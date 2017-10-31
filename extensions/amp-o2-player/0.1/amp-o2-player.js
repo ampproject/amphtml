@@ -16,6 +16,7 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 
 class AmpO2Player extends AMP.BaseElement {
 
@@ -39,7 +40,10 @@ class AmpO2Player extends AMP.BaseElement {
     this.src_ = '';
   }
 
-    /** @override */
+  /**
+   * @param {boolean=} onLayout
+   * @override
+   */
   preconnectCallback(onLayout) {
     this.preconnect.url(this.domain_, onLayout);
   }
@@ -111,12 +115,15 @@ class AmpO2Player extends AMP.BaseElement {
   /** @override */
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
-      this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
+      this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(dict({
         'method': 'pause',
         'value': this.domain_,
-      }), '*');
+      })), '*');
     }
   }
 }
 
-AMP.registerElement('amp-o2-player', AmpO2Player);
+
+AMP.extension('amp-o2-player', '0.1', AMP => {
+  AMP.registerElement('amp-o2-player', AmpO2Player);
+});

@@ -19,11 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Displays a Hulu simple embed.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
+    <td>Displays a simple embedded <a href="http://www.hulu.com">Hulu</a> video.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -39,6 +35,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Example
 
 ```html
@@ -49,7 +47,14 @@ limitations under the License.
 
 ## Attributes
 
-**data-eid**
+##### data-eid
 
-In a URL like https://secure.hulu.com/embed.html?eid=4Dk5F2PYTtrgciuvloH3UA `4Dk5F2PYTtrgciuvloH3UA` is the eid.
+The ID of the video. For example, `4Dk5F2PYTtrgciuvloH3UA` is the eid in the following URL: https://player.hulu.com/site/dash/mobile_embed.html?eid=4Dk5F2PYTtrgciuvloH3UA.
 
+##### common attributes
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+
+## Validation
+
+See [amp-hulu rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-hulu/validator-amp-hulu.protoascii) in the AMP validator specification.

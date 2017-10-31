@@ -18,7 +18,8 @@
 import '../polyfills';
 
 import {user} from '../log';
-import {fromClass} from '../service';
+import {registerServiceBuilder} from '../service';
+import {reportError} from '../error';
 
 /**
  * Helper with all things Timer.
@@ -72,10 +73,18 @@ export class Timer {
           return;
         }
         callback();
-      });
+      }).catch(reportError);
       return id;
     }
-    return this.win.setTimeout(callback, opt_delay);
+    const wrapped = () => {
+      try {
+        callback();
+      } catch (e) {
+        reportError(e);
+        throw e;
+      }
+    };
+    return this.win.setTimeout(wrapped, opt_delay);
   }
 
   /**
@@ -94,16 +103,12 @@ export class Timer {
    * Returns a promise that will resolve after the delay. Optionally, the
    * resolved value can be provided as opt_result argument.
    * @param {number=} opt_delay
-   * @param {RESULT=} opt_result
-   * @return {!Promise<RESULT>}
-   * @template RESULT
+   * @return {!Promise}
    */
-  promise(opt_delay, opt_result) {
+  promise(opt_delay) {
     return new Promise(resolve => {
-      const timerKey = this.delay(() => {
-        resolve(opt_result);
-      }, opt_delay);
-
+      // Avoid wrapping in closure if no specific result is produced.
+      const timerKey = this.delay(resolve, opt_delay);
       if (timerKey == -1) {
         throw new Error('Failed to schedule timer.');
       }
@@ -122,8 +127,9 @@ export class Timer {
    * @template RESULT
    */
   timeoutPromise(delay, opt_racePromise, opt_message) {
+    let timerKey;
     const delayPromise = new Promise((_resolve, reject) => {
-      const timerKey = this.delay(() => {
+      timerKey = this.delay(() => {
         reject(user().createError(opt_message || 'timeout'));
       }, delay);
 
@@ -134,14 +140,36 @@ export class Timer {
     if (!opt_racePromise) {
       return delayPromise;
     }
+    const cancel = () => {
+      this.cancel(timerKey);
+    };
+    opt_racePromise.then(cancel, cancel);
     return Promise.race([delayPromise, opt_racePromise]);
   }
+
+  /**
+   * Returns a promise that resolves after `predicate` returns true.
+   * Polls with interval `delay`
+   * @param {number} delay
+   * @param {function():boolean} predicate
+   * @return {!Promise}
+   */
+  poll(delay, predicate) {
+    return new Promise(resolve => {
+      const interval = this.win.setInterval(() => {
+        if (predicate()) {
+          this.win.clearInterval(interval);
+          resolve();
+        }
+      }, delay);
+    });
+  }
+
 }
 
 /**
  * @param {!Window} window
- * @return {!Timer}
  */
 export function installTimerService(window) {
-  return fromClass(window, 'timer', Timer);
+  registerServiceBuilder(window, 'timer', Timer);
 };

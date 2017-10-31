@@ -15,18 +15,14 @@
  */
 
 import {dev, user} from './log';
-import {documentInfoForDoc} from './document-info';
-import {getLengthNumeral} from '../src/layout';
+import {getContextMetadata} from '../src/iframe-attributes';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
-import {getModeObject} from './mode-object';
-import {dashToCamelCase} from './string';
+import {dict} from './utils/object';
 import {parseUrl, assertHttpsUrl} from './url';
-import {viewerForDoc} from './viewer';
 import {urls} from './config';
 import {setStyle} from './style';
-import {domFingerprint} from './utils/dom-fingerprint';
-
+import {startsWith} from './string';
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
 let count = {};
@@ -34,61 +30,32 @@ let count = {};
 /** @type {string} */
 let overrideBootstrapBaseUrl;
 
+/** @const {string} */
+const TAG = '3p-frame';
+
 /**
  * Produces the attributes for the ad template.
  * @param {!Window} parentWindow
- * @param {!Element} element
+ * @param {!AmpElement} element
  * @param {string=} opt_type
  * @param {Object=} opt_context
- * @return {!Object} Contains
+ * @return {!JsonObject} Contains
  *     - type, width, height, src attributes of <amp-ad> tag. These have
  *       precedence over the data- attributes.
  *     - data-* attributes of the <amp-ad> tag with the "data-" removed.
  *     - A _context object for internal use.
  */
 function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
-  const startTime = Date.now();
-  const width = element.getAttribute('width');
-  const height = element.getAttribute('height');
   const type = opt_type || element.getAttribute('type');
   user().assert(type, 'Attribute type required for <amp-ad>: %s', element);
-  const attributes = {};
+  const sentinel = generateSentinel(parentWindow);
+  let attributes = dict();
   // Do these first, as the other attributes have precedence.
   addDataAndJsonAttributes_(element, attributes);
-  attributes.width = getLengthNumeral(width);
-  attributes.height = getLengthNumeral(height);
-  attributes.type = type;
-  const docInfo = documentInfoForDoc(element);
-  const viewer = viewerForDoc(element);
-  let locationHref = parentWindow.location.href;
-  // This is really only needed for tests, but whatever. Children
-  // see us as the logical origin, so telling them we are about:srcdoc
-  // will fail ancestor checks.
-  if (locationHref == 'about:srcdoc') {
-    locationHref = parentWindow.parent.location.href;
-  }
-  attributes._context = {
-    referrer: viewer.getUnconfirmedReferrerUrl(),
-    canonicalUrl: docInfo.canonicalUrl,
-    sourceUrl: docInfo.sourceUrl,
-    pageViewId: docInfo.pageViewId,
-    location: {
-      href: locationHref,
-    },
-    tagName: element.tagName,
-    mode: getModeObject(),
-    canary: !!(parentWindow.AMP_CONFIG && parentWindow.AMP_CONFIG.canary),
-    hidden: !viewer.isVisible(),
-    amp3pSentinel: generateSentinel(parentWindow),
-    initialIntersection: element.getIntersectionChangeEntry(),
-    domFingerprint: domFingerprint(element),
-    startTime,
-  };
-  Object.assign(attributes._context, opt_context);
-  const adSrc = element.getAttribute('src');
-  if (adSrc) {
-    attributes.src = adSrc;
-  }
+  attributes = getContextMetadata(parentWindow, element, sentinel,
+      attributes);
+  attributes['type'] = type;
+  Object.assign(attributes['_context'], opt_context);
   return attributes;
 }
 
@@ -96,12 +63,14 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
  * Creates the iframe for the embed. Applies correct size and passes the embed
  * attributes to the frame via JSON inside the fragment.
  * @param {!Window} parentWindow
- * @param {!Element} parentElement
+ * @param {!AmpElement} parentElement
  * @param {string=} opt_type
  * @param {Object=} opt_context
+ * @param {boolean=} opt_disallowCustom whether 3p url should not use meta tag.
  * @return {!Element} The iframe.
  */
-export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
+export function getIframe(
+    parentWindow, parentElement, opt_type, opt_context, opt_disallowCustom) {
   // Check that the parentElement is already in DOM. This code uses a new and
   // fast `isConnected` API and thus only used when it's available.
   dev().assert(
@@ -111,21 +80,37 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
   const attributes =
       getFrameAttributes(parentWindow, parentElement, opt_type, opt_context);
   const iframe = parentWindow.document.createElement('iframe');
-  if (!count[attributes.type]) {
-    count[attributes.type] = 0;
+
+  if (!count[attributes['type']]) {
+    count[attributes['type']] = 0;
   }
+  count[attributes['type']] += 1;
 
-  const baseUrl = getBootstrapBaseUrl(parentWindow);
+  const baseUrl = getBootstrapBaseUrl(
+      parentWindow, undefined, opt_type, opt_disallowCustom);
   const host = parseUrl(baseUrl).hostname;
-  // Pass ad attributes to iframe via the fragment.
-  const src = baseUrl + '#' + JSON.stringify(attributes);
-  const name = host + '_' + attributes.type + '_' + count[attributes.type]++;
+  // This name attribute may be overwritten if this frame is chosen to
+  // be the master frame. That is ok, as we will read the name off
+  // for our uses before that would occur.
+  // @see https://github.com/ampproject/amphtml/blob/master/3p/integration.js
+  const name = JSON.stringify(dict({
+    'host': host,
+    'type': attributes['type'],
+    // https://github.com/ampproject/amphtml/pull/2955
+    'count': count[attributes['type']],
+    'attributes': attributes,
+  }));
 
-  iframe.src = src;
+  iframe.src = baseUrl;
+  iframe.ampLocation = parseUrl(baseUrl);
   iframe.name = name;
-  iframe.ampLocation = parseUrl(src);
-  iframe.width = attributes.width;
-  iframe.height = attributes.height;
+  // Add the check before assigning to prevent IE throw Invalid argument error
+  if (attributes['width']) {
+    iframe.width = attributes['width'];
+  }
+  if (attributes['height']) {
+    iframe.height = attributes['height'];
+  }
   iframe.setAttribute('scrolling', 'no');
   setStyle(iframe, 'border', 'none');
   /** @this {!Element} */
@@ -133,8 +118,8 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
     // Chrome does not reflect the iframe readystate.
     this.readyState = 'complete';
   };
-  iframe.setAttribute(
-      'data-amp-3p-sentinel', attributes._context.amp3pSentinel);
+  iframe.setAttribute('data-amp-3p-sentinel',
+      attributes['_context']['sentinel']);
   return iframe;
 }
 
@@ -144,16 +129,17 @@ export function getIframe(parentWindow, parentElement, opt_type, opt_context) {
  * is an attribute called json, parses the JSON and adds it to the
  * attributes.
  * @param {!Element} element
- * @param {!Object} attributes The destination.
+ * @param {!JsonObject} attributes The destination.
  * visibleForTesting
  */
 export function addDataAndJsonAttributes_(element, attributes) {
-  for (let i = 0; i < element.attributes.length; i++) {
-    const attr = element.attributes[i];
-    if (attr.name.indexOf('data-') != 0) {
-      continue;
+  const dataset = element.dataset;
+  for (const name in dataset) {
+    // data-vars- is reserved for amp-analytics
+    // see https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute
+    if (!startsWith(name, 'vars')) {
+      attributes[name] = dataset[name];
     }
-    attributes[dashToCamelCase(attr.name.substr(5))] = attr.value;
   }
   const json = element.getAttribute('json');
   if (json) {
@@ -171,17 +157,20 @@ export function addDataAndJsonAttributes_(element, attributes) {
 
 /**
  * Preloads URLs related to the bootstrap iframe.
- * @param {!Window} window
+ * @param {!Window} win
  * @param {!./preconnect.Preconnect} preconnect
+ * @param {string=} opt_type
+ * @param {boolean=} opt_disallowCustom whether 3p url should not use meta tag.
  */
-export function preloadBootstrap(window, preconnect) {
-  const url = getBootstrapBaseUrl(window);
+export function preloadBootstrap(
+    win, preconnect, opt_type, opt_disallowCustom) {
+  const url = getBootstrapBaseUrl(win, undefined, opt_type, opt_disallowCustom);
   preconnect.preload(url, 'document');
 
   // While the URL may point to a custom domain, this URL will always be
   // fetched by it.
   const scriptUrl = getMode().localDev
-      ? getAdsLocalhost(window) + '/dist.3p/current/integration.js'
+      ? getAdsLocalhost(win) + '/dist.3p/current/integration.js'
       : `${urls.thirdParty}/$internalRuntimeVersion$/f.js`;
   preconnect.preload(scriptUrl, 'script');
 }
@@ -190,18 +179,21 @@ export function preloadBootstrap(window, preconnect) {
  * Returns the base URL for 3p bootstrap iframes.
  * @param {!Window} parentWindow
  * @param {boolean=} opt_strictForUnitTest
+ * @param {string=} opt_type
+ * @param {boolean=} opt_disallowCustom whether 3p url should not use meta tag.
  * @return {string}
  * @visibleForTesting
  */
-export function getBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
+export function getBootstrapBaseUrl(
+    parentWindow, opt_strictForUnitTest, opt_type, opt_disallowCustom) {
   // The value is cached in a global variable called `bootstrapBaseUrl`;
   const bootstrapBaseUrl = parentWindow.bootstrapBaseUrl;
   if (bootstrapBaseUrl) {
     return bootstrapBaseUrl;
   }
-  return parentWindow.bootstrapBaseUrl =
-      getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest)
-          || getDefaultBootstrapBaseUrl(parentWindow);
+  return parentWindow.bootstrapBaseUrl = getCustomBootstrapBaseUrl(
+      parentWindow, opt_strictForUnitTest, opt_type, opt_disallowCustom) ||
+      getDefaultBootstrapBaseUrl(parentWindow);
 }
 
 export function setDefaultBootstrapBaseUrlForTesting(url) {
@@ -210,6 +202,7 @@ export function setDefaultBootstrapBaseUrlForTesting(url) {
 
 export function resetBootstrapBaseUrlForTesting(win) {
   win.bootstrapBaseUrl = undefined;
+  win.defaultBootstrapSubDomain = undefined;
 }
 
 /**
@@ -221,16 +214,16 @@ export function resetBootstrapBaseUrlForTesting(win) {
 export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
   const srcFileBasename = opt_srcFileBasename || 'frame';
   if (getMode().localDev || getMode().test) {
-    if (overrideBootstrapBaseUrl) {
-      return overrideBootstrapBaseUrl;
-    }
-    return getAdsLocalhost(parentWindow)
-        + '/dist.3p/'
-        + (getMode().minified ? `$internalRuntimeVersion$/${srcFileBasename}`
-            : `current/${srcFileBasename}.max`)
-        + '.html';
+    return overrideBootstrapBaseUrl || getAdsLocalhost(parentWindow)
+          + '/dist.3p/'
+          + (getMode().minified ? `$internalRuntimeVersion$/${srcFileBasename}`
+              : `current/${srcFileBasename}.max`)
+          + '.html';
   }
-  return 'https://' + getSubDomain(parentWindow) +
+  // Ensure same sub-domain is used despite potentially different file.
+  parentWindow.defaultBootstrapSubDomain =
+      parentWindow.defaultBootstrapSubDomain || getSubDomain(parentWindow);
+  return 'https://' + parentWindow.defaultBootstrapSubDomain +
       `.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/` +
       `${srcFileBasename}.html`;
 }
@@ -278,12 +271,19 @@ export function getRandom(win) {
  * Otherwise null.
  * @param {!Window} parentWindow
  * @param {boolean=} opt_strictForUnitTest
+ * @param {string=} opt_type
+ * @param {boolean=} opt_disallowCustom whether 3p url should not use meta tag.
  * @return {?string}
  */
-function getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
+function getCustomBootstrapBaseUrl(
+    parentWindow, opt_strictForUnitTest, opt_type, opt_disallowCustom) {
   const meta = parentWindow.document
       .querySelector('meta[name="amp-3p-iframe-src"]');
   if (!meta) {
+    return null;
+  }
+  if (opt_disallowCustom) {
+    user().error(TAG, `3p iframe url disabled for ${opt_type || 'unknown'}`);
     return null;
   }
   const url = assertHttpsUrl(meta.getAttribute('content'), meta);
@@ -325,62 +325,4 @@ export function generateSentinel(parentWindow) {
  */
 export function resetCountForTesting() {
   count = {};
-}
-
-
-/** @const */
-const AMP_MESSAGE_PREFIX = 'amp-';
-
-/** @enum {string} */
-export const MessageType = {
-  // For amp-ad
-  SEND_EMBED_STATE: 'send-embed-state',
-  EMBED_STATE: 'embed-state',
-  SEND_EMBED_CONTEXT: 'send-embed-context',
-  EMBED_CONTEXT: 'embed-context',
-  SEND_INTERSECTIONS: 'send-intersections',
-  INTERSECTION: 'intersection',
-  EMBED_SIZE: 'embed-size',
-  EMBED_SIZE_CHANGED: 'embed-size-changed',
-  EMBED_SIZE_DENIED: 'embed-size-denied',
-
-  // For amp-inabox
-  SEND_POSITIONS: 'send-positions',
-  POSITION: 'position',
-};
-
-/**
- * Serialize an AMP post message.
- *
- * @param type {string}
- * @param sentinel {string}
- * @param opt_data {Object=}
- * @returns {string}
- */
-export function serializeMessage(type, sentinel, opt_data) {
-  // TODO: consider wrap the data in a "data" field. { type, sentinal, data }
-  const message = opt_data || {};
-  message.type = type;
-  message.sentinel = sentinel;
-  return AMP_MESSAGE_PREFIX + JSON.stringify(message);
-}
-
-/**
- * Deserialize an AMP post message.
- * Returns null if it's not valid AMP message format.
- *
- * @param message {*}
- * @returns {?JSONType}
- */
-export function deserializeMessage(message) {
-  if (typeof message !== 'string' || message.indexOf(AMP_MESSAGE_PREFIX) != 0) {
-    return null;
-  }
-  try {
-    return /** @type {!JSONType} */ (JSON.parse(
-        message.substr(AMP_MESSAGE_PREFIX.length)));
-  } catch (e) {
-    dev().error('MESSAGING', 'Failed to parse message: ' + message, e);
-    return null;
-  }
 }

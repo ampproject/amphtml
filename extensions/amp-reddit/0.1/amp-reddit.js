@@ -51,18 +51,20 @@ class AmpReddit extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     user().assert(this.element.getAttribute('data-src'),
-      'The data-src attribute is required for <amp-reddit> %s',
-      this.element);
+        'The data-src attribute is required for <amp-reddit> %s',
+        this.element);
     user().assert(this.element.getAttribute('data-embedtype'),
-      'The data-embedtype attribute is required for <amp-reddit> %s',
-      this.element);
+        'The data-embedtype attribute is required for <amp-reddit> %s',
+        this.element);
 
     const iframe = getIframe(this.win, this.element, 'reddit');
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     return this.loadPromise(iframe);
   }
-
 }
 
-AMP.registerElement('amp-reddit', AmpReddit);
+
+AMP.extension('amp-reddit', '0.1', AMP => {
+  AMP.registerElement('amp-reddit', AmpReddit);
+});

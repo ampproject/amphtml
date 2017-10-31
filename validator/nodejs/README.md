@@ -76,3 +76,9 @@ As expected, this emits errors because the provided string in the example, `<htm
 
 ### 1.0.18
 * Small tweaks to this file and package.json.
+
+### 1.0.19
+* Set correct process exit status for old versions of Node.js (v0.10.25).
+
+### 1.0.20
+* Better npm post-install for virtual machines, running debian over windows with SMB shared folder

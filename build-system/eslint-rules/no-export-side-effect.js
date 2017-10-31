@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
 module.exports = function(context) {
   return {
@@ -24,9 +25,7 @@ module.exports = function(context) {
               .map(function(declarator) {
                 return declarator.init
               }).filter(function(init) {
-                return init && /(?:Call|New)Expression/.test(init.type)
-                    // Special case creating a map object from a literal.
-                    && init.callee.name != 'map';
+                return init && /(?:Call|New)Expression/.test(init.type);
               }).forEach(function(init) {
                 context.report(init, 'Cannot export side-effect');
               });

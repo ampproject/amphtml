@@ -14,13 +14,23 @@
  * limitations under the License.
  */
 
+import {Services} from './services';
 import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS';
-import {ampdocServiceFor} from './ampdoc';
 import {dev} from './log';
-import {closestNode, escapeCssSelectorIdent} from './dom';
-import {extensionsFor} from './extensions';
-import {insertStyleElement} from './style-installer';
+import {
+  closestNode,
+  escapeCssSelectorIdent,
+  iterateCursor,
+} from './dom';
+import {installCssTransformer} from './style-installer';
+import {
+  isShadowCssSupported,
+  isShadowDomSupported,
+  getShadowDomSupportedVersion,
+  ShadowDomVersion,
+} from './web-components';
 import {setStyle} from './style';
+import {toArray, toWin} from './types';
 
 /**
  * Used for non-composed root-node search. See `getRootNode`.
@@ -34,31 +44,10 @@ const CSS_SELECTOR_BEG_REGEX = /[^\.\-\_0-9a-zA-Z]/;
 /** @const {!RegExp} */
 const CSS_SELECTOR_END_REGEX = /[^\-\_0-9a-zA-Z]/;
 
-
 /**
  * @type {boolean|undefined}
- * @visibleForTesting
  */
-let shadowDomSupported;
-
-/**
- * @param {boolean|undefined} val
- * @visibleForTesting
- */
-export function setShadowDomSupportedForTesting(val) {
-  shadowDomSupported = val;
-}
-
-/**
- * Returns `true` if the Shadow DOM is supported.
- * @return {boolean}
- */
-export function isShadowDomSupported() {
-  if (shadowDomSupported === undefined) {
-    shadowDomSupported = !!Element.prototype.createShadowRoot;
-  }
-  return shadowDomSupported;
-}
+let shadowDomStreamingSupported;
 
 
 /**
@@ -68,19 +57,49 @@ export function isShadowDomSupported() {
  * @return {!ShadowRoot}
  */
 export function createShadowRoot(hostElement) {
+  const win = toWin(hostElement.ownerDocument.defaultView);
+
   const existingRoot = hostElement.shadowRoot || hostElement.__AMP_SHADOW_ROOT;
   if (existingRoot) {
     existingRoot./*OK*/innerHTML = '';
     return existingRoot;
   }
 
-  // Native support.
-  if (isShadowDomSupported()) {
-    return hostElement.createShadowRoot();
+  let shadowRoot;
+  const shadowDomSupported = getShadowDomSupportedVersion();
+  if (shadowDomSupported == ShadowDomVersion.V1) {
+    shadowRoot = hostElement.attachShadow({mode: 'open'});
+    if (!shadowRoot.styleSheets) {
+      Object.defineProperty(shadowRoot, 'styleSheets', {
+        get: function() {
+          const items = [];
+          iterateCursor(shadowRoot.childNodes, child => {
+            if (child.tagName === 'STYLE') {
+              items.push(child.sheet);
+            }
+          });
+          return items;
+        },
+      });
+    }
+  } else if (shadowDomSupported == ShadowDomVersion.V0) {
+    shadowRoot = hostElement.createShadowRoot();
+  } else {
+    shadowRoot = createShadowRootPolyfill(hostElement);
   }
 
-  // Polyfill.
-  return createShadowRootPolyfill(hostElement);
+  if (!isShadowCssSupported()) {
+    const rootId = `i-amphtml-sd-${win.Math.floor(win.Math.random() * 10000)}`;
+    shadowRoot.id = rootId;
+    shadowRoot.host.classList.add(rootId);
+
+    // CSS isolation.
+    installCssTransformer(shadowRoot, css => {
+      return transformShadowCss(shadowRoot, css);
+    });
+  }
+
+  return shadowRoot;
 }
 
 
@@ -91,13 +110,21 @@ export function createShadowRoot(hostElement) {
  */
 function createShadowRootPolyfill(hostElement) {
   const doc = hostElement.ownerDocument;
-  /** @const {!Window} */
-  const win = doc.defaultView;
+  const win = toWin(doc.defaultView);
+
+  // Host CSS polyfill.
+  hostElement.classList.add('i-amphtml-shadow-host-polyfill');
+  const hostStyle = doc.createElement('style');
+  hostStyle.textContent =
+      '.i-amphtml-shadow-host-polyfill>:not(i-amphtml-shadow-root)'
+      + '{display:none!important}';
+  hostElement.appendChild(hostStyle);
+
+  // Shadow root.
   const shadowRoot = /** @type {!ShadowRoot} */ (
       // Cast to ShadowRoot even though it is an Element
       // TODO(@dvoytenko) Consider to switch to a type union instead.
-      /** @type {?}  */ (doc.createElement('i-amp-shadow-root')));
-  shadowRoot.id = 'i-amp-sd-' + Math.floor(win.Math.random() * 10000);
+      /** @type {?}  */ (doc.createElement('i-amphtml-shadow-root')));
   hostElement.appendChild(shadowRoot);
   hostElement.shadowRoot = hostElement.__AMP_SHADOW_ROOT = shadowRoot;
 
@@ -105,11 +132,23 @@ function createShadowRootPolyfill(hostElement) {
 
   shadowRoot.host = hostElement;
 
+  // `getElementById` is resolved via `querySelector('#id')`.
   shadowRoot.getElementById = function(id) {
     const escapedId = escapeCssSelectorIdent(win, id);
     return /** @type {HTMLElement|null} */ (
-        shadowRoot.querySelector(`#${escapedId}`));
+        shadowRoot./*OK*/querySelector(`#${escapedId}`));
   };
+
+  // The styleSheets property should have a list of local styles.
+  Object.defineProperty(shadowRoot, 'styleSheets', {
+    get: () => {
+      if (!doc.styleSheets) {
+        return [];
+      }
+      return toArray(doc.styleSheets).filter(
+          styleSheet => shadowRoot.contains(styleSheet.ownerNode));
+    },
+  });
 
   return shadowRoot;
 }
@@ -126,7 +165,7 @@ export function isShadowRoot(value) {
   }
   // Node.nodeType == DOCUMENT_FRAGMENT to speed up the tests. Unfortunately,
   // nodeType of DOCUMENT_FRAGMENT is used currently for ShadowRoot nodes.
-  if (value.tagName == 'I-AMP-SHADOW-ROOT') {
+  if (value.tagName == 'I-AMPHTML-SHADOW-ROOT') {
     return true;
   }
   return (value.nodeType == /* DOCUMENT_FRAGMENT */ 11 &&
@@ -149,95 +188,34 @@ export function getShadowRootNode(node) {
 
 
 /**
- * Creates a shadow root for an shadow embed.
- * @param {!Element} hostElement
- * @param {!Array<string>} extensionIds
- * @return {!ShadowRoot}
- */
-export function createShadowEmbedRoot(hostElement, extensionIds) {
-  const shadowRoot = createShadowRoot(hostElement);
-  shadowRoot.AMP = {};
-
-  const win = hostElement.ownerDocument.defaultView;
-  /** @const {!./service/extensions-impl.Extensions} */
-  const extensions = extensionsFor(win);
-  const ampdocService = ampdocServiceFor(win);
-  const ampdoc = ampdocService.getAmpDoc(hostElement);
-
-  // Instal runtime CSS.
-  copyRuntimeStylesToShadowRoot(ampdoc, shadowRoot);
-
-  // Install extensions.
-  extensionIds.forEach(extensionId => extensions.loadExtension(extensionId));
-
-  // Apply extensions factories, such as CSS.
-  extensions.installFactoriesInShadowRoot(shadowRoot, extensionIds);
-
-  return shadowRoot;
-}
-
-
-/**
  * Imports a body into a shadow root with the workaround for a polyfill case.
  * @param {!ShadowRoot} shadowRoot
  * @param {!Element} body
+ * @param {boolean} deep
  * @return {!Element}
  */
-export function importShadowBody(shadowRoot, body) {
+export function importShadowBody(shadowRoot, body, deep) {
   const doc = shadowRoot.ownerDocument;
   let resultBody;
-  if (isShadowDomSupported()) {
-    resultBody = dev().assertElement(doc.importNode(body, true));
+  if (isShadowCssSupported()) {
+    resultBody = dev().assertElement(doc.importNode(body, deep));
   } else {
     resultBody = doc.createElement('amp-body');
-    for (let n = body.firstChild; !!n; n = n.nextSibling) {
-      resultBody.appendChild(doc.importNode(n, true));
-    }
     setStyle(resultBody, 'display', 'block');
+    for (let i = 0; i < body.attributes.length; i++) {
+      resultBody.setAttribute(
+          body.attributes[0].name, body.attributes[0].value);
+    }
+    if (deep) {
+      for (let n = body.firstChild; !!n; n = n.nextSibling) {
+        resultBody.appendChild(doc.importNode(n, true));
+      }
+    }
   }
   setStyle(resultBody, 'position', 'relative');
   shadowRoot.appendChild(resultBody);
+  Object.defineProperty(shadowRoot, 'body', {value: resultBody});
   return resultBody;
-}
-
-
-/**
- * Adds the given css text to the given shadow root.
- *
- * The style tags will be at the beginning of the shadow root before all author
- * styles. One element can be the main runtime CSS. This is guaranteed
- * to always be the first stylesheet in the doc.
- *
- * @param {!ShadowRoot} shadowRoot
- * @param {string} cssText
- * @param {boolean=} opt_isRuntimeCss If true, this style tag will be inserted
- *     as the first element in head and all style elements will be positioned
- *     after.
- * @param {string=} opt_ext
- * @return {!Element}
- */
-export function installStylesForShadowRoot(shadowRoot, cssText,
-    opt_isRuntimeCss, opt_ext) {
-  return insertStyleElement(
-      dev().assert(shadowRoot.ownerDocument),
-      shadowRoot,
-      transformShadowCss(shadowRoot, cssText),
-      opt_isRuntimeCss || false,
-      opt_ext || null);
-}
-
-
-/*
- * Copies runtime styles from the ampdoc context into a shadow root.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- * @param {!ShadowRoot} shadowRoot
- */
-export function copyRuntimeStylesToShadowRoot(ampdoc, shadowRoot) {
-  const style = dev().assert(
-      ampdoc.getRootNode().querySelector('style[amp-runtime]'),
-      'Runtime style is not found in the ampdoc: %s', ampdoc.getRootNode());
-  const cssText = style.textContent;
-  installStylesForShadowRoot(shadowRoot, cssText, /* opt_isRuntimeCss */ true);
 }
 
 
@@ -249,9 +227,6 @@ export function copyRuntimeStylesToShadowRoot(ampdoc, shadowRoot) {
  * @return {string}
  */
 export function transformShadowCss(shadowRoot, css) {
-  if (isShadowDomSupported()) {
-    return css;
-  }
   return scopeShadowCss(shadowRoot, css);
 }
 
@@ -260,7 +235,7 @@ export function transformShadowCss(shadowRoot, css) {
  * Transforms CSS to isolate AMP CSS within the shadow root and reduce the
  * possibility of high-level conflicts. There are two types of transformations:
  * 1. Root transformation: `body` -> `amp-body`, etc.
- * 2. Scoping: `a {}` -> `#i-amp-sd-123 a {}`.
+ * 2. Scoping: `a {}` -> `.i-amphtml-sd-123 a {}`.
  *
  * @param {!ShadowRoot} shadowRoot
  * @param {string} css
@@ -295,7 +270,7 @@ export function scopeShadowCss(shadowRoot, css) {
   // Invoke `ShadowCSS.scopeRules` via `call` because the way it uses `this`
   // internally conflicts with Closure compiler's advanced optimizations.
   const scopeRules = ShadowCSS.scopeRules;
-  return scopeRules.call(ShadowCSS, rules, `#${id}`, transformRootSelectors);
+  return scopeRules.call(ShadowCSS, rules, `.${id}`, transformRootSelectors);
 }
 
 
@@ -330,7 +305,6 @@ function rootSelectorPrefixer(match, name, pos, selector) {
 }
 
 
-
 /**
  * @param {!Document} doc
  * @param {string} css
@@ -349,5 +323,372 @@ function getStylesheetRules(doc, css) {
     if (style.parentNode) {
       style.parentNode.removeChild(style);
     }
+  }
+}
+
+
+/**
+ * @param {boolean|undefined} val
+ * @visibleForTesting
+ */
+export function setShadowDomStreamingSupportedForTesting(val) {
+  shadowDomStreamingSupported = val;
+}
+
+
+/**
+ * Returns `true` if the Shadow DOM streaming is supported.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function isShadowDomStreamingSupported(win) {
+  if (shadowDomStreamingSupported === undefined) {
+    shadowDomStreamingSupported = calcShadowDomStreamingSupported(win);
+  }
+  return shadowDomStreamingSupported;
+}
+
+
+/**
+ * @param {!Window} win
+ * @return {boolean}
+ */
+function calcShadowDomStreamingSupported(win) {
+  // API must be supported.
+  if (!win.document.implementation ||
+      typeof win.document.implementation.createHTMLDocument != 'function') {
+    return false;
+  }
+  // Firefox does not support DOM streaming.
+  // See: https://bugzilla.mozilla.org/show_bug.cgi?id=867102
+  if (Services.platformFor(win).isFirefox()) {
+    return false;
+  }
+  // Assume full streaming support.
+  return true;
+}
+
+
+/**
+ * Creates the Shadow DOM writer available on this platform.
+ * @param {!Window} win
+ * @return {!ShadowDomWriter}
+ */
+export function createShadowDomWriter(win) {
+  if (isShadowDomStreamingSupported(win)) {
+    return new ShadowDomWriterStreamer(win);
+  }
+  return new ShadowDomWriterBulk(win);
+}
+
+
+/**
+ * Takes as an input a text stream, parses it and incrementally reconstructs
+ * it in the shadow root.
+ *
+ * See https://jakearchibald.com/2016/fun-hacks-faster-content/ for more
+ * details.
+ *
+ * @interface
+ * @extends {WritableStreamDefaultWriter}
+ * @visibleForTesting
+ */
+export class ShadowDomWriter {
+
+  /**
+   * Sets the callback that will be called when body has been parsed.
+   *
+   * Unlike most of other nodes, `<body>` cannot be simply merged to support
+   * SD polyfill where the use of `<body>` element is not possible. The
+   * callback will be given the parsed document and it must return back
+   * the reconstructed `<body>` node in the target DOM where all children
+   * will be streamed into.
+   *
+   * @param {function(!Document):!Element} unusedCallback
+   */
+  onBody(unusedCallback) {}
+
+  /**
+   * Sets the callback that will be called when new nodes have been merged
+   * into the target DOM.
+   * @param {function()} unusedCallback
+   */
+  onBodyChunk(unusedCallback) {}
+
+  /**
+   * Sets the callback that will be called when the DOM has been fully
+   * constructed.
+   * @param {function()} unusedCallback
+   */
+  onEnd(unusedCallback) {}
+}
+
+
+/**
+ * Takes as an input a text stream, parses it and incrementally reconstructs
+ * it in the shadow root.
+ *
+ * See https://jakearchibald.com/2016/fun-hacks-faster-content/ for more
+ * details.
+ *
+ * @implements {ShadowDomWriter}
+ * @visibleForTesting
+ */
+export class ShadowDomWriterStreamer {
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    /** @const @private {!Document} */
+    this.parser_ = win.document.implementation.createHTMLDocument('');
+    this.parser_.open();
+
+    /** @const @private */
+    this.vsync_ = Services.vsyncFor(win);
+
+    /** @private @const */
+    this.boundMerge_ = this.merge_.bind(this);
+
+    /** @private {?function(!Document):!Element} */
+    this.onBody_ = null;
+
+    /** @private {?function()} */
+    this.onBodyChunk_ = null;
+
+    /** @private {?function()} */
+    this.onEnd_ = null;
+
+    /** @private {boolean} */
+    this.mergeScheduled_ = false;
+
+    /** @const @private {!Promise} */
+    this.success_ = Promise.resolve();
+
+    /** @private {boolean} */
+    this.eof_ = false;
+
+    /** @private {?Element} */
+    this.targetBody_ = null;
+  }
+
+  /** @override */
+  onBody(callback) {
+    this.onBody_ = callback;
+  }
+
+  /** @override */
+  onBodyChunk(callback) {
+    this.onBodyChunk_ = callback;
+  }
+
+  /** @override */
+  onEnd(callback) {
+    this.onEnd_ = callback;
+  }
+
+  /** @override */
+  write(chunk) {
+    if (this.eof_) {
+      throw new Error('closed already');
+    }
+    if (chunk) {
+      this.parser_.write(/** @type {string} */ (chunk));
+    }
+    this.schedule_();
+    return this.success_;
+  }
+
+  /** @override */
+  close() {
+    this.parser_.close();
+    this.eof_ = true;
+    this.schedule_();
+    return this.success_;
+  }
+
+  /** @override */
+  abort(unusedReason) {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  releaseLock() {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  get closed() {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  get desiredSize() {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  get ready() {
+    throw new Error('Not implemented');
+  }
+
+  /** @private */
+  schedule_() {
+    dev().assert(this.onBody_ && this.onBodyChunk_ && this.onEnd_);
+    if (!this.mergeScheduled_) {
+      this.mergeScheduled_ = true;
+      this.vsync_.mutate(this.boundMerge_);
+    }
+  }
+
+  /** @private */
+  merge_() {
+    this.mergeScheduled_ = false;
+
+    // Body has been newly parsed.
+    if (!this.targetBody_ && this.parser_.body) {
+      this.targetBody_ = this.onBody_(this.parser_);
+    }
+
+    // Merge body children.
+    if (this.targetBody_) {
+      const inputBody = dev().assert(this.parser_.body);
+      const targetBody = dev().assert(this.targetBody_);
+      let transferCount = 0;
+      while (inputBody.firstChild) {
+        transferCount++;
+        targetBody.appendChild(inputBody.firstChild);
+      }
+      if (transferCount > 0) {
+        this.onBodyChunk_();
+      }
+    }
+
+    // EOF.
+    if (this.eof_) {
+      this.onEnd_();
+    }
+  }
+}
+
+
+/**
+ * Takes as an input a text stream, aggregates it and parses it in one bulk.
+ * This is a workaround against the browsers that do not support streaming DOM
+ * parsing. Mainly currently Firefox.
+ *
+ * See https://github.com/whatwg/html/issues/2827 and
+ * https://bugzilla.mozilla.org/show_bug.cgi?id=867102
+ *
+ * @implements {ShadowDomWriter}
+ * @visibleForTesting
+ */
+export class ShadowDomWriterBulk {
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    /** @private {!Array<string>} */
+    this.fullHtml_ = [];
+
+    /** @const @private */
+    this.vsync_ = Services.vsyncFor(win);
+
+    /** @private {?function(!Document):!Element} */
+    this.onBody_ = null;
+
+    /** @private {?function()} */
+    this.onBodyChunk_ = null;
+
+    /** @private {?function()} */
+    this.onEnd_ = null;
+
+    /** @const @private {!Promise} */
+    this.success_ = Promise.resolve();
+
+    /** @private {boolean} */
+    this.eof_ = false;
+  }
+
+  /** @override */
+  onBody(callback) {
+    this.onBody_ = callback;
+  }
+
+  /** @override */
+  onBodyChunk(callback) {
+    this.onBodyChunk_ = callback;
+  }
+
+  /** @override */
+  onEnd(callback) {
+    this.onEnd_ = callback;
+  }
+
+  /** @override */
+  write(chunk) {
+    dev().assert(this.onBody_ && this.onBodyChunk_ && this.onEnd_);
+    if (this.eof_) {
+      throw new Error('closed already');
+    }
+    if (chunk) {
+      this.fullHtml_.push(dev().assertString(chunk));
+    }
+    return this.success_;
+  }
+
+  /** @override */
+  close() {
+    dev().assert(this.onBody_ && this.onBodyChunk_ && this.onEnd_);
+    this.eof_ = true;
+    this.vsync_.mutate(() => this.complete_());
+    return this.success_;
+  }
+
+  /** @override */
+  abort(unusedReason) {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  releaseLock() {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  get closed() {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  get desiredSize() {
+    throw new Error('Not implemented');
+  }
+
+  /** @override */
+  get ready() {
+    throw new Error('Not implemented');
+  }
+
+  /** @private */
+  complete_() {
+    const fullHtml = this.fullHtml_.join('');
+    const doc = new DOMParser().parseFromString(fullHtml, 'text/html');
+
+    // Merge body.
+    if (doc.body) {
+      const inputBody = doc.body;
+      const targetBody = this.onBody_(doc);
+      let transferCount = 0;
+      while (inputBody.firstChild) {
+        transferCount++;
+        targetBody.appendChild(inputBody.firstChild);
+      }
+      if (transferCount > 0) {
+        this.onBodyChunk_();
+      }
+    }
+
+    // EOF.
+    this.onEnd_();
   }
 }

@@ -15,9 +15,11 @@
  */
 
 // This must load before all other tests.
-import '../third_party/babel/custom-babel-helpers';
+import 'babel-polyfill';
 import '../src/polyfills';
+import {Services} from '../src/services';
 import {removeElement} from '../src/dom';
+import {setReportError} from '../src/log';
 import {
   adopt,
   installAmpdocServices,
@@ -25,11 +27,18 @@ import {
 } from '../src/runtime';
 import {activateChunkingForTesting} from '../src/chunk';
 import {installDocService} from '../src/service/ampdoc-impl';
-import {platformFor} from '../src/platform';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
-import {resetAccumulatedErrorMessagesForTesting} from '../src/error';
+import {
+  resetAccumulatedErrorMessagesForTesting,
+  reportError,
+} from '../src/error';
+import {resetExperimentTogglesForTesting} from '../src/experiments';
+import {
+  resetEvtListenerOptsSupportForTesting,
+} from '../src/event-helper-listen';
 import * as describes from '../testing/describes';
-
+import {installYieldIt} from '../testing/yield';
+import stringify from 'json-stable-stringify';
 
 // All exposed describes.
 global.describes = describes;
@@ -77,28 +86,68 @@ class TestConfig {
      * @type {!Array<function():boolean>}
      */
     this.skipMatchers = [];
+
+    /**
+     * List of predicate functions that are called before running each test
+     * suite to check whether the suite should be skipped or not.
+     * If any of the functions return 'false', the suite will be skipped.
+     * @type {!Array<function():boolean>}
+     */
+    this.ifMatchers = [];
+
     /**
      * Called for each test suite (things created by `describe`).
      * @type {!Array<function(!TestSuite)>}
      */
     this.configTasks = [];
-    this.platform_ = platformFor(window);
+
+    this.platform = Services.platformFor(window);
+
+    /**
+     * Predicate functions that determine whether to run tests on a platform.
+     */
+    this.runOnChrome = this.platform.isChrome.bind(this.platform);
+    this.runOnEdge = this.platform.isEdge.bind(this.platform);
+    this.runOnFirefox = this.platform.isFirefox.bind(this.platform);
+    this.runOnSafari = this.platform.isSafari.bind(this.platform);
+    this.runOnIos = this.platform.isIos.bind(this.platform);
+    this.runOnIe = this.platform.isIe.bind(this.platform);
+
+    /**
+     * By default, IE is skipped. Individual tests may opt in.
+     */
+    this.skip(this.runOnIe);
   }
 
   skipChrome() {
-    return this.skip(this.platform_.isChrome.bind(this.platform_));
+    return this.skip(this.runOnChrome);
+  }
+
+  skipOldChrome() {
+    return this.skip(() => {
+      return this.platform.isChrome() && this.platform.getMajorVersion() < 48;
+    });
   }
 
   skipEdge() {
-    return this.skip(this.platform_.isEdge.bind(this.platform_));
+    return this.skip(this.runOnEdge);
   }
 
   skipFirefox() {
-    return this.skip(this.platform_.isFirefox.bind(this.platform_));
+    return this.skip(this.runOnFirefox);
   }
 
   skipSafari() {
-    return this.skip(this.platform_.isSafari.bind(this.platform_));
+    return this.skip(this.runOnSafari);
+  }
+
+  skipIos() {
+    return this.skip(this.runOnIos);
+  }
+
+  enableIe() {
+    this.skipMatchers.splice(this.skipMatchers.indexOf(this.runOnIe), 1);
+    return this;
   }
 
   /**
@@ -106,6 +155,43 @@ class TestConfig {
    */
   skip(fn) {
     this.skipMatchers.push(fn);
+    return this;
+  }
+
+  ifNewChrome() {
+    return this.ifChrome().skipOldChrome();
+  }
+
+  ifChrome() {
+    return this.if(this.runOnChrome);
+  }
+
+  ifEdge() {
+    return this.if(this.runOnEdge);
+  }
+
+  ifFirefox() {
+    return this.if(this.runOnFirefox);
+  }
+
+  ifSafari() {
+    return this.if(this.runOnSafari);
+  }
+
+  ifIos() {
+    return this.if(this.runOnIos);
+  }
+
+  ifIe() {
+    // It's necessary to first enable IE because we skip it by default.
+    return this.enableIe().if(this.runOnIe);
+  }
+
+  /**
+   * @param {function():boolean} fn
+   */
+  if(fn) {
+    this.ifMatchers.push(fn);
     return this;
   }
 
@@ -125,7 +211,14 @@ class TestConfig {
    */
   run(desc, fn) {
     for (let i = 0; i < this.skipMatchers.length; i++) {
-      if (this.skipMatchers[i]()) {
+      if (this.skipMatchers[i].call(this)) {
+        this.runner.skip(desc, fn);
+        return;
+      }
+    }
+
+    for (let i = 0; i < this.ifMatchers.length; i++) {
+      if (!this.ifMatchers[i].call(this)) {
         this.runner.skip(desc, fn);
         return;
       }
@@ -144,6 +237,8 @@ class TestConfig {
 describe.configure = function() {
   return new TestConfig(describe);
 };
+
+installYieldIt(it);
 
 it.configure = function() {
   return new TestConfig(it);
@@ -174,15 +269,17 @@ beforeEach(function() {
 
 function beforeTest() {
   activateChunkingForTesting();
-  window.AMP_MODE = null;
+  window.AMP_MODE = undefined;
+  window.context = undefined;
   window.AMP_CONFIG = {
     canary: 'testSentinel',
   };
   window.AMP_TEST = true;
-  const ampdocService = installDocService(window, true);
-  const ampdoc = ampdocService.getAmpDoc(window.document);
+  installDocService(window, /* isSingleDoc */ true);
+  const ampdoc = Services.ampdocServiceFor(window).getAmpDoc();
   installRuntimeServices(window);
   installAmpdocServices(ampdoc);
+  Services.resourcesForDoc(ampdoc).ampInitComplete();
 }
 
 // Global cleanup of tags added during tests. Cool to add more
@@ -190,8 +287,7 @@ function beforeTest() {
 afterEach(function() {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   const cleanupTagNames = ['link', 'meta'];
-  if (!platformFor(window).isSafari()) {
-    // TODO(#3315): Removing test iframes break tests on Safari.
+  if (!Services.platformFor(window).isSafari()) {
     cleanupTagNames.push('iframe');
   }
   const cleanup = document.querySelectorAll(cleanupTagNames.join(','));
@@ -208,6 +304,8 @@ afterEach(function() {
   window.ENABLE_LOG = false;
   window.AMP_DEV_MODE = false;
   window.context = undefined;
+  window.AMP_MODE = undefined;
+
   const forgotGlobal = !!global.sandbox;
   if (forgotGlobal) {
     // The error will be thrown later to give possibly other sandboxes a
@@ -227,17 +325,20 @@ afterEach(function() {
   }
   setDefaultBootstrapBaseUrlForTesting(null);
   resetAccumulatedErrorMessagesForTesting();
+  resetExperimentTogglesForTesting(window);
+  resetEvtListenerOptsSupportForTesting();
+  setReportError(reportError);
 });
 
 chai.Assertion.addMethod('attribute', function(attr) {
   const obj = this._obj;
   const tagName = obj.tagName.toLowerCase();
   this.assert(
-    obj.hasAttribute(attr),
-    'expected element \'' + tagName + '\' to have attribute #{exp}',
-    'expected element \'' + tagName + '\' to not have attribute #{act}',
-    attr,
-    attr
+      obj.hasAttribute(attr),
+      'expected element \'' + tagName + '\' to have attribute #{exp}',
+      'expected element \'' + tagName + '\' to not have attribute #{act}',
+      attr,
+      attr
   );
 });
 
@@ -245,11 +346,11 @@ chai.Assertion.addMethod('class', function(className) {
   const obj = this._obj;
   const tagName = obj.tagName.toLowerCase();
   this.assert(
-    obj.classList.contains(className),
-    'expected element \'' + tagName + '\' to have class #{exp}',
-    'expected element \'' + tagName + '\' to not have class #{act}',
-    className,
-    className
+      obj.classList.contains(className),
+      'expected element \'' + tagName + '\' to have class #{exp}',
+      'expected element \'' + tagName + '\' to not have class #{act}',
+      className,
+      className
   );
 });
 
@@ -279,13 +380,13 @@ chai.Assertion.addProperty('hidden', function() {
   const opacity = computedStyle.getPropertyValue('opacity');
   const tagName = obj.tagName.toLowerCase();
   this.assert(
-     visibility === 'hidden' || parseInt(opacity, 10) == 0,
-    'expected element \'' +
+      visibility === 'hidden' || parseInt(opacity, 10) == 0,
+      'expected element \'' +
         tagName + '\' to be #{exp}, got #{act}. with classes: ' + obj.className,
-    'expected element \'' +
+      'expected element \'' +
         tagName + '\' not to be #{act}. with classes: ' + obj.className,
-    'hidden',
-    visibility
+      'hidden',
+      visibility
   );
 });
 
@@ -294,25 +395,23 @@ chai.Assertion.addMethod('display', function(display) {
   const value = window.getComputedStyle(obj).getPropertyValue('display');
   const tagName = obj.tagName.toLowerCase();
   this.assert(
-     value === display,
-    'expected element \'' + tagName + '\' to be #{exp}, got #{act}.',
-    'expected element \'' + tagName + '\' not to be #{act}.',
-    display,
-    value
+      value === display,
+      'expected element \'' + tagName + '\' to be #{exp}, got #{act}.',
+      'expected element \'' + tagName + '\' not to be #{act}.',
+      display,
+      value
   );
 });
 
 chai.Assertion.addMethod('jsonEqual', function(compare) {
   const obj = this._obj;
-  const a = JSON.stringify(compare);
-  const b = JSON.stringify(obj);
+  const a = stringify(compare);
+  const b = stringify(obj);
   this.assert(
-    a == b,
-    'expected JSON to be equal.\nExp: #{exp}\nAct: #{act}',
-    'expected JSON to not be equal.\nExp: #{exp}\nAct: #{act}',
-    a,
-    b
+      a == b,
+      'expected JSON to be equal.\nExp: #{exp}\nAct: #{act}',
+      'expected JSON to not be equal.\nExp: #{exp}\nAct: #{act}',
+      a,
+      b
   );
 });
-
-sinon = null;

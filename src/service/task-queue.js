@@ -23,7 +23,8 @@ import {dev} from '../log';
  *   id: string,
  *   resource: !./resource.Resource,
  *   priority: number,
- *   callback: function(boolean),
+ *   forceOutsideViewport: boolean,
+ *   callback: function(),
  *   scheduleTime: time,
  *   startTime: time,
  *   promise: (?Promise|undefined)

@@ -15,33 +15,24 @@
  */
 
 import {AmpAudio} from '../amp-audio';
-import {adopt} from '../../../../src/runtime';
 import {naturalDimensions_} from '../../../../src/layout';
-import {createIframePromise} from '../../../../testing/iframe';
-import * as sinon from 'sinon';
-import '../amp-audio';
 
-adopt(window);
 
-describe('amp-audio', () => {
-  let iframe;
+describes.realWin('amp-audio', {
+  amp: {
+    extensions: ['amp-audio'],
+  },
+}, env => {
+  let win, doc;
   let ampAudio;
-  let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    return createIframePromise(/* runtimeOff */ true).then(i => {
-      iframe = i;
-    });
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-    document.body.removeChild(iframe.iframe);
+    win = env.win;
+    doc = win.document;
   });
 
   function getAmpAudio(attributes, opt_childNodesAttrs) {
-    ampAudio = iframe.doc.createElement('amp-audio');
+    ampAudio = doc.createElement('amp-audio');
     for (const key in attributes) {
       ampAudio.setAttribute(key, attributes[key]);
     }
@@ -49,9 +40,9 @@ describe('amp-audio', () => {
       opt_childNodesAttrs.forEach(childNodeAttrs => {
         let child;
         if (childNodeAttrs.tag === 'text') {
-          child = iframe.doc.createTextNode(childNodeAttrs.text);
+          child = doc.createTextNode(childNodeAttrs.text);
         } else {
-          child = iframe.doc.createElement(childNodeAttrs.tag);
+          child = doc.createElement(childNodeAttrs.tag);
           for (const key in childNodeAttrs) {
             if (key !== 'tag') {
               child.setAttribute(key, childNodeAttrs[key]);
@@ -61,13 +52,16 @@ describe('amp-audio', () => {
         ampAudio.appendChild(child);
       });
     }
+    doc.body.appendChild(ampAudio);
     return ampAudio;
   }
 
   function attachAndRun(attributes, opt_childNodesAttrs) {
-    const ampAudio = getAmpAudio(attributes, opt_childNodesAttrs);
     naturalDimensions_['AMP-AUDIO'] = {width: '300px', height: '30px'};
-    return iframe.addElement(ampAudio);
+    const ampAudio = getAmpAudio(attributes, opt_childNodesAttrs);
+    return ampAudio.build().then(() => {
+      return ampAudio.layoutCallback();
+    }).then(() => ampAudio);
   }
 
   it('should load audio through attribute', () => {
@@ -92,8 +86,8 @@ describe('amp-audio', () => {
       muted: '',
       loop: '',
     }, [
-        {tag: 'source', src: 'https://origin.com/audio.mp3',
-            type: 'audio/mpeg'},
+      {tag: 'source', src: 'https://origin.com/audio.mp3',
+        type: 'audio/mpeg'},
         {tag: 'source', src: 'https://origin.com/audio.ogg', type: 'audio/ogg'},
         {tag: 'text', text: 'Unsupported.'},
     ]).then(a => {
@@ -101,8 +95,8 @@ describe('amp-audio', () => {
       expect(audio.tagName).to.equal('AUDIO');
       expect(a.getAttribute('width')).to.be.equal('503');
       expect(a.getAttribute('height')).to.be.equal('53');
-      expect(audio.offsetWidth).to.be.greaterThan('1');
-      expect(audio.offsetHeight).to.be.greaterThan('1');
+      expect(audio.offsetWidth).to.be.greaterThan(1);
+      expect(audio.offsetHeight).to.be.greaterThan(1);
       expect(audio.hasAttribute('controls')).to.be.true;
       expect(audio.hasAttribute('autoplay')).to.be.true;
       expect(audio.hasAttribute('muted')).to.be.true;
@@ -110,10 +104,10 @@ describe('amp-audio', () => {
       expect(audio.hasAttribute('src')).to.be.false;
       expect(audio.childNodes[0].tagName).to.equal('SOURCE');
       expect(audio.childNodes[0].getAttribute('src'))
-        .to.equal('https://origin.com/audio.mp3');
+          .to.equal('https://origin.com/audio.mp3');
       expect(audio.childNodes[1].tagName).to.equal('SOURCE');
       expect(audio.childNodes[1].getAttribute('src'))
-        .to.equal('https://origin.com/audio.ogg');
+          .to.equal('https://origin.com/audio.ogg');
       expect(audio.childNodes[2].nodeType).to.equal(Node.TEXT_NODE);
       expect(audio.childNodes[2].textContent).to.equal('Unsupported.');
     });
@@ -147,20 +141,20 @@ describe('amp-audio', () => {
   });
 
   it('should fallback when not available', () => {
-    const savedCreateElement = document.createElement;
-    document.createElement = name => {
+    const savedCreateElement = doc.createElement;
+    doc.createElement = name => {
       if (name == 'audio') {
-        return savedCreateElement.call(document, 'audio2');
+        return savedCreateElement.call(doc, 'audio2');
       }
-      return savedCreateElement.call(document, name);
+      return savedCreateElement.call(doc, name);
     };
-    const element = document.createElement('div');
+    const element = doc.createElement('div');
     element.toggleFallback = sandbox.spy();
     const audio = new AmpAudio(element);
     const promise = audio.layoutCallback();
-    document.createElement = savedCreateElement;
+    doc.createElement = savedCreateElement;
     return promise.then(() => {
-      expect(element.toggleFallback.callCount).to.equal(1);
+      expect(element.toggleFallback).to.be.calledOnce;
     });
   });
 

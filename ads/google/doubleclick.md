@@ -64,9 +64,9 @@ the `data-multi-size` attribute. Each size in the list must be a width followed
 by a lowercase 'x' followed by a height. Secondary sizes must not be larger than
 their corresponding dimensions specified by the `width` and `height` attributes,
 or the `data-override-width` and `data-override-height` attributes, if they are
-set. Further, the secondary sizes must not be smaller than 2/3rds of their
-primary size counterpart, unless `data-multi-size-validation` is explicitly set
-to false.
+set. Further, the secondary sizes must not be smaller than 2/3rds, in any of the
+two dimensions, of their primary size counterpart, unless 
+`data-multi-size-validation` is explicitly set to false.
 
 Examples:
 
@@ -105,7 +105,7 @@ Supported via `json` attribute:
 - `useSameDomainRenderingUntilDeprecated`
 
 ### Temporary use of useSameDomainRenderingUntilDeprecated
-An experiment to use the higher performance GPT Light tag in place of the DoubleClick GPT tag causes the ad to render in a second cross domain iframe within the outer AMP iframe. This prevents ads from accessing the iframe sandbox information and methods which are provided by the AMP runtime. Until this API is available to work in the second level iframe, publishers can opt out of this experiment by including "useSameDomainRenderingUntilDeprecated": 1 as a json attribute. This attribute will be deprecated by the end of August 2016, when the GPT Light tag will become the default, and all ads will always be rendered inside a second cross domain iframe
+An experiment to use the higher performance GPT Light tag in place of the DoubleClick GPT tag causes the ad to render in a second cross domain iframe within the outer AMP iframe. This prevents ads from accessing the iframe sandbox information and methods which are provided by the AMP runtime. Until this API is available to work in the second level iframe, publishers can opt out of this experiment by including "useSameDomainRenderingUntilDeprecated": 1 as a json attribute. This attribute will be deprecated once the [new window.context implementation](https://github.com/ampproject/amphtml/issues/6829) is complete. After that point, the GPT Light tag will become the default and all eligible ads will always be rendered inside a second cross domain iframe.
 
 Example:
 ```html

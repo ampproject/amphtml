@@ -14,58 +14,52 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-youtube';
-import {adopt} from '../../../../src/runtime';
-import {timerFor} from '../../../../src/timer';
+import {listenOncePromise} from '../../../../src/event-helper';
+import {Services} from '../../../../src/services';
+import {VideoEvents} from '../../../../src/video-interface';
 import * as sinon from 'sinon';
 
-adopt(window);
 
-describe('amp-youtube', function() {
+describes.realWin('amp-youtube', {
+  amp: {
+    extensions: ['amp-youtube'],
+  },
+}, function(env) {
   this.timeout(5000);
-  let sandbox;
-  const timer = timerFor(window);
+  let win, doc;
+  let timer;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
+    win = env.win;
+    doc = win.document;
+    timer = Services.timerFor(win);
   });
 
   function getYt(attributes, opt_responsive, opt_beforeLayoutCallback) {
-    return createIframePromise(
-        true, opt_beforeLayoutCallback).then(iframe => {
-          doNotLoadExternalResourcesInTest(iframe.win);
-          const yt = iframe.doc.createElement('amp-youtube');
-
-          // TODO(mkhatib): During tests, messages are not being correctly
-          // caught and hence the ready promise will never resolve.
-          // For now, this resolves the ready promise after a while.
-          timer.promise(50).then(() => {
-            const ytIframe = yt.querySelector('iframe');
-            yt.implementation_.handleYoutubeMessages_({
-              origin: 'https://www.youtube.com',
-              source: ytIframe.contentWindow,
-              data: JSON.stringify({event: 'onReady'}),
-            });
-          });
-
-          for (const key in attributes) {
-            yt.setAttribute(key, attributes[key]);
-          }
-          yt.setAttribute('width', '111');
-          yt.setAttribute('height', '222');
-          if (opt_responsive) {
-            yt.setAttribute('layout', 'responsive');
-          }
-          return iframe.addElement(yt);
-        });
+    const yt = doc.createElement('amp-youtube');
+    for (const key in attributes) {
+      yt.setAttribute(key, attributes[key]);
+    }
+    yt.setAttribute('width', '111');
+    yt.setAttribute('height', '222');
+    if (opt_responsive) {
+      yt.setAttribute('layout', 'responsive');
+    }
+    doc.body.appendChild(yt);
+    return yt.build().then(() => {
+      if (opt_beforeLayoutCallback) {
+        opt_beforeLayoutCallback(yt);
+      }
+      return yt.layoutCallback();
+    }).then(() => {
+      const ytIframe = yt.querySelector('iframe');
+      yt.implementation_.handleYoutubeMessages_({
+        origin: 'https://www.youtube.com',
+        source: ytIframe.contentWindow,
+        data: JSON.stringify({event: 'onReady'}),
+      });
+    }).then(() => yt);
   }
 
   it('renders', () => {
@@ -82,7 +76,7 @@ describe('amp-youtube', function() {
     return getYt({'data-videoid': 'mGENRKrdoGY'}, true).then(yt => {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.className).to.match(/-amp-fill-content/);
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
 
@@ -144,12 +138,12 @@ describe('amp-youtube', function() {
 
       // Fake out the 404 image response dimensions of YT.
       Object.defineProperty(imgPlaceholder, 'naturalWidth', {
-        get: function() {
+        get() {
           return 120;
         },
       });
       Object.defineProperty(imgPlaceholder, 'naturalHeight', {
-        get: function() {
+        get() {
           return 90;
         },
       });
@@ -171,16 +165,9 @@ describe('amp-youtube', function() {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;
 
-      expect(yt.implementation_.playerState_).to.equal(0);
+      expect(yt.implementation_.playerState_).to.equal(-1);
 
-      yt.implementation_.handleYoutubeMessages_({
-        origin: 'https://www.youtube.com',
-        source: iframe.contentWindow,
-        data: JSON.stringify({
-          event: 'infoDelivery',
-          info: {playerState: 1},
-        }),
-      });
+      sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 1});
 
       expect(yt.implementation_.playerState_).to.equal(1);
 
@@ -254,9 +241,97 @@ describe('amp-youtube', function() {
       'data-param-playsinline': '0',
     }).then(yt => {
       const src = yt.querySelector('iframe').src;
-      const preloadSpy = sandbox.spy(yt.implementation_.preconnect, 'preload');
+      const preloadSpy = sandbox.spy(yt.implementation_.preconnect, 'url');
       yt.implementation_.preconnectCallback();
       preloadSpy.should.have.been.calledWithExactly(src);
     });
   });
+
+  it('should forward certain events from youtube to the amp element', () => {
+    return getYt({'data-videoid': 'mGENRKrdoGY'}).then(yt => {
+      const iframe = yt.querySelector('iframe');
+
+      return Promise.resolve()
+          .then(() => {
+            const p = listenOncePromise(yt, VideoEvents.MUTED);
+            sendFakeInfoDeliveryMessage(yt, iframe, {muted: true});
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(yt, VideoEvents.PLAYING);
+            sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 1});
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(yt, VideoEvents.PAUSE);
+            sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 2});
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(yt, VideoEvents.UNMUTED);
+            sendFakeInfoDeliveryMessage(yt, iframe, {muted: false});
+            return p;
+          }).then(() => {
+            // Should not send the unmute event twice if already sent once.
+            const p = listenOncePromise(yt, VideoEvents.UNMUTED).then(() => {
+              assert.fail('Should not have dispatch unmute message twice');
+            });
+            sendFakeInfoDeliveryMessage(yt, iframe, {muted: false});
+            const successTimeout = timer.promise(10);
+            return Promise.race([p, successTimeout]);
+          }).then(() => {
+            // Make sure pause and end are triggered when video ends.
+            const pEnded = listenOncePromise(yt, VideoEvents.ENDED);
+            const pPause = listenOncePromise(yt, VideoEvents.PAUSE);
+            sendFakeInfoDeliveryMessage(yt, iframe, {playerState: 0});
+            return Promise.all([pEnded, pPause]);
+          });
+    });
+  });
+
+  it('should propagate attribute mutations', () => {
+    return getYt({'data-videoid': 'mGENRKrdoGY'}).then(yt => {
+      const spy = sandbox.spy(yt.implementation_, 'sendCommand_');
+      yt.setAttribute('data-videoid', 'lBTCB7yLs8Y');
+      yt.mutatedAttributesCallback({'data-videoid': 'lBTCB7yLs8Y'});
+      expect(spy).to.be.calledWith('loadVideoById',
+          sinon.match(['lBTCB7yLs8Y']));
+    });
+  });
+
+  it('should remove iframe after unlayoutCallback', () => {
+    return getYt({'data-videoid': 'mGENRKrdoGY'}).then(yt => {
+      const placeholder = yt.querySelector('[placeholder]');
+      const obj = yt.implementation_;
+      const unlistenSpy = sandbox.spy(obj, 'unlistenMessage_');
+      obj.unlayoutCallback();
+      expect(unlistenSpy).to.have.been.called;
+      expect(yt.querySelector('iframe')).to.be.null;
+      expect(obj.iframe_).to.be.null;
+      expect(placeholder.style.display).to.be.equal('');
+      expect(obj.playerState_).to.be.equal(2);
+    });
+  });
+
+  it('should propagate attribute mutations', () => {
+    return getYt({'data-videoid': 'mGENRKrdoGY'}).then(yt => {
+      const spy = sandbox.spy(yt.implementation_, 'sendCommand_');
+      yt.setAttribute('data-videoid', 'lBTCB7yLs8Y');
+      yt.mutatedAttributesCallback({'data-videoid': 'lBTCB7yLs8Y'});
+      expect(spy).to.be.calledWith('loadVideoById',
+          sinon.match(['lBTCB7yLs8Y']));
+
+    });
+  });
+
+  function sendFakeInfoDeliveryMessage(yt, iframe, info) {
+    yt.implementation_.handleYoutubeMessages_({
+      origin: 'https://www.youtube.com',
+      source: iframe.contentWindow,
+      data: JSON.stringify({
+        event: 'infoDelivery',
+        info,
+      }),
+    });
+  }
 });

@@ -22,10 +22,6 @@ limitations under the License.
     <td>Allows for a “image lightbox” or similar experience where upon user interaction, an image expands to fill the viewport until it is closed again by the user.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-image-lightbox" src="https://cdn.ampproject.org/v0/amp-image-lightbox-0.1.js">&lt;/script></code></td>
   </tr>
@@ -39,6 +35,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Behavior
 
 The typical scenario looks like this:
@@ -51,7 +49,7 @@ The typical scenario looks like this:
 <amp-image-lightbox id="lightbox1" layout="nodisplay"></amp-image-lightbox>
 ```
 
-The `amp-image-lightbox` is activated using `on` action on the `amp-img` element
+The `amp-image-lightbox` is activated using [`on`](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#on) action on the `amp-img` element
 by referencing the lightbox element's ID. When activated, it places the image in
 the center of the full-viewport lightbox. Notice that any number of images in
 the article can use the same `amp-image-lightbox`. The `amp-image-lightbox`
@@ -76,7 +74,7 @@ The `amp-image-lightbox-caption` class is also available to style the caption
 section.
 
 ## Actions
-The `amp-image-lightbox` exposes the following actions you can use [AMP on-syntax to trigger](../../../src/spec/amp-actions-and-events.md):
+The `amp-image-lightbox` exposes the following actions you can use [AMP on-syntax to trigger](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md):
 
 <table>
   <tr>
@@ -96,6 +94,16 @@ The `amp-image-lightbox` exposes the following actions you can use [AMP on-synta
 <amp-image-lightbox id="lightbox1" layout="nodisplay"></amp-image-lightbox>
 ```
 
+## Attributes
+
+##### layout
+
+Must be set to `nodisplay`.
+
+##### data-close-button-aria-label
+
+Optional string used as ARIA label for close button.
+
 ## Validation
 
-See [amp-image-lightbox rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-image-lightbox/0.1/validator-amp-image-lightbox.protoascii) in the AMP validator specification.
+See [amp-image-lightbox rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-image-lightbox/validator-amp-image-lightbox.protoascii) in the AMP validator specification.

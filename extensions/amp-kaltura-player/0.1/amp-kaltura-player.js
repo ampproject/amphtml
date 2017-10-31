@@ -17,6 +17,7 @@
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {addParamsToUrl} from '../../../src/url';
 import {getDataParamsFromAttributes} from '../../../src/dom';
+import {dict} from '../../../src/utils/object';
 import {user} from '../../../src/log';
 
 class AmpKaltura extends AMP.BaseElement {
@@ -98,13 +99,15 @@ class AmpKaltura extends AMP.BaseElement {
   /** @override */
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
-      this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
+      this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(dict({
         'method': 'pause' ,
         'value': '' ,
-      }) , '*');
+      })) , '*');
     }
   }
+}
 
-};
 
-AMP.registerElement('amp-kaltura-player', AmpKaltura);
+AMP.extension('amp-kaltura-player', '0.1', AMP => {
+  AMP.registerElement('amp-kaltura-player', AmpKaltura);
+});

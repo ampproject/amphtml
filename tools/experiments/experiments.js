@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import '../../third_party/babel/custom-babel-helpers';
 import '../../src/polyfills';
-import {dev, initLogConstructor} from '../../src/log';
+import {dev, initLogConstructor, setReportError} from '../../src/log';
+import {reportError} from '../../src/error';
 import {getCookie, setCookie} from '../../src/cookies';
 import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
@@ -26,6 +26,7 @@ import {onDocumentReady} from '../../src/document-ready';
 import '../../src/service/timer-impl';
 
 initLogConstructor();
+setReportError(reportError);
 
 const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
 
@@ -58,7 +59,7 @@ const EXPERIMENTS = [
   {
     id: 'ad-type-custom',
     name: 'Activates support for custom (self-serve) advertisements',
-    spec: 'https://github.com/ampproject/amphtml/ads/custom.md',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/ads/custom.md',
   },
   {
     id: 'alp',
@@ -91,22 +92,10 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6217',
   },
   {
-    id: 'amp-inabox',
-    name: 'AMP inabox',
-    spec: 'https://github.com/ampproject/amphtml/issues/5700',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6156',
-  },
-  {
-    id: 'amp-form-custom-validations',
-    name: 'AMP Form Custom Validations',
-    spec: 'https://github.com/ampproject/amphtml/issues/3343',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5423',
-  },
-  {
-    id: 'amp-form-var-sub',
-    name: 'Variable Substitutions in AMP Form inputs',
-    spec: 'https://github.com/ampproject/amphtml/issues/5654',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6377',
+    id: 'amp-auto-ads-adsense-holdout',
+    name: 'AMP Auto Ads AdSense Holdout',
+    spec: 'https://github.com/ampproject/amphtml/issues/6196',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9247',
   },
   {
     id: 'amp-google-vrview-image',
@@ -114,6 +103,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-google-vrview-image/amp-google-vrview-image.md',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
+  },
+  {
+    id: 'amp-gwd-animation',
+    name: 'AMP GWD Animation',
+    spec: 'https://github.com/ampproject/amphtml/issues/9949',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11238',
   },
   {
     id: 'no-auth-in-prerender',
@@ -135,7 +130,7 @@ const EXPERIMENTS = [
   },
   {
     id: 'amp-apester-media',
-    name: 'AMP extension for Apester media',
+    name: 'AMP extension for Apester media (launched)',
     spec: 'https://github.com/ampproject/amphtml/issues/3233',
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/4291',
   },
@@ -150,40 +145,21 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/4152',
   },
   {
+    id: 'amp-lightbox-a4a-proto',
+    name: 'Allows the new lightbox experience to be used in A4A (prototype).',
+    spec: 'https://github.com/ampproject/amphtml/issues/7743',
+  },
+  {
     id: 'amp-lightbox-viewer-auto',
     name: 'Allows the new lightbox experience to automatically include some ' +
         'elements without the need to manually add the `lightbox` attribute',
     spec: 'https://github.com/ampproject/amphtml/issues/4152',
   },
   {
-    id: 'amp-fresh',
-    name: 'Guaranteed minimum freshness on sections of a page',
-    spec: '',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4715',
-  },
-  {
     id: 'amp-playbuzz',
-    name: 'AMP extension for playbuzz engaging items',
+    name: 'AMP extension for playbuzz items (launched)',
     spec: 'https://github.com/ampproject/amphtml/issues/6106',
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
-  },
-  {
-    id: 'make-body-block',
-    name: 'Sets the body to display:block.',
-    spec: 'https://github.com/ampproject/amphtml/issues/5310',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5319',
-  },
-  {
-    id: 'make-body-relative',
-    name: 'Sets the body to position:relative.',
-    spec: 'https://github.com/ampproject/amphtml/issues/5667',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5660',
-  },
-  {
-    id: 'link-url-replace',
-    name: 'Enables replacing variables in URLs of outgoing links.',
-    spec: 'https://github.com/ampproject/amphtml/issues/4078',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5627',
   },
   {
     id: 'alp-for-a4a',
@@ -193,7 +169,7 @@ const EXPERIMENTS = [
   {
     id: 'ios-embed-wrapper',
     name: 'A new iOS embedded viewport model that wraps the body into' +
-        ' a synthetic root',
+        ' a synthetic root (launched)',
     spec: '',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5639',
   },
@@ -203,33 +179,108 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5535',
   },
   {
+    id: 'font-display-swap',
+    name: 'Use font-display: swap as the default for fonts.',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11165',
+  },
+  {
     id: 'amp-animation',
-    name: 'High-performing keyframe animations in AMP.',
+    name: 'High-performing keyframe animations in AMP (launched).',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-animation/amp-animation.md',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
   },
   {
-    id: 'amp-ad-loading-ux',
-    name: 'New default loading UX to amp-ad',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6009',
+    id: 'variable-filters',
+    name: 'Format to apply filters to analytics variables',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
   },
   {
-    id: 'visibility-v2',
-    name: 'New visibility tracking using native IntersectionObserver',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6254',
+    id: 'pump-early-frame',
+    name: 'Force all extensions to have the same release ' +
+        'as the main JS binary',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8237',
   },
   {
-    id: 'amp-selector',
-    name: 'Amp selector extension',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/6168',
+    id: 'version-locking',
+    name: 'Force all extensions to have the same release ' +
+        'as the main JS binary',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8236',
+  },
+  {
+    id: 'web-worker',
+    name: 'Web worker for background processing',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7156',
+  },
+  {
+    id: 'jank-meter',
+    name: 'Display jank meter',
+  },
+  {
+    id: 'amp-fx-parallax',
+    name: 'Amp extension for a parallax effect',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7801',
+    spec: 'https://github.com/ampproject/amphtml/issues/1443',
+  },
+  {
+    id: 'slidescroll-disable-css-snap',
+    name: 'Slidescroll disable css snap',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8195',
+    spec: 'https://github.com/ampproject/amphtml/issues/7670',
+  },
+  {
+    id: '3p-use-ampcontext',
+    name: 'Use AmpContext for window.context messaging',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8239',
+    spec: 'https://github.com/ampproject/amphtml/issues/6829',
+  },
+  {
+    id: 'as-use-attr-for-format',
+    name: 'Use slot width/height attribute for AdSense size format',
+  },
+  {
+    id: 'input-debounced',
+    name: 'A debounced input event for AMP actions',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9413',
+    spec: 'https://github.com/ampproject/amphtml/issues/9277',
+  },
+  {
+    id: 'amp-ima-video',
+    name: 'IMA-integrated Video Player',
+  },
+  {
+    id: 'amp-sidebar 1.0',
+    name: 'Amp sidebar 1.0 extension',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9803',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-selector/amp-selector.md',
+      'amp-sidebar/1.0/amp-sidebar-1.0.md',
   },
   {
-    id: 'amp-accordion-session-state-optout',
-    name: 'AMP Accordion attribute to opt out of preserved state.',
-    Spec: 'https://github.com/ampproject/amphtml/issues/3813',
+    id: 'user-error-reporting',
+    name: 'Report error to publishers',
+    spec: 'https://github.com/ampproject/amphtml/issues/6415',
+  },
+  {
+    id: 'disable-rtc',
+    name: 'Disable AMP RTC',
+    spec: 'https://github.com/ampproject/amphtml/issues/8551',
+  },
+  {
+    id: 'inabox-position-api',
+    name: 'Position API for foreign iframe',
+    spec: 'https://github.com/ampproject/amphtml/issues/10995',
+  },
+  {
+    id: 'amp-story',
+    name: 'Visual storytelling in AMP',
+    spec: 'https://github.com/ampproject/amphtml/issues/11329',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11475',
+  },
+  {
+    id: 'amp-story-desktop',
+    name: 'A responsive desktop experience for the amp-story component',
+    spec: 'https://github.com/ampproject/amphtml/issues/11714',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11715',
   },
 ];
 
@@ -257,6 +308,7 @@ function build() {
  * @param {!ExperimentDef} experiment
  */
 function buildExperimentRow(experiment) {
+
   const tr = document.createElement('tr');
   tr.id = 'exp-tr-' + experiment.id;
 
@@ -279,6 +331,11 @@ function buildExperimentRow(experiment) {
   buttonOn.classList.add('on');
   buttonOn.textContent = 'On';
   button.appendChild(buttonOn);
+
+  const buttonDefault = document.createElement('div');
+  buttonDefault.classList.add('default');
+  buttonDefault.textContent = 'Default on';
+  button.appendChild(buttonDefault);
 
   const buttonOff = document.createElement('div');
   buttonOff.classList.add('off');
@@ -331,7 +388,11 @@ function updateExperimentRow(experiment) {
   if (!tr) {
     return;
   }
-  tr.setAttribute('data-on', isExperimentOn_(experiment.id) ? 1 : 0);
+  let state = isExperimentOn_(experiment.id) ? 1 : 0;
+  if (self.AMP_CONFIG[experiment.id]) {
+    state = 'default';
+  }
+  tr.setAttribute('data-on', state);
 }
 
 
@@ -365,7 +426,14 @@ function toggleExperiment_(id, name, opt_on) {
     if (id == CANARY_EXPERIMENT_ID) {
       const validUntil = Date.now() +
           COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
-      setCookie(window, 'AMP_CANARY', (on ? '1' : '0'), (on ? validUntil : 0));
+      setCookie(window, 'AMP_CANARY',
+          (on ? '1' : '0'), (on ? validUntil : 0), {
+            // Set explicit domain, so the cookie gets send to sub domains.
+            domain: location.hostname,
+            allowOnProxyOrigin: true,
+          });
+      // Reflect default experiment state.
+      self.location.reload();
     } else {
       toggleExperiment(window, id, on);
     }
@@ -403,9 +471,41 @@ function showConfirmation_(message, callback) {
   container.classList.add('show');
 }
 
+/**
+ * Loads the AMP_CONFIG objects from whatever the v0.js is that the
+ * user has (depends on whether they opted into canary), so that
+ * experiment state can reflect the default activated experiments.
+ */
+function getAmpConfig() {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.addEventListener('load', () => {
+      resolve(xhr.responseText);
+    });
+    xhr.addEventListener('error', () => {
+      reject(new Error(xhr.statusText));
+    });
+    // Cache bust, so we immediately reflect AMP_CANARY cookie changes.
+    xhr.open('GET', '/v0.js?' + Math.random(), true);
+    xhr.send(null);
+  }).then(text => {
+    const match = text.match(/self\.AMP_CONFIG=([^;]+)/);
+    if (!match) {
+      throw new Error('Can\'t find AMP_CONFIG in: ' + text);
+    }
+    // Setting global var to make standard experiment code just work.
+    return self.AMP_CONFIG = JSON.parse(match[1]);
+  }).catch(error => {
+    console./*OK*/error('Error fetching AMP_CONFIG', error);
+    return {};
+  });
+}
+
 
 // Start up.
-onDocumentReady(document, () => {
-  build();
-  update();
+getAmpConfig().then(() => {
+  onDocumentReady(document, () => {
+    build();
+    update();
+  });
 });

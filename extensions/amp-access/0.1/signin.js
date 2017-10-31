@@ -17,6 +17,7 @@
 import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 
 
 /** @const */
@@ -57,17 +58,16 @@ const TAG = 'amp-access-signin';
 export class SignInProtocol {
 
   /**
-   * @param {!Window} win
-   * @param {!Viewer} viewer
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/viewer-impl.Viewer} viewer
    * @param {string} pubOrigin
-   * @param {!JSONObject} configJson
+   * @param {!JsonObject} configJson
    */
-  constructor(win, viewer, pubOrigin, configJson) {
+  constructor(ampdoc, viewer, pubOrigin, configJson) {
+    /** @const */
+    this.ampdoc = ampdoc;
 
-    /** @const {!Window} */
-    this.win = win;
-
-    /** @private @const {!Viewer} */
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = viewer;
 
     /** @private @const {string} */
@@ -75,14 +75,15 @@ export class SignInProtocol {
 
     /** @private @const {boolean} */
     this.isEnabled_ =
-        isExperimentOn(this.win, TAG) &&
+        isExperimentOn(ampdoc.win, TAG) &&
         this.viewer_.isEmbedded() &&
         this.viewer_.getParam('signin') == '1';
 
+    let acceptAccessToken;
+    let supportsSignInService;
     if (this.isEnabled_) {
 
-      /** @private @const {boolean} */
-      this.acceptAccessToken_ = !!configJson['acceptAccessToken'];
+      acceptAccessToken = !!configJson['acceptAccessToken'];
 
       const viewerSignInService = this.viewer_.getParam('signinService');
       const configSignInServices = configJson['signinServices'];
@@ -91,16 +92,17 @@ export class SignInProtocol {
             '"signinServices" must be an array');
       }
 
-      /** @private @const {boolean} */
-      this.supportsSignInService_ = configSignInServices &&
+      supportsSignInService = configSignInServices &&
           configSignInServices.indexOf(viewerSignInService) != -1;
     } else {
-      /** @private @const {boolean} */
-      this.acceptAccessToken_ = false;
-      /** @private @const {boolean} */
-      this.supportsSignInService_ = false;
+      acceptAccessToken = false;
+      supportsSignInService = false;
     }
 
+    /** @private @const {boolean} */
+    this.acceptAccessToken_ = acceptAccessToken;
+    /** @private @const {boolean} */
+    this.supportsSignInService_ = supportsSignInService;
     /** @private {?Promise<?string>} */
     this.accessTokenPromise_ = null;
   }
@@ -139,9 +141,9 @@ export class SignInProtocol {
     }
     if (!this.accessTokenPromise_) {
       this.accessTokenPromise_ = this.viewer_.sendMessageAwaitResponse(
-          'getAccessTokenPassive', {
-            origin: this.pubOrigin_,
-          }).then(resp => {
+          'getAccessTokenPassive', dict({
+            'origin': this.pubOrigin_,
+          })).then(resp => {
             return /** @type {?string} */ (resp);
           }).catch(reason => {
             user().error(TAG, 'Failed to retrieve access token: ', reason);
@@ -185,10 +187,10 @@ export class SignInProtocol {
     if (!authorizationCode) {
       return null;
     }
-    return this.viewer_.sendMessageAwaitResponse('storeAccessToken', {
-      origin: this.pubOrigin_,
-      authorizationCode,
-    }).then(resp => {
+    return this.viewer_.sendMessageAwaitResponse('storeAccessToken', dict({
+      'origin': this.pubOrigin_,
+      'authorizationCode': authorizationCode,
+    })).then(resp => {
       const accessToken = /** @type {?string} */ (resp);
       this.updateAccessToken_(accessToken);
       return accessToken;
@@ -218,10 +220,10 @@ export class SignInProtocol {
     if (!this.supportsSignInService_) {
       return null;
     }
-    return this.viewer_.sendMessageAwaitResponse('requestSignIn', {
-      origin: this.pubOrigin_,
-      url,
-    }).then(resp => {
+    return this.viewer_.sendMessageAwaitResponse('requestSignIn', dict({
+      'origin': this.pubOrigin_,
+      'url': url,
+    })).then(resp => {
       const accessToken = /** @type {?string} */ (resp);
       this.updateAccessToken_(accessToken);
       // Return empty dialog result.

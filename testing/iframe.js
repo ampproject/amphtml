@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-
-import {Timer} from '../src/timer';
+import {AmpEvents} from '../src/amp-events';
+import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
+import {FakeLocation} from './fake-dom';
+import {FormEvents} from '../extensions/amp-form/0.1/form-events';
+import {Services, resourcesForDoc} from '../src/services';
+import {cssText} from '../build/css';
+import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
+import {parseIfNeeded} from '../src/iframe-helper';
+import {
+  installAmpdocServices,
+  installRuntimeServices,
+} from '../src/runtime';
 import installCustomElements from
     'document-register-element/build/document-register-element.node';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
-import {
-  installAmpdocServices,
-  installRuntimeServices,
-  registerForUnitTest,
-} from '../src/runtime';
-import {installStyles} from '../src/style-installer';
-import {cssText} from '../build/css';
+import {installStylesLegacy} from '../src/style-installer';
 
 let iframeCount = 0;
 
@@ -61,10 +65,15 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
   return new Promise((resolve, reject) => {
     // Counts the supported custom events.
     const events = {
-      'amp:attached': 0,
-      'amp:error': 0,
-      'amp:stubbed': 0,
-      'amp:load:start': 0,
+      [AmpEvents.ATTACHED]: 0,
+      [AmpEvents.DOM_UPDATE]: 0,
+      [AmpEvents.ERROR]: 0,
+      [AmpEvents.LOAD_START]: 0,
+      [AmpEvents.STUBBED]: 0,
+      [BindEvents.INITIALIZE]: 0,
+      [BindEvents.SET_STATE]: 0,
+      [BindEvents.RESCAN_TEMPLATE]: 0,
+      [FormEvents.SERVICE_INIT]: 0,
     };
     const messages = [];
     let html = __html__[fixture];
@@ -82,16 +91,23 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
       // Flag as being a test window.
       win.AMP_TEST_IFRAME = true;
       win.AMP_TEST = true;
+      // Set the testLocation on iframe to parent's location since location of
+      // the test iframe is about:srcdoc.
+      // Unfortunately location object is not configurable, so we have to define
+      // a new property.
+      win.testLocation = new FakeLocation(window.location.href, win);
       win.ampTestRuntimeConfig = window.ampTestRuntimeConfig;
       if (opt_beforeLoad) {
         opt_beforeLoad(win);
       }
       win.addEventListener('message', (event) => {
-        if (event.data &&
+        const parsedData = parseMessageData(event.data);
+
+        if (parsedData &&
             // Either non-3P or 3P variant of the sentinel.
-            (/^amp/.test(event.data.sentinel) ||
-             /^\d+-\d+$/.test(event.data.sentinel))) {
-          messages.push(event.data);
+            (/^amp/.test(parsedData.sentinel) ||
+             /^\d+-\d+$/.test(parsedData.sentinel))) {
+          messages.push(parsedData);
         }
       })
       // Function that returns a promise for when the given event fired at
@@ -136,7 +152,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
       };
       let timeout = setTimeout(function() {
         reject(new Error('Timeout waiting for elements to start loading.'));
-      }, 2000);
+      }, window.ampTestRuntimeConfig.mochaTimeout || 2000);
       // Declare the test ready to run when the document was fully parsed.
       window.afterLoad = function() {
         resolve({
@@ -205,18 +221,20 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
     iframe.onload = function() {
       // Flag as being a test window.
       iframe.contentWindow.AMP_TEST_IFRAME = true;
+      iframe.contentWindow.testLocation = new FakeLocation(window.location.href,
+          iframe.contentWindow);
       if (opt_runtimeOff) {
         iframe.contentWindow.name = '__AMP__off=1';
       }
-      const ampdocService = installDocService(iframe.contentWindow, true);
-      const ampdoc = ampdocService.getAmpDoc(iframe.contentWindow.document);
+      installDocService(iframe.contentWindow, /* isSingleDoc */ true);
+      const ampdoc = Services.ampdocServiceFor(iframe.contentWindow).getAmpDoc();
       installExtensionsService(iframe.contentWindow);
       installRuntimeServices(iframe.contentWindow);
       installCustomElements(iframe.contentWindow);
       installAmpdocServices(ampdoc);
-      registerForUnitTest(iframe.contentWindow);
+      Services.resourcesForDoc(ampdoc).ampInitComplete();
       // Act like no other elements were loaded by default.
-      installStyles(iframe.contentWindow.document, cssText, () => {
+      installStylesLegacy(iframe.contentWindow.document, cssText, () => {
         resolve({
           win: iframe.contentWindow,
           doc: iframe.contentWindow.document,
@@ -225,7 +243,8 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
           addElement: function(element) {
             const iWin = iframe.contentWindow;
             const p = onInsert(iWin).then(() => {
-              element.build(true);
+              return element.build();
+            }).then(() => {
               if (!element.getPlaceholder()) {
                 const placeholder = element.createPlaceholder();
                 if (placeholder) {
@@ -264,7 +283,6 @@ export function createServedIframe(src) {
       win.AMP_TEST_IFRAME = true;
       win.AMP_TEST = true;
       installRuntimeServices(win);
-      registerForUnitTest(win);
       resolve({
         win: win,
         doc: win.document,
@@ -306,26 +324,42 @@ export function createIframeWithMessageStub(win) {
   /**
    * Returns a Promise that resolves when the iframe acknowledged the reception
    * of the specified message.
+   * @param {function(?Object, !Object|string)|string} callbackOrType
+   *     A callback that determines if this is the message we expected. If a
+   *     string is passed, the determination is based on whether the message's
+   *     type matches the string.
    */
-  element.expectMessageFromParent = msg => {
-    return new Promise(resolve => {
-      const listener = event => {
-        let expectMsg = msg;
-        let actualMsg = event.data.receivedMessage;
-        if (typeof expectMsg !== 'string') {
-          expectMsg = JSON.stringify(expectMsg);
-          actualMsg = JSON.stringify(actualMsg);
-        }
-        if (event.source == element.contentWindow
-            && event.data.testStubEcho
-            && expectMsg == actualMsg) {
-          win.removeEventListener('message', listener);
-          resolve(msg);
-        }
+  element.expectMessageFromParent = (callbackOrType) => {
+    let filter;
+    if (typeof callbackOrType === 'string') {
+      filter = (data) => {
+        return 'type' in data && data.type == callbackOrType;
       };
+    } else {
+      filter = callbackOrType;
+    }
+
+    return new Promise((resolve, reject) => {
+      function listener(event) {
+        if (event.source != element.contentWindow || !event.data.testStubEcho) {
+          return;
+        }
+        const message = event.data.receivedMessage;
+        const data = parseIfNeeded(message);
+        try {
+          if (filter(data, message)) {
+            win.removeEventListener('message', listener);
+            resolve(data || message);
+          }
+        } catch (e) {
+          win.removeEventListener('message', listener);
+          reject(e);
+        }
+      }
       win.addEventListener('message', listener);
     });
   };
+
   return element;
 }
 
@@ -364,14 +398,15 @@ export function expectPostMessage(sourceWin, targetwin, msg) {
  */
 export function poll(description, condition, opt_onError, opt_timeout) {
   return new Promise((resolve, reject) => {
-    let start = Date.now();
+    const start = Date.now();
+    const end = opt_timeout || 1600;
     function poll() {
       const ret = condition();
       if (ret) {
         clearInterval(interval);
         resolve(ret);
       } else {
-        if (Date.now() - start > (opt_timeout || 1600)) {
+        if (Date.now() - start > end) {
           clearInterval(interval);
           if (opt_onError) {
             reject(opt_onError());
@@ -381,7 +416,7 @@ export function poll(description, condition, opt_onError, opt_timeout) {
         }
       }
     }
-    let interval = setInterval(poll, 8);
+    const interval = setInterval(poll, 8);
     poll();
   });
 }
@@ -398,7 +433,8 @@ export function poll(description, condition, opt_onError, opt_timeout) {
  */
 export function pollForLayout(win, count, opt_timeout) {
   let getCount = () => {
-    return win.document.querySelectorAll('.-amp-layout,.-amp-error').length;
+    return win.document.querySelectorAll(
+        '.i-amphtml-layout,.i-amphtml-error').length;
   };
   return poll('Waiting for elements to layout: ' + count, () => {
     return getCount() >= count;
@@ -411,15 +447,16 @@ export function pollForLayout(win, count, opt_timeout) {
 
 /**
  * @param {!Window} win
+ * @param {number=} opt_timeout
  * @return {!Promise}
  */
-export function expectBodyToBecomeVisible(win) {
+export function expectBodyToBecomeVisible(win, opt_timeout) {
   return poll('expect body to become visible', () => {
     return win && win.document && win.document.body && (
         (win.document.body.style.visibility == 'visible'
             && win.document.body.style.opacity != '0')
         || win.document.body.style.opacity == '1');
-  }, undefined, 5000);
+  }, undefined, opt_timeout || 5000);
 }
 
 /**
@@ -439,6 +476,7 @@ export function doNotLoadExternalResourcesInTest(win) {
     if (tagName == 'iframe' || tagName == 'img') {
       // Make get/set write to a fake property instead of
       // triggering invocation.
+      element.fakeSrc = '';
       Object.defineProperty(element, 'src', {
         set: function(val) {
           this.fakeSrc = val;
@@ -509,4 +547,17 @@ function maybeSwitchToCompiledJs(html) {
         .replace(/dist\.3p\/current\//g, 'dist.3p/current-min/');
   }
   return html;
+}
+
+
+/**
+ * @param {*} data
+ * @returns {?}
+ * @private
+ */
+function parseMessageData(data) {
+  if (typeof data == 'string' && isAmpMessage(data)) {
+    return deserializeMessage(data);
+  }
+  return data;
 }

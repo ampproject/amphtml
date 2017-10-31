@@ -13,12 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-var path = require('path');
-
-var karmaConf = path.resolve('karma.conf.js');
-
-var commonTestPaths = [
+const commonTestPaths = [
   'test/_init_tests.js',
   'test/fixtures/*.html',
   {
@@ -51,68 +48,64 @@ var commonTestPaths = [
     nocache: false,
     watched: true,
   },
+  {
+    pattern: 'test/coverage/**/*',
+    included: false,
+    nocache: false,
+    watched: false,
+  },
 ];
 
-var testPaths = commonTestPaths.concat([
+const simpleTestPath = [
+  'test/simple-test.js',
+];
+
+const basicTestPaths = [
   'test/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
+];
+
+const testPaths = commonTestPaths.concat(basicTestPaths);
+
+const a4aTestPaths = [
+  'extensions/amp-a4a/**/test/**/*.js',
+  'extensions/amp-ad-network-*/**/test/**/*.js',
+  'ads/google/a4a/test/*.js',
+];
+
+const chaiAsPromised = [
+  'test/chai-as-promised/chai-as-promised.js',
+];
+
+const unitTestPaths = commonTestPaths.concat([
+  'test/functional/**/*.js',
+  'ads/**/test/test-*.js',
+  'extensions/**/test/*.js',
 ]);
 
-var integrationTestPaths = commonTestPaths.concat([
+const integrationTestPaths = commonTestPaths.concat([
   'test/integration/**/*.js',
+  'test/functional/test-error.js',
   'extensions/**/test/integration/**/*.js',
 ]);
 
-var karmaDefault = {
-  configFile: karmaConf,
-  singleRun: true,
-  client: {
-    mocha: {
-      // Longer timeout on Travis; fail quickly at local.
-      timeout: process.env.TRAVIS ? 10000 : 2000
-    },
-    captureConsole: false,
-  },
-  browserDisconnectTimeout: 10000,
-  browserDisconnectTolerance: 2,
-  browserNoActivityTimeout: 4 * 60 * 1000,
-  captureTimeout: 4 * 60 * 1000,
-};
-
-var karma = {
-  default: karmaDefault,
-  firefox: extend(karmaDefault, {browsers: ['Firefox']}),
-  safari: extend(karmaDefault, {browsers: ['Safari']}),
-  saucelabs: extend(karmaDefault, {
-    reporters: ['dots', 'saucelabs'],
-    browsers: [
-      'SL_Chrome_android',
-      'SL_Chrome_latest',
-      'SL_Chrome_45',
-      'SL_Firefox_latest',
-      'SL_Safari_8',
-      'SL_Safari_9',
-      'SL_Edge_latest',
-      'SL_iOS_8_4',
-      'SL_iOS_9_1',
-      'SL_iOS_10_0',
-      //'SL_IE_11',
-    ],
-  })
-};
-
 /** @const  */
 module.exports = {
-  commonTestPaths: commonTestPaths,
-  testPaths: testPaths,
-  integrationTestPaths: integrationTestPaths,
-  karma: karma,
+  commonTestPaths,
+  simpleTestPath,
+  basicTestPaths,
+  testPaths,
+  a4aTestPaths,
+  chaiAsPromised,
+  unitTestPaths,
+  integrationTestPaths,
   lintGlobs: [
     '**/*.js',
     '!**/*.extern.js',
     '!{node_modules,build,dist,dist.3p,dist.tools,' +
-        'third_party,build-system}/**/*.*',
+        'third_party}/**/*.*',
+    '!build-system/eslint-rules/**/*.*',
     '!{testing,examples}/**/*.*',
     // TODO: temporary, remove when validator is up to date
     '!validator/**/*.*',
@@ -121,7 +114,14 @@ module.exports = {
     '!karma.conf.js',
     '!**/local-amp-chrome-extension/background.js',
     '!extensions/amp-access/0.1/access-expr-impl.js',
+    '!extensions/amp-animation/0.1/css-expr-impl.js',
     '!extensions/amp-bind/0.1/bind-expr-impl.js',
+    '!test/coverage/**/*.*',
+  ],
+  jsonGlobs: [
+    '**/*.json',
+    '!{node_modules,build,dist,dist.3p,dist.tools,' +
+        'third_party,build-system}/**/*.*',
   ],
   presubmitGlobs: [
     '**/*.{css,js,go}',
@@ -131,6 +131,7 @@ module.exports = {
     '!{node_modules,build,dist,dist.tools,' +
         'dist.3p/[0-9]*,dist.3p/current-min}/**/*.*',
     '!dist.3p/current/**/ampcontext-lib.js',
+    '!dist.3p/current/**/iframe-transport-client-lib.js',
     '!validator/dist/**/*.*',
     '!validator/node_modules/**/*.*',
     '!validator/nodejs/node_modules/**/*.*',
@@ -144,10 +145,7 @@ module.exports = {
     // of the AMP runtime, so shouldn't be checked.
     '!extensions/amp-a4a/*/test/testdata/*.js',
     '!examples/*.js',
+    '!test/coverage/**/*.*',
   ],
-  changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/
+  changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/,
 };
-
-function extend(orig, add) {
-  return Object.assign({}, orig, add);
-}

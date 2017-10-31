@@ -1,5 +1,5 @@
 FAIL
-feature_tests/dog_doc_type.html:23:0 The attribute '🐶' may not appear in tag 'html doctype'. (see https://www.ampproject.org/docs/reference/spec.html#required-markup) [DISALLOWED_HTML]
-feature_tests/dog_doc_type.html:24:0 The mandatory attribute '⚡' is missing in tag 'html ⚡ for top-level html'. (see https://www.ampproject.org/docs/reference/spec.html#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-feature_tests/dog_doc_type.html:35:7 The mandatory tag 'html doctype' is missing or incorrect. (see https://www.ampproject.org/docs/reference/spec.html#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-feature_tests/dog_doc_type.html:35:7 The mandatory tag 'html ⚡ for top-level html' is missing or incorrect. (see https://www.ampproject.org/docs/reference/spec.html#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/dog_doc_type.html:23:0 The attribute '🐶' may not appear in tag 'html doctype'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
+feature_tests/dog_doc_type.html:24:0 The mandatory attribute '⚡' is missing in tag 'html ⚡ for top-level html'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/dog_doc_type.html:35:7 The mandatory tag 'html doctype' is missing or incorrect. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/dog_doc_type.html:35:7 The mandatory tag 'html ⚡ for top-level html' is missing or incorrect. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]

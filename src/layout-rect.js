@@ -25,11 +25,53 @@
  *   left: number,
  *   right: number,
  *   width: number,
- *   height: number
+ *   height: number,
+ *   x: number,
+ *   y: number
  * }}
  */
 export let LayoutRectDef;
 
+
+/**
+ * The structure that represents the margins of an Element.
+ *
+ * @typedef {{
+ *   top: number,
+ *   right: number,
+ *   bottom: number,
+ *   left: number
+ * }}
+ */
+export let LayoutMarginsDef;
+
+
+/**
+ * The structure that represents a requested change to the margins of an
+ * Element. Any new values specified will replace existing ones (rather than
+ * being additive).
+ *
+ * @typedef {{
+ *   top: (number|undefined),
+ *   right: (number|undefined),
+ *   bottom: (number|undefined),
+ *   left: (number|undefined)
+ * }}
+ */
+export let LayoutMarginsChangeDef;
+
+/**
+* RelativePositions
+*
+* Describes the relative position of an element to another (whether the
+* first is inside the second, on top of the second or on the bottom
+* @enum {string}
+*/
+export const RelativePositions = {
+  INSIDE: 'inside',
+  TOP: 'top',
+  BOTTOM: 'bottom',
+};
 
 /**
  * Creates a layout rect based on the left, top, width and height parameters
@@ -48,6 +90,8 @@ export function layoutRectLtwh(left, top, width, height) {
     height,
     bottom: top + height,
     right: left + width,
+    x: left,
+    y: top,
   };
 }
 
@@ -104,6 +148,21 @@ export function rectIntersection(var_args) {
   return layoutRectLtwh(x0, y0, x1 - x0, y1 - y0);
 }
 
+/**
+ * Returns the position of r2 relative to r1
+ * @param {!LayoutRectDef} r1
+ * @param {!LayoutRectDef} r2
+ * @return {RelativePositions}
+ */
+export function layoutRectsRelativePos(r1, r2) {
+  if (r1.top < r2.top) {
+    return RelativePositions.TOP;
+  } else if (r1.bottom > r2.bottom) {
+    return RelativePositions.BOTTOM;
+  } else {
+    return RelativePositions.INSIDE;
+  }
+}
 
 /**
  * Expand the layout rect using multiples of width and height.
@@ -113,16 +172,11 @@ export function rectIntersection(var_args) {
  * @return {!LayoutRectDef}
  */
 export function expandLayoutRect(rect, dw, dh) {
-  return {
-    top: rect.top - rect.height * dh,
-    bottom: rect.bottom + rect.height * dh,
-    left: rect.left - rect.width * dw,
-    right: rect.right + rect.width * dw,
-    width: rect.width * (1 + dw * 2),
-    height: rect.height * (1 + dh * 2),
-  };
+  return layoutRectLtwh(rect.left - rect.width * dw,
+      rect.top - rect.height * dh,
+      rect.width * (1 + dw * 2),
+      rect.height * (1 + dh * 2));
 }
-
 
 /**
  * Moves the layout rect using dx and dy.
@@ -138,4 +192,30 @@ export function moveLayoutRect(rect, dx, dy) {
   }
   return layoutRectLtwh(rect.left + dx, rect.top + dy,
       rect.width, rect.height);
+}
+
+
+/**
+ * @param {!LayoutMarginsDef} margins
+ * @param {!LayoutMarginsChangeDef} change
+ * @return {boolean}
+ */
+export function areMarginsChanged(margins, change) {
+  return (change.top !== undefined && change.top != margins.top) ||
+      (change.right !== undefined && change.right != margins.right) ||
+      (change.bottom !== undefined && change.bottom != margins.bottom) ||
+      (change.left !== undefined && change.left != margins.left);
+}
+
+/**
+ * @param {?LayoutRectDef} r1
+ * @param {?LayoutRectDef} r2
+ * @return {boolean}
+ */
+export function layoutRectEquals(r1, r2) {
+  if (!r1 || !r2) {
+    return false;
+  }
+  return r1.left == r2.left && r1.top == r2.top &&
+      r1.width == r2.width && r1.height == r2.height;
 }

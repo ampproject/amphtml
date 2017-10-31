@@ -25,6 +25,7 @@ import {install as installDocContains} from './polyfills/document-contains';
 import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installPromise} from './polyfills/promise';
+import {install as installArrayIncludes} from './polyfills/array-includes';
 import {getMode} from './mode';
 
 /**
@@ -35,10 +36,11 @@ import {getMode} from './mode';
   effect in importing the module.
 */
 if (!getMode().localDev) {
-  installCustomElements(self);
+  installCustomElements(self, 'auto');
 }
 installDOMTokenListToggle(self);
 installMathSign(self);
 installObjectAssign(self);
 installPromise(self);
 installDocContains(self);
+installArrayIncludes(self);

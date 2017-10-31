@@ -18,6 +18,7 @@
 
 import {loadScript} from './3p';
 import {setStyles} from '../src/style';
+import {parseUrl} from '../src/url';
 
 /**
  * Produces the Twitter API object for the passed in callback. If the current
@@ -71,11 +72,14 @@ export function twitter(global, data) {
       }
     });
 
-    twttr.widgets.createTweet(data.tweetid, tweet, data)./*OK*/then(el => {
+    const tweetId = cleanupTweetId_(data.tweetid);
+    twttr.widgets.createTweet(tweetId, tweet, data)./*OK*/then(el => {
       if (el) {
         // Not a deleted tweet
         twitterWidgetSandbox = el;
         resize(twitterWidgetSandbox);
+      } else {
+        global.context.noContentAvailable();
       }
     });
   });
@@ -92,3 +96,30 @@ export function twitter(global, data) {
         height + /* margins */ 20);
   }
 }
+
+/**
+ * @visibleForTesting
+ */
+export function cleanupTweetId_(tweetid) {
+  // 1)
+  // Handle malformed ids such as
+  // https://twitter.com/abc123/status/585110598171631616
+  tweetid = tweetid.toLowerCase();
+  if (tweetid.indexOf('https://twitter.com/') >= 0) {
+    const url = parseUrl(tweetid);
+    // pathname = /abc123/status/585110598171631616
+    const paths = url.pathname.split('/');
+    if (paths[2] == 'status' && paths[3]) {
+      return paths[3];
+    }
+  }
+  // 2)
+  // Handle malformed ids such as
+  // 585110598171631616?ref_src
+  const match = tweetid.match(/^(\d+)\?ref.*/);
+  if (match) {
+    return match[1];
+  }
+
+  return tweetid;
+};

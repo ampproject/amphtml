@@ -16,12 +16,15 @@
 
 import {AmpAnim} from '../amp-anim';
 
-describe('amp-anim', () => {
-
-  // TODO(#5589): Add more tests for amp-anim.
+describes.realWin('amp-anim', {
+  amp: {
+    ampdoc: 'single',
+    extensions: ['amp-anim'],
+  },
+}, env => {
 
   it('should propagate ARIA attributes', () => {
-    const el = document.createElement('amp-anim');
+    const el = env.win.document.createElement('amp-anim');
     el.setAttribute('src', 'test.jpg');
     el.setAttribute('width', 100);
     el.setAttribute('height', 100);
@@ -36,5 +39,6 @@ describe('amp-anim', () => {
     expect(img.getAttribute('aria-label')).to.equal('Hello');
     expect(img.getAttribute('aria-labelledby')).to.equal('id2');
     expect(img.getAttribute('aria-describedby')).to.equal('id3');
+    expect(img.hasAttribute('async')).to.be.true;
   });
 });

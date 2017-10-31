@@ -16,10 +16,15 @@
 
 import {BaseElement} from '../src/base-element';
 import {isLayoutSizeDefined} from '../src/layout';
-import {registerElement} from '../src/custom-element';
-import {srcsetFromElement} from '../src/srcset';
-import {user} from '../src/log';
+import {registerElement} from '../src/service/custom-element-registry';
+import {srcsetFromElement, srcsetFromSrc} from '../src/srcset';
 
+/**
+ * Attributes to propagate to internal image when changed externally.
+ * @type {!Array<string>}
+ */
+const ATTRIBUTES_TO_PROPAGATE = ['alt', 'title', 'referrerpolicy', 'aria-label',
+  'aria-describedby', 'aria-labelledby'];
 
 export class AmpImg extends BaseElement {
 
@@ -41,10 +46,57 @@ export class AmpImg extends BaseElement {
   }
 
   /** @override */
+  mutatedAttributesCallback(mutations) {
+    let mutated = false;
+    if (mutations['srcset'] !== undefined) {
+      // `srcset` mutations take precedence over `src` mutations.
+      this.srcset_ = srcsetFromElement(this.element);
+      mutated = true;
+    } else if (mutations['src'] !== undefined) {
+      // If only `src` is mutated, then ignore the existing `srcset` attribute
+      // value (may be set automatically as cache optimization).
+      this.srcset_ = srcsetFromSrc(this.element.getAttribute('src'));
+      mutated = true;
+    }
+
+    // This element may not have been laid out yet.
+    if (mutated && this.img_) {
+      this.updateImageSrc_();
+    }
+
+    if (this.img_) {
+      const attrs = ATTRIBUTES_TO_PROPAGATE.filter(
+          value => mutations[value] !== undefined);
+      this.propagateAttributes(
+          attrs, this.img_, /* opt_removeMissingAttrs */ true);
+    }
+  }
+
+  /** @override */
+  preconnectCallback(onLayout) {
+    // NOTE(@wassgha): since parseSrcset is computationally expensive and can
+    // not be inside the `buildCallback`, we went with preconnecting to the
+    // `src` url if it exists or the first srcset url.
+    const src = this.element.getAttribute('src');
+    if (src) {
+      this.preconnect.url(src, onLayout);
+    } else {
+      const srcset = this.element.getAttribute('srcset');
+      if (!srcset) {
+        return;
+      }
+      // We try to find the first url in the srcset
+      const srcseturls = srcset.match(/https?:\/\/[^\s]+/);
+      // Connect to the first url if it exists
+      if (srcseturls) {
+        this.preconnect.url(srcseturls[0], onLayout);
+      }
+    }
+  }
+
+  /** @override */
   buildCallback() {
     this.isPrerenderAllowed_ = !this.element.hasAttribute('noprerender');
-
-    this.srcset_ = srcsetFromElement(this.element);
   }
 
   /** @override */
@@ -60,6 +112,9 @@ export class AmpImg extends BaseElement {
     if (this.img_) {
       return;
     }
+    if (!this.srcset_) {
+      this.srcset_ = srcsetFromElement(this.element);
+    }
     this.allowImgLoadFallback_ = true;
     // If this amp-img IS the fallback then don't allow it to have its own
     // fallback to stop from nested fallback abuse.
@@ -68,6 +123,7 @@ export class AmpImg extends BaseElement {
     }
 
     this.img_ = new Image();
+    this.img_.setAttribute('async', '');
     if (this.element.id) {
       this.img_.setAttribute('amp-img-id', this.element.id);
     }
@@ -76,13 +132,13 @@ export class AmpImg extends BaseElement {
     // only read "Graphic" when using only 'alt'.
     if (this.element.getAttribute('role') == 'img') {
       this.element.removeAttribute('role');
-      user().error('AMP-IMG', 'Setting role=img on amp-img elements breaks ' +
+      this.user().error(
+          'AMP-IMG', 'Setting role=img on amp-img elements breaks ' +
         'screen readers please just set alt or ARIA attributes, they will ' +
         'be correctly propagated for the underlying <img> element.');
     }
 
-    this.propagateAttributes(['alt', 'referrerpolicy', 'aria-label',
-      'aria-describedby', 'aria-labelledby'], this.img_);
+    this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
     this.applyFillContent(this.img_, true);
 
     this.element.appendChild(this.img_);
@@ -96,6 +152,11 @@ export class AmpImg extends BaseElement {
   /** @override */
   isRelayoutNeeded() {
     return true;
+  }
+
+  /** @override */
+  reconstructWhenReparented() {
+    return false;
   }
 
   /** @override */
@@ -123,7 +184,11 @@ export class AmpImg extends BaseElement {
     if (this.getLayoutWidth() <= 0) {
       return Promise.resolve();
     }
-    const src = this.srcset_.select(this.getLayoutWidth(), this.getDpr()).url;
+    const src = this.srcset_.select(
+        // The width should never be 0, but we fall back to the screen width
+        // just in case.
+        this.getViewport().getWidth() || this.win.screen.width,
+        this.getDpr()).url;
     if (src == this.img_.getAttribute('src')) {
       return Promise.resolve();
     }
@@ -133,9 +198,9 @@ export class AmpImg extends BaseElement {
     return this.loadPromise(this.img_).then(() => {
       // Clean up the fallback if the src has changed.
       if (!this.allowImgLoadFallback_ &&
-          this.img_.classList.contains('-amp-ghost')) {
+          this.img_.classList.contains('i-amphtml-ghost')) {
         this.getVsync().mutate(() => {
-          this.img_.classList.remove('-amp-ghost');
+          this.img_.classList.remove('i-amphtml-ghost');
           this.toggleFallback(false);
         });
       }
@@ -144,8 +209,11 @@ export class AmpImg extends BaseElement {
 
   onImgLoadingError_() {
     this.getVsync().mutate(() => {
-      this.img_.classList.add('-amp-ghost');
+      this.img_.classList.add('i-amphtml-ghost');
       this.toggleFallback(true);
+      // Hide placeholders, as browsers that don't support webp
+      // Would show the placeholder underneath a transparent fallback
+      this.togglePlaceholder(false);
     });
   }
 };

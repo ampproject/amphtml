@@ -15,14 +15,21 @@
  */
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {Activity} from '../../extensions/amp-analytics/0.1/activity-impl';
-import {activityForDoc} from '../../src/activity';
-import {fromClassForDoc} from '../../src/service';
+import {
+  installActivityServiceForTesting,
+} from '../../extensions/amp-analytics/0.1/activity-impl';
+import {Services} from '../../src/services';
+import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import {installViewportServiceForDoc} from '../../src/service/viewport-impl';
-import {viewportForDoc} from '../../src/viewport';
+import {
+  installViewportServiceForDoc,
+} from '../../src/service/viewport/viewport-impl';
+import {
+  markElementScheduledForTesting,
+} from '../../src/service/custom-element-registry';
+import {installVsyncService} from '../../src/service/vsync-impl';
 import {Observable} from '../../src/observable';
 import * as sinon from 'sinon';
 
@@ -54,7 +61,7 @@ describe('Activity getTotalEngagedTime', () => {
 
     fakeDoc = {
       nodeType: /* DOCUMENT */ 9,
-      addEventListener: function(eventName, callback) {
+      addEventListener(eventName, callback) {
         if (eventName === 'mousedown') {
           mousedownObservable.add(callback);
         }
@@ -95,9 +102,12 @@ describe('Activity getTotalEngagedTime', () => {
       isSingleDoc: () => true,
     }};
 
+    installDocumentStateService(fakeWin);
     installTimerService(fakeWin);
+    installVsyncService(fakeWin);
     installPlatformService(fakeWin);
-    viewer = installViewerServiceForDoc(ampdoc);
+    installViewerServiceForDoc(ampdoc);
+    viewer = Services.viewerForDoc(ampdoc);
 
     const whenFirstVisiblePromise = new Promise(resolve => {
       whenFirstVisibleResolve = resolve;
@@ -108,15 +118,16 @@ describe('Activity getTotalEngagedTime', () => {
     });
 
     installViewportServiceForDoc(ampdoc);
-    viewport = viewportForDoc(ampdoc);
+    viewport = Services.viewportForDoc(ampdoc);
 
     sandbox.stub(viewport, 'onScroll', handler => {
       scrollObservable.add(handler);
     });
 
-    fromClassForDoc(ampdoc, 'activity', Activity);
+    markElementScheduledForTesting(fakeWin, 'amp-analytics');
+    installActivityServiceForTesting(ampdoc);
 
-    return activityForDoc(ampdoc).then(a => {
+    return Services.activityForDoc(ampdoc).then(a => {
       activity = a;
     });
   });
@@ -125,7 +136,7 @@ describe('Activity getTotalEngagedTime', () => {
     sandbox.restore();
   });
 
-  it('should use the stubed viewer in tests', () => {
+  it('should use the stubbed viewer in tests', () => {
     return expect(activity.viewer_).to.equal(viewer);
   });
 
@@ -215,16 +226,11 @@ describe('Activity getTotalEngagedTime', () => {
         activity.boundHandleActivity_);
     whenFirstVisibleResolve();
     return viewer.whenFirstVisible().then(() => {
-      expect(addEventListenerSpy).to.have.been.calledWith('mousedown',
-          activity.boundHandleActivity_);
-      expect(addEventListenerSpy).to.have.been.calledWith('mouseup',
-          activity.boundHandleActivity_);
-      expect(addEventListenerSpy).to.have.been.calledWith('mousemove',
-          activity.boundHandleActivity_);
-      expect(addEventListenerSpy).to.have.been.calledWith('keydown',
-          activity.boundHandleActivity_);
-      expect(addEventListenerSpy).to.have.been.calledWith('keyup',
-          activity.boundHandleActivity_);
+      expect(addEventListenerSpy.getCall(0).args[0]).to.equal('mousedown');
+      expect(addEventListenerSpy.getCall(1).args[0]).to.equal('mouseup');
+      expect(addEventListenerSpy.getCall(2).args[0]).to.equal('mousemove');
+      expect(addEventListenerSpy.getCall(3).args[0]).to.equal('keydown');
+      expect(addEventListenerSpy.getCall(4).args[0]).to.equal('keyup');
     });
   });
 });

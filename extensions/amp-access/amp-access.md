@@ -1,6 +1,6 @@
-# <a name="amp-access-"></a> AMP Access Specification
+# <a name="amp-access-"></a> amp-access
 
-**This extension is under active development, and the version number of the specification section should provide guidance to its evolution.**
+[TOC]
 
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
@@ -22,10 +22,6 @@ limitations under the License.
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
     <td>AMP Access or “AMP paywall and subscription support” gives Publishers control over which content can be accessed by a Reader and with what restrictions, based on the Reader’s subscription status, number of views, and other factors.</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Stable</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
@@ -97,7 +93,7 @@ Authorization is an endpoint provided by the publisher and called by the AMP Run
 
 ### Pingback Endpoint
 
-Pingback is an endpoint provided by the publisher and called by the AMP Runtime or Google AMP Cache. It is a credentialed CORS POST endpoint. AMP Runtime calls this endpoint automatically when the Reader has started viewing the document. This endpoint is also called after the Reader has successfully completed the Login Flow. On of the main goals of the Pingback is for the Publisher to update metering information.
+Pingback is an endpoint provided by the publisher and called by the AMP Runtime or Google AMP Cache. It is a credentialed CORS POST endpoint. AMP Runtime calls this endpoint automatically when the Reader has started viewing the document. This endpoint is also called after the Reader has successfully completed the Login Flow. One of the main goals of the Pingback is for the Publisher to update metering information.
 
 Pingback optional. It can be disabled by setting `noPingback` configuration property to `true`.
 
@@ -107,7 +103,7 @@ Login Page is implemented and served by the Publisher and called by the AMP Runt
 
 Login Page is triggered when the Reader taps on the Login Link which can be placed by the Publisher anywhere in the document.
 
-## Specification v0.5
+## Specification v0.1
 
 ### Configuration
 
@@ -124,15 +120,48 @@ All of the endpoints are configured in the AMP document as a JSON object in the 
 
 The following properties are defined in this configuration:
 
-|Property       | Values               | Description |
---------------  | -------------------- | --------------------------------- |
-| authorization | &lt;URL&gt;          | The HTTPS URL for the Authorization endpoint. |
-| pingback      | &lt;URL&gt;          | The HTTPS URL for the Pingback endpoint. |
-| noPingback    | true/false           | When true, disables pingback. |
-| login         | &lt;URL&gt; or &lt;Map[string, URL]&gt; | The HTTPS URL for the Login Page or a set of URLs for different types of login pages. |
-| authorizationFallbackResponse | &lt;object&gt;          | The JSON object to be used in place of the authorization response if it fails. |
-| authorizationTimeout          | &lt;number&gt;          | Timeout (in milliseconds) after which authorization request is considered as failed. Default is 3000. Values greater than 3000 are allowed only in dev environment. |
-| type          | "client" or "server" | Default is “client”. The "server" option is under design discussion and these docs will be updated when it is ready. |
+<table>
+  <tr>
+    <th>Property</th>
+    <th>Values</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td class="col-fourty"><code>authorization</code></td>
+    <td>&lt;URL&gt;</td>
+    <td>The HTTPS URL for the Authorization endpoint.</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><code>pingback</code></td>
+    <td>&lt;URL&gt;</td>
+    <td>The HTTPS URL for the Pingback endpoint.</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><code>noPingback</code></td>
+    <td>true/false</td>
+    <td>When true, disables pingback.</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><code>login</code></td>
+    <td class="col-twenty">&lt;URL&gt; or<br>&lt;Map[string, URL]&gt;</td>
+    <td>The HTTPS URL for the Login Page or a set of URLs for different types of login pages.</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><code>authorizationFallbackResponse</code></td>
+    <td>&lt;object&gt;</td>
+    <td>The JSON object to be used in place of the authorization response if it fails.</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><code>authorizationTimeout</code></td>
+    <td>&lt;number&gt;</td>
+    <td>Timeout (in milliseconds) after which the authorization request is considered as failed. Default is 3000. Values greater than 3000 are allowed only in dev environment. </td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><code>type</code></td>
+    <td>"client" or "server"</td>
+    <td>Default is “client”. The "server" option is under design discussion and these docs will be updated when it is ready.</td>
+  </tr>
+</table>
 
 *&lt;URL&gt;* values specify HTTPS URLs with substitution variables. The substitution variables are covered in more detail in the [Access URL Variables][7] section below.
 
@@ -155,17 +184,48 @@ Here’s an example of the AMP Access configuration:
 
 When configuring the URLs for various endpoints, the Publisher can use substitution variables. The full list of these variables are defined in the [AMP Var Spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md). In addition, this spec adds a few access-specific variables such as `READER_ID` and `AUTHDATA`. Some of the most relevant variables are described in the table below:
 
-| Var               | Description |
-| ----------------- | ----------- |
-| READER_ID         | The AMP Reader ID. |
-| AUTHDATA(field)   | The value of the field in the authorization response. |
-| RETURN_URL        | The placeholder for the return URL specified by the AMP runtime for a Login Dialog to return to. |
-| SOURCE_URL        | The Source URL of this AMP Document. If document is served from CDN, AMPDOC_URL will be a CDN URL, while SOURCE_URL will be the original source URL. |
-| AMPDOC_URL        | The URL of this AMP Document. |
-| CANONICAL_URL     | The canonical URL of this AMP Document. |
-| DOCUMENT_REFERRER | The Referrer URL. |
-| VIEWER            | The URL of the AMP Viewer. |
-| RANDOM            | A random number. Helpful to avoid browser caching. |
+<table>
+  <tr>
+    <th>Var</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td class="col-thirty"><code>READER_ID</code></td>
+    <td>The AMP Reader ID.</td>
+  </tr>
+  <tr>
+    <td class="col-thirty"><code>AUTHDATA(field)</code></td>
+    <td>The value of the field in the authorization response.</td>
+  </tr>
+  <tr>
+    <td class="col-thirty"><code>RETURN_URL</code></td>
+    <td>The placeholder for the return URL specified by the AMP runtime for a Login Dialog to return to.</td>
+  </tr>
+  <tr>
+    <td class="col-thirty"><code>SOURCE_URL</code></td>
+    <td>The Source URL of this AMP document. If the document is served from a CDN, the AMPDOC_URL will be a CDN URL, while SOURCE_URL will be the original source URL.</td>
+  </tr>
+  <tr>
+    <td class="col-thirty"><code>AMPDOC_URL</code></td>
+    <td>The URL of this AMP document.</td>
+  </tr>
+  <tr>
+    <td class="col-thirty"><code>CANONICAL_URL</code></td>
+    <td>The canonical URL of this AMP document.</td>
+  </tr>
+  <tr>
+    <td class="col-thirty"><code>DOCUMENT_REFERRER</code></td>
+    <td>The Referrer URL.</td>
+  </tr>
+  <tr>
+    <td class="col-thirty"><code>VIEWER</code></td>
+    <td>The URL of the AMP Viewer.</td>
+  </tr>
+  <tr>
+    <td class="col-thirty"><code>RANDOM</code></td>
+    <td>A random number. Helpful to avoid browser caching.</td>
+  </tr>
+</table>
 
 Here’s an example of the URL extended with Reader ID, Canonical URL, Referrer information and random cachebuster:
 ```text
@@ -509,4 +569,4 @@ This section will cover a detailed explanation of the design underlying the amp-
 
 ## Validation
 
-See [amp-access rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access/0.1/validator-amp-access.protoascii) in the AMP validator specification.
+See [amp-access rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access/validator-amp-access.protoascii) in the AMP validator specification.

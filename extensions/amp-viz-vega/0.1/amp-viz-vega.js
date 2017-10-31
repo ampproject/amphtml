@@ -22,8 +22,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {isObject, isFiniteNumber} from '../../../src/types';
 import {assertHttpsUrl} from '../../../src/url';
-import {vsyncFor} from '../../../src/vsync';
-import {xhrFor} from '../../../src/xhr';
+import {Services} from '../../../src/services';
 
 /** @const */
 const EXPERIMENT = 'amp-viz-vega';
@@ -34,7 +33,7 @@ export class AmpVizVega extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?JSONType} */
+    /** @private {?JsonObject} */
     this.data_ = null;
 
     /** @private {?string} */
@@ -158,10 +157,13 @@ export class AmpVizVega extends AMP.BaseElement {
       // calls. We may want to intercept all "urls" in spec and do the loading
       // and parsing ourselves.
 
-      return xhrFor(this.win).fetchJson(dev().assertString(this.src_))
-      .then(data => {
-        this.data_ = data;
-      });
+      return Services.xhrFor(this.win).fetchJson(
+          dev().assertString(this.src_),
+          {
+            requireAmpResponseSourceOrigin: false,
+          }).then(res => res.json()).then(data => {
+            this.data_ = data;
+          });
     }
   }
 
@@ -200,7 +202,7 @@ export class AmpVizVega extends AMP.BaseElement {
     });
 
     return parsePromise.then(chartFactory => {
-      return vsyncFor(this.win).mutatePromise(() => {
+      return Services.vsyncFor(this.win).mutatePromise(() => {
         dom.removeChildren(dev().assertElement(this.container_));
         this.chart_ = chartFactory({el: this.container_});
         if (!this.useDataWidth_) {
@@ -253,4 +255,7 @@ export class AmpVizVega extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-viz-vega', AmpVizVega, CSS);
+
+AMP.extension('amp-viz-vega', '0.1', AMP => {
+  AMP.registerElement('amp-viz-vega', AmpVizVega, CSS);
+});

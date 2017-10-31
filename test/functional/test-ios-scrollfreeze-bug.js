@@ -15,7 +15,7 @@
  */
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {checkAndFix} from '../../src/service/ios-scrollfreeze-bug';
+import {checkAndFix} from '../../src/service/viewport/ios-scrollfreeze-bug';
 import * as sinon from 'sinon';
 
 
@@ -52,10 +52,10 @@ describe('ios-scrollfreeze-bug', () => {
     bodyBottom = '0px';
     bodySetSpy = sandbox.spy();
     Object.defineProperty(windowApi.document.body.style, 'bottom', {
-      get: function() {
+      get() {
         return bodyBottom;
       },
-      set: function(value) {
+      set(value) {
         bodySetSpy(value);
         bodyBottom = value;
       },
@@ -90,8 +90,8 @@ describe('ios-scrollfreeze-bug', () => {
     expect(promise).to.exist;
     return promise.then(() => {
       expect(windowApi.document.body.style.bottom).to.equal('0px');
-      expect(mutateStub.callCount).to.equal(2);
-      expect(bodySetSpy.callCount).to.equal(2);
+      expect(mutateStub).to.have.callCount(2);
+      expect(bodySetSpy).to.have.callCount(2);
       expect(bodySetSpy.args[0][0]).to.equal('');
       expect(bodySetSpy.args[1][0]).to.equal('0px');
     });

@@ -15,7 +15,7 @@
  */
 
 import {Observable} from './observable';
-import {timerFor} from './timer';
+import {Services} from './services';
 import {dev} from './log';
 
 
@@ -38,8 +38,8 @@ export class FocusHistory {
     /** @private @const {!Array<!{el: !Element, time: time}>} */
     this.history_ = [];
 
-    /** @private {?Observable<!Element>} */
-    this.observeFocus_ = null;
+    /** @private @const {!Observable<!Element>} */
+    this.observeFocus_ = new Observable();
 
     /** @private @const {function(!Event)} */
     this.captureFocus_ = e => {
@@ -52,7 +52,7 @@ export class FocusHistory {
       // IFrame elements do not receive `focus` event. An alternative way is
       // implemented here. We wait for a blur to arrive on the main window
       // and after a short time check which element is active.
-      timerFor(win).delay(() => {
+      Services.timerFor(win).delay(() => {
         this.pushFocus_(this.win.document.activeElement);
       }, 500);
     };
@@ -72,9 +72,6 @@ export class FocusHistory {
    * @return {!UnlistenDef}
    */
   onFocus(handler) {
-    if (!this.observeFocus_) {
-      this.observeFocus_ = new Observable();
-    }
     return this.observeFocus_.add(handler);
   }
 
@@ -91,9 +88,6 @@ export class FocusHistory {
       this.history_[this.history_.length - 1].time = now;
     }
     this.purgeBefore(now - this.purgeTimeout_);
-    if (!this.observeFocus_) {
-      this.observeFocus_ = new Observable();
-    }
     this.observeFocus_.fire(element);
   }
 

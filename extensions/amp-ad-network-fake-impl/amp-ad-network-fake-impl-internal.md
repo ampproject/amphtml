@@ -47,6 +47,8 @@ fields: `"creative"` and `"signature"`.  The `signature` field **must** be a
 valid signature for the text of the `creative` field, according to at least 
 one of the built-in A4A keys.  (_Note:_ A4A will discontinue built-in keys 
 when the ability to fetch keys live from the validation service is available.)
+Alternatively, the `<amp-ad type="fake">` tag may include the attribute
+`fakesig="true"` to disable signature checking.
 
 ## Attributes
 

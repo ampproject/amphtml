@@ -17,12 +17,25 @@
 
 import {getMode} from './mode';
 import {exponentialBackoff} from './exponential-backoff';
-import {isLoadErrorMessage} from './event-helper';
-import {USER_ERROR_SENTINEL, isUserErrorMessage} from './log';
-import {makeBodyVisible} from './style-installer';
-import {urls} from './config';
+import {
+  isLoadErrorMessage,
+} from './event-helper';
+import {
+  USER_ERROR_SENTINEL,
+  isUserErrorMessage,
+  isUserErrorEmbed,
+  duplicateErrorIfNecessary,
+  dev,
+} from './log';
 import {isProxyOrigin} from './url';
-
+import {isCanary, experimentTogglesOrNull, getBinaryType} from './experiments';
+import {makeBodyVisible} from './style-installer';
+import {startsWith} from './string';
+import {urls} from './config';
+import {AmpEvents} from './amp-events';
+import {triggerAnalyticsEvent} from './analytics';
+import {isExperimentOn} from './experiments';
+import {Services} from './services';
 
 /**
  * @const {string}
@@ -31,10 +44,18 @@ const CANCELLED = 'CANCELLED';
 
 
 /**
- * The threshold for throttling load errors. Currently at 0.1%.
+ * The threshold for errors throttled because nothing can be done about
+ * them, but we'd still like to report the rough number.
  * @const {number}
  */
-const LOAD_ERROR_THRESHOLD = 1e-3;
+const NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD = 0.001;
+
+/**
+ * The threshold for errors throttled because nothing can be done about
+ * them, but we'd still like to report the rough number.
+ * @const {number}
+ */
+const USER_ERROR_THROTTLE_THRESHOLD = 0.1;
 
 
 /**
@@ -58,8 +79,42 @@ let reportingBackoff = function(work) {
 };
 
 /**
+ * Attempts to stringify a value, falling back to String.
+ * @param {*} value
+ * @return {string}
+ */
+function tryJsonStringify(value) {
+  try {
+    // Cast is fine, because we really don't care here. Just trying.
+    return JSON.stringify(/** @type {!JsonObject} */ (value));
+  } catch (e) {
+    return String(value);
+  }
+}
+
+/**
+ * The true JS engine, as detected by inspecting an Error stack. This should be
+ * used with the userAgent to tell definitely. I.e., Chrome on iOS is really a
+ * Safari JS engine.
+ */
+let detectedJsEngine;
+
+/**
+ * @param {!Window} win
+ * @param {*} error
+ * @param {!Element=} opt_associatedElement
+ */
+export function reportErrorForWin(win, error, opt_associatedElement) {
+  reportError(error, opt_associatedElement);
+  if (error && !!win && isUserErrorMessage(error.message)
+      && !isUserErrorEmbed(error.message)) {
+    reportErrorToAnalytics(/** @type {!Error} */(error), win);
+  }
+}
+
+/**
  * Reports an error. If the error has an "associatedElement" property
- * the element is marked with the -amp-element-error and displays
+ * the element is marked with the `i-amphtml-element-error` and displays
  * the message itself. The message is always send to the console.
  * If the error has a "messageArray" property, that array is logged.
  * This way one gets the native fidelity of the console for things like
@@ -69,67 +124,73 @@ let reportingBackoff = function(work) {
  * @return {!Error}
  */
 export function reportError(error, opt_associatedElement) {
-  // Convert error to the expected type.
-  let isValidError;
-  if (error) {
-    if (error.message !== undefined) {
-      isValidError = true;
-    } else {
-      const origError = error;
-      error = new Error(String(origError));
-      error.origError = origError;
-    }
-  } else {
-    error = new Error('Unknown error');
-  }
-  // Report if error is not an expected type.
-  if (!isValidError && getMode().localDev) {
-    setTimeout(function() {
-      const rethrow = new Error(
-          '_reported_ Error reported incorrectly: ' + error);
-      throw rethrow;
-    });
-  }
-
-  if (error.reported) {
-    return /** @type {!Error} */ (error);
-  }
-  error.reported = true;
-
-  // Update element.
-  const element = opt_associatedElement || error.associatedElement;
-  if (element && element.classList) {
-    element.classList.add('-amp-error');
-    if (getMode().development) {
-      element.classList.add('-amp-element-error');
-      element.setAttribute('error-message', error.message);
-    }
-  }
-
-  // Report to console.
-  if (self.console) {
-    if (error.messageArray) {
-      (console.error || console.log).apply(console,
-          error.messageArray);
-    } else {
-      if (element) {
-        (console.error || console.log).call(console,
-            element.tagName + '#' + element.id, error.message);
-      } else if (!getMode().minified) {
-        (console.error || console.log).call(console, error.stack);
+  try {
+    // Convert error to the expected type.
+    let isValidError;
+    if (error) {
+      if (error.message !== undefined) {
+        error = duplicateErrorIfNecessary(/** @type {!Error} */(error));
+        isValidError = true;
       } else {
-        (console.error || console.log).call(console, error.message);
+        const origError = error;
+        error = new Error(tryJsonStringify(origError));
+        error.origError = origError;
+      }
+    } else {
+      error = new Error('Unknown error');
+    }
+    // Report if error is not an expected type.
+    if (!isValidError && getMode().localDev && !getMode().test) {
+      setTimeout(function() {
+        const rethrow = new Error(
+            '_reported_ Error reported incorrectly: ' + error);
+        throw rethrow;
+      });
+    }
+
+    if (error.reported) {
+      return /** @type {!Error} */ (error);
+    }
+    error.reported = true;
+
+    // Update element.
+    const element = opt_associatedElement || error.associatedElement;
+    if (element && element.classList) {
+      element.classList.add('i-amphtml-error');
+      if (getMode().development) {
+        element.classList.add('i-amphtml-element-error');
+        element.setAttribute('error-message', error.message);
       }
     }
-  }
-  if (element && element.dispatchCustomEventForTesting) {
-    element.dispatchCustomEventForTesting('amp:error', error.message);
-  }
 
-  // 'call' to make linter happy. And .call to make compiler happy
-  // that expects some @this.
-  reportErrorToServer['call'](undefined, undefined, undefined, undefined,
-      undefined, error);
+    // Report to console.
+    if (self.console) {
+      const output = (console.error || console.log);
+      if (error.messageArray) {
+        output.apply(console, error.messageArray);
+      } else {
+        if (element) {
+          output.call(console, error.message, element);
+        } else if (!getMode().minified) {
+          output.call(console, error.stack);
+        } else {
+          output.call(console, error.message);
+        }
+      }
+    }
+    if (element && element.dispatchCustomEventForTesting) {
+      element.dispatchCustomEventForTesting(AmpEvents.ERROR, error.message);
+    }
+
+    // 'call' to make linter happy. And .call to make compiler happy
+    // that expects some @this.
+    reportErrorToServer['call'](undefined, undefined, undefined, undefined,
+        undefined, error);
+  } catch (errorReportingError) {
+    setTimeout(function() {
+      throw errorReportingError;
+    });
+  }
   return /** @type {!Error} */ (error);
 }
 
@@ -139,6 +200,23 @@ export function reportError(error, opt_associatedElement) {
  */
 export function cancellation() {
   return new Error(CANCELLED);
+}
+
+/**
+ * @param {*} errorOrMessage
+ * @return {boolean}
+ */
+export function isCancellation(errorOrMessage) {
+  if (!errorOrMessage) {
+    return false;
+  }
+  if (typeof errorOrMessage == 'string') {
+    return startsWith(errorOrMessage, CANCELLED);
+  }
+  if (typeof errorOrMessage.message == 'string') {
+    return startsWith(errorOrMessage.message, CANCELLED);
+  }
+  return false;
 }
 
 /**
@@ -235,14 +313,25 @@ export function getErrorReportUrl(message, filename, line, col, error,
     return;
   }
 
-  // Load errors are always "expected".
-  if (isLoadErrorMessage(message)) {
+  const throttleBase = Math.random();
+  // We throttle load errors and generic "Script error." errors
+  // that have no information and thus cannot be acted upon.
+  if (isLoadErrorMessage(message) ||
+    // See https://github.com/ampproject/amphtml/issues/7353
+    // for context.
+    message == 'Script error.') {
     expected = true;
 
-    // Throttle load errors.
-    if (Math.random() > LOAD_ERROR_THRESHOLD) {
+    if (throttleBase > NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD) {
       return;
     }
+  }
+
+  const isUserError = isUserErrorMessage(message);
+
+  // Only report a subset of user errors.
+  if (isUserError && throttleBase > USER_ERROR_THROTTLE_THRESHOLD) {
+    return;
   }
 
   // This is the App Engine app in
@@ -250,21 +339,33 @@ export function getErrorReportUrl(message, filename, line, col, error,
   // It stores error reports via https://cloud.google.com/error-reporting/
   // for analyzing production issues.
   let url = urls.errorReporting +
-      '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
+      '?v=' + getMode().rtvVersion +
       '&noAmp=' + (hasNonAmpJs ? 1 : 0) +
       '&m=' + encodeURIComponent(message.replace(USER_ERROR_SENTINEL, '')) +
-      '&a=' + (isUserErrorMessage(message) ? 1 : 0);
+      '&a=' + (isUserError ? 1 : 0);
   if (expected) {
     // Errors are tagged with "ex" ("expected") label to allow loggers to
     // classify these errors as benchmarks and not exceptions.
     url += '&ex=1';
   }
+
+  let runtime = '1p';
   if (self.context && self.context.location) {
     url += '&3p=1';
+    runtime = '3p';
+  } else if (getMode().runtime) {
+    runtime = getMode().runtime;
   }
-  if (self.AMP_CONFIG && self.AMP_CONFIG.canary) {
+  url += '&rt=' + runtime;
+
+  // TODO(erwinm): Remove ca when all systems read `bt` instead of `ca` to
+  // identify js binary type.
+  if (isCanary(self)) {
     url += '&ca=1';
   }
+  // Pass binary type.
+  url += '&bt=' + getBinaryType(self);
+
   if (self.location.ancestorOrigins && self.location.ancestorOrigins[0]) {
     url += '&or=' + encodeURIComponent(self.location.ancestorOrigins[0]);
   }
@@ -287,12 +388,34 @@ export function getErrorReportUrl(message, filename, line, col, error,
     }
   }
 
+  if (!detectedJsEngine) {
+    detectedJsEngine = detectJsEngineFromStack();
+  }
+  url += `&jse=${detectedJsEngine}`;
+
+  const exps = [];
+  const experiments = experimentTogglesOrNull(self);
+  for (const exp in experiments) {
+    const on = experiments[exp];
+    exps.push(`${exp}=${on ? '1' : '0'}`);
+  }
+  url += `&exps=${encodeURIComponent(exps.join(','))}`;
+
   if (error) {
     const tagName = error && error.associatedElement
-      ? error.associatedElement.tagName
-      : 'u';  // Unknown
-    url += '&el=' + encodeURIComponent(tagName) +
-        '&s=' + encodeURIComponent(error.stack || '');
+        ? error.associatedElement.tagName
+        : 'u';  // Unknown
+    url += `&el=${encodeURIComponent(tagName)}`;
+    if (error.args) {
+      url += `&args=${encodeURIComponent(JSON.stringify(error.args))}`;
+    }
+
+    if (!isUserError && !error.ignoreStack && error.stack) {
+      // Shorten
+      const stack = (error.stack || '').substr(0, 1000);
+      url += `&s=${encodeURIComponent(stack)}`;
+    }
+
     error.message += ' _reported_';
   } else {
     url += '&f=' + encodeURIComponent(filename || '') +
@@ -305,6 +428,14 @@ export function getErrorReportUrl(message, filename, line, col, error,
   url += '&fr=' + encodeURIComponent(self.location.originalHash
       || self.location.hash);
 
+  // Google App Engine maximum URL length.
+  if (url.length >= 2072) {
+    url = url.substr(0, 2072 - 8 /* length of suffix */)
+        // Full remove last URL encoded entity.
+        .replace(/\%[^&%]+$/, '')
+        // Sentinel
+        + '&SHORT=1';
+  }
   return url;
 }
 
@@ -312,6 +443,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
  * Returns true if it appears like there is non-AMP JS on the
  * current page.
  * @param {!Window} win
+ * @return {boolean}
  * @visibleForTesting
  */
 export function detectNonAmpJs(win) {
@@ -326,4 +458,78 @@ export function detectNonAmpJs(win) {
 
 export function resetAccumulatedErrorMessagesForTesting() {
   accumulatedErrorMessages = [];
+}
+
+/**
+ * Does a series of checks on the stack of an thrown error to determine the
+ * JS engine that is currently running. This gives a bit more information than
+ * just the UserAgent, since browsers often allow overriding it to "emulate"
+ * mobile.
+ * @return {string}
+ * @visibleForTesting
+ */
+export function detectJsEngineFromStack() {
+  /** @constructor */
+  function Fn() {}
+  Fn.prototype.t = function() {
+    throw new Error('message');
+  };
+  const object = new Fn();
+  try {
+    object.t();
+  } catch (e) {
+    const stack = e.stack;
+
+    // Safari only mentions the method name.
+    if (startsWith(stack, 't@')) {
+      return 'Safari';
+    }
+
+    // Firefox mentions "prototype".
+    if (stack.indexOf('.prototype.t@') > -1) {
+      return 'Firefox';
+    }
+
+    // IE looks like Chrome, but includes a context for the base stack line.
+    // Explicitly, we're looking for something like:
+    // "    at Global code (https://example.com/app.js:1:200)" or
+    // "    at Anonymous function (https://example.com/app.js:1:200)"
+    // vs Chrome which has:
+    // "    at https://example.com/app.js:1:200"
+    const last = stack.split('\n').pop();
+    if (/\bat .* \(/i.test(last)) {
+      return 'IE';
+    }
+
+    // Finally, chrome includes the error message in the stack.
+    if (startsWith(stack, 'Error: message')) {
+      return 'Chrome';
+    }
+  }
+
+  return 'unknown';
+}
+
+/**
+ * @param {!Error} error
+ * @param {!Window} win
+ */
+export function reportErrorToAnalytics(error, win) {
+  if (isExperimentOn(win, 'user-error-reporting')) {
+    const vars = {
+      'errorName': error.name,
+      'errorMessage': error.message,
+    };
+    triggerAnalyticsEvent(getRootElement_(win), 'user-error', vars);
+  }
+}
+
+/**
+ * @param {!Window} win
+ * @return {!Element}
+ * @private
+ */
+function getRootElement_(win) {
+  const root = Services.ampdocServiceFor(win).getAmpDoc().getRootNode();
+  return dev().assertElement(root.documentElement || root.body || root);
 }

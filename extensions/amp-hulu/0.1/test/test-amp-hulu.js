@@ -14,25 +14,31 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
 import '../amp-hulu';
-import {adopt} from '../../../../src/runtime';
 
-adopt(window);
 
-describe('amp-hulu', () => {
+describes.realWin('amp-hulu', {
+  amp: {
+    extensions: ['amp-hulu'],
+  },
+}, env => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
 
   function getHulu(eid, opt_responsive) {
-    return createIframePromise().then(iframe => {
-      const hulu = iframe.doc.createElement('amp-hulu');
-      hulu.setAttribute('data-eid', eid);
-      hulu.setAttribute('width', '111');
-      hulu.setAttribute('height', '222');
-      if (opt_responsive) {
-        hulu.setAttribute('layout', 'responsive');
-      }
-      return iframe.addElement(hulu);
-    });
+    const hulu = doc.createElement('amp-hulu');
+    hulu.setAttribute('data-eid', eid);
+    hulu.setAttribute('width', '111');
+    hulu.setAttribute('height', '222');
+    if (opt_responsive) {
+      hulu.setAttribute('layout', 'responsive');
+    }
+    doc.body.appendChild(hulu);
+    return hulu.build().then(() => hulu.layoutCallback()).then(() => hulu);
   }
 
   it('renders', () => {
@@ -40,7 +46,8 @@ describe('amp-hulu', () => {
       const iframe = hulu.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal('https://secure.hulu.com/dash/mobile_embed.html?eid=4Dk5F2PYTtrgciuvloH3UA');
+      expect(iframe.src)
+          .to.equal('https://player.hulu.com/site/dash/mobile_embed.html?amp=1&eid=4Dk5F2PYTtrgciuvloH3UA');
     });
   });
 
@@ -48,7 +55,7 @@ describe('amp-hulu', () => {
     return getHulu('4Dk5F2PYTtrgciuvloH3UA', true).then(hulu => {
       const iframe = hulu.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.className).to.match(/-amp-fill-content/);
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
 

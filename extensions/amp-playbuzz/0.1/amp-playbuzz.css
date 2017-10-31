@@ -68,7 +68,7 @@
 
 .pb_feed_placeholder_preloader {
         position: absolute;
-        top: 50%;
+        top: 47%;
         left: 50%;
         width: 29px;
         height: 38px;
@@ -77,6 +77,19 @@
         overflow: hidden;
         box-sizing: border-box;
 }
+
+@media screen and (max-width: 568px) {
+        .pb_feed_placeholder_preloader {
+                top: 46%;
+        }
+}
+
+@media screen and (min-width: 569px) and (max-width: 992px) {
+        .pb_feed_placeholder_preloader {
+                top: 48%;
+        }
+}
+
 
 .pb_feed_anim_mask {
         position: absolute;

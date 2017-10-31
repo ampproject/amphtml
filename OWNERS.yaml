@@ -1,1 +1,5 @@
 - cramforce
+- dvoytenko
+- jridgewell
+- ampproject/validator:
+  - "*.protoascii"

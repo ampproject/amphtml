@@ -17,27 +17,28 @@
 import {SignInProtocol} from '../signin';
 import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
-import * as sinon from 'sinon';
 
 
-describe('SignInProtocol', () => {
+describes.realWin('SignInProtocol', {amp: true}, env => {
 
   const ORIGIN = 'https://example.com';
   const AUTHORITY = 'https://authority.example.net';
 
-  let sandbox;
+  let win;
+  let ampdoc;
   let viewer, viewerMock;
   let configJson;
   let errorStub;
   let signin;
 
   function create() {
-    return new SignInProtocol(window, viewer, ORIGIN, configJson);
+    return new SignInProtocol(ampdoc, viewer, ORIGIN, configJson);
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    toggleExperiment(window, 'amp-access-signin', true);
+    win = env.win;
+    ampdoc = env.ampdoc;
+    toggleExperiment(win, 'amp-access-signin', true);
 
     errorStub = sandbox.stub(user(), 'error');
 
@@ -66,8 +67,7 @@ describe('SignInProtocol', () => {
 
   afterEach(() => {
     viewerMock.verify();
-    sandbox.restore();
-    toggleExperiment(window, 'amp-access-signin', false);
+    toggleExperiment(win, 'amp-access-signin', false);
   });
 
 
@@ -80,7 +80,7 @@ describe('SignInProtocol', () => {
     });
 
     it('should be disabled without expriment', () => {
-      toggleExperiment(window, 'amp-access-signin', false);
+      toggleExperiment(win, 'amp-access-signin', false);
       const signin = create();
       expect(signin.isEnabled()).to.be.false;
       expect(signin.acceptAccessToken_).to.be.false;
@@ -150,7 +150,7 @@ describe('SignInProtocol', () => {
           .once();
       return signin.getAccessTokenPassive().then(token => {
         expect(token).to.equal('access token');
-        expect(errorStub.callCount).to.equal(0);
+        expect(errorStub).to.have.not.been.called;
       });
     });
 
@@ -163,7 +163,7 @@ describe('SignInProtocol', () => {
           .once();
       return signin.getAccessTokenPassive().then(token => {
         expect(token).to.be.null;
-        expect(errorStub.callCount).to.equal(1);
+        expect(errorStub).to.be.calledOnce;
 
         // Second call doesn't call viewer.
         signin.getAccessTokenPassive();
@@ -185,7 +185,7 @@ describe('SignInProtocol', () => {
           .once();
       return signin.postLoginResult({'code': 'X'}).then(token => {
         expect(token).to.equal('access token X');
-        expect(errorStub.callCount).to.equal(0);
+        expect(errorStub).to.have.not.been.called;
         // The previous token is updated as well.
         return signin.getAccessTokenPassive().then(token => {
           expect(token).to.equal('access token X');
@@ -204,7 +204,7 @@ describe('SignInProtocol', () => {
           .once();
       return signin.postLoginResult({'code': 'X'}).then(token => {
         expect(token).to.be.null;
-        expect(errorStub.callCount).to.equal(1);
+        expect(errorStub).to.be.calledOnce;
         // The previous token is left unchanged.
         return signin.getAccessTokenPassive().then(token => {
           expect(token).to.equal('access token');

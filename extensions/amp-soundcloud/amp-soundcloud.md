@@ -22,10 +22,6 @@ limitations under the License.
     <td> Displays a <a href="https://soundcloud.com/">Soundcloud</a> clip.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-soundcloud" src="https://cdn.ampproject.org/v0/amp-soundcloud-0.1.js">&lt;/script></code></td>
   </tr>
@@ -38,6 +34,8 @@ limitations under the License.
     <td><a href="https://ampbyexample.com/components/amp-soundcloud/">Annotated code example for amp-soundcloud</a></td>
   </tr>
 </table>
+
+[TOC]
 
 ## Examples
 
@@ -57,37 +55,34 @@ Classic Mode:
     data-color="ff5500"></amp-soundcloud>
 ```
 
-## Required attributes
+## Attributes
 
-**data-trackid**
+##### data-trackid 
 
-The ID of the track, an integer.
+This attribute is required if `data-playlistid` is not defined.  
+The value for this attribute is the ID of a track, an integer.
 
-## Optional attributes
+##### data-playlistid
 
-**data-secret-token**
+This attribute is required if `data-trackid` is not defined.
+The value for this attribute is the ID of a playlist, an integer.
+
+##### data-secret-token (optional)
 
 The secret token of the track, if it is private.
 
-**data-visual**
+##### data-visual (optional)
 
-Value: `"true"` or `"false"`
+If set to `true`, displays full-width "Visual" mode; otherwise, it displays as "Classic" mode. The default value is `false`.
 
-Default value: `"false"`
+##### data-color (optional)
 
-If set to true, displays full width "Visual" mode. Otherwise, displays "Classic"
-mode.
+This attribute is a custom color override for the "Classic" mode. The attribute is ignored in "Visual" mode. Specify a hexadecimal color value, without the leading # (e.g., `data-color="e540ff"`).
 
-**data-color**
+##### width and height
 
-Value: Hexadecimal color value (without the leading #).
-E.g. `data-color="e540ff"`
-
-Custom color override for the "Classic" mode. Ignored in "Visual" mode.
-
-**width and height**
-Layout is `fixed-height` and will fill all the available horizontal space. This is ideal for "Classic" mode, but for "Visual", height is recommended to be 300px, 450px or 600px, as per Soundcloud embed code. This will allow the clip's internal elements to resize properly on mobile.
+The layout for `amp-soundcloud` is set to `fixed-height` and it fills all of the available horizontal space. This is ideal for the "Classic" mode, but for "Visual" mode, it's recommended that the height is 300px, 450px or 600px, as per Soundcloud embed code. This will allow the clip's internal elements to resize properly on mobile.
 
 ## Validation
 
-See [amp-soundcloud rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-soundcloud/0.1/validator-amp-soundcloud.protoascii) in the AMP validator specification.
+See [amp-soundcloud rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-soundcloud/validator-amp-soundcloud.protoascii) in the AMP validator specification.

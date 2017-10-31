@@ -13,73 +13,76 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {
-    createIframePromise,
-    doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-apester-media';
-import {adopt} from '../../../../src/runtime';
-import {toggleExperiment} from '../../../../src/experiments';
-import {xhrFor} from '../../../../src/xhr';
-import * as sinon from 'sinon';
+import {Services} from '../../../../src/services';
 
-adopt(window);
 
-describe('amp-apester-media', () => {
-  let sandbox;
+describes.realWin('amp-apester-media', {
+  amp: {
+    extensions: ['amp-apester-media'],
+  },
+}, env => {
+  let win, doc;
   let xhrMock;
   let changeSizeSpy;
+  let attemptChangeSizeSpy;
 
   beforeEach(() => {
-    toggleExperiment(window, 'amp-apester-media', true);
-    sandbox = sinon.sandbox.create();
-
+    win = env.win;
+    doc = win.document;
   });
 
   afterEach(() => {
     if (xhrMock) {
       xhrMock.verify();
     }
-    sandbox.restore();
   });
 
-  function getApester(attributes, opt_responsive, opt_beforeLayoutCallback) {
-    return createIframePromise(true, opt_beforeLayoutCallback).then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const media = iframe.doc.createElement('amp-apester-media');
-      const response = {
-        'code': 200,
-        'message': 'ok',
-        'payload': {
-          'interactionId': '57a336dba187a2ca3005e826',
-          'data': {
-            'size': {'width': '600', 'height': '444'},
-          },
-          'layout': {
-            'id': '557d52c059081084b94845c3',
-            'name': 'multi poll two',
-            'directive': 'multi-poll-two',
-          },
-          'language': 'en',
+  function getApester(attributes, opt_responsive) {
+    const media = doc.createElement('amp-apester-media');
+    const response = {
+      'code': 200,
+      'message': 'ok',
+      'payload': {
+        'interactionId': '57a336dba187a2ca3005e826',
+        'data': {
+          'size': {'width': '600', 'height': '404'},
         },
-      };
-      changeSizeSpy = sandbox.spy(
-          media.implementation_, 'attemptChangeHeight');
-      xhrMock = sandbox.mock(xhrFor(iframe.win));
-      xhrMock.expects('fetchJson').returns(Promise.resolve(response));
-      for (const key in attributes) {
-        media.setAttribute(key, attributes[key]);
-
-      }
-      media.setAttribute('width', '600');
-      media.setAttribute('height', '390');
-      //todo test width?
-      if (opt_responsive) {
-        media.setAttribute('layout', 'responsive');
-      }
-      return iframe.addElement(media);
-    });
+        'layout': {
+          'id': '557d52c059081084b94845c3',
+          'name': 'multi poll two',
+          'directive': 'multi-poll-two',
+        },
+        'language': 'en',
+      },
+    };
+    changeSizeSpy = sandbox.spy(
+        media.implementation_, 'changeHeight');
+    attemptChangeSizeSpy = sandbox.spy(
+        media.implementation_, 'attemptChangeHeight');
+    xhrMock = sandbox.mock(Services.xhrFor(win));
+    if (attributes) {
+      xhrMock.expects('fetchJson').returns(Promise.resolve({
+        json() {
+          return Promise.resolve(response);
+        },
+      }));
+    } else {
+      xhrMock.expects('fetchJson').never();
+    }
+    for (const key in attributes) {
+      media.setAttribute(key, attributes[key]);
+    }
+    media.setAttribute('width', '600');
+    media.setAttribute('height', '390');
+    //todo test width?
+    if (opt_responsive) {
+      media.setAttribute('layout', 'responsive');
+    }
+    doc.body.appendChild(media);
+    return media.build().then(() => {
+      return media.layoutCallback();
+    }).then(() => media);
   }
 
   it('renders', () => {
@@ -90,8 +93,8 @@ describe('amp-apester-media', () => {
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(
           'https://renderer.qmerce.com/interaction/57a336dba187a2ca3005e826');
-      expect(changeSizeSpy.callCount).to.equal(1);
-      expect(changeSizeSpy.args[0][0]).to.equal('444');
+      expect(changeSizeSpy).to.be.calledOnce;
+      expect(changeSizeSpy.args[0][0]).to.equal('404');
     });
   });
 
@@ -103,8 +106,8 @@ describe('amp-apester-media', () => {
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(
           'https://renderer.qmerce.com/interaction/57a336dba187a2ca3005e826');
-      expect(changeSizeSpy.callCount).to.equal(1);
-      expect(changeSizeSpy.args[0][0]).to.equal('444');
+      expect(attemptChangeSizeSpy).to.be.calledOnce;
+      expect(attemptChangeSizeSpy.args[0][0]).to.equal('404');
     });
   });
 
@@ -115,7 +118,7 @@ describe('amp-apester-media', () => {
       'width': '500',
     }, true).then(ape => {
       const iframe = ape.querySelector('iframe');
-      expect(iframe.className).to.match(/-amp-fill-content/);
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
 

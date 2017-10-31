@@ -15,9 +15,10 @@
  */
 
 import {Observable} from './observable';
-import {fromClass} from './service';
 import {dev} from './log';
+import {Services} from './services';
 import {listenOnce, listenOncePromise} from './event-helper';
+import {registerServiceBuilder} from './service';
 
 
 const TAG_ = 'Input';
@@ -71,14 +72,14 @@ export class Input {
     /** @private {number} */
     this.mouseConfirmAttemptCount_ = 0;
 
-    /** @private {?Observable<boolean>} */
-    this.touchDetectedObservable_ = null;
+    /** @private {!Observable<boolean>} */
+    this.touchDetectedObservable_ = new Observable();
 
-    /** @private {?Observable<boolean>} */
-    this.mouseDetectedObservable_ = null;
+    /** @private {!Observable<boolean>} */
+    this.mouseDetectedObservable_ = new Observable();
 
-    /** @private {?Observable<boolean>} */
-    this.keyboardStateObservable_ = null;
+    /** @private {!Observable<boolean>} */
+    this.keyboardStateObservable_ = new Observable();
 
     // If touch available, temporarily set hasMouse to false and wait for
     // mouse events.
@@ -114,9 +115,6 @@ export class Input {
     if (opt_fireImmediately) {
       handler(this.isTouchDetected());
     }
-    if (!this.touchDetectedObservable_) {
-      this.touchDetectedObservable_ = new Observable();
-    }
     return this.touchDetectedObservable_.add(handler);
   }
 
@@ -138,9 +136,6 @@ export class Input {
     if (opt_fireImmediately) {
       handler(this.isMouseDetected());
     }
-    if (!this.mouseDetectedObservable_) {
-      this.mouseDetectedObservable_ = new Observable();
-    }
     return this.mouseDetectedObservable_.add(handler);
   }
 
@@ -161,9 +156,6 @@ export class Input {
   onKeyboardStateChanged(handler, opt_fireImmediately) {
     if (opt_fireImmediately) {
       handler(this.isKeyboardActive());
-    }
-    if (!this.keyboardStateObservable_) {
-      this.keyboardStateObservable_ = new Observable();
     }
     return this.keyboardStateObservable_.add(handler);
   }
@@ -224,8 +216,19 @@ export class Input {
     // If "click" arrives within a timeout time, this is most likely a
     // touch/mouse emulation. Otherwise, if timeout exceeded, this looks
     // like a legitimate mouse event.
-    return listenOncePromise(this.win.document, 'click', false, CLICK_TIMEOUT_)
-        .then(this.boundMouseCanceled_, this.boundMouseConfirmed_);
+    let unlisten;
+    const listenPromise = listenOncePromise(this.win.document, 'click',
+        /* capture */ undefined, unlistener => {
+          unlisten = unlistener;
+        });
+    return Services.timerFor(this.win)
+        .timeoutPromise(CLICK_TIMEOUT_, listenPromise)
+        .then(this.boundMouseCanceled_, () => {
+          if (unlisten) {
+            unlisten();
+          }
+          this.boundMouseConfirmed_();
+        });
   }
 
   /** @private */
@@ -248,11 +251,9 @@ export class Input {
   }
 }
 
-
 /**
- * @param {!Window} window
- * @return {!Input}
+ * @param {!Window} win
  */
-export function inputFor(window) {
-  return fromClass(window, 'input', Input);
-};
+export function installInputService(win) {
+  registerServiceBuilder(win, 'input', Input);
+}

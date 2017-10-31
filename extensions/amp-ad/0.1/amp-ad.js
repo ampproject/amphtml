@@ -17,11 +17,12 @@ import {CSS} from '../../../build/amp-ad-0.1.css';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {AmpAd3PImpl} from './amp-ad-3p-impl';
 import {AmpAdCustom} from './amp-ad-custom';
-import {a4aRegistry} from '../../../ads/_a4a-config';
-import {dev, user} from '../../../src/log';
-import {extensionsFor} from '../../../src/extensions';
-import {userNotificationManagerFor} from '../../../src/user-notification';
+import {getA4ARegistry} from '../../../ads/_a4a-config';
+import {adConfig} from '../../../ads/_config';
+import {user} from '../../../src/log';
+import {Services} from '../../../src/services';
 import {isExperimentOn} from '../../../src/experiments';
+import {hasOwn} from '../../../src/utils/object';
 
 
 /**
@@ -40,63 +41,72 @@ function networkImplementationTag(type) {
 export class AmpAd extends AMP.BaseElement {
 
   /** @override */
+  isLayoutSupported(unusedLayout) {
+    // TODO(jridgewell, #5980, #8218): ensure that unupgraded calls are not
+    // done for `isLayoutSupported`.
+    return true;
+  }
+
+  /** @override */
   upgradeCallback() {
+    const a4aRegistry = getA4ARegistry();
     // Block whole ad load if a consent is needed.
     /** @const {string} */
     const consentId = this.element.getAttribute('data-consent-notification-id');
     const consent = consentId
-        ? userNotificationManagerFor(this.win)
+        ? Services.userNotificationManagerForDoc(this.element)
             .then(service => service.get(consentId))
         : Promise.resolve();
 
     return consent.then(() => {
       const type = this.element.getAttribute('type');
-      if (!type) {
-        // Unspecified or empty type.  Nothing to do here except bail out.
-        return null;
-      }
+      const isCustom = type === 'custom' && isExperimentOn(this.win,
+          'ad-type-custom');
+      user().assert(isCustom || hasOwn(adConfig, type)
+          || hasOwn(a4aRegistry, type), `Unknown ad type "${type}"`);
+
       // Check for the custom ad type (no ad network, self-service)
-      if (type === 'custom' && isExperimentOn(this.win, 'ad-type-custom')) {
+      if (isCustom) {
         return new AmpAdCustom(this.element);
       }
-      window.ampAdSlotIdCounter = window.ampAdSlotIdCounter || 0;
-      const slotId = window.ampAdSlotIdCounter++;
+
+      this.win.ampAdSlotIdCounter = this.win.ampAdSlotIdCounter || 0;
+      const slotId = this.win.ampAdSlotIdCounter++;
       this.element.setAttribute('data-amp-slot-index', slotId);
+
+      const useRemoteHtml = (
+          !(adConfig[type] || {}).remoteHTMLDisabled &&
+            this.win.document.querySelector('meta[name=amp-3p-iframe-src]'));
       // TODO(tdrl): Check amp-ad registry to see if they have this already.
+      // TODO(a4a-cam): Shorten this predicate.
       if (!a4aRegistry[type] ||
-          !a4aRegistry[type](this.win, this.element)) {
-        // Network either has not provided any A4A implementation or the
-        // implementation exists, but has explicitly chosen not to handle this
-        // tag as A4A.  Fall back to the 3p implementation.
+          // Note that predicate execution may have side effects.
+          !a4aRegistry[type](this.win, this.element, useRemoteHtml)) {
+        // Either this ad network doesn't support Fast Fetch, its Fast Fetch
+        // implementation has explicitly opted not to handle this tag, or this
+        // page uses remote.html which is inherently incompatible with Fast
+        // Fetch. Fall back to Delayed Fetch.
         return new AmpAd3PImpl(this.element);
       }
+
       const extensionTagName = networkImplementationTag(type);
       this.element.setAttribute('data-a4a-upgrade-type', extensionTagName);
-      return extensionsFor(this.win).loadElementClass(extensionTagName)
-        .then(ctor => new ctor(this.element))
-        .catch(error => {
+      return Services.extensionsFor(this.win).loadElementClass(extensionTagName)
+          .then(ctor => new ctor(this.element))
+          .catch(error => {
           // Work around presubmit restrictions.
-          const TAG = this.element.tagName;
+            const TAG = this.element.tagName;
           // Report error and fallback to 3p
-          user().error(TAG, 'Unable to load ad implementation for type ', type,
-              ', falling back to 3p, error: ', error);
-          return new AmpAd3PImpl(this.element);
-        });
+            this.user().error(
+                TAG, 'Unable to load ad implementation for type ',
+                type, ', falling back to 3p, error: ', error);
+            return new AmpAd3PImpl(this.element);
+          });
     });
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
-  }
-
-  /** @override */
-  buildCallback() {
-    // This is only called when no type was set on the element and thus
-    // upgrade element fell through.
-    dev().assert(this.element.getAttribute('type'), 'Required attribute type');
   }
 }
 
-AMP.registerElement('amp-ad', AmpAd, CSS);
-AMP.registerElement('amp-embed', AmpAd, CSS);
+AMP.extension('amp-ad', '0.1', AMP => {
+  AMP.registerElement('amp-ad', AmpAd, CSS);
+  AMP.registerElement('amp-embed', AmpAd);
+});

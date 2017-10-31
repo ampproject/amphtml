@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {waitForServices} from '../../src/render-delaying-services';
+import {
+  waitForServices,
+  hasRenderDelayingServices,
+} from '../../src/render-delaying-services';
 import {createIframePromise} from '../../testing/iframe';
 import * as service from '../../src/service';
 import * as sinon from 'sinon';
@@ -25,7 +28,6 @@ describe('waitForServices', () => {
   let win;
   let sandbox;
   let clock;
-  let accordionResolve;
   let dynamicCssResolve;
   let experimentResolve;
   let variantResolve;
@@ -33,7 +35,6 @@ describe('waitForServices', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     const getService = sandbox.stub(service, 'getServicePromise');
-    accordionResolve = waitForService(getService, 'amp-accordion');
     dynamicCssResolve = waitForService(getService, 'amp-dynamic-css-classes');
     experimentResolve = waitForService(getService, 'amp-experiment');
     variantResolve = waitForService(getService, 'variant');
@@ -51,17 +52,17 @@ describe('waitForServices', () => {
   it('should resolve if no blocking services is presented', () => {
     // <script custom-element="amp-experiment"> should not block
     addExtensionScript(win, 'amp-experiment');
+    expect(hasRenderDelayingServices(win)).to.be.false;
     return expect(waitForServices(win)).to.eventually.have.lengthOf(0);
   });
 
   it('should timeout if some blocking services are missing', () => {
-    addExtensionScript(win, 'amp-accordion');
     addExtensionScript(win, 'amp-dynamic-css-classes');
     win.document.body.appendChild(win.document.createElement('amp-experiment'));
+    expect(hasRenderDelayingServices(win)).to.be.true;
     addExtensionScript(win, 'non-blocking-extension');
 
     const promise = waitForServices(win);
-    accordionResolve();
     dynamicCssResolve();
     experimentResolve(); // 'amp-experiment' is actually blocked by 'variant'
     clock.tick(3000);
@@ -69,17 +70,16 @@ describe('waitForServices', () => {
   });
 
   it('should resolve when all extensions are ready', () => {
-    addExtensionScript(win, 'amp-accordion');
     addExtensionScript(win, 'amp-dynamic-css-classes');
     win.document.body.appendChild(win.document.createElement('amp-experiment'));
+    expect(hasRenderDelayingServices(win)).to.be.true;
     addExtensionScript(win, 'non-blocking-extension');
 
     const promise = waitForServices(win);
-    accordionResolve();
     dynamicCssResolve();
     variantResolve(); // this unblocks 'amp-experiment'
 
-    return expect(promise).to.eventually.have.lengthOf(3);
+    return expect(promise).to.eventually.have.lengthOf(2);
   });
 });
 

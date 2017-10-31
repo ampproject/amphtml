@@ -19,6 +19,7 @@
     - [Verify your examples](#verify-your-examples)
     - [Tests](#tests)
     - [Other tips](#other-tips)
+- [Developer announcements for ads related API changes ](#developer-announcements-for-ads-related-API-changes)
 
 ## Overview
 Ads are just another external resource and must play within the same constraints placed on all resources in AMP. We aim to support a large subset of existing ads with little or no changes to how the integrations work. Our long term goal is to further improve the impact of ads on the user experience through changes across the entire vertical client side stack. Although technically feasible, do not use amp-iframe to render display ads. Using amp-iframe for display ads breaks ad clicks and prevents recording viewability information. If you are an ad technology provider looking to integrate with AMP HTML, please also check the [general 3P inclusion guidelines](../3p/README.md#ads) and [ad service integration guidelines](./_integration-guide.md).
@@ -39,33 +40,35 @@ Reasons include:
 
 ## The iframe sandbox
 
-The ad itself is hosted within a document that has an origin different from the primary page.
+The ad itself is hosted within a document that has an origin different from the primary page. The iframe by default loads a [bootstrap HTML](../3p/frame.max.html), which provides a container `div` to hold your content together with a set of APIs. Note that the container `div` (with `id="c"`) is absolute positioned and takes the whole space of the iframe, so you will want to append your content as a child of the container (don't append to `body`).
 
 ### Available information
 We will provide the following information to the ad:
 
-- `window.context.referrer` contains the origin of the referrer value of the primary document if available.
-- `document.referrer` will typically contain the URL of the primary document. This may change in the future (See next value for a more reliable method).
+- [ad viewability](#ad-viewability)
+- `window.context.canonicalUrl` contains the canonical URL of the primary document as defined by its `link rel=canonical` tag.
+- `window.context.clientId` contains a unique id that is persistently the same for a given user and AMP origin site in their current browser until local data is deleted or the value expires (expiration is currently set to 1 year).
+  - Ad networks must register their cid scope in the variable `clientIdScope` in [_config.js](./_config.js). Use `clientIdCookieName` to provide a cookie name for non-proxy case, otherwise value of `clientIdScope` is used.
+  - Only available on pages that load `amp-analytics`. The clientId will be null if `amp-analytics` was not loaded on the given page.
+- `window.context.container` contains the ad container extension name if the current ad slot has one as its DOM ancestor. An valid ad container is one of the following AMP extensions: `amp-sticky-ad`, `amp-fx-flying-carpet`, `amp-lightbox`. As they provide non-trivial user experience, ad networks might want to use this info to select their serving strategies.
+- `window.context.domFingerprint` contains a string key based on where in the page the ad slot appears. Its purpose is to identify the same ad slot across many page views. It is formed by listing the ancestor tags and their ordinal position, up to 25 levels. For example, if its value is `amp-ad.0,td.1,tr.0,table.0,div/id2.0,div/id1.0` this would mean the first amp-ad child of the second td child of the first tr child of... etc.
 - `window.context.location` contains the sanitized `Location` object of the primary document.
   This object contains keys like `href`, `origin` and other keys common for [Location](https://developer.mozilla.org/en-US/docs/Web/API/Location) objects.
   In browsers that support `location.ancestorOrigins` you can trust that the `origin` of the
   location is actually correct (So rogue pages cannot claim they represent an origin they do not actually represent).
-- `window.context.canonicalUrl` contains the canonical URL of the primary document as defined by its `link rel=canonical` tag.
-- `window.context.sourceUrl` contains the source URL of the original AMP document. See details [here](../spec/amp-var-substitutions.md#source-url).
-- `window.context.clientId` contains a unique id that is persistently the same for a given user and AMP origin site in their current browser until local data is deleted or the value expires (expiration is currently set to 1 year).
-  - Ad networks must register their cid scope in the variable clientIdScope in [_config.js](./_config.js).
-  - Only available on pages that load `amp-analytics`. The clientId will be null if `amp-analytics` was not loaded on the given page.
 - `window.context.pageViewId` contains a relatively low entropy id that is the same for all ads shown on a page.
-- [ad viewability](#ad-viewability)
+- `window.context.referrer` contains the origin of the referrer value of the primary document if available.
+  - `document.referrer` will typically contain the URL of the primary document. This may change in the future (See window.context.location for a more reliable method).
+- `window.context.sourceUrl` contains the source URL of the original AMP document. See details [here](../spec/amp-var-substitutions.md#source-url).
 - `window.context.startTime` contains the time at which processing of the amp-ad element started.
-- `window.context.container` contains the ad container extension name if the current ad slot has one as its DOM ancestor. An valid ad container is one of the following AMP extensions: `amp-sticky-ad`, `amp-fx-flying-carpet`, `amp-lightbox`. As they provide non-trivial user experience, ad networks might want to use this info to select their serving strategies.
 
 More information can be provided in a similar fashion if needed (Please file an issue).
 
 ### Available APIs
 
-- `window.context.renderStart(opt_data)` is a method to inform AMP runtime when the ad starts rendering. The ad will then become visible to user. The optional param `opt_data` is an object of form `{width, height}` to request an [ad resize](#ad-resizing) if the size of the returned ad doesn't match the ad slot. To enable this method, add a line `renderStartImplemented=true` to the corresponding ad config in [_config.js](./_config.js).
+- `window.context.getHtml (selector, attrs, callback)` is a method that retrieves specified node's content from the parent window which cannot be accessed directly because of security restrictions caused by AMP rules and iframe's usage. `selector` is a CSS selector of the node to take content from. `attrs` takes an array of tag attributes to be left in the stringified HTML representation (for instance, ['id', 'class']). All not specified attributes will be cut off from the result string. `callback` takes a function to be called when the content is ready. `getHtml` invokes callback with the only argument of type string.
 - `window.context.noContentAvailable()` is a method to inform AMP runtime that the ad slot cannot be filled. The ad slot will then display the fallback content if provided, otherwise try to collapse.
+- `window.context.renderStart(opt_data)` is a method to inform AMP runtime when the ad starts rendering. The ad will then become visible to user. The optional param `opt_data` is an object of form `{width, height}` to request an [ad resize](#ad-resizing) if the size of the returned ad doesn't match the ad slot. To enable this method, add a line `renderStartImplemented=true` to the corresponding ad config in [_config.js](./_config.js).
 - `window.context.reportRenderedEntityIdentifier()` MUST be called by ads, when they know information about which creative was rendered into a particular ad frame and should contain information to allow identifying the creative. Consider including a small string identifying the ad network. This is used by AMP for reporting purposes. The value MUST NOT contain user data or personal identifiable information.
 
 ### Exceptions to available APIs and information
@@ -75,7 +78,7 @@ Depending on the ad server / provider some methods of rendering ads involve a se
 
 #### Position in viewport
 
-Ads can call the special API `window.context.observeIntersection(changesCallback)` to receive IntersectionObserver style [change records](http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#intersectionobserverentry) of the ad's intersection with the parent viewport.
+Ads can call the special API `window.context.observeIntersection(changesCallback)` to receive IntersectionObserver style [change records](https://github.com/WICG/IntersectionObserver/blob/gh-pages/explainer.md) of the ad's intersection with the parent viewport.
 
 The API allows specifying a callback that fires with change records when AMP observes that an ad becomes visible and then while it is visible, changes are reported as they happen.
 
@@ -104,9 +107,13 @@ Example usage:
   unlisten();
 ```
 
-##### Initial position
+##### Initial layout rect
 
-The value `window.context.initialIntersection` contains the initial intersection record at the time the iframe was created.
+The value `window.context.initialLayoutRect` contains the initial rect of the ad's position in the page.
+
+##### Initial viewport intersection
+
+The value `window.context.initialIntersection` contains the initial viewport intersection record at the time the iframe was created.
 
 #### Page visibility
 
@@ -148,6 +155,18 @@ Here are some factors that affect whether the resize will be executed:
 - Whether the resize is requested for a currently active ad;
 - Whether the resize is requested for an ad below the viewport or above the viewport.
 
+#### Specifying an overflow element
+
+You can specify an `overflow` element that is only shown when a resize request is declined. When the user clicks the overflow element, the resize will pass the "interaction" rule and will resize.
+
+Example: Using an `overflow` element
+
+```html
+<amp-ad type="...">
+  <div overflow>Click to resize</div>
+  <!-- whatever else -->
+</amp-ad>
+```
 
 ### Support for multi-size ad requests
 Allowing more than a single ad size to fill a slot improves ad server competition. Increased competition gives the publisher better monetization for the same slot, therefore increasing overall revenue earned by the publisher.
@@ -167,7 +186,7 @@ Note that if the creative needs to resize on user interaction, the creative can 
 #### JS reuse across iframes
 To allow ads to bundle HTTP requests across multiple ad units on the same page the object `window.context.master` will contain the window object of the iframe being elected master iframe for the current page. The `window.context.isMaster` property is `true` when the current frame is the master frame.
 
-The `computeInMasterFrame` function is designed to make it easy to perform a task only in the master frame and provide the result to all frames. It is also available to custom ad iframes as `window.context.computeInMasterFrame`. See [3p.js](https://github.com/ampproject/amphtml/blob/master/src/3p.js) for function signature.
+The `computeInMasterFrame` function is designed to make it easy to perform a task only in the master frame and provide the result to all frames. It is also available to custom ad iframes as `window.context.computeInMasterFrame`. See [3p.js](https://github.com/ampproject/amphtml/blob/master/3p/3p.js) for function signature.
 
 #### Preconnect and prefetch
 Add the JS URLs that an ad **always** fetches or always connects to (if you know the origin but not the path) to [_config.js](_config.js).
@@ -212,10 +231,11 @@ Technically the `<amp-ad>` tag loads an iframe to a generic bootstrap URL that k
 
 Access to a publishers 1st party cookies may be achieved through a custom ad bootstrap file. See ["Running ads from a custom domain"](../extensions/amp-ad/amp-ad.md#running-ads-from-a-custom-domain) in the ad documentation for details.
 
-If the publisher would like to add custom JavaScript in the `remote.html` file that wants to read or write to the publisher owned cookies, then the publisher needs to ensure that the `remote.html` file is hosted on a sub-domain of the publisher URL. e.g. if the publisher hosts a webpage on https://nytimes.com, then the remote file should be hosted on something similar to https://sub-domain.nytimes.com for the custom JavaScript to have the abiity to read or write cookies for nytimes.com.
+If the publisher would like to add custom JavaScript in the `remote.html` file that wants to read or write to the publisher owned cookies, then the publisher needs to ensure that the `remote.html` file is hosted on a sub-domain of the publisher URL. e.g. if the publisher hosts a webpage on `https://nytimes.com`, then the remote file should be hosted on something similar to `https://sub-domain.nytimes.com` for the custom JavaScript to have the ability to read or write cookies for nytimes.com.
 
 ## Developer guidelines for a pull request
-Please read through [DEVELOPING.md](../DEVELOPING.md) before contributing to this code repository.
+
+Please read through [DEVELOPING.md](../contributing/DEVELOPING.md) before contributing to this code repository.
 
 ### Files to change
 
@@ -226,15 +246,17 @@ If you're adding support for a new 3P ad service, changes to the following files
 - `/ads/_config.js` - add service specific configuration here.
 - `/3p/integration.js` - register your service here.
 - `/extensions/amp-ad/amp-ad.md` - add a link that points to your publisher doc.
-- `/examples/ads.amp.html` - add publisher examples here.
+- `/examples/ads.amp.html` - add publisher examples here. Since real ad isn't guaranteed to fill, a consistently displayed fake ad is highly recommended here to help AMP developers confidently identify new bugs.
 
 ### Verify your examples
 
-To verify the examples that you have put in `/examples/ads.amp.html`, you will need to start a local gulp web server by running command `gulp`. Then visit `http://localhost:8000/examples/ads.amp.max.html?type=yournetwork` in your browser to make sure the examples load ads.
+To verify the examples that you have put in `/examples/ads.amp.html`, you will need to start a local gulp web server by running command `gulp`. Then visit `http://localhost:8000/examples/ads.amp.html?type=yournetwork` in your browser to make sure the examples load ads.
 
 Please consider having the example consistently load a fake ad (with ad targeting disabled). Not only it will be a more confident example for publishers to follow, but also for us to catch any regression bug during our releases.
 
 It's encouraged to have multiple examples to cover different use cases.
+
+Please verify your ad is fully functioning, for example, by clicking on an ad. We have seen bugs reported for ads not being clickable, which was due to incorrectly appended content divs.
 
 ### Tests
 
@@ -254,5 +276,8 @@ To speed up the review process, please run `gulp lint` and `gulp check-types`, t
 ### Other tips
 
 - Please consider implementing the `render-start` and `no-content-available` APIs (see [Available APIs](#available-apis)), which helps AMP to provide user a much better ad loading experience.
-- [CLA](../CONTRIBUTIONG.md#contributing-code): for anyone who has trouble to pass the automatic CLA check in a pull request, try to follow the guidelines provided by the CLA Bot. Common mistakes are 1) used a different email address in git commit; 2) didn't provide the exact company name in the PR thread.
+- [CLA](../CONTRIBUTING.md#contributing-code): for anyone who has trouble to pass the automatic CLA check in a pull request, try to follow the guidelines provided by the CLA Bot. Common mistakes are 1) used a different email address in git commit; 2) didn't provide the exact company name in the PR thread.
 
+## Developer announcements for ads related API changes 
+
+For any major Ads API related changes that introduce new functionality or cause backwards compatible changes, we will notify the [amp-ads-announce@googlgroups.com](https://groups.google.com/d/forum/amp-ads-announce) at least 2 weeks in advance to make sure you have enough time to absorb those changes. 

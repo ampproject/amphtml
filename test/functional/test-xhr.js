@@ -17,13 +17,13 @@
 import * as sinon from 'sinon';
 import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
 import {
-  installXhrService,
+  xhrServiceForTesting,
   fetchPolyfill,
   FetchResponse,
   assertSuccess,
 } from '../../src/service/xhr-impl';
 import {getCookie} from '../../src/cookies';
-
+import {Services} from '../../src/services';
 
 describe('XHR', function() {
   let sandbox;
@@ -44,16 +44,16 @@ describe('XHR', function() {
 
   const scenarios = [
     {
-      xhr: installXhrService(nativeWin),
+      win: nativeWin,
       desc: 'Native',
     }, {
-      xhr: installXhrService(polyfillWin),
+      win: polyfillWin,
       desc: 'Polyfill',
     },
   ];
 
   function setupMockXhr() {
-    const mockXhr = sandbox.useFakeXMLHttpRequest().xhr;
+    const mockXhr = sandbox.useFakeXMLHttpRequest();
     requests = [];
     mockXhr.onCreate = function(xhr) {
       requests.push(xhr);
@@ -71,6 +71,9 @@ describe('XHR', function() {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    sandbox.stub(Services, 'ampdocServiceFor').returns({
+      isSingleDoc: () => false,
+    });
     location.href = 'https://acme.com/path';
   });
 
@@ -79,15 +82,17 @@ describe('XHR', function() {
   });
 
   scenarios.forEach(test => {
-    const xhr = test.xhr;
+    let xhr;
 
     // Since if it's the Native fetch, it won't use the XHR object so
     // mocking and testing the request becomes not doable.
     if (test.desc != 'Native') {
 
       describe('#XHR', () => {
-
-        beforeEach(setupMockXhr);
+        beforeEach(() => {
+          xhr = xhrServiceForTesting(test.win);
+          setupMockXhr();
+        });
 
         it('should allow GET and POST methods', () => {
           const get = xhr.fetchJson.bind(xhr, '/get?k=v1');
@@ -184,6 +189,12 @@ describe('XHR', function() {
           }).to.throw(/Source origin is not allowed/);
         });
 
+        it('should not include __amp_source_origin if ampCors ' +
+            'set to false', () => {
+          xhr.fetchJson('/get', {ampCors: false});
+          expect(noOrigin(requests[0].url)).to.equal('/get');
+        });
+
         it('should accept AMP origin when received in response', () => {
           const promise = xhr.fetchJson('/get');
           requests[0].respond(200, {
@@ -192,10 +203,7 @@ describe('XHR', function() {
                 'AMP-Access-Control-Allow-Source-Origin',
             'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
           }, '{}');
-          return promise.then(() => 'SUCCESS', reason => 'ERROR: ' + reason)
-              .then(res => {
-                expect(res).to.equal('SUCCESS');
-              });
+          return promise;
         });
 
         it('should deny AMP origin for different origin in response', () => {
@@ -206,30 +214,30 @@ describe('XHR', function() {
                 'AMP-Access-Control-Allow-Source-Origin',
             'AMP-Access-Control-Allow-Source-Origin': 'https://other.com',
           }, '{}');
-          return promise.then(() => 'SUCCESS', reason => 'ERROR: ' + reason)
-              .then(res => {
-                expect(res).to.match(/ERROR/);
-                expect(res).to.match(/Returned AMP-Access-.* is not equal/);
-              });
+          return promise.then(() => {
+            throw new Error('UNREACHABLE');
+          }, res => {
+            expect(res).to.match(/Returned AMP-Access-.* is not equal/);
+          });
         });
 
         it('should require AMP origin in response for when request', () => {
-          const promise = xhr.fetchJson('/get', {
-            requireAmpResponseSourceOrigin: true,
-          });
+          const promise = xhr.fetchJson('/get');
           requests[0].respond(200, {
             'Content-Type': 'application/json',
           }, '{}');
-          return promise.then(() => 'SUCCESS', reason => 'ERROR: ' + reason)
-              .then(res => {
-                expect(res).to.match(/ERROR/);
-                expect(res).to.match(/Response must contain/);
-              });
+          return promise.then(() => {
+            throw new Error('UNREACHABLE');
+          }, error => {
+            expect(error.message).to.contain('Response must contain');
+          });
         });
       });
     }
 
     describe('AMP-Same-Origin', () => {
+      beforeEach(() => xhr = xhrServiceForTesting(test.win));
+
       it('should not be set for cross origin requests', () => {
         const init = {};
         xhr.fetchJson('/whatever', init);
@@ -264,6 +272,7 @@ describe('XHR', function() {
     });
 
     describe(test.desc, () => {
+      beforeEach(() => xhr = xhrServiceForTesting(test.win));
 
       describe('assertSuccess', () => {
         function createResponseInstance(body, init) {
@@ -293,32 +302,15 @@ describe('XHR', function() {
         it('should reject if error', () => {
           mockXhr.status = 500;
           return assertSuccess(createResponseInstance('', mockXhr))
-              .then(response => {
-                expect(response.status).to.equal(500);
-              }).should.be.rejectedWith(/HTTP error 500/);
+              .should.be.rejected;
         });
 
-        it('should parse json content when error', () => {
+        it('should include response in error', () => {
           mockXhr.status = 500;
-          mockXhr.responseText = '{"a": "hello"}';
-          mockXhr.headers['Content-Type'] = 'application/json';
-          mockXhr.getResponseHeader = () => 'application/json';
-          return assertSuccess(createResponseInstance('{"a": 2}', mockXhr))
+          return assertSuccess(createResponseInstance('', mockXhr))
               .catch(error => {
-                expect(error.responseJson).to.be.defined;
-                expect(error.responseJson.a).to.equal(2);
-              });
-        });
-
-        it('should parse json content with charset when error', () => {
-          mockXhr.status = 500;
-          mockXhr.responseText = '{"a": "hello"}';
-          mockXhr.headers['Content-Type'] = 'application/json; charset=utf-8';
-          mockXhr.getResponseHeader = () => 'application/json; charset=utf-8';
-          return assertSuccess(createResponseInstance('{"a": 2}', mockXhr))
-              .catch(error => {
-                expect(error.responseJson).to.be.defined;
-                expect(error.responseJson.a).to.equal(2);
+                expect(error.response).to.exist;
+                expect(error.response.status).to.equal(500);
               });
         });
 
@@ -333,40 +325,40 @@ describe('XHR', function() {
       });
 
       it('should do simple JSON fetch', () => {
-        return xhr.fetchJson('http://localhost:31862/get?k=v1').then(res => {
-          expect(res).to.exist;
-          expect(res['args']['k']).to.equal('v1');
-        });
+        return xhr.fetchJson('http://localhost:31862/get?k=v1')
+            .then(res => res.json())
+            .then(res => {
+              expect(res).to.exist;
+              expect(res['args']['k']).to.equal('v1');
+            });
       });
 
       it('should redirect fetch', () => {
         const url = 'http://localhost:31862/redirect-to?url=' + encodeURIComponent(
             'http://localhost:31862/get?k=v2');
-        return xhr.fetchJson(url).then(res => {
-          expect(res).to.exist;
-          expect(res['args']['k']).to.equal('v2');
-        });
+        return xhr.fetchJson(url, {ampCors: false})
+            .then(res => res.json())
+            .then(res => {
+              expect(res).to.exist;
+              expect(res['args']['k']).to.equal('v2');
+            });
       });
 
       it('should fail fetch for 400-error', () => {
         const url = 'http://localhost:31862/status/404';
-        return xhr.fetchJson(url).then(unusedRes => {
-          return 'SUCCESS';
+        return xhr.fetchJson(url).then(() => {
+          throw new Error('UNREACHABLE');
         }, error => {
-          return 'ERROR: ' + error;
-        }).then(status => {
-          expect(status).to.match(/^ERROR:.*HTTP error 404/);
+          expect(error.message).to.contain('HTTP error 404');
         });
       });
 
       it('should fail fetch for 500-error', () => {
-        const url = 'http://localhost:31862/status/500';
-        return xhr.fetchJson(url).then(unusedRes => {
-          return 'SUCCESS';
+        const url = 'http://localhost:31862/status/500?CID=cid';
+        return xhr.fetchJson(url).then(() => {
+          throw new Error('UNREACHABLE');
         }, error => {
-          return 'ERROR: ' + error;
-        }).then(status => {
-          expect(status).to.match(/^ERROR.*HTTP error 500/);
+          expect(error.message).to.contain('HTTP error 500');
         });
       });
 
@@ -407,13 +399,27 @@ describe('XHR', function() {
       it('should expose HTTP headers', () => {
         const url = 'http://localhost:31862/response-headers?' +
             'AMP-Header=Value1&Access-Control-Expose-Headers=AMP-Header';
-        return xhr.fetchAmpCors_(url).then(res => {
+        return xhr.fetchAmpCors_(url, {ampCors: false}).then(res => {
           expect(res.headers.get('AMP-Header')).to.equal('Value1');
+        });
+      });
+
+      it('should omit request details for privacy', () => {
+        // NOTE THIS IS A BAD PORT ON PURPOSE.
+        return xhr.fetchJson('http://localhost:31863/status/500').then(() => {
+          throw new Error('UNREACHABLE');
+        }, error => {
+          const message = error.message;
+          expect(message).to.contain('http://localhost:31863');
+          expect(message).not.to.contain('status/500');
+          expect(message).not.to.contain('CID');
         });
       });
     });
 
     describe('#fetchDocument', () => {
+      beforeEach(() => xhr = xhrServiceForTesting(test.win));
+
       it('should be able to fetch a document', () => {
         setupMockXhr();
         expect(requests[0]).to.be.undefined;
@@ -423,6 +429,9 @@ describe('XHR', function() {
         expect(requests[0].requestHeaders['Accept']).to.equal('text/html');
         requests[0].respond(200, {
           'Content-Type': 'text/xml',
+          'Access-Control-Expose-Headers':
+              'AMP-Access-Control-Allow-Source-Origin',
+          'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
         }, '<html></html>');
         expect(requests[0].responseType).to.equal('document');
         return promise;
@@ -447,9 +456,12 @@ describe('XHR', function() {
         const promise = xhr.fetchDocument('/index.html');
         requests[0].respond(415, {
           'Content-Type': 'text/xml',
+          'Access-Control-Expose-Headers':
+              'AMP-Access-Control-Allow-Source-Origin',
+          'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
         }, '<html></html>');
         return promise.catch(e => {
-          expect(e.retriable).to.be.defined;
+          expect(e.retriable).to.exist;
           expect(e.retriable === true).to.be.true;
         });
       });
@@ -460,9 +472,12 @@ describe('XHR', function() {
         const promise = xhr.fetchDocument('/index.html');
         requests[0].respond(415, {
           'Content-Type': 'text/xml',
+          'Access-Control-Expose-Headers':
+              'AMP-Access-Control-Allow-Source-Origin',
+          'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
         }, '<html></html>');
         return promise.catch(e => {
-          expect(e.retriable).to.be.defined;
+          expect(e.retriable).to.exist;
           expect(e.retriable === true).to.be.true;
         });
       });
@@ -473,10 +488,13 @@ describe('XHR', function() {
         const promise = xhr.fetchDocument('/index.html');
         requests[0].respond(200, {
           'Content-Type': 'application/json',
+          'Access-Control-Expose-Headers':
+              'AMP-Access-Control-Allow-Source-Origin',
+          'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
         }, '{"hello": "world"}');
         return promise.catch(e => {
           expect(e.message)
-              .to.match(/responseXML should exist/);
+              .to.contain('responseXML should exist');
         });
       });
     });
@@ -486,6 +504,7 @@ describe('XHR', function() {
       let fetchStub;
 
       beforeEach(() => {
+        xhr = xhrServiceForTesting(test.win);
         const mockXhr = {
           status: 200,
           responseText: TEST_TEXT,
@@ -500,14 +519,18 @@ describe('XHR', function() {
           method: 'GET',
           headers: {'Accept': 'text/plain'},
         })).to.be.true;
-        return promise.then(text => {
+        return promise.then(res => {
+          return res.text();
+        }).then(text => {
           expect(text).to.equal(TEST_TEXT);
         });
       });
     });
 
     describe('#fetch ' + test.desc, () => {
-      const creative = '<html><body>This is a creative</body></html>';
+      const creative = '<html><body>This is a creative简</body></html>';
+
+      beforeEach(() => xhr = xhrServiceForTesting(test.win));
 
       // Using the Native fetch, we can't mock the XHR request, so an actual
       // HTTP request would be sent to the server.  Only execute this test
@@ -518,16 +541,21 @@ describe('XHR', function() {
           setupMockXhr();
           expect(requests[0]).to.be.undefined;
           const promise = xhr.fetch(
-            '/index.html').then(response => {
-              expect(response.headers.get('X-foo-header')).to.equal('foo data');
-              expect(response.headers.get('X-bar-header')).to.equal('bar data');
-              response.arrayBuffer().then(
-                bytes => utf8FromArrayBuffer(bytes)).then(text => {
-                  expect(text).to.equal(creative);
-                });
-            });
+              '/index.html').then(response => {
+                expect(response.headers.get('X-foo-header')).to
+                    .equal('foo data');
+                expect(response.headers.get('X-bar-header')).to
+                    .equal('bar data');
+                response.arrayBuffer().then(
+                    bytes => utf8FromArrayBuffer(bytes)).then(text => {
+                      expect(text).to.equal(creative);
+                    });
+              });
           requests[0].respond(200, {
             'Content-Type': 'text/xml',
+            'Access-Control-Expose-Headers':
+                'AMP-Access-Control-Allow-Source-Origin',
+            'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
             'X-foo-header': 'foo data',
             'X-bar-header': 'bar data',
           }, creative);
@@ -541,7 +569,9 @@ describe('XHR', function() {
     const url = 'http://localhost:31862/post';
 
     describe(test.desc + ' POST', () => {
-      const xhr = test.xhr;
+      let xhr;
+
+      beforeEach(() => xhr = xhrServiceForTesting(test.win));
 
       if (test.desc != 'Native') {
         it('should have required json POST headers by default', () => {
@@ -557,7 +587,7 @@ describe('XHR', function() {
           });
           expect(requests[0].requestHeaders).to.deep.equal({
             'Accept': 'application/json',
-            'Content-Type': 'application/json;charset=utf-8',
+            'Content-Type': 'text/plain;charset=utf-8',
             'Other': 'another',  // Not removed when other headers set.
           });
         });
@@ -569,7 +599,10 @@ describe('XHR', function() {
           body: {
             hello: 'world',
           },
-        }).then(res => {
+          headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+          },
+        }).then(res => res.json()).then(res => {
           expect(res.json).to.jsonEqual({
             hello: 'world',
           });
@@ -638,14 +671,42 @@ describe('XHR', function() {
       });
     });
 
+    it('should be cloneable and each instance should provide text', () => {
+      const response = new FetchResponse(mockXhr);
+      const clone = response.clone();
+      return Promise.all([
+        response.text(),
+        clone.text(),
+      ]).then(results => {
+        expect(results[0]).to.equal(TEST_TEXT);
+        expect(results[1]).to.equal(TEST_TEXT);
+      });
+    });
+
+    it('should not be cloneable if body is already accessed', () => {
+      const response = new FetchResponse(mockXhr);
+      return response.text()
+          .then(() => {
+            expect(() => response.clone(), 'should throw').to.throw(
+                Error,
+                /Body already used/);
+          });
+    });
+
     scenarios.forEach(test => {
       if (test.desc === 'Polyfill') {
         // FetchRequest is only returned by the Polyfill version of Xhr.
         describe('#text', () => {
-          beforeEach(setupMockXhr);
+          let xhr;
+
+          beforeEach(() => {
+            xhr = xhrServiceForTesting(test.win);
+            setupMockXhr();
+          });
+
           it('should return text from a full XHR request', () => {
             expect(requests[0]).to.be.undefined;
-            const promise = test.xhr.fetchAmpCors_('http://nowhere.org').then(
+            const promise = xhr.fetchAmpCors_('http://nowhere.org').then(
                 response => {
                   expect(response).to.be.instanceof(FetchResponse);
                   return response.text().then(result => {
@@ -654,6 +715,9 @@ describe('XHR', function() {
                 });
             requests[0].respond(200, {
               'Content-Type': 'text/plain',
+              'Access-Control-Expose-Headers':
+                  'AMP-Access-Control-Allow-Source-Origin',
+              'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
             }, TEST_TEXT);
             return promise;
           });

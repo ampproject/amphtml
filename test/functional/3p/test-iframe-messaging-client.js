@@ -15,7 +15,7 @@
  */
 
 import {IframeMessagingClient} from '../../../3p/iframe-messaging-client';
-import {serializeMessage} from '../../../src/3p-frame';
+import {serializeMessage} from '../../../src/3p-frame-messaging';
 
 describes.realWin('iframe-messaging-client', {}, env => {
 
@@ -37,9 +37,28 @@ describes.realWin('iframe-messaging-client', {}, env => {
     it('should send the request via postMessage', () => {
       const callbackSpy = sandbox.spy();
       client.makeRequest('request-type', 'response-type', callbackSpy);
-      expect(postMessageStub).to.be.calledWith(
-          serializeMessage('request-type', 'sentinel-123'));
+      expect(postMessageStub).to.be.calledWith(serializeMessage(
+          'request-type', 'sentinel-123', {}, '$internalRuntimeVersion$'));
 
+      postAmpMessage(
+          {type: 'response-type', sentinel: 'sentinel-123'}, hostWindow);
+      expect(callbackSpy).to.be.calledOnce;
+      postAmpMessage(
+          {type: 'response-type', sentinel: 'sentinel-123'}, hostWindow);
+      expect(callbackSpy).to.be.calledTwice;
+    });
+  });
+
+  describe('requestOnce', () => {
+    it('should unlisten after message received', () => {
+      const callbackSpy = sandbox.spy();
+      client.requestOnce('request-type', 'response-type', callbackSpy);
+      expect(postMessageStub).to.be.calledWith(serializeMessage(
+          'request-type', 'sentinel-123', {}, '$internalRuntimeVersion$'));
+
+      postAmpMessage(
+          {type: 'response-type', sentinel: 'sentinel-123'}, hostWindow);
+      expect(callbackSpy).to.be.calledOnce;
       postAmpMessage(
           {type: 'response-type', sentinel: 'sentinel-123'}, hostWindow);
       expect(callbackSpy).to.be.calledOnce;
@@ -64,6 +83,35 @@ describes.realWin('iframe-messaging-client', {}, env => {
         x: 1,
         y: 'abc',
       });
+    });
+
+    it('should invoke multiple callbacks on receiving a message of' +
+        ' expected response type', () => {
+      const callbackSpy1 = sandbox.spy();
+      const callbackSpy2 = sandbox.spy();
+      const irrelevantCallbackSpy = sandbox.spy();
+
+      const expectedResponseObject = {
+        type: 'response-type',
+        sentinel: 'sentinel-123',
+        x: 1,
+        y: 'abc',
+      };
+
+      client.registerCallback('response-type', callbackSpy1);
+      client.registerCallback('response-type', callbackSpy2);
+      client.registerCallback('irrelevant-response', irrelevantCallbackSpy);
+
+      postAmpMessage({
+        type: 'response-type',
+        sentinel: 'sentinel-123',
+        x: 1,
+        y: 'abc',
+      }, hostWindow);
+
+      expect(callbackSpy1).to.be.calledWith(expectedResponseObject);
+      expect(callbackSpy2).to.be.calledWith(expectedResponseObject);
+      expect(irrelevantCallbackSpy).to.not.be.called;
     });
 
     it('should not invoke callback on receiving a message of' +
@@ -126,8 +174,11 @@ describes.realWin('iframe-messaging-client', {}, env => {
   describe('sendMessage', () => {
     it('should send postMessage to host window', () => {
       client.sendMessage('request-type', {x: 1, y: 'abc'});
-      expect(postMessageStub).to.be.calledWith(
-          serializeMessage('request-type', 'sentinel-123', {x: 1, y: 'abc'}));
+      expect(postMessageStub).to.be.calledWith(serializeMessage(
+          'request-type',
+          'sentinel-123',
+          {x: 1, y: 'abc'},
+          '$internalRuntimeVersion$'));
     });
   });
 

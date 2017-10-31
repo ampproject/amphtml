@@ -36,14 +36,15 @@ class AmpTwitter extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
+    preloadBootstrap(this.win, this.preconnect);
+    // Hosts the script that renders tweets.
+    this.preconnect.preload(
+        'https://platform.twitter.com/widgets.js', 'script');
     // This domain serves the actual tweets as JSONP.
     this.preconnect.url('https://syndication.twitter.com', opt_onLayout);
     // All images
     this.preconnect.url('https://pbs.twimg.com', opt_onLayout);
-    // Hosts the script that renders tweets.
-    this.preconnect.preload(
-        'https://platform.twitter.com/widgets.js', 'script');
-    preloadBootstrap(this.win, this.preconnect);
+    this.preconnect.url('https://cdn.syndication.twimg.com', opt_onLayout);
   }
 
   /** @override */
@@ -53,7 +54,7 @@ class AmpTwitter extends AMP.BaseElement {
 
   /** @override */
   firstLayoutCompleted() {
-    // Do not hide placeholder
+    // Do not hide the placeholder.
   }
 
   /** @override */
@@ -62,9 +63,16 @@ class AmpTwitter extends AMP.BaseElement {
     this.applyFillContent(iframe);
     listenFor(iframe, 'embed-size', data => {
       // We only get the message if and when there is a tweet to display,
-      // so hide the placeholder.
+      // so hide the placeholder
       this.togglePlaceholder(false);
-      this./*OK*/changeHeight(data.height);
+      this./*OK*/changeHeight(data['height']);
+    }, /* opt_is3P */true);
+    listenFor(iframe, 'no-content', () => {
+      if (this.getFallback()) {
+        this.togglePlaceholder(false);
+        this.toggleFallback(true);
+      }
+      // else keep placeholder displayed since there's no fallback
     }, /* opt_is3P */true);
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
@@ -84,6 +92,9 @@ class AmpTwitter extends AMP.BaseElement {
     }
     return true;
   }
-};
+}
 
-AMP.registerElement('amp-twitter', AmpTwitter);
+
+AMP.extension('amp-twitter', '0.1', AMP => {
+  AMP.registerElement('amp-twitter', AmpTwitter);
+});

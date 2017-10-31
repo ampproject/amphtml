@@ -15,7 +15,11 @@
  * limitations under the license.
  */
 goog.provide('amp.validator.ValidatorTest');
+
 goog.require('amp.validator.CssLength');
+goog.require('amp.validator.TagSpec');
+goog.require('amp.validator.ValidationError');
+goog.require('amp.validator.annotateWithErrorCategories');
 goog.require('amp.validator.createRules');
 goog.require('amp.validator.renderValidationResult');
 goog.require('amp.validator.validateString');
@@ -73,9 +77,22 @@ function isValidRegex(regex) {
 }
 
 /**
+ * Returns true if the regex has a group but is missing the corresponding
+ * Unicode group. For now this tests only for word character group (\\w) which
+ * must be followed by the Unicode equivalent group (\\p{L}\\p{N}_).
+ * @param {null|string} regex
+ * @return {boolean}
+ */
+function isMissingUnicodeGroup(regex) {
+  var wordGroupRegex = new RegExp("\\\\w(?!\\\\p{L}\\\\p{N}_)");
+  return wordGroupRegex.test(regex);
+}
+
+/**
  * Returns all html files underneath the testdata roots. This looks
  * both for feature_tests/*.html and for tests in extension directories.
- * E.g.: extensions/amp-accordion/0.1/test/*.html and
+ * E.g.: extensions/amp-accordion/0.1/test/*.html,
+ *       extensions/amp-sidebar/1.0/test/*.html, and
  *       testdata/feature_tests/amp_accordion.html.
  * @return {!Array<string>}
  */
@@ -84,9 +101,17 @@ function findHtmlFilesRelativeToTestdata() {
   for (const root of process.env['TESTDATA_ROOTS'].split(':')) {
     if (path.basename(root) === 'extensions') {
       for (const extension of readdir(root)) {
-        const testPath = path.join(extension, '0.1', 'test');
-        if (isdir(path.join(root, testPath))) {
-          testSubdirs.push({root: root, subdir: testPath});
+        const extensionFolder = path.join(root, extension);
+        if (!isdir(extensionFolder)) {
+          // Skip if not a folder
+          continue;
+        }
+        // Get all versions
+        for (const possibleVersion of readdir(extensionFolder)) {
+          const testPath = path.join(extension, possibleVersion, 'test');
+          if (isdir(path.join(root, testPath))) {
+            testSubdirs.push({root: root, subdir: testPath});
+          }
         }
       }
     } else {
@@ -110,6 +135,8 @@ function findHtmlFilesRelativeToTestdata() {
  * An AMP Validator test case. This constructor will load the AMP HTML file
  * and also find the adjacent .out file.
  * @constructor
+ * @param {string} ampHtmlFile
+ * @param {string=} opt_ampUrl
  */
 const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
   /** @type {string} */
@@ -160,22 +187,14 @@ ValidatorTestCase.prototype.run = function() {
   assert.fail('', '', message, '');
 };
 
-describe('ValidatorTestdata', () => {
-  it('reports data-amp-report-test values', () => {
-    const result = amp.validator.validateString(
-        '<!doctype lemur data-amp-report-test="foo">');
-    assertStrictEqual(
-        result.status, amp.validator.ValidationResult.Status.FAIL);
-    assertStrictEqual('foo', result.errors[0].dataAmpReportTestValue);
-  });
-});
-
 /**
  * A strict comparison between two values.
  * Note: Unfortunately assert.strictEqual has some drawbacks, including that
  * it truncates the provided arguments (and it's not configurable) and
  * with the Closure compiler, it requires a message argument to which
  * we'd always have to pass undefined. Too messy, so we roll our own.
+ * @param {*} expected
+ * @param {*} saw
  */
 function assertStrictEqual(expected, saw) {
   assert.ok(expected === saw, 'expected: ' + expected + ' saw: ' + saw);
@@ -197,10 +216,14 @@ describe('ValidatorOutput', () => {
         'http://google.com/foo.html#development=1');
     test.expectedOutputFile = null;
     test.expectedOutput = 'FAIL\n' +
-        'http://google.com/foo.html:28:3 The tag \'script\' is disallowed ' +
-        'except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]\n' +
-        'http://google.com/foo.html:29:3 The tag \'script\' is disallowed ' +
-        'except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]';
+        'http://google.com/foo.html:28:3 Only AMP runtime \'script\' tags ' +
+        'are allowed, and only in the document head. (see ' +
+        'https://www.ampproject.org/docs/reference/spec#html-tags) ' +
+        '[CUSTOM_JAVASCRIPT_DISALLOWED]\n' +
+        'http://google.com/foo.html:29:3 Only AMP runtime \'script\' tags ' +
+        'are allowed, and only in the document head. (see ' +
+        'https://www.ampproject.org/docs/reference/spec#html-tags) ' +
+        '[CUSTOM_JAVASCRIPT_DISALLOWED]';
     test.run();
   });
 });
@@ -237,7 +260,7 @@ describe('ValidatorCssLengthValidation', () => {
         'feature_tests/css_length.html:28:2 The author stylesheet specified ' +
         'in tag \'style amp-custom\' is too long - we saw 50001 bytes ' +
         'whereas the limit is 50000 bytes. ' +
-        '(see https://www.ampproject.org/docs/reference/spec.html' +
+        '(see https://www.ampproject.org/docs/reference/spec' +
         '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
@@ -253,7 +276,7 @@ describe('ValidatorCssLengthValidation', () => {
         'feature_tests/css_length.html:28:2 The author stylesheet specified ' +
         'in tag \'style amp-custom\' is too long - we saw 50002 bytes ' +
         'whereas the limit is 50000 bytes. ' +
-        '(see https://www.ampproject.org/docs/reference/spec.html' +
+        '(see https://www.ampproject.org/docs/reference/spec' +
         '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
@@ -359,8 +382,9 @@ describe('CssLength', () => {
 /**
  * Helper for ValidatorRulesMakeSense.
  * @param {!amp.validator.AttrSpec} attrSpec
+ * @param {!amp.validator.ValidatorRules} rules
  */
-function attrRuleShouldMakeSense(attrSpec) {
+function attrRuleShouldMakeSense(attrSpec, rules) {
   const attrSpecNameRegex = new RegExp('[^A-Z]+');
   // name
   it('attr_spec name defined', () => {
@@ -395,10 +419,34 @@ function attrRuleShouldMakeSense(attrSpec) {
          });
     }
   }
-  // blacklisted_value_regex
+  if (attrSpec.valueRegex !== null) {
+    it('value_regex valid', () => {
+      const regex = rules.internedStrings[-1 - attrSpec.valueRegex];
+      expect(isValidRegex(regex)).toBe(true);
+    });
+    it('value_regex must have unicode named groups', () => {
+      const regex = rules.internedStrings[-1 - attrSpec.valueRegex];
+      expect(isMissingUnicodeGroup(regex)).toBe(false);
+    });
+  }
+  if (attrSpec.valueRegexCasei !== null) {
+    it('value_regex_casei valid', () => {
+      const regex = rules.internedStrings[-1 - attrSpec.valueRegexCasei];
+      expect(isValidRegex(regex)).toBe(true);
+    });
+    it('value_regex_casei must have unicode named groups', () => {
+      const regex = rules.internedStrings[-1 - attrSpec.valueRegexCasei];
+      expect(isMissingUnicodeGroup(regex)).toBe(false);
+    });
+  }
   if (attrSpec.blacklistedValueRegex !== null) {
     it('blacklisted_value_regex valid', () => {
-      expect(isValidRegex(attrSpec.blacklistedValueRegex)).toBe(true);
+      const regex = rules.internedStrings[-1 - attrSpec.blacklistedValueRegex];
+      expect(isValidRegex(regex)).toBe(true);
+    });
+    it('blacklisted_value_regex must have unicode named groups', () => {
+      const regex = rules.internedStrings[-1 - attrSpec.blacklistedValueRegex];
+      expect(isMissingUnicodeGroup(regex)).toBe(false);
     });
   }
   // value_url must have at least one allowed protocol.
@@ -432,16 +480,17 @@ function attrRuleShouldMakeSense(attrSpec) {
       expect(attrSpec.mandatory).toBeDefined();
       expect(attrSpec.mandatory).toBe(true);
     });
-    it('value or value_casei defined when dispatch_key is true', () => {
-      expect((attrSpec.value !== null) || (attrSpec.valueCasei !== null))
-          .toBe(true);
+  }
+  // Value property names must be unique.
+  if (attrSpec.valueProperties !== null) {
+    var seenPropertySpecNames = {};
+    it('value_properties must be unique', () => {
+      for (const propertySpec of attrSpec.valueProperties.properties) {
+        expect(seenPropertySpecNames.hasOwnProperty(propertySpec.name))
+            .toBe(false);
+        seenPropertySpecNames[propertySpec.name] = 0;
+      }
     });
-    if (attrSpec.valueCasei !== null) {
-      it('value_casei must be lower case when dispatch_key is true', () => {
-        expect(attrSpec.valueCasei === attrSpec.valueCasei.toLowerCase())
-            .toBe(true);
-      });
-    }
   }
 }
 
@@ -454,11 +503,20 @@ describe('ValidatorRulesMakeSense', () => {
   it('tags defined', () => {
     expect(rules.tags.length).toBeGreaterThan(0);
   });
-  it('attr_lists defined', () => {
-    expect(rules.attrLists.length).toBeGreaterThan(0);
+  it('direct_attr_lists defined', () => {
+    expect(rules.directAttrLists.length).toBeGreaterThan(0);
+  });
+  it('global_attrs defined', () => {
+    expect(rules.globalAttrs.length).toBeGreaterThan(0);
+  });
+  it('amp_layout_attrs defined', () => {
+    expect(rules.ampLayoutAttrs.length).toBeGreaterThan(0);
   });
   it('min_validator_revision_required defined', () => {
     expect(rules.minValidatorRevisionRequired).toBeGreaterThan(0);
+  });
+  it('template_spec_url is set', () => {
+    expect(rules.templateSpecUrl === null).toBe(false);
   });
 
   // For verifying that all ReferencePoint::tag_spec_names will resolve to a
@@ -485,7 +543,11 @@ describe('ValidatorRulesMakeSense', () => {
     });
     // spec_name can't be empty and must be unique.
     it('unique spec_name or if none then unique tag_name', () => {
-      if (tagSpec.specName !== null) {
+      if (tagSpec.extensionSpec !== null) {
+        const specName = tagSpec.extensionSpec.name + ' extension .js script';
+        expect(specNameIsUnique.hasOwnProperty(specName)).toBe(false);
+        specNameIsUnique[specName] = 0;
+      } else if (tagSpec.specName !== null) {
         expect(specNameIsUnique.hasOwnProperty(tagSpec.specName)).toBe(false);
         specNameIsUnique[tagSpec.specName] = 0;
       } else {
@@ -494,9 +556,36 @@ describe('ValidatorRulesMakeSense', () => {
         tagWithoutSpecNameIsUnique[tagSpec.tagName] = 0;
       }
     });
-    if (tagSpec.tagName./*OK*/ startsWith('AMP-')) {
-      it('AMP- tags have html_format', () => {
-        expect(tagSpec.htmlFormat.length).toBeGreaterThan(0);
+    if ((tagSpec.tagName.indexOf('AMP-') === 0) &&
+        ((tagSpec.htmlFormat.length === 0) ||
+         (tagSpec.htmlFormat.indexOf(
+              amp.validator.TagSpec.HtmlFormat.AMP4ADS) !== -1))) {
+      // AMP4ADS Creative Format document is the source of this whitelist.
+      // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
+      const whitelistedAmp4AdsExtensions = {
+        'AMP-ACCORDION': 0,
+        'AMP-AD-EXIT': 0,
+        'AMP-ANALYTICS': 0,
+        'AMP-ANIM': 0,
+        'AMP-ANIMATION': 0,
+        'AMP-AUDIO': 0,
+        'AMP-CAROUSEL': 0,
+        'AMP-FIT-TEXT': 0,
+        'AMP-FONT': 0,
+        'AMP-FORM': 0,
+        'AMP-GWD-ANIMATION': 0,
+        'AMP-IMG': 0,
+        'AMP-PIXEL': 0,
+        'AMP-POSITION-OBSERVER': 0,
+        'AMP-SOCIAL-SHARE': 0,
+        'AMP-VIDEO': 0,
+        'AMP-YOUTUBE': 0
+      };
+      it(tagSpec.tagName + ' has html_format either explicitly or implicitly' +
+          ' set for AMP4ADS but ' + tagSpec.tagName + ' is not whitelisted' +
+          ' for AMP4ADS', () => {
+        expect(whitelistedAmp4AdsExtensions.hasOwnProperty(tagSpec.tagName))
+            .toBe(true);
       });
     }
     // mandatory_parent
@@ -520,11 +609,20 @@ describe('ValidatorRulesMakeSense', () => {
       expect(tagSpec.unique && tagSpec.uniqueWarning).toBe(false);
     });
 
-    // attr_specs
+    // attr_specs within tag.
     let seenDispatchKey = false;
     const attrNameIsUnique = {};
-    for (const attrSpec of tagSpec.attrs) {
-      attrRuleShouldMakeSense(attrSpec);
+    for (const attrSpecId of tagSpec.attrs) {
+      if (attrSpecId < 0) {
+        it('unique attr_name within tag_spec (simple attrs)', () => {
+          const attrName = rules.internedStrings[-1 - attrSpecId];
+          expect(attrNameIsUnique.hasOwnProperty(attrName)).toBe(false);
+          attrNameIsUnique[attrName] = 0;
+        });
+        continue;
+      }
+      const attrSpec = rules.attrs[attrSpecId];
+
       // attr_name must be unique within tag_spec (no duplicates).
       it('unique attr_spec within tag_spec', () => {
         expect(attrSpec.name).toBeDefined();
@@ -533,12 +631,54 @@ describe('ValidatorRulesMakeSense', () => {
       });
       // Special check that every <script> tag with a src attribute has a
       // whitelist check on the attribute value.
-      if (tagSpec.tagName === 'script' && attrSpec.name === 'src') {
+      if (tagSpec.tagName === 'SCRIPT' && attrSpec.name === 'src') {
         it('every <script> tag with a src attribute has a whitelist check',
            () => {
-             expect(attrSpec.value || attrSpec.valueRegex).toBe(true);
+             expect(attrSpec.value !== null ||
+                    attrSpec.valueRegex !== null).toBe(true);
            });
       }
+      // TagSpecs with an ExtensionSpec are extensions. We have a few
+      // additional checks for these.
+      if (tagSpec.extensionSpec !== null) {
+        const extensionSpec = tagSpec.extensionSpec;
+        it('extension must have a name field value', () => {
+          expect(extensionSpec.name).toBeDefined();
+        });
+        it('extension ' + extensionSpec.name + ' must have at least two ' +
+               'allowed_versions, latest and a numeric version, e.g `1.0`',
+           () => {
+             expect(extensionSpec.allowedVersions).toBeGreaterThan(1);
+           });
+        it('extension ' + extensionSpec.name + ' versions must be `latest` ' +
+               'or a numeric value',
+           () => {
+             for (const versionString of extensionSpec.allowedVersions) {
+               expect(versionString).toMatch(/^(latest|[0-9.])$/);
+             }
+             for (const versionString of extensionSpec.deprecatedVersions) {
+               expect(versionString).toMatch(/^(latest|[0-9.])$/);
+             }
+           });
+        it('extension ' + extensionSpec.name + ' deprecated_versions must be ' +
+               'subset of allowed_versions',
+           () => {
+             var allowedVersions = {};
+             for (const versionString of extensionSpec.allowedVersions) {
+               expect(versionString).toMatch(/^(latest|[0-9.])$/);
+             }
+             for (const versionString of extensionSpec.deprecatedVersions) {
+               expect(allowedVersions.hasOwnProperty(versionString)).toBe(true);
+             }
+           });
+        it('extension ' + extensionSpec.name + ' must include the ' +
+               'attr_list: "common-extension-attrs"` attr_list ',
+           () => {
+             expect(tagSpec.attrLists.length).toEqual(1);
+             expect(tagSpec.attrLists[0]).toEqual('common-extension-attrs');
+           });
+      }
+
       if (attrSpec.dispatchKey) {
         it('tag_spec can not have more than one dispatch_key', () => {
           expect(seenDispatchKey).toBe(false);
@@ -561,15 +701,18 @@ describe('ValidatorRulesMakeSense', () => {
         });
       }
       // blacklisted_cdata_regex
-      it('blacklisted_cdata_regex valid and error_message defined', () => {
-        for (const blacklistedCdataRegex of
-                 tagSpec.cdata.blacklistedCdataRegex) {
+      for (const blacklistedCdataRegex of tagSpec.cdata.blacklistedCdataRegex) {
+        it('blacklisted_cdata_regex valid and error_message defined', () => {
           usefulCdataSpec = true;
           expect(blacklistedCdataRegex.regex).toBeDefined();
           expect(isValidRegex(blacklistedCdataRegex.regex)).toBe(true);
           expect(blacklistedCdataRegex.errorMessage).toBeDefined();
-        }
-      });
+        });
+        it('blacklisted_cdata_regex must have unicode named groups', () => {
+          const regex = rules.internedStrings[-1 - blacklistedCdataRegex.regex];
+          expect(isMissingUnicodeGroup(regex)).toBe(false);
+        });
+      }
 
       // css_spec
       if (tagSpec.cdata.cssSpec !== null) {
@@ -606,14 +749,14 @@ describe('ValidatorRulesMakeSense', () => {
         });
       }
 
-      if (tagSpec.tagName === 'script' || tagSpec.tagName === 'style') {
+      if (tagSpec.tagName === 'SCRIPT' || tagSpec.tagName === 'STYLE') {
         it('script and style tags must have cdata rules', () => {
           expect(
               (tagSpec.cdata.blacklistedCdataRegex.length > 0) ||
               tagSpec.cdata.cdataRegex !== null ||
-              tagSpec.cdata.mandatoryCdata !== null)
+              tagSpec.cdata.mandatoryCdata !== null ||
+              tagSpec.cdata.cssSpec.validateKeyframes)
               .toBe(true);
-
         });
       }
       // cdata_regex and mandatory_cdata
@@ -623,6 +766,10 @@ describe('ValidatorRulesMakeSense', () => {
       }
       it('a cdata spec must be defined', () => {
         expect(usefulCdataSpec).toBe(true);
+      });
+      it('cdata_regex must have unicode named groups', () => {
+        const regex = rules.internedStrings[-1 - tagSpec.cdata.cdataRegex];
+        expect(isMissingUnicodeGroup(regex)).toBe(false);
       });
 
       // reference_points
@@ -635,19 +782,26 @@ describe('ValidatorRulesMakeSense', () => {
     }
   }
 
-  // attr_lists
-  const attrListNameIsUnique = {};
-  for (const attrList of rules.attrLists) {
-    it('unique attr_list name', () => {
-      expect(attrListNameIsUnique.hasOwnProperty(attrList.name)).toBe(false);
-      attrListNameIsUnique[attrList.name] = 0;
-    });
-    it('attr_list has attrs', () => {
-      expect(attrList.attrs.length).toBeGreaterThan(0);
-    });
-    for (const attrSpec of attrList.attrs) {
-      attrRuleShouldMakeSense(attrSpec);
+  // satisfies and requires need to match up
+  var allSatisfies = [];
+  var allRequires = [];
+  for (const tagSpec of rules.tags) {
+    for (const condition of tagSpec.requires) {
+      allRequires.push(condition);
     }
+    for (const condition of tagSpec.satisfies)
+      allSatisfies.push(condition);
+  }
+  sortAndUniquify(allSatisfies);
+  sortAndUniquify(allRequires);
+  it('all conditions are both required and satisfied', ()=> {
+    expect(subtractDiff(allSatisfies, allRequires)).toEqual([]);
+    expect(subtractDiff(allRequires, allSatisfies)).toEqual([]);
+  });
+
+  // attr_specs within rules.
+  for (const attrSpec of rules.attrs) {
+    attrRuleShouldMakeSense(attrSpec, rules);
   }
 
   // Verify that for every error code in our enum, we have exactly one format

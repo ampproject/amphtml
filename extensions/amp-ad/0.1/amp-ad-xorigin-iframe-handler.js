@@ -14,23 +14,32 @@
  * limitations under the License.
  */
 
-import {removeElement} from '../../../src/dom';
+import {CommonSignals} from '../../../src/common-signals';
+import {
+  IntersectionObserver,
+} from '../../../src/intersection-observer';
 import {
   SubscriptionApi,
   listenFor,
   listenForOncePromise,
   postMessageToWindows,
 } from '../../../src/iframe-helper';
-import {
-  IntersectionObserverApi,
-} from '../../../src/intersection-observer-polyfill';
-import {viewerForDoc} from '../../../src/viewer';
-import {dev, user} from '../../../src/log';
-import {timerFor} from '../../../src/timer';
+import {Services} from '../../../src/services';
+import {dev} from '../../../src/log';
+import {reportErrorToAnalytics} from '../../../src/error';
+import {dict} from '../../../src/utils/object';
 import {setStyle} from '../../../src/style';
-import {AdDisplayState} from './amp-ad-ui';
+import {getData, loadPromise} from '../../../src/event-helper';
+import {getHtml} from '../../../src/get-html';
+import {removeElement} from '../../../src/dom';
+import {isExperimentOn} from '../../../src/experiments';
+import {MessageType} from '../../../src/3p-frame-messaging';
+import {throttle} from '../../../src/utils/rate-limit';
 
-const TIMEOUT_VALUE = 10000;
+const VISIBILITY_TIMEOUT = 10000;
+
+const MIN_INABOX_POSITION_EVENT_INTERVAL = 100;
+
 
 export class AmpAdXOriginIframeHandler {
 
@@ -38,6 +47,8 @@ export class AmpAdXOriginIframeHandler {
    * @param {!./amp-ad-3p-impl.AmpAd3PImpl|!../../amp-a4a/0.1/amp-a4a.AmpA4A} baseInstance
    */
   constructor(baseInstance) {
+    /** @private {!Window} */
+    this.win_ = baseInstance.win;
 
     /** @private */
     this.baseInstance_ = baseInstance;
@@ -51,28 +62,40 @@ export class AmpAdXOriginIframeHandler {
     /** {?Element} iframe instance */
     this.iframe = null;
 
-    /** @private {?IntersectionObserverApi} */
-    this.intersectionObserverApi_ = null;
+    /** @private {?IntersectionObserver} */
+    this.intersectionObserver_ = null;
 
     /** @private {SubscriptionApi} */
     this.embedStateApi_ = null;
+
+    /** @private {?SubscriptionApi} */
+    this.inaboxPositionApi_ = null;
+
+    /** @private {boolean} */
+    this.isInaboxPositionApiInit_ = false;
+
+    /** @private {?SubscriptionApi} */
+    this.inaboxRequestPositionApi_ = null;
 
     /** @private {!Array<!Function>} functions to unregister listeners */
     this.unlisteners_ = [];
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(this.baseInstance_.getAmpDoc());
+    this.viewer_ = Services.viewerForDoc(this.baseInstance_.getAmpDoc());
 
-    /** @private {?Promise} */
-    this.adResponsePromise_ = null;
+    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(this.baseInstance_.getAmpDoc());
+
+    /** @private {boolean} */
+    this.sendPositionPending_ = false;
   }
+
 
   /**
    * Sets up listeners and iframe state for iframe containing ad creative.
    * @param {!Element} iframe
    * @param {boolean=} opt_isA4A when true do not listen to ad response
    * @return {!Promise} awaiting render complete promise
-   * @suppress {checkTypes}  // TODO(tdrl): Temporary, for lifecycleReporter.
    */
   init(iframe, opt_isA4A) {
     dev().assert(
@@ -80,96 +103,193 @@ export class AmpAdXOriginIframeHandler {
     this.iframe = iframe;
     this.iframe.setAttribute('scrolling', 'no');
     this.baseInstance_.applyFillContent(this.iframe);
+    const timer = Services.timerFor(this.baseInstance_.win);
 
     // Init IntersectionObserver service.
-    this.intersectionObserverApi_ = new IntersectionObserverApi(
+    this.intersectionObserver_ = new IntersectionObserver(
         this.baseInstance_, this.iframe, true);
 
     this.embedStateApi_ = new SubscriptionApi(
         this.iframe, 'send-embed-state', true,
         () => this.sendEmbedInfo_(this.baseInstance_.isInViewport()));
+
+    // To provide position to inabox.
+    if (isExperimentOn(this.win_, 'inabox-position-api')) {
+      this.inaboxPositionApi_ = new SubscriptionApi(
+          this.iframe, MessageType.SEND_POSITIONS, true, () => {
+            // TODO(@zhouyx): Make sendPosition_ only send to message origin iframe
+            this.sendPosition_();
+            this.registerPosition_();
+          });
+    };
+
     // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
     // iframe.
     listenForOncePromise(this.iframe, 'entity-id', true)
         .then(info => {
-          this.element_.creativeId = info.data.id;
+          this.element_.creativeId = info.data['id'];
         });
+
+    this.unlisteners_.push(listenFor(this.iframe, 'get-html',
+        (info, source, origin) => {
+          if (!this.iframe) {
+            return;
+          }
+
+          const selector = info['selector'];
+          const attributes = info['attributes'];
+          const messageId = info['messageId'];
+          let content = '';
+
+          if (this.element_.hasAttribute('data-html-access-allowed')) {
+            content = getHtml(this.baseInstance_.win, selector, attributes);
+          }
+
+          postMessageToWindows(
+              this.iframe, [{win: source, origin}],
+              'get-html-result', dict({
+                'content': content,
+                'messageId': messageId,
+              }), true
+          );
+        }, true, false));
 
     // Install iframe resize API.
     this.unlisteners_.push(listenFor(this.iframe, 'embed-size',
         (data, source, origin) => {
-          this.updateSize_(data.height, data.width, source, origin);
+          this.handleResize_(data['height'], data['width'], source, origin);
         }, true, true));
 
     this.unlisteners_.push(this.viewer_.onVisibilityChanged(() => {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
     }));
 
-    if (opt_isA4A) {
-      // A4A writes creative frame directly to page therefore does not expect
-      // post message to unset visibility hidden
-      this.element_.appendChild(this.iframe);
-      return Promise.resolve();
+    this.unlisteners_.push(listenFor(this.iframe,
+        MessageType.USER_ERROR_IN_IFRAME, data => {
+          this.userErrorForAnalytics_(data['message']);
+        }, true, true /* opt_includingNestedWindows */));
+
+    // Iframe.onload normally called by the Ad after full load.
+    const iframeLoadPromise = loadPromise(this.iframe).then(() => {
+      // Wait just a little to allow `no-content` message to arrive.
+      if (this.iframe) {
+        // Chrome does not reflect the iframe readystate.
+        this.iframe.readyState = 'complete';
+      }
+      return timer.promise(10);
+    });
+    if (this.baseInstance_.emitLifecycleEvent) {
+      // Only set up a load listener if we know that we can send lifecycle
+      // messages.
+      iframeLoadPromise.then(() => {
+        this.baseInstance_.emitLifecycleEvent('xDomIframeLoaded');
+      });
     }
 
-    // Install API that listen to ad response
-    if (this.baseInstance_.config
-        && this.baseInstance_.config.renderStartImplemented) {
-      // If support render-start, create a race between render-start no-content
-      this.adResponsePromise_ = listenForOncePromise(this.iframe,
-        ['render-start', 'no-content'], true).then(info => {
-          const data = info.data;
-          if (data.type == 'render-start') {
-            this.renderStart_(info);
-          } else {
-            this.noContent_();
-          }
-        });
+    // Calculate render-start and no-content signals.
+    let renderStartResolve;
+    const renderStartPromise = new Promise(resolve => {
+      renderStartResolve = resolve;
+    });
+    let noContentResolve;
+    const noContentPromise = new Promise(resolve => {
+      noContentResolve = resolve;
+    });
+    if (this.baseInstance_.config &&
+            this.baseInstance_.config.renderStartImplemented) {
+      // When `render-start` is supported, these signals are mutually
+      // exclusive. Whichever arrives first wins.
+      listenForOncePromise(this.iframe,
+          ['render-start', 'no-content'], true).then(info => {
+            const data = info.data;
+            if (data['type'] == 'render-start') {
+              this.renderStart_(info);
+              renderStartResolve();
+            } else {
+              this.noContent_();
+              noContentResolve();
+            }
+          });
     } else {
-      // If NOT support render-start, listen to bootstrap-loaded no-content
-      // respectively
-      this.adResponsePromise_ = listenForOncePromise(this.iframe,
-        'bootstrap-loaded', true);
-      listenForOncePromise(this.iframe, 'no-content', true)
-          .then(() => this.noContent_());
+      // If `render-start` is not supported, listen to `bootstrap-loaded`.
+      // This will avoid keeping the Ad empty until it's fully loaded, which
+      // could be a long time.
+      listenForOncePromise(this.iframe, 'bootstrap-loaded', true).then(() => {
+        this.renderStart_();
+        renderStartResolve();
+      });
+      // Likewise, no-content is observed here. However, it's impossible to
+      // assure exclusivity between `no-content` and `bootstrap-loaded` b/c
+      // `bootstrap-loaded` always arrives first.
+      listenForOncePromise(this.iframe, 'no-content', true).then(() => {
+        this.noContent_();
+        noContentResolve();
+      });
     }
 
-    // Set iframe initially hidden which will be removed on load event +
-    // post message.
-    setStyle(this.iframe, 'visibility', 'hidden');
+    // Wait for initial load signal. Notice that this signal is not
+    // used to resolve the final layout promise because iframe may still be
+    // consuming significant network and CPU resources.
+    listenForOncePromise(this.iframe, CommonSignals.INI_LOAD, true).then(() => {
+      // TODO(dvoytenko, #7788): ensure that in-a-box "ini-load" message is
+      // received here as well.
+      this.baseInstance_.signals().signal(CommonSignals.INI_LOAD);
+    });
 
     this.element_.appendChild(this.iframe);
-    return timerFor(this.baseInstance_.win).timeoutPromise(TIMEOUT_VALUE,
-        this.adResponsePromise_,
-        'timeout waiting for ad response').catch(e => {
-          this.noContent_();
-          user().warn('AMP-AD', e);
-        }).then(() => {
-          if (this.iframe) {
-            setStyle(this.iframe, 'visibility', '');
-          }
-        });
+    if (opt_isA4A) {
+      // A4A writes creative frame directly to page once creative is received
+      // and therefore does not require render start message so attach and
+      // impose no loader delay.  Network is using renderStart or
+      // bootstrap-loaded to indicate ad request was sent, either way we know
+      // that occurred for Fast Fetch.
+      this.renderStart_();
+      renderStartResolve();
+    } else {
+      // Set iframe initially hidden which will be removed on render-start or
+      // load, whichever is earlier.
+      setStyle(this.iframe, 'visibility', 'hidden');
+      this.baseInstance_.lifecycleReporter.addPingsForVisibility(this.element_);
+    }
+
+    Promise.race([
+      renderStartPromise,
+      iframeLoadPromise,
+      timer.promise(VISIBILITY_TIMEOUT),
+    ]).then(() => {
+      if (this.iframe) {
+        setStyle(this.iframe, 'visibility', '');
+        if (this.baseInstance_.emitLifecycleEvent) {
+          this.baseInstance_.emitLifecycleEvent('adSlotUnhidden');
+        }
+      }
+    });
+
+    // The actual ad load is eariliest of iframe.onload event and no-content.
+    return Promise.race([iframeLoadPromise, noContentPromise]);
   }
 
   /**
    * callback functon on receiving render-start
-   * @param {!Object} info
+   * @param {{data: !JsonObject}=} opt_info
    * @private
    */
-  renderStart_(info) {
-    const data = info.data;
-    this.uiHandler_.setDisplayState(AdDisplayState.LOADED_RENDER_START);
-    this.updateSize_(data.height, data.width,
-                info.source, info.origin);
-    if (this.baseInstance_.lifecycleReporter) {
-      this.baseInstance_.lifecycleReporter.sendPing(
-          'renderCrossDomainStart');
+  renderStart_(opt_info) {
+    this.baseInstance_.renderStarted();
+    if (!opt_info) {
+      return;
+    }
+    const data = getData(opt_info);
+    this.handleResize_(
+        data['height'], data['width'], opt_info['source'], opt_info['origin']);
+    if (this.baseInstance_.emitLifecycleEvent) {
+      this.baseInstance_.emitLifecycleEvent('renderCrossDomainStart');
     }
   }
 
   /**
-   * Cleans up the listeners on the cross domain ad iframe.
-   * And free the iframe resource
+   * Cleans up the listeners on the cross domain ad iframe and frees the
+   * iframe resource.
    * @param {boolean=} opt_keep
    */
   freeXOriginIframe(opt_keep) {
@@ -195,7 +315,7 @@ export class AmpAdXOriginIframeHandler {
       return;
     }
     this.freeXOriginIframe(this.iframe.name.indexOf('_master') >= 0);
-    this.uiHandler_.setDisplayState(AdDisplayState.LOADED_NO_CONTENT);
+    this.uiHandler_.applyNoContentUI();
   }
 
   /**
@@ -209,9 +329,13 @@ export class AmpAdXOriginIframeHandler {
       this.embedStateApi_.destroy();
       this.embedStateApi_ = null;
     }
-    if (this.intersectionObserverApi_) {
-      this.intersectionObserverApi_.destroy();
-      this.intersectionObserverApi_ = null;
+    if (this.inaboxPositionApi_) {
+      this.inaboxPositionApi_.destroy();
+      this.inaboxPositionApi_ = null;
+    }
+    if (this.intersectionObserver_) {
+      this.intersectionObserver_.destroy();
+      this.intersectionObserver_ = null;
     }
   }
 
@@ -225,27 +349,20 @@ export class AmpAdXOriginIframeHandler {
    * @param {string} origin
    * @private
    */
-  updateSize_(height, width, source, origin) {
-    // Calculate new width and height of the container to include the padding.
-    // If padding is negative, just use the requested width and height directly.
-    let newHeight, newWidth;
-    height = parseInt(height, 10);
-    if (!isNaN(height)) {
-      newHeight = Math.max(this.element_./*OK*/offsetHeight +
-          height - this.iframe./*OK*/offsetHeight, height);
-    }
-    width = parseInt(width, 10);
-    if (!isNaN(width)) {
-      newWidth = Math.max(this.element_./*OK*/offsetWidth +
-          width - this.iframe./*OK*/offsetWidth, width);
-    }
-    if (newHeight !== undefined || newWidth !== undefined) {
-      this.baseInstance_.attemptChangeSize(newHeight, newWidth).then(() => {
-        this.sendEmbedSizeResponse_(
-          true /* success */, newWidth, newHeight, source, origin);
-      }, () => this.sendEmbedSizeResponse_(
-          false /* success */, newWidth, newHeight, source, origin));
-    }
+  handleResize_(height, width, source, origin) {
+    this.baseInstance_.getVsync().mutate(() => {
+      if (!this.iframe) {
+        // iframe can be cleanup before vsync.
+        return;
+      }
+      const iframeHeight = this.iframe./*OK*/offsetHeight;
+      const iframeWidth = this.iframe./*OK*/offsetWidth;
+      this.uiHandler_.updateSize(height, width, iframeHeight,
+          iframeWidth).then(info => {
+            this.sendEmbedSizeResponse_(info.success,
+                info.newWidth, info.newHeight, source, origin);
+          }, () => {});
+    });
   }
 
   /**
@@ -267,7 +384,10 @@ export class AmpAdXOriginIframeHandler {
         this.iframe,
         [{win: source, origin}],
         success ? 'embed-size-changed' : 'embed-size-denied',
-        {requestedWidth, requestedHeight},
+        dict({
+          'requestedWidth': requestedWidth,
+          'requestedHeight': requestedHeight,
+        }),
         true);
   }
 
@@ -279,10 +399,62 @@ export class AmpAdXOriginIframeHandler {
     if (!this.embedStateApi_) {
       return;
     }
-    this.embedStateApi_.send('embed-state', {
-      inViewport,
-      pageHidden: !this.viewer_.isVisible(),
+    this.embedStateApi_.send('embed-state', dict({
+      'inViewport': inViewport,
+      'pageHidden': !this.viewer_.isVisible(),
+    }));
+  }
+
+  /**
+   * Retrieve iframe position entry in next animation frame.
+   * @private
+   */
+  getIframePositionPromise_() {
+    return this.viewport_.getClientRectAsync(
+        dev().assertElement(this.iframe)).then(position => {
+          dev().assert(position,
+              'element clientRect should intersects with root clientRect');
+          const viewport = this.viewport_.getRect();
+          return dict({
+            'targetRect': position,
+            'viewportRect': viewport,
+          });
+        });
+  }
+
+  /** @private */
+  sendPosition_() {
+    if (this.sendPositionPending_) {
+      // Only send once in single animation frame.
+      return;
+    }
+
+    this.sendPositionPending_ = true;
+    this.getIframePositionPromise_().then(position => {
+      this.sendPositionPending_ = false;
+      this.inaboxPositionApi_.send(MessageType.POSITION, position);
     });
+  }
+
+  /** @private */
+  registerPosition_() {
+    if (this.isInaboxPositionApiInit_) {
+      // only register to viewport scroll/resize once
+      return;
+    }
+
+    this.isInaboxPositionApiInit_ = true;
+    // Send window scroll/resize event to viewport.
+    this.unlisteners_.push(this.viewport_.onScroll(throttle(this.win_, () => {
+      this.getIframePositionPromise_().then(position => {
+        this.inaboxPositionApi_.send(MessageType.POSITION, position);
+      });
+    }, MIN_INABOX_POSITION_EVENT_INTERVAL)));
+    this.unlisteners_.push(this.viewport_.onResize(() => {
+      this.getIframePositionPromise_().then(position => {
+        this.inaboxPositionApi_.send(MessageType.POSITION, position);
+      });
+    }));
   }
 
   /**
@@ -290,8 +462,8 @@ export class AmpAdXOriginIframeHandler {
    * @param {boolean} inViewport
    */
   viewportCallback(inViewport) {
-    if (this.intersectionObserverApi_) {
-      this.intersectionObserverApi_.onViewportCallback(inViewport);
+    if (this.intersectionObserver_) {
+      this.intersectionObserver_.onViewportCallback(inViewport);
     }
     this.sendEmbedInfo_(inViewport);
   }
@@ -303,8 +475,20 @@ export class AmpAdXOriginIframeHandler {
   onLayoutMeasure() {
     // When the framework has the need to remeasure us, our position might
     // have changed. Send an intersection record if needed.
-    if (this.intersectionObserverApi_) {
-      this.intersectionObserverApi_.fire();
+    if (this.intersectionObserver_) {
+      this.intersectionObserver_.fire();
+    }
+  }
+
+  /**
+   * @param {string} message
+   * @private
+   */
+  userErrorForAnalytics_(message) {
+    if (typeof message == 'string') {
+      const e = new Error(message);
+      e.name = '3pError';
+      reportErrorToAnalytics(e, this.baseInstance_.win);
     }
   }
 }

@@ -24,8 +24,8 @@
 export class Observable {
 
   constructor() {
-    /** @const {!Array<function(TYPE)>} */
-    this.handlers_ = [];
+    /** @type {?Array<function(TYPE)>} */
+    this.handlers_ = null;
   }
 
   /**
@@ -34,6 +34,9 @@ export class Observable {
    * @return {!UnlistenDef}
    */
   add(handler) {
+    if (!this.handlers_) {
+      this.handlers_ = [];
+    }
     this.handlers_.push(handler);
     return () => {
       this.remove(handler);
@@ -45,6 +48,9 @@ export class Observable {
    * @param {function(TYPE)} handler Observer's instance.
    */
   remove(handler) {
+    if (!this.handlers_) {
+      return;
+    }
     const index = this.handlers_.indexOf(handler);
     if (index > -1) {
       this.handlers_.splice(index, 1);
@@ -55,6 +61,9 @@ export class Observable {
    * Removes all observers.
    */
   removeAll() {
+    if (!this.handlers_) {
+      return;
+    }
     this.handlers_.length = 0;
   }
 
@@ -63,6 +72,9 @@ export class Observable {
    * @param {TYPE=} opt_event
    */
   fire(opt_event) {
+    if (!this.handlers_) {
+      return;
+    }
     const handlers = this.handlers_;
     for (let i = 0; i < handlers.length; i++) {
       const handler = handlers[i];
@@ -75,6 +87,9 @@ export class Observable {
    * @return {number}
    */
   getHandlerCount() {
+    if (!this.handlers_) {
+      return 0;
+    }
     return this.handlers_.length;
   }
 }

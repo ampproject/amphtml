@@ -1,0 +1,3 @@
+FAIL
+amp-izlesene/0.1/test/validator-amp-izlesene.html:42:2 The attribute 'data-videoid' in tag 'amp-izlesene' is set to the invalid value 'something else'. (see https://www.ampproject.org/docs/reference/components/amp-izlesene) [AMP_TAG_PROBLEM]
+amp-izlesene/0.1/test/validator-amp-izlesene.html:45:2 The mandatory attribute 'data-videoid' is missing in tag 'amp-izlesene'. (see https://www.ampproject.org/docs/reference/components/amp-izlesene) [AMP_TAG_PROBLEM]

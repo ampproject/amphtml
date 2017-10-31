@@ -31,11 +31,10 @@
  */
 
 import {BaseSlides} from '../base-slides';
-import * as sinon from 'sinon';
 
-describe('BaseSlides', () => {
 
-  let sandbox;
+describes.fakeWin('BaseSlides', {amp: true}, env => {
+  let win, doc;
   let buildSlidesSpy;
   let onViewportCallbackSpy;
   let hasPrevSpy;
@@ -52,7 +51,8 @@ describe('BaseSlides', () => {
 
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
+    win = env.win;
+    doc = win.document;
     buildSlidesSpy = sandbox.spy();
     onViewportCallbackSpy = sandbox.spy();
     hasPrevSpy = sandbox.spy();
@@ -70,13 +70,9 @@ describe('BaseSlides', () => {
         sandbox.spy(BaseSlides.prototype, 'onViewportCallback');
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
-
 
   function setElement(options) {
-    const element = document.createElement('div');
+    const element = doc.createElement('div');
     if (options.loop) {
       element.setAttribute('loop', '');
     }
@@ -129,9 +125,9 @@ describe('BaseSlides', () => {
     expect(carouselLoopOnly.shouldLoop).to.be.true;
     expect(carouselLoopOnly.shouldAutoplay_).to.be.false;
     expect(setupAutoplaySpy).to.not.have.been.called;
-    expect(buildButtonsSpy.callCount).to.equal(1);
-    expect(setupGesturesSpy.callCount).to.equal(1);
-    expect(setControlsStateSpy.callCount).to.equal(1);
+    expect(buildButtonsSpy).to.be.calledOnce;
+    expect(setupGesturesSpy).to.be.calledOnce;
+    expect(setControlsStateSpy).to.be.calledOnce;
 
     const carouselAutoplayOnly = new TestCarousel(setElement({
       autoplay: true,
@@ -142,9 +138,9 @@ describe('BaseSlides', () => {
     expect(carouselAutoplayOnly.shouldLoop).to.be.true;
     expect(carouselAutoplayOnly.shouldAutoplay_).to.be.true;
     expect(setupAutoplaySpy).to.have.been.called;
-    expect(buildButtonsSpy.callCount).to.equal(2);
-    expect(setupGesturesSpy.callCount).to.equal(2);
-    expect(setControlsStateSpy.callCount).to.equal(2);
+    expect(buildButtonsSpy).to.have.callCount(2);
+    expect(setupGesturesSpy).to.have.callCount(2);
+    expect(setControlsStateSpy).to.have.callCount(2);
 
     const carouselAutoplayWithLoop = new TestCarousel(setElement({
       loop: true,
@@ -155,10 +151,10 @@ describe('BaseSlides', () => {
 
     expect(carouselAutoplayWithLoop.shouldLoop).to.be.true;
     expect(carouselAutoplayWithLoop.shouldAutoplay_).to.be.true;
-    expect(setupAutoplaySpy.callCount).to.equal(2);
-    expect(buildButtonsSpy.callCount).to.equal(3);
-    expect(setupGesturesSpy.callCount).to.equal(3);
-    expect(setControlsStateSpy.callCount).to.equal(3);
+    expect(setupAutoplaySpy).to.have.callCount(2);
+    expect(buildButtonsSpy).to.have.callCount(3);
+    expect(setupGesturesSpy).to.have.callCount(3);
+    expect(setControlsStateSpy).to.have.callCount(3);
   });
 
   it('should handle viewportCallback when in viewport', () => {

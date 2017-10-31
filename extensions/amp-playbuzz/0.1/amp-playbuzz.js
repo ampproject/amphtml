@@ -18,10 +18,13 @@
 /**
  * @fileoverview Embeds an playbuzz item.
  * The src attribute can be easily copied from a normal playbuzz URL.
+ * data-item supports item id which can be taken from the item's embed code
+ * in case both are present data-item will be used
  * Example:
  * <code>
     <amp-playbuzz
         src="http://www.playbuzz.com/perezhilton/poll-which-presidential-candidate-did-ken-bone-vote-for"
+        data-item="a6aa5a14-8888-4618-b2e3-fe6a30d8c51b"
         layout="responsive"
         height="300"
         width="300"
@@ -39,11 +42,11 @@ import {CSS} from '../../../build/amp-playbuzz-0.1.css.js';
 import {logo, showMoreArrow} from './images';
 import * as utils from './utils';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {dict} from '../../../src/utils/object';
 import {removeElement} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
 import * as events from '../../../src/event-helper';
-import {postMessage} from '../../../src/iframe-helper';
 import {
   parseUrl,
   removeFragment,
@@ -65,9 +68,6 @@ class AmpPlaybuzz extends AMP.BaseElement {
     /** @private {?Promise} */
     this.iframePromise_ = null;
 
-    /** @private {?string} */
-    this.item_ = '';
-
     /** @private {?number} */
     this.itemHeight_ = 300; //default
 
@@ -83,14 +83,17 @@ class AmpPlaybuzz extends AMP.BaseElement {
     /** @private {?boolean} */
     this.iframeLoaded_ = false;
 
-    /** @private {Array.<function>} */
+    /** @private {Array<Function>} */
     this.unlisteners_ = [];
+
+    /** @private {string}  */
+    this.iframeSrcUrl_ = '';
   }
   /**
    * @override
    */
   preconnectCallback() {
-    this.preconnect.url(this.item_);
+    this.preconnect.url(this.iframeSrcUrl_);
   }
 
   /** @override */
@@ -103,13 +106,23 @@ class AmpPlaybuzz extends AMP.BaseElement {
     // EXPERIMENT
     // AMP.toggleExperiment(EXPERIMENT, true); //for dev
     user().assert(isExperimentOn(this.win, EXPERIMENT),
-      `Enable ${EXPERIMENT} experiment`);
+        `Enable ${EXPERIMENT} experiment`);
 
     const e = this.element;
+    const src = e.getAttribute('src');
+    const itemId = e.getAttribute('data-item');
 
-    this.item_ = assertAbsoluteHttpOrHttpsUrl(e.getAttribute('src'));
+    user().assert(src || itemId,
+        'Either src or data-item attribute is required for <amp-playbuzz> %s',
+        this.element);
+
+    if (src) {
+      assertAbsoluteHttpOrHttpsUrl(src);
+    }
+
     const parsedHeight = parseInt(e.getAttribute('height'), 10);
 
+    this.iframeSrcUrl_ = utils.composeItemSrcUrl(src, itemId);
     this.itemHeight_ = isNaN(parsedHeight) ? this.itemHeight_ : parsedHeight;
     this.displayItemInfo_ = e.getAttribute('data-item-info') === 'true';
     this.displayShareBar_ = e.getAttribute('data-share-buttons') === 'true';
@@ -130,9 +143,10 @@ class AmpPlaybuzz extends AMP.BaseElement {
     return placeholder;
   }
 
+  /** @param {!JsonObject} eventData */
   notifyIframe_(eventData) {
     const data = JSON.stringify(eventData);
-    postMessage(this.iframe_, 'onMessage', data, '*', false);
+    this.iframe_.contentWindow./*OK*/postMessage(data, '*');
   }
   /**
    *
@@ -163,13 +177,14 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
     const iframe = this.element.ownerDocument.createElement('iframe');
     this.iframe_ = iframe;
+    iframe.setAttribute('scrolling', 'no');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = this.generateEmbedSourceUrl_();
 
     this.listenToPlaybuzzItemMessage_('resize_height',
-      utils.debounce(this.itemHeightChanged_.bind(this), 100));
+        utils.debounce(this.itemHeightChanged_.bind(this), 100));
 
     this.element.appendChild(this.getOverflowElement_());
 
@@ -181,7 +196,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
       this.attemptChangeHeight(this.itemHeight_).catch(() => {/* die */ });
 
       const unlisten = this.getViewport().onChanged(
-        this.sendScrollDataToItem_.bind(this));
+          this.sendScrollDataToItem_.bind(this));
       this.unlisteners_.push(unlisten);
     }.bind(this));
   }
@@ -194,16 +209,13 @@ class AmpPlaybuzz extends AMP.BaseElement {
     const loaderImage = createElement('img', 'pb_feed_anim_mask');
     loaderImage.src = logo;
 
-    const loaderText = createElement('div', 'pb_feed_loading_text');
-    loaderText.textContent = 'Loading...';
-
     const loadingPlaceholder =
       createElement('div', 'pb_feed_placeholder_container',
-        createElement('div', 'pb_feed_placeholder_inner',
-          createElement('div', 'pb_feed_placeholder_content', [
-            createElement('div', 'pb_feed_placeholder_preloader', loaderImage),
-            loaderText,
-          ])));
+          createElement('div', 'pb_feed_placeholder_inner',
+              createElement('div', 'pb_feed_placeholder_content',
+                  createElement('div', 'pb_feed_placeholder_preloader',
+                      loaderImage)
+          )));
 
     return loadingPlaceholder;
   }
@@ -227,12 +239,12 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
   /**
    * @param {string} messageName
-   * @param {function} handler
+   * @param {Function} handler
    */
   listenToPlaybuzzItemMessage_(messageName, handler) {
     const unlisten = events.listen(this.win, 'message',
-      event => utils.handleMessageByName(this.iframe_,
-        event, messageName, handler));
+        event => utils.handleMessageByName(this.iframe_,
+            event, messageName, handler));
     this.unlisteners_.push(unlisten);
   }
 
@@ -243,11 +255,10 @@ class AmpPlaybuzz extends AMP.BaseElement {
    *
    */
   generateEmbedSourceUrl_() {
-    const itemSrc = parseUrl(this.item_);
     const winUrl = this.win.location;
     const params = {
-      itemUrl: removeFragment(itemSrc.href).replace(itemSrc.protocol, ''), //remove scheme (cors) & fragment
-      relativeUrl: itemSrc.pathname,
+      itemUrl: this.iframeSrcUrl_,
+      relativeUrl: parseUrl(this.iframeSrcUrl_).pathname,
       displayItemInfo: this.displayItemInfo_,
       displayShareBar: this.displayShareBar_,
       displayComments: this.displayComments_,
@@ -264,12 +275,12 @@ class AmpPlaybuzz extends AMP.BaseElement {
       return;
     }
 
-    const scrollingData = {
-      event: 'scroll',
-      windowHeight: changeEvent.height,
-      scroll: changeEvent.top,
-      offsetTop: this.getLayoutBox().top,
-    };
+    const scrollingData = dict({
+      'event': 'scroll',
+      'windowHeight': changeEvent.height,
+      'scroll': changeEvent.top,
+      'offsetTop': this.getLayoutBox().top,
+    });
 
     this.notifyIframe_(scrollingData);
   }
@@ -293,6 +304,9 @@ class AmpPlaybuzz extends AMP.BaseElement {
     }
     return true;  // Call layoutCallback again.
   }
-};
+}
 
-AMP.registerElement('amp-playbuzz', AmpPlaybuzz, CSS);
+
+AMP.extension('amp-playbuzz', '0.1', AMP => {
+  AMP.registerElement('amp-playbuzz', AmpPlaybuzz, CSS);
+});

@@ -15,8 +15,10 @@
  */
 
 import {dev} from './log';
+import {dict} from './utils/object';
 import {cssEscape} from '../third_party/css-escape/css-escape';
-import {toArray} from './types';
+import {startsWith} from './string';
+import {toWin} from './types';
 
 const HTML_ESCAPE_CHARS = {
   '&': '&amp;',
@@ -28,6 +30,13 @@ const HTML_ESCAPE_CHARS = {
 };
 const HTML_ESCAPE_REGEX = /(&|<|>|"|'|`)/g;
 
+/** @const {string} */
+export const UPGRADE_TO_CUSTOMELEMENT_PROMISE =
+    '__AMP_UPG_PRM';
+
+/** @const {string} */
+export const UPGRADE_TO_CUSTOMELEMENT_RESOLVER =
+    '__AMP_UPG_RES';
 
 /**
  * Waits until the child element is constructed. Once the child is found, the
@@ -42,7 +51,7 @@ export function waitForChild(parent, checkFunc, callback) {
     return;
   }
   /** @const {!Window} */
-  const win = parent.ownerDocument.defaultView;
+  const win = toWin(parent.ownerDocument.defaultView);
   if (win.MutationObserver) {
     /** @const {MutationObserver} */
     const observer = new win.MutationObserver(() => {
@@ -138,20 +147,64 @@ export function copyChildren(from, to) {
 }
 
 /**
- * Create a new element on document with specified tagName and attributes.
- * @param {!Document} doc
- * @param {string} tagName
- * @param {!Object<string, string>} attributes
+ * Add attributes to an element.
+ * @param {!Element} element
+ * @param {!JsonObject<string, string>} attributes
  * @return {!Element} created element
  */
-export function createElementWithAttributes(doc, tagName, attributes) {
-  const element = doc.createElement(tagName);
+export function addAttributesToElement(element, attributes) {
   for (const attr in attributes) {
     element.setAttribute(attr, attributes[attr]);
   }
   return element;
 }
 
+/**
+ * Create a new element on document with specified tagName and attributes.
+ * @param {!Document} doc
+ * @param {string} tagName
+ * @param {!JsonObject<string, string>} attributes
+ * @return {!Element} created element
+ */
+export function createElementWithAttributes(doc, tagName, attributes) {
+  const element = doc.createElement(tagName);
+  return addAttributesToElement(element, attributes);
+}
+
+/**
+ * Returns true if node is connected (attached).
+ * @param {!Node} node
+ * @return {boolean}
+ * @see https://dom.spec.whatwg.org/#connected
+ */
+export function isConnectedNode(node) {
+  // "An element is connected if its shadow-including root is a document."
+  let n = node;
+  do {
+    n = rootNodeFor(n);
+    if (n.host) {
+      n = n.host;
+    } else {
+      break;
+    }
+  } while (true);
+  return n.nodeType === Node.DOCUMENT_NODE;
+}
+
+/**
+ * Returns the root for a given node. Does not cross shadow DOM boundary.
+ * @param {!Node} node
+ * @return {!Node}
+ */
+export function rootNodeFor(node) {
+  if (Node.prototype.getRootNode) {
+    // Type checker says `getRootNode` may return null.
+    return node.getRootNode() || node;
+  }
+  let n;
+  for (n = node; !!n.parentNode; n = n.parentNode) {}
+  return n;
+}
 
 /**
  * Finds the closest element that satisfies the callback from this element
@@ -225,7 +278,7 @@ export function closestBySelector(element, selector) {
  * Checks if the given element matches the selector
  * @param  {!Element} el The element to verify
  * @param  {!string} selector The selector to check against
-y * @return {boolean} True if the element matched the selector. False otherwise
+ * @return {boolean} True if the element matched the selector. False otherwise.
  */
 export function matches(el, selector) {
   const matcher = el.matches ||
@@ -241,7 +294,7 @@ export function matches(el, selector) {
 
 /**
  * Finds the first descendant element with the specified name.
- * @param {!Element} element
+ * @param {!Element|!Document|!ShadowRoot} element
  * @param {string} tagName
  * @return {?Element}
  */
@@ -354,15 +407,7 @@ function isScopeSelectorSupported(parent) {
  * @return {?Element}
  */
 export function childElementByAttr(parent, attr) {
-  if (scopeSelectorSupported == null) {
-    scopeSelectorSupported = isScopeSelectorSupported(parent);
-  }
-  if (scopeSelectorSupported) {
-    return parent.querySelector(':scope > [' + attr + ']');
-  }
-  return childElement(parent, el => {
-    return el.hasAttribute(attr);
-  });
+  return scopedQuerySelector(parent, `> [${attr}]`);
 }
 
 
@@ -383,18 +428,10 @@ export function lastChildElementByAttr(parent, attr) {
  * Finds all child elements that has the specified attribute.
  * @param {!Element} parent
  * @param {string} attr
- * @return {!Array<!Element>}
+ * @return {!NodeList<!Element>}
  */
 export function childElementsByAttr(parent, attr) {
-  if (scopeSelectorSupported == null) {
-    scopeSelectorSupported = isScopeSelectorSupported(parent);
-  }
-  if (scopeSelectorSupported) {
-    return toArray(parent.querySelectorAll(':scope > [' + attr + ']'));
-  }
-  return childElements(parent, el => {
-    return el.hasAttribute(attr);
-  });
+  return scopedQuerySelectorAll(parent, `> [${attr}]`);
 }
 
 
@@ -405,16 +442,7 @@ export function childElementsByAttr(parent, attr) {
  * @return {?Element}
  */
 export function childElementByTag(parent, tagName) {
-  if (scopeSelectorSupported == null) {
-    scopeSelectorSupported = isScopeSelectorSupported(parent);
-  }
-  if (scopeSelectorSupported) {
-    return parent.querySelector(':scope > ' + tagName);
-  }
-  tagName = tagName.toUpperCase();
-  return childElement(parent, el => {
-    return el.tagName == tagName;
-  });
+  return scopedQuerySelector(parent, `> ${tagName}`);
 }
 
 
@@ -422,19 +450,58 @@ export function childElementByTag(parent, tagName) {
  * Finds all child elements with the specified tag name.
  * @param {!Element} parent
  * @param {string} tagName
- * @return {!Array<!Element>}
+ * @return {!NodeList<!Element>}
  */
 export function childElementsByTag(parent, tagName) {
+  return scopedQuerySelectorAll(parent, `> ${tagName}`);
+}
+
+
+/**
+ * Finds the first element that matches `selector`, scoped inside `root`.
+ * Note: in IE, this causes a quick mutation of the element's class list.
+ * @param {!Element} root
+ * @param {string} selector
+ * @return {?Element}
+ */
+export function scopedQuerySelector(root, selector) {
   if (scopeSelectorSupported == null) {
-    scopeSelectorSupported = isScopeSelectorSupported(parent);
+    scopeSelectorSupported = isScopeSelectorSupported(root);
   }
   if (scopeSelectorSupported) {
-    return toArray(parent.querySelectorAll(':scope > ' + tagName));
+    return root./*OK*/querySelector(`:scope ${selector}`);
   }
-  tagName = tagName.toUpperCase();
-  return childElements(parent, el => {
-    return el.tagName == tagName;
-  });
+
+  // Only IE.
+  const unique = 'i-amphtml-scoped';
+  root.classList.add(unique);
+  const element = root./*OK*/querySelector(`.${unique} ${selector}`);
+  root.classList.remove(unique);
+  return element;
+}
+
+
+/**
+ * Finds the every element that matches `selector`, scoped inside `root`.
+ * Note: in IE, this causes a quick mutation of the element's class list.
+ * @param {!Element} root
+ * @param {string} selector
+ * @return {!NodeList<!Element>}
+ */
+export function scopedQuerySelectorAll(root, selector) {
+  if (scopeSelectorSupported == null) {
+    scopeSelectorSupported = isScopeSelectorSupported(root);
+  }
+  if (scopeSelectorSupported) {
+    return root./*OK*/querySelectorAll(`:scope ${selector}`);
+  }
+
+  // Only IE.
+  const unique = 'i-amphtml-scoped';
+  root.classList.add(unique);
+  const elements = root./*OK*/querySelectorAll(`.${unique} ${selector}`);
+  root.classList.remove(unique);
+  return elements;
 }
 
 
@@ -445,13 +512,13 @@ export function childElementsByTag(parent, tagName) {
  * @param {function(string):string=} opt_computeParamNameFunc to compute the parameter
  *    name, get passed the camel-case parameter name.
  * @param {!RegExp=} opt_paramPattern Regex pattern to match data attributes.
- * @return {!Object<string, string>}
+ * @return {!JsonObject}
  */
 export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
   opt_paramPattern) {
   const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
   const dataset = element.dataset;
-  const params = Object.create(null);
+  const params = dict();
   const paramPattern = opt_paramPattern ? opt_paramPattern : /^param(.+)/;
   for (const key in dataset) {
     const matches = key.match(paramPattern);
@@ -469,15 +536,17 @@ export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
  *  a. The element itself has a nextSibling.
  *  b. Any of the element ancestors has a nextSibling.
  * @param {!Element} element
+ * @param {?Node} opt_stopNode
  * @return {boolean}
  */
-export function hasNextNodeInDocumentOrder(element) {
+export function hasNextNodeInDocumentOrder(element, opt_stopNode) {
   let currentElement = element;
   do {
     if (currentElement.nextSibling) {
       return true;
     }
-  } while (currentElement = currentElement.parentNode);
+  } while ((currentElement = currentElement.parentNode) &&
+            currentElement != opt_stopNode);
   return false;
 }
 
@@ -513,6 +582,21 @@ export function ancestorElementsByTag(child, tagName) {
   });
 }
 
+/**
+ * Iterate over an array-like. Some collections like NodeList are
+ * lazily evaluated in some browsers, and accessing `length` forces full
+ * evaluation. We can improve performance by iterating until an element is
+ * `undefined` to avoid checking the `length` property.
+ * Test cases: https://jsperf.com/iterating-over-collections-of-elements
+ * @param {!IArrayLike<T>} iterable
+ * @param {!function(T, number)} cb
+ * @template T
+ */
+export function iterateCursor(iterable, cb) {
+  for (let i = 0, value; (value = iterable[i]) !== undefined; i++) {
+    cb(value, i);
+  }
+}
 
 /**
  * This method wraps around window's open method. It first tries to execute
@@ -553,6 +637,28 @@ export function openWindowDialog(win, url, target, opt_features) {
 export function isJsonScriptTag(element) {
   return element.tagName == 'SCRIPT' &&
             element.getAttribute('type').toUpperCase() == 'APPLICATION/JSON';
+}
+
+/**
+ * Whether the element is a script tag with application/json type.
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isJsonLdScriptTag(element) {
+  return element.tagName == 'SCRIPT' &&
+      element.getAttribute('type').toUpperCase() == 'APPLICATION/LD+JSON';
+}
+
+/**
+ * Whether the page's direction is right to left or not.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+export function isRTL(doc) {
+  const dir = doc.body.getAttribute('dir')
+                 || doc.documentElement.getAttribute('dir')
+                 || 'ltr';
+  return dir == 'rtl';
 }
 
 
@@ -616,3 +722,130 @@ export function isIframed(win) {
   return win.parent && win.parent != win;
 }
 
+/**
+ * Determines if this element is an AMP element
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isAmpElement(element) {
+  const tag = element.tagName;
+  // Use prefix to recognize AMP element. This is necessary because stub
+  // may not be attached yet.
+  return startsWith(tag, 'AMP-') &&
+      // Some "amp-*" elements are not really AMP elements. :smh:
+      !(tag == 'AMP-STICKY-AD-TOP-PADDING' || tag == 'AMP-BODY');
+}
+
+/**
+ * Return a promise that resolve when an AMP element upgrade from HTMLElement
+ * to CustomElement
+ * @param {!Element} element
+ * @return {!Promise<!Element>}
+ */
+export function whenUpgradedToCustomElement(element) {
+  dev().assert(isAmpElement(element), 'element is not AmpElement');
+  if (element.createdCallback) {
+    // Element already is CustomElement;
+    return Promise.resolve(element);
+  }
+  // If Element is still HTMLElement, wait for it to upgrade to customElement
+  // Note: use pure string to avoid obfuscation between versions.
+  if (!element[UPGRADE_TO_CUSTOMELEMENT_PROMISE]) {
+    element[UPGRADE_TO_CUSTOMELEMENT_PROMISE] = new Promise(resolve => {
+      element[UPGRADE_TO_CUSTOMELEMENT_RESOLVER] = resolve;
+    });
+  }
+
+  return element[UPGRADE_TO_CUSTOMELEMENT_PROMISE];
+}
+
+/**
+ * Replacement for `Element.requestFullscreen()` method.
+ * https://developer.mozilla.org/en-US/docs/Web/API/Element/requestFullscreen
+ * @param {!Element} element
+ */
+export function fullscreenEnter(element) {
+  const requestFs = element.requestFullscreen
+   || element.requestFullScreen
+   || element.webkitRequestFullscreen
+   || element.webkitRequestFullScreen
+   || element.webkitEnterFullscreen
+   || element.webkitEnterFullScreen
+   || element.msRequestFullscreen
+   || element.msRequestFullScreen
+   || element.mozRequestFullscreen
+   || element.mozRequestFullScreen;
+  if (requestFs) {
+    requestFs.call(element);
+  }
+}
+
+/**
+ * Replacement for `Document.exitFullscreen()` method.
+ * https://developer.mozilla.org/en-US/docs/Web/API/Document/exitFullscreen
+ * @param {!Element} element
+ */
+export function fullscreenExit(element) {
+  let exitFs = element.cancelFullScreen
+               || element.exitFullscreen
+               || element.exitFullScreen
+               || element.webkitExitFullscreen
+               || element.webkitExitFullScreen
+               || element.webkitCancelFullScreen
+               || element.mozCancelFullScreen
+               || element.msExitFullscreen;
+  if (exitFs) {
+    exitFs.call(element);
+    return;
+  }
+  if (element.ownerDocument) {
+    exitFs = element.ownerDocument.cancelFullScreen
+             || element.ownerDocument.exitFullscreen
+             || element.ownerDocument.exitFullScreen
+             || element.ownerDocument.webkitExitFullscreen
+             || element.ownerDocument.webkitExitFullScreen
+             || element.ownerDocument.webkitCancelFullScreen
+             || element.ownerDocument.mozCancelFullScreen
+             || element.ownerDocument.msExitFullscreen;
+  }
+  if (exitFs) {
+    exitFs.call(element.ownerDocument);
+    return;
+  }
+}
+
+
+/**
+ * Replacement for `Document.fullscreenElement`.
+ * https://developer.mozilla.org/en-US/docs/Web/API/Document/fullscreenElement
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isFullscreenElement(element) {
+  const isFullscreen = element.webkitDisplayingFullscreen;
+  if (isFullscreen) {
+    return true;
+  }
+  if (element.ownerDocument) {
+    const fullscreenElement = element.ownerDocument.fullscreenElement
+             || element.ownerDocument.webkitFullscreenElement
+             || element.ownerDocument.mozFullScreenElement
+             || element.webkitCurrentFullScreenElement;
+    if (fullscreenElement == element) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Returns true if node is not disabled.
+ *
+ * IE8 can return false positives, see {@link matches}.
+ * @param {!Element} element
+ * @return {boolean}
+ * @see https://www.w3.org/TR/html5/forms.html#concept-fe-disabled
+ */
+export function isEnabled(element) {
+  return !(element.disabled || matches(element, ':disabled'));
+}

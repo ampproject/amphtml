@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from './action-trust';
 import {Layout} from './layout';
+import {getData} from './event-helper';
 import {loadPromise} from './event-helper';
 import {preconnectForElement} from './preconnect';
-import {isArray} from './types';
-import {viewportForDoc} from './viewport';
-import {vsyncFor} from './vsync';
+import {isArray, toWin} from './types';
+import {Services} from './services';
 import {user} from './log';
-
 
 /**
  * Base class for all custom element implementations. Instead of inheriting
@@ -32,10 +32,10 @@ import {user} from './log';
  * The base class implements a set of lifecycle methods that are called by
  * the runtime as appropriate. These are mostly based on the custom element
  * lifecycle (See
- * http://www.html5rocks.com/en/tutorials/webcomponents/customelements/)
+ * https://developers.google.com/web/fundamentals/getting-started/primers/customelements)
  * and adding AMP style late loading to the mix.
  *
- * The complete lifecycle of custom DOM element is:
+ * The complete lifecycle of a custom DOM element is:
  *
  *           ||
  *           || createdCallback
@@ -140,9 +140,15 @@ export class BaseElement {
     this.inViewport_ = false;
 
     /** @public @const {!Window} */
-    this.win = element.ownerDocument.defaultView;
+    this.win = toWin(element.ownerDocument.defaultView);
 
-    /** @private {?Object<string, function(!./service/action-impl.ActionInvocation)>} */
+    /**
+     * Maps action name to struct containing the action handler and minimum
+     * trust required to invoke the handler.
+     * @private {?Object<string, {
+     *   handler: function(!./service/action-impl.ActionInvocation),
+     *   minTrust: ActionTrust,
+     * }>} */
     this.actionMap_ = null;
 
     /** @public {!./preconnect.Preconnect} */
@@ -150,6 +156,14 @@ export class BaseElement {
 
     /** @public {?Object} For use by sub classes */
     this.config = null;
+  }
+
+  /**
+   * The element's signal tracker.
+   * @return {!./utils/signals.Signals}
+   */
+  signals() {
+    return this.element.signals();
   }
 
   /**
@@ -162,17 +176,43 @@ export class BaseElement {
     return 0;
   }
 
+  /**
+   * Updates the priority of the resource. If there are tasks currently
+   * scheduled, their priority is updated as well.
+   *
+   * This method can be called any time when the new priority value is
+   * available. It's a restricted API and special review is required to
+   * allow individual extensions to request priority upgrade.
+   *
+   * @param {number} newPriority
+   * @restricted
+   */
+  updatePriority(newPriority) {
+    this.element.getResources().updatePriority(this.element, newPriority);
+  }
+
   /** @return {!Layout} */
   getLayout() {
     return this.layout_;
   }
 
   /**
-   * Returns a previously measured layout box of the element.
+   * Returns a previously measured layout box adjusted to the viewport. This
+   * mainly affects fixed-position elements that are adjusted to be always
+   * relative to the document position in the viewport.
    * @return {!./layout-rect.LayoutRectDef}
    */
   getLayoutBox() {
     return this.element.getLayoutBox();
+  }
+
+  /**
+   * Returns a previously measured layout box relative to the page. The
+   * fixed-position elements are relative to the top of the document.
+   * @return {!./layout-rect.LayoutRectDef}
+   */
+  getPageLayoutBox() {
+    return this.element.getPageLayoutBox();
   }
 
   /**
@@ -194,7 +234,7 @@ export class BaseElement {
 
   /** @public @return {!./service/vsync-impl.Vsync} */
   getVsync() {
-    return vsyncFor(this.win);
+    return Services.vsyncFor(this.win);
   }
 
   /**
@@ -280,6 +320,11 @@ export class BaseElement {
    * class set on it.
    *
    * This callback is executed early after the element has been attached to DOM.
+   *
+   * This callback can either immediately return or return a promise if the
+   * build steps are asynchronous.
+   *
+   * @return {!Promise|undefined}
    */
   buildCallback() {
     // Subclasses may override.
@@ -432,6 +477,24 @@ export class BaseElement {
   }
 
   /**
+   * Whether the element needs to be reconstructed after it has been
+   * re-parented. Many elements cannot survive fully the reparenting and
+   * are better to be reconstructed from scratch.
+   *
+   * An example of an element that should be reconstructed in a iframe-based
+   * element. Reparenting such an element will cause the iframe to reload and
+   * will lost the previously established connection. It's safer to reconstruct
+   * such an element. An image or the other hand does not need to be
+   * reconstructed since image itself is not reloaded by the browser and thus
+   * there's no need to use additional resources for reconstruction.
+   *
+   * @return {boolean}
+   */
+  reconstructWhenReparented() {
+    return true;
+  }
+
+  /**
    * Instructs the element that its activation is requested based on some
    * user event. Intended to be implemented by actual components.
    * @param {!./service/action-impl.ActionInvocation} unusedInvocation
@@ -440,19 +503,26 @@ export class BaseElement {
   }
 
   /**
+   * Minimum event trust required for activate().
+   * @return {ActionTrust}
+   */
+  activationTrust() {
+    return ActionTrust.HIGH;
+  }
+
+  /**
    * Returns a promise that will resolve or fail based on the element's 'load'
-   * and 'error' events. Optionally this method takes a timeout, which will reject
-   * the promise if the resource has not loaded by then.
+   * and 'error' events.
    * @param {T} element
-   * @param {number=} opt_timeout
    * @return {!Promise<T>}
    * @template T
    * @final
    */
-  loadPromise(element, opt_timeout) {
-    return loadPromise(element, opt_timeout);
+  loadPromise(element) {
+    return loadPromise(element);
   }
 
+  /** @private */
   initActionMap_() {
     if (!this.actionMap_) {
       this.actionMap_ = this.win.Object.create(null);
@@ -461,13 +531,18 @@ export class BaseElement {
 
   /**
    * Registers the action handler for the method with the specified name.
+   *
+   * The handler is only invoked by events with trust equal to or greater than
+   * `minTrust`. Otherwise, a user error is logged.
+   *
    * @param {string} method
    * @param {function(!./service/action-impl.ActionInvocation)} handler
+   * @param {ActionTrust} minTrust
    * @public
    */
-  registerAction(method, handler) {
+  registerAction(method, handler, minTrust = ActionTrust.HIGH) {
     this.initActionMap_();
-    this.actionMap_[method] = handler;
+    this.actionMap_[method] = {handler, minTrust};
   }
 
   /**
@@ -482,13 +557,18 @@ export class BaseElement {
    */
   executeAction(invocation, unusedDeferred) {
     if (invocation.method == 'activate') {
-      this.activate(invocation);
+      if (invocation.satisfiesTrust(this.activationTrust())) {
+        return this.activate(invocation);
+      }
     } else {
       this.initActionMap_();
-      const handler = this.actionMap_[invocation.method];
-      user().assert(handler, `Method not found: ${invocation.method} in %s`,
+      const holder = this.actionMap_[invocation.method];
+      user().assert(holder, `Method not found: ${invocation.method} in %s`,
           this);
-      handler(invocation);
+      const {handler, minTrust} = holder;
+      if (invocation.satisfiesTrust(minTrust)) {
+        return handler(invocation);
+      }
     }
   }
 
@@ -511,18 +591,22 @@ export class BaseElement {
   /**
    * Utility method that propagates attributes from this element
    * to the given element.
-   * @param  {string|!Array<string>} attributes
-   * @param  {!Element} element
+   * If `opt_removeMissingAttrs` is true, then also removes any specified
+   * attributes that are missing on this element from the target element.
+   * @param {string|!Array<string>} attributes
+   * @param {!Element} element
+   * @param {boolean=} opt_removeMissingAttrs
    * @public @final
    */
-  propagateAttributes(attributes, element) {
+  propagateAttributes(attributes, element, opt_removeMissingAttrs) {
     attributes = isArray(attributes) ? attributes : [attributes];
     for (let i = 0; i < attributes.length; i++) {
       const attr = attributes[i];
-      if (!this.element.hasAttribute(attr)) {
-        continue;
+      if (this.element.hasAttribute(attr)) {
+        element.setAttribute(attr, this.element.getAttribute(attr));
+      } else if (opt_removeMissingAttrs) {
+        element.removeAttribute(attr);
       }
-      element.setAttribute(attr, this.element.getAttribute(attr));
     }
   }
 
@@ -537,9 +621,18 @@ export class BaseElement {
     events = isArray(events) ? events : [events];
     for (let i = 0; i < events.length; i++) {
       element.addEventListener(events[i], event => {
-        this.element.dispatchCustomEvent(events[i], event.data || {});
+        this.element.dispatchCustomEvent(events[i], getData(event) || {});
       });
     }
+  }
+
+  /**
+   * Must be executed in the mutate context. Removes `display:none` from the
+   * element set via `layout=nodisplay`.
+   * @param {boolean} displayOn
+   */
+  toggleLayoutDisplay(displayOn) {
+    this.element.toggleLayoutDisplay(displayOn);
   }
 
   /**
@@ -589,6 +682,14 @@ export class BaseElement {
   }
 
   /**
+   * An implementation can call this method to signal to the element that
+   * it has started rendering.
+   */
+  renderStarted() {
+    this.element.renderStarted();
+  }
+
+  /**
    * Returns the original nodes of the custom element without any service nodes
    * that could have been added for markup. These nodes can include Text,
    * Comment and other child nodes.
@@ -622,23 +723,23 @@ export class BaseElement {
    * @public @final
    */
   applyFillContent(element, opt_replacedContent) {
-    element.classList.add('-amp-fill-content');
+    element.classList.add('i-amphtml-fill-content');
     if (opt_replacedContent) {
-      element.classList.add('-amp-replaced-content');
+      element.classList.add('i-amphtml-replaced-content');
     }
   }
 
   /**
    * Returns the viewport within which the element operates.
-   * @return {!./service/viewport-impl.Viewport}
+   * @return {!./service/viewport/viewport-impl.Viewport}
    */
   getViewport() {
-    return viewportForDoc(this.getAmpDoc());
+    return Services.viewportForDoc(this.getAmpDoc());
   }
 
   /**
-   * Returns the layout rectangle of the element used for reporting this
-   * element's intersection with the viewport.
+   * Returns the layout rectangle used for when calculating this element's
+   * intersection with the viewport.
    * @return {!./layout-rect.LayoutRectDef}
    */
   getIntersectionElementLayoutBox() {
@@ -717,6 +818,24 @@ export class BaseElement {
   }
 
   /**
+   * Collapses the element, setting it to `display: none`, and notifies its
+   * owner (if there is one) through {@link collapsedCallback} that the element
+   * is no longer visible.
+   */
+  collapse() {
+    this.element.getResources().collapseElement(this.element);
+  }
+
+  /**
+   * Return a promise that request the runtime to collapse one element
+   * @return {!Promise}
+   */
+  attemptCollapse() {
+    return this.element.getResources().attemptCollapse(this.element);
+  }
+
+
+  /**
    * Return a promise that requests the runtime to update
    * the height of this element to the specified value.
    * The runtime will schedule this request and attempt to process it
@@ -784,20 +903,42 @@ export class BaseElement {
   }
 
   /**
-   * Collapses the element, setting it to `display: none`, and notifies its
-   * owner (if there is one) through {@link collapsedCallback} that the element
-   * is no longer visible.
+   * Called every time an owned AmpElement collapses itself.
+   * See {@link collapse}.
+   * @param {!AmpElement} unusedElement Child element that was collapsed.
    */
-  collapse() {
-    this.element.getResources().collapseElement(this.element);
+  collapsedCallback(unusedElement) {
+    // Subclasses may override.
   }
 
   /**
-   * Called every time an owned AmpElement collapses itself.
-   * See {@link collapse}.
-   * @param {!AmpElement} unusedElement
+   * Expands the element, resetting its default display value, and notifies its
+   * owner (if there is one) through {@link expandedCallback} that the element
+   * is no longer visible.
    */
-  collapsedCallback(unusedElement) {
+  expand() {
+    this.element.getResources().expandElement(this.element);
+  }
+
+  /**
+   * Called every time an owned AmpElement expands itself.
+   * See {@link expand}.
+   * @param {!AmpElement} unusedElement Child element that was expanded.
+   */
+  expandedCallback(unusedElement) {
+    // Subclasses may override.
+  }
+
+  /**
+   * Called when one or more attributes are mutated.
+   * @note Must be called inside a mutate context.
+   * @note Boolean attributes have a value of `true` and `false` when
+   *       present and missing, respectively.
+   * @param {
+   *   !JsonObject<string, (null|boolean|string|number|Array|Object)>
+   * } unusedMutations
+   */
+  mutatedAttributesCallback(unusedMutations) {
     // Subclasses may override.
   }
 
@@ -809,4 +950,8 @@ export class BaseElement {
    * @public
    */
   onLayoutMeasure() {}
-};
+
+  user() {
+    return user(this.element);
+  }
+}

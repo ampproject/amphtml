@@ -21,27 +21,27 @@ import {isProxyOrigin} from '../../../src/url';
 const TAG = 'amp-access-other';
 
 
-/** @implements {AccessTypeAdapterDef} */
+/** @implements {./amp-access.AccessTypeAdapterDef} */
 export class AccessOtherAdapter {
 
   /**
-   * @param {!Window} win
-   * @param {!JSONType} configJson
-   * @param {!AccessTypeAdapterContextDef} context
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!JsonObject} configJson
+   * @param {!./amp-access.AccessTypeAdapterContextDef} context
    */
-  constructor(win, configJson, context) {
-    /** @const {!Window} */
-    this.win = win;
+  constructor(ampdoc, configJson, context) {
+    /** @const */
+    this.ampdoc = ampdoc;
 
-    /** @const @private {!AccessTypeAdapterContextDef} */
+    /** @const @private {!./amp-access.AccessTypeAdapterContextDef} */
     this.context_ = context;
 
-    /** @private {?JSONType} */
+    /** @private {?JsonObject} */
     this.authorizationResponse_ =
         configJson['authorizationFallbackResponse'] || null;
 
     /** @const @private {boolean} */
-    this.isProxyOrigin_ = isProxyOrigin(win.location);
+    this.isProxyOrigin_ = isProxyOrigin(ampdoc.win.location);
   }
 
   /** @override */

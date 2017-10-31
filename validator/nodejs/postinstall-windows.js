@@ -20,6 +20,14 @@
 var path = require('path');
 var fs = require('fs');
 
+// The postinstall invocation in package.json creates this temp file and on
+// Windows installations, it won't delete it. We used to redirect to NUL
+// but that doesn't work in Linux if the underlying filesystem is SMB
+// (since in Windows NUL is special). So now we clean it up best-effort here.
+if (fs.existsSync('postinstall.DELETEME')) {
+  fs.unlinkSync('postinstall.DELETEME');
+}
+
 if (process.env.OS !== 'Windows_NT') {
   console./*OK*/ error(
       'postinstall-windows.js: This script is for Windows only.');

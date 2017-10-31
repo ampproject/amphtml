@@ -15,10 +15,9 @@
  */
 
 import {Observable} from '../observable';
-import {fromClass} from '../service';
 import {getVendorJsPropertyName} from '../style';
 import {waitForChild} from '../dom';
-
+import {registerServiceBuilder} from '../service';
 
 /**
  */
@@ -46,8 +45,8 @@ export class DocumentState {
       this.visibilityStateProp_ = null;
     }
 
-    /** @private {?Observable} */
-    this.visibilityObservable_ = null;
+    /** @private @const {!Observable} */
+    this.visibilityObservable_ = new Observable();
 
     /** @private {string|null} */
     this.visibilityChangeEvent_ = null;
@@ -109,9 +108,6 @@ export class DocumentState {
    * @return {!UnlistenDef}
    */
   onVisibilityChanged(handler) {
-    if (!this.visibilityObservable_) {
-      this.visibilityObservable_ = new Observable();
-    }
     return this.visibilityObservable_.add(handler);
   }
 
@@ -151,8 +147,7 @@ export class DocumentState {
 
 /**
  * @param {!Window} window
- * @return {!DocumentState}
  */
-export function documentStateFor(window) {
-  return fromClass(window, 'documentState', DocumentState);
+export function installDocumentStateService(window) {
+  registerServiceBuilder(window, 'documentState', DocumentState);
 }

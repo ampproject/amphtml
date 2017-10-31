@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
+const hasOwnProperty = Object.prototype.hasOwnProperty;
+
 /**
  * Copies values of all enumerable own properties from one or more source
  * objects (provided as extended arguments to the function) to a target object.
  *
  * @param {!Object} target
+ * @param {...Object} var_args
  * @returns {!Object}
  */
-
-const hasOwnProperty = Object.prototype.hasOwnProperty;
-
-export function assign(target) {
+export function assign(target, var_args) {
   if (target == null) {
     throw new TypeError('Cannot convert undefined or null to object');
   }
@@ -50,6 +50,11 @@ export function assign(target) {
  */
 export function install(win) {
   if (!win.Object.assign) {
-    win.Object.assign = assign;
+    win.Object.defineProperty(win.Object, 'assign', {
+      enumerable: false,
+      configurable: true,
+      writable: true,
+      value: assign,
+    });
   }
 }

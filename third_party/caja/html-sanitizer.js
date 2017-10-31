@@ -411,7 +411,7 @@ URI.prototype.setPath = function (newPath) {
 URI.prototype.setRawPath = function (newPath) {
   if (newPath) {
     newPath = String(newPath);
-    this.path_ = 
+    this.path_ =
       // Paths must start with '/' unless this is a path-relative URL.
       (!this.domain_ || /^\//.test(newPath)) ? newPath : '/' + newPath;
   } else {
@@ -1457,7 +1457,7 @@ var html = (function(html4) {
   var decimalEscapeRe = /^#(\d+)$/;
   var hexEscapeRe = /^#x([0-9A-Fa-f]+)$/;
   // contains every entity per http://www.w3.org/TR/2011/WD-html5-20110113/named-character-references.html
-  var safeEntityNameRe = /^[A-Za-z][A-za-z0-9]+$/;
+  var safeEntityNameRe = /^[A-Za-z][A-Za-z0-9]+$/;
   // Used as a hook to invoke the browser's entity parsing. <textarea> is used
   // because its content is parsed for entities but not tags.
   // TODO(kpreid): This retrieval is a kludge and leads to silent loss of
@@ -1608,7 +1608,7 @@ var html = (function(html4) {
 
   var ATTR_RE = new RegExp(
     '^\\s*' +
-    '([-.:\\w]+)' +             // 1 = Attribute name
+    '(\\[[-.:\\w]+\\]|[-.:\\w]+)'  +    // 1 = Attribute name
     '(?:' + (
       '\\s*(=)\\s*' +           // 2 = Is there a value?
       '(' + (                   // 3 = Attribute value

@@ -14,26 +14,72 @@
  * limitations under the License.
  */
 
-import {getService, getServiceForDoc} from '../src/service';
+import {poll} from './iframe';
+import {xhrServiceForTesting} from '../src/service/xhr-impl';
+import {
+  getService,
+  getServiceForDoc,
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+  resetServiceForTesting,
+} from '../src/service';
+import {WindowInterface} from '../src/window-interface';
 
 export function stubService(sandbox, win, serviceId, method) {
-  const stub = sandbox.stub();
-  getService(win, serviceId, () => {
-    const service = {};
-    service[method] = stub;
-    return service;
+  // Register if not already registered.
+  registerServiceBuilder(win, serviceId, function() {
+    return {
+      [method]: () => {},
+    };
   });
-  return stub;
+  const service = getService(win, serviceId);
+  return sandbox.stub(service, method);
 }
 
 export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
-  const stub = sandbox.stub();
-  getServiceForDoc(ampdoc, serviceId, () => {
-    const service = {};
-    service[method] = stub;
-    return service;
+  // Register if not already registered.
+  registerServiceBuilderForDoc(ampdoc, serviceId, function() {
+    return {
+      [method]: () => {},
+    };
   });
-  return stub;
+  const service = getServiceForDoc(ampdoc, serviceId);
+  return sandbox.stub(service, method);
+}
+
+export function mockServiceForDoc(sandbox, ampdoc, serviceId, methods) {
+  resetServiceForTesting(ampdoc.win, 'viewer');
+  const impl = {};
+  methods.forEach(method => {
+    impl[method] = () => {};
+  });
+  registerServiceBuilderForDoc(ampdoc, serviceId, () => impl);
+  const mock = {};
+  methods.forEach(method => {
+    mock[method] = sandbox.stub(impl, method);
+  });
+  return mock;
+}
+
+export function mockWindowInterface(sandbox) {
+  const methods = Object.getOwnPropertyNames(WindowInterface)
+      .filter(p => typeof WindowInterface[p] === 'function');
+  const mock = {};
+  methods.forEach(method => {
+    mock[method] = sandbox.stub(WindowInterface, method);
+  });
+  return mock;
+}
+
+/**
+ * Resolves a promise when a spy has been called a configurable number of times.
+ * @param {!Object} spy
+ * @param {number=} opt_callCount
+ * @return {!Promise}
+ */
+export function whenCalled(spy, opt_callCount = 1) {
+  return poll(`Spy was called ${opt_callCount} times`,
+      () => spy.callCount === opt_callCount);
 }
 
 /**
@@ -42,7 +88,7 @@ export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
  */
 export function assertScreenReaderElement(element) {
   expect(element).to.exist;
-  expect(element.classList.contains('-amp-screen-reader')).to.be.true;
+  expect(element.classList.contains('i-amphtml-screen-reader')).to.be.true;
   const win = element.ownerDocument.defaultView;
   const computedStyle = win.getComputedStyle(element);
   expect(computedStyle.getPropertyValue('position')).to.equal('fixed');
@@ -57,4 +103,33 @@ export function assertScreenReaderElement(element) {
   expect(computedStyle.getPropertyValue('padding')).to.equal('0px');
   expect(computedStyle.getPropertyValue('display')).to.equal('block');
   expect(computedStyle.getPropertyValue('visibility')).to.equal('visible');
+}
+
+/////////////////
+// Request Bank
+// A server side temporary request storage which is useful for testing
+// browser sent HTTP requests.
+/////////////////
+
+/** @const {string} */
+const REQUEST_URL = '//localhost:9876/amp4test/request-bank/';
+
+/**
+ * Append user agent to request-bank deposit/withdraw IDs to avoid
+ * cross-browser race conditions when testing in Saucelabs.
+ * @const {string}
+ */
+const userAgent = encodeURIComponent(window.navigator.userAgent);
+
+export function depositRequestUrl(id) {
+  return `${REQUEST_URL}deposit/${id}-${userAgent}`;
+}
+
+export function withdrawRequest(win, id) {
+  const url = `${REQUEST_URL}withdraw/${id}-${userAgent}`;
+  return xhrServiceForTesting(win).fetchJson(url, {
+    method: 'GET',
+    ampCors: false,
+    credentials: 'omit',
+  }).then(res => res.json());
 }
