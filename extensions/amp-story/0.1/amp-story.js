@@ -717,14 +717,15 @@ export class AmpStory extends AMP.BaseElement {
    * @return {?string} The URL of the background resource
    */
   getBackgroundUrl_(pageElement) {
-    const fillElement =
-        scopedQuerySelector(pageElement, '[template="fill"]');
+    let fillElement;
 
-    if (!fillElement) {
-      return;
+    try {
+      fillElement = dev().assertElement(
+          scopedQuerySelector(pageElement, '[template="fill"]'));
+    } catch (e) {
+      return '';
     }
 
-    dev().assertElement(fillElement);
     const fillPosterElement = scopedQuerySelector(fillElement, '[poster]');
     const srcElement = scopedQuerySelector(fillElement, '[src]');
 
