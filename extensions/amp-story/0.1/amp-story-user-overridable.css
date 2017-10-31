@@ -40,6 +40,6 @@
 }
 
 amp-story-grid-layer {
-  padding: 68px 32px 32px !important; /* 44 + 24 */
+  padding: 68px 32px 32px; /* 44 + 24 */
 }
 

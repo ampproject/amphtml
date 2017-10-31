@@ -44,6 +44,14 @@ amp-story[desktop] {
  filter: blur(30px)!important;
  margin: -60px!important;
  background-size: 125% 125%!important;
+ background-color: transparent!important;
+ transition-duration: 300ms!important;
+ transition-property: opacity!important;
+ will-change: opacity!important;
+}
+
+.i-amphtml-story-background.active {
+  opacity: 1!important;
 }
 
 [desktop] amp-story-page {
@@ -220,10 +228,11 @@ amp-story-page.i-amphtml-story-page-shown {
   right: 15px!important;
   text-align: center!important;
   width: 60px!important;
-  font-size: 16px!important;
+  font-size: 12px!important;
   font-weight: bold!important;
   letter-spacing: .5px!important;
   margin: auto!important;
+  color:#fff!important;
 }
 
 /* background for the share box */
@@ -233,7 +242,7 @@ amp-story-page.i-amphtml-story-page-shown {
   width: 58px!important;
   height: 40px!important;
   padding: 0 16px!important;
-  background-color: rgba(255, 255, 255, .25)!important;
+  background-color: rgba(255, 255, 255, .2)!important;
   border-radius: 500px!important;
   transition: width 300ms ease-in-out!important;
   right: 0!important;

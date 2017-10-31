@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {setStyle} from '../../../src/style';
+import {setStyle, resetStyles} from '../../../src/style';
 
 const BACKGROUND_CLASS = 'i-amphtml-story-background';
 
@@ -38,6 +38,7 @@ export class AmpStoryBackground {
     this.hidden_ = this.createBackground_();
     this.active_ = this.createBackground_();
     this.container_.appendChild(this.hidden_);
+    this.container_.appendChild(this.active_);
   }
 
   /**
@@ -57,8 +58,8 @@ export class AmpStoryBackground {
   }
 
   /**
-   * Update the background and move the previous background behind the new one.
-   * @param {string} newUrl
+   * Update the background with new background image URL.
+   * @param {?string} newUrl
    */
   setBackground(newUrl) {
     if (!newUrl) {
@@ -66,10 +67,26 @@ export class AmpStoryBackground {
     }
 
     setStyle(this.hidden_, 'background-image', `url(${newUrl})`);
+    this.rotateActiveBackground_();
+  }
 
+  /**
+   * Removes background image from page background.
+   */
+  removeBackground() {
+    resetStyles(this.hidden_, ['background-image']);
+    this.rotateActiveBackground_();
+  }
+
+  /**
+   * Rotates the classes on page background to bring the new bacground in foreground.
+   * @private
+   */
+  rotateActiveBackground_() {
     const newHidden = this.active_;
     this.active_ = this.hidden_;
     this.hidden_ = newHidden;
-    this.container_.appendChild(this.active_);
+    this.active_.classList.add('active');
+    this.hidden_.classList.remove('active');
   }
 }
