@@ -20,6 +20,8 @@ const BACKGROUND_CLASS = 'i-amphtml-story-background';
 
 const BACKGROUND_CONTAINER_CLASS = 'i-amphtml-story-background-container';
 
+const BACKGROUND_OVERLAY_CLASS = 'i-amphtml-story-background-overlay';
+
 /**
  * TODO(cvializ): Investigate pre-rendering blurred backgrounds to canvas to
  * possibly improve performance?
@@ -35,10 +37,14 @@ export class AmpStoryBackground {
 
     this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.classList.add(BACKGROUND_CONTAINER_CLASS);
+    this.containerOverlay_ = this.element.ownerDocument.createElement('div');
+    this.containerOverlay_.classList.add(BACKGROUND_OVERLAY_CLASS);
+
     this.hidden_ = this.createBackground_();
     this.active_ = this.createBackground_();
     this.container_.appendChild(this.hidden_);
     this.container_.appendChild(this.active_);
+    this.container_.appendChild(this.containerOverlay_);
   }
 
   /**
