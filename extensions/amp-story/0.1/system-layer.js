@@ -361,6 +361,16 @@ export class SystemLayer {
     this.progressBar_.setActivePageIndex(pageIndex);
   }
 
+  /**
+   * @param {number} pageIndex The index of the page whose progress should be
+   *     changed.
+   * @param {number} progress A number from 0.0 to 1.0, representing the
+   *     progress of the current page.
+   * @public
+   */
+  updateProgress(pageIndex, progress) {
+    this.progressBar_.updateProgress(pageIndex, progress);
+  }
 
   /**
    * @param {!./logging.AmpStoryLogEntryDef} logEntry
