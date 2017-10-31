@@ -334,7 +334,7 @@ i-amphtml-sizer {
 }
 
 .i-amphtml-hidden-by-media-query {
-  display: none;
+  display: none !important;
 }
 
 .i-amphtml-element-error {
