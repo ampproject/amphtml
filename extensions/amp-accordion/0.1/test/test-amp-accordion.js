@@ -68,10 +68,6 @@ describes.realWin('amp-accordion', {
 
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.true;
       expect(headerElements[0].getAttribute('aria-expanded')).to.equal('true');
-      expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.true;
-      expect(headerElements[1].getAttribute('aria-expanded')).to.equal('true');
-      expect(headerElements[2].parentNode.hasAttribute('expanded')).to.be.false;
-      expect(headerElements[2].getAttribute('aria-expanded')).to.equal('false');
     });
   });
 
