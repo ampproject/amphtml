@@ -156,7 +156,7 @@ describe('doubleclick-a4a-config', () => {
 
     it('should not honor url forced FF on non-CDN if prod', () => {
       // Ensure no selection in order to very experiment attribute.
-      const maybeSelectExperimentStub = sandbox.stub(
+      sandbox.stub(
           DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
           .returns(undefined);
       mockWin.AMP_MODE = {test: false, localDev: false};
@@ -202,7 +202,7 @@ describe('doubleclick-a4a-config', () => {
           'isCdnProxy', () => false);
       const elem = testFixture.doc.createElement('div');
       testFixture.doc.body.appendChild(elem);
-      const maybeSelectExperimentStub = sandbox.stub(
+      sandbox.stub(
           DoubleclickA4aEligibility.prototype,
           'maybeSelectExperiment').withArgs(
           mockWin, elem, [
