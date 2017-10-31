@@ -45,6 +45,7 @@ import {
   isFullscreenElement,
   scopedQuerySelector,
   scopedQuerySelectorAll,
+  removeElement,
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {once} from '../../../src/utils/function';
@@ -431,7 +432,8 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     const errorIconEl = this.win.document.createElement('div');
-    errorIconEl.classList.add('i-amphtml-story-experiment-error-icon');
+    errorIconEl.classList.add('i-amphtml-story-experiment-icon');
+    errorIconEl.classList.add('i-amphtml-story-experiment-icon-error');
 
     const errorMsgEl = this.win.document.createElement('span');
     errorMsgEl.textContent = 'You must enable the amp-story experiment to ' +
@@ -440,7 +442,11 @@ export class AmpStory extends AMP.BaseElement {
     const experimentsLinkEl = this.win.document.createElement('button');
     experimentsLinkEl.textContent = 'Enable';
     experimentsLinkEl.addEventListener('click', () => {
-      this.enableAmpStoryExperiment_();
+      toggleExperiment(this.win, 'amp-story', true);
+      errorIconEl.classList.remove('i-amphtml-story-experiment-icon-error');
+      errorIconEl.classList.add('i-amphtml-story-experiment-icon-done');
+      errorMsgEl.textContent = 'Experiment enabled.  Please reload.';
+      removeElement(experimentsLinkEl);
     });
 
     const errorEl = this.win.document.createElement('div');
@@ -451,14 +457,6 @@ export class AmpStory extends AMP.BaseElement {
     this.element.appendChild(errorEl);
 
     user().error(TAG, 'enable amp-story experiment');
-  }
-
-
-  /** @private */
-  enableAmpStoryExperiment_() {
-    toggleExperiment(this.win, 'amp-story', true);
-    toggleExperiment(this.win, 'dev-channel', true);
-    this.win.location.reload();
   }
 
 
