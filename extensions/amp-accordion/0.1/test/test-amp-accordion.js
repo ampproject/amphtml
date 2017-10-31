@@ -169,6 +169,32 @@ describes.realWin('amp-accordion', {
     });
   });
 
+  it('should collapse when collapse action is triggered on a expanded section', () => {
+    return getAmpAccordion().then(ampAccordion => {
+      const impl = ampAccordion.implementation_;
+      const headerElements = doc.querySelectorAll(
+          'section > *:first-child');
+      expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.true;
+      expect(headerElements[1].getAttribute('aria-expanded')).to.equal('true');
+      impl.collapse_(headerElements[1].parentNode);
+      expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.false;
+      expect(headerElements[1].getAttribute('aria-expanded')).to.equal('false');
+    });
+  });
+
+  it('should stay collapsed when collapse action is triggered on a collapsed section', () => {
+    return getAmpAccordion().then(ampAccordion => {
+      const impl = ampAccordion.implementation_;
+      const headerElements = doc.querySelectorAll(
+          'section > *:first-child');
+      expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
+      expect(headerElements[0].getAttribute('aria-expanded')).to.equal('false');
+      impl.collapse_(headerElements[0].parentNode);
+      expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
+      expect(headerElements[0].getAttribute('aria-expanded')).to.equal('false');
+    });
+  });
+
   it('should expand when header of a collapsed section is clicked', () => {
     return getAmpAccordion().then(ampAccordion => {
       const headerElements = doc.querySelectorAll(
