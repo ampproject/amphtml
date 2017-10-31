@@ -56,18 +56,24 @@ describes.realWin('amp-accordion', {
       const impl = ampAccordion.implementation_;
       const headerElements = doc.querySelectorAll(
           'section > *:first-child');
-      const clickEvent = {
-        target: headerElements[0],
-        currentTarget: headerElements[0],
-        preventDefault: sandbox.spy(),
-      };
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
       expect(headerElements[0].getAttribute('aria-expanded')).to.equal('false');
-
       impl.toggle_(headerElements[0].parentNode);
-
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.true;
       expect(headerElements[0].getAttribute('aria-expanded')).to.equal('true');
+    });
+  });
+
+  it('should collapse when toggle action is triggered on a expanded section', () => {
+    return getAmpAccordion().then(ampAccordion => {
+      const impl = ampAccordion.implementation_;
+      const headerElements = doc.querySelectorAll(
+          'section > *:first-child');
+      expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.true;
+      expect(headerElements[1].getAttribute('aria-expanded')).to.equal('true');
+      impl.toggle_(headerElements[1].parentNode);
+      expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.false;
+      expect(headerElements[1].getAttribute('aria-expanded')).to.equal('false');
     });
   });
 
@@ -76,16 +82,9 @@ describes.realWin('amp-accordion', {
       const impl = ampAccordion.implementation_;
       const headerElements = doc.querySelectorAll(
           'section > *:first-child');
-      const clickEvent = {
-        target: headerElements[0],
-        currentTarget: headerElements[0],
-        preventDefault: sandbox.spy(),
-      };
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
       expect(headerElements[0].getAttribute('aria-expanded')).to.equal('false');
-
       impl.expand_(headerElements[0].parentNode);
-
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.true;
       expect(headerElements[0].getAttribute('aria-expanded')).to.equal('true');
     });
@@ -96,16 +95,9 @@ describes.realWin('amp-accordion', {
       const impl = ampAccordion.implementation_;
       const headerElements = doc.querySelectorAll(
           'section > *:first-child');
-      const clickEvent = {
-        target: headerElements[0],
-        currentTarget: headerElements[0],
-        preventDefault: sandbox.spy(),
-      };
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.true;
       expect(headerElements[1].getAttribute('aria-expanded')).to.equal('true');
-
       impl.expand_(headerElements[1].parentNode);
-
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.true;
       expect(headerElements[1].getAttribute('aria-expanded')).to.equal('true');
     });
