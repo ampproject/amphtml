@@ -127,8 +127,6 @@ describe('doubleclick-a4a-config', () => {
         DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
         DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
       ], DFP_CANONICAL_FF_EXPERIMENT_NAME) ;
-      expect(maybeSelectExperimentSpy.callCount).to.equal(2);
-
     });
 
     it('should return false if no canonical AMP experiment branch', () => {
@@ -209,7 +207,7 @@ describe('doubleclick-a4a-config', () => {
             DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
             DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP],
           UNCONDITIONED_CANONICAL_FF_EXPERIMENT_NAME)
-            .returns(DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP);
+          .returns(DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP);
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
           DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP);
@@ -219,18 +217,17 @@ describe('doubleclick-a4a-config', () => {
           'isCdnProxy', () => false);
       const elem = testFixture.doc.createElement('div');
       testFixture.doc.body.appendChild(elem);
-      const maybeSelectExperimentStub = sandbox.stub(
+      sandbox.stub(
           DoubleclickA4aEligibility.prototype,
           'maybeSelectExperiment').withArgs(
           mockWin, elem, [
             DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
             DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP],
           UNCONDITIONED_CANONICAL_FF_EXPERIMENT_NAME)
-            .returns(DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL);
+          .returns(DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL);
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
           DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL);
-      expect(maybeSelectExperimentStub).to.be.calledOnce;
     });
     it('should not select into canonical exp if in unconditioned', () => {
       sandbox.stub(DoubleclickA4aEligibility.prototype,
@@ -255,7 +252,6 @@ describe('doubleclick-a4a-config', () => {
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
           DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP);
-      expect(maybeSelectExperimentStub).to.be.calledOnce;
       expect(maybeSelectExperimentStub).to.be.calledWith(
           mockWin, elem, [
             DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
