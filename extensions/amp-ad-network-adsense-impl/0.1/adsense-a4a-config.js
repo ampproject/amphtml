@@ -86,8 +86,16 @@ export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {
   const urlExperimentId = extractUrlExperimentId(win, element);
   if (urlExperimentId != undefined) {
     experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
-    dev().info(
-        TAG, `url experiment selection ${urlExperimentId}: ${experimentId}.`);
+    // Do not select into Identity experiment if in corresponding
+    // unconditioned experiment.
+    if ((experimentId == ADSENSE_EXPERIMENT_FEATURE.IDENTITY_CONTROL ||
+         experimentId == ADSENSE_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT) &&
+        getExperimentBranch(win, UNCONDITIONED_IDENTITY_ADX_EXP_NAME)) {
+      experimentId = null;
+    } else {
+      dev().info(
+          TAG, `url experiment selection ${urlExperimentId}: ${experimentId}.`);
+    }
   }
   if (experimentId) {
     addExperimentIdToElement(experimentId, element);

@@ -176,12 +176,12 @@ export class DoubleclickA4aEligibility {
           (getMode(win).localDev || getMode(win).test)) {
         experimentId = MANUAL_EXPERIMENT_ID;
       } else {
-        let e;
+        let unconditionedExp;
         // For unconditioned canonical experiment, in the experiment branch
         // we allow Fast Fetch on non-CDN pages, but in the control we do not.
-        if ((e = getExperimentBranch(
+        if ((unconditionedExp = getExperimentBranch(
             win, UNCONDITIONED_CANONICAL_FF_EXPERIMENT_NAME))) {
-          return e ==
+          return unconditionedExp ==
               DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP;
         }
         experimentId = this.maybeSelectExperiment(win, element, [
@@ -198,9 +198,18 @@ export class DoubleclickA4aEligibility {
       // See if in holdback control/experiment.
       if (urlExperimentId != undefined) {
         experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
-        dev().info(
-            TAG,
-            `url experiment selection ${urlExperimentId}: ${experimentId}.`);
+        // Do not select into Identity experiment if in corresponding
+        // unconditioned experiment.
+        if ((experimentId == DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_CONTROL ||
+             experimentId ==
+             DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT) &&
+            getExperimentBranch(win, UNCONDITIONED_IDENTITY_EXPERIMENT_NAME)) {
+          experimentId = null;
+        } else {
+          dev().info(
+              TAG,
+              `url experiment selection ${urlExperimentId}: ${experimentId}.`);
+        }
       }
     }
     if (experimentId) {
