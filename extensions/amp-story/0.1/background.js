@@ -59,7 +59,7 @@ export class AmpStoryBackground {
 
   /**
    * Update the background with new background image URL.
-   * @param {string|undefined} newUrl
+   * @param {?string} newUrl
    */
   setBackground(newUrl) {
     if (!newUrl) {
