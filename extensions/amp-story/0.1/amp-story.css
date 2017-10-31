@@ -138,8 +138,9 @@ amp-story[standalone]:fullscreen {
   border-radius: 1px;
   height: 100%;
   list-style-type: none;
-  margin: 0 1px;
   width: 100%;
+  margin: 0 2px;
+  overflow: hidden;
 }
 
 .i-amphtml-story-page-progress-value {
@@ -394,6 +395,7 @@ amp-story-grid-layer * {
   line-height: 1.4;
   margin: 0 0 8px;
 }
+
 
 .i-amphtml-story-bookend-article-image,
 .i-amphtml-story-bookend-replay-image,
