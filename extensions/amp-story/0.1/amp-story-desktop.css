@@ -47,8 +47,10 @@ amp-story[desktop] {
 }
 
 [desktop] amp-story-page {
+  transform: scale(1.0) translateX(-350%) translateY(0%) !important;
   opacity: .05!important;
   transform-origin: left!important;
+  border-radius: 3px!important;
 }
 
 amp-story-page.i-amphtml-story-page-shown {
@@ -64,9 +66,6 @@ amp-story-page.i-amphtml-story-page-shown {
   opacity: .25!important;
 }
 
-[desktop] amp-story-page {
-  transform: scale(1.0) translateX(-350%) translateY(0%) !important;
-}
 
 [desktop] amp-story-page[pre-active] {
   /* -150% + 15% */
@@ -115,7 +114,10 @@ amp-story-page.i-amphtml-story-page-shown {
 [desktop] amp-story-page {
   left: 50%!important;
   right: auto!important;
-  margin: 112px auto;
+  margin: 112px auto!important;
+  max-height: 736px!important;
+  max-width: 338px!important;
+  box-shadow: 0 0 15px rgba(0, 0, 0, .4)!important;
 }
 
 /* Navigation buttons */
