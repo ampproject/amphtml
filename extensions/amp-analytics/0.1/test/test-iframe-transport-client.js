@@ -97,13 +97,13 @@ describe('iframe-transport-client', () => {
   });
 
   it('receives an event message ', () => {
-    window.processAmpAnalyticsEvent = (event, transportId) => {
-      expect(transportId).to.equal('101');
+    window.processAmpAnalyticsEvent = (event, creativeId) => {
+      expect(creativeId).to.equal('101');
       expect(event).to.equal('hello, world!');
     };
     send(MessageType.IFRAME_TRANSPORT_EVENTS, /** @type {!JsonObject} */ ({
       events: [
-        {transportId: '101', message: 'hello, world!'},
+        {creativeId: '101', message: 'hello, world!'},
       ]}));
   });
 
