@@ -33,6 +33,16 @@ amp-story[desktop] {
  left: 0;
 }
 
+.i-amphtml-story-background-overlay{
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+  background-color: rgba(0,0,0,0.2);
+}
+
 .i-amphtml-story-background {
  position: absolute;
  top: 0;
@@ -123,8 +133,8 @@ amp-story-page.i-amphtml-story-page-shown {
 [desktop] amp-story-page {
   left: 50%!important;
   right: auto!important;
-  margin: 112px auto;
-  max-height: 736px;
+  margin: auto;
+  max-height: 70vh;
   max-width: 338px;
   box-shadow: 0 0 15px rgba(0, 0, 0, .4);
 }
@@ -147,6 +157,7 @@ amp-story-page.i-amphtml-story-page-shown {
   align-items: center;
   opacity: .5;
   transition: 150ms opacity linear, 300ms transform linear;
+  outline: none;
   cursor: pointer;
   z-index: 1;
 }
@@ -249,10 +260,6 @@ amp-story-page.i-amphtml-story-page-shown {
   right: 0;
 }
 
-.i-amphtml-story-share:hover:before {
-  width: calc(100% - 16px);
-}
-
 .i-amphtml-story-share .i-amphtml-story-share-list > li  {
   opacity: 0;
   transition: opacity 300ms linear;
@@ -308,9 +315,18 @@ amp-story-page.i-amphtml-story-page-shown {
   height: 40px;
 }
 
+[desktop] .i-amphtml-story-share .i-amphtml-story-share-list > li {
+  width: 56px;
+  height: 56px;
+}
+
 .i-amphtml-story-share .i-amphtml-story-share-list > li svg {
   width: 28px;
   height: 28px;
+}
+
+.i-amphtml-story-share:hover:before {
+  width: calc(100% + 16px);
 }
 
 .i-amphtml-story-share .i-amphtml-story-share-icon {
@@ -322,6 +338,24 @@ amp-story-page.i-amphtml-story-page-shown {
   background-size: 30px 30px;
   background-color: transparent;
   padding: 0;
+}
+
+[desktop] .i-amphtml-story-share-icon {
+  font-size: 0px;
+  background-position-y: 5px;
+}
+
+[desktop] .i-amphtml-story-share-icon::before {
+  background-color: transparent;
+}
+
+[desktop] .i-amphtml-story-share-icon:active::before {
+  background-color: transparent;
+}
+
+[desktop] .i-amphtml-story-share-list {
+  margin-right: 100px;
+  margin-top: 15px;
 }
 
 .i-amphtml-story-share .i-amphtml-story-share-name {
