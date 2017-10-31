@@ -51,6 +51,30 @@ describes.realWin('amp-accordion', {
     }).then(() => ampAccordion);
   }
 
+  it('should expand when toggle action is triggered on a collapsed section', () => {
+    return getAmpAccordion().then(ampAccordion => {
+      const impl = ampAccordion.implementation_;
+      const headerElements = doc.querySelectorAll(
+          'section > *:first-child');
+      const clickEvent = {
+        target: headerElements[0],
+        currentTarget: headerElements[0],
+        preventDefault: sandbox.spy(),
+      };
+      expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
+      expect(headerElements[0].getAttribute('aria-expanded')).to.equal('false');
+
+      impl.toggle_(headerElements[0].parentNode);
+
+      expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.true;
+      expect(headerElements[0].getAttribute('aria-expanded')).to.equal('true');
+      expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.true;
+      expect(headerElements[1].getAttribute('aria-expanded')).to.equal('true');
+      expect(headerElements[2].parentNode.hasAttribute('expanded')).to.be.false;
+      expect(headerElements[2].getAttribute('aria-expanded')).to.equal('false');
+    });
+  });
+
   it('should expand when header of a collapsed section is clicked', () => {
     return getAmpAccordion().then(ampAccordion => {
       const headerElements = doc.querySelectorAll(
