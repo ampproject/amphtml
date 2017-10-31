@@ -322,7 +322,8 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     const lockOrientation = screen.lockOrientation ||
-        screen.mozLockOrientation || screen.msLockOrientation || (o => {});
+        screen.mozLockOrientation || screen.msLockOrientation ||
+        (unusedOrientation => {});
 
     lockOrientation('portrait');
   }
