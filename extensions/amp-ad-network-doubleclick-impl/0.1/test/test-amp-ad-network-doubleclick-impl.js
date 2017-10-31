@@ -37,6 +37,8 @@ import {
   DFP_CANONICAL_FF_EXPERIMENT_NAME,
   DOUBLECLICK_A4A_EXPERIMENT_NAME,
   DOUBLECLICK_EXPERIMENT_FEATURE,
+  UNCONDITIONED_IDENTITY_EXPERIMENT_NAME,
+  DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
 } from '../doubleclick-a4a-config';
 import {
   isInExperiment,
@@ -615,6 +617,22 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     it('should include identity', () => {
       forceExperimentBranch(impl.win, DOUBLECLICK_A4A_EXPERIMENT_NAME,
           DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT);
+      // Force get identity result by overloading window variable.
+      const token = /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({
+        token: 'abcdef', jar: 'some_jar', pucrd: 'some_pucrd',
+      });
+      impl.win['goog_identity_prom'] = Promise.resolve(token);
+      impl.buildCallback();
+      return impl.getAdUrl().then(url => {
+        [/(\?|&)adsid=abcdef(&|$)/,
+          /(\?|&)jar=some_jar(&|$)/,
+          /(\?|&)pucrd=some_pucrd(&|$)/].forEach(
+            regexp => expect(url).to.match(regexp));
+      });
+    });
+    it('should include identity for unconditioned experiment', () => {
+      forceExperimentBranch(impl.win, UNCONDITIONED_IDENTITY_EXPERIMENT_NAME,
+          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.IDENTITY_EXPERIMENT);
       // Force get identity result by overloading window variable.
       const token = /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({
         token: 'abcdef', jar: 'some_jar', pucrd: 'some_pucrd',
