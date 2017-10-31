@@ -109,9 +109,13 @@ export class ProgressBar {
   setActivePageIndex(pageIndex) {
     this.assertValidPageIndex_(pageIndex);
     for (let i = 0; i < this.pageCount_; i++) {
-      if (i <= pageIndex) {
+      if (i < pageIndex) {
         this.updateProgress(i, 1.0);
+      } else if (i > pageIndex) {
+        this.updateProgress(i, 0.0);
       } else {
+        // The active page manages its own progress by firing PAGE_PROGRESS
+        // events to amp-story.
         this.updateProgress(i, 0.0);
       }
     }

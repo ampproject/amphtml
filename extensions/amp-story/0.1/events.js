@@ -43,6 +43,9 @@ export const EventType = {
   // Triggered when the story should switch to a specified page
   SWITCH_PAGE: 'ampstory:switchpage',
 
+  // Triggered when a page updates its progress
+  PAGE_PROGRESS: 'ampstory:pageprogress',
+
   // Triggered when the story should be replayed
   REPLAY: 'ampstory:replay',
 
