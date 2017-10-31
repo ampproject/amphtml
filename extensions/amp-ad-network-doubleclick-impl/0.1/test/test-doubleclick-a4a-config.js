@@ -166,7 +166,6 @@ describe('doubleclick-a4a-config', () => {
       testFixture.doc.body.appendChild(elem);
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
-      expect(maybeSelectExperimentStub).to.be.calledTwice;
     });
 
     it('should not enable if data-use-same-domain-rendering-until-deprecated',
@@ -214,7 +213,6 @@ describe('doubleclick-a4a-config', () => {
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
           DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP);
-      expect(maybeSelectExperimentStub).to.be.calledOnce;
     });
     it('should properly select into unconditioned canonical control', () => {
       sandbox.stub(DoubleclickA4aEligibility.prototype,
