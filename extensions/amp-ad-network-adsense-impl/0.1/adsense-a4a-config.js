@@ -34,10 +34,10 @@ import {
 } from '../../../src/experiments';
 import {dev} from '../../../src/log';
 
-/** @const {!string} @visibleForTesting */
+/** @const {string} @visibleForTesting */
 export const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
 
-/** @const {!string} @visibleForTesting */
+/** @const {string} @visibleForTesting */
 export const UNCONDITIONED_IDENTITY_ADX_EXP_NAME =
     'expUnconditionedAdxIdentity';
 
@@ -96,6 +96,11 @@ export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {
   return true;
 }
 
+/**
+ * Attempts all unconditioned experiment selection.
+ * @param {!Window} win
+ * @param {!Element} element
+ */
 function unconditionedExperimentSelection(win, element) {
   selectAndSetUnconditionedExp(
       win, element,
@@ -104,6 +109,13 @@ function unconditionedExperimentSelection(win, element) {
       UNCONDITIONED_IDENTITY_ADX_EXP_NAME);
 }
 
+/**
+ * Attempts to select into experiment and forces branch if selected.
+ * @param {!Window} win
+ * @param {!Element} element
+ * @param {!Array<string>} branches
+ * @param {!string} expName
+ */
 function selectAndSetUnconditionedExp(win, element, branches, expName) {
   const experimentInfoMap =
         /** @type {!Object<string, !ExperimentInfo>} */ ({});

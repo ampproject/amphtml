@@ -119,6 +119,11 @@ export class DoubleclickA4aEligibility {
     return googleCdnProxyRegex.test(win.location.origin);
   }
 
+  /**
+   * Attempts all unconditioned experiment selection.
+   * @param {!Window} win
+   * @param {!Element} element
+   */
   unconditionedExperimentSelection(win, element) {
     this.selectAndSetUnconditionedExp(
         win, element,
@@ -133,6 +138,13 @@ export class DoubleclickA4aEligibility {
         UNCONDITIONED_IDENTITY_EXPERIMENT_NAME);
   }
 
+  /**
+   * Attempts to select into experiment and forces branch if selected.
+   * @param {!Window} win
+   * @param {!Element} element
+   * @param {!Array<string>} branches
+   * @param {!string} expName
+   */
   selectAndSetUnconditionedExp(win, element, branches, expName) {
     const experimentId = this.maybeSelectExperiment(
         win, element, branches, expName);
@@ -149,12 +161,13 @@ export class DoubleclickA4aEligibility {
    * @return {boolean}
    */
   isA4aEnabled(win, element, useRemoteHtml) {
-    let experimentId = this.unconditionedExperimentSelection(win, element);
+    this.unconditionedExperimentSelection(win, element);
     if ((useRemoteHtml && !element.getAttribute('rtc-config')) ||
         'useSameDomainRenderingUntilDeprecated' in element.dataset ||
         element.hasAttribute('useSameDomainRenderingUntilDeprecated')) {
       return false;
     }
+    let experimentId;
     const urlExperimentId = extractUrlExperimentId(win, element);
     let experimentName = DFP_CANONICAL_FF_EXPERIMENT_NAME;
     if (!this.isCdnProxy(win)) {
