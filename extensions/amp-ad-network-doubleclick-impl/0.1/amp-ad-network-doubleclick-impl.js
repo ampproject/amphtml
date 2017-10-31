@@ -33,6 +33,7 @@ import {
   DOUBLECLICK_EXPERIMENT_FEATURE,
   DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
   DFP_CANONICAL_FF_EXPERIMENT_NAME,
+  UNCONDITIONED_IDENTITY_EXPERIMENT_NAME,
 } from './doubleclick-a4a-config';
 import {
   isInManualExperiment,
@@ -387,7 +388,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.win, DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT) ||
         experimentFeatureEnabled(
             this.win,
-            DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.IDENTITY_EXPERIMENT) ?
+            DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.IDENTITY_EXPERIMENT,
+            UNCONDITIONED_IDENTITY_EXPERIMENT_NAME) ?
         Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
         .then(() => getIdentityToken(this.win, this.getAmpDoc())) :
         Promise.resolve(
