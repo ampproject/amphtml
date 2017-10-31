@@ -147,6 +147,7 @@ amp-story-page.i-amphtml-story-page-shown {
   align-items: center;
   opacity: .5;
   transition: 150ms opacity linear, 300ms transform linear;
+  outline: none;
   cursor: pointer;
   z-index: 1;
 }
