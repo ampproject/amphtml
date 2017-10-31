@@ -70,6 +70,8 @@ export const DOUBLECLICK_EXPERIMENT_FEATURE = {
 export const DOUBLECLICK_UNCONDITIONED_EXPERIMENTS = {
   FF_CANONICAL_CTL: '21061145',
   FF_CANONICAL_EXP: '21061146',
+  IDENTITY_CONTROL: '21061304',
+  IDENTITY_EXPERIMENT: '21061305',
 };
 
 /** @const @type {!Object<string,?string>} */
@@ -118,14 +120,25 @@ export class DoubleclickA4aEligibility {
   }
 
   unconditionedExperimentSelection(win, element) {
-    let experimentId = this.maybeSelectExperiment(
-        win, element,[DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
+    this.selectAndSetUnconditionedExp(
+        win, element,
+        [DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
           DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP],
         UNCONDITIONED_CANONICAL_FF_EXPERIMENT_NAME);
+
+    this.selectAndSetUnconditionedExp(
+        win, element,
+        [DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.IDENTITY_CONTROL,
+          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.IDENTITY_EXPERIMENT],
+        UNCONDITIONED_IDENTITY_EXPERIMENT_NAME);
+  }
+
+  selectAndSetUnconditionedExp(win, element, branches, expName) {
+    const experimentId = this.maybeSelectExperiment(
+        win, element, branches, expName);
     if (!!experimentId) {
       addExperimentIdToElement(experimentId, element);
-      forceExperimentBranch(
-          win, UNCONDITIONED_CANONICAL_FF_EXPERIMENT_NAME, experimentId);
+      forceExperimentBranch(win, expName, experimentId);
     }
   }
 
@@ -137,7 +150,6 @@ export class DoubleclickA4aEligibility {
    */
   isA4aEnabled(win, element, useRemoteHtml) {
     let experimentId = this.unconditionedExperimentSelection(win, element);
-
     if ((useRemoteHtml && !element.getAttribute('rtc-config')) ||
         'useSameDomainRenderingUntilDeprecated' in element.dataset ||
         element.hasAttribute('useSameDomainRenderingUntilDeprecated')) {
@@ -145,7 +157,6 @@ export class DoubleclickA4aEligibility {
     }
     const urlExperimentId = extractUrlExperimentId(win, element);
     let experimentName = DFP_CANONICAL_FF_EXPERIMENT_NAME;
-
     if (!this.isCdnProxy(win)) {
       // Ensure that forcing FF via url is applied if test/localDev.
       if (urlExperimentId == -1 &&
@@ -155,8 +166,8 @@ export class DoubleclickA4aEligibility {
         let e;
         // For unconditioned canonical experiment, in the experiment branch
         // we allow Fast Fetch on non-CDN pages, but in the control we do not.
-        if (e = getExperimentBranch(
-            win, UNCONDITIONED_CANONICAL_FF_EXPERIMENT_NAME)) {
+        if ((e = getExperimentBranch(
+            win, UNCONDITIONED_CANONICAL_FF_EXPERIMENT_NAME))) {
           return e ==
               DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP;
         }
@@ -221,7 +232,8 @@ export function doubleclickIsA4AEnabled(win, element, useRemoteHtml) {
 
 /**
  * @param {!Window} win
- * @param {!DOUBLECLICK_EXPERIMENT_FEATURE} feature
+ * @param {!DOUBLECLICK_EXPERIMENT_FEATURE|
+ *         DOUBLECLICK_UNCONDITIONED_EXPERIMENTS} feature
  * @param {string=} opt_experimentName
  * @return {boolean} whether feature is enabled
  */
