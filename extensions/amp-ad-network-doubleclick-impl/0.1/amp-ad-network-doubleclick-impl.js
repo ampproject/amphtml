@@ -358,7 +358,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.safeframeVersion_ = DEFAULT_SAFEFRAME_VERSION;
 
     /** @private {string} */
-    this.nonAmpRenderingMethod_ = XORIGIN_MODE.SAFEFRAME;
+    this.nonAmpRenderingMethod_ = this.getNonAmpCreativeRenderingMethod();
   }
 
   /** @override */

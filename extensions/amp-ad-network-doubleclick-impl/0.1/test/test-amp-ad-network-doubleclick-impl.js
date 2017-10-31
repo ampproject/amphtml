@@ -18,6 +18,7 @@ import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpA4A,
   CREATIVE_SIZE_HEADER,
+  XORIGIN_MODE,
 } from '../../../amp-a4a/0.1/amp-a4a';
 import {DATA_ATTR_NAME} from '../../../amp-a4a/0.1/refresh-manager';
 import {AMP_SIGNATURE_HEADER} from '../../../amp-a4a/0.1/signature-verifier';
@@ -29,6 +30,7 @@ import {
   CORRELATOR_CLEAR_EXP_BRANCHES,
   CORRELATOR_CLEAR_EXP_NAME,
   SAFEFRAME_ORIGIN,
+  SAFEFRAME_VERSION_HEADER,
 } from '../amp-ad-network-doubleclick-impl';
 import {
   DFP_CANONICAL_FF_EXPERIMENT_NAME,
@@ -248,6 +250,19 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         },
       });
       expect(impl.refreshManager_.refreshInterval_).to.equal('45');
+    });
+
+    it('should change SafeFrame version if header is present', () => {
+      impl.preconnect = {preload: () => {}};
+      impl.processResponseHeaders({
+        get(name) {
+          return name == SAFEFRAME_VERSION_HEADER ? '1-2-3' : undefined;
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      });
+      expect(impl.safeframeVersion_).to.equal('1-2-3');
     });
   });
 
@@ -1055,6 +1070,45 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       expect(isInExperiment(element, '21061136')).to.be.false;
       expect(impl.getPreconnectUrls()).to.deep.equal(
           ['https://partner.googleadservices.com', SAFEFRAME_ORIGIN]);
+    });
+  });
+
+  describe('#getNonAmpCreativeRenderingMethod', () => {
+    beforeEach(() => {
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        'width': '200',
+        'height': '50',
+        'type': 'doubleclick',
+      });
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+    });
+    it('should use SafeFrame by default', () =>
+        expect(impl.getNonAmpCreativeRenderingMethod())
+            .to.equal(XORIGIN_MODE.SAFEFRAME));
+    it('should use header value', () =>
+        expect(impl.getNonAmpCreativeRenderingMethod(XORIGIN_MODE.CLIENT_CACHE))
+            .to.equal(XORIGIN_MODE.CLIENT_CACHE));
+    it('should use SafeFrame despite header value, due to fluid', () => {
+      impl.isFluid_ = true;
+      expect(impl.getNonAmpCreativeRenderingMethod(XORIGIN_MODE.CLIENT_CACHE))
+          .to.equal(XORIGIN_MODE.SAFEFRAME);
+    });
+  });
+
+  describe('#forceNonAmpRenderingMethod', () => {
+    beforeEach(() => {
+      element = createElementWithAttributes(doc, 'amp-ad', {
+        'width': '200',
+        'height': '50',
+        'type': 'doubleclick',
+      });
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+    });
+    it('should be false by default', () =>
+        expect(impl.forceNonAmpRenderingMethod()).to.be.false);
+    it('should be true for fluid ads', () => {
+      impl.isFluid_ = true;
+      expect(impl.forceNonAmpRenderingMethod()).to.be.true;
     });
   });
 });
