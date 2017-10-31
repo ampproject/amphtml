@@ -304,6 +304,11 @@ amp-story-page.i-amphtml-story-page-shown {
   height: 40px;
 }
 
+[desktop] .i-amphtml-story-share .i-amphtml-story-share-list > li {
+  width: 56px;
+  height: 56px;
+}
+
 .i-amphtml-story-share .i-amphtml-story-share-list > li svg {
   width: 28px;
   height: 28px;
@@ -338,7 +343,8 @@ amp-story-page.i-amphtml-story-page-shown {
 }
 
 [desktop] .i-amphtml-story-share-list {
-  margin-right: 108px;
+  margin-right: 100px;
+  margin-top: 15px;
 }
 
 .i-amphtml-story-share .i-amphtml-story-share-name {
@@ -364,6 +370,7 @@ amp-story-page.i-amphtml-story-page-shown {
 [desktop] .i-amphtml-story-page-progress-bar:first-child,
 [desktop] .i-amphtml-story-page-progress-bar:first-child .i-amphtml-story-page-progress-value {
   border-radius: 50px 0 0 50px;
+  margin: 0 2px;
 }
 
 [desktop] .i-amphtml-story-page-progress-bar:last-child,
