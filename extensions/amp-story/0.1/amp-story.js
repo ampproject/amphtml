@@ -40,7 +40,6 @@ import {Services} from '../../../src/services';
 import {relatedArticlesFromJson} from './related-articles';
 import {ShareWidget} from './share';
 import {
-  closest,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
@@ -60,9 +59,6 @@ import {getMode} from '../../../src/mode';
 import {urls} from '../../../src/config';
 import {getSourceOrigin, parseUrl} from '../../../src/url';
 import {stringHash32} from '../../../src/string';
-
-/** @private @const {number} */
-const NEXT_SCREEN_AREA_RATIO = 0.75;
 
 /** @private @const {string} */
 const PRE_ACTIVE_PAGE_ATTRIBUTE_NAME = 'pre-active';
@@ -86,18 +82,6 @@ const AUDIO_MUTED_ATTRIBUTE = 'muted';
 
 /** @type {string} */
 const TAG = 'amp-story';
-
-
-/**
- * @param {!Element} el
- * @return {boolean}
- */
-function hasTapAction(el) {
-  // There are better ways to determine this, but they're all bound to action
-  // service race conditions. This is good enough for our use case.
-  return el.hasAttribute('on') &&
-      !!el.getAttribute('on').match(/(^|;)\s*tap\s*:/);
-}
 
 
 export class AmpStory extends AMP.BaseElement {
@@ -211,9 +195,6 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   initializeListeners_() {
-    this.element.addEventListener('click',
-        this.maybePerformSystemNavigation_.bind(this), true);
-
     this.element.addEventListener(EventType.EXIT_FULLSCREEN, () => {
       this.exitFullScreen_(/* opt_explicitUserAction */ true);
     });
@@ -250,6 +231,19 @@ export class AmpStory extends AMP.BaseElement {
       } else {
         this.switchTo_(targetPageId);
       }
+    });
+
+    this.element.addEventListener(EventType.PAGE_PROGRESS, e => {
+      const pageId = e.detail.pageId;
+      const progress = e.detail.progress;
+
+      if (pageId !== this.activePage_.element.id) {
+        // Ignore progress update events from inactive pages.
+        return;
+      }
+
+      const pageIndex = this.getPageIndexById_(pageId);
+      this.systemLayer_.updateProgress(pageIndex, progress);
     });
 
     this.element.addEventListener(EventType.REPLAY, () => {
@@ -794,36 +788,6 @@ export class AmpStory extends AMP.BaseElement {
 
 
   /**
-   * Performs a system navigation if it is determined that the specified event
-   * was a click intended for navigation.
-   * @param {!Event} event 'click' event
-   * @private
-   */
-  maybePerformSystemNavigation_(event) {
-    if (!this.isNavigationalClick_(event)) {
-      // If the system doesn't need to handle this click, then we can simply
-      // return and let the event propagate as it would have otherwise.
-      return;
-    }
-
-    event.stopPropagation();
-
-    // TODO(newmuis): This will need to be flipped for RTL.
-    const offsetLeft = this.element./*OK*/offsetLeft;
-    const offsetWidth = this.element./*OK*/offsetWidth;
-    const nextScreenAreaMin = offsetLeft +
-        ((1 - NEXT_SCREEN_AREA_RATIO) * offsetWidth);
-    const nextScreenAreaMax = offsetLeft + offsetWidth;
-
-    if (event.pageX >= nextScreenAreaMin && event.pageX < nextScreenAreaMax) {
-      this.next_();
-    } else if (event.pageX >= offsetLeft && event.pageX < nextScreenAreaMin) {
-      this.previous_();
-    }
-  }
-
-
-  /**
    * @return {!Array<!Array<string>>} A 2D array representing lists of pages by
    *     distance.  The outer array index represents the distance from the
    *     active page; the inner array is a list of page IDs at the specified
@@ -958,23 +922,6 @@ export class AmpStory extends AMP.BaseElement {
         });
   }
 
-  /**
-   * Determines whether a click should be used for navigation.  Navigate should
-   * occur unless the click is on the system layer, or on an element that
-   * defines on="tap:..."
-   * @param {!Event} e 'click' event.
-   * @return {boolean} true, if the click should be used for navigation.
-   * @private
-   */
-  isNavigationalClick_(e) {
-    return !closest(dev().assertElement(e.target), el => {
-      return el === this.systemLayer_.getRoot() ||
-          this.isBookend_(el) ||
-          this.isTopBar_(el) ||
-          hasTapAction(el);
-    }, /* opt_stopAt */ this.element);
-  }
-
 
   /**
    * @param {!Element} el
@@ -997,14 +944,32 @@ export class AmpStory extends AMP.BaseElement {
 
 
   /**
+   * @param {string} id The ID of the page whose index should be retrieved.
+   * @return {number} The index of the page.
+   * @private
+   */
+  getPageIndexById_(id) {
+    const pageIndex = findIndex(this.pages_, page => page.element.id === id);
+
+    if (pageIndex < 0) {
+      user().error(TAG,
+          `Story refers to page "${id}", but no such page exists.`);
+    }
+
+    return pageIndex;
+  }
+
+
+  /**
    * @param {string} id The ID of the page to be retrieved.
-   * @return {!./amp-story-page.AmpStoryPage} Retrieves the page with the specified ID.
+   * @return {!./amp-story-page.AmpStoryPage} Retrieves the page with the
+   *     specified ID.
    * @private
    */
   getPageById_(id) {
-    const pageIndex = findIndex(this.pages_, page => page.element.id === id);
-    return user().assert(this.pages_[pageIndex],
-        `Story refers to page "${id}", but no such page exists.`);
+    const pageIndex = this.getPageIndexById_(id);
+    return dev().assert(this.pages_[pageIndex],
+        `Page at index ${pageIndex} exists, but is missing from the array.`);
   }
 
 
