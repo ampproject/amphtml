@@ -973,7 +973,9 @@ describe('amp-a4a', () => {
         });
       });
     });
-    it('should run end-to-end and render in friendly iframe', () => {
+    // TODO(keithwrightbos): Make this test work on Safari. See #11827.
+    it.configure().skipSafari().run('should run end-to-end and ' +
+        'render in friendly iframe', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         fetchMock.getOnce(
@@ -1058,7 +1060,8 @@ describe('amp-a4a', () => {
     });
     // TODO (keithwrightbos) - move into above e2e once signed creative with
     // image within creative can be regenerated.
-    it('should prefetch amp images', () => {
+    // TODO(keithwrightbos): Make this test work on Safari. See #11827.
+    it.configure().skipSafari().run('should prefetch amp images', () => {
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         fetchMock.getOnce(

@@ -302,7 +302,9 @@ describes.sandboxed('Extensions', {}, () => {
       });
     });
 
-    it('should install declared elements for AmpDocShell in shadow-doc', () => {
+    // TODO(dvoytenko): Make this test work on Safari. See #11827.
+    it.configure().skipSafari().run('should install declared elements for ' +
+        'AmpDocShell in shadow-doc', () => {
       const ampdocShell = new AmpDocShell(win);
       const ampdocServiceMock = sandbox.mock(Services.ampdocServiceFor(win));
 

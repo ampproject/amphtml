@@ -62,7 +62,9 @@ describe('iframe-transport-client', () => {
     window./*OK*/postMessage(payload, '*');
   }
 
-  it('fails to create iframeTransportClient if no window.name ', () => {
+  // TODO(jonkeller): Make this test work on Safari. See #11827.
+  it.configure().skipSafari().run('fails to create iframeTransportClient ' +
+      'if no window.name ', () => {
     const oldWindowName = window.name;
     expect(() => {
       window.name = '';

@@ -378,7 +378,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
         });
   });
 
-  it('should replace CLIENT_ID synchronously when available', () => {
+  // TODO(alanorozco): Make this test work on Safari. See #11827.
+  it.configure().skipSafari().run('should replace CLIENT_ID synchronously ' +
+      'when available', () => {
     return getReplacements({withCid: true}).then(urlReplacements => {
       setCookie(window, 'url-abc', 'cid-for-abc');
       setCookie(window, 'url-xyz', 'cid-for-xyz');

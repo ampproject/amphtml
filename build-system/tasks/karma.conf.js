@@ -48,7 +48,7 @@ module.exports = {
   reporters: ['super-dots', 'karmaSimpleReporter'],
 
   superDotsReporter: {
-    nbDotsPerLine: 10000,
+    nbDotsPerLine: 100000,
     color: {
       success: 'green',
       failure: 'red',

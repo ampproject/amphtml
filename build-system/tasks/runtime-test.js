@@ -85,6 +85,7 @@ function getConfig() {
         // Only browsers that support chai-as-promised may be included below.
         // TODO(rsimha-amp): Add more browsers to this list. #6039.
         'SL_Chrome_latest',
+        'SL_Safari_latest',
       ],
     });
   }
