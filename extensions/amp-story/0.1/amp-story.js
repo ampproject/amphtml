@@ -300,6 +300,16 @@ export class AmpStory extends AMP.BaseElement {
     setImportantStyles(document.body, {
       'overflow': 'hidden',
     });
+
+    const screen = this.win.screen;
+    if (!screen) {
+      return;
+    }
+
+    const lockOrientation = screen.lockOrientation ||
+        screen.mozLockOrientation || screen.msLockOrientation || (o => {});
+
+    lockOrientation('portrait');
   }
 
   /** @private */
