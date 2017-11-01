@@ -194,7 +194,7 @@ export class IntersectionObserverPolyfill {
     /** @private @const {function(?Array<!IntersectionObserverEntry>)} */
     this.callback_ = callback;
 
-    // The input threshold can be a number or an array of numbers
+    // The input threshold can be a number or an array of numbers.
     let threshold = opt_option && opt_option.threshold;
     if (threshold) {
       threshold = isArray(threshold) ?
