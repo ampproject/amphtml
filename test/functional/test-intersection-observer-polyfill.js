@@ -202,6 +202,37 @@ describe('IntersectionObserverPolyfill', () => {
   });
 
   describe('threshold', () => {
+    it('default threshold is "[0]"', () => {
+      const io = new IntersectionObserverPolyfill(() => {}, {});
+      expect(io.threshold_).to.jsonEqual([0]);
+    });
+
+    it('accept a single number threshold', () => {
+      const io = new IntersectionObserverPolyfill(() => {}, {
+        threshold: 0.3,
+      });
+      expect(io.threshold_).to.jsonEqual([0.3]);
+    });
+
+    it('threshold value must be finite number', () => {
+      const io1 = () => {
+        new IntersectionObserverPolyfill(() => {}, {
+          threshold: [0.5, '0.6'],
+        });
+      };
+      const io2 = () => {
+        new IntersectionObserverPolyfill(() => {}, {
+          threshold: Infinity,
+        });
+      };
+      expect(io1).to.throw(
+          'Threshold should be a ' +
+          'finite number or an array of finite numbers');
+      expect(io2).to.throw(
+          'Threshold should be a ' +
+          'finite number or an array of finite numbers');
+    });
+
     it('will be sorted', () => {
       const io = new IntersectionObserverPolyfill(() => {}, {
         threshold: [0, 0.9, 0.3, 1, 0.02],
