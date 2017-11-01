@@ -229,7 +229,8 @@ export class RefreshManager {
     return observers[threshold] ||
         (observers[threshold] = 'IntersectionObserver' in this.win_
          ? new this.win_['IntersectionObserver'](this.ioCallback_, {threshold})
-         : new IntersectionObserverPolyfill(this.ioCallback_, {threshold}));
+         : new IntersectionObserverPolyfill(this.ioCallback_,
+              {threshold: [threshold]}));
   }
 
   /**
