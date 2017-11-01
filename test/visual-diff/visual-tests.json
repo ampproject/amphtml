@@ -119,10 +119,10 @@
       "url": "examples/visual-tests/amp-story.bookend/amp-story.bookend.amp.html",
       "name": "amp-story bookend",
       "loading_incomplete_css": [
-        ":not(.i-amphtml-story-bookend-active)"
+        "amp-story:not(.i-amphtml-story-bookend-active)"
       ],
       "loading_complete_css": [
-        ".i-amphtml-story-standalone",
+        "amp-story.i-amphtml-story-standalone",
         ".i-amphtml-story-bookend-active"
       ]
     }
