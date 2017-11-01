@@ -122,7 +122,7 @@ export const LIFECYCLE_STAGES = {
   renderFriendlyEnd: '8',
   renderCrossDomainEnd: '9',
   preAdThrottle: '10',
-  renderSafeFrameStart: '11',
+  renderViaNameAttrStart: '11',
   throttled3p: '12',
   adResponseValidateEnd: '13',
   xDomIframeLoaded: '14',
@@ -1378,7 +1378,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderViaNameAttrOfXOriginIframe_(creativeBody) {
-    this.protectedEmitLifecycleEvent_('renderSafeFrameStart', {
+    this.protectedEmitLifecycleEvent_('renderViaNameAttrStart', {
       'isAmpCreative': this.isVerifiedAmpCreative_,
       'releaseType': this.releaseType_,
     });
@@ -1595,6 +1595,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * This function may be overriden by an implementing network to force the use
    * of a non-AMP rendering method when so desired.
+   * @return {boolean}
    */
   forceNonAmpRenderingMethod() {
     return false;

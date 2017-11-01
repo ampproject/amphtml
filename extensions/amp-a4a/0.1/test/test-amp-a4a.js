@@ -240,7 +240,7 @@ describe('amp-a4a', () => {
         expect(child).to.be.ok;
         expect(child).to.be.visible;
         expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
-        expect(lifecycleEventStub).to.be.calledWith('renderSafeFrameStart',
+        expect(lifecycleEventStub).to.be.calledWith('renderViaNameAttrStart',
             {'isAmpCreative': false, 'releaseType': '0'});
       });
     });
