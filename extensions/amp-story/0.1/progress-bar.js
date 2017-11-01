@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {dev} from '../../../src/log';
-import {scale, setStyles} from '../../../src/style';
+import {scale, setImportantStyles} from '../../../src/style';
 import {scopedQuerySelector} from '../../../src/dom';
 import {Services} from '../../../src/services';
 
@@ -137,7 +137,7 @@ export class ProgressBar {
         `.i-amphtml-story-page-progress-bar:nth-child(${nthChildIndex}) ` +
         '.i-amphtml-story-page-progress-value');
     this.vsync_.mutate(() => {
-      setStyles(dev().assertElement(progressEl), {
+      setImportantStyles(dev().assertElement(progressEl), {
         'transform': scale(`${progress},1`),
       });
     });
