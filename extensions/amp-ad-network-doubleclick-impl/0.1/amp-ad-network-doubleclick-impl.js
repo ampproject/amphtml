@@ -1128,7 +1128,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   preconnectCallback(unusedOnLayout) {
-    if (this.isFluid_) {
+    if (this.nonAmpRenderingMethod_ == XORIGIN_MODE.SAFEFRAME) {
       this.preconnect.preload(this.getSafeframePath_());
     }
   }
