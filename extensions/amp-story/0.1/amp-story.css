@@ -138,7 +138,8 @@ amp-story[standalone]:fullscreen {
   border-radius: 1px !important;
   height: 100% !important;
   list-style-type: none !important;
-  margin: 0 1px !important;
+  margin: 0 2px!important;
+  overflow: hidden!important;
   width: 100% !important;
 }
 
@@ -378,6 +379,7 @@ amp-story-grid-layer * {
   line-height: 1.4;
   margin: 0 0 8px !important;
 }
+
 
 .i-amphtml-story-bookend-article-image,
 .i-amphtml-story-bookend-replay-image,
@@ -630,7 +632,8 @@ amp-story[standalone] .i-amphtml-story-developer-log {
 
 /** Experiment disabled  */
 .i-amphtml-story-experiment-error {
-  align-content: center !important;
+  align-items: center !important;
+  align-content: center!important;
   background-color: #222 !important;
   bottom: 0 !important;
   color: #f0f0f0 !important;
@@ -647,8 +650,7 @@ amp-story[standalone] .i-amphtml-story-developer-log {
   z-index: 999999 !important;
 }
 
-.i-amphtml-story-experiment-error-icon {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>') !important;
+.i-amphtml-story-experiment-icon {
   background-repeat: no-repeat !important;
   background-size: cover !important;
   height: 64px !important;
@@ -656,8 +658,33 @@ amp-story[standalone] .i-amphtml-story-developer-log {
   width: 64px !important;
 }
 
-.i-amphtml-story-experiment-error a {
+.i-amphtml-story-experiment-icon-error {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M0 0h24v24H0z" fill="none"/><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>') !important;
+}
+
+.i-amphtml-story-experiment-icon-done {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path fill="none" d="M0 0h24v24H0z"/><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>') !important;
+}
+
+.i-amphtml-story-experiment-error button {
+  background-color: transparent !important;
+  border: 1px solid #f0f0f0 !important;
+  border-radius: 8px !important;
   color: #f0f0f0 !important;
+  cursor: pointer !important;
+  font-size: 20px !important;
+  font-family: 'Roboto', sans-serif !important;
+  margin: 16px 0 0 !important;
+  outline: none !important;
+  padding: 8px 32px !important;
+  text-transform: uppercase !important;
+  width: 50% !important;
+}
+
+.i-amphtml-story-experiment-error button:active,
+.i-amphtml-story-experiment-error button:focus {
+  background-color: #f0f0f0 !important;
+  color: #222 !important;
 }
 
 .i-amphtml-story-unmute-audio-control {

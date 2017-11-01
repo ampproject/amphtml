@@ -79,7 +79,7 @@ export class IframeTransportMessageQueue {
   }
 
   /**
-   * Returns how many transportId -> message(s) mappings there are
+   * Returns how many creativeId -> message(s) mappings there are
    * @return {number}
    * @VisibleForTesting
    */
@@ -94,13 +94,13 @@ export class IframeTransportMessageQueue {
    * creative) is sending it.
    */
   enqueue(event) {
-    dev().assert(TAG_, event && event.transportId && event.message,
+    dev().assert(event && event.creativeId && event.message,
         'Attempted to enqueue malformed message for: ' +
-        event.transportId);
+        event.creativeId);
     this.pendingEvents_.push(event);
     if (this.queueSize() >= MAX_QUEUE_SIZE_) {
       dev().warn(TAG_, 'Exceeded maximum size of queue for: ' +
-          event.transportId);
+          event.creativeId);
       this.pendingEvents_.shift();
     }
     this.flushQueue_();

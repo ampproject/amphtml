@@ -35,12 +35,23 @@ amp-story[desktop] {
  left: 0!important;
 }
 
+.i-amphtml-story-background-overlay{
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+  background-color: rgba(0,0,0,0.2);
+}
+
 .i-amphtml-story-background {
  position: absolute!important;
  top: 0!important;
  right: 0!important;
  bottom: 0!important;
  left: 0!important;
+ opacity: 0!important;
  filter: blur(30px)!important;
  margin: -60px!important;
  background-size: 125% 125%!important;
@@ -122,8 +133,8 @@ amp-story-page.i-amphtml-story-page-shown {
 [desktop] amp-story-page {
   left: 50%!important;
   right: auto!important;
-  margin: 112px auto!important;
-  max-height: 736px!important;
+  margin: auto!important;
+  max-height: 70vh!important;
   max-width: 338px!important;
   box-shadow: 0 0 15px rgba(0, 0, 0, .4)!important;
 }
@@ -148,6 +159,7 @@ amp-story-page.i-amphtml-story-page-shown {
   transition: 150ms opacity linear, 300ms transform linear!important;
   cursor: pointer!important;
   z-index: 1!important;
+  outline: none!important;
 }
 
 .i-amphtml-story-button-move {
@@ -307,9 +319,18 @@ amp-story-page.i-amphtml-story-page-shown {
   height: 40px!important;
 }
 
+[desktop] .i-amphtml-story-share .i-amphtml-story-share-list > li {
+  width: 56px;
+  height: 56px;
+}
+
 .i-amphtml-story-share .i-amphtml-story-share-list > li svg {
   width: 28px!important;
   height: 28px!important;
+}
+
+.i-amphtml-story-share:hover:before {
+  width: calc(100% + 16px);
 }
 
 .i-amphtml-story-share .i-amphtml-story-share-icon {
@@ -321,6 +342,24 @@ amp-story-page.i-amphtml-story-page-shown {
   background-size: 30px 30px;
   background-color: transparent;
   padding: 0;
+}
+
+[desktop] .i-amphtml-story-share-icon {
+  font-size: 0px;
+  background-position-y: 5px;
+}
+
+[desktop] .i-amphtml-story-share-icon::before {
+  background-color: transparent;
+}
+
+[desktop] .i-amphtml-story-share-icon:active::before {
+  background-color: transparent;
+}
+
+[desktop] .i-amphtml-story-share-list {
+  margin-right: 100px;
+  margin-top: 15px;
 }
 
 .i-amphtml-story-share .i-amphtml-story-share-name {
