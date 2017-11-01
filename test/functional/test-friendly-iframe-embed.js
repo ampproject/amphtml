@@ -93,6 +93,8 @@ describe('friendly-iframe-embed', () => {
       expect(embed.win.document.body.style.visibility).to.equal('visible');
       expect(String(embed.win.document.body.style.opacity)).to.equal('1');
       expect(getStyle(embed.win.document.body, 'animation')).to.equal('none');
+      expect(embed.win.document.documentElement.classList.contains(
+          'i-amphtml-fie')).to.be.true;
 
       // BASE element has been inserted.
       expect(embed.win.document.querySelector('base').href)
