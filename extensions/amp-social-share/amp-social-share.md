@@ -89,10 +89,12 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
 <table>
   <tr>
     <th class="col-twenty">Provider</th>
+    <th class="col-twenty">Type</th>
     <th>Parameters</th>
   </tr>
   <tr>
     <td>Email</td>
+    <td><code>email</code></td>
     <td>
       <ul>
         <li><code>data-param-subject</code>: optional, defaults to: Current page title</li>
@@ -103,6 +105,7 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
   </tr>
   <tr>
     <td>Facebook</td>
+    <td><code>facebook</code></td>
     <td>
       <ul>
        <li><code>data-param-app_id</code>: <strong>required</strong>, defaults to: none. This parameter is the Facebook <code>app_id</code> that's required for the <a href="https://developers.facebook.com/docs/sharing/reference/share-dialog">Facebook Share dialog</a>.</li>
@@ -113,6 +116,7 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
   </tr>
   <tr>
     <td>LinkedIn</td>
+    <td><code>linkedin</code></td>
     <td>
       <ul>
         <li><code>data-param-url</code>: optional, defaults to: <code>rel=canonical</code> URL</li>
@@ -122,6 +126,7 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
   </tr>
   <tr>
     <td>Pinterest</td>
+    <td><code>pinterest</code></td>
     <td>
       <ul>
         <li><code>data-param-media</code>: optional (but highly recommended to be set), defaults to: none. Url for the media to be shared on Pinterest. If not set, the end user will be requested to upload a media by Pinterest.</li>
@@ -133,6 +138,7 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
   </tr>
   <tr>
     <td>G+</td>
+    <td><code>gplus</code></td>
     <td>
       <ul>
         <li><code>data-param-url</code>: optional, defaults to: <code>rel=canonical</code> URL</li>
@@ -141,6 +147,7 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
   </tr>
   <tr>
     <td>Tumblr</td>
+    <td><code>tumblr</code></td>
     <td>
       <ul>
         <li><code>data-param-url</code>: optional, defaults to: <code>rel=canonical</code> URL</li>
@@ -150,6 +157,7 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
   </tr>
   <tr>
     <td>Twitter</td>
+    <td><code>twitter</code></td>
     <td>
       <ul>
         <li><code>data-param-url</code>: optional, defaults to: <code>rel=canonical</code> URL</li>
@@ -159,6 +167,7 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
   </tr>
   <tr>
     <td>Whatsapp</td>
+    <td><code>whatsapp</code></td>
     <td>
       <ul>
         <li><code>data-param-text</code>: optional, defaults to: "Current page title - current page URL"</li>
@@ -167,6 +176,7 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
   </tr>
   <tr>
     <td><a href="https://developers.google.com/web/updates/2016/10/navigator-share">Web Share API</a> (available in Chrome as an <a href="https://github.com/jpchase/OriginTrials/blob/gh-pages/developer-guide.md">origin trial</a>)</td>
+    <td><code>system</code></td>
     <td>
       <ul>
         <li><code>data-param-text</code>: optional, defaults to: "Current page title"</li>
@@ -176,6 +186,7 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
   </tr>
   <tr>
     <td>SMS</td>
+    <td><code>sms</code></td>
     <td>
       <ul>
         <li><code>data-param-body</code>: optional, defaults to: <code>rel=title - rel=canonical</code> URL</li></ul>
