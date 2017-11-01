@@ -421,6 +421,7 @@ export class FriendlyIframeEmbed {
     }
     setStyle(this.iframe, 'visibility', '');
     if (this.win.document && this.win.document.body) {
+      this.win.document.documentElement.classList.add('i-amphtml-fie');
       setStyles(dev().assertElement(this.win.document.body), {
         opacity: 1,
         visibility: 'visible',
