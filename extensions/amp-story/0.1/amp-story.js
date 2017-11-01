@@ -171,9 +171,6 @@ export class AmpStory extends AMP.BaseElement {
       this.lockBody_();
     }
 
-    this.element.appendChild(
-        this.systemLayer_.build(this.getRealChildren().length));
-
     this.initializeListeners_();
     this.initializeListenersForDev_();
 
@@ -190,6 +187,16 @@ export class AmpStory extends AMP.BaseElement {
 
     registerServiceBuilder(this.win, 'story-variable',
         () => this.variableService_);
+  }
+
+
+  /**
+   * Builds the system layer DOM.  This is dependent on the pages_ array having
+   * been initialized, so it cannot happen at build time.
+   * @private
+   */
+  buildSystemLayer_() {
+    this.element.appendChild(this.systemLayer_.build(this.getPageCount()));
   }
 
 
@@ -350,6 +357,7 @@ export class AmpStory extends AMP.BaseElement {
         'Story must have at least one page.');
 
     return this.initializePages_()
+        .then(() => this.buildSystemLayer_())
         .then(() => {
           this.pages_.forEach(page => {
             page.setActive(false);
