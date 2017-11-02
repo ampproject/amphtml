@@ -59,6 +59,10 @@ export class AmpPixel extends BaseElement {
           `${TAG}: invalid "referrerpolicy" value "${this.referrerPolicy_}".`
           + ' Only "no-referrer" is supported');
     }
+    if (this.element.querySelector('img')) {
+      dev().info(TAG, 'inabox img already present');
+      return;
+    }
     // Trigger, but only when visible.
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.whenFirstVisible().then(this.trigger_.bind(this));
