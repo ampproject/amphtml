@@ -53,7 +53,7 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {AudioManager, upgradeBackgroundAudio} from './audio';
-import {setStyle, setImportantStyles} from '../../../src/style';
+import {setImportantStyles} from '../../../src/style';
 import {findIndex} from '../../../src/utils/array';
 import {ActionTrust} from '../../../src/action-trust';
 import {getMode} from '../../../src/mode';
@@ -601,7 +601,7 @@ export class AmpStory extends AMP.BaseElement {
     const platform = Services.platformFor(this.win);
     if (platform.isSafari() || platform.isIos()) {
       this.mutateElement(() => {
-        setStyle(this.element, 'display', 'none');
+        setImportantStyles(this.element, 'display', 'none');
 
         // Reading the height is what forces the repaint.  The conditional exists
         // only to workaround the fact that the closure compiler would otherwise
@@ -609,7 +609,7 @@ export class AmpStory extends AMP.BaseElement {
         // always >= 0, this conditional will always be executed.
         const height = this.element./*OK*/offsetHeight;
         if (height >= 0) {
-          setStyle(this.element, 'display', '');
+          setImportantStyles(this.element, 'display', '');
         }
       });
     }
