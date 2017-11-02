@@ -282,7 +282,7 @@ function reportErrorToServer(message, filename, line, col, error) {
  * @param {string|undefined} col
  * @param {*|undefined} error
  * @param {boolean} hasNonAmpJs
- * @return {!Object<string, string>|undefined} The URL
+ * @return {!JsonObject|undefined} The data to post
  * visibleForTesting
  */
 export function getErrorReportData(message, filename, line, col, error,
@@ -340,7 +340,7 @@ export function getErrorReportData(message, filename, line, col, error,
   // https://github.com/ampproject/error-tracker
   // It stores error reports via https://cloud.google.com/error-reporting/
   // for analyzing production issues.
-  const data = Object.create(null);
+  const data = /** @type {!JsonObject} */ (Object.create(null));
   data['v'] = getMode().rtvVersion;
   data['noAmp'] = hasNonAmpJs ? '1' : '0';
   data['m'] = message.replace(USER_ERROR_SENTINEL, '');
