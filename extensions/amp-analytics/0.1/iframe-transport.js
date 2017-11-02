@@ -28,7 +28,7 @@ import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
 const TAG_ = 'amp-analytics.IframeTransport';
 
 /** @private @const {number} */
-const LONG_TASK_REPORTING_THRESHOLD_ = 3;
+const LONG_TASK_REPORTING_THRESHOLD_ = 5;
 
 /** @typedef {{
  *    frame: Element,
