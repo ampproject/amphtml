@@ -25,33 +25,29 @@ eventName:targetId[.methodName[(arg1=value, arg2=value)]]
 ```
 
 Here's what each part of this means:
-**eventName**
-__required__
-This is the name of the event that an element exposes.
+- **eventName** - __required__ - This is the name of the event that an element exposes.
 
-**targetId**
-__required__
-This is the DOM id for the element, or a predefined [special target](#special-targets) you'd like to execute an action on in response to the event. In the following example, the `targetId` is the DOM id of the `amp-lightbox` target, `photo-slides`.
+-  **targetId** - __required__ - This is the DOM id for the element, or a predefined [special target](#special-targets) you'd like to execute an action on  in response to the event. In the following example, the `targetId` is the DOM id of the `amp-lightbox` target, `photo-slides`.
 
-```html
-<amp-lightbox id="photo-slides"></amp-lightbox>
-<button on="tap:photo-slides">Show Images</button>
-```
+  ```html
+  <amp-lightbox id="photo-slides"></amp-lightbox>
+  <button on="tap:photo-slides">Show Images</button>
+  ```
 
-**methodName**
-__optional__ for elements with default actions
-This is the method that the target element (referenced by `targetId`) exposes and you'd like to execute when the event is triggered.
+-  **methodName** - __optional__ - for elements with default actions
 
-AMP has a concept of a default action that elements can implement. So when omitting the `methodName` AMP will execute that default method.
+  This is the method that the target element (referenced by `targetId`) exposes and you'd like to execute when the event is triggered.
 
-**arg=value**
-__optional__
-Some actions, if documented, may accept arguments. The arguments are defined between parentheses in `key=value` notation. The accepted values are:
- - simple unquoted strings: `simple-value`
- - quoted strings: `"string value"` or `'string value'`
- - boolean values: `true` or `false`
- - numbers: `11` or `1.1`
- - dot-syntax reference to event data: `event.someDataVariableName`
+  AMP has a concept of a default action that elements can implement. So when omitting the `methodName` AMP will execute that default method.
+
+-  **arg=value** - __optional__
+  
+  Some actions, if documented, may accept arguments. The arguments are defined between parentheses in `key=value` notation.   The accepted values are:
+   - simple unquoted strings: `simple-value`
+   - quoted strings: `"string value"` or `'string value'`
+   - boolean values: `true` or `false`
+   - numbers: `11` or `1.1`
+   - dot-syntax reference to event data: `event.someDataVariableName`
 
 ## Handling Multiple Events
 You can listen to multiple events on an element by separating the two events with a semicolon `;`.
