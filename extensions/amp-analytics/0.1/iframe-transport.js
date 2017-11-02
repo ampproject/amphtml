@@ -27,6 +27,9 @@ import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
 /** @private @const {string} */
 const TAG_ = 'amp-analytics.IframeTransport';
 
+/** @private @const {number} */
+const LONG_TASK_REPORTING_THRESHOLD_ = 3;
+
 /** @typedef {{
  *    frame: Element,
  *    sentinel: !string,
@@ -61,8 +64,11 @@ export class IframeTransport {
         'Must supply iframe URL to constructor!');
     this.frameUrl_ = config['iframe'];
 
-    /** @private PerformanceObserver */
+    /** @private {PerformanceObserver} */
     this.longTaskObserver_ = null;
+
+    /** @private {number} */
+    this.numLongTasks_ = 0;
 
     this.processCrossDomainIframe();
   }
@@ -87,7 +93,7 @@ export class IframeTransport {
     } else {
       frameData = this.createCrossDomainIframe();
       this.ampWin_.document.body.appendChild(frameData.frame);
-      this.createLongTaskObserver_(frameData.frame.sentinel);
+      this.createLongTaskObserver_();
     }
     dev().assert(frameData, 'Trying to use non-existent frame');
   }
@@ -144,7 +150,7 @@ export class IframeTransport {
     return frameData;
   }
 
-  createLongTaskObserver_(sentinel) {
+  createLongTaskObserver_() {
     if (this.longTaskObserver_ ||
         typeof this.ampWin_.PerformanceObserver == 'undefined') {
       return;
@@ -162,11 +168,15 @@ export class IframeTransport {
             if (entry.attribution) {
               entry.attribution.forEach(attrib => {
                 if (this.frameUrl_ == attrib.containerSrc) {
-                  user().warn(TAG_,
-                      `LT@${sentinel}! Name: "${attrib.name}" ` +
+                  if (++this.numLongTasks_ >= LONG_TASK_REPORTING_THRESHOLD_) {
+                    user().warn(TAG_,
+                      'Long Task: ' +
+                      `Attribution: "${attrib.name}" ` +
+                      `Vendor: ${this.type_} ` +
                       `Src: "${attrib.containerSrc}" ` +
                       `Duration: ${entry.duration}ms ` +
                       `StartTime: ${attrib.startTime}`);
+                  }
                 }
               });
             }
