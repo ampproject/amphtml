@@ -30,11 +30,6 @@ html, body {
   height: auto !important;
 }
 
-html.i-amphtml-fie {
-  height: 100% !important;
-  width: 100% !important;
-}
-
 /**
  * Margin:0 is currently needed for iOS viewer embeds.
  * See:
@@ -70,8 +65,7 @@ html.i-amphtml-singledoc.i-amphtml-embedded {
  * style is set in runtime vs css to avoid conflicts with ios-embedded mode
  * and fixed transfer layer.
  */
-html.i-amphtml-singledoc > body,
-html.i-amphtml-fie > body {
+html.i-amphtml-singledoc > body {
   overflow: visible !important;
   position: relative !important;
 }
@@ -339,7 +333,7 @@ i-amphtml-sizer {
 }
 
 .i-amphtml-hidden-by-media-query {
-  display: none !important;
+  display: none;
 }
 
 .i-amphtml-element-error {
