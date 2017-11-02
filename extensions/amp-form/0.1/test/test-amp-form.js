@@ -172,13 +172,13 @@ describes.repeated('', {
 
       const viewer = Services.viewerForDoc(form.ownerDocument);
       let resolve_ = null;
-      sandbox.stub(viewer, 'whenFirstVisible').returns(new Promise(resolve => {
+      sandbox.stub(viewer, 'whenNextVisible').returns(new Promise(resolve => {
         resolve_ = resolve;
       }));
 
       expect(document.activeElement).to.not.equal(button1);
       resolve_();
-      return viewer.whenFirstVisible().then(() => {
+      return viewer.whenNextVisible().then(() => {
         expect(document.activeElement).to.equal(button1);
       });
     });

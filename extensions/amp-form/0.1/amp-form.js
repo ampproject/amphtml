@@ -257,7 +257,7 @@ export class AmpForm {
 
   /** @private */
   installEventHandlers_() {
-    this.viewer_.whenFirstVisible().then(() => {
+    this.viewer_.whenNextVisible().then(() => {
       const autofocus = this.form_.querySelector('[autofocus]');
       if (autofocus) {
         tryFocus(autofocus);
