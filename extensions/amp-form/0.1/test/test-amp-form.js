@@ -161,6 +161,28 @@ describes.repeated('', {
       document.body.removeChild(form);
     });
 
+    it('should autofocus elements with the autofocus attribute', () => {
+      const form = getForm();
+      document.body.appendChild(form);
+      form.addEventListener = sandbox.spy();
+      form.setAttribute('action-xhr', 'https://example.com');
+      const button1 = form.querySelector('input');
+      button1.setAttribute('autofocus', '');
+      new AmpForm(form);
+
+      const viewer = Services.viewerForDoc(form.ownerDocument);
+      let resolve_ = null;
+      sandbox.stub(viewer, 'whenNextVisible').returns(new Promise(resolve => {
+        resolve_ = resolve;
+      }));
+
+      expect(document.activeElement).to.not.equal(button1);
+      resolve_();
+      return viewer.whenNextVisible().then(() => {
+        expect(document.activeElement).to.equal(button1);
+      });
+    });
+
     it('should install proxy', () => {
       const form = getForm();
       document.body.appendChild(form);
