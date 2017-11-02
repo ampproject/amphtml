@@ -170,12 +170,12 @@ export class IframeTransport {
                 if (this.frameUrl_ == attrib.containerSrc) {
                   if (++this.numLongTasks_ >= LONG_TASK_REPORTING_THRESHOLD_) {
                     user().warn(TAG_,
-                      'Long Task: ' +
-                      `Attribution: "${attrib.name}" ` +
-                      `Vendor: ${this.type_} ` +
-                      `Src: "${attrib.containerSrc}" ` +
-                      `Duration: ${entry.duration}ms ` +
-                      `StartTime: ${attrib.startTime}`);
+                        'Long Task: ' +
+                        `Attribution: "${attrib.name}" ` +
+                        `Vendor: ${this.type_} ` +
+                        `Src: "${attrib.containerSrc}" ` +
+                        `Duration: ${entry.duration}ms ` +
+                        `StartTime: ${attrib.startTime}`);
                   }
                 }
               });
