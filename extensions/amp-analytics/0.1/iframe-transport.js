@@ -43,10 +43,9 @@ export class IframeTransport {
    * @param {!Window} ampWin The window object of the AMP document
    * @param {!string} type The value of the amp-analytics tag's type attribute
    * @param {!JsonObject} config
-   * @param {!string} id A unique ID for this instance. If (potentially) using
-   *     sendResponseToCreative(), it should be something that the recipient
-   *     can use to identify the context of the message, e.g. the resourceID
-   *     of a DOM element.
+   * @param {!string} id If (potentially) using sendResponseToCreative(), it
+   *     should be something that the recipient can use to identify the
+   *     context of the message, e.g. the resourceID of a DOM element.
    */
   constructor(ampWin, type, config, id) {
     /** @private @const {!Window} */
@@ -88,7 +87,7 @@ export class IframeTransport {
     } else {
       frameData = this.createCrossDomainIframe();
       this.ampWin_.document.body.appendChild(frameData.frame);
-      this.createLongTaskObserver_();
+      this.createLongTaskObserver_(frameData.frame.sentinel);
     }
     dev().assert(frameData, 'Trying to use non-existent frame');
   }
@@ -145,12 +144,15 @@ export class IframeTransport {
     return frameData;
   }
 
-  createLongTaskObserver_() {
+  createLongTaskObserver_(sentinel) {
     if (this.longTaskObserver_ || typeof PerformanceObserver == 'undefined') {
       return;
     }
-    // TODO(jonkeller): Re-enable linter after
-    // https://github.com/sindresorhus/globals/pull/120 merges
+    // Note: linter disabled on next line. PerformanceObserver was added to
+    // globals in v10.2.0 (https://github.com/sindresorhus/globals/pull/120)
+    // but we are currently using eslint v3.18.0, which depends on globals
+    // v9.18.0
+    // TODO(jonkeller): Remove the disable once the above situation resolves.
     // eslint-disable-next-line no-undef
     this.longTaskObserver_ = new PerformanceObserver(entryList => {
       if (!entryList) {
@@ -162,16 +164,17 @@ export class IframeTransport {
               entry['name'] == 'multiple-contexts' ||
               (getMode().localDev &&
               entry['name'] == 'same-origin-descendant')) {
-            user().warn(TAG_, `${this.type_} frame took ${entry.duration}ms`);
             if (entry.attribution) {
               entry.attribution.forEach(attrib => {
-                user().warn(TAG_,
-                  `  Name: ${attrib.name} Src: ${attrib.containerSrc}` +
-                  `StartTime: ${attrib.startTime}`);
+                if (this.frameUrl_ == attrib.containerSrc) {
+                  user().warn(TAG_,
+                      `LT@${sentinel}! Name: "${attrib.name}" ` +
+                      `Src: "${attrib.containerSrc}" ` +
+                      `Duration: ${entry.duration}ms ` +
+                      `StartTime: ${attrib.startTime}`);
+                }
               });
             }
-          } else if (entry['name'] != 'unknown') {
-            user().warn(TAG_, `${entry['name']} took ${entry.duration}ms`);
           }
         }
       });
