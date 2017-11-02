@@ -16,7 +16,8 @@
 
 @import './amp-story-desktop-user-overridable.css';
 
-amp-story[desktop] {
+
+amp-story[standalone][desktop] {
  max-width: none!important;
  max-height: none!important;
  width: 100vw!important;
@@ -261,7 +262,7 @@ amp-story-page.i-amphtml-story-page-shown {
 }
 
 .i-amphtml-story-share:hover:before {
-  width: calc(100% - 16px)!important;
+  width: calc(100% + 16px)!important;
 }
 
 .i-amphtml-story-share .i-amphtml-story-share-list > li  {
@@ -320,8 +321,8 @@ amp-story-page.i-amphtml-story-page-shown {
 }
 
 [desktop] .i-amphtml-story-share .i-amphtml-story-share-list > li {
-  width: 56px;
-  height: 56px;
+  width: 56px!important;
+  height: 56px!important;
 }
 
 .i-amphtml-story-share .i-amphtml-story-share-list > li svg {
@@ -330,7 +331,7 @@ amp-story-page.i-amphtml-story-page-shown {
 }
 
 .i-amphtml-story-share:hover:before {
-  width: calc(100% + 16px);
+  width: calc(100% + 16px)!important;
 }
 
 .i-amphtml-story-share .i-amphtml-story-share-icon {
@@ -345,21 +346,21 @@ amp-story-page.i-amphtml-story-page-shown {
 }
 
 [desktop] .i-amphtml-story-share-icon {
-  font-size: 0px;
-  background-position-y: 5px;
+  font-size: 0px!important;
+  background-position-y: 5px!important;
 }
 
 [desktop] .i-amphtml-story-share-icon::before {
-  background-color: transparent;
+  background-color: transparent!important;
 }
 
 [desktop] .i-amphtml-story-share-icon:active::before {
-  background-color: transparent;
+  background-color: transparent!important;
 }
 
 [desktop] .i-amphtml-story-share-list {
-  margin-right: 100px;
-  margin-top: 15px;
+  margin-right: 100px!important;
+  margin-top: 15px!important;
 }
 
 .i-amphtml-story-share .i-amphtml-story-share-name {
