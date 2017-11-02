@@ -443,6 +443,9 @@ export class TimerEventTracker extends EventTracker {
       CAN_RESTART: 7,
       START_BUILDER: 8,
       STOP_BUILDER: 9,
+      TIMER_START: 10,
+      TIMER_DURATION: 11,
+      LAST_PING: 12,
     };
   }
 
@@ -574,8 +577,13 @@ export class TimerEventTracker extends EventTracker {
     }
     const win = this.root.ampdoc.win;
     const intervalId = win.setInterval(() => {
-      listener(this.createEvent_(eventType));
+      listener(this.createEvent_(timerId, eventType));
     }, timerSpec[this.TIMER_PARAMS_.INTERVAL_LENGTH] * 1000);
+    this.trackers_[timerId][this.TIMER_PARAMS_.TIMER_START] = Date.now();
+    // Clear previous durations upon timer start so we don't over-report on a
+    // recently restarted timer.
+    delete this.trackers_[timerId][this.TIMER_PARAMS_.TIMER_DURATION];
+    delete this.trackers_[timerId][this.TIMER_PARAMS_.LAST_PING];
     this.trackers_[timerId][this.TIMER_PARAMS_.INTERVAL_ID] = intervalId;
     if (!!timerSpec[this.TIMER_PARAMS_.UNLISTEN_START]) {
       timerSpec[this.TIMER_PARAMS_.UNLISTEN_START]();
@@ -587,7 +595,7 @@ export class TimerEventTracker extends EventTracker {
       }, timerSpec[this.TIMER_PARAMS_.MAX_TIMER_LENGTH] * 1000);
     }
     if (timerSpec[this.TIMER_PARAMS_.CALL_IMMEDIATE]) {
-      listener(this.createEvent_(eventType));
+      listener(this.createEvent_(timerId, eventType));
     }
   }
 
@@ -601,6 +609,9 @@ export class TimerEventTracker extends EventTracker {
     }
     const win = this.root.ampdoc.win;
     win.clearInterval(this.trackers_[timerId][this.TIMER_PARAMS_.INTERVAL_ID]);
+    this.trackers_[timerId][this.TIMER_PARAMS_.TIMER_DURATION] = Date.now() -
+        (this.trackers_[timerId][this.TIMER_PARAMS_.LAST_PING] ||
+	this.trackers[timerId][this.TIMER_PARAMS_.TIMER_START]);
     delete this.trackers_[timerId][this.TIMER_PARAMS_.INTERVAL_ID];
     if (!!this.trackers_[timerId][this.TIMER_PARAMS_.UNLISTEN_STOP]) {
       this.trackers_[timerId][this.TIMER_PARAMS_.UNLISTEN_STOP]();
@@ -618,12 +629,24 @@ export class TimerEventTracker extends EventTracker {
   }
 
   /**
+   * @param {number} timerId
    * @param {string} eventType
    * @return {!AnalyticsEvent}
    * @private
    */
-  createEvent_(eventType) {
-    return new AnalyticsEvent(this.root.getRootElement(), eventType);
+  createEvent_(timerId, eventType) {
+    const timerSpec = this.trackers_[timerId];
+    const timeSinceLastPing = Date.now() -
+        (timerSpec[this.TIMER_PARAMS_.LAST_PING] ||
+         timerSpec[this.TIMER_PARAMS_.TIMER_START]);
+    const duration = timerSpec[this.TIMER_PARAMS_.TIMER_DURATION] ||
+        timeSinceLastPing;
+    const params = {
+      'timerStart': timerSpec[this.TIMER_PARAMS_.TIMER_START],
+      'timerDuration': Math.floor(duration / 1000);
+    };
+    this.trackers_[timerId][this.TIMER_PARAMS_.LAST_PING] = Date.now();
+    return new AnalyticsEvent(this.root.getRootElement(), eventType, params);
   }
 
   /**
