@@ -160,27 +160,25 @@ export class IframeTransport {
         return;
       }
       entryList.getEntries().forEach(entry => {
-        if (entry && entry['entryType'] == 'longtask') {
-          if (entry['name'] == 'cross-origin-descendant' ||
-              entry['name'] == 'multiple-contexts' ||
-              (getMode().localDev &&
-              entry['name'] == 'same-origin-descendant')) {
-            if (entry.attribution) {
-              entry.attribution.forEach(attrib => {
-                if (this.frameUrl_ == attrib.containerSrc) {
-                  if (++this.numLongTasks_ >= LONG_TASK_REPORTING_THRESHOLD_) {
-                    user().warn(TAG_,
-                        'Long Task: ' +
-                        `Attribution: "${attrib.name}" ` +
-                        `Vendor: ${this.type_} ` +
-                        `Src: "${attrib.containerSrc}" ` +
-                        `Duration: ${entry.duration}ms ` +
-                        `StartTime: ${attrib.startTime}`);
-                  }
-                }
-              });
+        if (entry && entry['entryType'] == 'longtask' &&
+            (entry['name'] == 'cross-origin-descendant' ||
+            entry['name'] == 'multiple-contexts' ||
+            (getMode().localDev &&
+            entry['name'] == 'same-origin-descendant')) &&
+            entry.attribution) {
+          entry.attribution.forEach(attrib => {
+            if (this.frameUrl_ == attrib.containerSrc &&
+                ++this.numLongTasks_ >= LONG_TASK_REPORTING_THRESHOLD_) {
+              user().warn(TAG_,
+                  'Long Task: ' +
+                  `Attribution: "${attrib.name}" ` +
+                  `Vendor: ${this.type_} ` +
+                  `Src: "${attrib.containerSrc}" ` +
+                  `Duration: ${entry.duration}ms ` +
+                  `StartTime: ${attrib.startTime} ` +
+                  `Occurrences: ${this.numLongTasks_}`);
             }
-          }
+          });
         }
       });
     });
