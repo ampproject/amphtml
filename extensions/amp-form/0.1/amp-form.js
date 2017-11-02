@@ -19,7 +19,10 @@ import {FormEvents} from './form-events';
 import {installFormProxy} from './form-proxy';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {createCustomEvent} from '../../../src/event-helper';
-import {iterateCursor} from '../../../src/dom';
+import {
+  iterateCursor,
+  tryFocus,
+} from '../../../src/dom';
 import {
   formOrNullForElement,
   setFormForElement,
@@ -139,6 +142,9 @@ export class AmpForm {
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(this.form_);
 
+    /** @const @private */
+    this.viewer_ = Services.viewerForDoc(this.form_);
+
     /** @const @private {string} */
     this.method_ = (this.form_.getAttribute('method') || 'GET').toUpperCase();
 
@@ -251,6 +257,13 @@ export class AmpForm {
 
   /** @private */
   installEventHandlers_() {
+    this.viewer_.whenNextVisible().then(() => {
+      const autofocus = this.form_.querySelector('[autofocus]');
+      if (autofocus) {
+        tryFocus(autofocus);
+      }
+    });
+
     this.form_.addEventListener(
         'submit', this.handleSubmitEvent_.bind(this), true);
 
