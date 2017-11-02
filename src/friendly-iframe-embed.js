@@ -131,7 +131,7 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
   const extensions = Services.extensionsFor(win);
 
   setStyle(iframe, 'visibility', 'hidden');
-  iframe.setAttribute('referrerpolicy', 'unsafe-url');
+  // iframe.setAttribute('referrerpolicy', 'unsafe-url');
 
   // Pre-load extensions.
   if (spec.extensionIds) {
