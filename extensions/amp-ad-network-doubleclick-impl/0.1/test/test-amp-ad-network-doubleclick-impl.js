@@ -1064,6 +1064,56 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           ['https://partner.googleadservices.com', SAFEFRAME_ORIGIN]);
     });
   });
+
+  describe('Troubleshoot', () => {
+    beforeEach(() => {
+      element = doc.createElement('amp-ad');
+      element.setAttribute('type', 'doubleclick');
+      element.setAttribute('data-slot', 'slotId');
+      element.setAttribute('data-amp-slot-index', '0');
+      doc.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+      impl.lineitemId_ = '123';
+      impl.creativeId_ = '456';
+    });
+
+    afterEach(() => {
+      doc.body.removeChild(element);
+    });
+
+    it('should emit post message', () => {
+      const slotId = 'slotId'
+      env.win = {
+        location: {
+          href: 'http://localhost:8000/foo?dfpdeb',
+        },
+        opener: {
+          postMessage: payload => {
+            expect(payload).to.be.ok;
+            expect(payload.userAgent).to.be.ok;
+            expect(payload.referrer).to.be.ok;
+            expect(payload.messageType).to.equal('LOAD');
+
+            const gutData = JSON.parse(payload.gutData);
+            expect(gutData).to.be.ok;
+            expect(gutData.events[0].timestamp).to.be.ok;
+            expect(gutData.events[0].slotid).to.equal(slotId);
+            expect(gutData.events[0].messageId).to.equal(4);
+
+            expect(gutData.slots[0].contentUrl).to.equal('');
+            expect(gutData.slots[0].id).to.equal(slotId);
+            expect(gutData.slots[0].leafAdUnitName).to.equal(slotId);
+            expect(gutData.slots[0].domId).to.equal(
+                'gpt_unit_' + slotId + '_0');
+            expect(gutData.slots[0].lineItemId).to.equal('123');
+            expect(gutData.slots[0].creativeId).to.equal('456');
+          },
+        },
+      };
+      impl.win = env.win;
+      impl.postTroubleshootMessage_();
+    });
+  });
 });
 
 

@@ -1224,27 +1224,28 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!this.win.opener || !/\?.*dfpdeb/.test(this.win.location.href)) {
       return;
     }
+    const slotId = this.element.getAttribute('data-slot');
     const payload = dict({
       'gutData': JSON.stringify(dict({
         'events': [{
           'timestamp': new Date().getTime(),
-          'slotid': this.element.getAttribute('data-slot'),
+          'slotid': slotId,
           'messageId': 4,
         }],
         'slots': [{
           'contentUrl': this.getCachedAdUrl() || '',
-          'id': this.element.getAttribute('data-slot'),
-          'leafAdUnitName': this.element.getAttribute('data-slot'),
-          'domId': '',
-          'lineItemId': this.lineitemId_ || '102158080',
-          'creativeId': this.creativeId_ || '88085470120',
+          'id': slotId,
+          'leafAdUnitName': slotId,
+          'domId': 'gpt_unit_' + slotId + '_' +
+              this.element.getAttribute('data-amp-slot-index'),
+          'lineItemId': this.lineitemId_,
+          'creativeId': this.creativeId_,
         }],
       })),
       'userAgent': navigator.userAgent,
       'referrer': this.win.location.href,
       'messageType': 'LOAD',
     });
-    console.log(payload);
     this.win.opener.postMessage(payload, '*');
   }
 }
