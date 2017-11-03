@@ -329,6 +329,17 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /** @private */
+  addButtonListeners_() {
+    this.nextButton_.addEventListener('click', () => {
+      this.next_();
+    });
+
+    this.prevButton_.addEventListener('click', () => {
+      this.previous_();
+    });
+  }
+
+  /** @private */
   buildTopBar_() {
     const doc = this.element.ownerDocument;
     this.topBar_ = doc.createElement('div');
@@ -711,6 +722,7 @@ export class AmpStory extends AMP.BaseElement {
       this.element.setAttribute('desktop','');
       if (!this.nextButton_) {
         this.buildButtons_();
+        this.addButtonListeners_();
       }
       if (!this.topBar_) {
         this.buildTopBar_();
