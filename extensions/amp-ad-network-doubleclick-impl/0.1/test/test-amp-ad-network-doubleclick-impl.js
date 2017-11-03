@@ -1065,7 +1065,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
   });
 
-  describe('Troubleshoot', () => {
+  describe('Troubleshoot for AMP pages', () => {
     beforeEach(() => {
       element = doc.createElement('amp-ad');
       element.setAttribute('type', 'doubleclick');
@@ -1110,12 +1110,17 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           },
         },
       };
+      const postMessageSpy = sandbox.spy(env.win.opener, 'postMessage');
       impl.win = env.win;
       impl.postTroubleshootMessage_();
+      expect(postMessageSpy).to.be.calledOnce;
     });
 
     it('should not emit post message', () => {
       env.win = {
+        location: {
+          href: 'http://localhost:8000/foo',
+        },
         opener: {
           postMessage: () => {
             expect(false).to.be.true;
