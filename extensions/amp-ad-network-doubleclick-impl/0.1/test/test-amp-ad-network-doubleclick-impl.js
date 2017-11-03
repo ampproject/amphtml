@@ -1082,7 +1082,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
 
     it('should emit post message', () => {
-      const slotId = 'slotId'
+      const slotId = 'slotId';
       env.win = {
         location: {
           href: 'http://localhost:8000/foo?dfpdeb',
@@ -1113,6 +1113,18 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.win = env.win;
       impl.postTroubleshootMessage_();
     });
+
+    it('should not emit post message', () => {
+          env.win = {
+            opener: {
+              postMessage: payload => {
+                expect(false).to.be.true;
+              },
+            },
+          };
+          impl.win = env.win;
+          impl.postTroubleshootMessage_();
+        });
   });
 });
 
