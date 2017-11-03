@@ -136,7 +136,7 @@ amp-story-page.i-amphtml-story-page-shown {
   right: auto!important;
   margin: auto!important;
   max-height: 70vh!important;
-  max-width: 338px!important;
+  max-width: calc(9/16 * 70vh);
   box-shadow: 0 0 15px rgba(0, 0, 0, .4)!important;
 }
 
