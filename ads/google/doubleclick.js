@@ -16,9 +16,12 @@
 
 import {makeCorrelator} from './correlator';
 import {validateData, loadScript} from '../../3p/3p';
-import {dev} from '../../src/log';
+import {dev, user} from '../../src/log';
 import {setStyles} from '../../src/style';
 import {getMultiSizeDimensions} from './utils';
+
+/** @type {string} */
+const TAG = 'DoubleClick';
 
 /**
  * @enum {number}
@@ -277,7 +280,14 @@ export function selectGptExperiment(data) {
  */
 export function writeAdScript(global, data, gptFilename) {
   const url =
-  `https://www.googletagservices.com/tag/js/${gptFilename || 'gpt.js'}`;
+        `https://www.googletagservices.com/tag/js/${gptFilename || 'gpt.js'}`;
+  const hasUSDRD = data.useSameDomainRenderingUntilDeprecated != undefined;
+  if (hasUSDRD) {
+    user().warn(TAG, 'useSameDomainRenderingUntilDeprecated will no longer ' +
+                'be supported starting on March 29, 2018. Please refer to ' +
+                'https://github.com/ampproject/amphtml/issues/11834 ' +
+                'for morch information');
+  }
   if (gptFilename || data.useSameDomainRenderingUntilDeprecated != undefined
     || data.multiSize) {
     doubleClickWithGpt(global, data, GladeExperiment.GLADE_OPT_OUT, url);
