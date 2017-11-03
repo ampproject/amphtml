@@ -423,9 +423,9 @@ class TimerEventHandler {
    * @param {boolean} isUnstoppable Whether this has no stopSpec.
    * @param {boolean} callImmediate Whether to fire this timer immediately upon
    *     starting.
-   * @param {function(): EventTracker} startBuilder Factory for building start
+   * @param {function(): UnlistenDef=} startBuilder Factory for building start
    *     trackers for this timer.
-   * @param {function(): EventTracker} stopBuilder Factory for building stop
+   * @param {function(): UnlistenDef=} stopBuilder Factory for building stop
    *     trackers for this timer.
    */
   constructor(intervalLength, maxTimerLength, isUnstoppable, callImmediate,
@@ -445,16 +445,16 @@ class TimerEventHandler {
     /** @const @private {boolean} */
     this.callImmediate_ = callImmediate;
 
-    /** @private {?function} */
-    this.unlistenStart_ = undefined;
+    /** @private {?UnlistenDef} */
+    this.unlistenStart_ = null;
 
-    /** @private {?function} */
-    this.unlistenStop_ = undefined;
+    /** @private {?UnlistenDef} */
+    this.unlistenStop_ = null;
 
-    /** @const @private {?function(): function} */
+    /** @const @private {function(): UnlistenDef|undefined} */
     this.startBuilder_ = startBuilder;
 
-    /** @const @private {?function(): function} */
+    /** @const @private {function(): UnlistenDef|undefined} */
     this.stopBuilder_ = stopBuilder;
   }
 
@@ -481,7 +481,7 @@ class TimerEventHandler {
   unlistenForStart() {
     if (this.isListeningForStart()) {
       this.unlistenStart_();
-      this.unlistenStart_ = undefined;
+      this.unlistenStart_ = null;
     }
   }
 
@@ -503,7 +503,7 @@ class TimerEventHandler {
   unlistenForStop() {
     if (this.isListeningForStop()) {
       this.unlistenStop_();
-      this.unlistenStop_ = undefined;
+      this.unlistenStop_ = null;
     }
   }
 
@@ -514,8 +514,8 @@ class TimerEventHandler {
 
   /**
    * @param {!Window} win
-   * @param {function} timerCallback
-   * @param {function} timeoutCallback
+   * @param {function()} timerCallback
+   * @param {function()} timeoutCallback
    */
   startIntervalInWindow(win, timerCallback, timeoutCallback) {
     this.intervalId_ = win.setInterval(() => {
