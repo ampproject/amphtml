@@ -1232,7 +1232,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const payload = dict({
       'gutData': JSON.stringify(dict({
         'events': [{
-          'timestamp': new Date().getTime(),
+          'timestamp': Date.now(),
           'slotid': slotId,
           'messageId': 4,
         }],
@@ -1250,7 +1250,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'referrer': this.win.location.href,
       'messageType': 'LOAD',
     });
-    this.win.opener.postMessage(payload, '*');
+    this.win.opener./*OK*/postMessage(payload, '*');
   }
 }
 
