@@ -280,14 +280,7 @@ export function selectGptExperiment(data) {
  */
 export function writeAdScript(global, data, gptFilename) {
   const url =
-        `https://www.googletagservices.com/tag/js/${gptFilename || 'gpt.js'}`;
-  const hasUSDRD = data.useSameDomainRenderingUntilDeprecated != undefined;
-  if (hasUSDRD) {
-    user().warn(TAG, 'useSameDomainRenderingUntilDeprecated will no longer ' +
-                'be supported starting on March 29, 2018. Please refer to ' +
-                'https://github.com/ampproject/amphtml/issues/11834 ' +
-                'for morch information');
-  }
+  `https://www.googletagservices.com/tag/js/${gptFilename || 'gpt.js'}`;
   if (gptFilename || data.useSameDomainRenderingUntilDeprecated != undefined
     || data.multiSize) {
     doubleClickWithGpt(global, data, GladeExperiment.GLADE_OPT_OUT, url);
