@@ -124,7 +124,9 @@ export class AmpImg extends BaseElement {
 
     // For inabox SSR, image will have been written directly to DOM so no need
     // to recreate.  Calling appendChild again will have no effect.
-    this.img_ = this.element.querySelector('img');
+    if (this.element.hasAttribute('i-amphtml-ssr')) {
+      this.img_ = this.element.querySelector('img');
+    }
     this.img_ = this.img_ || new Image();
     this.img_.setAttribute('async', '');
     if (this.element.id) {

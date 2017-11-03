@@ -51,7 +51,8 @@ describes.fakeWin('amp-pixel with img (inabox)', {amp: true}, env => {
   it('should not write image', () => {
     const src = 'https://foo.com/tracker/foo';
     const pixelElem =
-        createElementWithAttributes(env.win.document, 'amp-pixel', {src});
+        createElementWithAttributes(env.win.document, 'amp-pixel',
+        {src, 'i-amphtml-ssr': ''});
     pixelElem.appendChild(
         createElementWithAttributes(env.win.document, 'img', {src}));
     env.win.document.body.appendChild(pixelElem);

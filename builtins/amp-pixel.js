@@ -59,7 +59,8 @@ export class AmpPixel extends BaseElement {
           `${TAG}: invalid "referrerpolicy" value "${this.referrerPolicy_}".`
           + ' Only "no-referrer" is supported');
     }
-    if (this.element.querySelector('img')) {
+    if (this.element.hasAttribute('i-amphtml-ssr') &&
+        this.element.querySelector('img')) {
       dev().info(TAG, 'inabox img already present');
       return;
     }
