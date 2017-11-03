@@ -55,7 +55,7 @@ import * as sinon from 'sinon';
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
 
-describe('amp-a4a', () => {
+describe('amp-a4a', function() {
   let sandbox;
   let fetchMock;
   let getSigningServiceNamesMock;
@@ -2007,25 +2007,40 @@ describe('amp-a4a', () => {
   describe('amp-analytics triggers for A4A', () => {
     let element;
     let a4a;
+    let triggerAnalyticsEventSpy;
 
     beforeEach(() => {
+      triggerAnalyticsEventSpy =
+          sandbox.spy(analytics, 'triggerAnalyticsEvent');
       return createIframePromise().then(fixture => {
-        // Ensures window location == AMP cache passes
-        const doc = fixture.doc;
-        element = createElementWithAttributes(doc, 'amp-ad', {
-          'width': '200',
-          'height': '50',
-          'type': 'doubleclick',
-          'layout': 'fixed',
-        });
-        doc.body.appendChild(element);
-        a4a = new AmpA4A(element);
+        element = createA4aElement(fixture.doc);
+        element['data-rand'] = String(Math.random());
+        fixture.doc.body.appendChild(element);
+        a4a = new MockA4AImpl(element);
+
+        // For determinism.
+        let time = 100;
+        sandbox.stub(a4a, 'getNow_', () => ++time);
       });
     });
 
+    it('should trigger amp-analytics events for friendly iframe rendering',
+      () => {
+        a4a.buildCallback();
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          expect(triggerAnalyticsEventSpy).to.be.calledWith(
+              element, 'adRequestStart', {'time': sinon.match.number});
+          expect(triggerAnalyticsEventSpy).to.be.calledWith(
+              element, 'adResponseEnd', {'time': sinon.match.number});
+          expect(triggerAnalyticsEventSpy).to.be.calledWith(
+              element, 'adRenderStart', {'time': sinon.match.number});
+          expect(triggerAnalyticsEventSpy).to.be.calledWith(
+              element, 'adRenderEnd', {'time': sinon.match.number});
+        });
+      });
+
     it('should trigger amp-analytics for SafeFrame rendering', () => {
-      const triggerAnalyticsEventSpy =
-          sandbox.spy(analytics, 'triggerAnalyticsEvent');
       // Make sure there's no signature, so that we go down the 3p iframe path.
       delete adResponse.headers['AMP-Fast-Fetch-Signature'];
       delete adResponse.headers[AMP_SIGNATURE_HEADER];
@@ -2034,15 +2049,15 @@ describe('amp-a4a', () => {
       sandbox.stub(a4a, 'getFallback', () => true);
       a4a.buildCallback();
       a4a.onLayoutMeasure();
-      // DO NOT SUBMIT
-      const lifecycleEventStub =
-          sandbox.stub(a4a, 'protectedEmitLifecycleEvent_');
       return a4a.layoutCallback().then(() => {
-        expect(lifecycleEventStub).to.be.called.once;
         expect(triggerAnalyticsEventSpy).to.be.calledWith(
-            element,
-            'adRenderStart',
-            {'isAmpCreative': false, 'releaseType': '0'});
+            element, 'adRequestStart', {'time': sinon.match.number});
+        expect(triggerAnalyticsEventSpy).to.be.calledWith(
+            element, 'adResponseEnd', {'time': sinon.match.number});
+        expect(triggerAnalyticsEventSpy).to.be.calledWith(
+            element, 'adRenderStart', {'time': sinon.match.number});
+        expect(triggerAnalyticsEventSpy).to.be.calledWith(
+            element, 'adRenderEnd', {'time': sinon.match.number});
       });
     });
   });
