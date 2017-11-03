@@ -2025,20 +2025,20 @@ describe('amp-a4a', function() {
     });
 
     it('should trigger amp-analytics events for friendly iframe rendering',
-      () => {
-        a4a.buildCallback();
-        a4a.onLayoutMeasure();
-        return a4a.layoutCallback().then(() => {
-          expect(triggerAnalyticsEventSpy).to.be.calledWith(
-              element, 'adRequestStart', {'time': sinon.match.number});
-          expect(triggerAnalyticsEventSpy).to.be.calledWith(
-              element, 'adResponseEnd', {'time': sinon.match.number});
-          expect(triggerAnalyticsEventSpy).to.be.calledWith(
-              element, 'adRenderStart', {'time': sinon.match.number});
-          expect(triggerAnalyticsEventSpy).to.be.calledWith(
-              element, 'adRenderEnd', {'time': sinon.match.number});
+        () => {
+          a4a.buildCallback();
+          a4a.onLayoutMeasure();
+          return a4a.layoutCallback().then(() => {
+            expect(triggerAnalyticsEventSpy).to.be.calledWith(
+                element, 'adRequestStart', {'time': sinon.match.number});
+            expect(triggerAnalyticsEventSpy).to.be.calledWith(
+                element, 'adResponseEnd', {'time': sinon.match.number});
+            expect(triggerAnalyticsEventSpy).to.be.calledWith(
+                element, 'adRenderStart', {'time': sinon.match.number});
+            expect(triggerAnalyticsEventSpy).to.be.calledWith(
+                element, 'adRenderEnd', {'time': sinon.match.number});
+          });
         });
-      });
 
     it('should trigger amp-analytics for SafeFrame rendering', () => {
       // Make sure there's no signature, so that we go down the 3p iframe path.

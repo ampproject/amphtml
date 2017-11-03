@@ -30,7 +30,7 @@ import {
 import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user, duplicateErrorIfNecessary} from '../../../src/log';
-import {deepMerge, dict} from '../../../src/utils/object';
+import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {utf8Decode} from '../../../src/utils/bytes';
@@ -1666,19 +1666,18 @@ export class AmpA4A extends AMP.BaseElement {
       return;
     }
     const analyticsVars = Object.assign(
-        { 'time': Math.round(this.getNow_()) },
+        {'time': Math.round(this.getNow_())},
         this.getAmpAnalyticsVars(analyticsEvent));
-    triggerAnalyticsEvent(
-      this.element, analyticsEvent, analyticsVars);
+    triggerAnalyticsEvent(this.element, analyticsEvent, analyticsVars);
   }
 
   /**
    * Returns variables to be included on an analytics event. This can be
    * overridden by specific network implementations.
-   * @param {string} analyticsEvent The name of the analytics event.
+   * @param {string} unusedAnalyticsEvent The name of the analytics event.
    * @return {!Object<string, string>}
    */
-  getAmpAnalyticsVars(analyticsEvent) { return {}; }
+  getAmpAnalyticsVars(unusedAnalyticsEvent) { return {}; }
 
   /**
    * Returns network-specific config for amp-analytics. It should overridden
