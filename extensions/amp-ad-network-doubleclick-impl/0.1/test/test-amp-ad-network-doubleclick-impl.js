@@ -1115,16 +1115,16 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
 
     it('should not emit post message', () => {
-          env.win = {
-            opener: {
-              postMessage: payload => {
-                expect(false).to.be.true;
-              },
-            },
-          };
-          impl.win = env.win;
-          impl.postTroubleshootMessage_();
-        });
+      env.win = {
+        opener: {
+          postMessage: () => {
+            expect(false).to.be.true;
+          },
+        },
+      };
+      impl.win = env.win;
+      impl.postTroubleshootMessage_();
+    });
   });
 });
 

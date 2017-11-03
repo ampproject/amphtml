@@ -1220,6 +1220,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
   }
 
+  /**
+   * Emits a postMessage containing information about this slot to the DFP
+   * Troubleshoot UI.
+   */
   postTroubleshootMessage_() {
     if (!this.win.opener || !/\?.*dfpdeb/.test(this.win.location.href)) {
       return;
