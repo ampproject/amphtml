@@ -47,6 +47,7 @@ import {dev, user} from '../../../../src/log';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
+import * as analytics from '../../../../src/analytics';
 import * as sinon from 'sinon';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
@@ -1999,6 +2000,49 @@ describe('amp-a4a', () => {
         const a4aElement = createA4aElement(doc);
         const a4a = new AmpA4A(a4aElement);
         expect(a4a.shouldPreferentialRenderWithoutCrypto()).to.be.false;
+      });
+    });
+  });
+
+  describe('amp-analytics triggers for A4A', () => {
+    let element;
+    let a4a;
+
+    beforeEach(() => {
+      return createIframePromise().then(fixture => {
+        // Ensures window location == AMP cache passes
+        const doc = fixture.doc;
+        element = createElementWithAttributes(doc, 'amp-ad', {
+          'width': '200',
+          'height': '50',
+          'type': 'doubleclick',
+          'layout': 'fixed',
+        });
+        doc.body.appendChild(element);
+        a4a = new AmpA4A(element);
+      });
+    });
+
+    it('should trigger amp-analytics for SafeFrame rendering', () => {
+      const triggerAnalyticsEventSpy =
+          sandbox.spy(analytics, 'triggerAnalyticsEvent');
+      // Make sure there's no signature, so that we go down the 3p iframe path.
+      delete adResponse.headers['AMP-Fast-Fetch-Signature'];
+      delete adResponse.headers[AMP_SIGNATURE_HEADER];
+      // If rendering type is safeframe, we SHOULD attach a SafeFrame.
+      adResponse.headers[RENDERING_TYPE_HEADER] = 'safeframe';
+      sandbox.stub(a4a, 'getFallback', () => true);
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      // DO NOT SUBMIT
+      const lifecycleEventStub =
+          sandbox.stub(a4a, 'protectedEmitLifecycleEvent_');
+      return a4a.layoutCallback().then(() => {
+        expect(lifecycleEventStub).to.be.called.once;
+        expect(triggerAnalyticsEventSpy).to.be.calledWith(
+            element,
+            'adRenderStart',
+            {'isAmpCreative': false, 'releaseType': '0'});
       });
     });
   });
