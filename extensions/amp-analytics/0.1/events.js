@@ -557,8 +557,8 @@ export class TimerEventTracker extends EventTracker {
   }
 
   /**
-   * Visible for testing.
    * @return {!Array<number>}
+   * @visibleForTesting
    */
   getTrackedTimerKeys() {
     return /** @type {!Array<number>} */ (Object.keys(this.trackers_));
