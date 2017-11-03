@@ -243,6 +243,6 @@ export class VariableSource {
     // FOO_BAR(arg1,arg2)
     // FOO_BAR(arg1, arg2)
     return new RegExp('\\$?(' + all + ')' +
-        '(?:\\((\\s*(?!,)(?:\\s*,?\\s*[0-9a-zA-Z-_.]*)*)\\))?', 'g');
+        '(?:\\(((?:\\s*[0-9a-zA-Z-_.]*\\s*(?=,|\\)),?)*)\\s*\\))?', 'g');
   }
 }
