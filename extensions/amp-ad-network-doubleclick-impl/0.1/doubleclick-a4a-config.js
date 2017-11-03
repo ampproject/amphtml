@@ -162,15 +162,22 @@ export class DoubleclickA4aEligibility {
    */
   isA4aEnabled(win, element, useRemoteHtml) {
     this.unconditionedExperimentSelection(win, element);
-    if ('useSameDomainRenderingUntilDeprecated' in element.dataset ||
-        element.hasAttribute('useSameDomainRenderingUntilDeprecated')) {
+    const hasUSDRD =
+          'useSameDomainRenderingUntilDeprecated' in element.dataset ||
+          element.hasAttribute('useSameDomainRenderingUntilDeprecated');
+    if (hasUSDRD) {
       user().warn(TAG, 'useSameDomainRenderingUntilDeprecated will no longer ' +
                   'be supported starting on March 29, 2018. Please refer to ' +
                   'https://github.com/ampproject/amphtml/issues/11834 ' +
                   'for morch information');
-      return false;
     }
-    if (useRemoteHtml && !element.getAttribute('rtc-config')) {
+    if (useRemoteHtml) {
+      user().warn(TAG, 'The use of remote.html will no longer ' +
+                  'be supported starting on March 29, 2018. Please refer to ' +
+                  'https://github.com/ampproject/amphtml/issues/11834 ' +
+                  'for morch information');
+    }
+    if (hasUSDRD || (useRemoteHtml && !element.getAttribute('rtc-config'))) {
       return false;
     }
     let experimentId;
