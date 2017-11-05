@@ -125,7 +125,7 @@ describes.realWin('amp-apester-media', {
     }).then(ape => {
       const iframe = ape.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.src).to.equal('about:blank');
+      expect(iframe.srcdoc).to.not.be.null;
       expect(changeSizeSpy).to.be.calledOnce;
       expect(changeSizeSpy.args[0][0]).to.equal('404');
     });
@@ -137,7 +137,7 @@ describes.realWin('amp-apester-media', {
     }).then(ape => {
       const iframe = ape.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.src).to.equal('about:blank');
+      expect(iframe.srcdoc).to.not.be.null;
       expect(attemptChangeSizeSpy).to.be.calledOnce;
       expect(attemptChangeSizeSpy.args[0][0]).to.equal('404');
     });
@@ -160,8 +160,7 @@ describes.realWin('amp-apester-media', {
     }).then(ape => {
       const iframe = ape.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.src).to.equal(
-          'about:blank');
+      expect(iframe.srcdoc).to.not.be.null;
       const tag = ape.implementation_;
       tag.unlayoutCallback();
       expect(ape.querySelector('iframe')).to.be.null;
