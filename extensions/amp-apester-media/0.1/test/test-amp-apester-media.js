@@ -40,7 +40,7 @@ describes.realWin('amp-apester-media', {
 
   function getApester(attributes, opt_responsive) {
     const media = doc.createElement('amp-apester-media');
-    const response = {
+    const regularResponse = {
       'code': 200,
       'message': 'ok',
       'payload': {
@@ -56,6 +56,25 @@ describes.realWin('amp-apester-media', {
         'language': 'en',
       },
     };
+    const playlistResponse = {
+      'code': 200,
+      'message': 'ok',
+      'payload': [{
+        'interactionId': '57a336dba187a2ca3005e826',
+        'data': {
+          'size': {'width': '600', 'height': '404'},
+        },
+        'layout': {
+          'id': '557d52c059081084b94845c3',
+          'name': 'multi poll two',
+          'directive': 'multi-poll-two',
+        },
+        'language': 'en',
+      }],
+    };
+    const currentResopnse = attributes && attributes['data-apester-channel-token'] ?
+      playlistResponse : regularResponse;
+    const html = '<head></head><body></body>'
     changeSizeSpy = sandbox.spy(
         media.implementation_, 'changeHeight');
     attemptChangeSizeSpy = sandbox.spy(
@@ -64,11 +83,18 @@ describes.realWin('amp-apester-media', {
     if (attributes) {
       xhrMock.expects('fetchJson').returns(Promise.resolve({
         json() {
-          return Promise.resolve(response);
+          return Promise.resolve(currentResopnse);
+        },
+      }));
+  
+      xhrMock.expects('fetchText').returns(Promise.resolve({
+        text() {
+          return Promise.resolve(html);
         },
       }));
     } else {
       xhrMock.expects('fetchJson').never();
+      xhrMock.expects('fetchText').never();
     }
     for (const key in attributes) {
       media.setAttribute(key, attributes[key]);
@@ -84,34 +110,32 @@ describes.realWin('amp-apester-media', {
       return media.layoutCallback();
     }).then(() => media);
   }
-
+//
   it('renders', () => {
     return getApester({
       'data-apester-media-id': '57a336dba187a2ca3005e826',
     }).then(ape => {
       const iframe = ape.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.src).to.equal(
-          'https://renderer.qmerce.com/interaction/57a336dba187a2ca3005e826');
+      expect(iframe.src).to.equal('about:blank');
       expect(changeSizeSpy).to.be.calledOnce;
       expect(changeSizeSpy.args[0][0]).to.equal('404');
     });
   });
-
+//
   it('render playlist', () => {
     return getApester({
       'data-apester-channel-token': '57a36e1e96cd505a7f01ed12',
     }).then(ape => {
       const iframe = ape.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.src).to.equal(
-          'https://renderer.qmerce.com/interaction/57a336dba187a2ca3005e826');
+      expect(iframe.src).to.equal('about:blank');
       expect(attemptChangeSizeSpy).to.be.calledOnce;
       expect(attemptChangeSizeSpy.args[0][0]).to.equal('404');
     });
   });
-
-//todo responsive layout isn't fully supported yet, just a stub
+//
+// //todo responsive layout isn't fully supported yet, just a stub
   it('renders responsively', () => {
     return getApester({
       'data-apester-media-id': '57a336dba187a2ca3005e826',
@@ -129,7 +153,7 @@ describes.realWin('amp-apester-media', {
       const iframe = ape.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(
-          'https://renderer.qmerce.com/interaction/57a336dba187a2ca3005e826');
+          'about:blank');
       const tag = ape.implementation_;
       tag.unlayoutCallback();
       expect(ape.querySelector('iframe')).to.be.null;

@@ -48,11 +48,11 @@ class AmpApesterMedia extends AMP.BaseElement {
     /**
      * @const @private {string}
      */
-    this.rendererBaseUrl_ = 'https://renderer.qmerce.local.com';
+    this.rendererBaseUrl_ = 'https://renderer.apester.com';
     /**
      * @const @private {string}
      */
-    this.displayBaseUrl_ = 'https://display.apester.local.com';
+    this.displayBaseUrl_ = 'https://display.apester.com';
     /**
      * @const @private {string}
      */
@@ -401,7 +401,7 @@ class AmpApesterMedia extends AMP.BaseElement {
   getMediaContent(content, src) {
     /** in case we already have renderer content from display-service use it, otherwise fetch from server  */
     const getContent = () => content ? Promise.resolve(content) :
-      Services.xhrFor(this.win).fetchJson(src, {
+      Services.xhrFor(this.win).fetchText(src, {
         requireAmpResponseSourceOrigin: false,
       }).then(res => res.text());
     return getContent();
