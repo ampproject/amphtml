@@ -235,7 +235,6 @@ class AmpApesterMedia extends AMP.BaseElement {
     iframe.originalUrlParams = splittedUrl.length > 1 ? `?${splittedUrl[1]}`
       : '';
     iframe.extensionData = media.campaignData;
-    iframe.src = 'about:blank';
     iframe.height = this.height_;
     iframe.width = this.width_;
     iframe.classList.add('amp-apester-iframe');
