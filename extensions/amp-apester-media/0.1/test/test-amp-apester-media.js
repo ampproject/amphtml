@@ -54,6 +54,7 @@ describes.realWin('amp-apester-media', {
           'directive': 'multi-poll-two',
         },
         'language': 'en',
+        'content': '<head></head><body></body>',
       },
     };
     const playlistResponse = {
