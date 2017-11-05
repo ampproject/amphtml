@@ -72,9 +72,10 @@ describes.realWin('amp-apester-media', {
         'language': 'en',
       }],
     };
-    const currentResopnse = attributes && attributes['data-apester-channel-token'] ?
+    const currentResopnse =
+      attributes && attributes['data-apester-channel-token'] ?
       playlistResponse : regularResponse;
-    const html = '<head></head><body></body>'
+    const html = '<head></head><body></body>';
     changeSizeSpy = sandbox.spy(
         media.implementation_, 'changeHeight');
     attemptChangeSizeSpy = sandbox.spy(
@@ -86,16 +87,22 @@ describes.realWin('amp-apester-media', {
           return Promise.resolve(currentResopnse);
         },
       }));
-  
-      xhrMock.expects('fetchText').returns(Promise.resolve({
-        text() {
-          return Promise.resolve(html);
-        },
-      }));
+
+      if (currentResopnse['payload']['content']) {
+        xhrMock.expects('fetchText').never();
+      } else {
+        xhrMock.expects('fetchText').returns(Promise.resolve({
+          text() {
+            return Promise.resolve(html);
+          },
+        }));
+      }
+
     } else {
       xhrMock.expects('fetchJson').never();
       xhrMock.expects('fetchText').never();
     }
+
     for (const key in attributes) {
       media.setAttribute(key, attributes[key]);
     }
@@ -110,7 +117,7 @@ describes.realWin('amp-apester-media', {
       return media.layoutCallback();
     }).then(() => media);
   }
-//
+
   it('renders', () => {
     return getApester({
       'data-apester-media-id': '57a336dba187a2ca3005e826',
@@ -122,7 +129,7 @@ describes.realWin('amp-apester-media', {
       expect(changeSizeSpy.args[0][0]).to.equal('404');
     });
   });
-//
+
   it('render playlist', () => {
     return getApester({
       'data-apester-channel-token': '57a36e1e96cd505a7f01ed12',
@@ -134,7 +141,7 @@ describes.realWin('amp-apester-media', {
       expect(attemptChangeSizeSpy.args[0][0]).to.equal('404');
     });
   });
-//
+
 // //todo responsive layout isn't fully supported yet, just a stub
   it('renders responsively', () => {
     return getApester({
