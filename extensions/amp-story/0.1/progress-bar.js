@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {dev} from '../../../src/log';
-import {scale, setStyles} from '../../../src/style';
+import {scale, setImportantStyles} from '../../../src/style';
 import {scopedQuerySelector} from '../../../src/dom';
 import {Services} from '../../../src/services';
 
@@ -109,9 +109,13 @@ export class ProgressBar {
   setActivePageIndex(pageIndex) {
     this.assertValidPageIndex_(pageIndex);
     for (let i = 0; i < this.pageCount_; i++) {
-      if (i <= pageIndex) {
+      if (i < pageIndex) {
         this.updateProgress(i, 1.0);
+      } else if (i > pageIndex) {
+        this.updateProgress(i, 0.0);
       } else {
+        // The active page manages its own progress by firing PAGE_PROGRESS
+        // events to amp-story.
         this.updateProgress(i, 0.0);
       }
     }
@@ -133,7 +137,7 @@ export class ProgressBar {
         `.i-amphtml-story-page-progress-bar:nth-child(${nthChildIndex}) ` +
         '.i-amphtml-story-page-progress-value');
     this.vsync_.mutate(() => {
-      setStyles(dev().assertElement(progressEl), {
+      setImportantStyles(dev().assertElement(progressEl), {
         'transform': scale(`${progress},1`),
       });
     });

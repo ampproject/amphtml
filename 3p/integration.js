@@ -105,6 +105,7 @@ import {capirs} from '../ads/capirs';
 import {caprofitx} from '../ads/caprofitx';
 import {chargeads} from '../ads/chargeads';
 import {colombia} from '../ads/colombia';
+import {connatix} from '../ads/connatix';
 import {contentad} from '../ads/contentad';
 import {criteo} from '../ads/criteo';
 import {csa} from '../ads/google/csa';
@@ -160,6 +161,7 @@ import {outbrain} from '../ads/outbrain';
 import {plista} from '../ads/plista';
 import {polymorphicads} from '../ads/polymorphicads';
 import {popin} from '../ads/popin';
+import {postquare} from '../ads/postquare';
 import {pubmatic} from '../ads/pubmatic';
 import {pubmine} from '../ads/pubmine';
 import {pulsepoint} from '../ads/pulsepoint';
@@ -215,6 +217,7 @@ const AMP_EMBED_ALLOWED = {
   mywidget: true,
   outbrain: true,
   plista: true,
+  postquare: true,
   smartclip: true,
   smi2: true,
   taboola: true,
@@ -272,6 +275,7 @@ register('capirs', capirs);
 register('caprofitx', caprofitx);
 register('chargeads', chargeads);
 register('colombia', colombia);
+register('connatix',connatix);
 register('contentad', contentad);
 register('criteo', criteo);
 register('csa', csa);
@@ -331,6 +335,7 @@ register('outbrain', outbrain);
 register('plista', plista);
 register('polymorphicads', polymorphicads);
 register('popin', popin);
+register('postquare', postquare);
 register('pubmatic', pubmatic);
 register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);

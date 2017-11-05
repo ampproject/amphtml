@@ -27,11 +27,13 @@ import {
   DEFAULT_SAFEFRAME_VERSION,
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
-import {VERIFIER_EXP_NAME} from '../../amp-a4a/0.1/legacy-signature-verifier';
+import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
 import {
   experimentFeatureEnabled,
   DOUBLECLICK_EXPERIMENT_FEATURE,
+  DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
   DFP_CANONICAL_FF_EXPERIMENT_NAME,
+  UNCONDITIONED_IDENTITY_EXPERIMENT_NAME,
 } from './doubleclick-a4a-config';
 import {
   isInManualExperiment,
@@ -383,15 +385,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   buildCallback() {
     super.buildCallback();
     this.identityTokenPromise_ = experimentFeatureEnabled(
-        this.win, DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT) ?
+        this.win, DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT) ||
+        experimentFeatureEnabled(
+            this.win,
+            DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.IDENTITY_EXPERIMENT,
+            UNCONDITIONED_IDENTITY_EXPERIMENT_NAME) ?
         Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
         .then(() => getIdentityToken(this.win, this.getAmpDoc())) :
         Promise.resolve(
             /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({}));
-    const verifierEid = getExperimentBranch(this.win, VERIFIER_EXP_NAME);
-    if (verifierEid) {
-      addExperimentIdToElement(verifierEid, this.element);
-    }
     if (this.win['dbclk_a4a_viz_change']) {
       // Only create one per page but ensure all slots get experiment
       // selection.
@@ -647,10 +649,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       if (rtcResponse.response) {
         ['targeting', 'categoryExclusions'].forEach(key => {
           if (rtcResponse.response[key]) {
+            const rewrittenResponse = this.rewriteRtcKeys_(
+                rtcResponse.response[key],
+                rtcResponse.callout);
             this.jsonTargeting_[key] =
                 !!this.jsonTargeting_[key] ?
-                deepMerge(this.jsonTargeting_[key], rtcResponse.response[key]) :
-                rtcResponse.response[key];
+                deepMerge(this.jsonTargeting_[key],
+                    rewrittenResponse) :
+                rewrittenResponse;
           }
         });
       }
@@ -658,6 +664,25 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return {'artc': artc.join() || null, 'ati': ati.join(), 'ard': ard.join()};
   }
 
+  /**
+   * Appends the callout value to the keys of response to prevent a collision
+   * case caused by multiple vendors returning the same keys.
+   * @param {!Object<string, string>} response
+   * @param {!string} callout
+   * @return {!Object<string, string>}
+   * @private
+   */
+  rewriteRtcKeys_(response, callout) {
+    // Only perform this substitution for vendor-defined URLs.
+    if (!RTC_VENDORS[callout]) {
+      return response;
+    }
+    const newResponse = {};
+    Object.keys(response).forEach(key => {
+      newResponse[`${key}_${callout}`] = response[key];
+    });
+    return newResponse;
+  }
 
   /** @override */
   onNetworkFailure(error, adUrl) {
@@ -1285,4 +1310,3 @@ function getFirstInstanceValue_(instances, extractFn) {
   }
   return null;
 }
-

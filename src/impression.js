@@ -62,10 +62,18 @@ export function maybeTrackImpression(win) {
         dev().warn('IMPRESSION', error);
       });
 
-  Services.viewerForDoc(win.document).isTrustedViewer().then(isTrusted => {
-    // Currently this feature is launched for trusted viewer, but still
-    // experiment guarded for all AMP docs.
-    if (!isTrusted && !isExperimentOn(win, 'alp')) {
+  const viewer = Services.viewerForDoc(win.document);
+  const isTrustedViewerPromise = viewer.isTrustedViewer();
+  const isTrustedReferrerPromise = viewer.isTrustedReferrer();
+  Promise.all([
+    isTrustedViewerPromise,
+    isTrustedReferrerPromise,
+  ]).then(results => {
+    const isTrustedViewer = results[0];
+    const isTrustedReferrer = results[1];
+    // Currently this feature is launched for trusted viewer and trusted referrer,
+    // but still experiment guarded for all AMP docs.
+    if (!isTrustedViewer && !isTrustedReferrer && !isExperimentOn(win, 'alp')) {
       resolveImpression();
       return;
     }
@@ -139,6 +147,7 @@ function handleClickUrl(win) {
   /** @const {string|undefined} */
   const clickUrl = viewer.getParam('click');
 
+
   if (!clickUrl) {
     return Promise.resolve();
   }
@@ -162,6 +171,8 @@ function handleClickUrl(win) {
     return invoke(win, dev().assertString(clickUrl));
   }).then(response => {
     applyResponse(win, response);
+  }).catch(err => {
+    user().warn('IMPRESSION', 'Error on request clickUrl: ', err);
   });
 }
 
@@ -169,7 +180,7 @@ function handleClickUrl(win) {
  * Send the url to ad server and wait for its response
  * @param {!Window} win
  * @param {string} clickUrl
- * @return {!Promise<!JsonObject>}
+ * @return {!Promise<?JsonObject>}
  */
 function invoke(win, clickUrl) {
   if (getMode().localDev && !getMode().test) {
@@ -179,16 +190,26 @@ function invoke(win, clickUrl) {
     credentials: 'include',
     // All origins are allows to send these requests.
     requireAmpResponseSourceOrigin: false,
-  }).then(res => res.json());
+  }).then(res => {
+    // Treat 204 no content response specially
+    if (res.status == 204) {
+      return null;
+    }
+    return res.json();
+  });
 }
 
 /**
  * parse the response back from ad server
  * Set for analytics purposes
  * @param {!Window} win
- * @param {!JsonObject} response
+ * @param {?JsonObject} response
  */
 function applyResponse(win, response) {
+  if (!response) {
+    return;
+  }
+
   const adLocation = response['location'];
   const adTracking = response['tracking_url'];
 

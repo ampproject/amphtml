@@ -542,6 +542,8 @@ app.use('/impression-proxy/', (req, res) => {
     'gclid': '1234',
   };
   res.send(body);
+
+  // Or fake response with status 204 if viewer replaceUrl is provided
 });
 
 // Proxy with local JS.

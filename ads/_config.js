@@ -247,7 +247,12 @@ export const adConfig = {
     prefetch: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
   },
 
+  connatix: {
+    renderStartImplemented: true,
+  },
+
   contentad: {},
+
 
   criteo: {
     prefetch: 'https://static.criteo.net/js/ld/publishertag.js',
@@ -571,6 +576,8 @@ export const adConfig = {
   popin: {
     renderStartImplemented: true,
   },
+
+  postquare: {},
 
   pubmatic: {
     prefetch: 'https://ads.pubmatic.com/AdServer/js/amp.js',
