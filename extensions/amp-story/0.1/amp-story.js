@@ -313,16 +313,23 @@ export class AmpStory extends AMP.BaseElement {
   buildButtons_() {
     const doc = this.element.ownerDocument;
     const nextButton = doc.createElement('button');
+    const nextButtonContainer = doc.createElement('div');
+    nextButtonContainer.classList.add(
+        'i-amphtml-story-button-container', 'next-container');
     nextButton.classList.add(
         'i-amphtml-story-button-move','i-amphtml-story-button-next');
-    this.element.appendChild(nextButton);
+    nextButtonContainer.appendChild(nextButton);
+    this.element.appendChild(nextButtonContainer);
     const previousButton = doc.createElement('button');
+    const prevButtonContainer = doc.createElement('div');
+    prevButtonContainer.classList.add(
+        'i-amphtml-story-button-container', 'prev-container');
     previousButton.classList.add(
         'i-amphtml-story-button-move','i-amphtml-story-button-prev',
         'i-amphtml-story-button-move-hidden');
-
-    this.element.insertBefore(previousButton, this.element.firstChild);
-    this.element.insertBefore(nextButton, this.element.firstChild);
+    prevButtonContainer.appendChild(previousButton);
+    this.element.insertBefore(prevButtonContainer, this.element.firstChild);
+    this.element.insertBefore(nextButtonContainer, this.element.firstChild);
 
     this.nextButton_ = nextButton;
     this.prevButton_ = previousButton;
