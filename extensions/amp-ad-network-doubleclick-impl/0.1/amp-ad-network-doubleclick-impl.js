@@ -634,6 +634,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const artc = [];
     const ati = [];
     const ard = [];
+    const exclusions = {};
     rtcResponseArray.forEach(rtcResponse => {
       // Only want to send errors for requests we actually sent.
       if (rtcResponse.error &&
@@ -658,7 +659,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               rewrittenResponse;
         }
         if (rtcResponse.response['categoryExclusions']) {
-          const exclusions = {};
           [this.jsonTargeting_['categoryExclusions'],
             rtcResponse.response['categoryExclusions']].forEach(
               categoryExclusions => {
