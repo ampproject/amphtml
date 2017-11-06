@@ -32,7 +32,7 @@ In both cases, the results of these call-outs will be passed to the Fast Fetch i
 
 Publishers may use RTC to send callouts to a maximum of 5 different endpoints. Each amp-ad element that will use RTC must have the rtc-config attribute set with valid JSON, see example: 
 
-  **Example 1: RTC Specification on an amp-ad** 
+|  **Example 1: RTC Specification on an amp-ad**| 
 ```html
 <amp-ad width="320" height="50"
             type="network-foo"
@@ -50,6 +50,7 @@ Publishers may use RTC to send callouts to a maximum of 5 different endpoints. E
             "timeoutMillis": 750}’>
 </amp-ad>
 ```
+|
 
 The value of rtc-config must conform to the following specification:
 
