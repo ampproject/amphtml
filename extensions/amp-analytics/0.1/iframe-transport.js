@@ -93,7 +93,7 @@ export class IframeTransport {
     } else {
       frameData = this.createCrossDomainIframe();
       this.ampWin_.document.body.appendChild(frameData.frame);
-      this.createLongTaskObserver_();
+      this.createLongTaskObserver();
     }
     dev().assert(frameData, 'Trying to use non-existent frame');
   }
@@ -150,7 +150,15 @@ export class IframeTransport {
     return frameData;
   }
 
-  createLongTaskObserver_() {
+  /**
+   * Uses the Long Task API to create an observer for when 3p vendor frames
+   * take more than 50ms of continuous CPU time.
+   * Currently the only action in response to that is to log. There is a
+   * grace of LONG_TASK_REPORTING_THRESHOLD_ occurrences before logging begins.
+   * @private
+   * @VisibleForTesting
+   */
+  createLongTaskObserver() {
     if (this.longTaskObserver_ ||
         typeof this.ampWin_.PerformanceObserver == 'undefined') {
       return;
@@ -163,7 +171,7 @@ export class IframeTransport {
         if (entry && entry['entryType'] == 'longtask' &&
             (entry['name'] == 'cross-origin-descendant' ||
             entry['name'] == 'multiple-contexts' ||
-            (getMode().localDev &&
+            ((getMode().localDev || getMode().test) &&
             entry['name'] == 'same-origin-descendant')) &&
             entry.attribution) {
           entry.attribution.forEach(attrib => {
@@ -204,6 +212,10 @@ export class IframeTransport {
     }
     ampDoc.body.removeChild(frameData.frame);
     delete IframeTransport.crossDomainIframes_[type];
+    if (this.longTaskObserver_) {
+      this.longTaskObserver_.disconnect();
+      delete this.longTaskObserver_;
+    }
   }
 
   /**
