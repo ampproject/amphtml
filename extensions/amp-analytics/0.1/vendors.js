@@ -387,11 +387,25 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         '&c7=${canonicalUrl}' +
         '&c9=${documentReferrer}' +
         '&cs_c7amp=${ampdocUrl}',
+      'storyPageview': '${base}c1=2' +
+        '&c2=${c2}' +
+        '&cs_pv=${pageViewId}' +
+        '&c12=${clientId(comScore)}' +
+        '&ns_type=view' +
+        '&rn=${random}' +
+        '&c8=${title}' +
+        '&c7=${canonicalUrl}%23${pageId}' +
+        '&c9=${documentReferrer}' +
+        '&cs_c7amp=${ampdocUrl}',
     },
     'triggers': {
       'defaultPageview': {
         'on': 'visible',
         'request': 'pageview',
+      },
+      'defaultStoryPageView': {
+        'on': 'story-page-visible',
+        'request': 'storyPageview',
       },
     },
     'transport': {
