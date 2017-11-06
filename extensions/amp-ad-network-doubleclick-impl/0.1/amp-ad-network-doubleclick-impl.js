@@ -659,17 +659,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         }
         if (rtcResponse.response['categoryExclusions']) {
           const exclusions = {};
-          this.jsonTargeting_['categoryExclusions'] =
-              this.jsonTargeting_['categoryExclusions'] || [];
-          this.jsonTargeting_['categoryExclusions'].forEach(exclusion => {
-            exclusions[exclusion] = true;
-          });
-          rtcResponse.response['categoryExclusions'].forEach(exclusion => {
-            if (!exclusions[exclusion]) {
-              this.jsonTargeting_['categoryExclusions'].push(exclusion);
-              exclusions[exclusion] = true;
-            }
-          });
+          [this.jsonTargeting_['categoryExclusions'],
+            rtcResponse.response['categoryExclusions']].forEach(
+              categoryExclusions => {
+                categoryExclusions = categoryExclusions || [];
+                categoryExclusions.forEach(exclusion => {
+                  exclusions[exclusion] = true;
+                });
+              });
+          this.jsonTargeting_['categoryExclusions'] = Object.keys(exclusions);
         }
       }
     });
