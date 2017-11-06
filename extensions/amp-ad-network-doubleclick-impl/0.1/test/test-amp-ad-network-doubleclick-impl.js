@@ -1122,13 +1122,13 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           href: 'http://localhost:8000/foo',
         },
         opener: {
-          postMessage: () => {
-            expect(false).to.be.true;
-          },
+          postMessage: () => {},
         },
       };
+      const postMessageSpy = sandbox.spy(env.win.opener, 'postMessage');
       impl.win = env.win;
       impl.postTroubleshootMessage_();
+      expect(postMessageSpy).to.not.be.called;
     });
   });
 });
