@@ -301,9 +301,14 @@ export class AmpA4A extends AMP.BaseElement {
     /**
      * Protected version of emitLifecycleEvent that ensures error does not
      * cause promise chain to reject.
-     * @private {?function(string, !Object=)}
+     * @private {function(string, !Object=)}
      */
-    this.protectedEmitLifecycleEvent_ = null;
+    this.protectedEmitLifecycleEvent_ = protectFunctionWrapper(
+        this.emitLifecycleEvent, this,
+        (err, varArgs) => {
+          dev().error(TAG, this.element.getAttribute('type'),
+              'Error on emitLifecycleEvent', err, varArgs) ;
+        });
 
     /** @const {string} */
     this.sentinel = generateSentinel(window);
@@ -392,12 +397,6 @@ export class AmpA4A extends AMP.BaseElement {
       width: this.element.getAttribute('width'),
       height: this.element.getAttribute('height'),
     };
-    this.protectedEmitLifecycleEvent_ = protectFunctionWrapper(
-        this.emitLifecycleEvent, this,
-        (err, varArgs) => {
-          dev().error(TAG, this.element.getAttribute('type'),
-              'Error on emitLifecycleEvent', err, varArgs) ;
-        });
     const upgradeDelayMs = Math.round(this.getResource().getUpgradeDelayMs());
     dev().info(TAG,
         `upgradeDelay ${this.element.getAttribute('type')}: ${upgradeDelayMs}`);

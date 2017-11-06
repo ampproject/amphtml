@@ -1917,9 +1917,10 @@ describe('amp-a4a', function() {
     });
 
     it('should emit upgradeDelay lifecycle ping', () => {
+      const emitLifecycleEventSpy =
+          sandbox.spy(MockA4AImpl.prototype, 'emitLifecycleEvent');
       return createIframePromise().then(fixture => {
         const a4a = new MockA4AImpl(createA4aElement(fixture.doc));
-        const emitLifecycleEventSpy = sandbox.spy(a4a, 'emitLifecycleEvent');
         a4a.buildCallback();
         expect(emitLifecycleEventSpy.withArgs('upgradeDelay', {
           'forced_delta': 12345,
