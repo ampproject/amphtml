@@ -1673,6 +1673,8 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Returns variables to be included on an analytics event. This can be
    * overridden by specific network implementations.
+   * Note that this function is called for each time an analytics event is
+   * fired.
    * @param {string} unusedAnalyticsEvent The name of the analytics event.
    * @return {!Object<string, string>}
    */
@@ -1680,8 +1682,9 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Returns network-specific config for amp-analytics. It should overridden
-   * with network-specific configurations. If the network has no amp-analytics
-   * config, it should return null;
+   * with network-specific configurations.
+   * This function may return null. If so, no amp-analytics element will be
+   * added to this A4A element and no A4A triggers will be fired.
    * @return {?JsonObject}
    */
   getAmpAnalyticsConfig() { return null; }

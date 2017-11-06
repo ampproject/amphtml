@@ -55,7 +55,7 @@ import * as sinon from 'sinon';
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
 
-describe('amp-a4a', function() {
+describe('amp-a4a', () => {
   let sandbox;
   let fetchMock;
   let getSigningServiceNamesMock;
