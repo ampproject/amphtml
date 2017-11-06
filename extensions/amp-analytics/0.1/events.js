@@ -601,6 +601,7 @@ export class TimerEventTracker extends EventTracker {
     if (!!timerStart) {
       const startTracker = trackerProvider(timerStart);
       user().assert(startTracker, 'Cannot track timer start');
+      // TODO(pomeroyr): check eventtype against allowed timer trackers
       startBuilder = startTracker.add.bind(startTracker, context,
           timerStart['on'], timerStart,
           this.handleTimerToggle_.bind(this, timerId, eventType, listener),
