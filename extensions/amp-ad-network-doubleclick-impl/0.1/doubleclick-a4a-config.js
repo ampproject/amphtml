@@ -33,7 +33,7 @@ import {
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 
 /** @const {string} */
 export const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
@@ -162,9 +162,20 @@ export class DoubleclickA4aEligibility {
    */
   isA4aEnabled(win, element, useRemoteHtml) {
     this.unconditionedExperimentSelection(win, element);
-    if ((useRemoteHtml && !element.getAttribute('rtc-config')) ||
-        'useSameDomainRenderingUntilDeprecated' in element.dataset ||
-        element.hasAttribute('useSameDomainRenderingUntilDeprecated')) {
+    const warnDeprecation = feature => user().warn(
+        TAG, `${feature} will no longer ` +
+          'be supported starting on March 29, 2018. Please refer to ' +
+          'https://github.com/ampproject/amphtml/issues/11834 ' +
+          'for more information');
+    const usdrd = 'useSameDomainRenderingUntilDeprecated';
+    const hasUSDRD = usdrd in element.dataset || element.hasAttribute(usdrd);
+    if (hasUSDRD) {
+      warnDeprecation(usdrd);
+    }
+    if (useRemoteHtml) {
+      warnDeprecation('remote.html');
+    }
+    if (hasUSDRD || (useRemoteHtml && !element.getAttribute('rtc-config'))) {
       return false;
     }
     let experimentId;
