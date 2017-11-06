@@ -155,7 +155,6 @@ export class IframeTransport {
    * take more than 50ms of continuous CPU time.
    * Currently the only action in response to that is to log. There is a
    * grace of LONG_TASK_REPORTING_THRESHOLD_ occurrences before logging begins.
-   * @private
    * @VisibleForTesting
    */
   createLongTaskObserver() {

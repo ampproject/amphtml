@@ -128,8 +128,8 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
 
     // Create frame for a new vendor
     const frameUrl2 = 'https://example.com/test2';
-    const iframeTransport2 = new IframeTransport(env.ampdoc.win,
-        'some_other_vendor_type', {iframe: frameUrl2}, frameUrl2 + '-3');
+    new IframeTransport(env.ampdoc.win, 'some_other_vendor_type',
+        {iframe: frameUrl2}, frameUrl2 + '-3');
     expect(createLongTaskObserverSpy).to.be.called;
   });
 
@@ -152,7 +152,7 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
         '    var d2 = null;\n' +
         '    do {\n' +
         '      d2 = new Date();\n' +
-        '    } while (d2-d < duration);\n' +
+        '    } while (d2-d < duration);\n' + // Note the semicolon!
         '    setTimeout(function() { busyWait(count-1, duration, cb); },0);\n' +
         '  } else {\n' +
         '    cb();\n' +
@@ -168,11 +168,12 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
         '</html>';
     frame.setAttribute('style', '');
     env.ampdoc.win.document.body.appendChild(frame);
-    return new Promise((resolve,reject) => {
-      expectPostMessage(frame.contentWindow, env.ampdoc.win, 'doneSleeping').then(() => {
-        expect(warnSpy).to.be.called;
-        resolve();
-      });
+    return new Promise((resolve,unused) => {
+      expectPostMessage(frame.contentWindow, env.ampdoc.win, 'doneSleeping')
+          .then(() => {
+            expect(warnSpy).to.be.called;
+            resolve();
+          });
     });
   }).timeout(10000);
 });
