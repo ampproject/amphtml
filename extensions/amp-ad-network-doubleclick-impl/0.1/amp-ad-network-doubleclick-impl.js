@@ -141,6 +141,15 @@ export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
 /** @private {?Promise} */
 let sraRequests = null;
 
+/** @typedef {{
+      adUrl: !Promise<string>,
+      lineItemId: string,
+      creativeId: string,
+      slotId: string,
+      slotIndex: string,
+    }} */
+let TroubleshootData;
+
 /**
  * Array of functions used to combine block level request parameters for SRA
  * request.
@@ -354,11 +363,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {boolean} */
     this.preloadSafeframe_ = true;
 
-    /** @private {?string} */
-    this.creativeId_ = null;
-
-    /** @private {?string} */
-    this.lineitemId_ = null;
+    /** @private {!TroubleshootData} */
+    this.troubleshootData_ = /** @type {!TroubleshootData} */ ({});
   }
 
   /** @override */
@@ -460,6 +466,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         }
       }
     });
+
+    this.troubleshootData_.slotId = this.element.getAttribute('data-slot');
+    this.troubleshootData_.slotIndex =
+        this.element.getAttribute('data-amp-slot-index');
   }
 
   /**
@@ -604,8 +614,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           // On error/timeout, proceed.
           return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({});
         });
-    return Promise.all([opt_rtcResponsesPromise, identityPromise]).then(
-        results => {
+    const urlPromise = Promise.all([opt_rtcResponsesPromise, identityPromise])
+        .then(results => {
           const rtcParams = this.mergeRtcResponses_(results[0]);
           this.identityToken = results[1];
           return googleAdUrl(
@@ -613,6 +623,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   this.getBlockParameters_(), rtcParams,
                   this.buildIdentityParams_(), PAGE_LEVEL_PARAMS_));
         });
+    this.troubleshootData_.adUrl = urlPromise;
+    return urlPromise;
   }
 
   /**
@@ -701,8 +713,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
-    this.creativeId_ = responseHeaders.get('google-creative-id');
-    this.lineitemId_ = responseHeaders.get('google-lineitem-id');
+    this.troubleshootData_.creativeId =
+        responseHeaders.get('google-creative-id');
+    this.troubleshootData_.lineItemId =
+        responseHeaders.get('google-lineitem-id');
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
       this.extensions_./*OK*/installExtensionForDoc(
@@ -1222,35 +1236,39 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * Emits a postMessage containing information about this slot to the DFP
-   * Troubleshoot UI.
+   * Troubleshoot UI. A promise is returned if a message is posted, otherwise
+   * null is returned. The promise is returned only for test convenience.
+   *
+//   * @return {?Promise}
    */
   postTroubleshootMessage_() {
-    if (!this.win.opener || !/\?.*dfpdeb/.test(this.win.location.href)) {
-      return;
+    if (!this.win.opener || !/[?|&]dfpdeb/.test(this.win.location.search)) {
+      return null;
     }
-    const slotId = this.element.getAttribute('data-slot');
-    const payload = dict({
-      'gutData': JSON.stringify(dict({
-        'events': [{
-          'timestamp': Date.now(),
-          'slotid': slotId,
-          'messageId': 4,
-        }],
-        'slots': [{
-          'contentUrl': this.getCachedAdUrl() || '',
-          'id': slotId,
-          'leafAdUnitName': slotId,
-          'domId': 'gpt_unit_' + slotId + '_' +
-              this.element.getAttribute('data-amp-slot-index'),
-          'lineItemId': this.lineitemId_,
-          'creativeId': this.creativeId_,
-        }],
-      })),
-      'userAgent': navigator.userAgent,
-      'referrer': this.win.location.href,
-      'messageType': 'LOAD',
+    return this.troubleshootData_.adUrl.then(adUrl => {
+      const payload = dict({
+        'gutData': JSON.stringify(dict({
+          'events': [{
+            'timestamp': Date.now(),
+            'slotid': this.troubleshootData_.slotId,
+            'messageId': 4,
+          }],
+          'slots': [{
+            'contentUrl': adUrl || '',
+            'id': this.troubleshootData_.slotId,
+            'leafAdUnitName': this.troubleshootData_.slotId,
+            'domId': 'gpt_unit_' + this.troubleshootData_.slotId + '_' +
+                this.troubleshootData_.slotIndex,
+            'lineItemId': this.troubleshootData_.lineItemId,
+            'creativeId': this.troubleshootData_.creativeId,
+          }],
+        })),
+        'userAgent': navigator.userAgent,
+        'referrer': this.win.location.href,
+        'messageType': 'LOAD',
+      });
+      this.win.opener./*OK*/postMessage(payload, '*');
     });
-    this.win.opener./*OK*/postMessage(payload, '*');
   }
 }
 

@@ -1069,12 +1069,15 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     beforeEach(() => {
       element = doc.createElement('amp-ad');
       element.setAttribute('type', 'doubleclick');
-      element.setAttribute('data-slot', 'slotId');
-      element.setAttribute('data-amp-slot-index', '0');
       doc.body.appendChild(element);
       impl = new AmpAdNetworkDoubleclickImpl(element);
-      impl.lineitemId_ = '123';
-      impl.creativeId_ = '456';
+      impl.troubleshootData_ = {
+        adUrl: Promise.resolve('http://www.getmesomeads.com'),
+        creativeId: '123',
+        lineItemId: '456',
+        slotId: 'slotId',
+        slotIndex: '0',
+      };
     });
 
     afterEach(() => {
@@ -1086,6 +1089,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       env.win = {
         location: {
           href: 'http://localhost:8000/foo?dfpdeb',
+          search: '?dfpdeb',
         },
         opener: {
           postMessage: payload => {
@@ -1100,35 +1104,38 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
             expect(gutData.events[0].slotid).to.equal(slotId);
             expect(gutData.events[0].messageId).to.equal(4);
 
-            expect(gutData.slots[0].contentUrl).to.equal('');
+            expect(gutData.slots[0].contentUrl).to
+                .equal('http://www.getmesomeads.com');
             expect(gutData.slots[0].id).to.equal(slotId);
             expect(gutData.slots[0].leafAdUnitName).to.equal(slotId);
             expect(gutData.slots[0].domId).to.equal(
                 'gpt_unit_' + slotId + '_0');
-            expect(gutData.slots[0].lineItemId).to.equal('123');
-            expect(gutData.slots[0].creativeId).to.equal('456');
+            expect(gutData.slots[0].creativeId).to.equal('123');
+            expect(gutData.slots[0].lineItemId).to.equal('456');
           },
         },
       };
       const postMessageSpy = sandbox.spy(env.win.opener, 'postMessage');
       impl.win = env.win;
-      impl.postTroubleshootMessage_();
-      expect(postMessageSpy).to.be.calledOnce;
+      return impl.postTroubleshootMessage_().then(() =>
+          expect(postMessageSpy).to.be.calledOnce);
     });
 
     it('should not emit post message', () => {
       env.win = {
         location: {
           href: 'http://localhost:8000/foo',
+          search: '',
         },
         opener: {
-          postMessage: () => {},
+          postMessage: () => {
+            // should never get here
+            expect(false).to.be.true;
+          },
         },
       };
-      const postMessageSpy = sandbox.spy(env.win.opener, 'postMessage');
       impl.win = env.win;
-      impl.postTroubleshootMessage_();
-      expect(postMessageSpy).to.not.be.called;
+      expect(impl.postTroubleshootMessage_()).to.be.null;
     });
   });
 });
