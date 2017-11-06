@@ -660,7 +660,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         if (rtcResponse.response['categoryExclusions']) {
           this.jsonTargeting_['categoryExclusions'] =
               rtcResponse.response['categoryExclusions'].concat(
-                  this.jsonTargeting_['categoryExclusions'] || {});
+                  this.jsonTargeting_['categoryExclusions'] || []);
         }
       }
     });
