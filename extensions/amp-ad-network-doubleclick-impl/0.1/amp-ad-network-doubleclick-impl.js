@@ -142,7 +142,7 @@ export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
 let sraRequests = null;
 
 /** @typedef {{
-      adUrl: !Promise<string>,
+      adUrl: ?Promise<string>,
       lineItemId: string,
       creativeId: string,
       slotId: string,
@@ -364,7 +364,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.preloadSafeframe_ = true;
 
     /** @private {!TroubleshootData} */
-    this.troubleshootData_ = /** @type {!TroubleshootData} */ ({});
+    this.troubleshootData_ = /** @type {!TroubleshootData} */ ({
+      adUrl: null,
+      creativeId: null,
+      lineItemId: null,
+      slotId: this.element.getAttribute('data-slot'),
+      slotIndex: this.element.getAttribute('data-amp-slot-index'),
+    });
   }
 
   /** @override */
@@ -466,10 +472,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         }
       }
     });
-
-    this.troubleshootData_.slotId = this.element.getAttribute('data-slot');
-    this.troubleshootData_.slotIndex =
-        this.element.getAttribute('data-amp-slot-index');
   }
 
   /**
@@ -1245,6 +1247,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!this.win.opener || !/[?|&]dfpdeb/.test(this.win.location.search)) {
       return null;
     }
+    dev().assert(this.troubleshootData_.adUrl, 'ad URL does not exist yet');
     return this.troubleshootData_.adUrl.then(adUrl => {
       const payload = dict({
         'gutData': JSON.stringify(dict({
