@@ -32,53 +32,43 @@ In both cases, the results of these call-outs will be passed to the Fast Fetch i
 
 Publishers may use RTC to send callouts to a maximum of 5 different endpoints. Each amp-ad element that will use RTC must have the rtc-config attribute set with valid JSON, see example: 
 
-
-<table>
-  <tr>
-   <td><code><amp-ad width="320" height="50"</code>
-<p>
-<code>            type="network-foo"</code>
-<p>
-<code>            data-slot="/1234/5678"</code>
-<p>
-<strong><code>            rtc-config='{</code></strong>
-<strong><code>            "vendors": {</code></strong>
-<strong><code>              "vendorA": {"SLOT_ID": "1"},</code></strong>
-<strong><code>              "vendorB": {"PAGE_ID": "2"},</code></strong>
-<strong><code>              "vendorC": {"SLOT_W": "320", "SLOT_H": "50"}          </code></strong>
-<strong><code>              },</code></strong>
-<strong><code>            "URLs": [</code></strong>
-<strong><code>              "https://www.AmpPublisher.biz/targetingA",</code></strong>
-<strong><code>              "https://www.AmpPublisher.biz/targetingB"</code></strong>
-<strong><code>            ], </code></strong>
-<strong><code>            "timeoutMillis": 750}'></code></strong>
-<code></amp-ad></code>
-   </td>
-  </tr>
-  <tr>
-   <td><strong><code>Example 1: RTC Specification on an amp-ad</code></strong>
-   </td>
-  </tr>
-</table>
-
+```html
+<amp-ad width="320" height="50"
+            type="network-foo"
+            data-slot="/1234/5678"
+            rtc-config='{
+            "vendors": {
+              "vendorA": {"SLOT_ID": "1"},
+              "vendorB": {"PAGE_ID": "2"},
+              “vendorC”: {“SLOT_W”: “320”, “SLOT_H”: “50”}          
+              },
+            "URLs": [
+              “https://www.AmpPublisher.biz/targetingA”,
+              “https://www.AmpPublisher.biz/targetingB”
+            ], 
+            "timeoutMillis": 750}’>
+</amp-ad>
+```
+ **Example 1: RTC Specification on an amp-ad**
 
 The value of rtc-config must conform to the following specification:
 
 
 ```
 {
-	"vendors": {
-"vendor1": {
-"MACRO_1": "MACRO_VALUE_1",
-"MACRO_2": "MACRO_VALUE_2"
-},
-"vendor2": {
-"MACRO_1": "MACRO_VALUE_1",
-"MACRO_2": "MACRO_VALUE_2"
-}
+    "vendors": {
+        "vendor1": {
+            "MACRO_1": "MACRO_VALUE_1",
+            "MACRO_2": "MACRO_VALUE_2"
+        },
+        "vendor2": {
+            "MACRO_1": "MACRO_VALUE_1",
+            "MACRO_2": "MACRO_VALUE_2"
+        }
 	},
-     "urls": ["https://www.exampleA.com/endpoint", 
-              "https://www.exampleb.com/endpoint"],
+    "urls": [
+        "https://www.exampleA.com/endpoint", 
+        "https://www.exampleb.com/endpoint"],
 	"timeoutMillis": 500 
 }
 ```
@@ -198,29 +188,18 @@ vendors: {
 
 If a publisher wishes to callout to vendor1, then they would specify their RTC config as:
 
-
-<table>
-  <tr>
-   <td><code><amp-ad width="320" height="50"</code>
-<p>
-<code>            type="network-foo"</code>
-<p>
-<code>            data-slot="/1234/5678"</code>
-<p>
-<strong><code>            rtc-config='{</code></strong>
-<strong><code>            "vendors": {</code></strong>
-<strong><code>              "vendor1": {"SLOT_ID": "1234"}         </code></strong>
-<strong><code>              }</code></strong>
-<strong><code>             }'></code></strong>
-<code></amp-ad></code>
-   </td>
-  </tr>
-  <tr>
-   <td><strong><code>Example 2: Use of Vendor URLs</code></strong>
-   </td>
-  </tr>
-</table>
-
+```html
+<amp-ad width="320" height="50"
+            type="network-foo"
+            data-slot="/1234/5678"
+            rtc-config='{
+            "vendors": {
+              "vendor1": {"SLOT_ID": "1234"}         
+              }
+             }’>
+</amp-ad>
+```
+ **Example 2: Use of Vendor URLs**
 
 The resulting RTC callout URL will then be, after macro expansion:
 
@@ -233,27 +212,20 @@ In addition to vendor-defined macros, with publishers specifying the values for 
 
 For example, Ad Network AmpAdCom overrides the property in their Fast Fetch Implementation:
 
+```js
+/** amp-ad-network-ampadcom-impl.js */
 
-<table>
-  <tr>
-   <td><strong><code>/** amp-ad-network-ampadcom-impl.js */</code></strong>
-<strong><code>export class AmpAdNetworkAmpAdComImpl extends AmpA4A {</code></strong>
-<strong><code>...</code></strong>
-<strong><code>/** @override */</code></strong>
-<strong><code>getCustomRealTimeConfigMacros() {</code></strong>
-<strong><code>  return {</code></strong>
-<strong><code>    'FOO_PROP': getElementById('fooEl').getAttribute('fooProp'),</code></strong>
-<strong><code>    'OTHER_PROP': 'staticValue'</code></strong>
-<strong><code>  }</code></strong>
-<strong><code>}</code></strong>
-   </td>
-  </tr>
-  <tr>
-   <td><strong>Example 3: Fast Fetch Implementation Defined Macros</strong>
-   </td>
-  </tr>
-</table>
-
+export class AmpAdNetworkAmpAdComImpl extends AmpA4A {
+...
+/** @override */
+getCustomRealTimeConfigMacros() {
+  return {
+    ‘FOO_PROP’: getElementById(‘fooEl’).getAttribute(‘fooProp’),
+    ‘OTHER_PROP’: ‘staticValue’
+  }
+}
+```
+ **Example 3: Fast Fetch Implementation Defined Macros**
 
 Then, publishers and vendors alike would be able to specify the macro FOO_PROP in their URL, and the value would be substituted in at runtime by the Fast Fetch implementation. 
 
@@ -579,40 +551,35 @@ export class AmpAdNetworkFadNetworkImpl extends AmpA4A {
 
 In this specific case, the Promise resolves to the following array: 
 
+```js
+[
+ /** Callout 1 RTC Response Object */
+ {response: ‘{“targeting”: {“ages”: “18-24”, “g”:[“m”, “f”, “o”]}}’,
+  rtcTime: 685,
+  callout: ‘www.AmpPublisher.biz’},
 
-<table>
-  <tr>
-   <td><strong><code>[</code></strong>
-<strong><code> /** Callout 1 RTC Response Object */</code></strong>
-<strong><code> {response: '{"targeting": {"ages": "18-24", "g":["m", "f", "o"]}}',</code></strong>
-<strong><code>  rtcTime: 685,</code></strong>
-<strong><code>  callout: 'www.AmpPublisher.biz'},</code></strong>
-<strong><code> /** Callout 2 RTC Response Object */</code></strong>
-<strong><code> {error: 'timeout',</code></strong>
-<strong><code>  rtcTime: 750,</code></strong>
-<strong><code>  callout: 'www.amptgt.biz'},</code></strong>
-<strong><code> /** Callout 3 RTC Response Object */</code></strong>
-<strong><code> {error: 'malformed_json_response',</code></strong>
-<strong><code>  rtcTime: 580,</code></strong>
-<strong><code>  callout: 'vendora'},</code></strong>
-<strong><code> </code></strong>
-<strong><code> /** Callout 4 RTC Response Object */</code></strong>
-<strong><code> {response: '{"targeting": {"ages": "35-45", </code></strong>
-<strong><code>                            "i": {"sport": "baseball"}}}',</code></strong>
-<strong><code>  rtcTime: 700,</code></strong>
-<strong><code>  callout: 'vendor-b'},</code></strong>
-<strong><code> /** Callout 5 RTC Response Object */</code></strong>
-<strong><code> {response: '{"targeting": {"i": {"city": "NYC"}}}',</code></strong>
-<strong><code>  rtcTime: 730,</code></strong>
-<strong><code>  callout: 'vendorc'}]</code></strong>
-   </td>
-  </tr>
-  <tr>
-   <td><strong><code>Example of Resolved Value of opt_rtcResponsesPromise passed to getAdUrl</code></strong>
-   </td>
-  </tr>
-</table>
+ /** Callout 2 RTC Response Object */
+ {error: ‘timeout’,
+  rtcTime: 750,
+  callout: ‘www.amptgt.biz’},
 
+ /** Callout 3 RTC Response Object */
+ {error: ‘malformed_json_response’,
+  rtcTime: 580,
+  callout: ‘vendora’},
+ 
+ /** Callout 4 RTC Response Object */
+ {response: ‘{“targeting”: {“ages”: “35-45”, 
+                            “i”: {“sport”: “baseball”}}}’,
+  rtcTime: 700,
+  callout: ‘vendor-b’},
+
+ /** Callout 5 RTC Response Object */
+ {response: ‘{“targeting”: {“i”: {“city”: “NYC”}}}’,
+  rtcTime: 730,
+  callout: ‘vendorc’}]
+```
+ **Example of Resolved Value of opt_rtcResponsesPromise passed to getAdUrl**
 
 **_Explanation of Errors in RTC Responses _**
 
@@ -624,34 +591,18 @@ _Callout 1, 4, and 5 all return valid JSON and cause no errors. _
 
 The Fast Fetch Implementation for FadNetwork then uses this array of RTC response objects to build and send the ad request URL. It is at the discretion of FadNetwork to merge these parameters however they see fit. In this example, FadNetwork simply does a deep merge of all the successful RTC callout responses, with the last response given precedence in case of collision, and gets the resulting JSON: 
 
-
-<table>
-  <tr>
-   <td><strong><code>{"targeting": {"ages": "35-45",</code></strong>
-<strong><code>               "g":["m", "f", "o"],</code></strong>
-<strong><code>               "i": {"sport": "baseball", "city": "NYC"}}}</code></strong>
-   </td>
-  </tr>
-  <tr>
-   <td><strong><code>Result of merging successful RTC Callouts 1, 4, and 5</code></strong>
-   </td>
-  </tr>
-</table>
-
+```js
+{“targeting”: {“ages”: “35-45”,
+               “g”:[“m”, “f”, “o”],
+               “i”: {“sport”: “baseball”, “city”: “NYC”}}}
+```
+ **Result of merging successful RTC Callouts 1, 4, and 5**
 
 FadNetwork then constructs and encodes their Ad URL as: 
 
-
-<table>
-  <tr>
-   <td><strong><code>https://www.fadnetwork.biz/adServer?%7B%E2%80%9Ctargeting%E2%80%9D:%20%7B%E2%80%9Cages%E2%80%9D:%20%E2%80%9C35-45%E2%80%9D,%20%E2%80%9Cg%E2%80%9D:%5B%E2%80%9Cm%E2%80%9D,%20%E2%80%9Cf%E2%80%9D,%20%E2%80%9Co%E2%80%9D%5D,%20%E2%80%9Ci%E2%80%9D:%20%7B%E2%80%9Csport%E2%80%9D:%20%E2%80%9Cbaseball%E2%80%9D,%20%E2%80%9Ccity%E2%80%9D:%20%E2%80%9CNYC%E2%80%9D%7D%7D</code></strong>
-   </td>
-  </tr>
-  <tr>
-   <td>FadNetwork's resulting Ad Request URL (use decodeURI to see original json)
-   </td>
-  </tr>
-</table>
-
-
+```js
+https://www.fadnetwork.biz/adServer?%7B%E2%80%9Ctargeting%E2%80%9D:%20%7B%E2%80%9Cages%E2%80%9D:%20%E2%80%9C35-45%E2%80%9D,%20%E2%80%9Cg%E2%80%9D:%5B%E2%80%9Cm%E2%80%9D,%20%E2%80%9Cf%E2%80%9D,%20%E2%80%9Co%E2%80%9D%5D,%20%E2%80%9Ci%E2%80%9D:%20%7B%E2%80%9Csport%E2%80%9D:%20%E2%80%9Cbaseball%E2%80%9D,%20%E2%80%9Ccity%E2%80%9D:%20%E2%80%9CNYC%E2%80%9D%7D%7D
+```
+ **FadNetwork's resulting Ad Request URL (use decodeURI to see original json)**
+ 
 From this point forward, all Fast Fetch behavior is exactly the same as non-RTC use cases, and regular Fast Fetch documentation may be consulted for additional questions. 
