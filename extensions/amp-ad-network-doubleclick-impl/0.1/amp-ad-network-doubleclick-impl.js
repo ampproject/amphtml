@@ -646,19 +646,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       ati.push(!rtcResponse.error ? RTC_ATI_ENUM.RTC_SUCCESS :
                RTC_ATI_ENUM.RTC_FAILURE);
       ard.push(rtcResponse.callout);
-      if (rtcResponse.response) {
-        ['targeting', 'categoryExclusions'].forEach(key => {
-          if (rtcResponse.response[key]) {
-            const rewrittenResponse = this.rewriteRtcKeys_(
-                rtcResponse.response[key],
-                rtcResponse.callout);
-            this.jsonTargeting_[key] =
-                !!this.jsonTargeting_[key] ?
-                deepMerge(this.jsonTargeting_[key],
-                    rewrittenResponse) :
-                rewrittenResponse;
-          }
-        });
+      if (rtcResponse.response['targeting']) {
+        const rewrittenResponse = this.rewriteRtcKeys_(
+            rtcResponse.response['targeting'],
+            rtcResponse.callout);
+        this.jsonTargeting_['targeting'] =
+            !!this.jsonTargeting_['targeting'] ?
+            deepMerge(this.jsonTargeting_['targeting'],
+                rewrittenResponse) :
+            rewrittenResponse;
+      }
+      if (rtcResponse.response['categoryExclusions']) {
+        this.jsonTargeting_['categoryExclusions'] =
+            rtcResponse.response['categoryExclusions'].concat(
+                this.jsonTargeting_['categoryExclusions'] || {});
       }
     });
     return {'artc': artc.join() || null, 'ati': ati.join(), 'ard': ard.join()};
