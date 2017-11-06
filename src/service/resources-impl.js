@@ -1454,15 +1454,25 @@ export class Resources {
           this.exec_.getSize() == 0 &&
           this.queue_.getSize() == 0 &&
           now > this.exec_.getLastDequeueTime() + 5000) {
-      let idleScheduledCount = 0;
+      let idleScheduledPreloadCount = 0;
+      let idleScheduledLayoutCount = 0;
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
         if (r.getState() == ResourceState.READY_FOR_LAYOUT &&
                 !r.hasOwner() && r.isDisplayed()) {
-          dev().fine(TAG_, 'idle layout:', r.debugid);
-          this.scheduleLayoutOrPreload_(r, /* layout */ false);
-          idleScheduledCount++;
-          if (idleScheduledCount >= 4) {
+          const idleLayout = r.renderOnIdleOutsideViewport();
+          this.scheduleLayoutOrPreload_(
+              r, /* layout */ idleLayout);
+          if (idleLayout) {
+            if (idleScheduledLayoutCount++ < 4) {
+              this.scheduleLayoutOrPreload_(r, /* layout */true);
+            }
+          } else  {
+            if (idleScheduledPreloadCount++ < 4) {
+              this.scheduleLayoutOrPreload_(r, /* layout */false);
+            }
+          }
+          if (idleScheduledPreloadCount >= 4 && idleScheduledLayoutCount >= 4) {
             break;
           }
         }
@@ -1793,7 +1803,8 @@ export class Resources {
     // The element has to be in its rendering corridor.
     if (!forceOutsideViewport &&
         !resource.isInViewport() &&
-        !resource.renderOutsideViewport()) {
+        !resource.renderOutsideViewport() &&
+        !resource.renderOnIdleOutsideViewport()) {
       return false;
     }
 

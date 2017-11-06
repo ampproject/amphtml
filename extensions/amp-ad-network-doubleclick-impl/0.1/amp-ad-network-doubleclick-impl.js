@@ -129,6 +129,9 @@ export const CORRELATOR_CLEAR_EXP_BRANCHES = {
   EXPERIMENT: '22302765',
 };
 
+/** @const {string} */
+const RENDER_ON_IDLE_EXP_NAME = 'a4a-render-idle';
+
 /**
  * @const {string}
  * @visibileForTesting
@@ -356,6 +359,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
+  renderOnIdleOutsideViewport() {
+    return getExperimentBranch(
+        this.win, RENDER_ON_IDLE_EXP_NAME) == '21061138' ? 5 : false;
+  }
+
+  /** @override */
   isLayoutSupported(layout) {
     this.isFluid_ = layout == Layout.FLUID;
     return this.isFluid_ || isLayoutSizeDefined(layout);
@@ -408,13 +417,26 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.win['dbclk_a4a_viz_change'] = true;
 
     const sfPreloadExpName = 'a4a-safeframe-preloading-off';
-    const experimentInfoMap =
+    let experimentInfoMap =
         /** @type {!Object<string, !ExperimentInfo>} */ ({});
     experimentInfoMap[sfPreloadExpName] = {
       isTrafficEligible: () => true,
       branches: ['21061135', '21061136'],
     };
     randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+    experimentInfoMap =
+        /** @type {!Object<string, !ExperimentInfo>} */ ({});
+    experimentInfoMap[RENDER_ON_IDLE_EXP_NAME] = {
+      isTrafficEligible: () => true,
+      // TODO: allocate actual ids!!!
+      branches: ['21061137', '21061138'],
+    };
+    randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+    const renderIdleExpId =
+        getExperimentBranch(this.win, RENDER_ON_IDLE_EXP_NAME);
+    if (renderIdleExpId) {
+      addExperimentIdToElement(renderIdleExpId, this.element);
+    }
     const sfPreloadExpId = getExperimentBranch(this.win, sfPreloadExpName);
     if (sfPreloadExpId) {
       addExperimentIdToElement(sfPreloadExpId, this.element);
