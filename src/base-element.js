@@ -156,6 +156,13 @@ export class BaseElement {
 
     /** @public {?Object} For use by sub classes */
     this.config = null;
+
+    /**
+     * The time at which this element was scheduled for layout relative to the
+     * epoch. This value will be set to 0 until the this element has been scheduled.
+     * @public {number}
+     */
+    this.layoutScheduleTime = 0;
   }
 
   /**

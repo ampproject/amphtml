@@ -1912,7 +1912,7 @@ export class Resources {
       this.queue_.enqueue(task);
       this.schedulePass(this.calcTaskTimeout_(task));
     }
-    task.resource.layoutScheduled();
+    task.resource.layoutScheduled(task.scheduleTime);
   }
 
   /**
