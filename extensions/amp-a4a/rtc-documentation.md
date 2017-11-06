@@ -117,7 +117,7 @@ vendors: {
 ```
 
 
-The only valid strings that can be replaced for a given URL are specified by the 'macros' array. In the above example, the only valid macro to replace in https://vendor1.com/slot_id=SLOT_ID is "SLOT_ID".
+The only valid strings that can be replaced for a given URL are specified by the 'macros' array. In the above example, the only valid macro to replace in `https://vendor1.com/slot_id=SLOT_ID` is "SLOT_ID".
 
 The 'macros' attribute is optional, i.e. a vendor could specify a URL that has no macros to substitute in. 
 
@@ -208,7 +208,7 @@ Example 2: Use of Vendor URLs
 
 The resulting RTC callout URL will then be, after macro expansion:
 
-**https://vendor1.com/foo?slot_id=1234**
+**`https://vendor1.com/foo?slot_id=1234`**
 
 
 ##### Fast Fetch Implementation Defined Macros
@@ -359,9 +359,9 @@ This is not allowed:
 
 <table>
   <tr>
-   <td>Callout 1: <a href="https://www.vendor1.com/foo?slot_id=1234">https://www.vendor1.com/foo?slot_id=1234</a>
+   <td>Callout 1: <a href="`https://www.vendor1.com/foo?slot_id=1234"`>`https://www.vendor1.com/foo?slot_id=1234`</a>
 <p>
-Callout 2: <a href="https://www.vendor1.com/foo?slot_id=1234">https://www.vendor1.com/foo?slot_id=1234</a>
+Callout 2: <a href="`https://www.vendor1.com/foo?slot_id=1234`">`https://www.vendor1.com/foo?slot_id=1234`</a>
    </td>
   </tr>
   <tr>
@@ -376,9 +376,9 @@ This is allowed:
 
 <table>
   <tr>
-   <td>Callout 1: <a href="https://www.vendor1.com/foo?slot_id=1234">https://www.vendor1.com/foo?slot_id=1234</a>
+   <td>Callout 1: <a href="`https://www.vendor1.com/foo?slot_id=1234`">`https://www.vendor1.com/foo?slot_id=1234`</a>
 <p>
-Callout 2: <a href="https://www.vendor1.com/foo?slot_id=1234">https://www.vendor1.com/foo?slot_id=5678</a>
+Callout 2: <a href="`https://www.vendor1.com/foo?slot_id=1234`">`https://www.vendor1.com/foo?slot_id=5678`</a>
    </td>
   </tr>
   <tr>
