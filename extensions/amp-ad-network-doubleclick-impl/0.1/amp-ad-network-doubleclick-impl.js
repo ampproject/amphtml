@@ -142,7 +142,7 @@ export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
 let sraRequests = null;
 
 /** @typedef {{
-      adUrl: ?Promise<string>,
+      adUrl: !Promise<string>,
       lineItemId: string,
       creativeId: string,
       slotId: string,
@@ -364,13 +364,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.preloadSafeframe_ = true;
 
     /** @private {!TroubleshootData} */
-    this.troubleshootData_ = /** @type {!TroubleshootData} */ ({
-      adUrl: null,
-      creativeId: null,
-      lineItemId: null,
-      slotId: this.element.getAttribute('data-slot'),
-      slotIndex: this.element.getAttribute('data-amp-slot-index'),
-    });
+    this.troubleshootData_ = /** @type {!TroubleshootData} */ ({});
   }
 
   /** @override */
@@ -412,6 +406,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         .then(() => getIdentityToken(this.win, this.getAmpDoc())) :
         Promise.resolve(
             /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({}));
+    this.troubleshootData_.slotId = this.element.getAttribute('data-slot');
+    this.troubleshootData_.slotIndex =
+        this.element.getAttribute('data-amp-slot-index');
     if (this.win['dbclk_a4a_viz_change']) {
       // Only create one per page but ensure all slots get experiment
       // selection.
