@@ -170,7 +170,7 @@ export class IframeTransport {
         if (entry && entry['entryType'] == 'longtask' &&
             (entry['name'] == 'cross-origin-descendant' ||
             entry['name'] == 'multiple-contexts' ||
-            ((getMode().localDev || getMode().test) &&
+            (getMode().localDev &&
             entry['name'] == 'same-origin-descendant')) &&
             entry.attribution) {
           entry.attribution.forEach(attrib => {

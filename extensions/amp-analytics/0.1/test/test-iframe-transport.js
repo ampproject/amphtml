@@ -135,15 +135,15 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
 
 
   it('logs poor performance of vendor iframe', () => {
-    const appendChildStub = sandbox.stub(env.ampdoc.win.document.body,
-        'appendChild'); // Because want to change srcdoc first
-    const warnSpy = sandbox.spy(user(), 'warn');
+    // Want to change srcdoc before appending
     const frameUrl2 = 'https://example.com/test2';
+    sandbox.stub(env.ampdoc.win.document.body, 'appendChild');
     const iframeTransport2 = new IframeTransport(env.ampdoc.win,
-      'some_other_vendor_type', {iframe: frameUrl2}, frameUrl2 + '-3');
+        'some_other_vendor_type', {iframe: frameUrl2}, frameUrl2 + '-3');
+    sandbox.restore();
     // Clear frame URL, because attrib.containerSrc=='' in test scenario
     iframeTransport2.frameUrl_ = '';
-    appendChildStub.restore();
+    const warnSpy = sandbox.spy(user(), 'warn');
     const frame = IframeTransport.getFrameData('some_other_vendor_type').frame;
     frame.srcdoc = '<html><head><script>' +
         'function busyWait(count, duration, cb) {\n' +
