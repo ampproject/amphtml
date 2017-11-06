@@ -236,11 +236,13 @@ export class VariableSource {
     keys.sort((s1, s2) => s2.length - s1.length);
     const all = keys.join('|');
     // Match the given replacement patterns, as well as optionally
-    // arguments to the replacement behind it in parantheses.
+    // arguments to the replacement behind it in parentheses.
     // Example string that match
     // FOO_BAR
     // FOO_BAR(arg1)
     // FOO_BAR(arg1,arg2)
-    return new RegExp('\\$?(' + all + ')(?:\\(([0-9a-zA-Z-_.,]+)\\))?', 'g');
+    // FOO_BAR(arg1, arg2)
+    return new RegExp('\\$?(' + all + ')' +
+        '(?:\\(((?:\\s*[0-9a-zA-Z-_.]*\\s*(?=,|\\)),?)*)\\s*\\))?', 'g');
   }
 }
