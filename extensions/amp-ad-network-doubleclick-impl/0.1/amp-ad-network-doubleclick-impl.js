@@ -1239,7 +1239,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Troubleshoot UI. A promise is returned if a message is posted, otherwise
    * null is returned. The promise is returned only for test convenience.
    *
-//   * @return {?Promise}
+   * @return {?Promise}
    */
   postTroubleshootMessage_() {
     if (!this.win.opener || !/[?|&]dfpdeb/.test(this.win.location.search)) {
