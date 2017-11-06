@@ -32,8 +32,8 @@ In both cases, the results of these call-outs will be passed to the Fast Fetch i
 
 Publishers may use RTC to send callouts to a maximum of 5 different endpoints. Each amp-ad element that will use RTC must have the rtc-config attribute set with valid JSON, see example: 
 
+  **Example 1: RTC Specification on an amp-ad** 
 ```html
- <!-- **Example 1: RTC Specification on an amp-ad** -->
 <amp-ad width="320" height="50"
             type="network-foo"
             data-slot="/1234/5678"
@@ -188,6 +188,7 @@ vendors: {
 
 If a publisher wishes to callout to vendor1, then they would specify their RTC config as:
 
+ **Example 2: Use of Vendor URLs**
 ```html
 <amp-ad width="320" height="50"
             type="network-foo"
@@ -199,7 +200,6 @@ If a publisher wishes to callout to vendor1, then they would specify their RTC c
              }’>
 </amp-ad>
 ```
- **Example 2: Use of Vendor URLs**
 
 The resulting RTC callout URL will then be, after macro expansion:
 
@@ -212,6 +212,7 @@ In addition to vendor-defined macros, with publishers specifying the values for 
 
 For example, Ad Network AmpAdCom overrides the property in their Fast Fetch Implementation:
 
+ **Example 3: Fast Fetch Implementation Defined Macros**
 ```js
 /** amp-ad-network-ampadcom-impl.js */
 
@@ -225,7 +226,6 @@ getCustomRealTimeConfigMacros() {
   }
 }
 ```
- **Example 3: Fast Fetch Implementation Defined Macros**
 
 Then, publishers and vendors alike would be able to specify the macro FOO_PROP in their URL, and the value would be substituted in at runtime by the Fast Fetch implementation. 
 
