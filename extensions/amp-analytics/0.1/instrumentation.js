@@ -450,7 +450,7 @@ export class AnalyticsGroup {
     if (!trackerProfile && !isEnumValue(AnalyticsEventType, eventType)) {
       trackerProfile = EVENT_TRACKERS['custom'];
     }
-    if (trackerProfile) {
+    if (!!trackerProfile) {
       user().assert(
           trackerProfile.allowedFor.indexOf(this.root_.getType()) != -1,
           'Trigger type "%s" is not allowed in the %s',

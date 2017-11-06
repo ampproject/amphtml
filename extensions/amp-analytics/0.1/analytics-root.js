@@ -142,6 +142,21 @@ export class AnalyticsRoot {
   getElementById(unusedId) {}
 
   /**
+   * Returns the tracker for the specified name and list of allowed types.
+   *
+   * @param {string} name
+   * @param {!Object<string, function(new:./events.EventTracker)>} options
+   * @return {?./events.EventTracker}
+   */
+  getTrackerForOptions(name, options) {
+    const trackerProfile = options[name];
+    if (!!trackerProfile) {
+      return this.getTracker(name, trackerProfile);
+    }
+    return null;
+  }
+
+  /**
    * Returns the tracker for the specified name and type. If the tracker
    * has not been requested before, it will be created.
    *

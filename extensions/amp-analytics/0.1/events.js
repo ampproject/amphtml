@@ -677,8 +677,8 @@ export class VisibilityTracker extends EventTracker {
     if (!waitForSpec) {
       // Default case:
       if (!selector) {
-        // waitFor nothing is selector is not defined
-        waitForSpec = 'none';
+        // waitFor selector is not defined, wait for nothing
+        return null;
       } else {
         // otherwise wait for ini-load by default
         waitForSpec = 'ini-load';
@@ -687,18 +687,17 @@ export class VisibilityTracker extends EventTracker {
 
     user().assert(SUPPORT_WAITFOR_TRACKERS[waitForSpec] !== undefined,
         'waitFor value %s not supported', waitForSpec);
-
     if (!SUPPORT_WAITFOR_TRACKERS[waitForSpec]) {
-      // waitFor NONE, wait for nothing
       return null;
     }
 
-    if (!this.waitForTrackers_[waitForSpec]) {
-      this.waitForTrackers_[waitForSpec] =
-        new SUPPORT_WAITFOR_TRACKERS[waitForSpec](this.root);
+    let waitForTracker = this.waitForTrackers_[waitForSpec];
+    if (!waitForTracker) {
+      waitForTracker = this.root.getTrackerForOptions(
+          waitForSpec, SUPPORT_WAITFOR_TRACKERS);
+      this.waitForTrackers_[waitForSpec] = waitForTracker;
     }
 
-    const waitForTracker = this.waitForTrackers_[waitForSpec];
     // Wait for root signal if there's no element selected.
     return element ? waitForTracker.getElementSignal(waitForSpec, element)
         : waitForTracker.getRootSignal(waitForSpec);
