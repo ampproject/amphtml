@@ -912,7 +912,7 @@ export class UrlReplacements {
     let replacement = url.replace(expr, (match, name, opt_strargs) => {
       let args = [];
       if (typeof opt_strargs == 'string') {
-        args = opt_strargs.split(',');
+        args = opt_strargs.split(/,\s*/);
       }
       if (opt_whiteList && !opt_whiteList[name]) {
         // Do not perform substitution and just return back the original
