@@ -662,8 +662,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           [this.jsonTargeting_['categoryExclusions'],
             rtcResponse.response['categoryExclusions']].forEach(
               categoryExclusions => {
-                categoryExclusions = categoryExclusions || [];
-                categoryExclusions.forEach(exclusion => {
+                (categoryExclusions || []).forEach(exclusion => {
                   exclusions[exclusion] = true;
                 });
               });
