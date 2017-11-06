@@ -30,10 +30,12 @@ import {Services} from '../services';
 import {
   parseUrl,
   parseUrlWithA,
-  addParamsToUrl,
-  parseQueryString} from '../url';
+} from '../url';
 import {toWin} from '../types';
-import {dict} from '../utils/object';
+import {
+  shouldAppendExtraParams,
+  getExtraParamsUrl,
+} from '../impression';
 
 
 const TAG = 'clickhandler';
@@ -105,7 +107,11 @@ export class ClickHandler {
     this.boundHandle_ = this.handle_.bind(this);
     this.rootNode_.addEventListener('click', this.boundHandle_);
 
-    this.whiteListOutgoingDomain_ = null;
+    this.appendExtraParams_ = false;
+
+    shouldAppendExtraParams(this.ampdoc.win).then(res => {
+      this.appendExtraParams_ = res;
+    });
   }
 
   /** @override */
@@ -142,15 +148,17 @@ export class ClickHandler {
     if (!target || !target.href) {
       return;
     }
-    Services.urlReplacementsForDoc(target).maybeExpandLink(target);
 
-    let tgtLoc = this.parseUrl_(target.href);
-
-    if (!this.isEmbed_ && !this.isInABox_) {
-      // append gclid and gclsrc
-      this.handleExternalNavDecoration_(e, target, tgtLoc);
-      tgtLoc = this.parseUrl_(target.href);
+    // First check if need to handle external link decoration.
+    let defaultExpandParamsUrl = null;
+    if (this.appendExtraParams_ && !this.isEmbed_) {
+      // Only decorate outgoing link when needed to and is not in FIE.
+      defaultExpandParamsUrl = getExtraParamsUrl(this.ampdoc.win, target);//this.getExternalNavDecoration_(target);
     }
+
+    Services.urlReplacementsForDoc(target).maybeExpandLink(
+        target, defaultExpandParamsUrl);
+    const tgtLoc = this.parseUrl_(target.href);
 
     // Handle custom protocols only if the document is iframed.
     if (this.isIframed_) {
@@ -192,43 +200,6 @@ export class ClickHandler {
       // in the case where there's no app to handle the custom protocol.
       e.preventDefault();
     }
-  }
-
-  /**
-   * Handle out going link decoration
-   * @param {!Event} e
-   * @param {!Element} target
-   * @param {!Location} tgtLoc
-   * @private
-   */
-  handleExternalNavDecoration_(e, target, tgtLoc) {
-    // Check outgoing link within whitelist domain
-    if (!this.whiteListOutgoingDomain_) {
-      this.whiteListOutgoingDomain_ = {};
-      const cUrl = Services.documentInfoForDoc(this.ampdoc).canonicalUrl;
-      const cHostname = this.parseUrl_(cUrl).hostname;
-      // TODO: QQ Do we have to support host name starts with www. and not with www.
-      this.whiteListOutgoingDomain_[cHostname] = true;
-    }
-
-    if (!this.whiteListOutgoingDomain_[tgtLoc.hostname]) {
-      // If the out going domain is not recognized do not decorate link.
-      return;
-    }
-
-    // Read every time since gclid and gclsrc resolve async.
-    // We can optimize by storing resolved gclid and gclsrc.
-    const url = parseUrl(this.ampdoc.win.location.href);
-    const params = parseQueryString(url.search);
-    const outGoingLinkDecoration = dict({
-      'gclid': params['gclid'],
-      'gclsrc': params['gclsrc'],
-    });
-
-    // TODO: QQ This would generate multiple gclid/gclsrc issue. Should we
-    // consider replace params instead of add.
-    target.href = addParamsToUrl(target.href, outGoingLinkDecoration);
-    return;
   }
 
   /**

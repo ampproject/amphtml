@@ -825,7 +825,6 @@ export class UrlReplacements {
     */
   isAllowedOrigin_(url) {
     const docInfo = Services.documentInfoForDoc(this.ampdoc);
-
     if (url.origin == parseUrl(docInfo.canonicalUrl).origin ||
         url.origin == parseUrl(docInfo.sourceUrl).origin) {
       return true;
@@ -851,18 +850,21 @@ export class UrlReplacements {
    * - the link opts into it (via data-amp-replace argument)
    * - the destination is the source or canonical origin of this doc.
    * @param {!Element} element An anchor element.
+   * @param {?string} defaultUrlParams to expand link if caller request.
    * @return {string|undefined} Replaced string for testing
    */
-  maybeExpandLink(element) {
+  maybeExpandLink(element, defaultUrlParams) {
     dev().assert(element.tagName == 'A');
     const supportedReplacements = {
       'CLIENT_ID': true,
       'QUERY_PARAM': true,
     };
-    const additionalUrlParameters = element.getAttribute('data-amp-addparams');
+    const additionalUrlParameters =
+        element.getAttribute('data-amp-addparams') || '';
     const whitelist = this.getWhitelistForElement_(
         element, supportedReplacements);
-    if (!whitelist && !additionalUrlParameters) {
+
+    if (!whitelist && !additionalUrlParameters && !defaultUrlParams) {
       return;
     }
     // ORIGINAL_HREF_PROPERTY has the value of the href "pre-replacement".
@@ -879,20 +881,38 @@ export class UrlReplacements {
           href,
           parseQueryString(additionalUrlParameters));
     }
-    if (whitelist) {
-      const isAllowedOrigin = this.isAllowedOrigin_(url);
-      if (!isAllowedOrigin) {
+
+    const isAllowedOrigin = this.isAllowedOrigin_(url);
+    if (!isAllowedOrigin) {
+      if (whitelist) {
         user().warn('URL', 'Ignoring link replacement', href,
             ' because the link does not go to the document\'s' +
             ' source, canonical, or whitelisted origin.');
-      } else {
-        href = this.expandSync(
-            href,
+      }
+      return element.href = href;
+    }
+
+    if (defaultUrlParams) {
+      if (!whitelist || !whitelist['QUERY_PARAM']) {
+        // override whitelist and expand defaultUrlParams;
+        const overrideWhiteliste = {'QUERY_PARAM': true};
+        defaultUrlParams = this.expandSync(
+            defaultUrlParams,
             /* opt_bindings */ undefined,
             /* opt_collectVars */ undefined,
-            /* opt_whitelist */ whitelist);
+            /* opt_whitelist */ overrideWhiteliste);
       }
+      href = addParamsToUrl(href, parseQueryString(defaultUrlParams));
     }
+
+    if (whitelist) {
+      href = this.expandSync(
+          href,
+          /* opt_bindings */ undefined,
+          /* opt_collectVars */ undefined,
+          /* opt_whitelist */ whitelist);
+    }
+
     return element.href = href;
   }
 

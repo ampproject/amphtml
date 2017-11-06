@@ -16,7 +16,8 @@
 
 import '../../src/service/document-click';
 import {addParamToUrl} from '../../src/url';
-import {Services} from '../../src/services';
+import {macroTask} from '../../testing/yield';
+import * as Impression from '../../src/impression';
 
 
 describes.sandboxed('ClickHandler', {}, () => {
@@ -40,6 +41,7 @@ describes.sandboxed('ClickHandler', {}, () => {
   }, env => {
     let win, doc;
     let handler;
+    let decorationSpy;
     let handleNavSpy;
     let handleCustomProtocolSpy;
     let winOpenStub;
@@ -56,6 +58,7 @@ describes.sandboxed('ClickHandler', {}, () => {
 
       handler = win.services.clickhandler.obj;
       handler.isIframed_ = true;
+      decorationSpy = sandbox.spy(Impression, 'getExtraParamsUrl');
       handleNavSpy = sandbox.spy(handler, 'handleNavClick_');
       handleCustomProtocolSpy = sandbox.spy(handler,
           'handleCustomProtocolClick_');
@@ -158,90 +161,71 @@ describes.sandboxed('ClickHandler', {}, () => {
       let test2Url;
       beforeEach(() => {
         // set canonical url;
+        handler.isEmbed_ = false;
+        handler.appendExtraParams_ = true;
         originLocation = win.location.href;
         test1Url = addParamToUrl(originLocation, 'gclid', '123');
         test2Url = addParamToUrl(test1Url, 'gclsrc', 'abcd');
+        const ga = win.document.createElement('amp-analytics');
+        ga.setAttribute('type', 'googleanalytics');
+        win.document.body.appendChild(ga);
       });
 
       afterEach(() => {
         win.location.href = originLocation;
       });
 
-      it('should not decorate for embed or inabox', () => {
-        win.location.href = test1Url;
-        sandbox.stub(Services, 'documentInfoForDoc', () => {
-          return {
-            'canonicalUrl': 'https://www.google.com',
-          };
-        });
+      it('should not decorate for page w/o ga tag', function* () {
+        handler.isEmbed_ = false;
+        const ga = win.document.getElementsByTagName('amp-analytics');
+        ga[0].parentNode.removeChild(ga[0]);
+        yield macroTask();
+        handler.handle_(event);
+        expect(decorationSpy).to.not.be.called;
+      });
 
+      it('should not decorate for embed', () => {
         handler.isEmbed_ = true;
-        handler.isInABox_ = false;
         handler.handle_(event);
-        expect(anchor.href).to.equal('https://www.google.com/other');
-        expect(handleNavSpy).to.be.calledOnce;
-        expect(handleNavSpy).to.be.calledWith(event, anchor);
-
-        handler.isEmbed_ = false;
-        handler.isInABox_ = true;
-        handler.handle_(event);
-        expect(anchor.href).to.equal('https://www.google.com/other');
-        expect(handleNavSpy).to.be.calledTwice;
-        expect(handleNavSpy).to.be.calledWith(event, anchor);
+        expect(decorationSpy).to.not.be.called;
       });
 
-      it('should not decorate for unrecognized outgoing domain', () => {
-        handler.isEmbed_ = false;
-        handler.isInABox_ = false;
+      it('should only decorate w/ params exists in sourceUrl', () => {
         win.location.href = test1Url;
-        sandbox.stub(Services, 'documentInfoForDoc', () => {
-          return {
-            'canonicalUrl': 'https://www.unknown.com',
-          };
-        });
         handler.handle_(event);
-        expect(anchor.href).to.equal('https://www.google.com/other');
-        expect(handleNavSpy).to.be.calledOnce;
-      });
-
-      it('should only decorate w/ params from sourceUrl', () => {
-        handler.isEmbed_ = false;
-        handler.isInABox_ = false;
-        win.location.href = test1Url;
-        sandbox.stub(Services, 'documentInfoForDoc', () => {
-          return {
-            'canonicalUrl': 'https://www.google.com',
-          };
-        });
-        handler.handle_(event);
+        expect(decorationSpy).to.be.called;
         expect(anchor.href).to.equal(
             'https://www.google.com/other?gclid=123');
         expect(handleNavSpy).to.be.calledOnce;
       });
 
       it('should append gclid and gclsrc to outgoing link', () => {
-        handler.isEmbed_ = false;
-        handler.isInABox_ = false;
         win.location.href = test2Url;
-        sandbox.stub(Services, 'documentInfoForDoc', () => {
-          return {
-            'canonicalUrl': 'https://www.google.com',
-          };
-        });
         handler.handle_(event);
         expect(anchor.href).to.equal(
             'https://www.google.com/other?gclid=123&gclsrc=abcd');
         expect(handleNavSpy).to.be.calledOnce;
       });
 
+      it('should respect params in outgoing link', () => {
+        anchor.href = 'https://www.google.com/other?gclid=456';
+        win.location.href = test2Url;
+        handler.handle_(event);
+        expect(anchor.href).to.equal(
+            'https://www.google.com/other?gclid=456&gclsrc=abcd');
+        expect(handleNavSpy).to.be.calledOnce;
+      });
+
+      it('should repsect data-amp-addparams', () => {
+        anchor.setAttribute('data-amp-addparams', 'gclsrc=test');
+        win.location.href = test2Url;
+        handler.handle_(event);
+        expect(anchor.href).to.equal(
+            'https://www.google.com/other?gclsrc=test&gclid=123');
+        expect(handleNavSpy).to.be.calledOnce;
+      });
+
       it('should respect async gclid and gclsrc assignment', () => {
-        handler.isEmbed_ = false;
-        handler.isInABox_ = false;
-        sandbox.stub(Services, 'documentInfoForDoc', () => {
-          return {
-            'canonicalUrl': 'https://www.google.com',
-          };
-        });
         handler.handle_(event);
         expect(anchor.href).to.equal(
             'https://www.google.com/other');
