@@ -162,7 +162,7 @@ export class DoubleclickA4aEligibility {
    */
   isA4aEnabled(win, element, useRemoteHtml) {
     this.unconditionedExperimentSelection(win, element);
-    const warnDeprecation = feature => user.warn(
+    const warnDeprecation = feature => user().warn(
         TAG, `${feature} will no longer ` +
           'be supported starting on March 29, 2018. Please refer to ' +
           'https://github.com/ampproject/amphtml/issues/11834 ' +
