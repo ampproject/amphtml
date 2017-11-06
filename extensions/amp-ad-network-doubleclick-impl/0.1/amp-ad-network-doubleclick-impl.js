@@ -933,7 +933,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return true;
         });
 
-    this.postTroubleshootMessage_();
+    this.postTroubleshootMessage();
   }
 
   /**
@@ -1242,8 +1242,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * null is returned. The promise is returned only for test convenience.
    *
    * @return {?Promise}
+   * @visibleForTesting
    */
-  postTroubleshootMessage_() {
+  postTroubleshootMessage() {
     if (!this.win.opener || !/[?|&]dfpdeb/.test(this.win.location.search)) {
       return null;
     }

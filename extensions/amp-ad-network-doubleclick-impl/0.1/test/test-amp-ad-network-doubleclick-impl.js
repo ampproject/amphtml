@@ -1117,7 +1117,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       };
       const postMessageSpy = sandbox.spy(env.win.opener, 'postMessage');
       impl.win = env.win;
-      return impl.postTroubleshootMessage_().then(() =>
+      return impl.postTroubleshootMessage().then(() =>
           expect(postMessageSpy).to.be.calledOnce);
     });
 
@@ -1135,7 +1135,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         },
       };
       impl.win = env.win;
-      expect(impl.postTroubleshootMessage_()).to.be.null;
+      expect(impl.postTroubleshootMessage()).to.be.null;
     });
   });
 });
