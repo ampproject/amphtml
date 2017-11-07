@@ -56,7 +56,7 @@ As expected, this emits errors because the provided string in the example, `<htm
   argument for validateString function in the API.
 
 ### 1.0.12
-* Added support for --user-agent option
+* Added support for --user-agent option.
 
 ### 1.0.13
 * Added newInstance method, a simple API that's not async.
@@ -81,4 +81,7 @@ As expected, this emits errors because the provided string in the example, `<htm
 * Set correct process exit status for old versions of Node.js (v0.10.25).
 
 ### 1.0.20
-* Better npm post-install for virtual machines, running debian over windows with SMB shared folder
+* Better npm post-install for virtual machines, running debian over windows with SMB shared folder.
+
+### 1.0.21
+* --html_format=AMP4ADS is no longer experimental.
