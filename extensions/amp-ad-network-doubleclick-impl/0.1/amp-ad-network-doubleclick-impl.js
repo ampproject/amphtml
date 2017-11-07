@@ -368,6 +368,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
+  idleRenderOutsideViewport() {
+    const vpRange =
+        parseInt(this.postAdResponseExperimentFeatures['render-idle-vp'], 10);
+    // Disable if publisher has indicated a non-default loading strategy.
+    if (isNaN(vpRange) || this.element.getAttribute('data-loading-strategy')) {
+      return false;
+    }
+    return vpRange;
+  }
+
+  /** @override */
   isLayoutSupported(layout) {
     this.isFluid_ = layout == Layout.FLUID;
     return this.isFluid_ || isLayoutSizeDefined(layout);
@@ -805,6 +816,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (this.isFluid_) {
       this.registerListenerForFluid_();
     }
+    // TODO(keithwrightbos): consider enforcing concurrent load throttle for
+    // non-AMP creatives loaded via idleRenderOutsideViewport.
     return super.layoutCallback();
   }
 
