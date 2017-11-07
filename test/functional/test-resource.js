@@ -823,6 +823,63 @@ describes.realWin('Resource', {amp: true}, env => {
   });
 });
 
+describe('Resource idleRenderOutsideViewport', () => {
+  let sandbox;
+  let element;
+  let resources;
+  let resource;
+  let idleRenderOutsideViewport;
+  let withinViewportMultiplier;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox.create();
+    idleRenderOutsideViewport = sandbox.stub();
+    element = {
+      idleRenderOutsideViewport,
+      ownerDocument: {defaultView: window},
+      tagName: 'AMP-AD',
+      hasAttribute: () => false,
+      isBuilt: () => false,
+      isUpgraded: () => false,
+      prerenderAllowed: () => false,
+      renderOutsideViewport: () => true,
+      build: () => false,
+      getBoundingClientRect: () => null,
+      updateLayoutBox: () => {},
+      isRelayoutNeeded: () => false,
+      layoutCallback: () => {},
+      changeSize: () => {},
+      unlayoutOnPause: () => false,
+      unlayoutCallback: () => true,
+      pauseCallback: () => false,
+      resumeCallback: () => false,
+      viewportCallback: () => {},
+      getPriority: () => 0,
+    };
+    resources = new Resources(new AmpDocSingle(window));
+    resource = new Resource(1, element, resources);
+    withinViewportMultiplier =
+        sandbox.stub(resource, 'withinViewportMultiplier');
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('should return true if withinViewportMultiplier', () => {
+    idleRenderOutsideViewport.returns(5);
+    withinViewportMultiplier.withArgs(5).returns(true);
+    expect(resource.idleRenderOutsideViewport()).to.equal(true);
+  });
+
+  it('should return false for false element idleRenderOutsideViewport', () => {
+    idleRenderOutsideViewport.returns(false);
+    withinViewportMultiplier.withArgs(false).returns(false);
+    expect(resource.idleRenderOutsideViewport()).to.equal(false);
+  });
+});
+
 describe('Resource renderOutsideViewport', () => {
   let sandbox;
   let element;
