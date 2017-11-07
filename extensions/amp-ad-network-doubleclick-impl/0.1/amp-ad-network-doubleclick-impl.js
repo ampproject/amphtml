@@ -129,9 +129,6 @@ export const CORRELATOR_CLEAR_EXP_BRANCHES = {
   EXPERIMENT: '22302765',
 };
 
-/** @const {string} */
-const RENDER_ON_IDLE_EXP_NAME = 'a4a-render-idle';
-
 /**
  * @const {string}
  * @visibileForTesting
