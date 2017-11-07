@@ -119,25 +119,25 @@ The value of rtc-config must conform to the following specification:
         *   Key is the name of the vendor to use.
             *   Vendor to use must appear as a key in [callout-vendors.js ](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/0.1/callout-vendors.js)
         *   Value is a mapping of macros to values.
-    *   Macros for a given vendor URL are specified by that particular vendor. 
+    *   Macros for a given vendor URL are specified by that particular vendor.
         *   E.g., in Example 1 above, VendorA has specified the macro SLOT_ID in their callout URL (see Vendor URL Specification below). The RTC config specifies the value "1" to substitute for SLOT_ID in the callout URL.
-        *   Vendors can use the same macros as other vendors. 
+        *   Vendors can use the same macros as other vendors.
 *   **urls**
     *   Optional parameter
     *   Type: Array
-    *   Each value in the array must be a valid RTC endpoint URL. These are the custom URLs mentioned above. 
-        *   See [RTC Callout Endpoint and Response Specification](#response-and-endpoint-specification) section below on all requirements for endpoint. 
+    *   Each value in the array must be a valid RTC endpoint URL. These are the custom URLs mentioned above.
+        *   See [RTC Callout Endpoint and Response Specification](#response-and-endpoint-specification) section below on all requirements for endpoint.
 *   **timeoutMillis**
     *   Optional parameter
     *   Type: integer
     *   Value in milliseconds for timeout to use for each individual RTC callout. Must be less than default value of 1000ms, and greater than 0.
 
-While all three parameters of rtc-config are optional, either "vendors" or "urls" _must be specified_ for RTC to occur. Both may be specified simultaneously. If neither "vendors" nor "urls" are specified, there are no endpoints to callout to and RTC is aborted. An error will be logged to the console.
+While all three parameters of _rtc-config_ are optional, either "vendors" or "urls" _must be specified_ for RTC to occur. Both may be specified simultaneously. If neither "vendors" nor "urls" are specified, there are no endpoints to callout to and RTC is aborted. An error will be logged to the console.
 
 
-### Vendor URL Specification
+### Setting up an Endpoint
 
-In order to spare publishers the details of having to construct URLs for external vendors, vendors may register a URL with macros in a central file called callout-vendors.js, which maps unique vendor names to an object which includes a URL and a whitelist of macros. Vendors may include these macros in their URLs, which publishers can then specify the value for. For instance: 
+If a publisher wants to set up their own custom server to receive and respond to RTC callouts, they must meet the following specifications:
 
 
 #### Response and Endpoint Specification
@@ -193,7 +193,7 @@ vendors: {
 
 All of the desired vendors are supported, thus they can use all of them.
 
-AmpPublisher now wants to check what macros they have available to use from FadNetwork's Fast Implementation, so they open up **amp-ad-network-fadnetwork-impl.js** and check the implementation of **getCustomRealTimeConfigMacros**: 
+AmpPublisher now wants to check what macros they have available to use from FadNetwork's Fast Implementation, so they open up amp-ad-network-fadnetwork-impl.js and check the implementation of getCustomRealTimeConfigMacros:
 
 
 ```javascript
