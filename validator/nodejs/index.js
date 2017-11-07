@@ -406,9 +406,7 @@ function main() {
       .option(
           '--html_format <AMP|AMP4ADS>',
           'The input format to be validated.\n' +
-              '  AMP by default. AMP4ADS is a format for ads creatives that is\n' +
-              '  still in draft; this requires specifying\n' +
-              '  https://cdn.ampproject.org/v0/validator-canary.js as validator.js.',
+              '  AMP by default.',
           'AMP')
       .option(
           '--format <color|text|json>',
