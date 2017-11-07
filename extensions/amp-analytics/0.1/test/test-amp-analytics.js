@@ -59,7 +59,7 @@ describes.realWin('amp-analytics', {
     'invalidConfig': '{"transport": {"iframe": "fake.com"}}',
     'config1': '{"vars": {"title": "remote"}}',
     'https://foo/Test%20Title': '{"vars": {"title": "magic"}}',
-    'config-rv2': '{"requests-v2": {"foo": "https://example.com/remote"}}',
+    'config-rv2': '{"requests": {"foo": "https://example.com/remote"}}',
   };
 
   const trivialConfig = {
@@ -185,11 +185,9 @@ describes.realWin('amp-analytics', {
         for (const name in config.requests) {
           it('should produce request: ' + name +
               '. If this test fails update vendor-requests.json', () => {
-            const analytics = getAnalyticsTag(clearVendorOnlyConfig(config));
-            analytics.createdCallback();
-            analytics.buildCallback();
             const urlReplacements =
-                Services.urlReplacementsForDoc(analytics.element);
+                Services.urlReplacementsForDoc(ampdoc);
+            const analytics = getAnalyticsTag(clearVendorOnlyConfig(config));
             sandbox.stub(urlReplacements.getVariableSource(), 'get',
                 function(name) {
                   expect(this.replacements_).to.have.property(name);
@@ -206,7 +204,8 @@ describes.realWin('amp-analytics', {
                     },
                   };
                 });
-            const variables = variableServiceFor(analytics.win);
+
+            const variables = variableServiceFor(ampdoc.win);
             const encodeVars = variables.encodeVars;
             sandbox.stub(variables, 'encodeVars', function(val, name) {
               val = encodeVars.call(this, val, name);
@@ -215,6 +214,8 @@ describes.realWin('amp-analytics', {
               }
               return val;
             });
+            analytics.createdCallback();
+            analytics.buildCallback();
             return analytics.layoutCallback().then(() => {
               return analytics.handleEvent_({
                 request: name,
@@ -359,35 +360,9 @@ describes.realWin('amp-analytics', {
     });
   });
 
-  it('expands nested requests-v2', function() {
-    const analytics = getAnalyticsTag({
-      'requests-v2': {'foo':
-        'https://example.com/bar&${foobar}&baz', 'foobar': 'f1'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}],
-    });
-    return waitForSendRequest(analytics).then(() => {
-      expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0])
-          .to.equal('https://example.com/bar&f1&baz');
-    });
-  });
-
   it('expands nested requests (3 levels)', function() {
     const analytics = getAnalyticsTag({
       'requests': {'foo':
-        'https://example.com/bar&${foobar}', 'foobar': '${baz}', 'baz': 'b1'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}],
-    });
-
-    return waitForSendRequest(analytics).then(() => {
-      expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/bar&b1');
-    });
-  });
-
-  it('expands nested requests-v2 (3 levels)', function() {
-    const analytics = getAnalyticsTag({
-      'requests-v2': {'foo':
         'https://example.com/bar&${foobar}', 'foobar': '${baz}', 'baz': 'b1'},
       'triggers': [{'on': 'visible', 'request': 'foo'}],
     });
@@ -421,33 +396,17 @@ describes.realWin('amp-analytics', {
     });
   });
 
-  it('expands recursive requests-v2', function() {
-    const analytics = getAnalyticsTag({
-      'requests-v2': {'foo': '/bar&${foobar}&baz', 'foobar': '${foo}'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}],
-    });
-
-    return waitForSendRequest(analytics).then(() => {
-      expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0])
-          .to.equal('/bar&/bar&/bar&&baz&baz&baz');
-    });
-  });
-
   it('sends multiple requests per trigger', function() {
     const analytics = getAnalyticsTag({
-      'requests-v2': {'foo2': 'https://e.com/bar&${foobar}',
-        'foobar': '${baz}', 'baz': 'b1'},
       'requests': {'foo':
         'https://example.com/bar&${foobar}', 'foobar': '${baz}', 'baz': 'b1'},
       'triggers': [{'on': 'visible', 'request': ['foo', 'foobar', 'foo2']}],
     });
 
-    return waitForSendRequest(analytics, undefined, 2).then(() => {
-      expect(sendRequestSpy.calledThrice).to.be.true;
+    return waitForSendRequest(analytics).then(() => {
+      expect(sendRequestSpy.calledTwice).to.be.true;
       expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/bar&b1');
       expect(sendRequestSpy.args[1][0]).to.equal('b1');
-      expect(sendRequestSpy.args[2][0]).to.equal('https://e.com/bar&b1');
     });
   });
 
@@ -466,43 +425,19 @@ describes.realWin('amp-analytics', {
   });
 
 
-  it('merges requests correctly', function() {
-    const analytics = getAnalyticsTag({
-      'requests': {'foo': 'https://example.com/${bar}'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}],
-    }, {'type': 'xyz'});
-
-    analytics.predefinedConfig_ = {
-      'xyz': {
-        'requests': {'foo': '/bar', 'bar': 'foobar'},
-      },
-    };
-    return waitForSendRequest(analytics).then(() => {
-      expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/foobar');
-    });
-  });
-
-  describe('merges requests-v2 correctly', function() {
-    it('inline and vendor both string', () => {
+  describe('merges requests correctly', function() {
+    it('inline and vendor both string', function() {
       const analytics = getAnalyticsTag({
-        'requests-v2': {'foo': 'https://example.com/${bar}'},
+        'requests': {'foo': 'https://example.com/${bar}'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
       }, {'type': 'xyz'});
+
       analytics.predefinedConfig_ = {
         'xyz': {
-          'requests-v2': {'foo': '/bar', 'bar': 'foobar'},
+          'requests': {'foo': '/bar', 'bar': 'foobar'},
         },
       };
       return waitForSendRequest(analytics).then(() => {
-        expect(analytics.config_['requests-v2']).to.jsonEqual({
-          'foo': {
-            'baseUrl': 'https://example.com/foobar',
-          },
-          'bar': {
-            'baseUrl': 'foobar',
-          },
-        });
         expect(sendRequestSpy.calledOnce).to.be.true;
         expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/foobar');
       });
@@ -510,7 +445,7 @@ describes.realWin('amp-analytics', {
 
     it('inline and vendor string and object', () => {
       const analytics = getAnalyticsTag({
-        'requests-v2': {'foo': {
+        'requests': {'foo': {
           'baseUrl': 'https://example.com/${bar}',
           'maxDelay': 0,
         }, 'bar': 'bar-i'},
@@ -518,7 +453,7 @@ describes.realWin('amp-analytics', {
       }, {'type': 'xyz'});
       analytics.predefinedConfig_ = {
         'xyz': {
-          'requests-v2': {
+          'requests': {
             'foo': 'foo',
             'bar': {
               'baseUrl': 'bar-v',
@@ -527,7 +462,7 @@ describes.realWin('amp-analytics', {
         },
       };
       return waitForSendRequest(analytics).then(() => {
-        expect(analytics.config_['requests-v2']).to.jsonEqual({
+        expect(analytics.config_['requests']).to.jsonEqual({
           'foo': {
             'baseUrl': 'https://example.com/bar-i',
             'maxDelay': 0,
@@ -544,7 +479,7 @@ describes.realWin('amp-analytics', {
 
     it('inline and vendor both object', () => {
       const analytics = getAnalyticsTag({
-        'requests-v2': {
+        'requests': {
           'foo': {
             'baseUrl': 'https://example.com/${bar}',
             'maxDelay': 0,
@@ -557,7 +492,7 @@ describes.realWin('amp-analytics', {
       }, {'type': 'xyz'});
       analytics.predefinedConfig_ = {
         'xyz': {
-          'requests-v2': {
+          'requests': {
             'foo': {
               'baseUrl': 'foo',
               'maxDelay': 5,
@@ -568,7 +503,7 @@ describes.realWin('amp-analytics', {
         },
       };
       return waitForSendRequest(analytics).then(() => {
-        expect(analytics.config_['requests-v2']).to.jsonEqual({
+        expect(analytics.config_['requests']).to.jsonEqual({
           'foo': {
             'baseUrl': 'https://example.com/bar-v',
             'maxDelay': 0,
@@ -586,7 +521,7 @@ describes.realWin('amp-analytics', {
     it('inline and remote both string', () => {
       const analytics = getAnalyticsTag({
         'vars': {'title': 'local'},
-        'requests-v2': {'foo': 'https://example.com/${title}'},
+        'requests': {'foo': 'https://example.com/${title}'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
       }, {
         'config': 'config-rv2',
@@ -707,226 +642,220 @@ describes.realWin('amp-analytics', {
   });
 
   describe('expand variables', () => {
-    const requestV = ['requests', 'requests-v2'];
-    for (let i = 0; i < requestV.length; i++) {
-      const requests = requestV[i];
-      describe('with request version ' + requests, () => {
-        it('expands trigger vars', () => {
-          const analytics = getAnalyticsTag({
-            requests: {'pageview':
-              'https://example.com/test1=${var1}&test2=${var2}'},
-            'triggers': [{
-              'on': 'visible',
-              'request': 'pageview',
-              'vars': {
-                'var1': 'x',
-                'var2': 'test2',
-              },
-            }]});
-          return waitForSendRequest(analytics).then(() => {
-            expect(sendRequestSpy.calledOnce).to.be.true;
-            expect(sendRequestSpy.args[0][0]).to.equal(
-                'https://example.com/test1=x&test2=test2');
-          });
-        });
-
-        it('expands config vars', () => {
-          const analytics = getAnalyticsTag({
-            'vars': {
-              'var1': 'x',
-              'var2': 'test2',
-            },
-            requests: {'pageview':
-              'https://example.com/test1=${var1}&test2=${var2}'},
-            'triggers': [{'on': 'visible', 'request': 'pageview'}]});
-          return waitForSendRequest(analytics).then(() => {
-            expect(sendRequestSpy.calledOnce).to.be.true;
-            expect(sendRequestSpy.args[0][0]).to.equal(
-                'https://example.com/test1=x&test2=test2');
-          });
-        });
-
-        it('expands platform vars', () => {
-          const analytics = getAnalyticsTag({
-            requests: {'pageview':
-              'https://example.com/title=${title}&ref=${documentReferrer}'},
-            'triggers': [{'on': 'visible', 'request': 'pageview'}]});
-          return waitForSendRequest(analytics).then(() => {
-            expect(sendRequestSpy.calledOnce).to.be.true;
-            expect(sendRequestSpy.args[0][0]).to.equal(
-                'https://example.com/title=Test%20Title&' +
-                'ref=http%3A%2F%2Flocalhost%3A9876%2Fcontext.html');
-          });
-        });
-
-        it('expands url-replacements vars', function() {
-          const analytics = getAnalyticsTag({
-            requests: {'foo': 'https://example.com/AMPDOC_URL&TITLE'},
-            'triggers': [{'on': 'visible', 'request': 'foo'}],
-          });
-          return waitForSendRequest(analytics).then(() => {
-            expect(sendRequestSpy.calledOnce).to.be.true;
-            expect(sendRequestSpy.args[0][0]).to.not.match(/AMPDOC_URL/);
-          });
-        });
-
-        it('expands trigger vars with higher precedence' +
-            'than config vars', () => {
-          const analytics = getAnalyticsTag({
-            'vars': {
-              'var1': 'config1',
-              'var2': 'config2',
-            },
-            requests: {'pageview':
-              'https://example.com/test1=${var1}&test2=${var2}'},
-            'triggers': [{
-              'on': 'visible',
-              'request': 'pageview',
-              'vars': {
-                'var1': 'trigger1',
-              }}]});
-          return waitForSendRequest(analytics).then(() => {
-            expect(sendRequestSpy.calledOnce).to.be.true;
-            expect(sendRequestSpy.args[0][0]).to.equal(
-                'https://example.com/test1=trigger1&test2=config2');
-          });
-        });
-
-        it('expands element level vars with higher precedence' +
-            'than trigger vars', () => {
-          const analytics = getAnalyticsTag();
-          const analyticsGroup = ins.createAnalyticsGroup(analytics.element);
-
-          const el1 = doc.createElement('div');
-          el1.className = 'x';
-          el1.dataset.varsTest = 'foo';
-          analyticsGroup.root_.getRootElement().appendChild(el1);
-
-          const handlerSpy = sandbox.spy();
-          analyticsGroup.addTrigger(
-            {'on': 'click', 'selector': '.x', 'vars': {'test': 'bar'}},
-              handlerSpy);
-          analyticsGroup.root_.getTrackerOptional('click')
-              .clickObservable_.fire({target: el1});
-
-          expect(handlerSpy).to.be.calledOnce;
-          const event = handlerSpy.args[0][0];
-          expect(event.vars.test).to.equal('foo');
-        });
-
-        it('expands config vars with higher precedence' +
-            'than platform vars', () => {
-          const analytics = getAnalyticsTag({
-            'vars': {'random': 428},
-            requests: {'pageview':
-              'https://example.com/test1=${title}&test2=${random}'},
-            'triggers': [{'on': 'visible', 'request': 'pageview'}],
-          });
-          return waitForSendRequest(analytics).then(() => {
-            expect(sendRequestSpy.calledOnce).to.be.true;
-            expect(sendRequestSpy.args[0][0]).to.equal(
-                'https://example.com/test1=Test%20Title&test2=428');
-          });
-        });
-
-        it('expands and encodes requests, config vars,' +
-            'and trigger vars', () => {
-          const analytics = getAnalyticsTag({
-            'vars': {
-              'c1': 'config 1',
-              'c2': 'config&2',
-            },
-            requests: {
-              'base': 'https://example.com/test?c1=${c1}&t1=${t1}',
-              'pageview': '${base}&c2=${c2}&t2=${t2}',
-            },
-            'triggers': [{
-              'on': 'visible',
-              'request': 'pageview',
-              'vars': {
-                't1': 'trigger=1',
-                't2': 'trigger?2',
-              }}]});
-          return waitForSendRequest(analytics).then(() => {
-            expect(sendRequestSpy.calledOnce).to.be.true;
-            expect(sendRequestSpy.args[0][0]).to.equal(
-                'https://example.com/test?c1=config%201&t1=trigger%3D1&' +
-                'c2=config%262&t2=trigger%3F2');
-          });
-        });
-
-        it('encodes array vars', () => {
-          const analytics = getAnalyticsTag({
-            'vars': {
-              'c1': ['Config, The Barbarian', 'config 1'],
-              'c2': 'config&2',
-            },
-            requests: {
-              'base': 'https://example.com/test?',
-              'pageview': '${base}c1=${c1}&c2=${c2}',
-            },
-            'triggers': [{
-              'on': 'visible',
-              'request': 'pageview',
-            }]});
-          return waitForSendRequest(analytics).then(() => {
-            expect(sendRequestSpy.calledOnce).to.be.true;
-            expect(sendRequestSpy.args[0][0]).to.equal(
-                'https://example.com/test?' +
-                'c1=Config%2C%20The%20Barbarian,config%201&c2=config%262');
-          });
-        });
-
-        it('expands url-replacements vars', () => {
-          const analytics = getAnalyticsTag({
-            requests: {
-              'pageview':
-                'https://example.com/test1=${var1}&test2=${var2}&title=TITLE'},
-            'triggers': [{
-              'on': 'visible',
-              'request': 'pageview',
-              'vars': {
-                'var1': 'x',
-                'var2': 'DOCUMENT_REFERRER',
-              },
-            }]});
-          return waitForSendRequest(analytics).then(() => {
-            expect(sendRequestSpy.calledOnce).to.be.true;
-            expect(sendRequestSpy.args[0][0]).to.equal(
-                'https://example.com/test1=x&' +
-                'test2=http%3A%2F%2Flocalhost%3A9876%2Fcontext.html' +
-                '&title=Test%20Title');
-          });
-        });
-
-        it('expands complex vars', () => {
-          const analytics = getAnalyticsTag({
-            requests: {
-              'pageview': 'https://example.com/test1=${qp_foo}'},
-            'triggers': [{
-              'on': 'visible',
-              'request': 'pageview',
-              'vars': {
-                'qp_foo': '${queryParam(foo)}',
-              },
-            }]});
-          const urlReplacements =
-              Services.urlReplacementsForDoc(analytics.element);
-          sandbox.stub(urlReplacements.getVariableSource(), 'get',
-              function(name) {
-                return {sync: param => {
-                  return '_' + name.toLowerCase() + '_' + param + '_';
-                }};
-              });
-
-          return waitForSendRequest(analytics).then(() => {
-            expect(sendRequestSpy.calledOnce).to.be.true;
-            expect(sendRequestSpy.args[0][0]).to.equal(
-                'https://example.com/test1=_query_param_foo_');
-          });
-        });
+    it('expands trigger vars', () => {
+      const analytics = getAnalyticsTag({
+        'requests': {'pageview':
+          'https://example.com/test1=${var1}&test2=${var2}'},
+        'triggers': [{
+          'on': 'visible',
+          'request': 'pageview',
+          'vars': {
+            'var1': 'x',
+            'var2': 'test2',
+          },
+        }]});
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.calledOnce).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/test1=x&test2=test2');
       });
-    }
+    });
+
+    it('expands config vars', () => {
+      const analytics = getAnalyticsTag({
+        'vars': {
+          'var1': 'x',
+          'var2': 'test2',
+        },
+        'requests': {'pageview':
+          'https://example.com/test1=${var1}&test2=${var2}'},
+        'triggers': [{'on': 'visible', 'request': 'pageview'}]});
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.calledOnce).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/test1=x&test2=test2');
+      });
+    });
+
+    it('expands platform vars', () => {
+      const analytics = getAnalyticsTag({
+        'requests': {'pageview':
+          'https://example.com/title=${title}&ref=${documentReferrer}'},
+        'triggers': [{'on': 'visible', 'request': 'pageview'}]});
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.calledOnce).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/title=Test%20Title&' +
+            'ref=http%3A%2F%2Flocalhost%3A9876%2Fcontext.html');
+      });
+    });
+
+    it('expands url-replacements vars', function() {
+      const analytics = getAnalyticsTag({
+        'requests': {'foo': 'https://example.com/AMPDOC_URL&TITLE'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      });
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.calledOnce).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.not.match(/AMPDOC_URL/);
+      });
+    });
+
+    it('expands trigger vars with higher precedence' +
+        'than config vars', () => {
+      const analytics = getAnalyticsTag({
+        'vars': {
+          'var1': 'config1',
+          'var2': 'config2',
+        },
+        'requests': {'pageview':
+          'https://example.com/test1=${var1}&test2=${var2}'},
+        'triggers': [{
+          'on': 'visible',
+          'request': 'pageview',
+          'vars': {
+            'var1': 'trigger1',
+          }}]});
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.calledOnce).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/test1=trigger1&test2=config2');
+      });
+    });
+
+    it('expands element level vars with higher precedence' +
+        'than trigger vars', () => {
+      const analytics = getAnalyticsTag();
+      const analyticsGroup = ins.createAnalyticsGroup(analytics.element);
+
+      const el1 = doc.createElement('div');
+      el1.className = 'x';
+      el1.dataset.varsTest = 'foo';
+      analyticsGroup.root_.getRootElement().appendChild(el1);
+
+      const handlerSpy = sandbox.spy();
+      analyticsGroup.addTrigger(
+        {'on': 'click', 'selector': '.x', 'vars': {'test': 'bar'}},
+          handlerSpy);
+      analyticsGroup.root_.getTrackerOptional('click')
+          .clickObservable_.fire({target: el1});
+
+      expect(handlerSpy).to.be.calledOnce;
+      const event = handlerSpy.args[0][0];
+      expect(event.vars.test).to.equal('foo');
+    });
+
+    it('expands config vars with higher precedence' +
+        'than platform vars', () => {
+      const analytics = getAnalyticsTag({
+        'vars': {'random': 428},
+        'requests': {'pageview':
+          'https://example.com/test1=${title}&test2=${random}'},
+        'triggers': [{'on': 'visible', 'request': 'pageview'}],
+      });
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.calledOnce).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/test1=Test%20Title&test2=428');
+      });
+    });
+
+    it('expands and encodes requests, config vars,' +
+        'and trigger vars', () => {
+      const analytics = getAnalyticsTag({
+        'vars': {
+          'c1': 'config 1',
+          'c2': 'config&2',
+        },
+        'requests': {
+          'base': 'https://example.com/test?c1=${c1}&t1=${t1}',
+          'pageview': '${base}&c2=${c2}&t2=${t2}',
+        },
+        'triggers': [{
+          'on': 'visible',
+          'request': 'pageview',
+          'vars': {
+            't1': 'trigger=1',
+            't2': 'trigger?2',
+          }}]});
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.calledOnce).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/test?c1=config%201&t1=trigger%3D1&' +
+            'c2=config%262&t2=trigger%3F2');
+      });
+    });
+
+    it('encodes array vars', () => {
+      const analytics = getAnalyticsTag({
+        'vars': {
+          'c1': ['Config, The Barbarian', 'config 1'],
+          'c2': 'config&2',
+        },
+        'requests': {
+          'base': 'https://example.com/test?',
+          'pageview': '${base}c1=${c1}&c2=${c2}',
+        },
+        'triggers': [{
+          'on': 'visible',
+          'request': 'pageview',
+        }]});
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.calledOnce).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/test?' +
+            'c1=Config%2C%20The%20Barbarian,config%201&c2=config%262');
+      });
+    });
+
+    it('expands url-replacements vars', () => {
+      const analytics = getAnalyticsTag({
+        'requests': {
+          'pageview':
+            'https://example.com/test1=${var1}&test2=${var2}&title=TITLE'},
+        'triggers': [{
+          'on': 'visible',
+          'request': 'pageview',
+          'vars': {
+            'var1': 'x',
+            'var2': 'DOCUMENT_REFERRER',
+          },
+        }]});
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.calledOnce).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/test1=x&' +
+            'test2=http%3A%2F%2Flocalhost%3A9876%2Fcontext.html' +
+            '&title=Test%20Title');
+      });
+    });
+
+    it('expands complex vars', () => {
+      const analytics = getAnalyticsTag({
+        'requests': {
+          'pageview': 'https://example.com/test1=${qp_foo}'},
+        'triggers': [{
+          'on': 'visible',
+          'request': 'pageview',
+          'vars': {
+            'qp_foo': '${queryParam(foo)}',
+          },
+        }]});
+      const urlReplacements =
+          Services.urlReplacementsForDoc(analytics.element);
+      sandbox.stub(urlReplacements.getVariableSource(), 'get',
+          function(name) {
+            return {sync: param => {
+              return '_' + name.toLowerCase() + '_' + param + '_';
+            }};
+          });
+
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.calledOnce).to.be.true;
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/test1=_query_param_foo_');
+      });
+    });
   });
 
   it('should create and destroy analytics group', () => {
@@ -1044,75 +973,64 @@ describes.realWin('amp-analytics', {
       expect(sendRequestSpy.args[0][0]).to.not.have.string('s.evar0');
       expect(sendRequestSpy.args[0][0]).to.have.string('foofoo=baz');
     }
-    const requestV = ['requests', 'requests-v2'];
-    for (let i = 0; i < requestV.length; i++) {
-      const requestsV = requestV[i];
-      describe('with request version ' + requestsV, () => {
-        let config;
-        beforeEach(() => {
-          config = {
-            vars: {host: 'example.com', path: 'helloworld'},
-            extraUrlParams:
-                {'s.evar0': '0', 's.evar1': '${path}', 'foofoo': 'baz'},
-            triggers: {trig: {'on': 'visible', 'request': 'foo'}},
-          };
-          config[requestsV] = {'foo': 'https://${host}/${path}?a=b'};
-        });
+    let config;
+    beforeEach(() => {
+      config = {
+        vars: {host: 'example.com', path: 'helloworld'},
+        extraUrlParams:
+            {'s.evar0': '0', 's.evar1': '${path}', 'foofoo': 'baz'},
+        triggers: {trig: {'on': 'visible', 'request': 'foo'}},
+      };
+      config['requests'] = {'foo': 'https://${host}/${path}?a=b'};
+    });
 
-        it('are sent', () => {
-          const analytics = getAnalyticsTag(config);
-          return waitForSendRequest(analytics).then(() => {
-            expect(sendRequestSpy.args[0][0]).to.equal(
-                'https://example.com/helloworld?a=b&s.evar0=0&s.evar1=' +
-                'helloworld&foofoo=baz');
-          });
-        });
-
-        it('are renamed by extraUrlParamsReplaceMap', () => {
-          config.extraUrlParamsReplaceMap = {'s.evar': 'v'};
-          const analytics = getAnalyticsTag(config);
-          return waitForSendRequest(analytics).then(() => {
-            verifyRequest();
-          });
-        });
-
-        it('are supported at trigger level', () => {
-          config.triggers.trig.extraUrlParams = {c: 'd', 's.evar': 'e'};
-          config.extraUrlParamsReplaceMap = {'s.evar': 'v'};
-          const analytics = getAnalyticsTag(config);
-          return waitForSendRequest(analytics).then(() => {
-            verifyRequest();
-            expect(sendRequestSpy.args[0][0]).to.have.string('c=d');
-            expect(sendRequestSpy.args[0][0]).to.have.string('v=e');
-          });
-        });
-
-        it('are supported as a var in URL', () => {
-          if (requestsV == 'requests') {
-            config[requestsV].foo =
-                'https://${host}/${path}?${extraUrlParams}&a=b';
-          } else {
-            config[requestsV].foo =
-                'https://${host}/${path}?${extraUrlParams}&a=b';
-          }
-          const analytics = getAnalyticsTag(config);
-          return waitForSendRequest(analytics).then(() => {
-            expect(sendRequestSpy.args[0][0]).to.equal(
-                'https://example.com/helloworld?s.evar0=0&s.evar1=helloworld' +
-                '&foofoo=baz&a=b');
-          });
-        });
-
-        it('work when the value is an array', () => {
-          config.extraUrlParams = {'foo': ['0']};
-          const analytics = getAnalyticsTag(config);
-          return waitForSendRequest(analytics).then(() => {
-            expect(sendRequestSpy.args[0][0]).to.equal(
-                'https://example.com/helloworld?a=b&foo=0');
-          });
-        });
+    it('are sent', () => {
+      const analytics = getAnalyticsTag(config);
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/helloworld?a=b&s.evar0=0&s.evar1=' +
+            'helloworld&foofoo=baz');
       });
-    }
+    });
+
+    it('are renamed by extraUrlParamsReplaceMap', () => {
+      config.extraUrlParamsReplaceMap = {'s.evar': 'v'};
+      const analytics = getAnalyticsTag(config);
+      return waitForSendRequest(analytics).then(() => {
+        verifyRequest();
+      });
+    });
+
+    it('are supported at trigger level', () => {
+      config.triggers.trig.extraUrlParams = {c: 'd', 's.evar': 'e'};
+      config.extraUrlParamsReplaceMap = {'s.evar': 'v'};
+      const analytics = getAnalyticsTag(config);
+      return waitForSendRequest(analytics).then(() => {
+        verifyRequest();
+        expect(sendRequestSpy.args[0][0]).to.have.string('c=d');
+        expect(sendRequestSpy.args[0][0]).to.have.string('v=e');
+      });
+    });
+
+    it('are supported as a var in URL', () => {
+      config['requests'].foo =
+          'https://${host}/${path}?${extraUrlParams}&a=b';
+      const analytics = getAnalyticsTag(config);
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/helloworld?s.evar0=0&s.evar1=helloworld' +
+            '&foofoo=baz&a=b');
+      });
+    });
+
+    it('work when the value is an array', () => {
+      config.extraUrlParams = {'foo': ['0']};
+      const analytics = getAnalyticsTag(config);
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/helloworld?a=b&foo=0');
+      });
+    });
   });
 
   it('fetches and merges remote config', () => {

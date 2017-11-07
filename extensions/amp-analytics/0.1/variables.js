@@ -224,7 +224,7 @@ export class VariableService {
 
       const {name, argList} = this.getNameArgs_(initialValue);
       if (options.freezeVars[name]) {
-        // Do nothing with freezed params
+        // Do nothing with frozen params
         return match;
       }
 

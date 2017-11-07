@@ -24,12 +24,18 @@ describes.realWin('Requests', {amp: 1}, env => {
   let win;
   let ampdoc;
   let clock;
+  let preconnect;
+  let preconnectSpy;
 
   beforeEach(() => {
     installVariableService(env.win);
     win = env.win;
     ampdoc = env.ampdoc;
     clock = lolex.install(win);
+    preconnectSpy = sandbox.spy();
+    preconnect = {
+      url: preconnectSpy,
+    };
   });
 
   describe('RequestHandler', () => {
@@ -40,11 +46,11 @@ describes.realWin('Requests', {amp: 1}, env => {
         const r3 = {'baseUrl': 'r3', 'maxDelay': '2.5'};
         const r4 = {'baseUrl': 'r4', 'maxDelay': 'invalid'};
         const r5 = {'baseUrl': 'r5'};
-        const handler1 = new RequestHandler(ampdoc, r1, () => {}, false);
-        const handler2 = new RequestHandler(ampdoc, r2, () => {}, false);
-        const handler3 = new RequestHandler(ampdoc, r3, () => {}, false);
-        const handler4 = new RequestHandler(ampdoc, r4, () => {}, false);
-        const handler5 = new RequestHandler(ampdoc, r5, () => {}, false);
+        const handler1 = new RequestHandler(ampdoc, r1, preconnect, false);
+        const handler2 = new RequestHandler(ampdoc, r2, preconnect, false);
+        const handler3 = new RequestHandler(ampdoc, r3, preconnect, false);
+        const handler4 = new RequestHandler(ampdoc, r4, preconnect, false);
+        const handler5 = new RequestHandler(ampdoc, r5, preconnect, false);
         expect(handler1.maxDelay_).to.equal(1);
         expect(handler2.maxDelay_).to.equal(2);
         expect(handler3.maxDelay_).to.equal(2.5);
@@ -52,19 +58,32 @@ describes.realWin('Requests', {amp: 1}, env => {
         expect(handler5.maxDelay_).to.equal(0);
       });
 
+      it('should work properly with 0 delay', function* () {
+        const spy = sandbox.spy();
+        const r = {'baseUrl': 'r1'};
+        const handler = new RequestHandler(ampdoc, r, preconnect, spy, false);
+        const expansionOptions = new ExpansionOptions({});
+        handler.send({}, {}, expansionOptions);
+        handler.send({}, {}, expansionOptions);
+        yield macroTask();
+        expect(spy).to.be.calledTwice;
+      });
+
       it('should respect maxDelay', function* () {
         const h1Spy = sandbox.spy();
         const h2Spy = sandbox.spy();
         const r1 = {'baseUrl': 'r1'};
         const r2 = {'baseUrl': 'r2', 'maxDelay': 1};
-        const handler1 = new RequestHandler(ampdoc, r1, h1Spy, false);
-        const handler2 = new RequestHandler(ampdoc, r2, h2Spy, false);
+        const handler1 =
+            new RequestHandler(ampdoc, r1, preconnect, h1Spy, false);
+        const handler2 =
+            new RequestHandler(ampdoc, r2, preconnect, h2Spy, false);
         const expansionOptions = new ExpansionOptions({});
         handler1.send({}, {}, expansionOptions);
+        handler1.send({}, {}, expansionOptions);
         handler2.send({}, {}, expansionOptions);
-        clock.tick(0);
         yield macroTask();
-        expect(h1Spy).to.be.calledOnce;
+        expect(h1Spy).to.be.calledTwice;
         clock.tick(999);
         yield macroTask();
         expect(h2Spy).to.not.be.called;
@@ -76,7 +95,7 @@ describes.realWin('Requests', {amp: 1}, env => {
       it('should batch multiple send', function* () {
         const spy = sandbox.spy();
         const r = {'baseUrl': 'r2', 'maxDelay': 1};
-        const handler = new RequestHandler(ampdoc, r, spy, false);
+        const handler = new RequestHandler(ampdoc, r, preconnect, spy, false);
         const expansionOptions = new ExpansionOptions({});
         handler.send({}, {}, expansionOptions);
         handler.send({}, {}, expansionOptions);
@@ -86,13 +105,26 @@ describes.realWin('Requests', {amp: 1}, env => {
         yield macroTask();
         expect(spy).to.be.calledOnce;
       });
+
+      it('should preconnect', function* () {
+        const r = {'baseUrl': 'r2?cid=CLIENT_ID(scope)&var=${test}'};
+        const handler =
+            new RequestHandler(ampdoc, r, preconnect, sandbox.spy(), false);
+        const expansionOptions = new ExpansionOptions({'test': 'expanded'});
+        handler.send({}, {}, expansionOptions);
+        yield macroTask();
+        expect(preconnectSpy).to.be.calledWith(
+            'r2?cid=CLIENT_ID(scope)&var=expanded');
+
+
+      });
     });
 
     describe('batch segments', () => {
       it('should respect config extraUrlParam', function* () {
         const spy = sandbox.spy();
         const r = {'baseUrl': 'r1', 'maxDelay': 1};
-        const handler = new RequestHandler(ampdoc, r, spy, false);
+        const handler = new RequestHandler(ampdoc, r, preconnect, spy, false);
         const expansionOptions = new ExpansionOptions({});
         handler.send({'e1': 'e1'}, {}, expansionOptions);
         handler.send({'e1': 'e1'}, {}, expansionOptions);
@@ -105,7 +137,7 @@ describes.realWin('Requests', {amp: 1}, env => {
       it('should respect trigger extraUrlParam', function* () {
         const spy = sandbox.spy();
         const r = {'baseUrl': 'r1', 'maxDelay': 1};
-        const handler = new RequestHandler(ampdoc, r, spy, false);
+        const handler = new RequestHandler(ampdoc, r, preconnect, spy, false);
         const expansionOptions = new ExpansionOptions({});
         handler.send({}, {'extraUrlParams': {'e1': 'e1'}}, expansionOptions);
         handler.send({}, {'extraUrlParams': {'e1': 'e1'}}, expansionOptions);
@@ -118,7 +150,7 @@ describes.realWin('Requests', {amp: 1}, env => {
       it('should replace extraUrlParam', function* () {
         const spy = sandbox.spy();
         const r = {'baseUrl': 'r1&${extraUrlParams}&r2', 'maxDelay': 1};
-        const handler = new RequestHandler(ampdoc, r, spy, false);
+        const handler = new RequestHandler(ampdoc, r, preconnect, spy, false);
         const expansionOptions = new ExpansionOptions({});
         handler.send({}, {'extraUrlParams': {'e1': 'e1'}}, expansionOptions);
         handler.send({}, {'extraUrlParams': {'e2': 'e2'}}, expansionOptions);
@@ -134,20 +166,17 @@ describes.realWin('Requests', {amp: 1}, env => {
 
   it('expandConfigRequest function', () => {
     let config = {
-      'requests-v2': {
+      'requests': {
         'foo': 'test',
         'bar': {
           'baseUrl': 'test1',
         },
         'foobar': {},
       },
-      'requests': {
-        'foo': 'foo-test',
-      },
     };
     config = expandConfigRequest(config);
     expect(config).to.jsonEqual({
-      'requests-v2': {
+      'requests': {
         'foo': {
           'baseUrl': 'test',
         },
@@ -155,9 +184,6 @@ describes.realWin('Requests', {amp: 1}, env => {
           'baseUrl': 'test1',
         },
         'foobar': {},
-      },
-      'requests': {
-        'foo': 'foo-test',
       },
     });
   });

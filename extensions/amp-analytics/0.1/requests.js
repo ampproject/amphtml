@@ -27,7 +27,14 @@ import {Services} from '../../../src/services';
 
 
 export class RequestHandler {
-  constructor(ampdoc, request, handler, isSandbox) {
+  /**
+   * @param {../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!JsonObject} request
+   * @param {!../../../src/preconnect.Preconnect} preconnect
+   * @param {!function(string, !JsonObject)} handler
+   * @param {boolean} isSandbox
+   */
+  constructor(ampdoc, request, preconnect, handler, isSandbox) {
 
     /** @const {!Window} */
     this.win = ampdoc.win;
@@ -47,8 +54,14 @@ export class RequestHandler {
     /** @private {?Promise<string>} */
     this.baseUrlPromise_ = null;
 
+    /** @private {?Promise<string>} */
+    this.baseUrlTemplatePromise_ = null;
+
     /** @private {!Array<!Promise<string>>}*/
     this.extraUrlParamsPromise_ = [];
+
+    /** @private {!../../../src/preconnect.Preconnect} */
+    this.preconnect_ = preconnect;
 
     /** @private {!function(string, !JsonObject)} */
     this.handler_ = handler;
@@ -61,25 +74,30 @@ export class RequestHandler {
 
     /** @private {?JsonObject} */
     this.lastTrigger_ = null;
+
+    /** @private {?Promise<string>} */
+    this.sendPromise_ = null;
   }
 
   /**
-   *
-   * @param {!JsonObject} configParams
+   * Exposed method to send a request on event.
+   * Real ping may be batched and send out later.
+   * @param {?JsonObject} configParams
    * @param {!JsonObject} trigger
    * @param {!./variables.ExpansionOptions} expansionOption
+   * @return {!Promise<string>}
    */
   send(configParams, trigger, expansionOption) {
     this.lastTrigger_ = trigger;
     const triggerParams = trigger['extraUrlParams'];
     if (!this.baseUrlPromise_) {
       expansionOption.freezeVar('extraUrlParams');
-      this.baseUrlPromise_ =
-          this.variableService_.expandTemplate(this.baseUrl, expansionOption)
-          .then(baseUrl => {
-            return this.urlReplacementService_.expandAsync(
-                baseUrl, undefined, this.whiteList_);
-          });
+      this.baseUrlTemplatePromise_ =
+          this.variableService_.expandTemplate(this.baseUrl, expansionOption);
+      this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then(baseUrl => {
+        return this.urlReplacementService_.expandAsync(
+            baseUrl, undefined, this.whiteList_);
+      });
     };
 
     this.extraUrlParamsPromise_.push(
@@ -92,7 +110,7 @@ export class RequestHandler {
               return finalExtraUrlParams;
             }));
 
-    this.trigger_();
+    return this.trigger_();
   }
 
   /**
@@ -110,34 +128,57 @@ export class RequestHandler {
    * @private
    */
   trigger_() {
-    if (!this.schedule_) {
-      this.schedule_ = this.win.setTimeout(() => {
-        this.fire_();
-      }, this.maxDelay_ * 1000);
+    if (this.maxDelay_ == 0) {
+      return this.fire_();
     }
+    // If is batched
+    if (!this.schedule_) {
+      // schedule fire_ after certain time
+      return this.sendPromise_ = new Promise(resolve => {
+        this.schedule_ = this.win.setTimeout(() => {
+          this.fire_().then(request => {
+            resolve(request);
+          });
+        }, this.maxDelay_ * 1000);
+      });
+    }
+
+    return this.sendPromise_;
   }
 
   /**
-   * Send out request.
+   * Send out request once ready
    * @private
    */
   fire_() {
-    //TODO: need to preconnect to request url at the right time
-    this.baseUrlPromise_.then(request => {
-      return Promise.all(this.extraUrlParamsPromise_).then(paramStrs => {
-        filterSplice(paramStrs, item => {return !!item;});
-        const extraUrlParamsStr = paramStrs.join('&');
-        if (request.indexOf('${extraUrlParams}') >= 0) {
-          request = request.replace('${extraUrlParams}', extraUrlParamsStr);
-        } else {
-          request = appendEncodedParamStringToUrl(request, extraUrlParamsStr);
-        }
-        return request;
+    const extraUrlParamsPromise = this.extraUrlParamsPromise_;
+    const baseUrlTemplatePromise = this.baseUrlTemplatePromise_;
+    const baseUrlPromise = this.baseUrlPromise_;
+    const lastTrigger = /** @type {!JsonObject} */ (this.lastTrigger_);
+    this.reset_();
+    return Promise.all(extraUrlParamsPromise).then(paramStrs => {
+      filterSplice(paramStrs, item => {return !!item;});
+      const extraUrlParamsStr = paramStrs.join('&');
+      let preUrl = this.baseUrl;
+      if (preUrl.indexOf('${extraUrlParams}') >= 0) {
+        preUrl = preUrl.replace('${extraUrlParams}', extraUrlParamsStr);
+      } else {
+        preUrl = appendEncodedParamStringToUrl(preUrl, extraUrlParamsStr);
+      }
+      return baseUrlTemplatePromise.then(preUrl => {
+        this.preconnect_.url(preUrl, true);
+        return baseUrlPromise.then(request => {
+          if (request.indexOf('${extraUrlParams}') >= 0) {
+            request = request.replace('${extraUrlParams}', extraUrlParamsStr);
+          } else {
+            request = appendEncodedParamStringToUrl(request, extraUrlParamsStr);
+          }
+          return request;
+        }).then(request => {
+          this.handler_(request, lastTrigger);
+          return request;
+        });
       });
-    }).then(request => {
-      const lastTrigger = /** @type {!JsonObject} */ (this.lastTrigger_);
-      this.handler_(request, lastTrigger);
-      this.reset_();
     });
   }
 
@@ -147,15 +188,17 @@ export class RequestHandler {
    */
   reset_() {
     this.baseUrlPromise_ = null;
+    this.baseUrlTemplatePromise_ = null;
     this.extraUrlParamsPromise_ = [];
     this.schedule_ = null;
     this.lastTrigger_ = null;
+    this.sendPromise_ = null;
   }
 
   /**
    * Function that handler extraUrlParams from config and trigger.
-   * @param {!JsonObject} configParams
-   * @param {!JsonObject} triggerParams
+   * @param {?JsonObject} configParams
+   * @param {?JsonObject} triggerParams
    * @param {!./variables.ExpansionOptions} expansionOption
    * @return {!Promise<string>}
    * @private
@@ -206,12 +249,12 @@ export class RequestHandler {
  * @param {!JsonObject} config
  */
 export function expandConfigRequest(config) {
-  if (!config['requests-v2']) {
+  if (!config['requests']) {
     return config;
   }
-  for (const k in config['requests-v2']) {
-    if (hasOwn(config['requests-v2'], k)) {
-      config['requests-v2'][k] = expandRequestStr(config['requests-v2'][k]);
+  for (const k in config['requests']) {
+    if (hasOwn(config['requests'], k)) {
+      config['requests'][k] = expandRequestStr(config['requests'][k]);
     }
   }
   return config;
