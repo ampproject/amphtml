@@ -359,11 +359,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   idleRenderOutsideViewport() {
     const vpRange =
         parseInt(this.postAdResponseExperimentFeatures['render-idle-vp'], 10);
-    // Disable if publisher has indicated a non-default loading strategy or
-    // renderOutsideViewport returns false (indicating concurrent load of
-    // non-AMP creative).
-    if (isNaN(vpRange) || this.element.getAttribute('data-loading-strategy') ||
-        !this.renderOutsideViewport()) {
+    // Disable if publisher has indicated a non-default loading strategy.
+    if (isNaN(vpRange) || this.element.getAttribute('data-loading-strategy')) {
       return false;
     }
     return vpRange;
@@ -798,6 +795,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (this.isFluid_) {
       this.registerListenerForFluid_();
     }
+    // TODO(keithwrightbos): consider enforcing concurrent load throttle for
+    // non-AMP creatives loaded via idleRenderOutsideViewport.
     return super.layoutCallback();
   }
 

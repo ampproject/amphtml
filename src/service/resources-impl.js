@@ -1452,7 +1452,7 @@ export class Resources {
           this.exec_.getSize() == 0 &&
           this.queue_.getSize() == 0 &&
           now > this.exec_.getLastDequeueTime() + 5000) {
-      // Phase 5: Idle Render Outside Viewport layout: layout up to 3 items
+      // Phase 5: Idle Render Outside Viewport layout: layout up to 4 items
       // with idleRenderOutsideViewport true
       let idleScheduledCount = 0;
       for (let i = 0; i < this.resources_.length && idleScheduledCount < 4;
