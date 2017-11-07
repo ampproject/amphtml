@@ -626,7 +626,6 @@ export const adConfig = {
   sekindo: {
     renderStartImplemented: true,
   },
-
   sharethrough: {
     renderStartImplemented: true,
   },
