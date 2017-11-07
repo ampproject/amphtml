@@ -1212,4 +1212,41 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
               .to.be.ok;
         });
       });
+
+      describe('#idleRenderOutsideViewport', () => {
+        beforeEach(() => {
+          element = createElementWithAttributes(doc, 'amp-ad', {
+            'width': '200',
+            'height': '50',
+            'type': 'doubleclick',
+          });
+          impl = new AmpAdNetworkDoubleclickImpl(element);
+        });
+
+        it('should use experiment value', () => {
+          impl.postAdResponseExperimentFeatures['render-idle-vp'] = '4';
+          sandbox.stub(impl, 'renderOutsideViewport', () => 3);
+          expect(impl.idleRenderOutsideViewport()).to.equal(4);
+        });
+
+        it('should return false if renderOutsideViewport returns false', () => {
+          impl.postAdResponseExperimentFeatures['render-idle-vp'] = '4';
+          sandbox.stub(impl, 'renderOutsideViewport', () => false);
+          expect(impl.idleRenderOutsideViewport()).to.be.false;
+        });
+
+        it('should return false if using loading strategy', () => {
+          impl.postAdResponseExperimentFeatures['render-idle-vp'] = '4';
+          impl.element.setAttribute('data-loading-strategy',
+              'prefer-viewability-over-views');
+          sandbox.stub(impl, 'renderOutsideViewport', () => 3);
+          expect(impl.idleRenderOutsideViewport()).to.be.false;
+        });
+
+        it('should return false if invalid experiment value', () => {
+          impl.postAdResponseExperimentFeatures['render-idle-vp'] = 'abc';
+          sandbox.stub(impl, 'renderOutsideViewport', () => 3);
+          expect(impl.idleRenderOutsideViewport()).to.be.false;
+        });
+      });
     });

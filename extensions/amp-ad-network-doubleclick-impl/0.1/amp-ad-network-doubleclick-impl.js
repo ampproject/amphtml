@@ -359,9 +359,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  renderOnIdleOutsideViewport() {
-    return getExperimentBranch(
-        this.win, RENDER_ON_IDLE_EXP_NAME) == '21061138' ? 5 : false;
+  idleRenderOutsideViewport() {
+    const vpRange =
+        parseInt(this.postAdResponseExperimentFeatures['render-idle-vp'], 10);
+    // Disable if publisher has indicated a non-default loading strategy or
+    // renderOutsideViewport returns false (indicating concurrent load of
+    // non-AMP creative).
+    if (isNaN(vpRange) || this.element.getAttribute('data-loading-strategy') ||
+        !this.renderOutsideViewport()) {
+      return false;
+    }
+    return vpRange;
   }
 
   /** @override */
@@ -417,26 +425,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.win['dbclk_a4a_viz_change'] = true;
 
     const sfPreloadExpName = 'a4a-safeframe-preloading-off';
-    let experimentInfoMap =
+    const experimentInfoMap =
         /** @type {!Object<string, !ExperimentInfo>} */ ({});
     experimentInfoMap[sfPreloadExpName] = {
       isTrafficEligible: () => true,
       branches: ['21061135', '21061136'],
     };
     randomlySelectUnsetExperiments(this.win, experimentInfoMap);
-    experimentInfoMap =
-        /** @type {!Object<string, !ExperimentInfo>} */ ({});
-    experimentInfoMap[RENDER_ON_IDLE_EXP_NAME] = {
-      isTrafficEligible: () => true,
-      // TODO: allocate actual ids!!!
-      branches: ['21061137', '21061138'],
-    };
-    randomlySelectUnsetExperiments(this.win, experimentInfoMap);
-    const renderIdleExpId =
-        getExperimentBranch(this.win, RENDER_ON_IDLE_EXP_NAME);
-    if (renderIdleExpId) {
-      addExperimentIdToElement(renderIdleExpId, this.element);
-    }
     const sfPreloadExpId = getExperimentBranch(this.win, sfPreloadExpName);
     if (sfPreloadExpId) {
       addExperimentIdToElement(sfPreloadExpId, this.element);

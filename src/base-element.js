@@ -394,12 +394,12 @@ export class BaseElement {
 
   /**
    * Allows for rendering outside of the constraint set by renderOutsideViewport
-   * so long task scheduler is idle.  Values should be greater than
-   * renderOutsideViewport and indicates outer range at which elements are
-   * are considered.  Subclasses can override (default is disabled).
+   * so long task scheduler is idle.  Integer values less than those returned
+   * by renderOutsideViewport have no effect.  Subclasses can override (default
+   * is disabled).
    * @return {boolean|number}
    */
-  renderOnIdleOutsideViewport() {
+  idleRenderOutsideViewport() {
     return false;
   }
 

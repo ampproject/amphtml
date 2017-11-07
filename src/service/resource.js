@@ -635,7 +635,7 @@ export class Resource {
     const viewportBox = this.resources_.getViewport().getRect();
     const layoutBox = this.getLayoutBox();
     const scrollDirection = this.resources_.getScrollDirection();
-    multipler = Math.max(multiplier, 0);
+    multiplier = Math.max(multiplier, 0);
     let scrollPenalty = 1;
     let distance;
     if (viewportBox.right < layoutBox.left ||
@@ -663,7 +663,7 @@ export class Resource {
       // Element is in viewport
       return true;
     }
-    return distance < viewportBox.height * multipler / scrollPenalty;
+    return distance < viewportBox.height * multiplier / scrollPenalty;
   }
 
   /**
@@ -677,8 +677,11 @@ export class Resource {
     // prerender this resource, so that it can avoid expensive elements wayyy
     // outside of viewport. For now, blindly trust that owner knows what it's
     // doing.
-    if (this.hasOwner() ||
-        this.withinViewportMultiplier_(this.element.renderOutsideViewport())) {
+    if (this.hasOwner()) {
+      this.resolveRenderOutsideViewport_();
+      return true;
+    }
+    if (this.withinViewportMultiplier_(this.element.renderOutsideViewport())) {
       this.resolveRenderOutsideViewport_();
       return true;
     }
@@ -690,9 +693,9 @@ export class Resource {
    * viewport.
    * @return {boolean}
    */
-  renderOnIdleOutsideViewport() {
-    return this.hasOwner() || this.withinViewportMultiplier_(
-        this.element.renderOnIdleOutsideViewport());
+  idleRenderOutsideViewport() {
+    return this.withinViewportMultiplier_(
+        this.element.idleRenderOutsideViewport());
   }
 
   /**

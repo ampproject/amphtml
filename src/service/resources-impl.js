@@ -1460,17 +1460,10 @@ export class Resources {
         const r = this.resources_[i];
         if (r.getState() == ResourceState.READY_FOR_LAYOUT &&
                 !r.hasOwner() && r.isDisplayed()) {
-          const idleLayout = r.renderOnIdleOutsideViewport();
-          this.scheduleLayoutOrPreload_(
-              r, /* layout */ idleLayout);
-          if (idleLayout) {
-            if (idleScheduledLayoutCount++ < 4) {
-              this.scheduleLayoutOrPreload_(r, /* layout */true);
-            }
-          } else  {
-            if (idleScheduledPreloadCount++ < 4) {
-              this.scheduleLayoutOrPreload_(r, /* layout */false);
-            }
+          const idleLayout = r.idleRenderOutsideViewport();
+          if ((idleLayout && idleScheduledLayoutCount++ < 4) ||
+            (!idleLayout && idleScheduledPreloadCount++ < 4)) {
+            this.scheduleLayoutOrPreload_(r, /* layout */ idleLayout);
           }
           if (idleScheduledPreloadCount >= 4 && idleScheduledLayoutCount >= 4) {
             break;
@@ -1804,7 +1797,7 @@ export class Resources {
     if (!forceOutsideViewport &&
         !resource.isInViewport() &&
         !resource.renderOutsideViewport() &&
-        !resource.renderOnIdleOutsideViewport()) {
+        !resource.idleRenderOutsideViewport()) {
       return false;
     }
 

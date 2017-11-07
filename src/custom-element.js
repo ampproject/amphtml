@@ -861,8 +861,8 @@ function createBaseCustomElementClass(win) {
      * @return {boolean|number}
      * @final @this {!Element}
      */
-    renderOnIdleOutsideViewport() {
-      return this.implementation_.renderOnIdleOutsideViewport();
+    idleRenderOutsideViewport() {
+      return this.implementation_.idleRenderOutsideViewport();
     }
 
     /**
