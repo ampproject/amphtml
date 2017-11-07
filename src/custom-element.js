@@ -856,6 +856,16 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
+     * Whether the element should render outside of renderOutsideViewport when
+     * the scheduler is idle.
+     * @return {boolean|number}
+     * @final @this {!Element}
+     */
+    idleRenderOutsideViewport() {
+      return this.implementation_.idleRenderOutsideViewport();
+    }
+
+    /**
      * Returns a previously measured layout box adjusted to the viewport. This
      * mainly affects fixed-position elements that are adjusted to be always
      * relative to the document position in the viewport.

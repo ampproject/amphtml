@@ -1286,4 +1286,32 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
               .to.be.ok;
         });
       });
+
+      describe('#idleRenderOutsideViewport', () => {
+        beforeEach(() => {
+          element = createElementWithAttributes(doc, 'amp-ad', {
+            'width': '200',
+            'height': '50',
+            'type': 'doubleclick',
+          });
+          impl = new AmpAdNetworkDoubleclickImpl(element);
+        });
+
+        it('should use experiment value', () => {
+          impl.postAdResponseExperimentFeatures['render-idle-vp'] = '4';
+          expect(impl.idleRenderOutsideViewport()).to.equal(4);
+        });
+
+        it('should return false if using loading strategy', () => {
+          impl.postAdResponseExperimentFeatures['render-idle-vp'] = '4';
+          impl.element.setAttribute('data-loading-strategy',
+              'prefer-viewability-over-views');
+          expect(impl.idleRenderOutsideViewport()).to.be.false;
+        });
+
+        it('should return false if invalid experiment value', () => {
+          impl.postAdResponseExperimentFeatures['render-idle-vp'] = 'abc';
+          expect(impl.idleRenderOutsideViewport()).to.be.false;
+        });
+      });
     });

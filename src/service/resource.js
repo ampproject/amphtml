@@ -620,36 +620,22 @@ export class Resource {
   }
 
   /**
-   * Whether this is allowed to render when not in viewport.
-   * @return {boolean}
+   * @param {number|boolean} multiplier
+   * @return {boolean} whether resource is within provider multiplier of
+   *    viewports from current visible viewport.
+   * @visibleForTesting
    */
-  renderOutsideViewport() {
-    // The exception is for owned resources, since they only attempt to
-    // render outside viewport when the owner has explicitly allowed it.
-    // TODO(jridgewell, #5803): Resources should be asking owner if it can
-    // prerender this resource, so that it can avoid expensive elements wayyy
-    // outside of viewport. For now, blindly trust that owner knows what it's
-    // doing.
-    if (this.hasOwner()) {
-      this.resolveRenderOutsideViewport_();
-      return true;
-    }
-
-    const renders = this.element.renderOutsideViewport();
-    // Boolean interface, element is either always allowed or never allowed to
-    // render outside viewport.
-    if (renders === true || renders === false) {
-      if (renders === true) {
-        this.resolveRenderOutsideViewport_();
-      }
-      return renders;
+  withinViewportMultiplier(multiplier) {
+    // Boolean interface controls explicit result.
+    if (multiplier === true || multiplier === false) {
+      return multiplier;
     }
     // Numeric interface, element is allowed to render outside viewport when it
     // is within X times the viewport height of the current viewport.
     const viewportBox = this.resources_.getViewport().getRect();
     const layoutBox = this.getLayoutBox();
     const scrollDirection = this.resources_.getScrollDirection();
-    const multipler = Math.max(renders, 0);
+    multiplier = Math.max(multiplier, 0);
     let scrollPenalty = 1;
     let distance;
     if (viewportBox.right < layoutBox.left ||
@@ -675,14 +661,41 @@ export class Resource {
       }
     } else {
       // Element is in viewport
+      return true;
+    }
+    return distance < viewportBox.height * multiplier / scrollPenalty;
+  }
+
+  /**
+   * Whether this is allowed to render when not in viewport.
+   * @return {boolean}
+   */
+  renderOutsideViewport() {
+    // The exception is for owned resources, since they only attempt to
+    // render outside viewport when the owner has explicitly allowed it.
+    // TODO(jridgewell, #5803): Resources should be asking owner if it can
+    // prerender this resource, so that it can avoid expensive elements wayyy
+    // outside of viewport. For now, blindly trust that owner knows what it's
+    // doing.
+    if (this.hasOwner()) {
       this.resolveRenderOutsideViewport_();
       return true;
     }
-    const result = distance < viewportBox.height * multipler / scrollPenalty;
-    if (result) {
+    if (this.withinViewportMultiplier(this.element.renderOutsideViewport())) {
       this.resolveRenderOutsideViewport_();
+      return true;
     }
-    return result;
+    return false;
+  }
+
+  /**
+   * Whether this is allowed to render when scheduler is idle but not in
+   * viewport.
+   * @return {boolean}
+   */
+  idleRenderOutsideViewport() {
+    return this.withinViewportMultiplier(
+        this.element.idleRenderOutsideViewport());
   }
 
   /**

@@ -393,6 +393,17 @@ export class BaseElement {
   }
 
   /**
+   * Allows for rendering outside of the constraint set by renderOutsideViewport
+   * so long task scheduler is idle.  Integer values less than those returned
+   * by renderOutsideViewport have no effect.  Subclasses can override (default
+   * is disabled).
+   * @return {boolean|number}
+   */
+  idleRenderOutsideViewport() {
+    return false;
+  }
+
+  /**
    * Subclasses can override this method to opt-in into receiving additional
    * {@link layoutCallback} calls. Note that this method is not consulted for
    * the first layout given that each element must be laid out at least once.
