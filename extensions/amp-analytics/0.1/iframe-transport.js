@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
+import {urls} from '../../../src/config';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {
-  calculateEntryPointScriptUrl,
-} from '../../../src/service/extension-location';
 import {setStyles} from '../../../src/style';
 import {hasOwn} from '../../../src/utils/object';
 import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
@@ -106,11 +103,12 @@ export class IframeTransport {
     // iframeTransport.getCreativeId() -> sentinel relationship is *not*
     // many-to-many.
     const sentinel = IframeTransport.createUniqueId_();
-    const useLocal = getMode().localDev || getMode().test;
-    const useRtvVersion = !useLocal;
-    const scriptSrc = calculateEntryPointScriptUrl(
-        this.ampWin_.parent.location, 'iframe-transport-client-lib',
-        useLocal, useRtvVersion);
+    const useLocal = false;//getMode().localDev || getMode().test;
+    const loc = this.ampWin_.parent.location;
+    const scriptSrc = useLocal ?
+        `${loc.protocol}//${loc.host}/dist/iframe-transport-client-lib.js` :
+        urls.thirdParty +
+        '/$internalRuntimeVersion$/iframe-transport-client-v0.js';
     const frameName = JSON.stringify(/** @type {JsonObject} */ ({
       scriptSrc,
       sentinel,
