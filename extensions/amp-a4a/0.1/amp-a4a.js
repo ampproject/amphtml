@@ -156,6 +156,11 @@ export const LIFECYCLE_STAGES = {
   resumeCallback: '27',
   visIniLoad: '29',
   upgradeDelay: '30',
+  // TODO(warrengm): This should replace xDomIframeLoaded once delayed fetch
+  // is fully deprecated. A new lifecycle stage, crossDomainIframeLoaded, was
+  // introduced since xDomIframeLoaded is handled in AmpAdXOriginIframeHandler
+  // outside A4A.
+  crossDomainIframeLoaded: '31',
 };
 
 /**
@@ -167,6 +172,7 @@ export const AnalyticsTrigger = {
   AD_RESPONSE_END: 'adResponseEnd',
   AD_RENDER_START: 'adRenderStart',
   AD_RENDER_END: 'adRenderEnd',
+  AD_IFRAME_LOADED: 'adIframeLoaded',
 };
 
 /**
@@ -180,6 +186,8 @@ const LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER = {
   'renderCrossDomainStart': AnalyticsTrigger.AD_RENDER_START,
   'renderFriendlyEnd': AnalyticsTrigger.AD_RENDER_END,
   'renderCrossDomainEnd': AnalyticsTrigger.AD_RENDER_END,
+  'friendlyIframeIniLoad': AnalyticsTrigger.AD_IFRAME_LOADED,
+  'crossDomainIframeLoaded': AnalyticsTrigger.AD_IFRAME_LOADED,
 };
 
 /**
@@ -369,7 +377,7 @@ export class AmpA4A extends AMP.BaseElement {
      * will be inserted and no analytics events will be fired.
      * @private {?JsonObject}
      */
-    this.ampAnalayticsConfig_ = this.getAmpAnalyticsConfig();
+    this.ampAnalyticsConfig_ = this.getAmpAnalyticsConfig();
   }
 
   /** @override */
@@ -414,8 +422,10 @@ export class AmpA4A extends AMP.BaseElement {
           });
         });
 
-    if (this.ampAnalayticsConfig_) {
-      insertAnalyticsElement(this.element, this.ampAnalayticsConfig_, true);
+    if (this.ampAnalyticsConfig_) {
+      // TODO(warrengm): Consider having page-level singletons for networks that
+      // use the same config for all ads.
+      insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
     }
   }
 
@@ -1300,7 +1310,12 @@ export class AmpA4A extends AMP.BaseElement {
           'No creative or URL available -- A4A can\'t render any ad');
     }
     incrementLoadingAds(this.win, renderPromise);
-    return renderPromise;
+    return renderPromise.then(
+        (result) => {
+          this.handleLifecycleStage_('crossDomainIframeLoaded');
+          // Pass on the result to the next value in the promise change.
+          return result;
+        });
   }
 
   /**
@@ -1654,7 +1669,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   maybeTriggerAnalyticsEvent_(lifeycleStage) {
-    if (!this.ampAnalayticsConfig_) {
+    if (!this.ampAnalyticsConfig_) {
       // No config exists that will listen to this event.
       return;
     }
