@@ -29,7 +29,5 @@ limitations under the License.
 
 ## Configuration
 
-Supported parameters:
-- width
-- height
-- data-slot
+Required parameters:
+- `data-slot`
