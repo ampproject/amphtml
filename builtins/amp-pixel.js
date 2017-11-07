@@ -15,6 +15,7 @@
  */
 
 import {BaseElement} from '../src/base-element';
+import {scopedQuerySelector} from '../src/dom';
 import {dev, user} from '../src/log';
 import {dict} from '../src/utils/object';
 import {registerElement} from '../src/service/custom-element-registry';
@@ -60,7 +61,7 @@ export class AmpPixel extends BaseElement {
           + ' Only "no-referrer" is supported');
     }
     if (this.element.hasAttribute('i-amphtml-ssr') &&
-        this.element.querySelector('img')) {
+        scopedQuerySelector(this.element, 'img')) {
       dev().info(TAG, 'inabox img already present');
       return;
     }
