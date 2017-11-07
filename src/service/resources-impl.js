@@ -1463,6 +1463,7 @@ export class Resources {
           const idleLayout = r.idleRenderOutsideViewport();
           if ((idleLayout && idleScheduledLayoutCount++ < 4) ||
             (!idleLayout && idleScheduledPreloadCount++ < 4)) {
+            dev().fine(TAG_, 'idle layout:', r.debugid);
             this.scheduleLayoutOrPreload_(r, /* layout */ idleLayout);
           }
           if (idleScheduledPreloadCount >= 4 && idleScheduledLayoutCount >= 4) {
