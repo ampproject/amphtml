@@ -82,3 +82,6 @@ As expected, this emits errors because the provided string in the example, `<htm
 
 ### 1.0.20
 * Better npm post-install for virtual machines, running debian over windows with SMB shared folder
+
+### 1.0.21
+* --html_format=AMP4ADS is no longer experimental.
