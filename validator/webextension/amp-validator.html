@@ -182,7 +182,7 @@ limitations under the License.
             var discoveryUrl =
                 'https://www.ampproject.org/docs/guides/discovery';
             if (item.specUrl === discoveryUrl) {
-              return browser.i18n.getMessage("warningCanonicalDoesntLinkToAMP",
+              return browser.i18n.getMessage("warningCanonicalDoesNotLinkToAMP",
                   [item.canonicalHref]);
             }
             return amp.validator.renderErrorMessage(item);
