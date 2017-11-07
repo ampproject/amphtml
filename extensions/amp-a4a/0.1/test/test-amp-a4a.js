@@ -234,6 +234,19 @@ describe('amp-a4a', () => {
     verifyContext(attributes._context);
   }
 
+  function verifyAmpAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy) {
+    expect(triggerAnalyticsEventSpy).to.be.calledWith(
+        a4a.element, 'adRequestStart', {'time': sinon.match.number});
+    expect(triggerAnalyticsEventSpy).to.be.calledWith(
+        a4a.element, 'adResponseEnd', {'time': sinon.match.number});
+    expect(triggerAnalyticsEventSpy).to.be.calledWith(
+        a4a.element, 'adRenderStart', {'time': sinon.match.number});
+    expect(triggerAnalyticsEventSpy).to.be.calledWith(
+        a4a.element, 'adRenderEnd', {'time': sinon.match.number});
+    expect(triggerAnalyticsEventSpy).to.be.calledWith(
+        a4a.element, 'adIframeLoaded', {'time': sinon.match.number});
+  }
+
   describe('ads are visible', () => {
     let a4aElement;
     let a4a;
@@ -362,6 +375,29 @@ describe('amp-a4a', () => {
         expect(a4a.friendlyIframeEmbed_.host).to.equal(a4a.element);
         expect(whenIniLoadedStub).to.be.calledOnce;
         expect(lifecycleEventStub).to.be.calledWith('friendlyIframeIniLoad');
+      });
+    });
+
+    it('should fire amp-analytics triggers for lifecycle events', () => {
+      let iniLoadResolver;
+      const iniLoadPromise = new Promise(resolve => {
+        iniLoadResolver = resolve;
+      });
+      const whenIniLoadedStub = sandbox.stub(
+          FriendlyIframeEmbed.prototype,
+          'whenIniLoaded',
+          () => iniLoadPromise);
+      a4a.buildCallback();
+      const triggerAnalyticsEventSpy =
+          sandbox.spy(analytics, 'triggerAnalyticsEvent');
+      a4a.onLayoutMeasure();
+      const layoutPromise = a4a.layoutCallback();
+      return Promise.resolve().then(() => {
+        expect(whenIniLoadedStub).to.not.be.called;
+        iniLoadResolver();
+        return layoutPromise;
+      }).then(() => {
+        verifyAmpAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
       });
     });
 
@@ -532,6 +568,16 @@ describe('amp-a4a', () => {
               {'isAmpCreative': false, 'releaseType': '0'});
         });
       });
+
+      it('should fire amp-analytics triggers for illegal render modes', () => {
+        const triggerAnalyticsEventSpy =
+            sandbox.spy(analytics, 'triggerAnalyticsEvent');
+        return a4a.layoutCallback().then(() => {
+          verifyAmpAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
+          expect(lifecycleEventStub).to.be.calledWith(
+              'crossDomainIframeLoaded');
+        });
+      });
     });
 
     describe('#renderViaNameFrame', () => {
@@ -594,6 +640,16 @@ describe('amp-a4a', () => {
                   });
                 });
           });
+
+      it('should fire amp-analytics triggers for lifecycle stages', () => {
+        const triggerAnalyticsEventSpy =
+            sandbox.spy(analytics, 'triggerAnalyticsEvent');
+        return a4a.layoutCallback().then(() => {
+          verifyAmpAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
+          expect(lifecycleEventStub).to.be.calledWith(
+              'crossDomainIframeLoaded');
+        });
+      });
     });
 
     describe('#renderViaSafeFrame', () => {
@@ -681,6 +737,16 @@ describe('amp-a4a', () => {
           a4a.vsync_.runScheduledTasks_();
           expect(a4a.experimentalNonAmpCreativeRenderMethod_).to.be.null;
           expect(fetchMock.called('ad')).to.be.true;
+        });
+      });
+
+      it('should fire amp-analytics triggers for lifecycle stages', () => {
+        const triggerAnalyticsEventSpy =
+            sandbox.spy(analytics, 'triggerAnalyticsEvent');
+        return a4a.layoutCallback().then(() => {
+          verifyAmpAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
+          expect(lifecycleEventStub).to.be.calledWith(
+              'crossDomainIframeLoaded');
         });
       });
     });
@@ -2001,64 +2067,6 @@ describe('amp-a4a', () => {
         const a4aElement = createA4aElement(doc);
         const a4a = new AmpA4A(a4aElement);
         expect(a4a.shouldPreferentialRenderWithoutCrypto()).to.be.false;
-      });
-    });
-  });
-
-  describe('amp-analytics triggers for A4A', () => {
-    let element;
-    let a4a;
-    let triggerAnalyticsEventSpy;
-
-    beforeEach(() => {
-      triggerAnalyticsEventSpy =
-          sandbox.spy(analytics, 'triggerAnalyticsEvent');
-      return createIframePromise().then(fixture => {
-        element = createA4aElement(fixture.doc);
-        element['data-rand'] = String(Math.random());
-        fixture.doc.body.appendChild(element);
-        a4a = new MockA4AImpl(element);
-
-        // For determinism.
-        let time = 100;
-        sandbox.stub(a4a, 'getNow_', () => ++time);
-      });
-    });
-
-    it('should trigger amp-analytics events for friendly iframe rendering',
-        () => {
-          a4a.buildCallback();
-          a4a.onLayoutMeasure();
-          return a4a.layoutCallback().then(() => {
-            expect(triggerAnalyticsEventSpy).to.be.calledWith(
-                element, 'adRequestStart', {'time': sinon.match.number});
-            expect(triggerAnalyticsEventSpy).to.be.calledWith(
-                element, 'adResponseEnd', {'time': sinon.match.number});
-            expect(triggerAnalyticsEventSpy).to.be.calledWith(
-                element, 'adRenderStart', {'time': sinon.match.number});
-            expect(triggerAnalyticsEventSpy).to.be.calledWith(
-                element, 'adRenderEnd', {'time': sinon.match.number});
-          });
-        });
-
-    it('should trigger amp-analytics for SafeFrame rendering', () => {
-      // Make sure there's no signature, so that we go down the 3p iframe path.
-      delete adResponse.headers['AMP-Fast-Fetch-Signature'];
-      delete adResponse.headers[AMP_SIGNATURE_HEADER];
-      // If rendering type is safeframe, we SHOULD attach a SafeFrame.
-      adResponse.headers[RENDERING_TYPE_HEADER] = 'safeframe';
-      sandbox.stub(a4a, 'getFallback', () => true);
-      a4a.buildCallback();
-      a4a.onLayoutMeasure();
-      return a4a.layoutCallback().then(() => {
-        expect(triggerAnalyticsEventSpy).to.be.calledWith(
-            element, 'adRequestStart', {'time': sinon.match.number});
-        expect(triggerAnalyticsEventSpy).to.be.calledWith(
-            element, 'adResponseEnd', {'time': sinon.match.number});
-        expect(triggerAnalyticsEventSpy).to.be.calledWith(
-            element, 'adRenderStart', {'time': sinon.match.number});
-        expect(triggerAnalyticsEventSpy).to.be.calledWith(
-            element, 'adRenderEnd', {'time': sinon.match.number});
       });
     });
   });

@@ -184,6 +184,7 @@ const LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER = {
   'adRequestEnd': AnalyticsTrigger.AD_RESPONSE_END,
   'renderFriendlyStart': AnalyticsTrigger.AD_RENDER_START,
   'renderCrossDomainStart': AnalyticsTrigger.AD_RENDER_START,
+  'renderSafeFrameStart': AnalyticsTrigger.AD_RENDER_START,
   'renderFriendlyEnd': AnalyticsTrigger.AD_RENDER_END,
   'renderCrossDomainEnd': AnalyticsTrigger.AD_RENDER_END,
   'friendlyIframeIniLoad': AnalyticsTrigger.AD_IFRAME_LOADED,
