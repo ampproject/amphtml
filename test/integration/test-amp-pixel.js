@@ -18,6 +18,9 @@ import {
   depositRequestUrl,
   withdrawRequest,
 } from '../../testing/test-helper';
+import {createElementWithAttributes} from '../../src/dom';
+import {Services} from '../../src/services';
+import {AmpPixel} from '../../builtins/amp-pixel';
 
 describe.configure().run('amp-pixel', function() {
   this.timeout(15000);
@@ -41,5 +44,24 @@ describe.configure().run('amp-pixel', function() {
         expect(request.headers.referer).to.not.be.ok;
       });
     });
+  });
+});
+
+describes.fakeWin('amp-pixel with img (inabox)', {amp: true}, env => {
+  it('should not write image', () => {
+    const src = 'https://foo.com/tracker/foo';
+    const pixelElem =
+        createElementWithAttributes(env.win.document, 'amp-pixel',
+        {src, 'i-amphtml-ssr': ''});
+    pixelElem.appendChild(
+        createElementWithAttributes(env.win.document, 'img', {src}));
+    env.win.document.body.appendChild(pixelElem);
+    const viewer = Services.viewerForDoc(env.win.document);
+    env.sandbox.stub(viewer, 'whenFirstVisible', () => {
+      return Promise.resolve();
+    });
+    const pixel = new AmpPixel(pixelElem);
+    pixel.buildCallback();
+    expect(pixelElem.querySelectorAll('img').length).to.equal(1);
   });
 });
