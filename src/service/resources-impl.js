@@ -1448,27 +1448,33 @@ export class Resources {
       }
     }
 
-    // Phase 5: Idle layout: layout more if we are otherwise not doing much.
-    // TODO(dvoytenko): document/estimate IDLE timeouts and other constants
     if (this.visible_ &&
           this.exec_.getSize() == 0 &&
           this.queue_.getSize() == 0 &&
           now > this.exec_.getLastDequeueTime() + 5000) {
-      let idleScheduledPreloadCount = 0;
-      let idleScheduledLayoutCount = 0;
-      for (let i = 0; i < this.resources_.length; i++) {
+      // Phase 5: Idle Render Outside Viewport layout: layout up to 3 items
+      // with idleRenderOutsideViewport true
+      let idleScheduledCount = 0;
+      for (let i = 0; i < this.resources_.length && idleScheduledCount < 4;
+          i++) {
         const r = this.resources_[i];
         if (r.getState() == ResourceState.READY_FOR_LAYOUT &&
-                !r.hasOwner() && r.isDisplayed()) {
-          const idleLayout = r.idleRenderOutsideViewport();
-          if ((idleLayout && idleScheduledLayoutCount++ < 4) ||
-            (!idleLayout && idleScheduledPreloadCount++ < 4)) {
-            dev().fine(TAG_, 'idle layout:', r.debugid, idleLayout);
-            this.scheduleLayoutOrPreload_(r, /* layout */ idleLayout);
-          }
-          if (idleScheduledPreloadCount >= 4 && idleScheduledLayoutCount >= 4) {
-            break;
-          }
+            !r.hasOwner() && r.isDisplayed() && r.idleRenderOutsideViewport()) {
+          dev().fine(TAG_, 'idleRenderOutsideViewport layout:', r.debugid);
+          this.scheduleLayoutOrPreload_(r, /* layout */ false);
+          idleScheduledCount++;
+        }
+      }
+      // Phase 6: Idle layout: layout more if we are otherwise not doing much.
+      // TODO(dvoytenko): document/estimate IDLE timeouts and other constants
+      for (let i = 0; i < this.resources_.length && idleScheduledCount < 4;
+          i++) {
+        const r = this.resources_[i];
+        if (r.getState() == ResourceState.READY_FOR_LAYOUT &&
+            !r.hasOwner() && r.isDisplayed()) {
+          dev().fine(TAG_, 'idle layout:', r.debugid);
+          this.scheduleLayoutOrPreload_(r, /* layout */ false);
+          idleScheduledCount++;
         }
       }
     }
