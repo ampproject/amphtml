@@ -623,9 +623,9 @@ export class Resource {
    * @param {number|boolean} multiplier
    * @return {boolean} whether resource is within provider multiplier of
    *    viewports from current visible viewport.
-   * @private
+   * @visibleForTesting
    */
-  withinViewportMultiplier_(multiplier) {
+  withinViewportMultiplier(multiplier) {
     // Boolean interface controls explicit result.
     if (multiplier === true || multiplier === false) {
       return multiplier;
@@ -681,7 +681,7 @@ export class Resource {
       this.resolveRenderOutsideViewport_();
       return true;
     }
-    if (this.withinViewportMultiplier_(this.element.renderOutsideViewport())) {
+    if (this.withinViewportMultiplier(this.element.renderOutsideViewport())) {
       this.resolveRenderOutsideViewport_();
       return true;
     }
@@ -694,7 +694,7 @@ export class Resource {
    * @return {boolean}
    */
   idleRenderOutsideViewport() {
-    return this.withinViewportMultiplier_(
+    return this.withinViewportMultiplier(
         this.element.idleRenderOutsideViewport());
   }
 
