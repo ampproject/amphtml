@@ -634,7 +634,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const artc = [];
     const ati = [];
     const ard = [];
-    const exclusions = {};
+    let exclusions;
     rtcResponseArray.forEach(rtcResponse => {
       // Only want to send errors for requests we actually sent.
       if (rtcResponse.error &&
@@ -659,6 +659,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               rewrittenResponse;
         }
         if (rtcResponse.response['categoryExclusions']) {
+          exclusions = exclusions || {};
           [this.jsonTargeting_['categoryExclusions'],
             rtcResponse.response['categoryExclusions']].forEach(
               categoryExclusions => {
@@ -666,10 +667,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   exclusions[exclusion] = true;
                 });
               });
-          this.jsonTargeting_['categoryExclusions'] = Object.keys(exclusions);
         }
       }
     });
+    this.jsonTargeting_['categoryExclusions'] = Object.keys(exclusions);
     return {'artc': artc.join() || null, 'ati': ati.join(), 'ard': ard.join()};
   }
 
