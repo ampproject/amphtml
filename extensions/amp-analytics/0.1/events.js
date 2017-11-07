@@ -687,15 +687,13 @@ export class VisibilityTracker extends EventTracker {
 
     user().assert(SUPPORT_WAITFOR_TRACKERS[waitForSpec] !== undefined,
         'waitFor value %s not supported', waitForSpec);
-    if (!SUPPORT_WAITFOR_TRACKERS[waitForSpec]) {
-      return null;
-    }
 
-    let waitForTracker = this.waitForTrackers_[waitForSpec];
-    if (!waitForTracker) {
-      waitForTracker = this.root.getTrackerForOptions(
-          waitForSpec, SUPPORT_WAITFOR_TRACKERS);
+    const waitForTracker = this.waitForTrackers_[waitForSpec] ||
+        this.root.getTrackerForWhitelist(waitForSpec, SUPPORT_WAITFOR_TRACKERS);
+    if (waitForTracker) {
       this.waitForTrackers_[waitForSpec] = waitForTracker;
+    } else {
+      return null;
     }
 
     // Wait for root signal if there's no element selected.
