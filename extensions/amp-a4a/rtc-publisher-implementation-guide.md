@@ -125,7 +125,7 @@ The value of rtc-config must conform to the following specification:
     *   Optional parameter
     *   Type: Array
     *   Each value in the array must be a valid RTC endpoint URL. These are the custom URLs mentioned above.
-        *   See [RTC Callout Endpoint and Response Specification](#Response-and-Endpoint-Specification) section below on all requirements for endpoint.
+        *   See [RTC Callout Endpoint and Response Specification](#response-and-endpoint-specification) section below on all requirements for endpoint.
 *   timeoutMillis
     *   Optional parameter
     *   Type: integer
