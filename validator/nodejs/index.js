@@ -404,7 +404,7 @@ function main() {
           '--user-agent <userAgent>', 'User agent string to use in requests.',
           DEFAULT_USER_AGENT)
       .option(
-          '--html_format <AMP|AMP4ADS>',
+          '--html_format <AMP|AMP4ADS|EXPERIMENTAL>',
           'The input format to be validated.\n' +
               '  AMP by default.',
           'AMP')
@@ -423,9 +423,11 @@ function main() {
     program.outputHelp();
     process.exit(1);
   }
-  if (program.html_format !== 'AMP' && program.html_format !== 'AMP4ADS') {
+  if (program.html_format !== 'AMP' && program.html_format !== 'AMP4ADS' &&
+      program.html_format !== 'EXPERIMENTAL') {
     process.stderr.write(
-        '--html_format must be set to "AMP" or "AMP4ADS".\n', function() {
+        '--html_format must be set to "AMP", "AMP4ADS", or "EXPERIMENTAL.\n',
+        function() {
           process.exit(1);
         });
   }
