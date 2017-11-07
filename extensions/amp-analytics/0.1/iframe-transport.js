@@ -17,6 +17,7 @@
 import {urls} from '../../../src/config';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {setStyles} from '../../../src/style';
 import {hasOwn} from '../../../src/utils/object';
 import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
