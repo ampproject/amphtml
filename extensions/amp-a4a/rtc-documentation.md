@@ -20,7 +20,7 @@ The design of RTC is per-slot, with a** maximum of 5 parallel callouts allowed p
 1.  **Custom URL callout**
     1.  The publisher specifies a custom URL that should be called out to. For example, a publisher may specify their own targeting server as a custom URL. If the ad network in use supports macro substitution for custom URLs, the publisher may specify macros in the URL. See URL Macro Substitution section below for details.
 1.  **Vendor-Specified URL**
-    1.  RTC supports call-outs to third-party vendors. For example, take VendorFooBar  which provides an API service that returns similar interests when provided a given interest (i.e. "baseball" yields ["sports", "apple-pie"]). If VendorFooBar wants publishers to be able to use them for RTC call outs, they simply add their call-out url with built-in macros to the AMP RTC vendor registry. Then publishers specify that they want to call out to VendorFooBar, and supply the value to substitute into the macro. This gives the Vendor complete control over the actual URL, with the Publisher only needing to supply the relevant inputs. See [URL Macro Substitution ](#bookmark=id.n1ot128b5nbl)section below for details.
+    1.  RTC supports call-outs to third-party vendors. For example, take VendorFooBar  which provides an API service that returns similar interests when provided a given interest (i.e. "baseball" yields ["sports", "apple-pie"]). If VendorFooBar wants publishers to be able to use them for RTC call outs, they simply add their call-out url with built-in macros to the AMP RTC vendor registry. Then publishers specify that they want to call out to VendorFooBar, and supply the value to substitute into the macro. This gives the Vendor complete control over the actual URL, with the Publisher only needing to supply the relevant inputs. See [URL Macro Substitution ](##url-macro-substitution)section below for details.
 
 In both cases, the results of these call-outs will be passed to the Fast Fetch implementations as part of ad url construction via the **getAdUrl** method. The ad network Fast Fetch implementation then uses results of these callouts to generate the ad URL. The semantics of how the ad network uses the RTC results to general the ad URL is specific to each individual network's implementation of Fast Fetch, so please refer to network-specific documentation for details.   
 
@@ -92,7 +92,7 @@ The value of rtc-config must conform to the following specification:
     *   Optional parameter
     *   Type: Array
     *   Each value in the array must be a valid RTC endpoint URL. These are the custom URLs mentioned above. 
-        *   See [RTC Callout Endpoint and Response Specification](#bookmark=id.bxd6zwocqzsy) section below on all requirements for endpoint. 
+        *   See [RTC Callout Endpoint and Response Specification](#rtc-callout-endpoint-and-response-specification) section below on all requirements for endpoint. 
 *   **timeoutMillis**
     *   Optional parameter
     *   Type: integer
@@ -121,7 +121,7 @@ The only valid strings that can be replaced for a given URL are specified by the
 
 The 'macros' attribute is optional, i.e. a vendor could specify a URL that has no macros to substitute in. 
 
-Additionally, macros can be substituted in by the Fast Fetch implementation itself. The URL for a vendor will be expanded with the correct macro values prior to callout. See [URL Macro Substitution](#bookmark=id.n1ot128b5nbl) section below for detailed explanation and example.
+Additionally, macros can be substituted in by the Fast Fetch implementation itself. The URL for a vendor will be expanded with the correct macro values prior to callout. See [URL Macro Substitution](#url-macro-substitution) section below for detailed explanation and example.
 
 
 ### RTC Callout Request Specification
