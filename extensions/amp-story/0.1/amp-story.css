@@ -312,7 +312,7 @@ amp-story-grid-layer * {
 }
 
 .i-amphtml-story-grid-template-thirds {
-  grid-template-rows: repeat(3, 1fr) !important;
+  grid-template-rows: 33% 33% 33% !important; /* `fr` is broken in Safari. */
   grid-template-areas: "upper-third"
                        "middle-third"
                        "lower-third" !important;
