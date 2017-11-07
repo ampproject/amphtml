@@ -337,6 +337,18 @@ export class GlobalVariableSource extends VariableSource {
       return new Date().toISOString();
     });
 
+    // Returns the current timestamp relative to page navigation (using the
+    // performance API) accurate to the nearest millisecond.
+    this.set('NOW_MS', () => {
+      if (!this.ampdoc.win['performance'] ||
+           !this.ampdoc.win['performance']['now']) {
+         // The performance API is not defined.
+        return undefined;
+      }
+       // Round to the previous ms.
+      return Math.floor(this.ampdoc.win['performance']['now']());
+    });
+
     // Returns the user's time-zone offset from UTC, in minutes.
     this.set('TIMEZONE', () => {
       return new Date().getTimezoneOffset();

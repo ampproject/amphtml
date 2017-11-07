@@ -68,6 +68,10 @@ describe('A4AVariableSource', () => {
     expect(expandSync('AD_NAV_REDIRECT_COUNT')).to.match(/\d/);
   });
 
+  it('should replace NOW_MS', () => {
+    expect(expandSync('NOW_MS')).to.match(/^\d+$/);
+  });
+
   function undefinedVariable(varName) {
     it('should not replace ' + varName, () => {
       expect(varSource.get(varName)).to.be.undefined;

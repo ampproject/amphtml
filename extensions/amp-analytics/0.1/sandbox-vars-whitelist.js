@@ -45,4 +45,5 @@ export const SANDBOX_AVAILABLE_VARS = {
   'AMP_VERSION': true,
   'BACKGROUND_STATE': true,
   'USER_AGENT': true,
+  'NOW_MS': true,
 };

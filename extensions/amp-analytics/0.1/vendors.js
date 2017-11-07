@@ -51,6 +51,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'navRedirectCount': 'NAV_REDIRECT_COUNT',
       'navTiming': 'NAV_TIMING',
       'navType': 'NAV_TYPE',
+      'nowMs': 'NOW_MS',
       'pageDownloadTime': 'PAGE_DOWNLOAD_TIME',
       'pageLoadTime': 'PAGE_LOAD_TIME',
       'pageViewId': 'PAGE_VIEW_ID',
