@@ -103,7 +103,7 @@ export class IframeTransport {
     // iframeTransport.getCreativeId() -> sentinel relationship is *not*
     // many-to-many.
     const sentinel = IframeTransport.createUniqueId_();
-    const useLocal = false;//getMode().localDev || getMode().test;
+    const useLocal = getMode().localDev || getMode().test;
     const loc = this.ampWin_.parent.location;
     const scriptSrc = useLocal ?
         `${loc.protocol}//${loc.host}/dist/iframe-transport-client-lib.js` :
