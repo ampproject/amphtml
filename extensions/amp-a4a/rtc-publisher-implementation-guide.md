@@ -139,7 +139,7 @@ While all three parameters of _rtc-config_ are optional, either "vendors" or "ur
 If a publisher wants to set up their own custom server to receive and respond to RTC callouts, they must meet the following specifications:
 
 
-#### **Response and Endpoint Specification**
+#### Response and Endpoint Specification
 
 The RTC endpoint must respond to the GET request with an object of targeting information to be inserted into the ad request url. Redirects are not allowed, and if the endpoint attempts to redirect, the RTC will be abandoned. Special care should be made to respond to these requests as quickly as possible, as there is a 1 second default timeout imposed by RTC, and publishers may optionally shorten this timeout. Responses that return after the timeout will be dropped.
 
