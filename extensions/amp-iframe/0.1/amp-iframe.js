@@ -39,6 +39,7 @@ const ATTRIBUTES_TO_PROPAGATE = [
   'allowfullscreen',
   'allowpaymentrequest',
   'allowtransparency',
+  'allow',
   'frameborder',
   'referrerpolicy',
   'scrolling',
