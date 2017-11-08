@@ -96,7 +96,8 @@ export class AmpStory extends AMP.BaseElement {
      * Whether entering into fullscreen automatically on navigation is enabled.
      * @private {boolean}
      */
-    this.isAutoFullScreenEnabled_ = true;
+    this.isAutoFullScreenEnabled_ =
+        isExperimentOn(this.win, 'amp-story-auto-fullscreen');
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
