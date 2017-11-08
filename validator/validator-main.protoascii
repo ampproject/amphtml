@@ -25,7 +25,7 @@ min_validator_revision_required: 246
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 509
+spec_file_revision: 510
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -961,13 +961,9 @@ tags: {
      mandatory: true
      dispatch_key: NAME_DISPATCH
   }
-  # We'll need the cdata in the future and will get rid of this.
-  # But for now we require an empty tag.
   cdata: {
-    max_bytes: 200000
-    # TODO(chenshay): This should be an ampproject url that explains the
-    # situation more fully.
-    max_bytes_spec_url: "https://github.com/ampproject/amphtml/issues/9625"
+    max_bytes: 500000
+    max_bytes_spec_url: "https://www.ampproject.org/docs/reference/spec#keyframes-stylesheet"
     css_spec: {
       at_rule_spec: {
         name: 'keyframes'
