@@ -23,7 +23,7 @@ import {dict, hasOwn, map} from '../../../src/utils/object';
 import {sendRequest, sendRequestUsingIframe} from './transport';
 import {IframeTransport} from './iframe-transport';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
-import {getTopWindow} from '../../../src/services';
+import {getTopWindow} from '../../../src/service';
 import {Services} from '../../../src/services';
 import {toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
