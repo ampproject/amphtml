@@ -36,7 +36,11 @@ import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {getBinaryType, isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
-import {assertHttpsUrl, isSecureUrl} from '../../../src/url';
+import {
+  assertHttpsUrl,
+  isSecureUrl,
+  tryDecodeUriComponent,
+} from '../../../src/url';
 import {parseJson} from '../../../src/json';
 import {handleClick} from '../../../ads/alp/handler';
 import {
@@ -636,7 +640,7 @@ export class AmpA4A extends AMP.BaseElement {
             if (match && match[1]) {
               dev().info(TAG, `Using debug exp features: ${match[1]}`);
               this.populatePostAdResponseExperimentFeatures_(
-                  decodeURIComponent(match[1]));
+                  tryDecodeUriComponent(match[1]));
             }
           }
           this.cspEnabled_ =
