@@ -48,6 +48,7 @@ import {createElementWithAttributes} from '../../../../src/dom';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import * as analytics from '../../../../src/analytics';
+import * as analyticsExtension from '../../../../src/extension-analytics';
 import * as sinon from 'sinon';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
@@ -460,7 +461,51 @@ describe('amp-a4a', () => {
         expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
       });
     });
+
+    it('should fire amp-analytics triggers', () => {
+      const triggerAnalyticsEventSpy =
+          sandbox.spy(analytics, 'triggerAnalyticsEvent');
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      return a4a.layoutCallback().then(() => {
+        verifyAmpAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
+      });
+    });
+
+    it('should not fire amp-analytics triggers without config', () => {
+      sandbox.stub(MockA4AImpl.prototype, 'getAmpAnalyticsConfig', () => null);
+      a4a = new MockA4AImpl(a4aElement);
+      const triggerAnalyticsEventSpy =
+          sandbox.spy(analytics, 'triggerAnalyticsEvent');
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      return a4a.layoutCallback().then(() => {
+        expect(triggerAnalyticsEventSpy).to.not.be.called;
+      });
+    });
+
+    it('should insert an amp-analytics element', () => {
+      sandbox.stub(
+          MockA4AImpl.prototype, 'getAmpAnalyticsConfig',
+          () => ({'foo': 'bar'}));
+      a4a = new MockA4AImpl(a4aElement);
+      const insertAnalyticsElementSpy =
+          sandbox.spy(analyticsExtension, 'insertAnalyticsElement');
+      a4a.buildCallback();
+      expect(insertAnalyticsElementSpy).to.be.calledWith(
+          a4a.element, {'foo': 'bar'}, true /* loadAnalytics */);
+    });
+
+    it('should not insert an amp-analytics element if config is null', () => {
+      sandbox.stub(MockA4AImpl.prototype, 'getAmpAnalyticsConfig', () => null);
+      a4a = new MockA4AImpl(a4aElement);
+      const insertAnalyticsElementSpy =
+          sandbox.spy(analyticsExtension, 'insertAnalyticsElement');
+      a4a.buildCallback();
+      expect(insertAnalyticsElementSpy).not.to.be.called;
+    });
   });
+
   describe('layoutCallback cancels properly', () => {
     let a4aElement;
     let a4a;

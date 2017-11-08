@@ -426,7 +426,8 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.ampAnalyticsConfig_) {
       // TODO(warrengm): Consider having page-level singletons for networks that
       // use the same config for all ads.
-      insertAnalyticsElement(this.element, this.ampAnalyticsConfig_, true);
+      insertAnalyticsElement(
+          this.element, this.ampAnalyticsConfig_, true /* loadAnalytics */);
     }
   }
 
@@ -1312,7 +1313,7 @@ export class AmpA4A extends AMP.BaseElement {
     }
     incrementLoadingAds(this.win, renderPromise);
     return renderPromise.then(
-        (result) => {
+        result => {
           this.handleLifecycleStage_('crossDomainIframeLoaded');
           // Pass on the result to the next value in the promise change.
           return result;
