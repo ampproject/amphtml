@@ -569,7 +569,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 94
+  // NEXT AVAILABLE TAG: 95
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -585,6 +585,7 @@ message ValidationError {
     DISALLOWED_ATTR = 3;
     DISALLOWED_STYLE_ATTR = 81;
     INVALID_ATTR_VALUE = 4;
+    DUPLICATE_ATTRIBUTE = 94;
     ATTR_VALUE_REQUIRED_BY_LAYOUT = 27;
     IMPLIED_LAYOUT_INVALID = 22;
     SPECIFIED_LAYOUT_INVALID = 26;
