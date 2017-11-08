@@ -40,7 +40,6 @@ import {scopedQuerySelectorAll} from '../../../src/dom';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 
-
 /** @private @const {!Array<!./simple-template.ElementDef>} */
 const LOADING_SCREEN_TEMPLATE = [
   {
@@ -526,7 +525,13 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Navigates to the previous page in the story.
    */
   previous() {
-    this.switchTo_(this.getPreviousPageId_());
+    const pageId = this.getPreviousPageId_();
+
+    if (pageId === null) {
+      dispatch(this.element, EventType.SHOW_NO_PREVIOUS_PAGE_HELP, true);
+    }
+
+    this.switchTo_(pageId);
   }
 
 

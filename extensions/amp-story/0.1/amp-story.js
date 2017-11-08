@@ -59,6 +59,8 @@ import {ActionTrust} from '../../../src/action-trust';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrl} from '../../../src/url';
 import {stringHash32} from '../../../src/string';
+import {AmpStoryHint} from './amp-story-hint';
+
 
 /** @private @const {string} */
 const PRE_ACTIVE_PAGE_ATTRIBUTE_NAME = 'pre-active';
@@ -156,6 +158,9 @@ export class AmpStory extends AMP.BaseElement {
       '878041739', '2199838184', '708478954', '142793127', '2414533450',
       '212690086',
     ];
+
+    /** @private {!AmpStoryHint} */
+    this.ampStoryHint_ = new AmpStoryHint(this.win);
   }
 
 
@@ -199,6 +204,14 @@ export class AmpStory extends AMP.BaseElement {
     this.element.appendChild(this.systemLayer_.build(this.getPageCount()));
   }
 
+  /**
+   * Builds the hint layer DOM.
+   * @private
+   */
+  buildHintLayer_() {
+    this.element.appendChild(this.ampStoryHint_.buildHintContainer());
+  }
+
 
   /** @private */
   initializeListeners_() {
@@ -238,6 +251,8 @@ export class AmpStory extends AMP.BaseElement {
       } else {
         this.switchTo_(targetPageId);
       }
+
+      this.ampStoryHint_.hideAllNavigationHint();
     });
 
     this.element.addEventListener(EventType.PAGE_PROGRESS, e => {
@@ -255,6 +270,10 @@ export class AmpStory extends AMP.BaseElement {
 
     this.element.addEventListener(EventType.REPLAY, () => {
       this.replay_();
+    });
+
+    this.element.addEventListener(EventType.SHOW_NO_PREVIOUS_PAGE_HELP, () => {
+      this.ampStoryHint_.showNavigationOverlay();
     });
 
     this.element.addEventListener('play', e => {
@@ -358,6 +377,7 @@ export class AmpStory extends AMP.BaseElement {
 
     return this.initializePages_()
         .then(() => this.buildSystemLayer_())
+        .then(() => this.buildHintLayer_())
         .then(() => {
           this.pages_.forEach(page => {
             page.setActive(false);

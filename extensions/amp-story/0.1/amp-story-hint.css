@@ -1,0 +1,63 @@
+.i-amphtml-story-navigation-help-overlay {
+  position: absolute!important;
+  left: 0!important;
+  top: 0!important;
+  height: 100%!important;
+  width: 100%!important;
+  background: rgba(0,0,0,0.9)!important;
+  display: none!important;
+  pointer-events: none!important;
+  flex-direction: row;
+  color: #fff;
+}
+
+.i-amphtml-story-navigation-help-section{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.i-amphtml-story-navigation-help-first-page {
+  flex: 1;
+}
+
+.i-amphtml-story-navigation-help-first-page .i-amphtml-story-hint-text {
+  padding: 16px;
+}
+
+.i-amphtml-story-navigation-help-next-page {
+  flex: 3;
+  border-left: 1px dashed white
+}
+
+.show-navigation-overlay .i-amphtml-story-navigation-help-overlay {
+  display: flex!important;
+}
+
+.i-amphtml-story-hint-tap-icon {
+  position: relative;
+  width: 60px;
+  height: 60px;
+}
+
+.i-amphtml-story-hint-tap-icon:before, .i-amphtml-story-hint-tap-icon:after {
+  position: absolute;
+  content: '';
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.i-amphtml-story-hint-tap-icon:after {
+  top: 5px;
+  left: 5px;
+  width: 50px;
+  height: 50px;
+  background-color: #fff;
+}
+
+.i-amphtml-story-hint-tap-icon-text {
+  margin-top: 16px;
+}
