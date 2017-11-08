@@ -1,1 +1,2 @@
-PASS
+FAIL
+feature_tests/svg.html:87:2 The attribute 'xml:base' may not appear in tag 'svg'. (see https://www.ampproject.org/docs/reference/spec#svg) [DISALLOWED_HTML]
