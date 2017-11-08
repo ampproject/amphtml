@@ -42,8 +42,9 @@ export class RequestHandler {
     /** @const {string} */
     this.baseUrl = dev().assert(request['baseUrl']);
 
-    /** @private {number} */
-    this.maxDelay_ = Number(request['maxDelay']) || 0;
+    /** @private @const {number} */
+    // TODO: to support intervalDelay that start timeout during construction.
+    this.maxDelay_ = Number(request['maxDelay']) || 0; //unit is sec
 
     /** @private {!./variables.VariableService} */
     this.variableService_ = variableServiceFor(this.win);
@@ -70,7 +71,7 @@ export class RequestHandler {
     this.whiteList_ = isSandbox ? SANDBOX_AVAILABLE_VARS : undefined;
 
     /** @private {?number} */
-    this.schedule_ = null;
+    this.timeoutId_ = null;
 
     /** @private {?JsonObject} */
     this.lastTrigger_ = null;
@@ -117,8 +118,8 @@ export class RequestHandler {
    * Dispose function that clear reqeust handler state.
    */
   dispose() {
-    if (this.schedule_) {
-      this.win.clearTimeout(this.schedule_);
+    if (this.timeoutId_) {
+      this.win.clearTimeout(this.timeoutId_);
     }
     this.reset_();
   }
@@ -132,10 +133,10 @@ export class RequestHandler {
       return this.fire_();
     }
     // If is batched
-    if (!this.schedule_) {
+    if (!this.timeoutId_) {
       // schedule fire_ after certain time
       return this.sendPromise_ = new Promise(resolve => {
-        this.schedule_ = this.win.setTimeout(() => {
+        this.timeoutId_ = this.win.setTimeout(() => {
           this.fire_().then(request => {
             resolve(request);
           });
@@ -190,7 +191,7 @@ export class RequestHandler {
     this.baseUrlPromise_ = null;
     this.baseUrlTemplatePromise_ = null;
     this.extraUrlParamsPromise_ = [];
-    this.schedule_ = null;
+    this.timeoutId_ = null;
     this.lastTrigger_ = null;
     this.sendPromise_ = null;
   }
