@@ -431,6 +431,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  lockerdome: {
+    prefetch: 'https://cdn2.lockerdomecdn.com/_js/amp.js',
+    renderStartImplemented: true,
+  },
+
   loka: {
     prefetch: 'https://loka-cdn.akamaized.net/scene/amp.js',
     preconnect: [
