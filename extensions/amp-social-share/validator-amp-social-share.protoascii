@@ -15,6 +15,8 @@
 #
 
 tags: {  # amp-social-share
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-social-share"
@@ -26,6 +28,8 @@ tags: {  # amp-social-share
   attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-social-share>
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "AMP-SOCIAL-SHARE"
   requires_extension: "amp-social-share"
   attrs: {

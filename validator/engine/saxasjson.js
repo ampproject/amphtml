@@ -60,13 +60,20 @@ class JsonOutHandler extends amp.htmlparser.HtmlSaxHandler {
   }
 
   /** @override */
-  startTag(tagName, attrs) {
-    this.out.push(['startTag', tagName].concat(attrs));
+  startTag(tag) {
+    let newArray = [];
+    newArray.push('startTag');
+    newArray.push(tag.upperName());
+    for (let attr of tag.attrs()) {
+      newArray.push(attr.name);
+      newArray.push(attr.value);
+    }
+    this.out.push(newArray);
   }
 
   /** @override */
-  endTag(tagName) {
-    this.out.push(['endTag', tagName]);
+  endTag(tag) {
+    this.out.push(['endTag', tag.upperName()]);
   }
 }
 

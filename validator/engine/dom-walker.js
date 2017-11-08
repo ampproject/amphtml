@@ -36,6 +36,8 @@ goog.provide('amp.domwalker.DomWalker');
 goog.provide('amp.domwalker.NodeProcessingState_');
 goog.require('amp.htmlparser.HtmlParser');
 goog.require('amp.htmlparser.HtmlSaxHandler');
+goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
+goog.require('amp.htmlparser.ParsedHtmlTag');
 
 /**
  * Stores an Element Node and a position in it's child list.
@@ -147,7 +149,8 @@ amp.domwalker.DomWalker = class {
     // Apparently the !doctype 'tag' is not considered an element in the DOM,
     // so we can't see it naively. Unsure if there is a better approach here.
     if (rootDoc.doctype !== null) {
-      handler.startTag('!DOCTYPE', [rootDoc.doctype.name, '']);
+      handler.startTag(new amp.htmlparser.ParsedHtmlTag(
+          '!DOCTYPE', [rootDoc.doctype.name, '']));
     }
 
     // The approach here is to walk the DOM, generating handler calls which
@@ -193,13 +196,14 @@ amp.domwalker.DomWalker = class {
     for (let i = 0; i < calls.length; ++i) {
       switch (calls[i][0]) {
         case amp.domwalker.HandlerCalls.START_TAG:
-          handler.startTag(calls[i][1], calls[i][2]);
+          handler.startTag(
+              new amp.htmlparser.ParsedHtmlTag(calls[i][1], calls[i][2]));
           break;
         case amp.domwalker.HandlerCalls.CDATA:
           handler.cdata(calls[i][1]);
           break;
         case amp.domwalker.HandlerCalls.END_TAG:
-          handler.endTag(calls[i][1]);
+          handler.endTag(new amp.htmlparser.ParsedHtmlTag(calls[i][1]));
           break;
         default:
           console/*OK*/.error(calls[i][0]);

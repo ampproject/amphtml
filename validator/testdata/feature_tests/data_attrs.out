@@ -1,0 +1,8 @@
+FAIL
+feature_tests/data_attrs.html:31:2 The attribute 'data' may not appear in tag 'div'. [DISALLOWED_HTML]
+feature_tests/data_attrs.html:33:2 The attribute 'data_foo' may not appear in tag 'div'. [DISALLOWED_HTML]
+feature_tests/data_attrs.html:39:2 The attribute 'data-foo&bar' may not appear in tag 'div'. [DISALLOWED_HTML]
+feature_tests/data_attrs.html:40:2 The attribute 'data-foo?bar' may not appear in tag 'div'. [DISALLOWED_HTML]
+feature_tests/data_attrs.html:41:2 The attribute 'data-foo;bar' may not appear in tag 'div'. [DISALLOWED_HTML]
+feature_tests/data_attrs.html:42:2 The attribute 'data-foo"bar' may not appear in tag 'div'. [DISALLOWED_HTML]
+feature_tests/data_attrs.html:43:2 The attribute 'data-foo<bar' may not appear in tag 'div'. [DISALLOWED_HTML]

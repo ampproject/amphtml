@@ -15,6 +15,7 @@
 #
 
 tags: {  # amp-story
+  html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-story"
@@ -90,7 +91,7 @@ tags: {  # <amp-story-grid-layer>
   }
   descendant_tag_lists: "amp-story-grid-layer-allowed-descendants"
   reference_points: {
-    tag_spec_name: "AMP-STORY-GRID-LAYER grid-area"
+    tag_spec_name: "AMP-STORY-GRID-LAYER default"
   }
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
@@ -99,8 +100,56 @@ tags: {  # <amp-story-grid-layer>
 tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
-  spec_name: "AMP-STORY-GRID-LAYER grid-area"
+  spec_name: "AMP-STORY-GRID-LAYER default"
   attrs: { name: "grid-area" }
+  attrs: {
+    name: "align-content"
+    value_regex: "(start|"
+        "end|"
+        "center|"
+        "stretch|"
+        "space-around|"
+        "space-between|"
+        "space-evenly)"
+  }
+  attrs: {
+    name: "align-items"
+    value_regex: "(start|"
+        "end|"
+        "center|"
+        "stretch)"
+  }
+  attrs: {
+    name: "align-self"
+    value_regex: "(start|"
+        "end|"
+        "center|"
+        "stretch)"
+  }
+  attrs: {
+    name: "justify-content"
+    value_regex: "(start|"
+        "end|"
+        "center|"
+        "stretch|"
+        "space-around|"
+        "space-between|"
+        "space-evenly)"
+  }
+  attrs: {
+    name: "justify-items"
+    value_regex: "(start|"
+        "end|"
+        "center|"
+        "stretch)"
+  }
+  attrs: {
+    name: "justify-self"
+    value_regex: "(start|"
+        "end|"
+        "center|"
+        "stretch)"
+  }
   attrs: {
     name: "animate-in"
     value_regex: "(drop|"
