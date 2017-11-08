@@ -15,6 +15,7 @@
  */
 
 import {dev} from './log';
+import {isArray, isFiniteNumber} from './types';
 import {dict} from './utils/object';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
 import {SubscriptionApi} from './iframe-helper';
@@ -193,11 +194,24 @@ export class IntersectionObserverPolyfill {
     /** @private @const {function(?Array<!IntersectionObserverEntry>)} */
     this.callback_ = callback;
 
+    // The input threshold can be a number or an array of numbers.
+    let threshold = opt_option && opt_option.threshold;
+    if (threshold) {
+      threshold = isArray(threshold) ?
+          threshold : [threshold];
+    } else {
+      threshold = [0];
+    }
+
+    for (let i = 0; i < threshold.length; i++) {
+      dev().assert(isFiniteNumber(threshold[i]), 'Threshold should be a ' +
+          'finite number or an array of finite numbers');
+    }
+
     /**
      * A list of threshold, sorted in increasing numeric order
      * @private @const {!Array}
      */
-    const threshold = opt_option && opt_option.threshold || [0];
     this.threshold_ = threshold.sort();
     dev().assert(this.threshold_[0] >= 0 &&
         this.threshold_[this.threshold_.length - 1] <= 1,

@@ -36,7 +36,11 @@ import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {getBinaryType, isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
-import {assertHttpsUrl, isSecureUrl} from '../../../src/url';
+import {
+  assertHttpsUrl,
+  isSecureUrl,
+  tryDecodeUriComponent,
+} from '../../../src/url';
 import {parseJson} from '../../../src/json';
 import {handleClick} from '../../../ads/alp/handler';
 import {
@@ -624,19 +628,24 @@ export class AmpA4A extends AMP.BaseElement {
           }
           if (fetchResponse.headers && fetchResponse.headers.has(
               EXPERIMENT_FEATURE_HEADER_NAME)) {
-            fetchResponse.headers.get(EXPERIMENT_FEATURE_HEADER_NAME).split(',')
-              .forEach(pair => {
-                const parts = pair.split('=');
-                if (parts.length != 2 || !parts[0]) {
-                  dev().warn(TAG, `invalid experiment feature ${pair}`);
-                  return;
-                }
-                this.postAdResponseExperimentFeatures[parts[0]] = parts[1];
-              });
-            this.cspEnabled_ =
-              this.postAdResponseExperimentFeatures[CSP_ENABLED_EXP_NAME] ==
-                'true';
+            this.populatePostAdResponseExperimentFeatures_(
+                fetchResponse.headers.get(EXPERIMENT_FEATURE_HEADER_NAME));
           }
+          if (getMode().localDev && this.win.location &&
+              this.win.location.search) {
+            // Allow for setting experiment features via query param which
+            // will potentially override values returned in response.
+            const match = /(?:\?|&)a4a_feat_exp=([^&]+)/.exec(
+                this.win.location.search);
+            if (match && match[1]) {
+              dev().info(TAG, `Using debug exp features: ${match[1]}`);
+              this.populatePostAdResponseExperimentFeatures_(
+                  tryDecodeUriComponent(match[1]));
+            }
+          }
+          this.cspEnabled_ =
+            this.postAdResponseExperimentFeatures[CSP_ENABLED_EXP_NAME] ==
+              'true';
           // If the response has response code 204, or arrayBuffer is null,
           // collapse it.
           if (!fetchResponse.arrayBuffer || fetchResponse.status == 204) {
@@ -785,6 +794,27 @@ export class AmpA4A extends AMP.BaseElement {
           this.promiseErrorHandler_(error);
           return null;
         });
+  }
+
+  /**
+   * Populates object mapping of feature to value used for post ad response
+   * behavior experimentation.  Assumes comma separated, = delimited key/value
+   * pairs.  If key appears more than once, last value wins.
+   * @param {string} input
+   * @private
+   */
+  populatePostAdResponseExperimentFeatures_(input) {
+    input.split(',').forEach(line => {
+      if (!line) {
+        return;
+      }
+      const parts = line.split('=');
+      if (parts.length != 2 || !parts[0]) {
+        dev().warn(TAG, `invalid experiment feature ${line}`);
+        return;
+      }
+      this.postAdResponseExperimentFeatures[parts[0]] = parts[1];
+    });
   }
 
   /**
