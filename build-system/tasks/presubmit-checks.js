@@ -355,6 +355,7 @@ const forbiddenTerms = {
       'src/cookies.js',
       'src/service/cid-impl.js',
       'testing/fake-dom.js',
+      'extensions/amp-analytics/0.1/vendors.js',
     ],
   },
   'getCookie\\W': {

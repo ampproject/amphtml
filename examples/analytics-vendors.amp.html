@@ -47,6 +47,7 @@
       <option>acquialift</option>
       <option>adobeanalytics</option>
       <option>adobeanalytics_nativeConfig</option>
+      <option>alexametrics</option>
       <option>atinternet</option>
       <option>afsanalytics</option>
       <option>baiduanalytics</option>
@@ -182,6 +183,19 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Adobe Analytics example -->
+
+<!-- Alexa tracking -->
+<amp-analytics type="alexametrics">
+<script type="application/json">
+  {
+    "vars": {
+      "atrk_acct": "YOURACCOUNT",
+      "domain": "YOURDOMAIN"
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End Alexa tracking -->
 
 <!-- AT Internet tracking -->
 <amp-analytics type="atinternet" id="atinternet">
