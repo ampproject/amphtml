@@ -31,7 +31,7 @@ import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
 export let FrameData;
 
 /**
- * @visibleForTesting
+ * @VisibleForTesting
  */
 export class IframeTransport {
   /**
@@ -104,14 +104,8 @@ export class IframeTransport {
     // iframeTransport.getCreativeId() -> sentinel relationship is *not*
     // many-to-many.
     const sentinel = IframeTransport.createUniqueId_();
-    const useLocal = getMode().localDev || getMode().test;
-    const loc = this.ampWin_.parent.location;
-    const scriptSrc = useLocal ?
-        `${loc.protocol}//${loc.host}/dist/iframe-transport-client-lib.js` :
-        urls.thirdParty +
-        '/$internalRuntimeVersion$/iframe-transport-client-v0.js';
     const frameName = JSON.stringify(/** @type {JsonObject} */ ({
-      scriptSrc,
+      scriptSrc: this.getLibScriptUrl(),
       sentinel,
       type: this.type_,
     }));
@@ -135,6 +129,22 @@ export class IframeTransport {
     });
     IframeTransport.crossDomainIframes_[this.type_] = frameData;
     return frameData;
+  }
+
+  /**
+   * Calculates the URL of the client lib
+   * @param {boolean=} opt_forceProdUrl If true, prod URL will be returned even
+   *     in local/test modes.
+   * @return {string}
+   * @VisibleForTesting
+   */
+  getLibScriptUrl(opt_forceProdUrl) {
+    if ((getMode().localDev || getMode().test) && !opt_forceProdUrl) {
+      const loc = this.ampWin_.parent.location;
+      return `${loc.protocol}//${loc.host}/dist/iframe-transport-client-lib.js`;
+    }
+    return urls.thirdParty +
+        '/$internalRuntimeVersion$/iframe-transport-client-v0.js';
   }
 
   /**
