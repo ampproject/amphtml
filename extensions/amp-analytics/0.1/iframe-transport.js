@@ -158,8 +158,7 @@ export class IframeTransport {
    * @VisibleForTesting
    */
   createLongTaskObserver() {
-    if (this.longTaskObserver_ ||
-        typeof this.ampWin_.PerformanceObserver == 'undefined') {
+    if (this.longTaskObserver_ || !this.ampWin_.PerformanceObserver) {
       return;
     }
     this.longTaskObserver_ = new this.ampWin_.PerformanceObserver(entryList => {
@@ -213,7 +212,7 @@ export class IframeTransport {
     delete IframeTransport.crossDomainIframes_[type];
     if (this.longTaskObserver_) {
       this.longTaskObserver_.disconnect();
-      delete this.longTaskObserver_;
+      this.longTaskObserver_ = null;
     }
   }
 
