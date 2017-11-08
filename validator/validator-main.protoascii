@@ -25,7 +25,7 @@ min_validator_revision_required: 246
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 514
+spec_file_revision: 515
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -1152,6 +1152,8 @@ attr_lists: {
   }
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "BLOCKQUOTE"
   attrs: { name: "align" }
   attr_lists: "cite-attr"
@@ -1217,6 +1219,8 @@ tags: {
 # 4.5 Text-level semantics
 # 4.5.1 The a element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "A"
   attrs: {
     name: "href"
@@ -1323,6 +1327,8 @@ tags: {
 }
 # 4.5.7 The q element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "Q"
   attr_lists: "cite-attr"
 }
@@ -1429,6 +1435,8 @@ tags: {
 # 4.6 Edits
 # 4.6.1 The ins element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "INS"
   # https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ins
   # These attributes have specific formatting, but as they are metadata
@@ -1439,6 +1447,8 @@ tags: {
 }
 # 4.6.2 The del element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "DEL"
   # https://developer.mozilla.org/en-US/docs/Web/HTML/Element/del
   # These attributes have specific formatting, but as they are metadata
@@ -1590,6 +1600,8 @@ tags: {
 }
 # 4.7.8 The source element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "SOURCE"
   spec_name: "amp-video > source"
   mandatory_parent: "AMP-VIDEO"
@@ -1609,6 +1621,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "SOURCE"
   spec_name: "amp-audio > source"
   mandatory_parent: "AMP-AUDIO"
@@ -1628,6 +1642,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-audio"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "SOURCE"
   spec_name: "audio > source"
   mandatory_parent: "AUDIO"
@@ -1648,6 +1664,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-audio"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "SOURCE"
   spec_name: "video > source"
   mandatory_parent: "VIDEO"
@@ -1668,6 +1686,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-video"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "SOURCE"
   spec_name: "amp-ima-video > source"
   mandatory_parent: "AMP-IMA-VIDEO"
@@ -1735,30 +1755,40 @@ attr_lists: {
   }
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "TRACK"
   spec_name: "audio > track"
   mandatory_parent: "AUDIO"
   attr_lists: "track-attrs-no-subtitles"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "TRACK"
   spec_name: "audio > track[kind=subtitles]"
   mandatory_parent: "AUDIO"
   attr_lists: "track-attrs-subtitles"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "TRACK"
   spec_name: "video > track"
   mandatory_parent: "VIDEO"
   attr_lists: "track-attrs-no-subtitles"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "TRACK"
   spec_name: "video > track[kind=subtitles]"
   mandatory_parent: "VIDEO"
   attr_lists: "track-attrs-subtitles"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "TRACK"
   spec_name: "amp-audio > track"
   mandatory_parent: "AMP-AUDIO"
@@ -1769,6 +1799,8 @@ tags: {
   attr_lists: "track-attrs-no-subtitles"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "TRACK"
   spec_name: "amp-audio > track[kind=subtitles]"
   mandatory_parent: "AMP-AUDIO"
@@ -1779,6 +1811,8 @@ tags: {
   attr_lists: "track-attrs-subtitles"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "TRACK"
   spec_name: "amp-video > track"
   mandatory_parent: "AMP-VIDEO"
@@ -1789,6 +1823,8 @@ tags: {
   attr_lists: "track-attrs-no-subtitles"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "TRACK"
   spec_name: "amp-video > track[kind=subtitles]"
   mandatory_parent: "AMP-VIDEO"
@@ -1799,6 +1835,8 @@ tags: {
   attr_lists: "track-attrs-subtitles"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "TRACK"
   spec_name: "amp-ima-video > track[kind=subtitles]"
   mandatory_parent: "AMP-IMA-VIDEO"
@@ -1941,6 +1979,8 @@ attr_lists: {
 
 # Basics
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "G"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -1952,6 +1992,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "GLYPH"
   mandatory_ancestor: "SVG"
   attrs: { name: "arabic-form" }
@@ -1969,6 +2011,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "GLYPHREF"
   mandatory_ancestor: "SVG"
   attrs: { name: "dx" }
@@ -1984,6 +2028,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "IMAGE"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2022,6 +2068,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "MARKER"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2040,6 +2088,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "METADATA"
   mandatory_ancestor: "SVG"
   attr_lists: "svg-style-attr"
@@ -2047,6 +2097,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "PATH"
   mandatory_ancestor: "SVG"
   attrs: { name: "d" }
@@ -2061,6 +2113,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "SOLIDCOLOR"
   mandatory_ancestor: "SVG"
   attrs: { name: "solid-color" }
@@ -2071,6 +2125,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "SVG"
   attrs: { name: "contentscripttype" }
   attrs: { name: "contentstyletype" }
@@ -2089,6 +2145,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "SWITCH"
   mandatory_ancestor: "SVG"
   attr_lists: "svg-style-attr"
@@ -2098,6 +2156,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "VIEW"
   mandatory_ancestor: "SVG"
   attr_lists: "svg-style-attr"
@@ -2111,6 +2171,8 @@ tags: {
 }
 # Shapes
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "CIRCLE"
   mandatory_ancestor: "SVG"
   attrs: { name: "cx" }
@@ -2126,6 +2188,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "ELLIPSE"
   mandatory_ancestor: "SVG"
   attrs: { name: "cx" }
@@ -2142,6 +2206,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "LINE"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2158,6 +2224,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "POLYGON"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2171,6 +2239,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "POLYLINE"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2184,6 +2254,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "RECT"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2203,6 +2275,8 @@ tags: {
 }
 # Text
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "TEXT"
   mandatory_ancestor: "SVG"
   attrs: { name: "dx" }
@@ -2222,6 +2296,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "TEXTPATH"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2236,6 +2312,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "TREF"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2247,6 +2325,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "TSPAN"
   mandatory_ancestor: "SVG"
   attrs: { name: "dx" }
@@ -2265,6 +2345,8 @@ tags: {
 }
 # Rendering
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "CLIPPATH"
   mandatory_ancestor: "SVG"
   attrs: { name: "clippathunits" }
@@ -2277,6 +2359,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "FILTER"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2294,6 +2378,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "HKERN"
   mandatory_ancestor: "SVG"
   attrs: { name: "g1" }
@@ -2306,6 +2392,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "LINEARGRADIENT"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2323,6 +2411,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "MASK"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2339,6 +2429,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "PATTERN"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2359,6 +2451,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "RADIALGRADIENT"
   mandatory_ancestor: "SVG"
   attrs: { name: "cx" }
@@ -2378,6 +2472,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "STOP"
   spec_name: "lineargradient > stop"
   mandatory_ancestor: "LINEARGRADIENT"
@@ -2388,6 +2484,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "STOP"
   spec_name: "radialgradient > stop"
   mandatory_ancestor: "RADIALGRADIENT"
@@ -2398,6 +2496,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "VKERN"
   mandatory_ancestor: "SVG"
   attrs: { name: "g1" }
@@ -2411,6 +2511,8 @@ tags: {
 }
 # Special
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "DEFS"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2422,6 +2524,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "SYMBOL"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2433,6 +2537,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "USE"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2450,6 +2556,8 @@ tags: {
 }
 # Filters
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "FECOLORMATRIX"
   mandatory_ancestor: "SVG"
   attrs: { name: "in" }
@@ -2462,6 +2570,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "FECOMPOSITE"
   mandatory_ancestor: "SVG"
   attrs: { name: "in" }
@@ -2478,6 +2588,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "FEFLOOD"
   mandatory_ancestor: "SVG"
   attr_lists: "svg-style-attr"
@@ -2487,6 +2599,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "FEGAUSSIANBLUR"
   mandatory_ancestor: "SVG"
   attrs: { name: "edgemode" }
@@ -2499,6 +2613,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "FEMERGE"
   mandatory_ancestor: "SVG"
   attr_lists: "svg-style-attr"
@@ -2508,6 +2624,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "FEMERGENODE"
   mandatory_ancestor: "SVG"
   attrs: { name: "in" }
@@ -2516,6 +2634,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "FEOFFSET"
   mandatory_ancestor: "SVG"
   attrs: { name: "dx" }
@@ -2530,6 +2650,8 @@ tags: {
 # HTML inside SVG, esp. to allow amp-img.
 # See https://github.com/ampproject/amphtml/issues/717
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "FOREIGNOBJECT"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2546,6 +2668,8 @@ tags: {
 }
 # ARIA
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "DESC"
   mandatory_ancestor: "SVG"
   attr_lists: "svg-style-attr"
@@ -2553,6 +2677,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#svg"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "TITLE"
   spec_name: "svg title"
   mandatory_ancestor: "SVG"
@@ -2651,6 +2777,8 @@ tags: {
 # with the exception of the button element which is always allowed.
 # 4.10.3 The form element
 tags {  # <form method=GET ...>
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "FORM"
   spec_name: "FORM [method=GET]"
   requires_extension: "amp-form"
@@ -2704,6 +2832,8 @@ tags {  # <form method=GET ...>
   }
 }
 tags {  # <form method=POST ...>
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "FORM"
   spec_name: "FORM [method=POST]"
   requires_extension: "amp-form"
@@ -3003,6 +3133,8 @@ tags: {
 # Button variant specifically supporting <amp-app-banner> tag with the
 # open-button attribute.
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "BUTTON"
   spec_name: "amp-app-banner button[open-button]"
   satisfies: "amp-app-banner button[open-button]"
@@ -3392,6 +3524,8 @@ attr_lists: {
   attrs: { name: "noloading" value: "" }
 }
 tags: {  # <amp-img>
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "AMP-IMG"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
@@ -3414,6 +3548,8 @@ tags: {  # <amp-img>
   }
 }
 tags: {  # <amp-pixel>
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "AMP-PIXEL"
   attrs: {
     name: "referrerpolicy"

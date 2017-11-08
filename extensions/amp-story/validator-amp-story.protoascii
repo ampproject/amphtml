@@ -15,6 +15,7 @@
 #
 
 tags: {  # amp-story
+  html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-story"
