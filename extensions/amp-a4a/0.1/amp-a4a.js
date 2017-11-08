@@ -631,7 +631,7 @@ export class AmpA4A extends AMP.BaseElement {
               this.win.location.search) {
             // Allow for setting experiment features via query param which
             // will potentially override values returned in response.
-            const match = /(?:\?|&)a4a_feat_exp=(.*)(?:&|$)/.exec(
+            const match = /(?:\?|&)a4a_feat_exp=([^&]+)/.exec(
                 this.win.location.search);
             if (match && match[1]) {
               dev().info(TAG, `Using debug exp features: ${match[1]}`);
