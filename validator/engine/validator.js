@@ -3633,18 +3633,10 @@ function validateAttrNotFoundInSpec(parsedTagSpec, context, attrName, result) {
   // particular data attributes.
   // http://www.w3.org/TR/html5/single-page.html#attr-data-*
   // http://w3c.github.io/aria-in-html/
-  // However, mostly to avoid confusion, we want to make sure that
-  // nobody tries to make a Mustache template data attribute,
-  // e.g. <div data-{{foo}}>, so we also exclude those characters.
-  // We also don't allow slashes as they can be parsed differently by
-  // different clients.
-  if (goog.string./*OK*/ startsWith(attrName, 'data-') &&
-      !goog.string.contains(attrName, '}') &&
-      !goog.string.contains(attrName, '{') &&
-      !goog.string.contains(attrName, '/') &&
-      !goog.string.contains(attrName, '\\')) {
-    return;
-  }
+  // However, to avoid parsing differences, we restrict the set of allowed
+  // characters in the document.
+  const dataAttrRe = /^data-[A-Za-z0-9-_:.]*$/;
+  if (attrName.match(dataAttrRe) !== null) return;
 
   // At this point, it's an error either way, but we try to give a
   // more specific error in the case of Mustache template characters.
