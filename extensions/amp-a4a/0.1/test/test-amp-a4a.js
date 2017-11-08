@@ -235,7 +235,7 @@ describe('amp-a4a', () => {
     verifyContext(attributes._context);
   }
 
-  function verifyAmpAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy) {
+  function verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy) {
     expect(triggerAnalyticsEventSpy).to.be.calledWith(
         a4a.element, 'adRequestStart', {'time': sinon.match.number});
     expect(triggerAnalyticsEventSpy).to.be.calledWith(
@@ -398,7 +398,7 @@ describe('amp-a4a', () => {
         iniLoadResolver();
         return layoutPromise;
       }).then(() => {
-        verifyAmpAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
+        verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
       });
     });
 
@@ -468,12 +468,12 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
-        verifyAmpAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
+        verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
       });
     });
 
     it('should not fire amp-analytics triggers without config', () => {
-      sandbox.stub(MockA4AImpl.prototype, 'getAmpAnalyticsConfig', () => null);
+      sandbox.stub(MockA4AImpl.prototype, 'getA4aAnalyticsConfig', () => null);
       a4a = new MockA4AImpl(a4aElement);
       const triggerAnalyticsEventSpy =
           sandbox.spy(analytics, 'triggerAnalyticsEvent');
@@ -486,7 +486,7 @@ describe('amp-a4a', () => {
 
     it('should insert an amp-analytics element', () => {
       sandbox.stub(
-          MockA4AImpl.prototype, 'getAmpAnalyticsConfig',
+          MockA4AImpl.prototype, 'getA4aAnalyticsConfig',
           () => ({'foo': 'bar'}));
       a4a = new MockA4AImpl(a4aElement);
       const insertAnalyticsElementSpy =
@@ -497,7 +497,7 @@ describe('amp-a4a', () => {
     });
 
     it('should not insert an amp-analytics element if config is null', () => {
-      sandbox.stub(MockA4AImpl.prototype, 'getAmpAnalyticsConfig', () => null);
+      sandbox.stub(MockA4AImpl.prototype, 'getA4aAnalyticsConfig', () => null);
       a4a = new MockA4AImpl(a4aElement);
       const insertAnalyticsElementSpy =
           sandbox.spy(analyticsExtension, 'insertAnalyticsElement');
@@ -618,7 +618,7 @@ describe('amp-a4a', () => {
         const triggerAnalyticsEventSpy =
             sandbox.spy(analytics, 'triggerAnalyticsEvent');
         return a4a.layoutCallback().then(() => {
-          verifyAmpAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
+          verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
           expect(lifecycleEventStub).to.be.calledWith(
               'crossDomainIframeLoaded');
         });
@@ -690,7 +690,7 @@ describe('amp-a4a', () => {
         const triggerAnalyticsEventSpy =
             sandbox.spy(analytics, 'triggerAnalyticsEvent');
         return a4a.layoutCallback().then(() => {
-          verifyAmpAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
+          verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
           expect(lifecycleEventStub).to.be.calledWith(
               'crossDomainIframeLoaded');
         });
@@ -789,7 +789,7 @@ describe('amp-a4a', () => {
         const triggerAnalyticsEventSpy =
             sandbox.spy(analytics, 'triggerAnalyticsEvent');
         return a4a.layoutCallback().then(() => {
-          verifyAmpAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
+          verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
           expect(lifecycleEventStub).to.be.calledWith(
               'crossDomainIframeLoaded');
         });

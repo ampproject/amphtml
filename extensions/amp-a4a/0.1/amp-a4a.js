@@ -168,11 +168,11 @@ export const LIFECYCLE_STAGES = {
  * @enum {string}
  */
 export const AnalyticsTrigger = {
-  AD_REQUEST_START: 'adRequestStart',
-  AD_RESPONSE_END: 'adResponseEnd',
-  AD_RENDER_START: 'adRenderStart',
-  AD_RENDER_END: 'adRenderEnd',
-  AD_IFRAME_LOADED: 'adIframeLoaded',
+  AD_REQUEST_START: 'ad-request-start',
+  AD_RESPONSE_END: 'ad-response-end',
+  AD_RENDER_START: 'ad-render-start',
+  AD_RENDER_END: 'ad-render-end',
+  AD_IFRAME_LOADED: 'ad-iframe-loaded',
 };
 
 /**
@@ -378,7 +378,7 @@ export class AmpA4A extends AMP.BaseElement {
      * will be inserted and no analytics events will be fired.
      * @private {?JsonObject}
      */
-    this.ampAnalyticsConfig_ = this.getAmpAnalyticsConfig();
+    this.a4aAnalyticsConfig_ = this.getA4aAnalyticsConfig();
   }
 
   /** @override */
@@ -423,11 +423,11 @@ export class AmpA4A extends AMP.BaseElement {
           });
         });
 
-    if (this.ampAnalyticsConfig_) {
+    if (this.a4aAnalyticsConfig_) {
       // TODO(warrengm): Consider having page-level singletons for networks that
       // use the same config for all ads.
       insertAnalyticsElement(
-          this.element, this.ampAnalyticsConfig_, true /* loadAnalytics */);
+          this.element, this.a4aAnalyticsConfig_, true /* loadAnalytics */);
     }
   }
 
@@ -1671,7 +1671,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   maybeTriggerAnalyticsEvent_(lifeycleStage) {
-    if (!this.ampAnalyticsConfig_) {
+    if (!this.a4aAnalyticsConfig_) {
       // No config exists that will listen to this event.
       return;
     }
@@ -1683,7 +1683,7 @@ export class AmpA4A extends AMP.BaseElement {
     }
     const analyticsVars = Object.assign(
         {'time': Math.round(this.getNow_())},
-        this.getAmpAnalyticsVars(analyticsEvent));
+        this.getA4aAnalyticsVars(analyticsEvent));
     triggerAnalyticsEvent(this.element, analyticsEvent, analyticsVars);
   }
 
@@ -1695,7 +1695,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @param {string} unusedAnalyticsEvent The name of the analytics event.
    * @return {!Object<string, string>}
    */
-  getAmpAnalyticsVars(unusedAnalyticsEvent) { return {}; }
+  getA4aAnalyticsVars(unusedAnalyticsEvent) { return {}; }
 
   /**
    * Returns network-specific config for amp-analytics. It should overridden
@@ -1704,7 +1704,7 @@ export class AmpA4A extends AMP.BaseElement {
    * added to this A4A element and no A4A triggers will be fired.
    * @return {?JsonObject}
    */
-  getAmpAnalyticsConfig() { return null; }
+  getA4aAnalyticsConfig() { return null; }
 
   /**
    * To be overriden by network specific implementation.
