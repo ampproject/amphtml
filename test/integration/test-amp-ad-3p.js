@@ -41,7 +41,8 @@ function createIframeWithApis(fixture) {
         resolve(iframe.contentWindow.context);
       }
       iframe.onload = () => {
-        expect(iframe.contentWindow.document.getElementById('c')).to.be.defined;
+        expect(iframe.contentWindow.document.getElementById('c'))
+            .to.exist;
         resolve(iframe.contentWindow.context);
       };
     });
@@ -83,8 +84,8 @@ function createIframeWithApis(fixture) {
         .equal(layoutRectLtwh(0, platform.isIos() ? 1001 : 1000, 300, 250));
     expect(initialIntersection.intersectionRatio).to.equal(1);
     expect(initialIntersection.time).to.be.a('number');
-    expect(context.isMaster).to.be.defined;
-    expect(context.computeInMasterFrame).to.be.defined;
+    expect(context.isMaster).to.exist;
+    expect(context.computeInMasterFrame).to.exist;
     expect(context.location).to.deep.equal({
       hash: '',
       host: 'localhost:9876',
@@ -96,7 +97,7 @@ function createIframeWithApis(fixture) {
       protocol: 'http:',
       search: '',
     });
-    expect(context.pageViewId).to.be.greaterThan(0);
+    expect(parseInt(context.pageViewId, 10)).to.be.greaterThan(0);
     // In some browsers the referrer is empty. But in Chrome it works, so
     // we always check there.
     if (context.referrer !== '' || platform.isChrome()) {

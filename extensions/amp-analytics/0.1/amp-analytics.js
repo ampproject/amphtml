@@ -22,10 +22,12 @@ import {isArray, isObject} from '../../../src/types';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {sendRequest, sendRequestUsingIframe} from './transport';
 import {IframeTransport} from './iframe-transport';
+import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {Services} from '../../../src/services';
 import {toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
 import {parseJson} from '../../../src/json';
+import {getMode} from '../../../src/mode';
 import {Activity} from './activity-impl';
 import {
     InstrumentationService,
@@ -117,8 +119,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   getPriority() {
-    // Loads after other content.
-    return 1;
+    // Load immediately if inabox, otherwise after other content.
+    return getMode().runtime == 'inabox' ? 0 : 1;
   }
 
   /** @override */
@@ -165,9 +167,28 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.analyticsGroup_.dispose();
       this.analyticsGroup_ = null;
     }
+  }
+
+  /** @override */
+  resumeCallback() {
+    if (this.config_['transport'] && this.config_['transport']['iframe']) {
+      this.initIframeTransport_();
+    }
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (Services.viewerForDoc(this.getAmpDoc()).isVisible()) {
+      // amp-analytics tag was just set to display:none. Page is still loaded.
+      return false;
+    }
+
+    // Page was unloaded - free up owned resources.
     if (this.iframeTransport_) {
       this.iframeTransport_.detach();
+      this.iframeTransport_ = null;
     }
+    return super.unlayoutCallback();
   }
 
   /**
@@ -224,9 +245,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         this.instrumentation_.createAnalyticsGroup(this.element);
 
     if (this.config_['transport'] && this.config_['transport']['iframe']) {
-      this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
-        this.element.getAttribute('type'),
-        this.config_['transport']);
+      this.initIframeTransport_();
     }
 
     const promises = [];
@@ -284,6 +303,29 @@ export class AmpAnalytics extends AMP.BaseElement {
       }
     }
     return Promise.all(promises);
+  }
+
+  /**
+   * amp-analytics will create an iframe for vendors in
+   * extensions/amp-analytics/0.1/vendors.js who have transport/iframe defined.
+   * This is limited to MRC-accreddited vendors. The frame is removed if the
+   * user navigates/swipes away from the page, and is recreated if the user
+   * navigates back to the page.
+   * @private
+   */
+  initIframeTransport_() {
+    if (this.iframeTransport_) {
+      return;
+    }
+    const TAG = this.getName_();
+    const ampAdResourceId = user().assertString(
+        getAmpAdResourceId(this.element, this.win.top),
+        `${TAG}: No friendly parent amp-ad element was found for ` +
+        'amp-analytics tag with iframe transport.');
+
+    this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
+        this.element.getAttribute('type'),
+        this.config_['transport'], ampAdResourceId);
   }
 
   /**
@@ -416,6 +458,22 @@ export class AmpAnalytics extends AMP.BaseElement {
         this.user().error(TAG, 'Inline or remote config should not ' +
             'overwrite vendor transport settings');
       }
+    }
+
+    // Do NOT allow inline or remote config to use 'transport: iframe'
+    if (inlineConfig['transport'] && inlineConfig['transport']['iframe']) {
+      this.user().error(TAG, 'Inline configs are not allowed to ' +
+          'specify transport iframe');
+      if (!getMode().localDev || getMode().test) {
+        inlineConfig['transport']['iframe'] = undefined;
+      }
+    }
+
+    if (this.remoteConfig_['transport'] &&
+        this.remoteConfig_['transport']['iframe']) {
+      this.user().error(TAG, 'Remote configs are not allowed to ' +
+          'specify transport iframe');
+      this.remoteConfig_['transport']['iframe'] = undefined;
     }
 
     this.mergeObjects_(defaultConfig, config);
@@ -755,6 +813,8 @@ export class AmpAnalytics extends AMP.BaseElement {
       sendRequestUsingIframe(this.win, request);
     } else if (this.config_['transport'] &&
         this.config_['transport']['iframe']) {
+      user().assert(this.iframeTransport_,
+          'iframe transport was inadvertently deleted');
       this.iframeTransport_.sendRequest(request);
     } else {
       sendRequest(this.win, request, this.config_['transport'] || {});
@@ -832,7 +892,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     return new ExpansionOptions(vars, opt_iterations, opt_noEncode);
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   // Register doc-service factory.

@@ -4,24 +4,30 @@
     <meta charset="UTF-8">
     <title>Requests Frame</title>
     <script>
-      window.addEventListener('amp-iframeTransportClientCreated', () => {
+      /**
+       * To receive analytics events in a third-party frame, you must
+       * implement window.onNewContextInstance, with this signature.
+       * @param context  Call onAnalyticsEvent() on this, passing your
+       * function which will receive the analytics events.
+       */
+      window.onNewContextInstance = context => {
         /**
-         * To receive AMP analytics events in a third-party frame, you must
-         * pass a callback function to this method. The callback will be called
-         * when an event is received, and will be passed two parameters:
-         * @param {string} event A string of the format specified in the
-         * requests block of the amp-analytics JSON config
-         * @param {string} transportId An ID uniquely identifying which creative
-         * generated the event
+         * Within the window.onNewContextInstance method, you
+         * must create a function which processes an event, and
+         * pass that function to context.onAnalyticsEvent().
+         * @param {string} event The event message received from AMP Analytics
          */
-        window.iframeTransportClient.onAnalyticsEvent(
-            (event, transportId) => {
-              // Now, do something meaningful with the AMP Analytics event
-              console.log('The page at: ' + window.location.href +
-                  ' has received an event: ' + event +
-                  ' from the creative with transport ID: ' + transportId);
-            });
-      });
+        context.onAnalyticsEvent(event => {
+          // Now, do something meaningful with the AMP Analytics event
+          console.log('The page at: ' + window.location.href +
+              ' has received an event: ' + event);
+
+          // Optionally, you may send a response containing key/value pairs, to
+          // be used by the amp-ad-exit of the creative which generated the
+          // event.
+          context.sendResponseToCreative({'collected-data': 'abc'});
+        });
+      };
 
       // Load the script specified in the iframe’s name attribute:
       const url = JSON.parse(window.name).scriptSrc;
@@ -29,7 +35,7 @@
         script = document.createElement('script');
         script.src = url;
         document.head.appendChild(script);
-        // The script will be loaded, and will call onNewAmpAnalyticsInstance()
+        // The script will be loaded, and will call onNewContextInstance()
       } else {
         console.warn('Received invalid URL - risk of XSS! ' + url);
       }

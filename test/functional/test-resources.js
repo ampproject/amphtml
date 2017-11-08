@@ -56,6 +56,7 @@ describe('Resources', () => {
     element.getPlaceholder = () => null;
     element.getPriority = () => 0;
     element.dispatchCustomEvent = () => {};
+    element.getLayout = () => 'fixed';
     return element;
   }
 
@@ -353,6 +354,7 @@ describe('Resources', () => {
       isInViewport: () => false,
       prerenderAllowed: () => true,
       renderOutsideViewport: () => false,
+      idleRenderOutsideViewport: () => false,
       startLayout: () => {},
       applySizesAndMediaQuery: () => {},
     };
@@ -369,6 +371,7 @@ describe('Resources', () => {
       isInViewport: () => false,
       prerenderAllowed: () => true,
       renderOutsideViewport: () => false,
+      idleRenderOutsideViewport: () => false,
       getPriority: () => 1,
       startLayout: () => {},
       layoutScheduled: () => {},
@@ -389,6 +392,28 @@ describe('Resources', () => {
       isInViewport: () => false,
       prerenderAllowed: () => true,
       renderOutsideViewport: () => true,
+      idleRenderOutsideViewport: () => false,
+      getPriority: () => 1,
+      startLayout: () => {},
+      layoutScheduled: () => {},
+      getTaskId: () => 'resource#L',
+      applySizesAndMediaQuery: () => {},
+    };
+    resources.scheduleLayoutOrPreload_(resource, true);
+    expect(resources.queue_.getSize()).to.equal(1);
+    expect(resources.queue_.tasks_[0].forceOutsideViewport).to.be.false;
+  });
+
+  it('should schedule idleRenderOutsideViewport resource when' +
+        ' resource is not visible', () => {
+    const resource = {
+      getState: () => ResourceState.READY_FOR_LAYOUT,
+      isDisplayed: () => true,
+      isFixed: () => false,
+      isInViewport: () => false,
+      prerenderAllowed: () => true,
+      renderOutsideViewport: () => false,
+      idleRenderOutsideViewport: () => true,
       getPriority: () => 1,
       startLayout: () => {},
       layoutScheduled: () => {},
@@ -685,6 +710,7 @@ describes.realWin('getElementLayoutBox', {}, env => {
 
   it('should measure the element in a vsync measure', () => {
     const element = document.createElement('div');
+    element.getLayout = () => 'fixed';
     element.style.position = 'absolute';
     element.style.top = '5px';
     element.style.left = '10px';
@@ -703,6 +729,7 @@ describes.realWin('getElementLayoutBox', {}, env => {
 
   it('should measure the element via its resource in a vsync measure', () => {
     const element = document.createElement('div');
+    element.getLayout = () => 'fluid';
     element.style.position = 'absolute';
     element.style.top = '5px';
     element.style.left = '10px';
@@ -725,6 +752,7 @@ describes.realWin('getElementLayoutBox', {}, env => {
 
   it('should use the already measured value from the resource', () => {
     const element = document.createElement('div');
+    element.getLayout = () => 'fixed';
     element.style.position = 'absolute';
     element.style.top = '5px';
     element.style.left = '10px';
@@ -1038,6 +1066,7 @@ describe('Resources discoverWork', () => {
         marginBottom: '0px',
         marginLeft: '0px',
       },
+      getLayout: () => 'fixed',
     };
   }
 
@@ -1317,6 +1346,7 @@ describe('Resources discoverWork', () => {
     const layoutCanceledSpy = sandbox.spy(resource1, 'layoutCanceled');
     sandbox.stub(resource1, 'isInViewport', () => false);
     sandbox.stub(resource1, 'renderOutsideViewport', () => false);
+    sandbox.stub(resource1, 'idleRenderOutsideViewport', () => false);
     resources.work_();
     expect(resources.exec_.getSize()).to.equal(0);
     expect(measureSpy).to.be.calledOnce;
@@ -1332,6 +1362,7 @@ describe('Resources discoverWork', () => {
     const measureSpy = sandbox.spy(resource1, 'measure');
     sandbox.stub(resource1, 'isInViewport', () => false);
     sandbox.stub(resource1, 'renderOutsideViewport', () => false);
+    sandbox.stub(resource1, 'idleRenderOutsideViewport', () => false);
     resources.work_();
     expect(resources.exec_.getSize()).to.equal(1);
     expect(measureSpy).to.be.calledOnce;
@@ -1427,6 +1458,7 @@ describe('Resources discoverWork', () => {
     sandbox.stub(resources, 'schedule_');
     resources.documentReady_ = true;
     resource1.element.isBuilt = () => false;
+    resource2.element.idleRenderOutsideViewport = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
     resource1.build = sandbox.spy();
 
@@ -1442,6 +1474,7 @@ describe('Resources discoverWork', () => {
     resources.documentReady_ = false;
     resource1.element.nextSibling = {};
     resource1.element.isBuilt = () => false;
+    resource2.element.idleRenderOutsideViewport = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
     resource1.build = sandbox.spy();
 
@@ -1449,6 +1482,22 @@ describe('Resources discoverWork', () => {
 
     expect(resource1.build).to.be.calledOnce;
     expect(schedulePassStub).to.not.be.called;
+  });
+
+  it('should layout resource if outside viewport but idle', () => {
+    const schedulePassStub = sandbox.stub(resources, 'schedulePass');
+    resources.documentReady_ = true;
+    resource1.element.nextSibling = {};
+    resource1.element.isBuilt = () => true;
+    resource1.element.renderOutsideViewport = () => false;
+    resource1.element.idleRenderOutsideViewport = () => true;
+    resource2.element.renderOutsideViewport = () => false;
+    resource2.element.idleRenderOutsideViewport = () => false;
+    resource1.state_ = ResourceState.READY_FOR_LAYOUT;
+
+    resources.discoverWork_();
+
+    expect(schedulePassStub).to.be.calledOnce;
   });
 
   describe('getResourcesInRect', () => {
@@ -1598,6 +1647,20 @@ describes.realWin('Resources scrollHeight', {
     expect(viewerSendMessageStub).to.not.be.called;
   });
 
+  it('should send scrollHeight to viewer if viewport resizes', () => {
+    sandbox.stub(resources.viewport_, 'getScrollHeight', () => {
+      return 200;
+    });
+    resources.viewport_.changed_(/* relayoutAll */ true, /* velocity */ 0);
+    resources.doPass();
+
+    expect(resources.maybeChangeHeight_).to.equal(false);
+    expect(resources.scrollHeight_).to.equal(200);
+    expect(viewerSendMessageStub).to.be.calledOnce;
+    expect(viewerSendMessageStub.lastCall.args[0]).to.equal('documentHeight');
+    expect(viewerSendMessageStub.lastCall.args[1].height).to.equal(200);
+    expect(viewerSendMessageStub.lastCall.args[2]).to.equal(true);
+  });
 
 });
 
@@ -2375,6 +2438,7 @@ describe('Resources mutateElement and collapse', () => {
       unlayoutCallback: () => {},
       getPriority: () => 0,
       signals: () => signals,
+      getLayout: () => 'fixed',
     };
   }
 

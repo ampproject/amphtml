@@ -15,8 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {signatureVerifierFor} from './legacy-signature-verifier';
-import {VerificationStatus} from './signature-verifier';
+import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {
   is3pThrottled,
   getAmpAdRenderOutsideViewport,
@@ -25,13 +24,10 @@ import {
 import {createElementWithAttributes} from '../../../src/dom';
 import {cancellation, isCancellation} from '../../../src/error';
 import {
-  installAnchorClickInterceptor,
-} from '../../../src/anchor-click-interceptor';
-import {
   installFriendlyIframeEmbed,
   setFriendlyIframeEmbedVisible,
 } from '../../../src/friendly-iframe-embed';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user, duplicateErrorIfNecessary} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -40,7 +36,11 @@ import {isArray, isObject, isEnumValue} from '../../../src/types';
 import {utf8Decode} from '../../../src/utils/bytes';
 import {getBinaryType, isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
-import {assertHttpsUrl} from '../../../src/url';
+import {
+  assertHttpsUrl,
+  isSecureUrl,
+  tryDecodeUriComponent,
+} from '../../../src/url';
 import {parseJson} from '../../../src/json';
 import {handleClick} from '../../../ads/alp/handler';
 import {
@@ -55,6 +55,7 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
+import {signingServerURLs} from '../../../ads/_a4a-config';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
@@ -66,7 +67,7 @@ const METADATA_STRINGS = [
 // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
 // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
 /** @type {string} */
-export const DEFAULT_SAFEFRAME_VERSION = '1-0-9';
+export const DEFAULT_SAFEFRAME_VERSION = '1-0-13';
 
 /** @const {string} */
 export const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
@@ -76,6 +77,15 @@ export const RENDERING_TYPE_HEADER = 'X-AmpAdRender';
 
 /** @type {string} @visibleForTesting */
 export const SAFEFRAME_VERSION_HEADER = 'X-AmpSafeFrameVersion';
+
+/** @type {string} @visibleForTesting */
+export const EXPERIMENT_FEATURE_HEADER_NAME = 'amp-ff-exps';
+
+/**
+ * Controls if Content Security Policy is enabled for FIE render.
+ * @type {string} @visibleForTesting
+ */
+export const CSP_ENABLED_EXP_NAME = 'csp_enabled';
 
 /** @type {string} */
 const TAG = 'amp-a4a';
@@ -106,7 +116,8 @@ export let SizeInfoDef;
 /** @typedef {{
       minifiedCreative: string,
       customElementExtensions: !Array<string>,
-      customStylesheets: !Array<{href: string}>
+      customStylesheets: !Array<{href: string}>,
+      images: (Array<string>|undefined),
     }} */
 let CreativeMetaDataDef;
 
@@ -248,7 +259,7 @@ export class AmpA4A extends AMP.BaseElement {
      * @private {?XORIGIN_MODE}
      */
     this.experimentalNonAmpCreativeRenderMethod_ =
-      Services.platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
+        this.getNonAmpCreativeRenderingMethod();
 
     /**
      * Gets a notion of current time, in ms.  The value is not necessarily
@@ -293,8 +304,8 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.fromResumeCallback = false;
 
-    /** @private {string} */
-    this.safeframeVersion_ = DEFAULT_SAFEFRAME_VERSION;
+    /** @protected {string} */
+    this.safeframeVersion = DEFAULT_SAFEFRAME_VERSION;
 
     /**
      * @protected {boolean} Indicates whether the ad is currently in the
@@ -311,6 +322,16 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.releaseType_ = getBinaryTypeNumericalCode(getBinaryType(this.win)) ||
         '-1';
+
+    /**
+     * Mapping of feature name to value extracted from ad response header
+     * amp-ff-exps with comma separated pairs of '=' separated key/value.
+     * @type {!Object<string,string>}
+     */
+    this.postAdResponseExperimentFeatures = {};
+
+    /** @private {boolean} whether CSP for FIE is enabled */
+    this.cspEnabled_ = false;
   }
 
   /** @override */
@@ -492,7 +513,8 @@ export class AmpA4A extends AMP.BaseElement {
    */
   shouldInitializePromiseChain_() {
     const slotRect = this.getIntersectionElementLayoutBox();
-    if (slotRect.height == 0 || slotRect.width == 0) {
+    if (this.getLayout() != Layout.FLUID &&
+        (slotRect.height == 0 || slotRect.width == 0)) {
       dev().fine(
           TAG, 'onLayoutMeasure canceled due height/width 0', this.element);
       return false;
@@ -581,7 +603,8 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {!Promise<?string>} */
         .then(() => {
           checkStillCurrent();
-          return /** @type {!Promise<?string>} */(this.getAdUrl());
+          return /** @type {!Promise<?string>} */(
+              this.getAdUrl(this.tryExecuteRealTimeConfig_()));
         })
         // This block returns the (possibly empty) response to the XHR request.
         /** @return {!Promise<?Response>} */
@@ -603,6 +626,26 @@ export class AmpA4A extends AMP.BaseElement {
           if (!fetchResponse) {
             return null;
           }
+          if (fetchResponse.headers && fetchResponse.headers.has(
+              EXPERIMENT_FEATURE_HEADER_NAME)) {
+            this.populatePostAdResponseExperimentFeatures_(
+                fetchResponse.headers.get(EXPERIMENT_FEATURE_HEADER_NAME));
+          }
+          if (getMode().localDev && this.win.location &&
+              this.win.location.search) {
+            // Allow for setting experiment features via query param which
+            // will potentially override values returned in response.
+            const match = /(?:\?|&)a4a_feat_exp=([^&]+)/.exec(
+                this.win.location.search);
+            if (match && match[1]) {
+              dev().info(TAG, `Using debug exp features: ${match[1]}`);
+              this.populatePostAdResponseExperimentFeatures_(
+                  tryDecodeUriComponent(match[1]));
+            }
+          }
+          this.cspEnabled_ =
+            this.postAdResponseExperimentFeatures[CSP_ENABLED_EXP_NAME] ==
+              'true';
           // If the response has response code 204, or arrayBuffer is null,
           // collapse it.
           if (!fetchResponse.arrayBuffer || fetchResponse.status == 204) {
@@ -613,17 +656,14 @@ export class AmpA4A extends AMP.BaseElement {
           // an acceptable solution to the 'Safari on iOS doesn't fetch
           // iframe src from cache' issue.  See
           // https://github.com/ampproject/amphtml/issues/5614
-          const method = fetchResponse.headers.get(RENDERING_TYPE_HEADER) ||
-              this.experimentalNonAmpCreativeRenderMethod_;
+          const method = this.getNonAmpCreativeRenderingMethod(
+              fetchResponse.headers.get(RENDERING_TYPE_HEADER));
           this.experimentalNonAmpCreativeRenderMethod_ = method;
-          if (method && !isEnumValue(XORIGIN_MODE, method)) {
-            dev().error('AMP-A4A', `cross-origin render mode header ${method}`);
-          }
           const safeframeVersionHeader =
             fetchResponse.headers.get(SAFEFRAME_VERSION_HEADER);
           if (/^[0-9-]+$/.test(safeframeVersionHeader) &&
               safeframeVersionHeader != DEFAULT_SAFEFRAME_VERSION) {
-            this.safeframeVersion_ = safeframeVersionHeader;
+            this.safeframeVersion = safeframeVersionHeader;
             this.preconnect.preload(this.getSafeframePath_());
           }
           // Note: Resolving a .then inside a .then because we need to capture
@@ -690,6 +730,9 @@ export class AmpA4A extends AMP.BaseElement {
                     return bytes;
                   case VerificationStatus.UNVERIFIED:
                     return null;
+                  case VerificationStatus.CRYPTO_UNAVAILABLE:
+                    return this.shouldPreferentialRenderWithoutCrypto() ?
+                      bytes : null;
                   // TODO(@taymonbeal, #9274): differentiate between these
                   case VerificationStatus.ERROR_KEY_NOT_FOUND:
                   case VerificationStatus.ERROR_SIGNATURE_MISMATCH:
@@ -706,9 +749,6 @@ export class AmpA4A extends AMP.BaseElement {
           // viewport but cannot wait on promise.  Sadly, need a state a
           // variable.
           this.isVerifiedAmpCreative_ = !!creative;
-          // TODO(levitzky) If creative comes back null, we should consider re-
-          // fetching the signing server public keys and try the verification
-          // step again.
           return creative && utf8Decode(creative);
         })
         // This block returns CreativeMetaDataDef iff the creative was verified
@@ -735,6 +775,9 @@ export class AmpA4A extends AMP.BaseElement {
           // Preload any fonts.
           (creativeMetaDataDef.customStylesheets || []).forEach(font =>
               this.preconnect.preload(font.href));
+          // Preload any AMP images.
+          (creativeMetaDataDef.images || []).forEach(image =>
+              isSecureUrl(image) && this.preconnect.preload(image));
           return creativeMetaDataDef;
         })
         .catch(error => {
@@ -751,6 +794,27 @@ export class AmpA4A extends AMP.BaseElement {
           this.promiseErrorHandler_(error);
           return null;
         });
+  }
+
+  /**
+   * Populates object mapping of feature to value used for post ad response
+   * behavior experimentation.  Assumes comma separated, = delimited key/value
+   * pairs.  If key appears more than once, last value wins.
+   * @param {string} input
+   * @private
+   */
+  populatePostAdResponseExperimentFeatures_(input) {
+    input.split(',').forEach(line => {
+      if (!line) {
+        return;
+      }
+      const parts = line.split('=');
+      if (parts.length != 2 || !parts[0]) {
+        dev().warn(TAG, `invalid experiment feature ${line}`);
+        return;
+      }
+      this.postAdResponseExperimentFeatures[parts[0]] = parts[1];
+    });
   }
 
   /**
@@ -959,7 +1023,9 @@ export class AmpA4A extends AMP.BaseElement {
     this.isVerifiedAmpCreative_ = false;
     this.fromResumeCallback = false;
     this.experimentalNonAmpCreativeRenderMethod_ =
-        Services.platformFor(this.win).isIos() ? XORIGIN_MODE.SAFEFRAME : null;
+        this.getNonAmpCreativeRenderingMethod();
+    this.postAdResponseExperimentFeatures = {};
+    this.cspEnabled_ = false;
   }
 
   /**
@@ -1008,9 +1074,10 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Gets the Ad URL to send an XHR Request to.  To be implemented
    * by network.
+   * @param {Promise<!Array<rtcResponseDef>>=} opt_rtcResponsesPromise
    * @return {!Promise<string>|string}
    */
-  getAdUrl() {
+  getAdUrl(opt_rtcResponsesPromise) {
     throw new Error('getAdUrl not implemented!');
   }
 
@@ -1084,11 +1151,11 @@ export class AmpA4A extends AMP.BaseElement {
    * publisher page but prior to load (or ini-load for friendly frame AMP
    * creative render).  To be overridden by network implementations as needed.
    *
-   * @param {boolean} isVerifiedAmpCreative whether or not the creative was
-   *    verified as AMP and therefore given preferential treatment.
+   * @param {?CreativeMetaDataDef} creativeMetaData metadata if AMP creative,
+   *    null otherwise.
    */
-  onCreativeRender(isVerifiedAmpCreative) {
-    if (isVerifiedAmpCreative) {
+  onCreativeRender(creativeMetaData) {
+    if (creativeMetaData) {
       this.protectedEmitLifecycleEvent_('renderFriendlyEnd');
     }
   }
@@ -1244,6 +1311,7 @@ export class AmpA4A extends AMP.BaseElement {
           html: creativeMetaData.minifiedCreative,
           extensionIds: creativeMetaData.customElementExtensions || [],
           fonts: fontsArray,
+          cspEnabled: this.cspEnabled_,
         }, embedWin => {
           installUrlReplacementsForEmbed(this.getAmpDoc(), embedWin,
               new A4AVariableSource(this.getAmpDoc(), embedWin));
@@ -1256,9 +1324,6 @@ export class AmpA4A extends AMP.BaseElement {
           const frameDoc = friendlyIframeEmbed.iframe.contentDocument ||
               friendlyIframeEmbed.win.document;
           setStyle(frameDoc.body, 'visibility', 'visible');
-          // Capture phase click handlers on the ad.
-          installAnchorClickInterceptor(
-              this.getAmpDoc(), friendlyIframeEmbed.win);
           // Bubble phase click handlers on the ad.
           this.registerAlpHandler_(friendlyIframeEmbed.win);
           // Capture timing info for friendly iframe load completion.
@@ -1276,7 +1341,7 @@ export class AmpA4A extends AMP.BaseElement {
           protectFunctionWrapper(this.onCreativeRender, this, err => {
             dev().error(TAG, this.element.getAttribute('type'),
                 'Error executing onCreativeRender', err);
-          })(true);
+          })(creativeMetaData);
           // It's enough to wait for "ini-load" signal because in a FIE case
           // we know that the embed no longer consumes significant resources
           // after the initial load.
@@ -1317,7 +1382,7 @@ export class AmpA4A extends AMP.BaseElement {
     protectFunctionWrapper(this.onCreativeRender, this, err => {
       dev().error(TAG, this.element.getAttribute('type'),
           'Error executing onCreativeRender', err);
-    })(false);
+    })(null);
     return frameLoadPromise;
   }
 
@@ -1358,6 +1423,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderViaNameAttrOfXOriginIframe_(creativeBody) {
+    /** @type {string} */
     const method = this.experimentalNonAmpCreativeRenderMethod_;
     dev().assert(method == XORIGIN_MODE.SAFEFRAME ||
         method == XORIGIN_MODE.NAMEFRAME,
@@ -1390,14 +1456,15 @@ export class AmpA4A extends AMP.BaseElement {
       }
       // TODO(bradfrizzell): change name of function and var
       let contextMetadata = getContextMetadata(
-          this.win, this.element, this.sentinel);
+          this.win, this.element, this.sentinel,
+          this.getAdditionalContextMetadata());
       // TODO(bradfrizzell) Clean up name assigning.
       if (method == XORIGIN_MODE.NAMEFRAME) {
         contextMetadata['creative'] = creative;
         name = JSON.stringify(contextMetadata);
       } else if (method == XORIGIN_MODE.SAFEFRAME) {
         contextMetadata = JSON.stringify(contextMetadata);
-        name = `${this.safeframeVersion_};${creative.length};${creative}` +
+        name = `${this.safeframeVersion};${creative.length};${creative}` +
             `${contextMetadata}`;
       }
       return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
@@ -1472,10 +1539,14 @@ export class AmpA4A extends AMP.BaseElement {
         metaData.customStylesheets.forEach(stylesheet => {
           if (!isObject(stylesheet) || !stylesheet['href'] ||
               typeof stylesheet['href'] !== 'string' ||
-              !/^https:\/\//i.test(stylesheet['href'])) {
+              !isSecureUrl(stylesheet['href'])) {
             throw new Error(errorMsg);
           }
         });
+      }
+      if (isArray(metaDataObj['images'])) {
+        // Load maximum of 5 images.
+        metaData.images = metaDataObj['images'].splice(0, 5);
       }
       // TODO(keithwrightbos): OK to assume ampRuntimeUtf16CharOffsets is before
       // metadata as its in the head?
@@ -1514,7 +1585,7 @@ export class AmpA4A extends AMP.BaseElement {
    */
   getSafeframePath_() {
     return 'https://tpc.googlesyndication.com/safeframe/' +
-      `${this.safeframeVersion_}/html/container.html`;
+      `${this.safeframeVersion}/html/container.html`;
   }
 
   /**
@@ -1538,6 +1609,70 @@ export class AmpA4A extends AMP.BaseElement {
    * @param {!Object<string, string|number>=} opt_extraVariables
    */
   emitLifecycleEvent(unusedEventName, opt_extraVariables) {}
+
+  /**
+   * Attempts to execute Real Time Config, if the ad network has enabled it.
+   * If it is not supported by the network, but the publisher has included
+   * the rtc-config attribute on the amp-ad element, warn.
+   * @return {Promise<!Array<!rtcResponseDef>>|undefined}
+   */
+  tryExecuteRealTimeConfig_() {
+    if (!!AMP.maybeExecuteRealTimeConfig) {
+      try {
+        return AMP.maybeExecuteRealTimeConfig(
+            this, this.getCustomRealTimeConfigMacros_());
+      } catch (err) {
+        user().error(TAG, 'Could not perform Real Time Config.', err);
+      }
+    } else if (this.element.getAttribute('rtc-config')) {
+      user().error(TAG, 'RTC not supported for ad network ' +
+                   `${this.element.getAttribute('type')}`);
+    }
+  }
+
+  /**
+   * To be overriden by network impl. Should return a mapping of macro keys
+   * to values for substitution in publisher-specified URLs for RTC.
+   * @return {?Object<string,
+   *   !../../../src/service/variable-source.SyncResolverDef>}
+   */
+  getCustomRealTimeConfigMacros_() {
+    return null;
+  }
+
+  /**
+   * Whether preferential render should still be utilized if web crypto is unavailable,
+   * and crypto signature header is present.
+   * @return {!boolean}
+   */
+  shouldPreferentialRenderWithoutCrypto() {
+    return false;
+  }
+
+  /**
+   * @param {string=} headerValue Method as given in header.
+   */
+  getNonAmpCreativeRenderingMethod(headerValue) {
+    if (headerValue) {
+      if (!isEnumValue(XORIGIN_MODE, headerValue)) {
+        dev().error(
+            'AMP-A4A', `cross-origin render mode header ${headerValue}`);
+      } else {
+        return headerValue;
+      }
+    }
+    return Services.platformFor(this.win).isIos() ?
+        XORIGIN_MODE.SAFEFRAME : null;
+  }
+
+  /**
+   * Returns base object that will be written to cross-domain iframe name
+   * attribute.
+   * @return {!JsonObject}
+   */
+  getAdditionalContextMetadata() {
+    return /** @type {!JsonObject} */ ({});
+  }
 }
 
 /**
@@ -1556,3 +1691,21 @@ export function assignAdUrlToError(error, adUrl) {
   (error.args || (error.args = {}))['au'] =
     adUrl.substring(adQueryIdx + 1, adQueryIdx + 251);
 };
+
+/**
+ * Returns the signature verifier for the given window. Lazily creates it if it
+ * doesn't already exist.
+ *
+ * This ensures that only one signature verifier exists per window, which allows
+ * multiple Fast Fetch ad slots on a page (even ones from different ad networks)
+ * to share the same cached public keys.
+ *
+ * @param {!Window} win
+ * @return {!SignatureVerifier}
+ * @visibleForTesting
+ */
+export function signatureVerifierFor(win) {
+  const propertyName = 'AMP_FAST_FETCH_SIGNATURE_VERIFIER_';
+  return win[propertyName] ||
+      (win[propertyName] = new SignatureVerifier(win, signingServerURLs));
+}

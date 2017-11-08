@@ -64,7 +64,5 @@ export const data = {
 
   signatureHeader: 'google:1:vpiimZfnOmH+PjI8oTF9ujhrNyHYNrTW4nY8sP3CWtPIdlP/pxSJ/UeMFQznTCM12Cq56Qgz1mA0VQuPrgNBIp3olSkClQks5CpAuq43P/wXvs3yML8YhQRgUZMCdIpUSW75wW22fcXRtwfR30KRRj8kMjX/QvmWF3H3phah06HiCREl0ONGyxtgyjJkFkPHtfPGGK2vMYMHqHybnsIDsP+zsvyQBPsiMCku8H+i5KtHrjWvVXj/GdcnHL25wvJiyC4qHwkMEoW8ridsDYNQ3dWQD4bVNS1D7gIRvzAM9ZlCBpZcxVhoO5B+mMuIOqq0YTnfgXaT2QgVnHqavpbu9w==',
 
-  signature: 'AJZdXi4GA8z0rd1aOQ+ZvLP3boJDvxdpoyi0SMX5Ij4G14riOFMRSdMsEGqTRn5fVhzQrf3/nqMkrWLeBIbi28AiYwkmFr/IR12jtx4qiMKDxJA1ycxyIjiJ7OM9pKuxXGc2rD8qf5jL9alDznEH/rOch5icmRiavqXThBl1zUkxIDQuZxU43N2yxfARuVDrjgEhxW7TWqkGhtEd31+fUZ83IgTFltWUh3DDoZmM+3fXbNjsEx/jYkVlsBWQCEdx8Z6YFtwOQVXSg6kKg7pffudpzg5r62JJeb46+NsQQNPnVlyryP7mFTI/4l3aaElk03cmLRMCYIWmwNrNDG1tJQJBEujr',
-
   publicKeyset: '{"keys":[{"alg":"RS256","e":"AQAB","ext":true,"kid":"1","kty":"RSA","n":"z43rjaJ9PLk1FHMEL31_ILXGtUTN03rxJ9amD9y3BRDpbTA-GkUKiQM07xAd8OXPUZRqcjvXQfc7b1RCEtwrcfx9oBRdF78QMA4tLLCqSHP0tSuqYF0fA7-GyTFWDcYzey90jRFNNWxjzKrvSazacE0TvJ8S_AVP4EV67VdbByCC1tpBzLhhy7RFHp2cXGTpWYUqZUAVUdJoeBuCho_zQz2au7c6sDaLiF-uYL9Td9MrZ6tSLo3MeMIZia4WgWqjTDICR0h-zlbHUd0K9CoXbGTt5nvkebXHmbKd99ma6zRYVlYNJTuSqsRCBNYtCTFVHIZeBlkjHKsQ46HTZPexZw"}]}',
 };

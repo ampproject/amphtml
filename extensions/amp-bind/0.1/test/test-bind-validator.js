@@ -26,12 +26,17 @@ describe('BindValidator', () => {
   describe('canBind()', () => {
     it('should allow binding to "class" for any element', () => {
       expect(val.canBind('DIV', 'class')).to.be.true;
-      expect(val.canBind('ANY-TAG-REAL-OR-FAKE', 'class')).to.be.true;
+      expect(val.canBind('FAKE-TAG', 'class')).to.be.true;
     });
 
     it('should allow binding to "text" for any elements', () => {
       expect(val.canBind('P', 'text')).to.be.true;
-      expect(val.canBind('ANY-TAG-REAL-OR-FAKE', 'text')).to.be.true;
+      expect(val.canBind('FAKE-TAG', 'text')).to.be.true;
+    });
+
+    it('should allow binding to ARIA attributes for any element', () => {
+      expect(val.canBind('P', 'aria-foo')).to.be.true;
+      expect(val.canBind('FAKE-TAG', 'aria-foo')).to.be.true;
     });
 
     it('should NOT allow binding to "style"', () => {

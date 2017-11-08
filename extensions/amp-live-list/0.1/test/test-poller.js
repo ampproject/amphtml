@@ -245,14 +245,14 @@ describe('Poller', () => {
     expect(delaySpy.lastCall.args[1]).to.equal(4000);
     clock.tick(4000);
 
-    expect(poller.lastTimeoutId_).to.be.number;
+    expect(poller.lastTimeoutId_).to.be.a('number');
     let lastTimeoutId_ = poller.lastTimeoutId_;
 
     // Reject 1
     return poller.lastWorkPromise_.then(() => {
       expect(delaySpy.lastCall.args[1]).to.equal(700);
       expect(poller.lastTimeoutId_).to.not.equal(lastTimeoutId_);
-      expect(poller.lastTimeoutId_).to.be.number;
+      expect(poller.lastTimeoutId_).to.be.a('number');
       lastTimeoutId_ = poller.lastTimeoutId_;
       clock.tick(700);
       // Reject 2
@@ -260,14 +260,14 @@ describe('Poller', () => {
         expect(delaySpy.lastCall.args[1]).to.equal(1400);
         // Should have cancelled next queued exponential tick
         expect(poller.lastTimeoutId_).to.not.equal(lastTimeoutId_);
-        expect(poller.lastTimeoutId_).to.be.number;
+        expect(poller.lastTimeoutId_).to.be.a('number');
         lastTimeoutId_ = poller.lastTimeoutId_;
         clock.tick(1400);
         return poller.lastWorkPromise_.then(() => {
           expect(delaySpy.lastCall.args[1]).to.equal(4000);
           expect(clearSpy.getCall(2)).to.be.null;
           expect(poller.lastTimeoutId_).to.not.equal(lastTimeoutId_);
-          expect(poller.lastTimeoutId_).to.be.number;
+          expect(poller.lastTimeoutId_).to.be.a('number');
           lastTimeoutId_ = poller.lastTimeoutId_;
           expect(clearSpy).to.have.not.been.called;
           poller.stop();

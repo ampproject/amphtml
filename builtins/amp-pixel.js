@@ -15,6 +15,7 @@
  */
 
 import {BaseElement} from '../src/base-element';
+import {scopedQuerySelector} from '../src/dom';
 import {dev, user} from '../src/log';
 import {dict} from '../src/utils/object';
 import {registerElement} from '../src/service/custom-element-registry';
@@ -58,6 +59,11 @@ export class AmpPixel extends BaseElement {
       user().assert(this.referrerPolicy_ == 'no-referrer',
           `${TAG}: invalid "referrerpolicy" value "${this.referrerPolicy_}".`
           + ' Only "no-referrer" is supported');
+    }
+    if (this.element.hasAttribute('i-amphtml-ssr') &&
+        scopedQuerySelector(this.element, 'img')) {
+      dev().info(TAG, 'inabox img already present');
+      return;
     }
     // Trigger, but only when visible.
     const viewer = Services.viewerForDoc(this.getAmpDoc());

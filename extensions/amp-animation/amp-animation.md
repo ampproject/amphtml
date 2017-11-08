@@ -22,10 +22,6 @@ limitations under the License.
     <td>Animation component</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a>; no validations yet.</div><div>Work in progress.</div></td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js">&lt;/script></code></td>
   </tr>
@@ -402,7 +398,7 @@ Another way to specify keyframes is in the document's stylesheet (`<style>` tag)
 CSS `@keyframes` are mostly equivalent to inlining keyframes definition in the JSON per [Web Animations spec](https://www.w3.org/TR/web-animations/#processing-a-keyframes-argument). However, there are some nuances:
  - For broad-platform support, vendor prefixes, e.g. `@-ms-keyframes {}` or `-moz-transform` may be needed. Vendor prefixes are not needed and not allowed in the JSON format, but in CSS they could be necessary.
  - Platforms that do not support `calc()` and `var()` will not be able to take advantage of `amp-animation` polyfills when keyframes are specified in CSS. It's thus recommended to always include fallback values in CSS.
- - CSS extensions such as [`width()`, `height()`, `rand()` and `index()`](#css-extensions) cannot be used in CSS.
+ - CSS extensions such as [`width()`, `height()`, `num()`, `rand()` and `index()`](#css-extensions) cannot be used in CSS.
 
 
 #### Whitelisted properties for keyframes
@@ -556,7 +552,7 @@ Animation components can specify their own variables as `--var-name` fields. The
 
 ### CSS extensions
 
-`amp-animation` provides several CSS extensions for typical animations needs: `rand()`, `width()`, and `height()`. These functions can be used everywhere where CSS values can be used within `amp-animation`, including timing and keyframes values.
+`amp-animation` provides several CSS extensions for typical animations needs: `rand()`, `num()`, `width()`, and `height()`. These functions can be used everywhere where CSS values can be used within `amp-animation`, including timing and keyframes values.
 
 #### CSS `index()` extension
 
@@ -603,6 +599,20 @@ These functions can be combined with `calc()`, `var()` and other CSS expressions
 ```
 {
   "transform": "translateX(calc(width('#container') + 10px))"
+}
+```
+
+#### CSS `num()` extension
+
+The `num()` function returns a number representation of a CSS value. For instance:
+ - `num(11px)` yields `11`;
+ - `num(110ms)` yields `110`;
+ - etc.
+
+For instance, the following expression calculates the delay in seconds proportional to the element's width:
+```
+{
+  "delay": "calc(1s * num(width()) / 100)"
 }
 ```
 

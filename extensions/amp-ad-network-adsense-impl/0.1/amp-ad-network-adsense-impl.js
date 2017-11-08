@@ -21,27 +21,32 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {VERIFIER_EXP_NAME} from '../../amp-a4a/0.1/legacy-signature-verifier';
-import {fastFetchDelayedRequestEnabled} from './adsense-a4a-config';
 import {
-  addExperimentIdToElement,
+  identityEnabled,
+} from './adsense-a4a-config';
+import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {getExperimentBranch, isExperimentOn} from '../../../src/experiments';
+import {isExperimentOn} from '../../../src/experiments';
 import {
   additionalDimensions,
   googleAdUrl,
-  isGoogleAdsA4AValidEnvironment,
   isReportingEnabled,
   extractAmpAnalyticsConfig,
   addCsiSignalsToAmpAnalyticsConfig,
   QQID_HEADER,
   maybeAppendErrorParameter,
+  getEnclosingContainerTypes,
+  ValidAdContainerTypes,
+  getIdentityToken,
 } from '../../../ads/google/a4a/utils';
 import {
   googleLifecycleReporterFactory,
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
+import {
+  installAnchorClickInterceptor,
+} from '../../../src/anchor-click-interceptor';
 import {removeElement} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/string';
@@ -113,7 +118,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
     this.size_ = null;
 
-    /** @private {?Element} */
+    /**
+     * amp-analytics element generated based on this.ampAnalyticsConfig_
+     * @private {?Element}
+     */
     this.ampAnalyticsElement_ = null;
 
     /** @private {?string} */
@@ -132,6 +140,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * @private {?string}
      */
     this.autoFormat_ = null;
+
+    /** @private {?Promise<!../../../ads/google/a4a/utils.IdentityToken>} */
+    this.identityTokenPromise_ = null;
   }
 
   /**
@@ -144,26 +155,32 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   isValidElement() {
+    /**
+     * isValidElement used to also check that we are in a valid A4A environment,
+     * however this is not necessary as that is checked by adsenseIsA4AEnabled,
+     * which is always called as part of the upgrade path from an amp-ad element
+     * to an amp-ad-adsense element. Thus, if we are an amp-ad, we can be sure
+     * that it has been verified.
+     */
     return !!this.element.getAttribute('data-ad-client') &&
-        isGoogleAdsA4AValidEnvironment(this.win) && this.isAmpAdElement();
+        this.isAmpAdElement();
   }
 
   /** @override */
   delayAdRequestEnabled() {
-    return fastFetchDelayedRequestEnabled(this.win);
+    return true;
   }
 
   /** @override */
   buildCallback() {
     super.buildCallback();
-
+    this.identityTokenPromise_ = identityEnabled(this.win) ?
+        Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
+        .then(() => getIdentityToken(this.win, this.getAmpDoc())) :
+        Promise.resolve(
+          /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({}));
     this.autoFormat_ =
         this.element.getAttribute('data-auto-format') || '';
-
-    const verifierEid = getExperimentBranch(this.win, VERIFIER_EXP_NAME);
-    if (verifierEid) {
-      addExperimentIdToElement(verifierEid, this.element);
-    }
 
     if (this.isResponsive_()) {
       // Attempt to resize to the correct height. The width should already be
@@ -210,18 +227,24 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     // dev().assert(slotId != undefined);
     const adk = this.adKey_(format);
     this.uniqueSlotId_ = slotId + adk;
+    const slotname = this.element.getAttribute('data-ad-slot');
     const sharedStateParams = sharedState.addNewSlot(
-        format, this.uniqueSlotId_, adClientId);
+        format, this.uniqueSlotId_, adClientId, slotname);
     const viewportSize = this.getViewport().getSize();
     this.win['ampAdGoogleIfiCounter'] = this.win['ampAdGoogleIfiCounter'] || 1;
+    const enclosingContainers = getEnclosingContainerTypes(this.element);
+    const pfx = enclosingContainers.includes(
+        ValidAdContainerTypes['AMP-FX-FLYING-CARPET']) ||
+        enclosingContainers.includes(ValidAdContainerTypes['AMP-STICKY-AD']);
     const parameters = {
       'client': adClientId,
       format,
       'w': this.size_.width,
       'h': this.size_.height,
-      'iu': this.element.getAttribute('data-ad-slot'),
+      'iu': slotname,
       'adtest': adTestOn ? 'on' : null,
       adk,
+      'output': 'html',
       'bc': global.SVGElement && global.document.createElementNS ? '1' : null,
       'ctypes': this.getCtypes_(),
       'host': this.element.getAttribute('data-ad-host'),
@@ -232,10 +255,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'asnt': this.sentinel,
       'dff': computedStyle(this.win, this.element)['font-family'],
       'prev_fmts': sharedStateParams.prevFmts || null,
+      'prev_slotnames': sharedStateParams.prevSlotnames || null,
       'brdim': additionalDimensions(this.win, viewportSize),
       'ifi': this.win['ampAdGoogleIfiCounter']++,
       'rc': this.fromResumeCallback ? 1 : null,
       'rafmt': this.isResponsive_() ? 13 : null,
+      'pfx': pfx ? '1' : '0',
     };
 
     const experimentIds = [];
@@ -243,9 +268,23 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     if (ampAutoAdsBranch) {
       experimentIds.push(ampAutoAdsBranch);
     }
-
-    return googleAdUrl(
-        this, ADSENSE_BASE_URL, startTime, parameters, experimentIds);
+    const identityPromise = Services.timerFor(this.win)
+        .timeoutPromise(1000, this.identityTokenPromise_)
+        .catch(unusedErr => {
+          // On error/timeout, proceed.
+          return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/(
+            {});
+        });
+    return identityPromise.then(identity => {
+      return googleAdUrl(
+          this, ADSENSE_BASE_URL, startTime, Object.assign(
+              {
+                adsid: identity.token || null,
+                jar: identity.jar || null,
+                pucrd: identity.pucrd || null,
+              },
+              parameters), experimentIds);
+    });
   }
 
   /** @override */
@@ -312,8 +351,16 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  onCreativeRender(isVerifiedAmpCreative) {
-    super.onCreativeRender(isVerifiedAmpCreative);
+  onCreativeRender(creativeMetaData) {
+    super.onCreativeRender(creativeMetaData);
+    if (creativeMetaData &&
+        !creativeMetaData.customElementExtensions.includes('amp-ad-exit')) {
+      // Capture phase click handlers on the ad if amp-ad-exit not present
+      // (assume it will handle capture).
+      dev().assert(this.iframe);
+      installAnchorClickInterceptor(
+          this.getAmpDoc(), this.iframe.contentWindow);
+    }
     if (this.ampAnalyticsConfig_) {
       dev().assert(!this.ampAnalyticsElement_);
       if (isReportingEnabled(this)) {
@@ -322,7 +369,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
             this.element,
             this.ampAnalyticsConfig_,
             this.qqid_,
-            isVerifiedAmpCreative,
+            !!creativeMetaData,
             this.lifecycleReporter_.getDeltaTime(),
             this.lifecycleReporter_.getInitTime());
       }
