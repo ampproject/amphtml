@@ -127,6 +127,7 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
     const url = iframeTransport.getLibScriptUrl(true);
     expect(url).to.contain(urls.thirdParty);
     expect(url).to.contain('/iframe-transport-client-v0.js');
-    expect(url).to.match(/https:\/\/3p\.ampproject\.net\/\$internalRuntimeVersion\$\/iframe-transport-client-v0\.js/); // eslint-disable-line max-len
+    expect(url).to.equal('https://3p.ampproject.net/$internalRuntimeVersion$/' +
+        'iframe-transport-client-v0.js');
   });
 });
