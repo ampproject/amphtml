@@ -153,20 +153,20 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         '&user_lang=${browserLanguage}&amp_doc_url=${ampdocUrl}'
     },
     'vars': {
-        'atrk_acct': 'xxxxxxxx'
-      , 'domain': 'xxxxxxxx'
-      , 'ampAtrkHost': 'certify-amp.alexametrics.com'
+      'atrk_acct': '',
+      'domain': '',
+      'ampAtrkHost': 'certify-amp.alexametrics.com'
     },
     'triggers': {
       'trackPageview': {
-          'on': 'visible'
-        , 'request': 'pageview'
+        'on': 'visible',
+        'request': 'pageview'
       }
     },
     'transport' : {
-        'xhrpost': false
-      , 'beacon' : false
-      , 'image' : true
+      'xhrpost': false, 
+      'beacon' : false,
+      'image' : true
     }
   },
 
