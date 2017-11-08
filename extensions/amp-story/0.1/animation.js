@@ -311,6 +311,11 @@ class AnimationRunner {
   cancel() {
     this.scheduledActivity_ = null;
     this.scheduledWait_ = null;
+
+    if (this.hasStarted()) {
+      dev().assert(this.runner_).cancel();
+      this.runnerReset_ = true;
+    }
   }
 
   /**
