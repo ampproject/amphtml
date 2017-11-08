@@ -630,7 +630,10 @@ function relativeScrolledPositionForChildren(layer) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!Element} scrollingElement
  */
-export function installLayersServiceForDoc(ampdoc) {
-  registerServiceBuilderForDoc(ampdoc, 'layers', LayoutLayers);
+export function installLayersServiceForDoc(ampdoc, scrollingElement) {
+  registerServiceBuilderForDoc(ampdoc, 'layers', function(ampdoc) {
+    return new LayoutLayers(ampdoc, scrollingElement);
+  }, /* opt_instantiate */ true);
 };

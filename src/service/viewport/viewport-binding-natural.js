@@ -21,6 +21,7 @@ import {Services} from '../../services';
 import {px, setStyle} from '../../style';
 import {ViewportBindingDef} from './viewport-binding-def';
 import {isExperimentOn} from '../../experiments';
+import {installLayersServiceForDoc} from '../layers-impl';
 
 
 const TAG_ = 'Viewport';
@@ -91,7 +92,7 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   ensureReadyForElements() {
-    // Nothing.
+    installLayersServiceForDoc(this.ampdoc, this.getScrollingElement_());
   }
 
   /** @override */
