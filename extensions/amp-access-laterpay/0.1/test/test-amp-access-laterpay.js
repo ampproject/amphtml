@@ -37,6 +37,7 @@ describes.fakeWin('LaterpayVendor', {
 
     laterpayConfig = {
       articleTitleSelector: '#laterpay-test-title',
+      region: 'us',
     };
     accessService = {
       ampdoc,
@@ -67,6 +68,24 @@ describes.fakeWin('LaterpayVendor', {
     beforeEach(() => {
       emptyContainerStub = sandbox.stub(vendor, 'emptyContainer_');
       sandbox.stub(vendor, 'renderPurchaseOverlay_');
+    });
+
+    it('uses a non default region', () => {
+      const buildUrl = accessServiceMock.expects('buildUrl')
+          .returns(Promise.resolve(''))
+          .once();
+      xhrMock.expects('fetchJson')
+          .returns(Promise.resolve({
+            json() {
+              return Promise.resolve({access: true});
+            },
+          }))
+          .once();
+      return vendor.authorize().then(() => {
+        expect(
+            /connector\.uselaterpay\.com/g.test(buildUrl.firstCall.args[0])
+          ).to.be.true;
+      });
     });
 
     it('successful authorization', () => {

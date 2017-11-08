@@ -60,6 +60,7 @@ describes.fakeWin('Viewport', {}, env => {
   let visibilityState;
   let viewerViewportHandler;
   let viewerScrollDocHandler;
+  let viewerDisableScrollHandler;
   let updatedPaddingTop;
   let viewportSize;
   let vsyncTasks;
@@ -72,6 +73,7 @@ describes.fakeWin('Viewport', {}, env => {
 
     viewerViewportHandler = undefined;
     viewerScrollDocHandler = undefined;
+    viewerDisableScrollHandler = undefined;
     visibilityState = 'visible';
     viewer = {
       isEmbedded: () => false,
@@ -86,6 +88,8 @@ describes.fakeWin('Viewport', {}, env => {
           viewerViewportHandler = handler;
         } else if (eventType == 'scroll') {
           viewerScrollDocHandler = handler;
+        } else if (eventType == 'disableScroll') {
+          viewerDisableScrollHandler = handler;
         }
       },
       sendMessage: sandbox.spy(),
@@ -647,6 +651,22 @@ describes.fakeWin('Viewport', {}, env => {
     viewport.leaveOverlayMode();
 
     expect(restoreOriginalTouchZoomStub).to.be.calledOnce;
+    expect(resetScrollStub).to.be.calledOnce;
+  });
+
+  it('should disable scrolling based on requests', () => {
+    const disableScrollStub = sandbox.stub(viewport, 'disableScroll');
+
+    viewerDisableScrollHandler(true);
+
+    expect(disableScrollStub).to.be.calledOnce;
+  });
+
+  it('should reset scrolling based on requests', () => {
+    const resetScrollStub = sandbox.stub(viewport, 'resetScroll');
+
+    viewerDisableScrollHandler(false);
+
     expect(resetScrollStub).to.be.calledOnce;
   });
 

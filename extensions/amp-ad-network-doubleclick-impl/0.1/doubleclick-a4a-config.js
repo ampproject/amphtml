@@ -33,7 +33,7 @@ import {
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 
 /** @const {string} */
 export const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
@@ -41,40 +41,49 @@ export const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
 /** @const {string} */
 export const DFP_CANONICAL_FF_EXPERIMENT_NAME = 'expDfpCanonicalFf';
 
+/** @const {string} */
+export const UNCONDITIONED_CANONICAL_FF_EXPERIMENT_NAME =
+    'expUnconditionedCanonical';
+
+/** @const {string} */
+export const UNCONDITIONED_IDENTITY_EXPERIMENT_NAME =
+    'expUnconditionedDfpIdentity';
+
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
 
 /** @const @enum{string} */
 export const DOUBLECLICK_EXPERIMENT_FEATURE = {
-  HOLDBACK_EXTERNAL_CONTROL: '21060726',
-  HOLDBACK_EXTERNAL: '21060727',
   DELAYED_REQUEST_CONTROL: '21060728',
   DELAYED_REQUEST: '21060729',
-  SFG_CONTROL_ID: '21060730',
-  SFG_EXP_ID: '21060731',
   SRA_CONTROL: '117152666',
   SRA: '117152667',
-  HOLDBACK_INTERNAL_CONTROL: '2092613',
-  HOLDBACK_INTERNAL: '2092614',
   CANONICAL_CONTROL: '21060932',
   CANONICAL_EXPERIMENT: '21060933',
   CACHE_EXTENSION_INJECTION_CONTROL: '21060955',
   CACHE_EXTENSION_INJECTION_EXP: '21060956',
+  IDENTITY_CONTROL: '21060937',
+  IDENTITY_EXPERIMENT: '21060938',
+};
+
+/** @const @enum{string} */
+export const DOUBLECLICK_UNCONDITIONED_EXPERIMENTS = {
+  FF_CANONICAL_CTL: '21061145',
+  FF_CANONICAL_EXP: '21061146',
+  IDENTITY_CONTROL: '21061304',
+  IDENTITY_EXPERIMENT: '21061305',
 };
 
 /** @const @type {!Object<string,?string>} */
 export const URL_EXPERIMENT_MAPPING = {
   '-1': MANUAL_EXPERIMENT_ID,
   '0': null,
-  // Holdback
-  '1': DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL_CONTROL,
-  '2': DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
   // Delay Request
   '3': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST_CONTROL,
   '4': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST,
-  // SFG
-  '5': DOUBLECLICK_EXPERIMENT_FEATURE.SFG_CONTROL_ID,
-  '6': DOUBLECLICK_EXPERIMENT_FEATURE.SFG_EXP_ID,
+  // Identity
+  '5': DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_CONTROL,
+  '6': DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT,
   // SRA
   '7': DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL,
   '8': DOUBLECLICK_EXPERIMENT_FEATURE.SRA,
@@ -82,12 +91,6 @@ export const URL_EXPERIMENT_MAPPING = {
   '9': DOUBLECLICK_EXPERIMENT_FEATURE.CACHE_EXTENSION_INJECTION_CONTROL,
   '10': DOUBLECLICK_EXPERIMENT_FEATURE.CACHE_EXTENSION_INJECTION_EXP,
 };
-
-/** @const {string} */
-export const BETA_ATTRIBUTE = 'data-use-beta-a4a-implementation';
-
-/** @const {string} */
-export const BETA_EXPERIMENT_ID = '2077831';
 
 /**
  * Class for checking whether a page/element is eligible for Fast Fetch.
@@ -116,63 +119,115 @@ export class DoubleclickA4aEligibility {
     return googleCdnProxyRegex.test(win.location.origin);
   }
 
+  /**
+   * Attempts all unconditioned experiment selection.
+   * @param {!Window} win
+   * @param {!Element} element
+   */
+  unconditionedExperimentSelection(win, element) {
+    this.selectAndSetUnconditionedExp(
+        win, element,
+        [DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_CTL,
+          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP],
+        UNCONDITIONED_CANONICAL_FF_EXPERIMENT_NAME);
+
+    this.selectAndSetUnconditionedExp(
+        win, element,
+        [DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.IDENTITY_CONTROL,
+          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.IDENTITY_EXPERIMENT],
+        UNCONDITIONED_IDENTITY_EXPERIMENT_NAME);
+  }
+
+  /**
+   * Attempts to select into experiment and forces branch if selected.
+   * @param {!Window} win
+   * @param {!Element} element
+   * @param {!Array<string>} branches
+   * @param {!string} expName
+   */
+  selectAndSetUnconditionedExp(win, element, branches, expName) {
+    const experimentId = this.maybeSelectExperiment(
+        win, element, branches, expName);
+    if (!!experimentId) {
+      addExperimentIdToElement(experimentId, element);
+      forceExperimentBranch(win, expName, experimentId);
+    }
+  }
+
   /** Whether Fast Fetch is enabled
    * @param {!Window} win
    * @param {!Element} element
+   * @param {!boolean} useRemoteHtml
    * @return {boolean}
    */
-  isA4aEnabled(win, element) {
-    let experimentId;
-    if ('useSameDomainRenderingUntilDeprecated' in element.dataset ||
-        element.hasAttribute('useSameDomainRenderingUntilDeprecated') ||
-        !this.supportsCrypto(win)) {
+  isA4aEnabled(win, element, useRemoteHtml) {
+    this.unconditionedExperimentSelection(win, element);
+    const warnDeprecation = feature => user().warn(
+        TAG, `${feature} will no longer ` +
+          'be supported starting on March 29, 2018. Please refer to ' +
+          'https://github.com/ampproject/amphtml/issues/11834 ' +
+          'for more information');
+    const usdrd = 'useSameDomainRenderingUntilDeprecated';
+    const hasUSDRD = usdrd in element.dataset || element.hasAttribute(usdrd);
+    if (hasUSDRD) {
+      warnDeprecation(usdrd);
+    }
+    if (useRemoteHtml) {
+      warnDeprecation('remote.html');
+    }
+    if (hasUSDRD || (useRemoteHtml && !element.getAttribute('rtc-config'))) {
       return false;
     }
+    let experimentId;
     const urlExperimentId = extractUrlExperimentId(win, element);
     let experimentName = DFP_CANONICAL_FF_EXPERIMENT_NAME;
     if (!this.isCdnProxy(win)) {
       // Ensure that forcing FF via url is applied if test/localDev.
-      experimentId = (urlExperimentId == -1 &&
-          (getMode(win).localDev ||	getMode(win).test)) ?
-          MANUAL_EXPERIMENT_ID :
-          this.maybeSelectExperiment(win, element, [
-            DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
-            DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
-          ], DFP_CANONICAL_FF_EXPERIMENT_NAME);
+      if (urlExperimentId == -1 &&
+          (getMode(win).localDev || getMode(win).test)) {
+        experimentId = MANUAL_EXPERIMENT_ID;
+      } else {
+        let unconditionedExp;
+        // For unconditioned canonical experiment, in the experiment branch
+        // we allow Fast Fetch on non-CDN pages, but in the control we do not.
+        if ((unconditionedExp = getExperimentBranch(
+            win, UNCONDITIONED_CANONICAL_FF_EXPERIMENT_NAME))) {
+          return unconditionedExp ==
+              DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.FF_CANONICAL_EXP;
+        }
+        experimentId = this.maybeSelectExperiment(win, element, [
+          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
+          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
+        ], DFP_CANONICAL_FF_EXPERIMENT_NAME);
+      }
       // If no experiment selected, return false.
       if (!experimentId) {
         return false;
       }
     } else {
-      if (element.hasAttribute(BETA_ATTRIBUTE)) {
-        addExperimentIdToElement(BETA_EXPERIMENT_ID, element);
-        dev().info(TAG, `beta forced a4a selection ${element}`);
-        return true;
-      }
       experimentName = DOUBLECLICK_A4A_EXPERIMENT_NAME;
       // See if in holdback control/experiment.
       if (urlExperimentId != undefined) {
         experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
-        dev().info(
-            TAG,
-            `url experiment selection ${urlExperimentId}: ${experimentId}.`);
-      } else {
-        experimentId = this.maybeSelectExperiment(win, element, [
-          DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
-          DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL],
-            DOUBLECLICK_A4A_EXPERIMENT_NAME);
+        // Do not select into Identity experiment if in corresponding
+        // unconditioned experiment.
+        if ((experimentId == DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_CONTROL ||
+             experimentId ==
+             DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT) &&
+            getExperimentBranch(win, UNCONDITIONED_IDENTITY_EXPERIMENT_NAME)) {
+          experimentId = null;
+        } else {
+          dev().info(
+              TAG,
+              `url experiment selection ${urlExperimentId}: ${experimentId}.`);
+        }
       }
     }
     if (experimentId) {
       addExperimentIdToElement(experimentId, element);
       forceExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME, experimentId);
     }
-    return ![DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
-      DOUBLECLICK_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL,
-      DOUBLECLICK_EXPERIMENT_FEATURE.SFG_CONTROL_ID,
-      DOUBLECLICK_EXPERIMENT_FEATURE.SFG_EXP_ID,
-      DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL,
-    ].includes(experimentId);
+    return DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_CONTROL != experimentId;
   }
 
   /**
@@ -201,17 +256,21 @@ const singleton = new DoubleclickA4aEligibility();
 /**
  * @param {!Window} win
  * @param {!Element} element
+ * @param {!boolean} useRemoteHtml
  * @returns {boolean}
  */
-export function doubleclickIsA4AEnabled(win, element) {
-  return singleton.isA4aEnabled(win, element);
+export function doubleclickIsA4AEnabled(win, element, useRemoteHtml) {
+  return singleton.isA4aEnabled(win, element, useRemoteHtml);
 }
 
 /**
  * @param {!Window} win
- * @param {!DOUBLECLICK_EXPERIMENT_FEATURE} feature
+ * @param {!DOUBLECLICK_EXPERIMENT_FEATURE|
+ *         DOUBLECLICK_UNCONDITIONED_EXPERIMENTS} feature
+ * @param {string=} opt_experimentName
  * @return {boolean} whether feature is enabled
  */
-export function experimentFeatureEnabled(win, feature) {
-  return getExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME) == feature;
+export function experimentFeatureEnabled(win, feature, opt_experimentName) {
+  const experimentName = opt_experimentName || DOUBLECLICK_A4A_EXPERIMENT_NAME;
+  return getExperimentBranch(win, experimentName) == feature;
 }

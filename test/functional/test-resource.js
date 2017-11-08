@@ -516,6 +516,24 @@ describes.realWin('Resource', {amp: true}, env => {
     });
   });
 
+  it('should complete startLayout with height == 0', () => {
+    elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
+    elementMock.expects('getLayout').returns('fluid').once();
+
+    resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 0};
+    const loaded = resource.loadedOnce();
+    const promise = resource.startLayout();
+    expect(resource.layoutPromise_).to.not.equal(null);
+    expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+
+    return promise.then(() => {
+      expect(resource.getState()).to.equal(ResourceState.LAYOUT_COMPLETE);
+      expect(resource.layoutPromise_).to.equal(null);
+      return loaded;
+    });
+  });
+
   it('should fail startLayout', () => {
     const error = new Error('intentional');
     elementMock.expects('layoutCallback')
@@ -802,6 +820,63 @@ describes.realWin('Resource', {amp: true}, env => {
       elementMock.expects('resumeCallback').once();
       resource.resume();
     });
+  });
+});
+
+describe('Resource idleRenderOutsideViewport', () => {
+  let sandbox;
+  let element;
+  let resources;
+  let resource;
+  let idleRenderOutsideViewport;
+  let withinViewportMultiplier;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    sandbox = sinon.sandbox.create();
+    idleRenderOutsideViewport = sandbox.stub();
+    element = {
+      idleRenderOutsideViewport,
+      ownerDocument: {defaultView: window},
+      tagName: 'AMP-AD',
+      hasAttribute: () => false,
+      isBuilt: () => false,
+      isUpgraded: () => false,
+      prerenderAllowed: () => false,
+      renderOutsideViewport: () => true,
+      build: () => false,
+      getBoundingClientRect: () => null,
+      updateLayoutBox: () => {},
+      isRelayoutNeeded: () => false,
+      layoutCallback: () => {},
+      changeSize: () => {},
+      unlayoutOnPause: () => false,
+      unlayoutCallback: () => true,
+      pauseCallback: () => false,
+      resumeCallback: () => false,
+      viewportCallback: () => {},
+      getPriority: () => 0,
+    };
+    resources = new Resources(new AmpDocSingle(window));
+    resource = new Resource(1, element, resources);
+    withinViewportMultiplier =
+        sandbox.stub(resource, 'withinViewportMultiplier');
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('should return true if withinViewportMultiplier', () => {
+    idleRenderOutsideViewport.returns(5);
+    withinViewportMultiplier.withArgs(5).returns(true);
+    expect(resource.idleRenderOutsideViewport()).to.equal(true);
+  });
+
+  it('should return false for false element idleRenderOutsideViewport', () => {
+    idleRenderOutsideViewport.returns(false);
+    withinViewportMultiplier.withArgs(false).returns(false);
+    expect(resource.idleRenderOutsideViewport()).to.equal(false);
   });
 });
 

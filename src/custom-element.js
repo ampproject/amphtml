@@ -808,8 +808,7 @@ function createBaseCustomElementClass(win) {
     dispatchCustomEvent(name, opt_data) {
       const data = opt_data || {};
       // Constructors of events need to come from the correct window. Sigh.
-      const win = this.ownerDocument.defaultView;
-      const event = win.document.createEvent('Event');
+      const event = this.ownerDocument.createEvent('Event');
       event.data = data;
       event.initEvent(name, /* bubbles */ true, /* cancelable */ true);
       this.dispatchEvent(event);
@@ -854,6 +853,16 @@ function createBaseCustomElementClass(win) {
      */
     renderOutsideViewport() {
       return this.implementation_.renderOutsideViewport();
+    }
+
+    /**
+     * Whether the element should render outside of renderOutsideViewport when
+     * the scheduler is idle.
+     * @return {boolean|number}
+     * @final @this {!Element}
+     */
+    idleRenderOutsideViewport() {
+      return this.implementation_.idleRenderOutsideViewport();
     }
 
     /**
@@ -932,6 +941,14 @@ function createBaseCustomElementClass(win) {
      */
     getImpl() {
       return this.whenBuilt().then(() => this.implementation_);
+    }
+
+    /**
+     * Returns the layout of the element.
+     * @return {!Layout}
+     */
+    getLayout() {
+      return this.layout_;
     }
 
     /**
