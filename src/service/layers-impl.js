@@ -26,6 +26,7 @@ const LAYOUT_PROP = '__AMP_LAYOUT';
 /**
  * The Size of an element.
  *
+ * @struct
  * @typedef {{
  *   height: number,
  *   width: number,
@@ -36,6 +37,7 @@ export let SizeDef;
 /**
  * The offset Position of an element.
  *
+ * @struct
  * @typedef {{
  *   left: number,
  *   top: number,
@@ -50,7 +52,7 @@ export let PositionDef;
  * @param {number} height
  * @return {!SizeDef}
  */
-function SizeWh(width, height) {
+function sizeWh(width, height) {
   return {
     height,
     width,
@@ -64,7 +66,7 @@ function SizeWh(width, height) {
  * @param {number} top
  * @return {!PositionDef}
  */
-function PositionLt(left, top) {
+function positionLt(left, top) {
   return {
     left,
     top,
@@ -289,8 +291,8 @@ export class LayoutElement {
     this.parentLayer_ = undefined;
 
     this.needsRemeasure_ = true;
-    this.size_ = SizeWh(0, 0);
-    this.position_ = PositionLt(0, 0);
+    this.size_ = sizeWh(0, 0);
+    this.position_ = positionLt(0, 0);
 
     this.isLayer_ = false;
     this.isRootLayer_ = false;
@@ -522,7 +524,7 @@ export class LayoutElement {
       last = p;
     }
 
-    return PositionLt(x, y);
+    return positionLt(x, y);
   }
 
   /**
@@ -547,7 +549,7 @@ export class LayoutElement {
       last = p;
     }
 
-    return PositionLt(x, y);
+    return positionLt(x, y);
   }
 
   requestRemeasure() {
@@ -578,18 +580,18 @@ export class LayoutElement {
       const parent = this.getParentLayer();
       relative = parent ?
           relativeScrolledPositionForChildren(parent) :
-          PositionLt(0, 0);
+          positionLt(0, 0);
     }
 
     const box = this.element_.getBoundingClientRect();
-    this.size_ = SizeWh(box.width, box.height);
+    this.size_ = sizeWh(box.width, box.height);
 
     let {left, top} = box;
     if (this.isRootLayer_) {
       left += this.getScrollLeft();
       top += this.getScrollTop();
     }
-    this.position_ = PositionLt(
+    this.position_ = positionLt(
         left - relative.left,
         top - relative.top
     );
@@ -616,11 +618,11 @@ export class LayoutElement {
 
 /**
  * @param {!LayoutElement} layer
- * @return {!PositionLt}
+ * @return {!positionLt}
  */
 function relativeScrolledPositionForChildren(layer) {
   const position = layer.getScrolledPosition();
-  return PositionLt(
+  return positionLt(
       position.left - layer.getScrollLeft(),
       position.top - layer.getScrollTop()
   );
