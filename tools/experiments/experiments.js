@@ -282,6 +282,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/11714',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11715',
   },
+  {
+    id: 'amp-story-auto-fullscreen',
+    name: 'Enables full-screen mode on first page transition',
+    spec: 'https://github.com/ampproject/amphtml/issues/11974',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11975',
+  },
 ];
 
 if (getMode().localDev) {
