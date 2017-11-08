@@ -25,7 +25,7 @@ min_validator_revision_required: 246
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 510
+spec_file_revision: 512
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -108,6 +108,8 @@ tags: {
 }
 # 4.2.3 the base element
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "BASE"
   unique: true
   mandatory_parent: "HEAD"
@@ -136,6 +138,8 @@ attr_lists: {
   attrs: { name: "color" }
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "LINK"
   spec_name: "link rel="
   disallowed_ancestor: "TEMPLATE"
@@ -198,6 +202,8 @@ tags: {
 }
 # Allow <link rel="manifest" ...> but not <link rel="manifest foo" ...>
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "LINK"
   spec_name: "link rel=manifest"
   mandatory_parent: "HEAD"
@@ -222,6 +228,8 @@ tags: {
 }
 # Whitelisted font providers
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "LINK"
   spec_name: "link rel=stylesheet for fonts"
   mandatory_parent: "HEAD"
@@ -260,6 +268,8 @@ tags: {
 }
 # itemprop=sameAs is allowed per schema.org, needs not be in head
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "LINK"
   spec_name: "link itemprop=sameAs"
   attrs: {
@@ -277,6 +287,8 @@ tags: {
 }
 # rel= isn't mandatory when itemprop= is present.
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "LINK"
   spec_name: "link itemprop="
   attrs: {
@@ -292,6 +304,8 @@ tags: {
 }
 # rel= isn't mandatory when property= is present.
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "LINK"
   spec_name: "link property="
   attrs: {
@@ -322,6 +336,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec#required-markup"
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "META"
   spec_name: "meta name=viewport"
   mandatory: true
@@ -352,6 +368,8 @@ tags: {
 # This tag is a hack to tell IE 10 to use its modern rendering engine as opposed
 # to the IE8 engine. So it's explicitly allowed.
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "META"
   spec_name: "meta http-equiv=X-UA-Compatible"
   mandatory_ancestor: "HEAD"
@@ -373,6 +391,8 @@ tags: {
 }
 # Tag specific to apple-itunes-app installs, see also <amp-app-banner>.
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "META"
   spec_name: "meta name=apple-itunes-app"
   mandatory_parent: "HEAD"
@@ -393,6 +413,8 @@ tags: {
 # AMP & AMP4ADS metadata, name=amp-experiments-opt-in
 # https://github.com/lannka/amphtml/blob/master/tools/experiments/README.md
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "META"
   spec_name: "meta name=amp-experiments-opt-in"
   mandatory_parent: "HEAD"
@@ -500,6 +522,8 @@ tags: {
   }
 }
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "META"
   spec_name: "meta name= and content="
   # The validator accepts any name="..." attribute values except
@@ -524,6 +548,8 @@ tags: {
 # This is redundant with meta charset, but also harmless as long as it's
 # set to utf-8.
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "META"
   spec_name: "meta http-equiv=Content-Type"
   mandatory_ancestor: "HEAD"
@@ -542,6 +568,8 @@ tags: {
 }
 # http-equiv content-language tag
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "META"
   spec_name: "meta http-equiv=content-language"
   mandatory_ancestor: "HEAD"
@@ -560,6 +588,8 @@ tags: {
 # http-equiv pics-label tag
 # https://www.w3.org/PICS/
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "META"
   spec_name: "meta http-equiv=pics-label"
   mandatory_ancestor: "HEAD"
@@ -578,6 +608,8 @@ tags: {
 # http-equiv imagetoolbar tag
 # https://msdn.microsoft.com/en-us/library/ms532986(v=vs.85).aspx
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "META"
   spec_name: "meta http-equiv=imagetoolbar"
   mandatory_ancestor: "HEAD"
@@ -596,6 +628,8 @@ tags: {
 # http-equiv content-style-type
 # https://www.w3.org/TR/REC-html40/present/styles#h-14.2.1
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "META"
   spec_name: "meta http-equiv=Content-Style-Type"
   mandatory_ancestor: "HEAD"
@@ -615,6 +649,8 @@ tags: {
 # http-equiv content-script-type
 # https://www.w3.org/TR/html4/interact/scripts#h-18.2.2.1
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "META"
   spec_name: "meta http-equiv=Content-Script-Type"
   mandatory_ancestor: "HEAD"
@@ -633,6 +669,8 @@ tags: {
 }
 # http-equiv origin-trial tag
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "META"
   spec_name: "meta http-equiv=origin-trial"
   mandatory_ancestor: "HEAD"
@@ -651,6 +689,8 @@ tags: {
 # http-equiv resource-type
 # http://www.metatags.info/meta_http_equiv_resource_type
 tags: {
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "META"
   spec_name: "meta http-equiv=resource-type"
   mandatory_ancestor: "HEAD"

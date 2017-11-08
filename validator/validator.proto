@@ -371,6 +371,7 @@ message TagSpec {
   enum HtmlFormat {
     AMP = 1;
     AMP4ADS = 2;
+    EXPERIMENTAL = 3;  // Currently unused
   }
   // Specifies which AMP HTML document formats we allow this TagSpec to
   // validate. If empty, then this TagSpec validates all formats.
