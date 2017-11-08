@@ -224,14 +224,23 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.pageActiveCallback_();
   }
 
+  /** @override */
+  layoutCallback() {
+    return this.beforeVisible();
+  }
+
+  /** @return {!Promise} */
+  beforeVisible() {
+    return this.maybeApplyFirstAnimationFrame();
+  }
 
   /** @private */
   onPageVisible_() {
     this.markPageAsLoaded_();
-    this.maybeApplyFirstAnimationFrame();
     this.updateAudioIcon_();
     this.playAllMedia_();
     this.advancement_.start();
+    this.maybeStartAnimations();
     this.reportDevModeErrors_();
   }
 

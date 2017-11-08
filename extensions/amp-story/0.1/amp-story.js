@@ -507,20 +507,6 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * @param {!./amp-story-page.AmpStoryPage} page
-   */
-  maybeApplyFirstAnimationFrame_(page) {
-    page.maybeApplyFirstAnimationFrame();
-  }
-
-  /**
-   * @param {!./amp-story-page.AmpStoryPage} page
-   */
-  maybeStartAnimations_(page) {
-    page.maybeStartAnimations();
-  }
-
-  /**
    * Switches to a particular page.
    * @param {string} targetPageId
    * @return {!Promise}
@@ -559,16 +545,14 @@ export class AmpStory extends AMP.BaseElement {
     const previousActivePriorSibling = scopedQuerySelector(
         this.element, `[${PRE_ACTIVE_PAGE_ATTRIBUTE_NAME}]`);
 
-    this.maybeApplyFirstAnimationFrame_(targetPage);
-
     return this.mutateElement(() => {
       this.activePage_ = targetPage;
       this.triggerActiveEventForPage_();
       this.systemLayer_.resetDeveloperLogs();
       this.systemLayer_.setDeveloperLogContextString(
           this.activePage_.element.id);
-      this.maybeStartAnimations_(targetPage);
     })
+        .then(() => targetPage.beforeVisible())
         .then(() => {
           if (oldPage) {
             oldPage.setActive(false);
