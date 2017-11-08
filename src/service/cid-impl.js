@@ -131,9 +131,10 @@ export class Cid {
         'The CID scope and cookie name must only use the characters ' +
         '[a-zA-Z0-9-_.]+\nInstead found: %s',
         getCidStruct.scope);
+    const viewer = Services.viewerForDoc(this.ampdoc);
 
     return consent.then(() => {
-      return Services.viewerForDoc(this.ampdoc).whenFirstVisible();
+      return viewer.whenFirstVisible();
     }).then(() => {
       // Check if user has globally opted out of CID, we do this after
       // consent check since user can optout during consent process.
@@ -142,15 +143,18 @@ export class Cid {
       if (optedOut) {
         return '';
       }
-      const cidPromise = this.getExternalCid_(
-          getCidStruct, opt_persistenceConsent || consent);
-      // Getting the CID might involve an HTTP request. We timeout after 10s.
-      return Services.timerFor(this.ampdoc.win)
-          .timeoutPromise(10000, cidPromise,
-          `Getting cid for "${getCidStruct.scope}" timed out`)
-          .catch(error => {
-            rethrowAsync(error);
-          });
+      return viewer.whenNextVisible().then(() => {
+        const cidPromise = this.getExternalCid_(
+            getCidStruct, opt_persistenceConsent || consent);
+        // Getting the CID might involve an HTTP request. We timeout after 10s.
+        // NOTE: If viewer gets invisible afterwards we also timeout after 10s now. May need improvement
+        return Services.timerFor(this.ampdoc.win)
+            .timeoutPromise(10000, cidPromise,
+            `Getting cid for "${getCidStruct.scope}" timed out`)
+            .catch(error => {
+              rethrowAsync(error);
+            });
+      });
     });
   }
 
@@ -402,19 +406,20 @@ export function viewerBaseCid(ampdoc, opt_data) {
     if (!trusted) {
       return undefined;
     }
-    return viewer.sendMessageAwaitResponse('cid', opt_data)
-        .then(data => {
-          // TODO(dvoytenko, #9019): cleanup the legacy CID format.
-          // For backward compatibility: #4029
-          if (data && !tryParseJson(data)) {
-            // TODO(dvoytenko, #9019): use this for reporting: dev().error('cid', 'invalid cid format');
-            return JSON.stringify(dict({
-              'time': Date.now(), // CID returned from old API is always fresh
-              'cid': data,
-            }));
-          }
-          return data;
-        });
+    return viewer.whenNextVisible().then(() => {
+      return viewer.sendMessageAwaitResponse('cid', opt_data);
+    }).then(data => {
+      // TODO(dvoytenko, #9019): cleanup the legacy CID format.
+      // For backward compatibility: #4029
+      if (data && !tryParseJson(data)) {
+        // TODO(dvoytenko, #9019): use this for reporting: dev().error('cid', 'invalid cid format');
+        return JSON.stringify(dict({
+          'time': Date.now(), // CID returned from old API is always fresh
+          'cid': data,
+        }));
+      }
+      return data;
+    });
   });
 }
 

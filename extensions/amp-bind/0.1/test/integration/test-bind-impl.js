@@ -352,6 +352,17 @@ describe.configure().ifNewChrome().run('Bind', function() {
       });
     });
 
+    it('should update value in addition to textContent for TextArea', () => {
+      const element = createElement(
+          env, container, '[text]="\'a\' + \'b\' + \'c\'"', 'textarea');
+      element.textContent = 'foo';
+      element.value = 'foo';
+      return onBindReadyAndSetState(env, bind, {}).then(() => {
+        expect(element.textContent).to.equal('abc');
+        expect(element.value).to.equal('abc');
+      });
+    });
+
     it('should support binding to CSS classes with strings', () => {
       const element = createElement(env, container, '[class]="[\'abc\']"');
       expect(toArray(element.classList)).to.deep.equal([]);
@@ -464,7 +475,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
         expect(element.textContent.length).to.not.equal(0);
         expect(element.classList.length).to.not.equal(0);
         expect(element.attributes.length).to.not.equal(0);
-        expect(element.mutatedAttributesCallback).to.be.called.once;
+        expect(element.mutatedAttributesCallback).to.be.calledOnce;
 
         element.textContent = '';
         element.className = '';
@@ -479,7 +490,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
         expect(element.textContent).to.equal('');
         expect(element.className).to.equal('');
         expect(element.attributes.length).to.equal(0);
-        expect(element.mutatedAttributesCallback).to.be.called.once;
+        expect(element.mutatedAttributesCallback).to.be.calledOnce;
       });
     });
 

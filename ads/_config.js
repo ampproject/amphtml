@@ -247,7 +247,12 @@ export const adConfig = {
     prefetch: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
   },
 
+  connatix: {
+    renderStartImplemented: true,
+  },
+
   contentad: {},
+
 
   criteo: {
     prefetch: 'https://static.criteo.net/js/ld/publishertag.js',
@@ -426,6 +431,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  lockerdome: {
+    prefetch: 'https://cdn2.lockerdomecdn.com/_js/amp.js',
+    renderStartImplemented: true,
+  },
+
   loka: {
     prefetch: 'https://loka-cdn.akamaized.net/scene/amp.js',
     preconnect: [
@@ -572,6 +582,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  postquare: {},
+
   pubmatic: {
     prefetch: 'https://ads.pubmatic.com/AdServer/js/amp.js',
   },
@@ -609,6 +621,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  revjet: {
+    prefetch: 'https://cdn.revjet.com/~cdn/JS/03/amp.js',
+    renderStartImplemented: true,
+  },
+
   rubicon: {},
 
   sharethrough: {
@@ -637,6 +654,10 @@ export const adConfig = {
   smartclip: {
     prefetch: 'https://cdn.smartclip.net/amp/amp.v0.js',
     preconnect: 'https://des.smartclip.net',
+    renderStartImplemented: true,
+  },
+
+  smi2: {
     renderStartImplemented: true,
   },
 
@@ -749,6 +770,10 @@ export const adConfig = {
 
   yandex: {
     prefetch: 'https://yastatic.net/partner-code/loaders/context_amp.js',
+    renderStartImplemented: true,
+  },
+
+  yengo: {
     renderStartImplemented: true,
   },
 

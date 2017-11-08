@@ -30,6 +30,11 @@ html, body {
   height: auto !important;
 }
 
+html.i-amphtml-fie {
+  height: 100% !important;
+  width: 100% !important;
+}
+
 /**
  * Margin:0 is currently needed for iOS viewer embeds.
  * See:
@@ -66,7 +71,8 @@ html.i-amphtml-singledoc.i-amphtml-embedded {
  * style is set in runtime vs css to avoid conflicts with ios-embedded mode
  * and fixed transfer layer.
  */
-html.i-amphtml-singledoc > body {
+html.i-amphtml-singledoc > body,
+html.i-amphtml-fie > body {
   overflow: visible !important;
   position: relative !important;
 }
@@ -334,7 +340,7 @@ i-amphtml-sizer {
 }
 
 .i-amphtml-hidden-by-media-query {
-  display: none;
+  display: none !important;
 }
 
 .i-amphtml-element-error {
@@ -586,10 +592,6 @@ amp-experiment, amp-share-tracking {
   display: none;
 }
 
-amp-fresh {
-  visibility: hidden;
-}
-
 .i-amphtml-jank-meter {
   position: fixed;
   background-color: rgba(232,72,95,.5);
@@ -758,4 +760,20 @@ amp-accordion > section > :last-child {
 /* Expand content when needed. */
 amp-accordion > section[expanded] > :last-child {
   display: block !important;
+}
+
+/**
+ * amp-story
+ */
+ amp-story, amp-story-page {
+  display: block;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  width: 100%;
+}
+
+amp-story-page {
+  background-color: #757575;
 }

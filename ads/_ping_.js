@@ -15,7 +15,7 @@
  */
 
 import {validateData} from '../3p/3p';
-import {dev} from '../src/log';
+import {dev, user} from '../src/log';
 
 /**
  * A fake ad network integration that is mainly used for testing
@@ -28,7 +28,9 @@ export function _ping_(global, data) {
   // for testing only. see #10628
   global.networkIntegrationDataParamForTesting = data;
 
-  validateData(data, [], ['valid', 'adHeight', 'adWidth', 'enableIo', 'url']);
+  validateData(data, [],
+      ['valid', 'adHeight', 'adWidth', 'enableIo', 'url', 'error']);
+  user().assert(!data['error'], 'Fake user error!');
   global.document.getElementById('c').textContent = data.ping;
   global.ping = Object.create(null);
 

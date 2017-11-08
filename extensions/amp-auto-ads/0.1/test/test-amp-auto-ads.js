@@ -47,6 +47,7 @@ describes.realWin('amp-auto-ads', {
   let ampAutoAds;
   let ampAutoAdsElem;
   let xhr;
+  let whenVisible;
   let configObj;
 
   beforeEach(() => {
@@ -150,6 +151,10 @@ describes.realWin('amp-auto-ads', {
     };
     sandbox.spy(xhr, 'fetchJson');
 
+    const viewer = Services.viewerForDoc(env.ampdoc);
+    whenVisible = sandbox.stub(viewer, 'whenFirstVisible');
+    whenVisible.returns(Promise.resolve());
+
     ampAutoAds = new AmpAutoAds(ampAutoAdsElem);
   });
 
@@ -158,6 +163,26 @@ describes.realWin('amp-auto-ads', {
     expect(adElement.getAttribute('type')).to.equal('adsense');
     expect(adElement.getAttribute('data-ad-client')).to.equal(AD_CLIENT);
   }
+
+  it('should wait for viewer visible', () => {
+    let resolve;
+    const visible = new Promise(res => {
+      resolve = res;
+    });
+    whenVisible.returns(visible);
+
+    ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
+    ampAutoAdsElem.setAttribute('type', 'adsense');
+    ampAutoAds.buildCallback();
+
+    return Promise.resolve().then(() => {
+      expect(xhr.fetchJson).to.not.have.been.called;
+      resolve();
+      return visible;
+    }).then(() => {
+      expect(xhr.fetchJson).to.have.been.called;
+    });
+  });
 
   it('should insert three ads on page using config', () => {
     ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);

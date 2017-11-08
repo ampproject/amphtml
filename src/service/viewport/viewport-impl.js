@@ -173,6 +173,8 @@ export class Viewport {
 
     this.viewer_.onMessage('viewport', this.updateOnViewportEvent_.bind(this));
     this.viewer_.onMessage('scroll', this.viewerSetScrollTop_.bind(this));
+    this.viewer_.onMessage(
+        'disableScroll', this.disableScrollEventHandler_.bind(this));
     this.binding_.updatePaddingTop(this.paddingTop_);
 
     this.binding_.onScroll(this.scroll_.bind(this));
@@ -825,6 +827,18 @@ export class Viewport {
       });
     }
 
+  }
+
+  /**
+   * @param {!JsonObject} data
+   * @private
+   */
+  disableScrollEventHandler_(data) {
+    if (!!data) {
+      this.disableScroll();
+    } else {
+      this.resetScroll();
+    }
   }
 
   /**

@@ -503,6 +503,16 @@ export class GlobalVariableSource extends VariableSource {
           .getVideoAnalyticsDetails(video)
           .then(details => details ? details[property] : '');
     });
+
+    this.setAsync('STORY_PAGE_INDEX', () => {
+      return this.getStoryValue_(storyVariables => storyVariables.pageIndex,
+          'STORY_PAGE_INDEX');
+    });
+
+    this.setAsync('STORY_PAGE_ID', () => {
+      return this.getStoryValue_(storyVariables => storyVariables.pageId,
+          'STORY_PAGE_ID');
+    });
   }
 
   /**
@@ -593,6 +603,26 @@ export class GlobalVariableSource extends VariableSource {
           expr);
       return getter(/** @type {!ShareTrackingFragmentsDef} */ (fragments));
     });
+  }
+
+  /**
+   * Resolves the value via amp-story's service.
+   * @param {function(!../../extensions/amp-story/0.1/variable-service.AmpStoryVariableService):T} getter
+   * @param {string} expr
+   * @return {!Promise<T>}
+   * @template T
+   * @private
+   */
+  getStoryValue_(getter, expr) {
+    return Services.storyVariableServiceForOrNull(this.ampdoc.win)
+        .then(storyVariables => {
+          user().assert(storyVariables,
+              'To use variable %s amp-story should be configured',
+              expr);
+          return getter(
+              /** @type {!../../extensions/amp-story/0.1/variable-service.AmpStoryVariableService} */
+              (storyVariables));
+        });
   }
 }
 
@@ -882,7 +912,7 @@ export class UrlReplacements {
     let replacement = url.replace(expr, (match, name, opt_strargs) => {
       let args = [];
       if (typeof opt_strargs == 'string') {
-        args = opt_strargs.split(',');
+        args = opt_strargs.split(/,\s*/);
       }
       if (opt_whiteList && !opt_whiteList[name]) {
         // Do not perform substitution and just return back the original

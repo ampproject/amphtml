@@ -78,7 +78,6 @@
  * or not.
  *
  * @return {boolean}
- * @suppress {checkTypes}
  */
  export function detectEvtListenerOptsSupport() {
    // Only run the test once

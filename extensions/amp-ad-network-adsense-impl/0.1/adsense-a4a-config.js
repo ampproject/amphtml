@@ -34,31 +34,24 @@ import {
 } from '../../../src/experiments';
 import {dev} from '../../../src/log';
 
-/** @const {!string} @visibleForTesting */
+/** @const {string} @visibleForTesting */
 export const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
 
-/**
- * Unconditioned, client-side diverted experiment across all AdSense traffic.
- * @const {!string} @visibleForTesting
- */
-export const FF_DR_EXP_NAME = 'expAdSenseFFDR';
-
-/** @const @enum{string} @visibleForTesting */
-export const INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP = {
-  CONTROL: '21060901',
-  EXPERIMENT: '21060902',
-};
+/** @const {string} @visibleForTesting */
+export const UNCONDITIONED_IDENTITY_ADX_EXP_NAME =
+    'expUnconditionedAdxIdentity';
 
 /** @const @enum{string} @visibleForTesting */
 export const ADSENSE_EXPERIMENT_FEATURE = {
-  HOLDBACK_EXTERNAL_CONTROL: '21060732',
-  HOLDBACK_EXTERNAL: '21060733',
-  DELAYED_REQUEST_EXTERNAL_CONTROL: '21060734',
-  DELAYED_REQUEST_EXTERNAL: '21060735',
-  HOLDBACK_INTERNAL_CONTROL: '2092615',
-  HOLDBACK_INTERNAL: '2092616',
   CACHE_EXTENSION_INJECTION_CONTROL: '21060953',
   CACHE_EXTENSION_INJECTION_EXP: '21060954',
+  IDENTITY_CONTROL: '21060939',
+  IDENTITY_EXPERIMENT: '21060940',
+};
+
+export const ADSENSE_UNCONDITIONED_EXPERIMENTS = {
+  IDENTITY_CONTROL: '21061302',
+  IDENTITY_EXPERIMENT: '21061303',
 };
 
 /** @type {string} */
@@ -68,41 +61,23 @@ const TAG = 'amp-ad-network-adsense-impl';
 export const URL_EXPERIMENT_MAPPING = {
   '-1': MANUAL_EXPERIMENT_ID,
   '0': null,
-  // Holdback
-  '1': ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL_CONTROL,
-  '2': ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
-  // Delay Request
-  '3': ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL_CONTROL,
-  '4': ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL,
   // AMP Cache extension injection
   '5': ADSENSE_EXPERIMENT_FEATURE.CACHE_EXTENSION_INJECTION_CONTROL,
   '6': ADSENSE_EXPERIMENT_FEATURE.CACHE_EXTENSION_INJECTION_EXP,
+  // Identity
+  '7': ADSENSE_EXPERIMENT_FEATURE.IDENTITY_CONTROL,
+  '8': ADSENSE_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT,
 };
 
 /**
  * @param {!Window} win
  * @param {!Element} element
+ * @param {!boolean} useRemoteHtml
  * @returns {boolean}
  */
-export function adsenseIsA4AEnabled(win, element) {
-  // Select Fast fetch, delayed request across all traffic as its unconditioned.
-  // Note that this will "pollute" the SERP triggered control/experiments and
-  // will have no effect on delayed fetch.
-  const ffDrExperimentInfoMap =
-      /** @type {!Object<string, !ExperimentInfo>} */ ({});
-  ffDrExperimentInfoMap[FF_DR_EXP_NAME] = {
-    isTrafficEligible: () => true,
-    branches: [
-      INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP.CONTROL,
-      INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP.EXPERIMENT,
-    ],
-  };
-  randomlySelectUnsetExperiments(win, ffDrExperimentInfoMap);
-  const delayedFetchExperimentId = getExperimentBranch(win, FF_DR_EXP_NAME);
-  if (delayedFetchExperimentId) {
-    addExperimentIdToElement(delayedFetchExperimentId, element);
-  }
-  if (!isGoogleAdsA4AValidEnvironment(win) ||
+export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {
+  unconditionedExperimentSelection(win, element);
+  if (useRemoteHtml || !isGoogleAdsA4AValidEnvironment(win) ||
       !element.getAttribute('data-ad-client')) {
     return false;
   }
@@ -111,45 +86,66 @@ export function adsenseIsA4AEnabled(win, element) {
   const urlExperimentId = extractUrlExperimentId(win, element);
   if (urlExperimentId != undefined) {
     experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
-    dev().info(
-        TAG, `url experiment selection ${urlExperimentId}: ${experimentId}.`);
-  } else {
-    // Not set via url so randomly set.
-    const experimentInfoMap =
-        /** @type {!Object<string, !ExperimentInfo>} */ ({});
-    experimentInfoMap[ADSENSE_A4A_EXPERIMENT_NAME] = {
-      isTrafficEligible: () => true,
-      branches: [
-        ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
-        ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL,
-      ],
-    };
-    // Note: Because the same experimentName is being used everywhere here,
-    // randomlySelectUnsetExperiments won't add new IDs if
-    // maybeSetExperimentFromUrl has already set something for this
-    // experimentName.
-    randomlySelectUnsetExperiments(win, experimentInfoMap);
-    experimentId = getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME);
-    dev().info(
-        TAG, `random experiment selection ${urlExperimentId}: ${experimentId}`);
-
+    // Do not select into Identity experiment if in corresponding
+    // unconditioned experiment.
+    if ((experimentId == ADSENSE_EXPERIMENT_FEATURE.IDENTITY_CONTROL ||
+         experimentId == ADSENSE_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT) &&
+        getExperimentBranch(win, UNCONDITIONED_IDENTITY_ADX_EXP_NAME)) {
+      experimentId = null;
+    } else {
+      dev().info(
+          TAG, `url experiment selection ${urlExperimentId}: ${experimentId}.`);
+    }
   }
   if (experimentId) {
     addExperimentIdToElement(experimentId, element);
     forceExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME, experimentId);
   }
-  return ![ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
-    ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL].includes(experimentId);
+  return true;
 }
 
 /**
+ * Attempts all unconditioned experiment selection.
  * @param {!Window} win
- * @return {boolean} whether fast fetch delayed request experiment is enabled.
+ * @param {!Element} element
  */
-export function fastFetchDelayedRequestEnabled(win) {
-  return !!(
-      getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME) ==
-        ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL ||
-      getExperimentBranch(win, FF_DR_EXP_NAME) ==
-        INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP.EXPERIMENT);
+function unconditionedExperimentSelection(win, element) {
+  selectAndSetUnconditionedExp(
+      win, element,
+      [ADSENSE_UNCONDITIONED_EXPERIMENTS.IDENTITY_EXPERIMENT,
+        ADSENSE_UNCONDITIONED_EXPERIMENTS.IDENTITY_CONTROL],
+      UNCONDITIONED_IDENTITY_ADX_EXP_NAME);
+}
+
+/**
+ * Attempts to select into experiment and forces branch if selected.
+ * @param {!Window} win
+ * @param {!Element} element
+ * @param {!Array<string>} branches
+ * @param {!string} expName
+ */
+function selectAndSetUnconditionedExp(win, element, branches, expName) {
+  const experimentInfoMap =
+        /** @type {!Object<string, !ExperimentInfo>} */ ({});
+  experimentInfoMap[expName] = {
+    isTrafficEligible: () => true,
+    branches,
+  };
+  randomlySelectUnsetExperiments(win, experimentInfoMap);
+  const experimentId = getExperimentBranch(win, expName);
+  if (!!experimentId) {
+    addExperimentIdToElement(experimentId, element);
+    forceExperimentBranch(win, expName, experimentId);
+  }
+}
+
+/**
++ * @param {!Window} win
++ * @return {boolean} whether identity enabled.
++ */
+export function identityEnabled(win) {
+  return (getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME) ==
+          ADSENSE_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT) ||
+      (getExperimentBranch(win, UNCONDITIONED_IDENTITY_ADX_EXP_NAME) ==
+          ADSENSE_UNCONDITIONED_EXPERIMENTS.IDENTITY_EXPERIMENT);
 }
