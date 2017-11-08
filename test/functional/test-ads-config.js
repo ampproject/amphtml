@@ -28,7 +28,7 @@ describe('test-ads-config', () => {
     delete adConfig.fakead3p;
     const keys = Object.keys(adConfig);
     for (let i = 0; i < keys.length - 1; i++) {
-      expect(keys[i]).to.be.below(keys[i + 1]);
+      expect(keys[i] < keys[i + 1]);
     }
   });
 

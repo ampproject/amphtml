@@ -92,6 +92,10 @@ If this attribute is present, and the browser supports autoplay:
 
 This attribute is similar to the `controls` attribute in the HTML5 `video`. If this attribute is present, the browser offers controls to allow the user to control video playback.
 
+##### controlsList
+
+Same as [controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList) attribute of HTML5 video element. Only supported by certain browsers. Please see [https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList) for details.
+
 ##### loop
 
 If present, the video will automatically loop back to the start upon reaching the end.
@@ -99,6 +103,10 @@ If present, the video will automatically loop back to the start upon reaching th
 ##### crossorigin
 
 Required if a `track` resource is hosted on a different origin than the document.
+
+##### disableremoteplayback
+
+Determines whether the media element is allowed to have a remote playback UI such as Chromecast or AirPlay.
 
 ##### muted (deprecated)
 

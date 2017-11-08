@@ -90,6 +90,7 @@ describes.realWin('amp-video', {
       'muted': '',
       'loop': '',
       'crossorigin': '',
+      'disableremoteplayback': '',
     }).then(v => {
       const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
       v.implementation_.preconnectCallback();
@@ -100,6 +101,7 @@ describes.realWin('amp-video', {
       expect(video.hasAttribute('controls')).to.be.true;
       expect(video.hasAttribute('loop')).to.be.true;
       expect(video.hasAttribute('crossorigin')).to.be.true;
+      expect(video.hasAttribute('disableremoteplayback')).to.be.true;
       // autoplay is never propagated to the video element
       expect(video.hasAttribute('autoplay')).to.be.false;
       // muted is a deprecated attribute
@@ -165,13 +167,14 @@ describes.realWin('amp-video', {
     }, sources)).to.be.rejectedWith(/start with/);
   });
 
-  it('should set poster and controls in prerender mode', () => {
+  it('should set poster, controls, controlsList in prerender mode', () => {
     return getVideo({
       src: 'video.mp4',
       width: 160,
       height: 90,
       'poster': 'img.png',
       'controls': '',
+      'controlsList': 'nofullscreen nodownload noremoteplayback',
     }, null, function(element) {
       // Should set appropriate attributes in buildCallback
       const video = element.querySelector('video');
@@ -185,6 +188,8 @@ describes.realWin('amp-video', {
       expect(video.tagName).to.equal('VIDEO');
       expect(video.getAttribute('poster')).to.equal('img.png');
       expect(video.getAttribute('controls')).to.exist;
+      expect(video.getAttribute('controlsList')).to.equal(
+          'nofullscreen nodownload noremoteplayback');
     });
   });
 
@@ -352,10 +357,12 @@ describes.realWin('amp-video', {
       width: 160,
       height: 90,
       controls: '',
+      controlsList: '',
     }).then(v => {
       const mutations = {
         src: 'bar.mp4',
         controls: null,
+        controlsList: 'nodownload nofullscreen',
       };
       Object.keys(mutations).forEach(property => {
         const value = mutations[property];
@@ -369,6 +376,8 @@ describes.realWin('amp-video', {
       const video = v.querySelector('video');
       expect(video.getAttribute('src')).to.equal('bar.mp4');
       expect(video.controls).to.be.false;
+      expect(video.getAttribute('controlsList')).to.equal(
+          'nodownload nofullscreen');
     });
   });
 

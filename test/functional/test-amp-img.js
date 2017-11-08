@@ -79,6 +79,7 @@ describe('amp-img', () => {
       expect(img.getAttribute('alt')).to.equal('An image');
       expect(img.getAttribute('title')).to.equal('Image title');
       expect(img.getAttribute('referrerpolicy')).to.equal('origin');
+      expect(img.hasAttribute('async')).to.be.true;
     });
   });
 
@@ -175,6 +176,30 @@ describe('amp-img', () => {
     });
   });
 
+  it('should handle attribute mutations', () => {
+    return getImg({
+      src: 'test.jpg',
+      srcset: 'large.jpg 2000w, small.jpg 1000w',
+      width: 300,
+      height: 200,
+    }).then(ampImg => {
+      const impl = ampImg.implementation_;
+
+      ampImg.setAttribute('srcset', 'mutated-srcset.jpg 500w');
+      ampImg.setAttribute('src', 'mutated-src.jpg');
+
+      // `srcset` mutation should take precedence over `src` mutation.
+      impl.mutatedAttributesCallback({
+        srcset: 'mutated-srcset.jpg 1000w',
+        src: 'mutated-src.jpg',
+      });
+      expect(impl.img_.getAttribute('src')).to.equal('mutated-srcset.jpg');
+
+      // `src` mutation should override existing `srcset` attribute.
+      impl.mutatedAttributesCallback({src: 'mutated-src.jpg'});
+      expect(impl.img_.getAttribute('src')).to.equal('mutated-src.jpg');
+    });
+  });
 
   describe('#fallback on initial load', () => {
     let el;
@@ -354,7 +379,6 @@ describe('amp-img', () => {
         });
       });
     });
-
   });
 
   it('should respect noprerender attribute', () => {

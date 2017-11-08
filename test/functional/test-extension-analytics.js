@@ -39,13 +39,19 @@ describes.realWin('extension-analytics', {
   let win;
 
   describe('insertAnalyticsElement', () => {
+    let sandbox;
     class MockInstrumentation {
     };
 
     beforeEach(() => {
+      sandbox = sinon.sandbox.create();
       timer = Services.timerFor(env.win);
       ampdoc = env.ampdoc;
       win = env.win;
+    });
+
+    afterEach(() => {
+      sandbox.restore();
     });
 
     it('should create analytics element if analytics is installed', () => {
@@ -85,9 +91,16 @@ describes.realWin('extension-analytics', {
   describe('CustomEventReporterBuilder', () => {
     let builder;
     let parent;
+    let sandbox;
+
     beforeEach(() => {
+      sandbox = sinon.sandbox.create();
       parent = document.createElement('div');
       builder = new CustomEventReporterBuilder(parent);
+    });
+
+    afterEach(() => {
+      sandbox.restore();
     });
 
     it('track event with one request', () => {
@@ -156,7 +169,7 @@ describes.realWin('extension-analytics', {
         whenSignal: () => {return Promise.resolve();},
       };};
       const reporter = builder.track('test', 'fake.com').build();
-      expect(reporter.trigger).to.be.defined;
+      expect(reporter.trigger).to.exist;
     });
   });
 
@@ -192,6 +205,10 @@ describes.realWin('extension-analytics', {
       builder = new CustomEventReporterBuilder(parentEle);
       reporter = builder.track('test', 'fake.com').build();
       return buildPromise;
+    });
+
+    afterEach(() => {
+      sandbox.restore();
     });
 
     it('replace eventType with new name', function* () {

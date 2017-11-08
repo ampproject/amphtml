@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
+import {urls} from '../../../src/config';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {
-  calculateEntryPointScriptUrl,
-} from '../../../src/service/extension-location';
 import {setStyles} from '../../../src/style';
 import {hasOwn} from '../../../src/utils/object';
 import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
@@ -33,27 +31,32 @@ import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
 export let FrameData;
 
 /**
- * @visibleForTesting
+ * @VisibleForTesting
  */
 export class IframeTransport {
   /**
-   * @param {!Window} win
+   * @param {!Window} ampWin The window object of the AMP document
    * @param {!string} type The value of the amp-analytics tag's type attribute
    * @param {!JsonObject} config
+   * @param {!string} id A unique ID for this instance. If (potentially) using
+   *     sendResponseToCreative(), it should be something that the recipient
+   *     can use to identify the context of the message, e.g. the resourceID
+   *     of a DOM element.
    */
-  constructor(win, type, config) {
-    /** @private @const {!Window} win */
-    this.win_ = win;
+  constructor(ampWin, type, config, id) {
+    /** @private @const {!Window} */
+    this.ampWin_ = ampWin;
 
     /** @private @const {string} */
     this.type_ = type;
 
     /** @private @const {string} */
-    this.id_ = IframeTransport.createUniqueId_();
+    this.creativeId_ = id;
 
     dev().assert(config && config['iframe'],
         'Must supply iframe URL to constructor!');
     this.frameUrl_ = config['iframe'];
+
     this.processCrossDomainIframe();
   }
 
@@ -61,7 +64,8 @@ export class IframeTransport {
    * Called when a Transport instance is being removed from the DOM
    */
   detach() {
-    IframeTransport.markCrossDomainIframeAsDone(this.win_.document, this.type_);
+    IframeTransport.markCrossDomainIframeAsDone(this.ampWin_.document,
+        this.type_);
   }
 
   /**
@@ -75,40 +79,37 @@ export class IframeTransport {
       ++(frameData.usageCount);
     } else {
       frameData = this.createCrossDomainIframe();
-      this.win_.document.body.appendChild(frameData.frame);
+      this.ampWin_.document.body.appendChild(frameData.frame);
     }
     dev().assert(frameData, 'Trying to use non-existent frame');
   }
 
   /**
-   * Create a cross-domain iframe for third-party vendor anaytlics
+   * Create a cross-domain iframe for third-party vendor analytics
    * @return {!FrameData}
    * @VisibleForTesting
    */
   createCrossDomainIframe() {
     // Explanation of IDs:
     // Each instance of IframeTransport (owned by a specific amp-analytics
-    // tag, in turn owned by a specific creative) has an ID in this._id.
+    // tag, in turn owned by a specific creative) has an ID
+    // (this.getCreativeId()).
     // Each cross-domain iframe also has an ID, stored here in sentinel.
-    // These two types of IDs are drawn from the same pool of numbers, and
-    // are thus mutually unique.
+    // These two types of IDs have different formats.
     // There is a many-to-one relationship, in that several creatives may
-    // utilize the same analytics vendor, so perhaps creatives #1 & #2 might
-    // both use xframe #3.
+    // utilize the same analytics vendor, so perhaps two creatives might
+    // both use the same vendor iframe.
     // Of course, a given creative may use multiple analytics vendors, but
     // in that case it would use multiple amp-analytics tags, so the
-    // iframeTransport.id_ -> sentinel relationship is *not* many-to-many.
+    // iframeTransport.getCreativeId() -> sentinel relationship is *not*
+    // many-to-many.
     const sentinel = IframeTransport.createUniqueId_();
-    const useLocal = getMode().localDev || getMode().test;
-    const useRtvVersion = !useLocal;
-    const scriptSrc = calculateEntryPointScriptUrl(
-        this.win_.parent.location, 'iframe-transport-client-lib',
-        useLocal, useRtvVersion);
     const frameName = JSON.stringify(/** @type {JsonObject} */ ({
-      scriptSrc,
+      scriptSrc: this.getLibScriptUrl(),
       sentinel,
+      type: this.type_,
     }));
-    const frame = createElementWithAttributes(this.win_.document, 'iframe',
+    const frame = createElementWithAttributes(this.ampWin_.document, 'iframe',
         /** @type {!JsonObject} */ ({
           sandbox: 'allow-scripts allow-same-origin',
           name: frameName,
@@ -122,12 +123,28 @@ export class IframeTransport {
     const frameData = /** @const {FrameData} */ ({
       frame,
       usageCount: 1,
-      queue: new IframeTransportMessageQueue(this.win_,
+      queue: new IframeTransportMessageQueue(this.ampWin_,
           /** @type {!HTMLIFrameElement} */
           (frame)),
     });
     IframeTransport.crossDomainIframes_[this.type_] = frameData;
     return frameData;
+  }
+
+  /**
+   * Calculates the URL of the client lib
+   * @param {boolean=} opt_forceProdUrl If true, prod URL will be returned even
+   *     in local/test modes.
+   * @return {string}
+   * @VisibleForTesting
+   */
+  getLibScriptUrl(opt_forceProdUrl) {
+    if ((getMode().localDev || getMode().test) && !opt_forceProdUrl) {
+      const loc = this.ampWin_.parent.location;
+      return `${loc.protocol}//${loc.host}/dist/iframe-transport-client-lib.js`;
+    }
+    return urls.thirdParty +
+        '/$internalRuntimeVersion$/iframe-transport-client-v0.js';
   }
 
   /**
@@ -180,12 +197,14 @@ export class IframeTransport {
   sendRequest(event) {
     const frameData = IframeTransport.getFrameData(this.type_);
     dev().assert(frameData, 'Trying to send message to non-existent frame');
-    dev().assert(frameData.queue, 'Event queue is missing for ' + this.id_);
+    dev().assert(frameData.queue,
+        'Event queue is missing for messages from ' + this.type_ +
+        ' to creative ID ' + this.creativeId_);
     frameData.queue.enqueue(
         /**
          * @type {!../../../src/3p-frame-messaging.IframeTransportEvent}
          */
-        ({transportId: this.id_, message: event}));
+        ({creativeId: this.creativeId_, message: event}));
   }
 
   /**
@@ -211,8 +230,8 @@ export class IframeTransport {
    * @returns {!string} Unique ID of this instance of IframeTransport
    * @VisibleForTesting
    */
-  getId() {
-    return this.id_;
+  getCreativeId() {
+    return this.creativeId_;
   }
 
   /**

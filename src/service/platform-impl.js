@@ -80,7 +80,10 @@ export class Platform {
    * @return {boolean}
    */
   isOpera() {
-    return /OPR|Opera|OPiOS/i.test(this.navigator_.userAgent);
+    // Chrome UA on Android may include OPR<v> (build code referring to Oreo),
+    // however real Opera puts put a / after OPR and that's the only tell, so
+    // we check for OPR/ instead of OPR
+    return /OPR\/|Opera|OPiOS/i.test(this.navigator_.userAgent);
   }
 
   /**

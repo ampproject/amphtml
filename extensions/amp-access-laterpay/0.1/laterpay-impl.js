@@ -24,8 +24,20 @@ import {removeChildren} from '../../../src/dom';
 import {Services} from '../../../src/services';
 
 const TAG = 'amp-access-laterpay';
-const CONFIG_URL = 'https://connector.laterpay.net';
-const SANDBOX_CONFIG_URL = 'https://connector.sandbox.laterpaytest.net';
+
+const CONFIG_URLS = {
+  live: {
+    eu: 'https://connector.laterpay.net',
+    us: 'https://connector.uselaterpay.com',
+  },
+  sandbox: {
+    eu: 'https://connector.sandbox.laterpaytest.net',
+    us: 'https://connector.sandbox.uselaterpaytest.com',
+  },
+};
+
+const DEFAULT_REGION = 'eu';
+
 const CONFIG_BASE_PATH = '/api/public/amp?' +
                          'article_url=CANONICAL_URL' +
                          '&amp_reader_id=READER_ID' +
@@ -49,6 +61,7 @@ const DEFAULT_MESSAGES = {
  *   scrollToTopAfterAuth: (boolean|undefined),
  *   locale: (string|undefined),
  *   localeMessages: (Object|undefined),
+ *   region: (string|undefined),
  *   sandbox: (boolean|undefined),
  * }}
  */
@@ -61,7 +74,6 @@ let LaterpayConfigDef;
  *   purchase_type: !string,
  *   purchase_url: !string,
  *   title: !string,
- *   tp_title: !string,
  *   validity_unit: !string,
  *   validity_value: !number
  * }}
@@ -158,15 +170,16 @@ export class LaterpayVendor {
    * @return {!string}
    */
   getConfigUrl_() {
+    const region = this.laterpayConfig_['region'] || DEFAULT_REGION;
     if (
       (getMode().localDev || getMode().development) &&
       this.laterpayConfig_['configUrl']
     ) {
       return this.laterpayConfig_['configUrl'];
     } else if (this.laterpayConfig_['sandbox']) {
-      return SANDBOX_CONFIG_URL;
+      return CONFIG_URLS.sandbox[region];
     } else {
-      return CONFIG_URL;
+      return CONFIG_URLS.live[region];
     }
   }
 
@@ -301,7 +314,7 @@ export class LaterpayVendor {
     }
     this.renderTextBlock_('header');
     const listContainer = this.createElement_('ul');
-    this.purchaseConfig_['premiumcontent']['tp_title'] =
+    this.purchaseConfig_['premiumcontent']['title'] =
       this.i18n_['premiumContentTitle'];
     this.purchaseConfig_['premiumcontent']['description'] =
         this.getArticleTitle_();
@@ -382,13 +395,13 @@ export class LaterpayVendor {
   createPurchaseOption_(option) {
     const li = this.createElement_('li');
     const control = this.createElement_('label');
-    control.for = option['tp_title'];
+    control.for = option['title'];
     control.appendChild(this.createRadioControl_(option));
     const metadataContainer = this.createElement_('div');
     metadataContainer.className = TAG + '-metadata';
     const title = this.createElement_('span');
     title.className = TAG + '-title';
-    title.textContent = option['tp_title'];
+    title.textContent = option['title'];
     metadataContainer.appendChild(title);
     const description = this.createElement_('p');
     description.className = TAG + '-description';
@@ -409,7 +422,7 @@ export class LaterpayVendor {
     const radio = this.createElement_('input');
     radio.name = 'purchaseOption';
     radio.type = 'radio';
-    radio.id = option['tp_title'];
+    radio.id = option['title'];
     radio.value = option['purchase_url'];
     const purchaseType = option['purchase_type'] === 'ppu' ?
       'payLater' :

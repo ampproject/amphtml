@@ -15,13 +15,13 @@
  */
 'use strict';
 
-var BBPromise = require('bluebird');
-var argv = require('minimist')(process.argv.slice(2));
-var child_process = require('child_process');
-var exec = BBPromise.promisify(child_process.exec);
-var fs = BBPromise.promisifyAll(require('fs'));
-var gulp = require('gulp-help')(require('gulp'));
-var util = require('gulp-util');
+const BBPromise = require('bluebird');
+const argv = require('minimist')(process.argv.slice(2));
+const childProcess = require('child_process');
+const exec = BBPromise.promisify(childProcess.exec);
+const fs = BBPromise.promisifyAll(require('fs'));
+const gulp = require('gulp-help')(require('gulp'));
+const util = require('gulp-util');
 
 
 /**
@@ -31,8 +31,8 @@ var util = require('gulp-util');
  * @return {number}
  */
 function numConfigs(str) {
-  var re = /\/\*AMP_CONFIG\*\//g;
-  var matches = str.match(re)
+  const re = /\/\*AMP_CONFIG\*\//g;
+  const matches = str.match(re);
   return matches == null ? 0 : matches.length;
 }
 
@@ -42,7 +42,8 @@ function numConfigs(str) {
  * @param {string} str
  */
 function sanityCheck(str) {
-  if (numConfigs(str) != 1) {
+  const numMatches = numConfigs(str);
+  if (numMatches != 1) {
     throw new Error(
       'Found ' + numMatches + ' AMP_CONFIG(s) before write. Aborting!');
   }
@@ -50,14 +51,15 @@ function sanityCheck(str) {
 
 /**
  * @param {string} filename
+ * @param {string} opt_local
  * @param {string=} opt_branch
  * @return {!Promise}
  */
-function checkoutBranchConfigs(filename, opt_branch) {
-  if (argv.local) {
+function checkoutBranchConfigs(filename, opt_local, opt_branch) {
+  if (opt_local) {
     return Promise.resolve();
   }
-  var branch = opt_branch || 'origin/master';
+  const branch = opt_branch || 'origin/master';
   // One bad path here will fail the whole operation.
   return exec(`git checkout ${branch} ${filename}`)
       .catch(function(e) {
@@ -101,15 +103,78 @@ function writeTarget(filename, fileString, opt_dryrun) {
  * @return {string}
  */
 function valueOrDefault(value, defaultValue) {
-  if (typeof value == 'string') {
+  if (typeof value === 'string') {
     return value;
   }
   return defaultValue;
 }
 
+/**
+ * @param {string} config
+ * @param {string} target
+ * @param {string} filename
+ * @param {string} opt_local
+ * @param {string} opt_branch
+ * @return {!Promise}
+ */
+function applyConfig(config, target, filename, opt_local, opt_branch) {
+  return checkoutBranchConfigs(filename, opt_local, opt_branch)
+      .then(() => {
+        return Promise.all([
+          fs.readFileAsync(filename),
+          fs.readFileAsync(target),
+        ]);
+      })
+      .then(files => {
+        let configFile;
+        try {
+          configFile = JSON.stringify(JSON.parse(files[0].toString()));
+        } catch (e) {
+          util.log(util.colors.red(`Error parsing config file: ${filename}`));
+          throw e;
+        }
+        const targetFile = files[1].toString();
+        return prependConfig(configFile, targetFile);
+      })
+      .then(fileString => {
+        sanityCheck(fileString);
+        return writeTarget(target, fileString, argv.dryrun);
+      })
+      .then(() => {
+        if (!process.env.TRAVIS) {
+          util.log('Wrote', util.colors.cyan(config), 'AMP config to',
+              util.colors.cyan(target));
+        }
+      });
+}
+
+/**
+ * @param {string} target
+ * @return {!Promise}
+ */
+function removeConfig(target) {
+  return fs.readFileAsync(target)
+      .then(file => {
+        let contents = file.toString();
+        if (numConfigs(contents) == 0) {
+          util.log('No configs found in', util.colors.cyan(target));
+          return Promise.resolve();
+        }
+        sanityCheck(contents);
+        const config =
+        /self\.AMP_CONFIG\|\|\(self\.AMP_CONFIG=.*?\/\*AMP_CONFIG\*\//;
+        contents = contents.replace(config, '');
+        return writeTarget(target, contents, argv.dryrun).then(() => {
+          if (!process.env.TRAVIS) {
+            util.log('Removed existing config from', util.colors.cyan(target));
+          }
+        });
+      });
+}
+
 function main() {
-  var TESTING_HOST = process.env.AMP_TESTING_HOST;
-  var target = argv.target || TESTING_HOST;
+  const TESTING_HOST = process.env.AMP_TESTING_HOST;
+  const target = argv.target || TESTING_HOST;
 
   if (!target) {
     util.log(util.colors.red('Missing --target.'));
@@ -117,15 +182,7 @@ function main() {
   }
 
   if (argv.remove) {
-    return fs.readFileAsync(target)
-    .then(file => {
-      var contents = file.toString();
-      sanityCheck(contents);
-      var config =
-          /self\.AMP_CONFIG\|\|\(self\.AMP_CONFIG=.*?\/\*AMP_CONFIG\*\//;
-      contents = contents.replace(config, '');
-      return writeTarget(target, contents, argv.dryrun);
-    });
+    return removeConfig(target);
   }
 
   if (!(argv.prod || argv.canary)) {
@@ -133,11 +190,11 @@ function main() {
     return;
   }
 
-  var globs = [].concat(argv.files).filter(x => typeof x == 'string');
-  var branch = argv.branch;
-  var filename = '';
+  const branch = argv.branch;
+  let filename = '';
 
   // Prod by default.
+  const config = argv.canary ? 'canary' : 'prod';
   if (argv.canary) {
     filename = valueOrDefault(argv.canary,
         'build-system/global-configs/canary-config.json');
@@ -145,28 +202,9 @@ function main() {
     filename = valueOrDefault(argv.prod,
         'build-system/global-configs/prod-config.json');
   }
-  return checkoutBranchConfigs(filename, branch)
-      .then(() => {
-       return Promise.all([
-         fs.readFileAsync(filename),
-         fs.readFileAsync(target),
-       ]);
-      })
-      .then(files => {
-        var configFile;
-        try {
-          configFile = JSON.stringify(JSON.parse(files[0].toString()));
-        } catch (e) {
-          util.log(util.colors.red(`Error parsing config file: ${filename}`));
-          throw e;
-        }
-        var targetFile = files[1].toString();
-        return prependConfig(configFile, targetFile);
-      })
-      .then(fileString => {
-        sanityCheck(fileString);
-        return writeTarget(target, fileString, argv.dryrun);
-      });
+  return removeConfig(target).then(() => {
+    return applyConfig(config, target, filename, argv.local, branch);
+  });
 }
 
 gulp.task('prepend-global', 'Prepends a json config to a target file', main, {
@@ -181,7 +219,7 @@ gulp.task('prepend-global', 'Prepends a json config to a target file', main, {
     'local': '  Don\'t switch branches and use local config',
     'remove': '  Removes previously prepended json config from the target ' +
         'file (if present).',
-  }
+  },
 });
 
 exports.checkoutBranchConfigs = checkoutBranchConfigs;
@@ -190,3 +228,5 @@ exports.writeTarget = writeTarget;
 exports.valueOrDefault = valueOrDefault;
 exports.sanityCheck = sanityCheck;
 exports.numConfigs = numConfigs;
+exports.removeConfig = removeConfig;
+exports.applyConfig = applyConfig;

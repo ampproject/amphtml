@@ -162,8 +162,9 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     this.initTime_ = initTime;
 
     /** @const {!function():number} */
-    this.getDeltaTime = (win.performance && win.performance.now.bind(
-        win.performance)) || (() => {return Date.now() - this.initTime_;});
+    this.getDeltaTime = (win.performance && win.performance.now) ?
+        win.performance.now.bind(win.performance) :
+        () => Date.now() - this.initTime_;
 
     /** (Not constant b/c this can be overridden for testing.) @private */
     this.pingbackAddress_ = 'https://csi.gstatic.com/csi';

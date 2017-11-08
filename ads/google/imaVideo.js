@@ -15,6 +15,9 @@
  */
 
 import {camelCaseToTitleCase, setStyle} from '../../src/style';
+import {
+  ImaPlayerData,
+} from './ima-player-data';
 import {isObject} from '../../src/types';
 import {loadScript} from '../../3p/3p';
 import {tryParseJson} from '../../src/json';
@@ -167,6 +170,9 @@ let videoWidth, videoHeight;
 
 // IMASettings provided via <script> tag in parent element.
 let imaSettings;
+
+// Player data used for video analytics.
+const playerData = new ImaPlayerData();
 
 /**
  * Loads the IMA SDK library.
@@ -477,6 +483,7 @@ function changeIcon(element, name, fill = '#FFFFFF') {
 export function onClick(global) {
   playbackStarted = true;
   uiTicker = setInterval(uiTickerClick, 500);
+  setInterval(playerDataTick, 1000);
   bigPlayDiv.removeEventListener(interactEvent, onClick);
   setStyle(bigPlayDiv, 'display', 'none');
   adDisplayContainer.initialize();
@@ -627,6 +634,23 @@ export function onContentResumeRequested() {
  */
 function uiTickerClick() {
   updateUi(videoPlayer.currentTime, videoPlayer.duration);
+}
+
+/**
+ *  Called when our player data timer goes off. Sends a message to the parent
+ *  iframe to update the player data.
+ */
+function playerDataTick() {
+  // Skip while ads are active in case of custom playback. No harm done for
+  // non-custom playback because content won't be progressing while ads are
+  // playing.
+  if (videoPlayer && !adsActive) {
+    playerData.update(videoPlayer);
+    window.parent./*OK*/postMessage({
+      event: ImaPlayerData.IMA_PLAYER_DATA,
+      data: playerData,
+    }, '*');
+  }
 }
 
 /**

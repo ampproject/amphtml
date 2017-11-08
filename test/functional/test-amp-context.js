@@ -60,19 +60,19 @@ describe('3p ampcontext.js', () => {
     windowMessageHandler = undefined;
   });
 
-  it('should send error message with report3pError_', () => {
+  it('should send error message with report3pError', () => {
     win.name = generateSerializedAttributes();
     const context = new AmpContext(win);
     expect(context).to.be.ok;
 
     // Resetting since a message is sent on construction.
     windowPostMessageSpy.reset();
-    win.onerror('message');
+    context.report3pError(new Error('test'));
     expect(windowPostMessageSpy).to.be.called;
     expect(windowPostMessageSpy).to.be.calledWith(serializeMessage(
         'user-error-in-iframe',
         '1-291921',
-        {'message': 'message'},
+        {'message': 'test'},
         '$internalRuntimeVersion$'
       ));
   });

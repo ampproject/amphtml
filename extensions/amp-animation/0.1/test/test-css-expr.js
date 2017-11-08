@@ -61,6 +61,9 @@ describe('CSS parse', () => {
           `, ${n.selector_ ? '"' + n.selector_ + '"' : null}` +
           `, ${n.selectionMethod_}>`;
     }
+    if (n instanceof ast.CssNumConvertNode) {
+      return `NUMC<${n.value_ ? pseudo(n.value_) : null}>`;
+    }
     if (n instanceof ast.CssRandNode) {
       return `RAND<${n.left_ ? pseudo(n.left_) : null}` +
           `, ${n.right_ ? pseudo(n.right_) : null}>`;
@@ -272,6 +275,23 @@ describe('CSS parse', () => {
         .to.equal('DIM<w, ".sel", closest>');
     expect(parsePseudo('height(closest(".sel"))'))
         .to.equal('DIM<h, ".sel", closest>');
+  });
+
+  it('should parse a num-convert function', () => {
+    expect(parsePseudo('num(10)'))
+        .to.equal('NUMC<NUM<10>>');
+    expect(parsePseudo('num(10px)'))
+        .to.equal('NUMC<LEN<10 PX>>');
+    expect(parsePseudo('num(10em)'))
+        .to.equal('NUMC<LEN<10 EM>>');
+    expect(parsePseudo('num(10s)'))
+        .to.equal('NUMC<TME<10 S>>');
+    expect(parsePseudo('num(10rad)'))
+        .to.equal('NUMC<ANG<10 RAD>>');
+    expect(parsePseudo('num(10%)'))
+        .to.equal('NUMC<PRC<10>>');
+    expect(parsePseudo('num(var(--x))'))
+        .to.equal('NUMC<VAR<--x>>');
   });
 
   it('should parse a rand function', () => {
@@ -1088,6 +1108,93 @@ describes.sandboxed('CSS resolve', {}, () => {
     it('should resolve height on the selected closest node', () => {
       const node = new ast.CssDimSizeNode('h', '.class > div', 'closest');
       expect(node.calc(context).css()).to.equal('224px');
+    });
+  });
+
+  describe('num-convert', () => {
+    it('should always consider as non-const', () => {
+      expect(ast.isVarCss('num(10px)')).to.be.true;
+      expect(ast.isVarCss('num(10em)', normalize)).to.be.true;
+    });
+
+    it('should always be a non-const and no css', () => {
+      const node = new ast.CssNumConvertNode();
+      expect(node.isConst()).to.equal(false);
+      expect(() => node.css()).to.throw(/no css/);
+    });
+
+    it('should resolve num from a number', () => {
+      const node = new ast.CssNumConvertNode(
+          new ast.CssNumberNode(10));
+      expect(resolvedCss(node)).to.equal('10');
+    });
+
+    it('should resolve num from a zero', () => {
+      const node = new ast.CssNumConvertNode(
+          new ast.CssNumberNode(0));
+      expect(resolvedCss(node)).to.equal('0');
+    });
+
+    it('should resolve num from a length', () => {
+      const node = new ast.CssNumConvertNode(
+          new ast.CssLengthNode(10, 'px'));
+      expect(resolvedCss(node)).to.equal('10');
+    });
+
+    it('should resolve num from a zero length', () => {
+      const node = new ast.CssNumConvertNode(
+          new ast.CssLengthNode(0, 'px'));
+      expect(resolvedCss(node)).to.equal('0');
+    });
+
+    it('should resolve num from a time', () => {
+      const node = new ast.CssNumConvertNode(
+          new ast.CssTimeNode(10, 's'));
+      expect(resolvedCss(node)).to.equal('10');
+      expect(resolvedCss(node, normalize)).to.equal('10000');
+    });
+
+    it('should resolve num from a percent', () => {
+      const node = new ast.CssNumConvertNode(
+          new ast.CssPercentNode(10));
+      expect(resolvedCss(node)).to.equal('10');
+
+      contextMock.expects('getDimension').returns('w').atLeast(1);
+      contextMock.expects('getCurrentElementSize')
+          .returns({width: 110, height: 220}).atLeast(1);
+      expect(resolvedCss(node, normalize)).to.equal('11');
+    });
+
+    it('should resolve num from an expression', () => {
+      contextMock.expects('getVar')
+          .withExactArgs('--var1')
+          .returns(new ast.CssLengthNode(100, 'px'))
+          .once();
+      const node = new ast.CssNumConvertNode(
+          new ast.CssVarNode('--var1'));
+      expect(resolvedCss(node)).to.equal('100');
+    });
+
+    it('should resolve num with a null arg', () => {
+      contextMock.expects('getVar')
+          .withExactArgs('--var1')
+          .returns(null)
+          .once();
+      const node = new ast.CssNumConvertNode(
+          new ast.CssVarNode('--var1'));
+      expect(resolvedCss(node)).to.be.null;
+    });
+
+    it('should resolve num from a string', () => {
+      const node = new ast.CssNumConvertNode(
+          new ast.CssPassthroughNode('11x'));
+      expect(resolvedCss(node)).to.equal('11');
+    });
+
+    it('should resolve num from a non-parseable string', () => {
+      const node = new ast.CssNumConvertNode(
+          new ast.CssPassthroughNode('A'));
+      expect(resolvedCss(node)).to.be.null;
     });
   });
 

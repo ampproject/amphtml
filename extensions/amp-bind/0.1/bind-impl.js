@@ -791,6 +791,12 @@ export class Bind {
     switch (property) {
       case 'text':
         element.textContent = String(newValue);
+        // Setting `textContent` on TEXTAREA element only works if user
+        // has not interacted with the element, therefore `value` also needs
+        // to be set (but `value` is not an attribute on TEXTAREA)
+        if (element.tagName == 'TEXTAREA') {
+          element.value = String(newValue);
+        }
         break;
 
       case 'class':
