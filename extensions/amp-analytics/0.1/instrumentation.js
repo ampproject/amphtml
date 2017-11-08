@@ -20,14 +20,14 @@ import {
 } from './analytics-root';
 import {
   AnalyticsEvent,
-  ClickEventTracker,
   CustomEventTracker,
-  IniLoadTracker,
-  SignalTracker,
-  TimerEventTracker,
-  VideoEventTracker,
-  VisibilityTracker,
 } from './events';
+import {
+  AnalyticsEventType,
+  getTrackerTypesForRootType,
+  isReservedTriggerType,
+  isVideoTriggerType,
+} from './event-types';
 import {Observable} from '../../../src/observable';
 import {dev, user} from '../../../src/log';
 import {
@@ -49,71 +49,6 @@ const VAR_V_SCROLL_BOUNDARY = 'verticalScrollBoundary';
 const PROP = '__AMP_AN_ROOT';
 
 
-/**
- * Events that can result in analytics data to be sent.
- * @const
- * @enum {string}
- */
-export const AnalyticsEventType = {
-  VISIBLE: 'visible',
-  CLICK: 'click',
-  TIMER: 'timer',
-  SCROLL: 'scroll',
-  HIDDEN: 'hidden',
-};
-
-const ALLOWED_FOR_ALL = ['ampdoc', 'embed'];
-
-/**
- * Events that can result in analytics data to be sent.
- * @const {!Object<string, {
- *     name: string,
- *     allowedFor: !Array<string>,
- *     klass: function(new:./events.EventTracker)
- *   }>}
- */
-const EVENT_TRACKERS = {
-  'click': {
-    name: 'click',
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: ClickEventTracker,
-  },
-  'custom': {
-    name: 'custom',
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: CustomEventTracker,
-  },
-  'render-start': {
-    name: 'render-start',
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: SignalTracker,
-  },
-  'ini-load': {
-    name: 'ini-load',
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: IniLoadTracker,
-  },
-  'timer': {
-    name: 'timer',
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: TimerEventTracker,
-  },
-  'visible': {
-    name: 'visible',
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: VisibilityTracker,
-  },
-  'hidden': {
-    name: 'visible', // Reuse tracker with visibility
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: VisibilityTracker,
-  },
-  'video': {
-    name: 'video',
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: VideoEventTracker,
-  },
-};
 
 /** @const {string} */
 const TAG = 'Analytics.Instrumentation';
@@ -443,55 +378,28 @@ export class AnalyticsGroup {
    * @param {function(!AnalyticsEvent)} handler
    */
   addTrigger(config, handler) {
-    const tracker = this.getTracker_(config);
+    const eventType = dev().assertString(config['on']);
+    let trackerKey = isVideoTriggerType(eventType) ? 'video' : eventType;
+    if (!isReservedTriggerType(trackerKey)) {
+      trackerKey = 'custom';
+    }
+
+    // TODO(pomeroyr): resolve the case where deprecated listener types would result in user().assert here
+    const trackerWhitelist = getTrackerTypesForRootType(this.root_.getType());
+    const tracker = this.root_.getTrackerForWhitelist(
+        trackerKey, trackerWhitelist);
+    user().assert(!!tracker && !isReservedTriggerType(trackerKey),
+        'Trigger type "%s" is not allowed in the %s', eventType,
+        this.root_.getType());
     if (tracker) {
-      const eventType = this.getEventType_(config);
       const unlisten = tracker.add(this.analyticsElement_, eventType, config,
-          handler, this.getTracker_.bind(this));
+          handler);
       this.listeners_.push(unlisten);
     } else {
       // TODO(dvoytenko): remove this use and `addListenerDepr_` once all
       // triggers have been migrated..
       this.service_.addListenerDepr_(config, handler, this.analyticsElement_);
     }
-  }
-
-  /**
-   * Parses the correct event type out of the config.
-   *
-   * @param {!JsonObject} config
-   * @return {string}
-   * @private
-   */
-  getEventType_(config) {
-    return dev().assertString(config['on']);
-  }
-
-  /**
-   * Provides the tracker for the given config.
-   *
-   * @param {!JsonObject} config
-   * @return {./events.EventTracker} tracker
-   * @private
-   */
-  getTracker_(config) {
-    const eventType = this.getEventType_(config);
-    const trackerKey = startsWith(eventType, 'video-') ? 'video' : eventType;
-
-    let trackerProfile = EVENT_TRACKERS[trackerKey];
-    if (!trackerProfile && !isEnumValue(AnalyticsEventType, eventType)) {
-      trackerProfile = EVENT_TRACKERS['custom'];
-    }
-    if (trackerProfile) {
-      user().assert(
-          trackerProfile.allowedFor.indexOf(this.root_.getType()) != -1,
-          'Trigger type "%s" is not allowed in the %s',
-          eventType, this.root_.getType());
-      const tracker = this.root_.getTracker(
-          trackerProfile.name, trackerProfile.klass);
-      return tracker;
-    }
-    return null; // Make non-null when all trackers are migrated.
   }
 }
 

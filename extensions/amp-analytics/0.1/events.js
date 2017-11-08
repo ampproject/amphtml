@@ -95,12 +95,10 @@ export class EventTracker {
    * @param {string} unusedEventType
    * @param {!JsonObject} unusedConfig
    * @param {function(!AnalyticsEvent)} unusedListener
-   * @param {function(!JsonObject): EventTracker} unusedTrackerProvider
    * @return {!UnlistenDef}
    * @abstract
    */
-  add(unusedContext, unusedEventType, unusedConfig, unusedListener,
-      unusedTrackerProvider) {}
+  add(unusedContext, unusedEventType, unusedConfig, unusedListener) {}
 }
 
 
@@ -149,7 +147,7 @@ export class CustomEventTracker extends EventTracker {
   }
 
   /** @override */
-  add(context, eventType, config, listener, unusedTrackerProvider) {
+  add(context, eventType, config, listener) {
     let selector = config['selector'];
     if (!selector) {
       selector = ':root';
@@ -261,7 +259,7 @@ export class ClickEventTracker extends EventTracker {
   }
 
   /** @override */
-  add(context, eventType, config, listener, unusedTrackerProvider) {
+  add(context, eventType, config, listener) {
     const selector = user().assert(config['selector'],
         'Missing required selector on click trigger');
     const selectionMethod = config['selectionMethod'] || null;
@@ -305,7 +303,7 @@ export class SignalTracker extends EventTracker {
   }
 
   /** @override */
-  add(context, eventType, config, listener, unusedTrackerProvider) {
+  add(context, eventType, config, listener) {
     let target;
     let signalsPromise;
     const selector = config['selector'] || ':root';
@@ -365,7 +363,7 @@ export class IniLoadTracker extends EventTracker {
   }
 
   /** @override */
-  add(context, eventType, config, listener, unusedTrackerProvider) {
+  add(context, eventType, config, listener) {
     let target;
     let promise;
     const selector = config['selector'] || ':root';
@@ -572,7 +570,7 @@ export class TimerEventTracker extends EventTracker {
   }
 
   /** @override */
-  add(context, eventType, config, listener, trackerProvider) {
+  add(context, eventType, config, listener) {
     const timerSpec = config['timerSpec'];
     user().assert(timerSpec && typeof timerSpec == 'object',
         'Bad timer specification');
@@ -599,21 +597,18 @@ export class TimerEventTracker extends EventTracker {
     let startBuilder;
     let stopBuilder;
     if (!!timerStart) {
-      const startTracker = trackerProvider(timerStart);
+      const startTracker = this.getTracker(timerStart);
       user().assert(startTracker, 'Cannot track timer start');
-      // TODO(pomeroyr): check eventtype against allowed timer trackers
       startBuilder = startTracker.add.bind(startTracker, context,
           timerStart['on'], timerStart,
-          this.handleTimerToggle_.bind(this, timerId, eventType, listener),
-          trackerProvider);
+          this.handleTimerToggle_.bind(this, timerId, eventType, listener));
     }
     if (!isUnstoppableTimer) {
-      const stopTracker = trackerProvider(timerStop);
+      const stopTracker = this.getTracker(timerStop);
       user().assert(stopTracker, 'Cannot tracker timer stop');
       stopBuilder = stopTracker.add.bind(stopTracker, context,
           timerStop['on'], timerStop,
-          this.handleTimerToggle_.bind(this, timerId, eventType, listener),
-          trackerProvider);
+          this.handleTimerToggle_.bind(this, timerId, eventType, listener));
     }
 
     const timerHandler = new TimerEventHandler(interval, maxTimerLength,
@@ -638,6 +633,23 @@ export class TimerEventTracker extends EventTracker {
    */
   generateTimerId_() {
     return ++this.timerIdSequence_;
+  }
+
+  /**
+   * @param {!JsonObject}
+   * @return {?EventTracker}
+   */
+  getTracker(config) {
+    let trackerType = user().assertString(config['on']);
+    if (isVideoTrackerType(trackerType)) {
+      trackerType = 'video';
+    }
+    if (!isReservedTrackerType(trackerType)) {
+      trackerType = 'custom';
+    }
+
+    return this.root.getTrackerForWhitelist(
+        trackerType, SUPPORT_TIMER_NESTED_TRIGGER);
   }
 
   /**
@@ -722,6 +734,17 @@ export class TimerEventTracker extends EventTracker {
   }
 }
 
+/** @const @private */
+const SUPPORT_TIMER_NESTED_TRIGGER = {
+  'click': ClickEventTracker,
+  'custom': CustomEventTracker,
+  'render-start': SignalTracker,
+  'ini-load': IniLoadTracker,
+  'visible': VisibilityTracker,
+  'hidden': VisibilityTracker,
+  'video': VideoEventTracker,
+};
+
 
 /**
  * Tracks video session events
@@ -758,7 +781,7 @@ export class VideoEventTracker extends EventTracker {
   }
 
   /** @override */
-  add(context, eventType, config, listener, unusedTrackerProvider) {
+  add(context, eventType, config, listener) {
     const videoSpec = config['videoSpec'] || {};
     const selector = config['selector'] || videoSpec['selector'];
     const selectionMethod = config['selectionMethod'] || null;
@@ -835,7 +858,7 @@ export class VisibilityTracker extends EventTracker {
   }
 
   /** @override */
-  add(context, eventType, config, listener, unusedTrackerProvider) {
+  add(context, eventType, config, listener) {
     const visibilitySpec = config['visibilitySpec'] || {};
     const selector = config['selector'] || visibilitySpec['selector'];
     const waitForSpec = visibilitySpec['waitFor'];

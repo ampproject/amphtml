@@ -15,7 +15,6 @@
  */
 
 import {
-  AnalyticsEventType,
   InstrumentationService,
 } from '../instrumentation.js';
 import {
@@ -26,6 +25,7 @@ import {
   TimerEventTracker,
   VisibilityTracker,
 } from '../events';
+import {AnalyticsEventType} from '../event-types';
 import * as sinon from 'sinon';
 
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
