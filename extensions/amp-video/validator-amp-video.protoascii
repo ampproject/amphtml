@@ -15,6 +15,8 @@
 #
 
 tags: {  # amp-video
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "SCRIPT"
   # Typically the extension_spec takes care of this, but we have
   # a unique situation where we need to refer to this earlier in
@@ -87,6 +89,8 @@ attr_lists: {
 }
 
 tags: {  # <amp-video>
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "AMP-VIDEO"
   # amp-story is disallowed_ancestor because the 'poster' attr is optional here.
   disallowed_ancestor: "AMP-STORY"
@@ -109,6 +113,8 @@ tags: {  # <amp-video>
 }
 
 tags: {  # <amp-video>
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "AMP-VIDEO"
   spec_name: "amp-story >> amp-video"
   mandatory_ancestor: "AMP-STORY"

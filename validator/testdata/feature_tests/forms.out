@@ -1,8 +1,5 @@
 FAIL
 feature_tests/forms.html:82:2 Invalid URL protocol 'http:' for attribute 'action-xhr' in tag 'FORM [method=POST]'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
-feature_tests/forms.html:86:2 The domain 'cdn.ampproject.org' for attribute 'action-xhr' in tag 'FORM [method=POST]' is disallowed. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
-feature_tests/forms.html:90:2 The domain 'example-com.cdn.ampproject.org' for attribute 'action-xhr' in tag 'FORM [method=POST]' is disallowed. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
-feature_tests/forms.html:94:2 The domain 'example-com.amp.cloudflare.com' for attribute 'action-xhr' in tag 'FORM [method=POST]' is disallowed. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 feature_tests/forms.html:102:2 The attribute 'target' in tag 'FORM [method=POST]' is set to the invalid value '_new'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 feature_tests/forms.html:113:4 The attribute 'type' in tag 'input' is set to the invalid value 'button'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 feature_tests/forms.html:114:4 The attribute 'type' in tag 'input' is set to the invalid value 'file'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]

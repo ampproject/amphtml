@@ -20,11 +20,12 @@
  *   Copyright 2009, The Closure Library Authors, licensed under the
  *   Apache License.
  */
+
+goog.provide('amp.htmlparser.HtmlParserTest');
 goog.require('amp.htmlparser.HtmlParser');
 goog.require('amp.htmlparser.HtmlSaxHandler');
 goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
 
-goog.provide('amp.htmlparser.HtmlParserTest');
 
 /**
  * @private
@@ -54,16 +55,40 @@ class LoggingHandler extends amp.htmlparser.HtmlSaxHandler {
   markManufacturedBody() { this.log.push('markManufacturedBody()'); }
 
   /** @override */
-  startTag(tagName, attrs) {
-    this.log.push('startTag(' + tagName + ',[' + attrs + '])');
+  startTag(tag) {
+    tag.dedupeAttrs();
+    this.log.push(
+        'startTag(' + tag.upperName() + ',' + this.attrsToString(tag.attrs()) +
+        ')');
   }
 
   /** @override */
-  endTag(tagName) { this.log.push('endTag(' + tagName + ')'); }
+  endTag(tag) {
+    this.log.push('endTag(' + tag.upperName() + ')');
+  }
 
   /** @override */
   effectiveBodyTag(attrs) {
-    this.log.push('effectiveBodyTag([' + attrs + '])');
+    this.log.push('effectiveBodyTag(' + this.attrsToString(attrs) + ')');
+  }
+
+  /**
+   * Converts a list of attributes to a comma separated string.
+   * @param {!Array<!Object>} attrs
+   * @return {string}
+   */
+  attrsToString(attrs) {
+    let str = '[';
+    let first = true;
+    for (let attr of attrs) {
+      if (first)
+        first = false;
+      else
+        str += ',';
+      str += attr.name + ',' + attr.value;
+    }
+    str += ']';
+    return str;
   }
 }
 
@@ -113,13 +138,24 @@ describe('HtmlParser', () => {
     ]);
   });
 
+  it('parses tag with duplicate attrs', () => {
+    const handler = new LoggingHandler();
+    const parser = new amp.htmlparser.HtmlParser();
+    parser.parse(handler, '<a class=foo class=bar>');
+    expect(handler.log).toEqual([
+      'startDoc()', 'markManufacturedBody()', 'startTag(BODY,[])',
+      'startTag(A,[class,foo])', 'endTag(A)', 'endTag(BODY)',
+      'effectiveBodyTag([])', 'endDoc()'
+    ]);
+  });
+
   it('parses tag with boolean attr', () => {
     const handler = new LoggingHandler();
     const parser = new amp.htmlparser.HtmlParser();
     parser.parse(handler, '<input type=checkbox checked>');
     expect(handler.log).toEqual([
       'startDoc()', 'markManufacturedBody()', 'startTag(BODY,[])',
-      'startTag(INPUT,[type,checkbox,checked,])', 'endTag(INPUT)',
+      'startTag(INPUT,[checked,,type,checkbox])', 'endTag(INPUT)',
       'endTag(BODY)', 'effectiveBodyTag([])', 'endDoc()'
     ]);
   });
@@ -216,7 +252,7 @@ describe('HtmlParser', () => {
     parser.parse(handler, '<a href="foo.html""></a>');
     expect(handler.log).toEqual([
       'startDoc()', 'markManufacturedBody()', 'startTag(BODY,[])',
-      'startTag(A,[href,foo.html,",])', 'endTag(A)', 'endTag(BODY)',
+      'startTag(A,[",,href,foo.html])', 'endTag(A)', 'endTag(BODY)',
       'effectiveBodyTag([])', 'endDoc()'
     ]);
   });
@@ -330,17 +366,38 @@ class LoggingHandlerWithLocation extends
   }
 
   /** @override */
-  startTag(tagName, attrs) {
+  startTag(tag) {
+    tag.dedupeAttrs();
     this.log.push(
         ':' + this.locator.getLine() + ':' + this.locator.getCol() +
-        ': startTag(' + tagName + ',[' + attrs + '])');
+        ': startTag(' + tag.upperName() + ',' +
+        this.attrsToString(tag.attrs()) + ')');
   }
 
   /** @override */
-  endTag(tagName) {
+  endTag(tag) {
     this.log.push(
         ':' + this.locator.getLine() + ':' + this.locator.getCol() +
-        ': endTag(' + tagName + ')');
+        ': endTag(' + tag.upperName() + ')');
+  }
+
+  /**
+   * Converts a list of attributes to a comma separated string.
+   * @param {!Array<!Object>} attrs
+   * @return {string}
+   */
+  attrsToString(attrs) {
+    let str = '[';
+    let first = true;
+    for (let attr of attrs) {
+      if (first)
+        first = false;
+      else
+        str += ',';
+      str += attr.name + ',' + attr.value;
+    }
+    str += ']';
+    return str;
   }
 }
 
