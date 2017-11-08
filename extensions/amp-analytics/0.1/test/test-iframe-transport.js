@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {urls} from '../../../../src/config';
 import {IframeTransport} from '../iframe-transport';
 
 describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
@@ -115,5 +116,18 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
     expect(frame2.usageCount).to.equal(0);
     expect(env.win.document.getElementsByTagName('IFRAME')).to.have.lengthOf(0);
   });
-});
 
+  it('gets correct client lib URL in local/test mode', () => {
+    const url = iframeTransport.getLibScriptUrl();
+    expect(url).to.contain(env.win.location.host);
+    expect(url).to.contain('/dist/iframe-transport-client-lib.js');
+  });
+
+  it('gets correct client lib URL in prod mode', () => {
+    const url = iframeTransport.getLibScriptUrl(true);
+    expect(url).to.contain(urls.thirdParty);
+    expect(url).to.contain('/iframe-transport-client-v0.js');
+    expect(url).to.equal('https://3p.ampproject.net/$internalRuntimeVersion$/' +
+        'iframe-transport-client-v0.js');
+  });
+});
