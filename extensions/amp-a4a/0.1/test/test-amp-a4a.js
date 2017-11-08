@@ -237,15 +237,15 @@ describe('amp-a4a', () => {
 
   function verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy) {
     expect(triggerAnalyticsEventSpy).to.be.calledWith(
-        a4a.element, 'adRequestStart', {'time': sinon.match.number});
+        a4a.element, 'ad-request-start', {'time': sinon.match.number});
     expect(triggerAnalyticsEventSpy).to.be.calledWith(
-        a4a.element, 'adResponseEnd', {'time': sinon.match.number});
+        a4a.element, 'ad-response-end', {'time': sinon.match.number});
     expect(triggerAnalyticsEventSpy).to.be.calledWith(
-        a4a.element, 'adRenderStart', {'time': sinon.match.number});
+        a4a.element, 'ad-render-start', {'time': sinon.match.number});
     expect(triggerAnalyticsEventSpy).to.be.calledWith(
-        a4a.element, 'adRenderEnd', {'time': sinon.match.number});
+        a4a.element, 'ad-render-end', {'time': sinon.match.number});
     expect(triggerAnalyticsEventSpy).to.be.calledWith(
-        a4a.element, 'adIframeLoaded', {'time': sinon.match.number});
+        a4a.element, 'ad-iframe-loaded', {'time': sinon.match.number});
   }
 
   describe('ads are visible', () => {
