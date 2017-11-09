@@ -227,17 +227,6 @@ export class LayoutLayers {
   }
 
   /**
-   * Changes the element's rect size.
-   *
-   * @param {!AmpElement} element An AMP Element
-   * @param {!SizeDef} size
-   * @param {boolean=} force Whether to skip approval/denial logic
-   * TODO
-   */
-  // changeSize(element, size, force = false) {
-  // }
-
-  /**
    * Eagerly creates a Layer for the element.
    * @param {!Element} element
    */
@@ -322,7 +311,7 @@ export class LayoutElement {
    * @return {?LayoutElement}
    */
   static forOptional(element) {
-    return element[LAYOUT_PROP];
+    return element[LAYOUT_PROP] || null;
   }
 
   /**
@@ -341,15 +330,10 @@ export class LayoutElement {
     }
 
     const win = element.ownerDocument.defaultView;
-    if (computedStyle(win, element).position == 'fixed') {
-      LayoutLayers.declareLayer(element);
-      return null;
-    }
-
     let last = element;
-    let op = element.offsetParent;
-    for (let el = last.parentNode; el; el = el.parentNode) {
-      const layout = LayoutElement.forOptional(el);
+    let op = element;
+    for (let el = element; el; el = el.parentNode) {
+      const layout = el === element ? null : LayoutElement.forOptional(el);
       if (layout && layout.isLayer()) {
         return layout;
       }
