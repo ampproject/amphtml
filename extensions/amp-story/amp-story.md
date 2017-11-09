@@ -186,19 +186,21 @@ The end screen displays related articles in sections. The heading for the sectio
 
 ```json
 {
-  "More to Read": [
-    {
-      title: "My friends, this is India [...]",
-      url: "http://a-publisher.com/india"
-      image: "./media/b1.jpg"
-    },
-    {
-      title: "A wonderful weekend with Tenturi",
-      url: "http://a-publisher.com/tenturi"
-      image: "./media/b2.jpg"
-    },
-    ...
-  ],
+  "related-articles": {
+    "More to Read": [
+      {
+        title: "My friends, this is India [...]",
+        url: "http://a-publisher.com/india"
+        image: "./media/b1.jpg"
+      },
+      {
+        title: "A wonderful weekend with Tenturi",
+        url: "http://a-publisher.com/tenturi"
+        image: "./media/b2.jpg"
+      },
+      ...
+    ],
+  }
 }
 ```
 
