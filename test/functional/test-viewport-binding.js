@@ -24,7 +24,6 @@ import {
 } from '../../src/service/viewport/viewport-binding-natural';
 import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
-import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installVsyncService} from '../../src/service/vsync-impl';
 import {whenDocumentReady} from '../../src/document-ready';
 
