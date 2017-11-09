@@ -1337,6 +1337,14 @@ describe('Resources discoverWork', () => {
     expect(resource1.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
   });
 
+  it('should record layout schedule time on the resource element', () => {
+    resources.scheduleLayoutOrPreload_(resource1, true);
+
+    resources.work_();
+    expect(resource1.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+    expect(resource1.element.layoutScheduleTime).to.be.greaterThan(0);
+  });
+
   it('should not schedule resource execution outside viewport', () => {
     resources.scheduleLayoutOrPreload_(resource1, true);
     expect(resources.queue_.getSize()).to.equal(1);
