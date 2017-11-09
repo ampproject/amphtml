@@ -329,13 +329,12 @@ describes.realWin('amp-story', {
 
   it('adds event listener for buttons', () => {
     story.buildButtons_();
-    const nextButtonEventListener =
-        sandbox.stub(story.nextButton_, 'addEventListener', NOOP);
-    const prevButtonEventListener =
-        sandbox.stub(story.prevButton_, 'addEventListener', NOOP);
-    story.addButtonListeners_();
-    expect(nextButtonEventListener).to.have.been.calledWith('click');
-    expect(prevButtonEventListener).to.have.been.calledWith('click');
+    const nextStub = sandbox.stub(story, 'next_');
+    const prevStub = sandbox.stub(story, 'previous_');
+    story.nextButton_.dispatchEvent(new Event('click'));
+    story.prevButton_.dispatchEvent(new Event('click'));
+    expect(nextStub).calledOnce;
+    expect(prevStub).calledOnce;
   });
 });
 

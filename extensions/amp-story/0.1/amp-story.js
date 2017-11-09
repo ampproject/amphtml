@@ -326,10 +326,7 @@ export class AmpStory extends AMP.BaseElement {
 
     this.nextButton_ = nextButton;
     this.prevButton_ = previousButton;
-  }
 
-  /** @private */
-  addButtonListeners_() {
     this.nextButton_.addEventListener('click', () => {
       this.next_();
     });
@@ -722,7 +719,6 @@ export class AmpStory extends AMP.BaseElement {
       this.element.setAttribute('desktop','');
       if (!this.nextButton_) {
         this.buildButtons_();
-        this.addButtonListeners_();
       }
       if (!this.topBar_) {
         this.buildTopBar_();
