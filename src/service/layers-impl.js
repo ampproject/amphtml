@@ -141,13 +141,17 @@ export class LayoutLayers {
 
   remove(element) {
     const layout = LayoutElement.for(element);
-    const parent = layout.getParentLayer();
-    dev().assert(parent);
+    layout.undeclareLayer();
+    layout.forgetParentLayer();
 
-    parent.remove(element);
     const index = this.layouts_.indexOf(layout);
     if (index > -1) {
       this.layouts_.splice(index, 1);
+    }
+
+    const parent = layout.getParentLayer();
+    if (parent) {
+      parent.remove(element);
     }
   }
 
@@ -388,8 +392,6 @@ export class LayoutElement {
     const layout = LayoutElement.for(child);
     dev().assert(layout.getParentLayer() === this);
 
-    layout.undeclareLayer();
-    layout.forgetParentLayer();
     const i = this.children_.indexOf(layout);
     if (i > -1) {
       this.children_.splice(i, 1);
