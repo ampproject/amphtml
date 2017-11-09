@@ -15,7 +15,6 @@
  */
 
 import {AmpStoryHint} from '../amp-story-hint';
-import {renderSimpleTemplate} from './simple-template';
 
 const NOOP = () => {};
 
@@ -29,20 +28,31 @@ describes.fakeWin('amp-story hint layer', {}, env => {
   });
 
   it('should build the UI', () => {
+    const buildNavigationOverlayStub =
+        sandbox.stub(ampStoryHint, 'buildNavigationOverlay_' , NOOP);
+    ampStoryHint.buildHintContainer();
     expect(ampStoryHint.hintContainer_).to.be.not.null;
+    expect(buildNavigationOverlayStub).to.be.calledOnce;
   });
 
   it('should be able to show navigation help overlay', () => {
-    ampStoryHint.showNavigationHelp();
+    expect(ampStoryHint.hintTimeout_).to.be.null;
+    ampStoryHint.buildHintContainer();
+    ampStoryHint.showNavigationOverlay();
     expect(ampStoryHint.hintContainer_.className).to.contain(
         'show-navigation-overlay');
+    expect(ampStoryHint.hintTimeout_).to.be.an('number');
   });
 
   it('should be able to hide shown hint', () => {
-    ampStoryHint.showNavigationHelp();
+    const clearTimeoutStub =
+        sandbox.stub(ampStoryHint.win_, 'clearTimeout', NOOP);
+    ampStoryHint.buildHintContainer();
+    ampStoryHint.showNavigationOverlay();
     ampStoryHint.hideAllNavigationHint();
     expect(ampStoryHint.hintContainer_.className).to.not.contain(
         'show-navigation-overlay');
+    expect(clearTimeoutStub).to.have.been.calledOnce;
   });
 });
 

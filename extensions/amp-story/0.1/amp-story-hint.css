@@ -4,31 +4,31 @@
   top: 0!important;
   height: 100%!important;
   width: 100%!important;
-  background: rgba(0,0,0,0.9)!important;
+  background: rgba(0,0,0,0.7)!important;
   display: none!important;
   pointer-events: none!important;
-  flex-direction: row;
-  color: #fff;
+  flex-direction: row!important;
+  color: #fff!important;
 }
 
 .i-amphtml-story-navigation-help-section{
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
+  display: flex!important;
+  align-items: center!important;
+  justify-content: center!important;
+  flex-direction: column!important;
 }
 
 .i-amphtml-story-navigation-help-first-page {
-  flex: 1;
+  flex: 1!important;
 }
 
 .i-amphtml-story-navigation-help-first-page .i-amphtml-story-hint-text {
-  padding: 16px;
+  padding: 16px!important;
 }
 
 .i-amphtml-story-navigation-help-next-page {
-  flex: 3;
-  border-left: 1px dashed white
+  flex: 3!important;
+  border-left: 1px dashed white!important;
 }
 
 .show-navigation-overlay .i-amphtml-story-navigation-help-overlay {
@@ -36,28 +36,39 @@
 }
 
 .i-amphtml-story-hint-tap-icon {
-  position: relative;
-  width: 60px;
-  height: 60px;
+  position: relative!important;
+  width: 50px!important;
+  height: 50px!important;
 }
 
 .i-amphtml-story-hint-tap-icon:before, .i-amphtml-story-hint-tap-icon:after {
-  position: absolute;
-  content: '';
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.5);
+  position: absolute!important;
+  content: ''!important;
+  width: 50px!important;
+  height: 50px!important;
+  border-radius: 50%!important;
+  background-color: rgba(255, 255, 255, 0.5)!important;
+}
+
+.i-amphtml-story-hint-tap-icon:before {
+  animation: expandingBubble 800ms infinite ease-out;
 }
 
 .i-amphtml-story-hint-tap-icon:after {
-  top: 5px;
-  left: 5px;
-  width: 50px;
-  height: 50px;
-  background-color: #fff;
+  background-color: #fff!important;
 }
 
 .i-amphtml-story-hint-tap-icon-text {
-  margin-top: 16px;
+  margin-top: 16px!important;
 }
+
+@keyframes expandingBubble {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.3);
+  }
+}
+

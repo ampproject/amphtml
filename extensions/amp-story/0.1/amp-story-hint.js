@@ -56,25 +56,34 @@ const NAVIGATION_HELP_OVERLAY = [
 ];
 
 /** @type {string} */
-const NAVIGATION_OVERLAY = 'show-navigation-overlay';
+const NAVIGATION_OVERLAY_CLASS = 'show-navigation-overlay';
 
+/** @type {number} */
+const NAVIGATION_OVERLAY_TIMEOUT = 2000;
 
 /**
  * User Hint Layer for <amp-story>.
  */
 export class AmpStoryHint {
+
   /**
    * @param {!Window} win
    */
-  constructor(window) {
+  constructor(win) {
     /** @private {!Window} */
-    this.win_ = window;
+    this.win_ = win;
 
     /** @private {!Document} */
     this.document_ = this.win_.document;
 
+    /** @private {?Storage} */
+    this.localStorage_ = this.win_.localStorage;
+
     /** @private {?Element} */
     this.hintContainer_ = null;
+
+    /** @private {?number} */
+    this.hintTimeout_ = null;
   }
 
   /**
@@ -101,14 +110,23 @@ export class AmpStoryHint {
    * Show navigation overlay DOM.
    */
   showNavigationOverlay() {
-    this.hintContainer_.classList.add(NAVIGATION_OVERLAY);
+    this.hintContainer_.classList.add(NAVIGATION_OVERLAY_CLASS);
+
+    this.hintTimeout_ = setTimeout(() => {
+      this.hideAllNavigationHint();
+    }, NAVIGATION_OVERLAY_TIMEOUT);
   }
 
   /**
    * Hide all navigation hints.
    */
   hideAllNavigationHint() {
-    this.hintContainer_.classList.remove(NAVIGATION_OVERLAY);
+    this.hintContainer_.classList.remove(NAVIGATION_OVERLAY_CLASS);
+
+    if (this.hintTimeout_) {
+      this.win_.clearTimeout(this.hintTimeout_);
+      this.hintTimeout_ = null;
+    }
   }
 }
 
