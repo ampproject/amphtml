@@ -327,6 +327,14 @@ export class AmpStory extends AMP.BaseElement {
 
     this.nextButton_ = nextButton;
     this.prevButton_ = previousButton;
+
+    this.nextButton_.addEventListener('click', () => {
+      this.next_();
+    });
+
+    this.prevButton_.addEventListener('click', () => {
+      this.previous_();
+    });
   }
 
   /** @private */
