@@ -17,6 +17,7 @@
 import {Poller} from './poller';
 import {addParamToUrl} from '../../../src/url';
 import {getMode} from '../../../src/mode';
+import {toArray} from '../../../src/types';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
@@ -47,6 +48,9 @@ export class LiveListManager {
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
+
+    /** @private @const {!../../../src/service/extensions-impl.Extensions} */
+    this.extensions_ = Services.extensionsFor(this.ampdoc.win);
 
     /** @private {number} */
     this.interval_ = 15000;
@@ -104,15 +108,6 @@ export class LiveListManager {
   }
 
   /**
-   * @param {!Document} doc
-   * @return {!Array<string>}
-   */
-  getExtensionScripts_(doc) {
-    return [].slice.call(doc
-        .querySelectorAll('script[custom-element], script[custom-template]'));
-  }
-
-  /**
    * Checks if any of the registered amp-live-list components is active/
    *
    * @return {boolean}
@@ -148,10 +143,7 @@ export class LiveListManager {
    * @param {!Document} doc
    */
   getLiveLists_(doc) {
-    const extensions = this.getExtensionScripts_(doc);
-    if (extensions.length) {
-      this.insertNewExtenstionScripts_(extensionsToInsert);
-    }
+    this.installExtensionsForDoc_(doc);
     const lists = Array.prototype.slice.call(
         doc.getElementsByTagName('amp-live-list'));
     const updateTimes = lists.map(this.updateLiveList_.bind(this));
@@ -227,14 +219,18 @@ export class LiveListManager {
   }
 
   /**
-   * @param {!Object<string, string>}
+   * @param {!Document} doc
    */
-  insertNewExtenstionScripts_(extensions) {
-    const fragment = this.win.document.createDocumentFragment();
-    Object.keys(extensions).forEach(x => {
-      fragment.appendChild(extensions[x]);
+  installExtensionsForDoc_(doc) {
+    const extensions = toArray(doc
+        .querySelectorAll('script[custom-element], script[custom-template]'));
+    extensions.forEach(script => {
+      const extensionName = script.getAttribute('custom-element') ||
+          script.getAttribute('custom-template');
+      // This is a cheap operation if extension is already installed so no need
+      // to over optimize checks.
+      this.extensions_.installExtensionForDoc(this.ampdoc, extensionName);
     });
-    this.win.document.head.appendChild(extensions);
   }
 
   /**
