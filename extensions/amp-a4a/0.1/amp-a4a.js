@@ -1667,16 +1667,16 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Checks if the given lifecycle event has a corresponding amp-analytics event
    * and fires the analytics trigger if so.
-   * @param {string} lifeycleStage
+   * @param {string} lifecycleStage
    * @private
    */
-  maybeTriggerAnalyticsEvent_(lifeycleStage) {
+  maybeTriggerAnalyticsEvent_(lifecycleStage) {
     if (!this.a4aAnalyticsConfig_) {
       // No config exists that will listen to this event.
       return;
     }
     const analyticsEvent =
-        LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER[lifeycleStage];
+        LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER[lifecycleStage];
     if (!analyticsEvent) {
       // No analytics event is defined for this lifecycle stage.
       return;
