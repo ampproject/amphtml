@@ -700,9 +700,11 @@ export class Resource {
 
   /**
    * Sets the resource's state to LAYOUT_SCHEDULED.
+   * @param {number} scheduleTime The time at which layout was scheduled.
    */
-  layoutScheduled() {
+  layoutScheduled(scheduleTime) {
     this.state_ = ResourceState.LAYOUT_SCHEDULED;
+    this.element.layoutScheduleTime = scheduleTime;
   }
 
   /**
