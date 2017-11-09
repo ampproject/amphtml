@@ -349,7 +349,7 @@ export class LayoutElement {
 
 
     // Use isConnected if available, but always pass if it's not.
-    dev().assert(node.isConnected !== false, 'element is not in the DOM tree')
+    dev().assert(element.isConnected !== false, 'element not in the DOM tree')
     return null;
   }
 
