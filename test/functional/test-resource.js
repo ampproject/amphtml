@@ -563,6 +563,26 @@ describes.realWin('Resource', {amp: true}, env => {
     });
   });
 
+  it('should record layout schedule time', () => {
+    resource.layoutScheduled(300);
+    expect(resource.element.layoutScheduleTime).to.equal(300);
+
+    // The time should be updated if scheduled multiple times.
+    resource.layoutScheduled(400);
+    expect(resource.element.layoutScheduleTime).to.equal(400);
+
+    expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+  });
+
+  it('should not record layout schedule time in startLayout', () => {
+    resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
+    resource.startLayout();
+
+    expect(resource.element.layoutScheduleTime).to.be.undefined;
+    expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+  });
+
   it('should change size and update state', () => {
     expect(resource.isMeasureRequested()).to.be.false;
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
