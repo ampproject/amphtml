@@ -393,11 +393,9 @@ describe('amp-a4a', () => {
           sandbox.spy(analytics, 'triggerAnalyticsEvent');
       a4a.onLayoutMeasure();
       const layoutPromise = a4a.layoutCallback();
-      return Promise.resolve().then(() => {
-        expect(whenIniLoadedStub).to.not.be.called;
-        iniLoadResolver();
-        return layoutPromise;
-      }).then(() => {
+      expect(whenIniLoadedStub).to.not.be.called;
+      iniLoadResolver();
+      layoutPromise.then(() => {
         verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
       });
     });
