@@ -330,7 +330,6 @@ export class LayoutElement {
     }
 
     const win = element.ownerDocument.defaultView;
-    let last = element;
     let op = element;
     for (let el = element; el; el = el.parentNode) {
       const layout = el === element ? null : LayoutElement.forOptional(el);
@@ -346,14 +345,11 @@ export class LayoutElement {
         }
         op = op.offsetParent;
       }
-
-      last = el;
     }
 
 
-    if (last.nodeType !== Node.DOCUMENT_NODE) {
-      throw dev().createError('element is not in the DOM tree');
-    }
+    // Use isConnected if available, but always pass if it's not.
+    dev().assert(node.isConnected !== false, 'element is not in the DOM tree')
     return null;
   }
 
