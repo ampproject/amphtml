@@ -17,7 +17,7 @@
 import {ActionTrust} from '../action-trust';
 import {KeyCodes} from '../utils/key-codes';
 import {Services} from '../services';
-import {debounce} from '../utils/rate-limit';
+import {debounce, throttle} from '../utils/rate-limit';
 import {dev, user} from '../log';
 import {isArray, isFiniteNumber, toWin} from '../types';
 import {isEnabled} from '../dom';
@@ -52,6 +52,9 @@ const DEFAULT_METHOD_ = 'activate';
 
 /** @const {number} */
 const DEFAULT_DEBOUNCE_WAIT = 300; // ms
+
+/** @const {number} */
+const DEFAULT_THROTTLE_INTERVAL = 100; // ms
 
 /** @const {!Object<string,!Array<string>>} */
 const ELEMENTS_ACTIONS_MAP_ = {
@@ -198,6 +201,7 @@ export class ActionService {
     this.addEvent('submit');
     this.addEvent('change');
     this.addEvent('input-debounced');
+    this.addEvent('input-throttled');
     this.addEvent('valid');
     this.addEvent('invalid');
   }
@@ -258,6 +262,18 @@ export class ActionService {
         const deferredEvent = new DeferredEvent(event);
         this.addTargetPropertiesAsDetail_(deferredEvent);
         debouncedInput(deferredEvent);
+      });
+    } else if (name == 'input-throttled') {
+      const throttledInput = throttle(this.ampdoc.win, event => {
+        const target = dev().assertElement(event.target);
+        this.trigger(target, name, /** @type {!ActionEventDef} */ (event),
+            ActionTrust.HIGH);
+      }, DEFAULT_THROTTLE_INTERVAL);
+
+      this.root_.addEventListener('input', event => {
+        const deferredEvent = new DeferredEvent(event);
+        this.addTargetPropertiesAsDetail_(deferredEvent);
+        throttledInput(deferredEvent);
       });
     } else if (name == 'valid' || name == 'invalid') {
       this.root_.addEventListener(name, event => {
