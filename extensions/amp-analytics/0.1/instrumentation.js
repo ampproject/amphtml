@@ -20,14 +20,11 @@ import {
 } from './analytics-root';
 import {
   AnalyticsEvent,
-  CustomEventTracker,
-} from './events';
-import {
   AnalyticsEventType,
+  CustomEventTracker,
   getTrackerKeyName,
   getTrackerTypesForRootType,
-  isDeprecatedListenerEvent,
-} from './event-types';
+} from './events';
 import {Observable} from '../../../src/observable';
 import {dev, user} from '../../../src/log';
 import {
@@ -39,8 +36,6 @@ import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
-import {isEnumValue} from '../../../src/types';
-import {startsWith} from '../../../src/string';
 import {Services} from '../../../src/services';
 
 const SCROLL_PRECISION_PERCENT = 5;
@@ -397,6 +392,14 @@ export class AnalyticsGroup {
     const unlisten = tracker.add(this.analyticsElement_, eventType, config,
         handler);
     this.listeners_.push(unlisten);
+  }
+
+  /**
+   * @param {string} triggerType
+   * @return {bool}
+   */
+  function isDeprecatedListenerEvent(triggerType) {
+    return triggerType == 'scroll';
   }
 }
 

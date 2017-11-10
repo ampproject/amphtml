@@ -21,16 +21,10 @@ import {
   VideoAnalyticsDetailsDef,
   VideoAnalyticsEvents,
 } from '../../../src/video-interface';
-import {
-  getTrackerKeyName,
-  getTrackerTypesForTimerEventTracker,
-  getTrackerTypesForVisibilityTracker,
-  isVideoTriggerType,
-  isReservedTriggerType,
-} from './event-types';
 import {dev, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
+import {isEnumValue} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 
 const MIN_TIMER_INTERVAL_SECONDS = 0.5;
@@ -38,6 +32,142 @@ const DEFAULT_MAX_TIMER_LENGTH_SECONDS = 7200;
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 const NO_UNLISTEN = function() {};
 const TAG = 'analytics-events';
+
+/**
+ * Events that can result in analytics data to be sent.
+ * @const
+ * @enum {string}
+ */
+export const AnalyticsEventType = {
+  VISIBLE: 'visible',
+  CLICK: 'click',
+  TIMER: 'timer',
+  SCROLL: 'scroll',
+  HIDDEN: 'hidden',
+};
+
+const ALLOWED_FOR_ALL_ROOT_TYPES = ['ampdoc', 'embed'];
+
+/**
+ * Events that can result in analytics data to be sent.
+ * @const {!Object<string, {
+ *     name: string,
+ *     allowedFor: !Array<string>,
+ *     klass: function(new:./events.EventTracker)
+ *   }>}
+ */
+const TRACKER_TYPE = Object.freeze({
+  'click': {
+    name: 'click',
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES + ['timer'],
+    // Escape the temporal dead zone by not referencing a class directly.
+    klass: function(root) { return new ClickEventTracker(root); },
+  },
+  'custom': {
+    name: 'custom',
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES + ['timer'],
+    klass: function(root) { return new CustomEventTracker(root); },
+  },
+  'render-start': {
+    name: 'render-start',
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES + ['timer', 'visible'],
+    klass: function(root) { return new SignalTracker(root); },
+  },
+  'ini-load': {
+    name: 'ini-load',
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES + ['timer', 'visible'],
+    klass: function(root) { return new IniLoadTracker(root); },
+  },
+  'timer': {
+    name: 'timer',
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
+    klass: function(root) { return new TimerEventTracker(root); },
+  },
+  'visible': {
+    name: 'visible',
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES + ['timer'],
+    klass: function(root) { return new VisibilityTracker(root); },
+  },
+  'hidden': {
+    name: 'visible', // Reuse tracker with visibility
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES + ['timer'],
+    klass: function(root) { return new VisibilityTracker(root); },
+  },
+  'video': {
+    name: 'video',
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES + ['timer'],
+    klass: function(root) { return new VideoEventTracker(root); },
+  },
+});
+
+/**
+ * @param {string} triggerType
+ * @return {bool}
+ */
+function isVideoTriggerType(triggerType) {
+  return startsWith(triggerType, 'video-');
+}
+
+/**
+ * @param {string} triggerType
+ * @return {bool}
+ */
+function isReservedTriggerType(triggerType) {
+  return !!TRACKER_TYPE[triggerType] ||
+      !!isEnumValue(AnalyticsEventType, triggerType);
+}
+
+/**
+ * @param {string} eventType
+ * @return {string}
+ */
+export function getTrackerKeyName(eventType) {
+  if (isVideoTriggerType(eventType)) {
+    return 'video';
+  }
+  if (!isReservedTriggerType(eventType)) {
+    return 'custom';
+  }
+  return TRACKER_TYPE.hasOwnProperty(eventType) ?
+      TRACKER_TYPE[eventType].name : eventType;
+}
+
+/**
+ * @param {string} rootType
+ * @return {!Object<string, function(new:./events.EventTracker)>}
+ */
+export function getTrackerTypesForRootType(rootType) {
+  return filterTrackers(function(trackerProfile) {
+    return trackerProfile.allowedFor.indexOf(rootType) != -1;
+  });
+}
+
+function getTrackerTypesForVisibilityTracker() {
+  return filterTrackers(function(trackerProfile) {
+    return trackerProfile.allowedFor.indexOf('visible') != -1;
+  });
+}
+
+function getTrackerTypesForTimerEventTracker() {
+  return filterTrackers(function(trackerProfile) {
+    return trackerProfile.allowedFor.indexOf('timer') != -1;
+  });
+}
+
+/**
+ * @param {function(): bool} predicate
+ * @return {!Object<string, function(new:./events.EventTracker)>}
+ * @private
+ */
+function filterTrackers(predicate) {
+  const filtered = {};
+  Object.keys(TRACKER_TYPE).forEach(key => {
+    if (TRACKER_TYPE.hasOwnProperty(key) && predicate(TRACKER_TYPE[key])) {
+      filtered[key] = TRACKER_TYPE[key].klass;
+    }
+  }, this);
+  return filtered;
+}
 
 /**
  * @interface
@@ -643,7 +773,7 @@ export class TimerEventTracker extends EventTracker {
   }
 
   /**
-   * @param {!JsonObject}
+   * @param {!JsonObject} config
    * @return {?EventTracker}
    */
   getTracker(config) {
