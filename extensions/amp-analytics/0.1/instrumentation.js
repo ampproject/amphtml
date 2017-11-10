@@ -147,12 +147,6 @@ export class InstrumentationService {
     /** @const */
     this.ampdocRoot_ = new AmpdocAnalyticsRoot(this.ampdoc);
 
-    /** @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = Services.timerFor(this.ampdoc.win);
-
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = Services.viewerForDoc(this.ampdoc);
-
     /** @const {!../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
