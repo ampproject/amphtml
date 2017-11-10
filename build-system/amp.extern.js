@@ -163,6 +163,54 @@ let VegaObject;
 /* @type {VegaObject} */
 window.vg;
 
+// amp-date-picker externs
+/**
+ * @type {function(*)}
+ */
+let ReactRender = function() {};
+
+/**
+ * @struct
+ */
+let PropTypes = {};
+
+/**
+ * @struct
+ */
+let ReactDates = {};
+
+/** @constructor */
+ReactDates.SingleDatePicker;
+
+/** @struct */
+ReactDates.SingleDatePickerShape;
+
+/** @constructor */
+ReactDates.DateRangePicker;
+
+/** @struct */
+ReactDates.DateRangePickerShape;
+
+/** @type {function(*):boolean} */
+ReactDates.isInclusivelyAfterDay;
+
+/** @type {function(*):boolean} */
+ReactDates.isInclusivelyBeforeDay;
+
+/** @type {function(*,*):boolean} */
+ReactDates.isSameDay;
+
+/**
+ * @struct
+ */
+let ReactDatesConstants = {};
+
+/** @const {string} */
+ReactDatesConstants.ANCHOR_LEFT;
+
+/** @const {string} */
+ReactDatesConstants.HORIZONTAL_ORIENTATION;
+
 // Should have been defined in the closure compiler's extern file for
 // IntersectionObserverEntry, but appears to have been omitted.
 IntersectionObserverEntry.prototype.rootBounds;

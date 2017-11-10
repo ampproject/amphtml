@@ -17,7 +17,7 @@
 import {rrulestr} from '../../../third_party/rrule/rrule';
 
 
-/** @enum */
+/** @enum {string} */
 export const DateType = {
   INVALID: 'invalid',
   RRULE: 'rrule',
@@ -30,7 +30,7 @@ export const DateType = {
 export class DatesList {
   /**
    * @param {!Object} ReactDates
-   * @param {!moment} moment
+   * @param {?} moment
    * @param {!Array<string>} dates
    */
   constructor(ReactDates, moment, dates) {
@@ -94,7 +94,10 @@ export class DatesList {
   getDateType_(date) {
     if (this.moment_(date).isValid()) {
       return DateType.DATE;
-    } else if (tryParseRrulestr(date)) {
+    }
+
+    const dateStr = /** @type {string} */ (date);
+    if (tryParseRrulestr(dateStr)) {
       return DateType.RRULE;
     }
 

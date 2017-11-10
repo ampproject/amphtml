@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-trust';
 import {omit} from '../../../src/utils/object';
 import {user} from '../../../src/log';
 import {withDatePickerCommon} from './date-picker-common';
@@ -27,8 +26,8 @@ const TAG = 'DateRangePicker';
  * @param {!Object} PropTypes
  * @param {!Object} ReactDates
  * @param {!Object} ReactDatesConstants
- * @param {!moment} moment
- * @return {!React.Component} A date range picker component class
+ * @param {?} moment
+ * @return {function(new:Object, !React.Component)} A date range picker component class
  */
 function createDateRangePickerBase(
     React, PropTypes, ReactDates, ReactDatesConstants, moment) {
@@ -155,7 +154,7 @@ function createDateRangePickerBase(
           } else {
             user().error(TAG, `Unknown action ${method}`);
           }
-        }, ActionTrust.MEDIUM);
+        });
       }
     }
 
@@ -176,15 +175,19 @@ function createDateRangePickerBase(
      * @param {?string} focusedInput
      */
     onFocusChange(focusedInput) {
-      if (focusedInput == null) {
-        this.setState({focusedInput});
-      }
-      if (this.state.startDate && !this.state.endDate &&
-            this.state.focusedInput === 'endDate') {
-        return;
-      } else if (this.state.startDate && this.state.endDate &&
-            this.state.focusedInput === 'endDate') {
-        return this.setState({focusedInput: 'startDate'});
+      // TODO(cvializ): there is a bug in the react-dates library that
+      // affects focus when the orientation="verticalScrollable" and
+      // with-full-screen-portal is set.
+      if (this.props.withFullScreenPortal) {
+        if (focusedInput == null) {
+          return this.setState({focusedInput});
+        } else if (this.state.startDate && !this.state.endDate &&
+              this.state.focusedInput === 'endDate') {
+          return;
+        } else if (this.state.startDate && this.state.endDate &&
+              this.state.focusedInput === 'endDate') {
+          return this.setState({focusedInput: 'startDate'});
+        }
       }
 
       this.setState({focusedInput});
@@ -215,10 +218,12 @@ function createDateRangePickerBase(
   DateRangePickerBase.propTypes = propTypes;
   DateRangePickerBase.defaultProps = defaultProps;
 
-  return DateRangePickerBase;
+  return withDatePickerCommon(
+      React, PropTypes, ReactDates, ReactDatesConstants, moment,
+      DateRangePickerBase);
 }
 
-/** @private */
+/** @private {?function(new:Object, !React.Component)} */
 let DateRangePicker_ = null;
 
 /**
@@ -227,17 +232,14 @@ let DateRangePicker_ = null;
  * @param {!Object} PropTypes
  * @param {!Object} ReactDates
  * @param {!Object} ReactDatesConstants
- * @param {!moment} moment
- * @return {!React.Component} A date range picker component class
+ * @param {?} moment
+ * @return {function(new:Object, !React.Component)} A date range picker component class
  */
 export function createDateRangePicker(
   React, PropTypes, ReactDates, ReactDatesConstants, moment) {
   if (!DateRangePicker_) {
-    const DateRangePickerBase = createDateRangePickerBase(
+    DateRangePicker_ = createDateRangePickerBase(
         React, PropTypes, ReactDates, ReactDatesConstants, moment);
-    DateRangePicker_ = withDatePickerCommon(
-        React, PropTypes, ReactDates, ReactDatesConstants, moment,
-        DateRangePickerBase);
   }
   return DateRangePicker_;
 }

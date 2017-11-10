@@ -232,8 +232,7 @@ function compile(entryModuleFilenames, outputDir,
       'third_party/closure-compiler/externs/streams.js',
       'third_party/closure-compiler/externs/web_animations.js',
       'third_party/moment/moment.extern.js',
-      'node_modules/react-externs/externs.js',
-
+      'third_party/react-externs/externs.js',
     ];
     if (options.externs) {
       externs = externs.concat(options.externs);

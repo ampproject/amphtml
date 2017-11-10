@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {omit} from '../../../src/utils/object';
 import {user} from '../../../src/log';
+import {omit} from '../../../src/utils/object';
 import {withDatePickerCommon} from './date-picker-common';
 
 
@@ -27,8 +27,8 @@ const TAG = 'SingleDatePicker';
  * @param {!Object} PropTypes
  * @param {!Object} ReactDates
  * @param {!Object} ReactDatesConstants
- * @param {!moment} moment
- * @return {!React.Component} A single date picker component class
+ * @param {?} moment
+ * @return {function(new:Object, !React.Component)} A single date picker component class
  */
 function createSingleDatePickerBase(
     React, PropTypes, ReactDates, ReactDatesConstants, moment) {
@@ -151,7 +151,8 @@ function createSingleDatePickerBase(
      * Respond to focus changes.
      * @param {!JsonObject} details
      */
-    onFocusChange({focused}) {
+    onFocusChange(details) {
+      const focused = details['focused'];
       this.setState({focused});
     }
 
@@ -177,11 +178,13 @@ function createSingleDatePickerBase(
   SingleDatePickerBase.propTypes = propTypes;
   SingleDatePickerBase.defaultProps = defaultProps;
 
-  return SingleDatePickerBase;
+  return withDatePickerCommon(
+      React, PropTypes, ReactDates, ReactDatesConstants, moment,
+      SingleDatePickerBase);
 }
 
 
-/** @private */
+/** @private {?function(new:Object, !React.Component)} */
 let SingleDatePicker_ = null;
 
 /**
@@ -190,17 +193,14 @@ let SingleDatePicker_ = null;
  * @param {!Object} PropTypes
  * @param {!Object} ReactDates
  * @param {!Object} ReactDatesConstants
- * @param {!moment} moment
- * @return {!React.Component} A date picker component class
+ * @param {?} moment
+ * @return {function(new:Object, !React.Component)} A date picker component class
  */
 export function createSingleDatePicker(
     React, PropTypes, ReactDates, ReactDatesConstants, moment) {
   if (!SingleDatePicker_) {
-    const SingleDatePickerBase = createSingleDatePickerBase(
+    SingleDatePicker_ = createSingleDatePickerBase(
         React, PropTypes, ReactDates, ReactDatesConstants, moment);
-    SingleDatePicker_ = withDatePickerCommon(
-        React, PropTypes, ReactDates, ReactDatesConstants, moment,
-        SingleDatePickerBase);
   }
   return SingleDatePicker_;
 }

@@ -386,9 +386,9 @@ export function isValidAttr(tagName, attrName, attrValue) {
 export function rewriteAttributeValue(tagName, attrName, attrValue) {
   const tag = tagName.toLowerCase();
   const attr = attrName.toLowerCase();
-  // if (attr == 'src' || attr == 'href' || attr == 'srcset') {
-  //   return resolveUrlAttr(tag, attr, attrValue, self.location);
-  // }
+  if (attr == 'src' || attr == 'href' || attr == 'srcset') {
+    return resolveUrlAttr(tag, attr, attrValue, self.location);
+  }
   return attrValue;
 }
 

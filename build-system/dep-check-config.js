@@ -63,6 +63,7 @@ exports.rules = [
       'src/shadow-embed.js->third_party/webcomponentsjs/ShadowCSS.js',
       'third_party/timeagojs/timeago.js->' +
           'third_party/timeagojs/timeago-locales.js',
+      'extensions/amp-date-picker/**->third_party/rrule/rrule.js',
     ],
   },
   // Rules for 3p

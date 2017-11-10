@@ -24,9 +24,9 @@ import {omit} from '../../../src/utils/object';
  * @param {!Object} PropTypes
  * @param {!Object} ReactDates
  * @param {!Object} ReactDatesConstants
- * @param {!moment} moment
+ * @param {?} moment
  * @param {!Object} WrappedComponent A date-picker component to wrap
- * @return {!React.Component} A date picker component with common functionality
+ * @return {function(new:Object, !React.Component)} A date picker component with common functionality
  */
 export function withDatePickerCommon(
     React, PropTypes, ReactDates, ReactDatesConstants, moment,
@@ -36,6 +36,7 @@ export function withDatePickerCommon(
 
   /**
    * @param {!moment} max
+   * @return {!moment}
    */
   function getDefaultMinDate(max) {
     const today = moment();
@@ -50,6 +51,7 @@ export function withDatePickerCommon(
    * @param {string} min
    * @param {string} max
    * @param {!moment} date
+   * @return {boolean}
    */
   function isOutsideRange(min, max, date) {
     const maxInclusive = max && moment(max);
@@ -105,6 +107,7 @@ export function withDatePickerCommon(
 
     /**
      * @param {!moment} day
+     * @return {boolean}
      */
     isDayBlocked(day) {
       return this.state.blocked.contains(day);
@@ -112,6 +115,7 @@ export function withDatePickerCommon(
 
     /**
      * @param {!moment} day
+     * @return {boolean}
      */
     isDayHighlighted(day) {
       return this.state.highlighted.contains(day);
@@ -119,6 +123,7 @@ export function withDatePickerCommon(
 
     /**
      * @param {!moment} day
+     * @return {boolean}
      */
     isOutsideRange(day) {
       return isOutsideRange(this.state.min, this.state.max, day);

@@ -17,7 +17,7 @@
 /**
  * Create a React component that can render Promises
  * @param {!Object} React
- * @return {!React.Component}
+ * @return {function(new:Object, !React.Component)}
  */
 function createDeferred_(React) {
   class Deferred extends React.Component {
@@ -52,13 +52,13 @@ function createDeferred_(React) {
   return Deferred;
 }
 
-/** @private */
+/** @private {?function(new:Object, !React.Component)} */
 let Deferred_ = null;
 
 /**
  * Creates a single date picker.
  * @param {!Object} React
- * @return {!React.Component} A date picker class
+ * @return {function(new:Object, !React.Component)} A date picker class
  */
 export function createDeferred(React) {
   if (!Deferred_) {

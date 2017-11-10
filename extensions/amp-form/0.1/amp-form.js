@@ -66,7 +66,7 @@ const TAG = 'amp-form';
  * A list of external dependencies that can be included in forms.
  * @type {!Array<string>}
  */
-const EXTERNAL_ELEMENT_DEPS = [
+const EXTERNAL_DEPS = [
   'amp-selector',
 ];
 
@@ -249,7 +249,7 @@ export class AmpForm {
       return this.dependenciesPromise_;
     }
     const depElements = this.form_./*OK*/querySelectorAll(
-        EXTERNAL_ELEMENT_DEPS.join(','));
+        EXTERNAL_DEPS.join(','));
     // Wait for an element to be built to make sure it is ready.
     const promises = toArray(depElements).map(el => el.whenBuilt());
     return this.dependenciesPromise_ = this.waitOnPromisesOrTimeout_(promises,

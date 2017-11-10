@@ -1928,8 +1928,10 @@ function analyticsEvent(entry, eventType, opt_vars) {
   const detailsPromise = opt_vars ? Promise.resolve(opt_vars) :
       entry.getAnalyticsDetails();
 
-  detailsPromise.then(details =>
-      video.element.dispatchCustomEvent(eventType, details));
+  detailsPromise.then(details => {
+    video.element.dispatchCustomEvent(
+        eventType, details);
+  });
 }
 
 /**

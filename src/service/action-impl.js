@@ -465,7 +465,7 @@ export class ActionService {
             'Did you forget to include it via <script custom-element>?',
             actionInfo, target);
       }
-      // return null;
+      return null;
     }
 
     // Special elements with AMP ID or known supported actions.
@@ -485,20 +485,6 @@ export class ActionService {
         target[ACTION_QUEUE_].push(invocation);
       }
       return null;
-    }
-
-    // AMP elements.
-    if (lowerTagName.substring(0, 4) == 'amp-' &&
-        !ELEMENTS_ACTIONS_MAP_[lowerTagName]) {
-      if (target.enqueAction) {
-        target.enqueAction(invocation);
-      } else {
-        this.actionInfoError_('Unrecognized AMP element "' +
-            lowerTagName + '". ' +
-            'Did you forget to include it via <script custom-element>?',
-            actionInfo, target);
-      }
-      return;
     }
 
     // Unsupported target.

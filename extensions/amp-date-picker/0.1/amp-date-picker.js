@@ -31,11 +31,11 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
+import {user} from '../../../src/log';
+import {map} from '../../../src/utils/object';
 import {toArray} from '../../../src/types';
 import {dashToCamelCase} from '../../../src/string';
 import {DatesList} from './dates-list';
-import {map} from '../../../src/utils/object';
-import {user} from '../../../src/log';
 
 /**
  * @typedef {{
@@ -63,7 +63,7 @@ let DateChangeDetailsDef;
 /**
  * @typedef {{
  *   date: string,
- *   id: string
+ *   id: ?string
  * }}
  */
 let BindDatesDef;
@@ -145,11 +145,16 @@ class DatePicker {
     /** @const */
     this.renderInfo = this.renderInfo.bind(this);
 
+    /** @private {?Promise<string>} */
+    this.infoTemplatePromise_ = null;
+
     /** @private @const */
     this.format_ = this.element.getAttribute('format') || DEFAULT_FORMAT;
 
     /** @private @const */
     this.firstDayOfWeek_ = this.element.getAttribute('first-day-of-week') || 0;
+
+    this.daySize_ = this.element.getAttribute('day-size') || 45;
 
     const blocked = this.element.getAttribute('blocked');
     /** @private @const */
@@ -181,24 +186,23 @@ class DatePicker {
     /** @private @const */
     this.elementTemplates_ = this.parseElementTemplates_();
 
-    /** @private @const */
+    /** @private {!Array<!DateTemplateMapDef>} */
     this.srcTemplates_ = [];
 
-    /** @private @const */
+    /** @private {?Element} */
     this.srcDefaultTemplate_ = null;
 
     /** @private @const */
     this.isRTL_ = this.element.ownerDocument.dir === 'rtl';
 
-    /** @private @const */
-    this.srcTemplatePromise_ = this.fetchSrcTemplates_();
-    this.parseSrcTemplates_();
+    /** @private {?function(?):?} */
+    this.templateThen_ = null;
 
     /** @private @const */
-    this.installActionHandler_ = handler => {
-      this.action_.installActionHandler(
-          this.element, handler, ActionTrust.MEDIUM);
-    };
+    this.installActionHandler_ =
+        handler => this.action_.installActionHandler(this.element, handler);
+
+    this.parseSrcTemplates_(this.fetchSrcTemplates_());
 
     const locale = this.element.getAttribute('locale') || DEFAULT_LOCALE;
     this.moment_.locale(locale);
@@ -209,15 +213,32 @@ class DatePicker {
   }
 
   /**
-   * Create an array of objects mapping dates to templates.
-   * @return {!Promise<!DateTemplateMapDef>}
+   * Fetch the JSON from the URL specified in the src attribute.
+   * @return {?Promise<!JsonObject|!Array<JsonObject>>}
    */
-  parseSrcTemplates_() {
-    return this.srcTemplatePromise_.then(srcJson => {
-      if (!srcJson) {
+  fetchSrcTemplates_() {
+    if (this.element.getAttribute('src')) {
+      return fetchBatchedJsonFor(this.ampdoc_, this.element);
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Create an array of objects mapping dates to templates.
+   * @param {?Promise<!JsonObject|!Array<JsonObject>>} srcTemplatePromise
+   */
+  parseSrcTemplates_(srcTemplatePromise) {
+    if (!srcTemplatePromise) {
+      return;
+    }
+
+    srcTemplatePromise.then(srcJson => {
+      const templates = srcJson && srcJson['templates'];
+      if (!templates) {
         return;
       }
-      const templates = srcJson.templates;
+
       const srcTemplates = templates
           .filter(t => t.dates)
           .map(t => ({
@@ -235,18 +256,6 @@ class DatePicker {
       // TODO(cvializ): better message?
       user().error('Failed fetching Date Picker data', error);
     });
-  }
-
-  /**
-   * Fetch the JSON from the URL specified in the src attribute.
-   * @return {Promise<!JsonObject|!Array<JsonObject>|undefined>}
-   */
-  fetchSrcTemplates_() {
-    if (this.element.getAttribute('src')) {
-      return fetchBatchedJsonFor(this.ampdoc_, this.element);
-    } else {
-      return Promise.resolve();
-    }
   }
 
   /**
@@ -325,7 +334,7 @@ class DatePicker {
   onDatesChange(details) {
     const name = 'select';
     const {startDate, endDate} = details;
-    const dates = this.getBindDates_(startDate, endDate);
+    const dates = startDate ? this.getBindDates_(startDate, endDate) : [];
     const event = createCustomEvent(this.win_, `${TAG}.${name}`, {
       dates,
       start: dates[0],
@@ -367,7 +376,7 @@ class DatePicker {
    * Create an array for date objects to be consumed by AMP actions and events
    * or amp-bind.
    * @param {!moment} startDate
-   * @param {!moment} endDate
+   * @param {?moment} endDate
    * @return {!Array<!BindDatesDef>}
    */
   getBindDates_(startDate, endDate) {
@@ -479,7 +488,7 @@ class DatePicker {
     return this.templates_.hasTemplate(this.element, '[info-template]');
   }
 
-  /** @return {!Promise} */
+  /** @return {!Promise<string>} */
   renderInfoTemplate_() {
     const template = scopedQuerySelector(this.element, '[info-template]');
     return this.renderTemplate_(template);
@@ -505,12 +514,14 @@ class DatePicker {
    * exist, use a fallback string.
    * The fallback string will be rendered directly into the DOM so it must
    * not contain unsanitized user-supplied values.
-   * @param {!Element} template
-   * @param {!JsonObject} data
-   * @param {string} fallback
+   * @param {?Element} template
+   * @param {!JsonObject=} opt_data
+   * @param {string=} opt_fallback
+   * @return {!Promise<string>}
    */
-  renderTemplate_(template, data, fallback) {
+  renderTemplate_(template, opt_data, opt_fallback) {
     if (template) {
+      const data = opt_data || /** @type {!JsonObject} */ ({});
       return this.templates_.renderTemplate(template, data)
           .then(rendered => {
             rendered.setAttribute('i-amphtml-rendered', '');
@@ -524,7 +535,7 @@ class DatePicker {
             return rendered.outerHTML;
           });
     } else {
-      return Promise.resolve(fallback);
+      return Promise.resolve(opt_fallback || '');
     }
   }
 
@@ -593,6 +604,7 @@ class DatePicker {
           blocked: this.blocked_,
           highlighted: this.highlighted_,
           firstDayOfWeek: this.firstDayOfWeek_,
+          daySize: this.daySize_,
         })),
         this.container_);
   }
@@ -649,7 +661,7 @@ export class AmpDatePickerService {
 
   /**
    * Construct a Date Picker class for every date picker element.
-   * @param {!Document} doc
+   * @param {!Document|!ShadowRoot} doc
    */
   installDatePickers_(doc) {
     const pickers = this.getPickers_(doc);
@@ -677,7 +689,7 @@ export class AmpDatePickerService {
 
   /**
    * Retrieve date picker elements from the DOM
-   * @param {!Document} doc
+   * @param {!Document|!ShadowRoot} doc
    * @return {!IArrayLike<!Element>}
    */
   getPickers_(doc) {
