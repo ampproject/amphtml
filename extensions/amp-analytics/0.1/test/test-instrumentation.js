@@ -18,6 +18,7 @@ import {
   InstrumentationService,
 } from '../instrumentation.js';
 import {
+  AnalyticsEventType,
   ClickEventTracker,
   CustomEventTracker,
   IniLoadTracker,
@@ -25,7 +26,6 @@ import {
   TimerEventTracker,
   VisibilityTracker,
 } from '../events';
-import {AnalyticsEventType} from '../event-types';
 import * as sinon from 'sinon';
 
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';

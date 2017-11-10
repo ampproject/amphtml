@@ -102,7 +102,7 @@ const TRACKER_TYPE = Object.freeze({
 
 /**
  * @param {string} triggerType
- * @return {bool}
+ * @return {boolean}
  */
 function isVideoTriggerType(triggerType) {
   return startsWith(triggerType, 'video-');
@@ -110,7 +110,7 @@ function isVideoTriggerType(triggerType) {
 
 /**
  * @param {string} triggerType
- * @return {bool}
+ * @return {boolean}
  */
 function isReservedTriggerType(triggerType) {
   return !!TRACKER_TYPE[triggerType] ||
@@ -155,7 +155,7 @@ function getTrackerTypesForTimerEventTracker() {
 }
 
 /**
- * @param {function(): bool} predicate
+ * @param {function(Object): boolean} predicate
  * @return {!Object<string, function(new:./events.EventTracker)>}
  * @private
  */

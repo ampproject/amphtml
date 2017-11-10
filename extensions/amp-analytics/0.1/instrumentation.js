@@ -377,7 +377,7 @@ export class AnalyticsGroup {
     const trackerKey = getTrackerKeyName(eventType);
     const trackerWhitelist = getTrackerTypesForRootType(this.root_.getType());
 
-    if (isDeprecatedListenerEvent(trackerKey)) {
+    if (this.isDeprecatedListenerEvent(trackerKey)) {
       // TODO(dvoytenko): remove this use and `addListenerDepr_` once all
       // triggers have been migrated..
       this.service_.addListenerDepr_(config, handler, this.analyticsElement_);
@@ -396,9 +396,9 @@ export class AnalyticsGroup {
 
   /**
    * @param {string} triggerType
-   * @return {bool}
+   * @return {boolean}
    */
-  function isDeprecatedListenerEvent(triggerType) {
+  isDeprecatedListenerEvent(triggerType) {
     return triggerType == 'scroll';
   }
 }
