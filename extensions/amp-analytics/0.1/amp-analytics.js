@@ -80,7 +80,7 @@ export class AmpAnalytics extends AMP.BaseElement {
      */
     this.type_ = null;
 
-    /** @private {!boolean} */
+    /** @private {boolean} */
     this.isSandbox_ = false;
 
     /**
@@ -117,7 +117,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     /** @private {?IframeTransport} */
     this.iframeTransport_ = null;
 
-    /** @private {!boolean} */
+    /** @private {boolean} */
     this.isInabox_ = getMode().runtime == 'inabox';
   }
 
