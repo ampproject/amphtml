@@ -26,28 +26,43 @@ const NAVIGATION_HELP_OVERLAY = [
       {
         tag: 'div',
         attrs: dict({'class': 'i-amphtml-story-navigation-help-section'
-            + ' i-amphtml-story-navigation-help-first-page'}),
+            + ' prev-page'}),
         children: [
           {
             tag: 'div',
-            attrs: dict({'class': 'i-amphtml-story-hint-text'}),
-            text: 'this is the first page',
+            attrs: dict({'class': 'i-amphtml-story-icons-container'}),
+            children: [
+              {
+                tag: 'div',
+                attrs: dict({'class': 'i-amphtml-story-hint-tap-icon'}),
+              },
+              {
+                tag: 'div',
+                attrs: dict({'class': 'i-amphtml-story-hint-tap-icon-text'}),
+              },
+            ],
           },
         ],
       },
       {
         tag: 'div',
         attrs: dict({'class': 'i-amphtml-story-navigation-help-section'
-            + ' i-amphtml-story-navigation-help-next-page'}),
+            + ' next-page'}),
         children: [
           {
             tag: 'div',
-            attrs: dict({'class': 'i-amphtml-story-hint-tap-icon'}),
-          },
-          {
-            tag: 'div',
-            attrs: dict({'class': 'i-amphtml-story-hint-tap-icon-text'}),
-            text: 'tap for next',
+            attrs: dict({'class': 'i-amphtml-story-icons-container'}),
+            children: [
+              {
+                tag: 'div',
+                attrs: dict({'class': 'i-amphtml-story-hint-tap-icon'}),
+              },
+              {
+                tag: 'div',
+                attrs: dict({'class': 'i-amphtml-story-hint-tap-icon-text'}),
+                text: 'Next page',
+              },
+            ],
           },
         ],
       },
@@ -57,6 +72,9 @@ const NAVIGATION_HELP_OVERLAY = [
 
 /** @type {string} */
 const NAVIGATION_OVERLAY_CLASS = 'show-navigation-overlay';
+
+/** @type {string} */
+const FIRST_PAGE_OVERLAY_CLASS = 'show-first-page-overlay';
 
 /** @type {number} */
 const NAVIGATION_OVERLAY_TIMEOUT = 2000;
@@ -75,9 +93,6 @@ export class AmpStoryHint {
 
     /** @private {!Document} */
     this.document_ = this.win_.document;
-
-    /** @private {?Storage} */
-    this.localStorage_ = this.win_.localStorage;
 
     /** @private {?Element} */
     this.hintContainer_ = null;
@@ -110,7 +125,28 @@ export class AmpStoryHint {
    * Show navigation overlay DOM.
    */
   showNavigationOverlay() {
+    if (this.hintContainer_.classList.contains(NAVIGATION_OVERLAY_CLASS)) {
+      return;
+    }
+
+    this.hideAllNavigationHint();
     this.hintContainer_.classList.add(NAVIGATION_OVERLAY_CLASS);
+
+    this.hintTimeout_ = setTimeout(() => {
+      this.hideAllNavigationHint();
+    }, NAVIGATION_OVERLAY_TIMEOUT);
+  }
+
+  /**
+   * Show navigation overlay DOM.
+   */
+  showFirstPageHintOverlay() {
+    if (this.hintContainer_.classList.contains(FIRST_PAGE_OVERLAY_CLASS)) {
+      return;
+    }
+
+    this.hideAllNavigationHint();
+    this.hintContainer_.classList.add(FIRST_PAGE_OVERLAY_CLASS);
 
     this.hintTimeout_ = setTimeout(() => {
       this.hideAllNavigationHint();
@@ -122,6 +158,7 @@ export class AmpStoryHint {
    */
   hideAllNavigationHint() {
     this.hintContainer_.classList.remove(NAVIGATION_OVERLAY_CLASS);
+    this.hintContainer_.classList.remove(FIRST_PAGE_OVERLAY_CLASS);
 
     if (this.hintTimeout_) {
       this.win_.clearTimeout(this.hintTimeout_);

@@ -44,6 +44,15 @@ describes.fakeWin('amp-story hint layer', {}, env => {
     expect(ampStoryHint.hintTimeout_).to.be.an('number');
   });
 
+  it('should be able to show no previous page help overlay', () => {
+    expect(ampStoryHint.hintTimeout_).to.be.null;
+    ampStoryHint.buildHintContainer();
+    ampStoryHint.showFirstPageHintOverlay();
+    expect(ampStoryHint.hintContainer_.className).to.contain(
+        'show-first-page-overlay');
+    expect(ampStoryHint.hintTimeout_).to.be.an('number');
+  });
+
   it('should be able to hide shown hint', () => {
     const clearTimeoutStub =
         sandbox.stub(ampStoryHint.win_, 'clearTimeout', NOOP);

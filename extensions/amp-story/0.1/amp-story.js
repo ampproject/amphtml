@@ -60,7 +60,8 @@ import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrl} from '../../../src/url';
 import {stringHash32} from '../../../src/string';
 import {AmpStoryHint} from './amp-story-hint';
-
+import {Gestures} from '../../../src/gesture';
+import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 
 /** @private @const {string} */
 const PRE_ACTIVE_PAGE_ATTRIBUTE_NAME = 'pre-active';
@@ -273,7 +274,7 @@ export class AmpStory extends AMP.BaseElement {
     });
 
     this.element.addEventListener(EventType.SHOW_NO_PREVIOUS_PAGE_HELP, () => {
-      this.ampStoryHint_.showNavigationOverlay();
+      this.ampStoryHint_.showFirstPageHintOverlay();
     });
 
     this.element.addEventListener('play', e => {
@@ -287,6 +288,11 @@ export class AmpStory extends AMP.BaseElement {
         this.audioManager_.stop(e.target);
       }
     }, true);
+
+    const gestures = Gestures.get(this.element);
+    gestures.onGesture(SwipeXYRecognizer, () => {
+      this.ampStoryHint_.showNavigationOverlay();
+    });
 
     this.win.document.addEventListener('keydown', e => {
       this.onKeyDown_(e);
