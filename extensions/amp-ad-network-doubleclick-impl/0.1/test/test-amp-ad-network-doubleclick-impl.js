@@ -1064,6 +1064,80 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           ['https://partner.googleadservices.com', SAFEFRAME_ORIGIN]);
     });
   });
+
+  describe('Troubleshoot for AMP pages', () => {
+    beforeEach(() => {
+      element = doc.createElement('amp-ad');
+      element.setAttribute('type', 'doubleclick');
+      doc.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+      impl.troubleshootData_ = {
+        adUrl: Promise.resolve('http://www.getmesomeads.com'),
+        creativeId: '123',
+        lineItemId: '456',
+        slotId: 'slotId',
+        slotIndex: '0',
+      };
+    });
+
+    afterEach(() => {
+      doc.body.removeChild(element);
+    });
+
+    it('should emit post message', () => {
+      const slotId = 'slotId';
+      env.win = {
+        location: {
+          href: 'http://localhost:8000/foo?dfpdeb',
+          search: '?dfpdeb',
+        },
+        opener: {
+          postMessage: payload => {
+            expect(payload).to.be.ok;
+            expect(payload.userAgent).to.be.ok;
+            expect(payload.referrer).to.be.ok;
+            expect(payload.messageType).to.equal('LOAD');
+
+            const gutData = JSON.parse(payload.gutData);
+            expect(gutData).to.be.ok;
+            expect(gutData.events[0].timestamp).to.be.ok;
+            expect(gutData.events[0].slotid).to.equal(slotId);
+            expect(gutData.events[0].messageId).to.equal(4);
+
+            expect(gutData.slots[0].contentUrl).to
+                .equal('http://www.getmesomeads.com');
+            expect(gutData.slots[0].id).to.equal(slotId);
+            expect(gutData.slots[0].leafAdUnitName).to.equal(slotId);
+            expect(gutData.slots[0].domId).to.equal(
+                'gpt_unit_' + slotId + '_0');
+            expect(gutData.slots[0].creativeId).to.equal('123');
+            expect(gutData.slots[0].lineItemId).to.equal('456');
+          },
+        },
+      };
+      const postMessageSpy = sandbox.spy(env.win.opener, 'postMessage');
+      impl.win = env.win;
+      return impl.postTroubleshootMessage().then(() =>
+          expect(postMessageSpy).to.be.calledOnce);
+    });
+
+    it('should not emit post message', () => {
+      env.win = {
+        location: {
+          href: 'http://localhost:8000/foo',
+          search: '',
+        },
+        opener: {
+          postMessage: () => {
+            // should never get here
+            expect(false).to.be.true;
+          },
+        },
+      };
+      impl.win = env.win;
+      expect(impl.postTroubleshootMessage()).to.be.null;
+    });
+  });
 });
 
 
@@ -1210,6 +1284,34 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
               'amp-pixel[src="https://b.net?c=d"]' +
               '[referrerpolicy="no-referrer"]'))
               .to.be.ok;
+        });
+      });
+
+      describe('#idleRenderOutsideViewport', () => {
+        beforeEach(() => {
+          element = createElementWithAttributes(doc, 'amp-ad', {
+            'width': '200',
+            'height': '50',
+            'type': 'doubleclick',
+          });
+          impl = new AmpAdNetworkDoubleclickImpl(element);
+        });
+
+        it('should use experiment value', () => {
+          impl.postAdResponseExperimentFeatures['render-idle-vp'] = '4';
+          expect(impl.idleRenderOutsideViewport()).to.equal(4);
+        });
+
+        it('should return false if using loading strategy', () => {
+          impl.postAdResponseExperimentFeatures['render-idle-vp'] = '4';
+          impl.element.setAttribute('data-loading-strategy',
+              'prefer-viewability-over-views');
+          expect(impl.idleRenderOutsideViewport()).to.be.false;
+        });
+
+        it('should return false if invalid experiment value', () => {
+          impl.postAdResponseExperimentFeatures['render-idle-vp'] = 'abc';
+          expect(impl.idleRenderOutsideViewport()).to.be.false;
         });
       });
     });

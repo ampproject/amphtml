@@ -53,7 +53,7 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {AudioManager, upgradeBackgroundAudio} from './audio';
-import {setStyle, setStyles, setImportantStyles} from '../../../src/style';
+import {setStyle, setImportantStyles} from '../../../src/style';
 import {findIndex} from '../../../src/utils/array';
 import {ActionTrust} from '../../../src/action-trust';
 import {getMode} from '../../../src/mode';
@@ -96,7 +96,8 @@ export class AmpStory extends AMP.BaseElement {
      * Whether entering into fullscreen automatically on navigation is enabled.
      * @private {boolean}
      */
-    this.isAutoFullScreenEnabled_ = true;
+    this.isAutoFullScreenEnabled_ =
+        isExperimentOn(this.win, 'amp-story-auto-fullscreen');
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
@@ -171,9 +172,6 @@ export class AmpStory extends AMP.BaseElement {
       this.lockBody_();
     }
 
-    this.element.appendChild(
-        this.systemLayer_.build(this.getRealChildren().length));
-
     this.initializeListeners_();
     this.initializeListenersForDev_();
 
@@ -190,6 +188,16 @@ export class AmpStory extends AMP.BaseElement {
 
     registerServiceBuilder(this.win, 'story-variable',
         () => this.variableService_);
+  }
+
+
+  /**
+   * Builds the system layer DOM.  This is dependent on the pages_ array having
+   * been initialized, so it cannot happen at build time.
+   * @private
+   */
+  buildSystemLayer_() {
+    this.element.appendChild(this.systemLayer_.build(this.getPageCount()));
   }
 
 
@@ -350,6 +358,7 @@ export class AmpStory extends AMP.BaseElement {
         'Story must have at least one page.');
 
     return this.initializePages_()
+        .then(() => this.buildSystemLayer_())
         .then(() => {
           this.pages_.forEach(page => {
             page.setActive(false);
@@ -875,7 +884,7 @@ export class AmpStory extends AMP.BaseElement {
       pagesByDistance.forEach((pageIds, distance) => {
         pageIds.forEach(pageId => {
           const page = this.getPageById_(pageId);
-          setStyles(page.element, {
+          setImportantStyles(page.element, {
             transform: `translateY(${100 * distance}%)`,
           });
         });
