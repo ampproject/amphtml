@@ -424,7 +424,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         '&ns_type=view' +
         '&rn=${random}' +
         '&c8=${title}' +
-        '&c7=${canonicalUrl}%23${pageId}' +
+        '&c7=${canonicalUrl}%23${storyPageId}' +
         '&c9=${documentReferrer}' +
         '&cs_c7amp=${ampdocUrl}',
     },
