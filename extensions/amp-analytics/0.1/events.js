@@ -21,6 +21,13 @@ import {
   VideoAnalyticsDetailsDef,
   VideoAnalyticsEvents,
 } from '../../../src/video-interface';
+import {
+  getTrackerKeyName,
+  getTrackerTypesForTimerEventTracker,
+  getTrackerTypesForVisibilityTracker,
+  isVideoTriggerType,
+  isReservedTriggerType,
+} from './event-types';
 import {dev, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
@@ -640,16 +647,11 @@ export class TimerEventTracker extends EventTracker {
    * @return {?EventTracker}
    */
   getTracker(config) {
-    let trackerType = user().assertString(config['on']);
-    if (isVideoTrackerType(trackerType)) {
-      trackerType = 'video';
-    }
-    if (!isReservedTrackerType(trackerType)) {
-      trackerType = 'custom';
-    }
+    const eventType = user().assertString(config['on']);
+    const trackerKey = getTrackerKeyName(eventType);
 
     return this.root.getTrackerForWhitelist(
-        trackerType, SUPPORT_TIMER_NESTED_TRIGGER);
+        trackerKey, getTrackerTypesForTimerEventTracker());
   }
 
   /**
@@ -733,17 +735,6 @@ export class TimerEventTracker extends EventTracker {
     }
   }
 }
-
-/** @const @private */
-const SUPPORT_TIMER_NESTED_TRIGGER = {
-  'click': ClickEventTracker,
-  'custom': CustomEventTracker,
-  'render-start': SignalTracker,
-  'ini-load': IniLoadTracker,
-  'visible': VisibilityTracker,
-  'hidden': VisibilityTracker,
-  'video': VideoEventTracker,
-};
 
 
 /**
@@ -943,11 +934,13 @@ export class VisibilityTracker extends EventTracker {
       }
     }
 
-    user().assert(SUPPORT_WAITFOR_TRACKERS[waitForSpec] !== undefined,
+    const trackerWhitelist = getTrackerTypesForVisibilityTracker();
+    user().assert(waitForSpec == 'none' ||
+        trackerWhitelist[waitForSpec] !== undefined,
         'waitFor value %s not supported', waitForSpec);
 
     const waitForTracker = this.waitForTrackers_[waitForSpec] ||
-        this.root.getTrackerForWhitelist(waitForSpec, SUPPORT_WAITFOR_TRACKERS);
+        this.root.getTrackerForWhitelist(waitForSpec, trackerWhitelist);
     if (waitForTracker) {
       this.waitForTrackers_[waitForSpec] = waitForTracker;
     } else {
@@ -977,10 +970,3 @@ export class VisibilityTracker extends EventTracker {
     listener(new AnalyticsEvent(target, eventType, state));
   }
 }
-
-/** @const @private */
-const SUPPORT_WAITFOR_TRACKERS = {
-  'none': null,
-  'ini-load': IniLoadTracker,
-  'render-start': SignalTracker,
-};

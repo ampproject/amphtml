@@ -24,9 +24,9 @@ import {
 } from './events';
 import {
   AnalyticsEventType,
+  getTrackerKeyName,
   getTrackerTypesForRootType,
-  isReservedTriggerType,
-  isVideoTriggerType,
+  isDeprecatedListenerEvent,
 } from './event-types';
 import {Observable} from '../../../src/observable';
 import {dev, user} from '../../../src/log';
@@ -379,27 +379,24 @@ export class AnalyticsGroup {
    */
   addTrigger(config, handler) {
     const eventType = dev().assertString(config['on']);
-    let trackerKey = isVideoTriggerType(eventType) ? 'video' : eventType;
-    if (!isReservedTriggerType(trackerKey)) {
-      trackerKey = 'custom';
-    }
-
-    // TODO(pomeroyr): resolve the case where deprecated listener types would result in user().assert here
+    const trackerKey = getTrackerKeyName(eventType);
     const trackerWhitelist = getTrackerTypesForRootType(this.root_.getType());
-    const tracker = this.root_.getTrackerForWhitelist(
-        trackerKey, trackerWhitelist);
-    user().assert(!!tracker && !isReservedTriggerType(trackerKey),
-        'Trigger type "%s" is not allowed in the %s', eventType,
-        this.root_.getType());
-    if (tracker) {
-      const unlisten = tracker.add(this.analyticsElement_, eventType, config,
-          handler);
-      this.listeners_.push(unlisten);
-    } else {
+
+    if (isDeprecatedListenerEvent(trackerKey)) {
       // TODO(dvoytenko): remove this use and `addListenerDepr_` once all
       // triggers have been migrated..
       this.service_.addListenerDepr_(config, handler, this.analyticsElement_);
+      return;
     }
+
+    const tracker = this.root_.getTrackerForWhitelist(
+        trackerKey, trackerWhitelist);
+    user().assert(!!tracker,
+        'Trigger type "%s" is not allowed in the %s', eventType,
+        this.root_.getType());
+    const unlisten = tracker.add(this.analyticsElement_, eventType, config,
+        handler);
+    this.listeners_.push(unlisten);
   }
 }
 

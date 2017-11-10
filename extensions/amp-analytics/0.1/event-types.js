@@ -23,6 +23,7 @@ import {
   VideoEventTracker,
   VisibilityTracker,
 } from './events';
+import {dev, user} from '../../../src/log';
 import {isEnumValue} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 
@@ -49,55 +50,56 @@ const ALLOWED_FOR_ALL_ROOT_TYPES = ['ampdoc', 'embed'];
  *     klass: function(new:./events.EventTracker)
  *   }>}
  */
-const TRACKER_TYPE = {
+const TRACKER_TYPE = Object.freeze({
   'click': {
     name: 'click',
-    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
-    klass: ClickEventTracker,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES + ['timer'],
+    // Escape the temporal dead zone by not referencing a class directly.
+    klass: function(root) { return new ClickEventTracker(root); },
   },
   'custom': {
     name: 'custom',
-    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
-    klass: CustomEventTracker,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES + ['timer'],
+    klass: function(root) { return new CustomEventTracker(root); },
   },
   'render-start': {
     name: 'render-start',
-    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
-    klass: SignalTracker,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES + ['timer', 'visible'],
+    klass: function(root) { return new SignalTracker(root); },
   },
   'ini-load': {
     name: 'ini-load',
-    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
-    klass: IniLoadTracker,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES + ['timer', 'visible'],
+    klass: function(root) { return new IniLoadTracker(root); },
   },
   'timer': {
     name: 'timer',
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
-    klass: TimerEventTracker,
+    klass: function(root) { return new TimerEventTracker(root); },
   },
   'visible': {
     name: 'visible',
-    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
-    klass: VisibilityTracker,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES + ['timer'],
+    klass: function(root) { return new VisibilityTracker(root); },
   },
   'hidden': {
     name: 'visible', // Reuse tracker with visibility
-    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
-    klass: VisibilityTracker,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES + ['timer'],
+    klass: function(root) { return new VisibilityTracker(root); },
   },
   'video': {
     name: 'video',
-    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
-    klass: VideoEventTracker,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES + ['timer'],
+    klass: function(root) { return new VideoEventTracker(root); },
   },
-};
+});
 
 /**
  * @param {string} triggerType
  * @return {bool}
  */
 export function isVideoTriggerType(triggerType) {
-  return triggerType.startsWith('video-');
+  return startsWith(triggerType, 'video-');
 }
 
 /**
@@ -107,6 +109,29 @@ export function isVideoTriggerType(triggerType) {
 export function isReservedTriggerType(triggerType) {
   return !!TRACKER_TYPE[triggerType] ||
       !!isEnumValue(AnalyticsEventType, triggerType);
+}
+
+/**
+ * @param {string} triggerType
+ * @return {bool}
+ */
+export function isDeprecatedListenerEvent(triggerType) {
+  return triggerType == 'scroll';
+}
+
+/**
+ * @param {string} eventType
+ * @return {string}
+ */
+export function getTrackerKeyName(eventType) {
+  if (isVideoTriggerType(eventType)) {
+    return 'video';
+  }
+  if (!isReservedTriggerType(eventType)) {
+    return 'custom';
+  }
+  return TRACKER_TYPE.hasOwnProperty(eventType) ?
+      TRACKER_TYPE[eventType].name : eventType;
 }
 
 /**
@@ -121,7 +146,7 @@ export function getTrackerTypesForRootType(rootType) {
 
 export function getTrackerTypesForVisibilityTracker() {
   return filterTrackers(function(trackerProfile) {
-    return trackerProfile.allowedFor.indexOf('visibility') != -1;
+    return trackerProfile.allowedFor.indexOf('visible') != -1;
   });
 }
 
@@ -137,11 +162,11 @@ export function getTrackerTypesForTimerEventTracker() {
  * @private
  */
 function filterTrackers(predicate) {
-  let filtered = {};
-  for (key in TRACKER_TYPE) {
+  const filtered = {};
+  Object.keys(TRACKER_TYPE).forEach(key => {
     if (TRACKER_TYPE.hasOwnProperty(key) && predicate(TRACKER_TYPE[key])) {
-      filtered[key] = TRACKER_TYPE[key]['klass'];
+      filtered[key] = TRACKER_TYPE[key].klass;
     }
-  }
+  }, this);
   return filtered;
 }

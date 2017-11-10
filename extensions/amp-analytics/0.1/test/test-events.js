@@ -613,7 +613,7 @@ describes.realWin('Events', {amp: 1}, env => {
             {timerSpec: {interval: 1}}, handler);
       }).to.not.throw();
 
-      const clickTracker = new ClickEventTracker(root);
+      const clickTracker = root.getTracker('click', ClickEventTracker);
       expect(() => {
         tracker.add(analyticsElement, 'timer',
             {
@@ -627,7 +627,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
     it('timers start and stop by tracking different events', () => {
       const fn1 = sandbox.stub();
-      const clickTracker = new ClickEventTracker(root);
+      const clickTracker = root.getTracker('click', ClickEventTracker);
       tracker.add(analyticsElement, 'timer', {timerSpec: {
         interval: 1,
         startSpec: {on: 'click', selector: '.target'},
@@ -646,7 +646,7 @@ describes.realWin('Events', {amp: 1}, env => {
       target.click(); // Stop timer.
 
       const fn2 = sandbox.stub();
-      const customTracker = new CustomEventTracker(root);
+      const customTracker = root.getTracker('custom', CustomEventTracker);
       const getElementSpy = sandbox.spy(root, 'getElement');
       tracker.add(analyticsElement, 'timer', {timerSpec: {
         interval: 1,
@@ -677,7 +677,7 @@ describes.realWin('Events', {amp: 1}, env => {
     it('timers started and stopped by the same event on the same target do not'
         + ' have race condition problems', () => {
       const fn1 = sandbox.stub();
-      const clickTracker = new ClickEventTracker(root);
+      const clickTracker = root.getTracker('click', ClickEventTracker);
       tracker.add(analyticsElement, 'timer', {timerSpec: {
         interval: 1,
         startSpec: {on: 'click', selector: '.target'},
