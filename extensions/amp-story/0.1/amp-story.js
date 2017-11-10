@@ -107,9 +107,6 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!SystemLayer} */
     this.systemLayer_ = new SystemLayer(this.win);
 
-    /** @private {boolean} */
-    this.isBookendActive_ = false;
-
     /** @private @const {!Array<string>} */
     this.pageHistoryStack_ = [];
 
@@ -526,7 +523,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   // TODO(newmuis): Update history state
   switchTo_(targetPageId) {
-    if (this.isBookendActive_) {
+    if (this.bookend_.isActive()) {
       // Disallow switching pages while the bookend is active.
       return Promise.resolve();
     }
@@ -648,7 +645,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onKeyDown_(e) {
-    if (this.isBookendActive_) {
+    if (this.bookend_.isActive()) {
       return;
     }
 
@@ -782,7 +779,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   showBookend_() {
-    if (this.isBookendActive_) {
+    if (this.bookend_.isActive()) {
       return;
     }
 
@@ -790,12 +787,10 @@ export class AmpStory extends AMP.BaseElement {
       this.systemLayer_.hideDeveloperLog();
 
       this.exitFullScreen_();
-      this.systemLayer_.toggleCloseBookendButton(true);
-      this.isBookendActive_ = true;
 
       this.vsync_.mutate(() => {
         this.element.classList.add('i-amphtml-story-bookend-active');
-        this.bookend_.getRoot()./*OK*/scrollTop = 0;
+        this.bookend_.show();
       });
     });
   }
@@ -806,11 +801,13 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   hideBookend_() {
-    this.systemLayer_.toggleCloseBookendButton(false);
-    this.isBookendActive_ = false;
+    if (!this.bookend_.isActive()) {
+      return;
+    }
 
     this.vsync_.mutate(() => {
       this.element.classList.remove('i-amphtml-story-bookend-active');
+      this.bookend_.hide();
     });
   }
 
