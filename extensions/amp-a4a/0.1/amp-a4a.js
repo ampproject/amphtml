@@ -376,9 +376,10 @@ export class AmpA4A extends AMP.BaseElement {
     /**
      * The configuration for amp-analytics. If null, no amp-analytics element
      * will be inserted and no analytics events will be fired.
+     * This will be initialized inside of buildCallback.
      * @private {?JsonObject}
      */
-    this.a4aAnalyticsConfig_ = this.getA4aAnalyticsConfig();
+    this.a4aAnalyticsConfig_ = null;
   }
 
   /** @override */
@@ -423,6 +424,7 @@ export class AmpA4A extends AMP.BaseElement {
           });
         });
 
+    this.a4aAnalyticsConfig_ = this.getA4aAnalyticsConfig();
     if (this.a4aAnalyticsConfig_) {
       // TODO(warrengm): Consider having page-level singletons for networks that
       // use the same config for all ads.
