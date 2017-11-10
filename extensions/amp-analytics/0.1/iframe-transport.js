@@ -177,11 +177,9 @@ export class IframeTransport {
                 ++this.numLongTasks_ >= LONG_TASK_REPORTING_THRESHOLD_) {
               user().warn(TAG_,
                   'Long Task: ' +
-                  `Attribution: "${attrib.name}" ` +
-                  `Vendor: ${this.type_} ` +
+                  `Vendor: "${this.type_}" ` +
                   `Src: "${attrib.containerSrc}" ` +
                   `Duration: ${entry.duration}ms ` +
-                  `StartTime: ${attrib.startTime} ` +
                   `Occurrences: ${this.numLongTasks_}`);
             }
           });
