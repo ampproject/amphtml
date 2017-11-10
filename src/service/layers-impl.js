@@ -73,35 +73,8 @@ function positionLt(left, top) {
   };
 }
 
-/**
- * @type {?Element}
- */
-let scrollingElement;
-
-/**
- * @param {!Node|!Document} nodeOrDoc
- */
-function getScrollingElement(nodeOrDoc) {
-  if (scrollingElement) {
-    return scrollingElement;
-  }
-
-  const doc = nodeOrDoc.ownerDocument || nodeOrDoc;
-  let s = doc./*OK*/scrollingElement;
-
-  if (!s) {
-    if (doc.body && Services.platformFor(doc.defaultView).isWebKit()) {
-      s = doc.body;
-    } else {
-      s = doc.documentElement;
-    }
-  }
-
-  return scrollingElement = s;
-}
-
 export class LayoutLayers {
-  constructor(ampdoc) {
+  constructor(ampdoc, scrollingElement) {
     const {win} = ampdoc;
 
     this.ampdoc_ = ampdoc;
@@ -125,8 +98,7 @@ export class LayoutLayers {
     }, /* TODO */{capture: true, passive: true});
     win.addEventListener('resize', () => this.onResize_());
 
-    this.declareLayer(this.document_.documentElement);
-    this.declareLayer(getScrollingElement(this.document_));
+    this.declareLayer_(scrollingElement, true);
   }
 
   add(element) {
@@ -231,17 +203,18 @@ export class LayoutLayers {
    * @param {!Element} element
    */
   declareLayer(element) {
-    this.declareLayer_(element);
+    this.declareLayer_(element, false);
   }
 
   /**
    * Eagerly creates a Layer for the element.
    * @param {!Element} element
+   * @param {!Boolean} isRootLayer
    * @return {!LayoutElement}
    */
-  declareLayer_(element) {
+  declareLayer_(element, isRootLayer) {
     const layout = this.add(element);
-    layout.declareLayer();
+    layout.declareLayer(isRootLayer);
     return layout;
   }
 
@@ -382,14 +355,12 @@ export class LayoutElement {
     return this.isLayer_;
   }
 
-  declareLayer() {
+  declareLayer(isRootLayer) {
     this.isLayer_ = true;
     this.needsRemeasure_ = true;
     this.needsScrollRemeasure_ = true;
 
-    const element = this.element_;
-    const scroller = getScrollingElement(element);
-    this.isRootLayer_ = element === scroller || !scroller.contains(element);
+    this.isRootLayer_ = isRootLayer;
 
     const parent = this.getParentLayer();
     if (parent) {
