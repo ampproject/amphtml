@@ -158,6 +158,13 @@ event.value</pre>
     <td>Elements that fire <code>input</code> event.</td>
     <td>Same as <code>change</code> event data.</td>
   </tr>
+    <!-- input-throttled -->
+  <tr>
+    <td><code>input-throttled</code></td>
+    <td>Fired when the value of the element is changed. This is similar to the standard <code>change</code> event, but it is throttled to firing at most once every 100ms while the value of the input is changing.</td>
+    <td>Elements that fire <code>input</code> event.</td>
+    <td>Same as <code>change</code> event data.</td>
+  </tr>
 </table>
 
 ### amp-carousel[type="slides"]
