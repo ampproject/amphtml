@@ -346,14 +346,21 @@ export class AmpStory extends AMP.BaseElement {
   buildButtons_() {
     this.element.insertBefore(
         renderSimpleTemplate(this.win.document, PAGE_SWITCH_BUTTONS),
-        this.element.firstChild
-    );
+        this.element.firstChild);
 
     this.nextButton_ =
         this.element.querySelector('.i-amphtml-story-button-next');
 
     this.prevButton_ =
         this.element.querySelector('.i-amphtml-story-button-prev');
+
+    this.nextButton_.addEventListener('click', () => {
+      this.next_();
+    });
+
+    this.prevButton_.addEventListener('click', () => {
+      this.previous_();
+    });
   }
 
   /** @private */
