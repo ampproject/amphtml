@@ -116,12 +116,15 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {?IframeTransport} */
     this.iframeTransport_ = null;
+
+    /** @private {!boolean} */
+    this.isInabox_ = getMode().runtime == 'inabox' ? true : false;
   }
 
   /** @override */
   getPriority() {
     // Load immediately if inabox, otherwise after other content.
-    return getMode().runtime == 'inabox' ? 0 : 1;
+    return this.isInabox_ ? 0 : 1;
   }
 
   /** @override */
