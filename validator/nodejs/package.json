@@ -24,6 +24,6 @@
     "jasmine": "2.3.2"
   },
   "scripts": {
-    "postinstall": "node postinstall-windows.js"
+    "postinstall": "$NODE postinstall-windows.js"
   }
 }
