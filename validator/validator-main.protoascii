@@ -990,6 +990,7 @@ tags: {
 
 tags: {
   html_format: AMP
+  html_format: AMP4ADS
   tag_name: "STYLE"
   spec_name: "style[amp-keyframes]"
   unique: true
