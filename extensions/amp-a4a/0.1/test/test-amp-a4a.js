@@ -794,7 +794,7 @@ describe('amp-a4a', () => {
         return a4a.layoutCallback().then(() => {
           expect(renderAmpCreativeSpy.calledOnce,
               'renderAmpCreative_ called exactly once').to.be.true;
-          a4a.unlayoutCallback();
+          sandbox.stub(a4a, 'unlayoutCallback', () => false);
           const onLayoutMeasureSpy = sandbox.spy(a4a, 'onLayoutMeasure');
           a4a.resumeCallback();
           expect(onLayoutMeasureSpy).to.not.be.called;
