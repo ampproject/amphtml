@@ -15,6 +15,7 @@
  */
 
 import {AmpA4A} from '../amp-a4a';
+import {dict} from '../../../../src/utils/object';
 
 /** @type {string} @private */
 export const TEST_URL = 'http://iframe.localhost:' + location.port +
@@ -44,5 +45,10 @@ export class MockA4AImpl extends AmpA4A {
   /** @override */
   getPreconnectUrls() {
     return ['https://googleads.g.doubleclick.net'];
+  }
+
+  /** @override */
+  getA4aAnalyticsConfig() {
+    return dict();
   }
 }
