@@ -25,6 +25,9 @@ import {
   addExperimentIdToElement,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {
+  isCdnProxy,
+} from '../../../ads/google/a4a/utils';
+import {
   /* eslint no-unused-vars: 0 */ ExperimentInfo,
   getExperimentBranch,
   forceExperimentBranch,
@@ -83,17 +86,6 @@ export const URL_EXPERIMENT_MAPPING = {
   '9': DOUBLECLICK_EXPERIMENT_FEATURE.CACHE_EXTENSION_INJECTION_CONTROL,
   '10': DOUBLECLICK_EXPERIMENT_FEATURE.CACHE_EXTENSION_INJECTION_EXP,
 };
-
-/**
- * Returns whether we are running on the AMP CDN.
- * @param {!Window} win
- * @return {boolean}
- */
-export function isCdnProxy(win) {
-  const googleCdnProxyRegex =
-    /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
-  return googleCdnProxyRegex.test(win.location.origin);
-}
 
 /**
  * Class for checking whether a page/element is eligible for Fast Fetch.
@@ -177,15 +169,11 @@ export class DoubleclickA4aEligibility {
           (getMode(win).localDev || getMode(win).test)) {
         experimentId = MANUAL_EXPERIMENT_ID;
       } else {
-        let unconditionedExp;
         // For unconditioned canonical holdback, in the control branch
         // we allow Fast Fetch on non-CDN pages, but in the experiment we do not.
-        if ((unconditionedExp = getExperimentBranch(
-            win, UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME))) {
-          return unconditionedExp ==
-              DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_CTL;
-        }
-        return true;
+        return getExperimentBranch(
+            win, UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME) !=
+          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_EXP;
       }
     } else {
       // See if in holdback control/experiment.

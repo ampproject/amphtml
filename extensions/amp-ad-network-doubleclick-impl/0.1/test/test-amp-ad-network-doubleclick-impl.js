@@ -34,10 +34,10 @@ import {
   SAFEFRAME_ORIGIN,
 } from '../amp-ad-network-doubleclick-impl';
 import {
-  DFP_CANONICAL_FF_EXPERIMENT_NAME,
   DOUBLECLICK_A4A_EXPERIMENT_NAME,
   DOUBLECLICK_EXPERIMENT_FEATURE,
   UNCONDITIONED_IDENTITY_EXPERIMENT_NAME,
+  UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
   DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
 } from '../doubleclick-a4a-config';
 import {
@@ -1021,14 +1021,16 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       doc.body.removeChild(element);
     });
 
-    it('should return false when not in canonical non-SSL experiment', () => {
-      expect(impl.shouldPreferentialRenderWithoutCrypto()).to.be.false;
+    it('should return true by default', () => {
+      expect(impl.shouldPreferentialRenderWithoutCrypto()).to.be.true;
     });
 
-    it('should return true when in canonical non-SSL experiment', () => {
-      forceExperimentBranch(impl.win, DFP_CANONICAL_FF_EXPERIMENT_NAME,
-          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT);
-      expect(impl.shouldPreferentialRenderWithoutCrypto()).to.be.true;
+    it('should return false when in canonical holdback experiment', () => {
+      forceExperimentBranch(
+        impl.win,
+        UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
+        DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_EXP);
+      expect(impl.shouldPreferentialRenderWithoutCrypto()).to.be.false;
     });
   });
 

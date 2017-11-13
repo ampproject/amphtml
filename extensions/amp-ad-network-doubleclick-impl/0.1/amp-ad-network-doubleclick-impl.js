@@ -30,7 +30,6 @@ import {
 import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
 import {
   experimentFeatureEnabled,
-  isCdnProxy,
   DOUBLECLICK_EXPERIMENT_FEATURE,
   DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
   UNCONDITIONED_IDENTITY_EXPERIMENT_NAME,
@@ -44,6 +43,7 @@ import {
   truncAndTimeUrl,
   googleBlockParameters,
   googlePageParameters,
+  isCdnProxy,
   isReportingEnabled,
   AmpAnalyticsConfigDef,
   extractAmpAnalyticsConfig,
@@ -505,7 +505,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   shouldPreferentialRenderWithoutCrypto() {
-    return !isCdnProxy(this.win) && !experimentFeatureEnabled(
+    dev().assert(!isCdnProxy(this.win));
+    return !experimentFeatureEnabled(
         this.win, DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_EXP,
         UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME);
   }
