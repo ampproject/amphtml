@@ -74,6 +74,7 @@ export class ViewportBindingNatural_ {
 
     /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.win, 'layers');
+    installLayersServiceForDoc(this.ampdoc, this.getScrollingElement_());
 
     dev().fine(TAG_, 'initialized natural viewport');
   }
@@ -92,7 +93,7 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   ensureReadyForElements() {
-    installLayersServiceForDoc(this.ampdoc, this.getScrollingElement_());
+    // Nothing.
   }
 
   /** @override */
