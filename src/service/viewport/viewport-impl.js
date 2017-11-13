@@ -41,9 +41,6 @@ import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {
   ViewportBindingIosEmbedWrapper_,
 } from './viewport-binding-ios-embed-wrapper';
-import {
-  ViewportBindingNaturalIosEmbed_,
-} from './viewport-binding-natural-ios-embed';
 
 
 const TAG_ = 'Viewport';
@@ -1078,13 +1075,7 @@ function createViewport(ampdoc) {
   let binding;
   if (ampdoc.isSingleDoc() &&
       getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
-    // The overriding of document.body fails in iOS7.
-    // Also, iOS8 sometimes freezes scrolling.
-    if (Services.platformFor(ampdoc.win).getIosMajorVersion() > 8) {
-      binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
-    } else {
-      binding = new ViewportBindingNaturalIosEmbed_(ampdoc.win, ampdoc);
-    }
+    binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
   } else {
     binding = new ViewportBindingNatural_(ampdoc, viewer);
   }
@@ -1108,7 +1099,6 @@ const ViewportType = {
    * device.
    * See:
    * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
-   * and {@link ViewportBindingNaturalIosEmbed_} for more details.
    */
   NATURAL_IOS_EMBED: 'natural-ios-embed',
 };
