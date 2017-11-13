@@ -39,8 +39,8 @@ With the responsive layout, the width and height from the example should yield c
 
 ```html
 <amp-nexxtv-player
-    data-mediaid="PTPFEC4U184674"
-    data-client="583"
+    data-mediaid="71QQG852413DU7J"
+    data-client="761"
     data-streamtype="video"
     data-delay="2"
     data-mode="static"
