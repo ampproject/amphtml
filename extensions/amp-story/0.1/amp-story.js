@@ -59,6 +59,8 @@ import {ActionTrust} from '../../../src/action-trust';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrl} from '../../../src/url';
 import {stringHash32} from '../../../src/string';
+import {dict} from '../../../src/utils/object';
+import {renderSimpleTemplate} from './simple-template';
 
 /** @private @const {string} */
 const PRE_ACTIVE_PAGE_ATTRIBUTE_NAME = 'pre-active';
@@ -83,6 +85,36 @@ const AUDIO_MUTED_ATTRIBUTE = 'muted';
 /** @type {string} */
 const TAG = 'amp-story';
 
+/** @type {string} */
+const NEXT_BUTTON_CLASS = 'i-amphtml-story-button-move'
+    + ' i-amphtml-story-button-next';
+
+/** @type {string} */
+const PREV_BUTTON_CLASS = 'i-amphtml-story-button-move'
+    + ' i-amphtml-story-button-prev i-amphtml-story-button-move-hidden';
+
+const PAGE_SWITCH_BUTTONS = [
+  {
+    tag: 'div',
+    attrs: dict({'class': 'i-amphtml-story-button-container next-container'}),
+    children: [
+      {
+        tag: 'button',
+        attrs: dict({'class': NEXT_BUTTON_CLASS}),
+      },
+    ],
+  },
+  {
+    tag: 'div',
+    attrs: dict({'class': 'i-amphtml-story-button-container prev-container'}),
+    children: [
+      {
+        tag: 'button',
+        attrs: dict({'class': PREV_BUTTON_CLASS}),
+      },
+    ],
+  },
+];
 
 export class AmpStory extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -312,21 +344,15 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   buildButtons_() {
-    const doc = this.element.ownerDocument;
-    const nextButton = doc.createElement('button');
-    nextButton.classList.add(
-        'i-amphtml-story-button-move','i-amphtml-story-button-next');
-    this.element.appendChild(nextButton);
-    const previousButton = doc.createElement('button');
-    previousButton.classList.add(
-        'i-amphtml-story-button-move','i-amphtml-story-button-prev',
-        'i-amphtml-story-button-move-hidden');
+    this.element.insertBefore(
+        renderSimpleTemplate(this.win.document, PAGE_SWITCH_BUTTONS),
+        this.element.firstChild);
 
-    this.element.insertBefore(previousButton, this.element.firstChild);
-    this.element.insertBefore(nextButton, this.element.firstChild);
+    this.nextButton_ =
+        this.element.querySelector('.i-amphtml-story-button-next');
 
-    this.nextButton_ = nextButton;
-    this.prevButton_ = previousButton;
+    this.prevButton_ =
+        this.element.querySelector('.i-amphtml-story-button-prev');
 
     this.nextButton_.addEventListener('click', () => {
       this.next_();
