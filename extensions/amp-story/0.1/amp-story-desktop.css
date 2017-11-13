@@ -103,11 +103,11 @@ amp-story-page.i-amphtml-story-page-shown {
 }
 
 [desktop] amp-story-page[active] + amp-story-page ~ amp-story-page {
-  transform: scale(1.0) translateX(250%) translateY(0%) !important;
+  transform: scale(1.0) translateX(250vw) translateY(0%) !important;
 }
 
 [dir=rtl] [desktop] amp-story-page {
-  transform: scale(1.0) translateX(250%) translateY(0%) !important;
+  transform: scale(1.0) translateX(250vw) translateY(0%) !important;
 }
 
 [dir=rtl] [desktop] amp-story-page[pre-active] {
