@@ -20,6 +20,7 @@ import {filterSplice} from '../utils/array';
 import {Services} from '../services';
 import {registerServiceBuilderForDoc} from '../service';
 import {computedStyle} from '../style';
+import {getMode} from '../mode';
 
 const LAYOUT_PROP = '__AMP_LAYOUT';
 
@@ -538,6 +539,9 @@ export class LayoutElement {
 
     const box = this.element_.getBoundingClientRect();
     this.size_ = sizeWh(box.width, box.height);
+    if ((getMode().localDev || getMode().test) && Object.freeze) {
+      Object.freeze(this.size_);
+    }
 
     let {left, top} = box;
     if (this.isRootLayer_) {
@@ -548,6 +552,9 @@ export class LayoutElement {
         left - relative.left,
         top - relative.top
     );
+    if ((getMode().localDev || getMode().test) && Object.freeze) {
+      Object.freeze(this.position_);
+    }
 
     const children = this.children_;
     if (children.length) {
