@@ -24,7 +24,6 @@ import {
   extractUrlExperimentId,
   addExperimentIdToElement,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {supportsNativeCrypto} from '../../../ads/google/a4a/utils';
 import {
   /* eslint no-unused-vars: 0 */ ExperimentInfo,
   getExperimentBranch,
@@ -102,16 +101,6 @@ export function isCdnProxy(win) {
  * @visibleForTesting
  */
 export class DoubleclickA4aEligibility {
-  /**
-   * Returns whether win supports native crypto. Is just a wrapper around
-   * supportsNativeCrypto, but this way we can mock out for testing.
-   * @param {!Window} win
-   * @return {boolean}
-   */
-  supportsCrypto(win) {
-    return supportsNativeCrypto(win);
-  }
-
   /**
    * Returns whether we are running on the AMP CDN.
    * @param {!Window} win
