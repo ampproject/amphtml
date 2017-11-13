@@ -1027,9 +1027,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
     it('should return false when in canonical holdback experiment', () => {
       forceExperimentBranch(
-        impl.win,
-        UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
-        DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_EXP);
+          impl.win,
+          UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
+          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_EXP);
       expect(impl.shouldPreferentialRenderWithoutCrypto()).to.be.false;
     });
   });
