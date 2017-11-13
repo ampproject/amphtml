@@ -20,6 +20,7 @@ import {filterSplice} from '../utils/array';
 import {Services} from '../services';
 import {registerServiceBuilderForDoc} from '../service';
 import {computedStyle} from '../style';
+import {listen} from '../event-helper';
 import {getMode} from '../mode';
 
 const LAYOUT_PROP = '__AMP_LAYOUT';
@@ -90,13 +91,18 @@ export class LayoutLayers {
 
     // TODO: figure out fixed layer
 
-    this.document_.addEventListener('scroll', event => {
+
+    // Listen for scroll events at the document level, so we know when either
+    // the document (the scrolling element) or an element scrolls.
+    // This forwards to our scroll-dirty system, and eventually to the scroll
+    // listener.
+    listen(this.document_, 'scroll', event => {
       const {target} = event;
       const scrolled = target.nodeType == Node.ELEMENT_NODE
           ? target
-          : getScrollingElement(this.document_);
+          : scrollingElement;
       this.scrolled_(scrolled);
-    }, /* TODO */{capture: true, passive: true});
+    }, {capture: true, passive: true});
     win.addEventListener('resize', () => this.onResize_());
 
     this.declareLayer_(scrollingElement, true);
