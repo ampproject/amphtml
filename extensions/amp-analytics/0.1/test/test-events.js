@@ -64,7 +64,7 @@ describes.realWin('Events', {amp: 1}, env => {
     beforeEach(() => {
       // ActionService and some other services may also add click listeners.
       iniEventCount = win.document.eventListeners.count('click');
-      tracker = new ClickEventTracker(root);
+      tracker = root.getTracker('click', ClickEventTracker);
     });
 
     it('should initalize, add listeners and dispose', () => {
@@ -167,7 +167,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
     beforeEach(() => {
       clock = sandbox.useFakeTimers();
-      tracker = new CustomEventTracker(root);
+      tracker = root.getTracker('custom', CustomEventTracker);
       getElementSpy = sandbox.spy(root, 'getElement');
     });
 
@@ -378,7 +378,7 @@ describes.realWin('Events', {amp: 1}, env => {
     let targetSignals;
 
     beforeEach(() => {
-      tracker = new SignalTracker(root);
+      tracker = root.getTracker('render-start', SignalTracker);
       target.classList.add('i-amphtml-element');
       targetSignals = new Signals();
       target.signals = () => targetSignals;
@@ -447,7 +447,7 @@ describes.realWin('Events', {amp: 1}, env => {
     let targetSignals;
 
     beforeEach(() => {
-      tracker = new IniLoadTracker(root);
+      tracker = root.getTracker('ini-load', IniLoadTracker);
       target.classList.add('i-amphtml-element');
       targetSignals = new Signals();
       target.signals = () => targetSignals;
@@ -542,7 +542,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
     beforeEach(() => {
       clock = lolex.install(root.ampdoc.win);
-      tracker = new TimerEventTracker(root);
+      tracker = root.getTracker('timer', TimerEventTracker);
     });
 
     function countIntervals() {
@@ -613,7 +613,7 @@ describes.realWin('Events', {amp: 1}, env => {
             {timerSpec: {interval: 1}}, handler);
       }).to.not.throw();
 
-      const clickTracker = new ClickEventTracker(root);
+      const clickTracker = root.getTracker('click', ClickEventTracker);
       expect(() => {
         tracker.add(analyticsElement, 'timer',
             {
@@ -627,7 +627,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
     it('timers start and stop by tracking different events', () => {
       const fn1 = sandbox.stub();
-      const clickTracker = new ClickEventTracker(root);
+      const clickTracker = root.getTracker('click', ClickEventTracker);
       tracker.add(analyticsElement, 'timer', {timerSpec: {
         interval: 1,
         startSpec: {on: 'click', selector: '.target'},
@@ -646,7 +646,7 @@ describes.realWin('Events', {amp: 1}, env => {
       target.click(); // Stop timer.
 
       const fn2 = sandbox.stub();
-      const customTracker = new CustomEventTracker(root);
+      const customTracker = root.getTracker('custom', CustomEventTracker);
       const getElementSpy = sandbox.spy(root, 'getElement');
       tracker.add(analyticsElement, 'timer', {timerSpec: {
         interval: 1,
@@ -677,7 +677,7 @@ describes.realWin('Events', {amp: 1}, env => {
     it('timers started and stopped by the same event on the same target do not'
         + ' have race condition problems', () => {
       const fn1 = sandbox.stub();
-      const clickTracker = new ClickEventTracker(root);
+      const clickTracker = root.getTracker('click', ClickEventTracker);
       tracker.add(analyticsElement, 'timer', {timerSpec: {
         interval: 1,
         startSpec: {on: 'click', selector: '.target'},
@@ -878,10 +878,11 @@ describes.realWin('Events', {amp: 1}, env => {
     let getAmpElementSpy;
 
     beforeEach(() => {
-      tracker = new VisibilityTracker(root);
+      tracker = root.getTracker('visible', VisibilityTracker);
       visibilityManagerMock = sandbox.mock(root.getVisibilityManager());
       getAmpElementSpy = sandbox.spy(root, 'getAmpElement');
-      tracker.waitForTrackers_['ini-load'] = new IniLoadTracker(tracker.root);
+      tracker.waitForTrackers_['ini-load'] =
+          root.getTracker('ini-load', IniLoadTracker);
       iniLoadTrackerMock = sandbox.mock(tracker.waitForTrackers_['ini-load']);
 
       target.classList.add('i-amphtml-element');
@@ -1161,7 +1162,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
       it('with waitFor RENDER_START', () => {
         tracker.waitForTrackers_['render-start'] =
-            new SignalTracker(tracker.root);
+            root.getTracker('render-start', SignalTracker);
         const signalTrackerMock =
             sandbox.mock(tracker.waitForTrackers_['render-start']);
         signalTrackerMock
