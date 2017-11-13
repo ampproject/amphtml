@@ -568,11 +568,20 @@ class TimerEventHandler {
     /** @private {number|undefined} */
     this.intervalId_ = undefined;
 
-    /** @const @private {number} */
-    this.intervalLength_ = intervalLength;
+    /** @private {number|undefined} */
+    this.startTime_ = undefined; // milliseconds
+
+    /** @private {number|undefined} */
+    this.lastPingTime_ = undefined; // milliseconds
+
+    /** @private {number} */
+    this.timerDuration_ = 0; // milliseconds
 
     /** @const @private {number} */
-    this.maxTimerLength_ = maxTimerLength;
+    this.intervalLength_ = intervalLength; // seconds
+
+    /** @const @private {number} */
+    this.maxTimerLength_ = maxTimerLength; // seconds
 
     /** @const @private {boolean} */
     this.isUnstoppable_ = isUnstoppable;
@@ -653,6 +662,9 @@ class TimerEventHandler {
    * @param {function()} timeoutCallback
    */
   startIntervalInWindow(win, timerCallback, timeoutCallback) {
+    this.startTime_ = Date.now();
+    this.lastPingTime_ = undefined;
+    this.timerDuration_ = 0;
     this.intervalId_ = win.setInterval(() => {
       timerCallback();
     }, this.intervalLength_ * 1000);
@@ -671,6 +683,31 @@ class TimerEventHandler {
   clearInterval(win) {
     win.clearInterval(this.intervalId_);
     this.intervalId_ = undefined;
+    this.calculateDuration_();
+    this.lastPingTime_ = undefined;
+  }
+
+  /** @private */
+  calculateDuration_() {
+    if (!!this.startTime_) {
+      this.timerDuration_ +=
+          Date.now() - (this.lastPingTime_ || this.startTime_);
+    }
+  }
+
+  /** @return {!JsonObject} */
+  reportTimerVars() {
+    if (this.isRunning()) {
+      this.calculateDuration_();
+      this.lastPingTime_ = Date.now();
+    }
+    const durationSeconds = Math.floor(this.timerDuration_ / 1000);
+    // Keep track of partial unreported seconds so they can roll over later.
+    this.timerDuration_ -= (durationSeconds * 1000);
+    return {
+      'timerDuration': durationSeconds,
+      'timerStart': this.timerStart_,
+    };
   }
 }
 
@@ -850,18 +887,9 @@ export class TimerEventTracker extends EventTracker {
    * @private
    */
   createEvent_(timerId, eventType) {
-    const timerSpec = this.trackers_[timerId];
-    const timeSinceLastPing = Date.now() -
-        (timerSpec[this.TIMER_PARAMS_.LAST_PING] ||
-         timerSpec[this.TIMER_PARAMS_.TIMER_START]);
-    const duration = timerSpec[this.TIMER_PARAMS_.TIMER_DURATION] ||
-        timeSinceLastPing;
-    const params = {
-      'timerStart': timerSpec[this.TIMER_PARAMS_.TIMER_START],
-      'timerDuration': Math.floor(duration / 1000);
-    };
-    this.trackers_[timerId][this.TIMER_PARAMS_.LAST_PING] = Date.now();
-    return new AnalyticsEvent(this.root.getRootElement(), eventType, params);
+    const timerHandler = this.trackers_[timerId];
+    return new AnalyticsEvent(this.root.getRootElement(), eventType,
+        timerHandler.reportTimerVars());
   }
 
   /**
