@@ -19,7 +19,6 @@
 // implementation is located in the ads/google/a4a directory rather than here.
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
-
 import {
   MANUAL_EXPERIMENT_ID,
   extractUrlExperimentId,
