@@ -149,6 +149,7 @@ const forbiddenTerms = {
       'src/service/action-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-form/0.1/amp-form.js',
+      'extensions/amp-date-picker/0.1/amp-date-picker.js',
     ],
   },
   'installActivityService': {

@@ -30,6 +30,7 @@ import {
   iterateCursor,
   scopedQuerySelector,
   scopedQuerySelectorAll,
+  removeElement,
 } from '../../../src/dom';
 import {user} from '../../../src/log';
 import {map} from '../../../src/utils/object';
@@ -254,7 +255,7 @@ class DatePicker {
       this.srcDefaultTemplate_ = defaultTemplate;
     }).catch(error => {
       // TODO(cvializ): better message?
-      user().error('Failed fetching Date Picker data', error);
+      user().error(TAG, 'Failed fetching Date Picker data', error);
     });
   }
 
@@ -299,7 +300,7 @@ class DatePicker {
       if (value.isValid()) {
         props.initialStartDate = value;
       }
-      startPlaceholder.remove();
+      removeElement(startPlaceholder);
     }
     const endPlaceholder = childElementByAttr(
         this.element, 'amp-date-placeholder-end');
@@ -310,7 +311,7 @@ class DatePicker {
       if (value.isValid()) {
         props.initialEndDate = value;
       }
-      endPlaceholder.remove();
+      removeElement(endPlaceholder);
     }
     const datePlaceholder = childElementByAttr(
         this.element, 'amp-date-placeholder');
@@ -321,7 +322,7 @@ class DatePicker {
       if (value.isValid()) {
         props.initialDate = value;
       }
-      datePlaceholder.remove();
+      removeElement(datePlaceholder);
     }
 
     return props;
@@ -532,7 +533,7 @@ class DatePicker {
                 {bubbles: true});
 
             template.dispatchEvent(renderedEvent);
-            return rendered.outerHTML;
+            return rendered./*REVIEW*/outerHTML;
           });
     } else {
       return Promise.resolve(opt_fallback || '');
