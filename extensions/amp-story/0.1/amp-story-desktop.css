@@ -383,14 +383,8 @@ amp-story-page.i-amphtml-story-page-shown {
  bottom: 0!important;
 }
 
-[desktop] .i-amphtml-story-page-progress-bar:first-child,
-[desktop] .i-amphtml-story-page-progress-bar:first-child .i-amphtml-story-page-progress-value {
-  border-radius: 50px 0 0 50px!important;
-}
-
-[desktop] .i-amphtml-story-page-progress-bar:last-child,
-[desktop] .i-amphtml-story-page-progress-bar:last-child .i-amphtml-story-page-progress-value {
-  border-radius: 0 50px 50px 0!important;
+[desktop] .i-amphtml-story-page-progress-bar {
+  border-radius: 100px !important;
 }
 
 [desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-right .i-amphtml-story-mute-audio-control,
