@@ -164,7 +164,8 @@ export class Cid {
           ` EXTRA INFO: doc isVisible: ${docVisible},` +
           ` doc hasBeenVisible ${hasVisible}`;
       dev().error('CID', trace);
-      throw error;
+      rethrowAsync(error);
+      return null;
     });
   }
 
