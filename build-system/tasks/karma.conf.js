@@ -48,6 +48,7 @@ module.exports = {
   reporters: ['super-dots', 'karmaSimpleReporter'],
 
   superDotsReporter: {
+    nbDotsPerLine: 10000,
     color: {
       success: 'green',
       failure: 'red',
@@ -152,6 +153,11 @@ module.exports = {
       base: 'SauceLabs',
       browserName: 'iphone',
       version: '10.0',
+    },
+    SL_iOS_11_0: {
+      base: 'SauceLabs',
+      browserName: 'iphone',
+      version: '11.0',
     },
     SL_Firefox_latest: {
       base: 'SauceLabs',

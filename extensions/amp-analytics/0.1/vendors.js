@@ -141,6 +141,36 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
+  'alexametrics': {
+    'requests': {
+      'base': 'https://${ampAtrkHost}/atrk.gif?account=${atrk_acct}&domain=${domain}',
+      'pageview': '${base}&jsv=amp-${ampVersion}' +
+        '&frame_height=${viewportHeight}&frame_width=${viewportWidth}' +
+        '&title=${title}&time=${timestamp}&time_zone_offset=${timezone}' +
+        '&screen_params=${screenWidth}x${screenHeight}x${screenColorDepth}' +
+        '&ref_url=${documentReferrer}&host_url=${sourceUrl}' +
+        '&random_number=${random}&user_cookie=${clientId(__auc)}' +
+        '&user_cookie_flag=0&user_lang=${browserLanguage}' +
+        '&amp_doc_url=${ampdocUrl}',
+    },
+    'vars': {
+      'atrk_acct': '',
+      'domain': '',
+      'ampAtrkHost': 'certify-amp.alexametrics.com',
+    },
+    'triggers': {
+      'trackPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+    'transport': {
+      'xhrpost': false,
+      'beacon': false,
+      'image': true,
+    },
+  },
+
   'atinternet': {
     'transport': {'beacon': false, 'xhrpost': false, 'image': true},
     'requests': {
@@ -171,6 +201,12 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'beacon': false,
       'xhrpost': false,
       'image': true,
+    },
+  },
+
+  'bg': {
+    'transport': {
+      'iframe': 'https://tpc.googlesyndication.com/b4a/b4a-runner.html',
     },
   },
 
@@ -420,7 +456,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
 
   'dynatrace': {
     'requests': {
-      'endpoint': '${protocol}://${tenant}.${environment}:${port}/ampbf',
+      'endpoint': '${protocol}://${tenant}${separator}${environment}:${port}/ampbf/${tenantpath}',
       'pageview': '${endpoint}?type=js&' +
         'flavor=amp&' +
         'v=1&' +
@@ -476,6 +512,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'tenant': '',
       'environment': 'live.dynatrace.com',
       'port': '443',
+      'separator': '.',
     },
   },
 
@@ -922,6 +959,103 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
+  'mediarithmics': {
+    'vars': {
+      'domain': 'events.mediarithmics.com',
+      'url': 'SOURCE_URL',
+      'event_name': '$page_view',
+      'referrer': 'DOCUMENT_REFERRER',
+    },
+    'requests': {
+      'host': 'https://${domain}',
+      'pageview': '${host}/v1/visits/pixel?' +
+        '$site_token=${site_token}' +
+        '&$url=${url}' +
+        '&$ev=${event_name}' +
+        '&$referrer=${referrer}',
+    },
+    'triggers': {
+      'trackPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
+  'mediator': {
+    'requests': {
+      'host': '//collector.mediator.media/amp/?',
+      'prefix': '${host}cid=${mediator_id}&url=${canonicalUrl}' +
+                '&ref=${documentReferrer}&p=4&',
+      'suffix': 'vh=${viewportHeight}&sh=${scrollHeight}&st=${scrollTop}',
+      'pageview': '${prefix}e=v',
+      'timer': '${prefix}e=t&${suffix}',
+      's0': '${prefix}e=s0',
+      's1': '${prefix}e=s1',
+      's2': '${prefix}e=s2',
+      's3': '${prefix}e=s3',
+    },
+    'vars': {
+      'mediator_id': '',
+    },
+    'triggers': {
+      'trackPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+      'scrollPing0': {
+        'on': 'scroll',
+        'scrollSpec': {
+          'verticalBoundaries': [
+            5,
+          ],
+        },
+        'request': 's0',
+      },
+      'scrollPing1': {
+        'on': 'scroll',
+        'scrollSpec': {
+          'verticalBoundaries': [
+            35,
+          ],
+        },
+        'request': 's1',
+      },
+      'scrollPing2': {
+        'on': 'scroll',
+        'scrollSpec': {
+          'verticalBoundaries': [
+            65,
+          ],
+        },
+        'request': 's2',
+      },
+      'scrollPing3': {
+        'on': 'scroll',
+        'scrollSpec': {
+          'verticalBoundaries': [
+            95,
+          ],
+        },
+        'request': 's3',
+      },
+      'pageTimer': {
+        'on': 'timer',
+        'timerSpec': {
+          'interval': 5,
+          'maxTimerLength': 600,
+          'immediate': false,
+        },
+        'request': 'timer',
+      },
+    },
+  },
+
   'metrika': {
     'transport': {'beacon': true, 'xhrpost': true, 'image': false},
     'requests': {
@@ -1004,6 +1138,49 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'beacon': false,
       'xhrpost': false,
       'image': true,
+    },
+  },
+
+  'newrelic': {
+    'requests': {
+      'pageview': 'https://${beacon}/amp?appId=${appId}' +
+        '&licenseKey=${licenseKey}' +
+        '&ampUrl=${ampdocUrl}' +
+        '&canonicalUrl=${canonicalUrl}' +
+        '&timeToDomContentLoadedEventEnd=' +
+          '${navTiming(domContentLoadedEventEnd)}' +
+        '&timeToDomInteractive=${navTiming(domInteractive)}' +
+        '&timeToDomComplete=${navTiming(domComplete)}' +
+        '&timeToDomLoading=${navTiming(domLoading)}' +
+        '&timeToResponseStart=${navTiming(responseStart)}' +
+        '&timeToResponseEnd=${navTiming(responseEnd)}' +
+        '&timeToLoadEventStart=${navTiming(loadEventStart)}' +
+        '&timeToLoadEventEnd=${navTiming(loadEventEnd)}' +
+        '&timeToConnectStart=${navTiming(connectStart)}' +
+        '&timeToConnectEnd=${navTiming(connectEnd)}' +
+        '&timeToFetchStart=${navTiming(fetchStart)}' +
+        '&timeToRequestStart=${navTiming(requestStart)}' +
+        '&timeToUnloadEventStart=${navTiming(unloadEventStart)}' +
+        '&timeToUnloadEventEnd=${navTiming(unloadEventEnd)}' +
+        '&timeToDomainLookupStart=${navTiming(domainLookupStart)}' +
+        '&timeToDomainLookupEnd=${navTiming(domainLookupEnd)}' +
+        '&timeToRedirectStart=${navTiming(redirectStart)}' +
+        '&timeToRedirectEnd=${navTiming(redirectEnd)}' +
+        '&timeToSecureConnection=${navTiming(secureConnectionStart)}' +
+        '&timestamp=${timestamp}' +
+        '&ampVersion=${ampVersion}' +
+        '&pageLoadTime=${pageLoadTime}',
+    },
+    'vars': {
+      'beacon': 'bam.nr-data.net',
+      'appId': [],
+      'licenseKey': '',
+    },
+    'triggers': {
+      'trackPageview': {
+        'on': 'ini-load',
+        'request': 'pageview',
+      },
     },
   },
 
@@ -1297,6 +1474,41 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
+  'shinystat': {
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+    'requests': {
+      'base': 'https://amp.shinystat.com/cgi-bin/shinyamp.cgi',
+      'commpar': 'AMP=1&RM=${random}' +
+                 '&USER=${account}' +
+                 '&PAG=${page}' +
+                 '&HR=${canonicalUrl}' +
+                 '&REFER=${documentReferrer}' +
+                 '&RES=${screenWidth}X${screenHeight}' +
+                 '&COLOR=${screenColorDepth}' +
+                 '&CID=${clientId(AMP_CID)}' +
+                 '&PAGID=${pageViewId}' +
+                 '&TITL=${title}' +
+                 '&RQC=${requestCount}',
+      'pagepar': '&VIE=${viewer}' +
+                 '&PLT=${pageLoadTime}',
+      'eventpar': '&SSXL=1',
+      'linkpar': '&LINK=${outboundLink}',
+      'pageview': '${base}?${commpar}${pagepar}',
+      'event': '${base}?${commpar}${eventpar}',
+      'link': '${base}?${commpar}${linkpar}',
+    },
+    'triggers': {
+      'pageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+  },
+
   'snowplow': {
     'vars': {
       'duid': 'CLIENT_ID(_sp_id)',
@@ -1355,6 +1567,11 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'on': 'visible',
         'request': 'pageview',
       },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
     },
   },
 

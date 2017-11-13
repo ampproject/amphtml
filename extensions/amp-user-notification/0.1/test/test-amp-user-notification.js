@@ -494,6 +494,20 @@ describes.realWin('amp-user-notification', {
     expect(el.getAttribute('role')).to.equal('status');
   });
 
+  describe('buildPostDismissRequest_', () => {
+    it('should return JSON request body', () => {
+      const el = getUserNotification(dftAttrs);
+      const impl = el.implementation_;
+      const elementId = 'elementId';
+      const ampUserId = '1';
+      const request = impl.buildPostDismissRequest_('application/json',
+          elementId, ampUserId);
+      expect(request.method).to.equal('POST');
+      expect(request.body.elementId).to.equal(elementId);
+      expect(request.body.ampUserId).to.equal(ampUserId);
+    });
+  });
+
   describe('buildGetHref_', () => {
 
     it('should do url replacement', () => {

@@ -20,6 +20,7 @@ import {WebPushService} from '../web-push-service';
 import {WebPushWidgetVisibilities} from '../amp-web-push-widget';
 import {NotificationPermission} from '../vars';
 import {WebPushConfigAttributes} from '../amp-web-push-config';
+import * as mode from '../../../../src/mode';
 
 const FAKE_IFRAME_URL =
   '//ads.localhost:9876/test/fixtures/served/iframe-stub.html#';
@@ -82,6 +83,93 @@ describes.realWin('web-push-service environment support', {
   });
 });
 
+describes.fakeWin('web-push-service environment support', {
+  amp: true,
+}, env => {
+  it('should not support HTTP location', () => {
+    env.ampdoc.win.location.resetHref('http://site.com/');
+    sandbox.stub(mode, 'getMode', () => {
+      return {development: false, test: false};
+    });
+    expect(env.ampdoc.win.location.href).to.be.equal(
+        'http://site.com/');
+    const webPush = new WebPushService(env.ampdoc);
+    sandbox./*OK*/stub(
+        webPush,
+        'arePushRelatedApisSupported_',
+        () => true
+    );
+    expect(webPush.environmentSupportsWebPush()).to.eq(false);
+  });
+});
+
+describes.fakeWin('web-push-service environment support', {
+  amp: true,
+}, env => {
+  it('should support localhost HTTP location', () => {
+    env.ampdoc.win.location.resetHref('http://localhost/');
+    expect(env.ampdoc.win.location.href).to.be.equal(
+        'http://localhost/');
+    const webPush = new WebPushService(env.ampdoc);
+    sandbox./*OK*/stub(
+        webPush,
+        'arePushRelatedApisSupported_',
+        () => true
+    );
+    expect(webPush.environmentSupportsWebPush()).to.eq(true);
+  });
+});
+
+describes.fakeWin('web-push-service environment support', {
+  amp: true,
+}, env => {
+  it('should support localhost HTTP location with port', () => {
+    env.ampdoc.win.location.resetHref('http://localhost:8000/');
+    const webPush = new WebPushService(env.ampdoc);
+    sandbox./*OK*/stub(
+        webPush,
+        'arePushRelatedApisSupported_',
+        () => true
+    );
+    expect(env.ampdoc.win.location.href).to.be.equal(
+        'http://localhost:8000/');
+    expect(webPush.environmentSupportsWebPush()).to.eq(true);
+  });
+});
+
+describes.fakeWin('web-push-service environment support', {
+  amp: true,
+}, env => {
+  it('should support 127.0.0.1 HTTP location', () => {
+    env.ampdoc.win.location.resetHref('http://127.0.0.1/');
+    const webPush = new WebPushService(env.ampdoc);
+    sandbox./*OK*/stub(
+        webPush,
+        'arePushRelatedApisSupported_',
+        () => true
+    );
+    expect(env.ampdoc.win.location.href).to.be.equal(
+        'http://127.0.0.1/');
+    expect(webPush.environmentSupportsWebPush()).to.eq(true);
+  });
+});
+
+describes.fakeWin('web-push-service environment support', {
+  amp: true,
+}, env => {
+  it('should support 127.0.0.1 HTTP location with port', () => {
+    env.ampdoc.win.location.resetHref('http://localhost:9000/');
+    const webPush = new WebPushService(env.ampdoc);
+    sandbox./*OK*/stub(
+        webPush,
+        'arePushRelatedApisSupported_',
+        () => true
+    );
+    expect(env.ampdoc.win.location.href).to.be.equal(
+        'http://localhost:9000/');
+    expect(webPush.environmentSupportsWebPush()).to.eq(true);
+  });
+});
 
 describes.realWin('web-push-service helper frame messaging', {
   amp: true,
@@ -209,10 +297,21 @@ describes.realWin('web-push-service widget visibilities', {
 
       sandbox./*OK*/stub(
           webPush,
-          'queryNotificationPermission',
+          'isQuerySupported_',
+          () => Promise.resolve(true)
+      );
+
+      sandbox./*OK*/stub(
+          webPush,
+          'getCanonicalFrameStorageValue_',
           () => Promise.resolve(NotificationPermission.DENIED)
       );
 
+      sandbox./*OK*/stub(
+          webPush,
+          'doesWidgetCategoryMarkupExist_',
+          () => true
+      );
       // We've mocked default notification permissions
       return webPush.updateWidgetVisibilities();
     }).then(() => {
@@ -319,6 +418,73 @@ describes.realWin('web-push-service widget visibilities', {
       expect(spy.withArgs(WebPushWidgetVisibilities.BLOCKED, false)
           .calledOnce).to.eq(true);
     });
+  });
+
+  it('service worker URLs should match except for query params', () => {
+    // Identical URLs
+    expect(
+        webPush.isUrlSimilarForQueryParams(
+            'https://site.com/worker-a.js?a=1&b=2',
+            'https://site.com/worker-a.js?a=1&b=2'
+      )
+    ).to.eq(true);
+
+    // Identical URLs except URL to test is allowed to have more than the
+    // first's query params
+    expect(
+        webPush.isUrlSimilarForQueryParams(
+            'https://site.com/worker-a.js?a=1&b=2',
+            'https://site.com/worker-a.js?a=1&b=2&c=3&d=4'
+      )
+    ).to.eq(true);
+
+    // URL to test is missing one of the first URL's query params
+    expect(
+        webPush.isUrlSimilarForQueryParams(
+            'https://site.com/worker-a.js?a=1&b=2',
+            'https://site.com/worker-a.js?a=1&c=3&d=4'
+      )
+    ).to.eq(false);
+
+    // URL to test is missing all query params
+    expect(
+        webPush.isUrlSimilarForQueryParams(
+            'https://site.com/worker-a.js?a=1&b=2',
+            'https://site.com/worker-a.js'
+      )
+    ).to.eq(false);
+
+    // URL to test has the wrong scheme
+    expect(
+        webPush.isUrlSimilarForQueryParams(
+            'https://site.com/worker-a.js?a=1&b=2',
+            'http://site.com/worker-a.js?a=1&b=2'
+      )
+    ).to.eq(false);
+
+    // URL to test has the wrong hostname
+    expect(
+        webPush.isUrlSimilarForQueryParams(
+            'https://site.com/worker-a.js?a=1&b=2',
+            'https://another-site.com/worker-a.js?a=1&b=2'
+      )
+    ).to.eq(false);
+
+    // URL to test has the wrong port
+    expect(
+        webPush.isUrlSimilarForQueryParams(
+            'https://site.com/worker-a.js?a=1&b=2',
+            'https://site:8000.com/worker-a.js?a=1&b=2'
+      )
+    ).to.eq(false);
+
+    // URL to test has the wrong pathname
+    expect(
+        webPush.isUrlSimilarForQueryParams(
+            'https://site.com/worker-a.js?a=1&b=2',
+            'https://site.com/another-worker-b.js?a=1&b=2'
+      )
+    ).to.eq(false);
   });
 
   it('should forward amp-web-push-subscription-state message to SW', done => {

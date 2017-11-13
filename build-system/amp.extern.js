@@ -202,6 +202,8 @@ UserNotificationManager.prototype.get;
 var Cid = function() {};
 /** @constructor @struct */
 var Activity = function() {};
+/** @constructor */
+var AmpStoryVariableService = function() {};
 
 // data
 var data;
@@ -276,6 +278,10 @@ var GetCidDef;
 Cid.prototype.get = function(
     externalCidScope, consent, opt_persistenceConsent) {}
 
+AmpStoryVariableService.prototype.onStateChange = function(event) {};
+AmpStoryVariableService.pageIndex;
+AmpStoryVariableService.pageId;
+
 var AMP = {};
 window.AMP;
 // Externed explicitly because we do not export Class shaped names
@@ -346,3 +352,19 @@ SomeBaseElementLikeClass.prototype.inViewport_;
 SomeBaseElementLikeClass.prototype.actionMap_;
 
 AMP.BaseTemplate;
+
+AMP.maybeExecuteRealTimeConfig = false;
+
+/**
+ * Actual filled values for this exists in
+ * extensions/amp-a4a/0.1/real-time-config-manager.js
+ * @enum {string}
+ */
+const RTC_ERROR_ENUM = {};
+
+/** @typedef {{
+      response: (Object|undefined),
+      rtcTime: number,
+      callout: string,
+      error: (RTC_ERROR_ENUM|undefined)}} */
+var rtcResponseDef;

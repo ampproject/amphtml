@@ -31,6 +31,8 @@ const port = process.env.SERVE_PORT;
 const useHttps = process.env.SERVE_USEHTTPS == 'true';
 const gulpProcess = process.env.SERVE_PROCESS_ID;
 const quiet = process.env.SERVE_QUIET == 'true';
+const sendCachingHeaders = process.env.SERVE_CACHING_HEADERS == 'true';
+const header = require('connect-header');
 
 // Exit if the port is in use.
 process.on('uncaughtException', function(err) {
@@ -50,6 +52,16 @@ setInterval(function() {
   }
 }, 1000);
 
+const middleware = [];
+if (!quiet) {
+  middleware.push(morgan('dev'), app);
+}
+if (sendCachingHeaders) {
+  middleware.push(header({
+    'cache-control': ' max-age=600',
+  }));
+}
+
 // Start gulp webserver
 gulp.src(process.cwd())
     .pipe(webserver({
@@ -57,6 +69,6 @@ gulp.src(process.cwd())
       host,
       directoryListing: true,
       https: useHttps,
-      middleware: quiet ? [] : [morgan('dev'), app],
+      middleware,
     }));
 

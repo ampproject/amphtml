@@ -22,6 +22,8 @@ import {
 import {
   ADSENSE_A4A_EXPERIMENT_NAME,
   ADSENSE_EXPERIMENT_FEATURE,
+  UNCONDITIONED_IDENTITY_ADX_EXP_NAME,
+  ADSENSE_UNCONDITIONED_EXPERIMENTS,
 } from '../adsense-a4a-config';
 import {Services} from '../../../../src/services';
 import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
@@ -263,6 +265,68 @@ describes.realWin('amp-ad-network-adsense-impl', {
       // test/functional/test-analytics.js.
       // Just ensure extensions is loaded, and analytics element appended.
     });
+
+    it('should register click listener', () => {
+      impl.iframe = impl.win.document.createElement('iframe');
+      impl.win.document.body.appendChild(impl.iframe);
+      const adBody = impl.iframe.contentDocument.body;
+      let clickHandlerCalled = 0;
+
+      adBody.onclick = function(e) {
+        expect(e.defaultPrevented).to.be.false;
+        e.preventDefault();  // Make the test not actually navigate.
+        clickHandlerCalled++;
+      };
+      adBody.innerHTML = '<a ' +
+          'href="https://f.co?CLICK_X,CLICK_Y,RANDOM">' +
+          '<button id="target"><button></div>';
+      const button = adBody.querySelector('#target');
+      const a = adBody.querySelector('a');
+      const ev1 = new Event('click', {bubbles: true});
+      ev1.pageX = 10;
+      ev1.pageY = 20;
+      sandbox.stub(impl, 'getResource').returns(
+          {
+            getUpgradeDelayMs: () => 1,
+          });
+      impl.buildCallback();
+      impl.size_ = {width: 123, height: 456};
+      impl.onCreativeRender({customElementExtensions: []});
+      button.dispatchEvent(ev1);
+      expect(a.href).to.equal('https://f.co/?10,20,RANDOM');
+      expect(clickHandlerCalled).to.equal(1);
+    });
+
+    it('should not register click listener is amp-ad-exit', () => {
+      impl.iframe = impl.win.document.createElement('iframe');
+      impl.win.document.body.appendChild(impl.iframe);
+      const adBody = impl.iframe.contentDocument.body;
+      let clickHandlerCalled = 0;
+
+      adBody.onclick = function(e) {
+        expect(e.defaultPrevented).to.be.false;
+        e.preventDefault();  // Make the test not actually navigate.
+        clickHandlerCalled++;
+      };
+      adBody.innerHTML = '<a ' +
+          'href="https://f.co?CLICK_X,CLICK_Y,RANDOM">' +
+          '<button id="target"><button></div>';
+      const button = adBody.querySelector('#target');
+      const a = adBody.querySelector('a');
+      const ev1 = new Event('click', {bubbles: true});
+      ev1.pageX = 10;
+      ev1.pageY = 20;
+      sandbox.stub(impl, 'getResource').returns(
+          {
+            getUpgradeDelayMs: () => 1,
+          });
+      impl.buildCallback();
+      impl.size_ = {width: 123, height: 456};
+      impl.onCreativeRender({customElementExtensions: ['amp-ad-exit']});
+      button.dispatchEvent(ev1);
+      expect(a.href).to.equal('https://f.co/?CLICK_X,CLICK_Y,RANDOM');
+      expect(clickHandlerCalled).to.equal(1);
+    });
   });
 
   describe('centering', () => {
@@ -484,6 +548,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
         'width': '320',
         'height': '50',
         'data-experiment-id': '8675309',
+        'data-ad-slot': 'slotname_foo',
       }, doc, 'amp-ad');
       doc.body.appendChild(elem2);
       const elem3 = createAdsenseImplElement({
@@ -497,17 +562,16 @@ describes.realWin('amp-ad-network-adsense-impl', {
       const impl2 = new AmpAdNetworkAdsenseImpl(elem2);
       const impl3 = new AmpAdNetworkAdsenseImpl(elem3);
       toggleExperiment(impl1.win, 'as-use-attr-for-format', true);
-      //new AmpAd(elem1).upgradeCallback();
       return impl1.getAdUrl().then(adUrl1 => {
         expect(adUrl1).to.match(/pv=2/);
         expect(adUrl1).to.not.match(/prev_fmts/);
+        expect(adUrl1).to.not.match(/prev_slotnames/);
         expect(adUrl1).to.match(/ifi=1/);
-        //new AmpAd(elem2).upgradeCallback();
         return impl2.getAdUrl().then(adUrl2 => {
           expect(adUrl2).to.match(/pv=1/);
           expect(adUrl2).to.match(/prev_fmts=320x50/);
+          expect(adUrl2).to.not.match(/prev_slotnames/);
           expect(adUrl2).to.match(/ifi=2/);
-          //new AmpAd(elem3).upgradeCallback();
           return impl3.getAdUrl().then(adUrl3 => {
             expect(adUrl3).to.match(/pv=2/);
             // By some quirk of the test infrastructure, when this test
@@ -516,9 +580,44 @@ describes.realWin('amp-ad-network-adsense-impl', {
             // test here is the number of previous formats.
             expect(adUrl3).to.match(
                 /prev_fmts=(320x50%2C320x50|320x50%2C0x0)/);
+            expect(adUrl3).to.match(/prev_slotnames=slotname_foo/);
             expect(adUrl3).to.match(/ifi=3/);
           });
         });
+      });
+    });
+
+    it('should include identity', () => {
+      forceExperimentBranch(impl.win, ADSENSE_A4A_EXPERIMENT_NAME,
+          ADSENSE_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT);
+      // Force get identity result by overloading window variable.
+      const token = /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({
+        token: 'abcdef', jar: 'some_jar', pucrd: 'some_pucrd',
+      });
+      impl.win['goog_identity_prom'] = Promise.resolve(token);
+      impl.buildCallback();
+      return impl.getAdUrl().then(url => {
+        [/(\?|&)adsid=abcdef(&|$)/,
+          /(\?|&)jar=some_jar(&|$)/,
+          /(\?|&)pucrd=some_pucrd(&|$)/].forEach(
+            regexp => expect(url).to.match(regexp));
+      });
+    });
+
+    it('should include identity for unconditioned experiment', () => {
+      forceExperimentBranch(impl.win, UNCONDITIONED_IDENTITY_ADX_EXP_NAME,
+          ADSENSE_UNCONDITIONED_EXPERIMENTS.IDENTITY_EXPERIMENT);
+      // Force get identity result by overloading window variable.
+      const token = /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({
+        token: 'abcdef', jar: 'some_jar', pucrd: 'some_pucrd',
+      });
+      impl.win['goog_identity_prom'] = Promise.resolve(token);
+      impl.buildCallback();
+      return impl.getAdUrl().then(url => {
+        [/(\?|&)adsid=abcdef(&|$)/,
+          /(\?|&)jar=some_jar(&|$)/,
+          /(\?|&)pucrd=some_pucrd(&|$)/].forEach(
+            regexp => expect(url).to.match(regexp));
       });
     });
   });
@@ -735,32 +834,9 @@ describes.realWin('amp-ad-network-adsense-impl', {
   });
 
   describe('#delayAdRequestEnabled', () => {
-    let impl;
-    beforeEach(() => {
-      impl = new AmpAdNetworkAdsenseImpl(
-        createElementWithAttributes(doc, 'amp-ad', {
-          type: 'adsense',
-        }));
-    });
-
-    [
-      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_HOLDBACK_CONTROL, {
-        layer: ADSENSE_A4A_EXPERIMENT_NAME,
-        result: true,
-      }],
-      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_HOLDBACK_EXTERNAL, {
-        layer: ADSENSE_A4A_EXPERIMENT_NAME,
-        result: false,
-      }],
-    ].forEach(item => {
-      it(`should return ${item[1].result} if in ${item[0]} experiment`, () => {
-        forceExperimentBranch(impl.win, item[1].layer, item[0]);
-        expect(impl.delayAdRequestEnabled()).to.equal(item[1].result);
-      });
-    });
-
-    it('should return true if not in any experiments', () => {
-      expect(impl.delayAdRequestEnabled()).to.be.true;
+    it('should return true', () => {
+      expect(AmpAdNetworkAdsenseImpl.prototype.delayAdRequestEnabled())
+          .to.be.true;
     });
   });
 });

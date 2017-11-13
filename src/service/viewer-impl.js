@@ -71,6 +71,23 @@ const TRUSTED_VIEWER_HOSTS = [
 ];
 
 /**
+ * These domains are trusted with more sensitive viewer operations such as
+ * sending impression requests. If you believe your domain should be here,
+ * file the issue on GitHub to discuss. The process will be similar
+ * (but somewhat more stringent) to the one described in the [3p/README.md](
+ * https://github.com/ampproject/amphtml/blob/master/3p/README.md)
+ *
+ * @export {!Array<!RegExp>}
+ */
+const TRUSTED_REFERRER_HOSTS = [
+  /**
+   * Twitter's link wrapper domains:
+   * - t.co
+   */
+  /^t.co$/,
+];
+
+/**
  * An AMP representation of the Viewer. This class doesn't do any work itself
  * but instead delegates everything to the actual viewer. This class and the
  * actual Viewer are connected via "AMP.viewer" using three methods:
@@ -148,6 +165,12 @@ export class Viewer {
 
     /** @private {?function()} */
     this.whenFirstVisibleResolve_ = null;
+
+    /** @private {?Promise} */
+    this.nextVisiblePromise_ = null;
+
+    /** @private {?function()} */
+    this.nextVisibleResolve_ = null;
 
     /** @private {?time} */
     this.firstVisibleTime_ = null;
@@ -371,27 +394,6 @@ export class Viewer {
       }
     });
 
-    // Replace URL if requested.
-    const replaceUrlParam = this.params_['replaceUrl'];
-    if (ampdoc.isSingleDoc() &&
-        replaceUrlParam &&
-        this.win.history.replaceState) {
-      try {
-        // The origin and source origin must match.
-        const url = parseUrl(this.win.location.href);
-        const replaceUrl = parseUrl(
-            removeFragment(replaceUrlParam) + this.win.location.hash);
-        if (url.origin == replaceUrl.origin &&
-            getSourceOrigin(url) == getSourceOrigin(replaceUrl)) {
-          this.win.history.replaceState({}, '', replaceUrl.href);
-          this.win.location.originalHref = url.href;
-          dev().fine(TAG_, 'replace url:' + replaceUrl.href);
-        }
-      } catch (e) {
-        dev().error(TAG_, 'replaceUrl failed', e);
-      }
-    }
-
     // Remove hash when we have an incoming click tracking string
     // (see impression.js).
     if (this.params_['click']) {
@@ -426,6 +428,7 @@ export class Viewer {
       this.lastVisibleTime_ = now;
       this.hasBeenVisible_ = true;
       this.whenFirstVisibleResolve_();
+      this.whenNextVisibleResolve_();
     }
     this.visibilityObservable_.fire();
   }
@@ -603,11 +606,42 @@ export class Viewer {
 
   /**
    * Returns a Promise that only ever resolved when the current
-   * AMP document becomes visible.
+   * AMP document first becomes visible.
    * @return {!Promise}
    */
   whenFirstVisible() {
     return this.whenFirstVisiblePromise_;
+  }
+
+  /**
+   * Returns a Promise that resolve when current doc becomes visible.
+   * The promise resolves immediately if doc is already visible.
+   * @return {!Promise}
+   */
+  whenNextVisible() {
+    if (this.isVisible()) {
+      return Promise.resolve();
+    }
+
+    if (this.nextVisiblePromise_) {
+      return this.nextVisiblePromise_;
+    }
+
+    return this.nextVisiblePromise_ = new Promise(resolve => {
+      this.nextVisibleResolve_ = resolve;
+    });
+  }
+
+  /**
+   * Helper method to be called on visiblity change
+   * @private
+   */
+  whenNextVisibleResolve_() {
+    if (this.nextVisibleResolve_) {
+      this.nextVisibleResolve_();
+      this.nextVisibleResolve_ = null;
+      this.nextVisiblePromise_ = null;
+    }
   }
 
   /**
@@ -666,6 +700,19 @@ export class Viewer {
   }
 
   /**
+   * @param {string} referrer
+   * @return {boolean}
+   * @private
+   */
+  isTrustedReferrer_(referrer) {
+    const url = parseUrl(referrer);
+    if (url.protocol != 'https:') {
+      return false;
+    }
+    return TRUSTED_REFERRER_HOSTS.some(th => th.test(url.hostname));
+  }
+
+  /**
    * Returns an unconfirmed "referrer" URL that can be optionally customized by
    * the viewer. Consider using `getReferrerUrl()` instead, which returns the
    * promise that will yield the confirmed "referrer" URL.
@@ -692,6 +739,16 @@ export class Viewer {
    */
   isTrustedViewer() {
     return this.isTrustedViewer_;
+  }
+
+  /**
+   * Whether the referrer has been whitelisted for CORS impression
+   * @return {!Promise<boolean>}
+   */
+  isTrustedReferrer() {
+    return this.referrerUrl_.then(referrer => {
+      return this.isTrustedReferrer_(referrer);
+    });
   }
 
   /**
@@ -950,6 +1007,33 @@ export class Viewer {
    */
   whenMessagingReady() {
     return this.messagingMaybePromise_;
+  }
+
+  /**
+   * Replace the document url with the viewer provided new replaceUrl.
+   * @param {?string} newUrl
+   */
+  replaceUrl(newUrl) {
+    if (!newUrl ||
+        !this.ampdoc.isSingleDoc() ||
+        !this.win.history.replaceState) {
+      return;
+    }
+
+    try {
+      // The origin and source origin must match.
+      const url = parseUrl(this.win.location.href);
+      const replaceUrl = parseUrl(
+          removeFragment(newUrl) + this.win.location.hash);
+      if (url.origin == replaceUrl.origin &&
+          getSourceOrigin(url) == getSourceOrigin(replaceUrl)) {
+        this.win.history.replaceState({}, '', replaceUrl.href);
+        this.win.location.originalHref = url.href;
+        dev().fine(TAG_, 'replace url:' + replaceUrl.href);
+      }
+    } catch (e) {
+      dev().error(TAG_, 'replaceUrl failed', e);
+    }
   }
 }
 

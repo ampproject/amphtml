@@ -128,7 +128,7 @@ export const PRESETS = {
       },
     ],
   },
-  'drop-in': {
+  'drop': {
     duration: 1600,
     keyframes(dimensions) {
       const maxBounceHeight =
