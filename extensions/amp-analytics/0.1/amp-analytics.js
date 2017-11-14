@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {urls} from '../../../src/config';
 import {isJsonScriptTag} from '../../../src/dom';
 import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dev, rethrowAsync, user} from '../../../src/log';
@@ -158,6 +159,23 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.element.getAttribute('trigger') == 'immediate') {
       this.ensureInitialized_();
     }
+  }
+
+  /**
+   * Prefetches and preconnects URLs related to the analytics.
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
+  preconnectCallback(opt_onLayout) {
+    let url;
+    if ((getMode().localDev || getMode().test)) {
+      const loc = this.getAmpDoc().win.parent.location;
+      url = `${loc.protocol}//${loc.host}/dist/iframe-transport-client-lib.js`;
+    } else {
+      url = urls.thirdParty +
+          '/$internalRuntimeVersion$/iframe-transport-client-v0.js';
+    }
+    this.preconnect.preload(url, 'script');
   }
 
   /** @override */
