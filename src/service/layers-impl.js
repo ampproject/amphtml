@@ -75,21 +75,46 @@ function positionLt(left, top) {
   };
 }
 
+/**
+ * The core class behind the Layers system, this controls layer creation and
+ * management.
+ */
 export class LayoutLayers {
+  /**
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Element} scrollingElement
+   */
   constructor(ampdoc, scrollingElement) {
     const {win} = ampdoc;
 
-    this.ampdoc_ = ampdoc;
-    this.win_ = win;
+    /** @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
 
-    this.onScroll_ = null;
+    /** @const {!Window} */
+    this.win = win;
 
-    /** @const {!Document} */
+    /**
+     * TODO(@jridgewell) How should this be handled in FIE and Shadow docs?
+     * We could depend on the host docs' Layers and mark the container as a
+     * layer, which seems easy. Need to verify.
+     * @const @private {!Document}
+     */
     this.document_ = win.document;
 
+    /** @const @private {!Element} */
+    this.scrollingElement_ = scrollingElement;
+
+    /**
+     * An Event handler, which will be called when a layer (any layer) scrolls.
+     * A later PR will refine this to send an array of elements who have
+     * changed position due to the scroll.
+     * @type {function()|null}
+     */
+    this.onScroll_ = null;
+
+    /** @const @private {!Array<LayoutElement>} */
     this.layouts_ = [];
 
-    // TODO: figure out fixed layer
 
 
     // Listen for scroll events at the document level, so we know when either
@@ -103,23 +128,59 @@ export class LayoutLayers {
           : scrollingElement;
       this.scrolled_(scrolled);
     }, {capture: true, passive: true});
+
+    // Destroys the layer tree on document resize, since entirely new CSS may
+    // apply to the document now.
     win.addEventListener('resize', () => this.onResize_());
 
+    // Finally, declare scrollingElement as the one true scrolling layer.
     this.declareLayer_(scrollingElement, true);
   }
 
+  /**
+   * Creates a layout for the element (if one doesn't exist for it already) and
+   * tracks the layout.
+   *
+   * This method may be called multiple times to ensure the element has a
+   * layout (and can therefore use the layout's instance methods) and that the
+   * layout will be remasured when necessary.
+   *
+   * @param {!Element} element
+   * @return {!Layout}
+   */
   add(element) {
-    // TODO keep track of all elements
     let layout = LayoutElement.forOptional(element);
+    // Elements may already have a layout (common for calls to get size or
+    // position from Resources).
     if (!layout) {
       layout = new LayoutElement(element);
     }
-    this.layouts_.push(layout);
+
+    // Layout may have been removed from the tracked layouts (due to
+    // reparenting).
+    if (this.layouts_.indexOf(layout) === -1) {
+      this.layouts_.push(layout);
+    }
+
     return layout;
   }
 
+  /**
+   * Removes the element's layout from tracking.
+   * This also "dirties" the layout, so if's being reparented it will lazily
+   * update appropriately.
+   *
+   * TODO(@jridgewell): This won't catch detach events from native DOM
+   * elements...
+   *
+   * @param {!Element} element
+   */
   remove(element) {
-    const layout = LayoutElement.for(element);
+    const layout = LayoutElement.forOptional(element);
+    if (!layout) {
+      return;
+    }
+
     layout.undeclareLayer();
     layout.forgetParentLayer();
 
@@ -135,63 +196,51 @@ export class LayoutLayers {
   }
 
   /**
-   * Calculates the element's intersection with the viewport's rect.
+   * Returns the current scrolled position of the element relative to the layer
+   * represented by opt_parent (or opt_parent's parent layer, if it is not a
+   * layer itself). This takes into account the scrolled position of every
+   * layer in between.
    *
-   * @param {!Element} element A regular or AMP Element
-   * @param {!LayoutRectDef} viewportRect
+   * @param {!Element} element
+   * @param {Element=} opt_parent
+   * @return {!PositionDef}
    */
-  calcIntersectionWithViewport(element) {
-    return this.calcIntersectionWithParent(element,
-        getScrollingElement(this.document_));
-  }
-
-  /**
-   * Calculates the element's intersection with the parent's rect.
-   * You may optionally expand the parent's rectangle.
-   *
-   * @param {!Element} element A regular or AMP Element
-   * @param {!Element} parent
-   * @param {{dw: number=, dh: number=}=} opt_expand
-   * @param {number=} opt_dh
-   * @return {!LayoutRectDef}
-   */
-  calcIntersectionWithParent(element, parent, opt_expand) {
-    const {left, top} = LayoutElement.getScrolledPosition(element, parent);
-    const size = LayoutElement.getSize(element);
-
-    let {width: parentWidth, height: parentHeight} =
-        LayoutElement.getSize(parent);
-    if (opt_expand) {
-      parentWidth *= 1 + (opt_expand.dw || 0) * 2;
-      parentHeight *= 1 + (opt_expand.dh || 0) * 2;
-    }
-
-    return layoutRectLtwh(
-        left,
-        top,
-        Math.max(Math.min(left + size.width, parentWidth) - left, 0),
-        Math.max(Math.min(top + size.height, parentHeight) - top, 0)
-    );
-  }
-
   getScrolledPosition(element, opt_parent) {
     const layout = this.add(element);
     return layout.getScrolledPosition(opt_parent);
   }
 
+  /**
+   * Returns the absolute offset position of the element relative to the layer
+   * represented by opt_parent (or opt_parent's parent layer, if it is not a
+   * layer itself). This remains constant, regardless of the scrolled position
+   * of any layer in between.
+   *
+   * @param {!Element} element
+   * @param {Element=} opt_parent
+   * @return {!PositionDef}
+   */
   getOffsetPosition(element, opt_parent) {
     const layout = this.add(element);
     return layout.getOffsetPosition(opt_parent);
   }
 
+  /**
+   * Returns the size of the element.
+   *
+   * @param {!Element} element
+   * @return {!SizeDef}
+   */
   getSize(element) {
     const layout = this.add(element);
     return layout.getSize(element);
   }
 
   /**
-   * Remeasures the element, and any other elements who's cached rects may have
-   * been altered by this element's mutation.
+   * Remeasures (now, not lazily) the element, and any other elements who's
+   * cached rects may have been altered by this element's mutation. This
+   * optimizes to also remeasure any higher up layers that are also marked as
+   * dirty, so that only 1 measure phase is needed.
    *
    * This is meant to be called after any element mutation happens (eg.
    * #buildCallback, #layoutCallback, viewport changes size).
@@ -206,7 +255,9 @@ export class LayoutLayers {
   }
 
   /**
-   * Eagerly creates a Layer for the element.
+   * Eagerly creates a Layer for the element. Doing so helps the scheduling
+   * algorithm better score nested components, and saves a few cycles.
+   *
    * @param {!Element} element
    */
   declareLayer(element) {
@@ -215,6 +266,7 @@ export class LayoutLayers {
 
   /**
    * Eagerly creates a Layer for the element.
+   *
    * @param {!Element} element
    * @param {!Boolean} isRootLayer
    * @return {!LayoutElement}
@@ -225,6 +277,10 @@ export class LayoutLayers {
     return layout;
   }
 
+  /**
+   * Destroys the layer tree, since new CSS may apply to the document after a
+   * resize.
+   */
   onResize_() {
     const layouts = this.layouts_;
     for (let i = 0; i < layouts.length; i++) {
@@ -234,6 +290,17 @@ export class LayoutLayers {
     }
   }
 
+  /**
+   * Dirties the scrolled layer, so any later calls to getScrolledPosition will
+   * recalc the scrolled position.  If the scrolled element is not yet a layer,
+   * it turns it into a layer lazily.
+   *
+   * This also sends the scrolled notifications to the onScrolled_ listener.
+   * Eventually, it will send an array of elements that actually changed
+   * position (instead of having to check all elements in the listener).
+   *
+   * @param {!Element} element
+   */
   scrolled_(element) {
     let layout = LayoutElement.forOptional(element);
     if (layout && layout.isLayer()) {
@@ -247,6 +314,11 @@ export class LayoutLayers {
     }
   }
 
+  /**
+   * Registers the scroll listener.
+   *
+   * @param {function()} handler
+   */
   onScroll(handler) {
     this.onScroll_ = handler;
   }
@@ -459,8 +531,10 @@ export class LayoutElement {
   }
 
   /**
-   * Gets the position of the element relative to the parent layer, taking
-   * scroll position of the parents into account.
+   * Returns the current scrolled position of the element relative to the layer
+   * represented by opt_parent (or opt_parent's parent layer, if it is not a
+   * layer itself). This takes into account the scrolled position of every
+   * layer in between.
    * @param {Element=} opt_parent
    * @return {!LayoutRectDef}
    */
@@ -488,8 +562,10 @@ export class LayoutElement {
   }
 
   /**
-   * Gets the position of the element relative to the parent layer, taking
-   * scroll position of the parents into account.
+   * Returns the absolute offset position of the element relative to the layer
+   * represented by opt_parent (or opt_parent's parent layer, if it is not a
+   * layer itself). This remains constant, regardless of the scrolled position
+   * of any layer in between.
    * @param {Element=} opt_parent
    * @return {!LayoutRectDef}
    */
