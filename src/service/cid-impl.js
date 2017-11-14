@@ -132,8 +132,8 @@ export class Cid {
         '[a-zA-Z0-9-_.]+\nInstead found: %s',
         getCidStruct.scope);
     const viewer = Services.viewerForDoc(this.ampdoc);
-    // TODO(zhouyx): Cleanup after tracing #11888
-    const trace = new Error('History trace for: ');
+    // TODO(zhouyx, #11888): Cleanup after tracing error
+    const trace = new Error('CID trace for: ');
     return consent.then(() => {
       return viewer.whenFirstVisible();
     }).then(() => {
@@ -147,6 +147,16 @@ export class Cid {
       return viewer.whenNextVisible().then(() => {
         const cidPromise = this.getExternalCid_(
             getCidStruct, opt_persistenceConsent || consent);
+        cidPromise.catch(error => {
+          const docVisible = viewer.isVisible();
+          const hasVisible = viewer.hasBeenVisible();
+          trace.message += error.message;
+          trace.message +=
+              ` EXTRA INFO: doc isVisible: ${docVisible},` +
+              ` doc hasBeenVisible ${hasVisible}`;
+          dev().error('CID', trace);
+          throw error;
+        });
         // Getting the CID might involve an HTTP request. We timeout after 10s.
         // NOTE: If viewer gets invisible afterwards we also timeout after 10s now. May need improvement
         return Services.timerFor(this.ampdoc.win)
@@ -156,16 +166,6 @@ export class Cid {
               rethrowAsync(error);
             });
       });
-    }).catch(error => {
-      const docVisible = viewer.isVisible();
-      const hasVisible = viewer.hasBeenVisible();
-      trace.message += error.message;
-      trace.message +=
-          ` EXTRA INFO: doc isVisible: ${docVisible},` +
-          ` doc hasBeenVisible ${hasVisible}`;
-      dev().error('CID', trace);
-      rethrowAsync(error);
-      return null;
     });
   }
 
