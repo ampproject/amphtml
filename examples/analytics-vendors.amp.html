@@ -47,6 +47,7 @@
       <option>acquialift</option>
       <option>adobeanalytics</option>
       <option>adobeanalytics_nativeConfig</option>
+      <option>alexametrics</option>
       <option>atinternet</option>
       <option>afsanalytics</option>
       <option>baiduanalytics</option>
@@ -71,6 +72,8 @@
       <option>mediator</option>
       <option>mparticle</option>
       <option>mpulse</option>
+      <option>newrelic</option>
+      <option>nielsen</option>
       <option>nielsen-marketing-cloud</option>
       <option>oewa</option>
       <option>oewadirect</option>
@@ -180,6 +183,19 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Adobe Analytics example -->
+
+<!-- Alexa tracking -->
+<amp-analytics type="alexametrics">
+<script type="application/json">
+  {
+    "vars": {
+      "atrk_acct": "YOURACCOUNT",
+      "domain": "YOURDOMAIN"
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End Alexa tracking -->
 
 <!-- AT Internet tracking -->
 <amp-analytics type="atinternet" id="atinternet">
@@ -641,6 +657,19 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End mParticle example -->
+
+<!-- New Relic example -->
+<amp-analytics type="newrelic" id="newrelic">
+<script type="application/json">
+  {
+    "vars": {
+      "appId": "555555",
+      "licenseKey": "2fffffffff"
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End New Relic example -->
 
 <!-- Nielsen example -->
 <amp-analytics type="nielsen" id="nielsen">

@@ -141,6 +141,15 @@ export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
 /** @private {?Promise} */
 let sraRequests = null;
 
+/** @typedef {{
+      adUrl: !Promise<string>,
+      lineItemId: string,
+      creativeId: string,
+      slotId: string,
+      slotIndex: string,
+    }} */
+let TroubleshootData;
+
 /**
  * Array of functions used to combine block level request parameters for SRA
  * request.
@@ -353,6 +362,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {boolean} */
     this.preloadSafeframe_ = true;
+
+    /** @private {!TroubleshootData} */
+    this.troubleshootData_ = /** @type {!TroubleshootData} */ ({});
+  }
+
+  /** @override */
+  idleRenderOutsideViewport() {
+    const vpRange =
+        parseInt(this.postAdResponseExperimentFeatures['render-idle-vp'], 10);
+    // Disable if publisher has indicated a non-default loading strategy.
+    if (isNaN(vpRange) || this.element.getAttribute('data-loading-strategy')) {
+      return false;
+    }
+    return vpRange;
   }
 
   /** @override */
@@ -394,6 +417,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         .then(() => getIdentityToken(this.win, this.getAmpDoc())) :
         Promise.resolve(
             /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({}));
+    this.troubleshootData_.slotId = this.element.getAttribute('data-slot');
+    this.troubleshootData_.slotIndex =
+        this.element.getAttribute('data-amp-slot-index');
     if (this.win['dbclk_a4a_viz_change']) {
       // Only create one per page but ensure all slots get experiment
       // selection.
@@ -598,8 +624,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           // On error/timeout, proceed.
           return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({});
         });
-    return Promise.all([opt_rtcResponsesPromise, identityPromise]).then(
-        results => {
+    const urlPromise = Promise.all([opt_rtcResponsesPromise, identityPromise])
+        .then(results => {
           const rtcParams = this.mergeRtcResponses_(results[0]);
           this.identityToken = results[1];
           return googleAdUrl(
@@ -607,6 +633,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   this.getBlockParameters_(), rtcParams,
                   this.buildIdentityParams_(), PAGE_LEVEL_PARAMS_));
         });
+    this.troubleshootData_.adUrl = urlPromise;
+    return urlPromise;
   }
 
   /**
@@ -634,6 +662,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const artc = [];
     const ati = [];
     const ard = [];
+    let exclusions;
     rtcResponseArray.forEach(rtcResponse => {
       // Only want to send errors for requests we actually sent.
       if (rtcResponse.error &&
@@ -647,20 +676,34 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                RTC_ATI_ENUM.RTC_FAILURE);
       ard.push(rtcResponse.callout);
       if (rtcResponse.response) {
-        ['targeting', 'categoryExclusions'].forEach(key => {
-          if (rtcResponse.response[key]) {
-            const rewrittenResponse = this.rewriteRtcKeys_(
-                rtcResponse.response[key],
-                rtcResponse.callout);
-            this.jsonTargeting_[key] =
-                !!this.jsonTargeting_[key] ?
-                deepMerge(this.jsonTargeting_[key],
-                    rewrittenResponse) :
-                rewrittenResponse;
+        if (rtcResponse.response['targeting']) {
+          const rewrittenResponse = this.rewriteRtcKeys_(
+              rtcResponse.response['targeting'],
+              rtcResponse.callout);
+          this.jsonTargeting_['targeting'] =
+              !!this.jsonTargeting_['targeting'] ?
+              deepMerge(this.jsonTargeting_['targeting'],
+                  rewrittenResponse) :
+              rewrittenResponse;
+        }
+        if (rtcResponse.response['categoryExclusions']) {
+          if (!exclusions) {
+            exclusions = {};
+            if (this.jsonTargeting_['categoryExclusions']) {
+              this.jsonTargeting_['categoryExclusions'].forEach(exclusion => {
+                exclusions[exclusion] = true;
+              });
+            }
           }
-        });
+          rtcResponse.response['categoryExclusions'].forEach(exclusion => {
+            exclusions[exclusion] = true;
+          });
+        }
       }
     });
+    if (exclusions) {
+      this.jsonTargeting_['categoryExclusions'] = Object.keys(exclusions);
+    }
     return {'artc': artc.join() || null, 'ati': ati.join(), 'ard': ard.join()};
   }
 
@@ -695,6 +738,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     setGoogleLifecycleVarsFromHeaders(responseHeaders, this.lifecycleReporter_);
     this.ampAnalyticsConfig_ = extractAmpAnalyticsConfig(this, responseHeaders);
     this.qqid_ = responseHeaders.get(QQID_HEADER);
+    this.troubleshootData_.creativeId =
+        responseHeaders.get('google-creative-id');
+    this.troubleshootData_.lineItemId =
+        responseHeaders.get('google-lineitem-id');
     if (this.ampAnalyticsConfig_) {
       // Load amp-analytics extensions
       this.extensions_./*OK*/installExtensionForDoc(
@@ -784,6 +831,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (this.isFluid_) {
       this.registerListenerForFluid_();
     }
+    // TODO(keithwrightbos): consider enforcing concurrent load throttle for
+    // non-AMP creatives loaded via idleRenderOutsideViewport.
     return super.layoutCallback();
   }
 
@@ -908,6 +957,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           }
           return true;
         });
+
+    this.postTroubleshootMessage();
   }
 
   /**
@@ -1208,6 +1259,45 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!Object.keys(fluidListeners).length) {
       this.win.removeEventListener('message', fluidMessageListener_);
     }
+  }
+
+  /**
+   * Emits a postMessage containing information about this slot to the DFP
+   * Troubleshoot UI. A promise is returned if a message is posted, otherwise
+   * null is returned. The promise is returned only for test convenience.
+   *
+   * @return {?Promise}
+   * @visibleForTesting
+   */
+  postTroubleshootMessage() {
+    if (!this.win.opener || !/[?|&]dfpdeb/.test(this.win.location.search)) {
+      return null;
+    }
+    dev().assert(this.troubleshootData_.adUrl, 'ad URL does not exist yet');
+    return this.troubleshootData_.adUrl.then(adUrl => {
+      const payload = dict({
+        'gutData': JSON.stringify(dict({
+          'events': [{
+            'timestamp': Date.now(),
+            'slotid': this.troubleshootData_.slotId,
+            'messageId': 4,
+          }],
+          'slots': [{
+            'contentUrl': adUrl || '',
+            'id': this.troubleshootData_.slotId,
+            'leafAdUnitName': this.troubleshootData_.slotId,
+            'domId': 'gpt_unit_' + this.troubleshootData_.slotId + '_' +
+                this.troubleshootData_.slotIndex,
+            'lineItemId': this.troubleshootData_.lineItemId,
+            'creativeId': this.troubleshootData_.creativeId,
+          }],
+        })),
+        'userAgent': navigator.userAgent,
+        'referrer': this.win.location.href,
+        'messageType': 'LOAD',
+      });
+      this.win.opener./*OK*/postMessage(payload, '*');
+    });
   }
 }
 

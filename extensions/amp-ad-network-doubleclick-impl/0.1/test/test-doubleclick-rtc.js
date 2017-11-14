@@ -131,6 +131,49 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
           rtcResponseArray, expectedParams, expectedJsonTargeting);
     });
 
+    it('should properly merge into existing categoryExclusions', () => {
+      element.setAttribute('json', '{"categoryExclusions": ["sports"]}');
+      impl = new AmpAdNetworkDoubleclickImpl(
+          element, env.win.document, env.win);
+      impl.populateAdUrlState();
+      const rtcResponseArray = [
+        {response: {targeting: {'a': [1,2,3]}, categoryExclusions: ['health']},
+          callout: 'fakevendor', rtcTime: 100},
+      ];
+      const expectedParams = {
+        ati: '2',
+        artc: '100',
+        ard: 'fakevendor',
+      };
+      const expectedJsonTargeting = {
+        targeting: {'a_fakevendor': [1,2,3]},
+        categoryExclusions: ['sports', 'health'],
+      };
+      testMergeRtcResponses(
+          rtcResponseArray, expectedParams, expectedJsonTargeting);
+    });
+
+    it('should not allow duplicate categoryExclusions', () => {
+      element.setAttribute('json', '{"categoryExclusions": ["health"]}');
+      impl = new AmpAdNetworkDoubleclickImpl(
+          element, env.win.document, env.win);
+      impl.populateAdUrlState();
+      const rtcResponseArray = [
+        {response: {categoryExclusions: ['health']},
+          callout: 'fakevendor', rtcTime: 100},
+      ];
+      const expectedParams = {
+        ati: '2',
+        artc: '100',
+        ard: 'fakevendor',
+      };
+      const expectedJsonTargeting = {
+        categoryExclusions: ['health'],
+      };
+      testMergeRtcResponses(
+          rtcResponseArray, expectedParams, expectedJsonTargeting);
+    });
+
     it('should only add params for callouts that were actually sent', () => {
       const rtcResponseArray = [
         {error: RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE,
@@ -157,12 +200,12 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
     it('should properly merge mix of success and errors', () => {
       impl.jsonTargeting_ = {targeting:
                             {'abc': [1,2,3], 'b': {n: 'm'}, 'a': 'TEST'},
-        categoryExclusions: {loc: 'USA'}};
+        categoryExclusions: ['sports']};
       const rtcResponseArray = [
         {error: RTC_ERROR_ENUM.TIMEOUT,
           callout: 'www.exampleA.com', rtcTime: 1500},
         {response: {targeting: {'a': 'foo', 'b': {e: 'f'}},
-          categoryExclusions: {sport: 'baseball'}},
+          categoryExclusions: ['health']},
           callout: 'VendorFoo', rtcTime: 500},
         {response: {targeting: {'a': [1,2,3], 'b': {c: 'd'}}},
           callout: 'www.exampleB.com', rtcTime: 100},
@@ -183,7 +226,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         targeting: {
           'a': [4,5,6], 'b': {n: 'm', e: 'f', c: 'd', x: [1,2]},
           abc: [1,2,3]},
-        categoryExclusions: {loc: 'USA', sport: 'baseball'},
+        categoryExclusions: ['sports', 'health'],
       };
       testMergeRtcResponses(
           rtcResponseArray, expectedParams, expectedJsonTargeting);
