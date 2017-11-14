@@ -81,10 +81,9 @@ function getConfig() {
         'SL_Edge_latest',
         'SL_IE_11',
       ] : [
-        // With --saucelabs_lite, unit tests are run on this set of browsers.
+        // With --saucelabs_lite, a subset of the unit tests are run.
         // Only browsers that support chai-as-promised may be included below.
         // TODO(rsimha-amp): Add more browsers to this list. #6039.
-        'SL_Chrome_latest',
         'SL_Safari_latest',
       ],
     });
@@ -236,7 +235,12 @@ function runTests() {
   } else if (argv.integration) {
     c.files = c.files.concat(config.integrationTestPaths);
   } else if (argv.unit) {
-    c.files = c.files.concat(config.unitTestPaths);
+    if (argv.saucelabs_lite) {
+      c.files = c.files.concat(config.unitTestOnSaucePaths);
+    } else {
+      c.files = c.files.concat(config.unitTestPaths);
+    }
+
   } else if (argv.randomize || argv.glob || argv.a4a) {
     const testPaths = argv.a4a ? config.a4aTestPaths : config.basicTestPaths;
 
