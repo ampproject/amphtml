@@ -277,8 +277,8 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11475',
   },
   {
-    id: 'amp-story-desktop',
-    name: 'A responsive desktop experience for the amp-story component',
+    id: 'disable-amp-story-desktop',
+    name: 'Disables responsive desktop experience for the amp-story component',
     spec: 'https://github.com/ampproject/amphtml/issues/11714',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11715',
   },
