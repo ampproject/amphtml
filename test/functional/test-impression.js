@@ -346,13 +346,14 @@ describe('impression', () => {
   it('shouldAppendExtraParams', () => {
     const div = window.document.createElement('amp-analytics');
     div.setAttribute('type', 'fake');
+    const ampdocApi = {win: window};
     window.document.body.appendChild(div);
-    return shouldAppendExtraParams(window).then(res => {
+    return shouldAppendExtraParams(ampdocApi).then(res => {
       expect(res).to.be.false;
       const div2 = window.document.createElement('amp-analytics');
       div2.setAttribute('type', 'googleanalytics');
       window.document.body.appendChild(div2);
-      return shouldAppendExtraParams(window).then(res => {
+      return shouldAppendExtraParams(ampdocApi).then(res => {
         expect(res).to.be.true;
       });
     });

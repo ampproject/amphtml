@@ -895,12 +895,12 @@ export class UrlReplacements {
     if (defaultUrlParams) {
       if (!whitelist || !whitelist['QUERY_PARAM']) {
         // override whitelist and expand defaultUrlParams;
-        const overrideWhiteliste = {'QUERY_PARAM': true};
+        const overrideWhitelist = {'QUERY_PARAM': true};
         defaultUrlParams = this.expandSync(
             defaultUrlParams,
             /* opt_bindings */ undefined,
             /* opt_collectVars */ undefined,
-            /* opt_whitelist */ overrideWhiteliste);
+            /* opt_whitelist */ overrideWhitelist);
       }
       href = addParamsToUrl(href, parseQueryString(defaultUrlParams));
     }

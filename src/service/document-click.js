@@ -109,7 +109,7 @@ export class ClickHandler {
 
     this.appendExtraParams_ = false;
 
-    shouldAppendExtraParams(this.ampdoc.win).then(res => {
+    shouldAppendExtraParams(this.ampdoc).then(res => {
       this.appendExtraParams_ = res;
     });
   }

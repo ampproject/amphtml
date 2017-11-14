@@ -244,11 +244,11 @@ function applyResponse(win, response) {
 
 /**
  * Return a promise that whether appending extra url params to outgoing link is required.
- * @param {!Window} win
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @return {!Promise<boolean>}
  */
-export function shouldAppendExtraParams(win) {
-  return whenDocumentReady(win.document).then(doc => {
+export function shouldAppendExtraParams(ampdoc) {
+  return whenDocumentReady(ampdoc.win.document).then(doc => {
     return !!doc.querySelector('amp-analytics[type=googleanalytics]');
   });
 }
@@ -272,10 +272,10 @@ export function getExtraParamsUrl(win, target) {
   }
 
   // Check if the param already exists
-  const additonalUrlParams = target.getAttribute('data-amp-addparams');
+  const additionalUrlParams = target.getAttribute('data-amp-addparams');
   let href = target.href;
-  if (additonalUrlParams) {
-    href = addParamsToUrl(href, parseQueryString(additonalUrlParams));
+  if (additionalUrlParams) {
+    href = addParamsToUrl(href, parseQueryString(additionalUrlParams));
   }
   const loc = parseUrl(href);
   const existParams = parseQueryString(loc.search);
