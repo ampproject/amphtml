@@ -49,7 +49,6 @@ tags: {  # <amp-animation>
   html_format: AMP
   html_format: AMP4ADS
   tag_name: "AMP-ANIMATION"
-  mandatory_parent: "BODY"
   requires_extension: "amp-animation"
   requires: "amp-animation extension .json script"
   attrs: {
