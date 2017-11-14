@@ -589,6 +589,9 @@ class TimerEventHandler {
     /** @const @private {boolean} */
     this.callImmediate_ = callImmediate;
 
+    /** @private {function()|undefined} */
+    this.intervalCallback_ = undefined;
+
     /** @private {?UnlistenDef} */
     this.unlistenStart_ = null;
 
@@ -665,6 +668,7 @@ class TimerEventHandler {
     this.startTime_ = Date.now();
     this.lastPingTime_ = undefined;
     this.timerDuration_ = 0;
+    this.intervalCallback_ = timerCallback;
     this.intervalId_ = win.setInterval(() => {
       timerCallback();
     }, this.intervalLength_ * 1000);
@@ -685,6 +689,8 @@ class TimerEventHandler {
     this.intervalId_ = undefined;
     this.calculateDuration_();
     this.lastPingTime_ = undefined;
+    this.intervalCallback_();
+    this.intervalCallback_ = undefined;
   }
 
   /** @private */
@@ -695,18 +701,22 @@ class TimerEventHandler {
     }
   }
 
-  /** @return {!JsonObject} */
+  /** @return {{timerDuration: number, timerStart: number}} */
   reportTimerVars() {
     if (this.isRunning()) {
+      //user().assert(Date.now() != 1600, 'erp?? %s', this.startTime_);
       this.calculateDuration_();
       this.lastPingTime_ = Date.now();
     }
+    /*if (this.timerDuration_ <= 0) {
+      user().assert(false, 'derp??? %s %s', this.timerDuration_, this.startTime_);
+    }*/
     const durationSeconds = Math.floor(this.timerDuration_ / 1000);
     // Keep track of partial unreported seconds so they can roll over later.
     this.timerDuration_ -= (durationSeconds * 1000);
     return {
       'timerDuration': durationSeconds,
-      'timerStart': this.timerStart_,
+      'timerStart': this.startTime_ || 0,
     };
   }
 }
@@ -858,7 +868,9 @@ export class TimerEventTracker extends EventTracker {
     if (timerHandler.isRunning()) {
       return;
     }
-    const timerCallback = listener.bind(this, this.createEvent_(eventType));
+    const timerCallback = () => {
+      listener(this.createEvent_(timerId, eventType));
+    };
     timerHandler.startIntervalInWindow(this.root.ampdoc.win, timerCallback,
         this.removeTracker_.bind(this, timerId));
     timerHandler.unlistenForStart();
@@ -887,9 +899,8 @@ export class TimerEventTracker extends EventTracker {
    * @private
    */
   createEvent_(timerId, eventType) {
-    const timerHandler = this.trackers_[timerId];
     return new AnalyticsEvent(this.root.getRootElement(), eventType,
-        timerHandler.reportTimerVars());
+        this.trackers_[timerId].reportTimerVars());
   }
 
   /**
