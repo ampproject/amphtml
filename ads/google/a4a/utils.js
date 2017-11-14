@@ -29,6 +29,7 @@ import {
   isExperimentOn,
   toggleExperiment,
 } from '../../../src/experiments';
+import {AnalyticsTrigger} from '../../../extensions/amp-a4a/0.1/amp-a4a';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
@@ -85,6 +86,19 @@ export let AmpAnalyticsConfigDef;
  * @visibleForTesting
  */
 export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
+
+/**
+ * Returns the value of navigation start using the performance API or 0 if not
+ * supported by the browser.
+ * Feature detection is used for safety on browsers that do not support the
+ * performance API.
+ * @param {!Window} win
+ * @const {number}
+ */
+function getNavStart(win) {
+  return win['performance'] && win['performance']['timing'] &&
+      win['performance']['timing']['navigationStart'] || 0;
+}
 
 /**
  * Check whether Google Ads supports the A4A rendering pathway is valid for the
@@ -410,6 +424,96 @@ export function additionalDimensions(win, viewportSize) {
     innerWidth,
     innerHeight].join();
 };
+
+/**
+ * Returns a new CSI trigger.
+ * @param {!Object<string, string>} params
+ * @return {!JsonObject}
+ */
+function csiTrigger(on, params) {
+  return dict({
+    'on': on,
+    'request': 'csi',
+    'sampleSpec': {
+      // Pings are sampled on a per-pageview basis. A prefix is included in the
+      // sampleOn spec so that the hash is orthogonal to any other sampling in
+      // amp.
+      'sampleOn': 'a4a-csi-${pageViewId}',
+      'threshold': 1,  // 1% sample
+    },
+    'selector': 'amp-ad',
+    'selectionMethod': 'closest',
+    'extraUrlParams': params,
+  });
+}
+
+/**
+ * Returns amp-analytics config for Google ads network impls.
+ * @return {!JsonObject}
+ */
+export function getCsiAmpAnalyticsConfig() {
+  return dict({
+    'requests': {
+      'csi': 'https://csi.gstatic.com/csi?',
+    },
+    'transport': {'xhrpost': false},
+    'triggers': {
+      'adRequestStart': csiTrigger(AnalyticsTrigger.AD_REQUEST_START, {
+        // afs => ad fetch start
+        'met.a4a': 'afs_lvt.${viewerLastVisibleTime}~afs.${time}',
+      }),
+      'adResponseEnd': csiTrigger(AnalyticsTrigger.AD_RESPONSE_END, {
+        // afe => ad fetch end
+        'met.a4a': 'afe.${time}',
+      }),
+      'adRenderStart': csiTrigger(AnalyticsTrigger.AD_RENDER_START, {
+        // ast => ad schedule time
+        // ars => ad render start
+        'met.a4a':
+            'ast.${scheduleTime}~ars_lvt.${viewerLastVisibleTime}.ars.${time}',
+      }),
+      'adIframeLoaded': csiTrigger(AnalyticsTrigger.AD_IFRAME_LOADED, {
+        // ail => ad iframe loaded
+        'met.a4a': 'ail.${time}',
+      }),
+    },
+    'extraUrlParams': {
+      's': 'ampad',
+      'ctx': '2',
+      'c': '${correlator}',
+      'slotId': '${slotId}',
+      // Time that the beacon was actually sent. Note that there can be delays
+      // between the time at which the event is fired and when ${nowMs} is
+      // evaluated when the URL is built by amp-analytics.
+      'puid': '${requestCount}~${timestamp}',
+    },
+  });
+}
+
+/**
+ * Returns variables to be included in the amp-analytics event for A4A.
+ * @param {!AnalyticsTrigger} analyticsTrigger The analytics trigger to get
+ *     variables for.
+ * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.A4A} a4a The A4A element.
+ * @param {?string} qqid The query ID or null if the query ID has not been set
+ *     yet.
+ */
+export function getCsiAmpAnalyticsVariables(analyticsTrigger, a4a, qqid) {
+  const viewer = Services.viewerForDoc(a4a.getAmpDoc());
+  const navStart = getNavStart(a4a.win);
+  const vars = {
+    'correlator': getCorrelator(a4a.win),
+    'slotId': a4a.element.getAttribute('data-amp-slot-index'),
+    'viewerLastVisibleTime': viewer.getLastVisibleTime() - navStart,
+  };
+  if (qqid) {
+    vars['qqid'] = qqid;
+  }
+  if (analyticsTrigger == AnalyticsTrigger.AD_RENDER_START) {
+    vars['scheduleTime'] = a4a.element.layoutScheduleTime - navStart;
+  }
+  return vars;
+}
 
 /**
  * Extracts configuration used to build amp-analytics element for active view.

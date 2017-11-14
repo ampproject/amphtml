@@ -46,6 +46,8 @@ import {
   isReportingEnabled,
   AmpAnalyticsConfigDef,
   extractAmpAnalyticsConfig,
+  getCsiAmpAnalyticsConfig,
+  getCsiAmpAnalyticsVariables,
   groupAmpAdsByType,
   addCsiSignalsToAmpAnalyticsConfig,
   QQID_HEADER,
@@ -1314,8 +1316,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.win.opener./*OK*/postMessage(payload, '*');
     });
   }
-}
 
+  /** @override */
+  getA4aAnalyticsVars(analyticsTrigger) {
+    return getCsiAmpAnalyticsVariables(analyticsTrigger, this, this.qqid_);
+  }
+
+  /** @override */
+  getA4aAnalyticsConfig() {
+    return getCsiAmpAnalyticsConfig();
+  }
+}
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpAdNetworkDoubleclickImpl);
