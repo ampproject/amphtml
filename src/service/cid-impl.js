@@ -147,22 +147,19 @@ export class Cid {
       return viewer.whenNextVisible().then(() => {
         const cidPromise = this.getExternalCid_(
             getCidStruct, opt_persistenceConsent || consent);
-        cidPromise.catch(error => {
-          const docVisible = viewer.isVisible();
-          const hasVisible = viewer.hasBeenVisible();
-          trace.message += error.message;
-          trace.message +=
-              ` EXTRA INFO: doc isVisible: ${docVisible},` +
-              ` doc hasBeenVisible ${hasVisible}`;
-          dev().error('CID', trace);
-          throw error;
-        });
         // Getting the CID might involve an HTTP request. We timeout after 10s.
         // NOTE: If viewer gets invisible afterwards we also timeout after 10s now. May need improvement
         return Services.timerFor(this.ampdoc.win)
             .timeoutPromise(10000, cidPromise,
             `Getting cid for "${getCidStruct.scope}" timed out`)
             .catch(error => {
+              const docVisible = viewer.isVisible();
+              const hasVisible = viewer.hasBeenVisible();
+              trace.message += error.message;
+              trace.message +=
+                  ` EXTRA INFO: doc isVisible: ${docVisible},` +
+                  ` doc hasBeenVisible ${hasVisible}`;
+              dev().error('CID', trace);
               rethrowAsync(error);
             });
       });
