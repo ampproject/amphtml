@@ -29,7 +29,6 @@ import {
   isExperimentOn,
   toggleExperiment,
 } from '../../../src/experiments';
-import {AnalyticsTrigger} from '../../../extensions/amp-a4a/0.1/amp-a4a';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
@@ -93,7 +92,7 @@ export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
  * Feature detection is used for safety on browsers that do not support the
  * performance API.
  * @param {!Window} win
- * @const {number}
+ * @return {number}
  */
 function getNavStart(win) {
   return win['performance'] && win['performance']['timing'] &&
@@ -458,21 +457,22 @@ export function getCsiAmpAnalyticsConfig() {
     },
     'transport': {'xhrpost': false},
     'triggers': {
-      'adRequestStart': csiTrigger(AnalyticsTrigger.AD_REQUEST_START, {
+      'adRequestStart': csiTrigger('ad-request-start', {
         // afs => ad fetch start
         'met.a4a': 'afs_lvt.${viewerLastVisibleTime}~afs.${time}',
       }),
-      'adResponseEnd': csiTrigger(AnalyticsTrigger.AD_RESPONSE_END, {
+      'adResponseEnd': csiTrigger('ad-response-end', {
         // afe => ad fetch end
         'met.a4a': 'afe.${time}',
       }),
-      'adRenderStart': csiTrigger(AnalyticsTrigger.AD_RENDER_START, {
+      'adRenderStart': csiTrigger('ad-render-start', {
         // ast => ad schedule time
         // ars => ad render start
         'met.a4a':
-            'ast.${scheduleTime}~ars_lvt.${viewerLastVisibleTime}.ars.${time}',
+            'ast.${scheduleTime}~ars_lvt.${viewerLastVisibleTime}~ars.${time}',
+        'qqid': '${qqid}',
       }),
-      'adIframeLoaded': csiTrigger(AnalyticsTrigger.AD_IFRAME_LOADED, {
+      'adIframeLoaded': csiTrigger('ad-iframe-loaded', {
         // ail => ad iframe loaded
         'met.a4a': 'ail.${time}',
       }),
@@ -492,9 +492,8 @@ export function getCsiAmpAnalyticsConfig() {
 
 /**
  * Returns variables to be included in the amp-analytics event for A4A.
- * @param {!AnalyticsTrigger} analyticsTrigger The analytics trigger to get
- *     variables for.
- * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.A4A} a4a The A4A element.
+ * @param {string} analyticsTrigger The name of the analytics trigger.
+ * @param {!AMP.BaseElement} a4a The A4A element.
  * @param {?string} qqid The query ID or null if the query ID has not been set
  *     yet.
  */
@@ -509,7 +508,7 @@ export function getCsiAmpAnalyticsVariables(analyticsTrigger, a4a, qqid) {
   if (qqid) {
     vars['qqid'] = qqid;
   }
-  if (analyticsTrigger == AnalyticsTrigger.AD_RENDER_START) {
+  if (analyticsTrigger == 'ad-render-start') {
     vars['scheduleTime'] = a4a.element.layoutScheduleTime - navStart;
   }
   return vars;
