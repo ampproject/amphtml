@@ -35,8 +35,8 @@ limitations under the License.
     <td width="40%"><strong>Examples</strong></td>
     <td>
       <ul>
-      <li><a href="https://github.com/ampproject/amphtml/blob/master/examples/amp-position-observer.amp.html">amp-position-observer</a></li>
-      <li><a href="https://codepen.io/collection/nMJYrv/">CodePen collection with 6 samples</a></li>
+        <li><a href="https://ampbyexample.com/visual_effects/basics_of_scrollbound_effects/">Basics of scrollbound effects tutorial</a></li>
+        <li><a href="https://codepen.io/collection/nMJYrv/">CodePen collection with samples</a></li>
       </ul>
     </td>
   </tr>
