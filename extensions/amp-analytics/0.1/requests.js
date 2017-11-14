@@ -28,7 +28,7 @@ import {Services} from '../../../src/services';
 
 export class RequestHandler {
   /**
-   * @param {../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} request
    * @param {!../../../src/preconnect.Preconnect} preconnect
    * @param {!function(string, !JsonObject)} handler
@@ -222,8 +222,6 @@ export class RequestHandler {
       return this.getExtraUrlParamsString_(params);
     });
   }
-
-  //TODO: Need function to handler batchSegment as well
 
   /**
    * Handle the params map and form the final extraUrlParams string
