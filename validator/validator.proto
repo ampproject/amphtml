@@ -341,15 +341,16 @@ message ExtensionSpec {
   //
   // The second requirement (extension requires usage) has a few exceptions:
   //   1) For older extensions, implemented before these tagspec rules, we
-  //      do not want to introduce a breaking change, so we emit a warning
-  //      rather than an error if there is an unused extension. New extensions
-  //      may not make this requirement a warning.
+  //      do not want to introduce a breaking change, so we grandfather these
+  //      extensions to not require usage. New extensions must use ERROR.
   //   2) Some extensions, such as `amp-dynamic-css-classes`, do not have any
   //      associated tag in the document indicating usage. These extensions do
   //      not trigger warnings or errors.
   enum ExtensionUsageRequirement {
     ERROR = 1;
-    DEPRECATED_WARNING = 2;
+    // Exception for grandfathered extensions. #1 above.
+    GRANDFATHERED = 2;
+    // Exception for extensions with no usage-indicating tag. #2 above.
     NONE = 3;
   }
   optional ExtensionUsageRequirement requires_usage = 7 [default = ERROR];

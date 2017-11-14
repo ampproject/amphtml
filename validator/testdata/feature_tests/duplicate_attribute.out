@@ -8,4 +8,3 @@ feature_tests/duplicate_attribute.html:38:3 The tag 'amp-img' contains the attri
 feature_tests/duplicate_attribute.html:41:3 The tag 'script' contains the attribute 'type' repeated multiple times. [DISALLOWED_HTML]
 feature_tests/duplicate_attribute.html:42:3 The tag 'script' contains the attribute 'type' repeated multiple times. [DISALLOWED_HTML]
 feature_tests/duplicate_attribute.html:42:3 Only AMP runtime 'script' tags are allowed, and only in the document head. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
-feature_tests/duplicate_attribute.html:45:7 The extension 'amp-image-lightbox' was found on this page, but is unused (no 'amp-image-lightbox' tag seen). This may become an error in the future. [DEPRECATION]

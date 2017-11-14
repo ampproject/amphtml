@@ -1974,11 +1974,9 @@ class ExtensionsContext {
   constructor() {
     // |extensionsLoaded_| tracks the valid <script> tags loading
     // amp extensions which were seen in the document's head. Most extensions
-    // are also added to either |extensionsUnusedRequired_| or
-    // |extensionsUnusedWarning_| when encountered in the head.
-    // When a tag is seen later in the document which makes use of an
-    // extension, that extension, the extension is recorded in
-    // |extensionsUsed_|.
+    // are also added to |extensionsUnusedRequired_| when encountered in the
+    // head. When a tag is seen later in the document which makes use of an
+    // extension, that extension is recorded in |extensionsUsed_|.
 
     /**
      * Used as a set, based on key names.
@@ -1997,12 +1995,6 @@ class ExtensionsContext {
      * @private
      */
     this.extensionsUnusedRequired_ = [];
-
-    /**
-     * @type {!Array<string>}
-     * @private
-     */
-    this.extensionsUnusedWarning_ = [];
 
     /**
      * Used as a set, based on key names.
@@ -2044,16 +2036,6 @@ class ExtensionsContext {
    */
   recordExtensionUnusedRequired(extension) {
     this.extensionsUnusedRequired_.push(extension);
-  }
-
-  /**
-   * Record that a loaded extension indicates a new non-fatal requirement:
-   * namely that some tag must make use of this extension. This results in
-   * a warning.
-   * @param {string} extension
-   */
-  recordExtensionUnusedWarning(extension) {
-    this.extensionsUnusedWarning_.push(extension);
   }
 
   /**
@@ -2136,20 +2118,6 @@ class ExtensionsContext {
     // Compute Difference: extensionsUnusedRequired_ - extensionsUsed_
     var out = [];
     for (const extension of this.extensionsUnusedRequired_)
-      if (!(extension in this.extensionsUsed_)) out.push(extension);
-    out.sort();
-    return out;
-  }
-
-  /**
-   * Returns a list of unused extensions which produce validation warnings
-   * when unused.
-   * @return {!Array<string>}
-   */
-  unusedExtensionsWarning() {
-    // Compute Difference: extensionsUnusedWarning_ - extensionsUsed_
-    var out = [];
-    for (const extension of this.extensionsUnusedWarning_)
       if (!(extension in this.extensionsUsed_)) out.push(extension);
     out.sort();
     return out;
@@ -4280,9 +4248,7 @@ function validateTagAgainstSpec(
     extensionsCtx.recordExtensionLoaded(extensionName);
     switch (extensionSpec.requiresUsage) {
       case amp.validator.ExtensionSpec.ExtensionUsageRequirement
-          .DEPRECATED_WARNING:
-        extensionsCtx.recordExtensionUnusedWarning(extensionName);
-        break;
+          .GRANDFATHERED:  // Fallthrough intended:
       case amp.validator.ExtensionSpec.ExtensionUsageRequirement.NONE:
         // This extension does not have usage demonstrated by a tag, for
         // example: amp-dynamic-css-classes
@@ -4786,22 +4752,6 @@ class ParsedValidatorRules {
             amp.validator.ValidationError.Code.EXTENSION_UNUSED,
             context.getDocLocator(),
             /* params */[unusedExtensionName],
-            /* specUrl */ '', validationResult);
-      }
-    }
-
-    if (!amp.validator.LIGHT) {
-      let unusedWarning = extensionsCtx.unusedExtensionsWarning();
-      for (const unusedExtensionName of unusedWarning) {
-        context.addError(
-            amp.validator.ValidationError.Severity.WARNING,
-            amp.validator.ValidationError.Code.WARNING_EXTENSION_UNUSED,
-            context.getDocLocator(),
-            /* params */
-            [
-              unusedExtensionName,
-              this.exampleTagForExtension(unusedExtensionName)
-            ],
             /* specUrl */ '', validationResult);
       }
     }
@@ -5820,8 +5770,6 @@ amp.validator.categorizeError = function(error) {
   // use 'data-shortcode' instead."
   if (error.code === amp.validator.ValidationError.Code.DEPRECATED_ATTR ||
       error.code === amp.validator.ValidationError.Code.DEPRECATED_TAG ||
-      error.code ===
-          amp.validator.ValidationError.Code.WARNING_EXTENSION_UNUSED ||
       error.code ===
           amp.validator.ValidationError.Code
               .WARNING_EXTENSION_DEPRECATED_VERSION ||
