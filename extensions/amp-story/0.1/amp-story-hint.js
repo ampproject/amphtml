@@ -16,6 +16,9 @@
 
 import {renderSimpleTemplate} from './simple-template';
 import {dict} from '../../../src/utils/object';
+import {debounce} from '../../../src/utils/rate-limit';
+import {Animation} from '../../../src/animation';
+import {setImportantStyles, resetStyles} from '../../../src/style';
 
 /** @private @const {!Array<!./simple-template.ElementDef>} */
 const NAVIGATION_HELP_OVERLAY = [
@@ -99,6 +102,15 @@ export class AmpStoryHint {
 
     /** @private {?number} */
     this.hintTimeout_ = null;
+
+    this.fadeoutHints_ = debounce(this.win_, () => {
+      Animation.animate(this.hintContainer_, () => {
+        setImportantStyles(this.hintContainer_, {'opacity': '0'});
+      }, 200).thenAlways(() => {
+        this.resetContainerStyle_();
+        resetStyles(this.hintContainer_, ['opacity']);
+      });
+    }, NAVIGATION_OVERLAY_TIMEOUT);
   }
 
   /**
@@ -122,48 +134,43 @@ export class AmpStoryHint {
   }
 
   /**
-   * Show navigation overlay DOM.
+   * Shows the given hint
    */
-  showNavigationOverlay() {
-    if (this.hintContainer_.classList.contains(NAVIGATION_OVERLAY_CLASS)) {
+  showHint_(hintClass) {
+    if (this.hintContainer_.classList.contains(hintClass)) {
       return;
     }
 
     this.hideAllNavigationHint();
-    this.hintContainer_.classList.add(NAVIGATION_OVERLAY_CLASS);
+    this.hintContainer_.classList.add(hintClass);
+  }
 
-    this.hintTimeout_ = setTimeout(() => {
-      this.hideAllNavigationHint();
-    }, NAVIGATION_OVERLAY_TIMEOUT);
+  /**
+   * Show navigation overlay DOM.
+   */
+  showNavigationOverlay() {
+    this.showHint_(NAVIGATION_OVERLAY_CLASS);
   }
 
   /**
    * Show navigation overlay DOM.
    */
   showFirstPageHintOverlay() {
-    if (this.hintContainer_.classList.contains(FIRST_PAGE_OVERLAY_CLASS)) {
-      return;
-    }
-
-    this.hideAllNavigationHint();
-    this.hintContainer_.classList.add(FIRST_PAGE_OVERLAY_CLASS);
-
-    this.hintTimeout_ = setTimeout(() => {
-      this.hideAllNavigationHint();
-    }, NAVIGATION_OVERLAY_TIMEOUT);
+    this.showHint_(FIRST_PAGE_OVERLAY_CLASS);
   }
 
   /**
    * Hide all navigation hints.
    */
   hideAllNavigationHint() {
+    this.resetContainerStyle_();
+    this.fadeoutHints_();
+  }
+
+  /** @private */
+  resetContainerStyle_() {
     this.hintContainer_.classList.remove(NAVIGATION_OVERLAY_CLASS);
     this.hintContainer_.classList.remove(FIRST_PAGE_OVERLAY_CLASS);
-
-    if (this.hintTimeout_) {
-      this.win_.clearTimeout(this.hintTimeout_);
-      this.hintTimeout_ = null;
-    }
   }
 }
 

@@ -529,6 +529,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     if (pageId === null) {
       dispatch(this.element, EventType.SHOW_NO_PREVIOUS_PAGE_HELP, true);
+      return;
     }
 
     this.switchTo_(pageId);
