@@ -68,6 +68,16 @@ export class ExpansionOptions {
     this.iterations = opt_iterations === undefined ? 2 : opt_iterations;
     /** @const {boolean} */
     this.noEncode = !!opt_noEncode;
+    this.freezeVars = {};
+  }
+
+  /**
+   * Freeze special variable name so that they don't get expanded.
+   * For example ${extraUrlParams}
+   * @param {string} str
+   */
+  freezeVar(str) {
+    this.freezeVars[str] = true;
   }
 }
 
@@ -213,6 +223,11 @@ export class VariableService {
       }
 
       const {name, argList} = this.getNameArgs_(initialValue);
+      if (options.freezeVars[name]) {
+        // Do nothing with frozen params
+        return match;
+      }
+
       const raw = options.vars[name] != null ? options.vars[name] : '';
 
       let p;
