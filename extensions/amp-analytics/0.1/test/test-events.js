@@ -679,7 +679,7 @@ describes.realWin('Events', {amp: 1}, env => {
       const fn1 = sandbox.stub();
       tracker.add(analyticsElement, 'timer', {timerSpec: {
         interval: 1,
-	immediate: false,
+        immediate: false,
         startSpec: {on: 'click', selector: '.target'},
         stopSpec: {on: 'click', selector: '.target'},
       }}, fn1);
@@ -868,7 +868,7 @@ describes.realWin('Events', {amp: 1}, env => {
       const handler = sandbox.stub();
       tracker.add(analyticsElement, 'timer', {timerSpec: {
         interval: 3,
-	immediate: false,
+        immediate: false,
         startSpec: {on: 'click', selector: '.target'},
         stopSpec: {on: 'click', selector: '.target'},
       }}, handler);
@@ -886,7 +886,7 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(stopEvent1).to.be.instanceOf(AnalyticsEvent);
       expect(stopEvent1.vars.timerStart).to.equal(1000);
       expect(stopEvent1.vars.timerDuration).to.equal(0);
-      
+
       target.click();
       expect(handler).to.be.calledOnce;
       fakeTime = 4600; // Must set fake time before advancing the interval.

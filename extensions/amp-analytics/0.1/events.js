@@ -704,13 +704,9 @@ class TimerEventHandler {
   /** @return {{timerDuration: number, timerStart: number}} */
   reportTimerVars() {
     if (this.isRunning()) {
-      //user().assert(Date.now() != 1600, 'erp?? %s', this.startTime_);
       this.calculateDuration_();
       this.lastPingTime_ = Date.now();
     }
-    /*if (this.timerDuration_ <= 0) {
-      user().assert(false, 'derp??? %s %s', this.timerDuration_, this.startTime_);
-    }*/
     const durationSeconds = Math.floor(this.timerDuration_ / 1000);
     // Keep track of partial unreported seconds so they can roll over later.
     this.timerDuration_ -= (durationSeconds * 1000);
