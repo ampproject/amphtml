@@ -19,6 +19,7 @@ import {dict} from '../../../src/utils/object';
 import {debounce} from '../../../src/utils/rate-limit';
 import {Animation} from '../../../src/animation';
 import {setImportantStyles, resetStyles} from '../../../src/style';
+import {dev} from '../../../src/log';
 
 /** @private @const {!Array<!./simple-template.ElementDef>} */
 const NAVIGATION_HELP_OVERLAY = [
@@ -104,11 +105,12 @@ export class AmpStoryHint {
     this.hintTimeout_ = null;
 
     this.fadeoutHints_ = debounce(this.win_, () => {
-      Animation.animate(this.hintContainer_, () => {
-        setImportantStyles(this.hintContainer_, {'opacity': '0'});
+      Animation.animate(dev().assertElement(this.hintContainer_), () => {
+        setImportantStyles(
+            dev().assertElement(this.hintContainer_), {'opacity': '0'});
       }, 200).thenAlways(() => {
         this.resetContainerStyle_();
-        resetStyles(this.hintContainer_, ['opacity']);
+        resetStyles(dev().assertElement(this.hintContainer_), ['opacity']);
       });
     }, NAVIGATION_OVERLAY_TIMEOUT);
   }

@@ -62,6 +62,8 @@ import {stringHash32} from '../../../src/string';
 import {AmpStoryHint} from './amp-story-hint';
 import {Gestures} from '../../../src/gesture';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
+import {dict} from '../../../src/utils/object';
+import {renderSimpleTemplate} from './simple-template';
 
 /** @private @const {string} */
 const PRE_ACTIVE_PAGE_ATTRIBUTE_NAME = 'pre-active';
@@ -86,6 +88,36 @@ const AUDIO_MUTED_ATTRIBUTE = 'muted';
 /** @type {string} */
 const TAG = 'amp-story';
 
+/** @type {string} */
+const NEXT_BUTTON_CLASS = 'i-amphtml-story-button-move'
+    + ' i-amphtml-story-button-next';
+
+/** @type {string} */
+const PREV_BUTTON_CLASS = 'i-amphtml-story-button-move'
+    + ' i-amphtml-story-button-prev i-amphtml-story-button-move-hidden';
+
+const PAGE_SWITCH_BUTTONS = [
+  {
+    tag: 'div',
+    attrs: dict({'class': 'i-amphtml-story-button-container next-container'}),
+    children: [
+      {
+        tag: 'button',
+        attrs: dict({'class': NEXT_BUTTON_CLASS}),
+      },
+    ],
+  },
+  {
+    tag: 'div',
+    attrs: dict({'class': 'i-amphtml-story-button-container prev-container'}),
+    children: [
+      {
+        tag: 'button',
+        attrs: dict({'class': PREV_BUTTON_CLASS}),
+      },
+    ],
+  },
+];
 
 export class AmpStory extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -99,7 +131,8 @@ export class AmpStory extends AMP.BaseElement {
      * Whether entering into fullscreen automatically on navigation is enabled.
      * @private {boolean}
      */
-    this.isAutoFullScreenEnabled_ = true;
+    this.isAutoFullScreenEnabled_ =
+        isExperimentOn(this.win, 'amp-story-auto-fullscreen');
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
@@ -336,21 +369,23 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   buildButtons_() {
-    const doc = this.element.ownerDocument;
-    const nextButton = doc.createElement('button');
-    nextButton.classList.add(
-        'i-amphtml-story-button-move','i-amphtml-story-button-next');
-    this.element.appendChild(nextButton);
-    const previousButton = doc.createElement('button');
-    previousButton.classList.add(
-        'i-amphtml-story-button-move','i-amphtml-story-button-prev',
-        'i-amphtml-story-button-move-hidden');
+    this.element.insertBefore(
+        renderSimpleTemplate(this.win.document, PAGE_SWITCH_BUTTONS),
+        this.element.firstChild);
 
-    this.element.insertBefore(previousButton, this.element.firstChild);
-    this.element.insertBefore(nextButton, this.element.firstChild);
+    this.nextButton_ =
+        this.element.querySelector('.i-amphtml-story-button-next');
 
-    this.nextButton_ = nextButton;
-    this.prevButton_ = previousButton;
+    this.prevButton_ =
+        this.element.querySelector('.i-amphtml-story-button-prev');
+
+    this.nextButton_.addEventListener('click', () => {
+      this.next_();
+    });
+
+    this.prevButton_.addEventListener('click', () => {
+      this.previous_();
+    });
   }
 
   /** @private */
@@ -532,20 +567,6 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * @param {!./amp-story-page.AmpStoryPage} page
-   */
-  maybeApplyFirstAnimationFrame_(page) {
-    page.maybeApplyFirstAnimationFrame();
-  }
-
-  /**
-   * @param {!./amp-story-page.AmpStoryPage} page
-   */
-  maybeStartAnimations_(page) {
-    page.maybeStartAnimations();
-  }
-
-  /**
    * Switches to a particular page.
    * @param {string} targetPageId
    * @return {!Promise}
@@ -584,16 +605,14 @@ export class AmpStory extends AMP.BaseElement {
     const previousActivePriorSibling = scopedQuerySelector(
         this.element, `[${PRE_ACTIVE_PAGE_ATTRIBUTE_NAME}]`);
 
-    this.maybeApplyFirstAnimationFrame_(targetPage);
-
     return this.mutateElement(() => {
       this.activePage_ = targetPage;
       this.triggerActiveEventForPage_();
       this.systemLayer_.resetDeveloperLogs();
       this.systemLayer_.setDeveloperLogContextString(
           this.activePage_.element.id);
-      this.maybeStartAnimations_(targetPage);
     })
+        .then(() => targetPage.beforeVisible())
         .then(() => {
           if (oldPage) {
             oldPage.setActive(false);
@@ -757,7 +776,7 @@ export class AmpStory extends AMP.BaseElement {
    * @return {boolean} True if the screen size matches the desktop media query.
    */
   isDesktop_() {
-    return isExperimentOn(this.win, 'amp-story-desktop') &&
+    return !isExperimentOn(this.win, 'disable-amp-story-desktop') &&
         this.desktopMedia_.matches;
   }
 

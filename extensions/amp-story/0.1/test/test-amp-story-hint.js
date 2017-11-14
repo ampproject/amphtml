@@ -36,32 +36,31 @@ describes.fakeWin('amp-story hint layer', {}, env => {
   });
 
   it('should be able to show navigation help overlay', () => {
-    expect(ampStoryHint.hintTimeout_).to.be.null;
+    const fadeoutHintsStub =
+        sandbox.stub(ampStoryHint, 'fadeoutHints_' , NOOP);
     ampStoryHint.buildHintContainer();
     ampStoryHint.showNavigationOverlay();
     expect(ampStoryHint.hintContainer_.className).to.contain(
         'show-navigation-overlay');
-    expect(ampStoryHint.hintTimeout_).to.be.an('number');
+    expect(fadeoutHintsStub).to.be.calledOnce;
   });
 
   it('should be able to show no previous page help overlay', () => {
-    expect(ampStoryHint.hintTimeout_).to.be.null;
+    const fadeoutHintsStub =
+    sandbox.stub(ampStoryHint, 'fadeoutHints_' , NOOP);
     ampStoryHint.buildHintContainer();
     ampStoryHint.showFirstPageHintOverlay();
     expect(ampStoryHint.hintContainer_.className).to.contain(
         'show-first-page-overlay');
-    expect(ampStoryHint.hintTimeout_).to.be.an('number');
+    expect(fadeoutHintsStub).to.be.calledOnce;
   });
 
   it('should be able to hide shown hint', () => {
-    const clearTimeoutStub =
-        sandbox.stub(ampStoryHint.win_, 'clearTimeout', NOOP);
     ampStoryHint.buildHintContainer();
     ampStoryHint.showNavigationOverlay();
     ampStoryHint.hideAllNavigationHint();
     expect(ampStoryHint.hintContainer_.className).to.not.contain(
         'show-navigation-overlay');
-    expect(clearTimeoutStub).to.have.been.calledOnce;
   });
 });
 

@@ -23,6 +23,7 @@ import {dict, hasOwn, map} from '../../../src/utils/object';
 import {sendRequest, sendRequestUsingIframe} from './transport';
 import {IframeTransport} from './iframe-transport';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
+import {getTopWindow} from '../../../src/service';
 import {Services} from '../../../src/services';
 import {toggle} from '../../../src/style';
 import {isEnumValue} from '../../../src/types';
@@ -79,7 +80,7 @@ export class AmpAnalytics extends AMP.BaseElement {
      */
     this.type_ = null;
 
-    /** @private {!boolean} */
+    /** @private {boolean} */
     this.isSandbox_ = false;
 
     /**
@@ -115,12 +116,15 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {?IframeTransport} */
     this.iframeTransport_ = null;
+
+    /** @private {boolean} */
+    this.isInabox_ = getMode().runtime == 'inabox';
   }
 
   /** @override */
   getPriority() {
     // Load immediately if inabox, otherwise after other content.
-    return getMode().runtime == 'inabox' ? 0 : 1;
+    return this.isInabox_ ? 0 : 1;
   }
 
   /** @override */
@@ -319,7 +323,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     const TAG = this.getName_();
     const ampAdResourceId = user().assertString(
-        getAmpAdResourceId(this.element, this.win.top),
+        getAmpAdResourceId(this.element, getTopWindow(this.win)),
         `${TAG}: No friendly parent amp-ad element was found for ` +
         'amp-analytics tag with iframe transport.');
 
