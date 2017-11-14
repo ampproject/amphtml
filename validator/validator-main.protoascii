@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 246
+min_validator_revision_required: 265
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 517
+spec_file_revision: 520
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -1136,8 +1136,6 @@ attr_lists: {
   }
 }
 tags: {
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "BLOCKQUOTE"
   attrs: { name: "align" }
   attr_lists: "cite-attr"
@@ -1311,8 +1309,6 @@ tags: {
 }
 # 4.5.7 The q element
 tags: {
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "Q"
   attr_lists: "cite-attr"
 }
@@ -1419,8 +1415,6 @@ tags: {
 # 4.6 Edits
 # 4.6.1 The ins element
 tags: {
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "INS"
   # https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ins
   # These attributes have specific formatting, but as they are metadata
@@ -1431,8 +1425,6 @@ tags: {
 }
 # 4.6.2 The del element
 tags: {
-  html_format: AMP
-  html_format: AMP4ADS
   tag_name: "DEL"
   # https://developer.mozilla.org/en-US/docs/Web/HTML/Element/del
   # These attributes have specific formatting, but as they are metadata
@@ -4000,11 +3992,11 @@ error_specificity {
 }
 error_specificity {
   code: CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION
-  specificity: 75
+  specificity: 76
 }
 error_specificity {
   code: BASE_TAG_MUST_PRECEED_ALL_URLS
-  specificity: 75
+  specificity: 76
 }
 error_specificity { code: DISALLOWED_SCRIPT_TAG specificity: 100 }
 error_specificity { code: GENERAL_DISALLOWED_TAG specificity: 101 }
