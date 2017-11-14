@@ -76,9 +76,7 @@ describe('refresh-manager', () => {
         mockA4a.element, window, 'doubleclick')).to.equal(40000);
   });
 
-  // TODO(glevitzky): Make this test work on Safari. See #11827.
-  it.configure().skipSafari().run('should call convertConfiguration_ ' +
-      'and set proper units', () => {
+  it('should call convertConfiguration_ and set proper units', () => {
     const getConfigurationSpy = sandbox.spy(
         RefreshManager.prototype, 'convertAndSanitizeConfiguration_');
     const refreshManager = new RefreshManager(mockA4a, {
@@ -91,8 +89,7 @@ describe('refresh-manager', () => {
     expect(refreshManager.config_.continuousTimeMin).to.equal(1000);
   });
 
-  // TODO(glevitzky): Make this test work on Safari. See #11827.
-  describe.configure().skipSafari().run('#ioCallback_', () => {
+  describe('#ioCallback_', () => {
     let refreshManager;
     beforeEach(
         () => refreshManager = new RefreshManager(mockA4a, config, 30000));

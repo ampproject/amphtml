@@ -1542,8 +1542,7 @@ describes.realWin('amp-analytics', {
     });
   });
 
-  // TODO(zhouyx): Make this test work on Safari. See #11827.
-  describe.configure().skipSafari().run('Sandbox AMP Analytics Element', () => {
+  describe('Sandbox AMP Analytics Element', () => {
 
     beforeEach(() => {
       // Unfortunately need to fake sandbox analytics element's parent

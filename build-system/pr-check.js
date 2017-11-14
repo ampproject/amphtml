@@ -272,10 +272,10 @@ const command = {
     timedExecOrDie('gulp check-types');
   },
   runUnitTests: function() {
-    // Run all unit tests on Chrome.
-    timedExecOrDie('gulp test --nobuild --unit');
-    // Run a subset of unit tests on other browsers via sauce labs.
-    timedExecOrDie('gulp test --nobuild --saucelabs_lite --unit');
+    // Unit tests with Travis' default chromium
+    timedExecOrDie('gulp test --unit --nobuild');
+    // A subset of unit tests on other browsers via sauce labs
+    timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
   },
   runIntegrationTests: function(compiled) {
     // Integration tests with all saucelabs browsers

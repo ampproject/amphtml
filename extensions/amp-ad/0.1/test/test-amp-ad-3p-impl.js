@@ -179,8 +179,7 @@ describes.realWin('amp-ad-3p-impl', {
       });
     });
 
-    // TODO(keithwrightbos): Make this test work on Safari. See #11827.
-    it.configure().skipSafari().run('should use custom path', () => {
+    it('should use custom path', () => {
       const remoteUrl = 'https://example.com/boot/remote.html';
       const meta = win.document.createElement('meta');
       meta.setAttribute('name', 'amp-3p-iframe-src');
@@ -221,8 +220,7 @@ describes.realWin('amp-ad-3p-impl', {
     });
   });
 
-  // TODO(keithwrightbos): Make this test work on Safari. See #11827.
-  describe.configure().skipSafari().run('preconnectCallback', () => {
+  describe('preconnectCallback', () => {
     it('should add preconnect and prefetch to DOM header', () => {
       ad3p.buildCallback();
       ad3p.preconnectCallback();
