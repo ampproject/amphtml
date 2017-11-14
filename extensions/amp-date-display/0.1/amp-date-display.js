@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
-import {Services} from '../../../src/services';
-import {createCustomEvent} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeChildren} from '../../../src/dom';
+import { AmpEvents } from '../../../src/amp-events';
+import { Services } from '../../../src/services';
+import { createCustomEvent } from '../../../src/event-helper';
+import { isLayoutSizeDefined } from '../../../src/layout';
+import { removeChildren } from '../../../src/dom';
 
 export class ampDateDisplay extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -44,30 +43,33 @@ export class ampDateDisplay extends AMP.BaseElement {
     /** @private {number} */
     this.offsetSeconds_ = 0;
 
+    /** @private {string} */
+    this.locale_ = '';
+
     /** @const {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win);
   }
 
   /** @override */
   buildCallback() {
-    this.datetime_ = this.element.getAttribute('datetime');
+    this.datetime_ = this.element.getAttribute('datetime') || '';
     this.timestampSeconds_ = this.element.getAttribute('timestamp-seconds');
     this.timestampMiliseconds_ = this.element.getAttribute('timestamp-ms');
     this.displayIn_ = this.element.getAttribute('display-in') || '';
     this.offsetSeconds_ = this.element.getAttribute('offset-seconds') || 0;
+    this.locale_ = this.element.getAttribute('locale') || 'en';
 
     const epoch = this.getEpoch_();
     const offset = this.offsetSeconds_ * 1000;
     const date = new Date(epoch + offset);
     const inUTC = this.displayIn_.toLowerCase() === 'utc';
     const basicData = inUTC
-      ? this.getVariablesInUTC_(date, 'en')
-      : this.getVariablesInLocal_(date, 'en');
+      ? this.getVariablesInUTC_(date, this.locale_)
+      : this.getVariablesInLocal_(date, this.locale_);
     const data = this.enhanceBasicVariables_(basicData);
 
-    console.log(data);
-
-    this.templates_.findAndRenderTemplate(this.element, data)
+    this.templates_
+        .findAndRenderTemplate(this.element, data)
         .then(this.boundRendered_);
   }
 
@@ -84,9 +86,9 @@ export class ampDateDisplay extends AMP.BaseElement {
     } else if (this.datetime_) {
       epoch = Date.parse(this.datetime_);
     } else if (this.timestampMiliseconds_) {
-      epoch = this.timestampMiliseconds_;
+      epoch = parseInt(this.timestampMiliseconds_, 10);
     } else if (this.timestampSeconds_) {
-      epoch = this.timestampSeconds_ * 1000;
+      epoch = parseInt(this.timestampSeconds_, 10) * 1000;
     }
 
     if (isNaN(epoch)) {
@@ -164,7 +166,7 @@ export class ampDateDisplay extends AMP.BaseElement {
       hour12TwoDigit: this.padStart_(hour12),
       minuteTwoDigit: this.padStart_(data.minute),
       secondTwoDigit: this.padStart_(data.second),
-      dayPeriod: (data.hour < 12) ? 'am' : 'pm',
+      dayPeriod: data.hour < 12 ? 'am' : 'pm',
     });
   }
 
@@ -188,8 +190,12 @@ export class ampDateDisplay extends AMP.BaseElement {
     removeChildren(this.element);
     this.element.appendChild(element);
 
-    const event = createCustomEvent(this.win,
-        AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
+    const event = createCustomEvent(
+        this.win,
+        AmpEvents.DOM_UPDATE,
+        /* detail */ null,
+        {bubbles: true}
+    );
     this.element.dispatchEvent(event);
   }
 }
