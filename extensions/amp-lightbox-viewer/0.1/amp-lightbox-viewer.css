@@ -172,3 +172,33 @@
 .i-amphtml-lbv[gallery-view] .amp-lbv-button-slide {
   display: block;
 }
+
+.i-amphtml-image-lightbox-trans {
+  pointer-events: none !important;
+  position: fixed;
+  z-index: 1001;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+.i-amphtml-image-lightbox-viewer {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* This is necessary due to crbug/248522 where touch events fail after
+    transform */
+  overflow: hidden;
+  transform: translate3d(0, 0, 0);
+}
+
+.i-amphtml-image-lightbox-viewer-image {
+  position: absolute;
+  z-index: 1;
+  display: block;
+  transform-origin: 50% 50%;
+}

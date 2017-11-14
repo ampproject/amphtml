@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-
+import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-lightbox-viewer-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
+import {ImageViewer} from '../../../src/image-viewer';
 import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
 import {user, dev} from '../../../src/log';
 import {toggle, setStyle} from '../../../src/style';
 import {getData, listen} from '../../../src/event-helper';
 import {LightboxManager} from './service/lightbox-manager-impl';
-import {Animation} from '../../../src/animation';
 import {numeric} from '../../../src/transition';
+import {startsWith} from '../../../src/string';
 
 /** @const */
 const TAG = 'amp-lightbox-viewer';
@@ -140,7 +141,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     // DO NOT ADD CODE HERE
     // layoutCallback for lightbox-viewer is meaningless, lightbox-viewer
     // doesn't have children, it just manages elements elsewhere in the page in
-    // `open_` `close_` and `updateViewer_` methods.
+    // `open_` `close` and `updateViewer_` methods.
     return Promise.resolve();
   }
 
@@ -172,22 +173,38 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         const lightboxableElements = list;
         this.vsync_.mutate(() => {
           let index = 0;
+
           lightboxableElements.forEach(element => {
             element.lightboxItemId = index++;
             const deepClone = !element.classList.contains(
                 'i-amphtml-element');
             const clonedNode = element.cloneNode(deepClone);
             clonedNode.removeAttribute('on');
+            // TODO(yuxichen): store descriptionText and lightboxItemId in a
+            // list other than the node itself
             const descText = this.manager_.getDescription(element);
             if (descText) {
               clonedNode.descriptionText = descText;
             }
-            // TODO(yuxichen): store descriptionText and lightboxItemId in a
-            // list other than the node itself
-            this.clonedLightboxableElements_.push(clonedNode);
-            this.carousel_.appendChild(clonedNode);
+
+            if (clonedNode.tagName == 'AMP-IMG') {
+              const container = this.element.ownerDocument.createElement('div');
+              container.classList.add('i-amphtml-image-lightbox-container');
+              const imageViewer = new ImageViewer(this, this.win,
+                this.loadPromise.bind(this));
+              container.appendChild(imageViewer.getElement());
+              this.carousel_.appendChild(container);
+              this.clonedLightboxableElements_.push(imageViewer);
+            }
+
+            else {
+              this.clonedLightboxableElements_.push(clonedNode);
+              this.carousel_.appendChild(clonedNode);
+            }
           });
+
         });
+
       });
 
       this.container_.appendChild(this.carousel_);
@@ -367,7 +384,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.topGradient_.classList.add('i-amphtml-lbv-top-bar-top-gradient');
     this.topBar_.appendChild(this.topGradient_);
 
-    const close = this.close_.bind(this);
+    const close = this.close.bind(this);
     const openGallery = this.openGallery_.bind(this);
     const closeGallery = this.closeGallery_.bind(this);
 
@@ -464,24 +481,47 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
     this.updateInViewport(dev().assertElement(this.container_), true);
     this.scheduleLayout(dev().assertElement(this.container_));
-
     this.currentElementId_ = element.lightboxItemId;
-    // Hack to access private property. Better than not getting
-    // type checking to work.
-    /**@type {?}*/ (this.carousel_).implementation_.showSlideWhenReady(
-        this.currentElementId_);
+
+    /**@type {?}*/ (this.carousel_).implementation_
+        .showSlide_(this.currentElementId_);
 
     this.win.document.documentElement.addEventListener(
         'keydown', this.boundHandleKeyboardEvents_);
 
+    this.enter_(element);
+
     return Promise.resolve();
+  }
+
+  enter_(element) {
+    const imgViewer = this.clonedLightboxableElements_[this.currentElementId_];
+    imgViewer.init(element, element);
+    imgViewer.measure();
+
+    // TODO (cathyzhu): need to unregister this eventually
+    this.unlistenViewport_ = this.getViewport().onChanged(() => {
+      // In IOS 10.3, the measured size of an element is incorrect if the
+      // element size depends on window size directly and the measurement
+      // happens in window.resize event. Adding a timeout for correct
+      // measurement. See https://github.com/ampproject/amphtml/issues/8479
+      if (startsWith(
+          Services.platformFor(this.win).getIosVersionString(), '10.3')) {
+        Services.timerFor(this.win).delay(() => {
+          imgViewer.measure();
+        }, 500);
+      } else {
+        imgViewer.measure();
+      }
+    });
+
   }
 
   /**
    * Closes the lightbox-viewer
    * @private
    */
-  close_() {
+  close() {
     if (!this.active_) {
       return Promise.resolve();
     }
@@ -502,6 +542,17 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         'keydown', this.boundHandleKeyboardEvents_);
   }
 
+
+  /**
+   * Toggles the view mode.
+   * @param {boolean=} opt_on
+   */
+  toggleViewMode(opt_on) {
+    // TODO (cathyzhu): hide description, no op for now
+
+  }
+
+
   /**
    * Handles keyboard events for the lightbox.
    *  -Esc will close the lightbox.
@@ -510,7 +561,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   handleKeyboardEvents_(event) {
     const code = event.keyCode;
     if (code == KeyCodes.ESCAPE) {
-      this.close_();
+      this.close();
     }
   }
 
@@ -593,7 +644,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     imgElement.classList.add('i-amphtml-lbv-gallery-thumbnail-img');
     imgElement.setAttribute('src', thumbnailObj.url);
     element.appendChild(imgElement);
-    const closeGallaryAndShowTargetSlide = event => {
+    const closeGalleryAndShowTargetSlide = event => {
       this.closeGallery_();
       this.currentElementId_ = thumbnailObj.element.lightboxItemId;
       this.updateDescriptionBox_();
@@ -603,7 +654,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
           this.currentElementId_);
       event.stopPropagation();
     };
-    element.addEventListener('click', closeGallaryAndShowTargetSlide);
+    element.addEventListener('click', closeGalleryAndShowTargetSlide);
     return element;
   }
 }

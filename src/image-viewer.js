@@ -1,8 +1,8 @@
 /**
  * This class is responsible providing all operations necessary for viewing
  * an image, such as full-bleed display, zoom and pan, etc.
+ * // TODO (cathyzhu): figure out what package visibility means
  * @package  Visible for testing only!
- * TODO(dvoytenko): move to the separate file once build system is ready.
  */
 import {Animation} from './animation';
 import {Gestures} from './gesture';
