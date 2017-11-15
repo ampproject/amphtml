@@ -533,7 +533,7 @@ amp-story-grid-layer * {
 .i-amphtml-story-share-icon::before {
   content: " " !important;
   border-radius: 4px !important;
-  background-color: rgba(33, 33, 33, 1) !important;
+  background-color: #212121 !important;
   width: 48px !important;
   height: 48px !important;
   position: absolute !important;
@@ -550,7 +550,7 @@ amp-story-grid-layer * {
 }
 
 .i-amphtml-story-share-icon:active::before {
-  background-color: rgba(120, 120, 120, 1) !important;
+  background-color: #787878 !important;
 }
 
 .i-amphtml-story-share-icon[type=email] {
