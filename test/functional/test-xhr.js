@@ -22,6 +22,7 @@ import {
   FetchResponse,
   assertSuccess,
 } from '../../src/service/xhr-impl';
+import {FormDataWrapper} from '../../src/form-data-wrapper';
 import {getCookie} from '../../src/cookies';
 import {Services} from '../../src/services';
 
@@ -130,7 +131,7 @@ describe.configure().skipSafari().run('XHR', function() {
         });
 
         it('should allow FormData as body', () => {
-          const formData = new FormData();
+          const formData = new FormDataWrapper();
           sandbox.stub(JSON, 'stringify');
           formData.append('name', 'John Miller');
           formData.append('age', 56);
