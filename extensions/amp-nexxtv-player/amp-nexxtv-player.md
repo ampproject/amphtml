@@ -91,7 +91,7 @@ Ads are enabled by default. Set value to 1 to disable.
 
 #### data-streaming-filter (optional)
 
-Set streaming filter e.g. "nxp-bitrate-0750" for max 750kbit max. bitrate
+Set streaming filter e.g. "nxp-bitrate-0750" for max 750kbit max bitrate
 
 ##### common attributes
 
