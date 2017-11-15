@@ -27,8 +27,16 @@ import {
 import {dev} from '../log';
 import {getMode} from '../mode';
 import {Services} from '../services';
-import {parseUrl, parseUrlWithA} from '../url';
+import {
+  parseUrl,
+  parseUrlWithA,
+} from '../url';
 import {toWin} from '../types';
+import {
+  shouldAppendExtraParams,
+  getExtraParamsUrl,
+} from '../impression';
+
 
 const TAG = 'clickhandler';
 
@@ -75,6 +83,7 @@ export class ClickHandler {
     this.history_ = Services.historyForDoc(this.ampdoc);
 
     const platform = Services.platformFor(this.ampdoc.win);
+
     /** @private @const {boolean} */
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
 
@@ -97,6 +106,12 @@ export class ClickHandler {
     /** @private @const {!function(!Event)|undefined} */
     this.boundHandle_ = this.handle_.bind(this);
     this.rootNode_.addEventListener('click', this.boundHandle_);
+
+    this.appendExtraParams_ = false;
+
+    shouldAppendExtraParams(this.ampdoc).then(res => {
+      this.appendExtraParams_ = res;
+    });
   }
 
   /** @override */
@@ -133,8 +148,16 @@ export class ClickHandler {
     if (!target || !target.href) {
       return;
     }
-    Services.urlReplacementsForDoc(target).maybeExpandLink(target);
 
+    // First check if need to handle external link decoration.
+    let defaultExpandParamsUrl = null;
+    if (this.appendExtraParams_ && !this.isEmbed_) {
+      // Only decorate outgoing link when needed to and is not in FIE.
+      defaultExpandParamsUrl = getExtraParamsUrl(this.ampdoc.win, target);
+    }
+
+    Services.urlReplacementsForDoc(target).maybeExpandLink(
+        target, defaultExpandParamsUrl);
     const tgtLoc = this.parseUrl_(target.href);
 
     // Handle custom protocols only if the document is iframed.
