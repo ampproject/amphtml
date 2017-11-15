@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Animation} from '../../../src/animation';
+import {KeyCodes} from '../../../src/utils/key-codes';
 import {ShareWidget} from './share';
 import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
@@ -22,6 +24,8 @@ import {getJsonLd} from './jsonld';
 import {isArray} from '../../../src/types';
 import {parseUrl} from '../../../src/url';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
+import {throttle} from '../../../src/utils/rate-limit';
+import * as tr from '../../../src/transition';
 
 
 /**
@@ -33,10 +37,49 @@ import {renderAsElement, renderSimpleTemplate} from './simple-template';
 export let BookendConfigDef;
 
 
+/**
+ * Scroll amount required for full-bleed in px.
+ * @private @const {number}
+ */
+const FULLBLEED_THRESHOLD = 60;
+
+
+/** @private @const {string} */
+const FULLBLEED_CLASSNAME = 'i-amphtml-story-bookend-fullbleed';
+
+
 /** @private @const {!./simple-template.ElementDef} */
 const ROOT_TEMPLATE = {
   tag: 'section',
-  attrs: dict({'class': 'i-amphtml-story-bookend'}),
+  attrs: dict({
+    'class': 'i-amphtml-story-bookend',
+    'hidden': true,
+  }),
+  children: [
+    // Overflow container that gets pushed to the bottom when content height is
+    // smaller than viewport.
+    {
+      tag: 'div',
+      attrs: dict({'class': 'i-amphtml-story-bookend-overflow'}),
+      children: [
+        // Holds bookend content.
+        {
+          tag: 'div',
+          attrs: dict({'class': 'i-amphtml-story-bookend-inner'}),
+          children: [
+            {
+              tag: 'div',
+              attrs: dict({
+                'role': 'button',
+                'class':
+                    'i-amphtml-story-bookend-close i-amphtml-story-button',
+              }),
+            },
+          ],
+        },
+      ],
+    },
+  ],
 };
 
 
@@ -184,6 +227,9 @@ export class Bookend {
     /** @private {?Element} */
     this.replayBtn_ = null;
 
+    /** @private {?Element} */
+    this.closeBtn_ = null;
+
     /** @private {!ShareWidget} */
     this.shareWidget_ = ShareWidget.create(win);
   }
@@ -203,8 +249,11 @@ export class Bookend {
 
     this.replayBtn_ = this.buildReplayButton_(ampdoc);
 
-    this.root_.appendChild(this.replayBtn_);
-    this.root_.appendChild(this.shareWidget_.build(ampdoc));
+    this.closeBtn_ =
+        this.root_.querySelector('.i-amphtml-story-bookend-close');
+
+    this.getInnerContainer_().appendChild(this.replayBtn_);
+    this.getInnerContainer_().appendChild(this.shareWidget_.build(ampdoc));
 
     this.attachEvents_();
 
@@ -215,6 +264,26 @@ export class Bookend {
   attachEvents_() {
     // TODO(alanorozco): Listen to tap event properly (i.e. fastclick)
     this.replayBtn_.addEventListener('click', e => this.onReplayBtnClick_(e));
+    this.closeBtn_.addEventListener('click', e => this.onClose_(e));
+
+    this.getOverflowContainer_().addEventListener('scroll',
+        // minInterval is high since this is a step function that does not
+        // require smoothness
+        throttle(this.win_, () => this.onScroll_(), 100));
+
+    this.win_.addEventListener('keyup', e => {
+      if (!this.isActive) {
+        return;
+      }
+      if (e.keyCode == KeyCodes.ESCAPE) {
+        this.onClose_(e);
+      }
+    });
+  }
+
+  /** @return {boolean} */
+  isActive() {
+    return this.isBuilt_ && !this.getRoot().hasAttribute('hidden');
   }
 
   /**
@@ -224,6 +293,76 @@ export class Bookend {
   onReplayBtnClick_(e) {
     e.stopPropagation();
     dispatch(this.getRoot(), EventType.REPLAY, /* opt_bubbles */ true);
+  }
+
+  /**
+   * @param {!Event} e
+   * @private
+   */
+  onClose_(e) {
+    e.stopPropagation();
+    dispatch(this.getRoot(), EventType.CLOSE_BOOKEND, /* opt_bubbles */ true);
+  }
+
+  /**
+   * Changes between card view and full-bleed based on scroll position.
+   * @private
+   */
+  onScroll_() {
+    if (!this.isActive()) {
+      return;
+    }
+    Services.vsyncFor(this.win_).run({
+      measure: state => {
+        state.shouldBeFullBleed =
+            this.getOverflowContainer_()./*OK*/scrollTop >= FULLBLEED_THRESHOLD;
+      },
+      mutate: state => {
+        this.getRoot().classList.toggle(
+            FULLBLEED_CLASSNAME, state.shouldBeFullBleed);
+      },
+    }, {});
+  }
+
+  /**
+   * Hides bookend with a transition.
+   * Uses animation utils instead of CSS transition for convenience and
+   * coordination (i.e. listening to transition end).
+   */
+  hide() {
+    const transition = tr.setStyles(this.getRoot(), {
+      transform: tr.translateY(tr.numeric(0, this.getViewportHeight_())),
+    });
+
+    Animation.animate(this.getRoot(), transition, 300, 'ease-in')
+        .thenAlways(() => {
+          this.getRoot().setAttribute('hidden', true);
+        });
+  }
+
+  /**
+   * Shows bookend with a transition.
+   * Uses animation utils instead of CSS transition for convenience and
+   * coordination (i.e. listening to transition end).
+   */
+  show() {
+    const transition = tr.setStyles(this.getRoot(), {
+      transform: tr.translateY(tr.numeric(this.getViewportHeight_(), 0)),
+    });
+
+    this.getRoot().classList.remove(FULLBLEED_CLASSNAME);
+    this.getRoot().removeAttribute('hidden');
+    this.getRoot()./*OK*/scrollTop = 0;
+
+    Animation.animate(this.getRoot(), transition, 300, 'ease-out');
+  }
+
+  /**
+   * @return {number}
+   * @private
+   */
+  getViewportHeight_() {
+    return Services.viewportForDoc(this.getRoot()).getSize().height;
   }
 
   /**
@@ -257,7 +396,7 @@ export class Bookend {
    * @private
    */
   setRelatedArticles_(articleSets) {
-    this.getRoot().appendChild(
+    this.getInnerContainer_().appendChild(
         renderSimpleTemplate(this.win_.document,
             buildArticlesContainerTemplate(articleSets)));
   }
@@ -266,6 +405,24 @@ export class Bookend {
   getRoot() {
     this.assertBuilt_();
     return dev().assertElement(this.root_);
+  }
+
+  /**
+   * Gets container for bookend content.
+   * @return {!Element}
+   * @private
+   */
+  getInnerContainer_() {
+    return dev().assertElement(this.getOverflowContainer_().firstElementChild);
+  }
+
+  /**
+   * Gets outer container that gets scrolled.
+   * @return {!Element}
+   * @private
+   */
+  getOverflowContainer_() {
+    return dev().assertElement(this.getRoot().firstElementChild);
   }
 
   /**
