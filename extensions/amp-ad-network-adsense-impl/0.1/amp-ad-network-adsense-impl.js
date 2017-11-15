@@ -143,6 +143,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
     /** @private {?Promise<!../../../ads/google/a4a/utils.IdentityToken>} */
     this.identityTokenPromise_ = null;
+
+    /**
+     * @private {?boolean} whether preferential rendered AMP creative, null
+     * indicates no creative render.
+     */
+    this.isAmpCreative_ = null;
   }
 
   /**
@@ -353,6 +359,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   onCreativeRender(creativeMetaData) {
     super.onCreativeRender(creativeMetaData);
+    this.isAmpCreative_ = !!creativeMetaData;
     if (creativeMetaData &&
         !creativeMetaData.customElementExtensions.includes('amp-ad-exit')) {
       // Capture phase click handlers on the ad if amp-ad-exit not present
@@ -387,7 +394,26 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   unlayoutCallback() {
-    super.unlayoutCallback();
+    switch (this.postAdResponseExperimentFeatures['unlayout_exp']) {
+      case 'all':
+        // Ensure all creatives are removed.
+        this.isAmpCreative_ = false;
+        break;
+      case 'remain':
+        if (this.qqid_ && this.isAmpCreative_ === null) {
+          // Ad response received but not yet rendered.  Note that no fills
+          // would fall into this case even if layoutCallback has executed.
+          // Assume high probability of continued no fill therefore do not
+          // tear down.
+          dev().info(TAG, 'unlayoutCallback - unrendered creative can remain');
+          return false;
+        }
+    }
+    if (this.isAmpCreative_) {
+      // Allow AMP creatives to remain in case SERP viewer swipe back.
+      return false;
+    }
+    const superResult = super.unlayoutCallback();
     this.element.setAttribute('data-amp-slot-index',
         this.win.ampAdSlotIdCounter++);
     this.lifecycleReporter_ = this.initLifecycleReporter();
@@ -400,6 +426,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     }
     this.ampAnalyticsConfig_ = null;
     this.qqid_ = null;
+    this.isAmpCreative_ = null;
+    return superResult;
   }
 
   /** @override */
