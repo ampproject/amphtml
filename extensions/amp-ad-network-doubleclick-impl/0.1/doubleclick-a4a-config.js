@@ -55,6 +55,7 @@ export const DOUBLECLICK_EXPERIMENT_FEATURE = {
   DELAYED_REQUEST: '21060729',
   SRA_CONTROL: '117152666',
   SRA: '117152667',
+  CANONICAL_EXPERIMENT: '21060933',
   CACHE_EXTENSION_INJECTION_CONTROL: '21060955',
   CACHE_EXTENSION_INJECTION_EXP: '21060956',
   IDENTITY_CONTROL: '21060937',
@@ -171,9 +172,14 @@ export class DoubleclickA4aEligibility {
       } else {
         // For unconditioned canonical holdback, in the control branch
         // we allow Fast Fetch on non-CDN pages, but in the experiment we do not.
-        return getExperimentBranch(
+        if (getExperimentBranch(
             win, UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME) !=
-          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_EXP;
+            DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_EXP) {
+          addExperimentIdToElement(
+              DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT, element);
+          return true;
+        }
+        return false;
       }
     } else {
       // See if in holdback control/experiment.
