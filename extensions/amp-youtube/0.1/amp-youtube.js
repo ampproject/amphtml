@@ -331,6 +331,9 @@ class AmpYoutube extends AMP.BaseElement {
    * @private
    */
   listenToFrame_() {
+    if (!this.iframe_) {
+      return;
+    }
     this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(dict({
       'event': 'listening',
     })), '*');
