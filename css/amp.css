@@ -144,31 +144,47 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
   display: inline-block;
 }
 
-.i-amphtml-layout-nodisplay {
+.i-amphtml-layout-nodisplay,
+[layout=nodisplay]:not(.i-amphtml-layout-nodisplay)
+{
   /* Display is set/reset in JS */
 }
 
-.i-amphtml-layout-fixed {
+.i-amphtml-layout-fixed,
+/*, [width][height]:not([layout=fixed]) */
+[layout=fixed][width][height]:not(.i-amphtml-layout-fixed)
+{
   display: inline-block;
   position: relative;
 }
 
-.i-amphtml-layout-responsive {
+.i-amphtml-layout-responsive,
+[layout=responsive][width][height]:not(.i-amphtml-layout-responsive),
+[width][height][sizes]:not(.i-amphtml-layout-responsive)
+{
   display: block;
   position: relative;
 }
 
-.i-amphtml-layout-fixed-height {
+.i-amphtml-layout-fixed-height,
+[layout=fixed-height][height],
+/* [height]:not([width]), */
+/* [height][width=auto], */
+{
   display: block;
   position: relative;
 }
 
-.i-amphtml-layout-container {
+.i-amphtml-layout-container,
+[layout=container]
+{
   display: block;
   position: relative;
 }
 
-.i-amphtml-layout-fill {
+.i-amphtml-layout-fill,
+[layout=fill]:not(.i-amphtml-layout-fill)
+{
   display: block;
   overflow: hidden !important;
   position: absolute;
@@ -178,7 +194,9 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
   right: 0;
 }
 
-.i-amphtml-layout-flex-item {
+.i-amphtml-layout-flex-item,
+[layout=flex-item]:not(.i-amphtml-layout-flex-item)
+{
   display: block;
   position: relative;
   flex: 1 1 auto;
