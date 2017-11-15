@@ -95,7 +95,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
         'The data-client attribute is required for <amp-nexxtv-player> %s',
         this.element);
 
-    const delay = this.element.getAttribute('data-delay') || '0';
+    const delay = this.element.getAttribute('data-seek-to') || '0';
     const mode = this.element.getAttribute('data-mode') || 'static';
     const streamtype = this.element.getAttribute('data-streamtype') || 'video';
     const origin = this.element.getAttribute('data-origin')

@@ -42,7 +42,7 @@ With the responsive layout, the width and height from the example should yield c
     data-mediaid="71QQG852413DU7J"
     data-client="761"
     data-streamtype="video"
-    data-delay="2"
+    data-seek-to="2"
     data-mode="static"
     data-origin="https://embed.nexx.cloud/"
     data-disable-ads="1"
@@ -73,7 +73,7 @@ Indicates the media streaming type, which can be one of the following:
 * `album`: An audio playlist.
 
 
-##### data-delay (optional)
+##### data-seek-to (optional)
 
 Indicates the starting point of your media (in seconds).  For example, video starting 1:30min.
 
