@@ -168,7 +168,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   preconnectCallback(opt_onLayout) {
     let url;
-    if ((getMode().localDev || getMode().test)) {
+    if (getMode().localDev || getMode().test) {
       const loc = this.getAmpDoc().win.parent.location;
       url = `${loc.protocol}//${loc.host}/dist/iframe-transport-client-lib.js`;
     } else {
