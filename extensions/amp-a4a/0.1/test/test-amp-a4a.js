@@ -402,33 +402,6 @@ describe('amp-a4a', () => {
       });
     });
 
-    it('should reset state to null on non-FIE unlayoutCallback', () => {
-      // Make sure there's no signature, so that we go down the 3p iframe path.
-      delete adResponse.headers['AMP-Fast-Fetch-Signature'];
-      delete adResponse.headers[AMP_SIGNATURE_HEADER];
-      a4a.buildCallback();
-      a4a.onLayoutMeasure();
-      return a4a.layoutCallback().then(() => {
-        expect(a4aElement.querySelector('iframe[src]')).to.be.ok;
-        expect(a4a.unlayoutCallback()).to.be.true;
-        expect(a4aElement.querySelector('iframe[src]')).to.not.be.ok;
-      });
-    });
-
-    it('should not reset state to null on FIE unlayoutCallback', () => {
-      a4a.buildCallback();
-      a4a.onLayoutMeasure();
-      return a4a.layoutCallback().then(() => {
-        a4a.vsync_.runScheduledTasks_();
-        expect(a4a.friendlyIframeEmbed_).to.exist;
-        const destroySpy = sandbox.spy();
-        a4a.friendlyIframeEmbed_.destroy = destroySpy;
-        expect(a4a.unlayoutCallback()).to.be.false;
-        expect(a4a.friendlyIframeEmbed_).to.exist;
-        expect(destroySpy).to.not.be.called;
-      });
-    });
-
     it('should update embed visibility', () => {
       sandbox.stub(a4a, 'isInViewport', () => false);
       a4a.buildCallback();
@@ -933,7 +906,7 @@ describe('amp-a4a', () => {
         return a4a.layoutCallback().then(() => {
           expect(renderAmpCreativeSpy.calledOnce,
               'renderAmpCreative_ called exactly once').to.be.true;
-          a4a.unlayoutCallback();
+          sandbox.stub(a4a, 'unlayoutCallback', () => false);
           const onLayoutMeasureSpy = sandbox.spy(a4a, 'onLayoutMeasure');
           a4a.resumeCallback();
           expect(onLayoutMeasureSpy).to.not.be.called;

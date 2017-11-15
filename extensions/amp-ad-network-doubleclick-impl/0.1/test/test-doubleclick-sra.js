@@ -106,15 +106,17 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
             width: 50,
           }, 'iframe', element);
       impl = new AmpAdNetworkDoubleclickImpl(element);
+      impl.buildCallback();
+      impl.isAmpCreative_ = true;
     });
 
     it('should not remove if not SRA', () => {
-      expect(impl.shouldUnlayoutAmpCreatives()).to.be.false;
+      expect(impl.unlayoutCallback()).to.be.false;
     });
 
     it('should remove if SRA and has frame', () => {
       impl.useSra = true;
-      expect(impl.shouldUnlayoutAmpCreatives()).to.be.true;
+      expect(impl.unlayoutCallback()).to.be.true;
     });
   });
 

@@ -1022,19 +1022,8 @@ export class AmpA4A extends AMP.BaseElement {
     return super.attemptChangeSize(newHeight, newWidth).catch(() => {});
   }
 
-  /**
-   * @return {boolean} where AMP creatives rendered via FIE should
-   *    be removed as part of unlayoutCallback.  By default they remain.
-   */
-  shouldUnlayoutAmpCreatives() {
-    return false;
-  }
-
   /** @override  */
   unlayoutCallback() {
-    if (this.friendlyIframeEmbed_ && !this.shouldUnlayoutAmpCreatives()) {
-      return false;
-    }
     this.tearDownSlot();
     return true;
   }
