@@ -39,9 +39,10 @@ The above code must be accompanied by AMP-enabled widgets delivered by Outbrainâ
 
 ## Troubleshooting 
 
-- **Widget is cut off**
+### Widget is cut off
 
-  According to the AMP API: "resizes are honored when the resize will not adjust the content the user is currently reading.  I.e, if the ad is above the viewport's contents, it'll resize. Same if it's below. If it's in the viewport, it ignores it."
-  **To overcome this**, you can set an initial height of what the widget height is supposed to be.
-  I.e, instead of ```height="100"```, widget final height is 600px, then set ```height="600"```.
-  Setting initial height ***will not*** finalize the widget height if it's different from the actual. The widget will resize to it's true dimensions after the widget leaves the viewport.
+According to the AMP API, "resizes are honored when the resize will not adjust the content the user is currently reading.  That is, if the ad is above the viewport's contents, it'll resize. Same if it's below. If it's in the viewport, it ignores it."
+
+**Resolution**
+
+ You can set an initial height of what the widget height is supposed to be. That is, instead of ```height="100"```, if the widget's final height is 600px, then set ```height="600"```. Setting the initial height ***will not*** finalize the widget height if it's different from the actual. The widget will resize to it's true dimensions after the widget leaves the viewport.
