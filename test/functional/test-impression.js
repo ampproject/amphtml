@@ -346,7 +346,10 @@ describe('impression', () => {
   it('shouldAppendExtraParams', () => {
     const div = window.document.createElement('amp-analytics');
     div.setAttribute('type', 'fake');
-    const ampdocApi = {win: window};
+    const ampdocApi = {
+      whenReady: () => {return Promise.resolve();},
+      getBody: () => {return window.document.body;},
+    };
     window.document.body.appendChild(div);
     return shouldAppendExtraParams(ampdocApi).then(res => {
       expect(res).to.be.false;

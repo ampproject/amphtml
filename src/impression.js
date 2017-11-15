@@ -24,7 +24,6 @@ import {
   addParamsToUrl,
 } from './url';
 import {getMode} from './mode';
-import {whenDocumentReady} from './document-ready';
 
 const TIMEOUT_VALUE = 8000;
 
@@ -248,8 +247,9 @@ function applyResponse(win, response) {
  * @return {!Promise<boolean>}
  */
 export function shouldAppendExtraParams(ampdoc) {
-  return whenDocumentReady(ampdoc.win.document).then(doc => {
-    return !!doc.querySelector('amp-analytics[type=googleanalytics]');
+  return ampdoc.whenReady().then(() => {
+    return !!ampdoc.getBody().querySelector(
+        'amp-analytics[type=googleanalytics]');
   });
 }
 

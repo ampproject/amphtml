@@ -175,6 +175,13 @@ describes.sandboxed('ClickHandler', {}, () => {
         win.location.href = originLocation;
       });
 
+      it('should decorate for page w/ ga tag', function* () {
+        handler.isEmbed_ = false;
+        yield macroTask();
+        handler.handle_(event);
+        expect(decorationSpy).to.be.calledOnce;
+      });
+
       it('should not decorate for page w/o ga tag', function* () {
         handler.isEmbed_ = false;
         const ga = win.document.getElementsByTagName('amp-analytics');
