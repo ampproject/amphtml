@@ -52,6 +52,9 @@ export const EventType = {
   // DEVELOPMENT MODE ONLY: Triggered when a story page has log entries (e.g.
   // warnings or errors).
   DEV_LOG_ENTRIES_AVAILABLE: 'ampstory:devlogentriesavailable',
+
+  // Triggered when user clicks on left 25% of the first page
+  SHOW_NO_PREVIOUS_PAGE_HELP: 'ampstory:shownopreviouspagehelp',
 };
 
 
