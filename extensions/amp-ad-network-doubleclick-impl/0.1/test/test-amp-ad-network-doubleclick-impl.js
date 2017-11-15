@@ -1164,15 +1164,14 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
             const gutData = JSON.parse(payload.gutData);
             expect(gutData).to.be.ok;
             expect(gutData.events[0].timestamp).to.be.ok;
-            expect(gutData.events[0].slotid).to.equal(slotId);
+            expect(gutData.events[0].slotid).to.equal(slotId + '_0');
             expect(gutData.events[0].messageId).to.equal(4);
 
             expect(gutData.slots[0].contentUrl).to
                 .equal('http://www.getmesomeads.com');
-            expect(gutData.slots[0].id).to.equal(slotId);
+            expect(gutData.slots[0].id).to.equal(slotId + '_0');
             expect(gutData.slots[0].leafAdUnitName).to.equal(slotId);
-            expect(gutData.slots[0].domId).to.equal(
-                'gpt_unit_' + slotId + '_0');
+            expect(gutData.slots[0].domId).to.equal(slotId + '_0');
             expect(gutData.slots[0].creativeId).to.equal('123');
             expect(gutData.slots[0].lineItemId).to.equal('456');
           },
