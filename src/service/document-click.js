@@ -153,7 +153,7 @@ export class ClickHandler {
     let defaultExpandParamsUrl = null;
     if (this.appendExtraParams_ && !this.isEmbed_) {
       // Only decorate outgoing link when needed to and is not in FIE.
-      defaultExpandParamsUrl = getExtraParamsUrl(this.ampdoc.win, target);//this.getExternalNavDecoration_(target);
+      defaultExpandParamsUrl = getExtraParamsUrl(this.ampdoc.win, target);
     }
 
     Services.urlReplacementsForDoc(target).maybeExpandLink(

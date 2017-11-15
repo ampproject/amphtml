@@ -892,6 +892,13 @@ export class UrlReplacements {
       return element.href = href;
     }
 
+    // Note that defaultUrlParams is treated differently than additionalUrlParameters in two ways
+    // #1: If the outgoing url origin is not whitelisted:
+    // additionalUrlParameters are always appended by not expanded,
+    // defaultUrlParams will not be appended.
+    // #2: If the expansion function is not whitelisted:
+    // addionalUrlParamters will not be expanded,
+    // defaultUrlParams will by default support QUERY_PARAM, and will still be expanded.
     if (defaultUrlParams) {
       if (!whitelist || !whitelist['QUERY_PARAM']) {
         // override whitelist and expand defaultUrlParams;
