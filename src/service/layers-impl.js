@@ -112,7 +112,7 @@ export class LayoutLayers {
      */
     this.onScroll_ = null;
 
-    /** @const @private {!Array<LayoutElement>} */
+    /** @const @private {!Array<!LayoutElement>} */
     this.layouts_ = [];
 
 
@@ -181,9 +181,6 @@ export class LayoutLayers {
       return;
     }
 
-    layout.undeclareLayer();
-    layout.forgetParentLayer();
-
     const index = this.layouts_.indexOf(layout);
     if (index > -1) {
       this.layouts_.splice(index, 1);
@@ -191,8 +188,11 @@ export class LayoutLayers {
 
     const parent = layout.getParentLayer();
     if (parent) {
-      parent.remove(element);
+      parent.remove(layout);
     }
+
+    // TODO child elements will disappear into the ether.
+    layout.undeclareLayer();
   }
 
   /**
@@ -302,11 +302,11 @@ export class LayoutLayers {
    * @param {!Element} element
    */
   scrolled_(element) {
-    let layout = LayoutElement.forOptional(element);
-    if (layout && layout.isLayer()) {
-      layout.requestScrollRemeasure();
+    let layer = LayoutElement.forOptional(element);
+    if (layer && layer.isLayer()) {
+      layer.requestScrollRemeasure();
     } else {
-      layout = this.declareLayer_(element);
+      layer = this.declareLayer_(element);
     }
 
     if (this.onScroll_) {
@@ -324,32 +324,106 @@ export class LayoutLayers {
   }
 }
 
+/**
+ * The per-Element class, which caches the positions and size of the elements.
+ */
 export class LayoutElement {
+  /**
+   * @param {!Element} element
+   */
   constructor(element) {
     element[LAYOUT_PROP] = this;
-    /**
-     * @private @const {!Element}
-     */
+
+    /** @const @private {!Element} */
     this.element_ = element;
 
-    /** @type {?LayoutElement|undefined} */
-    this.parentLayer_ = undefined;
+    /**
+     * The parent layer of the current element. Note that even if _this_
+     * element is a layer, it's parent layer will be an ancestor (if there is a
+     * parent layer).
+     *
+     * If the parent is null, that means the element does not have a parent
+     * layer.
+     * If the parent is undefined, that means the parent has not been cached
+     * yet (or has been reset).
+     *
+     * @private {?LayoutElement|undefined}
+     */
+    this.parentlayer_ = undefined;
 
-    this.needsRemeasure_ = true;
-    this.size_ = sizeWh(0, 0);
-    this.position_ = positionLt(0, 0);
+    /**
+     * Whether to remeasure the element in the next size/position calculation.
+     * This is done lazily to allow entire trees to be remeasured at the same
+     * time, instead of individual elements.
+     *
+     * @private {boolean}
+     */
+    this.needsremeasure_ = true;
 
-    this.isLayer_ = false;
-    this.isRootLayer_ = false;
-    this.needsScrollRemeasure_ = false;
-    this.scrollLeft_ = 0;
-    this.scrollTop_ = 0;
+    /**
+     * The current cached size of the element.
+     *
+     * @private {!SizeDef}
+     */
+    this.size_ = sizewh(0, 0);
 
+    /**
+     * The current cached **offset** position of the element, relative to the
+     * parent layer. Note that offsets are constant, and unchanged by the
+     * current scroll position of the parent.
+     *
+     * @private {!PositionDef}
+     */
+    this.position_ = positionlt(0, 0);
+
+    /**
+     * Whether the element defines a layer with a new coordinate system.
+     * Elements may freely transition to/from being a layer, causing child
+     * elements to redefine their offset positions.
+     *
+     * @private {boolean}
+     */
+    this.islayer_ = false;
+
+    /**
+     * Whether the layer is a "root" scrolling layer. Root scrollers have
+     * special properties, mainly that they can never be un-declared (they will
+     * always exist) and that their offset positions are not defined by
+     * scrollTop (DOM APIs are inconsistent between a root scroller and an
+     * overflow scroller).
+     *
+     * @private {boolean}
+     */
+    this.isrootlayer_ = false;
+
+    /**
+     * Whether this layer needs to remeasure its scrollTop/Left position during
+     * the next position calculation. This is done lazily so that scroll
+     * performance is not hampered.
+     *
+     * @private {boolean}
+     */
+    this.needsscrollremeasure_ = false;
+
+    /** @private {number} */
+    this.scrollleft_ = 0;
+
+    /** @private {number} */
+    this.scrolltop_ = 0;
+
+    /**
+     * The child LayoutElements of this layer. Only a layer (which means it
+     * defines a coordinate system) may have children, even if the element
+     * _contains_ other elements.
+     *
+     * @const @private {!Array<!LayoutElement>}
+     */
     this.children_ = [];
   }
 
   /**
    * Gets the element's LayoutElement instance.
+   *
    * @param {!Element}
    * @return {!LayoutElement}
    */
@@ -359,6 +433,7 @@ export class LayoutElement {
 
   /**
    * Gets the element's LayoutElement instance, if the element has one.
+   *
    * @param {!Element}
    * @return {?LayoutElement}
    */
@@ -368,32 +443,44 @@ export class LayoutElement {
 
   /**
    * Finds the element's parent layer
-   * If the element is itself a layer, it returns the layer's parent layer.
-   * @param {!Element}
+   *
+   * If the element is itself a layer, it still looks in the element's ancestry
+   * for a parent layer.
+   *
+   * @param {!Node} node
    * @param {opt_force=} Whether to force a re-lookup
    * @return {?LayoutElement}
    */
-  static getParentLayer(element, opt_force) {
+  static getParentLayer(node, opt_force) {
     if (!opt_force) {
-      const layout = LayoutElement.forOptional(element);
+      const layout = LayoutElement.forOptional(node);
       if (layout) {
         return layout.getParentLayer();
       }
     }
 
-    const win = element.ownerDocument.defaultView;
-    let op = element;
-    for (let el = element; el; el = el.parentNode) {
-      const layout = el === element ? null : LayoutElement.forOptional(el);
+    const win = node.ownerDocument.defaultView;
+    let op = node;
+    for (let el = node; el; el = el.parentNode) {
+      // Ensure the node (if it a layer itself) is not return as the parent
+      // layer.
+      const layout = el === node ? null : LayoutElement.forOptional(el);
       if (layout && layout.isLayer()) {
         return layout;
       }
 
-      // now check to see if offsetParent is a fixed layer
+      // Now, is this element fixed-position? We only check this on
+      // offsetParent (and the original node itself) as a performance
+      // optimization.
       if (el === op) {
         if (computedStyle(win, op).position == 'fixed') {
+          // Ensure this fixed-position element is a layer.
           LayoutLayers.declareLayer(op);
-          return op;
+
+          // If the op is fixed-position, it defines a new layer. But, if the
+          // node is the op, we can't return the node as its own parent layer.
+          // In that case, it doesn't have a parent layer.
+          return op === node ? null : op;
         }
         op = op.offsetParent;
       }
@@ -401,46 +488,73 @@ export class LayoutElement {
 
 
     // Use isConnected if available, but always pass if it's not.
-    dev().assert(element.isConnected !== false, 'element not in the DOM tree')
+    dev().assert(node.isConnected !== false, 'node not in the DOM tree')
     return null;
   }
 
-  contains(element) {
-    const root = this.element_;
-    return root !== element && root.contains(element);
+  /**
+   * A check that the LayoutElement is contained by this layer, and the element
+   * is not the layer's element.
+   *
+   * @param {!LayoutElement} layout
+   * @return {boolean}
+   */
+  contains(layout) {
+    return layout !== this && root.contains(layout.element_);
   }
 
+  /**
+   * Adds the child to the list of children of this layer.
+   *
+   * @param {!LayoutElement} child;
+   */
   add(child) {
     dev().assert(this.isLayer());
     dev().assert(this.contains(child));
 
-    const layout = LayoutElement.for(child);
-    this.children_.push(layout);
+    this.children_.push(child);
   }
 
+  /**
+   * Removes the child from the list of children of this layer.
+   *
+   * @param {!LayoutElement} child;
+   */
   remove(child) {
     dev().assert(this.isLayer());
+    dev().assert(child.getParentLayer() === this);
 
-    const layout = LayoutElement.for(child);
-    dev().assert(layout.getParentLayer() === this);
-
-    const i = this.children_.indexOf(layout);
+    const i = this.children_.indexOf(child);
     if (i > -1) {
       this.children_.splice(i, 1);
+      child.forgetParentLayer();
     }
   }
 
+  /**
+   * Whether this element represents a layer with its own coordinate system.
+   *
+   * @return {boolean}
+   */
   isLayer() {
     return this.isLayer_;
   }
 
+  /**
+   * Marks this element as a layer, which'll define its own coordinate system
+   * for child elements.
+   *
+   * @param {boolean} isRootLayer
+   */
   declareLayer(isRootLayer) {
     this.isLayer_ = true;
+    this.isRootLayer_ = isRootLayer;
+
+    // Ensure the coordinate system is remeasured
     this.needsRemeasure_ = true;
     this.needsScrollRemeasure_ = true;
 
-    this.isRootLayer_ = isRootLayer;
-
+    // Transfer all children elements into this new coordinate system
     const parent = this.getParentLayer();
     if (parent) {
       parent.transfer_(this);
@@ -461,13 +575,25 @@ export class LayoutElement {
     this.transfer_(this.getParentLayer());
   }
 
+  /**
+   * Transfers all children (contained inside the new layer) to a new layer.
+   * Note, this new layer may actually be a parent layer if we're un-declaring
+   * the this layer.
+   *
+   * @param {!LayoutElement} layer
+   */
   transfer_(layer) {
     // An optimization if we know that the new layer definitely contains
     // everything in this layer.
-    const contained = layer.contains(this.element_);
+    const contained = layer.contains(this);
 
     filterSplice(this.children_, layout => {
-      if (contained || layer.contains(layout.element_)) {
+      if (contained || layer.contains(layout)) {
+        // Mark the layout as needing a remeasure, since it's offset position
+        // has likely changed.
+        layout.needsRemeasure_ = true;
+
+        // And transfer ownership to the new layer.
         layout.parentLayer_ = layer;
         layer.children_.push(layout);
         return false;
@@ -480,25 +606,35 @@ export class LayoutElement {
   /**
    * Gets the element's parent layer. If this element is itself a layer, it
    * returns the layer's parent.
+   *
    * @return {?LayoutElement}
    */
   getParentLayer() {
+    // An undefined cache means we haven't cached the parent yet. Let's find it
+    // now.
+    // Valid cached values are either null or a LayoutElement.
     if (this.parentLayer_ === undefined) {
       const parent = LayoutElement.getParentLayer(this.element_, true);
       this.parentLayer_ = parent;
       if (parent) {
-        parent.add(this.element_);
+        parent.add(this);
       }
     }
     return this.parentLayer_;
   }
 
+  /**
+   * Uncaches the parent layer, so a relookup will happen again. This is
+   * necessary when the DOM resizes, or when reparenting nodes, since the old
+   * parent layer may no longer be.
+   */
   forgetParentLayer() {
     this.parentLayer_ = undefined;
   }
 
   /**
-   * Gets the size of the element.
+   * Gets the current size of the element.
+   *
    * @return {!SizeDef}
    */
   getSize() {
@@ -509,8 +645,9 @@ export class LayoutElement {
   }
 
   /**
-   * Gets offsets of the element relative to the parent layer, without taking
-   * scroll position into account.
+   * Gets current offset of the element relative to the parent layer, without
+   * taking scroll position into account.
+   *
    * @return {!PositionDef}
    */
   getOffsetFromParent() {
@@ -520,11 +657,21 @@ export class LayoutElement {
     return this.position_;
   }
 
+  /*
+   * Gets the current scrollTop of this layer.
+   *
+   * @return {number}
+   */
   getScrollTop() {
     this.updateScrollPosition_();
     return this.scrollTop_;
   }
 
+  /*
+   * Gets the current scrollLeft of this layer.
+   *
+   * @return {number}
+   */
   getScrollLeft() {
     this.updateScrollPosition_();
     return this.scrollLeft_;
@@ -535,27 +682,32 @@ export class LayoutElement {
    * represented by opt_parent (or opt_parent's parent layer, if it is not a
    * layer itself). This takes into account the scrolled position of every
    * layer in between.
+   *
    * @param {Element=} opt_parent
    * @return {!LayoutRectDef}
    */
   getScrolledPosition(opt_parent) {
-    const position = this.getOffsetFromParent();
-    let x = position.left;
-    let y = position.top;
+    // Compensate for the fact that the loop below will subtract the current
+    // scroll position of this element. But, this element's scroll position
+    // doesn't affect it's overall position, only its children.
+    // This is fine because the loop is guaranteed to roll at least once,
+    // zeroing the scroll.
+    let x = this.getScrollLeft();
+    let y = this.getScrollTop();
 
-    let last;
-    const stopAt = opt_parent ? LayoutElement.getParentLayer(opt_parent) : null;
-    for (let p = this.getParentLayer(); p !== stopAt; p = p.getParentLayer()) {
-
-      x -= p.getScrollLeft();
-      y -= p.getScrollTop();
-
-      if (last) {
-        const position = last.getOffsetFromParent();
-        x += position.left;
-        y += position.top;
-      }
-      last = p;
+    // Find the layer to stop measuring at. This is so that you can find the
+    // relative position of an element from some parent element, say the
+    // position of a slide inside a carousel, without any further measurements.
+    let stopAt = opt_parent ? LayoutElement.getParentLayer(opt_parent) : null;
+    for (let l = this; l !== stopAt; l = l.getParentLayer()) {
+      const position = l.getOffsetFromParent();
+      // Calculate the scrolled position. If the element has offset 200, and
+      // the element is scrolled 150, then the scrolled position is just 150.
+      // Note that the scrolled position shouldn't take into account the scroll
+      // position of this LayoutElement, so we've already compensated in
+      // declaring x and y.
+      x += position.left - l.getScrollLeft();
+      y += position.top - l.getScrollTop();
     }
 
     return positionLt(x, y);
@@ -566,78 +718,113 @@ export class LayoutElement {
    * represented by opt_parent (or opt_parent's parent layer, if it is not a
    * layer itself). This remains constant, regardless of the scrolled position
    * of any layer in between.
+   *
    * @param {Element=} opt_parent
    * @return {!LayoutRectDef}
    */
   getOffsetPosition(opt_parent) {
-    const position = this.getOffsetFromParent();
-    let x = position.left;
-    let y = position.top;
+    let x = 0;
+    let y = 0;
 
-    let last;
-    const stopAt = opt_parent ? LayoutElement.getParentLayer(opt_parent) : null;
-    for (let p = this.getParentLayer(); p !== stopAt; p = p.getParentLayer()) {
-      if (last) {
-        const position = last.getOffsetFromParent();
-        x += position.left;
-        y += position.top;
-      }
-      last = p;
+    // Find the layer to stop measuring at. This is so that you can find the
+    // relative position of an element from some parent element, say the
+    // position of a slide inside a carousel, without any further measurements.
+    let stopAt = opt_parent ? LayoutElement.getParentLayer(opt_parent) : null;
+
+    for (let l = this; l !== stopAt; l = l.getParentLayer()) {
+      const position = l.getOffsetFromParent();
+      // Add up every offset position in the ancestry.
+      x += position.left;
+      y += position.top;
     }
 
     return positionLt(x, y);
   }
 
+  /**
+   * Dirties the element, so the next size/position calculation will remeasure
+   * the element.
+   */
   requestRemeasure() {
     this.needsRemeasure_ = true;
   }
 
+  /**
+   * Dirties the layer, so the next position calculation will remeasure the
+   * scroll positions.
+   */
   requestScrollRemeasure() {
     this.needsScrollRemeasure_ = true;
   }
 
+  /**
+   * Remasures the element's size and offset position. This traverse as high as
+   * possible in the layer tree to remeasure as many elements as possible in
+   * one go. This is necessary both from a performance standpoint, and to
+   * ensure that any calculation uses the correct value, since layer in the
+   * ancestry may have been dirtied.
+   *
+   * No matter what, though, the current element will be remeasured.
+   */
   remeasure() {
-    let last = this;
     let layer = this;
-    for (let layer = this; layer; layer = layer.getParentLayer()) {
-      if (layer.needsRemeasure_) {
-        last = layer;
+
+    // Find the root-est layer that's dirty, and remeasure from there.
+    for (let p = this.getParentLayer(); p; p = p.getParentLayer()) {
+      if (p.needsRemeasure_) {
+        layer = p;
       }
     }
-    last.remeasure_();
+
+    layer.remeasure_();
   }
 
+  /**
+   * Remeasures the element, and all children, since this element was marked dirty.
+   *
+   * @param {!PositionDef=} opt_relativeTo A performance optimization used when
+   *     recursively measuring the child nodes of the layer.
+   */
   remeasure_(opt_relativeTo) {
     this.updateScrollPosition_();
     this.needsRemeasure_ = false;
 
+    const box = this.element_.getBoundingClientRect();
+    // We need a relative box to measure our offset. Importantly, this box must
+    // be negatively offset by it's scroll position, to account for the fact
+    // that getBoundingClientRect() will only return scrolled positions.
     let relative = opt_relativeTo;
     if (!relative) {
       const parent = this.getParentLayer();
       relative = parent ?
-          relativeScrolledPositionForChildren(parent) :
-          positionLt(0, 0);
+        relativeScrolledPositionForChildren(parent) :
+        positionLt(0, 0);
     }
 
-    const box = this.element_.getBoundingClientRect();
     this.size_ = sizeWh(box.width, box.height);
-    if ((getMode().localDev || getMode().test) && Object.freeze) {
-      Object.freeze(this.size_);
-    }
 
     let {left, top} = box;
+    // Root layers are really screwed up. Their positions will **double** count
+    // their scroll position (left === -scrollLeft, top === -scrollTop), which
+    // breaks with every other scroll box on the page.
     if (this.isRootLayer_) {
       left += this.getScrollLeft();
       top += this.getScrollTop();
     }
     this.position_ = positionLt(
-        left - relative.left,
-        top - relative.top
+      left - relative.left,
+      top - relative.top
     );
+
+    // In dev mode, we freeze the structs to prevent consumer from mutating it.
+    // Stateless FTW.
     if ((getMode().localDev || getMode().test) && Object.freeze) {
+      Object.freeze(this.size_);
       Object.freeze(this.position_);
     }
 
+    // Now, recursively measure all child nodes, to since they've probably been
+    // invalidated by the parent changing.
     const children = this.children_;
     if (children.length) {
       const relative = relativeScrolledPositionForChildren(this);
@@ -649,6 +836,9 @@ export class LayoutElement {
     }
   }
 
+  /**
+   * Updates the cached scroll positions of the layer, if the layer is dirty.
+   */
   updateScrollPosition_() {
     if (this.isLayer_ && this.needsScrollRemeasure_) {
       this.needsScrollRemeasure_ = false;
@@ -659,14 +849,19 @@ export class LayoutElement {
 }
 
 /**
+ * Creates a relative measurement box to measure the offset of children
+ * against. This negatively applies the current scroll position of the layer to
+ * the coordinates, since the bounding box measurement of the child will have
+ * positively applied that scroll position.
+ *
  * @param {!LayoutElement} layer
  * @return {!positionLt}
  */
 function relativeScrolledPositionForChildren(layer) {
   const position = layer.getScrolledPosition();
   return positionLt(
-      position.left - layer.getScrollLeft(),
-      position.top - layer.getScrollTop()
+    position.left - layer.getScrollLeft(),
+    position.top - layer.getScrollTop()
   );
 }
 
