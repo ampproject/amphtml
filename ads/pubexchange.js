@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,12 @@ import {loadScript, validateData} from '../3p/3p';
 export function pubexchange(global, data) {
 
   // ensure we have valid widgetIds value
-  validateData(data, ['publication','moduleid','modulenum']);
+  validateData(data, ['publication','moduleId','moduleNum','test']);
 
   (global.PUBX = global.PUBX || {
     pub: data['publication'],
-    modNum: data['modulenum'],
-    modId: data['moduleid'],
+    modNum: data['moduleNum'],
+    modId: data['moduleId'],
     test: data['test'],
   });
 

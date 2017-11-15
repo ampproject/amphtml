@@ -1,5 +1,5 @@
 <!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,19 +26,19 @@ limitations under the License.
     layout="responsive"
     type="pubexchange"
     data-publication="test_publication"
-    data-moduleId="below_content"
-    data-moduleNum="2626"
+    data-module-id="below_content"
+    data-module-num="2626"
     data-test="true">
 </amp-embed>
 ```
 
 ## Configuration
 
-For semantics of configuration, please see ad network documentation.
+For semantics of configuration, please see [ad network documentation](https://www.pubexchange.com/dashboard/developer/update_modules).
 
 Supported parameters:
 
 - data-publication *(**mandatory**)* - Shortcode identifying publication provided by PubExchange account manager
-- data-moduleId *(**mandatory**)* - Shortcode identifying module provided by PubExchange account manager
-- data-moduleNum *(**mandatory**)* - ID identifying module provided by PubExchange account manager
+- data-module-id *(**mandatory**)* - Shortcode identifying module provided by PubExchange account manager
+- data-module-num *(**mandatory**)* - ID identifying module provided by PubExchange account manager
 - data-test *(optional)* - Pass the parameter with the "true" value to test the PubExchange module
