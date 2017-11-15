@@ -36,7 +36,7 @@ import {EventType, dispatch, dispatchCustom} from './events';
 import {PageElement} from './page-element';
 import {AdvancementConfig} from './page-advancement';
 import {dict} from '../../../src/utils/object';
-import {scopedQuerySelectorAll} from '../../../src/dom';
+import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 
@@ -238,7 +238,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   onPageVisible_() {
     this.markPageAsLoaded_();
     this.updateAudioIcon_();
-    this.playAllMedia_();
+    this.playAutoplayMedia_();
     this.advancement_.start();
     this.maybeStartAnimations();
     this.reportDevModeErrors_();
@@ -331,6 +331,17 @@ export class AmpStoryPage extends AMP.BaseElement {
 
 
   /**
+   * Gets all media elements on this page that can be autoplayed.
+   * @return {!NodeList<!Element>}
+   * @private
+   */
+  getAutoplayMedia_() {
+    return scopedQuerySelectorAll(this.element,
+        'audio[autoplay], video[autoplay]');
+  }
+
+
+  /**
    * Pauses all media on this page.
    * @param {boolean} opt_rewindToBeginning Whether to rewind the currentTime
    *     of media items to the beginning.
@@ -352,12 +363,14 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Pauses all media on this page.
    * @private
    */
-  playAllMedia_() {
-    const mediaSet = this.getAllMedia_();
+  playAutoplayMedia_() {
+    const mediaSet = this.getAutoplayMedia_();
     Array.prototype.forEach.call(mediaSet, mediaItem => {
       mediaItem.play().catch(() => {
+        const sourceEl = scopedQuerySelector(mediaItem, 'source[src]');
+        const source = (sourceEl && sourceEl.src) || mediaItem.src;
         dev().error('AMP-STORY',
-            `Failed to play media element with src ${mediaItem.src}.`);
+            `Failed to play media element with src "${source}".`);
       });
     });
   }
