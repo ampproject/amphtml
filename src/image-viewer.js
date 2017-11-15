@@ -1,4 +1,20 @@
 /**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * This class is responsible providing all operations necessary for viewing
  * an image, such as full-bleed display, zoom and pan, etc.
  * // TODO (cathyzhu): figure out what package visibility means
@@ -25,17 +41,17 @@ import {
 import * as st from './style';
 import * as tr from './transition';
 
-/** @private @const {!../../../src/curve.CurveDef} */
+/** @private @const {!./curve.CurveDef} */
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 
 export class ImageViewer {
   /**
    * @param {!AmpImageLightbox} lightbox
    * @param {!Window} win
-   * @param {!function(T, number=):Promise<T>} loadPromise
+   * @param {!function(T, number=):Promise<T>} parentLoadPromise
    * @template T
    */
-  constructor(lightbox, win, loadPromise) {
+  constructor(lightbox, win, parentLoadPromise) {
     /** @private {!AmpImageLightbox} */
     this.lightbox_ = lightbox;
 
@@ -43,7 +59,7 @@ export class ImageViewer {
     this.win = win;
 
     /** @private {function(T, number=):Promise<T>} */
-    this.loadPromise_ = loadPromise;
+    this.loadPromise_ = parentLoadPromise;
 
     /** @private {!Element} */
     this.viewer_ = lightbox.element.ownerDocument.createElement('div');
@@ -70,10 +86,10 @@ export class ImageViewer {
     /** @private {number} */
     this.sourceHeight_ = 0;
 
-    /** @private {./src/layout-rect.LayoutRectDef} */
+    /** @private {.layout-rect.LayoutRectDef} */
     this.viewerBox_ = layoutRectLtwh(0, 0, 0, 0);
 
-    /** @private {./src/layout-rect.LayoutRectDef} */
+    /** @private {./layout-rect.LayoutRectDef} */
     this.imageBox_ = layoutRectLtwh(0, 0, 0, 0);
 
     /** @private {number} */
@@ -104,7 +120,7 @@ export class ImageViewer {
     /** @private {number} */
     this.maxY_ = 0;
 
-    /** @private {?../../../src/motion.Motion} */
+    /** @private {?./motion.Motion} */
     this.motion_ = null;
 
     this.setupGestures_();
@@ -128,7 +144,7 @@ export class ImageViewer {
 
   /**
    * Returns the boundaries of the viewer.
-   * @return {!../../../src/layout-rect.LayoutRectDef}
+   * @return {!./layout-rect.LayoutRectDef}
    */
   getViewerBox() {
     return this.viewerBox_;
@@ -136,16 +152,23 @@ export class ImageViewer {
 
   /**
    * Returns the boundaries of the image element.
-   * @return {!../../../src/layout-rect.LayoutRectDef}
+   * @return {!./layout-rect.LayoutRectDef}
    */
   getImageBox() {
     return this.imageBox_;
   }
 
   /**
+   * Returns true if the image is enlarged and not at its original scale
+   */
+  isScaled() {
+    return this.scale_ !== 1;
+  }
+
+  /**
    * Returns the boundaries of the image element with the offset if it was
    * moved by a gesture.
-   * @return {!../../../src/layout-rect.LayoutRectDef}
+   * @return {!./layout-rect.LayoutRectDef}
    */
   getImageBoxWithOffset() {
     if (this.posX_ == 0 && this.posY_ == 0) {
@@ -294,9 +317,13 @@ export class ImageViewer {
 
     // Movable.
     gestures.onGesture(SwipeXYRecognizer, e => {
-      this.onMove_(e.data.deltaX, e.data.deltaY, false);
-      if (e.data.last) {
-        this.onMoveRelease_(e.data.velocityX, e.data.velocityY);
+      if (this.isScaled()) {
+        this.onMove_(e.data.deltaX, e.data.deltaY, false);
+        if (e.data.last) {
+          this.onMoveRelease_(e.data.velocityX, e.data.velocityY);
+        }
+      } else {
+
       }
     });
     gestures.onPointerDown(() => {

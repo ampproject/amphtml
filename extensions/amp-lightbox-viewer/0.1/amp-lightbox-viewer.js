@@ -59,6 +59,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    /** @private {!../../../src/service/resources-impl.Resources} */
+    this.resources_ = null;
+
     /** @private {!boolean} */
     this.active_ = false;
 
@@ -125,7 +128,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.vsync_ = this.getVsync();
     this.container_ = this.win.document.createElement('div');
     this.container_.classList.add('i-amphtml-lbv');
-
+    this.resources_ = Services.resourcesForDoc(this.getAmpDoc());
     this.buildMask_();
     this.buildCarousel_();
     this.buildDescriptionBox_();
@@ -144,6 +147,13 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     // `open_` `close` and `updateViewer_` methods.
     return Promise.resolve();
   }
+
+    /**
+   * Returns a promise that will be resolved when all dependencies used by
+   * lightbox-viewer are resolved or a 2 second timeout.
+   * @return {!Promise}
+   * @private
+   */
 
   /**
    * Builds the page mask and appends it to the container.
@@ -192,6 +202,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
               container.classList.add('i-amphtml-image-lightbox-container');
               const imageViewer = new ImageViewer(this, this.win,
                 this.loadPromise.bind(this));
+              imageViewer.init(element, element);
               container.appendChild(imageViewer.getElement());
               this.carousel_.appendChild(container);
               this.clonedLightboxableElements_.push(imageViewer);
@@ -219,6 +230,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    */
   slideChangeHandler_(event) {
     this.currentElementId_ = getData(event)['index'];
+    // TODO: only resize imageViewer dimensions if it's an image
+    this.resizeImageViewerDimensions_();
+
     this.updateDescriptionBox_();
   }
 
@@ -481,25 +495,24 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
     this.updateInViewport(dev().assertElement(this.container_), true);
     this.scheduleLayout(dev().assertElement(this.container_));
-    this.currentElementId_ = element.lightboxItemId;
-
-    /**@type {?}*/ (this.carousel_).implementation_
-        .showSlide_(this.currentElementId_);
 
     this.win.document.documentElement.addEventListener(
         'keydown', this.boundHandleKeyboardEvents_);
 
-    this.enter_(element);
-
-    return Promise.resolve();
+    return this.resources_.requireLayout(this.carousel_)
+        .then(() => {
+          this.currentElementId_ = element.lightboxItemId;
+          /**@type {?}*/ (this.carousel_).implementation_
+              .showSlideWhenReady(this.currentElementId_);
+          this.resizeImageViewerDimensions_();
+        });
   }
 
-  enter_(element) {
+  resizeImageViewerDimensions_() {
     const imgViewer = this.clonedLightboxableElements_[this.currentElementId_];
-    imgViewer.init(element, element);
     imgViewer.measure();
 
-    // TODO (cathyzhu): need to unregister this eventually
+    // TODO (cathyzhu): need to unregister this
     this.unlistenViewport_ = this.getViewport().onChanged(() => {
       // In IOS 10.3, the measured size of an element is incorrect if the
       // element size depends on window size directly and the measurement
@@ -514,13 +527,15 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         imgViewer.measure();
       }
     });
-
   }
 
   /**
    * Closes the lightbox-viewer
-   * @private
    */
+
+  // TODO (cathyzhu): decide who gets to close the lightbox viewer.
+  // The flip gesture close event listener should probably be moved
+  // from ImageViewer into the parent (aka this) class
   close() {
     if (!this.active_) {
       return Promise.resolve();
@@ -552,7 +567,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
   }
 
-
   /**
    * Handles keyboard events for the lightbox.
    *  -Esc will close the lightbox.
@@ -576,6 +590,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     }
     this.container_.setAttribute('gallery-view', '');
     this.topBar_.classList.add('fullscreen');
+    toggle(this.carousel_);
   }
 
   /**
@@ -587,6 +602,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     if (this.descriptionBox_.classList.contains('standard')) {
       this.topBar_.classList.remove('fullscreen');
     }
+    toggle(this.carousel_);
   }
 
   /**
