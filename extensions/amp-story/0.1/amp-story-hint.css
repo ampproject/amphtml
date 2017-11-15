@@ -127,13 +127,13 @@
 
 @keyframes expandingBubble {
   from {
-    transform: scale(1) !important;
-    opacity: 0 !important;
+    transform: scale(1);
+    opacity: 0;
   }
 
   to {
-    transform: scale(1.5) !important;
-    opacity: 1 !important;
+    transform: scale(1.5);
+    opacity: 1;
   }
 }
 
