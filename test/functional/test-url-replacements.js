@@ -1141,23 +1141,31 @@ describes.sandboxed('UrlReplacements', {}, () => {
     beforeEach(() => {
       a = document.createElement('a');
       win = getFakeWindow();
-      win.location = parseUrl('https://example.com/base?foo=bar&bar=abc');
+      win.location =
+          parseUrl('https://example.com/base?foo=bar&bar=abc&gclid=123');
       urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
     });
 
     it('should replace href', () => {
       a.href = 'https://example.com/link?out=QUERY_PARAM(foo)';
       a.setAttribute('data-amp-replace', 'QUERY_PARAM');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('https://example.com/link?out=bar');
+    });
+
+    it('should append default outgoing decoration', () => {
+      a.href = 'https://example.com/link?out=QUERY_PARAM(foo)';
+      a.setAttribute('data-amp-replace', 'QUERY_PARAM');
+      urlReplacements.maybeExpandLink(a, 'gclid=QUERY_PARAM(gclid)');
+      expect(a.href).to.equal('https://example.com/link?out=bar&gclid=123');
     });
 
     it('should replace href 2x', () => {
       a.href = 'https://example.com/link?out=QUERY_PARAM(foo)';
       a.setAttribute('data-amp-replace', 'QUERY_PARAM');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('https://example.com/link?out=bar');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('https://example.com/link?out=bar');
     });
 
@@ -1165,34 +1173,41 @@ describes.sandboxed('UrlReplacements', {}, () => {
       a.href = 'https://example.com/link?out=QUERY_PARAM(foo)&' +
           'out2=QUERY_PARAM(bar)';
       a.setAttribute('data-amp-replace', 'QUERY_PARAM');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('https://example.com/link?out=bar&out2=abc');
     });
 
     it('has nothing to replace', () => {
       a.href = 'https://example.com/link';
       a.setAttribute('data-amp-replace', 'QUERY_PARAM');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('https://example.com/link');
     });
 
     it('should not replace without user whitelisting', () => {
       a.href = 'https://example.com/link?out=QUERY_PARAM(foo)';
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('https://example.com/link?out=QUERY_PARAM(foo)');
     });
 
     it('should not replace without user whitelisting 2', () => {
       a.href = 'https://example.com/link?out=QUERY_PARAM(foo)';
       a.setAttribute('data-amp-replace', 'ABC');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('https://example.com/link?out=QUERY_PARAM(foo)');
+    });
+
+    it('should replace default append params regardless of whitelist', () => {
+      a.href = 'https://example.com/link?out=QUERY_PARAM(foo)';
+      urlReplacements.maybeExpandLink(a, 'gclid=QUERY_PARAM(gclid)');
+      expect(a.href).to.equal(
+          'https://example.com/link?out=QUERY_PARAM(foo)&gclid=123');
     });
 
     it('should not replace unwhitelisted fields', () => {
       a.href = 'https://example.com/link?out=RANDOM';
       a.setAttribute('data-amp-replace', 'RANDOM');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('https://example.com/link?out=RANDOM');
     });
 
@@ -1200,28 +1215,36 @@ describes.sandboxed('UrlReplacements', {}, () => {
       canonical = 'http://example.com/link';
       a.href = 'http://example.com/link?out=QUERY_PARAM(foo)';
       a.setAttribute('data-amp-replace', 'QUERY_PARAM');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('http://example.com/link?out=bar');
     });
 
     it('should replace with canonical origin', () => {
       a.href = 'https://canonical.com/link?out=QUERY_PARAM(foo)';
       a.setAttribute('data-amp-replace', 'QUERY_PARAM');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('https://canonical.com/link?out=bar');
     });
 
     it('should replace with whitelisted origin', () => {
       a.href = 'https://whitelisted.com/link?out=QUERY_PARAM(foo)';
       a.setAttribute('data-amp-replace', 'QUERY_PARAM');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('https://whitelisted.com/link?out=bar');
     });
 
     it('should not replace to different origin', () => {
       a.href = 'https://example2.com/link?out=QUERY_PARAM(foo)';
       a.setAttribute('data-amp-replace', 'QUERY_PARAM');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
+      expect(a.href).to.equal(
+          'https://example2.com/link?out=QUERY_PARAM(foo)');
+    });
+
+    it('should not append default param to different origin', () => {
+      a.href = 'https://example2.com/link?out=QUERY_PARAM(foo)';
+      a.setAttribute('data-amp-replace', 'QUERY_PARAM');
+      urlReplacements.maybeExpandLink(a, 'gclid=QUERY_PARAM(gclid)');
       expect(a.href).to.equal(
           'https://example2.com/link?out=QUERY_PARAM(foo)');
     });
@@ -1231,12 +1254,12 @@ describes.sandboxed('UrlReplacements', {}, () => {
           'out=QUERY_PARAM(foo)&c=CLIENT_ID(abc)';
       a.setAttribute('data-amp-replace', 'QUERY_PARAM CLIENT_ID');
       // No replacement without previous async replacement
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal(
           'https://canonical.com/link?out=bar&c=');
       // Get a cid, then proceed.
       return urlReplacements.expandAsync('CLIENT_ID(abc)').then(() => {
-        urlReplacements.maybeExpandLink(a);
+        urlReplacements.maybeExpandLink(a, null);
         expect(a.href).to.equal(
             'https://canonical.com/link?out=bar&c=test-cid(abc)');
       });
@@ -1245,14 +1268,14 @@ describes.sandboxed('UrlReplacements', {}, () => {
     it('should add URL parameters for different origin', () => {
       a.href = 'https://example2.com/link';
       a.setAttribute('data-amp-addparams', 'guid=123');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('https://example2.com/link?guid=123');
     });
 
     it('should add URL parameters for http URL\'s(non-secure)', () => {
       a.href = 'http://whitelisted.com/link?out=QUERY_PARAM(foo)';
       a.setAttribute('data-amp-addparams', 'guid=123');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('http://whitelisted.com/link?out=QUERY_PARAM(foo)&guid=123');
     });
 
@@ -1263,7 +1286,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       a.setAttribute('data-amp-addparams', 'guid=123&c=CLIENT_ID(abc)');
       // Get a cid, then proceed.
       return urlReplacements.expandAsync('CLIENT_ID(abc)').then(() => {
-        urlReplacements.maybeExpandLink(a);
+        urlReplacements.maybeExpandLink(a, null);
         expect(a.href).to.equal(
             'http://example.com/link?out=QUERY_PARAM(foo)&guid=123&c=test-cid(abc)');
       });
@@ -1276,7 +1299,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       a.setAttribute('data-amp-addparams', 'guid=123&c=CLIENT_ID(abc)');
       // Get a cid, then proceed.
       return urlReplacements.expandAsync('CLIENT_ID(abc)').then(() => {
-        urlReplacements.maybeExpandLink(a);
+        urlReplacements.maybeExpandLink(a, null);
         expect(a.href).to.equal(
             'http://example2.com/link?out=QUERY_PARAM(foo)&guid=123&c=CLIENT_ID(abc)');
       });
@@ -1288,7 +1311,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       a.setAttribute('data-amp-addparams', 'guid=123&c=CLIENT_ID(abc)');
       // Get a cid, then proceed.
       return urlReplacements.expandAsync('CLIENT_ID(abc)').then(() => {
-        urlReplacements.maybeExpandLink(a);
+        urlReplacements.maybeExpandLink(a, null);
         expect(a.href).to.equal(
             'https://whitelisted.com/link?out=bar&guid=123&c=test-cid(abc)');
       });
