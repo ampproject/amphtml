@@ -151,7 +151,6 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
 }
 
 .i-amphtml-layout-fixed,
-/*, [width][height]:not([layout=fixed]) */
 [layout=fixed][width][height]:not(.i-amphtml-layout-fixed)
 {
   display: inline-block;
@@ -167,9 +166,7 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
 }
 
 .i-amphtml-layout-fixed-height,
-[layout=fixed-height][height],
-/* [height]:not([width]), */
-/* [height][width=auto], */
+[layout=fixed-height][height]
 {
   display: block;
   position: relative;
