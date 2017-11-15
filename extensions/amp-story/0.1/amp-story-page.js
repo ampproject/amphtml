@@ -36,7 +36,7 @@ import {EventType, dispatch, dispatchCustom} from './events';
 import {PageElement} from './page-element';
 import {AdvancementConfig} from './page-advancement';
 import {dict} from '../../../src/utils/object';
-import {scopedQuerySelectorAll} from '../../../src/dom';
+import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 
