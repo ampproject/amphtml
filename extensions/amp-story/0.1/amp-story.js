@@ -59,6 +59,9 @@ import {ActionTrust} from '../../../src/action-trust';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrl} from '../../../src/url';
 import {stringHash32} from '../../../src/string';
+import {AmpStoryHint} from './amp-story-hint';
+import {Gestures} from '../../../src/gesture';
+import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {dict} from '../../../src/utils/object';
 import {renderSimpleTemplate} from './simple-template';
 
@@ -75,7 +78,10 @@ const AMP_STORY_STANDALONE_ATTRIBUTE = 'standalone';
 const FULLSCREEN_THRESHOLD = 1024;
 
 /** @private @const {number} */
-const DESKTOP_THRESHOLD = 768;
+const DESKTOP_WIDTH_THRESHOLD = 1024;
+
+/** @private @const {number} */
+const DESKTOP_HEIGHT_THRESHOLD = 550;
 
 /**
  * @private @const {string}
@@ -163,7 +169,13 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const */
     this.desktopMedia_ = this.win.matchMedia(
-        `(min-width: ${DESKTOP_THRESHOLD}px)`);
+        `(min-width: ${DESKTOP_WIDTH_THRESHOLD}px) and ` +
+        `(min-height: ${DESKTOP_HEIGHT_THRESHOLD}px)`);
+
+    /** @private @const */
+    this.canRotateToDesktopMedia_ = this.win.matchMedia(
+        `(min-width: ${DESKTOP_HEIGHT_THRESHOLD}px) and ` +
+        `(min-height: ${DESKTOP_WIDTH_THRESHOLD}px)`);
 
     /** @private {?AmpStoryBackground} */
     this.background_ = null;
@@ -189,6 +201,9 @@ export class AmpStory extends AMP.BaseElement {
       '878041739', '2199838184', '708478954', '142793127', '2414533450',
       '212690086',
     ];
+
+    /** @private {!AmpStoryHint} */
+    this.ampStoryHint_ = new AmpStoryHint(this.win);
   }
 
 
@@ -232,6 +247,14 @@ export class AmpStory extends AMP.BaseElement {
     this.element.appendChild(this.systemLayer_.build(this.getPageCount()));
   }
 
+  /**
+   * Builds the hint layer DOM.
+   * @private
+   */
+  buildHintLayer_() {
+    this.element.appendChild(this.ampStoryHint_.buildHintContainer());
+  }
+
 
   /** @private */
   initializeListeners_() {
@@ -271,6 +294,8 @@ export class AmpStory extends AMP.BaseElement {
       } else {
         this.switchTo_(targetPageId);
       }
+
+      this.ampStoryHint_.hideAllNavigationHint();
     });
 
     this.element.addEventListener(EventType.PAGE_PROGRESS, e => {
@@ -290,6 +315,10 @@ export class AmpStory extends AMP.BaseElement {
       this.replay_();
     });
 
+    this.element.addEventListener(EventType.SHOW_NO_PREVIOUS_PAGE_HELP, () => {
+      this.ampStoryHint_.showFirstPageHintOverlay();
+    });
+
     this.element.addEventListener('play', e => {
       if (e.target instanceof HTMLMediaElement) {
         this.audioManager_.play(e.target);
@@ -301,6 +330,11 @@ export class AmpStory extends AMP.BaseElement {
         this.audioManager_.stop(e.target);
       }
     }, true);
+
+    const gestures = Gestures.get(this.element);
+    gestures.onGesture(SwipeXYRecognizer, () => {
+      this.ampStoryHint_.showNavigationOverlay();
+    });
 
     this.win.document.addEventListener('keydown', e => {
       this.onKeyDown_(e);
@@ -340,6 +374,23 @@ export class AmpStory extends AMP.BaseElement {
     setImportantStyles(document.body, {
       'overflow': 'hidden',
     });
+
+    this.maybeLockScreenOrientation_();
+  }
+
+
+  /** @private */
+  maybeLockScreenOrientation_() {
+    const screen = this.win.screen;
+    if (!screen || !this.canRotateToDesktopMedia_.matches) {
+      return;
+    }
+
+    const lockOrientation = screen.lockOrientation ||
+        screen.mozLockOrientation || screen.msLockOrientation ||
+        (unusedOrientation => {});
+
+    lockOrientation('portrait');
   }
 
   /** @private */
@@ -393,6 +444,7 @@ export class AmpStory extends AMP.BaseElement {
 
     return this.initializePages_()
         .then(() => this.buildSystemLayer_())
+        .then(() => this.buildHintLayer_())
         .then(() => {
           this.pages_.forEach(page => {
             page.setActive(false);
@@ -750,7 +802,7 @@ export class AmpStory extends AMP.BaseElement {
    * @return {boolean} True if the screen size matches the desktop media query.
    */
   isDesktop_() {
-    return isExperimentOn(this.win, 'amp-story-desktop') &&
+    return !isExperimentOn(this.win, 'disable-amp-story-desktop') &&
         this.desktopMedia_.matches;
   }
 
