@@ -88,7 +88,6 @@ describes.fakeWin('amp-story system layer', {}, env => {
     systemLayer.addEventHandlers_();
 
     expect(rootMock.addEventListener).to.have.been.calledWith('click');
-    expect(rootMock.addEventListener).to.have.been.calledWith('keyup');
   });
 
   it('should dispatch EXIT_FULLSCREEN when exit button is clicked', () => {
@@ -100,11 +99,6 @@ describes.fakeWin('amp-story system layer', {}, env => {
     expectEventTransform(
         e => systemLayer.onEnterFullScreenClick_(e), EventType.ENTER_FULLSCREEN
     );
-  });
-
-  it('should dispatch CLOSE_BOOKEND when button is clicked', () => {
-    expectEventTransform(
-        e => systemLayer.onCloseBookend_(e), EventType.CLOSE_BOOKEND);
   });
 
   it('should hide exit and show enter fullscreen button when not in fullscreen',
