@@ -38,7 +38,7 @@ import {getCryptoRandomBytesArray} from '../utils/bytes';
 import {Services} from '../services';
 import {base64UrlEncodeFromBytes} from '../utils/base64';
 import {parseJson, tryParseJson} from '../json';
-import {user, rethrowAsync} from '../log';
+import {dev, user, rethrowAsync} from '../log';
 import {ViewerCidApi} from './viewer-cid-api';
 import {GoogleCidApi, TokenStatus} from './cid-api';
 
@@ -132,7 +132,8 @@ export class Cid {
         '[a-zA-Z0-9-_.]+\nInstead found: %s',
         getCidStruct.scope);
     const viewer = Services.viewerForDoc(this.ampdoc);
-
+    // TODO(zhouyx, #11888): Cleanup after tracing error
+    const trace = new Error('CID trace for: ');
     return consent.then(() => {
       return viewer.whenFirstVisible();
     }).then(() => {
@@ -152,6 +153,13 @@ export class Cid {
             .timeoutPromise(10000, cidPromise,
             `Getting cid for "${getCidStruct.scope}" timed out`)
             .catch(error => {
+              const docVisible = viewer.isVisible();
+              const hasVisible = viewer.hasBeenVisible();
+              trace.message += error.message;
+              trace.message +=
+                  ` EXTRA INFO: doc isVisible: ${docVisible},` +
+                  ` doc hasBeenVisible ${hasVisible}`;
+              dev().error('CID', trace);
               rethrowAsync(error);
             });
       });
