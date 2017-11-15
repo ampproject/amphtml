@@ -75,7 +75,10 @@ const AMP_STORY_STANDALONE_ATTRIBUTE = 'standalone';
 const FULLSCREEN_THRESHOLD = 1024;
 
 /** @private @const {number} */
-const DESKTOP_THRESHOLD = 768;
+const DESKTOP_WIDTH_THRESHOLD = 1024;
+
+/** @private @const {number} */
+const DESKTOP_HEIGHT_THRESHOLD = 550;
 
 /**
  * @private @const {string}
@@ -163,7 +166,13 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const */
     this.desktopMedia_ = this.win.matchMedia(
-        `(min-width: ${DESKTOP_THRESHOLD}px)`);
+        `(min-width: ${DESKTOP_WIDTH_THRESHOLD}px) and ` +
+        `(min-height: ${DESKTOP_HEIGHT_THRESHOLD}px)`);
+
+    /** @private @const */
+    this.canRotateToDesktopMedia_ = this.win.matchMedia(
+        `(min-width: ${DESKTOP_HEIGHT_THRESHOLD}px) and ` +
+        `(min-height: ${DESKTOP_WIDTH_THRESHOLD}px)`);
 
     /** @private {?AmpStoryBackground} */
     this.background_ = null;
@@ -340,6 +349,23 @@ export class AmpStory extends AMP.BaseElement {
     setImportantStyles(document.body, {
       'overflow': 'hidden',
     });
+
+    this.maybeLockScreenOrientation_();
+  }
+
+
+  /** @private */
+  maybeLockScreenOrientation_() {
+    const screen = this.win.screen;
+    if (!screen || !this.canRotateToDesktopMedia_.matches) {
+      return;
+    }
+
+    const lockOrientation = screen.lockOrientation ||
+        screen.mozLockOrientation || screen.msLockOrientation ||
+        (unusedOrientation => {});
+
+    lockOrientation('portrait');
   }
 
   /** @private */
