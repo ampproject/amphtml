@@ -21,7 +21,6 @@ import {Services} from '../../../src/services';
 import {ProgressBar} from './progress-bar';
 import {getMode} from '../../../src/mode';
 import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui'; // eslint-disable-line max-len
-import {KeyCodes} from '../../../src/utils/key-codes';
 
 
 const MUTE_CLASS = 'i-amphtml-story-mute-audio-control';
@@ -31,8 +30,6 @@ const UNMUTE_CLASS = 'i-amphtml-story-unmute-audio-control';
 const ENTER_FULLSCREEN_CLASS = 'i-amphtml-story-enter-fullscreen';
 
 const EXIT_FULLSCREEN_CLASS = 'i-amphtml-story-exit-fullscreen';
-
-const CLOSE_CLASS = 'i-amphtml-story-bookend-close';
 
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
@@ -93,14 +90,6 @@ const TEMPLATE = {
             'hidden': true,
           }),
         },
-        {
-          tag: 'div',
-          attrs: dict({
-            'role': 'button',
-            'class': CLOSE_CLASS + ' i-amphtml-story-button',
-            'hidden': true,
-          }),
-        },
       ],
     },
   ],
@@ -152,9 +141,6 @@ export class SystemLayer {
     this.enterFullScreenBtn_ = null;
 
     /** @private {?Element} */
-    this.closeBookendBtn_ = null;
-
-    /** @private {?Element} */
     this.muteAudioBtn_ = null;
 
     /** @private {?Element} */
@@ -200,9 +186,6 @@ export class SystemLayer {
     this.enterFullScreenBtn_ =
         this.root_.querySelector('.i-amphtml-story-enter-fullscreen');
 
-    this.closeBookendBtn_ =
-        this.root_.querySelector('.i-amphtml-story-bookend-close');
-
     this.addEventHandlers_();
 
     return this.getRoot();
@@ -235,19 +218,10 @@ export class SystemLayer {
       } else if (target.matches(
           `.${ENTER_FULLSCREEN_CLASS}, .${ENTER_FULLSCREEN_CLASS} *`)) {
         this.onEnterFullScreenClick_(e);
-      } else if (target.matches(`.${CLOSE_CLASS}, .${CLOSE_CLASS} *`)) {
-        this.onCloseBookend_(e);
       } else if (target.matches(`.${MUTE_CLASS}, .${MUTE_CLASS} *`)) {
         this.onMuteAudioClick_(e);
       } else if (target.matches(`.${UNMUTE_CLASS}, .${UNMUTE_CLASS} *`)) {
         this.onUnmuteAudioClick_(e);
-      }
-    });
-
-    this.win_.addEventListener('keyup', e => {
-      if (!this.closeBookendBtn_.hasAttribute('hidden')
-          && e.keyCode == KeyCodes.ESCAPE) {
-        this.onCloseBookend_(e);
       }
     });
   }
@@ -291,16 +265,6 @@ export class SystemLayer {
   }
 
   /**
-   * @param {boolean} isEnabled
-   */
-  toggleCloseBookendButton(isEnabled) {
-    toggleHiddenAttribute(
-        Services.vsyncFor(this.win_),
-        dev().assertElement(this.closeBookendBtn_),
-        /* opt_isHidden */ !isEnabled);
-  }
-
-  /**
    * @param {!Event} e
    * @private
    */
@@ -314,14 +278,6 @@ export class SystemLayer {
    */
   onEnterFullScreenClick_(e) {
     this.dispatch_(EventType.ENTER_FULLSCREEN, e);
-  }
-
-  /**
-   * @param {!Event} e
-   * @private
-   */
-  onCloseBookend_(e) {
-    this.dispatch_(EventType.CLOSE_BOOKEND, e);
   }
 
   /**
