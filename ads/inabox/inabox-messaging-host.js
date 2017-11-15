@@ -154,10 +154,14 @@ export class InaboxMessagingHost {
    * @param {JsonObject} data
    */
   sendPosition_(request, source, origin, data) {
-    dev().fine(TAG, `Sent position data to [${request.sentinel}]`, data);
-    source./*OK*/postMessage(
-        serializeMessage(MessageType.POSITION, request.sentinel, data),
-        origin);
+    if (source./*OK*/postMessage) {
+      dev().fine(TAG, `Sent position data to [${request.sentinel}]`, data);
+      source./*OK*/postMessage(
+          serializeMessage(MessageType.POSITION, request.sentinel, data),
+          origin);
+    } else {
+      dev().warn(TAG, 'postMessage is undefined');
+    }
   }
 
   /**
@@ -172,15 +176,19 @@ export class InaboxMessagingHost {
   // 2. Disable zoom and scroll on parent doc
   handleEnterFullOverlay_(iframe, request, source, origin) {
     this.frameOverlayManager_.expandFrame(iframe, boxRect => {
-      source./*OK*/postMessage(
-          serializeMessage(
-              MessageType.FULL_OVERLAY_FRAME_RESPONSE,
-              request.sentinel,
-              dict({
-                'success': true,
-                'boxRect': boxRect,
-              })),
-          origin);
+      if (source./*OK*/postMessage) {
+        source./*OK*/postMessage(
+            serializeMessage(
+                MessageType.FULL_OVERLAY_FRAME_RESPONSE,
+                request.sentinel,
+                dict({
+                  'success': true,
+                  'boxRect': boxRect,
+                })),
+            origin);
+      } else {
+        dev().warn(TAG, 'postMessage is undefined');
+      }
     });
 
     return true;
@@ -195,15 +203,19 @@ export class InaboxMessagingHost {
    */
   handleCancelFullOverlay_(iframe, request, source, origin) {
     this.frameOverlayManager_.collapseFrame(iframe, boxRect => {
-      source./*OK*/postMessage(
-          serializeMessage(
-              MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
-              request.sentinel,
-              dict({
-                'success': true,
-                'boxRect': boxRect,
-              })),
-          origin);
+      if (source./*OK*/postMessage) {
+        source./*OK*/postMessage(
+            serializeMessage(
+                MessageType.CANCEL_FULL_OVERLAY_FRAME_RESPONSE,
+                request.sentinel,
+                dict({
+                  'success': true,
+                  'boxRect': boxRect,
+                })),
+            origin);
+      } else {
+        dev().warn(TAG, 'postMessage is undefined');
+      }
     });
 
     return true;
