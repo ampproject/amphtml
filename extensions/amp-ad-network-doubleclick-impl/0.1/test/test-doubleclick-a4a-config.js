@@ -17,6 +17,7 @@
 import {
   doubleclickIsA4AEnabled,
   DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
+  DOUBLECLICK_EXPERIMENT_FEATURE,
   UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
   URL_EXPERIMENT_MAPPING,
   DoubleclickA4aEligibility,
@@ -117,6 +118,8 @@ describe('doubleclick-a4a-config', () => {
       testFixture.doc.body.appendChild(elem);
       const isA4aEnabled = doubleclickIsA4AEnabled(mockWin, elem);
       expect(isA4aEnabled).to.be.true;
+      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE).includes(
+          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT)).to.be.true;
     });
 
     it('should honor url forced FF on non-CDN', () => {
@@ -192,8 +195,11 @@ describe('doubleclick-a4a-config', () => {
           UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME)
           .returns(DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_CTL);
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
-      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_CTL);
+      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE).includes(
+          DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT)).to.be.true;
+      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE).includes(
+          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_CTL)
+            ).to.be.true;
     });
   });
 });
