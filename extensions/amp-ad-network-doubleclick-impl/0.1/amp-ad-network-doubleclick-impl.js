@@ -1296,19 +1296,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     dev().assert(this.troubleshootData_.adUrl, 'ad URL does not exist yet');
     return this.troubleshootData_.adUrl.then(adUrl => {
+      const slotId = this.troubleshootData_.slotId + '_' +
+          this.troubleshootData_.slotIndex;
       const payload = dict({
         'gutData': JSON.stringify(dict({
           'events': [{
             'timestamp': Date.now(),
-            'slotid': this.troubleshootData_.slotId,
+            'slotid': slotId,
             'messageId': 4,
           }],
           'slots': [{
             'contentUrl': adUrl || '',
-            'id': this.troubleshootData_.slotId,
+            'id': slotId,
             'leafAdUnitName': this.troubleshootData_.slotId,
-            'domId': 'gpt_unit_' + this.troubleshootData_.slotId + '_' +
-                this.troubleshootData_.slotIndex,
+            'domId': slotId,
             'lineItemId': this.troubleshootData_.lineItemId,
             'creativeId': this.troubleshootData_.creativeId,
           }],
