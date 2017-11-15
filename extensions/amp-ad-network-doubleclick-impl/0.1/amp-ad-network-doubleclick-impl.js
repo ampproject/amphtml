@@ -365,6 +365,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {!TroubleshootData} */
     this.troubleshootData_ = /** @type {!TroubleshootData} */ ({});
+
+    /**
+     * @private {?boolean} whether preferential rendered AMP creative, null
+     * indicates no creative render.
+     */
+    this.isAmpCreative_ = null;
   }
 
   /** @override */
@@ -794,15 +800,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  shouldUnlayoutAmpCreatives() {
-    // If using SRA, remove AMP creatives if we have at least one non-AMP
-    // creative present.
-    return this.useSra && !!this.win.document.querySelector(
-        'amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] ' +
-        'iframe[src]');
-  }
-
-  /** @override */
   tearDownSlot() {
     super.tearDownSlot();
     this.element.setAttribute('data-amp-slot-index',
@@ -814,6 +811,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     this.ampAnalyticsConfig_ = null;
     this.jsonTargeting_ = null;
+    this.isAmpCreative_ = null;
     // Reset SRA requests to allow for resumeCallback to re-fetch
     // ad requests.  Assumes that unlayoutCallback will be called for all slots
     // in rapid succession (meaning onLayoutMeasure initiated promise chain
@@ -838,8 +836,28 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override  */
   unlayoutCallback() {
-    super.unlayoutCallback();
+    switch (this.postAdResponseExperimentFeatures['unlayout_exp']) {
+      case 'all':
+        // Ensure all creatives are removed.
+        this.isAmpCreative_ = false;
+        break;
+      case 'remain':
+        if (this.qqid_ && this.isAmpCreative_ === null) {
+          // Ad response received but not yet rendered.  Note that no fills
+          // would fall into this case even if layoutCallback has executed.
+          // Assume high probability of continued no fill therefore do not
+          // tear down.
+          dev().info(TAG, 'unlayoutCallback - unrendered creative can remain');
+          return false;
+        }
+    }
+    if (!this.useSra && this.isAmpCreative_) {
+      // Allow non-AMP creatives to remain unless SRA.
+      return false;
+    }
+    const superResult = super.unlayoutCallback();
     this.maybeRemoveListenerForFluid();
+    return superResult;
   }
 
   /**
@@ -887,6 +905,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   onCreativeRender(creativeMetaData) {
     super.onCreativeRender(creativeMetaData);
+    this.isAmpCreative_ = !!creativeMetaData;
     if (creativeMetaData &&
         !creativeMetaData.customElementExtensions.includes('amp-ad-exit')) {
       // Capture phase click handlers on the ad if amp-ad-exit not present

@@ -649,37 +649,98 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
   });
 
   describe('#unlayoutCallback', () => {
+    beforeEach(() => {
+      const setup = createImplTag({
+        width: '300',
+        height: '150',
+      }, element, impl, env);
+      element = setup[0];
+      impl = setup[1];
+      env = setup[2];
+      impl.buildCallback();
+      impl.win.ampAdSlotIdCounter = 1;
+      expect(impl.element.getAttribute('data-amp-slot-index')).to.not.be.ok;
+      impl.layoutMeasureExecuted_ = true;
+      impl.uiHandler = {applyUnlayoutUI: () => {}};
+      const placeholder = doc.createElement('div');
+      placeholder.setAttribute('placeholder', '');
+      const fallback = doc.createElement('div');
+      fallback.setAttribute('fallback', '');
+      impl.element.appendChild(placeholder);
+      impl.element.appendChild(fallback);
+      impl.size_ = {width: 123, height: 456};
+    });
+
+    it('should reset state to null on non-FIE unlayoutCallback', () => {
+      impl.onCreativeRender();
+      expect(impl.unlayoutCallback()).to.be.true;
+      expect(impl.iframe).is.not.ok;
+    });
+
+    it('should not reset state to null on FIE unlayoutCallback', () => {
+      impl.onCreativeRender({customElementExtensions: []});
+      expect(impl.unlayoutCallback()).to.be.false;
+      expect(impl.iframe).is.ok;
+    });
+
+    it('should remove FIE if in all exp', () => {
+      impl.onCreativeRender({customElementExtensions: []});
+      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'all';
+      expect(impl.unlayoutCallback()).to.be.true;
+      expect(impl.iframe).is.not.ok;
+      expect(impl.isAmpCreative_).to.be.null;
+    });
+
+    it('should remove non-FIE if in all exp', () => {
+      impl.onCreativeRender();
+      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'all';
+      expect(impl.unlayoutCallback()).to.be.true;
+      expect(impl.iframe).is.not.ok;
+      expect(impl.isAmpCreative_).to.be.null;
+    });
+
+    it('should not remove FIE if in remain exp', () => {
+      impl.onCreativeRender({customElementExtensions: []});
+      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
+      expect(impl.unlayoutCallback()).to.be.false;
+      expect(impl.iframe).is.ok;
+    });
+
+    it('should remove rendered non-FIE if in remain exp', () => {
+      impl.onCreativeRender();
+      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
+      expect(impl.unlayoutCallback()).to.be.true;
+      expect(impl.iframe).is.not.ok;
+      expect(impl.isAmpCreative_).to.be.null;
+    });
+
+    it('should not destroy ad promise for unrendered if in remain exp', () => {
+      impl.onCreativeRender();
+      impl.qqid_ = 'abcdef';
+      impl.isAmpCreative_ = null;
+      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
+      expect(impl.unlayoutCallback()).to.be.false;
+      expect(impl.isAmpCreative_).to.be.null;
+    });
+
+    it('should destroy ad promise if ad response not yet received and in ' +
+        'remain exp', () => {
+      impl.onCreativeRender();
+      impl.qqid_ = null;
+      impl.isAmpCreative_ = null;
+      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
+      expect(impl.unlayoutCallback()).to.be.true;
+      expect(impl.isAmpCreative_).to.be.null;
+    });
+
     it('should call #resetSlot, remove child iframe, but keep other children',
         () => {
-          const setup = createImplTag({
-            width: '300',
-            height: '150',
-          }, element, impl, env);
-          element = setup[0];
-          impl = setup[1];
-          env = setup[2];
-          impl.buildCallback();
-          impl.win.ampAdSlotIdCounter = 1;
-          const slotIdBefore = impl.element.getAttribute(
-              'data-amp-slot-index');
-
-          impl.layoutMeasureExecuted_ = true;
-          impl.uiHandler = {applyUnlayoutUI: () => {}};
-          const placeholder = doc.createElement('div');
-          placeholder.setAttribute('placeholder', '');
-          const fallback = doc.createElement('div');
-          fallback.setAttribute('fallback', '');
-          impl.element.appendChild(placeholder);
-          impl.element.appendChild(fallback);
           impl.ampAnalyticsConfig_ = {};
           impl.ampAnalyticsElement_ =
              doc.createElement('amp-analytics');
           impl.element.appendChild(impl.ampAnalyticsElement_);
-
           expect(impl.iframe).to.be.ok;
-          expect(impl.ampAnalyticsConfig_).to.be.ok;
           expect(impl.element.querySelector('iframe')).to.be.ok;
-          expect(impl.element.querySelector('amp-analytics')).to.be.ok;
           impl.unlayoutCallback();
           expect(impl.element.querySelector('div[placeholder]')).to.be.ok;
           expect(impl.element.querySelector('div[fallback]')).to.be.ok;
@@ -688,8 +749,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           expect(impl.iframe).to.be.null;
           expect(impl.ampAnalyticsConfig_).to.be.null;
           expect(impl.ampAnalyticsElement_).to.be.null;
-          expect(impl.element.getAttribute('data-amp-slot-index')).to
-              .equal(String(Number(slotIdBefore) + 1));
+          expect(impl.element.getAttribute('data-amp-slot-index'))
+              .to.equal('1');
         });
   });
 
