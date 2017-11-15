@@ -32,8 +32,8 @@ import {
   experimentFeatureEnabled,
   DOUBLECLICK_EXPERIMENT_FEATURE,
   DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
-  DFP_CANONICAL_FF_EXPERIMENT_NAME,
   UNCONDITIONED_IDENTITY_EXPERIMENT_NAME,
+  UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
 } from './doubleclick-a4a-config';
 import {
   isInManualExperiment,
@@ -43,6 +43,7 @@ import {
   truncAndTimeUrl,
   googleBlockParameters,
   googlePageParameters,
+  isCdnProxy,
   isReportingEnabled,
   AmpAnalyticsConfigDef,
   extractAmpAnalyticsConfig,
@@ -510,9 +511,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   shouldPreferentialRenderWithoutCrypto() {
-    return experimentFeatureEnabled(
-        this.win, DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT,
-        DFP_CANONICAL_FF_EXPERIMENT_NAME);
+    dev().assert(!isCdnProxy(this.win));
+    return !experimentFeatureEnabled(
+        this.win, DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_EXP,
+        UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME);
   }
 
   /**

@@ -687,3 +687,14 @@ export function getIdentityTokenRequestUrl(win, nodeOrDoc, domain = undefined) {
     parseUrl(Services.documentInfoForDoc(nodeOrDoc).canonicalUrl).hostname;
   return `https://adservice${domain}/adsid/integrator.json?domain=${canonical}`;
 };
+
+/**
+ * Returns whether we are running on the AMP CDN.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function isCdnProxy(win) {
+  const googleCdnProxyRegex =
+    /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
+  return googleCdnProxyRegex.test(win.location.origin);
+}
