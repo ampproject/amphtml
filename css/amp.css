@@ -335,7 +335,8 @@ i-amphtml-sizer {
   display: none !important;
 }
 
-.i-amphtml-element > [placeholder] {
+.i-amphtml-element > [placeholder],
+[layout]:not(.i-amphtml-element) > [placeholder] {
   display: block;
 }
 
