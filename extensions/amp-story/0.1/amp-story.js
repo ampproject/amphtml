@@ -225,8 +225,8 @@ export class AmpStory extends AMP.BaseElement {
     this.navigationState_.observe(stateChangeEvent =>
         this.variableService_.onStateChange(stateChangeEvent));
 
-    // Add muted attribute to `amp-story` in beginning.
-    this.toggleMutedAttribute_(true);
+    // Mute `amp-story` in beginning.
+    this.mute_();
 
     upgradeBackgroundAudio(this.element);
 
