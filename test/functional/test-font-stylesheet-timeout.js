@@ -58,7 +58,7 @@ describes.realWin('font-stylesheet-timeout', {
     return 'data:text/css;charset=utf-8,' + (opt_content || '');
   }
 
-  // TODO(cramforce): Make this test work on Safari. See #11827.
+  // TODO(cramforce, #11827): Make this test work on Safari.
   it.configure().skipSafari().run('should not time out for immediately ' +
       'loading style sheets', () => {
     const link = addLink();

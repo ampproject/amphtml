@@ -903,7 +903,7 @@ describes.fakeWin('Viewport', {}, env => {
       root.className = '';
     });
 
-    // TODO(zhouyx): Make this test work on Safari. See #11827.
+    // TODO(zhouyx, #11827): Make this test work on Safari.
     it.configure().skipSafari().run('should not set pan-y when ' +
         'not embedded', () => {
       viewer.isEmbedded = () => false;
@@ -911,7 +911,7 @@ describes.fakeWin('Viewport', {}, env => {
       expect(win.getComputedStyle(root)['touch-action']).to.equal('auto');
     });
 
-    // TODO(zhouyx): Make this test work on Safari. See #11827.
+    // TODO(zhouyx, #11827): Make this test work on Safari.
     it.configure().skipSafari().run('should set pan-y with experiment', () => {
       viewer.isEmbedded = () => true;
       viewport = new Viewport(ampdoc, binding, viewer);

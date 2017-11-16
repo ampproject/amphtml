@@ -378,7 +378,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
         });
   });
 
-  // TODO(alanorozco): Make this test work on Safari. See #11827.
+  // TODO(alanorozco, #11827): Make this test work on Safari.
   it.configure().skipSafari().run('should replace CLIENT_ID synchronously ' +
       'when available', () => {
     return getReplacements({withCid: true}).then(urlReplacements => {

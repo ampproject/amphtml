@@ -26,7 +26,7 @@ import * as lolex from 'lolex';
 
 
 describes.realWin('CustomElement', {amp: true}, env => {
-  // TODO(dvoytenko): Make this test work on Safari. See #11827.
+  // TODO(dvoytenko, #11827): Make this test work on Safari.
   describe.configure().skipSafari().run('CustomElement', () => {
     let win, doc, ampdoc;
     let resources;
@@ -1480,7 +1480,7 @@ describes.realWin('CustomElement Service Elements', {amp: true}, env => {
 
 
 describes.realWin('CustomElement', {amp: true}, env => {
-  // TODO(dvoytenko): Make this test work on Safari. See #11827.
+  // TODO(dvoytenko, #11827): Make this test work on Safari.
   describe.configure().skipSafari().run('Loading Indicator', () => {
     let win, doc;
     let ElementClass;

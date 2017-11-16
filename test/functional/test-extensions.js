@@ -302,7 +302,7 @@ describes.sandboxed('Extensions', {}, () => {
       });
     });
 
-    // TODO(dvoytenko): Make this test work on Safari. See #11827.
+    // TODO(dvoytenko, #11827): Make this test work on Safari.
     it.configure().skipSafari().run('should install declared elements for ' +
         'AmpDocShell in shadow-doc', () => {
       const ampdocShell = new AmpDocShell(win);

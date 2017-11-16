@@ -350,7 +350,7 @@ describe('FixedLayer', () => {
   }
 
 
-  // TODO(jridgewell): Make this test work on Safari. See #11827.
+  // TODO(jridgewell, #11827): Make this test work on Safari.
   describe.configure().skipSafari().run('no-transfer', () => {
     let fixedLayer;
 

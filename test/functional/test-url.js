@@ -682,7 +682,7 @@ describe('resolveRelativeUrl', () => {
       'http://base.org/bpath/bfile?bf=0#bh',
       'http://acme.org/path/file?f=0#h');
 
-  // TODO(camelburrito): This resolves to file:// on Sauce Labs. See #11827.
+  // TODO(camelburrito, #11827): This resolves to file:// on Sauce Labs.
   // testRelUrl(
   //     '\\\\acme.org/path/file?f=0#h',
   //     'http://base.org/bpath/bfile?bf=0#bh',

@@ -240,7 +240,7 @@ describe('preconnect', () => {
     });
   });
 
-  // TODO(cramforce): Make this test work on Safari. See #11827.
+  // TODO(cramforce, #11827): Make this test work on Safari.
   it.configure().skipSafari().run('should add links if feature ' +
       'if detected', () => {
     // Don't stub preload support allow the test to run through the browser

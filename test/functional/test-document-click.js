@@ -358,7 +358,7 @@ describes.sandboxed('ClickHandler', {}, () => {
       ampdoc: 'fie',
     },
   }, env => {
-    // TODO(dvoytenko): Make this test work on Safari. See #11827.
+    // TODO(dvoytenko, #11827): Make this test work on Safari.
     describe.configure().skipSafari().run('fie embed', () => {
       let win, doc;
       let parentWin;

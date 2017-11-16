@@ -166,7 +166,7 @@ describe('AmpDocService', () => {
       }).to.throw(/The shadow root already contains ampdoc/);
     });
 
-    // TODO(dvoytenko): Make this test work on Safari. See #11827.
+    // TODO(dvoytenko, #11827): Make this test work on Safari.
     it.configure().skipSafari().run('should navigate via host', () => {
       if (!shadowRoot) {
         return;

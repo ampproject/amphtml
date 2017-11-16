@@ -25,7 +25,7 @@ import {
 import {getCookie} from '../../src/cookies';
 import {Services} from '../../src/services';
 
-// TODO(jridgewell): Make this test work on Safari. See #11827.
+// TODO(jridgewell, #11827): Make this test work on Safari.
 describe.configure().skipSafari().run('XHR', function() {
   let sandbox;
   let requests;
