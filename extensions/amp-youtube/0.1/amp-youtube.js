@@ -147,13 +147,25 @@ class AmpYoutube extends AMP.BaseElement {
     Services.videoManagerForDoc(this.element).register(this);
   }
 
+  /**
+   * @return {string}
+   * @private
+   */
+  getEmbedUrl_() {
+    let urlSuffix = '';
+    if (this.getCredentials_() === 'omit') {
+      urlSuffix = '-nocookie';
+    }
+    return `https://www.youtube${urlSuffix}.com/embed/${encodeURIComponent(this.videoid_ || '')}?enablejsapi=1`;
+  }
+
   /** @return {string} */
   getVideoIframeSrc_() {
     if (this.videoIframeSrc_) {
       return this.videoIframeSrc_;
     }
     dev().assert(this.videoid_);
-    let src = `https://www.youtube.com/embed/${encodeURIComponent(this.videoid_ || '')}?enablejsapi=1`;
+    let src = this.getEmbedUrl_();
 
     const params = getDataParamsFromAttributes(this.element);
     if ('autoplay' in params) {
@@ -266,6 +278,14 @@ class AmpYoutube extends AMP.BaseElement {
         this.element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-youtube> %s',
         this.element);
+  }
+
+  /**
+   * @return {string}
+   * @private
+   */
+  getCredentials_() {
+    return this.element.getAttribute('credentials') || 'include';
   }
 
   /**
