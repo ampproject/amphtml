@@ -94,6 +94,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     /** @private {!Array<!Element>} */
     this.clonedLightboxableElements_ = [];
 
+    /** @private {!Array<any>} */
+    this.lightboxableElementsMetadata_ = [];
+
     /** @private  {?Element} */
     this.gallery_ = null;
 
@@ -148,13 +151,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     return Promise.resolve();
   }
 
-    /**
-   * Returns a promise that will be resolved when all dependencies used by
-   * lightbox-viewer are resolved or a 2 second timeout.
-   * @return {!Promise}
-   * @private
-   */
-
   /**
    * Builds the page mask and appends it to the container.
    * @private
@@ -183,21 +179,19 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         const lightboxableElements = list;
         this.vsync_.mutate(() => {
           let index = 0;
-
           lightboxableElements.forEach(element => {
             element.lightboxItemId = index++;
             const deepClone = !element.classList.contains(
                 'i-amphtml-element');
             const clonedNode = element.cloneNode(deepClone);
             clonedNode.removeAttribute('on');
-            // TODO(yuxichen): store descriptionText and lightboxItemId in a
-            // list other than the node itself
             const descText = this.manager_.getDescription(element);
-            if (descText) {
-              clonedNode.descriptionText = descText;
-            }
+            let metadata = {
+              'descriptionText': descText,
+              'tagName': clonedNode.tagName
+            };
 
-            if (clonedNode.tagName == 'AMP-IMG') {
+            if (clonedNode.tagName === 'AMP-IMG') {
               const container = this.element.ownerDocument.createElement('div');
               container.classList.add('i-amphtml-image-lightbox-container');
               const imageViewer = new ImageViewer(this, this.win,
@@ -205,17 +199,16 @@ export class AmpLightboxViewer extends AMP.BaseElement {
               imageViewer.init(element, element);
               container.appendChild(imageViewer.getElement());
               this.carousel_.appendChild(container);
-              this.clonedLightboxableElements_.push(imageViewer);
-            }
-
-            else {
+              this.clonedLightboxableElements_.push(container);
+              metadata.imageViewer = imageViewer;
+            } else {
               this.clonedLightboxableElements_.push(clonedNode);
               this.carousel_.appendChild(clonedNode);
             }
+
+            this.lightboxableElementsMetadata_.push(metadata);
           });
-
         });
-
       });
 
       this.container_.appendChild(this.carousel_);
@@ -230,9 +223,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    */
   slideChangeHandler_(event) {
     this.currentElementId_ = getData(event)['index'];
-    // TODO: only resize imageViewer dimensions if it's an image
-    this.resizeImageViewerDimensions_();
-
+    if (this.lightboxableElementsMetadata_[this.currentElementId_].tagName === 'AMP-IMG') {
+      this.resizeImageViewerDimensions_();
+    }
     this.updateDescriptionBox_();
   }
 
@@ -263,7 +256,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   updateDescriptionBox_() {
-    const descText = this.clonedLightboxableElements_[this.currentElementId_]
+    const descText = this.lightboxableElementsMetadata_[this.currentElementId_]
         .descriptionText;
     this.descriptionTextArea_.textContent = descText;
     if (!descText) {
@@ -505,14 +498,15 @@ export class AmpLightboxViewer extends AMP.BaseElement {
           /**@type {?}*/ (this.carousel_).implementation_
               .showSlideWhenReady(this.currentElementId_);
           this.resizeImageViewerDimensions_();
+          this.updateDescriptionBox_();
         });
   }
 
   resizeImageViewerDimensions_() {
-    const imgViewer = this.clonedLightboxableElements_[this.currentElementId_];
+    const imgViewer = this.lightboxableElementsMetadata_[this.currentElementId_].imageViewer;
     imgViewer.measure();
 
-    // TODO (cathyzhu): need to unregister this
+    // TODO (cathyzhu): need to unregister this on slide change
     this.unlistenViewport_ = this.getViewport().onChanged(() => {
       // In IOS 10.3, the measured size of an element is incorrect if the
       // element size depends on window size directly and the measurement
@@ -557,14 +551,14 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         'keydown', this.boundHandleKeyboardEvents_);
   }
 
-
   /**
    * Toggles the view mode.
    * @param {boolean=} opt_on
    */
   toggleViewMode(opt_on) {
-    // TODO (cathyzhu): hide description, no op for now
-
+    // TODO (cathyzhu): ImageViewer currently requires that we provide this API.
+    // We should change the ImageViewer API so that this is handled purely by the
+    // lightbox-viewer (OR give this logic to the ImageViewer).
   }
 
   /**
@@ -686,7 +680,6 @@ export function installLightboxManager(win) {
     manager_ = new LightboxManager(ampdoc);
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   installLightboxManager(AMP.win);

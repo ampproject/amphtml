@@ -82,6 +82,7 @@
   color: #ffffff;
   opacity: 1;
   transition: opacity 1s;
+  z-index: 1;
 }
 
 .i-amphtml-lbv-desc-box.standard {
@@ -173,16 +174,6 @@
   display: block;
 }
 
-.i-amphtml-image-lightbox-trans {
-  pointer-events: none !important;
-  position: fixed;
-  z-index: 1001;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-}
-
 .i-amphtml-image-lightbox-viewer {
   position: absolute;
   z-index: 1;
@@ -200,5 +191,4 @@
   position: absolute;
   z-index: 1;
   display: block;
-  transform-origin: 50% 50%;
 }
