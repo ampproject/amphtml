@@ -453,99 +453,102 @@ describes.sandboxed('ClickHandler', {}, () => {
       ampdoc: 'fie',
     },
   }, env => {
-    let win, doc;
-    let parentWin;
-    let ampdoc;
-    let embed;
-    let handler;
-    let winOpenStub;
-    let scrollIntoViewStub;
-    let replaceStateForTargetStub;
-    let replaceStateForTargetPromise;
-    let anchor;
-    let elementWithId;
-    let anchorWithName;
-
-    beforeEach(() => {
-      win = env.win;
-      doc = win.document;
-      ampdoc = env.ampdoc;
-      parentWin = env.parentWin;
-      embed = env.embed;
-
-      handler = win.services.clickhandler.obj;
-      winOpenStub = sandbox.stub(win, 'open', () => {
-        return {};
-      });
-      const viewport = parentWin.services.viewport.obj;
-      scrollIntoViewStub = sandbox.stub(viewport, 'scrollIntoView');
-      const history = parentWin.services.history.obj;
-      replaceStateForTargetPromise = Promise.resolve();
-      replaceStateForTargetStub = sandbox.stub(history,
-          'replaceStateForTarget', () => replaceStateForTargetPromise);
-
-      anchor = doc.createElement('a');
-      anchor.href = 'http://ads.localhost:8000/example';
-      doc.body.appendChild(anchor);
-      event.target = anchor;
-
-      elementWithId = doc.createElement('div');
-      elementWithId.id = 'test';
-      doc.body.appendChild(elementWithId);
-
-      anchorWithName = doc.createElement('a');
-      anchorWithName.setAttribute('name', 'test2');
-      doc.body.appendChild(anchorWithName);
-    });
-
-    it('should adopt correctly to embed', () => {
-      expect(handler.ampdoc).to.equal(ampdoc);
-      expect(handler.rootNode_).to.equal(embed.win.document);
-      expect(handler.isEmbed_).to.be.true;
-    });
-
-    describe('when linking to a different origin or path', () => {
-      it('should update target to _blank', () => {
-        anchor.href = 'https://www.google.com/some-other-path';
-        handler.handle_(event);
-        expect(event.defaultPrevented).to.be.false;
-        expect(winOpenStub).to.not.be.called;
-        expect(scrollIntoViewStub).to.not.be.called;
-        expect(anchor.getAttribute('target')).to.equal('_blank');
-      });
-
-      it('should keep the target when specified', () => {
-        anchor.href = 'https://www.google.com/some-other-path';
-        anchor.setAttribute('target', '_top');
-        handler.handle_(event);
-        expect(event.defaultPrevented).to.be.false;
-        expect(winOpenStub).to.not.be.called;
-        expect(scrollIntoViewStub).to.not.be.called;
-        expect(anchor.getAttribute('target')).to.equal('_top');
-      });
-
-      it('should reset the target when illegal specified', () => {
-        anchor.href = 'https://www.google.com/some-other-path';
-        anchor.setAttribute('target', '_self');
-        handler.handle_(event);
-        expect(event.defaultPrevented).to.be.false;
-        expect(winOpenStub).to.not.be.called;
-        expect(scrollIntoViewStub).to.not.be.called;
-        expect(anchor.getAttribute('target')).to.equal('_blank');
-      });
-    });
-
-    describe('when linking to identifier', () => {
+    // TODO(dvoytenko, #11827): Make this test work on Safari.
+    describe.configure().skipSafari().run('fie embed', () => {
+      let win, doc;
+      let parentWin;
+      let ampdoc;
+      let embed;
+      let handler;
+      let winOpenStub;
+      let scrollIntoViewStub;
+      let replaceStateForTargetStub;
+      let replaceStateForTargetPromise;
+      let anchor;
+      let elementWithId;
+      let anchorWithName;
 
       beforeEach(() => {
-        anchor.href = 'http://ads.localhost:8000/example#test';
+        win = env.win;
+        doc = win.document;
+        ampdoc = env.ampdoc;
+        parentWin = env.parentWin;
+        embed = env.embed;
+
+        handler = win.services.clickhandler.obj;
+        winOpenStub = sandbox.stub(win, 'open', () => {
+          return {};
+        });
+        const viewport = parentWin.services.viewport.obj;
+        scrollIntoViewStub = sandbox.stub(viewport, 'scrollIntoView');
+        const history = parentWin.services.history.obj;
+        replaceStateForTargetPromise = Promise.resolve();
+        replaceStateForTargetStub = sandbox.stub(history,
+            'replaceStateForTarget', () => replaceStateForTargetPromise);
+
+        anchor = doc.createElement('a');
+        anchor.href = 'http://ads.localhost:8000/example';
+        doc.body.appendChild(anchor);
+        event.target = anchor;
+
+        elementWithId = doc.createElement('div');
+        elementWithId.id = 'test';
+        doc.body.appendChild(elementWithId);
+
+        anchorWithName = doc.createElement('a');
+        anchorWithName.setAttribute('name', 'test2');
+        doc.body.appendChild(anchorWithName);
       });
 
-      it('should NOT do anything, but cancel the event', () => {
-        handler.handle_(event);
-        expect(event.defaultPrevented).to.be.true;
-        expect(replaceStateForTargetStub).to.not.be.called;
-        expect(scrollIntoViewStub).to.not.be.called;
+      it('should adopt correctly to embed', () => {
+        expect(handler.ampdoc).to.equal(ampdoc);
+        expect(handler.rootNode_).to.equal(embed.win.document);
+        expect(handler.isEmbed_).to.be.true;
+      });
+
+      describe('when linking to a different origin or path', () => {
+        it('should update target to _blank', () => {
+          anchor.href = 'https://www.google.com/some-other-path';
+          handler.handle_(event);
+          expect(event.defaultPrevented).to.be.false;
+          expect(winOpenStub).to.not.be.called;
+          expect(scrollIntoViewStub).to.not.be.called;
+          expect(anchor.getAttribute('target')).to.equal('_blank');
+        });
+
+        it('should keep the target when specified', () => {
+          anchor.href = 'https://www.google.com/some-other-path';
+          anchor.setAttribute('target', '_top');
+          handler.handle_(event);
+          expect(event.defaultPrevented).to.be.false;
+          expect(winOpenStub).to.not.be.called;
+          expect(scrollIntoViewStub).to.not.be.called;
+          expect(anchor.getAttribute('target')).to.equal('_top');
+        });
+
+        it('should reset the target when illegal specified', () => {
+          anchor.href = 'https://www.google.com/some-other-path';
+          anchor.setAttribute('target', '_self');
+          handler.handle_(event);
+          expect(event.defaultPrevented).to.be.false;
+          expect(winOpenStub).to.not.be.called;
+          expect(scrollIntoViewStub).to.not.be.called;
+          expect(anchor.getAttribute('target')).to.equal('_blank');
+        });
+      });
+
+      describe('when linking to identifier', () => {
+
+        beforeEach(() => {
+          anchor.href = 'http://ads.localhost:8000/example#test';
+        });
+
+        it('should NOT do anything, but cancel the event', () => {
+          handler.handle_(event);
+          expect(event.defaultPrevented).to.be.true;
+          expect(replaceStateForTargetStub).to.not.be.called;
+          expect(scrollIntoViewStub).to.not.be.called;
+        });
       });
     });
   });
