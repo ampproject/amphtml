@@ -190,6 +190,8 @@ exports.rules = [
           'src/service/parallax-impl.js',
       'extensions/amp-analytics/0.1/iframe-transport.js->' +
           'src/service/extension-location.js',
+      'extensions/amp-analytics/0.1/iframe-transport.js->' +
+          'src/service/jank-meter.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
           'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js->' +

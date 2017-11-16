@@ -18,6 +18,7 @@ import {urls} from '../../../src/config';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {isLongTaskApiSupported} from '../../../src/service/jank-meter';
 import {setStyles} from '../../../src/style';
 import {hasOwn} from '../../../src/utils/object';
 import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
@@ -62,7 +63,7 @@ export class IframeTransport {
         'Must supply iframe URL to constructor!');
     this.frameUrl_ = config['iframe'];
 
-    /** @private {PerformanceObserver} */
+    /** @private {?PerformanceObserver} */
     this.longTaskObserver_ = null;
 
     /** @private {number} */
@@ -91,7 +92,7 @@ export class IframeTransport {
     } else {
       frameData = this.createCrossDomainIframe();
       this.ampWin_.document.body.appendChild(frameData.frame);
-      this.createLongTaskObserver();
+      this.createLongTaskObserver_();
     }
     dev().assert(frameData, 'Trying to use non-existent frame');
   }
@@ -162,14 +163,18 @@ export class IframeTransport {
   /**
    * Uses the Long Task API to create an observer for when 3p vendor frames
    * take more than 50ms of continuous CPU time.
-   * Currently the only action in response to that is to log. There is a
-   * grace of LONG_TASK_REPORTING_THRESHOLD_ occurrences before logging begins.
+   * Currently the only action in response to that is to log. It will log
+   * once per LONG_TASK_REPORTING_THRESHOLD_ that a long task occurs. (This
+   * implies that there is a grace period for the first
+   * LONG_TASK_REPORTING_THRESHOLD_-1 occurrences.)
    * @VisibleForTesting
+   * @private
    */
-  createLongTaskObserver() {
-    if (this.longTaskObserver_ || !this.ampWin_.PerformanceObserver) {
+  createLongTaskObserver_() {
+    if (!isLongTaskApiSupported(this.ampWin_)) {
       return;
     }
+    // TODO(jonkeller): Consider merging with jank-meter.js
     this.longTaskObserver_ = new this.ampWin_.PerformanceObserver(entryList => {
       if (!entryList) {
         return;
@@ -177,13 +182,12 @@ export class IframeTransport {
       entryList.getEntries().forEach(entry => {
         if (entry && entry['entryType'] == 'longtask' &&
             (entry['name'] == 'cross-origin-descendant' ||
-            entry['name'] == 'multiple-contexts' ||
             (getMode().localDev &&
             entry['name'] == 'same-origin-descendant')) &&
             entry.attribution) {
           entry.attribution.forEach(attrib => {
             if (this.frameUrl_ == attrib.containerSrc &&
-                ++this.numLongTasks_ >= LONG_TASK_REPORTING_THRESHOLD_) {
+                ++this.numLongTasks_ % LONG_TASK_REPORTING_THRESHOLD_ == 0) {
               user().warn(TAG_,
                   'Long Task: ' +
                   `Vendor: "${this.type_}" ` +
