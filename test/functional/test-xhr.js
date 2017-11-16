@@ -25,7 +25,8 @@ import {
 import {getCookie} from '../../src/cookies';
 import {Services} from '../../src/services';
 
-describe('XHR', function() {
+// TODO(jridgewell, #11827): Make this test work on Safari.
+describe.configure().skipSafari().run('XHR', function() {
   let sandbox;
   let requests;
   const location = {href: 'https://acme.com/path'};
