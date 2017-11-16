@@ -308,22 +308,16 @@ export class ImageViewer {
 
   /** @private */
   setupGestures_() {
-    const gestures = Gestures.get(this.image_);
-
-    // Toggle viewer mode.
-    gestures.onGesture(TapRecognizer, () => {
-      this.lightbox_.toggleViewMode();
-    });
+    const gestures = Gestures.get(this.image_, true);
 
     // Movable.
     gestures.onGesture(SwipeXYRecognizer, e => {
       if (this.isScaled()) {
+        event.preventDefault();
         this.onMove_(e.data.deltaX, e.data.deltaY, false);
         if (e.data.last) {
           this.onMoveRelease_(e.data.velocityX, e.data.velocityY);
         }
-      } else {
-
       }
     });
     gestures.onPointerDown(() => {
@@ -448,9 +442,6 @@ export class ImageViewer {
       transform: st.translate(this.posX_, this.posY_) +
           ' ' + st.scale(this.scale_),
     });
-    if (this.scale_ != 1) {
-      this.lightbox_.toggleViewMode(true);
-    }
   }
 
   /**
@@ -475,10 +466,6 @@ export class ImageViewer {
    */
   onMoveRelease_(veloX, veloY) {
     const deltaY = this.posY_ - this.startY_;
-    if (this.scale_ == 1 && Math.abs(deltaY) > 10) {
-      this.lightbox_.close();
-      return;
-    }
 
     // Continue motion.
     this.motion_ = continueMotion(this.image_,
