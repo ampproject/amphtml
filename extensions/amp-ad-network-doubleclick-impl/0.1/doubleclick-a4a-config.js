@@ -159,7 +159,7 @@ export class DoubleclickA4aEligibility {
     if (useRemoteHtml) {
       warnDeprecation('remote.html');
       if (!element.getAttribute('rtc-config')) {
-        element.setAttribute('ati', '1');
+        element.setAttribute('data-ati', '1');
         return false;
       }
     }
