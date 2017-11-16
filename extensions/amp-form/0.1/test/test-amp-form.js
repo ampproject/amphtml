@@ -228,7 +228,7 @@ describes.repeated('', {
       sandbox.stub(ampForm, 'analyticsEvent_');
       sandbox.spy(form, 'checkValidity');
       const errorRe =
-          /Only XHR based \(via action-xhr attribute\) submissions are support/;
+        /Only XHR based \(via action-xhr attribute\) submissions are supported/;
       expect(() => ampForm.handleSubmitEvent_(event)).to.throw(errorRe);
       expect(event.preventDefault).to.be.called;
       expect(ampForm.analyticsEvent_).to.have.not.been.called;
@@ -288,7 +288,7 @@ describes.repeated('', {
       sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
       sandbox.spy(form, 'checkValidity');
       const submitErrorRe =
-          /Only XHR based \(via action-xhr attribute\) submissions are support/;
+        /Only XHR based \(via action-xhr attribute\) submissions are supported/;
       expect(() => ampForm.handleSubmitEvent_(event)).to.throw(submitErrorRe);
       expect(event.preventDefault).to.be.called;
       document.body.removeChild(form);

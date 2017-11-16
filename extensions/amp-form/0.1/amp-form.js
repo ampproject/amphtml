@@ -547,7 +547,7 @@ export class AmpForm {
   handleNonXhrPost_() {
     // non-XHR POST requests are not supported.
     user().assert(false,
-        'Only XHR based (via action-xhr attribute) submissions are support ' +
+        'Only XHR based (via action-xhr attribute) submissions are supported ' +
         'for POST requests. %s',
         this.form_);
   }
