@@ -48,7 +48,7 @@ module.exports = {
   reporters: ['super-dots', 'karmaSimpleReporter'],
 
   superDotsReporter: {
-    nbDotsPerLine: 10000,
+    nbDotsPerLine: 100000,
     color: {
       success: 'green',
       failure: 'red',
@@ -139,50 +139,50 @@ module.exports = {
       browserName: 'chrome',
       version: '45',
     },
-    SL_iOS_8_4: {
+    SL_iOS_latest: {
       base: 'SauceLabs',
       browserName: 'iphone',
-      version: '8.4',
-    },
-    SL_iOS_9_1: {
-      base: 'SauceLabs',
-      browserName: 'iphone',
-      version: '9.1',
+      version: 'latest',
     },
     SL_iOS_10_0: {
       base: 'SauceLabs',
       browserName: 'iphone',
       version: '10.0',
     },
-    SL_iOS_11_0: {
+    SL_iOS_9_1: {
       base: 'SauceLabs',
       browserName: 'iphone',
-      version: '11.0',
+      version: '9.1',
     },
     SL_Firefox_latest: {
       base: 'SauceLabs',
       browserName: 'firefox',
       version: 'latest',
     },
-    SL_IE_11: {
+    SL_Safari_latest: {
       base: 'SauceLabs',
-      browserName: 'internet explorer',
-      version: 11,
-    },
-    SL_Edge_latest: {
-      base: 'SauceLabs',
-      browserName: 'microsoftedge',
+      browserName: 'safari',
       version: 'latest',
+    },
+    SL_Safari_10: {
+      base: 'SauceLabs',
+      browserName: 'safari',
+      version: 10,
     },
     SL_Safari_9: {
       base: 'SauceLabs',
       browserName: 'safari',
       version: 9,
     },
-    SL_Safari_8: {
+    SL_Edge_latest: {
       base: 'SauceLabs',
-      browserName: 'safari',
-      version: 8,
+      browserName: 'microsoftedge',
+      version: 'latest',
+    },
+    SL_IE_11: {
+      base: 'SauceLabs',
+      browserName: 'internet explorer',
+      version: 11,
     },
   },
 

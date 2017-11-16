@@ -240,7 +240,9 @@ describe('preconnect', () => {
     });
   });
 
-  it('should add links if feature if detected', () => {
+  // TODO(cramforce, #11827): Make this test work on Safari.
+  it.configure().skipSafari().run('should add links if feature ' +
+      'if detected', () => {
     // Don't stub preload support allow the test to run through the browser
     // default regardless of support or not.
     return getPreconnectIframe(/* detectFeatures */ true).then(iframe => {
