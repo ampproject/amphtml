@@ -66,7 +66,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.active_ = false;
 
     /** @private {!number} */
-    this.currentElementId_ = -1;
+    this.currentElemId_ = -1;
 
     /** @private {!function(!Event)} */
     this.boundHandleKeyboardEvents_ = this.handleKeyboardEvents_.bind(this);
@@ -95,7 +95,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.clonedLightboxableElements_ = [];
 
     /** @private {!Array<any>} */
-    this.lightboxableElementsMetadata_ = [];
+    this.elementsMetadata_ = [];
 
     /** @private  {?Element} */
     this.gallery_ = null;
@@ -186,9 +186,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
             const clonedNode = element.cloneNode(deepClone);
             clonedNode.removeAttribute('on');
             const descText = this.manager_.getDescription(element);
-            let metadata = {
+            const metadata = {
               'descriptionText': descText,
-              'tagName': clonedNode.tagName
+              'tagName': clonedNode.tagName,
             };
 
             if (clonedNode.tagName === 'AMP-IMG') {
@@ -206,7 +206,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
               this.carousel_.appendChild(clonedNode);
             }
 
-            this.lightboxableElementsMetadata_.push(metadata);
+            this.elementsMetadata_.push(metadata);
           });
         });
       });
@@ -222,8 +222,10 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   slideChangeHandler_(event) {
-    this.currentElementId_ = getData(event)['index'];
-    if (this.lightboxableElementsMetadata_[this.currentElementId_].tagName === 'AMP-IMG') {
+    this.currentElemId_ = getData(event)['index'];
+    const tagName = this.elementsMetadata_[this.currentElemId_]
+        .tagName;
+    if (tagName === 'AMP-IMG') {
       this.resizeImageViewerDimensions_();
     }
     this.updateDescriptionBox_();
@@ -256,7 +258,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   updateDescriptionBox_() {
-    const descText = this.lightboxableElementsMetadata_[this.currentElementId_]
+    const descText = this.elementsMetadata_[this.currentElemId_]
         .descriptionText;
     this.descriptionTextArea_.textContent = descText;
     if (!descText) {
@@ -494,16 +496,16 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
     return this.resources_.requireLayout(this.carousel_)
         .then(() => {
-          this.currentElementId_ = element.lightboxItemId;
+          this.currentElemId_ = element.lightboxItemId;
           /**@type {?}*/ (this.carousel_).implementation_
-              .showSlideWhenReady(this.currentElementId_);
+              .showSlideWhenReady(this.currentElemId_);
           this.resizeImageViewerDimensions_();
           this.updateDescriptionBox_();
         });
   }
 
   resizeImageViewerDimensions_() {
-    const imgViewer = this.lightboxableElementsMetadata_[this.currentElementId_].imageViewer;
+    const imgViewer = this.elementsMetadata_[this.currentElemId_].imageViewer;
     imgViewer.measure();
 
     // TODO (cathyzhu): need to unregister this on slide change
@@ -656,12 +658,12 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     element.appendChild(imgElement);
     const closeGalleryAndShowTargetSlide = event => {
       this.closeGallery_();
-      this.currentElementId_ = thumbnailObj.element.lightboxItemId;
+      this.currentElemId_ = thumbnailObj.element.lightboxItemId;
       this.updateDescriptionBox_();
       // Hack to access private property. Better than not getting
       // type checking to work.
       /**@type {?}*/ (this.carousel_).implementation_.showSlideWhenReady(
-          this.currentElementId_);
+          this.currentElemId_);
       event.stopPropagation();
     };
     element.addEventListener('click', closeGalleryAndShowTargetSlide);

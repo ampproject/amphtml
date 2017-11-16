@@ -25,7 +25,6 @@ import {Gestures} from './gesture';
 import {
   DoubletapRecognizer,
   SwipeXYRecognizer,
-  TapRecognizer,
   TapzoomRecognizer,
 } from './gesture-recognizers';
 import {bezierCurve} from './curve';
@@ -465,8 +464,6 @@ export class ImageViewer {
    * @private
    */
   onMoveRelease_(veloX, veloY) {
-    const deltaY = this.posY_ - this.startY_;
-
     // Continue motion.
     this.motion_ = continueMotion(this.image_,
         this.posX_, this.posY_, veloX, veloY,
