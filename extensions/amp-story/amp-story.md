@@ -297,7 +297,7 @@ Layers are stacked on top of one another to create the desired visual effect. Th
 ### Attributes
 
 
-##### template [optional]
+##### template [required]
 
 The `template` attribute determines the layout of the grid layer. Available templates are described in the [Templates](#templates) section below.
 
