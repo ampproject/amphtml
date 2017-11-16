@@ -100,7 +100,8 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
     expect(win.document.documentElement.style.paddingTop).to.equal('31px');
   });
 
-  it('should calculate size', () => {
+  // TODO(zhouyx, #11827): Make this test work on Safari.
+  it.configure().skipSafari().run('should calculate size', () => {
     const size = binding.getSize();
     expect(size.width).to.equal(100);
     expect(size.height).to.equal(200);
@@ -317,7 +318,8 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     expect(win.document.documentElement.style.paddingTop).to.equal('');
   });
 
-  it('should calculate size', () => {
+  // TODO(zhouyx, #11827): Make this test work on Safari.
+  it.configure().skipSafari().run('should calculate size', () => {
     const size = binding.getSize();
     expect(size.width).to.equal(100);
     expect(size.height).to.equal(100);
