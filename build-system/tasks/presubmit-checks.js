@@ -356,6 +356,7 @@ const forbiddenTerms = {
       'src/service/cid-impl.js',
       'testing/fake-dom.js',
       'extensions/amp-analytics/0.1/vendors.js',
+      'extensions/amp-youtube/0.1/amp-youtube.js',
     ],
   },
   'getCookie\\W': {
