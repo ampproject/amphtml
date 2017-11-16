@@ -23,7 +23,11 @@ const renderTo = 'yandex_rtb';
  * @param {!Object} data
  */
 export function yandex(global, data) {
-  validateData(data, ['blockId'], ['data', 'onRender', 'onError']);
+  validateData(
+      data,
+      ['blockId'],
+      ['data', 'htmlAccessAllowed', 'onRender', 'onError']
+  );
 
   addToQueue(global, data);
   loadScript(global,
@@ -49,13 +53,13 @@ function addToQueue(global, data) {
       data: data.data,
       async: true,
       onRender: () => {
-        if (data.onRender) {
+        if (typeof data.onRender === 'function') {
           data.onRender();
         }
         global.context.renderStart();
       },
     }, () => {
-      if (data.onError) {
+      if (typeof data.onError === 'function') {
         data.onError();
       } else {
         global.context.noContentAvailable();

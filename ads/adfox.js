@@ -60,7 +60,6 @@ function checkLoading(global, data, onRender, onError) {
     const dblParams = {
       blockId: data.bundleParams.blockId,
       data: data.bundleParams.data,
-      isAdfox: true,
       onRender,
       onError,
     };
