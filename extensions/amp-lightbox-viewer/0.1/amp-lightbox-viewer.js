@@ -196,7 +196,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
               container.classList.add('i-amphtml-image-lightbox-container');
               const imageViewer = new ImageViewer(this, this.win,
                 this.loadPromise.bind(this));
-              imageViewer.init(element, element);
+              imageViewer.init(element);
               container.appendChild(imageViewer.getElement());
               this.carousel_.appendChild(container);
               this.clonedLightboxableElements_.push(container);
@@ -393,7 +393,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.topGradient_.classList.add('i-amphtml-lbv-top-bar-top-gradient');
     this.topBar_.appendChild(this.topGradient_);
 
-    const close = this.close.bind(this);
+    const close = this.close_.bind(this);
     const openGallery = this.openGallery_.bind(this);
     const closeGallery = this.closeGallery_.bind(this);
 
@@ -497,6 +497,11 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     return this.resources_.requireLayout(this.carousel_)
         .then(() => {
           this.currentElemId_ = element.lightboxItemId;
+          // TODO (cathyzhu): figure out why this is done and whether we
+          // should expose this function via carousel api instead
+
+          // Hack to access private property. Better than not getting
+          // type checking to work.
           /**@type {?}*/ (this.carousel_).implementation_
               .showSlideWhenReady(this.currentElemId_);
           this.resizeImageViewerDimensions_();
@@ -529,10 +534,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * Closes the lightbox-viewer
    */
 
-  // TODO (cathyzhu): decide who gets to close the lightbox viewer.
-  // The flip gesture close event listener should probably be moved
-  // from ImageViewer into the parent (aka this) class
-  close() {
+  close_() {
     if (!this.active_) {
       return Promise.resolve();
     }
@@ -554,16 +556,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
-   * Toggles the view mode.
-   * @param {boolean=} opt_on
-   */
-  toggleViewMode(opt_on) {
-    // TODO (cathyzhu): ImageViewer currently requires that we provide this API.
-    // We should change the ImageViewer API so that this is handled purely by the
-    // lightbox-viewer (OR give this logic to the ImageViewer).
-  }
-
-  /**
    * Handles keyboard events for the lightbox.
    *  -Esc will close the lightbox.
    * @private
@@ -571,7 +563,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   handleKeyboardEvents_(event) {
     const code = event.keyCode;
     if (code == KeyCodes.ESCAPE) {
-      this.close();
+      this.close_();
     }
   }
 
