@@ -22,9 +22,6 @@
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {
-  identityEnabled,
-} from './adsense-a4a-config';
-import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {isExperimentOn} from '../../../src/experiments';
@@ -181,11 +178,9 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     super.buildCallback();
-    this.identityTokenPromise_ = identityEnabled(this.win) ?
-        Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
-        .then(() => getIdentityToken(this.win, this.getAmpDoc())) :
-        Promise.resolve(
-          /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({}));
+    this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
+        .whenFirstVisible()
+        .then(() => getIdentityToken(this.win, this.getAmpDoc()));
     this.autoFormat_ =
         this.element.getAttribute('data-auto-format') || '';
 
