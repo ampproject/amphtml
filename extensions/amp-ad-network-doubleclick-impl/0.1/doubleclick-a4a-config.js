@@ -39,10 +39,6 @@ import {dev, user} from '../../../src/log';
 /** @const {string} */
 export const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';
 
-/** @const {string} */
-export const UNCONDITIONED_IDENTITY_EXPERIMENT_NAME =
-  'expUnconditionedDfpIdentity';
-
 export const UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME =
   'expUnconditionedCanonicalHoldback';
 
@@ -58,14 +54,10 @@ export const DOUBLECLICK_EXPERIMENT_FEATURE = {
   CANONICAL_EXPERIMENT: '21060933',
   CACHE_EXTENSION_INJECTION_CONTROL: '21060955',
   CACHE_EXTENSION_INJECTION_EXP: '21060956',
-  IDENTITY_CONTROL: '21060937',
-  IDENTITY_EXPERIMENT: '21060938',
 };
 
 /** @const @enum{string} */
 export const DOUBLECLICK_UNCONDITIONED_EXPERIMENTS = {
-  IDENTITY_CONTROL: '21061304',
-  IDENTITY_EXPERIMENT: '21061305',
   CANONICAL_HLDBK_CTL: '21061372',
   CANONICAL_HLDBK_EXP: '21061373',
 };
@@ -77,15 +69,9 @@ export const URL_EXPERIMENT_MAPPING = {
   // Delay Request
   '3': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST_CONTROL,
   '4': DOUBLECLICK_EXPERIMENT_FEATURE.DELAYED_REQUEST,
-  // Identity
-  '5': DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_CONTROL,
-  '6': DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT,
   // SRA
   '7': DOUBLECLICK_EXPERIMENT_FEATURE.SRA_CONTROL,
   '8': DOUBLECLICK_EXPERIMENT_FEATURE.SRA,
-  // AMP Cache extension injection
-  '9': DOUBLECLICK_EXPERIMENT_FEATURE.CACHE_EXTENSION_INJECTION_CONTROL,
-  '10': DOUBLECLICK_EXPERIMENT_FEATURE.CACHE_EXTENSION_INJECTION_EXP,
 };
 
 /**
@@ -114,12 +100,6 @@ export class DoubleclickA4aEligibility {
         [DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_CTL,
           DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_EXP],
         UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME);
-
-    this.selectAndSetUnconditionedExp(
-        win, element,
-        [DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.IDENTITY_CONTROL,
-          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.IDENTITY_EXPERIMENT],
-        UNCONDITIONED_IDENTITY_EXPERIMENT_NAME);
   }
 
   /**
@@ -185,18 +165,9 @@ export class DoubleclickA4aEligibility {
       // See if in holdback control/experiment.
       if (urlExperimentId != undefined) {
         experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
-        // Do not select into Identity experiment if in corresponding
-        // unconditioned experiment.
-        if ((experimentId == DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_CONTROL ||
-             experimentId ==
-             DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT) &&
-            getExperimentBranch(win, UNCONDITIONED_IDENTITY_EXPERIMENT_NAME)) {
-          experimentId = null;
-        } else {
-          dev().info(
-              TAG,
-              `url experiment selection ${urlExperimentId}: ${experimentId}.`);
-        }
+        dev().info(
+            TAG,
+            `url experiment selection ${urlExperimentId}: ${experimentId}.`);
       }
     }
     if (experimentId) {
