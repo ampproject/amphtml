@@ -300,8 +300,7 @@ i-amphtml-sizer {
 }
 
 .i-amphtml-notbuilt,
-[layout]:not(.i-amphtml-element),
-.-amp-element:not(.i-amphtml-element)
+[layout]:not(.i-amphtml-element)
 {
   position: relative;
   overflow: hidden !important;
@@ -309,8 +308,7 @@ i-amphtml-sizer {
 }
 
 .i-amphtml-notbuilt:not(.i-amphtml-layout-container) > * ,
-[layout]:not(.i-amphtml-element):not(.i-amphtml-layout-container) > *,
-.-amp-element:not(.i-amphtml-element):not(.i-amphtml-layout-container) > *
+[layout]:not([layout=container]):not(.i-amphtml-element) > *
 {
   display: none;
 }
