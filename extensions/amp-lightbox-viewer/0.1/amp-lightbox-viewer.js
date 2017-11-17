@@ -82,7 +82,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     /** @private {?Element} */
     this.container_ = null;
 
-    /** @private {?Element} */
+    /** @private {?../../../src/CustomElement} */
     this.carousel_ = null;
 
     /** @private {?Element} */
@@ -111,6 +111,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
     /** @private {!LightboxControlsModes} */
     this.controlsMode_ = LightboxControlsModes.SHOW_CONTROLS;
+
+    /** @private {?UnlistenDef} */
+    this.unlistenViewport_ = null;
   }
 
   /** @override */
@@ -147,7 +150,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     // DO NOT ADD CODE HERE
     // layoutCallback for lightbox-viewer is meaningless, lightbox-viewer
     // doesn't have children, it just manages elements elsewhere in the page in
-    // `open_` `close` and `updateViewer_` methods.
+    // `open_` `close_` and `updateViewer_` methods.
     return Promise.resolve();
   }
 
@@ -190,7 +193,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
               'descriptionText': descText,
               'tagName': clonedNode.tagName,
             };
-
+            let slide = clonedNode;
             if (clonedNode.tagName === 'AMP-IMG') {
               const container = this.element.ownerDocument.createElement('div');
               container.classList.add('i-amphtml-image-lightbox-container');
@@ -198,14 +201,11 @@ export class AmpLightboxViewer extends AMP.BaseElement {
                 this.loadPromise.bind(this));
               imageViewer.init(element);
               container.appendChild(imageViewer.getElement());
-              this.carousel_.appendChild(container);
-              this.clonedLightboxableElements_.push(container);
+              slide = container;
               metadata.imageViewer = imageViewer;
-            } else {
-              this.clonedLightboxableElements_.push(clonedNode);
-              this.carousel_.appendChild(clonedNode);
             }
-
+            this.carousel_.appendChild(slide);
+            this.clonedLightboxableElements_.push(slide);
             this.elementsMetadata_.push(metadata);
           });
         });
@@ -226,6 +226,10 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     const tagName = this.elementsMetadata_[this.currentElemId_]
         .tagName;
     if (tagName === 'AMP-IMG') {
+      // Unregister the previous onResize handler to rescale the ImageViewer
+      if (this.unlistenViewport_) {
+        this.unlistenViewport_();
+      }
       this.resizeImageViewerDimensions_();
     }
     this.updateDescriptionBox_();
@@ -236,7 +240,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   buildDescriptionBox_() {
-
     this.descriptionBox_ = this.win.document.createElement('div');
     this.descriptionBox_.classList.add('i-amphtml-lbv-desc-box');
     this.descriptionBox_.classList.add('standard');
@@ -497,24 +500,25 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     return this.resources_.requireLayout(this.carousel_)
         .then(() => {
           this.currentElemId_ = element.lightboxItemId;
-          // TODO (cathyzhu): figure out why this is done and whether we
-          // should expose this function via carousel api instead
-
-          // Hack to access private property. Better than not getting
-          // type checking to work.
-          /**@type {?}*/ (this.carousel_).implementation_
+          this.carousel_.implementation_
               .showSlideWhenReady(this.currentElemId_);
           this.resizeImageViewerDimensions_();
           this.updateDescriptionBox_();
         });
   }
 
+  /**
+   * Resizes the ImageViewer of the current slide so that the image
+   * is centered in the page. Used in open or on slide change. Also
+   * registers a onResize handler to resize the ImageViewer whenever
+   * the screen size changes.
+   * @private
+   */
   resizeImageViewerDimensions_() {
     const imgViewer = this.elementsMetadata_[this.currentElemId_].imageViewer;
     imgViewer.measure();
 
-    // TODO (cathyzhu): need to unregister this on slide change
-    this.unlistenViewport_ = this.getViewport().onChanged(() => {
+    this.unlistenViewport_ = this.getViewport().onResize(() => {
       // In IOS 10.3, the measured size of an element is incorrect if the
       // element size depends on window size directly and the measurement
       // happens in window.resize event. Adding a timeout for correct
@@ -532,11 +536,17 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
   /**
    * Closes the lightbox-viewer
+   * @private
    */
 
   close_() {
     if (!this.active_) {
       return Promise.resolve();
+    }
+
+    if (this.unlistenViewport_) {
+      this.unlistenViewport_();
+      this.unlistenViewport_ = null;
     }
 
     toggle(this.element, false);
@@ -652,10 +662,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       this.closeGallery_();
       this.currentElemId_ = thumbnailObj.element.lightboxItemId;
       this.updateDescriptionBox_();
-      // Hack to access private property. Better than not getting
-      // type checking to work.
-      /**@type {?}*/ (this.carousel_).implementation_.showSlideWhenReady(
-          this.currentElemId_);
+      this.carousel_.implementation_.showSlideWhenReady(this.currentElemId_);
       event.stopPropagation();
     };
     element.addEventListener('click', closeGalleryAndShowTargetSlide);
