@@ -28,6 +28,7 @@ import {
   setFormForElement,
   getFormAsObject,
 } from '../../../src/form';
+import {FormDataWrapper} from '../../../src/form-data-wrapper';
 import {
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
@@ -487,7 +488,7 @@ export class AmpForm {
       xhrUrl = addParamsToUrl(url, values);
     } else {
       xhrUrl = url;
-      body = new FormData(this.form_);
+      body = new FormDataWrapper(this.form_);
       for (const key in opt_extraFields) {
         body.append(key, opt_extraFields[key]);
       }
