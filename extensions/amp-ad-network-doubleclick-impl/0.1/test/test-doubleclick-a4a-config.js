@@ -80,6 +80,7 @@ describe('doubleclick-a4a-config', () => {
       expect(
           doubleclickIsA4AEnabled(mockWin, elem, useRemoteHtml)).to.be.false;
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
+      expect(elem.getAttribute('data-ati')).to.equal('1');
     });
 
     it('should use Fast Fetch if useRemoteHtml is true and RTC is set', () => {
