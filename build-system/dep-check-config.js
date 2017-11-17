@@ -253,7 +253,6 @@ exports.rules = [
   },
 
   {
-    filesMatching: 'extensions/amp-ad-network-*/**/*.js',
     mustNotDependOn: [
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
