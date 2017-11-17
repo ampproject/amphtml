@@ -425,8 +425,9 @@ export function additionalDimensions(win, viewportSize) {
 };
 
 /**
- * Returns a new CSI trigger.
- * @param {!Object<string, string>} params
+ * Returns amp-analytics config for a new CSI trigger.
+ * @param {string} on The name of the analytics trigger.
+ * @param {!Object<string, string>} params Params to be included on the ping.
  * @return {!JsonObject}
  */
 function csiTrigger(on, params) {
