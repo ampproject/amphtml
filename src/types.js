@@ -73,15 +73,6 @@ export function isFiniteNumber(value) {
 }
 
 /**
- * Determines if value is of FormData type.
- * @param {*} value
- * @return {boolean}
- */
-export function isFormData(value) {
-  return toString(value) === '[object FormData]';
-}
-
-/**
  * Checks whether `s` is a valid value of `enumObj`.
  *
  * @param {!Object<T>} enumObj

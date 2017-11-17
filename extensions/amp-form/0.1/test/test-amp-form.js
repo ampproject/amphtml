@@ -36,6 +36,8 @@ import '../../../amp-selector/0.1/amp-selector';
 import {user} from '../../../../src/log';
 import {whenCalled} from '../../../../testing/test-helper.js';
 import {AmpEvents} from '../../../../src/amp-events';
+import {FormDataWrapper} from '../../../../src/form-data-wrapper';
+import {fromIterator} from '../../../../src/utils/array';
 
 describes.repeated('', {
   'single ampdoc': {ampdoc: 'single'},
@@ -678,7 +680,11 @@ describes.repeated('', {
 
           const xhrCall = ampForm.xhr_.fetch.getCall(0);
           const config = xhrCall.args[1];
-          expect(config.body).to.not.be.null;
+          expect(config.body).to.be.an.instanceof(FormDataWrapper);
+          const entriesInForm =
+              fromIterator(new FormDataWrapper(getForm()).entries());
+          expect(fromIterator(config.body.entries())).to.have.deep.members(
+              entriesInForm);
           expect(config.method).to.equal('POST');
           expect(config.credentials).to.equal('include');
         });
