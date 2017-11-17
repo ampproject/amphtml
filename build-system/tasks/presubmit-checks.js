@@ -580,6 +580,13 @@ const forbiddenTerms = {
       'src/event-helper.js',
     ],
   },
+  'new FormData\\(': {
+    message: 'Use new FormDataWrapper() instead and call ' +
+        'formDataWrapper.getFormData() to get the native FormData object.',
+    whitelist: [
+      'src/form-data-wrapper.js',
+    ],
+  },
   '([eE]xit|[eE]nter|[cC]ancel|[rR]equest)Full[Ss]creen\\(': {
     message: 'Use fullscreenEnter() and fullscreenExit() from dom.js instead.',
     whitelist: [
