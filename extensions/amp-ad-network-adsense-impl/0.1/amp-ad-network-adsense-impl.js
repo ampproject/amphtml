@@ -83,6 +83,7 @@ export function resetSharedState() {
   sharedState.reset();
 }
 
+/** @final */
 export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /**
