@@ -60,6 +60,7 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp test --testnames`<sup>[[1]](#footnote-1)</sup>                    | Lists the name of each test being run, and prints a summary at the end.  |
 | `gulp serve`                                                            | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples/. Serve unminified AMP by default. |
 | `gulp serve --quiet`                                                    | Same as `serve`, with logging silenced. |
+| `gulp serve --port 9000`                                                | Same as `serve`, but uses a port number other than the default of 8000. |
 | `gulp check-types`                                                      | Verifies that there are no errors associated with Closure typing. Run automatically upon push.  |
 | `gulp dep-check`                                                        | Runs a dependency check on each module. Run automatically upon push.  |
 | `gulp presubmit`                                                        | Run validation against files to check for forbidden and required terms. Run automatically upon push.  |
