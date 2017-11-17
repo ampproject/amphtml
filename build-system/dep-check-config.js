@@ -258,4 +258,34 @@ exports.rules = [
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
     ],
   },
+
+  {
+    // Note: Delayed Fetch will be deprecated on March 29, 2018
+    mustNotDependOn: [
+      'ads/google/doubleclick.js',
+    ],
+    whitelist: [
+      'ads/criteo.js->ads/google/doubleclick.js',
+      'ads/ix.js->ads/google/doubleclick.js',
+      'ads/medianet.js->ads/google/doubleclick.js',
+      'ads/navegg.js->ads/google/doubleclick.js',
+      'ads/openx.js->ads/google/doubleclick.js',
+      'ads/pulsepoint.js->ads/google/doubleclick.js',
+      'ads/rubicon.js->ads/google/doubleclick.js',
+      'ads/yieldbot.js->ads/google/doubleclick.js',
+      '3p/integration.js->ads/google/doubleclick.js',
+    ],
+  },
+
+  {
+    mustNotDependOn: [
+      'ads/google/a4a/**/*.js',
+    ],
+    whitelist: [
+      'ads/google/**/*.js->ads/google/a4a/**/*.js',
+      'extensions/amp-ad-network-doubleclick-impl/**/*.js->ads/google/a4a/**/*.js',
+      'extensions/amp-ad-network-adsense-impl/**/*.js->ads/google/a4a/**/*.js',
+      'extensions/amp-ad/**/*.js->ads/google/a4a/**/*.js',
+    ],
+  },
 ];
