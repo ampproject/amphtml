@@ -279,6 +279,7 @@ function fluidMessageListener_(event) {
   listener.instance.receiveMessageForFluid_(payload);
 }
 
+/** @final */
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
