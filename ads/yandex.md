@@ -34,4 +34,6 @@ Required parameters:
 
 Supported parameters:
 - data-data
-- data-is-adfox
+- data-html-access-allowed
+- data-on-render
+- data-on-error
