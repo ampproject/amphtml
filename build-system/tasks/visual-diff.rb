@@ -353,6 +353,7 @@ def enable_experiments(page, experiments)
         'AMP_EXP',
         experiments.join('%2C'),
         { :path => '/', :domain => 'localhost' })
+    log('verbose', 'Setting AMP experiments ' + cyan(experiments.join(', ')))
   end
 end
 
@@ -363,6 +364,7 @@ end
 # - page: Page object used by Percy for snapshotting.
 def clear_experiments(page)
   page.driver.clear_cookies
+  log('verbose', 'Cleared all AMP experiment cookies')
 end
 
 
