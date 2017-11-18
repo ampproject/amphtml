@@ -62,20 +62,34 @@ export class TouchHandler {
      * @private {boolean}
      */
     this.scrollLocked_ = false;
-
+    /**
+     * @const @private {!Array<function()>}
+     */
+    this.unlistenHandlers_ = [];
 
     messaging.registerHandler(SCROLL_LOCK, this.scrollLockHandler_.bind(this));
-
-    this.listenForTouchEvents();
+    this.listenForTouchEvents_();
   }
 
-  listenForTouchEvents() {
+  listenForTouchEvents_() {
     const handleEvent = this.handleEvent_.bind(this);
     const doc = this.win.document;
 
-    listen(doc, 'touchstart', handleEvent);
-    listen(doc, 'touchend', handleEvent);
-    listen(doc, 'touchmove', handleEvent);
+    const options = {
+      capture: false,
+      // Use higher performance passive handlers (that cannot call
+      // preventDefault) when scroll locking is not active.
+      passive: !this.scrollLocked_,
+    };
+    this.unlistenHandlers_.push(
+        listen(doc, 'touchstart', handleEvent, options),
+        listen(doc, 'touchend', handleEvent, options),
+        listen(doc, 'touchmove', handleEvent, options));
+  }
+
+  unlisten_() {
+    this.unlistenHandlers_.forEach(unlisten => unlisten());
+    this.unlistenHandlers_.length = 0;
   }
 
   /**
@@ -103,7 +117,6 @@ export class TouchHandler {
       const msg = this.copyTouchEvent_(e);
       this.messaging_.sendRequest(e.type, msg, false);
     }
-    // TODO: switch to passive events and pan-touch action.
     if (this.scrollLocked_) {
       e.preventDefault();
     }
@@ -171,6 +184,10 @@ export class TouchHandler {
    */
   scrollLockHandler_(type, payload, awaitResponse) {
     this.scrollLocked_ = !!payload;
+    // Depending on scroll lock state re-register touch events.
+    // Passive events are used when scroll lock is not active.
+    this.unlisten_();
+    this.listenForTouchEvents_();
     return awaitResponse ? Promise.resolve({}) : undefined;
   }
 }

@@ -66,6 +66,8 @@ export function expandFrameUnderVsyncMutate(iframe) {
     'height': '100vh',
     'transition': null,
     'transform': null,
+    'margin': 0,
+    'border': 0,
   });
 }
 
@@ -86,7 +88,7 @@ export function collapseFrameUnderVsyncMutate(iframe) {
     'bottom',
     'width',
     'height',
-    'min-width',
-    'min-height',
+    'margin',
+    'border',
   ]);
 }

@@ -41,6 +41,9 @@ class AmpSocialShare extends AMP.BaseElement {
     /** @private {?../../../src/service/platform-impl.Platform} */
     this.platform_ = null;
 
+    /** @private {?../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = null;
+
     /** @private {?string} */
     this.href_ = null;
 
@@ -60,15 +63,19 @@ class AmpSocialShare extends AMP.BaseElement {
     user().assert(!/\s/.test(typeAttr),
         'Space characters are not allowed in type attribute value. %s',
         this.element);
+
+    this.platform_ = Services.platformFor(this.win);
+    this.viewer_ = Services.viewerForDoc(this.element);
+
     if (typeAttr === 'system') {
       // Hide/ignore system component if navigator.share unavailable
-      if (!('share' in navigator)) {
+      if (!this.systemShareSupported_()) {
         setStyle(this.element, 'display', 'none');
         return;
       }
     } else {
       // Hide/ignore non-system component if system share wants to be unique
-      const systemOnly = ('share' in navigator) &&
+      const systemOnly = this.systemShareSupported_() &&
         !!this.win.document.querySelectorAll(
             'amp-social-share[type=system][data-mode=replace]').length;
       if (systemOnly) {
@@ -83,11 +90,19 @@ class AmpSocialShare extends AMP.BaseElement {
         'The data-share-endpoint attribute is required. %s', this.element);
     Object.assign(this.params_, typeConfig['defaultParams'],
         getDataParamsFromAttributes(this.element));
-    this.platform_ = Services.platformFor(this.win);
 
     const hrefWithVars = addParamsToUrl(this.shareEndpoint_, this.params_);
     const urlReplacements = Services.urlReplacementsForDoc(this.getAmpDoc());
-    urlReplacements.expandAsync(hrefWithVars).then(href => {
+    const bindingVars = typeConfig['bindings'];
+    const bindings = {};
+    if (bindingVars) {
+      bindingVars.forEach(name => {
+        const bindingName = name.toUpperCase();
+        bindings[bindingName] = this.params_[name];
+      });
+    }
+
+    urlReplacements.expandAsync(hrefWithVars, bindings).then(href => {
       this.href_ = href;
       // mailto:, whatsapp: protocols breaks when opened in _blank on iOS Safari
       const protocol = parseUrl(href).protocol;
@@ -150,6 +165,17 @@ class AmpSocialShare extends AMP.BaseElement {
     }
   }
 
-};
+  /** @private */
+  systemShareSupported_() {
+    // Chrome exports navigator.share in WebView but does not implement it.
+    // See https://bugs.chromium.org/p/chromium/issues/detail?id=765923
+    const isChromeWebview = this.viewer_.isWebviewEmbedded() &&
+        this.platform_.isChrome();
 
-AMP.registerElement('amp-social-share', AmpSocialShare, CSS);
+    return ('share' in navigator) && !isChromeWebview;
+  }
+}
+
+AMP.extension('amp-social-share', '0.1', AMP => {
+  AMP.registerElement('amp-social-share', AmpSocialShare, CSS);
+});

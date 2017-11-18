@@ -18,46 +18,25 @@ import {AmpDocShadow} from '../../src/service/ampdoc-impl';
 import {
   ShadowDomWriterBulk,
   ShadowDomWriterStreamer,
-  copyRuntimeStylesToShadowRoot,
   createShadowDomWriter,
-  createShadowEmbedRoot,
   createShadowRoot,
   getShadowRootNode,
   importShadowBody,
-  installStylesForShadowRoot,
   isShadowRoot,
   scopeShadowCss,
   setShadowDomStreamingSupportedForTesting,
 } from '../../src/shadow-embed';
-import {Services} from '../../src/services';
+import {toArray} from '../../src/types';
+import {installStylesForDoc} from '../../src/style-installer';
 import {
   setShadowDomSupportedVersionForTesting,
+  setShadowCssSupportedForTesting,
   ShadowDomVersion,
 } from '../../src/web-components';
-import * as sinon from 'sinon';
-
 
 describes.sandboxed('shadow-embed', {}, () => {
   afterEach(() => {
     setShadowDomSupportedVersionForTesting(undefined);
-  });
-
-  it('should copy runtime styles from ampdoc', () => {
-    const parentRoot = document.createElement('div');
-    const style = document.createElement('style');
-    style.setAttribute('amp-runtime', '');
-    style.textContent = '.cssClass{}';
-    parentRoot.appendChild(style);
-    const hostElement = document.createElement('div');
-    const shadowRoot = createShadowRoot(hostElement);
-    const ampdoc = new AmpDocShadow(window, 'https://a.org/', parentRoot);
-
-    copyRuntimeStylesToShadowRoot(ampdoc, shadowRoot);
-
-    const copy = shadowRoot.querySelector('style[amp-runtime]');
-    expect(copy).to.exist;
-    expect(copy.textContent).to.contain('.cssClass');
-    expect(copy).to.not.equal(style);
   });
 
   [ShadowDomVersion.NONE, ShadowDomVersion.V0, ShadowDomVersion.V1]
@@ -68,6 +47,7 @@ describes.sandboxed('shadow-embed', {}, () => {
           beforeEach(function() {
             hostElement = document.createElement('div');
             setShadowDomSupportedVersionForTesting(scenario);
+            setShadowCssSupportedForTesting(undefined);
 
             if (scenario == ShadowDomVersion.V0 &&
                 !Element.prototype.createShadowRoot) {
@@ -80,10 +60,11 @@ describes.sandboxed('shadow-embed', {}, () => {
             }
           });
 
-          it('should transform CSS installStylesForShadowRoot', () => {
+          it('should transform CSS installStylesForDoc for shadow root', () => {
             const shadowRoot = createShadowRoot(hostElement);
-            const style = installStylesForShadowRoot(
-                shadowRoot, 'body {}', true);
+            const ampdoc = new AmpDocShadow(
+                window, 'https://a.org/', shadowRoot);
+            const style = installStylesForDoc(ampdoc, 'body {}', null, true);
             expect(shadowRoot.contains(style)).to.be.true;
             const css = style.textContent.replace(/\s/g, '');
             if (scenario == ShadowDomVersion.NONE) {
@@ -144,6 +125,37 @@ describes.sandboxed('shadow-embed', {}, () => {
                 doc.body.removeChild(hostElement);
               });
             }
+
+            // Test scenarios where Shadow Css is not supported
+            it('Should add an id and class for CSS \
+              encapsulation to the shadow root', () => {
+              setShadowCssSupportedForTesting(false);
+              const shadowRoot = createShadowRoot(hostElement);
+              expect(shadowRoot.id).to.match(/i-amphtml-sd-\d+/);
+              // Browserify does not support arrow functions with params.
+              // Using Old School for
+              const shadowRootClassListArray =
+                toArray(shadowRoot.host.classList);
+              let foundShadowCssClass = false;
+              for (let i = 0; i < shadowRootClassListArray.length; i++) {
+                if (shadowRootClassListArray[i].match(/i-amphtml-sd-\d+/)) {
+                  foundShadowCssClass = true;
+                  break;
+                }
+              }
+              expect(foundShadowCssClass).to.be.ok;
+            });
+
+            it('Should transform CSS for the shadow root', () => {
+              setShadowCssSupportedForTesting(false);
+              const shadowRoot = createShadowRoot(hostElement);
+              const ampdoc = new AmpDocShadow(
+                  window, 'https://a.org/', shadowRoot);
+              const style = installStylesForDoc(ampdoc, 'body {}', null, true);
+              expect(shadowRoot.contains(style)).to.be.true;
+              const css = style.textContent.replace(/\s/g, '');
+              expect(css).to.match(/amp-body/);
+            });
           });
 
           describe('stylesheets', () => {
@@ -286,66 +298,6 @@ describes.sandboxed('shadow-embed', {}, () => {
     });
   });
 
-  describe('createShadowEmbedRoot', () => {
-    let extensionsMock;
-    let hostElement;
-
-    beforeEach(() => {
-      const extensions = Services.extensionsFor(window);
-      extensionsMock = sandbox.mock(extensions);
-
-      hostElement = document.createElement('div');
-      if (!hostElement.createShadowRoot) {
-        hostElement.createShadowRoot = () => {
-          const shadowRoot = document.createElement('shadow');
-          hostElement.appendChild(shadowRoot);
-          hostElement.shadowRoot = shadowRoot;
-          shadowRoot.host = hostElement;
-        };
-      }
-
-      const root = document.createElement('div');
-      const style = document.createElement('style');
-      style.setAttribute('amp-runtime', '');
-      root.appendChild(style);
-      const ampdoc = new AmpDocShadow(window, 'https://a.org/', root);
-      const ampdocService = Services.ampdocServiceFor(window);
-      sandbox.stub(ampdocService, 'getAmpDoc', () => ampdoc);
-    });
-
-    afterEach(() => {
-      extensionsMock.verify();
-    });
-
-    it('should create shadow root and context', () => {
-      const shadowRoot = createShadowEmbedRoot(hostElement, []);
-      expect(shadowRoot).to.exist;
-      expect(shadowRoot.AMP).to.exist;
-    });
-
-    it('should install runtime styles', () => {
-      const shadowRoot = createShadowEmbedRoot(hostElement, []);
-      expect(shadowRoot.querySelector('style[amp-runtime]')).to.exist;
-    });
-
-    it('should install extensions', () => {
-      extensionsMock.expects('loadExtension')
-          .withExactArgs('amp-ext1')
-          .returns(Promise.resolve({}))
-          .once();
-      let savedShadowRoot;
-      extensionsMock.expects('installFactoriesInShadowRoot')
-          .withExactArgs(sinon.match(arg => {
-            savedShadowRoot = arg;
-            return true;
-          }), ['amp-ext1'])
-          .returns(Promise.resolve())
-          .once();
-      const shadowRoot = createShadowEmbedRoot(hostElement, ['amp-ext1']);
-      expect(savedShadowRoot).to.equal(shadowRoot);
-    });
-  });
-
   describe('scopeShadowCss', () => {
     let shadowRoot;
 
@@ -359,22 +311,22 @@ describes.sandboxed('shadow-embed', {}, () => {
     }
 
     it('should replace root selectors', () => {
-      expect(scope('html {}')).to.equal('#h amp-html {}');
-      expect(scope('body {}')).to.equal('#h amp-body {}');
+      expect(scope('html {}')).to.equal('.h amp-html {}');
+      expect(scope('body {}')).to.equal('.h amp-body {}');
       expect(scope('html {} body {}')).to.equal(
-          '#h amp-html {}#h amp-body {}');
-      expect(scope('html, body {}')).to.equal('#h amp-html, #h amp-body {}');
-      expect(scope('body.x {}')).to.equal('#h amp-body.x {}');
-      expect(scope('body::after {}')).to.equal('#h amp-body::after {}');
-      expect(scope('body[x] {}')).to.equal('#h amp-body[x] {}');
+          '.h amp-html {}.h amp-body {}');
+      expect(scope('html, body {}')).to.equal('.h amp-html, .h amp-body {}');
+      expect(scope('body.x {}')).to.equal('.h amp-body.x {}');
+      expect(scope('body::after {}')).to.equal('.h amp-body::after {}');
+      expect(scope('body[x] {}')).to.equal('.h amp-body[x] {}');
     });
 
     it('should avoid false positives for root selectors', () => {
-      expect(scope('.body {}')).to.equal('#h .body {}');
-      expect(scope('x-body {}')).to.equal('#h x-body {}');
-      expect(scope('body-x {}')).to.equal('#h body-x {}');
-      expect(scope('body_x {}')).to.equal('#h body_x {}');
-      expect(scope('body1 {}')).to.equal('#h body1 {}');
+      expect(scope('.body {}')).to.equal('.h .body {}');
+      expect(scope('x-body {}')).to.equal('.h x-body {}');
+      expect(scope('body-x {}')).to.equal('.h body-x {}');
+      expect(scope('body_x {}')).to.equal('.h body_x {}');
+      expect(scope('body1 {}')).to.equal('.h body1 {}');
     });
   });
 

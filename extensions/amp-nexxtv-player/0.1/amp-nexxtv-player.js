@@ -250,6 +250,9 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
    * @override
    */
   fullscreenEnter() {
+    if (!this.iframe_) {
+      return;
+    }
     fullscreenEnter(dev().assertElement(this.iframe_));
   }
 
@@ -257,12 +260,28 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
    * @override
    */
   fullscreenExit() {
+    if (!this.iframe_) {
+      return;
+    }
     fullscreenExit(dev().assertElement(this.iframe_));
   }
 
   /** @override */
   isFullscreen() {
+    if (!this.iframe_) {
+      return false;
+    }
     return isFullscreenElement(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
   }
 
   /** @override */
@@ -284,4 +303,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-nexxtv-player', AmpNexxtvPlayer);
+
+AMP.extension('amp-nexxtv-player', '0.1', AMP => {
+  AMP.registerElement('amp-nexxtv-player', AmpNexxtvPlayer);
+});

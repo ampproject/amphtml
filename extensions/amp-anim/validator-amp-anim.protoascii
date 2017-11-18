@@ -15,19 +15,22 @@
 #
 
 tags: {  # amp-anim
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-anim"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    requires_usage: DEPRECATED_WARNING
+    requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-anim>
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "AMP-ANIM"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-anim"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }

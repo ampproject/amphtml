@@ -59,7 +59,7 @@ The `<amp-ad>` requires width and height values to be specified according to the
             resizable
             src="https://ampproject-b5f4c.firebaseapp.com/examples/ampad.basic.embed.html">
   <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div> 
+  <div placeholder></div>
 </amp-iframe>
 </div>
 
@@ -79,7 +79,7 @@ Most ad networks require further configuration, which can be passed to the netwo
 
 ##### data-vars-foo-bar
 
-Attributes starting with `data-vars-` are reserved for [`amp-analytics` vars](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute). 
+Attributes starting with `data-vars-` are reserved for [`amp-analytics` vars](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute).
 
 ##### json (optional)
 
@@ -91,7 +91,7 @@ If provided, requires confirming the [amp-user-notification](https://www.ampproj
 
 ##### data-loading-strategy (optional)
 
-Instructs the ad to start loading when it is within the given number of viewports away (specified as a float value in the range of [0, 3]) from the current viewport. Use a smaller value to gain higher degree of viewability, with the risk of generating fewer views. If the attribute is not used, the default value is 3. If the attribute is used but the value is left blank, then a float value is assigned by the system, which optimizes for viewability without drastically impacting the views.
+Instructs the ad to start loading when the ad is within the given number of viewports away from the current viewport. You must specify a float value in the range of [0, 3]. By default, the value is 3. Use a smaller value to gain a higher degree of viewability (i.e., increase the chance that an ad, once loaded, will be seen) but with the risk of generating fewer impressions (i.e., fewer ads loaded). If the attribute is used but the value is left blank, then a float value is assigned by the system, which optimizes for viewability without drastically impacting the impressions.
 
 ##### common attributes
 
@@ -110,7 +110,7 @@ Optionally, `amp-ad` supports a child element with the `placeholder` attribute. 
 
 ## No ad available
 
-The `amp-ad` component supports a child element with the `fallback` attribute. If supported by the ad network, the fallback element is shown if no ad is available for this slot. 
+The `amp-ad` component supports a child element with the `fallback` attribute. If supported by the ad network, the fallback element is shown if no ad is available for this slot.
 
 If there is no fallback element available, the `amp-ad` element is collapsed (that is, set to `display: none`) if the ad sends a message that the ad slot cannot be filled and AMP determines that this operation can be performed without affecting the user's scroll position.
 
@@ -123,13 +123,15 @@ Example with fallback:
 ```
 
 ## Serving video ads
-AMP natively supports a number video players like BrightCove, DailyMotion, etc. that can monetize ads. For a full list, see the [media](https://www.ampproject.org/docs/reference/components#media) components.
+There are 3 ways to monetize videos in AMP with video ads:
+1. AMP natively supports a number video players like BrightCove, DailyMotion, etc. that can monetize ads. For a full list, see the [media](https://www.ampproject.org/docs/reference/components#media) components.
 
-If you use a player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://ampbyexample.com/components/amp-iframe/).
+2. Use the [amp-ima-video](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ima-video/amp-ima-video.md) component that comes with a built-in IMA SDK and HTML5 video player 
 
+3. If you use a video player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://ampbyexample.com/components/amp-iframe/).
 When using `amp-iframe` approach:
- - Make sure there is a poster if loading the player in the first viewport. [Details](https://www.ampproject.org/docs/reference/components/amp-iframe#iframe-with-placeholder).
- - Video and poster must be served over HTTPS.
+    * Make sure there is a poster if loading the player in the first viewport. [Details](https://www.ampproject.org/docs/reference/components/amp-iframe#iframe-with-placeholder).
+    * Video and poster must be served over HTTPS.
 
 
 ## Running ads from a custom domain
@@ -151,7 +153,7 @@ The `content` attribute of the meta tag is the absolute URL to your copy of the 
 Iframes should also enforce that they are only iframed into origins that they expect to be iframed into. The origins would be:
 
 - your own origins
-- https://cdn.ampproject.org for the AMP cache
+- `https://cdn.ampproject.org` for the AMP cache
 
 In the case of the AMP cache you also need to check that the "source origin" (origin of the document served by cdn.ampproject.org) is one of your origins.
 
@@ -199,6 +201,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [ADITION](../../ads/adition.md)
 - [Adman](../../ads/adman.md)
 - [AdmanMedia](../../ads/admanmedia.md)
+- [AdOcean](../../ads/adocean.md)
 - [AdReactor](../../ads/adreactor.md)
 - [AdSense](../../ads/google/adsense.md)
 - [AdsNative](../../ads/adsnative.md)
@@ -221,11 +224,13 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [CA-ProFit-X](../../ads/caprofitx.md)
 - [Chargeads](../../ads/chargeads.md)
 - [Colombia](../../ads/colombia.md)
+- [Connatix](../../ads/connatix.md)
 - [Content.ad](../../ads/contentad.md)
 - [Criteo](../../ads/criteo.md)
 - [CSA](../../ads/google/csa.md)
 - [CxenseDisplay](../../ads/eas.md)
 - [Dianomi](../../ads/dianomi.md)
+- [Directadvert](../../ads/directadvert.md)
 - [DistroScale](../../ads/distroscale.md)
 - [Dot and Media](../../ads/dotandads.md)
 - [Doubleclick](../../ads/google/doubleclick.md)
@@ -253,6 +258,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Kiosked](../../ads/kiosked.md)
 - [Kixer](../../ads/kixer.md)
 - [Ligatus](../../ads/ligatus.md)
+- [LockerDome](../../ads/lockerdome.md)
 - [LOKA](../../ads/loka.md)
 - [MADS](../../ads/mads.md)
 - [MANTIS](../../ads/mantis.md)
@@ -280,6 +286,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Rambler&Co](../../ads/capirs.md)
 - [Relap](../../ads/relap.md)
 - [Revcontent](../../ads/revcontent.md)
+- [RevJet](../../ads/revjet.md)
 - [Rubicon Project](../../ads/rubicon.md)
 - [Sharethrough](../../ads/sharethrough.md)
 - [Sklik](../../ads/sklik.md)
@@ -287,6 +294,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Smart AdServer](../../ads/smartadserver.md)
 - [smartclip](../../ads/smartclip.md)
 - [Sortable](../../ads/sortable.md)
+- [sogou Ad](../../ads/sogouad.md)
 - [SOVRN](../../ads/sovrn.md)
 - [SpotX](../../ads/spotx.md)
 - [SunMedia](../../ads/sunmedia.md)
@@ -302,6 +310,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Yahoo](../../ads/yahoo.md)
 - [YahooJP](../../ads/yahoojp.md)
 - [Yandex](../../ads/yandex.md)
+- [Yengo](../../ads/yengo.md)
 - [Yieldbot](../../ads/yieldbot.md)
 - [Yieldmo](../../ads/yieldmo.md)
 - [Yieldone](../../ads/yieldone.md)
@@ -312,6 +321,9 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 
 - [Bringhub](../../ads/bringhub.md)
 - [Dable](../../ads/dable.md)
+- [Engageya](../../ads/engageya.md)
 - [Outbrain](../../ads/outbrain.md)
+- [Postquare](../../ads/postquare.md)
+- [Smi2](../../ads/smi2.md)
 - [Taboola](../../ads/taboola.md)
 - [ZergNet](../../ads/zergnet.md)

@@ -204,6 +204,8 @@ class AmpDailymotion extends AMP.BaseElement {
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
         break;
       case DailymotionEvents.END:
+        this.element.dispatchCustomEvent(VideoEvents.ENDED);
+        // Don't break, also dispatch pause
       case DailymotionEvents.PAUSE:
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
         this.playerState_ = DailymotionEvents.PAUSE;
@@ -339,14 +341,14 @@ class AmpDailymotion extends AMP.BaseElement {
    * @override
    */
   showControls() {
-    // Not supported
+    this.sendCommand_('controls', [true]);
   }
 
   /**
    * @override
    */
   hideControls() {
-    // Not supported
+    this.sendCommand_('controls', [false]);
   }
 
   /**
@@ -357,6 +359,9 @@ class AmpDailymotion extends AMP.BaseElement {
     if (platform.isSafari() || platform.isIos()) {
       this.sendCommand_('fullscreen', [true]);
     } else {
+      if (!this.iframe_) {
+        return;
+      }
       fullscreenEnter(dev().assertElement(this.iframe_));
     }
   }
@@ -369,6 +374,9 @@ class AmpDailymotion extends AMP.BaseElement {
     if (platform.isSafari() || platform.isIos()) {
       this.sendCommand_('fullscreen', [false]);
     } else {
+      if (!this.iframe_) {
+        return;
+      }
       fullscreenExit(dev().assertElement(this.iframe_));
     }
   }
@@ -379,8 +387,21 @@ class AmpDailymotion extends AMP.BaseElement {
     if (platform.isSafari() || platform.isIos()) {
       return this.isFullscreen_;
     } else {
+      if (!this.iframe_) {
+        return false;
+      }
       return isFullscreenElement(dev().assertElement(this.iframe_));
     }
+  }
+
+  /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
   }
 
   /** @override */
@@ -400,6 +421,9 @@ class AmpDailymotion extends AMP.BaseElement {
     // Not supported.
     return [];
   }
-};
+}
 
-AMP.registerElement('amp-dailymotion', AmpDailymotion);
+
+AMP.extension('amp-dailymotion', '0.1', AMP => {
+  AMP.registerElement('amp-dailymotion', AmpDailymotion);
+});

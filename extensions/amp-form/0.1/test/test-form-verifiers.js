@@ -16,11 +16,9 @@
 
 import {
   AsyncVerifier,
-  FORM_VERIFY_EXPERIMENT,
   DefaultVerifier,
   getFormVerifier,
 } from '../form-verifiers';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describes.fakeWin('amp-form async verification', {}, env => {
   function stubValidationMessage(input) {
@@ -98,10 +96,6 @@ describes.fakeWin('amp-form async verification', {}, env => {
   }
 
   describe('getFormVerifier', () => {
-    beforeEach(() => {
-      toggleExperiment(env.win, FORM_VERIFY_EXPERIMENT, true);
-    });
-
     it('returns a DefaultVerifier without the verify-xhr attribute', () => {
       const form = getForm(env.win.document, false);
       const verifier = getFormVerifier(form, () => {});
@@ -113,19 +107,11 @@ describes.fakeWin('amp-form async verification', {}, env => {
       const verifier = getFormVerifier(form, () => {});
       expect(verifier instanceof AsyncVerifier).to.be.true;
     });
-
-    it('should throw if the experiment is disabled with the verify-xhr ' +
-        'attribute present', () => {
-      toggleExperiment(env.win, FORM_VERIFY_EXPERIMENT, false);
-      const form = getForm(env.win.document);
-      expect(() => getFormVerifier(form, () => {})).to.throw(/experiment/);
-    });
   });
 
   describe('AsyncVerifier', () => {
     let sandbox;
     beforeEach(() => {
-      toggleExperiment(env.win, FORM_VERIFY_EXPERIMENT, true);
       sandbox = env.sandbox;
     });
 

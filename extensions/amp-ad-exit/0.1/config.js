@@ -15,6 +15,7 @@
  */
 
 import {user} from '../../../src/log';
+import {ANALYTICS_CONFIG} from '../../amp-analytics/0.1/vendors';
 import {FilterType} from './filters/filter';
 
 /**
@@ -30,16 +31,24 @@ export let AmpAdExitConfig;
  * @typedef {{
  *   finalUrl: string,
  *   trackingUrls: (!Array<string>|undefined),
- *   vars: (Variables|undefined),
+ *   vars: (VariablesDef|undefined),
  *   filters: (!Array<string>|undefined)
  * }}
  */
 export let NavigationTargetConfig;
 
 /**
- * @typedef {!Object<string, {defaultValue: (string|number|boolean)}>}
+ * @typedef {{
+ *   defaultValue: (string|number|boolean),
+ *   iframeTransportSignal: (string|undefined)
+ * }}
  */
-export let Variables;
+export let VariableDef;
+
+/**
+ * @typedef {!Object<string, !VariableDef>}
+ */
+export let VariablesDef;
 
 /**
  * @typedef {{
@@ -49,7 +58,19 @@ export let Variables;
  */
 export let ClickDelayConfig;
 
-/** @typedef {!ClickDelayConfig} */
+/**
+ * @typedef {{
+ *   type: !FilterType,
+ *   top: (number|undefined),
+ *   right: (number|undefined),
+ *   bottom: (number|undefined),
+ *   left: (number|undefined),
+ *   relativeTo: (string|undefined)
+ * }}
+ */
+export let ClickLocationConfig;
+
+/** @typedef {!ClickDelayConfig|!ClickLocationConfig} */
 export let FilterConfig;
 
 /** @enum {string} */
@@ -93,8 +114,10 @@ function assertFilters(filters) {
     user().assert(typeof filters[name] == 'object',
         'Filter specification \'%s\' is malformed', name);
     user().assert(
-        filters[name].type == FilterType.CLICK_DELAY,
-        'Only ClickDelayFilter is currently supported.');
+        filters[name].type == FilterType.CLICK_DELAY ||
+        filters[name].type == FilterType.CLICK_LOCATION,
+        'Only ClickDelayFilter and ClickLocationDelay are currently ' +
+        'supported.');
   }
 }
 
@@ -123,4 +146,19 @@ function assertTarget(name, target, config) {
           variable, pattern);
     }
   }
+}
+
+/**
+ * Checks whether a vendor is valid (i.e. listed in vendors.js and has
+ * transport/iframe defined.
+ * @param {string} vendor The vendor name that should be listed in vendors.js
+ * @return {string} The vendor's iframe URL
+ */
+export function assertVendor(vendor) {
+  user().assert(ANALYTICS_CONFIG &&
+      ANALYTICS_CONFIG[vendor] &&
+      ANALYTICS_CONFIG[vendor]['transport'] &&
+      ANALYTICS_CONFIG[vendor]['transport']['iframe'],
+      'Unknown vendor: ' + vendor);
+  return ANALYTICS_CONFIG[vendor]['transport']['iframe'];
 }

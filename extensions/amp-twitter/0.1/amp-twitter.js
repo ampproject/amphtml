@@ -92,6 +92,9 @@ class AmpTwitter extends AMP.BaseElement {
     }
     return true;
   }
-};
+}
 
-AMP.registerElement('amp-twitter', AmpTwitter);
+
+AMP.extension('amp-twitter', '0.1', AMP => {
+  AMP.registerElement('amp-twitter', AmpTwitter);
+});

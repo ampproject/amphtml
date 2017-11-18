@@ -833,19 +833,7 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format, light,
   out.Line('')
   for name in all_names:
     out.Line("goog.provide('%s');" % name)
-  out.Line("goog.provide('amp.validator.LIGHT');")
-  out.Line("goog.provide('amp.validator.VALIDATE_CSS');")
   out.Line("goog.provide('amp.validator.createRules');")
-
-  out.Line('')
-  out.Line('/** @define {boolean} */')
-  if light:
-    out.Line('amp.validator.LIGHT = true;')
-  else:
-    out.Line('amp.validator.LIGHT = false;')
-  out.Line('')
-  out.Line('/** @define {boolean} */')
-  out.Line('amp.validator.VALIDATE_CSS = true;')
   out.Line('')
 
   # We share the empty arrays between all specification object instances; this

@@ -240,7 +240,9 @@ describe('preconnect', () => {
     });
   });
 
-  it('should add links if feature if detected', () => {
+  // TODO(cramforce, #11827): Make this test work on Safari.
+  it.configure().skipSafari().run('should add links if feature ' +
+      'if detected', () => {
     // Don't stub preload support allow the test to run through the browser
     // default regardless of support or not.
     return getPreconnectIframe(/* detectFeatures */ true).then(iframe => {
@@ -293,7 +295,7 @@ describe('preconnect', () => {
         expect(as == '' || as == 'fetch').to.be.ok;
         preloads[0].as = 'not-valid';
         if (preloads[0].as != 'not-valid') {
-          expect(as).to.equal('fetch');
+          expect(as == '' || as == 'fetch').to.be.ok;
         }
       });
     });

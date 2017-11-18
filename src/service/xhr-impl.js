@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
+import {FormDataWrapper} from '../form-data-wrapper';
 import {Services} from '../services';
 import {dev, user} from '../log';
 import {registerServiceBuilder, getService} from '../service';
 import {
   getSourceOrigin,
   getCorsUrl,
+  getWinOrigin,
   parseUrl,
+  serializeQueryString,
 } from '../url';
 import {parseJson} from '../json';
-import {isArray, isObject, isFormData} from '../types';
+import {isArray, isObject} from '../types';
 import {utf8EncodeSync} from '../utils/bytes';
 import {getMode} from '../mode';
 
@@ -90,14 +93,10 @@ export class Xhr {
     /** @const {!Window} */
     this.win = win;
 
+    const ampdocService = Services.ampdocServiceFor(win);
     /** @private {?./ampdoc-impl.AmpDoc} */
-    this.ampdocSingle_ = null;
-    if (!getMode().test) {
-      const ampdocService = Services.ampdocServiceFor(win);
-      this.ampdocSingle_ = ampdocService.isSingleDoc() ?
-          ampdocService.getAmpDoc() :
-          null;
-    }
+    this.ampdocSingle_ =
+        ampdocService.isSingleDoc() ? ampdocService.getAmpDoc() : null;
   }
 
   /**
@@ -110,7 +109,8 @@ export class Xhr {
    * @private
    */
   fetch_(input, init) {
-    if (this.ampdocSingle_ &&
+    if (!getMode().test &&
+        this.ampdocSingle_ &&
         Math.random() < 0.01 &&
         parseUrl(input).origin != this.win.location.origin &&
         !Services.viewerForDoc(this.ampdocSingle_).hasBeenVisible()) {
@@ -125,6 +125,14 @@ export class Xhr {
     dev().assert(
         creds === undefined || creds == 'include' || creds == 'omit',
         'Only credentials=include|omit support: %s', creds);
+
+    // After this point, both the native `fetch` and the `fetch` polyfill will
+    // expect a native `FormData` object in the `body` property, so the native
+    // `FormData` object needs to be unwrapped.
+    if (init.body instanceof FormDataWrapper) {
+      init.body = init.body.getFormData();
+    }
+
     // Fallback to xhr polyfill since `fetch` api does not support
     // responseType = 'document'. We do this so we don't have to do any parsing
     // and document construction on the UI thread which would be expensive.
@@ -166,7 +174,7 @@ export class Xhr {
     }
     // For some same origin requests, add AMP-Same-Origin: true header to allow
     // publishers to validate that this request came from their own origin.
-    const currentOrigin = parseUrl(this.win.location.href).origin;
+    const currentOrigin = getWinOrigin(this.win);
     const targetOrigin = parseUrl(input).origin;
     if (currentOrigin == targetOrigin) {
       init['headers'] = init['headers'] || {};
@@ -213,7 +221,7 @@ export class Xhr {
    */
   fetchJson(input, opt_init, opt_allowFailure) {
     const init = setupInit(opt_init, 'application/json');
-    if (init.method == 'POST' && !isFormData(init.body)) {
+    if (init.method == 'POST' && !(init.body instanceof FormDataWrapper)) {
       // Assume JSON strict mode where only objects or arrays are allowed
       // as body.
       dev().assert(
@@ -222,9 +230,17 @@ export class Xhr {
           init.body
       );
 
-      init.headers['Content-Type'] = 'application/json;charset=utf-8';
+      // Content should be 'text/plain' to avoid CORS preflight.
+      init.headers['Content-Type'] = init.headers['Content-Type'] ||
+          'text/plain;charset=utf-8';
+      const headerContentType = init.headers['Content-Type'];
       // Cast is valid, because we checked that it is not form data above.
-      init.body = JSON.stringify(/** @type {!JsonObject} */ (init.body));
+      if (headerContentType === 'application/x-www-form-urlencoded') {
+        init.body =
+          serializeQueryString(/** @type {!JsonObject} */ (init.body));
+      } else {
+        init.body = JSON.stringify(/** @type {!JsonObject} */ (init.body));
+      }
     }
     return this.fetch(input, init);
   }

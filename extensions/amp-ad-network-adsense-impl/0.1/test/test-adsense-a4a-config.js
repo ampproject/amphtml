@@ -16,16 +16,14 @@
 
 import {
   adsenseIsA4AEnabled,
-  ADSENSE_A4A_EXPERIMENT_NAME,
-  ADSENSE_EXPERIMENT_FEATURE,
   URL_EXPERIMENT_MAPPING,
 } from '../adsense-a4a-config';
 import {
   isInExperiment,
 } from '../../../../ads/google/a4a/traffic-experiments';
 import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
-import {forceExperimentBranch} from '../../../../src/experiments';
-import {parseUrl} from '../../../../src/url';
+import {urls} from '../../../../src/config';
+import {isProxyOrigin, parseUrl} from '../../../../src/url';
 import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
 
@@ -63,6 +61,32 @@ describe('adsense-a4a-config', () => {
       expect(adsenseIsA4AEnabled(mockWin, elem)).to.be.false;
     });
 
+    it('should not enable a4a when useRemoteHtml is true', () => {
+      mockWin.location = parseUrl(
+          'https://cdn.ampproject.org/some/path/to/content.html');
+      sandbox.stub(
+          urls, 'cdnProxyRegex',
+          /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org/);
+      const elem = testFixture.doc.createElement('div');
+      elem.setAttribute('data-ad-client', 'ca-pub-somepub');
+      testFixture.doc.body.appendChild(elem);
+      const useRemoteHtml = true;
+      expect(adsenseIsA4AEnabled(mockWin, elem, useRemoteHtml)).to.be.false;
+    });
+
+    it('should not enable a4a when on a non-Google AMP cache', () => {
+      mockWin.location = parseUrl(
+          'https://amp.cloudflare.com/some/path/to/content.html');
+      sandbox.stub(
+          urls, 'cdnProxyRegex',
+          /^https:\/\/([a-zA-Z0-9_-]+\.)?amp\.cloudflare\.com/);
+      expect(isProxyOrigin(mockWin.location)).to.be.true;
+      const elem = testFixture.doc.createElement('div');
+      elem.setAttribute('data-ad-client', 'ca-pub-somepub');
+      testFixture.doc.body.appendChild(elem);
+      expect(adsenseIsA4AEnabled(mockWin, elem)).to.be.false;
+    });
+
     Object.keys(URL_EXPERIMENT_MAPPING).forEach(expFlagValue => {
       it(`exp flag=${expFlagValue} should set eid attribute`, () => {
         mockWin.location = parseUrl(
@@ -71,9 +95,8 @@ describe('adsense-a4a-config', () => {
         const elem = testFixture.doc.createElement('div');
         elem.setAttribute('data-ad-client', 'ca-pub-somepub');
         testFixture.doc.body.appendChild(elem);
-        // Enabled for all but holdback & sfg.
-        expect(adsenseIsA4AEnabled(mockWin, elem)).to.equal(
-            expFlagValue != '2');
+        // Enabled for all
+        expect(adsenseIsA4AEnabled(mockWin, elem)).to.be.true;
         if (expFlagValue == 0) {
           expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
         } else {
@@ -82,31 +105,6 @@ describe('adsense-a4a-config', () => {
               .to.be.true;
         }
       });
-    });
-
-    it('should select random branch, holdback', () => {
-      mockWin.location = parseUrl(
-          'https://cdn.ampproject.org/some/path/to/content.html');
-      forceExperimentBranch(mockWin, ADSENSE_A4A_EXPERIMENT_NAME,
-          ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL);
-      const elem = testFixture.doc.createElement('div');
-      elem.setAttribute('data-ad-client', 'ca-pub-somepub');
-      testFixture.doc.body.appendChild(elem);
-      expect(adsenseIsA4AEnabled(mockWin, elem)).to.be.false;
-      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal(
-          ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL);
-    });
-
-    it('should select random branch, control', () => {
-      mockWin.location = parseUrl(
-          'https://cdn.ampproject.org/some/path/to/content.html');
-      forceExperimentBranch(
-          mockWin, ADSENSE_A4A_EXPERIMENT_NAME, '2092615');
-      const elem = testFixture.doc.createElement('div');
-      elem.setAttribute('data-ad-client', 'ca-pub-somepub');
-      testFixture.doc.body.appendChild(elem);
-      expect(adsenseIsA4AEnabled(mockWin, elem)).to.be.true;
-      expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.equal('2092615');
     });
   });
 });

@@ -31,6 +31,9 @@ import {listen, getData} from '../../../src/event-helper';
 import {VideoEvents} from '../../../src/video-interface';
 import {Services} from '../../../src/services';
 
+const TAG = 'amp-3q-player';
+
+
 /**
  * @implements {../../../src/video-interface.VideoInterface}
  */
@@ -224,6 +227,9 @@ class Amp3QPlayer extends AMP.BaseElement {
    * @override
    */
   fullscreenEnter() {
+    if (!this.iframe_) {
+      return;
+    }
     fullscreenEnter(dev().assertElement(this.iframe_));
   }
 
@@ -231,12 +237,28 @@ class Amp3QPlayer extends AMP.BaseElement {
    * @override
    */
   fullscreenExit() {
+    if (!this.iframe_) {
+      return;
+    }
     fullscreenExit(dev().assertElement(this.iframe_));
   }
 
   /** @override */
   isFullscreen() {
+    if (!this.iframe_) {
+      return false;
+    }
     return isFullscreenElement(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
   }
 
   /** @override */
@@ -256,6 +278,9 @@ class Amp3QPlayer extends AMP.BaseElement {
     // Not supported.
     return [];
   }
-};
+}
 
-AMP.registerElement('amp-3q-player', Amp3QPlayer);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, Amp3QPlayer);
+});

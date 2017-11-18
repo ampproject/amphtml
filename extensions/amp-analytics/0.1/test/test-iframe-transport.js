@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {urls} from '../../../../src/config';
 import {IframeTransport} from '../iframe-transport';
 
 describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
@@ -24,8 +25,8 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
 
   beforeEach(() => {
     sandbox = env.sandbox;
-    iframeTransport = new IframeTransport(env.win, 'some_vendor_type',
-        {iframe: frameUrl});
+    iframeTransport = new IframeTransport(env.ampdoc.win,
+        'some_vendor_type', {iframe: frameUrl}, frameUrl + '-1');
   });
 
   afterEach(() => {
@@ -61,19 +62,21 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
   });
 
   it('does not cause sentinel collisions', () => {
-    const iframeTransport2 = new IframeTransport(env.win,
-        'some_other_vendor_type', {iframe: 'https://example.com/test2'});
+    const iframeTransport2 = new IframeTransport(env.ampdoc.win,
+        'some_other_vendor_type', {iframe: 'https://example.com/test2'},
+        'https://example.com/test2-2');
 
     const frame1 = IframeTransport.getFrameData(iframeTransport.getType());
     const frame2 = IframeTransport.getFrameData(iframeTransport2.getType());
-    expectAllUnique([iframeTransport.getId(), iframeTransport2.getId(),
+    expectAllUnique([iframeTransport.getCreativeId(),
+      iframeTransport2.getCreativeId(),
       frame1.frame.sentinel, frame2.frame.sentinel]);
   });
 
   it('correctly tracks usageCount and destroys iframes', () => {
     const frameUrl2 = 'https://example.com/test2';
-    const iframeTransport2 = new IframeTransport(env.win,
-        'some_other_vendor_type', {iframe: frameUrl2});
+    const iframeTransport2 = new IframeTransport(env.ampdoc.win,
+        'some_other_vendor_type', {iframe: frameUrl2}, frameUrl2 + '-3');
 
     const frame1 = IframeTransport.getFrameData(iframeTransport.getType());
     const frame2 = IframeTransport.getFrameData(iframeTransport2.getType());
@@ -113,5 +116,18 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
     expect(frame2.usageCount).to.equal(0);
     expect(env.win.document.getElementsByTagName('IFRAME')).to.have.lengthOf(0);
   });
-});
 
+  it('gets correct client lib URL in local/test mode', () => {
+    const url = iframeTransport.getLibScriptUrl();
+    expect(url).to.contain(env.win.location.host);
+    expect(url).to.contain('/dist/iframe-transport-client-lib.js');
+  });
+
+  it('gets correct client lib URL in prod mode', () => {
+    const url = iframeTransport.getLibScriptUrl(true);
+    expect(url).to.contain(urls.thirdParty);
+    expect(url).to.contain('/iframe-transport-client-v0.js');
+    expect(url).to.equal('https://3p.ampproject.net/$internalRuntimeVersion$/' +
+        'iframe-transport-client-v0.js');
+  });
+});

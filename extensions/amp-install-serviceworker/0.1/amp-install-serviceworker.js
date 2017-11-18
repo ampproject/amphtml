@@ -86,7 +86,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
         return install(this.win, src);
       });
     } else {
-      user().error(TAG,
+      this.user().error(TAG,
           'Did not install ServiceWorker because it does not ' +
           'match the current origin: ' + src);
     }
@@ -95,7 +95,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
   /** @private */
   scheduleIframeLoad_() {
     Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
-      // If the user is longer than 20 seconds on this page, load
+      // If the user is longer than 10 seconds on this page, load
       // the external iframe to install the ServiceWorker. The wait is
       // introduced to avoid installing SWs for content that the user
       // only engaged with superficially.
@@ -299,5 +299,6 @@ function install(win, src) {
 }
 
 
-AMP.registerElement('amp-install-serviceworker',
-    AmpInstallServiceWorker);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpInstallServiceWorker);
+});

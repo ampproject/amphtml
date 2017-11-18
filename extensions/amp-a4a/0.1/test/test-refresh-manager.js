@@ -15,13 +15,13 @@
  */
 
 import {
+  getPublisherSpecifiedRefreshInterval,
   RefreshManager,
   DATA_ATTR_NAME,
   DATA_MANAGER_ID_NAME,
   METATAG_NAME,
 } from '../refresh-manager';
 import {timerFor} from '../../../../src/services';
-import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 
 function getTestElement() {
@@ -49,32 +49,31 @@ describe('refresh-manager', () => {
       element: getTestElement(),
       refresh: () => {},
     };
-    toggleExperiment(window, 'amp-ad-refresh', true);
   });
 
   afterEach(() => {
     sandbox.restore();
   });
 
+  it('should get null refreshInterval', () => {
+    mockA4a.element.removeAttribute(DATA_ATTR_NAME);
+    expect(getPublisherSpecifiedRefreshInterval(
+        mockA4a.element, window, 'doubleclick')).to.be.null;
+  });
+
   it('should get refreshInterval from slot', () => {
-    const getPublisherSpecifiedRefreshIntervalSpy = sandbox.spy(
-        RefreshManager.prototype, 'getPublisherSpecifiedRefreshInterval_');
-    const refreshManager = new RefreshManager(mockA4a, config);
-    expect(getPublisherSpecifiedRefreshIntervalSpy).to.be.calledOnce;
-    expect(refreshManager.refreshInterval_).to.equal(35000);
+    expect(getPublisherSpecifiedRefreshInterval(
+        mockA4a.element, window, 'doubleclick')).to.equal(35000);
   });
 
   it('should get refreshInterval from meta tag', () => {
-    const getPublisherSpecifiedRefreshIntervalSpy = sandbox.spy(
-        RefreshManager.prototype, 'getPublisherSpecifiedRefreshInterval_');
     mockA4a.element.removeAttribute(DATA_ATTR_NAME);
     const meta = window.document.createElement('meta');
     meta.setAttribute('name', METATAG_NAME);
     meta.setAttribute('content', 'doubleclick=40');
     window.document.head.appendChild(meta);
-    const refreshManager = new RefreshManager(mockA4a, config);
-    expect(getPublisherSpecifiedRefreshIntervalSpy).to.be.calledOnce;
-    expect(refreshManager.refreshInterval_).to.equal(40000);
+    expect(getPublisherSpecifiedRefreshInterval(
+        mockA4a.element, window, 'doubleclick')).to.equal(40000);
   });
 
   it('should call convertConfiguration_ and set proper units', () => {
@@ -82,30 +81,18 @@ describe('refresh-manager', () => {
         RefreshManager.prototype, 'convertAndSanitizeConfiguration_');
     const refreshManager = new RefreshManager(mockA4a, {
       visiblePercentageMin: 50,
-      totalTimeMin: 0,
       continuousTimeMin: 1,
-    });
+    }, 30000);
     expect(getConfigurationSpy).to.be.calledOnce;
     expect(refreshManager.config_).to.not.be.null;
     expect(refreshManager.config_.visiblePercentageMin).to.equal(0.5);
-    expect(refreshManager.config_.totalTimeMin).to.equal(0);
     expect(refreshManager.config_.continuousTimeMin).to.equal(1000);
-  });
-
-  it('should be eligible for refresh', () => {
-    const refreshManager = new RefreshManager(mockA4a, config);
-    expect(refreshManager.isRefreshable()).to.be.true;
-  });
-
-  it('should NOT be eligible for refresh', () => {
-    mockA4a.element.removeAttribute(DATA_ATTR_NAME);
-    const refreshManager = new RefreshManager(mockA4a, config);
-    expect(refreshManager.isRefreshable()).to.be.false;
   });
 
   describe('#ioCallback_', () => {
     let refreshManager;
-    beforeEach(() => refreshManager = new RefreshManager(mockA4a, config));
+    beforeEach(
+        () => refreshManager = new RefreshManager(mockA4a, config, 30000));
 
     it('should stay in INITIAL state', () => {
       const ioEntry = {
@@ -150,7 +137,7 @@ describe('refresh-manager', () => {
     // Attach element to DOM, as is necessary for request ampdoc.
     window.document.body.appendChild(mockA4a.element);
     const refreshSpy = sandbox.spy(mockA4a, 'refresh');
-    const refreshManager = new RefreshManager(mockA4a, config);
+    const refreshManager = new RefreshManager(mockA4a, config, 30000);
     // So the test doesn't hang for the required minimum 30s interval, or the
     // 1s ActiveView visibility definition.
     refreshManager.config_ = {
@@ -166,5 +153,3 @@ describe('refresh-manager', () => {
     });
   });
 });
-
-

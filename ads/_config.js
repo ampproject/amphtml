@@ -107,6 +107,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  adocean: {},
+
   adreactor: {},
 
   adsense: {
@@ -245,7 +247,12 @@ export const adConfig = {
     prefetch: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
   },
 
+  connatix: {
+    renderStartImplemented: true,
+  },
+
   contentad: {},
+
 
   criteo: {
     prefetch: 'https://static.criteo.net/js/ld/publishertag.js',
@@ -262,6 +269,10 @@ export const adConfig = {
       'https://api.dable.io',
       'https://images.dable.io',
     ],
+    renderStartImplemented: true,
+  },
+
+  directadvert: {
     renderStartImplemented: true,
   },
 
@@ -298,6 +309,8 @@ export const adConfig = {
     prefetch: 'https://amp.emediate.eu/amp.v0.js',
     renderStartImplemented: true,
   },
+
+  engageya: {},
 
   eplanning: {
     prefetch: 'https://us.img.e-planning.net/layers/epl-amp.js',
@@ -418,6 +431,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  lockerdome: {
+    prefetch: 'https://cdn2.lockerdomecdn.com/_js/amp.js',
+    renderStartImplemented: true,
+  },
+
   loka: {
     prefetch: 'https://loka-cdn.akamaized.net/scene/amp.js',
     preconnect: [
@@ -497,7 +515,7 @@ export const adConfig = {
 
   mywidget: {
     preconnect: 'https://likemore-fe.go.mail.ru',
-    prefetch: 'https://likemore-go.imgsmail.ru/widget.amp.js',
+    prefetch: 'https://likemore-go.imgsmail.ru/widget_amp.js',
     renderStartImplemented: true,
   },
 
@@ -564,6 +582,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  postquare: {},
+
   pubmatic: {
     prefetch: 'https://ads.pubmatic.com/AdServer/js/amp.js',
   },
@@ -601,6 +621,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  revjet: {
+    prefetch: 'https://cdn.revjet.com/~cdn/JS/03/amp.js',
+    renderStartImplemented: true,
+  },
+
   rubicon: {},
 
   sharethrough: {
@@ -629,6 +654,15 @@ export const adConfig = {
   smartclip: {
     prefetch: 'https://cdn.smartclip.net/amp/amp.v0.js',
     preconnect: 'https://des.smartclip.net',
+    renderStartImplemented: true,
+  },
+
+  smi2: {
+    renderStartImplemented: true,
+  },
+
+  sogouad: {
+    prefetch: 'https://theta.sogoucdn.com/wap/js/aw.js',
     renderStartImplemented: true,
   },
 
@@ -736,6 +770,10 @@ export const adConfig = {
 
   yandex: {
     prefetch: 'https://yastatic.net/partner-code/loaders/context_amp.js',
+    renderStartImplemented: true,
+  },
+
+  yengo: {
     renderStartImplemented: true,
   },
 

@@ -35,36 +35,31 @@ describe('#getMultiSizeDimensions', () => {
 
   it('should return all sizes', () => {
     const actual = getMultiSizeDimensions(multiSizeDataStr, 300, 300,
-        /* Ignore lowerbound */ false,
-        /* Don't drop entire string on error */ false);
+        /* Ignore lowerbound */ false);
     verifyArray(actual, 0, multiSizes.length);
   });
 
   it('should return a smaller array', () => {
     const actual = getMultiSizeDimensions(multiSizeDataStr, 300, 250,
-        /* Ignore lowerbound */ false,
-        /* Don't drop entire string on error */ false);
+        /* Ignore lowerbound */ false);
     verifyArray(actual, 1, multiSizes.length);
   });
 
   it('should return an even smaller array', () => {
     const actual = getMultiSizeDimensions(multiSizeDataStr, 250, 250,
-        /* Ignore lowerbound */ false,
-        /* Don't drop entire string on error */ false);
+        /* Ignore lowerbound */ false);
     verifyArray(actual, 2, multiSizes.length);
   });
 
   it('should return an empty array', () => {
     const actual = getMultiSizeDimensions(multiSizeDataStr, 100, 50,
-        /* Ignore lowerbound */ false,
-        /* Don't drop entire string on error */ false);
+        /* Ignore lowerbound */ false);
     verifyArray(actual, 0, 0);
   });
 
   it('should return a smaller array due to lowerbound', () => {
     const actual = getMultiSizeDimensions(multiSizeDataStr, 300, 300,
-        /* Use lowerbound */ true,
-        /* Don't drop entire string on error */ false);
+        /* Use lowerbound */ true);
 
     verifyArray(actual, 0, multiSizes.length - 1);
   });
@@ -72,23 +67,14 @@ describe('#getMultiSizeDimensions', () => {
   it('should return a smaller array due to lowerbound + smaller primary size',
       () => {
         const actual = getMultiSizeDimensions(multiSizeDataStr, 300, 250,
-            /* Use lowerbound */ true,
-            /* Don't drop entire string on error */ false);
+            /* Use lowerbound */ true);
         verifyArray(actual, 1, multiSizes.length - 1);
       });
 
-  it('should return null', () => {
-    const actual = getMultiSizeDimensions(multiSizeDataStr, 300, 250,
-        /* Ignore lowerbound */ false,
-        /* Drop entire string on error */ true);
-    expect(actual).to.be.null;
-  });
-
-  it('should return null due to non-positive argument', () => {
+  it('should return all positive sizes', () => {
     const actual = getMultiSizeDimensions(
         '-1x300,' + multiSizeDataStr, 300, 300,
-        /* Ignore lowerbound */ false,
-        /* Drop entire string on error */ true);
-    expect(actual).to.be.null;
+        /* Ignore lowerbound */ false);
+    verifyArray(actual, 0, multiSizes.length);
   });
 });

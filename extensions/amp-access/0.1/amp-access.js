@@ -19,6 +19,7 @@ import {AccessOtherAdapter} from './amp-access-other';
 import {AccessServerAdapter} from './amp-access-server';
 import {AccessServerJwtAdapter} from './amp-access-server-jwt';
 import {AccessVendorAdapter} from './amp-access-vendor';
+import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {SignInProtocol} from './signin';
 import {Services} from '../../../src/services';
@@ -27,8 +28,7 @@ import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
 import {cancellation} from '../../../src/error';
 import {evaluateAccessExpr} from './access-expr';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
-import {installStyles} from '../../../src/style-installer';
-import {installStylesForShadowRoot} from '../../../src/shadow-embed';
+import {installStylesForDoc} from '../../../src/style-installer';
 import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
 import {listenOnce} from '../../../src/event-helper';
@@ -72,13 +72,7 @@ export class AccessService {
     this.ampdoc = ampdoc;
 
     // Install styles.
-    if (ampdoc.isSingleDoc()) {
-      const root = /** @type {!Document} */ (ampdoc.getRootNode());
-      installStyles(root, CSS, () => {}, false, TAG);
-    } else {
-      const root = /** @type {!ShadowRoot} */ (ampdoc.getRootNode());
-      installStylesForShadowRoot(root, CSS, false, TAG);
-    }
+    installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
 
     const accessElement = ampdoc.getElementById('amp-access');
 
@@ -136,7 +130,7 @@ export class AccessService {
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(ampdoc);
 
-    /** @private @const {!../../../src/service/viewport-impl.Viewport} */
+    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
     /** @private @const {!../../../src/service/template-impl.Templates} */
@@ -192,6 +186,28 @@ export class AccessService {
         this.performance_.flush();
       }
     });
+
+    // Re-authorize newly added sections.
+    ampdoc.getRootNode().addEventListener(AmpEvents.DOM_UPDATE,
+        this.onDomUpdate_.bind(this));
+  }
+
+  /**
+   * @param {!Event} event
+   * @private
+   */
+  onDomUpdate_(event) {
+    // Only re-authorize sections if the response is already available.
+    // Otherwise, just wait for the authorization - it will cover new sections.
+    // But wait for the last authorization operation to complete.
+    const response = this.authResponse_;
+    if (response) {
+      return this.lastAuthorizationPromise_.then(() => {
+        const target = dev().assertElement(event.target);
+        this.applyAuthorizationToRoot_(target,
+            /** @type {!JsonObject} */ (response));
+      });
+    }
   }
 
   /**
@@ -548,7 +564,17 @@ export class AccessService {
    * @private
    */
   applyAuthorization_(response) {
-    const elements = this.ampdoc.getRootNode().querySelectorAll('[amp-access]');
+    return this.applyAuthorizationToRoot_(this.ampdoc.getRootNode(), response);
+  }
+
+  /**
+   * @param {!Document|!ShadowRoot|!Element} root
+   * @param {!JsonObject} response
+   * @return {!Promise}
+   * @private
+   */
+  applyAuthorizationToRoot_(root, response) {
+    const elements = root.querySelectorAll('[amp-access]');
     const promises = [];
     for (let i = 0; i < elements.length; i++) {
       promises.push(this.applyAuthorizationToElement_(elements[i], response));
@@ -773,6 +799,7 @@ export class AccessService {
 
   /**
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @return {?Promise}
    * @private
    */
   handleAction_(invocation) {
@@ -787,6 +814,7 @@ export class AccessService {
       }
       this.loginWithType_(invocation.method.substring('login-'.length));
     }
+    return null;
   }
 
   /**

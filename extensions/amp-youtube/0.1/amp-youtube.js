@@ -147,19 +147,32 @@ class AmpYoutube extends AMP.BaseElement {
     Services.videoManagerForDoc(this.element).register(this);
   }
 
+  /**
+   * @return {string}
+   * @private
+   */
+  getEmbedUrl_() {
+    let urlSuffix = '';
+    if (this.getCredentials_() === 'omit') {
+      urlSuffix = '-nocookie';
+    }
+    return `https://www.youtube${urlSuffix}.com/embed/${encodeURIComponent(this.videoid_ || '')}?enablejsapi=1`;
+  }
+
   /** @return {string} */
   getVideoIframeSrc_() {
     if (this.videoIframeSrc_) {
       return this.videoIframeSrc_;
     }
     dev().assert(this.videoid_);
-    let src = `https://www.youtube.com/embed/${encodeURIComponent(this.videoid_ || '')}?enablejsapi=1`;
+    let src = this.getEmbedUrl_();
 
     const params = getDataParamsFromAttributes(this.element);
     if ('autoplay' in params) {
       // Autoplay is managed by video manager, do not pass it to YouTube.
       delete params['autoplay'];
-      user().error('AMP-YOUTUBE', 'Use autoplay attribute instead of ' +
+      this.user().error(
+          'AMP-YOUTUBE', 'Use autoplay attribute instead of ' +
           'data-param-autoplay');
     }
 
@@ -268,6 +281,14 @@ class AmpYoutube extends AMP.BaseElement {
   }
 
   /**
+   * @return {string}
+   * @private
+   */
+  getCredentials_() {
+    return this.element.getAttribute('credentials') || 'include';
+  }
+
+  /**
    * Sends a command to the player through postMessage.
    * @param {string} command
    * @param {Array=} opt_args
@@ -306,9 +327,12 @@ class AmpYoutube extends AMP.BaseElement {
     if (data['event'] == 'infoDelivery' &&
         data['info'] && data['info']['playerState'] !== undefined) {
       this.playerState_ = data['info']['playerState'];
-      if (this.playerState_ == PlayerStates.PAUSED ||
-          this.playerState_ == PlayerStates.ENDED) {
+      if (this.playerState_ == PlayerStates.PAUSED) {
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+      } else if (this.playerState_ == PlayerStates.ENDED) {
+        // YT does not fire pause and ended together.
+        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+        this.element.dispatchCustomEvent(VideoEvents.ENDED);
       } else if (this.playerState_ == PlayerStates.PLAYING) {
         this.element.dispatchCustomEvent(VideoEvents.PLAYING);
       }
@@ -327,6 +351,9 @@ class AmpYoutube extends AMP.BaseElement {
    * @private
    */
   listenToFrame_() {
+    if (!this.iframe_) {
+      return;
+    }
     this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify(dict({
       'event': 'listening',
     })), '*');
@@ -442,6 +469,9 @@ class AmpYoutube extends AMP.BaseElement {
    * @override
    */
   fullscreenEnter() {
+    if (!this.iframe_) {
+      return;
+    }
     fullscreenEnter(dev().assertElement(this.iframe_));
   }
 
@@ -449,12 +479,30 @@ class AmpYoutube extends AMP.BaseElement {
    * @override
    */
   fullscreenExit() {
+    if (!this.iframe_) {
+      return;
+    }
     fullscreenExit(dev().assertElement(this.iframe_));
   }
 
   /** @override */
   isFullscreen() {
+    if (!this.iframe_) {
+      return false;
+    }
     return isFullscreenElement(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    // Youtube already updates the Media Session so no need for the video
+    // manager to update it too
+    return true;
   }
 
   /** @override */
@@ -474,6 +522,9 @@ class AmpYoutube extends AMP.BaseElement {
     // Not supported.
     return [];
   }
-};
+}
 
-AMP.registerElement('amp-youtube', AmpYoutube);
+
+AMP.extension('amp-youtube', '0.1', AMP => {
+  AMP.registerElement('amp-youtube', AmpYoutube);
+});

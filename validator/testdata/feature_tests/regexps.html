@@ -22,7 +22,7 @@
 <html ⚡>
 <head>
   <meta charset="utf-8">
-  <link rel="canonical" href="./regular-html-version.html" />
+  <link rel="canonical" href="./regular-html-version.html">
   <meta name="viewport" content="width=device-width,minimum-scale=1">
   <style>invalid body</style>
   <noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
@@ -38,6 +38,15 @@
   <script async custom-element="amp-hulu" src="https://cdn.ampproject.org/v0/amp-hulu-latest.js"> Only whitespace is allowed here. </script>
 
   <!--
+  href value_regex: "https://cdn\\.materialdesignicons\\.com/([0-9]+\\.?)+/css/materialdesignicons\\.min\\.css"
+  The first example is valid, the second example is invalid.
+  -->
+  <link rel="stylesheet" type="text/css"
+        href="https://cdn.materialdesignicons.com/2.0.46/css/materialdesignicons.min.css">
+  <link rel="stylesheet" type="text/css"
+        href="https://cdn.materialdesignicons.com/2.0.46/css/.../materialdesignicons.min.css">
+
+  <!--
   href value_regex: "https://fonts\\.googleapis\\.com/css\\?.*|https://fast\\.fonts\\.net/.*"
   The first two examples are valid, the third example is invalid.
   -->
@@ -47,6 +56,16 @@
         href="https://cloud.typography.com/6256354/724768/css/fonts.css">
   <link rel="stylesheet" type="text/css"
         href="http://xss.com/https://fonts.googleapis.com/css?foobar">
+
+  <!--
+    Regexp to allow typekit fonts.
+    href value_regex: "https://use\\.typekit\\.net/\\w+\\.css"
+    The first example is valid, the second example is invalid.
+  -->
+  <link rel="stylesheet" type="text/css"
+        href="https://use.typekit.net/oeg4hgb.css">
+  <link rel="stylesheet" type="text/css"
+        href="https://use.typekit.net/css/oeg4hgb.css">
 
   <!--
     Regexp to allow font-awesome css, but not path traversal.

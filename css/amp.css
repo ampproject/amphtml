@@ -30,11 +30,15 @@ html, body {
   height: auto !important;
 }
 
+html.i-amphtml-fie {
+  height: 100% !important;
+  width: 100% !important;
+}
+
 /**
  * Margin:0 is currently needed for iOS viewer embeds.
  * See:
  * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
- * and {@link ViewportBindingNaturalIosEmbed_} for more info.
  */
 body {
   margin: 0 !important;
@@ -66,7 +70,8 @@ html.i-amphtml-singledoc.i-amphtml-embedded {
  * style is set in runtime vs css to avoid conflicts with ios-embedded mode
  * and fixed transfer layer.
  */
-html.i-amphtml-singledoc > body {
+html.i-amphtml-singledoc > body,
+html.i-amphtml-fie > body {
   overflow: visible !important;
   position: relative !important;
 }
@@ -139,31 +144,44 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
   display: inline-block;
 }
 
-.i-amphtml-layout-nodisplay {
+.i-amphtml-layout-nodisplay,
+[layout=nodisplay]:not(.i-amphtml-layout-nodisplay)
+{
   /* Display is set/reset in JS */
 }
 
-.i-amphtml-layout-fixed {
+.i-amphtml-layout-fixed,
+[layout=fixed][width][height]:not(.i-amphtml-layout-fixed)
+{
   display: inline-block;
   position: relative;
 }
 
-.i-amphtml-layout-responsive {
+.i-amphtml-layout-responsive,
+[layout=responsive][width][height]:not(.i-amphtml-layout-responsive),
+[width][height][sizes]:not(.i-amphtml-layout-responsive)
+{
   display: block;
   position: relative;
 }
 
-.i-amphtml-layout-fixed-height {
+.i-amphtml-layout-fixed-height,
+[layout=fixed-height][height]
+{
   display: block;
   position: relative;
 }
 
-.i-amphtml-layout-container {
+.i-amphtml-layout-container,
+[layout=container]
+{
   display: block;
   position: relative;
 }
 
-.i-amphtml-layout-fill {
+.i-amphtml-layout-fill,
+[layout=fill]:not(.i-amphtml-layout-fill)
+{
   display: block;
   overflow: hidden !important;
   position: absolute;
@@ -173,7 +191,9 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
   right: 0;
 }
 
-.i-amphtml-layout-flex-item {
+.i-amphtml-layout-flex-item,
+[layout=flex-item]:not(.i-amphtml-layout-flex-item)
+{
   display: block;
   position: relative;
   flex: 1 1 auto;
@@ -195,10 +215,15 @@ i-amphtml-sizer {
 
 .i-amphtml-fill-content {
   display: block;
-  width: 1px;          /* These lines are a work around to this issue in iOS: */
-  min-width: 100%;     /* https://bugs.webkit.org/show_bug.cgi?id=155198      */
-  height: 1px;
+  /* These lines are a work around to this issue in iOS:     */
+  /* https://bugs.webkit.org/show_bug.cgi?id=155198          */
+  /* And: https://github.com/ampproject/amphtml/issues/11133 */
+  height: 0;
+  max-height: 100%;
+  max-width: 100%;
   min-height: 100%;
+  min-width: 100%;
+  width: 0;
   margin: auto;
 }
 
@@ -274,13 +299,17 @@ i-amphtml-sizer {
   /* For author styling. */
 }
 
-.i-amphtml-notbuilt {
+.i-amphtml-notbuilt,
+[layout]:not(.i-amphtml-element)
+{
   position: relative;
   overflow: hidden !important;
   color: transparent !important;
 }
 
-.i-amphtml-notbuilt:not(.i-amphtml-layout-container) > * {
+.i-amphtml-notbuilt:not(.i-amphtml-layout-container) > * ,
+[layout]:not([layout=container]):not(.i-amphtml-element) > *
+{
   display: none;
 }
 
@@ -301,7 +330,8 @@ i-amphtml-sizer {
   display: none !important;
 }
 
-.i-amphtml-element > [placeholder] {
+.i-amphtml-element > [placeholder],
+[layout]:not(.i-amphtml-element) > [placeholder] {
   display: block;
 }
 
@@ -329,7 +359,7 @@ i-amphtml-sizer {
 }
 
 .i-amphtml-hidden-by-media-query {
-  display: none;
+  display: none !important;
 }
 
 .i-amphtml-element-error {
@@ -581,10 +611,6 @@ amp-experiment, amp-share-tracking {
   display: none;
 }
 
-amp-fresh {
-  visibility: hidden;
-}
-
 .i-amphtml-jank-meter {
   position: fixed;
   background-color: rgba(232,72,95,.5);
@@ -753,4 +779,20 @@ amp-accordion > section > :last-child {
 /* Expand content when needed. */
 amp-accordion > section[expanded] > :last-child {
   display: block !important;
+}
+
+/**
+ * amp-story
+ */
+ amp-story, amp-story-page {
+  display: block;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  width: 100%;
+}
+
+amp-story-page {
+  background-color: #757575;
 }

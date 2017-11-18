@@ -25,6 +25,7 @@ limitations under the License.
     type="capirs"
     data-begun-auto-pad="1212332"
     data-begun-block-id="5665768"
+    data-custom-css="div[id^=begun_block] iframe{margin:0 auto;}"
     json=""
 ></amp-ad>
 ```
@@ -37,3 +38,4 @@ Supported parameters:
 
 - data-begun-auto-pad
 - data-begun-block-id
+- data-custom-css

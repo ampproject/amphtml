@@ -255,4 +255,7 @@ export class AmpVizVega extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-viz-vega', AmpVizVega, CSS);
+
+AMP.extension('amp-viz-vega', '0.1', AMP => {
+  AMP.registerElement('amp-viz-vega', AmpVizVega, CSS);
+});

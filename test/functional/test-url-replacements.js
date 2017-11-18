@@ -21,7 +21,7 @@ import {user} from '../../src/log';
 import {
   markElementScheduledForTesting,
   resetScheduledElementForTesting,
-} from '../../src/custom-element';
+} from '../../src/service/custom-element-registry';
 import {cidServiceForDocForTesting} from
     '../../src/service/cid-impl';
 import {installCryptoService} from '../../src/service/crypto-impl';
@@ -39,7 +39,10 @@ import {registerServiceBuilder} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
 import * as trackPromise from '../../src/impression';
-import {stubServiceForDoc} from '../../testing/test-helper';
+import {
+  stubServiceForDoc,
+  mockWindowInterface,
+} from '../../testing/test-helper';
 
 
 describes.sandboxed('UrlReplacements', {}, () => {
@@ -96,6 +99,15 @@ describes.sandboxed('UrlReplacements', {}, () => {
             });
           });
         }
+        if (opt_options.withStoryVariableService) {
+          markElementScheduledForTesting(iframe.win, 'amp-story');
+          registerServiceBuilder(iframe.win, 'story-variable', function() {
+            return Promise.resolve({
+              pageIndex: 546,
+              pageId: 'id-123',
+            });
+          });
+        }
       }
       viewerService = Services.viewerForDoc(iframe.ampdoc);
       replacements = Services.urlReplacementsForDoc(iframe.ampdoc);
@@ -137,6 +149,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
             return {href: canonical};
           }
         },
+        getElementById: () => {},
         cookie: '',
       },
       Math: window.Math,
@@ -199,6 +212,59 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('should replace DOCUMENT_REFERRER', () => {
     return expandAsync('?ref=DOCUMENT_REFERRER').then(res => {
       expect(res).to.equal('?ref=http%3A%2F%2Flocalhost%3A9876%2Fcontext.html');
+    });
+  });
+
+  it('should replace EXTERNAL_REFERRER', () => {
+    const windowInterface = mockWindowInterface(sandbox);
+    windowInterface.getHostname.returns('different.org');
+    return getReplacements().then(replacements => {
+      stubServiceForDoc(sandbox, ampdoc, 'viewer', 'getReferrerUrl')
+          .returns(Promise.resolve('http://example.org/page.html'));
+      return replacements.expandAsync('?ref=EXTERNAL_REFERRER');
+    }).then(res => {
+      expect(res).to.equal('?ref=http%3A%2F%2Fexample.org%2Fpage.html');
+    });
+  });
+
+  it('should replace EXTERNAL_REFERRER to empty string ' +
+      'if referrer is of same domain', () => {
+    const windowInterface = mockWindowInterface(sandbox);
+    windowInterface.getHostname.returns('example.org');
+    return getReplacements().then(replacements => {
+      stubServiceForDoc(sandbox, ampdoc, 'viewer', 'getReferrerUrl')
+          .returns(Promise.resolve('http://example.org/page.html'));
+      return replacements.expandAsync('?ref=EXTERNAL_REFERRER');
+    }).then(res => {
+      expect(res).to.equal('?ref=');
+    });
+  });
+
+  it('should replace EXTERNAL_REFERRER to empty string ' +
+      'if referrer is CDN proxy of same domain', () => {
+    const windowInterface = mockWindowInterface(sandbox);
+    windowInterface.getHostname.returns('example.org');
+    return getReplacements().then(replacements => {
+      stubServiceForDoc(sandbox, ampdoc, 'viewer', 'getReferrerUrl')
+          .returns(Promise.resolve(
+              'https://example-org.cdn.ampproject.org/v/example.org/page.html'));
+      return replacements.expandAsync('?ref=EXTERNAL_REFERRER');
+    }).then(res => {
+      expect(res).to.equal('?ref=');
+    });
+  });
+
+  it('should replace EXTERNAL_REFERRER to empty string ' +
+      'if referrer is CDN proxy of same domain (before CURLS)', () => {
+    const windowInterface = mockWindowInterface(sandbox);
+    windowInterface.getHostname.returns('example.org');
+    return getReplacements().then(replacements => {
+      stubServiceForDoc(sandbox, ampdoc, 'viewer', 'getReferrerUrl')
+          .returns(Promise.resolve(
+              'https://cdn.ampproject.org/v/example.org/page.html'));
+      return replacements.expandAsync('?ref=EXTERNAL_REFERRER');
+    }).then(res => {
+      expect(res).to.equal('?ref=');
     });
   });
 
@@ -312,7 +378,9 @@ describes.sandboxed('UrlReplacements', {}, () => {
         });
   });
 
-  it('should replace CLIENT_ID synchronously when available', () => {
+  // TODO(alanorozco, #11827): Make this test work on Safari.
+  it.configure().skipSafari().run('should replace CLIENT_ID synchronously ' +
+      'when available', () => {
     return getReplacements({withCid: true}).then(urlReplacements => {
       setCookie(window, 'url-abc', 'cid-for-abc');
       setCookie(window, 'url-xyz', 'cid-for-xyz');
@@ -364,10 +432,37 @@ describes.sandboxed('UrlReplacements', {}, () => {
         .to.eventually.equal('?in=&out=');
   });
 
+  it('should replace STORY_PAGE_INDEX and STORY_PAGE_ID', () => {
+    return expect(
+        expandAsync('?index=STORY_PAGE_INDEX&id=STORY_PAGE_ID',
+            /*opt_bindings*/ undefined, {withStoryVariableService: true}))
+        .to.eventually.equal('?index=546&id=id-123');
+  });
+
+  it('should replace STORY_PAGE_INDEX and STORY_PAGE_ID' +
+      ' with empty string if amp-story is not configured', () => {
+    return expect(
+        expandAsync('?index=STORY_PAGE_INDEX&id=STORY_PAGE_ID'))
+        .to.eventually.equal('?index=&id=');
+  });
+
   it('should replace TIMESTAMP', () => {
     return expandAsync('?ts=TIMESTAMP').then(res => {
       expect(res).to.match(/ts=\d+/);
     });
+  });
+
+  it('should replace TIMESTAMP_ISO', () => {
+    return expandAsync('?tsf=TIMESTAMP_ISO').then(res => {
+      expect(res).to.match(/tsf=\d+/);
+    });
+  });
+
+  it('should return correct ISO timestamp', () => {
+    const fakeTime = 1499979336612;
+    sandbox.useFakeTimers(fakeTime);
+    return expect(expandAsync('?tsf=TIMESTAMP_ISO'))
+        .to.eventually.equal('?tsf=2017-07-13T20%3A55%3A36.612Z');
   });
 
   it('should replace TIMEZONE', () => {
@@ -456,6 +551,25 @@ describes.sandboxed('UrlReplacements', {}, () => {
         .expandAsync('?sh=BACKGROUND_STATE')
         .then(res => {
           expect(res).to.equal('?sh=1');
+        });
+  });
+
+  it('Should replace VIDEO_STATE(video,parameter) with video data', () => {
+    const win = getFakeWindow();
+    sandbox.stub(Services, 'videoManagerForDoc')
+        .returns({
+          getVideoAnalyticsDetails(unusedVideo) {
+            return Promise.resolve({currentTime: 1.5});
+          },
+        });
+    sandbox.stub(win.document, 'getElementById')
+        .withArgs('video')
+        .returns(document.createElement('video'));
+
+    return Services.urlReplacementsForDoc(win.ampdoc)
+        .expandAsync('?sh=VIDEO_STATE(video,currentTime)')
+        .then(res => {
+          expect(res).to.equal('?sh=1.5');
         });
   });
 
@@ -979,7 +1093,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
 
         const replacements = Services.urlReplacementsForDoc(iframe.ampdoc);
         replacements.getVariableSource().getAccessService_ = ampdoc => {
-          expect(ampdoc.isSingleDoc).to.be.function;
+          expect(ampdoc.isSingleDoc).to.be.a('function');
           if (opt_disabled) {
             return Promise.resolve(null);
           }
@@ -1029,23 +1143,31 @@ describes.sandboxed('UrlReplacements', {}, () => {
     beforeEach(() => {
       a = document.createElement('a');
       win = getFakeWindow();
-      win.location = parseUrl('https://example.com/base?foo=bar&bar=abc');
+      win.location =
+          parseUrl('https://example.com/base?foo=bar&bar=abc&gclid=123');
       urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
     });
 
     it('should replace href', () => {
       a.href = 'https://example.com/link?out=QUERY_PARAM(foo)';
       a.setAttribute('data-amp-replace', 'QUERY_PARAM');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('https://example.com/link?out=bar');
+    });
+
+    it('should append default outgoing decoration', () => {
+      a.href = 'https://example.com/link?out=QUERY_PARAM(foo)';
+      a.setAttribute('data-amp-replace', 'QUERY_PARAM');
+      urlReplacements.maybeExpandLink(a, 'gclid=QUERY_PARAM(gclid)');
+      expect(a.href).to.equal('https://example.com/link?out=bar&gclid=123');
     });
 
     it('should replace href 2x', () => {
       a.href = 'https://example.com/link?out=QUERY_PARAM(foo)';
       a.setAttribute('data-amp-replace', 'QUERY_PARAM');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('https://example.com/link?out=bar');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('https://example.com/link?out=bar');
     });
 
@@ -1053,34 +1175,41 @@ describes.sandboxed('UrlReplacements', {}, () => {
       a.href = 'https://example.com/link?out=QUERY_PARAM(foo)&' +
           'out2=QUERY_PARAM(bar)';
       a.setAttribute('data-amp-replace', 'QUERY_PARAM');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('https://example.com/link?out=bar&out2=abc');
     });
 
     it('has nothing to replace', () => {
       a.href = 'https://example.com/link';
       a.setAttribute('data-amp-replace', 'QUERY_PARAM');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('https://example.com/link');
     });
 
     it('should not replace without user whitelisting', () => {
       a.href = 'https://example.com/link?out=QUERY_PARAM(foo)';
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('https://example.com/link?out=QUERY_PARAM(foo)');
     });
 
     it('should not replace without user whitelisting 2', () => {
       a.href = 'https://example.com/link?out=QUERY_PARAM(foo)';
       a.setAttribute('data-amp-replace', 'ABC');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('https://example.com/link?out=QUERY_PARAM(foo)');
+    });
+
+    it('should replace default append params regardless of whitelist', () => {
+      a.href = 'https://example.com/link?out=QUERY_PARAM(foo)';
+      urlReplacements.maybeExpandLink(a, 'gclid=QUERY_PARAM(gclid)');
+      expect(a.href).to.equal(
+          'https://example.com/link?out=QUERY_PARAM(foo)&gclid=123');
     });
 
     it('should not replace unwhitelisted fields', () => {
       a.href = 'https://example.com/link?out=RANDOM';
       a.setAttribute('data-amp-replace', 'RANDOM');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('https://example.com/link?out=RANDOM');
     });
 
@@ -1088,28 +1217,36 @@ describes.sandboxed('UrlReplacements', {}, () => {
       canonical = 'http://example.com/link';
       a.href = 'http://example.com/link?out=QUERY_PARAM(foo)';
       a.setAttribute('data-amp-replace', 'QUERY_PARAM');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('http://example.com/link?out=bar');
     });
 
     it('should replace with canonical origin', () => {
       a.href = 'https://canonical.com/link?out=QUERY_PARAM(foo)';
       a.setAttribute('data-amp-replace', 'QUERY_PARAM');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('https://canonical.com/link?out=bar');
     });
 
     it('should replace with whitelisted origin', () => {
       a.href = 'https://whitelisted.com/link?out=QUERY_PARAM(foo)';
       a.setAttribute('data-amp-replace', 'QUERY_PARAM');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('https://whitelisted.com/link?out=bar');
     });
 
     it('should not replace to different origin', () => {
       a.href = 'https://example2.com/link?out=QUERY_PARAM(foo)';
       a.setAttribute('data-amp-replace', 'QUERY_PARAM');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
+      expect(a.href).to.equal(
+          'https://example2.com/link?out=QUERY_PARAM(foo)');
+    });
+
+    it('should not append default param to different origin', () => {
+      a.href = 'https://example2.com/link?out=QUERY_PARAM(foo)';
+      a.setAttribute('data-amp-replace', 'QUERY_PARAM');
+      urlReplacements.maybeExpandLink(a, 'gclid=QUERY_PARAM(gclid)');
       expect(a.href).to.equal(
           'https://example2.com/link?out=QUERY_PARAM(foo)');
     });
@@ -1119,12 +1256,12 @@ describes.sandboxed('UrlReplacements', {}, () => {
           'out=QUERY_PARAM(foo)&c=CLIENT_ID(abc)';
       a.setAttribute('data-amp-replace', 'QUERY_PARAM CLIENT_ID');
       // No replacement without previous async replacement
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal(
           'https://canonical.com/link?out=bar&c=');
       // Get a cid, then proceed.
       return urlReplacements.expandAsync('CLIENT_ID(abc)').then(() => {
-        urlReplacements.maybeExpandLink(a);
+        urlReplacements.maybeExpandLink(a, null);
         expect(a.href).to.equal(
             'https://canonical.com/link?out=bar&c=test-cid(abc)');
       });
@@ -1133,14 +1270,14 @@ describes.sandboxed('UrlReplacements', {}, () => {
     it('should add URL parameters for different origin', () => {
       a.href = 'https://example2.com/link';
       a.setAttribute('data-amp-addparams', 'guid=123');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('https://example2.com/link?guid=123');
     });
 
     it('should add URL parameters for http URL\'s(non-secure)', () => {
       a.href = 'http://whitelisted.com/link?out=QUERY_PARAM(foo)';
       a.setAttribute('data-amp-addparams', 'guid=123');
-      urlReplacements.maybeExpandLink(a);
+      urlReplacements.maybeExpandLink(a, null);
       expect(a.href).to.equal('http://whitelisted.com/link?out=QUERY_PARAM(foo)&guid=123');
     });
 
@@ -1151,7 +1288,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       a.setAttribute('data-amp-addparams', 'guid=123&c=CLIENT_ID(abc)');
       // Get a cid, then proceed.
       return urlReplacements.expandAsync('CLIENT_ID(abc)').then(() => {
-        urlReplacements.maybeExpandLink(a);
+        urlReplacements.maybeExpandLink(a, null);
         expect(a.href).to.equal(
             'http://example.com/link?out=QUERY_PARAM(foo)&guid=123&c=test-cid(abc)');
       });
@@ -1164,7 +1301,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       a.setAttribute('data-amp-addparams', 'guid=123&c=CLIENT_ID(abc)');
       // Get a cid, then proceed.
       return urlReplacements.expandAsync('CLIENT_ID(abc)').then(() => {
-        urlReplacements.maybeExpandLink(a);
+        urlReplacements.maybeExpandLink(a, null);
         expect(a.href).to.equal(
             'http://example2.com/link?out=QUERY_PARAM(foo)&guid=123&c=CLIENT_ID(abc)');
       });
@@ -1176,7 +1313,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
       a.setAttribute('data-amp-addparams', 'guid=123&c=CLIENT_ID(abc)');
       // Get a cid, then proceed.
       return urlReplacements.expandAsync('CLIENT_ID(abc)').then(() => {
-        urlReplacements.maybeExpandLink(a);
+        urlReplacements.maybeExpandLink(a, null);
         expect(a.href).to.equal(
             'https://whitelisted.com/link?out=bar&guid=123&c=test-cid(abc)');
       });

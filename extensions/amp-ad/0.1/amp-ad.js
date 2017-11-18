@@ -17,7 +17,7 @@ import {CSS} from '../../../build/amp-ad-0.1.css';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {AmpAd3PImpl} from './amp-ad-3p-impl';
 import {AmpAdCustom} from './amp-ad-custom';
-import {a4aRegistry} from '../../../ads/_a4a-config';
+import {getA4ARegistry} from '../../../ads/_a4a-config';
 import {adConfig} from '../../../ads/_config';
 import {user} from '../../../src/log';
 import {Services} from '../../../src/services';
@@ -49,6 +49,7 @@ export class AmpAd extends AMP.BaseElement {
 
   /** @override */
   upgradeCallback() {
+    const a4aRegistry = getA4ARegistry();
     // Block whole ad load if a consent is needed.
     /** @const {string} */
     const consentId = this.element.getAttribute('data-consent-notification-id');
@@ -69,17 +70,18 @@ export class AmpAd extends AMP.BaseElement {
         return new AmpAdCustom(this.element);
       }
 
-      window.ampAdSlotIdCounter = window.ampAdSlotIdCounter || 0;
-      const slotId = window.ampAdSlotIdCounter++;
+      this.win.ampAdSlotIdCounter = this.win.ampAdSlotIdCounter || 0;
+      const slotId = this.win.ampAdSlotIdCounter++;
       this.element.setAttribute('data-amp-slot-index', slotId);
 
+      const useRemoteHtml = (
+          !(adConfig[type] || {}).remoteHTMLDisabled &&
+            this.win.document.querySelector('meta[name=amp-3p-iframe-src]'));
       // TODO(tdrl): Check amp-ad registry to see if they have this already.
+      // TODO(a4a-cam): Shorten this predicate.
       if (!a4aRegistry[type] ||
-          (!(adConfig[type] || {}).remoteHTMLDisabled &&
-          this.win.document.querySelector('meta[name=amp-3p-iframe-src]') &&
-          !this.win.document.getElementById('amp-rtc')) ||
           // Note that predicate execution may have side effects.
-          !a4aRegistry[type](this.win, this.element)) {
+          !a4aRegistry[type](this.win, this.element, useRemoteHtml)) {
         // Either this ad network doesn't support Fast Fetch, its Fast Fetch
         // implementation has explicitly opted not to handle this tag, or this
         // page uses remote.html which is inherently incompatible with Fast
@@ -95,7 +97,8 @@ export class AmpAd extends AMP.BaseElement {
           // Work around presubmit restrictions.
             const TAG = this.element.tagName;
           // Report error and fallback to 3p
-            user().error(TAG, 'Unable to load ad implementation for type ',
+            this.user().error(
+                TAG, 'Unable to load ad implementation for type ',
                 type, ', falling back to 3p, error: ', error);
             return new AmpAd3PImpl(this.element);
           });
@@ -103,5 +106,7 @@ export class AmpAd extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-ad', AmpAd, CSS);
-AMP.registerElement('amp-embed', AmpAd);
+AMP.extension('amp-ad', '0.1', AMP => {
+  AMP.registerElement('amp-ad', AmpAd, CSS);
+  AMP.registerElement('amp-embed', AmpAd);
+});

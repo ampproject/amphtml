@@ -21,9 +21,11 @@ import {
   CustomEventTracker,
   IniLoadTracker,
   SignalTracker,
+  TimerEventTracker,
   VisibilityTracker,
 } from '../events';
 import {Signals} from '../../../../src/utils/signals';
+import * as lolex from 'lolex';
 import * as sinon from 'sinon';
 
 
@@ -62,7 +64,7 @@ describes.realWin('Events', {amp: 1}, env => {
     beforeEach(() => {
       // ActionService and some other services may also add click listeners.
       iniEventCount = win.document.eventListeners.count('click');
-      tracker = new ClickEventTracker(root);
+      tracker = root.getTracker('click', ClickEventTracker);
     });
 
     it('should initalize, add listeners and dispose', () => {
@@ -92,7 +94,7 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(tracker.clickObservable_.handlers_[0]).to.equal(selUnlisten);
       expect(selListenerStub).to.be.calledOnce;
       const args = selListenerStub.args[0];
-      expect(args[0]).to.be.function;
+      expect(args[0]).to.be.a('function');
       expect(args[1]).to.equal(win.document.body);  // Parent element of amp-analytics.
       expect(args[2]).to.equal('*');
       expect(args[3]).to.equal('scope');  // Default selection method.
@@ -165,7 +167,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
     beforeEach(() => {
       clock = sandbox.useFakeTimers();
-      tracker = new CustomEventTracker(root);
+      tracker = root.getTracker('custom', CustomEventTracker);
       getElementSpy = sandbox.spy(root, 'getElement');
     });
 
@@ -376,7 +378,7 @@ describes.realWin('Events', {amp: 1}, env => {
     let targetSignals;
 
     beforeEach(() => {
-      tracker = new SignalTracker(root);
+      tracker = root.getTracker('render-start', SignalTracker);
       target.classList.add('i-amphtml-element');
       targetSignals = new Signals();
       target.signals = () => targetSignals;
@@ -445,7 +447,7 @@ describes.realWin('Events', {amp: 1}, env => {
     let targetSignals;
 
     beforeEach(() => {
-      tracker = new IniLoadTracker(root);
+      tracker = root.getTracker('ini-load', IniLoadTracker);
       target.classList.add('i-amphtml-element');
       targetSignals = new Signals();
       target.signals = () => targetSignals;
@@ -534,6 +536,249 @@ describes.realWin('Events', {amp: 1}, env => {
   });
 
 
+  describe('TimerEventTracker', () => {
+    let clock;
+    let tracker;
+
+    beforeEach(() => {
+      clock = lolex.install(root.ampdoc.win);
+      tracker = root.getTracker('timer', TimerEventTracker);
+    });
+
+    function countIntervals() {
+      let count = 0;
+      for (const t in clock.timers) {
+        if (clock.timers[t].interval !== undefined) {
+          count++;
+        }
+      }
+      return count;
+    }
+
+    it('should initalize, add listeners and dispose', () => {
+      expect(tracker.root).to.equal(root);
+      expect(tracker.trackers_).to.have.length(0);
+
+      tracker.dispose();
+      expect(tracker.trackers_).to.have.length(0);
+    });
+
+    it('should validate timerSpec', () => {
+      const handler = sandbox.stub();
+      expect(() => {
+        tracker.add(analyticsElement, 'timer', {}, handler);
+      }).to.throw(/Bad timer specification/);
+      expect(() => {
+        tracker.add(analyticsElement, 'timer', {timerSpec: 1}, handler);
+      }).to.throw(/Bad timer specification/);
+      expect(() => {
+        tracker.add(analyticsElement, 'timer', {timerSpec: {}}, handler);
+      }).to.throw(/Timer interval specification required/);
+      expect(() => {
+        tracker.add(analyticsElement, 'timer', {timerSpec: {
+          interval: null,
+        }}, handler);
+      }).to.throw(/Bad timer interval specification/);
+      expect(() => {
+        tracker.add(analyticsElement, 'timer', {timerSpec: {
+          interval: 'two',
+        }}, handler);
+      }).to.throw(/Bad timer interval specification/);
+      expect(() => {
+        tracker.add(analyticsElement, 'timer', {timerSpec: {
+          interval: 0.1,
+        }}, handler);
+      }).to.throw(/Bad timer interval specification/);
+      expect(() => {
+        tracker.add(analyticsElement, 'timer', {timerSpec: {
+          interval: 0.49,
+        }}, handler);
+      }).to.throw(/Bad timer interval specification/);
+      expect(() => {
+        tracker.add(analyticsElement, 'timer', {timerSpec: {
+          interval: 1,
+          maxTimerLength: '',
+        }}, handler);
+      }).to.throw(/Bad maxTimerLength specification/);
+      expect(() => {
+        tracker.add(analyticsElement, 'timer', {timerSpec: {
+          interval: 1,
+          maxTimerLength: 0,
+        }}, handler);
+      }).to.throw(/Bad maxTimerLength specification/);
+
+      expect(handler).to.not.be.called;
+      expect(() => {
+        tracker.add(analyticsElement, 'timer',
+            {timerSpec: {interval: 1}}, handler);
+      }).to.not.throw();
+    });
+
+    it('only fires when the timer interval exceeds the minimum', () => {
+      const fn1 = sandbox.stub();
+      expect(() => {
+        tracker.add(analyticsElement, 'timer', {timerSpec: {
+          interval: 0,
+        }}, fn1);
+      }).to.throw();
+      expect(fn1).to.have.not.been.called;
+
+      const fn2 = sandbox.stub();
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 1,
+      }}, fn2);
+      expect(fn2).to.be.calledOnce;
+      expect(fn2.args[0][0]).to.be.instanceOf(AnalyticsEvent);
+      expect(fn2.args[0][0].target).to.equal(root.getRootElement());
+      expect(fn2.args[0][0].type).to.equal('timer');
+    });
+
+    it('fires on the appropriate interval', () => {
+      const fn1 = sandbox.stub();
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 10,
+      }}, fn1);
+      expect(fn1).to.be.calledOnce;
+
+      const fn2 = sandbox.stub();
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 15,
+      }}, fn2);
+      expect(fn2).to.be.calledOnce;
+
+      const fn3 = sandbox.stub();
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 10,
+        immediate: false,
+      }}, fn3);
+      expect(fn3).to.have.not.been.called;
+
+      const fn4 = sandbox.stub();
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 15,
+        immediate: false,
+      }}, fn4);
+      expect(fn4).to.have.not.been.called;
+
+      clock.tick(10 * 1000); // 10 seconds
+      expect(fn1).to.have.callCount(2);
+      expect(fn2).to.be.calledOnce;
+      expect(fn3).to.be.calledOnce;
+      expect(fn4).to.have.not.been.called;
+
+      clock.tick(10 * 1000); // 20 seconds
+      expect(fn1).to.have.callCount(3);
+      expect(fn2).to.have.callCount(2);
+      expect(fn3).to.have.callCount(2);
+      expect(fn4).to.be.calledOnce;
+
+      clock.tick(10 * 1000); // 30 seconds
+      expect(fn1).to.have.callCount(4);
+      expect(fn2).to.have.callCount(3);
+      expect(fn3).to.have.callCount(3);
+      expect(fn4).to.have.callCount(2);
+
+      expect(fn1.args[0][0]).to.be.instanceOf(AnalyticsEvent);
+      expect(fn1.args[0][0].target).to.equal(root.getRootElement());
+      expect(fn1.args[0][0].type).to.equal('timer');
+    });
+
+    it('stops firing after the maxTimerLength is exceeded', () => {
+      const fn1 = sandbox.stub();
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 10,
+        maxTimerLength: 15,
+      }}, fn1);
+      expect(fn1).to.be.calledOnce;
+
+      const fn2 = sandbox.stub();
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 10,
+        maxTimerLength: 20,
+      }}, fn2);
+      expect(fn2).to.be.calledOnce;
+
+      const fn3 = sandbox.stub();
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 3600,
+      }}, fn3);
+      expect(fn3).to.be.calledOnce;
+
+      expect(tracker.trackers_).to.have.length(3);
+
+      clock.tick(10 * 1000); // 10 seconds
+      expect(fn1).to.have.callCount(2);
+      expect(fn2).to.have.callCount(2);
+      expect(tracker.trackers_).to.have.length(3);
+
+      clock.tick(10 * 1000); // 20 seconds
+      expect(fn1).to.have.callCount(2);
+      expect(fn2).to.have.callCount(3);
+      expect(tracker.trackers_).to.have.length(1);
+
+      clock.tick(10 * 1000); // 30 seconds
+      expect(fn1).to.have.callCount(2);
+      expect(fn2).to.have.callCount(3);
+      expect(tracker.trackers_).to.have.length(1);
+
+      // Default maxTimerLength is 2 hours
+      clock.tick(3 * 3600 * 1000); // 3 hours
+      expect(fn3).to.have.callCount(3);
+
+      // All timers removed.
+      expect(tracker.trackers_).to.have.length(0);
+    });
+
+    it('should unlisten tracker', () => {
+      const fn1 = sandbox.stub();
+      const u1 = tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 10,
+        maxTimerLength: 15,
+      }}, fn1);
+      expect(fn1).to.be.calledOnce;
+
+      const fn2 = sandbox.stub();
+      const u2 = tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 10,
+        maxTimerLength: 20,
+      }}, fn2);
+      expect(fn2).to.be.calledOnce;
+
+      expect(tracker.trackers_).to.have.length(2);
+      expect(countIntervals()).to.equal(2);
+
+      u1();
+      expect(tracker.trackers_).to.have.length(1);
+      expect(countIntervals()).to.equal(1);
+
+      u2();
+      expect(tracker.trackers_).to.have.length(0);
+      expect(countIntervals()).to.equal(0);
+    });
+
+    it('should dispose all trackers', () => {
+      const fn1 = sandbox.stub();
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 10,
+        maxTimerLength: 15,
+      }}, fn1);
+      expect(fn1).to.be.calledOnce;
+
+      const fn2 = sandbox.stub();
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 10,
+        maxTimerLength: 20,
+      }}, fn2);
+      expect(fn2).to.be.calledOnce;
+
+      expect(countIntervals()).to.equal(2);
+
+      tracker.dispose();
+      expect(countIntervals()).to.equal(0);
+    });
+  });
+
+
   describe('VisibilityTracker', () => {
     let tracker;
     let visibilityManagerMock;
@@ -546,10 +791,11 @@ describes.realWin('Events', {amp: 1}, env => {
     let getAmpElementSpy;
 
     beforeEach(() => {
-      tracker = new VisibilityTracker(root);
+      tracker = root.getTracker('visible', VisibilityTracker);
       visibilityManagerMock = sandbox.mock(root.getVisibilityManager());
       getAmpElementSpy = sandbox.spy(root, 'getAmpElement');
-      tracker.waitForTrackers_['ini-load'] = new IniLoadTracker(tracker.root);
+      tracker.waitForTrackers_['ini-load'] =
+          root.getTracker('ini-load', IniLoadTracker);
       iniLoadTrackerMock = sandbox.mock(tracker.waitForTrackers_['ini-load']);
 
       target.classList.add('i-amphtml-element');
@@ -692,7 +938,7 @@ describes.realWin('Events', {amp: 1}, env => {
           .once();
       const res = tracker.add(analyticsElement,
           'visible', config, eventResolver);
-      expect(res).to.be.function;
+      expect(res).to.be.a('function');
       const unlistenReady = getAmpElementSpy.returnValues[0];
 
       return unlistenReady.then(() => {
@@ -829,7 +1075,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
       it('with waitFor RENDER_START', () => {
         tracker.waitForTrackers_['render-start'] =
-            new SignalTracker(tracker.root);
+            root.getTracker('render-start', SignalTracker);
         const signalTrackerMock =
             sandbox.mock(tracker.waitForTrackers_['render-start']);
         signalTrackerMock

@@ -202,6 +202,7 @@ export function setDefaultBootstrapBaseUrlForTesting(url) {
 
 export function resetBootstrapBaseUrlForTesting(win) {
   win.bootstrapBaseUrl = undefined;
+  win.defaultBootstrapSubDomain = undefined;
 }
 
 /**
@@ -213,16 +214,16 @@ export function resetBootstrapBaseUrlForTesting(win) {
 export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
   const srcFileBasename = opt_srcFileBasename || 'frame';
   if (getMode().localDev || getMode().test) {
-    if (overrideBootstrapBaseUrl) {
-      return overrideBootstrapBaseUrl;
-    }
-    return getAdsLocalhost(parentWindow)
-        + '/dist.3p/'
-        + (getMode().minified ? `$internalRuntimeVersion$/${srcFileBasename}`
-            : `current/${srcFileBasename}.max`)
-        + '.html';
+    return overrideBootstrapBaseUrl || getAdsLocalhost(parentWindow)
+          + '/dist.3p/'
+          + (getMode().minified ? `$internalRuntimeVersion$/${srcFileBasename}`
+              : `current/${srcFileBasename}.max`)
+          + '.html';
   }
-  return 'https://' + getSubDomain(parentWindow) +
+  // Ensure same sub-domain is used despite potentially different file.
+  parentWindow.defaultBootstrapSubDomain =
+      parentWindow.defaultBootstrapSubDomain || getSubDomain(parentWindow);
+  return 'https://' + parentWindow.defaultBootstrapSubDomain +
       `.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/` +
       `${srcFileBasename}.html`;
 }

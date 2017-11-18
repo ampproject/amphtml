@@ -21,11 +21,17 @@ import {dev, rethrowAsync} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
 import {escapeHtml} from './dom';
 import {Services} from './services';
-import {getFixedContainer} from './full-overlay-frame-child-helper';
 import {isDocumentReady} from './document-ready';
 import {layoutRectLtwh} from './layout-rect';
 import {loadPromise} from './event-helper';
-import {px, resetStyles, setStyle, setStyles} from './style';
+import {
+  px,
+  resetStyles,
+  setImportantStyles,
+  setStyle,
+  setStyles,
+} from './style';
+import {toWin} from './types';
 
 
 /** @const {string} */
@@ -50,6 +56,7 @@ const EXCLUDE_INI_LOAD = ['AMP-AD', 'AMP-ANALYTICS', 'AMP-PIXEL'];
  *   html: string,
  *   extensionIds: (?Array<string>|undefined),
  *   fonts: (?Array<string>|undefined),
+ *   cspEnabled: boolean,
  * }}
  */
 export let FriendlyIframeSpec;
@@ -119,7 +126,7 @@ export function getFriendlyIframeEmbedOptional(iframe) {
 export function installFriendlyIframeEmbed(iframe, container, spec,
     opt_preinstallCallback) {
   /** @const {!Window} */
-  const win = getTopWindow(iframe.ownerDocument.defaultView);
+  const win = getTopWindow(toWin(iframe.ownerDocument.defaultView));
   /** @const {!./service/extensions-impl.Extensions} */
   const extensions = Services.extensionsFor(win);
 
@@ -129,7 +136,7 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
   // Pre-load extensions.
   if (spec.extensionIds) {
     spec.extensionIds.forEach(
-        extensionId => extensions.loadExtension(extensionId));
+        extensionId => extensions.preloadExtension(extensionId));
   }
 
   const html = mergeHtml(spec);
@@ -139,16 +146,27 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
     // Chrome does not reflect the iframe readystate.
     iframe.readyState = 'complete';
   };
+  const registerViolationListener = () => {
+    if (!spec.cspEnabled) {
+      return;
+    }
+    iframe.contentWindow.addEventListener('securitypolicyviolation',
+        violationEvent => {
+          dev().warn('FIE', 'security policy violation', violationEvent);
+        });
+  };
   let loadedPromise;
   if (isSrcdocSupported()) {
     iframe.srcdoc = html;
     loadedPromise = loadPromise(iframe);
     container.appendChild(iframe);
+    registerViolationListener();
   } else {
     iframe.src = 'about:blank';
     container.appendChild(iframe);
     const childDoc = iframe.contentWindow.document;
     childDoc.open();
+    registerViolationListener();
     childDoc.write(html);
     // With document.write, `iframe.onload` arrives almost immediately, thus
     // we need to wait for child's `window.onload`.
@@ -259,6 +277,12 @@ function mergeHtml(spec) {
       result.push(
           `<link href="${escapeHtml(font)}" rel="stylesheet" type="text/css">`);
     });
+  }
+
+  // Load CSP
+  if (spec.cspEnabled) {
+    result.push('<meta http-equiv=Content-Security-Policy ' +
+      'content="script-src \'none\';object-src \'none\';child-src \'none\'">');
   }
 
   // Postambule.
@@ -397,6 +421,7 @@ export class FriendlyIframeEmbed {
     }
     setStyle(this.iframe, 'visibility', '');
     if (this.win.document && this.win.document.body) {
+      this.win.document.documentElement.classList.add('i-amphtml-fie');
       setStyles(dev().assertElement(this.win.document.body), {
         opacity: 1,
         visibility: 'visible',
@@ -511,29 +536,22 @@ export class FriendlyIframeEmbed {
    * @return {!Promise}
    */
   enterFullOverlayMode() {
-    const iframeBody = this.getBodyElement();
-    const fixedContainer = this.getFixedContainer();
-
     return this.runVsyncOnIframe_({
       measure: state => {
         const iframeRect = this.iframe./*OK*/getBoundingClientRect();
 
-        const winWidth = this.win./*OK*/innerWidth;
-        const winHeight = this.win./*OK*/innerHeight;
-
-        state.fixedContainerStyle = {
+        state.bodyStyle = {
+          'background': 'transparent',
           'position': 'absolute',
           'top': px(iframeRect.top),
-          'right': px(winWidth - iframeRect.right),
           'left': px(iframeRect.left),
-          'bottom': px(winHeight - iframeRect.bottom),
           'width': px(iframeRect.width),
           'height': px(iframeRect.height),
+          'bottom': 'auto',
+          'right': 'auto',
         };
       },
       mutate: state => {
-        setStyle(iframeBody, 'background', 'transparent');
-
         setStyles(this.iframe, {
           'position': 'fixed',
           'left': 0,
@@ -544,7 +562,8 @@ export class FriendlyIframeEmbed {
           'height': '100vh',
         });
 
-        setStyles(fixedContainer, state.fixedContainerStyle);
+        // We need to override runtime-level !important rules
+        setImportantStyles(this.getBodyElement(), state.bodyStyle);
       },
     }, {});
   }
@@ -553,13 +572,8 @@ export class FriendlyIframeEmbed {
    * @return {!Promise}
    */
   leaveFullOverlayMode() {
-    const iframeBody = this.getBodyElement();
-    const fixedContainer = this.getFixedContainer();
-
     return this.runVsyncOnIframe_({
       mutate: () => {
-        resetStyles(iframeBody, ['background']);
-
         resetStyles(this.iframe, [
           'position',
           'left',
@@ -570,25 +584,19 @@ export class FriendlyIframeEmbed {
           'height',
         ]);
 
-        resetStyles(fixedContainer, [
+        // we're not resetting background here as we need to set it to
+        // transparent permanently (see TODO)
+        resetStyles(this.getBodyElement(), [
           'position',
           'top',
-          'right',
           'left',
-          'bottom',
           'width',
           'height',
+          'bottom',
+          'right',
         ]);
       },
     });
-  }
-
-  /**
-   * @return {!Element}
-   * @visibleForTesting
-   */
-  getFixedContainer() {
-    return getFixedContainer(this.getBodyElement());
   }
 }
 

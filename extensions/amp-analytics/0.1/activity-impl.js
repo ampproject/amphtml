@@ -178,7 +178,7 @@ export class Activity {
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
 
-    /** @private @const {!../../../src/service/viewport-impl.Viewport} */
+    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     this.viewer_.whenFirstVisible().then(this.start_.bind(this));

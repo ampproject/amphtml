@@ -122,6 +122,9 @@ google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED;
 google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED;
 google.ima.AdsManager;
 google.ima.AdsManager.setVolume;
+google.ima.settings;
+google.ima.settings.setLocale;
+google.ima.settings.setVpaidMode;
 
 // 3P ads
 // Please sort by alphabetic order of the ad server name to avoid conflict
@@ -229,6 +232,9 @@ Criteo.Log.Debug;
 Criteo.CallRTA;
 Criteo.ComputeDFPTargetingForAMP;
 Criteo.PubTag = {};
+Criteo.PubTag.Adapters = {};
+Criteo.PubTag.Adapters.AMP = {};
+Criteo.PubTag.Adapters.AMP.Standalone;
 Criteo.PubTag.RTA = {};
 Criteo.PubTag.RTA.DefaultCrtgContentName;
 Criteo.PubTag.RTA.DefaultCrtgRtaCookieName

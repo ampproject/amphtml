@@ -18,7 +18,7 @@ import * as dom from '../../src/dom';
 import {loadPromise} from '../../src/event-helper';
 import {toArray} from '../../src/types';
 import {BaseElement} from '../../src/base-element';
-import {createAmpElementProto} from '../../src/custom-element';
+import {createAmpElementProtoForTesting} from '../../src/custom-element';
 
 
 describes.sandboxed('DOM', {}, env => {
@@ -443,7 +443,7 @@ describes.sandboxed('DOM', {}, env => {
 
     const bSpy = sandbox.spy();
     dom.iterateCursor(fragment.querySelectorAll('b'), bSpy);
-    expect(bSpy).to.be.notCalled;
+    expect(bSpy).to.have.not.been.called;
   });
 
   it('iterateCursor should allow null elements in a list', () => {
@@ -903,6 +903,32 @@ describes.sandboxed('DOM', {}, env => {
       });
     });
   });
+
+  it('isEnabled', () => {
+    expect(dom.isEnabled(document)).to.be.true;
+
+    const a = document.createElement('button');
+    expect(dom.isEnabled(a)).to.be.true;
+
+    a.disabled = true;
+    expect(dom.isEnabled(a)).to.be.false;
+
+    a.disabled = false;
+    expect(dom.isEnabled(a)).to.be.true;
+
+    const b = document.createElement('fieldset');
+    b.appendChild(a);
+    expect(dom.isEnabled(a)).to.be.true;
+
+    b.disabled = true;
+    expect(dom.isEnabled(a)).to.be.false;
+
+    b.removeChild(a);
+    const c = document.createElement('legend');
+    c.appendChild(a);
+    b.appendChild(c);
+    expect(dom.isEnabled(a)).to.be.true;
+  });
 });
 
 describes.realWin('DOM', {
@@ -927,7 +953,7 @@ describes.realWin('DOM', {
       const element = doc.createElement('amp-img');
       doc.body.appendChild(element);
       return dom.whenUpgradedToCustomElement(element).then(element => {
-        expect(element.whenBuilt).to.not.be.undefined;
+        expect(element.whenBuilt).to.exist;
       });
     });
 
@@ -936,11 +962,12 @@ describes.realWin('DOM', {
       doc.body.appendChild(element);
       env.win.setTimeout(() => {
         doc.registerElement('amp-test', {
-          prototype: createAmpElementProto(env.win, 'amp-test', TestElement),
+          prototype: createAmpElementProtoForTesting(
+              env.win, 'amp-test', TestElement),
         });
       }, 100);
       return dom.whenUpgradedToCustomElement(element).then(element => {
-        expect(element.whenBuilt).to.not.be.undefined;
+        expect(element.whenBuilt).to.exist;
       });
     });
   });

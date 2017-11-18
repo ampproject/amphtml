@@ -75,7 +75,7 @@ export class WindowPortEmulator {
     this.win = win;
     /** @private {string} */
     this.origin_ = origin;
-    /** @const {!Window} */
+    /** @private @const {!Window} */
     this.target_ = target;
   }
 
@@ -115,7 +115,7 @@ export class Messaging {
    * Conversation (messaging protocol) between me and Bob.
    * @param {!Window} win
    * @param {!MessagePort|!WindowPortEmulator} port
-   * @param {boolean} opt_isWebview
+   * @param {boolean=} opt_isWebview
    */
   constructor(win, port, opt_isWebview) {
     /** @const {!Window} */
@@ -316,7 +316,7 @@ export class Messaging {
 
   /**
    * @param {string} state
-   * @param {!Error|string} opt_data
+   * @param {!Error|string=} opt_data
    * @private
    */
   logError_(state, opt_data) {

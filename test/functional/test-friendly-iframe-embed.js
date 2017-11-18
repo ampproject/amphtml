@@ -63,7 +63,7 @@ describe('friendly-iframe-embed', () => {
   it('should follow main install steps', () => {
 
     // Resources are not involved.
-    extensionsMock.expects('loadExtension').never();
+    extensionsMock.expects('preloadExtension').never();
     resourcesMock.expects('add').never();
 
     const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
@@ -93,6 +93,8 @@ describe('friendly-iframe-embed', () => {
       expect(embed.win.document.body.style.visibility).to.equal('visible');
       expect(String(embed.win.document.body.style.opacity)).to.equal('1');
       expect(getStyle(embed.win.document.body, 'animation')).to.equal('none');
+      expect(embed.win.document.documentElement.classList.contains(
+          'i-amphtml-fie')).to.be.true;
 
       // BASE element has been inserted.
       expect(embed.win.document.querySelector('base').href)
@@ -131,7 +133,7 @@ describe('friendly-iframe-embed', () => {
   it('should install extensions', () => {
 
     // Extensions preloading have been requested.
-    extensionsMock.expects('loadExtension')
+    extensionsMock.expects('preloadExtension')
         .withExactArgs('amp-test')
         .returns(Promise.resolve())
         .once();
@@ -172,7 +174,7 @@ describe('friendly-iframe-embed', () => {
   });
 
   it('should uninstall all resources', () => {
-    extensionsMock.expects('loadExtension').atLeast(1);
+    extensionsMock.expects('preloadExtension').atLeast(1);
     extensionsMock.expects('installExtensionsInChildWindow').atLeast(1);
     const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
       url: 'https://acme.org/url1',
@@ -434,6 +436,29 @@ describe('friendly-iframe-embed', () => {
           + '<base href="https://acme.org/embed1">'
           + 'content');
     });
+
+    it('should insert CSP', () => {
+      spec.html = '<html><head></head><body></body></html>';
+      spec.cspEnabled = true;
+      expect(mergeHtmlForTesting(spec)).to.equal(
+          '<html><head><base href="https://acme.org/embed1">' +
+          '<meta http-equiv=Content-Security-Policy ' +
+          'content="script-src \'none\';object-src \'none\';' +
+          'child-src \'none\'">' +
+          '</head><body></body></html>');
+      spec.html = '<html>foo';
+      expect(mergeHtmlForTesting(spec)).to.equal(
+          '<html><base href="https://acme.org/embed1">' +
+          '<meta http-equiv=Content-Security-Policy ' +
+          'content="script-src \'none\';object-src \'none\';' +
+          'child-src \'none\'">foo');
+      spec.html = '<body>foo';
+      expect(mergeHtmlForTesting(spec)).to.equal(
+          '<base href="https://acme.org/embed1">' +
+          '<meta http-equiv=Content-Security-Policy ' +
+          'content="script-src \'none\';object-src \'none\';' +
+          'child-src \'none\'"><body>foo');
+    });
   });
 
   describe('child document ready and loaded states', () => {
@@ -503,7 +528,7 @@ describe('friendly-iframe-embed', () => {
         services: {
           'extensions': {obj: {
             installExtensionsInChildWindow: () => {},
-            loadExtension: () => {},
+            preloadExtension: () => {},
           }},
         },
         setInterval() {
@@ -696,76 +721,66 @@ describe('friendly-iframe-embed', () => {
       sandbox.stub(fie, 'win', win);
     });
 
-    it('should resize body and fixed container when entering', () => {
-      const bodyElementMock = {style: {}};
-      const fixedContainerMock = {style: {}};
+    it('should resize body and fixed container when entering', function* () {
+      const bodyElementMock = document.createElement('div');
 
       const mutateElementSpy = sandbox.spy(resourcesMock, 'mutateElement');
 
       sandbox.stub(fie, 'getBodyElement', () => bodyElementMock);
-      sandbox.stub(fie, 'getFixedContainer', () => fixedContainerMock);
 
-      return fie.enterFullOverlayMode().then(() => {
-        expect(bodyElementMock.style.background).to.equal('transparent');
+      yield fie.enterFullOverlayMode();
 
-        expect(fixedContainerMock.style.position).to.equal('absolute');
-        expect(fixedContainerMock.style.width).to.equal(`${w}px`);
-        expect(fixedContainerMock.style.height).to.equal(`${h}px`);
-        expect(fixedContainerMock.style.top).to.equal(`${y}px`);
-        expect(fixedContainerMock.style.left).to.equal(`${x}px`);
-        expect(fixedContainerMock.style.right).to.equal(`${winW - x - w}px`);
-        expect(fixedContainerMock.style.bottom).to.equal(`${winH - y - h}px`);
+      expect(bodyElementMock.style.background).to.equal('transparent');
+      expect(bodyElementMock.style.position).to.equal('absolute');
+      expect(bodyElementMock.style.width).to.equal(`${w}px`);
+      expect(bodyElementMock.style.height).to.equal(`${h}px`);
+      expect(bodyElementMock.style.top).to.equal(`${y}px`);
+      expect(bodyElementMock.style.left).to.equal(`${x}px`);
+      expect(bodyElementMock.style.right).to.equal('auto');
+      expect(bodyElementMock.style.bottom).to.equal('auto');
 
-        expect(iframe.style.position).to.equal('fixed');
-        expect(iframe.style.left).to.equal('0px');
-        expect(iframe.style.right).to.equal('0px');
-        expect(iframe.style.top).to.equal('0px');
-        expect(iframe.style.bottom).to.equal('0px');
-        expect(iframe.style.width).to.equal('100vw');
-        expect(iframe.style.height).to.equal('100vh');
+      expect(iframe.style.position).to.equal('fixed');
+      expect(iframe.style.left).to.equal('0px');
+      expect(iframe.style.right).to.equal('0px');
+      expect(iframe.style.top).to.equal('0px');
+      expect(iframe.style.bottom).to.equal('0px');
+      expect(iframe.style.width).to.equal('100vw');
+      expect(iframe.style.height).to.equal('100vh');
 
-        // ensuring that the resource scheduler knows about the iframe change
-        expect(mutateElementSpy)
-            .to.have.been.calledWith(iframe, sinon.match.any);
-      });
+      // ensuring that the resource scheduler knows about the iframe change
+      expect(mutateElementSpy)
+          .to.have.been.calledWith(iframe, sinon.match.any);
     });
 
-    it('should reset body and fixed container when leaving', () => {
-      const bodyElementMock = {style: {}};
-      const fixedContainerMock = {style: {}};
+    it('should reset body and fixed container when leaving', function* () {
+      const bodyElementMock = document.createElement('div');
 
       const mutateElementSpy = sandbox.spy(resourcesMock, 'mutateElement');
 
       sandbox.stub(fie, 'getBodyElement', () => bodyElementMock);
-      sandbox.stub(fie, 'getFixedContainer', () => fixedContainerMock);
 
-      const enterAndLeave = fie.enterFullOverlayMode()
-          .then(() => fie.leaveFullOverlayMode());
+      yield fie.enterFullOverlayMode();
+      yield fie.leaveFullOverlayMode();
 
-      return enterAndLeave.then(() => {
-        expect(bodyElementMock.style.background).to.be.null;
+      expect(bodyElementMock.style.position).to.be.empty;
+      expect(bodyElementMock.style.width).to.be.empty;
+      expect(bodyElementMock.style.height).to.be.empty;
+      expect(bodyElementMock.style.top).to.be.empty;
+      expect(bodyElementMock.style.left).to.be.empty;
+      expect(bodyElementMock.style.right).to.be.empty;
+      expect(bodyElementMock.style.bottom).to.be.empty;
 
-        expect(fixedContainerMock.style.position).to.be.null;
-        expect(fixedContainerMock.style.width).to.be.null;
-        expect(fixedContainerMock.style.height).to.be.null;
-        expect(fixedContainerMock.style.top).to.be.null;
-        expect(fixedContainerMock.style.left).to.be.null;
-        expect(fixedContainerMock.style.right).to.be.null;
-        expect(fixedContainerMock.style.bottom).to.be.null;
+      expect(iframe.style.position).to.be.empty;
+      expect(iframe.style.left).to.be.empty;
+      expect(iframe.style.right).to.be.empty;
+      expect(iframe.style.top).to.be.empty;
+      expect(iframe.style.bottom).to.be.empty;
+      expect(iframe.style.width).to.be.empty;
+      expect(iframe.style.height).to.be.empty;
 
-        // checking for empty instead of null as `iframe` is a real element
-        expect(iframe.style.position).to.be.empty;
-        expect(iframe.style.left).to.be.empty;
-        expect(iframe.style.right).to.be.empty;
-        expect(iframe.style.top).to.be.empty;
-        expect(iframe.style.bottom).to.be.empty;
-        expect(iframe.style.width).to.be.empty;
-        expect(iframe.style.height).to.be.empty;
-
-        // ensuring that the resource scheduler knows about the iframe change
-        expect(mutateElementSpy)
-            .to.have.been.calledWith(iframe, sinon.match.any);
-      });
+      // ensuring that the resource scheduler knows about the iframe change
+      expect(mutateElementSpy)
+          .to.have.been.calledWith(iframe, sinon.match.any);
     });
   });
 });

@@ -15,11 +15,8 @@
  */
 
 import {LastAddedResolver} from '../../../src/utils/promise';
-import {isExperimentOn} from '../../../src/experiments';
 import {iterateCursor} from '../../../src/dom';
 import {user} from '../../../src/log';
-
-export const FORM_VERIFY_EXPERIMENT = 'amp-form-verifiers';
 
 export const FORM_VERIFY_PARAM = '__amp_form_verify';
 
@@ -40,10 +37,7 @@ let VerificationErrorDef;
  * @param {function():Promise<!../../../src/service/xhr-impl.FetchResponse>} xhr
  */
 export function getFormVerifier(form, xhr) {
-  const win = form.ownerDocument.defaultView;
   if (form.hasAttribute('verify-xhr')) {
-    user().assert(isExperimentOn(win, FORM_VERIFY_EXPERIMENT),
-        `Enable "${FORM_VERIFY_EXPERIMENT}" experiment to use form verifiers`);
     return new AsyncVerifier(form, xhr);
   } else {
     return new DefaultVerifier(form);

@@ -18,7 +18,7 @@
 import {ActionTrust} from '../action-trust';
 import {VideoSessionManager} from './video-session-manager';
 import {removeElement, scopedQuerySelector, isRTL} from '../dom';
-import {listen, listenOncePromise} from '../event-helper';
+import {getData, listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
 import {registerServiceBuilderForDoc, getServiceForDoc} from '../service';
@@ -35,13 +35,24 @@ import {
 import {Services} from '../services';
 import {
   installPositionObserverServiceForDoc,
+} from './position-observer/position-observer-impl';
+import {
   PositionObserverFidelity,
-  PositionInViewportEntryDef,
-} from './position-observer-impl';
+} from './position-observer/position-observer-worker';
+import {map} from '../utils/object';
 import {layoutRectLtwh, RelativePositions} from '../layout-rect';
+import {
+  EMPTY_METADATA,
+  parseSchemaImage,
+  parseOgImage,
+  parseFavicon,
+  setMediaSession,
+} from '../mediasession-helper';
 import {Animation} from '../animation';
 import * as st from '../style';
 import * as tr from '../transition';
+
+const TAG = 'video-manager';
 
 /**
  * @const {number} Percentage of the video that should be in viewport before it
@@ -127,7 +138,7 @@ export class VideoManager {
     /** @const {!./ampdoc-impl.AmpDoc}  */
     this.ampdoc = ampdoc;
 
-    /** @private {!../service/viewport-impl.Viewport} */
+    /** @private {!../service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private {?Array<!VideoEntry>} */
@@ -139,7 +150,7 @@ export class VideoManager {
     /** @private {boolean} */
     this.resizeListenerInstalled_ = false;
 
-    /** @private {./position-observer-impl.AmpDocPositionObserver} */
+    /** @private {./position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = null;
 
     /** @private {?VideoEntry} */
@@ -149,7 +160,7 @@ export class VideoManager {
     this.timer_ = Services.timerFor(ampdoc.win);
 
     /** @private @const */
-    this.boundSecondsPlaying_ = () => this.secondsPlaying_();;
+    this.boundSecondsPlaying_ = () => this.secondsPlaying_();
 
     // TODO(cvializ, #10599): It would be nice to only create the timer
     // if video analytics are present, since the timer is not needed if
@@ -192,6 +203,8 @@ export class VideoManager {
     this.maybeInstallOrientationObserver_(entry);
     this.entries_.push(entry);
     video.element.dispatchCustomEvent(VideoEvents.REGISTERED);
+    // Add a class to element to indicate it implements the video interface.
+    video.element.classList.add('i-amphtml-video-interface');
   }
 
   /**
@@ -210,6 +223,8 @@ export class VideoManager {
     video.registerAction('pause', video.pause.bind(video), ActionTrust.LOW);
     video.registerAction('mute', video.mute.bind(video), ActionTrust.LOW);
     video.registerAction('unmute', video.unmute.bind(video), ActionTrust.LOW);
+    video.registerAction('fullscreen', video.fullscreenEnter.bind(video),
+        ActionTrust.LOW);
   }
 
   /**
@@ -223,8 +238,13 @@ export class VideoManager {
    * @private
    */
   maybeInstallVisibilityObserver_(entry) {
-    listen(entry.video.element, VideoEvents.VISIBILITY, () => {
-      entry.updateVisibility();
+    listen(entry.video.element, VideoEvents.VISIBILITY, details => {
+      const data = getData(details);
+      if (data && data['visible'] == true) {
+        entry.updateVisibility(/* opt_forceVisible */ true);
+      } else {
+        entry.updateVisibility();
+      }
     });
 
     listen(entry.video.element, VideoEvents.RELOAD, () => {
@@ -341,8 +361,38 @@ export class VideoManager {
         return this.entries_[i];
       }
     }
-    dev().assert(false, 'video is not registered to this video manager');
+    dev().error(TAG, 'video is not registered to this video manager');
     return null;
+  }
+
+  /**
+   * Returns the entry in the video manager corresponding to the element
+   * provided
+   *
+   * @param {!AmpElement} element
+   * @return {VideoEntry} entry
+   * @private
+   */
+  getEntryForElement_(element) {
+    for (let i = 0; i < this.entries_.length; i++) {
+      const entry = this.entries_[i];
+      if (entry.video.element === element) {
+        return entry;
+      }
+    }
+    dev().error(TAG, 'video is not registered to this video manager');
+    return null;
+  }
+
+  /**
+   * Get the current analytics details for the given video.
+   * Silently fail if the video is not found in this manager.
+   * @param {!AmpElement} videoElement
+   * @return {!Promise<!../video-interface.VideoAnalyticsDetailsDef>|!Promise<undefined>}
+   */
+  getVideoAnalyticsDetails(videoElement) {
+    const entry = this.getEntryForElement_(videoElement);
+    return entry ? entry.getAnalyticsDetails() : Promise.resolve();
   }
 
   /**
@@ -412,7 +462,7 @@ class VideoEntry {
     /** @private @const {!./ampdoc-impl.AmpDoc}  */
     this.ampdoc_ = manager.ampdoc;
 
-    /** @private {!../service/viewport-impl.Viewport} */
+    /** @private {!../service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc_);
 
     /** @package @const {!../video-interface.VideoInterface} */
@@ -454,6 +504,8 @@ class VideoEntry {
 
     const element = dev().assert(video.element);
 
+    // Autoplay Variables
+
     /** @private {boolean} */
     this.userInteractedWithAutoPlay_ = false;
 
@@ -489,7 +541,7 @@ class VideoEntry {
     /** @private {number} */
     this.dockVisibleHeight_ = 0;
 
-    /** @private {?PositionInViewportEntryDef} */
+    /** @private {?./position-observer/position-observer-worker.PositionInViewportEntryDef} */
     this.dockLastPosition_ = null;
 
     /** @private {boolean} */
@@ -536,10 +588,13 @@ class VideoEntry {
     this.hasFullscreenOnLandscape = fsOnLandscapeAttr == ''
                                     || fsOnLandscapeAttr == 'always';
 
+    // Media Session API Variables
+
+    /** @private {!../mediasession-helper.MetadataDef} */
+    this.metadata_ = EMPTY_METADATA;
+
     listenOncePromise(element, VideoEvents.LOAD)
         .then(() => this.videoLoaded());
-
-
     listen(element, VideoEvents.PAUSE, () => this.videoPaused_());
     listen(element, VideoEvents.PLAYING, () => this.videoPlayed_());
     listen(element, VideoEvents.MUTED, () => this.muted_ = true);
@@ -569,6 +624,23 @@ class VideoEntry {
    */
   videoPlayed_() {
     this.isPlaying_ = true;
+
+    if (!this.video.preimplementsMediaSessionAPI()) {
+      const playHandler = () => {
+        this.video.play(/*isAutoplay*/ false);
+      };
+      const pauseHandler = () => {
+        this.video.pause();
+      };
+      // Update the media session
+      setMediaSession(
+          this.ampdoc_.win,
+          this.metadata_,
+          playHandler,
+          pauseHandler
+      );
+    }
+
     this.actionSessionManager_.beginSession();
     if (this.isVisible_) {
       this.visibilitySessionManager_.beginSession();
@@ -615,10 +687,54 @@ class VideoEntry {
       this.inlineVidRect_ = this.video.element./*OK*/getBoundingClientRect();
     });
 
+    this.fillMediaSessionMetadata_();
+
     this.updateVisibility();
     if (this.isVisible_) {
       // Handles the case when the video becomes visible before loading
       this.loadedVideoVisibilityChanged_();
+    }
+  }
+
+  /**
+   * Gets the provided metadata and fills in missing fields
+   * @private
+   */
+  fillMediaSessionMetadata_() {
+    if (this.video.preimplementsMediaSessionAPI()) {
+      return;
+    }
+
+    if (this.video.getMetadata()) {
+      this.metadata_ = map(
+          /** @type {!../mediasession-helper.MetadataDef} */
+          (this.video.getMetadata())
+      );
+    }
+
+    const doc = this.ampdoc_.win.document;
+
+    if (!this.metadata_.artwork || this.metadata_.artwork.length == 0) {
+      const posterUrl = parseSchemaImage(doc)
+                        || parseOgImage(doc)
+                        || parseFavicon(doc);
+
+      if (posterUrl) {
+        this.metadata_.artwork = [{
+          'src': posterUrl,
+        }];
+      }
+    }
+
+    if (!this.metadata_.title) {
+      const title = this.video.element.getAttribute('title')
+                    || this.video.element.getAttribute('aria-label')
+                    || this.internalElement_.getAttribute('title')
+                    || this.internalElement_.getAttribute('aria-label')
+                    || doc.title;
+      if (title) {
+        this.metadata_.title = title;
+      }
     }
   }
 
@@ -753,23 +869,43 @@ class VideoEntry {
     });
 
     // Listen to pause, play and user interaction events.
-    const unlistenInteraction = listen(mask, 'click', onInteraction.bind(this));
+    const unlisteners = [];
+    unlisteners.push(listen(mask, 'click', onInteraction.bind(this)));
+    unlisteners.push(listen(animation, 'click', onInteraction.bind(this)));
 
-    const unlistenPause = listen(this.video.element, VideoEvents.PAUSE,
-        toggleAnimation.bind(this, /*playing*/ false));
+    unlisteners.push(listen(this.video.element, VideoEvents.PAUSE,
+        toggleAnimation.bind(this, /*playing*/ false)));
 
-    const unlistenPlaying = listen(this.video.element, VideoEvents.PLAYING,
-        toggleAnimation.bind(this, /*playing*/ true));
+    unlisteners.push(listen(this.video.element, VideoEvents.PLAYING,
+        toggleAnimation.bind(this, /*playing*/ true)));
+
+    unlisteners.push(listen(this.video.element, VideoEvents.AD_START,
+        adStart.bind(this)));
+
+    unlisteners.push(listen(this.video.element, VideoEvents.AD_END,
+        adEnd.bind(this)));
 
     function onInteraction() {
       this.userInteractedWithAutoPlay_ = true;
       this.video.showControls();
       this.video.unmute();
-      unlistenInteraction();
-      unlistenPause();
-      unlistenPlaying();
+      unlisteners.forEach(unlistener => {
+        unlistener();
+      });
       removeElement(animation);
       removeElement(mask);
+    }
+
+    function adStart() {
+      setStyles(mask, {
+        'display': 'none',
+      });
+    }
+
+    function adEnd() {
+      setStyles(mask, {
+        'display': 'block',
+      });
     }
   }
 
@@ -935,7 +1071,7 @@ class VideoEntry {
   /**
    * Called when the video's position in the viewport changed (at most once per
    * animation frame)
-   * @param {PositionInViewportEntryDef} newPos
+   * @param {./position-observer/position-observer-worker.PositionInViewportEntryDef} newPos
    */
   onDockableVideoPositionChanged(newPos) {
     this.vsync_.run({
@@ -999,7 +1135,7 @@ class VideoEntry {
    * Updates the minimization position of the video (in viewport, above or
    * below viewport), also the height of the part of the video that is
    * currently in the viewport (between 0 and the initial video height).
-   * @param {PositionInViewportEntryDef} newPos
+   * @param {./position-observer/position-observer-worker.PositionInViewportEntryDef} newPos
    * @private
    */
   updateDockableVideoPosition_(newPos) {
@@ -1624,18 +1760,23 @@ class VideoEntry {
   /**
    * Called by all possible events that might change the visibility of the video
    * such as scrolling or {@link ../video-interface.VideoEvents#VISIBILITY}.
+   * @param {?boolean=} opt_forceVisible
    * @package
    */
-  updateVisibility() {
+  updateVisibility(opt_forceVisible) {
     const wasVisible = this.isVisible_;
 
     // Measure if video is now in viewport and what percentage of it is visible.
     const measure = () => {
-      // Calculate what percentage of the video is in viewport.
-      const change = this.video.element.getIntersectionChangeEntry();
-      const visiblePercent = !isFiniteNumber(change.intersectionRatio) ? 0
-          : change.intersectionRatio * 100;
-      this.isVisible_ = visiblePercent >= VISIBILITY_PERCENT;
+      if (opt_forceVisible == true) {
+        this.isVisible_ = true;
+      } else {
+        // Calculate what percentage of the video is in viewport.
+        const change = this.video.element.getIntersectionChangeEntry();
+        const visiblePercent = !isFiniteNumber(change.intersectionRatio) ? 0
+            : change.intersectionRatio * 100;
+        this.isVisible_ = visiblePercent >= VISIBILITY_PERCENT;
+      }
     };
 
     // Mutate if visibility changed from previous state

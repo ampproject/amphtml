@@ -9,7 +9,7 @@ If you operate a software-as-a-service tool for publishers to better understand 
 Before you can add your analytics service to AMP HTML runtime, you may need to:
 * Identify the kinds of [variables](analytics-vars.md) and [requests](amp-analytics.md#requests) you'll need in an AMP HTML document for your analytics service.
 * Identify the triggers that result in analytics requests being sent from a page that would be relevant for your service.
-* Consider if and how you will [track users across](cross-origin-tracking.md) first-party and third-party AMP contexts.
+* Consider if and how you will [track users across](https://github.com/ampproject/amphtml/blob/master/spec/amp-managing-user-state.md) first-party and third-party AMP contexts.
 * Determine how your analytics dashboard handles AMP traffic.
 * Identify any missing functionality in `amp-analytics`, and [file requests](https://github.com/ampproject/amphtml/issues/new) for needed features.
 * AMP Analytics sends its variables as query string parameters in a HTTPS request to a preconfigured endpoint.  If you do not already have an existing endpoint, review [this sample](https://github.com/ampproject/amp-publisher-sample#amp-analytics-sample) for an overview on how to build one.  
@@ -24,10 +24,12 @@ Before you can add your analytics service to AMP HTML runtime, you may need to:
         1. "requests": {} for requests that your service will use.
         1. "optout": if needed.  We currently don't have a great opt-out system, so please reach out to help us design one that works well for you.
     1. An example in the [examples/analytics-vendors.amp.html](../../examples/analytics-vendors.amp.html)
-    1. A line for your analytics service in the 'type' attribute section of the [amp-analytics](amp-analytics.md) usage reference.
+reference.
 1. Test the new example you put in [examples/analytics-vendors.amp.html](../../examples/analytics-vendors.amp.html) to ensure the hits from the example are working as expected. For example, the data needed is being collected and displayed in your analytics dashboard.
 1. Submit a Pull Request with this patch, referencing the Intent-To-Implement issue.
+1. Add your analytics service to the [list of supported Analytics Vendors](https://github.com/ampproject/docs/blob/master/content/docs/guides/analytics_amp/analytics-vendors.md) by submitting a Pull Request to the [ampproject/docs](https://github.com/ampproject/docs) repo. Include the type, description, and link to your usage documentation.
 1. Update your service's usage documentation and inform your customers.
+
 
 
 ## Tag Managers
@@ -47,12 +49,12 @@ To take this approach, review the documentation for publishers' integration with
 
 ## Further Resources
 * Deep Dive: [Why not just use an iframe?](why-not-iframe.md)
-* Deep Dive: [Tracking users across origins](cross-origin-tracking.md)
+* Deep Dive: [Managing non-authenticated user state with AMP](https://github.com/ampproject/amphtml/blob/master/spec/amp-managing-user-state.md)
 * Review pull requests from other AMP Analytics providers:
  * [AT Internet](https://github.com/ampproject/amphtml/pull/1672)
  * [Piano](https://github.com/ampproject/amphtml/pull/1652)
  * [comScore](https://github.com/ampproject/amphtml/pull/1608)
  * [Parsely](https://github.com/ampproject/amphtml/pull/1595)
 * [amp-analytics sample](https://github.com/ampproject/amp-publisher-sample#amp-analytics-sample)
-* [amp-analytics](amp-analytics.md) reference documentation
+* [amp-analytics](https://www.ampproject.org/docs/reference/components/amp-analytics) reference documentation
 * [amp-analytics variables](analytics-vars.md) reference documentation

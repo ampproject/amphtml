@@ -34,10 +34,25 @@ export const USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
 
 
 /**
+ * Four zero width space.
+ *
+ * @const {string}
+ */
+export const USER_ERROR_EMBED_SENTINEL = '\u200B\u200B\u200B\u200B';
+
+
+/**
  * @return {boolean} Whether this message was a user error.
  */
 export function isUserErrorMessage(message) {
   return message.indexOf(USER_ERROR_SENTINEL) >= 0;
+}
+
+/**
+ * @return {boolean} Whether this message was a a user error from an iframe embed.
+ */
+export function isUserErrorEmbed(message) {
+  return message.indexOf(USER_ERROR_EMBED_SENTINEL) >= 0;
 }
 
 
@@ -64,6 +79,10 @@ export function setReportError(fn) {
 
 /**
  * Logging class.
+ * Use of sentinel string instead of a boolean to check user/dev errors
+ * because errors could be rethrown by some native code as a new error, and only a message would survive.
+ * Also, some browser don’t support a 5th error object argument in window.onerror. List of supporting browser can be found
+ * here: https://blog.sentry.io/2016/01/04/client-javascript-reporting-window-onerror.html
  * @final
  * @private Visible for testing only.
  */
@@ -494,11 +513,12 @@ export function rethrowAsync(var_args) {
 /**
  * Cache for logs. We do not use a Service since the service module depends
  * on Log and closure literally can't even.
- * @type {{user: ?Log, dev: ?Log}}
+ * @type {{user: ?Log, dev: ?Log, userForEmbed: ?Log}}
  */
 self.log = (self.log || {
   user: null,
   dev: null,
+  userForEmbed: null,
 });
 
 const logs = self.log;
@@ -531,7 +551,6 @@ export function resetLogConstructorForTesting() {
   logConstructor = null;
 }
 
-
 /**
  * Publisher level log.
  *
@@ -540,24 +559,40 @@ export function resetLogConstructorForTesting() {
  *  2. Development mode is enabled via `#development=1` or logging is explicitly
  *     enabled via `#log=D` where D >= 1.
  *
+ * @param {!Element=} opt_element
  * @return {!Log}
  */
-export function user() {
-  if (logs.user) {
-    return logs.user;
+export function user(opt_element) {
+  if (!logs.user) {
+    logs.user = getUserLogger(USER_ERROR_SENTINEL);
   }
+  if (!isFromEmbed(logs.user.win, opt_element)) {
+    return logs.user;
+  } else {
+    if (logs.userForEmbed) {
+      return logs.userForEmbed;
+    }
+    return logs.userForEmbed = getUserLogger(USER_ERROR_EMBED_SENTINEL);
+  }
+}
+
+/**
+ * Getter for user logger
+ * @param {string=} suffix
+ * @returns {!Log}
+ */
+function getUserLogger(suffix) {
   if (!logConstructor) {
     throw new Error('failed to call initLogConstructor');
   }
-  return logs.user = new logConstructor(self, mode => {
+  return new logConstructor(self, mode => {
     const logNum = parseInt(mode.log, 10);
     if (mode.development || logNum >= 1) {
       return LogLevel.FINE;
     }
     return LogLevel.OFF;
-  }, USER_ERROR_SENTINEL);
+  }, suffix);
 }
-
 
 /**
  * AMP development log. Calls to `devLog().assert` and `dev.fine` are stripped in
@@ -586,4 +621,16 @@ export function dev() {
     }
     return LogLevel.OFF;
   });
+}
+
+/**
+ * @param {!Window} win
+ * @param {!Element=} opt_element
+ * @returns {boolean} isEmbed
+ */
+export function isFromEmbed(win, opt_element) {
+  if (!opt_element) {
+    return false;
+  }
+  return opt_element.ownerDocument.defaultView != win;
 }

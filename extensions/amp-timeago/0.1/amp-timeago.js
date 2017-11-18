@@ -42,7 +42,7 @@ export class AmpTimeAgo extends AMP.BaseElement {
     this.datetime_ = this.element.getAttribute('datetime');
     this.locale_ = this.element.getAttribute('locale') ||
       this.win.document.documentElement.lang;
-    this.title_ = this.element.textContent;
+    this.title_ = this.element.textContent.trim();
 
     this.element.title = this.title_;
     this.element.textContent = '';
@@ -73,4 +73,7 @@ export class AmpTimeAgo extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-timeago', AmpTimeAgo);
+
+AMP.extension('amp-timeago', '0.1', AMP => {
+  AMP.registerElement('amp-timeago', AmpTimeAgo);
+});

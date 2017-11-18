@@ -18,7 +18,7 @@ import {FakeWindow} from '../../testing/fake-dom';
 import {
   markElementScheduledForTesting,
   resetScheduledElementForTesting,
-} from '../../src/custom-element';
+} from '../../src/service/custom-element-registry';
 import {
   getElementService,
   getElementServiceIfAvailable,
