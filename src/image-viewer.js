@@ -45,13 +45,13 @@ const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 
 export class ImageViewer {
   /**
-   * @param {!AmpImageLightbox} lightbox
+   * @param {!./base-element.BaseElement} lightbox
    * @param {!Window} win
    * @param {!function(T, number=):Promise<T>} parentLoadPromise
    * @template T
    */
   constructor(lightbox, win, parentLoadPromise) {
-    /** @private {!AmpImageLightbox} */
+    /** @private {!./base-element.BaseElement} */
     this.lightbox_ = lightbox;
 
     /** @const {!Window} */
@@ -85,7 +85,7 @@ export class ImageViewer {
     /** @private {number} */
     this.sourceHeight_ = 0;
 
-    /** @private {.layout-rect.LayoutRectDef} */
+    /** @private {./layout-rect.LayoutRectDef} */
     this.viewerBox_ = layoutRectLtwh(0, 0, 0, 0);
 
     /** @private {./layout-rect.LayoutRectDef} */
@@ -159,6 +159,7 @@ export class ImageViewer {
 
   /**
    * Returns true if the image is enlarged and not at its original scale
+   * @return {!boolean}
    */
   isScaled() {
     return this.scale_ !== 1;
@@ -218,7 +219,7 @@ export class ImageViewer {
    * @param {!Element} sourceElement
    * @param {?Element} sourceImage
    */
-  init(sourceElement, sourceImage) {
+  init(sourceElement, sourceImage = null) {
     this.sourceWidth_ = sourceElement./*OK*/offsetWidth;
     this.sourceHeight_ = sourceElement./*OK*/offsetHeight;
     this.srcset_ = srcsetFromElement(sourceElement);
@@ -307,7 +308,8 @@ export class ImageViewer {
 
   /** @private */
   setupGestures_() {
-    const gestures = Gestures.get(this.image_, true);
+    const gestures = Gestures.get(this.image_,
+        /* opt_shouldNotPreventDefault */ true);
 
     // Movable.
     gestures.onGesture(SwipeXYRecognizer, e => {

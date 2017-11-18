@@ -51,6 +51,17 @@ const DESC_BOX_PADDING_TOP = 50;
 let manager_;
 
 /**
+ * The structure that represents the metadata of a lightbox element
+ *
+ * @typedef {{
+ *   descriptionText: string,
+ *   tagName: string,
+ *   imageViewer: ?../../../src/image-viewer.ImageViewer
+ * }}
+ */
+let LightboxElementMetadataDef_;
+
+/**
  * @private visible for testing.
  */
 export class AmpLightboxViewer extends AMP.BaseElement {
@@ -59,7 +70,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {!../../../src/service/resources-impl.Resources} */
+    /** @private {?../../../src/service/resources-impl.Resources} */
     this.resources_ = null;
 
     /** @private {!boolean} */
@@ -82,7 +93,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     /** @private {?Element} */
     this.container_ = null;
 
-    /** @private {?../../../src/CustomElement} */
+    /** @private {?Element} */
     this.carousel_ = null;
 
     /** @private {?Element} */
@@ -94,7 +105,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     /** @private {!Array<!Element>} */
     this.clonedLightboxableElements_ = [];
 
-    /** @private {!Array<any>} */
+    /** @private {!Array<!LightboxElementMetadataDef_>} */
     this.elementsMetadata_ = [];
 
     /** @private  {?Element} */
@@ -190,8 +201,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
             clonedNode.removeAttribute('on');
             const descText = this.manager_.getDescription(element);
             const metadata = {
-              'descriptionText': descText,
-              'tagName': clonedNode.tagName,
+              descriptionText: descText,
+              tagName: clonedNode.tagName,
             };
             let slide = clonedNode;
             if (clonedNode.tagName === 'AMP-IMG') {
@@ -497,14 +508,22 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.win.document.documentElement.addEventListener(
         'keydown', this.boundHandleKeyboardEvents_);
 
-    return this.resources_.requireLayout(this.carousel_)
-        .then(() => {
-          this.currentElemId_ = element.lightboxItemId;
-          this.carousel_.implementation_
-              .showSlideWhenReady(this.currentElemId_);
-          this.resizeImageViewerDimensions_();
-          this.updateDescriptionBox_();
-        });
+    if (this.carousel_) {
+      return this.resources_.requireLayout(this.carousel_)
+          .then(() => {
+            this.currentElemId_ = element.lightboxItemId;
+            // Hack to access private property. Better than not getting
+            // type checking to work.
+            /**@type {?}*/ (this.carousel_).implementation_.showSlideWhenReady(
+                this.currentElemId_);
+            this.resizeImageViewerDimensions_();
+            this.updateDescriptionBox_();
+          });
+    } else {
+      // We should never be opening a lightbox whose carousel hasn't built.
+      return Promise.resolve();
+    }
+
   }
 
   /**
@@ -519,10 +538,10 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     imgViewer.measure();
 
     this.unlistenViewport_ = this.getViewport().onResize(() => {
-      // In IOS 10.3, the measured size of an element is incorrect if the
-      // element size depends on window size directly and the measurement
-      // happens in window.resize event. Adding a timeout for correct
-      // measurement. See https://github.com/ampproject/amphtml/issues/8479
+        // In IOS 10.3, the measured size of an element is incorrect if the
+        // element size depends on window size directly and the measurement
+        // happens in window.resize event. Adding a timeout for correct
+        // measurement. See https://github.com/ampproject/amphtml/issues/8479
       if (startsWith(
           Services.platformFor(this.win).getIosVersionString(), '10.3')) {
         Services.timerFor(this.win).delay(() => {
@@ -538,10 +557,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * Closes the lightbox-viewer
    * @private
    */
-
   close_() {
     if (!this.active_) {
-      return Promise.resolve();
+      return;
     }
 
     if (this.unlistenViewport_) {
@@ -588,7 +606,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     }
     this.container_.setAttribute('gallery-view', '');
     this.topBar_.classList.add('fullscreen');
-    toggle(this.carousel_);
+    if (this.carousel_) {
+      toggle(this.carousel_);
+    }
   }
 
   /**
@@ -600,7 +620,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     if (this.descriptionBox_.classList.contains('standard')) {
       this.topBar_.classList.remove('fullscreen');
     }
-    toggle(this.carousel_);
+    if (this.carousel_) {
+      toggle(this.carousel_);
+    }
   }
 
   /**
@@ -650,6 +672,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * Create an element inside gallery from the thumbnail info from manager.
    * @param {{url: string, element: !Element}} thumbnailObj
    * @private
+   * @return {!Element}
    */
   createThumbnailElement_(thumbnailObj) {
     const element = this.win.document.createElement('div');
@@ -662,7 +685,10 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       this.closeGallery_();
       this.currentElemId_ = thumbnailObj.element.lightboxItemId;
       this.updateDescriptionBox_();
-      this.carousel_.implementation_.showSlideWhenReady(this.currentElemId_);
+      // Hack to access private property. Better than not getting
+      // type checking to work.
+      /**@type {?}*/ (this.carousel_).implementation_.showSlideWhenReady(
+          this.currentElemId_);
       event.stopPropagation();
     };
     element.addEventListener('click', closeGalleryAndShowTargetSlide);
