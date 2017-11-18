@@ -331,7 +331,9 @@ amp-story-grid-layer * {
   z-index: 100001 !important;
 
   /* arbitrarily high number to avoid visual jumps before transition starts */
-  transform: translateY(4000px) !important;
+  /* TODO(alanorozco): Find a better solution for this, as value can be
+  /* overriden. */
+  transform: translateY(4000px);
 }
 
 .i-amphtml-story-bookend-hidden {
