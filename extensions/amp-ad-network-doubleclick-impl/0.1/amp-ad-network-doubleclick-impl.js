@@ -32,7 +32,6 @@ import {
   experimentFeatureEnabled,
   DOUBLECLICK_EXPERIMENT_FEATURE,
   DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
-  UNCONDITIONED_IDENTITY_EXPERIMENT_NAME,
   UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
 } from './doubleclick-a4a-config';
 import {
@@ -279,6 +278,7 @@ function fluidMessageListener_(event) {
   listener.instance.receiveMessageForFluid_(payload);
 }
 
+/** @final */
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
@@ -414,16 +414,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     super.buildCallback();
-    this.identityTokenPromise_ = experimentFeatureEnabled(
-        this.win, DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT) ||
-        experimentFeatureEnabled(
-            this.win,
-            DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.IDENTITY_EXPERIMENT,
-            UNCONDITIONED_IDENTITY_EXPERIMENT_NAME) ?
-        Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
-        .then(() => getIdentityToken(this.win, this.getAmpDoc())) :
-        Promise.resolve(
-            /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({}));
+    this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
+        .whenFirstVisible()
+        .then(() => getIdentityToken(this.win, this.getAmpDoc()));
     this.troubleshootData_.slotId = this.element.getAttribute('data-slot');
     this.troubleshootData_.slotIndex =
         this.element.getAttribute('data-amp-slot-index');

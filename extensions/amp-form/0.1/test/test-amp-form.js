@@ -36,6 +36,8 @@ import '../../../amp-selector/0.1/amp-selector';
 import {user} from '../../../../src/log';
 import {whenCalled} from '../../../../testing/test-helper.js';
 import {AmpEvents} from '../../../../src/amp-events';
+import {FormDataWrapper} from '../../../../src/form-data-wrapper';
+import {fromIterator} from '../../../../src/utils/array';
 
 describes.repeated('', {
   'single ampdoc': {ampdoc: 'single'},
@@ -228,7 +230,7 @@ describes.repeated('', {
       sandbox.stub(ampForm, 'analyticsEvent_');
       sandbox.spy(form, 'checkValidity');
       const errorRe =
-          /Only XHR based \(via action-xhr attribute\) submissions are support/;
+        /Only XHR based \(via action-xhr attribute\) submissions are supported/;
       expect(() => ampForm.handleSubmitEvent_(event)).to.throw(errorRe);
       expect(event.preventDefault).to.be.called;
       expect(ampForm.analyticsEvent_).to.have.not.been.called;
@@ -288,7 +290,7 @@ describes.repeated('', {
       sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
       sandbox.spy(form, 'checkValidity');
       const submitErrorRe =
-          /Only XHR based \(via action-xhr attribute\) submissions are support/;
+        /Only XHR based \(via action-xhr attribute\) submissions are supported/;
       expect(() => ampForm.handleSubmitEvent_(event)).to.throw(submitErrorRe);
       expect(event.preventDefault).to.be.called;
       document.body.removeChild(form);
@@ -678,7 +680,11 @@ describes.repeated('', {
 
           const xhrCall = ampForm.xhr_.fetch.getCall(0);
           const config = xhrCall.args[1];
-          expect(config.body).to.not.be.null;
+          expect(config.body).to.be.an.instanceof(FormDataWrapper);
+          const entriesInForm =
+              fromIterator(new FormDataWrapper(getForm()).entries());
+          expect(fromIterator(config.body.entries())).to.have.deep.members(
+              entriesInForm);
           expect(config.method).to.equal('POST');
           expect(config.credentials).to.equal('include');
         });

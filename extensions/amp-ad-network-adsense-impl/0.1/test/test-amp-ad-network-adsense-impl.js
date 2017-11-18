@@ -19,12 +19,6 @@ import {
   AmpAdNetworkAdsenseImpl,
   resetSharedState,
 } from '../amp-ad-network-adsense-impl';
-import {
-  ADSENSE_A4A_EXPERIMENT_NAME,
-  ADSENSE_EXPERIMENT_FEATURE,
-  UNCONDITIONED_IDENTITY_ADX_EXP_NAME,
-  ADSENSE_UNCONDITIONED_EXPERIMENTS,
-} from '../adsense-a4a-config';
 import {Services} from '../../../../src/services';
 import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
 import {
@@ -86,6 +80,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
     sandbox.stub(element, 'tryUpgrade_', () => {});
     doc.body.appendChild(element);
     impl = new AmpAdNetworkAdsenseImpl(element);
+    impl.win['goog_identity_prom'] = Promise.resolve({});
   });
 
   /**
@@ -588,25 +583,6 @@ describes.realWin('amp-ad-network-adsense-impl', {
     });
 
     it('should include identity', () => {
-      forceExperimentBranch(impl.win, ADSENSE_A4A_EXPERIMENT_NAME,
-          ADSENSE_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT);
-      // Force get identity result by overloading window variable.
-      const token = /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({
-        token: 'abcdef', jar: 'some_jar', pucrd: 'some_pucrd',
-      });
-      impl.win['goog_identity_prom'] = Promise.resolve(token);
-      impl.buildCallback();
-      return impl.getAdUrl().then(url => {
-        [/(\?|&)adsid=abcdef(&|$)/,
-          /(\?|&)jar=some_jar(&|$)/,
-          /(\?|&)pucrd=some_pucrd(&|$)/].forEach(
-            regexp => expect(url).to.match(regexp));
-      });
-    });
-
-    it('should include identity for unconditioned experiment', () => {
-      forceExperimentBranch(impl.win, UNCONDITIONED_IDENTITY_ADX_EXP_NAME,
-          ADSENSE_UNCONDITIONED_EXPERIMENTS.IDENTITY_EXPERIMENT);
       // Force get identity result by overloading window variable.
       const token = /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({
         token: 'abcdef', jar: 'some_jar', pucrd: 'some_pucrd',
