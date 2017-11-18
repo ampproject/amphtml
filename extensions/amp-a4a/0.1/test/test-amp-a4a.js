@@ -24,22 +24,15 @@ import {
   SAFEFRAME_VERSION_HEADER,
   protectFunctionWrapper,
   assignAdUrlToError,
+  EXPERIMENT_FEATURE_HEADER_NAME,
+  CSP_ENABLED_EXP_NAME,
 } from '../amp-a4a';
-import {
-  AMP_SIGNATURE_HEADER,
-  LEGACY_VERIFIER_EID,
-  NEW_VERIFIER_EID,
-  VERIFIER_EXP_NAME,
-  signatureVerifierFor,
-} from '../legacy-signature-verifier';
-import {VerificationStatus} from '../signature-verifier';
+import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
-import {utf8EncodeSync} from '../../../../src/utils/bytes';
 import {Signals} from '../../../../src/utils/signals';
 import {Extensions} from '../../../../src/service/extensions-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
 import {cancellation} from '../../../../src/error';
-import {forceExperimentBranch} from '../../../../src/experiments';
 import {
   data as validCSSAmp,
 } from './testdata/valid_css_at_rules_amp.reserialized';
@@ -55,6 +48,10 @@ import {createElementWithAttributes} from '../../../../src/dom';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import * as sinon from 'sinon';
+// The following namespaces are imported so that we can stub and spy on certain
+// methods in tests.
+import * as analytics from '../../../../src/analytics';
+import * as analyticsExtension from '../../../../src/extension-analytics';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
@@ -91,7 +88,7 @@ describe('amp-a4a', () => {
       },
       body: validCSSAmp.reserialized,
     };
-    adResponse.headers[AMP_SIGNATURE_HEADER] = validCSSAmp.signature;
+    adResponse.headers[AMP_SIGNATURE_HEADER] = validCSSAmp.signatureHeader;
   });
 
   afterEach(() => {
@@ -240,6 +237,19 @@ describe('amp-a4a', () => {
     verifyContext(attributes._context);
   }
 
+  function verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy) {
+    expect(triggerAnalyticsEventSpy).to.be.calledWith(
+        a4a.element, 'ad-request-start', {'time': sinon.match.number});
+    expect(triggerAnalyticsEventSpy).to.be.calledWith(
+        a4a.element, 'ad-response-end', {'time': sinon.match.number});
+    expect(triggerAnalyticsEventSpy).to.be.calledWith(
+        a4a.element, 'ad-render-start', {'time': sinon.match.number});
+    expect(triggerAnalyticsEventSpy).to.be.calledWith(
+        a4a.element, 'ad-render-end', {'time': sinon.match.number});
+    expect(triggerAnalyticsEventSpy).to.be.calledWith(
+        a4a.element, 'ad-iframe-loaded', {'time': sinon.match.number});
+  }
+
   describe('ads are visible', () => {
     let a4aElement;
     let a4a;
@@ -314,26 +324,24 @@ describe('amp-a4a', () => {
       });
     });
 
-    it('for A4A friendly iframe rendering case with legacy verifier', () => {
-      expect(a4a.friendlyIframeEmbed_).to.not.exist;
-      forceExperimentBranch(
-          fixture.win, VERIFIER_EXP_NAME, LEGACY_VERIFIER_EID);
+    it('populates postAdResponseExperimentFeatures', () => {
+      adResponse.headers[EXPERIMENT_FEATURE_HEADER_NAME] =
+          `foo=bar,bad,${CSP_ENABLED_EXP_NAME}=true`;
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
         const child = a4aElement.querySelector('iframe[srcdoc]');
         expect(child).to.be.ok;
-        expect(child).to.be.visible;
-        const a4aBody = child.contentDocument.body;
-        expect(a4aBody).to.be.ok;
-        expect(a4aBody).to.be.visible;
-        expect(a4a.friendlyIframeEmbed_).to.exist;
+        expect(child.srcdoc.indexOf('meta http-equiv=Content-Security-Policy'))
+            .to.not.equal(-1);
+        expect(a4a.postAdResponseExperimentFeatures).to.jsonEqual({
+          foo: 'bar', [CSP_ENABLED_EXP_NAME]: 'true',
+        });
       });
     });
 
-    it('for A4A friendly iframe rendering case with new verifier', () => {
+    it('for A4A friendly iframe rendering case', () => {
       expect(a4a.friendlyIframeEmbed_).to.not.exist;
-      forceExperimentBranch(fixture.win, VERIFIER_EXP_NAME, NEW_VERIFIER_EID);
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
@@ -373,30 +381,24 @@ describe('amp-a4a', () => {
       });
     });
 
-    it('should reset state to null on non-FIE unlayoutCallback', () => {
-      // Make sure there's no signature, so that we go down the 3p iframe path.
-      delete adResponse.headers['AMP-Fast-Fetch-Signature'];
-      delete adResponse.headers[AMP_SIGNATURE_HEADER];
-      a4a.buildCallback();
-      a4a.onLayoutMeasure();
-      return a4a.layoutCallback().then(() => {
-        expect(a4aElement.querySelector('iframe[src]')).to.be.ok;
-        expect(a4a.unlayoutCallback()).to.be.true;
-        expect(a4aElement.querySelector('iframe[src]')).to.not.be.ok;
+    it('should fire amp-analytics triggers for lifecycle events', () => {
+      let iniLoadResolver;
+      const iniLoadPromise = new Promise(resolve => {
+        iniLoadResolver = resolve;
       });
-    });
-
-    it('should not reset state to null on FIE unlayoutCallback', () => {
+      const whenIniLoadedStub = sandbox.stub(
+          FriendlyIframeEmbed.prototype,
+          'whenIniLoaded',
+          () => iniLoadPromise);
       a4a.buildCallback();
+      const triggerAnalyticsEventSpy =
+          sandbox.spy(analytics, 'triggerAnalyticsEvent');
       a4a.onLayoutMeasure();
-      return a4a.layoutCallback().then(() => {
-        a4a.vsync_.runScheduledTasks_();
-        expect(a4a.friendlyIframeEmbed_).to.exist;
-        const destroySpy = sandbox.spy();
-        a4a.friendlyIframeEmbed_.destroy = destroySpy;
-        expect(a4a.unlayoutCallback()).to.be.false;
-        expect(a4a.friendlyIframeEmbed_).to.exist;
-        expect(destroySpy).to.not.be.called;
+      const layoutPromise = a4a.layoutCallback();
+      expect(whenIniLoadedStub).to.not.be.called;
+      iniLoadResolver();
+      layoutPromise.then(() => {
+        verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
       });
     });
 
@@ -432,7 +434,51 @@ describe('amp-a4a', () => {
         expect(onCreativeRenderSpy.withArgs(null)).to.be.called;
       });
     });
+
+    it('should fire amp-analytics triggers', () => {
+      const triggerAnalyticsEventSpy =
+          sandbox.spy(analytics, 'triggerAnalyticsEvent');
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      return a4a.layoutCallback().then(() => {
+        verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
+      });
+    });
+
+    it('should not fire amp-analytics triggers without config', () => {
+      sandbox.stub(MockA4AImpl.prototype, 'getA4aAnalyticsConfig', () => null);
+      a4a = new MockA4AImpl(a4aElement);
+      const triggerAnalyticsEventSpy =
+          sandbox.spy(analytics, 'triggerAnalyticsEvent');
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      return a4a.layoutCallback().then(() => {
+        expect(triggerAnalyticsEventSpy).to.not.be.called;
+      });
+    });
+
+    it('should insert an amp-analytics element', () => {
+      sandbox.stub(
+          MockA4AImpl.prototype, 'getA4aAnalyticsConfig',
+          () => ({'foo': 'bar'}));
+      a4a = new MockA4AImpl(a4aElement);
+      const insertAnalyticsElementSpy =
+          sandbox.spy(analyticsExtension, 'insertAnalyticsElement');
+      a4a.buildCallback();
+      expect(insertAnalyticsElementSpy).to.be.calledWith(
+          a4a.element, {'foo': 'bar'}, true /* loadAnalytics */);
+    });
+
+    it('should not insert an amp-analytics element if config is null', () => {
+      sandbox.stub(MockA4AImpl.prototype, 'getA4aAnalyticsConfig', () => null);
+      a4a = new MockA4AImpl(a4aElement);
+      const insertAnalyticsElementSpy =
+          sandbox.spy(analyticsExtension, 'insertAnalyticsElement');
+      a4a.buildCallback();
+      expect(insertAnalyticsElementSpy).not.to.be.called;
+    });
   });
+
   describe('layoutCallback cancels properly', () => {
     let a4aElement;
     let a4a;
@@ -540,6 +586,16 @@ describe('amp-a4a', () => {
               {'isAmpCreative': false, 'releaseType': '0'});
         });
       });
+
+      it('should fire amp-analytics triggers for illegal render modes', () => {
+        const triggerAnalyticsEventSpy =
+            sandbox.spy(analytics, 'triggerAnalyticsEvent');
+        return a4a.layoutCallback().then(() => {
+          verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
+          expect(lifecycleEventStub).to.be.calledWith(
+              'crossDomainIframeLoaded');
+        });
+      });
     });
 
     describe('#renderViaNameFrame', () => {
@@ -602,6 +658,16 @@ describe('amp-a4a', () => {
                   });
                 });
           });
+
+      it('should fire amp-analytics triggers for lifecycle stages', () => {
+        const triggerAnalyticsEventSpy =
+            sandbox.spy(analytics, 'triggerAnalyticsEvent');
+        return a4a.layoutCallback().then(() => {
+          verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
+          expect(lifecycleEventStub).to.be.calledWith(
+              'crossDomainIframeLoaded');
+        });
+      });
     });
 
     describe('#renderViaSafeFrame', () => {
@@ -689,6 +755,16 @@ describe('amp-a4a', () => {
           a4a.vsync_.runScheduledTasks_();
           expect(a4a.experimentalNonAmpCreativeRenderMethod_).to.be.null;
           expect(fetchMock.called('ad')).to.be.true;
+        });
+      });
+
+      it('should fire amp-analytics triggers for lifecycle stages', () => {
+        const triggerAnalyticsEventSpy =
+            sandbox.spy(analytics, 'triggerAnalyticsEvent');
+        return a4a.layoutCallback().then(() => {
+          verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
+          expect(lifecycleEventStub).to.be.calledWith(
+              'crossDomainIframeLoaded');
         });
       });
     });
@@ -830,7 +906,7 @@ describe('amp-a4a', () => {
         return a4a.layoutCallback().then(() => {
           expect(renderAmpCreativeSpy.calledOnce,
               'renderAmpCreative_ called exactly once').to.be.true;
-          a4a.unlayoutCallback();
+          sandbox.stub(a4a, 'unlayoutCallback', () => false);
           const onLayoutMeasureSpy = sandbox.spy(a4a, 'onLayoutMeasure');
           a4a.resumeCallback();
           expect(onLayoutMeasureSpy).to.not.be.called;
@@ -1739,103 +1815,6 @@ describe('amp-a4a', () => {
         })('world')).to.be.undefined;
       });
     });
-
-    describe('verifySignature_', () => {
-      let stubVerifySignature;
-      let a4a;
-      beforeEach(() => {
-        return createIframePromise().then(fixture => {
-          forceExperimentBranch(
-              fixture.win, VERIFIER_EXP_NAME, LEGACY_VERIFIER_EID);
-          setupForAdTesting(fixture);
-          const a4aElement = createA4aElement(fixture.doc);
-          a4a = new MockA4AImpl(a4aElement);
-          a4a.buildCallback();
-          stubVerifySignature =
-              sandbox.stub(signatureVerifierFor(a4a.win), 'verifySignature_');
-        });
-      });
-
-      it('properly handles all failures', () => {
-        // Multiple providers with multiple keys each that all fail validation
-        signatureVerifierFor(a4a.win).keys_ = (() => {
-          const providers = [];
-          for (let i = 0; i < 10; i++) {
-            const signingServiceName = `test-service${i}`;
-            providers[i] = Promise.resolve({signingServiceName, keys: [
-              Promise.resolve({signingServiceName}),
-              Promise.resolve({signingServiceName}),
-            ]});
-          }
-          return providers;
-        })();
-        stubVerifySignature.returns(Promise.resolve(false));
-        const headers = new Headers();
-        headers.set(AMP_SIGNATURE_HEADER, 'some_sig');
-        return signatureVerifierFor(a4a.win).verify(
-            utf8EncodeSync('some_creative'), headers, () => {})
-            .then(status => {
-              expect(status).to.equal(
-                  VerificationStatus.ERROR_SIGNATURE_MISMATCH);
-              expect(stubVerifySignature).to.be.callCount(20);
-            });
-      });
-
-      it('properly handles multiple keys for one provider', () => {
-        // Single provider with first key fails but second key passes validation
-        const signingServiceName = 'test-service';
-        signatureVerifierFor(a4a.win).keys_ = [
-          Promise.resolve({signingServiceName, keys: [
-            Promise.resolve({signingServiceName: '1'}),
-            Promise.resolve({signingServiceName: '2'}),
-          ]}),
-        ];
-        const creative = 'some_creative';
-        const headers = new Headers();
-        headers.set(AMP_SIGNATURE_HEADER, 'some_sig');
-        stubVerifySignature.onCall(0).returns(Promise.resolve(false));
-        stubVerifySignature.onCall(1).returns(Promise.resolve(true));
-        return signatureVerifierFor(a4a.win).verify(
-            utf8EncodeSync(creative), headers, () => {})
-            .then(status => {
-              expect(stubVerifySignature).to.be.calledTwice;
-              expect(status).to.equal(VerificationStatus.OK);
-            });
-      });
-
-      it('properly stops verification at first valid key', () => {
-        // Single provider where first key fails, second passes, and third
-        // never calls verifySignature.
-        const signingServiceName = 'test-service';
-        let keyInfoResolver;
-        signatureVerifierFor(a4a.win).keys_ = [
-          Promise.resolve({signingServiceName, keys: [
-            Promise.resolve({}),
-            Promise.resolve({}),
-            new Promise(resolver => {
-              keyInfoResolver = resolver;
-            }),
-          ]}),
-        ];
-        const creative = 'some_creative';
-        const headers = new Headers();
-        headers.set(AMP_SIGNATURE_HEADER, 'some_signature');
-        stubVerifySignature.onCall(0).returns(Promise.resolve(false));
-        stubVerifySignature.onCall(1).returns(Promise.resolve(true));
-
-        // From testing have found that need to yield prior to calling last
-        // key info resolver to ensure previous keys have had a chance to
-        // execute.
-        setTimeout(() => {keyInfoResolver({}); }, 0);
-
-        return signatureVerifierFor(a4a.win).verify(
-            utf8EncodeSync(creative), headers, () => {})
-            .then(status => {
-              expect(stubVerifySignature).to.be.calledTwice;
-              expect(status).to.equal(VerificationStatus.OK);
-            });
-      });
-    });
   });
 
   describe('error handler', () => {
@@ -2022,9 +2001,10 @@ describe('amp-a4a', () => {
     });
 
     it('should emit upgradeDelay lifecycle ping', () => {
+      const emitLifecycleEventSpy =
+          sandbox.spy(MockA4AImpl.prototype, 'emitLifecycleEvent');
       return createIframePromise().then(fixture => {
         const a4a = new MockA4AImpl(createA4aElement(fixture.doc));
-        const emitLifecycleEventSpy = sandbox.spy(a4a, 'emitLifecycleEvent');
         a4a.buildCallback();
         expect(emitLifecycleEventSpy.withArgs('upgradeDelay', {
           'forced_delta': 12345,

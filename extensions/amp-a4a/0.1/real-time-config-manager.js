@@ -19,6 +19,7 @@ import {dev, user} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {isArray, isObject} from '../../../src/types';
 import {isSecureUrl} from '../../../src/url';
+import {getMode} from '../../../src/mode';
 
 /** @type {string} */
 const TAG = 'real-time-config';
@@ -96,14 +97,22 @@ export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
   // For each vendor the publisher has specified, inflate the vendor
   // url if it exists, and send the RTC request.
   Object.keys(rtcConfig['vendors'] || []).forEach(vendor => {
-    const url = RTC_VENDORS[vendor.toLowerCase()];
+    const vendorObject = RTC_VENDORS[vendor.toLowerCase()];
+    const url = vendorObject ? vendorObject.url : '';
     if (!url) {
       return logAndAddErrorResponse_(promiseArray,
           RTC_ERROR_ENUM.UNKNOWN_VENDOR, vendor);
     }
+    const validVendorMacros = {};
+    Object.keys(rtcConfig['vendors'][vendor]).forEach(macro => {
+      if (vendorObject.macros && vendorObject.macros.includes(macro)) {
+        validVendorMacros[macro] = rtcConfig['vendors'][vendor][macro];
+      } else {
+        user().warn(TAG, `Unknown macro: ${macro} for vendor: ${vendor}`);
+      }
+    });
     // The ad network defined macros override vendor defined/pub specifed.
-    const macros = Object.assign(
-        rtcConfig['vendors'][vendor] || {}, customMacros);
+    const macros = Object.assign(validVendorMacros, customMacros);
     inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray, rtcStartTime,
         macros, rtcConfig['timeoutMillis'],
         vendor.toLowerCase());
@@ -139,7 +148,7 @@ function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
     url = urlReplacements.expandUrlSync(
         url, macros, /** opt_collectVars */undefined, whitelist);
   }
-  if (!isSecureUrl(url)) {
+  if (!isSecureUrl(url) && !(getMode(win).localDev || getMode(win).test)) {
     return logAndAddErrorResponse_(promiseArray, RTC_ERROR_ENUM.INSECURE_URL,
         opt_vendor || url);
   }

@@ -20,6 +20,7 @@ import {createFilter} from './filters/factory';
 import {isJsonScriptTag, openWindowDialog} from '../../../src/dom';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {Services} from '../../../src/services';
+import {getMode} from '../../../src/mode';
 import {user, dev} from '../../../src/log';
 import {parseJson} from '../../../src/json';
 import {parseUrl} from '../../../src/url';
@@ -280,10 +281,6 @@ export class AmpAdExit extends AMP.BaseElement {
       throw e;
     }
 
-    this.ampAdResourceId_ = user().assert(
-        this.getAmpAdResourceId_(),
-        `${TAG}: No friendly parent amp-ad element was found for amp-ad-exit.`);
-
     this.init3pResponseListener_();
   }
 
@@ -324,6 +321,17 @@ export class AmpAdExit extends AMP.BaseElement {
    * @private
    */
   init3pResponseListener_() {
+    if (getMode().runtime == 'inabox') {
+      // TODO(jonkeller): Remove this once #11436 is resolved.
+      return;
+    }
+    this.ampAdResourceId_ = this.ampAdResourceId_ || this.getAmpAdResourceId_();
+    if (!this.ampAdResourceId_) {
+      user().warn(TAG,
+          'No friendly parent amp-ad element was found for amp-ad-exit; ' +
+          'not in inabox case.');
+      return;
+    }
     dev().assert(!this.unlisten_, 'Unlistener should not already exist.');
     this.unlisten_ = listen(this.getAmpDoc().win, 'message',
         event => {
@@ -334,11 +342,13 @@ export class AmpAdExit extends AMP.BaseElement {
           }
           const responseMsg = deserializeMessage(getData(event));
           if (!responseMsg ||
-              responseMsg['type'] != MessageType.IFRAME_TRANSPORT_RESPONSE ||
-              responseMsg['creativeId'] != this.ampAdResourceId_) {
+              responseMsg['type'] != MessageType.IFRAME_TRANSPORT_RESPONSE) {
             return;
           }
           this.assertValidResponseMessage_(responseMsg, event.origin);
+          if (responseMsg['creativeId'] != this.ampAdResourceId_) {
+            return; // Valid message, but for different amp-ad-exit instance
+          }
           this.vendorResponses_[responseMsg['vendor']] = responseMsg['message'];
         });
   }
@@ -354,6 +364,10 @@ export class AmpAdExit extends AMP.BaseElement {
   assertValidResponseMessage_(responseMessage, eventOrigin) {
     user().assert(responseMessage['message'],
         'Received empty response from 3p analytics frame');
+    user().assert(
+        responseMessage['creativeId'],
+        'Received malformed message from 3p analytics frame: ' +
+        'creativeId missing');
     user().assert(responseMessage['vendor'],
         'Received malformed message from 3p analytics frame: ' +
         'vendor missing');

@@ -21,7 +21,7 @@ tags: {  # amp-iframe
     name: "amp-iframe"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    requires_usage: DEPRECATED_WARNING
+    requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -30,6 +30,10 @@ tags: {  # <amp-iframe>
   html_format: AMP  # Iframes not allowed in ads.
   tag_name: "AMP-IFRAME"
   requires_extension: "amp-iframe"
+  attrs: {
+    name: "allow"
+    value_regex: "geolocation|fullscreen|payment|transparency"
+  }
   attrs: {
     name: "allowfullscreen"
     value: ""

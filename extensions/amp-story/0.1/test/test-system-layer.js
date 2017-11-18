@@ -28,13 +28,6 @@ describes.fakeWin('amp-story system layer', {}, env => {
   let progressBarStub;
   let progressBarRoot;
 
-  function matchEventHandlerThatExecutes(spy) {
-    return sandbox.match(handler => {
-      handler(new Event('covfefe'));
-      return spy.called;
-    });
-  }
-
   function matchEvent(name, bubbles) {
     return sandbox.match.has('type', name)
         .and(sandbox.match.has('bubbles', bubbles));
@@ -87,67 +80,56 @@ describes.fakeWin('amp-story system layer', {}, env => {
   });
 
   it('should attach event handlers', () => {
-    const onExitFullScreenClick =
-        sandbox.stub(systemLayer, 'onExitFullScreenClick_');
-    const onCloseBookendClick =
-        sandbox.stub(systemLayer, 'onCloseBookendClick_');
-    const onMuteAudioClick = sandbox.stub(systemLayer, 'onMuteAudioClick_');
-    const onUnmuteAudioClick = sandbox.stub(systemLayer, 'onUnmuteAudioClick_');
+    const rootMock = {addEventListener: sandbox.spy()};
 
-    const exitFullScreenBtnMock = {addEventListener: sandbox.spy()};
-    const closeBookendBtnMock = {addEventListener: sandbox.spy()};
-    const muteAudioBtnMock = {addEventListener: sandbox.spy()};
-    const unmuteAudioBtnMock = {addEventListener: sandbox.spy()};
-
-    sandbox.stub(systemLayer, 'exitFullScreenBtn_', exitFullScreenBtnMock);
-    sandbox.stub(systemLayer, 'closeBookendBtn_', closeBookendBtnMock);
-    sandbox.stub(systemLayer, 'muteAudioBtn_', muteAudioBtnMock);
-    sandbox.stub(systemLayer, 'unmuteAudioBtn_', unmuteAudioBtnMock);
+    sandbox.stub(systemLayer, 'root_', rootMock);
+    sandbox.stub(systemLayer, 'win_', rootMock);
 
     systemLayer.addEventHandlers_();
 
-    expect(exitFullScreenBtnMock.addEventListener).to.have.been.calledWith(
-        'click', matchEventHandlerThatExecutes(onExitFullScreenClick));
-
-    expect(closeBookendBtnMock.addEventListener).to.have.been.calledWith(
-        'click', matchEventHandlerThatExecutes(onCloseBookendClick));
-
-    expect(muteAudioBtnMock.addEventListener).to.have.been.calledWith(
-        'click', matchEventHandlerThatExecutes(onMuteAudioClick));
-
-    expect(unmuteAudioBtnMock.addEventListener).to.have.been.calledWith(
-        'click', matchEventHandlerThatExecutes(onUnmuteAudioClick));
+    expect(rootMock.addEventListener).to.have.been.calledWith('click');
   });
 
-  it('should dispatch EXIT_FULLSCREEN when button is clicked', () => {
+  it('should dispatch EXIT_FULLSCREEN when exit button is clicked', () => {
     expectEventTransform(
         e => systemLayer.onExitFullScreenClick_(e), EventType.EXIT_FULLSCREEN);
   });
 
-  it('should dispatch CLOSE_BOOKEND when button is clicked', () => {
+  it('should dispatch ENTER_FULLSCREEN when enter button is clicked', () => {
     expectEventTransform(
-        e => systemLayer.onCloseBookendClick_(e), EventType.CLOSE_BOOKEND);
+        e => systemLayer.onEnterFullScreenClick_(e), EventType.ENTER_FULLSCREEN
+    );
   });
 
-  it('should hide exit fullscreen button when not in fullscreen', () => {
-    const button = win.document.createElement('button');
+  it('should hide exit and show enter fullscreen button when not in fullscreen',
+      () => {
+        const exitButton = win.document.createElement('button');
+        const enterButton = win.document.createElement('button');
 
-    sandbox.stub(systemLayer, 'exitFullScreenBtn_', button);
+        sandbox.stub(systemLayer, 'exitFullScreenBtn_', exitButton);
+        sandbox.stub(systemLayer, 'enterFullScreenBtn_', enterButton);
 
-    systemLayer.setInFullScreen(false);
+        systemLayer.setInFullScreen(false);
 
-    expect(button.hasAttribute('hidden')).to.be.true;
-  });
+        expect(exitButton.hasAttribute('hidden')).to.be.true;
+        expect(enterButton.hasAttribute('hidden')).to.be.false;
+      }
+  );
 
-  it('should show exit fullscreen button when in fullscreen', () => {
-    const button = win.document.createElement('button');
+  it('should show exit and hide enter fullscreen button when in fullscreen',
+      () => {
+        const exitButton = win.document.createElement('button');
+        const enterButton = win.document.createElement('button');
 
-    sandbox.stub(systemLayer, 'exitFullScreenBtn_', button);
+        sandbox.stub(systemLayer, 'exitFullScreenBtn_', exitButton);
+        sandbox.stub(systemLayer, 'enterFullScreenBtn_', enterButton);
 
-    systemLayer.setInFullScreen(true);
+        systemLayer.setInFullScreen(true);
 
-    expect(button.hasAttribute('hidden')).to.be.false;
-  });
+        expect(exitButton.hasAttribute('hidden')).to.be.false;
+        expect(enterButton.hasAttribute('hidden')).to.be.true;
+      }
+  );
 
   it('should set the active page index', () => {
     [0, 1, 2, 3, 4].forEach(index => {

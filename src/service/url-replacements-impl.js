@@ -82,9 +82,6 @@ export class GlobalVariableSource extends VariableSource {
 
     /** @private {?Promise<?ShareTrackingFragmentsDef>} */
     this.shareTrackingFragments_ = null;
-
-    /** @private {?Promise<?{pageIndex: number, pageId: string}>} */
-    this.storyVariablesPromise_ = null;
   }
 
   /**
@@ -610,24 +607,22 @@ export class GlobalVariableSource extends VariableSource {
 
   /**
    * Resolves the value via amp-story's service.
-   * @param {function(!{pageIndex: number, pageId: string}):T} getter
+   * @param {function(!../../extensions/amp-story/0.1/variable-service.AmpStoryVariableService):T} getter
    * @param {string} expr
    * @return {!Promise<T>}
    * @template T
    * @private
    */
   getStoryValue_(getter, expr) {
-    if (!this.storyVariablesPromise_) {
-      this.storyVariablesPromise_ =
-          Services.storyVariableServiceForOrNull(this.ampdoc.win);
-    }
-    return this.storyVariablesPromise_.then(storyVariables => {
-      user().assert(storyVariables,
-          'To use variable %s amp-story should be configured',
-          expr);
-      return getter(
-          /** @type {{pageIndex: number, pageId: string}} */ (storyVariables));
-    });
+    return Services.storyVariableServiceForOrNull(this.ampdoc.win)
+        .then(storyVariables => {
+          user().assert(storyVariables,
+              'To use variable %s amp-story should be configured',
+              expr);
+          return getter(
+              /** @type {!../../extensions/amp-story/0.1/variable-service.AmpStoryVariableService} */
+              (storyVariables));
+        });
   }
 }
 
@@ -830,7 +825,6 @@ export class UrlReplacements {
     */
   isAllowedOrigin_(url) {
     const docInfo = Services.documentInfoForDoc(this.ampdoc);
-
     if (url.origin == parseUrl(docInfo.canonicalUrl).origin ||
         url.origin == parseUrl(docInfo.sourceUrl).origin) {
       return true;
@@ -856,18 +850,21 @@ export class UrlReplacements {
    * - the link opts into it (via data-amp-replace argument)
    * - the destination is the source or canonical origin of this doc.
    * @param {!Element} element An anchor element.
+   * @param {?string} defaultUrlParams to expand link if caller request.
    * @return {string|undefined} Replaced string for testing
    */
-  maybeExpandLink(element) {
+  maybeExpandLink(element, defaultUrlParams) {
     dev().assert(element.tagName == 'A');
     const supportedReplacements = {
       'CLIENT_ID': true,
       'QUERY_PARAM': true,
     };
-    const additionalUrlParameters = element.getAttribute('data-amp-addparams');
+    const additionalUrlParameters =
+        element.getAttribute('data-amp-addparams') || '';
     const whitelist = this.getWhitelistForElement_(
         element, supportedReplacements);
-    if (!whitelist && !additionalUrlParameters) {
+
+    if (!whitelist && !additionalUrlParameters && !defaultUrlParams) {
       return;
     }
     // ORIGINAL_HREF_PROPERTY has the value of the href "pre-replacement".
@@ -884,20 +881,45 @@ export class UrlReplacements {
           href,
           parseQueryString(additionalUrlParameters));
     }
-    if (whitelist) {
-      const isAllowedOrigin = this.isAllowedOrigin_(url);
-      if (!isAllowedOrigin) {
+
+    const isAllowedOrigin = this.isAllowedOrigin_(url);
+    if (!isAllowedOrigin) {
+      if (whitelist) {
         user().warn('URL', 'Ignoring link replacement', href,
             ' because the link does not go to the document\'s' +
             ' source, canonical, or whitelisted origin.');
-      } else {
-        href = this.expandSync(
-            href,
+      }
+      return element.href = href;
+    }
+
+    // Note that defaultUrlParams is treated differently than additionalUrlParameters in two ways
+    // #1: If the outgoing url origin is not whitelisted:
+    // additionalUrlParameters are always appended by not expanded,
+    // defaultUrlParams will not be appended.
+    // #2: If the expansion function is not whitelisted:
+    // addionalUrlParamters will not be expanded,
+    // defaultUrlParams will by default support QUERY_PARAM, and will still be expanded.
+    if (defaultUrlParams) {
+      if (!whitelist || !whitelist['QUERY_PARAM']) {
+        // override whitelist and expand defaultUrlParams;
+        const overrideWhitelist = {'QUERY_PARAM': true};
+        defaultUrlParams = this.expandSync(
+            defaultUrlParams,
             /* opt_bindings */ undefined,
             /* opt_collectVars */ undefined,
-            /* opt_whitelist */ whitelist);
+            /* opt_whitelist */ overrideWhitelist);
       }
+      href = addParamsToUrl(href, parseQueryString(defaultUrlParams));
     }
+
+    if (whitelist) {
+      href = this.expandSync(
+          href,
+          /* opt_bindings */ undefined,
+          /* opt_collectVars */ undefined,
+          /* opt_whitelist */ whitelist);
+    }
+
     return element.href = href;
   }
 
@@ -917,7 +939,7 @@ export class UrlReplacements {
     let replacement = url.replace(expr, (match, name, opt_strargs) => {
       let args = [];
       if (typeof opt_strargs == 'string') {
-        args = opt_strargs.split(',');
+        args = opt_strargs.split(/,\s*/);
       }
       if (opt_whiteList && !opt_whiteList[name]) {
         // Do not perform substitution and just return back the original

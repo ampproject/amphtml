@@ -105,6 +105,7 @@ import {capirs} from '../ads/capirs';
 import {caprofitx} from '../ads/caprofitx';
 import {chargeads} from '../ads/chargeads';
 import {colombia} from '../ads/colombia';
+import {connatix} from '../ads/connatix';
 import {contentad} from '../ads/contentad';
 import {criteo} from '../ads/criteo';
 import {csa} from '../ads/google/csa';
@@ -139,6 +140,7 @@ import {kargo} from '../ads/kargo';
 import {kiosked} from '../ads/kiosked';
 import {kixer} from '../ads/kixer';
 import {ligatus} from '../ads/ligatus';
+import {lockerdome} from '../ads/lockerdome';
 import {loka} from '../ads/loka';
 import {mads} from '../ads/mads';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
@@ -161,12 +163,14 @@ import {plista} from '../ads/plista';
 import {polymorphicads} from '../ads/polymorphicads';
 import {popin} from '../ads/popin';
 import {pubexchange} from '../ads/pubexchange';
+import {postquare} from '../ads/postquare';
 import {pubmatic} from '../ads/pubmatic';
 import {pubmine} from '../ads/pubmine';
 import {pulsepoint} from '../ads/pulsepoint';
 import {purch} from '../ads/purch';
 import {revcontent} from '../ads/revcontent';
 import {relap} from '../ads/relap';
+import {revjet} from '../ads/revjet';
 import {rubicon} from '../ads/rubicon';
 import {sharethrough} from '../ads/sharethrough';
 import {sklik} from '../ads/sklik';
@@ -215,6 +219,7 @@ const AMP_EMBED_ALLOWED = {
   outbrain: true,
   plista: true,
   pubexchange: true,
+  postquare: true,
   smartclip: true,
   smi2: true,
   taboola: true,
@@ -272,6 +277,7 @@ register('capirs', capirs);
 register('caprofitx', caprofitx);
 register('chargeads', chargeads);
 register('colombia', colombia);
+register('connatix',connatix);
 register('contentad', contentad);
 register('criteo', criteo);
 register('csa', csa);
@@ -309,6 +315,7 @@ register('kargo', kargo);
 register('kiosked', kiosked);
 register('kixer', kixer);
 register('ligatus', ligatus);
+register('lockerdome', lockerdome);
 register('loka', loka);
 register('mads', mads);
 register('mantis-display', mantisDisplay);
@@ -332,6 +339,7 @@ register('plista', plista);
 register('polymorphicads', polymorphicads);
 register('popin', popin);
 register('pubexchange', pubexchange);
+register('postquare', postquare);
 register('pubmatic', pubmatic);
 register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);
@@ -339,6 +347,7 @@ register('purch', purch);
 register('reddit', reddit);
 register('relap', relap);
 register('revcontent', revcontent);
+register('revjet', revjet);
 register('rubicon', rubicon);
 register('sharethrough', sharethrough);
 register('sklik', sklik);

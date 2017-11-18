@@ -30,6 +30,35 @@ Please add new release changes here. Use the time in UTC for the header and
 mention any release notes since the last change as well as the version numbers.
 -->
 
+### 7:00 PM, November 15, 2017 UTC
+
+Validator version 263
+Rules version 514
+
+Includes:
+ - #11758 Whitelist material design icons.
+ - Wrap HtmlTag and add some utility methods to simplify code. Warn on duplicate
+   attributes.
+ - Remove disallowed_domains from AMP-FORM tag now that we use CURLS v2.
+ - #9625 allow additional amp-keyframes style
+ - allow "fr" attribute for radialGradient SVG tag
+ - #11821 whitelist amp-position-observer for A4A
+ 
+
+### 7:30 PM, October 23, 2017 UTC
+
+Validator version 256
+Rules version 501
+
+Includes:
+ - Add `allow=geolocation` attributes to <amp-iframe>
+ - Allow feflood for SVGs
+ - #11433 amp-user-notification
+ - Size limit 200k bytes, allow specific at-rules for style[keyframes]
+ - #11122 amp-gwd-animation
+ - #11543 Allow viewport-fit meta viewport content property
+ - amp-story changes
+
 ### 9:00 PM, October 10, 2017 UTC
 
 Validator version 253
