@@ -18,10 +18,13 @@ import {
   getTrackImpressionPromise,
   maybeTrackImpression,
   resetTrackImpressionPromiseForTesting,
+  shouldAppendExtraParams,
+  getExtraParamsUrl,
 } from '../../src/impression';
 import {toggleExperiment} from '../../src/experiments';
 import {Services} from '../../src/services';
 import {macroTask} from '../../testing/yield';
+import {user} from '../../src/log';
 import * as sinon from 'sinon';
 
 describe('impression', () => {
@@ -31,6 +34,7 @@ describe('impression', () => {
   let xhr;
   let isTrustedViewer;
   let isTrustedReferrer;
+  let warnStub;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -40,6 +44,7 @@ describe('impression', () => {
     xhr = Services.xhrFor(window);
     expect(xhr.fetchJson).to.exist;
     const stub = sandbox.stub(xhr, 'fetchJson');
+    warnStub = sandbox.stub(user(), 'warn');
     stub.returns(Promise.resolve({
       json() {
         return Promise.resolve(null);
@@ -201,6 +206,31 @@ describe('impression', () => {
       expect(window.location.href).to.equal(prevHref);
     });
 
+    it('should resolve if get no content response', function* () {
+      toggleExperiment(window, 'alp', true);
+      viewer.getParam.withArgs('click').returns('https://www.example.com');
+      xhr.fetchJson.returns(Promise.resolve({
+        // No-content response
+        status: 204,
+      }));
+      maybeTrackImpression(window);
+      return getTrackImpressionPromise().then(() => {
+        expect(warnStub).to.not.be.called;
+      });
+    });
+
+    it('should still resolve on request error', function* () {
+      toggleExperiment(window, 'alp', true);
+      viewer.getParam.withArgs('click').returns('https://www.example.com');
+      xhr.fetchJson.returns(Promise.resolve({
+        status: 404,
+      }));
+      maybeTrackImpression(window);
+      return getTrackImpressionPromise().then(() => {
+        expect(warnStub).to.be.calledOnce;
+      });
+    });
+
     it('should resolve trackImpressionPromise if resolve click', () => {
       toggleExperiment(window, 'alp', true);
       viewer.getParam.withArgs('click').returns('https://www.example.com');
@@ -310,6 +340,77 @@ describe('impression', () => {
             'http://localhost:9876/v/s/f.com/?gclid=1234&amp_js_v=1#hash');
         window.history.replaceState(null, '', prevHref);
       });
+    });
+  });
+
+  it('shouldAppendExtraParams', () => {
+    const div = window.document.createElement('amp-analytics');
+    div.setAttribute('type', 'fake');
+    const ampdocApi = {
+      whenReady: () => {return Promise.resolve();},
+      getBody: () => {return window.document.body;},
+    };
+    window.document.body.appendChild(div);
+    return shouldAppendExtraParams(ampdocApi).then(res => {
+      expect(res).to.be.false;
+      const div2 = window.document.createElement('amp-analytics');
+      div2.setAttribute('type', 'googleanalytics');
+      window.document.body.appendChild(div2);
+      return shouldAppendExtraParams(ampdocApi).then(res => {
+        expect(res).to.be.true;
+      });
+    });
+  });
+
+  describe('getExtraParamsUrl', () => {
+    let windowApi;
+
+    beforeEach(() => {
+      const WindowApi = function() {};
+      windowApi = new WindowApi();
+      windowApi.location = {};
+    });
+
+    afterEach(() => {
+    });
+
+    it('should append gclid and gclsrc from window href', () => {
+      const target = window.document.createElement('a');
+      target.href = 'https://www.test.com?a=1&b=2&c=QUERY_PARAM(c)';
+      windowApi.location.href = 'www.current.com?gclid=123&gclsrc=abc';
+      expect(getExtraParamsUrl(windowApi, target)).to.equal(
+          'gclid=QUERY_PARAM(gclid)&gclsrc=QUERY_PARAM(gclsrc)');
+    });
+
+    it('should respect window location href', () => {
+      const target = window.document.createElement('a');
+      target.href = 'https://www.test.com?a=1&b=2&c=QUERY_PARAM(c)';
+      windowApi.location.href = 'www.current.com';
+      expect(getExtraParamsUrl(windowApi, target)).to.equal('');
+      windowApi.location.href = 'www.current.com?gclid=123';
+      expect(getExtraParamsUrl(windowApi, target)).to.equal(
+          'gclid=QUERY_PARAM(gclid)');
+      windowApi.location.href = 'www.current.com?gclid=123&gclsrc=abc';
+      expect(getExtraParamsUrl(windowApi, target)).to.equal(
+          'gclid=QUERY_PARAM(gclid)&gclsrc=QUERY_PARAM(gclsrc)');
+    });
+
+    it('should respect param in url', () => {
+      const target = window.document.createElement('a');
+      target.href = 'https://www.test.com?a=1&b=2&gclid=123';
+      windowApi.location.href = 'www.current.com?gclid=123&gclsrc=abc';
+      expect(getExtraParamsUrl(windowApi, target)).to.equal(
+          'gclsrc=QUERY_PARAM(gclsrc)');
+    });
+
+
+    it('should respect param in data-amp-addparams', () => {
+      const target = window.document.createElement('a');
+      target.href = 'https://www.test.com?a=1&b=2&gclid=123';
+      target.setAttribute('data-amp-addparams', 'gclid=QUERY_PARAM(gclid)');
+      windowApi.location.href = 'www.current.com?gclid=123&gclsrc=abc';
+      expect(getExtraParamsUrl(windowApi, target)).to.equal(
+          'gclsrc=QUERY_PARAM(gclsrc)');
     });
   });
 });

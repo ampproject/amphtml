@@ -669,6 +669,21 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     expect(keyframes.opacity).to.jsonEqual(['0', '0.525']);
   });
 
+  it('should parse num function', () => {
+    target2.style.width = '110px';
+    const request = scan({
+      target: target2,
+      duration: 'calc(1s * num(width()) / 10)',
+      delay: 'calc(1ms * num(width()) / 10)',
+      keyframes: {
+        transform: ['none', 'rotateX(calc(1rad * num(width()) / 20))'],
+      },
+    })[0];
+    expect(request.timing.duration).to.equal(11000);
+    expect(request.timing.delay).to.equal(11);
+    expect(request.keyframes.transform[1]).to.equal('rotatex(5.5rad)');
+  });
+
   it('should fail when cannot discover style keyframes', () => {
     expect(() => scan({target: target1, keyframes: 'keyframes1'}))
         .to.throw(/Keyframes not found/);

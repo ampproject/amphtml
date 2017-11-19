@@ -464,6 +464,23 @@ describes.realWin('EmbedAnalyticsRoot', {
     expect(root.getTrackerOptional('custom')).to.be.null;
   });
 
+  it('should create and reuse trackers, but not if not in whitelist', () => {
+    const whitelist = {
+      'custom': CustomEventTracker,
+    };
+    const customTracker = root.getTrackerForWhitelist('custom', whitelist);
+    expect(customTracker).to.be.instanceOf(CustomEventTracker);
+    expect(customTracker.root).to.equal(root);
+
+    const noneTracker = root.getTrackerForWhitelist('none', whitelist);
+    expect(noneTracker).to.be.null;
+
+    expect(root.getTrackerForWhitelist('custom', whitelist))
+        .to.equal(customTracker);
+    expect(root.getTracker('custom', CustomEventTracker))
+        .to.equal(customTracker);
+  });
+
   it('should init with embed signals', () => {
     expect(root.signals()).to.equal(embed.signals());
   });

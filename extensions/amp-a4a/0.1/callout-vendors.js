@@ -27,7 +27,7 @@ let RtcVendorDef;
 /** @const {!Object<string, RtcVendorDef>} */
 export const RTC_VENDORS = {
   'fakevendor': {
-    url: 'https://www.fake.qqq/?slot_id=SLOT_ID&page_id=PAGE_ID&foo_id=FOO_ID',
+    url: 'https://localhost:8000/examples/rtcE1.json?slot_id=SLOT_ID&page_id=PAGE_ID&foo_id=FOO_ID',
     macros: ['SLOT_ID', 'PAGE_ID', 'FOO_ID'],
   },
 };
