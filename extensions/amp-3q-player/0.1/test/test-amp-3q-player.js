@@ -14,50 +14,43 @@
  * limitations under the License.
  */
 
-import {
-    createIframePromise,
-    doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-3q-player';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {adopt} from '../../../../src/runtime';
 import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
-import * as sinon from 'sinon';
 
-adopt(window);
 
-describe('amp-3q-player', function() {
-  this.timeout(10000);
-  let sandbox;
-  const timer = Services.timerFor(window);
+describes.realWin('amp-3q-player', {
+  amp: {
+    extensions: ['amp-3q-player'],
+  },
+}, function(env) {
+  let win;
+  let doc;
+  let timer;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
+    win = env.win;
+    doc = win.document;
+    timer = Services.timerFor(win);
   });
 
   function get3QElement(playoutId) {
-    return createIframePromise(true).then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const player = iframe.doc.createElement('amp-3q-player');
-
-      timer.promise(50).then(() => {
-        const iframe = player.querySelector('iframe');
-        player.implementation_.sdnBridge_({
-          source: iframe.contentWindow,
-          data: JSON.stringify({data: 'ready'}),
-        });
+    const player = doc.createElement('amp-3q-player');
+    if (playoutId) {
+      player.setAttribute('data-id', playoutId);
+    }
+    doc.body.appendChild(player);
+    return player.build().then(() => {
+      const layoutPromise = player.layoutCallback();
+      const iframe = player.querySelector('iframe');
+      player.implementation_.sdnBridge_({
+        source: iframe.contentWindow,
+        data: JSON.stringify({data: 'ready'}),
       });
-
-      if (playoutId) {
-        player.setAttribute('data-id', playoutId);
-      }
-
-      return iframe.addElement(player);
+      return layoutPromise;
+    }).then(() => {
+      return player;
     });
   }
 
@@ -100,12 +93,10 @@ describe('amp-3q-player', function() {
             return Promise.race([p, successTimeout]);
           });
         });
-  })
-;
+  });
 
   function sendFakeMessage(player, iframe, command) {
     player.implementation_.sdnBridge_(
         {source: iframe.contentWindow, data: JSON.stringify({data: command})});
   }
-
 });

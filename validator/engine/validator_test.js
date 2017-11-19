@@ -15,8 +15,11 @@
  * limitations under the license.
  */
 goog.provide('amp.validator.ValidatorTest');
+
 goog.require('amp.validator.CssLength');
 goog.require('amp.validator.TagSpec');
+goog.require('amp.validator.ValidationError');
+goog.require('amp.validator.annotateWithErrorCategories');
 goog.require('amp.validator.createRules');
 goog.require('amp.validator.renderValidationResult');
 goog.require('amp.validator.validateString');
@@ -74,6 +77,18 @@ function isValidRegex(regex) {
 }
 
 /**
+ * Returns true if the regex has a group but is missing the corresponding
+ * Unicode group. For now this tests only for word character group (\\w) which
+ * must be followed by the Unicode equivalent group (\\p{L}\\p{N}_).
+ * @param {null|string} regex
+ * @return {boolean}
+ */
+function isMissingUnicodeGroup(regex) {
+  var wordGroupRegex = new RegExp("\\\\w(?!\\\\p{L}\\\\p{N}_)");
+  return wordGroupRegex.test(regex);
+}
+
+/**
  * Returns all html files underneath the testdata roots. This looks
  * both for feature_tests/*.html and for tests in extension directories.
  * E.g.: extensions/amp-accordion/0.1/test/*.html,
@@ -120,6 +135,8 @@ function findHtmlFilesRelativeToTestdata() {
  * An AMP Validator test case. This constructor will load the AMP HTML file
  * and also find the adjacent .out file.
  * @constructor
+ * @param {string} ampHtmlFile
+ * @param {string=} opt_ampUrl
  */
 const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
   /** @type {string} */
@@ -170,22 +187,14 @@ ValidatorTestCase.prototype.run = function() {
   assert.fail('', '', message, '');
 };
 
-describe('ValidatorTestdata', () => {
-  it('reports data-amp-report-test values', () => {
-    const result = amp.validator.validateString(
-        '<!doctype lemur data-amp-report-test="foo">');
-    assertStrictEqual(
-        result.status, amp.validator.ValidationResult.Status.FAIL);
-    assertStrictEqual('foo', result.errors[0].dataAmpReportTestValue);
-  });
-});
-
 /**
  * A strict comparison between two values.
  * Note: Unfortunately assert.strictEqual has some drawbacks, including that
  * it truncates the provided arguments (and it's not configurable) and
  * with the Closure compiler, it requires a message argument to which
  * we'd always have to pass undefined. Too messy, so we roll our own.
+ * @param {*} expected
+ * @param {*} saw
  */
 function assertStrictEqual(expected, saw) {
   assert.ok(expected === saw, 'expected: ' + expected + ' saw: ' + saw);
@@ -207,10 +216,14 @@ describe('ValidatorOutput', () => {
         'http://google.com/foo.html#development=1');
     test.expectedOutputFile = null;
     test.expectedOutput = 'FAIL\n' +
-        'http://google.com/foo.html:28:3 The tag \'script\' is disallowed ' +
-        'except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]\n' +
-        'http://google.com/foo.html:29:3 The tag \'script\' is disallowed ' +
-        'except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]';
+        'http://google.com/foo.html:28:3 Only AMP runtime \'script\' tags ' +
+        'are allowed, and only in the document head. (see ' +
+        'https://www.ampproject.org/docs/reference/spec#html-tags) ' +
+        '[CUSTOM_JAVASCRIPT_DISALLOWED]\n' +
+        'http://google.com/foo.html:29:3 Only AMP runtime \'script\' tags ' +
+        'are allowed, and only in the document head. (see ' +
+        'https://www.ampproject.org/docs/reference/spec#html-tags) ' +
+        '[CUSTOM_JAVASCRIPT_DISALLOWED]';
     test.run();
   });
 });
@@ -411,17 +424,29 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
       const regex = rules.internedStrings[-1 - attrSpec.valueRegex];
       expect(isValidRegex(regex)).toBe(true);
     });
+    it('value_regex must have unicode named groups', () => {
+      const regex = rules.internedStrings[-1 - attrSpec.valueRegex];
+      expect(isMissingUnicodeGroup(regex)).toBe(false);
+    });
   }
   if (attrSpec.valueRegexCasei !== null) {
     it('value_regex_casei valid', () => {
       const regex = rules.internedStrings[-1 - attrSpec.valueRegexCasei];
       expect(isValidRegex(regex)).toBe(true);
     });
+    it('value_regex_casei must have unicode named groups', () => {
+      const regex = rules.internedStrings[-1 - attrSpec.valueRegexCasei];
+      expect(isMissingUnicodeGroup(regex)).toBe(false);
+    });
   }
   if (attrSpec.blacklistedValueRegex !== null) {
     it('blacklisted_value_regex valid', () => {
       const regex = rules.internedStrings[-1 - attrSpec.blacklistedValueRegex];
       expect(isValidRegex(regex)).toBe(true);
+    });
+    it('blacklisted_value_regex must have unicode named groups', () => {
+      const regex = rules.internedStrings[-1 - attrSpec.blacklistedValueRegex];
+      expect(isMissingUnicodeGroup(regex)).toBe(false);
     });
   }
   // value_url must have at least one allowed protocol.
@@ -548,6 +573,7 @@ describe('ValidatorRulesMakeSense', () => {
         'AMP-FIT-TEXT': 0,
         'AMP-FONT': 0,
         'AMP-FORM': 0,
+        'AMP-GWD-ANIMATION': 0,
         'AMP-IMG': 0,
         'AMP-PIXEL': 0,
         'AMP-SOCIAL-SHARE': 0,
@@ -674,15 +700,18 @@ describe('ValidatorRulesMakeSense', () => {
         });
       }
       // blacklisted_cdata_regex
-      it('blacklisted_cdata_regex valid and error_message defined', () => {
-        for (const blacklistedCdataRegex of
-                 tagSpec.cdata.blacklistedCdataRegex) {
+      for (const blacklistedCdataRegex of tagSpec.cdata.blacklistedCdataRegex) {
+        it('blacklisted_cdata_regex valid and error_message defined', () => {
           usefulCdataSpec = true;
           expect(blacklistedCdataRegex.regex).toBeDefined();
           expect(isValidRegex(blacklistedCdataRegex.regex)).toBe(true);
           expect(blacklistedCdataRegex.errorMessage).toBeDefined();
-        }
-      });
+        });
+        it('blacklisted_cdata_regex must have unicode named groups', () => {
+          const regex = rules.internedStrings[-1 - blacklistedCdataRegex.regex];
+          expect(isMissingUnicodeGroup(regex)).toBe(false);
+        });
+      }
 
       // css_spec
       if (tagSpec.cdata.cssSpec !== null) {
@@ -724,9 +753,9 @@ describe('ValidatorRulesMakeSense', () => {
           expect(
               (tagSpec.cdata.blacklistedCdataRegex.length > 0) ||
               tagSpec.cdata.cdataRegex !== null ||
-              tagSpec.cdata.mandatoryCdata !== null)
+              tagSpec.cdata.mandatoryCdata !== null ||
+              tagSpec.cdata.cssSpec.validateKeyframes)
               .toBe(true);
-
         });
       }
       // cdata_regex and mandatory_cdata
@@ -736,6 +765,10 @@ describe('ValidatorRulesMakeSense', () => {
       }
       it('a cdata spec must be defined', () => {
         expect(usefulCdataSpec).toBe(true);
+      });
+      it('cdata_regex must have unicode named groups', () => {
+        const regex = rules.internedStrings[-1 - tagSpec.cdata.cdataRegex];
+        expect(isMissingUnicodeGroup(regex)).toBe(false);
       });
 
       // reference_points

@@ -27,7 +27,6 @@ tags: {  # amp-anim
 }
 tags: {  # <amp-anim>
   tag_name: "AMP-ANIM"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-anim"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }

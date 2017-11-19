@@ -13,31 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
+
 import '../amp-kaltura-player';
-import {adopt} from '../../../../src/runtime';
 
-adopt(window);
 
-describe('amp-kaltura-player', () => {
+describes.realWin('amp-kaltura-player', {
+  amp: {
+    extensions: ['amp-kaltura-player'],
+  },
+}, env => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
 
   function getKaltura(attributes, opt_responsive) {
-    return createIframePromise().then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const kalturaPlayer = iframe.doc.createElement('amp-kaltura-player');
-      for (const key in attributes) {
-        kalturaPlayer.setAttribute(key, attributes[key]);
-      }
-      kalturaPlayer.setAttribute('width', '111');
-      kalturaPlayer.setAttribute('height', '222');
-      if (opt_responsive) {
-        kalturaPlayer.setAttribute('layout', 'responsive');
-      }
-      return iframe.addElement(kalturaPlayer);
-    });
+    const kalturaPlayer = doc.createElement('amp-kaltura-player');
+    for (const key in attributes) {
+      kalturaPlayer.setAttribute(key, attributes[key]);
+    }
+    kalturaPlayer.setAttribute('width', '111');
+    kalturaPlayer.setAttribute('height', '222');
+    if (opt_responsive) {
+      kalturaPlayer.setAttribute('layout', 'responsive');
+    }
+    doc.body.appendChild(kalturaPlayer);
+    return kalturaPlayer.build().then(() => {
+      return kalturaPlayer.layoutCallback();
+    }).then(() => kalturaPlayer);
   }
 
   it('renders', () => {

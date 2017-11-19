@@ -14,31 +14,33 @@
  * limitations under the License.
  */
 
-import {
-    createIframePromise,
-    doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-o2-player';
-import {adopt} from '../../../../src/runtime';
 
-adopt(window);
 
-describe('amp-o2-player', () => {
+describes.realWin('amp-o2-player', {
+  amp: {
+    extensions: ['amp-o2-player'],
+  },
+}, env => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
 
   function getO2player(attributes, opt_responsive) {
-    return createIframePromise().then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const o2 = iframe.doc.createElement('amp-o2-player');
-      for (const key in attributes) {
-        o2.setAttribute(key, attributes[key]);
-      }
-      o2.setAttribute('width', '111');
-      o2.setAttribute('height', '222');
-      if (opt_responsive) {
-        o2.setAttribute('layout', 'responsive');
-      }
-      return iframe.addElement(o2);
-    });
+    const o2 = doc.createElement('amp-o2-player');
+    for (const key in attributes) {
+      o2.setAttribute(key, attributes[key]);
+    }
+    o2.setAttribute('width', '111');
+    o2.setAttribute('height', '222');
+    if (opt_responsive) {
+      o2.setAttribute('layout', 'responsive');
+    }
+    doc.body.appendChild(o2);
+    return o2.build().then(() => o2.layoutCallback()).then(() => o2);
   }
 
   it('renders', () => {

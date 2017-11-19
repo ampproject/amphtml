@@ -85,7 +85,7 @@ describe('cookies', () => {
         document: doc,
         location: {
           hostname,
-          href: 'https://' + hostname + ':8000/test.html',
+          href: 'https://' + hostname + '/test.html',
         }},
           'c&1', 'v&1', 1447383159853, {
             highestAvailableDomain: true,

@@ -18,6 +18,7 @@ import {dev} from './log';
 import {dict} from './utils/object';
 import {cssEscape} from '../third_party/css-escape/css-escape';
 import {startsWith} from './string';
+import {toWin} from './types';
 
 const HTML_ESCAPE_CHARS = {
   '&': '&amp;',
@@ -50,7 +51,7 @@ export function waitForChild(parent, checkFunc, callback) {
     return;
   }
   /** @const {!Window} */
-  const win = parent.ownerDocument.defaultView;
+  const win = toWin(parent.ownerDocument.defaultView);
   if (win.MutationObserver) {
     /** @const {MutationObserver} */
     const observer = new win.MutationObserver(() => {
@@ -636,6 +637,16 @@ export function openWindowDialog(win, url, target, opt_features) {
 export function isJsonScriptTag(element) {
   return element.tagName == 'SCRIPT' &&
             element.getAttribute('type').toUpperCase() == 'APPLICATION/JSON';
+}
+
+/**
+ * Whether the element is a script tag with application/json type.
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isJsonLdScriptTag(element) {
+  return element.tagName == 'SCRIPT' &&
+      element.getAttribute('type').toUpperCase() == 'APPLICATION/LD+JSON';
 }
 
 /**

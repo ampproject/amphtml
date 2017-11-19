@@ -105,32 +105,39 @@ For example, the following is possible in AMP.
   <!-- change -->
   <tr>
     <td rowspan=3><code>change</code></td>
-    <td rowspan=3>Fired when the value of the element is changed and committed.</td>
-    <td>input[type="range"]</td>
+    <td rowspan=3>
+      Fired when the value of the element is changed and committed.
+      <br><br>
+      Data properties mirror those in <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement#Properties">HTMLInputElement</a> and <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLSelectElement#Properties">HTMLSelectElement</a>.
+    </td>
+    <td><code>input</code></td>
     <td>
-      <code>event.min</code> : The minimum value of the range<br>
-      <code>event.value</code> : The current value of the range<br>
-      <code>event.max</code> : The maximum value of the range<br>
+      <pre>event.min
+event.max
+event.value
+event.valueAsNumber</pre>
     </td>
   </tr>
   <tr>
-    <td>input[type="radio"], input[type="checkbox"]</td>
+    <td><code>input[type="radio"]</code>, <code>input[type="checkbox"]</code></td>
     <td>
-      <code>event.checked</code> : If the element is checked
+      <code>event.checked</code>
     </td>
   </tr>
   <tr>
-    <td>input[type="text"], select</td>
+    <td><code>select</code></td>
     <td>
-      <code>event.value</code> : String of the text or selected option
+      <pre>event.min
+event.max
+event.value</pre>
     </td>
   </tr>
   <!-- input-debounced -->
   <tr>
     <td><code>input-debounced</code></td>
-    <td>Fired when the value of the element is changed. This is similar to the standard <code>input</code> event, but it only fires when 300ms have passed after the value of the input has stopped changing.</td>
+    <td>Fired when the value of the element is changed. This is similar to the standard <code>change</code> event, but it only fires when 300ms have passed after the value of the input has stopped changing.</td>
     <td>Elements that fire <code>input</code> event.</td>
-    <td>Same as above.</td>
+    <td>Same as <code>change</code> event data.</td>
   </tr>
 </table>
 
@@ -144,7 +151,8 @@ For example, the following is possible in AMP.
   <tr>
     <td><code>slideChange</code></td>
     <td>Fired when the user manually changes the carousel's current slide. Does not fire on autoplay or the <code>goToSlide</code> action.</td>
-    <td><code>event.index</code> : slide number</td>
+    <td><pre>// Slide number.
+event.index</pre></td>
   </tr>
 </table>
 
@@ -158,7 +166,8 @@ For example, the following is possible in AMP.
   <tr>
     <td><code>select</code></td>
     <td>Fired when the user manually selects an option.</td>
-    <td><code>event.targetOption</code> : The <code>option</code> attribute value of the selected element</td>
+    <td><pre>// The `option` attribute value of the selected element.
+event.targetOption</pre></td>
   </tr>
 </table>
 
@@ -177,12 +186,24 @@ For example, the following is possible in AMP.
   <tr>
     <td><code>submit-success</code></td>
     <td>Fired when the form submission response is success.</td>
-    <td><code>event.response</code> : JSON response</td>
+    <td><pre>// Response JSON.
+event.response</pre></td>
   </tr>
   <tr>
     <td><code>submit-error</code></td>
     <td>Fired when the form submission response is an error.</td>
-    <td><code>event.response</code> : JSON response</td>
+    <td><pre>// Response JSON.
+event.response</pre></td>
+  </tr>
+  <tr>
+    <td><code>valid</code></td>
+    <td>Fired when the form is valid.</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td><code>invalid</code></td>
+    <td>Fired when the form is invalid.</td>
+    <td></td>
   </tr>
 </table>
 
@@ -296,20 +317,6 @@ For example, the following is possible in AMP.
   </tr>
 </table>
 
-### amp-state
-<table>
-  <tr>
-    <th>Action</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td><code>(default)</code></td>
-    <td>Updates the amp-state's data with the data contained in the event. Requires
-      <a href="../extensions/amp-bind/amp-bind.md">amp-bind</a>.
-    </td>
-  </tr>
-</table>
-
 ### amp-user-notification
 <table>
   <tr>
@@ -385,14 +392,26 @@ actions that apply to the whole document.
     <td>Navigates back in history.</td>
   </tr>
   <tr>
-    <td><code>setState</code></td>
-    <td>Updates <code>amp-bind</code>'s state. See <a href="../extensions/amp-bind/amp-bind.md#ampsetstate">details</a>.</td>
-  </tr>
-  <tr>
     <td><code>print</code></td>
     <td>Opens the Print Dialog to print the current page.</td>
   </tr>
+  <tr>
+    <td><code>setState({foo: 'bar'})</code><sup>1</sup></td>
+    <td>
+      <p>Requires <a href="../extensions/amp-bind/amp-bind.md#updating-state-with-ampsetstate">amp-bind</a>.</p>
+      <p>Merges an object literal into the bindable state.</p>
+      <p></p>
+    </td>
+  </tr>
+  <tr>
+    <td><code>pushState({foo: 'bar'})</code><sup>1</sup></td>
+    <td>
+      <p>Requires <a href="../extensions/amp-bind/amp-bind.md#modifying-history-with-amppushstate">amp-bind</a>.</p>
+      <p>Merges an object literal into the bindable state and pushes a new entry onto browser history stack. Popping the entry will restore the previous values of variables (in this example, <code>foo</code>).    </td>
+  </tr>
 </table>
+
+<sup>1</sup>When used with <a href="#multiple-actions-for-one-event">multiple actions</a>, subsequent actions will wait for <code>setState()</code> or <code>pushState()</code> to complete before invocation. Only a single <code>setState()</code> or <code>pushState()</code> is allowed per event.
 
 ### `amp-access`
 

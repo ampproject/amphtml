@@ -48,11 +48,17 @@ import {urls} from '../src/config';
 import {endsWith} from '../src/string';
 import {parseJson} from '../src/json';
 import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
-import {initLogConstructor, setReportError, user} from '../src/log';
+import {
+  initLogConstructor,
+  setReportError,
+  user,
+  isUserErrorMessage,
+} from '../src/log';
 import {dict} from '../src/utils/object.js';
 import {getMode} from '../src/mode';
 import {startsWith} from '../src/string.js';
 import {AmpEvents} from '../src/amp-events';
+import {MessageType} from '../src/3p-frame-messaging';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
@@ -103,6 +109,7 @@ import {contentad} from '../ads/contentad';
 import {criteo} from '../ads/criteo';
 import {csa} from '../ads/google/csa';
 import {dable} from '../ads/dable';
+import {directadvert} from '../ads/directadvert';
 import {distroscale} from '../ads/distroscale';
 import {ezoic} from '../ads/ezoic';
 import {dotandads} from '../ads/dotandads';
@@ -153,18 +160,21 @@ import {outbrain} from '../ads/outbrain';
 import {plista} from '../ads/plista';
 import {polymorphicads} from '../ads/polymorphicads';
 import {popin} from '../ads/popin';
+import {postquare} from '../ads/postquare';
 import {pubmatic} from '../ads/pubmatic';
 import {pubmine} from '../ads/pubmine';
 import {pulsepoint} from '../ads/pulsepoint';
 import {purch} from '../ads/purch';
 import {revcontent} from '../ads/revcontent';
 import {relap} from '../ads/relap';
+import {revjet} from '../ads/revjet';
 import {rubicon} from '../ads/rubicon';
 import {sharethrough} from '../ads/sharethrough';
 import {sklik} from '../ads/sklik';
 import {slimcutmedia} from '../ads/slimcutmedia';
 import {smartadserver} from '../ads/smartadserver';
 import {smartclip} from '../ads/smartclip';
+import {smi2} from '../ads/smi2';
 import {sortable} from '../ads/sortable';
 import {sogouad} from '../ads/sogouad';
 import {sovrn} from '../ads/sovrn';
@@ -183,6 +193,7 @@ import {xlift} from '../ads/xlift';
 import {yahoo} from '../ads/yahoo';
 import {yahoojp} from '../ads/yahoojp';
 import {yandex} from '../ads/yandex';
+import {yengo} from '../ads/yengo';
 import {yieldbot} from '../ads/yieldbot';
 import {yieldmo} from '../ads/yieldmo';
 import {yieldone} from '../ads/yieldone';
@@ -204,7 +215,9 @@ const AMP_EMBED_ALLOWED = {
   mywidget: true,
   outbrain: true,
   plista: true,
+  postquare: true,
   smartclip: true,
+  smi2: true,
   taboola: true,
   zergnet: true,
 };
@@ -264,6 +277,7 @@ register('contentad', contentad);
 register('criteo', criteo);
 register('csa', csa);
 register('dable', dable);
+register('directadvert', directadvert);
 register('distroscale', distroscale);
 register('dotandads', dotandads);
 register('doubleclick', doubleclick);
@@ -318,6 +332,7 @@ register('outbrain', outbrain);
 register('plista', plista);
 register('polymorphicads', polymorphicads);
 register('popin', popin);
+register('postquare', postquare);
 register('pubmatic', pubmatic);
 register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);
@@ -325,12 +340,14 @@ register('purch', purch);
 register('reddit', reddit);
 register('relap', relap);
 register('revcontent', revcontent);
+register('revjet', revjet);
 register('rubicon', rubicon);
 register('sharethrough', sharethrough);
 register('sklik', sklik);
 register('slimcutmedia', slimcutmedia);
 register('smartadserver', smartadserver);
 register('smartclip', smartclip);
+register('smi2', smi2);
 register('sortable', sortable);
 register('sogouad', sogouad);
 register('sovrn', sovrn);
@@ -350,6 +367,7 @@ register('xlift' , xlift);
 register('yahoo', yahoo);
 register('yahoojp', yahoojp);
 register('yandex', yandex);
+register('yengo', yengo);
 register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
 register('zergnet', zergnet);
@@ -470,6 +488,14 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
       nonSensitiveDataPostMessage('bootstrap-loaded');
     }
   } catch (e) {
+    if (window.context && window.context.report3pError) {
+      // window.context has initiated yet
+      if (e.message && isUserErrorMessage(e.message)) {
+        // report user error to parent window
+        window.context.report3pError(e);
+      }
+    }
+
     const c = window.context || {mode: {test: false}};
     if (!c.mode.test) {
       lightweightErrorReport(e, c.canary);
@@ -551,6 +577,8 @@ function installContextUsingStandardImpl(win, data) {
     renderStart: triggerRenderStart,
     reportRenderedEntityIdentifier,
     requestResize: triggerResizeRequest,
+    report3pError,
+
 
     // Using quotes due to bug related to imported variables in object property
     // shorthand + object shorthand lint rule.
@@ -717,6 +745,19 @@ function reportRenderedEntityIdentifier(entityId) {
       'entityId should be a string %s', entityId);
   nonSensitiveDataPostMessage('entity-id', dict({
     'id': entityId,
+  }));
+}
+
+/**
+ * Send 3p error to parent iframe
+ * @param {!Error} e
+ */
+function report3pError(e) {
+  if (!e.message) {
+    return;
+  }
+  nonSensitiveDataPostMessage(MessageType.USER_ERROR_IN_IFRAME, dict({
+    'message': e.message,
   }));
 }
 

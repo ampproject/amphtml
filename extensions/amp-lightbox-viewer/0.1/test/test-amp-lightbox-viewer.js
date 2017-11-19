@@ -14,18 +14,43 @@
  * limitations under the License.
  */
 
-import {adopt} from '../../../../src/runtime';
-import {createIframePromise} from '../../../../testing/iframe';
 import {toggleExperiment} from '../../../../src/experiments';
 import {installLightboxManager} from '../amp-lightbox-viewer';
+import '../../../amp-carousel/0.1/amp-carousel';
 
-adopt(window);
 
-describe('amp-lightbox-viewer', () => {
+describes.realWin('amp-lightbox-viewer', {
+  amp: {
+    extensions: ['amp-lightbox-viewer', 'amp-carousel'],
+  },
+}, env => {
+  let win, doc;
   let item1; // Auto lightboxable
   let item2; // Manually lightboxable
   let item3; // Not lightboxable
   let item4; // Auto lightboxable
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
+
+  function getAmpLightboxViewer(autoLightbox) {
+    toggleExperiment(win, 'amp-lightbox-viewer', true);
+    if (autoLightbox) {
+      toggleExperiment(win, 'amp-lightbox-viewer-auto', true);
+    } else {
+      toggleExperiment(win, 'amp-lightbox-viewer-auto', false);
+    }
+    setUpDocument(doc, autoLightbox);
+    const viewer = doc.createElement('amp-lightbox-viewer');
+    viewer.setAttribute('layout', 'nodisplay');
+    installLightboxManager(win);
+    doc.body.appendChild(viewer);
+    return viewer.build()
+        .then(() => viewer.layoutCallback())
+        .then(() => viewer);
+  }
 
   describe('with manual lightboxing', () => {
     runTests(/*autoLightbox*/false);
@@ -158,6 +183,7 @@ describe('amp-lightbox-viewer', () => {
       img.setAttribute('width', '200');
       img.setAttribute('height', '200');
       img.setAttribute('src', 'someimage');
+      img.updateLayoutBox({top: 0, left: 0, width: 200, height: 200});
       return img;
     };
 
@@ -188,21 +214,10 @@ describe('amp-lightbox-viewer', () => {
     container.appendChild(item4);
 
     doc.body.appendChild(container);
-  }
 
-  function getAmpLightboxViewer(autoLightbox) {
-    return createIframePromise().then(iframe => {
-      toggleExperiment(iframe.win, 'amp-lightbox-viewer', true);
-      if (autoLightbox) {
-        toggleExperiment(iframe.win, 'amp-lightbox-viewer-auto', true);
-      } else {
-        toggleExperiment(iframe.win, 'amp-lightbox-viewer-auto', false);
-      }
-      setUpDocument(iframe.doc, autoLightbox);
-      const viewer = iframe.doc.createElement('amp-lightbox-viewer');
-      viewer.setAttribute('layout', 'nodisplay');
-      installLightboxManager(iframe.win);
-      return iframe.addElement(viewer);
-    });
+    const resources = item1.getResources();
+    resources.getResourceForElement(item1).measure();
+    resources.getResourceForElement(item3).measure();
+    resources.getResourceForElement(item4).measure();
   }
 });

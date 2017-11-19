@@ -18,6 +18,7 @@ import {
   addDataAndJsonAttributes_,
   getIframe,
   getBootstrapBaseUrl,
+  getDefaultBootstrapBaseUrl,
   getSubDomain,
   preloadBootstrap,
   resetCountForTesting,
@@ -270,10 +271,34 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
         /^https:\/\/d-\d+\.ampproject\.net\/\$\internal\w+\$\/frame\.html$/);
   });
 
+  it('should return a stable URL in getBootstrapBaseUrl', () => {
+    window.AMP_MODE = {};
+    expect(getBootstrapBaseUrl(window)).to.equal(getBootstrapBaseUrl(window));
+  });
+
+  it('should return a stable URL in getDefaultBootstrapBaseUrl', () => {
+    window.AMP_MODE = {};
+    expect(getDefaultBootstrapBaseUrl(window)).to.equal(
+        getDefaultBootstrapBaseUrl(window));
+  });
+
   it('should pick the right bootstrap url (custom)', () => {
     addCustomBootstrap('https://example.com/boot/remote.html');
     expect(getBootstrapBaseUrl(window)).to.equal(
         'https://example.com/boot/remote.html?$internalRuntimeVersion$');
+  });
+
+  it('should return different values for different file names', () => {
+    window.AMP_MODE = {};
+    let match =
+        /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame\.html$/
+        .exec(getDefaultBootstrapBaseUrl(window));
+    const domain = match && match[1];
+    expect(domain).to.be.ok;
+    match =
+        /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame2\.html$/
+        .exec(getDefaultBootstrapBaseUrl(window, 'frame2'));
+    expect(match && match[1]).to.equal(domain);
   });
 
   it('should pick the right bootstrap url (custom)', () => {

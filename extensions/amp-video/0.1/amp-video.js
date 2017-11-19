@@ -41,7 +41,9 @@ const ATTRS_TO_PROPAGATE_ON_BUILD = [
   'aria-labelledby',
   'controls',
   'crossorigin',
+  'disableremoteplayback',
   'poster',
+  'controlsList',
 ];
 
 /**
@@ -232,7 +234,8 @@ class AmpVideo extends AMP.BaseElement {
    */
   installEventHandlers_() {
     const video = dev().assertElement(this.video_);
-    this.forwardEvents([VideoEvents.PLAYING, VideoEvents.PAUSE], video);
+    this.forwardEvents(
+      [VideoEvents.PLAYING, VideoEvents.PAUSE, VideoEvents.ENDED], video);
     listen(video, 'volumechange', () => {
       if (this.muted_ != this.video_.muted) {
         this.muted_ = this.video_.muted;
@@ -377,4 +380,7 @@ class AmpVideo extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement(TAG, AmpVideo);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpVideo);
+});

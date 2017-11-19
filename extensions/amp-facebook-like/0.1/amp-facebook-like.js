@@ -79,6 +79,9 @@ class AmpFacebookLike extends AMP.BaseElement {
     }
     return true;
   }
-};
+}
 
-AMP.registerElement('amp-facebook-like', AmpFacebookLike);
+
+AMP.extension('amp-facebook-like', '0.1', AMP => {
+  AMP.registerElement('amp-facebook-like', AmpFacebookLike);
+});

@@ -30,7 +30,6 @@ tags: {  # <amp-sidebar>
   html_format: AMP
   tag_name: "AMP-SIDEBAR"
   mandatory_parent: "BODY"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-sidebar"
   attrs: {
     name: "side"
@@ -49,6 +48,9 @@ tags: {  # amp-sidebar > nav
   attrs: {
     name: "toolbar"
     mandatory: true
+    # This tagspec sometimes produces errors for non-sidebar NAVs. This
+    # dispatch key helps with this somewhat.
+    dispatch_key: NAME_DISPATCH
   }
   attrs: {
     name: "toolbar-target"

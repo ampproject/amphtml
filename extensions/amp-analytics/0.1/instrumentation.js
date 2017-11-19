@@ -24,6 +24,7 @@ import {
   CustomEventTracker,
   IniLoadTracker,
   SignalTracker,
+  TimerEventTracker,
   VideoEventTracker,
   VisibilityTracker,
 } from './events';
@@ -42,8 +43,6 @@ import {isEnumValue} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 import {Services} from '../../../src/services';
 
-const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
-const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
 const VAR_V_SCROLL_BOUNDARY = 'verticalScrollBoundary';
@@ -93,6 +92,11 @@ const EVENT_TRACKERS = {
     name: 'ini-load',
     allowedFor: ALLOWED_FOR_ALL,
     klass: IniLoadTracker,
+  },
+  'timer': {
+    name: 'timer',
+    allowedFor: ALLOWED_FOR_ALL,
+    klass: TimerEventTracker,
   },
   'visible': {
     name: 'visible',
@@ -149,14 +153,14 @@ export class InstrumentationService {
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
 
-    /** @const {!../../../src/service/viewport-impl.Viewport} */
+    /** @const {!../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private {boolean} */
     this.scrollHandlerRegistered_ = false;
 
     /** @private {!Observable<
-        !../../../src/service/viewport-impl.ViewportChangedEventDef>} */
+        !../../../src/service/viewport/viewport-impl.ViewportChangedEventDef>} */
     this.scrollObservable_ = new Observable();
   }
 
@@ -266,10 +270,6 @@ export class InstrumentationService {
         relayoutAll: false,
         velocity: 0,  // Hack for typing.
       });
-    } else if (eventType === AnalyticsEventType.TIMER) {
-      if (this.isTimerSpecValid_(config['timerSpec'])) {
-        this.createTimerListener_(listener, config['timerSpec']);
-      }
     }
   }
 
@@ -286,7 +286,7 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {!../../../src/service/viewport-impl.ViewportChangedEventDef} e
+   * @param {!../../../src/service/viewport/viewport-impl.ViewportChangedEventDef} e
    * @private
    */
   onScroll_(e) {
@@ -380,55 +380,6 @@ export class InstrumentationService {
       result[bound] = false;
     }
     return result;
-  }
-
-  /**
-   * @param {JsonObject} timerSpec
-   * @private
-   */
-  isTimerSpecValid_(timerSpec) {
-    if (!timerSpec || typeof timerSpec != 'object') {
-      user().error(TAG, 'Bad timer specification');
-      return false;
-    } else if (!('interval' in timerSpec)) {
-      user().error(TAG, 'Timer interval specification required');
-      return false;
-    } else if (typeof timerSpec['interval'] !== 'number' ||
-               timerSpec['interval'] < MIN_TIMER_INTERVAL_SECONDS_) {
-      user().error(TAG, 'Bad timer interval specification');
-      return false;
-    } else if (('maxTimerLength' in timerSpec) &&
-              (typeof timerSpec['maxTimerLength'] !== 'number' ||
-                  timerSpec['maxTimerLength'] <= 0)) {
-      user().error(TAG, 'Bad maxTimerLength specification');
-      return false;
-    } else {
-      return true;
-    }
-  }
-
-  /**
-   * @param {!function(!AnalyticsEvent)} listener
-   * @param {JsonObject} timerSpec
-   * @private
-   */
-  createTimerListener_(listener, timerSpec) {
-    const hasImmediate = 'immediate' in timerSpec;
-    const callImmediate = hasImmediate ? Boolean(timerSpec['immediate']) : true;
-    const intervalId = this.ampdoc.win.setInterval(
-        listener.bind(null, this.createEventDepr_(AnalyticsEventType.TIMER)),
-        timerSpec['interval'] * 1000
-    );
-
-    if (callImmediate) {
-      listener(this.createEventDepr_(AnalyticsEventType.TIMER));
-    }
-
-    const maxTimerLength = timerSpec['maxTimerLength'] ||
-        DEFAULT_MAX_TIMER_LENGTH_SECONDS_;
-    this.ampdoc.win.setTimeout(
-        this.ampdoc.win.clearInterval.bind(this.ampdoc.win, intervalId),
-        maxTimerLength * 1000);
   }
 
   /**

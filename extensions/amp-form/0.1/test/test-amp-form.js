@@ -46,7 +46,7 @@ describes.repeated('', {
     amp: {
       runtimeOn: false,
       ampdoc: variant.ampdoc,
-      extensions: ['amp-selector'],  // amp-form is installed as service.
+      extensions: ['amp-form', 'amp-selector'],  // amp-form is installed as service.
     },
   }, env => {
 

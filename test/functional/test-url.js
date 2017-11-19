@@ -32,7 +32,61 @@ import {
   resolveRelativeUrlFallback_,
   serializeQueryString,
   getCorsUrl,
+  getWinOrigin,
 } from '../../src/url';
+
+describe('getWinOrigin', () => {
+
+  it('should return origin if available', () => {
+    expect(getWinOrigin({
+      'origin': 'https://foo.com',
+      'location': {
+        'href': 'https://foo1.com/abc?123#foo',
+      },
+    })).to.equal('https://foo.com');
+  });
+
+
+  it('should return origin from href when win.origin is not available', () => {
+    expect(getWinOrigin({
+      'location': {
+        'href': 'https://foo1.com/abc?123#foo',
+      },
+    })).to.equal('https://foo1.com');
+  });
+
+
+  it('should return origin from href when win.origin is empty', () => {
+    expect(getWinOrigin({
+      'origin': '',
+      'location': {
+        'href': 'https://foo1.com/abc?123#foo',
+      },
+    })).to.equal('https://foo1.com');
+  });
+
+  it('should return origin from href when win.origin is null', () => {
+    expect(getWinOrigin({
+      'origin': null,
+      'location': {
+        'href': 'https://foo1.com/abc?123#foo',
+      },
+    })).to.equal('https://foo1.com');
+  });
+
+  it('should return \"null\" when win.origin is \"null\"', () => {
+    expect(getWinOrigin({
+      'origin': 'null',
+      'location': {
+        'href': 'https://foo1.com/abc?123#foo',
+      },
+    })).to.equal('null');
+  });
+
+
+
+});
+
 
 describe('parseUrl', () => {
 
@@ -418,7 +472,8 @@ describe('addParamsToUrl', () => {
 describe('isProxyOrigin', () => {
 
   function testProxyOrigin(href, bool) {
-    it('should return whether it is a proxy origin for ' + href, () => {
+    it('should return that ' + href + (bool ? ' is' : ' is not') +
+        ' a proxy origin', () => {
       expect(isProxyOrigin(parseUrl(href))).to.equal(bool);
     });
   }
@@ -428,6 +483,12 @@ describe('isProxyOrigin', () => {
       'https://cdn.ampproject.org/', true);
   testProxyOrigin(
       'http://cdn.ampproject.org/', false);
+  testProxyOrigin(
+      'https://cdn.ampproject.org.badguys.com/', false);
+  testProxyOrigin(
+      'https://cdn.ampproject.orgbadguys.com/', false);
+  testProxyOrigin(
+      'https://cdn.ampproject.org:1234', false);
   testProxyOrigin(
       'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0', true);
   testProxyOrigin(
@@ -459,7 +520,8 @@ describe('isProxyOrigin', () => {
 
 describe('isLocalhostOrigin', () => {
   function testLocalhostOrigin(href, bool) {
-    it('should return whether it is a localhost origin for ' + href, () => {
+    it('should return that ' + href + (bool ? ' is' : ' is not') +
+      ' a localhost origin', () => {
       expect(isLocalhostOrigin(parseUrl(href))).to.equal(bool);
     });
   }
@@ -480,7 +542,8 @@ describe('isLocalhostOrigin', () => {
 
 describe('isProtocolValid', () => {
   function testProtocolValid(href, bool) {
-    it('should return whether it is a valid protocol for ' + href, () => {
+    it('should return that ' + href + (bool ? ' is' : ' is not') +
+      ' a valid protocol', () => {
       expect(isProtocolValid(href)).to.equal(bool);
     });
   }

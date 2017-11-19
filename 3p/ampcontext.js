@@ -312,8 +312,20 @@ export class AbstractAmpContext {
       this.setupMetadata_(this.win_.name);
     }
   }
-}
 
+  /**
+   * Send 3p error to parent iframe
+   * @param {!Error} e
+   */
+  report3pError(e) {
+    if (!e.message) {
+      return;
+    }
+    this.client_.sendMessage(MessageType.USER_ERROR_IN_IFRAME, dict({
+      'message': e.message,
+    }));
+  }
+}
 
 export class AmpContext extends AbstractAmpContext {
   /** @return {boolean} */

@@ -45,7 +45,6 @@ attr_lists: { # amp-audio attributes that are common to both AMP and A4A format.
 tags: {  # <amp-audio> for AMP (autoplay attribute allowed)
   html_format: AMP
   tag_name: "AMP-AUDIO"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-audio"
   attrs: {
     name: "autoplay"
@@ -69,7 +68,6 @@ tags: {  # <amp-audio> for A4A (autoplay attribute disallowed)
   html_format: AMP4ADS
   tag_name: "AMP-AUDIO"
   spec_name: "amp-audio (A4A)"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-audio"
   attr_lists: "amp-audio-common"
   attr_lists: "extended-amp-global"

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import '../../third_party/babel/custom-babel-helpers';
-
 self.addEventListener('install', function(event) {
   // Usually when you register a new service worker, it has to wait for a
   // navigation (refreshing the page) before it really starts. Well, we can't

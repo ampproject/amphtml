@@ -71,7 +71,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         },
       },
     }, env => {
-      describe('Open Channel', () => {
+      describe.configure().run('Open Channel', () => {
         class Messaging {
           constructor() {}
           sendRequest() {}
@@ -156,7 +156,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       });
 
       const port = new WindowPortEmulator(
-        this.win, viewerOrigin);
+        window, viewerOrigin);
       port.addEventListener = function() {};
       port.postMessage = function() {};
 
@@ -164,7 +164,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         postMessageResolve();
       });
 
-      messaging = new Messaging(this.win, port);
+      messaging = new Messaging(window, port);
       messaging.setDefaultHandler(requestProcessor);
     });
 

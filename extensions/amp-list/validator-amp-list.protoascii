@@ -31,6 +31,9 @@ tags: {  # <amp-list>
   tag_name: "AMP-LIST"
   requires_extension: "amp-list"
   attrs: { name: "credentials" }
+  attrs: { name: "items" }
+  attrs: { name: "max-items" }
+  attrs: { name: "single-item" }
   attrs: {
     name: "src"
     mandatory: true
@@ -40,7 +43,6 @@ tags: {  # <amp-list>
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  attrs: { name: "items" }
   # TODO(gregable): Implement validation that requires the template attr value
   # to reference the id of an existing template element.
   attrs: { name: "template" }

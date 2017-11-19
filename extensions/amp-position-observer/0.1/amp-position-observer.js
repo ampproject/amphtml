@@ -18,7 +18,6 @@ import {ActionTrust} from '../../../src/action-trust';
 import {getServiceForDoc} from '../../../src/service';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
-import {isExperimentOn} from '../../../src/experiments';
 import {dev, user} from '../../../src/log';
 import {
   RelativePositions,
@@ -34,9 +33,10 @@ import {
 } from '../../../src/layout';
 import {
   installPositionObserverServiceForDoc,
+} from '../../../src/service/position-observer/position-observer-impl';
+import {
   PositionObserverFidelity,
-  PositionInViewportEntryDef,
-} from '../../../src/service/position-observer-impl';
+} from '../../../src/service/position-observer/position-observer-worker';
 
 const TAG = 'amp-position-observer';
 
@@ -52,7 +52,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     /** @private {!boolean} */
     this.isVisible_ = false;
 
-    /** @private {?../../../src/service/position-observer-impl.AmpDocPositionObserver} */
+    /** @private {?../../../src/service/position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = null;
 
     /** @private {!number} */
@@ -90,7 +90,6 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG), `${TAG} experiment is off.`);
     // Since this is a functional component and not visual,
     // layoutCallback is meaningless. We delay the heavy work until
     // we become visible.
@@ -151,7 +150,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   /**
    * Called by position observer.
    * It calculates visibility and progress, and triggers the appropriate events.
-   * @param {!../../../src/service/position-observer-impl.PositionInViewportEntryDef} entry PositionObserver entry
+   * @param {!../../../src/service/position-observer/position-observer-worker.PositionInViewportEntryDef} entry PositionObserver entry
    * @private
    */
   positionChanged_(entry) {
@@ -394,4 +393,6 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement(TAG, AmpVisibilityObserver);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpVisibilityObserver);
+});

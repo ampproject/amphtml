@@ -41,11 +41,9 @@ export function criteo(global, data) {
       }, () => {});
       setTargeting(global, data, null);
     } else if (data.tagtype === 'standalone') {
-      computeInMasterFrame(window, 'call-standalone', resultCallback => {
-        Criteo.PubTag.Adapters.AMP.Standalone(data, resultCallback, targ => {
-          setTargeting(global, data, targ);
-        });
-      }, () => {});
+      Criteo.PubTag.Adapters.AMP.Standalone(data, () => {}, targ => {
+        setTargeting(global, data, targ);
+      });
     } else if (!data.tagtype || data.tagtype === 'passback') {
       Criteo.DisplayAd({
         zoneid: data.zone,

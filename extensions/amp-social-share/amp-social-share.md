@@ -96,7 +96,9 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
     <td>
       <ul>
         <li><code>data-param-subject</code>: optional, defaults to: Current page title</li>
-        <li><code>data-param-body</code>: optional, defaults to: <code>rel=canonical</code> URL</li></ul>
+        <li><code>data-param-body</code>: optional, defaults to: <code>rel=canonical</code> URL</li>
+        <li><code>data-param-recipient</code>: optional, defaults to: '' (empty string)</li>
+      </ul>
     </td>
   </tr>
   <tr>

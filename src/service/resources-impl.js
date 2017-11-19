@@ -184,7 +184,7 @@ export class Resources {
     /** @private {boolean} */
     this.isCurrentlyBuildingPendingResources_ = false;
 
-    /** @private @const {!./viewport-impl.Viewport} */
+    /** @private @const {!./viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private @const {!./vsync-impl.Vsync} */
@@ -212,7 +212,10 @@ export class Resources {
     this.viewport_.onChanged(event => {
       this.lastScrollTime_ = Date.now();
       this.lastVelocity_ = event.velocity;
-      this.relayoutAll_ = this.relayoutAll_ || event.relayoutAll;
+      if (event.relayoutAll) {
+        this.relayoutAll_ = true;
+        this.maybeChangeHeight_ = true;
+      }
       this.schedulePass();
     });
     this.viewport_.onScroll(() => {
@@ -449,7 +452,7 @@ export class Resources {
 
   /**
    * Returns the viewport instance
-   * @return {!./viewport-impl.Viewport}
+   * @return {!./viewport/viewport-impl.Viewport}
    */
   getViewport() {
     return this.viewport_;

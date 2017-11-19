@@ -14,6 +14,10 @@
     "es6": true,
     "browser": true
   },
+ "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module"
+  },
   "globals": {
     "it": false,
     "chai": false,

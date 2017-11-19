@@ -15,6 +15,9 @@
  */
 
 import {camelCaseToTitleCase, setStyle} from '../../src/style';
+import {
+  ImaPlayerData,
+} from './ima-player-data';
 import {isObject} from '../../src/types';
 import {loadScript} from '../../3p/3p';
 import {tryParseJson} from '../../src/json';
@@ -168,12 +171,14 @@ let videoWidth, videoHeight;
 // IMASettings provided via <script> tag in parent element.
 let imaSettings;
 
+// Player data used for video analytics.
+const playerData = new ImaPlayerData();
+
 /**
  * Loads the IMA SDK library.
  */
 function getIma(global, cb) {
   loadScript(global, 'https://imasdk.googleapis.com/js/sdkloader/ima3.js', cb);
-  //loadScript(global, 'https://storage.googleapis.com/gvabox/sbusolits/h5/debug/ima3.js', cb);
 }
 
 /**
@@ -322,6 +327,8 @@ export function imaVideo(global, data) {
   setStyle(videoPlayer, 'background-color', 'black');
   videoPlayer.setAttribute('poster', data.poster);
   videoPlayer.setAttribute('playsinline', true);
+  videoPlayer.setAttribute(
+      'controlsList', 'nodownload nofullscreen noremoteplayback');
   if (data.src) {
     const sourceElement = document.createElement('source');
     sourceElement.setAttribute('src', data.src);
@@ -476,6 +483,7 @@ function changeIcon(element, name, fill = '#FFFFFF') {
 export function onClick(global) {
   playbackStarted = true;
   uiTicker = setInterval(uiTickerClick, 500);
+  setInterval(playerDataTick, 1000);
   bigPlayDiv.removeEventListener(interactEvent, onClick);
   setStyle(bigPlayDiv, 'display', 'none');
   adDisplayContainer.initialize();
@@ -520,6 +528,7 @@ export function onContentEnded() {
   contentComplete = true;
   adsLoader.contentComplete();
   window.parent./*OK*/postMessage({event: VideoEvents.PAUSE}, '*');
+  window.parent./*OK*/postMessage({event: VideoEvents.ENDED}, '*');
 }
 
 /**
@@ -556,7 +565,14 @@ export function onAdsManagerLoaded(global, adsManagerLoadedEvent) {
  */
 export function onAdsLoaderError() {
   adRequestFailed = true;
-  playVideo();
+  // Send this message to trigger auto-play for failed pre-roll requests -
+  // failing to load an ad is just as good as loading one as far as starting
+  // playback is concerned because our content will be ready to play.
+  window.parent./*OK*/postMessage({event: VideoEvents.LOAD}, '*');
+  if (playbackStarted) {
+    videoPlayer.addEventListener(interactEvent, showControls);
+    playVideo();
+  }
 }
 
 /**
@@ -569,6 +585,7 @@ export function onAdError() {
   if (adsManager) {
     adsManager.destroy();
   }
+  videoPlayer.addEventListener(interactEvent, showControls);
   playVideo();
 }
 
@@ -617,6 +634,23 @@ export function onContentResumeRequested() {
  */
 function uiTickerClick() {
   updateUi(videoPlayer.currentTime, videoPlayer.duration);
+}
+
+/**
+ *  Called when our player data timer goes off. Sends a message to the parent
+ *  iframe to update the player data.
+ */
+function playerDataTick() {
+  // Skip while ads are active in case of custom playback. No harm done for
+  // non-custom playback because content won't be progressing while ads are
+  // playing.
+  if (videoPlayer && !adsActive) {
+    playerData.update(videoPlayer);
+    window.parent./*OK*/postMessage({
+      event: ImaPlayerData.IMA_PLAYER_DATA,
+      data: playerData,
+    }, '*');
+  }
 }
 
 /**
@@ -773,6 +807,7 @@ export function pauseVideo(event) {
   if (event && event.type == 'webkitendfullscreen') {
     // Video was paused because we exited fullscreen.
     videoPlayer.removeEventListener('webkitendfullscreen', pauseVideo);
+    fullscreen = false;
   }
 }
 
@@ -804,7 +839,7 @@ function onFullscreenClick(global) {
       fullscreenHeight = window.screen.height;
       requestFullscreen.call(global.document.documentElement);
     } else {
-      // Figure out how to make iPhone fullscren work here - I've got nothing.
+      // Use native fullscreen (iPhone)
       videoPlayer.webkitEnterFullscreen();
       // Pause the video when we leave fullscreen. iPhone does this
       // automatically, but we still use pauseVideo as an event handler to
@@ -1100,6 +1135,17 @@ const VideoEvents = {
    * @event pause
    */
   PAUSE: 'pause',
+
+  /**
+   * ended
+   *
+   * Fired when the video ends.
+   *
+   * This event should be fired in addition to `pause` when video ends.
+   *
+   * @event ended
+   */
+  ENDED: 'ended',
 
   /**
    * muted

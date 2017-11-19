@@ -19,6 +19,7 @@ import {AdStrategy} from '../ad-strategy';
 import {PlacementState, getPlacementsFromConfigObj} from '../placement';
 import {AdTracker} from '../ad-tracker';
 
+
 describes.realWin('amp-strategy', {
   amp: {
     runtimeOn: true,
@@ -26,30 +27,31 @@ describes.realWin('amp-strategy', {
     extensions: ['amp-ad'],
   },
 }, env => {
-
-  let sandbox;
+  let win, doc, ampdoc;
   let container;
 
   beforeEach(() => {
-    sandbox = env.sandbox;
+    win = env.win;
+    doc = win.document;
+    ampdoc = env.ampdoc;
 
-    env.win.frameElement.style.height = '1000px';
+    env.iframe.style.height = '1000px';
 
-    const belowFoldSpacer = document.createElement('div');
+    const belowFoldSpacer = doc.createElement('div');
     belowFoldSpacer.style.height = '1000px';
-    env.win.document.body.appendChild(belowFoldSpacer);
+    doc.body.appendChild(belowFoldSpacer);
 
-    container = env.win.document.createElement('div');
-    env.win.document.body.appendChild(container);
+    container = doc.createElement('div');
+    doc.body.appendChild(container);
   });
 
   it('should place an ad in the first placement only with correct attributes',
       () => {
-        const anchor1 = document.createElement('div');
+        const anchor1 = doc.createElement('div');
         anchor1.id = 'anchor1Id';
         container.appendChild(anchor1);
 
-        const anchor2 = document.createElement('div');
+        const anchor2 = doc.createElement('div');
         anchor2.id = 'anchor2Id';
         container.appendChild(anchor2);
 
@@ -71,7 +73,7 @@ describes.realWin('amp-strategy', {
             },
           ],
         };
-        const placements = getPlacementsFromConfigObj(env.win, configObj);
+        const placements = getPlacementsFromConfigObj(ampdoc, configObj);
         expect(placements).to.have.lengthOf(2);
 
         const attributes = {
@@ -100,11 +102,11 @@ describes.realWin('amp-strategy', {
       });
 
   it('should place the second ad when placing the first one fails', () => {
-    const anchor1 = document.createElement('div');
+    const anchor1 = doc.createElement('div');
     anchor1.id = 'anchor1Id';
     container.appendChild(anchor1);
 
-    const anchor2 = document.createElement('div');
+    const anchor2 = doc.createElement('div');
     anchor2.id = 'anchor2Id';
     container.appendChild(anchor2);
 
@@ -126,7 +128,7 @@ describes.realWin('amp-strategy', {
         },
       ],
     };
-    const placements = getPlacementsFromConfigObj(env.win, configObj);
+    const placements = getPlacementsFromConfigObj(ampdoc, configObj);
 
     expect(placements).to.have.lengthOf(2);
     sandbox.stub(placements[0], 'placeAd', () => {
@@ -160,19 +162,19 @@ describes.realWin('amp-strategy', {
 
   it('should place an ad in the first placement only when second placement ' +
       'too close.', () => {
-    const belowViewportSpacer = document.createElement('div');
+    const belowViewportSpacer = doc.createElement('div');
     belowViewportSpacer.style.height = '1000px';
     container.appendChild(belowViewportSpacer);
 
-    const anchor1 = document.createElement('div');
+    const anchor1 = doc.createElement('div');
     anchor1.id = 'anchor1Id';
     container.appendChild(anchor1);
 
-    const spacer = document.createElement('div');
+    const spacer = doc.createElement('div');
     spacer.style.height = '199px';
     container.appendChild(spacer);
 
-    const anchor2 = document.createElement('div');
+    const anchor2 = doc.createElement('div');
     anchor2.id = 'anchor2Id';
     container.appendChild(anchor2);
 
@@ -194,7 +196,7 @@ describes.realWin('amp-strategy', {
         },
       ],
     };
-    const placements = getPlacementsFromConfigObj(env.win, configObj);
+    const placements = getPlacementsFromConfigObj(ampdoc, configObj);
     expect(placements).to.have.lengthOf(2);
 
     const attributes = {
@@ -224,19 +226,19 @@ describes.realWin('amp-strategy', {
 
   it('should place an ad in the first placement and second placement when ' +
       'sufficiently far apart.', () => {
-    const belowViewportSpacer = document.createElement('div');
+    const belowViewportSpacer = doc.createElement('div');
     belowViewportSpacer.style.height = '1000px';
     container.appendChild(belowViewportSpacer);
 
-    const anchor1 = document.createElement('div');
+    const anchor1 = doc.createElement('div');
     anchor1.id = 'anchor1Id';
     container.appendChild(anchor1);
 
-    const spacer = document.createElement('div');
+    const spacer = doc.createElement('div');
     spacer.style.height = '200px';
     container.appendChild(spacer);
 
-    const anchor2 = document.createElement('div');
+    const anchor2 = doc.createElement('div');
     anchor2.id = 'anchor2Id';
     container.appendChild(anchor2);
 
@@ -258,7 +260,7 @@ describes.realWin('amp-strategy', {
         },
       ],
     };
-    const placements = getPlacementsFromConfigObj(env.win, configObj);
+    const placements = getPlacementsFromConfigObj(ampdoc, configObj);
     expect(placements).to.have.lengthOf(2);
 
     const attributes = {
@@ -293,22 +295,22 @@ describes.realWin('amp-strategy', {
 
   it('should place an ad in the first placement only when already an ad on ' +
       'the page.', () => {
-    const fakeExistingAd = document.createElement('div');
+    const fakeExistingAd = doc.createElement('div');
     container.appendChild(fakeExistingAd);
 
-    const belowViewportSpacer = document.createElement('div');
+    const belowViewportSpacer = doc.createElement('div');
     belowViewportSpacer.style.height = '1000px';
     container.appendChild(belowViewportSpacer);
 
-    const anchor1 = document.createElement('div');
+    const anchor1 = doc.createElement('div');
     anchor1.id = 'anchor1Id';
     container.appendChild(anchor1);
 
-    const spacer = document.createElement('div');
+    const spacer = doc.createElement('div');
     spacer.style.height = '200px';
     container.appendChild(spacer);
 
-    const anchor2 = document.createElement('div');
+    const anchor2 = doc.createElement('div');
     anchor2.id = 'anchor2Id';
     container.appendChild(anchor2);
 
@@ -330,7 +332,7 @@ describes.realWin('amp-strategy', {
         },
       ],
     };
-    const placements = getPlacementsFromConfigObj(env.win, configObj);
+    const placements = getPlacementsFromConfigObj(ampdoc, configObj);
     expect(placements).to.have.lengthOf(2);
 
     const attributes = {
@@ -359,11 +361,11 @@ describes.realWin('amp-strategy', {
   });
 
   it('should report unable to place either ad', () => {
-    const anchor1 = document.createElement('div');
+    const anchor1 = doc.createElement('div');
     anchor1.id = 'anchor1Id';
     container.appendChild(anchor1);
 
-    const anchor2 = document.createElement('div');
+    const anchor2 = doc.createElement('div');
     anchor2.id = 'anchor2Id';
     container.appendChild(anchor2);
 
@@ -385,7 +387,7 @@ describes.realWin('amp-strategy', {
         },
       ],
     };
-    const placements = getPlacementsFromConfigObj(env.win, configObj);
+    const placements = getPlacementsFromConfigObj(ampdoc, configObj);
 
     expect(placements).to.have.lengthOf(2);
     sandbox.stub(placements[0], 'placeAd', () => {

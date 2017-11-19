@@ -39,6 +39,60 @@ export const METATAG_NAME = 'amp-ad-enable-refresh';
 const TAG = 'AMP-AD';
 
 /**
+ * Retrieves the publisher-specified refresh interval, if one were set. This
+ * function first checks for appropriate slot attributes and then for
+ * metadata tags, preferring whichever it finds first.
+ * @param {!Element} element
+ * @param {!Window} win
+ * @return {?number}
+ * @visibleForTesting
+ */
+export function getPublisherSpecifiedRefreshInterval(element, win) {
+  const refreshInterval = element.getAttribute(DATA_ATTR_NAME);
+  if (refreshInterval) {
+    return checkAndSanitizeRefreshInterval(refreshInterval);
+  }
+  let metaTag;
+  const metaTagContent = ((metaTag = win.document
+        .getElementsByName(METATAG_NAME))
+      && metaTag[0]
+      && metaTag[0].getAttribute('content'));
+  if (!metaTagContent) {
+    return null;
+  }
+  const networkIntervalPairs = metaTagContent.split(',');
+  for (let i = 0; i < networkIntervalPairs.length; i++) {
+    const pair = networkIntervalPairs[i].split('=');
+    user().assert(pair.length == 2, 'refresh metadata config must be of ' +
+        'the form `network_type=refresh_interval`');
+    if (pair[0].toLowerCase() == element.getAttribute('type').toLowerCase()) {
+      return checkAndSanitizeRefreshInterval(pair[1]);
+    }
+  }
+  return null;
+}
+
+/**
+ * Ensures that refreshInterval is a number no less than 30. Returns null if
+ * the given input fails to meet these criteria. This also converts from
+ * seconds to milliseconds.
+ *
+ * @param {(number|string)} refreshInterval
+ * @return {?number}
+ */
+function checkAndSanitizeRefreshInterval(refreshInterval) {
+  const refreshIntervalNum = Number(refreshInterval);
+  if (isNaN(refreshIntervalNum) ||
+      refreshIntervalNum < MIN_REFRESH_INTERVAL) {
+    user().warn(TAG,
+        'invalid refresh interval, must be a number no less than ' +
+        `${MIN_REFRESH_INTERVAL}: ${refreshInterval}`);
+    return null;
+  }
+  return refreshIntervalNum * 1000;
+}
+
+/**
  * Defines the DFA states for the refresh cycle.
  *
  * 1. All newly registered elements begin in the INITIAL state.
@@ -96,13 +150,36 @@ const managers = {};
  */
 let refreshManagerIdCounter = 0;
 
+/**
+ * Returns an instance of RefreshManager, if refresh is enabled on the page or
+ * slot. An optional predicate for eligibility may be passed. If refresh is not
+ * enabled, or fails the optional predicate, null will be returned.
+ *
+ * @param {!./amp-a4a.AmpA4A} a4a
+ * @param {function():boolean=} opt_predicate
+ * @return {?RefreshManager}
+ */
+export function getRefreshManager(a4a, opt_predicate) {
+  const refreshInterval =
+      getPublisherSpecifiedRefreshInterval(a4a.element, a4a.win);
+  if (!refreshInterval || (opt_predicate && !opt_predicate())) {
+    return null;
+  }
+  return new RefreshManager(a4a, {
+    visiblePercentageMin: 50,
+    continuousTimeMin: 1,
+  }, refreshInterval);
+}
+
+
 export class RefreshManager {
 
   /**
    * @param {!./amp-a4a.AmpA4A} a4a The AmpA4A instance to be refreshed.
    * @param {!RefreshConfig} config
+   * @param {number} refreshInterval
    */
-  constructor(a4a, config) {
+  constructor(a4a, config, refreshInterval) {
 
     /** @private {string} */
     this.state_ = RefreshLifecycleState.INITIAL;
@@ -120,7 +197,7 @@ export class RefreshManager {
     this.adType_ = this.element_.getAttribute('type').toLowerCase();
 
     /** @const @private {?number} */
-    this.refreshInterval_ = this.getPublisherSpecifiedRefreshInterval_();
+    this.refreshInterval_ = refreshInterval;
 
     /** @const @private {!RefreshConfig} */
     this.config_ = this.convertAndSanitizeConfiguration_(config);
@@ -134,15 +211,10 @@ export class RefreshManager {
     /** @private {?(number|string)} */
     this.visibilityTimeoutId_ = null;
 
-    /** @private {boolean} */
-    this.isRefreshable_ = !!(this.config_ && this.refreshInterval_);
-
-    if (this.isRefreshable_) {
-      const managerId = String(refreshManagerIdCounter++);
-      this.element_.setAttribute(DATA_MANAGER_ID_NAME, managerId);
-      managers[managerId] = this;
-      this.initiateRefreshCycle();
-    }
+    const managerId = String(refreshManagerIdCounter++);
+    this.element_.setAttribute(DATA_MANAGER_ID_NAME, managerId);
+    managers[managerId] = this;
+    this.initiateRefreshCycle();
   }
 
   /**
@@ -215,9 +287,6 @@ export class RefreshManager {
    * element.
    */
   initiateRefreshCycle() {
-    if (!this.isRefreshable()) {
-      return;
-    }
     switch (this.state_) {
       case RefreshLifecycleState.INITIAL:
         this.getIntersectionObserverWithThreshold_(
@@ -264,73 +333,5 @@ export class RefreshManager {
     config['visiblePercentageMin'] /= 100;
     return config;
   }
-
-  /**
-   * Retrieves the publisher-specified refresh interval, if one were set. This
-   * function first checks for appropriate slot attributes and then for
-   * metadata tags, preferring whichever it finds first.
-   *
-   * @return {?number}
-   */
-  getPublisherSpecifiedRefreshInterval_() {
-    const refreshInterval = this.element_.getAttribute(DATA_ATTR_NAME);
-    if (refreshInterval) {
-      return this.checkAndSanitizeRefreshInterval_(refreshInterval);
-    }
-    let metaTag;
-    const metaTagContent = ((metaTag = this.win_.document
-          .getElementsByName(METATAG_NAME))
-        && metaTag[0]
-        && metaTag[0].getAttribute('content'));
-    if (!metaTagContent) {
-      return null;
-    }
-    const networkIntervalPairs = metaTagContent.split(',');
-    for (let i = 0; i < networkIntervalPairs.length; i++) {
-      const pair = networkIntervalPairs[i].split('=');
-      user().assert(pair.length == 2, 'refresh metadata config must be of ' +
-          'the form `network_type=refresh_interval`');
-      if (pair[0].toLowerCase() == this.adType_) {
-        return this.checkAndSanitizeRefreshInterval_(pair[1]);
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Ensures that refreshInterval is a number no less than 30. Returns null if
-   * the given input fails to meet these criteria. This also converts from
-   * seconds to milliseconds.
-   *
-   * @param {(number|string)} refreshInterval
-   * @return {?number}
-   */
-  checkAndSanitizeRefreshInterval_(refreshInterval) {
-    const refreshIntervalNum = Number(refreshInterval);
-    if (isNaN(refreshIntervalNum) ||
-        refreshIntervalNum < MIN_REFRESH_INTERVAL) {
-      user().warn(TAG,
-          'invalid refresh interval, must be a number no less than ' +
-          `${MIN_REFRESH_INTERVAL}: ${refreshInterval}`);
-      return null;
-    }
-    return refreshIntervalNum * 1000;
-  }
-
-  /**
-   * Returns true if this slot is eligible and enabled for refresh. A slot is
-   * eligible for refresh if it is of a network type that has opted in to
-   * refresh eligibility, and is not the child of an invalid container type
-   * (the only valid types are carousel and sticky-ad). The slot is
-   * refresh-enabled if the publisher has supplied an appropriate data
-   * attribute either on the slot or as part of a meta tag.
-   *
-   * @VisibleForTesting
-   * @return {boolean}
-   */
-  isRefreshable() {
-    return this.isRefreshable_;
-  }
 }
-
 

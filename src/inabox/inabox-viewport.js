@@ -16,11 +16,9 @@
 
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
 import {Services} from '../services';
-import {Viewport, ViewportBindingDef} from '../service/viewport-impl';
+import {Viewport} from '../service/viewport/viewport-impl';
+import {ViewportBindingDef} from '../service/viewport/viewport-binding-def';
 import {registerServiceBuilderForDoc} from '../service';
-import {
-  nativeIntersectionObserverSupported,
-} from '../../src/intersection-observer-polyfill';
 import {
   layoutRectLtwh,
   moveLayoutRect,
@@ -29,9 +27,13 @@ import {Observable} from '../observable';
 import {MessageType} from '../../src/3p-frame-messaging';
 import {dev} from '../log';
 import {px, setImportantStyles, resetStyles} from '../../src/style';
+import {throttle} from '../../src/utils/rate-limit';
 
 /** @const {string} */
 const TAG = 'inabox-viewport';
+
+/** @const {number} */
+const MIN_EVENT_INTERVAL = 100;
 
 /** @visibleForTesting */
 export function prepareBodyForOverlay(win, bodyElement) {
@@ -127,6 +129,17 @@ export class ViewportBindingInabox {
     /** @private @const {!../../3p/iframe-messaging-client.IframeMessagingClient} */
     this.iframeClient_ = iframeMessagingClientFor(win);
 
+    /** @private {?Promise<!../layout-rect.LayoutRectDef>} */
+    this.requestPositionPromise_ = null;
+
+    /** @private {!../service/vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(this.win);
+
+    /** @private {function()} */
+    this.fireScrollThrottle_ = throttle(this.win, () => {
+      this.scrollObservable_.fire();
+    }, MIN_EVENT_INTERVAL);
+
     dev().fine(TAG, 'initialized inabox viewport');
   }
 
@@ -137,12 +150,6 @@ export class ViewportBindingInabox {
 
   /** @private */
   listenForPosition_() {
-
-    if (nativeIntersectionObserverSupported(this.win)) {
-      // Using native IntersectionObserver, no position data needed
-      // from host doc.
-      return;
-    }
 
     this.iframeClient_.makeRequest(
         MessageType.SEND_POSITIONS, MessageType.POSITION,
@@ -157,7 +164,7 @@ export class ViewportBindingInabox {
             this.resizeObservable_.fire();
           }
           if (isMoved(this.viewportRect_, oldViewportRect)) {
-            this.scrollObservable_.fire();
+            this.fireScrollThrottle_();
           }
         });
   }
@@ -244,6 +251,24 @@ export class ViewportBindingInabox {
     }
     return this.leaveOverlayMode_();
   }
+
+  /** @override */
+  getRootClientRectAsync() {
+    if (!this.requestPositionPromise_) {
+      this.requestPositionPromise_ = new Promise(resolve => {
+        this.iframeClient_.requestOnce(
+            MessageType.SEND_POSITIONS, MessageType.POSITION,
+            data => {
+              this.requestPositionPromise_ = null;
+              dev().assert(data.targetRect, 'Host should send targetRect');
+              resolve(data.targetRect);
+            }
+        );
+      });
+    }
+    return this.requestPositionPromise_;
+  }
+
 
   /**
    * @return {!Promise}

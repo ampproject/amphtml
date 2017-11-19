@@ -18,7 +18,7 @@
 import {ActionTrust} from '../action-trust';
 import {VideoSessionManager} from './video-session-manager';
 import {removeElement, scopedQuerySelector, isRTL} from '../dom';
-import {listen, listenOncePromise} from '../event-helper';
+import {getData, listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
 import {registerServiceBuilderForDoc, getServiceForDoc} from '../service';
@@ -35,9 +35,10 @@ import {
 import {Services} from '../services';
 import {
   installPositionObserverServiceForDoc,
+} from './position-observer/position-observer-impl';
+import {
   PositionObserverFidelity,
-  PositionInViewportEntryDef,
-} from './position-observer-impl';
+} from './position-observer/position-observer-worker';
 import {map} from '../utils/object';
 import {layoutRectLtwh, RelativePositions} from '../layout-rect';
 import {
@@ -137,7 +138,7 @@ export class VideoManager {
     /** @const {!./ampdoc-impl.AmpDoc}  */
     this.ampdoc = ampdoc;
 
-    /** @private {!../service/viewport-impl.Viewport} */
+    /** @private {!../service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private {?Array<!VideoEntry>} */
@@ -149,7 +150,7 @@ export class VideoManager {
     /** @private {boolean} */
     this.resizeListenerInstalled_ = false;
 
-    /** @private {./position-observer-impl.AmpDocPositionObserver} */
+    /** @private {./position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = null;
 
     /** @private {?VideoEntry} */
@@ -202,6 +203,8 @@ export class VideoManager {
     this.maybeInstallOrientationObserver_(entry);
     this.entries_.push(entry);
     video.element.dispatchCustomEvent(VideoEvents.REGISTERED);
+    // Add a class to element to indicate it implements the video interface.
+    video.element.classList.add('i-amphtml-video-interface');
   }
 
   /**
@@ -235,8 +238,13 @@ export class VideoManager {
    * @private
    */
   maybeInstallVisibilityObserver_(entry) {
-    listen(entry.video.element, VideoEvents.VISIBILITY, () => {
-      entry.updateVisibility();
+    listen(entry.video.element, VideoEvents.VISIBILITY, details => {
+      const data = getData(details);
+      if (data && data['visible'] == true) {
+        entry.updateVisibility(/* opt_forceVisible */ true);
+      } else {
+        entry.updateVisibility();
+      }
     });
 
     listen(entry.video.element, VideoEvents.RELOAD, () => {
@@ -454,7 +462,7 @@ class VideoEntry {
     /** @private @const {!./ampdoc-impl.AmpDoc}  */
     this.ampdoc_ = manager.ampdoc;
 
-    /** @private {!../service/viewport-impl.Viewport} */
+    /** @private {!../service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc_);
 
     /** @package @const {!../video-interface.VideoInterface} */
@@ -533,7 +541,7 @@ class VideoEntry {
     /** @private {number} */
     this.dockVisibleHeight_ = 0;
 
-    /** @private {?PositionInViewportEntryDef} */
+    /** @private {?./position-observer/position-observer-worker.PositionInViewportEntryDef} */
     this.dockLastPosition_ = null;
 
     /** @private {boolean} */
@@ -1063,7 +1071,7 @@ class VideoEntry {
   /**
    * Called when the video's position in the viewport changed (at most once per
    * animation frame)
-   * @param {PositionInViewportEntryDef} newPos
+   * @param {./position-observer/position-observer-worker.PositionInViewportEntryDef} newPos
    */
   onDockableVideoPositionChanged(newPos) {
     this.vsync_.run({
@@ -1127,7 +1135,7 @@ class VideoEntry {
    * Updates the minimization position of the video (in viewport, above or
    * below viewport), also the height of the part of the video that is
    * currently in the viewport (between 0 and the initial video height).
-   * @param {PositionInViewportEntryDef} newPos
+   * @param {./position-observer/position-observer-worker.PositionInViewportEntryDef} newPos
    * @private
    */
   updateDockableVideoPosition_(newPos) {
@@ -1752,18 +1760,23 @@ class VideoEntry {
   /**
    * Called by all possible events that might change the visibility of the video
    * such as scrolling or {@link ../video-interface.VideoEvents#VISIBILITY}.
+   * @param {?boolean=} opt_forceVisible
    * @package
    */
-  updateVisibility() {
+  updateVisibility(opt_forceVisible) {
     const wasVisible = this.isVisible_;
 
     // Measure if video is now in viewport and what percentage of it is visible.
     const measure = () => {
-      // Calculate what percentage of the video is in viewport.
-      const change = this.video.element.getIntersectionChangeEntry();
-      const visiblePercent = !isFiniteNumber(change.intersectionRatio) ? 0
-          : change.intersectionRatio * 100;
-      this.isVisible_ = visiblePercent >= VISIBILITY_PERCENT;
+      if (opt_forceVisible == true) {
+        this.isVisible_ = true;
+      } else {
+        // Calculate what percentage of the video is in viewport.
+        const change = this.video.element.getIntersectionChangeEntry();
+        const visiblePercent = !isFiniteNumber(change.intersectionRatio) ? 0
+            : change.intersectionRatio * 100;
+        this.isVisible_ = visiblePercent >= VISIBILITY_PERCENT;
+      }
     };
 
     // Mutate if visibility changed from previous state

@@ -16,6 +16,7 @@
 
 import {assertHttpsUrl} from '../../../src/url';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {ImaPlayerData} from '../../../ads/google/ima-player-data';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
@@ -24,6 +25,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {
   isObject,
   toArray,
+  toWin,
 } from '../../../src/types';
 import {
   getData,
@@ -72,6 +74,9 @@ class AmpImaVideo extends AMP.BaseElement {
 
     /** @private {?String} */
     this.preconnectTrack_ = null;
+
+    /** @private {!ImaPlayerData} */
+    this.playerData_ = new ImaPlayerData();
   }
 
   /** @override */
@@ -136,7 +141,7 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = getIframe(this.element.ownerDocument.defaultView,
+    const iframe = getIframe(toWin(this.element.ownerDocument.defaultView),
         this.element, 'ima-video');
     iframe.setAttribute('allowfullscreen', 'true');
     this.applyFillContent(iframe);
@@ -197,7 +202,7 @@ class AmpImaVideo extends AMP.BaseElement {
    * @param {string} command
    * @param {Object=} opt_args
    * @private
-   * */
+   */
   sendCommand_(command, opt_args) {
     if (this.iframe_ && this.iframe_.contentWindow)
     {
@@ -225,6 +230,8 @@ class AmpImaVideo extends AMP.BaseElement {
           this.playerReadyResolver_(this.iframe_);
         }
         this.element.dispatchCustomEvent(videoEvent);
+      } else if (videoEvent == ImaPlayerData.IMA_PLAYER_DATA) {
+        this.playerData_ = /** @type {!ImaPlayerData} */(eventData['data']);
       }
     }
   }
@@ -329,21 +336,21 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /** @override */
   getCurrentTime() {
-    // Not supported.
-    return 0;
+    return this.playerData_.currentTime;
   }
 
   /** @override */
   getDuration() {
-    // Not supported.
-    return 1;
+    return this.playerData_.duration;
   }
 
   /** @override */
   getPlayedRanges() {
-    // Not supported.
-    return [];
+    return this.playerData_.playedRanges;
   }
-};
+}
 
-AMP.registerElement('amp-ima-video', AmpImaVideo);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpImaVideo);
+});

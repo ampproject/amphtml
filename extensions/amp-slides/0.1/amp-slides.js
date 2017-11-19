@@ -21,7 +21,7 @@ import * as tr from '../../../src/transition';
 
 
 /**
- * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
+ * Deprecated `amp-slides` is deprecated and will be deleted before 1.0.
  * Please see {@link AmpCarousel} with `type=slides` attribute instead.
  */
 class AmpSlides extends AMP.BaseElement {
@@ -229,4 +229,7 @@ class AmpSlides extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-slides', AmpSlides);
+
+AMP.extension('amp-slides', '0.1', AMP => {
+  AMP.registerElement('amp-slides', AmpSlides);
+});

@@ -23,6 +23,9 @@ import {dict} from '../../../src/utils/object';
 import {tryFocus} from '../../../src/dom';
 import {parseJson} from '../../../src/json';
 
+const TAG = 'amp-accordion';
+
+
 class AmpAccordion extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -248,7 +251,9 @@ class AmpAccordion extends AMP.BaseElement {
       tryFocus(newFocusHeader);
     }
   }
-
 }
 
-AMP.registerElement('amp-accordion', AmpAccordion);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpAccordion);
+});

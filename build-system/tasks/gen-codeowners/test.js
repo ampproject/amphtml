@@ -27,7 +27,7 @@ test('sync - build out correct CODEOWNERS', t => {
     '*': [
       'username1',
       '@username2',
-      {'ampproject/group': ['*.protoascii']}
+      {'ampproject/group': ['*.protoascii']},
     ],
     ads: ['username3', '@username1'],
     'some/deeply/nested/dir': ['username5', {'ampproject/group2': ['some.js']}],
@@ -43,7 +43,8 @@ some/deeply/nested/dir/some.js @ampproject/group2
   t.is(expected, result);
 });
 
-test('CODEOWNERS must be in sync with OWNERS.yaml', t => {
+// TODO(erwinm, #11042): remove skip when we need to enforce sync
+test.skip('CODEOWNERS must be in sync with OWNERS.yaml', t => {
   t.plan(1);
   const tmppath = '/tmp/amphtml/CODEOWNERS';
   fs.ensureDirSync('/tmp/amphtml');
