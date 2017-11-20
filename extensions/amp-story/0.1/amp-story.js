@@ -330,6 +330,9 @@ export class AmpStory extends AMP.BaseElement {
 
     const gestures = Gestures.get(this.element);
     gestures.onGesture(SwipeXYRecognizer, () => {
+      if (this.bookend_.isActive()) {
+        return;
+      }
       this.ampStoryHint_.showNavigationOverlay();
     });
 
