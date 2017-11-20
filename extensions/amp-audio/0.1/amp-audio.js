@@ -71,6 +71,9 @@ export class AmpAudio extends AMP.BaseElement {
 
     this.applyFillContent(audio);
     this.getRealChildNodes().forEach(child => {
+      if (child.classList.contains('i-amphtml-pool-audio')) {
+        return;
+      }
       if (child.getAttribute && child.getAttribute('src')) {
         assertHttpsUrl(child.getAttribute('src'),
             dev().assertElement(child));
@@ -126,6 +129,15 @@ export class AmpAudio extends AMP.BaseElement {
         playHandler,
         pauseHandler
     );
+  }
+
+  /**
+   * @param {!HTMLAudioElement} audioEl The audio element to set internally to
+   *     the amp-audio instance.
+   */
+  setAudio(audioEl) {
+    this.element.replaceChild(audioEl, this.audio_);
+    this.audio_ = audioEl;
   }
 }
 

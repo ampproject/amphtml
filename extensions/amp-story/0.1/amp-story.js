@@ -1116,7 +1116,7 @@ export class AmpStory extends AMP.BaseElement {
     });
 
     return dev().assert(this.pages_[pageIndex],
-        `Element ${element} not contained on any amp-story-page.`);
+        `Element not contained on any amp-story-page:\n\n${element.outerHTML}`);
   }
 
 

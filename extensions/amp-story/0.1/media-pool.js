@@ -161,6 +161,9 @@ export class MediaPool {
       this.unallocated_[type] = [];
       for (let i = 0; i < maxCount; i++) {
         const mediaEl = this.mediaFactory_[type].call(this);
+        // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE is
+        // returned.  If so, we should adjust the pool size/distribution between
+        // media types.
         this.unallocated_[type].push(mediaEl);
       }
     });
@@ -340,7 +343,9 @@ export class MediaPool {
    */
   swapPoolMediaElementOutOfDom_(poolMediaEl) {
     const oldDomMediaElId = poolMediaEl.getAttribute(REPLACED_MEDIA_ATTRIBUTE);
-    const oldDomMediaEl = this.domMediaEls_[oldDomMediaElId];
+    const oldDomMediaEl = dev().assertElement(
+        this.domMediaEls_[oldDomMediaElId],
+        'No media element to put back into DOM after eviction.');
     poolMediaEl.parentElement.replaceChild(oldDomMediaEl, poolMediaEl);
     poolMediaEl.removeAttribute(REPLACED_MEDIA_ATTRIBUTE);
     Sources.removeFrom(poolMediaEl);
@@ -467,6 +472,15 @@ export class MediaPool {
     this.swapPoolMediaElementIntoDom_(domMediaEl, poolMediaEl);
     this.allocateMediaElement_(mediaType, poolMediaEl);
     poolMediaEl.play();
+  }
+
+
+  /**
+   * Pauses the specified media element in the DOM.
+   * @param {!HTMLMediaElement} domMediaEl The media element to be paused.
+   */
+  pause(domMediaEl) {
+    domMediaEl.pause();
   }
 
 

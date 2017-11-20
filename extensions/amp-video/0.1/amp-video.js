@@ -213,7 +213,8 @@ class AmpVideo extends AMP.BaseElement {
 
     this.getRealChildNodes().forEach(child => {
       // Skip the video we already added to the element.
-      if (this.video_ === child) {
+      if (this.video_ === child ||
+          child.classList.contains('i-amphtml-pool-video')) {
         return;
       }
       if (child.getAttribute && child.getAttribute('src')) {
@@ -377,6 +378,15 @@ class AmpVideo extends AMP.BaseElement {
       ranges.push([played.start(i), played.end(i)]);
     }
     return ranges;
+  }
+
+  /**
+   * @param {!HTMLVideoElement} videoEl The video element to set internally to
+   *     the amp-video instance.
+   */
+  setVideo(videoEl) {
+    this.element.replaceChild(videoEl, this.video_);
+    this.video_ = videoEl;
   }
 }
 

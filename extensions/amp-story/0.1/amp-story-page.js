@@ -28,50 +28,13 @@ import {
   hasAnimations,
 } from './animation';
 import {Layout} from '../../../src/layout';
-import {Services} from '../../../src/services';
 import {upgradeBackgroundAudio} from './audio';
-import {renderSimpleTemplate} from './simple-template';
 import {dev} from '../../../src/log';
 import {EventType, dispatch, dispatchCustom} from './events';
-import {PageElement} from './page-element';
 import {AdvancementConfig} from './page-advancement';
-import {dict} from '../../../src/utils/object';
 import {scopedQuerySelectorAll} from '../../../src/dom';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
-
-/** @private @const {!Array<!./simple-template.ElementDef>} */
-const LOADING_SCREEN_TEMPLATE = [
-  {
-    tag: 'div',
-    attrs: dict({'class': 'i-amphtml-story-page-loading-screen'}),
-    children: [
-      {
-        tag: 'ul',
-        attrs: dict({'class': 'i-amphtml-story-page-loading-dots'}),
-        children: [
-          {
-            tag: 'li',
-            attrs: dict({'class': 'i-amphtml-story-page-loading-dot'}),
-          },
-          {
-            tag: 'li',
-            attrs: dict({'class': 'i-amphtml-story-page-loading-dot'}),
-          },
-          {
-            tag: 'li',
-            attrs: dict({'class': 'i-amphtml-story-page-loading-dot'}),
-          },
-        ],
-      },
-      {
-        tag: 'p',
-        attrs: dict({'class': 'i-amphtml-story-page-loading-text'}),
-        text: 'Loading', // TODO(alanorozco): i18n
-      },
-    ],
-  },
-];
 
 
 /**
@@ -79,27 +42,6 @@ const LOADING_SCREEN_TEMPLATE = [
  * @const {string}
  */
 const PAGE_LOADED_CLASS_NAME = 'i-amphtml-story-page-loaded';
-
-
-/**
- * CSS class for an amp-story-page that indicates the entire page can be shown.
- * @const {string}
- */
-const PAGE_SHOWN_CLASS_NAME = 'i-amphtml-story-page-shown';
-
-
-/**
- * The duration of time (in milliseconds) to show the loading screen for this
- * page, before showing the page content.
- * @const {number}
- */
-const LOAD_TIMEOUT_MS = 8000;
-
-
-/**
- * The delay (in milliseconds) to wait between polling for loaded resources.
- */
-const LOAD_TIMER_POLL_DELAY_MS = 250;
 
 
 /** @private @const {string} */
@@ -117,29 +59,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?AnimationManager} */
     this.animationManager_ = null;
-
-    /** @private {!Array<!PageElement>} */
-    this.pageElements_ = [];
-
-    /** @private {?function()} */
-    this.resolveLoadPromise_ = null;
-
-    /** @private {?Promise<undefined>} */
-    this.loadPromise_ = new Promise(resolve => {
-      this.resolveLoadPromise_ = resolve;
-    });
-
-    /** @private {?Promise<undefined>} */
-    this.loadTimeoutPromise_ = null;
-
-    /** @private @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = Services.timerFor(this.win);
-
-    /** @private {boolean} */
-    this.isLoaded_ = false;
-
-    /** @private {?UnlistenDef} */
-    this.autoAdvanceUnlistenDef_ = null;
 
     /** @private {!AdvancementConfig} */
     this.advancement_ = AdvancementConfig.forPage(this);
@@ -170,7 +89,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     upgradeBackgroundAudio(this.element);
     this.markMediaElementsWithPreload_();
     this.maybeCreateAnimationManager_();
-    this.initializeLoading_();
     this.advancement_.addPreviousListener(() => this.previous());
     this.advancement_
         .addAdvanceListener(() => this.next(/* opt_isAutomaticAdvance */ true));
@@ -189,23 +107,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     Array.prototype.forEach.call(mediaSet, mediaItem => {
       mediaItem.setAttribute('preload', 'auto');
     });
-  }
-
-
-  /**
-   * Initializes the loading screen for this amp-story-page, and the listeners
-   * to remove it once loaded.
-   * @private
-   */
-  initializeLoading_() {
-    this.element.appendChild(
-        renderSimpleTemplate(this.win.document, LOADING_SCREEN_TEMPLATE));
-
-    // Build a list of page elements and poll until they are all loaded.
-    this.pageElements_ = PageElement.getElementsFromPage(this);
-    this.loadPromise_ = this.timer_.poll(LOAD_TIMER_POLL_DELAY_MS, () => {
-      return this.calculateLoadStatus();
-    }).then(() => this.markPageAsLoaded_());
   }
 
 
@@ -241,7 +142,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.markPageAsLoaded_();
     this.updateAudioIcon_();
     this.playAllMedia_();
-    this.advancement_.start();
     this.maybeStartAnimations();
     this.reportDevModeErrors_();
   }
@@ -249,16 +149,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @private */
   markPageAsLoaded_() {
-    this.isLoaded_ = true;
     this.element.classList.add(PAGE_LOADED_CLASS_NAME);
-    this.markPageAsShown_();
-    this.resolveLoadPromise_();
-  }
-
-
-  /** @private */
-  markPageAsShown_() {
-    this.element.classList.add(PAGE_SHOWN_CLASS_NAME);
   }
 
 
@@ -276,43 +167,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   hasAudio_() {
-    return this.pageElements_.some(pageElement => pageElement.hasAudio());
-  }
-
-
-  /**
-   * @return {boolean} true, if the page is completely loaded; false otherwise.
-   * @public
-   */
-  calculateLoadStatus() {
-    if (this.isLoaded_ || this.pageElements_.length == 0) {
-      return true;
-    }
-
-    let isPageLoaded = true;
-    let canPageBeShown = false;
-
-    this.pageElements_.forEach(pageElement => {
-      pageElement.updateState();
-
-      if (isPageLoaded) {
-        isPageLoaded = pageElement.isLoaded || pageElement.hasFailed;
-      }
-
-      if (!canPageBeShown) {
-        canPageBeShown = pageElement.canBeShown;
-      }
-    });
-
-    if (isPageLoaded) {
-      this.markPageAsLoaded_();
-    }
-
-    if (canPageBeShown) {
-      this.markPageAsShown_();
-    }
-
-    return isPageLoaded;
+    return true;
   }
 
 
@@ -341,7 +196,8 @@ export class AmpStoryPage extends AMP.BaseElement {
   pauseAllMedia_(opt_rewindToBeginning) {
     const mediaSet = this.getAllMedia_();
     Array.prototype.forEach.call(mediaSet, mediaItem => {
-      mediaItem.pause();
+      dev().assert(this.mediaPool_, 'Media pool is still unset.');
+      this.mediaPool_.pause(mediaItem);
 
       if (opt_rewindToBeginning) {
         mediaItem.currentTime = 0;
@@ -358,7 +214,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     const mediaSet = this.getAllMedia_();
     Array.prototype.forEach.call(mediaSet, mediaItem => {
       dev().assert(this.mediaPool_, 'Media pool is still unset.');
-      // this.mediaPool_.register(mediaItem);
       this.mediaPool_.play(mediaItem);
     });
   }
@@ -390,8 +245,10 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   setActive(isActive) {
     if (isActive) {
+      this.element.setAttribute('active', '');
       this.pageActiveCallback_();
     } else {
+      this.element.removeAttribute('active');
       this.pageInactiveCallback_();
     }
   }
@@ -399,35 +256,14 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @private */
   pageActiveCallback_() {
-    this.element.setAttribute('active', '');
-
-    if (!this.loadPromise_) {
-      return;
-    }
-
-    if (!this.loadTimeoutPromise_) {
-      this.loadTimeoutPromise_ = this.timer_.promise(LOAD_TIMEOUT_MS);
-    }
-
-    this.pageElements_.forEach(pageElement => {
-      pageElement.resumeCallback();
-    });
-
-    Promise.race([this.loadPromise_, this.loadTimeoutPromise_]).then(() => {
-      this.onPageVisible_();
-    });
+    this.advancement_.start();
+    this.onPageVisible_();
   }
 
 
   /** @private */
   pageInactiveCallback_() {
-    this.element.removeAttribute('active');
-
     this.pauseAllMedia_(/* opt_rewindToBeginning */ true);
-    this.pageElements_.forEach(pageElement => {
-      pageElement.pauseCallback();
-    });
-
     this.advancement_.stop();
 
     if (this.animationManager_) {
