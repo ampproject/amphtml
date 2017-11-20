@@ -19,7 +19,7 @@
   transition-duration: 200ms !important;
 }
 
-[desktop].i-amphtml-story-hint-container {
+[desktop] .i-amphtml-story-hint-container {
   display: none !important;
 }
 
