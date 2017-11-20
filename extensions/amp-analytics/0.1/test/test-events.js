@@ -815,18 +815,18 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(tracker.getTrackedTimerKeys()).to.have.length(5);
 
       clock.tick(10 * 1000); // 20 seconds
-      expect(fn1).to.have.callCount(2);
-      expect(fn2).to.have.callCount(3);
+      expect(fn1).to.have.callCount(3);
+      expect(fn2).to.have.callCount(4);
       expect(fn3).to.have.callCount(1);
-      expect(fn4).to.have.callCount(3);
+      expect(fn4).to.have.callCount(4);
       expect(fn5).to.have.callCount(3);
       expect(tracker.getTrackedTimerKeys()).to.have.length(2);
 
       clock.tick(10 * 1000); // 30 seconds
-      expect(fn1).to.have.callCount(2);
-      expect(fn2).to.have.callCount(3);
+      expect(fn1).to.have.callCount(3);
+      expect(fn2).to.have.callCount(4);
       expect(fn3).to.have.callCount(1);
-      expect(fn4).to.have.callCount(3);
+      expect(fn4).to.have.callCount(4);
       expect(fn5).to.have.callCount(4);
       expect(tracker.getTrackedTimerKeys()).to.have.length(2);
 
