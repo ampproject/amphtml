@@ -14,14 +14,30 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {BaseElement} from '../src/base-element';
+import {isLayoutSizeDefined} from '../src/layout';
+import {registerElement} from '../src/service/custom-element-registry';
 
-class AmpLayout extends AMP.BaseElement {
+class AmpLayout extends BaseElement {
 
     /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
+
+  /** @override */
+  buildCallback() {
+    this.getRealChildren().forEach(child => {
+      this.applyFillContent(child);
+    });
+  }
 }
 
-AMP.registerElement('amp-layout', AmpLayout);
+/**
+ * @param {!Window} win Destination window for the new element.
+ */
+export function installLayout(win) {
+  registerElement(win, 'amp-layout', AmpLayout);
+}
+
+
