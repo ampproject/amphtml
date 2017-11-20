@@ -157,7 +157,9 @@ function removeConfig(target) {
       .then(file => {
         let contents = file.toString();
         if (numConfigs(contents) == 0) {
-          util.log('No configs found in', util.colors.cyan(target));
+          if (!process.env.TRAVIS) {
+            util.log('No configs found in', util.colors.cyan(target));
+          }
           return Promise.resolve();
         }
         sanityCheck(contents);
