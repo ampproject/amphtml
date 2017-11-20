@@ -81,7 +81,7 @@ const NAVIGATION_OVERLAY_CLASS = 'show-navigation-overlay';
 const FIRST_PAGE_OVERLAY_CLASS = 'show-first-page-overlay';
 
 /** @type {number} */
-const NAVIGATION_OVERLAY_TIMEOUT = 2000;
+const NAVIGATION_OVERLAY_TIMEOUT = 3000;
 
 /**
  * User Hint Layer for <amp-story>.
