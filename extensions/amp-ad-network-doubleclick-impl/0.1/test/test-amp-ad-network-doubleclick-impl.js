@@ -36,9 +36,8 @@ import {
 import {
   DOUBLECLICK_A4A_EXPERIMENT_NAME,
   DOUBLECLICK_EXPERIMENT_FEATURE,
-  UNCONDITIONED_IDENTITY_EXPERIMENT_NAME,
-  UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
   DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
+  UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
 } from '../doubleclick-a4a-config';
 import {
   isInExperiment,
@@ -99,6 +98,7 @@ function createImplTag(config, element, impl, env) {
   env.win.document.body.appendChild(element);
   impl = new AmpAdNetworkDoubleclickImpl(element);
   impl.iframe = iframe;
+  impl.win['goog_identity_prom'] = Promise.resolve({});
   return [element, impl, env];
 }
 
@@ -615,24 +615,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       });
     });
     it('should include identity', () => {
-      forceExperimentBranch(impl.win, DOUBLECLICK_A4A_EXPERIMENT_NAME,
-          DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT);
-      // Force get identity result by overloading window variable.
-      const token = /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({
-        token: 'abcdef', jar: 'some_jar', pucrd: 'some_pucrd',
-      });
-      impl.win['goog_identity_prom'] = Promise.resolve(token);
-      impl.buildCallback();
-      return impl.getAdUrl().then(url => {
-        [/(\?|&)adsid=abcdef(&|$)/,
-          /(\?|&)jar=some_jar(&|$)/,
-          /(\?|&)pucrd=some_pucrd(&|$)/].forEach(
-            regexp => expect(url).to.match(regexp));
-      });
-    });
-    it('should include identity for unconditioned experiment', () => {
-      forceExperimentBranch(impl.win, UNCONDITIONED_IDENTITY_EXPERIMENT_NAME,
-          DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.IDENTITY_EXPERIMENT);
       // Force get identity result by overloading window variable.
       const token = /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({
         token: 'abcdef', jar: 'some_jar', pucrd: 'some_pucrd',
@@ -1164,15 +1146,14 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
             const gutData = JSON.parse(payload.gutData);
             expect(gutData).to.be.ok;
             expect(gutData.events[0].timestamp).to.be.ok;
-            expect(gutData.events[0].slotid).to.equal(slotId);
+            expect(gutData.events[0].slotid).to.equal(slotId + '_0');
             expect(gutData.events[0].messageId).to.equal(4);
 
             expect(gutData.slots[0].contentUrl).to
                 .equal('http://www.getmesomeads.com');
-            expect(gutData.slots[0].id).to.equal(slotId);
+            expect(gutData.slots[0].id).to.equal(slotId + '_0');
             expect(gutData.slots[0].leafAdUnitName).to.equal(slotId);
-            expect(gutData.slots[0].domId).to.equal(
-                'gpt_unit_' + slotId + '_0');
+            expect(gutData.slots[0].domId).to.equal(slotId + '_0');
             expect(gutData.slots[0].creativeId).to.equal('123');
             expect(gutData.slots[0].lineItemId).to.equal('456');
           },

@@ -3764,6 +3764,7 @@ attr_lists: {
   attrs: { name: "aria-busy" }
   attrs: { name: "aria-checked" }
   attrs: { name: "aria-controls" }
+  attrs: { name: "aria-current" }
   attrs: { name: "aria-describedby" }
   attrs: { name: "aria-disabled" }
   attrs: { name: "aria-dropeffect" }
