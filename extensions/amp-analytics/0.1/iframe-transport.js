@@ -27,7 +27,7 @@ import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
 const TAG_ = 'amp-analytics.IframeTransport';
 
 /** @private @const {number} */
-const LONG_TASK_REPORTING_THRESHOLD_ = 5;
+const LONG_TASK_REPORTING_THRESHOLD = 5;
 
 /** @typedef {{
  *    frame: Element,
@@ -63,9 +63,6 @@ export class IframeTransport {
         'Must supply iframe URL to constructor!');
     this.frameUrl_ = config['iframe'];
 
-    /** @private {?PerformanceObserver} */
-    this.longTaskObserver_ = null;
-
     /** @private {number} */
     this.numLongTasks_ = 0;
 
@@ -92,7 +89,7 @@ export class IframeTransport {
     } else {
       frameData = this.createCrossDomainIframe();
       this.ampWin_.document.body.appendChild(frameData.frame);
-      this.createLongTaskObserver_();
+      this.createPerformanceObserver_();
     }
     dev().assert(frameData, 'Trying to use non-existent frame');
   }
@@ -164,42 +161,45 @@ export class IframeTransport {
    * Uses the Long Task API to create an observer for when 3p vendor frames
    * take more than 50ms of continuous CPU time.
    * Currently the only action in response to that is to log. It will log
-   * once per LONG_TASK_REPORTING_THRESHOLD_ that a long task occurs. (This
+   * once per LONG_TASK_REPORTING_THRESHOLD that a long task occurs. (This
    * implies that there is a grace period for the first
-   * LONG_TASK_REPORTING_THRESHOLD_-1 occurrences.)
+   * LONG_TASK_REPORTING_THRESHOLD-1 occurrences.)
    * @VisibleForTesting
    * @private
    */
-  createLongTaskObserver_() {
+  createPerformanceObserver_() {
     if (!isLongTaskApiSupported(this.ampWin_)) {
       return;
     }
     // TODO(jonkeller): Consider merging with jank-meter.js
-    this.longTaskObserver_ = new this.ampWin_.PerformanceObserver(entryList => {
-      if (!entryList) {
-        return;
-      }
-      entryList.getEntries().forEach(entry => {
-        if (entry && entry['entryType'] == 'longtask' &&
-            (entry['name'] == 'cross-origin-descendant' ||
-            (getMode().localDev &&
-            entry['name'] == 'same-origin-descendant')) &&
-            entry.attribution) {
-          entry.attribution.forEach(attrib => {
-            if (this.frameUrl_ == attrib.containerSrc &&
-                ++this.numLongTasks_ % LONG_TASK_REPORTING_THRESHOLD_ == 0) {
-              user().warn(TAG_,
-                  'Long Task: ' +
-                  `Vendor: "${this.type_}" ` +
-                  `Src: "${attrib.containerSrc}" ` +
-                  `Duration: ${entry.duration}ms ` +
-                  `Occurrences: ${this.numLongTasks_}`);
+    IframeTransport.performanceObservers_[this.type_] =
+        new this.ampWin_.PerformanceObserver(entryList => {
+          if (!entryList) {
+            return;
+          }
+          entryList.getEntries().forEach(entry => {
+            if (entry && entry['entryType'] == 'longtask' &&
+                (entry['name'] == 'cross-origin-descendant' ||
+                (getMode().localDev &&
+                entry['name'] == 'same-origin-descendant')) &&
+                entry.attribution) {
+              entry.attribution.forEach(attrib => {
+                if (this.frameUrl_ == attrib.containerSrc &&
+                    ++this.numLongTasks_ % LONG_TASK_REPORTING_THRESHOLD == 0) {
+                  user().warn(TAG_,
+                      'Long Task: ' +
+                      `Vendor: "${this.type_}" ` +
+                      `Src: "${attrib.containerSrc}" ` +
+                      `Duration: ${entry.duration}ms ` +
+                      `Occurrences: ${this.numLongTasks_}`);
+                }
+              });
             }
           });
-        }
-      });
+        });
+    IframeTransport.performanceObservers_[this.type_].observe({
+      entryTypes: ['longtask'],
     });
-    this.longTaskObserver_.observe({entryTypes: ['longtask']});
   }
 
   /**
@@ -221,9 +221,9 @@ export class IframeTransport {
     }
     ampDoc.body.removeChild(frameData.frame);
     delete IframeTransport.crossDomainIframes_[type];
-    if (this.longTaskObserver_) {
-      this.longTaskObserver_.disconnect();
-      this.longTaskObserver_ = null;
+    if (IframeTransport.performanceObservers_[this.type_]) {
+      IframeTransport.performanceObservers_[this.type_].disconnect();
+      IframeTransport.performanceObservers_[this.type_] = null;
     }
   }
 
@@ -307,3 +307,6 @@ IframeTransport.crossDomainIframes_ = {};
 
 /** @private {number} */
 IframeTransport.nextId_ = 0;
+
+/** @private {Object<string,PerformanceObserver>} */
+IframeTransport.performanceObservers_ = {};

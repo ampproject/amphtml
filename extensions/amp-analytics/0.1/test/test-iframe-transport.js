@@ -121,7 +121,7 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
 
   it('creates one PerformanceObserver per vendor type', () => {
     const createLongTaskObserverSpy = sandbox.spy(
-        IframeTransport.prototype, 'createLongTaskObserver_');
+        IframeTransport.prototype, 'createPerformanceObserver_');
     expect(createLongTaskObserverSpy).to.not.be.called;
 
     iframeTransport.processCrossDomainIframe(); // Create 2nd frame for 1st vendor
