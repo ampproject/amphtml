@@ -19,7 +19,7 @@
   transition-duration: 200ms !important;
 }
 
-[desktop].i-amphtml-story-hint-container {
+[desktop] .i-amphtml-story-hint-container {
   display: none !important;
 }
 
@@ -49,9 +49,16 @@
   flex: 1 !important;
 }
 
+.show-first-page-overlay .prev-page {
+  background: rgba(0,0,0,0.8) !important;
+}
 .next-page {
   flex: 3 !important;
-  border-left: 1px dashed white !important;
+  border-left: 1px dashed transparent;
+  border-image-source: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" version="1.1"><line x1="0" y1="0" x2="0" y2="30" fill-rule="evenodd" stroke-width="1" fill="none" stroke-linecap="square" stroke-dasharray="6,6" stroke="white"></line></svg>');
+  border-image-slice: 33% 33%;
+  border-image-repeat: repeat;
+  border-image-width: 14px;
 }
 
 .show-navigation-overlay .i-amphtml-story-navigation-help-overlay,
@@ -101,7 +108,7 @@
 }
 
 .i-amphtml-story-hint-tap-icon:before {
-  animation: expandingBubble 800ms infinite ease-out !important;
+  animation: expandingBubble 1000ms infinite cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .i-amphtml-story-hint-tap-icon:after {
@@ -126,14 +133,19 @@
 }
 
 @keyframes expandingBubble {
-  from {
+  0% {
     transform: scale(1);
     opacity: 0;
   }
 
-  to {
+  50% {
     transform: scale(1.5);
     opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0;
   }
 }
 
