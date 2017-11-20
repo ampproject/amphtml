@@ -26,7 +26,6 @@ import {toggle, setStyle} from '../../../src/style';
 import {getData, listen} from '../../../src/event-helper';
 import {LightboxManager} from './service/lightbox-manager-impl';
 import {numeric} from '../../../src/transition';
-import {startsWith} from '../../../src/string';
 
 /** @const */
 const TAG = 'amp-lightbox-viewer';
@@ -521,6 +520,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
           });
     } else {
       // We should never be opening a lightbox whose carousel hasn't built.
+      dev().error(TAG, 'Trying to open an uninitialized lightbox viewer.');
       return Promise.resolve();
     }
 
@@ -538,18 +538,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     imgViewer.measure();
 
     this.unlistenViewport_ = this.getViewport().onResize(() => {
-        // In IOS 10.3, the measured size of an element is incorrect if the
-        // element size depends on window size directly and the measurement
-        // happens in window.resize event. Adding a timeout for correct
-        // measurement. See https://github.com/ampproject/amphtml/issues/8479
-      if (startsWith(
-          Services.platformFor(this.win).getIosVersionString(), '10.3')) {
-        Services.timerFor(this.win).delay(() => {
-          imgViewer.measure();
-        }, 500);
-      } else {
-        imgViewer.measure();
-      }
+      imgViewer.measure();
     });
   }
 
