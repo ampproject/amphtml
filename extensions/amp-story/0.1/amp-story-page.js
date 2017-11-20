@@ -129,6 +129,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.muteAllMedia();
     return this.beforeVisible();
   }
 
@@ -218,6 +219,41 @@ export class AmpStoryPage extends AMP.BaseElement {
     });
   }
 
+
+  /**
+   * Pauses all media on this page.
+   * @private
+   */
+  preloadAllMedia_() {
+    const mediaSet = this.getAllMedia_();
+    Array.prototype.forEach.call(mediaSet, mediaItem => {
+      dev().assert(this.mediaPool_, 'Media pool is still unset.');
+      this.mediaPool_.preload(mediaItem);
+    });
+  }
+
+
+  /**
+   * Mutes all media on this page.
+   */
+  muteAllMedia() {
+    const mediaSet = this.getAllMedia_();
+    Array.prototype.forEach.call(mediaSet, mediaItem => {
+      this.mediaPool_.mute(mediaItem);
+    });
+  }
+
+
+  /**
+   * Mutes all media on this page.
+   */
+  unmuteAllMedia() {
+    const mediaSet = this.getAllMedia_();
+    Array.prototype.forEach.call(mediaSet, mediaItem => {
+      this.mediaPool_.unmute(mediaItem);
+    });
+  }
+
   /**
    * Starts playing animations, if the animation manager is available.
    */
@@ -286,6 +322,10 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   setDistance(distance) {
     this.element.setAttribute('distance', distance);
+
+    if (distance <= 2) {
+      this.preloadAllMedia_();
+    }
   }
 
 

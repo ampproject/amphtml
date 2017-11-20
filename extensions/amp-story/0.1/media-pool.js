@@ -149,7 +149,7 @@ export class MediaPool {
   /**
    * Fills the media pool by creating the maximum number of media elements for
    * each of the types of media elements.  We need to create these eagerly so
-   * that all media elements exist by the time that unmuteAll() is invoked,
+   * that all media elements exist by the time that blessAll() is invoked,
    * thereby "blessing" all media elements for playback without user gesture.
    * @private
    */
@@ -239,16 +239,28 @@ export class MediaPool {
    * Deallocates and returns the media element of the specified type furthest
    * from the current position in the document.
    * @param {!MediaType} mediaType The type of media element to deallocate.
+   * @param {!Element=} opt_elToAllocate If specified, the element that is
+   *     trying to be allocated, such that another element must be evicted.
    * @return {?HTMLMediaElement} The deallocated element, if one exists.
    * @private
    */
-  deallocateMediaElement_(mediaType) {
+  deallocateMediaElement_(mediaType, opt_elToAllocate) {
     const allocatedEls = this.allocated_[mediaType];
 
     // Sort the allocated media elements by distance to ensure that we are
     // evicting the media element that is furthest from the current place in the
     // document.
     allocatedEls.sort((a, b) => this.compareMediaDistances_(a, b));
+
+    // Do not deallocate any media elements if the element being loaded or
+    // played is further than the farthest allocated element.
+    if (opt_elToAllocate) {
+      const furthestEl = allocatedEls[allocatedEls.length - 1];
+      if (!furthestEl ||
+          this.distanceFn_(furthestEl) < this.distanceFn_(opt_elToAllocate)) {
+        return null;
+      }
+    }
 
     // De-allocate a media element.
     return allocatedEls.pop();
@@ -259,11 +271,14 @@ export class MediaPool {
    * Evicts an element of the specified type, replaces it in the DOM with the
    * original media element, and returns it.
    * @param {!MediaType} mediaType The type of media element to evict.
+   * @param {!Element=} opt_elToAllocate If specified, the element that is
+   *     trying to be allocated, such that another element must be evicted.
    * @return {?HTMLMediaElement} A media element of the specified type.
    * @private
    */
-  evictMediaElement_(mediaType) {
-    const poolMediaEl = this.deallocateMediaElement_(mediaType);
+  evictMediaElement_(mediaType, opt_elToAllocate) {
+    const poolMediaEl =
+        this.deallocateMediaElement_(mediaType, opt_elToAllocate);
     if (!poolMediaEl) {
       return null;
     }
@@ -435,6 +450,61 @@ export class MediaPool {
 
 
   /**
+   * Preloads the content of the specified media element in the DOM and returns
+   * a media element that can be used in its stead for playback.
+   * @param {!HTMLMediaElement} domMediaEl The media element, found in the DOM,
+   *     whose content should be loaded.
+   * @return {?HTMLMediaElement} A media element from the pool that can be used
+   *     to replace the specified element.
+   */
+  loadInternal_(domMediaEl) {
+    const mediaType = this.getMediaType_(domMediaEl);
+    if (this.isAllocatedMediaElement_(mediaType, domMediaEl)) {
+      // The element being played is already an allocated media element.
+      return domMediaEl;
+    }
+
+    const poolMediaEl = this.reserveUnallocatedMediaElement_(mediaType) ||
+        this.evictMediaElement_(mediaType, domMediaEl);
+
+    if (!poolMediaEl) {
+      // If there is no space in the pool to allocate a new element, and no
+      // element can be evicted, do not return any element.
+      return null;
+    }
+
+    this.swapPoolMediaElementIntoDom_(domMediaEl, poolMediaEl);
+    this.allocateMediaElement_(mediaType, poolMediaEl);
+    return poolMediaEl;
+  }
+
+
+  /**
+   * "Blesses" the specified media element for playback.  In order for this to
+   * bless the media element, this function must be invoked in response to a
+   * user gesture.
+   * @param {!HTMLMediaElement} mediaEl The media element to bless.
+   */
+  bless_(mediaEl) {
+    const isPaused = mediaEl.paused;
+    const isMuted = mediaEl.muted;
+    const currentTime = mediaEl.currentTime;
+
+    mediaEl.muted = false;
+    mediaEl.play().then(() => {
+      if (isPaused) {
+        mediaEl.pause();
+        mediaEl.currentTime = currentTime;
+      }
+
+      if (isMuted) {
+        mediaEl.muted = true;
+      }
+    });
+  }
+
+
+  /**
    * Registers the specified element to be usable by the media pool.  Elements
    * should be registered as early as possible, in order to prevent them from
    * being played while not managed by the media pool.
@@ -451,26 +521,27 @@ export class MediaPool {
 
 
   /**
+   * Preloads the content of the specified media element in the DOM.
+   * @param {!HTMLMediaElement} domMediaEl The media element, found in the DOM,
+   *     whose content should be loaded.
+   */
+  preload(domMediaEl) {
+    this.loadInternal_(domMediaEl);
+  }
+
+
+  /**
    * Plays the specified media element in the DOM by replacing it with a media
    * element from the pool and playing that.
    * @param {!HTMLMediaElement} domMediaEl The media element to be played.
    */
   play(domMediaEl) {
-    const mediaType = this.getMediaType_(domMediaEl);
-    if (this.isAllocatedMediaElement_(mediaType, domMediaEl)) {
-      // The element being played is already an allocated media element.  All we
-      // need to do is actually play the element.
-      domMediaEl.play();
+    const poolMediaEl = this.loadInternal_(domMediaEl);
+
+    if (!poolMediaEl) {
       return;
     }
 
-    const reservedEl = this.reserveUnallocatedMediaElement_(mediaType) ||
-        this.evictMediaElement_(mediaType);
-
-    const poolMediaEl = /** @type {!HTMLMediaElement} */ (dev().assertElement(
-        reservedEl, `There were no ${mediaType} elements in the pool.`));
-    this.swapPoolMediaElementIntoDom_(domMediaEl, poolMediaEl);
-    this.allocateMediaElement_(mediaType, poolMediaEl);
     poolMediaEl.play();
   }
 
@@ -485,21 +556,29 @@ export class MediaPool {
 
 
   /**
-   * Mutes all media elements in the media pool.
+   * Mutes the specified media element in the DOM.
+   * @param {!HTMLMediaElement} domMediaEl The media element to be muted.
    */
-  muteAll() {
-    this.forEachMediaElement_(mediaEl => {
-      mediaEl.muted = true;
-    });
+  mute(domMediaEl) {
+    domMediaEl.muted = true;
+  }
+
+
+  /**
+   * Unmutes the specified media element in the DOM.
+   * @param {!HTMLMediaElement} domMediaEl The media element to be unmuted.
+   */
+  unmute(domMediaEl) {
+    domMediaEl.muted = false;
   }
 
 
   /**
    * Unmutes all media elements in the media pool.
    */
-  unmuteAll() {
+  blessAll() {
     this.forEachMediaElement_(mediaEl => {
-      mediaEl.muted = false;
+      this.bless_(mediaEl);
     });
   }
 }

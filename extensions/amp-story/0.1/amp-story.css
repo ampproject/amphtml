@@ -852,3 +852,7 @@ amp-story[standalone] .i-amphtml-story-developer-log {
   overflow: hidden !important;
   white-space: nowrap !important;
 }
+
+.i-amphtml-pool-video {
+  border: 10px solid red !important;
+}

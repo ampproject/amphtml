@@ -1125,8 +1125,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   mute_() {
-    this.audioManager_.muteAll();
-    this.mediaPool_.muteAll();
+    this.pages_.forEach(page => {
+      page.muteAllMedia();
+    });
     this.toggleMutedAttribute_(true);
   }
 
@@ -1135,8 +1136,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   unmute_() {
-    this.audioManager_.unmuteAll();
-    this.mediaPool_.unmuteAll();
+    this.mediaPool_.blessAll();
+    this.activePage_.unmuteAllMedia();
     this.toggleMutedAttribute_(false);
   }
 
