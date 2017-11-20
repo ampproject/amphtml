@@ -23,7 +23,7 @@ import {
   AnalyticsEventType,
   CustomEventTracker,
   getTrackerKeyName,
-  getTrackerTypesForRootType,
+  getTrackerTypesForParentType,
 } from './events';
 import {Observable} from '../../../src/observable';
 import {dev, user} from '../../../src/log';
@@ -375,7 +375,7 @@ export class AnalyticsGroup {
   addTrigger(config, handler) {
     const eventType = dev().assertString(config['on']);
     const trackerKey = getTrackerKeyName(eventType);
-    const trackerWhitelist = getTrackerTypesForRootType(this.root_.getType());
+    const trackerWhitelist = getTrackerTypesForParentType(this.root_.getType());
 
     if (this.isDeprecatedListenerEvent(trackerKey)) {
       // TODO(dvoytenko): remove this use and `addListenerDepr_` once all

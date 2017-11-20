@@ -791,29 +791,51 @@ describes.realWin('Events', {amp: 1}, env => {
       }}, fn3);
       expect(fn3).to.be.calledOnce;
 
-      expect(tracker.getTrackedTimerKeys()).to.have.length(3);
+      const fn4 = sandbox.stub();
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 10,
+        stopSpec: {on: 'click', selector: '.target'},
+        maxTimerLength: 20,
+      }}, fn4);
+
+      const fn5 = sandbox.stub();
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 10,
+        stopSpec: {on: 'click', selector: '.target'},
+      }}, fn5);
+
+      expect(tracker.getTrackedTimerKeys()).to.have.length(5);
 
       clock.tick(10 * 1000); // 10 seconds
       expect(fn1).to.have.callCount(2);
       expect(fn2).to.have.callCount(2);
-      expect(tracker.getTrackedTimerKeys()).to.have.length(3);
+      expect(fn3).to.have.callCount(1);
+      expect(fn4).to.have.callCount(2);
+      expect(fn5).to.have.callCount(2);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(5);
 
       clock.tick(10 * 1000); // 20 seconds
-      expect(fn1).to.have.callCount(3); // Hit maxTimerLength and stopped.
-      expect(fn2).to.have.callCount(4); // Hit maxTimerLength and stopped.
-      expect(tracker.getTrackedTimerKeys()).to.have.length(1);
+      expect(fn1).to.have.callCount(2);
+      expect(fn2).to.have.callCount(3);
+      expect(fn3).to.have.callCount(1);
+      expect(fn4).to.have.callCount(3);
+      expect(fn5).to.have.callCount(3);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(2);
 
       clock.tick(10 * 1000); // 30 seconds
-      expect(fn1).to.have.callCount(3);
-      expect(fn2).to.have.callCount(4);
-      expect(tracker.getTrackedTimerKeys()).to.have.length(1);
+      expect(fn1).to.have.callCount(2);
+      expect(fn2).to.have.callCount(3);
+      expect(fn3).to.have.callCount(1);
+      expect(fn4).to.have.callCount(3);
+      expect(fn5).to.have.callCount(4);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(2);
 
       // Default maxTimerLength is 2 hours
       clock.tick(3 * 3600 * 1000); // 3 hours
       expect(fn3).to.have.callCount(4); // Hit maxTimerLength and stopped.
 
-      // All timers removed.
-      expect(tracker.getTrackedTimerKeys()).to.have.length(0);
+      // All timers removed except the one that never ends.
+      expect(tracker.getTrackedTimerKeys()).to.have.length(1);
     });
 
     it('should unlisten tracker', () => {
