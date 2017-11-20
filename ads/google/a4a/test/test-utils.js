@@ -614,6 +614,10 @@ describe('Google A4A utils', () => {
       });
     });
 
+    afterEach(() => {
+      sandbox.restore();
+    });
+
     it('should include the correlator', () => {
       const vars = getCsiAmpAnalyticsVariables('trigger', a4a, null);
       expect(vars['correlator']).not.to.be.undefined;
