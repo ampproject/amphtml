@@ -104,6 +104,17 @@ describe('amp-analytics.VariableService', function() {
       return variables.expandTemplate('${fooParam(foo,bar)}', vars)
           .then(actual => expect(actual).to.equal('QUERY_PARAM(foo,bar)'));
     });
+
+    it('respect freeze variables', () => {
+      const vars = new ExpansionOptions({'fooParam': 'QUERY_PARAM',
+        'freeze': 'error'});
+      vars.freezeVar('freeze');
+      return variables.expandTemplate(
+          '${fooParam(foo,bar)}${nonfreeze}${freeze}', vars)
+          .then(actual => expect(actual).to.equal(
+              'QUERY_PARAM(foo,bar)${freeze}'));
+
+    });
   });
 
   it('default filterdoesn\'t work when experiment is off' , () =>
