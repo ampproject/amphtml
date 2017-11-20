@@ -553,6 +553,9 @@ class TimerEventHandler {
     user().assert(this.maxTimerLength_ > 0, 'Bad maxTimerLength specification');
 
     /** @private @const {boolean} */
+    this.maxTimerInSpec_ = 'maxTimerLength' in timerSpec;
+
+    /** @private @const {boolean} */
     this.callImmediate_ = 'immediate' in timerSpec ?
         Boolean(timerSpec['immediate']) : true;
 
@@ -637,7 +640,7 @@ class TimerEventHandler {
     }, this.intervalLength_ * 1000);
 
     // If there's no way to turn off the timer, cap it.
-    if (!this.stopBuilder_) {
+    if (!this.stopBuilder_ || (this.stopBuilder_ && this.maxTimerInSpec_)) {
       win.setTimeout(() => {
         timeoutCallback();
       }, this.maxTimerLength_ * 1000);
