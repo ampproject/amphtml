@@ -40,6 +40,7 @@ import {Services} from '../../../src/services';
 import {relatedArticlesFromJson} from './related-articles';
 import {ShareWidget} from './share';
 import {
+  closest,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
@@ -64,6 +65,7 @@ import {Gestures} from '../../../src/gesture';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {dict} from '../../../src/utils/object';
 import {renderSimpleTemplate} from './simple-template';
+import {MediaPool} from './media-pool';
 
 /** @private @const {string} */
 const PRE_ACTIVE_PAGE_ATTRIBUTE_NAME = 'pre-active';
@@ -201,6 +203,12 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {!AmpStoryHint} */
     this.ampStoryHint_ = new AmpStoryHint(this.win);
+
+    /** @private {!MediaPool} */
+    this.mediaPool_ = new MediaPool(this.win, el => {
+      const page = this.getPageContainingElement_(el);
+      return page.getDistance();
+    });
   }
 
 
@@ -564,6 +572,7 @@ export class AmpStory extends AMP.BaseElement {
         (pageEl, index) => {
           return pageEl.getImpl().then(pageImpl => {
             this.pages_[index] = pageImpl;
+            pageImpl.setMediaPool(this.mediaPool_);
           });
         });
 
@@ -956,6 +965,7 @@ export class AmpStory extends AMP.BaseElement {
       pagesByDistance.forEach((pageIds, distance) => {
         pageIds.forEach(pageId => {
           const page = this.getPageById_(pageId);
+          page.setDistance(distance);
           setImportantStyles(page.element, {
             transform: `translateY(${100 * distance}%)`,
           });
@@ -1089,12 +1099,34 @@ export class AmpStory extends AMP.BaseElement {
     return findIndex(this.pages_, page => page === desiredPage);
   }
 
+
+  /**
+   * @param {!Element} element The element whose containing AmpStoryPage should
+   *     be retrieved
+   * @return {!./amp-story-page.AmpStoryPage} The AmpStoryPage containing the
+   *     specified element.
+   */
+  getPageContainingElement_(element) {
+    const pageIndex = findIndex(this.pages_, page => {
+      const pageEl = closest(element, el => {
+        return el === page.element;
+      });
+
+      return !!pageEl;
+    });
+
+    return dev().assert(this.pages_[pageIndex],
+        `Element ${element} not contained on any amp-story-page.`);
+  }
+
+
   /**
    * Mutes the audio for the story.
    * @private
    */
   mute_() {
     this.audioManager_.muteAll();
+    this.mediaPool_.muteAll();
     this.toggleMutedAttribute_(true);
   }
 
@@ -1104,6 +1136,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   unmute_() {
     this.audioManager_.unmuteAll();
+    this.mediaPool_.unmuteAll();
     this.toggleMutedAttribute_(false);
   }
 

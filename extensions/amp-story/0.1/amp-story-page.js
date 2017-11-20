@@ -143,6 +143,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {!AdvancementConfig} */
     this.advancement_ = AdvancementConfig.forPage(this);
+
+    /** @private {?./media-pool.MediaPool} */
+    this.mediaPool_ = null;
   }
 
 
@@ -354,10 +357,9 @@ export class AmpStoryPage extends AMP.BaseElement {
   playAllMedia_() {
     const mediaSet = this.getAllMedia_();
     Array.prototype.forEach.call(mediaSet, mediaItem => {
-      mediaItem.play().catch(() => {
-        dev().error('AMP-STORY',
-            `Failed to play media element with src ${mediaItem.src}.`);
-      });
+      dev().assert(this.mediaPool_, 'Media pool is still unset.');
+      // this.mediaPool_.register(mediaItem);
+      this.mediaPool_.play(mediaItem);
     });
   }
 
@@ -435,10 +437,41 @@ export class AmpStoryPage extends AMP.BaseElement {
 
 
   /**
+   * @return {number} The distance from the current page to the active page.
+   */
+  getDistance() {
+    return parseInt(this.element.getAttribute('distance'), 10);
+  }
+
+
+  /**
+   * @param {number} distance The distance from the current page to the active
+   *     page.
+   */
+  setDistance(distance) {
+    this.element.setAttribute('distance', distance);
+  }
+
+
+  /**
    * @return {boolean} Whether this page is currently active.
    */
   isActive() {
     return this.element.hasAttribute('active');
+  }
+
+
+  /**
+   * @param {!./media-pool.MediaPool} mediaPool The MediaPool instance to use to
+   *     manage media on this page.
+   */
+  setMediaPool(mediaPool) {
+    this.mediaPool_ = mediaPool;
+
+    const mediaSet = this.getAllMedia_();
+    Array.prototype.forEach.call(mediaSet, mediaItem => {
+      this.mediaPool_.register(mediaItem);
+    });
   }
 
 

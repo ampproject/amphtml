@@ -248,6 +248,7 @@ class MediaElement extends PageElement {
 
   /** @override */
   isLoaded_() {
+    return true;
     const mediaElement = this.getMediaElement_();
     const firstTimeRangeOrNull = this.getFirstTimeRange_();
 
@@ -333,6 +334,7 @@ class ImageElement extends PageElement {
 
   /** @override */
   isLoaded_() {
+    return true;
     const imageElement = this.getImageElement_();
     return Boolean(imageElement && imageElement.complete &&
         imageElement.naturalWidth && imageElement.naturalHeight);
@@ -359,6 +361,7 @@ class VideoInterfaceElement extends PageElement {
 
   /** @override */
   isLoaded_() {
+    return true;
     return this.isLaidOut_();
   }
 
