@@ -284,10 +284,16 @@ def generate_snapshots(page, webpages)
       forbidden_css = webpage['forbidden_css']
       loading_incomplete_css = webpage['loading_incomplete_css']
       loading_complete_css = webpage['loading_complete_css']
+      enable_experiments(page, webpage['experiments'])
       page.visit(url)
-      verify_css_elements(page, url,
-                          forbidden_css, loading_incomplete_css, loading_complete_css)
+      verify_css_elements(
+          page,
+          url,
+          forbidden_css,
+          loading_incomplete_css,
+          loading_complete_css)
       Percy::Capybara.snapshot(page, name: name)
+      clear_experiments(page)
     end
   end
 end
@@ -333,6 +339,32 @@ def verify_css_elements(
       end
     end
   end
+end
+
+
+# Enables the given AMP experiments.
+#
+# Args:
+# - page: Page object used by Percy for snapshotting.
+# - experiments: List of experiments to enable.
+def enable_experiments(page, experiments)
+  if experiments
+    page.driver.set_cookie(
+        'AMP_EXP',
+        experiments.join('%2C'),
+        { :path => '/', :domain => 'localhost' })
+    log('verbose', 'Setting AMP experiments ' + cyan(experiments.join(', ')))
+  end
+end
+
+
+# Clears all AMP experiment cookies.
+#
+# Args:
+# - page: Page object used by Percy for snapshotting.
+def clear_experiments(page)
+  page.driver.clear_cookies
+  log('verbose', 'Cleared all AMP experiment cookies')
 end
 
 

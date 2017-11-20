@@ -63,6 +63,12 @@
    *   "loading_complete_css": [
    *     ".loading-complete-css-class",
    *     ".another-loading-complete-css-class"
+   *   ],
+   *
+   *   // Experiments that must be enabled via cookies.
+   *   "experiments": [
+   *     "amp-feature-one",
+   *     "amp-feature-two"
    *   ]
    * },
    */
