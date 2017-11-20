@@ -123,6 +123,9 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.isInabox_ = getMode().runtime == 'inabox';
 
     /** @private {boolean} */
+    this.use3pScript_ = false;
+
+    /** @private {boolean} */
     this.scriptLoad_ = false;
   }
 
@@ -184,7 +187,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   resumeCallback() {
-    if (this.config_['transport'] && this.config_['transport']['iframe']) {
+    if (this.config_['transport'] && this.config_['transport']['iframe'] &&
+        !this.use3pScript_) {
       this.initIframeTransport_();
     }
   }
@@ -353,9 +357,16 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   inject3pScript_() {
+    this.use3pScript_ = true;
     const s = this.win.document.createElement('script');
     s.src = this.config_['transport']['script'];
     s.onload = () => { this.scriptLoad_ = true; };
+    s.onerror = () => {
+      if (this.config_['transport']['iframe']) {
+        this.initIframeTransport_();
+      }
+      this.use3pScript_ = false;
+    }
     this.element.appendChild(s);
   }
 
@@ -823,14 +834,16 @@ export class AmpAnalytics extends AMP.BaseElement {
           'iframePing is only available on page view requests.');
       sendRequestUsingIframe(this.win, request);
     } else if (this.config_['transport']) {
-      user().assert(this.iframeTransport_,
-          'iframe transport was inadvertently deleted');
-      if (this.config_['transport']['iframe']) {
+      if (this.use3pScript_) {
+        if (this.scriptLoad_) {
+          // direct call to the script API.
+        } else {
+          // drop the request if the script is not loaded yet.
+        }
+      } else if (this.config_['transport']['iframe']) {
+        user().assert(this.iframeTransport_,
+            'iframe transport was inadvertently deleted');
         this.iframeTransport_.sendRequest(request);
-      } else if (this.scriptLoad_) {
-        // direct call to the script API.
-      } else {
-        // We drop the request if the script is not loaded.
       }
     } else {
       sendRequest(this.win, request, this.config_['transport'] || {});
