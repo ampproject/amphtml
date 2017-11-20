@@ -180,6 +180,7 @@ function buildReplayButtonTemplate(doc, title, domainName, opt_imageUrl) {
         tag: 'div',
         attrs: dict({'class': 'i-amphtml-story-bookend-replay-image'}),
         children: [
+          REPLAY_ICON_TEMPLATE,
           // TODO(alanorozco): Figure out how to use amp-img here
           {
             tag: 'img',
@@ -189,7 +190,6 @@ function buildReplayButtonTemplate(doc, title, domainName, opt_imageUrl) {
               'height': 80,
             }),
           },
-          REPLAY_ICON_TEMPLATE,
         ],
       },
       {
