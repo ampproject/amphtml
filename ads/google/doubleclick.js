@@ -43,6 +43,7 @@ export function doubleclick(global, data) {
     'overrideWidth', 'overrideHeight', 'loadingStrategy',
     'consentNotificationId', 'useSameDomainRenderingUntilDeprecated',
     'experimentId', 'multiSize', 'multiSizeValidation', 'ampSlotIndex',
+    'ati',
   ]);
 
   if (global.context.clientId) {
