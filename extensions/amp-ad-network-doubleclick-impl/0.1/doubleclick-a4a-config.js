@@ -138,8 +138,12 @@ export class DoubleclickA4aEligibility {
     }
     if (useRemoteHtml) {
       warnDeprecation('remote.html');
+      if (!element.getAttribute('rtc-config')) {
+        element.setAttribute('data-ati', '1');
+        return false;
+      }
     }
-    if (hasUSDRD || (useRemoteHtml && !element.getAttribute('rtc-config'))) {
+    if (hasUSDRD) {
       return false;
     }
     let experimentId;
