@@ -213,8 +213,7 @@ class AmpVideo extends AMP.BaseElement {
 
     this.getRealChildNodes().forEach(child => {
       // Skip the video we already added to the element.
-      if (this.video_ === child ||
-          child.classList.contains('i-amphtml-pool-video')) {
+      if (this.video_ === child) {
         return;
       }
       if (child.getAttribute && child.getAttribute('src')) {
