@@ -23,6 +23,8 @@ const fs = BBPromise.promisifyAll(require('fs'));
 const gulp = require('gulp-help')(require('gulp'));
 const util = require('gulp-util');
 
+const red = util.colors.red;
+const cyan = util.colors.cyan;
 
 /**
  * Returns the number of AMP_CONFIG matches in the given config string.
@@ -50,13 +52,13 @@ function sanityCheck(str) {
 }
 
 /**
- * @param {string} filename
- * @param {string} opt_local
- * @param {string=} opt_branch
+ * @param {string} filename File containing the config
+ * @param {string=} opt_localBranch Whether to use the local branch version
+ * @param {string=} opt_branch If not the local branch, which branch to use
  * @return {!Promise}
  */
-function checkoutBranchConfigs(filename, opt_local, opt_branch) {
-  if (opt_local) {
+function checkoutBranchConfigs(filename, opt_localBranch, opt_branch) {
+  if (opt_localBranch) {
     return Promise.resolve();
   }
   const branch = opt_branch || 'origin/master';
@@ -73,8 +75,8 @@ function checkoutBranchConfigs(filename, opt_local, opt_branch) {
 }
 
 /**
- * @param {string} configString
- * @param {string} fileString
+ * @param {string} configString String containing the AMP config
+ * @param {string} fileString String containing the AMP runtime
  * @return {string}
  */
 function prependConfig(configString, fileString) {
@@ -83,14 +85,14 @@ function prependConfig(configString, fileString) {
 }
 
 /**
- * @param {string} filename
- * @param {string} fileString
- * @param {boolean=} opt_dryrun
+ * @param {string} filename Destination filename
+ * @param {string} fileString String to write
+ * @param {boolean=} opt_dryrun If true, print the contents without writing them
  * @return {!Promise}
  */
 function writeTarget(filename, fileString, opt_dryrun) {
   if (opt_dryrun) {
-    util.log(util.colors.blue(`overwriting: ${filename}`));
+    util.log(cyan(`overwriting: ${filename}`));
     util.log(fileString);
     return Promise.resolve();
   }
@@ -110,15 +112,17 @@ function valueOrDefault(value, defaultValue) {
 }
 
 /**
- * @param {string} config
- * @param {string} target
- * @param {string} filename
- * @param {string} opt_local
- * @param {string} opt_branch
+ * @param {string} config Prod or canary
+ * @param {string} target File containing the AMP runtime (amp.js or v0.js)
+ * @param {string} filename File containing the (prod or canary) config
+ * @param {boolean=} opt_localDev Whether to enable local development
+ * @param {boolean=} opt_localBranch Whether to use the local branch version
+ * @param {string=} opt_branch If not the local branch, which branch to use
  * @return {!Promise}
  */
-function applyConfig(config, target, filename, opt_local, opt_branch) {
-  return checkoutBranchConfigs(filename, opt_local, opt_branch)
+function applyConfig(
+    config, target, filename, opt_localDev, opt_localBranch, opt_branch) {
+  return checkoutBranchConfigs(filename, opt_localBranch, opt_branch)
       .then(() => {
         return Promise.all([
           fs.readFileAsync(filename),
@@ -126,15 +130,19 @@ function applyConfig(config, target, filename, opt_local, opt_branch) {
         ]);
       })
       .then(files => {
-        let configFile;
+        let configJson;
         try {
-          configFile = JSON.stringify(JSON.parse(files[0].toString()));
+          configJson = JSON.parse(files[0].toString());
         } catch (e) {
-          util.log(util.colors.red(`Error parsing config file: ${filename}`));
+          util.log(red(`Error parsing config file: ${filename}`));
           throw e;
         }
-        const targetFile = files[1].toString();
-        return prependConfig(configFile, targetFile);
+        if (opt_localDev) {
+          configJson = enableLocalDev(config, target, configJson);
+        }
+        const targetString = files[1].toString();
+        const configString = JSON.stringify(configJson);
+        return prependConfig(configString, targetString);
       })
       .then(fileString => {
         sanityCheck(fileString);
@@ -142,14 +150,45 @@ function applyConfig(config, target, filename, opt_local, opt_branch) {
       })
       .then(() => {
         if (!process.env.TRAVIS) {
-          util.log('Wrote', util.colors.cyan(config), 'AMP config to',
-              util.colors.cyan(target));
+          util.log('Wrote', cyan(config), 'AMP config to', cyan(target));
         }
       });
 }
 
 /**
- * @param {string} target
+ * @param {string} config Prod or canary
+ * @param {string} target File containing the AMP runtime (amp.js or v0.js)
+ * @param {string} configJson The json object in which to enable local dev
+ * @return {string}
+ */
+function enableLocalDev(config, target, configJson) {
+  let LOCAL_DEV_AMP_CONFIG = {localDev: true};
+  if (!process.env.TRAVIS) {
+    util.log('Enabled local development mode in', cyan(target));
+  }
+  const TESTING_HOST = process.env.AMP_TESTING_HOST;
+  if (typeof TESTING_HOST == 'string') {
+    LOCAL_DEV_AMP_CONFIG = Object.assign(LOCAL_DEV_AMP_CONFIG, {
+      thirdPartyFrameHost: TESTING_HOST,
+      thirdPartyFrameRegex: TESTING_HOST,
+    });
+    if (!process.env.TRAVIS) {
+      util.log('Set', cyan('TESTING_HOST'), 'to', cyan(TESTING_HOST),
+          'in', cyan(target));
+    }
+  }
+  LOCAL_DEV_AMP_CONFIG = Object.assign(LOCAL_DEV_AMP_CONFIG, configJson);
+  const herokuConfigFile = 'node_modules/AMP_CONFIG.json';
+  fs.writeFileSync(herokuConfigFile, JSON.stringify(LOCAL_DEV_AMP_CONFIG));
+  if (!process.env.TRAVIS) {
+    util.log('Wrote', cyan(config), 'AMP config to', cyan(herokuConfigFile),
+        'for use with Heroku');
+  }
+  return LOCAL_DEV_AMP_CONFIG;
+}
+
+/**
+ * @param {string} target Target file from which to remove the AMP config
  * @return {!Promise}
  */
 function removeConfig(target) {
@@ -158,7 +197,7 @@ function removeConfig(target) {
         let contents = file.toString();
         if (numConfigs(contents) == 0) {
           if (!process.env.TRAVIS) {
-            util.log('No configs found in', util.colors.cyan(target));
+            util.log('No configs found in', cyan(target));
           }
           return Promise.resolve();
         }
@@ -168,7 +207,7 @@ function removeConfig(target) {
         contents = contents.replace(config, '');
         return writeTarget(target, contents, argv.dryrun).then(() => {
           if (!process.env.TRAVIS) {
-            util.log('Removed existing config from', util.colors.cyan(target));
+            util.log('Removed existing config from', cyan(target));
           }
         });
       });
@@ -179,7 +218,7 @@ function main() {
   const target = argv.target || TESTING_HOST;
 
   if (!target) {
-    util.log(util.colors.red('Missing --target.'));
+    util.log(red('Missing --target.'));
     return;
   }
 
@@ -188,11 +227,10 @@ function main() {
   }
 
   if (!(argv.prod || argv.canary)) {
-    util.log(util.colors.red('One of --prod or --canary should be provided.'));
+    util.log(red('One of --prod or --canary should be provided.'));
     return;
   }
 
-  const branch = argv.branch;
   let filename = '';
 
   // Prod by default.
@@ -205,7 +243,9 @@ function main() {
         'build-system/global-configs/prod-config.json');
   }
   return removeConfig(target).then(() => {
-    return applyConfig(config, target, filename, argv.local, branch);
+    return applyConfig(
+        config, target, filename,
+        argv.local_dev, argv.local_branch, argv.branch);
   });
 }
 
@@ -216,9 +256,11 @@ gulp.task('prepend-global', 'Prepends a json config to a target file', main, {
         'Takes in an optional value for a custom canary config source.',
     'prod': '  Prepend the default prod config. ' +
         'Takes in an optional value for a custom prod config source.',
+    'local_dev': '  Enables runtime to be used for local development.',
     'branch': '  Switch to a git branch to get config source from. ' +
         'Uses master by default.',
-    'local': '  Don\'t switch branches and use local config',
+    'local_branch': '  Don\'t switch branches and use the config from the ' +
+        'local branch.',
     'remove': '  Removes previously prepended json config from the target ' +
         'file (if present).',
   },
