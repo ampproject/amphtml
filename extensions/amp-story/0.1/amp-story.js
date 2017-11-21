@@ -206,7 +206,7 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private {!MediaPool} */
     this.mediaPool_ = new MediaPool(this.win,
-        this.getElementDistanceFromActivePage_);
+        element => this.getElementDistanceFromActivePage_(element));
   }
 
 
@@ -664,6 +664,7 @@ export class AmpStory extends AMP.BaseElement {
           }
         })
         .then(() => this.preloadPagesByDistance_())
+        .then(() => this.reapplyMuting_())
         .then(() => this.forceRepaintForSafari_());
   }
 
@@ -1142,10 +1143,33 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   unmute_() {
-    this.mediaPool_.blessAll();
-    this.activePage_.unmuteAllMedia();
+    this.mediaPool_.blessAll().then(() => {
+      this.activePage_.unmuteAllMedia();
+    });
     this.toggleMutedAttribute_(false);
   }
+
+
+  /**
+   * Reapplies the muting status for the currently-active media in the story.
+   */
+  reapplyMuting_() {
+    const isMuted = this.isMuted_();
+    if (!isMuted) {
+      this.mute_();
+      this.unmute_();
+    }
+  }
+
+
+  /**
+   * @return {boolean} Whether the story is currently muted.
+   * @private
+   */
+  isMuted_() {
+    return this.element.hasAttribute(AUDIO_MUTED_ATTRIBUTE);
+  }
+
 
   /**
    * Toggles mute or unmute attribute on element.

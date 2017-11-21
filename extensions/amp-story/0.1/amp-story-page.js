@@ -202,7 +202,15 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   hasAudio_() {
-    return true;
+    return Array.prototype.some.call(this.getAllMedia_(), mediaEl => {
+      if (!(mediaEl instanceof HTMLMediaElement)) {
+        return false;
+      }
+
+      return mediaEl.mozHasAudio ||
+          Boolean(mediaEl['webkitAudioDecodedByteCount']) ||
+          Boolean(mediaEl.audioTracks && mediaEl.audioTracks.length);
+    });
   }
 
 
@@ -246,11 +254,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   pauseAllMedia_(opt_rewindToBeginning) {
     this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.pause(/** @type {!HTMLMediaElement} */ (mediaEl));
-
-      if (opt_rewindToBeginning) {
-        mediaEl.currentTime = 0;
-      }
+      mediaPool.pause(/** @type {!HTMLMediaElement} */ (mediaEl),
+          opt_rewindToBeginning);
     });
   }
 
@@ -380,8 +385,8 @@ export class AmpStoryPage extends AMP.BaseElement {
       transform: `translateY(${100 * distance}%)`,
     });
 
-    if (distance >= 0 && distance <= 2) {
-      this.registerAllMedia_();
+    this.registerAllMedia_();
+    if (distance > 0 && distance <= 2) {
       this.preloadAllMedia_();
     }
   }

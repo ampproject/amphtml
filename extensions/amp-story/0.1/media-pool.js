@@ -21,6 +21,8 @@ import {
   scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {dev} from '../../../src/log';
+import {findIndex} from '../../../src/utils/array';
+import {BLANK_AUDIO_SRC, BLANK_VIDEO_SRC} from './default-media';
 
 
 
@@ -103,14 +105,12 @@ export class MediaPool {
      * @private @const {!Object<!MediaType, !Array<!HTMLMediaElement>>}
      */
     this.allocated_ = {};
-    win['allocated'] = this.allocated_;
 
     /**
      * Holds all of the media elements that have not been allocated.
      * @private @const {!Object<!MediaType, !Array<!HTMLMediaElement>>}
      */
     this.unallocated_ = {};
-    win['unallocated'] = this.unallocated_;
 
     /**
      * Maps a media element's ID to the object containing its sources.
@@ -131,10 +131,18 @@ export class MediaPool {
      */
     this.idCounter_ = 0;
 
+    /**
+     * Whether the media elements in this MediaPool instance have been "blessed"
+     * for unmuted playback without user gesture.
+     * @private {boolean}
+     */
+    this.blessed_ = false;
+
     /** @const {!Object<string, (function(): !HTMLMediaElement)>} */
     this.mediaFactory_ = {
       [MediaType.AUDIO]: () => {
         const audioEl = this.win_.document.createElement('audio');
+        audioEl.setAttribute('src', BLANK_AUDIO_SRC);
         audioEl.setAttribute('muted', '');
         audioEl.setAttribute('autoplay', '');
         audioEl.classList.add('i-amphtml-pool-media');
@@ -143,6 +151,7 @@ export class MediaPool {
       },
       [MediaType.VIDEO]: () => {
         const videoEl = this.win_.document.createElement('video');
+        videoEl.setAttribute('src', BLANK_VIDEO_SRC);
         videoEl.setAttribute('muted', '');
         videoEl.setAttribute('autoplay', '');
         videoEl.setAttribute('playsinline', '');
@@ -231,6 +240,30 @@ export class MediaPool {
    */
   reserveUnallocatedMediaElement_(mediaType) {
     return this.unallocated_[mediaType].pop();
+  }
+
+
+  /**
+   * Retrieves the media element from the pool that matches the specified
+   * element, if one exists.
+   * @param {!MediaType} mediaType The type of media element to get.
+   * @param {!HTMLMediaElement} domMediaEl The element whose matching media
+   *     element should be retrieved.
+   * @return {?HTMLMediaElement} The media element in the pool that represents
+   *     the specified media element
+   */
+  getMatchingMediaElementFromPool_(mediaType, domMediaEl) {
+    if (this.isAllocatedMediaElement_(mediaType, domMediaEl)) {
+      return domMediaEl;
+    }
+
+    const allocatedEls = this.allocated_[mediaType];
+    const index = findIndex(allocatedEls, poolMediaEl => {
+      return poolMediaEl.getAttribute(REPLACED_MEDIA_ATTRIBUTE) ===
+          domMediaEl.id;
+    });
+
+    return allocatedEls[index];
   }
 
 
@@ -364,9 +397,11 @@ export class MediaPool {
    */
   swapPoolMediaElementOutOfDom_(poolMediaEl) {
     const oldDomMediaElId = poolMediaEl.getAttribute(REPLACED_MEDIA_ATTRIBUTE);
-    const oldDomMediaEl = dev().assertElement(
+    const oldDomMediaEl = /** @type {!HTMLMediaElement} */ (dev().assertElement(
         this.domMediaEls_[oldDomMediaElId],
-        'No media element to put back into DOM after eviction.');
+        'No media element to put back into DOM after eviction.'));
+    this.copyCssClasses_(poolMediaEl, oldDomMediaEl);
+    this.copyAttributes_(poolMediaEl, oldDomMediaEl);
     poolMediaEl.parentElement.replaceChild(oldDomMediaEl, poolMediaEl);
     poolMediaEl.removeAttribute(REPLACED_MEDIA_ATTRIBUTE);
     Sources.removeFrom(poolMediaEl);
@@ -471,7 +506,7 @@ export class MediaPool {
     }
 
     const mediaType = this.getMediaType_(domMediaEl);
-    if (this.isAllocatedMediaElement_(mediaType, domMediaEl)) {
+    if (this.getMatchingMediaElementFromPool_(mediaType, domMediaEl)) {
       // The element being loaded is already an allocated media element.
       return domMediaEl;
     }
@@ -500,6 +535,8 @@ export class MediaPool {
    * bless the media element, this function must be invoked in response to a
    * user gesture.
    * @param {!HTMLMediaElement} mediaEl The media element to bless.
+   * @return {!Promise} A promise that is resolved when blessing the media
+   *     element is complete.
    */
   bless_(mediaEl) {
     const isPaused = mediaEl.paused;
@@ -507,7 +544,7 @@ export class MediaPool {
     const currentTime = mediaEl.currentTime;
 
     mediaEl.muted = false;
-    mediaEl.play().then(() => {
+    return mediaEl.play().then(() => {
       if (isPaused) {
         mediaEl.pause();
         mediaEl.currentTime = currentTime;
@@ -546,6 +583,10 @@ export class MediaPool {
     const sources = Sources.removeFrom(domMediaEl);
     this.sources_[id] = sources;
     this.domMediaEls_[id] = domMediaEl;
+
+    domMediaEl.muted = true;
+    domMediaEl.setAttribute('muted', '');
+    domMediaEl.pause();
   }
 
 
@@ -578,9 +619,23 @@ export class MediaPool {
   /**
    * Pauses the specified media element in the DOM.
    * @param {!HTMLMediaElement} domMediaEl The media element to be paused.
+   * @param {boolean} opt_rewindToBeginning Whether to rewind the currentTime
+   *     of media items to the beginning.
    */
-  pause(domMediaEl) {
-    domMediaEl.pause();
+  pause(domMediaEl, opt_rewindToBeginning) {
+    const mediaType = this.getMediaType_(domMediaEl);
+    const poolMediaEl =
+        this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
+
+    if (!poolMediaEl) {
+      return;
+    }
+
+    poolMediaEl.pause();
+
+    if (opt_rewindToBeginning) {
+      poolMediaEl.currentTime = 0;
+    }
   }
 
 
@@ -589,7 +644,17 @@ export class MediaPool {
    * @param {!HTMLMediaElement} domMediaEl The media element to be muted.
    */
   mute(domMediaEl) {
-    domMediaEl.muted = true;
+    const mediaType = this.getMediaType_(domMediaEl);
+    const poolMediaEl =
+        this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
+
+    if (!poolMediaEl) {
+      return;
+    }
+
+    // TODO(newmuis): Use WebAudio gain nodes to control volume.
+    poolMediaEl.muted = true;
+    poolMediaEl.setAttribute('muted', '');
   }
 
 
@@ -598,17 +663,39 @@ export class MediaPool {
    * @param {!HTMLMediaElement} domMediaEl The media element to be unmuted.
    */
   unmute(domMediaEl) {
-    domMediaEl.muted = false;
+    const mediaType = this.getMediaType_(domMediaEl);
+    const poolMediaEl =
+        this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
+
+    if (!poolMediaEl) {
+      return;
+    }
+
+    // TODO(newmuis): Use WebAudio gain nodes to control volume.
+    poolMediaEl.muted = false;
+    poolMediaEl.removeAttribute('muted');
   }
 
 
   /**
    * Unmutes all media elements in the media pool.
+   * @return {!Promise} A promise that is resolved when all media elements in
+   *     the pool are blessed.
    */
   blessAll() {
+    if (this.blessed_) {
+      return Promise.resolve();
+    }
+
+    const blessPromises = [];
     this.forEachMediaElement_(mediaEl => {
-      this.bless_(mediaEl);
+      blessPromises.push(this.bless_(mediaEl));
     });
+
+    return Promise.all(blessPromises)
+        .then(() => {
+          this.blessed_ = true;
+        });
   }
 }
 
