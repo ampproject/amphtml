@@ -261,7 +261,7 @@ export class ShareWidget {
         // Total width that the buttons will occupy with minimum padding
         const totalItemWidth =
             (iconWidth * items.length + 2 * MIN_BUTTON_PADDING *
-                (items.length - 1))
+                (items.length - 1));
 
         // If buttons don't fit within the available area, calculate padding so
         // that there will be an element cut-off.
