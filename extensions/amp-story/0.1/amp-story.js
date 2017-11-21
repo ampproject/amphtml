@@ -53,7 +53,7 @@ import {once} from '../../../src/utils/function';
 import {debounce} from '../../../src/utils/rate-limit';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
-import {AudioManager, upgradeBackgroundAudio} from './audio';
+import {upgradeBackgroundAudio} from './audio';
 import {setStyle, setImportantStyles} from '../../../src/style';
 import {findIndex} from '../../../src/utils/array';
 import {ActionTrust} from '../../../src/action-trust';
@@ -157,9 +157,6 @@ export class AmpStory extends AMP.BaseElement {
     /** @const @private {!AmpStoryVariableService} */
     this.variableService_ = new AmpStoryVariableService();
 
-    /** @const @private {!AudioManager} */
-    this.audioManager_ = new AudioManager(this.win, this.element);
-
     /** @private @const {!function():!Promise<?./bookend.BookendConfigDef>} */
     this.loadBookendConfig_ = once(() => this.loadBookendConfigImpl_());
 
@@ -202,7 +199,7 @@ export class AmpStory extends AMP.BaseElement {
     ];
 
     /** @private {!AmpStoryHint} */
-    this.ampStoryHint_ = new AmpStoryHint(this.win);
+    // this.ampStoryHint_ = new AmpStoryHint(this.win);
 
     /** @private {!MediaPool} */
     this.mediaPool_ = new MediaPool(this.win,
@@ -255,7 +252,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   buildHintLayer_() {
-    this.element.appendChild(this.ampStoryHint_.buildHintContainer());
+    // this.element.appendChild(this.ampStoryHint_.buildHintContainer());
   }
 
 
@@ -298,7 +295,7 @@ export class AmpStory extends AMP.BaseElement {
         this.switchTo_(targetPageId);
       }
 
-      this.ampStoryHint_.hideAllNavigationHint();
+      // this.ampStoryHint_.hideAllNavigationHint();
     });
 
     this.element.addEventListener(EventType.PAGE_PROGRESS, e => {
@@ -319,7 +316,7 @@ export class AmpStory extends AMP.BaseElement {
     });
 
     this.element.addEventListener(EventType.SHOW_NO_PREVIOUS_PAGE_HELP, () => {
-      this.ampStoryHint_.showFirstPageHintOverlay();
+      // this.ampStoryHint_.showFirstPageHintOverlay();
     });
 
     this.element.addEventListener('play', e => {

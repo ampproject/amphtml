@@ -77,6 +77,7 @@ const PROTECTED_ATTRIBUTES = [
   'id',
   'src',
   'class',
+  'autoplay',
   REPLACED_MEDIA_ATTRIBUTE,
 ];
 
@@ -144,7 +145,6 @@ export class MediaPool {
         const audioEl = this.win_.document.createElement('audio');
         audioEl.setAttribute('src', BLANK_AUDIO_SRC);
         audioEl.setAttribute('muted', '');
-        audioEl.setAttribute('autoplay', '');
         audioEl.classList.add('i-amphtml-pool-media');
         audioEl.classList.add('i-amphtml-pool-audio');
         return audioEl;
@@ -153,7 +153,6 @@ export class MediaPool {
         const videoEl = this.win_.document.createElement('video');
         videoEl.setAttribute('src', BLANK_VIDEO_SRC);
         videoEl.setAttribute('muted', '');
-        videoEl.setAttribute('autoplay', '');
         videoEl.setAttribute('playsinline', '');
         videoEl.classList.add('i-amphtml-pool-media');
         videoEl.classList.add('i-amphtml-pool-video');
@@ -652,7 +651,6 @@ export class MediaPool {
       return;
     }
 
-    // TODO(newmuis): Use WebAudio gain nodes to control volume.
     poolMediaEl.muted = true;
     poolMediaEl.setAttribute('muted', '');
   }
@@ -671,7 +669,6 @@ export class MediaPool {
       return;
     }
 
-    // TODO(newmuis): Use WebAudio gain nodes to control volume.
     poolMediaEl.muted = false;
     poolMediaEl.removeAttribute('muted');
   }
