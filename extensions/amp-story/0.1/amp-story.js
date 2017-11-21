@@ -205,7 +205,7 @@ export class AmpStory extends AMP.BaseElement {
     ];
 
     /** @private {!AmpStoryHint} */
-    // this.ampStoryHint_ = new AmpStoryHint(this.win);
+    this.ampStoryHint_ = new AmpStoryHint(this.win);
 
     /** @private {!MediaPool} */
     this.mediaPool_ = new MediaPool(this.win, MAX_MEDIA_ELEMENT_COUNTS,
@@ -258,7 +258,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   buildHintLayer_() {
-    // this.element.appendChild(this.ampStoryHint_.buildHintContainer());
+    this.element.appendChild(this.ampStoryHint_.buildHintContainer());
   }
 
 
@@ -301,7 +301,7 @@ export class AmpStory extends AMP.BaseElement {
         this.switchTo_(targetPageId);
       }
 
-      // this.ampStoryHint_.hideAllNavigationHint();
+      this.ampStoryHint_.hideAllNavigationHint();
     });
 
     this.element.addEventListener(EventType.PAGE_PROGRESS, e => {
@@ -322,7 +322,7 @@ export class AmpStory extends AMP.BaseElement {
     });
 
     this.element.addEventListener(EventType.SHOW_NO_PREVIOUS_PAGE_HELP, () => {
-      // this.ampStoryHint_.showFirstPageHintOverlay();
+      this.ampStoryHint_.showFirstPageHintOverlay();
     });
 
     this.element.addEventListener('play', e => {

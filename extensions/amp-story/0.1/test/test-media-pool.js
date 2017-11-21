@@ -116,8 +116,11 @@ describes.realWin('media-pool', {}, env => {
     elements.forEach(element => mediaPool.play(element));
 
     expect(mediaPool.allocated['video'].length).to.equal(2);
-    expect(isElementInPool(mediaPool.allocated['video'], elements[0])).to.be.true;
-    expect(isElementInPool(mediaPool.allocated['video'], elements[1])).to.be.true;
-    expect(isElementInPool(mediaPool.allocated['video'], elements[2])).to.be.false;
+    expect(isElementInPool(mediaPool.allocated['video'], elements[0]))
+        .to.be.true;
+    expect(isElementInPool(mediaPool.allocated['video'], elements[1]))
+        .to.be.true;
+    expect(isElementInPool(mediaPool.allocated['video'], elements[2]))
+        .to.be.false;
   });
 });
