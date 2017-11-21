@@ -110,7 +110,10 @@
     },
     {
       "url": "examples/visual-tests/amp-layout/amp-layout.amp.html",
-      "name": "AMP Layout"
+      "name": "AMP Layout",
+      "loading_complete_css": [
+        ".i-amphtml-fill-content"
+      ]
     }
   ],
 
