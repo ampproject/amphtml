@@ -23,8 +23,8 @@ const fs = BBPromise.promisifyAll(require('fs'));
 const gulp = require('gulp-help')(require('gulp'));
 const util = require('gulp-util');
 
-var red = util.colors.red;
-var cyan = util.colors.cyan;
+const red = util.colors.red;
+const cyan = util.colors.cyan;
 
 /**
  * Returns the number of AMP_CONFIG matches in the given config string.
@@ -166,7 +166,7 @@ function enableLocalDev(config, target, configJson) {
   if (!process.env.TRAVIS) {
     util.log('Enabled local development mode in', cyan(target));
   }
-  let TESTING_HOST = process.env.AMP_TESTING_HOST;
+  const TESTING_HOST = process.env.AMP_TESTING_HOST;
   if (typeof TESTING_HOST == 'string') {
     LOCAL_DEV_AMP_CONFIG = Object.assign(LOCAL_DEV_AMP_CONFIG, {
       thirdPartyFrameHost: TESTING_HOST,
@@ -178,7 +178,7 @@ function enableLocalDev(config, target, configJson) {
     }
   }
   LOCAL_DEV_AMP_CONFIG = Object.assign(LOCAL_DEV_AMP_CONFIG, configJson);
-  let herokuConfigFile = 'node_modules/AMP_CONFIG.json';
+  const herokuConfigFile = 'node_modules/AMP_CONFIG.json';
   fs.writeFileSync(herokuConfigFile, JSON.stringify(LOCAL_DEV_AMP_CONFIG));
   if (!process.env.TRAVIS) {
     util.log('Wrote', cyan(config), 'AMP config to', cyan(herokuConfigFile),
