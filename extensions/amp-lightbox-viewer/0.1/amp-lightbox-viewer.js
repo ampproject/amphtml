@@ -123,7 +123,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.controlsMode_ = LightboxControlsModes.SHOW_CONTROLS;
 
     /** @private {?UnlistenDef} */
-    this.unlistenViewport_ = null;
+    this.unlistenResize_ = null;
   }
 
   /** @override */
@@ -236,10 +236,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     const tagName = this.elementsMetadata_[this.currentElemId_]
         .tagName;
     if (tagName === 'AMP-IMG') {
-      // Unregister the previous onResize handler to rescale the ImageViewer
-      if (this.unlistenViewport_) {
-        this.unlistenViewport_();
-      }
       this.resizeImageViewerDimensions_();
     }
     this.updateDescriptionBox_();
@@ -507,23 +503,16 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.win.document.documentElement.addEventListener(
         'keydown', this.boundHandleKeyboardEvents_);
 
-    if (this.carousel_) {
-      return this.resources_.requireLayout(this.carousel_)
-          .then(() => {
-            this.currentElemId_ = element.lightboxItemId;
-            // Hack to access private property. Better than not getting
-            // type checking to work.
-            /**@type {?}*/ (this.carousel_).implementation_.showSlideWhenReady(
-                this.currentElemId_);
-            this.resizeImageViewerDimensions_();
-            this.updateDescriptionBox_();
-          });
-    } else {
-      // We should never be opening a lightbox whose carousel hasn't built.
-      dev().error(TAG, 'Trying to open an uninitialized lightbox viewer.');
-      return Promise.resolve();
-    }
-
+    return this.resources_.requireLayout(dev().assertElement(this.carousel_))
+        .then(() => {
+          this.currentElemId_ = element.lightboxItemId;
+          // Hack to access private property. Better than not getting
+          // type checking to work.
+          /**@type {?}*/ (this.carousel_).implementation_.showSlideWhenReady(
+              this.currentElemId_);
+          this.resizeImageViewerDimensions_();
+          this.updateDescriptionBox_();
+        });
   }
 
   /**
@@ -537,7 +526,13 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     const imgViewer = this.elementsMetadata_[this.currentElemId_].imageViewer;
     imgViewer.measure();
 
-    this.unlistenViewport_ = this.getViewport().onResize(() => {
+    // Unregister the previous onResize handler to rescale the ImageViewer
+    if (this.unlistenResize_) {
+      this.unlistenResize_();
+    }
+
+    // Register a new onResize handler
+    this.unlistenResize_ = this.getViewport().onResize(() => {
       imgViewer.measure();
     });
   }
@@ -551,9 +546,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       return;
     }
 
-    if (this.unlistenViewport_) {
-      this.unlistenViewport_();
-      this.unlistenViewport_ = null;
+    if (this.unlistenResize_) {
+      this.unlistenResize_();
+      this.unlistenResize_ = null;
     }
 
     toggle(this.element, false);
@@ -595,9 +590,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     }
     this.container_.setAttribute('gallery-view', '');
     this.topBar_.classList.add('fullscreen');
-    if (this.carousel_) {
-      toggle(this.carousel_);
-    }
+    toggle(dev().assertElement(this.carousel_), true);
   }
 
   /**
@@ -609,9 +602,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     if (this.descriptionBox_.classList.contains('standard')) {
       this.topBar_.classList.remove('fullscreen');
     }
-    if (this.carousel_) {
-      toggle(this.carousel_);
-    }
+    toggle(dev().assertElement(this.carousel_), false);
   }
 
   /**

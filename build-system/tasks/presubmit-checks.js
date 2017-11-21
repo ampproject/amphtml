@@ -499,8 +499,8 @@ const forbiddenTerms = {
     message: 'requireLayout is restricted b/c it affects non-contained elements',  // eslint-disable-line max-len
     whitelist: [
       'extensions/amp-animation/0.1/web-animations.js',
-      'src/service/resources-impl.js',
       'extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.js',
+      'src/service/resources-impl.js',
     ],
   },
   '\\.updatePriority\\(': {

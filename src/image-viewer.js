@@ -240,46 +240,47 @@ export class ImageViewer {
 
   /**
    * Measures the image viewer and image sizes and positioning.
-   * @return {!Promise}
    */
   measure() {
-    this.viewerBox_ = layoutRectFromDomRect(this.viewer_
+    this.lightbox_.getVsync().measure(() => {
+      this.viewerBox_ = layoutRectFromDomRect(this.viewer_
         ./*OK*/getBoundingClientRect());
 
-    const sf = Math.min(this.viewerBox_.width / this.sourceWidth_,
-        this.viewerBox_.height / this.sourceHeight_);
-    let width = Math.min(this.sourceWidth_ * sf, this.viewerBox_.width);
-    let height = Math.min(this.sourceHeight_ * sf, this.viewerBox_.height);
+      const sf = Math.min(this.viewerBox_.width / this.sourceWidth_,
+          this.viewerBox_.height / this.sourceHeight_);
+      let width = Math.min(this.sourceWidth_ * sf, this.viewerBox_.width);
+      let height = Math.min(this.sourceHeight_ * sf, this.viewerBox_.height);
 
-    // TODO(dvoytenko): This is to reduce very small expansions that often
-    // look like a stutter. To be evaluated if this is still the right
-    // idea.
-    if (width - this.sourceWidth_ <= 16) {
-      width = this.sourceWidth_;
-      height = this.sourceHeight_;
-    }
+      // TODO(dvoytenko): This is to reduce very small expansions that often
+      // look like a stutter. To be evaluated if this is still the right
+      // idea.
+      if (width - this.sourceWidth_ <= 16) {
+        width = this.sourceWidth_;
+        height = this.sourceHeight_;
+      }
 
-    this.imageBox_ = layoutRectLtwh(
-        Math.round((this.viewerBox_.width - width) / 2),
-        Math.round((this.viewerBox_.height - height) / 2),
-        Math.round(width),
-        Math.round(height));
+      this.imageBox_ = layoutRectLtwh(
+          Math.round((this.viewerBox_.width - width) / 2),
+          Math.round((this.viewerBox_.height - height) / 2),
+          Math.round(width),
+          Math.round(height));
 
-    st.setStyles(this.image_, {
-      top: st.px(this.imageBox_.top),
-      left: st.px(this.imageBox_.left),
-      width: st.px(this.imageBox_.width),
-      height: st.px(this.imageBox_.height),
+      st.setStyles(this.image_, {
+        top: st.px(this.imageBox_.top),
+        left: st.px(this.imageBox_.left),
+        width: st.px(this.imageBox_.width),
+        height: st.px(this.imageBox_.height),
+      });
+
+      // Reset zoom and pan.
+      this.startScale_ = this.scale_ = 1;
+      this.startX_ = this.posX_ = 0;
+      this.startY_ = this.posY_ = 0;
+      this.updatePanZoomBounds_(this.scale_);
+      this.updatePanZoom_();
+
+      this.updateSrc_();
     });
-
-    // Reset zoom and pan.
-    this.startScale_ = this.scale_ = 1;
-    this.startX_ = this.posX_ = 0;
-    this.startY_ = this.posY_ = 0;
-    this.updatePanZoomBounds_(this.scale_);
-    this.updatePanZoom_();
-
-    return this.updateSrc_();
   }
 
   /**
