@@ -25,7 +25,7 @@ min_validator_revision_required: 265
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 523
+spec_file_revision: 524
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -3764,6 +3764,7 @@ attr_lists: {
   attrs: { name: "aria-busy" }
   attrs: { name: "aria-checked" }
   attrs: { name: "aria-controls" }
+  attrs: { name: "aria-current" }
   attrs: { name: "aria-describedby" }
   attrs: { name: "aria-disabled" }
   attrs: { name: "aria-dropeffect" }
