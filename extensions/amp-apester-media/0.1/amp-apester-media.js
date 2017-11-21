@@ -36,7 +36,7 @@ const TAG = 'amp-apester-media';
 const apesterEventNames = {
   SET_FULL_SCREEN: 'fullscreen_on',
   REMOVE_FULL_SCREEN: 'fullscreen_off',
-  RESIZE_UNIT: 'apester_resize_u  nit',
+  RESIZE_UNIT: 'apester_resize_unit',
 };
 
 /**
@@ -207,42 +207,30 @@ class AmpApesterMedia extends AMP.BaseElement {
    * @return {string}
    * */
   constructUrlFromMedia_(id) {
-    const conditionalChannelId = this.embedOptions_distributionChannelId
-      ? `&channelId=${this.embedOptions_distributionChannelId}`
-      : '';
-    const conditionalInteractionType = `&type=${encodeURIComponent(
-        this.embedOptions_.playlist ? 'playlist' : 'editorial'
-    )}`;
-    const platform = `&platform=${getPlatform()}`;
-    const cannonicalUrl = document.querySelector("link[rel='canonical']")
-      ? document.querySelector("link[rel='canonical']").getAttribute('href')
-      : document.location.href;
-    return `${this.rendererBaseUrl_}/interaction/${encodeURIComponent(
-        id
-    )}?sdk=amp&canonicalUrl=${encodeURIComponent(
-        cannonicalUrl
-    )}${conditionalChannelId}${conditionalInteractionType}${platform}`;
+    const queryParams = {
+      channelId: this.embedOptions_distributionChannelId,
+      type: this.embedOptions_.playlist ? 'playlist' : 'editorial',
+      platform: getPlatform(),
+      cannonicalUrl: Services.documentInfoForDoc(this.element).canonicalUrl,
+      sdk: 'amp',
+    };
+    return addParamsToUrl(
+        `${this.rendererBaseUrl_}/interaction/${encodeURIComponent(id)}`,
+        queryParams
+    );
   }
 
-  /**
-   * Constructs the media Iframe.
-   * @param src
-   * @param mediaId
-   * @private
+  /** @param {string} src
+   * @return {!Element}
    */
-  constructIframe_(src, media) {
+
+  constructIframe_(src) {
     const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
     iframe.setAttribute('scrolling', 'no');
-    iframe.setAttribute('data-interaction-id', media.interactionId);
-    iframe.name = /wpcomwidgets/.test(document.location.href)
-      ? document.referrer
-      : document.location.href;
-    const splittedUrl = src.split('?');
-    iframe.originalUrlParams =
-      splittedUrl.length > 1 ? `?${splittedUrl[1]}` : '';
-    iframe.extensionData = media.campaignData;
+    iframe.src = src;
+    iframe.name = this.win.location.href;
     iframe.height = this.height_;
     iframe.width = this.width_;
     iframe.classList.add('amp-apester-iframe');
@@ -332,10 +320,9 @@ class AmpApesterMedia extends AMP.BaseElement {
             const media = this.embedOptions_.playlist
               ? payload[Math.floor(Math.random() * payload.length)]
               : payload;
-            this.mediaId_ = media['interactionId'];
             const src = this.constructUrlFromMedia_(media['interactionId']);
-            const iframe = this.constructIframe_(src, media);
-            const overflow = this.constructOverflow_();
+            const iframe = this.constructIframe_(src);
+            const overflow = this.c6777onstructOverflow_();
             const mutate = state => {
               state.element.classList.add('i-amphtml-apester-iframe-ready');
             };
@@ -345,19 +332,12 @@ class AmpApesterMedia extends AMP.BaseElement {
             };
             this.iframe_ = iframe;
             this.element.appendChild(overflow);
-
+            this.element.appendChild(iframe);
             this.registerToApesterEvents_();
 
-            return (this.iframePromise_ = this.getMediaContent(
-                media.content,
-                src
-            ).then(content => {
-              return installFriendlyIframeEmbed(this.iframe_, this.element, {
-                html: content,
-              }).then(() => {
-                Services.vsyncFor(this.win).runPromise({mutate}, state);
-                return media;
-              });
+            return (this.iframePromise_ = this.loadPromise(iframe).then(() => {
+              Services.vsyncFor(this.win).runPromise({mutate}, state);
+              return media;
             }));
           },
           error => {
