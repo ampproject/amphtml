@@ -577,7 +577,8 @@ function printConfigHelp(command, targetFile) {
         cyan(command), cyan('--config={canary|prod}'));
     $$.util.log(
         green('- To switch configs after building:'),
-        cyan('gulp prepend-global {--canary|--prod} --target ' + targetFile));
+        cyan('gulp prepend-global {--canary|--prod} --local_dev --target ' +
+            targetFile));
     $$.util.log(
         green('- To remove any existing config:'),
         cyan('gulp prepend-global --remove --target ' + targetFile));
@@ -592,28 +593,11 @@ function printConfigHelp(command, targetFile) {
 function enableLocalTesting(targetFile) {
   let config = (argv.config === 'canary') ? 'canary' : 'prod';
   let baseConfigFile = 'build-system/global-configs/' + config + '-config.json';
-  let localTestingConfigFile = 'node_modules/AMP_CONFIG.json';
 
   return removeConfig(targetFile).then(() => {
-    let AMP_CONFIG = {localDev: true};
-    let TESTING_HOST = process.env.AMP_TESTING_HOST;
-    if (typeof TESTING_HOST == 'string') {
-      AMP_CONFIG = Object.assign(AMP_CONFIG, {
-        thirdPartyFrameHost: TESTING_HOST,
-        thirdPartyFrameRegex: TESTING_HOST,
-      });
-    }
-    AMP_CONFIG = Object.assign(
-        AMP_CONFIG, JSON.parse(fs.readFileSync(baseConfigFile).toString()));
-    fs.writeFileSync(localTestingConfigFile, JSON.stringify(AMP_CONFIG));
-    if (!process.env.TRAVIS) {
-      $$.util.log('Wrote', cyan(config), 'AMP config to',
-          cyan(localTestingConfigFile), 'for use with Heroku');
-    }
-    return Promise.resolve();
-  }).then(() => {
     return applyConfig(
-        config, targetFile, localTestingConfigFile, /* opt_local */ true);
+        config, targetFile, baseConfigFile,
+        /* opt_localDev */ true, /* opt_localBranch */ true);
   });
 }
 
