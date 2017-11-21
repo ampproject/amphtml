@@ -523,13 +523,26 @@ export class MediaPool {
   /**
    * Registers the specified element to be usable by the media pool.  Elements
    * should be registered as early as possible, in order to prevent them from
-   * being played while not managed by the media pool.
+   * being played while not managed by the media pool.  If the media element is
+   * already registered, this is a no-op.  Registering elements from within the
+   * pool is not allowed, and will also be a no-op.
    * @param {!HTMLMediaElement} domMediaEl The media element to be registered.
    */
   register(domMediaEl) {
-    const id = domMediaEl.id || this.createDomMediaElementId_();
-    domMediaEl.id = id;
+    const mediaType = this.getMediaType_(domMediaEl);
+    if (this.isAllocatedMediaElement_(mediaType, domMediaEl)) {
+      // This media element originated from the media pool.
+      return;
+    }
 
+    const id = domMediaEl.id || this.createDomMediaElementId_();
+    if (this.sources_[id] && this.domMediaEls_[id]) {
+      // This media element is already registered.
+      return;
+    }
+
+    // This media element has not yet been registered.
+    domMediaEl.id = id;
     const sources = Sources.removeFrom(domMediaEl);
     this.sources_[id] = sources;
     this.domMediaEls_[id] = domMediaEl;

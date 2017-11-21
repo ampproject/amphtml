@@ -262,7 +262,6 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   playAllMedia_() {
     this.forEachMediaElement_((mediaPool, mediaEl) => {
-      console.log('playing', mediaEl);
       mediaPool.play(mediaEl);
     });
   }
@@ -305,7 +304,6 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   registerAllMedia_() {
     this.forEachMediaElement_((mediaPool, mediaEl) => {
-      console.log('registering', mediaEl);
       mediaPool.register(mediaEl);
     });
   }
@@ -384,6 +382,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     });
 
     if (distance >= 0 && distance <= 2) {
+      this.registerAllMedia_();
       this.preloadAllMedia_();
     }
   }

@@ -966,9 +966,6 @@ export class AmpStory extends AMP.BaseElement {
         pageIds.forEach(pageId => {
           const page = this.getPageById_(pageId);
           page.setDistance(distance);
-          setImportantStyles(page.element, {
-            transform: `translateY(${100 * distance}%)`,
-          });
         });
       });
     });
