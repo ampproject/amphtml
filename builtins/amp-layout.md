@@ -37,8 +37,8 @@ This example uses `amp-layout` to create a responsive container around a circle 
 
 ```html
 <amp-layout layout="responsive" width="1" height="1">
-  <svg width="100%" height="100%" >
-    <circle cx="50%" cy="50%" r="20%" stroke="black" stroke-width="3" />
+  <svg viewBox="0 0 100 100">
+    <circle cx="50%" cy="50%" r="40%" stroke="black" stroke-width="3" />
     Sorry, your browser does not support inline SVG.
   </svg>
 </amp-layout>

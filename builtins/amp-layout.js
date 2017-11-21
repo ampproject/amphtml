@@ -27,9 +27,12 @@ class AmpLayout extends BaseElement {
 
   /** @override */
   buildCallback() {
-    this.getRealChildren().forEach(child => {
-      this.applyFillContent(child);
+    const container = this.win.document.createElement('div');
+    this.applyFillContent(container);
+    this.getRealChildNodes().forEach(child => {
+      container.appendChild(child);
     });
+    this.element.appendChild(container);
   }
 }
 
