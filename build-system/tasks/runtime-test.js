@@ -186,7 +186,8 @@ function applyAmpConfig(targetFile) {
   if (fs.existsSync(targetFile)) {
     return removeConfig(targetFile).then(() => {
       return applyConfig(
-          ampConfig, targetFile, configFile, /* opt_local */ true);
+          ampConfig, targetFile, configFile,
+          /* opt_localDev */ true, /* opt_localBranch */ true);
     });
   } else {
     return Promise.resolve();
