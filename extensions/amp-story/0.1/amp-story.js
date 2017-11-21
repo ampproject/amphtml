@@ -328,8 +328,13 @@ export class AmpStory extends AMP.BaseElement {
       }
     }, true);
 
-    const gestures = Gestures.get(this.element);
+    const gestures = Gestures.get(this.element,
+        /* shouldNotPreventDefault */ true);
+
     gestures.onGesture(SwipeXYRecognizer, () => {
+      if (this.bookend_.isActive()) {
+        return;
+      }
       this.ampStoryHint_.showNavigationOverlay();
     });
 
