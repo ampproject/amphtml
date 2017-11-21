@@ -53,7 +53,7 @@ function sanityCheck(str) {
 
 /**
  * @param {string} filename File containing the config
- * @param {string} opt_localBranch Whether to use the local branch version
+ * @param {string=} opt_localBranch Whether to use the local branch version
  * @param {string=} opt_branch If not the local branch, which branch to use
  * @return {!Promise}
  */
@@ -115,9 +115,9 @@ function valueOrDefault(value, defaultValue) {
  * @param {string} config Prod or canary
  * @param {string} target File containing the AMP runtime (amp.js or v0.js)
  * @param {string} filename File containing the (prod or canary) config
- * @param {boolean} opt_localDev Whether to enable local development
- * @param {boolean} opt_localBranch Whether to use the local branch version
- * @param {string} opt_branch If not the local branch, which branch to use
+ * @param {boolean=} opt_localDev Whether to enable local development
+ * @param {boolean=} opt_localBranch Whether to use the local branch version
+ * @param {string=} opt_branch If not the local branch, which branch to use
  * @return {!Promise}
  */
 function applyConfig(
