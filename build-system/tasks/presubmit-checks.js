@@ -354,8 +354,9 @@ const forbiddenTerms = {
       'build-system/test-server.js',
       'src/cookies.js',
       'src/service/cid-impl.js',
-      'extensions/amp-analytics/0.1/vendors.js',
       'testing/fake-dom.js',
+      'extensions/amp-analytics/0.1/vendors.js',
+      'extensions/amp-youtube/0.1/amp-youtube.js',
     ],
   },
   'getCookie\\W': {
@@ -579,12 +580,25 @@ const forbiddenTerms = {
       'src/event-helper.js',
     ],
   },
+  'new FormData\\(': {
+    message: 'Use new FormDataWrapper() instead and call ' +
+        'formDataWrapper.getFormData() to get the native FormData object.',
+    whitelist: [
+      'src/form-data-wrapper.js',
+    ],
+  },
   '([eE]xit|[eE]nter|[cC]ancel|[rR]equest)Full[Ss]creen\\(': {
     message: 'Use fullscreenEnter() and fullscreenExit() from dom.js instead.',
     whitelist: [
       'ads/google/imaVideo.js',
       'dist.3p/current/integration.js',
     ],
+  },
+  '\\.defer\\(\\)': {
+    message: 'Promise.defer() is deprecated and should not be used.',
+  },
+  '(dev|user)\\(\\)\\.assert(Element|String|Number)?\\(\\s*([A-Z][A-Z0-9-]*,)': {  // eslint-disable-line max-len
+    message: 'TAG is not an argument to assert(). Will cause false positives.',
   },
 };
 

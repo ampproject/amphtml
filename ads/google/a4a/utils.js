@@ -20,8 +20,8 @@ import {makeCorrelator} from '../correlator';
 import {getBinaryType} from '../../../src/experiments';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
+import {dict} from '../../../src/utils/object';
 import {parseUrl} from '../../../src/url';
 import {parseJson} from '../../../src/json';
 import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
@@ -229,6 +229,8 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
           'ish': win != win.top ? viewportSize.height : null,
           'art': art == '0' ? null : art,
           'vis': visibilityStateCodes[visibilityState] || '0',
+          'debug_experiment_id':
+              (/,?deid=(\d+)/i.exec(win.location.hash) || [])[1] || null,
           'url': documentInfo.canonicalUrl,
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
           'loc': win.location.href == documentInfo.canonicalUrl ?
@@ -685,3 +687,14 @@ export function getIdentityTokenRequestUrl(win, nodeOrDoc, domain = undefined) {
     parseUrl(Services.documentInfoForDoc(nodeOrDoc).canonicalUrl).hostname;
   return `https://adservice${domain}/adsid/integrator.json?domain=${canonical}`;
 };
+
+/**
+ * Returns whether we are running on the AMP CDN.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function isCdnProxy(win) {
+  const googleCdnProxyRegex =
+    /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
+  return googleCdnProxyRegex.test(win.location.origin);
+}

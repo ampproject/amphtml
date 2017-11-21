@@ -573,13 +573,14 @@ function printConfigHelp(command, targetFile) {
         cyan((argv.config === 'canary') ? 'canary' : 'prod'),
         green('AMP config'));
     $$.util.log(
-        green('You can specify which config to use by passing'),
-        cyan('--config=canary'), green('or'), cyan('--config=prod'),
-        green('to'), cyan(command));
+        green('- To specify which config to apply:'),
+        cyan(command), cyan('--config={canary|prod}'));
     $$.util.log(
-        green('After the build, you can switch configs with'),
-        cyan('gulp prepend-global --canary --target ' + targetFile),
-        green('or'), cyan('gulp prepend-global --prod --target ' + targetFile));
+        green('- To switch configs after building:'),
+        cyan('gulp prepend-global {--canary|--prod} --target ' + targetFile));
+    $$.util.log(
+        green('- To remove any existing config:'),
+        cyan('gulp prepend-global --remove --target ' + targetFile));
   }
 }
 
@@ -593,7 +594,7 @@ function enableLocalTesting(targetFile) {
   let configFile = 'build-system/global-configs/' + config + '-config.json';
 
   return removeConfig(targetFile).then(() => {
-    return applyConfig(config, targetFile, configFile);
+    return applyConfig(config, targetFile, configFile, /* opt_local */ true);
   }).then(() => {
     let AMP_CONFIG = {localDev: true};
     let herokuConfigFile = 'node_modules/AMP_CONFIG.json';

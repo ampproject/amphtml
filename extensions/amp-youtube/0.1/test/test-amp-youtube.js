@@ -72,6 +72,18 @@ describes.realWin('amp-youtube', {
     });
   });
 
+  it('uses privacy-enhanced mode', () => {
+    return getYt({'data-videoid': 'mGENRKrdoGY', 'credentials': 'omit'})
+        .then(yt => {
+          const iframe = yt.querySelector('iframe');
+          expect(iframe).to.not.be.null;
+          expect(iframe.tagName).to.equal('IFRAME');
+          expect(iframe.src).to.equal(
+              'https://www.youtube-nocookie.com/embed/mGENRKrdoGY?enablejsapi=1&playsinline=1'
+          );
+        });
+  });
+
   it('renders responsively', () => {
     return getYt({'data-videoid': 'mGENRKrdoGY'}, true).then(yt => {
       const iframe = yt.querySelector('iframe');

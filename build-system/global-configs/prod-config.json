@@ -5,8 +5,8 @@
   "canary": 0,
   "expAdsenseA4A": 0.01,
   "expDoubleclickA4A": 0.01,
-  "expDfpCanonicalFf": 0.01,
-  "expUnconditionedCanonical": 0.01,
+  "expDfpCanonicalFf": 0.05,
+  "expUnconditionedCanonical": 0.05,
   "dbclk_a4a_viz_change": 0.02,
   "a4aProfilingRate": 0.1,
   "ad-type-custom": 1,
@@ -30,5 +30,8 @@
   "amp-animation": 1,
   "amp-sidebar toolbar": 1,
   "amp-position-observer": 1,
-  "a4a-safeframe-preloading-off": 0.01
+  "a4a-safeframe-preloading-off": 0.01,
+  "expUnconditionedAdxIdentity": 0.01,
+  "expUnconditionedDfpIdentity": 0.01,
+  "expUnconditionedCanonicalHoldback": 0.01
 }
