@@ -575,6 +575,7 @@ describe('ValidatorRulesMakeSense', () => {
         'AMP-FORM': 0,
         'AMP-GWD-ANIMATION': 0,
         'AMP-IMG': 0,
+        'AMP-LAYOUT': 0,
         'AMP-PIXEL': 0,
         'AMP-POSITION-OBSERVER': 0,
         'AMP-SOCIAL-SHARE': 0,

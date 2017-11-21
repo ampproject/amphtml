@@ -22,17 +22,9 @@ limitations under the License.
     <td>A generic, multi-purpose container element that brings AMP's powerful <a href="https://www.ampproject.org/docs/guides/responsive/control_layout#the-layout-attribute">layouts </a> to any element.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-layout" src="https://cdn.ampproject.org/v0/amp-layout-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, responsive</td>
   </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
-  </tr> 
 </table>
 
 ## Overview
@@ -45,10 +37,10 @@ This example uses `amp-layout` to create a responsive container around a circle 
 
 ```html
 <amp-layout layout="responsive" width="1" height="1">
-  <svg height="100" width="100">
-    <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" />
-    Sorry, your browser does not support inline SVG.  
-  </svg> 
+  <svg viewBox="0 0 100 100">
+    <circle cx="50%" cy="50%" r="40%" stroke="black" stroke-width="3" />
+    Sorry, your browser does not support inline SVG.
+  </svg>
 </amp-layout>
 ```
 ## Attributes
@@ -57,4 +49,4 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 ## Validation
 
-See [amp-layout rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-layout/validator-amp-layout.protoascii) in the AMP validator specification.
+See [amp-layout rules](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii) in the AMP validator specification.
