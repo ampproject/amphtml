@@ -32,9 +32,12 @@ import {upgradeBackgroundAudio} from './audio';
 import {dev} from '../../../src/log';
 import {EventType, dispatch, dispatchCustom} from './events';
 import {AdvancementConfig} from './page-advancement';
-import {scopedQuerySelectorAll} from '../../../src/dom';
+import {scopedQuerySelectorAll, scopedQuerySelector} from '../../../src/dom';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
+import {CommonSignals} from '../../../src/common-signals';
+import {setImportantStyles} from '../../../src/style';
+
 
 
 /**
@@ -42,6 +45,13 @@ import {getMode} from '../../../src/mode';
  * @const {string}
  */
 const PAGE_LOADED_CLASS_NAME = 'i-amphtml-story-page-loaded';
+
+
+/**
+ * Selector for which media to wait for on page layout.
+ * @const {string}
+ */
+const PAGE_MEDIA_SELECTOR = 'amp-audio, amp-video, amp-img, anim';
 
 
 /** @private @const {string} */
@@ -60,11 +70,19 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?AnimationManager} */
     this.animationManager_ = null;
 
-    /** @private {!AdvancementConfig} */
+    /** @private @const {!AdvancementConfig} */
     this.advancement_ = AdvancementConfig.forPage(this);
 
-    /** @private {?./media-pool.MediaPool} */
-    this.mediaPool_ = null;
+    /** @private @const {!Promise} */
+    this.mediaLayoutPromise_ = this.waitForMediaLayout_();
+
+    /** @private @const {!Promise<!./media-pool.MediaPool>} */
+    this.mediaPoolPromise_ = new Promise(resolve => {
+      this.setMediaPool = mediaPool => {
+        this.mediaLayoutPromise_
+            .then(() => resolve(mediaPool));
+      };
+    });
   }
 
 
@@ -130,7 +148,12 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.muteAllMedia();
-    return this.beforeVisible();
+
+    return Promise.all([
+      this.beforeVisible(),
+      this.mediaLayoutPromise_,
+      this.mediaPoolPromise_,
+    ]);
   }
 
   /** @return {!Promise} */
@@ -142,9 +165,21 @@ export class AmpStoryPage extends AMP.BaseElement {
   onPageVisible_() {
     this.markPageAsLoaded_();
     this.updateAudioIcon_();
+    this.registerAllMedia_();
     this.playAllMedia_();
     this.maybeStartAnimations();
     this.reportDevModeErrors_();
+  }
+
+
+  /** @private */
+  waitForMediaLayout_() {
+    const mediaSet = scopedQuerySelectorAll(this.element, PAGE_MEDIA_SELECTOR);
+    const mediaPromises = Array.prototype.map.call(mediaSet, mediaEl => {
+      return mediaEl.signals().whenSignal(CommonSignals.LOAD_END);
+    });
+
+    return Promise.all(mediaPromises);
   }
 
 
@@ -189,19 +224,33 @@ export class AmpStoryPage extends AMP.BaseElement {
 
 
   /**
+   * Applies the specified callback to each media element on the page, after the
+   * media element is loaded.
+   * @param {!function(!Element)} callbackFn The callback to be applied to each
+   *     media element.
+   */
+  forEachMediaElement_(callbackFn) {
+    const mediaSet = this.getAllMedia_();
+    this.mediaPoolPromise_.then(mediaPool => {
+      Array.prototype.forEach.call(mediaSet, mediaEl => {
+        callbackFn(mediaPool, mediaEl);
+      });
+    });
+  }
+
+
+  /**
    * Pauses all media on this page.
    * @param {boolean} opt_rewindToBeginning Whether to rewind the currentTime
    *     of media items to the beginning.
    * @private
    */
   pauseAllMedia_(opt_rewindToBeginning) {
-    const mediaSet = this.getAllMedia_();
-    Array.prototype.forEach.call(mediaSet, mediaItem => {
-      dev().assert(this.mediaPool_, 'Media pool is still unset.');
-      this.mediaPool_.pause(mediaItem);
+    this.forEachMediaElement_((mediaPool, mediaEl) => {
+      mediaPool.pause(mediaEl);
 
       if (opt_rewindToBeginning) {
-        mediaItem.currentTime = 0;
+        mediaEl.currentTime = 0;
       }
     });
   }
@@ -212,10 +261,9 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   playAllMedia_() {
-    const mediaSet = this.getAllMedia_();
-    Array.prototype.forEach.call(mediaSet, mediaItem => {
-      dev().assert(this.mediaPool_, 'Media pool is still unset.');
-      this.mediaPool_.play(mediaItem);
+    this.forEachMediaElement_((mediaPool, mediaEl) => {
+      console.log('playing', mediaEl);
+      mediaPool.play(mediaEl);
     });
   }
 
@@ -225,10 +273,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   preloadAllMedia_() {
-    const mediaSet = this.getAllMedia_();
-    Array.prototype.forEach.call(mediaSet, mediaItem => {
-      dev().assert(this.mediaPool_, 'Media pool is still unset.');
-      this.mediaPool_.preload(mediaItem);
+    this.forEachMediaElement_((mediaPool, mediaEl) => {
+      mediaPool.preload(mediaEl);
     });
   }
 
@@ -237,22 +283,33 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Mutes all media on this page.
    */
   muteAllMedia() {
-    const mediaSet = this.getAllMedia_();
-    Array.prototype.forEach.call(mediaSet, mediaItem => {
-      this.mediaPool_.mute(mediaItem);
+    this.forEachMediaElement_((mediaPool, mediaEl) => {
+      mediaPool.mute(mediaEl);
     });
   }
 
 
   /**
-   * Mutes all media on this page.
+   * Unmutes all media on this page.
    */
   unmuteAllMedia() {
-    const mediaSet = this.getAllMedia_();
-    Array.prototype.forEach.call(mediaSet, mediaItem => {
-      this.mediaPool_.unmute(mediaItem);
+    this.forEachMediaElement_((mediaPool, mediaEl) => {
+      mediaPool.unmute(mediaEl);
     });
   }
+
+
+  /**
+   * Registers all media on this page
+   * @private
+   */
+  registerAllMedia_() {
+    this.forEachMediaElement_((mediaPool, mediaEl) => {
+      console.log('registering', mediaEl);
+      mediaPool.register(mediaEl);
+    });
+  }
+
 
   /**
    * Starts playing animations, if the animation manager is available.
@@ -322,8 +379,11 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   setDistance(distance) {
     this.element.setAttribute('distance', distance);
+    setImportantStyles(this.element, {
+      transform: `translateY(${100 * distance}%)`,
+    });
 
-    if (distance <= 2) {
+    if (distance >= 0 && distance <= 2) {
       this.preloadAllMedia_();
     }
   }
@@ -334,20 +394,6 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   isActive() {
     return this.element.hasAttribute('active');
-  }
-
-
-  /**
-   * @param {!./media-pool.MediaPool} mediaPool The MediaPool instance to use to
-   *     manage media on this page.
-   */
-  setMediaPool(mediaPool) {
-    this.mediaPool_ = mediaPool;
-
-    const mediaSet = this.getAllMedia_();
-    Array.prototype.forEach.call(mediaSet, mediaItem => {
-      this.mediaPool_.register(mediaItem);
-    });
   }
 
 

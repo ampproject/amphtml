@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-import {closest, removeElement, scopedQuerySelectorAll} from '../../../src/dom';
+import {
+  closest,
+  isConnectedNode,
+  removeElement,
+  scopedQuerySelectorAll,
+  scopedQuerySelector,
+} from '../../../src/dom';
 import {dev} from '../../../src/log';
 
 
 
 /** @const @enum {string} */
-export const MediaType = {
+const MediaType = {
   UNSUPPORTED: 'unsupported',
   AUDIO: 'audio',
   VIDEO: 'video',
@@ -98,12 +104,14 @@ export class MediaPool {
      * @private @const {!Object<!MediaType, !Array<!HTMLMediaElement>>}
      */
     this.allocated_ = {};
+    win['allocated'] = this.allocated_;
 
     /**
      * Holds all of the media elements that have not been allocated.
      * @private @const {!Object<!MediaType, !Array<!HTMLMediaElement>>}
      */
     this.unallocated_ = {};
+    win['unallocated'] = this.unallocated_;
 
     /**
      * Maps a media element's ID to the object containing its sources.
@@ -118,7 +126,10 @@ export class MediaPool {
      */
     this.domMediaEls_ = {};
 
-    /** @private {number} */
+    /**
+     * Counter used to produce unique IDs for media elements.
+     * @private {number}
+     */
     this.idCounter_ = 0;
 
     /** @const {!Object<string, (function(): !HTMLMediaElement)>} */
@@ -333,14 +344,10 @@ export class MediaPool {
    *     the DOM.
    * @param {!HTMLMediaElement} poolMediaEl The media element originating from
    *     the pool.
+   * @param {!Sources} sources The sources for the media element.
    * @private
    */
-  swapPoolMediaElementIntoDom_(domMediaEl, poolMediaEl) {
-    const sources = this.sources_[domMediaEl.id];
-
-    dev().assert(sources instanceof Sources,
-        'Cannot play unregistered element.');
-
+  swapPoolMediaElementIntoDom_(domMediaEl, poolMediaEl, sources) {
     this.copyCssClasses_(domMediaEl, poolMediaEl);
     this.copyAttributes_(domMediaEl, poolMediaEl);
     sources.applyToElement(poolMediaEl);
@@ -458,11 +465,20 @@ export class MediaPool {
    *     to replace the specified element.
    */
   loadInternal_(domMediaEl) {
+    if (!isConnectedNode(domMediaEl)) {
+      // Don't handle nodes that aren't even in the document.
+      return null;
+    }
+
     const mediaType = this.getMediaType_(domMediaEl);
     if (this.isAllocatedMediaElement_(mediaType, domMediaEl)) {
-      // The element being played is already an allocated media element.
+      // The element being loaded is already an allocated media element.
       return domMediaEl;
     }
+
+    const sources = this.sources_[domMediaEl.id];
+    dev().assert(sources instanceof Sources,
+        `Cannot play unregistered element ${domMediaEl.outerHTML}.`);
 
     const poolMediaEl = this.reserveUnallocatedMediaElement_(mediaType) ||
         this.evictMediaElement_(mediaType, domMediaEl);
@@ -473,7 +489,7 @@ export class MediaPool {
       return null;
     }
 
-    this.swapPoolMediaElementIntoDom_(domMediaEl, poolMediaEl);
+    this.swapPoolMediaElementIntoDom_(domMediaEl, poolMediaEl, sources);
     this.allocateMediaElement_(mediaType, poolMediaEl);
     return poolMediaEl;
   }
