@@ -510,7 +510,11 @@ export class AmpLightboxViewer extends AMP.BaseElement {
           // type checking to work.
           /**@type {?}*/ (this.carousel_).implementation_.showSlideWhenReady(
               this.currentElemId_);
-          this.resizeImageViewerDimensions_();
+          const tagName = this.elementsMetadata_[this.currentElemId_]
+              .tagName;
+          if (tagName === 'AMP-IMG') {
+            this.resizeImageViewerDimensions_();
+          }
           this.updateDescriptionBox_();
         });
   }
@@ -590,7 +594,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     }
     this.container_.setAttribute('gallery-view', '');
     this.topBar_.classList.add('fullscreen');
-    toggle(dev().assertElement(this.carousel_), true);
+    toggle(dev().assertElement(this.carousel_), false);
   }
 
   /**
@@ -602,7 +606,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     if (this.descriptionBox_.classList.contains('standard')) {
       this.topBar_.classList.remove('fullscreen');
     }
-    toggle(dev().assertElement(this.carousel_), false);
+    toggle(dev().assertElement(this.carousel_), true);
   }
 
   /**
@@ -669,6 +673,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       // type checking to work.
       /**@type {?}*/ (this.carousel_).implementation_.showSlideWhenReady(
           this.currentElemId_);
+      this.resizeImageViewerDimensions_();
+      this.updateDescriptionBox_();
       event.stopPropagation();
     };
     element.addEventListener('click', closeGalleryAndShowTargetSlide);
