@@ -29,10 +29,9 @@ import {
 } from './animation';
 import {Layout} from '../../../src/layout';
 import {upgradeBackgroundAudio} from './audio';
-import {dev} from '../../../src/log';
 import {EventType, dispatch, dispatchCustom} from './events';
 import {AdvancementConfig} from './page-advancement';
-import {scopedQuerySelectorAll, scopedQuerySelector} from '../../../src/dom';
+import {scopedQuerySelectorAll} from '../../../src/dom';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 import {CommonSignals} from '../../../src/common-signals';
@@ -226,8 +225,8 @@ export class AmpStoryPage extends AMP.BaseElement {
   /**
    * Applies the specified callback to each media element on the page, after the
    * media element is loaded.
-   * @param {!function(!Element)} callbackFn The callback to be applied to each
-   *     media element.
+   * @param {!function(!./media-pool.MediaPool, !Element)} callbackFn The
+   *     callback to be applied to each media element.
    */
   forEachMediaElement_(callbackFn) {
     const mediaSet = this.getAllMedia_();
@@ -247,7 +246,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   pauseAllMedia_(opt_rewindToBeginning) {
     this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.pause(mediaEl);
+      mediaPool.pause(/** @type {!HTMLMediaElement} */ (mediaEl));
 
       if (opt_rewindToBeginning) {
         mediaEl.currentTime = 0;
@@ -262,7 +261,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   playAllMedia_() {
     this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.play(mediaEl);
+      mediaPool.play(/** @type {!HTMLMediaElement} */ (mediaEl));
     });
   }
 
@@ -273,7 +272,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   preloadAllMedia_() {
     this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.preload(mediaEl);
+      mediaPool.preload(/** @type {!HTMLMediaElement} */ (mediaEl));
     });
   }
 
@@ -283,7 +282,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   muteAllMedia() {
     this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.mute(mediaEl);
+      mediaPool.mute(/** @type {!HTMLMediaElement} */ (mediaEl));
     });
   }
 
@@ -293,7 +292,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   unmuteAllMedia() {
     this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.unmute(mediaEl);
+      mediaPool.unmute(/** @type {!HTMLMediaElement} */ (mediaEl));
     });
   }
 
@@ -304,7 +303,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   registerAllMedia_() {
     this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.register(mediaEl);
+      mediaPool.register(/** @type {!HTMLMediaElement} */ (mediaEl));
     });
   }
 
@@ -387,6 +386,14 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
   }
 
+
+  /**
+   * @param {!./media-pool.MediaPool} unusedMediaPool The media pool instance to
+   *     use for this AmpStoryPage.
+   */
+  setMediaPool(unusedMediaPool) {
+    // Overridden by this.mediaPoolPromise_.
+  }
 
   /**
    * @return {boolean} Whether this page is currently active.

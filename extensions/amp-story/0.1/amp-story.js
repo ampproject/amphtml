@@ -205,10 +205,8 @@ export class AmpStory extends AMP.BaseElement {
     this.ampStoryHint_ = new AmpStoryHint(this.win);
 
     /** @private {!MediaPool} */
-    this.mediaPool_ = new MediaPool(this.win, el => {
-      const page = this.getPageContainingElement_(el);
-      return page.getDistance();
-    });
+    this.mediaPool_ = new MediaPool(this.win,
+        this.getElementDistanceFromActivePage_);
   }
 
 
@@ -1114,6 +1112,17 @@ export class AmpStory extends AMP.BaseElement {
 
     return dev().assert(this.pages_[pageIndex],
         `Element not contained on any amp-story-page:\n\n${element.outerHTML}`);
+  }
+
+
+  /**
+   * @param {!Element} element The element whose distance should be retrieved.
+   * @return {number} The number of pages the specified element is from the
+   *     currently active page.
+   */
+  getElementDistanceFromActivePage_(element) {
+    const page = this.getPageContainingElement_(element);
+    return page.getDistance();
   }
 
 

@@ -19,7 +19,6 @@ import {
   isConnectedNode,
   removeElement,
   scopedQuerySelectorAll,
-  scopedQuerySelector,
 } from '../../../src/dom';
 import {dev} from '../../../src/log';
 
@@ -250,8 +249,8 @@ export class MediaPool {
    * Deallocates and returns the media element of the specified type furthest
    * from the current position in the document.
    * @param {!MediaType} mediaType The type of media element to deallocate.
-   * @param {!Element=} opt_elToAllocate If specified, the element that is
-   *     trying to be allocated, such that another element must be evicted.
+   * @param {!HTMLMediaElement=} opt_elToAllocate If specified, the element that
+   *     is trying to be allocated, such that another element must be evicted.
    * @return {?HTMLMediaElement} The deallocated element, if one exists.
    * @private
    */
@@ -282,8 +281,8 @@ export class MediaPool {
    * Evicts an element of the specified type, replaces it in the DOM with the
    * original media element, and returns it.
    * @param {!MediaType} mediaType The type of media element to evict.
-   * @param {!Element=} opt_elToAllocate If specified, the element that is
-   *     trying to be allocated, such that another element must be evicted.
+   * @param {!HTMLMediaElement=} opt_elToAllocate If specified, the element that
+   *     is trying to be allocated, such that another element must be evicted.
    * @return {?HTMLMediaElement} A media element of the specified type.
    * @private
    */
@@ -438,7 +437,8 @@ export class MediaPool {
 
   /**
    * Invokes a function for all media managed by the media pool.
-   * @param {!function(HTMLMediaElement)} callbackFn The function to be invoked.
+   * @param {!function(!HTMLMediaElement)} callbackFn The function to be
+   *     invoked.
    * @private
    */
   forEachMediaElement_(callbackFn) {
