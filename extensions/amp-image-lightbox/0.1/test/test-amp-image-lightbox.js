@@ -19,7 +19,7 @@ import {Services} from '../../../../src/services';
 import '../amp-image-lightbox';
 import {
   ImageViewer,
-} from '../../../../src/image-viewer';
+} from '../amp-image-lightbox';
 import {parseSrcset} from '../../../../src/srcset';
 import * as lolex from 'lolex';
 
@@ -485,8 +485,7 @@ describes.realWin('amp-image-lightbox image viewer gestures', {
     expect(imageViewer.posY_).to.equal(-50);
   });
 
-  // TODO (cathyzhu, #12112): fix after implementing removeGestureRecognizer
-  it.skip('should cancel lightbox when pulled down at scale = 1', () => {
+  it('should cancel lightbox when pulled down at scale = 1', () => {
     lightboxMock.expects('close').once();
     imageViewer.onMove_(0, -100, false);
     imageViewer.onMoveRelease_(0, 0.5);
