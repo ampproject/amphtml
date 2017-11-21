@@ -378,15 +378,6 @@ class AmpVideo extends AMP.BaseElement {
     }
     return ranges;
   }
-
-  /**
-   * @param {!HTMLVideoElement} videoEl The video element to set internally to
-   *     the amp-video instance.
-   */
-  setVideo(videoEl) {
-    this.element.replaceChild(videoEl, this.video_);
-    this.video_ = videoEl;
-  }
 }
 
 

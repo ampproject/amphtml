@@ -127,15 +127,6 @@ export class AmpAudio extends AMP.BaseElement {
         pauseHandler
     );
   }
-
-  /**
-   * @param {!HTMLAudioElement} audioEl The audio element to set internally to
-   *     the amp-audio instance.
-   */
-  setAudio(audioEl) {
-    this.element.replaceChild(audioEl, this.audio_);
-    this.audio_ = audioEl;
-  }
 }
 
 
