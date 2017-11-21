@@ -19,6 +19,7 @@ import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 import {Services} from '../../../src/services';
 import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
+import {addParamsToUrl} from '../../../src/url';
 import {
   extractTags,
   getPlatform,
@@ -30,12 +31,12 @@ import {
 /** @const */
 const TAG = 'amp-apester-media';
 /**
- * @type {{SET_FULL_SCREEN: string, REMOVE_FULL_SCREEN: string, RESIZE_UNIT: string}}
+ * @enum {string}
  */
 const apesterEventNames = {
   SET_FULL_SCREEN: 'fullscreen_on',
   REMOVE_FULL_SCREEN: 'fullscreen_off',
-  RESIZE_UNIT: 'apester_resize_unit',
+  RESIZE_UNIT: 'apester_resize_u  nit',
 };
 
 /**
@@ -80,7 +81,7 @@ class AmpApesterMedia extends AMP.BaseElement {
      */
     this.mediaAttribute_ = null;
     /**
-     * @private {?string}
+     * @private {!Object}
      */
     this.embedOptions_ = {};
     /**
@@ -156,14 +157,12 @@ class AmpApesterMedia extends AMP.BaseElement {
    * @return {string}
    **/
   buildUrl_() {
-    const {
-      idOrToken, playlist, inative, distributionChannelId, fallback,
-      renderer, tags,
-    } = this.embedOptions_;
+    const {idOrToken, playlist, inative, distributionChannelId, fallback, tags}
+      = this.embedOptions_;
     const encodedMediaAttribute = encodeURIComponent(
         dev().assertString(this.mediaAttribute_));
     let suffix = '';
-    let queryParmas = '?';
+    const queryParams = {renderer: false, platform: getPlatform()};
     if (inative) {
       if (idOrToken) {
         suffix = `/inatives/${idOrToken}`;
@@ -171,19 +170,15 @@ class AmpApesterMedia extends AMP.BaseElement {
         suffix = `/channels/${distributionChannelId}/inatives`;
       }
     } else if (playlist && tags) {
-      const encodedTags = tags.map(tag =>
-        `tags=${encodeURIComponent(tag.trim())}`).join('&');
       suffix = `/tokens/${encodedMediaAttribute}/interactions/random`;
-      queryParmas += encodedTags ? `${encodedTags}&` : '';
-      queryParmas += `fallback=${!!fallback}&`;
+      queryParams.tags = tags;
+      queryParams.fallback = !!fallback;
     } else if (playlist) {
       suffix = `/tokens/${encodedMediaAttribute}/interactions/random`;
     } else {
       suffix = `/interactions/${encodedMediaAttribute}/display`;
     }
-    queryParmas += `platform=${getPlatform()}`;
-    queryParmas += renderer ? '&renderer=true' : '';
-    return `${this.displayBaseUrl_}${suffix}${queryParmas}`;
+    return addParamsToUrl(`${this.displayBaseUrl_}${suffix}`, queryParams);
   }
 
   /**
