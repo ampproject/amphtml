@@ -27,17 +27,10 @@ import {BLANK_AUDIO_SRC, BLANK_VIDEO_SRC} from './default-media';
 
 
 /** @const @enum {string} */
-const MediaType = {
+export const MediaType = {
   UNSUPPORTED: 'unsupported',
   AUDIO: 'audio',
   VIDEO: 'video',
-};
-
-
-/** @const {!Object<string, number>} */
-const MAX_COUNT = {
-  [MediaType.AUDIO]: 4,
-  [MediaType.VIDEO]: 8,
 };
 
 
@@ -85,12 +78,14 @@ const PROTECTED_ATTRIBUTES = [
 export class MediaPool {
   /**
    * @param {!Window} win The window object.
+   * @param {!Object<!MediaType, number>} maxCounts The maximum amount of each
+   *     media element that can be allocated by the pool.
    * @param {!ElementDistanceFnDef} distanceFn A function that, given an
    *     element, returns the distance of that element from the current position
    *     in the document.  The definition of "distance" can be implementation-
    *     dependant, as long as it is consistent between invocations.
    */
-  constructor(win, distanceFn) {
+  constructor(win, maxCounts, distanceFn) {
     /** @private @const {!Window} */
     this.win_ = win;
 
@@ -103,15 +98,17 @@ export class MediaPool {
 
     /**
      * Holds all of the media elements that have been allocated.
-     * @private @const {!Object<!MediaType, !Array<!HTMLMediaElement>>}
+     * @const {!Object<!MediaType, !Array<!HTMLMediaElement>>}
+     * @visibleForTesting
      */
-    this.allocated_ = {};
+    this.allocated = {};
 
     /**
      * Holds all of the media elements that have not been allocated.
-     * @private @const {!Object<!MediaType, !Array<!HTMLMediaElement>>}
+     * @const {!Object<!MediaType, !Array<!HTMLMediaElement>>}
+     * @visibleForTesting
      */
-    this.unallocated_ = {};
+    this.unallocated = {};
 
     /**
      * Maps a media element's ID to the object containing its sources.
@@ -160,7 +157,7 @@ export class MediaPool {
       },
     };
 
-    this.initializeMediaPool_();
+    this.initializeMediaPool_(maxCounts);
   }
 
 
@@ -169,20 +166,22 @@ export class MediaPool {
    * each of the types of media elements.  We need to create these eagerly so
    * that all media elements exist by the time that blessAll() is invoked,
    * thereby "blessing" all media elements for playback without user gesture.
+   * @param {!Object<!MediaType, number>} maxCounts The maximum amount of each
+   *     media element that can be allocated by the pool.
    * @private
    */
-  initializeMediaPool_() {
+  initializeMediaPool_(maxCounts) {
     this.forEachMediaType_(key => {
       const type = MediaType[key];
-      const maxCount = MAX_COUNT[type] || 0;
-      this.allocated_[type] = [];
-      this.unallocated_[type] = [];
-      for (let i = 0; i < maxCount; i++) {
+      const count = maxCounts[type] || 0;
+      this.allocated[type] = [];
+      this.unallocated[type] = [];
+      for (let i = 0; i < count; i++) {
         const mediaEl = this.mediaFactory_[type].call(this);
         // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE is
         // returned.  If so, we should adjust the pool size/distribution between
         // media types.
-        this.unallocated_[type].push(mediaEl);
+        this.unallocated[type].push(mediaEl);
       }
     });
   }
@@ -238,7 +237,7 @@ export class MediaPool {
    * @private
    */
   reserveUnallocatedMediaElement_(mediaType) {
-    return this.unallocated_[mediaType].pop();
+    return this.unallocated[mediaType].pop();
   }
 
 
@@ -256,7 +255,7 @@ export class MediaPool {
       return domMediaEl;
     }
 
-    const allocatedEls = this.allocated_[mediaType];
+    const allocatedEls = this.allocated[mediaType];
     const index = findIndex(allocatedEls, poolMediaEl => {
       return poolMediaEl.getAttribute(REPLACED_MEDIA_ATTRIBUTE) ===
           domMediaEl.id;
@@ -273,7 +272,7 @@ export class MediaPool {
    * @private
    */
   allocateMediaElement_(mediaType, poolMediaEl) {
-    this.allocated_[mediaType].push(poolMediaEl);
+    this.allocated[mediaType].push(poolMediaEl);
   }
 
 
@@ -287,7 +286,7 @@ export class MediaPool {
    * @private
    */
   deallocateMediaElement_(mediaType, opt_elToAllocate) {
-    const allocatedEls = this.allocated_[mediaType];
+    const allocatedEls = this.allocated[mediaType];
 
     // Sort the allocated media elements by distance to ensure that we are
     // evicting the media element that is furthest from the current place in the
@@ -338,7 +337,7 @@ export class MediaPool {
    * @private
    */
   isAllocatedMediaElement_(mediaType, el) {
-    return this.allocated_[mediaType].indexOf(el) >= 0;
+    return this.allocated[mediaType].indexOf(el) >= 0;
   }
 
 
@@ -478,13 +477,13 @@ export class MediaPool {
   forEachMediaElement_(callbackFn) {
     this.forEachMediaType_(key => {
       const type = MediaType[key];
-      const allocatedEls = this.allocated_[type];
+      const allocatedEls = this.allocated[type];
       allocatedEls.forEach(callbackFn.bind(this));
     });
 
     this.forEachMediaType_(key => {
       const type = MediaType[key];
-      const unallocatedEls = this.unallocated_[type];
+      const unallocatedEls = this.unallocated[type];
       unallocatedEls.forEach(callbackFn.bind(this));
     });
   }

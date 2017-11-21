@@ -65,7 +65,7 @@ import {Gestures} from '../../../src/gesture';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {dict} from '../../../src/utils/object';
 import {renderSimpleTemplate} from './simple-template';
-import {MediaPool} from './media-pool';
+import {MediaPool, MediaType} from './media-pool';
 
 /** @private @const {string} */
 const PRE_ACTIVE_PAGE_ATTRIBUTE_NAME = 'pre-active';
@@ -84,6 +84,12 @@ const DESKTOP_WIDTH_THRESHOLD = 1024;
 
 /** @private @const {number} */
 const DESKTOP_HEIGHT_THRESHOLD = 550;
+
+/** @const {!Object<string, number>} */
+const MAX_MEDIA_ELEMENT_COUNTS = {
+  [MediaType.AUDIO]: 4,
+  [MediaType.VIDEO]: 8,
+};
 
 /**
  * @private @const {string}
@@ -202,7 +208,7 @@ export class AmpStory extends AMP.BaseElement {
     // this.ampStoryHint_ = new AmpStoryHint(this.win);
 
     /** @private {!MediaPool} */
-    this.mediaPool_ = new MediaPool(this.win,
+    this.mediaPool_ = new MediaPool(this.win, MAX_MEDIA_ELEMENT_COUNTS,
         element => this.getElementDistanceFromActivePage_(element));
   }
 
