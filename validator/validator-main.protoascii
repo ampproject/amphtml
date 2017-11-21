@@ -3523,6 +3523,21 @@ tags: {  # <amp-img>
     supported_layouts: RESPONSIVE
   }
 }
+tags: {  # <amp-layout>
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "AMP-LAYOUT"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-layout"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
 tags: {  # <amp-pixel>
   html_format: AMP
   html_format: AMP4ADS
