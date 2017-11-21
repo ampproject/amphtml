@@ -54,13 +54,14 @@ const FALLBACK = dict({
   }),
 });
 
+let winForTesting;
 
 /**
  * Gets metadata encoded in iframe name attribute.
  * @return {!JsonObject}
  */
 const allMetadata = once(() => {
-  const iframeName = window.name;
+  const iframeName = (winForTesting || window).name;
 
   try {
     // TODO(bradfrizzell@): Change the data structure of the attributes
@@ -131,9 +132,11 @@ export function getLocation() {
 
 
 /**
+ * @param {?Window} opt_win
  * @return {!ContextStateDef}
  */
-export function getContextState() {
+export function getContextState(opt_win) {
+  winForTesting = opt_win;
   const attributes = allMetadata()['attributes'];
   const rawContext = attributes['_context'];
 

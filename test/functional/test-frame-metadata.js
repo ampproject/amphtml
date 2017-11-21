@@ -27,8 +27,10 @@ const realWinConfigAmpAd = {
 describes.realWin('frame-metadata', realWinConfigAmpAd, env => {
   let context;
   let name;
+  let win;
 
   beforeEach(() => {
+    win = env.win;
     context = {
       referrer: 'http://acme.org/',
       ampcontextVersion: '$internalRuntimeVersion$',
@@ -66,8 +68,8 @@ describes.realWin('frame-metadata', realWinConfigAmpAd, env => {
   describe('getContextState', () => {
     it('should return context with usdrd', () => {
       name.attributes['useSameDomainRenderingUntilDeprecated'] = '1';
-      window.name = JSON.stringify(name);
-      const contextState = getContextState();
+      win.name = JSON.stringify(name);
+      const contextState = getContextState(win);
       context['useSameDomainRenderingUntilDeprecated'] = '1';
       expect(contextState).to.deep.equal(context);
     });
