@@ -409,11 +409,6 @@ amp-story-grid-layer * {
   overflow: hidden !important;
 }
 
-.i-amphtml-story-bookend-article-set:last-child >
-    .i-amphtml-story-bookend-article:last-child {
-  margin-bottom: 0 !important; /* bottom of bookend has padding > article margin */
-}
-
 .i-amphtml-story-bookend-article-heading {
   font-family: 'Roboto', sans-serif !important;
   font-weight: 300 !important;
@@ -476,6 +471,7 @@ amp-story-grid-layer * {
 
 .i-amphtml-story-bookend-article-set {
   border-top: 1px solid rgba(255, 255, 255, 0.25) !important;
+  margin-bottom: 32px !important;
 }
 
 /* All top-level bookend elements need to set their own left/right margins */
