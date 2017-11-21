@@ -727,7 +727,10 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           expect(impl.element.querySelector('div[placeholder]')).to.be.ok;
           expect(impl.element.querySelector('div[fallback]')).to.be.ok;
           expect(impl.element.querySelector('iframe')).to.be.null;
-          expect(impl.element.querySelector('amp-analytics')).to.be.null;
+          expect(impl.element.querySelectorAll('amp-analytics'))
+              .to.have.lengthOf(1);
+          expect(impl.element.querySelector('amp-analytics')).to.equal(
+              impl.a4aAnalyticsElement_);
           expect(impl.iframe).to.be.null;
           expect(impl.ampAnalyticsConfig_).to.be.null;
           expect(impl.ampAnalyticsElement_).to.be.null;

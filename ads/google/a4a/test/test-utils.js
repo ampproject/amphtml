@@ -18,6 +18,7 @@ import {
   additionalDimensions,
   addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
+  getCsiAmpAnalyticsVariables,
   EXPERIMENT_ATTRIBUTE,
   googleAdUrl,
   mergeExperimentIds,
@@ -591,6 +592,75 @@ describe('Google A4A utils', () => {
         {fetchJson: () => Promise.reject('some network failure')});
       return getIdentityToken(env.win, env.win.document)
           .then(result => expect(result).to.jsonEqual({}));
+    });
+  });
+
+  describe('variables for amp-analytics', () => {
+    let a4a;
+    let sandbox;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const element = createElementWithAttributes(fixture.doc, 'amp-a4a', {
+          'width': '200',
+          'height': '50',
+          'type': 'adsense',
+          'data-amp-slot-index': '4',
+        });
+        element.getAmpDoc = () => fixture.doc;
+        a4a = new MockA4AImpl(element);
+      });
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+    it('should include the correlator', () => {
+      const vars = getCsiAmpAnalyticsVariables('trigger', a4a, null);
+      expect(vars['correlator']).not.to.be.undefined;
+      expect(vars['correlator']).to.be.greaterThan(0);
+    });
+
+    it('should include the slot index', () => {
+      const vars = getCsiAmpAnalyticsVariables('trigger', a4a, null);
+      expect(vars['slotId']).to.equal('4');
+    });
+
+    it('should include the qqid when provided', () => {
+      const vars = getCsiAmpAnalyticsVariables('trigger', a4a, '<qqid>');
+      expect(vars['qqid']).to.equal('<qqid>');
+    });
+
+    it('should omit the qqid when null', () => {
+      const vars = getCsiAmpAnalyticsVariables('trigger', a4a, null);
+      expect(vars['qqid']).to.be.undefined;
+    });
+
+    it('should include scheduleTime for ad render start triggers', () => {
+      a4a.element.layoutScheduleTime = 200;
+      const vars = getCsiAmpAnalyticsVariables(
+          'ad-render-start', a4a, null);
+      expect(vars['scheduleTime']).to.be.a('number');
+      expect(vars['scheduleTime']).not.to.equal(0);
+    });
+
+    it('should omit scheduleTime by default', () => {
+      a4a.element.layoutScheduleTime = 200;
+      const vars = getCsiAmpAnalyticsVariables('trigger', a4a, null);
+      expect(vars['scheduleTime']).to.be.undefined;
+    });
+
+    it('should include viewer lastVisibleTime', () => {
+      const getLastVisibleTime = () => 300;
+      const viewerStub = sandbox.stub(Services, 'viewerForDoc');
+      viewerStub.returns({getLastVisibleTime});
+
+      const vars = getCsiAmpAnalyticsVariables('trigger', a4a, null);
+      expect(vars['viewerLastVisibleTime']).to.be.a('number');
+      expect(vars['viewerLastVisibleTime']).not.to.equal(0);
     });
   });
 });
