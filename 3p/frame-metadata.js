@@ -134,9 +134,10 @@ export function getLocation() {
  * @return {!ContextStateDef}
  */
 export function getContextState() {
+  //const allMetadata =  allMetadata();
   const rawContext = allMetadata()['attributes']['_context'];
 
-  return {
+  const context = {
     ampcontextFilepath: rawContext['ampcontextFilepath'],
     ampcontextVersion: rawContext['ampcontextVersion'],
     canary: rawContext['canary'],
@@ -155,6 +156,11 @@ export function getContextState() {
     startTime: rawContext['startTime'],
     tagName: rawContext['tagName'],
   };
+  if (allMetadata['useSameDomainRenderingUntilDeprecated']) {
+    context['useSameDomainRenderingUntilDeprecated'] =
+      allMetadata['useSameDomainRenderingUntilDeprecated'];
+  }
+  return context;
 };
 
 

@@ -590,6 +590,10 @@ function installContextUsingStandardImpl(win, data) {
     'computeInMasterFrame': computeInMasterFrame,
   };
 
+  if (contextState.useSameDomainRenderingUntilDeprecated) {
+    win.context['useSameDomainRenderingUntilDeprecated'] = true;
+  }
+
   // Define master related properties to be lazily read.
   Object.defineProperties(win.context, {
     master: {
