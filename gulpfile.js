@@ -591,13 +591,11 @@ function printConfigHelp(command, targetFile) {
  */
 function enableLocalTesting(targetFile) {
   let config = (argv.config === 'canary') ? 'canary' : 'prod';
-  let configFile = 'build-system/global-configs/' + config + '-config.json';
+  let baseConfigFile = 'build-system/global-configs/' + config + '-config.json';
+  let localTestingConfigFile = 'node_modules/AMP_CONFIG.json';
 
   return removeConfig(targetFile).then(() => {
-    return applyConfig(config, targetFile, configFile, /* opt_local */ true);
-  }).then(() => {
     let AMP_CONFIG = {localDev: true};
-    let herokuConfigFile = 'node_modules/AMP_CONFIG.json';
     let TESTING_HOST = process.env.AMP_TESTING_HOST;
     if (typeof TESTING_HOST == 'string') {
       AMP_CONFIG = Object.assign(AMP_CONFIG, {
@@ -606,12 +604,16 @@ function enableLocalTesting(targetFile) {
       });
     }
     AMP_CONFIG = Object.assign(
-        AMP_CONFIG, JSON.parse(fs.readFileSync(configFile).toString()));
-    fs.writeFileSync(herokuConfigFile, JSON.stringify(AMP_CONFIG));
+        AMP_CONFIG, JSON.parse(fs.readFileSync(baseConfigFile).toString()));
+    fs.writeFileSync(localTestingConfigFile, JSON.stringify(AMP_CONFIG));
     if (!process.env.TRAVIS) {
       $$.util.log('Wrote', cyan(config), 'AMP config to',
-          cyan(herokuConfigFile), 'for use with Heroku');
+          cyan(localTestingConfigFile), 'for use with Heroku');
     }
+    return Promise.resolve();
+  }).then(() => {
+    return applyConfig(
+        config, targetFile, localTestingConfigFile, /* opt_local */ true);
   });
 }
 
