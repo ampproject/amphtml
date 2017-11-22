@@ -107,10 +107,6 @@
         ".comic-amp-font-loaded",
         ".comic-amp-bold-font-loaded"
       ]
-    },
-    {
-      "url": "examples/visual-tests/amp-layout/amp-layout.amp.html",
-      "name": "AMP Layout"
     }
   ],
 
