@@ -25,6 +25,7 @@ import {
 import {VisibilityState} from '../../../../src/visibility-state';
 import {Services} from '../../../../src/services';
 import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
+import {macroTask} from '../../../../testing/yield';
 
 class IntersectionObserverStub {
 
@@ -983,7 +984,27 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
     });
   });
 
-  it('should triger "visible" with no duration condition', () => {
+  it('should execute "visible" trigger with percent range', () => {
+    viewer.setVisibilityState_(VisibilityState.VISIBLE);
+    visibility = new VisibilityManagerForDoc(ampdoc);
+
+    const spy = sandbox.spy();
+    visibility.listenElement(ampElement, {
+      'visiblePercentageThresholds': [[0, 30], [50, 100]],
+    }, Promise.resolve(), null, spy);
+
+    return Promise.resolve().then(() => {
+      fireIntersect(25); // visible
+    }).then(() => {
+      expect(spy).to.be.calledOnce;
+      fireIntersect(55);
+      return Promise.resolve().then(() => {
+        expect(spy).to.be.calledTwice;
+      });
+    });
+  });
+
+  it('should trigger "visible" with no duration condition', () => {
     viewer.setVisibilityState_(VisibilityState.VISIBLE);
     visibility = new VisibilityManagerForDoc(ampdoc);
 
