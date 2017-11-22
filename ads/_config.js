@@ -185,6 +185,16 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  appvador: {
+    prefetch: [
+      'https://cdn.apvdr.com/js/VastAdUnit.min.js',
+      'https://cdn.apvdr.com/js/VideoAd.min.js',
+      'https://cdn.apvdr.com/js/VideoAd3PAS.min.js',
+      'https://cdn.apvdr.com/js/VideoAdAutoPlay.min.js',
+      'https://cdn.apvdr.com/js/VideoAdNative.min.js',
+    ],
+  },
+
   amoad: {
     prefetch: [
       'https://j.amoad.com/js/a.js',
