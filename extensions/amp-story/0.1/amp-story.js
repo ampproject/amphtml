@@ -325,18 +325,6 @@ export class AmpStory extends AMP.BaseElement {
       this.ampStoryHint_.showFirstPageHintOverlay();
     });
 
-    this.element.addEventListener('play', e => {
-      if (e.target instanceof HTMLMediaElement) {
-        this.audioManager_.play(e.target);
-      }
-    }, true);
-
-    this.element.addEventListener('pause', e => {
-      if (e.target instanceof HTMLMediaElement) {
-        this.audioManager_.stop(e.target);
-      }
-    }, true);
-
     const gestures = Gestures.get(this.element,
         /* shouldNotPreventDefault */ true);
 
