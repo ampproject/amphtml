@@ -511,7 +511,7 @@ export class MediaPool {
 
     const sources = this.sources_[domMediaEl.id];
     dev().assert(sources instanceof Sources,
-        `Cannot play unregistered element.`);
+        'Cannot play unregistered element.');
 
     const poolMediaEl = this.reserveUnallocatedMediaElement_(mediaType) ||
         this.evictMediaElement_(mediaType, domMediaEl);
