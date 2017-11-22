@@ -1013,10 +1013,12 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     const rawUrl = this.element.getAttribute(attributeName);
+    const opts = {};
+    opts.requireAmpResponseSourceOrigin = false;
 
     return Services.urlReplacementsForDoc(this.getAmpDoc())
         .expandAsync(user().assertString(rawUrl))
-        .then(url => Services.xhrFor(this.win).fetchJson(url))
+        .then(url => Services.xhrFor(this.win).fetchJson(url, opts))
         .then(response => {
           user().assert(response.ok, 'Invalid HTTP response for bookend JSON');
           return response.json();
