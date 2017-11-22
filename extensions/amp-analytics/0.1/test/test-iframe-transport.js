@@ -120,18 +120,18 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
   });
 
   it('creates one PerformanceObserver per vendor type', () => {
-    const createLongTaskObserverSpy = sandbox.spy(
+    const createPerformanceObserverSpy = sandbox.spy(
         IframeTransport.prototype, 'createPerformanceObserver_');
-    expect(createLongTaskObserverSpy).to.not.be.called;
+    expect(createPerformanceObserverSpy).to.not.be.called;
 
     iframeTransport.processCrossDomainIframe(); // Create 2nd frame for 1st vendor
-    expect(createLongTaskObserverSpy).to.not.be.called;
+    expect(createPerformanceObserverSpy).to.not.be.called;
 
     // Create frame for a new vendor
     const frameUrl2 = 'https://example.com/test2';
     new IframeTransport(env.ampdoc.win, 'some_other_vendor_type',
         {iframe: frameUrl2}, frameUrl2 + '-3');
-    expect(createLongTaskObserverSpy).to.be.called;
+    expect(createPerformanceObserverSpy).to.be.called;
   });
 
 

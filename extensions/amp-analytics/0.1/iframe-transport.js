@@ -179,9 +179,7 @@ export class IframeTransport {
           }
           entryList.getEntries().forEach(entry => {
             if (entry && entry['entryType'] == 'longtask' &&
-                (entry['name'] == 'cross-origin-descendant' ||
-                (getMode().localDev &&
-                entry['name'] == 'same-origin-descendant')) &&
+                entry['name'] == 'cross-origin-descendant' &&
                 entry.attribution) {
               entry.attribution.forEach(attrib => {
                 if (this.frameUrl_ == attrib.containerSrc &&
@@ -220,10 +218,10 @@ export class IframeTransport {
       return;
     }
     ampDoc.body.removeChild(frameData.frame);
-    delete IframeTransport.crossDomainIframes_[type];
-    if (IframeTransport.performanceObservers_[this.type_]) {
-      IframeTransport.performanceObservers_[this.type_].disconnect();
-      IframeTransport.performanceObservers_[this.type_] = null;
+    IframeTransport.crossDomainIframes_[type] = null;
+    if (IframeTransport.performanceObservers_[type]) {
+      IframeTransport.performanceObservers_[type].disconnect();
+      IframeTransport.performanceObservers_[type] = null;
     }
   }
 
@@ -302,11 +300,11 @@ export class IframeTransport {
   }
 }
 
-/** @private {Object<string,FrameData>} */
+/** @private {Object<string, FrameData>} */
 IframeTransport.crossDomainIframes_ = {};
 
 /** @private {number} */
 IframeTransport.nextId_ = 0;
 
-/** @private {Object<string,PerformanceObserver>} */
+/** @private {Object<string, PerformanceObserver>} */
 IframeTransport.performanceObservers_ = {};
