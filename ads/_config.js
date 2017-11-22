@@ -58,6 +58,11 @@ export const adConfig = {
     clientIdScope: '_PING_',
   },
 
+  '24smi': {
+    prefetch: 'https://jsn.24smi.net/smi.js',
+    preconnect: 'https://data.24smi.net',
+  },
+
   a8: {
     prefetch: 'https://statics.a8.net/amp/ad.js',
     renderStartImplemented: true,
