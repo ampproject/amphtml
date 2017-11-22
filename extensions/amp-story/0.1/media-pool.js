@@ -542,7 +542,7 @@ export class MediaPool {
     const currentTime = mediaEl.currentTime;
 
     mediaEl.muted = false;
-    return mediaEl.play().then(() => {
+    return Promise.resolve(mediaEl.play()).then(() => {
       if (isPaused) {
         mediaEl.pause();
         mediaEl.currentTime = currentTime;

@@ -50,7 +50,7 @@ const PAGE_LOADED_CLASS_NAME = 'i-amphtml-story-page-loaded';
  * Selector for which media to wait for on page layout.
  * @const {string}
  */
-const PAGE_MEDIA_SELECTOR = 'amp-audio, amp-video, amp-img, anim';
+const PAGE_MEDIA_SELECTOR = 'amp-audio, amp-video, amp-img, amp-anim';
 
 
 /** @private @const {string} */
@@ -76,10 +76,11 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.mediaLayoutPromise_ = this.waitForMediaLayout_();
 
     /** @private @const {!Promise<!./media-pool.MediaPool>} */
-    this.mediaPoolPromise_ = new Promise(resolve => {
+    this.mediaPoolPromise_ = new Promise((resolve, reject) => {
       this.setMediaPool = mediaPool => {
         this.mediaLayoutPromise_
-            .then(() => resolve(mediaPool));
+            .then(() => resolve(mediaPool))
+            .catch(reject);
       };
     });
   }
@@ -150,7 +151,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     return Promise.all([
       this.beforeVisible(),
-      this.mediaLayoutPromise_,
       this.mediaPoolPromise_,
     ]);
   }
