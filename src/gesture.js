@@ -64,13 +64,13 @@ export class Gestures {
    * Creates if not yet created and returns the shared Gestures instance for
    * the specified element.
    * @param {!Element} element
-   * @param {boolean=} shouldNotPreventDefault
+   * @param {boolean=} opt_shouldNotPreventDefault
    * @return {!Gestures}
    */
-  static get(element, shouldNotPreventDefault = false) {
+  static get(element, opt_shouldNotPreventDefault = false) {
     let res = element[PROP_];
     if (!res) {
-      res = new Gestures(element, shouldNotPreventDefault);
+      res = new Gestures(element, opt_shouldNotPreventDefault);
       element[PROP_] = res;
     }
     return res;
