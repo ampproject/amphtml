@@ -708,7 +708,7 @@ export class ShadowDomWriterBulk {
  * createHTMLDocument() seems to behave the same way.
  */
 function removeNoScriptElements(parent) {
-  const noscriptElements = childElementsByTag(parent, 'noscript');
+  const noscriptElements = toArray(childElementsByTag(parent, 'noscript'));
   noscriptElements.forEach(element => {
     removeElement(element);
   });
