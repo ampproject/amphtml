@@ -16,11 +16,18 @@
 
 import {urls} from '../../../src/config';
 import {createElementWithAttributes} from '../../../src/dom';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {isLongTaskApiSupported} from '../../../src/service/jank-meter';
 import {setStyles} from '../../../src/style';
 import {hasOwn} from '../../../src/utils/object';
 import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
+
+/** @private @const {string} */
+const TAG_ = 'amp-analytics.IframeTransport';
+
+/** @private @const {number} */
+const LONG_TASK_REPORTING_THRESHOLD = 5;
 
 /** @typedef {{
  *    frame: Element,
@@ -38,10 +45,9 @@ export class IframeTransport {
    * @param {!Window} ampWin The window object of the AMP document
    * @param {!string} type The value of the amp-analytics tag's type attribute
    * @param {!JsonObject} config
-   * @param {!string} id A unique ID for this instance. If (potentially) using
-   *     sendResponseToCreative(), it should be something that the recipient
-   *     can use to identify the context of the message, e.g. the resourceID
-   *     of a DOM element.
+   * @param {!string} id If (potentially) using sendResponseToCreative(), it
+   *     should be something that the recipient can use to identify the
+   *     context of the message, e.g. the resourceID of a DOM element.
    */
   constructor(ampWin, type, config, id) {
     /** @private @const {!Window} */
@@ -56,6 +62,9 @@ export class IframeTransport {
     dev().assert(config && config['iframe'],
         'Must supply iframe URL to constructor!');
     this.frameUrl_ = config['iframe'];
+
+    /** @private {number} */
+    this.numLongTasks_ = 0;
 
     this.processCrossDomainIframe();
   }
@@ -80,6 +89,7 @@ export class IframeTransport {
     } else {
       frameData = this.createCrossDomainIframe();
       this.ampWin_.document.body.appendChild(frameData.frame);
+      this.createPerformanceObserver_();
     }
     dev().assert(frameData, 'Trying to use non-existent frame');
   }
@@ -148,6 +158,51 @@ export class IframeTransport {
   }
 
   /**
+   * Uses the Long Task API to create an observer for when 3p vendor frames
+   * take more than 50ms of continuous CPU time.
+   * Currently the only action in response to that is to log. It will log
+   * once per LONG_TASK_REPORTING_THRESHOLD that a long task occurs. (This
+   * implies that there is a grace period for the first
+   * LONG_TASK_REPORTING_THRESHOLD-1 occurrences.)
+   * @VisibleForTesting
+   * @private
+   */
+  createPerformanceObserver_() {
+    if (!isLongTaskApiSupported(this.ampWin_)) {
+      return;
+    }
+    // TODO(jonkeller): Consider merging with jank-meter.js
+    IframeTransport.performanceObservers_[this.type_] =
+        new this.ampWin_.PerformanceObserver(entryList => {
+          if (!entryList) {
+            return;
+          }
+          entryList.getEntries().forEach(entry => {
+            if (entry && entry['entryType'] == 'longtask' &&
+              (entry['name'] == 'cross-origin-descendant' ||
+               (getMode().test &&
+               entry['name'] == 'same-origin-descendant')) &&
+              entry.attribution) {
+              entry.attribution.forEach(attrib => {
+                if (this.frameUrl_ == attrib.containerSrc &&
+                    ++this.numLongTasks_ % LONG_TASK_REPORTING_THRESHOLD == 0) {
+                  user().warn(TAG_,
+                      'Long Task: ' +
+                      `Vendor: "${this.type_}" ` +
+                      `Src: "${attrib.containerSrc}" ` +
+                      `Duration: ${entry.duration}ms ` +
+                      `Occurrences: ${this.numLongTasks_}`);
+                }
+              });
+            }
+          });
+        });
+    IframeTransport.performanceObservers_[this.type_].observe({
+      entryTypes: ['longtask'],
+    });
+  }
+
+  /**
    * Called when a creative no longer needs its cross-domain iframe (for
    * instance, because the creative has been removed from the DOM).
    * Once all creatives using a frame are done with it, the frame can be
@@ -166,6 +221,10 @@ export class IframeTransport {
     }
     ampDoc.body.removeChild(frameData.frame);
     delete IframeTransport.crossDomainIframes_[type];
+    if (IframeTransport.performanceObservers_[type]) {
+      IframeTransport.performanceObservers_[type].disconnect();
+      IframeTransport.performanceObservers_[type] = null;
+    }
   }
 
   /**
@@ -243,8 +302,11 @@ export class IframeTransport {
   }
 }
 
-/** @private {Object<string,FrameData>} */
+/** @private {Object<string, FrameData>} */
 IframeTransport.crossDomainIframes_ = {};
 
 /** @private {number} */
 IframeTransport.nextId_ = 0;
+
+/** @private {Object<string, PerformanceObserver>} */
+IframeTransport.performanceObservers_ = {};
