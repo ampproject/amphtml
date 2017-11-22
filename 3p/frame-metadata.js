@@ -132,7 +132,7 @@ export function getLocation() {
 
 
 /**
- * @param {?Window} opt_win
+ * @param {Window=} opt_win
  * @return {!ContextStateDef}
  */
 export function getContextState(opt_win) {
