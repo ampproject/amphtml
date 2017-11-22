@@ -698,14 +698,14 @@ export class ShadowDomWriterBulk {
 }
 
 /*
- * Returns whether a node is a noscript element.
+ * Remove any noscript elements.
  * @param {!Element} parent
  *
  * According to the spec (https://w3c.github.io/DOM-Parsing/#the-domparser-interface),
  * with `DOMParser().parseFromString`, contents of `noscript` get parsed as markup,
  * so we need to remove them manually.
  * Why? ¯\_(ツ)_/¯
- * createHTMLDocument() seems to behave the same way.
+ * `createHTMLDocument()` seems to behave the same way.
  */
 function removeNoScriptElements(parent) {
   const noscriptElements = toArray(childElementsByTag(parent, 'noscript'));
