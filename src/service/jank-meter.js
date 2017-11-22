@@ -181,7 +181,7 @@ function isJankMeterEnabled(win) {
  * @param {!Window} win
  * @returns {boolean}
  */
-function isLongTaskApiSupported(win) {
+export function isLongTaskApiSupported(win) {
   return !!win.PerformanceObserver
       && !!win.TaskAttributionTiming
       && ('containerName' in win.TaskAttributionTiming.prototype);
