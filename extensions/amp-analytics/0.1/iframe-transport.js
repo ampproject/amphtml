@@ -218,7 +218,7 @@ export class IframeTransport {
       return;
     }
     ampDoc.body.removeChild(frameData.frame);
-    IframeTransport.crossDomainIframes_[type] = null;
+    delete IframeTransport.crossDomainIframes_[type];
     if (IframeTransport.performanceObservers_[type]) {
       IframeTransport.performanceObservers_[type].disconnect();
       IframeTransport.performanceObservers_[type] = null;
