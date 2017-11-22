@@ -24,7 +24,6 @@ import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {map} from '../../../src/utils/object';
 import {Services} from '../../../src/services';
-import {tryParseJson} from '../../../src/json';
 import {isFiniteNumber, isArray} from '../../../src/types';
 
 const TAG = 'VISIBILITY-MANAGER';

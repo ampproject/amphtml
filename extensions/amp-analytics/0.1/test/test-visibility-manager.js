@@ -25,7 +25,6 @@ import {
 import {VisibilityState} from '../../../../src/visibility-state';
 import {Services} from '../../../../src/services';
 import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
-import {macroTask} from '../../../../testing/yield';
 
 class IntersectionObserverStub {
 
@@ -230,6 +229,31 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(root.getRootVisibility()).to.equal(1);
     root.dispose();
     expect(root.getRootVisibility()).to.equal(0);
+  });
+
+  it('create correct number of models', () => {
+    let spec = {};
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(1);
+    root.dispose();
+    spec = {visiblePercentageThresholds: [[0, 10], [10, 100]]};
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(2);
+    root.dispose();
+    spec = {visiblePercentageThresholds: [[-1, 10], [10, 101]]};
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(0);
+    root.dispose();
+    spec = {visiblePercentageThresholds: [[1, 2, 3], ['invalid', 3]]};
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(0);
+    root.dispose();
+    spec = {
+      visiblePercentageMin: 0,
+      visiblePercentageThresholds: [[0, 10], [10, 100]],
+    };
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(1);
   });
 
   it('should dispose everything', () => {
