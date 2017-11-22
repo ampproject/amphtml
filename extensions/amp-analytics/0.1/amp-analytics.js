@@ -121,6 +121,12 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isInabox_ = getMode().runtime == 'inabox';
+
+    /** @private {boolean} */
+    this.use3pScript_ = false;
+
+    /** @private {boolean} */
+    this.scriptLoad_ = false;
   }
 
   /** @override */
@@ -181,7 +187,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   resumeCallback() {
-    if (this.config_['transport'] && this.config_['transport']['iframe']) {
+    if (this.config_['transport'] && this.config_['transport']['iframe'] &&
+        !this.use3pScript_) {
       this.initIframeTransport_();
     }
   }
@@ -254,8 +261,12 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.analyticsGroup_ =
         this.instrumentation_.createAnalyticsGroup(this.element);
 
-    if (this.config_['transport'] && this.config_['transport']['iframe']) {
-      this.initIframeTransport_();
+    if (this.config_['transport']) {
+      if (this.isInabox_ && this.config_['transport']['script']) {
+        this.inject3pScript_();
+      } else if (this.config_['transport']['iframe']) {
+        this.initIframeTransport_();
+      }
     }
 
     const promises = [];
@@ -336,6 +347,27 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
         this.element.getAttribute('type'),
         this.config_['transport'], ampAdResourceId);
+  }
+
+  /**
+   * amp-analytics will inject the third party script into the creative
+   * directly for vendors in extensions/amp-analytics/0.1/vendors.js who
+   * have transport/script defined. This is limited to MRC-accreddited vendors
+   * and only for the case of amp creative within inabox.
+   * @private
+   */
+  inject3pScript_() {
+    this.use3pScript_ = true;
+    const s = this.win.document.createElement('script');
+    s.src = this.config_['transport']['script'];
+    s.onload = () => { this.scriptLoad_ = true; };
+    s.onerror = () => {
+      if (this.config_['transport']['iframe']) {
+        this.initIframeTransport_();
+      }
+      this.use3pScript_ = false;
+    }
+    this.element.appendChild(s);
   }
 
   /**
@@ -801,11 +833,18 @@ export class AmpAnalytics extends AMP.BaseElement {
       user().assert(trigger['on'] == 'visible',
           'iframePing is only available on page view requests.');
       sendRequestUsingIframe(this.win, request);
-    } else if (this.config_['transport'] &&
-        this.config_['transport']['iframe']) {
-      user().assert(this.iframeTransport_,
-          'iframe transport was inadvertently deleted');
-      this.iframeTransport_.sendRequest(request);
+    } else if (this.config_['transport']) {
+      if (this.use3pScript_) {
+        if (this.scriptLoad_) {
+          // direct call to the script API.
+        } else {
+          // drop the request if the script is not loaded yet.
+        }
+      } else if (this.config_['transport']['iframe']) {
+        user().assert(this.iframeTransport_,
+            'iframe transport was inadvertently deleted');
+        this.iframeTransport_.sendRequest(request);
+      }
     } else {
       sendRequest(this.win, request, this.config_['transport'] || {});
     }
