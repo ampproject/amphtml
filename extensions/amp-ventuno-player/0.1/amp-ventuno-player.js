@@ -175,19 +175,34 @@ class AmpVentunoPlayer extends AMP.BaseElement {
 	getVideoIframeSrc_() {
 		let pubid = encodeURIComponent(this.pubid_ || ''),
 			slotid = encodeURIComponent(this.slotid_ || ''),
-			pType = this.playerType_ || '';
+			pType = this.playerType_ || '',
+			optParams = {};
+
 		if (this.videoIframeSrc_) {
 			return this.videoIframeSrc_;
 		}
 		// As of now, only the 'ep' player type will be supported
-		user().assert(this.playerType_ === 'ep');
+		user().assert(this.playerType_ === 'ep', 'Only Editorial Player is supported');
 
 		dev().assert(this.pubid_);
 		dev().assert(this.slotid_);
+		
+		let src = `https://venwebsecure.ventunotech.com/embed/embedPlayer.html?pFrom=amp&pType=${pType}&pubKey=${pubid}&slot=${slotid}`;
 
-		// let src = `https://vensecure.ventunotech.com/embed/vtnEmbed.html?pType=${pType}&pubKey=${pubid}&slot=${slotid}`;
-		let src = `http://staging.ventunotech.com/newPlayer/dev/amp/vtnEmbed.html?pFrom=amp&pType=${pType}&pubKey=${pubid}&slot=${slotid}`;
-	//   src = addParamsToUrl(src, params);
+		if (this.title_) {
+			optParams['pTitle'] = this.title_;
+		}
+
+		if (this.url_) {
+			optParams['pUrl'] = this.url_;
+		}
+
+		if (this.meta_) {
+			optParams['pMeta'] = this.meta_;
+		}
+
+		src = addParamsToUrl(src, optParams);
+
 		return this.videoIframeSrc_ = src;
 	}
 
