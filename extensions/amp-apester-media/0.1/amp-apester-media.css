@@ -160,6 +160,7 @@
   width: 100vw !important;
   height: 100vh !important;
   z-index: 2147483646 !important;
+  top: 0;
   zoom: 1;
   -webkit-overflow-scrolling: touch !important;
 }
