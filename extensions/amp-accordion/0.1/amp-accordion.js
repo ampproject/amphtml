@@ -86,10 +86,10 @@ class AmpAccordion extends AMP.BaseElement {
       this.registerAction('toggle', invocation => {
         if (invocation.args) {
           const sectionId = invocation.args['section'];
-          user().assertElement(
-              sectionEl,
-              'No element found with id:' + sectionId);
           const sectionEl = this.getAmpDoc().getElementById(sectionId);
+          user().assertElement(
+            sectionEl,
+            'No element found with id:' + sectionId);
           this.toggle_(sectionEl);
         } else {
           for (let i = 0; i < this.sections_.length; i++) {
@@ -100,10 +100,10 @@ class AmpAccordion extends AMP.BaseElement {
       this.registerAction('expand', invocation => {
         if (invocation.args) {
           const sectionId = invocation.args['section'];
-          user().assertElement(
-              sectionEl,
-              'No element found with id:' + sectionId);
           const sectionEl = this.getAmpDoc().getElementById(sectionId);
+          user().assertElement(
+            sectionEl,
+            'No element found with id:' + sectionId);
           this.expand_(sectionEl);
         } else {
           for (let i = 0; i < this.sections_.length; i++) {
@@ -114,10 +114,10 @@ class AmpAccordion extends AMP.BaseElement {
       this.registerAction('collapse', invocation => {
         if (invocation.args) {
           const sectionId = invocation.args['section'];
-          user().assertElement(
-              sectionEl,
-              'No element found with id:' + sectionId);
           const sectionEl = this.getAmpDoc().getElementById(sectionId);
+          user().assertElement(
+            sectionEl,
+            'No element found with id:' + sectionId);
           this.collapse_(sectionEl);
         } else {
           for (let i = 0; i < this.sections_.length; i++) {
