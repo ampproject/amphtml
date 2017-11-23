@@ -61,10 +61,14 @@ class AmpAccordion extends AMP.BaseElement {
 
     this.registerAction('toggle', invocation => {
       if (invocation.args) {
-        const sectionEl = document.getElementById(invocation.args['section']);
+        const sectionId = invocation.args['section'];
+        user().assertElement(
+          sectionEl,
+          'No element found with id:' + sectionId);
+        const sectionEl = this.getAmpDoc().getElementById(sectionId);
         this.toggle_(sectionEl);
       } else {
-        const accordionEl = document.getElementById(invocation.target.id);
+        const accordionEl = this.getAmpDoc().getElementById(invocation.target.id);
         for (let i = 0; i < accordionEl.children.length; i++) {
           this.toggle_(accordionEl.children[i]);
         }
@@ -72,10 +76,14 @@ class AmpAccordion extends AMP.BaseElement {
     });
     this.registerAction('expand', invocation => {
       if (invocation.args) {
-        const sectionEl = document.getElementById(invocation.args['section']);
+        const sectionId = invocation.args['section'];
+        user().assertElement(
+          sectionEl,
+          'No element found with id:' + sectionId);
+        const sectionEl = this.getAmpDoc().getElementById(sectionId);
         this.expand_(sectionEl);
       } else {
-        const accordionEl = document.getElementById(invocation.target.id);
+        const accordionEl = this.getAmpDoc().getElementById(invocation.target.id);
         for (let i = 0; i < accordionEl.children.length; i++) {
           this.expand_(accordionEl.children[i]);
         }
@@ -83,10 +91,14 @@ class AmpAccordion extends AMP.BaseElement {
     });
     this.registerAction('collapse', invocation => {
       if (invocation.args) {
-        const sectionEl = document.getElementById(invocation.args['section']);
+        const sectionId = invocation.args['section'];
+        user().assertElement(
+          sectionEl,
+          'No element found with id:' + sectionId);
+        const sectionEl = this.getAmpDoc().getElementById(sectionId);
         this.collapse_(sectionEl);
       } else {
-        const accordionEl = document.getElementById(invocation.target.id);
+        const accordionEl = this.getAmpDoc().getElementById(invocation.target.id);
         for (let i = 0; i < accordionEl.children.length; i++) {
           this.collapse_(accordionEl.children[i]);
         }
