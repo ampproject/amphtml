@@ -87,8 +87,8 @@ class AmpAccordion extends AMP.BaseElement {
         if (invocation.args) {
           const sectionId = invocation.args['section'];
           user().assertElement(
-            sectionEl,
-            'No element found with id:' + sectionId);
+              sectionEl,
+              'No element found with id:' + sectionId);
           const sectionEl = this.getAmpDoc().getElementById(sectionId);
           this.toggle_(sectionEl);
         } else {
@@ -101,8 +101,8 @@ class AmpAccordion extends AMP.BaseElement {
         if (invocation.args) {
           const sectionId = invocation.args['section'];
           user().assertElement(
-            sectionEl,
-            'No element found with id:' + sectionId);
+              sectionEl,
+              'No element found with id:' + sectionId);
           const sectionEl = this.getAmpDoc().getElementById(sectionId);
           this.expand_(sectionEl);
         } else {
@@ -115,8 +115,8 @@ class AmpAccordion extends AMP.BaseElement {
         if (invocation.args) {
           const sectionId = invocation.args['section'];
           user().assertElement(
-            sectionEl,
-            'No element found with id:' + sectionId);
+              sectionEl,
+              'No element found with id:' + sectionId);
           const sectionEl = this.getAmpDoc().getElementById(sectionId);
           this.collapse_(sectionEl);
         } else {
@@ -217,9 +217,9 @@ class AmpAccordion extends AMP.BaseElement {
     const isSectionClosedAfterClick = section.hasAttribute('expanded');
     this.mutateElement(() => {
       let toExpand;
-      if(opt_forceExpand === true) {
+      if (opt_forceExpand === true) {
         toExpand = true;
-      } else if(opt_forceExpand === false) {
+      } else if (opt_forceExpand === false) {
         toExpand = false;
       } else {
         toExpand = !section.hasAttribute('expanded');
@@ -241,15 +241,15 @@ class AmpAccordion extends AMP.BaseElement {
    * @private
    */
   expand_(section) {
-    this.toggle_(section, true)
+    this.toggle_(section, true);
   }
-  
+
   /**
    * Force collapses the accordion.
    * @private
    */
   collapse_(section) {
-    this.toggle_(section, false)
+    this.toggle_(section, false);
   }
 
   /**
