@@ -55,6 +55,7 @@ import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {upgradeBackgroundAudio} from './audio';
 import {setStyle, setImportantStyles} from '../../../src/style';
+import {installParallaxHandler} from './parallax';
 import {findIndex} from '../../../src/utils/array';
 import {ActionTrust} from '../../../src/action-trust';
 import {getMode} from '../../../src/mode';
@@ -210,6 +211,9 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {!MediaPool} */
     this.mediaPool_ = new MediaPool(this.win, MAX_MEDIA_ELEMENT_COUNTS,
         element => this.getElementDistanceFromActivePage_(element));
+
+    /** @private {?./parallax.ParallaxService} */
+    this.parallaxService_ = null;
   }
 
 
@@ -450,7 +454,13 @@ export class AmpStory extends AMP.BaseElement {
           });
         })
         .then(() => this.switchTo_(firstPageEl.id))
-        .then(() => this.preloadPagesByDistance_());
+        .then(() => this.preloadPagesByDistance_())
+        .then(() => {
+          if (!this.isDesktop_()) {
+            this.parallaxService_ = this.parallaxService_ ||
+              installParallaxHandler(this.win, this.pages_, this.getViewport());
+          }
+        });
   }
 
 
