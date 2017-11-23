@@ -444,8 +444,8 @@ amp-story-page.i-amphtml-story-page-shown {
 }
 
 [desktop] .i-amphtml-story-bookend-inner {
-  box-sizing: border-box;
-  min-height: 100vh;
+  box-sizing: border-box !important;
+  min-height: 100vh !important;
   padding: 104px 156px 64px !important;
   margin: 0 !important;
 }

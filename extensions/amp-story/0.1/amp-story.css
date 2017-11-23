@@ -489,15 +489,15 @@ amp-story-grid-layer * {
 .i-amphtml-story-bookend-article-set {
   border-top: 1px solid rgba(255, 255, 255, 0.25) !important;
   margin-bottom: 32px !important;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: space-between !important;
 }
 
 /* Required for spacing when bottom row has fewer articles than column size */
 .i-amphtml-story-bookend-article-set::after {
-  content: '';
-  flex: auto;
+  content: '' !important;
+  flex: auto !important;
 }
 
 /* All top-level bookend elements need to set their own left/right margins */
