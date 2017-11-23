@@ -43,6 +43,9 @@ class AmpAccordion extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.sessionOptOut_ = false;
+
+    /** @private {!Array<!Node>} */
+    this.sections_ = null;
   }
 
   /** @override */
@@ -59,54 +62,8 @@ class AmpAccordion extends AMP.BaseElement {
     this.sessionId_ = this.getSessionStorageKey_();
     this.currentState_ = this.getSessionState_();
 
-    this.registerAction('toggle', invocation => {
-      if (invocation.args) {
-        const sectionId = invocation.args['section'];
-        user().assertElement(
-          sectionEl,
-          'No element found with id:' + sectionId);
-        const sectionEl = this.getAmpDoc().getElementById(sectionId);
-        this.toggle_(sectionEl);
-      } else {
-        const accordionEl = this.getAmpDoc().getElementById(invocation.target.id);
-        for (let i = 0; i < accordionEl.children.length; i++) {
-          this.toggle_(accordionEl.children[i]);
-        }
-      }
-    });
-    this.registerAction('expand', invocation => {
-      if (invocation.args) {
-        const sectionId = invocation.args['section'];
-        user().assertElement(
-          sectionEl,
-          'No element found with id:' + sectionId);
-        const sectionEl = this.getAmpDoc().getElementById(sectionId);
-        this.expand_(sectionEl);
-      } else {
-        const accordionEl = this.getAmpDoc().getElementById(invocation.target.id);
-        for (let i = 0; i < accordionEl.children.length; i++) {
-          this.expand_(accordionEl.children[i]);
-        }
-      }
-    });
-    this.registerAction('collapse', invocation => {
-      if (invocation.args) {
-        const sectionId = invocation.args['section'];
-        user().assertElement(
-          sectionEl,
-          'No element found with id:' + sectionId);
-        const sectionEl = this.getAmpDoc().getElementById(sectionId);
-        this.collapse_(sectionEl);
-      } else {
-        const accordionEl = this.getAmpDoc().getElementById(invocation.target.id);
-        for (let i = 0; i < accordionEl.children.length; i++) {
-          this.collapse_(accordionEl.children[i]);
-        }
-      }
-    });
-
-    const sections = this.getRealChildren();
-    sections.forEach((section, index) => {
+    this.sections_ = this.getRealChildren();
+    this.sections_.forEach((section, index) => {
       user().assert(
           section.tagName.toLowerCase() == 'section',
           'Sections should be enclosed in a <section> tag, ' +
@@ -126,7 +83,48 @@ class AmpAccordion extends AMP.BaseElement {
         content.setAttribute('id', contentId);
       }
 
-
+      this.registerAction('toggle', invocation => {
+        if (invocation.args) {
+          const sectionId = invocation.args['section'];
+          user().assertElement(
+            sectionEl,
+            'No element found with id:' + sectionId);
+          const sectionEl = this.getAmpDoc().getElementById(sectionId);
+          this.toggle_(sectionEl);
+        } else {
+          for (let i = 0; i < this.sections_.length; i++) {
+            this.toggle_(this.sections_[i]);
+          }
+        }
+      });
+      this.registerAction('expand', invocation => {
+        if (invocation.args) {
+          const sectionId = invocation.args['section'];
+          user().assertElement(
+            sectionEl,
+            'No element found with id:' + sectionId);
+          const sectionEl = this.getAmpDoc().getElementById(sectionId);
+          this.expand_(sectionEl);
+        } else {
+          for (let i = 0; i < this.sections_.length; i++) {
+            this.expand_(this.sections_[i]);
+          }
+        }
+      });
+      this.registerAction('collapse', invocation => {
+        if (invocation.args) {
+          const sectionId = invocation.args['section'];
+          user().assertElement(
+            sectionEl,
+            'No element found with id:' + sectionId);
+          const sectionEl = this.getAmpDoc().getElementById(sectionId);
+          this.collapse_(sectionEl);
+        } else {
+          for (let i = 0; i < this.sections_.length; i++) {
+            this.collapse_(this.sections_[i]);
+          }
+        }
+      });
 
       if (this.currentState_[contentId]) {
         section.setAttribute('expanded', '');
