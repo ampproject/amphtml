@@ -322,7 +322,7 @@ class AmpApesterMedia extends AMP.BaseElement {
               : payload;
             const src = this.constructUrlFromMedia_(media['interactionId']);
             const iframe = this.constructIframe_(src);
-            const overflow = this.c6777onstructOverflow_();
+            const overflow = this.constructOverflow_();
             const mutate = state => {
               state.element.classList.add('i-amphtml-apester-iframe-ready');
             };
@@ -330,6 +330,7 @@ class AmpApesterMedia extends AMP.BaseElement {
               element: iframe,
               mutator: mutate,
             };
+            this.mediaId_ = media['interactionId'];
             this.iframe_ = iframe;
             this.element.appendChild(overflow);
             this.element.appendChild(iframe);
@@ -444,7 +445,7 @@ class AmpApesterMedia extends AMP.BaseElement {
         apesterEventNames.RESIZE_UNIT,
         data => {
           if (this.mediaId_ === data.id && data.height) {
-            this.attemptChangeHeight(this.iframe_, data.height);
+            this.attemptChangeHeight(data.height);
           }
         },
         this.win,
