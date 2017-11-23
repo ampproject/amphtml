@@ -44,7 +44,7 @@ class AmpAccordion extends AMP.BaseElement {
     /** @private {boolean} */
     this.sessionOptOut_ = false;
 
-    /** @private {!Array<!Node>} */
+    /** @private {Element} */
     this.sections_ = null;
   }
 
@@ -209,7 +209,7 @@ class AmpAccordion extends AMP.BaseElement {
    * Toggles section between expanded or collapsed.
    * @private
    */
-  toggle_(section, opt_forceExpand) {
+  toggle_(section, opt_forceExpand = undefined) {
     const sectionComponents = section.children;
     const header = sectionComponents[0];
     const content = sectionComponents[1];
