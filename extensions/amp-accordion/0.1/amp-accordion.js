@@ -216,18 +216,20 @@ class AmpAccordion extends AMP.BaseElement {
     const contentId = content.getAttribute('id');
     const isSectionClosedAfterClick = section.hasAttribute('expanded');
     this.mutateElement(() => {
-      if (typeof opt_forceExpand !== 'undefined' && opt_forceExpand) {
-        section.setAttribute('expanded', '');
-        header.setAttribute('aria-expanded', 'true');
-      } else if (typeof opt_forceExpand !== 'undefined' && !opt_forceExpand) {
-        section.removeAttribute('expanded');
-        header.setAttribute('aria-expanded', 'false');
-      } else if (section.hasAttribute('expanded')) {
-        section.removeAttribute('expanded');
-        header.setAttribute('aria-expanded', 'false');
+      let toExpand;
+      if(opt_forceExpand === true) {
+        toExpand = true;
+      } else if(opt_forceExpand === false) {
+        toExpand = false;
       } else {
+        toExpand = !section.hasAttribute('expanded');
+      }
+      if (toExpand) {
         section.setAttribute('expanded', '');
         header.setAttribute('aria-expanded', 'true');
+      } else {
+        section.removeAttribute('expanded');
+        header.setAttribute('aria-expanded', 'false');
       }
     }, section);
     this.currentState_[contentId] = !isSectionClosedAfterClick;
