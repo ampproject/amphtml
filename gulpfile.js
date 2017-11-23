@@ -69,6 +69,7 @@ declareExtension('amp-analytics', '0.1', false);
 declareExtension('amp-anim', '0.1', false);
 declareExtension('amp-animation', '0.1', false);
 declareExtension('amp-apester-media', '0.1', true);
+declareExtension('amp-riddle-quiz', '0.1', false);
 declareExtension('amp-app-banner', '0.1', true);
 declareExtension('amp-audio', '0.1', false);
 declareExtension('amp-auto-ads', '0.1', false);
