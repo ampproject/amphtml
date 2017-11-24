@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {EventType, dispatch} from './events';
+import {EventType, dispatch, dispatchCustom} from './events';
 import {renderAsElement} from './simple-template';
 import {dict} from '../../../src/utils/object';
 import {dev} from '../../../src/log';
@@ -30,6 +30,8 @@ const UNMUTE_CLASS = 'i-amphtml-story-unmute-audio-control';
 const ENTER_FULLSCREEN_CLASS = 'i-amphtml-story-enter-fullscreen';
 
 const EXIT_FULLSCREEN_CLASS = 'i-amphtml-story-exit-fullscreen';
+
+const SHARE_CLASS = 'i-amphtml-share-fullscreen';
 
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
@@ -78,8 +80,14 @@ const TEMPLATE = {
           tag: 'div',
           attrs: dict({
             'role': 'button',
+            'class': SHARE_CLASS + ' i-amphtml-story-button',
+          }),
+        },
+        {
+          tag: 'div',
+          attrs: dict({
+            'role': 'button',
             'class': ENTER_FULLSCREEN_CLASS + ' i-amphtml-story-button',
-            'hidden': true,
           }),
         },
         {
@@ -222,6 +230,8 @@ export class SystemLayer {
         this.onMuteAudioClick_(e);
       } else if (target.matches(`.${UNMUTE_CLASS}, .${UNMUTE_CLASS} *`)) {
         this.onUnmuteAudioClick_(e);
+      } else if (target.matches(`.${SHARE_CLASS}, .${SHARE_CLASS} *`)) {
+        this.shareStory_(e);
       }
     });
   }
@@ -294,6 +304,23 @@ export class SystemLayer {
    */
   onUnmuteAudioClick_(e) {
     this.dispatch_(EventType.UNMUTE, e);
+  }
+
+  /**
+   * @param {!Event} e
+   * @private
+   */
+  shareStory_() {
+    if (navigator.share) {
+      navigator.share({
+        title: document.title,
+        url: document.URL,
+      });
+    } else {
+      dispatchCustom(this.win_, this.root_, EventType.SWITCH_PAGE,
+        {targetPageId: 'i-amphtml-story-share-bookend'},
+        {bubbles: true});
+    }
   }
 
   /**

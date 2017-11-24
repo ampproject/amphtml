@@ -297,6 +297,8 @@ export class AmpStory extends AMP.BaseElement {
 
       if (targetPageId === 'i-amphtml-story-bookend') {
         this.showBookend_();
+      } else if (targetPageId === 'i-amphtml-story-share-bookend') {
+        this.showBookend_(/* showOnlyShare */ true);
       } else {
         this.switchTo_(targetPageId);
       }
@@ -853,7 +855,7 @@ export class AmpStory extends AMP.BaseElement {
    * Shows the bookend overlay.
    * @private
    */
-  showBookend_() {
+  showBookend_(showOnlyShare) {
     if (this.bookend_.isActive()) {
       return;
     }
@@ -865,7 +867,7 @@ export class AmpStory extends AMP.BaseElement {
 
       this.vsync_.mutate(() => {
         this.element.classList.add('i-amphtml-story-bookend-active');
-        this.bookend_.show();
+        this.bookend_.show(showOnlyShare);
       });
     });
   }
