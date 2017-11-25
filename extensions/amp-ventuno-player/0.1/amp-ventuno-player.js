@@ -111,8 +111,7 @@ class AmpVentunoPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  layoutCallback() {
-	  
+  layoutCallback() {	
     const iframe = this.element.ownerDocument.createElement('iframe');
     const src = this.getVideoIframeSrc_();
 
@@ -133,7 +132,7 @@ class AmpVentunoPlayer extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
-
+	
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
@@ -186,7 +185,8 @@ class AmpVentunoPlayer extends AMP.BaseElement {
 		dev().assert(this.pubid_);
 		dev().assert(this.slotid_);
 
-		let src = `https://vensecure.ventunotech.com/embed/vtnEmbed.html?pType=${pType}&pubKey=${pubid}&slot=${slotid}`;
+		// let src = `https://vensecure.ventunotech.com/embed/vtnEmbed.html?pType=${pType}&pubKey=${pubid}&slot=${slotid}`;
+		let src = `http://staging.ventunotech.com/newPlayer/dev/amp/vtnEmbed.html?pFrom=amp&pType=${pType}&pubKey=${pubid}&slot=${slotid}`;
 	//   src = addParamsToUrl(src, params);
 		return this.videoIframeSrc_ = src;
 	}
@@ -201,7 +201,10 @@ class AmpVentunoPlayer extends AMP.BaseElement {
 		this.playerReadyPromise_.then(() => {
 		  if (this.iframe_ && this.iframe_.contentWindow) {
 			const message = 'vtn' + command;
-			this.iframe_.contentWindow./*OK*/postMessage(message, '*');
+			this.iframe_.contentWindow./*OK*/postMessage({
+				command: message,
+				from: 'amp'
+			}, '*');
 		  }
 		});
 	  }
