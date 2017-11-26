@@ -15,12 +15,16 @@
  */
 
 import {Layout} from '../../../src/layout';
+import {getData} from './../../../src/event-helper';
 
 export class AmpRiddleQuiz extends AMP.BaseElement {
 
     /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+
+    /** @private {?Element} */
+    this.iframe_ = null;
 
     /** @private {?Promise} */
     this.iframePromise_ = null;
@@ -39,13 +43,15 @@ export class AmpRiddleQuiz extends AMP.BaseElement {
   }
 
   onWindowMessage(event) {
-    if (typeof event.data != 'object') {
-      return;
+    const data = getData(event);
+
+    if (typeof data === 'object') {
+      return data;
     }
 
-    if (event.data.riddleId != undefined
-      && event.data.riddleId == this.riddleId_) {
-      this.riddleHeightChanged_(event.data.riddleHeight);
+    if (data['riddleId'] != undefined
+      && data['riddleId'] == this.riddleId_) {
+      this.riddleHeightChanged_(data['riddleHeight']);
     }
   }
 
