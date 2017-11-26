@@ -22,7 +22,6 @@ tags: {  # amp-riddle-quiz
   requires: "amp-riddle-quiz"
   mandatory_parent: "HEAD"
   unique: true
-  extension_unused_unless_tag_present: "amp-riddle-quiz"
   attrs: {
     name: "async"
     mandatory: true
