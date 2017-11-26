@@ -14,91 +14,86 @@
  * limitations under the License.
  */
 
-import {
-    Layout
-} from '../../../src/layout';
+import {Layout} from '../../../src/layout';
 
 export class AmpRiddleQuiz extends AMP.BaseElement {
 
     /** @param {!AmpElement} element */
-    constructor(element) {
-        super(element);
+  constructor(element) {
+    super(element);
 
-        /** @private {?Promise} */
-        this.iframePromise_ = null;
+    /** @private {?Promise} */
+    this.iframePromise_ = null;
 
-        /** @private {?boolean} */
-        this.iframeLoaded_ = false;
+    /** @private {?boolean} */
+    this.iframeLoaded_ = false;
 
-        /** @private {?number} */
-        this.itemHeight_ = 300; //default
+    /** @private {?number} */
+    this.itemHeight_ = 300; //default
 
-        /** @private {?number} */
-        this.riddleId_ = null;
+    /** @private {?number} */
+    this.riddleId_ = null;
 
-        /** @private {!Element} */
-        this.container_ = this.win.document.createElement('div');
+    /** @private {!Element} */
+    this.container_ = this.win.document.createElement('div');
+  }
+
+  onWindowMessage(event) {
+    if (typeof event.data != 'object') {
+      return;
     }
 
-    onWindowMessage(event) {
-        if (typeof event.data != "object") {
-            return;
-        }
+    if (event.data.riddleId != undefined
+      && event.data.riddleId == this.riddleId_) {
+      this.riddleHeightChanged_(event.data.riddleHeight);
+    }
+  }
 
-        if (event.data.riddleId != undefined && event.data.riddleId == this.riddleId_) {
-            this.riddleHeightChanged_(event.data.riddleHeight);
-        }
+  /** @override */
+  buildCallback() {
+    this.riddleId_ = this.element.getAttribute('data-riddle-id');
+    // listen for resize events coming from riddles
+    window.addEventListener('message', this.onWindowMessage.bind(this), false);
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return layout == Layout.RESPONSIVE;
+  }
+
+  /** @override */
+  layoutCallback() {
+    const iframe = this.element.ownerDocument.createElement('iframe');
+    this.iframe_ = iframe;
+    iframe.setAttribute('scrolling', 'no');
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('allowtransparency', 'true');
+    iframe.setAttribute('allowfullscreen', 'true');
+    iframe.src = 'https://www.riddle.com/a/iframe/' + this.riddleId_;
+
+    this.applyFillContent(iframe);
+    this.element.appendChild(iframe);
+
+    return this.iframePromise_ = this.loadPromise(iframe).then(function() {
+      this.iframeLoaded_ = true;
+      this.attemptChangeHeight(this.itemHeight_).catch(() => { /* die */ });
+    }.bind(this));
+  }
+
+  /**
+   * @param {number} height
+   */
+  riddleHeightChanged_(height) {
+    if (isNaN(height) || height === this.itemHeight_) {
+      return;
     }
 
-    /** @override */
-    buildCallback() {
-        // this.container_.textContent = this.myText_;
-        // this.element.appendChild(this.container_);
-        // this.applyFillContent(this.container_, /* replacedContent */ true);
-        this.riddleId_ = this.element.getAttribute('data-riddle-id');
-        // listen for resize events coming from riddles
-        window.addEventListener("message", this.onWindowMessage.bind(this), false);
+    this.itemHeight_ = height; //Save new height
+
+    if (this.iframeLoaded_) {
+      this.attemptChangeHeight(this.itemHeight_).catch(() => { /* die */ });
     }
-
-    /** @override */
-    isLayoutSupported(layout) {
-        return layout == Layout.RESPONSIVE;
-    }
-
-    /** @override */
-    layoutCallback() {
-        const iframe = this.element.ownerDocument.createElement('iframe');
-        this.iframe_ = iframe;
-        iframe.setAttribute('scrolling', 'no');
-        iframe.setAttribute('frameborder', '0');
-        iframe.setAttribute('allowtransparency', 'true');
-        iframe.setAttribute('allowfullscreen', 'true');
-        iframe.src = "https://www.riddle.com/a/iframe/" + this.riddleId_;
-
-        this.applyFillContent(iframe);
-        this.element.appendChild(iframe);
-
-        return this.iframePromise_ = this.loadPromise(iframe).then(function() {
-            this.iframeLoaded_ = true;
-            this.attemptChangeHeight(this.itemHeight_).catch(() => { /* die */ });
-        }.bind(this));
-    }
-
-    /**
-     * @param {number} height
-     */
-    riddleHeightChanged_(height) {
-
-        if (isNaN(height) || height === this.itemHeight_) {
-            return;
-        }
-
-        this.itemHeight_ = height; //Save new height
-
-        if (this.iframeLoaded_) {
-            this.attemptChangeHeight(this.itemHeight_).catch(() => { /* die */ });
-        }
-    }
+  }
 }
 
 AMP.extension('amp-riddle-quiz', '0.1', AMP => {
