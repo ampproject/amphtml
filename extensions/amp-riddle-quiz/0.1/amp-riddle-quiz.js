@@ -45,7 +45,7 @@ export class AmpRiddleQuiz extends AMP.BaseElement {
   onWindowMessage(event) {
     const data = getData(event);
 
-    if (typeof data === 'object') {
+    if (typeof data != 'object') {
       return data;
     }
 
