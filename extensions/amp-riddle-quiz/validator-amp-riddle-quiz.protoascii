@@ -17,48 +17,27 @@
 tags: {  # amp-riddle-quiz
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amp-riddle-quiz extension .js script"
-  satisfies: "amp-riddle-quiz extension .js script"
-  requires: "amp-riddle-quiz"
-  mandatory_parent: "HEAD"
-  unique: true
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  extension_spec: {
+    name: "amp-riddle-quiz"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    requires_usage: GRANDFATHERED
+    deprecated_allow_duplicates: true
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-riddle-quiz"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\.ampproject\.org/v0/amp-riddle-quiz-(latest|0\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-riddle-quiz"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-riddle-quiz>
   html_format: AMP
-  tag_name: "AMP-RIDDLE-QUIZ"
-  satisfies: "amp-riddle-quiz"
-  requires: "amp-riddle-quiz extension .js script"
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-riddle-quiz"
-  amp_layout: {
-    supported_layouts: RESPONSIVE
+  tag_name: "amp-riddle-quiz"
+  requires_extension: "amp-riddle-quiz"
+  attrs: {
+    name: "data-riddle-id"
+    mandatory: true
+    value_regex: "[0-9]+"
   }
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+      supported_layouts: RESPONSIVE
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-riddle-quiz"
 }
