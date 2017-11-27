@@ -242,7 +242,7 @@ export class VisibilityManager {
    * @param {!Object<string, *>} spec
    * @param {?Promise} readyPromise
    * @param {?function():!Promise} createReportPromiseFunc
-   * @param {function(!Object<string, *)} callback
+   * @param {function(!Object<string, *>)} callback
    * @param {!Element=} opt_element
    * @return {!UnlistenDef}
    */
@@ -252,15 +252,13 @@ export class VisibilityManager {
         spec['visiblePercentageMin'] == undefined &&
         spec['visiblePercentageMax'] == undefined) {
       const unlisteners = [];
-      //const ranges = tryParseJson(spec['visiblePercentageThresholds']);
       const ranges = spec['visiblePercentageThresholds'];
       if (!ranges || !isArray(ranges)) {
         user().error(TAG, 'invalid visiblePercentageThresholds');
+        return () => {};
       }
-      console.log('ranges is ', ranges);
       for (let i = 0; i < ranges.length; i++) {
         const percents = ranges[i];
-        console.log('percents is ', percents);
         if (!isArray(percents) || percents.length != 2) {
           user().error(TAG,
               'visiblePercentageThresholds entry length is not 2');
