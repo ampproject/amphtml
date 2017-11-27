@@ -372,7 +372,8 @@ amp-story-grid-layer * {
   border-radius: 8px !important;
 }
 
-.i-amphtml-story-bookend-fullbleed .i-amphtml-story-bookend-inner::before {
+.i-amphtml-story-bookend-fullbleed .i-amphtml-story-bookend-inner::before,
+[desktop] .i-amphtml-story-bookend-inner::before {
   left: 0 !important;
   top: 0 !important;
   bottom: 0 !important;
@@ -402,11 +403,27 @@ amp-story-grid-layer * {
 }
 
 .i-amphtml-story-bookend-article {
+  box-sizing: border-box !important;
   display: block !important;
   text-decoration: none !important;
   color: inherit !important;
-  margin: 24px 0 !important;
   overflow: hidden !important;
+  flex: 1 0 320px !important;
+  min-width: calc(33%) !important;
+  margin: 24px 0 !important;
+  padding: 0 32px !important;
+}
+
+@media (min-width: 640px) {
+  .i-amphtml-story-bookend-article {
+    max-width: calc(50%) !important;
+  }
+}
+
+@media (min-width: 960px) {
+  .i-amphtml-story-bookend-article {
+    max-width: calc(33%) !important;
+  }
 }
 
 .i-amphtml-story-bookend-article-heading {
@@ -472,10 +489,18 @@ amp-story-grid-layer * {
 .i-amphtml-story-bookend-article-set {
   border-top: 1px solid rgba(255, 255, 255, 0.25) !important;
   margin-bottom: 32px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: space-between !important;
+}
+
+/* Required for spacing when bottom row has fewer articles than column size */
+.i-amphtml-story-bookend-article-set::after {
+  content: '' !important;
+  flex: auto !important;
 }
 
 /* All top-level bookend elements need to set their own left/right margins */
-.i-amphtml-story-bookend-article-set,
 .i-amphtml-story-bookend-heading,
 .i-amphtml-story-bookend-replay {
   margin-left: 32px !important;
