@@ -127,8 +127,7 @@ export class GlobalVariableSource extends VariableSource {
     // Provides a sum per given scope using passed values.
     let sumStore = null;
     this.set('SUM', (scope, value) => {
-      const numValue = Number(value);
-      user().assert(!Number.isNaN(numValue),
+      user().assert(!isNaN(value),
           'Second parameter must be a number');
       if (!sumStore) {
         sumStore = Object.create(null);
@@ -136,7 +135,7 @@ export class GlobalVariableSource extends VariableSource {
       if (!sumStore[scope]) {
         sumStore[scope] = 0;
       }
-      sumStore[scope] += numValue;
+      sumStore[scope] += Number(value);
       return sumStore[scope];
     });
 
