@@ -32,7 +32,6 @@ import {
   experimentFeatureEnabled,
   DOUBLECLICK_EXPERIMENT_FEATURE,
   DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
-  UNCONDITIONED_IDENTITY_EXPERIMENT_NAME,
   UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
 } from './doubleclick-a4a-config';
 import {
@@ -47,6 +46,8 @@ import {
   isReportingEnabled,
   AmpAnalyticsConfigDef,
   extractAmpAnalyticsConfig,
+  getCsiAmpAnalyticsConfig,
+  getCsiAmpAnalyticsVariables,
   groupAmpAdsByType,
   addCsiSignalsToAmpAnalyticsConfig,
   QQID_HEADER,
@@ -279,6 +280,7 @@ function fluidMessageListener_(event) {
   listener.instance.receiveMessageForFluid_(payload);
 }
 
+/** @final */
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
@@ -414,16 +416,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     super.buildCallback();
-    this.identityTokenPromise_ = experimentFeatureEnabled(
-        this.win, DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT) ||
-        experimentFeatureEnabled(
-            this.win,
-            DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.IDENTITY_EXPERIMENT,
-            UNCONDITIONED_IDENTITY_EXPERIMENT_NAME) ?
-        Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
-        .then(() => getIdentityToken(this.win, this.getAmpDoc())) :
-        Promise.resolve(
-            /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({}));
+    this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
+        .whenFirstVisible()
+        .then(() => getIdentityToken(this.win, this.getAmpDoc()));
     this.troubleshootData_.slotId = this.element.getAttribute('data-slot');
     this.troubleshootData_.slotIndex =
         this.element.getAttribute('data-amp-slot-index');
@@ -1296,19 +1291,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     dev().assert(this.troubleshootData_.adUrl, 'ad URL does not exist yet');
     return this.troubleshootData_.adUrl.then(adUrl => {
+      const slotId = this.troubleshootData_.slotId + '_' +
+          this.troubleshootData_.slotIndex;
       const payload = dict({
         'gutData': JSON.stringify(dict({
           'events': [{
             'timestamp': Date.now(),
-            'slotid': this.troubleshootData_.slotId,
+            'slotid': slotId,
             'messageId': 4,
           }],
           'slots': [{
             'contentUrl': adUrl || '',
-            'id': this.troubleshootData_.slotId,
+            'id': slotId,
             'leafAdUnitName': this.troubleshootData_.slotId,
-            'domId': 'gpt_unit_' + this.troubleshootData_.slotId + '_' +
-                this.troubleshootData_.slotIndex,
+            'domId': slotId,
             'lineItemId': this.troubleshootData_.lineItemId,
             'creativeId': this.troubleshootData_.creativeId,
           }],
@@ -1320,8 +1316,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.win.opener./*OK*/postMessage(payload, '*');
     });
   }
-}
 
+  /** @override */
+  getA4aAnalyticsVars(analyticsTrigger) {
+    return getCsiAmpAnalyticsVariables(analyticsTrigger, this, this.qqid_);
+  }
+
+  /** @override */
+  getA4aAnalyticsConfig() {
+    return getCsiAmpAnalyticsConfig();
+  }
+}
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpAdNetworkDoubleclickImpl);

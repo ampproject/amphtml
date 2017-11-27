@@ -69,7 +69,7 @@ const METADATA_STRINGS = [
 // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
 // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
 /** @type {string} */
-export const DEFAULT_SAFEFRAME_VERSION = '1-0-13';
+export const DEFAULT_SAFEFRAME_VERSION = '1-0-14';
 
 /** @const {string} */
 export const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
@@ -380,6 +380,14 @@ export class AmpA4A extends AMP.BaseElement {
      * @private {?JsonObject}
      */
     this.a4aAnalyticsConfig_ = null;
+
+    /**
+     * The amp-analytics element that for this impl's analytics config. It will
+     * be null before buildCallback() executes or if the impl does not provide
+     * an analytice config.
+     * @private {?Element}
+     */
+    this.a4aAnalyticsElement_ = null;
   }
 
   /** @override */
@@ -428,7 +436,7 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.a4aAnalyticsConfig_) {
       // TODO(warrengm): Consider having page-level singletons for networks that
       // use the same config for all ads.
-      insertAnalyticsElement(
+      this.a4aAnalyticsElement_ = insertAnalyticsElement(
           this.element, this.a4aAnalyticsConfig_, true /* loadAnalytics */);
     }
   }

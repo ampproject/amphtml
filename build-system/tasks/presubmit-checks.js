@@ -356,6 +356,7 @@ const forbiddenTerms = {
       'src/service/cid-impl.js',
       'testing/fake-dom.js',
       'extensions/amp-analytics/0.1/vendors.js',
+      'extensions/amp-youtube/0.1/amp-youtube.js',
     ],
   },
   'getCookie\\W': {
@@ -499,6 +500,7 @@ const forbiddenTerms = {
     message: 'requireLayout is restricted b/c it affects non-contained elements',  // eslint-disable-line max-len
     whitelist: [
       'extensions/amp-animation/0.1/web-animations.js',
+      'extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.js',
       'src/service/resources-impl.js',
     ],
   },
@@ -577,6 +579,13 @@ const forbiddenTerms = {
     message: 'Use createCustomEvent() helper instead.',
     whitelist: [
       'src/event-helper.js',
+    ],
+  },
+  'new FormData\\(': {
+    message: 'Use new FormDataWrapper() instead and call ' +
+        'formDataWrapper.getFormData() to get the native FormData object.',
+    whitelist: [
+      'src/form-data-wrapper.js',
     ],
   },
   '([eE]xit|[eE]nter|[cC]ancel|[rR]equest)Full[Ss]creen\\(': {

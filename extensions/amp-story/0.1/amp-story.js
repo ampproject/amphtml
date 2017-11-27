@@ -40,6 +40,7 @@ import {Services} from '../../../src/services';
 import {relatedArticlesFromJson} from './related-articles';
 import {ShareWidget} from './share';
 import {
+  closest,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
@@ -52,15 +53,19 @@ import {once} from '../../../src/utils/function';
 import {debounce} from '../../../src/utils/rate-limit';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
-import {AudioManager, upgradeBackgroundAudio} from './audio';
+import {upgradeBackgroundAudio} from './audio';
 import {setStyle, setImportantStyles} from '../../../src/style';
 import {findIndex} from '../../../src/utils/array';
 import {ActionTrust} from '../../../src/action-trust';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrl} from '../../../src/url';
 import {stringHash32} from '../../../src/string';
+import {AmpStoryHint} from './amp-story-hint';
+import {Gestures} from '../../../src/gesture';
+import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {dict} from '../../../src/utils/object';
 import {renderSimpleTemplate} from './simple-template';
+import {MediaPool, MediaType} from './media-pool';
 
 /** @private @const {string} */
 const PRE_ACTIVE_PAGE_ATTRIBUTE_NAME = 'pre-active';
@@ -79,6 +84,12 @@ const DESKTOP_WIDTH_THRESHOLD = 1024;
 
 /** @private @const {number} */
 const DESKTOP_HEIGHT_THRESHOLD = 550;
+
+/** @const {!Object<string, number>} */
+const MAX_MEDIA_ELEMENT_COUNTS = {
+  [MediaType.AUDIO]: 4,
+  [MediaType.VIDEO]: 8,
+};
 
 /**
  * @private @const {string}
@@ -143,9 +154,6 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!SystemLayer} */
     this.systemLayer_ = new SystemLayer(this.win);
 
-    /** @private {boolean} */
-    this.isBookendActive_ = false;
-
     /** @private @const {!Array<string>} */
     this.pageHistoryStack_ = [];
 
@@ -154,9 +162,6 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @const @private {!AmpStoryVariableService} */
     this.variableService_ = new AmpStoryVariableService();
-
-    /** @const @private {!AudioManager} */
-    this.audioManager_ = new AudioManager(this.win, this.element);
 
     /** @private @const {!function():!Promise<?./bookend.BookendConfigDef>} */
     this.loadBookendConfig_ = once(() => this.loadBookendConfigImpl_());
@@ -198,6 +203,13 @@ export class AmpStory extends AMP.BaseElement {
       '878041739', '2199838184', '708478954', '142793127', '2414533450',
       '212690086',
     ];
+
+    /** @private {!AmpStoryHint} */
+    this.ampStoryHint_ = new AmpStoryHint(this.win);
+
+    /** @private {!MediaPool} */
+    this.mediaPool_ = new MediaPool(this.win, MAX_MEDIA_ELEMENT_COUNTS,
+        element => this.getElementDistanceFromActivePage_(element));
   }
 
 
@@ -222,8 +234,8 @@ export class AmpStory extends AMP.BaseElement {
     this.navigationState_.observe(stateChangeEvent =>
         this.variableService_.onStateChange(stateChangeEvent));
 
-    // Add muted attribute to `amp-story` in beginning.
-    this.toggleMutedAttribute_(true);
+    // Mute `amp-story` in beginning.
+    this.mute_();
 
     upgradeBackgroundAudio(this.element);
 
@@ -239,6 +251,14 @@ export class AmpStory extends AMP.BaseElement {
    */
   buildSystemLayer_() {
     this.element.appendChild(this.systemLayer_.build(this.getPageCount()));
+  }
+
+  /**
+   * Builds the hint layer DOM.
+   * @private
+   */
+  buildHintLayer_() {
+    this.element.appendChild(this.ampStoryHint_.buildHintContainer());
   }
 
 
@@ -280,6 +300,8 @@ export class AmpStory extends AMP.BaseElement {
       } else {
         this.switchTo_(targetPageId);
       }
+
+      this.ampStoryHint_.hideAllNavigationHint();
     });
 
     this.element.addEventListener(EventType.PAGE_PROGRESS, e => {
@@ -299,17 +321,19 @@ export class AmpStory extends AMP.BaseElement {
       this.replay_();
     });
 
-    this.element.addEventListener('play', e => {
-      if (e.target instanceof HTMLMediaElement) {
-        this.audioManager_.play(e.target);
-      }
-    }, true);
+    this.element.addEventListener(EventType.SHOW_NO_PREVIOUS_PAGE_HELP, () => {
+      this.ampStoryHint_.showFirstPageHintOverlay();
+    });
 
-    this.element.addEventListener('pause', e => {
-      if (e.target instanceof HTMLMediaElement) {
-        this.audioManager_.stop(e.target);
+    const gestures = Gestures.get(this.element,
+        /* shouldNotPreventDefault */ true);
+
+    gestures.onGesture(SwipeXYRecognizer, () => {
+      if (this.bookend_.isActive()) {
+        return;
       }
-    }, true);
+      this.ampStoryHint_.showNavigationOverlay();
+    });
 
     this.win.document.addEventListener('keydown', e => {
       this.onKeyDown_(e);
@@ -419,6 +443,7 @@ export class AmpStory extends AMP.BaseElement {
 
     return this.initializePages_()
         .then(() => this.buildSystemLayer_())
+        .then(() => this.buildHintLayer_())
         .then(() => {
           this.pages_.forEach(page => {
             page.setActive(false);
@@ -536,6 +561,7 @@ export class AmpStory extends AMP.BaseElement {
         (pageEl, index) => {
           return pageEl.getImpl().then(pageImpl => {
             this.pages_[index] = pageImpl;
+            pageImpl.setMediaPool(this.mediaPool_);
           });
         });
 
@@ -573,7 +599,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   // TODO(newmuis): Update history state
   switchTo_(targetPageId) {
-    if (this.isBookendActive_) {
+    if (this.bookend_.isActive()) {
       // Disallow switching pages while the bookend is active.
       return Promise.resolve();
     }
@@ -629,6 +655,7 @@ export class AmpStory extends AMP.BaseElement {
           }
         })
         .then(() => this.preloadPagesByDistance_())
+        .then(() => this.reapplyMuting_())
         .then(() => this.forceRepaintForSafari_());
   }
 
@@ -693,7 +720,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onKeyDown_(e) {
-    if (this.isBookendActive_) {
+    if (this.bookend_.isActive()) {
       return;
     }
 
@@ -827,7 +854,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   showBookend_() {
-    if (this.isBookendActive_) {
+    if (this.bookend_.isActive()) {
       return;
     }
 
@@ -835,12 +862,10 @@ export class AmpStory extends AMP.BaseElement {
       this.systemLayer_.hideDeveloperLog();
 
       this.exitFullScreen_();
-      this.systemLayer_.toggleCloseBookendButton(true);
-      this.isBookendActive_ = true;
 
       this.vsync_.mutate(() => {
         this.element.classList.add('i-amphtml-story-bookend-active');
-        this.bookend_.getRoot()./*OK*/scrollTop = 0;
+        this.bookend_.show();
       });
     });
   }
@@ -851,11 +876,13 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   hideBookend_() {
-    this.systemLayer_.toggleCloseBookendButton(false);
-    this.isBookendActive_ = false;
+    if (!this.bookend_.isActive()) {
+      return;
+    }
 
     this.vsync_.mutate(() => {
       this.element.classList.remove('i-amphtml-story-bookend-active');
+      this.bookend_.hide();
     });
   }
 
@@ -928,9 +955,7 @@ export class AmpStory extends AMP.BaseElement {
       pagesByDistance.forEach((pageIds, distance) => {
         pageIds.forEach(pageId => {
           const page = this.getPageById_(pageId);
-          setImportantStyles(page.element, {
-            transform: `translateY(${100 * distance}%)`,
-          });
+          page.setDistance(distance);
         });
       });
     });
@@ -985,10 +1010,12 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     const rawUrl = this.element.getAttribute(attributeName);
+    const opts = {};
+    opts.requireAmpResponseSourceOrigin = false;
 
     return Services.urlReplacementsForDoc(this.getAmpDoc())
         .expandAsync(user().assertString(rawUrl))
-        .then(url => Services.xhrFor(this.win).fetchJson(url))
+        .then(url => Services.xhrFor(this.win).fetchJson(url, opts))
         .then(response => {
           user().assert(response.ok, 'Invalid HTTP response for bookend JSON');
           return response.json();
@@ -1061,12 +1088,46 @@ export class AmpStory extends AMP.BaseElement {
     return findIndex(this.pages_, page => page === desiredPage);
   }
 
+
+  /**
+   * @param {!Element} element The element whose containing AmpStoryPage should
+   *     be retrieved
+   * @return {!./amp-story-page.AmpStoryPage} The AmpStoryPage containing the
+   *     specified element.
+   */
+  getPageContainingElement_(element) {
+    const pageIndex = findIndex(this.pages_, page => {
+      const pageEl = closest(element, el => {
+        return el === page.element;
+      });
+
+      return !!pageEl;
+    });
+
+    return dev().assert(this.pages_[pageIndex],
+        'Element not contained on any amp-story-page');
+  }
+
+
+  /**
+   * @param {!Element} element The element whose distance should be retrieved.
+   * @return {number} The number of pages the specified element is from the
+   *     currently active page.
+   */
+  getElementDistanceFromActivePage_(element) {
+    const page = this.getPageContainingElement_(element);
+    return page.getDistance();
+  }
+
+
   /**
    * Mutes the audio for the story.
    * @private
    */
   mute_() {
-    this.audioManager_.muteAll();
+    this.pages_.forEach(page => {
+      page.muteAllMedia();
+    });
     this.toggleMutedAttribute_(true);
   }
 
@@ -1075,9 +1136,33 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   unmute_() {
-    this.audioManager_.unmuteAll();
+    this.mediaPool_.blessAll().then(() => {
+      this.activePage_.unmuteAllMedia();
+    });
     this.toggleMutedAttribute_(false);
   }
+
+
+  /**
+   * Reapplies the muting status for the currently-active media in the story.
+   */
+  reapplyMuting_() {
+    const isMuted = this.isMuted_();
+    if (!isMuted) {
+      this.mute_();
+      this.unmute_();
+    }
+  }
+
+
+  /**
+   * @return {boolean} Whether the story is currently muted.
+   * @private
+   */
+  isMuted_() {
+    return this.element.hasAttribute(AUDIO_MUTED_ATTRIBUTE);
+  }
+
 
   /**
    * Toggles mute or unmute attribute on element.
