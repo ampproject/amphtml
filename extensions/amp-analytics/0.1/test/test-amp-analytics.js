@@ -1775,9 +1775,9 @@ describes.realWin('amp-analytics', {
   });
 
   describe('inabox nested transport iframe', () => {
-    let ampMode;
+    let origAmpMode;
     beforeEach(() => {
-      ampMode = env.win.AMP_MODE
+      origAmpMode = env.win.AMP_MODE;
       env.win.AMP_MODE = 'inabox';
       // Unfortunately need to fake sandbox analytics element's parent
       // to an AMP element
@@ -1786,7 +1786,7 @@ describes.realWin('amp-analytics', {
 
     afterEach(() => {
       doc.body.classList.remove('i-amphtml-element');
-      env.win.AMP_MODE = ampMode;
+      env.win.AMP_MODE = origAmpMode;
     });
 
     it('sends a basic hit', function() {
