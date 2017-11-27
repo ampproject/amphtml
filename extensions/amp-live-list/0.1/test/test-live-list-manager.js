@@ -473,6 +473,7 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
     doc.getElementsByTagName = () => {
       return [list1.element, list2.element];
     };
+    doc.querySelectorAll = function() {};
     list1.buildCallback();
     list2.buildCallback();
     expect(manager.latestUpdateTime_).to.equal(0);
@@ -505,5 +506,53 @@ describes.fakeWin('LiveListManager', {amp: true}, env => {
         expect(requests[1].url).to.match(/amp_latest_update_time=2500/);
       });
     });
+  });
+});
+
+describes.realWin('install scripts', {
+  amp: true,
+  fakeRegisterElement: true,
+}, env => {
+  let manager;
+  let ampdoc;
+  let win;
+  let doc;
+  let extensions;
+
+  beforeEach(function() {
+    win = env.win;
+    doc = win.document;
+    ampdoc = env.ampdoc;
+    extensions = env.extensions;
+    manager = liveListManagerForDoc(ampdoc);
+  });
+
+  it('should install newly discovered script tags on xhr doc', () => {
+    // Emulate doc
+    const div = document.createElement('div');
+    const script1 = document.createElement('script');
+    const script2 = document.createElement('script');
+    script1.setAttribute('custom-element', 'amp-test');
+    script2.setAttribute('custom-template', 'amp-template');
+    div.appendChild(script1);
+    div.appendChild(script2);
+
+    expect(doc.head.querySelectorAll(
+        '[custom-element="amp-test"]')).to.have.length(0);
+    expect(extensions.extensions_['amp-test']).to.be.undefined;
+
+    expect(doc.head.querySelectorAll(
+        '[custom-template="amp-template"]')).to.have.length(0);
+    expect(extensions.extensions_['amp-template']).to.be.undefined;
+
+    manager.installExtensionsForDoc_(div);
+
+    expect(doc.head.querySelectorAll(
+        '[custom-element="amp-test"]')).to.have.length(1);
+    expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+
+    expect(doc.head.querySelectorAll(
+        '[custom-element="amp-template"]')).to.have.length(1);
+    expect(extensions.extensions_['amp-template'].scriptPresent).to.be.true;
   });
 });
