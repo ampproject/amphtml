@@ -27,6 +27,7 @@ import {user} from '../../../src/log';
 const WHITELISTED_VARIABLES = [
   'RANDOM',
   'COUNTER',
+  'SUM',
   'CANONICAL_URL',
   'CANONICAL_HOST',
   'CANONICAL_HOSTNAME',

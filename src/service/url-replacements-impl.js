@@ -124,6 +124,22 @@ export class GlobalVariableSource extends VariableSource {
       return ++counterStore[scope];
     });
 
+    // Provides a sum per given scope using passed values.
+    let sumStore = null;
+    this.set('SUM', (scope, value) => {
+      const numValue = Number(value);
+      user().assert(!Number.isNaN(numValue),
+          'Second parameter must be a number');
+      if (!sumStore) {
+        sumStore = Object.create(null);
+      }
+      if (!sumStore[scope]) {
+        sumStore[scope] = 0;
+      }
+      sumStore[scope] += numValue;
+      return sumStore[scope];
+    });
+
     // Returns the canonical URL for this AMP document.
     this.set('CANONICAL_URL', this.getDocInfoValue_.bind(this, info => {
       return info.canonicalUrl;
