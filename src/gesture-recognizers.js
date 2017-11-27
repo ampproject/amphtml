@@ -148,8 +148,10 @@ export class DoubletapRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchMove(e) {
-    const touches = e.changedTouches || e.touches;
-    if (touches && touches.length == 1) {
+    const touches = e.touches;
+    if (!touches || touches.length != 1) {
+      return false;
+    } else {
       this.lastX_ = touches[0].clientX;
       this.lastY_ = touches[0].clientY;
       const dx = Math.abs(this.lastX_ - this.startX_) >= 8;
@@ -158,8 +160,8 @@ export class DoubletapRecognizer extends GestureRecognizer {
         this.acceptCancel();
         return false;
       }
+      return true;
     }
-    return true;
   }
 
   /** @override */
@@ -271,8 +273,10 @@ class SwipeRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchMove(e) {
-    const touches = e.changedTouches || e.touches;
-    if (touches && touches.length == 1) {
+    const touches = e.touches;
+    if (!touches || touches.length != 1) {
+      return false;
+    } else {
       const x = touches[0].clientX;
       const y = touches[0].clientY;
       this.lastX_ = x;
@@ -304,8 +308,8 @@ class SwipeRecognizer extends GestureRecognizer {
           return false;
         }
       }
+      return true;
     }
-    return true;
   }
 
   /** @override */
@@ -512,7 +516,9 @@ export class TapzoomRecognizer extends GestureRecognizer {
   /** @override */
   onTouchMove(e) {
     const touches = e.changedTouches || e.touches;
-    if (touches && touches.length == 1) {
+    if (!touches || touches.length != 1) {
+      return false;
+    } else {
       this.lastX_ = touches[0].clientX;
       this.lastY_ = touches[0].clientY;
       if (this.eventing_) {
@@ -529,8 +535,8 @@ export class TapzoomRecognizer extends GestureRecognizer {
           }
         }
       }
+      return true;
     }
-    return true;
   }
 
   /** @override */
@@ -691,42 +697,48 @@ export class PinchRecognizer extends GestureRecognizer {
   /** @override */
   onTouchStart(e) {
     const touches = e.touches;
-    if (!touches || touches.length != 2) {
+    if (!touches || touches.length > 2) {
       return false;
+    } else if (touches.length == 1) {
+      return true;
+    } else {
+      this.startTime_ = Date.now();
+      this.startX1_ = touches[0].clientX;
+      this.startY1_ = touches[0].clientY;
+      this.startX2_ = touches[1].clientX;
+      this.startY2_ = touches[1].clientY;
+      return true;
     }
-    this.startTime_ = Date.now();
-    this.startX1_ = touches[0].clientX;
-    this.startY1_ = touches[0].clientY;
-    this.startX2_ = touches[1].clientX;
-    this.startY2_ = touches[1].clientY;
-    return true;
   }
 
   /** @override */
   onTouchMove(e) {
     const touches = e.touches;
-    if (!touches || touches.length != 2) {
+    if (!touches || touches.length > 2) {
       return false;
-    }
-    this.lastX1_ = touches[0].clientX;
-    this.lastY1_ = touches[0].clientY;
-    this.lastX2_ = touches[1].clientX;
-    this.lastY2_ = touches[1].clientY;
-    if (this.eventing_) {
-      this.emit_(false, false, e);
+    } else if (touches.length == 1) {
+      return true;
     } else {
-      const dx1 = this.lastX1_ - this.startX1_;
-      const dy1 = this.lastY1_ - this.startY1_;
-      const dx2 = this.lastX2_ - this.startX2_;
-      const dy2 = this.lastY2_ - this.startY2_;
-      // Fingers should move in opposite directions and go over the threshold.
-      if (dx1 * dx2 <= 0 && dy1 * dy2 <= 0) {
-        if (Math.abs(dx1 - dx2) >= 8 || Math.abs(dy1 - dy2) >= 8) {
-          this.signalReady(0);
+      this.lastX1_ = touches[0].clientX;
+      this.lastY1_ = touches[0].clientY;
+      this.lastX2_ = touches[1].clientX;
+      this.lastY2_ = touches[1].clientY;
+      if (this.eventing_) {
+        this.emit_(false, false, e);
+      } else {
+        const dx1 = this.lastX1_ - this.startX1_;
+        const dy1 = this.lastY1_ - this.startY1_;
+        const dx2 = this.lastX2_ - this.startX2_;
+        const dy2 = this.lastY2_ - this.startY2_;
+        // Fingers should move in opposite directions and go over the threshold.
+        if (dx1 * dx2 <= 0 && dy1 * dy2 <= 0) {
+          if (Math.abs(dx1 - dx2) >= 4 || Math.abs(dy1 - dy2) >= 4) {
+            this.signalReady(0);
+          }
+        } else if (Math.abs(dx1 + dx2) >= 10 || Math.abs(dy1 + dy2) >= 10) {
+          // Moving in the same direction over a threshold.
+          return false;
         }
-      } else if (Math.abs(dx1 + dx2) >= 8 || Math.abs(dy1 + dy2) >= 8) {
-        // Moving in the same direction over a threshold.
-        return false;
       }
     }
     return true;
