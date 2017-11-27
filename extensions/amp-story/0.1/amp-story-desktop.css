@@ -423,3 +423,46 @@ amp-story-page.i-amphtml-story-page-shown {
 [desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-right {
   margin: 16px 40px!important;
 }
+
+[desktop] .i-amphtml-story-top {
+  z-index: 100002 !important; /* 1 higher than bookend */
+
+  /* This is only needed since we need to render the share button inside the
+  top bar in a higher context than the bookend. This won't be necessary once
+  the bookend close button is rendered on a different area than the top bar. */
+  pointer-events: none !important;
+}
+
+[desktop] .i-amphtml-story-top > .i-amphtml-story-share {
+  /* Ditto. */
+  pointer-events: all !important;
+}
+
+[desktop] .i-amphtml-story-bookend .i-amphtml-story-share-widget {
+  /* TODO(alanorozco): Don't render at all when on desktop */
+  display: none !important;
+}
+
+[desktop] .i-amphtml-story-bookend-inner {
+  box-sizing: border-box !important;
+  min-height: 100vh !important;
+  padding: 104px 156px 64px !important;
+  margin: 0 !important;
+}
+
+[desktop] .i-amphtml-story-bookend-overflow {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+@media (min-width: 952px) {
+  [desktop] .i-amphtml-story-bookend-article {
+    max-width: calc(50%) !important;
+  }
+}
+
+@media (min-width: 1272px) {
+  [desktop] .i-amphtml-story-bookend-article {
+    max-width: calc(33%) !important;
+  }
+}
