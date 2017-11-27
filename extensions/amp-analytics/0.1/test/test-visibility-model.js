@@ -163,7 +163,10 @@ describes.sandboxed('VisibilityModel', {}, () => {
       // Accept number
       expect(getReset({reset: '200'}).reset).to.be.true;
       expect(getReset({reset: 200}).reset).to.be.true;
+
+      // Should forbid reset request with interval less than MIN_RESET_INTERVAL
       expect(getReset({reset: 199}).reset).to.be.false;
+
       expect(getReset({reset: 0, continuousTimeMin: 199}).reset).to.be.false;
       expect(getReset({reset: 0, continuousTimeMin: 200}).reset).to.be.true;
       expect(getReset({reset: 0, totalTimeMin: 200}).reset).to.be.true;

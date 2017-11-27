@@ -165,11 +165,14 @@ export class VisibilityModel {
   /**
    * Refresh counter on visible reset.
    * TODO: Right now all state value are scoped state values that gets reset.
-   * We may need to add support to global state values, that never reset like globalTotalVisibleTime.
+   * We may need to add support to global state values,
+   * that never reset like globalTotalVisibleTime.
    * Note: loadTimeVisibility is an exception.
    * @private
    */
   refresh_() {
+    dev().assert(!this.eventResolver_,
+        'Attempt to refresh visible event before previous one resolve');
     this.eventPromise_ = new Promise(resolve => {
       this.eventResolver_ = resolve;
     });
@@ -205,15 +208,17 @@ export class VisibilityModel {
     if (this.resetInterval_) {
       const now = Date.now();
       const interval = now - this.firstVisibleTime_;
-      const diff = Math.max(0, this.resetInterval_ - interval);
+
+      // Unit in milliseconds
+      const timeUntilReset = Math.max(0, this.resetInterval_ - interval);
       this.ready_ = false;
       dev().assert(!this.scheduleResetId_, 'Should not reset twice');
       this.scheduleResetId_ = setTimeout(() => {
         this.refresh_();
         this.setReady(true);
-      }, diff);
+      }, timeUntilReset);
     } else {
-      // Reset after element falls out of [minPercentage, maxPercentage]
+      // Reset after element falls out of (minPercentage, maxPercentage]
       this.waitToRefresh_ = true;
     }
   }
