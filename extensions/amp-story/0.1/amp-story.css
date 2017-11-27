@@ -409,7 +409,7 @@ amp-story-grid-layer * {
   color: inherit !important;
   overflow: hidden !important;
   flex: 1 0 320px !important;
-  min-width: calc(33%);
+  min-width: calc(33%) !important;
   margin: 24px 0 !important;
   padding: 0 32px !important;
 }
