@@ -319,13 +319,22 @@ describes.realWin('amp-story', {
     expect(pages[1].hasAttribute('active')).to.be.true;
   });
 
-  // TODO(prateekbh): Add test for lock body once amp-story tests are enabled.
   it('lock body when amp-story is initialized', () => {
     story.lockBody_();
     expect(win.document.body.style.getPropertyValue('overflow'))
         .to.be.equal('hidden');
     expect(win.document.documentElement.style.getPropertyValue('overflow'))
         .to.be.equal('hidden');
+  });
+
+  it('adds event listener for buttons', () => {
+    story.buildButtons_();
+    const nextStub = sandbox.stub(story, 'next_');
+    const prevStub = sandbox.stub(story, 'previous_');
+    story.nextButton_.dispatchEvent(new Event('click'));
+    story.prevButton_.dispatchEvent(new Event('click'));
+    expect(nextStub).calledOnce;
+    expect(prevStub).calledOnce;
   });
 });
 
