@@ -265,7 +265,7 @@ export class VisibilityManager {
     model.onTriggerEvent(() => {
       const startTime = this.getStartTime();
       const state = model.getState(startTime);
-      model.dispose();
+      model.disposeOrReset();
 
       // Additional doc-level state.
       state['backgrounded'] = this.isBackgrounded() ? 1 : 0;
