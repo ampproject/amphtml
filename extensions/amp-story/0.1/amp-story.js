@@ -130,6 +130,31 @@ const PAGE_SWITCH_BUTTONS = [
   },
 ];
 
+const MOBILE_ROTATION_BLOCKER = [
+  {
+    tag: 'div',
+    attrs: dict({'class': 'i-amphtml-story-no-rotation-overlay'}),
+    children: [
+      {
+        tag: 'div',
+        attrs: dict({'class': 'i-amphtml-overlay-container'}),
+        children: [
+          {
+            tag: 'div',
+            attrs: dict({'class': 'i-amphtml-rotate-icon'}),
+            children: [
+            ],
+          },
+          {
+            tag: 'div',
+            text: 'The page is best viewed in Portrait mode.',
+          },
+        ],
+      },
+    ],
+  },
+];
+
 export class AmpStory extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -241,6 +266,8 @@ export class AmpStory extends AMP.BaseElement {
 
     registerServiceBuilder(this.win, 'story-variable',
         () => this.variableService_);
+
+    this.buildMobileOverlay_();
   }
 
 
@@ -297,6 +324,8 @@ export class AmpStory extends AMP.BaseElement {
 
       if (targetPageId === 'i-amphtml-story-bookend') {
         this.showBookend_();
+      } else if (targetPageId === 'i-amphtml-story-share-bookend') {
+        this.showBookend_(/* showOnlyShare */ true);
       } else {
         this.switchTo_(targetPageId);
       }
@@ -795,6 +824,11 @@ export class AmpStory extends AMP.BaseElement {
         this.updateBackground_(this.activePage_.element);
       }
     } else {
+      if (this.element.offsetWidth > this.element.offsetHeight) {
+        this.element.setAttribute('landscape', '');
+      } else {
+        this.element.removeAttribute('landscape');
+      }
       this.element.removeAttribute('desktop');
     }
   }
@@ -807,6 +841,15 @@ export class AmpStory extends AMP.BaseElement {
         this.desktopMedia_.matches;
   }
 
+
+  /**
+   * Build overlay for Landscape mode mobile
+   */
+  buildMobileOverlay_() {
+    this.element.insertBefore(
+        renderSimpleTemplate(this.win.document, MOBILE_ROTATION_BLOCKER),
+        this.element.firstChild);
+  }
   /**
    * Get the URL of the given page's background resource.
    * @param {!Element} pageElement
@@ -853,7 +896,7 @@ export class AmpStory extends AMP.BaseElement {
    * Shows the bookend overlay.
    * @private
    */
-  showBookend_() {
+  showBookend_(showOnlyShare) {
     if (this.bookend_.isActive()) {
       return;
     }
@@ -865,7 +908,7 @@ export class AmpStory extends AMP.BaseElement {
 
       this.vsync_.mutate(() => {
         this.element.classList.add('i-amphtml-story-bookend-active');
-        this.bookend_.show();
+        this.bookend_.show(showOnlyShare);
       });
     });
   }
