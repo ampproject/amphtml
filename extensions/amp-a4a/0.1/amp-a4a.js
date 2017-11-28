@@ -408,9 +408,7 @@ export class AmpA4A extends AMP.BaseElement {
    *    whether creative returned is validated as AMP.
    */
   isVerifiedAmpCreativePromise() {
-    this.verifyStillCurrent();
-    return this.adPromise_.then(
-        () => this.verifyStillCurrent() && this.isVerifiedAmpCreative_);
+    return this.adPromise_.then(() => this.isVerifiedAmpCreative_);
   }
 
   /** @override */
