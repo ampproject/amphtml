@@ -171,6 +171,7 @@ class AmpVideo extends AMP.BaseElement {
     }
     if (mutations['src']) {
       assertHttpsUrl(this.element.getAttribute('src'), this.element);
+      this.propagateAttributes(['src'], this.video_);
     }
     const attrs = ATTRS_TO_PROPAGATE.filter(
         value => mutations[value] !== undefined);
