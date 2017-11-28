@@ -26,6 +26,7 @@ import {
   VerificationStatus,
 } from '../../../amp-a4a/0.1/signature-verifier';
 import {Services} from '../../../../src/services';
+import {Timer} from '../../../../src/service/timer-impl';
 import {
   AmpAdNetworkDoubleclickImpl,
   getNetworkId,
@@ -101,7 +102,6 @@ function createImplTag(config, element, impl, env) {
   impl.win['goog_identity_prom'] = Promise.resolve({});
   return [element, impl, env];
 }
-
 
 describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
   let win, doc, ampdoc;
@@ -1347,6 +1347,7 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
         it('should use experiment value', () => {
           impl.postAdResponseExperimentFeatures['render-idle-vp'] = '4';
           expect(impl.idleRenderOutsideViewport()).to.equal(4);
+          expect(impl.isIdleRender_).to.be.true;
         });
 
         it('should return false if using loading strategy', () => {
@@ -1354,11 +1355,83 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           impl.element.setAttribute('data-loading-strategy',
               'prefer-viewability-over-views');
           expect(impl.idleRenderOutsideViewport()).to.be.false;
+          expect(impl.isIdleRender_).to.be.false;
         });
 
         it('should return false if invalid experiment value', () => {
           impl.postAdResponseExperimentFeatures['render-idle-vp'] = 'abc';
           expect(impl.idleRenderOutsideViewport()).to.be.false;
+          expect(impl.isIdleRender_).to.be.false;
+        });
+      });
+
+      describe('idle render layoutCallback', () => {
+        let attemptToRenderCreativeStub;
+        let isVerifiedAmpCreativePromiseStub;
+
+        beforeEach(() => {
+          element = createElementWithAttributes(doc, 'amp-ad', {
+            'width': '200',
+            'height': '50',
+            'type': 'doubleclick',
+          });
+          impl = new AmpAdNetworkDoubleclickImpl(element);
+          impl.postAdResponseExperimentFeatures['render-idle-vp'] = '4';
+          impl.postAdResponseExperimentFeatures['render-idle-throttle'] =
+              'true';
+          attemptToRenderCreativeStub =
+              sandbox.stub(impl, 'attemptToRenderCreative')
+              .returns(Promise.resolve());
+          isVerifiedAmpCreativePromiseStub =
+              sandbox.stub(impl, 'isVerifiedAmpCreativePromise');
+          sandbox.stub(Timer.prototype, 'delay')
+              .callsFake((fn, timeout) => {
+                expect(timeout).to.equal(1000);
+                impl.win['3pla']--;
+                return fn();
+              });
+        });
+
+        it('should throttle if idle render and non-AMP creative', () => {
+          isVerifiedAmpCreativePromiseStub.returns(Promise.resolve(false));
+          impl.win['3pla'] = 1;
+          expect(impl.idleRenderOutsideViewport()).to.equal(4);
+          return impl.layoutCallback().then(() => {
+            expect(impl.win['3pla']).to.equal(0);
+            expect(attemptToRenderCreativeStub).to.be.calledOnce;
+          });
+        });
+
+        it('should NOT throttle if idle experiment not enabled', () => {
+          isVerifiedAmpCreativePromiseStub.returns(Promise.resolve(false));
+          delete impl.postAdResponseExperimentFeatures['render-idle-vp'];
+          impl.win['3pla'] = 1;
+          expect(impl.idleRenderOutsideViewport()).to.be.false;
+          return impl.layoutCallback().then(() => {
+            expect(impl.win['3pla']).to.equal(1);
+            expect(attemptToRenderCreativeStub).to.be.calledOnce;
+          });
+        });
+
+        it('should NOT throttle if experiment throttle not enabled', () => {
+          isVerifiedAmpCreativePromiseStub.returns(Promise.resolve(false));
+          delete impl.postAdResponseExperimentFeatures['render-idle-throttle'];
+          impl.win['3pla'] = 1;
+          expect(impl.idleRenderOutsideViewport()).to.equal(4);
+          return impl.layoutCallback().then(() => {
+            expect(impl.win['3pla']).to.equal(1);
+            expect(attemptToRenderCreativeStub).to.be.calledOnce;
+          });
+        });
+
+        it('should NOT throttle if idle render and AMP creative', () => {
+          isVerifiedAmpCreativePromiseStub.returns(Promise.resolve(true));
+          impl.win['3pla'] = 1;
+          expect(impl.idleRenderOutsideViewport()).to.equal(4);
+          return impl.layoutCallback().then(() => {
+            expect(impl.win['3pla']).to.equal(1);
+            expect(attemptToRenderCreativeStub).to.be.calledOnce;
+          });
         });
       });
     });
