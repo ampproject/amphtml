@@ -839,7 +839,6 @@ describes.realWin('Events', {amp: 1}, env => {
       // Default maxTimerLength is 2 hours
       clock.tick(3 * 3600 * 1000); // 3 hours
       expect(fn3).to.have.callCount(4); // Hit maxTimerLength and stopped.
-      expect(fn3).to.have.callCount(3);
       expect(fn5).to.have.callCount(1084);
 
       // All timers removed except the one that never ends.
