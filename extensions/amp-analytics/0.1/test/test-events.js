@@ -610,7 +610,7 @@ describes.realWin('Events', {amp: 1}, env => {
         tracker.add(analyticsElement, 'timer', {timerSpec: {
 	  interval: 1,
 	  startSpec: {on: 'timer', selector: '.target'},
-	}}, handler);
+        }}, handler);
       }).to.throw(/Cannot track timer start/);
 
       expect(handler).to.not.be.called;
