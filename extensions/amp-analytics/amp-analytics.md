@@ -443,7 +443,7 @@ Use the scroll trigger (`"on": "scroll"`) to fire a request under certain condit
 Use the timer trigger (`"on": "timer"`) to fire a request on a regular time interval. Use `timerSpec` to control when this will fire:
   - `timerSpec` Specification for triggers of type `timer`. The unless a `startSpec` is specified, the timer will trigger immediately (by default, can be unset) and then at a specified interval thereafter.
     - `interval` Length of the timer interval, in seconds.
-    - `maxTimerLength` Maximum duration for which the timer will fire, in seconds.
+    - `maxTimerLength` Maximum duration for which the timer will fire, in seconds. The default is 2 hours. When a `stopSpec` is present, but no maxTimerLength is specified, the default will be infinity.
     - `immediate` trigger timer immediately or not. Boolean, defaults to true
 
 ```javascript
@@ -460,8 +460,10 @@ Use the timer trigger (`"on": "timer"`) to fire a request on a regular time inte
 ```
 
 To configure a timer which times user events use:
-    - `startSpec` Specification for triggering when a timer starts. Use the value of `on` and `selector` to track specific events.
-    - `stopSpec` Specification for triggering when a timer stops. Must also have a `startSpec` to be valid.
+    - `startSpec` Specification for triggering when a timer starts. Use the value of `on` and `selector` to track specific events. A config with a `startSpec` but no `stopSpec` will only stop after `maxTimerLength` has been reached.
+    - `stopSpec` Specification for triggering when a timer stops. A config with a `stopSpec` but no `startSpec` will start immediately but only stop on the specified event.
+
+See the spec for [triggers](#triggers) for details. Note that using a timer trigger to start or stop a timer is not allowed.
 
 ```javascript
 "triggers": {
