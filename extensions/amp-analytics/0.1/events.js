@@ -608,7 +608,12 @@ class TimerEventHandler {
   /** @private */
   listenForStop_() {
     if (this.stopBuilder_) {
-      this.unlistenStop_ = this.stopBuilder_();
+      try {
+        this.unlistenStop_ = this.stopBuilder_();
+      } catch (e) {
+        this.dispose(); // Stop timer and then throw error.
+        throw e;
+      }
     }
   }
 
@@ -723,7 +728,7 @@ export class TimerEventTracker extends EventTracker {
     }
     if (timerStop) {
       const stopTracker = this.getTracker_(timerStop);
-      user().assert(stopTracker, 'Cannot tracker timer stop');
+      user().assert(stopTracker, 'Cannot track timer stop');
       stopBuilder = stopTracker.add.bind(stopTracker, context,
           timerStop['on'], timerStop,
           this.handleTimerToggle_.bind(this, timerId, eventType, listener));
