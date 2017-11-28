@@ -253,7 +253,7 @@ class AmpVideo extends AMP.BaseElement {
     const sources = toArray(childElementsByTag(this.element, 'source'));
 
     // if the `src` of `amp-video` itself is cached, move it to <source>
-    if (this.isCachedByCDN_(this.element)) {
+    if (this.element.hasAttribute('src') && this.isCachedByCDN_(this.element)) {
       const src = this.element.getAttribute('src');
       const ampOrigSrc = this.element.getAttribute('amp-orig-src');
       assertHttpsUrl(src, this.element);
@@ -280,7 +280,8 @@ class AmpVideo extends AMP.BaseElement {
     const sources = toArray(childElementsByTag(this.element, 'source'));
 
     // If the `src` of `amp-video` itself is NOT cached, set it on video
-    if (!this.isCachedByCDN_(this.element)) {
+    if (this.element.hasAttribute('src') &&
+        !this.isCachedByCDN_(this.element)) {
       assertHttpsUrl(this.element.getAttribute('src'), this.element);
       this.propagateAttributes(['src'], this.video_);
     }
