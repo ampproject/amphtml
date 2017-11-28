@@ -531,12 +531,12 @@ export class IniLoadTracker extends EventTracker {
 class TimerEventHandler {
   /**
    * @param {JsonObject} timerSpec The timer specification.
-   * @param {function(): UnlistenDef=} startBuilder Factory for building start
-   *     trackers for this timer.
-   * @param {function(): UnlistenDef=} stopBuilder Factory for building stop
+   * @param {function(): UnlistenDef=} opt_startBuilder Factory for building
+   *     start trackers for this timer.
+   * @param {function(): UnlistenDef=} opt_stopBuilder Factory for building stop
    *     trackers for this timer.
    */
-  constructor(timerSpec, startBuilder, stopBuilder) {
+  constructor(timerSpec, opt_startBuilder, opt_stopBuilder) {
     /** @private {number|undefined} */
     this.intervalId_ = undefined;
 
@@ -565,11 +565,11 @@ class TimerEventHandler {
     /** @private {?UnlistenDef} */
     this.unlistenStop_ = null;
 
-    /** @private @const {function(): UnlistenDef|undefined} */
-    this.startBuilder_ = startBuilder;
+    /** @private @const {?function(): UnlistenDef} */
+    this.startBuilder_ = opt_startBuilder || null;
 
-    /** @private @const {function(): UnlistenDef|undefined} */
-    this.stopBuilder_ = stopBuilder;
+    /** @private @const {?function(): UnlistenDef} */
+    this.stopBuilder_ = opt_stopBuilder || null;
   }
 
   /**
@@ -1007,11 +1007,11 @@ export class VisibilityTracker extends EventTracker {
   /**
    * @param {string|undefined} waitForSpec
    * @param {string|undefined} selector
-   * @param {Element=} element
+   * @param {Element=} opt_element
    * @return {?Promise}
    * @visibleForTesting
    */
-  getReadyPromise(waitForSpec, selector, element) {
+  getReadyPromise(waitForSpec, selector, opt_element) {
     if (!waitForSpec) {
       // Default case:
       if (!selector) {
@@ -1037,7 +1037,8 @@ export class VisibilityTracker extends EventTracker {
     }
 
     // Wait for root signal if there's no element selected.
-    return element ? waitForTracker.getElementSignal(waitForSpec, element)
+    return opt_element ?
+        waitForTracker.getElementSignal(waitForSpec, opt_element)
         : waitForTracker.getRootSignal(waitForSpec);
   }
 
