@@ -50,16 +50,11 @@
     "google-camelcase/google-camelcase": 2,
     "indent": [2, 2, { "SwitchCase": 1, "VariableDeclarator": 2, "MemberExpression": 2, "ObjectExpression": 1, "CallExpression": { "arguments": 2 } }],
     "key-spacing": 2,
-    "max-len": [
-      2,
-      80,
-      4,
-      {
-        "ignoreComments": true,
-        "ignoreUrls": true,
-        "ignorePattern": ""
-      }
-    ],
+    "max-len": [2, 80, 4, {
+      "ignoreComments": true,
+      "ignoreUrls": true,
+      "ignorePattern": ""
+    }],
     "no-alert": 2,
     "no-array-destructuring": 2,
     "no-cond-assign": 2,
@@ -87,26 +82,19 @@
     "no-throw-literal": 2,
     "no-trailing-spaces": 2,
     "no-unused-expressions": 0,
-    "no-unused-vars": [
-      2,
-      {
-        "argsIgnorePattern": "^var_|opt_|unused",
-        "varsIgnorePattern": "AmpElement|Def|Interface$"
-      }
-    ],
+    "no-unused-vars": [2, {
+      "argsIgnorePattern": "^var_|opt_|unused",
+      "varsIgnorePattern": "AmpElement|Def|Interface$"
+    }],
     "no-useless-call": 2,
     "no-useless-concat": 2,
     "no-undef": 2,
     "no-var": 2,
     "no-warning-comments": [2, { "terms": ["do not submit"], "location": "anywhere" }],
-    "object-curly-spacing": [
-      2,
-      "never",
-      {
-        "objectsInObjects": false,
-        "arraysInObjects": false
-      }
-    ],
+    "object-curly-spacing": [2, "never", {
+      "objectsInObjects": false,
+      "arraysInObjects": false
+    }],
     "object-shorthand": [2, "properties", { "avoidQuotes": true }],
     "prefer-const": 2,
     "quotes": [2, "single", "avoid-escape"],
