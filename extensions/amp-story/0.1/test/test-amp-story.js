@@ -336,6 +336,26 @@ describes.realWin('amp-story', {
     expect(nextStub).calledOnce;
     expect(prevStub).calledOnce;
   });
+
+  it('adds `landscape` attribute if width is more than height', () => {
+    element.offsetWidth = 10;
+    element.offsetHeight = 9;
+    const isDesktopStub = sandbox.stub(story, 'isDesktop_').returns(false);
+    const setAttributeStub = sandbox.stub(story.element, 'setAttribute');
+    story.onResize();
+    expect(isDesktopStub).to.be.calledOnce;
+    expect(setAttributeStub).to.be.calledWith('landscape', '');
+  });
+
+  it('removes `landscape` attribute if width is less than height', () => {
+    element.offsetWidth = 9;
+    element.offsetHeight = 10;
+    const isDesktopStub = sandbox.stub(story, 'isDesktop_').returns(false);
+    const removeAttributeStub = sandbox.stub(story.element, 'removeAttribute');
+    story.onResize();
+    expect(isDesktopStub).to.be.calledOnce;
+    expect(removeAttributeStub).to.be.calledOnce;
+  });
 });
 
 

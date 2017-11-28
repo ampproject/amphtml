@@ -130,6 +130,31 @@ const PAGE_SWITCH_BUTTONS = [
   },
 ];
 
+const MOBILE_ROTATION_BLOCKER = [
+  {
+    tag: 'div',
+    attrs: dict({'class': 'i-amphtml-story-no-rotation-overlay'}),
+    children: [
+      {
+        tag: 'div',
+        attrs: dict({'class': 'i-amphtml-overlay-container'}),
+        children: [
+          {
+            tag: 'div',
+            attrs: dict({'class': 'i-amphtml-rotate-icon'}),
+            children: [
+            ],
+          },
+          {
+            tag: 'div',
+            text: 'The page is best viewed in Portrait mode.',
+          },
+        ],
+      },
+    ],
+  },
+];
+
 export class AmpStory extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -241,6 +266,8 @@ export class AmpStory extends AMP.BaseElement {
 
     registerServiceBuilder(this.win, 'story-variable',
         () => this.variableService_);
+
+    this.buildMobileOverlay_();
   }
 
 
@@ -797,6 +824,11 @@ export class AmpStory extends AMP.BaseElement {
         this.updateBackground_(this.activePage_.element);
       }
     } else {
+      if (this.element.offsetWidth > this.element.offsetHeight) {
+        this.element.setAttribute('landscape', '');
+      } else {
+        this.element.removeAttribute('landscape');
+      }
       this.element.removeAttribute('desktop');
     }
   }
@@ -809,6 +841,15 @@ export class AmpStory extends AMP.BaseElement {
         this.desktopMedia_.matches;
   }
 
+
+  /**
+   * Build overlay for Landscape mode mobile
+   */
+  buildMobileOverlay_() {
+    this.element.insertBefore(
+        renderSimpleTemplate(this.win.document, MOBILE_ROTATION_BLOCKER),
+        this.element.firstChild);
+  }
   /**
    * Get the URL of the given page's background resource.
    * @param {!Element} pageElement
