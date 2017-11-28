@@ -18,7 +18,6 @@ import {user, dev} from '../../../src/log';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 import {Services} from '../../../src/services';
-import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
 import {addParamsToUrl} from '../../../src/url';
 import {
   extractTags,
