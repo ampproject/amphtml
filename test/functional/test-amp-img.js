@@ -79,7 +79,7 @@ describe('amp-img', () => {
       expect(img.getAttribute('alt')).to.equal('An image');
       expect(img.getAttribute('title')).to.equal('Image title');
       expect(img.getAttribute('referrerpolicy')).to.equal('origin');
-      expect(img.hasAttribute('async')).to.be.true;
+      expect(img.getAttribute('decoding')).to.equal('async');
     });
   });
 

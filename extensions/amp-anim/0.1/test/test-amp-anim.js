@@ -39,6 +39,6 @@ describes.realWin('amp-anim', {
     expect(img.getAttribute('aria-label')).to.equal('Hello');
     expect(img.getAttribute('aria-labelledby')).to.equal('id2');
     expect(img.getAttribute('aria-describedby')).to.equal('id3');
-    expect(img.hasAttribute('async')).to.be.true;
+    expect(img.getAttribute('decoding')).to.equal('async');
   });
 });
