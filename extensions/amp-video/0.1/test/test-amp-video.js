@@ -16,7 +16,9 @@
 
 import {listenOncePromise} from '../../../../src/event-helper';
 import {Services} from '../../../../src/services';
+import {mockServiceForDoc} from '../../../../testing/test-helper';
 import {VideoEvents} from '../../../../src/video-interface';
+import {VisibilityState} from '../../../../src/visibility-state';
 import '../amp-video';
 
 
@@ -26,16 +28,20 @@ describes.realWin('amp-video', {
   },
 }, env => {
   let win, doc;
-  let timer;
+  let timer, viewerMock;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
     timer = Services.timerFor(win);
+    viewerMock = mockServiceForDoc(sandbox, env.ampdoc, 'viewer', [
+      'getVisibilityState',
+      'whenFirstVisible',
+    ]);
   });
 
-  function getFooVideoSrc(mediatype) {
-    return '//someHost/foo.' + mediatype.slice(mediatype.indexOf('/') + 1); // assumes no optional params
+  function getFooVideoSrc(filetype) {
+    return '//someHost/foo.' + filetype.slice(filetype.indexOf('/') + 1); // assumes no optional params
   }
 
   function getVideo(attributes, children, opt_beforeLayoutCallback) {
@@ -144,6 +150,57 @@ describes.realWin('amp-video', {
         expect(video.children.item(i).getAttribute('type')).to.equal(mediatype);
       }
     });
+  });
+
+  it('should load a video with track children', () => {
+    const tracks = [];
+    const tracktypes = ['captions', 'subtitles', 'descriptions', 'chapters'];
+    for (let i = 0; i < tracktypes.length; i++) {
+      const tracktype = tracktypes[i];
+      const track = doc.createElement('track');
+      track.setAttribute('src', getFooVideoSrc(tracktype));
+      track.setAttribute('type', tracktype);
+      track.setAttribute('srclang', 'en');
+      tracks.push(track);
+    }
+    return getVideo({
+      src: 'video.mp4',
+      width: 160,
+      height: 90,
+      'controls': '',
+      'autoplay': '',
+      'muted': '',
+      'loop': '',
+    }, tracks).then(v => {
+      const preloadSpy = sandbox.spy(v.implementation_.preconnect, 'url');
+      v.implementation_.preconnectCallback();
+      preloadSpy.should.have.been.calledWithExactly('video.mp4',
+          undefined);
+      const video = v.querySelector('video');
+      // check that the source tags were propogated
+      expect(video.children.length).to.equal(tracktypes.length);
+      for (let i = 0; i < tracktypes.length; i++) {
+        const tracktype = tracktypes[i];
+        expect(video.children.item(i).tagName).to.equal('TRACK');
+        expect(video.children.item(i).hasAttribute('src')).to.be.true;
+        expect(video.children.item(i).getAttribute('src'))
+            .to.equal(getFooVideoSrc(tracktype));
+        expect(video.children.item(i).getAttribute('type')).to.equal(tracktype);
+        expect(video.children.item(i).getAttribute('srclang')).to.equal('en');
+      }
+    });
+  });
+
+  it('should not load a video with http src', () => {
+    return expect(getVideo({
+      src: 'http://example.com/video.mp4',
+      width: 160,
+      height: 90,
+      'controls': '',
+      'autoplay': '',
+      'muted': '',
+      'loop': '',
+    })).to.be.rejectedWith(/start with/);
   });
 
   it('should not load a video with http source children', () => {
@@ -422,6 +479,28 @@ describes.realWin('amp-video', {
             const pPause = listenOncePromise(v, VideoEvents.PAUSE);
             return Promise.all([pEnded, pPause]);
           });
+    });
+  });
+
+  describe('in prerender mode', () => {
+    //let makeVisible;
+
+    beforeEach(() => {
+      viewerMock.getVisibilityState.returns(VisibilityState.PRERENDER);
+      const visiblePromise = new Promise(resolve => {
+        //makeVisible = resolve;
+      });
+      viewerMock.whenFirstVisible.returns(visiblePromise);
+    });
+
+    it('should not add src if not cached', () => {
+      return getVideo({
+        'src': 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
+        'amp-orig-src': 'example.com/video.mp4',
+      }).then(v => {
+        const video = v.querySelector('video');
+        expect(video.hasAttribute('src')).to.be.false;
+      });
     });
   });
 });
