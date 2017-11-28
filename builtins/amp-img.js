@@ -129,7 +129,7 @@ export class AmpImg extends BaseElement {
       this.img_ = scopedQuerySelector(this.element, 'img');
     }
     this.img_ = this.img_ || new Image();
-    this.img_.setAttribute('async', '');
+    this.img_.setAttribute('decoding', 'async');
     if (this.element.id) {
       this.img_.setAttribute('amp-img-id', this.element.id);
     }

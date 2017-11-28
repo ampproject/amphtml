@@ -39,6 +39,7 @@ import {
 } from '../polyfills/domtokenlist-toggle';
 import {installImg} from '../../builtins/amp-img';
 import {installPixel} from '../../builtins/amp-pixel';
+import {installLayout} from '../../builtins/amp-layout';
 import {installStylesForDoc, installStylesLegacy} from '../style-installer';
 import {calculateExtensionScriptUrl} from './extension-location';
 import {map} from '../utils/object';
@@ -655,6 +656,7 @@ export class Extensions {
 export function installBuiltinElements(win) {
   installImg(win);
   installPixel(win);
+  installLayout(win);
 }
 
 

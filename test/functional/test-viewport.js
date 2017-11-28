@@ -30,8 +30,8 @@ import {
   ViewportBindingNatural_,
 } from '../../src/service/viewport/viewport-binding-natural';
 import {
-  ViewportBindingNaturalIosEmbed_,
-} from '../../src/service/viewport/viewport-binding-natural-ios-embed';
+  ViewportBindingIosEmbedWrapper_,
+} from '../../src/service/viewport/viewport-binding-ios-embed-wrapper';
 
 import {dev} from '../../src/log';
 import {getMode} from '../../src/mode';
@@ -903,13 +903,16 @@ describes.fakeWin('Viewport', {}, env => {
       root.className = '';
     });
 
-    it('should not set pan-y when not embedded', () => {
+    // TODO(zhouyx, #11827): Make this test work on Safari.
+    it.configure().skipSafari().run('should not set pan-y when ' +
+        'not embedded', () => {
       viewer.isEmbedded = () => false;
       viewport = new Viewport(ampdoc, binding, viewer);
       expect(win.getComputedStyle(root)['touch-action']).to.equal('auto');
     });
 
-    it('should set pan-y with experiment', () => {
+    // TODO(zhouyx, #11827): Make this test work on Safari.
+    it.configure().skipSafari().run('should set pan-y with experiment', () => {
       viewer.isEmbedded = () => true;
       viewport = new Viewport(ampdoc, binding, viewer);
       expect(win.getComputedStyle(root)['touch-action']).to.equal('pan-y');
@@ -1345,7 +1348,7 @@ describe('createViewport', () => {
       installViewportServiceForDoc(ampDoc);
       const viewport = Services.viewportForDoc(ampDoc);
       expect(viewport.binding_).to
-          .be.instanceof(ViewportBindingNaturalIosEmbed_);
+          .be.instanceof(ViewportBindingIosEmbedWrapper_);
     });
 
     it('should NOT bind to "iOS embed" when iframed but not embedded', () => {
@@ -1363,7 +1366,7 @@ describe('createViewport', () => {
       installViewportServiceForDoc(ampDoc);
       const viewport = Services.viewportForDoc(ampDoc);
       expect(viewport.binding_).to
-          .be.instanceof(ViewportBindingNaturalIosEmbed_);
+          .be.instanceof(ViewportBindingIosEmbedWrapper_);
     });
 
     it('should bind to "iOS embed" when iframed but in test mode', () => {
@@ -1373,7 +1376,7 @@ describe('createViewport', () => {
       installViewportServiceForDoc(ampDoc);
       const viewport = Services.viewportForDoc(ampDoc);
       expect(viewport.binding_).to
-          .be.instanceof(ViewportBindingNaturalIosEmbed_);
+          .be.instanceof(ViewportBindingIosEmbedWrapper_);
     });
 
     it('should NOT bind to "iOS embed" when in dev mode, but iframed', () => {

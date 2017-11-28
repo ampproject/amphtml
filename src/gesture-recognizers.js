@@ -141,6 +141,8 @@ export class DoubletapRecognizer extends GestureRecognizer {
     }
     this.startX_ = touches[0].clientX;
     this.startY_ = touches[0].clientY;
+    this.lastX_ = touches[0].clientX;
+    this.lastY_ = touches[0].clientY;
     return true;
   }
 
