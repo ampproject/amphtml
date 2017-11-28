@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
+import {isFiniteNumber} from '../../../src/types';
+import {Observable} from '../../../src/observable';
+
+const MIN_RESET_INTERVAL = 200;
 
 
 /**
@@ -51,12 +55,47 @@ export class VisibilityModel {
       continuousTimeMax: Number(spec['continuousTimeMax']) || Infinity,
     };
 
+    /** @private {boolean} */
+    this.reset_ = false;
+
+    /** @private {?number} */
+    this.resetInterval_ = null;
+
+    let reset = spec['reset'];
+    if (reset === true) {
+      this.reset_ = true;
+    } else {
+      reset = Number(spec['reset']);
+      if (isFiniteNumber(reset)) {
+        const resetInterval = Math.max(
+            this.spec_.totalTimeMin,
+            this.spec_.continuousTimeMin,
+            reset);
+        if (resetInterval >= MIN_RESET_INTERVAL) {
+          this.reset_ = true;
+          this.resetInterval_ = resetInterval;
+        } else {
+          user().error(
+              'AMP-ANALYTICS',
+              `Cannot reset with interval less than ${MIN_RESET_INTERVAL}, ` +
+              ' reset set to false');
+        }
+      }
+    }
+
     /** @private {?function()} */
     this.eventResolver_ = null;
 
-    /** @const @private */
+    /** @private {?Observable} */
+    this.onTriggerObservable_ = new Observable();
+
+    /** @private */
     this.eventPromise_ = new Promise(resolve => {
       this.eventResolver_ = resolve;
+    });
+
+    this.eventPromise_.then(() => {
+      this.onTriggerObservable_.fire();
     });
 
     /** @private {!Array<!UnlistenDef>} */
@@ -115,6 +154,73 @@ export class VisibilityModel {
 
     /** @private {time} milliseconds since epoch */
     this.lastVisibleUpdateTime_ = 0;
+
+    /** @private {boolean} */
+    this.waitToRefresh_ = false;
+
+    /** @private {?number} */
+    this.scheduleResetId_ = null;
+  }
+
+  /**
+   * Refresh counter on visible reset.
+   * TODO: Right now all state value are scoped state values that gets reset.
+   * We may need to add support to global state values,
+   * that never reset like globalTotalVisibleTime.
+   * Note: loadTimeVisibility is an exception.
+   * @private
+   */
+  refresh_() {
+    dev().assert(!this.eventResolver_,
+        'Attempt to refresh visible event before previous one resolve');
+    this.eventPromise_ = new Promise(resolve => {
+      this.eventResolver_ = resolve;
+    });
+    this.eventPromise_.then(() => {
+      this.onTriggerObservable_.fire();
+    });
+    this.waitToRefresh_ = false;
+    this.scheduleResetId_ = null;
+    this.everMatchedVisibility_ = false;
+    this.matchesVisibility_ = false;
+    this.continuousTime_ = 0;
+    this.maxContinuousVisibleTime_ = 0;
+    this.totalVisibleTime_ = 0;
+    this.firstVisibleTime_ = 0;
+    this.firstSeenTime_ = 0;
+    this.lastSeenTime_ = 0;
+    this.lastVisibleTime_ = 0;
+    this.minVisiblePercentage_ = 0;
+    this.maxVisiblePercentage_ = 0;
+    this.lastVisibleUpdateTime_ = 0;
+    this.waitToRefresh_ = false;
+  }
+
+  /**
+   * Function that visibilityManager can used to dispose model or reset model
+   */
+  disposeOrReset() {
+    // We may need a maxIntervalWindow to stop visible event even with reset true
+    if (!this.reset_) {
+      this.dispose();
+      return;
+    }
+    if (this.resetInterval_) {
+      const now = Date.now();
+      const interval = now - this.firstVisibleTime_;
+
+      // Unit in milliseconds
+      const timeUntilReset = Math.max(0, this.resetInterval_ - interval);
+      this.ready_ = false;
+      dev().assert(!this.scheduleResetId_, 'Should not reset twice');
+      this.scheduleResetId_ = setTimeout(() => {
+        this.refresh_();
+        this.setReady(true);
+      }, timeUntilReset);
+    } else {
+      // Reset after element falls out of (minPercentage, maxPercentage]
+      this.waitToRefresh_ = true;
+    }
   }
 
   /** @override */
@@ -123,11 +229,17 @@ export class VisibilityModel {
       clearTimeout(this.scheduledRunId_);
       this.scheduledRunId_ = null;
     }
+    if (this.scheduleResetId_) {
+      clearTimeout(this.scheduleResetId_);
+      this.scheduleResetId_ = null;
+    }
     this.unsubscribe_.forEach(unsubscribe => {
       unsubscribe();
     });
     this.unsubscribe_.length = 0;
     this.eventResolver_ = null;
+    this.onTriggerObservable_.removeAll();
+    this.onTriggerObservable_ = null;
   }
 
   /**
@@ -145,7 +257,11 @@ export class VisibilityModel {
    * @param {function()} handler
    */
   onTriggerEvent(handler) {
-    this.eventPromise_.then(handler);
+    this.onTriggerObservable_.add(handler);
+    if (this.eventPromise_ && !this.eventResolver_) {
+      // If eventPromise has already resolved, need to call handler manually.
+      handler();
+    }
   }
 
   /**
@@ -213,10 +329,16 @@ export class VisibilityModel {
    * @private
    */
   update_(visibility) {
+    // Update state and check if all conditions are satisfied
+    if (this.waitToRefresh_) {
+      if (!this.isVisibilityMatch_(visibility)) {
+        this.refresh_();
+      }
+      return;
+    }
     if (!this.eventResolver_) {
       return;
     }
-    // Update state and check if all conditions are satisfied
     const conditionsMet = this.updateCounters_(visibility);
     if (conditionsMet) {
       if (this.scheduledRunId_) {
@@ -253,6 +375,18 @@ export class VisibilityModel {
   }
 
   /**
+   * Check if visibility fall into the percentage range
+   * @param {number} visibility
+   * @return {boolean}
+   */
+  isVisibilityMatch_(visibility) {
+    dev().assert(visibility >= 0 && visibility <= 1,
+        'invalid visibility value: %s', visibility);
+    return visibility > this.spec_.visiblePercentageMin &&
+        visibility <= this.spec_.visiblePercentageMax;
+  }
+
+  /**
    * @param {number} visibility
    * @return {boolean} true
    * @private
@@ -275,10 +409,7 @@ export class VisibilityModel {
     const prevMatchesVisibility = this.matchesVisibility_;
     const timeSinceLastUpdate =
         this.lastVisibleUpdateTime_ ? now - this.lastVisibleUpdateTime_ : 0;
-    this.matchesVisibility_ = (
-        visibility > this.spec_.visiblePercentageMin &&
-        visibility <= this.spec_.visiblePercentageMax);
-
+    this.matchesVisibility_ = this.isVisibilityMatch_(visibility);
     if (this.matchesVisibility_) {
       this.everMatchedVisibility_ = true;
       if (prevMatchesVisibility) {
