@@ -463,8 +463,6 @@ To configure a timer which times user events use:
     - `startSpec` Specification for triggering when a timer starts. Use the value of `on` and `selector` to track specific events. A config with a `startSpec` but no `stopSpec` will only stop after `maxTimerLength` has been reached.
     - `stopSpec` Specification for triggering when a timer stops. A config with a `stopSpec` but no `startSpec` will start immediately but only stop on the specified event.
 
-See the spec for [triggers](#triggers) for details. Note that using a timer trigger to start or stop a timer is not allowed.
-
 ```javascript
 "triggers": {
   "videoPlayTimer": {
@@ -484,6 +482,8 @@ See the spec for [triggers](#triggers) for details. Note that using a timer trig
   }
 }
 ```
+
+See the spec on [triggers](#triggers) for details. Note that using a timer trigger to start or stop a timer is not allowed.
 
 ##### Hidden trigger
 
