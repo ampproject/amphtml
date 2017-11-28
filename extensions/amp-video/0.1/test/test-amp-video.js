@@ -250,7 +250,7 @@ describes.realWin('amp-video', {
     });
   });
 
-  it('should not set src or preload in prerender mode', () => {
+  it('should not set src or preload in build', () => {
     return getVideo({
       src: 'video.mp4',
       width: 160,
@@ -483,23 +483,261 @@ describes.realWin('amp-video', {
   });
 
   describe('in prerender mode', () => {
-    //let makeVisible;
+    let makeVisible;
+    let visiblePromise;
+    let video;
 
     beforeEach(() => {
       viewerMock.getVisibilityState.returns(VisibilityState.PRERENDER);
-      const visiblePromise = new Promise(resolve => {
-        //makeVisible = resolve;
+      visiblePromise = new Promise(resolve => {
+        makeVisible = resolve;
       });
       viewerMock.whenFirstVisible.returns(visiblePromise);
     });
 
-    it('should not add src if not cached', () => {
-      return getVideo({
-        'src': 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
-        'amp-orig-src': 'example.com/video.mp4',
-      }).then(v => {
-        const video = v.querySelector('video');
-        expect(video.hasAttribute('src')).to.be.false;
+    describe('should not prerender if no cached sources', () => {
+      it('with just src', () => {
+        return new Promise(resolve => {
+          getVideo({
+            src: 'video.mp4',
+            width: 160,
+            height: 90,
+          }, null, element => {
+            expect(element.implementation_.prerenderAllowed()).to.be.false;
+            resolve();
+          });
+        });
+      });
+
+      it('with just source', () => {
+        return new Promise(resolve => {
+          const source = doc.createElement('source');
+          source.setAttribute('src', 'video.mp4');
+          getVideo({
+            width: 160,
+            height: 90,
+          }, null, element => {
+            expect(element.implementation_.prerenderAllowed()).to.be.false;
+            resolve();
+          });
+        });
+      });
+
+      it('with both src and source', () => {
+        return new Promise(resolve => {
+          const source = doc.createElement('source');
+          source.setAttribute('src', 'video.mp4');
+          getVideo({
+            src: 'video.mp4',
+            width: 160,
+            height: 90,
+          }, [source], element => {
+            expect(element.implementation_.prerenderAllowed()).to.be.false;
+            resolve();
+          });
+        });
+      });
+    });
+
+    describe('should prerender cached sources', () => {
+      it('with just cached src', () => {
+        return new Promise(resolve => {
+          getVideo({
+            'src': 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
+            'amp-orig-src': 'https://example.com/video.mp4',
+            width: 160,
+            height: 90,
+          }, null, element => {
+            expect(element.implementation_.prerenderAllowed()).to.be.true;
+            resolve();
+          });
+        });
+      });
+
+      it('with just cached source', () => {
+        return new Promise(resolve => {
+          const source = doc.createElement('source');
+          source.setAttribute('src', 'https://example-com.cdn.ampproject.org/m/s/video.mp4');
+          source.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
+          getVideo({
+            width: 160,
+            height: 90,
+          }, [source], element => {
+            expect(element.implementation_.prerenderAllowed()).to.be.true;
+            resolve();
+          });
+        });
+      });
+
+      it('with a mix or cached and non-cached', () => {
+        return new Promise(resolve => {
+          const source = doc.createElement('source');
+          source.setAttribute('src', 'video.mp4');
+
+          const cachedSource = doc.createElement('source');
+          cachedSource.setAttribute('src', 'https://example-com.cdn.ampproject.org/m/s/video.mp4');
+          cachedSource.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
+
+          getVideo({
+            src: 'video.mp4',
+            width: 160,
+            height: 90,
+          }, [source, cachedSource], element => {
+            expect(element.implementation_.prerenderAllowed()).to.be.true;
+            resolve();
+          });
+        });
+      });
+    });
+
+    describe('before visible', () => {
+      it('should move cached src to source during prerender', () => {
+        return getVideo({
+          'src': 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
+          'amp-orig-src': 'https://example.com/video.mp4',
+        }).then(v => {
+          video = v.querySelector('video');
+          expect(video.hasAttribute('src')).to.be.false;
+          const sources = video.querySelectorAll('source');
+          expect(sources.length).to.equal(1);
+          const cachedSource = sources[0];
+          expect(cachedSource.getAttribute('src')).to.equal('https://example-com.cdn.ampproject.org/m/s/video.mp4');
+        });
+      });
+
+      it('should add cached sources to video', () => {
+        const s1 = doc.createElement('source');
+        s1.setAttribute('src', 'https://example-com.cdn.ampproject.org/m/s/video1.mp4');
+        s1.setAttribute('amp-orig-src', 'https://example.com/video1.mp4');
+
+        const s2 = doc.createElement('source');
+        s2.setAttribute('src', 'https://example-com.cdn.ampproject.org/m/s/video2.mp4');
+        s2.setAttribute('amp-orig-src', 'https://example.com/video2.mp4');
+
+        return getVideo({
+        },[s1, s2]).then(v => {
+          video = v.querySelector('video');
+          expect(video.hasAttribute('src')).to.be.false;
+          const sources = video.querySelectorAll('source');
+          expect(sources.length).to.equal(2);
+          expect(sources[0].getAttribute('src')).to.equal('https://example-com.cdn.ampproject.org/m/s/video1.mp4');
+          expect(sources[1].getAttribute('src')).to.equal('https://example-com.cdn.ampproject.org/m/s/video2.mp4');
+          expect(sources[0], s1);
+          expect(sources[1], s2);
+        });
+      });
+
+      it('should NOT add non-cached sources to video', () => {
+        const cached = doc.createElement('source');
+        cached.setAttribute('src', 'https://example-com.cdn.ampproject.org/m/s/video.mp4');
+        cached.setAttribute('amp-orig-src', 'https://example.com/video1.mp4');
+
+        const noncached = doc.createElement('source');
+        noncached.setAttribute('src', 'video.mp4');
+
+        return getVideo({
+        },[cached, noncached]).then(v => {
+          video = v.querySelector('video');
+          expect(video.hasAttribute('src')).to.be.false;
+          const sources = video.querySelectorAll('source');
+          expect(sources.length).to.equal(1);
+          expect(sources[0].getAttribute('src')).to.equal('https://example-com.cdn.ampproject.org/m/s/video.mp4');
+          expect(sources[0], cached);
+        });
+      });
+
+      it('preload should be set to auto if not specified', () => {
+        return getVideo({
+          'src': 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
+          'amp-orig-src': 'https://example.com/video.mp4',
+        },null).then(v => {
+          video = v.querySelector('video');
+          expect(video.getAttribute('preload')).to.equal('auto');
+        });
+      });
+
+      it('preload should not be overwritten if specified', () => {
+        return getVideo({
+          'src': 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
+          'amp-orig-src': 'https://example.com/video.mp4',
+          'preload': 'none',
+        },null).then(v => {
+          video = v.querySelector('video');
+          expect(video.getAttribute('preload')).to.equal('none');
+        });
+      });
+    });
+
+    describe('after visible', () => {
+      it('should add original source after cache one - single src', () => {
+        return getVideo({
+          'src': 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
+          'amp-orig-src': 'https://example.com/video.mp4',
+        }).then(v => {
+          video = v.querySelector('video');
+          makeVisible();
+          return visiblePromise;
+        }).then(() => {
+          expect(video.hasAttribute('src')).to.be.false;
+          const sources = video.querySelectorAll('source');
+          expect(sources.length).to.equal(2);
+          expect(sources[0].getAttribute('src')).to.equal('https://example-com.cdn.ampproject.org/m/s/video.mp4');
+          expect(sources[1].getAttribute('src')).to.equal('https://example.com/video.mp4');
+        });
+      });
+
+      it('should add original source after cache one - multiple source', () => {
+        const s1 = doc.createElement('source');
+        s1.setAttribute('src', 'https://example-com.cdn.ampproject.org/m/s/video1.mp4');
+        s1.setAttribute('amp-orig-src', 'https://example.com/video1.mp4');
+
+        const s2 = doc.createElement('source');
+        s2.setAttribute('src', 'https://example-com.cdn.ampproject.org/m/s/video2.mp4');
+        s2.setAttribute('amp-orig-src', 'https://example.com/video2.mp4');
+
+        return getVideo({
+        }, [s1, s2]).then(v => {
+          video = v.querySelector('video');
+          makeVisible();
+          return visiblePromise;
+        }).then(() => {
+          expect(video.hasAttribute('src')).to.be.false;
+          const sources = video.querySelectorAll('source');
+          expect(sources.length).to.equal(4);
+          expect(sources[0].getAttribute('src')).to.equal('https://example-com.cdn.ampproject.org/m/s/video1.mp4');
+          expect(sources[1].getAttribute('src')).to.equal('https://example.com/video1.mp4');
+          expect(sources[2].getAttribute('src')).to.equal('https://example-com.cdn.ampproject.org/m/s/video2.mp4');
+          expect(sources[3].getAttribute('src')).to.equal('https://example.com/video2.mp4');
+        });
+      });
+    });
+
+    describe('isCachedByCDN', () => {
+      it('must have amp-orig-src attribute', () => {
+        return new Promise(resolve => {
+          getVideo({
+            'src': 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
+            width: 160,
+            height: 90,
+          }, null, element => {
+            expect(element.implementation_.isCachedByCDN_(element)).to.be.false;
+            resolve();
+          });
+        });
+      });
+
+      it('must be CDN url', () => {
+        return new Promise(resolve => {
+          getVideo({
+            'src': 'https://example-com.cdn.FAKEampproject.org/m/s/video.mp4',
+            'amp-orig-src': 'https://example.com/video.mp4',
+            width: 160,
+            height: 90,
+          }, null, element => {
+            expect(element.implementation_.isCachedByCDN_(element)).to.be.false;
+            resolve();
+          });
+        });
       });
     });
   });
