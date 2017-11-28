@@ -460,8 +460,8 @@ Use the timer trigger (`"on": "timer"`) to fire a request on a regular time inte
 ```
 
 To configure a timer which times user events use:
-    - `startSpec` Specification for triggering when a timer starts. Use the value of `on` and `selector` to track specific events. A config with a `startSpec` but no `stopSpec` will only stop after `maxTimerLength` has been reached.
-    - `stopSpec` Specification for triggering when a timer stops. A config with a `stopSpec` but no `startSpec` will start immediately but only stop on the specified event.
+  - `startSpec` Specification for triggering when a timer starts. Use the value of `on` and `selector` to track specific events. A config with a `startSpec` but no `stopSpec` will only stop after `maxTimerLength` has been reached.
+  - `stopSpec` Specification for triggering when a timer stops. A config with a `stopSpec` but no `startSpec` will start immediately but only stop on the specified event.
 
 ```javascript
 "triggers": {
