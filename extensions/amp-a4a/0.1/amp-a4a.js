@@ -252,9 +252,6 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.promiseId_ = 0;
 
-    /** {?Object} */
-    this.config = null;
-
     /** @private {?string} */
     this.adUrl_ = null;
 
@@ -266,9 +263,6 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @private {?AMP.AmpAdXOriginIframeHandler} */
     this.xOriginIframeHandler_ = null;
-
-    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = this.getVsync();
 
     /** @private {boolean} whether creative has been verified as AMP */
     this.isVerifiedAmpCreative_ = false;
@@ -380,6 +374,14 @@ export class AmpA4A extends AMP.BaseElement {
      * @private {?JsonObject}
      */
     this.a4aAnalyticsConfig_ = null;
+
+    /**
+     * The amp-analytics element that for this impl's analytics config. It will
+     * be null before buildCallback() executes or if the impl does not provide
+     * an analytice config.
+     * @private {?Element}
+     */
+    this.a4aAnalyticsElement_ = null;
   }
 
   /** @override */
@@ -399,6 +401,14 @@ export class AmpA4A extends AMP.BaseElement {
   /** @override */
   isRelayoutNeeded() {
     return this.isRelayoutNeededFlag;
+  }
+
+  /**
+   * @return {!Promise<boolean>} promise blocked on ad promise whose result is
+   *    whether creative returned is validated as AMP.
+   */
+  isVerifiedAmpCreativePromise() {
+    return this.adPromise_.then(() => this.isVerifiedAmpCreative_);
   }
 
   /** @override */
@@ -428,7 +438,7 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.a4aAnalyticsConfig_) {
       // TODO(warrengm): Consider having page-level singletons for networks that
       // use the same config for all ads.
-      insertAnalyticsElement(
+      this.a4aAnalyticsElement_ = insertAnalyticsElement(
           this.element, this.a4aAnalyticsConfig_, true /* loadAnalytics */);
     }
   }
