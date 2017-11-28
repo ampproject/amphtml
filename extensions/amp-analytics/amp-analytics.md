@@ -483,7 +483,7 @@ To configure a timer which times user events use:
 }
 ```
 
-See the spec on [triggers](#triggers) for details. Note that using a timer trigger to start or stop a timer is not allowed.
+See the spec on [triggers](#triggers) for details on creating nested timer triggers. Note that using a timer trigger to start or stop a timer is not allowed.
 
 ##### Hidden trigger
 
