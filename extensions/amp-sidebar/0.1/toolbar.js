@@ -131,8 +131,8 @@ export class Toolbar {
             .add('amp-sidebar-toolbar-target-shown');
         this.toolbarDomElement_.classList
             .remove('amp-sidebar-toolbar-target-hidden');
+        this.toolbarShown_ = true;
       }
-      this.toolbarShown_ = true;
     });
   }
 
@@ -154,8 +154,8 @@ export class Toolbar {
             .add('amp-sidebar-toolbar-target-hidden');
         this.toolbarDomElement_.classList
             .remove('amp-sidebar-toolbar-target-shown');
+        this.toolbarShown_ = false;
       }
-      this.toolbarShown_ = false;
     });
   }
 }
