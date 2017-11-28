@@ -1,4 +1,4 @@
-# <a name="amp-analytics"></a> Variables supported in `amp-analytics`
+ <a name="amp-analytics"></a> Variables supported in `amp-analytics`
 
 Use the format `${varName}` in a request string for a page or platform-defined variable. The `amp-analytics` tag will replace the template with its actual value at the time of construction of the analytics request.
 
