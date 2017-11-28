@@ -93,6 +93,16 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
     <th>Parameters</th>
   </tr>
   <tr>
+    <td><a href="https://developers.google.com/web/updates/2016/10/navigator-share">Web Share API</a> (triggers OS share dialog)</td>
+    <td><code>system</code></td>
+    <td>
+      <ul>
+        <li><code>data-param-text</code>: optional, defaults to: "Current page title"</li>
+        <li><code>data-mode</code>: optional, if set to <code>replace</code>, all other share options are removed.</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
     <td>Email</td>
     <td><code>email</code></td>
     <td>
@@ -171,16 +181,6 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
     <td>
       <ul>
         <li><code>data-param-text</code>: optional, defaults to: "Current page title - current page URL"</li>
-      </ul>
-    </td>
-  </tr>
-  <tr>
-    <td><a href="https://developers.google.com/web/updates/2016/10/navigator-share">Web Share API</a> (available in Chrome as an <a href="https://github.com/jpchase/OriginTrials/blob/gh-pages/developer-guide.md">origin trial</a>)</td>
-    <td><code>system</code></td>
-    <td>
-      <ul>
-        <li><code>data-param-text</code>: optional, defaults to: "Current page title"</li>
-        <li><code>data-mode</code>: optional, if set to <code>replace</code>, all other share options are removed.</li>
       </ul>
     </td>
   </tr>
