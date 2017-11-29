@@ -231,6 +231,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 ### Timers
 
 | Variable Name | Platform Variable | amp-analytics Variable |
+|---------------|-------------------|------------------------|
 | [Timer Duration](#timer-duration) | N/A | `${timerDuration}` |
 | [Timer Start Time](#timer-start) | N/A | `${timerStart}` |
 
