@@ -267,7 +267,7 @@ export class AmpStory extends AMP.BaseElement {
     registerServiceBuilder(this.win, 'story-variable',
         () => this.variableService_);
 
-    this.buildMobileOverlay_();
+    this.buildLandscapeOrientationOverlay_();
   }
 
 
@@ -843,7 +843,7 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * Build overlay for Landscape mode mobile
    */
-  buildMobileOverlay_() {
+  buildLandscapeOrientationOverlay_() {
     this.element.insertBefore(
         renderSimpleTemplate(this.win.document, MOBILE_ROTATION_BLOCKER),
         this.element.firstChild);

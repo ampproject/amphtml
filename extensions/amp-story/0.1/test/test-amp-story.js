@@ -337,7 +337,7 @@ describes.realWin('amp-story', {
     expect(prevStub).calledOnce;
   });
 
-  it('adds `landscape` attribute if width is more than height', () => {
+  it('adds `landscape` attribute if width is greater than height', () => {
     element.offsetWidth = 10;
     element.offsetHeight = 9;
     const isDesktopStub = sandbox.stub(story, 'isDesktop_').returns(false);
@@ -347,7 +347,7 @@ describes.realWin('amp-story', {
     expect(setAttributeStub).to.be.calledWith('landscape', '');
   });
 
-  it('removes `landscape` attribute if width is less than height', () => {
+  it('removes `landscape` attribute if height is greater than width', () => {
     element.offsetWidth = 9;
     element.offsetHeight = 10;
     const isDesktopStub = sandbox.stub(story, 'isDesktop_').returns(false);
