@@ -559,8 +559,8 @@ class TimerEventHandler {
     this.callImmediate_ = 'immediate' in timerSpec ?
         Boolean(timerSpec['immediate']) : true;
 
-    /** @private {function()|undefined} */
-    this.intervalCallback_ = undefined;
+    /** @private {?function()} */
+    this.intervalCallback_ = null;
 
     /** @private {?UnlistenDef} */
     this.unlistenStart_ = null;
@@ -620,7 +620,12 @@ class TimerEventHandler {
   /** @private */
   listenForStop_() {
     if (this.stopBuilder_) {
-      this.unlistenStop_ = this.stopBuilder_();
+      try {
+        this.unlistenStop_ = this.stopBuilder_();
+      } catch (e) {
+        this.dispose(); // Stop timer and then throw error.
+        throw e;
+      }
     }
   }
 
@@ -680,7 +685,7 @@ class TimerEventHandler {
     this.calculateDuration_();
     this.lastPingTime_ = undefined;
     this.intervalCallback_();
-    this.intervalCallback_ = undefined;
+    this.intervalCallback_ = null;
     this.unlistenForStop_();
     this.listenForStart_();
   }
@@ -765,7 +770,7 @@ export class TimerEventTracker extends EventTracker {
     }
     if (timerStop) {
       const stopTracker = this.getTracker_(timerStop);
-      user().assert(stopTracker, 'Cannot tracker timer stop');
+      user().assert(stopTracker, 'Cannot track timer stop');
       stopBuilder = stopTracker.add.bind(stopTracker, context,
           timerStop['on'], timerStop,
           this.handleTimerToggle_.bind(this, timerId, eventType, listener));

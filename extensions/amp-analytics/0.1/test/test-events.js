@@ -683,16 +683,16 @@ describes.realWin('Events', {amp: 1}, env => {
     it('timers started and stopped by the same event on the same target do not'
         + ' have race condition problems', () => {
       const fn1 = sandbox.stub();
+      const clickTracker = root.getTracker('click', ClickEventTracker);
       tracker.add(analyticsElement, 'timer', {timerSpec: {
         interval: 1,
-        immediate: false,
         startSpec: {on: 'click', selector: '.target'},
         stopSpec: {on: 'click', selector: '.target'},
       }}, fn1);
       expect(fn1).to.have.not.been.called;
 
       target.click(); // Start timer.
-      expect(fn1).to.be.have.not.been.called;
+      expect(fn1).to.be.calledOnce;
       target.click(); // Stop timer.
       target.click(); // Start timer.
       target.click(); // Stop timer.
