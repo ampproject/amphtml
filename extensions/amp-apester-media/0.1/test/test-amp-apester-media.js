@@ -126,7 +126,8 @@ describes.realWin(
           const url = new URL(iframe.src);
           const qs = new URLSearchParams(url.searchParams);
           expect(url.hostname).to.equal('renderer.apester.com');
-          expect(url.pathname).to.equal('/interaction/57a336dba187a2ca3005e826');
+          expect(url.pathname)
+              .to.equal('/interaction/57a336dba187a2ca3005e826');
           expect(qs.get('sdk')).to.equal('amp');
           expect(qs.get('type')).to.equal('editorial');
           expect(changeSizeSpy).to.be.calledOnce;
@@ -144,7 +145,8 @@ describes.realWin(
           const url = new URL(iframe.src);
           const qs = new URLSearchParams(url.searchParams);
           expect(url.hostname).to.equal('renderer.apester.com');
-          expect(url.pathname).to.equal('/interaction/57a336dba187a2ca3005e826');
+          expect(url.pathname)
+              .to.equal('/interaction/57a336dba187a2ca3005e826');
           expect(qs.get('sdk')).to.equal('amp');
           expect(qs.get('type')).to.equal('playlist');
           expect(attemptChangeSizeSpy).to.be.calledOnce;
@@ -175,7 +177,8 @@ describes.realWin(
           expect(iframe.src).not.to.be.null;
           const url = new URL(iframe.src);
           expect(url.hostname).to.equal('renderer.apester.com');
-          expect(url.pathname).to.equal('/interaction/57a336dba187a2ca3005e826');
+          expect(url.pathname)
+              .to.equal('/interaction/57a336dba187a2ca3005e826');
           const tag = ape.implementation_;
           tag.unlayoutCallback();
           expect(ape.querySelector('iframe')).to.be.null;
