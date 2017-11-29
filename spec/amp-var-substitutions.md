@@ -484,6 +484,10 @@ Use `COUNTER(name)` to generate an index for the given request. Counts start at 
 Use `SUM(name, value)` to generate a sum for the given request. Values are added per a given `name`.
 
 * **platform variable**: `SUM`
+*  Example: <br>
+  ```html
+  <amp-pixel src="https://foo.com/pixel?SUM('pixel1', 5)"></amp-pixel>
+  ```
 * **amp-analytics variable**: `${sum}`
 
 #### Document Charset
