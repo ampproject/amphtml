@@ -14,7 +14,7 @@
     "es6": true,
     "browser": true
   },
-  "parserOptions": {
+ "parserOptions": {
     "ecmaVersion": 6,
     "sourceType": "module"
   },
