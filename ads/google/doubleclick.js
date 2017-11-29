@@ -16,7 +16,7 @@
 
 import {makeCorrelator} from './correlator';
 import {validateData, loadScript} from '../../3p/3p';
-import {dev} from '../../src/log';
+import {dev, user} from '../../src/log';
 import {setStyles} from '../../src/style';
 import {getMultiSizeDimensions} from './utils';
 
@@ -36,6 +36,12 @@ const GladeExperiment = {
  * @param {!Object} data
  */
 export function doubleclick(global, data) {
+  user().warn(
+      'DOUBLECLICK', 'Delayed Fetch for DoubleClick will be' +
+      'removed by March 29, 2018. Any use of this file will cease' +
+      'to work at that time. Please refer to ' +
+      'https://github.com/ampproject/amphtml/issues/11834 ' +
+      'for more information');
   // TODO: check mandatory fields
   validateData(data, [], [
     'slot', 'targeting', 'categoryExclusions',
