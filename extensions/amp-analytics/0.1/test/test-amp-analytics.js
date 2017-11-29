@@ -1773,4 +1773,60 @@ describes.realWin('amp-analytics', {
       expect(getAnalyticsTag(getConfig()).getPriority()).to.equal(1);
     });
   });
+
+  describe('inabox nested transport iframe', () => {
+    let origAmpMode;
+    beforeEach(() => {
+      origAmpMode = env.win.AMP_MODE;
+      env.win.AMP_MODE = 'inabox';
+      // Unfortunately need to fake sandbox analytics element's parent
+      // to an AMP element
+      doc.body.classList.add('i-amphtml-element');
+    });
+
+    afterEach(() => {
+      doc.body.classList.remove('i-amphtml-element');
+      env.win.AMP_MODE = origAmpMode;
+    });
+
+    it('sends a basic hit', function() {
+      const analytics = getAnalyticsTag(trivialConfig);
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.withArgs('https://example.com/bar'))
+            .to.be.calledOnce;
+      });
+    });
+
+    it('fails for iframePing config outside of vendor config', function() {
+      const analytics = getAnalyticsTag({
+        'requests': {'foo': 'https://example.com/bar'},
+        'triggers': [{'on': 'visible', 'iframePing': true}],
+      });
+      return expect(waitForNoSendRequest(analytics)).to.be
+          .rejectedWith(
+          /iframePing config is only available to vendor config/);
+    });
+
+    it('succeeds for iframePing config in vendor config', function() {
+      const analytics = getAnalyticsTag({}, {'type': 'testVendor'});
+      const url = 'http://iframe.localhost:9876/test/' +
+              'fixtures/served/iframe.html?title=${title}';
+      analytics.predefinedConfig_.testVendor = {
+        'requests': {
+          'pageview': url,
+        },
+        'triggers': {
+          'pageview': {
+            'on': 'visible',
+            'request': 'pageview',
+            'iframePing': true,
+          },
+        },
+      };
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.be.calledOnce;
+        expect(sendRequestSpy.args[0][1]['iframePing']).to.be.true;
+      });
+    });
+  });
 });

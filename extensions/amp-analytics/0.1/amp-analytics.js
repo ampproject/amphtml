@@ -333,7 +333,9 @@ export class AmpAnalytics extends AMP.BaseElement {
         `${TAG}: No friendly parent amp-ad element was found for ` +
         'amp-analytics tag with iframe transport.');
 
-    this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
+    this.iframeTransport_ = new IframeTransport(
+        // Create  3p transport frame within creative frame if inabox.
+        this.isInabox_ ? this.win : this.getAmpDoc().win,
         this.element.getAttribute('type'),
         this.config_['transport'], ampAdResourceId);
   }
