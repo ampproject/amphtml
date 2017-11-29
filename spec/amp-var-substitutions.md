@@ -152,6 +152,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Canonical Path](#canonical-path)     | `CANONICAL_PATH` | `${canonicalPath}` |
 | [Canonical URL](#canonical-url)       | `CANONICAL_URL`    | `${canonicalUrl}` |
 | [Counter](#counter) | `COUNTER` | `${counter}` |
+| [Sum](#sum) | `SUM` | `${sum}` |
 | [Document Charset](#document-charset) | `DOCUMENT_CHARSET` | `${documentCharset}` |
 | [Document Referrer](#document-referrer) | `DOCUMENT_REFERRER` | `${documentReferrer}` |
 | [External Referrer](#external-referrer) | `EXTERNAL_REFERRER` | `${externalReferrer}` |
@@ -477,6 +478,13 @@ Use `COUNTER(name)` to generate an index for the given request. Counts start at 
 
 * **platform variable**: `COUNTER`
 * **amp-analytics variable**: `${counter}`
+
+#### Sum
+
+Use `SUM(name, value)` to generate a sum for the given request. Values are added per a given `name`.
+
+* **platform variable**: `SUM`
+* **amp-analytics variable**: `${sum}`
 
 #### Document Charset
 
