@@ -53,9 +53,9 @@ amp-story[standalone][desktop] {
  bottom: 0!important;
  left: 0!important;
  opacity: 0!important;
- filter: blur(30px)!important;
+ filter: blur(50px)!important;
  margin: -60px!important;
- background-size: 125% 125%!important;
+ background-size: cover!important;
  background-color: transparent!important;
  transition-duration: 300ms!important;
  transition-property: opacity!important;
@@ -106,7 +106,7 @@ amp-story-page.i-amphtml-story-page-shown {
 
 [desktop] amp-story-page[pre-active] {
   /* -150% + 15% */
-  transform: scale(1.0) translateX(calc(-150% - 64px)) translateY(0%) !important;
+  transform: scale(0.9) translateX(calc(-150% - 64px)) translateY(0%) !important;
 }
 
 [desktop] amp-story-page[active] {
@@ -116,20 +116,20 @@ amp-story-page.i-amphtml-story-page-shown {
 
 [desktop] amp-story-page[active] + amp-story-page {
   /* 50% - 15% */
-  transform: scale(1.0) translateX(calc(50% + 64px)) translateY(0%) !important;
+  transform: scale(0.9) translateX(calc(50% + 64px)) translateY(0%) !important;
 }
 
 [desktop] amp-story-page[active] + amp-story-page ~ amp-story-page {
-  transform: scale(1.0) translateX(250vw) translateY(0%) !important;
+  transform: scale(0.9) translateX(250vw) translateY(0%) !important;
 }
 
 [dir=rtl] [desktop] amp-story-page {
-  transform: scale(1.0) translateX(250vw) translateY(0%) !important;
+  transform: scale(0.9) translateX(250vw) translateY(0%) !important;
 }
 
 [dir=rtl] [desktop] amp-story-page[pre-active] {
   /* 50% - 15% */
-  transform: scale(1.0) translateX(calc(50% + 64px)) translateY(0%) !important;
+  transform: scale(0.9) translateX(calc(50% + 64px)) translateY(0%) !important;
   /*transform: scale(1.0) translateX(35%) translateY(0%) !important;*/
 }
 
@@ -140,12 +140,12 @@ amp-story-page.i-amphtml-story-page-shown {
 
 [dir=rtl] [desktop] amp-story-page[active] + amp-story-page {
   /* -150% + 15% */
-  transform: scale(1.0) translateX(calc(-150% - 64px)) translateY(0%) !important;
-  /*transform: scale(1.0) translateX(-135%) translateY(0%) !important;*/
+  transform: scale(0.9) translateX(calc(-150% - 64px)) translateY(0%) !important;
+  /*transform: scale(0.9) translateX(-135%) translateY(0%) !important;*/
 }
 
 [dir=rtl] [desktop] amp-story-page[active] + amp-story-page ~ amp-story-page {
-  transform: scale(1.0) translateX(-350%) translateY(0%) !important;
+  transform: scale(0.9) translateX(-350%) translateY(0%) !important;
 }
 
 [desktop] amp-story-page {
@@ -155,6 +155,8 @@ amp-story-page.i-amphtml-story-page-shown {
   max-height: 70vh!important;
   max-width: calc(9/16 * 70vh);
   box-shadow: 0 0 15px rgba(0, 0, 0, .4)!important;
+  transition-property: transform !important;
+  transition-duration: 500ms !important;
 }
 
 /* Navigation buttons */
