@@ -610,7 +610,7 @@ describes.realWin('Events', {amp: 1}, env => {
         tracker.add(analyticsElement, 'timer', {timerSpec: {
 	  interval: 1,
 	  startSpec: {on: 'timer', selector: '.target'},
-	}}, handler);
+        }}, handler);
       }).to.throw(/Cannot track timer start/);
 
       expect(handler).to.not.be.called;
@@ -683,25 +683,33 @@ describes.realWin('Events', {amp: 1}, env => {
     it('timers started and stopped by the same event on the same target do not'
         + ' have race condition problems', () => {
       const fn1 = sandbox.stub();
-      const clickTracker = root.getTracker('click', ClickEventTracker);
       tracker.add(analyticsElement, 'timer', {timerSpec: {
         interval: 1,
+        immediate: false,
         startSpec: {on: 'click', selector: '.target'},
         stopSpec: {on: 'click', selector: '.target'},
       }}, fn1);
       expect(fn1).to.have.not.been.called;
 
       target.click(); // Start timer.
+      expect(fn1).to.have.not.been.called;
+      target.click(); // Stop timer.
+      expect(fn1).to.be.calledOnce;
+      target.click(); // Start timer.
       expect(fn1).to.be.calledOnce;
       target.click(); // Stop timer.
-      target.click(); // Start timer.
-      target.click(); // Stop timer.
+      expect(fn1).to.be.calledTwice;
       clock.tick(5);
       target.click(); // Start timer.
+      expect(fn1).to.be.calledTwice;
       target.click(); // Stop timer.
+      expect(fn1).to.be.calledThrice;
       target.click(); // Start timer.
+      expect(fn1).to.be.calledThrice;
       target.click(); // Stop timer.
+      expect(fn1).to.have.callCount(4);
       target.click(); // Start timer.
+      expect(fn1).to.have.callCount(4);
 
       clock.tick(3 * 1000); // 3 seconds
       expect(fn1).to.have.callCount(7); // 4 timer stops + 3.005 seconds
