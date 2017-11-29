@@ -692,7 +692,7 @@ class TimerEventHandler {
 
   /** @private */
   calculateDuration_() {
-    if (!!this.startTime_) {
+    if (this.startTime_) {
       this.timerDuration_ +=
           Date.now() - (this.lastPingTime_ || this.startTime_);
     }

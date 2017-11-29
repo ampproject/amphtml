@@ -915,7 +915,7 @@ describes.realWin('Events', {amp: 1}, env => {
       let fakeTime = 1000; // 1 second past epoch
       sandbox.stub(Date, 'now', () => { return fakeTime; });
       target.click();
-      fakeTime = 1600;
+      fakeTime = 1600; // Must set fake time before advancing the interval.
       clock.tick(600); // Not a full second.
       target.click();
       expect(handler).to.be.calledOnce;
@@ -926,7 +926,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
       target.click();
       expect(handler).to.be.calledOnce;
-      fakeTime = 4600; // Must set fake time before advancing the interval.
+      fakeTime = 4600;
       clock.tick(3000); // 3 seconds.
       expect(handler).to.have.callCount(2);
       const intervalEvent = handler.args[1][0];
@@ -941,7 +941,7 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(handler).to.have.callCount(3);
       const stopEvent2 = handler.args[2][0];
       expect(stopEvent2).to.be.instanceOf(AnalyticsEvent);
-      // Report partial interval time on timer stop.
+      // Report partial interval time on timer stop between intervals.
       expect(stopEvent2.vars.timerDuration).to.equal(1);
       expect(stopEvent2.vars.timerStart).to.equal(1600);
     });
