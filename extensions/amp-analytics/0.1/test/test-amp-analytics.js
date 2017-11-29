@@ -1769,8 +1769,8 @@ describes.realWin('amp-analytics', {
     });
 
     it('is 0 for inabox', () => {
-      env.win.AMP_MODE = 'inabox';
-      expect(getAnalyticsTag(getConfig()).getPriority()).to.equal(1);
+      env.win.AMP_MODE.runtime = 'inabox';
+      expect(getAnalyticsTag(getConfig()).getPriority()).to.equal(0);
     });
   });
 
