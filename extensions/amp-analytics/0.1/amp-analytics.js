@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {urls} from '../../../src/config';
 import {isJsonScriptTag} from '../../../src/dom';
 import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
 import {dev, rethrowAsync, user} from '../../../src/log';
@@ -22,7 +21,7 @@ import {expandTemplate} from '../../../src/string';
 import {isArray, isObject} from '../../../src/types';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {sendRequest, sendRequestUsingIframe} from './transport';
-import {IframeTransport} from './iframe-transport';
+import {getIframeTransportScriptUrl, IframeTransport} from './iframe-transport';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getTopWindow} from '../../../src/service';
 import {Services} from '../../../src/services';
@@ -167,15 +166,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    let url;
-    if ((getMode().localDev || getMode().test) &&
-        this.getAmpDoc().win.parent && this.getAmpDoc().win.parent.location) {
-      const loc = this.getAmpDoc().win.parent.location;
-      url = `${loc.protocol}//${loc.host}/dist/iframe-transport-client-lib.js`;
-    } else {
-      url = urls.thirdParty +
-          '/$internalRuntimeVersion$/iframe-transport-client-v0.js';
-    }
+    const url = getIframeTransportScriptUrl(this.getAmpDoc().win);
     this.preconnect.preload(url, 'script');
   }
 
