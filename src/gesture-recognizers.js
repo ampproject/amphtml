@@ -640,6 +640,17 @@ export class TapzoomRecognizer extends GestureRecognizer {
  */
 let PinchDef;
 
+/**
+ * Threshold in pixels for how much two touches move away from
+ * each other before we recognize the gesture as a pinch.
+ */
+const PINCH_ACCEPT_THRESHOLD = 4;
+
+/**
+ * Threshold in pixels for how much two touches move in the same
+ * direction before we reject the gesture as a pinch.
+ */
+const PINCH_REJECT_THRESHOLD = 10;
 
 /**
  * Recognizes a "pinch" gesture.
@@ -738,10 +749,12 @@ export class PinchRecognizer extends GestureRecognizer {
         const dy2 = this.lastY2_ - this.startY2_;
         // Fingers should move in opposite directions and go over the threshold.
         if (dx1 * dx2 <= 0 && dy1 * dy2 <= 0) {
-          if (Math.abs(dx1 - dx2) >= 4 || Math.abs(dy1 - dy2) >= 4) {
+          if (Math.abs(dx1 - dx2) >= PINCH_ACCEPT_THRESHOLD
+            || Math.abs(dy1 - dy2) >= PINCH_ACCEPT_THRESHOLD) {
             this.signalReady(0);
           }
-        } else if (Math.abs(dx1 + dx2) >= 10 || Math.abs(dy1 + dy2) >= 10) {
+        } else if (Math.abs(dx1 + dx2) >= PINCH_REJECT_THRESHOLD
+          || Math.abs(dy1 + dy2) >= PINCH_REJECT_THRESHOLD) {
           // Moving in the same direction over a threshold.
           return false;
         }
