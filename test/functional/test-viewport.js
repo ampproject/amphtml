@@ -43,7 +43,6 @@ import {installVsyncService} from '../../src/service/vsync-impl';
 import {loadPromise} from '../../src/event-helper';
 import {setParentWindow} from '../../src/service';
 import {layoutRectLtwh} from '../../src/layout-rect';
-import * as sinon from 'sinon';
 
 
 const NOOP = () => {};
@@ -633,27 +632,6 @@ describes.fakeWin('Viewport', {}, env => {
     expect(fieMock.leaveFullOverlayMode).to.be.calledOnce;
   });
 
-  it('should update viewport when entering overlay mode', () => {
-    const disableTouchZoomStub = sandbox.stub(viewport, 'disableTouchZoom');
-    const disableScrollStub = sandbox.stub(viewport, 'disableScroll');
-
-    viewport.enterOverlayMode();
-
-    expect(disableTouchZoomStub).to.be.calledOnce;
-    expect(disableScrollStub).to.be.calledOnce;
-  });
-
-  it('should update viewport when leaving overlay mode', () => {
-    const restoreOriginalTouchZoomStub = sandbox.stub(viewport,
-        'restoreOriginalTouchZoom');
-    const resetScrollStub = sandbox.stub(viewport, 'resetScroll');
-
-    viewport.leaveOverlayMode();
-
-    expect(restoreOriginalTouchZoomStub).to.be.calledOnce;
-    expect(resetScrollStub).to.be.calledOnce;
-  });
-
   it('should disable scrolling based on requests', () => {
     const disableScrollStub = sandbox.stub(viewport, 'disableScroll');
 
@@ -1137,149 +1115,6 @@ describe('Viewport META', () => {
       expect(updateViewportMetaString(
           'width=device-width,minimum-scale=1', {'minimum-scale': '1'}))
           .to.equal('width=device-width,minimum-scale=1');
-    });
-  });
-
-  describe('TouchZoom', () => {
-    let sandbox;
-    let clock;
-    let viewport;
-    let binding;
-    let viewer;
-    let windowApi;
-    let ampdoc;
-    let originalViewportMetaString, viewportMetaString;
-    let viewportMeta;
-    let viewportMetaSetter;
-
-    beforeEach(() => {
-      sandbox = sinon.sandbox.create();
-      clock = sandbox.useFakeTimers();
-      viewer = {
-        isEmbedded: () => false,
-        getParam: param => {
-          if (param == 'paddingTop') {
-            return 0;
-          }
-          return undefined;
-        },
-        onMessage: () => {},
-        isVisible: () => true,
-        onVisibilityChanged: () => {},
-      };
-
-      originalViewportMetaString = 'width=device-width,minimum-scale=1';
-      viewportMetaString = originalViewportMetaString;
-      viewportMeta = Object.create(null);
-      viewportMetaSetter = sandbox.spy();
-      Object.defineProperty(viewportMeta, 'content', {
-        get: () => viewportMetaString,
-        set: value => {
-          viewportMetaSetter(value);
-          viewportMetaString = value;
-        },
-      });
-      windowApi = {
-        document: {
-          documentElement: {
-            style: {},
-            classList: {
-              add() {},
-            },
-          },
-          querySelector: selector => {
-            if (selector == 'meta[name=viewport]') {
-              return viewportMeta;
-            }
-            return undefined;
-          },
-        },
-        navigator: window.navigator,
-        setTimeout: window.setTimeout,
-        clearTimeout: window.clearTimeout,
-        location: {},
-      };
-      installTimerService(windowApi);
-      installVsyncService(windowApi);
-      installPlatformService(windowApi);
-      installDocService(windowApi, /* isSingleDoc */ true);
-      installDocumentStateService(windowApi);
-      ampdoc = Services.ampdocServiceFor(windowApi).getAmpDoc();
-      installViewerServiceForDoc(ampdoc);
-      binding = new ViewportBindingDef();
-      viewport = new Viewport(ampdoc, binding, viewer);
-    });
-
-    afterEach(() => {
-      sandbox.restore();
-    });
-
-    it('should initialize original viewport meta', () => {
-      viewport.getViewportMeta_();
-      expect(viewport.originalViewportMetaString_).to.equal(viewportMetaString);
-      expect(viewportMetaSetter).to.have.not.been.called;
-    });
-
-    it('should disable TouchZoom', () => {
-      viewport.disableTouchZoom();
-      expect(viewportMetaSetter).to.be.calledOnce;
-      expect(viewportMetaString).to.have.string('maximum-scale=1');
-      expect(viewportMetaString).to.have.string('user-scalable=no');
-    });
-
-    it('should ignore disable TouchZoom if already disabled', () => {
-      viewportMetaString = 'width=device-width,minimum-scale=1,' +
-          'maximum-scale=1,user-scalable=no';
-      viewport.disableTouchZoom();
-      expect(viewportMetaSetter).to.have.not.been.called;
-    });
-
-    it('should ignore disable TouchZoom if embedded', () => {
-      windowApi.parent = {};
-      viewport.disableTouchZoom();
-      expect(viewportMetaSetter).to.have.not.been.called;
-    });
-
-    it('should restore TouchZoom', () => {
-      viewport.disableTouchZoom();
-      expect(viewportMetaSetter).to.be.calledOnce;
-      expect(viewportMetaString).to.have.string('maximum-scale=1');
-      expect(viewportMetaString).to.have.string('user-scalable=no');
-
-      viewport.restoreOriginalTouchZoom();
-      expect(viewportMetaSetter).to.have.callCount(2);
-      expect(viewportMetaString).to.equal(originalViewportMetaString);
-    });
-
-    it('should reset TouchZoom; zooming state unknown', () => {
-      viewport.resetTouchZoom();
-      expect(viewportMetaSetter).to.be.calledOnce;
-      expect(viewportMetaString).to.have.string('maximum-scale=1');
-      expect(viewportMetaString).to.have.string('user-scalable=no');
-
-      clock.tick(1000);
-      expect(viewportMetaSetter).to.have.callCount(2);
-      expect(viewportMetaString).to.equal(originalViewportMetaString);
-    });
-
-    it('should ignore reset TouchZoom if not currently zoomed', () => {
-      windowApi.document.documentElement.clientHeight = 500;
-      windowApi.innerHeight = 500;
-      viewport.resetTouchZoom();
-      expect(viewportMetaSetter).to.have.not.been.called;
-    });
-
-    it('should proceed with reset TouchZoom if currently zoomed', () => {
-      windowApi.document.documentElement.clientHeight = 500;
-      windowApi.innerHeight = 300;
-      viewport.resetTouchZoom();
-      expect(viewportMetaSetter).to.be.calledOnce;
-    });
-
-    it('should ignore reset TouchZoom if embedded', () => {
-      windowApi.parent = {};
-      viewport.resetTouchZoom();
-      expect(viewportMetaSetter).to.have.not.been.called;
     });
   });
 });

@@ -638,7 +638,6 @@ export class Viewport {
    * Instruct the viewport to enter overlay mode.
    */
   enterOverlayMode() {
-    this.disableTouchZoom();
     this.disableScroll();
   }
 
@@ -647,7 +646,6 @@ export class Viewport {
    */
   leaveOverlayMode() {
     this.resetScroll();
-    this.restoreOriginalTouchZoom();
   }
 
   /*
@@ -667,57 +665,6 @@ export class Viewport {
     this.vsync_.mutate(() => {
       this.binding_.resetScroll();
     });
-  }
-
-  /**
-   * Resets touch zoom to initial scale of 1.
-   */
-  resetTouchZoom() {
-    const windowHeight = this.ampdoc.win./*OK*/innerHeight;
-    const documentHeight = this.globalDoc_.documentElement./*OK*/clientHeight;
-    if (windowHeight && documentHeight && windowHeight === documentHeight) {
-      // This code only works when scrollbar overlay content and take no space,
-      // which is fine on mobile. For non-mobile devices this code is
-      // irrelevant.
-      return;
-    }
-    if (this.disableTouchZoom()) {
-      this.timer_.delay(() => {
-        this.restoreOriginalTouchZoom();
-      }, 50);
-    }
-  }
-
-  /**
-   * Disables touch zoom on this viewport. Returns `true` if any actual
-   * changes have been done.
-   * @return {boolean}
-   */
-  disableTouchZoom() {
-    const viewportMeta = this.getViewportMeta_();
-    if (!viewportMeta) {
-      // This should never happen in a valid AMP document, thus shortcircuit.
-      return false;
-    }
-    // Setting maximum-scale=1 and user-scalable=no zooms page back to normal
-    // and prohibit further default zooming.
-    const newValue = updateViewportMetaString(viewportMeta.content, {
-      'maximum-scale': '1',
-      'user-scalable': 'no',
-    });
-    return this.setViewportMetaString_(newValue);
-  }
-
-  /**
-   * Restores original touch zoom parameters. Returns `true` if any actual
-   * changes have been done.
-   * @return {boolean}
-   */
-  restoreOriginalTouchZoom() {
-    if (this.originalViewportMetaString_ !== undefined) {
-      return this.setViewportMetaString_(this.originalViewportMetaString_);
-    }
-    return false;
   }
 
   /**
