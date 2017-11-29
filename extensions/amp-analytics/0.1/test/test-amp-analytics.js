@@ -1792,8 +1792,8 @@ describes.realWin('amp-analytics', {
     it('sends a basic hit', function() {
       const analytics = getAnalyticsTag(trivialConfig);
       return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy.withArgs('https://example.com/bar').calledOnce)
-            .to.be.true;
+        expect(sendRequestSpy.withArgs('https://example.com/bar'))
+            .to.be.calledOnce;
       });
     });
 

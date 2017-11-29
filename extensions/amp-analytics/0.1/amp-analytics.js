@@ -334,7 +334,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         'amp-analytics tag with iframe transport.');
 
     this.iframeTransport_ = new IframeTransport(
-        // We create a nested cross-domain iframe within the ads if isInabox.
+        // Create  3p transport frame within creative frame if inabox.
         this.isInabox_ ? this.win : this.getAmpDoc().win,
         this.element.getAttribute('type'),
         this.config_['transport'], ampAdResourceId);
