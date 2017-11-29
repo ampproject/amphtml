@@ -172,7 +172,9 @@ class AmpApesterMedia extends AMP.BaseElement {
         dev().assertString(this.mediaAttribute_)
     );
     let suffix = '';
-    const queryParams = {renderer: false, platform: getPlatform()};
+    const queryParams = dict();
+    queryParams.renderer = false;
+    queryParams.platform = getPlatform();
     if (inative) {
       if (idOrToken) {
         suffix = `/inatives/${idOrToken}`;
@@ -188,7 +190,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     } else {
       suffix = `/interactions/${encodedMediaAttribute}/display`;
     }
-    return addParamsToUrl(`${this.displayBaseUrl_}${suffix}`, dict(queryParams));
+    return addParamsToUrl(`${this.displayBaseUrl_}${suffix}`, queryParams);
   }
 
   /**
@@ -207,16 +209,20 @@ class AmpApesterMedia extends AMP.BaseElement {
    * @return {string}
    * */
   constructUrlFromMedia_(id) {
-    const queryParams = {
-      channelId: this.embedOptions_.distributionChannelId,
-      type: this.embedOptions_.playlist ? 'playlist' : 'editorial',
-      platform: getPlatform(),
-      cannonicalUrl: Services.documentInfoForDoc(this.element).canonicalUrl,
-      sdk: 'amp',
-    };
+    const queryParams = dict();
+    queryParams['channelId'] = this.embedOptions_.distributionChannelId;
+    queryParams['type'] = this.embedOptions_.playlist
+      ? 'playlist'
+      : 'editorial';
+    queryParams['platform'] = getPlatform();
+    queryParams['cannonicalUrl'] = Services.documentInfoForDoc(
+        this.element
+    ).canonicalUrl;
+    queryParams['sdk'] = 'amp';
+
     return addParamsToUrl(
         `${this.rendererBaseUrl_}/interaction/${encodeURIComponent(id)}`,
-        dict(queryParams)
+        queryParams
     );
   }
 
