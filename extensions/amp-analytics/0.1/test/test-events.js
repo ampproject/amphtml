@@ -557,10 +557,10 @@ describes.realWin('Events', {amp: 1}, env => {
 
     it('should initalize, add listeners and dispose', () => {
       expect(tracker.root).to.equal(root);
-      expect(tracker.trackers_).to.have.length(0);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(0);
 
       tracker.dispose();
-      expect(tracker.trackers_).to.have.length(0);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(0);
     });
 
     it('should validate timerSpec', () => {
@@ -606,12 +606,105 @@ describes.realWin('Events', {amp: 1}, env => {
           maxTimerLength: 0,
         }}, handler);
       }).to.throw(/Bad maxTimerLength specification/);
+      expect(() => {
+        tracker.add(analyticsElement, 'timer', {timerSpec: {
+	  interval: 1,
+	  startSpec: {on: 'timer', selector: '.target'},
+        }}, handler);
+      }).to.throw(/Cannot track timer start/);
 
       expect(handler).to.not.be.called;
       expect(() => {
         tracker.add(analyticsElement, 'timer',
             {timerSpec: {interval: 1}}, handler);
       }).to.not.throw();
+
+      const clickTracker = root.getTracker('click', ClickEventTracker);
+      expect(() => {
+        tracker.add(analyticsElement, 'timer',
+            {
+	      timerSpec: {
+	        startSpec: {on: 'click', selector: '.target'},
+	        stopSpec: {on: 'click', selector: '.target'},
+	        interval: 1},
+	    }, handler, function(unused) { return clickTracker; });
+      }).to.not.throw();
+    });
+
+    it('timers start and stop by tracking different events', () => {
+      const fn1 = sandbox.stub();
+      const clickTracker = root.getTracker('click', ClickEventTracker);
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 1,
+        startSpec: {on: 'click', selector: '.target'},
+        stopSpec: {on: 'click', selector: '.target'},
+      }}, fn1, function(unused) { return clickTracker; });
+      expect(fn1).to.have.not.been.called;
+
+      clock.tick(5 * 1000); // 5 seconds
+      expect(fn1).to.have.not.been.called;
+
+      target.click(); // Start timer.
+      expect(fn1).to.be.calledOnce;
+      expect(fn1.args[0][0]).to.be.instanceOf(AnalyticsEvent);
+      expect(fn1.args[0][0].target).to.equal(root.getRootElement());
+      expect(fn1.args[0][0].type).to.equal('timer');
+      target.click(); // Stop timer.
+
+      const fn2 = sandbox.stub();
+      const customTracker = root.getTracker('custom', CustomEventTracker);
+      const getElementSpy = sandbox.spy(root, 'getElement');
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 1,
+        startSpec: {on: 'custom-event-start', selector: '.target'},
+        stopSpec: {on: 'custom-event-stop', selector: '.target'},
+      }}, fn2, function(unused) { return customTracker; });
+      expect(fn2).to.have.not.been.called;
+      customTracker.trigger(new AnalyticsEvent(target, 'custom-event-start'));
+
+      expect(getElementSpy.returnValues.length).to.equal(1);
+      return getElementSpy.returnValues[0].then(() => {
+        expect(fn2).to.be.calledOnce;
+        expect(fn2.args[0][0]).to.be.instanceOf(AnalyticsEvent);
+        expect(fn2.args[0][0].target).to.equal(root.getRootElement());
+        expect(fn2.args[0][0].type).to.equal('timer');
+        customTracker.trigger(new AnalyticsEvent(target, 'custom-event-stop'));
+
+        expect(getElementSpy.returnValues.length).to.equal(2);
+        getElementSpy.returnValues[1].then(() => {
+          // Timers have genuinely stopped.
+          clock.tick(5 * 1000); // 5 seconds
+          expect(fn1).to.have.callCount(1);
+          expect(fn2).to.have.callCount(1);
+        });
+      });
+    });
+
+    it('timers started and stopped by the same event on the same target do not'
+        + ' have race condition problems', () => {
+      const fn1 = sandbox.stub();
+      const clickTracker = root.getTracker('click', ClickEventTracker);
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 1,
+        startSpec: {on: 'click', selector: '.target'},
+        stopSpec: {on: 'click', selector: '.target'},
+      }}, fn1, function(unused) { return clickTracker; });
+      expect(fn1).to.have.not.been.called;
+
+      target.click(); // Start timer.
+      expect(fn1).to.be.calledOnce;
+      target.click(); // Stop timer.
+      target.click(); // Start timer.
+      target.click(); // Stop timer.
+      clock.tick(5);
+      target.click(); // Start timer.
+      target.click(); // Stop timer.
+      target.click(); // Start timer.
+      target.click(); // Stop timer.
+      target.click(); // Start timer.
+
+      clock.tick(3 * 1000); // 3 seconds
+      expect(fn1).to.have.callCount(8); // 5 timer starts + 3.005 seconds
     });
 
     it('only fires when the timer interval exceeds the minimum', () => {
@@ -704,29 +797,52 @@ describes.realWin('Events', {amp: 1}, env => {
       }}, fn3);
       expect(fn3).to.be.calledOnce;
 
-      expect(tracker.trackers_).to.have.length(3);
+      const fn4 = sandbox.stub();
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 10,
+        stopSpec: {on: 'click', selector: '.target'},
+        maxTimerLength: 20,
+      }}, fn4);
+
+      const fn5 = sandbox.stub();
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 10,
+        stopSpec: {on: 'click', selector: '.target'},
+      }}, fn5);
+
+      expect(tracker.getTrackedTimerKeys()).to.have.length(5);
 
       clock.tick(10 * 1000); // 10 seconds
       expect(fn1).to.have.callCount(2);
       expect(fn2).to.have.callCount(2);
-      expect(tracker.trackers_).to.have.length(3);
+      expect(fn3).to.have.callCount(1);
+      expect(fn4).to.have.callCount(2);
+      expect(fn5).to.have.callCount(2);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(5);
 
       clock.tick(10 * 1000); // 20 seconds
       expect(fn1).to.have.callCount(2);
       expect(fn2).to.have.callCount(3);
-      expect(tracker.trackers_).to.have.length(1);
+      expect(fn3).to.have.callCount(1);
+      expect(fn4).to.have.callCount(3);
+      expect(fn5).to.have.callCount(3);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(2);
 
       clock.tick(10 * 1000); // 30 seconds
       expect(fn1).to.have.callCount(2);
       expect(fn2).to.have.callCount(3);
-      expect(tracker.trackers_).to.have.length(1);
+      expect(fn3).to.have.callCount(1);
+      expect(fn4).to.have.callCount(3);
+      expect(fn5).to.have.callCount(4);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(2);
 
       // Default maxTimerLength is 2 hours
       clock.tick(3 * 3600 * 1000); // 3 hours
       expect(fn3).to.have.callCount(3);
+      expect(fn5).to.have.callCount(1084);
 
-      // All timers removed.
-      expect(tracker.trackers_).to.have.length(0);
+      // All timers removed except the one that never ends.
+      expect(tracker.getTrackedTimerKeys()).to.have.length(1);
     });
 
     it('should unlisten tracker', () => {
@@ -744,15 +860,15 @@ describes.realWin('Events', {amp: 1}, env => {
       }}, fn2);
       expect(fn2).to.be.calledOnce;
 
-      expect(tracker.trackers_).to.have.length(2);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(2);
       expect(countIntervals()).to.equal(2);
 
       u1();
-      expect(tracker.trackers_).to.have.length(1);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(1);
       expect(countIntervals()).to.equal(1);
 
       u2();
-      expect(tracker.trackers_).to.have.length(0);
+      expect(tracker.getTrackedTimerKeys()).to.have.length(0);
       expect(countIntervals()).to.equal(0);
     });
 

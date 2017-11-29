@@ -30,10 +30,10 @@ import {isEnumValue} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {getMode} from '../../../src/mode';
 import {Activity} from './activity-impl';
+import {AnalyticsEventType} from './events';
 import {
     InstrumentationService,
     instrumentationServicePromiseForDoc,
-    AnalyticsEventType,
 } from './instrumentation';
 import {
   ExpansionOptions,
