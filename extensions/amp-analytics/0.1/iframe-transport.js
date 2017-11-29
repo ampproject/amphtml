@@ -149,7 +149,8 @@ export class IframeTransport {
    * @VisibleForTesting
    */
   getLibScriptUrl(opt_forceProdUrl) {
-    if ((getMode().localDev || getMode().test) && !opt_forceProdUrl) {
+    if ((getMode().localDev || getMode().test) && !opt_forceProdUrl &&
+        this.ampWin_.parent && this.ampWin_.parent.location) {
       const loc = this.ampWin_.parent.location;
       return `${loc.protocol}//${loc.host}/dist/iframe-transport-client-lib.js`;
     }
