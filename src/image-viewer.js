@@ -501,19 +501,19 @@ export class ImageViewer {
   }
 
   /**
- * Performs a one-step pinch zoom action.
- * @param {number} centerClientX
- * @param {number} centerClientY
- * @param {number} deltaX
- * @param {number} deltaY
- *  @param {number} dir
- * @private
- */
+   * Performs a one-step pinch zoom action.
+   * @param {number} centerClientX
+   * @param {number} centerClientY
+   * @param {number} deltaX
+   * @param {number} deltaY
+   *  @param {number} dir
+   * @private
+   */
   onPinchZoom_(centerClientX, centerClientY, deltaX, deltaY, dir) {
-    this.onZoomInc_(centerClientX, centerClientY, deltaX, deltaY, dir);
+    this.zoomToPoint_(centerClientX, centerClientY, deltaX, deltaY, dir);
   }
 
-/**
+  /**
    * Performs a one-step tap zoom action.
    * @param {number} centerClientX
    * @param {number} centerClientY
@@ -521,11 +521,10 @@ export class ImageViewer {
    * @param {number} deltaY
    * @private
    */
-
   onTapZoom_(centerClientX, centerClientY, deltaX, deltaY) {
     const dir = Math.abs(deltaY) > Math.abs(deltaX) ?
       Math.sign(deltaY) : Math.sign(-deltaX);
-    this.onZoomInc_(centerClientX, centerClientY, deltaX, deltaY, dir);
+    this.zoomToPoint_(centerClientX, centerClientY, deltaX, deltaY, dir);
   }
 
   /**
@@ -538,7 +537,7 @@ export class ImageViewer {
    * @param {number} dir
    * @private
    */
-  onZoomInc_(centerClientX, centerClientY, deltaX, deltaY, dir) {
+  zoomToPoint_(centerClientX, centerClientY, deltaX, deltaY, dir) {
     if (dir == 0) {
       return;
     }
