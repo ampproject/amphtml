@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {CSS} from '../../../build/amp-apester-media-0.1.css';
+import {dict} from '../../../src/utils/object';
 import {user, dev} from '../../../src/log';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
@@ -187,7 +188,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     } else {
       suffix = `/interactions/${encodedMediaAttribute}/display`;
     }
-    return addParamsToUrl(`${this.displayBaseUrl_}${suffix}`, queryParams);
+    return addParamsToUrl(`${this.displayBaseUrl_}${suffix}`, dict(queryParams));
   }
 
   /**
@@ -207,7 +208,7 @@ class AmpApesterMedia extends AMP.BaseElement {
    * */
   constructUrlFromMedia_(id) {
     const queryParams = {
-      channelId: this.embedOptions_distributionChannelId,
+      channelId: this.embedOptions_.distributionChannelId,
       type: this.embedOptions_.playlist ? 'playlist' : 'editorial',
       platform: getPlatform(),
       cannonicalUrl: Services.documentInfoForDoc(this.element).canonicalUrl,
@@ -215,7 +216,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     };
     return addParamsToUrl(
         `${this.rendererBaseUrl_}/interaction/${encodeURIComponent(id)}`,
-        queryParams
+        dict(queryParams)
     );
   }
 
@@ -313,7 +314,7 @@ class AmpApesterMedia extends AMP.BaseElement {
       this.queryMedia_()
           .then(
           response => {
-            const payload = response.payload;
+            const payload = response['payload'];
             // If it's a playlist we choose a media randomly.
             // The response will be an array.
             const media = this.embedOptions_.playlist
