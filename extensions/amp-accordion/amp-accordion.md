@@ -68,7 +68,15 @@ In this example, we display three sections, where the third section is expanded 
 To see more demos of the `amp-accordion`, visit [AMP By Example](https://ampbyexample.com/components/amp-accordion/).
 {% endcall %}
 
-## Attributes
+### Actions
+#### `toggle`
+This action toggles between the `expanded` and `collapsed` states of the `amp-accordion`. When called with no arguements, it will toggle all sections of the accordion. A single section may be specified with the `section` arguement and the corresponding `id` as the value.
+#### `expand`
+This action expands an `amp-accordion`. If it is already `expanded`, it will stay so. When called with no arguements, it will expand all sections of the accordion. A single section may be spefified with the `section` arguement and the corresponding `id` as the value.
+#### `collapse`
+This action collapses an `amp-accordion`. If it is already collapsed, it will stay so. When called with no arguements, it will collapse all sections of the accordion. A single section may be spefified with the `section` arguement and the corresponding `id` as the value.
+
+#### Attributes
 
 ##### disable-session-states
 
