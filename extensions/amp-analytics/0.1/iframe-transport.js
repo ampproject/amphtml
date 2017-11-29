@@ -43,7 +43,6 @@ export let FrameData;
  * @param {boolean=} opt_forceProdUrl If true, prod URL will be returned even
  *     in local/test modes.
  * @return {string}
- * @VisibleForTesting
  */
 export function getIframeTransportScriptUrl(ampWin, opt_forceProdUrl) {
   if ((getMode().localDev || getMode().test) && !opt_forceProdUrl &&
