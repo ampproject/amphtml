@@ -120,7 +120,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.iframeTransport_ = null;
 
     /** @private {boolean} */
-    this.isInabox_ = getMode().runtime == 'inabox';
+    this.isInabox_ = getMode(this.win).runtime == 'inabox';
   }
 
   /** @override */
