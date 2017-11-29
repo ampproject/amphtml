@@ -198,6 +198,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
                 'i-amphtml-element');
             const clonedNode = element.cloneNode(deepClone);
             clonedNode.removeAttribute('on');
+            clonedNode.removeAttribute('id');
             const descText = this.manager_.getDescription(element);
             const metadata = {
               descriptionText: descText,
