@@ -25,7 +25,7 @@ min_validator_revision_required: 265
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 520
+spec_file_revision: 522
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -3523,21 +3523,6 @@ tags: {  # <amp-img>
     supported_layouts: RESPONSIVE
   }
 }
-tags: {  # <amp-layout>
-  html_format: AMP
-  html_format: AMP4ADS
-  tag_name: "AMP-LAYOUT"
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-layout"
-  amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: FLEX_ITEM
-    supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
-  }
-}
 tags: {  # <amp-pixel>
   html_format: AMP
   html_format: AMP4ADS
@@ -3779,7 +3764,6 @@ attr_lists: {
   attrs: { name: "aria-busy" }
   attrs: { name: "aria-checked" }
   attrs: { name: "aria-controls" }
-  attrs: { name: "aria-current" }
   attrs: { name: "aria-describedby" }
   attrs: { name: "aria-disabled" }
   attrs: { name: "aria-dropeffect" }
@@ -4012,7 +3996,7 @@ error_specificity {
 }
 error_specificity {
   code: BASE_TAG_MUST_PRECEED_ALL_URLS
-  specificity: 76
+  specificity: 77
 }
 error_specificity { code: DISALLOWED_SCRIPT_TAG specificity: 100 }
 error_specificity { code: GENERAL_DISALLOWED_TAG specificity: 101 }
