@@ -75,10 +75,10 @@ class AmpVideo extends AMP.BaseElement {
     /** @private {?Element} */
     this.video_ = null;
 
-    /** @private {boolean}  */
+    /** @private {boolean} */
     this.muted_ = false;
 
-    /** @private {boolean}  */
+    /** @private {boolean} */
     this.isPrerenderAllowed_ = false;
 
     /** @private {!../../../src/mediasession-helper.MetadataDef} */
@@ -112,8 +112,8 @@ class AmpVideo extends AMP.BaseElement {
    * Eventhough AMP Cache rewrites the `src` to point to the CDN, the actual
    * video may not be ready in the cache yet, in those cases the CDN will
    * return a 404. Runtime handles this situation by appending an additional
-   * <source> pointing to the original src AFTER the cached source. Browser will
-   * naturally fallback to that source if the cached one 404s.
+   * <source> pointing to the original src AFTER the cached source so browser
+   * will automatically proceed to the next source if one fails.
    *
    * 2) Prerendering
    * Now that some sources might be cached, we can preload them during prerender
