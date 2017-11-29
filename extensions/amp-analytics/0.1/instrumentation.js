@@ -20,13 +20,10 @@ import {
 } from './analytics-root';
 import {
   AnalyticsEvent,
-  ClickEventTracker,
+  AnalyticsEventType,
   CustomEventTracker,
-  IniLoadTracker,
-  SignalTracker,
-  TimerEventTracker,
-  VideoEventTracker,
-  VisibilityTracker,
+  getTrackerKeyName,
+  getTrackerTypesForParentType,
 } from './events';
 import {Observable} from '../../../src/observable';
 import {dev, user} from '../../../src/log';
@@ -39,8 +36,6 @@ import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
-import {isEnumValue} from '../../../src/types';
-import {startsWith} from '../../../src/string';
 import {Services} from '../../../src/services';
 
 const SCROLL_PRECISION_PERCENT = 5;
@@ -49,71 +44,6 @@ const VAR_V_SCROLL_BOUNDARY = 'verticalScrollBoundary';
 const PROP = '__AMP_AN_ROOT';
 
 
-/**
- * Events that can result in analytics data to be sent.
- * @const
- * @enum {string}
- */
-export const AnalyticsEventType = {
-  VISIBLE: 'visible',
-  CLICK: 'click',
-  TIMER: 'timer',
-  SCROLL: 'scroll',
-  HIDDEN: 'hidden',
-};
-
-const ALLOWED_FOR_ALL = ['ampdoc', 'embed'];
-
-/**
- * Events that can result in analytics data to be sent.
- * @const {!Object<string, {
- *     name: string,
- *     allowedFor: !Array<string>,
- *     klass: function(new:./events.EventTracker)
- *   }>}
- */
-const EVENT_TRACKERS = {
-  'click': {
-    name: 'click',
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: ClickEventTracker,
-  },
-  'custom': {
-    name: 'custom',
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: CustomEventTracker,
-  },
-  'render-start': {
-    name: 'render-start',
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: SignalTracker,
-  },
-  'ini-load': {
-    name: 'ini-load',
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: IniLoadTracker,
-  },
-  'timer': {
-    name: 'timer',
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: TimerEventTracker,
-  },
-  'visible': {
-    name: 'visible',
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: VisibilityTracker,
-  },
-  'hidden': {
-    name: 'visible', // Reuse tracker with visibility
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: VisibilityTracker,
-  },
-  'video': {
-    name: 'video',
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: VideoEventTracker,
-  },
-};
 
 /** @const {string} */
 const TAG = 'Analytics.Instrumentation';
@@ -438,27 +368,32 @@ export class AnalyticsGroup {
    */
   addTrigger(config, handler) {
     const eventType = dev().assertString(config['on']);
-    const trackerKey = startsWith(eventType, 'video-') ? 'video' : eventType;
+    const trackerKey = getTrackerKeyName(eventType);
+    const trackerWhitelist = getTrackerTypesForParentType(this.root_.getType());
 
-    let trackerProfile = EVENT_TRACKERS[trackerKey];
-    if (!trackerProfile && !isEnumValue(AnalyticsEventType, eventType)) {
-      trackerProfile = EVENT_TRACKERS['custom'];
-    }
-    if (trackerProfile) {
-      user().assert(
-          trackerProfile.allowedFor.indexOf(this.root_.getType()) != -1,
-          'Trigger type "%s" is not allowed in the %s',
-          eventType, this.root_.getType());
-      const tracker = this.root_.getTracker(
-          trackerProfile.name, trackerProfile.klass);
-      const unlisten = tracker.add(
-          this.analyticsElement_, eventType, config, handler);
-      this.listeners_.push(unlisten);
-    } else {
+    if (this.isDeprecatedListenerEvent(trackerKey)) {
       // TODO(dvoytenko): remove this use and `addListenerDepr_` once all
       // triggers have been migrated..
       this.service_.addListenerDepr_(config, handler, this.analyticsElement_);
+      return;
     }
+
+    const tracker = this.root_.getTrackerForWhitelist(
+        trackerKey, trackerWhitelist);
+    user().assert(!!tracker,
+        'Trigger type "%s" is not allowed in the %s', eventType,
+        this.root_.getType());
+    const unlisten = tracker.add(this.analyticsElement_, eventType, config,
+        handler);
+    this.listeners_.push(unlisten);
+  }
+
+  /**
+   * @param {string} triggerType
+   * @return {boolean}
+   */
+  isDeprecatedListenerEvent(triggerType) {
+    return triggerType == 'scroll';
   }
 }
 

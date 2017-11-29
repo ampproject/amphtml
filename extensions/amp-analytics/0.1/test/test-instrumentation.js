@@ -15,10 +15,10 @@
  */
 
 import {
-  AnalyticsEventType,
   InstrumentationService,
 } from '../instrumentation.js';
 import {
+  AnalyticsEventType,
   ClickEventTracker,
   CustomEventTracker,
   IniLoadTracker,
