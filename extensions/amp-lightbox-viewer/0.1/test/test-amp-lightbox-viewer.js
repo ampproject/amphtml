@@ -54,18 +54,18 @@ describes.realWin('amp-lightbox-viewer', {
           const impl = viewer.implementation_;
           // stub vsync and resource function
           sandbox.stub(impl.vsync_,
-            'mutate', callback => {
-              callback();
-            });
+              'mutate', callback => {
+                callback();
+              });
           sandbox.stub(impl.vsync_,
-            'mutatePromise', callback => {
-              callback();
-              return Promise.resolve();
-            });
+              'mutatePromise', callback => {
+                callback();
+                return Promise.resolve();
+              });
           sandbox.stub(impl.resources_,
-            'requireLayout', callback => {
-              return Promise.resolve();
-            });
+              'requireLayout', () => {
+                return Promise.resolve();
+              });
         })
         .then(() => viewer);
   }
@@ -176,12 +176,6 @@ describes.realWin('amp-lightbox-viewer', {
     it('should create gallery with thumbnails', () => {
       return getAmpLightboxViewer(autoLightbox).then(viewer => {
         const impl = viewer.implementation_;
-        impl.vsync_.mutate = function(callback) {
-          callback();
-        };
-        impl.resources_.requireLayout = function() {
-          return Promise.resolve();
-        };
         return impl.open_(item1).then(() => {
           impl.openGallery_();
           const container = viewer.querySelector('.i-amphtml-lbv');

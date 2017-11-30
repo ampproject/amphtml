@@ -505,8 +505,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   /**
    * Opens the lightbox-viewer and displays the given element inside.
    * @param {!Element} element Element to lightbox.
-   * @private
    * @return {!Promise}
+   * @private
    */
   open_(element) {
     return this.initializeLightboxIfNecessary_().then(() => {
@@ -521,9 +521,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       this.win.document.documentElement.addEventListener(
           'keydown', this.boundHandleKeyboardEvents_);
 
-      return this.resources_.requireLayout(dev().assertElement(this.carousel_))
-          .then(() => this.openLightboxForElement_(element));
-    });
+      return this.resources_.requireLayout(dev().assertElement(this.carousel_));
+    }).then(() => this.openLightboxForElement_(element));
   }
 
   /**
@@ -531,6 +530,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * associated with said element, updates the description, and initializes
    * the image viewer if the element is an amp-img.
    * @param {!Element} element
+   * @private
    */
   openLightboxForElement_(element) {
     this.currentElemId_ = element.lightboxItemId;
@@ -682,8 +682,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   /**
    * Create an element inside gallery from the thumbnail info from manager.
    * @param {{url: string, element: !Element}} thumbnailObj
-   * @private
    * @return {!Element}
+   * @private
    */
   createThumbnailElement_(thumbnailObj) {
     const element = this.win.document.createElement('div');

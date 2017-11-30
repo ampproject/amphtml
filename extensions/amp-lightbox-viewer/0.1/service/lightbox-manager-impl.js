@@ -57,8 +57,8 @@ export class LightboxManager {
 
   /**
    * Initializes the manager only once.
-   * @private
    * @return {!Promise}
+   * @private
    */
   maybeInit_() {
     if (this.initPromise_) {
