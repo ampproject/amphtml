@@ -587,8 +587,6 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
-  pubexchange: {},
-
   postquare: {},
 
   pubexchange: {},
