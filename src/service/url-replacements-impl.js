@@ -107,42 +107,60 @@ export class GlobalVariableSource extends VariableSource {
     /** @const {!./viewport/viewport-impl.Viewport} */
     const viewport = Services.viewportForDoc(this.ampdoc);
 
-    // Returns a random value for cache busters.
-    this.set('RANDOM', () => {
-      return Math.random();
-    });
-
-    // Provides a counter starting at 1 per given scope.
-    let counterStore = null;
-    this.set('COUNTER', scope => {
-      if (!counterStore) {
-        counterStore = Object.create(null);
-      }
-      if (!counterStore[scope]) {
-        counterStore[scope] = 0;
-      }
-      return ++counterStore[scope];
-    });
-
-    // Provides a sum per given scope using passed values.
-    let sumStore = null;
-    this.set('SUM', (scope, value) => {
-      user().assert(!isNaN(value),
-          'Second parameter must be a number');
-      if (!sumStore) {
-        sumStore = Object.create(null);
-      }
-      if (!sumStore[scope]) {
-        sumStore[scope] = 0;
-      }
-      sumStore[scope] += Number(value);
-      return sumStore[scope];
-    });
-
-    // Returns the canonical URL for this AMP document.
-    this.set('CANONICAL_URL', this.getDocInfoValue_.bind(this, info => {
-      return info.canonicalUrl;
+    // Access: Reader ID.
+    this.setAsync('ACCESS_READER_ID', /** @type {AsyncResolverDef} */(() => {
+      return this.getAccessValue_(accessService => {
+        return accessService.getAccessReaderId();
+      }, 'ACCESS_READER_ID');
     }));
+
+    // returns the AMP version number
+    this.set('AMP_VERSION', () => '$internalRuntimeVersion$');
+
+    // Returns the host of the URL for this AMP document.
+    this.set('AMPDOC_HOST', () => {
+      const url = parseUrl(this.ampdoc.win.location.href);
+      return url && url.host;
+    });
+
+    // Returns the hostname of the URL for this AMP document.
+    this.set('AMPDOC_HOSTNAME', () => {
+      const url = parseUrl(this.ampdoc.win.location.href);
+      return url && url.hostname;
+    });
+
+    // Returns the URL for this AMP document.
+    this.set('AMPDOC_URL', () => {
+      return removeFragment(this.ampdoc.win.location.href);
+    });
+
+    // Access: data from the authorization response.
+    this.setAsync('AUTHDATA', /** @type {AsyncResolverDef} */(field => {
+      user().assert(field,
+          'The first argument to AUTHDATA, the field, is required');
+      return this.getAccessValue_(accessService => {
+        return accessService.getAuthdataField(field);
+      }, 'AUTHDATA');
+    }));
+
+    // Returns screen.availHeight.
+    this.set('AVAILABLE_SCREEN_HEIGHT',
+        () => this.ampdoc.win.screen.availHeight);
+
+    // Returns screen.availWidth.
+    this.set('AVAILABLE_SCREEN_WIDTH',
+        () => this.ampdoc.win.screen.availWidth);
+
+    this.set('BACKGROUND_STATE', () => {
+      return Services.viewerForDoc(this.ampdoc).isVisible() ? '0' : '1';
+    });
+
+    // Returns the browser language.
+    this.set('BROWSER_LANGUAGE', () => {
+      const nav = this.ampdoc.win.navigator;
+      return (nav.language || nav.userLanguage || nav.browserLanguage || '')
+          .toLowerCase();
+    });
 
     // Returns the host of the canonical URL for this AMP document.
     this.set('CANONICAL_HOST', this.getDocInfoValue_.bind(this, info => {
@@ -162,88 +180,10 @@ export class GlobalVariableSource extends VariableSource {
       return url && url.pathname;
     }));
 
-    // Returns the referrer URL.
-    this.setAsync('DOCUMENT_REFERRER', /** @type {AsyncResolverDef} */(() => {
-      return Services.viewerForDoc(this.ampdoc).getReferrerUrl();
+    // Returns the canonical URL for this AMP document.
+    this.set('CANONICAL_URL', this.getDocInfoValue_.bind(this, info => {
+      return info.canonicalUrl;
     }));
-
-    // Like DOCUMENT_REFERRER, but returns null if the referrer is of
-    // same domain or the corresponding CDN proxy.
-    this.setAsync('EXTERNAL_REFERRER', /** @type {AsyncResolverDef} */(() => {
-      return Services.viewerForDoc(this.ampdoc).getReferrerUrl()
-          .then(referrer => {
-            if (!referrer) {
-              return null;
-            }
-            const referrerHostname = parseUrl(getSourceUrl(referrer)).hostname;
-            const currentHostname =
-                WindowInterface.getHostname(this.ampdoc.win);
-            return referrerHostname === currentHostname ? null : referrer;
-          });
-    }));
-
-    // Returns the title of this AMP document.
-    this.set('TITLE', () => {
-      return this.ampdoc.win.document.title;
-    });
-
-    // Returns the URL for this AMP document.
-    this.set('AMPDOC_URL', () => {
-      return removeFragment(this.ampdoc.win.location.href);
-    });
-
-    // Returns the host of the URL for this AMP document.
-    this.set('AMPDOC_HOST', () => {
-      const url = parseUrl(this.ampdoc.win.location.href);
-      return url && url.host;
-    });
-
-    // Returns the hostname of the URL for this AMP document.
-    this.set('AMPDOC_HOSTNAME', () => {
-      const url = parseUrl(this.ampdoc.win.location.href);
-      return url && url.hostname;
-    });
-
-    // Returns the Source URL for this AMP document.
-    this.setBoth('SOURCE_URL', this.getDocInfoValue_.bind(this, info => {
-      return removeFragment(info.sourceUrl);
-    }), () => {
-      return getTrackImpressionPromise().then(() => {
-        return this.getDocInfoValue_(info => {
-          return removeFragment(info.sourceUrl);
-        });
-      });
-    });
-
-    // Returns the host of the Source URL for this AMP document.
-    this.set('SOURCE_HOST', this.getDocInfoValue_.bind(this, info => {
-      return parseUrl(info.sourceUrl).host;
-    }));
-
-    // Returns the hostname of the Source URL for this AMP document.
-    this.set('SOURCE_HOSTNAME', this.getDocInfoValue_.bind(this, info => {
-      return parseUrl(info.sourceUrl).hostname;
-    }));
-
-    // Returns the path of the Source URL for this AMP document.
-    this.set('SOURCE_PATH', this.getDocInfoValue_.bind(this, info => {
-      return parseUrl(info.sourceUrl).pathname;
-    }));
-
-    // Returns a random string that will be the constant for the duration of
-    // single page view. It should have sufficient entropy to be unique for
-    // all the page views a single user is making at a time.
-    this.set('PAGE_VIEW_ID', this.getDocInfoValue_.bind(this, info => {
-      return info.pageViewId;
-    }));
-
-    this.setBoth('QUERY_PARAM', (param, defaultValue = '') => {
-      return this.getQueryParamData_(param, defaultValue);
-    }, (param, defaultValue = '') => {
-      return getTrackImpressionPromise().then(() => {
-        return this.getQueryParamData_(param, defaultValue);
-      });
-    });
 
     /**
      * Stores client ids that were generated during this page view
@@ -301,6 +241,245 @@ export class GlobalVariableSource extends VariableSource {
       });
     });
 
+    // Returns the time it took for content to load.
+    this.setTimingResolver_(
+        'CONTENT_LOAD_TIME', 'navigationStart', 'domContentLoadedEventStart');
+
+    // Provides a counter starting at 1 per given scope.
+    let counterStore = null;
+    this.set('COUNTER', scope => {
+      if (!counterStore) {
+        counterStore = Object.create(null);
+      }
+      if (!counterStore[scope]) {
+        counterStore[scope] = 0;
+      }
+      return ++counterStore[scope];
+    });
+
+    // Returns document characterset.
+    this.set('DOCUMENT_CHARSET', () => {
+      const doc = this.ampdoc.win.document;
+      return doc.characterSet || doc.charset;
+    });
+
+    // Returns the referrer URL.
+    this.setAsync('DOCUMENT_REFERRER', /** @type {AsyncResolverDef} */(() => {
+      return Services.viewerForDoc(this.ampdoc).getReferrerUrl();
+    }));
+
+    // Returns the time it took for DOM to become interactive.
+    this.setTimingResolver_(
+        'DOM_INTERACTIVE_TIME', 'navigationStart', 'domInteractive');
+
+    // Returns the time it took to perform DNS lookup for the domain.
+    this.setTimingResolver_(
+        'DOMAIN_LOOKUP_TIME', 'domainLookupStart', 'domainLookupEnd');
+
+    // Like DOCUMENT_REFERRER, but returns null if the referrer is of
+    // same domain or the corresponding CDN proxy.
+    this.setAsync('EXTERNAL_REFERRER', /** @type {AsyncResolverDef} */(() => {
+      return Services.viewerForDoc(this.ampdoc).getReferrerUrl()
+          .then(referrer => {
+            if (!referrer) {
+              return null;
+            }
+            const referrerHostname = parseUrl(getSourceUrl(referrer)).hostname;
+            const currentHostname =
+                WindowInterface.getHostname(this.ampdoc.win);
+            return referrerHostname === currentHostname ? null : referrer;
+          });
+    }));
+
+    this.set('NAV_REDIRECT_COUNT', () => {
+      return getNavigationData(this.ampdoc.win, 'redirectCount');
+    });
+
+    this.set('NAV_TIMING', (startAttribute, endAttribute) => {
+      user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
+          'start attribute name, is required');
+      return getTimingDataSync(
+          this.ampdoc.win,
+          /**@type {string}*/(startAttribute),
+          /**@type {string}*/(endAttribute));
+    });
+    this.setAsync('NAV_TIMING', (startAttribute, endAttribute) => {
+      user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
+          'start attribute name, is required');
+      return getTimingDataAsync(
+          this.ampdoc.win,
+          /**@type {string}*/(startAttribute),
+          /**@type {string}*/(endAttribute));
+    });
+
+    this.set('NAV_TYPE', () => {
+      return getNavigationData(this.ampdoc.win, 'type');
+    });
+
+    // Returns the time it took to download the page.
+    this.setTimingResolver_(
+        'PAGE_DOWNLOAD_TIME', 'responseStart', 'responseEnd');
+
+    // Returns the time it took to load the whole page. (excludes amp-* elements
+    // that are not rendered by the system yet.)
+    this.setTimingResolver_(
+        'PAGE_LOAD_TIME', 'navigationStart', 'loadEventStart');
+
+    // Returns a random string that will be the constant for the duration of
+    // single page view. It should have sufficient entropy to be unique for
+    // all the page views a single user is making at a time.
+    this.set('PAGE_VIEW_ID', this.getDocInfoValue_.bind(this, info => {
+      return info.pageViewId;
+    }));
+
+    this.setBoth('QUERY_PARAM', (param, defaultValue = '') => {
+      return this.getQueryParamData_(param, defaultValue);
+    }, (param, defaultValue = '') => {
+      return getTrackImpressionPromise().then(() => {
+        return this.getQueryParamData_(param, defaultValue);
+      });
+    });
+
+    // Returns a random value for cache busters.
+    this.set('RANDOM', () => {
+      return Math.random();
+    });
+
+    // Returns the time it took for redirects to complete.
+    this.setTimingResolver_(
+        'REDIRECT_TIME', 'navigationStart', 'fetchStart');
+
+    // Returns screen.ColorDepth.
+    this.set('SCREEN_COLOR_DEPTH',
+        () => this.ampdoc.win.screen.colorDepth);
+
+    // Returns screen.height.
+    this.set('SCREEN_HEIGHT', () => this.ampdoc.win.screen.height);
+
+    // Returns screen.width.
+    this.set('SCREEN_WIDTH', () => this.ampdoc.win.screen.width);
+
+    // Returns a promise resolving to viewport.getScrollHeight.
+    this.set('SCROLL_HEIGHT', () => viewport.getScrollHeight());
+
+    // Returns a promise resolving to viewport.getScrollLeft.
+    this.set('SCROLL_LEFT', () => viewport.getScrollLeft());
+
+    // Returns a promise resolving to viewport.getScrollTop.
+    this.set('SCROLL_TOP', () => viewport.getScrollTop());
+
+    // Returns a promise resolving to viewport.getScrollWidth.
+    this.set('SCROLL_WIDTH', () => viewport.getScrollWidth());
+
+    // Returns the time it took for server to start sending a response to the
+    // request.
+    this.setTimingResolver_(
+        'SERVER_RESPONSE_TIME', 'requestStart', 'responseStart');
+
+    // Returns incoming share tracking fragment.
+    this.setAsync('SHARE_TRACKING_INCOMING', /** @type {AsyncResolverDef} */(
+        () => {
+          return this.getShareTrackingValue_(fragments => {
+            return fragments.incomingFragment;
+          }, 'SHARE_TRACKING_INCOMING');
+        }));
+
+    // Returns outgoing share tracking fragment.
+    this.setAsync('SHARE_TRACKING_OUTGOING', /** @type {AsyncResolverDef} */(
+        () => {
+          return this.getShareTrackingValue_(fragments => {
+            return fragments.outgoingFragment;
+          }, 'SHARE_TRACKING_OUTGOING');
+        }));
+
+    // Returns the host of the Source URL for this AMP document.
+    this.set('SOURCE_HOST', this.getDocInfoValue_.bind(this, info => {
+      return parseUrl(info.sourceUrl).host;
+    }));
+
+    // Returns the hostname of the Source URL for this AMP document.
+    this.set('SOURCE_HOSTNAME', this.getDocInfoValue_.bind(this, info => {
+      return parseUrl(info.sourceUrl).hostname;
+    }));
+
+    // Returns the path of the Source URL for this AMP document.
+    this.set('SOURCE_PATH', this.getDocInfoValue_.bind(this, info => {
+      return parseUrl(info.sourceUrl).pathname;
+    }));
+
+    // Returns the Source URL for this AMP document.
+    this.setBoth('SOURCE_URL', this.getDocInfoValue_.bind(this, info => {
+      return removeFragment(info.sourceUrl);
+    }), () => {
+      return getTrackImpressionPromise().then(() => {
+        return this.getDocInfoValue_(info => {
+          return removeFragment(info.sourceUrl);
+        });
+      });
+    });
+
+    this.setAsync('STORY_PAGE_ID', () => {
+      return this.getStoryValue_(storyVariables => storyVariables.pageId,
+          'STORY_PAGE_ID');
+    });
+
+    this.setAsync('STORY_PAGE_INDEX', () => {
+      return this.getStoryValue_(storyVariables => storyVariables.pageIndex,
+          'STORY_PAGE_INDEX');
+    });
+
+    // Provides a sum per given scope using passed values.
+    let sumStore = null;
+    this.set('SUM', (scope, value) => {
+      user().assert(!isNaN(value),
+          'Second parameter must be a number');
+      if (!sumStore) {
+        sumStore = Object.create(null);
+      }
+      if (!sumStore[scope]) {
+        sumStore[scope] = 0;
+      }
+      sumStore[scope] += Number(value);
+      return sumStore[scope];
+    });
+
+    // Returns the time it took to connect to the server.
+    this.setTimingResolver_(
+        'TCP_CONNECT_TIME', 'connectStart', 'connectEnd');
+
+    // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
+    this.set('TIMESTAMP', () => {
+      return Date.now();
+    });
+
+    //Returns the human readable timestamp in format of 2011-01-01T11:11:11.612Z.
+    this.set('TIMESTAMP_ISO', () => {
+      return new Date().toISOString();
+    });
+
+    // Returns the user's time-zone offset from UTC, in minutes.
+    this.set('TIMEZONE', () => {
+      return new Date().getTimezoneOffset();
+    });
+
+    // Returns the title of this AMP document.
+    this.set('TITLE', () => {
+      return this.ampdoc.win.document.title;
+    });
+
+    // Returns the total engaged time since the content became viewable.
+    this.setAsync('TOTAL_ENGAGED_TIME', () => {
+      return Services.activityForDoc(this.ampdoc).then(activity => {
+        return activity.getTotalEngagedTime();
+      });
+    });
+
+    // Returns the user agent.
+    this.set('USER_AGENT', () => {
+      const nav = this.ampdoc.win.navigator;
+      return nav.userAgent;
+    });
+
     // Returns assigned variant name for the given experiment.
     this.setAsync('VARIANT', /** @type {AsyncResolverDef} */(experiment => {
       return this.getVairiantsValue_(variants => {
@@ -326,189 +505,6 @@ export class GlobalVariableSource extends VariableSource {
       }, 'VARIANTS');
     }));
 
-    // Returns incoming share tracking fragment.
-    this.setAsync('SHARE_TRACKING_INCOMING', /** @type {AsyncResolverDef} */(
-        () => {
-          return this.getShareTrackingValue_(fragments => {
-            return fragments.incomingFragment;
-          }, 'SHARE_TRACKING_INCOMING');
-        }));
-
-    // Returns outgoing share tracking fragment.
-    this.setAsync('SHARE_TRACKING_OUTGOING', /** @type {AsyncResolverDef} */(
-        () => {
-          return this.getShareTrackingValue_(fragments => {
-            return fragments.outgoingFragment;
-          }, 'SHARE_TRACKING_OUTGOING');
-        }));
-
-    // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
-    this.set('TIMESTAMP', () => {
-      return Date.now();
-    });
-
-    //Returns the human readable timestamp in format of 2011-01-01T11:11:11.612Z.
-    this.set('TIMESTAMP_ISO', () => {
-      return new Date().toISOString();
-    });
-
-    // Returns the user's time-zone offset from UTC, in minutes.
-    this.set('TIMEZONE', () => {
-      return new Date().getTimezoneOffset();
-    });
-
-    // Returns a promise resolving to viewport.getScrollTop.
-    this.set('SCROLL_TOP', () => viewport.getScrollTop());
-
-    // Returns a promise resolving to viewport.getScrollLeft.
-    this.set('SCROLL_LEFT', () => viewport.getScrollLeft());
-
-    // Returns a promise resolving to viewport.getScrollHeight.
-    this.set('SCROLL_HEIGHT', () => viewport.getScrollHeight());
-
-    // Returns a promise resolving to viewport.getScrollWidth.
-    this.set('SCROLL_WIDTH', () => viewport.getScrollWidth());
-
-    // Returns the viewport height.
-    this.set('VIEWPORT_HEIGHT', () => viewport.getSize().height);
-
-    // Returns the viewport width.
-    this.set('VIEWPORT_WIDTH', () => viewport.getSize().width);
-
-    // Returns screen.width.
-    this.set('SCREEN_WIDTH', () => this.ampdoc.win.screen.width);
-
-    // Returns screen.height.
-    this.set('SCREEN_HEIGHT', () => this.ampdoc.win.screen.height);
-
-    // Returns screen.availHeight.
-    this.set('AVAILABLE_SCREEN_HEIGHT',
-        () => this.ampdoc.win.screen.availHeight);
-
-    // Returns screen.availWidth.
-    this.set('AVAILABLE_SCREEN_WIDTH',
-        () => this.ampdoc.win.screen.availWidth);
-
-    // Returns screen.ColorDepth.
-    this.set('SCREEN_COLOR_DEPTH',
-        () => this.ampdoc.win.screen.colorDepth);
-
-    // Returns document characterset.
-    this.set('DOCUMENT_CHARSET', () => {
-      const doc = this.ampdoc.win.document;
-      return doc.characterSet || doc.charset;
-    });
-
-    // Returns the browser language.
-    this.set('BROWSER_LANGUAGE', () => {
-      const nav = this.ampdoc.win.navigator;
-      return (nav.language || nav.userLanguage || nav.browserLanguage || '')
-          .toLowerCase();
-    });
-
-    // Returns the user agent.
-    this.set('USER_AGENT', () => {
-      const nav = this.ampdoc.win.navigator;
-      return nav.userAgent;
-    });
-
-    // Returns the time it took to load the whole page. (excludes amp-* elements
-    // that are not rendered by the system yet.)
-    this.setTimingResolver_(
-        'PAGE_LOAD_TIME', 'navigationStart', 'loadEventStart');
-
-    // Returns the time it took to perform DNS lookup for the domain.
-    this.setTimingResolver_(
-        'DOMAIN_LOOKUP_TIME', 'domainLookupStart', 'domainLookupEnd');
-
-    // Returns the time it took to connect to the server.
-    this.setTimingResolver_(
-        'TCP_CONNECT_TIME', 'connectStart', 'connectEnd');
-
-    // Returns the time it took for server to start sending a response to the
-    // request.
-    this.setTimingResolver_(
-        'SERVER_RESPONSE_TIME', 'requestStart', 'responseStart');
-
-    // Returns the time it took to download the page.
-    this.setTimingResolver_(
-        'PAGE_DOWNLOAD_TIME', 'responseStart', 'responseEnd');
-
-    // Returns the time it took for redirects to complete.
-    this.setTimingResolver_(
-        'REDIRECT_TIME', 'navigationStart', 'fetchStart');
-
-    // Returns the time it took for DOM to become interactive.
-    this.setTimingResolver_(
-        'DOM_INTERACTIVE_TIME', 'navigationStart', 'domInteractive');
-
-    // Returns the time it took for content to load.
-    this.setTimingResolver_(
-        'CONTENT_LOAD_TIME', 'navigationStart', 'domContentLoadedEventStart');
-
-    // Access: Reader ID.
-    this.setAsync('ACCESS_READER_ID', /** @type {AsyncResolverDef} */(() => {
-      return this.getAccessValue_(accessService => {
-        return accessService.getAccessReaderId();
-      }, 'ACCESS_READER_ID');
-    }));
-
-    // Access: data from the authorization response.
-    this.setAsync('AUTHDATA', /** @type {AsyncResolverDef} */(field => {
-      user().assert(field,
-          'The first argument to AUTHDATA, the field, is required');
-      return this.getAccessValue_(accessService => {
-        return accessService.getAuthdataField(field);
-      }, 'AUTHDATA');
-    }));
-
-    // Returns an identifier for the viewer.
-    this.setAsync('VIEWER', () => {
-      return Services.viewerForDoc(this.ampdoc)
-          .getViewerOrigin().then(viewer => {
-            return viewer == undefined ? '' : viewer;
-          });
-    });
-
-    // Returns the total engaged time since the content became viewable.
-    this.setAsync('TOTAL_ENGAGED_TIME', () => {
-      return Services.activityForDoc(this.ampdoc).then(activity => {
-        return activity.getTotalEngagedTime();
-      });
-    });
-
-    this.set('NAV_TIMING', (startAttribute, endAttribute) => {
-      user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
-          'start attribute name, is required');
-      return getTimingDataSync(
-          this.ampdoc.win,
-          /**@type {string}*/(startAttribute),
-          /**@type {string}*/(endAttribute));
-    });
-    this.setAsync('NAV_TIMING', (startAttribute, endAttribute) => {
-      user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
-          'start attribute name, is required');
-      return getTimingDataAsync(
-          this.ampdoc.win,
-          /**@type {string}*/(startAttribute),
-          /**@type {string}*/(endAttribute));
-    });
-
-    this.set('NAV_TYPE', () => {
-      return getNavigationData(this.ampdoc.win, 'type');
-    });
-
-    this.set('NAV_REDIRECT_COUNT', () => {
-      return getNavigationData(this.ampdoc.win, 'redirectCount');
-    });
-
-    // returns the AMP version number
-    this.set('AMP_VERSION', () => '$internalRuntimeVersion$');
-
-    this.set('BACKGROUND_STATE', () => {
-      return Services.viewerForDoc(this.ampdoc).isVisible() ? '0' : '1';
-    });
-
     this.setAsync('VIDEO_STATE', (id, property) => {
       const root = this.ampdoc.getRootNode();
       const video = user().assertElement(
@@ -519,15 +515,19 @@ export class GlobalVariableSource extends VariableSource {
           .then(details => details ? details[property] : '');
     });
 
-    this.setAsync('STORY_PAGE_INDEX', () => {
-      return this.getStoryValue_(storyVariables => storyVariables.pageIndex,
-          'STORY_PAGE_INDEX');
+    // Returns an identifier for the viewer.
+    this.setAsync('VIEWER', () => {
+      return Services.viewerForDoc(this.ampdoc)
+          .getViewerOrigin().then(viewer => {
+            return viewer == undefined ? '' : viewer;
+          });
     });
 
-    this.setAsync('STORY_PAGE_ID', () => {
-      return this.getStoryValue_(storyVariables => storyVariables.pageId,
-          'STORY_PAGE_ID');
-    });
+    // Returns the viewport height.
+    this.set('VIEWPORT_HEIGHT', () => viewport.getSize().height);
+
+    // Returns the viewport width.
+    this.set('VIEWPORT_WIDTH', () => viewport.getSize().width);
   }
 
   /**
