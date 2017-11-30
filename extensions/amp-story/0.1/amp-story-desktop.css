@@ -70,7 +70,7 @@ amp-story[standalone][desktop] {
   transform: scale(1.0) translateX(-350%) translateY(0%) !important;
   opacity: .05!important;
   transform-origin: left!important;
-  border-radius: 3px!important;
+  border-radius: 16px!important;
 }
 
 amp-story-page.i-amphtml-story-page-shown {
@@ -397,7 +397,7 @@ amp-story-page.i-amphtml-story-page-shown {
 }
 
 [desktop] .i-amphtml-story-progress-bar {
- height: 4px!important;
+ height: 3px!important;
  width: calc(100vw/3)!important;
  margin: auto!important;
  top: 0!important;
