@@ -17,6 +17,7 @@
 import {loadScript, writeScript, validateData} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
 import {startsWith} from '../src/string';
+import {user} from '../src/log';
 
 const hasOwnProperty = Object.prototype.hasOwnProperty;
 
@@ -103,6 +104,12 @@ export function openx(global, data) {
       loadScript(global, jssdk);
     }
   } else if (data.dfpSlot) { // Fall back to a DFP ad.
+    user().warn(
+        'DOUBLECLICK', 'Delayed Fetch for DoubleClick will be' +
+        'removed by March 29, 2018. Any use of this file will cease' +
+        'to work at that time. Please refer to ' +
+        'https://github.com/ampproject/amphtml/issues/11834 ' +
+        'for more information');
     doubleclick(global, dfpData);
   }
 }

@@ -17,6 +17,7 @@
 import {computeInMasterFrame, loadScript} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
 import {tryParseJson} from '../src/json';
+import {user} from '../src/log';
 
 /* global Criteo: false */
 
@@ -77,6 +78,12 @@ function setTargeting(global, data, targeting) {
       dblParams['targeting'][i] = targeting[i];
     }
 
+    user().warn(
+        'DOUBLECLICK', 'Delayed Fetch for DoubleClick will be' +
+        'removed by March 29, 2018. Any use of this file will cease' +
+        'to work at that time. Please refer to ' +
+        'https://github.com/ampproject/amphtml/issues/11834 ' +
+        'for more information');
     doubleclick(global, dblParams);
   }
 }

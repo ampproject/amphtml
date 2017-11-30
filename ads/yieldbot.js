@@ -17,7 +17,7 @@
 import {validateData, loadScript} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
 import {getMultiSizeDimensions} from '../ads/google/utils';
-import {rethrowAsync} from '../src/log';
+import {rethrowAsync, user} from '../src/log';
 
 /**
  * @param {!Window} global
@@ -73,6 +73,12 @@ export function yieldbot(global, data) {
       }
       delete data['ybSlot'];
       delete data['psn'];
+      user().warn(
+          'DOUBLECLICK', 'Delayed Fetch for DoubleClick will be' +
+          'removed by March 29, 2018. Any use of this file will cease' +
+          'to work at that time. Please refer to ' +
+          'https://github.com/ampproject/amphtml/issues/11834 ' +
+          'for more information');
       doubleclick(global, data);
     });
   });

@@ -16,6 +16,7 @@
 
 import {writeScript, loadScript, validateData} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
+import {user} from '../src/log';
 
 /**
  * @param {!Window} global
@@ -60,6 +61,12 @@ function headerBidding(global, data) {
         elementId: 'c',
       }],
       done(targeting) {
+        user().warn(
+            'DOUBLECLICK', 'Delayed Fetch for DoubleClick will be' +
+            'removed by March 29, 2018. Any use of this file will cease' +
+            'to work at that time. Please refer to ' +
+            'https://github.com/ampproject/amphtml/issues/11834 ' +
+            'for more information');
         doubleclick(global, {
           width: data.width,
           height: data.height,
