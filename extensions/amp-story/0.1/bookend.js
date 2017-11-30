@@ -345,10 +345,16 @@ export class Bookend {
    * Uses animation utils instead of CSS transition for convenience and
    * coordination (i.e. listening to transition end).
    */
-  show() {
+  show(showOnlyShare) {
     const transition = tr.setStyles(this.getRoot(), {
       transform: tr.translateY(tr.numeric(this.getViewportHeight_(), 0)),
     });
+
+    if (showOnlyShare) {
+      this.getRoot().classList.add('share-only');
+    } else {
+      this.getRoot().classList.remove('share-only');
+    }
 
     this.getRoot().classList.remove(FULLBLEED_CLASSNAME);
     this.getRoot().removeAttribute('hidden');
@@ -366,7 +372,7 @@ export class Bookend {
   }
 
   /**
-   * @retun {boolean}
+   * @return {boolean}
    */
   isBuilt() {
     return this.isBuilt_;
