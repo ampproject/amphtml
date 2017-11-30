@@ -23,12 +23,11 @@ limitations under the License.
     type="giraff"
     data-block-name="novotekaru">
 </amp-ad>
-
 ```
 
 ## Configuration
 
-For more information, please see ad network documentation.
+For more information, please [see ad network documentation](https://www.giraff.io/help).
 
 Required parameters:
 - data-block-name
