@@ -249,6 +249,21 @@ describes.realWin('amp-analytics', {
     }
   });
 
+  it('preload script', function() {
+    const el = doc.createElement('amp-analytics');
+    doc.body.appendChild(el);
+    const analytics = new AmpAnalytics(el);
+    analytics.buildCallback();
+    analytics.preconnectCallback();
+    return Promise.resolve().then(() => {
+      const preloads = doc.querySelectorAll('link[rel=preload]');
+      expect(preloads).to.have.length(1);
+      expect(preloads[0]).to.have.property(
+          'href',
+          'http://localhost:9876/dist/iframe-transport-client-lib.js');
+    });
+  });
+
   it('sends a basic hit', function() {
     const analytics = getAnalyticsTag(trivialConfig);
 
@@ -423,7 +438,6 @@ describes.realWin('amp-analytics', {
           'https://example.com/cid=CLIENT_ID(analytics-abc)');
     });
   });
-
 
   describe('merges requests correctly', function() {
     it('inline and vendor both string', function() {
