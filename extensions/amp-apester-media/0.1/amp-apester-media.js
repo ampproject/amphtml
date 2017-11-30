@@ -173,8 +173,8 @@ class AmpApesterMedia extends AMP.BaseElement {
     );
     let suffix = '';
     const queryParams = dict();
-    queryParams.renderer = false;
-    queryParams.platform = getPlatform();
+    queryParams['renderer'] = false;
+    queryParams['platform'] = getPlatform();
     if (inative) {
       if (idOrToken) {
         suffix = `/inatives/${idOrToken}`;
@@ -183,8 +183,8 @@ class AmpApesterMedia extends AMP.BaseElement {
       }
     } else if (playlist && tags) {
       suffix = `/tokens/${encodedMediaAttribute}/interactions/random`;
-      queryParams.tags = tags;
-      queryParams.fallback = !!fallback;
+      queryParams['tags'] = tags;
+      queryParams['fallback'] = !!fallback;
     } else if (playlist) {
       suffix = `/tokens/${encodedMediaAttribute}/interactions/random`;
     } else {
