@@ -224,6 +224,41 @@ export const VideoAttributes = {
    * and http://caniuse.com/#feat=fullscreen
    */
   FULLSCREEN_ON_LANDSCAPE: 'fullscreen-on-landscape',
+  /**
+   * custom-controls
+   *
+   * When this attribute is specified, native controls are hidden and
+   * customizable AMP controls are added to the video element
+   */
+  CUSTOM_CONTROLS: 'custom-controls',
+  /**
+   * custom-controls-skin
+   *
+   * This attribute takes one of 'dark' or 'light' and describes the theme
+   * of the custom controls
+   */
+  CUSTOM_CONTROLS_SKIN: 'custom-controls-skin',
+  /**
+   * custom-controls-main
+   *
+   * A space-separated ordered list of the buttons to include in the bottom
+   * control bar
+   */
+  CUSTOM_CONTROLS_MAIN: 'custom-controls-main',
+  /**
+   * custom-controls-mini
+   *
+   * An ordered space-separated list of three buttons to include in the
+   * mobile/small screen overlay controls
+   */
+  CUSTOM_CONTROLS_MINI: 'custom-controls-mini',
+  /**
+   * custom-controls-floating
+   *
+   * A button to display floating in the middle of the video player as the main
+   * action (usually the play/pause action).
+   */
+  CUSTOM_CONTROLS_FLOATING: 'custom-controls-floating',
 };
 
 
@@ -346,6 +381,14 @@ export const VideoEvents = {
    * @event ad_end
    */
   AD_END: 'ad_end',
+  /**
+   * time_update
+   *
+   * Fired everytime the video is playing, seeking or its duration changed.
+   *
+   * @event time_update
+   */
+  TIME_UPDATE: 'time_update',
 };
 
 

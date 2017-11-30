@@ -14,11 +14,13 @@
   * limitations under the License.
   */
 
+import {assertHttpsUrl} from '../../../src/url';
 import {
   elementByTag,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
+  scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -29,8 +31,9 @@ import {
 } from '../../../src/service/video-manager-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
+import {toArray} from '../../../src/types';
 import {EMPTY_METADATA} from '../../../src/mediasession-helper';
+import {CSS} from '../../../build/amp-video-0.1.css';
 
 const TAG = 'amp-video';
 
@@ -211,7 +214,11 @@ class AmpVideo extends AMP.BaseElement {
     this.propagateAttributes(ATTRS_TO_PROPAGATE_ON_LAYOUT, this.video_,
         /* opt_removeMissingAttrs */ true);
 
-    this.getRealChildNodes().forEach(child => {
+    const children = toArray(scopedQuerySelectorAll(
+        this.element,
+        'source, track'
+    ));
+    children.forEach(child => {
       // Skip the video we already added to the element.
       if (this.video_ === child) {
         return;
@@ -246,6 +253,12 @@ class AmpVideo extends AMP.BaseElement {
     listen(video, 'ended', () => {
       this.element.dispatchCustomEvent(VideoEvents.PAUSE);
     });
+    const dispatchTimeUpdate = () => {
+      this.element.dispatchCustomEvent(VideoEvents.TIME_UPDATE);
+    };
+    ['durationchange', 'timeupdate', 'seeking'].map(e => {
+      listen(video, e, dispatchTimeUpdate);
+    });
   }
 
   /** @override */
@@ -273,7 +286,8 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   isInteractive() {
-    return this.element.hasAttribute('controls');
+    return this.element.hasAttribute('controls')
+           || this.element.hasAttribute('custom-controls');
   }
 
   /**
@@ -380,7 +394,6 @@ class AmpVideo extends AMP.BaseElement {
   }
 }
 
-
 AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(TAG, AmpVideo);
+  AMP.registerElement(TAG, AmpVideo, CSS);
 });

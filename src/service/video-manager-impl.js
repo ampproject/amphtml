@@ -22,7 +22,6 @@ import {getData, listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
 import {registerServiceBuilderForDoc, getServiceForDoc} from '../service';
-import {setStyles} from '../style';
 import {isFiniteNumber} from '../types';
 import {mapRange} from '../utils/math';
 import {startsWith} from '../string.js';
@@ -48,6 +47,7 @@ import {
   parseFavicon,
   setMediaSession,
 } from '../mediasession-helper';
+import {CustomControls} from '../video-custom-controls';
 import {Animation} from '../animation';
 import * as st from '../style';
 import * as tr from '../transition';
@@ -82,7 +82,7 @@ const DOCK_MARGIN = 20;
 /**
  * @const {number} Amount by which the velocity decreseases every frame
  */
-const FRICTION_COEFF = 0.55;
+const FRICTION_COEFF = 0.65;
 
 /**
  * @const {number} Used to determine at which minmal velocity the element is
@@ -331,7 +331,7 @@ export class VideoManager {
         entry.video.element,
         PositionObserverFidelity.HIGH,
         newPos => {
-          entry.onDockableVideoPositionChanged(newPos);
+          entry.onDockableVideoPositionChanged(newPos, /* reset */ false);
         }
     );
 
@@ -429,10 +429,20 @@ export class VideoManager {
   /**
    * Registers the provided video as docked
    *
-   * @param {VideoEntry} entry
+   * @param {!VideoEntry} entry
    */
   registerDocked(entry) {
     this.dockedVideo_ = entry;
+  }
+
+  /**
+   * Checks whether the given video is docked or not
+   *
+   * @param {!VideoEntry} entry
+   * @return {boolean}
+   */
+  isDocked(entry) {
+    return this.dockedVideo_ == entry;
   }
 
   /**
@@ -449,7 +459,7 @@ export class VideoManager {
 /**
  * VideoEntry represents an entry in the VideoManager's list.
  */
-class VideoEntry {
+export class VideoEntry {
   /**
    * @param {!VideoManager} manager
    * @param {!../video-interface.VideoInterface} video
@@ -465,7 +475,7 @@ class VideoEntry {
     /** @private {!../service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc_);
 
-    /** @package @const {!../video-interface.VideoInterface} */
+    /** @const {!../video-interface.VideoInterface} */
     this.video = video;
 
     /** @private {?Element} */
@@ -518,9 +528,6 @@ class VideoEntry {
     /** @private {?Element} */
     this.internalElement_ = null;
 
-    /** @private {?Element} */
-    this.draggingMask_ = null;
-
     /** @private {boolean} */
     this.muted_ = false;
 
@@ -550,9 +557,6 @@ class VideoEntry {
     // Dragging Variables
 
     /** @private {boolean} */
-    this.dragListenerInstalled_ = false;
-
-    /** @private {boolean} */
     this.isTouched_ = false;
 
     /** @private {boolean} */
@@ -560,9 +564,6 @@ class VideoEntry {
 
     /** @private {boolean} */
     this.isSnapping_ = false;
-
-    /** @private {boolean} */
-    this.isDismissed_ = false;
 
     /** @private {Object} */
     this.dragCoordinates_ = {
@@ -577,6 +578,19 @@ class VideoEntry {
     /** @private {Array<!UnlistenDef>} */
     this.dragUnlisteners_ = [];
 
+    // Custom Controls Variables
+    this.customControls_ = null;
+
+    // Media Session API Variables
+
+    /** @private {!../mediasession-helper.MetadataDef} */
+    this.metadata_ = EMPTY_METADATA;
+
+    // Public Variables
+
+    this.hasCustomControls =
+      element.hasAttribute(VideoAttributes.CUSTOM_CONTROLS);
+
     this.hasDocking = element.hasAttribute(VideoAttributes.DOCK);
 
     this.hasAutoplay = element.hasAttribute(VideoAttributes.AUTOPLAY);
@@ -587,11 +601,6 @@ class VideoEntry {
 
     this.hasFullscreenOnLandscape = fsOnLandscapeAttr == ''
                                     || fsOnLandscapeAttr == 'always';
-
-    // Media Session API Variables
-
-    /** @private {!../mediasession-helper.MetadataDef} */
-    this.metadata_ = EMPTY_METADATA;
 
     listenOncePromise(element, VideoEvents.LOAD)
         .then(() => this.videoLoaded());
@@ -610,6 +619,9 @@ class VideoEntry {
    */
   videoBuilt_() {
     this.updateVisibility();
+    if (this.hasCustomControls || this.hasDocking) {
+      this.customControlsVideoBuilt_();
+    }
     if (this.hasAutoplay) {
       this.autoplayVideoBuilt_();
     }
@@ -627,7 +639,7 @@ class VideoEntry {
 
     if (!this.video.preimplementsMediaSessionAPI()) {
       const playHandler = () => {
-        this.video.play(/*isAutoplay*/ false);
+        this.video.play(/* autoplay */ false);
       };
       const pauseHandler = () => {
         this.video.pause();
@@ -694,6 +706,22 @@ class VideoEntry {
       // Handles the case when the video becomes visible before loading
       this.loadedVideoVisibilityChanged_();
     }
+  }
+
+  /**
+   * Returns whether the video is currently playing or not
+   * @return {boolean}
+   */
+  isPlaying() {
+    return this.isPlaying_;
+  }
+
+  /**
+   * Returns whether the video is currently muted or not
+   * @return {boolean}
+   */
+  isMuted() {
+    return this.muted_;
   }
 
   /**
@@ -824,14 +852,17 @@ class VideoEntry {
     // and showing the controls quickly becomes a bad user experience for the
     // common case where autoplay is supported.
     if (this.video.isInteractive()) {
-      this.video.hideControls();
+      this.hideControls();
     }
 
     this.boundSupportsAutoplay_().then(supportsAutoplay => {
       if (!supportsAutoplay && this.video.isInteractive()) {
         // Autoplay is not supported, show the controls so user can manually
         // initiate playback.
-        this.video.showControls();
+        this.showControls(
+            /* showToo */ true,
+            /* enableToo */ this.hasCustomControls
+        );
         return;
       }
 
@@ -858,7 +889,7 @@ class VideoEntry {
     };
 
     // Hide the controls.
-    this.video.hideControls();
+    this.hideControls();
 
     // Create autoplay animation and the mask to detect user interaction.
     const animation = this.createAutoplayAnimation_();
@@ -887,7 +918,10 @@ class VideoEntry {
 
     function onInteraction() {
       this.userInteractedWithAutoPlay_ = true;
-      this.video.showControls();
+      this.showControls(
+          /* showToo */ true,
+          /* enableToo */ this.hasCustomControls
+      );
       this.video.unmute();
       unlisteners.forEach(unlistener => {
         unlistener();
@@ -897,13 +931,13 @@ class VideoEntry {
     }
 
     function adStart() {
-      setStyles(mask, {
+      st.setStyles(mask, {
         'display': 'none',
       });
     }
 
     function adEnd() {
-      setStyles(mask, {
+      st.setStyles(mask, {
         'display': 'block',
       });
     }
@@ -916,7 +950,7 @@ class VideoEntry {
   autoplayLoadedVideoVisibilityChanged_() {
     if (this.isVisible_) {
       this.visibilitySessionManager_.beginSession();
-      this.video.play(/*autoplay*/ true);
+      this.video.play(/* autoplay */ true);
       this.playCalledByAutoplay_ = true;
     } else {
       if (this.isPlaying_) {
@@ -990,7 +1024,7 @@ class VideoEntry {
       },
       mutate: () => {
         this.repositionMinimizedVideo_();
-        this.realignDraggingMask_();
+        this.realignMiniControls_();
       },
     });
   }
@@ -1031,27 +1065,30 @@ class VideoEntry {
   repositionMinimizedVideo_() {
     this.dockState_ = DockStates.INLINE;
     if (this.dockLastPosition_) {
-      this.onDockableVideoPositionChanged(this.dockLastPosition_);
+      this.onDockableVideoPositionChanged(this.dockLastPosition_, true);
     }
   }
 
   /**
-   * Re-aligns the dragging mask with the position of the minimized video,
+   * Re-aligns the mini controls with the position of the minimized video,
    * usually following a device orientation change
    * @private
    */
-  realignDraggingMask_() {
-    if (!this.draggingMask_ || !this.internalElement_) {
+  realignMiniControls_() {
+    if (!this.customControls_ || !this.internalElement_) {
       return;
     }
 
     this.vsync_.mutate(() => {
+      if (this.dockState_ == DockStates.INLINE) {
+        return;
+      }
       const internalElement = this.internalElement_;
       function cloneStyle(prop) {
         return st.getStyle(dev().assertElement(internalElement), prop);
       };
 
-      st.setStyles(dev().assertElement(this.draggingMask_), {
+      st.setStyles(dev().assertElement(this.customControls_.getElement()), {
         'top': cloneStyle('top'),
         'left': cloneStyle('left'),
         'bottom': cloneStyle('bottom'),
@@ -1063,7 +1100,6 @@ class VideoEntry {
         'height': cloneStyle('height'),
         'position': 'fixed',
         'z-index': '17',
-        'background': 'transparent',
       });
     });
   }
@@ -1072,12 +1108,13 @@ class VideoEntry {
    * Called when the video's position in the viewport changed (at most once per
    * animation frame)
    * @param {./position-observer/position-observer-worker.PositionInViewportEntryDef} newPos
+   * @param {boolean} reset
    */
-  onDockableVideoPositionChanged(newPos) {
+  onDockableVideoPositionChanged(newPos, reset = false) {
     this.vsync_.run({
       measure: () => {
         this.inlineVidRect_ = this.video.element./*OK*/getBoundingClientRect();
-        this.updateDockableVideoPosition_(newPos);
+        this.updateDockableVideoPosition_(newPos, reset);
       },
       mutate: () => {
         // Short-circuit the position change handler if the video isn't loaded yet
@@ -1088,7 +1125,7 @@ class VideoEntry {
           || !this.inlineVidRect_
           || !this.internalElement_
           || (this.getPlayingState() != PlayingStates.PLAYING_MANUAL
-                  && !this.internalElement_.classList.contains(DOCK_CLASS))
+                  && !this.video.element.classList.contains(DOCK_CLASS))
         ) {
           return;
         }
@@ -1104,13 +1141,13 @@ class VideoEntry {
         // undocked even when paused)
         const manual = this.getPlayingState() == PlayingStates.PLAYING_MANUAL;
         const paused = this.getPlayingState() == PlayingStates.PAUSED;
-        const docked = this.internalElement_.classList.contains(DOCK_CLASS);
+        const docked = this.video.element.classList.contains(DOCK_CLASS);
 
         if (outOfView && (manual || (paused && docked))) {
           // On the first time, we initialize the docking animation
           if (this.dockState_ == DockStates.INLINE
               && this.manager_.canDock(this)) {
-            this.initializeDocking_();
+            this.initializeDocking_(reset);
           }
           // Then we animate docking or undocking
           if (this.dockState_ != DockStates.INLINE) {
@@ -1124,8 +1161,6 @@ class VideoEntry {
 
         if (this.dockState_ == DockStates.DOCKED) {
           this.initializeDragging_();
-        } else {
-          this.finishDragging_();
         }
       },
     });
@@ -1136,9 +1171,10 @@ class VideoEntry {
    * below viewport), also the height of the part of the video that is
    * currently in the viewport (between 0 and the initial video height).
    * @param {./position-observer/position-observer-worker.PositionInViewportEntryDef} newPos
+   * @param {boolean} reset whether this is called after an orientation change
    * @private
    */
-  updateDockableVideoPosition_(newPos) {
+  updateDockableVideoPosition_(newPos, reset = false) {
     const isBottom = newPos.relativePos == RelativePositions.BOTTOM;
     const isTop = newPos.relativePos == RelativePositions.TOP;
     const isInside = newPos.relativePos == RelativePositions.INSIDE;
@@ -1194,15 +1230,16 @@ class VideoEntry {
                          - spaceOnTop
                          - this.video.element./*OK*/offsetHeight;
     // Don't minimize if video can never be hidden by scrolling to top/bottom
-    if ((isBottom && spaceOnTop < this.viewport_.getHeight())
-        || (isTop && spaceOnBottom < this.viewport_.getHeight())) {
+    const vh = this.viewport_.getHeight();
+    if ((isBottom && spaceOnTop < vh)
+        || (isTop && spaceOnBottom < vh)) {
       this.dockPosition_ = DockPositions.INLINE;
       return;
     }
 
     // Don't minimize if the video is bigger than the viewport (will always
     // minimize and never be inline otherwise!)
-    if (this.video.element./*OK*/offsetHeight >= this.viewport_.getHeight()) {
+    if (this.video.element./*OK*/offsetHeight >= vh && !reset) {
       this.dockPosition_ = DockPositions.INLINE;
       return;
     }
@@ -1229,21 +1266,74 @@ class VideoEntry {
   /**
    * Set the initial width and hight when the video is docking
    * so that we scale relative to the initial video's dimensions
+   * @param {boolean} reset
    * @private
    */
-  initializeDocking_() {
-    this.video.hideControls();
-    this.internalElement_.classList.add(DOCK_CLASS);
-    st.setStyles(dev().assertElement(this.internalElement_), {
-      'height': st.px(this.inlineVidRect_.height),
-      'width': st.px(this.inlineVidRect_.width),
-      'maxWidth': st.px(this.inlineVidRect_.width),
+  initializeDocking_(reset = false) {
+    if (this.manager_.isDocked(this) && !reset) {
+      return;
+    }
+    this.hideControls(/* customToo */ true, /* disableToo */ true);
+    this.customControls_.toggleMinimalControls(/* enabled */ true);
+    this.video.element.classList.add(DOCK_CLASS);
+    [
+      this.customControls_.getElement(),
+      this.internalElement_,
+    ].forEach(element => {
+      st.setStyles(dev().assertElement(element), {
+        'height': st.px(this.inlineVidRect_.height),
+        'width': st.px(this.inlineVidRect_.width),
+        'maxWidth': st.px(this.inlineVidRect_.width),
+      });
     });
     st.setStyles(dev().assertElement(this.video.element), {
       'background-color': '#222',
     });
     this.dockState_ = DockStates.DOCKING;
     this.manager_.registerDocked(this);
+
+    this.addListener_(
+        dev().assertElement(this.customControls_.getElement()),
+        ['mousedown', 'touchstart'],
+        e => {
+          this.isTouched_ = true;
+          this.isDragging_ = false;
+          this.mouse_(e, true);
+        }
+    );
+
+    this.addListener_(
+        this.ampdoc_.win.document,
+        ['mouseup', 'touchend'],
+        () => {
+          this.isTouched_ = false;
+          this.isDragging_ = false;
+          // Call drag one last time to see if the velocity is still not null
+          // in which case, drag would call itself again to finish the animation
+          this.drag_();
+        }
+    );
+
+    this.addListener_(
+        this.ampdoc_.win.document,
+        ['mousemove', 'touchmove'],
+        e => {
+          // TODO(@wassgha) Make this passive once the PR goes through
+          // TODO(@wassgha) Unlisten to this event as soon as we stop dragging
+          this.isDragging_ = this.isTouched_;
+          if (this.isDragging_) {
+            e.preventDefault();
+            // Start dragging
+            this.dockState_ = DockStates.DRAGGABLE;
+            this.drag_();
+          }
+          this.mouse_(e);
+        },
+        {
+          'capture': true,
+          'passive': false,
+        }
+    );
   }
 
   /**
@@ -1252,6 +1342,8 @@ class VideoEntry {
    * @private
    */
   animateDocking_() {
+    this.customControls_.disableControls();
+
     // Viewport width & height
     const vw = this.viewport_.getWidth();
     const vh = this.viewport_.getHeight();
@@ -1267,7 +1359,7 @@ class VideoEntry {
     const scaledHeight = DOCK_SCALE * this.inlineVidRect_.height;
     const offsetYBottom = vh - scaledHeight - DOCK_MARGIN;
 
-    // Calculate translate
+    // Calculate Offset
     let minimizedRectTop = 0, minimizedRectLeft = 0;
     switch (this.dockPosition_) {
       case DockPositions.TOP_LEFT:
@@ -1321,6 +1413,15 @@ class VideoEntry {
       'left': '0px',
     });
 
+    st.setStyles(dev().assertElement(this.customControls_.getElement()), {
+      'transform': transform,
+      'transformOrigin': 'top left',
+      'bottom': 'auto',
+      'top': '0px',
+      'right': 'auto',
+      'left': '0px',
+    });
+
     if (this.scrollMap_(DOCK_SCALE, 1) == DOCK_SCALE) {
       this.dockState_ = DockStates.DOCKED;
     } else {
@@ -1331,31 +1432,34 @@ class VideoEntry {
   /**
    * Listens for the specified event on the element and records unlistener
    * @param {!EventTarget} element
-   * @param {string} eventType
+   * @param {Array} eventTypes
    * @param {function(!Event)} listener
+   * @param {Object=} opt_evtListenerOpts
    * @private
    */
-  addDragListener_(element, eventType, listener) {
-    this.dragUnlisteners_.push(
-        listen(
-            element,
-            eventType,
-            listener
-        )
-    );
+  addListener_(element, eventTypes, listener, opt_evtListenerOpts) {
+    eventTypes.forEach(eventType => {
+      this.dragUnlisteners_.push(
+          listen(
+              element,
+              eventType,
+              listener,
+              opt_evtListenerOpts
+          )
+      );
+    });
   }
 
   /**
    * Removes all listeners for touch and mouse events
    * @private
    */
-  unlistenToDragEvents_() {
+  unlistenDragListeners_() {
     let unlistener = this.dragUnlisteners_.pop();
     while (unlistener) {
       unlistener.call();
       unlistener = this.dragUnlisteners_.pop();
     }
-    this.dragListenerInstalled_ = false;
   }
 
   /**
@@ -1364,74 +1468,13 @@ class VideoEntry {
    * @private
    */
   initializeDragging_() {
-    if (this.dragListenerInstalled_) {
-      return;
-    }
-
     this.vsync_.run({
       measure: () => {
         this.measureMinimizedRect_();
       },
       mutate: () => {
-        this.createDraggingMask_();
-
-        // Desktop listeners
-        this.addDragListener_(
-            dev().assertElement(this.draggingMask_),
-            'mousedown',
-            e => {
-              e.preventDefault();
-              this.isTouched_ = true;
-              this.isDragging_ = false;
-              this.mouse_(e, true);
-            }
-        );
-        this.addDragListener_(this.ampdoc_.win.document, 'mouseup', () => {
-          this.isTouched_ = false;
-          this.isDragging_ = false;
-          // Call drag one last time to see if the velocity is still not null
-          // in which case, drag would call itself again to finish the animation
-          this.drag_();
-        });
-        this.addDragListener_(this.ampdoc_.win.document, 'mousemove', e => {
-          this.isDragging_ = this.isTouched_;
-          if (this.isDragging_) {
-            e.preventDefault();
-            // Start dragging
-            this.dockState_ = DockStates.DRAGGABLE;
-            this.drag_();
-          }
-          this.mouse_(e);
-        });
-        // Touch listeners
-        this.addDragListener_(
-            dev().assertElement(this.draggingMask_),
-            'touchstart',
-            e => {
-              e.preventDefault();
-              this.isTouched_ = true;
-              this.isDragging_ = false;
-              this.mouse_(e, true);
-            }
-        );
-        this.addDragListener_(this.ampdoc_.win.document, 'touchend', () => {
-          this.isTouched_ = false;
-          this.isDragging_ = false;
-          // Call drag one last time to see if the velocity is still not null
-          // in which case, drag would call itself again to finish the animation
-          this.drag_();
-        });
-        this.addDragListener_(this.ampdoc_.win.document, 'touchmove', e => {
-          this.isDragging_ = this.isTouched_;
-          if (this.isDragging_) {
-            e.preventDefault();
-            // Start dragging
-            this.dockState_ = DockStates.DRAGGABLE;
-            this.drag_();
-          }
-          this.mouse_(e);
-        });
-        this.dragListenerInstalled_ = true;
+        this.showControls(/* showToo */ false, /* enableToo */ true);
+        this.realignMiniControls_();
       },
     });
   }
@@ -1453,7 +1496,7 @@ class VideoEntry {
           || !this.internalElement_
           || this.dockPosition_ == DockPositions.INLINE
           || this.dockVisibleHeight_ != 0
-          || !this.internalElement_.classList.contains(DOCK_CLASS)
+          || !this.video.element.classList.contains(DOCK_CLASS)
           || this.dockState_ != DockStates.DRAGGABLE) {
           return;
         }
@@ -1468,31 +1511,27 @@ class VideoEntry {
           dragCoord.velocity.x = (dragCoord.position.x - dragCoord.previous.x);
           dragCoord.velocity.y = (dragCoord.position.y - dragCoord.previous.y);
 
-          const minimizedWidth = this.minimizedRect_.width;
-          const minimizedHeight = this.minimizedRect_.height;
-
-          const vidCenterX = dragCoord.position.x + minimizedWidth / 2;
-          const vidCenterY = dragCoord.position.y + minimizedHeight / 2;
-
-          if (vidCenterX > this.viewport_.getWidth()
-              || vidCenterX < 0
-              || vidCenterY > this.viewport_.getHeight()
-              || vidCenterY < 0) {
-            this.isDismissed_ = true;
-          }
         } else {
           dragCoord.position.x += dragCoord.velocity.x;
           dragCoord.position.y += dragCoord.velocity.y;
 
           dragCoord.velocity.x *= FRICTION_COEFF;
           dragCoord.velocity.y *= FRICTION_COEFF;
+        }
 
-          if (this.isDismissed_) {
-            this.video.pause();
-            this.finishDocking_();
-            this.isDismissed_ = false;
-            return;
-          }
+        const minimizedWidth = this.minimizedRect_.width;
+        const minimizedHeight = this.minimizedRect_.height;
+
+        const vidCenterX = dragCoord.position.x + minimizedWidth / 2;
+        const vidCenterY = dragCoord.position.y + minimizedHeight / 2;
+
+        if (vidCenterX > this.viewport_.getWidth()
+            || vidCenterX < 0
+            || vidCenterY > this.viewport_.getHeight()
+            || vidCenterY < 0) {
+          this.video.pause();
+          this.finishDocking_();
+          return;
         }
 
         // Snap to corners
@@ -1535,16 +1574,24 @@ class VideoEntry {
               || dragCoord.position.y != newPosY) {
             this.isSnapping_ = true;
             // Snap to the calculated corner
-            this.animateSnap_(this.draggingMask_, newPosX, newPosY);
-            this.animateSnap_(this.internalElement_, newPosX, newPosY);
+            [
+              this.customControls_.getElement(),
+              this.internalElement_,
+            ].forEach(element => {
+              this.animateSnap_(element, newPosX, newPosY);
+            });
             this.dockState_ = DockStates.DOCKED;
           }
         }
 
         // Update the video's position
         if (!this.isSnapping_) {
-          this.dragMove_(this.draggingMask_);
-          this.dragMove_(this.internalElement_);
+          [
+            this.customControls_.getElement(),
+            this.internalElement_,
+          ].forEach(element => {
+            this.dragMove_(element);
+          });
         }
 
         if (!this.isDragging_) {
@@ -1554,17 +1601,6 @@ class VideoEntry {
           });
         }
       },
-    });
-  }
-
-  /**
-   * Removes the draggable mask and ends dragging
-   * @private
-   */
-  finishDragging_() {
-    this.vsync_.mutate(() => {
-      this.unlistenToDragEvents_();
-      this.removeDraggingMask_();
     });
   }
 
@@ -1597,8 +1633,10 @@ class VideoEntry {
    * @private
    */
   calcSnapCorner_() {
-    const viewportCenterX = this.viewport_.getWidth() / 2;
-    const viewportCenterY = this.viewport_.getHeight() / 2;
+    const vw = this.viewport_.getWidth();
+    const vh = this.viewport_.getHeight();
+    const viewportCenterX = vw / 2;
+    const viewportCenterY = vh / 2;
     const minRectW = this.minimizedRect_.width;
     const minRectH = this.minimizedRect_.height;
     const centerX = this.dragCoordinates_.position.x + minRectW / 2;
@@ -1626,17 +1664,37 @@ class VideoEntry {
    */
   finishDocking_() {
     // Remove draggable mask and listeners
-    this.finishDragging_();
-    // Re-enable controls
-    this.video.showControls();
-    // Restore the video inline
-    this.internalElement_.classList.remove(DOCK_CLASS);
-    this.internalElement_.setAttribute('style', '');
-    st.setStyles(dev().assertElement(this.video.element), {
-      'background-color': 'transparent',
+    this.vsync_.mutate(() => {
+      this.unlistenDragListeners_();
+      this.hideControls(
+          /* customToo */ true,
+          /* disableToo */ !this.hasCustomControls
+      );
+      this.showControls(
+          /* showToo */ false,
+          /* enableToo */ this.hasCustomControls
+      );
+      this.customControls_.toggleMinimalControls(/* enabled */ false);
+      // Restore the video inline
+      this.video.element.classList.remove(DOCK_CLASS);
+      [
+        this.customControls_.getElement(),
+        this.internalElement_,
+      ].forEach(element => {
+        st.resetStyles(dev().assertElement(element),
+            [
+              'transform', 'position', 'top', 'width', 'height', 'opacity',
+              'background-color', 'left', 'bottom', 'right', 'transform-origin',
+              'borderRadius', 'z-index', 'background-color', 'maxWidth',
+            ]
+        );
+      });
+      st.setStyles(dev().assertElement(this.video.element), {
+        'background-color': 'transparent',
+      });
+      this.dockState_ = DockStates.INLINE;
+      this.manager_.unregisterDocked();
     });
-    this.dockState_ = DockStates.INLINE;
-    this.manager_.unregisterDocked();
   }
 
   /**
@@ -1734,30 +1792,6 @@ class VideoEntry {
   }
 
   /**
-   * Creates a mask to overlay on top of a minimized video to capture drag
-   * and drop events on iframe-based players
-   * @private
-   */
-  createDraggingMask_() {
-    const doc = this.ampdoc_.win.document;
-    this.draggingMask_ = doc.createElement('i-amphtml-dragging-mask');
-    this.realignDraggingMask_();
-    this.video.element.appendChild(this.draggingMask_);
-  }
-
-  /**
-   * Removes the draggable mask so that the video can be interacted with
-   * again when inline
-   * @private
-   */
-  removeDraggingMask_() {
-    if (this.draggingMask_) {
-      removeElement(this.draggingMask_);
-      this.draggingMask_ = null;
-    }
-  }
-
-  /**
    * Called by all possible events that might change the visibility of the video
    * such as scrolling or {@link ../video-interface.VideoEvents#VISIBILITY}.
    * @param {?boolean=} opt_forceVisible
@@ -1849,6 +1883,90 @@ class VideoEntry {
       };
     });
   }
+
+  /* Custom Controls Behavior */
+
+  /**
+   * Called when a video with custom controls is built.
+   * @private
+   */
+  customControlsVideoBuilt_() {
+    // Hide native controls
+    this.hideControls(/* customToo */ false, /* disableToo */ false);
+
+    const skinAttr = this.video.element.getAttribute(
+        VideoAttributes.CUSTOM_CONTROLS_SKIN
+    );
+    const darkSkin = skinAttr == 'dark' ? true : false;
+
+    // Get main controls (in the control bar)
+    const mainControlsAttr = this.video.element.getAttribute(
+        VideoAttributes.CUSTOM_CONTROLS_MAIN
+    );
+    const mainControls = mainControlsAttr ?
+                         mainControlsAttr.split(' ') : undefined;
+
+    // Get mini-controls (used when video is docked)
+    const miniControlsAttr = this.video.element.getAttribute(
+        VideoAttributes.CUSTOM_CONTROLS_MINI
+    );
+    const miniControls = miniControlsAttr ?
+                         miniControlsAttr.split(' ') : undefined;
+
+    // Get floating button (main action)
+    const floatingControlsAttr = this.video.element.getAttribute(
+        VideoAttributes.CUSTOM_CONTROLS_FLOATING
+    );
+    const floating = floatingControlsAttr ? floatingControlsAttr : undefined;
+
+    this.customControls_ = new CustomControls(
+        this.ampdoc_,
+        this,
+        {
+          darkSkin,
+          mainControls,
+          miniControls,
+          floating,
+        }
+    );
+
+    // If we only use custom controls for docked videos then we hide them
+    // until the video is docked.
+    this.vsync_.mutate(() => {
+      if (!this.hasCustomControls) {
+        this.hideControls(/* customToo */ true, /* disableToo */ true);
+      }
+    });
+  }
+
+  hideControls(customToo = true, disableToo = true) {
+    // Hide native controls
+    this.video.hideControls();
+    // Hide custom controls
+    if (customToo
+        && this.customControls_
+        && (this.hasCustomControls || this.hasDocking)) {
+      if (disableToo) {
+        this.customControls_.disableControls();
+      }
+      this.customControls_.hideControls(true);
+    }
+  }
+
+  showControls(showToo = false, enableToo = false) {
+    if ((this.hasCustomControls || this.hasDocking) && this.customControls_) {
+      // Show custom controls
+      if (enableToo) {
+        this.customControls_.enableControls();
+      }
+      if (this.hasCustomControls && showToo) {
+        this.customControls_.showControls();
+      }
+    } else {
+      // Show native controls
+      this.video.showControls();
+    }
+  }
 }
 
 /* @type {?Promise<boolean>} */
@@ -1894,7 +2012,7 @@ export function supportsAutoplay(win, isLiteViewer) {
   detectionElement.webkitPlaysinline = true;
   detectionElement.setAttribute('height', '0');
   detectionElement.setAttribute('width', '0');
-  setStyles(detectionElement, {
+  st.setStyles(detectionElement, {
     position: 'fixed',
     top: '0',
     width: '0',

@@ -36,18 +36,16 @@
   <h1>amp-video</h1>
 
   <amp-video
-      id="myVideo"
-      src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
-      width="720"
-      height="405"
-      layout="responsive"
-      controls>
-    <div placeholder>
-      This is a placeholder
-    </div>
-    <div fallback>
-      This is a fallback
-    </div>
+    autoplay
+    title="Big Buck Bunny"
+    artist="Blender Foundation"
+    poster="img/bigbuckbunny-poster.jpg"
+    artwork="img/bigbuckbunny-artwork.jpg"
+    album="The Peach Open Movie Project"
+    src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+    width="720"
+    height="405"
+    layout="responsive">
   </amp-video>
   <h3>Actions</h3>
   <button on="tap:myVideo.play">Play</button>
@@ -65,8 +63,8 @@
     autoplay
     title="Big Buck Bunny"
     artist="Blender Foundation"
-    poster="https://peach.blender.org/wp-content/uploads/bbb-splash.png"
-    artwork="img/bigbuckbunny.jpg"
+    poster="img/bigbuckbunny-poster.jpg"
+    artwork="img/bigbuckbunny-artwork.jpg"
     album="The Peach Open Movie Project"
     src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
     width="720"
@@ -83,6 +81,27 @@
     height="405"
     layout="responsive"
     controls>
+  </amp-video>
+
+  <h2>Custom Controls</h2>
+  <p>
+     Custom controls replace native controls and can be customized through CSS.
+  </p>
+  <amp-video
+    custom-controls
+    custom-controls-skin="light"
+    custom-controls-main="time spacer volume fullscreen"
+    custom-controls-mini="play volume fullscreen"
+    custom-controls-floating="play"
+    title="Big Buck Bunny"
+    artist="Blender Foundation"
+    poster="img/bigbuckbunny-poster.jpg"
+    artwork="img/bigbuckbunny-artwork.jpg"
+    album="The Peach Open Movie Project"
+    src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+    width="720"
+    height="405"
+    layout="responsive">
   </amp-video>
   <div class="spacer"></div>
 </body>
