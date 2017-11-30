@@ -21,7 +21,7 @@ import {expandTemplate} from '../../../src/string';
 import {isArray, isObject} from '../../../src/types';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {sendRequest, sendRequestUsingIframe} from './transport';
-import {IframeTransport} from './iframe-transport';
+import {getIframeTransportScriptUrl, IframeTransport} from './iframe-transport';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getTopWindow} from '../../../src/service';
 import {Services} from '../../../src/services';
@@ -158,6 +158,16 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.element.getAttribute('trigger') == 'immediate') {
       this.ensureInitialized_();
     }
+  }
+
+  /**
+   * Prefetches and preconnects URLs related to the analytics.
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
+  preconnectCallback(opt_onLayout) {
+    const url = getIframeTransportScriptUrl(this.getAmpDoc().win);
+    this.preconnect.preload(url, 'script');
   }
 
   /** @override */
