@@ -259,4 +259,19 @@ exports.rules = [
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
     ],
   },
+
+  {
+    mustNotDependOn: 'ads/google/doubleclick.js',
+    whitelist: [
+      'ads/criteo.js->ads/google/doubleclick.js',
+      'ads/ix.js->ads/google/doubleclick.js',
+      'ads/medianet.js->ads/google/doubleclick.js',
+      'ads/navegg.js->ads/google/doubleclick.js',
+      'ads/openx.js->ads/google/doubleclick.js',
+      'ads/pulsepoint.js->ads/google/doubleclick.js',
+      'ads/rubicon.js->ads/google/doubleclick.js',
+      'ads/yieldbot.js->ads/google/doubleclick.js',
+      '3p/integration.js->ads/google/doubleclick.js',
+    ],
+  },
 ];
