@@ -30,10 +30,10 @@ import {isEnumValue} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {getMode} from '../../../src/mode';
 import {Activity} from './activity-impl';
+import {AnalyticsEventType} from './events';
 import {
     InstrumentationService,
     instrumentationServicePromiseForDoc,
-    AnalyticsEventType,
 } from './instrumentation';
 import {
   ExpansionOptions,
@@ -120,7 +120,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.iframeTransport_ = null;
 
     /** @private {boolean} */
-    this.isInabox_ = getMode().runtime == 'inabox';
+    this.isInabox_ = getMode(this.win).runtime == 'inabox';
   }
 
   /** @override */
@@ -333,7 +333,9 @@ export class AmpAnalytics extends AMP.BaseElement {
         `${TAG}: No friendly parent amp-ad element was found for ` +
         'amp-analytics tag with iframe transport.');
 
-    this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
+    this.iframeTransport_ = new IframeTransport(
+        // Create  3p transport frame within creative frame if inabox.
+        this.isInabox_ ? this.win : this.getAmpDoc().win,
         this.element.getAttribute('type'),
         this.config_['transport'], ampAdResourceId);
   }

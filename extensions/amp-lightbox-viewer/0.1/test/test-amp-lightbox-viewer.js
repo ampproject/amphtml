@@ -21,6 +21,7 @@ import '../../../amp-carousel/0.1/amp-carousel';
 
 describes.realWin('amp-lightbox-viewer', {
   amp: {
+    amp: true,
     extensions: ['amp-lightbox-viewer', 'amp-carousel'],
   },
 }, env => {
@@ -52,11 +53,12 @@ describes.realWin('amp-lightbox-viewer', {
         .then(() => viewer);
   }
 
-  describe('with manual lightboxing', () => {
+  // TODO (cathyzhu): rewrite these tests after finalizing lightbox API.
+  describe.skip('with manual lightboxing', function() {
     runTests(/*autoLightbox*/false);
   });
 
-  describe('with auto lightboxing', () => {
+  describe('with auto lightboxing', function() {
     runTests(/*autoLightbox*/true);
   });
 
@@ -97,6 +99,9 @@ describes.realWin('amp-lightbox-viewer', {
         impl.vsync_.mutate = function(callback) {
           callback();
         };
+        impl.resources_.requireLayout = function() {
+          return Promise.resolve();
+        };
         expect(viewer.style.display).to.equal('none');
         return impl.activate({source: item1}).then(() => {
           expect(viewer.style.display).to.equal('');
@@ -109,6 +114,9 @@ describes.realWin('amp-lightbox-viewer', {
         const impl = viewer.implementation_;
         impl.vsync_.mutate = function(callback) {
           callback();
+        };
+        impl.resources_.requireLayout = function() {
+          return Promise.resolve();
         };
         expect(viewer.style.display).to.equal('none');
         return impl.activate({source: item1}).then(() => {
@@ -162,6 +170,9 @@ describes.realWin('amp-lightbox-viewer', {
         const impl = viewer.implementation_;
         impl.vsync_.mutate = function(callback) {
           callback();
+        };
+        impl.resources_.requireLayout = function() {
+          return Promise.resolve();
         };
         return impl.activate({source: item1}).then(() => {
           impl.openGallery_();

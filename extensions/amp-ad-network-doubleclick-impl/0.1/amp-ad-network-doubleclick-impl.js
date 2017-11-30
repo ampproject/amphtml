@@ -27,12 +27,12 @@ import {
   DEFAULT_SAFEFRAME_VERSION,
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
+import {is3pThrottled} from '../../amp-ad/0.1/concurrent-load';
 import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
 import {
   experimentFeatureEnabled,
   DOUBLECLICK_EXPERIMENT_FEATURE,
   DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
-  UNCONDITIONED_IDENTITY_EXPERIMENT_NAME,
   UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
 } from './doubleclick-a4a-config';
 import {
@@ -47,6 +47,8 @@ import {
   isReportingEnabled,
   AmpAnalyticsConfigDef,
   extractAmpAnalyticsConfig,
+  getCsiAmpAnalyticsConfig,
+  getCsiAmpAnalyticsVariables,
   groupAmpAdsByType,
   addCsiSignalsToAmpAnalyticsConfig,
   QQID_HEADER,
@@ -279,6 +281,7 @@ function fluidMessageListener_(event) {
   listener.instance.receiveMessageForFluid_(payload);
 }
 
+/** @final */
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
@@ -372,6 +375,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      * indicates no creative render.
      */
     this.isAmpCreative_ = null;
+
+    /** @private {boolean} */
+    this.isIdleRender_ = false;
   }
 
   /** @override */
@@ -382,6 +388,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (isNaN(vpRange) || this.element.getAttribute('data-loading-strategy')) {
       return false;
     }
+    this.isIdleRender_ = true;
     return vpRange;
   }
 
@@ -414,16 +421,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     super.buildCallback();
-    this.identityTokenPromise_ = experimentFeatureEnabled(
-        this.win, DOUBLECLICK_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT) ||
-        experimentFeatureEnabled(
-            this.win,
-            DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.IDENTITY_EXPERIMENT,
-            UNCONDITIONED_IDENTITY_EXPERIMENT_NAME) ?
-        Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible()
-        .then(() => getIdentityToken(this.win, this.getAmpDoc())) :
-        Promise.resolve(
-            /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({}));
+    this.identityTokenPromise_ = Services.viewerForDoc(this.getAmpDoc())
+        .whenFirstVisible()
+        .then(() => getIdentityToken(this.win, this.getAmpDoc()));
     this.troubleshootData_.slotId = this.element.getAttribute('data-slot');
     this.troubleshootData_.slotIndex =
         this.element.getAttribute('data-amp-slot-index');
@@ -814,6 +814,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.ampAnalyticsConfig_ = null;
     this.jsonTargeting_ = null;
     this.isAmpCreative_ = null;
+    this.isIdleRender_ = false;
     // Reset SRA requests to allow for resumeCallback to re-fetch
     // ad requests.  Assumes that unlayoutCallback will be called for all slots
     // in rapid succession (meaning onLayoutMeasure initiated promise chain
@@ -828,12 +829,26 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   layoutCallback() {
-    if (this.isFluid_) {
-      this.registerListenerForFluid_();
+    const registerFluidAndExec = () => {
+      if (this.isFluid_) {
+        this.registerListenerForFluid_();
+      }
+      return super.layoutCallback();
+    };
+    if (this.postAdResponseExperimentFeatures['render-idle-throttle'] &&
+        this.isIdleRender_) {
+      return this.isVerifiedAmpCreativePromise().then(verified => {
+        // Control concurrent loading of non-AMP creatives executed via
+        // idleRenderOutsideViewport as doing so within
+        // idleRenderOutsideViewport would impose at least 5 second delay due to
+        // scheduler constraints.
+        const throttleFn = () => !verified && is3pThrottled(this.win) ?
+            Services.timerFor(this.win).delay(throttleFn, 1000) :
+            registerFluidAndExec();
+        return throttleFn();
+      });
     }
-    // TODO(keithwrightbos): consider enforcing concurrent load throttle for
-    // non-AMP creatives loaded via idleRenderOutsideViewport.
-    return super.layoutCallback();
+    return registerFluidAndExec();
   }
 
   /** @override  */
@@ -1321,8 +1336,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.win.opener./*OK*/postMessage(payload, '*');
     });
   }
-}
 
+  /** @override */
+  getA4aAnalyticsVars(analyticsTrigger) {
+    return getCsiAmpAnalyticsVariables(analyticsTrigger, this, this.qqid_);
+  }
+
+  /** @override */
+  getA4aAnalyticsConfig() {
+    return getCsiAmpAnalyticsConfig();
+  }
+}
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpAdNetworkDoubleclickImpl);
