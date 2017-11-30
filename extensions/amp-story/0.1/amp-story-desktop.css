@@ -57,9 +57,6 @@ amp-story[standalone][desktop] {
  margin: -60px!important;
  background-size: cover!important;
  background-color: transparent!important;
- transition-duration: 300ms!important;
- transition-property: opacity!important;
- will-change: opacity!important;
 }
 
 .i-amphtml-story-background.active {
@@ -157,6 +154,7 @@ amp-story-page.i-amphtml-story-page-shown {
   box-shadow: 0 0 15px rgba(0, 0, 0, .4)!important;
   transition-property: transform !important;
   transition-duration: 500ms !important;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1)!important;
 }
 
 /* Navigation buttons */
@@ -194,16 +192,24 @@ amp-story-page.i-amphtml-story-page-shown {
   transition: 300ms transform linear!important;
 }
 
-.i-amphtml-story-button-move:hover {
+.i-amphtml-story-button-container.prev-container:hover ~ amp-story-page[pre-active] {
+  opacity: 0.3!important;
+}
+
+.i-amphtml-story-button-container.next-container:hover ~ amp-story-page[active] + amp-story-page {
+  opacity: 0.3!important;
+}
+
+.i-amphtml-story-button-container:hover .i-amphtml-story-button-move:not(.i-amphtml-story-button-move-hidden) {
   opacity: 1!important;
 }
 
-.i-amphtml-story-button-move:hover:before {
-  transform: translateX(-8px)!important;
+.i-amphtml-story-button-container:hover  .i-amphtml-story-button-next {
+  transform: translateX(8px)!important;
 }
 
-.i-amphtml-story-button-prev:hover:before {
-  transform: translateX(8px)!important;
+.i-amphtml-story-button-container:hover  .i-amphtml-story-button-prev {
+  transform: translateX(-8px)!important;
 }
 
 .i-amphtml-story-button-next {
