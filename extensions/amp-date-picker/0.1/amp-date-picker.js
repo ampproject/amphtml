@@ -508,21 +508,6 @@ class AmpDatePicker extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Array<!Element>} elements
-   * @return {!Promise<!Array<!Element>>}
-   * @private
-   */
-  scanForBindings_(elements) {
-    const forwardElements = () => elements;
-    return Services.bindForDocOrNull(this.element).then(bind => {
-      if (bind) {
-        return bind.rescanAndEvaluate(elements);
-      }
-    // Forward elements to chained promise on success or failure.
-    }).then(forwardElements, forwardElements);
-  }
-
-  /**
    * Render the given template with the given data. If the template does not
    * exist, use a fallback string.
    * The fallback string will be rendered directly into the DOM so it must
@@ -537,14 +522,12 @@ class AmpDatePicker extends AMP.BaseElement {
       const data = opt_data || /** @type {!JsonObject} */ ({});
       return this.templates_.renderTemplate(template, data)
           .then(rendered => {
-            rendered.setAttribute('i-amphtml-rendered', '');
             const renderedEvent = createCustomEvent(
                 this.win_,
                 AmpEvents.DOM_UPDATE,
                 /* detail */ null,
                 {bubbles: true});
-
-            template.dispatchEvent(renderedEvent);
+            this.container_.dispatchEvent(renderedEvent);
             return rendered./*REVIEW*/outerHTML;
           });
     } else {
