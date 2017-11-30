@@ -30,6 +30,7 @@ import {
   isRTL,
   removeElement,
 } from '../../../src/dom';
+import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
 import {map} from '../../../src/utils/object';
 import {toArray} from '../../../src/types';
@@ -216,6 +217,9 @@ class AmpDatePicker extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    user().assert(isExperimentOn(this.win, TAG),
+        `Experiment ${TAG} is disabled.`);
+
     this.element.appendChild(this.container_);
     this.render();
     this.element.setAttribute('i-amphtml-date-picker-attached', '');
