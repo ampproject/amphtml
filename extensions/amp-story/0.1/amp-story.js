@@ -130,7 +130,7 @@ const PAGE_SWITCH_BUTTONS = [
   },
 ];
 
-const MOBILE_ROTATION_BLOCKER = [
+const LANDSCAPE_ORIENTATION_WARNING = [
   {
     tag: 'div',
     attrs: dict({'class': 'i-amphtml-story-no-rotation-overlay'}),
@@ -845,7 +845,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   buildLandscapeOrientationOverlay_() {
     this.element.insertBefore(
-        renderSimpleTemplate(this.win.document, MOBILE_ROTATION_BLOCKER),
+        renderSimpleTemplate(this.win.document, LANDSCAPE_ORIENTATION_WARNING),
         this.element.firstChild);
   }
   /**
