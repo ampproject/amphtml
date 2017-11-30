@@ -15,10 +15,8 @@
  */
 
 import {omit} from '../../../src/utils/object';
-import {user} from '../../../src/log';
 import {withDatePickerCommon} from './date-picker-common';
 
-const TAG = 'DateRangePicker';
 
 /**
  * Create a DateRangePicker React component
@@ -41,7 +39,7 @@ function createDateRangePickerBase(
     autoFocusEndDate: PropTypes.bool,
     initialStartDate: PropTypes.object,
     initialEndDate: PropTypes.object,
-    installActionHandler: PropTypes.func,
+    registerAction: PropTypes.func,
     templates: PropTypes.object,
   };
 
@@ -133,27 +131,22 @@ function createDateRangePickerBase(
       this.onDatesChange = this.onDatesChange.bind(this);
       this.onFocusChange = this.onFocusChange.bind(this);
 
-      if (this.props.installActionHandler) {
-        this.props.installActionHandler(invocation => {
-          const {args, method} = invocation;
-
-          if (method === 'setDates') {
-            const {startDate, endDate} = args;
-            const state = {};
-            if (startDate) {
-              state.startDate = moment(startDate);
-            }
-            if (endDate) {
-              state.endDate = moment(endDate);
-            }
-
-            // TODO(cvializ): check if valid date, blocked, outside range, etc
-            this.setState(state);
-          } else if (method === 'clear') {
-            this.setState({startDate: null, endDate: null});
-          } else {
-            user().error(TAG, `Unknown action ${method}`);
+      if (this.props.registerAction) {
+        this.props.registerAction('setDates', invocation => {
+          const {startDate, endDate} = invocation.args;
+          const state = {};
+          if (startDate) {
+            state.startDate = moment(startDate);
           }
+          if (endDate) {
+            state.endDate = moment(endDate);
+          }
+
+          // TODO(cvializ): check if valid date, blocked, outside range, etc
+          this.setState(state);
+        });
+        this.props.registerAction('clear', () => {
+          this.setState({startDate: null, endDate: null});
         });
       }
     }

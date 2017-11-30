@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-import {user} from '../../../src/log';
 import {omit} from '../../../src/utils/object';
 import {withDatePickerCommon} from './date-picker-common';
 
-
-const TAG = 'SingleDatePicker';
 
 /**
  * Create a SingleDatePicker React component
@@ -44,7 +41,7 @@ function createSingleDatePickerBase(
     blockedDates: PropTypes.arrayOf(PropTypes.string),
     firstDayOfWeek: PropTypes.number,
     onDateChange: PropTypes.func,
-    installActionHandler: PropTypes.func,
+    registerAction: PropTypes.func,
     templates: PropTypes.object,
   };
 
@@ -113,19 +110,13 @@ function createSingleDatePickerBase(
         date: props.initialDate && moment(props.initialDate),
       };
 
-      if (this.props.installActionHandler) {
-        this.props.installActionHandler(invocation => {
-          const {args, method} = invocation;
-
-          if (method === 'setDate') {
-            const {date} = args;
-            this.setState({date: moment(date)});
-            // TODO(cvializ): check if valid date, blocked, outside range
-          } else if (method === 'clear') {
-            this.setState({date: null});
-          } else {
-            user().error(TAG, `Unknown action ${method}`);
-          }
+      if (this.props.registerAction) {
+        this.props.registerAction('setDate', invocation => {
+          const {date} = invocation.args;
+          this.setState({date: moment(date)});
+        });
+        this.props.registerAction('clear', () => {
+          this.setState({date: null});
         });
       }
 

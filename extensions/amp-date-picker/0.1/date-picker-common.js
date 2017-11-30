@@ -73,7 +73,7 @@ export function withDatePickerCommon(
     initialVisibleMonth: PropTypes.string,
     max: PropTypes.string,
     min: PropTypes.string,
-    installActionHandler: PropTypes.func,
+    registerAction: PropTypes.func,
     src: PropTypes.string,
   };
 
@@ -83,7 +83,7 @@ export function withDatePickerCommon(
     initialVisibleMonth: '',
     max: '',
     min: '',
-    installActionHandler: null,
+    registerAction: null,
     src: '',
   };
 
@@ -140,7 +140,7 @@ export function withDatePickerCommon(
 
       return React.createElement(WrappedComponent, Object.assign({}, props, {
         daySize: Number(props.daySize),
-        installActionHandler: this.props.installActionHandler,
+        registerAction: this.props.registerAction,
         isDayBlocked: this.isDayBlocked,
         isDayHighlighted: this.isDayHighlighted,
         isOutsideRange: this.isOutsideRange,

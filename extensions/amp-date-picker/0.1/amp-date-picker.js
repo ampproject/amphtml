@@ -18,18 +18,16 @@ import {ActionTrust} from '../../../src/action-trust';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-date-picker-0.1.css';
 import {DEFAULT_LOCALE, DEFAULT_FORMAT, FORMAT_STRINGS} from './constants';
+import {Layout} from '../../../src/layout';
 import {createDeferred} from './react-utils';
 import {Services} from '../../../src/services';
 import {createSingleDatePicker} from './single-date-picker';
 import {createDateRangePicker} from './date-range-picker';
 import {createCustomEvent} from '../../../src/event-helper';
-import {installStylesForDoc} from '../../../src/style-installer';
 import {fetchBatchedJsonFor} from '../../../src/batched-json';
 import {
   childElementByAttr,
-  iterateCursor,
-  scopedQuerySelector,
-  scopedQuerySelectorAll,
+  isRTL,
   removeElement,
 } from '../../../src/dom';
 import {user} from '../../../src/log';
@@ -70,7 +68,6 @@ let DateChangeDetailsDef;
 let BindDatesDef;
 
 const TAG = 'amp-date-picker';
-const SERVICE_TAG = 'amp-date-picker-service';
 const DATE_SEPARATOR = ' ';
 
 const attributesToForward = [
@@ -102,10 +99,14 @@ const attributesToForward = [
   'week-day-format',
 ];
 
-class DatePicker {
+const DEFAULT_DATE_SIZE = 45; // px
+
+const DEFAULT_FIRST_DAY_OF_WEEK = 0; // Sunday
+
+class AmpDatePicker extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
-    this.element = element;
+    super(element);
 
     /** @private @const */
     this.ampdoc_ = Services.ampdoc(this.element);
@@ -153,9 +154,10 @@ class DatePicker {
     this.format_ = this.element.getAttribute('format') || DEFAULT_FORMAT;
 
     /** @private @const */
-    this.firstDayOfWeek_ = this.element.getAttribute('first-day-of-week') || 0;
+    this.firstDayOfWeek_ = this.element.getAttribute('first-day-of-week') ||
+        DEFAULT_FIRST_DAY_OF_WEEK;
 
-    this.daySize_ = this.element.getAttribute('day-size') || 45;
+    this.daySize_ = this.element.getAttribute('day-size') || DEFAULT_DATE_SIZE;
 
     const blocked = this.element.getAttribute('blocked');
     /** @private @const */
@@ -174,12 +176,13 @@ class DatePicker {
     /** @private @const */
     this.container_ = this.element.ownerDocument.createElement('div');
 
-    const type = this.element.tagName;
+    const type = this.element.getAttribute('type') || 'single';
+    const datePickerFactory = (type === 'range' ?
+        createDateRangePicker :
+        createSingleDatePicker);
     /** @private @const */
-    this.picker_ = (type === 'AMP-DATE-RANGE' ? createDateRangePicker :
-        createSingleDatePicker)(
-        this.win_.React, this.win_.PropTypes, this.win_.ReactDates,
-        this.win_.ReactDatesConstants, this.win_.moment);
+    this.picker_ = datePickerFactory(this.win_.React, this.win_.PropTypes,
+        this.win_.ReactDates, this.win_.ReactDatesConstants, this.win_.moment);
 
     /** @private @const */
     this.props_ = this.getProps_();
@@ -194,23 +197,33 @@ class DatePicker {
     this.srcDefaultTemplate_ = null;
 
     /** @private @const */
-    this.isRTL_ = this.element.ownerDocument.dir === 'rtl';
+    this.isRTL_ = isRTL(/** @type {!Document} */ (this.ampdoc_.getRootNode()));
 
     /** @private {?function(?):?} */
     this.templateThen_ = null;
 
     /** @private @const */
-    this.installActionHandler_ =
-        handler => this.action_.installActionHandler(this.element, handler);
-
-    this.parseSrcTemplates_(this.fetchSrcTemplates_());
+    this.registerAction_ = this.registerAction.bind(this);
 
     const locale = this.element.getAttribute('locale') || DEFAULT_LOCALE;
     this.moment_.locale(locale);
+  }
 
+  /** @override */
+  isLayoutSupported(layout) {
+    return layout == Layout.CONTAINER;
+  }
+
+  /** @override */
+  buildCallback() {
     this.element.appendChild(this.container_);
     this.render();
     this.element.setAttribute('i-amphtml-date-picker-attached', '');
+  }
+
+  /** @override */
+  layoutCallback() {
+    return this.parseSrcTemplates_(this.fetchSrcTemplates_());
   }
 
   /**
@@ -231,10 +244,10 @@ class DatePicker {
    */
   parseSrcTemplates_(srcTemplatePromise) {
     if (!srcTemplatePromise) {
-      return;
+      return Promise.resolve();
     }
 
-    srcTemplatePromise.then(srcJson => {
+    return srcTemplatePromise.then(srcJson => {
       const templates = srcJson && srcJson['templates'];
       if (!templates) {
         return;
@@ -265,8 +278,8 @@ class DatePicker {
    * @return {!Array<!DateTemplateMapDef>}
    */
   parseElementTemplates_() {
-    const templates = toArray(scopedQuerySelectorAll(
-        this.element, '[date-template][dates]'));
+    const templates = toArray(
+        this.element.querySelectorAll('[date-template][dates]'));
 
     return templates.map(template => {
       const dates = template.getAttribute('dates').split(DATE_SEPARATOR);
@@ -456,7 +469,7 @@ class DatePicker {
       this.getTemplate_(this.srcTemplates_, date) ||
       this.getTemplate_(this.elementTemplates_, date) ||
       this.srcDefaultTemplate_ ||
-      scopedQuerySelector(this.element, '[date-template][default]')
+      this.element.querySelector('[date-template][default]')
     );
   }
 
@@ -477,7 +490,6 @@ class DatePicker {
     if (!this.infoTemplatePromise_) {
       this.infoTemplatePromise_ = this.renderInfoTemplate_();
     }
-    this.scanForBindings_([this.container_]);
     return this.renderPromiseIntoReact_(this.infoTemplatePromise_);
   }
 
@@ -491,7 +503,7 @@ class DatePicker {
 
   /** @return {!Promise<string>} */
   renderInfoTemplate_() {
-    const template = scopedQuerySelector(this.element, '[info-template]');
+    const template = this.element.querySelector('[info-template]');
     return this.renderTemplate_(template);
   }
 
@@ -599,7 +611,7 @@ class DatePicker {
     this.reactRender_(
         this.react_.createElement(Picker, Object.assign({}, props, {
           isRTL: this.isRTL_,
-          installActionHandler: this.installActionHandler_,
+          registerAction: this.registerAction_,
           onDateChange: this.onDateChange,
           onDatesChange: this.onDatesChange,
           blocked: this.blocked_,
@@ -611,93 +623,6 @@ class DatePicker {
   }
 }
 
-
-/**
- * Bootstraps the date picker elements
- */
-export class AmpDatePickerService {
-  /**
-   * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   */
-  constructor(ampdoc) {
-    /** @const @private {!Promise} */
-    this.whenInitialized_ = this.installStyles_(ampdoc)
-        .then(() => this.installHandlers_(ampdoc));
-  }
-
-  /**
-   * Returns a promise that resolves when all form implementations (if any)
-   * have been upgraded.
-   * @return {!Promise}
-   */
-  whenInitialized() {
-    return this.whenInitialized_;
-  }
-
-  /**
-   * Install the date picker CSS
-   * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @return {!Promise}
-   * @private
-   */
-  installStyles_(ampdoc) {
-    return new Promise(resolve => {
-      installStylesForDoc(ampdoc, CSS, resolve, false, TAG);
-    });
-  }
-
-  /**
-   * Install the event handlers
-   * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @return {!Promise}
-   * @private
-   */
-  installHandlers_(ampdoc) {
-    return ampdoc.whenReady().then(() => {
-      const doc = ampdoc.getRootNode();
-      this.installDatePickers_(doc);
-      this.installGlobalEventListener_(doc);
-    });
-  }
-
-  /**
-   * Construct a Date Picker class for every date picker element.
-   * @param {!Document|!ShadowRoot} doc
-   */
-  installDatePickers_(doc) {
-    const pickers = this.getPickers_(doc);
-    if (!pickers.length) {
-      return;
-    }
-
-    iterateCursor(pickers, picker => {
-      if (!picker.hasAttribute('i-amphtml-date-picker-attached')) {
-        new DatePicker(picker);
-      }
-    });
-  }
-
-  /**
-   * Listen for DOM updated messages sent to the document.
-   * @param {!Document|!ShadowRoot} doc
-   * @private
-   */
-  installGlobalEventListener_(doc) {
-    doc.addEventListener(AmpEvents.DOM_UPDATE, () => {
-      this.installDatePickers_(doc);
-    });
-  }
-
-  /**
-   * Retrieve date picker elements from the DOM
-   * @param {!Document|!ShadowRoot} doc
-   * @return {!IArrayLike<!Element>}
-   */
-  getPickers_(doc) {
-    return doc.querySelectorAll('amp-date,amp-date-range');
-  }
-}
-
-AMP.extension(SERVICE_TAG, '0.1', AMP => {
-  AMP.registerServiceForDoc(SERVICE_TAG, AmpDatePickerService);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpDatePicker, CSS);
 });

@@ -46,10 +46,14 @@
   <p>Try to pick a date. This is a single-date picker</p>
   <button on="tap:sdp.setDate(date='2017-10-22')">Set date</button>
   <button on="tap:sdp.clear">Clear</button>
-  <amp-date
+  <amp-date-picker
+    layout="container"
+    width="300"
+    height="300"
     on="select:AMP.setState({date: event.date, dateType: event.id})"
     locale="en"
     format="Y-MM-DD"
+    number-of-months="1"
     highlighted="2017-10-10 2017-10-12"
     blocked="2017-10-10 2017-10-17 2017-10-19 2017-10-21"
     show-clear-date
@@ -83,13 +87,14 @@
         (dateType == 'tacos1' ? ' Happy Taco Tuesday!' : '')"
       >You will see your chosen date here.</span>
     </template>
-  </amp-date>
+  </amp-date-picker>
 
   <h2><code>&lt;amp-date-range&gt;</code></h2>
   <p>Try to pick a range. This is a date-range picker</p>
   <button on="tap:drp.setDates(startDate='2017-10-26',endDate='2017-11-04')">Set date range</button>
   <button on="tap:drp.clear">Clear</button>
-  <amp-date-range
+  <amp-date-picker
+    type="range"
     id="drp"
     on="
     select:
@@ -128,10 +133,11 @@
       <span [text]="tacoTuesdays != null ? 'You chose ' + tacoTuesdays + ' taco tuesdays!' : ''">Cool</span>
       <span [text]="containsSales ? 'This is a sale' : ''">Cool</span>
     </template>
-  </amp-date-range>
+  </amp-date-picker>
 
   <h2>external <code>src</code></h2>
-  <amp-date
+  <amp-date-picker
+    type="single"
     locale="en"
     format="Y-MM-DD"
     show-clear-date
@@ -143,12 +149,12 @@
     <template type="amp-mustache" date-template id="spooky">
       <span>🙀</span>
     </template>
-  </amp-date>
+  </amp-date-picker>
 
   <h2>minimal example</h2>
-  <amp-date>
+  <amp-date-picker>
     <input amp-date-placeholder placeholder="Pick a date" id="myDate"/>
-  </amp-date>
+  </amp-date-picker>
 
   <amp-state id="sales">
     <script type="application/json">

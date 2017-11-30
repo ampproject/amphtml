@@ -59,8 +59,6 @@ const DEFAULT_THROTTLE_INTERVAL = 100; // ms
 /** @const {!Object<string,!Array<string>>} */
 const ELEMENTS_ACTIONS_MAP_ = {
   'form': ['submit'],
-  'amp-date': ['setDate', 'clear'],
-  'amp-date-range': ['setDates', 'clear'],
 };
 
 /**
