@@ -119,6 +119,10 @@ export class ImageViewer {
     this.maxX_ = 0;
     /** @private {number} */
     this.maxY_ = 0;
+    /** @private {?./gesture.Gestures} */
+    this.gestures_ = null;
+    /** @private {?function()} */
+    this.panningGestureRecognizer_ = null;
 
     /** @private {?./motion.Motion} */
     this.motion_ = null;
@@ -310,27 +314,15 @@ export class ImageViewer {
 
   /** @private */
   setupGestures_() {
-    const gestures = Gestures.get(this.image_,
-        /* opt_shouldNotPreventDefault */ true);
-
-    // Movable.
-    gestures.onGesture(SwipeXYRecognizer, e => {
-      if (this.isScaled()) {
-        event.preventDefault();
-        this.onMove_(e.data.deltaX, e.data.deltaY, false);
-        if (e.data.last) {
-          this.onMoveRelease_(e.data.velocityX, e.data.velocityY);
-        }
-      }
-    });
-    gestures.onPointerDown(() => {
+    this.gestures_ = Gestures.get(this.image_);
+    this.gestures_.onPointerDown(() => {
       if (this.motion_) {
         this.motion_.halt();
       }
     });
 
     // Zoomable.
-    gestures.onGesture(DoubletapRecognizer, e => {
+    this.gestures_.onGesture(DoubletapRecognizer, e => {
       let newScale;
       if (this.scale_ == 1) {
         newScale = this.maxScale_;
@@ -341,26 +333,70 @@ export class ImageViewer {
       const deltaY = this.viewerBox_.height / 2 - e.data.clientY;
       this.onZoom_(newScale, deltaX, deltaY, true).then(() => {
         return this.onZoomRelease_();
-      });
+      }).then(() => this.updatePanningGestureRegistration_());
     });
-    gestures.onGesture(TapzoomRecognizer, e => {
+
+    this.gestures_.onGesture(TapzoomRecognizer, e => {
       event.preventDefault();
       this.onTapZoom_(e.data.centerClientX, e.data.centerClientY,
           e.data.deltaX, e.data.deltaY);
       if (e.data.last) {
         this.onTapZoomRelease_(e.data.centerClientX, e.data.centerClientY,
-            e.data.deltaX, e.data.deltaY, e.data.velocityY, e.data.velocityY);
+            e.data.deltaX, e.data.deltaY, e.data.velocityY, e.data.velocityY)
+            .then(() => this.updatePanningGestureRegistration_());;
       }
     });
-    gestures.onGesture(PinchRecognizer, e => {
+
+    this.gestures_.onGesture(PinchRecognizer, e => {
       // To disable iOS 10 Safari default pinch zoom
       event.preventDefault();
       this.onPinchZoom_(e.data.centerClientX, e.data.centerClientY,
           e.data.deltaX, e.data.deltaY, e.data.dir);
       if (e.data.last) {
-        this.onZoomRelease_();
+        this.onZoomRelease_().then(() => {
+          this.updatePanningGestureRegistration_();
+        });;
       }
     });
+  }
+
+/**
+ * Registers and unregisters a panning gesture depending on whether or not the image is zoomed.
+ * @private
+ */
+  updatePanningGestureRegistration_() {
+    if (this.scale_ <= 1) {
+      this.unregisterPanningGesture_();
+    } else {
+      this.registerPanningGesture_();
+    }
+  }
+
+  /**
+   * Registers a Swipe gesture to handle panning when the image is zoomed.
+   * @private
+   */
+  registerPanningGesture_() {
+    // Movable.
+    this.panningGestureRecognizer_ = this.gestures_
+      .onGesture(SwipeXYRecognizer, e => {
+        this.onMove_(e.data.deltaX, e.data.deltaY, false);
+        if (e.data.last) {
+          this.onMoveRelease_(e.data.velocityX, e.data.velocityY);
+        }
+      });
+  }
+
+  /**
+   * Deregisters the Swipe gesture for panning when the image is zoomed out.
+   * @private
+   */
+  unregisterPanningGesture_() {
+    if (this.panningGestureRecognizer_) {
+      this.panningGestureRecognizer_();
+      this.panningGestureRecognizer_ = null;
+      this.gestures_.removeGesture(SwipeXYRecognizer);
+    }
   }
 
   /**
