@@ -452,11 +452,9 @@ export class ActionService {
 
     const lowerTagName = target.tagName.toLowerCase();
     // AMP elements.
-    if (lowerTagName.substring(0, 4) == 'amp-' &&
-        !ELEMENTS_ACTIONS_MAP_[lowerTagName]) {
+    if (lowerTagName.substring(0, 4) == 'amp-') {
       if (target.enqueAction) {
         target.enqueAction(invocation);
-        return null;
       } else {
         this.actionInfoError_('Unrecognized AMP element "' +
             lowerTagName + '". ' +

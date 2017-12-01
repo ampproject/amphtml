@@ -72,16 +72,17 @@ moment.prototype.startOf = function(unit) {};
  */
 moment.prototype.add = function(amount, unit) {};
 
-/** @return {moment.Locale} */
-moment.prototype.localeData = function () {};
-
 /**
  * @struct
+ * @constructor
  */
-moment.Locale;
+moment.Locale = function() {};
 
 /**
  * @param {string} format
  * @return {string}
  */
 moment.Locale.longDateFormat = function (format) {};
+
+/** @return {moment.Locale} */
+moment.prototype.localeData = function () {};

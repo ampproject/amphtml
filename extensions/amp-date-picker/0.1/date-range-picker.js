@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {externalRequire} from '../../../src/module';
+import {requireExternal} from '../../../src/module';
 import {omit} from '../../../src/utils/object';
 import {withDatePickerCommon} from './date-picker-common';
 
@@ -24,17 +24,17 @@ import {withDatePickerCommon} from './date-picker-common';
  * @return {!function(new:React.Component, !Object)} A date range picker component class
  */
 function createDateRangePickerBase() {
-  const React = externalRequire('react');
-  const PropTypes = externalRequire('prop-types');
-  const moment = externalRequire('moment');
+  const React = requireExternal('react');
+  const PropTypes = requireExternal('prop-types');
+  const moment = requireExternal('moment');
   const {
     ANCHOR_LEFT,
     HORIZONTAL_ORIENTATION,
-  } = externalRequire('react-dates/constants');
+  } = requireExternal('react-dates/constants');
   const {
     DateRangePicker: DatePicker,
     DateRangePickerShape,
-  } = externalRequire('react-dates');
+  } = requireExternal('react-dates');
 
   const propTypes = {
     // example props for the demo
@@ -105,10 +105,8 @@ function createDateRangePickerBase() {
     // internationalization
     displayFormat: () => moment.localeData().longDateFormat('L'),
     monthFormat: 'MMMM YYYY',
-    // phrases: DateRangePickerPhrases,
-    //
-    installActionHandler: null,
-    templates: null,
+
+    registerAction: null,
   };
 
   class DateRangePickerBase extends React.Component {

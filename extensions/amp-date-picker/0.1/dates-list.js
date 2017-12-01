@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {requireExternal} from '../../../src/module';
 import {rrulestr} from '../../../third_party/rrule/rrule';
 
 
@@ -29,16 +30,14 @@ export const DateType = {
  */
 export class DatesList {
   /**
-   * @param {!Object} ReactDates
-   * @param {?} moment
    * @param {!Array<string>} dates
    */
-  constructor(ReactDates, moment, dates) {
+  constructor(dates) {
     /** @private @const */
-    this.ReactDates_ = ReactDates;
+    this.ReactDates_ = requireExternal('react-dates');
 
     /** @private @const */
-    this.moment_ = moment;
+    this.moment_ = requireExternal('moment');
 
     /** @private @const */
     this.rrulestrs_ = dates

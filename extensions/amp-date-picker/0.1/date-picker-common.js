@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {externalRequire} from '../../../src/module';
+import {requireExternal} from '../../../src/module';
 import {omit} from '../../../src/utils/object';
 
 
@@ -28,10 +28,10 @@ export function withDatePickerCommon(WrappedComponent) {
   const {
     isInclusivelyAfterDay,
     isInclusivelyBeforeDay,
-  } = externalRequire('react-dates');
-  const React = externalRequire('react');
-  const PropTypes = externalRequire('prop-types');
-  const moment = externalRequire('moment');
+  } = requireExternal('react-dates');
+  const React = requireExternal('react');
+  const PropTypes = requireExternal('prop-types');
+  const moment = requireExternal('moment');
 
   /**
    * @param {!moment} max

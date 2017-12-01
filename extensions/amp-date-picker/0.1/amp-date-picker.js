@@ -34,7 +34,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
 import {map} from '../../../src/utils/object';
 import {toArray} from '../../../src/types';
-import {externalRequire} from '../../../src/module';
+import {requireExternal} from '../../../src/module';
 import {dashToCamelCase} from '../../../src/string';
 import {DatesList} from './dates-list';
 
@@ -117,16 +117,16 @@ class AmpDatePicker extends AMP.BaseElement {
     this.win_ = this.ampdoc_.win;
 
     /** @private @const */
-    this.moment_ = externalRequire('moment');
+    this.moment_ = requireExternal('moment');
 
     /** @private @const */
-    this.react_ = externalRequire('react');
+    this.react_ = requireExternal('react');
 
     /** @private @const */
-    this.reactRender_ = externalRequire('react-dom').render;
+    this.reactRender_ = requireExternal('react-dom').render;
 
     /** @private @const */
-    this.ReactDates_ = externalRequire('react-dates');
+    this.ReactDates_ = requireExternal('react-dates');
 
     /** @private @const */
     this.action_ = Services.actionServiceForDoc(element);
@@ -164,15 +164,11 @@ class AmpDatePicker extends AMP.BaseElement {
     const blocked = this.element.getAttribute('blocked');
     /** @private @const */
     this.blocked_ = new DatesList(
-        this.ReactDates_,
-        this.moment_,
         blocked ? blocked.split(DATE_SEPARATOR) : []);
 
     const highlighted = this.element.getAttribute('highlighted');
     /** @private @const */
     this.highlighted_ = new DatesList(
-        this.ReactDates_,
-        this.moment_,
         highlighted ? highlighted.split(DATE_SEPARATOR) : []);
 
     /** @private @const */
@@ -259,7 +255,7 @@ class AmpDatePicker extends AMP.BaseElement {
       const srcTemplates = templates
           .filter(t => t.dates)
           .map(t => ({
-            dates: new DatesList(this.ReactDates_, this.moment_, t.dates),
+            dates: new DatesList(t.dates),
             template: this.ampdoc_.getRootNode().querySelector(
                 `#${t.id}[date-template]`),
           }));
@@ -287,7 +283,7 @@ class AmpDatePicker extends AMP.BaseElement {
     return templates.map(template => {
       const dates = template.getAttribute('dates').split(DATE_SEPARATOR);
       return {
-        dates: new DatesList(this.ReactDates_, this.moment_, dates),
+        dates: new DatesList(dates),
         template,
       };
     });

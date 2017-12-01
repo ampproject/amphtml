@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {externalRequire} from '../../../src/module';
+import {requireExternal} from '../../../src/module';
 
 
 /**
@@ -22,7 +22,7 @@ import {externalRequire} from '../../../src/module';
  * @return {!function(new:React.Component, !Object)}
  */
 function createDeferred_() {
-  const React = externalRequire('react');
+  const React = requireExternal('react');
 
   class Deferred extends React.Component {
     /**

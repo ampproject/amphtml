@@ -19,10 +19,10 @@
  * @param {string} module
  * @return {?}
  */
-export function externalRequire(module) {
+export function requireExternal(module) {
   // Alias the `require` function so Closure doesn't complain that
   // the module isn't provided.
   // Technique found in https://github.com/google/closure-compiler/issues/954
-  const requireAlias = require; // eslint-disable-line no-undef
-  return requireAlias(module);
+  const aliasedRequire = require; // eslint-disable-line no-undef
+  return aliasedRequire(module);
 }
