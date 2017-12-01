@@ -44,17 +44,15 @@ export function doubleclick(global, data) {
 
   centerAd(global);
 
-  const gptFilename = selectGptExperiment(data);
-
-  writeAdScript(global, data, gptFilename);
+  writeAdScript(global, data);
 }
 
 /**
  * @param {!Window} global
  * @param {!Object} data
- * @param {!string} url
  */
-function doubleClickWithGpt(global, data, url) {
+function doubleClickWithGpt(global, data) {
+  const url = 'https://www.googletagservices.com/tag/js/gpt.js';
   // Handle multi-size data parsing, validation, and inclusion into dimensions.
   const multiSizeDataStr = data.multiSize || null;
   const primaryWidth = parseInt(data.overrideWidth || data.width, 10);
@@ -232,35 +230,15 @@ function centerAd(global) {
 }
 
 /**
- * @param {!Object} data
- * @return {!string}
- */
-export function selectGptExperiment(data) {
-  const fileExperimentConfig = {
-    21060540: 'gpt_sf_a.js',
-    21060541: 'gpt_sf_b.js',
-  };
-  // Note that reduce will return the first item that matches but it is
-  // expected that only one of the experiment ids will be present.
-  let expFilename;
-  (data['experimentId'] || '').split(',').forEach(
-      val => expFilename = expFilename || fileExperimentConfig[val]);
-  return expFilename;
-}
-
-/**
  * @param {!Window} global
  * @param {!Object} data
- * @param {!string} gptFilename
  */
-export function writeAdScript(global, data, gptFilename) {
-  const url =
-  `https://www.googletagservices.com/tag/js/${gptFilename || 'gpt.js'}`;
-    const href = global.context.location.href;
-  if (gptFilename || data.useSameDomainRenderingUntilDeprecated != undefined
+export function writeAdScript(global, data) {
+  const href = global.context.location.href;
+  if (data.useSameDomainRenderingUntilDeprecated != undefined
       || data.multiSize || (href.indexOf('google_glade=0') > 0 &&
                             href.indexOf('google_glade=1'))) {
-        doubleClickWithGpt(global, data, url);
+    doubleClickWithGpt(global, data);
   } else {
     doubleClickWithGlade(global, data);
   }
