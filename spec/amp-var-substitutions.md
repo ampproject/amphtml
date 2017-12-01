@@ -444,8 +444,8 @@ Provides a per document-source-origin (the origin of the website where you publi
      <button on="tap:user-consent.dismiss">I accept</button>
   </amp-user-notification>
 
-  <!-- cid is not provided until `user-consent` is dismissed -->
-  <amp-pixel src="https://foo.com/pixel?cid=CLIENT_ID(cid-scope-cookie-fallback-name,user-consent-id)"></amp-pixel>
+  <!-- Client ID is not provided until `user-consent` is dismissed -->
+  <amp-pixel src="https://foo.com/pixel?cid=CLIENT_ID(cid-scope-cookie-fallback-name,user-consent)"></amp-pixel>
   ```
 * **amp-analytics variable**: `${clientId}`
   * Example usage: `${clientId(foo)}`
