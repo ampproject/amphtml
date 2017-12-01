@@ -622,10 +622,11 @@ describe('PinchRecognizer', () => {
   }
 
 
-  it('should deny single-point touchstart', () => {
+  it('should wait and listen on single-point touchstart', () => {
+    gesturesMock.expects('signalReady_').never();
     const res = recognizer.onTouchStart({touches:
         [{clientX: 101, clientY: 201}]});
-    expect(res).to.equal(false);
+    expect(res).to.equal(true);
     expect(recognizer.startX1_).to.equal(0);
     expect(recognizer.startY1_).to.equal(0);
     expect(recognizer.startX2_).to.equal(0);
@@ -656,11 +657,11 @@ describe('PinchRecognizer', () => {
     expect(recognizer.startY2_).to.equal(120);
 
     res = recognizer.onTouchMove({touches:
-    [{clientX: 88, clientY: 78},
+    [{clientX: 89, clientY: 79},
          {clientX: 112, clientY: 122}]});
     expect(res).to.equal(true);
-    expect(recognizer.lastX1_).to.equal(88);
-    expect(recognizer.lastY1_).to.equal(78);
+    expect(recognizer.lastX1_).to.equal(89);
+    expect(recognizer.lastY1_).to.equal(79);
     expect(recognizer.lastX2_).to.equal(112);
     expect(recognizer.lastY2_).to.equal(122);
   });

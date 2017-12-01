@@ -26,6 +26,7 @@ import {
   DoubletapRecognizer,
   SwipeXYRecognizer,
   TapzoomRecognizer,
+  PinchRecognizer,
 } from './gesture-recognizers';
 import {bezierCurve} from './curve';
 import {isLoaded} from './event-helper';
@@ -339,15 +340,25 @@ export class ImageViewer {
       const deltaX = this.viewerBox_.width / 2 - e.data.clientX;
       const deltaY = this.viewerBox_.height / 2 - e.data.clientY;
       this.onZoom_(newScale, deltaX, deltaY, true).then(() => {
-        return this.onZoomRelease_(0, 0, 0, 0, 0, 0);
+        return this.onZoomRelease_();
       });
     });
     gestures.onGesture(TapzoomRecognizer, e => {
-      this.onZoomInc_(e.data.centerClientX, e.data.centerClientY,
+      event.preventDefault();
+      this.onTapZoom_(e.data.centerClientX, e.data.centerClientY,
           e.data.deltaX, e.data.deltaY);
       if (e.data.last) {
-        this.onZoomRelease_(e.data.centerClientX, e.data.centerClientY,
+        this.onTapZoomRelease_(e.data.centerClientX, e.data.centerClientY,
             e.data.deltaX, e.data.deltaY, e.data.velocityY, e.data.velocityY);
+      }
+    });
+    gestures.onGesture(PinchRecognizer, e => {
+      // To disable iOS 10 Safari default pinch zoom
+      event.preventDefault();
+      this.onPinchZoom_(e.data.centerClientX, e.data.centerClientY,
+          e.data.deltaX, e.data.deltaY, e.data.dir);
+      if (e.data.last) {
+        this.onZoomRelease_();
       }
     });
   }
@@ -490,23 +501,48 @@ export class ImageViewer {
   }
 
   /**
-   * Performs a one-step zoom action.
+   * Performs a one-step pinch zoom action.
+   * @param {number} centerClientX
+   * @param {number} centerClientY
+   * @param {number} deltaX
+   * @param {number} deltaY
+   *  @param {number} dir
+   * @private
+   */
+  onPinchZoom_(centerClientX, centerClientY, deltaX, deltaY, dir) {
+    this.zoomToPoint_(centerClientX, centerClientY, deltaX, deltaY, dir);
+  }
+
+  /**
+   * Performs a one-step tap zoom action.
    * @param {number} centerClientX
    * @param {number} centerClientY
    * @param {number} deltaX
    * @param {number} deltaY
    * @private
    */
-  onZoomInc_(centerClientX, centerClientY, deltaX, deltaY) {
-    const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+  onTapZoom_(centerClientX, centerClientY, deltaX, deltaY) {
+    const dir = Math.abs(deltaY) > Math.abs(deltaX) ?
+      Math.sign(deltaY) : Math.sign(-deltaX);
+    this.zoomToPoint_(centerClientX, centerClientY, deltaX, deltaY, dir);
+  }
 
-    const zoomSign = Math.abs(deltaY) > Math.abs(deltaX) ?
-        Math.sign(deltaY) : Math.sign(-deltaX);
-    if (zoomSign == 0) {
+  /**
+   * Given center position, zoom delta, and zoom position, computes
+   * and updates a zoom action on the image.
+   * @param {number} centerClientX
+   * @param {number} centerClientY
+   * @param {number} deltaX
+   * @param {number} deltaY
+   * @param {number} dir
+   * @private
+   */
+  zoomToPoint_(centerClientX, centerClientY, deltaX, deltaY, dir) {
+    if (dir == 0) {
       return;
     }
-
-    const newScale = this.startScale_ * (1 + zoomSign * dist / 100);
+    const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const newScale = this.startScale_ * (1 + dir * dist / 100);
     const deltaCenterX = this.viewerBox_.width / 2 - centerClientX;
     const deltaCenterY = this.viewerBox_.height / 2 - centerClientY;
     deltaX = Math.min(deltaCenterX, deltaCenterX * (dist / 100));
@@ -549,7 +585,8 @@ export class ImageViewer {
    * @return {!Promise}
    * @private
    */
-  onZoomRelease_(centerClientX, centerClientY, deltaX, deltaY, veloX, veloY) {
+  onTapZoomRelease_(centerClientX, centerClientY,
+    deltaX, deltaY, veloX, veloY) {
     let promise;
     if (veloX == 0 && veloY == 0) {
       promise = Promise.resolve();
@@ -557,15 +594,24 @@ export class ImageViewer {
       promise = continueMotion(this.image_,
           deltaX, deltaY, veloX, veloY,
           (x, y) => {
-            this.onZoomInc_(centerClientX, centerClientY, x, y);
+            this.onTapZoom_(centerClientX, centerClientY, x, y);
             return true;
           }).thenAlways();
     }
-
-    const relayout = this.scale_ > this.startScale_;
     return promise.then(() => {
-      return this.release_();
-    }).then(() => {
+      this.onZoomRelease_();
+    });
+  }
+
+  /**
+   * Performs actions after the gesture that was performing zooming has been
+   * released.
+   * @return {!Promise}
+   * @private
+   */
+  onZoomRelease_() {
+    const relayout = this.scale_ > this.startScale_;
+    return this.release_().then(() => {
       if (relayout) {
         this.updateSrc_();
       }
