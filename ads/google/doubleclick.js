@@ -21,17 +21,6 @@ import {setStyles} from '../../src/style';
 import {getMultiSizeDimensions} from './utils';
 
 /**
- * @enum {number}
- * @private
- */
-const GladeExperiment = {
-  NO_EXPERIMENT: 0,
-  GLADE_CONTROL: 1,
-  GLADE_EXPERIMENT: 2,
-  GLADE_OPT_OUT: 3,
-};
-
-/**
  * @param {!Window} global
  * @param {!Object} data
  */
@@ -63,10 +52,9 @@ export function doubleclick(global, data) {
 /**
  * @param {!Window} global
  * @param {!Object} data
- * @param {!GladeExperiment} gladeExperiment
  * @param {!string} url
  */
-function doubleClickWithGpt(global, data, gladeExperiment, url) {
+function doubleClickWithGpt(global, data, url) {
   // Handle multi-size data parsing, validation, and inclusion into dimensions.
   const multiSizeDataStr = data.multiSize || null;
   const primaryWidth = parseInt(data.overrideWidth || data.width, 10);
@@ -88,12 +76,6 @@ function doubleClickWithGpt(global, data, gladeExperiment, url) {
       const pubads = googletag.pubads();
       const slot = googletag.defineSlot(data.slot, dimensions, 'c')
           .addService(pubads);
-
-      if (gladeExperiment === GladeExperiment.GLADE_CONTROL) {
-        pubads.markAsGladeControl();
-      } else if (gladeExperiment === GladeExperiment.GLADE_OPT_OUT) {
-        pubads.markAsGladeOptOut();
-      }
 
       if (data['experimentId']) {
         const experimentIdList = data['experimentId'].split(',');
@@ -178,9 +160,8 @@ function doubleClickWithGpt(global, data, gladeExperiment, url) {
 /**
  * @param {!Window} global
  * @param {!Object} data
- * @param {!GladeExperiment} gladeExperiment
  */
-function doubleClickWithGlade(global, data, gladeExperiment) {
+function doubleClickWithGlade(global, data) {
   const requestHeight = parseInt(data.overrideHeight || data.height, 10);
   const requestWidth = parseInt(data.overrideWidth || data.width, 10);
 
@@ -197,9 +178,6 @@ function doubleClickWithGlade(global, data, gladeExperiment) {
   }
   if (data.targeting) {
     jsonParameters.targeting = data.targeting;
-  }
-  if (gladeExperiment === GladeExperiment.GLADE_EXPERIMENT) {
-    jsonParameters.gladeEids = '108809102';
   }
   const expIds = data['experimentId'];
   if (expIds) {
@@ -278,20 +256,12 @@ export function selectGptExperiment(data) {
 export function writeAdScript(global, data, gptFilename) {
   const url =
   `https://www.googletagservices.com/tag/js/${gptFilename || 'gpt.js'}`;
-  if (gptFilename || data.useSameDomainRenderingUntilDeprecated != undefined
-    || data.multiSize) {
-    doubleClickWithGpt(global, data, GladeExperiment.GLADE_OPT_OUT, url);
-  } else {
-    const experimentFraction = 0.1;
-    const dice = global.Math.random();
     const href = global.context.location.href;
-    if ((href.indexOf('google_glade=0') > 0 || dice < experimentFraction)
-          && href.indexOf('google_glade=1') < 0) {
-      doubleClickWithGpt(global, data, GladeExperiment.GLADE_CONTROL, url);
-    } else {
-      const exp = (dice < 2 * experimentFraction) ?
-          GladeExperiment.GLADE_EXPERIMENT : GladeExperiment.NO_EXPERIMENT;
-      doubleClickWithGlade(global, data, exp);
-    }
+  if (gptFilename || data.useSameDomainRenderingUntilDeprecated != undefined
+      || data.multiSize || (href.indexOf('google_glade=0') > 0 &&
+                            href.indexOf('google_glade=1'))) {
+        doubleClickWithGpt(global, data, url);
+  } else {
+    doubleClickWithGlade(global, data);
   }
 }
