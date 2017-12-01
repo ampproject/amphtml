@@ -822,11 +822,16 @@ export class AmpStory extends AMP.BaseElement {
         this.updateBackground_(this.activePage_.element);
       }
     } else {
-      if (this.element.offsetWidth > this.element.offsetHeight) {
-        this.element.setAttribute('landscape', '');
-      } else {
-        this.element.removeAttribute('landscape');
-      }
+      this.vsync_.runPromise({
+        measure: () => {
+          const {offsetWidth, offsetHeight} = this.element;
+          if (offsetWidth > offsetHeight) {
+            this.element.setAttribute('landscape', '');
+          } else {
+            this.element.removeAttribute('landscape');
+          }
+        },
+      });
       this.element.removeAttribute('desktop');
     }
   }
