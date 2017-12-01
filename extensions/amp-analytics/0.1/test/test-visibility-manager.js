@@ -231,6 +231,31 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(root.getRootVisibility()).to.equal(0);
   });
 
+  it('create correct number of models', () => {
+    let spec = {};
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(1);
+    root.dispose();
+    spec = {visiblePercentageThresholds: [[0, 10], [10, 100]]};
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(2);
+    root.dispose();
+    spec = {visiblePercentageThresholds: [[-1, 10], [10, 101]]};
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(0);
+    root.dispose();
+    spec = {visiblePercentageThresholds: [[1, 2, 3], ['invalid', 3]]};
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(0);
+    root.dispose();
+    spec = {
+      visiblePercentageMin: 0,
+      visiblePercentageThresholds: [[0, 10], [10, 100]],
+    };
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(1);
+  });
+
   it('should dispose everything', () => {
     const modelsDisposed = sandbox.spy();
     const modelsCalled = sandbox.spy();
@@ -983,7 +1008,27 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
     });
   });
 
-  it('should triger "visible" with no duration condition', () => {
+  it('should execute "visible" trigger with percent range', () => {
+    viewer.setVisibilityState_(VisibilityState.VISIBLE);
+    visibility = new VisibilityManagerForDoc(ampdoc);
+
+    const spy = sandbox.spy();
+    visibility.listenElement(ampElement, {
+      'visiblePercentageThresholds': [[0, 30], [50, 100]],
+    }, Promise.resolve(), null, spy);
+
+    return Promise.resolve().then(() => {
+      fireIntersect(25); // visible
+    }).then(() => {
+      expect(spy).to.be.calledOnce;
+      fireIntersect(55);
+      return Promise.resolve().then(() => {
+        expect(spy).to.be.calledTwice;
+      });
+    });
+  });
+
+  it('should trigger "visible" with no duration condition', () => {
     viewer.setVisibilityState_(VisibilityState.VISIBLE);
     visibility = new VisibilityManagerForDoc(ampdoc);
 
