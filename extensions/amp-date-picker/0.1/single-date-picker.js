@@ -14,24 +14,27 @@
  * limitations under the License.
  */
 
+import {externalRequire} from '../../../src/module';
 import {omit} from '../../../src/utils/object';
 import {withDatePickerCommon} from './date-picker-common';
 
 
 /**
  * Create a SingleDatePicker React component
- * @param {!Object} React
- * @param {!Object} PropTypes
- * @param {!Object} ReactDates
- * @param {!Object} ReactDatesConstants
- * @param {?} moment
- * @return {function(new:Object, !React.Component)} A single date picker component class
+ * @return {!function(new:React.Component, !Object)} A single date picker component class
  */
-function createSingleDatePickerBase(
-    React, PropTypes, ReactDates, ReactDatesConstants, moment) {
-
-  const {ANCHOR_LEFT, HORIZONTAL_ORIENTATION} = ReactDatesConstants;
-  const {SingleDatePicker: DatePicker, SingleDatePickerShape} = ReactDates;
+function createSingleDatePickerBase() {
+  const React = externalRequire('react');
+  const PropTypes = externalRequire('prop-types');
+  const moment = externalRequire('moment');
+  const {
+    ANCHOR_LEFT,
+    HORIZONTAL_ORIENTATION,
+  } = externalRequire('react-dates/constants');
+  const {
+    SingleDatePicker: DatePicker,
+    SingleDatePickerShape,
+  } = externalRequire('react-dates');
 
   const propTypes = {
     // example props for the demo
@@ -169,29 +172,20 @@ function createSingleDatePickerBase(
   SingleDatePickerBase.propTypes = propTypes;
   SingleDatePickerBase.defaultProps = defaultProps;
 
-  return withDatePickerCommon(
-      React, PropTypes, ReactDates, ReactDatesConstants, moment,
-      SingleDatePickerBase);
+  return withDatePickerCommon(SingleDatePickerBase);
 }
 
 
-/** @private {?function(new:Object, !React.Component)} */
+/** @private {?function(new:React.Component, !Object)} */
 let SingleDatePicker_ = null;
 
 /**
  * Creates a single date picker, injecting its dependencies
- * @param {!Object} React
- * @param {!Object} PropTypes
- * @param {!Object} ReactDates
- * @param {!Object} ReactDatesConstants
- * @param {?} moment
- * @return {function(new:Object, !React.Component)} A date picker component class
+ * @return {!function(new:React.Component, !Object)} A date picker component class
  */
-export function createSingleDatePicker(
-    React, PropTypes, ReactDates, ReactDatesConstants, moment) {
+export function createSingleDatePicker() {
   if (!SingleDatePicker_) {
-    SingleDatePicker_ = createSingleDatePickerBase(
-        React, PropTypes, ReactDates, ReactDatesConstants, moment);
+    SingleDatePicker_ = createSingleDatePickerBase();
   }
   return SingleDatePicker_;
 }

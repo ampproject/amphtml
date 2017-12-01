@@ -34,6 +34,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
 import {map} from '../../../src/utils/object';
 import {toArray} from '../../../src/types';
+import {externalRequire} from '../../../src/module';
 import {dashToCamelCase} from '../../../src/string';
 import {DatesList} from './dates-list';
 
@@ -116,16 +117,16 @@ class AmpDatePicker extends AMP.BaseElement {
     this.win_ = this.ampdoc_.win;
 
     /** @private @const */
-    this.moment_ = this.win_.moment;
+    this.moment_ = externalRequire('moment');
 
     /** @private @const */
-    this.react_ = this.win_.React;
+    this.react_ = externalRequire('react');
 
     /** @private @const */
-    this.reactRender_ = this.win_.ReactRender;
+    this.reactRender_ = externalRequire('react-dom').render;
 
     /** @private @const */
-    this.ReactDates_ = this.win_.ReactDates;
+    this.ReactDates_ = externalRequire('react-dates');
 
     /** @private @const */
     this.action_ = Services.actionServiceForDoc(element);
@@ -178,12 +179,10 @@ class AmpDatePicker extends AMP.BaseElement {
     this.container_ = this.element.ownerDocument.createElement('div');
 
     const type = this.element.getAttribute('type') || 'single';
-    const datePickerFactory = (type === 'range' ?
-        createDateRangePicker :
-        createSingleDatePicker);
     /** @private @const */
-    this.picker_ = datePickerFactory(this.win_.React, this.win_.PropTypes,
-        this.win_.ReactDates, this.win_.ReactDatesConstants, this.win_.moment);
+    this.picker_ = (type === 'range' ?
+        createDateRangePicker() :
+        createSingleDatePicker());
 
     /** @private @const */
     this.props_ = this.getProps_();
@@ -574,7 +573,7 @@ class AmpDatePicker extends AMP.BaseElement {
       });
     }
 
-    return this.react_.createElement(createDeferred(this.react_), {
+    return this.react_.createElement(createDeferred(), {
       promise: templatePromise,
       then: this.templateThen_,
     });

@@ -14,24 +14,27 @@
  * limitations under the License.
  */
 
+import {externalRequire} from '../../../src/module';
 import {omit} from '../../../src/utils/object';
 import {withDatePickerCommon} from './date-picker-common';
 
 
 /**
  * Create a DateRangePicker React component
- * @param {!Object} React
- * @param {!Object} PropTypes
- * @param {!Object} ReactDates
- * @param {!Object} ReactDatesConstants
- * @param {?} moment
- * @return {function(new:Object, !React.Component)} A date range picker component class
+ * @return {!function(new:React.Component, !Object)} A date range picker component class
  */
-function createDateRangePickerBase(
-    React, PropTypes, ReactDates, ReactDatesConstants, moment) {
-
-  const {DateRangePicker: DatePicker, DateRangePickerShape} = ReactDates;
-  const {ANCHOR_LEFT, HORIZONTAL_ORIENTATION} = ReactDatesConstants;
+function createDateRangePickerBase() {
+  const React = externalRequire('react');
+  const PropTypes = externalRequire('prop-types');
+  const moment = externalRequire('moment');
+  const {
+    ANCHOR_LEFT,
+    HORIZONTAL_ORIENTATION,
+  } = externalRequire('react-dates/constants');
+  const {
+    DateRangePicker: DatePicker,
+    DateRangePickerShape,
+  } = externalRequire('react-dates');
 
   const propTypes = {
     // example props for the demo
@@ -211,28 +214,19 @@ function createDateRangePickerBase(
   DateRangePickerBase.propTypes = propTypes;
   DateRangePickerBase.defaultProps = defaultProps;
 
-  return withDatePickerCommon(
-      React, PropTypes, ReactDates, ReactDatesConstants, moment,
-      DateRangePickerBase);
+  return withDatePickerCommon(DateRangePickerBase);
 }
 
-/** @private {?function(new:Object, !React.Component)} */
+/** @private {?function(new:React.Component, !Object)} */
 let DateRangePicker_ = null;
 
 /**
  * Creates a date range picker, injecting its dependencies.
- * @param {!Object} React
- * @param {!Object} PropTypes
- * @param {!Object} ReactDates
- * @param {!Object} ReactDatesConstants
- * @param {?} moment
- * @return {function(new:Object, !React.Component)} A date range picker component class
+ * @return {!function(new:React.Component, !Object)} A date range picker component class
  */
-export function createDateRangePicker(
-  React, PropTypes, ReactDates, ReactDatesConstants, moment) {
+export function createDateRangePicker() {
   if (!DateRangePicker_) {
-    DateRangePicker_ = createDateRangePickerBase(
-        React, PropTypes, ReactDates, ReactDatesConstants, moment);
+    DateRangePicker_ = createDateRangePickerBase();
   }
   return DateRangePicker_;
 }

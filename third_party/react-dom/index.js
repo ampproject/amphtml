@@ -1,3 +1,1 @@
-import {render} from 'react-dom';
-
-window.ReactRender = render;
+import 'react-dom';

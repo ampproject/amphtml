@@ -1,3 +1,1 @@
-import PropTypes from 'prop-types';
-
-window.PropTypes = PropTypes;
+import 'prop-types';

@@ -47,6 +47,13 @@ exports.rules = [
   },
   {
     filesMatching: '**/*.js',
+    mustNotDependOn: 'src/module.js',
+    whitelist: [
+      'extensions/amp-date-picker/0.1/**->src/module.js',
+    ],
+  },
+  {
+    filesMatching: '**/*.js',
     mustNotDependOn: 'third_party/**/*.js',
     whitelist: [
       'extensions/amp-crypto-polyfill/**/*.js->' +

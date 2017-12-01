@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
+import {externalRequire} from '../../../src/module';
+
+
 /**
  * Create a React component that can render Promises
- * @param {!Object} React
- * @return {function(new:Object, !React.Component)}
+ * @return {!function(new:React.Component, !Object)}
  */
-function createDeferred_(React) {
+function createDeferred_() {
+  const React = externalRequire('react');
+
   class Deferred extends React.Component {
     /**
      * @param {!Object} props
@@ -52,17 +56,16 @@ function createDeferred_(React) {
   return Deferred;
 }
 
-/** @private {?function(new:Object, !React.Component)} */
+/** @private {?function(new:React.Component, !Object)} */
 let Deferred_ = null;
 
 /**
  * Creates a single date picker.
- * @param {!Object} React
- * @return {function(new:Object, !React.Component)} A date picker class
+ * @return {!function(new:React.Component, !Object)} A date picker class
  */
-export function createDeferred(React) {
+export function createDeferred() {
   if (!Deferred_) {
-    Deferred_ = createDeferred_(React);
+    Deferred_ = createDeferred_();
   }
   return Deferred_;
 }

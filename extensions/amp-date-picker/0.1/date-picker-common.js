@@ -14,25 +14,24 @@
  * limitations under the License.
  */
 
+import {externalRequire} from '../../../src/module';
 import {omit} from '../../../src/utils/object';
 
 
 /**
  * A higher-order component that wraps a specific date-picker implmentation
  * with common functionality.
- * @param {!Object} React
- * @param {!Object} PropTypes
- * @param {!Object} ReactDates
- * @param {!Object} ReactDatesConstants
- * @param {?} moment
- * @param {!Object} WrappedComponent A date-picker component to wrap
- * @return {function(new:Object, !React.Component)} A date picker component with common functionality
+ * @param {!function(new:React.Component, !Object)} WrappedComponent A date-picker component to wrap
+ * @return {!function(new:React.Component, !Object)} A date picker component with common functionality
  */
-export function withDatePickerCommon(
-    React, PropTypes, ReactDates, ReactDatesConstants, moment,
-    WrappedComponent) {
-
-  const {isInclusivelyAfterDay, isInclusivelyBeforeDay} = ReactDates;
+export function withDatePickerCommon(WrappedComponent) {
+  const {
+    isInclusivelyAfterDay,
+    isInclusivelyBeforeDay,
+  } = externalRequire('react-dates');
+  const React = externalRequire('react');
+  const PropTypes = externalRequire('prop-types');
+  const moment = externalRequire('moment');
 
   /**
    * @param {!moment} max
