@@ -54,7 +54,7 @@ describe.configure().run('New Visibility Boilerplate', () => {
       expect(getStyle(
           fixture.win.document.body, 'visibility')).to.equal('visible');
       // Firefox spells out the values when assigning none.
-      const ffValue = '0s ease 0s normal none 1 running none';
+      const ffValue = '0s ease 0s 1 normal none running none';
       const animation = getStyle(fixture.win.document.body, 'animation');
       if (animation == ffValue) {
         expect(animation).to.equal(ffValue);
