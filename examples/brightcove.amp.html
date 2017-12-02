@@ -12,13 +12,36 @@
 </head>
 <body>
   <h2>Brightcove Player</h2>
-
+  <p>With amp support configured</p>
   <amp-brightcove
-      data-account="906043040001"
-      data-video-id="1401169490001"
-      data-player="180a5658-8be8-4f33-8eba-d562ab41b40c"
-      layout="responsive" width="480" height="270">
+    id="myPlayer"
+    dock fullscreen-on-landscape
+    data-account="906043040001"
+    data-video-id="1401169490001"
+    data-player-id="Sy0KNe55g"
+    layout="responsive" width="480" height="270">
   </amp-brightcove>
-
+  <button on="tap:myPlayer.play">Play</button>
+  <button on="tap:myPlayer.pause">Pause</button>
+  <button on="tap:myPlayer.mute">Mute</button>
+  <button on="tap:myPlayer.unmute">Unmute</button>
+  <!-- <h3>Unconfigured player</h3>
+  <p>Without amp support plugin. Not recommended, but should not break for legacy players.</p>
+  <amp-brightcove
+    data-account="906043040001"
+    data-video-id="1401169490001"
+    data-player-id="default"
+    layout="responsive" width="480" height="270">
+  </amp-brightcove>
+  <h3>Autoplay</h3>
+  <p><code>amp-brightcove</code> has <code>autoplay</code> attribute.</p>
+  <amp-brightcove
+    autoplay
+    data-account="906043040001"
+    data-video-id="1401169490001"
+    data-player-id="Sy0KNe55g"
+    layout="responsive" width="480" height="270">
+  </amp-brightcove> -->
+  <!-- Old player id: data-player="180a5658-8be8-4f33-8eba-d562ab41b40c" -->
 </body>
 </html>
