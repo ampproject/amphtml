@@ -20,10 +20,13 @@ import {
   nativeIntersectionObserverSupported,
 } from '../../../src/intersection-observer-polyfill';
 import {VisibilityModel} from './visibility-model';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {map} from '../../../src/utils/object';
 import {Services} from '../../../src/services';
+import {isFiniteNumber, isArray} from '../../../src/types';
+
+const TAG = 'VISIBILITY-MANAGER';
 
 const VISIBILITY_ID_PROP = '__AMP_VIS_ID';
 
@@ -210,11 +213,9 @@ export class VisibilityManager {
    * @return {!UnlistenDef}
    */
   listenRoot(spec, readyPromise, createReportPromiseFunc, callback) {
-    const model = new VisibilityModel(
-        spec,
-        this.getRootVisibility.bind(this));
-    return this.listen_(
-        model, spec, readyPromise, createReportPromiseFunc, callback);
+    const calcVisibility = this.getRootVisibility.bind(this);
+    return this.createModelAndListen_(calcVisibility, spec, readyPromise,
+        createReportPromiseFunc, callback);
   }
 
   /**
@@ -230,11 +231,67 @@ export class VisibilityManager {
    */
   listenElement(
       element, spec, readyPromise, createReportPromiseFunc, callback) {
-    const model = new VisibilityModel(
-        spec,
-        this.getElementVisibility.bind(this, element));
-    return this.listen_(
-        model, spec, readyPromise, createReportPromiseFunc, callback, element);
+    const calcVisibility = this.getElementVisibility.bind(this, element);
+    return this.createModelAndListen_(calcVisibility, spec, readyPromise,
+        createReportPromiseFunc, callback, element);
+  }
+
+  /**
+   * Create visibilityModel and listen to visible events.
+   * @param {function():number} calcVisibility
+   * @param {!Object<string, *>} spec
+   * @param {?Promise} readyPromise
+   * @param {?function():!Promise} createReportPromiseFunc
+   * @param {function(!Object<string, *>)} callback
+   * @param {!Element=} opt_element
+   * @return {!UnlistenDef}
+   */
+  createModelAndListen_(calcVisibility, spec,
+      readyPromise, createReportPromiseFunc, callback, opt_element) {
+    if (spec['visiblePercentageThresholds'] &&
+        spec['visiblePercentageMin'] == undefined &&
+        spec['visiblePercentageMax'] == undefined) {
+      const unlisteners = [];
+      const ranges = spec['visiblePercentageThresholds'];
+      if (!ranges || !isArray(ranges)) {
+        user().error(TAG, 'invalid visiblePercentageThresholds');
+        return () => {};
+      }
+      for (let i = 0; i < ranges.length; i++) {
+        const percents = ranges[i];
+        if (!isArray(percents) || percents.length != 2) {
+          user().error(TAG,
+              'visiblePercentageThresholds entry length is not 2');
+          continue;
+        }
+        if (!isFiniteNumber(percents[0]) || !isFiniteNumber(percents[1])) {
+          // not valid number
+          user().error(TAG,
+              'visiblePercentageThresholds entry is not valid number');
+          continue;
+        }
+        const min = Number(percents[0]);
+        const max = Number(percents[1]);
+        if (min < 0 || max > 100 || min >= max) {
+          user().error(TAG,
+              'visiblePercentageThresholds entry invalid min/max value');
+          continue;
+        }
+        const newSpec = spec;
+        newSpec['visiblePercentageMin'] = min;
+        newSpec['visiblePercentageMax'] = max;
+        const model = new VisibilityModel(newSpec, calcVisibility);
+        unlisteners.push(this.listen_(model, spec, readyPromise,
+            createReportPromiseFunc, callback, opt_element));
+      }
+      return () => {
+        unlisteners.forEach(unlistener => unlistener());
+      };
+    }
+
+    const model = new VisibilityModel(spec, calcVisibility);
+    return this.listen_(model, spec, readyPromise,
+        createReportPromiseFunc, callback, opt_element);
   }
 
   /**
