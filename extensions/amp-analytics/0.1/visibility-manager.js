@@ -25,6 +25,7 @@ import {getMode} from '../../../src/mode';
 import {map} from '../../../src/utils/object';
 import {Services} from '../../../src/services';
 import {isFiniteNumber, isArray} from '../../../src/types';
+import {layoutRectLtwh} from '../../../src/layout-rect';
 
 const TAG = 'VISIBILITY-MANAGER';
 
@@ -322,7 +323,6 @@ export class VisibilityManager {
     model.onTriggerEvent(() => {
       const startTime = this.getStartTime();
       const state = model.getState(startTime);
-      model.disposeOrReset();
 
       // Additional doc-level state.
       state['backgrounded'] = this.isBackgrounded() ? 1 : 0;
@@ -331,6 +331,7 @@ export class VisibilityManager {
 
       // Optionally, element-level state.
       let layoutBox;
+
       if (opt_element) {
         const resource =
             this.resources_.getResourceForElementOptional(opt_element);
@@ -338,9 +339,18 @@ export class VisibilityManager {
             resource ?
             resource.getLayoutBox() :
             Services.viewportForDoc(this.ampdoc).getLayoutRect(opt_element);
+        const intersectionRatio = this.getElementVisibility(opt_element);
+        const intersectionRect = this.getElementIntersectionRect(opt_element);
+        Object.assign(state, {
+          'intersectionRatio': intersectionRatio,
+          'intersectionRect': JSON.stringify(intersectionRect),
+        });
+
       } else {
         layoutBox = this.getRootLayoutBox();
       }
+      model.disposeOrReset();
+
       if (layoutBox) {
         Object.assign(state, {
           'elementX': layoutBox.left,
@@ -349,7 +359,6 @@ export class VisibilityManager {
           'elementHeight': layoutBox.height,
         });
       }
-
       callback(state);
     });
 
@@ -393,6 +402,13 @@ export class VisibilityManager {
    * @abstract
    */
   getElementVisibility(unusedElement) {}
+
+  /**
+   * @param {!Element} unusedElement
+   * @return {?JsonObject}
+   * @abstract
+   */
+  getElementIntersectionRect(unusedElement) {}
 }
 
 
@@ -496,6 +512,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
       trackedElement = {
         element,
         intersectionRatio: 0,
+        intersectionRect: null,
         listeners: [],
       };
       this.trackedElements_[id] = trackedElement;
@@ -528,6 +545,18 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     const id = getElementId(element);
     const trackedElement = this.trackedElements_[id];
     return trackedElement && trackedElement.intersectionRatio || 0;
+  }
+
+  getElementIntersectionRect(element) {
+    if (this.getElementVisibility(element) <= 0) {
+      return null;
+    }
+    const id = getElementId(element);
+    const trackedElement = this.trackedElements_[id];
+    if (trackedElement) {
+      return /** @type {!JsonObject} */ (trackedElement.intersectionRect);
+    }
+    return null;
   }
 
   /**
@@ -594,21 +623,33 @@ export class VisibilityManagerForDoc extends VisibilityManager {
    */
   onIntersectionChanges_(entries) {
     entries.forEach(change => {
-      this.onIntersectionChange_(change.target, change.intersectionRatio);
+      let intersection = change.intersectionRect;
+      // IntersectionRect type now changed from ClientRect to DOMRectReadOnly.
+      // TODO(@zhouyx): Fix all InOb related type.
+      intersection = layoutRectLtwh(Number(intersection.left),
+          Number(intersection.top),
+          Number(intersection.width),
+          Number(intersection.height));
+      this.onIntersectionChange_(
+          change.target,
+          change.intersectionRatio,
+          intersection);
     });
   }
 
   /**
    * @param {!Element} target
    * @param {number} intersectionRatio
+   * @param {!../../../src/layout-rect.LayoutRectDef} intersectionRect
    * @private
    */
-  onIntersectionChange_(target, intersectionRatio) {
+  onIntersectionChange_(target, intersectionRatio, intersectionRect) {
     intersectionRatio = Math.min(Math.max(intersectionRatio, 0), 1);
     const id = getElementId(target);
     const trackedElement = this.trackedElements_[id];
     if (trackedElement) {
       trackedElement.intersectionRatio = intersectionRatio;
+      trackedElement.intersectionRect = intersectionRect;
       for (let i = 0; i < trackedElement.listeners.length; i++) {
         trackedElement.listeners[i](intersectionRatio);
       }
@@ -673,4 +714,12 @@ export class VisibilityManagerForEmbed extends VisibilityManager {
     }
     return this.parent.getElementVisibility(element);
   }
+
+  getElementIntersectionRect(element) {
+    if (this.getRootVisibility() == 0) {
+      return null;
+    }
+    return this.parent.getElementIntersectionRect(element);
+  }
+
 }
