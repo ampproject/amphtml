@@ -141,6 +141,36 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
+  'alexametrics': {
+    'requests': {
+      'base': 'https://${ampAtrkHost}/atrk.gif?account=${atrk_acct}&domain=${domain}',
+      'pageview': '${base}&jsv=amp-${ampVersion}' +
+        '&frame_height=${viewportHeight}&frame_width=${viewportWidth}' +
+        '&title=${title}&time=${timestamp}&time_zone_offset=${timezone}' +
+        '&screen_params=${screenWidth}x${screenHeight}x${screenColorDepth}' +
+        '&ref_url=${documentReferrer}&host_url=${sourceUrl}' +
+        '&random_number=${random}&user_cookie=${clientId(__auc)}' +
+        '&user_cookie_flag=0&user_lang=${browserLanguage}' +
+        '&amp_doc_url=${ampdocUrl}',
+    },
+    'vars': {
+      'atrk_acct': '',
+      'domain': '',
+      'ampAtrkHost': 'certify-amp.alexametrics.com',
+    },
+    'triggers': {
+      'trackPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+    'transport': {
+      'xhrpost': false,
+      'beacon': false,
+      'image': true,
+    },
+  },
+
   'atinternet': {
     'transport': {'beacon': false, 'xhrpost': false, 'image': true},
     'requests': {
@@ -1108,6 +1138,49 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'beacon': false,
       'xhrpost': false,
       'image': true,
+    },
+  },
+
+  'newrelic': {
+    'requests': {
+      'pageview': 'https://${beacon}/amp?appId=${appId}' +
+        '&licenseKey=${licenseKey}' +
+        '&ampUrl=${ampdocUrl}' +
+        '&canonicalUrl=${canonicalUrl}' +
+        '&timeToDomContentLoadedEventEnd=' +
+          '${navTiming(domContentLoadedEventEnd)}' +
+        '&timeToDomInteractive=${navTiming(domInteractive)}' +
+        '&timeToDomComplete=${navTiming(domComplete)}' +
+        '&timeToDomLoading=${navTiming(domLoading)}' +
+        '&timeToResponseStart=${navTiming(responseStart)}' +
+        '&timeToResponseEnd=${navTiming(responseEnd)}' +
+        '&timeToLoadEventStart=${navTiming(loadEventStart)}' +
+        '&timeToLoadEventEnd=${navTiming(loadEventEnd)}' +
+        '&timeToConnectStart=${navTiming(connectStart)}' +
+        '&timeToConnectEnd=${navTiming(connectEnd)}' +
+        '&timeToFetchStart=${navTiming(fetchStart)}' +
+        '&timeToRequestStart=${navTiming(requestStart)}' +
+        '&timeToUnloadEventStart=${navTiming(unloadEventStart)}' +
+        '&timeToUnloadEventEnd=${navTiming(unloadEventEnd)}' +
+        '&timeToDomainLookupStart=${navTiming(domainLookupStart)}' +
+        '&timeToDomainLookupEnd=${navTiming(domainLookupEnd)}' +
+        '&timeToRedirectStart=${navTiming(redirectStart)}' +
+        '&timeToRedirectEnd=${navTiming(redirectEnd)}' +
+        '&timeToSecureConnection=${navTiming(secureConnectionStart)}' +
+        '&timestamp=${timestamp}' +
+        '&ampVersion=${ampVersion}' +
+        '&pageLoadTime=${pageLoadTime}',
+    },
+    'vars': {
+      'beacon': 'bam.nr-data.net',
+      'appId': [],
+      'licenseKey': '',
+    },
+    'triggers': {
+      'trackPageview': {
+        'on': 'ini-load',
+        'request': 'pageview',
+      },
     },
   },
 

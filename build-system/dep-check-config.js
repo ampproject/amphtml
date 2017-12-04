@@ -190,6 +190,8 @@ exports.rules = [
           'src/service/parallax-impl.js',
       'extensions/amp-analytics/0.1/iframe-transport.js->' +
           'src/service/extension-location.js',
+      'extensions/amp-analytics/0.1/iframe-transport.js->' +
+          'src/service/jank-meter.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
           'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
@@ -246,9 +248,15 @@ exports.rules = [
     filesMatching: 'extensions/**/*-ad-network-*.js',
     mustNotDependOn: [
       'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js',
-      'extensions/amp-ad/0.1/concurrent-load.js',
       'src/3p-frame.js',
       'src/iframe-helper.js',
+    ],
+  },
+
+  {
+    mustNotDependOn: [
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
     ],
   },
 ];

@@ -16,17 +16,13 @@
 
 import {
   adsenseIsA4AEnabled,
-  ADSENSE_A4A_EXPERIMENT_NAME,
-  ADSENSE_EXPERIMENT_FEATURE,
   URL_EXPERIMENT_MAPPING,
-  identityEnabled,
 } from '../adsense-a4a-config';
 import {
   isInExperiment,
 } from '../../../../ads/google/a4a/traffic-experiments';
 import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
 import {urls} from '../../../../src/config';
-import {forceExperimentBranch} from '../../../../src/experiments';
 import {isProxyOrigin, parseUrl} from '../../../../src/url';
 import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
@@ -109,28 +105,6 @@ describe('adsense-a4a-config', () => {
               .to.be.true;
         }
       });
-    });
-  });
-
-  describe('#identityEnabled', () => {
-    [
-      [ADSENSE_EXPERIMENT_FEATURE.IDENTITY_CONTROL, {
-        layer: ADSENSE_A4A_EXPERIMENT_NAME,
-        result: false,
-      }],
-      [ADSENSE_EXPERIMENT_FEATURE.IDENTITY_EXPERIMENT, {
-        layer: ADSENSE_A4A_EXPERIMENT_NAME,
-        result: true,
-      }],
-    ].forEach(item => {
-      it(`should return ${item[1].result} if in ${item[0]} experiment`, () => {
-        forceExperimentBranch(mockWin, item[1].layer, item[0]);
-        expect(identityEnabled(mockWin)).to.equal(item[1].result);
-      });
-    });
-
-    it('should return false if not in any experiments', () => {
-      expect(identityEnabled(mockWin)).to.be.false;
     });
   });
 });

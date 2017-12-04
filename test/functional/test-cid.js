@@ -736,17 +736,29 @@ describes.realWin('cid', {amp: true}, env => {
     expect(fooCid).to.equal(fooCid2);
   });
 
-  it('get method should return CID when in Viewer', () => {
+  it('get method should return CID when in Viewer when visible', function* () {
     win.parent = {};
-    stubServiceForDoc(sandbox, ampdoc, 'viewer', 'sendMessageAwaitResponse')
+    const sendMsgSpy =
+        stubServiceForDoc(sandbox, ampdoc, 'viewer', 'sendMessageAwaitResponse')
         .returns(Promise.resolve('cid-from-viewer'));
     stubServiceForDoc(sandbox, ampdoc, 'viewer', 'isTrustedViewer')
         .returns(Promise.resolve(true));
     stubServiceForDoc(sandbox, ampdoc, 'viewer', 'hasCapability')
         .withArgs('cid').returns(true);
     sandbox.stub(url, 'isProxyOrigin').returns(true);
-    return expect(cid.get({scope: 'foo'}, hasConsent))
-        .to.eventually.equal('cid-from-viewer');
+    let viewerVisibleResolver;
+    const viewerNextVisiblePromise = new Promise(resolve => {
+      viewerVisibleResolver = resolve;
+    });
+    stubServiceForDoc(sandbox, ampdoc, 'viewer', 'whenNextVisible')
+        .returns(viewerNextVisiblePromise);
+    const requestCidPromise = cid.get({scope: 'foo'}, hasConsent);
+    yield macroTask();
+    expect(sendMsgSpy).to.not.be.called;
+    viewerVisibleResolver();
+    yield macroTask();
+    expect(sendMsgSpy).to.be.calledOnce;
+    return expect(requestCidPromise).to.eventually.equal('cid-from-viewer');
   });
 
   it('get method should time out when in Viewer', function *() {
