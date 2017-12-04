@@ -17,7 +17,7 @@ import {writeAdScript} from '../doubleclick';
 import {createServedIframe} from '../../../testing/iframe';
 
 function verifyScript(win, name) {
-  const scripts = ['gpt.js', 'gpt_sf_a.js', 'gpt_sf_b.js', 'glade.js'];
+  const scripts = ['gpt.js', 'glade.js'];
   assert(scripts.includes(name));
   scripts.forEach(script => {
     if (script == 'glade.js') {
@@ -46,15 +46,14 @@ describes.sandboxed('writeAdScript', {}, env => {
   });
 
 
-  it('should use GPT and opt out of the GladeExperiment when' +
+  it('should use GPT when' +
   'useSameDomainRenderingUntilDeprecated is not undefined', () => {
     const data = {useSameDomainRenderingUntilDeprecated: true};
     writeAdScript(win, data);
     verifyScript(win, 'gpt.js');
   });
 
-  it('should use GPT and opt out of the GladeExperiment when multiSize is not' +
-  'null', () => {
+  it('should use GPT when multiSize is not null', () => {
     const data = {multiSize: 'hey!'};
     writeAdScript(win, data);
     verifyScript(win, 'gpt.js');
