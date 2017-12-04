@@ -101,8 +101,9 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    *
    * @overview
-   * AMP Cache may selectively cache certain video sources (based on size, type
-   * etc..). When AMP Cache does so, it rewrites the `src` for `amp-video` and
+   * AMP Cache may selectively cache certain video sources (based on various
+   * heuristics such as video type, extensions, etc...).
+   * When AMP Cache does so, it rewrites the `src` for `amp-video` and
    * `source` children that are cached and adds a `amp-orig-src` attribute
    * pointing to the original source.
    *
@@ -111,9 +112,15 @@ class AmpVideo extends AMP.BaseElement {
    * 1) Handling 404s
    * Eventhough AMP Cache rewrites the `src` to point to the CDN, the actual
    * video may not be ready in the cache yet, in those cases the CDN will
-   * return a 404. Runtime handles this situation by appending an additional
+   * return a 404.
+   * AMP Cache also rewrites Urls for all sources and returns 404 for types
+   * that are not supported to be cached.
+   *
+   * Runtime handles this situation by appending an additional
    * <source> pointing to the original src AFTER the cached source so browser
    * will automatically proceed to the next source if one fails.
+   * Original sources are added only when page becomes visible and not during
+   * prerender mode.
    *
    * 2) Prerendering
    * Now that some sources might be cached, we can preload them during prerender
@@ -121,6 +128,10 @@ class AmpVideo extends AMP.BaseElement {
    * element during prerender and automatically sets the `preload` to `auto`
    * so browsers (based on their own heuristics) can start fetching the cached
    * videos. If `preload` is specified by the author, then it takes precedence.
+   *
+   * Note that this flag does not impact prerendering of the `poster` as poster
+   * is fetched (and is always cached) during `buildCallback` which is not
+   * dependent on the value of `prerenderAllowed()`.
    */
   prerenderAllowed() {
     return this.isPrerenderAllowed_;
@@ -249,16 +260,19 @@ class AmpVideo extends AMP.BaseElement {
         dev().assertElement(this.video_),
         /* opt_removeMissingAttrs */ true);
 
+    this.propagateCachedSources_();
+
+    // If we are in prerender mode, only propagate cached sources and then
+    // when document becomes visible propagate origin sources and other children
+    // If not in prerender mode, propagate everything.
     if (viewer.getVisibilityState() == VisibilityState.PRERENDER) {
       if (!this.element.hasAttribute('preload')) {
         this.video_.setAttribute('preload', 'auto');
       }
-      this.propagatePrerenderSources_();
       viewer.whenFirstVisible().then(() => {
         this.propagateLayoutChildren_();
       });
     } else {
-      this.propagatePrerenderSources_();
       this.propagateLayoutChildren_();
     }
 
@@ -272,7 +286,7 @@ class AmpVideo extends AMP.BaseElement {
    * @private
    * Propagate sources that are cached by the CDN.
    */
-  propagatePrerenderSources_() {
+  propagateCachedSources_() {
     dev().assert(this.video_);
 
     const sources = toArray(childElementsByTag(this.element, 'source'));
@@ -288,6 +302,8 @@ class AmpVideo extends AMP.BaseElement {
       sources.unshift(srcSource);
     }
 
+    // Only cached sources are added during prerender.
+    // Origin sources will only be added when document becomes visible.
     sources.forEach(source => {
       if (this.isCachedByCDN_(source)) {
         this.video_.appendChild(source);
@@ -312,7 +328,7 @@ class AmpVideo extends AMP.BaseElement {
     }
 
     sources.forEach(source => {
-      // Cached sources should have been moved already.
+      // Cached sources should have been moved from <amp-video> to <video>.
       dev().assert(!this.isCachedByCDN_(source));
       assertHttpsUrl(source.getAttribute('src'), source);
       this.video_.appendChild(source);
