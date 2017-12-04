@@ -155,6 +155,8 @@ amp-story-page.i-amphtml-story-page-shown {
   max-height: 70vh!important;
   max-width: calc(9/16 * 70vh);
   box-shadow: 0 0 15px rgba(0, 0, 0, .4)!important;
+  min-width: 348px !important;
+  max-width: 619px !important;
 }
 
 /* Navigation buttons */
