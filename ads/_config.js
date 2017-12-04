@@ -77,6 +77,7 @@ export const adConfig = {
       'https://ad-aws-it.neodatagroup.com',
       'https://tracker.neodatagroup.com',
     ],
+    renderStartImplemented: true,
   },
 
   adblade: {
