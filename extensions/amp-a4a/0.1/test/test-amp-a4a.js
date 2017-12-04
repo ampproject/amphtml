@@ -24,7 +24,6 @@ import {
   SAFEFRAME_VERSION_HEADER,
   protectFunctionWrapper,
   assignAdUrlToError,
-  EXPERIMENT_FEATURE_HEADER_NAME,
 } from '../amp-a4a';
 import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
