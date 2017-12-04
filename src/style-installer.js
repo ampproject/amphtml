@@ -18,7 +18,7 @@ import {Services} from './services';
 import {dev, rethrowAsync} from './log';
 import {map} from './utils/object';
 import {setStyles} from './style';
-import {waitForBody} from './dom';
+import {waitForBody, insertAfterOrAtStart} from './dom';
 import {waitForServices} from './render-delaying-services';
 
 const TRANSFORMER_PROP = '__AMP_CSS_TR';
@@ -319,23 +319,3 @@ function styleLoaded(doc, style) {
   }
   return false;
 };
-
-/**
- * Insert the element in the root after the element named after or
- * if that is null at the beginning.
- * @param {!Element|!ShadowRoot} root
- * @param {!Element} element
- * @param {?Node} after
- */
-function insertAfterOrAtStart(root, element, after) {
-  if (after) {
-    if (after.nextSibling) {
-      root.insertBefore(element, after.nextSibling);
-    } else {
-      root.appendChild(element);
-    }
-  } else {
-    // Add at the start.
-    root.insertBefore(element, root.firstChild);
-  }
-}
