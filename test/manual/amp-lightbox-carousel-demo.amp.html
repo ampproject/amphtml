@@ -1,0 +1,124 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>Lightbox Carousel Demo</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-lightbox-viewer" src="https://cdn.ampproject.org/v0/amp-lightbox-viewer-0.1.js"></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+  <script async custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    body {
+      font-family: sans-serif;
+    }
+
+    h2, h3, h4 {
+      margin-top: 30px;
+      margin-bottom: 5px;
+      color: 333;
+      font-weight: normal;
+    }
+
+    amp-lightbox-viewer ul {
+      background-color: #FFF;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    // Enable amp-lightbox-viewer experiment automatically if it is not enabled.
+    // Disable amp-lightbox-viewer-auto experiment if it is enabled.
+    setTimeout(function() {
+      if (!AMP.isExperimentOn('amp-lightbox-viewer') || AMP.isExperimentOn('amp-lightbox-viewer-auto')) {
+        if (!AMP.isExperimentOn('amp-lightbox-viewer')) {
+          AMP.toggleExperiment('amp-lightbox-viewer');
+        }
+        if (AMP.isExperimentOn('amp-lightbox-viewer-auto')) {
+          AMP.toggleExperiment('amp-lightbox-viewer-auto');
+        }
+        location.reload();
+      }
+    }, 1000);
+  </script>
+
+  <h1>Lightbox Carousel Demo</h1>
+
+  <amp-carousel height="300"
+  layout="fixed-height"
+  type="carousel">
+    <amp-img src="https://picsum.photos/300/200/?image=10"
+      width="300"
+      height="200"
+      alt="a sample image"
+      lightbox
+      on="tap:myLightboxViewer.activate"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=11"
+      width="300"
+      height="200"
+      alt="another sample image"
+      lightbox
+      on="tap:myLightboxViewer.activate"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=12"
+      width="300"
+      height="200"
+      alt="and another sample image"
+      lightbox
+      on="tap:myLightboxViewer.activate"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=13"
+      width="300"
+      height="200"
+      alt="and another sample image"
+      lightbox
+      on="tap:myLightboxViewer.activate"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=14"
+      width="300"
+      height="200"
+      alt="and another sample image"
+      lightbox
+      on="tap:myLightboxViewer.activate"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=15"
+      width="300"
+      height="200"
+      alt="and another sample image"
+      lightbox
+      on="tap:myLightboxViewer.activate"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=16"
+      width="300"
+      height="200"
+      alt="and another sample image"
+      lightbox
+      on="tap:myLightboxViewer.activate"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=17"
+      width="300"
+      height="200"
+      alt="and another sample image"
+      lightbox
+      on="tap:myLightboxViewer.activate"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=18"
+      width="300"
+      height="200"
+      alt="and another sample image"
+      lightbox
+      on="tap:myLightboxViewer.activate"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=19"
+      width="300"
+      height="200"
+      alt="and another sample image"
+      lightbox
+      on="tap:myLightboxViewer.activate"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=20"
+      width="300"
+      height="200"
+      alt="and another sample image"
+      lightbox
+      on="tap:myLightboxViewer.activate"></amp-img>
+  </amp-carousel>
+
+  <amp-lightbox-viewer id="myLightboxViewer" layout="nodisplay"></amp-lightbox-viewer>
+
+</body>
+</html>
