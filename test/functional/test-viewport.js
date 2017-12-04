@@ -885,6 +885,12 @@ describes.fakeWin('Viewport', {}, env => {
     expect(viewport.getScrollHeight()).to.equal(117);
   });
 
+  it('should delegate contentHeight', () => {
+    const bindingMock = sandbox.mock(binding);
+    bindingMock.expects('getContentHeight').withArgs().returns(117).once();
+    expect(viewport.getContentHeight()).to.equal(117);
+  });
+
   it('should scroll to target position when the viewer sets scrollTop', () => {
     const bindingMock = sandbox.mock(binding);
     bindingMock.expects('setScrollTop').withArgs(117).once();
