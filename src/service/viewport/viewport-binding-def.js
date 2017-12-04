@@ -142,6 +142,15 @@ export class ViewportBindingDef {
   getScrollHeight() {}
 
   /**
+   * Returns the height of the content of the document, including the
+   * padding top for the viewer header.
+   * contentHeight will match scrollHeight in all cases unless the viewport is
+   * taller than the content.
+   * @return {number}
+   */
+  getContentHeight() {}
+
+  /**
    * Returns the rect of the element within the document.
    * @param {!Element} unusedEl
    * @param {number=} unusedScrollLeft Optional arguments that the caller may

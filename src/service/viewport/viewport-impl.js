@@ -358,6 +358,19 @@ export class Viewport {
   }
 
   /**
+   * Returns the height of the content of the document, including the
+   * padding top for the viewer header.
+   * contentHeight will match scrollHeight in all cases unless the viewport is
+   * taller than the content.
+   * Note that this method is not cached since we there's no indication when
+   * it might change.
+   * @return {number}
+   */
+  getContentHeight() {
+    return this.binding_.getContentHeight();
+  }
+
+  /**
    * Returns the rect of the viewport which includes scroll positions and size.
    * @return {!../../layout-rect.LayoutRectDef}}
    */

@@ -32,6 +32,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
   let win;
   let ampdoc;
   let viewer;
+  let child;
 
   beforeEach(() => {
     env.iframe.style.width = '100px';
@@ -39,7 +40,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
     win = env.win;
     win.document.documentElement.classList.add('i-amphtml-singledoc');
 
-    const child = win.document.createElement('div');
+    child = win.document.createElement('div');
     child.style.width = '200px';
     child.style.height = '300px';
     win.document.body.appendChild(child);
@@ -119,6 +120,18 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
 
   it('should calculate scrollHeight from scrollElement', () => {
     expect(binding.getScrollHeight()).to.equal(300);
+  });
+
+  it('should calculate contentHeight from body height', () => {
+    // Set content to be smaller than viewport.
+    child.style.height = '50px';
+    expect(binding.getContentHeight()).to.equal(50);
+  });
+
+  it('should include padding top in contentHeight', () => {
+    binding.updatePaddingTop(10);
+    binding.setScrollTop(20); // should have no effect on height
+    expect(binding.getContentHeight()).to.equal(310);
   });
 
   it('should update scrollTop on scrollElement', () => {
@@ -336,6 +349,18 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
 
   it('should calculate scrollHeight from wrapper', () => {
     expect(binding.getScrollHeight()).to.equal(301); // +1px for border-top.
+  });
+
+  it('should calculate contentHeight from body height', () => {
+    // Set content to be smaller than viewport.
+    child.style.height = '50px';
+    expect(binding.getContentHeight()).to.equal(51);
+  });
+
+  it('should include padding top in contentHeight', () => {
+    binding.updatePaddingTop(10);
+    binding.setScrollTop(20); // should have no effect on height
+    expect(binding.getContentHeight()).to.equal(311);  // +1px for border-top.
   });
 
   it('should update scrollTop on wrapper', () => {
