@@ -52,7 +52,6 @@ export function doubleclick(global, data) {
  * @param {!Object} data
  */
 function doubleClickWithGpt(global, data) {
-  const url = 'https://www.googletagservices.com/tag/js/gpt.js';
   // Handle multi-size data parsing, validation, and inclusion into dimensions.
   const multiSizeDataStr = data.multiSize || null;
   const primaryWidth = parseInt(data.overrideWidth || data.width, 10);
@@ -68,91 +67,92 @@ function doubleClickWithGpt(global, data) {
     dimensions = [[primaryWidth, primaryHeight]];
   }
 
-  loadScript(global, url, () => {
-    global.googletag.cmd.push(() => {
-      const googletag = global.googletag;
-      const pubads = googletag.pubads();
-      const slot = googletag.defineSlot(data.slot, dimensions, 'c')
+  loadScript(
+      global, 'https://www.googletagservices.com/tag/js/gpt.js', () => {
+        global.googletag.cmd.push(() => {
+          const googletag = global.googletag;
+          const pubads = googletag.pubads();
+          const slot = googletag.defineSlot(data.slot, dimensions, 'c')
           .addService(pubads);
 
-      if (data['experimentId']) {
-        const experimentIdList = data['experimentId'].split(',');
-        pubads.forceExperiment = pubads.forceExperiment || function() {};
-        experimentIdList &&
+          if (data['experimentId']) {
+            const experimentIdList = data['experimentId'].split(',');
+            pubads.forceExperiment = pubads.forceExperiment || function() {};
+            experimentIdList &&
             experimentIdList.forEach(eid => pubads.forceExperiment(eid));
-      }
-
-      pubads.markAsAmp();
-      pubads.set('page_url', global.context.canonicalUrl);
-      pubads.setCorrelator(Number(getCorrelator(global)));
-      googletag.enableServices();
-
-      if (data.categoryExclusions) {
-        if (Array.isArray(data.categoryExclusions)) {
-          for (let i = 0; i < data.categoryExclusions.length; i++) {
-            slot.setCategoryExclusion(data.categoryExclusions[i]);
           }
-        } else {
-          slot.setCategoryExclusion(data.categoryExclusions);
-        }
-      }
 
-      if (data.cookieOptions) {
-        pubads.setCookieOptions(data.cookieOptions);
-      }
+          pubads.markAsAmp();
+          pubads.set('page_url', global.context.canonicalUrl);
+          pubads.setCorrelator(Number(getCorrelator(global)));
+          googletag.enableServices();
 
-      if (data.tagForChildDirectedTreatment != undefined) {
-        pubads.setTagForChildDirectedTreatment(
-            data.tagForChildDirectedTreatment);
-      }
+          if (data.categoryExclusions) {
+            if (Array.isArray(data.categoryExclusions)) {
+              for (let i = 0; i < data.categoryExclusions.length; i++) {
+                slot.setCategoryExclusion(data.categoryExclusions[i]);
+              }
+            } else {
+              slot.setCategoryExclusion(data.categoryExclusions);
+            }
+          }
 
-      if (data.targeting) {
-        for (const key in data.targeting) {
-          slot.setTargeting(key, data.targeting[key]);
-        }
-      }
+          if (data.cookieOptions) {
+            pubads.setCookieOptions(data.cookieOptions);
+          }
 
-      pubads.addEventListener('slotRenderEnded', event => {
-        const primaryInvSize = dimensions[0];
-        const pWidth = primaryInvSize[0];
-        const pHeight = primaryInvSize[1];
-        const returnedSize = event.size;
-        const rWidth = returnedSize ? returnedSize[0] : null;
-        const rHeight = returnedSize ? returnedSize[1] : null;
+          if (data.tagForChildDirectedTreatment != undefined) {
+            pubads.setTagForChildDirectedTreatment(
+                data.tagForChildDirectedTreatment);
+          }
 
-        let creativeId = event.creativeId || '_backfill_';
+          if (data.targeting) {
+            for (const key in data.targeting) {
+              slot.setTargeting(key, data.targeting[key]);
+            }
+          }
+
+          pubads.addEventListener('slotRenderEnded', event => {
+            const primaryInvSize = dimensions[0];
+            const pWidth = primaryInvSize[0];
+            const pHeight = primaryInvSize[1];
+            const returnedSize = event.size;
+            const rWidth = returnedSize ? returnedSize[0] : null;
+            const rHeight = returnedSize ? returnedSize[1] : null;
+
+            let creativeId = event.creativeId || '_backfill_';
 
         // If the creative is empty, or either dimension of the returned size
         // is larger than its counterpart in the primary size, then we don't
         // want to render the creative.
-        if (event.isEmpty ||
+            if (event.isEmpty ||
             returnedSize && (rWidth > pWidth || rHeight > pHeight)) {
-          global.context.noContentAvailable();
-          creativeId = '_empty_';
-        } else {
+              global.context.noContentAvailable();
+              creativeId = '_empty_';
+            } else {
           // We only want to call renderStart with a specific size if the
           // returned creative size matches one of the multi-size sizes.
-          let newSize;
-          for (let i = 1; i < dimensions.length; i++) {
+              let newSize;
+              for (let i = 1; i < dimensions.length; i++) {
             // dimensions[0] is the primary or overridden size.
-            if (dimensions[i][0] == rWidth && dimensions[i][1] == rHeight) {
-              newSize = {
-                width: rWidth,
-                height: rHeight,
-              };
-              break;
+                if (dimensions[i][0] == rWidth && dimensions[i][1] == rHeight) {
+                  newSize = {
+                    width: rWidth,
+                    height: rHeight,
+                  };
+                  break;
+                }
+              }
+              global.context.renderStart(newSize);
             }
-          }
-          global.context.renderStart(newSize);
-        }
-        global.context.reportRenderedEntityIdentifier('dfp-' + creativeId);
-      });
+            global.context.reportRenderedEntityIdentifier('dfp-' + creativeId);
+          });
 
       // Exported for testing.
-      global.document.getElementById('c')['slot'] = slot;
-      googletag.display('c');
-    });
-  });
+          global.document.getElementById('c')['slot'] = slot;
+          googletag.display('c');
+        });
+      });
 }
 
 /**
@@ -234,10 +234,12 @@ function centerAd(global) {
  * @param {!Object} data
  */
 export function writeAdScript(global, data) {
-  const href = global.context.location.href;
   if (data.useSameDomainRenderingUntilDeprecated != undefined
-      || data.multiSize || (href.indexOf('google_glade=0') > 0 &&
-                            href.indexOf('google_glade=1'))) {
+      || data.multiSize || (
+          global.context && global.context.location &&
+            global.context.location.href &&
+            global.context.location.href.indexOf('google_glade=0') > 0 &&
+            global.context.location.href.indexOf('google_glade=1') < 0)) {
     doubleClickWithGpt(global, data);
   } else {
     doubleClickWithGlade(global, data);
