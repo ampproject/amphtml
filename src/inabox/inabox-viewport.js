@@ -359,6 +359,7 @@ export class ViewportBindingInabox {
   /** @override */ setScrollTop() {/* no-op */}
   /** @override */ getScrollWidth() {return 0;}
   /** @override */ getScrollHeight() {return 0;}
+  /** @override */ getContentHeight() {return 0;}
   /** @override */ getBorderTop() {return 0;}
   /** @override */ requiresFixedLayerTransfer() {return false;}
 }
