@@ -252,6 +252,16 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
           .to.deep.equal(rewrittenResponse);
     });
 
+    it('should not rewrite key names if vendor has disableKeyAppend', () => {
+      const response = {
+        'a': '1',
+        'b': '2',
+      };
+      // fakevendor2 has disableKeyAppend set to true, see callout-vendors.js
+      expect(impl.rewriteRtcKeys_(response, 'fakevendor2'))
+          .to.deep.equal(response);
+    });
+
     it('should not rewrite key names if custom url callout', () => {
       const response = {
         'a': '1',
