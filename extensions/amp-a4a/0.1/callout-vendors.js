@@ -22,7 +22,8 @@
 //////////////////////////////////////////////////////////////////
 /** @typedef {{
     url: string,
-    macros: Array<string>}} */
+    macros: Array<string>,
+    disableKeyAppend: boolean}} */
 let RtcVendorDef;
 /** @const {!Object<string, RtcVendorDef>} */
 export const RTC_VENDORS = {
