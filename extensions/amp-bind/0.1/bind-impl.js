@@ -338,7 +338,7 @@ export class Bind {
    * @private
    */
   addMacros_() {
-    const elements = 
+    const elements =
         this.localWin_.document.getElementsByTagName('AMP-MACRO');
     const ampMacroDefs = [];
     for (let i = 0; i < elements.length; i++) {
