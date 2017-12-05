@@ -65,15 +65,15 @@ export class VisibilityModel {
       this.repeat_ = true;
       if (this.spec_.totalTimeMin || this.spec_.continuousTimeMin) {
         const repeatInterval = Math.max(
-          this.spec_.totalTimeMin,
-          this.spec_.continuousTimeMin);
+            this.spec_.totalTimeMin,
+            this.spec_.continuousTimeMin);
         if (repeatInterval >= MIN_REPEAT_INTERVAL) {
           this.repeatInterval_ = repeatInterval;
         } else {
           this.repeat_ = false;
           user().error(
-            'AMP-ANALYTICS',
-            `Cannot repeat with interval less than ${MIN_REPEAT_INTERVAL}, ` +
+              'AMP-ANALYTICS',
+              `Cannot repeat with interval less than ${MIN_REPEAT_INTERVAL}, ` +
             ' repeat set to false');
         }
       }

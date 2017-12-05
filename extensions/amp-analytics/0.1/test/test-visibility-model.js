@@ -178,8 +178,8 @@ describes.sandboxed('VisibilityModel', {}, () => {
       expect(getRepeat({repeat: true, totalTimeMin: 202})
           .repeatInterval).to.equal(202);
       expect(
-        getRepeat({repeat: true, continuousTimeMin: 202, totalTimeMin: 203})
-        .repeatInterval).to.equal(203);
+          getRepeat({repeat: true, continuousTimeMin: 202, totalTimeMin: 203})
+              .repeatInterval).to.equal(203);
     });
   });
 
