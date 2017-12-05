@@ -1283,6 +1283,10 @@ class TagStack {
     if (topStackEntry.childTagMatcher !== null) {
       topStackEntry.childTagMatcher.exitTag(context, result);
     }
+    if (topStackEntry.referencePointMatcher !== null) {
+      topStackEntry.referencePointMatcher.exitParentTag(context, result);
+    }
+
   }
 
   /**
@@ -5066,10 +5070,6 @@ amp.validator.ValidationHandler =
    * @override
    */
   endTag(tag) {
-    const matcher = this.context_.getTagStack().currentReferencePointMatcher();
-    if (matcher !== null) {
-      matcher.exitParentTag(this.context_, this.validationResult_);
-    }
     this.context_.getTagStack().exitTag(this.context_, this.validationResult_);
   };
 
