@@ -774,7 +774,7 @@ export class LayoutElement {
   remeasure() {
     let layer = this;
 
-    // Find the root-est layer that's dirty, and remeasure from there.
+    // Find the topmost dirty layer, and remeasure from there.
     for (let p = this.getParentLayer(); p; p = p.getParentLayer()) {
       if (p.needsRemeasure_) {
         layer = p;
