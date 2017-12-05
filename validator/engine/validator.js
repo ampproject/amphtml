@@ -1263,6 +1263,24 @@ class TagStack {
   }
 
   /**
+   * Upon exiting a tag, validation for the current child tag matcher is
+   * triggered, e.g. for checking that the tag had some specified number
+   * of children.
+   * @param {string} tagName
+   * @param {!Context} context
+   * @param {!amp.validator.ValidationResult} result
+   */
+  exitTag(tagName, context, result) {
+    this.cdataMatcher_ = null;
+    this.unRegisterDescendantConstraintList();
+
+    const topStackEntry = this.stack_.pop();
+    if (topStackEntry.childTagMatcher !== null) {
+      topStackEntry.childTagMatcher.exitTag(context, result);
+    }
+  }
+
+  /**
    * Sets the child tag matcher for the tag which is currently on the
    * stack. This gets called shortly after EnterTag for a given tag.
    * @param {?ChildTagMatcher} matcher
@@ -1338,24 +1356,6 @@ class TagStack {
     const matcher = this.stack_[this.stack_.length - 2].childTagMatcher;
     if (matcher !== null) {
       matcher.matchChildTagName(context, result);
-    }
-  }
-
-  /**
-   * Upon exiting a tag, validation for the current child tag matcher is
-   * triggered, e.g. for checking that the tag had some specified number
-   * of children.
-   * @param {string} tagName
-   * @param {!Context} context
-   * @param {!amp.validator.ValidationResult} result
-   */
-  exitTag(tagName, context, result) {
-    this.cdataMatcher_ = null;
-    this.unRegisterDescendantConstraintList();
-
-    const topStackEntry = this.stack_.pop();
-    if (topStackEntry.childTagMatcher !== null) {
-      topStackEntry.childTagMatcher.exitTag(context, result);
     }
   }
 
