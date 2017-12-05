@@ -1,0 +1,2 @@
+FAIL
+amp-story/0.1/test/validator-empty-story.html:37:7 The tag 'amp-story-page' is missing or incorrect, but required by 'amp-story'. (see https://www.ampproject.org/docs/reference/components/amp-story) [AMP_TAG_PROBLEM]

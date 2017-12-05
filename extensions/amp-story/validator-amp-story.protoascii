@@ -29,6 +29,11 @@ tags: {  # <amp-story>
   tag_name: "AMP-STORY"
   requires_extension: "amp-story"
   mandatory_parent: "BODY"
+  # Mandate that at least one of the children is an amp-story-page.
+  # TODO(gregable): This global requires/satisfies approach only works because
+  # there is only one <amp-story standalone> in a document. We really want this
+  # requirement to be expressed on the <amp-story> children, however.
+  requires: "amp-story-page"
   attrs: {
     name: "standalone"
     mandatory: true
@@ -61,6 +66,7 @@ tags: {  # <amp-story-page>
   tag_name: "AMP-STORY-PAGE"
   requires_extension: "amp-story"
   mandatory_parent: "AMP-STORY"
+  satisfies: "amp-story-page"
   attrs: {
     name: "id"
     mandatory: true
@@ -89,7 +95,7 @@ tags: {  # <amp-story-grid-layer>
     value_regex: "(fill|horizontal|vertical|thirds)"
     mandatory: true
   }
-  descendant_tag_lists: "amp-story-grid-layer-allowed-descendants"
+  descendant_tag_list: "amp-story-grid-layer-allowed-descendants"
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER default"
   }
@@ -202,7 +208,7 @@ tags: {
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-story"
 }
-descendant_tag_lists: {
+descendant_tag_list: {
   name: "amp-story-grid-layer-allowed-descendants"
   allowed_tags: "ABBR"
   allowed_tags: "ADDRESS"

@@ -428,9 +428,9 @@ message TagSpec {
   // This tag may not descend from any tag with any of these tag names.
   repeated string disallowed_ancestor = 13;
 
-  // If set, all of the tag's descendants must be tags from the list. A tag not
-  // in the list will generate an error.
-  repeated string descendant_tag_lists = 29;
+  // If set, all of the tag's descendants must be tags from the named list.
+  // A tag not in the named list will generate an error.
+  optional string descendant_tag_list = 29;
 
   // If set, other tags - identified by their detail string - must be
   // present as well or a warning will be issued (will not invalidate doc).
@@ -511,7 +511,7 @@ message ValidatorRules {
   repeated ErrorFormat error_formats = 9;
   repeated ErrorSpecificity error_specificity = 13;
 
-  repeated DescendantTagList descendant_tag_lists = 16;
+  repeated DescendantTagList descendant_tag_list = 16;
 
   // Deprecated fields, do not reuse.
   extensions 2, 5, 11, 12, 14;
@@ -571,7 +571,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 95
+  // NEXT AVAILABLE TAG: 96
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -657,6 +657,7 @@ message ValidationError {
     CSS_SYNTAX_DISALLOWED_RELATIVE_URL = 55;
     CSS_SYNTAX_INVALID_ATTR_SELECTOR = 59;
     CSS_SYNTAX_INVALID_PROPERTY = 90;
+    CSS_SYNTAX_INVALID_PROPERTY_NOLIST = 95;
     CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS = 91;
     CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME = 92;
     CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME = 93;
