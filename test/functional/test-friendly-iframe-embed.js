@@ -504,6 +504,24 @@ describe('friendly-iframe-embed', () => {
         return embed.whenWindowLoaded();
       });
     });
+
+    it('should add violation listener', () => {
+      let eventListenerSpy;
+      const container = {
+        appendChild: child => {
+          document.body.appendChild(child);
+          eventListenerSpy =
+              sandbox.spy(child.contentWindow, 'addEventListener');
+        },
+      };
+      const embedPromise = installFriendlyIframeEmbed(iframe, container, {
+        url: 'https://acme.org/url1',
+        html: '<a id="a1"></a>',
+      });
+      return embedPromise.then(() => {
+        expect(eventListenerSpy).to.be.calledOnce;
+      });
+    });
   });
 
   describe('child document ready polling', () => {
