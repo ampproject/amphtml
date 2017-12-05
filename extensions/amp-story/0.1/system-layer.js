@@ -20,7 +20,7 @@ import {dev} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {ProgressBar} from './progress-bar';
 import {getMode} from '../../../src/mode';
-import {dom} from '../../../src/dom';
+import {matches} from '../../../src/dom';
 import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui'; // eslint-disable-line max-len
 
 
