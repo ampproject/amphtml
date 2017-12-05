@@ -197,32 +197,32 @@ export class LayoutLayers {
 
   /**
    * Returns the current scrolled position of the element relative to the layer
-   * represented by opt_parent (or opt_parent's parent layer, if it is not a
-   * layer itself). This takes into account the scrolled position of every
+   * represented by opt_ancestor (or opt_ancestor's parent layer, if it is not
+   * a layer itself). This takes into account the scrolled position of every
    * layer in between.
    *
    * @param {!Element} element
-   * @param {Element=} opt_parent
+   * @param {Element=} opt_ancestor
    * @return {!PositionDef}
    */
-  getScrolledPosition(element, opt_parent) {
+  getScrolledPosition(element, opt_ancestor) {
     const layout = this.add(element);
-    return layout.getScrolledPosition(opt_parent);
+    return layout.getScrolledPosition(opt_ancestor);
   }
 
   /**
    * Returns the absolute offset position of the element relative to the layer
-   * represented by opt_parent (or opt_parent's parent layer, if it is not a
-   * layer itself). This remains constant, regardless of the scrolled position
-   * of any layer in between.
+   * represented by opt_ancestor (or opt_ancestor's parent layer, if it is not
+   * a layer itself). This remains constant, regardless of the scrolled
+   * position of any layer in between.
    *
    * @param {!Element} element
-   * @param {Element=} opt_parent
+   * @param {Element=} opt_ancestor
    * @return {!PositionDef}
    */
-  getOffsetPosition(element, opt_parent) {
+  getOffsetPosition(element, opt_ancestor) {
     const layout = this.add(element);
-    return layout.getOffsetPosition(opt_parent);
+    return layout.getOffsetPosition(opt_ancestor);
   }
 
   /**
@@ -679,14 +679,14 @@ export class LayoutElement {
 
   /**
    * Returns the current scrolled position of the element relative to the layer
-   * represented by opt_parent (or opt_parent's parent layer, if it is not a
-   * layer itself). This takes into account the scrolled position of every
+   * represented by opt_ancestor (or opt_ancestor's parent layer, if it is not
+   * a layer itself). This takes into account the scrolled position of every
    * layer in between.
    *
-   * @param {Element=} opt_parent
+   * @param {Element=} opt_ancestor
    * @return {!LayoutRectDef}
    */
-  getScrolledPosition(opt_parent) {
+  getScrolledPosition(opt_ancestor) {
     // Compensate for the fact that the loop below will subtract the current
     // scroll position of this element. But, this element's scroll position
     // doesn't affect it's overall position, only its children.
@@ -698,7 +698,9 @@ export class LayoutElement {
     // Find the layer to stop measuring at. This is so that you can find the
     // relative position of an element from some parent element, say the
     // position of a slide inside a carousel, without any further measurements.
-    let stopAt = opt_parent ? LayoutElement.getParentLayer(opt_parent) : null;
+    let stopAt = opt_ancestor
+      ? LayoutElement.getParentLayer(opt_ancestor)
+      : null;
     for (let l = this; l !== stopAt; l = l.getParentLayer()) {
       const position = l.getOffsetFromParent();
       // Calculate the scrolled position. If the element has offset 200, and
@@ -715,21 +717,24 @@ export class LayoutElement {
 
   /**
    * Returns the absolute offset position of the element relative to the layer
-   * represented by opt_parent (or opt_parent's parent layer, if it is not a
-   * layer itself). This remains constant, regardless of the scrolled position
+   * represented by opt_ancestor (or opt_ancestor's parent layer, if it is not
+   * a layer itself). This remains constant, regardless of the scrolled
+   * position
    * of any layer in between.
    *
-   * @param {Element=} opt_parent
+   * @param {Element=} opt_ancestor
    * @return {!LayoutRectDef}
    */
-  getOffsetPosition(opt_parent) {
+  getOffsetPosition(opt_ancestor) {
     let x = 0;
     let y = 0;
 
     // Find the layer to stop measuring at. This is so that you can find the
     // relative position of an element from some parent element, say the
     // position of a slide inside a carousel, without any further measurements.
-    let stopAt = opt_parent ? LayoutElement.getParentLayer(opt_parent) : null;
+    let stopAt = opt_ancestor
+      ? LayoutElement.getParentLayer(opt_ancestor)
+      : null;
 
     for (let l = this; l !== stopAt; l = l.getParentLayer()) {
       const position = l.getOffsetFromParent();
