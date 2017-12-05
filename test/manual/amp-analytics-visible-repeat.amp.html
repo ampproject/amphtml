@@ -40,16 +40,16 @@
       {
         "transport": {"beacon": false, "xhrpost": false},
         "requests": {
-          "base": "fake.com/ad1?reset=3000"
+          "base": "fake.com/ad1?repeat=3000"
         },
         "triggers": {
-          "reset": {
+          "repeat": {
             "on": "visible",
             "request": "base",
             "visibilitySpec": {
               "selector": "#ad1",
               "visiblePercentageMin": "0",
-              "reset": 3000
+              "repeat": 3000
             }
           }
         }
@@ -61,17 +61,17 @@
       {
         "transport": {"beacon": false, "xhrpost": false},
         "requests": {
-          "base": "fake.com/ad1?reset=200&continoustimemin=2000"
+          "base": "fake.com/ad1?repeat=200&continoustimemin=2000"
         },
         "triggers": {
-          "reset": {
+          "repeat": {
             "on": "visible",
             "request": "base",
             "visibilitySpec": {
               "selector": "#ad1",
               "visiblePercentageMin": "0",
               "continuousTimeMin": 2000,
-              "reset": 200
+              "repeat": 200
             }
           }
         }
@@ -83,16 +83,16 @@
       {
         "transport": {"beacon": false, "xhrpost": false},
         "requests": {
-          "base": "fake.com/ad1?reset=100"
+          "base": "fake.com/ad1?repeat=100"
         },
         "triggers": {
-          "reset": {
+          "repeat": {
             "on": "visible",
             "request": "base",
             "visibilitySpec": {
               "selector": "#ad1",
               "visiblePercentageMin": "0",
-              "reset": 100
+              "repeat": 100
             }
           }
         }
@@ -104,16 +104,16 @@
       {
         "transport": {"beacon": false, "xhrpost": false},
         "requests": {
-          "base": "fake.com/ad2?reset=true"
+          "base": "fake.com/ad2?repeat=true"
         },
         "triggers": {
-          "reset": {
+          "repeat": {
             "on": "visible",
             "request": "base",
             "visibilitySpec": {
               "selector": "#ad2",
               "visiblePercentageMin": "0",
-              "reset": true
+              "repeat": true
             }
           }
         }
