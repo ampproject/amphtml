@@ -3200,23 +3200,21 @@ function validateParentTag(parsedTagSpec, context, validationResult) {
 /**
  * Validates that this tag is an allowed descendant tag type.
  * Registers new descendent constraints if they are set.
+ * @param {!amp.htmlparser.ParsedHtmlTag} encounteredTag
  * @param {!ParsedTagSpec} parsedTagSpec
  * @param {!Context} context
  * @param {!amp.validator.ValidationResult} validationResult
- * @param {!ParsedValidatorRules} parsedRules
  */
 function validateDescendantTags(
-    parsedTagSpec, context, validationResult, parsedRules) {
-  const spec = parsedTagSpec.getSpec();
-  const tagName = context.getTagStack().getCurrent();
+    encounteredTag, parsedTagSpec, context, validationResult) {
+  const tagStack = context.getTagStack();
 
-  for (var ii = 0; ii < context.getTagStack().allowedDescendantsList().length;
-       ++ii) {
-    const allowedDescendantsList =
-        context.getTagStack().allowedDescendantsList()[ii];
+  for (var ii = 0; ii < tagStack.allowedDescendantsList().length; ++ii) {
+    const allowedDescendantsList = tagStack.allowedDescendantsList()[ii];
     // If the tag we're validating is not whitelisted for a specific ancestor,
     // then throw an error.
-    if (!allowedDescendantsList.allowedTags.includes(tagName)) {
+    if (!allowedDescendantsList.allowedTags.includes(
+            encounteredTag.upperName())) {
       if (amp.validator.LIGHT) {
         validationResult.status = amp.validator.ValidationResult.Status.FAIL;
         return;
@@ -3226,9 +3224,11 @@ function validateDescendantTags(
             amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR,
             context.getDocLocator(),
             /* params */
-            [tagName.toLowerCase(),
-             allowedDescendantsList.tagName.toLowerCase()],
-            getTagSpecUrl(spec), validationResult);
+            [
+              encounteredTag.lowerName(),
+              allowedDescendantsList.tagName.toLowerCase()
+            ],
+            getTagSpecUrl(parsedTagSpec), validationResult);
         return;
       }
     }
@@ -3279,10 +3279,6 @@ function validateNoSiblingsAllowedTags(
         getTagSpecUrl(spec), validationResult);
     }
   }
-
-  if (spec.siblingsDisallowed) {
-    tagStack.tellParentNoSiblingsAllowed(spec.tagName, context.getDocLocator());
-  }
 }
 
 /**
@@ -3312,12 +3308,6 @@ function validateLastChildTags(tagSpec, context, validationResult) {
           ],
           tagStack.parentLastChildUrl(), validationResult);
     }
-  }
-
-  if (tagSpec.mandatoryLastChild) {
-    tagStack.tellParentImTheLastChild(
-        getTagSpecName(tagSpec), getTagSpecUrl(tagSpec),
-        context.getDocLocator());
   }
 }
 
@@ -4140,6 +4130,42 @@ class TagSpecDispatch {
   }
 }
 
+/**
+ * Update Global Specs
+ * @param {!ParsedTagSpec} parsedSpec
+ * @param {!amp.htmlparser.ParsedHtmlTag} encounteredTag
+ * @param {!Context} context
+ */
+function UpdateGlobalSpecs(parsedSpec, encounteredTag, context) {
+  const tagSpec = parsedSpec.getSpec();
+  var tagStack = context.getTagStack();
+
+  if (tagSpec.descendantTagList !== null) {
+    let allowedDescendantsForThisTag = [];
+    for (const descendantTagList of context.getRules()
+             .getDescendantTagLists()) {
+      // Get the list matching this tag's descendant tag name.
+      if (tagSpec.descendantTagList === descendantTagList.name) {
+        for (const tag of descendantTagList.allowedTags) {
+          allowedDescendantsForThisTag.push(tag);
+        }
+      }
+    }
+    tagStack.registerDescendantConstraintList(
+        encounteredTag.lowerName(), allowedDescendantsForThisTag);
+  }
+
+  if (tagSpec.siblingsDisallowed) {
+    tagStack.tellParentNoSiblingsAllowed(
+        encounteredTag.lowerName(), context.getDocLocator());
+  }
+
+  if (tagSpec.mandatoryLastChild) {
+    tagStack.tellParentImTheLastChild(
+        getTagSpecName(tagSpec), getTagSpecUrl(tagSpec),
+        context.getDocLocator());
+  }
+}
 
 /**
  * Validates the provided |tagName| with respect to a single tag
@@ -4165,33 +4191,9 @@ function validateTagAgainstSpec(
         parsedRules.getParsedAttrSpecs(), parsedSpec, context, parsedSpec,
         encounteredTag, resultForAttempt);
   }
-  validateDescendantTags(parsedSpec, context, resultForAttempt, parsedRules);
+  validateDescendantTags(encounteredTag, parsedSpec, context, resultForAttempt);
   validateNoSiblingsAllowedTags(parsedSpec, context, resultForAttempt);
   validateLastChildTags(parsedSpec.getSpec(), context, resultForAttempt);
-
-  // Set Descendent Constraint rules.
-  const descendantTagLists = parsedRules.getDescendantTagLists();
-  if (!!descendantTagLists) {
-    const tagSpec = parsedSpec.getSpec();
-
-    if (tagSpec.descendantTagList !== null) {
-      // Find a matching descendant tag list, by name.
-      let allowedDescendantsForThisTag = [];
-      for (const list of descendantTagLists) {
-        goog.asserts.assert(list !== null);
-
-        // Get the lists associated with this tag.
-        if (list.name == tagSpec.descendantTagList) {
-          for (const tag of list.allowedTags) {
-            allowedDescendantsForThisTag.push(tag);
-          }
-        }
-      }
-      context.getTagStack().registerDescendantConstraintList(
-          context.getTagStack().getCurrent(), allowedDescendantsForThisTag);
-    }
-  }
-  // End set Descendent Constraint rules.
 
   if (resultForAttempt.status === amp.validator.ValidationResult.Status.FAIL) {
     if (amp.validator.LIGHT) {
@@ -5175,6 +5177,8 @@ amp.validator.ValidationHandler =
               resultForBestAttempt);
           // Use the dispatched TagSpec validation results, success or fail.
           this.validationResult_.mergeFrom(resultForBestAttempt);
+          UpdateGlobalSpecs(
+              this.rules_.getByTagSpecId(maybeTagSpecId), tag, this.context_);
           return;
         }
       }
@@ -5211,6 +5215,8 @@ amp.validator.ValidationHandler =
     for (const tagSpecId of tagSpecDispatch.allTagSpecs()) {
       validateTagAgainstSpec(
           this.rules_, tagSpecId, this.context_, tag, resultForBestAttempt);
+      UpdateGlobalSpecs(
+          this.rules_.getByTagSpecId(tagSpecId), tag, this.context_);
       if (resultForBestAttempt.status !==
           amp.validator.ValidationResult.Status.FAIL) {
         break;  // Exit early on success
