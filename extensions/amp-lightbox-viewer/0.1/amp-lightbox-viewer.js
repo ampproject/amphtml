@@ -44,6 +44,7 @@ const LightboxControlsModes = {
 };
 
 const DESC_BOX_PADDING_TOP = 50;
+const SWIPE_TO_CLOSE_THRESHOLD = 10;
 
 /**
  * TODO(aghassemi): Make lightbox-manager into a doc-level service.
@@ -500,7 +501,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   onMoveRelease_(deltaY) {
-    if (Math.abs(deltaY) > 10) {
+    if (Math.abs(deltaY) > SWIPE_TO_CLOSE_THRESHOLD) {
       this.close_();
     }
   }

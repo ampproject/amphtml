@@ -122,7 +122,7 @@ export class ImageViewer {
     /** @private {?./gesture.Gestures} */
     this.gestures_ = null;
     /** @private {?function()} */
-    this.panningGestureRecognizer_ = null;
+    this.unlistenOnSwipePan_ = null;
 
     /** @private {?./motion.Motion} */
     this.motion_ = null;
@@ -333,7 +333,7 @@ export class ImageViewer {
       const deltaY = this.viewerBox_.height / 2 - e.data.clientY;
       this.onZoom_(newScale, deltaX, deltaY, true).then(() => {
         return this.onZoomRelease_();
-      }).then(() => this.updatePanningGestureRegistration_());
+      });
     });
 
     this.gestures_.onGesture(TapzoomRecognizer, e => {
@@ -342,8 +342,7 @@ export class ImageViewer {
           e.data.deltaX, e.data.deltaY);
       if (e.data.last) {
         this.onTapZoomRelease_(e.data.centerClientX, e.data.centerClientY,
-            e.data.deltaX, e.data.deltaY, e.data.velocityY, e.data.velocityY)
-            .then(() => this.updatePanningGestureRegistration_());;
+            e.data.deltaX, e.data.deltaY, e.data.velocityY, e.data.velocityY);
       }
     });
 
@@ -353,23 +352,9 @@ export class ImageViewer {
       this.onPinchZoom_(e.data.centerClientX, e.data.centerClientY,
           e.data.deltaX, e.data.deltaY, e.data.dir);
       if (e.data.last) {
-        this.onZoomRelease_().then(() => {
-          this.updatePanningGestureRegistration_();
-        });;
+        this.onZoomRelease_();
       }
     });
-  }
-
-/**
- * Registers and unregisters a panning gesture depending on whether or not the image is zoomed.
- * @private
- */
-  updatePanningGestureRegistration_() {
-    if (this.scale_ <= 1) {
-      this.unregisterPanningGesture_();
-    } else {
-      this.registerPanningGesture_();
-    }
   }
 
   /**
@@ -378,7 +363,7 @@ export class ImageViewer {
    */
   registerPanningGesture_() {
     // Movable.
-    this.panningGestureRecognizer_ = this.gestures_
+    this.unlistenOnSwipePan_ = this.gestures_
       .onGesture(SwipeXYRecognizer, e => {
         this.onMove_(e.data.deltaX, e.data.deltaY, false);
         if (e.data.last) {
@@ -392,9 +377,9 @@ export class ImageViewer {
    * @private
    */
   unregisterPanningGesture_() {
-    if (this.panningGestureRecognizer_) {
-      this.panningGestureRecognizer_();
-      this.panningGestureRecognizer_ = null;
+    if (this.unlistenOnSwipePan_) {
+      this.unlistenOnSwipePan_();
+      this.unlistenOnSwipePan_ = null;
       this.gestures_.removeGesture(SwipeXYRecognizer);
     }
   }
@@ -650,6 +635,12 @@ export class ImageViewer {
     return this.release_().then(() => {
       if (relayout) {
         this.updateSrc_();
+      }
+      // After the scale is updated, also register or unregister panning
+      if (this.scale_ <= 1) {
+        this.unregisterPanningGesture_();
+      } else {
+        this.registerPanningGesture_();
       }
     });
   }
