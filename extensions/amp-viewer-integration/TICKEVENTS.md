@@ -29,7 +29,7 @@ As an example if we executed `perf.tick('label')` we assume we have a counterpar
 | Install Styles      | `is`              | Set when the styles are installed. |
 | End Install Styles  | `e_is`            | Set when the styles are done installing. |
 | Window load event   | `ol`              | Window load event fired.           |
-| Prerender Complete  | `pc`              | The runtime completes prerending a single document. |
+| First viewport ready | `pc`             | Fires when non-ad resources above the fold fired their load event measured from the time the user clicks (So takes pre-rendering into account) |
 | Make Body Visible | `mbv` | Make Body Visible Executes. |
 | On First Visible | `ofv` | The first time the page has been turned visible. |
 | First paint time | `fp` | The time on the first non-blank paint of the page. |
