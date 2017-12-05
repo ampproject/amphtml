@@ -34,6 +34,9 @@
   <amp-iframe width="200" height="200" src="https://example.com"></amp-iframe>
   <amp-iframe width="200" height="200" srcdoc="<p>Hello World</p>"></amp-iframe>
 
+  <!-- Valid: Allowed attributes tests -->
+  <amp-iframe width="200" height="200" src="https://example.com" allow="geolocation; microphone" allowfullscreen allowpaymentrequest allowtransparency frameborder="0" referrerpolicy="origin" resizable sandbox="allow-same-origin allow-scripts" scrolling="no" ></amp-iframe>
+
   <!-- Valid: We allow the src attribute to be bindable -->
   <amp-iframe width="200" height="200" src="https://example.com" [src]="iframeurl"></amp-iframe>
 
