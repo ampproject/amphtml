@@ -56,7 +56,6 @@ const EXCLUDE_INI_LOAD = ['AMP-AD', 'AMP-ANALYTICS', 'AMP-PIXEL'];
  *   html: string,
  *   extensionIds: (?Array<string>|undefined),
  *   fonts: (?Array<string>|undefined),
- *   cspEnabled: boolean,
  * }}
  */
 export let FriendlyIframeSpec;
@@ -147,9 +146,6 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
     iframe.readyState = 'complete';
   };
   const registerViolationListener = () => {
-    if (!spec.cspEnabled) {
-      return;
-    }
     iframe.contentWindow.addEventListener('securitypolicyviolation',
         violationEvent => {
           dev().warn('FIE', 'security policy violation', violationEvent);
@@ -280,10 +276,8 @@ function mergeHtml(spec) {
   }
 
   // Load CSP
-  if (spec.cspEnabled) {
-    result.push('<meta http-equiv=Content-Security-Policy ' +
+  result.push('<meta http-equiv=Content-Security-Policy ' +
       'content="script-src \'none\';object-src \'none\';child-src \'none\'">');
-  }
 
   // Postambule.
   if (ip > 0) {
