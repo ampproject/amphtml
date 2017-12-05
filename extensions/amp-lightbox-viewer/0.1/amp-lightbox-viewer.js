@@ -47,10 +47,8 @@ const LightboxControlsModes = {
 
 const DESC_BOX_PADDING_TOP = 50;
 
-/** @private @const {!../../../src/curve.CurveDef} */
 const ENTER_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
 
-/** @private @const {!../../../src/curve.CurveDef} */
 const EXIT_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
 
 /**
@@ -559,6 +557,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   /**
    * Entry animation to transition in a lightboxable image
    * @param {!Element} sourceImage
+   * @private
    */
   // TODO (cathyxz): make this generalizable to more than just images
   enter_(sourceImage) {
