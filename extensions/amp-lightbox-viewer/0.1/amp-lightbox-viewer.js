@@ -17,6 +17,7 @@
 import {Animation} from '../../../src/animation';
 import {bezierCurve} from '../../../src/curve';
 import {CSS} from '../../../build/amp-lightbox-viewer-0.1.css';
+import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {ImageViewer} from '../../../src/image-viewer';
@@ -30,6 +31,7 @@ import {LightboxManager} from './service/lightbox-manager-impl';
 import {layoutRectFromDomRect} from '../../../src/layout-rect';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
+import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
 
 /** @const */
 const TAG = 'amp-lightbox-viewer';
@@ -46,6 +48,7 @@ const LightboxControlsModes = {
 };
 
 const DESC_BOX_PADDING_TOP = 50;
+const SWIPE_TO_CLOSE_THRESHOLD = 10;
 
 const ENTER_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
 
@@ -488,6 +491,30 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
+   * Set up gestures
+   * @private
+   */
+  setupGestures_() {
+    const gestures = Gestures.get(dev().assertElement(this.carousel_));
+    gestures.onGesture(SwipeYRecognizer, e => {
+      if (e.data.last) {
+        this.onMoveRelease_(e.data.deltaY);
+      }
+    });
+  }
+
+  /**
+   * Closes the lightbox viewer on a tiny upwards swipe.
+   * @param {number} deltaY
+   * @private
+   */
+  onMoveRelease_(deltaY) {
+    if (Math.abs(deltaY) > SWIPE_TO_CLOSE_THRESHOLD) {
+      this.close_();
+    }
+  }
+
+  /**
    * Opens the lightbox-viewer with either the invocation source or
    * the element referenced by the `id` argument.
    * Examples:
@@ -528,6 +555,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
       this.win.document.documentElement.addEventListener(
           'keydown', this.boundHandleKeyboardEvents_);
+
+      this.setupGestures_();
 
       return this.resources_.requireLayout(dev().assertElement(this.carousel_));
     }).then(() => this.openLightboxForElement_(element));
@@ -702,12 +731,14 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.win.document.documentElement.removeEventListener(
         'keydown', this.boundHandleKeyboardEvents_);
 
+    const gestures = Gestures.get(dev().assertElement(this.carousel_));
+    gestures.cleanup();
+
     return this.exit_().then(() => {
       toggle(this.element, false);
       this.getViewport().leaveLightboxMode();
       this.schedulePause(dev().assertElement(this.container_));
     });
-
   }
 
   /**

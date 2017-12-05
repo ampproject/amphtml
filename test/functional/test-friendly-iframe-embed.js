@@ -390,56 +390,56 @@ describe('friendly-iframe-embed', () => {
 
     it('should pre-pend to html', () => {
       const html = mergeHtmlForTesting(spec);
-      expect(html).to.equal('<base href="https://acme.org/embed1"><a></a>');
+      expect(html).to.equal('<base href="https://acme.org/embed1">'
+          + '<meta http-equiv=Content-Security-Policy content='
+          + '"script-src \'none\';object-src \'none\';child-src \'none\'">'
+          + '<a></a>');
     });
 
     it('should insert into head', () => {
       spec.html = '<html><head>head</head><body>body';
       const html = mergeHtmlForTesting(spec);
-      expect(html).to.equal(
-          '<html><head>'
-          + '<base href="https://acme.org/embed1">'
-          + 'head</head><body>body');
+      expect(html).to.equal('<html><head><base href="https://acme.org/embed1">'
+          + '<meta http-equiv=Content-Security-Policy content='
+          + '"script-src \'none\';object-src \'none\';'
+          + 'child-src \'none\'">head</head><body>body');
     });
 
     it('should insert into head w/o html', () => {
       spec.html = '<head>head</head><body>body';
       const html = mergeHtmlForTesting(spec);
-      expect(html).to.equal(
-          '<head>'
-          + '<base href="https://acme.org/embed1">'
-          + 'head</head><body>body');
+      expect(html).to.equal('<head><base href="https://acme.org/embed1">'
+          + '<meta http-equiv=Content-Security-Policy content="'
+          + 'script-src \'none\';object-src \'none\';child-src \'none\'">head'
+          + '</head><body>body');
     });
 
     it('should insert before body', () => {
       spec.html = '<html><body>body';
       const html = mergeHtmlForTesting(spec);
-      expect(html).to.equal(
-          '<html>'
-          + '<base href="https://acme.org/embed1">'
-          + '<body>body');
+      expect(html).to.equal('<html><base href="https://acme.org/embed1">'
+          + '<meta http-equiv=Content-Security-Policy content="script-src '
+          + '\'none\';object-src \'none\';child-src \'none\'"><body>body');
     });
 
     it('should insert before body w/o html', () => {
       spec.html = '<body>body';
       const html = mergeHtmlForTesting(spec);
-      expect(html).to.equal(
-          '<base href="https://acme.org/embed1">'
-          + '<body>body');
+      expect(html).to.equal('<base href="https://acme.org/embed1">'
+          + '<meta http-equiv=Content-Security-Policy content="script-src '
+          + '\'none\';object-src \'none\';child-src \'none\'"><body>body');
     });
 
     it('should insert after html', () => {
       spec.html = '<html>content';
       const html = mergeHtmlForTesting(spec);
-      expect(html).to.equal(
-          '<html>'
-          + '<base href="https://acme.org/embed1">'
-          + 'content');
+      expect(html).to.equal('<html><base href="https://acme.org/embed1">'
+          + '<meta http-equiv=Content-Security-Policy content="script-src '
+          + '\'none\';object-src \'none\';child-src \'none\'">content');
     });
 
     it('should insert CSP', () => {
       spec.html = '<html><head></head><body></body></html>';
-      spec.cspEnabled = true;
       expect(mergeHtmlForTesting(spec)).to.equal(
           '<html><head><base href="https://acme.org/embed1">' +
           '<meta http-equiv=Content-Security-Policy ' +
@@ -504,6 +504,24 @@ describe('friendly-iframe-embed', () => {
         return embed.whenWindowLoaded();
       });
     });
+
+    it('should add violation listener', () => {
+      let eventListenerSpy;
+      const container = {
+        appendChild: child => {
+          document.body.appendChild(child);
+          eventListenerSpy =
+              sandbox.spy(child.contentWindow, 'addEventListener');
+        },
+      };
+      const embedPromise = installFriendlyIframeEmbed(iframe, container, {
+        url: 'https://acme.org/url1',
+        html: '<a id="a1"></a>',
+      });
+      return embedPromise.then(() => {
+        expect(eventListenerSpy).to.be.calledOnce;
+      });
+    });
   });
 
   describe('child document ready polling', () => {
@@ -561,7 +579,9 @@ describe('friendly-iframe-embed', () => {
         },
         removeEventListener: () => {},
       };
-      contentWindow = {};
+      contentWindow = {
+        addEventListener: () => {},
+      };
       contentDocument = {};
       contentBody = {nodeType: 1, style: {}};
       container = {
@@ -595,6 +615,7 @@ describe('friendly-iframe-embed', () => {
     });
 
     it('should poll until ready', () => {
+      iframe.contentWindow = contentWindow;
       const embedPromise = installFriendlyIframeEmbed(iframe, container, {
         url: 'https://acme.org/url1',
         html: '<body></body>',
@@ -643,6 +664,7 @@ describe('friendly-iframe-embed', () => {
     });
 
     it('should stop polling when loaded', () => {
+      iframe.contentWindow = contentWindow;
       const embedPromise = installFriendlyIframeEmbed(iframe, container, {
         url: 'https://acme.org/url1',
         html: '<body></body>',
@@ -657,6 +679,7 @@ describe('friendly-iframe-embed', () => {
     });
 
     it('should stop polling when loading failed', () => {
+      iframe.contentWindow = contentWindow;
       const embedPromise = installFriendlyIframeEmbed(iframe, container, {
         url: 'https://acme.org/url1',
         html: '<body></body>',
