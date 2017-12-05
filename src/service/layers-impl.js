@@ -349,7 +349,7 @@ export class LayoutElement {
      *
      * @private {?LayoutElement|undefined}
      */
-    this.parentlayer_ = undefined;
+    this.parentLayer_ = undefined;
 
     /**
      * Whether to remeasure the element in the next size/position calculation.
@@ -358,7 +358,7 @@ export class LayoutElement {
      *
      * @private {boolean}
      */
-    this.needsremeasure_ = true;
+    this.needsRemeasure_ = true;
 
     /**
      * The current cached size of the element.
@@ -383,7 +383,7 @@ export class LayoutElement {
      *
      * @private {boolean}
      */
-    this.islayer_ = false;
+    this.isLayer_ = false;
 
     /**
      * Whether the layer is a "root" scrolling layer. Root scrollers have
@@ -394,7 +394,7 @@ export class LayoutElement {
      *
      * @private {boolean}
      */
-    this.isrootlayer_ = false;
+    this.isRootLayer_ = false;
 
     /**
      * Whether this layer needs to remeasure its scrollTop/Left position during
@@ -403,13 +403,13 @@ export class LayoutElement {
      *
      * @private {boolean}
      */
-    this.needsscrollremeasure_ = false;
+    this.needsScrollRemeasure_ = false;
 
     /** @private {number} */
-    this.scrollleft_ = 0;
+    this.scrollLeft_ = 0;
 
     /** @private {number} */
-    this.scrolltop_ = 0;
+    this.scrollTop_ = 0;
 
     /**
      * The child LayoutElements of this layer. Only a layer (which means it
