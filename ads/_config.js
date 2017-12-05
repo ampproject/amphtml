@@ -363,6 +363,10 @@ export const adConfig = {
     prefetch: 'https://js.gsspcln.jp/l/amp.js',
   },
 
+  giraff: {
+    renderStartImplemented: true,
+  },
+
   gmossp: {
     prefetch: 'https://cdn.gmossp-sp.jp/ads/amp.js',
   },
