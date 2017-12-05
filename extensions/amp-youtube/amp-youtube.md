@@ -76,6 +76,16 @@ Keys and values will be URI encoded. Keys will be camel cased.
 
 See [YouTube Embedded Player Parameters](https://developers.google.com/youtube/player_parameters) for more parameter options for YouTube.
 
+##### credentials (optional)
+
+Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
+
+* Supported values: `omit`, `include`
+* Default: `include`
+
+If you want to use the [YouTube player in privacy-enhanced mode](http://www.google.com/support/youtube/bin/answer.py?answer=141046), pass the value of `omit`.  
+Usually YouTube sets its cookies when the player is loaded. In privacy-enhanced mode cookies are set when the user has clicked on the player.
+
 ##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.

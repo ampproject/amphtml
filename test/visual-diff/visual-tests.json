@@ -63,6 +63,12 @@
    *   "loading_complete_css": [
    *     ".loading-complete-css-class",
    *     ".another-loading-complete-css-class"
+   *   ],
+   *
+   *   // Experiments that must be enabled via cookies.
+   *   "experiments": [
+   *     "amp-feature-one",
+   *     "amp-feature-two"
    *   ]
    * },
    */
@@ -101,6 +107,10 @@
         ".comic-amp-font-loaded",
         ".comic-amp-bold-font-loaded"
       ]
+    },
+    {
+      "url": "examples/visual-tests/amp-layout/amp-layout.amp.html",
+      "name": "AMP Layout"
     }
   ],
 

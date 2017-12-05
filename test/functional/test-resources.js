@@ -354,6 +354,7 @@ describe('Resources', () => {
       isInViewport: () => false,
       prerenderAllowed: () => true,
       renderOutsideViewport: () => false,
+      idleRenderOutsideViewport: () => false,
       startLayout: () => {},
       applySizesAndMediaQuery: () => {},
     };
@@ -370,6 +371,7 @@ describe('Resources', () => {
       isInViewport: () => false,
       prerenderAllowed: () => true,
       renderOutsideViewport: () => false,
+      idleRenderOutsideViewport: () => false,
       getPriority: () => 1,
       startLayout: () => {},
       layoutScheduled: () => {},
@@ -390,6 +392,28 @@ describe('Resources', () => {
       isInViewport: () => false,
       prerenderAllowed: () => true,
       renderOutsideViewport: () => true,
+      idleRenderOutsideViewport: () => false,
+      getPriority: () => 1,
+      startLayout: () => {},
+      layoutScheduled: () => {},
+      getTaskId: () => 'resource#L',
+      applySizesAndMediaQuery: () => {},
+    };
+    resources.scheduleLayoutOrPreload_(resource, true);
+    expect(resources.queue_.getSize()).to.equal(1);
+    expect(resources.queue_.tasks_[0].forceOutsideViewport).to.be.false;
+  });
+
+  it('should schedule idleRenderOutsideViewport resource when' +
+        ' resource is not visible', () => {
+    const resource = {
+      getState: () => ResourceState.READY_FOR_LAYOUT,
+      isDisplayed: () => true,
+      isFixed: () => false,
+      isInViewport: () => false,
+      prerenderAllowed: () => true,
+      renderOutsideViewport: () => false,
+      idleRenderOutsideViewport: () => true,
       getPriority: () => 1,
       startLayout: () => {},
       layoutScheduled: () => {},
@@ -1313,6 +1337,14 @@ describe('Resources discoverWork', () => {
     expect(resource1.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
   });
 
+  it('should record layout schedule time on the resource element', () => {
+    resources.scheduleLayoutOrPreload_(resource1, true);
+
+    resources.work_();
+    expect(resource1.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+    expect(resource1.element.layoutScheduleTime).to.be.greaterThan(0);
+  });
+
   it('should not schedule resource execution outside viewport', () => {
     resources.scheduleLayoutOrPreload_(resource1, true);
     expect(resources.queue_.getSize()).to.equal(1);
@@ -1322,6 +1354,7 @@ describe('Resources discoverWork', () => {
     const layoutCanceledSpy = sandbox.spy(resource1, 'layoutCanceled');
     sandbox.stub(resource1, 'isInViewport', () => false);
     sandbox.stub(resource1, 'renderOutsideViewport', () => false);
+    sandbox.stub(resource1, 'idleRenderOutsideViewport', () => false);
     resources.work_();
     expect(resources.exec_.getSize()).to.equal(0);
     expect(measureSpy).to.be.calledOnce;
@@ -1337,6 +1370,7 @@ describe('Resources discoverWork', () => {
     const measureSpy = sandbox.spy(resource1, 'measure');
     sandbox.stub(resource1, 'isInViewport', () => false);
     sandbox.stub(resource1, 'renderOutsideViewport', () => false);
+    sandbox.stub(resource1, 'idleRenderOutsideViewport', () => false);
     resources.work_();
     expect(resources.exec_.getSize()).to.equal(1);
     expect(measureSpy).to.be.calledOnce;
@@ -1432,6 +1466,7 @@ describe('Resources discoverWork', () => {
     sandbox.stub(resources, 'schedule_');
     resources.documentReady_ = true;
     resource1.element.isBuilt = () => false;
+    resource2.element.idleRenderOutsideViewport = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
     resource1.build = sandbox.spy();
 
@@ -1447,6 +1482,7 @@ describe('Resources discoverWork', () => {
     resources.documentReady_ = false;
     resource1.element.nextSibling = {};
     resource1.element.isBuilt = () => false;
+    resource2.element.idleRenderOutsideViewport = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
     resource1.build = sandbox.spy();
 
@@ -1454,6 +1490,22 @@ describe('Resources discoverWork', () => {
 
     expect(resource1.build).to.be.calledOnce;
     expect(schedulePassStub).to.not.be.called;
+  });
+
+  it('should layout resource if outside viewport but idle', () => {
+    const schedulePassStub = sandbox.stub(resources, 'schedulePass');
+    resources.documentReady_ = true;
+    resource1.element.nextSibling = {};
+    resource1.element.isBuilt = () => true;
+    resource1.element.renderOutsideViewport = () => false;
+    resource1.element.idleRenderOutsideViewport = () => true;
+    resource2.element.renderOutsideViewport = () => false;
+    resource2.element.idleRenderOutsideViewport = () => false;
+    resource1.state_ = ResourceState.READY_FOR_LAYOUT;
+
+    resources.discoverWork_();
+
+    expect(schedulePassStub).to.be.calledOnce;
   });
 
   describe('getResourcesInRect', () => {
@@ -1551,7 +1603,7 @@ describe('Resources discoverWork', () => {
   });
 });
 
-describes.realWin('Resources scrollHeight', {
+describes.realWin('Resources contentHeight', {
   amp: {
     runtimeOn: true,
   },
@@ -1569,15 +1621,15 @@ describes.realWin('Resources scrollHeight', {
     });
   });
 
-  it('should measure initial scrollHeight', () => {
-    const scrollHeight = resources.viewport_.getScrollHeight();
+  it('should measure initial contentHeight', () => {
+    const contentHeight = resources.viewport_.getContentHeight();
     expect(resources.maybeChangeHeight_).to.equal(false);
     expect(resources.documentReady_).to.equal(true);
-    expect(resources.scrollHeight_).to.equal(scrollHeight);
+    expect(resources.contentHeight_).to.equal(contentHeight);
   });
 
-  it('should send scrollHeight to viewer if height was changed', () => {
-    sandbox.stub(resources.viewport_, 'getScrollHeight', () => {
+  it('should send contentHeight to viewer if height was changed', () => {
+    sandbox.stub(resources.viewport_, 'getContentHeight', () => {
       return 200;
     });
     resources.maybeChangeHeight_ = true;
@@ -1585,33 +1637,33 @@ describes.realWin('Resources scrollHeight', {
     resources.doPass();
 
     expect(resources.maybeChangeHeight_).to.equal(false);
-    expect(resources.scrollHeight_).to.equal(200);
+    expect(resources.contentHeight_).to.equal(200);
     expect(viewerSendMessageStub).to.be.calledOnce;
     expect(viewerSendMessageStub.lastCall.args[0]).to.equal('documentHeight');
     expect(viewerSendMessageStub.lastCall.args[1].height).to.equal(200);
     expect(viewerSendMessageStub.lastCall.args[2]).to.equal(true);
   });
 
-  it('should not send scrollHeight to viewer if height is not changed', () => {
-    const scrollHeight = resources.viewport_.getScrollHeight();
+  it('should not send contentHeight to viewer if height is not changed', () => {
+    const contentHeight = resources.viewport_.getContentHeight();
     resources.maybeChangeHeight_ = true;
 
     resources.doPass();
 
     expect(resources.maybeChangeHeight_).to.equal(false);
-    expect(resources.scrollHeight_).to.equal(scrollHeight);
+    expect(resources.contentHeight_).to.equal(contentHeight);
     expect(viewerSendMessageStub).to.not.be.called;
   });
 
-  it('should send scrollHeight to viewer if viewport resizes', () => {
-    sandbox.stub(resources.viewport_, 'getScrollHeight', () => {
+  it('should send contentHeight to viewer if viewport resizes', () => {
+    sandbox.stub(resources.viewport_, 'getContentHeight', () => {
       return 200;
     });
     resources.viewport_.changed_(/* relayoutAll */ true, /* velocity */ 0);
     resources.doPass();
 
     expect(resources.maybeChangeHeight_).to.equal(false);
-    expect(resources.scrollHeight_).to.equal(200);
+    expect(resources.contentHeight_).to.equal(200);
     expect(viewerSendMessageStub).to.be.calledOnce;
     expect(viewerSendMessageStub.lastCall.args[0]).to.equal('documentHeight');
     expect(viewerSendMessageStub.lastCall.args[1].height).to.equal(200);

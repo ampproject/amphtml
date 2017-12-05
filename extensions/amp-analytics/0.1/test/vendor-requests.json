@@ -11,6 +11,10 @@
    "pageview": "//www.afsanalytics.com/cgi_bin/connect.cgi?usr=xxxxxxxxPauto&js=1&amp=1&title=_title_&url=_canonical_url_&refer=_document_referrer_&resolution=_screen_width_x_screen_height_&color=_screen_color_depth_&Tips=_random_",
    "click":   "//www.afsanalytics.com/cgi_bin/click.cgi?usr=xxxxxxxx&event=click&exit=clicked%20from%20AMP%20page"
   },
+  "alexametrics": {
+    "base": "https://certify-amp.alexametrics.com/atrk.gif?account=$atrk_acct&domain=$domain",
+    "pageview": "https://certify-amp.alexametrics.com/atrk.gif?account=$atrk_acct&domain=$domain&jsv=amp-_amp_version_&frame_height=_viewport_height_&frame_width=_viewport_width_&title=_title_&time=_timestamp_&time_zone_offset=_timezone_&screen_params=_screen_width_x_screen_height_x_screen_color_depth_&ref_url=_document_referrer_&host_url=_source_url_&random_number=_random_&user_cookie=_client_id_&user_cookie_flag=0&user_lang=_browser_language_&amp_doc_url=_ampdoc_url_"
+  },
   "atinternet": {
     "base": "https://$log$domain/hit.xiti?s=$site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_",
     "suffix": "&medium=amp&&ref=_document_referrer_",
