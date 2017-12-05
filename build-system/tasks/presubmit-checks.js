@@ -855,6 +855,7 @@ const forbiddenTermsSrcInclusive = {
       'validator/engine/validator.js',
     ],
   },
+  '\\.matches(?!_)': 'please use matches() helper in src/dom.js',  
 };
 
 // Terms that must appear in a source file.
