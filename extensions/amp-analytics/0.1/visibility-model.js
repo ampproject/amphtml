@@ -80,12 +80,6 @@ export class VisibilityModel {
               `Cannot repeat with interval less than ${MIN_REPEAT_INTERVAL}, ` +
               ' repeat set to false');
         }
-      } else {
-        user().error(
-            'AMP-ANALYTICS',
-            `Repeat interval must be a finite number: ${repeat}, ` +
-          ' repeat set to false');
-      }
     }
 
     /** @private {?function()} */
