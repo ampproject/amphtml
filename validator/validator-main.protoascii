@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 265
+min_validator_revision_required: 269
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 527
+spec_file_revision: 530
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -4028,16 +4028,20 @@ error_specificity {
   specificity: 109
 }
 error_specificity {
-  code: CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS
+  code: CSS_SYNTAX_INVALID_PROPERTY_NOLIST
   specificity: 110
 }
 error_specificity {
-  code: CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME
+  code: CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS
   specificity: 111
 }
 error_specificity {
-  code: CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME
+  code: CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME
   specificity: 112
+}
+error_specificity {
+  code: CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME
+  specificity: 113
 }
 # Error formats
 error_formats {
@@ -4358,6 +4362,10 @@ error_formats {
   code: CSS_SYNTAX_INVALID_PROPERTY
   format: "CSS syntax error in tag '%1' - invalid property '%2'. The only "
           "allowed properties are '%3'."
+}
+error_formats {
+  code: CSS_SYNTAX_INVALID_PROPERTY_NOLIST
+  format: "CSS syntax error in tag '%1' - invalid property '%2'."
 }
 error_formats {
   code: CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS
