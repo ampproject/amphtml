@@ -74,7 +74,7 @@ export class VisibilityModel {
           user().error(
               'AMP-ANALYTICS',
               `Cannot repeat with interval less than ${MIN_REPEAT_INTERVAL}, ` +
-            ' repeat set to false');
+              ' repeat set to false');
         }
       }
     }
