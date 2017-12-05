@@ -836,7 +836,7 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * @param {!object} state
+   * @param {boolean} isLandscape
    * Toggles landscape overlay based on vsync state.
    */
   toggleLandscapeOverlay_(isLandscape) {
