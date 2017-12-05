@@ -122,20 +122,20 @@ module.exports.format = function(logger) {
 };
 
 /**
- * Fail when the stream ends if any AMP validation error(s) occurred.
+ * Fail when the stream ends if for any AMP validation results,
+ * isFailure(ampValidationResult) returns true.
  *
+ * @param {!function(amphtmlValidator.ValidationResult): boolean} isFailure
  * @return {!stream} gulp file stream
  */
-module.exports.failAfterError = function() {
-
+function failAfter(isFailure) {
   let failedFiles = 0;
 
   function collectFailedFiles(file, encoding, callback) {
     if (file.isNull() || !file.ampValidationResult) {
       return callback(null, file);
     }
-    const status = file.ampValidationResult.status;
-    if (status === STATUS_FAIL || status === STATUS_UNKNOWN) {
+    if (isFailure(file.ampValidationResult)) {
       failedFiles++;
     }
     return callback(null, file);
@@ -150,4 +150,30 @@ module.exports.failAfterError = function() {
   }
 
   return through.obj(collectFailedFiles, failOnError);
+}
+
+/**
+ * Fail when the stream ends if any AMP validation error(s) occurred.
+ *
+ * @return {!stream} gulp file stream
+ */
+module.exports.failAfterError = function() {
+  return failAfter(function(ampValidationResult) {
+    return ampValidationResult.status === STATUS_FAIL ||
+        ampValidationResult.status === STATUS_UNKNOWN;
+  });
+};
+
+/**
+ * Fail when the stream ends if any AMP validation warning(s) or
+ * error(s) occurred.
+ *
+ * @return {!stream} gulp file stream
+ */
+module.exports.failAfterWarningOrError = function() {
+  return failAfter(function(ampValidationResult) {
+    return ampValidationResult.errors.length > 0 ||
+        ampValidationResult.status === STATUS_FAIL ||
+        ampValidationResult.status === STATUS_UNKNOWN;
+  });
 };
