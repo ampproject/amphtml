@@ -1020,9 +1020,7 @@ class ReferencePointMatcher {
       // p.tagSpecName here is actually a number, which was replaced in
       // validator_gen_js.py from the name string, so this works.
       const tagSpecId = /** @type {!number} */ (p.tagSpecName);
-      validateTagAgainstSpec(
-          this.parsedValidatorRules_, tagSpecId, context, tag,
-          resultForBestAttempt);
+      validateTagAgainstSpec(tagSpecId, context, tag, resultForBestAttempt);
       if (resultForBestAttempt.status !==
           amp.validator.ValidationResult.Status.FAIL) {
         this.referencePointsMatched_.push(tagSpecId);
@@ -3679,7 +3677,6 @@ function validateAttributeInExtension(tagSpec, context, attr, result) {
  * tag specification. All mandatory attributes must appear. Only attributes
  * explicitly mentioned by this tag spec may appear.
  * Returns true iff the validation is successful.
- * @param {!ParsedAttrSpecs} parsedAttrSpecs
  * @param {!ParsedTagSpec} parsedTagSpec
  * @param {!Context} context
  * @param {!ParsedTagSpec} parsedSpec
@@ -3687,8 +3684,7 @@ function validateAttributeInExtension(tagSpec, context, attr, result) {
  * @param {!amp.validator.ValidationResult} result
  */
 function validateAttributes(
-    parsedAttrSpecs, parsedTagSpec, context, parsedSpec, encounteredTag,
-    result) {
+    parsedTagSpec, context, parsedSpec, encounteredTag, result) {
   const spec = parsedTagSpec.getSpec();
   if (spec.ampLayout !== null) {
     validateLayout(parsedTagSpec, context, encounteredTag, result);
@@ -3774,7 +3770,8 @@ function validateAttributes(
       attrspecsValidated[attrId] = 0;
       continue;
     }
-    const parsedAttrSpec = parsedAttrSpecs.getByAttrSpecId(attrId);
+    const parsedAttrSpec =
+        context.getRules().getParsedAttrSpecs().getByAttrSpecId(attrId);
     const attrSpec = parsedAttrSpec.getSpec();
     if (!amp.validator.LIGHT && attrSpec.deprecation !== null) {
       context.addWarning(
@@ -3903,7 +3900,8 @@ function validateAttributes(
               context.getDocLocator(),
               /* params */
               [
-                parsedAttrSpecs.getNameByAttrSpecId(attrId),
+                context.getRules().getParsedAttrSpecs().getNameByAttrSpecId(
+                    attrId),
                 getTagSpecName(spec), attrSpec.name
               ],
               getTagSpecUrl(spec), result);
@@ -3922,7 +3920,8 @@ function validateAttributes(
             context.getDocLocator(),
             /* params */
             [
-              parsedAttrSpecs.getNameByAttrSpecId(mandatory),
+              context.getRules().getParsedAttrSpecs().getNameByAttrSpecId(
+                  mandatory),
               getTagSpecName(spec)
             ],
             getTagSpecUrl(spec), result);
@@ -4101,17 +4100,16 @@ function UpdateGlobalSpecs(parsedSpec, encounteredTag, context) {
 /**
  * Validates the provided |tagName| with respect to a single tag
  * specification.
- * @param {!ParsedValidatorRules} parsedRules
  * @param {number} tagSpecId
  * @param {!Context} context
  * @param {!amp.htmlparser.ParsedHtmlTag} encounteredTag
  * @param {!amp.validator.ValidationResult} resultForBestAttempt
  */
 function validateTagAgainstSpec(
-    parsedRules, tagSpecId, context, encounteredTag, resultForBestAttempt) {
+    tagSpecId, context, encounteredTag, resultForBestAttempt) {
   let resultForAttempt = new amp.validator.ValidationResult();
   resultForAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
-  const parsedSpec = parsedRules.getByTagSpecId(tagSpecId);
+  const parsedSpec = context.getRules().getByTagSpecId(tagSpecId);
   validateParentTag(parsedSpec, context, resultForAttempt);
   validateAncestorTags(parsedSpec, context, resultForAttempt);
   // Only validate attributes if we haven't yet found any errors. The
@@ -4119,8 +4117,7 @@ function validateTagAgainstSpec(
   // about attributes.
   if (resultForAttempt.status != amp.validator.ValidationResult.Status.FAIL) {
     validateAttributes(
-        parsedRules.getParsedAttrSpecs(), parsedSpec, context, parsedSpec,
-        encounteredTag, resultForAttempt);
+        parsedSpec, context, parsedSpec, encounteredTag, resultForAttempt);
   }
   validateDescendantTags(encounteredTag, parsedSpec, context, resultForAttempt);
   validateNoSiblingsAllowedTags(parsedSpec, context, resultForAttempt);
@@ -4280,7 +4277,7 @@ function validateTagAgainstSpec(
       }
     } else {
       context.setReferencePointMatcher(new ReferencePointMatcher(
-          parsedRules, parsedSpec.getReferencePoints()));
+          context.getRules(), parsedSpec.getReferencePoints()));
     }
   }
 }
@@ -5105,8 +5102,7 @@ amp.validator.ValidationHandler =
             this.context_.getTagStack().parentTagName());
         if (maybeTagSpecId !== -1) {
           validateTagAgainstSpec(
-              this.rules_, maybeTagSpecId, this.context_, tag,
-              resultForBestAttempt);
+              maybeTagSpecId, this.context_, tag, resultForBestAttempt);
           // Use the dispatched TagSpec validation results, success or fail.
           this.validationResult_.mergeFrom(resultForBestAttempt);
           UpdateGlobalSpecs(
@@ -5144,7 +5140,7 @@ amp.validator.ValidationHandler =
     // Validate against all tagspecs.
     for (const tagSpecId of tagSpecDispatch.allTagSpecs()) {
       validateTagAgainstSpec(
-          this.rules_, tagSpecId, this.context_, tag, resultForBestAttempt);
+          tagSpecId, this.context_, tag, resultForBestAttempt);
       UpdateGlobalSpecs(
           this.rules_.getByTagSpecId(tagSpecId), tag, this.context_);
       if (resultForBestAttempt.status !==
