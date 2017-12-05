@@ -838,19 +838,19 @@ class ChildTagMatcher {
   }
 
   /**
+   * @param {!amp.htmlparser.ParsedHtmlTag} encounteredTag
    * @param {!Context} context
    * @param {!amp.validator.ValidationResult} result
    */
-  matchChildTagName(context, result) {
+  matchChildTagName(encounteredTag, context, result) {
     if (!this.isEnabled()) {
       return;
     }
-    const tagName = context.getTagStack().getCurrent();
     const childTags = this.parentSpec_.childTags;
     this.numChildTagsSeen_++;  // Increment this first to allow early exit.
     if (childTags.childTagNameOneof.length > 0) {
       const names = childTags.childTagNameOneof;
-      if (names.indexOf(tagName) === -1) {
+      if (names.indexOf(encounteredTag.upperName()) === -1) {
         if (!amp.validator.LIGHT) {
           const allowedNames = '[\'' + names.join('\', \'') + '\']';
           context.addError(
@@ -859,7 +859,7 @@ class ChildTagMatcher {
               context.getDocLocator(),
               /* params */
               [
-                tagName.toLowerCase(), getTagSpecName(this.parentSpec_),
+                encounteredTag.lowerName(), getTagSpecName(this.parentSpec_),
                 allowedNames.toLowerCase()
               ],
               getTagSpecUrl(this.parentSpec_), result);
@@ -872,7 +872,7 @@ class ChildTagMatcher {
     if (childTags.firstChildTagNameOneof.length > 0 &&
         (this.numChildTagsSeen_ - 1) === 0) {
       const names = childTags.firstChildTagNameOneof;
-      if (names.indexOf(tagName) === -1) {
+      if (names.indexOf(encounteredTag.upperName()) === -1) {
         if (!amp.validator.LIGHT) {
           const allowedNames = '[\'' + names.join('\', \'') + '\']';
           context.addError(
@@ -882,7 +882,7 @@ class ChildTagMatcher {
               context.getDocLocator(),
               /* params */
               [
-                tagName.toLowerCase(), getTagSpecName(this.parentSpec_),
+                encounteredTag.lowerName(), getTagSpecName(this.parentSpec_),
                 allowedNames.toLowerCase()
               ],
               getTagSpecUrl(this.parentSpec_), result);
@@ -1212,6 +1212,11 @@ class TagStack {
      */
     this.stack_ = [];
 
+    // // We always have one element on the stack. This simplifies certain
+    // checks, for example, allowing us to guarantee we can always return a
+    // value for parent().
+    this.stack_.push(this.createNewTagStackEntry('$ROOT'));
+
     /**
      * CdataMatcher for the current top stack entry. We only ever track cdata
      * for the immediate top of the stack, so we don't need to store a pointer
@@ -1266,14 +1271,14 @@ class TagStack {
    * Upon exiting a tag, validation for the current child tag matcher is
    * triggered, e.g. for checking that the tag had some specified number
    * of children.
-   * @param {string} tagName
    * @param {!Context} context
    * @param {!amp.validator.ValidationResult} result
    */
-  exitTag(tagName, context, result) {
-    this.cdataMatcher_ = null;
-    this.unRegisterDescendantConstraintList();
+  exitTag(context, result) {
+    goog.asserts.assert(this.stack_.length > 0, 'Exiting an empty tag stack.');
 
+    this.unRegisterDescendantConstraintList();
+    this.cdataMatcher_ = null;
     const topStackEntry = this.stack_.pop();
     if (topStackEntry.childTagMatcher !== null) {
       topStackEntry.childTagMatcher.exitTag(context, result);
@@ -1281,22 +1286,30 @@ class TagStack {
   }
 
   /**
+   * Alias to the last element on the tag stack.
+   * @return {TagStackEntry}
+   * @private
+   */
+  back_() {
+    goog.asserts.assert(this.stack_.length > 0, 'Exiting an empty tag stack.');
+    return this.stack_[this.stack_.length - 1];
+  }
+
+
+  /**
    * Sets the child tag matcher for the tag which is currently on the
    * stack. This gets called shortly after EnterTag for a given tag.
    * @param {?ChildTagMatcher} matcher
    */
   setChildTagMatcher(matcher) {
-    this.stack_[this.stack_.length - 1].childTagMatcher = matcher;
+    this.back_().childTagMatcher = matcher;
   }
 
   /**
    * @param {boolean} value
    */
   setHasDescendantConstraintLists(value) {
-    if (this.stack_.length <= 0) {
-      return;
-    }
-    this.stack_[this.stack_.length - 1].hasDescendantConstraintLists = value;
+    this.back_().hasDescendantConstraintLists = value;
   }
 
   /**
@@ -1323,69 +1336,54 @@ class TagStack {
    */
   setReferencePointMatcher(matcher) {
     if (!matcher.parsedReferencePoints_.empty())
-      this.stack_[this.stack_.length - 1].referencePointMatcher = matcher;
+      this.back_().referencePointMatcher = matcher;
   }
 
   /**
    * @return {?ReferencePointMatcher}
    */
   currentReferencePointMatcher() {
-    return this.stack_[this.stack_.length - 1].referencePointMatcher;
+    return this.back_().referencePointMatcher;
   }
 
   /**
    * @return {?ReferencePointMatcher}
    */
   parentReferencePointMatcher() {
-    if (this.stack_.length < 2) {
-      return null;
-    }
-    return this.stack_[this.stack_.length - 2].referencePointMatcher;
+    return this.parentStackEntry_().referencePointMatcher;
   }
 
   /**
    * This method is called as we're visiting a tag; so the matcher we
    * need here is the one provided/specified for the tag parent.
+   * @param {!amp.htmlparser.ParsedHtmlTag} encounteredTag
    * @param {!Context} context
    * @param {!amp.validator.ValidationResult} result
    */
-  matchChildTagName(context, result) {
-    if (this.stack_.length < 2) {
-      return;
-    }
-    const matcher = this.stack_[this.stack_.length - 2].childTagMatcher;
+  matchChildTagName(encounteredTag, context, result) {
+    const matcher = this.parentStackEntry_().childTagMatcher;
     if (matcher !== null) {
-      matcher.matchChildTagName(context, result);
+      matcher.matchChildTagName(encounteredTag, context, result);
     }
   }
 
   /**
-   * The name of the current tag.
-   * @return {string}
-   */
-  getCurrent() {
-    goog.asserts.assert(this.stack_.length > 0, 'Empty tag stack.');
-    return this.stack_[this.stack_.length - 1].tagName;
-  };
-
-  /**
    * The parent of the current stack entry.
-   * @return {?TagStackEntry}
+   * @return {TagStackEntry}
+   * @private
    */
-  getParentStackEntry() {
-    if (this.stack_.length >= 2) {
-      return this.stack_[this.stack_.length - 2];
-    }
-    return null;
+  parentStackEntry_() {
+    goog.asserts.assert(
+        this.stack_.length >= 2, 'Parent of empty $ROOT tag requested.');
+    return this.stack_[this.stack_.length - 2];
   }
 
   /**
    * The name of the parent of the current tag.
    * @return {string}
    */
-  getParent() {
-    const parent = this.getParentStackEntry();
-    return (parent === null) ? '$ROOT' : parent.tagName;
+  parentTagName() {
+    return this.parentStackEntry_().tagName;
   }
 
   /**
@@ -1394,9 +1392,7 @@ class TagStack {
    * @return {number}
    */
   numOfChildrenForParent() {
-    const parent = this.getParentStackEntry();
-    if (parent !== null) return parent.numOfChildren;
-    return 0;
+    return this.parentStackEntry_().numOfChildren;
   }
 
   /**
@@ -1405,17 +1401,14 @@ class TagStack {
    * @return {number}
    */
   numOfSiblings() {
-    const parent = this.getParentStackEntry();
-    if (parent !== null) return parent.numOfChildren - 1;
-    return 0;
+    return this.parentStackEntry_().numOfChildren - 1;
   }
 
   /**
    * Increases the Parent tag's child count.
    */
   increaseChildCounterForParent() {
-    const parent = this.getParentStackEntry();
-    if (parent !== null) ++parent.numOfChildren;
+    this.parentStackEntry_().numOfChildren++;
   }
 
   /**
@@ -1426,12 +1419,9 @@ class TagStack {
    *  current stack entry appears.
    */
   tellParentNoSiblingsAllowed(tagName, docLocator) {
-    const parent = this.getParentStackEntry();
-    if (parent !== null) {
-      parent.onlyChildTagName = tagName;
-      parent.onlyChildErrorLineCol =
-          new LineCol(docLocator.getLine(), docLocator.getCol());
-    }
+    this.parentStackEntry_().onlyChildTagName = tagName;
+    this.parentStackEntry_().onlyChildErrorLineCol =
+        new LineCol(docLocator.getLine(), docLocator.getCol());
   }
 
   /**
@@ -1439,9 +1429,7 @@ class TagStack {
    * rule.
    */
   parentOnlyChildErrorLineCol() {
-    const parent = this.getParentStackEntry();
-    if (parent !== null) return parent.onlyChildErrorLineCol;
-    return null;
+    return this.parentStackEntry_().onlyChildErrorLineCol;
   }
 
   /**
@@ -1449,9 +1437,7 @@ class TagStack {
    * rule.
    */
   parentOnlyChildTagName() {
-    const parent = this.getParentStackEntry();
-    if (parent !== null) return parent.onlyChildTagName;
-    return '';
+    return this.parentStackEntry_().onlyChildTagName;
   }
 
   /**
@@ -1471,14 +1457,12 @@ class TagStack {
    *  current stack entry appears.
    */
   tellParentImTheLastChild(tagName, url, docLocator) {
-    const parent = this.getParentStackEntry();
-    if (parent !== null) {
-      parent.lastChildTagName = tagName;
-      parent.lastChildErrorLineCol =
-          new LineCol(docLocator.getLine(), docLocator.getCol());
-      parent.lastChildSiblingCount = parent.numOfChildren;
-      parent.lastChildUrl = url;
-    }
+    this.parentStackEntry_().lastChildTagName = tagName;
+    this.parentStackEntry_().lastChildErrorLineCol =
+        new LineCol(docLocator.getLine(), docLocator.getCol());
+    this.parentStackEntry_().lastChildSiblingCount =
+        this.parentStackEntry_().numOfChildren;
+    this.parentStackEntry_().lastChildUrl = url;
   }
 
   /**
@@ -1486,36 +1470,28 @@ class TagStack {
    * encountered.
    */
   parentLastChildSiblingCount() {
-    const parent = this.getParentStackEntry();
-    if (parent !== null) return parent.lastChildSiblingCount;
-    return -1;
+    return this.parentStackEntry_().lastChildSiblingCount;
   }
 
   /**
    * @return {LineCol} The LineCol of the tag that set the 'last child' rule.
    */
   parentLastChildErrorLineCol() {
-    const parent = this.getParentStackEntry();
-    if (parent !== null) return parent.lastChildErrorLineCol;
-    return null;
+    return this.parentStackEntry_().lastChildErrorLineCol;
   }
 
   /**
    * @return {string} The name of the tag with the 'last child' rule.
    */
   parentLastChildTagName() {
-    const parent = this.getParentStackEntry();
-    if (parent !== null) return parent.lastChildTagName;
-    return '';
+    return this.parentStackEntry_().lastChildTagName;
   }
 
   /**
    * @return {string} The spec url of the last child.
    */
   parentLastChildUrl() {
-    const parent = this.getParentStackEntry();
-    if (parent !== null) return parent.lastChildUrl;
-    return '';
+    return this.parentStackEntry_().lastChildUrl;
   }
 
   /**
@@ -1532,8 +1508,9 @@ class TagStack {
    * @return {boolean}
    */
   hasAncestor(ancestor) {
-    // Skip the last element, which is the current tag.
-    for (let i = 0; i < this.stack_.length - 1; ++i) {
+    // Skip the last element, which is the current tag, and the first element,
+    // which is "$ROOT".
+    for (let i = 1; i < this.stack_.length - 1; ++i) {
       if (this.stack_[i].tagName === ancestor) {
         return true;
       }
@@ -1557,10 +1534,7 @@ class TagStack {
    * Else false.
    */
   hasDescendantConstraintLists() {
-    if (this.stack_.length <= 0) {
-      return false;
-    }
-    return this.stack_[this.stack_.length - 1].hasDescendantConstraintLists;
+    return this.back_().hasDescendantConstraintLists;
   }
 
   /**
@@ -3177,7 +3151,7 @@ function attrValueHasPartialsTemplateSyntax(value) {
 function validateParentTag(parsedTagSpec, context, validationResult) {
   const spec = parsedTagSpec.getSpec();
   if (spec.mandatoryParent !== null &&
-      spec.mandatoryParent !== context.getTagStack().getParent()) {
+      spec.mandatoryParent !== context.getTagStack().parentTagName()) {
     if (amp.validator.LIGHT) {
       validationResult.status = amp.validator.ValidationResult.Status.FAIL;
       return;
@@ -3190,7 +3164,8 @@ function validateParentTag(parsedTagSpec, context, validationResult) {
         context.getDocLocator(),
         /* params */
         [
-          getTagSpecName(spec), context.getTagStack().getParent().toLowerCase(),
+          getTagSpecName(spec),
+          context.getTagStack().parentTagName().toLowerCase(),
           spec.mandatoryParent.toLowerCase()
         ],
         getTagSpecUrl(spec), validationResult);
@@ -3252,12 +3227,12 @@ function validateNoSiblingsAllowedTags(
       return;
     } else {
       context.addError(
-        amp.validator.ValidationError.Severity.ERROR,
-        amp.validator.ValidationError.Code.TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS,
-        context.getDocLocator(),
-        /* params */
-        [spec.tagName.toLowerCase(), tagStack.getParent().toLowerCase()],
-        getTagSpecUrl(spec), validationResult);
+          amp.validator.ValidationError.Severity.ERROR,
+          amp.validator.ValidationError.Code.TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS,
+          context.getDocLocator(),
+          /* params */
+          [spec.tagName.toLowerCase(), tagStack.parentTagName().toLowerCase()],
+          getTagSpecUrl(spec), validationResult);
     }
   }
 
@@ -3268,15 +3243,15 @@ function validateNoSiblingsAllowedTags(
       return;
     } else {
       context.addError(
-        amp.validator.ValidationError.Severity.ERROR,
-        amp.validator.ValidationError.Code.TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS,
-        tagStack.parentOnlyChildErrorLineCol(),
-        /* params */
-        [
-          tagStack.parentOnlyChildTagName().toLowerCase(),
-          tagStack.getParent().toLowerCase()
-        ],
-        getTagSpecUrl(spec), validationResult);
+          amp.validator.ValidationError.Severity.ERROR,
+          amp.validator.ValidationError.Code.TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS,
+          tagStack.parentOnlyChildErrorLineCol(),
+          /* params */
+          [
+            tagStack.parentOnlyChildTagName().toLowerCase(),
+            tagStack.parentTagName().toLowerCase()
+          ],
+          getTagSpecUrl(spec), validationResult);
     }
   }
 }
@@ -3304,7 +3279,7 @@ function validateLastChildTags(tagSpec, context, validationResult) {
           /* params */
           [
             tagStack.parentLastChildTagName().toLowerCase(),
-            tagStack.getParent().toLowerCase()
+            tagStack.parentTagName().toLowerCase()
           ],
           tagStack.parentLastChildUrl(), validationResult);
     }
@@ -5051,37 +5026,38 @@ amp.validator.ValidationHandler =
 
   /**
    * Callback for a start HTML tag.
-   * @param {!amp.htmlparser.ParsedHtmlTag} tag
+   * @param {!amp.htmlparser.ParsedHtmlTag} encounteredTag
    * @override
    */
-  startTag(tag) {
+  startTag(encounteredTag) {
     this.context_.getTagStack().enterTag(
-        tag.upperName(), this.context_, this.validationResult_);
+        encounteredTag.upperName(), this.context_, this.validationResult_);
     /** @type {?string} */
-    let maybeDuplicateAttrName = tag.hasDuplicateAttrs();
+    let maybeDuplicateAttrName = encounteredTag.hasDuplicateAttrs();
     if (maybeDuplicateAttrName !== null) {
       if (!amp.validator.LIGHT) {
         this.context_.addError(
             amp.validator.ValidationError.Severity.WARNING,
             amp.validator.ValidationError.Code.DUPLICATE_ATTRIBUTE,
             this.context_.getDocLocator(),
-            /* params */[tag.lowerName(), maybeDuplicateAttrName],
+            /* params */[encounteredTag.lowerName(), maybeDuplicateAttrName],
             /* specUrl */ '', this.validationResult_);
       }
-      tag.dedupeAttrs();
+      encounteredTag.dedupeAttrs();
     }
     const referencePointMatcher =
         this.context_.getTagStack().parentReferencePointMatcher();
     if (referencePointMatcher !== null) {
-      referencePointMatcher.match(tag, this.context_, this.validationResult_);
+      referencePointMatcher.match(
+          encounteredTag, this.context_, this.validationResult_);
     }
-    if ('BODY' === tag.upperName()) {
-      this.context_.recordBodyTag(tag.attrs());
+    if ('BODY' === encounteredTag.upperName()) {
+      this.context_.recordBodyTag(encounteredTag.attrs());
       this.emitMissingExtensionErrors();
     }
-    this.validateTag(tag);
+    this.validateTag(encounteredTag);
     this.context_.getTagStack().matchChildTagName(
-        this.context_, this.validationResult_);
+        encounteredTag, this.context_, this.validationResult_);
   }
 
   /**
@@ -5094,8 +5070,7 @@ amp.validator.ValidationHandler =
     if (matcher !== null) {
       matcher.exitParentTag(this.context_, this.validationResult_);
     }
-    this.context_.getTagStack().exitTag(
-        tag.upperName(), this.context_, this.validationResult_);
+    this.context_.getTagStack().exitTag(this.context_, this.validationResult_);
   };
 
   /**
@@ -5170,7 +5145,8 @@ amp.validator.ValidationHandler =
             // Attribute values are case-sensitive by default, but we
             // match dispatch keys in a case-insensitive manner and then
             // validate using whatever the tagspec requests.
-            attr.value.toLowerCase(), this.context_.getTagStack().getParent());
+            attr.value.toLowerCase(),
+            this.context_.getTagStack().parentTagName());
         if (maybeTagSpecId !== -1) {
           validateTagAgainstSpec(
               this.rules_, maybeTagSpecId, this.context_, tag,
