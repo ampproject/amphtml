@@ -197,7 +197,7 @@ export class Resources {
     this.vsyncScheduled_ = false;
 
     /** @private {number} */
-    this.scrollHeight_ = 0;
+    this.contentHeight_ = 0;
 
     /** @private {boolean} */
     this.maybeChangeHeight_ = false;
@@ -1035,10 +1035,10 @@ export class Resources {
         'linkRels': Services.documentInfoForDoc(this.ampdoc).linkRels,
       }), /* cancelUnsent */true);
 
-      this.scrollHeight_ = this.viewport_.getScrollHeight();
+      this.contentHeight_ = this.viewport_.getContentHeight();
       this.viewer_.sendMessage('documentHeight',
-          dict({'height': this.scrollHeight_}), /* cancelUnsent */true);
-      dev().fine(TAG_, 'document height on load: ' + this.scrollHeight_);
+          dict({'height': this.contentHeight_}), /* cancelUnsent */true);
+      dev().fine(TAG_, 'document height on load: ' + this.contentHeight_);
     }
 
     const viewportSize = this.viewport_.getSize();
@@ -1065,12 +1065,12 @@ export class Resources {
     if (this.maybeChangeHeight_) {
       this.maybeChangeHeight_ = false;
       this.vsync_.measure(() => {
-        const measuredScrollHeight = this.viewport_.getScrollHeight();
-        if (measuredScrollHeight != this.scrollHeight_) {
+        const measuredContentHeight = this.viewport_.getContentHeight();
+        if (measuredContentHeight != this.contentHeight_) {
           this.viewer_.sendMessage('documentHeight',
-              dict({'height': measuredScrollHeight}), /* cancelUnsent */true);
-          this.scrollHeight_ = measuredScrollHeight;
-          dev().fine(TAG_, 'document height changed: ' + this.scrollHeight_);
+              dict({'height': measuredContentHeight}), /* cancelUnsent */true);
+          this.contentHeight_ = measuredContentHeight;
+          dev().fine(TAG_, 'document height changed: ' + this.contentHeight_);
         }
       });
     }
@@ -1448,23 +1448,33 @@ export class Resources {
       }
     }
 
-    // Phase 5: Idle layout: layout more if we are otherwise not doing much.
-    // TODO(dvoytenko): document/estimate IDLE timeouts and other constants
     if (this.visible_ &&
           this.exec_.getSize() == 0 &&
           this.queue_.getSize() == 0 &&
           now > this.exec_.getLastDequeueTime() + 5000) {
+      // Phase 5: Idle Render Outside Viewport layout: layout up to 4 items
+      // with idleRenderOutsideViewport true
       let idleScheduledCount = 0;
-      for (let i = 0; i < this.resources_.length; i++) {
+      for (let i = 0; i < this.resources_.length && idleScheduledCount < 4;
+          i++) {
         const r = this.resources_[i];
         if (r.getState() == ResourceState.READY_FOR_LAYOUT &&
-                !r.hasOwner() && r.isDisplayed()) {
+            !r.hasOwner() && r.isDisplayed() && r.idleRenderOutsideViewport()) {
+          dev().fine(TAG_, 'idleRenderOutsideViewport layout:', r.debugid);
+          this.scheduleLayoutOrPreload_(r, /* layout */ false);
+          idleScheduledCount++;
+        }
+      }
+      // Phase 6: Idle layout: layout more if we are otherwise not doing much.
+      // TODO(dvoytenko): document/estimate IDLE timeouts and other constants
+      for (let i = 0; i < this.resources_.length && idleScheduledCount < 4;
+          i++) {
+        const r = this.resources_[i];
+        if (r.getState() == ResourceState.READY_FOR_LAYOUT &&
+            !r.hasOwner() && r.isDisplayed()) {
           dev().fine(TAG_, 'idle layout:', r.debugid);
           this.scheduleLayoutOrPreload_(r, /* layout */ false);
           idleScheduledCount++;
-          if (idleScheduledCount >= 4) {
-            break;
-          }
         }
       }
     }
@@ -1793,7 +1803,8 @@ export class Resources {
     // The element has to be in its rendering corridor.
     if (!forceOutsideViewport &&
         !resource.isInViewport() &&
-        !resource.renderOutsideViewport()) {
+        !resource.renderOutsideViewport() &&
+        !resource.idleRenderOutsideViewport()) {
       return false;
     }
 
@@ -1912,7 +1923,7 @@ export class Resources {
       this.queue_.enqueue(task);
       this.schedulePass(this.calcTaskTimeout_(task));
     }
-    task.resource.layoutScheduled();
+    task.resource.layoutScheduled(task.scheduleTime);
   }
 
   /**

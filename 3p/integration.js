@@ -66,8 +66,10 @@ import {github} from './github';
 import {reddit} from './reddit';
 import {twitter} from './twitter';
 
-// 3P Ad Networks - please keep in alphabetic order
 import {_ping_} from '../ads/_ping_';
+
+// 3P Ad Networks - please keep in alphabetic order
+import {_24smi} from '../ads/24smi';
 import {a8} from '../ads/a8';
 import {a9} from '../ads/a9';
 import {accesstrade} from '../ads/accesstrade';
@@ -105,6 +107,7 @@ import {capirs} from '../ads/capirs';
 import {caprofitx} from '../ads/caprofitx';
 import {chargeads} from '../ads/chargeads';
 import {colombia} from '../ads/colombia';
+import {connatix} from '../ads/connatix';
 import {contentad} from '../ads/contentad';
 import {criteo} from '../ads/criteo';
 import {csa} from '../ads/google/csa';
@@ -124,6 +127,7 @@ import {flite} from '../ads/flite';
 import {fluct} from '../ads/fluct';
 import {fusion} from '../ads/fusion';
 import {genieessp} from '../ads/genieessp';
+import {giraff} from '../ads/giraff';
 import {gmossp} from '../ads/gmossp';
 import {gumgum} from '../ads/gumgum';
 import {holder} from '../ads/holder';
@@ -139,6 +143,7 @@ import {kargo} from '../ads/kargo';
 import {kiosked} from '../ads/kiosked';
 import {kixer} from '../ads/kixer';
 import {ligatus} from '../ads/ligatus';
+import {lockerdome} from '../ads/lockerdome';
 import {loka} from '../ads/loka';
 import {mads} from '../ads/mads';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
@@ -208,6 +213,7 @@ import {zucks} from '../ads/zucks';
  */
 const AMP_EMBED_ALLOWED = {
   _ping_: true,
+  '24smi': true,
   bringhub: true,
   dable: true,
   engageya: true,
@@ -236,6 +242,7 @@ if (getMode().test || getMode().localDev) {
 }
 
 // Keep the list in alphabetic order
+register('24smi', _24smi);
 register('a8', a8);
 register('a9', a9);
 register('accesstrade', accesstrade);
@@ -273,6 +280,7 @@ register('capirs', capirs);
 register('caprofitx', caprofitx);
 register('chargeads', chargeads);
 register('colombia', colombia);
+register('connatix',connatix);
 register('contentad', contentad);
 register('criteo', criteo);
 register('csa', csa);
@@ -293,6 +301,7 @@ register('flite', flite);
 register('fluct', fluct);
 register('fusion', fusion);
 register('genieessp', genieessp);
+register('giraff', giraff);
 register('github', github);
 register('gmossp', gmossp);
 register('gumgum', gumgum);
@@ -310,6 +319,7 @@ register('kargo', kargo);
 register('kiosked', kiosked);
 register('kixer', kixer);
 register('ligatus', ligatus);
+register('lockerdome', lockerdome);
 register('loka', loka);
 register('mads', mads);
 register('mantis-display', mantisDisplay);

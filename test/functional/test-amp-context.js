@@ -18,6 +18,7 @@ import {
 } from '../../3p/ampcontext';
 import {MessageType, serializeMessage} from '../../src/3p-frame-messaging';
 import * as sinon from 'sinon';
+import {Platform} from '../../src/service/platform-impl';
 
 const NOOP = () => {};
 
@@ -154,7 +155,9 @@ describe('3p ampcontext.js', () => {
 
   it('should throw error if metadata missing', () => {
     win.name = generateIncorrectAttributes();
-    expect(() => new AmpContext(win)).to.throw(/Cannot read property/);
+    const platform = new Platform(window);
+    expect(() => new AmpContext(win)).to.throw(platform.isSafari() ?
+        /undefined is not an object/ : /Cannot read property/);
   });
 
   it('should be able to send an intersection observer request', () => {

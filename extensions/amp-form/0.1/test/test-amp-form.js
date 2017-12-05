@@ -36,6 +36,8 @@ import '../../../amp-selector/0.1/amp-selector';
 import {user} from '../../../../src/log';
 import {whenCalled} from '../../../../testing/test-helper.js';
 import {AmpEvents} from '../../../../src/amp-events';
+import {FormDataWrapper} from '../../../../src/form-data-wrapper';
+import {fromIterator} from '../../../../src/utils/array';
 
 describes.repeated('', {
   'single ampdoc': {ampdoc: 'single'},
@@ -161,6 +163,28 @@ describes.repeated('', {
       document.body.removeChild(form);
     });
 
+    it('should autofocus elements with the autofocus attribute', () => {
+      const form = getForm();
+      document.body.appendChild(form);
+      form.addEventListener = sandbox.spy();
+      form.setAttribute('action-xhr', 'https://example.com');
+      const button1 = form.querySelector('input');
+      button1.setAttribute('autofocus', '');
+      new AmpForm(form);
+
+      const viewer = Services.viewerForDoc(form.ownerDocument);
+      let resolve_ = null;
+      sandbox.stub(viewer, 'whenNextVisible').returns(new Promise(resolve => {
+        resolve_ = resolve;
+      }));
+
+      expect(document.activeElement).to.not.equal(button1);
+      resolve_();
+      return viewer.whenNextVisible().then(() => {
+        expect(document.activeElement).to.equal(button1);
+      });
+    });
+
     it('should install proxy', () => {
       const form = getForm();
       document.body.appendChild(form);
@@ -206,7 +230,7 @@ describes.repeated('', {
       sandbox.stub(ampForm, 'analyticsEvent_');
       sandbox.spy(form, 'checkValidity');
       const errorRe =
-          /Only XHR based \(via action-xhr attribute\) submissions are support/;
+        /Only XHR based \(via action-xhr attribute\) submissions are supported/;
       expect(() => ampForm.handleSubmitEvent_(event)).to.throw(errorRe);
       expect(event.preventDefault).to.be.called;
       expect(ampForm.analyticsEvent_).to.have.not.been.called;
@@ -266,7 +290,7 @@ describes.repeated('', {
       sandbox.stub(ampForm.xhr_, 'fetch').returns(Promise.resolve());
       sandbox.spy(form, 'checkValidity');
       const submitErrorRe =
-          /Only XHR based \(via action-xhr attribute\) submissions are support/;
+        /Only XHR based \(via action-xhr attribute\) submissions are supported/;
       expect(() => ampForm.handleSubmitEvent_(event)).to.throw(submitErrorRe);
       expect(event.preventDefault).to.be.called;
       document.body.removeChild(form);
@@ -656,7 +680,11 @@ describes.repeated('', {
 
           const xhrCall = ampForm.xhr_.fetch.getCall(0);
           const config = xhrCall.args[1];
-          expect(config.body).to.not.be.null;
+          expect(config.body).to.be.an.instanceof(FormDataWrapper);
+          const entriesInForm =
+              fromIterator(new FormDataWrapper(getForm()).entries());
+          expect(fromIterator(config.body.entries())).to.have.deep.members(
+              entriesInForm);
           expect(config.method).to.equal('POST');
           expect(config.credentials).to.equal('include');
         });

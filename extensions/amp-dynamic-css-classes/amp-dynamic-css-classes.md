@@ -27,7 +27,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>None</td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-dynamic-css-classes/">amp-dynamic-css-classes</a> example.</td>
   </tr>
 </table>
 

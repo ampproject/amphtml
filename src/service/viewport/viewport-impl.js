@@ -41,9 +41,6 @@ import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {
   ViewportBindingIosEmbedWrapper_,
 } from './viewport-binding-ios-embed-wrapper';
-import {
-  ViewportBindingNaturalIosEmbed_,
-} from './viewport-binding-natural-ios-embed';
 
 
 const TAG_ = 'Viewport';
@@ -358,6 +355,19 @@ export class Viewport {
    */
   getScrollHeight() {
     return this.binding_.getScrollHeight();
+  }
+
+  /**
+   * Returns the height of the content of the document, including the
+   * padding top for the viewer header.
+   * contentHeight will match scrollHeight in all cases unless the viewport is
+   * taller than the content.
+   * Note that this method is not cached since we there's no indication when
+   * it might change.
+   * @return {number}
+   */
+  getContentHeight() {
+    return this.binding_.getContentHeight();
   }
 
   /**
@@ -1078,13 +1088,7 @@ function createViewport(ampdoc) {
   let binding;
   if (ampdoc.isSingleDoc() &&
       getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
-    // The overriding of document.body fails in iOS7.
-    // Also, iOS8 sometimes freezes scrolling.
-    if (Services.platformFor(ampdoc.win).getIosMajorVersion() > 8) {
-      binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
-    } else {
-      binding = new ViewportBindingNaturalIosEmbed_(ampdoc.win, ampdoc);
-    }
+    binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
   } else {
     binding = new ViewportBindingNatural_(ampdoc, viewer);
   }
@@ -1108,7 +1112,6 @@ const ViewportType = {
    * device.
    * See:
    * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
-   * and {@link ViewportBindingNaturalIosEmbed_} for more details.
    */
   NATURAL_IOS_EMBED: 'natural-ios-embed',
 };
