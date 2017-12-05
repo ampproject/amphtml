@@ -160,26 +160,26 @@ describes.sandboxed('VisibilityModel', {}, () => {
       expect(getRepeat({repeat: 'true'}).repeat).to.be.false;
       expect(getRepeat({repeat: 'invalid'}).repeat).to.be.false;
 
-      // Accept number
-      expect(getRepeat({repeat: '200'}).repeat).to.be.true;
-      expect(getRepeat({repeat: 200}).repeat).to.be.true;
+      // Not accept number
+      expect(getRepeat({repeat: '200'}).repeat).to.be.false;
+      expect(getRepeat({repeat: 200}).repeat).to.be.false;
 
       // Should forbid repeat request with interval less than
       // MIN_REPEAT_INTERVAL
-      expect(getRepeat({repeat: 199}).repeat).to.be.false;
-
-      expect(getRepeat({repeat: 0, continuousTimeMin: 199}).repeat).to.be.false;
-      expect(getRepeat({repeat: 0, continuousTimeMin: 200}).repeat).to.be.true;
-      expect(getRepeat({repeat: 0, totalTimeMin: 200}).repeat).to.be.true;
+      expect(getRepeat({repeat: true, continuousTimeMin: 199}).repeat)
+          .to.be.false;
+      expect(getRepeat({repeat: true, continuousTimeMin: 200}).repeat)
+          .to.be.true;
+      expect(getRepeat({repeat: true, totalTimeMin: 200}).repeat).to.be.true;
 
       // repeatInterval
-      expect(getRepeat({repeat: 200}).repeatInterval).to.equal(200);
-      expect(getRepeat({repeat: 0, continuousTimeMin: 201})
+      expect(getRepeat({repeat: true, continuousTimeMin: 201})
           .repeatInterval).to.equal(201);
-      expect(getRepeat({repeat: 0, totalTimeMin: 202})
+      expect(getRepeat({repeat: true, totalTimeMin: 202})
           .repeatInterval).to.equal(202);
-      expect(getRepeat({repeat: 500, continuousTimeMin: 202, totalTimeMin: 203})
-          .repeatInterval).to.equal(500);
+      expect(
+        getRepeat({repeat: true, continuousTimeMin: 202, totalTimeMin: 203})
+        .repeatInterval).to.equal(203);
     });
   });
 
@@ -1001,7 +1001,8 @@ describes.sandboxed('VisibilityModel', {}, () => {
     it('should wait for repeat interval', function* () {
       const vh = new VisibilityModel({
         visiblePercentageMin: 49,
-        repeat: 1000,
+        repeat: true,
+        continuousTimeMin: 200,
       }, calcVisibility);
       const spy = sandbox.spy();
       vh.onTriggerEvent(() => {
@@ -1010,13 +1011,19 @@ describes.sandboxed('VisibilityModel', {}, () => {
       });
       visibility = 1;
       vh.update();
+      clock.tick(300);
       yield vh.eventPromise_;
       expect(spy).to.be.calledOnce;
-      expect(vh.ready_).to.be.false;
-      clock.tick(999);
-      yield vh.eventPromise_;
+
+      visibility = 0;
+      vh.update();
+      clock.tick(300);
+      expect(vh.ready_).to.be.true;
       expect(spy).to.be.calledOnce;
-      clock.tick(1);
+
+      visibility = 1;
+      vh.update();
+      clock.tick(300);
       yield vh.eventPromise_;
       expect(spy).to.be.calledTwice;
     });

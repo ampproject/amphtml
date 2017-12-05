@@ -15,7 +15,6 @@
  */
 
 import {dev, user} from '../../../src/log';
-import {isFiniteNumber} from '../../../src/types';
 import {Observable} from '../../../src/observable';
 
 const MIN_REPEAT_INTERVAL = 200;
@@ -61,24 +60,21 @@ export class VisibilityModel {
     /** @private {?number} */
     this.repeatInterval_ = null;
 
-    let repeat = spec['repeat'];
+    const repeat = spec['repeat'];
     if (repeat === true) {
       this.repeat_ = true;
-    } else {
-      repeat = Number(spec['repeat']);
-      if (isFiniteNumber(repeat)) {
+      if (this.spec_.totalTimeMin || this.spec_.continuousTimeMin) {
         const repeatInterval = Math.max(
-            this.spec_.totalTimeMin,
-            this.spec_.continuousTimeMin,
-            repeat);
+          this.spec_.totalTimeMin,
+          this.spec_.continuousTimeMin);
         if (repeatInterval >= MIN_REPEAT_INTERVAL) {
-          this.repeat_ = true;
           this.repeatInterval_ = repeatInterval;
         } else {
+          this.repeat_ = false;
           user().error(
-              'AMP-ANALYTICS',
-              `Cannot repeat with interval less than ${MIN_REPEAT_INTERVAL}, ` +
-              ' repeat set to false');
+            'AMP-ANALYTICS',
+            `Cannot repeat with interval less than ${MIN_REPEAT_INTERVAL}, ` +
+            ' repeat set to false');
         }
       }
     }
