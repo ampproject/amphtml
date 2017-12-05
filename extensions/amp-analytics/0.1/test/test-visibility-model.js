@@ -37,11 +37,11 @@ describes.sandboxed('VisibilityModel', {}, () => {
       return new VisibilityModel(spec, NO_CALC).spec_;
     }
 
-    function getReset(spec) {
+    function getRepeat(spec) {
       const model = new VisibilityModel(spec, NO_CALC);
       return {
-        reset: model.reset_,
-        resetInterval: model.resetInterval_,
+        repeat: model.repeat_,
+        repeatInterval: model.repeatInterval_,
       };
     };
 
@@ -153,32 +153,33 @@ describes.sandboxed('VisibilityModel', {}, () => {
           .to.equal(100);
     });
 
-    it('should parse reset', () => {
+    it('should parse repeat', () => {
       // Accept boolean
-      expect(getReset({reset: true}).reset).to.be.true;
-      expect(getReset({reset: true}).resetInterval).to.be.null;
-      expect(getReset({reset: 'true'}).reset).to.be.false;
-      expect(getReset({reset: 'invalid'}).reset).to.be.false;
+      expect(getRepeat({repeat: true}).repeat).to.be.true;
+      expect(getRepeat({repeat: true}).repeatInterval).to.be.null;
+      expect(getRepeat({repeat: 'true'}).repeat).to.be.false;
+      expect(getRepeat({repeat: 'invalid'}).repeat).to.be.false;
 
       // Accept number
-      expect(getReset({reset: '200'}).reset).to.be.true;
-      expect(getReset({reset: 200}).reset).to.be.true;
+      expect(getRepeat({repeat: '200'}).repeat).to.be.true;
+      expect(getRepeat({repeat: 200}).repeat).to.be.true;
 
-      // Should forbid reset request with interval less than MIN_RESET_INTERVAL
-      expect(getReset({reset: 199}).reset).to.be.false;
+      // Should forbid repeat request with interval less than
+      // MIN_REPEAT_INTERVAL
+      expect(getRepeat({repeat: 199}).repeat).to.be.false;
 
-      expect(getReset({reset: 0, continuousTimeMin: 199}).reset).to.be.false;
-      expect(getReset({reset: 0, continuousTimeMin: 200}).reset).to.be.true;
-      expect(getReset({reset: 0, totalTimeMin: 200}).reset).to.be.true;
+      expect(getRepeat({repeat: 0, continuousTimeMin: 199}).repeat).to.be.false;
+      expect(getRepeat({repeat: 0, continuousTimeMin: 200}).repeat).to.be.true;
+      expect(getRepeat({repeat: 0, totalTimeMin: 200}).repeat).to.be.true;
 
-      // resetInterval
-      expect(getReset({reset: 200}).resetInterval).to.equal(200);
-      expect(getReset({reset: 0, continuousTimeMin: 201})
-          .resetInterval).to.equal(201);
-      expect(getReset({reset: 0, totalTimeMin: 202})
-          .resetInterval).to.equal(202);
-      expect(getReset({reset: 500, continuousTimeMin: 202, totalTimeMin: 203})
-          .resetInterval).to.equal(500);
+      // repeatInterval
+      expect(getRepeat({repeat: 200}).repeatInterval).to.equal(200);
+      expect(getRepeat({repeat: 0, continuousTimeMin: 201})
+          .repeatInterval).to.equal(201);
+      expect(getRepeat({repeat: 0, totalTimeMin: 202})
+          .repeatInterval).to.equal(202);
+      expect(getRepeat({repeat: 500, continuousTimeMin: 202, totalTimeMin: 203})
+          .repeatInterval).to.equal(500);
     });
   });
 
@@ -194,14 +195,14 @@ describes.sandboxed('VisibilityModel', {}, () => {
     it('should dispose fully', () => {
       const vh = new VisibilityModel(NO_SPEC, calcVisibility);
       vh.scheduledRunId_ = 1;
-      vh.scheduleResetId_ = 1;
+      vh.scheduleRepeatId_ = 1;
       const unsubscribeSpy = sandbox.spy();
       vh.unsubscribe(unsubscribeSpy);
       const removeSpy = sandbox.spy(vh.onTriggerObservable_, 'removeAll');
 
       vh.dispose();
       expect(vh.scheduledRunId_).to.be.null;
-      expect(vh.scheduleResetId_).to.be.null;
+      expect(vh.scheduleRepeatId_).to.be.null;
       expect(unsubscribeSpy).to.be.calledOnce;
       expect(vh.unsubscribe_).to.be.empty;
       expect(vh.eventResolver_).to.be.null;
@@ -297,7 +298,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
       });
     });
 
-    it('should refresh on reset', () => {
+    it('should refresh on repeat', () => {
       const vh = new VisibilityModel(NO_SPEC, calcVisibility);
       vh.firstSeenTime_ = 2;
       vh.lastSeenTime_ = 3;
@@ -988,7 +989,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
     });
   });
 
-  describe('end to end event reset', () => {
+  describe('end to end event repeat', () => {
     let visibility;
     let calcVisibility;
 
@@ -997,10 +998,10 @@ describes.sandboxed('VisibilityModel', {}, () => {
       calcVisibility = () => visibility;
     });
 
-    it('should wait for reset interval', function* () {
+    it('should wait for repeat interval', function* () {
       const vh = new VisibilityModel({
         visiblePercentageMin: 49,
-        reset: 1000,
+        repeat: 1000,
       }, calcVisibility);
       const spy = sandbox.spy();
       vh.onTriggerEvent(() => {
@@ -1023,7 +1024,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
     it('should wait for not match to fire again w/o interval', function* () {
       const vh = new VisibilityModel({
         visiblePercentageMin: 49,
-        reset: true,
+        repeat: true,
       }, calcVisibility);
       const spy = sandbox.spy();
       vh.onTriggerEvent(() => {

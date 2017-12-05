@@ -18,7 +18,7 @@ import {dev, user} from '../../../src/log';
 import {isFiniteNumber} from '../../../src/types';
 import {Observable} from '../../../src/observable';
 
-const MIN_RESET_INTERVAL = 200;
+const MIN_REPEAT_INTERVAL = 200;
 
 
 /**
@@ -56,29 +56,29 @@ export class VisibilityModel {
     };
 
     /** @private {boolean} */
-    this.reset_ = false;
+    this.repeat_ = false;
 
     /** @private {?number} */
-    this.resetInterval_ = null;
+    this.repeatInterval_ = null;
 
-    let reset = spec['reset'];
-    if (reset === true) {
-      this.reset_ = true;
+    let repeat = spec['repeat'];
+    if (repeat === true) {
+      this.repeat_ = true;
     } else {
-      reset = Number(spec['reset']);
-      if (isFiniteNumber(reset)) {
-        const resetInterval = Math.max(
+      repeat = Number(spec['repeat']);
+      if (isFiniteNumber(repeat)) {
+        const repeatInterval = Math.max(
             this.spec_.totalTimeMin,
             this.spec_.continuousTimeMin,
-            reset);
-        if (resetInterval >= MIN_RESET_INTERVAL) {
-          this.reset_ = true;
-          this.resetInterval_ = resetInterval;
+            repeat);
+        if (repeatInterval >= MIN_REPEAT_INTERVAL) {
+          this.repeat_ = true;
+          this.repeatInterval_ = repeatInterval;
         } else {
           user().error(
               'AMP-ANALYTICS',
-              `Cannot reset with interval less than ${MIN_RESET_INTERVAL}, ` +
-              ' reset set to false');
+              `Cannot repeat with interval less than ${MIN_REPEAT_INTERVAL}, ` +
+              ' repeat set to false');
         }
       }
     }
@@ -159,7 +159,7 @@ export class VisibilityModel {
     this.waitToRefresh_ = false;
 
     /** @private {?number} */
-    this.scheduleResetId_ = null;
+    this.scheduleRepeatId_ = null;
   }
 
   /**
@@ -180,7 +180,7 @@ export class VisibilityModel {
       this.onTriggerObservable_.fire();
     });
     this.waitToRefresh_ = false;
-    this.scheduleResetId_ = null;
+    this.scheduleRepeatId_ = null;
     this.everMatchedVisibility_ = false;
     this.matchesVisibility_ = false;
     this.continuousTime_ = 0;
@@ -200,23 +200,24 @@ export class VisibilityModel {
    * Function that visibilityManager can used to dispose model or reset model
    */
   disposeOrReset() {
-    // We may need a maxIntervalWindow to stop visible event even with reset true
-    if (!this.reset_) {
+    // We may need a maxIntervalWindow to stop visible event even with repeat
+    // true
+    if (!this.repeat_) {
       this.dispose();
       return;
     }
-    if (this.resetInterval_) {
+    if (this.repeatInterval_) {
       const now = Date.now();
       const interval = now - this.firstVisibleTime_;
 
       // Unit in milliseconds
-      const timeUntilReset = Math.max(0, this.resetInterval_ - interval);
+      const timeUntilRepeat = Math.max(0, this.repeatInterval_ - interval);
       this.ready_ = false;
-      dev().assert(!this.scheduleResetId_, 'Should not reset twice');
-      this.scheduleResetId_ = setTimeout(() => {
+      dev().assert(!this.scheduleRepeatId_, 'Should not repeat twice');
+      this.scheduleRepeatId_ = setTimeout(() => {
         this.refresh_();
         this.setReady(true);
-      }, timeUntilReset);
+      }, timeUntilRepeat);
     } else {
       // Reset after element falls out of (minPercentage, maxPercentage]
       this.waitToRefresh_ = true;
@@ -229,9 +230,9 @@ export class VisibilityModel {
       clearTimeout(this.scheduledRunId_);
       this.scheduledRunId_ = null;
     }
-    if (this.scheduleResetId_) {
-      clearTimeout(this.scheduleResetId_);
-      this.scheduleResetId_ = null;
+    if (this.scheduleRepeatId_) {
+      clearTimeout(this.scheduleRepeatId_);
+      this.scheduleRepeatId_ = null;
     }
     this.unsubscribe_.forEach(unsubscribe => {
       unsubscribe();
