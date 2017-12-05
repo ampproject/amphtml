@@ -752,8 +752,9 @@ amp.validator.ValidationResult.prototype.copyFrom = function(other) {
   goog.asserts.assert(other.status !== null);
   this.status = other.status;
   if (!amp.validator.LIGHT) {
-    this.errors = [];
-    Array.prototype.push.apply(this.errors, other.errors);
+    let newErrors = [];
+    Array.prototype.push.apply(newErrors, other.errors);
+    this.errors = newErrors;
   }
 };
 
@@ -1013,7 +1014,7 @@ class ReferencePointMatcher {
    * @param {!amp.validator.ValidationResult} result
    */
   match(tag, context, result) {
-    const resultForBestAttempt = new amp.validator.ValidationResult();
+    let resultForBestAttempt = new amp.validator.ValidationResult();
     resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
     for (const p of this.parsedReferencePoints_.iterate()) {
       // p.tagSpecName here is actually a number, which was replaced in
@@ -4125,36 +4126,13 @@ function validateTagAgainstSpec(
   validateNoSiblingsAllowedTags(parsedSpec, context, resultForAttempt);
   validateLastChildTags(parsedSpec.getSpec(), context, resultForAttempt);
 
-  if (resultForAttempt.status === amp.validator.ValidationResult.Status.FAIL) {
-    if (amp.validator.LIGHT) {
-      resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
-      return;
-    }
-    // If this is the first attempt, always use it.
-    if (resultForBestAttempt.errors.length === 0) {
-      resultForBestAttempt.copyFrom(resultForAttempt);
-      return;
-    }
-
-    // Prefer the attempt with the fewest errors.
-    if (resultForAttempt.errors.length < resultForBestAttempt.errors.length) {
-      resultForBestAttempt.copyFrom(resultForAttempt);
-      return;
-    }
-    if (resultForAttempt.errors.length > resultForBestAttempt.errors.length) {
-      return;
-    }
-
-    // If the same number of errors, prefer the most specific error.
-    if (parsedRules.maxSpecificity(resultForAttempt.errors) >
-        parsedRules.maxSpecificity(resultForBestAttempt.errors)) {
-      resultForBestAttempt.copyFrom(resultForAttempt);
-    }
-
+  resultForBestAttempt.copyFrom(context.getRules().selectBestValidationResult(
+      resultForBestAttempt, resultForAttempt));
+  if (resultForBestAttempt.status ===
+      amp.validator.ValidationResult.Status.FAIL)
     return;
-  }
+
   // This is the successful branch of the code: locally the tagspec matches.
-  resultForBestAttempt.copyFrom(resultForAttempt);
 
   const tagSpec = parsedSpec.getSpec();
   if (!amp.validator.LIGHT && tagSpec.deprecation !== null) {
@@ -4575,6 +4553,46 @@ class ParsedValidatorRules {
     }
     return max;
   };
+
+  /**
+   * Given two ValidationResults, selects the best result and returns it.
+   * If results are equal, will return the first.
+   * @param {!amp.validator.ValidationResult} resultA
+   * @param {!amp.validator.ValidationResult} resultB
+   * @return {!amp.validator.ValidationResult} best
+   */
+  selectBestValidationResult(resultA, resultB) {
+    // A non-failing result is better than a failing one. Results are
+    // either UNKNOWN or FAIL.
+    if (resultA.status !== resultB.status) {
+      if (resultA.status === amp.validator.ValidationResult.Status.FAIL)
+        return resultB;
+      if (resultB.status === amp.validator.ValidationResult.Status.FAIL)
+        return resultA;
+    }
+
+    // In the light mode, we only have status values.
+    if (!amp.validator.LIGHT) {
+      // If one of the results is empty (ie: first attempt), prefer the other.
+      if (resultA.errors.length === 0) return resultB;
+      if (resultB.errors.length === 0) return resultA;
+
+      // Prefer the attempt with the fewest errors.
+      if (resultA.errors.length < resultB.errors.length) return resultA;
+      if (resultB.errors.length < resultA.errors.length) return resultB;
+
+      // If the same number of errors, prefer the most specific error.
+      if (this.maxSpecificity(resultA.errors) >
+          this.maxSpecificity(resultB.errors))
+        return resultA;
+      if (this.maxSpecificity(resultB.errors) >
+          this.maxSpecificity(resultA.errors))
+        return resultB;
+    }
+
+    // Default to returning the first argument.
+    return resultA;
+  }
 
   /**
    * Returns an example tag which uses a given extension, or empty
