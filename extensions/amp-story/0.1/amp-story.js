@@ -828,14 +828,22 @@ export class AmpStory extends AMP.BaseElement {
           state.isLandscape = offsetWidth > offsetHeight;
         },
         mutate: state => {
-          if (state.isLandscape) {
-            this.element.classList.add(LANDSCAPE_OVERLAY_CLASS);
-          } else {
-            this.element.classList.remove(LANDSCAPE_OVERLAY_CLASS);
-          }
+          this.toggleLandscapeOverlay_(state.isLandscape);
         },
       }, {});
       this.element.removeAttribute('desktop');
+    }
+  }
+
+  /**
+   * @param {!object} state
+   * Toggles landscape overlay based on vsync state.
+   */
+  toggleLandscapeOverlay_(isLandscape) {
+    if (isLandscape) {
+      this.element.classList.add(LANDSCAPE_OVERLAY_CLASS);
+    } else {
+      this.element.classList.remove(LANDSCAPE_OVERLAY_CLASS);
     }
   }
 
