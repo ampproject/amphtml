@@ -594,6 +594,7 @@ describes.realWin('amp-video', {
       it('should move cached src to source during prerender', () => {
         return getVideo({
           'src': 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
+          'type': 'video/mp4',
           'amp-orig-src': 'https://example.com/video.mp4',
         }).then(v => {
           video = v.querySelector('video');
@@ -602,6 +603,7 @@ describes.realWin('amp-video', {
           expect(sources.length).to.equal(1);
           const cachedSource = sources[0];
           expect(cachedSource.getAttribute('src')).to.equal('https://example-com.cdn.ampproject.org/m/s/video.mp4');
+          expect(cachedSource.getAttribute('type')).to.equal('video/mp4');
         });
       });
 
@@ -609,6 +611,7 @@ describes.realWin('amp-video', {
         const s1 = doc.createElement('source');
         s1.setAttribute('src', 'https://example-com.cdn.ampproject.org/m/s/video1.mp4');
         s1.setAttribute('amp-orig-src', 'https://example.com/video1.mp4');
+        s1.setAttribute('type', 'video/mp4');
 
         const s2 = doc.createElement('source');
         s2.setAttribute('src', 'https://example-com.cdn.ampproject.org/m/s/video2.mp4');
@@ -621,7 +624,9 @@ describes.realWin('amp-video', {
           const sources = video.querySelectorAll('source');
           expect(sources.length).to.equal(2);
           expect(sources[0].getAttribute('src')).to.equal('https://example-com.cdn.ampproject.org/m/s/video1.mp4');
+          expect(sources[0].getAttribute('type')).to.equal('video/mp4');
           expect(sources[1].getAttribute('src')).to.equal('https://example-com.cdn.ampproject.org/m/s/video2.mp4');
+          expect(sources[1].getAttribute('type')).to.be.null;
           expect(sources[0], s1);
           expect(sources[1], s2);
         });
