@@ -41,9 +41,7 @@ export function doubleclick(global, data) {
       hid: global.context.pageViewId,
     };
   }
-
   centerAd(global);
-
   writeAdScript(global, data);
 }
 
@@ -77,9 +75,9 @@ function doubleClickWithGpt(global, data) {
 
           if (data['experimentId']) {
             const experimentIdList = data['experimentId'].split(',');
-            pubads.forceExperiment = pubads.forceExperiment || function() {};
-            experimentIdList &&
-            experimentIdList.forEach(eid => pubads.forceExperiment(eid));
+            pubads.forceExperiment = pubads.forceExperiment || (() => {});
+            (experimentIdList || [])
+                .forEach(eid => pubads.forceExperiment(eid));
           }
 
           pubads.markAsAmp();
@@ -122,19 +120,19 @@ function doubleClickWithGpt(global, data) {
 
             let creativeId = event.creativeId || '_backfill_';
 
-        // If the creative is empty, or either dimension of the returned size
-        // is larger than its counterpart in the primary size, then we don't
-        // want to render the creative.
+            // If the creative is empty, or either dimension of the returned size
+            // is larger than its counterpart in the primary size, then we don't
+            // want to render the creative.
             if (event.isEmpty ||
-            returnedSize && (rWidth > pWidth || rHeight > pHeight)) {
+                returnedSize && (rWidth > pWidth || rHeight > pHeight)) {
               global.context.noContentAvailable();
               creativeId = '_empty_';
             } else {
-          // We only want to call renderStart with a specific size if the
-          // returned creative size matches one of the multi-size sizes.
+              // We only want to call renderStart with a specific size if the
+              // returned creative size matches one of the multi-size sizes.
               let newSize;
               for (let i = 1; i < dimensions.length; i++) {
-            // dimensions[0] is the primary or overridden size.
+                // dimensions[0] is the primary or overridden size.
                 if (dimensions[i][0] == rWidth && dimensions[i][1] == rHeight) {
                   newSize = {
                     width: rWidth,
@@ -148,7 +146,7 @@ function doubleClickWithGpt(global, data) {
             global.context.reportRenderedEntityIdentifier('dfp-' + creativeId);
           });
 
-      // Exported for testing.
+          // Exported for testing.
           global.document.getElementById('c')['slot'] = slot;
           googletag.display('c');
         });
