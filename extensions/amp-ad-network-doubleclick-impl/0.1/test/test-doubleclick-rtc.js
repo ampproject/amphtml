@@ -86,7 +86,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
     });
 
     it('should properly merge RTC responses from vendors', () => {
-      RTC_VENDORS['fakevendor2'] = {
+      RTC_VENDORS['TEMP_VENDOR'] = {
         'url': 'https://fakevendor2.biz',
       };
       const rtcResponseArray = [
@@ -95,17 +95,17 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         {response: {targeting: {'a': 'foo', 'b': {e: 'f'}}},
           callout: 'www.exampleB.com', rtcTime: 500},
         {response: {targeting: {'a': 'bar'}},
-          callout: 'fakevendor2', rtcTime: 100},
+          callout: 'TEMP_VENDOR', rtcTime: 100},
       ];
       const expectedParams = {
         ati: '2,2,2',
         artc: '100,500,100',
-        ard: 'fakevendor,www.exampleB.com,fakevendor2',
+        ard: 'fakevendor,www.exampleB.com,TEMP_VENDOR',
       };
       const expectedJsonTargeting = {
         targeting: {
           'a': 'foo', 'b': {e: 'f'}, 'a_fakevendor': [1,2,3],
-          'b_fakevendor': {c: 'd'}, 'a_fakevendor2': 'bar'},
+          'b_fakevendor': {c: 'd'}, 'a_TEMP_VENDOR': 'bar'},
       };
       testMergeRtcResponses(
           rtcResponseArray, expectedParams, expectedJsonTargeting);
@@ -250,6 +250,16 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       };
       expect(impl.rewriteRtcKeys_(response, 'fakevendor'))
           .to.deep.equal(rewrittenResponse);
+    });
+
+    it('should not rewrite key names if vendor has disableKeyAppend', () => {
+      const response = {
+        'a': '1',
+        'b': '2',
+      };
+      // fakevendor2 has disableKeyAppend set to true, see callout-vendors.js
+      expect(impl.rewriteRtcKeys_(response, 'fakevendor2'))
+          .to.deep.equal(response);
     });
 
     it('should not rewrite key names if custom url callout', () => {
