@@ -2422,39 +2422,12 @@ class Context {
   }
 
   /**
-   * @param {string} tagName The tag that has constraints.
-   * @param {!Array<string>} allowedTags The tags whitelisted as descendents of
-   * tagName.
-   */
-  registerDescendantConstraintList(tagName, allowedTags) {
-    this.tagStack_.registerDescendantConstraintList(tagName, allowedTags);
-  }
-
-  /**
-   * @return {!Array<DescendantConstraints>}
-   */
-  allowedDescendantsList() {
-    return this.tagStack_.allowedDescendantsList();
-  }
-
-  /**
    * The number of siblings that have been discovered up to now by traversing
    * the stack.
    * @return {number}
    */
   numOfSiblings() {
     return this.tagStack_.numOfSiblings();
-  }
-
-  /**
-   * Tells the parent of the current stack entry that it can only have 1 child
-   * and that child must be me (the current stack entry).
-   * @param {string} tagName The current stack entry's tag name.
-   * @param {amp.htmlparser.DocLocator} docLocator The line and col of where the
-   *  current stack entry appears.
-   */
-  tellParentNoSiblingsAllowed(tagName, docLocator) {
-    this.tagStack_.tellParentNoSiblingsAllowed(tagName, docLocator);
   }
 }
 
@@ -3224,8 +3197,10 @@ function validateDescendantTags(
   const spec = parsedTagSpec.getSpec();
   const tagName = context.getTagStack().getCurrent();
 
-  for (var ii = 0; ii < context.allowedDescendantsList().length; ++ii) {
-    const allowedDescendantsList = context.allowedDescendantsList()[ii];
+  for (var ii = 0; ii < context.getTagStack().allowedDescendantsList().length;
+       ++ii) {
+    const allowedDescendantsList =
+        context.getTagStack().allowedDescendantsList()[ii];
     // If the tag we're validating is not whitelisted for a specific ancestor,
     // then throw an error.
     if (!allowedDescendantsList.allowedTags.includes(tagName)) {
@@ -3293,7 +3268,7 @@ function validateNoSiblingsAllowedTags(
   }
 
   if (spec.siblingsDisallowed) {
-    context.tellParentNoSiblingsAllowed(spec.tagName, context.getDocLocator());
+    tagStack.tellParentNoSiblingsAllowed(spec.tagName, context.getDocLocator());
   }
 }
 
@@ -4204,7 +4179,7 @@ function validateTagAgainstSpec(
     }
 
     if (allowedDescendantsForThisTag.length > 0) {
-      context.registerDescendantConstraintList(
+      context.getTagStack().registerDescendantConstraintList(
           context.getTagStack().getCurrent(), allowedDescendantsForThisTag);
     }
   }
