@@ -29,6 +29,11 @@ tags: {  # <amp-story>
   tag_name: "AMP-STORY"
   requires_extension: "amp-story"
   mandatory_parent: "BODY"
+  # Mandate that at least one of the children is an amp-story-page.
+  # TODO(gregable): This global requires/satisfies approach only works because
+  # there is only one <amp-story standalone> in a document. We really want this
+  # requirement to be expressed on the <amp-story> children, however.
+  requires: "amp-story-page"
   attrs: {
     name: "standalone"
     mandatory: true
@@ -61,6 +66,7 @@ tags: {  # <amp-story-page>
   tag_name: "AMP-STORY-PAGE"
   requires_extension: "amp-story"
   mandatory_parent: "AMP-STORY"
+  satisfies: "amp-story-page"
   attrs: {
     name: "id"
     mandatory: true
