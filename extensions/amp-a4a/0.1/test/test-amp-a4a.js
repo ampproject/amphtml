@@ -24,8 +24,6 @@ import {
   SAFEFRAME_VERSION_HEADER,
   protectFunctionWrapper,
   assignAdUrlToError,
-  EXPERIMENT_FEATURE_HEADER_NAME,
-  CSP_ENABLED_EXP_NAME,
 } from '../amp-a4a';
 import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
@@ -322,8 +320,6 @@ describe('amp-a4a', () => {
     });
 
     it('populates postAdResponseExperimentFeatures', () => {
-      adResponse.headers[EXPERIMENT_FEATURE_HEADER_NAME] =
-          `foo=bar,bad,${CSP_ENABLED_EXP_NAME}=true`;
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
@@ -331,9 +327,6 @@ describe('amp-a4a', () => {
         expect(child).to.be.ok;
         expect(child.srcdoc.indexOf('meta http-equiv=Content-Security-Policy'))
             .to.not.equal(-1);
-        expect(a4a.postAdResponseExperimentFeatures).to.jsonEqual({
-          foo: 'bar', [CSP_ENABLED_EXP_NAME]: 'true',
-        });
       });
     });
 

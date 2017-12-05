@@ -83,12 +83,6 @@ export const SAFEFRAME_VERSION_HEADER = 'X-AmpSafeFrameVersion';
 /** @type {string} @visibleForTesting */
 export const EXPERIMENT_FEATURE_HEADER_NAME = 'amp-ff-exps';
 
-/**
- * Controls if Content Security Policy is enabled for FIE render.
- * @type {string} @visibleForTesting
- */
-export const CSP_ENABLED_EXP_NAME = 'csp_enabled';
-
 /** @type {string} */
 const TAG = 'amp-a4a';
 
@@ -363,9 +357,6 @@ export class AmpA4A extends AMP.BaseElement {
      * @type {!Object<string,string>}
      */
     this.postAdResponseExperimentFeatures = {};
-
-    /** @private {boolean} whether CSP for FIE is enabled */
-    this.cspEnabled_ = false;
 
     /**
      * The configuration for amp-analytics. If null, no amp-analytics element
@@ -703,9 +694,6 @@ export class AmpA4A extends AMP.BaseElement {
                   tryDecodeUriComponent(match[1]));
             }
           }
-          this.cspEnabled_ =
-            this.postAdResponseExperimentFeatures[CSP_ENABLED_EXP_NAME] ==
-              'true';
           // If the response has response code 204, or arrayBuffer is null,
           // collapse it.
           if (!fetchResponse.arrayBuffer || fetchResponse.status == 204) {
@@ -1074,7 +1062,6 @@ export class AmpA4A extends AMP.BaseElement {
     this.experimentalNonAmpCreativeRenderMethod_ =
         this.getNonAmpCreativeRenderingMethod();
     this.postAdResponseExperimentFeatures = {};
-    this.cspEnabled_ = false;
   }
 
   /**
@@ -1365,7 +1352,6 @@ export class AmpA4A extends AMP.BaseElement {
           html: creativeMetaData.minifiedCreative,
           extensionIds: creativeMetaData.customElementExtensions || [],
           fonts: fontsArray,
-          cspEnabled: this.cspEnabled_,
         }, embedWin => {
           installUrlReplacementsForEmbed(this.getAmpDoc(), embedWin,
               new A4AVariableSource(this.getAmpDoc(), embedWin));
