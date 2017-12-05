@@ -67,15 +67,9 @@
 <body>
   <script>
     // Enable amp-lightbox-viewer experiment automatically if it is not enabled.
-    // Disable amp-lightbox-viewer-auto experiment if it is enabled.
     setTimeout(function() {
-      if (!AMP.isExperimentOn('amp-lightbox-viewer') || AMP.isExperimentOn('amp-lightbox-viewer-auto')) {
-        if (!AMP.isExperimentOn('amp-lightbox-viewer')) {
-          AMP.toggleExperiment('amp-lightbox-viewer');
-        }
-        if (AMP.isExperimentOn('amp-lightbox-viewer-auto')) {
-          AMP.toggleExperiment('amp-lightbox-viewer-auto');
-        }
+      if (!AMP.isExperimentOn('amp-lightbox-viewer')) {
+        AMP.toggleExperiment('amp-lightbox-viewer');
         location.reload();
       }
     }, 1000);
