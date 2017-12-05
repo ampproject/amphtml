@@ -28,6 +28,15 @@ gulp.task('amphtml:validate', () => {
 });
 ```
 
+To treat warnings as errors, replace the last line of the validation closure with:
+
+```js
+// Exit the process with error code (1) if an AMP validation warning or
+// error occurred.
+.pipe(gulpAmpValidator.failAfterWarningOrError());
+
+```
+
 ## Release Notes
 
 ### 1.0.1
