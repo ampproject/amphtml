@@ -30,10 +30,7 @@ tags: {  # <amp-iframe>
   html_format: AMP  # Iframes not allowed in ads.
   tag_name: "AMP-IFRAME"
   requires_extension: "amp-iframe"
-  attrs: {
-    name: "allow"
-    value_regex: "geolocation|fullscreen|payment|transparency"
-  }
+  attrs: { name: "allow" }
   attrs: {
     name: "allowfullscreen"
     value: ""
