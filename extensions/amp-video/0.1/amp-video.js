@@ -294,10 +294,9 @@ class AmpVideo extends AMP.BaseElement {
     // if the `src` of `amp-video` itself is cached, move it to <source>
     if (this.element.hasAttribute('src') && this.isCachedByCDN_(this.element)) {
       const src = this.element.getAttribute('src');
+      const type = this.element.getAttribute('type');
+      const srcSource = this.createSourceElement_(src, type);
       const ampOrigSrc = this.element.getAttribute('amp-orig-src');
-      assertHttpsUrl(src, this.element);
-      const srcSource = this.element.ownerDocument.createElement('source');
-      srcSource.setAttribute('src', src);
       srcSource.setAttribute('amp-orig-src', ampOrigSrc);
       sources.unshift(srcSource);
     }
@@ -338,10 +337,9 @@ class AmpVideo extends AMP.BaseElement {
     // duplicate the `origin` Urls for cached sources and insert them after each
     const cached = toArray(this.video_.querySelectorAll('[amp-orig-src]'));
     cached.forEach(cachedSource => {
-      const origSource = this.element.ownerDocument.createElement('source');
-      const ampOrigSrc = cachedSource.getAttribute('amp-orig-src');
-      assertHttpsUrl(ampOrigSrc, cachedSource);
-      origSource.setAttribute('src', ampOrigSrc);
+      const origSrc = cachedSource.getAttribute('amp-orig-src');
+      const origType = cachedSource.getAttribute('type');
+      const origSource = this.createSourceElement_(origSrc, origType);
       insertAfterOrAtStart(dev().assertElement(this.video_),
           origSource, cachedSource);
     });
@@ -359,6 +357,22 @@ class AmpVideo extends AMP.BaseElement {
     const src = element.getAttribute('src');
     const hasOrigSrcAttr = element.hasAttribute('amp-orig-src');
     return hasOrigSrcAttr && isProxyOrigin(src);
+  }
+
+  /**
+   * @param {!string} src
+   * @param {?string} type
+   * @return {!Element} source element
+   * @private
+   */
+  createSourceElement_(src, type) {
+    assertHttpsUrl(src, this.element);
+    const source = this.element.ownerDocument.createElement('source');
+    source.setAttribute('src', src);
+    if (type) {
+      source.setAttribute('type', type);
+    }
+    return source;
   }
 
   /**
