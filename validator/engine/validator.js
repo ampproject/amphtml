@@ -1609,6 +1609,7 @@ function IsDeclarationValid(cssSpec, declarationName) {
  * @return {string}
  */
 function AllowedDeclarationsString(cssSpec) {
+  if (cssSpec.allowedDeclarations.length > 5) return '';
   return '[\'' + cssSpec.allowedDeclarations.join('\', \'') + '\']';
 }
 
@@ -1654,16 +1655,28 @@ class InvalidRuleVisitor extends parse_css.RuleVisitor {
       if (amp.validator.LIGHT) {
         this.result.status = amp.validator.ValidationResult.Status.FAIL;
       } else {
-        this.context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_PROPERTY,
-            new LineCol(declaration.line, declaration.col),
-            /* params */
-            [
-              getTagSpecName(this.tagSpec), declaration.name,
-              AllowedDeclarationsString(this.cssSpec)
-            ],
-            /* url */ '', this.result);
+        const allowedDeclarationsStr = AllowedDeclarationsString(this.cssSpec);
+        if (allowedDeclarationsStr === '') {
+          this.context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code
+                  .CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
+              new LineCol(declaration.line, declaration.col),
+              /* params */[getTagSpecName(this.tagSpec), declaration.name],
+              /* url */ '', this.result);
+
+        } else {
+          this.context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_PROPERTY,
+              new LineCol(declaration.line, declaration.col),
+              /* params */
+              [
+                getTagSpecName(this.tagSpec), declaration.name,
+                AllowedDeclarationsString(this.cssSpec)
+              ],
+              /* url */ '', this.result);
+        }
       }
     }
   }
