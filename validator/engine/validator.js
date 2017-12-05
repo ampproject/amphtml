@@ -1185,6 +1185,7 @@ let DescendantConstraints;
  *             lastChildTagName: string,
  *             lastChildUrl: string,
  *             lastChildErrorLineCol: LineCol,
+ *             cdataMatcher: ?CdataMatcher,
  *             childTagMatcher: ?ChildTagMatcher,
  *             referencePointMatcher: ?ReferencePointMatcher }}
  */
@@ -1218,15 +1219,6 @@ class TagStack {
     this.stack_.push(this.createNewTagStackEntry('$ROOT'));
 
     /**
-     * CdataMatcher for the current top stack entry. We only ever track cdata
-     * for the immediate top of the stack, so we don't need to store a pointer
-     * for every element on the stack_ itself.
-     * @type {?CdataMatcher}
-     * @private
-     */
-    this.cdataMatcher_ = null;
-
-    /**
      * @type {!Array<DescendantConstraints>}
      * @private
      */
@@ -1248,6 +1240,7 @@ class TagStack {
       lastChildTagName: '',
       lastChildUrl: '',
       lastChildErrorLineCol: null,
+      cdataMatcher: null,
       childTagMatcher: null,
       referencePointMatcher: null
     };
@@ -1278,7 +1271,6 @@ class TagStack {
     goog.asserts.assert(this.stack_.length > 0, 'Exiting an empty tag stack.');
 
     this.unRegisterDescendantConstraintList();
-    this.cdataMatcher_ = null;
     const topStackEntry = this.stack_.pop();
     if (topStackEntry.childTagMatcher !== null) {
       topStackEntry.childTagMatcher.exitTag(context, result);
@@ -1321,7 +1313,7 @@ class TagStack {
    * @param {?CdataMatcher} matcher
    */
   setCdataMatcher(matcher) {
-    this.cdataMatcher_ = matcher;
+    this.back_().cdataMatcher = matcher;
   }
 
   /**
@@ -1329,8 +1321,8 @@ class TagStack {
    * is no cdata matcher, returns null.
    * @return {?CdataMatcher}
    */
-  getCdataMatcher() {
-    return this.cdataMatcher_;
+  cdataMatcher() {
+    return this.back_().cdataMatcher;
   }
 
   /**
@@ -5096,7 +5088,7 @@ amp.validator.ValidationHandler =
    * @override
    */
   cdata(text) {
-    const matcher = this.context_.getTagStack().getCdataMatcher();
+    const matcher = this.context_.getTagStack().cdataMatcher();
     if (matcher !== null)
       matcher.match(text, this.context_, this.validationResult_);
   }
