@@ -107,6 +107,8 @@ const NEXT_BUTTON_CLASS = 'i-amphtml-story-button-move'
 const PREV_BUTTON_CLASS = 'i-amphtml-story-button-move'
     + ' i-amphtml-story-button-prev i-amphtml-story-button-move-hidden';
 
+const LANDSCAPE_OVERLAY_CLASS = 'i-amphtml-story-landscape';
+
 const PAGE_SWITCH_BUTTONS = [
   {
     tag: 'div',
@@ -142,8 +144,6 @@ const LANDSCAPE_ORIENTATION_WARNING = [
           {
             tag: 'div',
             attrs: dict({'class': 'i-amphtml-rotate-icon'}),
-            children: [
-            ],
           },
           {
             tag: 'div',
@@ -822,16 +822,19 @@ export class AmpStory extends AMP.BaseElement {
         this.updateBackground_(this.activePage_.element);
       }
     } else {
-      this.vsync_.runPromise({
-        measure: () => {
+      this.vsync_.run({
+        measure: state => {
           const {offsetWidth, offsetHeight} = this.element;
-          if (offsetWidth > offsetHeight) {
-            this.element.setAttribute('landscape', '');
+          state.isLandscape = offsetWidth > offsetHeight;
+        },
+        mutate: state => {
+          if (state.isLandscape) {
+            this.element.classList.add(LANDSCAPE_OVERLAY_CLASS);
           } else {
-            this.element.removeAttribute('landscape');
+            this.element.classList.remove(LANDSCAPE_OVERLAY_CLASS);
           }
         },
-      });
+      }, {});
       this.element.removeAttribute('desktop');
     }
   }

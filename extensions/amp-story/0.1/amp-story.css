@@ -893,7 +893,7 @@ amp-story[standalone] .i-amphtml-story-no-rotation-overlay {
   display: none!important;
 }
 
-amp-story[standalone][landscape] .i-amphtml-story-no-rotation-overlay {
+amp-story[standalone].i-amphtml-story-landscape .i-amphtml-story-no-rotation-overlay {
   display: flex!important;
 }
 
