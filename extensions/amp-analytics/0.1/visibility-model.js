@@ -239,8 +239,12 @@ export class VisibilityModel {
     });
     this.unsubscribe_.length = 0;
     this.eventResolver_ = null;
-    this.onTriggerObservable_.removeAll();
-    this.onTriggerObservable_ = null;
+    // TODO(jonkeller): Investigate why dispose() can be called twice,
+    // necessitating this "if"
+    if (this.onTriggerObservable_) {
+      this.onTriggerObservable_.removeAll();
+      this.onTriggerObservable_ = null;
+    }
   }
 
   /**
