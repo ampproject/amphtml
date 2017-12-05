@@ -183,6 +183,7 @@ function generateFunctionWhitelist() {
 export class BindExpression {
   /**
    * @param {string} expressionString
+   * @param {!Object<string, !./bind-macro.BindMacro>} macros
    * @param {number=} opt_maxAstSize
    * @throws {Error} On malformed expressions.
    */
@@ -195,7 +196,7 @@ export class BindExpression {
     this.expressionString = expressionString;
 
     /** @const {!Object<string, !./bind-macro.BindMacro>} */
-    this.macros = macros || {};
+    this.macros = macros;
 
     /** @const @private {!./bind-expr-defines.AstNode} */
     this.ast_ = parser.parse(this.expressionString);
