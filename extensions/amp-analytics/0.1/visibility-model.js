@@ -80,6 +80,11 @@ export class VisibilityModel {
               `Cannot repeat with interval less than ${MIN_REPEAT_INTERVAL}, ` +
               ' repeat set to false');
         }
+      } else {
+        user().error(
+            'AMP-ANALYTICS',
+            `Repeat interval must be a finite number: ${repeat}, ` +
+          ' repeat set to false');
       }
     }
 
@@ -239,8 +244,12 @@ export class VisibilityModel {
     });
     this.unsubscribe_.length = 0;
     this.eventResolver_ = null;
-    this.onTriggerObservable_.removeAll();
-    this.onTriggerObservable_ = null;
+    // TODO(jonkeller): Investigate why dispose() can be called twice,
+    // necessitating this "if"
+    if (this.onTriggerObservable_) {
+      this.onTriggerObservable_.removeAll();
+      this.onTriggerObservable_ = null;
+    }
   }
 
   /**
