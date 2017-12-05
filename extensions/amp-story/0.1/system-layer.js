@@ -213,9 +213,11 @@ export class SystemLayer {
     this.root_.addEventListener('click', e => {
       const target = dev().assertElement(e.target);
 
-      if (matches(target, `.${EXIT_FULLSCREEN_CLASS}, .${EXIT_FULLSCREEN_CLASS} *`)) {
+      if (matches(
+        target, `.${EXIT_FULLSCREEN_CLASS}, .${EXIT_FULLSCREEN_CLASS} *`)) {
         this.onExitFullScreenClick_(e);
-      } else if (matches(target, `.${ENTER_FULLSCREEN_CLASS}, .${ENTER_FULLSCREEN_CLASS} *`)) {
+      } else if (matches(
+        target, `.${ENTER_FULLSCREEN_CLASS}, .${ENTER_FULLSCREEN_CLASS} *`)) {
         this.onEnterFullScreenClick_(e);
       } else if (matches(target, `.${MUTE_CLASS}, .${MUTE_CLASS} *`)) {
         this.onMuteAudioClick_(e);
