@@ -1183,6 +1183,7 @@ let DescendantConstraints;
  *             onlyChildErrorLineCol: LineCol,
  *             lastChildSiblingCount: number,
  *             lastChildTagName: string,
+ *             lastChildUrl: string,
  *             lastChildErrorLineCol: LineCol,
  *             childTagMatcher: ?ChildTagMatcher,
  *             referencePointMatcher: ?ReferencePointMatcher }}
@@ -1240,6 +1241,7 @@ class TagStack {
       onlyChildErrorLineCol: null,
       lastChildSiblingCount: 0,
       lastChildTagName: '',
+      lastChildUrl: '',
       lastChildErrorLineCol: null,
       childTagMatcher: null,
       referencePointMatcher: null
@@ -1464,16 +1466,18 @@ class TagStack {
    * Tells the parent of the current stack entry that its last child must be me
    * (the current stack entry).
    * @param {string} tagName The current stack entry's tag name.
+   * @param {string} url The current stack entry's spec url.
    * @param {amp.htmlparser.DocLocator} docLocator The line and col of where the
    *  current stack entry appears.
    */
-  tellParentImTheLastChild(tagName, docLocator) {
+  tellParentImTheLastChild(tagName, url, docLocator) {
     const parent = this.getParentStackEntry();
     if (parent !== null) {
       parent.lastChildTagName = tagName;
       parent.lastChildErrorLineCol =
           new LineCol(docLocator.getLine(), docLocator.getCol());
       parent.lastChildSiblingCount = parent.numOfChildren;
+      parent.lastChildUrl = url;
     }
   }
 
@@ -1502,6 +1506,15 @@ class TagStack {
   parentLastChildTagName() {
     const parent = this.getParentStackEntry();
     if (parent !== null) return parent.lastChildTagName;
+    return '';
+  }
+
+  /**
+   * @return {string} The spec url of the last child.
+   */
+  parentLastChildUrl() {
+    const parent = this.getParentStackEntry();
+    if (parent !== null) return parent.lastChildUrl;
     return '';
   }
 
@@ -3274,12 +3287,11 @@ function validateNoSiblingsAllowedTags(
 
 /**
  * Validates if the 'last child' rule exists.
- * @param {!ParsedTagSpec} parsedTagSpec
+ * @param {!amp.validator.TagSpec} tagSpec
  * @param {!Context} context
  * @param {!amp.validator.ValidationResult} validationResult
  */
-function validateLastChildTags(parsedTagSpec, context, validationResult) {
-  const spec = parsedTagSpec.getSpec();
+function validateLastChildTags(tagSpec, context, validationResult) {
   const tagStack = context.getTagStack();
 
   if (tagStack.parentHasChildWithLastChildRule() &&
@@ -3298,13 +3310,14 @@ function validateLastChildTags(parsedTagSpec, context, validationResult) {
             tagStack.parentLastChildTagName().toLowerCase(),
             tagStack.getParent().toLowerCase()
           ],
-          getTagSpecUrl(spec), validationResult);
+          tagStack.parentLastChildUrl(), validationResult);
     }
   }
 
-  if (spec.mandatoryLastChild) {
+  if (tagSpec.mandatoryLastChild) {
     tagStack.tellParentImTheLastChild(
-        getTagSpecName(spec), context.getDocLocator());
+        getTagSpecName(tagSpec), getTagSpecUrl(tagSpec),
+        context.getDocLocator());
   }
 }
 
@@ -4154,31 +4167,26 @@ function validateTagAgainstSpec(
   }
   validateDescendantTags(parsedSpec, context, resultForAttempt, parsedRules);
   validateNoSiblingsAllowedTags(parsedSpec, context, resultForAttempt);
-  validateLastChildTags(parsedSpec, context, resultForAttempt);
+  validateLastChildTags(parsedSpec.getSpec(), context, resultForAttempt);
 
   // Set Descendent Constraint rules.
   const descendantTagLists = parsedRules.getDescendantTagLists();
   if (!!descendantTagLists) {
-    const spec = parsedSpec.getSpec();
+    const tagSpec = parsedSpec.getSpec();
 
-    // Register new Descendant Constraints (if they exist).
-    let allowedDescendantsForThisTag = [];
-
-    // Go through each list_name in for this tag.
-    for (const listName of spec.descendantTagLists) {
+    if (tagSpec.descendantTagList !== null) {
+      // Find a matching descendant tag list, by name.
+      let allowedDescendantsForThisTag = [];
       for (const list of descendantTagLists) {
         goog.asserts.assert(list !== null);
 
         // Get the lists associated with this tag.
-        if (list.name == listName) {
+        if (list.name == tagSpec.descendantTagList) {
           for (const tag of list.allowedTags) {
             allowedDescendantsForThisTag.push(tag);
           }
         }
       }
-    }
-
-    if (allowedDescendantsForThisTag.length > 0) {
       context.getTagStack().registerDescendantConstraintList(
           context.getTagStack().getCurrent(), allowedDescendantsForThisTag);
     }
@@ -4836,7 +4844,7 @@ class ParsedValidatorRules {
    * @return {!Array<amp.validator.DescendantTagList>}
    */
   getDescendantTagLists() {
-    return this.rules_.descendantTagLists;
+    return this.rules_.descendantTagList;
   }
 
   /**

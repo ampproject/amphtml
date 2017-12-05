@@ -428,9 +428,9 @@ message TagSpec {
   // This tag may not descend from any tag with any of these tag names.
   repeated string disallowed_ancestor = 13;
 
-  // If set, all of the tag's descendants must be tags from the list. A tag not
-  // in the list will generate an error.
-  repeated string descendant_tag_lists = 29;
+  // If set, all of the tag's descendants must be tags from the named list.
+  // A tag not in the named list will generate an error.
+  optional string descendant_tag_list = 29;
 
   // If set, other tags - identified by their detail string - must be
   // present as well or a warning will be issued (will not invalidate doc).
@@ -511,7 +511,7 @@ message ValidatorRules {
   repeated ErrorFormat error_formats = 9;
   repeated ErrorSpecificity error_specificity = 13;
 
-  repeated DescendantTagList descendant_tag_lists = 16;
+  repeated DescendantTagList descendant_tag_list = 16;
 
   // Deprecated fields, do not reuse.
   extensions 2, 5, 11, 12, 14;

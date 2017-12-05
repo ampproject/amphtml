@@ -95,7 +95,7 @@ tags: {  # <amp-story-grid-layer>
     value_regex: "(fill|horizontal|vertical|thirds)"
     mandatory: true
   }
-  descendant_tag_lists: "amp-story-grid-layer-allowed-descendants"
+  descendant_tag_list: "amp-story-grid-layer-allowed-descendants"
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER default"
   }
@@ -208,7 +208,7 @@ tags: {
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-story"
 }
-descendant_tag_lists: {
+descendant_tag_list: {
   name: "amp-story-grid-layer-allowed-descendants"
   allowed_tags: "ABBR"
   allowed_tags: "ADDRESS"
