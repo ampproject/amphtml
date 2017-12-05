@@ -477,6 +477,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
     });
     it('returns the right URL', () => {
       element.setAttribute('data-ad-slot', 'some_slot');
+      element.setAttribute('data-language', 'lxz');
       return impl.getAdUrl().then(url => {
         [
           /^https:\/\/googleads\.g\.doubleclick\.net\/pagead\/ads/,
@@ -509,6 +510,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
           /(\?|&)isw=\d+(&|$)/,
           /(\?|&)ish=\d+(&|$)/,
           /(\?|&)pfx=(1|0)(&|$)/,
+          /(\?|&)hl=lxz(&|$)/,
           /(\?|&)url=https?%3A%2F%2F[a-zA-Z0-9.:%]+(&|$)/,
           /(\?|&)top=localhost(&|$)/,
           /(\?|&)ref=https%3A%2F%2Facme.org%2F(&|$)/,

@@ -252,6 +252,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'bc': global.SVGElement && global.document.createElementNS ? '1' : null,
       'ctypes': this.getCtypes_(),
       'host': this.element.getAttribute('data-ad-host'),
+      'hl': this.element.getAttribute('data-language'),
       'to': this.element.getAttribute('data-tag-origin'),
       'pv': sharedStateParams.pv,
       'channel': this.element.getAttribute('data-ad-channel'),
