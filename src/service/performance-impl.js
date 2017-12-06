@@ -22,6 +22,8 @@ import {getMode} from '../mode';
 import {isCanary} from '../experiments';
 import {throttle} from '../utils/rate-limit';
 import {dict, map} from '../utils/object';
+import {triggerAnalyticsEvent} from '../analytics';
+import {dev} from '../log';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance
@@ -188,6 +190,8 @@ export class Performance {
           && !recordedFirstContentfulPaint) {
         this.tickDelta('fcp', entry.startTime + entry.duration);
         recordedFirstContentfulPaint = true;
+	dev().error("FCP");
+        triggerAnalyticsEvent(this.win.ampAnalyticsPageLoadMetricsElement, 'fcp');
       }
     };
     const observer = new this.win.PerformanceObserver(list => {
@@ -255,6 +259,8 @@ export class Performance {
           // 0 case, since pre-renders that are never used are highly
           // likely to fully load before they are never used :)
           this.tickDelta('pc', userPerceivedVisualCompletenesssTime);
+	  dev().error("FVR1");
+	  triggerAnalyticsEvent(this.win.ampAnalyticsPageLoadMetricsElement, 'fvr');
         });
         this.prerenderComplete_(userPerceivedVisualCompletenesssTime);
       } else {
@@ -262,6 +268,8 @@ export class Performance {
         // and we just need to tick `pc`. (it will give us the relative
         // time since the viewer initialized the timer)
         this.tick('pc');
+	dev().error("FVR2");
+        triggerAnalyticsEvent(this.win.ampAnalyticsPageLoadMetricsElement, 'fvr');
         // We don't have the actual csi timer's clock start time,
         // so we just have to use `docVisibleTime`.
         this.prerenderComplete_(this.win.Date.now() - docVisibleTime);

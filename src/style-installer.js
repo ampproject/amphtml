@@ -20,6 +20,7 @@ import {map} from './utils/object';
 import {setStyles} from './style';
 import {waitForBody, insertAfterOrAtStart} from './dom';
 import {waitForServices} from './render-delaying-services';
+import {triggerAnalyticsEvent} from './analytics';
 
 const TRANSFORMER_PROP = '__AMP_CSS_TR';
 const STYLE_MAP_PROP = '__AMP_CSS_SM';
@@ -263,6 +264,8 @@ export function makeBodyVisible(doc, opt_waitForServices) {
             const perf = Services.performanceFor(win);
             perf.tick('mbv');
             perf.flush();
+            dev().info("MBV");
+            triggerAnalyticsEvent(this.win.ampAnalyticsPageLoadMetricsElement, 'mbv');
           } catch (e) {}
         });
       } else {
