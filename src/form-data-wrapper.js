@@ -130,7 +130,7 @@ export class FormDataWrapper {
 
 /**
  * Check if the given object is a FormDataWrapper instance
- * @param {!Object|string|undefined} o
+ * @param {*} o
  * @return {boolean} True if the object is a FormDataWrapper instance.
  */
 export function isFormDataWrapper(o) {
