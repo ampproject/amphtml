@@ -104,14 +104,14 @@ export class LaterpayVendor {
     /** @const */
     this.ampdoc = accessService.ampdoc;
 
-    /** @const @private {!../../amp-access/0.1/amp-access.AccessService} */
-    this.accessService_ = accessService;
+    /** @const @private {!../../amp-access/0.1/amp-access.AccessSource} */
+    this.accessSource_ = accessService.getSource(0);
 
     /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @const @private {!JsonObject} For shape see LaterpayConfigDef */
-    this.laterpayConfig_ = this.accessService_.getAdapterConfig();
+    this.laterpayConfig_ = this.accessSource_.getAdapterConfig();
 
     /** @private {?JsonObject} For shape see PurchaseConfigDef */
     this.purchaseConfig_ = null;
@@ -226,10 +226,10 @@ export class LaterpayVendor {
   getPurchaseConfig_() {
     const url = this.purchaseConfigBaseUrl_ +
                 '&article_title=' + encodeURIComponent(this.getArticleTitle_());
-    const urlPromise = this.accessService_.buildUrl(
+    const urlPromise = this.accessSource_.buildUrl(
         url, /* useAuthData */ false);
     return urlPromise.then(url => {
-      return this.accessService_.getLoginUrl(url);
+      return this.accessSource_.getLoginUrl(url);
     }).then(url => {
       dev().info(TAG, 'Authorization URL: ', url);
       return this.timer_.timeoutPromise(
@@ -522,11 +522,11 @@ export class LaterpayVendor {
    */
   handlePurchase_(ev, purchaseUrl, purchaseType) {
     ev.preventDefault();
-    const urlPromise = this.accessService_.buildUrl(
+    const urlPromise = this.accessSource_.buildUrl(
         purchaseUrl, /* useAuthData */ false);
     return urlPromise.then(url => {
       dev().fine(TAG, 'Authorization URL: ', url);
-      this.accessService_.loginWithUrl(url, purchaseType);
+      this.accessSource_.loginWithUrl(url, purchaseType);
     });
   }
 
