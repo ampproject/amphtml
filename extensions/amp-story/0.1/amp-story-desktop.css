@@ -150,11 +150,11 @@ amp-story-page.i-amphtml-story-page-shown {
   right: auto!important;
   margin: auto!important;
   max-height: 70vh!important;
-  max-width: calc(9/16 * 70vh);
+  max-width: calc(9/16 * 70vh) !important;
   box-shadow: 0 0 15px rgba(0, 0, 0, .4)!important;
   transition: transform 500ms cubic-bezier(0.4,0,0.2,1)!important;
   min-width: 348px !important;
-  max-width: 619px !important;
+  min-height: 619px !important;
 }
 
 /* Navigation buttons */
@@ -400,6 +400,12 @@ amp-story-page.i-amphtml-story-page-shown {
   top: auto!important;
   bottom: 0!important;
   height: 72px!important;
+}
+
+@media (max-height: 768px) {
+  [desktop] .i-amphtml-story-system-layer {
+    height: 32px !important;
+  }
 }
 
 [desktop] .i-amphtml-story-progress-bar {
