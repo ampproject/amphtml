@@ -58,17 +58,17 @@ export class VisibilityModel {
     this.repeat_ = false;
 
     /** @private {?number} */
-    this.repeatInterval_ = null;
+    this.refreshInterval_ = null;
 
     const repeat = spec['repeat'];
     if (repeat === true) {
       this.repeat_ = true;
       if (this.spec_.totalTimeMin || this.spec_.continuousTimeMin) {
-        const repeatInterval = Math.max(
+        const totalContinuousMax = Math.max(
             this.spec_.totalTimeMin,
             this.spec_.continuousTimeMin);
-        if (repeatInterval >= MIN_REPEAT_INTERVAL) {
-          this.repeatInterval_ = repeatInterval;
+        if (totalContinuousMax >= MIN_REPEAT_INTERVAL) {
+          this.refreshInterval_ = totalContinuousMax;
         } else {
           this.repeat_ = false;
           user().error(
@@ -202,12 +202,12 @@ export class VisibilityModel {
       this.dispose();
       return;
     }
-    if (this.repeatInterval_) {
+    if (this.refreshInterval_) {
       const now = Date.now();
       const interval = now - this.firstVisibleTime_;
 
       // Unit in milliseconds
-      const timeUntilRepeat = Math.max(0, this.repeatInterval_ - interval);
+      const timeUntilRepeat = Math.max(0, this.refreshInterval_ - interval);
       this.ready_ = false;
       dev().assert(!this.scheduleRepeatId_, 'Should not repeat twice');
       this.scheduleRepeatId_ = setTimeout(() => {
