@@ -37,3 +37,4 @@ Supported parameters:
 - data-ad-host
 - data-adtest
 - data-tag-origin
+- data-language

@@ -155,6 +155,8 @@ amp-story-page.i-amphtml-story-page-shown {
   transition-property: transform !important;
   transition-duration: 500ms !important;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1)!important;
+  min-width: 348px !important;
+  max-width: 619px !important;
 }
 
 /* Navigation buttons */

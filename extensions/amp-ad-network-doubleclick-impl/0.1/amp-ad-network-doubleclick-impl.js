@@ -725,7 +725,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   rewriteRtcKeys_(response, callout) {
     // Only perform this substitution for vendor-defined URLs.
-    if (!RTC_VENDORS[callout]) {
+    if (!RTC_VENDORS[callout] || RTC_VENDORS[callout].disableKeyAppend) {
       return response;
     }
     const newResponse = {};
