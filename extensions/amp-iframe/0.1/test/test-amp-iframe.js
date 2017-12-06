@@ -177,6 +177,7 @@ describes.realWin('amp-iframe', {
         allowfullscreen: '',
         allowpaymentrequest: '',
         allowtransparency: '',
+        allow: 'microphone; camera',
         referrerpolicy: 'no-referrer',
         frameborder: 3,
         longdesc: 'foo',
@@ -187,6 +188,7 @@ describes.realWin('amp-iframe', {
       expect(iframe.getAttribute('allowfullscreen')).to.equal('');
       expect(iframe.getAttribute('allowpaymentrequest')).to.equal('');
       expect(iframe.getAttribute('allowtransparency')).to.equal('');
+      expect(iframe.getAttribute('allow')).to.equal('microphone; camera');
       expect(iframe.getAttribute('referrerpolicy')).to.equal('no-referrer');
       expect(iframe.getAttribute('frameborder')).to.equal('3');
       // unsupproted attributes
