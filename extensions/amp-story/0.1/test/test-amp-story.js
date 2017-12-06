@@ -337,23 +337,30 @@ describes.realWin('amp-story', {
     expect(prevStub).calledOnce;
   });
 
-  it('runs vsync on resize', () => {
-    element.offsetWidth = 10;
-    element.offsetHeight = 9;
+  it('toggles `i-amphtml-story-landscape` based on height and width', () => {
+    story.element.style.width = '11px';
+    story.element.style.height = '10px';
     const isDesktopStub = sandbox.stub(story, 'isDesktop_').returns(false);
-    const vSyncStub = sandbox.spy(story.vsync_, 'run');
-    story.onResize();
-    expect(isDesktopStub).to.be.calledOnce;
-    expect(vSyncStub).to.be.calledOnce;
-  });
-
-  it('toggles `i-amphtml-story-landscape` class based on vsync state', () => {
     const addClassStub = sandbox.stub(story.element.classList, 'add');
     const removeClassStub = sandbox.stub(story.element.classList, 'remove');
-    story.toggleLandscapeOverlay_(true);
+    story.vsync_ = {
+      run: (task, state) => {
+        if (task.measure) {
+          task.measure(state);
+        }
+        if (task.mutate) {
+          task.mutate(state);
+        }
+      },
+    };
+    story.onResize();
+    expect(isDesktopStub).to.be.calledOnce;
     expect(addClassStub).to.be.calledWith('i-amphtml-story-landscape');
-    story.toggleLandscapeOverlay_(false);
-    expect(removeClassStub).to.be.calledWith('i-amphtml-story-landscape');
+    story.element.style.width = '10px';
+    story.element.style.height = '11px';
+    story.onResize();
+    expect(isDesktopStub).to.be.calledTwice;
+    expect(removeClassStub).to.be.calledOnce;
   });
 });
 
