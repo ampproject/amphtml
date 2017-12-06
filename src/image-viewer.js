@@ -245,9 +245,10 @@ export class ImageViewer {
 
   /**
    * Measures the image viewer and image sizes and positioning.
+   * @return {!Promise}
    */
   measure() {
-    this.lightbox_.getVsync().measure(() => {
+    return this.lightbox_.getVsync().measurePromise(() => {
       this.viewerBox_ = layoutRectFromDomRect(this.viewer_
         ./*OK*/getBoundingClientRect());
 
@@ -284,6 +285,7 @@ export class ImageViewer {
       this.updatePanZoomBounds_(this.scale_);
       this.updatePanZoom_();
 
+    }).then(() => {
       this.updateSrc_();
     });
   }
