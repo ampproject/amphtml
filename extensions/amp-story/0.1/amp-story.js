@@ -44,10 +44,10 @@ import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
+  matches,
+  removeElement,
   scopedQuerySelector,
   scopedQuerySelectorAll,
-  removeElement,
-  matches,
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {once} from '../../../src/utils/function';
