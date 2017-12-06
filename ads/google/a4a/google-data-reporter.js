@@ -33,6 +33,7 @@ import {
 import {
   DOUBLECLICK_A4A_EXPERIMENT_NAME,
 } from '../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config'; // eslint-disable-line max-len
+import {dev} from '../../../src/log';
 
 /**
  * An experiment config for controlling profiling.  Profiling has no branches:
@@ -64,9 +65,9 @@ export const PROFILING_BRANCHES = {
 export function getLifecycleReporter(ampElement, slotId) {
   const win = ampElement.win;
   randomlySelectUnsetExperiments(win, PROFILING_BRANCHES);
-  if (isReportingEnabled(ampElement) &&
-      (!!getExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME) ||
-       !!getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME))) {
+  if (true) { // (isReportingEnabled(ampElement) &&
+      //(!!getExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME) ||
+      // !!getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME))) {
     setupPageLoadMetricsReporter_(ampElement);
     return new GoogleAdLifecycleReporter(
       win, ampElement.element, Number(slotId));
@@ -148,6 +149,9 @@ function setupPageLoadMetricsReporter_(ampElement) {
           'firstViewportReady.${FVR_VALUE}'
           */
           ,
+	  'fvr' : 'https://fvrpingfvrping',
+	  'fcp' : 'https://fcppingfcpping',
+	  'mbv' : 'https://mbvpingmbvping',
         },
         'transport': {
           'beacon': false,
@@ -159,9 +163,22 @@ function setupPageLoadMetricsReporter_(ampElement) {
             'request': 'fvt',
             'selector': 'body',
           },
+	  'fvr': {
+ 	    'on': 'fvr',
+            'request': 'fvr',
+          },
+          'fcp': {
+ 	    'on': 'fcp',
+            'request': 'fcp',
+          },
+          'mbv': {
+ 	    'on': 'mbv',
+            'request': 'mbv',
+          },
         },
       });
 
+  dev().error("Set up analytics element");
   // Load amp-analytics extensions
   win.ampAnalyticsPageLoadMetricsElement =
       win.ampAnalyticsPageLoadMetricsElement ||
