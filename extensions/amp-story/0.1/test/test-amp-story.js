@@ -341,8 +341,7 @@ describes.realWin('amp-story', {
     story.element.style.width = '11px';
     story.element.style.height = '10px';
     const isDesktopStub = sandbox.stub(story, 'isDesktop_').returns(false);
-    const addClassStub = sandbox.stub(story.element.classList, 'add');
-    const removeClassStub = sandbox.stub(story.element.classList, 'remove');
+    const toggleClassStub = sandbox.stub(story.element.classList, 'toggle');
     story.vsync_ = {
       run: (task, state) => {
         if (task.measure) {
@@ -355,12 +354,13 @@ describes.realWin('amp-story', {
     };
     story.onResize();
     expect(isDesktopStub).to.be.calledOnce;
-    expect(addClassStub).to.be.calledWith('i-amphtml-story-landscape');
+    expect(toggleClassStub).to.be.calledWith('i-amphtml-story-landscape', true);
     story.element.style.width = '10px';
     story.element.style.height = '11px';
     story.onResize();
     expect(isDesktopStub).to.be.calledTwice;
-    expect(removeClassStub).to.be.calledOnce;
+    expect(toggleClassStub).to.be.calledWith('i-amphtml-story-landscape',
+        false);
   });
 });
 

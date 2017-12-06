@@ -828,11 +828,8 @@ export class AmpStory extends AMP.BaseElement {
           state.isLandscape = offsetWidth > offsetHeight;
         },
         mutate: state => {
-          if (state.isLandscape) {
-            this.element.classList.add(LANDSCAPE_OVERLAY_CLASS);
-          } else {
-            this.element.classList.remove(LANDSCAPE_OVERLAY_CLASS);
-          }
+          this.element.classList.toggle(LANDSCAPE_OVERLAY_CLASS,
+              state.isLandscape);
           this.element.removeAttribute('desktop');
         },
       }, {});
