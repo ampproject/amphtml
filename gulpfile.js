@@ -546,7 +546,7 @@ function buildExtensionJs(path, name, version, options) {
     watch: options.watch,
     preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
     minify: options.minify,
-    toName:  name + '-' + version + '.max.js',
+    toName: name + '-' + version + '.max.js',
     minifiedName: name + '-' + version + '.js',
     latestName: name + '-latest.js',
     extraGlobs: options.extraGlobs,
@@ -780,45 +780,54 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
       });
 }
 
-/**
- * Synchronously concatenates the given files into the given destination
- *
- * @param {string} destFilePath File path to write the concatenated files to
- * @param {Array<string>} files List of file paths to concatenate
- */
-function concatFiles(destFilePath, files) {
-  var all = files.map(function(filePath) {
-    return fs.readFileSync(filePath, 'utf-8');
-  });
-
-  fs.writeFileSync(destFilePath, all.join(';'), 'utf-8');
-}
+const MODULE_PLACEHOLDER_TOKEN = 'AMP.includeExternalBundle();';
+const MODULE_SEPARATOR = ';';
 
 /**
- * Allows (ap|pre)pending to the already compiled, minified JS file
- *
- * @param {string} srcFilename Name of the JS source file
- * @param {string} destFilePath File path to the compiled JS file
+ * Allows prepending code to the compiled, minified extension.
+ * This code will not be parsed by the compiler.
+ * @param {string} name The name of the extension.
+ * @return {string} The concatenated source of the additional files needed by the extension.
  */
-function appendToCompiledFile(srcFilename, destFilePath) {
-  if (srcFilename == 'amp-viz-vega.js') {
-    // Prepend minified d3 and vega third_party to compiled amp-viz-vega.js
-    concatFiles(destFilePath, [
-      'third_party/d3/d3.js',
-      'third_party/d3-geo-projection/d3-geo-projection.js',
-      'third_party/vega/vega.js',
-      destFilePath,
-    ]);
-  } else if (srcFilename == 'amp-date-picker.js') {
-    concatFiles(destFilePath, [
+function replaceExternalBundleToken(srcFilename, destFilePath) {
+  let bundle;
+  if (srcFilename === 'amp-date-picker.js') {
+    bundle = concatFilesToString([
       'third_party/moment/bundle.js',
       'third_party/react/bundle.js',
       'third_party/react-dom/bundle.js',
       'third_party/prop-types/bundle.js',
       'third_party/react-dates/bundle.js',
-      destFilePath,
     ]);
+  } else if (srcFilename === 'amp-viz-vega.js') {
+    bundle = concatFilesToString([
+      'third_party/d3/d3.js',
+      'third_party/d3-geo-projection/d3-geo-projection.js',
+      'third_party/vega/vega.js',
+    ]);
+  } else {
+    bundle = '';
   }
+
+  const source = fs.readFileSync(destFilePath, 'utf8');
+  const containsToken = (source.indexOf(MODULE_PLACEHOLDER_TOKEN) > -1);
+  const newSource = containsToken ?
+      source.replace(MODULE_PLACEHOLDER_TOKEN, () => bundle) :
+      bundle + MODULE_SEPARATOR + source;
+
+  fs.writeFileSync(destFilePath, newSource, 'utf8');
+}
+
+/**
+ * Synchronously concatenates the given files into a string.
+ *
+ * @param {Array<string>} files A list of file paths.
+ * @return {string} The concatenated contents of the given files.
+ */
+function concatFilesToString(files) {
+  return files.map(function(filePath) {
+    return fs.readFileSync(filePath, 'utf8');
+  }).join(MODULE_SEPARATOR);
 }
 
 /**
@@ -844,11 +853,12 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     return closureCompile(
         srcDir + srcFilename, destDir, options.minifiedName, options)
         .then(function() {
-          appendToCompiledFile(srcFilename, destDir + '/' + options.minifiedName);
+          const destPath = destDir + '/' + options.minifiedName;
+          replaceExternalBundleToken(srcFilename, destPath);
           fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
           if (options.latestName) {
             fs.copySync(
-                destDir + '/' + options.minifiedName,
+                destPath,
                 destDir + '/' + options.latestName);
           }
         })
@@ -907,7 +917,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe($$.rename(destFilename))
       .pipe(lazywrite())
       .on('end', function() {
-        appendToCompiledFile(srcFilename, destDir + '/' + destFilename);
+        replaceExternalBundleToken(srcFilename, destDir + '/' + destFilename);
       })).then(() => {
         endBuildStep('Compiled', srcFilename, startTime);
       });

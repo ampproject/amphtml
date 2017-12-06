@@ -416,3 +416,13 @@ const RTC_ERROR_ENUM = {};
       callout: string,
       error: (RTC_ERROR_ENUM|undefined)}} */
 var rtcResponseDef;
+
+/** @type {!function(string):?} */
+AMP.require;
+
+/**
+ * Replaced in the gulpfile by either an empty string, or a concatenated
+ * set of browserify bundles that expose external modules.
+ * @type {!function()}
+ */
+AMP.includeExternalBundle = function() {};

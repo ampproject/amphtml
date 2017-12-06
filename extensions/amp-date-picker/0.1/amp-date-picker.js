@@ -38,6 +38,8 @@ import {requireExternal} from '../../../src/module';
 import {dashToCamelCase} from '../../../src/string';
 import {DatesList} from './dates-list';
 
+AMP.includeExternalBundle();
+
 /**
  * @typedef {{
  *   dates: !DatesList,
