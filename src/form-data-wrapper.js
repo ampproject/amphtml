@@ -135,5 +135,5 @@ export class FormDataWrapper {
  */
 export function isFormDataWrapper(o) {
   // instanceof doesn't work as expected, so we detect with duck-typing.
-  return !!(o && o.getFormData);
+  return !!o && typeof o.getFormData == 'function';
 }
