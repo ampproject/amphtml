@@ -31,8 +31,39 @@ describes.realWin('amp-ventuno-player', {
     win.document.body.appendChild(element);
   });
 
-  it('should have hello world when built', () => {
-    element.build();
-    expect(element.querySelector('div').textContent).to.equal('hello world');
+  function getVentunoPlayer(type, pubid, slotid, title, url, meta) {
+	  const player = win.document.createElement('amp-ventuno-player');
+	  if (type) {
+		player.setAttribute('data-player', type);
+	  }
+	  if (pubid) {
+		player.setAttribute('data-pubid', pubid);
+	  }
+	  if (slotid) {
+		player.setAttribute('data-slotid', slotid);
+	  }
+	  if (title) {
+		player.setAttribute('data-title', title);
+	  }
+	  if (url) {
+		player.setAttribute('data-url', url);
+	  }
+	  if (meta) {
+		player.setAttribute('data-meta', meta);
+	  }
+	  win.document.body.appendChild(player);
+	  return player.build()
+	  	.then(() => player.layoutCallback())
+	  	.then(() => player);
+  }
+
+  it('renders an editorial player', () => {
+	let actSrc = 'https://venwebsecure.ventunotech.com/embed/embedPlayer.html?pFrom=amp&pType=ep&pubKey=49b792a987103&slot=380&pTitle=test&pUrl=http%3A%2F%2Fventunotech.com&pMeta=One%2CTwo%2Cthree';
+	  return getVentunoPlayer('ep', '49b792a987103', '380', 'test', 'http://ventunotech.com', 'One,Two,three').then(player => {
+		const playerIframe = player.querySelector('iframe');
+		expect(playerIframe).to.not.be.null;
+		expect(playerIframe.src).to.equal(actSrc);
+	  });
   });
+
 });
