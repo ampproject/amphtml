@@ -156,30 +156,12 @@ describes.sandboxed('VisibilityModel', {}, () => {
     it('should parse repeat', () => {
       // Accept boolean
       expect(getRepeat({repeat: true}).repeat).to.be.true;
-      expect(getRepeat({repeat: true}).refreshInterval).to.be.null;
       expect(getRepeat({repeat: 'true'}).repeat).to.be.false;
       expect(getRepeat({repeat: 'invalid'}).repeat).to.be.false;
 
       // Not accept number
       expect(getRepeat({repeat: '200'}).repeat).to.be.false;
       expect(getRepeat({repeat: 200}).repeat).to.be.false;
-
-      // Should forbid repeat request with interval less than
-      // MIN_REPEAT_INTERVAL
-      expect(getRepeat({repeat: true, continuousTimeMin: 199}).repeat)
-          .to.be.false;
-      expect(getRepeat({repeat: true, continuousTimeMin: 200}).repeat)
-          .to.be.true;
-      expect(getRepeat({repeat: true, totalTimeMin: 200}).repeat).to.be.true;
-
-      // refreshInterval
-      expect(getRepeat({repeat: true, continuousTimeMin: 201})
-          .refreshInterval).to.equal(201);
-      expect(getRepeat({repeat: true, totalTimeMin: 202})
-          .refreshInterval).to.equal(202);
-      expect(
-          getRepeat({repeat: true, continuousTimeMin: 202, totalTimeMin: 203})
-              .refreshInterval).to.equal(203);
     });
   });
 

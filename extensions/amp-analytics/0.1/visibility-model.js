@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../../../src/log';
+import {dev} from '../../../src/log';
 import {Observable} from '../../../src/observable';
 
 const MIN_REPEAT_INTERVAL = 200;
@@ -57,26 +57,9 @@ export class VisibilityModel {
     /** @private {boolean} */
     this.repeat_ = false;
 
-    /** @private {?number} */
-    this.refreshInterval_ = null;
-
     const repeat = spec['repeat'];
     if (repeat === true) {
       this.repeat_ = true;
-      if (this.spec_.totalTimeMin || this.spec_.continuousTimeMin) {
-        const totalContinuousMax = Math.max(
-            this.spec_.totalTimeMin,
-            this.spec_.continuousTimeMin);
-        if (totalContinuousMax >= MIN_REPEAT_INTERVAL) {
-          this.refreshInterval_ = totalContinuousMax;
-        } else {
-          this.repeat_ = false;
-          user().error(
-              'AMP-ANALYTICS',
-              `Cannot repeat with interval less than ${MIN_REPEAT_INTERVAL}, ` +
-              ' repeat set to false');
-        }
-      }
     }
 
     /** @private {?function()} */
@@ -202,12 +185,14 @@ export class VisibilityModel {
       this.dispose();
       return;
     }
-    if (this.refreshInterval_) {
+    const totalContinuousMax = Math.max(
+        this.spec_.totalTimeMin, this.spec_.continuousTimeMin);
+    if (totalContinuousMax >= MIN_REPEAT_INTERVAL) {
       const now = Date.now();
       const interval = now - this.firstVisibleTime_;
 
       // Unit in milliseconds
-      const timeUntilRepeat = Math.max(0, this.refreshInterval_ - interval);
+      const timeUntilRepeat = Math.max(0, totalContinuousMax - interval);
       this.ready_ = false;
       dev().assert(!this.scheduleRepeatId_, 'Should not repeat twice');
       this.scheduleRepeatId_ = setTimeout(() => {
