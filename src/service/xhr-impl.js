@@ -73,10 +73,10 @@ export let FetchInitJsonDef;
  *   statusText: string,
  *   responseText: string,
  *   responseXML: ?Document,
- *   getResponseHeader: function(this:XhrDef, string): string,
+ *   getResponseHeader: function(this:XMLHttpRequestDef, string): string,
  * }}
  */
-let XhrDef;
+let XMLHttpRequestDef;
 
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
@@ -187,8 +187,8 @@ export class Xhr {
       return Promise.resolve();
     }
 
-    const docOptedIn = this.win.document.documentElement.hasAttribute(
-        'allow-xhr-interception');
+    const htmlElement = this.ampdocSingle_.getRootNode().documentElement;
+    const docOptedIn = htmlElement.hasAttribute('allow-xhr-interception');
     if (!docOptedIn) {
       return Promise.resolve();
     }
@@ -317,7 +317,7 @@ export class Xhr {
     }
 
     const lowercasedHeaders = map();
-    const xhr = {
+    const data = {
       status: 200,
       statusText: 'OK',
       responseText: (response['body'] ? String(response['body']) : ''),
@@ -341,19 +341,19 @@ export class Xhr {
         });
       }
       if (init.status) {
-        xhr.status = parseInt(init.status, 10);
+        data.status = parseInt(init.status, 10);
       }
       if (init.statusText) {
-        xhr.statusText = String(init.statusText);
+        data.statusText = String(init.statusText);
       }
     }
 
     if (isDocumentType) {
-      xhr.responseXML =
-          new DOMParser().parseFromString(xhr.responseText, 'text/html');
+      data.responseXML =
+          new DOMParser().parseFromString(data.responseText, 'text/html');
     }
 
-    return new FetchResponse(xhr);
+    return new FetchResponse(data);
   }
 
   /**
@@ -694,10 +694,10 @@ export function assertSuccess(response) {
  */
 export class FetchResponse {
   /**
-   * @param {!XMLHttpRequest|!XDomainRequest|!XhrDef} xhr
+   * @param {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} xhr
    */
   constructor(xhr) {
-    /** @private @const {!XMLHttpRequest|!XDomainRequest|!XhrDef} */
+    /** @private @const {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} */
     this.xhr_ = xhr;
 
     /** @const {number} */
@@ -787,10 +787,10 @@ export class FetchResponse {
  */
 export class FetchResponseHeaders {
   /**
-   * @param {!XMLHttpRequest|!XDomainRequest|!XhrDef} xhr
+   * @param {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} xhr
    */
   constructor(xhr) {
-    /** @private @const {!XMLHttpRequest|!XDomainRequest|!XhrDef} */
+    /** @private @const {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} */
     this.xhr_ = xhr;
   }
 
@@ -814,7 +814,7 @@ export class FetchResponseHeaders {
 
 /**
  * @param {!Window} window
- * @return {!XhrDef}
+ * @return {!Xhr}
  */
 export function xhrServiceForTesting(window) {
   installXhrService(window);

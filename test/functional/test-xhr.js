@@ -781,9 +781,12 @@ describe.configure().skipSafari().run('XHR', function() {
     }
 
     beforeEach(() => {
+      const optedInDoc = window.document.implementation.createHTMLDocument('');
+      optedInDoc.documentElement.setAttribute('allow-xhr-interception', '');
+
       ampdocServiceForStub.returns({
         isSingleDoc: () => true,
-        getAmpDoc: () => ({}),
+        getAmpDoc: () => ({getRootNode: () => optedInDoc}),
       });
 
       viewer = {
@@ -795,16 +798,12 @@ describe.configure().skipSafari().run('XHR', function() {
       sendMessageStub.returns(getDefaultResponsePromise());
       sandbox.stub(Services, 'viewerForDoc').returns(viewer);
 
-      const optedInDoc = window.document.implementation.createHTMLDocument('');
-      optedInDoc.documentElement.setAttribute('allow-xhr-interception', '');
-
       interceptionEnabledWin = {
         location: {
           href: `${origin}/path`,
         },
         fetch: () =>
             Promise.resolve(new Response('', getDefaultResponseOptions())),
-        document: optedInDoc,
       };
     });
 
@@ -819,7 +818,10 @@ describe.configure().skipSafari().run('XHR', function() {
     it('should not intercept if AMP doc does not opt in', () => {
       const nonOptedInDoc =
           window.document.implementation.createHTMLDocument('');
-      interceptionEnabledWin.document = nonOptedInDoc;
+      ampdocServiceForStub.returns({
+        isSingleDoc: () => true,
+        getAmpDoc: () => ({getRootNode: () => nonOptedInDoc}),
+      });
 
       const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
