@@ -96,8 +96,8 @@ const LogType = {
 
   /** Warnings */
   IMAGES_MAX_720P_OR_SRCSET: {
-    message: 'Images should not be larger than 720p.  If you wish to use' +
-        'images that are larger than 720p, you should specify a srcset.',
+    message: 'Images should be no larger than 720p.  If you wish to use ' +
+        'images that are larger than 720p, specify a srcset.',
     moreInfo: AMPPROJECT_DOCS + '/guides/responsive/art_direction#srcset',
     selector: 'img:not([srcset])',
     predicate: el => el.naturalWidth <= 720 && el.naturalHeight <= 1280,
@@ -126,7 +126,7 @@ const LogType = {
   },
 
   VIDEO_POSTER_MAX_720P: {
-    message: 'Video poster images should not be larger than 720p.',
+    message: 'Video poster images should be no larger than 720p.',
     selector: 'video[poster]',
     predicate: el => getPosterFromVideo(el)
         .then(poster => {
