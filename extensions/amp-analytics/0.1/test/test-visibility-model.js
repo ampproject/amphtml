@@ -41,7 +41,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
       const model = new VisibilityModel(spec, NO_CALC);
       return {
         repeat: model.repeat_,
-        repeatInterval: model.repeatInterval_,
+        refreshInterval: model.refreshInterval_,
       };
     };
 
@@ -156,7 +156,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
     it('should parse repeat', () => {
       // Accept boolean
       expect(getRepeat({repeat: true}).repeat).to.be.true;
-      expect(getRepeat({repeat: true}).repeatInterval).to.be.null;
+      expect(getRepeat({repeat: true}).refreshInterval).to.be.null;
       expect(getRepeat({repeat: 'true'}).repeat).to.be.false;
       expect(getRepeat({repeat: 'invalid'}).repeat).to.be.false;
 
@@ -172,14 +172,14 @@ describes.sandboxed('VisibilityModel', {}, () => {
           .to.be.true;
       expect(getRepeat({repeat: true, totalTimeMin: 200}).repeat).to.be.true;
 
-      // repeatInterval
+      // refreshInterval
       expect(getRepeat({repeat: true, continuousTimeMin: 201})
-          .repeatInterval).to.equal(201);
+          .refreshInterval).to.equal(201);
       expect(getRepeat({repeat: true, totalTimeMin: 202})
-          .repeatInterval).to.equal(202);
+          .refreshInterval).to.equal(202);
       expect(
           getRepeat({repeat: true, continuousTimeMin: 202, totalTimeMin: 203})
-              .repeatInterval).to.equal(203);
+              .refreshInterval).to.equal(203);
     });
   });
 
