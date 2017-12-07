@@ -376,8 +376,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {boolean} */
     this.isIdleRender_ = false;
 
-    /** @private {?{writeInHead: boolean, waitForOnload: boolean}} */
-    this.nameframeExperimentConfig_ = null;
+    /** @private {{writeInHead: boolean, waitForOnload: boolean, control: true}} */
+    this.nameframeExperimentConfig_ = {
+      waitForOnload: true,
+      writeInHead: true,
+      control: true,
+    };
   }
 
   /** @override */
@@ -816,6 +820,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             this.nameframeExperimentConfig_[config] = false;
         }
       });
+      this.nameframeExperimentConfig_['control'] = false;
     }
 
     if (this.isFluid_) {
