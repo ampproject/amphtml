@@ -31,12 +31,11 @@ import {Layout} from '../../../src/layout';
 import {upgradeBackgroundAudio} from './audio';
 import {EventType, dispatch, dispatchCustom} from './events';
 import {AdvancementConfig} from './page-advancement';
-import {scopedQuerySelectorAll} from '../../../src/dom';
+import {matches, scopedQuerySelectorAll} from '../../../src/dom';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 import {CommonSignals} from '../../../src/common-signals';
 import {setImportantStyles} from '../../../src/style';
-
 
 
 /**
@@ -83,6 +82,10 @@ export class AmpStoryPage extends AMP.BaseElement {
             .catch(reject);
       };
     });
+
+    /** @private @const {boolean} Only prerender the first story page. */
+    this.prerenderAllowed_ = matches(this.element,
+        'amp-story-page:first-of-type');
   }
 
 
@@ -145,6 +148,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.pageActiveCallback_();
   }
 
+
   /** @override */
   layoutCallback() {
     this.muteAllMedia();
@@ -155,10 +159,12 @@ export class AmpStoryPage extends AMP.BaseElement {
     ]);
   }
 
+
   /** @return {!Promise} */
   beforeVisible() {
     return this.maybeApplyFirstAnimationFrame();
   }
+
 
   /** @private */
   onPageVisible_() {
@@ -216,7 +222,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   prerenderAllowed() {
-    return true;
+    return this.prerenderAllowed_;
   }
 
 
