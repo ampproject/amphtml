@@ -237,10 +237,10 @@ export class Bind {
       // so that we can restore them on history-pop.
       const oldState = map();
       Object.keys(result).forEach(variable => {
-        const s = map();
         const value = this.state_[variable];
-        s[variable] = (value === undefined) ? null : value;
-        deepMerge(oldState, s, MAX_MERGE_DEPTH);
+        // Store a deep copy of `value` to make sure `oldState` isn't
+        // modified by subsequent setState() actions.
+        oldState[variable] = this.copyJsonObject_(value);
       });
 
       const onPop = () => this.setState(oldState);
@@ -994,6 +994,25 @@ export class Bind {
       }
     }
     return true;
+  }
+
+  /**
+   * Copies an object containing JSON data and returns it.
+   * Returns null if input object contains invalid JSON (e.g. undefined or
+   * circular references).
+   * @param {Object|undefined} o
+   * @return {Object}
+   */
+  copyJsonObject_(o) {
+    if (o === undefined) {
+      return null;
+    }
+    try {
+      return JSON.parse(JSON.stringify(o));
+    } catch (e) {
+      dev().error(TAG, 'Failed to copy JSON (' + o + ') with error: ' + e);
+    }
+    return null;
   }
 
   /**
