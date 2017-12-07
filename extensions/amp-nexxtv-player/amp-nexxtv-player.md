@@ -39,13 +39,14 @@ With the responsive layout, the width and height from the example should yield c
 
 ```html
 <amp-nexxtv-player
-    data-mediaid="PTPFEC4U184674"
-    data-client="583"
+    data-mediaid="71QQG852413DU7J"
+    data-client="761"
     data-streamtype="video"
     data-seek-to="2"
     data-mode="static"
     data-origin="https://embed.nexx.cloud/"
     data-disable-ads="1"
+    data-streaming-filter="nxp-bitrate-2500"
     layout="responsive"
     width="480" height="270"></amp-nexxtv-player>
 ```
@@ -87,6 +88,10 @@ Indicates the source from which the embedded domain media is played. By default 
 ##### data-disable-ads (optional)
 
 Ads are enabled by default. Set value to 1 to disable.
+
+#### data-streaming-filter (optional)
+
+Set streaming filter e.g. "nxp-bitrate-0750" for max 750kbit max bitrate.
 
 ##### common attributes
 

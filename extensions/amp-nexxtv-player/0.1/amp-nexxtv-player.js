@@ -95,12 +95,13 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
         'The data-client attribute is required for <amp-nexxtv-player> %s',
         this.element);
 
-    const start = this.element.getAttribute('data-seek-to') || '0';
+    const delay = this.element.getAttribute('data-seek-to') || '0';
     const mode = this.element.getAttribute('data-mode') || 'static';
     const streamtype = this.element.getAttribute('data-streamtype') || 'video';
     const origin = this.element.getAttribute('data-origin')
       || 'https://embed.nexx.cloud/';
     const disableAds = this.element.getAttribute('data-disable-ads');
+    const streamingFilter = this.element.getAttribute('data-streaming-filter');
 
     let src = origin;
 
@@ -110,11 +111,18 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
     src += `${encodeURIComponent(client)}/`;
     src += encodeURIComponent(mediaId);
-    src += `?start=${encodeURIComponent(start)}`;
-    src += `&datamode=${encodeURIComponent(mode)}&amp=1`;
+    src += `?dataMode=${encodeURIComponent(mode)}&platform=amp`;
+
+    if (delay > 0) {
+      src += `&delay=${encodeURIComponent(delay)}`;
+    }
 
     if (disableAds === '1') {
       src += '&disableAds=1';
+    }
+
+    if (streamingFilter !== null && streamingFilter.length > 0) {
+      src += `&streamingFilter=${encodeURIComponent(streamingFilter)}`;
     }
 
     this.videoIframeSrc_ = assertAbsoluteHttpOrHttpsUrl(src);
