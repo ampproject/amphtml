@@ -188,6 +188,18 @@ export class ViewportBindingNatural_ {
   }
 
   /** @override */
+  getContentHeight() {
+    // The reparented body inside wrapper will have the correct content height.
+    // Body is overflow: hidden so that the scrollHeight include the margins of
+    // body's first and last child.
+    // Body height doesn't include paddingTop on the parent, so we add on the
+    // position of the body from the top of the viewport and subtract the
+    // scrollTop (as position relative to the viewport changes as you scroll).
+    const rect = this.win.document.body./*OK*/getBoundingClientRect();
+    return rect.height + rect.top + this.getScrollTop();
+  }
+
+  /** @override */
   getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
     const scrollTop = opt_scrollTop != undefined
         ? opt_scrollTop
