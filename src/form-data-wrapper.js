@@ -127,3 +127,13 @@ export class FormDataWrapper {
     return this.formData_;
   }
 }
+
+/**
+ * Check if the given object is a FormDataWrapper instance
+ * @param {*} o
+ * @return {boolean} True if the object is a FormDataWrapper instance.
+ */
+export function isFormDataWrapper(o) {
+  // instanceof doesn't work as expected, so we detect with duck-typing.
+  return !!o && typeof o.getFormData == 'function';
+}
