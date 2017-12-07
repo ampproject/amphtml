@@ -364,7 +364,7 @@ describe('Google A4A utils', () => {
         const getScrollLeft = () => 12;
         const getScrollTop = () => 34;
         const viewportStub = sandbox.stub(Services, 'viewportForDoc');
-        viewportStub.returns({ getRect, getSize, getScrollTop, getScrollLeft});
+        viewportStub.returns({getRect, getSize, getScrollTop, getScrollLeft});
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, {}, []).then(url1 => {
             expect(url1).to.match(/scr_x=12&scr_y=34/);
