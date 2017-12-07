@@ -346,8 +346,6 @@ describe('Google A4A utils', () => {
     });
 
     it('should include scroll position', function() {
-      // When ran locally, this test tends to exceed 2000ms timeout.
-      this.timeout(5000);
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const doc = fixture.doc;
