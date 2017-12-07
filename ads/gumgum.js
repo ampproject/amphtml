@@ -66,6 +66,7 @@ export function gumgum(global, data) {
       height: '100%',
     });
     ins.setAttribute('data-gg-slot', slotId);
+    ins.setAttribute('pl', 2);
     dom.appendChild(ins);
     // Events
     ggevents.push({
