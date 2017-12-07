@@ -22,10 +22,10 @@ import {AccessVendorAdapter} from './amp-access-vendor';
 import {SignInProtocol} from './signin';
 import {Services} from '../../../src/services';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {assertHttpsUrl, getSourceOrigin } from '../../../src/url';
+import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
 import {isExperimentOn} from '../../../src/experiments';
 import {getValueForExpr} from '../../../src/json';
-import {isObject} from "../../../src/types";
+import {isObject} from '../../../src/types';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getLoginUrl, openLoginDialog} from './login-dialog';
@@ -265,7 +265,7 @@ export class AccessSource {
       }
     } else {
       user().assert(false,
-        '"login" must be either a single URL or a map of URLs');
+          '"login" must be either a single URL or a map of URLs');
     }
 
     // Check that all URLs are valid.
@@ -294,7 +294,6 @@ export class AccessSource {
 
   /**
    * @return {!AccessService}
-   * @private
    */
   start() {
     dev().fine(TAG, 'config:', this.type_, this.loginConfig_,
@@ -371,7 +370,6 @@ export class AccessSource {
    * Note that this promise never fails.
    * @param {boolean=} opt_disableFallback
    * @return {!Promise}
-   * @private
    */
   runAuthorization(opt_disableFallback) {
     if (!this.adapter_.isAuthorizationEnabled()) {
@@ -403,7 +401,6 @@ export class AccessSource {
       this.buildLoginUrls_();
       return response;
     }).catch(error => {
-      debugger;
       user().error(TAG, 'Authorization failed: ', error);
       this.toggleTopClass_('amp-access-loading', false);
       this.toggleTopClass_('amp-access-error', true);
@@ -464,7 +461,6 @@ export class AccessSource {
   /**
    * Runs the login flow using one of the predefined urls in the amp-access config
    *
-   * @private
    * @param {string} type Type of login defined in the config
    * @return {!Promise}
    */

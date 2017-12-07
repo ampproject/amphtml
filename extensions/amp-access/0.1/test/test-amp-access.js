@@ -103,19 +103,6 @@ describes.fakeWin('AccessService', {
     expect(source.adapter_.authorizationUrl_).to.equal('https://acme.com/a');
   });
 
-  it('should return adapter config', () => {
-    const config = {
-      type: 'vendor',
-      vendor: 'vendor1',
-    };
-    element.textContent = JSON.stringify(config);
-    const accessService = new AccessService(ampdoc);
-    sandbox.stub(accessService.sources_[0].adapter_, 'getConfig');
-    accessService.getAdapterConfig();
-    expect(accessService.sources_[0].adapter_.getConfig.called).to.be.true;
-  });
-
-
   it('should fail if type is unknown', () => {
     const config = {
       'type': 'unknown',
@@ -245,7 +232,7 @@ describes.fakeWin('AccessService', {
       new AccessService(ampdoc);
     }).to.throw(/Namespace already used/);
 
-    delete(config[0].namespace);
+    delete (config[0].namespace);
     element.textContent = JSON.stringify(config);
     expect(() => {
       new AccessService(ampdoc);
@@ -311,7 +298,11 @@ describes.fakeWin('AccessService authorization', {
     service.sources_[0].adapter_ = adapter;
     adapterMock = sandbox.mock(adapter);
 
+<<<<<<< HEAD
     sandbox.stub(service.resources_, 'mutateElement').callsFake(
+=======
+    sandbox.stub(service.resources_, 'mutateElement',
+>>>>>>> Fix warnings and lint
         (unusedElement, mutator) => {
           mutator();
           return Promise.resolve();
@@ -357,17 +348,22 @@ describes.fakeWin('AccessService authorization', {
   function expectGetReaderId(result) {
     cidMock.expects('get')
         .withExactArgs(
+<<<<<<< HEAD
             {scope: 'amp-access', createCookieIfNotPresent: true},
             sinon.match(() => true))
+=======
+      {scope: 'amp-access', createCookieIfNotPresent: true},
+        sinon.match(() => true))
+>>>>>>> Fix warnings and lint
         .returns(Promise.resolve(result))
         .once();
   }
 
   it('should short-circuit authorization flow when disabled', () => {
     adapterMock.expects('isAuthorizationEnabled')
-    .withExactArgs()
-    .returns(false)
-    .once();
+        .withExactArgs()
+        .returns(false)
+        .once();
     adapterMock.expects('authorize').never();
     cidMock.expects('get').never();
     const promise = service.runAuthorization_();
@@ -1367,7 +1363,7 @@ describes.fakeWin('AccessService login', {
       sandbox.stub(source, 'runAuthorization').callsFake(
             () => Promise.resolve());
     const broadcastStub = sandbox.stub(source.viewer_,
-      'broadcast');
+        'broadcast');
     sourceMock.expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l2?rid=R')
         .returns(Promise.resolve('#success=true'))
@@ -1397,7 +1393,7 @@ describes.fakeWin('AccessService login', {
       p1Reject = reject;
     });
     const source = service.sources_[0];
-     service.runAuthorization_ = sandbox.spy();
+    service.runAuthorization_ = sandbox.spy();
 
     const openLoginDialogStub = sandbox.stub(source, 'openLoginDialog_');
     openLoginDialogStub.onCall(0).returns(p1Promise);
@@ -1424,13 +1420,6 @@ describes.fakeWin('AccessService login', {
     });
   });
 
-  it('should login with url only', () => {
-    sourceMock.expects('login_')
-        .withExactArgs('https://url', '')
-        .once();
-    service.loginWithUrl('https://url');
-  });
-
   it('should request sign-in when configured', () => {
     const source = service.sources_[0];
     source.signIn_.requestSignIn = sandbox.stub();
@@ -1448,9 +1437,14 @@ describes.fakeWin('AccessService login', {
     const source = service.sources_[0];
     source.signIn_.postLoginResult = sandbox.stub();
     source.signIn_.postLoginResult.returns(Promise.resolve());
+<<<<<<< HEAD
     const authorizationStub =
       sandbox.stub(source, 'runAuthorization').callsFake(
         () => Promise.resolve());
+=======
+    const authorizationStub = sandbox.stub(source,
+        'runAuthorization', () => Promise.resolve());
+>>>>>>> Fix warnings and lint
     const viewStub = sandbox.stub(source, 'scheduleView_');
     const broadcastStub = sandbox.stub(source.viewer_, 'broadcast');
     sourceMock.expects('openLoginDialog_')
@@ -1613,16 +1607,16 @@ describes.fakeWin('AccessService multiple sources', {
         'authorization': 'https://acme.com/a?rid=READER_ID',
         'pingback': 'https://acme.com/p?rid=READER_ID',
         'login': 'https://acme.com/l?rid=READER_ID',
-        'namespace': 'beer'
+        'namespace': 'beer',
       },
       {
         'authorization': 'https://acme.com/a?rid=READER_ID',
         'pingback': 'https://acme.com/p?rid=READER_ID',
         'login': {
-          'login2': 'https://acme.com/l?rid=READER_ID'
+          'login2': 'https://acme.com/l?rid=READER_ID',
         },
-        'namespace': 'donuts'
-      }
+        'namespace': 'donuts',
+      },
     ]);
     document.body.appendChild(configElement);
     document.documentElement.classList.remove('amp-access-error');
@@ -1632,7 +1626,8 @@ describes.fakeWin('AccessService multiple sources', {
     document.body.appendChild(elementOnBeer);
 
     elementOnBeerOrDonuts = document.createElement('div');
-    elementOnBeerOrDonuts.setAttribute('amp-access', 'beer.access OR donuts.access');
+    elementOnBeerOrDonuts.setAttribute('amp-access',
+        'beer.access OR donuts.access');
     document.body.appendChild(elementOnBeerOrDonuts);
 
     elementError = document.createElement('div');
@@ -1663,10 +1658,10 @@ describes.fakeWin('AccessService multiple sources', {
     adapterDonutsMock = sandbox.mock(adapterDonuts);
 
     sandbox.stub(service.resources_, 'mutateElement',
-      (unusedElement, mutator) => {
-        mutator();
-        return Promise.resolve();
-      });
+        (unusedElement, mutator) => {
+          mutator();
+          return Promise.resolve();
+        });
     service.vsync_ = sourceBeer.vsync_ = sourceDonuts.vsync_ = {
       mutate: callback => {
         callback();
@@ -1709,26 +1704,26 @@ describes.fakeWin('AccessService multiple sources', {
 
   function expectGetReaderId(result) {
     cidMock.expects('get')
-      .withExactArgs(
+        .withExactArgs(
         {scope: 'amp-access', createCookieIfNotPresent: true},
         sinon.match(() => true))
-      .returns(Promise.resolve(result))
-      .once();
+        .returns(Promise.resolve(result))
+        .once();
   }
 
   it('should run authorization flow', () => {
     expectGetReaderId('reader1');
     adapterBeerMock.expects('authorize')
-      .withExactArgs()
-      .returns(Promise.resolve({access: false}))
-      .once();
+        .withExactArgs()
+        .returns(Promise.resolve({access: false}))
+        .once();
     adapterDonutsMock.expects('authorize')
-      .withExactArgs()
-      .returns(Promise.resolve({access: true}))
-      .once();
+        .withExactArgs()
+        .returns(Promise.resolve({access: true}))
+        .once();
 
     expect(service.lastAuthorizationPromises_).to.equal(
-      service.firstAuthorizationPromises_);
+        service.firstAuthorizationPromises_);
     const promise = service.runAuthorization_();
     const lastPromise = service.lastAuthorizationPromises_;
     expect(lastPromise).to.not.equal(service.firstAuthorizationPromises_);
@@ -1751,13 +1746,13 @@ describes.fakeWin('AccessService multiple sources', {
   it('should return authdata', () => {
     expectGetReaderId('reader1');
     adapterBeerMock.expects('authorize')
-      .withExactArgs()
-      .returns(Promise.reject('rejected'))
-      .once();
+        .withExactArgs()
+        .returns(Promise.reject('rejected'))
+        .once();
     adapterDonutsMock.expects('authorize')
-      .withExactArgs()
-      .returns(Promise.resolve({access: true}))
-      .once();
+        .withExactArgs()
+        .returns(Promise.resolve({access: true}))
+        .once();
     service.runAuthorization_();
     return Promise.all([
       service.getAuthdataField('beer.access'),
@@ -1777,67 +1772,67 @@ describes.fakeWin('AccessService multiple sources', {
   it('should succeed login flat', () => {
     expectGetReaderId('reader1');
     const authorizationStub = sandbox.stub(sourceBeer,
-      'runAuthorization', () => Promise.resolve());
+        'runAuthorization', () => Promise.resolve());
     const broadcastStub = sandbox.stub(sourceBeer.viewer_,
-      'broadcast');
+        'broadcast');
     const sourceBeerMock = sandbox.mock(sourceBeer);
     sourceBeerMock.expects('openLoginDialog_')
-      .withExactArgs('https://acme.com/l?rid=reader1')
-      .returns(Promise.resolve('#success=true'))
-      .once();
+        .withExactArgs('https://acme.com/l?rid=reader1')
+        .returns(Promise.resolve('#success=true'))
+        .once();
     sourceBeer.analyticsEvent_ = sandbox.spy();
     return sourceBeer.buildLoginUrls_()
-      .then(() => service.loginWithType_('beer.'))
-      .then(() => {
-        expect(sourceBeer.loginPromise_).to.not.exist;
-        expect(authorizationStub).to.be.calledOnce;
-        expect(broadcastStub).to.be.calledOnce;
-        expect(broadcastStub.firstCall.args[0]).to.deep.equal({
-          'type': 'amp-access-reauthorize',
-          'origin': service.pubOrigin_,
-        });
-        expect(sourceBeer.analyticsEvent_).to.have.been.calledWith(
-          'access-login-started');
-        expect(sourceBeer.analyticsEvent_).to.have.been.calledWith(
-          'access-login-success');
+        .then(() => service.loginWithType_('beer.'))
+        .then(() => {
+          expect(sourceBeer.loginPromise_).to.not.exist;
+          expect(authorizationStub).to.be.calledOnce;
+          expect(broadcastStub).to.be.calledOnce;
+          expect(broadcastStub.firstCall.args[0]).to.deep.equal({
+            'type': 'amp-access-reauthorize',
+            'origin': service.pubOrigin_,
+          });
+          expect(sourceBeer.analyticsEvent_).to.have.been.calledWith(
+              'access-login-started');
+          expect(sourceBeer.analyticsEvent_).to.have.been.calledWith(
+              'access-login-success');
 
-        sourceBeerMock.verify();
-      });
+          sourceBeerMock.verify();
+        });
   });
 
   it('should succeed login hierarchy', () => {
     expectGetReaderId('reader1');
     const authorizationStub = sandbox.stub(sourceDonuts,
-      'runAuthorization', () => Promise.resolve());
+        'runAuthorization', () => Promise.resolve());
     const broadcastStub = sandbox.stub(sourceDonuts.viewer_,
-      'broadcast');
+        'broadcast');
     const sourceDonutsMock = sandbox.mock(sourceDonuts);
     sourceDonutsMock.expects('openLoginDialog_')
-      .withExactArgs('https://acme.com/l?rid=reader1')
-      .returns(Promise.resolve('#success=true'))
-      .once();
+        .withExactArgs('https://acme.com/l?rid=reader1')
+        .returns(Promise.resolve('#success=true'))
+        .once();
     sourceDonuts.analyticsEvent_ = sandbox.spy();
     return sourceDonuts.buildLoginUrls_()
-      .then(() => service.loginWithType_('donuts.login2'))
-      .then(() => {
-        expect(sourceDonuts.loginPromise_).to.not.exist;
-        expect(authorizationStub).to.be.calledOnce;
-        expect(broadcastStub).to.be.calledOnce;
-        expect(broadcastStub.firstCall.args[0]).to.deep.equal({
-          'type': 'amp-access-reauthorize',
-          'origin': service.pubOrigin_,
+        .then(() => service.loginWithType_('donuts.login2'))
+        .then(() => {
+          expect(sourceDonuts.loginPromise_).to.not.exist;
+          expect(authorizationStub).to.be.calledOnce;
+          expect(broadcastStub).to.be.calledOnce;
+          expect(broadcastStub.firstCall.args[0]).to.deep.equal({
+            'type': 'amp-access-reauthorize',
+            'origin': service.pubOrigin_,
+          });
+          expect(sourceDonuts.analyticsEvent_).to.have.been.calledWith(
+              'access-login-started');
+          expect(sourceDonuts.analyticsEvent_).to.have.been.calledWith(
+              'access-login-login2-started');
+          expect(sourceDonuts.analyticsEvent_).to.have.been.calledWith(
+              'access-login-success');
+          expect(sourceDonuts.analyticsEvent_).to.have.been.calledWith(
+              'access-login-login2-success');
+
+
+          sourceDonutsMock.verify();
         });
-        expect(sourceDonuts.analyticsEvent_).to.have.been.calledWith(
-          'access-login-started');
-        expect(sourceDonuts.analyticsEvent_).to.have.been.calledWith(
-          'access-login-login2-started');
-        expect(sourceDonuts.analyticsEvent_).to.have.been.calledWith(
-          'access-login-success');
-        expect(sourceDonuts.analyticsEvent_).to.have.been.calledWith(
-          'access-login-login2-success');
-
-
-        sourceDonutsMock.verify();
-      });
   });
 });

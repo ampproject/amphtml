@@ -25,7 +25,6 @@ import {cidServiceForDocForTesting} from
 import {installPerformanceService} from
     '../../../../src/service/performance-impl';
 import {toggleExperiment} from '../../../../src/experiments';
-import * as sinon from 'sinon';
 
 
 describes.fakeWin('AccessSource', {
@@ -91,7 +90,7 @@ describes.fakeWin('AccessSource', {
 
     config['type'] = 'server';
     expectSourceType(ampdoc, config, 'client', AccessClientAdapter);
-    
+
     config['type'] = 'server';
     toggleExperiment(win, 'amp-access-server', true);
     expectSourceType(ampdoc, config, 'server', AccessServerAdapter);
@@ -176,6 +175,21 @@ describes.fakeWin('AccessSource', {
     expect(service.authorizationFallbackResponse_).to.deep.equal(
         {'error': true});
   });
+
+  it('should login with url only', () => {
+    const config = {
+      type: 'vendor',
+      vendor: 'vendor1',
+    };
+    const source = new AccessSource(ampdoc, config);
+    const sourceMock = sandbox.mock(source);
+    sourceMock.expects('login_')
+        .withExactArgs('https://url', '')
+        .once();
+    source.loginWithUrl('https://url');
+  });
+
+
 });
 
 
@@ -286,5 +300,11 @@ describes.fakeWin('AccessSource adapter context', {
     return context.buildUrl('?at=ACCESS_TOKEN').then(url => {
       expect(url).to.equal('?at=access_token');
     });
+  });
+
+  it('should return adapter config', () => {
+    sandbox.stub(source.adapter_, 'getConfig');
+    source.getAdapterConfig();
+    expect(source.adapter_.getConfig.called).to.be.true;
   });
 });

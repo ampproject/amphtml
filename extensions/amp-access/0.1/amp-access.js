@@ -15,7 +15,6 @@
  */
 
 import {AccessSource, AccessType} from './amp-access-source';
-import {AccessVendorAdapter} from './amp-access-vendor';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {Services} from '../../../src/services';
@@ -150,7 +149,7 @@ export class AccessService {
       const consent = Promise.resolve();
       this.readerIdPromise_ = this.cid_.then(cid => {
         return cid.get({scope: 'amp-access', createCookieIfNotPresent: true},
-          consent);
+            consent);
       });
     }
     return this.readerIdPromise_;
@@ -168,9 +167,10 @@ export class AccessService {
     const configMap = {};
     if (isArray(rawContent)) {
       for (let i = 0; i < rawContent.length; i++) {
-        const namespace = rawContent[i].namespace; 
+        const namespace = rawContent[i].namespace;
         user().assert(!!namespace, 'Namespace required');
-        user().assert(!configMap[namespace], 'Namespace already used: ' + namespace);
+        user().assert(!configMap[namespace],
+            'Namespace already used: ' + namespace);
         configMap[namespace] = rawContent[i];
       }
     } else {
@@ -206,7 +206,8 @@ export class AccessService {
    * @param {!./access-vendor.AccessVendor} vendor
    */
   registerVendor(name, vendor) {
-    for (const source of this.sources_) {
+    for (let i = 0; i < this.sources_.length; i++) {
+      const source = this.sources_[i];
       if (source.getType() == AccessType.VENDOR) {
         const vendorAdapter = /** @type {!AccessVendorAdapter} */ (
           source.getAdapter()
@@ -216,8 +217,8 @@ export class AccessService {
       }
     }
     user().assert(false,
-      'Access vendor "%s" can only be used for "type=vendor", but none found',
-      name);
+        'Access vendor "%s" can only be used for "type=vendor", but none found',
+        name);
   }
 
   /**
@@ -371,7 +372,7 @@ export class AccessService {
   runAuthorization_(opt_disableFallback) {
     const promises = this.sources_.map(source =>
       source.runAuthorization()
-        .then(response =>
+          .then(response =>
           response && this.ampdoc.whenReady().then(() =>
             this.applyAuthorization_(this.combinedResponses())))
     );
@@ -380,7 +381,7 @@ export class AccessService {
     // The "first" promises must always succeed first.
     this.lastAuthorizationPromises_ = Promise.all(
         [this.firstAuthorizationPromises_,
-         promise]);
+          promise]);
     return promise;
   }
 
@@ -690,19 +691,20 @@ export class AccessService {
     // No namespace
     if (splitPoint < 0) {
       user().assert(this.sources_.length == 1,
-        'Login types must be namespaced with multiple sources.');
+          'Login types must be namespaced with multiple sources.');
       return this.sources_[0].loginWithType(type);
     }
 
     // Namespaced
     const namespace = type.substring(0, splitPoint);
-    for (const source of this.sources_) {
+    for (let i = 0; i < this.sources_.length; i++) {
+      const source = this.sources_[i];
       if (source.getNamespace() == namespace) {
         return source.loginWithType(type.substring(splitPoint + 1));
       }
     }
 
-    user().error('Login type not found: %s', type);
+    user().error(TAG, 'Login type not found: %s', type);
   }
 
   /**
