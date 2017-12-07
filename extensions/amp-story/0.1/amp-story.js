@@ -44,9 +44,10 @@ import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
+  matches,
+  removeElement,
   scopedQuerySelector,
   scopedQuerySelectorAll,
-  removeElement,
 } from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {once} from '../../../src/utils/function';
@@ -646,7 +647,7 @@ export class AmpStory extends AMP.BaseElement {
           targetPage.setActive(true);
 
           if (activePriorSibling &&
-              activePriorSibling.matches('amp-story-page')) {
+              matches(activePriorSibling, 'amp-story-page')) {
             activePriorSibling.setAttribute(PRE_ACTIVE_PAGE_ATTRIBUTE_NAME, '');
           }
           if (previousActivePriorSibling) {
