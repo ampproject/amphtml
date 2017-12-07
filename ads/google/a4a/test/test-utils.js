@@ -345,6 +345,28 @@ describe('Google A4A utils', () => {
       });
     });
 
+    it('should include scroll position', function() {
+      // When ran locally, this test tends to exceed 2000ms timeout.
+      this.timeout(5000);
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        doc.win = window;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', 0, {}, []).then(url1 => {
+            expect(url1).to.match(/scr_x=0&scr_y=0/);
+          });
+        });
+      });
+    });
+
     it('should include all experiment ids', function() {
       // When ran locally, this test tends to exceed 2000ms timeout.
       this.timeout(5000);
