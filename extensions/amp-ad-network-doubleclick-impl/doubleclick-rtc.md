@@ -119,7 +119,7 @@ https://securepubads.g.doubleclick.net/gampad/ads?.....&scp=loc%3Dusa%26animal%3
 
 ### Merging targeting data for Vendors
 
-To prevent malicious vendors from naming the keys in their RTC response to match other vendors (and thereby overwrite them), key names from all vendor RTC responses  are automatically appended with the vendor's name as defined in callout-vendors.js. Note that this is only done to responses from vendors, not responses from custom URLs. Publisher-defined custom URLs are expected to guarantee uniqueness amongst key names. This may optionally be turned off, see below.
+To prevent malicious vendors from naming the keys in their RTC response to match other vendors (and thereby overwrite them), key names from all vendor RTC responses are automatically appended with the vendor's name as defined in callout-vendors.js. Note that this is only done to responses from vendors, not responses from custom URLs. This may optionally be turned off via vendor configuration in callout-vendors.js.
 
 For instance, take this example where we call out to vendors, VendorA and VendorB:
 
@@ -175,7 +175,7 @@ Thus, when the merging happens, the final object is:
 {"targeting":{"abc":"123", "abc_vendorA": "456", "abc_vendorB": "FOO"}}
 ```
 
-As mentioned above, appending vendor names onto keys of returned RTC respones may optionally be turned off. This is done by the vendor, and will apply across all of that vendor's usage throughout AMP. This poses the risk of response being overwritten by another vendor's keys. To disable key appending, within callout-vendors.js set the option `disableKeyAppend: true` as seen in the following example:
+To disable key appending, within callout-vendors.js set the option `disableKeyAppend: true` as seen in the following example:
 
 ```
 export const RTC_VENDORS = {
