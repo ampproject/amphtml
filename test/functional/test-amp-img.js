@@ -176,7 +176,8 @@ describe('amp-img', () => {
     });
   });
 
-  it('should handle attribute mutations', () => {
+  // TODO(cvializ, #12336): unskip
+  it.skip('should handle attribute mutations', () => {
     return getImg({
       src: 'test.jpg',
       srcset: 'large.jpg 2000w, small.jpg 1000w',
