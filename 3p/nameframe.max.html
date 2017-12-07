@@ -3,7 +3,6 @@
 <head>
   <meta charset="utf-8">
   <script>
-
     var name_data;
     var writeInHead = true;
     var waitForOnload = true;
@@ -18,7 +17,7 @@
       }
     };
 
-    tryProtected(function() { debugger;
+    tryProtected(function() {
       name_data = JSON.parse(window.name);
       writeInHead = name_data['writeInHead'];
       waitForOnload = name_data['waitForOnload'];
@@ -35,7 +34,6 @@
         document.close();
         delete name_data['creative'];
         window.name = JSON.stringify(name_data);
-        debugger;
       });
     };
 

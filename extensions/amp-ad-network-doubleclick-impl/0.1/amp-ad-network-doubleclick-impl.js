@@ -809,9 +809,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.getAmpDoc(), 'amp-analytics');
     }
 
-    const nameframeExperimentConfig = responseHeaders.get('amp-nameframe-exp');
+    const nameframeExperimentConfig = responseHeaders.get('amp-nameframe-exp') || 'writeInHead';
     if (nameframeExperimentConfig) {
-      nameframeExperimentConfig.split(';').map(config => {
+      nameframeExperimentConfig.split(';').map(config => { debugger;
         switch (config) {
           case 'waitForOnload':
           case 'writeInHead':
@@ -1353,8 +1353,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       attributes['isDifferentSourceWindow'] = false;
       attributes['sentinel'] = this.sentinel;
     } else {
-      attributes['writeInHead'] = false;
-      attributes['waitForOnload'] = false;
+      Object.assign(attributes, this.nameframeExperimentConfig_);
     }
     return attributes;
   }
