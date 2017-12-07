@@ -349,7 +349,7 @@ export class VisibilityManager {
       } else {
         layoutBox = this.getRootLayoutBox();
       }
-      model.disposeOrReset();
+      model.maybeDispose();
 
       if (layoutBox) {
         Object.assign(state, {

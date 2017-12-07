@@ -379,6 +379,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     root.setRootVisibility(1);
     expect(model.getVisibility_()).to.equal(1);
 
+    sandbox.stub(model, 'reset_');
     // Fire event.
     clock.tick(11);
     return eventPromise.then(state => {
@@ -501,6 +502,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     root.setRootVisibility(1);
     expect(model.getVisibility_()).to.equal(0.3);
 
+    sandbox.stub(model, 'reset_');
     // Fire event.
     clock.tick(11);
     return eventPromise.then(state => {
@@ -589,11 +591,13 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(root.models_).to.have.length(2);
     const model2 = root.models_[1];
     expect(model2.spec_.totalTimeMin).to.equal(20);
+    sandbox.stub(model2, 'reset_');
     model2.unsubscribe(disposed2);
     expect(trackedElement.listeners).to.have.length(2);
     // Immediately visible.
     expect(model2.getVisibility_()).to.equal(0.3);
 
+    sandbox.stub(model1, 'reset_');
     // Fire the first event.
     clock.tick(11);
     return eventPromise.then(state => {
@@ -641,6 +645,10 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
       intersectionRatio: 0.3,
       intersectionRect: layoutRectLtwh(0, 0, 1, 1),
     }]);
+
+    expect(root.models_).to.have.length(1);
+    const model = root.models_[0];
+    sandbox.stub(model, 'reset_');
 
     // Fire event.
     clock.tick(11);
@@ -1165,6 +1173,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
       expect(isModelResolved(model)).to.be.false;
       clock.tick(899); // not yet!
       expect(isModelResolved(model)).to.be.false;
+      sandbox.stub(model, 'reset_');
       clock.tick(1);  // now fire
       expect(isModelResolved(model)).to.be.true;
       return eventPromise.then(state => {
