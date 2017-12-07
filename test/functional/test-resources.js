@@ -1492,6 +1492,23 @@ describe('Resources discoverWork', () => {
     expect(schedulePassStub).to.not.be.called;
   });
 
+  it('should NOT build non-prerenderable resources in prerender', () => {
+    sandbox.stub(resources.viewer_, 'getVisibilityState')
+        .returns(VisibilityState.PRERENDER);
+    sandbox.stub(resources, 'schedule_');
+    resources.documentReady_ = true;
+
+    resource1.element.isBuilt = () => false;
+    resource1.prerenderAllowed = () => false;
+    resource1.state_ = ResourceState.NOT_BUILT;
+    resource1.build = sandbox.spy();
+    resource2.element.idleRenderOutsideViewport = () => false;
+
+    resources.discoverWork_();
+
+    expect(resource1.build).to.not.be.called;
+  });
+
   it('should layout resource if outside viewport but idle', () => {
     const schedulePassStub = sandbox.stub(resources, 'schedulePass');
     resources.documentReady_ = true;
