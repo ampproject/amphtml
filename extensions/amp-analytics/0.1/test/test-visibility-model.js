@@ -327,8 +327,6 @@ describes.sandboxed('VisibilityModel', {}, () => {
         }
       });
       sandbox.stub(vh, 'getVisibility_').callsFake(() => {
-        console.log('Returning fake visibility value: ' +
-            visibilityValueForTesting);
         return visibilityValueForTesting;
       });
       eventSpy = vh.eventResolver_ = sandbox.spy();
@@ -339,7 +337,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
     });
 
     it('conditions not met only', () => {
-      setReadyStub = sandbox.stub(vh, 'setReady'); // Because it calls update()
+      sandbox.stub(vh, 'setReady'); // Because it calls update()
       visibilityValueForTesting = 0.1;
       vh.update_(visibilityValueForTesting);
       expect(vh.scheduledUpdateTimeoutId_).to.be.ok;
@@ -832,7 +830,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
       expect(vh.getState(startTime)).to.contains({maxVisiblePercentage: 64});
       expect(eventSpy).to.not.be.called;
 
-      const resetStub = sandbox.stub(vh, 'reset_');
+      sandbox.stub(vh, 'reset_');
       clock.tick(1);
       expect(vh.getState(startTime)).to.contains({
         maxVisiblePercentage: 64,
@@ -873,7 +871,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
       });
       expect(eventSpy).to.not.be.called;
 
-      const resetStub = sandbox.stub(vh, 'reset_');
+      sandbox.stub(vh, 'reset_');
       clock.tick(999);
       expect(eventSpy).to.be.calledOnce;
       expect(vh.getState(startTime)).to.contains({
@@ -903,7 +901,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
       expect(vh.getState(startTime)).to.contains({maxVisiblePercentage: 11});
       expect(eventSpy).to.not.be.called;
 
-      const resetStub = sandbox.stub(vh, 'reset_');
+      sandbox.stub(vh, 'reset_');
       clock.tick(1000);
       expect(eventSpy).to.be.calledOnce;
       expect(vh.getState(startTime)).to.contains({
@@ -935,7 +933,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
       expect(vh.getState(startTime)).to.contains({maxVisiblePercentage: 10});
       expect(eventSpy).to.not.be.called;
 
-      const resetStub = sandbox.stub(vh, 'reset_');
+      sandbox.stub(vh, 'reset_');
       clock.tick(1000);
       expect(eventSpy).to.be.calledOnce;
       expect(vh.getState(startTime)).to.contains({
@@ -971,7 +969,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
       clock.tick(999);
       expect(eventSpy).to.not.be.called;
 
-      const resetStub = sandbox.stub(vh, 'reset_');
+      sandbox.stub(vh, 'reset_');
       clock.tick(1);
       expect(eventSpy).to.be.calledOnce;
       expect(vh.getState(startTime)).to.contains({
