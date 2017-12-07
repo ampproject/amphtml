@@ -359,9 +359,15 @@ describe('Google A4A utils', () => {
         });
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, doc, sandbox);
+        const getRect = () => { return {'width': 100, 'height': 200}; };
+        const getSize = () => { return {'width': 100, 'height': 200}; };
+        const getScrollLeft = () => 12;
+        const getScrollTop = () => 34;
+        const viewportStub = sandbox.stub(Services, 'viewportForDoc');
+        viewportStub.returns({ getRect, getSize, getScrollTop, getScrollLeft});
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, {}, []).then(url1 => {
-            expect(url1).to.match(/scr_x=0&scr_y=0/);
+            expect(url1).to.match(/scr_x=12&scr_y=34/);
           });
         });
       });
