@@ -57,13 +57,47 @@ describes.realWin('amp-ventuno-player', {
 	  	.then(() => player);
   }
 
-  it('renders an editorial player', () => {
-	let actSrc = 'https://venwebsecure.ventunotech.com/embed/embedPlayer.html?pFrom=amp&pType=ep&pubKey=49b792a987103&slot=380&pTitle=test&pUrl=http%3A%2F%2Fventunotech.com&pMeta=One%2CTwo%2Cthree';
-	  return getVentunoPlayer('ep', '49b792a987103', '380', 'test', 'http://ventunotech.com', 'One,Two,three').then(player => {
+  it('renders an editorial player with optional params', () => {
+	let actSrc = 'https://venwebsecure.ventunotech.com/embed/embedPlayer.html?pFrom=amp&pType=ep&pubKey=49b792a987103&slot=380&pTitle=World%20Cup%202018&pUrl=http%3A%2F%2Fventunotech.com%2Ftest%2Fwc2018&pMeta=Sports%2CFootball';
+	  return getVentunoPlayer('ep', '49b792a987103', '380', 'World Cup 2018', 'http://ventunotech.com/test/wc2018', 'Sports,Football').then(player => {
 		const playerIframe = player.querySelector('iframe');
 		expect(playerIframe).to.not.be.null;
 		expect(playerIframe.src).to.equal(actSrc);
 	  });
   });
+
+  it('renders an editorial player without optional params', () => {
+	let actSrc = 'https://venwebsecure.ventunotech.com/embed/embedPlayer.html?pFrom=amp&pType=ep&pubKey=49b792a987103&slot=380';
+	  return getVentunoPlayer('ep', '49b792a987103', '380').then(player => {
+		const playerIframe = player.querySelector('iframe');
+		expect(playerIframe).to.not.be.null;
+		expect(playerIframe.src).to.equal(actSrc);
+	  });
+  });
+
+  it('fails without the player type', () => {	
+	  return getVentunoPlayer(null, '49b792a987103', '380').should.eventually.be.rejectedWith(
+		  /The data-player attribute is required/
+	  );
+  });
+
+  it('fails without the publisher id', () => {
+	return getVentunoPlayer('ep', null, '380').should.eventually.be.rejectedWith(
+		/The data-pubid attribute is required/
+	);
+  });
+
+  it('fails without the slot id', () => {
+	return getVentunoPlayer('ep', '49b792a987103', null).should.eventually.be.rejectedWith(
+		/The data-slotid attribute is required/
+	);
+  });
+
+  it('fails with a player other than ep (Editorial Player)', () => {
+	return getVentunoPlayer('plp', '49b792a987103', '380').should.eventually.be.rejectedWith(
+		'Only Editorial Player is supported'
+	);
+  });
+  
 
 });

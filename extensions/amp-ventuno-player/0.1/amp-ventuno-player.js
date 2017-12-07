@@ -182,7 +182,7 @@ class AmpVentunoPlayer extends AMP.BaseElement {
 			return this.videoIframeSrc_;
 		}
 		// As of now, only the 'ep' player type will be supported
-		user().assert(this.playerType_ === 'ep');
+		user().assert(this.playerType_ === 'ep', 'Only Editorial Player is supported');
 
 		dev().assert(this.pubid_);
 		dev().assert(this.slotid_);
