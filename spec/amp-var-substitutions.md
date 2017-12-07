@@ -970,7 +970,7 @@ Provides the title of the current document.
 
 #### Timestamp
 
-Provides the number of seconds that have elapsed since 1970. (Epoch time)
+Provides the number of milliseconds that have elapsed since 1970. (Epoch time)
 
 * **platform variable**: `TIMESTAMP`
   *  Example: <br>
