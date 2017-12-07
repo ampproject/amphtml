@@ -210,7 +210,10 @@ export class RequestHandler {
     const params = map();
     // Don't encode param values here,
     // as we'll do it later in the getExtraUrlParamsString_ call.
-    const option = Object.assign({}, expansionOption, {noEncode: true});
+    const option = new ExpansionOptions(
+        expansionOption.vars,
+        expansionOption.iterations,
+        true /* noEncode */);
     // Add any given extraUrlParams as query string param
     if (configParams || triggerParams) {
       Object.assign(params, configParams, triggerParams);
