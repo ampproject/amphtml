@@ -307,11 +307,6 @@ export class Viewer {
       trustedViewerResolved = (this.win.location.ancestorOrigins.length > 0 &&
           this.isTrustedViewerOrigin_(this.win.location.ancestorOrigins[0]));
       trustedViewerPromise = Promise.resolve(trustedViewerResolved);
-    } else if (!this.params_['origin']) {
-      // TODO(dvoytenko, #10991): Remove "origin" parameter check once all
-      // clients properly implement handshake.
-      trustedViewerResolved = false;
-      trustedViewerPromise = Promise.resolve(false);
     } else {
       // Wait for comms channel to confirm the origin.
       trustedViewerResolved = undefined;
