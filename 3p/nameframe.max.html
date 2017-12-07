@@ -3,7 +3,10 @@
 <head>
   <meta charset="utf-8">
   <script>
-    window.onload = function() {
+    var writeInHead = false;
+    var waitForOnload = false;
+
+    var render = function() {
       try {
         var name_data = JSON.parse(window.name);
         if (!name_data || !name_data['creative']) {
@@ -21,8 +24,21 @@
         window.name = '';
       }
     };
+
+    if (writeInHead && waitForOnload) {
+      window.onload = render;
+    } else if (writeInHead) {
+      render();
+    }
   </script>
 </head>
 <body style="visibility: hidden;">
+  <script>
+    if (!writeInHead && waitForOnload) {
+      window.onload = render;
+    } else if (!writeInHead) {
+      render();
+    }
+  </script>
 </body>
 </html>
