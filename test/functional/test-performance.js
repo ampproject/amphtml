@@ -490,6 +490,10 @@ describes.realWin('performance', {amp: true}, env => {
           .returns(visibility);
     }
 
+    function getPerformanceMarks() {
+      return win.performance.getEntriesByType('mark').map(entry => entry.name);
+    }
+
     beforeEach(() => {
       viewer = Services.viewerForDoc(ampdoc);
       sandbox.stub(viewer, 'whenMessagingReady')
@@ -533,6 +537,9 @@ describes.realWin('performance', {amp: true}, env => {
           return perf.whenViewportLayoutComplete_().then(() => {
             expect(viewerSendMessageStub.withArgs(
                 'prerenderComplete').firstCall.args[1].value).to.equal(400);
+
+            expect(getPerformanceMarks()).to.deep.equal(
+                ['ol', 'ofv', 'pc']);
           });
         });
       });
@@ -584,6 +591,8 @@ describes.realWin('performance', {amp: true}, env => {
           return whenFirstVisiblePromise.then(() => {
             expect(tickSpy.withArgs('pc')).to.be.calledOnce;
             expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(0);
+            expect(getPerformanceMarks()).to.deep.equal(
+                ['ol', 'pc', 'ofv']);
           });
         });
       });
@@ -604,6 +613,7 @@ describes.realWin('performance', {amp: true}, env => {
         return perf.whenViewportLayoutComplete_().then(() => {
           expect(viewerSendMessageStub.withArgs(
               'prerenderComplete').firstCall.args[1].value).to.equal(300);
+          expect(getPerformanceMarks()).to.deep.equal(['ol', 'pc']);
         });
       });
 
@@ -615,6 +625,7 @@ describes.realWin('performance', {amp: true}, env => {
           expect(tickSpy.withArgs('ol')).to.be.calledOnce;
           expect(tickSpy.withArgs('pc')).to.be.calledOnce;
           expect(tickSpy.withArgs('pc').args[0][2]).to.be.undefined;
+          expect(getPerformanceMarks()).to.deep.equal(['ol', 'pc']);
         });
       });
     });
