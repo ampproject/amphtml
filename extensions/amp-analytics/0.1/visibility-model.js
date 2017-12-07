@@ -303,10 +303,12 @@ export class VisibilityModel {
         this.scheduledUpdateTimeoutId_ = null;
       }
       if (this.reportReady_) {
+        // TODO(jonkeller): Can we eliminate eventResolver_?
         this.eventResolver_();
         this.eventResolver_ = null;
         if (this.repeat_) {
           this.waitToReset_ = true;
+          this.continuousTime_ = 0;
         }
       } else if (this.createReportReadyPromise_) {
         // Report when report ready promise resolve
@@ -346,9 +348,11 @@ export class VisibilityModel {
   isVisibilityMatch_(visibility) {
     dev().assert(visibility >= 0 && visibility <= 1,
         'invalid visibility value: %s', visibility);
-    if (this.spec_.visiblePercentageMin == 1) {
-      return visibility == 1;
-    }
+    // TODO(jonkeller): Currently don't allow min=100%.
+    // One possible approach is:
+    // if (this.spec_.visiblePercentageMin == 1) {
+    //   return visibility == 1;
+    // }
     return visibility > this.spec_.visiblePercentageMin &&
         visibility <= this.spec_.visiblePercentageMax;
   }
