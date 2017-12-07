@@ -17,9 +17,6 @@
 import {dev} from '../../../src/log';
 import {Observable} from '../../../src/observable';
 
-const MIN_REPEAT_INTERVAL = 200;
-
-
 /**
  * This class implements visibility calculations based on the
  * visibility ratio. It's used for documents, embeds and individual element.
@@ -55,12 +52,7 @@ export class VisibilityModel {
     };
 
     /** @private {boolean} */
-    this.repeat_ = false;
-
-    const repeat = spec['repeat'];
-    if (repeat === true) {
-      this.repeat_ = true;
-    }
+    this.repeat_ = spec['repeat'] === true;
 
     /** @private {?function()} */
     this.eventResolver_ = null;
@@ -93,7 +85,7 @@ export class VisibilityModel {
     this.createReportReadyPromise_ = null;
 
     /** @private {?number} */
-    this.scheduledRunId_ = null;
+    this.scheduledUpdateTimeoutId_ = null;
 
     /** @private {boolean} */
     this.matchesVisibility_ = false;
@@ -135,7 +127,7 @@ export class VisibilityModel {
     this.lastVisibleUpdateTime_ = 0;
 
     /** @private {boolean} */
-    this.waitToRefresh_ = false;
+    this.waitToReset_ = false;
 
     /** @private {?number} */
     this.scheduleRepeatId_ = null;
@@ -149,7 +141,7 @@ export class VisibilityModel {
    * Note: loadTimeVisibility is an exception.
    * @private
    */
-  refresh_() {
+  reset_() {
     dev().assert(!this.eventResolver_,
         'Attempt to refresh visible event before previous one resolve');
     this.eventPromise_ = new Promise(resolve => {
@@ -158,7 +150,6 @@ export class VisibilityModel {
     this.eventPromise_.then(() => {
       this.onTriggerObservable_.fire();
     });
-    this.waitToRefresh_ = false;
     this.scheduleRepeatId_ = null;
     this.everMatchedVisibility_ = false;
     this.matchesVisibility_ = false;
@@ -172,44 +163,23 @@ export class VisibilityModel {
     this.minVisiblePercentage_ = 0;
     this.maxVisiblePercentage_ = 0;
     this.lastVisibleUpdateTime_ = 0;
-    this.waitToRefresh_ = false;
+    this.waitToReset_ = false;
   }
 
   /**
    * Function that visibilityManager can used to dispose model or reset model
    */
-  disposeOrReset() {
-    // We may need a maxIntervalWindow to stop visible event even with repeat
-    // true
+  maybeDispose() {
     if (!this.repeat_) {
       this.dispose();
-      return;
-    }
-    const totalContinuousMax = Math.max(
-        this.spec_.totalTimeMin, this.spec_.continuousTimeMin);
-    if (totalContinuousMax >= MIN_REPEAT_INTERVAL) {
-      const now = Date.now();
-      const interval = now - this.firstVisibleTime_;
-
-      // Unit in milliseconds
-      const timeUntilRepeat = Math.max(0, totalContinuousMax - interval);
-      this.ready_ = false;
-      dev().assert(!this.scheduleRepeatId_, 'Should not repeat twice');
-      this.scheduleRepeatId_ = setTimeout(() => {
-        this.refresh_();
-        this.setReady(true);
-      }, timeUntilRepeat);
-    } else {
-      // Reset after element falls out of (minPercentage, maxPercentage]
-      this.waitToRefresh_ = true;
     }
   }
 
   /** @override */
   dispose() {
-    if (this.scheduledRunId_) {
-      clearTimeout(this.scheduledRunId_);
-      this.scheduledRunId_ = null;
+    if (this.scheduledUpdateTimeoutId_) {
+      clearTimeout(this.scheduledUpdateTimeoutId_);
+      this.scheduledUpdateTimeoutId_ = null;
     }
     if (this.scheduleRepeatId_) {
       clearTimeout(this.scheduleRepeatId_);
@@ -316,9 +286,10 @@ export class VisibilityModel {
    */
   update_(visibility) {
     // Update state and check if all conditions are satisfied
-    if (this.waitToRefresh_) {
+    if (this.waitToReset_) {
       if (!this.isVisibilityMatch_(visibility)) {
-        this.refresh_();
+        // We were waiting for a condition to become unmet, and now it has
+        this.reset_();
       }
       return;
     }
@@ -327,13 +298,16 @@ export class VisibilityModel {
     }
     const conditionsMet = this.updateCounters_(visibility);
     if (conditionsMet) {
-      if (this.scheduledRunId_) {
-        clearTimeout(this.scheduledRunId_);
-        this.scheduledRunId_ = null;
+      if (this.scheduledUpdateTimeoutId_) {
+        clearTimeout(this.scheduledUpdateTimeoutId_);
+        this.scheduledUpdateTimeoutId_ = null;
       }
       if (this.reportReady_) {
         this.eventResolver_();
         this.eventResolver_ = null;
+        if (this.repeat_) {
+          this.waitToReset_ = true;
+        }
       } else if (this.createReportReadyPromise_) {
         // Report when report ready promise resolve
         const reportReadyPromise = this.createReportReadyPromise_();
@@ -345,18 +319,20 @@ export class VisibilityModel {
           this.update();
         });
       }
-    } else if (this.matchesVisibility_ && !this.scheduledRunId_) {
+    } else if (this.matchesVisibility_ && !this.scheduledUpdateTimeoutId_) {
       // There is unmet duration condition, schedule a check
       const timeToWait = this.computeTimeToWait_();
       if (timeToWait > 0) {
-        this.scheduledRunId_ = setTimeout(() => {
-          this.scheduledRunId_ = null;
+        this.scheduledUpdateTimeoutId_ = setTimeout(() => {
+          this.scheduledUpdateTimeoutId_ = null;
           this.update();
+          this.reset_();
+          this.setReady(true);
         }, timeToWait);
       }
-    } else if (!this.matchesVisibility_ && this.scheduledRunId_) {
-      clearTimeout(this.scheduledRunId_);
-      this.scheduledRunId_ = null;
+    } else if (!this.matchesVisibility_ && this.scheduledUpdateTimeoutId_) {
+      clearTimeout(this.scheduledUpdateTimeoutId_);
+      this.scheduledUpdateTimeoutId_ = null;
     }
   }
 
