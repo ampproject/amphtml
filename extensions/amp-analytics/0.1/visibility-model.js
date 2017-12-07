@@ -228,7 +228,7 @@ export class VisibilityModel {
    */
   setReady(ready) {
     this.ready_ = ready;
-    this.update();
+    this.update_(this.getVisibility_());
   }
 
   /**
@@ -324,10 +324,12 @@ export class VisibilityModel {
       const timeToWait = this.computeTimeToWait_();
       if (timeToWait > 0) {
         this.scheduledUpdateTimeoutId_ = setTimeout(() => {
+          this.update();
+          if (!this.eventResolver_) {
+            this.reset_();
+            this.setReady(true);
+          }
           this.scheduledUpdateTimeoutId_ = null;
-          this.update_(this.getVisibility_());
-          this.reset_();
-          this.setReady(true);
         }, timeToWait);
       }
     } else if (!this.matchesVisibility_ && this.scheduledUpdateTimeoutId_) {
