@@ -95,6 +95,9 @@ export class AccessService {
     /** @private @const {?../../../src/service/performance-impl.Performance} */
     this.performance_ = Services.performanceForOrNull(ampdoc.win);
 
+    /** @private {?Promise<string>} */
+    this.readerIdPromise_ = null;
+
     /** @const */
     this.sources_ = this.parseConfig_();
 
@@ -166,21 +169,23 @@ export class AccessService {
 
     const configMap = {};
     if (isArray(rawContent)) {
-      for (let i = 0; i < rawContent.length; i++) {
-        const namespace = rawContent[i].namespace;
+      const contentArray = rawContent;
+      for (let i = 0; i < contentArray['length']; i++) {
+        const namespace = contentArray[i]['namespace'];
         user().assert(!!namespace, 'Namespace required');
         user().assert(!configMap[namespace],
             'Namespace already used: ' + namespace);
-        configMap[namespace] = rawContent[i];
+        configMap[namespace] = contentArray[i];
       }
     } else {
-      configMap[rawContent.namespace || ''] = rawContent;
+      configMap[rawContent['namespace'] || ''] = rawContent;
     }
 
     const readerIdFn = this.getReaderId_.bind(this);
     const scheduleViewFn = this.scheduleView_.bind(this);
-    return Object.values(configMap).map(config =>
-        new AccessSource(this.ampdoc, config, readerIdFn, scheduleViewFn)
+    return Object.keys(configMap).map(key =>
+        new AccessSource(this.ampdoc, configMap[key], readerIdFn,
+          scheduleViewFn, this.accessElement_)
     );
   }
 
@@ -196,7 +201,8 @@ export class AccessService {
     if (responseReceived) {
       return this.lastAuthorizationPromises_.then(() => {
         const target = dev().assertElement(event.target);
-        this.applyAuthorizationToRoot_(target, this.combinedResponses());
+        this.applyAuthorizationToRoot_(target,
+          /** @type {!JsonObject} */ (this.combinedResponses()));
       });
     }
   }
@@ -209,9 +215,9 @@ export class AccessService {
     for (let i = 0; i < this.sources_.length; i++) {
       const source = this.sources_[i];
       if (source.getType() == AccessType.VENDOR) {
-        const vendorAdapter = /** @type {!AccessVendorAdapter} */ (
-          source.getAdapter()
-        );
+        const vendorAdapter =
+          /** @type {!./amp-access-vendor.AccessVendorAdapter} */ (
+            source.getAdapter());
         vendorAdapter.registerVendor(name, vendor);
         return;
       }
@@ -374,7 +380,8 @@ export class AccessService {
       source.runAuthorization()
           .then(response =>
           response && this.ampdoc.whenReady().then(() =>
-            this.applyAuthorization_(this.combinedResponses())))
+            this.applyAuthorizationToRoot_(this.ampdoc.getRootNode(),
+              /** @type {!JsonObject} */ (this.combinedResponses()))))
     );
     const promise = Promise.all(promises);
 
@@ -405,27 +412,9 @@ export class AccessService {
       if (!responses) {
         return null;
       }
-      const v = getValueForExpr(this.combinedResponses(), field);
+      const v = getValueForExpr(responses, field);
       return v !== undefined ? v : null;
     });
-  }
-
-  /**
-   * @return {!Promise} Returns a promise for the initial authorization.
-   */
-  whenFirstAuthorized() {
-    // Only used by tests.
-    return this.sources_[0].whenFirstAuthorized();
-  }
-
-  /**
-   * @param {!JsonObject} response
-   * @return {!Promise}
-   * @private
-   */
-  applyAuthorization_(response) {
-    // This breaks failure recovery
-    return this.applyAuthorizationToRoot_(this.ampdoc.getRootNode(), response);
   }
 
   /**
@@ -672,7 +661,7 @@ export class AccessService {
   /**
    * Expose the underlying AccessSource for use by laterpay.
    *
-   * @return {!AccessSource}
+   * @return {?AccessSource}
    */
   getSource(index) {
     return this.sources_[index];
@@ -697,27 +686,22 @@ export class AccessService {
 
     // Namespaced
     const namespace = type.substring(0, splitPoint);
-    for (let i = 0; i < this.sources_.length; i++) {
-      const source = this.sources_[i];
-      if (source.getNamespace() == namespace) {
-        return source.loginWithType(type.substring(splitPoint + 1));
-      }
-    }
-
-    user().error(TAG, 'Login type not found: %s', type);
+    const match = this.sources_.filter(s => s.getNamespace() == namespace);
+    user().assert(match.length, 'Login type not found: %s', namespace);
+    return match[0].loginWithType(type.substring(splitPoint + 1));
   }
 
   /**
    * Either combine namespaced responses or just return the single one.
    *
-   * @return {!JsonObject}
+   * @return {?JsonObject}
    */
   combinedResponses() {
     if (this.sources_.length == 1 && !this.sources_[0].getNamespace()) {
       return this.sources_[0].getAuthResponse();
     }
 
-    const combined = {};
+    const combined = /** @type {JsonObject} */ ({});
     this.sources_.forEach(source =>
       combined[source.getNamespace()] = source.getAuthResponse());
     return combined;

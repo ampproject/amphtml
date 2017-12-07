@@ -26,7 +26,7 @@ const TAG = 'amp-access-vendor';
  * interface and delivered via a separate extension. The vendor implementation
  * mainly requires two method: `authorize` and `pingback`. The actual
  * extension is registered via `registerVendor` method.
- * @implements {./amp-access.AccessTypeAdapterDef}
+ * @implements {./amp-access-source.AccessTypeAdapterDef}
  */
 export class AccessVendorAdapter {
 

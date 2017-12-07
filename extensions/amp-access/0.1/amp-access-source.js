@@ -55,10 +55,11 @@ export class AccessSource {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} configJson
-   * @param {Function} readerIdFn
-   * @param {Function} scheduleViewFn
+   * @param {!Function} readerIdFn
+   * @param {!Function} scheduleViewFn
+   * @param {!Element} accessElement
    */
-  constructor(ampdoc, configJson, readerIdFn, scheduleViewFn) {
+  constructor(ampdoc, configJson, readerIdFn, scheduleViewFn, accessElement) {
 
     /** @const */
     this.ampdoc = ampdoc;
@@ -68,6 +69,9 @@ export class AccessSource {
 
     /** @const */
     this.scheduleView_ = scheduleViewFn;
+
+    /** @const */
+    this.accessElement_ = accessElement;
 
     /** @const @private {boolean} */
     this.isServerEnabled_ = isExperimentOn(ampdoc.win, 'amp-access-server');
@@ -109,9 +113,6 @@ export class AccessSource {
 
     /** @private @const {function(string):Promise<string>} */
     this.openLoginDialog_ = openLoginDialog.bind(null, ampdoc);
-
-    /** @private {?Promise<string>} */
-    this.readerIdPromise_ = null;
 
     /** @private {?JsonObject} */
     this.authResponse_ = null;
@@ -293,7 +294,7 @@ export class AccessSource {
   }
 
   /**
-   * @return {!AccessService}
+   * Start authorization and sign in.
    */
   start() {
     dev().fine(TAG, 'config:', this.type_, this.loginConfig_,
@@ -416,13 +417,6 @@ export class AccessSource {
   setAuthResponse_(authResponse) {
     this.authResponse_ = authResponse;
     this.firstAuthorizationResolver_();
-  }
-
-  /**
-   * @return {!Promise} Returns a promise for the initial authorization.
-   */
-  whenFirstAuthorized() {
-    return this.firstAuthorizationPromise_;
   }
 
   /**

@@ -104,7 +104,7 @@ export class LaterpayVendor {
     /** @const */
     this.ampdoc = accessService.ampdoc;
 
-    /** @const @private {!../../amp-access/0.1/amp-access.AccessSource} */
+    /** @const @private {?../../amp-access/0.1/amp-access-source.AccessSource} */
     this.accessSource_ = accessService.getSource(0);
 
     /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */

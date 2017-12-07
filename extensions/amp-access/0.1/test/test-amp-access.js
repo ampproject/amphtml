@@ -547,7 +547,7 @@ describes.fakeWin('AccessService authorization', {
         .once();
     expect(service.firstAuthorizationPromises_).to.exist;
     return service.runAuthorization_().then(() => {
-      return service.whenFirstAuthorized().then(() => {
+      return service.sources_[0].whenFirstAuthorized().then(() => {
         expect(service.sources_[0].analyticsEvent_).to.have.been.calledOnce;
         expect(service.sources_[0].analyticsEvent_).to.have.been.calledWith(
             'access-authorization-received');
