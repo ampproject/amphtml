@@ -108,6 +108,8 @@ const NEXT_BUTTON_CLASS = 'i-amphtml-story-button-move'
 const PREV_BUTTON_CLASS = 'i-amphtml-story-button-move'
     + ' i-amphtml-story-button-prev i-amphtml-story-button-move-hidden';
 
+const LANDSCAPE_OVERLAY_CLASS = 'i-amphtml-story-landscape';
+
 const PAGE_SWITCH_BUTTONS = [
   {
     tag: 'div',
@@ -126,6 +128,29 @@ const PAGE_SWITCH_BUTTONS = [
       {
         tag: 'button',
         attrs: dict({'class': PREV_BUTTON_CLASS}),
+      },
+    ],
+  },
+];
+
+const LANDSCAPE_ORIENTATION_WARNING = [
+  {
+    tag: 'div',
+    attrs: dict({'class': 'i-amphtml-story-no-rotation-overlay'}),
+    children: [
+      {
+        tag: 'div',
+        attrs: dict({'class': 'i-amphtml-overlay-container'}),
+        children: [
+          {
+            tag: 'div',
+            attrs: dict({'class': 'i-amphtml-rotate-icon'}),
+          },
+          {
+            tag: 'div',
+            text: 'The page is best viewed in Portrait mode.',
+          },
+        ],
       },
     ],
   },
@@ -242,6 +267,8 @@ export class AmpStory extends AMP.BaseElement {
 
     registerServiceBuilder(this.win, 'story-variable',
         () => this.variableService_);
+
+    this.buildLandscapeOrientationOverlay_();
   }
 
 
@@ -796,7 +823,17 @@ export class AmpStory extends AMP.BaseElement {
         this.updateBackground_(this.activePage_.element);
       }
     } else {
-      this.element.removeAttribute('desktop');
+      this.vsync_.run({
+        measure: state => {
+          const {offsetWidth, offsetHeight} = this.element;
+          state.isLandscape = offsetWidth > offsetHeight;
+        },
+        mutate: state => {
+          this.element.classList.toggle(LANDSCAPE_OVERLAY_CLASS,
+              state.isLandscape);
+          this.element.removeAttribute('desktop');
+        },
+      }, {});
     }
   }
 
@@ -808,6 +845,15 @@ export class AmpStory extends AMP.BaseElement {
         this.desktopMedia_.matches;
   }
 
+
+  /**
+   * Build overlay for Landscape mode mobile
+   */
+  buildLandscapeOrientationOverlay_() {
+    this.element.insertBefore(
+        renderSimpleTemplate(this.win.document, LANDSCAPE_ORIENTATION_WARNING),
+        this.element.firstChild);
+  }
   /**
    * Get the URL of the given page's background resource.
    * @param {!Element} pageElement

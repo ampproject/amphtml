@@ -336,6 +336,32 @@ describes.realWin('amp-story', {
     expect(nextStub).calledOnce;
     expect(prevStub).calledOnce;
   });
+
+  it('toggles `i-amphtml-story-landscape` based on height and width', () => {
+    story.element.style.width = '11px';
+    story.element.style.height = '10px';
+    const isDesktopStub = sandbox.stub(story, 'isDesktop_').returns(false);
+    story.vsync_ = {
+      run: (task, state) => {
+        if (task.measure) {
+          task.measure(state);
+        }
+        if (task.mutate) {
+          task.mutate(state);
+        }
+      },
+    };
+    story.onResize();
+    expect(isDesktopStub).to.be.calledOnce;
+    expect(story.element.classList.contains('i-amphtml-story-landscape'))
+        .to.be.true;
+    story.element.style.width = '10px';
+    story.element.style.height = '11px';
+    story.onResize();
+    expect(isDesktopStub).to.be.calledTwice;
+    expect(story.element.classList.contains('i-amphtml-story-landscape'))
+        .to.be.false;
+  });
 });
 
 
