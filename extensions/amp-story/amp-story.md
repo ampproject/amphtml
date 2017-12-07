@@ -43,7 +43,7 @@ This component is experimental and under active development. For any issues, ple
 
 ## Overview
 
-The `amp-story` extension provides a new format for displaying visual content that you can assembled into a story-telling experience. With an AMP Story, you can provide users with bite-sized, visually rich information and content.
+The `amp-story` extension provides a new format for displaying visual content that you can assemble into a story-telling experience. With an AMP Story, you can provide users with bite-sized, visually rich information and content.
 
 <figure class="centered-fig">
   <amp-anim width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story.gif">
