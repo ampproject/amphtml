@@ -21,6 +21,7 @@ import {filterSplice} from '../../../src/utils/array';
 import {appendEncodedParamStringToUrl} from '../../../src/url';
 import {
   variableServiceFor,
+  ExpansionOptions,
 } from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
@@ -207,13 +208,19 @@ export class RequestHandler {
   expandExtraUrlParams_(configParams, triggerParams, expansionOption) {
     const requestPromises = [];
     const params = map();
+    // Don't encode param values here,
+    // as we'll do it later in the getExtraUrlParamsString_ call.
+    const option = new ExpansionOptions(
+        expansionOption.vars,
+        expansionOption.iterations,
+        true /* noEncode */);
     // Add any given extraUrlParams as query string param
     if (configParams || triggerParams) {
       Object.assign(params, configParams, triggerParams);
       for (const k in params) {
         if (typeof params[k] == 'string') {
           requestPromises.push(
-              this.variableService_.expandTemplate(params[k], expansionOption)
+              this.variableService_.expandTemplate(params[k], option)
                   .then(value => { params[k] = value; }));
         }
       }
