@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {FormDataWrapper} from '../form-data-wrapper';
+import {isFormDataWrapper} from '../form-data-wrapper';
 import {Services} from '../services';
 import {dev, user} from '../log';
 import {registerServiceBuilder, getService} from '../service';
@@ -150,7 +150,7 @@ export class Xhr {
       // After this point, both the native `fetch` and the `fetch` polyfill will
       // expect a native `FormData` object in the `body` property, so the native
       // `FormData` object needs to be unwrapped.
-      if (init.body instanceof FormDataWrapper) {
+      if (isFormDataWrapper(init.body)) {
         init.body = init.body.getFormData();
       }
       // Fallback to xhr polyfill since `fetch` api does not support
@@ -258,7 +258,7 @@ export class Xhr {
    */
   toStructuredCloneable_(input, init) {
     const newInit = Object.assign({}, init);
-    if (init.body instanceof FormDataWrapper) {
+    if (isFormDataWrapper(init.body)) {
       newInit.headers = newInit.headers || {};
       newInit.headers['Content-Type'] = 'multipart/form-data;charset=utf-8';
       newInit.body = fromIterator(init.body.entries());
@@ -435,7 +435,7 @@ export class Xhr {
    */
   fetchJson(input, opt_init, opt_allowFailure) {
     const init = setupInit(opt_init, 'application/json');
-    if (init.method == 'POST' && !(init.body instanceof FormDataWrapper)) {
+    if (init.method == 'POST' && !isFormDataWrapper(init.body)) {
       // Assume JSON strict mode where only objects or arrays are allowed
       // as body.
       dev().assert(
