@@ -617,7 +617,8 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
-  it('should replace NAV_TIMING', () => {
+  // TODO(cvializ, #12336): unskip
+  it.skip('should replace NAV_TIMING', () => {
     return expandAsync('?a=NAV_TIMING(navigationStart)' +
         '&b=NAV_TIMING(navigationStart,responseStart)').then(res => {
           expect(res).to.match(/a=\d+&b=\d+/);
@@ -662,7 +663,8 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
-  it('should replace REDIRECT_TIME', () => {
+  // TODO(cvializ, #12336): unskip
+  it.skip('should replace REDIRECT_TIME', () => {
     return expandAsync('?sh=REDIRECT_TIME').then(res => {
       expect(res).to.match(/sh=\d+/);
     });
