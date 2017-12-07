@@ -24,5 +24,5 @@ export function monetizer101(global, data) {
   validateData(data, ['widget', 'config']);
   global.widget = data.widget;
   global.config = data.config;
-  writeScript(global, 'https://prova.monetizer101.com/widget/amp/amp.js');
+  writeScript(global, 'https://link.monetizer101.com/widget/amp/amp.js');
 }
