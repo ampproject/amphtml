@@ -176,14 +176,14 @@ describes.sandboxed('VisibilityModel', {}, () => {
 
     it('should dispose fully', () => {
       const vh = new VisibilityModel(NO_SPEC, calcVisibility);
-      vh.scheduledRunId_ = 1;
+      vh.scheduledUpdateTimeoutId_ = 1;
       vh.scheduleRepeatId_ = 1;
       const unsubscribeSpy = sandbox.spy();
       vh.unsubscribe(unsubscribeSpy);
       const removeSpy = sandbox.spy(vh.onTriggerObservable_, 'removeAll');
 
       vh.dispose();
-      expect(vh.scheduledRunId_).to.be.null;
+      expect(vh.scheduledUpdateTimeoutId_).to.be.null;
       expect(vh.scheduleRepeatId_).to.be.null;
       expect(unsubscribeSpy).to.be.calledOnce;
       expect(vh.unsubscribe_).to.be.empty;
@@ -292,7 +292,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
       vh.minVisiblePercentage_ = 0.2;
       vh.maxVisiblePercentage_ = 0.3;
       vh.eventResolver_ = null;
-      vh.refresh_();
+      vh.reset_();
       expect(vh.getState(0)).to.contains({
         firstSeenTime: 0,
         lastSeenTime: 0,
@@ -322,7 +322,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
         continuousTimeMin: 10,
         continuousTimeMax: 1000,
       }, NO_CALC);
-      updateStub = sandbox.stub(vh, 'update', () => {
+      updateStub = sandbox.stub(vh, 'update').callsFake(() => {
         if (visibilityValueForTesting) {
           vh.update_(visibilityValueForTesting);
         }
@@ -334,9 +334,9 @@ describes.sandboxed('VisibilityModel', {}, () => {
       visibilityValueForTesting = null;
     });
 
-    it('conditions not met', () => {
+    it('conditions not met only', () => {
       vh.update_(0.1);
-      expect(vh.scheduledRunId_).to.be.ok;
+      expect(vh.scheduledUpdateTimeoutId_).to.be.ok;
       expect(updateStub).to.not.be.called;
 
       // Check schedule for 10 seconds.
@@ -344,88 +344,88 @@ describes.sandboxed('VisibilityModel', {}, () => {
       expect(updateStub).to.not.be.called;
       clock.tick(1);
       expect(updateStub).to.be.calledOnce;
-      expect(vh.scheduledRunId_).to.be.null;
+      expect(vh.scheduledUpdateTimeoutId_).to.be.null;
     });
 
     it('conditions not met and cannot schedule', () => {
       vh.continuousTime_ = vh.totalVisibleTime_ = 10;
       vh.update_(0.1);
-      expect(vh.scheduledRunId_).to.be.null;
+      expect(vh.scheduledUpdateTimeoutId_).to.be.null;
     });
 
     it('conditions not met, schedule for total time', () => {
       vh.totalVisibleTime_ = 5;
       vh.update_(0.1);
-      expect(vh.scheduledRunId_).to.be.ok;
+      expect(vh.scheduledUpdateTimeoutId_).to.be.ok;
 
       // Check schedule for 5 seconds.
       clock.tick(4);
       expect(updateStub).to.not.be.called;
       clock.tick(1);
       expect(updateStub).to.be.calledOnce;
-      expect(vh.scheduledRunId_).to.be.null;
+      expect(vh.scheduledUpdateTimeoutId_).to.be.null;
     });
 
     it('conditions not met, schedule for continuous time', () => {
       vh.continuousTime_ = 4;
       vh.update_(0.1);
-      expect(vh.scheduledRunId_).to.be.ok;
+      expect(vh.scheduledUpdateTimeoutId_).to.be.ok;
 
       // Check schedule for 6 seconds.
       clock.tick(5);
       expect(updateStub).to.not.be.called;
       clock.tick(1);
       expect(updateStub).to.be.calledOnce;
-      expect(vh.scheduledRunId_).to.be.null;
+      expect(vh.scheduledUpdateTimeoutId_).to.be.null;
     });
 
     it('conditions not met, schedule w/o total time', () => {
       vh.totalVisibleTime_ = 10;
       vh.continuousTime_ = 4;
       vh.update_(0.1);
-      expect(vh.scheduledRunId_).to.be.ok;
+      expect(vh.scheduledUpdateTimeoutId_).to.be.ok;
 
       // Check schedule for 6 seconds.
       clock.tick(5);
       expect(updateStub).to.not.be.called;
       clock.tick(1);
       expect(updateStub).to.be.calledOnce;
-      expect(vh.scheduledRunId_).to.be.null;
+      expect(vh.scheduledUpdateTimeoutId_).to.be.null;
     });
 
     it('conditions not met, schedule w/o continuous time', () => {
       vh.totalVisibleTime_ = 5;
       vh.continuousTime_ = 10;
       vh.update_(0.1);
-      expect(vh.scheduledRunId_).to.be.ok;
+      expect(vh.scheduledUpdateTimeoutId_).to.be.ok;
 
       // Check schedule for 5 seconds.
       clock.tick(4);
       expect(updateStub).to.not.be.called;
       clock.tick(1);
       expect(updateStub).to.be.calledOnce;
-      expect(vh.scheduledRunId_).to.be.null;
+      expect(vh.scheduledUpdateTimeoutId_).to.be.null;
     });
 
     it('conditions not met -> invisible', () => {
       vh.update_(0.1);
-      expect(vh.scheduledRunId_).to.be.ok;
+      expect(vh.scheduledUpdateTimeoutId_).to.be.ok;
 
       // Goes invisible.
       vh.update_(0);
-      expect(vh.scheduledRunId_).to.be.null;
+      expect(vh.scheduledUpdateTimeoutId_).to.be.null;
       clock.tick(1000);
       expect(updateStub).to.not.be.called;
     });
 
     it('conditions met', () => {
       vh.update_(0.1);
-      expect(vh.scheduledRunId_).to.be.ok;
+      expect(vh.scheduledUpdateTimeoutId_).to.be.ok;
 
       // Goes invisible.
       vh.continuousTime_ = vh.totalVisibleTime_ = 10;
       vh.update_(1);
-      expect(vh.scheduledRunId_).to.be.null;
+      expect(vh.scheduledUpdateTimeoutId_).to.be.null;
       expect(eventSpy).to.be.calledOnce;
       clock.tick(1000);
       expect(updateStub).to.not.be.called;
