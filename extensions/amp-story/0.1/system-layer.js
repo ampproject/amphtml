@@ -20,6 +20,7 @@ import {dev} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {ProgressBar} from './progress-bar';
 import {getMode} from '../../../src/mode';
+import {matches} from '../../../src/dom';
 import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui'; // eslint-disable-line max-len
 
 
@@ -212,15 +213,15 @@ export class SystemLayer {
     this.root_.addEventListener('click', e => {
       const target = dev().assertElement(e.target);
 
-      if (target.matches(
+      if (matches(target,
           `.${EXIT_FULLSCREEN_CLASS}, .${EXIT_FULLSCREEN_CLASS} *`)) {
         this.onExitFullScreenClick_(e);
-      } else if (target.matches(
+      } else if (matches(target,
           `.${ENTER_FULLSCREEN_CLASS}, .${ENTER_FULLSCREEN_CLASS} *`)) {
         this.onEnterFullScreenClick_(e);
-      } else if (target.matches(`.${MUTE_CLASS}, .${MUTE_CLASS} *`)) {
+      } else if (matches(target, `.${MUTE_CLASS}, .${MUTE_CLASS} *`)) {
         this.onMuteAudioClick_(e);
-      } else if (target.matches(`.${UNMUTE_CLASS}, .${UNMUTE_CLASS} *`)) {
+      } else if (matches(target, `.${UNMUTE_CLASS}, .${UNMUTE_CLASS} *`)) {
         this.onUnmuteAudioClick_(e);
       }
     });
