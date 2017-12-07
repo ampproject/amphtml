@@ -28,15 +28,50 @@ import {
   hasAnimations,
 } from './animation';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {upgradeBackgroundAudio} from './audio';
+import {renderSimpleTemplate} from './simple-template';
+import {dev} from '../../../src/log';
 import {EventType, dispatch, dispatchCustom} from './events';
+import {PageElement} from './page-element';
 import {AdvancementConfig} from './page-advancement';
-import {scopedQuerySelectorAll} from '../../../src/dom';
+import {dict} from '../../../src/utils/object';
+import {matches, scopedQuerySelectorAll} from '../../../src/dom';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
-import {CommonSignals} from '../../../src/common-signals';
-import {setImportantStyles} from '../../../src/style';
 
+/** @private @const {!Array<!./simple-template.ElementDef>} */
+const LOADING_SCREEN_TEMPLATE = [
+  {
+    tag: 'div',
+    attrs: dict({'class': 'i-amphtml-story-page-loading-screen'}),
+    children: [
+      {
+        tag: 'ul',
+        attrs: dict({'class': 'i-amphtml-story-page-loading-dots'}),
+        children: [
+          {
+            tag: 'li',
+            attrs: dict({'class': 'i-amphtml-story-page-loading-dot'}),
+          },
+          {
+            tag: 'li',
+            attrs: dict({'class': 'i-amphtml-story-page-loading-dot'}),
+          },
+          {
+            tag: 'li',
+            attrs: dict({'class': 'i-amphtml-story-page-loading-dot'}),
+          },
+        ],
+      },
+      {
+        tag: 'p',
+        attrs: dict({'class': 'i-amphtml-story-page-loading-text'}),
+        text: 'Loading', // TODO(alanorozco): i18n
+      },
+    ],
+  },
+];
 
 
 /**
@@ -47,10 +82,24 @@ const PAGE_LOADED_CLASS_NAME = 'i-amphtml-story-page-loaded';
 
 
 /**
- * Selector for which media to wait for on page layout.
+ * CSS class for an amp-story-page that indicates the entire page can be shown.
  * @const {string}
  */
-const PAGE_MEDIA_SELECTOR = 'amp-audio, amp-video, amp-img, amp-anim';
+const PAGE_SHOWN_CLASS_NAME = 'i-amphtml-story-page-shown';
+
+
+/**
+ * The duration of time (in milliseconds) to show the loading screen for this
+ * page, before showing the page content.
+ * @const {number}
+ */
+const LOAD_TIMEOUT_MS = 8000;
+
+
+/**
+ * The delay (in milliseconds) to wait between polling for loaded resources.
+ */
+const LOAD_TIMER_POLL_DELAY_MS = 250;
 
 
 /** @private @const {string} */
@@ -69,20 +118,35 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?AnimationManager} */
     this.animationManager_ = null;
 
-    /** @private @const {!AdvancementConfig} */
+    /** @private {!Array<!PageElement>} */
+    this.pageElements_ = [];
+
+    /** @private {?function()} */
+    this.resolveLoadPromise_ = null;
+
+    /** @private {?Promise<undefined>} */
+    this.loadPromise_ = new Promise(resolve => {
+      this.resolveLoadPromise_ = resolve;
+    });
+
+    /** @private {?Promise<undefined>} */
+    this.loadTimeoutPromise_ = null;
+
+    /** @private @const {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(this.win);
+
+    /** @private {boolean} */
+    this.isLoaded_ = false;
+
+    /** @private {?UnlistenDef} */
+    this.autoAdvanceUnlistenDef_ = null;
+
+    /** @private {!AdvancementConfig} */
     this.advancement_ = AdvancementConfig.forPage(this);
 
-    /** @private @const {!Promise} */
-    this.mediaLayoutPromise_ = this.waitForMediaLayout_();
-
-    /** @private @const {!Promise<!./media-pool.MediaPool>} */
-    this.mediaPoolPromise_ = new Promise((resolve, reject) => {
-      this.setMediaPool = mediaPool => {
-        this.mediaLayoutPromise_
-            .then(() => resolve(mediaPool))
-            .catch(reject);
-      };
-    });
+    /** @private @const {boolean} Only prerender the first story page. */
+    this.prerenderAllowed_ = matches(this.element,
+        'amp-story-page:first-of-type');
   }
 
 
@@ -107,6 +171,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     upgradeBackgroundAudio(this.element);
     this.markMediaElementsWithPreload_();
     this.maybeCreateAnimationManager_();
+    this.initializeLoading_();
     this.advancement_.addPreviousListener(() => this.previous());
     this.advancement_
         .addAdvanceListener(() => this.next(/* opt_isAutomaticAdvance */ true));
@@ -125,6 +190,23 @@ export class AmpStoryPage extends AMP.BaseElement {
     Array.prototype.forEach.call(mediaSet, mediaItem => {
       mediaItem.setAttribute('preload', 'auto');
     });
+  }
+
+
+  /**
+   * Initializes the loading screen for this amp-story-page, and the listeners
+   * to remove it once loaded.
+   * @private
+   */
+  initializeLoading_() {
+    this.element.appendChild(
+        renderSimpleTemplate(this.win.document, LOADING_SCREEN_TEMPLATE));
+
+    // Build a list of page elements and poll until they are all loaded.
+    this.pageElements_ = PageElement.getElementsFromPage(this);
+    this.loadPromise_ = this.timer_.poll(LOAD_TIMER_POLL_DELAY_MS, () => {
+      return this.calculateLoadStatus();
+    }).then(() => this.markPageAsLoaded_());
   }
 
 
@@ -147,12 +229,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.muteAllMedia();
-
-    return Promise.all([
-      this.beforeVisible(),
-      this.mediaPoolPromise_,
-    ]);
+    return this.beforeVisible();
   }
 
   /** @return {!Promise} */
@@ -164,27 +241,25 @@ export class AmpStoryPage extends AMP.BaseElement {
   onPageVisible_() {
     this.markPageAsLoaded_();
     this.updateAudioIcon_();
-    this.registerAllMedia_();
     this.playAllMedia_();
+    this.advancement_.start();
     this.maybeStartAnimations();
     this.reportDevModeErrors_();
   }
 
 
   /** @private */
-  waitForMediaLayout_() {
-    const mediaSet = scopedQuerySelectorAll(this.element, PAGE_MEDIA_SELECTOR);
-    const mediaPromises = Array.prototype.map.call(mediaSet, mediaEl => {
-      return mediaEl.signals().whenSignal(CommonSignals.LOAD_END);
-    });
-
-    return Promise.all(mediaPromises);
+  markPageAsLoaded_() {
+    this.isLoaded_ = true;
+    this.element.classList.add(PAGE_LOADED_CLASS_NAME);
+    this.markPageAsShown_();
+    this.resolveLoadPromise_();
   }
 
 
   /** @private */
-  markPageAsLoaded_() {
-    this.element.classList.add(PAGE_LOADED_CLASS_NAME);
+  markPageAsShown_() {
+    this.element.classList.add(PAGE_SHOWN_CLASS_NAME);
   }
 
 
@@ -202,15 +277,43 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   hasAudio_() {
-    return Array.prototype.some.call(this.getAllMedia_(), mediaEl => {
-      if (!(mediaEl instanceof HTMLMediaElement)) {
-        return false;
+    return this.pageElements_.some(pageElement => pageElement.hasAudio());
+  }
+
+
+  /**
+   * @return {boolean} true, if the page is completely loaded; false otherwise.
+   * @public
+   */
+  calculateLoadStatus() {
+    if (this.isLoaded_ || this.pageElements_.length == 0) {
+      return true;
+    }
+
+    let isPageLoaded = true;
+    let canPageBeShown = false;
+
+    this.pageElements_.forEach(pageElement => {
+      pageElement.updateState();
+
+      if (isPageLoaded) {
+        isPageLoaded = pageElement.isLoaded || pageElement.hasFailed;
       }
 
-      return mediaEl.mozHasAudio ||
-          Boolean(mediaEl['webkitAudioDecodedByteCount']) ||
-          Boolean(mediaEl.audioTracks && mediaEl.audioTracks.length);
+      if (!canPageBeShown) {
+        canPageBeShown = pageElement.canBeShown;
+      }
     });
+
+    if (isPageLoaded) {
+      this.markPageAsLoaded_();
+    }
+
+    if (canPageBeShown) {
+      this.markPageAsShown_();
+    }
+
+    return isPageLoaded;
   }
 
 
@@ -231,31 +334,19 @@ export class AmpStoryPage extends AMP.BaseElement {
 
 
   /**
-   * Applies the specified callback to each media element on the page, after the
-   * media element is loaded.
-   * @param {!function(!./media-pool.MediaPool, !Element)} callbackFn The
-   *     callback to be applied to each media element.
-   */
-  forEachMediaElement_(callbackFn) {
-    const mediaSet = this.getAllMedia_();
-    this.mediaPoolPromise_.then(mediaPool => {
-      Array.prototype.forEach.call(mediaSet, mediaEl => {
-        callbackFn(mediaPool, mediaEl);
-      });
-    });
-  }
-
-
-  /**
    * Pauses all media on this page.
    * @param {boolean} opt_rewindToBeginning Whether to rewind the currentTime
    *     of media items to the beginning.
    * @private
    */
   pauseAllMedia_(opt_rewindToBeginning) {
-    this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.pause(/** @type {!HTMLMediaElement} */ (mediaEl),
-          opt_rewindToBeginning);
+    const mediaSet = this.getAllMedia_();
+    Array.prototype.forEach.call(mediaSet, mediaItem => {
+      mediaItem.pause();
+
+      if (opt_rewindToBeginning) {
+        mediaItem.currentTime = 0;
+      }
     });
   }
 
@@ -265,53 +356,14 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   playAllMedia_() {
-    this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.play(/** @type {!HTMLMediaElement} */ (mediaEl));
+    const mediaSet = this.getAllMedia_();
+    Array.prototype.forEach.call(mediaSet, mediaItem => {
+      mediaItem.play().catch(() => {
+        dev().error('AMP-STORY',
+            `Failed to play media element with src ${mediaItem.src}.`);
+      });
     });
   }
-
-
-  /**
-   * Pauses all media on this page.
-   * @private
-   */
-  preloadAllMedia_() {
-    this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.preload(/** @type {!HTMLMediaElement} */ (mediaEl));
-    });
-  }
-
-
-  /**
-   * Mutes all media on this page.
-   */
-  muteAllMedia() {
-    this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.mute(/** @type {!HTMLMediaElement} */ (mediaEl));
-    });
-  }
-
-
-  /**
-   * Unmutes all media on this page.
-   */
-  unmuteAllMedia() {
-    this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.unmute(/** @type {!HTMLMediaElement} */ (mediaEl));
-    });
-  }
-
-
-  /**
-   * Registers all media on this page
-   * @private
-   */
-  registerAllMedia_() {
-    this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.register(/** @type {!HTMLMediaElement} */ (mediaEl));
-    });
-  }
-
 
   /**
    * Starts playing animations, if the animation manager is available.
@@ -340,10 +392,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   setActive(isActive) {
     if (isActive) {
-      this.element.setAttribute('active', '');
       this.pageActiveCallback_();
     } else {
-      this.element.removeAttribute('active');
       this.pageInactiveCallback_();
     }
   }
@@ -351,14 +401,35 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @private */
   pageActiveCallback_() {
-    this.advancement_.start();
-    this.onPageVisible_();
+    this.element.setAttribute('active', '');
+
+    if (!this.loadPromise_) {
+      return;
+    }
+
+    if (!this.loadTimeoutPromise_) {
+      this.loadTimeoutPromise_ = this.timer_.promise(LOAD_TIMEOUT_MS);
+    }
+
+    this.pageElements_.forEach(pageElement => {
+      pageElement.resumeCallback();
+    });
+
+    Promise.race([this.loadPromise_, this.loadTimeoutPromise_]).then(() => {
+      this.onPageVisible_();
+    });
   }
 
 
   /** @private */
   pageInactiveCallback_() {
+    this.element.removeAttribute('active');
+
     this.pauseAllMedia_(/* opt_rewindToBeginning */ true);
+    this.pageElements_.forEach(pageElement => {
+      pageElement.pauseCallback();
+    });
+
     this.advancement_.stop();
 
     if (this.animationManager_) {
@@ -366,39 +437,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
   }
 
-
-  /**
-   * @return {number} The distance from the current page to the active page.
-   */
-  getDistance() {
-    return parseInt(this.element.getAttribute('distance'), 10);
-  }
-
-
-  /**
-   * @param {number} distance The distance from the current page to the active
-   *     page.
-   */
-  setDistance(distance) {
-    this.element.setAttribute('distance', distance);
-    setImportantStyles(this.element, {
-      transform: `translateY(${100 * distance}%)`,
-    });
-
-    this.registerAllMedia_();
-    if (distance > 0 && distance <= 2) {
-      this.preloadAllMedia_();
-    }
-  }
-
-
-  /**
-   * @param {!./media-pool.MediaPool} unusedMediaPool The media pool instance to
-   *     use for this AmpStoryPage.
-   */
-  setMediaPool(unusedMediaPool) {
-    // Overridden by this.mediaPoolPromise_.
-  }
 
   /**
    * @return {boolean} Whether this page is currently active.
