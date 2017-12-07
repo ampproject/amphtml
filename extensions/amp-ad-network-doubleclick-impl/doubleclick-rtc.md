@@ -119,7 +119,7 @@ https://securepubads.g.doubleclick.net/gampad/ads?.....&scp=loc%3Dusa%26animal%3
 
 ### Merging targeting data for Vendors
 
-To prevent malicious vendors from naming the keys in their RTC response to match other vendors (and thereby overwrite them), key names from all vendor RTC responses  are automatically appended with the vendor's name as defined in callout-vendors.js. Note that this is only done to responses from vendors, not responses from custom URLs. Publisher-defined custom URLs are expected to guarantee uniqueness amongst key names.
+To prevent malicious vendors from naming the keys in their RTC response to match other vendors (and thereby overwrite them), key names from all vendor RTC responses are automatically appended with the vendor's name as defined in callout-vendors.js. Note that this is only done to responses from vendors, not responses from custom URLs. This may optionally be turned off via vendor configuration in callout-vendors.js.
 
 For instance, take this example where we call out to vendors, VendorA and VendorB:
 
@@ -175,7 +175,21 @@ Thus, when the merging happens, the final object is:
 {"targeting":{"abc":"123", "abc_vendorA": "456", "abc_vendorB": "FOO"}}
 ```
 
+To disable key appending, within callout-vendors.js set the option `disableKeyAppend: true` as seen in the following example:
 
+```
+export const RTC_VENDORS = {
+ ...
+ ...
+    'fakeVendor': {
+      url: 'https://fakeVendor.biz/slot_id=SLOT_ID&page_id=PAGE_ID&foo_id=FOO_ID',
+      macros: ['SLOT_ID', 'PAGE_ID', 'FOO_ID'],
+      disableKeyAppend: true,
+    },
+ ...
+ ...
+};
+```
 
 ### Merging categoryExclusions
 
