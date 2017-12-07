@@ -228,7 +228,7 @@ export class VisibilityModel {
    */
   setReady(ready) {
     this.ready_ = ready;
-    this.update_(this.getVisibility_());
+    this.update();
   }
 
   /**
