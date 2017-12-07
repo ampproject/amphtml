@@ -732,6 +732,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  viralize: {
+    renderStartImplemented: true,
+  },
+
   vmfive: {
     prefetch: 'https://man.vm5apis.com/dist/adn-web-sdk.js',
     preconnect: [
