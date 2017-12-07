@@ -76,6 +76,15 @@ export const adConfig = {
     prefetch: 'https://h.accesstrade.net/js/amp/amp.js',
   },
 
+  adagio: {
+    prefetch: 'https://js-ssl.neodatagroup.com/adagio_amp.js',
+    preconnect: [
+      'https://ad-aws-it.neodatagroup.com',
+      'https://tracker.neodatagroup.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   adblade: {
     prefetch: 'https://web.adblade.com/js/ads/async/show.js',
     preconnect: [
