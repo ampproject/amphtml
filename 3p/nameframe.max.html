@@ -3,26 +3,40 @@
 <head>
   <meta charset="utf-8">
   <script>
-    var writeInHead = false;
-    var waitForOnload = false;
+
+    var name_data;
+    var writeInHead = true;
+    var waitForOnload = true;
+
+    var tryProtected = function(blockFn) {
+      try {
+        blockFn();
+      } catch (err) {
+        window.parent.postMessage(
+            {type: 'no-content', error: err.message}, '*');
+        window.name = '';
+      }
+    };
+
+    tryProtected(function() { debugger;
+      name_data = JSON.parse(window.name);
+      writeInHead = name_data['writeInHead'];
+      waitForOnload = name_data['waitForOnload'];
+      if (!name_data || !name_data['creative']) {
+        throw new Error('Missing or incorrectly formatted JSON ' +
+            'input to nameframe');
+      }
+    });
 
     var render = function() {
-      try {
-        var name_data = JSON.parse(window.name);
-        if (!name_data || !name_data['creative']) {
-          throw new Error('Missing or incorrectly formatted JSON ' +
-            'input to nameframe');
-        }
+      tryProtected(function() {
         document.open();
         document.write(name_data['creative']);
         document.close();
         delete name_data['creative'];
         window.name = JSON.stringify(name_data);
-      } catch (err) {
-        window.parent.postMessage(
-          {type: 'no-content', error: err.message}, '*');
-        window.name = '';
-      }
+        debugger;
+      });
     };
 
     if (writeInHead && waitForOnload) {
@@ -32,7 +46,7 @@
     }
   </script>
 </head>
-<body style="visibility: hidden;">
+<body>
   <script>
     if (!writeInHead && waitForOnload) {
       window.onload = render;

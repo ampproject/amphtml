@@ -375,6 +375,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {boolean} */
     this.isIdleRender_ = false;
+
+    /** @private {?{writeInHead: boolean, waitForOnload: boolean}} */
+    this.nameframeExperimentConfig_ = null;
   }
 
   /** @override */
@@ -800,6 +803,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // Load amp-analytics extensions
       this.extensions_./*OK*/installExtensionForDoc(
           this.getAmpDoc(), 'amp-analytics');
+    }
+
+    const nameframeExperimentConfig = responseHeaders.get('amp-nameframe-exp');
+    if (nameframeExperimentConfig) {
+      nameframeExperimentConfig.split(';').map(config => {
+        switch (config) {
+          case 'waitForOnload':
+          case 'writeInHead':
+            // Both parameters are true by default; we flip those sent back on
+            // the header.
+            this.nameframeExperimentConfig_[config] = false;
+        }
+      });
     }
 
     if (this.isFluid_) {
@@ -1331,6 +1347,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       attributes['reportCreativeGeometry'] = true;
       attributes['isDifferentSourceWindow'] = false;
       attributes['sentinel'] = this.sentinel;
+    } else {
+      attributes['writeInHead'] = false;
+      attributes['waitForOnload'] = false;
     }
     return attributes;
   }

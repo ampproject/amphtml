@@ -379,7 +379,7 @@ export class AmpAdXOriginIframeHandler {
     // The iframe may have been removed by the time we resize.
     if (!this.iframe) {
       return;
-    }
+    } debugger;
     postMessageToWindows(
         this.iframe,
         [{win: source, origin}],
