@@ -1,6 +1,5 @@
 {
   "parser": "babel-eslint",
-  "rulePaths": ["build-system/eslint-rules/"],
   "plugins": ["eslint-plugin-google-camelcase"],
   "ecmaFeatures": {
     "modules": true,
