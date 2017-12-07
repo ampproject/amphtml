@@ -27,6 +27,7 @@
  */
 
 import {Layout} from '../../../src/layout';
+import {matches} from '../../../src/dom';
 
 /**
  * A mapping of attribute names we support for grid layers to the CSS Grid
@@ -72,6 +73,16 @@ const TEMPLATE_CLASS_NAMES = {
 };
 
 export class AmpStoryGridLayer extends AMP.BaseElement {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private @const {boolean} Only prerender if child of the first page. */
+    this.prerenderAllowed_ = matches(this.element,
+        'amp-story-page:first-of-type amp-story-grid-layer');
+  }
+
+
   /** @override */
   buildCallback() {
     this.applyTemplateClassName_();
@@ -82,7 +93,7 @@ export class AmpStoryGridLayer extends AMP.BaseElement {
 
   /** @override */
   prerenderAllowed() {
-    return true;
+    return this.prerenderAllowed_;
   }
 
 

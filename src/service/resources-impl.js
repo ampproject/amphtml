@@ -524,7 +524,16 @@ export class Resources {
    */
   buildOrScheduleBuildForResource_(resource, checkForDupes = false,
       scheduleWhenBuilt = true) {
-    if (this.isRuntimeOn_ || this.isBuildOn_) {
+    const buildingEnabled = (this.isRuntimeOn_ || this.isBuildOn_);
+
+    // During prerender mode, don't build elements that aren't allowed to be
+    // prerendered. This avoids wasting our prerender build quota.
+    // See grantBuildPermission() for more details.
+    const shouldBuildResource =
+        this.viewer_.getVisibilityState() != VisibilityState.PRERENDER
+        || resource.prerenderAllowed();
+
+    if (buildingEnabled && shouldBuildResource) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
         this.buildResourceUnsafe_(resource, scheduleWhenBuilt);
