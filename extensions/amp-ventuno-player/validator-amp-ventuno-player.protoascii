@@ -17,49 +17,49 @@
 tags: {  # amp-ventuno-player
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amp-ventuno-player extension .js script"
-  satisfies: "amp-ventuno-player extension .js script"
-  requires: "amp-ventuno-player"
-  mandatory_parent: "HEAD"
-  unique: true
-  extension_unused_unless_tag_present: "amp-ventuno-player"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  extension_spec: {
+    name: "amp-ventuno-player"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-ventuno-player"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\.ampproject\.org/v0/amp-ventuno-player-(latest|0\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ventuno-player"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-ventuno-player>
   html_format: AMP
   tag_name: "AMP-VENTUNO-PLAYER"
-  satisfies: "amp-ventuno-player"
-  requires: "amp-ventuno-player extension .js script"
+  requires_extension: "amp-ventuno-player"
+  attrs: {
+    name: "data-player"
+    mandatory: true
+  }
+  attrs: {
+    name: "data-pubid"
+    mandatory: true
+  }
+  attrs: {
+    name: "data-slotid"
+    mandatory: true
+  }
+  attrs: {
+    name: "data-title"
+    mandatory: false
+  }
+  attrs: {
+    name: "data-url"
+    mandatory: false
+  }
+  attrs: {
+    name: "data-meta"
+    mandatory: false
+  }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-hello-world"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-ventuno-player"
   amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
 }
