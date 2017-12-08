@@ -109,7 +109,7 @@ export function getValueForExpr(obj, expr) {
  * to JsonObject.
  * Create a new wrapper if an array return value is desired.
  * @param {*} json JSON string to parse
- * @return {?JsonObject|undefined} May be extend to parse arrays.
+ * @return {?JsonObject} May be extend to parse arrays.
  */
 export function parseJson(json) {
   return /** @type {?JsonObject} */(JSON.parse(/** @type {string} */ (json)));
