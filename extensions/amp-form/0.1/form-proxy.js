@@ -17,6 +17,7 @@
 import {dev} from '../../../src/log';
 import {parseUrl} from '../../../src/url';
 import {startsWith} from '../../../src/string';
+import {toWin} from '../../../src/types';
 
 
 /**
@@ -49,7 +50,7 @@ export function setBlacklistedPropertiesForTesting(properties) {
  * @return {!Object}
  */
 export function installFormProxy(form) {
-  const constr = getFormProxyConstr(form.ownerDocument.defaultView);
+  const constr = getFormProxyConstr(toWin(form.ownerDocument.defaultView));
   const proxy = new constr(form);
   if (!('action' in proxy)) {
     setupLegacyProxy(form, proxy);
@@ -187,7 +188,7 @@ function setupLegacyProxy(form, proxy) {
           actual = current;
         }
         Object.defineProperty(proxy, name, {
-          get: function() {
+          get() {
             return actual;
           },
         });
@@ -196,7 +197,7 @@ function setupLegacyProxy(form, proxy) {
         // with a minimal type conversion.
         const attr = desc.attr || name;
         Object.defineProperty(proxy, name, {
-          get: function() {
+          get() {
             let value = proxy.getAttribute(attr);
             if (value == null && desc.def !== undefined) {
               value = desc.def;
@@ -211,7 +212,7 @@ function setupLegacyProxy(form, proxy) {
             }
             return value;
           },
-          set: function(value) {
+          set(value) {
             if (desc.type == LegacyPropDataType.TOGGLE) {
               if (value) {
                 value = '';
@@ -232,10 +233,10 @@ function setupLegacyProxy(form, proxy) {
     } else {
       // Not a known property - proxy directly.
       Object.defineProperty(proxy, name, {
-        get: function() {
+        get() {
           return form[name];
         },
-        set: function(value) {
+        set(value) {
           form[name] = value;
         },
       });

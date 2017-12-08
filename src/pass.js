@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {timerFor} from './services';
+import {Services} from './services';
 
 
 /**
@@ -32,7 +32,7 @@ export class Pass {
    *   is called without one.
    */
   constructor(win, handler, opt_defaultDelay) {
-    this.timer_ = timerFor(win);
+    this.timer_ = Services.timerFor(win);
 
     /** @private @const {function()} */
     this.handler_ = handler;

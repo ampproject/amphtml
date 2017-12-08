@@ -22,10 +22,6 @@ limitations under the License.
     <td>An <code>amp-kaltura-player</code> component displays the Kaltura Player as used in Kaltura's <a href="https://corp.kaltura.com/">Video Platform</a>.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-kaltura-player" src="https://cdn.ampproject.org/v0/amp-kaltura-player-0.1.js">&lt;/script></code></td>
   </tr>
@@ -38,6 +34,8 @@ limitations under the License.
     <td><a href="https://ampbyexample.com/components/amp-kaltura-player/">Annotated code example for amp-kaltura-player</a></td>
   </tr>
 </table>
+
+[TOC]
 
 ## Example
 
@@ -57,20 +55,19 @@ Example:
 
 ## Attributes
 
-**data-partner**
+##### data-partner
 
 The Kaltura partner id. This attribute is mandatory.
 
-**data-uiconf**
+##### data-uiconf
 
 The Kaltura player id - uiconf id.
 
-**data-entryid**
+##### data-entryid
 
 The Kaltura entry id.
 
-
-**data-param-***
+##### data-param-*
 
 All `data-param-*` attributes will be added as query parameter to the player iframe src. This may be used to pass custom values through to player plugins, such as ad parameters or video ids for Perform players.
 
@@ -78,10 +75,10 @@ Keys and values will be URI encoded. Keys will be camel cased.
 
 - `data-param-streamerType="auto"` becomes `&flashvars[streamerType]=auto`
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 
-See [amp-kaltura-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-kaltura-player/0.1/validator-amp-kaltura-player.protoascii) in the AMP validator specification.
+See [amp-kaltura-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-kaltura-player/validator-amp-kaltura-player.protoascii) in the AMP validator specification.

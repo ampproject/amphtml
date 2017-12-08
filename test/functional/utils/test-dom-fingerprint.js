@@ -16,7 +16,7 @@
 
 import {
   domFingerprintPlain,
-  domFingerprint,
+  DomFingerprint,
 } from '../../../src/utils/dom-fingerprint';
 
 
@@ -51,10 +51,10 @@ describes.realWin('domFingerprint', {}, env => {
 
   it('should map a sample DOM structure to the right string', () => {
     expect(domFingerprintPlain(ampAd)).to.equal(
-      'amp-ad.0,td.1,tr.0,tbody.0,table.0,div/id2.0,div/id1.0,body.0,html.0');
+        'amp-ad.0,td.1,tr.0,tbody.0,table.0,div/id2.0,div/id1.0,body.0,html.0');
   });
 
   it('should map a sample DOM structure to the right hashed value', () => {
-    expect(domFingerprint(ampAd)).to.equal('2437661740');
+    expect(DomFingerprint.generate(ampAd)).to.equal('2437661740');
   });
 });

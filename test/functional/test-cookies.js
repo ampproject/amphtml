@@ -85,7 +85,7 @@ describe('cookies', () => {
         document: doc,
         location: {
           hostname,
-          href: 'https://' + hostname + ':8000/test.html',
+          href: 'https://' + hostname + '/test.html',
         }},
           'c&1', 'v&1', 1447383159853, {
             highestAvailableDomain: true,
@@ -95,7 +95,7 @@ describe('cookies', () => {
         expect(cookie).to.be.undefined;
       } else {
         expect(cookie).to.equal(
-           'c%261=v%261; path=/; domain=' + targetDomain +
+            'c%261=v%261; path=/; domain=' + targetDomain +
             '; expires=Fri, 13 Nov 2015 02:52:39 GMT');
       }
     }

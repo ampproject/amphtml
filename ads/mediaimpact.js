@@ -42,11 +42,11 @@ export function mediaimpact(global, data) {
   };
   window.addEventListener('load', function() {
     asmi.sas.call(data.site + '/(' + data.page + ')',
-      data.format,
-      data.target + ';googleAMP=1;',
-      '',
-      'sas_' + data.slot.replace('sas_',''),
-      1);
+        data.format,
+        data.target + ';googleAMP=1;',
+        '',
+        'sas_' + data.slot.replace('sas_',''),
+        1);
   }, false);
   /* global asmiSetup: true */
   /* eslint no-unused-vars: 0 */

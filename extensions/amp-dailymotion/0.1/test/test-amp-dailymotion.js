@@ -14,32 +14,37 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-dailymotion';
-import {adopt} from '../../../../src/runtime';
 
-adopt(window);
 
-describe('amp-dailymotion', () => {
+describes.realWin('amp-dailymotion', {
+  amp: {
+    extensions: ['amp-dailymotion'],
+  },
+}, env => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
 
   function getDailymotion(videoId, optResponsive, optCustomSettings) {
-    return createIframePromise().then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const dailymotion = iframe.doc.createElement('amp-dailymotion');
-      dailymotion.setAttribute('data-videoid', videoId);
-      dailymotion.setAttribute('width', '111');
-      dailymotion.setAttribute('height', '222');
-      if (optResponsive) {
-        dailymotion.setAttribute('layout', 'responsive');
-      }
-      if (optCustomSettings) {
-        dailymotion.setAttribute('data-start', 123);
-      }
-      return iframe.addElement(dailymotion);
-    });
+    const dailymotion = doc.createElement('amp-dailymotion');
+    dailymotion.setAttribute('data-videoid', videoId);
+    dailymotion.setAttribute('width', '111');
+    dailymotion.setAttribute('height', '222');
+    if (optResponsive) {
+      dailymotion.setAttribute('layout', 'responsive');
+    }
+    if (optCustomSettings) {
+      dailymotion.setAttribute('data-start', 123);
+      dailymotion.setAttribute('data-param-origin', 'example&.org');
+    }
+    doc.body.appendChild(dailymotion);
+    return dailymotion.build().then(() => {
+      return dailymotion.layoutCallback();
+    }).then(() => dailymotion);
   }
 
   it('renders', () => {
@@ -65,7 +70,7 @@ describe('amp-dailymotion', () => {
       const iframe = dailymotion.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(
-          'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp&start=123');
+          'https://www.dailymotion.com/embed/video/x2m8jpp?api=1&html=1&app=amp&start=123&origin=example%26.org');
     });
   });
 

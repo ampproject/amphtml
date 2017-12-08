@@ -168,11 +168,11 @@ describe('LoginDoneDialog', () => {
     it('should post message to opener', () => {
       openerMock.expects('postMessage')
           .withExactArgs(
-              sinon.match(arg => {
-                return (arg.sentinel == 'amp' && arg.type == 'result' &&
+          sinon.match(arg => {
+            return (arg.sentinel == 'amp' && arg.type == 'result' &&
                     arg.result == '#result1');
-              }),
-              '*')
+          }),
+          '*')
           .once();
       const promise = dialog.postbackOrRedirect_();
       return Promise.resolve()
@@ -238,11 +238,11 @@ describe('LoginDoneDialog', () => {
     it('should fail with timeout', () => {
       openerMock.expects('postMessage')
           .withExactArgs(
-              sinon.match(arg => {
-                return (arg.sentinel == 'amp' && arg.type == 'result' &&
+          sinon.match(arg => {
+            return (arg.sentinel == 'amp' && arg.type == 'result' &&
                     arg.result == '#result1');
-              }),
-              '*')
+          }),
+          '*')
           .once();
       const promise = dialog.postback_();
       return Promise.resolve()

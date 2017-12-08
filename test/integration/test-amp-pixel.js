@@ -18,24 +18,50 @@ import {
   depositRequestUrl,
   withdrawRequest,
 } from '../../testing/test-helper';
+import {createElementWithAttributes} from '../../src/dom';
+import {Services} from '../../src/services';
+import {AmpPixel} from '../../builtins/amp-pixel';
 
-describes.integration('amp-pixel integration test', {
-  body: `<amp-pixel src="${depositRequestUrl('has-referrer')}">`,
-}, env => {
-  it('should keep referrer if no referrerpolicy specified', () => {
-    return withdrawRequest(env.win, 'has-referrer').then(request => {
-      expect(request.headers.referer).to.be.ok;
+describe.configure().run('amp-pixel', function() {
+  this.timeout(15000);
+
+  describes.integration('amp-pixel integration test', {
+    body: `<amp-pixel src="${depositRequestUrl('has-referrer')}">`,
+  }, env => {
+    it('should keep referrer if no referrerpolicy specified', () => {
+      return withdrawRequest(env.win, 'has-referrer').then(request => {
+        expect(request.headers.referer).to.be.ok;
+      });
+    });
+  });
+
+  describes.integration('amp-pixel integration test', {
+    body: `<amp-pixel src="${depositRequestUrl('no-referrer')}"
+             referrerpolicy="no-referrer">`,
+  }, env => {
+    it('should remove referrer if referrerpolicy=no-referrer', () => {
+      return withdrawRequest(env.win, 'no-referrer').then(request => {
+        expect(request.headers.referer).to.not.be.ok;
+      });
     });
   });
 });
 
-describes.integration('amp-pixel integration test', {
-  body: `<amp-pixel src="${depositRequestUrl('no-referrer')}"
-             referrerpolicy="no-referrer">`,
-}, env => {
-  it('should remove referrer if referrerpolicy=no-referrer', () => {
-    return withdrawRequest(env.win, 'no-referrer').then(request => {
-      expect(request.headers.referer).to.not.be.ok;
+describes.fakeWin('amp-pixel with img (inabox)', {amp: true}, env => {
+  it('should not write image', () => {
+    const src = 'https://foo.com/tracker/foo';
+    const pixelElem =
+        createElementWithAttributes(env.win.document, 'amp-pixel',
+        {src, 'i-amphtml-ssr': ''});
+    pixelElem.appendChild(
+        createElementWithAttributes(env.win.document, 'img', {src}));
+    env.win.document.body.appendChild(pixelElem);
+    const viewer = Services.viewerForDoc(env.win.document);
+    env.sandbox.stub(viewer, 'whenFirstVisible', () => {
+      return Promise.resolve();
     });
+    const pixel = new AmpPixel(pixelElem);
+    pixel.buildCallback();
+    expect(pixelElem.querySelectorAll('img').length).to.equal(1);
   });
 });

@@ -22,10 +22,6 @@ limitations under the License.
     <td>Displays an Instagram embed.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-instagram" src="https://cdn.ampproject.org/v0/amp-instagram-0.1.js">&lt;/script></code></td>
   </tr>
@@ -38,6 +34,8 @@ limitations under the License.
     <td><a href="https://ampbyexample.com/components/amp-instagram/">Annotated code example for amp-instagram</a></td>
   </tr>
 </table>
+
+[TOC]
 
 ## Behavior
 
@@ -64,20 +62,20 @@ When using non-responsive layout you will need to account for the extra space ad
 
 ## Attributes
 
-**data-shortcode**
+##### data-shortcode
 
 The instagram data-shortcode is found in every instagram photo URL.
 
 For example, in https://instagram.com/p/fBwFP, `fBwFP` is the data-shortcode.
 
-**data-captioned**
+##### data-captioned
 
 Include the Instagram caption.  `amp-instagram` will attept to resize to the correct hight including the caption.
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 
-See [amp-instagram rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/0.1/validator-amp-instagram.protoascii) in the AMP validator specification.
+See [amp-instagram rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/validator-amp-instagram.protoascii) in the AMP validator specification.

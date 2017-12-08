@@ -19,8 +19,10 @@ import {
   pollForLayout,
   poll,
 } from '../../testing/iframe';
+import {AmpEvents} from '../../src/amp-events';
 
-describe.configure().retryOnSaucelabs().run('Rendering of one ad', () => {
+describe.configure().enableIe().retryOnSaucelabs().run('Rendering of' +
+    ' one ad', () => {
   let fixture;
   let beforeHref;
 
@@ -81,10 +83,10 @@ describe.configure().retryOnSaucelabs().run('Rendering of one ad', () => {
         expect(context.referrer).to.contain('http://localhost:' + location.port);
       }
       expect(context.pageViewId).to.be.greaterThan(0);
-      expect(context.initialLayoutRect).to.be.defined;
-      expect(context.initialLayoutRect.top).to.be.defined;
-      expect(context.initialIntersection).to.be.defined;
-      expect(context.initialIntersection.rootBounds).to.be.defined;
+      expect(context.initialLayoutRect).to.exist;
+      expect(context.initialLayoutRect.top).to.exist;
+      expect(context.initialIntersection).to.exist;
+      expect(context.initialIntersection.rootBounds).to.exist;
       expect(context.data.tagForChildDirectedTreatment).to.equal(0);
       expect(context.data.categoryExclusions).to.be.jsonEqual(['health']);
       expect(context.data.targeting).to.be.jsonEqual(
@@ -122,7 +124,8 @@ describe.configure().retryOnSaucelabs().run('Rendering of one ad', () => {
     }).then(() => {
       expect(iframe.contentWindow.context.hidden).to.be.false;
       return new Promise(resolve => {
-        iframe.contentWindow.addEventListener('amp:visibilitychange', resolve);
+        iframe.contentWindow.addEventListener(
+            AmpEvents.VISIBILITY_CHANGE, resolve);
         fixture.win.AMP.viewer.receiveMessage('visibilitychange', {
           state: 'hidden',
         });

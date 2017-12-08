@@ -19,7 +19,7 @@ import {
   setInViewportForTesting,
 } from '../../3p/environment';
 import {createIframePromise} from '../../testing/iframe';
-import {timerFor} from '../../src/services';
+import {Services} from '../../src/services';
 import {loadPromise} from '../../src/event-helper';
 import * as lolex from 'lolex';
 
@@ -27,7 +27,7 @@ describe('3p environment', () => {
 
   let testWin;
   let iframeCount;
-  const timer = timerFor(window);
+  const timer = Services.timerFor(window);
 
   beforeEach(() => {
     iframeCount = 0;

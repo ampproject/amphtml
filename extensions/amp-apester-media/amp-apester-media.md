@@ -22,10 +22,6 @@ limitations under the License.
     <td> Displays a <a href="https://apester.com/">Apester</a> smart unit.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td> <code>&lt;script async custom-element="amp-apester-media" src="https://cdn.ampproject.org/v0/amp-apester-media-0.1.js">&lt;/script></code></td>
   </tr>
@@ -36,6 +32,8 @@ limitations under the License.
     </td>
   </tr>
 </table>
+
+[TOC]
 
 ## Examples 
 
@@ -55,18 +53,16 @@ Playlist Mode:
 </amp-apester-media>
 ```
 
-## Required attributes
+## Attributes
 
-###Single Mode: 
-**data-apester-media-id**
+##### data-apester-media-id
 
-The ID of the media, a string.
+This attribute is required for single mode, and it represents the ID of the media (string value).
 
-###Playlist Mode: 
-**data-apester-channel-token**
+##### data-apester-channel-token
 
-The token of the channel, a string.
+This attribute is required for playlist mode, and it represents the token of the channel (string value).
 
 ## Validation
 
-See [amp-apester-media rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-apester-media/0.1/validator-amp-apester-media.protoascii) in the AMP validator specification.
+See [amp-apester-media rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-apester-media/validator-amp-apester-media.protoascii) in the AMP validator specification.

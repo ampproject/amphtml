@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-import {Keycodes} from '../utils/keycodes';
+import {ActionTrust} from '../action-trust';
+import {KeyCodes} from '../utils/key-codes';
+import {Services} from '../services';
+import {debounce, throttle} from '../utils/rate-limit';
 import {dev, user} from '../log';
+import {isArray, isFiniteNumber, toWin} from '../types';
+import {isEnabled} from '../dom';
+import {getMode} from '../mode';
+import {getValueForExpr} from '../json';
+import {map} from '../utils/object';
 import {
   registerServiceBuilderForDoc,
   installServiceInEmbedScope,
 } from '../service';
-import {getMode} from '../mode';
-import {isArray} from '../types';
-import {map} from '../utils/object';
-import {timerFor} from '../services';
-import {vsyncFor} from '../services';
 
 /**
  * ActionInfoDef args key that maps to the an unparsed object literal string.
@@ -47,38 +50,32 @@ const ACTION_HANDLER_ = '__AMP_ACTION_HANDLER__';
 /** @const {string} */
 const DEFAULT_METHOD_ = 'activate';
 
+/** @const {number} */
+const DEFAULT_DEBOUNCE_WAIT = 300; // ms
+
+/** @const {number} */
+const DEFAULT_THROTTLE_INTERVAL = 100; // ms
+
 /** @const {!Object<string,!Array<string>>} */
 const ELEMENTS_ACTIONS_MAP_ = {
   'form': ['submit'],
-  'AMP': ['setState'],
-};
-
-/** @enum {string} */
-const TYPE = {
-  NUMBER: 'number',
-  BOOLEAN: 'boolean',
-};
-
-/** @const {!Object<string, !Object<string, string>>} */
-const WHITELISTED_INPUT_DATA_ = {
-  'range': {
-    'min': TYPE.NUMBER,
-    'max': TYPE.NUMBER,
-    'value': TYPE.NUMBER,
-  },
-  'radio': {
-    'checked': TYPE.BOOLEAN,
-  },
-  'checkbox': {
-    'checked': TYPE.BOOLEAN,
-  },
 };
 
 /**
- * A map of method argument keys to functions that generate the argument values
- * given a local scope object. The function allows argument values to reference
- * data in the event that generated the action.
- * @typedef {Object<string,function(!Object):string>}
+ * An expression arg value, e.g. `foo.bar` in `e:t.m(arg=foo.bar)`.
+ * @typedef {{expression: string}}
+ */
+let ActionInfoArgExpressionDef;
+
+/**
+ * An arg value.
+ * @typedef {(boolean|number|string|ActionInfoArgExpressionDef)}
+ */
+let ActionInfoArgValueDef;
+
+/**
+ * Map of arg names to their values, e.g. {arg: 123} in `e:t.m(arg=123)`.
+ * @typedef {Object<string, ActionInfoArgValueDef>}
  */
 let ActionInfoArgsDef;
 
@@ -91,7 +88,26 @@ let ActionInfoArgsDef;
  *   str: string
  * }}
  */
-let ActionInfoDef;
+export let ActionInfoDef;
+
+/**
+ * Function called when an action is invoked.
+ *
+ * Optionally, takes this action's position within all actions triggered by
+ * the same event, as well as said action array, as params.
+ *
+ * If the action is chainable, returns a Promise which resolves when the
+ * action is complete. Otherwise, returns null.
+ *
+ * @typedef {function(
+ *     !ActionInvocation, number=, !Array<!ActionInfoDef>=):?Promise}
+ */
+let ActionHandlerDef;
+
+/**
+ * @typedef {Event|DeferredEvent}
+ */
+export let ActionEventDef;
 
 /**
  * The structure that contains all details of the action method invocation.
@@ -104,24 +120,46 @@ export class ActionInvocation {
   /**
    * @param {!Node} target
    * @param {string} method
-   * @param {?JSONType} args
+   * @param {?JsonObject} args
    * @param {?Element} source
-   * @param {?Event} event
+   * @param {?ActionEventDef} event
+   * @param {ActionTrust} trust
    */
-  constructor(target, method, args, source, event) {
+  constructor(target, method, args, source, event, trust) {
     /** @const {!Node} */
     this.target = target;
     /** @const {string} */
     this.method = method;
-    /** @const {?JSONType} */
+    /** @const {?JsonObject} */
     this.args = args;
     /** @const {?Element} */
     this.source = source;
-    /** @const {?Event} */
+    /** @const {?ActionEventDef} */
     this.event = event;
+    /** @const {ActionTrust} */
+    this.trust = trust;
+  }
+
+  /**
+   * Returns true if the trigger event has a trust equal to or greater than
+   * `minimumTrust`. Otherwise, logs a user error and returns false.
+   * @param {ActionTrust} minimumTrust
+   * @returns {boolean}
+   */
+  satisfiesTrust(minimumTrust) {
+    // Sanity check.
+    if (!isFiniteNumber(this.trust)) {
+      dev().error(TAG_, `Invalid trust for '${this.method}': ${this.trust}`);
+      return false;
+    }
+    if (this.trust < minimumTrust) {
+      user().error(TAG_, `Trust for '${this.method}' (${this.trust}) ` +
+          `insufficient (min: ${minimumTrust}).`);
+      return false;
+    }
+    return true;
   }
 }
-
 
 /**
  * TODO(dvoytenko): consider splitting this class into two:
@@ -144,20 +182,28 @@ export class ActionService {
     /** @const {!Document|!ShadowRoot} */
     this.root_ = opt_root || ampdoc.getRootNode();
 
-    /** @const @private {!Object<string, function(!ActionInvocation)>} */
+    /** @const @private {!Object<string, ActionHandlerDef>} */
     this.globalTargets_ = map();
 
-    /** @const @private {!Object<string, function(!ActionInvocation)>} */
+    /**
+     * @const @private {!Object<string, {
+      *   handler: ActionHandlerDef,
+      *   minTrust: ActionTrust,
+      * }>}
+      */
     this.globalMethodHandlers_ = map();
 
     /** @private {!./vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(ampdoc.win);
+    this.vsync_ = Services.vsyncFor(ampdoc.win);
 
     // Add core events.
     this.addEvent('tap');
     this.addEvent('submit');
-    // TODO(mkhatib, #5702): Consider a debounced-input event for text-type inputs.
     this.addEvent('change');
+    this.addEvent('input-debounced');
+    this.addEvent('input-throttled');
+    this.addEvent('valid');
+    this.addEvent('invalid');
   }
 
   /** @override */
@@ -177,72 +223,70 @@ export class ActionService {
       // fast-click.
       this.root_.addEventListener('click', event => {
         if (!event.defaultPrevented) {
-          this.trigger(dev().assertElement(event.target), name, event);
+          const element = dev().assertElement(event.target);
+          this.trigger(element, name, event, ActionTrust.HIGH);
         }
       });
       this.root_.addEventListener('keydown', event => {
+        const element = dev().assertElement(event.target);
         const keyCode = event.keyCode;
-        if (keyCode == Keycodes.ENTER || keyCode == Keycodes.SPACE) {
-          const element = dev().assertElement(event.target);
+        if (keyCode == KeyCodes.ENTER || keyCode == KeyCodes.SPACE) {
           if (!event.defaultPrevented &&
               element.getAttribute('role') == 'button') {
             event.preventDefault();
-            this.trigger(element, name, event);
+            this.trigger(element, name, event, ActionTrust.HIGH);
           }
         }
       });
     } else if (name == 'submit') {
       this.root_.addEventListener(name, event => {
-        this.trigger(dev().assertElement(event.target), name, event);
+        const element = dev().assertElement(event.target);
+        this.trigger(element, name, event, ActionTrust.HIGH);
       });
     } else if (name == 'change') {
       this.root_.addEventListener(name, event => {
-        this.addChangeDetails_(event);
-        this.trigger(dev().assertElement(event.target), name, event);
+        const element = dev().assertElement(event.target);
+        this.addTargetPropertiesAsDetail_(event);
+        this.trigger(element, name, event, ActionTrust.HIGH);
       });
-    }
-  }
+    } else if (name == 'input-debounced') {
+      const debouncedInput = debounce(this.ampdoc.win, event => {
+        const target = dev().assertElement(event.target);
+        this.trigger(target, name, /** @type {!ActionEventDef} */ (event),
+            ActionTrust.HIGH);
+      }, DEFAULT_DEBOUNCE_WAIT);
 
-  /**
-   * Given a browser 'change' event, add `details` property containing the
-   * relevant information for the change that generated the initial event.
-   * @param {!Event} event A `change` event.
-   */
-  addChangeDetails_(event) {
-    const detail = map();
-    const target = event.target;
-    const tagName = target.tagName.toLowerCase();
-    switch (tagName) {
-      case 'input':
-        const inputType = target.getAttribute('type');
-        const fieldsToInclude = WHITELISTED_INPUT_DATA_[inputType];
-        if (fieldsToInclude) {
-          Object.keys(fieldsToInclude).forEach(field => {
-            const expectedType = fieldsToInclude[field];
-            const value = target[field];
-            if (expectedType === 'number') {
-              detail[field] = Number(value);
-            } else if (expectedType === 'boolean') {
-              detail[field] = !!value;
-            } else {
-              detail[field] = String(value);
-            }
-          });
-        }
-        break;
-      case 'select':
-        detail.value = target.value;
-        break;
-    }
-    if (Object.keys(detail).length > 0) {
-      event.detail = detail;
+      this.root_.addEventListener('input', event => {
+        // Create a DeferredEvent to avoid races where the browser cleans up
+        // the event object before the async debounced function is called.
+        const deferredEvent = new DeferredEvent(event);
+        this.addTargetPropertiesAsDetail_(deferredEvent);
+        debouncedInput(deferredEvent);
+      });
+    } else if (name == 'input-throttled') {
+      const throttledInput = throttle(this.ampdoc.win, event => {
+        const target = dev().assertElement(event.target);
+        this.trigger(target, name, /** @type {!ActionEventDef} */ (event),
+            ActionTrust.HIGH);
+      }, DEFAULT_THROTTLE_INTERVAL);
+
+      this.root_.addEventListener('input', event => {
+        const deferredEvent = new DeferredEvent(event);
+        this.addTargetPropertiesAsDetail_(deferredEvent);
+        throttledInput(deferredEvent);
+      });
+    } else if (name == 'valid' || name == 'invalid') {
+      this.root_.addEventListener(name, event => {
+        const element = dev().assertElement(event.target);
+        this.trigger(element, name, event, ActionTrust.HIGH);
+      });
     }
   }
 
   /**
    * Registers the action target that will receive all designated actions.
    * @param {string} name
-   * @param {function(!ActionInvocation)} handler
+   * @param {ActionHandlerDef} handler
    */
   addGlobalTarget(name, handler) {
     this.globalTargets_[name] = handler;
@@ -251,40 +295,46 @@ export class ActionService {
   /**
    * Registers the action handler for a common method.
    * @param {string} name
-   * @param {function(!ActionInvocation)} handler
+   * @param {ActionHandlerDef} handler
+   * @param {ActionTrust} minTrust
    */
-  addGlobalMethodHandler(name, handler) {
-    this.globalMethodHandlers_[name] = handler;
+  addGlobalMethodHandler(name, handler, minTrust = ActionTrust.HIGH) {
+    this.globalMethodHandlers_[name] = {handler, minTrust};
   }
 
   /**
    * Triggers the specified event on the target element.
    * @param {!Element} target
    * @param {string} eventType
-   * @param {?Event} event
+   * @param {?ActionEventDef} event
+   * @param {ActionTrust} trust
    */
-  trigger(target, eventType, event) {
-    this.action_(target, eventType, event);
+  trigger(target, eventType, event, trust) {
+    this.action_(target, eventType, event, trust);
   }
 
   /**
    * Triggers execution of the method on a target/method.
    * @param {!Element} target
    * @param {string} method
-   * @param {?JSONType} args
+   * @param {?JsonObject} args
    * @param {?Element} source
-   * @param {?Event} event
+   * @param {?ActionEventDef} event
+   * @param {ActionTrust} trust
    */
-  execute(target, method, args, source, event) {
-    this.invoke_(target, method, args, source, event, null);
+  execute(target, method, args, source, event, trust) {
+    const invocation =
+        new ActionInvocation(target, method, args, source, event, trust);
+    this.invoke_(invocation, /* actionInfo */ null);
   }
 
   /**
    * Installs action handler for the specified element.
    * @param {!Element} target
-   * @param {function(!ActionInvocation)} handler
+   * @param {ActionHandlerDef} handler
+   * @param {ActionTrust} minTrust
    */
-  installActionHandler(target, handler) {
+  installActionHandler(target, handler, minTrust = ActionTrust.HIGH) {
     // TODO(dvoytenko, #7063): switch back to `target.id` with form proxy.
     const targetId = target.getAttribute('id') || '';
     const debugid = target.tagName + '#' + targetId;
@@ -300,15 +350,18 @@ export class ActionService {
     /** @const {Array<!ActionInvocation>} */
     const currentQueue = target[ACTION_QUEUE_];
 
-    target[ACTION_HANDLER_] = handler;
+    target[ACTION_HANDLER_] = {handler, minTrust};
 
     // Dequeue the current queue.
     if (isArray(currentQueue)) {
-      timerFor(target.ownerDocument.defaultView).delay(() => {
+      Services.timerFor(toWin(target.ownerDocument.defaultView)).delay(() => {
         // TODO(dvoytenko, #1260): dedupe actions.
         currentQueue.forEach(invocation => {
           try {
-            handler(invocation);
+            if (invocation.satisfiesTrust(
+                /** @type {ActionTrust} */ (minTrust))) {
+              handler(invocation);
+            }
           } catch (e) {
             dev().error(TAG_, 'Action execution failed:', invocation, e);
           }
@@ -321,41 +374,50 @@ export class ActionService {
   /**
    * @param {!Element} source
    * @param {string} actionEventType
-   * @param {?Event} event
+   * @param {?ActionEventDef} event
+   * @param {ActionTrust} trust
    * @private
    */
-  action_(source, actionEventType, event) {
+  action_(source, actionEventType, event, trust) {
     const action = this.findAction_(source, actionEventType);
     if (!action) {
       // TODO(dvoytenko): implement default (catch-all) actions.
       return;
     }
 
-    for (let i = 0; i < action.actionInfos.length; i++) {
-      const actionInfo = action.actionInfos[i];
-      // Replace any variables in args with data in `event`.
-      const args = applyActionInfoArgs(actionInfo.args, event);
+    // Invoke actions serially, where each action waits for its predecessor
+    // to complete. `currentPromise` is the i'th promise in the chain.
+    let currentPromise = null;
 
-      // Global target, e.g. `AMP`.
-      const globalTarget = this.globalTargets_[actionInfo.target];
-      if (globalTarget) {
-        const invocation = new ActionInvocation(
-            this.root_,
-            actionInfo.method,
-            args,
-            action.node,
-            event);
-        globalTarget(invocation);
-      } else {
+    action.actionInfos.forEach((actionInfo, i) => {
+      // Replace any variables in args with data in `event`.
+      const args = dereferenceExprsInArgs(actionInfo.args, event);
+
+      const invoke = () => {
+        // Global target, e.g. `AMP`.
+        const globalTarget = this.globalTargets_[actionInfo.target];
+        if (globalTarget) {
+          const invocation = new ActionInvocation(this.root_, actionInfo.method,
+              args, action.node, event, trust);
+          return globalTarget(invocation, i, action.actionInfos);
+        }
+
+        // Element target via `id` attribute.
         const target = this.root_.getElementById(actionInfo.target);
         if (target) {
-          this.invoke_(target, actionInfo.method, args,
-              action.node, event, actionInfo);
+          const invocation = new ActionInvocation(target, actionInfo.method,
+              args, action.node, event, trust);
+          return this.invoke_(invocation, actionInfo);
         } else {
           this.actionInfoError_('target not found', actionInfo, target);
         }
-      }
-    }
+      };
+
+      // Wait for the previous action, if applicable.
+      currentPromise = (currentPromise)
+          ? currentPromise.then(invoke)
+          : invoke();
+    });
   }
 
   /**
@@ -373,21 +435,19 @@ export class ActionService {
   }
 
   /**
-   * @param {!Element} target
-   * @param {string} method
-   * @param {?JSONType} args
-   * @param {?Element} source
-   * @param {?Event} event
-   * @param {?ActionInfoDef} actionInfo
+   * @param {!ActionInvocation} invocation
+   * @param {?ActionInfoDef} actionInfo TODO(choumx): Remove this param.
+   * @return {?Promise}
+   * @private visible for testing
    */
-  invoke_(target, method, args, source, event, actionInfo) {
-    const invocation = new ActionInvocation(target, method, args,
-        source, event);
+  invoke_(invocation, actionInfo) {
+    const target = dev().assertElement(invocation.target);
+    const method = invocation.method;
 
     // Try a global method handler first.
-    if (this.globalMethodHandlers_[invocation.method]) {
-      this.globalMethodHandlers_[invocation.method](invocation);
-      return;
+    const globalMethod = this.globalMethodHandlers_[method];
+    if (globalMethod && invocation.satisfiesTrust(globalMethod.minTrust)) {
+      return globalMethod.handler(invocation);
     }
 
     const lowerTagName = target.tagName.toLowerCase();
@@ -401,7 +461,7 @@ export class ActionService {
             'Did you forget to include it via <script custom-element>?',
             actionInfo, target);
       }
-      return;
+      return null;
     }
 
     // Special elements with AMP ID or known supported actions.
@@ -409,21 +469,25 @@ export class ActionService {
     // TODO(dvoytenko, #7063): switch back to `target.id` with form proxy.
     const targetId = target.getAttribute('id') || '';
     if ((targetId && targetId.substring(0, 4) == 'amp-') ||
-        (supportedActions && supportedActions.indexOf(method) != -1)) {
-      const handler = target[ACTION_HANDLER_];
-      if (handler) {
-        handler(invocation);
+        (supportedActions && supportedActions.indexOf(method) > -1)) {
+      const holder = target[ACTION_HANDLER_];
+      if (holder) {
+        const {handler, minTrust} = holder;
+        if (invocation.satisfiesTrust(minTrust)) {
+          handler(invocation);
+        }
       } else {
         target[ACTION_QUEUE_] = target[ACTION_QUEUE_] || [];
         target[ACTION_QUEUE_].push(invocation);
       }
-      return;
+      return null;
     }
 
     // Unsupported target.
-    this.actionInfoError_(
-        'Target element does not support provided action',
+    this.actionInfoError_('Target element does not support provided action',
         actionInfo, target);
+
+    return null;
   }
 
   /**
@@ -436,7 +500,7 @@ export class ActionService {
     let n = target;
     while (n) {
       const actionInfos = this.matchActionInfos_(n, actionEventType);
-      if (actionInfos) {
+      if (actionInfos && isEnabled(n)) {
         return {node: n, actionInfos: dev().assert(actionInfos)};
       }
       n = n.parentElement;
@@ -472,6 +536,101 @@ export class ActionService {
     }
     return actionMap;
   }
+
+  /**
+   * Resets a node's actions with those defined in the given actions string.
+   * @param {!Element} node
+   * @param {string} actionsStr
+   */
+  setActions(node, actionsStr) {
+    node.setAttribute('on', actionsStr);
+
+    // Clear cache.
+    delete node[ACTION_MAP_];
+  }
+
+  /**
+   * Given a browser 'change' or 'input' event, add `details` property to it
+   * containing whitelisted properties of the target element.
+   * @param {!ActionEventDef} event
+   * @private
+   */
+  addTargetPropertiesAsDetail_(event) {
+    const detail = /** @type {!JsonObject} */ (map());
+    const target = event.target;
+
+    if (target.value !== undefined) {
+      detail['value'] = target.value;
+    }
+
+    // Check tagName instead since `valueAsNumber` isn't supported on IE.
+    if (target.tagName == 'INPUT') {
+      // Probably supported natively but convert anyways for consistency.
+      detail['valueAsNumber'] = Number(target.value);
+    }
+
+    if (target.checked !== undefined) {
+      detail['checked'] = target.checked;
+    }
+
+    if (target.min !== undefined || target.max !== undefined) {
+      detail['min'] = target.min;
+      detail['max'] = target.max;
+    }
+
+    if (Object.keys(detail).length > 0) {
+      event.detail = detail;
+    }
+  }
+}
+
+
+/**
+ * A clone of an event object with its function properties replaced.
+ * This is useful e.g. for event objects that need to be passed to an async
+ * context, but the browser might have cleaned up the original event object.
+ * This clone replaces functions with error throws since they won't behave
+ * normally after the original object has been destroyed.
+ * @private visible for testing
+ */
+export class DeferredEvent {
+  /**
+   * @param {!Event} event
+   */
+  constructor(event) {
+    /** @type {?Object} */
+    this.detail = null;
+
+    cloneWithoutFunctions(event, this);
+  }
+}
+
+
+/**
+ * Clones an object and replaces its function properties with throws.
+ * @param {!T} original
+ * @param {!T=} opt_dest
+ * @return {!T}
+ * @template T
+ * @private
+ */
+function cloneWithoutFunctions(original, opt_dest) {
+  const clone = opt_dest || map();
+  for (const prop in original) {
+    const value = original[prop];
+    if (typeof value === 'function') {
+      clone[prop] = notImplemented;
+    } else {
+      clone[prop] = original[prop];
+    }
+  }
+  return clone;
+}
+
+
+/** @private */
+function notImplemented() {
+  dev().assert(null, 'Deferred events cannot access native event functions.');
 }
 
 
@@ -577,7 +736,7 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
     // fragment and delegate to specific action handler.
     args = map();
     const value = toks.next().value;
-    args[OBJECT_STRING_ARGS_KEY] = () => value;
+    args[OBJECT_STRING_ARGS_KEY] = value;
     assertToken(toks.next(), [TokenType.SEPARATOR], ')');
   } else {
     // Key-value pairs. Format: key = value, ....
@@ -590,21 +749,21 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
       } else if (type == TokenType.LITERAL || type == TokenType.ID) {
         // Key: "key = "
         assertToken(toks.next(), [TokenType.SEPARATOR], '=');
-        // Value is either a literal or a variable: "foo.bar.baz"
+        // Value is either a literal or an expression: "foo.bar.baz"
         tok = assertToken(toks.next(/* convertValue */ true),
             [TokenType.LITERAL, TokenType.ID]);
         const argValueTokens = [tok];
-        // Variables have one or more dereferences: ".identifier"
+        // Expressions have one or more dereferences: ".identifier"
         if (tok.type == TokenType.ID) {
           for (peek = toks.peek();
               peek.type == TokenType.SEPARATOR && peek.value == '.';
               peek = toks.peek()) {
-            tok = toks.next(); // Skip '.'.
+            toks.next(); // Skip '.'.
             tok = assertToken(toks.next(false), [TokenType.ID]);
             argValueTokens.push(tok);
           }
         }
-        const argValue = getActionInfoArgValue(argValueTokens);
+        const argValue = argValueForTokens(argValueTokens);
         if (!args) {
           args = map();
         }
@@ -624,62 +783,49 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
 }
 
 /**
- * Returns a function that generates a method argument value for a given token.
- * The function takes a single object argument `data`.
- * If the token is an identifier `foo`, the function returns `data[foo]`.
- * Otherwise, the function returns the token value.
  * @param {Array<!TokenDef>} tokens
- * @return {?function(!Object):string}
+ * @return {?ActionInfoArgValueDef}
  * @private
  */
-function getActionInfoArgValue(tokens) {
+function argValueForTokens(tokens) {
   if (tokens.length == 0) {
     return null;
-  }
-  if (tokens.length == 1) {
-    return () => tokens[0].value;
+  } else if (tokens.length == 1) {
+    return /** @type {(boolean|number|string)} */ (tokens[0].value);
   } else {
-    return data => {
-      let current = data;
-      // Traverse properties of `data` per token values.
-      for (let i = 0; i < tokens.length; i++) {
-        const value = tokens[i].value;
-        if (current && current.hasOwnProperty(value)) {
-          current = current[value];
-        } else {
-          return null;
-        }
-      }
-      // Only allow dereferencing of primitives.
-      const type = typeof current;
-      if (type === 'string' || type === 'number' || type === 'boolean') {
-        return current;
-      } else {
-        return null;
-      }
-    };
+    const values = tokens.map(token => token.value);
+    const expression = values.join('.');
+    return /** @type {ActionInfoArgExpressionDef} */ ({expression});
   }
 }
 
 /**
- * Generates method arg values for each key in the given ActionInfoArgsDef
- * with the data in the given event.
+ * Dereferences expression args in `args` using data in `event`.
  * @param {?ActionInfoArgsDef} args
- * @param {?Event} event
- * @return {?JSONType}
- * @private Visible for testing only.
+ * @param {?ActionEventDef} event
+ * @return {?JsonObject}
+ * @private
+ * @visibleForTesting
  */
-export function applyActionInfoArgs(args, event) {
+export function dereferenceExprsInArgs(args, event) {
   if (!args) {
     return args;
   }
-  const data = {};
+  const data = map();
   if (event && event.detail) {
     data['event'] = event.detail;
   }
   const applied = map();
   Object.keys(args).forEach(key => {
-    applied[key] = args[key].call(null, data);
+    let value = args[key];
+    if (typeof value == 'object' && value.expression) {
+      const expr =
+          /** @type {ActionInfoArgExpressionDef} */ (value).expression;
+      const exprValue = getValueForExpr(data, expr);
+      // If expr can't be found in data, use null instead of undefined.
+      value = (exprValue === undefined) ? null : exprValue;
+    }
+    applied[key] = value;
   });
   return applied;
 }
@@ -800,7 +946,7 @@ class ParserTokenizer {
     if (WHITESPACE_SET.indexOf(c) != -1) {
       newIndex++;
       for (; newIndex < this.str_.length; newIndex++) {
-        if (!WHITESPACE_SET.includes(this.str_.charAt(newIndex))) {
+        if (WHITESPACE_SET.indexOf(this.str_.charAt(newIndex)) == -1) {
           break;
         }
       }
@@ -903,6 +1049,7 @@ class ParserTokenizer {
     return {type: TokenType.LITERAL, value: s, index: newIndex};
   }
 }
+
 
 /**
  * Tests whether a chacter is a number.

@@ -22,8 +22,8 @@ limitations under the License.
     <td>An attribute that enables a 3D-perspective effect on an element.</td>
   </tr>
   <tr>
-    <td class="col-fourty" width="40%"><strong>Availability</strong></td>
-    <td>In development</td>
+    <td width="40%"><strong>Availability</strong></td>
+    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
@@ -34,6 +34,8 @@ limitations under the License.
     <td><a href="https://ampbyexample.com/components/amp-fx-parallax/">Annotated code example for amp-fx-parallax</a></td>
   </tr>
 </table>
+
+[TOC]
 
 ## Behavior
 
@@ -48,6 +50,6 @@ The `amp-fx-parallax` attribute causes an element to move as if it is nearer or 
 
 ## Attributes
 
-**amp-fx-parallax**
+##### amp-fx-parallax
 
 The factor to use when scrolling. A value greater than 1 scrolls the element upward when the user scrolls down the page. A value less than 1 scrolls the element downward when the user scrolls downward. A value of 1 behaves normally. A value of 0 effectively makes the element scroll fixed with the page.

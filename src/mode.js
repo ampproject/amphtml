@@ -67,11 +67,6 @@ export function getMode(opt_win) {
  * @return {!ModeDef}
  */
 function getMode_(win) {
-  // For 3p integration code
-  if (win.context && win.context.mode) {
-    return win.context.mode;
-  }
-
   // Magic constants that are replaced by closure compiler.
   // IS_MINIFIED is always replaced with true when closure compiler is used
   // while IS_DEV is only replaced when the --fortesting flag is NOT used.
@@ -110,6 +105,7 @@ function getMode_(win) {
     // Triggers validation
     development: !!(hashQuery['development'] == '1' ||
         win.AMP_DEV_MODE),
+    examiner: hashQuery['development'] == '2',
     // Allows filtering validation errors by error category. For the
     // available categories, see ErrorCategory in validator/validator.proto.
     filter: hashQuery['filter'],

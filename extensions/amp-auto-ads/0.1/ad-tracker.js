@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {resourcesForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 
 /**
  * Structure for defining contraints about the placement of ads.
@@ -129,7 +129,7 @@ export class AdTracker {
    * @private
    */
   getDistanceFromAd_(yPosition, ad) {
-    return resourcesForDoc(ad).getElementLayoutBox(ad).then(box => {
+    return Services.resourcesForDoc(ad).getElementLayoutBox(ad).then(box => {
       if (yPosition >= box.top && yPosition <= box.bottom) {
         return 0;
       } else {
@@ -157,10 +157,16 @@ export class AdTracker {
 }
 
 /**
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {!Array<!Element>}
  */
-export function getExistingAds(win) {
-  return [].slice.call(win.document.getElementsByTagName('AMP-AD')).concat(
-      [].slice.call(win.document.getElementsByTagName('AMP-A4A')));
+export function getExistingAds(ampdoc) {
+  return [].slice.call(ampdoc.getRootNode().getElementsByTagName('AMP-AD'))
+      .filter(ad => {
+        // Filters out AMP-STICKY-AD.
+        if (ad.parentElement && ad.parentElement.tagName == 'AMP-STICKY-AD') {
+          return false;
+        }
+        return true;
+      });
 }

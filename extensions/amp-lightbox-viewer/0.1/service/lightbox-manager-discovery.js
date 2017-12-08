@@ -54,7 +54,6 @@ const VIEWER_TAG = 'amp-lightbox-viewer';
  * @return {!Promise}
  */
 export function autoDiscoverLightboxables(ampdoc) {
-
   // Extra safety check, manager should not call this if experiments are off
   dev().assert(isExperimentOn(ampdoc.win, 'amp-lightbox-viewer'));
   dev().assert(isExperimentOn(ampdoc.win, 'amp-lightbox-viewer-auto'));
@@ -89,7 +88,6 @@ function meetsHeuristics(element) {
 
   // TODO(aghassemi): This will become complicated soon, create a pluggable
   // system for this.
-
   if (element.getLayoutBox) {
     const layoutBox = element.getLayoutBox();
     if (layoutBox.left < 0 ||
@@ -124,25 +122,26 @@ function meetsHeuristicsForTap(element) {
 /**
  * Tries to find an existing amp-lightbox-viewer, if there is none, it adds a
  * default one.
- * @param {!Element} elem
- * @return {!string} Returns the id of the amp-lightbox-viewer.
+ * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @return {!Promise<string>} Returns the id of the amp-lightbox-viewer.
  */
 function maybeInstallLightboxViewer(ampdoc) {
   // TODO(aghassemi): Use the upcoming ampdoc.waitForBody
-  return waitForBodyPromise(ampdoc.getRootNode()).then(() => {
-    const existingViewer = elementByTag(ampdoc.getRootNode(), VIEWER_TAG);
-    if (existingViewer) {
-      if (!existingViewer.id) {
-        existingViewer.id = DEFAULT_VIEWER_ID;
-      }
-      return existingViewer.id;
-    }
+  return waitForBodyPromise(/** @type {!Document} */ (
+      ampdoc.getRootNode())).then(() => {
+        const existingViewer = elementByTag(ampdoc.getRootNode(), VIEWER_TAG);
+        if (existingViewer) {
+          if (!existingViewer.id) {
+            existingViewer.id = DEFAULT_VIEWER_ID;
+          }
+          return existingViewer.id;
+        }
 
-    const viewer = ampdoc.getRootNode().createElement(VIEWER_TAG);
-    viewer.setAttribute('layout', 'nodisplay');
-    viewer.setAttribute('id', DEFAULT_VIEWER_ID);
-    ampdoc.getRootNode().body.appendChild(viewer);
+        const viewer = ampdoc.getRootNode().createElement(VIEWER_TAG);
+        viewer.setAttribute('layout', 'nodisplay');
+        viewer.setAttribute('id', DEFAULT_VIEWER_ID);
+        ampdoc.getRootNode().body.appendChild(viewer);
 
-    return viewer.id;
-  });
+        return viewer.id;
+      });
 }

@@ -28,7 +28,6 @@ import {dev, user} from './log';
  */
 let SrcsetSourceDef;
 
-
 /**
  * Extracts `srcset` and fallbacks to `src` if not available.
  * @param {!Element} element
@@ -45,9 +44,17 @@ export function srcsetFromElement(element) {
   const srcAttr = user().assert(element.getAttribute('src'),
       'Either non-empty "srcset" or "src" attribute must be specified: %s',
       element);
-  return new Srcset([{url: srcAttr, width: undefined, dpr: 1}]);
+  return srcsetFromSrc(srcAttr);
 }
 
+/**
+ * Creates a Srcset from a `src` attribute value.
+ * @param {string} src
+ * @return {!Srcset}
+ */
+export function srcsetFromSrc(src) {
+  return new Srcset([{url: src, width: undefined, dpr: 1}]);
+}
 
 /**
  * Parses the text representation of srcset into Srcset object.

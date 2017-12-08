@@ -22,10 +22,6 @@ limitations under the License.
     <td>Displays a <a href="https://gfycat.com/">Gfycat</a> video GIF.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-gfycat" src="https://cdn.ampproject.org/v0/amp-gfycat-0.1.js">&lt;/script></code></td>
   </tr>
@@ -45,6 +41,8 @@ limitations under the License.
   </tr>
 </table>
 
+[TOC]
+
 ## Example
 
 The `width` and `height` attributes determine the aspect ratio of the Gfycat embedded in responsive layouts.
@@ -60,11 +58,11 @@ The `width` and `height` attributes determine the aspect ratio of the Gfycat emb
 
 ## Attributes
 
-**data-gfyid**
+##### data-gfyid
 
 The Gfycat ID found in any Gfycat url. For example, `TautWhoppingCougar` is the id in the following url: https://gfycat.com/TautWhoppingCougar.
 
-**width** and **height**
+##### width and height
 
 The width and height attributes are special for the Gfycat embed. These should be the actual width and height of the Gfycat. The system automatically adds space for the "chrome" that Gfycat adds around the GIF.
 
@@ -84,9 +82,15 @@ Example: Finding the actual width and height
         height='360' allowfullscreen>
 </iframe>
 ```
-**noautoplay**
 
-By default, a video autoplays. You can turn off autoplay by setting the  `noautoplay` attribute.
+##### noautoplay
+
+By default, a video autoplays.
+* when the video is scrolled out of view, the video is paused
+* when the video is scrolled into view, the video resumes playback
+* if the user has interacted with the video (e.g., pauses/resumes), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused. 
+
+You can turn off autoplay by setting the  `noautoplay` attribute.
 
 Example: Turning off autoplay
 
@@ -99,10 +103,10 @@ Example: Turning off autoplay
   </amp-gfycat>
 ```
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 
-See [amp-gfycat rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-gfycat/0.1/validator-amp-gfycat.protoascii) in the AMP validator specification.
+See [amp-gfycat rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-gfycat/validator-amp-gfycat.protoascii) in the AMP validator specification.

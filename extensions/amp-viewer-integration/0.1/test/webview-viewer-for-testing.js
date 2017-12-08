@@ -15,7 +15,7 @@
  */
 
 import {parseUrl, serializeQueryString} from '../../../../src/url';
-import {Messaging} from '../messaging';
+import {Messaging} from '../messaging/messaging';
 
 const APP = '__AMPHTML__';
 const MessageType = {
@@ -179,7 +179,7 @@ export class WebviewViewerForTesting {
 
     this.messaging_.setDefaultHandler((type, payload, awaitResponse) => {
       console/*OK*/.log(
-        'viewer receiving message: ', type, payload, awaitResponse);
+          'viewer receiving message: ', type, payload, awaitResponse);
       return Promise.resolve();
     });
 

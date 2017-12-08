@@ -15,8 +15,11 @@
  * limitations under the license.
  */
 goog.provide('amp.validator.ValidatorTest');
+
 goog.require('amp.validator.CssLength');
 goog.require('amp.validator.TagSpec');
+goog.require('amp.validator.ValidationError');
+goog.require('amp.validator.annotateWithErrorCategories');
 goog.require('amp.validator.createRules');
 goog.require('amp.validator.renderValidationResult');
 goog.require('amp.validator.validateString');
@@ -74,9 +77,22 @@ function isValidRegex(regex) {
 }
 
 /**
+ * Returns true if the regex has a group but is missing the corresponding
+ * Unicode group. For now this tests only for word character group (\\w) which
+ * must be followed by the Unicode equivalent group (\\p{L}\\p{N}_).
+ * @param {null|string} regex
+ * @return {boolean}
+ */
+function isMissingUnicodeGroup(regex) {
+  var wordGroupRegex = new RegExp("\\\\w(?!\\\\p{L}\\\\p{N}_)");
+  return wordGroupRegex.test(regex);
+}
+
+/**
  * Returns all html files underneath the testdata roots. This looks
  * both for feature_tests/*.html and for tests in extension directories.
- * E.g.: extensions/amp-accordion/0.1/test/*.html and
+ * E.g.: extensions/amp-accordion/0.1/test/*.html,
+ *       extensions/amp-sidebar/1.0/test/*.html, and
  *       testdata/feature_tests/amp_accordion.html.
  * @return {!Array<string>}
  */
@@ -85,9 +101,17 @@ function findHtmlFilesRelativeToTestdata() {
   for (const root of process.env['TESTDATA_ROOTS'].split(':')) {
     if (path.basename(root) === 'extensions') {
       for (const extension of readdir(root)) {
-        const testPath = path.join(extension, '0.1', 'test');
-        if (isdir(path.join(root, testPath))) {
-          testSubdirs.push({root: root, subdir: testPath});
+        const extensionFolder = path.join(root, extension);
+        if (!isdir(extensionFolder)) {
+          // Skip if not a folder
+          continue;
+        }
+        // Get all versions
+        for (const possibleVersion of readdir(extensionFolder)) {
+          const testPath = path.join(extension, possibleVersion, 'test');
+          if (isdir(path.join(root, testPath))) {
+            testSubdirs.push({root: root, subdir: testPath});
+          }
         }
       }
     } else {
@@ -111,6 +135,8 @@ function findHtmlFilesRelativeToTestdata() {
  * An AMP Validator test case. This constructor will load the AMP HTML file
  * and also find the adjacent .out file.
  * @constructor
+ * @param {string} ampHtmlFile
+ * @param {string=} opt_ampUrl
  */
 const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
   /** @type {string} */
@@ -161,22 +187,14 @@ ValidatorTestCase.prototype.run = function() {
   assert.fail('', '', message, '');
 };
 
-describe('ValidatorTestdata', () => {
-  it('reports data-amp-report-test values', () => {
-    const result = amp.validator.validateString(
-        '<!doctype lemur data-amp-report-test="foo">');
-    assertStrictEqual(
-        result.status, amp.validator.ValidationResult.Status.FAIL);
-    assertStrictEqual('foo', result.errors[0].dataAmpReportTestValue);
-  });
-});
-
 /**
  * A strict comparison between two values.
  * Note: Unfortunately assert.strictEqual has some drawbacks, including that
  * it truncates the provided arguments (and it's not configurable) and
  * with the Closure compiler, it requires a message argument to which
  * we'd always have to pass undefined. Too messy, so we roll our own.
+ * @param {*} expected
+ * @param {*} saw
  */
 function assertStrictEqual(expected, saw) {
   assert.ok(expected === saw, 'expected: ' + expected + ' saw: ' + saw);
@@ -198,10 +216,14 @@ describe('ValidatorOutput', () => {
         'http://google.com/foo.html#development=1');
     test.expectedOutputFile = null;
     test.expectedOutput = 'FAIL\n' +
-        'http://google.com/foo.html:28:3 The tag \'script\' is disallowed ' +
-        'except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]\n' +
-        'http://google.com/foo.html:29:3 The tag \'script\' is disallowed ' +
-        'except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]';
+        'http://google.com/foo.html:28:3 Only AMP runtime \'script\' tags ' +
+        'are allowed, and only in the document head. (see ' +
+        'https://www.ampproject.org/docs/reference/spec#html-tags) ' +
+        '[CUSTOM_JAVASCRIPT_DISALLOWED]\n' +
+        'http://google.com/foo.html:29:3 Only AMP runtime \'script\' tags ' +
+        'are allowed, and only in the document head. (see ' +
+        'https://www.ampproject.org/docs/reference/spec#html-tags) ' +
+        '[CUSTOM_JAVASCRIPT_DISALLOWED]';
     test.run();
   });
 });
@@ -402,17 +424,29 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
       const regex = rules.internedStrings[-1 - attrSpec.valueRegex];
       expect(isValidRegex(regex)).toBe(true);
     });
+    it('value_regex must have unicode named groups', () => {
+      const regex = rules.internedStrings[-1 - attrSpec.valueRegex];
+      expect(isMissingUnicodeGroup(regex)).toBe(false);
+    });
   }
   if (attrSpec.valueRegexCasei !== null) {
     it('value_regex_casei valid', () => {
       const regex = rules.internedStrings[-1 - attrSpec.valueRegexCasei];
       expect(isValidRegex(regex)).toBe(true);
     });
+    it('value_regex_casei must have unicode named groups', () => {
+      const regex = rules.internedStrings[-1 - attrSpec.valueRegexCasei];
+      expect(isMissingUnicodeGroup(regex)).toBe(false);
+    });
   }
   if (attrSpec.blacklistedValueRegex !== null) {
     it('blacklisted_value_regex valid', () => {
       const regex = rules.internedStrings[-1 - attrSpec.blacklistedValueRegex];
       expect(isValidRegex(regex)).toBe(true);
+    });
+    it('blacklisted_value_regex must have unicode named groups', () => {
+      const regex = rules.internedStrings[-1 - attrSpec.blacklistedValueRegex];
+      expect(isMissingUnicodeGroup(regex)).toBe(false);
     });
   }
   // value_url must have at least one allowed protocol.
@@ -446,16 +480,6 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
       expect(attrSpec.mandatory).toBeDefined();
       expect(attrSpec.mandatory).toBe(true);
     });
-    it('value or value_casei defined when dispatch_key is true', () => {
-      expect((attrSpec.value !== null) || (attrSpec.valueCasei !== null))
-          .toBe(true);
-    });
-    if (attrSpec.valueCasei !== null) {
-      it('value_casei must be lower case when dispatch_key is true', () => {
-        expect(attrSpec.valueCasei === attrSpec.valueCasei.toLowerCase())
-            .toBe(true);
-      });
-    }
   }
   // Value property names must be unique.
   if (attrSpec.valueProperties !== null) {
@@ -540,17 +564,23 @@ describe('ValidatorRulesMakeSense', () => {
       // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
       const whitelistedAmp4AdsExtensions = {
         'AMP-ACCORDION': 0,
+        'AMP-AD-EXIT': 0,
         'AMP-ANALYTICS': 0,
         'AMP-ANIM': 0,
+        'AMP-ANIMATION': 0,
         'AMP-AUDIO': 0,
         'AMP-CAROUSEL': 0,
         'AMP-FIT-TEXT': 0,
         'AMP-FONT': 0,
         'AMP-FORM': 0,
+        'AMP-GWD-ANIMATION': 0,
         'AMP-IMG': 0,
+        'AMP-LAYOUT': 0,
         'AMP-PIXEL': 0,
+        'AMP-POSITION-OBSERVER': 0,
         'AMP-SOCIAL-SHARE': 0,
-        'AMP-VIDEO': 0
+        'AMP-VIDEO': 0,
+        'AMP-YOUTUBE': 0
       };
       it(tagSpec.tagName + ' has html_format either explicitly or implicitly' +
           ' set for AMP4ADS but ' + tagSpec.tagName + ' is not whitelisted' +
@@ -648,36 +678,6 @@ describe('ValidatorRulesMakeSense', () => {
              expect(tagSpec.attrLists.length).toEqual(1);
              expect(tagSpec.attrLists[0]).toEqual('common-extension-attrs');
            });
-        // We want the extension to be present only when there is a matching
-        // tag on the page which requires the extension. These extensions don't
-        // have a single matching tag, so we allow these extensions to not
-        // also require an additional tag.
-        const extensionExceptions = {
-          // This can be present based on 'amp-access', which isn't allowed in
-          // AMP4ADS, which makes checking tricky.
-          'amp-analytics': 0,
-          // There are two variants of amp-audio, one for each html_format.
-          // The references break when we filter by format, so currently this
-          // does not require another tag to indicate usage.
-          // TODO(gregable): Fix above.
-          'amp-audio': 0,
-          // amp-dynamic-css-classes corresponds to no specific tag.
-          'amp-dynamic-css-classes': 0,
-          // amp-slides is deprecated in favor of amp-carousel, so we don't
-          // want to be recommending adding <amp-slides> to any page.
-          'amp-slides': 0
-        };
-        if (!extensionExceptions.hasOwnProperty(extensionSpec.name)) {
-          it('Extension ' + extensionSpec.name + ' does not identify' +
-                 ' any required tags indicating usage. Please add a `requires:`' +
-                 ' field to the TagSpec.',
-             () => {
-               expect(
-                   tagSpec.requires.length +
-                   tagSpec.extensionSpec.deprecatedRecommendsUsageOfTag.length)
-                   .toBeGreaterThan(0);
-             });
-        }
       }
 
       if (attrSpec.dispatchKey) {
@@ -702,15 +702,18 @@ describe('ValidatorRulesMakeSense', () => {
         });
       }
       // blacklisted_cdata_regex
-      it('blacklisted_cdata_regex valid and error_message defined', () => {
-        for (const blacklistedCdataRegex of
-                 tagSpec.cdata.blacklistedCdataRegex) {
+      for (const blacklistedCdataRegex of tagSpec.cdata.blacklistedCdataRegex) {
+        it('blacklisted_cdata_regex valid and error_message defined', () => {
           usefulCdataSpec = true;
           expect(blacklistedCdataRegex.regex).toBeDefined();
           expect(isValidRegex(blacklistedCdataRegex.regex)).toBe(true);
           expect(blacklistedCdataRegex.errorMessage).toBeDefined();
-        }
-      });
+        });
+        it('blacklisted_cdata_regex must have unicode named groups', () => {
+          const regex = rules.internedStrings[-1 - blacklistedCdataRegex.regex];
+          expect(isMissingUnicodeGroup(regex)).toBe(false);
+        });
+      }
 
       // css_spec
       if (tagSpec.cdata.cssSpec !== null) {
@@ -752,9 +755,9 @@ describe('ValidatorRulesMakeSense', () => {
           expect(
               (tagSpec.cdata.blacklistedCdataRegex.length > 0) ||
               tagSpec.cdata.cdataRegex !== null ||
-              tagSpec.cdata.mandatoryCdata !== null)
+              tagSpec.cdata.mandatoryCdata !== null ||
+              tagSpec.cdata.cssSpec.validateKeyframes)
               .toBe(true);
-
         });
       }
       // cdata_regex and mandatory_cdata
@@ -764,6 +767,10 @@ describe('ValidatorRulesMakeSense', () => {
       }
       it('a cdata spec must be defined', () => {
         expect(usefulCdataSpec).toBe(true);
+      });
+      it('cdata_regex must have unicode named groups', () => {
+        const regex = rules.internedStrings[-1 - tagSpec.cdata.cdataRegex];
+        expect(isMissingUnicodeGroup(regex)).toBe(false);
       });
 
       // reference_points

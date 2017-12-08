@@ -116,7 +116,7 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
     /** Show default image for playlist */
     if (this.mode_ == 'playlist') {
       placeholder.setAttribute('src',
-        'https://www.springboardplatform.com/storage/default/' +
+          'https://www.springboardplatform.com/storage/default/' +
         'snapshots/default_snapshot.png');
     }
     placeholder.setAttribute('placeholder', '');
@@ -126,4 +126,7 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-springboard-player', AmpSpringboardPlayer);
+
+AMP.extension('amp-springboard-player', '0.1', AMP => {
+  AMP.registerElement('amp-springboard-player', AmpSpringboardPlayer);
+});

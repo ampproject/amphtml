@@ -22,6 +22,10 @@ import {
   listenOncePromise,
   loadPromise,
 } from '../../src/event-helper';
+import {
+  detectEvtListenerOptsSupport,
+  resetEvtListenerOptsSupportForTesting,
+} from '../../src/event-helper-listen';
 import {Observable} from '../../src/observable';
 import * as sinon from 'sinon';
 
@@ -38,6 +42,8 @@ describe('EventHelper', () => {
   let element;
   let loadObservable;
   let errorObservable;
+  let addEventListenerStub;
+  let removeEventListenerStub;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -47,7 +53,7 @@ describe('EventHelper', () => {
       tagName: 'TEST',
       complete: false,
       readyState: '',
-      addEventListener: function(type, callback) {
+      addEventListener(type, callback) {
         if (type == 'load') {
           loadObservable.add(callback);
         } else if (type == 'error') {
@@ -56,7 +62,7 @@ describe('EventHelper', () => {
           expect(type).to.equal('load or error');
         }
       },
-      removeEventListener: function(type, callback) {
+      removeEventListener(type, callback) {
         if (type == 'load') {
           loadObservable.remove(callback);
         } else if (type == 'error') {
@@ -210,13 +216,19 @@ describe('EventHelper', () => {
   });
 
   it('should polyfill CustomEvent constructor', () => {
-    const native = createCustomEvent(window, 'foo', {bar: 123});
+    const native = createCustomEvent(window, 'foo', {bar: 123},
+        {bubbles: true, cancelable: true});
     expect(native.type).to.equal('foo');
     expect(native.detail).to.deep.equal({bar: 123});
+    expect(native.bubbles).to.be.true;
+    expect(native.cancelable).to.be.true;
 
-    const polyfilled = createCustomEvent({document}, 'foo', {bar: 123});
+    const polyfilled = createCustomEvent({document}, 'foo', {bar: 123},
+        {bubbles: true, cancelable: true});
     expect(polyfilled.type).to.equal('foo');
     expect(polyfilled.detail).to.deep.equal({bar: 123});
+    expect(polyfilled.bubbles).to.be.true;
+    expect(polyfilled.cancelable).to.be.true;
   });
 
   it('should create the correct custom event for IE11', () => {
@@ -230,13 +242,64 @@ describe('EventHelper', () => {
     win.document = {};
     win.document.createEvent = function() {
       return {
-        initCustomEvent: function() {
+        initCustomEvent() {
           initCustomEventSpy();
         },
       };
     };
     createCustomEvent(win, 'foo', {bar: 123});
     expect(initCustomEventSpy).to.be.calledOnce;
+  });
+
+  it('should detect when addEventListener options are supported', () => {
+    const eventListenerStubAcceptOpts = (type, listener, options) => {
+      const getCapture = options.capture;
+      if (getCapture) {
+        // Added to bypass linter (never used warning)
+      }
+    };
+    // Simulate an addEventListener that accepts options
+    addEventListenerStub =
+      sandbox.stub(self, 'addEventListener', eventListenerStubAcceptOpts);
+    // Simulate a removeEventListener that accepts options
+    removeEventListenerStub =
+      sandbox.stub(self, 'removeEventListener', eventListenerStubAcceptOpts);
+    resetEvtListenerOptsSupportForTesting();
+    expect(detectEvtListenerOptsSupport()).to.be.true;
+    expect(addEventListenerStub.called).to.be.true;
+    expect(removeEventListenerStub.called).to.be.true;
+    resetEvtListenerOptsSupportForTesting();
+  });
+
+  it('should cache the result of the test and only do it once', () => {
+    resetEvtListenerOptsSupportForTesting();
+    expect(detectEvtListenerOptsSupport()).to.be.true;
+    expect(addEventListenerStub.called).to.be.true;
+    expect(removeEventListenerStub.called).to.be.true;
+    expect(detectEvtListenerOptsSupport()).to.be.true;
+    expect(addEventListenerStub.calledOnce).to.be.true;
+    expect(removeEventListenerStub.calledOnce).to.be.true;
+  });
+
+  it('should detect when addEventListener options are not supported', () => {
+    const eventListenerStubRejectOpts = (type, listener, capture) => {
+      const getCapture = capture;
+      if (getCapture) {
+        // Added to bypass linter (never used warning)
+      }
+    };
+    // Simulate an addEventListener that does not accept options
+    addEventListenerStub =
+      sandbox.stub(self, 'addEventListener', eventListenerStubRejectOpts);
+    // Simulate a removeEventListener that does not accept options
+    removeEventListenerStub =
+      sandbox.stub(self, 'removeEventListener', eventListenerStubRejectOpts);
+    resetEvtListenerOptsSupportForTesting();
+    expect(detectEvtListenerOptsSupport()).to.be.false;
+    expect(addEventListenerStub.called).to.be.true;
+    expect(removeEventListenerStub.called).to.be.true;
+    expect(detectEvtListenerOptsSupport()).to.be.false;
+    expect(removeEventListenerStub.calledOnce).to.be.true;
   });
 
 });

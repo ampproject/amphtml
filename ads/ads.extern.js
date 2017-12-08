@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/** @externs */
+
 // HACK. Define application types used in default AMP externs
 // that are not in the 3p code.
 /** @constructor */
@@ -88,6 +90,42 @@ data.tagForChildDirectedTreatment;
 data.targeting;
 data.slot;
 
+// imaVideo.js
+var google;
+google.ima;
+google.ima.AdDisplayContainer;
+google.ima.AdDisplayContainer.initialize;
+google.ima.ImaSdkSettings;
+google.ima.ImaSdkSettings.setPlayerType;
+google.ima.ImaSdkSettings.setPlayerVersion;
+google.ima.AdsLoader;
+google.ima.AdsLoader.getSettings;
+google.ima.AdsLoader.requestAds;
+google.ima.AdsManagerLoadedEvent;
+google.ima.AdsManagerLoadedEvent.Type
+google.ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED;
+google.ima.AdsManagerLoadedEvent.getAdsManager;
+google.ima.AdErrorEvent;
+google.ima.AdErrorEvent.Type;
+google.ima.AdErrorEvent.Type.AD_ERROR;
+google.ima.AdsRequest;
+google.ima.ViewMode;
+google.ima.ViewMode.NORMAL;
+google.ima.ViewMode.FULLSCREEN;
+google.ima.AdsRenderingSettings;
+google.ima.UiElements;
+google.ima.UiElements.AD_ATTRIBUTION;
+google.ima.UiElements.COUNTDOWN;
+google.ima.AdEvent;
+google.ima.AdEvent.Type;
+google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED;
+google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED;
+google.ima.AdsManager;
+google.ima.AdsManager.setVolume;
+google.ima.settings;
+google.ima.settings.setLocale;
+google.ima.settings.setVpaidMode;
+
 // 3P ads
 // Please sort by alphabetic order of the ad server name to avoid conflict
 
@@ -102,6 +140,13 @@ data.cid;
 // adform.js
 data.bn;
 data.mid;
+
+// adfox.js
+data.bundleName;
+data.adfoxParams;
+data.bundleParams;
+data.bundleParams.blockId;
+data.bundleParams.data;
 
 // adgeneration.js
 data.option;
@@ -187,6 +232,9 @@ Criteo.Log.Debug;
 Criteo.CallRTA;
 Criteo.ComputeDFPTargetingForAMP;
 Criteo.PubTag = {};
+Criteo.PubTag.Adapters = {};
+Criteo.PubTag.Adapters.AMP = {};
+Criteo.PubTag.Adapters.AMP.Standalone;
 Criteo.PubTag.RTA = {};
 Criteo.PubTag.RTA.DefaultCrtgContentName;
 Criteo.PubTag.RTA.DefaultCrtgRtaCookieName
@@ -236,6 +284,9 @@ data.parameters;
 // holder.js
 data.queue;
 
+// imedia.js
+data.positions
+
 // improvedigital.js
 data.placement;
 data.optin;
@@ -247,6 +298,14 @@ window._inmobi;
 _inmobi.getNewAd;
 data.siteid;
 data.slotid;
+
+// innity.js
+var innity_adZone;
+var innityAMPZone;
+var innityAMPTag;
+data.pub;
+data.zone;
+data.channel;
 
 // ix.js
 data.ixId;
@@ -443,6 +502,15 @@ data.wbo_is_mobile;
 data.wbo_vars;
 data.wbo_weak_encoding;
 
+// yandex.js
+var Ya;
+Ya.Context;
+Ya.Context.AdvManager;
+Ya.Context.AdvManager.render;
+Ya.adfoxCode;
+Ya.adfoxCode.onRender;
+data.isAdfox;
+
 // yieldbot.js
 var yieldbot;
 yieldbot.psn;
@@ -478,3 +546,6 @@ data.renderer;
 // zergnet.js
 window.zergnetWidgetId;
 data.zergid;
+
+// _ping_.js
+window.networkIntegrationDataParamForTesting;

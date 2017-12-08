@@ -17,6 +17,7 @@
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {FixedLayer} from '../../src/service/fixed-layer';
 import {installPlatformService} from '../../src/service/platform-impl';
+import {endsWith} from '../../src/string';
 import * as sinon from 'sinon';
 
 
@@ -171,24 +172,99 @@ describe('FixedLayer', () => {
     const children = [];
     const elem = {
       id,
-      autoOffsetTop: 17,
+      autoTop: '',
       toString: () => {
         return id;
       },
       style: {
-        top: '',
-        bottom: '',
-        position: '',
-        opacity: '0.9',
-        visibility: 'visible',
+        _top: '15px',
+        _bottom: '',
+        _position: '',
+        _opacity: '0.9',
+        _visibility: 'visible',
+        _transition: '',
+
+        get top() {
+          return this._top;
+        },
+        set top(v) {
+          elem.style.setProperty('top', v);
+        },
+        get bottom() {
+          return this._bottom;
+        },
+        set bottom(v) {
+          elem.style.setProperty('bottom', v);
+        },
+        get position() {
+          return this._position;
+        },
+        set position(v) {
+          elem.style.setProperty('position', v);
+        },
+        get opacity() {
+          return this._opacity;
+        },
+        set opacity(v) {
+          elem.style.setProperty('opacity', v);
+        },
+        get visibility() {
+          return this._visibility;
+        },
+        set visibility(v) {
+          elem.style.setProperty('visibility', v);
+        },
+        get transition() {
+          return this._transition;
+        },
+        set transition(v) {
+          elem.style.setProperty('transition', v);
+        },
+
+        setProperty(prop, value, priority) {
+          const privProp = '_' + prop;
+
+          // Override if important
+          if (priority === 'important') {
+            elem.style[privProp] = `${value} !${priority}`;
+          } else if (elem.style[privProp] ||
+              !endsWith(elem.computedStyle[prop], '!important')) {
+            if (prop === 'transition' && !value &&
+                endsWith(elem.style[privProp] || '', '!important')) {
+              // Emulate a stupid Safari bug.
+              // noop.
+            } else {
+              // If element style is already set, we can override
+              // Or, if computed style is not important priority
+              elem.style[privProp] = value;
+            }
+          }
+        },
       },
       computedStyle: {
         opacity: '0.9',
         visibility: 'visible',
-        top: '',
+        _top: '',
+        get top() {
+          if (elem.computedStyle.transition &&
+              elem.style.transition !== '' &&
+              elem.style.transition !== 'none !important') {
+            return this._oldTop;
+          }
+          if (elem.style.bottom) {
+            return elem.autoTop || this._top;
+          }
+          return this._top;
+        },
+        set top(val) {
+          this._oldTop = this._top;
+          this._top = val;
+        },
         bottom: '',
         zIndex: '',
         transform: '',
+        position: '',
+        transition: '',
       },
       matches: () => true,
       compareDocumentPosition: other => {
@@ -231,13 +307,6 @@ describe('FixedLayer', () => {
     };
     Object.defineProperty(elem, 'offsetTop', {
       get: () => {
-        if (elem.overrideOffsetTop != null) {
-          return elem.overrideOffsetTop;
-        }
-        if (elem.style.top == 'auto' || elem.computedStyle.top == 'auto' ||
-                elem.computedStyle.top == '') {
-          return elem.autoOffsetTop;
-        }
         return parseFloat(elem.computedStyle.top);
       },
     });
@@ -281,7 +350,8 @@ describe('FixedLayer', () => {
   }
 
 
-  describe('no-transfer', () => {
+  // TODO(jridgewell, #11827): Make this test work on Safari.
+  describe.configure().skipSafari().run('no-transfer', () => {
     let fixedLayer;
 
     beforeEach(() => {
@@ -303,7 +373,7 @@ describe('FixedLayer', () => {
             `${expected.id}: wrong position`);
         expect(JSON.stringify(actual.selectors))
             .to.equal(JSON.stringify(expected.selectors),
-                `${expected.id}: wrong selectors`);
+            `${expected.id}: wrong selectors`);
       }
 
       expect(fixedLayer.elements_).to.have.length(5);
@@ -557,8 +627,7 @@ describe('FixedLayer', () => {
       // See http://crbug.com/703816.
       element5.computedStyle['position'] = 'sticky';
       element5.computedStyle['top'] = '0px';
-      element5.autoOffsetTop = 12;
-      element5.overrideOffsetTop = 12;
+      element5.autoTop = '12px';
 
       expect(vsyncTasks).to.have.length(1);
       const state = {};
@@ -568,12 +637,11 @@ describe('FixedLayer', () => {
       expect(state['F4'].top).to.equal('');
     });
 
-    it('should NOT work around top=0 for sticky when offset = 0', () => {
+    it('should work around top=0 for sticky when offset = 0', () => {
       // See http://crbug.com/703816.
       element5.computedStyle['position'] = 'sticky';
       element5.computedStyle['top'] = '0px';
-      element5.autoOffsetTop = 0;
-      element5.overrideOffsetTop = 0;
+      element5.autoTop = '0px';
 
       expect(vsyncTasks).to.have.length(1);
       const state = {};
@@ -587,26 +655,24 @@ describe('FixedLayer', () => {
       // See http://crbug.com/703816.
       element5.computedStyle['position'] = 'sticky';
       element5.computedStyle['top'] = '0px';
-      element5.autoOffsetTop = 12;
-      element5.overrideOffsetTop = 11;
+      element5.autoTop = '12px';
 
       expect(vsyncTasks).to.have.length(1);
       const state = {};
       vsyncTasks[0].measure(state);
 
       expect(state['F4'].sticky).to.be.true;
-      expect(state['F4'].top).to.equal('0px');
+      expect(state['F4'].top).to.equal('');
     });
 
     it('should collect for implicit top = auto, but not update top', () => {
       element1.computedStyle['position'] = 'fixed';
-      element1.computedStyle['top'] = '12px';
-      element1.autoOffsetTop = 12;
+      element1.computedStyle['top'] = '0px';
+      element1.autoTop = '12px';
       element1.offsetWidth = 10;
       element1.offsetHeight = 10;
       element5.computedStyle['position'] = 'sticky';
-      element5.computedStyle['top'] = '12px';
-      element5.autoOffsetTop = 12;
+      element5.autoTop = '12px';
 
       expect(vsyncTasks).to.have.length(1);
       const state = {};
@@ -622,12 +688,12 @@ describe('FixedLayer', () => {
     it('should override implicit top = auto to 0 when equals padding', () => {
       element1.computedStyle['position'] = 'fixed';
       element1.computedStyle['top'] = '11px';
-      element1.autoOffsetTop = 11;
+      element1.autoTop = '0px';
       element1.offsetWidth = 10;
       element1.offsetHeight = 10;
       element5.computedStyle['position'] = 'sticky';
       element5.computedStyle['top'] = '11px';
-      element5.autoOffsetTop = 11;
+      element5.autoTop = '11px';
 
       expect(vsyncTasks).to.have.length(1);
       const state = {};
@@ -637,19 +703,19 @@ describe('FixedLayer', () => {
       expect(state['F0'].top).to.equal('0px');
 
       expect(state['F4'].sticky).to.be.true;
-      expect(state['F4'].top).to.equal('0px');
+      expect(state['F4'].top).to.equal('11px');
     });
 
     it('should override implicit top = auto to 0 and padding + border', () => {
       fixedLayer.borderTop_ = 1;
       element1.computedStyle['position'] = 'fixed';
       element1.computedStyle['top'] = '12px';
-      element1.autoOffsetTop = 12;
+      element1.autoTop = '0px';
       element1.offsetWidth = 10;
       element1.offsetHeight = 10;
       element5.computedStyle['position'] = 'sticky';
       element5.computedStyle['top'] = '12px';
-      element5.autoOffsetTop = 12;
+      element5.autoTop = '12px';
 
       expect(vsyncTasks).to.have.length(1);
       const state = {};
@@ -659,18 +725,18 @@ describe('FixedLayer', () => {
       expect(state['F0'].top).to.equal('0px');
 
       expect(state['F4'].sticky).to.be.true;
-      expect(state['F4'].top).to.equal('0px');
+      expect(state['F4'].top).to.equal('12px');
     });
 
     it('should override implicit top = auto to 0 w/transient padding', () => {
       element1.computedStyle['position'] = 'fixed';
       element1.computedStyle['top'] = '11px';
-      element1.autoOffsetTop = 11;
+      element1.autoTop = '0px';
       element1.offsetWidth = 10;
       element1.offsetHeight = 10;
       element5.computedStyle['position'] = 'sticky';
       element5.computedStyle['top'] = '11px';
-      element5.autoOffsetTop = 11;
+      element5.autoTop = '11px';
 
       expect(vsyncTasks).to.have.length(1);
       const state = {};
@@ -686,7 +752,7 @@ describe('FixedLayer', () => {
       expect(state['F0'].fixed).to.be.true;
       expect(state['F0'].top).to.equal('0px');
       expect(state['F4'].sticky).to.be.true;
-      expect(state['F4'].top).to.equal('0px');
+      expect(state['F4'].top).to.equal('11px');
       expect(fixedLayer.paddingTop_).to.equal(22);
       expect(fixedLayer.committedPaddingTop_).to.equal(11);
 
@@ -696,7 +762,7 @@ describe('FixedLayer', () => {
       expect(state['F0'].fixed).to.be.true;
       expect(state['F0'].top).to.equal(''); // Reset completely.
       expect(state['F4'].sticky).to.be.true;
-      expect(state['F4'].top).to.equal(''); // Reset completely.
+      expect(state['F4'].top).to.equal('11px');
       expect(fixedLayer.paddingTop_).to.equal(22);
       expect(fixedLayer.committedPaddingTop_).to.equal(22);
     });
@@ -704,12 +770,12 @@ describe('FixedLayer', () => {
     it('should always collect and update top = 0', () => {
       element1.computedStyle['position'] = 'fixed';
       element1.computedStyle['top'] = '0px';
-      element1.autoOffsetTop = 0;
+      element1.autoTop = '0px';
       element1.offsetWidth = 10;
       element1.offsetHeight = 10;
       element5.computedStyle['position'] = 'sticky';
       element5.computedStyle['top'] = '0px';
-      element5.autoOffsetTop = 0;
+      element5.autoTop = '0px';
 
       expect(vsyncTasks).to.have.length(1);
       const state = {};
@@ -722,6 +788,35 @@ describe('FixedLayer', () => {
       expect(state['F4'].top).to.equal('0px');
     });
 
+    it('should handle transitions', () => {
+      element1.computedStyle['position'] = 'fixed';
+      element1.computedStyle['transition'] = 'all .4s ease';
+      element1.computedStyle['top'] = '0px';
+      element1.autoTop = '0px';
+      element1.offsetWidth = 10;
+      element1.offsetHeight = 10;
+      element5.computedStyle['position'] = 'sticky';
+      element5.computedStyle['transition'] = 'all .4s ease';
+      element5.computedStyle['top'] = '0px';
+      element5.autoTop = '0px';
+
+      expect(vsyncTasks).to.have.length(1);
+      const state = {};
+      vsyncTasks[0].measure(state);
+
+      expect(state['F0'].fixed).to.be.true;
+      expect(state['F0'].top).to.equal('0px');
+      expect(element1.style.transition).to.equal('none !important');
+
+      expect(state['F4'].sticky).to.be.true;
+      expect(state['F4'].top).to.equal('0px');
+      expect(element5.style.transition).to.equal('none !important');
+
+      vsyncTasks[0].mutate({});
+      expect(element1.style.transition).to.equal('');
+      expect(element5.style.transition).to.equal('');
+    });
+
     it('should mutate element to fixed without top', () => {
       const fe = fixedLayer.elements_[0];
       fixedLayer.mutateElement_(fe, 1, {
@@ -732,7 +827,7 @@ describe('FixedLayer', () => {
 
       expect(fe.fixedNow).to.be.true;
       expect(fe.stickyNow).to.be.false;
-      expect(fe.element.style.top).to.equal('');
+      expect(fe.element.style.top).to.equal('15px');
       expect(fixedLayer.transferLayer_).to.be.null;
     });
 
@@ -746,12 +841,13 @@ describe('FixedLayer', () => {
 
       expect(fe.fixedNow).to.be.false;
       expect(fe.stickyNow).to.be.true;
-      expect(fe.element.style.top).to.equal('');
+      expect(fe.element.style.top).to.equal('15px');
       expect(fixedLayer.transferLayer_).to.be.null;
     });
 
     it('should mutate element to fixed with top', () => {
       const fe = fixedLayer.elements_[0];
+      element1.style.top = '';
       fixedLayer.mutateElement_(fe, 1, {
         fixed: true,
         top: '17px',
@@ -759,6 +855,33 @@ describe('FixedLayer', () => {
 
       expect(fe.fixedNow).to.be.true;
       expect(fe.element.style.top).to.equal('calc(17px + 11px)');
+    });
+
+    it('should add needed padding to sticky top if transferring', () => {
+      const fe = fixedLayer.elements_[4];
+      fixedLayer.transfer_ = true;
+      fe.element.style.top = '';
+      fixedLayer.mutateElement_(fe, 1, {
+        sticky: true,
+        top: '17px',
+      });
+
+      expect(fe.stickyNow).to.be.true;
+      expect(fe.element.style.top).to.equal('17px');
+    });
+
+    it('should not add unneeded padding to sticky top if transferring', () => {
+      const fe = fixedLayer.elements_[4];
+      fixedLayer.transfer_ = true;
+      fixedLayer.paddingTop_ = 0;
+      fe.element.style.top = '';
+      fixedLayer.mutateElement_(fe, 1, {
+        sticky: true,
+        top: '17px',
+      });
+
+      expect(fe.stickyNow).to.be.true;
+      expect(fe.element.style.top).to.equal('calc(17px - 11px)');
     });
 
     it('should mutate element to sticky with top', () => {
@@ -791,7 +914,7 @@ describe('FixedLayer', () => {
       expect(fe.element.style.top).to.equal('calc(17px + 11px)');
       // Remove.
       fixedLayer.vsync_ = {
-        mutate: function(callback) {
+        mutate(callback) {
           callback();
         },
       };
@@ -814,39 +937,13 @@ describe('FixedLayer', () => {
 
       // Remove.
       fixedLayer.vsync_ = {
-        mutate: function(callback) {
+        mutate(callback) {
           callback();
         },
       };
       fixedLayer.removeElement(element5);
       expect(fixedLayer.elements_).to.have.length(4);
       expect(element5.style.top).to.equal('');
-    });
-
-    it('should mutate element to non-fixed', () => {
-      const fe = fixedLayer.elements_[0];
-      fe.fixedNow = true;
-      fe.element.style.top = '27px';
-      fixedLayer.mutateElement_(fe, 1, {
-        fixed: false,
-        top: '17px',
-      });
-
-      expect(fe.fixedNow).to.be.false;
-      expect(fe.element.style.top).to.equal('');
-    });
-
-    it('should mutate element to non-sticky', () => {
-      const fe = fixedLayer.elements_[4];
-      fe.stickyNow = true;
-      fe.element.style.top = '27px';
-      fixedLayer.mutateElement_(fe, 1, {
-        sticky: false,
-        top: '17px',
-      });
-
-      expect(fe.stickyNow).to.be.false;
-      expect(fe.element.style.top).to.equal('');
     });
 
     it('should transform fixed elements with anchored top', () => {
@@ -879,12 +976,12 @@ describe('FixedLayer', () => {
 
       fixedLayer.transformMutate('translateY(-10px)');
       expect(fe.element.style.transform).to.be.undefined;
-      expect(fe.element.style.transition).to.be.undefined;
+      expect(fe.element.style.transition).to.equal('');
 
       // Reset back.
       fixedLayer.transformMutate(null);
       expect(fe.element.style.transform).to.be.undefined;
-      expect(fe.element.style.transition).to.be.undefined;
+      expect(fe.element.style.transition).to.equal('');
     });
 
     it('should compound transform with anchored top', () => {
@@ -992,8 +1089,10 @@ describe('FixedLayer', () => {
       element1.computedStyle['position'] = 'fixed';
       element1.offsetWidth = 10;
       element1.offsetHeight = 10;
+      element1.computedStyle['top'] = '';
       element1.computedStyle['bottom'] = '0px';
       element5.computedStyle['position'] = 'sticky';
+      element5.computedStyle['top'] = '';
       element5.computedStyle['bottom'] = '0px';
 
       expect(vsyncTasks).to.have.length(1);
@@ -1035,8 +1134,12 @@ describe('FixedLayer', () => {
       element1.computedStyle['position'] = 'fixed';
       element1.offsetWidth = 10;
       element1.offsetHeight = 10;
+      element1.style['top'] = '';
+      element1.computedStyle['top'] = '';
       element1.computedStyle['bottom'] = '2px';
       element5.computedStyle['position'] = 'sticky';
+      element5.style['top'] = '';
+      element5.computedStyle['top'] = '';
       element5.computedStyle['bottom'] = '2px';
 
       expect(vsyncTasks).to.have.length(1);

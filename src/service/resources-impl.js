@@ -19,24 +19,22 @@ import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
 import {Resource, ResourceState} from './resource';
+import {Services} from '../services';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {expandLayoutRect} from '../layout-rect';
 import {installInputService} from '../input';
+import {loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
-import {inputFor} from '../services';
-import {viewerForDoc} from '../services';
-import {viewportForDoc} from '../services';
-import {vsyncFor} from '../services';
 import {isArray} from '../types';
 import {dev} from '../log';
+import {dict} from '../utils/object';
 import {reportError} from '../error';
 import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
 import {areMarginsChanged} from '../layout-rect';
-import {documentInfoForDoc} from '../services';
 import {computedStyle} from '../style';
 
 const TAG_ = 'Resources';
@@ -51,6 +49,7 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
 const FOUR_FRAME_DELAY_ = 70;
+const DOC_BOTTOM_OFFSET_LIMIT_ = 1000;
 
 
 /**
@@ -87,7 +86,7 @@ export class Resources {
     this.win = ampdoc.win;
 
     /** @const @private {!./viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(ampdoc);
+    this.viewer_ = Services.viewerForDoc(ampdoc);
 
     /** @private {boolean} */
     this.isRuntimeOn_ = this.viewer_.isRuntimeOn();
@@ -153,8 +152,14 @@ export class Resources {
     /** @private {number} */
     this.lastVelocity_ = 0;
 
-    /** @const {!Pass} */
-    this.pass_ = new Pass(this.win, () => this.doPass_());
+    /** @const @private {!Pass} */
+    this.pass_ = new Pass(this.win, () => this.doPass());
+
+    /** @const @private {!Pass} */
+    this.remeasurePass_ = new Pass(this.win, () => {
+      this.relayoutAll_ = true;
+      this.schedulePass();
+    });
 
     /** @const {!TaskQueue} */
     this.exec_ = new TaskQueue();
@@ -179,11 +184,11 @@ export class Resources {
     /** @private {boolean} */
     this.isCurrentlyBuildingPendingResources_ = false;
 
-    /** @private @const {!./viewport-impl.Viewport} */
-    this.viewport_ = viewportForDoc(this.ampdoc);
+    /** @private @const {!./viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private @const {!./vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(this.win);
+    this.vsync_ = Services.vsyncFor(this.win);
 
     /** @private @const {!FocusHistory} */
     this.activeHistory_ = new FocusHistory(this.win, FOCUS_HISTORY_TIMEOUT_);
@@ -192,7 +197,7 @@ export class Resources {
     this.vsyncScheduled_ = false;
 
     /** @private {number} */
-    this.scrollHeight_ = 0;
+    this.contentHeight_ = 0;
 
     /** @private {boolean} */
     this.maybeChangeHeight_ = false;
@@ -207,7 +212,10 @@ export class Resources {
     this.viewport_.onChanged(event => {
       this.lastScrollTime_ = Date.now();
       this.lastVelocity_ = event.velocity;
-      this.relayoutAll_ = this.relayoutAll_ || event.relayoutAll;
+      if (event.relayoutAll) {
+        this.relayoutAll_ = true;
+        this.maybeChangeHeight_ = true;
+      }
       this.schedulePass();
     });
     this.viewport_.onScroll(() => {
@@ -241,17 +249,33 @@ export class Resources {
       this.buildReadyResources_();
       this.pendingBuildResources_ = null;
       const fixPromise = ieMediaCheckAndFix(this.win);
+      const remeasure = () => this.remeasurePass_.schedule();
       if (fixPromise) {
-        fixPromise.then(() => {
-          this.relayoutAll_ = true;
-          this.schedulePass();
-        });
+        fixPromise.then(remeasure);
       } else {
         // No promise means that there's no problem.
-        this.relayoutAll_ = true;
+        remeasure();
       }
-      this.schedulePass();
       this.monitorInput_();
+
+      // Safari 10 and under incorrectly estimates font spacing for
+      // `@font-face` fonts. This leads to wild measurement errors. The best
+      // course of action is to remeasure everything on window.onload or font
+      // timeout (3s), whichever is earlier. This has to be done on the global
+      // window because this is where the fonts are always added.
+      // Unfortunately, `document.fonts.ready` cannot be used here due to
+      // https://bugs.webkit.org/show_bug.cgi?id=174030.
+      // See https://bugs.webkit.org/show_bug.cgi?id=174031 for more details.
+      Promise.race([
+        loadPromise(this.win),
+        Services.timerFor(this.win).promise(3100),
+      ]).then(remeasure);
+
+      // Remeasure the document when all fonts loaded.
+      if (this.win.document.fonts &&
+          this.win.document.fonts.status != 'loaded') {
+        this.win.document.fonts.ready.then(remeasure);
+      }
     });
   }
 
@@ -332,7 +356,7 @@ export class Resources {
   /** @private */
   monitorInput_() {
     installInputService(this.win);
-    const input = inputFor(this.win);
+    const input = Services.inputFor(this.win);
     input.onTouchDetected(detected => {
       this.toggleInputClass_('amp-mode-touch', detected);
     }, true);
@@ -428,7 +452,7 @@ export class Resources {
 
   /**
    * Returns the viewport instance
-   * @return {!./viewport-impl.Viewport}
+   * @return {!./viewport/viewport-impl.Viewport}
    */
   getViewport() {
     return this.viewport_;
@@ -471,6 +495,7 @@ export class Resources {
       dev().fine(TAG_, 'resource added:', resource.debugid);
     }
     this.resources_.push(resource);
+    this.remeasurePass_.schedule(1000);
   }
 
   /**
@@ -499,16 +524,20 @@ export class Resources {
    */
   buildOrScheduleBuildForResource_(resource, checkForDupes = false,
       scheduleWhenBuilt = true) {
-    if (this.isRuntimeOn_ || this.isBuildOn_) {
+    const buildingEnabled = (this.isRuntimeOn_ || this.isBuildOn_);
+
+    // During prerender mode, don't build elements that aren't allowed to be
+    // prerendered. This avoids wasting our prerender build quota.
+    // See grantBuildPermission() for more details.
+    const shouldBuildResource =
+        this.viewer_.getVisibilityState() != VisibilityState.PRERENDER
+        || resource.prerenderAllowed();
+
+    if (buildingEnabled && shouldBuildResource) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
-        resource.build();
-        if (scheduleWhenBuilt && !resource.isBlacklisted()) {
-          // TODO(dvoytenko): Consider removing "blacklisted" resources
-          // altogether from the list of resources.
-          this.schedulePass();
-        }
-      } else if (!resource.element.isBuilt()) {
+        this.buildResourceUnsafe_(resource, scheduleWhenBuilt);
+      } else if (!resource.isBuilt() && !resource.isBuilding()) {
         if (!checkForDupes || !this.pendingBuildResources_.includes(resource)) {
           // Otherwise add to pending resources and try to build any ready ones.
           this.pendingBuildResources_.push(resource);
@@ -542,27 +571,39 @@ export class Resources {
    * @private
    */
   buildReadyResourcesUnsafe_(scheduleWhenBuilt = true) {
-    let builtElementsCount = 0;
     // This will loop over all current pending resources and those that
     // get added by other resources build-cycle, this will make sure all
     // elements get a chance to be built.
     for (let i = 0; i < this.pendingBuildResources_.length; i++) {
       const resource = this.pendingBuildResources_[i];
       if (this.documentReady_ ||
-          hasNextNodeInDocumentOrder(resource.element)) {
+          hasNextNodeInDocumentOrder(
+              resource.element, this.ampdoc.getRootNode())) {
         // Remove resource before build to remove it from the pending list
         // in either case the build succeed or throws an error.
         this.pendingBuildResources_.splice(i--, 1);
-        resource.build();
-        if (!resource.isBlacklisted()) {
-          builtElementsCount++;
-        }
+        this.buildResourceUnsafe_(resource, scheduleWhenBuilt);
       }
     }
+  }
 
-    if (scheduleWhenBuilt && builtElementsCount > 0) {
-      this.schedulePass();
+  /**
+   * @param {!Resource} resource
+   * @param {boolean} schedulePass
+   * @return {?Promise}
+   * @private
+   */
+  buildResourceUnsafe_(resource, schedulePass) {
+    const promise = resource.build();
+    if (!promise || !schedulePass) {
+      return promise;
     }
+    return promise.then(() => this.schedulePass(), error => {
+      // Build failed: remove the resource. No other state changes are
+      // needed.
+      this.removeResource_(resource);
+      throw error;
+    });
   }
 
   /**
@@ -588,9 +629,11 @@ export class Resources {
     if (index != -1) {
       this.resources_.splice(index, 1);
     }
-    resource.pauseOnRemove();
-    if (opt_disconnect) {
-      resource.disconnect();
+    if (resource.isBuilt()) {
+      resource.pauseOnRemove();
+      if (opt_disconnect) {
+        resource.disconnect();
+      }
     }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev().fine(TAG_, 'element removed:', resource.debugid);
@@ -642,7 +685,7 @@ export class Resources {
         return;
       }
       if (resource.getState() != ResourceState.LAYOUT_SCHEDULED) {
-        promises.push(resource.element.whenBuilt().then(() => {
+        promises.push(resource.whenBuilt().then(() => {
           resource.measure();
           if (!resource.isDisplayed()) {
             return;
@@ -814,13 +857,13 @@ export class Resources {
   attemptChangeSize(element, newHeight, newWidth, opt_newMargins) {
     return new Promise((resolve, reject) => {
       this.scheduleChangeSize_(Resource.forElement(element), newHeight,
-        newWidth, opt_newMargins, /* force */ false, success => {
-          if (success) {
-            resolve();
-          } else {
-            reject(new Error('changeSize attempt denied'));
-          }
-        });
+          newWidth, opt_newMargins, /* force */ false, success => {
+            if (success) {
+              resolve();
+            } else {
+              reject(new Error('changeSize attempt denied'));
+            }
+          });
     });
   }
 
@@ -968,7 +1011,7 @@ export class Resources {
       return;
     }
     this.vsyncScheduled_ = true;
-    this.vsync_.mutate(() => this.doPass_());
+    this.vsync_.mutate(() => this.doPass());
   }
 
   /**
@@ -980,8 +1023,7 @@ export class Resources {
     this.schedulePass();
   }
 
-  /** @private */
-  doPass_() {
+  doPass() {
     if (!this.isRuntimeOn_) {
       dev().fine(TAG_, 'runtime is off');
       return;
@@ -995,23 +1037,22 @@ export class Resources {
     if (firstPassAfterDocumentReady) {
       this.firstPassAfterDocumentReady_ = false;
       const doc = this.win.document;
-      this.viewer_.sendMessage('documentLoaded', {
-        title: doc.title,
-        sourceUrl: getSourceUrl(this.ampdoc.getUrl()),
-        serverLayout: doc.documentElement.hasAttribute('i-amphtml-element'),
-        linkRels: documentInfoForDoc(this.ampdoc).linkRels,
-      }, /* cancelUnsent */true);
+      this.viewer_.sendMessage('documentLoaded', dict({
+        'title': doc.title,
+        'sourceUrl': getSourceUrl(this.ampdoc.getUrl()),
+        'serverLayout': doc.documentElement.hasAttribute('i-amphtml-element'),
+        'linkRels': Services.documentInfoForDoc(this.ampdoc).linkRels,
+      }), /* cancelUnsent */true);
 
-      this.scrollHeight_ = this.viewport_.getScrollHeight();
+      this.contentHeight_ = this.viewport_.getContentHeight();
       this.viewer_.sendMessage('documentHeight',
-          {height: this.scrollHeight_}, /* cancelUnsent */true);
-      dev().fine(TAG_, 'document height on load: ' + this.scrollHeight_);
+          dict({'height': this.contentHeight_}), /* cancelUnsent */true);
+      dev().fine(TAG_, 'document height on load: ' + this.contentHeight_);
     }
 
     const viewportSize = this.viewport_.getSize();
-    const now = Date.now();
-    dev().fine(TAG_, 'PASS: at ' + now +
-        ', visible=', this.visible_,
+    dev().fine(TAG_,
+        'PASS: visible=', this.visible_,
         ', relayoutAll=', this.relayoutAll_,
         ', relayoutTop=', this.relayoutTop_,
         ', viewportSize=', viewportSize.width, viewportSize.height,
@@ -1033,12 +1074,12 @@ export class Resources {
     if (this.maybeChangeHeight_) {
       this.maybeChangeHeight_ = false;
       this.vsync_.measure(() => {
-        const measuredScrollHeight = this.viewport_.getScrollHeight();
-        if (measuredScrollHeight != this.scrollHeight_) {
+        const measuredContentHeight = this.viewport_.getContentHeight();
+        if (measuredContentHeight != this.contentHeight_) {
           this.viewer_.sendMessage('documentHeight',
-              {height: measuredScrollHeight}, /* cancelUnsent */true);
-          this.scrollHeight_ = measuredScrollHeight;
-          dev().fine(TAG_, 'document height changed: ' + this.scrollHeight_);
+              dict({'height': measuredContentHeight}), /* cancelUnsent */true);
+          this.contentHeight_ = measuredContentHeight;
+          dev().fine(TAG_, 'document height changed: ' + this.contentHeight_);
         }
       });
     }
@@ -1076,7 +1117,8 @@ export class Resources {
     const scrollHeight = this.viewport_.getScrollHeight();
     const topOffset = viewportRect.height / 10;
     const bottomOffset = viewportRect.height / 10;
-    const docBottomOffset = scrollHeight * 0.85;
+    const maxDocBottomOffset = scrollHeight - DOC_BOTTOM_OFFSET_LIMIT_;
+    const docBottomOffset = Math.max(scrollHeight * 0.85, maxDocBottomOffset);
     const isScrollingStopped = (Math.abs(this.lastVelocity_) < 1e-2 &&
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ ||
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2);
@@ -1310,7 +1352,7 @@ export class Resources {
     let remeasureCount = 0;
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
-      if (r.getState() == ResourceState.NOT_BUILT && !r.isBlacklisted()) {
+      if (r.getState() == ResourceState.NOT_BUILT && !r.isBuilding()) {
         this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true,
             /* scheduleWhenBuilt */ false);
       }
@@ -1415,23 +1457,33 @@ export class Resources {
       }
     }
 
-    // Phase 5: Idle layout: layout more if we are otherwise not doing much.
-    // TODO(dvoytenko): document/estimate IDLE timeouts and other constants
     if (this.visible_ &&
           this.exec_.getSize() == 0 &&
           this.queue_.getSize() == 0 &&
           now > this.exec_.getLastDequeueTime() + 5000) {
+      // Phase 5: Idle Render Outside Viewport layout: layout up to 4 items
+      // with idleRenderOutsideViewport true
       let idleScheduledCount = 0;
-      for (let i = 0; i < this.resources_.length; i++) {
+      for (let i = 0; i < this.resources_.length && idleScheduledCount < 4;
+          i++) {
         const r = this.resources_[i];
         if (r.getState() == ResourceState.READY_FOR_LAYOUT &&
-                !r.hasOwner() && r.isDisplayed()) {
+            !r.hasOwner() && r.isDisplayed() && r.idleRenderOutsideViewport()) {
+          dev().fine(TAG_, 'idleRenderOutsideViewport layout:', r.debugid);
+          this.scheduleLayoutOrPreload_(r, /* layout */ false);
+          idleScheduledCount++;
+        }
+      }
+      // Phase 6: Idle layout: layout more if we are otherwise not doing much.
+      // TODO(dvoytenko): document/estimate IDLE timeouts and other constants
+      for (let i = 0; i < this.resources_.length && idleScheduledCount < 4;
+          i++) {
+        const r = this.resources_[i];
+        if (r.getState() == ResourceState.READY_FOR_LAYOUT &&
+            !r.hasOwner() && r.isDisplayed()) {
           dev().fine(TAG_, 'idle layout:', r.debugid);
           this.scheduleLayoutOrPreload_(r, /* layout */ false);
           idleScheduledCount++;
-          if (idleScheduledCount >= 4) {
-            break;
-          }
         }
       }
     }
@@ -1476,7 +1528,7 @@ export class Resources {
       } else {
         task.resource.measure();
         if (this.isLayoutAllowed_(
-                task.resource, task.forceOutsideViewport)) {
+            task.resource, task.forceOutsideViewport)) {
           task.promise = task.callback();
           task.startTime = now;
           dev().fine(TAG_, 'exec:', task.id, 'at', task.startTime);
@@ -1760,7 +1812,8 @@ export class Resources {
     // The element has to be in its rendering corridor.
     if (!forceOutsideViewport &&
         !resource.isInViewport() &&
-        !resource.renderOutsideViewport()) {
+        !resource.renderOutsideViewport() &&
+        !resource.idleRenderOutsideViewport()) {
       return false;
     }
 
@@ -1812,7 +1865,7 @@ export class Resources {
   scheduleLayoutOrPreloadForSubresources_(parentResource, layout, subElements) {
     this.discoverResourcesForArray_(parentResource, subElements, resource => {
       if (resource.getState() == ResourceState.NOT_BUILT) {
-        resource.element.whenBuilt().then(() => {
+        resource.whenBuilt().then(() => {
           this.measureAndScheduleIfAllowed_(resource, layout,
               parentResource.getPriority());
         });
@@ -1879,7 +1932,7 @@ export class Resources {
       this.queue_.enqueue(task);
       this.schedulePass(this.calcTaskTimeout_(task));
     }
-    task.resource.layoutScheduled();
+    task.resource.layoutScheduled(task.scheduleTime);
   }
 
   /**

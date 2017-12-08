@@ -58,6 +58,12 @@ The following table lists the features that enable variable substitutions, as we
     <td width="25%">None</td>
   </tr>
   <tr>
+    <td width="25%"><code>amp-state</code><br><a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-bind/amp-bind.md#attributes">Detailed documentation</a></td>
+    <td width="25%">Requests must be HTTPS URLs (not a requirement specific to variable substitutions)</td>
+    <td width="25%">No</td>
+    <td width="25%">None</td>
+  </tr>
+  <tr>
     <td width="25%">Links (<code>&lt;a&gt;</code>)</td>
     <td width="25%">
       HTTPS URL and URL matching either:
@@ -96,17 +102,17 @@ Only these variables are supported:
 
 ### Per-use opt-in
 
-Link substitution requires per-use opt-in as an added security measure and to affirm the intention to use variable substitution. This is done by specifying an additional attribute called `data-amp-replace` with a string value containing a comma-delimited listing of the desired variables to substitute. An example is below.
+Link substitution requires per-use opt-in as an added security measure and to affirm the intention to use variable substitution. This is done by specifying an additional attribute called `data-amp-replace` with a string value containing a space-delimited listing of the desired variables to substitute. An example is below.
 
 ``` text
-<a href="https://example.com?client_id=CLIENT_ID(bar)&abc=QUERY_PARAM(abc)" data-amp-replace="CLIENT_ID,QUERY_PARAM">Go to my site</a>
+<a href="https://example.com?client_id=CLIENT_ID(bar)&abc=QUERY_PARAM(abc)" data-amp-replace="CLIENT_ID QUERY_PARAM">Go to my site</a>
 ```
 
 #### Appending parameters to the href
 If you need to append dynamic parameters to the href, specify the parameters by using the `data-amp-addparams` attribute. Any substitution parameters that you specify in `data-amp-addparams` must also be specified in `data-amp-replace`, as in the following example
 
 ``` text
-<a href="https://example.com?abc=QUERY_PARAM(abc)" data-amp-replace="CLIENT_ID,QUERY_PARAM" data-amp-addparams="client_id=CLIENT_ID(bar)&linkid=l123">Go to my site</a>
+<a href="https://example.com?abc=QUERY_PARAM(abc)" data-amp-replace="CLIENT_ID QUERY_PARAM" data-amp-addparams="client_id=CLIENT_ID(bar)&linkid=l123">Go to my site</a>
 ```
 
 ### Whitelisted domains for link substitution
@@ -148,6 +154,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Counter](#counter) | `COUNTER` | `${counter}` |
 | [Document Charset](#document-charset) | `DOCUMENT_CHARSET` | `${documentCharset}` |
 | [Document Referrer](#document-referrer) | `DOCUMENT_REFERRER` | `${documentReferrer}` |
+| [External Referrer](#external-referrer) | `EXTERNAL_REFERRER` | `${externalReferrer}` |
 | [Source URL](#source-url)           | `SOURCE_URL`      | `${sourceUrl}` |
 | [Source Host](#source-host)         | `SOURCE_HOST`     | `${sourceHost}` |
 | [Source Hostname](#source-hostname) | `SOURCE_HOSTNAME` | `${sourceHostname}` |
@@ -186,6 +193,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Scroll Left](#scroll-left)         | `SCROLL_LEFT`     | `${scrollLeft}`     |
 | [Scroll Top](#scroll-top)           | `SCROLL_TOP`      | `${scrollTop}`      |
 | [Timezone](#timezone)               | `TIMEZONE`        | `${timezone}`       |
+| [User Agent](#user-agent)           | `USER_AGENT`      | `${userAgent}`      |
 | [Viewport Height](#viewport-height) | `VIEWPORT_HEIGHT` | `${viewportHeight}` |
 | [Viewport Width](#viewport-width)   | `VIEWPORT_WIDTH`  | `${viewportWidth}`  |
 
@@ -194,7 +202,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | Variable Name  | Platform Variable  | amp-analytics Variable |
 |----------------|--------------------|------------------------|
 | [Horizontal Scroll Boundary](#horizontal-scroll-boundary) | N/A | `${horizontalScrollBoundary}` |
-| [Total Engaged Time](#horizontal-scroll-boundary) | `TOTAL_ENGAGED_TIME` | `${totalEngagedTime}` |
+| [Total Engaged Time](#total-engaged-time) | `TOTAL_ENGAGED_TIME` | `${totalEngagedTime}` |
 | [Vertical Scroll Boundary](#vertical-scroll-boundary) | N/A | `${verticalScrollBoundary}` |
 
 ### Visibility
@@ -233,6 +241,8 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Random](#random) | `RANDOM` | `${random}` |
 | [Request Count](#request-count) | N/A | `${requestCount}` |
 | [Timestamp](#timestamp) | `TIMESTAMP` | `${timestamp}` |
+| [Error Name](#error-name) | N/A | `${errorName}` |
+| [Error Message](#error-message) | N/A | `${errorMessage}` |
 
 ### Variable Descriptions
 
@@ -420,7 +430,7 @@ Provides a per document-source-origin (the origin of the website where you publi
 
 * **platform variable**: `CLIENT_ID`
   *  Example: <br>
-  
+
   ```html
   <amp-pixel src="https://foo.com/pixel?cid=CLIENT_ID(cid-scope-cookie-fallback-name)"></amp-pixel>
 
@@ -434,8 +444,8 @@ Provides a per document-source-origin (the origin of the website where you publi
      <button on="tap:user-consent.dismiss">I accept</button>
   </amp-user-notification>
 
-  <!-- cid is not provided until `user-consent` is dismissed -->
-  <amp-pixel src="https://foo.com/pixel?cid=CLIENT_ID(cid-scope-cookie-fallback-name,user-consent-id)"></amp-pixel>
+  <!-- Client ID is not provided until `user-consent` is dismissed -->
+  <amp-pixel src="https://foo.com/pixel?cid=CLIENT_ID(cid-scope-cookie-fallback-name,user-consent)"></amp-pixel>
   ```
 * **amp-analytics variable**: `${clientId}`
   * Example usage: `${clientId(foo)}`
@@ -543,6 +553,35 @@ Provides the absolute Y coordinate of the top edge of the element specified by `
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${elementY}`
+
+#### Error Message
+
+Provides the message of the error that triggered an user error event. This variable is only available in a `trigger` of type `user-error`
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${errorMessage}`
+  * Example value: `Invalid multi-size data format`
+
+#### Error Name
+
+Provides the name of the error that triggered an user error event. This variable is only available in a `trigger` of type `user-error`
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${errorName}`
+  * Example value: `AMP-AD`
+
+#### External Referrer
+
+Provides the referrer where the user came from. Similar to [Document Referrer](#document_referrer), but the value is empty if user is navigated from same domain or the corresponding CDN proxy domain.
+Analytics vendor might prefer this value to Document Referrer for better session stitching, depending on the server side implementation. 
+
+* **platform variable**: `EXTERNAL_REFERRER`
+  *  Example: <br>
+  ```html
+  <amp-pixel src="https://foo.com/pixel?referrer=EXTERNAL_REFERRER"></amp-pixel>
+  ```
+* **amp-analytics variable**: `${externalReferrer}`
+  * Example value: `https://www.google.com`
 
 #### Extra URL Parameters
 
@@ -931,7 +970,7 @@ Provides the title of the current document.
 
 #### Timestamp
 
-Provides the number of seconds that have elapsed since 1970. (Epoch time)
+Provides the number of milliseconds that have elapsed since 1970. (Epoch time)
 
 * **platform variable**: `TIMESTAMP`
   *  Example: <br>
@@ -974,6 +1013,18 @@ Provides the total time for which the element has met the `visiblitySpec `condit
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${totalVisibleTime}`
+
+#### User Agent
+
+Provides a string representing the user agent of the requesting software, usually tells about user's browser operating system.
+
+* **platform variable**: `USER_AGENT`
+  *  Example: <br>
+  ```html
+  <amp-pixel src="https://foo.com/pixel?sh=USER_AGENT"></amp-pixel>
+  ```
+* **amp-analytics variable**: `${userAgent}`
+  * Example value: `Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0`
 
 #### Vertical Scroll Boundary
 

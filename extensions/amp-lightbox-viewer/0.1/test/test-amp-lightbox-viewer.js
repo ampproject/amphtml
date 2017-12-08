@@ -14,55 +14,113 @@
  * limitations under the License.
  */
 
-import {adopt} from '../../../../src/runtime';
-import {createIframePromise} from '../../../../testing/iframe';
 import {toggleExperiment} from '../../../../src/experiments';
 import {installLightboxManager} from '../amp-lightbox-viewer';
+import '../../../amp-carousel/0.1/amp-carousel';
 
-adopt(window);
 
-describe('amp-lightbox-viewer', () => {
+describes.realWin('amp-lightbox-viewer', {
+  amp: {
+    amp: true,
+    extensions: ['amp-lightbox-viewer', 'amp-carousel'],
+  },
+}, env => {
+  let win, doc;
   let item1; // Auto lightboxable
   let item2; // Manually lightboxable
   let item3; // Not lightboxable
   let item4; // Auto lightboxable
 
-  describe('with manual lightboxing', () => {
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
+
+  function getAmpLightboxViewer(autoLightbox) {
+    toggleExperiment(win, 'amp-lightbox-viewer', true);
+    if (autoLightbox) {
+      toggleExperiment(win, 'amp-lightbox-viewer-auto', true);
+    } else {
+      toggleExperiment(win, 'amp-lightbox-viewer-auto', false);
+    }
+    setUpDocument(doc, autoLightbox);
+    const viewer = doc.createElement('amp-lightbox-viewer');
+    viewer.setAttribute('layout', 'nodisplay');
+    installLightboxManager(win);
+    doc.body.appendChild(viewer);
+    return viewer.build()
+        .then(() => viewer.layoutCallback())
+        .then(() => {
+          const impl = viewer.implementation_;
+          // stub vsync and resource function
+          sandbox.stub(impl.vsync_,
+              'mutate', callback => {
+                callback();
+              });
+          sandbox.stub(impl.vsync_,
+              'mutatePromise', callback => {
+                callback();
+                return Promise.resolve();
+              });
+          sandbox.stub(impl.resources_,
+              'requireLayout', () => {
+                return Promise.resolve();
+              });
+        })
+        .then(() => viewer);
+  }
+
+  // TODO (cathyzhu): rewrite these tests after finalizing lightbox API.
+  describe.skip('with manual lightboxing', function() {
     runTests(/*autoLightbox*/false);
   });
 
-  describe('with auto lightboxing', () => {
+  describe('with auto lightboxing', function() {
     runTests(/*autoLightbox*/true);
   });
 
   function runTests(autoLightbox) {
-    it('should build', () => {
-      return getAmpLightboxViewer(autoLightbox).then(viewer => {
+    it('should build on open', () => {
+      let viewer = null;
+      return getAmpLightboxViewer(autoLightbox).then(v => {
+        viewer = v;
+        const impl = viewer.implementation_;
+        expect(viewer.style.display).to.equal('none');
+        return impl.open_(item1);
+      }).then(() => {
         const container = viewer.querySelector('.i-amphtml-lbv');
         expect(container).to.exist;
 
         const mask = viewer.querySelector('.i-amphtml-lbv-mask');
         expect(mask).to.exist;
 
+        const topBar = viewer.querySelector('.i-amphtml-lbv-top-bar');
+        expect(topBar).to.exist;
+
+        const btns = viewer.querySelectorAll(
+            '.i-amphtml-lbv-top-bar > [role=button]');
+        expect(btns.length).to.equal(3);
+        expect(btns[0].className).to.equal('amp-lbv-button-close');
+        expect(btns[1].className).to.equal('amp-lbv-button-gallery');
+        expect(btns[2].className).to.equal('amp-lbv-button-slide');
+
+        const descriptionBox = viewer.querySelector('.i-amphtml-lbv-desc-box');
+        expect(descriptionBox).to.exist;
+
+        const descriptionTextArea = viewer.querySelector(
+            '.i-amphtml-lbv-desc-text');
+        expect(descriptionTextArea).to.exist;
+
         const carousel = viewer.querySelector('amp-carousel');
         expect(carousel).to.exist;
-
-        const btns = viewer.querySelectorAll('.i-amphtml-lbv > [role=button]');
-        expect(btns.length).to.equal(2);
-        expect(btns[0].className).to.equal('amp-lbv-button-close');
-        expect(btns[1].className).to.equal(
-            'amp-lbv-button-gallery');
       });
     });
 
     it('should make lightbox viewer visible on activate', () => {
       return getAmpLightboxViewer(autoLightbox).then(viewer => {
         const impl = viewer.implementation_;
-        impl.vsync_.mutate = function(callback) {
-          callback();
-        };
         expect(viewer.style.display).to.equal('none');
-        return impl.activate({source: item1}).then(() => {
+        return impl.open_(item1).then(() => {
           expect(viewer.style.display).to.equal('');
         });
       });
@@ -71,11 +129,8 @@ describe('amp-lightbox-viewer', () => {
     it('should make lightbox viewer invisible on close', () => {
       return getAmpLightboxViewer(autoLightbox).then(viewer => {
         const impl = viewer.implementation_;
-        impl.vsync_.mutate = function(callback) {
-          callback();
-        };
         expect(viewer.style.display).to.equal('none');
-        return impl.activate({source: item1}).then(() => {
+        return impl.open_(item1).then(() => {
         }).then(() => {
           expect(viewer.style.display).to.equal('');
           return impl.close_();
@@ -89,10 +144,7 @@ describe('amp-lightbox-viewer', () => {
     it.skip('should show detailed description correctly', () => {
       return getAmpLightboxViewer(autoLightbox).then(viewer => {
         const impl = viewer.implementation_;
-        impl.vsync_.mutate = function(callback) {
-          callback();
-        };
-        return impl.activate({source: item1}).then(() => {
+        return impl.open_(item1).then(() => {
           const container = viewer.querySelector('.i-amphtml-lbv');
           const descriptionBox = viewer.querySelector(
               '.i-amphtml-lbv-desc-box');
@@ -124,17 +176,14 @@ describe('amp-lightbox-viewer', () => {
     it('should create gallery with thumbnails', () => {
       return getAmpLightboxViewer(autoLightbox).then(viewer => {
         const impl = viewer.implementation_;
-        impl.vsync_.mutate = function(callback) {
-          callback();
-        };
-        return impl.activate({source: item1}).then(() => {
+        return impl.open_(item1).then(() => {
           impl.openGallery_();
           const container = viewer.querySelector('.i-amphtml-lbv');
-          expect(container.getAttribute('gallery-view')).to.equal('');
+          expect(container.hasAttribute('gallery-view')).to.be.true;
           const gallery = viewer.querySelector('.i-amphtml-lbv-gallery');
           expect(gallery.childNodes).to.have.length(3);
           gallery.childNodes[1].dispatchEvent(new Event('click'));
-          expect(container.getAttribute('gallery-view')).to.be.null;
+          expect(container.hasAttribute('gallery-view')).to.be.false;
         });
       });
     });
@@ -147,6 +196,7 @@ describe('amp-lightbox-viewer', () => {
       img.setAttribute('width', '200');
       img.setAttribute('height', '200');
       img.setAttribute('src', 'someimage');
+      img.updateLayoutBox({top: 0, left: 0, width: 200, height: 200});
       return img;
     };
 
@@ -177,21 +227,10 @@ describe('amp-lightbox-viewer', () => {
     container.appendChild(item4);
 
     doc.body.appendChild(container);
-  }
 
-  function getAmpLightboxViewer(autoLightbox) {
-    return createIframePromise().then(iframe => {
-      toggleExperiment(iframe.win, 'amp-lightbox-viewer', true);
-      if (autoLightbox) {
-        toggleExperiment(iframe.win, 'amp-lightbox-viewer-auto', true);
-      } else {
-        toggleExperiment(iframe.win, 'amp-lightbox-viewer-auto', false);
-      }
-      setUpDocument(iframe.doc, autoLightbox);
-      const viewer = iframe.doc.createElement('amp-lightbox-viewer');
-      viewer.setAttribute('layout', 'nodisplay');
-      installLightboxManager(iframe.win);
-      return iframe.addElement(viewer);
-    });
+    const resources = item1.getResources();
+    resources.getResourceForElement(item1).measure();
+    resources.getResourceForElement(item3).measure();
+    resources.getResourceForElement(item4).measure();
   }
 });

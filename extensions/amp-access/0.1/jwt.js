@@ -24,8 +24,8 @@ import {tryParseJson} from '../../../src/json';
 
 /**
  * @typedef {{
- *   header: !JSONObject,
- *   payload: !JSONObject,
+ *   header: (?JsonObject|undefined),
+ *   payload: (?JsonObject|undefined),
  *   verifiable: string,
  *   sig: string,
  * }}
@@ -48,7 +48,7 @@ export class JwtHelper {
 
     /**
      * Might be `null` if the platform does not support Crypto Subtle.
-     * @const @private {?SubtleCrypto}
+     * @const @private {?webCrypto.SubtleCrypto}
      */
     this.subtle_ = win.crypto &&
         (win.crypto.subtle || win.crypto.webkitSubtle) || null;
@@ -57,7 +57,7 @@ export class JwtHelper {
   /**
    * Decodes JWT token and returns its payload.
    * @param {string} encodedToken
-   * @return {!JSONObject}
+   * @return {?JsonObject|undefined}
    */
   decode(encodedToken) {
     return this.decodeInternal_(encodedToken).payload;
@@ -75,7 +75,7 @@ export class JwtHelper {
    * Decodes HWT token and verifies its signature.
    * @param {string} encodedToken
    * @param {!Promise<string>} pemPromise
-   * @return {!Promise<!JSONObject>}
+   * @return {!Promise<!JsonObject>}
    */
   decodeAndVerify(encodedToken, pemPromise) {
     if (!this.subtle_) {
@@ -93,9 +93,9 @@ export class JwtHelper {
         const sig = base64UrlDecodeToBytes(decoded.sig);
         return this.subtle_.verify(
           /* options */ {name: 'RSASSA-PKCS1-v1_5'},
-          key,
-          sig,
-          stringToBytes(decoded.verifiable)
+            key,
+            sig,
+            stringToBytes(decoded.verifiable)
         );
       }).then(isValid => {
         if (isValid) {
@@ -136,18 +136,18 @@ export class JwtHelper {
 
   /**
    * @param {!Promise<string>} pemPromise
-   * @return {!Promise<!CryptoKey>}
+   * @return {!Promise<!webCrypto.CryptoKey>}
    */
   importKey_(pemPromise) {
     return pemPromise.then(pem => {
       return this.subtle_.importKey(
-        /* format */ 'spki',
-        pemToBytes(pem),
-        /* algo options */ {
-          name: 'RSASSA-PKCS1-v1_5',
-          hash: {name: 'SHA-256'},
-        },
-        /* extractable */ false,
+          /* format */ 'spki',
+          pemToBytes(pem),
+          /* algo options */ {
+            name: 'RSASSA-PKCS1-v1_5',
+            hash: {name: 'SHA-256'},
+          },
+          /* extractable */ false,
         /* uses */ ['verify']);
     });
   }

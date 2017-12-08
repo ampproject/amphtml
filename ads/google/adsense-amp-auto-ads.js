@@ -16,6 +16,7 @@
 
 
 import {
+  /* eslint no-unused-vars: 0 */ ExperimentInfo,
   randomlySelectUnsetExperiments,
   getExperimentBranch,
 } from '../../src/experiments';
@@ -53,7 +54,7 @@ const ADSENSE_AMP_AUTO_ADS_EXPERIMENT_INFO = {
  * @return {?string}
  */
 export function getAdSenseAmpAutoAdsExpBranch(win) {
-  const experiments = {};
+  const experiments = /** @type {!Object<string, !ExperimentInfo>} */ ({});
   experiments[ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME] =
       ADSENSE_AMP_AUTO_ADS_EXPERIMENT_INFO;
   randomlySelectUnsetExperiments(win, experiments);

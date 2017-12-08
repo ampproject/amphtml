@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import {installCryptoService} from '../../src/service/crypto-impl';
+import {Services} from '../../src/services';
 import {
   isCanary,
   isExperimentOn,
+  isOriginExperimentOn,
   experimentToggles,
   toggleExperiment,
   resetExperimentTogglesForTesting,
@@ -24,6 +27,7 @@ import {
   RANDOM_NUMBER_GENERATORS,
   getExperimentBranch,
   randomlySelectUnsetExperiments,
+  getBinaryType,
 } from '../../src/experiments';
 import {createElementWithAttributes} from '../../src/dom';
 import * as sinon from 'sinon';
@@ -52,6 +56,48 @@ describe('experimentToggles', () => {
       // "v" should not appear here
     });
   });
+
+  it('should cache experiment toggles on window', () => {
+    const win = {
+      document: {
+        cookie: 'AMP_EXP=-exp3,exp4,exp5',
+      },
+      AMP_CONFIG: {
+        exp1: 1,
+        exp2: 0,
+        exp3: 1,
+        exp4: 0,
+        v: '12345667',
+      },
+    };
+    resetExperimentTogglesForTesting(window);
+    expect(experimentToggles(win)).to.deep.equal({
+      exp1: true,
+      exp2: false,
+      exp3: false, // overridden in cookie
+      exp4: true, // overridden in cookie
+      exp5: true,
+      // "v" should not appear here
+    });
+
+    expect(win['__AMP__EXPERIMENT_TOGGLES']).to.deep.equal({
+      exp1: true,
+      exp2: false,
+      exp3: false,
+      exp4: true,
+      exp5: true,
+    });
+
+    win['__AMP__EXPERIMENT_TOGGLES'].exp1 = false;
+
+    expect(experimentToggles(win)).to.deep.equal({
+      exp1: false,
+      exp2: false,
+      exp3: false,
+      exp4: true,
+      exp5: true,
+    });
+  });
 });
 
 describe('isExperimentOn', () => {
@@ -67,6 +113,7 @@ describe('isExperimentOn', () => {
       AMP_CONFIG: {},
       location: {
         hash: '',
+        href: 'http://foo.bar',
       },
     };
   });
@@ -76,7 +123,7 @@ describe('isExperimentOn', () => {
   });
 
   function expectExperiment(cookieString, experimentId) {
-    resetExperimentTogglesForTesting(window);
+    resetExperimentTogglesForTesting(win);
     win.document.cookie = cookieString;
     return expect(isExperimentOn(win, experimentId));
   }
@@ -388,6 +435,7 @@ describe('toggleExperiment', () => {
       },
       location: {
         hostname: 'test.test',
+        href: 'http://foo.bar',
       },
     };
 
@@ -397,21 +445,21 @@ describe('toggleExperiment', () => {
     expect(toggleExperiment(win, 'e1')).to.be.false;
     expect(isExperimentOn(win, 'e1')).to.be.false;
 
-    // The new setting should be persisted in cookie, so cache reset should not
-    // affect its status.
-    resetExperimentTogglesForTesting(window);
-    expect(isExperimentOn(win, 'e1')).to.be.false;
+    // Calling cache reset testing function clears cookies on window object
+    // it is called with.
+    resetExperimentTogglesForTesting(win);
+    expect(isExperimentOn(win, 'e1')).to.be.true;
 
     // Now let's explicitly toggle to true
     expect(toggleExperiment(win, 'e1', true)).to.be.true;
     expect(isExperimentOn(win, 'e1')).to.be.true;
-    resetExperimentTogglesForTesting(window);
+    resetExperimentTogglesForTesting(win);
     expect(isExperimentOn(win, 'e1')).to.be.true;
 
     // Toggle transiently should still work
     expect(toggleExperiment(win, 'e1', false, true)).to.be.false;
     expect(isExperimentOn(win, 'e1')).to.be.false;
-    resetExperimentTogglesForTesting(window); // cache reset should bring it back to true
+    resetExperimentTogglesForTesting(win); // cache reset should bring it back to true
     expect(isExperimentOn(win, 'e1')).to.be.true;
 
     // Sanity check, the global setting should never be changed.
@@ -517,6 +565,24 @@ describe('isCanary', () => {
     expect(isCanary(win)).to.be.false;
     win.AMP_CONFIG.canary = 1;
     expect(isCanary(win)).to.be.true;
+  });
+});
+
+describe('getBinaryType', () => {
+  it('should return correct type', () => {
+    const win = {
+      AMP_CONFIG: {
+        type: 'production',
+      },
+    };
+    expect(getBinaryType(win)).to.equal('production');
+    win.AMP_CONFIG.type = 'canary';
+    expect(getBinaryType(win)).to.equal('canary');
+    delete win.AMP_CONFIG.type;
+    expect(getBinaryType(win)).to.equal('unknown');
+  });
+  it('should return "unknown"', () => {
+    expect(getBinaryType({})).to.equal('unknown');
   });
 });
 
@@ -793,3 +859,68 @@ describe('experiment branch tests', () => {
   });
 });
 
+describes.fakeWin('isOriginExperimentOn', {amp: false}, env => {
+  // Token enables experiment "foo" for origin "https://origin.com".
+  /*eslint "max-len": 0*/
+  const token = 'AAAAAFd7Im9yaWdpbiI6Imh0dHBzOi8vb3JpZ2luLmNvbSIsImV4cGVyaW1lbnQiOiJmb28iLCJleHBpcmF0aW9uIjoxLjc5NzY5MzEzNDg2MjMxNTdlKzMwOH0+0WnsFJFtFJzkrzqxid2h3jnFI2C7FTK+8iRYcU1r+9PZtnMPJCVCkNkxWGpXFZ6z2FwIa/hY4XDM//GJHr+2pdChx67wm6RIY1NDwcYqFbUrugEqWiT/2RviS9PPhtP6PKgUDI+0opQUt2ibXhsc1KynroAcGTaaxofmpnuMdj7vjGlWTF+6WCFYfAzqcLJB5a4+Drop9ZTEYRbRROMVROC8EGHwugeMfoNf3roCqaJydADQ/tSTY/fPZOlcwOtGW8GE4s/KlNyFaonjEYOROuLctJxYAqwIStQ4TdS7xfy70hsgVLCKnLeXIRJKN0eaJCkLy6BFbIrCH5FhjhbY';
+
+  let win;
+  let isPkcsAvailable;
+
+  beforeEach(() => {
+    win = env.win;
+    installCryptoService(win);
+    const crypto = Services.cryptoFor(win);
+    isPkcsAvailable = env.sandbox.stub(crypto, 'isPkcsAvailable').returns(true);
+  });
+
+  function setupMetaTagWith(token) {
+    const meta = win.document.createElement('meta');
+    meta.setAttribute('name', 'amp-experiment-token');
+    meta.setAttribute('content', token);
+    win.document.head.appendChild(meta);
+  }
+
+  it('should return false if no token is found', () => {
+    return expect(isOriginExperimentOn(win, 'foo', true))
+        .to.eventually.be.false;
+  });
+
+  it('should return false if crypto is unavailable', () => {
+    isPkcsAvailable.returns(false);
+
+    return expect(isOriginExperimentOn(win, 'foo', true))
+        .to.eventually.be.false;
+  });
+
+  it('should return false for missing token', () => {
+    setupMetaTagWith('');
+
+    return expect(isOriginExperimentOn(win, 'foo', true))
+        .to.eventually.be.false;
+  });
+
+  it('should return false if origin does not match', () => {
+    setupMetaTagWith(token);
+    win.location.href = 'https://not-origin.com';
+
+    return expect(isOriginExperimentOn(win, 'foo', true))
+        .to.eventually.be.false;
+  });
+
+  it('should return true for valid token with matching origin', () => {
+    setupMetaTagWith(token);
+    win.location.href = 'https://origin.com';
+
+    return expect(isOriginExperimentOn(win, 'foo', true))
+        .to.eventually.be.true;
+  });
+
+  it('should return false if requested experiment is not in config', () => {
+    setupMetaTagWith(token);
+    win.location.href = 'https://origin.com';
+
+    return expect(isOriginExperimentOn(win, 'bar', true))
+        .to.eventually.be.false;
+  });
+});

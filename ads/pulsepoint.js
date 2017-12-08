@@ -59,7 +59,7 @@ function headerBidding(global, data) {
         placement: data.slot,
         elementId: 'c',
       }],
-      done: function(targeting) {
+      done(targeting) {
         doubleclick(global, {
           width: data.width,
           height: data.height,

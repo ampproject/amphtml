@@ -18,25 +18,21 @@ import {
   EXPERIMENT_ATTRIBUTE,
   QQID_HEADER,
   isReportingEnabled,
+  getCorrelator,
 } from './utils';
 import {BaseLifecycleReporter, GoogleAdLifecycleReporter} from './performance';
-import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {
-    parseExperimentIds,
-    isInManualExperiment,
-} from './traffic-experiments';
+  getExperimentBranch,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
+import {dict} from '../../../src/utils/object';
 import {
-    ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
-    ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
-    ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
-    ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
+    ADSENSE_A4A_EXPERIMENT_NAME,
 } from '../../../extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
 import {
-    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
-    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH,
-    DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
-    DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH,
-} from '../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';  // eslint-disable-line max-len
+  DOUBLECLICK_A4A_EXPERIMENT_NAME,
+} from '../../../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config'; // eslint-disable-line max-len
 
 /**
  * An experiment config for controlling profiling.  Profiling has no branches:
@@ -51,80 +47,29 @@ import {
  * @const {!Object<string,!../../../src/experiments.ExperimentInfo>}
  */
 export const PROFILING_BRANCHES = {
-  a4aProfilingRate: {
+  'a4aProfilingRate': {
     isTrafficEligible: () => true,
     branches: ['unused', 'unused'],
   },
 };
 
 /**
- * Set of namespaces that can be set for lifecycle reporters.
- *
- * @enum {string}
- */
-export const ReporterNamespace = {
-  A4A: 'a4a',
-  AMP: 'amp',
-};
-
-/**
- * Check whether the element is in an experiment branch that is eligible for
- * monitoring.
- *
- * @param {!AMP.BaseElement} ampElement
- * @param {!string} namespace
- * @returns {boolean}
- */
-function isInReportableBranch(ampElement, namespace) {
-  // Handle the possibility of multiple eids on the element.
-  const eids = parseExperimentIds(
-      ampElement.element.getAttribute(EXPERIMENT_ATTRIBUTE));
-  const reportableA4AEids = {
-    [ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment]: 1,
-    [ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment]: 1,
-    [ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment]: 1,
-    [ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment]: 1,
-    [DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment]: 1,
-    [DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.experiment]: 1,
-    [DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment]: 1,
-    [DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.experiment]: 1,
-  };
-  const reportableControlEids = {
-    [ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control]: 1,
-    [ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control]: 1,
-    [ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control]: 1,
-    [ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control]: 1,
-    [DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control]: 1,
-    [DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_PRE_LAUNCH.control]: 1,
-    [DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control]: 1,
-    [DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES_POST_LAUNCH.control]: 1,
-  };
-  switch (namespace) {
-    case ReporterNamespace.A4A:
-      return eids.some(x => { return x in reportableA4AEids; }) ||
-          isInManualExperiment(ampElement.element);
-    case ReporterNamespace.AMP:
-      return eids.some(x => { return x in reportableControlEids; });
-    default:
-      return false;
-  }
-}
-
-/**
  * @param {!AMP.BaseElement} ampElement The element on whose lifecycle this
  *    reporter will be reporting.
- * @param {string} namespace
  * @param {number|string} slotId A unique numeric identifier in the page for
  *    the given element's slot.
  * @return {!./performance.BaseLifecycleReporter}
  * @visibleForTesting
  */
-export function getLifecycleReporter(ampElement, namespace, slotId) {
-  randomlySelectUnsetExperiments(ampElement.win, PROFILING_BRANCHES);
+export function getLifecycleReporter(ampElement, slotId) {
+  const win = ampElement.win;
+  randomlySelectUnsetExperiments(win, PROFILING_BRANCHES);
   if (isReportingEnabled(ampElement) &&
-      isInReportableBranch(ampElement, namespace)) {
-    return new GoogleAdLifecycleReporter(ampElement.win, ampElement.element,
-      namespace, Number(slotId));
+      (!!getExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME) ||
+       !!getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME))) {
+    setupPageLoadMetricsReporter_(ampElement);
+    return new GoogleAdLifecycleReporter(
+      win, ampElement.element, Number(slotId));
   } else {
     return new BaseLifecycleReporter();
   }
@@ -137,15 +82,11 @@ export function getLifecycleReporter(ampElement, namespace, slotId) {
  * generates no outputs.
  *
  * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A|!../../../extensions/amp-ad/0.1/amp-ad-3p-impl.AmpAd3PImpl} baseInstance
- * @param {string=} opt_namespace  CSI ping namespace.  For example, a key
- *   of #ReporterNamespace.
  * @return {!./performance.BaseLifecycleReporter}
  */
-export function googleLifecycleReporterFactory(baseInstance, opt_namespace) {
-  const namespace = opt_namespace || ReporterNamespace.A4A;
-  const reporter =
-      (getLifecycleReporter(baseInstance, namespace,
-          baseInstance.element.getAttribute('data-amp-slot-index')));
+export function googleLifecycleReporterFactory(baseInstance) {
+  const reporter = getLifecycleReporter(
+      baseInstance, baseInstance.element.getAttribute('data-amp-slot-index'));
   reporter.setPingParameters({
     's': 'AD_SLOT_NAMESPACE',
     'dt': 'NAV_TIMING(navigationStart)',
@@ -169,7 +110,6 @@ export function googleLifecycleReporterFactory(baseInstance, opt_namespace) {
   return reporter;
 }
 
-
 /**
  * Sets reportable variables from ad response headers.
  *
@@ -189,4 +129,42 @@ export function setGoogleLifecycleVarsFromHeaders(headers, reporter) {
   pingParameters[qqidKey] = headers.get(QQID_HEADER);
   pingParameters[renderingMethodKey] = headers.get(renderingMethodHeader);
   reporter.setPingParameters(pingParameters);
+}
+
+function setupPageLoadMetricsReporter_(ampElement) {
+  const win = ampElement.win;
+  const correlator = getCorrelator(win);
+  win.ampAnalyticsPageLoadMetricsConfig =
+      win.ampAnalyticsPageLoadMetricsConfig || dict({
+        'requests': {
+          'fvt': 'https://csi.gstatic.com/csi?s=a4a' +
+          `&c=${correlator}&met.a4a=` +
+          /* TODO(jonkeller): Add remaining metrics commented-out below to cfg
+          'makeBodyVisible.${MBV_VALUE}~' +
+          */
+          'firstVisibleTime.${firstVisibleTime}'
+          /*
+          + 'firstContentfulPaint.${FCP_VALUE}~' +
+          'firstViewportReady.${FVR_VALUE}'
+          */
+          ,
+        },
+        'transport': {
+          'beacon': false,
+          'xhrpost': false,
+        },
+        'triggers': {
+          'iniLoad': {
+            'on': 'visible',
+            'request': 'fvt',
+            'selector': 'body',
+          },
+        },
+      });
+
+  // Load amp-analytics extensions
+  win.ampAnalyticsPageLoadMetricsElement =
+      win.ampAnalyticsPageLoadMetricsElement ||
+      insertAnalyticsElement(ampElement.element,
+          win.ampAnalyticsPageLoadMetricsConfig, true);
 }

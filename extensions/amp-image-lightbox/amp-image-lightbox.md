@@ -22,10 +22,6 @@ limitations under the License.
     <td>Allows for a “image lightbox” or similar experience where upon user interaction, an image expands to fill the viewport until it is closed again by the user.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-image-lightbox" src="https://cdn.ampproject.org/v0/amp-image-lightbox-0.1.js">&lt;/script></code></td>
   </tr>
@@ -38,6 +34,8 @@ limitations under the License.
     <td><a href="https://ampbyexample.com/components/amp-image-lightbox/">Annotated code example for amp-image-lightbox</a></td>
   </tr>
 </table>
+
+[TOC]
 
 ## Behavior
 
@@ -76,7 +74,7 @@ The `amp-image-lightbox-caption` class is also available to style the caption
 section.
 
 ## Actions
-The `amp-image-lightbox` exposes the following actions you can use [AMP on-syntax to trigger](../../../src/spec/amp-actions-and-events.md):
+The `amp-image-lightbox` exposes the following actions you can use [AMP on-syntax to trigger](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md):
 
 <table>
   <tr>
@@ -98,10 +96,14 @@ The `amp-image-lightbox` exposes the following actions you can use [AMP on-synta
 
 ## Attributes
 
-**layout**
+##### layout
 
 Must be set to `nodisplay`.
 
+##### data-close-button-aria-label
+
+Optional string used as ARIA label for close button.
+
 ## Validation
 
-See [amp-image-lightbox rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-image-lightbox/0.1/validator-amp-image-lightbox.protoascii) in the AMP validator specification.
+See [amp-image-lightbox rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-image-lightbox/validator-amp-image-lightbox.protoascii) in the AMP validator specification.

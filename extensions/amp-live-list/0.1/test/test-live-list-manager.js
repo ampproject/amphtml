@@ -14,47 +14,54 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-import {liveListManagerFor, LiveListManager} from '../live-list-manager';
-import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
-import {resetServiceForTesting} from '../../../../src/service';
-import {toggleExperiment} from '../../../../src/experiments';
-import {viewerForDoc} from '../../../../src/services';
+import {liveListManagerForDoc, LiveListManager} from '../live-list-manager';
+import {Services} from '../../../../src/services';
 
-describe('LiveListManager', () => {
+const XHR_BUFFER_SIZE = 2;
+
+describes.fakeWin('LiveListManager', {amp: true}, env => {
   const jitterOffset = 1000;
+  let win, doc;
+  let ampdoc;
   let manager;
-  let sandbox;
   let liveList;
-  let requests;
+  let xhrs;
   let clock;
   let viewer;
   let ready;
+  let sandbox;
 
   beforeEach(() => {
-    toggleExperiment(window, 'amp-live-list', true);
     sandbox = sinon.sandbox.create();
+    win = env.win;
+    doc = win.document;
+    ampdoc = env.ampdoc;
     const docReadyPromise = new Promise(resolve => { ready = resolve; });
     sandbox.stub(LiveListManager.prototype, 'whenDocReady_')
         .returns(docReadyPromise);
     clock = sandbox.useFakeTimers();
-    const mockXhr = sandbox.useFakeXMLHttpRequest().xhr;
-    requests = [];
-    mockXhr.onCreate = function(xhr) {
-      requests.push(xhr);
-    };
-    const ampdoc = new AmpDocSingle(window);
-    installViewerServiceForDoc(ampdoc);
-    viewer = viewerForDoc(ampdoc);
-    manager = liveListManagerFor(window);
+    xhrs = setUpMockXhrs(sandbox);
+    viewer = Services.viewerForDoc(ampdoc);
+    manager = liveListManagerForDoc(ampdoc);
     liveList = getLiveList({'data-sort-time': '1111'});
     sandbox.stub(liveList, 'getInterval', () => 5000);
   });
 
+  function setUpMockXhrs(sandbox) {
+    const mockXhr = sandbox.useFakeXMLHttpRequest();
+    const xhrs = [];
+    const xhrResolvers = [];
+    for (let i = 0; i < XHR_BUFFER_SIZE; i++) {
+      xhrs[i] = new Promise(resolve => xhrResolvers[i] = resolve);
+    }
+    let xhrCount = 0;
+    mockXhr.onCreate = function(xhr) {
+      xhrResolvers[xhrCount++](xhr);
+    };
+    return xhrs;
+  }
+
   afterEach(() => {
-    toggleExperiment(window, 'amp-live-list', false);
-    resetServiceForTesting(window, 'liveListManager');
     sandbox.restore();
   });
 
@@ -66,10 +73,11 @@ describe('LiveListManager', () => {
     }
 
     buildCallback() {
-      this.manager_ = liveListManagerFor(window);
+      this.manager_ = liveListManagerForDoc(ampdoc);
       this.updateTime_ = Number(this.element.getAttribute('data-sort-time'));
       this.manager_.register(this.element.getAttribute('id'), this);
     }
+
     getInterval() {
       return Number(this.element.getAttribute('data-poll-interval'));
     }
@@ -87,17 +95,18 @@ describe('LiveListManager', () => {
         this.element.setAttribute('disabled', '');
       }
     }
+
     getUpdateTime() {
       return this.updateTime_;
     }
   }
 
   function getLiveList(attrs = {}, opt_id) {
-    const el = document.createElement('amp-live-list');
+    const el = doc.createElement('amp-live-list');
     el.setAttribute('id', opt_id || 'id-1');
     el.setAttribute('data-max-items-per-page', '10');
-    const updateSlot = document.createElement('div');
-    const itemsSlot = document.createElement('div');
+    const updateSlot = doc.createElement('div');
+    const itemsSlot = doc.createElement('div');
     updateSlot.setAttribute('update', '');
     itemsSlot.setAttribute('items', '');
     el.appendChild(updateSlot);
@@ -118,7 +127,7 @@ describe('LiveListManager', () => {
     expect(manager.liveLists_['id-1']).to.equal(liveList);
   });
 
-  it('should start poller when document is ready', () => {
+  it('should start poller when doc is ready', () => {
     sandbox.stub(viewer, 'isVisible').returns(true);
     expect(manager.poller_).to.be.null;
     liveList.buildCallback();
@@ -159,7 +168,8 @@ describe('LiveListManager', () => {
       const tick = interval - jitterOffset;
       expect(manager.poller_.isRunning()).to.be.true;
       clock.tick(tick);
-      expect(requests[0].url).to.match(/amp_latest_update_time=2222/);
+      return xhrs[0].then(
+          xhr => expect(xhr.url).to.match(/amp_latest_update_time=2222/));
     });
   });
 
@@ -226,10 +236,10 @@ describe('LiveListManager', () => {
     return manager.whenDocReady_().then(() => {
       expect(manager.poller_.isRunning()).to.be.true;
 
-      const fromServer1 = document.createElement('div');
-      const fromServer1List1 = document.createElement('amp-live-list');
+      const fromServer1 = doc.createElement('div');
+      const fromServer1List1 = doc.createElement('amp-live-list');
       fromServer1List1.setAttribute('id', 'id-1');
-      const fromServer1List2 = document.createElement('amp-live-list');
+      const fromServer1List2 = doc.createElement('amp-live-list');
       fromServer1List2.setAttribute('id', 'id-2');
       fromServer1List2.setAttribute('disabled', '');
       fromServer1.appendChild(fromServer1List1);
@@ -245,8 +255,8 @@ describe('LiveListManager', () => {
       expect(liveList2.isEnabled()).to.be.false;
       expect(manager.poller_.isRunning()).to.be.true;
 
-      const fromServer2 = document.createElement('div');
-      const fromServer2List1 = document.createElement('amp-live-list');
+      const fromServer2 = doc.createElement('div');
+      const fromServer2List1 = doc.createElement('amp-live-list');
       fromServer2List1.setAttribute('id', 'id-1');
       fromServer2List1.setAttribute('disabled', '');
       fromServer2.appendChild(fromServer2List1);
@@ -272,10 +282,10 @@ describe('LiveListManager', () => {
     expect(liveList.isEnabled()).to.be.true;
     expect(liveList2.isEnabled()).to.be.false;
 
-    const fromServer1 = document.createElement('div');
-    const fromServer1List1 = document.createElement('amp-live-list');
+    const fromServer1 = doc.createElement('div');
+    const fromServer1List1 = doc.createElement('amp-live-list');
     fromServer1List1.setAttribute('id', 'id-1');
-    const fromServer1List2 = document.createElement('amp-live-list');
+    const fromServer1List2 = doc.createElement('amp-live-list');
     fromServer1List2.setAttribute('id', 'id-2');
     // We have to set this here so that it actually is disabled
     fromServer1List2.setAttribute('disabled', '');
@@ -290,12 +300,12 @@ describe('LiveListManager', () => {
     expect(updateSpy1).to.be.calledOnce;
     expect(updateSpy2).to.have.not.been.called;
 
-    const fromServer2 = document.createElement('div');
-    const fromServer2List1 = document.createElement('amp-live-list');
+    const fromServer2 = doc.createElement('div');
+    const fromServer2List1 = doc.createElement('amp-live-list');
     fromServer2List1.setAttribute('id', 'id-1');
     // No disabled attribute here which re-enables updates to
     // amp-live-list#id-2
-    const fromServer2List2 = document.createElement('amp-live-list');
+    const fromServer2List2 = doc.createElement('amp-live-list');
     fromServer2List2.setAttribute('id', 'id-2');
     fromServer2.appendChild(fromServer2List1);
     fromServer2.appendChild(fromServer2List2);
@@ -321,16 +331,22 @@ describe('LiveListManager', () => {
       expect(fetchSpy).to.have.not.been.called;
       clock.tick(tick);
       expect(fetchSpy).to.be.calledOnce;
-      requests[0].respond(200, {
-        'Content-Type': 'text/xml',
-      }, '<html></html>');
+      xhrs[0].then(
+          xhr => xhr.respond(
+              200, {
+                'Content-Type': 'text/xml',
+              },
+              '<html></html>'));
 
       return manager.poller_.lastWorkPromise_.then(() => {
         expect(manager.poller_.isRunning()).to.be.true;
         clock.tick(tick);
-        requests[1].respond(415, {
-          'Content-Type': 'text/xml',
-        }, '<html></html>');
+        xhrs[1].then(
+            xhr => xhr.respond(
+                415, {
+                  'Content-Type': 'text/xml',
+                },
+                '<html></html>'));
         expect(fetchSpy).to.have.callCount(2);
         expect(manager.poller_.backoffClock_).to.be.null;
         return manager.poller_.lastWorkPromise_.then(() => {
@@ -353,16 +369,22 @@ describe('LiveListManager', () => {
       expect(fetchSpy).to.have.not.been.called;
       clock.tick(tick);
       expect(fetchSpy).to.be.calledOnce;
-      requests[0].respond(200, {
-        'Content-Type': 'text/xml',
-      }, '<html></html>');
+      xhrs[0].then(
+          xhr => xhr.respond(
+              200, {
+                'Content-Type': 'text/xml',
+              },
+              '<html></html>'));
 
       return manager.poller_.lastWorkPromise_.then(() => {
         expect(manager.poller_.isRunning()).to.be.true;
         clock.tick(tick);
-        requests[1].respond(500, {
-          'Content-Type': 'text/xml',
-        }, '<html></html>');
+        xhrs[1].then(
+            xhr => xhr.respond(
+                500, {
+                  'Content-Type': 'text/xml',
+                },
+                '<html></html>'));
         expect(fetchSpy).to.have.callCount(2);
         expect(manager.poller_.backoffClock_).to.be.null;
         return manager.poller_.lastWorkPromise_.then(() => {
@@ -387,18 +409,24 @@ describe('LiveListManager', () => {
       clock.tick(tick);
       expect(fetchSpy).to.be.calledOnce;
       expect(manager.poller_.backoffClock_).to.be.null;
-      requests[0].respond(415, {
-        'Content-Type': 'text/xml',
-      }, '<html></html>');
+      xhrs[0].then(
+          xhr => xhr.respond(
+              415, {
+                'Content-Type': 'text/xml',
+              },
+              '<html></html>'));
       return manager.poller_.lastWorkPromise_.then(() => {
         expect(manager.poller_.isRunning()).to.be.true;
         expect(manager.poller_.backoffClock_).to.be.a('function');
         // tick 1 max initial backoff with random = 1
         clock.tick(700);
         expect(fetchSpy).to.have.callCount(2);
-        requests[1].respond(200, {
-          'Content-Type': 'text/xml',
-        }, '<html></html>');
+        xhrs[1].then(
+            xhr => xhr.respond(
+                200, {
+                  'Content-Type': 'text/xml',
+                },
+                '<html></html>'));
         return manager.poller_.lastWorkPromise_.then(() => {
           expect(manager.poller_.isRunning()).to.be.true;
           expect(manager.poller_.backoffClock_).to.be.null;
@@ -460,10 +488,11 @@ describe('LiveListManager', () => {
       expect(fetchSpy).to.have.not.been.called;
       clock.tick(tick);
       expect(fetchSpy).to.be.calledOnce;
-      expect(requests[0].url)
-          .to.match(/^www\.example\.com\/foo\/bar\?hello=world/);
-      expect(requests[0].url).to.match(/#dev=1/);
-      expect(requests[0].url).to.match(/amp_latest_update_time/);
+      return xhrs[0].then(xhr => {
+        expect(xhr.url).to.match(/^www\.example\.com\/foo\/bar\?hello=world/);
+        expect(xhr.url).to.match(/#dev=1/);
+        expect(xhr.url).to.match(/amp_latest_update_time/);
+      });
     });
   });
 
@@ -476,6 +505,7 @@ describe('LiveListManager', () => {
     doc.getElementsByTagName = () => {
       return [list1.element, list2.element];
     };
+    doc.querySelectorAll = function() {};
     list1.buildCallback();
     list2.buildCallback();
     expect(manager.latestUpdateTime_).to.equal(0);
@@ -498,15 +528,68 @@ describe('LiveListManager', () => {
       expect(fetchSpy).to.have.not.been.called;
       clock.tick(tick);
       expect(fetchSpy).to.be.calledOnce;
-      expect(requests[0].url).to.match(/amp_latest_update_time=1111/);
-      requests[0].respond(200, {
-        'Content-Type': 'text/xml',
-      }, '<html><amp-live-list id="id-1"></amp-live-list></html>');
+      xhrs[0].then(xhr => {
+        expect(xhr.url).to.match(/amp_latest_update_time=1111/);
+        xhr.respond(
+            200, {
+              'Content-Type': 'text/xml',
+            },
+            '<html><amp-live-list id="id-1"></amp-live-list></html>');
+      });
       return manager.poller_.lastWorkPromise_.then(() => {
         clock.tick(tick);
         expect(fetchSpy).to.have.callCount(2);
-        expect(requests[1].url).to.match(/amp_latest_update_time=2500/);
+        return xhrs[1].then(
+            xhr => expect(xhr.url).to.match(/amp_latest_update_time=2500/));
       });
     });
+  });
+});
+
+describes.realWin('install scripts', {
+  amp: true,
+  fakeRegisterElement: true,
+}, env => {
+  let manager;
+  let ampdoc;
+  let win;
+  let doc;
+  let extensions;
+
+  beforeEach(function() {
+    win = env.win;
+    doc = win.document;
+    ampdoc = env.ampdoc;
+    extensions = env.extensions;
+    manager = liveListManagerForDoc(ampdoc);
+  });
+
+  it('should install newly discovered script tags on xhr doc', () => {
+    // Emulate doc
+    const div = document.createElement('div');
+    const script1 = document.createElement('script');
+    const script2 = document.createElement('script');
+    script1.setAttribute('custom-element', 'amp-test');
+    script2.setAttribute('custom-template', 'amp-template');
+    div.appendChild(script1);
+    div.appendChild(script2);
+
+    expect(doc.head.querySelectorAll(
+        '[custom-element="amp-test"]')).to.have.length(0);
+    expect(extensions.extensions_['amp-test']).to.be.undefined;
+
+    expect(doc.head.querySelectorAll(
+        '[custom-template="amp-template"]')).to.have.length(0);
+    expect(extensions.extensions_['amp-template']).to.be.undefined;
+
+    manager.installExtensionsForDoc_(div);
+
+    expect(doc.head.querySelectorAll(
+        '[custom-element="amp-test"]')).to.have.length(1);
+    expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+
+    expect(doc.head.querySelectorAll(
+        '[custom-element="amp-template"]')).to.have.length(1);
+    expect(extensions.extensions_['amp-template'].scriptPresent).to.be.true;
   });
 });

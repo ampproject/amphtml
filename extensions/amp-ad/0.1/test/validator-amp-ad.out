@@ -1,1 +1,3 @@
-PASS
+FAIL
+amp-ad/0.1/test/validator-amp-ad.html:45:4 The tag 'amp-ad with data-multi-size attribute' may not appear as a descendant of tag 'amp-fx-flying-carpet'. (see https://www.ampproject.org/docs/reference/components/amp-ad) [AMP_TAG_PROBLEM]
+amp-ad/0.1/test/validator-amp-ad.html:49:4 The tag 'amp-embed with data-multi-size attribute' may not appear as a descendant of tag 'amp-fx-flying-carpet'. (see https://www.ampproject.org/docs/reference/components/amp-ad) [AMP_TAG_PROBLEM]

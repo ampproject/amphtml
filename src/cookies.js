@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {isProxyOrigin, parseUrl} from './url';
+import {
+  isProxyOrigin,
+  parseUrl,
+  tryDecodeUriComponent,
+} from './url';
 import {endsWith} from './string';
 import {urls} from './config';
 
@@ -42,8 +46,9 @@ export function getCookie(win, name) {
     if (eq == -1) {
       continue;
     }
-    if (decodeURIComponent(cookie.substring(0, eq).trim()) == name) {
-      return decodeURIComponent(cookie.substring(eq + 1).trim());
+    if (tryDecodeUriComponent(cookie.substring(0, eq).trim()) == name) {
+      const value = cookie.substring(eq + 1).trim();
+      return tryDecodeUriComponent(value, value);
     }
   }
   return null;
@@ -53,7 +58,8 @@ export function getCookie(win, name) {
  * This method should not be inlined to prevent TryCatch deoptimization.
  * NoInline keyword at the end of function name also prevents Closure compiler
  * from inlining the function.
- * @private
+ * @param {!Window} win
+ * @return {string}
  */
 function tryGetDocumentCookieNoInline(win) {
   try {
@@ -62,6 +68,7 @@ function tryGetDocumentCookieNoInline(win) {
     // Act as if no cookie is available. Exceptions can be thrown when
     // AMP docs are opened on origins that do not allow setting
     // cookies such as null origins.
+    return '';
   }
 }
 

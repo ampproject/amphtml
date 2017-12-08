@@ -20,6 +20,7 @@ import {
 } from '../../src/url';
 import {closest, openWindowDialog} from '../../src/dom';
 import {dev} from '../../src/log';
+import {dict} from '../../src/utils/object';
 import {urls} from '../../src/config';
 import {isProxyOrigin, isLocalhostOrigin, parseUrl} from '../../src/url';
 import {startsWith} from '../../src/string';
@@ -149,9 +150,9 @@ function navigateTo(win, a, url) {
   const target = (a.target || '_top').toLowerCase();
   const a2aAncestor = getA2AAncestor(win);
   if (a2aAncestor) {
-    a2aAncestor.win./*OK*/postMessage('a2a;' + JSON.stringify({
-      url,
-    }), a2aAncestor.origin);
+    a2aAncestor.win./*OK*/postMessage('a2a;' + JSON.stringify(dict({
+      'url': url,
+    })), a2aAncestor.origin);
     return;
   }
   openWindowDialog(win, url, target);
@@ -186,11 +187,19 @@ export function warmupDynamic(e) {
   if (!link || !link.eventualUrl) {
     return;
   }
-  const linkRel = /*OK*/document.createElement('link');
-  linkRel.rel = 'preload';
-  linkRel.setAttribute('as', 'document');
-  linkRel.href = link.eventualUrl;
-  getHeadOrFallback(e.target.ownerDocument).appendChild(linkRel);
+  // Preloading with empty as and newly specced value `fetch` meaning the same
+  // thing. `document` would be the right value, but this is not yet supported
+  // in browsers.
+  const linkRel0 = /*OK*/document.createElement('link');
+  linkRel0.rel = 'preload';
+  linkRel0.href = link.eventualUrl;
+  const linkRel1 = /*OK*/document.createElement('link');
+  linkRel1.rel = 'preload';
+  linkRel1.as = 'fetch';
+  linkRel1.href = link.eventualUrl;
+  const head = getHeadOrFallback(e.target.ownerDocument);
+  head.appendChild(linkRel0);
+  head.appendChild(linkRel1);
 }
 
 /**

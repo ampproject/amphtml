@@ -21,23 +21,10 @@ import {setStyles} from '../../src/style';
 import {getMultiSizeDimensions} from './utils';
 
 /**
- * @enum {number}
- * @private
- */
-const GladeExperiment = {
-  NO_EXPERIMENT: 0,
-  GLADE_CONTROL: 1,
-  GLADE_EXPERIMENT: 2,
-  GLADE_OPT_OUT: 3,
-};
-
-/**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function doubleclick(global, data) {
-  const experimentFraction = 0.1;
-
   // TODO: check mandatory fields
   validateData(data, [], [
     'slot', 'targeting', 'categoryExclusions',
@@ -54,159 +41,123 @@ export function doubleclick(global, data) {
       hid: global.context.pageViewId,
     };
   }
-
-  // Center the ad in the container.
-  const container = global.document.querySelector('#c');
-  setStyles(dev().assertElement(container), {
-    top: '50%',
-    left: '50%',
-    bottom: '',
-    right: '',
-    transform: 'translate(-50%, -50%)',
-  });
-
-  if (data.useSameDomainRenderingUntilDeprecated != undefined ||
-      data.multiSize) {
-    doubleClickWithGpt(global, data, GladeExperiment.GLADE_OPT_OUT);
-  } else {
-    const dice = Math.random();
-    const href = global.context.location.href;
-    if ((href.indexOf('google_glade=0') > 0 || dice < experimentFraction)
-        && href.indexOf('google_glade=1') < 0) {
-      doubleClickWithGpt(global, data, GladeExperiment.GLADE_CONTROL);
-    } else {
-      const exp = (dice < 2 * experimentFraction) ?
-        GladeExperiment.GLADE_EXPERIMENT : GladeExperiment.NO_EXPERIMENT;
-      doubleClickWithGlade(global, data, exp);
-    }
-  }
+  centerAd(global);
+  writeAdScript(global, data);
 }
 
 /**
  * @param {!Window} global
  * @param {!Object} data
- * @param {!GladeExperiment} gladeExperiment
  */
-function doubleClickWithGpt(global, data, gladeExperiment) {
-  const dimensions = [[
-    parseInt(data.overrideWidth || data.width, 10),
-    parseInt(data.overrideHeight || data.height, 10),
-  ]];
-
+function doubleClickWithGpt(global, data) {
   // Handle multi-size data parsing, validation, and inclusion into dimensions.
   const multiSizeDataStr = data.multiSize || null;
-  if (multiSizeDataStr) {
-    const primarySize = dimensions[0];
-    const primaryWidth = primarySize[0];
-    const primaryHeight = primarySize[1];
-
-    getMultiSizeDimensions(
-        multiSizeDataStr,
-        primaryWidth,
-        primaryHeight,
-        (data.multiSizeValidation || 'true') == 'true',
-        dimensions);
+  const primaryWidth = parseInt(data.overrideWidth || data.width, 10);
+  const primaryHeight = parseInt(data.overrideHeight || data.height, 10);
+  let dimensions;
+  if (multiSizeDataStr && (dimensions = getMultiSizeDimensions(
+      multiSizeDataStr,
+      primaryWidth,
+      primaryHeight,
+      (data.multiSizeValidation || 'true') == 'true'))) {
+    dimensions.unshift([primaryWidth, primaryHeight]);
+  } else {
+    dimensions = [[primaryWidth, primaryHeight]];
   }
 
-  loadScript(global, 'https://www.googletagservices.com/tag/js/gpt.js', () => {
-    global.googletag.cmd.push(() => {
-      const googletag = global.googletag;
-      const pubads = googletag.pubads();
-      const slot = googletag.defineSlot(data.slot, dimensions, 'c')
+  loadScript(
+      global, 'https://www.googletagservices.com/tag/js/gpt.js', () => {
+        global.googletag.cmd.push(() => {
+          const googletag = global.googletag;
+          const pubads = googletag.pubads();
+          const slot = googletag.defineSlot(data.slot, dimensions, 'c')
           .addService(pubads);
 
-      if (gladeExperiment === GladeExperiment.GLADE_CONTROL) {
-        pubads.markAsGladeControl();
-      } else if (gladeExperiment === GladeExperiment.GLADE_OPT_OUT) {
-        pubads.markAsGladeOptOut();
-      }
-
-      if (data['experimentId']) {
-        const experimentIdList = data['experimentId'].split(',');
-        pubads.forceExperiment = pubads.forceExperiment || function() {};
-        experimentIdList &&
-            experimentIdList.forEach(eid => pubads.forceExperiment(eid));
-      }
-
-      pubads.markAsAmp();
-      pubads.set('page_url', global.context.canonicalUrl);
-      pubads.setCorrelator(Number(getCorrelator(global)));
-      googletag.enableServices();
-
-      if (data.categoryExclusions) {
-        if (Array.isArray(data.categoryExclusions)) {
-          for (let i = 0; i < data.categoryExclusions.length; i++) {
-            slot.setCategoryExclusion(data.categoryExclusions[i]);
+          if (data['experimentId']) {
+            const experimentIdList = data['experimentId'].split(',');
+            pubads.forceExperiment = pubads.forceExperiment || (() => {});
+            (experimentIdList || [])
+                .forEach(eid => pubads.forceExperiment(eid));
           }
-        } else {
-          slot.setCategoryExclusion(data.categoryExclusions);
-        }
-      }
 
-      if (data.cookieOptions) {
-        pubads.setCookieOptions(data.cookieOptions);
-      }
+          pubads.markAsAmp();
+          pubads.set('page_url', global.context.canonicalUrl);
+          pubads.setCorrelator(Number(getCorrelator(global)));
+          googletag.enableServices();
 
-      if (data.tagForChildDirectedTreatment != undefined) {
-        pubads.setTagForChildDirectedTreatment(
-            data.tagForChildDirectedTreatment);
-      }
-
-      if (data.targeting) {
-        for (const key in data.targeting) {
-          slot.setTargeting(key, data.targeting[key]);
-        }
-      }
-
-      pubads.addEventListener('slotRenderEnded', event => {
-        const primaryInvSize = dimensions[0];
-        const pWidth = primaryInvSize[0];
-        const pHeight = primaryInvSize[1];
-        const returnedSize = event.size;
-        const rWidth = returnedSize ? returnedSize[0] : null;
-        const rHeight = returnedSize ? returnedSize[1] : null;
-
-        let creativeId = event.creativeId || '_backfill_';
-
-        // If the creative is empty, or either dimension of the returned size
-        // is larger than its counterpart in the primary size, then we don't
-        // want to render the creative.
-        if (event.isEmpty ||
-            returnedSize && (rWidth > pWidth || rHeight > pHeight)) {
-          global.context.noContentAvailable();
-          creativeId = '_empty_';
-        } else {
-          // We only want to call renderStart with a specific size if the
-          // returned creative size matches one of the multi-size sizes.
-          let newSize;
-          for (let i = 1; i < dimensions.length; i++) {
-            // dimensions[0] is the primary or overridden size.
-            if (dimensions[i][0] == rWidth && dimensions[i][1] == rHeight) {
-              newSize = {
-                width: rWidth,
-                height: rHeight,
-              };
-              break;
+          if (data.categoryExclusions) {
+            if (Array.isArray(data.categoryExclusions)) {
+              for (let i = 0; i < data.categoryExclusions.length; i++) {
+                slot.setCategoryExclusion(data.categoryExclusions[i]);
+              }
+            } else {
+              slot.setCategoryExclusion(data.categoryExclusions);
             }
           }
-          global.context.renderStart(newSize);
-        }
-        global.context.reportRenderedEntityIdentifier('dfp-' + creativeId);
-      });
 
-      // Exported for testing.
-      global.document.getElementById('c')['slot'] = slot;
-      googletag.display('c');
-    });
-  });
+          if (data.cookieOptions) {
+            pubads.setCookieOptions(data.cookieOptions);
+          }
+
+          if (data.tagForChildDirectedTreatment != undefined) {
+            pubads.setTagForChildDirectedTreatment(
+                data.tagForChildDirectedTreatment);
+          }
+
+          if (data.targeting) {
+            for (const key in data.targeting) {
+              slot.setTargeting(key, data.targeting[key]);
+            }
+          }
+
+          pubads.addEventListener('slotRenderEnded', event => {
+            const primaryInvSize = dimensions[0];
+            const pWidth = primaryInvSize[0];
+            const pHeight = primaryInvSize[1];
+            const returnedSize = event.size;
+            const rWidth = returnedSize ? returnedSize[0] : null;
+            const rHeight = returnedSize ? returnedSize[1] : null;
+
+            let creativeId = event.creativeId || '_backfill_';
+
+            // If the creative is empty, or either dimension of the returned size
+            // is larger than its counterpart in the primary size, then we don't
+            // want to render the creative.
+            if (event.isEmpty ||
+                returnedSize && (rWidth > pWidth || rHeight > pHeight)) {
+              global.context.noContentAvailable();
+              creativeId = '_empty_';
+            } else {
+              // We only want to call renderStart with a specific size if the
+              // returned creative size matches one of the multi-size sizes.
+              let newSize;
+              for (let i = 1; i < dimensions.length; i++) {
+                // dimensions[0] is the primary or overridden size.
+                if (dimensions[i][0] == rWidth && dimensions[i][1] == rHeight) {
+                  newSize = {
+                    width: rWidth,
+                    height: rHeight,
+                  };
+                  break;
+                }
+              }
+              global.context.renderStart(newSize);
+            }
+            global.context.reportRenderedEntityIdentifier('dfp-' + creativeId);
+          });
+
+          // Exported for testing.
+          global.document.getElementById('c')['slot'] = slot;
+          googletag.display('c');
+        });
+      });
 }
 
 /**
  * @param {!Window} global
  * @param {!Object} data
- * @param {!GladeExperiment} gladeExperiment
  */
-function doubleClickWithGlade(global, data, gladeExperiment) {
+function doubleClickWithGlade(global, data) {
   const requestHeight = parseInt(data.overrideHeight || data.height, 10);
   const requestWidth = parseInt(data.overrideWidth || data.width, 10);
 
@@ -224,9 +175,6 @@ function doubleClickWithGlade(global, data, gladeExperiment) {
   if (data.targeting) {
     jsonParameters.targeting = data.targeting;
   }
-  if (gladeExperiment === GladeExperiment.GLADE_EXPERIMENT) {
-    jsonParameters.gladeEids = '108809102';
-  }
   const expIds = data['experimentId'];
   if (expIds) {
     jsonParameters.gladeEids = jsonParameters.gladeEids ?
@@ -234,7 +182,7 @@ function doubleClickWithGlade(global, data, gladeExperiment) {
   }
 
 
-  const slot = global.document.querySelector('#c');
+  const slot = global.document.getElementById('c');
   slot.setAttribute('data-glade', '');
   slot.setAttribute('data-amp-ad', '');
   slot.setAttribute('data-ad-unit-path', data.slot);
@@ -264,4 +212,34 @@ function doubleClickWithGlade(global, data, gladeExperiment) {
  */
 function getCorrelator(global) {
   return makeCorrelator(global.context.clientId, global.context.pageViewId);
+}
+
+/**
+ * @param {!Window} global
+ */
+function centerAd(global) {
+  setStyles(dev().assertElement(global.document.getElementById('c')), {
+    top: '50%',
+    left: '50%',
+    bottom: '',
+    right: '',
+    transform: 'translate(-50%, -50%)',
+  });
+}
+
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function writeAdScript(global, data) {
+  if (data.useSameDomainRenderingUntilDeprecated != undefined
+      || data.multiSize || (
+          global.context && global.context.location &&
+            global.context.location.href &&
+            global.context.location.href.indexOf('google_glade=0') > 0 &&
+            global.context.location.href.indexOf('google_glade=1') < 0)) {
+    doubleClickWithGpt(global, data);
+  } else {
+    doubleClickWithGlade(global, data);
+  }
 }

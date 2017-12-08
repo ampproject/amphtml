@@ -15,8 +15,9 @@
  */
 
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getAttributesFromConfigObj} from './attributes';
-import {resourcesForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {
   closestByTag,
   createElementWithAttributes,
@@ -30,7 +31,7 @@ const TAG = 'amp-auto-ads';
  * TODO: Specify this via the configuration.
  * @const
  */
-const TARGET_AD_HEIGHT_PX = 100;
+const TARGET_AD_HEIGHT_PX = 250;
 
 /**
  * @enum {number}
@@ -83,18 +84,18 @@ INJECTORS[Position.LAST_CHILD] = (anchorElement, elementToInject) => {
 
 export class Placement {
   /**
-   * @param {!Window} win
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!../../../src/service/resources-impl.Resources} resources
    * @param {!Element} anchorElement
    * @param {!Position} position
    * @param {!function(!Element, !Element)} injector
-   * @param {!Object<string, string>} attributes
+   * @param {!JsonObject<string, string>} attributes
    * @param {!../../../src/layout-rect.LayoutMarginsChangeDef=} opt_margins
    */
-  constructor(win, resources, anchorElement, position, injector, attributes,
+  constructor(ampdoc, resources, anchorElement, position, injector, attributes,
       opt_margins) {
-    /** @const @private {!Window} */
-    this.win_ = win;
+    /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
 
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = resources;
@@ -108,7 +109,7 @@ export class Placement {
     /** @const @private {!function(!Element, !Element)} */
     this.injector_ = injector;
 
-    /** @const @private {!Object<string, string>} */
+    /** @const @private {!JsonObject<string, string>} */
     this.attributes_ = attributes;
 
     /**
@@ -164,7 +165,7 @@ export class Placement {
   }
 
   /**
-   * @param {!Object<string, string>} baseAttributes Any attributes to add to
+   * @param {!JsonObject<string, string>} baseAttributes Any attributes to add to
    *     injected <amp-ad>. Specific attributes will override defaults, but be
    *     overridden by placement specific attributes defined in the
    *     configuration.
@@ -182,39 +183,40 @@ export class Placement {
         this.injector_(this.anchorElement_, this.adElement_);
         return this.resources_.attemptChangeSize(this.adElement_,
             TARGET_AD_HEIGHT_PX, undefined, this.margins_)
-                .then(() => {
-                  this.state_ = PlacementState.PLACED;
-                  return this.state_;
-                }, () => {
-                  this.state_ = PlacementState.RESIZE_FAILED;
-                  return this.state_;
-                });
+            .then(() => {
+              this.state_ = PlacementState.PLACED;
+              return this.state_;
+            }, () => {
+              this.state_ = PlacementState.RESIZE_FAILED;
+              return this.state_;
+            });
       });
     });
   }
 
   /**
-   * @param {!Object<string, string>} baseAttributes
+   * @param {!JsonObject<string, string>} baseAttributes
    * @return {!Element}
    * @private
    */
   createAdElement_(baseAttributes) {
-    const attributes = Object.assign({
+    const attributes = /** @type {!JsonObject} */ (Object.assign(dict({
       'layout': 'fixed-height',
       'height': '0',
       'class': 'i-amphtml-layout-awaiting-size',
-    }, baseAttributes, this.attributes_);
+    }), baseAttributes, this.attributes_));
     return createElementWithAttributes(
-        this.win_.document, 'amp-ad', attributes);
+        this.ampdoc.win.document, 'amp-ad', attributes);
   }
 }
 
+
 /**
- * @param {!Window} win
- * @param {!JSONType} configObj
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!JsonObject} configObj
  * @return {!Array<!Placement>}
  */
-export function getPlacementsFromConfigObj(win, configObj) {
+export function getPlacementsFromConfigObj(ampdoc, configObj) {
   const placementObjs = configObj['placements'];
   if (!placementObjs) {
     user().warn(TAG, 'No placements in config');
@@ -222,19 +224,20 @@ export function getPlacementsFromConfigObj(win, configObj) {
   }
   const placements = [];
   placementObjs.forEach(placementObj => {
-    getPlacementsFromObject(win, placementObj, placements);
+    getPlacementsFromObject(ampdoc, placementObj, placements);
   });
   return placements;
 }
 
+
 /**
  * Validates that the placementObj represents a valid placement and if so
  * constructs and returns an instance of the Placement class for it.
- * @param {!Window} win
- * @param {!Object} placementObj
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!JsonObject} placementObj
  * @param {!Array<!Placement>} placements
  */
-function getPlacementsFromObject(win, placementObj, placements) {
+function getPlacementsFromObject(ampdoc, placementObj, placements) {
   const injector = INJECTORS[placementObj['pos']];
   if (!injector) {
     user().warn(TAG, 'No injector for position');
@@ -245,8 +248,7 @@ function getPlacementsFromObject(win, placementObj, placements) {
     user().warn(TAG, 'No anchor in placement');
     return;
   }
-  const anchorElements =
-      getAnchorElements(win.document.documentElement, anchor);
+  const anchorElements = getAnchorElements(ampdoc.getBody(), anchor);
   if (!anchorElements.length) {
     user().warn(TAG, 'No anchor element found');
     return;
@@ -267,10 +269,17 @@ function getPlacementsFromObject(win, placementObj, placements) {
       return;
     }
     const attributes = getAttributesFromConfigObj(placementObj);
-    placements.push(new Placement(win, resourcesForDoc(anchorElement),
-        anchorElement, placementObj['pos'], injector, attributes, margins));
+    placements.push(new Placement(
+        ampdoc,
+        Services.resourcesForDoc(anchorElement),
+        anchorElement,
+        placementObj['pos'],
+        injector,
+        attributes,
+        margins));
   });
 }
+
 
 /**
  * Looks up the element(s) addresses by the anchorObj.
@@ -312,6 +321,7 @@ function getAnchorElements(rootElement, anchorObj) {
   }
   return elements;
 }
+
 
 /**
  * @param {!Element} anchorElement

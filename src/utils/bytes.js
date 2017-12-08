@@ -15,7 +15,6 @@
  */
 
 import {dev} from '../log';
-import {toArray} from '../types';
 
 /**
  * Interpret a byte array as a UTF-8 string.
@@ -111,8 +110,32 @@ export function stringToBytes(str) {
  * @return {string}
  */
 export function bytesToString(bytes) {
-  return String.fromCharCode.apply(String, toArray(bytes));
+  // Intentionally avoids String.fromCharCode.apply so we don't suffer a
+  // stack overflow. #10495, https://jsperf.com/bytesToString-2
+  const array = new Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) {
+    array[i] = String.fromCharCode(bytes[i]);
+  }
+  return array.join('');
 };
+
+/**
+ * Converts a 4-item byte array to an unsigned integer.
+ * Assumes bytes are big endian.
+ * @param {!Uint8Array} bytes
+ * @return {number}
+ */
+export function bytesToUInt32(bytes) {
+  if (bytes.length != 4) {
+    throw new Error('Received byte array with length != 4');
+  }
+  const val = (bytes[0] & 0xFF) << 24 |
+     (bytes[1] & 0xFF) << 16 |
+     (bytes[2] & 0xFF) << 8 |
+     (bytes[3] & 0xFF);
+  // Convert to unsigned.
+  return val >>> 0;
+}
 
 /**
  * Generate a random bytes array with specific length using

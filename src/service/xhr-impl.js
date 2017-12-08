@@ -14,16 +14,23 @@
  * limitations under the License.
  */
 
+import {isFormDataWrapper} from '../form-data-wrapper';
+import {Services} from '../services';
 import {dev, user} from '../log';
 import {registerServiceBuilder, getService} from '../service';
 import {
   getSourceOrigin,
   getCorsUrl,
+  getWinOrigin,
   parseUrl,
+  serializeQueryString,
 } from '../url';
-import {isArray, isObject, isFormData} from '../types';
+import {parseJson} from '../json';
+import {isArray, isObject} from '../types';
 import {utf8EncodeSync} from '../utils/bytes';
-
+import {getMode} from '../mode';
+import {dict, map} from '../utils/object';
+import {fromIterator} from '../utils/array';
 
 /**
  * The "init" argument of the Fetch API. Currently, only "credentials: include"
@@ -45,24 +52,31 @@ import {utf8EncodeSync} from '../utils/bytes';
 export let FetchInitDef;
 
 /**
- * A custom error that encapsulates an XHR error message
- * with the corresponding response data.
+ * Special case for fetchJson
+ * @typedef {{
+ *   body: (!JsonObject|!FormData|undefined),
+ *   credentials: (string|undefined),
+ *   headers: (!Object|undefined),
+ *   method: (string|undefined),
+ *   requireAmpResponseSourceOrigin: (boolean|undefined),
+ *   ampCors: (boolean|undefined)
+ * }}
  */
-export class FetchError {
-  /**
-   * @param {!Error} error
-   * @param {!FetchResponse} response
-   * @param {boolean=} opt_retriable
-   * @param {?JSONType=} opt_responseJson
-   */
-  constructor(error, response, opt_retriable, opt_responseJson) {
-    this.error = error;
-    this.response = response;
-    this.retriable = opt_retriable;
-    this.responseJson = opt_responseJson;
-  }
-}
+export let FetchInitJsonDef;
 
+/**
+ * A record version of `XMLHttpRequest` that has all the necessary properties
+ * and methods of `XMLHttpRequest` to construct a `FetchResponse` from a
+ * serialized response returned by the viewer.
+ * @typedef {{
+ *   status: number,
+ *   statusText: string,
+ *   responseText: string,
+ *   responseXML: ?Document,
+ *   getResponseHeader: function(this:XMLHttpRequestDef, string): string,
+ * }}
+ */
+let XMLHttpRequestDef;
 
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
@@ -94,6 +108,11 @@ export class Xhr {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
+
+    const ampdocService = Services.ampdocServiceFor(win);
+    /** @private {?./ampdoc-impl.AmpDoc} */
+    this.ampdocSingle_ =
+        ampdocService.isSingleDoc() ? ampdocService.getAmpDoc() : null;
   }
 
   /**
@@ -106,6 +125,15 @@ export class Xhr {
    * @private
    */
   fetch_(input, init) {
+    if (!getMode().test &&
+        this.ampdocSingle_ &&
+        Math.random() < 0.01 &&
+        parseUrl(input).origin != this.win.location.origin &&
+        !Services.viewerForDoc(this.ampdocSingle_).hasBeenVisible()) {
+      dev().error('XHR', 'attempted to fetch %s before viewer was visible',
+          input);
+    }
+
     dev().assert(typeof input == 'string', 'Only URL supported: %s', input);
     // In particular, Firefox does not tolerate `null` values for
     // `credentials`.
@@ -113,13 +141,219 @@ export class Xhr {
     dev().assert(
         creds === undefined || creds == 'include' || creds == 'omit',
         'Only credentials=include|omit support: %s', creds);
-    // Fallback to xhr polyfill since `fetch` api does not support
-    // responseType = 'document'. We do this so we don't have to do any parsing
-    // and document construction on the UI thread which would be expensive.
-    if (init.responseType == 'document') {
-      return fetchPolyfill(input, init);
+
+    return this.maybeIntercept_(input, init).then(interceptorResponse => {
+      if (interceptorResponse) {
+        return interceptorResponse;
+      }
+
+      // After this point, both the native `fetch` and the `fetch` polyfill will
+      // expect a native `FormData` object in the `body` property, so the native
+      // `FormData` object needs to be unwrapped.
+      if (isFormDataWrapper(init.body)) {
+        init.body = init.body.getFormData();
+      }
+      // Fallback to xhr polyfill since `fetch` api does not support
+      // responseType = 'document'. We do this so we don't have to do any
+      // parsing and document construction on the UI thread which would be
+      // expensive.
+      if (init.responseType == 'document') {
+        return fetchPolyfill(input, init);
+      }
+      return (this.win.fetch || fetchPolyfill).apply(null, arguments);
+    });
+  }
+
+  /**
+   * Intercepts the XHR and proxies it through the viewer if necessary.
+   *
+   * XHRs are intercepted if all of the following are true:
+   * - The AMP doc is in single doc mode
+   * - The viewer has the `xhrInterceptor` capability
+   * - The Viewer is a trusted viewer or AMP is currently in developement mode
+   * - The AMP doc is opted-in for XHR interception (`<html>` tag has
+   *   `allow-xhr-interception` attribute)
+   *
+   * @param {string} input The URL of the XHR which may get intercepted.
+   * @param {!FetchInitDef} init The options of the XHR which may get
+   *     intercepted.
+   * @return {!Promise<!FetchResponse|!Response|undefined>}
+   *     A response returned by the interceptor if XHR is intercepted or
+   *     `Promise<undefined>` otherwise.
+   * @private
+   */
+  maybeIntercept_(input, init) {
+    if (!this.ampdocSingle_) {
+      return Promise.resolve();
     }
-    return (this.win.fetch || fetchPolyfill).apply(null, arguments);
+
+    const htmlElement = this.ampdocSingle_.getRootNode().documentElement;
+    const docOptedIn = htmlElement.hasAttribute('allow-xhr-interception');
+    if (!docOptedIn) {
+      return Promise.resolve();
+    }
+
+    const viewer = Services.viewerForDoc(this.ampdocSingle_);
+    if (!viewer.hasCapability('xhrInterceptor')) {
+      return Promise.resolve();
+    }
+
+    return viewer.isTrustedViewer().then(viewerTrusted => {
+      if (!viewerTrusted && !getMode(this.win).development) {
+        return;
+      }
+
+      const messagePayload = dict({
+        'originalRequest': this.toStructuredCloneable_(input, init),
+      });
+
+      return viewer.sendMessageAwaitResponse('xhr', messagePayload)
+          .then(response =>
+              this.fromStructuredCloneable_(response, init.responseType));
+    });
+  }
+
+  /**
+   * Serializes a fetch request so that it can be passed to `postMessage()`,
+   * i.e., can be cloned using the
+   * [structured clone algorithm](http://mdn.io/Structured_clone_algorithm).
+   *
+   * The request is serialized in the following way:
+   *
+   * 1. If the `init.body` is a `FormData`, set content-type header to
+   * `multipart/form-data` and transform `init.body` into an
+   * `!Array<!Array<string>>` holding the list of form entries, where each
+   * element in the array is a form entry (key-value pair) represented as a
+   * 2-element array.
+   *
+   * 2. Return a new object having properties `input` and the transformed
+   * `init`.
+   *
+   * The serialized request is assumed to be de-serialized in the following way:
+   *
+   * 1.If content-type header starts with `multipart/form-data`
+   * (case-insensitive), transform the entry array in `init.body` into a
+   * `FormData` object.
+   *
+   * 2. Pass `input` and transformed `init` to `fetch` (or the constructor of
+   * `Request`).
+   *
+   * Currently only `FormData` used in `init.body` is handled as it's the only
+   * type being used in AMP runtime that needs serialization. The `Headers` type
+   * also needs serialization, but callers should not be passing `Headers`
+   * object in `init`, as that fails `fetchPolyfill` on browsers that don't
+   * support fetch. Some serialization-needing types for `init.body` such as
+   * `ArrayBuffer` and `Blob` are already supported by the structured clone
+   * algorithm. Other serialization-needing types such as `URLSearchParams`
+   * (which is not supported in IE and Safari) and `FederatedCredentials` are
+   * not used in AMP runtime.
+   *
+   * @param {string} input The URL of the XHR to convert to structured
+   *     cloneable.
+   * @param {!FetchInitDef} init The options of the XHR to convert to structured
+   *     cloneable.
+   * @return {{input: string, init: !FetchInitDef}} The serialized structurally-
+   *     cloneable request.
+   * @private
+   */
+  toStructuredCloneable_(input, init) {
+    const newInit = Object.assign({}, init);
+    if (isFormDataWrapper(init.body)) {
+      newInit.headers = newInit.headers || {};
+      newInit.headers['Content-Type'] = 'multipart/form-data;charset=utf-8';
+      newInit.body = fromIterator(init.body.entries());
+    }
+    return {input, init: newInit};
+  }
+
+  /**
+   * De-serializes a fetch response that was made possible to be passed to
+   * `postMessage()`, i.e., can be cloned using the
+   * [structured clone algorithm](http://mdn.io/Structured_clone_algorithm).
+   *
+   * The response is assumed to be serialized in the following way:
+   *
+   * 1. Transform the entries in the headers of the response into an
+   * `!Array<!Array<string>>` holding the list of header entries, where each
+   * element in the array is a header entry (key-value pair) represented as a
+   * 2-element array. The header key is case-insensitive.
+   *
+   * 2. Include the header entry list and `status` and `statusText` properties
+   * of the response in as `headers`, `status` and `statusText` properties of
+   * `init`.
+   *
+   * 3. Include the body of the response serialized as string in `body`.
+   *
+   * 4. Return a new object having properties `body` and `init`.
+   *
+   * The response is de-serialized in the following way:
+   *
+   * 1. If the `Response` type is supported and `responseType` is not
+   * document, pass `body` and `init` directly to the constructor of `Response`.
+   *
+   * 2. Otherwise, populate a fake XHR object to pass to `FetchResponse` as if
+   * the response is returned by the fetch polyfill.
+   *
+   * 3. If `responseType` is `document`, also parse the body and populate
+   * `responseXML` as a `Document` type.
+   *
+   * @param {JsonObject|string|undefined} response The structurally-cloneable
+   *     response to convert back to a regular Response.
+   * @param {string|undefined} responseType The original response type used to
+   *     initiate the XHR.
+   * @return {!FetchResponse|!Response} The deserialized regular response.
+   * @private
+   */
+  fromStructuredCloneable_(response, responseType) {
+    user().assert(isObject(response), 'Object expected: %s', response);
+
+    const isDocumentType = responseType == 'document';
+    if (typeof this.win.Response === 'function' && !isDocumentType) {
+      // Use native `Response` type if available for performance. If response
+      // type is `document`, we must fall back to `FetchResponse` polyfill
+      // because callers would then rely on the `responseXML` property being
+      // present, which is not supported by the Response type.
+      return new this.win.Response(response['body'], response['init']);
+    }
+
+    const lowercasedHeaders = map();
+    const data = {
+      status: 200,
+      statusText: 'OK',
+      responseText: (response['body'] ? String(response['body']) : ''),
+      /**
+       * @param {string} name
+       * @return {string}
+       */
+      getResponseHeader(name) {
+        return lowercasedHeaders[String(name).toLowerCase()] || null;
+      },
+    };
+
+    if (response['init']) {
+      const init = response['init'];
+      if (isArray(init.headers)) {
+        init.headers.forEach(entry => {
+          const headerName = entry[0];
+          const headerValue = entry[1];
+          lowercasedHeaders[String(headerName).toLowerCase()] =
+              String(headerValue);
+        });
+      }
+      if (init.status) {
+        data.status = parseInt(init.status, 10);
+      }
+      if (init.statusText) {
+        data.statusText = String(init.statusText);
+      }
+    }
+
+    if (isDocumentType) {
+      data.responseXML =
+          new DOMParser().parseFromString(data.responseText, 'text/html');
+    }
+
+    return new FetchResponse(data);
   }
 
   /**
@@ -154,7 +388,7 @@ export class Xhr {
     }
     // For some same origin requests, add AMP-Same-Origin: true header to allow
     // publishers to validate that this request came from their own origin.
-    const currentOrigin = parseUrl(this.win.location.href).origin;
+    const currentOrigin = getWinOrigin(this.win);
     const targetOrigin = parseUrl(input).origin;
     if (currentOrigin == targetOrigin) {
       init['headers'] = init['headers'] || {};
@@ -170,53 +404,64 @@ export class Xhr {
         // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
         // ensure that it's equal to the current source origin.
         user().assert(allowSourceOriginHeader == sourceOrigin,
-              `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
+            `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
               ` equal to the current: ${allowSourceOriginHeader}` +
               ` vs ${sourceOrigin}`);
       } else if (init.requireAmpResponseSourceOrigin) {
         // If the `AMP-Access-Control-Allow-Source-Origin` header is not
         // returned but required, return error.
-        user().assert(false, `Response must contain the` +
+        user().assert(false, 'Response must contain the' +
             ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
       }
       return response;
     }, reason => {
-      user().assert(false, 'Fetch failed %s: %s', input,
-          reason && reason.message);
+      throw user().createExpectedError('XHR', 'Failed fetching' +
+          ` (${targetOrigin}/...):`, reason && reason.message);
     });
   }
 
   /**
-   * Fetches and constructs JSON object based on the fetch polyfill.
+   * Fetches a JSON response. Note this returns the response object, not the
+   * response's JSON. #fetchJson merely sets up the request to accept JSON.
    *
    * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
    *
    * See `fetchAmpCors_` for more detail.
    *
    * @param {string} input
-   * @param {?FetchInitDef=} opt_init
-   * @return {!Promise<!JSONType>}
+   * @param {?FetchInitJsonDef=} opt_init
+   * @param {boolean=} opt_allowFailure Allows non-2XX status codes to fulfill.
+   * @return {!Promise<!FetchResponse>}
    */
-  fetchJson(input, opt_init) {
+  fetchJson(input, opt_init, opt_allowFailure) {
     const init = setupInit(opt_init, 'application/json');
-    if (init.method == 'POST' && !isFormData(init.body)) {
+    if (init.method == 'POST' && !isFormDataWrapper(init.body)) {
       // Assume JSON strict mode where only objects or arrays are allowed
       // as body.
       dev().assert(
-        allowedJsonBodyTypes_.some(test => test(init.body)),
-        'body must be of type object or array. %s',
-        init.body
+          allowedJsonBodyTypes_.some(test => test(init.body)),
+          'body must be of type object or array. %s',
+          init.body
       );
 
-      init.headers['Content-Type'] = 'application/json;charset=utf-8';
-      init.body = JSON.stringify(init.body);
+      // Content should be 'text/plain' to avoid CORS preflight.
+      init.headers['Content-Type'] = init.headers['Content-Type'] ||
+          'text/plain;charset=utf-8';
+      const headerContentType = init.headers['Content-Type'];
+      // Cast is valid, because we checked that it is not form data above.
+      if (headerContentType === 'application/x-www-form-urlencoded') {
+        init.body =
+          serializeQueryString(/** @type {!JsonObject} */ (init.body));
+      } else {
+        init.body = JSON.stringify(/** @type {!JsonObject} */ (init.body));
+      }
     }
-    return this.fetch(input, init)
-        .then(response => response.json());
+    return this.fetch(input, init);
   }
 
   /**
-   * Fetches text based on the fetch polyfill.
+   * Fetches a text response. Note this returns the response object, not the
+   * response's text. #fetchText merely sets up the request to accept text.
    *
    * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
    *
@@ -224,17 +469,17 @@ export class Xhr {
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
-   * @return {!Promise<string>}
+   * @return {!Promise<!FetchResponse>}
    */
   fetchText(input, opt_init) {
-    const init = setupInit(opt_init, 'text/plain');
-    return this.fetch(input, init)
-        .then(response => response.text());
+    return this.fetch(input, setupInit(opt_init, 'text/plain'));
   }
 
   /**
    * Creates an XHR request with responseType=document
-   * and returns the `FetchResponse` object.
+   * and returns a promise for the initialized `Document`.
+   * Note this does not return a `Response`, since this is not a standard
+   * Fetch response type.
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
@@ -300,10 +545,10 @@ function normalizeMethod_(method) {
   method = method.toUpperCase();
 
   dev().assert(
-    allowedMethods_.includes(method),
-    'Only one of %s is currently allowed. Got %s',
-    allowedMethods_.join(', '),
-    method
+      allowedMethods_.includes(method),
+      'Only one of %s is currently allowed. Got %s',
+      allowedMethods_.join(', '),
+      method
   );
 
   return method;
@@ -426,28 +671,18 @@ function isRetriable(status) {
  * @private Visible for testing
  */
 export function assertSuccess(response) {
-  return new Promise((resolve, reject) => {
-    const status = response.status;
-    if (status < 200 || status >= 300) {
-      const retriable = isRetriable(status);
-      const err = new FetchError(
-          user().createError(`HTTP error ${status}`), response, retriable);
-      const contentType = response.headers.get('Content-Type') || '';
-      if (contentType.split(';')[0] == 'application/json') {
-        response.json().then(json => {
-          err.responseJson = json;
-          reject(err);
-        }, () => {
-          // Ignore a failed json parsing and just throw the error without
-          // setting responseJson.
-          reject(err);
-        });
-      } else {
-        reject(err);
-      }
-    } else {
-      resolve(response);
+  return new Promise(resolve => {
+    if (response.ok) {
+      return resolve(response);
     }
+
+    const {status} = response;
+    const err = user().createError(`HTTP error ${status}`);
+    err.retriable = isRetriable(status);
+    // TODO(@jridgewell, #9448): Callers who need the response should
+    // skip processing.
+    err.response = response;
+    throw err;
   });
 }
 
@@ -459,20 +694,26 @@ export function assertSuccess(response) {
  */
 export class FetchResponse {
   /**
-   * @param {!XMLHttpRequest|!XDomainRequest} xhr
+   * @param {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} xhr
    */
   constructor(xhr) {
-    /** @private @const {!XMLHttpRequest|!XDomainRequest} */
+    /** @private @const {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} */
     this.xhr_ = xhr;
 
-    /** @type {number} */
+    /** @const {number} */
     this.status = this.xhr_.status;
+
+    /** @const {boolean} */
+    this.ok = this.status >= 200 && this.status < 300;
 
     /** @const {!FetchResponseHeaders} */
     this.headers = new FetchResponseHeaders(xhr);
 
     /** @type {boolean} */
     this.bodyUsed = false;
+
+    /** @type {?ReadableStream} */
+    this.body = null;
   }
 
   /**
@@ -506,11 +747,11 @@ export class FetchResponse {
 
   /**
    * Drains the response and returns the JSON object.
-   * @return {!Promise<!JSONType>}
+   * @return {!Promise<!JsonObject>}
    */
   json() {
-    return /** @type {!Promise<!JSONType>} */ (
-        this.drainText_().then(JSON.parse.bind(JSON)));
+    return /** @type {!Promise<!JsonObject>} */ (
+        this.drainText_().then(parseJson));
   }
 
   /**
@@ -546,10 +787,10 @@ export class FetchResponse {
  */
 export class FetchResponseHeaders {
   /**
-   * @param {!XMLHttpRequest|!XDomainRequest} xhr
+   * @param {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} xhr
    */
   constructor(xhr) {
-    /** @private @const {!XMLHttpRequest|!XDomainRequest} */
+    /** @private @const {!XMLHttpRequest|!XDomainRequest|!XMLHttpRequestDef} */
     this.xhr_ = xhr;
   }
 

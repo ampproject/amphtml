@@ -15,15 +15,20 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {user, dev} from '../../../src/log';
 import {
     installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {VideoEvents} from '../../../src/video-interface';
-import {videoManagerForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
-import {removeElement} from '../../../src/dom';
-import {listen} from '../../../src/event-helper';
+import {
+  removeElement,
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '../../../src/dom';
+import {getData, listen} from '../../../src/event-helper';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -87,6 +92,8 @@ class AmpBridPlayer extends AMP.BaseElement {
       feedType = 'video';
     } else if (this.element.hasAttribute('data-playlist')) {
       feedType = 'playlist';
+    } else if (this.element.hasAttribute('data-outstream')) {
+      feedType = 'outstream';
     }
 
     //Create iframe
@@ -115,8 +122,9 @@ class AmpBridPlayer extends AMP.BaseElement {
 
     this.feedID_ = user().assert(
         (this.element.getAttribute('data-video') ||
-        this.element.getAttribute('data-playlist')),
-        'Either the data-video or the data-playlist ' +
+        this.element.getAttribute('data-playlist') ||
+        this.element.getAttribute('data-outstream')),
+        'Either the data-video or the data-playlist or the data-outstream ' +
         'attributes must be specified for <amp-brid-player> %s',
         this.element);
 
@@ -125,7 +133,7 @@ class AmpBridPlayer extends AMP.BaseElement {
     });
 
     installVideoManagerForDoc(this.element);
-    videoManagerForDoc(this.element).register(this);
+    Services.videoManagerForDoc(this.element).register(this);
   }
 
   /** @override */
@@ -139,9 +147,9 @@ class AmpBridPlayer extends AMP.BaseElement {
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
-      this.win,
-      'message',
-      this. handleBridMessages_.bind(this)
+        this.win,
+        'message',
+        this. handleBridMessages_.bind(this)
     );
 
     this.element.appendChild(iframe);
@@ -177,24 +185,32 @@ class AmpBridPlayer extends AMP.BaseElement {
     const partnerID = this.partnerID_;
     const feedID = this.feedID_;
 
-    const placeholderFallback = this.win.document.createElement('amp-img');
-    placeholderFallback.setAttribute('src',
-        'https://cdn.brid.tv/live/default/defaultSnapshot.png');
-    placeholderFallback.setAttribute('referrerpolicy', 'origin');
-    placeholderFallback.setAttribute('layout', 'fill');
-    placeholderFallback.setAttribute('fallback', '');
-    placeholder.appendChild(placeholderFallback);
+    if (this.element.hasAttribute('data-video') ||
+    		this.element.hasAttribute('data-playlist')) {
 
-    placeholder.setAttribute('src',
-        'https://cdn.brid.tv/live/partners/' +
-        encodeURIComponent(partnerID) + '/snapshot/' +
-        encodeURIComponent(feedID) + '.jpg');
-    placeholder.setAttribute('layout', 'fill');
-    placeholder.setAttribute('placeholder', '');
-    placeholder.setAttribute('referrerpolicy', 'origin');
-    this.applyFillContent(placeholder);
+      const placeholderFallback = this.win.document.createElement('amp-img');
+      placeholderFallback.setAttribute('src',
+    		  'https://cdn.brid.tv/live/default/defaultSnapshot.png');
+      placeholderFallback.setAttribute('referrerpolicy', 'origin');
+      placeholderFallback.setAttribute('layout', 'fill');
+      placeholderFallback.setAttribute('fallback', '');
+      placeholder.appendChild(placeholderFallback);
 
-    return placeholder;
+      placeholder.setAttribute('src',
+    		  'https://cdn.brid.tv/live/partners/' +
+    		  encodeURIComponent(partnerID) + '/snapshot/' +
+    		  encodeURIComponent(feedID) + '.jpg');
+      placeholder.setAttribute('layout', 'fill');
+      placeholder.setAttribute('placeholder', '');
+      placeholder.setAttribute('referrerpolicy', 'origin');
+      this.applyFillContent(placeholder);
+
+      return placeholder;
+
+    } else {
+      return false;
+    }
+
   }
 
     /**
@@ -216,20 +232,21 @@ class AmpBridPlayer extends AMP.BaseElement {
 
   /** @private */
   handleBridMessages_(event) {
+    const eventData = /** @type {?string|undefined} */ (getData(event));
     if (event.origin !== 'https://services.brid.tv' ||
         event.source != this.iframe_.contentWindow ||
-        typeof event.data !== 'string' || event.data.indexOf('Brid') !== 0) {
+        typeof eventData !== 'string' || eventData.indexOf('Brid') !== 0) {
       return;
     }
 
-    const params = event.data.split('|');
+    const params = eventData.split('|');
 
     if (params[2] == 'trigger') {
       if (params[3] == 'ready') {
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
         this.playerReadyResolver_(this.iframe_);
       } else if (params[3] == 'play') {
-        this.element.dispatchCustomEvent(VideoEvents.PLAY);
+        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
       } else if (params[3] == 'pause') {
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
       }
@@ -284,6 +301,65 @@ class AmpBridPlayer extends AMP.BaseElement {
   hideControls() {
     // Not supported.
   }
-};
 
-AMP.registerElement('amp-brid-player', AmpBridPlayer);
+  /**
+   * @override
+   */
+  fullscreenEnter() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenEnter(dev().assertElement(this.iframe_));
+  }
+
+  /**
+   * @override
+   */
+  fullscreenExit() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenExit(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  isFullscreen() {
+    if (!this.iframe_) {
+      return false;
+    }
+    return isFullscreenElement(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
+  }
+
+  /** @override */
+  getCurrentTime() {
+    // Not supported.
+    return 0;
+  }
+
+  /** @override */
+  getDuration() {
+    // Not supported.
+    return 1;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // Not supported.
+    return [];
+  }
+}
+
+
+AMP.extension('amp-brid-player', '0.1', AMP => {
+  AMP.registerElement('amp-brid-player', AmpBridPlayer);
+});

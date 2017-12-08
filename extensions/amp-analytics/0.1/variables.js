@@ -15,7 +15,7 @@
  */
 
 import {isExperimentOn} from '../../../src/experiments';
-import {cryptoFor} from '../../../src/crypto';
+import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
@@ -68,6 +68,16 @@ export class ExpansionOptions {
     this.iterations = opt_iterations === undefined ? 2 : opt_iterations;
     /** @const {boolean} */
     this.noEncode = !!opt_noEncode;
+    this.freezeVars = {};
+  }
+
+  /**
+   * Freeze special variable name so that they don't get expanded.
+   * For example ${extraUrlParams}
+   * @param {string} str
+   */
+  freezeVar(str) {
+    this.freezeVars[str] = true;
   }
 }
 
@@ -213,6 +223,11 @@ export class VariableService {
       }
 
       const {name, argList} = this.getNameArgs_(initialValue);
+      if (options.freezeVars[name]) {
+        // Do nothing with frozen params
+        return match;
+      }
+
       const raw = options.vars[name] != null ? options.vars[name] : '';
 
       let p;
@@ -220,7 +235,7 @@ export class VariableService {
         // Expand string values further.
         p = this.expandTemplate(raw,
             new ExpansionOptions(options.vars, options.iterations - 1,
-                options.noEncode));
+                true /* noEncode */));
       } else {
         // Values can also be arrays and objects. Don't expand them.
         p = Promise.resolve(raw);
@@ -291,7 +306,7 @@ export class VariableService {
    * @return {!Promise<string>}
    */
   hashFilter_(value) {
-    return cryptoFor(this.win_).sha384Base64(value);
+    return Services.cryptoFor(this.win_).sha384Base64(value);
   }
 
   isFilterExperimentOn_() {

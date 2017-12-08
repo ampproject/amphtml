@@ -24,7 +24,7 @@
  * ```
  * phantomjs --ssl-protocol=any --ignore-ssl-errors=true --load-images=true \
  *     make-screenshot.js "http://localhost:8000" \
- *     "/examples/everything.amp.max.html" \
+ *     "/examples/everything.amp.html" \
  *     "everything.png" "iPhone6+"
  * ```
  */

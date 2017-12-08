@@ -22,10 +22,6 @@ limitations under the License.
     <td>Displays an embedded <a href="https://www.izlesene.com/">Izlesene</a> video.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-izlesene" src="https://cdn.ampproject.org/v0/amp-izlesene-0.1.js">&lt;/script></code></td>
   </tr>
@@ -34,6 +30,8 @@ limitations under the License.
     <td>fill, fixed, fixed-height, flex-item, responsive</td>
   </tr>
 </table>
+
+[TOC]
 
 ## Example
 
@@ -48,28 +46,28 @@ With responsive layout the width and height from the example should yield correc
 
 ## Attributes
 
-**data-videoid** (required)
+##### data-videoid (required)
 
 The ID of the Izlesene video, which can be found in the Izlesene video page URL. For example, in https://www.izlesene.com/video/yayin-yok/7221390, the video ID is `7221390`.
 
-**data-param-showrel** (optional)
+##### data-param-showrel (optional)
 
 This is an optional attribute that indicates whether to show related content. This functionality is not available for iOS devices.
 
 * Accepted values: `1` or `0`
 * Default value: `1`
 
-**data-param-showreplay** (optional)
+##### data-param-showreplay (optional)
 
 This is an optional attribute that indicates whether to show the replay button at the end of the content.
 
 * Accepted values: `1` or `0`
 * Default value: `1`
 
-**common attributes**
+##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Validation
 
-See [amp-izlesene rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-izlesene/0.1/validator-amp-izlesene.protoascii) in the AMP validator specification.
+See [amp-izlesene rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-izlesene/validator-amp-izlesene.protoascii) in the AMP validator specification.

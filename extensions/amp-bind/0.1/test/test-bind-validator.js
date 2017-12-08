@@ -26,12 +26,17 @@ describe('BindValidator', () => {
   describe('canBind()', () => {
     it('should allow binding to "class" for any element', () => {
       expect(val.canBind('DIV', 'class')).to.be.true;
-      expect(val.canBind('ANY-TAG-REAL-OR-FAKE', 'class')).to.be.true;
+      expect(val.canBind('FAKE-TAG', 'class')).to.be.true;
     });
 
     it('should allow binding to "text" for any elements', () => {
       expect(val.canBind('P', 'text')).to.be.true;
-      expect(val.canBind('ANY-TAG-REAL-OR-FAKE', 'text')).to.be.true;
+      expect(val.canBind('FAKE-TAG', 'text')).to.be.true;
+    });
+
+    it('should allow binding to ARIA attributes for any element', () => {
+      expect(val.canBind('P', 'aria-foo')).to.be.true;
+      expect(val.canBind('FAKE-TAG', 'aria-foo')).to.be.true;
     });
 
     it('should NOT allow binding to "style"', () => {
@@ -164,6 +169,9 @@ describe('BindValidator', () => {
 
   describe('AMP extensions', () => {
     it('should support width/height for all AMP elements', () => {
+      expect(val.canBind('AMP-IMG', 'width')).to.be.true;
+      expect(val.canBind('AMP-IMG', 'height')).to.be.true;
+
       expect(val.canBind('AMP-FOO', 'width')).to.be.true;
       expect(val.canBind('AMP-FOO', 'height')).to.be.true;
     });
@@ -190,6 +198,11 @@ describe('BindValidator', () => {
           'AMP-IMG',
           'srcset',
           /* eslint no-script-url: 0 */ 'javascript:alert(1)\n;')).to.be.false;
+    });
+
+    it('should support <amp-list>', () => {
+      expect(val.canBind('AMP-LIST', 'src')).to.be.true;
+      expect(val.canBind('AMP-LIST', 'state')).to.be.true;
     });
 
     it('should support <amp-selector>', () => {

@@ -50,28 +50,28 @@ You can think of AMP as a portable content format that enables content to be loa
 
 <table>
   <tr>
-    <th width="25%"><strong>Context</strong></th>
-    <th width="25%"><strong>Context #1: the publisher’s origin</strong></th>
-    <th width="25%"><strong>Context #2: an AMP cache</strong></th>
-    <th width="25%"><strong>Context #3: an AMP viewer</strong></th>
+    <th width="20%">Context</th>
+    <th width="20%">Can non-AMP pages be served from here?</th>
+    <th width="20%">Can AMP pages be served from here?</th>
+    <th>Sample URL</th>
   </tr>
   <tr>
-    <td width="25%"><strong>Can non-AMP pages be served from here?</strong></td>
-    <td width="25%">Yes</td>
-    <td width="25%">No</td>
-    <td width="25%">No</td>
+    <td>Publisher’s origin</td>
+    <td>Yes</td>
+    <td>Yes</td>
+    <td><code>https://example.com/article.amp.html</code></td>
   </tr>
-  <tr>
-    <td width="25%"><strong>Can AMP pages be served from here?</strong></td>
-    <td width="25%">Yes</td>
-    <td width="25%">Yes</td>
-    <td width="25%">Yes</td>
+   <tr>
+    <td>AMP cache</td>
+    <td>No</td>
+    <td>Yes</td>
+    <td><code>https://example-com.cdn.ampproject.org/s/example.com/article.amp.html</code></td>
   </tr>
-  <tr>
-    <td width="25%"><strong>Sample URL</strong></td>
-    <td width="25%"><code>https://example.com/article.amp.html</code></td>
-    <td width="25%"><code>https://example-com.cdn.ampproject.org/s/example.com/article.amp.html</code></td>
-    <td width="25%"><code>https://google.com/amp/s/example.com/article.amp.html</code></td>
+   <tr>
+    <td>AMP viewer</td>
+    <td>No</td>
+    <td>Yes</td>
+    <td><code>https://google.com/amp/s/example.com/article.amp.html</code></td>
   </tr>
 </table>
 
@@ -205,7 +205,7 @@ Turning now to AMP pages, let's look at how you can establish and transmit an id
 
 Through usage of features that require Client ID, AMP will do the “under the hood” work to generate and store client ID values and surface them to the features that require them. One of the principal features that can use AMP’s Client ID is [amp-analytics](https://www.ampproject.org/docs/reference/components/amp-analytics), which happens to be exactly what we’ll need to implement our analytics use case example.
 
-On AMP pages, construct an analytics-analytics ping containing the Client ID:
+On AMP pages, construct an amp-analytics ping containing the Client ID:
 
 <table>
   <tr>

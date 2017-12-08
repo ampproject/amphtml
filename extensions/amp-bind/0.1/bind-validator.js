@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {map} from '../../../src/utils/object';
+import {ownProperty} from '../../../src/utils/object';
 import {parseSrcset} from '../../../src/srcset';
 import {startsWith} from '../../../src/string';
 import {user} from '../../../src/log';
@@ -33,21 +33,22 @@ let PropertyRulesDef;
  * Property rules that apply to any and all tags.
  * @private {Object<string, ?PropertyRulesDef>}
  */
-const GLOBAL_PROPERTY_RULES = map({
-  'text': null,
+const GLOBAL_PROPERTY_RULES = {
   'class': {
     blacklistedValueRegex: '(^|\\W)i-amphtml-',
   },
-});
+  'hidden': null,
+  'text': null,
+};
 
 /**
  * Property rules that apply to all AMP elements.
- * @private {Object<string, Object<string, ?PropertyRulesDef>>}
+ * @private {Object<string, ?PropertyRulesDef>}
  */
-const AMP_PROPERTY_RULES = map({
+const AMP_PROPERTY_RULES = {
   'width': null,
   'height': null,
-});
+};
 
 /**
  * Maps tag names to property names to PropertyRulesDef.
@@ -61,11 +62,11 @@ const ELEMENT_RULES = createElementRules_();
  * Map whose keys comprise all properties that contain URLs.
  * @private {Object<string, boolean>}
  */
-const URL_PROPERTIES = map({
+const URL_PROPERTIES = {
   'src': true,
   'srcset': true,
   'href': true,
-});
+};
 
 /**
  * BindValidator performs runtime validation of Bind expression results.
@@ -113,7 +114,7 @@ export class BindValidator {
     }
 
     // Validate URL(s) if applicable.
-    if (value && URL_PROPERTIES[property]) {
+    if (value && ownProperty(URL_PROPERTIES, property)) {
       let urls;
       if (property === 'srcset') {
         let srcset;
@@ -162,7 +163,7 @@ export class BindValidator {
       const re = /^([^:\/?#.]+):[\s\S]*$/;
       const match = re.exec(url);
       if (match !== null) {
-        const protocol = match[1].toLowerCase().trimLeft();
+        const protocol = match[1].toLowerCase().trim();
         // hasOwnProperty() needed since nested objects are not prototype-less.
         if (!allowedProtocols.hasOwnProperty(protocol)) {
           return false;
@@ -181,18 +182,21 @@ export class BindValidator {
    * @private
    */
   rulesForTagAndProperty_(tag, property) {
-    const globalPropertyRules = GLOBAL_PROPERTY_RULES[property];
-    if (globalPropertyRules !== undefined) {
-      return globalPropertyRules;
+    // Allow binding to all ARIA attributes.
+    if (startsWith(property, 'aria-')) {
+      return null;
     }
-    const tagRules = ELEMENT_RULES[tag];
-    // hasOwnProperty() needed since nested objects are not prototype-less.
-    if (tagRules && tagRules.hasOwnProperty(property)) {
-      return tagRules[property];
+    const globalRules = ownProperty(GLOBAL_PROPERTY_RULES, property);
+    if (globalRules !== undefined) {
+      return /** @type {PropertyRulesDef} */ (globalRules);
     }
-    const ampPropertyRules = AMP_PROPERTY_RULES[property];
+    const ampPropertyRules = ownProperty(AMP_PROPERTY_RULES, property);
     if (startsWith(tag, 'AMP-') && ampPropertyRules !== undefined) {
-      return ampPropertyRules;
+      return /** @type {PropertyRulesDef} */ (ampPropertyRules);
+    }
+    const tagRules = ownProperty(ELEMENT_RULES, tag);
+    if (tagRules) {
+      return tagRules[property];
     }
     return undefined;
   }
@@ -204,7 +208,7 @@ export class BindValidator {
  */
 function createElementRules_() {
   // Initialize `rules` with tag-specific constraints.
-  const rules = map({
+  const rules = {
     'AMP-BRIGHTCOVE': {
       'data-account': null,
       'data-embed': null,
@@ -239,6 +243,7 @@ function createElementRules_() {
           'https': true,
         },
       },
+      'state': null,
     },
     'AMP-SELECTOR': {
       'selected': null,
@@ -373,6 +378,6 @@ function createElementRules_() {
       'spellcheck': null,
       'wrap': null,
     },
-  });
+  };
   return rules;
 }

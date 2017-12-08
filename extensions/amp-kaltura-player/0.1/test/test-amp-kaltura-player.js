@@ -13,31 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
+
 import '../amp-kaltura-player';
-import {adopt} from '../../../../src/runtime';
 
-adopt(window);
 
-describe('amp-kaltura-player', () => {
+describes.realWin('amp-kaltura-player', {
+  amp: {
+    extensions: ['amp-kaltura-player'],
+  },
+}, env => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
 
   function getKaltura(attributes, opt_responsive) {
-    return createIframePromise().then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const kalturaPlayer = iframe.doc.createElement('amp-kaltura-player');
-      for (const key in attributes) {
-        kalturaPlayer.setAttribute(key, attributes[key]);
-      }
-      kalturaPlayer.setAttribute('width', '111');
-      kalturaPlayer.setAttribute('height', '222');
-      if (opt_responsive) {
-        kalturaPlayer.setAttribute('layout', 'responsive');
-      }
-      return iframe.addElement(kalturaPlayer);
-    });
+    const kalturaPlayer = doc.createElement('amp-kaltura-player');
+    for (const key in attributes) {
+      kalturaPlayer.setAttribute(key, attributes[key]);
+    }
+    kalturaPlayer.setAttribute('width', '111');
+    kalturaPlayer.setAttribute('height', '222');
+    if (opt_responsive) {
+      kalturaPlayer.setAttribute('layout', 'responsive');
+    }
+    doc.body.appendChild(kalturaPlayer);
+    return kalturaPlayer.build().then(() => {
+      return kalturaPlayer.layoutCallback();
+    }).then(() => kalturaPlayer);
   }
 
   it('renders', () => {
@@ -50,7 +55,7 @@ describe('amp-kaltura-player', () => {
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-                'https://cdnapisec.kaltura.com/p/1281471/sp/128147100/embedIframeJs/uiconf_id/33502051/partner_id/1281471?iframeembed=true&playerId=kaltura_player_amp&entry_id=1_3ts1ms9c');
+          'https://cdnapisec.kaltura.com/p/1281471/sp/128147100/embedIframeJs/uiconf_id/33502051/partner_id/1281471?iframeembed=true&playerId=kaltura_player_amp&entry_id=1_3ts1ms9c');
     });
   });
 
@@ -70,7 +75,7 @@ describe('amp-kaltura-player', () => {
     return getKaltura({}).then(kp => {
       kp.build();
     }).should.eventually.be.rejectedWith(
-            /The data-partner attribute is required for/);
+        /The data-partner attribute is required for/);
   });
 
   it('should pass data-param-* attributes to the iframe src', () => {

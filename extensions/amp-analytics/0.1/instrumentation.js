@@ -20,17 +20,13 @@ import {
 } from './analytics-root';
 import {
   AnalyticsEvent,
-  ClickEventTracker,
+  AnalyticsEventType,
   CustomEventTracker,
-  IniLoadTracker,
-  SignalTracker,
-  VisibilityTracker,
+  getTrackerKeyName,
+  getTrackerTypesForParentType,
 } from './events';
 import {Observable} from '../../../src/observable';
-import {Visibility} from './visibility-impl';
 import {dev, user} from '../../../src/log';
-import {getDataParamsFromAttributes} from '../../../src/dom';
-import {getElement, isVisibilitySpecValid} from './visibility-impl';
 import {
   getFriendlyIframeEmbedOptional,
 } from '../../../src/friendly-iframe-embed';
@@ -40,76 +36,14 @@ import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
-import {isEnumValue} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
-import {timerFor} from '../../../src/services';
-import {viewerForDoc} from '../../../src/services';
-import {viewportForDoc} from '../../../src/services';
+import {Services} from '../../../src/services';
 
-const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
-const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
 const VAR_V_SCROLL_BOUNDARY = 'verticalScrollBoundary';
-const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 const PROP = '__AMP_AN_ROOT';
 
 
-/**
- * Events that can result in analytics data to be sent.
- * @const
- * @enum {string}
- */
-export const AnalyticsEventType = {
-  VISIBLE: 'visible',
-  CLICK: 'click',
-  TIMER: 'timer',
-  SCROLL: 'scroll',
-  HIDDEN: 'hidden',
-};
-
-const ALLOWED_FOR_ALL = ['ampdoc', 'embed'];
-
-/**
- * Events that can result in analytics data to be sent.
- * @const {!Object<string, {
- *     name: string,
- *     allowedFor: !Array<string>,
- *     klass: function(new:./events.EventTracker)
- *   }>}
- */
-const EVENT_TRACKERS = {
-  'click': {
-    name: 'click',
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: ClickEventTracker,
-  },
-  'custom': {
-    name: 'custom',
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: CustomEventTracker,
-  },
-  'render-start': {
-    name: 'render-start',
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: SignalTracker,
-  },
-  'ini-load': {
-    name: 'ini-load',
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: IniLoadTracker,
-  },
-  'visible-v3': {
-    name: 'visible-v3',
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: VisibilityTracker,
-  },
-  'hidden-v3': {
-    name: 'visible-v3', // Reuse tracker with visibility
-    allowedFor: ALLOWED_FOR_ALL,
-    klass: VisibilityTracker,
-  },
-};
 
 /** @const {string} */
 const TAG = 'Analytics.Instrumentation';
@@ -143,23 +77,14 @@ export class InstrumentationService {
     /** @const */
     this.ampdocRoot_ = new AmpdocAnalyticsRoot(this.ampdoc);
 
-    /** @const @private {!./visibility-impl.Visibility} */
-    this.visibility_ = new Visibility(this.ampdoc);
-
-    /** @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = timerFor(this.ampdoc.win);
-
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = viewerForDoc(this.ampdoc);
-
-    /** @const {!../../../src/service/viewport-impl.Viewport} */
-    this.viewport_ = viewportForDoc(this.ampdoc);
+    /** @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private {boolean} */
     this.scrollHandlerRegistered_ = false;
 
     /** @private {!Observable<
-        !../../../src/service/viewport-impl.ViewportChangedEventDef>} */
+        !../../../src/service/viewport/viewport-impl.ViewportChangedEventDef>} */
     this.scrollObservable_ = new Observable();
   }
 
@@ -202,18 +127,6 @@ export class InstrumentationService {
   }
 
   /**
-   * Triggers the analytics event with the specified type.
-   *
-   * @param {string} eventType
-   * @param {!Object<string, string>=} opt_vars A map of vars and their values.
-   */
-  triggerEvent(eventType, opt_vars) {
-    // TODO(dvoytenko): deprecate/remove in preference of triggerEventForTarget.
-    this.triggerEventForTarget(
-        this.ampdocRoot_.getRootElement(), eventType, opt_vars);
-  }
-
-  /**
    * @param {!Node} context
    * @return {!./analytics-root.AnalyticsRoot}
    */
@@ -250,7 +163,7 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {!JSONType} config Configuration for instrumentation.
+   * @param {!JsonObject} config Configuration for instrumentation.
    * @param {function(!AnalyticsEvent)} listener The callback to call when the event
    *  occurs.
    * @param {!Element} analyticsElement The element associated with the
@@ -264,10 +177,7 @@ export class InstrumentationService {
         'allowed in the embed.');
       return;
     }
-    if (eventType === AnalyticsEventType.VISIBLE) {
-      this.createVisibilityListener_(listener, config,
-          AnalyticsEventType.VISIBLE, analyticsElement);
-    } else if (eventType === AnalyticsEventType.SCROLL) {
+    if (eventType === AnalyticsEventType.SCROLL) {
       if (!config['scrollSpec']) {
         user().error(TAG, 'Missing scrollSpec on scroll trigger.');
         return;
@@ -284,13 +194,6 @@ export class InstrumentationService {
         relayoutAll: false,
         velocity: 0,  // Hack for typing.
       });
-    } else if (eventType === AnalyticsEventType.TIMER) {
-      if (this.isTimerSpecValid_(config['timerSpec'])) {
-        this.createTimerListener_(listener, config['timerSpec']);
-      }
-    } else if (eventType === AnalyticsEventType.HIDDEN) {
-      this.createVisibilityListener_(listener, config,
-          AnalyticsEventType.HIDDEN, analyticsElement);
     }
   }
 
@@ -307,59 +210,7 @@ export class InstrumentationService {
   }
 
   /**
-   * Creates listeners for visibility conditions or calls the callback if all
-   * the conditions are met.
-   * @param {function(!AnalyticsEvent)} callback The callback to call when the
-   *   event occurs.
-   * @param {!JSONType} config Configuration for instrumentation.
-   * @param {AnalyticsEventType} eventType Event type for which the callback is triggered.
-   * @param {!Element} analyticsElement The element assoicated with the
-   *   config.
-   * @private
-   */
-  createVisibilityListener_(callback, config, eventType, analyticsElement) {
-    dev().assert(eventType == AnalyticsEventType.VISIBLE ||
-        eventType == AnalyticsEventType.HIDDEN,
-        'createVisibilityListener should be called with visible or hidden ' +
-        'eventType');
-    const shouldBeVisible = eventType == AnalyticsEventType.VISIBLE;
-    /** @const {!JSONType} */
-    const spec = config['visibilitySpec'];
-    if (spec) {
-      if (!isVisibilitySpecValid(config)) {
-        return;
-      }
-
-      this.visibility_.listenOnce(spec, vars => {
-        const el = getElement(this.ampdoc, spec['selector'],
-            analyticsElement, spec['selectionMethod']);
-        if (el) {
-          const attr = getDataParamsFromAttributes(el, undefined,
-              VARIABLE_DATA_ATTRIBUTE_KEY);
-          for (const key in attr) {
-            vars[key] = attr[key];
-          }
-        }
-        callback(this.createEventDepr_(eventType, vars));
-      }, shouldBeVisible, analyticsElement);
-    } else {
-      if (this.viewer_.isVisible() == shouldBeVisible) {
-        callback(this.createEventDepr_(eventType));
-        config['called'] = true;
-      } else {
-        this.viewer_.onVisibilityChanged(() => {
-          if (!config['called'] &&
-              this.viewer_.isVisible() == shouldBeVisible) {
-            callback(this.createEventDepr_(eventType));
-            config['called'] = true;
-          }
-        });
-      }
-    }
-  }
-
-  /**
-   * @param {!../../../src/service/viewport-impl.ViewportChangedEventDef} e
+   * @param {!../../../src/service/viewport/viewport-impl.ViewportChangedEventDef} e
    * @private
    */
   onScroll_(e) {
@@ -369,7 +220,7 @@ export class InstrumentationService {
   /**
    * Register for a listener to be called when the boundaries specified in
    * config are reached.
-   * @param {!JSONType} config the config that specifies the boundaries.
+   * @param {!JsonObject} config the config that specifies the boundaries.
    * @param {function(!AnalyticsEvent)} listener
    * @private
    */
@@ -456,55 +307,6 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {JSONType} timerSpec
-   * @private
-   */
-  isTimerSpecValid_(timerSpec) {
-    if (!timerSpec) {
-      user().error(TAG, 'Bad timer specification');
-      return false;
-    } else if (!timerSpec.hasOwnProperty('interval')) {
-      user().error(TAG, 'Timer interval specification required');
-      return false;
-    } else if (typeof timerSpec['interval'] !== 'number' ||
-               timerSpec['interval'] < MIN_TIMER_INTERVAL_SECONDS_) {
-      user().error(TAG, 'Bad timer interval specification');
-      return false;
-    } else if (timerSpec.hasOwnProperty('maxTimerLength') &&
-              (typeof timerSpec['maxTimerLength'] !== 'number' ||
-                  timerSpec['maxTimerLength'] <= 0)) {
-      user().error(TAG, 'Bad maxTimerLength specification');
-      return false;
-    } else {
-      return true;
-    }
-  }
-
-  /**
-   * @param {!function(!AnalyticsEvent)} listener
-   * @param {JSONType} timerSpec
-   * @private
-   */
-  createTimerListener_(listener, timerSpec) {
-    const hasImmediate = timerSpec.hasOwnProperty('immediate');
-    const callImmediate = hasImmediate ? Boolean(timerSpec['immediate']) : true;
-    const intervalId = this.ampdoc.win.setInterval(
-      listener.bind(null, this.createEventDepr_(AnalyticsEventType.TIMER)),
-      timerSpec['interval'] * 1000
-    );
-
-    if (callImmediate) {
-      listener(this.createEventDepr_(AnalyticsEventType.TIMER));
-    }
-
-    const maxTimerLength = timerSpec['maxTimerLength'] ||
-        DEFAULT_MAX_TIMER_LENGTH_SECONDS_;
-    this.ampdoc.win.setTimeout(
-        this.ampdoc.win.clearInterval.bind(this.ampdoc.win, intervalId),
-        maxTimerLength * 1000);
-  }
-
-  /**
    * Checks to confirm that a given trigger type is allowed for the element.
    * Specifically, it confirms that if the element is in the embed, only a
    * subset of the trigger types are allowed.
@@ -545,10 +347,6 @@ export class AnalyticsGroup {
 
     /** @private @const {!Array<!UnlistenDef>} */
     this.listeners_ = [];
-
-    // TODO(dvoytenko, #8121): Cleanup visibility-v3 experiment.
-    /** @private @const {boolean} */
-    this.visibilityV3_ = isExperimentOn(root.ampdoc.win, 'visibility-v3');
   }
 
   /** @override */
@@ -565,34 +363,37 @@ export class AnalyticsGroup {
    * Triggers registered on a group are automatically released when the
    * group is disposed.
    *
-   * @param {!JSONType} config
+   * @param {!JsonObject} config
    * @param {function(!AnalyticsEvent)} handler
    */
   addTrigger(config, handler) {
-    let eventType = dev().assertString(config['on']);
-    // TODO(dvoytenko, #8121): Cleanup visibility-v3 experiment.
-    if ((eventType == 'visible') && this.visibilityV3_) {
-      eventType += '-v3';
-    }
-    let trackerProfile = EVENT_TRACKERS[eventType];
-    if (!trackerProfile && !isEnumValue(AnalyticsEventType, eventType)) {
-      trackerProfile = EVENT_TRACKERS['custom'];
-    }
-    if (trackerProfile) {
-      user().assert(
-          trackerProfile.allowedFor.indexOf(this.root_.getType()) != -1,
-          'Trigger type "%s" is not allowed in the %s',
-          eventType, this.root_.getType());
-      const tracker = this.root_.getTracker(
-          trackerProfile.name, trackerProfile.klass);
-      const unlisten = tracker.add(
-          this.analyticsElement_, eventType, config, handler);
-      this.listeners_.push(unlisten);
-    } else {
+    const eventType = dev().assertString(config['on']);
+    const trackerKey = getTrackerKeyName(eventType);
+    const trackerWhitelist = getTrackerTypesForParentType(this.root_.getType());
+
+    if (this.isDeprecatedListenerEvent(trackerKey)) {
       // TODO(dvoytenko): remove this use and `addListenerDepr_` once all
       // triggers have been migrated..
       this.service_.addListenerDepr_(config, handler, this.analyticsElement_);
+      return;
     }
+
+    const tracker = this.root_.getTrackerForWhitelist(
+        trackerKey, trackerWhitelist);
+    user().assert(!!tracker,
+        'Trigger type "%s" is not allowed in the %s', eventType,
+        this.root_.getType());
+    const unlisten = tracker.add(this.analyticsElement_, eventType, config,
+        handler);
+    this.listeners_.push(unlisten);
+  }
+
+  /**
+   * @param {string} triggerType
+   * @return {boolean}
+   */
+  isDeprecatedListenerEvent(triggerType) {
+    return triggerType == 'scroll';
   }
 }
 

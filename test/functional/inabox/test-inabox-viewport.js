@@ -15,11 +15,18 @@
  */
 
 import {layoutRectLtwh} from '../../../src/layout-rect';
-import {resourcesForDoc} from '../../../src/services';
-import {ViewportBindingInabox} from '../../../src/inabox/inabox-viewport';
+import {Services} from '../../../src/services';
+import {
+  prepareBodyForOverlay,
+  resetBodyForOverlay,
+  ViewportBindingInabox,
+} from '../../../src/inabox/inabox-viewport';
 import {
   installIframeMessagingClient,
 } from '../../../src/inabox/inabox-iframe-messaging-client';
+
+
+const NOOP = () => {};
 
 describes.fakeWin('inabox-viewport', {amp: {}}, env => {
 
@@ -30,6 +37,25 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   let onScrollCallback;
   let onResizeCallback;
   let measureSpy;
+
+  function stubIframeClientMakeRequest(
+      requestType, responseType, callback, opt_sync, opt_once) {
+    const methodName = opt_once ? 'requestOnce' : 'makeRequest';
+
+    return sandbox./*OK*/stub(
+        binding.iframeClient_, methodName, (req, res, cb) => {
+          expect(req).to.equal(requestType);
+          expect(res).to.equal(responseType);
+
+          if (opt_sync) {
+            callback(req, res, cb);
+          } else {
+            setTimeout(() => callback(req, res, cb), 10);
+          }
+
+          return NOOP;
+        });
+  }
 
   beforeEach(() => {
     win = env.win;
@@ -50,18 +76,27 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       },
       measure: measureSpy,
     };
-    sandbox.stub(resourcesForDoc(win.document), 'get').returns([element]);
-    sandbox./*OK*/stub(binding.iframeClient_, 'makeRequest', (req, res, cb) => {
-      positionCallback = cb;
-    });
+    sandbox.stub(
+        Services.resourcesForDoc(win.document), 'get').returns([element]);
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('should work for size, layoutRect and position observer', () => {
+    stubIframeClientMakeRequest(
+        'send-positions',
+        'position',
+        (req, res, cb) => { positionCallback = cb; },
+        /* opt_sync */ true);
+
     onScrollCallback = sandbox.spy();
     onResizeCallback = sandbox.spy();
     binding.connect();
     binding.onScroll(onScrollCallback);
     binding.onResize(onResizeCallback);
-  });
 
-  it('should work', () => {
     // Initial state
     expect(binding.getSize()).to.deep.equal({width: 200, height: 150});
     expect(binding.getLayoutRect(element))
@@ -69,8 +104,8 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
 
     // Initial position received
     positionCallback({
-      viewport: layoutRectLtwh(0, 0, 100, 100),
-      target: layoutRectLtwh(10, 20, 50, 50),
+      viewportRect: layoutRectLtwh(0, 0, 100, 100),
+      targetRect: layoutRectLtwh(10, 20, 50, 50),
     });
 
     expect(onScrollCallback).to.not.be.called;
@@ -82,8 +117,8 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
 
     // Scroll, viewport position changed
     positionCallback({
-      viewport: layoutRectLtwh(0, 10, 100, 100),
-      target: layoutRectLtwh(10, 20, 50, 50),
+      viewportRect: layoutRectLtwh(0, 10, 100, 100),
+      targetRect: layoutRectLtwh(10, 10, 50, 50),
     });
 
     expect(onScrollCallback).to.be.calledOnce;
@@ -95,8 +130,8 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
 
     // Resize, viewport size changed
     positionCallback({
-      viewport: layoutRectLtwh(0, 10, 200, 100),
-      target: layoutRectLtwh(10, 20, 50, 50),
+      viewportRect: layoutRectLtwh(0, 10, 200, 100),
+      targetRect: layoutRectLtwh(10, 10, 50, 50),
     });
 
     expect(onScrollCallback).to.not.be.called;
@@ -107,9 +142,12 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     sandbox.reset();
 
     // DOM change, target position changed
+    sandbox.restore();
+    sandbox.stub(
+        Services.resourcesForDoc(win.document), 'get').returns([element]);
     positionCallback({
-      viewport: layoutRectLtwh(0, 10, 200, 100),
-      target: layoutRectLtwh(20, 20, 50, 50),
+      viewportRect: layoutRectLtwh(0, 10, 200, 100),
+      targetRect: layoutRectLtwh(20, 10, 50, 50),
     });
 
     expect(onScrollCallback).to.not.be.called;
@@ -117,5 +155,157 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     expect(measureSpy).to.be.calledOnce;
     expect(binding.getLayoutRect(element))
         .to.deep.equal(layoutRectLtwh(20, 20, 100, 100));
+  });
+
+  it('should center content, resize and remeasure on overlay mode', () => {
+    const allResourcesMock = Array(5).fill(undefined).map(() => ({
+      measure: sandbox.spy(),
+    }));
+
+    sandbox.stub(binding, 'getChildResources', () => allResourcesMock);
+
+    const prepareContainer =
+        sandbox.stub(binding, 'prepareBodyForOverlay_')
+            .returns(Promise.resolve());
+
+    const makeRequest = stubIframeClientMakeRequest(
+        'full-overlay-frame',
+        'full-overlay-frame-response',
+        (req, res, cb) => cb({
+          success: true,
+          boxRect: {
+            left: 0,
+            top: 0,
+            right: 1000,
+            bottom: 2000,
+            width: 1000,
+            height: 2000,
+          },
+        }));
+
+    return binding.updateLightboxMode(true).then(() => {
+      expect(prepareContainer).to.be.calledOnce;
+      expect(prepareContainer).to.be.calledBefore(makeRequest);
+
+      allResourcesMock.forEach(resource => {
+        expect(resource.measure).to.have.been.calledOnce;
+      });
+    });
+  });
+
+  it('should reset content and request resize on leave overlay mode', () => {
+    const resetContainer =
+        sandbox.stub(binding, 'resetBodyForOverlay_')
+            .returns(Promise.resolve());
+
+    const makeRequest = stubIframeClientMakeRequest(
+        'cancel-full-overlay-frame',
+        'cancel-full-overlay-frame-response',
+        (req, res, cb) => cb({success: true}));
+
+    return binding.updateLightboxMode(false).then(() => {
+      expect(resetContainer).to.be.calledOnce;
+      expect(resetContainer).to.be.calledAfter(makeRequest);
+    });
+  });
+
+  it('should update box rect when expanding/collapsing', function*() {
+    const boxRect = {
+      left: 20,
+      top: 10,
+      bottom: 310,
+      right: 420,
+      width: 400,
+      height: 300,
+    };
+
+    const updateBoxRectStub = sandbox.stub(binding, 'updateBoxRect_', NOOP);
+
+    stubIframeClientMakeRequest(
+        'full-overlay-frame',
+        'full-overlay-frame-response',
+        (req, res, cb) => cb({success: true, boxRect}));
+
+    sandbox.stub(binding, 'prepareBodyForOverlay_').returns(Promise.resolve());
+
+    yield binding.updateLightboxMode(true);
+
+    expect(updateBoxRectStub).to.be.calledWith(boxRect);
+  });
+
+  it('should update box rect when collapsing', function*() {
+    const boxRect = {
+      left: 20,
+      top: 10,
+      bottom: 310,
+      right: 420,
+      width: 400,
+      height: 300,
+    };
+
+    const updateBoxRectStub = sandbox.stub(binding, 'updateBoxRect_', NOOP);
+
+    stubIframeClientMakeRequest(
+        'cancel-full-overlay-frame',
+        'cancel-full-overlay-frame-response',
+        (req, res, cb) => cb({success: true, boxRect}));
+
+    sandbox.stub(binding, 'resetBodyForOverlay_').returns(Promise.resolve());
+
+    yield binding.updateLightboxMode(false);
+
+    expect(updateBoxRectStub).to.be.calledWith(boxRect);
+  });
+
+  it('should center the fixed container properly', function* () {
+    const w = 120;
+    const h = 90;
+
+    const el = document.createElement('div');
+
+    sandbox.stub(win, 'innerWidth', w);
+    sandbox.stub(win, 'innerHeight', h);
+
+    yield prepareBodyForOverlay(win, el);
+
+    expect(el.style['position']).to.equal('absolute');
+    expect(el.style['left']).to.equal('50%');
+    expect(el.style['top']).to.equal('50%');
+    expect(el.style['bottom']).to.equal('auto');
+    expect(el.style['right']).to.equal('auto');
+    expect(el.style['width']).to.equal(`${w}px`);
+    expect(el.style['height']).to.equal(`${h}px`);
+    expect(el.style['margin-left']).to.equal(`-${w / 2}px`);
+    expect(el.style['margin-top']).to.equal(`-${h / 2}px`);
+  });
+
+  it('should undo styling when the fixed container is reset', function* () {
+    const el = document.createElement('div');
+
+    yield resetBodyForOverlay(win, el);
+
+    expect(el.style['position']).to.be.empty;
+    expect(el.style['left']).to.be.empty;
+    expect(el.style['top']).to.be.empty;
+    expect(el.style['bottom']).to.be.empty;
+    expect(el.style['right']).to.be.empty;
+    expect(el.style['width']).to.be.empty;
+    expect(el.style['height']).to.be.empty;
+    expect(el.style['margin-left']).to.be.empty;
+    expect(el.style['margin-top']).to.be.empty;
+  });
+
+  it('should request the position async from host', () => {
+    const requestSpy = stubIframeClientMakeRequest(
+        'send-positions',
+        'position',
+        (req, res, cb) => cb({
+          targetRect: layoutRectLtwh(10, 20, 100, 100),
+          viewportRect: layoutRectLtwh(1, 1, 1, 1),
+        }), undefined, true);
+    return binding.getRootClientRectAsync().then(rect => {
+      expect(rect).to.jsonEqual(layoutRectLtwh(10, 20, 100, 100));
+      expect(requestSpy).to.be.calledOnce;
+    });
   });
 });

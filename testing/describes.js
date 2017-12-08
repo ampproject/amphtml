@@ -14,6 +14,72 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview
+ *
+ * describes.js helps save you from writing a lot of boilerplate test code.
+ * It also helps avoid mutating global state in tests by providing mock globals
+ * like FakeWindow.
+ *
+ * `describes` is a global test variable that wraps and augments Mocha's test
+ * methods. For each test method, it takes an additional `spec` parameter and
+ * returns an `env` object containing mocks, etc. that help testing.
+ *
+ * For example, a typical Mocha test may look like:
+ *
+ *     describe('myTest', () => {
+ *       // I gotta do this sandbox creation and restore for every test? Ugh...
+ *       let sandbox;
+ *       beforeEach(() => { sandbox = sinon.sandbox.create(); })
+ *       it('stubbing', () => { sandbox.stub(foo, 'bar'); });
+ *       afterEach(() => { sandbox.restore(); });
+ *     });
+ *
+ * A test that uses describes.js can save you the work of setting up sandboxes,
+ * embedded iframes, mock windows, etc. For example:
+ *
+ *     // Yay! describes.sandboxed() sets up the sandbox for me.
+ *     // Note the second `spec` param, and the returned `env` object.
+ *     describes.sandboxed('myTest', {}, env => {
+ *       it('stubbing', () => { env.sandbox.stub(foo, 'bar'); });
+ *     });
+ *
+ * In addition to `sandboxed()`, describes.js has three other modes of
+ * operation (that actually all support `env.sandbox`):
+ *
+ * 1. `sandboxed()` just helps you set up and tear down a sinon sandbox.
+ *    Use this to save some sinon boilerplate code.
+ *
+ * 2. `fakeWin()` provides a fake Window (fake-dom.js#FakeWindow) in `env.win`.
+ *    Use this when you're testing APIs that don't heavily depend on the DOM.
+ *
+ * 3. `realWin()` provides a real Window in an embedded iframe in `env.win`.
+ *    Use this when you're testing APIs that need a real DOM.
+ *
+ * 4. `integration()` also provides a real Window in an embedded iframe, but
+ *    the iframe contains an AMP doc where you can specify its <body> markup.
+ *    Use this to save boilerplate for setting up the DOM of the iframe.
+ *
+ * The returned `env` object contains different objects depending on (A) the
+ * mode of operation and (B) the `spec` object you provide it.
+ *
+ * - `fakeWin()` and `realWin()` both read `spec.amp`, which configures
+ *   the AMP runtime on the returned window (see AmpTestSpec). You can also
+ *   pass `false` to `spec.amp` to disable the AMP runtime if you just need
+ *   a plain, non-AMP window.
+ *
+ *   Several AMP runtime objects (e.g. AmpDoc, AmpDocService) are returned to
+ *   the test method in `env.amp`. See AmpTestEnv for details.
+ *
+ * - `integration()` reads `spec.body` and sets the string literal as the
+ *   innerHTML of the embedded iframe's AMP document's <body>.
+ *
+ * The are more advanced usages of the various `spec` and returned `env`
+ * objects. See the type definitions for `sandboxed`, `fakeWin`, `realWin`,
+ * and `integration` below.
+ */
+
+import fetchMock from 'fetch-mock';
 import installCustomElements from
     'document-register-element/build/document-register-element.node';
 import {BaseElement} from '../src/base-element';
@@ -23,28 +89,30 @@ import {
   FakeWindow,
   interceptEventListeners,
 } from './fake-dom';
+import {stubService} from './test-helper';
 import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
 import {doNotLoadExternalResourcesInTest} from './iframe';
-import {ampdocServiceFor} from '../src/ampdoc';
+import {Services} from '../src/services';
 import {
   adopt,
   adoptShadowMode,
   installAmpdocServices,
   installRuntimeServices,
-  registerElementForTesting,
 } from '../src/runtime';
 import {createElementWithAttributes} from '../src/dom';
 import {addParamsToUrl} from '../src/url';
 import {cssText} from '../build/css';
-import {createAmpElementProto} from '../src/custom-element';
+import {CSS} from '../build/amp-ad-0.1.css.js';
+import {createAmpElementProtoForTesting} from '../src/custom-element';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {
   installBuiltinElements,
   installExtensionsService,
   registerExtension,
 } from '../src/service/extensions-impl';
-import {extensionsFor, resourcesForDoc} from '../src/services';
-import {resetScheduledElementForTesting} from '../src/custom-element';
+import {
+  resetScheduledElementForTesting,
+} from '../src/service/custom-element-registry';
 import {setStyles} from '../src/style';
 import * as sinon from 'sinon';
 
@@ -81,7 +149,9 @@ export let TestSpec;
 
 
 /**
- * - ampdoc: "single", "shadow", "multi", "none".
+ * An object specifying the configuration of an AmpFixture.
+ *
+ * - ampdoc: "single", "shadow", "multi", "none", "fie".
  *
  * @typedef {{
  *   runtimeOn: (boolean|undefined),
@@ -95,6 +165,7 @@ export let AmpTestSpec;
 
 
 /**
+ * An object containing artifacts of AmpFixture that's returned to test methods.
  * @typedef {{
  *   win: !Window,
  *   extensions: !Extensions,
@@ -120,7 +191,7 @@ export const sandboxed = describeEnv(spec => []);
  * @param {string} name
  * @param {{
  *   win: !FakeWindowSpec,
- *   amp: (!AmpTestSpec|undefined),
+ *   amp: (boolean|!AmpTestSpec|undefined),
  * }} spec
  * @param {function({
  *   win: !FakeWindow,
@@ -128,9 +199,9 @@ export const sandboxed = describeEnv(spec => []);
  * })} fn
  */
 export const fakeWin = describeEnv(spec => [
-      new FakeWinFixture(spec),
-      new AmpFixture(spec),
-    ]);
+  new FakeWinFixture(spec),
+  new AmpFixture(spec),
+]);
 
 
 /**
@@ -138,7 +209,7 @@ export const fakeWin = describeEnv(spec => [
  * @param {string} name
  * @param {{
  *   fakeRegisterElement: (boolean|undefined),
- *   amp: (!AmpTestSpec|undefined),
+ *   amp: (boolean|!AmpTestSpec|undefined),
  * }} spec
  * @param {function({
  *   win: !Window,
@@ -147,13 +218,28 @@ export const fakeWin = describeEnv(spec => [
  * })} fn
  */
 export const realWin = describeEnv(spec => [
-      new RealWinFixture(spec),
-      new AmpFixture(spec),
-    ]);
+  new RealWinFixture(spec),
+  new AmpFixture(spec),
+]);
 
+
+/**
+ * A test that loads HTML markup in `spec.body` into an embedded iframe.
+ * @param {string} name
+ * @param {{
+ *   body: string,
+ *   css: (string|undefined),
+ *   hash: (string|undefined),
+ * }} spec
+ * @param {function({
+ *   win: !Window,
+ *   iframe: !HTMLIFrameElement,
+ * })} fn
+ */
 export const integration = describeEnv(spec => [
   new IntegrationFixture(spec),
 ]);
+
 
 /**
  * A repeating test.
@@ -201,7 +287,26 @@ export const repeated = (function() {
 
 
 /**
- * A test within a described environment.
+ * Mocks Window.fetch in the given environment and exposes `env.fetchMock`. For
+ * convenience, also exposes fetch-mock's mock() function as
+ * `env.expectFetch(matcher, response)`.
+ *
+ * @param {!Object} env
+ * @see http://www.wheresrhys.co.uk/fetch-mock/quickstart
+ */
+function attachFetchMock(env) {
+  fetchMock.constructor.global = env.win;
+  fetchMock._mock();
+
+  env.fetchMock = fetchMock;
+  env.expectFetch = fetchMock.mock.bind(fetchMock);
+}
+
+
+/**
+ * Returns a wrapped version of Mocha's describe(), it() and only() methods
+ * that also sets up the provided fixtures and returns the corresponding
+ * environment objects of each fixture to the test method.
  * @param {function(!Object):!Array<?Fixture>} factory
  */
 function describeEnv(factory) {
@@ -219,7 +324,6 @@ function describeEnv(factory) {
       }
     });
     return describeFunc(name, function() {
-
       const env = Object.create(null);
 
       beforeEach(() => {
@@ -344,10 +448,15 @@ class SandboxFixture {
 
 /** @implements {Fixture} */
 class IntegrationFixture {
+
   /** @param {!{body: string}} spec */
   constructor(spec) {
     /** @const */
     this.spec = spec;
+
+    /** @const {string} */
+    this.hash = spec.hash || '';
+    delete spec.hash;
   }
 
   /** @override */
@@ -357,10 +466,19 @@ class IntegrationFixture {
 
   /** @override */
   setup(env) {
-    const spec = this.spec;
-    return new Promise(function(resolve, reject) {
+    const body = typeof this.spec.body == 'function' ?
+          this.spec.body() : this.spec.body;
+    const css = typeof this.spec.css == 'function' ?
+          this.spec.css() : this.spec.css;
+    const experiments = this.spec.experiments == undefined ?
+        undefined : this.spec.experiments.join(',');
+    const extensions = this.spec.extensions == undefined ?
+        undefined : this.spec.extensions.join(',');
+
+    return new Promise((resolve, reject) => {
       env.iframe = createElementWithAttributes(document, 'iframe', {
-        src: addParamsToUrl('/amp4test/compose-doc', spec),
+        src: addParamsToUrl('/amp4test/compose-doc',
+            {body, css, experiments, extensions}) + `#${this.hash}`,
       });
       env.iframe.onload = function() {
         env.win = env.iframe.contentWindow;
@@ -396,10 +514,17 @@ class FakeWinFixture {
   /** @override */
   setup(env) {
     env.win = new FakeWindow(this.spec.win || {});
+
+    if (this.spec.mockFetch !== false) {
+      attachFetchMock(env);
+    }
   }
 
   /** @override */
   teardown(env) {
+    if (this.spec.mockFetch !== false) {
+      fetchMock./*OK*/restore();
+    }
   }
 }
 
@@ -410,7 +535,8 @@ class RealWinFixture {
   /** @param {!{
   *   fakeRegisterElement: boolean,
   *   ampCss: boolean,
-  *   allowExternalResources: boolean
+  *   allowExternalResources: boolean,
+  *   ampAdCss: boolean
   * }} spec */
   constructor(spec) {
     /** @const */
@@ -425,11 +551,11 @@ class RealWinFixture {
   /** @override */
   setup(env) {
     const spec = this.spec;
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
       const iframe = document.createElement('iframe');
       env.iframe = iframe;
       iframe.name = 'test_' + iframeCount++;
-      iframe.srcdoc = '<!doctype><html><head>' +
+      iframe.srcdoc = '<!doctype html><html><head>' +
           '<style>.i-amphtml-element {display: block;}</style>' +
           '<body style="margin:0"><div id=parent></div>';
       iframe.onload = function() {
@@ -453,6 +579,11 @@ class RealWinFixture {
           installRuntimeStylesPromise(win);
         }
 
+        // Install AMP AD CSS if requested.
+        if (spec.ampAdCss) {
+          installAmpAdStylesPromise(win);
+        }
+
         if (spec.fakeRegisterElement) {
           const customElements = new FakeCustomElements(win);
           Object.defineProperty(win, 'customElements', {
@@ -469,6 +600,10 @@ class RealWinFixture {
         interceptEventListeners(win.document.body);
         env.interceptEventListeners = interceptEventListeners;
 
+        if (spec.mockFetch !== false) {
+          attachFetchMock(env);
+        }
+
         resolve();
       };
       iframe.onerror = reject;
@@ -481,6 +616,9 @@ class RealWinFixture {
     // TODO(dvoytenko): test that window is returned in a good condition.
     if (env.iframe.parentNode) {
       env.iframe.parentNode.removeChild(env.iframe);
+    }
+    if (this.spec.mockFetch !== false) {
+      fetchMock./*OK*/restore();
     }
   }
 }
@@ -508,6 +646,9 @@ class AmpFixture {
     const win = env.win;
     let completePromise;
 
+    // Configure mode.
+    configureAmpTestMode(win);
+
     // AMP requires canonical URL.
     const link = win.document.createElement('link');
     link.setAttribute('rel', 'canonical');
@@ -520,10 +661,10 @@ class AmpFixture {
     const ampdocType = spec.ampdoc || 'single';
     const singleDoc = ampdocType == 'single' || ampdocType == 'fie';
     installDocService(win, singleDoc);
-    const ampdocService = ampdocServiceFor(win);
-    env.ampdocService  = ampdocService;
+    const ampdocService = Services.ampdocServiceFor(win);
+    env.ampdocService = ampdocService;
     installExtensionsService(win);
-    env.extensions = extensionsFor(win);
+    env.extensions = Services.extensionsFor(win);
     installBuiltinElements(win);
     installRuntimeServices(win);
     env.flushVsync = function() {
@@ -536,7 +677,7 @@ class AmpFixture {
       env.ampdoc = ampdoc;
       installAmpdocServices(ampdoc, spec.params);
       adopt(win);
-      resourcesForDoc(ampdoc).ampInitComplete();
+      Services.resourcesForDoc(ampdoc).ampInitComplete();
     } else if (ampdocType == 'multi' || ampdocType == 'shadow') {
       adoptShadowMode(win);
       // Notice that ampdoc's themselves install runtime styles in shadow roots.
@@ -552,12 +693,42 @@ class AmpFixture {
         const version = tuple[1] || '0.1';
         const installer = extensionsBuffer[`${extensionId}:${version}`];
         if (installer) {
+          if (env.ampdoc) {
+            env.ampdoc.declareExtension_(extensionId);
+          }
           registerExtension(env.extensions, extensionId, installer, win.AMP);
-        } else {
-          registerElementForTesting(win, extensionId);
         }
       });
     }
+
+    /**
+     * Stubs a method of a service object using Sinon.
+     *
+     * @param {string} serviceId
+     * @param {string} method
+     * @return {!sinon.stub}
+     */
+    env.stubService = (serviceId, method) => {
+      return stubService(env.sandbox, env.win, serviceId, method);
+    };
+
+    /**
+     * Installs the specified extension.
+     * @param {string} extensionId
+     * @param {string=} opt_version
+     */
+    env.installExtension = function(extensionId, opt_version) {
+      const version = opt_version || '0.1';
+      const installer = extensionsBuffer[`${extensionId}:${version}`];
+      if (!installer) {
+        throw new Error(`extension not found: ${extensionId}:${version}.` +
+            ' Make sure the module is imported');
+      }
+      if (env.ampdoc) {
+        env.ampdoc.declareExtension_(extensionId);
+      }
+      registerExtension(env.extensions, extensionId, installer, win.AMP);
+    };
 
     /**
      * Creates a custom element without registration.
@@ -599,6 +770,7 @@ class AmpFixture {
             env.embed = embed;
             env.parentWin = env.win;
             env.win = embed.win;
+            configureAmpTestMode(embed.win);
           });
       completePromise = completePromise ?
           completePromise.then(() => promise) : promise;
@@ -610,7 +782,10 @@ class AmpFixture {
           hostElement, importDoc, win.location.href);
       const ampdoc = ret.ampdoc;
       env.ampdoc = ampdoc;
-      const promise = ampdoc.whenReady();
+      const promise = Promise.all([
+        env.extensions.installExtensionsInDoc_(ampdoc, extensionIds),
+        ampdoc.whenReady(),
+      ]);
       completePromise = completePromise ?
           completePromise.then(() => promise) : promise;
     }
@@ -644,6 +819,14 @@ class AmpFixture {
 /**
  * @param {!Window} win
  */
+function configureAmpTestMode(win) {
+  win.AMP_TEST = true;
+}
+
+
+/**
+ * @param {!Window} win
+ */
 function installRuntimeStylesPromise(win) {
   if (win.document.querySelector('style[amp-runtime]')) {
     // Already installed.
@@ -654,6 +837,21 @@ function installRuntimeStylesPromise(win) {
   style./*OK*/textContent = cssText;
   win.document.head.appendChild(style);
 }
+
+/**
+ * @param {!Window} win
+ */
+function installAmpAdStylesPromise(win) {
+  if (win.document.querySelector('style[amp-extension="amp-ad"]')) {
+    // Already installed.
+    return;
+  }
+  const style = document.createElement('style');
+  style.setAttribute('amp-extension', 'amp-ad');
+  style./*OK*/textContent = CSS;
+  win.document.head.appendChild(style);
+}
+
 
 
 /**
@@ -666,7 +864,7 @@ function installRuntimeStylesPromise(win) {
 function createAmpElement(win, opt_name, opt_implementationClass) {
   // Create prototype and constructor.
   const name = opt_name || 'amp-element';
-  const proto = createAmpElementProto(win, name);
+  const proto = createAmpElementProtoForTesting(win, name);
   const ctor = function() {
     const el = win.document.createElement(name);
     el.__proto__ = proto;

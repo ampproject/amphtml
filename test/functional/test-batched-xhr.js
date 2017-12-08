@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-import {FetchResponse, fetchPolyfill} from '../../src/service/xhr-impl';
+import {FetchResponse} from '../../src/service/xhr-impl';
+import {Services} from '../../src/services';
 import {batchedXhrServiceForTesting} from '../../src/service/batched-xhr-impl';
 
+describes.sandboxed('BatchedXhr', {}, env => {
+  beforeEach(() => {
+    env.sandbox.stub(Services, 'ampdocServiceFor').returns({
+      isSingleDoc: () => false,
+    });
+  });
 
-describes.sandboxed('BatchedXhr', {}, () => {
-  // Since if it's the Native fetch, it won't use the XHR object so
-  // mocking and testing the request becomes not doable.
-  function getPolyfillWin() {
-    return {
-      location: {href: 'https://acme.com/path'},
-      fetch: fetchPolyfill,
-    };
-  }
-
-  describes.fakeWin('#fetch', getPolyfillWin(), env => {
+  describes.fakeWin('#fetch', {}, env => {
     const TEST_OBJECT = {a: {b: [{c: 2}, {d: 4}]}};
     const TEST_RESPONSE = JSON.stringify(TEST_OBJECT);
     const mockXhr = {
@@ -78,7 +75,7 @@ describes.sandboxed('BatchedXhr', {}, () => {
     it('should cache the same as the convenience methods', () => {
       return Promise.all([
         xhr.fetch('/get?k=v1', jsonInit).then(response => response.json()),
-        xhr.fetchJson('/get?k=v1'),
+        xhr.fetchJson('/get?k=v1').then(res => res.json()),
       ]).then(results => {
         expect(fetchStub).to.be.calledOnce;
         expect(results[0]).to.jsonEqual(TEST_OBJECT);
@@ -87,7 +84,7 @@ describes.sandboxed('BatchedXhr', {}, () => {
     });
   });
 
-  describes.fakeWin('#fetchJson', getPolyfillWin(), env => {
+  describes.fakeWin('#fetchJson', {}, env => {
     const TEST_OBJECT = {a: {b: [{c: 2}, {d: 4}]}};
     const TEST_RESPONSE = JSON.stringify(TEST_OBJECT);
     const mockXhr = {
@@ -106,8 +103,8 @@ describes.sandboxed('BatchedXhr', {}, () => {
 
     it('should fetch JSON GET requests once for identical URLs', () => {
       return Promise.all([
-        xhr.fetchJson('/get?k=v1'),
-        xhr.fetchJson('/get?k=v1'),
+        xhr.fetchJson('/get?k=v1').then(res => res.json()),
+        xhr.fetchJson('/get?k=v1').then(res => res.json()),
       ]).then(results => {
         expect(fetchStub).to.be.calledOnce;
         expect(results[0]).to.jsonEqual(TEST_OBJECT);
@@ -117,8 +114,8 @@ describes.sandboxed('BatchedXhr', {}, () => {
 
     it('should not be affected by fragments passed in the URL', () => {
       return Promise.all([
-        xhr.fetchJson('/get?k=v1#a.b[0].c'),
-        xhr.fetchJson('/get?k=v1#a.b[1].d'),
+        xhr.fetchJson('/get?k=v1#a.b[0].c').then(res => res.json()),
+        xhr.fetchJson('/get?k=v1#a.b[1].d').then(res => res.json()),
       ]).then(results => {
         expect(fetchStub).to.be.calledOnce;
         expect(results[0]).to.jsonEqual(TEST_OBJECT);
@@ -130,15 +127,13 @@ describes.sandboxed('BatchedXhr', {}, () => {
       return Promise.all([
         xhr.fetchJson('/get?k=v1', {method: 'POST', body: {}}),
         xhr.fetchJson('/get?k=v1', {method: 'POST', body: {}}),
-      ]).then(results => {
+      ]).then(() => {
         expect(fetchStub).to.be.calledTwice;
-        expect(results[0]).to.jsonEqual(TEST_OBJECT);
-        expect(results[1]).to.jsonEqual(TEST_OBJECT);
       });
     });
   });
 
-  describes.realWin('#fetchDocument', getPolyfillWin(), env => {
+  describes.realWin('#fetchDocument', {}, env => {
     const TEST_CONTENT = '<b>Hello, world';
     const TEST_RESPONSE_TEXT = '<!doctype html><html><body>' + TEST_CONTENT;
     let xhr;
@@ -183,7 +178,7 @@ describes.sandboxed('BatchedXhr', {}, () => {
     });
   });
 
-  describes.fakeWin('#fetchText', getPolyfillWin(), env => {
+  describes.fakeWin('#fetchText', {}, env => {
     const TEST_RESPONSE = 'Hello, world!';
     const mockXhr = {
       status: 200,
@@ -200,8 +195,8 @@ describes.sandboxed('BatchedXhr', {}, () => {
 
     it('should fetch text GET requests once for identical URLs', () => {
       return Promise.all([
-        xhr.fetchText('/get?k=v1'),
-        xhr.fetchText('/get?k=v1'),
+        xhr.fetchText('/get?k=v1').then(res => res.text()),
+        xhr.fetchText('/get?k=v1').then(res => res.text()),
       ]).then(results => {
         expect(fetchStub).to.be.calledOnce;
         expect(results[0]).to.equal(TEST_RESPONSE);
@@ -213,10 +208,8 @@ describes.sandboxed('BatchedXhr', {}, () => {
       return Promise.all([
         xhr.fetchText('/get?k=v1', {method: 'POST', body: {}}),
         xhr.fetchText('/get?k=v1', {method: 'POST', body: {}}),
-      ]).then(results => {
+      ]).then(() => {
         expect(fetchStub).to.be.calledTwice;
-        expect(results[0]).to.equal(TEST_RESPONSE);
-        expect(results[1]).to.equal(TEST_RESPONSE);
       });
     });
   });

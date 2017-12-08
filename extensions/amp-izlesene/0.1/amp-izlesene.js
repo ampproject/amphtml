@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
- import {addParamsToUrl} from '../../../src/url';
- import {getDataParamsFromAttributes} from '../../../src/dom';
- import {isLayoutSizeDefined} from '../../../src/layout';
- import {dev, user} from '../../../src/log';
+import {addParamsToUrl} from '../../../src/url';
+import {getDataParamsFromAttributes} from '../../../src/dom';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 
- class AmpIzlesene extends AMP.BaseElement {
+
+class AmpIzlesene extends AMP.BaseElement {
   constructor(element) {
     super(element);
     /** @private {?string}  */
@@ -74,7 +76,6 @@
 
   /** @override */
   layoutCallback() {
-
     const iframe = this.element.ownerDocument.createElement('iframe');
     const src = this.getVideoIframeSrc_();
 
@@ -91,9 +92,14 @@
   /** @override */
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
-      this.iframe_.contentWindow./*OK*/postMessage({command: 'pause'}, '*');
+      this.iframe_.contentWindow./*OK*/postMessage(dict({
+        'command': 'pause',
+      }), '*');
     }
   }
-};
+}
 
- AMP.registerElement('amp-izlesene', AmpIzlesene);
+
+AMP.extension('amp-izlesene', '0.1', AMP => {
+  AMP.registerElement('amp-izlesene', AmpIzlesene);
+});

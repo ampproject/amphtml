@@ -23,14 +23,19 @@ import {
 import {
   USER_ERROR_SENTINEL,
   isUserErrorMessage,
+  isUserErrorEmbed,
   duplicateErrorIfNecessary,
+  dev,
 } from './log';
 import {isProxyOrigin} from './url';
-import {isCanary, experimentTogglesOrNull} from './experiments';
+import {isCanary, experimentTogglesOrNull, getBinaryType} from './experiments';
 import {makeBodyVisible} from './style-installer';
 import {startsWith} from './string';
 import {urls} from './config';
-
+import {AmpEvents} from './amp-events';
+import {triggerAnalyticsEvent} from './analytics';
+import {isExperimentOn} from './experiments';
+import {Services} from './services';
 
 /**
  * @const {string}
@@ -39,10 +44,18 @@ const CANCELLED = 'CANCELLED';
 
 
 /**
- * The threshold for throttled errors. Currently at 0.1%.
+ * The threshold for errors throttled because nothing can be done about
+ * them, but we'd still like to report the rough number.
  * @const {number}
  */
-const THROTTLED_ERROR_THRESHOLD = 1e-3;
+const NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD = 0.001;
+
+/**
+ * The threshold for errors throttled because nothing can be done about
+ * them, but we'd still like to report the rough number.
+ * @const {number}
+ */
+const USER_ERROR_THROTTLE_THRESHOLD = 0.1;
 
 
 /**
@@ -66,11 +79,38 @@ let reportingBackoff = function(work) {
 };
 
 /**
+ * Attempts to stringify a value, falling back to String.
+ * @param {*} value
+ * @return {string}
+ */
+function tryJsonStringify(value) {
+  try {
+    // Cast is fine, because we really don't care here. Just trying.
+    return JSON.stringify(/** @type {!JsonObject} */ (value));
+  } catch (e) {
+    return String(value);
+  }
+}
+
+/**
  * The true JS engine, as detected by inspecting an Error stack. This should be
  * used with the userAgent to tell definitely. I.e., Chrome on iOS is really a
  * Safari JS engine.
  */
 let detectedJsEngine;
+
+/**
+ * @param {!Window} win
+ * @param {*} error
+ * @param {!Element=} opt_associatedElement
+ */
+export function reportErrorForWin(win, error, opt_associatedElement) {
+  reportError(error, opt_associatedElement);
+  if (error && !!win && isUserErrorMessage(error.message)
+      && !isUserErrorEmbed(error.message)) {
+    reportErrorToAnalytics(/** @type {!Error} */(error), win);
+  }
+}
 
 /**
  * Reports an error. If the error has an "associatedElement" property
@@ -93,7 +133,7 @@ export function reportError(error, opt_associatedElement) {
         isValidError = true;
       } else {
         const origError = error;
-        error = new Error(String(origError));
+        error = new Error(tryJsonStringify(origError));
         error.origError = origError;
       }
     } else {
@@ -139,7 +179,7 @@ export function reportError(error, opt_associatedElement) {
       }
     }
     if (element && element.dispatchCustomEventForTesting) {
-      element.dispatchCustomEventForTesting('amp:error', error.message);
+      element.dispatchCustomEventForTesting(AmpEvents.ERROR, error.message);
     }
 
     // 'call' to make linter happy. And .call to make compiler happy
@@ -223,11 +263,13 @@ function reportErrorToServer(message, filename, line, col, error) {
     // due to buggy browser extensions may be helpful to notify authors.
     return;
   }
-  const url = getErrorReportUrl(message, filename, line, col, error,
+  const data = getErrorReportData(message, filename, line, col, error,
       hasNonAmpJs);
-  if (url) {
+  if (data) {
     reportingBackoff(() => {
-      new Image().src = url;
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', urls.errorReporting, true);
+      xhr.send(JSON.stringify(data));
     });
   }
 }
@@ -240,10 +282,10 @@ function reportErrorToServer(message, filename, line, col, error) {
  * @param {string|undefined} col
  * @param {*|undefined} error
  * @param {boolean} hasNonAmpJs
- * @return {string|undefined} The URL
+ * @return {!JsonObject|undefined} The data to post
  * visibleForTesting
  */
-export function getErrorReportUrl(message, filename, line, col, error,
+export function getErrorReportData(message, filename, line, col, error,
     hasNonAmpJs) {
   let expected = false;
   if (error) {
@@ -273,6 +315,7 @@ export function getErrorReportUrl(message, filename, line, col, error,
     return;
   }
 
+  const throttleBase = Math.random();
   // We throttle load errors and generic "Script error." errors
   // that have no information and thus cannot be acted upon.
   if (isLoadErrorMessage(message) ||
@@ -281,112 +324,110 @@ export function getErrorReportUrl(message, filename, line, col, error,
     message == 'Script error.') {
     expected = true;
 
-    // Throttle load errors.
-    if (Math.random() > THROTTLED_ERROR_THRESHOLD) {
+    if (throttleBase > NON_ACTIONABLE_ERROR_THROTTLE_THRESHOLD) {
       return;
     }
   }
 
   const isUserError = isUserErrorMessage(message);
 
+  // Only report a subset of user errors.
+  if (isUserError && throttleBase > USER_ERROR_THROTTLE_THRESHOLD) {
+    return;
+  }
+
   // This is the App Engine app in
-  // ../tools/errortracker
+  // https://github.com/ampproject/error-tracker
   // It stores error reports via https://cloud.google.com/error-reporting/
   // for analyzing production issues.
-  let url = urls.errorReporting +
-      '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
-      '&noAmp=' + (hasNonAmpJs ? 1 : 0) +
-      '&m=' + encodeURIComponent(message.replace(USER_ERROR_SENTINEL, '')) +
-      '&a=' + (isUserError ? 1 : 0);
-  if (expected) {
-    // Errors are tagged with "ex" ("expected") label to allow loggers to
-    // classify these errors as benchmarks and not exceptions.
-    url += '&ex=1';
-  }
+  const data = /** @type {!JsonObject} */ (Object.create(null));
+  data['v'] = getMode().rtvVersion;
+  data['noAmp'] = hasNonAmpJs ? '1' : '0';
+  data['m'] = message.replace(USER_ERROR_SENTINEL, '');
+  data['a'] = isUserError ? '1' : '0';
+
+  // Errors are tagged with "ex" ("expected") label to allow loggers to
+  // classify these errors as benchmarks and not exceptions.
+  data['ex'] = expected ? '1' : '0';
 
   let runtime = '1p';
   if (self.context && self.context.location) {
-    url += '&3p=1';
+    data['3p'] = '1';
     runtime = '3p';
   } else if (getMode().runtime) {
     runtime = getMode().runtime;
   }
-  url += '&rt=' + runtime;
+  data['rt'] = runtime;
 
-  if (isCanary(self)) {
-    url += '&ca=1';
-  }
+  // TODO(erwinm): Remove ca when all systems read `bt` instead of `ca` to
+  // identify js binary type.
+  data['ca'] = isCanary(self) ? '1' : '0';
+
+  // Pass binary type.
+  data['bt'] = getBinaryType(self);
+
   if (self.location.ancestorOrigins && self.location.ancestorOrigins[0]) {
-    url += '&or=' + encodeURIComponent(self.location.ancestorOrigins[0]);
+    data['or'] = self.location.ancestorOrigins[0];
   }
   if (self.viewerState) {
-    url += '&vs=' + encodeURIComponent(self.viewerState);
+    data['vs'] = self.viewerState;
   }
   // Is embedded?
   if (self.parent && self.parent != self) {
-    url += '&iem=1';
+    data['iem'] = '1';
   }
 
   if (self.AMP && self.AMP.viewer) {
     const resolvedViewerUrl = self.AMP.viewer.getResolvedViewerUrl();
     const messagingOrigin = self.AMP.viewer.maybeGetMessagingOrigin();
     if (resolvedViewerUrl) {
-      url += `&rvu=${encodeURIComponent(resolvedViewerUrl)}`;
+      data['rvu'] = resolvedViewerUrl;
     }
     if (messagingOrigin) {
-      url += `&mso=${encodeURIComponent(messagingOrigin)}`;
+      data['mso'] = messagingOrigin;
     }
   }
 
   if (!detectedJsEngine) {
     detectedJsEngine = detectJsEngineFromStack();
   }
-  url += `&jse=${detectedJsEngine}`;
+  data['jse'] = detectedJsEngine;
 
   const exps = [];
-  const experiments = experimentTogglesOrNull();
+  const experiments = experimentTogglesOrNull(self);
   for (const exp in experiments) {
     const on = experiments[exp];
     exps.push(`${exp}=${on ? '1' : '0'}`);
   }
-  url += `&exps=${encodeURIComponent(exps.join(','))}`;
+  data['exps'] = exps.join(',');
 
   if (error) {
     const tagName = error && error.associatedElement
         ? error.associatedElement.tagName
         : 'u';  // Unknown
-    url += `&el=${encodeURIComponent(tagName)}`;
+    data['el'] = tagName;
+
     if (error.args) {
-      url += `&args=${encodeURIComponent(JSON.stringify(error.args))}`;
+      data['args'] = JSON.stringify(error.args);
     }
 
     if (!isUserError && !error.ignoreStack && error.stack) {
-      // Shorten
-      const stack = (error.stack || '').substr(0, 1000);
-      url += `&s=${encodeURIComponent(stack)}`;
+      data['s'] = error.stack;
     }
 
     error.message += ' _reported_';
   } else {
-    url += '&f=' + encodeURIComponent(filename || '') +
-        '&l=' + encodeURIComponent(line || '') +
-        '&c=' + encodeURIComponent(col || '');
+    data['f'] = filename || '';
+    data['l'] = line || '';
+    data['c'] = col || '';
   }
-  url += '&r=' + encodeURIComponent(self.document.referrer);
-  url += '&ae=' + encodeURIComponent(accumulatedErrorMessages.join(','));
-  accumulatedErrorMessages.push(message);
-  url += '&fr=' + encodeURIComponent(self.location.originalHash
-      || self.location.hash);
+  data['r'] = self.document.referrer;
+  data['ae'] = accumulatedErrorMessages.join(',');
+  data['fr'] = self.location.originalHash || self.location.hash;
 
-  // Google App Engine maximum URL length.
-  if (url.length >= 2072) {
-    url = url.substr(0, 2072 - 8 /* length of suffix */)
-        // Full remove last URL encoded entity.
-        .replace(/\%[^&%]+$/, '')
-        // Sentinel
-        + '&SHORT=1';
-  }
-  return url;
+  accumulatedErrorMessages.push(message);
+
+  return data;
 }
 
 /**
@@ -458,4 +499,28 @@ export function detectJsEngineFromStack() {
   }
 
   return 'unknown';
+}
+
+/**
+ * @param {!Error} error
+ * @param {!Window} win
+ */
+export function reportErrorToAnalytics(error, win) {
+  if (isExperimentOn(win, 'user-error-reporting')) {
+    const vars = {
+      'errorName': error.name,
+      'errorMessage': error.message,
+    };
+    triggerAnalyticsEvent(getRootElement_(win), 'user-error', vars);
+  }
+}
+
+/**
+ * @param {!Window} win
+ * @return {!Element}
+ * @private
+ */
+function getRootElement_(win) {
+  const root = Services.ampdocServiceFor(win).getAmpDoc().getRootNode();
+  return dev().assertElement(root.documentElement || root.body || root);
 }

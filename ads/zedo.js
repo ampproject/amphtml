@@ -40,7 +40,7 @@ export function zedo(global, data) {
     if (data.renderer) {
       for (const key in data.renderer) {
         placement.includeRenderer(data.renderer[key].name,
-          data.renderer[key].value);
+            data.renderer[key].value);
       }
     } else {
       placement.includeRenderer('display', {});

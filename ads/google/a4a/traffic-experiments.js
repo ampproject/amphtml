@@ -28,16 +28,14 @@ import {
   EXPERIMENT_ATTRIBUTE,
 } from './utils';
 import {
+  /* eslint no-unused-vars: 0 */ ExperimentInfo,
   isExperimentOn,
   forceExperimentBranch,
   getExperimentBranch,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
 import {dev} from '../../../src/log';
-import {
-  viewerForDoc,
-  performanceForOrNull,
-} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {parseQueryString} from '../../../src/url';
 
 /** @typedef {{
@@ -47,13 +45,8 @@ import {parseQueryString} from '../../../src/url';
 export let A4aExperimentBranches;
 
 /** @type {!string} @private */
-const MANUAL_EXPERIMENT_ID = '117152632';
+export const MANUAL_EXPERIMENT_ID = '117152632';
 
-/** @type {!string} @private */
-const EXTERNALLY_SELECTED_ID = '2088461';
-
-/** @type {!string} @private */
-const INTERNALLY_SELECTED_ID = '2088462';
 
 /**
  * Check whether Google Ads supports the A4A rendering pathway for a given ad
@@ -77,11 +70,14 @@ const INTERNALLY_SELECTED_ID = '2088462';
  * @param {!A4aExperimentBranches} internalBranches experiment and control
  *   branch IDs to use when experiment is triggered internally (i.e., via
  *   client-side selection).
+ * @param {!A4aExperimentBranches} delayedExternalBranches
+ * @param {!A4aExperimentBranches=} opt_sfgInternalBranches
  * @return {boolean} Whether Google Ads should attempt to render via the A4A
  *   pathway.
  */
 export function googleAdsIsA4AEnabled(win, element, experimentName,
-    externalBranches, internalBranches, delayedExternalBranches) {
+    externalBranches, internalBranches, delayedExternalBranches,
+    opt_sfgInternalBranches) {
   if (!isGoogleAdsA4AValidEnvironment(win)) {
     // Serving location doesn't qualify for A4A treatment
     return false;
@@ -91,21 +87,26 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
       experimentName, externalBranches.control,
       externalBranches.experiment, delayedExternalBranches.control,
       delayedExternalBranches.experiment,
+      opt_sfgInternalBranches ? opt_sfgInternalBranches.control : null,
+      opt_sfgInternalBranches ? opt_sfgInternalBranches.experiment : null,
       MANUAL_EXPERIMENT_ID);
-  const experimentInfoMap = {};
-  const branches = [
-    internalBranches.control,
-    internalBranches.experiment,
-  ];
-  experimentInfoMap[experimentName] = {
-    isTrafficEligible: () => true,
-    branches,
-  };
-  // Note: Because the same experimentName is being used everywhere here,
-  // randomlySelectUnsetExperiments won't add new IDs if
-  // maybeSetExperimentFromUrl has already set something for this
-  // experimentName.
-  randomlySelectUnsetExperiments(win, experimentInfoMap);
+  if (!isSetFromUrl) {
+    const experimentInfoMap =
+        /** @type {!Object<string, !ExperimentInfo>} */ ({});
+    const branches = [
+      internalBranches.control,
+      internalBranches.experiment,
+    ];
+    experimentInfoMap[experimentName] = {
+      isTrafficEligible: () => true,
+      branches,
+    };
+    // Note: Because the same experimentName is being used everywhere here,
+    // randomlySelectUnsetExperiments won't add new IDs if
+    // maybeSetExperimentFromUrl has already set something for this
+    // experimentName.
+    randomlySelectUnsetExperiments(win, experimentInfoMap);
+  }
   if (isExperimentOn(win, experimentName)) {
     // Page is selected into the overall traffic experiment.
     // In other words, if A4A has not yet launched serve A4A Fast Fetch,
@@ -113,17 +114,10 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
     const selectedBranch = getExperimentBranch(win, experimentName);
     if (selectedBranch) {
       addExperimentIdToElement(selectedBranch, element);
-      const perf = performanceForOrNull(win);
+      const perf = Services.performanceForOrNull(win);
       if (perf) {
         perf.addEnabledExperiment(experimentName + '-' + selectedBranch);
       }
-    }
-    // Detect how page was selected into the overall experimentName.
-    if (isSetFromUrl) {
-      addExperimentIdToElement(EXTERNALLY_SELECTED_ID, element);
-    } else {
-      // Must be internally selected.
-      addExperimentIdToElement(INTERNALLY_SELECTED_ID, element);
     }
     // Detect whether page is on the "experiment" (i.e., use A4A rendering
     // pathway) branch of the overall traffic experiment or it's on the
@@ -146,6 +140,32 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
 }
 
 /**
+ * @param {!Window} win
+ * @param {!Element} element Ad tag Element.
+ * @return {?string} experiment extracted from page url.
+ */
+export function extractUrlExperimentId(win, element) {
+  const expParam = Services.viewerForDoc(element).getParam('exp') ||
+    parseQueryString(win.location.search)['exp'];
+  if (!expParam) {
+    return null;
+  }
+  // Allow for per type experiment control with Doubleclick key set for 'da'
+  // and AdSense using 'aa'.  Fallback to 'a4a' if type specific is missing.
+  const expKeys = [
+    (element.getAttribute('type') || '').toLowerCase() == 'doubleclick' ?
+      'da' : 'aa',
+    'a4a',
+  ];
+  let arg;
+  let match;
+  expKeys.forEach(key => arg = arg ||
+    ((match = new RegExp(`(?:^|,)${key}:(-?\\d+)`).exec(expParam)) &&
+      match[1]));
+  return arg || null;
+}
+
+/**
  * Set experiment state from URL parameter, if present.  This looks for the
  * presence of a URL parameter of the form
  *   `exp=expt0:val0,expt1:val1,...,a4a:X,...,exptN:valN`
@@ -164,6 +184,8 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  *   - `2`: Ad is on the experimental branch of the overall A4A-vs-3p iframe
  *     experiment.  Ad will render via the A4A path, including early ad
  *     request and (possibly) early rendering in shadow DOM or iframe.
+ * Allows for per network selection using exp=aa:# for AdSense and exp=da:# for
+ * Doubleclick.
  *
  * @param {!Window} win  Window.
  * @param {!Element} element Ad tag Element.
@@ -179,21 +201,8 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  *   parameter or not.
  */
 function maybeSetExperimentFromUrl(win, element, experimentName,
-    controlBranchId, treatmentBranchId, delayedControlId,
-    delayedTreatmentBrandId, manualId) {
-  const expParam = viewerForDoc(element).getParam('exp') ||
-      parseQueryString(win.location.search)['exp'];
-  if (!expParam) {
-    return false;
-  }
-  const match = /(^|,)(a4a:[^,]*)/.exec(expParam);
-  const a4aParam = match && match[2];
-  if (!a4aParam) {
-    return false;
-  }
-  // In the future, we may want to specify multiple experiments in the a4a
-  // arg.  For the moment, however, assume that it's just a single flag.
-  const arg = a4aParam.split(':', 2)[1];
+     controlBranchId, treatmentBranchId, delayedControlId,
+     delayedTreatmentBrandId, sfgControlId, sfgTreatmentId, manualId) {
   const argMapping = {
     '-1': manualId,
     '0': null,
@@ -201,19 +210,20 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
     '2': treatmentBranchId,
     '3': delayedControlId,
     '4': delayedTreatmentBrandId,
+    '5': sfgControlId,
+    '6': sfgTreatmentId,
   };
+  const arg = extractUrlExperimentId(win, element);
   if (argMapping.hasOwnProperty(arg)) {
     forceExperimentBranch(win, experimentName, argMapping[arg]);
     return true;
   } else {
-    dev().warn('A4A-CONFIG', 'Unknown a4a URL parameter: ', a4aParam,
+    dev().warn('A4A-CONFIG', 'Unknown a4a URL parameter: ', arg,
         ' expected one of -1 (manual), 0 (not in experiment), 1 (control ' +
         'branch), or 2 (a4a experiment branch)');
     return false;
   }
 }
-
-
 
 /**
  * Sets of experiment IDs can be attached to Elements via attributes.  In
@@ -283,30 +293,6 @@ export function hasLaunched(win, element) {
     default:
       return false;
   }
-}
-
-/**
- * Checks whether the given element is in any of the branches triggered by
- * the externally-provided experiment parameter (as decided by the
- * #maybeSetExperimentFromUrl function).
- *
- * @param {!Element} element
- * @return {boolean}
- */
-export function isExternallyTriggeredExperiment(element) {
-  return isInExperiment(element, EXTERNALLY_SELECTED_ID);
-}
-
-/**
- * Checks whether the given element is in any of the branches triggered by
- * internal experiment selection (as set by
- * #randomlySelectUnsetExperiments).
- *
- * @param {!Element} element
- * @return {boolean}
- */
-export function isInternallyTriggeredExperiment(element) {
-  return isInExperiment(element, INTERNALLY_SELECTED_ID);
 }
 
 /**

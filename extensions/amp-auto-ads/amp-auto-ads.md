@@ -52,16 +52,14 @@ limitations under the License.
 
 ## Behavior
 Given a sufficient number of valid placements (supplied in the configuration),
-`amp-auto-ads` tries to insert additional ads within the following
-constraints:
+`amp-auto-ads` tries to insert additional ads while adhering to a set of
+constraints specified by the ad network. These constraints will limit:
 <ul>
-  <li>No more than 3 ads on the page (including any existing ads)</li>
-  <li>No injected ad within 500px (measured vertically) of another ad</li>
-  <li>
-    An injected ad does not cause any unacceptable re-flow (as determined by
-    attemptChangeSize).
-  </li>
+  <li>The total number of ads that can be inserted</li>
+  <li>The minimum distance that there should be between any adjacent ads</li>
 </ul>
+In addition to this, ads will only be inserted in locations on the page that do
+not cause an unacceptable re-flow (as determined by attemptChangeSize).
 
 The `<amp-auto-ads>` tag should be placed as the first child of the `<body>`.
 
@@ -79,9 +77,17 @@ should be specified on the tag.
 
 ## Attributes
 
-**type**
+##### type (required)
 
 An identifier for the ad network.
+
+##### data-foo-bar
+
+Most ad networks require further configuration, which can be passed to the network by using HTML `data-` attributes. The parameter names are subject to standard data attribute dash to camel case conversion. For example, "data-foo-bar" is send to the ad for configuration as "fooBar".  See the documentation for the [ad network](#supported-ad-networks) on which attributes can be used.
+
+##### common attributes
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Configuration Spec
 
@@ -304,4 +310,4 @@ The ENUM values for the `type` field in the `placements` configuration object:
 
 ## Validation
 
-See [amp-auto-ads rules](0.1/validator-amp-auto-ads.protoascii) in the AMP validator specification.
+See [amp-auto-ads rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-auto-ads/validator-amp-auto-ads.protoascii) in the AMP validator specification.

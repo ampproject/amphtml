@@ -23,6 +23,7 @@ import {
   getSourceUrl,
   isProxyOrigin,
   isLocalhostOrigin,
+  isProtocolValid,
   isSecureUrl,
   parseQueryString,
   parseUrl,
@@ -31,7 +32,61 @@ import {
   resolveRelativeUrlFallback_,
   serializeQueryString,
   getCorsUrl,
+  getWinOrigin,
 } from '../../src/url';
+
+describe('getWinOrigin', () => {
+
+  it('should return origin if available', () => {
+    expect(getWinOrigin({
+      'origin': 'https://foo.com',
+      'location': {
+        'href': 'https://foo1.com/abc?123#foo',
+      },
+    })).to.equal('https://foo.com');
+  });
+
+
+  it('should return origin from href when win.origin is not available', () => {
+    expect(getWinOrigin({
+      'location': {
+        'href': 'https://foo1.com/abc?123#foo',
+      },
+    })).to.equal('https://foo1.com');
+  });
+
+
+  it('should return origin from href when win.origin is empty', () => {
+    expect(getWinOrigin({
+      'origin': '',
+      'location': {
+        'href': 'https://foo1.com/abc?123#foo',
+      },
+    })).to.equal('https://foo1.com');
+  });
+
+  it('should return origin from href when win.origin is null', () => {
+    expect(getWinOrigin({
+      'origin': null,
+      'location': {
+        'href': 'https://foo1.com/abc?123#foo',
+      },
+    })).to.equal('https://foo1.com');
+  });
+
+  it('should return \"null\" when win.origin is \"null\"', () => {
+    expect(getWinOrigin({
+      'origin': 'null',
+      'location': {
+        'href': 'https://foo1.com/abc?123#foo',
+      },
+    })).to.equal('null');
+  });
+
+
+
+});
+
 
 describe('parseUrl', () => {
 
@@ -417,7 +472,8 @@ describe('addParamsToUrl', () => {
 describe('isProxyOrigin', () => {
 
   function testProxyOrigin(href, bool) {
-    it('should return whether it is a proxy origin for ' + href, () => {
+    it('should return that ' + href + (bool ? ' is' : ' is not') +
+        ' a proxy origin', () => {
       expect(isProxyOrigin(parseUrl(href))).to.equal(bool);
     });
   }
@@ -427,6 +483,12 @@ describe('isProxyOrigin', () => {
       'https://cdn.ampproject.org/', true);
   testProxyOrigin(
       'http://cdn.ampproject.org/', false);
+  testProxyOrigin(
+      'https://cdn.ampproject.org.badguys.com/', false);
+  testProxyOrigin(
+      'https://cdn.ampproject.orgbadguys.com/', false);
+  testProxyOrigin(
+      'https://cdn.ampproject.org:1234', false);
   testProxyOrigin(
       'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0', true);
   testProxyOrigin(
@@ -458,7 +520,8 @@ describe('isProxyOrigin', () => {
 
 describe('isLocalhostOrigin', () => {
   function testLocalhostOrigin(href, bool) {
-    it('should return whether it is a localhost origin for ' + href, () => {
+    it('should return that ' + href + (bool ? ' is' : ' is not') +
+      ' a localhost origin', () => {
       expect(isLocalhostOrigin(parseUrl(href))).to.equal(bool);
     });
   }
@@ -475,6 +538,29 @@ describe('isLocalhostOrigin', () => {
       'http://localhost.example.com/foo.html', false);
   testLocalhostOrigin(
       'http://www.example.com/foo.html', false);
+});
+
+describe('isProtocolValid', () => {
+  function testProtocolValid(href, bool) {
+    it('should return that ' + href + (bool ? ' is' : ' is not') +
+      ' a valid protocol', () => {
+      expect(isProtocolValid(href)).to.equal(bool);
+    });
+  }
+
+  testProtocolValid('http://foo.com', true);
+  testProtocolValid('https://foo.com', true);
+  testProtocolValid('bar://foo.com', true);
+  testProtocolValid('', true);
+  testProtocolValid('foo', true);
+  testProtocolValid('./foo', true);
+  testProtocolValid('/foo', true);
+  testProtocolValid('//foo.com', true);
+  testProtocolValid(undefined, true);
+  testProtocolValid(null, true);
+  testProtocolValid('javascript:alert("hello world!");', false);
+  testProtocolValid('data:12345', false);
+  testProtocolValid('vbscript:foo', false);
 });
 
 describe('getSourceOrigin/Url', () => {
@@ -505,6 +591,9 @@ describe('getSourceOrigin/Url', () => {
   testOrigin(
       'https://cdn.ampproject.org/c/s/origin.com%3A81/foo/?f=0',
       'https://origin.com:81/foo/?f=0');
+  testOrigin(
+      'https://cdn.ampproject.org/a/www.origin.com/foo/?f=0#h',
+      'http://www.origin.com/foo/?f=0#h');
 
   // Prefixed CDN
   testOrigin(
@@ -549,6 +638,38 @@ describe('getSourceOrigin/Url', () => {
       'https://cdn.ampproject.org/c/o.com/foo/&amp_js_param=5&d=5',
       'http://o.com/foo/&amp_js_param=5&d=5');  // Treats &... as part of path.
 
+  // Removes google experimental queryString parameters.
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/?usqp=mq331AQCCAE',
+      'http://o.com/foo/');
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/?usqp=mq331AQCCAE&amp_js_param=5',
+      'http://o.com/foo/');
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/?amp_js_param=5&usqp=mq331AQCCAE',
+      'http://o.com/foo/');
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/?usqp=mq331AQCCAE&bar=1&amp_js_param=5',
+      'http://o.com/foo/?bar=1');
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/?f=0&usqp=mq331AQCCAE#something',
+      'http://o.com/foo/?f=0#something');
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/?usqp=mq331AQCCAE&f=0#bar',
+      'http://o.com/foo/?f=0#bar');
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/?f=0&usqp=mq331AQCCAE&d=5#baz',
+      'http://o.com/foo/?f=0&d=5#baz');
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/?f_usqp=mq331AQCCAE&d=5',
+      'http://o.com/foo/?f_usqp=mq331AQCCAE&d=5');
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/?usqp=mq331AQCCAE?d=5',
+      'http://o.com/foo/');  // Treats amp_js_param=5?d=5 as one param.
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/&usqp=mq331AQCCAE&d=5',
+      'http://o.com/foo/&usqp=mq331AQCCAE&d=5');  // Treats &... as part of path.
+
   // Non-CDN.
   testOrigin(
       'https://origin.com/foo/?f=0',
@@ -592,10 +713,12 @@ describe('resolveRelativeUrl', () => {
       '//acme.org/path/file?f=0#h',
       'http://base.org/bpath/bfile?bf=0#bh',
       'http://acme.org/path/file?f=0#h');
-  testRelUrl(
-      '\\\\acme.org/path/file?f=0#h',
-      'http://base.org/bpath/bfile?bf=0#bh',
-      'http://acme.org/path/file?f=0#h');
+
+  // TODO(camelburrito, #11827): This resolves to file:// on Sauce Labs.
+  // testRelUrl(
+  //     '\\\\acme.org/path/file?f=0#h',
+  //     'http://base.org/bpath/bfile?bf=0#bh',
+  //     'http://acme.org/path/file?f=0#h');
 
   // Absolute path.
   testRelUrl(

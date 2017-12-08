@@ -14,29 +14,31 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-jwplayer';
-import {adopt} from '../../../../src/runtime';
 
-adopt(window);
 
-describe('amp-jwplayer', () => {
+describes.realWin('amp-jwplayer', {
+  amp: {
+    extensions: ['amp-jwplayer'],
+  },
+}, env => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
 
   function getjwplayer(attributes) {
-    return createIframePromise().then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const jw = iframe.doc.createElement('amp-jwplayer');
-      for (const key in attributes) {
-        jw.setAttribute(key, attributes[key]);
-      }
-      jw.setAttribute('width', '320');
-      jw.setAttribute('height', '180');
-      jw.setAttribute('layout', 'responsive');
-      return iframe.addElement(jw);
-    });
+    const jw = doc.createElement('amp-jwplayer');
+    for (const key in attributes) {
+      jw.setAttribute(key, attributes[key]);
+    }
+    jw.setAttribute('width', '320');
+    jw.setAttribute('height', '180');
+    jw.setAttribute('layout', 'responsive');
+    doc.body.appendChild(jw);
+    return jw.build().then(() => jw.layoutCallback()).then(() => jw);
   }
 
   it('renders', () => {
@@ -70,7 +72,7 @@ describe('amp-jwplayer', () => {
     return getjwplayer({
       'data-player-id': 'sDZEo0ea',
     }).should.eventually.be.rejectedWith(
-      /Either the data-media-id or the data-playlist-id attributes must be/
+        /Either the data-media-id or the data-playlist-id attributes must be/
     );
   });
 
@@ -78,7 +80,7 @@ describe('amp-jwplayer', () => {
     return getjwplayer({
       'data-media-id': 'Wferorsv',
     }).should.eventually.be.rejectedWith(
-      /The data-player-id attribute is required for/
+        /The data-player-id attribute is required for/
     );
   });
 
@@ -121,5 +123,4 @@ describe('amp-jwplayer', () => {
       });
     });
   });
-
 });

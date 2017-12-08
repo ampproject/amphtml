@@ -20,6 +20,7 @@ import {getMode} from './mode';
 import {urls} from './config';
 import {isArray} from './types';
 import {parseQueryString_} from './url-parse-query-string';
+import {tryDecodeUriComponent_} from './url-try-decode-uri-component';
 
 /**
  * Cached a-tag to avoid memory allocation during URL parsing.
@@ -35,11 +36,29 @@ let a;
  */
 let cache;
 
-/** @private @const Matches amp_js_* paramters in query string. */
+/** @private @const Matches amp_js_* parameters in query string. */
 const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
+
+/** @private @const Matches usqp parameters from goog experiment in query string. */
+const GOOGLE_EXPERIMENT_PARAMS_REGEX = /[?&]usqp[^&]*/;
+
+const INVALID_PROTOCOLS = [
+  /*eslint no-script-url: 0*/ 'javascript:',
+  /*eslint no-script-url: 0*/ 'data:',
+  /*eslint no-script-url: 0*/ 'vbscript:',
+];
 
 /** @const {string} */
 export const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
+
+/**
+ * Returns the correct origin for a given window.
+ * @param {!Window} win
+ * @return {string} origin
+ */
+export function getWinOrigin(win) {
+  return win.origin || parseUrl(win.location.href).origin;
+}
 
 /**
  * Returns a Location-like object for the given URL. If it is relative,
@@ -170,7 +189,7 @@ export function addParamToUrl(url, key, value, opt_addToFront) {
  * Appends query string fields and values to a url. The `params` objects'
  * `key`s and `value`s will be transformed into query string keys/values.
  * @param {string} url
- * @param {!Object<string, string|!Array<string>>} params
+ * @param {!JsonObject<string, string|!Array<string>>} params
  * @return {string}
  */
 export function addParamsToUrl(url, params) {
@@ -180,7 +199,7 @@ export function addParamsToUrl(url, params) {
 /**
  * Serializes the passed parameter map into a query string with both keys
  * and values encoded.
- * @param {!Object<string, string|!Array<string>>} params
+ * @param {!JsonObject<string, string|!Array<string>>} params
  * @return {string}
  */
 export function serializeQueryString(params) {
@@ -262,7 +281,7 @@ export function assertAbsoluteHttpOrHttpsUrl(urlString) {
  * dependency.
  *
  * @param {string} queryString
- * @return {!Object<string>}
+ * @return {!JsonObject}
  */
 export function parseQueryString(queryString) {
   return parseQueryString_(queryString);
@@ -322,18 +341,18 @@ export function isLocalhostOrigin(url) {
 
 /**
  * Returns whether the URL has valid protocol.
- * @param {string|!Location} url URL of an AMP document.
+ * Deep link protocol is valid, but not javascript etc.
+ * @param {string|!Location} url
  * @return {boolean}
  */
 export function isProtocolValid(url) {
+  if (!url) {
+    return true;
+  }
   if (typeof url == 'string') {
     url = parseUrl(url);
   }
-  const invalidProtocols = [
-    /*eslint no-script-url: 0*/ 'javascript:',
-    /*eslint no-script-url: 0*/ 'data:',
-    /*eslint no-script-url: 0*/ 'vbscript:'];
-  return !invalidProtocols.includes(url.protocol);
+  return !INVALID_PROTOCOLS.includes(url.protocol);
 }
 
 /**
@@ -348,6 +367,7 @@ function removeAmpJsParams(urlSearch) {
   }
   const search = urlSearch
       .replace(AMP_JS_PARAMS_REGEX, '')
+      .replace(GOOGLE_EXPERIMENT_PARAMS_REGEX, '')
       .replace(/^[?&]/, '');  // Removes first ? or &.
   return search ? '?' + search : '';
 }
@@ -374,7 +394,7 @@ export function getSourceUrl(url) {
   // The /s/ is optional and signals a secure origin.
   const path = url.pathname.split('/');
   const prefix = path[1];
-  user().assert(prefix == 'c' || prefix == 'v',
+  user().assert(prefix == 'a' || prefix == 'c' || prefix == 'v',
       'Unknown path prefix in url %s', url.href);
   const domainOrHttpsSignal = path[2];
   const origin = domainOrHttpsSignal == 's'
@@ -470,4 +490,16 @@ export function checkCorsUrl(url) {
   const query = parseQueryString(parsedUrl.search);
   user().assert(!(SOURCE_ORIGIN_PARAM in query),
       'Source origin is not allowed in %s', url);
+}
+
+/**
+ * Tries to decode a URI component, falling back to opt_fallback (or an empty
+ * string)
+ *
+ * @param {string} component
+ * @param {string=} opt_fallback
+ * @return {string}
+ */
+export function tryDecodeUriComponent(component, opt_fallback) {
+  return tryDecodeUriComponent_(component, opt_fallback);
 }

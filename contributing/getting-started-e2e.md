@@ -13,6 +13,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+
+# Getting Started End-to-end
+
+This end-to-end guide will show you how to contribute code to the AMP Project.  It covers everything from creating a GitHub account to getting your code reviewed and merged.
+
+This guide is intended for people who don't know much about Git/GitHub and the tools we use to build/test AMP (Node.js, Gulp, etc.).  The guide may look long, but it includes a lot of explanation so you can get a better understanding of how things work.
+
+If you're already familiar with Git/GitHub/etc. or you just want to know what commands to type in instead of what they're doing take a look at the much shorter [Quick Start Guide](getting-started-quick.md).
+
+If you do not yet have a specific code contribution project in mind as you go through this guide, consider grabbing one of the [Good First Issues](https://github.com/ampproject/amphtml/labels/good%20first%20issue) we have created for new contributors.
+
 - [How to get help](#how-to-get-help)
 - [Intro to Git and GitHub](#intro-to-git-and-github)
 - [Set up your GitHub account and Git](#set-up-your-github-account-and-git)
@@ -35,21 +46,13 @@ limitations under the License.
 - [⚡⚡⚡... (Next steps)](#-next-steps)
 - [Other resources](#other-resources)
 
-# Getting Started End-to-end
-
-This end-to-end guide will show you how to contribute code to the AMP Project.  It covers everything from creating a GitHub account to getting your code reviewed and merged.
-
-This guide is intended for people who don't know much about Git/GitHub and the tools we use to build/test AMP (Node.js, Gulp, etc.).  The guide may look long, but it includes a lot of explanation so you can get a better understanding of how things work.
-
-If you're already familiar with Git/GitHub/etc. or you just want to know what commands to type in instead of what they're doing take a look at the much shorter [Quick Start Guide](getting-started-quick.md).
-
 # How to get help
 
 If you have a question or are unsure about something while following this end-to-end guide, you can get help from the AMP Project community in many ways:
 
-* If you are tackling a [Great First Issue](https://github.com/ampproject/amphtml/milestone/25) or other GitHub issue you can ask a question as a comment on the issue directly.  This works particularly well if the question is about how to make progress on that specific issue.
+* If you are tackling a [Good First Issue](https://github.com/ampproject/amphtml/labels/good%20first%20issue) or other GitHub issue you can ask a question as a comment on the issue directly.  This works particularly well if the question is about how to make progress on that specific issue.
 
-* The [#welcome-contributors](https://amphtml.slack.com/messages/welcome-contributors/) channel on Slack is a place for new contributors getting up to speed in the AMP Project to find help.  You should feel comfortable asking any question in there no matter how basic it may seem to you (e.g. problems getting Git set up, errors during a build, etc.).  If you haven't already signed up for our Slack, you'll need to [request an invitation](https://docs.google.com/forms/d/e/1FAIpQLSd83J2IZA6cdR6jPwABGsJE8YL4pkypAbKMGgUZZriU7Qu6Tg/viewform?fbzx=4406980310789882877).
+* The [#welcome-contributors](https://amphtml.slack.com/messages/welcome-contributors/) channel on Slack is a place for new contributors getting up to speed in the AMP Project to find help.  You should feel comfortable asking any question in there no matter how basic it may seem to you (e.g. problems getting Git set up, errors during a build, etc.).  We'll send you an [invitation](https://docs.google.com/forms/d/e/1FAIpQLSd83J2IZA6cdR6jPwABGsJE8YL4pkypAbKMGgUZZriU7Qu6Tg/viewform?fbzx=4406980310789882877) if you're not already on the AMP Slack.
 
 * You can also ask questions on [amphtml-discuss@googlegroups.com](https://groups.google.com/forum/#!forum/amphtml-discuss).
 
@@ -148,17 +151,18 @@ Now run `git remote -v` again and notice that you have set up your upstream alia
 
 Now that you have all of the files copied locally you can actually build the code and run a local server to try things out.
 
-amphtml uses Node.js, the yarn package manager and the Gulp build system to build amphtml and start up a local server that lets you try out your changes.  Installing these and getting amphtml built is straightforward:
+amphtml uses Node.js, the Yarn package manager and the Gulp build system to build amphtml and start up a local server that lets you try out your changes.  Installing these and getting amphtml built is straightforward:
 
-* Install [NodeJS](https://nodejs.org/) (which includes npm).
+* Install [NodeJS](https://nodejs.org/) version >= 6 (which includes npm)
 
-* Install [yarn](https://yarnpkg.com/en/docs/install)
+
+* Install [Yarn](https://yarnpkg.com/) version >= 1.0.2 (instructions [here](https://yarnpkg.com/en/docs/install), this may require elevated privileges using `sudo` on some platforms)
 
 * In your local repository directory (e.g. `~/src/ampproject/amphtml`), install the packages that AMP uses by running
    ```
    yarn
    ```
-   You should see a progress indicator and some messages scrolling by.  You may see some warnings about optional dependencies that are generally safe to ignore.
+   You should see a progress indicator and some messages scrolling by.  You may see some warnings about optional dependencies, which are generally safe to ignore.
 
 * For some local testing we refer to fake local URLs in order to simulate referencing third party URLs.  This requires extra setup so your browser will know that these URLs actually point to your local server.
 
@@ -168,11 +172,13 @@ amphtml uses Node.js, the yarn package manager and the Gulp build system to buil
 
 * The AMP Project uses Gulp as our build system.   Gulp uses a configuration file ([gulpfile.js](https://github.com/ampproject/amphtml/blob/master/gulpfile.js)) to build amphtml (including the amphtml javascript) and to start up the Node.js server with the proper settings.  You don't really have to understand exactly what it is doing at this point--you just have to install it and use it.
 
-   You can install Gulp using yarn:
+   You can install Gulp using Yarn:
 
    ```
    yarn global add gulp
    ```
+
+   The preceding command might require elevated privileges using `sudo` on some platforms.
 
 Now whenever you're ready to build amphtml and start up your local server, simply go to your local repository directory and run:
 
@@ -184,13 +190,19 @@ Running the `gulp` command will compile the code and start up a Node.js server l
 
 You can browse the [http://localhost:8000/examples](http://localhost:8000/examples) directory to see some demo pages for various AMP components and combination of components.
 
-Note that by default each of the pages in the /examples directory actually uses the production version of AMP JavaScript; you can verify this by loading an example page in your browser, viewing the source and seeing that it is loading the AMP JavaScript from cdn.ampproject.org.
+Note that by default each of the pages in the /examples directory uses the unminified AMP JavaScript from your local server. You can also change which JS to load from local server by hitting the `/serve_mode=<mode>` endpoint:
 
-For local development you will usually want to load the JS from your local server to test your changes.  You can do this by changing the URL suffix from .html to .max.html, e.g.
+- [http://localhost:8000/serve_mode=default](http://localhost:8000/serve_mode=default)
 
-* [http://localhost:8000/examples/article.amp.html](http://localhost:8000/examples/article.amp.html) loads an example page that uses AMP JS from cdn.ampproject.org
+  This is the default. Unminified AMP JavaScript is served from the local server. For local development you will usually want to serve unminified JS to test your changes.
 
-* [http://localhost:8000/examples/article.amp.max.html](http://localhost:8000/examples/article.amp.max.html) loads an example page that uses the locally built JS  (if you view the source of the .max.html files, you'll see that it is loading the JS from your local `/dist` directory)
+- [http://localhost:8000/serve_mode=compiled](http://localhost:8000/serve_mode=compiled)
+
+  Minified AMP JavaScript is served from the local server. This is only available after running `gulp dist --fortesting`.
+
+- [http://localhost:8000/serve_mode=cdn](http://localhost:8000/serve_mode=cdn)
+
+  Minified AMP JavaScript is served from `cdn.ampproject.org`.
 
 When you're ready to make changes, you'll want to follow the steps below for creating a branch, testing and sending your changes for review.
 
@@ -261,6 +273,10 @@ The common workflow for making changes to files in Git is:
 
 * edit some files using your favorite editor
 
+* if your code requires a new dependency, run `yarn add --dev --exact [packagename]`, which will automatically update `package.json` and `yarn.lock`
+
+* if you manually edited `package.json`, run `yarn install` to install the dependency and generate an updated `yarn.lock` file
+
 * tell Git that you care about these changes by _staging_ them using the `git add` command
 
 * create a checkpoint (called a _commit_) that bundles together the changes you've staged by using the `git commit` command
@@ -313,7 +329,7 @@ Before sending your code changes for review, you will want to make sure that all
 
 ## Running tests locally
 
-Make sure you are in the branch that has your changes (`git branch <branch name>`), pull in the latest changes from the remote amphtml repository and then simply run:
+Make sure you are in the branch that has your changes (`git checkout <branch name>`), pull in the latest changes from the remote amphtml repository and then simply run:
 
 `gulp test`
 
@@ -325,7 +341,7 @@ If the tests have failed you will need to determine whether the failure is relat
 
 If the failing test looks completely unrelated to your change, it *might* be due to bad code/tests that have made it into the amphtml repository.  You can check the latest [amphtml test run on Travis](https://travis-ci.org/ampproject/amphtml/builds).  If it's green (meaning the tests pass) then it's more likely the failure is a problem with your change.  If it's red, you can click through to see if the failing tests are the same as the ones you see locally.
 
-Fixing the tests will depend heavily on the change you are making and what tests are failing.  If you need help to fix them you can ask on the GitHub issue you're working on or reach out to the community as described in [How to get help](#how-to-get-help).  
+Fixing the tests will depend heavily on the change you are making and what tests are failing.  If you need help to fix them you can ask on the GitHub issue you're working on or reach out to the community as described in [How to get help](#how-to-get-help).
 
 ## Adding tests for your change
 
@@ -389,7 +405,7 @@ Note that you *can* edit files in your branch directly on GitHub using the web U
 In order for your changes to become part of the amphtml repository, you will need to get your code reviewed by one of the [core committers](https://github.com/ampproject/amphtml/blob/master/GOVERNANCE.md) via a Pull Request (PR).  In fact you won't actually merge your code into the amphtml repository directly; once a core committer approves it he or she will handle the merge for you.
 
 Once your code is ready for a review, go to [https://github.com/ampproject/amphtml](https://github.com/ampproject/amphtml) and click on the "Compare & pull request" button on the "recently pushed branches" banner.  If that banner isn't visible, go to your GitHub fork at
-`https://github.com/<username>/amphtml`, use the Branch dropdown to select the branch that contains the changes you want reviewed and press the "New pull request" button.  
+`https://github.com/<username>/amphtml`, use the Branch dropdown to select the branch that contains the changes you want reviewed and press the "New pull request" button.
 
 On the "Open a pull request" page, you will see dropdowns at the top indicating the proposed merge.  It will look something like:
 
@@ -462,12 +478,15 @@ The [Release Schedule](release-schedule.md) doc has more details on the release 
 
 # ⚡⚡⚡... (Next steps)
 
-Now that you know the process for making changes to the AMP Project you already have most of the heavy lifting done.  **We look forward to seeing your future contributions to the project.** :)
+Now that you know the process for making changes to the AMP Project you already have most of the heavy lifting done.  **We look forward to seeing your future [contributions](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md) to the project.** :)
+
+If you're looking for ideas on your next contribution feel free to reach out to anyone you worked with on your first contribution or let us know in the [#welcome-contributors](https://amphtml.slack.com/messages/welcome-contributors/) channel on Slack.  (We'll send you an [invitation](https://docs.google.com/forms/d/e/1FAIpQLSd83J2IZA6cdR6jPwABGsJE8YL4pkypAbKMGgUZZriU7Qu6Tg/viewform?fbzx=4406980310789882877) if you're not already on the AMP Slack.)
 
 # Other resources
 
 This end-to-end guide provided enough details to get a basic understanding of a typical workflow for contributing code to the AMP Project.  If you find yourself wanting to know more there are a lot of resources available.  Here are a few:
 
+* The ["Creating your first AMP Component" codelab](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/index.html) provides step-by-step instructions for a common type of code contribution to the AMP Project.  Even if your project involves modifying an existing AMP component this codelab will give you an overview of how AMP components work.
 * GitHub has a lot of helpful introductory material, including:
    * a [Hello World tutorial](https://guides.github.com/activities/hello-world/) that's a bit less in depth than this guide, but it covers things like creating a new repository and merging in code after a pull request
    * the [Git cheat sheet](https://services.github.com/on-demand/downloads/github-git-cheat-sheet.pdf) from GitHub provides a quick reference to some common commands, including many we didn't cover in this guide (such as [diff](https://www.git-tower.com/learn/git/ebook/en/command-line/advanced-topics/diffs) and [log](https://git-scm.com/book/en/v2/Git-Basics-Viewing-the-Commit-History))

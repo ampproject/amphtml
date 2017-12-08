@@ -15,6 +15,8 @@
  */
 
 import {dev} from './log';
+import {isArray, isFiniteNumber} from './types';
+import {dict} from './utils/object';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
 import {SubscriptionApi} from './iframe-helper';
 
@@ -36,7 +38,7 @@ export let DOMRect;
 
 export const DEFAULT_THRESHOLD =
     [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4,
-    0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1];
+      0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1];
 
 /** @typedef {{
  *    element: !Element,
@@ -102,7 +104,7 @@ export class IntersectionObserverApi {
     /** @private {?function()} */
     this.unlistenOnDestroy_ = null;
 
-    /** @private @const {!./service/viewport-impl.Viewport} */
+    /** @private @const {!./service/viewport/viewport-impl.Viewport} */
     this.viewport_ = baseElement.getViewport();
 
     /** @private {?SubscriptionApi} */
@@ -116,7 +118,7 @@ export class IntersectionObserverApi {
       for (let i = 0; i < entries.length; i++) {
         delete entries[i]['target'];
       }
-      this.subscriptionApi_.send('intersection', {changes: entries});
+      this.subscriptionApi_.send('intersection', dict({'changes': entries}));
     }, {threshold: DEFAULT_THRESHOLD});
     this.intersectionObserver_.tick(this.viewport_.getRect());
 
@@ -192,11 +194,24 @@ export class IntersectionObserverPolyfill {
     /** @private @const {function(?Array<!IntersectionObserverEntry>)} */
     this.callback_ = callback;
 
+    // The input threshold can be a number or an array of numbers.
+    let threshold = opt_option && opt_option.threshold;
+    if (threshold) {
+      threshold = isArray(threshold) ?
+          threshold : [threshold];
+    } else {
+      threshold = [0];
+    }
+
+    for (let i = 0; i < threshold.length; i++) {
+      dev().assert(isFiniteNumber(threshold[i]), 'Threshold should be a ' +
+          'finite number or an array of finite numbers');
+    }
+
     /**
      * A list of threshold, sorted in increasing numeric order
      * @private @const {!Array}
      */
-    const threshold = opt_option && opt_option.threshold || [0];
     this.threshold_ = threshold.sort();
     dev().assert(this.threshold_[0] >= 0 &&
         this.threshold_[this.threshold_.length - 1] <= 1,
@@ -325,14 +340,13 @@ export class IntersectionObserverPolyfill {
     const element = state.element;
 
     // Normalize container LayoutRect to be relative to page
-    let elementRect;
     let ownerRect = null;
 
     // If opt_iframe is provided, all LayoutRect has position relative to
     // the iframe.
     // If opt_iframe is not provided, all LayoutRect has position relative to
     // the host document.
-    elementRect = element.getLayoutBox();
+    const elementRect = element.getLayoutBox();
     const owner = element.getOwner();
     ownerRect = owner && owner.getLayoutBox();
 
@@ -357,24 +371,6 @@ export class IntersectionObserverPolyfill {
     changeEntry.target = element;
     return changeEntry;
   }
-}
-
-/**
- * Transforms a LayoutRect into a DOMRect for use in intersection observers.
- * @param {!./layout-rect.LayoutRectDef} rect
- * @return {!DOMRect}
- */
-function DomRectFromLayoutRect(rect) {
-  return {
-    left: rect.left,
-    top: rect.top,
-    width: rect.width,
-    height: rect.height,
-    bottom: rect.bottom,
-    right: rect.right,
-    x: rect.left,
-    y: rect.top,
-  };
 }
 
 /**
@@ -453,9 +449,9 @@ function calculateChangeEntry(
   return /** @type {!IntersectionObserverEntry} */ ({
     time: (typeof performance !== 'undefined' && performance.now) ?
         performance.now() : Date.now() - INIT_TIME,
-    rootBounds: rootBounds && DomRectFromLayoutRect(rootBounds),
-    boundingClientRect: DomRectFromLayoutRect(boundingClientRect),
-    intersectionRect: DomRectFromLayoutRect(intersection),
+    rootBounds,
+    boundingClientRect,
+    intersectionRect: intersection,
     intersectionRatio: ratio,
   });
 }

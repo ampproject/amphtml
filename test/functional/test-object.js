@@ -17,10 +17,16 @@
 import * as object from '../../src/utils/object';
 
 describe('Object', () => {
-  it('hasOwn works', () => {
+  it('hasOwn', () => {
     expect(object.hasOwn(object.map(), 'a')).to.be.false;
     expect(object.hasOwn(object.map({'a': 'b'}), 'b')).to.be.false;
     expect(object.hasOwn(object.map({'a': {}}), 'a')).to.be.true;
+  });
+
+  it('ownProperty', () => {
+    expect(object.ownProperty({}, '__proto__')).to.be.undefined;
+    expect(object.ownProperty({}, 'constructor')).to.be.undefined;
+    expect(object.ownProperty({foo: 'bar'}, 'foo')).to.equal('bar');
   });
 
   describe('map', () => {
@@ -144,7 +150,7 @@ describe('Object', () => {
       const fromObject = {};
       fromObject.a = fromObject;
       expect(() => object.deepMerge(destObject, fromObject))
-          .to.throw(/Source object contains circular references/);
+          .to.throw(/Source object has a circular reference./);
     });
 
     it('should merge null and undefined correctly', () => {
@@ -188,7 +194,5 @@ describe('Object', () => {
       };
       expect(object.deepMerge(destObject, destObject)).to.not.throw;
     });
-
   });
-
 });

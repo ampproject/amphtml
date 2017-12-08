@@ -14,17 +14,11 @@
  * limitations under the License.
  */
 
-import {PublicKeyInfoDef} from '../crypto';
 import {registerServiceBuilder, getService} from '../service';
 import {dev} from '../log';
-import {extensionsFor} from '../services';
-import {stringToBytes, utf8Encode} from '../utils/bytes';
-import {
-  base64UrlDecodeToBytes,
-  base64UrlEncodeFromBytes} from '../utils/base64';
-
-/** @const {number} */
-const VERSION = 0x00;
+import {Services} from '../services';
+import {stringToBytes, utf8EncodeSync} from '../utils/bytes';
+import {base64UrlEncodeFromBytes} from '../utils/base64';
 
 /** @const {string} */
 const TAG = 'Crypto';
@@ -36,11 +30,28 @@ export class Crypto {
     /** @private {!Window} */
     this.win_ = win;
 
-    /** @private @const {?webCrypto.SubtleCrypto} */
-    this.subtle_ = getSubtle(win);
+    let subtle = null;
+    let isLegacyWebkit = false;
+    if (win.crypto) {
+      if (win.crypto.subtle) {
+        subtle = win.crypto.subtle;
+      } else if (win.crypto.webkitSubtle) {
+        subtle = win.crypto.webkitSubtle;
+        isLegacyWebkit = true;
+      }
+    }
+
+    /** @const {{name: string}} */
+    this.pkcsAlgo = {
+      name: 'RSASSA-PKCS1-v1_5',
+      hash: {name: 'SHA-256'},
+    };
+
+    /** @const {?webCrypto.SubtleCrypto} */
+    this.subtle = subtle;
 
     /** @private @const {boolean} */
-    this.isWebkit_ = this.subtle_ && win.crypto && 'webkitSubtle' in win.crypto;
+    this.isLegacyWebkit_ = isLegacyWebkit;
 
     /** @private {?Promise<{sha384: function((string|Uint8Array))}>} */
     this.polyfillPromise_ = null;
@@ -58,25 +69,25 @@ export class Crypto {
       input = stringToBytes(input);
     }
 
-    if (!this.subtle_ || this.polyfillPromise_) {
+    if (!this.subtle || this.polyfillPromise_) {
       // means native Crypto API is not available or failed before.
       return (this.polyfillPromise_ || this.loadPolyfill_())
           .then(polyfill => polyfill.sha384(input));
     }
 
     try {
-      return this.subtle_.digest({name: 'SHA-384'}, input)
+      return this.subtle.digest({name: 'SHA-384'}, input)
           /** @param {?} buffer */
           .then(buffer => new Uint8Array(buffer),
-              e => {
+          e => {
                 // Chrome doesn't allow the usage of Crypto API under
                 // non-secure origin: https://www.chromium.org/Home/chromium-security/prefer-secure-origins-for-powerful-new-features
-                if (e.message && e.message.indexOf('secure origin') < 0) {
+            if (e.message && e.message.indexOf('secure origin') < 0) {
                   // Log unexpected fallback.
-                  dev().error(TAG, FALLBACK_MSG, e);
-                }
-                return this.loadPolyfill_().then(() => this.sha384(input));
-              });
+              dev().error(TAG, FALLBACK_MSG, e);
+            }
+            return this.loadPolyfill_().then(() => this.sha384(input));
+          });
     } catch (e) {
       dev().error(TAG, FALLBACK_MSG, e);
       return this.loadPolyfill_().then(() => this.sha384(input));
@@ -123,151 +134,60 @@ export class Crypto {
     if (this.polyfillPromise_) {
       return this.polyfillPromise_;
     }
-    return this.polyfillPromise_ = extensionsFor(this.win_)
-        .loadExtension('amp-crypto-polyfill')
+    return this.polyfillPromise_ = Services.extensionsFor(this.win_)
+        .preloadExtension('amp-crypto-polyfill')
         .then(() => getService(this.win_, 'crypto-polyfill'));
   }
 
   /**
-   * Convert a JSON Web Key object to a browser-native cryptographic key and
-   * compute a hash for it.  The caller must verify that Web Cryptography is
-   * available using isCryptoAvailable before calling this function.
+   * Checks whether Web Cryptography is available, which is required for PKCS 1
+   * operations. SHA-384 operations do not need this because there's a polyfill.
+   * This could be false if the browser does not support Web Cryptography, or if
+   * the current browsing context is not secure (e.g., it's on an insecure HTTP
+   * page, or an HTTPS iframe embedded in an insecure HTTP page).
    *
-   * @param {string} serviceName used to identify the signing service.
-   * @param {!Object} jwk An object which is hopefully an RSA JSON Web Key.  The
-   *     caller should verify that it is an object before calling this function.
-   * @return {!Promise<!PublicKeyInfoDef>}
+   * @return {boolean} whether Web Cryptography is available
    */
-  importPublicKey(serviceName, jwk) {
-    dev().assert(this.isCryptoAvailable());
-    // WebKit wants this as an ArrayBufferView.
-    return (this.isWebkit_ ?
-          utf8Encode(JSON.stringify(jwk)) : Promise.resolve(jwk))
-        .then(encodedJwk => this.subtle_.importKey(
-            'jwk',
-            encodedJwk,
-            {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}},
-            true,
-            ['verify']))
-        .then(cryptoKey => {
-          // We do the importKey first to allow the browser to check for
-          // an invalid key.  This last check is in case the key is valid
-          // but a different kind.
-          if (typeof jwk.n != 'string' || typeof jwk.e != 'string') {
-            throw new Error('missing fields in JSON Web Key');
-          }
-          const mod = base64UrlDecodeToBytes(jwk.n);
-          const pubExp = base64UrlDecodeToBytes(jwk.e);
-          const lenMod = lenPrefix(mod);
-          const lenPubExp = lenPrefix(pubExp);
-          const data = new Uint8Array(lenMod.length + lenPubExp.length);
-          data.set(lenMod);
-          data.set(lenPubExp, lenMod.length);
-          // The list of RSA public keys are not under attacker's
-          // control, so a collision would not help.
-          return this.subtle_.digest({name: 'SHA-1'}, data)
-              .then(digest => ({
-                serviceName,
-                cryptoKey,
-                // Hash is the first 4 bytes of the SHA-1 digest.
-                hash: new Uint8Array(/** @type {ArrayBuffer} */(digest), 0, 4),
-              }));
-        });
+  isPkcsAvailable() {
+    return Boolean(this.subtle) && this.win_['isSecureContext'] !== false;
   }
 
   /**
-   * Verifies signature was signed with private key matching public key given.
-   * Does not verify data actually matches signature (use verifySignature).
-   * @param {!Uint8Array} signature the RSA signature.
-   * @param {!PublicKeyInfoDef} publicKeyInfo the RSA public key.
-   * @return {boolean} whether signature was generated using hash.
+   * Converts an RSA JSON Web Key object to a browser-native cryptographic key.
+   * As a precondition, `isPkcsAvailable()` must be `true`.
+   *
+   * @param {!Object} jwk a deserialized RSA JSON Web Key, as specified in
+   *     Section 6.3 of RFC 7518
+   * @return {!Promise<!webCrypto.CryptoKey>}
+   * @throws {TypeError} if `jwk` is not an RSA JSON Web Key
    */
-  verifyHashVersion(signature, publicKeyInfo) {
-    // The signature has the following format:
-    // 1-byte version + 4-byte key hash + raw RSA signature where
-    // the raw RSA signature is computed over (data || 1-byte version).
-    // If the hash doesn't match, don't bother checking this key.
-    return signature.length > 5 && signature[0] == VERSION &&
-        hashesEqual(signature, publicKeyInfo.hash);
+  importPkcsKey(jwk) {
+    dev().assert(this.isPkcsAvailable());
+    // Safari 10 and earlier want this as an ArrayBufferView.
+    const keyData = this.isLegacyWebkit_
+        ? utf8EncodeSync(JSON.stringify(/** @type {!JsonObject} */ (jwk)))
+        : /** @type {!webCrypto.JsonWebKey} */ (jwk);
+    return /** @type {!Promise<!webCrypto.CryptoKey>} */ (
+      this.subtle.importKey('jwk', keyData, this.pkcsAlgo, true, ['verify'])
+    );
   }
 
   /**
-   * Verifies RSA signature corresponds to the data, given a public key.
-   * @param {!Uint8Array} data the data that was signed.
-   * @param {!Uint8Array} signature the RSA signature.
-   * @param {!PublicKeyInfoDef} publicKeyInfo the RSA public key.
-   * @return {!Promise<!boolean>} whether the signature is valid for
-   *     the public key.
+   * Verifies an RSASSA-PKCS1-v1_5 signature with a SHA-256 hash. As a
+   * precondition, `isPkcsAvailable()` must be `true`.
+   *
+   * @param {!webCrypto.CryptoKey} key an RSA public key
+   * @param {!Uint8Array} signature an RSASSA-PKCS1-v1_5 signature
+   * @param {!BufferSource} data the data that was signed
+   * @return {!Promise<boolean>} whether the signature is correct for the given
+   *     data and public key
    */
-  verifySignature(data, signature, publicKeyInfo) {
-    dev().assert(this.isCryptoAvailable());
-    if (!this.verifyHashVersion(signature, publicKeyInfo)) {
-      return Promise.resolve(false);
-    }
-    // Verify that the data matches the raw RSA signature, using the
-    // public key.
-    // Append the version number to the data.
-    const signedData = new Uint8Array(data.length + 1);
-    signedData.set(data);
-    signedData[data.length] = VERSION;
-
-    return /** @type {!Promise<boolean>} */ (this.subtle_.verify(
-        {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}},
-        publicKeyInfo.cryptoKey,
-        signature.subarray(5),
-        signedData));
+  verifyPkcs(key, signature, data) {
+    dev().assert(this.isPkcsAvailable());
+    return /** @type {!Promise<boolean>} */ (
+      this.subtle.verify(this.pkcsAlgo, key, signature, data)
+    );
   }
-
-  /**
-   * Is this service actually available? For now, we use browser native
-   * crypto. So if that is not available, then this service is not available.
-   * @return {boolean}
-   */
-  isCryptoAvailable() {
-    return !!this.subtle_;
-  }
-}
-
-function getSubtle(win) {
-  if (!win.crypto) {
-    return null;
-  }
-  return win.crypto.subtle || win.crypto.webkitSubtle || null;
-}
-
-/**
- * Appends 4-byte endian data's length to the data itself.
- * @param {!Uint8Array} data
- * @return {!Uint8Array} the prepended 4-byte endian data's length together with
- *     the data itself.
- */
-function lenPrefix(data) {
-  const res = new Uint8Array(4 + data.length);
-  res[0] = (data.length >> 24) & 0xff;
-  res[1] = (data.length >> 16) & 0xff;
-  res[2] = (data.length >> 8) & 0xff;
-  res[3] = data.length & 0xff;
-  res.set(data, 4);
-  return res;
-}
-
-/**
- * Compare the hash field of the signature to keyHash.
- * Note that signature has a one-byte version, followed by 4-byte hash.
- * @param {?Uint8Array} signature
- * @param {?Uint8Array} keyHash
- * @return {boolean} signature[1..5] == keyHash
- */
-function hashesEqual(signature, keyHash) {
-  if (!signature || !keyHash) {
-    return false;
-  }
-  for (let i = 0; i < 4; i++) {
-    if (signature[i + 1] !== keyHash[i]) {
-      return false;
-    }
-  }
-  return true;
 }
 
 /**

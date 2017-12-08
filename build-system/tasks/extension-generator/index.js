@@ -13,14 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-var argv = require('minimist')(process.argv.slice(2));
-var fs = require('fs-extra');
-var gulp = require('gulp-help')(require('gulp'));
-var util = require('gulp-util');
+const argv = require('minimist')(process.argv.slice(2));
+const fs = require('fs-extra');
+const gulp = require('gulp-help')(require('gulp'));
+const util = require('gulp-util');
 
 
 const year = new Date().getFullYear();
+
+/*eslint "max-len": 0*/
 
 function pascalCase(str) {
   return str[0].toUpperCase() + str.slice(1).replace(/-([a-z])/g,
@@ -97,7 +100,7 @@ tags: {  # <${name}>
 }
 
 function getMarkdownExtensionFile(name) {
-return `<!--
+  return `<!--
 Copyright ${year} The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -147,7 +150,7 @@ FILL THIS IN. What does this extension do?
 FILL THIS IN. Does this extension allow for properties to configure?
 
 ## Validation
-See [${name} rules](https://github.com/ampproject/amphtml/blob/master/extensions/${name}/0.1/validator-${name}.protoascii) in the AMP validator specification.
+See [${name} rules](https://github.com/ampproject/amphtml/blob/master/extensions/${name}/validator-${name}.protoascii) in the AMP validator specification.
 `;
 }
 
@@ -245,7 +248,7 @@ AMP.registerElement('${name}', ${className});
 }
 
 function getExamplesFile(name) {
-return `<!doctype html>
+  return `<!doctype html>
 <html ⚡>
 <head>
   <meta charset="utf-8">
@@ -278,10 +281,10 @@ function makeExtension() {
   fs.mkdirpSync(`extensions/${name}/0.1/test`);
   fs.writeFileSync(`extensions/${name}/${name}.md`,
       getMarkdownExtensionFile(name));
+  fs.writeFileSync(`extensions/${name}/validator-${name}.protoascii`,
+      getValidatorFile(name));
   fs.writeFileSync(`extensions/${name}/0.1/${name}.js`,
       getJsExtensionFile(name));
-  fs.writeFileSync(`extensions/${name}/0.1/validator-${name}.protoascii`,
-      getValidatorFile(name));
   fs.writeFileSync(`extensions/${name}/0.1/test/test-${name}.js`,
       getJsTestExtensionFile(name));
   fs.writeFileSync(`examples/${name}.amp.html`,
@@ -294,5 +297,5 @@ function makeExtension() {
 gulp.task('make-extension', 'Create an extension skeleton', makeExtension, {
   options: {
     name: '  The name of the extension. Preferable prefixed with `amp-*`',
-  }
+  },
 });

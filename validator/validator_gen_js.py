@@ -772,12 +772,17 @@ def DispatchKeyForTagSpecOrNone(tag_spec):
     a string indicating the dispatch key, or None.
   """
   for attr in tag_spec.attrs:
-    if attr.dispatch_key:
+    if attr.dispatch_key != attr.NONE_DISPATCH:
       mandatory_parent = tag_spec.mandatory_parent or ''
       attr_name = attr.name
       attr_value = attr.value_casei or attr.value.lower()
       assert attr_value is not None
-      return '%s\\0%s\\0%s' % (attr_name, attr_value, mandatory_parent)
+      if attr.dispatch_key == attr.NAME_DISPATCH:
+        return '%s' % attr_name
+      if attr.dispatch_key == attr.NAME_VALUE_DISPATCH:
+        return '%s\\0%s' % (attr_name, attr_value)
+      if attr.dispatch_key == attr.NAME_VALUE_PARENT_DISPATCH:
+        return '%s\\0%s\\0%s' % (attr_name, attr_value, mandatory_parent)
   return None
 
 
@@ -828,19 +833,7 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format, light,
   out.Line('')
   for name in all_names:
     out.Line("goog.provide('%s');" % name)
-  out.Line("goog.provide('amp.validator.LIGHT');")
-  out.Line("goog.provide('amp.validator.VALIDATE_CSS');")
   out.Line("goog.provide('amp.validator.createRules');")
-
-  out.Line('')
-  out.Line('/** @define {boolean} */')
-  if light:
-    out.Line('amp.validator.LIGHT = true;')
-  else:
-    out.Line('amp.validator.LIGHT = false;')
-  out.Line('')
-  out.Line('/** @define {boolean} */')
-  out.Line('amp.validator.VALIDATE_CSS = true;')
   out.Line('')
 
   # We share the empty arrays between all specification object instances; this

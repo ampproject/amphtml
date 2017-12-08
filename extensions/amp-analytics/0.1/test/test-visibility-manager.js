@@ -23,7 +23,7 @@ import {
   VisibilityManagerForEmbed,
 } from '../visibility-manager';
 import {VisibilityState} from '../../../../src/visibility-state';
-import {documentStateFor} from '../../../../src/service/document-state';
+import {Services} from '../../../../src/services';
 import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
 
 class IntersectionObserverStub {
@@ -129,6 +129,40 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(root.getRootVisibility()).to.equal(1);
   });
 
+  it('should resolve root layout box', () => {
+    const rootElement = win.document.documentElement;
+    sandbox.stub(viewport, 'getLayoutRect', element => {
+      if (element == rootElement) {
+        return layoutRectLtwh(0, 0, 101, 201);
+      }
+      return null;
+    });
+    expect(root.getRootLayoutBox()).to.contain({
+      left: 0,
+      top: 0,
+      width: 101,
+      height: 201,
+    });
+  });
+
+  it('should resolve root layout box for in-a-box', () => {
+    win.AMP_MODE = {runtime: 'inabox'};
+    root = new VisibilityManagerForDoc(ampdoc);
+    const rootElement = win.document.documentElement;
+    sandbox.stub(viewport, 'getLayoutRect', element => {
+      if (element == rootElement) {
+        return layoutRectLtwh(11, 21, 101, 201);
+      }
+      return null;
+    });
+    expect(root.getRootLayoutBox()).to.contain({
+      left: 11,
+      top: 21,
+      width: 101,
+      height: 201,
+    });
+  });
+
   it('should switch visibility based on viewer for main doc', () => {
     expect(viewer.visibilityObservable_.getHandlerCount())
         .equal(startVisibilityHandlerCount + 1);
@@ -165,6 +199,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     inOb.callback([{
       target: otherTarget,
       intersectionRatio: 0.3,
+      intersectionRect: layoutRectLtwh(0, 0, 1, 1),
     }]);
     expect(root.getRootVisibility()).to.equal(0);
 
@@ -173,10 +208,12 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
       {
         target: otherTarget,
         intersectionRatio: 0.5,
+        intersectionRect: layoutRectLtwh(0, 0, 1, 1),
       },
       {
         target: win.document.documentElement,
         intersectionRatio: 0.3,
+        intersectionRect: layoutRectLtwh(0, 0, 1, 1),
       },
     ]);
     expect(root.getRootVisibility()).to.equal(0.3);
@@ -186,6 +223,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
       {
         target: win.document.documentElement,
         intersectionRatio: 0,
+        intersectionRect: layoutRectLtwh(0, 0, 0, 0),
       },
     ]);
     expect(root.getRootVisibility()).to.equal(0);
@@ -195,6 +233,31 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(root.getRootVisibility()).to.equal(1);
     root.dispose();
     expect(root.getRootVisibility()).to.equal(0);
+  });
+
+  it('create correct number of models', () => {
+    let spec = {};
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(1);
+    root.dispose();
+    spec = {visiblePercentageThresholds: [[0, 10], [10, 100]]};
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(2);
+    root.dispose();
+    spec = {visiblePercentageThresholds: [[-1, 10], [10, 101]]};
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(0);
+    root.dispose();
+    spec = {visiblePercentageThresholds: [[1, 2, 3], ['invalid', 3]]};
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(0);
+    root.dispose();
+    spec = {
+      visiblePercentageMin: 0,
+      visiblePercentageThresholds: [[0, 10], [10, 100]],
+    };
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(1);
   });
 
   it('should dispose everything', () => {
@@ -268,7 +331,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(inOb.observeEntries_).to.have.length(1);
 
     // AMP API is polyfilled.
-    expect(rootElement.getLayoutBox).to.be.function;
+    expect(rootElement.getLayoutBox).to.be.a('function');
     expect(rootElement.getOwner()).to.be.null;
 
     // Starts as invisible.
@@ -299,6 +362,8 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     const disposed = sandbox.spy();
     const spec = {totalTimeMin: 10};
     root.listenRoot(spec, null, null, eventResolver);
+    sandbox.stub(root, 'getRootLayoutBox',
+        () => layoutRectLtwh(11, 21, 101, 201));
 
     expect(root.models_).to.have.length(1);
     const model = root.models_[0];
@@ -314,6 +379,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     root.setRootVisibility(1);
     expect(model.getVisibility_()).to.equal(1);
 
+    sandbox.stub(model, 'reset_');
     // Fire event.
     clock.tick(11);
     return eventPromise.then(state => {
@@ -325,6 +391,11 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
       expect(state.backgrounded).to.equal(0);
       expect(state.backgroundedAtStart).to.equal(0);
       expect(state.totalTime).to.equal(12);
+
+      expect(state.elementX).to.equal(11);
+      expect(state.elementY).to.equal(21);
+      expect(state.elementWidth).to.equal(101);
+      expect(state.elementHeight).to.equal(201);
     });
   });
 
@@ -419,6 +490,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     inOb.callback([{
       target,
       intersectionRatio: 0.3,
+      intersectionRect: layoutRectLtwh(0, 0, 1, 1),
     }]);
     expect(model.getVisibility_()).to.equal(0.3);
 
@@ -430,6 +502,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     root.setRootVisibility(1);
     expect(model.getVisibility_()).to.equal(0.3);
 
+    sandbox.stub(model, 'reset_');
     // Fire event.
     clock.tick(11);
     return eventPromise.then(state => {
@@ -443,8 +516,6 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
       expect(state.backgrounded).to.equal(0);
       expect(state.backgroundedAtStart).to.equal(0);
       expect(state.totalTime).to.equal(12);
-
-      expect(state.elementX).to.be.undefined;
     });
   });
 
@@ -458,21 +529,26 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(model.getVisibility_()).to.equal(0);
 
     // Valid value.
-    inOb.callback([{target, intersectionRatio: 0.3}]);
+    inOb.callback([{target, intersectionRatio: 0.3,
+      intersectionRect: layoutRectLtwh(0, 0, 1, 1)}]);
     expect(model.getVisibility_()).to.equal(0.3);
 
     // Invalid negative value.
-    inOb.callback([{target, intersectionRatio: -0.01}]);
+    inOb.callback([{target, intersectionRatio: -0.01,
+      intersectionRect: layoutRectLtwh(0, 0, 1, 1)}]);
     expect(model.getVisibility_()).to.equal(0);
 
-    inOb.callback([{target, intersectionRatio: -1000}]);
+    inOb.callback([{target, intersectionRatio: -1000,
+      intersectionRect: layoutRectLtwh(0, 0, 1, 1)}]);
     expect(model.getVisibility_()).to.equal(0);
 
     // Invalid overflow value.
-    inOb.callback([{target, intersectionRatio: 1.01}]);
+    inOb.callback([{target, intersectionRatio: 1.01,
+      intersectionRect: layoutRectLtwh(0, 0, 1, 1)}]);
     expect(model.getVisibility_()).to.equal(1);
 
-    inOb.callback([{target, intersectionRatio: 1000}]);
+    inOb.callback([{target, intersectionRatio: 1000,
+      intersectionRect: layoutRectLtwh(0, 0, 1, 1)}]);
     expect(model.getVisibility_()).to.equal(1);
   });
 
@@ -499,6 +575,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     inOb.callback([{
       target,
       intersectionRatio: 0.3,
+      intersectionRect: layoutRectLtwh(0, 0, 1, 1),
     }]);
     expect(model1.getVisibility_()).to.equal(0.3);
     expect(trackedElement.intersectionRatio).to.equal(0.3);
@@ -514,11 +591,13 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(root.models_).to.have.length(2);
     const model2 = root.models_[1];
     expect(model2.spec_.totalTimeMin).to.equal(20);
+    sandbox.stub(model2, 'reset_');
     model2.unsubscribe(disposed2);
     expect(trackedElement.listeners).to.have.length(2);
     // Immediately visible.
     expect(model2.getVisibility_()).to.equal(0.3);
 
+    sandbox.stub(model1, 'reset_');
     // Fire the first event.
     clock.tick(11);
     return eventPromise.then(state => {
@@ -564,7 +643,12 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     inOb.callback([{
       target,
       intersectionRatio: 0.3,
+      intersectionRect: layoutRectLtwh(0, 0, 1, 1),
     }]);
+
+    expect(root.models_).to.have.length(1);
+    const model = root.models_[0];
+    sandbox.stub(model, 'reset_');
 
     // Fire event.
     clock.tick(11);
@@ -588,6 +672,7 @@ describes.realWin('EmbedAnalyticsRoot', {
   let embed;
   let clock;
   let viewer;
+  let viewport;
   let parentRoot;
   let root;
   let inob;
@@ -601,6 +686,7 @@ describes.realWin('EmbedAnalyticsRoot', {
     clock = sandbox.useFakeTimers();
     clock.tick(1);
 
+    viewport = parentWin.services.viewport.obj;
     viewer = parentWin.services.viewer.obj;
     sandbox.stub(viewer, 'getFirstVisibleTime', () => 1);
 
@@ -663,6 +749,21 @@ describes.realWin('EmbedAnalyticsRoot', {
     expect(root.getRootVisibility()).to.equal(1);
   });
 
+  it('should resolve root layout box', () => {
+    sandbox.stub(viewport, 'getLayoutRect', element => {
+      if (element == embed.host) {
+        return layoutRectLtwh(11, 21, 101, 201);
+      }
+      return null;
+    });
+    expect(root.getRootLayoutBox()).to.contain({
+      left: 11,
+      top: 21,
+      width: 101,
+      height: 201,
+    });
+  });
+
   it('should ask parent to observe host element', () => {
     const id = embed.host.__AMP_VIS_ID;
     expect(parentRoot.trackedElements_[id]).to.be.ok;
@@ -720,6 +821,7 @@ describes.realWin('EmbedAnalyticsRoot', {
     inob.callback([{
       target: embed.host,
       intersectionRatio: 0.5,
+      intersectionRect: layoutRectLtwh(0, 0, 1, 1),
     }]);
     expect(root.getRootVisibility()).to.equal(0.5);
     expect(rootModel.getVisibility_()).to.equal(0.5);
@@ -729,6 +831,7 @@ describes.realWin('EmbedAnalyticsRoot', {
     inob.callback([{
       target: otherTarget,
       intersectionRatio: 0.45,
+      intersectionRect: layoutRectLtwh(0, 0, 1, 1),
     }]);
     expect(root.getRootVisibility()).to.equal(0.5);
     expect(rootModel.getVisibility_()).to.equal(0.5);
@@ -752,6 +855,7 @@ describes.realWin('EmbedAnalyticsRoot', {
     inob.callback([{
       target: embed.host,
       intersectionRatio: 0,
+      intersectionRect: layoutRectLtwh(0, 0, 1, 1),
     }]);
     expect(root.getRootVisibility()).to.equal(0);
     expect(rootModel.getVisibility_()).to.equal(0);
@@ -761,6 +865,7 @@ describes.realWin('EmbedAnalyticsRoot', {
     inob.callback([{
       target: otherTarget,
       intersectionRatio: 0.55,
+      intersectionRect: layoutRectLtwh(0, 0, 1, 1),
     }]);
     expect(root.getRootVisibility()).to.equal(0);
     expect(rootModel.getVisibility_()).to.equal(0);
@@ -770,6 +875,7 @@ describes.realWin('EmbedAnalyticsRoot', {
     inob.callback([{
       target: embed.host,
       intersectionRatio: 0.7,
+      intersectionRect: layoutRectLtwh(0, 0, 1, 1),
     }]);
     expect(root.getRootVisibility()).to.equal(0.7);
     expect(rootModel.getVisibility_()).to.equal(0.7);
@@ -833,7 +939,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
       eventResolver2 = resolve;
     });
 
-    const docState = documentStateFor(win);
+    const docState = Services.documentStateFor(win);
     sandbox.stub(docState, 'isHidden', () => false);
     sandbox.stub(viewer, 'getFirstVisibleTime', () => startTime);
 
@@ -923,11 +1029,34 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
         minVisiblePercentage: 25,
         totalVisibleTime: 5,
         maxContinuousVisibleTime: 5,
+        intersectionRatio: 0.25,
+        intersectionRect: '{"left":0,"top":75,"width":100,"height":25,' +
+          '"bottom":100,"right":100,"x":0,"y":75}',
       });
     });
   });
 
-  it('should triger "visible" with no duration condition', () => {
+  it('should execute "visible" trigger with percent range', () => {
+    viewer.setVisibilityState_(VisibilityState.VISIBLE);
+    visibility = new VisibilityManagerForDoc(ampdoc);
+
+    const spy = sandbox.spy();
+    visibility.listenElement(ampElement, {
+      'visiblePercentageThresholds': [[0, 30], [50, 100]],
+    }, Promise.resolve(), null, spy);
+
+    return Promise.resolve().then(() => {
+      fireIntersect(25); // visible
+    }).then(() => {
+      expect(spy).to.be.calledOnce;
+      fireIntersect(55);
+      return Promise.resolve().then(() => {
+        expect(spy).to.be.calledTwice;
+      });
+    });
+  });
+
+  it('should trigger "visible" with no duration condition', () => {
     viewer.setVisibilityState_(VisibilityState.VISIBLE);
     visibility = new VisibilityManagerForDoc(ampdoc);
 
@@ -1044,6 +1173,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
       expect(isModelResolved(model)).to.be.false;
       clock.tick(899); // not yet!
       expect(isModelResolved(model)).to.be.false;
+      sandbox.stub(model, 'reset_');
       clock.tick(1);  // now fire
       expect(isModelResolved(model)).to.be.true;
       return eventPromise.then(state => {

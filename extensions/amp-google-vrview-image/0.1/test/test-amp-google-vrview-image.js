@@ -14,46 +14,35 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-google-vrview-image';
-import {adopt} from '../../../../src/runtime';
 import {toggleExperiment} from '../../../../src/experiments';
-import * as sinon from 'sinon';
 
-adopt(window);
 
-describe('amp-google-vrview-image', function() {
-  let sandbox;
+describes.realWin('amp-google-vrview-image', {
+  amp: {
+    extensions: ['amp-google-vrview-image'],
+  },
+}, function(env) {
+  let win, doc;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    toggleExperiment(window, 'amp-google-vrview-image', true);
-  });
-
-  afterEach(() => {
-    toggleExperiment(window, 'amp-google-vrview-image', false);
-    sandbox.restore();
+    win = env.win;
+    doc = win.document;
+    toggleExperiment(win, 'amp-google-vrview-image', true);
   });
 
   function getVrImage(attributes, opt_responsive, opt_beforeLayoutCallback) {
-    return createIframePromise(
-        true, opt_beforeLayoutCallback).then(iframe => {
-          doNotLoadExternalResourcesInTest(iframe.win);
-          const vr = iframe.doc.createElement('amp-google-vrview-image');
-
-          for (const key in attributes) {
-            vr.setAttribute(key, attributes[key]);
-          }
-          vr.setAttribute('width', '111');
-          vr.setAttribute('height', '222');
-          if (opt_responsive) {
-            vr.setAttribute('layout', 'responsive');
-          }
-          return iframe.addElement(vr);
-        });
+    const vr = doc.createElement('amp-google-vrview-image');
+    for (const key in attributes) {
+      vr.setAttribute(key, attributes[key]);
+    }
+    vr.setAttribute('width', '111');
+    vr.setAttribute('height', '222');
+    if (opt_responsive) {
+      vr.setAttribute('layout', 'responsive');
+    }
+    doc.body.appendChild(vr);
+    return vr.build().then(() => vr.layoutCallback()).then(() => vr);
   }
 
   it('renders', () => {

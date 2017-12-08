@@ -15,12 +15,13 @@
  */
 
 import {BaseElement} from '../src/base-element';
+import {scopedQuerySelector} from '../src/dom';
 import {dev, user} from '../src/log';
-import {registerElement} from '../src/custom-element';
-import {timerFor} from '../src/services';
-import {urlReplacementsForDoc} from '../src/services';
-import {viewerForDoc} from '../src/services';
+import {dict} from '../src/utils/object';
+import {registerElement} from '../src/service/custom-element-registry';
+import {Services} from '../src/services';
 import {createElementWithAttributes} from '../src/dom';
+import {toWin} from '../src/types';
 
 const TAG = 'amp-pixel';
 
@@ -59,8 +60,13 @@ export class AmpPixel extends BaseElement {
           `${TAG}: invalid "referrerpolicy" value "${this.referrerPolicy_}".`
           + ' Only "no-referrer" is supported');
     }
+    if (this.element.hasAttribute('i-amphtml-ssr') &&
+        scopedQuerySelector(this.element, 'img')) {
+      dev().info(TAG, 'inabox img already present');
+      return;
+    }
     // Trigger, but only when visible.
-    const viewer = viewerForDoc(this.getAmpDoc());
+    const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.whenFirstVisible().then(this.trigger_.bind(this));
   }
 
@@ -76,12 +82,12 @@ export class AmpPixel extends BaseElement {
     }
     // Delay(1) provides a rudimentary "idle" signal.
     // TODO(dvoytenko): use an improved idle signal when available.
-    this.triggerPromise_ = timerFor(this.win).promise(1).then(() => {
+    this.triggerPromise_ = Services.timerFor(this.win).promise(1).then(() => {
       const src = this.element.getAttribute('src');
       if (!src) {
         return;
       }
-      return urlReplacementsForDoc(this.element)
+      return Services.urlReplacementsForDoc(this.element)
           .expandAsync(this.assertSource_(src))
           .then(src => {
             const pixel = this.referrerPolicy_
@@ -114,14 +120,15 @@ export class AmpPixel extends BaseElement {
  */
 function createNoReferrerPixel(parentElement, src) {
   if (isReferrerPolicySupported()) {
-    return createImagePixel(parentElement.ownerDocument.defaultView, src, true);
+    return createImagePixel(toWin(parentElement.ownerDocument.defaultView), src,
+        true);
   } else {
     // if "referrerPolicy" is not supported, use iframe wrapper
     // to scrub the referrer.
     const iframe = createElementWithAttributes(
-        /** @type {!Document} */ (parentElement.ownerDocument), 'iframe', {
-          src: 'about:blank',
-        });
+        /** @type {!Document} */ (parentElement.ownerDocument), 'iframe', dict({
+          'src': 'about:blank',
+        }));
     parentElement.appendChild(iframe);
     createImagePixel(iframe.contentWindow, src);
     return iframe;

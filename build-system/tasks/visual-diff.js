@@ -13,143 +13,57 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-var argv = require('minimist')(process.argv.slice(2));
-var exec = require('../exec.js').exec;
-var fs = require('fs-extra');
-var gulp = require('gulp-help')(require('gulp'));
-var util = require('gulp-util');
+const argv = require('minimist')(process.argv.slice(2));
+const execOrDie = require('../exec').execOrDie;
+const getStdout = require('../exec').getStdout;
+const gulp = require('gulp-help')(require('gulp'));
 
-var percyCommand = 'percy snapshot';
-var defaultWidths = [375, 411];  // CSS widths: iPhone: 375, Pixel: 411.
-var percyProjectSeparator = '/';  // Standard format of repo slug: "foo/bar".
-var percyTokenLength = 64;  // Standard Percy API key length.
-var visualTestsFile = 'test/visual-diff/visual-tests.json';
 
 /**
- * Extracts and verifies Percy project keys from the environment.
- *
- * @return {!Object} Object containing Percy project and token.
+ * Disambiguates branch names by decorating them with the commit author name.
+ * We do this for all non-push builds in order to prevent them from being used
+ * as baselines for future builds.
  */
-function extractPercyKeys() {
-  // Repo slug to which to upload snapshots. Same as the Github repo slug.
-  if (!process.env.PERCY_PROJECT) {
-    util.log(util.colors.red(
-        'Error: PERCY_PROJECT must be specified as an environment variable'));
-    process.exit(1);
+function setPercyBranch() {
+  if (!argv.master || !process.env['TRAVIS']) {
+    const userName = getStdout(
+        'git log -1 --pretty=format:"%ae"').trim();
+    const branchName = process.env['TRAVIS'] ?
+        process.env['TRAVIS_PULL_REQUEST_BRANCH'] :
+        getStdout('git rev-parse --abbrev-ref HEAD').trim();
+    process.env['PERCY_BRANCH'] = userName + '-' + branchName;
   }
-  var percyProject = process.env.PERCY_PROJECT;
-  if (percyProject.indexOf(percyProjectSeparator) == -1) {
-    util.log(util.colors.red(
-        'Error: PERCY_PROJECT doesn\'t look like a valid repo slug'));
-    process.exit(1);
-  }
-  util.log('Percy project: ', util.colors.magenta(percyProject));
-
-  // Secret token for the percy project.
-  if (!process.env.PERCY_TOKEN) {
-    util.log(util.colors.red(
-        'Error: PERCY_TOKEN must be specified as an environment variable'));
-    process.exit(1);
-  }
-  var percyToken = process.env.PERCY_TOKEN;
-  if (percyToken.length != percyTokenLength) {
-    util.log(util.colors.red(
-        'Error: PERCY_TOKEN doesn\'t look like a valid Percy API key'));
-    process.exit(1);
-  }
-  util.log('Percy token: ', util.colors.magenta('<redacted>'));
-  return {
-    percyProject: percyProject,
-    percyToken: percyToken,
-  };
 }
 
 /**
- * Extracts Percy args from the command line.
- *
- * @return {!Object} Object containing extracted args.
+ * Simple wrapper around the ruby based visual diff tests.
  */
-function extractPercyArgs() {
-  // Webpage to snapshot. This is a path, relative to amphtml/. For automated
-  // tests on Travis, this defaults to the set of test cases defined in
-  var webpage = '';
-  if (argv.webpage) {
-    webpage = argv.webpage;
-  } else {
-    // Default to the amp-by-example page for test runs.
-    // TODO(rsimha): Refactor this to support multiple webpages.
-    var webpage = JSON.parse(fs.readFileSync(visualTestsFile)).webpage;
+function visualDiff() {
+  setPercyBranch();
+  let cmd = 'ruby build-system/tasks/visual-diff.rb';
+  for (const arg in argv) {
+    if (arg !== '_') {
+      cmd = cmd + ' --' + arg;
+    }
   }
-  util.log('Webpage: ', util.colors.magenta(webpage));
-
-  // Smartphone screen widths to snapshot.
-  var widths = defaultWidths;
-  if (argv.widths) {
-    widths = argv.widths.split(',');
-  }
-  util.log('Widths: ', util.colors.magenta(widths.toString()));
-
-  // TODO(rsimha): Separate out some test pages into directories, and then
-  // add an arg to include the directory containing assets for those pages.
-
-  return {
-    webpage: webpage,
-    widths: widths,
-  };
+  execOrDie(cmd);
 }
 
-/**
- * Constructs the Percy command line with various args.
- *
- * @param {!Object} percyKeys Object containing access keys for the Percy repo.
- * @return {string} Full command line to be executed.
- */
-function constructCommandLine(percyKeys) {
-  var commandLine = [];
-
-  // Main snapshot command.
-  commandLine.push(percyCommand);
-
-  // Percy repo slug. This matches up exactly with the amphtml Github repo slug.
-  commandLine.push('--repo ' + percyKeys.percyProject);
-
-  // Percy args.
-  var percyArgs = extractPercyArgs();
-  commandLine.push('--baseurl /' + percyArgs.webpage);
-  commandLine.push('--widths ' + percyArgs.widths);
-
-  // Other args.
-  commandLine.push('--enable_javascript');
-  commandLine.push('--include_all');
-
-  // The webpage being tested is typically the last arg.
-  commandLine.push(percyArgs.webpage);
-
-  util.log('Executing command line:');
-  commandLine.forEach(function(command) {
-    util.log('\t', util.colors.cyan(command));
-  });
-
-  return commandLine.join(' ');
-}
-
-/**
- * Run visual diff tests
- */
-function runTests() {
-  util.log(util.colors.yellow('Running visual diff tests...'));
-  var percyKeys = extractPercyKeys();
-  var commandLine = constructCommandLine(percyKeys);
-  exec(commandLine);
-}
-
-
-gulp.task('visual-diff', 'Runs visual diff tests using Percy', runTests, {
-  options: {
-    'webpage': '  Path of the webpage being tested, relative to amphtml/.' +
-        ' Used this as the baseurl while looking up snapshots on Percy.',
-    'widths': '  CSV with the device CSS widths to test. Defaults to '
-        + defaultWidths.toString() + ' (iPhone and Pixel).'
-  }
-});
+gulp.task(
+    'visual-diff',
+    'Runs the AMP visual diff tests.',
+    visualDiff,
+    {
+      options: {
+        'master': '  Includes a blank snapshot (baseline for skipped builds)',
+        'verify': '  Verifies the status of the build ID in ./PERCY_BUILD_ID',
+        'skip': '  Creates a dummy Percy build with only a blank snapshot',
+        'percy_debug': '  Prints debug info from Percy libraries',
+        'phantomjs_debug': '  Prints debug info from PhantomJS libraries',
+        'webserver_debug': '  Prints debug info from the local gulp webserver',
+        'debug': '  Prints all the above debug info',
+      },
+    }
+);

@@ -20,8 +20,8 @@ import {
 } from '../form-proxy';
 
 const PROPS = ['id', 'action', 'method', 'style', 'acceptCharset',
-    'attributes', 'elements', 'children', 'draggable', 'hidden',
-    'autocomplete'];
+  'attributes', 'elements', 'children', 'draggable', 'hidden',
+  'autocomplete'];
 
 
 describes.repeated('installFormProxy', {
@@ -91,14 +91,14 @@ describes.repeated('installFormProxy', {
 
   it('should proxy methods', () => {
     expect(form.$p.getAttribute('id')).to.equal('form1');
-    expect(form.$p.submit).to.be.function;
+    expect(form.$p.submit).to.be.a('function');
     if (inputs) {
       expect(form.getAttribute).to.equal(inputs.getAttribute);
       expect(form.submit).to.equal(inputs.submit);
     } else {
-      expect(form.getAttribute).to.be.function;
+      expect(form.getAttribute).to.be.a('function');
       expect(form.getAttribute('id')).to.equal('form1');
-      expect(form.submit).to.be.function;
+      expect(form.submit).to.be.a('function');
     }
   });
 

@@ -541,7 +541,7 @@ describe('LocalStorageBinding', () => {
         .once();
     // Never reaches setItem
     return binding.saveBlob('https://acme.com', 'BLOB1')
-        .then(() => 'SUCCESS', () => `ERROR`).then(res => {
+        .then(() => 'SUCCESS', () => 'ERROR').then(res => {
           expect(res).to.equal('SUCCESS');
         });
   });
@@ -555,7 +555,7 @@ describe('LocalStorageBinding', () => {
     binding = new LocalStorageBinding(windowApi);
     // Never reaches setItem
     return binding.saveBlob('https://acme.com', 'BLOB1')
-        .then(() => 'SUCCESS', () => `ERROR`).then(res => {
+        .then(() => 'SUCCESS', () => 'ERROR').then(res => {
           expect(setItemSpy).to.have.not.been.called;
           expect(res).to.equal('SUCCESS');
         });

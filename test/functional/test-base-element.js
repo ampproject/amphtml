@@ -16,35 +16,30 @@
 
 import {BaseElement} from '../../src/base-element';
 import {Resource} from '../../src/service/resource';
-import {createAmpElementProto} from '../../src/custom-element';
+import {createAmpElementProtoForTesting} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {listenOncePromise} from '../../src/event-helper';
-import {timerFor} from '../../src/services';
-import * as sinon from 'sinon';
+import {Services} from '../../src/services';
 
 
-describe('BaseElement', () => {
-
-  let sandbox;
+describes.realWin('BaseElement', {amp: true}, env => {
+  let win, doc;
   let customElement;
   let element;
 
-  document.registerElement('amp-test-element', {
-    prototype: createAmpElementProto(window, 'amp-test-element', BaseElement),
-  });
-
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    customElement = document.createElement('amp-test-element');
+    win = env.win;
+    doc = win.document;
+    doc.registerElement('amp-test-element', {
+      prototype: createAmpElementProtoForTesting(win,
+          'amp-test-element', BaseElement),
+    });
+    customElement = doc.createElement('amp-test-element');
     element = new BaseElement(customElement);
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
-
   it('should delegate update priority to resources', () => {
-    const resources = window.services.resources.obj;
+    const resources = win.services.resources.obj;
     customElement.getResources = () => resources;
     const updatePriorityStub = sandbox.stub(resources, 'updatePriority');
     element.updatePriority(1);
@@ -52,7 +47,7 @@ describe('BaseElement', () => {
   });
 
   it('propagateAttributes - niente', () => {
-    const target = document.createElement('div');
+    const target = doc.createElement('div');
     expect(target.hasAttributes()).to.be.false;
 
     element.propagateAttributes(['data-test1'], target);
@@ -63,7 +58,7 @@ describe('BaseElement', () => {
   });
 
   it('propagateAttributes', () => {
-    const target = document.createElement('div');
+    const target = doc.createElement('div');
     expect(target.hasAttributes()).to.be.false;
 
     customElement.setAttribute('data-test1', 'abc');
@@ -85,7 +80,7 @@ describe('BaseElement', () => {
   it('should register action', () => {
     const handler = () => {};
     element.registerAction('method1', handler);
-    expect(element.actionMap_['method1']).to.equal(handler);
+    expect(element.actionMap_['method1']).to.not.be.null;
   });
 
   it('should fail execution of unregistered action', () => {
@@ -94,22 +89,62 @@ describe('BaseElement', () => {
     }).to.throw(/Method not found/);
   });
 
+  it('`this` context of handler should not be the holder', () => {
+    const handler = () => {
+      const holder = element.actionMap_['foo'];
+      expect(this).to.not.equal(holder);
+    };
+    element.registerAction('foo', handler);
+    const invocation = {method: 'foo', satisfiesTrust: () => true};
+    element.executeAction(invocation, false);
+  });
+
   it('should execute registered action', () => {
     const handler = sandbox.spy();
     element.registerAction('method1', handler);
-    element.executeAction({method: 'method1'}, false);
+    const invocation = {method: 'method1', satisfiesTrust: () => true};
+    element.executeAction(invocation, false);
     expect(handler).to.be.calledOnce;
   });
 
   it('should execute "activate" action without registration', () => {
     const handler = sandbox.spy();
     element.activate = handler;
-    element.executeAction({method: 'activate'}, false);
+    const invocation = {method: 'activate', satisfiesTrust: () => true};
+    element.executeAction(invocation, false);
     expect(handler).to.be.calledOnce;
   });
 
+  it('should check trust before invocation', () => {
+    const handler = sandbox.spy();
+    const minTrust = 123;
+    element.registerAction('foo', handler, minTrust);
+    const activate = sandbox.stub(element, 'activate');
+
+    // Registered action.
+    element.executeAction({method: 'foo', satisfiesTrust: () => false}, false);
+    expect(handler).to.not.be.called;
+    element.executeAction({
+      method: 'foo',
+      satisfiesTrust: t => (t == minTrust),
+    }, false);
+    expect(handler).to.be.calledOnce;
+
+    // Unregistered action (activate).
+    element.executeAction({
+      method: 'activate',
+      satisfiesTrust: () => false,
+    }, false);
+    expect(activate).to.not.be.called;
+    element.executeAction({
+      method: 'activate',
+      satisfiesTrust: t => (t <= element.activationTrust()),
+    }, false);
+    expect(activate).to.be.calledOnce;
+  });
+
   it('should return correct layoutBox', () => {
-    const resources = window.services.resources.obj;
+    const resources = win.services.resources.obj;
     customElement.getResources = () => resources;
     const resource = new Resource(1, customElement, resources);
     sandbox.stub(resources, 'getResourceForElement')
@@ -134,13 +169,13 @@ describe('BaseElement', () => {
     let event2Promise;
 
     beforeEach(() => {
-      const timer = timerFor(element.win);
-      target = document.createElement('div');
+      const timer = Services.timerFor(element.win);
+      target = doc.createElement('div');
 
-      event1 = document.createEvent('Event');
+      event1 = doc.createEvent('Event');
       event1.initEvent('event1', false, true);
 
-      event2 = document.createEvent('Event');
+      event2 = doc.createEvent('Event');
       event2.initEvent('event2', false, true);
 
       event1Promise = listenOncePromise(element.element, 'event1');
@@ -158,8 +193,8 @@ describe('BaseElement', () => {
       return Promise.all([
         event1Promise,
         event2Promise
-        .then(() => { assert.fail('Blur should not have been forwarded'); })
-        .catch(() => { /* timed-out, all good */ }),
+            .then(() => { assert.fail('Blur should not have been forwarded'); })
+            .catch(() => { /* timed-out, all good */ }),
       ]);
     });
 
