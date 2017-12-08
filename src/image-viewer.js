@@ -316,7 +316,7 @@ export class ImageViewer {
 
   /** @private */
   setupGestures_() {
-    this.gestures_ = Gestures.get(this.image_,
+    this.gestures_ = Gestures.get(this.viewer_,
         /* opt_shouldNotPreventDefault */true);
     this.gestures_.onPointerDown(() => {
       if (this.motion_) {
