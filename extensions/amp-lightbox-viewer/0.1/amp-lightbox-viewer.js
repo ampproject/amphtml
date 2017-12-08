@@ -33,6 +33,7 @@ import {elementByTag} from '../../../src/dom';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
+import {debounce} from '../../../src/utils/rate-limit';
 
 /** @const */
 const TAG = 'amp-lightbox-viewer';
@@ -136,6 +137,12 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
     /** @private {?UnlistenDef} */
     this.unlistenResize_ = null;
+
+    /** @private {?UnlistenDef} */
+    this.unlistenOrientationChange_ = null;
+
+    /** @private {?UnlistenDef} */
+    this.unlistenClick_ = null;
   }
 
   /** @override */
@@ -181,7 +188,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     return this.buildCarousel_().then(() => {
       this.buildDescriptionBox_();
       this.buildTopBar_();
-      this.setupContainerListener_();
+      this.setupEventListeners_();
     });
   }
 
@@ -482,13 +489,42 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
-   * Set up container listener.
+   * Set up event listeners.
    * @private
    */
-  setupContainerListener_() {
+  setupEventListeners_() {
     dev().assert(this.container_);
     const toggleControls = this.toggleControls_.bind(this);
-    listen(dev().assertElement(this.container_), 'click', toggleControls);
+    this.unlistenClick_ = listen(dev().assertElement(this.container_),
+        'click', toggleControls);
+
+    // iOS non-safari browsers do not reliably fire onResize on orientation
+    // change, so listen to orientationchange to trigger resize
+    const platform = Services.platformFor(this.win);
+    if (platform.isIos() && !platform.isSafari()) {
+      // The debounce is to force a 500ms delay due to Webkit bug #170595
+      const debouncedOnResize = debounce(this.win,
+          this.onResize_.bind(this), 500);
+      this.unlistenOrientationChange_ = listen(this.win,
+          'orientationchange', debouncedOnResize);
+    }
+  }
+
+  cleanupEventListeners_() {
+    if (this.unlistenResize_) {
+      this.unlistenResize_();
+      this.unlistenResize_ = null;
+    }
+
+    if (this.unlistenOrientationChange_) {
+      this.unlistenOrientationChange_();
+      this.unlistenOrientationChange_ = null;
+    }
+
+    if (this.unlistenClick_) {
+      this.unlistenClick_();
+      this.unlistenClick_ = null;
+    }
   }
 
   /**
@@ -662,6 +698,11 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     });
   }
 
+  onResize_() {
+    const imgViewer = this.elementsMetadata_[this.currentElemId_].imageViewer;
+    imgViewer.measure();
+  }
+
   /**
    * Resizes the ImageViewer of the current slide so that the image
    * is centered in the page. Used in open or on slide change. Also
@@ -673,16 +714,24 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   resizeImageViewerDimensions_() {
     const imgViewer = this.elementsMetadata_[this.currentElemId_].imageViewer;
 
-    // Unregister the previous onResize handler to rescale the ImageViewer
     if (this.unlistenResize_) {
       this.unlistenResize_();
     }
 
-    // Register a new onResize handler
+    // Register an onResize handler to resize the image viewer
+    const platform = Services.platformFor(this.win);
+    const boundOnResize = this.onResize_.bind(this);
+    const debouncedOnResize = debounce(this.win, boundOnResize, 500);
     this.unlistenResize_ = this.getViewport().onResize(() => {
-      imgViewer.measure();
+      if (!platform.isIos()) {
+        boundOnResize();
+      } else if (platform.isSafari()) {
+        // Special case for iOS Safari due to Webkit bug #170595
+        // Delay the onResize by 500 ms to ensure correct height and width
+        // Other iOS browsers are registered to onorientationchange
+        debouncedOnResize();
+      }
     });
-
     return imgViewer.measure();
   }
 
@@ -716,12 +765,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    if (this.unlistenResize_) {
-      this.unlistenResize_();
-      this.unlistenResize_ = null;
-    }
-
     this.active_ = false;
+
+    this.cleanupEventListeners_();
 
     // Reset the state of the description box
     this.descriptionBox_.classList.remove('hide');
