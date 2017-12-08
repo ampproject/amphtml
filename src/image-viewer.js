@@ -240,11 +240,14 @@ export class ImageViewer {
       // Set src provisionally to the known loaded value for fast display.
       // It will be updated later.
       this.image_.setAttribute('src', sourceImage.src);
-    } else {
-      // Most browsers show a gray border for images with alt but no src
-      // If we did not set the src, remove the alt attribute
-      this.image_.removeAttribute('alt');
     }
+
+    st.setStyles(this.image_, {
+      top: st.px(0),
+      left: st.px(0),
+      width: st.px(0),
+      height: st.px(0),
+    });
   }
 
   /**
@@ -314,11 +317,6 @@ export class ImageViewer {
     // and then naturally upgrade to a higher quality image.
     return Services.timerFor(this.win).promise(1).then(() => {
       this.image_.setAttribute('src', src);
-      if (this.ariaAttributes_.hasOwnProperty('alt')) {
-        // Most browsers show a gray border for images with alt but no src
-        // Set alt only after we set the src attribute
-        this.image_.setAttribute('alt', this.ariaAttributes_['alt']);
-      }
       return this.loadPromise_(this.image_);
     });
   }
