@@ -57,6 +57,7 @@ amp-story[standalone][desktop] {
  margin: -60px!important;
  background-size: cover!important;
  background-color: transparent!important;
+ background-position: center center !important;
 }
 
 .i-amphtml-story-background.active {
