@@ -238,7 +238,7 @@ Then, publishers and vendors alike would be able to specify the macro FOO_PROP i
 
 ##### Vendor Macro Substitution with Fast Fetch Network Macro Substitution
 
-It is possible for a vendor to specify macros in their URL into which the Fast Fetch implementation will substitute values, in addition to their own custom macros that the publisher may specify in the rtc-config.. Take the following example:
+It is possible for a vendor to specify macros in their URL into which the Fast Fetch implementation will substitute values, in addition to their own custom macros that the publisher may specify in the rtc-config. Take the following example:
 
 **Example 4**
 
