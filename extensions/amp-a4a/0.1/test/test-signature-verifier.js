@@ -432,7 +432,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
             env.fetchMock.getOnce(
                 'https://signingservice1.net/keyset.json', jwkSet([key1]));
             verifier.loadKeyset('service-1');
-            expect(
+            return expect(
                 verifier.verify(
                     creative1,
                     new Headers({
@@ -447,7 +447,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
         env.fetchMock.getOnce(
             'https://signingservice1.net/keyset.json', jwkSet([key1]));
         verifier.loadKeyset('service-1');
-        expect(verifier.verify(creative1, new Headers(), noop))
+        return expect(verifier.verify(creative1, new Headers(), noop))
             .to.eventually.equal(VerificationStatus.UNVERIFIED);
       });
 
@@ -457,7 +457,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
             env.fetchMock.getOnce(
                 'https://signingservice1.net/keyset.json', jwkSet([key1]));
             verifier.loadKeyset('service-1');
-            expect(verifier.verify(creative1, new Headers(), noop))
+            return expect(verifier.verify(creative1, new Headers(), noop))
                 .to.eventually.equal(VerificationStatus.UNVERIFIED);
           });
 
@@ -466,7 +466,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
             'https://signingservice1.net/keyset.json', jwkSet([key1]));
         env.sandbox.stub(user(), 'error');
         verifier.loadKeyset('service-1');
-        expect(
+        return expect(
             verifier.verify(
                 creative1,
                 new Headers({

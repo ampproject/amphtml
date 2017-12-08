@@ -36,7 +36,7 @@ import {EventType, dispatch, dispatchCustom} from './events';
 import {PageElement} from './page-element';
 import {AdvancementConfig} from './page-advancement';
 import {dict} from '../../../src/utils/object';
-import {scopedQuerySelectorAll} from '../../../src/dom';
+import {matches, scopedQuerySelectorAll} from '../../../src/dom';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 
@@ -72,7 +72,6 @@ const LOADING_SCREEN_TEMPLATE = [
     ],
   },
 ];
-
 
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
@@ -143,6 +142,10 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {!AdvancementConfig} */
     this.advancement_ = AdvancementConfig.forPage(this);
+
+    /** @private @const {boolean} Only prerender the first story page. */
+    this.prerenderAllowed_ = matches(this.element,
+        'amp-story-page:first-of-type');
   }
 
 
@@ -223,15 +226,18 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.pageActiveCallback_();
   }
 
+
   /** @override */
   layoutCallback() {
     return this.beforeVisible();
   }
 
+
   /** @return {!Promise} */
   beforeVisible() {
     return this.maybeApplyFirstAnimationFrame();
   }
+
 
   /** @private */
   onPageVisible_() {
@@ -315,7 +321,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   prerenderAllowed() {
-    return true;
+    return this.prerenderAllowed_;
   }
 
 

@@ -318,6 +318,7 @@ const forbiddenTerms = {
   '\\.sendMessageAwaitResponse\\(': {
     message: 'Usages must be reviewed.',
     whitelist: [
+      'src/service/xhr-impl.js',
       'src/service/viewer-impl.js',
       'src/service/viewer-cid-api.js',
       'src/service/storage-impl.js',
@@ -382,6 +383,7 @@ const forbiddenTerms = {
   'isTrustedViewer': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'src/service/xhr-impl.js',
       'src/service/viewer-impl.js',
       'src/service/viewer-cid-api.js',
       'src/inabox/inabox-viewer.js',
@@ -855,6 +857,7 @@ const forbiddenTermsSrcInclusive = {
       'validator/engine/validator.js',
     ],
   },
+  '\\.matches\\(': 'Please use matches() helper in src/dom.js',
 };
 
 // Terms that must appear in a source file.

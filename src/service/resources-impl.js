@@ -197,7 +197,7 @@ export class Resources {
     this.vsyncScheduled_ = false;
 
     /** @private {number} */
-    this.scrollHeight_ = 0;
+    this.contentHeight_ = 0;
 
     /** @private {boolean} */
     this.maybeChangeHeight_ = false;
@@ -524,7 +524,16 @@ export class Resources {
    */
   buildOrScheduleBuildForResource_(resource, checkForDupes = false,
       scheduleWhenBuilt = true) {
-    if (this.isRuntimeOn_ || this.isBuildOn_) {
+    const buildingEnabled = (this.isRuntimeOn_ || this.isBuildOn_);
+
+    // During prerender mode, don't build elements that aren't allowed to be
+    // prerendered. This avoids wasting our prerender build quota.
+    // See grantBuildPermission() for more details.
+    const shouldBuildResource =
+        this.viewer_.getVisibilityState() != VisibilityState.PRERENDER
+        || resource.prerenderAllowed();
+
+    if (buildingEnabled && shouldBuildResource) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
         this.buildResourceUnsafe_(resource, scheduleWhenBuilt);
@@ -1035,10 +1044,10 @@ export class Resources {
         'linkRels': Services.documentInfoForDoc(this.ampdoc).linkRels,
       }), /* cancelUnsent */true);
 
-      this.scrollHeight_ = this.viewport_.getScrollHeight();
+      this.contentHeight_ = this.viewport_.getContentHeight();
       this.viewer_.sendMessage('documentHeight',
-          dict({'height': this.scrollHeight_}), /* cancelUnsent */true);
-      dev().fine(TAG_, 'document height on load: ' + this.scrollHeight_);
+          dict({'height': this.contentHeight_}), /* cancelUnsent */true);
+      dev().fine(TAG_, 'document height on load: ' + this.contentHeight_);
     }
 
     const viewportSize = this.viewport_.getSize();
@@ -1065,12 +1074,12 @@ export class Resources {
     if (this.maybeChangeHeight_) {
       this.maybeChangeHeight_ = false;
       this.vsync_.measure(() => {
-        const measuredScrollHeight = this.viewport_.getScrollHeight();
-        if (measuredScrollHeight != this.scrollHeight_) {
+        const measuredContentHeight = this.viewport_.getContentHeight();
+        if (measuredContentHeight != this.contentHeight_) {
           this.viewer_.sendMessage('documentHeight',
-              dict({'height': measuredScrollHeight}), /* cancelUnsent */true);
-          this.scrollHeight_ = measuredScrollHeight;
-          dev().fine(TAG_, 'document height changed: ' + this.scrollHeight_);
+              dict({'height': measuredContentHeight}), /* cancelUnsent */true);
+          this.contentHeight_ = measuredContentHeight;
+          dev().fine(TAG_, 'document height changed: ' + this.contentHeight_);
         }
       });
     }

@@ -83,12 +83,6 @@ export const SAFEFRAME_VERSION_HEADER = 'X-AmpSafeFrameVersion';
 /** @type {string} @visibleForTesting */
 export const EXPERIMENT_FEATURE_HEADER_NAME = 'amp-ff-exps';
 
-/**
- * Controls if Content Security Policy is enabled for FIE render.
- * @type {string} @visibleForTesting
- */
-export const CSP_ENABLED_EXP_NAME = 'csp_enabled';
-
 /** @type {string} */
 const TAG = 'amp-a4a';
 
@@ -252,9 +246,6 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.promiseId_ = 0;
 
-    /** {?Object} */
-    this.config = null;
-
     /** @private {?string} */
     this.adUrl_ = null;
 
@@ -266,9 +257,6 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @private {?AMP.AmpAdXOriginIframeHandler} */
     this.xOriginIframeHandler_ = null;
-
-    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = this.getVsync();
 
     /** @private {boolean} whether creative has been verified as AMP */
     this.isVerifiedAmpCreative_ = false;
@@ -370,9 +358,6 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.postAdResponseExperimentFeatures = {};
 
-    /** @private {boolean} whether CSP for FIE is enabled */
-    this.cspEnabled_ = false;
-
     /**
      * The configuration for amp-analytics. If null, no amp-analytics element
      * will be inserted and no analytics events will be fired.
@@ -407,6 +392,14 @@ export class AmpA4A extends AMP.BaseElement {
   /** @override */
   isRelayoutNeeded() {
     return this.isRelayoutNeededFlag;
+  }
+
+  /**
+   * @return {!Promise<boolean>} promise blocked on ad promise whose result is
+   *    whether creative returned is validated as AMP.
+   */
+  isVerifiedAmpCreativePromise() {
+    return this.adPromise_.then(() => this.isVerifiedAmpCreative_);
   }
 
   /** @override */
@@ -701,9 +694,6 @@ export class AmpA4A extends AMP.BaseElement {
                   tryDecodeUriComponent(match[1]));
             }
           }
-          this.cspEnabled_ =
-            this.postAdResponseExperimentFeatures[CSP_ENABLED_EXP_NAME] ==
-              'true';
           // If the response has response code 204, or arrayBuffer is null,
           // collapse it.
           if (!fetchResponse.arrayBuffer || fetchResponse.status == 204) {
@@ -1072,7 +1062,6 @@ export class AmpA4A extends AMP.BaseElement {
     this.experimentalNonAmpCreativeRenderMethod_ =
         this.getNonAmpCreativeRenderingMethod();
     this.postAdResponseExperimentFeatures = {};
-    this.cspEnabled_ = false;
   }
 
   /**
@@ -1363,7 +1352,6 @@ export class AmpA4A extends AMP.BaseElement {
           html: creativeMetaData.minifiedCreative,
           extensionIds: creativeMetaData.customElementExtensions || [],
           fonts: fontsArray,
-          cspEnabled: this.cspEnabled_,
         }, embedWin => {
           installUrlReplacementsForEmbed(this.getAmpDoc(), embedWin,
               new A4AVariableSource(this.getAmpDoc(), embedWin));

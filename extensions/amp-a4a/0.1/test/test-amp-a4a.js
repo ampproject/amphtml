@@ -24,8 +24,6 @@ import {
   SAFEFRAME_VERSION_HEADER,
   protectFunctionWrapper,
   assignAdUrlToError,
-  EXPERIMENT_FEATURE_HEADER_NAME,
-  CSP_ENABLED_EXP_NAME,
 } from '../amp-a4a';
 import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
@@ -300,9 +298,6 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
-        // Force vsync system to run all queued tasks, so that DOM mutations
-        // are actually completed before testing.
-        a4a.vsync_.runScheduledTasks_();
         const child = a4aElement.querySelector('iframe[name]');
         expect(child).to.be.ok;
         expect(child).to.be.visible;
@@ -325,8 +320,6 @@ describe('amp-a4a', () => {
     });
 
     it('populates postAdResponseExperimentFeatures', () => {
-      adResponse.headers[EXPERIMENT_FEATURE_HEADER_NAME] =
-          `foo=bar,bad,${CSP_ENABLED_EXP_NAME}=true`;
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
@@ -334,9 +327,6 @@ describe('amp-a4a', () => {
         expect(child).to.be.ok;
         expect(child.srcdoc.indexOf('meta http-equiv=Content-Security-Policy'))
             .to.not.equal(-1);
-        expect(a4a.postAdResponseExperimentFeatures).to.jsonEqual({
-          foo: 'bar', [CSP_ENABLED_EXP_NAME]: 'true',
-        });
       });
     });
 
@@ -407,7 +397,6 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
-        a4a.vsync_.runScheduledTasks_();
         expect(a4a.friendlyIframeEmbed_).to.exist;
         expect(a4a.friendlyIframeEmbed_.isVisible()).to.be.false;
 
@@ -607,9 +596,6 @@ describe('amp-a4a', () => {
 
       it('should attach a NameFrame when header is set', () => {
         return a4a.layoutCallback().then(() => {
-          // Force vsync system to run all queued tasks, so that DOM mutations
-          // are actually completed before testing.
-          a4a.vsync_.runScheduledTasks_();
           verifyNameFrameRender(a4aElement);
           expect(fetchMock.called('ad')).to.be.true;
         });
@@ -622,9 +608,6 @@ describe('amp-a4a', () => {
         a4a.onLayoutMeasure();
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
-          // Force vsync system to run all queued tasks, so that DOM mutations
-          // are actually completed before testing.
-          a4a.vsync_.runScheduledTasks_();
           verifyNameFrameRender(a4aElement);
           expect(fetchMock.called('ad')).to.be.true;
         });
@@ -642,9 +625,6 @@ describe('amp-a4a', () => {
                   adResponse.headers[RENDERING_TYPE_HEADER] = headerVal;
                   a4a.onLayoutMeasure();
                   return a4a.layoutCallback().then(() => {
-                    // Force vsync system to run all queued tasks, so that
-                    // DOM mutations are actually completed before testing.
-                    a4a.vsync_.runScheduledTasks_();
                     const nameChild = a4aElement.querySelector(
                         'iframe[src^="nameframe"]');
                     expect(nameChild).to.not.be.ok;
@@ -679,9 +659,6 @@ describe('amp-a4a', () => {
 
       it('should attach a SafeFrame when header is set', () => {
         return a4a.layoutCallback().then(() => {
-          // Force vsync system to run all queued tasks, so that DOM mutations
-          // are actually completed before testing.
-          a4a.vsync_.runScheduledTasks_();
           verifySafeFrameRender(a4aElement, DEFAULT_SAFEFRAME_VERSION);
           expect(fetchMock.called('ad')).to.be.true;
         });
@@ -690,9 +667,6 @@ describe('amp-a4a', () => {
       it('should use safeframe version header value', () => {
         a4a.safeframeVersion = '1-2-3';
         return a4a.layoutCallback().then(() => {
-          // Force vsync system to run all queued tasks, so that DOM mutations
-          // are actually completed before testing.
-          a4a.vsync_.runScheduledTasks_();
           verifySafeFrameRender(a4aElement, '1-2-3');
           expect(fetchMock.called('ad')).to.be.true;
         });
@@ -705,9 +679,6 @@ describe('amp-a4a', () => {
         a4a.onLayoutMeasure();
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
-          // Force vsync system to run all queued tasks, so that DOM mutations
-          // are actually completed before testing.
-          a4a.vsync_.runScheduledTasks_();
           verifySafeFrameRender(a4aElement, DEFAULT_SAFEFRAME_VERSION);
           expect(fetchMock.called('ad')).to.be.true;
         });
@@ -722,9 +693,6 @@ describe('amp-a4a', () => {
                   adResponse.headers[RENDERING_TYPE_HEADER] = headerVal;
                   a4a.onLayoutMeasure();
                   return a4a.layoutCallback().then(() => {
-                    // Force vsync system to run all queued tasks, so that
-                    // DOM mutations are actually completed before testing.
-                    a4a.vsync_.runScheduledTasks_();
                     const safeframeUrl = 'https://tpc.googlesyndication.com/safeframe/' +
                       DEFAULT_SAFEFRAME_VERSION + '/html/container.html';
                     const safeChild = a4aElement.querySelector(
@@ -743,16 +711,9 @@ describe('amp-a4a', () => {
 
       it('should reset state to null on unlayoutCallback', () => {
         return a4a.layoutCallback().then(() => {
-          // Force vsync system to run all queued tasks, so that DOM mutations
-          // are actually completed before testing.
-          a4a.vsync_.runScheduledTasks_();
           expect(a4a.experimentalNonAmpCreativeRenderMethod_)
               .to.equal('safeframe');
           a4a.unlayoutCallback();
-          // QUESTION TO REVIEWERS: Do we really need the vsync.mutate in
-          // AmpA4A.unlayoutCallback?  We have an open question there about
-          // whether it's necessary or perhaps hazardous.  Feedback welcome.
-          a4a.vsync_.runScheduledTasks_();
           expect(a4a.experimentalNonAmpCreativeRenderMethod_).to.be.null;
           expect(fetchMock.called('ad')).to.be.true;
         });
@@ -792,9 +753,6 @@ describe('amp-a4a', () => {
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
-          // Force vsync system to run all queued tasks, so that DOM mutations
-          // are actually completed before testing.
-          a4a.vsync_.runScheduledTasks_();
           verifyA4ARender(a4aElement);
         });
       });
@@ -842,9 +800,6 @@ describe('amp-a4a', () => {
       a4a.onLayoutMeasure();
       const renderPromise = a4a.layoutCallback();
       return renderPromise.then(() => {
-        // Force vsync system to run all queued tasks, so that DOM mutations
-        // are actually completed before testing.
-        a4a.vsync_.runScheduledTasks_();
         const child = a4aElement.querySelector('iframe[name]');
         expect(child).to.be.ok;
         expect(child.getAttribute('width')).to.equal('320');
@@ -1763,9 +1718,6 @@ describe('amp-a4a', () => {
         // This is to prevent `applyUnlayoutUI` to be called;
         a4a.uiHandler.state = 0;
         a4a.unlayoutCallback();
-        // Force vsync system to run all queued tasks, so that DOM mutations
-        // are actually completed before testing.
-        a4a.vsync_.runScheduledTasks_();
         whenFirstVisibleResolve();
         return adPromise.then(unusedError => {
           assert.fail('cancelled ad promise should not succeed');
@@ -2037,9 +1989,6 @@ describe('amp-a4a', () => {
             a4a.buildCallback();
             a4a.onLayoutMeasure();
             return a4a.layoutCallback().then(() => {
-              // Force vsync system to run all queued tasks, so that DOM mutations
-              // are actually completed before testing.
-              a4a.vsync_.runScheduledTasks_();
               expect(a4aElement.querySelector('iframe[src]')).to.be.ok;
               expect(a4aElement.querySelector('iframe[srcdoc]')).to.not.be.ok;
             });
@@ -2054,9 +2003,6 @@ describe('amp-a4a', () => {
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
-             // Force vsync system to run all queued tasks, so that DOM mutations
-             // are actually completed before testing.
-          a4a.vsync_.runScheduledTasks_();
           verifyA4ARender(a4aElement);
         });
       });
@@ -2069,9 +2015,6 @@ describe('amp-a4a', () => {
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
-          // Force vsync system to run all queued tasks, so that DOM mutations
-          // are actually completed before testing.
-          a4a.vsync_.runScheduledTasks_();
           expect(a4aElement.querySelector('iframe[src]')).to.be.ok;
           expect(a4aElement.querySelector('iframe[srcdoc]')).to.not.be.ok;
         });

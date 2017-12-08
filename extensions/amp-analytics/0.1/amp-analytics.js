@@ -21,7 +21,7 @@ import {expandTemplate} from '../../../src/string';
 import {isArray, isObject} from '../../../src/types';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {sendRequest, sendRequestUsingIframe} from './transport';
-import {IframeTransport} from './iframe-transport';
+import {getIframeTransportScriptUrl, IframeTransport} from './iframe-transport';
 import {getAmpAdResourceId} from '../../../src/ad-helper';
 import {getTopWindow} from '../../../src/service';
 import {Services} from '../../../src/services';
@@ -30,10 +30,10 @@ import {isEnumValue} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {getMode} from '../../../src/mode';
 import {Activity} from './activity-impl';
+import {AnalyticsEventType} from './events';
 import {
     InstrumentationService,
     instrumentationServicePromiseForDoc,
-    AnalyticsEventType,
 } from './instrumentation';
 import {
   ExpansionOptions,
@@ -120,7 +120,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.iframeTransport_ = null;
 
     /** @private {boolean} */
-    this.isInabox_ = getMode().runtime == 'inabox';
+    this.isInabox_ = getMode(this.win).runtime == 'inabox';
   }
 
   /** @override */
@@ -158,6 +158,16 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.element.getAttribute('trigger') == 'immediate') {
       this.ensureInitialized_();
     }
+  }
+
+  /**
+   * Prefetches and preconnects URLs related to the analytics.
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
+  preconnectCallback(opt_onLayout) {
+    const url = getIframeTransportScriptUrl(this.getAmpDoc().win);
+    this.preconnect.preload(url, 'script');
   }
 
   /** @override */
@@ -330,10 +340,12 @@ export class AmpAnalytics extends AMP.BaseElement {
     const TAG = this.getName_();
     const ampAdResourceId = user().assertString(
         getAmpAdResourceId(this.element, getTopWindow(this.win)),
-        `${TAG}: No friendly parent amp-ad element was found for ` +
+        `${TAG}: No friendly amp-ad ancestor element was found for ` +
         'amp-analytics tag with iframe transport.');
 
-    this.iframeTransport_ = new IframeTransport(this.getAmpDoc().win,
+    this.iframeTransport_ = new IframeTransport(
+        // Create  3p transport frame within creative frame if inabox.
+        this.isInabox_ ? this.win : this.getAmpDoc().win,
         this.element.getAttribute('type'),
         this.config_['transport'], ampAdResourceId);
   }
