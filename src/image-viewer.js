@@ -316,12 +316,15 @@ export class ImageViewer {
 
   /** @private */
   setupGestures_() {
-    this.gestures_ = Gestures.get(this.image_);
-    this.gestures_.onPointerDown(() => {
+    const gesturesWithoutPreventDefault = Gestures.get(this.image_,
+        /* opt_shouldNotPreventDefault */true);
+    gesturesWithoutPreventDefault.onPointerDown(() => {
       if (this.motion_) {
         this.motion_.halt();
       }
     });
+
+    this.gestures_ = Gestures.get(this.viewer_);
 
     // Zoomable.
     this.gestures_.onGesture(DoubletapRecognizer, e => {
@@ -339,7 +342,6 @@ export class ImageViewer {
     });
 
     this.gestures_.onGesture(TapzoomRecognizer, e => {
-      event.preventDefault();
       this.onTapZoom_(e.data.centerClientX, e.data.centerClientY,
           e.data.deltaX, e.data.deltaY);
       if (e.data.last) {
@@ -349,8 +351,6 @@ export class ImageViewer {
     });
 
     this.gestures_.onGesture(PinchRecognizer, e => {
-      // To disable iOS 10 Safari default pinch zoom
-      event.preventDefault();
       this.onPinchZoom_(e.data.centerClientX, e.data.centerClientY,
           e.data.deltaX, e.data.deltaY, e.data.dir);
       if (e.data.last) {
