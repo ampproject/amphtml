@@ -316,9 +316,9 @@ export class ImageViewer {
 
   /** @private */
   setupGestures_() {
-    const gestures = Gestures.get(this.image_,
+    const gesturesWithoutPreventDefault = Gestures.get(this.image_,
         /* opt_shouldNotPreventDefault */true);
-    gestures.onPointerDown(() => {
+    gesturesWithoutPreventDefault.onPointerDown(() => {
       if (this.motion_) {
         this.motion_.halt();
       }
@@ -367,7 +367,6 @@ export class ImageViewer {
     // Movable.
     this.unlistenOnSwipePan_ = this.gestures_
       .onGesture(SwipeXYRecognizer, e => {
-        event.preventDefault();
         this.onMove_(e.data.deltaX, e.data.deltaY, false);
         if (e.data.last) {
           this.onMoveRelease_(e.data.velocityX, e.data.velocityY);
