@@ -316,7 +316,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     }
     if (this.descriptionBox_.textContent) {
       this.descriptionBox_.classList.toggle('hide', !opt_display);
-    } else if (!this.descriptionBox_.classList.contains('hide')) {
+    } else {
       this.descriptionBox_.classList.add('hide');
     }
   }
