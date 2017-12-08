@@ -155,7 +155,7 @@ The RTC Response to a GET must meet the following requirements:
     *   CORS
     *   AMP-Access-Control-Allow-Source-Origin
     *   Access-control-allow-origin
-    *   Access-control-expose-header: AMP-Access-Control-Allow-Source-Origin
+    *   Access-control-expose-headers: AMP-Access-Control-Allow-Source-Origin
 *   Body of response is a JSON object of targeting information such as:
     *   {"targeting": {"sport":["rugby","cricket"]}}
     *   The response body must be JSON, but the actual structure of that data need not match the structure here. Refer to Fast Fetch Network-specific documentation for the required spec. (for example, if using DoubleClick, refer to DoubleClick docs).
