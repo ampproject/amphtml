@@ -418,6 +418,8 @@ function isScopeSelectorSupported(parent) {
     const testElement = doc.createElement('div');
     const testChild = doc.createElement('div');
     testElement.appendChild(testChild);
+    // NOTE(cvializ, #12383): Firefox's implementation is incomplete,
+    // therefore we test actual functionality of`:scope` as well.
     return testElement./*OK*/querySelector(':scope div') === testChild;
   } catch (e) {
     return false;
