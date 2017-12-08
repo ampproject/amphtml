@@ -409,6 +409,30 @@ describe.configure().ifNewChrome().run('Bind', function() {
       });
     });
 
+    it('pushStateWithExpression() should work with nested objects', () => {
+      const pushHistorySpy =
+        env.sandbox.spy(bind.historyForTesting(), 'push');
+
+      const element = createElement(env, container, '[text]="foo.bar"');
+      expect(element.textContent).to.equal('');
+      return bind.pushStateWithExpression('{foo: {bar: 0}}', {}).then(() => {
+        env.flushVsync();
+        expect(element.textContent).to.equal('0');
+
+        return bind.pushStateWithExpression('{foo: {bar: 1}}', {});
+      }).then(() => {
+        env.flushVsync();
+        expect(element.textContent).to.equal('1');
+
+        expect(pushHistorySpy).calledTwice;
+        // Pop callback should restore `foo.bar` to second pushed value (0).
+        const onPopCallback = pushHistorySpy.secondCall.args[0];
+        return onPopCallback();
+      }).then(() => {
+        expect(element.textContent).to.equal('0');
+      });
+    });
+
     it('should ignore <amp-state> updates if specified in setState()', () => {
       const element = createElement(env, container, '[src]="foo"', 'amp-state');
       expect(element.getAttribute('src')).to.be.null;
