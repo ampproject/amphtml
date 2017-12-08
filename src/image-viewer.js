@@ -236,12 +236,13 @@ export class ImageViewer {
       }
     });
 
+    const platform = Services.platformFor(this.win);
     if (sourceImage && isLoaded(sourceImage) && sourceImage.src) {
       // Set src provisionally to the known loaded value for fast display.
       // It will be updated later.
       this.image_.setAttribute('src', sourceImage.src);
-    } else if (Services.platformFor(this.win).isSafari()) {
-      // Safari shows a gray border for images with alt but no src
+    } else if (platform.isSafari() || platform.isIos()) {
+      // iOS/Safari shows a gray border for images with alt but no src
       // If we did not set the src, remove the alt attribute
       this.image_.removeAttribute('alt');
     }
@@ -315,8 +316,9 @@ export class ImageViewer {
     return Services.timerFor(this.win).promise(1).then(() => {
       this.image_.setAttribute('src', src);
       const platform = Services.platformFor(this.win);
-      if (platform.isSafari() && this.ariaAttributes_.hasOwnProperty('alt')) {
-        // Safari shows a gray border for images with alt but no src
+      if ((platform.isSafari() || platform.isIos())
+        && this.ariaAttributes_.hasOwnProperty('alt')) {
+        // iOS/Safari shows a gray border for images with alt but no src
         // Set alt only after we set the src attribute
         this.image_.setAttribute('alt', this.ariaAttributes_['alt']);
       }
