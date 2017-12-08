@@ -22,7 +22,7 @@ import {childElementByTag} from '../../../src/dom';
 import {getFriendlyIframeEmbedOptional}
     from '../../../src/friendly-iframe-embed';
 import {getParentWindowFrameElement} from '../../../src/service';
-import {installWebAnimations} from 'web-animations-js/web-animations.install';
+import {ensurePolyfillInstalled} from './web-animations-polyfill';
 import {listen} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
@@ -33,7 +33,6 @@ import {clamp} from '../../../src/utils/math';
 import {WebAnimationService} from './web-animation-service';
 
 const TAG = 'amp-animation';
-const POLYFILLED = '__AMP_WA';
 
 
 export class AmpAnimation extends AMP.BaseElement {
@@ -501,15 +500,7 @@ export class AmpAnimation extends AMP.BaseElement {
   }
 }
 
-/**
- * @param {!Window} win
- */
-function ensurePolyfillInstalled(win) {
-  if (!win[POLYFILLED]) {
-    win[POLYFILLED] = true;
-    installWebAnimations(win);
-  }
-}
+
 
 AMP.extension(TAG, '0.1', function(AMP) {
   AMP.registerElement(TAG, AmpAnimation);
