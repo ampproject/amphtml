@@ -1473,7 +1473,7 @@ describe('Resources discoverWork', () => {
     resources.discoverWork_();
 
     expect(resource1.build).to.be.calledOnce;
-    return resource1.build().then(() => {
+    return Promise.resolve().then(() => {
       // Pass should be scheduled after successful resource build.
       expect(resources.schedulePass).to.be.calledWithExactly();
     });
@@ -1491,7 +1491,7 @@ describe('Resources discoverWork', () => {
     resources.discoverWork_();
 
     expect(resource1.build).to.be.calledOnce;
-    return resource1.build().then(() => {
+    return Promise.resolve().then(() => {
       // Pass should be scheduled after successful resource build.
       expect(resources.schedulePass).to.be.calledWithExactly();
     });
