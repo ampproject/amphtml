@@ -251,14 +251,12 @@ export class ShareWidget {
           return;
         }
 
-        const leftMargin =
-            dev().assert(items[0].firstElementChild)./*OK*/offsetLeft -
-            this.root_./*OK*/offsetLeft;
+        const icon = dev().assert(items[0].firstElementChild);
 
-        const iconWidth =
-            dev().assert(items[0].firstElementChild)./*OK*/offsetWidth;
+        const leftMargin = icon./*OK*/offsetLeft - this.root_./*OK*/offsetLeft;
+        const iconWidth = icon./*OK*/offsetWidth;
 
-        // Total width that the buttons will occupy with minimum padding
+        // Total width that the buttons will occupy with minimum padding.
         const totalItemWidth =
             (iconWidth * items.length + 2 * MIN_BUTTON_PADDING *
                 (items.length - 1));
