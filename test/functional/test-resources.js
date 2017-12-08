@@ -1468,12 +1468,15 @@ describe('Resources discoverWork', () => {
     resource1.element.isBuilt = () => false;
     resource2.element.idleRenderOutsideViewport = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
-    resource1.build = sandbox.spy();
+    resource1.build = sandbox.stub().returns(Promise.resolve());
 
     resources.discoverWork_();
 
     expect(resource1.build).to.be.calledOnce;
-    expect(resources.schedulePass).to.not.be.called;
+    return resource1.build().then(() => {
+      // Pass should be scheduled after successful resource build.
+      expect(resources.schedulePass).to.be.calledWithExactly();
+    });
   });
 
   it('should build resource when not built and before doc ready', () => {
@@ -1483,12 +1486,15 @@ describe('Resources discoverWork', () => {
     resource1.element.isBuilt = () => false;
     resource2.element.idleRenderOutsideViewport = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
-    resource1.build = sandbox.spy();
+    resource1.build = sandbox.stub().returns(Promise.resolve());
 
     resources.discoverWork_();
 
     expect(resource1.build).to.be.calledOnce;
-    expect(resources.schedulePass).to.not.be.called;
+    return resource1.build().then(() => {
+      // Pass should be scheduled after successful resource build.
+      expect(resources.schedulePass).to.be.calledWithExactly();
+    });
   });
 
   it('should NOT build non-prerenderable resources in prerender', () => {
