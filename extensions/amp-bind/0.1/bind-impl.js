@@ -30,7 +30,7 @@ import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isFiniteNumber} from '../../../src/types';
 import {map} from '../../../src/utils/object';
-import {recursiveEquals} from '../../../src/json';
+import {parseJson, recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
 import {waitForBodyPromise} from '../../../src/dom';
@@ -1000,15 +1000,15 @@ export class Bind {
    * Copies an object containing JSON data and returns it.
    * Returns null if input object contains invalid JSON (e.g. undefined or
    * circular references).
-   * @param {Object|undefined} o
-   * @return {Object}
+   * @param {?JsonObject|undefined} o
+   * @return {?JsonObject}
    */
   copyJsonObject_(o) {
     if (o === undefined) {
       return null;
     }
     try {
-      return JSON.parse(JSON.stringify(o));
+      return parseJson(JSON.stringify(o));
     } catch (e) {
       dev().error(TAG, 'Failed to copy JSON (' + o + ') with error: ' + e);
     }
