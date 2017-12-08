@@ -43,8 +43,8 @@ const TAG = 'amp-lightbox-viewer';
  * @enum {number}
  */
 const LightboxControlsModes = {
-  SHOW_CONTROLS: 1,
-  HIDE_CONTROLS: 0,
+  CONTROLS_DISPLAYED: 1,
+  CONTROLS_HIDDEN: 0,
 };
 
 const DESC_BOX_PADDING_TOP = 50;
@@ -131,7 +131,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.topGradient_ = null;
 
     /** @private {!LightboxControlsModes} */
-    this.controlsMode_ = LightboxControlsModes.SHOW_CONTROLS;
+    this.controlsMode_ = LightboxControlsModes.CONTROLS_DISPLAYED;
 
     /** @private {?UnlistenDef} */
     this.unlistenResize_ = null;
@@ -315,7 +315,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       opt_display = this.descriptionBox_.classList.contains('hide');
     }
     if (this.descriptionBox_.textContent) {
-      this.descriptionBox_.classList.toggle('hide', opt_display);
+      this.descriptionBox_.classList.toggle('hide', !opt_display);
     } else {
       this.descriptionBox_.classList.add('hide');
     }
@@ -414,7 +414,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     if (opt_display == undefined) {
       opt_display = this.topBar_.classList.contains('hide');
     }
-    this.topBar_.classList.toggle('hide', opt_display);
+    this.topBar_.classList.toggle('hide', !opt_display);
   }
 
   /**
@@ -469,14 +469,14 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   toggleControls_() {
-    if (this.controlsMode_ == LightboxControlsModes.HIDE_CONTROLS) {
+    if (this.controlsMode_ == LightboxControlsModes.CONTROLS_HIDDEN) {
       this.toggleDescriptionBox_(/* opt_display */true);
       this.toggleTopBar_(/* opt_display */true);
-      this.controlsMode_ = LightboxControlsModes.SHOW_CONTROLS;
+      this.controlsMode_ = LightboxControlsModes.CONTROLS_DISPLAYED;
     } else {
       this.toggleDescriptionBox_(/* opt_display */false);
       this.toggleTopBar_(/* opt_display */false);
-      this.controlsMode_ = LightboxControlsModes.HIDE_CONTROLS;
+      this.controlsMode_ = LightboxControlsModes.CONTROLS_HIDDEN;
     }
   }
 
@@ -765,6 +765,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.container_.setAttribute('gallery-view', '');
     this.topBar_.classList.add('fullscreen');
     toggle(dev().assertElement(this.carousel_), false);
+    this.toggleDescriptionBox_(false);
   }
 
   /**
@@ -777,6 +778,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       this.topBar_.classList.remove('fullscreen');
     }
     toggle(dev().assertElement(this.carousel_), true);
+    this.toggleDescriptionBox_(true);
   }
 
   /**
