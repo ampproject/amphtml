@@ -298,10 +298,7 @@ class MediaElement extends PageElement {
 
   /** @override */
   hasAudio() {
-    const mediaElement = this.getMediaElement_();
-    return mediaElement.mozHasAudio ||
-        Boolean(mediaElement['webkitAudioDecodedByteCount']) ||
-        Boolean(mediaElement.audioTracks && mediaElement.audioTracks.length);
+    return true;
   }
 }
 
