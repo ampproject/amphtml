@@ -408,13 +408,17 @@ export function setScopeSelectorSupportedForTesting(val) {
 }
 
 /**
+ * Test that the :scope selector is supported and behaves correctly.
  * @param {!Element} parent
  * @return {boolean}
  */
 function isScopeSelectorSupported(parent) {
+  const doc = parent.ownerDocument;
   try {
-    parent.ownerDocument.querySelector(':scope');
-    return true;
+    const testElement = doc.createElement('div');
+    const testChild = doc.createElement('div');
+    testElement.appendChild(testChild);
+    return testElement./*OK*/querySelector(':scope div') === testChild;
   } catch (e) {
     return false;
   }
