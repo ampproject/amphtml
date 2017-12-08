@@ -345,6 +345,32 @@ describe('Google A4A utils', () => {
       });
     });
 
+    it('should include scroll position', function() {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        doc.win = window;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        const getRect = () => { return {'width': 100, 'height': 200}; };
+        const getSize = () => { return {'width': 100, 'height': 200}; };
+        const getScrollLeft = () => 12;
+        const getScrollTop = () => 34;
+        const viewportStub = sandbox.stub(Services, 'viewportForDoc');
+        viewportStub.returns({getRect, getSize, getScrollTop, getScrollLeft});
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', 0, {}, []).then(url1 => {
+            expect(url1).to.match(/scr_x=12&scr_y=34/);
+          });
+        });
+      });
+    });
+
     it('should include all experiment ids', function() {
       // When ran locally, this test tends to exceed 2000ms timeout.
       this.timeout(5000);
