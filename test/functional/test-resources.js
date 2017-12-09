@@ -1102,6 +1102,7 @@ describe('Resources discoverWork', () => {
       mutate: callback => callback(),
       measurePromise: callback => Promise.resolve(callback()),
     };
+    sandbox.stub(resources, 'schedulePass');
   });
 
   afterEach(() => {
@@ -1462,34 +1463,35 @@ describe('Resources discoverWork', () => {
   });
 
   it('should build resource when not built', () => {
-    const schedulePassStub = sandbox.stub(resources, 'schedulePass');
     sandbox.stub(resources, 'schedule_');
+    sandbox.stub(resources, 'buildResourceUnsafe_');
     resources.documentReady_ = true;
     resource1.element.isBuilt = () => false;
     resource2.element.idleRenderOutsideViewport = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
-    resource1.build = sandbox.spy();
+    resource1.build = sandbox.stub().returns(Promise.resolve());
 
     resources.discoverWork_();
 
-    expect(resource1.build).to.be.calledOnce;
-    expect(schedulePassStub).to.not.be.called;
+    expect(resources.buildResourceUnsafe_).to.be.calledOnce;
+    expect(resources.buildResourceUnsafe_).to.be.calledWithExactly(
+        resource1, /* schedulePass */ true);
   });
 
   it('should build resource when not built and before doc ready', () => {
-    const schedulePassStub = sandbox.stub(resources, 'schedulePass');
     sandbox.stub(resources, 'schedule_');
+    sandbox.stub(resources, 'buildResourceUnsafe_');
     resources.documentReady_ = false;
     resource1.element.nextSibling = {};
     resource1.element.isBuilt = () => false;
     resource2.element.idleRenderOutsideViewport = () => false;
     resource1.state_ = ResourceState.NOT_BUILT;
-    resource1.build = sandbox.spy();
 
     resources.discoverWork_();
 
-    expect(resource1.build).to.be.calledOnce;
-    expect(schedulePassStub).to.not.be.called;
+    expect(resources.buildResourceUnsafe_).to.be.calledOnce;
+    expect(resources.buildResourceUnsafe_).to.be.calledWithExactly(
+        resource1, /* schedulePass */ true);
   });
 
   it('should NOT build non-prerenderable resources in prerender', () => {
@@ -1510,7 +1512,6 @@ describe('Resources discoverWork', () => {
   });
 
   it('should layout resource if outside viewport but idle', () => {
-    const schedulePassStub = sandbox.stub(resources, 'schedulePass');
     resources.documentReady_ = true;
     resource1.element.nextSibling = {};
     resource1.element.isBuilt = () => true;
@@ -1522,7 +1523,7 @@ describe('Resources discoverWork', () => {
 
     resources.discoverWork_();
 
-    expect(schedulePassStub).to.be.calledOnce;
+    expect(resources.schedulePass).to.be.calledOnce;
   });
 
   describe('getResourcesInRect', () => {
