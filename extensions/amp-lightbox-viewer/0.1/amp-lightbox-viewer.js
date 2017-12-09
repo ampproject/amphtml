@@ -29,6 +29,7 @@ import {toggle, setStyle} from '../../../src/style';
 import {getData, listen} from '../../../src/event-helper';
 import {LightboxManager} from './service/lightbox-manager-impl';
 import {layoutRectFromDomRect} from '../../../src/layout-rect';
+import {elementByTag} from '../../../src/dom';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
@@ -220,7 +221,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         container.classList.add('i-amphtml-image-lightbox-container');
         const imageViewer = new ImageViewer(this, this.win,
           this.loadPromise.bind(this));
-        imageViewer.init(element);
+        imageViewer.init(element, elementByTag(element, 'img'));
         container.appendChild(imageViewer.getElement());
         slide = container;
         metadata.imageViewer = imageViewer;
