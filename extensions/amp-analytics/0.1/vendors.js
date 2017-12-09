@@ -1102,8 +1102,8 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
 
   'mobify': {
     'vars': {
-      'projectSlug': '',
-      'templateName': ''
+      'projectSlug': 'mobify-project-id',
+      'templateName': 'page-type'
     },
     'requests': {
       '_host': 'https://engagement-collector.mobify.net',
@@ -1122,14 +1122,19 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'timestamp_local=${timestamp}&' +
         'channel=web&' +
         'dimensions=%7b${_dimensions}%7d',
+      'ampstart': '${_basePrefix}&data=%7b%22category%22%3a%22timing%22%2c%22action%22%3a%22ampStart%22%2c%22value%22%3a${navTiming(navigationStart,domLoading)}%7d',
       'pageview': '${_basePrefix}&data=%7b%22action%22%3a%22pageview%22%7d',
       'pageload': '${_basePrefix}&data=%7b%22category%22%3a%22timing%22%2c%22action%22%3a%22load%22%2c%22value%22%3a${pageLoadTime}%7d',
       'pagedcl': '${_basePrefix}&data=%7b%22category%22%3a%22timing%22%2c%22action%22%3a%22DOMContentLoaded%22%2c%22value%22%3a${contentLoadTime}%7d'
     },
     'triggers': {
+      'ampstart': {
+          on: 'visible',
+          request: 'ampstart'
+      },
       'pageview': {
-        'on': 'visible',
-        'request': 'pageview'
+          on: 'ini-load',
+          request: 'pageview'
       },
       'pageload': {
         'on': 'visible',
@@ -1145,8 +1150,8 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'xhrpost': false,
       'image': true
     }
-  },  
-  
+  },
+
   'mparticle': {
     'vars': {
       'eventType': 'Unknown',
