@@ -708,8 +708,8 @@ export class ShadowDomWriterBulk {
  * `createHTMLDocument()` seems to behave the same way.
  */
 function removeNoScriptElements(parent) {
-  const noscriptElements = toArray(childElementsByTag(parent, 'noscript'));
-  noscriptElements.forEach(element => {
+  const noscriptElements = childElementsByTag(parent, 'noscript');
+  iterateCursor(noscriptElements, element => {
     removeElement(element);
   });
 }
