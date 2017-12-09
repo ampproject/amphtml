@@ -496,6 +496,23 @@ describes.sandboxed('shadow-embed', {}, () => {
         });
       });
     });
+
+    it('should not parse noscript as markup across writes', () => {
+      writer.write('<body><child1></child1><noscript><child2>');
+      return waitForNextBodyChunk().then(() => {
+        expect(win.document.body.querySelector('child1')).to.exist;
+        writer.write('</child2></noscript>');
+        writer.write('<child3></child3>');
+        writer.close();
+        env.flushVsync();
+
+        return onEndPromise.then(() => {
+          expect(win.document.body.querySelector('child1')).to.exist;
+          expect(win.document.body.querySelector('child2')).not.to.exist;
+          expect(win.document.body.querySelector('child3')).to.exist;
+        });
+      });
+    });
   });
 
   describes.fakeWin('ShadowDomWriterBulk', {amp: true}, env => {
