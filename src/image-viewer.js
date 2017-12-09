@@ -241,6 +241,13 @@ export class ImageViewer {
       // It will be updated later.
       this.image_.setAttribute('src', sourceImage.src);
     }
+
+    st.setStyles(this.image_, {
+      top: st.px(0),
+      left: st.px(0),
+      width: st.px(0),
+      height: st.px(0),
+    });
   }
 
   /**
