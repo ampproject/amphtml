@@ -107,6 +107,27 @@
         ".comic-amp-font-loaded",
         ".comic-amp-bold-font-loaded"
       ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story/amp-story.amp.html",
+      "name": "amp-story",
+      "loading_complete_css": [
+        ".i-amphtml-story-standalone"
+      ],
+      "experiments": [
+        "amp-story"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-story.bookend/amp-story.bookend.amp.html",
+      "name": "amp-story bookend",
+      "loading_complete_css": [
+        "amp-story.i-amphtml-story-standalone",
+        ".i-amphtml-story-bookend-active"
+      ],
+      "experiments": [
+        "amp-story"
+      ]
     }
   ],
 
