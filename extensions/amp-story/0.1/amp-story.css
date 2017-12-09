@@ -509,6 +509,7 @@ amp-story-grid-layer * {
   display: flex !important;
   overflow: auto !important;
   margin: 32px 8px !important;
+  height: 80px !important;
 }
 
 .i-amphtml-story-bookend-fullbleed .i-amphtml-story-share-widget {
