@@ -797,32 +797,30 @@ amp-story-page {
   background-color: #757575;
 }
 
-amp-date,
-amp-date-range {
+amp-date-picker {
   display: block;
 }
 
-amp-date:not([i-amphtml-date-picker-attached]),
-amp-date-range:not([i-amphtml-date-picker-attached])  {
+amp-date-picker:not([i-amphtml-date-picker-attached])  {
   display: flex;
   width: 200px;
   height: 50px;
   border: 1px solid #dbdbdb;
 }
 
-amp-date-range:not([i-amphtml-date-picker-attached]) {
+amp-date-picker[type="range"]:not([i-amphtml-date-picker-attached]) {
   width: 400px;
 }
 
-amp-date[i-amphtml-date-picker-attached] [amp-date-placeholder],
-amp-date-range[i-amphtml-date-picker-attached] [amp-date-placeholder-start],
-amp-date-range[i-amphtml-date-picker-attached] [amp-date-placeholder-end] {
+amp-date-picker[i-amphtml-date-picker-attached] [amp-date-placeholder],
+amp-date-picker[type="range"][i-amphtml-date-picker-attached] [amp-date-placeholder-start],
+amp-date-picker[type="range"][i-amphtml-date-picker-attached] [amp-date-placeholder-end] {
   display: none;
 }
 
-amp-date [amp-date-placeholder],
-amp-date-range [amp-date-placeholder-start],
-amp-date-range [amp-date-placeholder-end] {
+amp-date-picker [amp-date-placeholder],
+amp-date-picker[type="range"] [amp-date-placeholder-start],
+amp-date-picker[type="range"] [amp-date-placeholder-end] {
   border: 0;
   font-weight: 200;
   font-size: 18px;
@@ -838,7 +836,7 @@ amp-date-range [amp-date-placeholder-end] {
 }
 
 amp-date [amp-date-placeholder]::placeholder,
-amp-date-range [amp-date-placeholder-start]::placeholder,
-amp-date-range [amp-date-placeholder-end]::placeholder {
+amp-date-picker[type="range"] [amp-date-placeholder-start]::placeholder,
+amp-date-picker[type="range"] [amp-date-placeholder-end]::placeholder {
   color: #757575;
 }

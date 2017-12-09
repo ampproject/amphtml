@@ -18,25 +18,23 @@ import {ActionTrust} from '../../../src/action-trust';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-date-picker-0.1.css';
 import {DEFAULT_LOCALE, DEFAULT_FORMAT, FORMAT_STRINGS} from './constants';
-import {Layout} from '../../../src/layout';
-import {createDeferred} from './react-utils';
-import {Services} from '../../../src/services';
-import {createSingleDatePicker} from './single-date-picker';
-import {createDateRangePicker} from './date-range-picker';
-import {createCustomEvent} from '../../../src/event-helper';
-import {fetchBatchedJsonFor} from '../../../src/batched-json';
-import {
-  childElementByAttr,
-  isRTL,
-  removeElement,
-} from '../../../src/dom';
-import {isExperimentOn} from '../../../src/experiments';
-import {user} from '../../../src/log';
-import {map} from '../../../src/utils/object';
-import {toArray} from '../../../src/types';
-import {requireExternal} from '../../../src/module';
-import {dashToCamelCase} from '../../../src/string';
 import {DatesList} from './dates-list';
+import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
+import {assertHttpsUrl} from '../../../src/url';
+import {childElementByAttr, isRTL, removeElement} from '../../../src/dom';
+import {createCustomEvent} from '../../../src/event-helper';
+import {createDateRangePicker} from './date-range-picker';
+import {createDeferred} from './react-utils';
+import {createSingleDatePicker} from './single-date-picker';
+import {fetchBatchedJsonFor} from '../../../src/batched-json';
+import {dashToCamelCase} from '../../../src/string';
+import {isExperimentOn} from '../../../src/experiments';
+import {map} from '../../../src/utils/object';
+import {requireExternal} from '../../../src/module';
+import {sanitizeFormattingHtml} from '../../../src/sanitizer';
+import {toArray} from '../../../src/types';
+import {user} from '../../../src/log';
 
 AMP.includeExternalBundle();
 
@@ -232,7 +230,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * @return {?Promise<!JsonObject|!Array<JsonObject>>}
    */
   fetchSrcTemplates_() {
-    if (this.element.getAttribute('src')) {
+    if (assertHttpsUrl(this.element.getAttribute('src'), this.element)) {
       return fetchBatchedJsonFor(this.ampdoc_, this.element);
     } else {
       return null;
@@ -242,6 +240,7 @@ class AmpDatePicker extends AMP.BaseElement {
   /**
    * Create an array of objects mapping dates to templates.
    * @param {?Promise<!JsonObject|!Array<JsonObject>>} srcTemplatePromise
+   * @return {!Promise<undefined>}
    */
   parseSrcTemplates_(srcTemplatePromise) {
     if (!srcTemplatePromise) {
@@ -518,7 +517,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * @param {string=} opt_fallback
    * @return {!Promise<string>}
    */
-  renderTemplate_(template, opt_data, opt_fallback) {
+  renderTemplate_(template, opt_data, opt_fallback = '') {
     if (template) {
       const data = opt_data || /** @type {!JsonObject} */ ({});
       return this.templates_.renderTemplate(template, data)
@@ -532,7 +531,7 @@ class AmpDatePicker extends AMP.BaseElement {
             return rendered./*REVIEW*/outerHTML;
           });
     } else {
-      return Promise.resolve(opt_fallback || '');
+      return Promise.resolve(sanitizeFormattingHtml(opt_fallback));
     }
   }
 

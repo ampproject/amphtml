@@ -202,7 +202,8 @@
 <div class="tooltip" [class]="'tooltip' + (tooltip ? ' tooltip-show' : '')">
   Great price
 </div>
-<amp-date-range
+<amp-date-picker
+  type="range"
   number-of-months="12"
   orientation="verticalScrollable"
   with-full-screen-portal
@@ -224,7 +225,7 @@
     {{D}}
     <span class="highlight-square"></span>
   </template>
-</amp-date-range>
+</amp-date-picker>
 
 </body>
 </html>

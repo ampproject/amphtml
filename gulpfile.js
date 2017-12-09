@@ -782,40 +782,46 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
 
 const MODULE_PLACEHOLDER_TOKEN = 'AMP.includeExternalBundle();';
 const MODULE_SEPARATOR = ';';
+const EXTENSION_BUNDLE_MAP = {
+  'amp-date-picker.js': [
+    'third_party/moment/bundle.js',
+    'third_party/react/bundle.js',
+    'third_party/react-dom/bundle.js',
+    'third_party/prop-types/bundle.js',
+    'third_party/react-dates/bundle.js',
+  ],
+  'amp-viz-vega.js': [
+    'third_party/d3/d3.js',
+    'third_party/d3-geo-projection/d3-geo-projection.js',
+    'third_party/vega/vega.js',
+  ]
+};
 
 /**
- * Allows prepending code to the compiled, minified extension.
- * This code will not be parsed by the compiler.
- * @param {string} name The name of the extension.
- * @return {string} The concatenated source of the additional files needed by the extension.
+ * Injects code into compiled, minified extensions.
+ * If the extension contains `AMP.includeExternalBundle()`, that call will be
+ * replaced with the concatenated contents of the bundle files. If the
+ * call is absent, the bundle files will be prepended to the original source.
+ * The resulting code will not be parsed by the compiler. This method overwrites
+ * the originally built extension binary.
+ * @param {string} srcFilename The filename of the extension entry point.
+ * @param {string} destFilePath The path of the final built file.
  */
-function replaceExternalBundleToken(srcFilename, destFilePath) {
-  let bundle;
-  if (srcFilename === 'amp-date-picker.js') {
-    bundle = concatFilesToString([
-      'third_party/moment/bundle.js',
-      'third_party/react/bundle.js',
-      'third_party/react-dom/bundle.js',
-      'third_party/prop-types/bundle.js',
-      'third_party/react-dates/bundle.js',
-    ]);
-  } else if (srcFilename === 'amp-viz-vega.js') {
-    bundle = concatFilesToString([
-      'third_party/d3/d3.js',
-      'third_party/d3-geo-projection/d3-geo-projection.js',
-      'third_party/vega/vega.js',
-    ]);
-  } else {
-    bundle = '';
+function injectExternalDependencies(srcFilename, destFilePath) {
+  const bundleFiles = EXTENSION_BUNDLE_MAP[srcFilename];
+  if (bundleFiles) {
+    const bundle = concatFilesToString(bundleFiles);
+    const source = fs.readFileSync(destFilePath, 'utf8');
+    const containsToken = (source.indexOf(MODULE_PLACEHOLDER_TOKEN) > -1);
+    // Use the function argument of String.prototype.replace to avoid special
+    // tokens like $` and $' being substituted with their replacement value.
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#Specifying_a_string_as_a_parameter
+    const newSource = containsToken ?
+        source.replace(MODULE_PLACEHOLDER_TOKEN, () => bundle) :
+        bundle + MODULE_SEPARATOR + source;
+
+    fs.writeFileSync(destFilePath, newSource, 'utf8');
   }
-
-  const source = fs.readFileSync(destFilePath, 'utf8');
-  const containsToken = (source.indexOf(MODULE_PLACEHOLDER_TOKEN) > -1);
-  const newSource = containsToken ?
-      source.replace(MODULE_PLACEHOLDER_TOKEN, () => bundle) :
-      bundle + MODULE_SEPARATOR + source;
-
-  fs.writeFileSync(destFilePath, newSource, 'utf8');
 }
 
 /**
@@ -854,7 +860,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         srcDir + srcFilename, destDir, options.minifiedName, options)
         .then(function() {
           const destPath = destDir + '/' + options.minifiedName;
-          replaceExternalBundleToken(srcFilename, destPath);
+          injectExternalDependencies(srcFilename, destPath);
           fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
           if (options.latestName) {
             fs.copySync(
@@ -917,7 +923,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe($$.rename(destFilename))
       .pipe(lazywrite())
       .on('end', function() {
-        replaceExternalBundleToken(srcFilename, destDir + '/' + destFilename);
+        injectExternalDependencies(srcFilename, destDir + '/' + destFilename);
       })).then(() => {
         endBuildStep('Compiled', srcFilename, startTime);
       });

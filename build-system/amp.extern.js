@@ -417,12 +417,21 @@ const RTC_ERROR_ENUM = {};
       error: (RTC_ERROR_ENUM|undefined)}} */
 var rtcResponseDef;
 
-/** @type {!function(string):?} */
+/**
+ * This symbol is exposed by browserify bundles transformed by
+ * `scoped-require.js` to avoid polluting the global namespace with `require`.
+ * It allows AMP extensions to consume code injected into their binaries that
+ * cannot be run through Closure Compiler, e.g. React code with JSX.
+ * @type {!function(string):?}
+ */
 AMP.require;
 
 /**
- * Replaced in the gulpfile by either an empty string, or a concatenated
- * set of browserify bundles that expose external modules.
+ * `AMP.includeExternalBundle` is replaced with injected code during the
+ * build process. Extensions must declare their external bundles in
+ * `guplfile.js#EXTENSION_BUNDLE_MAP`. If an extension declares external bundles
+ * but does not add an `AMP.includeExternalBundle();` call, the bundle will
+ * be prepended to the extension binary.
  * @type {!function()}
  */
 AMP.includeExternalBundle = function() {};
