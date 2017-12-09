@@ -478,6 +478,41 @@ describes.sandboxed('shadow-embed', {}, () => {
         });
       });
     });
+
+    it('should not parse noscript as markup', () => {
+      writer.write('<body><child1></child1><noscript><child2></child2>' +
+          '</noscript>');
+      return waitForNextBodyChunk().then(() => {
+        expect(win.document.body.querySelector('child1')).to.exist;
+        expect(win.document.body.querySelector('child2')).not.to.exist;
+        writer.write('<noscript><child3></child3></noscript>');
+        writer.write('<child4></child4>');
+        writer.close();
+        env.flushVsync();
+
+        return onEndPromise.then(() => {
+          expect(win.document.body.querySelector('child3')).not.to.exist;
+          expect(win.document.body.querySelector('child4')).to.exist;
+        });
+      });
+    });
+
+    it('should not parse noscript as markup across writes', () => {
+      writer.write('<body><child1></child1><noscript><child2>');
+      return waitForNextBodyChunk().then(() => {
+        expect(win.document.body.querySelector('child1')).to.exist;
+        writer.write('</child2></noscript>');
+        writer.write('<child3></child3>');
+        writer.close();
+        env.flushVsync();
+
+        return onEndPromise.then(() => {
+          expect(win.document.body.querySelector('child1')).to.exist;
+          expect(win.document.body.querySelector('child2')).not.to.exist;
+          expect(win.document.body.querySelector('child3')).to.exist;
+        });
+      });
+    });
   });
 
   describes.fakeWin('ShadowDomWriterBulk', {amp: true}, env => {
@@ -557,6 +592,18 @@ describes.sandboxed('shadow-embed', {}, () => {
       expect(win.document.body.querySelector('child')).to.exist;
       expect(win.document.body.querySelector('child2')).to.exist;
       expect(writer.eof_).to.be.true;
+      return Promise.all([onBodyPromise, onEndPromise]);
+    });
+
+    it('should not parse noscript as markup', () => {
+      writer.write('<body>');
+      writer.write('<child1></child1><noscript><child2></child2></noscript>');
+      writer.write('<child3></child3>');
+      writer.close();
+      env.flushVsync();
+      expect(win.document.body.querySelector('child1')).to.exist;
+      expect(win.document.body.querySelector('child2')).not.to.exist;
+      expect(win.document.body.querySelector('child3')).to.exist;
       return Promise.all([onBodyPromise, onEndPromise]);
     });
   });
