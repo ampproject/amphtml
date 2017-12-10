@@ -400,25 +400,6 @@ class AmpApesterMedia extends AMP.BaseElement {
   }
 
   /**
-   * Pour the HTML into the media Iframe,
-   * If we don't have the media HTML already we fetch it.
-   * @param content
-   * @param src
-   */
-  getMediaContent(content, src) {
-    /** in case we already have renderer content from display-service use it, otherwise fetch from server  */
-    const getContent = () =>
-      content
-        ? Promise.resolve(content)
-        : Services.xhrFor(this.win)
-            .fetchText(src, {
-              requireAmpResponseSourceOrigin: false,
-            })
-            .then(res => res.text());
-    return getContent();
-  }
-
-  /**
    * Registers to apester events.
    * @private
    */
