@@ -980,7 +980,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
       });
     });
 
-    it('should fire for 100 percent min and max visibility', () => {
+    it('should fire for visiblePercentageMin=visiblePercentageMax=100', () => {
       const vh = new VisibilityModel({
         visiblePercentageMin: 100,
         visiblePercentageMax: 100,
