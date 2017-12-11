@@ -54,7 +54,7 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {AudioManager, upgradeBackgroundAudio} from './audio';
-import {setStyle, setImportantStyles} from '../../../src/style';
+import {setStyle, setImportantStyles, resetStyles} from '../../../src/style';
 import {findIndex} from '../../../src/utils/array';
 import {ActionTrust} from '../../../src/action-trust';
 import {getMode} from '../../../src/mode';
@@ -909,6 +909,8 @@ export class AmpStory extends AMP.BaseElement {
     this.buildBookend_().then(() => {
       this.systemLayer_.hideDeveloperLog();
 
+      this.activePage_.pause();
+
       this.exitFullScreen_();
 
       this.vsync_.mutate(() => {
@@ -928,9 +930,11 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
+    this.activePage_.setActive(true);
+    this.bookend_.hide();
+
     this.vsync_.mutate(() => {
       this.element.classList.remove('i-amphtml-story-bookend-active');
-      this.bookend_.hide();
     });
   }
 
@@ -1003,9 +1007,14 @@ export class AmpStory extends AMP.BaseElement {
       pagesByDistance.forEach((pageIds, distance) => {
         pageIds.forEach(pageId => {
           const page = this.getPageById_(pageId);
-          setImportantStyles(page.element, {
-            transform: `translateY(${100 * distance}%)`,
-          });
+
+          if (distance == 0) {
+            resetStyles(page.element, ['transform']);
+          } else {
+            setImportantStyles(page.element, {
+              transform: `translateY(${100 * distance}%)`,
+            });
+          }
         });
       });
     });

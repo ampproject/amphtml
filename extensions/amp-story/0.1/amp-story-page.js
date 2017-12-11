@@ -427,6 +427,11 @@ export class AmpStoryPage extends AMP.BaseElement {
   pageInactiveCallback_() {
     this.element.removeAttribute('active');
 
+    this.pause();
+  }
+
+
+  pause() {
     this.pauseAllMedia_(/* opt_rewindToBeginning */ true);
     this.pageElements_.forEach(pageElement => {
       pageElement.pauseCallback();
