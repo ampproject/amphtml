@@ -214,6 +214,15 @@ data.debug;
 data.adUnits;
 data.target;
 
+// aps.js
+var apstag;
+apstag.init;
+apstag.fetchBids;
+apstag.targetingKeys;
+apstag.renderImp;
+data.pubId;
+data.bidTimeout;
+
 // colombia.js
 data.clmb_slot;
 data.clmb_position;
