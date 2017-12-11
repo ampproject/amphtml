@@ -49,7 +49,7 @@ describes.realWin('amp-font', {
     sandbox.stub(FontLoader.prototype, 'load')
         .returns(Promise.reject('mock rejection'));
     return getAmpFont().then(() => {
-      expect(doc.documentElement)
+      expect(doc.body)
           .to.have.class('comic-amp-font-missing');
       expect(doc.body)
           .to.not.have.class('comic-amp-font-loading');
@@ -59,7 +59,7 @@ describes.realWin('amp-font', {
   it('should load custom font', function() {
     sandbox.stub(FontLoader.prototype, 'load').returns(Promise.resolve());
     return getAmpFont().then(() => {
-      expect(doc.documentElement)
+      expect(doc.body)
           .to.have.class('comic-amp-font-loaded');
       expect(doc.body)
           .to.not.have.class('comic-amp-font-loading');

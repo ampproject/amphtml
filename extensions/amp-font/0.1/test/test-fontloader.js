@@ -77,12 +77,12 @@ describes.realWin('FontLoader', {amp: true}, env => {
     doc.body.appendChild(textEl);
     setupFontCheckSpy = sandbox./*OK*/spy(doc.fonts, 'check');
     setupFontLoadSpy = sandbox./*OK*/spy(doc.fonts, 'load');
-    fontloader = new FontLoader(win);
+    fontloader = new FontLoader(env.ampdoc);
   });
 
   it('should check and load font via native api', () => {
     fontloader.load(FONT_CONFIG, 3000).then(() => {
-      doc.documentElement.classList.add('comic-amp-font-loaded');
+      doc.body.classList.add('comic-amp-font-loaded');
       expect(setupFontCheckSpy).to.be.calledOnce;
       expect(setupFontLoadSpy).to.be.calledOnce;
       expect(setupDisposeSpy).to.be.calledOnce;
@@ -94,7 +94,7 @@ describes.realWin('FontLoader', {amp: true}, env => {
   it('should check and load font via polyfill', () => {
     sandbox.stub(FontLoader.prototype, 'canUseNativeApis_').returns(false);
     fontloader.load(FONT_CONFIG, 3000).then(() => {
-      doc.documentElement.classList.add('comic-amp-font-loaded');
+      doc.body.classList.add('comic-amp-font-loaded');
       expect(setupFontCheckSpy).to.have.not.been.called;
       expect(setupFontLoadSpy).to.have.not.been.called;
       expect(setupLoadWithPolyfillSpy).to.be.calledOnce;
@@ -118,7 +118,7 @@ describes.realWin('FontLoader', {amp: true}, env => {
   it('should error when font is not available via polyfill', () => {
     sandbox.stub(FontLoader.prototype, 'canUseNativeApis_').returns(false);
     fontloader.load(FONT_CONFIG, 3000).then(() => {
-      doc.documentElement.classList.add('comic-amp-font-loaded');
+      doc.body.classList.add('comic-amp-font-loaded');
       assert.fail('Font loaded when it should have failed.');
     }).catch(() => {
       expect(setupFontCheckSpy).to.have.not.been.called;
@@ -136,7 +136,7 @@ describes.realWin('FontLoader', {amp: true}, env => {
         sandbox.stub(FontLoader.prototype, 'dispose_').returns(undefined);
     const initialElementsCount = doc.getElementsByTagName('*').length;
     fontloader.load(FONT_CONFIG, 3000).then(() => {
-      doc.documentElement.classList.add('comic-amp-font-loaded');
+      doc.body.classList.add('comic-amp-font-loaded');
       const finalElementsCount = doc.getElementsByTagName('*').length;
       expect(initialElementsCount).to.be.below(finalElementsCount);
       const createdContainer = doc.querySelectorAll('body > div')[1];
@@ -152,7 +152,7 @@ describes.realWin('FontLoader', {amp: true}, env => {
     sandbox.stub(FontLoader.prototype, 'canUseNativeApis_').returns(false);
     const initialElementsCount = doc.getElementsByTagName('*').length;
     fontloader.load(FONT_CONFIG, 3000).then(() => {
-      doc.documentElement.classList.add('comic-amp-font-loaded');
+      doc.body.classList.add('comic-amp-font-loaded');
       const finalElementsCount = doc.getElementsByTagName('*').length;
       expect(initialElementsCount).to.equal(finalElementsCount);
     }).catch(() => {

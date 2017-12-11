@@ -41,7 +41,7 @@ limitations under the License.
 
 The `amp-font` extension should be used for controlling timeouts on font loading.
 
-The `amp-font` extension allows adding and removing CSS classes from `document.documentElement` based on whether a font was loaded or is in error-state.
+The `amp-font` extension allows adding and removing CSS classes from `document.body` based on whether a font was loaded or is in error-state.
 
 Example:
 ```html
@@ -82,19 +82,19 @@ Time in milliseconds after which the we don't wait for the custom font to be ava
 
 ##### on-load-add-class
 
-CSS class that would be added to the `document.documentElement`  after making sure that the custom font is available for display. This attribute is optional.
+CSS class that would be added to the `document.body` after making sure that the custom font is available for display. This attribute is optional.
 
 ##### on-load-remove-class
 
-CSS class that would be removed from the `document.documentElement` and `document.body` after making sure that the custom font is available for display. This attribute is optional.
+CSS class that would be removed from the `document.body` after making sure that the custom font is available for display. This attribute is optional.
 
 ##### on-error-add-class
 
-CSS class that would be added to the `document.documentElement`, if the timeout interval runs out before the font becomes available for use. This attribute is optional.
+CSS class that would be added to the `document.body`, if the timeout interval runs out before the font becomes available for use. This attribute is optional.
 
 **on-error-remove-class**
 
-CSS class that would be removed from the `document.documentElement` and `document.body` , if the timeout interval runs out before the font becomes available for use. This attribute is optional.
+CSS class that would be removed from the `document.body`, if the timeout interval runs out before the font becomes available for use. This attribute is optional.
 
 ##### font-weight, font-style, font-variant
 
