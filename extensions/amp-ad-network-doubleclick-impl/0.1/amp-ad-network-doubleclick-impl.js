@@ -1346,6 +1346,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getA4aAnalyticsConfig() {
     return getCsiAmpAnalyticsConfig();
   }
+
+  /** @override */
+  forceNonAmpRendering() {
+    return this.isFluid_;
+  }
 }
 
 AMP.extension(TAG, '0.1', AMP => {

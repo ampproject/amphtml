@@ -990,7 +990,7 @@ export class AmpA4A extends AMP.BaseElement {
         this.handleLifecycleStage_('iframeAlreadyExists');
         return Promise.resolve();
       }
-      if (!creativeMetaData) {
+      if (!creativeMetaData || this.forceNonAmpRendering()) {
         // Non-AMP creative case, will verify ad url existence.
         return this.renderNonAmpCreative_();
       }
@@ -1767,6 +1767,16 @@ export class AmpA4A extends AMP.BaseElement {
    */
   getAdditionalContextMetadata() {
     return /** @type {!JsonObject} */ ({});
+  }
+
+  /**
+   * This method will be called before deciding which rendering path will be
+   * executed. If this returns true, the creative will be rendered as if it is
+   * not AMP regardless of whether it actually is.
+   * @return {boolean}
+   */
+  forceNonAmpRendering() {
+    return false;
   }
 }
 
