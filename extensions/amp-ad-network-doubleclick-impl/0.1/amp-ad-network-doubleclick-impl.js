@@ -1349,7 +1349,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   forceNonAmpRendering() {
-    return this.isFluid_;
+    // For purely Fluid creatives, we want to always render via the non-AMP
+    // execution path, since we must rely on rendering within a cross-domain
+    // SafeFrame to properly render the Fluid creative.
+    return this.isFluid_ && !this.returnedSize_;
   }
 }
 
