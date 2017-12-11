@@ -22,7 +22,7 @@ import {childElementByTag} from '../../../src/dom';
 import {getFriendlyIframeEmbedOptional}
     from '../../../src/friendly-iframe-embed';
 import {getParentWindowFrameElement} from '../../../src/service';
-import {ensurePolyfillInstalled} from './web-animations-polyfill';
+import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
 import {listen} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
@@ -454,7 +454,7 @@ export class AmpAnimation extends AMP.BaseElement {
         opt_args || null);
 
     // Ensure polyfill is installed.
-    ensurePolyfillInstalled(this.win);
+    installWebAnimationsIfNecessary(this.win);
 
     const ampdoc = this.getAmpDoc();
     const readyPromise = this.embed_ ? this.embed_.whenReady() :

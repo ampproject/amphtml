@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Builder} from './web-animations';
-import {ensurePolyfillInstalled} from './web-animations-polyfill';
+import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
 import {Services} from '../../../src/services';
 
 
@@ -38,7 +38,7 @@ export class WebAnimationService {
    * @return {!Builder}
    */
   createBuilder() {
-    ensurePolyfillInstalled(this.ampdoc_.win);
+    installWebAnimationsIfNecessary(this.ampdoc_.win);
 
     return new Builder(
         this.ampdoc_.win,

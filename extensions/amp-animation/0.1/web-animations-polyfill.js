@@ -22,7 +22,7 @@ const POLYFILLED = '__AMP_WA';
 /**
  * @param {!Window} win
  */
-export function ensurePolyfillInstalled(win) {
+export function installWebAnimationsIfNecessary(win) {
   if (!win[POLYFILLED]) {
     win[POLYFILLED] = true;
     installWebAnimations(win);
