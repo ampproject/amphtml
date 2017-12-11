@@ -43,6 +43,14 @@ exports.rules = [
     whitelist: [
       'extensions/amp-mustache/0.1/amp-mustache.js->src/sanitizer.js',
       'extensions/amp-bind/0.1/bind-impl.js->src/sanitizer.js',
+      'extensions/amp-date-picker/0.1/amp-date-picker.js->src/sanitizer.js',
+    ],
+  },
+  {
+    filesMatching: '**/*.js',
+    mustNotDependOn: 'src/module.js',
+    whitelist: [
+      'extensions/amp-date-picker/0.1/**->src/module.js',
     ],
   },
   {
@@ -63,6 +71,7 @@ exports.rules = [
       'src/shadow-embed.js->third_party/webcomponentsjs/ShadowCSS.js',
       'third_party/timeagojs/timeago.js->' +
           'third_party/timeagojs/timeago-locales.js',
+      'extensions/amp-date-picker/**->third_party/rrule/rrule.js',
     ],
   },
   // Rules for 3p

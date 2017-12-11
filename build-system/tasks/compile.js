@@ -172,6 +172,7 @@ function compile(entryModuleFilenames, outputDir,
       'third_party/vega/**/*.js',
       'third_party/d3/**/*.js',
       'third_party/webcomponentsjs/ShadowCSS.js',
+      'third_party/rrule/rrule.js',
       'node_modules/promise-pjs/promise.js',
       'node_modules/web-animations-js/web-animations.install.js',
       'build/patched-module/document-register-element/build/' +
@@ -230,6 +231,8 @@ function compile(entryModuleFilenames, outputDir,
       'third_party/closure-compiler/externs/shadow_dom.js',
       'third_party/closure-compiler/externs/streams.js',
       'third_party/closure-compiler/externs/web_animations.js',
+      'third_party/moment/moment.extern.js',
+      'third_party/react-externs/externs.js',
     ];
     if (options.externs) {
       externs = externs.concat(options.externs);
@@ -281,6 +284,7 @@ function compile(entryModuleFilenames, outputDir,
           'third_party/mustache/',
           'third_party/vega/',
           'third_party/webcomponentsjs/',
+          'third_party/rrule/',
           'node_modules/',
           'build/patched-module/',
           // Can't seem to suppress `(0, win.eval)` suspicious code warning

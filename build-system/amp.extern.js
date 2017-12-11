@@ -163,6 +163,54 @@ let VegaObject;
 /* @type {VegaObject} */
 window.vg;
 
+// amp-date-picker externs
+/**
+ * @type {function(*)}
+ */
+let ReactRender = function() {};
+
+/**
+ * @struct
+ */
+let PropTypes = {};
+
+/**
+ * @struct
+ */
+let ReactDates = {};
+
+/** @constructor */
+ReactDates.SingleDatePicker;
+
+/** @struct */
+ReactDates.SingleDatePickerShape;
+
+/** @constructor */
+ReactDates.DateRangePicker;
+
+/** @struct */
+ReactDates.DateRangePickerShape;
+
+/** @type {function(*):boolean} */
+ReactDates.isInclusivelyAfterDay;
+
+/** @type {function(*):boolean} */
+ReactDates.isInclusivelyBeforeDay;
+
+/** @type {function(*,*):boolean} */
+ReactDates.isSameDay;
+
+/**
+ * @struct
+ */
+let ReactDatesConstants = {};
+
+/** @const {string} */
+ReactDatesConstants.ANCHOR_LEFT;
+
+/** @const {string} */
+ReactDatesConstants.HORIZONTAL_ORIENTATION;
+
 // Should have been defined in the closure compiler's extern file for
 // IntersectionObserverEntry, but appears to have been omitted.
 IntersectionObserverEntry.prototype.rootBounds;
@@ -368,3 +416,22 @@ const RTC_ERROR_ENUM = {};
       callout: string,
       error: (RTC_ERROR_ENUM|undefined)}} */
 var rtcResponseDef;
+
+/**
+ * This symbol is exposed by browserify bundles transformed by
+ * `scoped-require.js` to avoid polluting the global namespace with `require`.
+ * It allows AMP extensions to consume code injected into their binaries that
+ * cannot be run through Closure Compiler, e.g. React code with JSX.
+ * @type {!function(string):?}
+ */
+AMP.require;
+
+/**
+ * `AMP.includeExternalBundle` is replaced with injected code during the
+ * build process. Extensions must declare their external bundles in
+ * `guplfile.js#EXTENSION_BUNDLE_MAP`. If an extension declares external bundles
+ * but does not add an `AMP.includeExternalBundle();` call, the bundle will
+ * be prepended to the extension binary.
+ * @type {!function()}
+ */
+AMP.includeExternalBundle = function() {};

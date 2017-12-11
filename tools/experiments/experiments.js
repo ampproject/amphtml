@@ -288,6 +288,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/11974',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11975',
   },
+  {
+    id: 'amp-date-picker',
+    name: 'Enables the amp-date-picker extension',
+    spec: 'https://github.com/ampproject/amphtml/issues/6469',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12267',
+  },
 ];
 
 if (getMode().localDev) {
