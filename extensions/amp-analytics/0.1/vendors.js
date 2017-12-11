@@ -1099,10 +1099,11 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       },
     },
   },
+
   'mobify': {
     'vars': {
       'projectSlug': 'mobify-project-id',
-      'templateName': 'page-type'
+      'templateName': 'page-type',
     },
     'requests': {
       '_host': 'https://engagement-collector.mobify.net',
@@ -1114,41 +1115,46 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         '%22page%22%3a%22${sourcePath}%22',
         '%22src_location%22%3a%22${ampdocUrl}%22',
         '%22referrer%22%3a%22${documentReferrer}%22',
-        '%22templateName%22%3a%22${templateName}%22'
+        '%22templateName%22%3a%22${templateName}%22',
       ].join('%2c'),
-        '_basePrefix': '${_host}/s.gif?' +
+      '_basePrefix': '${_host}/s.gif?' +
         'slug=${projectSlug}&' +
         'timestamp_local=${timestamp}&' +
         'channel=web&' +
         'dimensions=%7b${_dimensions}%7d',
-        'ampstart': '${_basePrefix}&data=%7b%22category%22%3a%22timing%22%2c%22action%22%3a%22ampStart%22%2c%22value%22%3a${navTiming(navigationStart,domLoading)}%7d',
-        'pageview': '${_basePrefix}&data=%7b%22action%22%3a%22pageview%22%7d',
-        'pageload': '${_basePrefix}&data=%7b%22category%22%3a%22timing%22%2c%22action%22%3a%22load%22%2c%22value%22%3a${pageLoadTime}%7d',
-        'pagedcl': '${_basePrefix}&data=%7b%22category%22%3a%22timing%22%2c%22action%22%3a%22DOMContentLoaded%22%2c%22value%22%3a${contentLoadTime}%7d'
+      'ampstart': '${_basePrefix}&data=%7b%22category%22%3a%22timing%22%2c' +
+        '%22action%22%3a%22ampStart%22%2c%22value%22' +
+        '%3a${navTiming(navigationStart,domLoading)}%7d',
+      'pageview': '${_basePrefix}&data=%7b%22action%22%3a%22pageview%22%7d',
+      'pageload': '${_basePrefix}&data=%7b%22category%22%3a%22timing%22%2c' +
+        '%22action%22%3a%22load%22%2c%22value%22%3a${pageLoadTime}%7d',
+      'pagedcl': '${_basePrefix}&data=%7b%22category%22%3a%22timing%22%2c' +
+        '%22action%22%3a%22DOMContentLoaded%22%2c%22value%22' +
+        '%3a${contentLoadTime}%7d',
     },
     'triggers': {
-     'ampstart': {
-        on: 'visible',
-        request: 'ampstart'
+      'ampstart': {
+        'on': 'visible',
+        'request': 'ampstart',
       },
       'pageview': {
-        on: 'ini-load',
-        request: 'pageview'
+        'on': 'ini-load',
+        'request': 'pageview',
       },
       'pageload': {
         'on': 'visible',
-        'request': 'pageload'
+        'request': 'pageload',
       },
       'pagedcl': {
         'on': 'visible',
-        'request': 'pagedcl'
-      }
+        'request': 'pagedcl',
+      },
     },
     'transport': {
       'beacon': false,
       'xhrpost': false,
-      'image': true
-    }
+      'image': true,
+    },
   },
 
   'mparticle': {
