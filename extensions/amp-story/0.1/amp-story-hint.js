@@ -136,8 +136,7 @@ export class AmpStoryHint {
       this.hintContainer_.classList.remove('i-amphtml-hidden');
     });
 
-    this.hintTimeout_ =
-        this.timer_.delay(() => this.fadeOut_(), NAVIGATION_OVERLAY_TIMEOUT);
+    this.fadeOutAfterTimeout();
   }
 
   /**
@@ -152,6 +151,12 @@ export class AmpStoryHint {
    */
   showFirstPageHintOverlay() {
     this.showHint_(FIRST_PAGE_OVERLAY_CLASS);
+  }
+
+  /** @visibleForTesting */
+  fadeOutAfterTimeout() {
+    this.hintTimeout_ =
+        this.timer_.delay(() => this.fadeOut_(), NAVIGATION_OVERLAY_TIMEOUT);
   }
 
   /**
