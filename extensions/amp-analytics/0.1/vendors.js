@@ -646,7 +646,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
-  'googleadwords': {
+  'googleadwords': { // https://developers.google.com/adwords/amp/landing-pages
     'requests': {
       'conversion_prefix': 'https://www.googleadservices.com/pagead/conversion/',
       'remarketing_prefix':
