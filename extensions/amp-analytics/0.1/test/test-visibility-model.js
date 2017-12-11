@@ -979,6 +979,22 @@ describes.sandboxed('VisibilityModel', {}, () => {
         totalVisibleTime: 1000,
       });
     });
+
+    it('should fire for 100 percent min and max visibility', () => {
+      const vh = new VisibilityModel({
+        continuousTimeMin: 1000,
+        visiblePercentageMin: 100,
+        visiblePercentageMax: 100,
+      }, calcVisibility);
+      const eventSpy = vh.eventResolver_ = sandbox.spy();
+      visibility = 1.0;
+      clock.tick(200);
+      vh.update();
+      expect(eventSpy).to.not.be.called;
+      clock.tick(1100);
+      vh.update();
+      expect(eventSpy).to.be.calledOnce;
+    });
   });
 
   describe('end to end event repeat', () => {
