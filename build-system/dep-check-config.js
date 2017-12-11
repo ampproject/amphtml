@@ -43,6 +43,7 @@ exports.rules = [
     whitelist: [
       'extensions/amp-mustache/0.1/amp-mustache.js->src/sanitizer.js',
       'extensions/amp-bind/0.1/bind-impl.js->src/sanitizer.js',
+      'extensions/amp-date-picker/0.1/amp-date-picker.js->src/sanitizer.js',
     ],
   },
   {
