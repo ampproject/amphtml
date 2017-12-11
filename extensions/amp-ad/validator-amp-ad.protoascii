@@ -71,6 +71,7 @@ tags: {  # <amp-ad>
     supported_layouts: FLEX_ITEM
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
+    supported_layouts: INTRINSIC
   }
 }
 tags: {  # <amp-ad data-multi-size>
@@ -114,6 +115,7 @@ tags: {  # <amp-ad data-multi-size>
     supported_layouts: FLEX_ITEM
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
+    supported_layouts: INTRINSIC
   }
 }
 tags: {  # <amp-embed>
@@ -142,6 +144,7 @@ tags: {  # <amp-embed>
     supported_layouts: FLEX_ITEM
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
+    supported_layouts: INTRINSIC
   }
 }
 tags: {  # <amp-embed data-multi-size>
@@ -183,6 +186,7 @@ tags: {  # <amp-embed data-multi-size>
     supported_layouts: FLEX_ITEM
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
+    supported_layouts: INTRINSIC
   }
 }
 
