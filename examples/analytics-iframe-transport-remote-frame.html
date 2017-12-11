@@ -19,8 +19,11 @@
          */
         context.onAnalyticsEvent(function(event) {
           // Now, do something meaningful with the AMP Analytics event
-          console.log('The page at: ' + window.location.href +
-              ' has received an event: ' + event);
+          try {
+            console.log('The page at: ' + window.location.href +
+                ' has received an event: ' + event);
+          } catch (e) {
+          }
 
           // Optionally, you may send a response containing key/value pairs, to
           // be used by the amp-ad-exit of the creative which generated the
@@ -38,10 +41,16 @@
           document.head.appendChild(script);
           // The script will be loaded, and will call onNewContextInstance()
         } else {
-          console.warn('Received invalid URL - risk of XSS! ' + url);
+          try {
+            console.warn('Received invalid URL - risk of XSS! ' + url);
+          } catch (e) {
+          }
         }
       } catch (e) {
-        console.warn('Caught exception parsing window.name!', e);
+        try {
+          console.warn('Caught exception parsing window.name!', e);
+        } catch (e) {
+        }
       }
     </script>
   </head>
