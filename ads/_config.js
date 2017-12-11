@@ -499,7 +499,7 @@ export const adConfig = {
   },
 
   mediavine: {
-    prefetch: 'https://www.googletagservices.com/tag/js/gpt.js',
+    prefetch: 'https://amp.mediavine.com/wrapper.min.js',
     preconnect: [
       'https://partner.googleadservices.com',
       'https://securepubads.g.doubleclick.net',
