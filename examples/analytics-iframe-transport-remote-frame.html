@@ -41,7 +41,7 @@
           console.warn('Received invalid URL - risk of XSS! ' + url);
         }
       } catch (e) {
-        console.warn('Caught exception parsing window.name!');
+        console.warn('Caught exception parsing window.name!', e);
       }
     </script>
   </head>
