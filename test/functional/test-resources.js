@@ -1462,7 +1462,7 @@ describe('Resources discoverWork', () => {
   });
 
   it('should build resource when not built', () => {
-    const schedulePassStub = sandbox.stub(resources, 'schedulePass');
+    const buildResourceSpy = sandbox.spy(resources, 'buildResourceUnsafe_');
     sandbox.stub(resources, 'schedule_');
     resources.documentReady_ = true;
     resource1.element.isBuilt = () => false;
@@ -1473,11 +1473,12 @@ describe('Resources discoverWork', () => {
     resources.discoverWork_();
 
     expect(resource1.build).to.be.calledOnce;
-    expect(schedulePassStub).to.not.be.called;
+    expect(buildResourceSpy).calledWithExactly(
+        resource1, /* schedulePass */ true);
   });
 
   it('should build resource when not built and before doc ready', () => {
-    const schedulePassStub = sandbox.stub(resources, 'schedulePass');
+    const buildResourceSpy = sandbox.spy(resources, 'buildResourceUnsafe_');
     sandbox.stub(resources, 'schedule_');
     resources.documentReady_ = false;
     resource1.element.nextSibling = {};
@@ -1489,7 +1490,8 @@ describe('Resources discoverWork', () => {
     resources.discoverWork_();
 
     expect(resource1.build).to.be.calledOnce;
-    expect(schedulePassStub).to.not.be.called;
+    expect(buildResourceSpy).calledWithExactly(
+        resource1, /* schedulePass */ true);
   });
 
   it('should NOT build non-prerenderable resources in prerender', () => {
