@@ -1353,8 +1353,7 @@ export class Resources {
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (r.getState() == ResourceState.NOT_BUILT && !r.isBuilding()) {
-        this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true,
-            /* scheduleWhenBuilt */ false);
+        this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true);
       }
       if (relayoutAll ||
               !r.hasBeenMeasured() ||
