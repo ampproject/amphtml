@@ -77,8 +77,13 @@ export class AmpList extends AMP.BaseElement {
     return false;
   }
 
-  /** @override */
+  /** @override 
+   *  Src is not required,via [src] to render list
+   */
   layoutCallback() {
+    if(this.element.src === undefined){
+      return;
+    }
     const fetch = this.fetchList_();
     if (this.getFallback()) {
       fetch.then(() => {
