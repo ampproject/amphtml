@@ -276,8 +276,12 @@ class ManualAdvancement extends AdvancementConfig {
 
     // TODO(newmuis): This will need to be flipped for RTL.
     const elRect = this.element_./*OK*/getBoundingClientRect();
-    const offsetLeft = elRect.x;
+
+    // Using `left` as a fallback since Safari returns a ClientRect in some
+    // cases.
+    const offsetLeft = elRect.x !== null ? elRect.x : elRect.left;
     const offsetWidth = elRect.width;
+
     const nextScreenAreaMin = offsetLeft +
         ((1 - NEXT_SCREEN_AREA_RATIO) * offsetWidth);
     const nextScreenAreaMax = offsetLeft + offsetWidth;
