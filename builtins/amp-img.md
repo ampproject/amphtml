@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
+    <td>fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, responsive</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
@@ -142,7 +142,15 @@ amp-img {
 If you want your image to scale as the window is resized but up to a maximum width (so the image doesn't stretch beyond its width):
 
 1. Set `layout=responsive` for `<amp-img>`.
+<<<<<<< HEAD
 2. On the container of the image, specify the `max-width:<max width to display image>` CSS attribute.
+=======
+2. On the container of the image, specify the `max-width:<max width to display image>` CSS attribute.  Why on the container?  An `amp-img` element with `layout=responsive` is a *block-level* element, whereas, `<img>` is *inline*. Alternatively, you could set `display: inline-block` in your CSS for the amp-img element.
+
+#### The difference between responsive and intrinsic layout
+
+Both the `responsive` and `intrinsic` layouts create an image that will scale automatically.  The main difference is that the `intrinsic` layout uses an SVG image as it's scaling element.  This will make it behave in the same way as a standard html image while retaining the benifit of the browser knowing the image size on initial layout. The `intrinsic` layout will have an intrinsic size and will inflate a floated `div` until it reaches either the natural image size or a CSS constraint like `max-width`. The `responsive` layout will render 0x0 in a floated `div` becasue it takes its size from the parent which in a float has no natural size.
+>>>>>>> Intrinsic layout
 
 #### Setting a fixed sized image
 

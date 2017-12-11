@@ -66,5 +66,6 @@ tags: {  # <amp-carousel>
     supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
+    supported_layouts: INTRINSIC
   }
 }
