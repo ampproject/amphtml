@@ -4111,6 +4111,7 @@ tags: {  # <amp-img>
 <<<<<<< HEAD
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
+    supported_layouts: INTRINSIC
   }
 }
 # See the restrictions on mandatory-src-amp4email.
@@ -4154,6 +4155,7 @@ tags: {  # <amp-layout>
     supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
+    supported_layouts: INTRINSIC
   }
 }
 tags: {  # <amp-pixel>
