@@ -986,6 +986,10 @@ describes.sandboxed('VisibilityModel', {}, () => {
         visiblePercentageMax: 100,
       }, calcVisibility);
       const eventSpy = vh.eventResolver_ = sandbox.spy();
+      visibility = 0.99;
+      clock.tick(200);
+      expect(eventSpy).to.not.be.called;
+      vh.update();
       visibility = 1.0;
       clock.tick(200);
       vh.update();
