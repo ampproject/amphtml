@@ -169,15 +169,17 @@ export class AmpFont extends AMP.BaseElement {
     const body = ampdoc.getBody();
     const root = ampdoc.getRootNode().documentElement;
     if (addClassName) {
-      body.classList.add(addClassName);
       if (root) {
         root.classList.add(addClassName);
+      } else {
+        body.classList.add(addClassName);
       }
     }
     if (removeClassName) {
-      body.classList.remove(removeClassName);
       if (root) {
         root.classList.remove(removeClassName);
+      } else {
+        body.classList.remove(removeClassName);
       }
     };
     this.dispose_();
