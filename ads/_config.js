@@ -311,11 +311,12 @@ export const adConfig = {
   },
 
   eadv: {
-      clientIdScope: 'AMP_ECID_EADV',
-      prefetch: [
-          'https://www.eadv.it/track/esr.min.js',
-          'https://www.eadv.it/track/ead.min.js'
-      ]
+    renderStartImplemented: true,
+    clientIdScope: 'AMP_ECID_EADV',
+    prefetch: [
+      'https://www.eadv.it/track/esr.min.js',
+      'https://www.eadv.it/track/ead.min.js'
+    ]
   },
 
   eas: {
