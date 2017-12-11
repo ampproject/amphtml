@@ -183,7 +183,7 @@ window.parent.postMessage({
 
 ## Iframe viewability
 
-Iframes can send a `send-intersections` message to their parents to start receiving IntersectionObserver style [change records](https://wicg.github.io/IntersectionObserver/#intersectionobserverentry) of the iframe's intersection with the parent viewport.
+Iframes can send a `send-intersections` message to their parents to start receiving IntersectionObserver style [change records](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry) of the iframe's intersection with the parent viewport.
 
 *Note: In the following examples, we assume the script is in the created iframe, where `window.parent` is the top window. If the script lives in a nested iframe, change `window.parent` to the top AMP window.*
 
