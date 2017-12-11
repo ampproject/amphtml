@@ -165,12 +165,20 @@ export class AmpFont extends AMP.BaseElement {
    * @private
    */
   onFontLoadFinish_(addClassName, removeClassName) {
-    const body = this.getAmpDoc().getBody();
+    const ampdoc = this.getAmpDoc();
+    const body = ampdoc.getBody();
+    const root = ampdoc.getRootNode().documentElement;
     if (addClassName) {
       body.classList.add(addClassName);
+      if (root) {
+        root.classList.add(addClassName);
+      }
     }
     if (removeClassName) {
       body.classList.remove(removeClassName);
+      if (root) {
+        root.classList.remove(removeClassName);
+      }
     };
     this.dispose_();
   }

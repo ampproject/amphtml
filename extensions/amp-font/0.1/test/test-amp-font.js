@@ -32,6 +32,7 @@ describes.realWin('amp-font', {
 
   function getAmpFont() {
     doc.body.classList.add('comic-amp-font-loading');
+    doc.documentElement.classList.add('comic-amp-font-loading');
     const font = doc.createElement('amp-font');
     font.setAttribute('layout', 'nodisplay');
     font.setAttribute('font-family', 'Comic AMP');
@@ -49,20 +50,20 @@ describes.realWin('amp-font', {
     sandbox.stub(FontLoader.prototype, 'load')
         .returns(Promise.reject('mock rejection'));
     return getAmpFont().then(() => {
-      expect(doc.body)
-          .to.have.class('comic-amp-font-missing');
-      expect(doc.body)
-          .to.not.have.class('comic-amp-font-loading');
+      expect(doc.body).to.have.class('comic-amp-font-missing');
+      expect(doc.body).to.not.have.class('comic-amp-font-loading');
+      expect(doc.documentElement).to.have.class('comic-amp-font-missing');
+      expect(doc.documentElement).to.not.have.class('comic-amp-font-loading');
     });
   });
 
   it('should load custom font', function() {
     sandbox.stub(FontLoader.prototype, 'load').returns(Promise.resolve());
     return getAmpFont().then(() => {
-      expect(doc.body)
-          .to.have.class('comic-amp-font-loaded');
-      expect(doc.body)
-          .to.not.have.class('comic-amp-font-loading');
+      expect(doc.body).to.have.class('comic-amp-font-loaded');
+      expect(doc.body).to.not.have.class('comic-amp-font-loading');
+      expect(doc.documentElement).to.have.class('comic-amp-font-loaded');
+      expect(doc.documentElement).to.not.have.class('comic-amp-font-loading');
     });
   });
 });
