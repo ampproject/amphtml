@@ -22,6 +22,7 @@
  *   clientIdScope: (string|undefined),
  *   clientIdCookieName: (string|undefined),
  *   remoteHTMLDisabled: (boolean|undefined),
+ *   fullWidthHeightRatio: (number|undefined),
  * }}
  */
 let AdNetworkConfigDef;
@@ -48,6 +49,11 @@ let AdNetworkConfigDef;
  *   // We highly recommend all networks to implement the API,
  *   // see details in the README.md
  *   renderStartImplemented: boolean
+ *
+ *   // The width / height ratio for full width ad units.
+ *   // If absent, it means the network does not support full width ad units.
+ *   // Example value: 1.2
+ *   fullWidthHeightRatio: number
  * }
  *
  * @const {!Object<string, !AdNetworkConfigDef>}}
@@ -132,6 +138,7 @@ export const adConfig = {
     clientIdCookieName: '_ga',
     remoteHTMLDisabled: true,
     masterFrameAccessibleType: 'google_network',
+    fullWidthHeightRatio: 1.2,
   },
 
   adsnative: {

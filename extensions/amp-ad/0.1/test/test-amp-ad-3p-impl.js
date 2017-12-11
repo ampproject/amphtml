@@ -357,4 +357,164 @@ describes.realWin('amp-ad-3p-impl', {
       });
     });
   });
+
+  describe('full width responsive ad', () => {
+
+    const VIEWPORT_WIDTH = 300;
+    const VIEWPORT_HEIGHT = 600;
+
+    beforeEach(() => {
+      adConfig['_ping_'].fullWidthHeightRatio = 1.2;
+      win.document.body.removeChild(ad3p.element);
+    });
+
+    describe('should resize correctly', () => {
+      let impl;
+      let element;
+
+      function constructImpl(config) {
+        config.type = '_ping_';
+        element = createElementWithAttributes(win.document, 'amp-ad', config);
+        win.document.body.appendChild(element);
+        impl = new AmpAd3PImpl(element);
+        impl.element.style.display = 'block';
+        impl.element.style.position = 'relative';
+        impl.element.style.top = '101vh';
+
+        // Fix the viewport to a consistent size to that the test doesn't depend
+        // on the actual browser window opened.
+        impl.getViewport().getSize =
+          () => ({width: VIEWPORT_WIDTH, height: VIEWPORT_HEIGHT});
+      }
+
+      it('should do nothing for non-responsive', () => {
+        constructImpl({
+          width: '280',
+          height: '280',
+        });
+        const attemptChangeSizeSpy = sandbox.spy(impl, 'attemptChangeSize');
+        expect(impl.buildCallback()).to.be.undefined;
+        expect(attemptChangeSizeSpy).to.not.be.called;
+      });
+
+      it('should schedule a resize for responsive', () => {
+        constructImpl({
+          width: '100vw',
+          height: '280',
+          'data-auto-format': 'rspv',
+          'data-full-width': '',
+        });
+        const attemptChangeSizeSpy = sandbox.stub(impl, 'attemptChangeSize',
+            (height, width) => {
+              expect(width).to.equal(VIEWPORT_WIDTH);
+              expect(height).to.equal(250);
+              return Promise.resolve();
+            });
+
+        const callback = impl.buildCallback();
+        expect(callback).to.exist;
+        expect(attemptChangeSizeSpy).to.be.calledOnce;
+      });
+    });
+
+    describe('should align correctly', () => {
+      // Nested elements to contain the ad. (container contains the ad, and
+      // containerContainer contains that container.)
+      let containerContainer, container;
+      let viewer;
+      let element;
+      let impl;
+
+      function buildImpl(config) {
+        containerContainer = win.document.createElement('div');
+        container = win.document.createElement('div');
+        // Create an element with horizontal margins for the ad to break out
+        // of.
+        containerContainer.style.marginLeft = '5px';
+        containerContainer.style.marginRight = '9px';
+
+        // Create an element with horizontal margins for the ad to break out
+        // of.
+        container.style.marginLeft = '14px';
+        container.style.paddingLeft = '5px';
+        container.style.marginRight = '20px';
+        container.style.paddingRight = '5px';
+
+        config.type = '_ping_';
+
+        element = createElementWithAttributes(win.document, 'amp-ad', config);
+
+        container.appendChild(element);
+        containerContainer.appendChild(container);
+        win.document.body.appendChild(containerContainer);
+
+        impl = new AmpAd3PImpl(element);
+        impl.element.style.display = 'block';
+        impl.element.style.position = 'relative';
+        impl.element.style.top = '150vh';
+
+        // Stub out vsync tasks to run immediately.
+        impl.getVsync().run = (vsyncTaskSpec, vsyncState) => {
+          if (vsyncTaskSpec.measure) {
+            vsyncTaskSpec.measure(vsyncState);
+          }
+          if (vsyncTaskSpec.mutate) {
+            vsyncTaskSpec.mutate(vsyncState);
+          }
+        };
+
+        // Fix the viewport to a consistent size to that the test doesn't
+        // depend on the actual browser window opened.
+        impl.getViewport().getSize =
+              () => ({width: VIEWPORT_WIDTH, height: VIEWPORT_HEIGHT});
+
+        return impl.buildCallback();
+      }
+
+      beforeEach(() => {
+        viewer = win.services.viewer.obj;
+        viewer.toggleRuntime();  // Turn runtime on for these tests.
+      });
+
+      afterEach(() => {
+        viewer.toggleRuntime();  // Turn runtime off again.
+        win.document.body.style.direction = '';
+      });
+
+      it('should change left margin for responsive', () => {
+        return buildImpl({
+          width: '100vw',
+          height: '280',
+          'data-auto-format': 'rspv',
+          'data-full-width': '',
+        }).then(() => {
+          expect(element.offsetWidth).to.equal(VIEWPORT_WIDTH);
+
+          impl.onLayoutMeasure();
+          // Left margin is 19px from container and 5px from body.
+          expect(element.style.marginRight).to.be.equal('');
+          expect(element.style.marginLeft).to.be.equal('-24px');
+        });
+      });
+
+      it('should change right margin for responsive in RTL', () => {
+        win.document.body.style.direction = 'rtl';
+
+        return buildImpl({
+          width: '100vw',
+          height: '320',
+          'data-auto-format': 'rspv',
+          'data-full-width': '',
+        }).then(() => {
+          expect(element.offsetWidth).to.equal(VIEWPORT_WIDTH);
+
+          impl.onLayoutMeasure();
+          // Right margin is 9px from containerContainer and 25px from
+          // container.
+          expect(element.style.marginLeft).to.be.equal('');
+          expect(element.style.marginRight).to.be.equal('-49px');
+        });
+      });
+    });
+  });
 });
