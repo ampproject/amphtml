@@ -195,8 +195,8 @@ export class BindExpression {
     /** @const {string} */
     this.expressionString = expressionString;
 
-    /** @const {!Object<string, !./bind-macro.BindMacro>} */
-    this.macros = macros;
+    /** @private @const {!Object<string, !./bind-macro.BindMacro>} */
+    this.macros_ = macros;
 
     /** @const @private {!./bind-expr-defines.AstNode} */
     this.ast_ = parser.parse(this.expressionString);
@@ -228,23 +228,10 @@ export class BindExpression {
    */
   numberOfNodesInAst_(ast) {
     // Include the node count of any nested macros in the expression
-    if (ast.type === AstNodeType.INVOCATION && !ast.args[0] &&
-        this.macros[String(ast.value)]) {
-      const macro = this.macros[String(ast.value)];
+    if (this.isMacroInvocationNode_(ast)) {
+      const macro = this.macros_[String(ast.value)];
       let nodes = macro.getExpressionSize();
-      // Include the arguments in the node count, but don't include the ARGS node and ARRAY node
-      let children = ast.args;
-      if (ast.args.length === 2 && ast.args[1].type === AstNodeType.ARGS) {
-        const argsNode = ast.args[1];
-        if (argsNode.args.length === 0) {
-          children = [];
-        } else if (argsNode.args.length === 1 &&
-          argsNode.args[0].type === AstNodeType.ARRAY) {
-          const arrayNode = argsNode.args[0];
-          children = arrayNode.args;
-        }
-      }
-      children.forEach(arg => {
+      this.getInvocationArgNodes_(ast).forEach(arg => {
         if (arg) {
           nodes += this.numberOfNodesInAst_(arg) - 1;
         }
@@ -260,6 +247,38 @@ export class BindExpression {
         });
       }
       return nodes;
+    }
+  }
+
+  /**
+   * @param {!./bind-expr-defines.AstNode} ast
+   * @return {boolean}
+   * @private
+   */
+  isMacroInvocationNode_(ast) {
+    return ast.type === AstNodeType.INVOCATION && !ast.args[0] &&
+        this.macros_[String(ast.value)];
+  }
+
+  /**
+   * Gets the array of nodes for the arguments of the provided INVOCATION
+   * node, without the wrapping ARGS node and ARRAY node.
+   * @param {!./bind-expr-defines.AstNode} ast
+   * @return {!Array<!./bind-expr-defines.AstNode>}
+   * @private
+   */
+  getInvocationArgNodes_(ast) {
+    if (ast.args.length === 2 && ast.args[1].type === AstNodeType.ARGS) {
+      const argsNode = ast.args[1];
+      if (argsNode.args.length === 0) {
+        return [];
+      } else if (argsNode.args.length === 1 &&
+        argsNode.args[0].type === AstNodeType.ARRAY) {
+        const arrayNode = argsNode.args[0];
+        return arrayNode.args;
+      }
+    } else {
+      return ast.args;
     }
   }
 
@@ -289,7 +308,7 @@ export class BindExpression {
 
       case AstNodeType.INVOCATION:
         // Built-in functions and macros don't have a caller object.
-        const hasCaller = (args[0] !== undefined);
+        const isBuiltInOrMacro = (args[0] === undefined);
 
         const caller = this.eval_(args[0], scope);
         const params = this.eval_(args[1], scope);
@@ -298,8 +317,8 @@ export class BindExpression {
         let validFunction;
         let unsupportedError;
 
-        if (!hasCaller) {
-          const macro = this.macros[method];
+        if (isBuiltInOrMacro) {
+          const macro = this.macros_[method];
           if (macro) {
             validFunction = function() {
               return macro.evaluate(

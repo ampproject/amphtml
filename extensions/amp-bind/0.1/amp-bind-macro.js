@@ -16,14 +16,18 @@
 
 /**
  * @typedef {{
- *   name: string,
+ *   id: string,
  *   argumentNames: Array<string>,
  *   expressionString: string
  * }}
  */
 export let AmpMacroDef;
 
-export class AmpMacro extends AMP.BaseElement {
+/**
+ * The amp-bind-macro element is used to define an expression macro that can be
+ * called from other amp-bind expressions within the document.
+ */
+export class AmpBindMacro extends AMP.BaseElement {
   /** @override */
   getPriority() {
     // Loads after other content.
@@ -52,7 +56,7 @@ export class AmpMacro extends AMP.BaseElement {
    * @private
    */
   getName_() {
-    return '<amp-macro> ' +
-        (this.element.getAttribute('name') || '<unknown id>');
+    return '<amp-bind-macro> ' +
+        (this.element.getAttribute('id') || '<unknown id>');
   }
 }

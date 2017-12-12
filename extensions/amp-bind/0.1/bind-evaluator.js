@@ -97,7 +97,7 @@ export class BindEvaluator {
   /**
    * Parses and stores the given macros and returns map
    * of macro name to parse errors.
-   * @param {!Array<./amp-macro.AmpMacroDef>} ampMacroDefs
+   * @param {!Array<./amp-bind-macro.AmpMacroDef>} ampMacroDefs
    * @return {?Object<string, EvaluatorErrorDef>},
    */
   addMacros(ampMacroDefs) {
@@ -105,10 +105,10 @@ export class BindEvaluator {
     // Create BindMacro objects from AmpMacroDefs.
     ampMacroDefs.forEach(ampMacroDef => {
       try {
-        this.macros_[ampMacroDef.name] =
+        this.macros_[ampMacroDef.id] =
           new BindMacro(ampMacroDef, this.macros_);
       } catch (e) {
-        errors[ampMacroDef.name] = {message: e.message, stack: e.stack};
+        errors[ampMacroDef.id] = {message: e.message, stack: e.stack};
       }
     });
     return errors;

@@ -33,7 +33,9 @@ import {map} from '../../../src/utils/object';
 import {parseJson, recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
-import {waitForBodyPromise} from '../../../src/dom';
+import {
+  childElementsByTag, iterateCursor, waitForBodyPromise,
+} from '../../../src/dom';
 
 const TAG = 'amp-bind';
 
@@ -330,7 +332,7 @@ export class Bind {
   }
 
   /**
-   * Scans the document for <amp-macro> elements, and adds them to the bind-evaluator.
+   * Scans the document for <amp-bind-macro> elements, and adds them to the bind-evaluator.
    *
    * Returns a promise that resolves after macros have been added.
    *
@@ -339,23 +341,23 @@ export class Bind {
    */
   addMacros_() {
     const elements =
-        this.localWin_.document.getElementsByTagName('AMP-MACRO');
-    const ampMacroDefs = [];
-    for (let i = 0; i < elements.length; i++) {
-      const element = elements[i];
-      ampMacroDefs.push({
-        name: element.getAttribute('name'),
-        argumentNames: (element.getAttribute('arguments') || '')
-            .split(',')
-            .map(s => s.trim()),
+        childElementsByTag(this.ampdoc.getBody(), 'AMP-BIND-MACRO');
+    const macros = /** @type {!Array<!AmpMacroDef>} */ [];
+    iterateCursor(elements, element => {
+      const argumentNames = (element.getAttribute('arguments') || '')
+          .split(',')
+          .map(s => s.trim());
+      macros.push({
+        id: element.getAttribute('id'),
+        argumentNames,
         expressionString: element.getAttribute('expression'),
       });
-    }
-    if (ampMacroDefs.length == 0) {
+    });
+    if (macros.length == 0) {
       return Promise.resolve(0);
     } else {
-      return this.ww_('bind.addMacros', [ampMacroDefs])
-          .then(() => ampMacroDefs.length);
+      return this.ww_('bind.addMacros', [macros])
+          .then(() => macros.length);
     }
   }
 

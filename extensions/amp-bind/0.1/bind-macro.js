@@ -21,14 +21,24 @@ import {BindExpression} from './bind-expression';
  */
 export class BindMacro {
 
+  /**
+   * @param {!./amp-bind-macro.AmpMacroDef} ampMacro
+   * @param {Object<string, BindMacro} otherMacros
+   */
   constructor(ampMacro, otherMacros) {
-    /** @const @private {Array<string>} */
+    /** @const @private {!Array<string>} */
     this.argumentNames_ = ampMacro.argumentNames || [];
-    /** @const @private {BindExpression} */
+    /** @const @private {!BindExpression} */
     this.expression_ =
-      new BindExpression(ampMacro.expressionString, otherMacros);
+        new BindExpression(ampMacro.expressionString, otherMacros);
   }
 
+  /**
+   * @param {!Object} state
+   * @param {!Array} args
+   * @throws {Error} On illegal function invocation.
+   * @return {BindExpressionResultDef}
+   */
   evaluate(state, args) {
     const scope = Object.assign({}, state);
     for (let i = 0; i < this.argumentNames_.length; i++) {
@@ -37,6 +47,9 @@ export class BindMacro {
     return this.expression_.evaluate(scope);
   }
 
+  /**
+   * @return {number}
+   */
   getExpressionSize() {
     return this.expression_.expressionSize;
   }
