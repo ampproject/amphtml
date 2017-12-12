@@ -1003,8 +1003,8 @@ describes.sandboxed('VisibilityModel', {}, () => {
         repeat: true,
       }, calcVisibility);
       const eventSpy = vh.eventResolver_ = sandbox.spy();
-      const updateStub = sandbox.stub(vh, 'reset_').callsFake(() => {
-        vh.eventPromise_ = new Promise(resolve => {
+      sandbox.stub(vh, 'reset_').callsFake(() => {
+        vh.eventPromise_ = new Promise(unused => {
           vh.eventResolver_ = eventSpy;
         });
         vh.eventPromise_.then(() => {
