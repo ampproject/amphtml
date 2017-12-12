@@ -1000,6 +1000,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
       const vh = new VisibilityModel({
         visiblePercentageMin: 0,
         visiblePercentageMax: 0,
+        repeat: true,
       }, calcVisibility);
       const eventSpy = vh.eventResolver_ = sandbox.spy();
       visibility = 0;
@@ -1007,7 +1008,18 @@ describes.sandboxed('VisibilityModel', {}, () => {
       expect(eventSpy).to.not.be.called;
       vh.update();
 
-      visibility = 0.1;
+      visibility = 1;
+      clock.tick(200);
+      expect(eventSpy).to.not.be.called;
+      vh.update();
+
+      visibility = 0;
+      clock.tick(200);
+      vh.update();
+      expect(eventSpy).to.be.calledOnce;
+
+      eventSpy.reset();
+      visibility = 1;
       clock.tick(200);
       expect(eventSpy).to.not.be.called;
       vh.update();
