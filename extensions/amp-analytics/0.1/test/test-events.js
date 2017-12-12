@@ -922,7 +922,7 @@ describes.realWin('Events', {amp: 1}, env => {
       const stopEvent1 = handler.args[0][0];
       expect(stopEvent1).to.be.instanceOf(AnalyticsEvent);
       expect(stopEvent1.vars.timerStart).to.equal(1000);
-      expect(stopEvent1.vars.timerDuration).to.equal(0);
+      expect(stopEvent1.vars.timerDuration).to.equal(600);
 
       target.click();
       expect(handler).to.be.calledOnce;
@@ -932,7 +932,7 @@ describes.realWin('Events', {amp: 1}, env => {
       const intervalEvent = handler.args[1][0];
       expect(intervalEvent).to.be.instanceOf(AnalyticsEvent);
       expect(intervalEvent.vars.timerStart).to.equal(1600);
-      expect(intervalEvent.vars.timerDuration).to.equal(3);
+      expect(intervalEvent.vars.timerDuration).to.equal(3000);
 
       fakeTime = 6200;
       clock.tick(1600); // 4.6 seconds.
@@ -942,7 +942,7 @@ describes.realWin('Events', {amp: 1}, env => {
       const stopEvent2 = handler.args[2][0];
       expect(stopEvent2).to.be.instanceOf(AnalyticsEvent);
       // Report partial interval time on timer stop between intervals.
-      expect(stopEvent2.vars.timerDuration).to.equal(1);
+      expect(stopEvent2.vars.timerDuration).to.equal(1600);
       expect(stopEvent2.vars.timerStart).to.equal(1600);
     });
   });

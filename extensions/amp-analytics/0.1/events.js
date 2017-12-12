@@ -704,11 +704,10 @@ class TimerEventHandler {
       this.calculateDuration_();
       this.lastPingTime_ = Date.now();
     }
-    const durationSeconds = Math.floor(this.timerDuration_ / 1000);
-    // Keep track of partial unreported seconds so they can roll over later.
-    this.timerDuration_ -= (durationSeconds * 1000);
+    const reportDuration = this.timerDuration_;
+    this.timerDuration_ = 0;
     return {
-      'timerDuration': durationSeconds,
+      'timerDuration': reportDuration,
       'timerStart': this.startTime_ || 0,
     };
   }
