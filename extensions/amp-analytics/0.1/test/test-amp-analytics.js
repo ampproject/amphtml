@@ -249,6 +249,21 @@ describes.realWin('amp-analytics', {
     }
   });
 
+  it('preload script', function() {
+    const el = doc.createElement('amp-analytics');
+    doc.body.appendChild(el);
+    const analytics = new AmpAnalytics(el);
+    analytics.buildCallback();
+    analytics.preconnectCallback();
+    return Promise.resolve().then(() => {
+      const preloads = doc.querySelectorAll('link[rel=preload]');
+      expect(preloads).to.have.length(1);
+      expect(preloads[0]).to.have.property(
+          'href',
+          'http://localhost:9876/dist/iframe-transport-client-lib.js');
+    });
+  });
+
   it('sends a basic hit', function() {
     const analytics = getAnalyticsTag(trivialConfig);
 
@@ -1795,8 +1810,64 @@ describes.realWin('amp-analytics', {
     });
 
     it('is 0 for inabox', () => {
+      env.win.AMP_MODE.runtime = 'inabox';
+      expect(getAnalyticsTag(getConfig()).getPriority()).to.equal(0);
+    });
+  });
+
+  describe('inabox nested transport iframe', () => {
+    let origAmpMode;
+    beforeEach(() => {
+      origAmpMode = env.win.AMP_MODE;
       env.win.AMP_MODE = 'inabox';
-      expect(getAnalyticsTag(getConfig()).getPriority()).to.equal(1);
+      // Unfortunately need to fake sandbox analytics element's parent
+      // to an AMP element
+      doc.body.classList.add('i-amphtml-element');
+    });
+
+    afterEach(() => {
+      doc.body.classList.remove('i-amphtml-element');
+      env.win.AMP_MODE = origAmpMode;
+    });
+
+    it('sends a basic hit', function() {
+      const analytics = getAnalyticsTag(trivialConfig);
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.withArgs('https://example.com/bar'))
+            .to.be.calledOnce;
+      });
+    });
+
+    it('fails for iframePing config outside of vendor config', function() {
+      const analytics = getAnalyticsTag({
+        'requests': {'foo': 'https://example.com/bar'},
+        'triggers': [{'on': 'visible', 'iframePing': true}],
+      });
+      return expect(waitForNoSendRequest(analytics)).to.be
+          .rejectedWith(
+          /iframePing config is only available to vendor config/);
+    });
+
+    it('succeeds for iframePing config in vendor config', function() {
+      const analytics = getAnalyticsTag({}, {'type': 'testVendor'});
+      const url = 'http://iframe.localhost:9876/test/' +
+              'fixtures/served/iframe.html?title=${title}';
+      analytics.predefinedConfig_.testVendor = {
+        'requests': {
+          'pageview': url,
+        },
+        'triggers': {
+          'pageview': {
+            'on': 'visible',
+            'request': 'pageview',
+            'iframePing': true,
+          },
+        },
+      };
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy).to.be.calledOnce;
+        expect(sendRequestSpy.args[0][1]['iframePing']).to.be.true;
+      });
     });
   });
 });

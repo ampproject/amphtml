@@ -147,6 +147,26 @@ export function copyChildren(from, to) {
 }
 
 /**
+ * Insert the element in the root after the element named after or
+ * if that is null at the beginning.
+ * @param {!Element|!ShadowRoot} root
+ * @param {!Element} element
+ * @param {?Node} after
+ */
+export function insertAfterOrAtStart(root, element, after) {
+  if (after) {
+    if (after.nextSibling) {
+      root.insertBefore(element, after.nextSibling);
+    } else {
+      root.appendChild(element);
+    }
+  } else {
+    // Add at the start.
+    root.insertBefore(element, root.firstChild);
+  }
+}
+
+/**
  * Add attributes to an element.
  * @param {!Element} element
  * @param {!JsonObject<string, string>} attributes
@@ -388,13 +408,19 @@ export function setScopeSelectorSupportedForTesting(val) {
 }
 
 /**
+ * Test that the :scope selector is supported and behaves correctly.
  * @param {!Element} parent
  * @return {boolean}
  */
 function isScopeSelectorSupported(parent) {
+  const doc = parent.ownerDocument;
   try {
-    parent.ownerDocument.querySelector(':scope');
-    return true;
+    const testElement = doc.createElement('div');
+    const testChild = doc.createElement('div');
+    testElement.appendChild(testChild);
+    // NOTE(cvializ, #12383): Firefox's implementation is incomplete,
+    // therefore we test actual functionality of`:scope` as well.
+    return testElement./*OK*/querySelector(':scope div') === testChild;
   } catch (e) {
     return false;
   }

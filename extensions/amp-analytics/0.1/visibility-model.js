@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../../../src/log';
-import {isFiniteNumber} from '../../../src/types';
+import {dev} from '../../../src/log';
 import {Observable} from '../../../src/observable';
-
-const MIN_RESET_INTERVAL = 200;
-
 
 /**
  * This class implements visibility calculations based on the
@@ -56,32 +52,7 @@ export class VisibilityModel {
     };
 
     /** @private {boolean} */
-    this.reset_ = false;
-
-    /** @private {?number} */
-    this.resetInterval_ = null;
-
-    let reset = spec['reset'];
-    if (reset === true) {
-      this.reset_ = true;
-    } else {
-      reset = Number(spec['reset']);
-      if (isFiniteNumber(reset)) {
-        const resetInterval = Math.max(
-            this.spec_.totalTimeMin,
-            this.spec_.continuousTimeMin,
-            reset);
-        if (resetInterval >= MIN_RESET_INTERVAL) {
-          this.reset_ = true;
-          this.resetInterval_ = resetInterval;
-        } else {
-          user().error(
-              'AMP-ANALYTICS',
-              `Cannot reset with interval less than ${MIN_RESET_INTERVAL}, ` +
-              ' reset set to false');
-        }
-      }
-    }
+    this.repeat_ = spec['repeat'] === true;
 
     /** @private {?function()} */
     this.eventResolver_ = null;
@@ -114,7 +85,7 @@ export class VisibilityModel {
     this.createReportReadyPromise_ = null;
 
     /** @private {?number} */
-    this.scheduledRunId_ = null;
+    this.scheduledUpdateTimeoutId_ = null;
 
     /** @private {boolean} */
     this.matchesVisibility_ = false;
@@ -156,10 +127,10 @@ export class VisibilityModel {
     this.lastVisibleUpdateTime_ = 0;
 
     /** @private {boolean} */
-    this.waitToRefresh_ = false;
+    this.waitToReset_ = false;
 
     /** @private {?number} */
-    this.scheduleResetId_ = null;
+    this.scheduleRepeatId_ = null;
   }
 
   /**
@@ -170,7 +141,7 @@ export class VisibilityModel {
    * Note: loadTimeVisibility is an exception.
    * @private
    */
-  refresh_() {
+  reset_() {
     dev().assert(!this.eventResolver_,
         'Attempt to refresh visible event before previous one resolve');
     this.eventPromise_ = new Promise(resolve => {
@@ -179,8 +150,7 @@ export class VisibilityModel {
     this.eventPromise_.then(() => {
       this.onTriggerObservable_.fire();
     });
-    this.waitToRefresh_ = false;
-    this.scheduleResetId_ = null;
+    this.scheduleRepeatId_ = null;
     this.everMatchedVisibility_ = false;
     this.matchesVisibility_ = false;
     this.continuousTime_ = 0;
@@ -193,53 +163,39 @@ export class VisibilityModel {
     this.minVisiblePercentage_ = 0;
     this.maxVisiblePercentage_ = 0;
     this.lastVisibleUpdateTime_ = 0;
-    this.waitToRefresh_ = false;
+    this.waitToReset_ = false;
   }
 
   /**
    * Function that visibilityManager can used to dispose model or reset model
    */
-  disposeOrReset() {
-    // We may need a maxIntervalWindow to stop visible event even with reset true
-    if (!this.reset_) {
+  maybeDispose() {
+    if (!this.repeat_) {
       this.dispose();
-      return;
-    }
-    if (this.resetInterval_) {
-      const now = Date.now();
-      const interval = now - this.firstVisibleTime_;
-
-      // Unit in milliseconds
-      const timeUntilReset = Math.max(0, this.resetInterval_ - interval);
-      this.ready_ = false;
-      dev().assert(!this.scheduleResetId_, 'Should not reset twice');
-      this.scheduleResetId_ = setTimeout(() => {
-        this.refresh_();
-        this.setReady(true);
-      }, timeUntilReset);
-    } else {
-      // Reset after element falls out of (minPercentage, maxPercentage]
-      this.waitToRefresh_ = true;
     }
   }
 
   /** @override */
   dispose() {
-    if (this.scheduledRunId_) {
-      clearTimeout(this.scheduledRunId_);
-      this.scheduledRunId_ = null;
+    if (this.scheduledUpdateTimeoutId_) {
+      clearTimeout(this.scheduledUpdateTimeoutId_);
+      this.scheduledUpdateTimeoutId_ = null;
     }
-    if (this.scheduleResetId_) {
-      clearTimeout(this.scheduleResetId_);
-      this.scheduleResetId_ = null;
+    if (this.scheduleRepeatId_) {
+      clearTimeout(this.scheduleRepeatId_);
+      this.scheduleRepeatId_ = null;
     }
     this.unsubscribe_.forEach(unsubscribe => {
       unsubscribe();
     });
     this.unsubscribe_.length = 0;
     this.eventResolver_ = null;
-    this.onTriggerObservable_.removeAll();
-    this.onTriggerObservable_ = null;
+    // TODO(jonkeller): Investigate why dispose() can be called twice,
+    // necessitating this "if"
+    if (this.onTriggerObservable_) {
+      this.onTriggerObservable_.removeAll();
+      this.onTriggerObservable_ = null;
+    }
   }
 
   /**
@@ -330,9 +286,10 @@ export class VisibilityModel {
    */
   update_(visibility) {
     // Update state and check if all conditions are satisfied
-    if (this.waitToRefresh_) {
+    if (this.waitToReset_) {
       if (!this.isVisibilityMatch_(visibility)) {
-        this.refresh_();
+        // We were waiting for a condition to become unmet, and now it has
+        this.reset_();
       }
       return;
     }
@@ -341,13 +298,18 @@ export class VisibilityModel {
     }
     const conditionsMet = this.updateCounters_(visibility);
     if (conditionsMet) {
-      if (this.scheduledRunId_) {
-        clearTimeout(this.scheduledRunId_);
-        this.scheduledRunId_ = null;
+      if (this.scheduledUpdateTimeoutId_) {
+        clearTimeout(this.scheduledUpdateTimeoutId_);
+        this.scheduledUpdateTimeoutId_ = null;
       }
       if (this.reportReady_) {
+        // TODO(jonkeller): Can we eliminate eventResolver_?
         this.eventResolver_();
         this.eventResolver_ = null;
+        if (this.repeat_) {
+          this.waitToReset_ = true;
+          this.continuousTime_ = 0;
+        }
       } else if (this.createReportReadyPromise_) {
         // Report when report ready promise resolve
         const reportReadyPromise = this.createReportReadyPromise_();
@@ -359,18 +321,22 @@ export class VisibilityModel {
           this.update();
         });
       }
-    } else if (this.matchesVisibility_ && !this.scheduledRunId_) {
+    } else if (this.matchesVisibility_ && !this.scheduledUpdateTimeoutId_) {
       // There is unmet duration condition, schedule a check
       const timeToWait = this.computeTimeToWait_();
       if (timeToWait > 0) {
-        this.scheduledRunId_ = setTimeout(() => {
-          this.scheduledRunId_ = null;
+        this.scheduledUpdateTimeoutId_ = setTimeout(() => {
           this.update();
+          if (!this.eventResolver_) {
+            this.reset_();
+            this.setReady(true);
+          }
+          this.scheduledUpdateTimeoutId_ = null;
         }, timeToWait);
       }
-    } else if (!this.matchesVisibility_ && this.scheduledRunId_) {
-      clearTimeout(this.scheduledRunId_);
-      this.scheduledRunId_ = null;
+    } else if (!this.matchesVisibility_ && this.scheduledUpdateTimeoutId_) {
+      clearTimeout(this.scheduledUpdateTimeoutId_);
+      this.scheduledUpdateTimeoutId_ = null;
     }
   }
 
@@ -382,6 +348,9 @@ export class VisibilityModel {
   isVisibilityMatch_(visibility) {
     dev().assert(visibility >= 0 && visibility <= 1,
         'invalid visibility value: %s', visibility);
+    if (this.spec_.visiblePercentageMin == 1) {
+      return visibility == 1;
+    }
     return visibility > this.spec_.visiblePercentageMin &&
         visibility <= this.spec_.visiblePercentageMax;
   }

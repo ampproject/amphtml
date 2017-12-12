@@ -50,6 +50,23 @@ describes.realWin('amp-lightbox-viewer', {
     doc.body.appendChild(viewer);
     return viewer.build()
         .then(() => viewer.layoutCallback())
+        .then(() => {
+          const impl = viewer.implementation_;
+          // stub vsync and resource function
+          sandbox.stub(impl.vsync_,
+              'mutate', callback => {
+                callback();
+              });
+          sandbox.stub(impl.vsync_,
+              'mutatePromise', callback => {
+                callback();
+                return Promise.resolve();
+              });
+          sandbox.stub(impl.resources_,
+              'requireLayout', () => {
+                return Promise.resolve();
+              });
+        })
         .then(() => viewer);
   }
 
@@ -63,8 +80,14 @@ describes.realWin('amp-lightbox-viewer', {
   });
 
   function runTests(autoLightbox) {
-    it('should build', () => {
-      return getAmpLightboxViewer(autoLightbox).then(viewer => {
+    it('should build on open', () => {
+      let viewer = null;
+      return getAmpLightboxViewer(autoLightbox).then(v => {
+        viewer = v;
+        const impl = viewer.implementation_;
+        expect(viewer.style.display).to.equal('none');
+        return impl.open_(item1);
+      }).then(() => {
         const container = viewer.querySelector('.i-amphtml-lbv');
         expect(container).to.exist;
 
@@ -96,14 +119,8 @@ describes.realWin('amp-lightbox-viewer', {
     it('should make lightbox viewer visible on activate', () => {
       return getAmpLightboxViewer(autoLightbox).then(viewer => {
         const impl = viewer.implementation_;
-        impl.vsync_.mutate = function(callback) {
-          callback();
-        };
-        impl.resources_.requireLayout = function() {
-          return Promise.resolve();
-        };
         expect(viewer.style.display).to.equal('none');
-        return impl.activate({source: item1}).then(() => {
+        return impl.open_(item1).then(() => {
           expect(viewer.style.display).to.equal('');
         });
       });
@@ -112,14 +129,8 @@ describes.realWin('amp-lightbox-viewer', {
     it('should make lightbox viewer invisible on close', () => {
       return getAmpLightboxViewer(autoLightbox).then(viewer => {
         const impl = viewer.implementation_;
-        impl.vsync_.mutate = function(callback) {
-          callback();
-        };
-        impl.resources_.requireLayout = function() {
-          return Promise.resolve();
-        };
         expect(viewer.style.display).to.equal('none');
-        return impl.activate({source: item1}).then(() => {
+        return impl.open_(item1).then(() => {
         }).then(() => {
           expect(viewer.style.display).to.equal('');
           return impl.close_();
@@ -133,10 +144,7 @@ describes.realWin('amp-lightbox-viewer', {
     it.skip('should show detailed description correctly', () => {
       return getAmpLightboxViewer(autoLightbox).then(viewer => {
         const impl = viewer.implementation_;
-        impl.vsync_.mutate = function(callback) {
-          callback();
-        };
-        return impl.activate({source: item1}).then(() => {
+        return impl.open_(item1).then(() => {
           const container = viewer.querySelector('.i-amphtml-lbv');
           const descriptionBox = viewer.querySelector(
               '.i-amphtml-lbv-desc-box');
@@ -168,13 +176,7 @@ describes.realWin('amp-lightbox-viewer', {
     it('should create gallery with thumbnails', () => {
       return getAmpLightboxViewer(autoLightbox).then(viewer => {
         const impl = viewer.implementation_;
-        impl.vsync_.mutate = function(callback) {
-          callback();
-        };
-        impl.resources_.requireLayout = function() {
-          return Promise.resolve();
-        };
-        return impl.activate({source: item1}).then(() => {
+        return impl.open_(item1).then(() => {
           impl.openGallery_();
           const container = viewer.querySelector('.i-amphtml-lbv');
           expect(container.hasAttribute('gallery-view')).to.be.true;
