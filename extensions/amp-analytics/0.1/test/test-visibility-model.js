@@ -995,6 +995,28 @@ describes.sandboxed('VisibilityModel', {}, () => {
       vh.update();
       expect(eventSpy).to.be.calledOnce;
     });
+
+    it('should fire for visiblePercentageMin=visiblePercentageMax=0', () => {
+      const vh = new VisibilityModel({
+        visiblePercentageMin: 0,
+        visiblePercentageMax: 0,
+      }, calcVisibility);
+      const eventSpy = vh.eventResolver_ = sandbox.spy();
+      visibility = 0;
+      clock.tick(200);
+      expect(eventSpy).to.not.be.called;
+      vh.update();
+
+      visibility = 0.1;
+      clock.tick(200);
+      expect(eventSpy).to.not.be.called;
+      vh.update();
+
+      visibility = 0;
+      clock.tick(200);
+      vh.update();
+      expect(eventSpy).to.be.calledOnce;
+    });
   });
 
   describe('end to end event repeat', () => {
