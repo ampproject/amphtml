@@ -746,14 +746,20 @@ class MultidocManager {
                   src.indexOf('/v0.js') != -1;
               const customElement = n.getAttribute('custom-element');
               const customTemplate = n.getAttribute('custom-template');
+              const versionRe = /-(\d+.\d+)(.max)?\.js$/;
+              const match = versionRe.exec(src);
+              const version = match ? match[1] : '0.1';
               if (isRuntime) {
                 dev().fine(TAG, '- ignore runtime script: ', src);
               } else if (customElement || customTemplate) {
                 // This is an extension.
                 this.extensions_.installExtensionForDoc(
-                    ampdoc, customElement || customTemplate);
+                    ampdoc, customElement || customTemplate, version);
                 dev().fine(
-                    TAG, '- load extension: ', customElement || customTemplate);
+                    TAG, '- load extension: ',
+                    customElement || customTemplate,
+                    ' ',
+                    version);
                 if (customElement) {
                   extensionIds.push(customElement);
                 }
