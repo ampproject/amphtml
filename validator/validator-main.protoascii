@@ -3547,6 +3547,9 @@ tags: {  # <amp-pixel>
     value: "no-referrer"
   }
   attrs: {
+    name: "i-amphtml-ssr"
+  }
+  attrs: {
     name: "src"
     mandatory: true
     value_url: {
@@ -4455,4 +4458,3 @@ error_formats {
   format: "CSS syntax error in tag '%1' - the property '%2' is disallowed "
           "unless the enclosing rule is prefixed with the '%3' qualification."
 }
-
