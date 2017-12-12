@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/layout';
-import {getData} from './../../../src/event-helper';
+import {getData, listen} from './../../../src/event-helper';
+import {isObject, isFiniteNumber} from '../../../src/types';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {user} from '../../../src/log';
 
 export class AmpRiddleQuiz extends AMP.BaseElement {
 
@@ -26,12 +28,6 @@ export class AmpRiddleQuiz extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @private {?Promise} */
-    this.iframePromise_ = null;
-
-    /** @private {?boolean} */
-    this.iframeLoaded_ = false;
-
     /** @private {?number} */
     this.itemHeight_ = 300; //default
 
@@ -40,13 +36,21 @@ export class AmpRiddleQuiz extends AMP.BaseElement {
 
     /** @private {!Element} */
     this.container_ = this.win.document.createElement('div');
+
+    /** @private {?Function} */
+    this.unlistenMessage_ = null;
   }
 
-  onWindowMessage(event) {
+  handleMessage_(event) {
+    if (event.origin != 'https://www.riddle.com' ||
+        event.source != this.iframe_.contentWindow) {
+      return;
+    }
+
     const data = getData(event);
 
-    if (typeof data != 'object') {
-      return data;
+    if (!isObject(data)) {
+      return;
     }
 
     if (data['riddleId'] != undefined
@@ -56,49 +60,59 @@ export class AmpRiddleQuiz extends AMP.BaseElement {
   }
 
   /** @override */
-  buildCallback() {
-    this.riddleId_ = this.element.getAttribute('data-riddle-id');
-    // listen for resize events coming from riddles
-    window.addEventListener('message', this.onWindowMessage.bind(this), false);
-  }
-
-  /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.RESPONSIVE;
+    return isLayoutSizeDefined(layout);
   }
 
   /** @override */
   layoutCallback() {
+    this.riddleId_ = user().assert(
+        this.element.getAttribute('data-riddle-id'),
+        'The data-riddle-id attribute is required for <amp-riddle-quiz> %s',
+        this.element);
+    // listen for resize events coming from riddles
+    this.unlistenMessage_ = listen(
+        this.win,
+        'message',
+        this.handleMessage_.bind(this)
+    );
+
     const iframe = this.element.ownerDocument.createElement('iframe');
     this.iframe_ = iframe;
     iframe.setAttribute('scrolling', 'no');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
     iframe.setAttribute('allowfullscreen', 'true');
-    iframe.src = 'https://www.riddle.com/a/iframe/' + this.riddleId_;
+    iframe.src = 'https://www.riddle.com/a/iframe/' + encodeURIComponent(this.riddleId_);
 
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
 
-    return this.iframePromise_ = this.loadPromise(iframe).then(function() {
-      this.iframeLoaded_ = true;
+    return this.loadPromise(iframe).then(function() {
       this.attemptChangeHeight(this.itemHeight_).catch(() => { /* die */ });
     }.bind(this));
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.unlistenMessage_) {
+      this.unlistenMessage_();
+    }
+
+    return true;  // Call layoutCallback again.
   }
 
   /**
    * @param {number} height
    */
   riddleHeightChanged_(height) {
-    if (isNaN(height) || height === this.itemHeight_) {
+    if (!isFiniteNumber(height) || height === this.itemHeight_) {
       return;
     }
 
     this.itemHeight_ = height; //Save new height
 
-    if (this.iframeLoaded_) {
-      this.attemptChangeHeight(this.itemHeight_).catch(() => { /* die */ });
-    }
+    this.attemptChangeHeight(this.itemHeight_).catch(() => { /* die */ });
   }
 }
 

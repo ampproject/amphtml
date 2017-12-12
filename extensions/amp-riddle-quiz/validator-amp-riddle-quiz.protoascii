@@ -26,7 +26,7 @@ tags: {  # amp-riddle-quiz
 }
 tags: {  # <amp-riddle-quiz>
   html_format: AMP
-  tag_name: "amp-riddle-quiz"
+  tag_name: "AMP-RIDDLE-QUIZ"
   requires_extension: "amp-riddle-quiz"
   attrs: {
     name: "data-riddle-id"
