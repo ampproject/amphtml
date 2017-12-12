@@ -136,7 +136,7 @@ export class AmpStoryHint {
       this.hintContainer_.classList.remove('i-amphtml-hidden');
     });
 
-    this.fadeOutAfterTimeout();
+    this.hideAfterTimeout();
   }
 
   /**
@@ -154,16 +154,16 @@ export class AmpStoryHint {
   }
 
   /** @visibleForTesting */
-  fadeOutAfterTimeout() {
-    this.hintTimeout_ =
-        this.timer_.delay(() => this.fadeOut_(), NAVIGATION_OVERLAY_TIMEOUT);
+  hideAfterTimeout() {
+    this.hintTimeout_ = this.timer_.delay(
+        () => this.hideInternal_(), NAVIGATION_OVERLAY_TIMEOUT);
   }
 
   /**
    * Hide all navigation hints.
    */
   hideAllNavigationHint() {
-    this.fadeOut_();
+    this.hideInternal_();
 
     if (this.hintTimeout_ !== null) {
       this.timer_.cancel(this.hintTimeout_);
@@ -172,7 +172,7 @@ export class AmpStoryHint {
   }
 
   /** @private */
-  fadeOut_() {
+  hideInternal_() {
     this.vsync_.mutate(() => {
       this.hintContainer_.classList.add('i-amphtml-hidden');
     });
