@@ -1057,6 +1057,25 @@ describes.realWin('runtime multidoc', {
           .to.not.exist;
     });
 
+    it('should import extension element with version ≠ 0.1', () => {
+      extensionsMock.expects('preloadExtension')
+          .withExactArgs('amp-ext1', '1.0')
+          .returns(Promise.resolve({
+            elements: {
+              'amp-ext1': function() { },
+            },
+          }))
+          .once();
+
+      const scriptEl = win.document.createElement('script');
+      scriptEl.setAttribute('custom-element', 'amp-ext1');
+      scriptEl.setAttribute('src', 'https://cdn.ampproject.org/v0/amp-ext1-1.0.js');
+      importDoc.head.appendChild(scriptEl);
+      win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      expect(win.document.querySelector('script[custom-element="amp-ext1"]'))
+          .to.not.exist;
+    });
+
     it('should import extension template', () => {
       extensionsMock.expects('preloadExtension')
           .withExactArgs('amp-ext1', '0.1')
