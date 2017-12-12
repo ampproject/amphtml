@@ -22,8 +22,7 @@
           try {
             console.log('The page at: ' + window.location.href +
                 ' has received an event: ' + event);
-          } catch (e) {
-          }
+          } catch (e) { }
 
           // Optionally, you may send a response containing key/value pairs, to
           // be used by the amp-ad-exit of the creative which generated the
@@ -43,14 +42,12 @@
         } else {
           try {
             console.warn('Received invalid URL - risk of XSS! ' + url);
-          } catch (e) {
-          }
+          } catch (e) { }
         }
       } catch (e) {
         try {
           console.warn('Caught exception parsing window.name!', e);
-        } catch (e) {
-        }
+        } catch (e2) { }
       }
     </script>
   </head>
