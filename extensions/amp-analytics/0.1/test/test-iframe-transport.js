@@ -180,10 +180,10 @@ describes.realWin('amp-analytics.iframe-transport',
             '</body>' +
             '</html>';
         const frameUrl2 = addParamsToUrl('http://ads.localhost:' +
-        document.location.port + '/amp4test/compose-doc', {body});
+            document.location.port + '/amp4test/compose-doc', {body});
         sandbox.stub(env.ampdoc.win.document.body, 'appendChild');
         new IframeTransport(env.ampdoc.win, 'some_other_vendor_type',
-        {iframe: frameUrl2}, frameUrl2 + '-3');
+            {iframe: frameUrl2}, frameUrl2 + '-3');
         sandbox.restore();
         const warnSpy = sandbox.spy(user(), 'warn');
         const frame =
