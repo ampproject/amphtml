@@ -190,6 +190,10 @@ amp-story-page {
 
 amp-story-page.i-amphtml-layout-container {
   display: block !important;
+}
+
+amp-story:not([desktop]) >
+    amp-story-page.i-amphtml-layout-container:not([active]) {
   transform: translateY(1000%) !important;
 }
 
