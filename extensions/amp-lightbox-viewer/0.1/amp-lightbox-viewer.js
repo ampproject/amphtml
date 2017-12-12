@@ -268,11 +268,13 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   slideChangeHandler_(event) {
+    this.cleanupOnResizeHandler_();
     this.currentElemId_ = getData(event)['index'];
     const tagName = this.elementsMetadata_[this.currentElemId_]
         .tagName;
     if (tagName === 'AMP-IMG') {
-      this.resizeImageViewerDimensions_();
+      this.onResize_();
+      this.registerOnResizeHandler_();
     }
     this.updateDescriptionBox_();
   }
@@ -497,17 +499,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     const toggleControls = this.toggleControls_.bind(this);
     this.unlistenClick_ = listen(dev().assertElement(this.container_),
         'click', toggleControls);
-
-    // iOS non-safari browsers do not reliably fire onResize on orientation
-    // change, so listen to orientationchange to trigger resize
-    const platform = Services.platformFor(this.win);
-    if (platform.isIos() && !platform.isSafari()) {
-      // The debounce is to force a 500ms delay due to Webkit bug #170595
-      const debouncedOnResize = debounce(this.win,
-          this.onResize_.bind(this), 500);
-      this.unlistenOrientationChange_ = listen(this.win,
-          'orientationchange', debouncedOnResize);
-    }
   }
 
   cleanupEventListeners_() {
@@ -615,7 +606,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     const tagName = this.elementsMetadata_[this.currentElemId_]
         .tagName;
     if (tagName === 'AMP-IMG') {
-      this.resizeImageViewerDimensions_().then(() => this.enter_(element));
+      this.registerOnResizeHandler_();
+      this.onResize_().then(() => this.enter_(element));
     }
     this.updateDescriptionBox_();
   }
@@ -698,41 +690,58 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     });
   }
 
-  onResize_() {
-    const imgViewer = this.elementsMetadata_[this.currentElemId_].imageViewer;
-    imgViewer.measure();
-  }
-
   /**
-   * Resizes the ImageViewer of the current slide so that the image
-   * is centered in the page. Used in open or on slide change. Also
-   * registers a onResize handler to resize the ImageViewer whenever
-   * the screen size changes.
+   * This function resizes the image inside the lightbox.
    * @return {!Promise}
    * @private
    */
-  resizeImageViewerDimensions_() {
+  onResize_() {
     const imgViewer = this.elementsMetadata_[this.currentElemId_].imageViewer;
+    return imgViewer.measure();
+  }
 
+  /**
+   * @private
+   */
+  cleanupOnResizeHandler_() {
     if (this.unlistenResize_) {
       this.unlistenResize_();
     }
 
-    // Register an onResize handler to resize the image viewer
+    if (this.unlistenOrientationChange_) {
+      this.unlistenOrientationChange_();
+    }
+  }
+
+  /**
+   * Registers a onResize handler to resize the ImageViewer whenever
+   * the screen size or mobile orientation changes.
+   * @private
+   */
+  registerOnResizeHandler_() {
     const platform = Services.platformFor(this.win);
     const boundOnResize = this.onResize_.bind(this);
+
+    // Special case for iOS browsers due to Webkit bug #170595
+    // https://bugs.webkit.org/show_bug.cgi?id=170595
+    // Delay the onResize by 500 ms to ensure correct height and width
     const debouncedOnResize = debounce(this.win, boundOnResize, 500);
+
+    // Register an onResize handler to resize the image viewer
     this.unlistenResize_ = this.getViewport().onResize(() => {
       if (!platform.isIos()) {
         boundOnResize();
       } else if (platform.isSafari()) {
-        // Special case for iOS Safari due to Webkit bug #170595
-        // Delay the onResize by 500 ms to ensure correct height and width
-        // Other iOS browsers are registered to onorientationchange
         debouncedOnResize();
       }
     });
-    return imgViewer.measure();
+
+    // iOS non-safari browsers do not reliably fire onResize on orientation
+    // change, so listen to orientationchange to trigger resize
+    if (platform.isIos() && !platform.isSafari()) {
+      this.unlistenOrientationChange_ = listen(this.win,
+          'orientationchange', debouncedOnResize);
+    }
   }
 
   /**
@@ -892,7 +901,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       // type checking to work.
       /**@type {?}*/ (this.carousel_).implementation_.showSlideWhenReady(
           this.currentElemId_);
-      this.resizeImageViewerDimensions_();
+      this.onResize_();
+      this.registerOnResizeHandler_();
       this.updateDescriptionBox_();
       event.stopPropagation();
     };
