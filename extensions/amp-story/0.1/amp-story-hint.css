@@ -17,6 +17,17 @@
 .i-amphtml-story-hint-container {
   transition-property: opacity !important;
   transition-duration: 200ms !important;
+  contain: strict !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+}
+
+.i-amphtml-story-hint-container.i-amphtml-hidden {
+  opacity: 0 !important;
 }
 
 [desktop] .i-amphtml-story-hint-container {
@@ -35,11 +46,9 @@
   position: absolute !important;
   left: 0 !important;
   top: 0 !important;
-  height: 100% !important;
-  width: 100% !important;
+  right: 0 !important;
+  bottom: 0 !important;
   background: rgba(0,0,0,0.7) !important;
-  display: none !important;
-  pointer-events: none !important;
   flex-direction: row !important;
   color: #fff !important;
   font-size: 20px;
