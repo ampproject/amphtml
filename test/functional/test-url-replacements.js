@@ -185,6 +185,13 @@ describes.sandboxed('UrlReplacements', {}, () => {
         });
   });
 
+  it('should replace SUM', () => {
+    return expandAsync('SUM(foo, 2),SUM(bar, 3),SUM(foo, 3),SUM(bar, 4)')
+        .then(res => {
+          expect(res).to.equal('2,3,5,7');
+        });
+  });
+
   it('should replace CANONICAL_URL', () => {
     return expandAsync('?href=CANONICAL_URL').then(res => {
       expect(res).to.equal('?href=https%3A%2F%2Fpinterest.com%3A8080%2Fpin1');
