@@ -201,7 +201,7 @@ amp-story-page[active] {
   transform: translateY(0) !important;
 }
 
-.i-amphtml-story-bookend-active > amp-story-page[active] {
+.i-amphtml-story-bookend-active:not([desktop]) > amp-story-page[active] {
   transform: translateY(0) scale(1.2) !important;
   filter: blur(15px) !important;
 }
