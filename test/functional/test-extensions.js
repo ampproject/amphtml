@@ -663,7 +663,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(extensions.extensions_['amp-test']).to.be.undefined;
       extensions.installExtensionForDoc(ampdoc, 'amp-test');
       expect(loadSpy).to.be.calledOnce;
-      expect(loadSpy).to.be.calledWithExactly('amp-test');
+      expect(loadSpy).to.be.calledWithExactly('amp-test', undefined);
       expect(doc.head.querySelectorAll(
           '[custom-element="amp-test"]')).to.have.length(1);
       expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;

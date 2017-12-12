@@ -1040,7 +1040,7 @@ describes.realWin('runtime multidoc', {
 
     it('should import extension element', () => {
       extensionsMock.expects('preloadExtension')
-          .withExactArgs('amp-ext1')
+          .withExactArgs('amp-ext1', '0.1')
           .returns(Promise.resolve({
             elements: {
               'amp-ext1': function() {},
@@ -1059,7 +1059,7 @@ describes.realWin('runtime multidoc', {
 
     it('should import extension template', () => {
       extensionsMock.expects('preloadExtension')
-          .withExactArgs('amp-ext1')
+          .withExactArgs('amp-ext1', '0.1')
           .returns(Promise.resolve({elements: {}}))
           .once();
 
@@ -1367,7 +1367,7 @@ describes.realWin('runtime multidoc', {
       shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
       writer = shadowDoc.writer;
       extensionsMock.expects('preloadExtension')
-          .withExactArgs('amp-ext1')
+          .withExactArgs('amp-ext1', '0.1')
           .returns(Promise.resolve({
             elements: {
               'amp-ext1': function() {},
@@ -1387,7 +1387,7 @@ describes.realWin('runtime multidoc', {
       shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
       writer = shadowDoc.writer;
       extensionsMock.expects('preloadExtension')
-          .withExactArgs('amp-ext1')
+          .withExactArgs('amp-ext1', '0.1')
           .returns(Promise.resolve({elements: {}}))
           .once();
       writer.write(
