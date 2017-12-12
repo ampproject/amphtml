@@ -279,7 +279,7 @@ class ManualAdvancement extends AdvancementConfig {
 
     // Using `left` as a fallback since Safari returns a ClientRect in some
     // cases.
-    const offsetLeft = elRect.x !== null ? elRect.x : elRect.left;
+    const offsetLeft = ('x' in elRect) ? elRect.x : elRect.left;
     const offsetWidth = elRect.width;
 
     const nextScreenAreaMin = offsetLeft +
