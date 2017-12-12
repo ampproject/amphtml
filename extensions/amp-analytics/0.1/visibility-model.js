@@ -44,12 +44,19 @@ export class VisibilityModel {
      */
     this.spec_ = {
       visiblePercentageMin: Number(spec['visiblePercentageMin']) / 100 || 0,
-      visiblePercentageMax: Number(spec['visiblePercentageMax']) / 100 || 1,
+      visiblePercentageMax: Number(spec['visiblePercentageMax']) / 100,
       totalTimeMin: Number(spec['totalTimeMin']) || 0,
       totalTimeMax: Number(spec['totalTimeMax']) || Infinity,
       continuousTimeMin: Number(spec['continuousTimeMin']) || 0,
       continuousTimeMax: Number(spec['continuousTimeMax']) || Infinity,
     };
+    // If visiblePercentageMax was not specified, assume 100% (but do allow
+    // 0% to have been specified)
+    if (spec['visiblePercentageMax'] === null ||
+        spec['visiblePercentageMax'] === '' ||
+        isNaN(spec['visiblePercentageMax'])) {
+      this.spec_.visiblePercentageMax = 1;
+    }
 
     /** @private {boolean} */
     this.repeat_ = spec['repeat'] === true;
@@ -126,8 +133,12 @@ export class VisibilityModel {
     /** @private {time} milliseconds since epoch */
     this.lastVisibleUpdateTime_ = 0;
 
-    /** @private {boolean} */
-    this.waitToReset_ = false;
+    /**
+     * Want to fire when visibility becomes zero, *after* having been
+     * non-zero. So, set up the state as though it needs to wait to fire.
+     * @private {boolean} */
+    this.waitToReset_ = this.spec_.visiblePercentageMin == 0 &&
+        this.spec_.visiblePercentageMax == 0;
 
     /** @private {?number} */
     this.scheduleRepeatId_ = null;
@@ -348,8 +359,17 @@ export class VisibilityModel {
   isVisibilityMatch_(visibility) {
     dev().assert(visibility >= 0 && visibility <= 1,
         'invalid visibility value: %s', visibility);
+    // Special case: If visiblePercentageMin is 100%, then it doesn't make
+    // sense to do the usual (min, max] since that would never be true.
     if (this.spec_.visiblePercentageMin == 1) {
       return visibility == 1;
+    }
+    // Special case: If visiblePercentageMin and Max are both 0, then we
+    // want to ping when the creative becomes not visible after having
+    // previously been visible.
+    if (this.spec_.visiblePercentageMin == 0 &&
+        this.spec_.visiblePercentageMax == 0) {
+      return visibility == 0;
     }
     return visibility > this.spec_.visiblePercentageMin &&
         visibility <= this.spec_.visiblePercentageMax;
