@@ -501,6 +501,10 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         'click', toggleControls);
   }
 
+  /**
+   * Clean up event listeners.
+   * @private
+   */
   cleanupEventListeners_() {
     if (this.unlistenResize_) {
       this.unlistenResize_();
@@ -729,10 +733,10 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
     // Register an onResize handler to resize the image viewer
     this.unlistenResize_ = this.getViewport().onResize(() => {
-      if (!platform.isIos()) {
-        onResize();
-      } else if (platform.isSafari()) {
+      if (platform.isIos() && platform.isSafari()) {
         debouncedOnResize();
+      } else {
+        onResize();
       }
     });
 
