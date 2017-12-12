@@ -98,6 +98,9 @@ export class AbstractAmpContext {
     /** @type {?string} */
     this.tagName = null;
 
+    /** @type {number} */
+    this.getHtmlMessageId_ = 1;
+
     this.findAndSetMetadata_();
 
     /** @protected {!IframeMessagingClient} */
@@ -176,6 +179,31 @@ export class AbstractAmpContext {
 
     return unlisten;
   };
+
+  /**
+   *  Send message to runtime requesting HTML snippet of the parent window.
+   *  @param {string} selector CSS selector
+   *  @param {Array<string>} attributes an array of tag attributes to be left
+   *    in the stringified HTML
+   *  @param {function(string)} callback
+   */
+  getHtml(selector, attributes, callback) {
+    const messageId = this.getHtmlMessageId_++;
+    const unlisten = this.client_.registerCallback(
+        MessageType.GET_HTML_RESULT,
+        result => {
+          if (result.messageId && (result.messageId == messageId)) {
+            unlisten();
+            callback(result.content);
+          }
+        });
+
+    this.client_.sendMessage(MessageType.GET_HTML, {
+      selector,
+      attributes,
+      messageId,
+    });
+  }
 
   /**
    *  Send message to runtime requesting to resize ad to height and width.
