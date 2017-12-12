@@ -348,11 +348,9 @@ export class VisibilityModel {
   isVisibilityMatch_(visibility) {
     dev().assert(visibility >= 0 && visibility <= 1,
         'invalid visibility value: %s', visibility);
-    // TODO(jonkeller): Currently don't allow min=100%.
-    // One possible approach is:
-    // if (this.spec_.visiblePercentageMin == 1) {
-    //   return visibility == 1;
-    // }
+    if (this.spec_.visiblePercentageMin == 1) {
+      return visibility == 1;
+    }
     return visibility > this.spec_.visiblePercentageMin &&
         visibility <= this.spec_.visiblePercentageMax;
   }
