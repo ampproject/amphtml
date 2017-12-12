@@ -273,7 +273,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     const tagName = this.elementsMetadata_[this.currentElemId_]
         .tagName;
     if (tagName === 'AMP-IMG') {
-      this.onResize_();
+      this.resizeCurrentImageViewer_();
       this.registerOnResizeHandler_();
     }
     this.updateDescriptionBox_();
@@ -607,7 +607,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         .tagName;
     if (tagName === 'AMP-IMG') {
       this.registerOnResizeHandler_();
-      this.onResize_().then(() => this.enter_(element));
+      this.resizeCurrentImageViewer_().then(() => this.enter_(element));
     }
     this.updateDescriptionBox_();
   }
@@ -695,7 +695,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @return {!Promise}
    * @private
    */
-  onResize_() {
+  resizeCurrentImageViewer_() {
     const imgViewer = this.elementsMetadata_[this.currentElemId_].imageViewer;
     return imgViewer.measure();
   }
@@ -720,17 +720,17 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    */
   registerOnResizeHandler_() {
     const platform = Services.platformFor(this.win);
-    const boundOnResize = this.onResize_.bind(this);
+    const onResize = this.resizeCurrentImageViewer_.bind(this);
 
     // Special case for iOS browsers due to Webkit bug #170595
     // https://bugs.webkit.org/show_bug.cgi?id=170595
     // Delay the onResize by 500 ms to ensure correct height and width
-    const debouncedOnResize = debounce(this.win, boundOnResize, 500);
+    const debouncedOnResize = debounce(this.win, onResize, 500);
 
     // Register an onResize handler to resize the image viewer
     this.unlistenResize_ = this.getViewport().onResize(() => {
       if (!platform.isIos()) {
-        boundOnResize();
+        onResize();
       } else if (platform.isSafari()) {
         debouncedOnResize();
       }
@@ -901,7 +901,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       // type checking to work.
       /**@type {?}*/ (this.carousel_).implementation_.showSlideWhenReady(
           this.currentElemId_);
-      this.onResize_();
+      this.resizeCurrentImageViewer_();
       this.registerOnResizeHandler_();
       this.updateDescriptionBox_();
       event.stopPropagation();
