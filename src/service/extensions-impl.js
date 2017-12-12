@@ -246,14 +246,16 @@ export class Extensions {
    * Returns the promise that will be resolved when the extension has been
    * loaded. If necessary, adds the extension script to the page.
    * @param {string} extensionId
+   * @param {string=} opt_extensionVersion
    * @return {!Promise<!ExtensionDef>}
    */
-  preloadExtension(extensionId) {
+  preloadExtension(extensionId, opt_extensionVersion) {
     if (extensionId == 'amp-embed') {
       extensionId = 'amp-ad';
     }
     const holder = this.getExtensionHolder_(extensionId, /* auto */ false);
-    this.insertExtensionScriptIfNeeded_(extensionId, holder);
+    this.insertExtensionScriptIfNeeded_(extensionId, holder,
+        opt_extensionVersion);
     return this.waitFor_(holder);
   }
 
@@ -262,9 +264,10 @@ export class Extensions {
    * loaded. If necessary, adds the extension script to the page.
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {string} extensionId
+   * @param {string=} opt_extensionVersion
    * @return {!Promise<!ExtensionDef>}
    */
-  installExtensionForDoc(ampdoc, extensionId) {
+  installExtensionForDoc(ampdoc, extensionId, opt_extensionVersion) {
     const rootNode = ampdoc.getRootNode();
     let extLoaders = rootNode[LOADER_PROP];
     if (!extLoaders) {
@@ -274,7 +277,8 @@ export class Extensions {
       return extLoaders[extensionId];
     }
     stubElementIfNotKnown(ampdoc.win, extensionId);
-    return extLoaders[extensionId] = this.preloadExtension(extensionId)
+    return extLoaders[extensionId] = this.preloadExtension(
+        extensionId, opt_extensionVersion)
         .then(() => this.installExtensionInDoc_(ampdoc, extensionId));
   }
 
@@ -596,11 +600,13 @@ export class Extensions {
    * Ensures that the script has already been injected in the page.
    * @param {string} extensionId
    * @param {!ExtensionHolderDef} holder
+   * @param {string=} opt_extensionVersion
    * @private
    */
-  insertExtensionScriptIfNeeded_(extensionId, holder) {
+  insertExtensionScriptIfNeeded_(extensionId, holder, opt_extensionVersion) {
     if (this.isExtensionScriptRequired_(extensionId, holder)) {
-      const scriptElement = this.createExtensionScript_(extensionId);
+      const scriptElement =
+          this.createExtensionScript_(extensionId, opt_extensionVersion);
       this.win.document.head.appendChild(scriptElement);
       holder.scriptPresent = true;
     }
@@ -628,10 +634,11 @@ export class Extensions {
   /**
    * Create the missing amp extension HTML script element.
    * @param {string} extensionId
+   * @param {string=} opt_extensionVersion
    * @return {!Element} Script object
    * @private
    */
-  createExtensionScript_(extensionId) {
+  createExtensionScript_(extensionId, opt_extensionVersion) {
     const scriptElement = this.win.document.createElement('script');
     scriptElement.async = true;
     scriptElement.setAttribute('custom-element', extensionId);
@@ -642,7 +649,7 @@ export class Extensions {
       loc = this.win.testLocation;
     }
     const scriptSrc = calculateExtensionScriptUrl(loc, extensionId,
-        getMode().localDev);
+        opt_extensionVersion, getMode().localDev);
     scriptElement.src = scriptSrc;
     return scriptElement;
   }

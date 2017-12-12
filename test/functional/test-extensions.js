@@ -581,6 +581,19 @@ describes.sandboxed('Extensions', {}, () => {
       expect(win.customElements.elements['amp-test']).to.be.undefined;
     });
 
+    it('should insert extension version correctly', () => {
+      expect(doc.head.querySelectorAll(
+          '[custom-element="amp-test"]')).to.have.length(0);
+      expect(extensions.extensions_['amp-test']).to.be.undefined;
+      extensions.preloadExtension('amp-test', '1.0');
+      expect(doc.head.querySelectorAll(
+          '[custom-element="amp-test"][src*="0.1"]')).to.have.length(0);
+      expect(doc.head.querySelectorAll(
+          '[custom-element="amp-test"][src*="1.0"]')).to.have.length(1);
+      expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
+      expect(win.customElements.elements['amp-test']).to.be.undefined;
+    });
+
     it('should only insert script once', () => {
       expect(doc.head.querySelectorAll(
           '[custom-element="amp-test"]')).to.have.length(0);
@@ -641,6 +654,8 @@ describes.sandboxed('Extensions', {}, () => {
           .to.have.length(0);
       expect(extensions.extensions_['amp-embed']).to.be.undefined;
     });
+
+
   });
 
   describes.realWin('installExtensionForDoc', {
@@ -663,7 +678,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(extensions.extensions_['amp-test']).to.be.undefined;
       extensions.installExtensionForDoc(ampdoc, 'amp-test');
       expect(loadSpy).to.be.calledOnce;
-      expect(loadSpy).to.be.calledWithExactly('amp-test');
+      expect(loadSpy).to.be.calledWithExactly('amp-test', undefined);
       expect(doc.head.querySelectorAll(
           '[custom-element="amp-test"]')).to.have.length(1);
       expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
