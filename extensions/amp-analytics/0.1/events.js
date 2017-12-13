@@ -578,7 +578,7 @@ class TimerEventHandler {
     this.startTime_ = undefined; // milliseconds
 
     /** @private {number|undefined} */
-    this.lastPingTime_ = undefined; // milliseconds
+    this.lastRequestTime_ = undefined; // milliseconds
 
     /** @private {number} */
     this.timerDuration_ = 0; // milliseconds
@@ -652,7 +652,7 @@ class TimerEventHandler {
       return;
     }
     this.startTime_ = Date.now();
-    this.lastPingTime_ = undefined;
+    this.lastRequestTime_ = undefined;
     this.timerDuration_ = 0;
     this.intervalCallback_ = timerCallback;
     this.intervalId_ = win.setInterval(() => {
@@ -676,14 +676,14 @@ class TimerEventHandler {
   /**
    * @param {!Window} win
    */
-  clearInterval(win) {
+  stopTimer_(win) {
     if (!this.isRunning()) {
       return;
     }
     win.clearInterval(this.intervalId_);
     this.intervalId_ = undefined;
     this.calculateDuration_();
-    this.lastPingTime_ = undefined;
+    this.lastRequestTime_ = undefined;
     this.intervalCallback_();
     this.intervalCallback_ = null;
     this.unlistenForStop_();
@@ -694,15 +694,15 @@ class TimerEventHandler {
   calculateDuration_() {
     if (this.startTime_) {
       this.timerDuration_ +=
-          Date.now() - (this.lastPingTime_ || this.startTime_);
+          Date.now() - (this.lastRequestTime_ || this.startTime_);
     }
   }
 
   /** @return {{timerDuration: number, timerStart: number}} */
-  reportTimerVars() {
+  getTimerVars() {
     if (this.isRunning()) {
       this.calculateDuration_();
-      this.lastPingTime_ = Date.now();
+      this.lastRequestTime_ = Date.now();
     }
     const reportDuration = this.timerDuration_;
     this.timerDuration_ = 0;
@@ -848,7 +848,7 @@ export class TimerEventTracker extends EventTracker {
    * @private
    */
   stopTimer_(timerId) {
-    this.trackers_[timerId].clearInterval(this.root.ampdoc.win);
+    this.trackers_[timerId].stopTimer_(this.root.ampdoc.win);
   }
 
   /**
@@ -859,7 +859,7 @@ export class TimerEventTracker extends EventTracker {
    */
   createEvent_(timerId, eventType) {
     return new AnalyticsEvent(this.root.getRootElement(), eventType,
-        this.trackers_[timerId].reportTimerVars());
+        this.trackers_[timerId].getTimerVars());
   }
 
   /**
