@@ -22,7 +22,7 @@ import {
 import {dev, user} from '../../../src/log';
 import {map} from '../../../src/utils/object';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
-import {setStyle, resetStyles} from '../../../src/style';
+import {setStyle} from '../../../src/style';
 import {
   StoryAnimationDef,
   StoryAnimationDimsDef,
@@ -130,12 +130,6 @@ class AnimationRunner {
     /** @private {?Promise} */
     this.scheduledWait_ = null;
 
-    /** @private */
-    this.runnerReset_ = true;
-
-    /** @private */
-    this.firstFrameApplied_ = false;
-
     this.keyframes_.then(keyframes => dev().assert(
         !keyframes[0].offset,
         'First keyframe offset for animation preset should be 0 or undefined'));
@@ -190,16 +184,15 @@ class AnimationRunner {
       target: this.target_,
       duration: `${this.duration_}ms`,
       easing: this.presetDef_.easing,
+      fill: 'forwards',
     }));
   }
 
   /** @return {!Promise<void>} */
   applyFirstFrame() {
-    if (this.firstFrameApplied_) {
-      return Promise.resolve();
+    if (this.runner_) {
+      this.runner_.cancel();
     }
-
-    this.firstFrameApplied_ = true;
 
     return this.keyframes_.then(keyframes => {
       const firstFrameDef = keyframes[0];
@@ -209,24 +202,6 @@ class AnimationRunner {
         firstFrameProps.forEach(k => {
           setStyle(this.target_, k, firstFrameDef[k]);
         });
-      });
-    });
-  }
-
-  /** @private */
-  resetFirstFrame_() {
-    if (!this.firstFrameApplied_) {
-      return;
-    }
-
-    this.firstFrameApplied_ = false;
-
-    this.keyframes_.then(keyframes => {
-      const firstFrameDef = keyframes[0];
-      const firstFrameProps = getCssProps(firstFrameDef);
-
-      this.vsync_.mutate(() => {
-        resetStyles(this.target_, firstFrameProps);
       });
     });
   }
@@ -264,18 +239,7 @@ class AnimationRunner {
    * @private
    */
   startWhenReady_(runner) {
-    const shouldStart = !!this.runnerReset_;
-
-    this.runnerReset_ = false;
-
-    this.resetFirstFrame_();
-
-    if (shouldStart) {
-      runner.start();
-      return;
-    }
-
-    runner.resume();
+    runner.start();
   }
 
   /** @return {boolean} */
@@ -287,12 +251,9 @@ class AnimationRunner {
 
   /** Force-finishes all animations. */
   finish() {
-    if (this.firstFrameApplied_) {
+    if (!this.runner_) {
       this.notifyFinish_();
     }
-
-    this.resetFirstFrame_();
-
     this.playback_(PlaybackActivity.FINISH);
   }
 
@@ -303,7 +264,6 @@ class AnimationRunner {
   finishWhenReady_(runner) {
     if (runner.getPlayState() == WebAnimationPlayState.RUNNING) {
       runner.finish();
-      this.runnerReset_ = true;
     }
   }
 
@@ -312,9 +272,8 @@ class AnimationRunner {
     this.scheduledActivity_ = null;
     this.scheduledWait_ = null;
 
-    if (this.hasStarted()) {
+    if (this.runner_) {
       dev().assert(this.runner_).cancel();
-      this.runnerReset_ = true;
     }
   }
 
