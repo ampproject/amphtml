@@ -579,9 +579,6 @@ class TimerEventHandler {
 
     /** @private {number|undefined} */
     this.lastRequestTime_ = undefined; // milliseconds
-
-    /** @private {number} */
-    this.timerDuration_ = 0; // milliseconds
   }
 
   /**
@@ -653,7 +650,6 @@ class TimerEventHandler {
     }
     this.startTime_ = Date.now();
     this.lastRequestTime_ = undefined;
-    this.timerDuration_ = 0;
     this.intervalCallback_ = timerCallback;
     this.intervalId_ = win.setInterval(() => {
       timerCallback();
@@ -680,34 +676,32 @@ class TimerEventHandler {
     if (!this.isRunning()) {
       return;
     }
-    win.clearInterval(this.intervalId_);
-    this.intervalId_ = undefined;
-    this.calculateDuration_();
-    this.lastRequestTime_ = undefined;
     this.intervalCallback_();
     this.intervalCallback_ = null;
+    win.clearInterval(this.intervalId_);
+    this.intervalId_ = undefined;
+    this.lastRequestTime_ = undefined;
     this.unlistenForStop_();
     this.listenForStart_();
   }
 
-  /** @private */
+  /** @private @return {number} */
   calculateDuration_() {
     if (this.startTime_) {
-      this.timerDuration_ +=
-          Date.now() - (this.lastRequestTime_ || this.startTime_);
+      return Date.now() - (this.lastRequestTime_ || this.startTime_);
     }
+    return 0;
   }
 
   /** @return {{timerDuration: number, timerStart: number}} */
   getTimerVars() {
+    let timerDuration = 0;
     if (this.isRunning()) {
-      this.calculateDuration_();
+      timerDuration = this.calculateDuration_();
       this.lastRequestTime_ = Date.now();
     }
-    const reportDuration = this.timerDuration_;
-    this.timerDuration_ = 0;
     return {
-      'timerDuration': reportDuration,
+      'timerDuration': timerDuration,
       'timerStart': this.startTime_ || 0,
     };
   }
