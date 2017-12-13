@@ -259,15 +259,17 @@ export class ImageViewer {
       this.viewerBox_ = layoutRectFromDomRect(this.viewer_
         ./*OK*/getBoundingClientRect());
 
-      const sf = Math.min(this.viewerBox_.width / this.sourceWidth_,
-          this.viewerBox_.height / this.sourceHeight_);
-      let width = Math.min(this.sourceWidth_ * sf, this.viewerBox_.width);
-      let height = Math.min(this.sourceHeight_ * sf, this.viewerBox_.height);
+      const sourceAspectRatio = this.sourceWidth_ / this.sourceHeight_;
+      let height = Math.min(this.viewerBox_.width / sourceAspectRatio,
+          this.viewerBox_.height);
+      let width = Math.min(this.viewerBox_.height * sourceAspectRatio,
+          this.viewerBox_.width);
 
       // TODO(dvoytenko): This is to reduce very small expansions that often
       // look like a stutter. To be evaluated if this is still the right
       // idea.
-      if (width - this.sourceWidth_ <= 16) {
+      if (width - this.sourceWidth_ <= 16
+          && height - this.sourceHeight_ <= 16) {
         width = this.sourceWidth_;
         height = this.sourceHeight_;
       }
