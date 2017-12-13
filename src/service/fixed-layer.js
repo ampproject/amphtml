@@ -301,6 +301,7 @@ export class FixedLayer {
           const {offsetWidth, offsetHeight, offsetTop} = element;
           const {
             position = '',
+            display = '',
             bottom,
             zIndex,
           } = style;
@@ -315,8 +316,9 @@ export class FixedLayer {
               (fe.forceTransfer || (offsetWidth > 0 && offsetHeight > 0)));
           // Element is indeed sticky.
           const isSticky = endsWith(position, 'sticky');
+          const isDisplayed = display !== 'none';
 
-          if (!isFixed && !isSticky) {
+          if (!isDisplayed || !(isFixed || isSticky)) {
             state[fe.id] = {
               fixed: false,
               sticky: false,
