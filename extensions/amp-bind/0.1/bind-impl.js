@@ -34,7 +34,7 @@ import {parseJson, recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
 import {
-  childElementsByTag, iterateCursor, waitForBodyPromise,
+  iterateCursor, scopedQuerySelectorAll, waitForBodyPromise,
 } from '../../../src/dom';
 
 const TAG = 'amp-bind';
@@ -341,7 +341,7 @@ export class Bind {
    */
   addMacros_() {
     const elements =
-        childElementsByTag(this.ampdoc.getBody(), 'AMP-BIND-MACRO');
+        scopedQuerySelectorAll(this.ampdoc.getBody(), 'AMP-BIND-MACRO');
     const macros = /** @type {!Array<!AmpMacroDef>} */ [];
     iterateCursor(elements, element => {
       const argumentNames = (element.getAttribute('arguments') || '')
