@@ -142,7 +142,8 @@ The configuration object for `<amp-analytics>` uses the following format:
   "transport": {
     "beacon": *boolean*,
     "xhrpost": *boolean*,
-    "image": *boolean*
+    "image": *boolean*,
+    "iframe": *url*,
   }
 }
 ```
@@ -508,10 +509,11 @@ indicate which transport methods are acceptable.
   - `beacon` Indicates [`navigator.sendBeacon`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon)  can be used to transmit the request. This will send a POST request, with credentials, and an empty body.
   - `xhrpost` Indicates `XMLHttpRequest` can be used to transmit the request. This will send a POST request, with credentials, and an empty body.
   - `image` Indicates the request can be sent by generating an `Image` tag. This will send a GET request.
+  - `iframe` The value is a URL string. Indicates that an iframe should be created, with its `src` attribute set to this URL, and requests will be sent to that iframe via `window.postMessage()`. In this case, requests need not be full-fledged URLs. `iframe` may only be specified in `vendors.js`, not inline within the `amp-analytics` tag, nor via remote configuration. This option is also only available to MRC-accredited vendors.
 
-If more than one of the above transport methods are enabled, the precedence is `beacon` > `xhrpost` > `image`. Only one transport method will be used, and it will be the highest precedence one that is permitted and available. If the client's user agent does not support a method, the next highest precedence method enabled will be used. By default, all three methods above are enabled.
+If more than one of the above transport methods are enabled, the precedence is `iframe` > `beacon` > `xhrpost` > `image`. Only one transport method will be used, and it will be the highest precedence one that is permitted and available. If the client's user agent does not support a method, the next highest precedence method enabled will be used. By default, all four methods above are enabled.
 
-In the example below, `beacon` and `xhrpost` are set to `false`, so they will not be used even though they have higher precedence than `image`. `image` would be set `true` by default, but it is explicitly declared here. If the client's user agent supports the `image` method, then it will be used; otherwise, no request would be sent.
+In the example below, an `iframe` URL is not specified, and `beacon` and `xhrpost` are set to `false`, so they will not be used even though they have higher precedence than `image`. `image` would be set `true` by default, but it is explicitly declared here. If the client's user agent supports the `image` method, then it will be used; otherwise, no request would be sent.
 
 ```javascript
 "transport": {
@@ -520,6 +522,8 @@ In the example below, `beacon` and `xhrpost` are set to `false`, so they will no
   "image": true
 }
 ```
+
+To learn more, see [this example that implements iframe transport client API] (https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport-remote-frame.html) and [this example page that incorporates that iframe](https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport.amp.html). The example loads a [fake ad](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp_ad_with_iframe_transport.html), which contains the `amp-analytics` tag. Note that the fake ad content includes some extra configuration instructions that must be followed. 
 
 ## Validation
 
