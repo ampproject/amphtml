@@ -180,9 +180,7 @@ export class IframeTransport {
           }
           entryList.getEntries().forEach(entry => {
             if (entry && entry['entryType'] == 'longtask' &&
-              (entry['name'] == 'cross-origin-descendant' ||
-               (getMode().test &&
-               entry['name'] == 'same-origin-descendant')) &&
+              (entry['name'] == 'cross-origin-descendant') &&
               entry.attribution) {
               entry.attribution.forEach(attrib => {
                 if (this.frameUrl_ == attrib.containerSrc &&
