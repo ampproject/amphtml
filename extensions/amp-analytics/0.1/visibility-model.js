@@ -44,18 +44,16 @@ export class VisibilityModel {
      */
     this.spec_ = {
       visiblePercentageMin: Number(spec['visiblePercentageMin']) / 100 || 0,
-      visiblePercentageMax: Number(spec['visiblePercentageMax']) / 100,
+      visiblePercentageMax: Number(spec['visiblePercentageMax']) / 100 || 1,
       totalTimeMin: Number(spec['totalTimeMin']) || 0,
       totalTimeMax: Number(spec['totalTimeMax']) || Infinity,
       continuousTimeMin: Number(spec['continuousTimeMin']) || 0,
       continuousTimeMax: Number(spec['continuousTimeMax']) || Infinity,
     };
-    // If visiblePercentageMax was not specified, assume 100% (but do allow
-    // 0% to have been specified)
-    if (spec['visiblePercentageMax'] === null ||
-        spec['visiblePercentageMax'] === '' ||
-        isNaN(spec['visiblePercentageMax'])) {
-      this.spec_.visiblePercentageMax = 1;
+    // Above, if visiblePercentageMax was not specified, assume 100%.
+    // Here, do allow 0% to be the value if that is what was specified.
+    if (String(spec['visiblePercentageMax']).trim() === '0') {
+      this.spec_.visiblePercentageMax = 0;
     }
 
     /** @private {boolean} */
@@ -133,12 +131,8 @@ export class VisibilityModel {
     /** @private {time} milliseconds since epoch */
     this.lastVisibleUpdateTime_ = 0;
 
-    /**
-     * Want to fire when visibility becomes zero, *after* having been
-     * non-zero. So, set up the state as though it needs to wait to fire.
-     * @private {boolean} */
-    this.waitToReset_ = this.spec_.visiblePercentageMin == 0 &&
-        this.spec_.visiblePercentageMax == 0;
+    /** @private {boolean} */
+    this.waitToReset_ = false;
 
     /** @private {?number} */
     this.scheduleRepeatId_ = null;

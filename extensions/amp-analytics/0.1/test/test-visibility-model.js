@@ -1025,17 +1025,6 @@ describes.sandboxed('VisibilityModel', {}, () => {
         vh.lastVisibleUpdateTime_ = 0;
         vh.waitToReset_ = false;
       });
-
-      visibility = 0;
-      clock.tick(200);
-      vh.update();
-      expect(eventSpy).to.not.be.called;
-
-      visibility = 1;
-      clock.tick(200);
-      vh.update();
-      expect(eventSpy).to.not.be.called;
-
       visibility = 0;
       clock.tick(200);
       vh.update();
