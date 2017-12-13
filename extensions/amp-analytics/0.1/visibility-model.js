@@ -359,8 +359,7 @@ export class VisibilityModel {
       return visibility == 1;
     }
     // Special case: If visiblePercentageMin and Max are both 0, then we
-    // want to ping when the creative becomes not visible after having
-    // previously been visible.
+    // want to ping when the creative becomes not visible.
     if (this.spec_.visiblePercentageMin == 0 &&
         this.spec_.visiblePercentageMax == 0) {
       return visibility == 0;
