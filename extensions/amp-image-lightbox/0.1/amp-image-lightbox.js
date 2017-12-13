@@ -524,7 +524,7 @@ export class ImageViewer {
     const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
     const zoomSign = Math.abs(deltaY) > Math.abs(deltaX) ?
-        Math.sign(deltaY) : Math.sign(-deltaX);
+      Math.sign(deltaY) : Math.sign(-deltaX);
     if (zoomSign == 0) {
       return;
     }
@@ -557,7 +557,7 @@ export class ImageViewer {
     const newPosX = this.boundX_(this.startX_ + deltaX * newScale, false);
     const newPosY = this.boundY_(this.startY_ + deltaY * newScale, false);
     return /** @type {!Promise|undefined} */ (
-        this.set_(newScale, newPosX, newPosY, animate));
+      this.set_(newScale, newPosX, newPosY, animate));
   }
 
   /**
@@ -614,8 +614,8 @@ export class ImageViewer {
     if (animate) {
       const maxDur = 250;
       dur = Math.min(maxDur, Math.max(
-          maxDur * dist * 0.01,      // Moving component.
-          maxDur * Math.abs(ds)));   // Zooming component.
+          maxDur * dist * 0.01, // Moving component.
+          maxDur * Math.abs(ds))); // Zooming component.
     }
 
     let promise;
@@ -764,7 +764,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.element.addEventListener('click', e => {
       if (!this.entering_ &&
             !this.imageViewer_.getImage().contains(/** @type {?Node} */ (
-                e.target))) {
+              e.target))) {
         this.close();
       }
     });

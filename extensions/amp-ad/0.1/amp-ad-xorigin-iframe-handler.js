@@ -201,15 +201,15 @@ export class AmpAdXOriginIframeHandler {
       // exclusive. Whichever arrives first wins.
       listenForOncePromise(this.iframe,
           ['render-start', 'no-content'], true).then(info => {
-            const data = info.data;
-            if (data['type'] == 'render-start') {
-              this.renderStart_(info);
-              renderStartResolve();
-            } else {
-              this.noContent_();
-              noContentResolve();
-            }
-          });
+        const data = info.data;
+        if (data['type'] == 'render-start') {
+          this.renderStart_(info);
+          renderStartResolve();
+        } else {
+          this.noContent_();
+          noContentResolve();
+        }
+      });
     } else {
       // If `render-start` is not supported, listen to `bootstrap-loaded`.
       // This will avoid keeping the Ad empty until it's fully loaded, which
@@ -359,9 +359,9 @@ export class AmpAdXOriginIframeHandler {
       const iframeWidth = this.iframe./*OK*/offsetWidth;
       this.uiHandler_.updateSize(height, width, iframeHeight,
           iframeWidth).then(info => {
-            this.sendEmbedSizeResponse_(info.success,
-                info.newWidth, info.newHeight, source, origin);
-          }, () => {});
+        this.sendEmbedSizeResponse_(info.success,
+            info.newWidth, info.newHeight, source, origin);
+      }, () => {});
     });
   }
 
@@ -375,7 +375,7 @@ export class AmpAdXOriginIframeHandler {
    * @private
    */
   sendEmbedSizeResponse_(success, requestedWidth, requestedHeight, source,
-      origin) {
+    origin) {
     // The iframe may have been removed by the time we resize.
     if (!this.iframe) {
       return;
@@ -412,14 +412,14 @@ export class AmpAdXOriginIframeHandler {
   getIframePositionPromise_() {
     return this.viewport_.getClientRectAsync(
         dev().assertElement(this.iframe)).then(position => {
-          dev().assert(position,
-              'element clientRect should intersects with root clientRect');
-          const viewport = this.viewport_.getRect();
-          return dict({
-            'targetRect': position,
-            'viewportRect': viewport,
-          });
-        });
+      dev().assert(position,
+          'element clientRect should intersects with root clientRect');
+      const viewport = this.viewport_.getRect();
+      return dict({
+        'targetRect': position,
+        'viewportRect': viewport,
+      });
+    });
   }
 
   /** @private */

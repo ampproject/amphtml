@@ -113,7 +113,7 @@ export function isGoogleAdsA4AValidEnvironment(win) {
   const googleCdnProxyRegex =
         /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
   return supportsNativeCrypto(win) && (
-      !!googleCdnProxyRegex.test(win.location.origin) ||
+    !!googleCdnProxyRegex.test(win.location.origin) ||
         getMode(win).localDev || getMode(win).test);
 }
 
@@ -249,7 +249,7 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
           'url': documentInfo.canonicalUrl,
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
           'loc': win.location.href == documentInfo.canonicalUrl ?
-          null : win.location.href,
+            null : win.location.href,
           'ref': referrer,
         };
       }));
@@ -266,7 +266,7 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
  * @return {!Promise<string>}
  */
 export function googleAdUrl(
-    a4a, baseUrl, startTime, parameters, opt_experimentIds) {
+  a4a, baseUrl, startTime, parameters, opt_experimentIds) {
   // TODO: Maybe add checks in case these promises fail.
   const blockLevelParameters = googleBlockParameters(a4a, opt_experimentIds);
   return googlePageParameters(a4a.win, a4a.getAmpDoc(), startTime)
@@ -441,7 +441,7 @@ function csiTrigger(on, params) {
       // sampleOn spec so that the hash is orthogonal to any other sampling in
       // amp.
       'sampleOn': 'a4a-csi-${pageViewId}',
-      'threshold': 1,  // 1% sample
+      'threshold': 1, // 1% sample
     },
     'selector': 'amp-ad',
     'selectionMethod': 'closest',
@@ -610,7 +610,7 @@ export function mergeExperimentIds(newIds, currentIdString) {
  * @return {?JsonObject} config or null if invalid/missing.
  */
 export function addCsiSignalsToAmpAnalyticsConfig(win, element, config,
-    qqid, isVerifiedAmpCreative, deltaTime, initTime) {
+  qqid, isVerifiedAmpCreative, deltaTime, initTime) {
   // Add CSI pingbacks.
   const correlator = getCorrelator(win);
   const slotId = Number(element.getAttribute('data-amp-slot-index'));
@@ -658,7 +658,7 @@ export function addCsiSignalsToAmpAnalyticsConfig(win, element, config,
 export function getEnclosingContainerTypes(adElement) {
   const containerTypeSet = {};
   for (let el = adElement.parentElement, counter = 0;
-      el && counter < 20; el = el.parentElement, counter++) {
+    el && counter < 20; el = el.parentElement, counter++) {
     const tagName = el.tagName.toUpperCase();
     if (ValidAdContainerTypes[tagName]) {
       containerTypeSet[ValidAdContainerTypes[tagName]] = true;
@@ -736,7 +736,7 @@ export function getIdentityToken(win, nodeOrDoc) {
  * @return {!Promise<!IdentityToken>}
  */
 function executeIdentityTokenFetch(win, nodeOrDoc, redirectsRemaining = 1,
-    domain = undefined, startTime = Date.now()) {
+  domain = undefined, startTime = Date.now()) {
   const url = getIdentityTokenRequestUrl(win, nodeOrDoc, domain);
   return Services.xhrFor(win).fetchJson(url, {
     mode: 'cors',

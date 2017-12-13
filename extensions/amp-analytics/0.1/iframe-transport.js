@@ -175,27 +175,27 @@ export class IframeTransport {
     // TODO(jonkeller): Consider merging with jank-meter.js
     IframeTransport.performanceObservers_[this.type_] =
         new this.ampWin_.PerformanceObserver(entryList => {
-          if (!entryList) {
-            return;
-          }
-          entryList.getEntries().forEach(entry => {
-            if (entry && entry['entryType'] == 'longtask' &&
+        if (!entryList) {
+          return;
+        }
+        entryList.getEntries().forEach(entry => {
+          if (entry && entry['entryType'] == 'longtask' &&
               (entry['name'] == 'cross-origin-descendant') &&
               entry.attribution) {
-              entry.attribution.forEach(attrib => {
-                if (this.frameUrl_ == attrib.containerSrc &&
+            entry.attribution.forEach(attrib => {
+              if (this.frameUrl_ == attrib.containerSrc &&
                     ++this.numLongTasks_ % LONG_TASK_REPORTING_THRESHOLD == 0) {
-                  user().warn(TAG_,
-                      'Long Task: ' +
+                user().warn(TAG_,
+                    'Long Task: ' +
                       `Vendor: "${this.type_}" ` +
                       `Src: "${attrib.containerSrc}" ` +
                       `Duration: ${entry.duration}ms ` +
                       `Occurrences: ${this.numLongTasks_}`);
-                }
-              });
-            }
-          });
+              }
+            });
+          }
         });
+      });
     IframeTransport.performanceObservers_[this.type_].observe({
       entryTypes: ['longtask'],
     });

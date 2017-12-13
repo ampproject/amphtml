@@ -110,8 +110,8 @@ describe('iframe-transport-client', () => {
   it('requires onNewContextInstance', () => {
     expect(() => {
       new IframeTransportContext(window,
-        iframeTransportClient.iframeMessagingClient_,
-        'my_creative', 'my_vendor');
+          iframeTransportClient.iframeMessagingClient_,
+          'my_creative', 'my_vendor');
     }).to.throw(/Must implement onNewContextInstance/);
   });
 
@@ -119,8 +119,8 @@ describe('iframe-transport-client', () => {
     const onNewContextInstanceSpy = sandbox.spy();
     window.onNewContextInstance = ctx => onNewContextInstanceSpy(ctx);
     const ctx = new IframeTransportContext(window,
-      iframeTransportClient.iframeMessagingClient_,
-      'my_creative', 'my_vendor');
+        iframeTransportClient.iframeMessagingClient_,
+        'my_creative', 'my_vendor');
     expect(onNewContextInstanceSpy).to.be.calledOnce;
     expect(onNewContextInstanceSpy).to.be.calledWith(ctx);
     window.onNewContextInstance = undefined;
@@ -130,8 +130,8 @@ describe('iframe-transport-client', () => {
     const onNewContextInstanceSpy = sandbox.spy();
     window.onNewContextInstance = ctx => onNewContextInstanceSpy(ctx);
     const ctx = new IframeTransportContext(window,
-      iframeTransportClient.iframeMessagingClient_,
-      'my_creative', 'my_vendor');
+        iframeTransportClient.iframeMessagingClient_,
+        'my_creative', 'my_vendor');
     expect(ctx.listener_).to.be.null;
     expect(ctx.baseMessage_).to.not.be.null;
     expect(ctx.baseMessage_.creativeId).to.equal('my_creative');
@@ -149,8 +149,8 @@ describe('iframe-transport-client', () => {
     const onNewContextInstanceSpy = sandbox.spy();
     window.onNewContextInstance = ctx => onNewContextInstanceSpy(ctx);
     const ctx = new IframeTransportContext(window,
-      iframeTransportClient.iframeMessagingClient_,
-      'my_creative', 'my_vendor');
+        iframeTransportClient.iframeMessagingClient_,
+        'my_creative', 'my_vendor');
     const listener = sandbox.spy();
     ctx.onAnalyticsEvent(listener);
     const event = 'Something important happened';
@@ -167,7 +167,7 @@ describe('iframe-transport-client', () => {
     // presubmit rule that says you can't call stub() on a cross-domain iframe.
     const imc = iframeTransportClient.iframeMessagingClient_;
     const ctx = new IframeTransportContext(window, imc,
-      'my_creative', 'my_vendor');
+        'my_creative', 'my_vendor');
     const response = {foo: 'bar', answer: '42'};
     sandbox.stub(imc, 'sendMessage', (type, opt_payload) => {
       expect(type).to.equal(MessageType.IFRAME_TRANSPORT_RESPONSE);

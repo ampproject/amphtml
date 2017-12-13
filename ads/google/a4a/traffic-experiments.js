@@ -76,8 +76,8 @@ export const MANUAL_EXPERIMENT_ID = '117152632';
  *   pathway.
  */
 export function googleAdsIsA4AEnabled(win, element, experimentName,
-    externalBranches, internalBranches, delayedExternalBranches,
-    opt_sfgInternalBranches) {
+  externalBranches, internalBranches, delayedExternalBranches,
+  opt_sfgInternalBranches) {
   if (!isGoogleAdsA4AValidEnvironment(win)) {
     // Serving location doesn't qualify for A4A treatment
     return false;
@@ -201,8 +201,8 @@ export function extractUrlExperimentId(win, element) {
  *   parameter or not.
  */
 function maybeSetExperimentFromUrl(win, element, experimentName,
-     controlBranchId, treatmentBranchId, delayedControlId,
-     delayedTreatmentBrandId, sfgControlId, sfgTreatmentId, manualId) {
+  controlBranchId, treatmentBranchId, delayedControlId,
+  delayedTreatmentBrandId, sfgControlId, sfgTreatmentId, manualId) {
   const argMapping = {
     '-1': manualId,
     '0': null,
