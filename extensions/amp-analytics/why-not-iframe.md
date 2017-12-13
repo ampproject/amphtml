@@ -14,3 +14,5 @@ With AMP, The AMP Project decided to encourage the use of the AMP Analytics syst
 The disadvantages of this approach are:
 * **Less data points (initially):** Initially, the `amp-analytics` extension's data collection will not be as complete as existing systems. This is being addressed by multiple partners in the Github repo. The AMP Project is committed to enhancing the capabilities of amp-analytics based on the foundation that’s been built thus far.
 * **Adaption to a new technical approach:** For example, you may use a client-side collection technique that needs to be substituted for a server-side solution.
+
+If this is insufficient, MRC-accredited vendors may still use an embedded iframe. This is discussed in the [amp-analytics documentation](amp-analytics.md). Note that the cross-domain frame is loaded after the creative due to AMP’s prioritization constraints for cross-domain iframes, which may lead to ping loss. Should the previously-existing solution (beacon, image, and/or xhrpost) meet your needs, it is recommended that it be used.

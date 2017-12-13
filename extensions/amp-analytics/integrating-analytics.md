@@ -12,7 +12,9 @@ Before you can add your analytics service to AMP HTML runtime, you may need to:
 * Consider if and how you will [track users across](https://github.com/ampproject/amphtml/blob/master/spec/amp-managing-user-state.md) first-party and third-party AMP contexts.
 * Determine how your analytics dashboard handles AMP traffic.
 * Identify any missing functionality in `amp-analytics`, and [file requests](https://github.com/ampproject/amphtml/issues/new) for needed features.
-* AMP Analytics sends its variables as query string parameters in a HTTPS request to a preconfigured endpoint.  If you do not already have an existing endpoint, review [this sample](https://github.com/ampproject/amp-publisher-sample#amp-analytics-sample) for an overview on how to build one.  
+* AMP Analytics sends its variables to a preconfigured endpoint.  If you do not already have an existing endpoint, review [this sample](https://github.com/ampproject/amp-publisher-sample#amp-analytics-sample) for an overview on how to build one.
+  * For all transport types except `iframe`, variables are sent as query string parameters in a HTTPS request.  
+  * For the `iframe` transport type, an iframe is created and variables are sent to it via `window.postMessage`. In this case, the message need not be a URL. This option is available only to MRC-accredited vendors.
 * Consider how integration with `amp-analytics` may impact any policies (particularly your privacy policy) or agreements you may have.
 
 ## Adding your configuration to the AMP HTML runtime
@@ -22,6 +24,7 @@ Before you can add your analytics service to AMP HTML runtime, you may need to:
     1. A new block in [vendors.js](0.1/vendors.js) including any options above and beyond the default, such as:
         1. "vars": {} for additional default variables.
         1. "requests": {} for requests that your service will use.
+        1. "transport": { "iframe": *url* } if you are using iframe transport.
         1. "optout": if needed.  We currently don't have a great opt-out system, so please reach out to help us design one that works well for you.
     1. An example in the [examples/analytics-vendors.amp.html](../../examples/analytics-vendors.amp.html)
 reference.
