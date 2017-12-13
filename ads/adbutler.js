@@ -23,8 +23,8 @@ import {loadScript, validateData} from '../3p/3p';
 export function adbutler(global,data) {
   validateData(
       data,
-    ['account', 'zone', 'width', 'height'],
-    ['keyword', 'place']
+      ['account', 'zone', 'width', 'height'],
+      ['keyword', 'place']
   );
 
   data['place'] = data['place'] || 0;

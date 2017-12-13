@@ -199,7 +199,7 @@ describe('doubleclick-a4a-config', () => {
           DOUBLECLICK_EXPERIMENT_FEATURE.CANONICAL_EXPERIMENT)).to.be.true;
       expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE).includes(
           DOUBLECLICK_UNCONDITIONED_EXPERIMENTS.CANONICAL_HLDBK_CTL)
-            ).to.be.true;
+      ).to.be.true;
     });
   });
 });

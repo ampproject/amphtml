@@ -40,7 +40,7 @@ export function getAdCid(adElement) {
  * @return {!Promise<string|undefined>} A promise for a CID or undefined.
  */
 export function getOrCreateAdCid(
-    ampDoc, clientIdScope, opt_clientIdCookieName) {
+  ampDoc, clientIdScope, opt_clientIdCookieName) {
   const cidPromise = Services.cidForDoc(ampDoc).then(cidService => {
     if (!cidService) {
       return;

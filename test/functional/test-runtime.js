@@ -847,8 +847,8 @@ describes.realWin('runtime multidoc', {
 
       ampdocServiceMock.expects('installShadowDoc_')
           .withExactArgs(
-          docUrl,
-          sinon.match(arg => arg == getShadowRoot(hostElement)))
+              docUrl,
+              sinon.match(arg => arg == getShadowRoot(hostElement)))
           .returns(ampdoc)
           .atLeast(0);
       ampdocServiceMock.expects('getAmpDoc')
@@ -1171,8 +1171,8 @@ describes.realWin('runtime multidoc', {
 
       ampdocServiceMock.expects('installShadowDoc_')
           .withExactArgs(
-          docUrl,
-          sinon.match(arg => arg == getShadowRoot(hostElement)))
+              docUrl,
+              sinon.match(arg => arg == getShadowRoot(hostElement)))
           .returns(ampdoc)
           .atLeast(0);
       ampdocServiceMock.expects('getAmpDoc')
@@ -1518,8 +1518,8 @@ describes.realWin('runtime multidoc', {
 
       ampdocServiceMock.expects('installShadowDoc_')
           .withExactArgs(
-          docUrl,
-          sinon.match(arg => arg == getShadowRoot(hostElement)))
+              docUrl,
+              sinon.match(arg => arg == getShadowRoot(hostElement)))
           .returns(ampdoc)
           .atLeast(0);
       ampdocServiceMock.expects('getAmpDoc')

@@ -332,7 +332,7 @@ export class BindExpression {
         }
         // Ignore Closure's type constraint for `hasOwnProperty`.
         if (Object.prototype.hasOwnProperty.call(
-              /** @type {Object} */ (target), member)) {
+            /** @type {Object} */ (target), member)) {
           return target[member];
         } else {
           this.memberAccessWarning_(target, member);
@@ -360,8 +360,8 @@ export class BindExpression {
 
       case AstNodeType.OBJECT_LITERAL:
         return (args.length > 0)
-            ? this.eval_(args[0], scope)
-            : map();
+          ? this.eval_(args[0], scope)
+          : map();
 
       case AstNodeType.OBJECT:
         const object = map();
@@ -431,8 +431,8 @@ export class BindExpression {
 
       case AstNodeType.TERNARY:
         return this.eval_(args[0], scope)
-            ? this.eval_(args[1], scope)
-            : this.eval_(args[2], scope);
+          ? this.eval_(args[1], scope)
+          : this.eval_(args[2], scope);
 
       case AstNodeType.ARROW_FUNCTION:
         const functionScope = map(scope);

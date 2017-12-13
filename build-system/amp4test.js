@@ -23,8 +23,8 @@ app.use('/compose-doc', function(req, res) {
   res.setHeader('X-XSS-Protection', '0');
   const mode = process.env.SERVE_MODE == 'compiled' ? '' : 'max.';
   const frameHtml = process.env.SERVE_MODE == 'compiled'
-      ? 'dist.3p/current-min/frame.html'
-      : 'dist.3p/current/frame.max.html';
+    ? 'dist.3p/current-min/frame.html'
+    : 'dist.3p/current/frame.max.html';
   const extensions = req.query.extensions;
   let extensionScripts = '';
   if (!!extensions) {

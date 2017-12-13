@@ -71,10 +71,10 @@ describes.fakeWin('Template', {}, env => {
         TemplateImpl);
     return templates.renderTemplateArray(templateElement,
         [{value: 1}, {value: 2}]).then(res => {
-          expect(res).to.have.length.of(2);
-          expect(res[0].textContent).to.equal('abc1');
-          expect(res[1].textContent).to.equal('abc2');
-        });
+      expect(res).to.have.length.of(2);
+      expect(res[0].textContent).to.equal('abc1');
+      expect(res[1].textContent).to.equal('abc2');
+    });
   });
 
   it('should NOT allow registering template class twice', () => {
@@ -235,10 +235,10 @@ describes.fakeWin('Template', {}, env => {
     parentElement.setAttribute('template', id);
     return templates.findAndRenderTemplateArray(parentElement,
         [{value: 1}, {value: 2}]).then(res => {
-          expect(res).to.have.length.of(2);
-          expect(res[0].textContent).to.equal('abc1');
-          expect(res[1].textContent).to.equal('abc2');
-        });
+      expect(res).to.have.length.of(2);
+      expect(res[0].textContent).to.equal('abc1');
+      expect(res[1].textContent).to.equal('abc2');
+    });
   });
 
   it('should discover and render template for an array', () => {
@@ -253,10 +253,10 @@ describes.fakeWin('Template', {}, env => {
     parentElement.setAttribute('template', id);
     return templates.findAndRenderTemplateArray(parentElement,
         [{value: 1}, {value: 2}]).then(res => {
-          expect(res).to.have.length.of(2);
-          expect(res[0].textContent).to.equal('abc1');
-          expect(res[1].textContent).to.equal('abc2');
-        });
+      expect(res).to.have.length.of(2);
+      expect(res[0].textContent).to.equal('abc1');
+      expect(res[1].textContent).to.equal('abc2');
+    });
   });
 });
 

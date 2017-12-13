@@ -52,8 +52,8 @@ export function taboola(global, data) {
     framework: 'amp',
     container: 'c',
   },
-    params,
-    {flush: true}]
+  params,
+  {flush: true}]
   );
 
   // install observation on entering/leaving the view

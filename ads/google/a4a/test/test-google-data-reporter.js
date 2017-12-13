@@ -16,13 +16,13 @@
 
 import {createIframePromise} from '../../../../testing/iframe';
 import {
-    getLifecycleReporter,
-    setGoogleLifecycleVarsFromHeaders,
-    googleLifecycleReporterFactory,
+  getLifecycleReporter,
+  setGoogleLifecycleVarsFromHeaders,
+  googleLifecycleReporterFactory,
 } from '../google-data-reporter';
 import {
-    GoogleAdLifecycleReporter,
-    BaseLifecycleReporter,
+  GoogleAdLifecycleReporter,
+  BaseLifecycleReporter,
 } from '../performance';
 import {EXPERIMENT_ATTRIBUTE, QQID_HEADER} from '../utils';
 import {
@@ -164,7 +164,7 @@ describes.sandboxed('#googleLifecycleReporterFactory', {}, () => {
         'slotId=22',
         `rls=${encodeURIComponent('$internalRuntimeVersion$')}`,
         'v_h=[0-9]+',
-        's_t=',  // SROLL_TOP not defined in test environment.
+        's_t=', // SROLL_TOP not defined in test environment.
         'stageName=renderFriendlyStart',
         'stageIdx=6',
         'met.a4a.22=renderFriendlyStart.[0-9]+',

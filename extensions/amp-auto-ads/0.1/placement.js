@@ -48,10 +48,10 @@ export const PlacementState = {
  * @enum {number}
  */
 const Position = {
-  BEFORE: 1,  // Placement should be the sibling before the anchor element.
-  FIRST_CHILD: 2,  // Placement should be the first child of the anchor element.
-  LAST_CHILD: 3,  // Placement should be the last child of the anchor element.
-  AFTER: 4,  // Placement should be the sibling after the anchor element.
+  BEFORE: 1, // Placement should be the sibling before the anchor element.
+  FIRST_CHILD: 2, // Placement should be the first child of the anchor element.
+  LAST_CHILD: 3, // Placement should be the last child of the anchor element.
+  AFTER: 4, // Placement should be the sibling after the anchor element.
 };
 
 /**
@@ -93,7 +93,7 @@ export class Placement {
    * @param {!../../../src/layout-rect.LayoutMarginsChangeDef=} opt_margins
    */
   constructor(ampdoc, resources, anchorElement, position, injector, attributes,
-      opt_margins) {
+    opt_margins) {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -331,7 +331,7 @@ function getAnchorElements(rootElement, anchorObj) {
 function isPositionValid(anchorElement, position) {
   const elementToCheckOrNull =
       position == Position.BEFORE || position == Position.AFTER ?
-          anchorElement.parentElement : anchorElement;
+        anchorElement.parentElement : anchorElement;
   if (!elementToCheckOrNull) {
     user().warn(TAG, 'Parentless anchor with BEFORE/AFTER position.');
     return false;

@@ -32,7 +32,7 @@ import {cssText} from '../../build/css';
 import {dev, rethrowAsync} from '../log';
 import {getMode} from '../mode';
 import installCustomElements from
-    'document-register-element/build/document-register-element.node';
+  'document-register-element/build/document-register-element.node';
 import {install as installDocContains} from '../polyfills/document-contains';
 import {
   install as installDOMTokenListToggle,
@@ -141,7 +141,7 @@ export function installExtensionsInDoc(extensions, ampdoc, extensionIds) {
  * @restricted
  */
 export function addElementToExtension(
-    extensions, name, implementationClass, css) {
+  extensions, name, implementationClass, css) {
   extensions.addElement_(name, implementationClass, css);
 }
 
@@ -452,7 +452,7 @@ export class Extensions {
    * @restricted
    */
   installExtensionsInChildWindow(childWin, extensionIds,
-      opt_preinstallCallback) {
+    opt_preinstallCallback) {
     const topWin = this.win;
     const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
     setParentWindow(childWin, parentWin);

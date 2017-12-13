@@ -17,7 +17,7 @@
 import {createIframePromise} from '../../testing/iframe';
 import {Services} from '../../src/services';
 import {installDocumentInfoServiceForDoc} from
-    '../../src/service/document-info-impl';
+  '../../src/service/document-info-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import * as sinon from 'sinon';
 

@@ -39,7 +39,7 @@ function calculateScriptBaseUrl(location, opt_isLocalDev) {
  * @return {string}
  */
 export function calculateExtensionScriptUrl(location, extensionId,
-    opt_extensionVersion, opt_isLocalDev) {
+  opt_extensionVersion, opt_isLocalDev) {
   const base = calculateScriptBaseUrl(location, opt_isLocalDev);
   const rtv = getMode().rtvVersion;
   const extensionVersion = opt_extensionVersion || '0.1';
@@ -56,7 +56,7 @@ export function calculateExtensionScriptUrl(location, extensionId,
  * @return {string}
  */
 export function calculateEntryPointScriptUrl(
-    location, entryPoint, isLocalDev, opt_rtv) {
+  location, entryPoint, isLocalDev, opt_rtv) {
   const base = calculateScriptBaseUrl(location, isLocalDev);
   if (opt_rtv) {
     return `${base}/rtv/${getMode().rtvVersion}/${entryPoint}.js`;

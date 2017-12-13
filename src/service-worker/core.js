@@ -638,7 +638,7 @@ self.addEventListener('install', install => {
   if (install.registerForeignFetch) {
     install.registerForeignFetch({
       scopes: [/** @type {!ServiceWorkerGlobalScope} */(
-          self).registration.scope],
+        self).registration.scope],
       origins: ['*'],
     });
   }

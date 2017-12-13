@@ -27,7 +27,7 @@ import {loadPromise} from './event-helper';
  */
 export function maybeValidate(win) {
   const filename = win.location.href;
-  if (startsWith(filename, 'about:')) {  // Should only happen in tests.
+  if (startsWith(filename, 'about:')) { // Should only happen in tests.
     return;
   }
 

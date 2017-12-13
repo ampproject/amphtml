@@ -334,17 +334,17 @@ describes.realWin('web-push-service widget visibilities', {
           sandbox./*OK*/stub(
               webPush, 'querySubscriptionStateRemotely',
               () => Promise.resolve(true)
-      );
+          );
           sandbox./*OK*/stub(
               webPush, 'isServiceWorkerActivated',
               () => Promise.resolve(true)
-      );
+          );
           sandbox./*OK*/stub(
               webPush, 'queryNotificationPermission',
               () => Promise.resolve(NotificationPermission.DEFAULT)
-      );
+          );
 
-      // We've mocked default notification permissions
+          // We've mocked default notification permissions
           return webPush.updateWidgetVisibilities();
         }).then(() => {
           expect(spy.withArgs(WebPushWidgetVisibilities.UNSUBSCRIBED, false)
@@ -367,14 +367,14 @@ describes.realWin('web-push-service widget visibilities', {
               webPush,
               'isServiceWorkerActivated',
               () => Promise.resolve(false)
-      );
+          );
           sandbox./*OK*/stub(
               webPush,
               'queryNotificationPermission',
               () => Promise.resolve(NotificationPermission.DEFAULT)
-      );
+          );
 
-      // We've mocked default notification permissions
+          // We've mocked default notification permissions
           return webPush.updateWidgetVisibilities();
         }).then(() => {
           expect(spy.withArgs(WebPushWidgetVisibilities.UNSUBSCRIBED, true)
@@ -426,7 +426,7 @@ describes.realWin('web-push-service widget visibilities', {
         webPush.isUrlSimilarForQueryParams(
             'https://site.com/worker-a.js?a=1&b=2',
             'https://site.com/worker-a.js?a=1&b=2'
-      )
+        )
     ).to.eq(true);
 
     // Identical URLs except URL to test is allowed to have more than the
@@ -435,7 +435,7 @@ describes.realWin('web-push-service widget visibilities', {
         webPush.isUrlSimilarForQueryParams(
             'https://site.com/worker-a.js?a=1&b=2',
             'https://site.com/worker-a.js?a=1&b=2&c=3&d=4'
-      )
+        )
     ).to.eq(true);
 
     // URL to test is missing one of the first URL's query params
@@ -443,7 +443,7 @@ describes.realWin('web-push-service widget visibilities', {
         webPush.isUrlSimilarForQueryParams(
             'https://site.com/worker-a.js?a=1&b=2',
             'https://site.com/worker-a.js?a=1&c=3&d=4'
-      )
+        )
     ).to.eq(false);
 
     // URL to test is missing all query params
@@ -451,7 +451,7 @@ describes.realWin('web-push-service widget visibilities', {
         webPush.isUrlSimilarForQueryParams(
             'https://site.com/worker-a.js?a=1&b=2',
             'https://site.com/worker-a.js'
-      )
+        )
     ).to.eq(false);
 
     // URL to test has the wrong scheme
@@ -459,7 +459,7 @@ describes.realWin('web-push-service widget visibilities', {
         webPush.isUrlSimilarForQueryParams(
             'https://site.com/worker-a.js?a=1&b=2',
             'http://site.com/worker-a.js?a=1&b=2'
-      )
+        )
     ).to.eq(false);
 
     // URL to test has the wrong hostname
@@ -467,7 +467,7 @@ describes.realWin('web-push-service widget visibilities', {
         webPush.isUrlSimilarForQueryParams(
             'https://site.com/worker-a.js?a=1&b=2',
             'https://another-site.com/worker-a.js?a=1&b=2'
-      )
+        )
     ).to.eq(false);
 
     // URL to test has the wrong port
@@ -475,7 +475,7 @@ describes.realWin('web-push-service widget visibilities', {
         webPush.isUrlSimilarForQueryParams(
             'https://site.com/worker-a.js?a=1&b=2',
             'https://site:8000.com/worker-a.js?a=1&b=2'
-      )
+        )
     ).to.eq(false);
 
     // URL to test has the wrong pathname
@@ -483,7 +483,7 @@ describes.realWin('web-push-service widget visibilities', {
         webPush.isUrlSimilarForQueryParams(
             'https://site.com/worker-a.js?a=1&b=2',
             'https://site.com/another-worker-b.js?a=1&b=2'
-      )
+        )
     ).to.eq(false);
   });
 
@@ -580,10 +580,10 @@ describes.realWin('web-push-service subscribing', {
       helperFrameSwMessageMock.expects('register')
           .once()
           .withArgs(
-          webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL],
-          {
-            scope: '/',
-          })
+              webPushConfig[WebPushConfigAttributes.SERVICE_WORKER_URL],
+              {
+                scope: '/',
+              })
           .returns(Promise.resolve(true));
 
       return webPush.registerServiceWorker();
@@ -623,13 +623,13 @@ describes.realWin('web-push-service subscribing', {
         WebPushService.PERMISSION_POPUP_URL_FRAGMENT;
       openWindowMock.expects('open')
           .withArgs(
-          webPushConfig['permission-dialog-url'] +
+              webPushConfig['permission-dialog-url'] +
           `?return=${encodeURIComponent(returningPopupUrl)}`, '_blank')
           .onFirstCall()
           .returns();
       openWindowMock.expects('open')
           .withArgs(
-          webPushConfig['permission-dialog-url'] +
+              webPushConfig['permission-dialog-url'] +
           `?return=${encodeURIComponent(returningPopupUrl)}`, '_top')
           .onSecondCall()
           .returns();

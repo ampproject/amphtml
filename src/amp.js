@@ -52,11 +52,11 @@ let ampdocService;
 // a completely blank page.
 try {
   // Should happen first.
-  installErrorReporting(self);  // Also calls makeBodyVisible on errors.
+  installErrorReporting(self); // Also calls makeBodyVisible on errors.
 
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
-  installDocService(self,  /* isSingleDoc */ true);
+  installDocService(self, /* isSingleDoc */ true);
   ampdocService = Services.ampdocServiceFor(self);
 } catch (e) {
   // In case of an error call this.

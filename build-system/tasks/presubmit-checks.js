@@ -88,7 +88,7 @@ const forbiddenTerms = {
     whitelist: [
       'build-system/pr-check.js',
       'build-system/app.js',
-      'validator/nodejs/index.js',  // NodeJs only.
+      'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
       'validator/engine/validator.js',
@@ -479,7 +479,7 @@ const forbiddenTerms = {
       'src/3p-frame-messaging.js',
       'src/event-helper.js',
       'src/event-helper-listen.js',
-      'dist.3p/current/integration.js',  // includes previous
+      'dist.3p/current/integration.js', // includes previous
     ],
   },
   'setTimeout.*throw': {
@@ -488,7 +488,7 @@ const forbiddenTerms = {
       'src/log.js',
     ],
   },
-  '(dev|user)\\(\\)\\.(fine|info|warn|error)\\((?!\\s*([A-Z0-9-]+|[\'"`][A-Z0-9-]+[\'"`]))[^,)\n]*': {  // eslint-disable-line max-len
+  '(dev|user)\\(\\)\\.(fine|info|warn|error)\\((?!\\s*([A-Z0-9-]+|[\'"`][A-Z0-9-]+[\'"`]))[^,)\n]*': { // eslint-disable-line max-len
     message: 'Logging message require explicitly `TAG`, or an all uppercase' +
         ' string as the first parameter',
   },
@@ -499,7 +499,7 @@ const forbiddenTerms = {
     ],
   },
   '\\.requireLayout\\(': {
-    message: 'requireLayout is restricted b/c it affects non-contained elements',  // eslint-disable-line max-len
+    message: 'requireLayout is restricted b/c it affects non-contained elements', // eslint-disable-line max-len
     whitelist: [
       'extensions/amp-animation/0.1/web-animations.js',
       'extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.js',
@@ -528,8 +528,8 @@ const forbiddenTerms = {
   '/\\*\\* @type \\{\\!Element\\} \\*/': {
     message: 'Use assertElement instead of casting to !Element.',
     whitelist: [
-      'src/log.js',  // Has actual implementation of assertElement.
-      'dist.3p/current/integration.js',  // Includes the previous.
+      'src/log.js', // Has actual implementation of assertElement.
+      'dist.3p/current/integration.js', // Includes the previous.
     ],
   },
   'startupChunk\\(': {
@@ -600,7 +600,7 @@ const forbiddenTerms = {
   '\\.defer\\(\\)': {
     message: 'Promise.defer() is deprecated and should not be used.',
   },
-  '(dev|user)\\(\\)\\.assert(Element|String|Number)?\\(\\s*([A-Z][A-Z0-9-]*,)': {  // eslint-disable-line max-len
+  '(dev|user)\\(\\)\\.assert(Element|String|Number)?\\(\\s*([A-Z][A-Z0-9-]*,)': { // eslint-disable-line max-len
     message: 'TAG is not an argument to assert(). Will cause false positives.',
   },
 };
@@ -712,7 +712,7 @@ const forbiddenTermsSrcInclusive = {
   // Super complicated regex that says "find any querySelector method call that
   // is passed as a variable anything that is not a string, or a string that
   // contains a space.
-  '\\b(?:(?!\\w*[dD]oc\\w*)\\w)+\\.querySelector(?:All)?\\((?=\\s*([^\'"\\s]|[^\\s)]+\\s))[^)]*\\)': {  // eslint-disable-line max-len
+  '\\b(?:(?!\\w*[dD]oc\\w*)\\w)+\\.querySelector(?:All)?\\((?=\\s*([^\'"\\s]|[^\\s)]+\\s))[^)]*\\)': { // eslint-disable-line max-len
     message: 'querySelector is not scoped to the element, but globally and ' +
     'filtered to just the elements inside the element. This leads to ' +
     'obscure bugs if you attempt to match a descendant of a descendant (ie ' +
@@ -733,8 +733,8 @@ const forbiddenTermsSrcInclusive = {
       'src/services.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
-      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',  // eslint-disable-line max-len
-      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',  // eslint-disable-line max-len
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js', // eslint-disable-line max-len
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js', // eslint-disable-line max-len
       'extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.js',
     ],
   },

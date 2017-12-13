@@ -59,7 +59,7 @@ export function renderAsElement(doc, elementDef) {
 function renderMulti(doc, elementsDef) {
   const fragment = doc.createDocumentFragment();
   elementsDef.forEach(elementDef =>
-      fragment.appendChild(renderSingle(doc, elementDef)));
+    fragment.appendChild(renderSingle(doc, elementDef)));
   return fragment;
 }
 
@@ -71,8 +71,8 @@ function renderMulti(doc, elementsDef) {
  */
 function renderSingle(doc, elementDef) {
   const el = elementDef.attrs ?
-      createElementWithAttributes(doc, elementDef.tag, elementDef.attrs) :
-      doc.createElement(elementDef.tag);
+    createElementWithAttributes(doc, elementDef.tag, elementDef.attrs) :
+    doc.createElement(elementDef.tag);
 
   if (elementDef.text) {
     el.textContent = elementDef.text;

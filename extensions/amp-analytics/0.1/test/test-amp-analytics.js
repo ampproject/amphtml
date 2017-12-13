@@ -33,7 +33,7 @@ import {
 } from '../../../../src/service';
 import {map} from '../../../../src/utils/object';
 import {cidServiceForDocForTesting} from
-    '../../../../src/service/cid-impl';
+  '../../../../src/service/cid-impl';
 import {Services} from '../../../../src/services';
 import * as log from '../../../../src/log';
 
@@ -749,7 +749,7 @@ describes.realWin('amp-analytics', {
 
       const handlerSpy = sandbox.spy();
       analyticsGroup.addTrigger(
-        {'on': 'click', 'selector': '.x', 'vars': {'test': 'bar'}},
+          {'on': 'click', 'selector': '.x', 'vars': {'test': 'bar'}},
           handlerSpy);
       analyticsGroup.root_.getTrackerOptional('click')
           .clickObservable_.fire({target: el1});
@@ -1489,7 +1489,7 @@ describes.realWin('amp-analytics', {
       });
       return expect(waitForNoSendRequest(analytics)).to.be
           .rejectedWith(
-          /iframePing config is only available to vendor config/);
+              /iframePing config is only available to vendor config/);
     });
 
     it('succeeds for iframePing config in vendor config', function() {
@@ -1643,8 +1643,8 @@ describes.realWin('amp-analytics', {
             'var2': 'test2',
           },
         }]}, {
-          'sandbox': 'true',
-        }, true);
+        'sandbox': 'true',
+      }, true);
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.calledOnce).to.be.true;
         expect(sendRequestSpy.args[0][0]).to.equal(
@@ -1718,8 +1718,8 @@ describes.realWin('amp-analytics', {
             'var3': 'CLIENT_ID',
           },
         }]}, {
-          'sandbox': 'true',
-        }, true);
+        'sandbox': 'true',
+      }, true);
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.calledOnce).to.be.true;
         expect(sendRequestSpy.args[0][0]).to.equal(
@@ -1818,7 +1818,7 @@ describes.realWin('amp-analytics', {
       });
       return expect(waitForNoSendRequest(analytics)).to.be
           .rejectedWith(
-          /iframePing config is only available to vendor config/);
+              /iframePing config is only available to vendor config/);
     });
 
     it('succeeds for iframePing config in vendor config', function() {

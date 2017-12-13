@@ -92,7 +92,7 @@ export class JwtHelper {
       return this.importKey_(pemPromise).then(key => {
         const sig = base64UrlDecodeToBytes(decoded.sig);
         return this.subtle_.verify(
-          /* options */ {name: 'RSASSA-PKCS1-v1_5'},
+            /* options */ {name: 'RSASSA-PKCS1-v1_5'},
             key,
             sig,
             stringToBytes(decoded.verifiable)
@@ -148,7 +148,7 @@ export class JwtHelper {
             hash: {name: 'SHA-256'},
           },
           /* extractable */ false,
-        /* uses */ ['verify']);
+          /* uses */ ['verify']);
     });
   }
 }

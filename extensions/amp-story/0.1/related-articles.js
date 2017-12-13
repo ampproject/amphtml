@@ -71,18 +71,18 @@ function buildArticleFromJson_(articleJson) {
  */
 export function relatedArticlesFromJson(opt_articleSetsResponse) {
   return /** @type {!Array<!RelatedArticleSetDef>} */ (
-      Object.keys(opt_articleSetsResponse || {}).map(headingKey => {
-        const articleSet = {
-          articles:
+    Object.keys(opt_articleSetsResponse || {}).map(headingKey => {
+      const articleSet = {
+        articles:
               opt_articleSetsResponse[headingKey]
                   .map(buildArticleFromJson_)
                   .filter(a => !!a),
-        };
+      };
 
-        if (headingKey.trim().length) {
-          articleSet.heading = headingKey;
-        }
+      if (headingKey.trim().length) {
+        articleSet.heading = headingKey;
+      }
 
-        return /** @type {!RelatedArticleSetDef} */ (articleSet);
-      }));
+      return /** @type {!RelatedArticleSetDef} */ (articleSet);
+    }));
 }

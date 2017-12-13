@@ -152,7 +152,7 @@ export class AmpUserNotification extends AMP.BaseElement {
         'data-persist-dismissal');
 
     this.persistDismissal_ = (
-        persistDismissal != 'false' && persistDismissal != 'no');
+      persistDismissal != 'false' && persistDismissal != 'no');
 
     this.registerAction('dismiss', () => this.dismiss(/*forceNoPersist*/false));
     this.registerAction('optoutOfCid', () => this.optoutOfCid_());
@@ -292,7 +292,7 @@ export class AmpUserNotification extends AMP.BaseElement {
       // the notification or have the nagging notification sitting there
       // (to never resolve).
       return cid.get(
-        {scope: TAG, createCookieIfNotPresent: true},
+          {scope: TAG, createCookieIfNotPresent: true},
           Promise.resolve(), this.dialogPromise_);
     });
   }

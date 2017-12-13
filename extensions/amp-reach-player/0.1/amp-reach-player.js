@@ -26,7 +26,7 @@ class AmpReachPlayer extends AMP.BaseElement {
     this.iframe_ = null;
   }
 
- /**
+  /**
   * @param {boolean=} opt_onLayout
   * @override
   */

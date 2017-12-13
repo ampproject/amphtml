@@ -221,8 +221,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         && !isNaN(width) && width > 0
         && !isNaN(height) && height > 0;
     this.size_ = useDefinedSizes
-        ? {width, height}
-        : this.getIntersectionElementLayoutBox();
+      ? {width, height}
+      : this.getIntersectionElementLayoutBox();
     const format = `${this.size_.width}x${this.size_.height}`;
     const slotId = this.element.getAttribute('data-amp-slot-index');
     // data-amp-slot-index is set by the upgradeCallback method of amp-ad.

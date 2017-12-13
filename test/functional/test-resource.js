@@ -48,7 +48,7 @@ describes.realWin('Resource', {amp: true}, env => {
       document,
       getComputedStyle: el => {
         return el.fakeComputedStyle ?
-            el.fakeComputedStyle : window.getComputedStyle(el);
+          el.fakeComputedStyle : window.getComputedStyle(el);
       },
     };
   });
@@ -205,13 +205,13 @@ describes.realWin('Resource', {amp: true}, env => {
     elementMock.expects('build').returns(Promise.resolve()).once();
     return resource.build().then(() => {
       element.getBoundingClientRect = () =>
-          ({left: 11, top: 12, width: 111, height: 222});
+        ({left: 11, top: 12, width: 111, height: 222});
       resource.measure();
       expect(resource.getLayoutBox().top).to.equal(12);
       expect(resource.getInitialLayoutBox().top).to.equal(12);
 
       element.getBoundingClientRect = () =>
-          ({left: 11, top: 22, width: 111, height: 222});
+        ({left: 11, top: 22, width: 111, height: 222});
       resource.measure();
       expect(resource.getLayoutBox().top).to.equal(22);
       expect(resource.getInitialLayoutBox().top).to.equal(12);
@@ -512,7 +512,7 @@ describes.realWin('Resource', {amp: true}, env => {
     return promise.then(() => {
       expect(resource.getState()).to.equal(ResourceState.LAYOUT_COMPLETE);
       expect(resource.layoutPromise_).to.equal(null);
-      return loaded;  // Just making sure this doesn't time out.
+      return loaded; // Just making sure this doesn't time out.
     });
   });
 

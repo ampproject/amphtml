@@ -480,13 +480,13 @@ runner.run('Cache SW', () => {
 
       // "Previous" cached requests
       cache.cached.push(
-        [{url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0.js`}, new Response('')],
-        // A different file
-        [{url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-comp-0.1.js`}, new Response('')],
-        // A diversion of v0
-        [{url: `https://cdn.ampproject.org/rtv/${prevDiversionRtv}/v0.js`}, new Response('', {headers: expires})],
-        // A diversion of amp-comp
-        [{url: `https://cdn.ampproject.org/rtv/${prevDiversionRtv}/v0/amp-comp-0.1.js`}, , new Response('', {headers: expires})]
+          [{url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0.js`}, new Response('')],
+          // A different file
+          [{url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-comp-0.1.js`}, new Response('')],
+          // A diversion of v0
+          [{url: `https://cdn.ampproject.org/rtv/${prevDiversionRtv}/v0.js`}, new Response('', {headers: expires})],
+          // A diversion of amp-comp
+          [{url: `https://cdn.ampproject.org/rtv/${prevDiversionRtv}/v0/amp-comp-0.1.js`}, , new Response('', {headers: expires})]
       );
       deleter = sandbox.stub(cache, 'delete');
       fetch = sandbox.stub(window, 'fetch');

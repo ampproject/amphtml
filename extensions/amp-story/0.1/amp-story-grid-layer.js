@@ -52,8 +52,8 @@ const SUPPORTED_CSS_GRID_ATTRIBUTES = {
  */
 const SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR =
     Object.keys(SUPPORTED_CSS_GRID_ATTRIBUTES)
-    .map(key => `[${key}]`)
-    .join(',');
+        .map(key => `[${key}]`)
+        .join(',');
 
 /**
  * The attribute name for grid layer templates.

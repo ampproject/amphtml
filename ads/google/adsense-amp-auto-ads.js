@@ -31,8 +31,8 @@ export const ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME =
  * @enum {string}
  */
 export const AdSenseAmpAutoAdsHoldoutBranches = {
-  CONTROL: '3782001',  // don't run amp-auto-ads
-  EXPERIMENT: '3782002',  // do run amp-auto-ads
+  CONTROL: '3782001', // don't run amp-auto-ads
+  EXPERIMENT: '3782002', // do run amp-auto-ads
 };
 
 

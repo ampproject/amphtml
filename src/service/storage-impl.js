@@ -391,8 +391,8 @@ export function installStorageServiceForDoc(ampdoc) {
         const viewer = Services.viewerForDoc(ampdoc);
         const overrideStorage = parseInt(viewer.getParam('storage'), 10);
         const binding = overrideStorage ?
-            new ViewerStorageBinding(viewer) :
-            new LocalStorageBinding(ampdoc.win);
+          new ViewerStorageBinding(viewer) :
+          new LocalStorageBinding(ampdoc.win);
         return new Storage(ampdoc, viewer, binding).start_();
       },
       /* opt_instantiate */ true);

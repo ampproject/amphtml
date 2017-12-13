@@ -38,8 +38,8 @@ export function parseQueryString_(queryString) {
   while ((match = regex.exec(queryString))) {
     const name = tryDecodeUriComponent_(match[1], match[1]).trim();
     const value = match[2] ?
-        tryDecodeUriComponent_(match[2], match[2]).trim() :
-        '';
+      tryDecodeUriComponent_(match[2], match[2]).trim() :
+      '';
     params[name] = value;
   }
   return params;

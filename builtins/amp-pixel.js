@@ -91,8 +91,8 @@ export class AmpPixel extends BaseElement {
           .expandAsync(this.assertSource_(src))
           .then(src => {
             const pixel = this.referrerPolicy_
-                ? createNoReferrerPixel(this.element, src)
-                : createImagePixel(this.win, src);
+              ? createNoReferrerPixel(this.element, src)
+              : createImagePixel(this.win, src);
             dev().info(TAG, 'pixel triggered: ', src);
             return pixel;
           });

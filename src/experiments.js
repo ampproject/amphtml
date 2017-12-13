@@ -34,7 +34,7 @@ const TAG = 'experiments';
 const COOKIE_NAME = 'AMP_EXP';
 
 /** @const {number} */
-const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
+const COOKIE_MAX_AGE_DAYS = 180; // 6 month
 
 /** @const {time} */
 const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
@@ -83,7 +83,7 @@ export function isCanary(win) {
  */
 export function getBinaryType(win) {
   return win.AMP_CONFIG && win.AMP_CONFIG.type ?
-      win.AMP_CONFIG.type : 'unknown';
+    win.AMP_CONFIG.type : 'unknown';
 }
 
 /**
@@ -183,7 +183,7 @@ export function isExperimentOn(win, experimentId) {
  * @return {boolean} New state for experimentId.
  */
 export function toggleExperiment(win, experimentId, opt_on,
-    opt_transientExperiment) {
+  opt_transientExperiment) {
   const currentlyOn = isExperimentOn(win, experimentId);
   const on = !!(opt_on !== undefined ? opt_on : !currentlyOn);
   if (on != currentlyOn) {

@@ -47,9 +47,9 @@ export const EMPTY_METADATA = {
  * @param {function()=} pauseHandler
  */
 export function setMediaSession(win,
-                                metadata,
-                                playHandler,
-                                pauseHandler) {
+  metadata,
+  playHandler,
+  pauseHandler) {
   const navigator = win.navigator;
   if ('mediaSession' in navigator && win.MediaMetadata) {
     // Clear mediaSession (required to fix a bug when switching between two

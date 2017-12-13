@@ -123,7 +123,7 @@ class AmpFitText extends AMP.BaseElement {
  * @private  Visible for testing only!
  */
 export function calculateFontSize_(measurer, expectedHeight, expectedWidth,
-    minFontSize, maxFontSize) {
+  minFontSize, maxFontSize) {
   maxFontSize++;
   // Binomial search for the best font size.
   while (maxFontSize - minFontSize > 1) {

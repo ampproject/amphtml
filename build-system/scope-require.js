@@ -40,7 +40,7 @@ function scopeRequire(src, scopeName) {
   flatGlobals
       .filter(node => isIdentifier(node) && isRequire(node))
       .forEach(node =>
-          replaceIdentifier(node.parent, test => test === node, scopeName));
+        replaceIdentifier(node.parent, test => test === node, scopeName));
 
   return escodegen.generate(ast, {format: {compact: true}});
 }
@@ -113,21 +113,21 @@ program
     .parse(process.argv);
 
 const inputStream = (program.infile && program.infile !== '-' ?
-    fs.createReadStream(program.infile) :
-    process.stdin);
+  fs.createReadStream(program.infile) :
+  process.stdin);
 inputStream.on('error', err => {
   console./*OK*/error(util.colors.red('\nError reading file: ' + err.path));
 });
 
 const outputStream = (program.outfile && program.outfile !== '-' ?
-    fs.createWriteStream(program.outfile) :
-    process.stdout);
+  fs.createWriteStream(program.outfile) :
+  process.stdout);
 outputStream.on('error', err => {
   console./*OK*/error(util.colors.red('\nError writing file: ' + err.path));
 });
 
 const scopeRequireStream = es.map((inputFile, cb) =>
-    cb(null, scopeRequire(inputFile.toString('utf8'), program.name)));
+  cb(null, scopeRequire(inputFile.toString('utf8'), program.name)));
 
 inputStream
     .pipe(es.wait())

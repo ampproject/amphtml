@@ -211,7 +211,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     }
 
     const ratioToUse = relativePos == RelativePositions.TOP ?
-        this.topRatio_ : this.bottomRatio_;
+      this.topRatio_ : this.bottomRatio_;
 
     const offset = positionRect.height * ratioToUse;
     if (relativePos == RelativePositions.BOTTOM) {
@@ -251,7 +251,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
         (adjustedViewportRect.height -
             (positionRect.height * this.bottomRatio_)
         )
-      );
+    );
 
     this.scrollProgress_ = topOffset / totalProgress;
   }

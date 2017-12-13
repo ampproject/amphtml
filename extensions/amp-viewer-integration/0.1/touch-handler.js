@@ -156,7 +156,7 @@ export class TouchHandler {
     return copiedTouches;
   }
 
- /**
+  /**
    * Copies specified properties of o to a new object.
    * @param {!Object} o The source object.
    * @param {!Array<string>} properties The properties to copy.

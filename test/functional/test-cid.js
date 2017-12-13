@@ -188,12 +188,12 @@ describe('cid', () => {
       return compare(
           'e1',
           'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come1)').then(() => {
-            expect(storage['amp-cid']).to.be.string;
-            const stored = JSON.parse(storage['amp-cid']);
-            expect(stored.cid).to.equal(
-                'sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])');
-            expect(stored.time).to.equal(123);
-          });
+        expect(storage['amp-cid']).to.be.string;
+        const stored = JSON.parse(storage['amp-cid']);
+        expect(stored.cid).to.equal(
+            'sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])');
+        expect(stored.time).to.equal(123);
+      });
     });
 
     it('should depend on external id e2', () => {
@@ -590,16 +590,16 @@ describe('cid', () => {
       };
       return cid.get({scope: 'scope_name', createCookieIfNotPresent: true},
           hasConsent).then(c => {
-            expect(c).to.exist;
-            // Since various parties depend on the cookie values, please be careful
-            // about changing the format.
-            expect(c).to.equal('amp-AAIECBAgQID_BwsWIULIJw');
-            expect(fakeWin.document.cookie).to.equal(
-                'scope_name=' + encodeURIComponent(c) +
+        expect(c).to.exist;
+        // Since various parties depend on the cookie values, please be careful
+        // about changing the format.
+        expect(c).to.equal('amp-AAIECBAgQID_BwsWIULIJw');
+        expect(fakeWin.document.cookie).to.equal(
+            'scope_name=' + encodeURIComponent(c) +
                 '; path=/' +
                 '; domain=abc.org' +
-                '; expires=Fri, 01 Jan 1971 00:00:00 GMT');  // 1 year from 0.
-          });
+                '; expires=Fri, 01 Jan 1971 00:00:00 GMT'); // 1 year from 0.
+      });
     });
 
     it('should create fallback cookie with provided name', () => {
@@ -617,7 +617,7 @@ describe('cid', () => {
             'cookie_name=' + encodeURIComponent(c) +
             '; path=/' +
             '; domain=abc.org' +
-            '; expires=Fri, 01 Jan 1971 00:00:00 GMT');  // 1 year from 0.
+            '; expires=Fri, 01 Jan 1971 00:00:00 GMT'); // 1 year from 0.
       });
     });
 
@@ -632,7 +632,7 @@ describe('cid', () => {
             'cookie_name=' + encodeURIComponent(c) +
           '; path=/' +
           '; domain=abc.org' +
-          '; expires=Fri, 01 Jan 1971 00:00:00 GMT'  // 1 year from 0.
+          '; expires=Fri, 01 Jan 1971 00:00:00 GMT' // 1 year from 0.
         );
       });
     });
@@ -740,7 +740,7 @@ describes.realWin('cid', {amp: true}, env => {
     win.parent = {};
     const sendMsgSpy =
         stubServiceForDoc(sandbox, ampdoc, 'viewer', 'sendMessageAwaitResponse')
-        .returns(Promise.resolve('cid-from-viewer'));
+            .returns(Promise.resolve('cid-from-viewer'));
     stubServiceForDoc(sandbox, ampdoc, 'viewer', 'isTrustedViewer')
         .returns(Promise.resolve(true));
     stubServiceForDoc(sandbox, ampdoc, 'viewer', 'hasCapability')

@@ -117,7 +117,7 @@ export class FetchMock {
     route.called = true;
     return Promise.resolve(
         typeof route.response == 'function' ?
-            route.response() : route.response)
+          route.response() : route.response)
         .then(data => {
           if (data === null || typeof data == 'string') {
             return new Response(data);

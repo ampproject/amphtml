@@ -32,7 +32,7 @@ export function zedo(global, data) {
     const charset = data.charset || '';
     const callback = data.callback || function() {};
     const geckoTag = new ZGTag(data.superId, data.network, '', '',
-      charset, callback);
+        charset, callback);
     geckoTag.setAMP();
     // define placement
     const placement = geckoTag.addPlacement(data.placementId,

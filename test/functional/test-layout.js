@@ -15,8 +15,8 @@
  */
 
 import {Layout, applyStaticLayout,
-    assertLength, getLengthNumeral, getLengthUnits, parseLength,
-    parseLayout, assertLengthOrPercent} from '../../src/layout';
+  assertLength, getLengthNumeral, getLengthUnits, parseLength,
+  parseLayout, assertLengthOrPercent} from '../../src/layout';
 
 
 describe('Layout', () => {

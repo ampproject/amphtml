@@ -23,9 +23,9 @@ import {AccessService} from '../amp-access';
 import {AmpEvents} from '../../../../src/amp-events';
 import {Observable} from '../../../../src/observable';
 import {cidServiceForDocForTesting} from
-    '../../../../src/service/cid-impl';
+  '../../../../src/service/cid-impl';
 import {installPerformanceService} from
-    '../../../../src/service/performance-impl';
+  '../../../../src/service/performance-impl';
 import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 
@@ -396,39 +396,39 @@ describes.fakeWin('AccessService adapter context', {
   it('should resolve URL without auth response and no authdata vars', () => {
     return context.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type)',
         /* useAuthData */ false).then(url => {
-          expect(url).to.equal('?rid=reader1&type=');
-        });
+      expect(url).to.equal('?rid=reader1&type=');
+    });
   });
 
   it('should resolve URL without auth response and with authdata vars', () => {
     return context.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type)',
         /* useAuthData */ true).then(url => {
-          expect(url).to.equal('?rid=reader1&type=');
-        });
+      expect(url).to.equal('?rid=reader1&type=');
+    });
   });
 
   it('should resolve URL with auth response and no authdata vars', () => {
     service.setAuthResponse_({child: {type: 'premium'}});
     return context.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type)',
         /* useAuthData */ false).then(url => {
-          expect(url).to.equal('?rid=reader1&type=');
-        });
+      expect(url).to.equal('?rid=reader1&type=');
+    });
   });
 
   it('should resolve URL with auth response and with authdata vars', () => {
     service.setAuthResponse_({child: {type: 'premium'}});
     return context.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type)',
         /* useAuthData */ true).then(url => {
-          expect(url).to.equal('?rid=reader1&type=premium');
-        });
+      expect(url).to.equal('?rid=reader1&type=premium');
+    });
   });
 
   it('should resolve URL with unknown authdata var', () => {
     service.setAuthResponse_({child: {type: 'premium'}});
     return context.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type2)',
         /* useAuthData */ true).then(url => {
-          expect(url).to.equal('?rid=reader1&type=');
-        });
+      expect(url).to.equal('?rid=reader1&type=');
+    });
   });
 
   it('should resolve URL with ACCESS_TOKEN, but not enabled', () => {
@@ -565,7 +565,7 @@ describes.fakeWin('AccessService authorization', {
     cidMock.expects('get')
         .withExactArgs(
             {scope: 'amp-access', createCookieIfNotPresent: true},
-        sinon.match(() => true))
+            sinon.match(() => true))
         .returns(Promise.resolve(result))
         .once();
   }
@@ -1040,7 +1040,7 @@ describes.fakeWin('AccessService pingback', {
     cidMock.expects('get')
         .withExactArgs(
             {scope: 'amp-access', createCookieIfNotPresent: true},
-        sinon.match(() => true))
+            sinon.match(() => true))
         .returns(Promise.resolve(result))
         .once();
   }
@@ -1101,7 +1101,7 @@ describes.fakeWin('AccessService pingback', {
     service.firstAuthorizationPromise_ = new Promise(resolve => {
       firstAuthorizationResolver = resolve;
     });
-    const triggerStart = 1;  // First event is "access-authorization-received".
+    const triggerStart = 1; // First event is "access-authorization-received".
     service.reportViewToServer_ = sandbox.spy();
     service.reportWhenViewed_(/* timeToView */ 2000);
     return Promise.resolve().then(() => {
@@ -1127,7 +1127,7 @@ describes.fakeWin('AccessService pingback', {
     service.lastAuthorizationPromise_ = new Promise(resolve => {
       lastAuthorizationResolver = resolve;
     });
-    const triggerStart = 1;  // First event is "access-authorization-received".
+    const triggerStart = 1; // First event is "access-authorization-received".
     service.reportViewToServer_ = sandbox.spy();
     service.reportWhenViewed_(/* timeToView */ 2000);
     return Promise.resolve().then(() => {
@@ -1379,7 +1379,7 @@ describes.fakeWin('AccessService login', {
     cidMock.expects('get')
         .withExactArgs(
             {scope: 'amp-access', createCookieIfNotPresent: true},
-        sinon.match(() => true))
+            sinon.match(() => true))
         .returns(Promise.resolve('reader1'))
         .once();
     return service.buildLoginUrls_().then(urls => {
@@ -1397,7 +1397,7 @@ describes.fakeWin('AccessService login', {
     cidMock.expects('get')
         .withExactArgs(
             {scope: 'amp-access', createCookieIfNotPresent: true},
-        sinon.match(() => true))
+            sinon.match(() => true))
         .returns(Promise.resolve('reader1'))
         .atLeast(1);
     return service.buildLoginUrls_().then(urls => {
@@ -1431,7 +1431,7 @@ describes.fakeWin('AccessService login', {
     cidMock.expects('get')
         .withExactArgs(
             {scope: 'amp-access', createCookieIfNotPresent: true},
-        sinon.match(() => true))
+            sinon.match(() => true))
         .returns(Promise.resolve('reader1'))
         .once();
     return service.buildLoginUrls_().then(urls => {

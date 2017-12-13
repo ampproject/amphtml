@@ -63,8 +63,8 @@ export class AmpAutoAds extends AMP.BaseElement {
 
       const placements = getPlacementsFromConfigObj(ampdoc, configObj);
       const attributes = /** @type {!JsonObject} */ (
-          Object.assign(adNetwork.getAttributes(),
-              getAttributesFromConfigObj(configObj)));
+        Object.assign(adNetwork.getAttributes(),
+            getAttributesFromConfigObj(configObj)));
       const adTracker =
           new AdTracker(getExistingAds(ampdoc), adNetwork.getAdConstraints());
       new AdStrategy(placements, attributes, adTracker).run();

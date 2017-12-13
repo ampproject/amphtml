@@ -133,9 +133,9 @@ class AmpSlides extends AMP.BaseElement {
         Animation.animate(this.element,
             this.createTransition_(oldSlide, newSlide, dir),
             200, 'ease-out').thenAlways(() => {
-              this.commitSwitch_(oldSlide, newSlide);
-              this.preloadNext_(dir);
-            });
+          this.commitSwitch_(oldSlide, newSlide);
+          this.preloadNext_(dir);
+        });
       }
     }
   }

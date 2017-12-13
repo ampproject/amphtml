@@ -228,13 +228,13 @@ export class StandardActions {
     const duration = invocation.args
                      && invocation.args['duration']
                      && invocation.args['duration'] >= 0 ?
-                        invocation.args['duration'] : 500;
+      invocation.args['duration'] : 500;
 
     // Position in the viewport at the end
     const pos = (invocation.args
                 && invocation.args['position']
                 && PERMITTED_POSITIONS.includes(invocation.args['position'])) ?
-                invocation.args['position'] : 'top';
+      invocation.args['position'] : 'top';
 
     // Animate the scroll
     this.viewport_.animateScrollIntoView(node, duration, 'ease-in', pos);

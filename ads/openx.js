@@ -153,7 +153,7 @@ function setCustomVars(oxRequest, customVars) {
 function filterCustomVar(customVars) {
   const filterPattern = /^[A-Za-z0-9._]{1,20}$/;
   const filteredKeys = Object.keys(customVars)
-    .filter(key => filterPattern.test(key));
+      .filter(key => filterPattern.test(key));
   const filteredCustomVar = {};
   filteredKeys.forEach(key => {
     filteredCustomVar[key.toLowerCase()] = customVars[key];

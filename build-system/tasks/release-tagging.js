@@ -128,11 +128,11 @@ function applyLabel(pullRequest, label) {
       '/issues/' + pullRequest + '/labels',
       'POST',
       [label]).then(function() {
-        if (verbose) {
-          util.log(util.colors.green(
-              'Label applied ' + label + ' for #' + pullRequest));
-        }
-      });
+    if (verbose) {
+      util.log(util.colors.green(
+          'Label applied ' + label + ' for #' + pullRequest));
+    }
+  });
 }
 
 /**

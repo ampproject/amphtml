@@ -30,10 +30,10 @@ import {installDocService} from '../service/ampdoc-impl';
 import {installCacheServiceWorker} from '../service-worker/install';
 import {stubElementsForDoc} from '../service/custom-element-registry';
 import {
-    installAmpdocServices,
-    installBuiltins,
-    installRuntimeServices,
-    adopt,
+  installAmpdocServices,
+  installBuiltins,
+  installRuntimeServices,
+  adopt,
 } from '../runtime';
 import {cssText} from '../../build/css';
 import {maybeValidate} from '../validator-integration';
@@ -54,11 +54,11 @@ let ampdocService;
 // a completely blank page.
 try {
   // Should happen first.
-  installErrorReporting(self);  // Also calls makeBodyVisible on errors.
+  installErrorReporting(self); // Also calls makeBodyVisible on errors.
 
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
-  installDocService(self,  /* isSingleDoc */ true);
+  installDocService(self, /* isSingleDoc */ true);
   ampdocService = Services.ampdocServiceFor(self);
 } catch (e) {
   // In case of an error call this.

@@ -16,7 +16,7 @@
 
 import {urls} from '../../../../src/config';
 import {getIframeTransportScriptUrl, IframeTransport}
-    from '../iframe-transport';
+  from '../iframe-transport';
 import {user} from '../../../../src/log';
 import {addParamsToUrl} from '../../../../src/url';
 import {expectPostMessage} from '../../../../testing/iframe.js';

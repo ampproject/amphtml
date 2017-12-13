@@ -17,7 +17,7 @@
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user, dev} from '../../../src/log';
 import {
-    installVideoManagerForDoc,
+  installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
 import {VideoEvents} from '../../../src/video-interface';
 import {Services} from '../../../src/services';
@@ -67,7 +67,7 @@ class AmpBridPlayer extends AMP.BaseElement {
     this.unlistenMessage_ = null;
   }
 
- /**
+  /**
   * @param {boolean=} opt_onLayout
   * @override
   */
@@ -171,7 +171,7 @@ class AmpBridPlayer extends AMP.BaseElement {
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
     });
-    return true;  // Call layoutCallback again.
+    return true; // Call layoutCallback again.
   }
 
   /** @override */
@@ -213,7 +213,7 @@ class AmpBridPlayer extends AMP.BaseElement {
 
   }
 
-    /**
+  /**
      * Sends a command to the player through postMessage.
      * @param {string} command
      * @param {*=} opt_arg

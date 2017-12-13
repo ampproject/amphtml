@@ -61,7 +61,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
     } else {
       const textFunction = () => {
         return !isString ? Promise.resolve(JSON.stringify(response)) :
-            Promise.resolve(response);
+          Promise.resolve(response);
       };
       fetchJsonStub.withArgs(params).returns(Promise.resolve({
         status: 200,
@@ -77,8 +77,8 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
   describe('#maybeExecuteRealTimeConfig_', () => {
     function executeTest(args) {
       const {urls, vendors, timeoutMillis, rtcCalloutResponses,
-           expectedCalloutUrls, responseIsString, failXhr,
-           customMacros, expectedRtcArray, calloutCount} = args;
+        expectedCalloutUrls, responseIsString, failXhr,
+        customMacros, expectedRtcArray, calloutCount} = args;
       setRtcConfig({urls, vendors, timeoutMillis});
       (expectedCalloutUrls || []).forEach((expectedUrl, i) => {
         setFetchJsonStubBehavior(expectedUrl, rtcCalloutResponses[i],
@@ -122,7 +122,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
 
     function rtcEntry(response, callout, error) {
       return response ? {response, callout, rtcTime: 10} :
-      {callout, error, rtcTime: 10};
+        {callout, error, rtcTime: 10};
     }
 
     function generateCalloutResponses(numGoodResponses) {
@@ -446,14 +446,14 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
 
     // Test various misconfigurations that are missing vendors or urls.
     [{'timeoutMillis': 500}, {'vendors': {}}, {'urls': []},
-     {'vendors': {}, 'urls': []},
-     {'vendors': 'incorrect', 'urls': 'incorrect'}].forEach(rtcConfig => {
-       it('should return null for rtcConfig missing required values', () => {
-         setRtcConfig(rtcConfig);
-         validatedRtcConfig = validateRtcConfig_(element);
-         expect(validatedRtcConfig).to.be.null;
-       });
-     });
+      {'vendors': {}, 'urls': []},
+      {'vendors': 'incorrect', 'urls': 'incorrect'}].forEach(rtcConfig => {
+      it('should return null for rtcConfig missing required values', () => {
+        setRtcConfig(rtcConfig);
+        validatedRtcConfig = validateRtcConfig_(element);
+        expect(validatedRtcConfig).to.be.null;
+      });
+    });
 
     it('should return false for bad JSON rtcConfig', () => {
       const rtcConfig = '{"urls" : ["https://google.com"]';

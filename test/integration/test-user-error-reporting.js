@@ -15,8 +15,8 @@
  */
 
 import {
-    withdrawRequest,
-    depositRequestUrl,
+  withdrawRequest,
+  depositRequestUrl,
 } from '../../testing/test-helper';
 
 describe.configure().skipSafari().skipEdge().run('user-error', function() {

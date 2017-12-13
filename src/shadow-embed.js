@@ -124,9 +124,9 @@ function createShadowRootPolyfill(hostElement) {
 
   // Shadow root.
   const shadowRoot = /** @type {!ShadowRoot} */ (
-      // Cast to ShadowRoot even though it is an Element
-      // TODO(@dvoytenko) Consider to switch to a type union instead.
-      /** @type {?}  */ (doc.createElement('i-amphtml-shadow-root')));
+    // Cast to ShadowRoot even though it is an Element
+    // TODO(@dvoytenko) Consider to switch to a type union instead.
+    /** @type {?}  */ (doc.createElement('i-amphtml-shadow-root')));
   hostElement.appendChild(shadowRoot);
   hostElement.shadowRoot = hostElement.__AMP_SHADOW_ROOT = shadowRoot;
 
@@ -138,7 +138,7 @@ function createShadowRootPolyfill(hostElement) {
   shadowRoot.getElementById = function(id) {
     const escapedId = escapeCssSelectorIdent(win, id);
     return /** @type {HTMLElement|null} */ (
-        shadowRoot./*OK*/querySelector(`#${escapedId}`));
+      shadowRoot./*OK*/querySelector(`#${escapedId}`));
   };
 
   // The styleSheets property should have a list of local styles.

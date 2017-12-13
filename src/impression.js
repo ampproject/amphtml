@@ -64,8 +64,8 @@ export function maybeTrackImpression(win) {
 
   trackImpressionPromise = Services.timerFor(win).timeoutPromise(TIMEOUT_VALUE,
       promise, 'TrackImpressionPromise timeout').catch(error => {
-        dev().warn('IMPRESSION', error);
-      });
+    dev().warn('IMPRESSION', error);
+  });
 
   const viewer = Services.viewerForDoc(win.document);
   const isTrustedViewerPromise = viewer.isTrustedViewer();
@@ -171,7 +171,7 @@ function handleClickUrl(win) {
     win.location.hash = '';
   }
 
-    // TODO(@zhouyx) need test with a real response.
+  // TODO(@zhouyx) need test with a real response.
   return viewer.whenFirstVisible().then(() => {
     return invoke(win, dev().assertString(clickUrl));
   }).then(response => {
@@ -298,8 +298,8 @@ function getQueryParamUrl(params) {
   for (let i = 0; i < params.length; i++) {
     const param = params[i];
     url += (i == 0) ?
-        `${param}=QUERY_PARAM(${param})` :
-        `&${param}=QUERY_PARAM(${param})`;
+      `${param}=QUERY_PARAM(${param})` :
+      `&${param}=QUERY_PARAM(${param})`;
   }
   return url;
 }

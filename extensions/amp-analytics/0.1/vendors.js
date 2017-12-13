@@ -24,9 +24,9 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'transport': {'beacon': true, 'xhrpost': true, 'image': true},
     'vars': {
       'accessReaderId': 'ACCESS_READER_ID',
-      'adNavTiming': 'AD_NAV_TIMING',  // only available in A4A embeds
-      'adNavType': 'AD_NAV_TYPE',  // only available in A4A embeds
-      'adRedirectCount': 'AD_NAV_REDIRECT_COUNT',  // only available in A4A
+      'adNavTiming': 'AD_NAV_TIMING', // only available in A4A embeds
+      'adNavType': 'AD_NAV_TYPE', // only available in A4A embeds
+      'adRedirectCount': 'AD_NAV_REDIRECT_COUNT', // only available in A4A
       'ampdocHost': 'AMPDOC_HOST',
       'ampdocHostname': 'AMPDOC_HOSTNAME',
       'ampdocUrl': 'AMPDOC_URL',
@@ -652,7 +652,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'remarketing_prefix':
           'https://googleads.g.doubleclick.net/pagead/viewthroughconversion/',
       'common_params': '${googleConversionId}/?' +
-          'cv=amp2&' +  // Increment when making changes.
+          'cv=amp2&' + // Increment when making changes.
           'label=${googleConversionLabel}&' +
           'random=${random}&' +
           'url=${sourceUrl}&' +
@@ -1839,8 +1839,8 @@ ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
 ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
-  ['triggers']['pageLoad']['iframe' +
-/* TEMPORARY EXCEPTION */ 'Ping'] = true;
+    ['triggers']['pageLoad']['iframe' +
+      /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
 ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;

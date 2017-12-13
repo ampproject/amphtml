@@ -123,8 +123,8 @@ class AmpApesterMedia extends AMP.BaseElement {
     const encodedMediaAttribute = encodeURIComponent(
         dev().assertString(this.mediaAttribute_));
     const suffix = (this.random_) ?
-        `/tokens/${encodedMediaAttribute}/interactions/random` :
-        `/interactions/${encodedMediaAttribute}/display`;
+      `/tokens/${encodedMediaAttribute}/interactions/random` :
+      `/interactions/${encodedMediaAttribute}/display`;
     return `${this.displayBaseUrl_}${suffix}`;
   }
 

@@ -39,7 +39,7 @@ describe('amp-analytics.transport', () => {
   }
 
   function assertCallCounts(
-      expectedBeaconCalls, expectedXhrCalls, expectedImageCalls) {
+    expectedBeaconCalls, expectedXhrCalls, expectedImageCalls) {
     expect(Transport.sendRequestUsingBeacon.callCount,
         'sendRequestUsingBeacon call count').to.equal(expectedBeaconCalls);
     expect(Transport.sendRequestUsingXhr.callCount,

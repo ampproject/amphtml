@@ -175,7 +175,7 @@ export class WebviewViewerForTesting {
       start() {}
     }
     this.messaging_ = new Messaging(this.win,
-      new WindowPortEmulator(this.messageHandlers_, this.id, this.log));
+        new WindowPortEmulator(this.messageHandlers_, this.id, this.log));
 
     this.messaging_.setDefaultHandler((type, payload, awaitResponse) => {
       console/*OK*/.log(

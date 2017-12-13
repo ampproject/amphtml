@@ -253,9 +253,9 @@ describe('friendly-iframe-embed', () => {
     resourcesMock
         .expects('getResourcesInRect')
         .withExactArgs(
-        sinon.match(arg => arg == iframe.contentWindow),
-        sinon.match(arg =>
-                arg.left == 0 &&
+            sinon.match(arg => arg == iframe.contentWindow),
+            sinon.match(arg =>
+              arg.left == 0 &&
                 arg.top == 0 &&
                 arg.width == iframe.contentWindow.innerWidth &&
                 arg.height == iframe.contentWindow.innerHeight))
@@ -271,7 +271,7 @@ describe('friendly-iframe-embed', () => {
       return embed.whenIniLoaded();
     }).then(() => {
       expect(embed.signals().get('ini-load')).to.be.ok;
-      return embed.whenReady();  // `whenReady` should also be complete.
+      return embed.whenReady(); // `whenReady` should also be complete.
     });
   });
 
@@ -287,9 +287,9 @@ describe('friendly-iframe-embed', () => {
     resourcesMock
         .expects('getResourcesInRect')
         .withExactArgs(
-        sinon.match(arg => arg == iframe.contentWindow),
-        sinon.match(arg =>
-                arg.left == 10 &&
+            sinon.match(arg => arg == iframe.contentWindow),
+            sinon.match(arg =>
+              arg.left == 10 &&
                 arg.top == 10 &&
                 arg.width == 100 &&
                 arg.height == 200))
@@ -306,7 +306,7 @@ describe('friendly-iframe-embed', () => {
       return embed.whenIniLoaded();
     }).then(() => {
       expect(embed.signals().get('ini-load')).to.be.ok;
-      return embed.whenReady();  // `whenReady` should also be complete.
+      return embed.whenReady(); // `whenReady` should also be complete.
     });
   });
 

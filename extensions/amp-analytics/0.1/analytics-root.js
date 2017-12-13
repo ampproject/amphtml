@@ -260,7 +260,7 @@ export class AnalyticsRoot {
    * @return {function(!Event)}
    */
   createSelectiveListener(
-      listener, context, selector, selectionMethod = null) {
+    listener, context, selector, selectionMethod = null) {
     return event => {
       if (selector == ':host') {
         // `:host` is not reachable via selective listener b/c event path

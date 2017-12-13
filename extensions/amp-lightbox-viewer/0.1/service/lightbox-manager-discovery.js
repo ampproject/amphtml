@@ -128,20 +128,20 @@ function meetsHeuristicsForTap(element) {
 function maybeInstallLightboxViewer(ampdoc) {
   // TODO(aghassemi): Use the upcoming ampdoc.waitForBody
   return waitForBodyPromise(/** @type {!Document} */ (
-      ampdoc.getRootNode())).then(() => {
-        const existingViewer = elementByTag(ampdoc.getRootNode(), VIEWER_TAG);
-        if (existingViewer) {
-          if (!existingViewer.id) {
-            existingViewer.id = DEFAULT_VIEWER_ID;
-          }
-          return existingViewer.id;
-        }
+    ampdoc.getRootNode())).then(() => {
+    const existingViewer = elementByTag(ampdoc.getRootNode(), VIEWER_TAG);
+    if (existingViewer) {
+      if (!existingViewer.id) {
+        existingViewer.id = DEFAULT_VIEWER_ID;
+      }
+      return existingViewer.id;
+    }
 
-        const viewer = ampdoc.getRootNode().createElement(VIEWER_TAG);
-        viewer.setAttribute('layout', 'nodisplay');
-        viewer.setAttribute('id', DEFAULT_VIEWER_ID);
-        ampdoc.getRootNode().body.appendChild(viewer);
+    const viewer = ampdoc.getRootNode().createElement(VIEWER_TAG);
+    viewer.setAttribute('layout', 'nodisplay');
+    viewer.setAttribute('id', DEFAULT_VIEWER_ID);
+    ampdoc.getRootNode().body.appendChild(viewer);
 
-        return viewer.id;
-      });
+    return viewer.id;
+  });
 }

@@ -137,11 +137,11 @@ export class AmpAdUIHandler {
     }
     return this.baseInstance_.attemptChangeSize(
         newHeight, newWidth).then(() => {
-          return resizeInfo;
-        }, () => {
-          resizeInfo.success = false;
-          return resizeInfo;
-        });
+      return resizeInfo;
+    }, () => {
+      resizeInfo.success = false;
+      return resizeInfo;
+    });
   }
 }
 

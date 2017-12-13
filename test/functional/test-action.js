@@ -1095,7 +1095,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
         element,
         'change',
         sinon.match(object =>
-            object.detail.checked && object.detail.value == 'foo'));
+          object.detail.checked && object.detail.value == 'foo'));
   });
 
   it('should trigger change event for <input type="range"> elements', () => {

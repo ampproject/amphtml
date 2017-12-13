@@ -194,7 +194,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
       // Go to hidden state.
       viewer.setVisibilityState_('hidden');
       expect(pauseStub).to.be.calledOnce;
-      expect(startStub).to.be.calledOnce;  // Doesn't change.
+      expect(startStub).to.be.calledOnce; // Doesn't change.
     });
 
     it('should NOT resume/pause when visible, but not triggered', function* () {
@@ -470,7 +470,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
       it('should ignore pause before start', () => {
         runnerMock.expects('pause').never();
         return anim.executeAction(
-          {method: 'pause', satisfiesTrust: () => true}
+            {method: 'pause', satisfiesTrust: () => true}
         );
       });
 
@@ -504,7 +504,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
       it('should ignore resume before start', () => {
         runnerMock.expects('resume').never();
         return anim.executeAction(
-          {method: 'resume', satisfiesTrust: () => true}
+            {method: 'resume', satisfiesTrust: () => true}
         );
       });
 
@@ -534,7 +534,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
         runnerMock.expects('resume').never();
         runnerMock.expects('pause').never();
         return anim.executeAction(
-          {method: 'togglePause', satisfiesTrust: () => true}
+            {method: 'togglePause', satisfiesTrust: () => true}
         );
       });
 
@@ -610,7 +610,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
       it('should ignore reverse before start', () => {
         runnerMock.expects('reverse').never();
         return anim.executeAction(
-          {method: 'reverse', satisfiesTrust: () => true}
+            {method: 'reverse', satisfiesTrust: () => true}
         );
       });
 

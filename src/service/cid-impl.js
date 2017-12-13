@@ -151,7 +151,7 @@ export class Cid {
         // NOTE: If viewer gets invisible afterwards we also timeout after 10s now. May need improvement
         return Services.timerFor(this.ampdoc.win)
             .timeoutPromise(10000, cidPromise,
-            `Getting cid for "${getCidStruct.scope}" timed out`)
+                `Getting cid for "${getCidStruct.scope}" timed out`)
             .catch(error => {
               const docVisible = viewer.isVisible();
               const hasVisible = viewer.hasBeenVisible();
@@ -295,7 +295,7 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
       setCidCookie(win, cookieName, existingCookie);
     }
     return /** @type {!Promise<?string>} */ (
-        Promise.resolve(existingCookie));
+      Promise.resolve(existingCookie));
   }
 
   const newCookiePromise = getNewCidForCookie(win)

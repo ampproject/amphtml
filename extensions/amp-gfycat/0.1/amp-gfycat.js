@@ -55,7 +55,7 @@ class AmpGfycat extends AMP.BaseElement {
     this.unlistenMessage_ = null;
   }
 
- /**
+  /**
   * @param {boolean=} opt_onLayout
   * @override
   */
@@ -163,7 +163,7 @@ class AmpGfycat extends AMP.BaseElement {
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
     }
-    return true;  // Call layoutCallback again.
+    return true; // Call layoutCallback again.
   }
 
   /**
@@ -246,7 +246,7 @@ class AmpGfycat extends AMP.BaseElement {
     // Not supported.
   }
 
-    /**
+  /**
    * @override
    */
   fullscreenEnter() {
@@ -284,7 +284,7 @@ class AmpGfycat extends AMP.BaseElement {
     return false;
   }
 
-    /** @override */
+  /** @override */
   getCurrentTime() {
     // Not supported.
     return 0;

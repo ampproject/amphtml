@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- /**
+/**
   * @fileoverview Embeds a imgur
   * Example:
   * <code>
@@ -113,7 +113,7 @@ export class AmpImgur extends AMP.BaseElement {
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
     }
-    return true;  // Call layoutCallback again.
+    return true; // Call layoutCallback again.
   }
 }
 

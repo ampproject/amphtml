@@ -47,7 +47,7 @@ function sanityCheck(str) {
   const numMatches = numConfigs(str);
   if (numMatches != 1) {
     throw new Error(
-      'Found ' + numMatches + ' AMP_CONFIG(s) before write. Aborting!');
+        'Found ' + numMatches + ' AMP_CONFIG(s) before write. Aborting!');
   }
 }
 
@@ -121,7 +121,7 @@ function valueOrDefault(value, defaultValue) {
  * @return {!Promise}
  */
 function applyConfig(
-    config, target, filename, opt_localDev, opt_localBranch, opt_branch) {
+  config, target, filename, opt_localDev, opt_localBranch, opt_branch) {
   return checkoutBranchConfigs(filename, opt_localBranch, opt_branch)
       .then(() => {
         return Promise.all([

@@ -497,7 +497,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
         expect(element).to.not.have.class('amp-notbuilt');
         expect(testElementBuildCallback).to.be.calledOnce;
         expect(element.signals().get('built')).to.be.ok;
-        return element.whenBuilt();  // Should eventually resolve.
+        return element.whenBuilt(); // Should eventually resolve.
       });
     });
 

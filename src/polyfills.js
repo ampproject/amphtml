@@ -17,7 +17,7 @@
 // Importing the document-register-element module has the side effect
 // of installing the custom elements polyfill if necessary.
 import installCustomElements from
-    'document-register-element/build/document-register-element.node';
+  'document-register-element/build/document-register-element.node';
 import {
   install as installDOMTokenListToggle,
 } from './polyfills/domtokenlist-toggle';

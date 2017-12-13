@@ -124,7 +124,7 @@ function checkLinks() {
 function isLinkToFileIntroducedByPR(link) {
   const filesAdded =
       getStdout('git diff --name-only --diff-filter=ARC master...HEAD')
-      .trim().split('\n');
+          .trim().split('\n');
   return filesAdded.some(function(file) {
     return (file.length > 0 && link.includes(path.parse(file).base));
   });
