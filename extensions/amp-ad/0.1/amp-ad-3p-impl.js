@@ -24,7 +24,7 @@ import {getAdCid} from '../../../src/ad-cid';
 import {preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isAdPositionAllowed, getAdContainer}
-    from '../../../src/ad-helper';
+  from '../../../src/ad-helper';
 import {adConfig} from '../../../ads/_config';
 import {
   googleLifecycleReporterFactory,
@@ -292,7 +292,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     }
 
     const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */(
-        dev().assert(this.iframeLayoutBox_));
+      dev().assert(this.iframeLayoutBox_));
     return moveLayoutRect(iframe, box.left, box.top);
   }
 

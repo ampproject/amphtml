@@ -39,7 +39,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   let measureSpy;
 
   function stubIframeClientMakeRequest(
-      requestType, responseType, callback, opt_sync, opt_once) {
+    requestType, responseType, callback, opt_sync, opt_once) {
     const methodName = opt_once ? 'requestOnce' : 'makeRequest';
 
     return sandbox./*OK*/stub(

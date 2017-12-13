@@ -227,7 +227,7 @@ describes.realWin('amp-ad-exit', {
     element.implementation_.executeAction({
       method: 'exit',
       args: {target: 'twoSecondDelay'},
-      event: makeClickEvent(1000),  // 1000 ms + 999 from the previous exit.
+      event: makeClickEvent(1000), // 1000 ms + 999 from the previous exit.
       satisfiesTrust: () => true,
     });
 
@@ -427,10 +427,10 @@ describes.realWin('amp-ad-exit', {
         'http://localhost:8000/vars?foo=foo', '_blank');
     expect(sendBeacon)
         .to.have.been.calledWith(
-        'http://localhost:8000/tracking?bar=bar', '');
+            'http://localhost:8000/tracking?bar=bar', '');
     expect(sendBeacon)
         .to.have.been.calledWith(
-        'http://localhost:8000/tracking?numVar=0&boolVar=false', '');
+            'http://localhost:8000/tracking?numVar=0&boolVar=false', '');
   });
 
   it('border protection', () => {

@@ -44,7 +44,7 @@ export class Timer {
     this.startTime_ = Date.now();
   }
 
- /**
+  /**
   * Returns time since start in milliseconds.
   * @return {number}
   */

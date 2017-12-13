@@ -105,7 +105,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(root.getStartTime()).to.equal(viewer.getFirstVisibleTime());
     expect(root.isBackgrounded()).to.be.true;
     expect(root.isBackgroundedAtStart()).to.be.true;
-    expect(root.children_).to.be.null;  // Don't take extra memory.
+    expect(root.children_).to.be.null; // Don't take extra memory.
 
     // Will be initialized lazily
     expect(root.intersectionObserver_).to.be.null;
@@ -1100,8 +1100,8 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
           loadTimeVisibility: 5,
           maxVisiblePercentage: 25,
           minVisiblePercentage: 25,
-          totalVisibleTime: 0,  // duration metrics are always 0
-          maxContinuousVisibleTime: 0,  // as it triggers immediately
+          totalVisibleTime: 0, // duration metrics are always 0
+          maxContinuousVisibleTime: 0, // as it triggers immediately
         });
         expect(unobserveSpy).to.not.be.called;
 
@@ -1122,8 +1122,8 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
           loadTimeVisibility: 5,
           maxVisiblePercentage: 35,
           minVisiblePercentage: 35,
-          totalVisibleTime: 0,  // duration metrics is always 0
-          maxContinuousVisibleTime: 0,  // as it triggers immediately
+          totalVisibleTime: 0, // duration metrics is always 0
+          maxContinuousVisibleTime: 0, // as it triggers immediately
         });
       });
     }).then(() => {
@@ -1174,7 +1174,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
       clock.tick(899); // not yet!
       expect(isModelResolved(model)).to.be.false;
       sandbox.stub(model, 'reset_');
-      clock.tick(1);  // now fire
+      clock.tick(1); // now fire
       expect(isModelResolved(model)).to.be.true;
       return eventPromise.then(state => {
         expect(state).to.contains({
