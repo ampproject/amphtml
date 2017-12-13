@@ -80,7 +80,7 @@ export function calcVelocity(deltaV, deltaTime, prevVelocity) {
  * @return {!Motion}
  */
 export function continueMotion(contextNode, startX, startY, veloX, veloY,
-    callback, opt_vsync) {
+  callback, opt_vsync) {
   return new Motion(contextNode, startX, startY, veloX, veloY,
       callback, opt_vsync).start_();
 }

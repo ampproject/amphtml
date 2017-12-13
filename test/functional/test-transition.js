@@ -161,7 +161,7 @@ describe('Transition', () => {
     expect(func(0)).to.equal(2);
     expect(func(0.3)).to.be.closeTo(5.75, 1e-3);
     expect(func(0.6)).to.be.closeTo(9.5, 1e-3);
-    expect(func(0.8)).to.be.closeTo(12, 1e-3);  // Summit.
+    expect(func(0.8)).to.be.closeTo(12, 1e-3); // Summit.
     expect(func(0.9)).to.be.closeTo(11, 1e-3);
     expect(func(1)).to.equal(10);
 
@@ -169,7 +169,7 @@ describe('Transition', () => {
     expect(func(0)).to.equal(-2);
     expect(func(0.3)).to.be.closeTo(-5.75, 1e-3);
     expect(func(0.6)).to.be.closeTo(-9.5, 1e-3);
-    expect(func(0.8)).to.be.closeTo(-12, 1e-3);  // Summit.
+    expect(func(0.8)).to.be.closeTo(-12, 1e-3); // Summit.
     expect(func(0.9)).to.be.closeTo(-11, 1e-3);
     expect(func(1)).to.equal(-10);
   });

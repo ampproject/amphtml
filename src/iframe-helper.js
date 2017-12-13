@@ -246,7 +246,7 @@ function registerGlobalListenerIfNeeded(parentWin) {
  * @return {!UnlistenDef}
  */
 export function listenFor(
-    iframe, typeOfMessage, callback, opt_is3P, opt_includingNestedWindows) {
+  iframe, typeOfMessage, callback, opt_is3P, opt_includingNestedWindows) {
   dev().assert(iframe.src, 'only iframes with src supported');
   dev().assert(!iframe.parentNode, 'cannot register events on an attached ' +
       'iframe. It will cause hair-pulling bugs like #2942');
@@ -435,7 +435,7 @@ export class SubscriptionApi {
       requestCallback(data, source, origin);
     }, this.is3p_,
         // For 3P frames we also allow nested frames within them to subscribe..
-        this.is3p_ /* opt_includingNestedWindows */);
+    this.is3p_ /* opt_includingNestedWindows */);
   }
 
   /**

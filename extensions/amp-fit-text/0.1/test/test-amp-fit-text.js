@@ -173,6 +173,6 @@ describes.realWin('amp-fit-text updateOverflow', {}, env => {
     updateOverflow_(content, measurer, 24, 20);
     expect(classToggles['i-amphtml-fit-text-content-overflown']).to.equal(true);
     expect(getLineClamp()).to.equal(1);
-    expect(content.style.maxHeight).to.equal(23 + 'px');  // 23 = 20 * 1.15
+    expect(content.style.maxHeight).to.equal(23 + 'px'); // 23 = 20 * 1.15
   });
 });

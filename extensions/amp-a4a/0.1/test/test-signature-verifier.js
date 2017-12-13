@@ -53,7 +53,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
     verifier.loadKeyset('service-1');
     return verifier
         .verifyCreativeAndSignature(
-        'service-1', 'key-1', creative1, new Uint8Array(256), noop)
+            'service-1', 'key-1', creative1, new Uint8Array(256), noop)
         .then(status => {
           expect(status).to.equal(VerificationStatus.CRYPTO_UNAVAILABLE);
           expect(env.fetchMock.called()).to.be.false;
@@ -116,8 +116,8 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
      * @return {!Promise<!JsonObject>}
      */
     const jwkSet = keys =>
-        Promise.all(keys.map(key => key.jwk()))
-            .then(jwks => ({body: {'keys': jwks}, headers}));
+      Promise.all(keys.map(key => key.jwk()))
+          .then(jwks => ({body: {'keys': jwks}, headers}));
 
     const key1 = new Keypair('key-1');
     const key2 = new Keypair('key-2');
@@ -154,7 +154,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
           const lifecycleSpy = env.sandbox.spy();
           return verifier
               .verifyCreativeAndSignature(
-              'service-1', 'key-1', signature, creative1, lifecycleSpy)
+                  'service-1', 'key-1', signature, creative1, lifecycleSpy)
               .then(status => {
                 expect(status).to.equal(VerificationStatus.OK);
                 expect(lifecycleSpy).to.be.calledOnce;
@@ -175,7 +175,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
               verifier.loadKeyset('service-1');
               return verifier
                   .verifyCreativeAndSignature(
-                  'service-1', 'key-1', signature1, creative1, noop)
+                      'service-1', 'key-1', signature1, creative1, noop)
                   .then(status => {
                     expect(status).to.equal(VerificationStatus.OK);
                     verifier.loadKeyset('service-1');
@@ -194,7 +194,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
               verifier.loadKeyset('service-1');
               return verifier
                   .verifyCreativeAndSignature(
-                  'service-1', 'key-1', signature1, creative1, noop)
+                      'service-1', 'key-1', signature1, creative1, noop)
                   .then(status => {
                     expect(status).to.equal(VerificationStatus.OK);
                     env.fetchMock.getOnce(
@@ -217,7 +217,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
             verifier.loadKeyset('service-1');
             return verifier
                 .verifyCreativeAndSignature(
-                'service-1', 'key-1', signature1, creative1, noop)
+                    'service-1', 'key-1', signature1, creative1, noop)
                 .then(status => {
                   expect(status).to.equal(VerificationStatus.OK);
                   env.fetchMock.getOnce(
@@ -277,7 +277,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
               verifier.loadKeyset('service-1');
               return verifier
                   .verifyCreativeAndSignature(
-                  'service-1', 'key-1', signature1, creative1, noop)
+                      'service-1', 'key-1', signature1, creative1, noop)
                   .then(status => {
                     expect(status).to.equal(
                         VerificationStatus.ERROR_KEY_NOT_FOUND);
@@ -286,7 +286,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
                         verifier.verifyCreativeAndSignature(
                             'service-1', 'key-1', signature2, creative2, noop))
                         .to.eventually.equal(
-                        VerificationStatus.ERROR_KEY_NOT_FOUND);
+                            VerificationStatus.ERROR_KEY_NOT_FOUND);
                   });
             })));
 
@@ -336,7 +336,7 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
               verifier.loadKeyset('service-1');
               return verifier
                   .verifyCreativeAndSignature(
-                  'service-1', 'key-1', signature1, creative1, noop)
+                      'service-1', 'key-1', signature1, creative1, noop)
                   .then(status => {
                     expect(status).to.equal(VerificationStatus.UNVERIFIED);
                     verifier.loadKeyset('service-1');
@@ -352,12 +352,12 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
             signature1 => key1.sign(creative2).then(signature2 => {
               env.fetchMock.getOnce(
                   'https://signingservice1.net/keyset.json',
-                 {body: '{"keys":', headers});
+                  {body: '{"keys":', headers});
               expectSigningServiceError('service-1');
               verifier.loadKeyset('service-1');
               return verifier
                   .verifyCreativeAndSignature(
-                  'service-1', 'key-1', signature1, creative1, noop)
+                      'service-1', 'key-1', signature1, creative1, noop)
                   .then(status => {
                     expect(status).to.equal(VerificationStatus.UNVERIFIED);
                     verifier.loadKeyset('service-1');
@@ -373,12 +373,12 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
             signature1 => key1.sign(creative2).then(signature2 => {
               env.fetchMock.getOnce(
                   'https://signingservice1.net/keyset.json',
-                 {body: '{"foo":"bar"}', headers});
+                  {body: '{"foo":"bar"}', headers});
               expectSigningServiceError('service-1');
               verifier.loadKeyset('service-1');
               return verifier
                   .verifyCreativeAndSignature(
-                  'service-1', 'key-1', signature1, creative1, noop)
+                      'service-1', 'key-1', signature1, creative1, noop)
                   .then(status => {
                     expect(status).to.equal(VerificationStatus.UNVERIFIED);
                     verifier.loadKeyset('service-1');
@@ -410,12 +410,12 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
             signature1 => key1.sign(creative2).then(signature2 => {
               env.fetchMock.getOnce(
                   'https://signingservice1.net/keyset.json',
-                 {body: {'keys': [{'kid': 'key-1', 'foo': 'bar'}]}, headers});
+                  {body: {'keys': [{'kid': 'key-1', 'foo': 'bar'}]}, headers});
               expectSigningServiceError('service-1');
               verifier.loadKeyset('service-1');
               return verifier
                   .verifyCreativeAndSignature(
-                  'service-1', 'key-1', signature1, creative1, noop)
+                      'service-1', 'key-1', signature1, creative1, noop)
                   .then(status => {
                     expect(status).to.equal(VerificationStatus.UNVERIFIED);
                     verifier.loadKeyset('service-1');

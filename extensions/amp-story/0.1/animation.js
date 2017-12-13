@@ -82,7 +82,7 @@ class AnimationRunner {
    * @param {!AnimationSequence} sequence
    */
   constructor(
-      page, animationDef, webAnimationBuilderPromise, vsync, timer, sequence) {
+    page, animationDef, webAnimationBuilderPromise, vsync, timer, sequence) {
     /** @private @const */
     this.page_ = page;
 
@@ -118,8 +118,8 @@ class AnimationRunner {
      *    !../../amp-animation/0.1/web-animations.WebAnimationRunner>}
      */
     this.runnerPromise_ = this.getWebAnimationDef_().then(webAnimDef =>
-        webAnimationBuilderPromise.then(builder =>
-            builder.createRunner(webAnimDef)));
+      webAnimationBuilderPromise.then(builder =>
+        builder.createRunner(webAnimDef)));
 
     /** @private {?../../amp-animation/0.1/web-animations.WebAnimationRunner} */
     this.runner_ = null;
