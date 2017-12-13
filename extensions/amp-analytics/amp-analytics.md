@@ -523,7 +523,7 @@ In the example below, an `iframe` URL is not specified, and `beacon` and `xhrpos
 }
 ```
 
-If the `iframe` transport option is used, the specified URL must point to a page which implements the iframe transport client API. See the [example](https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport-remote-frame.html) of how to use this API, and also an [example](https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport.html) of a page that incorporates that iframe. The example loads a [fake ad](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp_ad_with_iframe_transport.html), which contains the `amp-analytics` tag. Note that the fake ad content includes some extra configuration instructions that must be followed. 
+If the `iframe` transport option is used, the specified URL must point to a page which implements the iframe transport client API. See the [example](https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport-remote-frame.html) of how to use this API, and also an [example](https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport.amp.html) of a page that incorporates that iframe. The example loads a [fake ad](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp_ad_with_iframe_transport.html), which contains the `amp-analytics` tag. Note that the fake ad content includes some extra configuration instructions that must be followed. 
 
 ## Validation
 
