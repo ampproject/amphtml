@@ -161,7 +161,7 @@ describe('BindEvaluator', () => {
   it('should evaluate expressions with macros', () => {
     expect(numberOfBindings()).to.equal(0);
     evaluator.addMacros([{
-      name: 'add',
+      id: 'add',
       argumentNames: ['a', 'b'],
       expressionString: 'a + b',
     }]);
@@ -179,11 +179,11 @@ describe('BindEvaluator', () => {
   it('should evaluate expressions with nested macros', () => {
     expect(numberOfBindings()).to.equal(0);
     evaluator.addMacros([{
-      name: 'add',
+      id: 'add',
       argumentNames: ['a', 'b'],
       expressionString: 'a + b',
     }, {
-      name: 'addThree',
+      id: 'addThree',
       argumentNames: ['a', 'b', 'c'],
       expressionString: 'add(add(a, b), c)',
     }]);
