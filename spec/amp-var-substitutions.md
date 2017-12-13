@@ -1023,7 +1023,7 @@ Provides the total time for which the element has met the `visiblitySpec `condit
 
 #### Timer Duration
 
-Provides the duration of the triggered timer since last start or interval in seconds. For timers stopped before a full interval completes, this will report the partial time.
+Provides the duration of the triggered timer since last start or interval in milliseconds. For timers stopped before a full interval completes, this will report the partial time.
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${timerDuration}`
