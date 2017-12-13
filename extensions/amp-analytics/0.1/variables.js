@@ -294,10 +294,7 @@ export class VariableService {
     }
 
     if (isArray(raw)) {
-      return raw.map(item => {
-        const {name, argList} = this.getNameArgs_(String(item));
-        return encodeURIComponent(name) + argList;
-      }).join(',');
+      return raw.map(this.encodeVars.bind(this)).join(',');
     }
     // Separate out names and arguments from the value and encode the value.
     const {name, argList} = this.getNameArgs_(String(raw));
