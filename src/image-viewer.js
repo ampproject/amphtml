@@ -241,6 +241,13 @@ export class ImageViewer {
       // It will be updated later.
       this.image_.setAttribute('src', sourceImage.src);
     }
+
+    st.setStyles(this.image_, {
+      top: st.px(0),
+      left: st.px(0),
+      width: st.px(0),
+      height: st.px(0),
+    });
   }
 
   /**
@@ -252,15 +259,17 @@ export class ImageViewer {
       this.viewerBox_ = layoutRectFromDomRect(this.viewer_
         ./*OK*/getBoundingClientRect());
 
-      const sf = Math.min(this.viewerBox_.width / this.sourceWidth_,
-          this.viewerBox_.height / this.sourceHeight_);
-      let width = Math.min(this.sourceWidth_ * sf, this.viewerBox_.width);
-      let height = Math.min(this.sourceHeight_ * sf, this.viewerBox_.height);
+      const sourceAspectRatio = this.sourceWidth_ / this.sourceHeight_;
+      let height = Math.min(this.viewerBox_.width / sourceAspectRatio,
+          this.viewerBox_.height);
+      let width = Math.min(this.viewerBox_.height * sourceAspectRatio,
+          this.viewerBox_.width);
 
       // TODO(dvoytenko): This is to reduce very small expansions that often
       // look like a stutter. To be evaluated if this is still the right
       // idea.
-      if (width - this.sourceWidth_ <= 16) {
+      if (width - this.sourceWidth_ <= 16
+          && height - this.sourceHeight_ <= 16) {
         width = this.sourceWidth_;
         height = this.sourceHeight_;
       }
@@ -316,12 +325,15 @@ export class ImageViewer {
 
   /** @private */
   setupGestures_() {
-    this.gestures_ = Gestures.get(this.image_);
-    this.gestures_.onPointerDown(() => {
+    const gesturesWithoutPreventDefault = Gestures.get(this.image_,
+        /* opt_shouldNotPreventDefault */true);
+    gesturesWithoutPreventDefault.onPointerDown(() => {
       if (this.motion_) {
         this.motion_.halt();
       }
     });
+
+    this.gestures_ = Gestures.get(this.viewer_);
 
     // Zoomable.
     this.gestures_.onGesture(DoubletapRecognizer, e => {
@@ -339,7 +351,6 @@ export class ImageViewer {
     });
 
     this.gestures_.onGesture(TapzoomRecognizer, e => {
-      event.preventDefault();
       this.onTapZoom_(e.data.centerClientX, e.data.centerClientY,
           e.data.deltaX, e.data.deltaY);
       if (e.data.last) {
@@ -349,8 +360,6 @@ export class ImageViewer {
     });
 
     this.gestures_.onGesture(PinchRecognizer, e => {
-      // To disable iOS 10 Safari default pinch zoom
-      event.preventDefault();
       this.onPinchZoom_(e.data.centerClientX, e.data.centerClientY,
           e.data.deltaX, e.data.deltaY, e.data.dir);
       if (e.data.last) {

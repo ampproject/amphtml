@@ -242,6 +242,8 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
           'ish': win != win.top ? viewportSize.height : null,
           'art': art == '0' ? null : art,
           'vis': visibilityStateCodes[visibilityState] || '0',
+          'scr_x': viewport.getScrollLeft(),
+          'scr_y': viewport.getScrollTop(),
           'debug_experiment_id':
               (/,?deid=(\d+)/i.exec(win.location.hash) || [])[1] || null,
           'url': documentInfo.canonicalUrl,
