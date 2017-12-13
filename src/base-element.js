@@ -875,7 +875,7 @@ export class BaseElement {
         this.element, newHeight, /* newWidth */ undefined);
   }
 
- /**
+  /**
   * Return a promise that requests the runtime to update
   * the size of this element to the specified value.
   * The runtime will schedule this request and attempt to process it
@@ -895,7 +895,7 @@ export class BaseElement {
         this.element, newHeight, newWidth);
   }
 
- /**
+  /**
   * Runs the specified mutation on the element and ensures that measures
   * and layouts performed for the affected elements.
   *

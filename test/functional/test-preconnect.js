@@ -16,7 +16,7 @@
 
 import {createIframePromise} from '../../testing/iframe';
 import {preconnectForElement, setPreconnectFeaturesForTesting} from
-    '../../src/preconnect';
+  '../../src/preconnect';
 import * as sinon from 'sinon';
 import * as lolex from 'lolex';
 

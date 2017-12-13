@@ -333,10 +333,10 @@ export function applyStaticLayout(element) {
   const inputLayout = layoutAttr ? parseLayout(layoutAttr) : null;
   user().assert(inputLayout !== undefined, 'Unknown layout: %s', layoutAttr);
   const inputWidth = (widthAttr && widthAttr != 'auto') ?
-      parseLength(widthAttr) : widthAttr;
+    parseLength(widthAttr) : widthAttr;
   user().assert(inputWidth !== undefined, 'Invalid width value: %s', widthAttr);
   const inputHeight = (heightAttr && heightAttr != 'fluid') ?
-      parseLength(heightAttr) : heightAttr;
+    parseLength(heightAttr) : heightAttr;
   user().assert(inputHeight !== undefined, 'Invalid height value: %s',
       heightAttr);
 
@@ -353,7 +353,7 @@ export function applyStaticLayout(element) {
     // width/height and are defined to have natural browser dimensions.
     const dimensions = getNaturalDimensions(element);
     width = (inputWidth || inputLayout == Layout.FIXED_HEIGHT) ? inputWidth :
-        dimensions.width;
+      dimensions.width;
     height = inputHeight || dimensions.height;
   } else {
     width = inputWidth;

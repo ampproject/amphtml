@@ -147,7 +147,7 @@ function buildArticlesContainerTemplate(articleSets) {
       tag: 'div',
       attrs: dict({'class': 'i-amphtml-story-bookend-article-set'}),
       children: articleSet.articles.map(article =>
-          buildArticleTemplate(article)),
+        buildArticleTemplate(article)),
     });
   });
 
@@ -443,10 +443,10 @@ export class Bookend {
 
     const metadata = {
       title: jsonLd && jsonLd['heading'] ?
-          jsonLd['heading'] :
-          user().assertElement(
-              this.win_.document.head.querySelector('title'),
-              'Please set <title> or structured data (JSON-LD).').textContent,
+        jsonLd['heading'] :
+        user().assertElement(
+            this.win_.document.head.querySelector('title'),
+            'Please set <title> or structured data (JSON-LD).').textContent,
 
       domainName:
           parseUrl(Services.documentInfoForDoc(ampdoc).canonicalUrl).hostname,

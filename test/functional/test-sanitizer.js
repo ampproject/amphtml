@@ -38,7 +38,7 @@ describe('sanitizeHtml', () => {
         '<h1>a<i>b</i>c' +
         '<amp-img src="http://example.com/1.png"></amp-img></h1>'))
         .to.be.equal(
-        '<h1>a<i>b</i>c' +
+            '<h1>a<i>b</i>c' +
             '<amp-img src="http://example.com/1.png"></amp-img></h1>');
   });
 
@@ -86,7 +86,7 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml(
         '<a href="">a</a>'
         + '<a href="" target="">c</a>'
-        )).to.equal(
+    )).to.equal(
         '<a href="" target="_top">a</a>'
         + '<a href="" target="_top">c</a>');
   });
@@ -95,7 +95,7 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml(
         '<a>b</a>'
         + '<a target="">d</a>'
-        )).to.equal(
+    )).to.equal(
         '<a>b</a>'
         + '<a target="_top">d</a>');
   });
@@ -117,7 +117,7 @@ describe('sanitizeHtml', () => {
         + '<a target="_other">_other</a>'
         + '<a target="_OTHER">_OTHER</a>'
         + '<a target="other">other</a>'
-        )).to.equal(
+    )).to.equal(
         '<a target="_top">_self</a>'
         + '<a target="_top">_parent</a>'
         + '<a target="_top">_other</a>'

@@ -211,7 +211,7 @@ describe('documentReady', () => {
           expect(callback).to.have.not.been.called;
           expect(eventListeners['readystatechange']).to.not.equal(undefined);
 
-            // Complete
+          // Complete
           testDoc.readyState = 'complete';
           eventListeners['readystatechange']();
 

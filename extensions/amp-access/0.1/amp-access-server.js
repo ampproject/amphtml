@@ -89,7 +89,7 @@ export class AccessServerAdapter {
 
     /** @private @const {?string} */
     this.serverState_ = stateElement ?
-        stateElement.getAttribute('content') : null;
+      stateElement.getAttribute('content') : null;
 
     const isInExperiment = isExperimentOn(ampdoc.win, TAG);
 
@@ -97,7 +97,7 @@ export class AccessServerAdapter {
     this.isProxyOrigin_ = isProxyOrigin(ampdoc.win.location) || isInExperiment;
 
     const serviceUrlOverride = isInExperiment ?
-        this.viewer_.getParam('serverAccessService') : null;
+      this.viewer_.getParam('serverAccessService') : null;
 
     /** @private @const {string} */
     this.serviceUrl_ = serviceUrlOverride ||

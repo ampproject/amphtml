@@ -84,7 +84,7 @@ describes.fakeWin('LaterpayVendor', {
       return vendor.authorize().then(() => {
         expect(
             /connector\.uselaterpay\.com/g.test(buildUrl.firstCall.args[0])
-          ).to.be.true;
+        ).to.be.true;
       });
     });
 

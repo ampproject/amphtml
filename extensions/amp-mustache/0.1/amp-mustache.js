@@ -15,7 +15,7 @@
  */
 
 import {parse as mustacheParse, render as mustacheRender,
-    setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
+  setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
 import {sanitizeHtml, sanitizeFormattingHtml} from '../../../src/sanitizer';
 
 // Configure inline sanitizer for unescaped values.

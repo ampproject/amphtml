@@ -79,7 +79,7 @@ describes.realWin('crypto-impl', {}, env => {
       it('should hash [1,2,3] in sha384', () => {
         return expect(crypto.sha384Base64(uint8Array([1, 2, 3])))
             .to.eventually.equal(
-            'hiKdxtL_vqxzgHRBVKpwApHAZDUqDb3H' +
+                'hiKdxtL_vqxzgHRBVKpwApHAZDUqDb3H' +
                 'e57T8sjh2sTcMlhn053f8dJim3o5PUf2');
       });
 

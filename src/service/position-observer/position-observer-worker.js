@@ -64,7 +64,7 @@ export class PositionObserverWorker {
 
     /** @type {number} */
     this.turn = (fidelity == PositionObserverFidelity.LOW) ?
-        Math.floor(Math.random() * LOW_FIDELITY_FRAME_COUNT) : 0;
+      Math.floor(Math.random() * LOW_FIDELITY_FRAME_COUNT) : 0;
 
     /** @type {?PositionInViewportEntryDef} */
     this.prevPosition_ = null;
@@ -132,10 +132,10 @@ export class PositionObserverWorker {
     this.viewport_.getClientRectAsync(this.element).then(elementBox => {
       this.trigger_(
       /** @type {./position-observer-worker.PositionInViewportEntryDef}*/ ({
-        positionRect: elementBox,
-        viewportRect: viewportBox,
-        relativePos: '',
-      }));
+            positionRect: elementBox,
+            viewportRect: viewportBox,
+            relativePos: '',
+          }));
     });
   }
 }

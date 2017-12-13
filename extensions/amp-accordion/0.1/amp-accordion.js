@@ -179,9 +179,9 @@ class AmpAccordion extends AMP.BaseElement {
           this.win./*OK*/sessionStorage.getItem(
               dev().assertString(this.sessionId_));
       return sessionStr
-          ? /** @type {!JsonObject} */ (
-              dev().assert(parseJson(dev().assertString(sessionStr))))
-          : dict();
+        ? /** @type {!JsonObject} */ (
+          dev().assert(parseJson(dev().assertString(sessionStr))))
+        : dict();
     } catch (e) {
       dev().fine('AMP-ACCORDION', e.message, e.stack);
       return dict();

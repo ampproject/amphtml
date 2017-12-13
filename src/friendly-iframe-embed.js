@@ -123,7 +123,7 @@ export function getFriendlyIframeEmbedOptional(iframe) {
  * @return {!Promise<!FriendlyIframeEmbed>}
  */
 export function installFriendlyIframeEmbed(iframe, container, spec,
-    opt_preinstallCallback) {
+  opt_preinstallCallback) {
   /** @const {!Window} */
   const win = getTopWindow(toWin(iframe.ownerDocument.defaultView));
   /** @const {!./service/extensions-impl.Extensions} */
@@ -478,8 +478,8 @@ export class FriendlyIframeEmbed {
    */
   getBodyElement() {
     return /** @type {!HTMLBodyElement} */ (
-        (this.iframe.contentDocument || this.iframe.contentWindow.document)
-            .body);
+      (this.iframe.contentDocument || this.iframe.contentWindow.document)
+          .body);
   }
 
   /**

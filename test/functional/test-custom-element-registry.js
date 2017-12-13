@@ -222,7 +222,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
     });
 
     it('should repeat stubbing when body is not available', () => {
-      doc.body = null;  // Body not available
+      doc.body = null; // Body not available
 
       stubElementsForDoc(ampdoc);
 

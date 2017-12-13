@@ -134,7 +134,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
         expect(iframe.style.visibility).to.equal('hidden');
         iframe.postMessageToParent({
           width: 114,
-          height: '217',  // should be tolerant to string number
+          height: '217', // should be tolerant to string number
           type: 'render-start',
           sentinel: 'amp3ptest' + testIndex,
         });
@@ -330,7 +330,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       });
       iframe.postMessageToParent({
         width: 114,
-        height: '217',  // should be tolerant to string number
+        height: '217', // should be tolerant to string number
         type: 'embed-size',
         sentinel: 'amp3ptest' + testIndex,
       });

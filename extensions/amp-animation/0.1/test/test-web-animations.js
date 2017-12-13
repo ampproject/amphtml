@@ -378,11 +378,11 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       animations: [{
         target: target1,
         '--child1': '21px',
-        '--parent2': '22px',  // Override parent.
+        '--parent2': '22px', // Override parent.
         '--child2': 'var(--child1)',
         '--child3': 'var(--parent1)',
         '--child4': 'var(--parent2)',
-        '--child5': 'var(--child6)',  // Reverse order dependency.
+        '--child5': 'var(--child6)', // Reverse order dependency.
         '--child6': '23px',
         keyframes: {
           transform: 'translate(var(--child3), var(--child4))',
@@ -411,11 +411,11 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       animations: [{
         selector: '.target',
         '--child1': '21px',
-        '--parent2': '22px',  // Override parent.
+        '--parent2': '22px', // Override parent.
         '--child2': 'var(--child1)',
         '--child3': 'var(--parent1)',
         '--child4': 'var(--parent2)',
-        '--child5': 'var(--child6)',  // Reverse order dependency.
+        '--child5': 'var(--child6)', // Reverse order dependency.
         '--child6': '23px',
         subtargets: [
           // By index.
@@ -452,12 +452,12 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     expect(requests[0].vars).to.jsonEqual({
       '--parent1': '11px',
       '--parent2': '22px',
-      '--child1': '33px',  // Overriden via `#target1`
-      '--child2': '35px',  // Overriden via `div`
+      '--child1': '33px', // Overriden via `#target1`
+      '--child2': '35px', // Overriden via `div`
       '--child3': '11px',
       '--child4': '22px',
-      '--child5': '31px',  // Overriden via `index: 0`
-      '--child6': '31px',  // Overriden via `index: 0`
+      '--child5': '31px', // Overriden via `index: 0`
+      '--child6': '31px', // Overriden via `index: 0`
     });
     expect(requests[0].keyframes.transform[1]).to.equal('translate(31px,33px)');
 
@@ -465,12 +465,12 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     expect(requests[1].vars).to.jsonEqual({
       '--parent1': '11px',
       '--parent2': '22px',
-      '--child1': '34px',  // Overriden via `#target2`
-      '--child2': '35px',  // Overriden via `div`
+      '--child1': '34px', // Overriden via `#target2`
+      '--child2': '35px', // Overriden via `div`
       '--child3': '11px',
       '--child4': '22px',
-      '--child5': '32px',  // Overriden via `index: 1`
-      '--child6': '32px',  // Overriden via `index: 1`
+      '--child5': '32px', // Overriden via `index: 1`
+      '--child6': '32px', // Overriden via `index: 1`
     });
     expect(requests[1].keyframes.transform[1]).to.equal('translate(32px,34px)');
   });

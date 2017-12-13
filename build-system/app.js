@@ -312,7 +312,7 @@ function proxyToAmpProxy(req, res, mode) {
     body = body
         // Unversion URLs.
         .replace(/https\:\/\/cdn\.ampproject\.org\/rtv\/\d+\//g,
-        'https://cdn.ampproject.org/')
+            'https://cdn.ampproject.org/')
         // <base> href pointing to the proxy, so that images, etc. still work.
         .replace('<head>', '<head><base href="https://cdn.ampproject.org/">');
     const inabox = req.query['inabox'] == '1';
@@ -630,7 +630,7 @@ app.use('/inabox/', (req, res) => {
   let adUrl = req.url;
   const templatePath = '/build-system/server-inabox-template.html';
   const urlPrefix = getUrlPrefix(req);
-  if (!adUrl.startsWith('/proxy') &&  // Ignore /proxy
+  if (!adUrl.startsWith('/proxy') && // Ignore /proxy
       urlPrefix.indexOf('//localhost') != -1) {
     // This is a special case for testing. `localhost` URLs are transformed to
     // `ads.localhost` to ensure that the iframe is fully x-origin.
@@ -1078,7 +1078,7 @@ function addViewerIntegrationScript(ampJsVersion, file) {
     return file;
   }
   let viewerScript;
-  if (Number.isInteger(ampJsVersion)) {  // eslint-disable-line no-es2015-number-props
+  if (Number.isInteger(ampJsVersion)) { // eslint-disable-line no-es2015-number-props
     // Viewer integration script from gws, such as
     // https://cdn.ampproject.org/viewer/google/v7.js
     viewerScript =

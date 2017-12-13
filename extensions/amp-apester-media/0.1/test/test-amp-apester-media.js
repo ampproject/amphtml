@@ -111,7 +111,7 @@ describes.realWin('amp-apester-media', {
     });
   });
 
-//todo responsive layout isn't fully supported yet, just a stub
+  //todo responsive layout isn't fully supported yet, just a stub
   it('renders responsively', () => {
     return getApester({
       'data-apester-media-id': '57a336dba187a2ca3005e826',

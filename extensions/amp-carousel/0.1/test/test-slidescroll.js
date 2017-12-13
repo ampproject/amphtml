@@ -34,7 +34,7 @@ describes.realWin('SlideScroll', {
   });
 
   function getAmpSlideScroll(
-      opt_hasLooping, opt_slideCount = 5, opt_attachToDom = true) {
+    opt_hasLooping, opt_slideCount = 5, opt_attachToDom = true) {
     const imgUrl = 'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +
         'Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no';
     const ampSlideScroll = doc.createElement('amp-carousel');

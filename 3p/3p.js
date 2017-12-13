@@ -196,7 +196,7 @@ export function computeInMasterFrame(global, taskId, work, cb) {
   }
   cbs.push(cb);
   if (!global.context.isMaster) {
-    return;  // Only do work in master.
+    return; // Only do work in master.
   }
   work(result => {
     for (let i = 0; i < cbs.length; i++) {

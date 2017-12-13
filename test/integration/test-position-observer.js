@@ -69,7 +69,7 @@ config.run('amp-position-observer', function() {
     <div class="spacer"></div>
     `;
 
- /*
+  /*
   * scrollbound amp-animation will make the target will go
   * from opacity 0 to 1 with scroll.
   **/
@@ -133,7 +133,7 @@ config.run('amp-position-observer', function() {
     <div class="spacer"></div>
     `;
 
- /*
+  /*
   * Animation scene will start when 50% visible above the 10vh margin
   * and paused when 50% invisible below the 10vh margin.
   * There is no scrollbound behavior, purely time-based animation.

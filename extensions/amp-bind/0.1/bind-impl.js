@@ -147,9 +147,9 @@ export class Bind {
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
 
     const bodyPromise = (opt_win)
-        ? waitForBodyPromise(opt_win.document)
-            .then(() => dev().assertElement(opt_win.document.body))
-        : ampdoc.whenBodyAvailable();
+      ? waitForBodyPromise(opt_win.document)
+          .then(() => dev().assertElement(opt_win.document.body))
+      : ampdoc.whenBodyAvailable();
 
     /**
      * Resolved when the service finishes scanning the document for bindings.
@@ -269,7 +269,7 @@ export class Bind {
           // Don't reevaluate/apply if there are no bindings.
           if (numberOfBindingsAdded > 0) {
             return this.evaluate_().then(results =>
-                this.applyElements_(results, elements));
+              this.applyElements_(results, elements));
           }
         });
     return this.timer_.timeoutPromise(timeout, rescan,
@@ -342,8 +342,8 @@ export class Bind {
     const scanPromises = nodes.map(node => {
       // Limit number of total bindings (unless in local manual testing).
       const limit = (getMode().localDev && !getMode().test)
-          ? Number.POSITIVE_INFINITY
-          : this.maxNumberOfBindings_ - this.numberOfBindings();
+        ? Number.POSITIVE_INFINITY
+        : this.maxNumberOfBindings_ - this.numberOfBindings();
 
       return this.scanNode_(node, limit).then(results => {
         const {

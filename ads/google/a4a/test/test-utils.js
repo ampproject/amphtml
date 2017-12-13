@@ -615,7 +615,7 @@ describe('Google A4A utils', () => {
 
     it('should handle fetch error', () => {
       sandbox.stub(Services, 'xhrFor').returns(
-        {fetchJson: () => Promise.reject('some network failure')});
+          {fetchJson: () => Promise.reject('some network failure')});
       return getIdentityToken(env.win, env.win.document)
           .then(result => expect(result).to.jsonEqual({}));
     });

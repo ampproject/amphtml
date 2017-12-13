@@ -48,7 +48,7 @@ describes.repeated('', {
     amp: {
       runtimeOn: false,
       ampdoc: variant.ampdoc,
-      extensions: ['amp-form', 'amp-selector'],  // amp-form is installed as service.
+      extensions: ['amp-form', 'amp-selector'], // amp-form is installed as service.
     },
   }, env => {
 
@@ -65,7 +65,7 @@ describes.repeated('', {
     }
 
     function getForm(doc = document, button1 = true, button2 = false,
-                     button3 = false) {
+      button3 = false) {
       const form = doc.createElement('form');
       form.setAttribute('method', 'POST');
 

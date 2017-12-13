@@ -286,7 +286,7 @@ function reportErrorToServer(message, filename, line, col, error) {
  * visibleForTesting
  */
 export function getErrorReportData(message, filename, line, col, error,
-    hasNonAmpJs) {
+  hasNonAmpJs) {
   let expected = false;
   if (error) {
     if (error.message) {
@@ -403,8 +403,8 @@ export function getErrorReportData(message, filename, line, col, error,
 
   if (error) {
     const tagName = error && error.associatedElement
-        ? error.associatedElement.tagName
-        : 'u';  // Unknown
+      ? error.associatedElement.tagName
+      : 'u'; // Unknown
     data['el'] = tagName;
 
     if (error.args) {

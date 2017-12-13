@@ -833,8 +833,9 @@ describe('amp-a4a', () => {
           expect(renderNonAmpCreativeSpy.calledOnce,
               'renderNonAmpCreative_ called exactly once').to.be.true;
           a4a.unlayoutCallback();
-          getResourceStub.returns(
-            {'hasBeenMeasured': () => true, 'isMeasureRequested': () => false});
+          getResourceStub.returns({
+            'hasBeenMeasured': () => true,
+            'isMeasureRequested': () => false});
           const onLayoutMeasureSpy = sandbox.spy(a4a, 'onLayoutMeasure');
           a4a.resumeCallback();
           expect(onLayoutMeasureSpy).to.be.calledOnce;
@@ -1644,7 +1645,7 @@ describe('amp-a4a', () => {
             s => {
               return s.innerHTML == 'p { background: green }';
             }),
-            'Some style is "background: green"').to.be.true;
+        'Some style is "background: green"').to.be.true;
         expect(frameDoc.body.innerHTML.trim()).to.equal('<p>some text</p>');
         expect(Services.urlReplacementsForDoc(frameDoc))
             .to.not.equal(Services.urlReplacementsForDoc(a4aElement));

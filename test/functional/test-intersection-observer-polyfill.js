@@ -159,34 +159,34 @@ describe('getIntersectionChangeEntry', () => {
         layoutRectLtwh(0, 100, 50, 50),
         null,
         layoutRectLtwh(0, 100, 100, 100))).to.jsonEqual({
-          time: 100,
-          rootBounds: layoutRectLtwh(0, 0, 100, 100),
-          boundingClientRect: layoutRectLtwh(0, 0, 50, 50),
-          intersectionRect: layoutRectLtwh(0, 0, 50, 50),
-          intersectionRatio: 1,
-        });
+      time: 100,
+      rootBounds: layoutRectLtwh(0, 0, 100, 100),
+      boundingClientRect: layoutRectLtwh(0, 0, 50, 50),
+      intersectionRect: layoutRectLtwh(0, 0, 50, 50),
+      intersectionRatio: 1,
+    });
     expect(getIntersectionChangeEntry(
         layoutRectLtwh(50, 200, 150, 200),
         null,
         layoutRectLtwh(0, 100, 100, 100))).to.jsonEqual({
-          time: 100,
-          rootBounds: layoutRectLtwh(0, 0, 100, 100),
-          boundingClientRect: layoutRectLtwh(50, 100, 150, 200),
-          intersectionRect: layoutRectLtwh(50, 100, 50, 0),
-          intersectionRatio: 0,
-        });
+      time: 100,
+      rootBounds: layoutRectLtwh(0, 0, 100, 100),
+      boundingClientRect: layoutRectLtwh(50, 100, 150, 200),
+      intersectionRect: layoutRectLtwh(50, 100, 50, 0),
+      intersectionRatio: 0,
+    });
   });
   it('with owner', () => {
     expect(getIntersectionChangeEntry(
         layoutRectLtwh(50, 50, 150, 200),
         layoutRectLtwh(0, 50, 100, 100),
         layoutRectLtwh(0, 100, 100, 100))).to.jsonEqual({
-          time: 100,
-          rootBounds: layoutRectLtwh(0, 0, 100, 100),
-          boundingClientRect: layoutRectLtwh(50, -50, 150, 200),
-          intersectionRect: layoutRectLtwh(50, 0, 50, 50),
-          intersectionRatio: 1 / 12,
-        });
+      time: 100,
+      rootBounds: layoutRectLtwh(0, 0, 100, 100),
+      boundingClientRect: layoutRectLtwh(50, -50, 150, 200),
+      intersectionRect: layoutRectLtwh(50, 0, 50, 50),
+      intersectionRatio: 1 / 12,
+    });
   });
 });
 

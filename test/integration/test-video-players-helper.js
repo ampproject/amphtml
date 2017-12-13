@@ -33,7 +33,7 @@ import {
 import * as st from '../../src/style';
 
 export function runVideoPlayerIntegrationTests(
-    createVideoElementFunc, opt_experiment) {
+  createVideoElementFunc, opt_experiment) {
 
   /**
    * @const {number} Height of the fixture iframe

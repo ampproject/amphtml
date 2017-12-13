@@ -754,10 +754,10 @@ function onProgressMove(event) {
 function getPagePosition(el) {
   let lx, ly;
   for (lx = 0, ly = 0;
-      el != null;
-      lx += el./*OK*/offsetLeft, ly += el./*OK*/offsetTop,
-          el = el./*OK*/offsetParent)
-    {};
+    el != null;
+    lx += el./*OK*/offsetLeft, ly += el./*OK*/offsetTop,
+    el = el./*OK*/offsetParent)
+  {};
   return {x: lx,y: ly};
 }
 

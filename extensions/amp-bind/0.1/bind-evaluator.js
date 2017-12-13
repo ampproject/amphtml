@@ -84,7 +84,7 @@ export class BindEvaluator {
     });
 
     filterSplice(this.bindings_, binding =>
-        !expressionsToRemove[binding.expressionString]);
+      !expressionsToRemove[binding.expressionString]);
   }
 
   /**

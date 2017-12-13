@@ -86,7 +86,7 @@ describes.realWin('amp-iframe', {
     }
 
     function createAmpIframe(env, opt_attributes, opt_top, opt_height,
-        opt_translateY, opt_container) {
+      opt_translateY, opt_container) {
       const doc = env.win.document;
       env.win.innerHeight = opt_height;
       const attributes = opt_attributes || {

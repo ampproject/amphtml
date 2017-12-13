@@ -312,7 +312,7 @@ export class ShareWidget {
   copyUrlToClipboard_() {
     const url = Services.documentInfoForDoc(
         /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
-        dev().assert(this.ampdoc_))).canonicalUrl;
+          dev().assert(this.ampdoc_))).canonicalUrl;
 
     if (!copyTextToClipboard(this.win_.document, url)) {
       Toast.show(this.win_, 'Could not copy link to clipboard :(');
@@ -343,7 +343,7 @@ export class ShareWidget {
   isSystemShareSupported_() {
     const viewer = Services.viewerForDoc(
         /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
-        dev().assert(this.ampdoc_)));
+          dev().assert(this.ampdoc_)));
 
     const platform = Services.platformFor(this.win_);
 
@@ -395,7 +395,7 @@ export class ShareWidget {
   /** @private */
   loadRequiredExtensions_() {
     const ampdoc = /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
-        dev().assert(this.ampdoc_));
+      dev().assert(this.ampdoc_));
 
     Services.extensionsFor(this.win_)
         .installExtensionForDoc(ampdoc, 'amp-social-share');

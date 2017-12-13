@@ -144,11 +144,11 @@ export class SignInProtocol {
           'getAccessTokenPassive', dict({
             'origin': this.pubOrigin_,
           })).then(resp => {
-            return /** @type {?string} */ (resp);
-          }).catch(reason => {
-            user().error(TAG, 'Failed to retrieve access token: ', reason);
-            return null;
-          });
+        return /** @type {?string} */ (resp);
+      }).catch(reason => {
+        user().error(TAG, 'Failed to retrieve access token: ', reason);
+        return null;
+      });
     }
     return this.accessTokenPromise_;
   }

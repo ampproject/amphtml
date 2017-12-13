@@ -328,7 +328,7 @@ function runAllCommands() {
   if (process.env.BUILD_SHARD == 'integration_tests') {
     command.cleanBuild();
     command.buildRuntimeMinified();
-    command.runPresubmitTests();  // Needs runtime to be built and served.
+    command.runPresubmitTests(); // Needs runtime to be built and served.
     command.runIntegrationTests(/* compiled */ true);
   }
 }

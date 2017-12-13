@@ -32,8 +32,8 @@ import {getMode} from '../../../src/mode';
 import {Activity} from './activity-impl';
 import {AnalyticsEventType} from './events';
 import {
-    InstrumentationService,
-    instrumentationServicePromiseForDoc,
+  InstrumentationService,
+  instrumentationServicePromiseForDoc,
 } from './instrumentation';
 import {
   ExpansionOptions,
@@ -625,7 +625,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   handleEvent_(trigger, event) {
     const requests = isArray(trigger['request'])
-        ? trigger['request'] : [trigger['request']];
+      ? trigger['request'] : [trigger['request']];
 
     const resultPromises = [];
     for (let r = 0; r < requests.length; r++) {
@@ -852,7 +852,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     // that is already being used in the wild.
     user().assert(opt_predefinedConfig || !from || !from['optout'] ||
         from['optout'] == '_gaUserPrefs.ioo',
-        'optout property is only available to vendor config.');
+    'optout property is only available to vendor config.');
 
     for (const property in from) {
       user().assert(opt_predefinedConfig || property != 'iframePing',

@@ -103,7 +103,7 @@ class Amp3QPlayer extends AMP.BaseElement {
     this.element.appendChild(iframe);
 
     return this.loadPromise(this.iframe_).then(() =>
-        this.playerReadyPromise_);
+      this.playerReadyPromise_);
   }
 
   /** @override */
@@ -148,8 +148,8 @@ class Amp3QPlayer extends AMP.BaseElement {
     }
 
     const data = isObject(getData(event))
-        ? getData(event)
-        : tryParseJson(getData(event));
+      ? getData(event)
+      : tryParseJson(getData(event));
     if (data === undefined) {
       return;
     }

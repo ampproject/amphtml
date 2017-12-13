@@ -36,7 +36,7 @@ describe('#line-delimited-response-handler', () => {
     slotData.forEach(slot => {
       // TODO: escape creative returns
       const creative = slot.creative.replace(/\\/g, '\\\\')
-        .replace(/\n/g, '\\n').replace(/\r/g, '\\r');
+          .replace(/\n/g, '\\n').replace(/\r/g, '\\r');
       slotDataString += `${JSON.stringify(slot.headers)}\n${creative}\n`;
     });
     return slotDataString;

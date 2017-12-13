@@ -123,10 +123,10 @@ function getBucketTicket(ampdoc, group, opt_cidScope) {
   }
 
   const cidPromise = Services.cidForDoc(ampdoc).then(cidService =>
-      cidService.get({
-        scope: dev().assertString(opt_cidScope),
-        createCookieIfNotPresent: true,
-      }, Promise.resolve()));
+    cidService.get({
+      scope: dev().assertString(opt_cidScope),
+      createCookieIfNotPresent: true,
+    }, Promise.resolve()));
 
   return Promise.all([cidPromise, Services.cryptoFor(ampdoc.win)])
       .then(results => results[1].uniform(group + ':' + results[0]))

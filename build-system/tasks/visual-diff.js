@@ -31,8 +31,8 @@ function setPercyBranch() {
     const userName = getStdout(
         'git log -1 --pretty=format:"%ae"').trim();
     const branchName = process.env['TRAVIS'] ?
-        process.env['TRAVIS_PULL_REQUEST_BRANCH'] :
-        getStdout('git rev-parse --abbrev-ref HEAD').trim();
+      process.env['TRAVIS_PULL_REQUEST_BRANCH'] :
+      getStdout('git rev-parse --abbrev-ref HEAD').trim();
     process.env['PERCY_BRANCH'] = userName + '-' + branchName;
   }
 }

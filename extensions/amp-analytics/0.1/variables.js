@@ -242,19 +242,19 @@ export class VariableService {
       }
 
       p = p.then(expandedValue =>
-            // First apply filters
-            this.applyFilters_(expandedValue, tokens))
-        .then(finalRawValue => {
+          // First apply filters
+        this.applyFilters_(expandedValue, tokens))
+          .then(finalRawValue => {
           // Then encode the value
-          const val = options.noEncode
+            const val = options.noEncode
               ? finalRawValue
               : this.encodeVars(finalRawValue, name);
-          return val ? val + argList : val;
-        })
-        .then(encodedValue => {
+            return val ? val + argList : val;
+          })
+          .then(encodedValue => {
           // Replace it in the string
-          replacement = replacement.replace(match, encodedValue);
-        });
+            replacement = replacement.replace(match, encodedValue);
+          });
 
       // Queue current replacement promise after the last replacement.
       replacementPromises.push(p);

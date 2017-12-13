@@ -15,10 +15,10 @@
  */
 
 import {
-    AmpAppBanner,
-    AbstractAppBanner,
-    AmpIosAppBanner,
-    AmpAndroidAppBanner,
+  AmpAppBanner,
+  AbstractAppBanner,
+  AmpIosAppBanner,
+  AmpAndroidAppBanner,
 } from '../amp-app-banner';
 import {Services} from '../../../../src/services';
 
@@ -171,9 +171,9 @@ describes.realWin('amp-app-banner', {
       return getAppBanner({iosMeta}).then(el => {
         expect(AbstractAppBanner.prototype.setupOpenButton_)
             .to.have.been.calledWith(
-            el.querySelector('button[open-button]'),
-            'medium://p/cb7f223fad86',
-            'https://itunes.apple.com/us/app/id828256236');
+                el.querySelector('button[open-button]'),
+                'medium://p/cb7f223fad86',
+                'https://itunes.apple.com/us/app/id828256236');
       });
     });
 
@@ -185,9 +185,9 @@ describes.realWin('amp-app-banner', {
       }).then(el => {
         expect(AbstractAppBanner.prototype.setupOpenButton_)
             .to.have.been.calledWith(
-            el.querySelector('button[open-button]'),
-            'https://itunes.apple.com/us/app/id828256236',
-            'https://itunes.apple.com/us/app/id828256236');
+                el.querySelector('button[open-button]'),
+                'https://itunes.apple.com/us/app/id828256236',
+                'https://itunes.apple.com/us/app/id828256236');
       });
     });
 
@@ -251,10 +251,10 @@ describes.realWin('amp-app-banner', {
       return getAppBanner({androidManifest}).then(el => {
         expect(AbstractAppBanner.prototype.setupOpenButton_)
             .to.have.been.calledWith(
-            el.querySelector('button[open-button]'),
-            'android-app://com.medium.reader/https/example.com/amps.html',
-            'https://play.google.com/store/apps/details?id=com.medium.reader'
-        );
+                el.querySelector('button[open-button]'),
+                'android-app://com.medium.reader/https/example.com/amps.html',
+                'https://play.google.com/store/apps/details?id=com.medium.reader'
+            );
       });
     });
 
@@ -263,10 +263,10 @@ describes.realWin('amp-app-banner', {
       return getAppBanner({originManifest: androidManifest}).then(el => {
         expect(AbstractAppBanner.prototype.setupOpenButton_)
             .to.have.been.calledWith(
-            el.querySelector('button[open-button]'),
-            'android-app://com.medium.reader/https/example.com/amps.html',
-            'https://play.google.com/store/apps/details?id=com.medium.reader'
-        );
+                el.querySelector('button[open-button]'),
+                'android-app://com.medium.reader/https/example.com/amps.html',
+                'https://play.google.com/store/apps/details?id=com.medium.reader'
+            );
       });
     });
   }

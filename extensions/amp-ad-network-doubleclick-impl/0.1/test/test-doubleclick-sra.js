@@ -64,7 +64,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
     const element = createElementWithAttributes(
         doc, opt_type || 'amp-ad',
         Object.assign(
-          {type: 'doubleclick', height: 320, width: 50}, opt_attributes));
+            {type: 'doubleclick', height: 320, width: 50}, opt_attributes));
     (opt_domElement || doc.body).appendChild(element);
     return element;
   }
@@ -81,7 +81,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
     // layoutCallback is executed.
     it('should be enabled if meta tag present, and force refresh off', () => {
       createAndAppendAdElement(
-        {name: 'amp-ad-doubleclick-sra'}, 'meta', doc.head);
+          {name: 'amp-ad-doubleclick-sra'}, 'meta', doc.head);
       const element = createAndAppendAdElement({'data-enable-refresh': 30});
       const impl = new AmpAdNetworkDoubleclickImpl(element);
       expect(impl.useSra).to.be.true;
@@ -95,7 +95,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
 
     beforeEach(() => {
       const element = createAndAppendAdElement(
-        {'data-a4a-upgrade-type': 'amp-ad-network-doubleclick-impl'});
+          {'data-a4a-upgrade-type': 'amp-ad-network-doubleclick-impl'});
       // Testing competitive exclusion when we have an AMP ad and a non-AMP ad
       // on the same page. Need to add the child frame of the element to stand
       // in as the non-AMP ad.
@@ -142,9 +142,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
       sandbox.stub(impl1, 'generateAdKey_').withArgs('50x320').returns('13579');
       impl1.populateAdUrlState();
       impl1.identityToken =
-          /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({
-            token: 'abcdef', jar: 'some_jar', pucrd: 'some_pucrd',
-          });
+        /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({
+          token: 'abcdef', jar: 'some_jar', pucrd: 'some_pucrd',
+        });
       const targeting2 = {
         cookieOptOut: 1,
         categoryExclusions: 'food',
@@ -203,7 +203,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
     }
 
     function generateSraXhrMockCall(
-        validInstances, networkId, responses, opt_xhrFail, opt_allInvalid) {
+      validInstances, networkId, responses, opt_xhrFail, opt_allInvalid) {
       dev().assert(validInstances.length > 1);
       dev().assert(!(opt_xhrFail && opt_allInvalid));
       // Start with nameframe method, SRA will override to use safeframe.
@@ -212,7 +212,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
       // Assume all implementations have same data slot.
       const iuParts = encodeURIComponent(
           validInstances[0].element.getAttribute('data-slot').split(/\//)
-        .splice(1).join());
+              .splice(1).join());
       const xhrWithArgs = xhrMock.withArgs(
           sinon.match(
               new RegExp('^https:\/\/securepubads\\.g\\.doubleclick\\.net' +
@@ -255,7 +255,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
       headers[RENDERING_TYPE_HEADER] = XORIGIN_MODE.NAMEFRAME;
       const iu = encodeURIComponent(impl.element.getAttribute('data-slot'));
       const urlRegexp = new RegExp(
-        '^https:\/\/securepubads\\.g\\.doubleclick\\.net' +
+          '^https:\/\/securepubads\\.g\\.doubleclick\\.net' +
         `\/gampad\/ads\\?iu=${iu}&`);
       xhrMock.withArgs(
           sinon.match(urlRegexp),
@@ -264,17 +264,17 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
             method: 'GET',
             credentials: 'include',
           }).returns(Promise.resolve({
-            arrayBuffer: () => utf8Encode(creative),
-            bodyUsed: false,
-            headers: new FetchResponseHeaders({
-              getResponseHeader(name) {
-                return headers[name];
-              },
-            }),
-            text: () => {
-              throw new Error('should not be SRA!');
-            },
-          }));
+        arrayBuffer: () => utf8Encode(creative),
+        bodyUsed: false,
+        headers: new FetchResponseHeaders({
+          getResponseHeader(name) {
+            return headers[name];
+          },
+        }),
+        text: () => {
+          throw new Error('should not be SRA!');
+        },
+      }));
     }
 
     /**
@@ -428,7 +428,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
 
     it('should handle mixture of all possible scenarios', () => executeTest(
         [1234, 1234, 101, {networkId: 4567, instances: 2, xhrFail: true}, 202,
-        {networkId: 8901, instances: 3, invalidInstances: 1}]));
+          {networkId: 8901, instances: 3, invalidInstances: 1}]));
   });
 
 });

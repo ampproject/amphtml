@@ -177,8 +177,8 @@ class AmpDatePicker extends AMP.BaseElement {
     const type = this.element.getAttribute('type') || 'single';
     /** @private @const */
     this.picker_ = (type === 'range' ?
-        createDateRangePicker() :
-        createSingleDatePicker());
+      createDateRangePicker() :
+      createSingleDatePicker());
 
     /** @private @const */
     this.props_ = this.getProps_();
@@ -417,7 +417,7 @@ class AmpDatePicker extends AMP.BaseElement {
   getFormattedDate_(date) {
     const isUnixTimestamp = this.format_.match(/[Xx]/);
     return date && (isUnixTimestamp ?
-        date.clone().locale(DEFAULT_LOCALE) : date).format(this.format_);
+      date.clone().locale(DEFAULT_LOCALE) : date).format(this.format_);
   }
 
   /**

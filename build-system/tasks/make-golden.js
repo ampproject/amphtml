@@ -49,18 +49,18 @@ function doScreenshot(host, path, output, device, verbose, cb) {
       '"' + path + '" ' +
       '"' + output + '" ' +
       '"' + device + '" ',
-      function(err, stdout, stderr) {
-        if (verbose) {
-          util.log(util.colors.gray('stdout: ', stdout));
-          if (stderr.length) {
-            util.log(util.colors.red('stderr: ', stderr));
-          }
-        }
-        if (err != null) {
-          util.log(util.colors.red('exec error: ', err));
-        }
-        cb();
-      });
+  function(err, stdout, stderr) {
+    if (verbose) {
+      util.log(util.colors.gray('stdout: ', stdout));
+      if (stderr.length) {
+        util.log(util.colors.red('stderr: ', stderr));
+      }
+    }
+    if (err != null) {
+      util.log(util.colors.red('exec error: ', err));
+    }
+    cb();
+  });
 }
 
 

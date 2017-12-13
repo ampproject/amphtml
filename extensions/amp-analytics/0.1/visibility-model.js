@@ -395,8 +395,8 @@ export class VisibilityModel {
       this.lastVisibleUpdateTime_ = now;
       this.minVisiblePercentage_ =
           this.minVisiblePercentage_ > 0 ?
-          Math.min(this.minVisiblePercentage_, visibility) :
-          visibility;
+            Math.min(this.minVisiblePercentage_, visibility) :
+            visibility;
       this.maxVisiblePercentage_ =
           Math.max(this.maxVisiblePercentage_, visibility);
       this.lastVisibleTime_ = now;
@@ -411,7 +411,7 @@ export class VisibilityModel {
       // Reset for next visibility event.
       this.lastVisibleUpdateTime_ = 0;
       this.totalVisibleTime_ += timeSinceLastUpdate;
-      this.continuousTime_ = 0;  // Clear only after max is calculated above.
+      this.continuousTime_ = 0; // Clear only after max is calculated above.
       this.lastVisibleTime_ = now;
     }
 

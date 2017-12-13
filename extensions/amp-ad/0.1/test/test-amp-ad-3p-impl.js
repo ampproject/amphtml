@@ -473,11 +473,11 @@ describes.realWin('amp-ad-3p-impl', {
 
       beforeEach(() => {
         viewer = win.services.viewer.obj;
-        viewer.toggleRuntime();  // Turn runtime on for these tests.
+        viewer.toggleRuntime(); // Turn runtime on for these tests.
       });
 
       afterEach(() => {
-        viewer.toggleRuntime();  // Turn runtime off again.
+        viewer.toggleRuntime(); // Turn runtime off again.
         win.document.body.style.direction = '';
       });
 

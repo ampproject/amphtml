@@ -227,7 +227,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         const container = this.element.ownerDocument.createElement('div');
         container.classList.add('i-amphtml-image-lightbox-container');
         const imageViewer = new ImageViewer(this, this.win,
-          this.loadPromise.bind(this));
+            this.loadPromise.bind(this));
         imageViewer.init(element, elementByTag(element, 'img'));
         container.appendChild(imageViewer.getElement());
         slide = container;
@@ -351,12 +351,12 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       const mutateAnimateDesc = state => {
         const finalDescTextAreaTop =
             state.descBoxHeight > state.descTextAreaHeight ?
-            state.descBoxHeight - state.descBoxPaddingTop -
+              state.descBoxHeight - state.descBoxPaddingTop -
             state.descTextAreaHeight : 0;
         const tempOffsetHeight =
             state.descBoxHeight > state.descTextAreaHeight ?
-            state.descTextAreaHeight - state.prevDescTextAreaHeight :
-            state.descBoxHeight - state.descBoxPaddingTop -
+              state.descTextAreaHeight - state.prevDescTextAreaHeight :
+              state.descBoxHeight - state.descBoxPaddingTop -
             state.prevDescTextAreaHeight;
         this.animateDescOverflow_(tempOffsetHeight, finalDescTextAreaTop);
       };
@@ -402,7 +402,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   animateDescOverflow_(diffTop, finalTop,
-                              duration = 500, curve = 'ease-out') {
+    duration = 500, curve = 'ease-out') {
     const textArea = dev().assertElement(this.descriptionTextArea_);
     const transition = tr.numeric(0, diffTop);
     return Animation.animate(textArea, time => {
@@ -646,7 +646,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       const rect = layoutRectFromDomRect(sourceImage
           ./*OK*/getBoundingClientRect());
       const imageBox = this.elementsMetadata_[this.currentElemId_]
-        .imageViewer.getImageBox();
+          .imageViewer.getImageBox();
 
       const clone = sourceImage.cloneNode(true);
       clone.className = '';

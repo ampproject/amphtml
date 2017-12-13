@@ -28,7 +28,7 @@ export function mixpo(global, data) {
 
   const g = global,
       cdnSubdomain = (data.subdomain == 'www') ?
-          'cdn' : data.subdomain + '-cdn',
+        'cdn' : data.subdomain + '-cdn',
       url = data.loader || `https://${cdnSubdomain}.mixpo.com/js/loader.js`;
 
   g.mixpoAd = {

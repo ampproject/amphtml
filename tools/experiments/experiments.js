@@ -28,7 +28,7 @@ import '../../src/service/timer-impl';
 initLogConstructor();
 setReportError(reportError);
 
-const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
+const COOKIE_MAX_AGE_DAYS = 180; // 6 month
 
 /**
  * @typedef {{
@@ -431,8 +431,8 @@ function toggleExperiment_(id, name, opt_on) {
   const on = opt_on === undefined ? !currentlyOn : opt_on;
   // Protect against click jacking.
   const confirmMessage = on ?
-      'Do you really want to activate the AMP experiment' :
-      'Do you really want to deactivate the AMP experiment';
+    'Do you really want to activate the AMP experiment' :
+    'Do you really want to deactivate the AMP experiment';
 
   showConfirmation_(`${confirmMessage}: "${name}"`, () => {
     if (id == CANARY_EXPERIMENT_ID) {

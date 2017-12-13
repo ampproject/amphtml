@@ -265,13 +265,13 @@ class FontComparator {
    */
   compare() {
     const hasWidthChanged = (
-        Math.abs(
-            this.defaultFontElement_./*OK*/offsetWidth -
+      Math.abs(
+          this.defaultFontElement_./*OK*/offsetWidth -
             this.testFontElement_./*OK*/offsetWidth) >
             TOLERANCE_);
     const hasHeightChanged = (
-        Math.abs(
-            this.defaultFontElement_./*OK*/offsetHeight -
+      Math.abs(
+          this.defaultFontElement_./*OK*/offsetHeight -
             this.testFontElement_./*OK*/offsetHeight) >
             TOLERANCE_);
     return (hasWidthChanged || hasHeightChanged);

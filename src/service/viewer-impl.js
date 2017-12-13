@@ -239,7 +239,7 @@ export class Viewer {
      * @private @const {boolean}
      */
     this.isEmbedded_ = !!(
-        this.isIframed_ && !this.win.AMP_TEST_IFRAME
+      this.isIframed_ && !this.win.AMP_TEST_IFRAME
         // Checking param "origin", as we expect all viewers to provide it.
         // See https://github.com/ampproject/amphtml/issues/4183
         // There appears to be a bug under investigation where the
@@ -269,14 +269,14 @@ export class Viewer {
      * @private @const {?Promise}
      */
     this.messagingReadyPromise_ = this.isEmbedded_ ?
-        Services.timerFor(this.win).timeoutPromise(
-            20000,
-            new Promise(resolve => {
-              this.messagingReadyResolver_ = resolve;
-            })).catch(reason => {
-              throw getChannelError(/** @type {!Error|string|undefined} */ (
-                  reason));
-            }) : null;
+      Services.timerFor(this.win).timeoutPromise(
+          20000,
+          new Promise(resolve => {
+            this.messagingReadyResolver_ = resolve;
+          })).catch(reason => {
+        throw getChannelError(/** @type {!Error|string|undefined} */ (
+          reason));
+      }) : null;
 
     /**
      * A promise for non-essential messages. These messages should not fail
@@ -286,12 +286,12 @@ export class Viewer {
      * @private @const {?Promise}
      */
     this.messagingMaybePromise_ = this.isEmbedded_ ?
-        this.messagingReadyPromise_
-            .catch(reason => {
-              // Don't fail promise, but still report.
-              reportError(getChannelError(
-                  /** @type {!Error|string|undefined} */ (reason)));
-            }) : null;
+      this.messagingReadyPromise_
+          .catch(reason => {
+            // Don't fail promise, but still report.
+            reportError(getChannelError(
+                /** @type {!Error|string|undefined} */ (reason)));
+          }) : null;
 
     // Trusted viewer and referrer.
     let trustedViewerResolved;
@@ -338,8 +338,8 @@ export class Viewer {
     this.unconfirmedReferrerUrl_ =
         this.isEmbedded() && 'referrer' in this.params_ &&
             trustedViewerResolved !== false ?
-        this.params_['referrer'] :
-        this.win.document.referrer;
+          this.params_['referrer'] :
+          this.win.document.referrer;
 
     /** @const @private {!Promise<string>} */
     this.referrerUrl_ = new Promise(resolve => {
@@ -925,10 +925,10 @@ export class Viewer {
       // "Thenables". Convert from these values into trusted Promise instances,
       // assimilating with the resolved (or rejected) internal value.
       return /** @type {!Promise<?JsonObject|string|undefined>} */ (
-          Promise.resolve(this.messageDeliverer_(
-              eventType,
-              /** @type {?JsonObject|string|undefined} */ (data),
-              awaitResponse)));
+        Promise.resolve(this.messageDeliverer_(
+            eventType,
+            /** @type {?JsonObject|string|undefined} */ (data),
+            awaitResponse)));
     }
 
     if (!this.messagingReadyPromise_) {

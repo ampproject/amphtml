@@ -209,7 +209,7 @@ export class Xhr {
 
       return viewer.sendMessageAwaitResponse('xhr', messagePayload)
           .then(response =>
-              this.fromStructuredCloneable_(response, init.responseType));
+            this.fromStructuredCloneable_(response, init.responseType));
     });
   }
 
@@ -500,7 +500,7 @@ export class Xhr {
   fetch(input, opt_init) {
     const init = setupInit(opt_init);
     return this.fetchAmpCors_(input, init).then(response =>
-        assertSuccess(response));
+      assertSuccess(response));
   }
 
   /**
@@ -751,7 +751,7 @@ export class FetchResponse {
    */
   json() {
     return /** @type {!Promise<!JsonObject>} */ (
-        this.drainText_().then(parseJson));
+      this.drainText_().then(parseJson));
   }
 
   /**
@@ -766,7 +766,7 @@ export class FetchResponse {
         'responseXML should exist. Make sure to return ' +
         'Content-Type: text/html header.');
     return /** @type {!Promise<!Document>} */ (
-        Promise.resolve(dev().assert(this.xhr_.responseXML)));
+      Promise.resolve(dev().assert(this.xhr_.responseXML)));
   }
 
   /**
@@ -776,7 +776,7 @@ export class FetchResponse {
    */
   arrayBuffer() {
     return /** @type {!Promise<!ArrayBuffer>} */ (
-        this.drainText_().then(utf8EncodeSync));
+      this.drainText_().then(utf8EncodeSync));
   }
 }
 

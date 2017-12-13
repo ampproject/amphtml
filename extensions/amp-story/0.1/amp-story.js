@@ -246,10 +246,10 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeListenersForDev_();
 
     this.navigationState_.observe(stateChangeEvent =>
-        (new AmpStoryAnalytics(this.element)).onStateChange(stateChangeEvent));
+      (new AmpStoryAnalytics(this.element)).onStateChange(stateChangeEvent));
 
     this.navigationState_.observe(stateChangeEvent =>
-        this.variableService_.onStateChange(stateChangeEvent));
+      this.variableService_.onStateChange(stateChangeEvent));
 
     // Mute `amp-story` in beginning.
     this.mute_();
@@ -695,7 +695,7 @@ export class AmpStory extends AMP.BaseElement {
     // with upstream.
     Services.actionServiceForDoc(this.element)
         .trigger(this.activePage_.element, 'active', /* event */ null,
-        ActionTrust.HIGH);
+            ActionTrust.HIGH);
   }
 
 
@@ -873,7 +873,7 @@ export class AmpStory extends AMP.BaseElement {
     const srcElement = scopedQuerySelector(fillElement, '[src]');
 
     const fillPoster = fillPosterElement ?
-        fillPosterElement.getAttribute('poster') : '';
+      fillPosterElement.getAttribute('poster') : '';
     const src = srcElement ? srcElement.getAttribute('src') : '';
 
     return fillPoster || src;

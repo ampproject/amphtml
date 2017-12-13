@@ -83,8 +83,8 @@ export class Resource {
    */
   static forElement(element) {
     return /** @type {!Resource} */ (
-        dev().assert(Resource.forElementOptional(element),
-            'Missing resource prop on %s', element));
+      dev().assert(Resource.forElementOptional(element),
+          'Missing resource prop on %s', element));
   }
 
   /**
@@ -152,7 +152,7 @@ export class Resource {
 
     /** @private {!ResourceState} */
     this.state_ = element.isBuilt() ? ResourceState.NOT_LAID_OUT :
-        ResourceState.NOT_BUILT;
+      ResourceState.NOT_BUILT;
 
     /** @private {number} */
     this.priorityOverride_ = -1;
@@ -184,7 +184,7 @@ export class Resource {
     /** @private {?Promise<undefined>} */
     this.layoutPromise_ = null;
 
-   /**
+    /**
     * Pending change size that was requested but could not be satisfied.
     * @private {!./resources-impl.SizeDef|undefined}
     */
@@ -360,7 +360,7 @@ export class Resource {
    *     requestedMargins
    */
   overflowCallback(overflown, requestedHeight, requestedWidth,
-      requestedMargins) {
+    requestedMargins) {
     if (overflown) {
       this.pendingChangeSize_ = {
         height: requestedHeight,
@@ -713,8 +713,8 @@ export class Resource {
   layoutCanceled() {
     this.state_ =
         this.hasBeenMeasured() ?
-        ResourceState.READY_FOR_LAYOUT :
-        ResourceState.NOT_LAID_OUT;
+          ResourceState.READY_FOR_LAYOUT :
+          ResourceState.NOT_LAID_OUT;
   }
 
   /**
@@ -777,7 +777,7 @@ export class Resource {
     this.layoutPromise_ = null;
     this.loadedOnce_ = true;
     this.state_ = success ? ResourceState.LAYOUT_COMPLETE :
-        ResourceState.LAYOUT_FAILED;
+      ResourceState.LAYOUT_FAILED;
     this.lastLayoutError_ = opt_reason;
     if (success) {
       dev().fine(TAG, 'layout complete:', this.debugid);

@@ -1091,7 +1091,7 @@ describe('Resources discoverWork', () => {
       document,
       getComputedStyle: el => {
         return el.fakeComputedStyle ?
-            el.fakeComputedStyle : window.getComputedStyle(el);
+          el.fakeComputedStyle : window.getComputedStyle(el);
       },
     };
 
@@ -1263,7 +1263,7 @@ describe('Resources discoverWork', () => {
     expect(resource1.isMeasureRequested()).to.be.true;
     expect(resource2.isMeasureRequested()).to.be.true;
     resource2.element.getBoundingClientRect =
-        () => layoutRectLtwh(0, 0, 0, 0);  // Equiv to display:none.
+        () => layoutRectLtwh(0, 0, 0, 0); // Equiv to display:none.
     resources.discoverWork_();
     expect(resource1MeasureStub).to.have.callCount(2);
     expect(resource1UnloadStub).to.have.not.been.called;
@@ -1758,7 +1758,7 @@ describe('Resources changeSize', () => {
     resources.win = {
       getComputedStyle: el => {
         return el.fakeComputedStyle ?
-            el.fakeComputedStyle : window.getComputedStyle(el);
+          el.fakeComputedStyle : window.getComputedStyle(el);
       },
     };
     viewportMock = sandbox.mock(resources.viewport_);
@@ -2659,7 +2659,7 @@ describe('Resources mutateElement and collapse', () => {
 
   it('attemptCollapse should complete collapse if resize succeed', () => {
     sandbox.stub(resources, 'scheduleChangeSize_', (resource, newHeight,
-        newWidth, newMargins, force, callback) => {
+      newWidth, newMargins, force, callback) => {
       callback(true);
     });
     resources.attemptCollapse(resource1.element);
@@ -2668,7 +2668,7 @@ describe('Resources mutateElement and collapse', () => {
 
   it('attemptCollapse should NOT complete collapse if resize fail', () => {
     sandbox.stub(resources, 'scheduleChangeSize_', (resource, newHeight,
-        newWidth, newMargins, force, callback) => {
+      newWidth, newMargins, force, callback) => {
       callback(false);
     });
     resources.attemptCollapse(resource1.element);

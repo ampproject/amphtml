@@ -246,9 +246,9 @@ export class Performance {
     this.whenViewportLayoutComplete_().then(() => {
       if (didStartInPrerender) {
         const userPerceivedVisualCompletenesssTime = docVisibleTime > -1
-            ? (this.win.Date.now() - docVisibleTime)
-            //  Prerender was complete before visibility.
-            : 0;
+          ? (this.win.Date.now() - docVisibleTime)
+          //  Prerender was complete before visibility.
+          : 0;
         this.viewer_.whenFirstVisible().then(() => {
           // We only tick this if the page eventually becomes visible,
           // since otherwise we heavily skew the metric towards the

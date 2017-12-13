@@ -24,7 +24,7 @@ export function caajainfeed(global, data) {
 
   validateData(
       data,
-    [],
+      [],
       [
         'adSpot',
         'format',

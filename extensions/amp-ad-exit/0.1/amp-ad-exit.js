@@ -181,7 +181,7 @@ export class AmpAdExit extends AMP.BaseElement {
           // Either it's not a 3p analytics variable, or it is one
           // but no matching response has been received yet.
           return (customVarName in args) ?
-              args[customVarName] : customVar.defaultValue;
+            args[customVarName] : customVar.defaultValue;
         };
         whitelist[customVarName] = true;
       }

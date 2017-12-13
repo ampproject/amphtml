@@ -387,7 +387,7 @@ export class AmpLiveList extends AMP.BaseElement {
       } else {
         const orphanSortTime = this.getSortTime_(orphan);
         for (let child = this.itemsSlot_.firstElementChild; child;
-            child = child.nextElementSibling) {
+          child = child.nextElementSibling) {
           const childSortTime = this.getSortTime_(child);
           if (orphanSortTime >= childSortTime) {
             this.itemsSlot_.insertBefore(orphan, child);
@@ -482,7 +482,7 @@ export class AmpLiveList extends AMP.BaseElement {
     // Only accumulate the items in this loop. Removing them here
     // will break the prev reference.
     for (let child = parent.lastElementChild; child;
-        child = child.previousElementSibling) {
+      child = child.previousElementSibling) {
       if (deleteItemsCandidates.length >= numOfItemsToDelete) {
         break;
       }
@@ -606,7 +606,7 @@ export class AmpLiveList extends AMP.BaseElement {
     const tombstone = [];
 
     for (let child = updatedElement.firstElementChild; child;
-        child = child.nextElementSibling) {
+      child = child.nextElementSibling) {
       const id = child.getAttribute('id');
 
       if (this.isChildNew_(child)) {
@@ -762,7 +762,7 @@ export class AmpLiveList extends AMP.BaseElement {
    */
   eachChildElement_(parent, cb) {
     for (let child = parent.firstElementChild; child;
-        child = child.nextElementSibling) {
+      child = child.nextElementSibling) {
       cb(child);
     }
   }
