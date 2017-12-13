@@ -24,7 +24,7 @@ import {
 import {tryParseJson} from '../../../src/json';
 import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {dev, user} from '../../../src/log';
+import {dev} from '../../../src/log';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
@@ -59,6 +59,8 @@ const PlayerFlags = {
   HIDE_ANNOTATION: 3,
 };
 
+const TAG = 'amp-youtube';
+
 /**
  * @implements {../../../src/video-interface.VideoInterface}
  */
@@ -72,6 +74,9 @@ class AmpYoutube extends AMP.BaseElement {
 
     /** @private {?string}  */
     this.videoid_ = null;
+
+    /** @private {?string} */
+    this.liveChannelid_ = null;
 
     /** @private {?boolean}  */
     this.muted_ = false;
@@ -130,6 +135,13 @@ class AmpYoutube extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.videoid_ = this.getVideoId_();
+    this.liveChannelid_ = this.getLiveChannelId_();
+
+    if ((this.videoid_ && this.liveChannelid_)
+      || !(this.videoid_ || this.liveChannelid_)) {
+      dev().error(TAG, 'Exactly one of data-videoid or data-live-channel-id'
+        + ' should be present.');
+    }
 
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
@@ -156,7 +168,12 @@ class AmpYoutube extends AMP.BaseElement {
     if (this.getCredentials_() === 'omit') {
       urlSuffix = '-nocookie';
     }
-    return `https://www.youtube${urlSuffix}.com/embed/${encodeURIComponent(this.videoid_ || '')}?enablejsapi=1`;
+
+    if (this.videoid_) {
+      return `https://www.youtube${urlSuffix}.com/embed/${encodeURIComponent(this.videoid_ || '')}?enablejsapi=1`;
+    } else {
+      return `https://www.youtube.com/embed/live_stream?channel=${encodeURIComponent(this.liveChannelid_ || '')}?enablejsapi=1`;
+    }
   }
 
   /** @return {string} */
@@ -164,7 +181,7 @@ class AmpYoutube extends AMP.BaseElement {
     if (this.videoIframeSrc_) {
       return this.videoIframeSrc_;
     }
-    dev().assert(this.videoid_);
+    dev().assert(this.videoid_ || this.liveChannelid_);
     let src = this.getEmbedUrl_();
 
     const params = getDataParamsFromAttributes(this.element);
@@ -268,16 +285,20 @@ class AmpYoutube extends AMP.BaseElement {
       }
     }
   }
+  /**
+   * @return {?string}
+   * @private
+   */
+  getLiveChannelId_() {
+    return this.element.getAttribute('data-live-channelid');
+  }
 
   /**
-   * @return {string}
+   * @return {?string}
    * @private
    */
   getVideoId_() {
-    return user().assert(
-        this.element.getAttribute('data-videoid'),
-        'The data-videoid attribute is required for <amp-youtube> %s',
-        this.element);
+    return this.element.getAttribute('data-videoid');
   }
 
   /**
@@ -361,9 +382,12 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @private */
   buildImagePlaceholder_() {
+    // TODO: add custom placeholder logic for live channels
+    // There is currently no way to get a placeholder image from
+    // the channel id without accessing the Youtube Data API.
     const imgPlaceholder = this.element.ownerDocument.createElement('img');
-    dev().assert(this.videoid_);
-    const videoid = this.videoid_ || '';
+    dev().assert(this.videoid_ || this.liveChannelid_);
+    const videoid = this.videoid_ || this.liveChannelid_ || '';
 
     setStyles(imgPlaceholder, {
       // Cover matches YouTube Player styling.
