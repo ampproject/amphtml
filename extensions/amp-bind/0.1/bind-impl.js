@@ -342,7 +342,7 @@ export class Bind {
   addMacros_() {
     const elements =
         scopedQuerySelectorAll(this.ampdoc.getBody(), 'AMP-BIND-MACRO');
-    const macros = /** @type {!Array<!AmpMacroDef>} */ [];
+    const macros = /** @type {!Array<!./amp-bind-macro.AmpMacroDef>} */ ([]);
     iterateCursor(elements, element => {
       const argumentNames = (element.getAttribute('arguments') || '')
           .split(',')

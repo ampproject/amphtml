@@ -256,15 +256,15 @@ export class BindExpression {
    * @private
    */
   isMacroInvocationNode_(ast) {
-    return ast.type === AstNodeType.INVOCATION && !ast.args[0] &&
-        this.macros_[String(ast.value)];
+    return !!(ast.type === AstNodeType.INVOCATION && !ast.args[0] &&
+        this.macros_[String(ast.value)]);
   }
 
   /**
    * Gets the array of nodes for the arguments of the provided INVOCATION
    * node, without the wrapping ARGS node and ARRAY node.
    * @param {!./bind-expr-defines.AstNode} ast
-   * @return {!Array<!./bind-expr-defines.AstNode>}
+   * @return {!Array<./bind-expr-defines.AstNode>}
    * @private
    */
   getInvocationArgNodes_(ast) {
@@ -275,11 +275,10 @@ export class BindExpression {
       } else if (argsNode.args.length === 1 &&
         argsNode.args[0].type === AstNodeType.ARRAY) {
         const arrayNode = argsNode.args[0];
-        return arrayNode.args;
+        return arrayNode.args || [];
       }
-    } else {
-      return ast.args;
     }
+    return ast.args || [];
   }
 
   /**

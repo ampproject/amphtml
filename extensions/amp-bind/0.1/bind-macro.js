@@ -23,7 +23,7 @@ export class BindMacro {
 
   /**
    * @param {!./amp-bind-macro.AmpMacroDef} ampMacro
-   * @param {Object<string, BindMacro} otherMacros
+   * @param {!Object<string, !BindMacro>} otherMacros
    */
   constructor(ampMacro, otherMacros) {
     /** @const @private {!Array<string>} */
@@ -37,7 +37,7 @@ export class BindMacro {
    * @param {!Object} state
    * @param {!Array} args
    * @throws {Error} On illegal function invocation.
-   * @return {BindExpressionResultDef}
+   * @return {./bind-expression.BindExpressionResultDef}
    */
   evaluate(state, args) {
     const scope = Object.assign({}, state);
