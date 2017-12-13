@@ -36,7 +36,7 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS = 4;
 // production use. During development we intent to continue using
 // babel, as it has much faster incremental compilation.
 exports.closureCompile = function(entryModuleFilename, outputDir,
-    outputFilename, options) {
+  outputFilename, options) {
   // Rate limit closure compilation to MAX_PARALLEL_CLOSURE_INVOCATIONS
   // concurrent processes.
   return new Promise(function(resolve) {
@@ -86,7 +86,7 @@ function cleanupBuildDir() {
 exports.cleanupBuildDir = cleanupBuildDir;
 
 function compile(entryModuleFilenames, outputDir,
-    outputFilename, options) {
+  outputFilename, options) {
   return new Promise(function(resolve) {
     let entryModuleFilename;
     if (entryModuleFilenames instanceof Array) {
@@ -245,7 +245,7 @@ function compile(entryModuleFilenames, outputDir,
       compilerPath: 'build-system/runner/dist/runner.jar',
       fileName: intermediateFilename,
       continueWithWarnings: false,
-      tieredCompilation: true,  // Magic speed up.
+      tieredCompilation: true, // Magic speed up.
       compilerFlags: {
         compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
         // Turns on more optimizations.
@@ -347,17 +347,17 @@ function compile(entryModuleFilenames, outputDir,
     // If we're only doing type checking, no need to output the files.
     if (!argv.typecheck_only) {
       stream = stream
-        .pipe(rename(outputFilename))
-        .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
-        .pipe(replace(/\$internalRuntimeToken\$/g, internalRuntimeToken))
-        .pipe(shortenLicense())
-        .pipe(gulp.dest(outputDir))
-        .on('end', function() {
-          gulp.src(intermediateFilename + '.map')
-              .pipe(rename(outputFilename + '.map'))
-              .pipe(gulp.dest(outputDir))
-              .on('end', resolve);
-        });
+          .pipe(rename(outputFilename))
+          .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
+          .pipe(replace(/\$internalRuntimeToken\$/g, internalRuntimeToken))
+          .pipe(shortenLicense())
+          .pipe(gulp.dest(outputDir))
+          .on('end', function() {
+            gulp.src(intermediateFilename + '.map')
+                .pipe(rename(outputFilename + '.map'))
+                .pipe(gulp.dest(outputDir))
+                .on('end', resolve);
+          });
     }
     return stream;
   });

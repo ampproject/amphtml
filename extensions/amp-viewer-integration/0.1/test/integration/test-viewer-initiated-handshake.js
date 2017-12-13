@@ -15,7 +15,7 @@
  */
 
 import {
-    WebviewViewerForTesting,
+  WebviewViewerForTesting,
 } from '../viewer-initiated-handshake-viewer-for-testing';
 
 

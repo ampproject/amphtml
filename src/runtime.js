@@ -66,9 +66,9 @@ import {installStylesForDoc} from './style-installer';
 import {installTimerService} from './service/timer-impl';
 import {installTemplatesService} from './service/template-impl';
 import {installUrlReplacementsServiceForDoc} from
-    './service/url-replacements-impl';
+  './service/url-replacements-impl';
 import {installViewerServiceForDoc, setViewerVisibilityState} from
-    './service/viewer-impl';
+  './service/viewer-impl';
 import {installViewportServiceForDoc} from './service/viewport/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';

@@ -20,7 +20,7 @@ import {AmpMustache} from '../../../../amp-mustache/0.1/amp-mustache';
 import {listenOncePromise} from '../../../../../src/event-helper';
 import {poll} from '../../../../../testing/iframe';
 import {registerExtendedTemplate} from
-    '../../../../../src/service/template-impl';
+  '../../../../../src/service/template-impl';
 
 /** @const {number} */
 const RENDER_TIMEOUT = 15000;

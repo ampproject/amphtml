@@ -593,7 +593,7 @@ function createBaseCustomElementClass(win) {
           this.layout_ === Layout.RESPONSIVE) {
         const heightsAttr = this.getAttribute('heights');
         this.heightsList_ = heightsAttr ?
-            parseSizeList(heightsAttr, /* allowPercent */ true) : null;
+          parseSizeList(heightsAttr, /* allowPercent */ true) : null;
       }
       if (this.heightsList_) {
         const sizer = this.getSizer_();
@@ -970,7 +970,7 @@ function createBaseCustomElementClass(win) {
       dev().assert(this.isBuilt(),
           'Must be built to receive viewport events');
       this.dispatchCustomEventForTesting(AmpEvents.LOAD_START);
-      const isLoadEvent = (this.layoutCount_ == 0);  // First layout is "load".
+      const isLoadEvent = (this.layoutCount_ == 0); // First layout is "load".
       this.signals_.reset(CommonSignals.UNLOAD);
       if (isLoadEvent) {
         this.signals_.signal(CommonSignals.LOAD_START);
@@ -1426,8 +1426,8 @@ function createBaseCustomElementClass(win) {
      */
     isInA4A_() {
       return (
-          // in FIE
-          this.ampdoc_ && this.ampdoc_.win != this.ownerDocument.defaultView ||
+      // in FIE
+        this.ampdoc_ && this.ampdoc_.win != this.ownerDocument.defaultView ||
 
           // in inabox
           getMode().runtime == 'inabox');
@@ -1634,7 +1634,7 @@ function isInternalOrServiceNode(node) {
  * @return {!Object} Prototype of element.
  */
 export function createAmpElementProtoForTesting(
-    win, name, opt_implementationClass) {
+  win, name, opt_implementationClass) {
   const ElementProto = createCustomElementClass(win, name).prototype;
   if (getMode().test && opt_implementationClass) {
     ElementProto.implementationClassForTesting = opt_implementationClass;
