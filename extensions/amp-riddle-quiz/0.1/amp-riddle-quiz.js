@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import {removeElement} from '../../../src/dom';
 import {getData, listen} from './../../../src/event-helper';
 import {isObject, isFiniteNumber} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -29,7 +29,7 @@ export class AmpRiddleQuiz extends AMP.BaseElement {
     this.iframe_ = null;
 
     /** @private {?number} */
-    this.itemHeight_ = 300; //default
+    this.itemHeight_ = 400; //default
 
     /** @private {?number} */
     this.riddleId_ = null;
@@ -42,7 +42,8 @@ export class AmpRiddleQuiz extends AMP.BaseElement {
   }
 
   handleMessage_(event) {
-    if (event.origin != 'https://www.riddle.com' ||
+    if (!this.iframe_ ||
+        event.origin != 'https://www.riddle.com' ||
         event.source != this.iframe_.contentWindow) {
       return;
     }
@@ -88,15 +89,18 @@ export class AmpRiddleQuiz extends AMP.BaseElement {
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
 
-    return this.loadPromise(iframe).then(function() {
-      this.attemptChangeHeight(this.itemHeight_).catch(() => { /* die */ });
-    }.bind(this));
+    return this.loadPromise(iframe);
   }
 
   /** @override */
   unlayoutCallback() {
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
+    }
+
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
     }
 
     return true;  // Call layoutCallback again.
