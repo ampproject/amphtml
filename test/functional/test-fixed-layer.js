@@ -567,7 +567,7 @@ describe('FixedLayer', () => {
       element5.computedStyle['position'] = 'sticky';
       element5.offsetWidth = 10;
       element5.offsetHeight = 10;
-      element1.computedStyle['display'] = 'none';
+      element5.computedStyle['display'] = 'none';
 
       expect(vsyncTasks).to.have.length(1);
       const state = {};
