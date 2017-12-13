@@ -1,4 +1,4 @@
-# Why not just use an iframe? 
+# Why not just use an iframe?
 
 With AMP, The AMP Project decided to encourage the use of the AMP Analytics system instead of relegating analytics providers to a separate iframe.  This was done for a number of reasons, including:
 * **Performance:** Ultimately, the major driver is performance.  By centralizing client-side code, AMP Analytics is able to remove duplication of effort in collecting data points between analytics providers, thus improving runtime performance.
