@@ -35,7 +35,12 @@ tags: {  # <amp-youtube>
   }
   attrs: {
     name: "data-videoid"
-    mandatory: true
+    mandatory_oneof: "['data-videoid', 'data-live-channelid']"
+    value_regex: "[^=/?:]+"
+  }
+  attrs: {
+    name: "data-live-channelid"
+    mandatory_oneof: "['data-videoid', 'data-live-channelid']"
     value_regex: "[^=/?:]+"
   }
   # <amp-bind>
