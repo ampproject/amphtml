@@ -192,9 +192,9 @@ export class AbstractAmpContext {
     const unlisten = this.client_.registerCallback(
         MessageType.GET_HTML_RESULT,
         result => {
-          if (result.messageId && (result.messageId == messageId)) {
+          if (result['messageId'] && (result['messageId'] == messageId)) {
             unlisten();
-            callback(result.content);
+            callback(result['content']);
           }
         });
 
