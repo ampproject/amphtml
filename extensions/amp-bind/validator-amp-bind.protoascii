@@ -83,14 +83,14 @@ tags: {  # <amp-bind-macro>
   tag_name: "AMP-BIND-MACRO"
   requires_extension: "amp-bind"
   attrs: {
-    name: "id"
-    mandatory: true
-  }
-  attrs: {
     name: "arguments"
   }
   attrs: {
     name: "expression"
+    mandatory: true
+  }
+  attrs: {
+    name: "id"
     mandatory: true
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
