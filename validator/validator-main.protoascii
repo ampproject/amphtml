@@ -720,6 +720,26 @@ tags: {
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 }
+# AMP metadata, name=amp-ad-enable-refresh
+# Enables Refresh for amp-ad doubleclick Fast Fetch
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "META"
+  spec_name: "meta name=amp-ad-enable-refresh"
+  mandatory_ancestor: "HEAD"
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-ad-enable-refresh"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+}
+
 
 # 4.2.6 The style
 # Text contents of the style tag will be validated seperately.
