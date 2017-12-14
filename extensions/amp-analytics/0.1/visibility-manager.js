@@ -231,7 +231,7 @@ export class VisibilityManager {
    * @return {!UnlistenDef}
    */
   listenElement(
-      element, spec, readyPromise, createReportPromiseFunc, callback) {
+    element, spec, readyPromise, createReportPromiseFunc, callback) {
     const calcVisibility = this.getElementVisibility.bind(this, element);
     return this.createModelAndListen_(calcVisibility, spec, readyPromise,
         createReportPromiseFunc, callback, element);
@@ -248,7 +248,7 @@ export class VisibilityManager {
    * @return {!UnlistenDef}
    */
   createModelAndListen_(calcVisibility, spec,
-      readyPromise, createReportPromiseFunc, callback, opt_element) {
+    readyPromise, createReportPromiseFunc, callback, opt_element) {
     if (spec['visiblePercentageThresholds'] &&
         spec['visiblePercentageMin'] == undefined &&
         spec['visiblePercentageMax'] == undefined) {
@@ -306,7 +306,7 @@ export class VisibilityManager {
    * @private
    */
   listen_(model, spec,
-      readyPromise, createReportPromiseFunc, callback, opt_element) {
+    readyPromise, createReportPromiseFunc, callback, opt_element) {
     // Block visibility.
     if (readyPromise) {
       model.setReady(false);
@@ -337,8 +337,8 @@ export class VisibilityManager {
             this.resources_.getResourceForElementOptional(opt_element);
         layoutBox =
             resource ?
-            resource.getLayoutBox() :
-            Services.viewportForDoc(this.ampdoc).getLayoutRect(opt_element);
+              resource.getLayoutBox() :
+              Services.viewportForDoc(this.ampdoc).getLayoutRect(opt_element);
         const intersectionRatio = this.getElementVisibility(opt_element);
         const intersectionRect = this.getElementIntersectionRect(opt_element);
         Object.assign(state, {

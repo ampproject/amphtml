@@ -292,12 +292,12 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
     window.AMP_MODE = {};
     let match =
         /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame\.html$/
-        .exec(getDefaultBootstrapBaseUrl(window));
+            .exec(getDefaultBootstrapBaseUrl(window));
     const domain = match && match[1];
     expect(domain).to.be.ok;
     match =
         /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame2\.html$/
-        .exec(getDefaultBootstrapBaseUrl(window, 'frame2'));
+            .exec(getDefaultBootstrapBaseUrl(window, 'frame2'));
     expect(match && match[1]).to.equal(domain);
   });
 

@@ -129,7 +129,7 @@ export function getTrackerKeyName(eventType) {
     return 'custom';
   }
   return TRACKER_TYPE.hasOwnProperty(eventType) ?
-      TRACKER_TYPE[eventType].name : eventType;
+    TRACKER_TYPE[eventType].name : eventType;
 }
 
 /**
@@ -276,8 +276,8 @@ export class CustomEventTracker extends EventTracker {
 
     // Push recent events if any.
     const buffer = isSandboxEvent ?
-        this.sandboxBuffer_ && this.sandboxBuffer_[eventType] :
-        this.buffer_ && this.buffer_[eventType];
+      this.sandboxBuffer_ && this.sandboxBuffer_[eventType] :
+      this.buffer_ && this.buffer_[eventType];
 
     if (buffer) {
       const bufferLength = buffer.length;
@@ -434,10 +434,10 @@ export class SignalTracker extends EventTracker {
           (context.parentElement || context),
           selector,
           selectionMethod
-          ).then(element => {
-            target = element;
-            return this.getElementSignal(eventType, target);
-          });
+      ).then(element => {
+        target = element;
+        return this.getElementSignal(eventType, target);
+      });
     }
 
     // Wait for the target and the event signal.
@@ -494,10 +494,10 @@ export class IniLoadTracker extends EventTracker {
           (context.parentElement || context),
           selector,
           selectionMethod
-          ).then(element => {
-            target = element;
-            return this.getElementSignal('ini-load', target);
-          });
+      ).then(element => {
+        target = element;
+        return this.getElementSignal('ini-load', target);
+      });
     }
     // Wait for the target and the event.
     promise.then(() => {
@@ -549,7 +549,7 @@ class TimerEventHandler {
 
     /** @private @const {number} */
     this.maxTimerLength_ = 'maxTimerLength' in timerSpec ?
-        Number(timerSpec['maxTimerLength']) : DEFAULT_MAX_TIMER_LENGTH_SECONDS;
+      Number(timerSpec['maxTimerLength']) : DEFAULT_MAX_TIMER_LENGTH_SECONDS;
     user().assert(this.maxTimerLength_ > 0, 'Bad maxTimerLength specification');
 
     /** @private @const {boolean} */
@@ -557,7 +557,7 @@ class TimerEventHandler {
 
     /** @private @const {boolean} */
     this.callImmediate_ = 'immediate' in timerSpec ?
-        Boolean(timerSpec['immediate']) : true;
+      Boolean(timerSpec['immediate']) : true;
 
     /** @private {?UnlistenDef} */
     this.unlistenStart_ = null;
@@ -974,14 +974,14 @@ export class VisibilityTracker extends EventTracker {
         (context.parentElement || context),
         selector,
         selectionMethod
-        ).then(element => {
-          return visibilityManager.listenElement(
-              element,
-              visibilitySpec,
-              this.getReadyPromise(waitForSpec, selector, element),
-              createReadyReportPromiseFunc,
-              this.onEvent_.bind(this, eventType, listener, element));
-        });
+    ).then(element => {
+      return visibilityManager.listenElement(
+          element,
+          visibilitySpec,
+          this.getReadyPromise(waitForSpec, selector, element),
+          createReadyReportPromiseFunc,
+          this.onEvent_.bind(this, eventType, listener, element));
+    });
     return function() {
       unlistenPromise.then(unlisten => {
         unlisten();
@@ -1031,7 +1031,7 @@ export class VisibilityTracker extends EventTracker {
     const trackerWhitelist = getTrackerTypesForParentType('visible');
     user().assert(waitForSpec == 'none' ||
         trackerWhitelist[waitForSpec] !== undefined,
-        'waitFor value %s not supported', waitForSpec);
+    'waitFor value %s not supported', waitForSpec);
 
     const waitForTracker = this.waitForTrackers_[waitForSpec] ||
         this.root.getTrackerForWhitelist(waitForSpec, trackerWhitelist);
@@ -1043,8 +1043,8 @@ export class VisibilityTracker extends EventTracker {
 
     // Wait for root signal if there's no element selected.
     return opt_element ?
-        waitForTracker.getElementSignal(waitForSpec, opt_element)
-        : waitForTracker.getRootSignal(waitForSpec);
+      waitForTracker.getElementSignal(waitForSpec, opt_element)
+      : waitForTracker.getRootSignal(waitForSpec);
   }
 
   /**

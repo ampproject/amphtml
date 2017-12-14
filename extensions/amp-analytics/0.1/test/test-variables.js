@@ -56,23 +56,23 @@ describe('amp-analytics.VariableService', function() {
     it('expands zeros', () => {
       return variables.expandTemplate('${5}', new ExpansionOptions(vars))
           .then(actual =>
-          expect(actual).to.equal('0')
-      );
+            expect(actual).to.equal('0')
+          );
     });
 
     it('expands nested vars', () => {
       return variables.expandTemplate('${1}', new ExpansionOptions(vars))
           .then(actual =>
-          expect(actual).to.equal('123%24%7B4%7D')
-      );
+            expect(actual).to.equal('123%24%7B4%7D')
+          );
     });
 
     it('expands nested vars (no encode)', () => {
       return variables.expandTemplate('${1}',
           new ExpansionOptions(vars, undefined, true))
           .then(actual =>
-          expect(actual).to.equal('123${4}')
-        );
+            expect(actual).to.equal('123${4}')
+          );
     });
 
     it('expands nested vars without double encoding', () => {
@@ -84,19 +84,19 @@ describe('amp-analytics.VariableService', function() {
     it('limits the recursion to n', () => {
       return variables.expandTemplate('${1}', new ExpansionOptions(vars, 3))
           .then(actual =>
-          expect(actual).to.equal('1234%24%7B1%7D'))
+            expect(actual).to.equal('1234%24%7B1%7D'))
           .then(() =>
-          variables.expandTemplate('${1}', new ExpansionOptions(vars, 5))
-              .then(actual => expect(actual).to
-                  .equal('123412%24%7B3%7D')
-      ));
+            variables.expandTemplate('${1}', new ExpansionOptions(vars, 5))
+                .then(actual => expect(actual).to
+                    .equal('123412%24%7B3%7D')
+                ));
     });
 
     it('works with complex params (1)', () => {
       const vars = new ExpansionOptions({'fooParam': 'QUERY_PARAM(foo,bar)'});
       return variables.expandTemplate('${fooParam}', vars)
           .then(actual =>
-          expect(actual).to.equal('QUERY_PARAM(foo,bar)'));
+            expect(actual).to.equal('QUERY_PARAM(foo,bar)'));
     });
 
     it('works with complex params (2)', () => {
@@ -118,9 +118,9 @@ describe('amp-analytics.VariableService', function() {
   });
 
   it('default filterdoesn\'t work when experiment is off' , () =>
-      variables.expandTemplate('${bar|default:baz}',
-          new ExpansionOptions({'foo': ' Hello world! '}))
-          .then(actual => expect(actual).to.equal('')));
+    variables.expandTemplate('${bar|default:baz}',
+        new ExpansionOptions({'foo': ' Hello world! '}))
+        .then(actual => expect(actual).to.equal('')));
 
   describe('filter:', () => {
     const vars = new ExpansionOptions({'foo': ' Hello world! '});
@@ -131,7 +131,7 @@ describe('amp-analytics.VariableService', function() {
 
     function check(input, output) {
       return variables.expandTemplate(input, vars).then(actual =>
-          expect(actual).to.equal(output));
+        expect(actual).to.equal(output));
     }
 
     it('default works', () => check('${bar|default:baz}', 'baz'));
@@ -148,7 +148,7 @@ describe('amp-analytics.VariableService', function() {
       check('${foo|json}', '%22%20Hello%20world!%20%22'));
 
     it('toLowerCase works', () =>
-        check('${foo|toLowerCase}', '%20hello%20world!%20'));
+      check('${foo|toLowerCase}', '%20hello%20world!%20'));
 
     it('toUpperCase works', () => {
       return check('${foo|toUpperCase}', '%20HELLO%20WORLD!%20');
@@ -171,7 +171,7 @@ describe('amp-analytics.VariableService', function() {
         check('${foo|substr:6|trim|toUpperCase|base64}', 'V09STEQh')).then(() =>
         check('${foo|substr:6|trim|toUpperCase|base64|hash}',
             'OPTTt2IGW8-R31MrIF_cRUwLTZ9jLDOXEuhNz_QS7Uc5ZmODduHWdplzrZ7Jsnqx')
-        );
+      );
     });
   });
 

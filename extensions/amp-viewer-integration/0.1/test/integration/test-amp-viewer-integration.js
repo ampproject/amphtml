@@ -133,8 +133,8 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           ampViewerIntegration.unconfirmedViewerOrigin_ = '';
           ampViewerIntegration.openChannelAndStart_(
               viewer, env.ampdoc, origin, messaging).then(() => {
-                expect(initTouchHandlerStub).to.be.called;
-              });
+            expect(initTouchHandlerStub).to.be.called;
+          });
         });
       });
     });
@@ -156,7 +156,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
       });
 
       const port = new WindowPortEmulator(
-        window, viewerOrigin);
+          window, viewerOrigin);
       port.addEventListener = function() {};
       port.postMessage = function() {};
 
