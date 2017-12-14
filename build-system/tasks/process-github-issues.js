@@ -85,23 +85,6 @@ function processIssues() {
   });
 }
 /**
- * Fetches all milestones
- *
- * @return {!Promise<*>}
- */
-function geMilestones() {
-  const options = extend({}, milestoneOptions);
-  options.qs = {
-    'state': 'open',
-    'per_page': 100,
-    'access_token': GITHUB_ACCESS_TOKEN,
-  };
-  return request(options).then(res => {
-    const milestones = JSON.parse(res.body);
-    return milestones;
-  });
-}
-/**
  * Fetches issues?page=${opt_page}
  *
  * @param {number=} opt_page
