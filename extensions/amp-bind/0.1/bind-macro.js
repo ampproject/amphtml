@@ -20,17 +20,17 @@ import {BindExpression} from './bind-expression';
  * A single parsed Bind macro.
  */
 export class BindMacro {
-
   /**
-   * @param {!./amp-bind-macro.AmpMacroDef} ampMacro
-   * @param {!Object<string, !BindMacro>} otherMacros
+   * @param {!./amp-bind-macro.AmpBindMacroDef} data
+   * @param {!Object<string, !BindMacro>} referableMacros
    */
-  constructor(ampMacro, otherMacros) {
+  constructor(data, referableMacros) {
     /** @const @private {!Array<string>} */
-    this.argumentNames_ = ampMacro.argumentNames || [];
+    this.argumentNames_ = data.argumentNames || [];
+
     /** @const @private {!BindExpression} */
     this.expression_ =
-        new BindExpression(ampMacro.expressionString, otherMacros);
+        new BindExpression(data.expressionString, referableMacros);
   }
 
   /**
@@ -53,5 +53,4 @@ export class BindMacro {
   getExpressionSize() {
     return this.expression_.expressionSize;
   }
-
 }

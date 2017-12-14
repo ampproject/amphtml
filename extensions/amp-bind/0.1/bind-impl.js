@@ -285,10 +285,11 @@ export class Bind {
    * @private
    */
   initialize_(rootNode) {
-    dev().fine(TAG, 'Scanning DOM for bindings...');
-    let promise = this.addMacros_().then(() => {
-      return this.addBindingsForNodes_([rootNode]);
-    }).then(() => {
+    dev().fine(TAG, 'Scanning DOM for bindings and macros...');
+    let promise = Promise.all([
+      this.addMacros_(),
+      this.addBindingsForNodes_([rootNode])]
+    ).then(() => {
       // Listen for DOM updates (e.g. template render) to rescan for bindings.
       rootNode.addEventListener(AmpEvents.DOM_UPDATE, this.boundOnDomUpdate_);
     });
@@ -332,7 +333,8 @@ export class Bind {
   }
 
   /**
-   * Scans the document for <amp-bind-macro> elements, and adds them to the bind-evaluator.
+   * Scans the document for <amp-bind-macro> elements, and adds them to the
+   * bind-evaluator.
    *
    * Returns a promise that resolves after macros have been added.
    *
@@ -342,7 +344,8 @@ export class Bind {
   addMacros_() {
     const elements =
         scopedQuerySelectorAll(this.ampdoc.getBody(), 'AMP-BIND-MACRO');
-    const macros = /** @type {!Array<!./amp-bind-macro.AmpMacroDef>} */ ([]);
+    const macros =
+        /** @type {!Array<!./amp-bind-macro.AmpBindMacroDef>} */ ([]);
     iterateCursor(elements, element => {
       const argumentNames = (element.getAttribute('arguments') || '')
           .split(',')
@@ -356,8 +359,7 @@ export class Bind {
     if (macros.length == 0) {
       return Promise.resolve(0);
     } else {
-      return this.ww_('bind.addMacros', [macros])
-          .then(() => macros.length);
+      return this.ww_('bind.addMacros', [macros]).then(() => macros.length);
     }
   }
 
