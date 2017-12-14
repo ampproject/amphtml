@@ -106,7 +106,7 @@ describes.realWin('amp-ad-3p-impl', {
     });
 
     it('should propagete CID to ad iframe', () => {
-      sandbox.stub(adCid, 'getAdCid', () => {
+      sandbox.stub(adCid, 'getAdCid').callsFake(() => {
         return Promise.resolve('sentinel123');
       });
 
@@ -121,7 +121,7 @@ describes.realWin('amp-ad-3p-impl', {
     });
 
     it('should proceed w/o CID', () => {
-      sandbox.stub(adCid, 'getAdCid', () => {
+      sandbox.stub(adCid, 'getAdCid').callsFake(() => {
         return Promise.resolve(undefined);
       });
       return ad3p.layoutCallback().then(() => {
@@ -404,12 +404,13 @@ describes.realWin('amp-ad-3p-impl', {
           'data-auto-format': 'rspv',
           'data-full-width': '',
         });
-        const attemptChangeSizeSpy = sandbox.stub(impl, 'attemptChangeSize',
-            (height, width) => {
-              expect(width).to.equal(VIEWPORT_WIDTH);
-              expect(height).to.equal(250);
-              return Promise.resolve();
-            });
+        const attemptChangeSizeSpy =
+            sandbox.stub(impl, 'attemptChangeSize').callsFake(
+                (height, width) => {
+                  expect(width).to.equal(VIEWPORT_WIDTH);
+                  expect(height).to.equal(250);
+                  return Promise.resolve();
+                });
 
         const callback = impl.buildCallback();
         expect(callback).to.exist;

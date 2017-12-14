@@ -55,7 +55,7 @@ describe('alp-handler', () => {
       postMessage: sandbox.stub(),
       _id: 'p3',
     };
-    open = sandbox.stub(win, 'open', () => {
+    open = sandbox.stub(win, 'open').callsFake(() => {
       return {};
     });
     const doc = {

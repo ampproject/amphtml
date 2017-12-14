@@ -86,8 +86,9 @@ describes.realWin('Events', {amp: 1}, env => {
 
     it('should add listener', () => {
       const selUnlisten = function() {};
-      const selListenerStub = sandbox.stub(root, 'createSelectiveListener',
-          () => selUnlisten);
+      const selListenerStub =
+          sandbox.stub(root, 'createSelectiveListener').callsFake(
+              () => selUnlisten);
       tracker.add(analyticsElement, 'click',
           {selector: '*', selectionMethod: 'scope'}, handler);
       expect(tracker.clickObservable_.getHandlerCount()).to.equal(1);
@@ -462,7 +463,7 @@ describes.realWin('Events', {amp: 1}, env => {
       const promise = new Promise(resolve => {
         resolver = resolve;
       });
-      const iniLoadStub = sandbox.stub(root, 'whenIniLoaded',
+      const iniLoadStub = sandbox.stub(root, 'whenIniLoaded').callsFake(
           () => Promise.resolve());
       tracker.add(analyticsElement, 'ini-load', {}, resolver);
       return promise.then(event => {
@@ -477,7 +478,7 @@ describes.realWin('Events', {amp: 1}, env => {
       const promise = new Promise(resolve => {
         resolver = resolve;
       });
-      const iniLoadStub = sandbox.stub(root, 'whenIniLoaded',
+      const iniLoadStub = sandbox.stub(root, 'whenIniLoaded').callsFake(
           () => Promise.resolve());
       tracker.add(analyticsElement, 'ini-load', {selector: ':root'}, resolver);
       return promise.then(event => {
@@ -492,7 +493,7 @@ describes.realWin('Events', {amp: 1}, env => {
       const promise = new Promise(resolve => {
         resolver = resolve;
       });
-      const iniLoadStub = sandbox.stub(root, 'whenIniLoaded',
+      const iniLoadStub = sandbox.stub(root, 'whenIniLoaded').callsFake(
           () => Promise.resolve());
       tracker.add(analyticsElement, 'sig1', {selector: ':host'}, resolver);
       return promise.then(event => {
@@ -913,7 +914,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
       // Fake out the time since clock.tick will not actually advance the time.
       let fakeTime = 1000; // 1 second past epoch
-      sandbox.stub(Date, 'now', () => { return fakeTime; });
+      sandbox.stub(Date, 'now').callsFake(() => { return fakeTime; });
       target.click();
       fakeTime = 1600; // Must set fake time before advancing the interval.
       clock.tick(600); // Not a full second.
@@ -1273,7 +1274,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
     describe('should create correct readyReportPromise', () => {
       it('with viewer hidden', () => {
-        const stub = sandbox.stub(tracker.root, 'getViewer', () => {
+        const stub = sandbox.stub(tracker.root, 'getViewer').callsFake(() => {
           return {
             isVisible: () => {return false;},
           };
