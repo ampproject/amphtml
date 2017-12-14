@@ -1,5 +1,5 @@
 <!---
-Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -29,9 +29,10 @@ limitations under the License.
 
 For semantics of configuration, please contact [AppVador](http://www.appvador.com/).
 
-Supported parameters:
-
+### Required Parameters:
 - data-id
+
+### Optional parameters:
 - data-options
 - data-js-type
 - data-custom-script
