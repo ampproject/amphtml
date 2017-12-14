@@ -137,10 +137,9 @@ export class DoubleclickA4aEligibility {
       json = tryParseJson(element.getAttribute('json'));
     }
     const usdrd = 'useSameDomainRenderingUntilDeprecated';
-    const hasUSDRD = (json &&
-                      (json['UseSameDomainRenderingUntilDeprecated'] ||
-                       json['useSameDomainRenderingUntilDeprecated'])) ||
-          usdrd in element.dataset || usdrd.toLowerCase() in element.dataset;
+    const hasUSDRD =
+          (json && json['useSameDomainRenderingUntilDeprecated']) ||
+          usdrd in element.dataset;
     if (hasUSDRD) {
       warnDeprecation(usdrd);
     }

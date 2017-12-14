@@ -150,33 +150,18 @@ describe('doubleclick-a4a-config', () => {
           'https://cdn.ampproject.org/some/path/to/content.html');
 
       const elem1 = testFixture.doc.createElement('div');
-      elem1.setAttribute('data-UseSameDomainRenderingUntilDeprecated', '1');
+      elem1.setAttribute(
+          'json', '{"useSameDomainRenderingUntilDeprecated": 1}');
       testFixture.doc.body.appendChild(elem1);
-      const useRemoteHtml = false;
-      expect(
-          doubleclickIsA4AEnabled(mockWin, elem1, useRemoteHtml)).to.be.false;
+      expect(doubleclickIsA4AEnabled(mockWin, elem1)).to.be.false;
+      expect(elem1.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
 
       const elem2 = testFixture.doc.createElement('div');
       elem2.setAttribute(
-          'data-use-same-domain-rendering-until-deprecated', '');
+          'data-use-same-domain-rendering-until-deprecated', '1');
       testFixture.doc.body.appendChild(elem2);
       expect(doubleclickIsA4AEnabled(mockWin, elem2)).to.be.false;
       expect(elem2.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
-
-      const elem3 = testFixture.doc.createElement('div');
-      elem3.setAttribute(
-          'json', '{"useSameDomainRenderingUntilDeprecated": 1}');
-      testFixture.doc.body.appendChild(elem3);
-      expect(doubleclickIsA4AEnabled(mockWin, elem3)).to.be.false;
-      expect(elem3.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
-
-      const elem4 = testFixture.doc.createElement('div');
-      elem4.setAttribute(
-          'json', '{"UseSameDomainRenderingUntilDeprecated": 1}');
-      testFixture.doc.body.appendChild(elem4);
-      expect(doubleclickIsA4AEnabled(mockWin, elem4)).to.be.false;
-      expect(elem4.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
-
     });
 
     Object.keys(URL_EXPERIMENT_MAPPING).forEach(expFlagValue => {
