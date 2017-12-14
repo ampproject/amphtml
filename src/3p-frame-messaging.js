@@ -37,6 +37,8 @@ export const MessageType = {
   EMBED_SIZE_CHANGED: 'embed-size-changed',
   EMBED_SIZE_DENIED: 'embed-size-denied',
   NO_CONTENT: 'no-content',
+  GET_HTML: 'get-html',
+  GET_HTML_RESULT: 'get-html-result',
 
   // For the frame to be placed in full overlay mode for lightboxes
   FULL_OVERLAY_FRAME: 'full-overlay-frame',
