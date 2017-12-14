@@ -93,7 +93,7 @@ export class AmpAdCustom extends AMP.BaseElement {
       let templateData = data;
       if (this.slot_ !== null) {
         templateData = data.hasOwnProperty(this.slot_) ? data[this.slot_] :
-            null;
+          null;
       }
       // Set UI state
       if (templateData !== null && typeof templateData == 'object') {

@@ -384,7 +384,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
           const invocationFromEvent2 = {
             method: 'gotoAndPlayNTimes',
             args: {id: 'page1', label: 'foo', N: 1},
-            event: {eventName: 'event-2'},  // Different event.
+            event: {eventName: 'event-2'}, // Different event.
             satisfiesTrust: () => true,
           };
 

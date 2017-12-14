@@ -1,14 +1,6 @@
 {
   "parser": "babel-eslint",
   "plugins": ["eslint-plugin-google-camelcase"],
-  "ecmaFeatures": {
-    "modules": true,
-    "arrowFunctions": true,
-    "blockBindings": true,
-    "forOf": false,
-    "destructuring": true,
-    "spread": true
-  },
   "env": {
     "es6": true,
     "browser": true

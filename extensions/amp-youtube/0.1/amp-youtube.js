@@ -41,8 +41,8 @@ import {startsWith} from '../../../src/string';
  * @private
  */
 
- // Correct PlayerStates taken from
- // https://developers.google.com/youtube/iframe_api_reference#Playback_status
+// Correct PlayerStates taken from
+// https://developers.google.com/youtube/iframe_api_reference#Playback_status
 const PlayerStates = {
   UNSTARTED: -1,
   ENDED: 0,
@@ -122,7 +122,7 @@ class AmpYoutube extends AMP.BaseElement {
     return 0.75;
   }
 
-   /** @override */
+  /** @override */
   viewportCallback(visible) {
     this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
   }
@@ -245,7 +245,7 @@ class AmpYoutube extends AMP.BaseElement {
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
     });
-    return true;  // Call layoutCallback again.
+    return true; // Call layoutCallback again.
   }
 
   /** @override */
@@ -315,12 +315,12 @@ class AmpYoutube extends AMP.BaseElement {
     }
     if (!getData(event) || !(isObject(getData(event))
         || startsWith(/** @type {string} */ (getData(event)), '{'))) {
-      return;  // Doesn't look like JSON.
+      return; // Doesn't look like JSON.
     }
     /** @const {?JsonObject} */
     const data = /** @type {?JsonObject} */ (isObject(getData(event))
-        ? getData(event)
-        : tryParseJson(getData(event)));
+      ? getData(event)
+      : tryParseJson(getData(event)));
     if (data === undefined) {
       return; // We only process valid JSON.
     }

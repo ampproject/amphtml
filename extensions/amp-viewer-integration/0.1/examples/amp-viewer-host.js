@@ -41,7 +41,7 @@ export class AmpViewerHost {
    * looking at.
    */
   constructor(win, ampIframe, frameOrigin, messageHandler, opt_logsId,
-      opt_isWebview, opt_isHandshakePoll) {
+    opt_isWebview, opt_isHandshakePoll) {
     /** @const {!Window} */
     this.win = win;
     /** @private {!HTMLIFrameElement} */
