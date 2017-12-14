@@ -157,4 +157,46 @@ describe('BindEvaluator', () => {
     expect(results[string]).to.be.undefined;
     expect(errors[string].message).to.match(/not a valid result/);
   });
+
+  it('should evaluate expressions with macros', () => {
+    expect(numberOfBindings()).to.equal(0);
+    evaluator.addMacros([{
+      id: 'add',
+      argumentNames: ['a', 'b'],
+      expressionString: 'a + b',
+    }]);
+    evaluator.addBindings([{
+      tagName: 'P',
+      property: 'text',
+      expressionString: 'add(oneplusone, 2)',
+    }]);
+    expect(numberOfBindings()).to.equal(1);
+    const {results, errors} = evaluator.evaluateBindings({oneplusone: 2});
+    expect(results['add(oneplusone, 2)']).to.equal(4);
+    expect(errors['add(oneplusone, 2)']).to.be.undefined;
+  });
+
+  it('should evaluate expressions with nested macros', () => {
+    expect(numberOfBindings()).to.equal(0);
+    evaluator.addMacros([{
+      id: 'add',
+      argumentNames: ['a', 'b'],
+      expressionString: 'a + b',
+    }, {
+      id: 'addThree',
+      argumentNames: ['a', 'b', 'c'],
+      expressionString: 'add(add(a, b), c)',
+    }]);
+    evaluator.addBindings([{
+      tagName: 'P',
+      property: 'text',
+      expressionString: 'addThree(oneplusone, 2, 2)',
+    }]);
+    expect(numberOfBindings()).to.equal(1);
+    const {results, errors} = evaluator.evaluateBindings({oneplusone: 2});
+    expect(results['addThree(oneplusone, 2, 2)']).to.equal(6);
+    expect(errors['addThree(oneplusone, 2, 2)']).to.be.undefined;
+  });
+
+
 });

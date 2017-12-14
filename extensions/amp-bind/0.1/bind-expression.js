@@ -183,10 +183,11 @@ function generateFunctionWhitelist() {
 export class BindExpression {
   /**
    * @param {string} expressionString
+   * @param {!Object<string, !./bind-macro.BindMacro>} macros
    * @param {number=} opt_maxAstSize
    * @throws {Error} On malformed expressions.
    */
-  constructor(expressionString, opt_maxAstSize) {
+  constructor(expressionString, macros, opt_maxAstSize) {
     if (!FUNCTION_WHITELIST) {
       FUNCTION_WHITELIST = generateFunctionWhitelist();
     }
@@ -194,16 +195,19 @@ export class BindExpression {
     /** @const {string} */
     this.expressionString = expressionString;
 
+    /** @private @const {!Object<string, !./bind-macro.BindMacro>} */
+    this.macros_ = macros;
+
     /** @const @private {!./bind-expr-defines.AstNode} */
     this.ast_ = parser.parse(this.expressionString);
 
     // Check if this expression string is too large (for performance).
-    const size = this.numberOfNodesInAst_(this.ast_);
+    this.expressionSize = this.numberOfNodesInAst_(this.ast_);
     const maxSize = opt_maxAstSize || DEFAULT_MAX_AST_SIZE;
     const skipConstraint = getMode().localDev && !getMode().test;
-    if (size > maxSize && !skipConstraint) {
-      throw new Error(`Expression size (${size}) exceeds max (${maxSize}). ` +
-          'Please reduce number of operands.');
+    if (this.expressionSize > maxSize && !skipConstraint) {
+      throw new Error(`Expression size (${this.expressionSize}) exceeds max ` +
+          `(${maxSize}). Please reduce number of operands.`);
     }
   }
 
@@ -223,15 +227,58 @@ export class BindExpression {
    * @private
    */
   numberOfNodesInAst_(ast) {
-    let nodes = 1;
-    if (ast.args) {
-      ast.args.forEach(arg => {
+    // Include the node count of any nested macros in the expression
+    if (this.isMacroInvocationNode_(ast)) {
+      const macro = this.macros_[String(ast.value)];
+      let nodes = macro.getExpressionSize();
+      this.getInvocationArgNodes_(ast).forEach(arg => {
         if (arg) {
-          nodes += this.numberOfNodesInAst_(arg);
+          nodes += this.numberOfNodesInAst_(arg) - 1;
         }
       });
+      return nodes;
+    } else {
+      let nodes = 1;
+      if (ast.args) {
+        ast.args.forEach(arg => {
+          if (arg) {
+            nodes += this.numberOfNodesInAst_(arg);
+          }
+        });
+      }
+      return nodes;
     }
-    return nodes;
+  }
+
+  /**
+   * @param {!./bind-expr-defines.AstNode} ast
+   * @return {boolean}
+   * @private
+   */
+  isMacroInvocationNode_(ast) {
+    return !!(ast.type === AstNodeType.INVOCATION && !ast.args[0] &&
+        this.macros_[String(ast.value)]);
+  }
+
+  /**
+   * Gets the array of nodes for the arguments of the provided INVOCATION
+   * node, without the wrapping ARGS node and ARRAY node.
+   * @param {!./bind-expr-defines.AstNode} ast
+   * @return {!Array<./bind-expr-defines.AstNode>}
+   * @private
+   */
+  getInvocationArgNodes_(ast) {
+    if (ast.args.length === 2 && ast.args[1].type === AstNodeType.ARGS) {
+      const argsNode = ast.args[1];
+      if (argsNode.args.length === 0) {
+        return [];
+      } else if (argsNode.args.length === 1 &&
+        argsNode.args[0].type === AstNodeType.ARRAY) {
+        const arrayNode = argsNode.args[0];
+        return arrayNode.args || [];
+      }
+    }
+    return ast.args || [];
   }
 
   /**
@@ -259,8 +306,8 @@ export class BindExpression {
         return this.eval_(args[0], scope);
 
       case AstNodeType.INVOCATION:
-        // Built-in functions don't have a caller object.
-        const isBuiltIn = (args[0] === undefined);
+        // Built-in functions and macros don't have a caller object.
+        const isBuiltInOrMacro = (args[0] === undefined);
 
         const caller = this.eval_(args[0], scope);
         const params = this.eval_(args[1], scope);
@@ -269,8 +316,16 @@ export class BindExpression {
         let validFunction;
         let unsupportedError;
 
-        if (isBuiltIn) {
-          validFunction = FUNCTION_WHITELIST[BUILT_IN_FUNCTIONS][method];
+        if (isBuiltInOrMacro) {
+          const macro = this.macros_[method];
+          if (macro) {
+            validFunction = function() {
+              return macro.evaluate(
+                  scope, Array.prototype.slice.call(arguments));
+            };
+          } else {
+            validFunction = FUNCTION_WHITELIST[BUILT_IN_FUNCTIONS][method];
+          }
           if (!validFunction) {
             unsupportedError = `${method} is not a supported function.`;
           }

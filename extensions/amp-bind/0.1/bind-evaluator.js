@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {BindMacro} from './bind-macro';
 import {BindExpression} from './bind-expression';
 import {BindValidator} from './bind-validator';
 import {filterSplice} from '../../../src/utils/array';
@@ -43,6 +44,12 @@ export class BindEvaluator {
   constructor() {
     /** @const @private {!Array<BindingDef>} */
     this.bindings_ = [];
+
+    /**
+     * The map of name to macro for all macros on the page
+     * @private @const {!Object<string, !./bind-macro.BindMacro>}
+     */
+    this.macros_ = Object.create(null);
 
     /** @const @private {!./bind-validator.BindValidator} */
     this.validator_ = new BindValidator();
@@ -85,6 +92,26 @@ export class BindEvaluator {
 
     filterSplice(this.bindings_, binding =>
       !expressionsToRemove[binding.expressionString]);
+  }
+
+  /**
+   * Parses and stores the given macros and returns map
+   * of macro name to parse errors.
+   * @param {!Array<./amp-bind-macro.AmpMacroDef>} ampMacroDefs
+   * @return {!Object<string, EvaluatorErrorDef>},
+   */
+  addMacros(ampMacroDefs) {
+    const errors = Object.create(null);
+    // Create BindMacro objects from AmpMacroDefs.
+    ampMacroDefs.forEach(ampMacroDef => {
+      try {
+        this.macros_[ampMacroDef.id] =
+          new BindMacro(ampMacroDef, this.macros_);
+      } catch (e) {
+        errors[ampMacroDef.id] = {message: e.message, stack: e.stack};
+      }
+    });
+    return errors;
   }
 
   /**
@@ -183,7 +210,7 @@ export class BindEvaluator {
     let error = null;
     if (!expression) {
       try {
-        expression = new BindExpression(expressionString);
+        expression = new BindExpression(expressionString, this.macros_);
         this.expressions_[expressionString] = expression;
       } catch (e) {
         error = {message: e.message, stack: e.stack};
