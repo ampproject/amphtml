@@ -169,21 +169,6 @@ function createDateRangePickerBase() {
      * @param {?string} focusedInput
      */
     onFocusChange(focusedInput) {
-      // TODO(cvializ): there is a bug in the react-dates library that
-      // affects focus when the orientation="verticalScrollable" and
-      // with-full-screen-portal is set.
-      if (this.props.withFullScreenPortal) {
-        if (focusedInput == null) {
-          return this.setState({focusedInput});
-        } else if (this.state.startDate && !this.state.endDate &&
-              this.state.focusedInput === 'endDate') {
-          return;
-        } else if (this.state.startDate && this.state.endDate &&
-              this.state.focusedInput === 'endDate') {
-          return this.setState({focusedInput: 'startDate'});
-        }
-      }
-
       this.setState({focusedInput});
     }
 
