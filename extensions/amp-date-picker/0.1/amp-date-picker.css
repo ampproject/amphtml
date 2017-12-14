@@ -15,3 +15,7 @@
  */
 
 @import '../../../node_modules/react-dates/lib/css/_datepicker.css';
+
+.DateInput_input {
+  font-size: 100%;
+}

@@ -20,8 +20,6 @@ const TAG = 'AMP.require';
 
 /**
  * Allows `require`ing modules exported by a browserify bundle.
- * Use with `AMP.includeExternalBundle()` once in an extension.
- *
  * @param {string} module
  * @return {?}
  */
@@ -30,6 +28,6 @@ export function requireExternal(module) {
     return AMP.require(module);
   } else {
     dev().error(TAG, `Could not require external module '${module}'.` +
-        ' Did you call AMP.includeExternalBundle() in the extension?');
+        ' Did you import the bundle in the extension?');
   }
 }
