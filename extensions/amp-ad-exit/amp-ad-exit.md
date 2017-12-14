@@ -258,7 +258,13 @@ Custom variables must begin with an underscore. Define variables in the
 config alongside the navigation target. Variables should have a `"defaultValue"`
 property. The default value can be overridden in the `exit` action invocation:
 
-Variable values can also come from 3P analytics.
+Variable values can also come from 3P analytics. Use
+`<amp-analytics type='example-3p-vendor'>` to install a 3P analytics
+vendor iframe and reference it in the variable definition with the
+`"iframeTransportSignal"` property. The format of `"iframeTransportSignal"` is
+`"IFRAME_TRANSPORT_SIGNAL(example-3p-vendor,collected-data)"`, where `example-3p-vendor`
+is the name of the vendor and `collected-data` is a key in the message from the 
+vendor iframe. There must not be a space after the comma.
 
 Example:
 ```html
@@ -273,8 +279,7 @@ Example:
         },
         "_3pAnalytics": {
           "defaultValue": "no_response",
-          "vendorAnalyticsSource": "VendorXYZ",
-          "vendorAnalyticsResponseKey": "findings"
+          "iframeTransportSignal": "IFRAME_TRANSPORT_SIGNAL(example-3p-vendor,collected-data)"
          }
       }
     }
