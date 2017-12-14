@@ -683,28 +683,36 @@ describes.realWin('Events', {amp: 1}, env => {
     it('timers started and stopped by the same event on the same target do not'
         + ' have race condition problems', () => {
       const fn1 = sandbox.stub();
-      const clickTracker = root.getTracker('click', ClickEventTracker);
       tracker.add(analyticsElement, 'timer', {timerSpec: {
         interval: 1,
+        immediate: false,
         startSpec: {on: 'click', selector: '.target'},
         stopSpec: {on: 'click', selector: '.target'},
-      }}, fn1, function(unused) { return clickTracker; });
+      }}, fn1);
       expect(fn1).to.have.not.been.called;
 
       target.click(); // Start timer.
+      expect(fn1).to.have.not.been.called;
+      target.click(); // Stop timer.
+      expect(fn1).to.be.calledOnce;
+      target.click(); // Start timer.
       expect(fn1).to.be.calledOnce;
       target.click(); // Stop timer.
-      target.click(); // Start timer.
-      target.click(); // Stop timer.
+      expect(fn1).to.be.calledTwice;
       clock.tick(5);
       target.click(); // Start timer.
+      expect(fn1).to.be.calledTwice;
       target.click(); // Stop timer.
+      expect(fn1).to.be.calledThrice;
       target.click(); // Start timer.
+      expect(fn1).to.be.calledThrice;
       target.click(); // Stop timer.
+      expect(fn1).to.have.callCount(4);
       target.click(); // Start timer.
+      expect(fn1).to.have.callCount(4);
 
       clock.tick(3 * 1000); // 3 seconds
-      expect(fn1).to.have.callCount(8); // 5 timer starts + 3.005 seconds
+      expect(fn1).to.have.callCount(7); // 4 timer stops + 3.005 seconds
     });
 
     it('only fires when the timer interval exceeds the minimum', () => {
@@ -821,24 +829,24 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(tracker.getTrackedTimerKeys()).to.have.length(5);
 
       clock.tick(10 * 1000); // 20 seconds
-      expect(fn1).to.have.callCount(2);
-      expect(fn2).to.have.callCount(3);
+      expect(fn1).to.have.callCount(3);
+      expect(fn2).to.have.callCount(4);
       expect(fn3).to.have.callCount(1);
-      expect(fn4).to.have.callCount(3);
+      expect(fn4).to.have.callCount(4);
       expect(fn5).to.have.callCount(3);
       expect(tracker.getTrackedTimerKeys()).to.have.length(2);
 
       clock.tick(10 * 1000); // 30 seconds
-      expect(fn1).to.have.callCount(2);
-      expect(fn2).to.have.callCount(3);
+      expect(fn1).to.have.callCount(3);
+      expect(fn2).to.have.callCount(4);
       expect(fn3).to.have.callCount(1);
-      expect(fn4).to.have.callCount(3);
+      expect(fn4).to.have.callCount(4);
       expect(fn5).to.have.callCount(4);
       expect(tracker.getTrackedTimerKeys()).to.have.length(2);
 
       // Default maxTimerLength is 2 hours
       clock.tick(3 * 3600 * 1000); // 3 hours
-      expect(fn3).to.have.callCount(3);
+      expect(fn3).to.have.callCount(4); // Hit maxTimerLength and stopped.
       expect(fn5).to.have.callCount(1084);
 
       // All timers removed except the one that never ends.
@@ -891,6 +899,51 @@ describes.realWin('Events', {amp: 1}, env => {
 
       tracker.dispose();
       expect(countIntervals()).to.equal(0);
+    });
+
+    it('should create events with timer vars', () => {
+      const handler = sandbox.stub();
+      tracker.add(analyticsElement, 'timer', {timerSpec: {
+        interval: 3,
+        immediate: false,
+        startSpec: {on: 'click', selector: '.target'},
+        stopSpec: {on: 'click', selector: '.target'},
+      }}, handler);
+      expect(handler).to.have.not.been.called;
+
+      // Fake out the time since clock.tick will not actually advance the time.
+      let fakeTime = 1000; // 1 second past epoch
+      sandbox.stub(Date, 'now', () => { return fakeTime; });
+      target.click();
+      fakeTime = 1600; // Must set fake time before advancing the interval.
+      clock.tick(600); // Not a full second.
+      target.click();
+      expect(handler).to.be.calledOnce;
+      const stopEvent1 = handler.args[0][0];
+      expect(stopEvent1).to.be.instanceOf(AnalyticsEvent);
+      expect(stopEvent1.vars.timerStart).to.equal(1000);
+      expect(stopEvent1.vars.timerDuration).to.equal(600);
+
+      target.click();
+      expect(handler).to.be.calledOnce;
+      fakeTime = 4600;
+      clock.tick(3000); // 3 seconds.
+      expect(handler).to.have.callCount(2);
+      const intervalEvent = handler.args[1][0];
+      expect(intervalEvent).to.be.instanceOf(AnalyticsEvent);
+      expect(intervalEvent.vars.timerStart).to.equal(1600);
+      expect(intervalEvent.vars.timerDuration).to.equal(3000);
+
+      fakeTime = 6200;
+      clock.tick(1600); // 4.6 seconds.
+      target.click();
+
+      expect(handler).to.have.callCount(3);
+      const stopEvent2 = handler.args[2][0];
+      expect(stopEvent2).to.be.instanceOf(AnalyticsEvent);
+      // Report partial interval time on timer stop between intervals.
+      expect(stopEvent2.vars.timerDuration).to.equal(1600);
+      expect(stopEvent2.vars.timerStart).to.equal(1600);
     });
   });
 
