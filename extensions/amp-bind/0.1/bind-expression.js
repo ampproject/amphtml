@@ -201,7 +201,7 @@ export class BindExpression {
     /** @const @private {!./bind-expr-defines.AstNode} */
     this.ast_ = parser.parse(this.expressionString);
 
-    /** @const @private {number} */
+    /** @const {number} */
     this.expressionSize = this.numberOfNodesInAst_(this.ast_);
 
     // Check if this expression string is too large (for performance).
@@ -260,8 +260,11 @@ export class BindExpression {
   isMacroInvocationNode_(ast) {
     const isInvocationWithNoCaller =
         (ast.type === AstNodeType.INVOCATION && !ast.args[0]);
-    const macroExistsWithValue = this.macros_[String(ast.value)];
-    return isInvocationWithNoCaller && macroExistsWithValue;
+    if (isInvocationWithNoCaller) {
+      const macroExistsWithValue = this.macros_[String(ast.value)] != null;
+      return macroExistsWithValue;
+    }
+    return false;
   }
 
   /**

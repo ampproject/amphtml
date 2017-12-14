@@ -288,7 +288,7 @@ export class Bind {
     dev().fine(TAG, 'Scanning DOM for bindings and macros...');
     let promise = Promise.all([
       this.addMacros_(),
-      this.addBindingsForNodes_([rootNode])],
+      this.addBindingsForNodes_([rootNode])]
     ).then(() => {
       // Listen for DOM updates (e.g. template render) to rescan for bindings.
       rootNode.addEventListener(AmpEvents.DOM_UPDATE, this.boundOnDomUpdate_);
