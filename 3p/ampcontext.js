@@ -181,11 +181,11 @@ export class AbstractAmpContext {
   };
 
   /**
-   *  Send message to runtime requesting HTML snippet of the parent window.
+   *  Requests HTML snippet from the parent window.
    *  @param {string} selector CSS selector
-   *  @param {Array<string>} attributes an array of tag attributes to be left
-   *    in the stringified HTML
-   *  @param {function(string)} callback
+   *  @param {!Array<string>} attributes whitelisted attributes to be kept
+   *    in the returned HTML string
+   *  @param {function(string)} callback to be invoked with the HTML string
    */
   getHtml(selector, attributes, callback) {
     const messageId = this.getHtmlMessageId_++;
