@@ -33,7 +33,9 @@ import {map} from '../../../src/utils/object';
 import {parseJson, recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
-import {waitForBodyPromise} from '../../../src/dom';
+import {
+  iterateCursor, scopedQuerySelectorAll, waitForBodyPromise,
+} from '../../../src/dom';
 
 const TAG = 'amp-bind';
 
@@ -147,9 +149,9 @@ export class Bind {
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
 
     const bodyPromise = (opt_win)
-        ? waitForBodyPromise(opt_win.document)
-            .then(() => dev().assertElement(opt_win.document.body))
-        : ampdoc.whenBodyAvailable();
+      ? waitForBodyPromise(opt_win.document)
+          .then(() => dev().assertElement(opt_win.document.body))
+      : ampdoc.whenBodyAvailable();
 
     /**
      * Resolved when the service finishes scanning the document for bindings.
@@ -269,7 +271,7 @@ export class Bind {
           // Don't reevaluate/apply if there are no bindings.
           if (numberOfBindingsAdded > 0) {
             return this.evaluate_().then(results =>
-                this.applyElements_(results, elements));
+              this.applyElements_(results, elements));
           }
         });
     return this.timer_.timeoutPromise(timeout, rescan,
@@ -284,7 +286,9 @@ export class Bind {
    */
   initialize_(rootNode) {
     dev().fine(TAG, 'Scanning DOM for bindings...');
-    let promise = this.addBindingsForNodes_([rootNode]).then(() => {
+    let promise = this.addMacros_().then(() => {
+      return this.addBindingsForNodes_([rootNode]);
+    }).then(() => {
       // Listen for DOM updates (e.g. template render) to rescan for bindings.
       rootNode.addEventListener(AmpEvents.DOM_UPDATE, this.boundOnDomUpdate_);
     });
@@ -328,6 +332,36 @@ export class Bind {
   }
 
   /**
+   * Scans the document for <amp-bind-macro> elements, and adds them to the bind-evaluator.
+   *
+   * Returns a promise that resolves after macros have been added.
+   *
+   * @return {!Promise<number>}
+   * @private
+   */
+  addMacros_() {
+    const elements =
+        scopedQuerySelectorAll(this.ampdoc.getBody(), 'AMP-BIND-MACRO');
+    const macros = /** @type {!Array<!./amp-bind-macro.AmpMacroDef>} */ ([]);
+    iterateCursor(elements, element => {
+      const argumentNames = (element.getAttribute('arguments') || '')
+          .split(',')
+          .map(s => s.trim());
+      macros.push({
+        id: element.getAttribute('id'),
+        argumentNames,
+        expressionString: element.getAttribute('expression'),
+      });
+    });
+    if (macros.length == 0) {
+      return Promise.resolve(0);
+    } else {
+      return this.ww_('bind.addMacros', [macros])
+          .then(() => macros.length);
+    }
+  }
+
+  /**
    * For each node in an array, scans it and its descendants for bindings.
    * This function is not idempotent.
    *
@@ -342,8 +376,8 @@ export class Bind {
     const scanPromises = nodes.map(node => {
       // Limit number of total bindings (unless in local manual testing).
       const limit = (getMode().localDev && !getMode().test)
-          ? Number.POSITIVE_INFINITY
-          : this.maxNumberOfBindings_ - this.numberOfBindings();
+        ? Number.POSITIVE_INFINITY
+        : this.maxNumberOfBindings_ - this.numberOfBindings();
 
       return this.scanNode_(node, limit).then(results => {
         const {

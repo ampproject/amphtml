@@ -67,9 +67,9 @@ describes.sandboxed('VisibilityModel', {}, () => {
       expect(config({visiblePercentageMax: ''}).visiblePercentageMax)
           .to.equal(1);
       expect(config({visiblePercentageMax: 0}).visiblePercentageMax)
-          .to.equal(1);
+          .to.equal(0);
       expect(config({visiblePercentageMax: '0'}).visiblePercentageMax)
-          .to.equal(1);
+          .to.equal(0);
       expect(config({visiblePercentageMax: 50}).visiblePercentageMax)
           .to.equal(0.5);
       expect(config({visiblePercentageMax: '50'}).visiblePercentageMax)
@@ -606,7 +606,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
       clock.tick(100);
       vh.updateCounters_(0.05);
       expect(vh.getState(startTime)).to.contains({
-        firstVisibleTime: 101,  // Doesn't change.
+        firstVisibleTime: 101, // Doesn't change.
         lastVisibleTime: 201,
         totalVisibleTime: 100,
         maxContinuousVisibleTime: 100,
@@ -619,7 +619,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
       clock.tick(100);
       vh.updateCounters_(0.2);
       expect(vh.getState(startTime)).to.contains({
-        firstVisibleTime: 101,  // Doesn't change.
+        firstVisibleTime: 101, // Doesn't change.
         lastVisibleTime: 301,
         totalVisibleTime: 200,
         maxContinuousVisibleTime: 200,
@@ -647,7 +647,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
       clock.tick(100);
       vh.updateCounters_(0.05);
       expect(vh.getState(startTime)).to.contains({
-        firstVisibleTime: 101,  // Doesn't change.
+        firstVisibleTime: 101, // Doesn't change.
         lastVisibleTime: 201,
         totalVisibleTime: 100,
         maxContinuousVisibleTime: 100,
@@ -988,9 +988,55 @@ describes.sandboxed('VisibilityModel', {}, () => {
       const eventSpy = vh.eventResolver_ = sandbox.spy();
       visibility = 0.99;
       clock.tick(200);
-      expect(eventSpy).to.not.be.called;
       vh.update();
+      expect(eventSpy).to.not.be.called;
       visibility = 1.0;
+      clock.tick(200);
+      vh.update();
+      expect(eventSpy).to.be.calledOnce;
+    });
+
+    it('should fire for visiblePercentageMin=visiblePercentageMax=0', () => {
+      const vh = new VisibilityModel({
+        visiblePercentageMin: 0,
+        visiblePercentageMax: 0,
+        repeat: true,
+      }, calcVisibility);
+      const eventSpy = vh.eventResolver_ = sandbox.spy();
+      sandbox.stub(vh, 'reset_').callsFake(() => {
+        vh.eventPromise_ = new Promise(unused => {
+          vh.eventResolver_ = eventSpy;
+        });
+        vh.eventPromise_.then(() => {
+          vh.onTriggerObservable_.fire();
+        });
+        vh.scheduleRepeatId_ = null;
+        vh.everMatchedVisibility_ = false;
+        vh.matchesVisibility_ = false;
+        vh.continuousTime_ = 0;
+        vh.maxContinuousVisibleTime_ = 0;
+        vh.totalVisibleTime_ = 0;
+        vh.firstVisibleTime_ = 0;
+        vh.firstSeenTime_ = 0;
+        vh.lastSeenTime_ = 0;
+        vh.lastVisibleTime_ = 0;
+        vh.minVisiblePercentage_ = 0;
+        vh.maxVisiblePercentage_ = 0;
+        vh.lastVisibleUpdateTime_ = 0;
+        vh.waitToReset_ = false;
+      });
+      visibility = 0;
+      clock.tick(200);
+      vh.update();
+      expect(eventSpy).to.be.calledOnce;
+
+      eventSpy.reset();
+      visibility = 1;
+      clock.tick(200);
+      vh.update();
+      expect(eventSpy).to.not.be.called;
+
+      visibility = 0;
       clock.tick(200);
       vh.update();
       expect(eventSpy).to.be.calledOnce;

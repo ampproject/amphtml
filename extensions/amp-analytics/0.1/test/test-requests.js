@@ -142,7 +142,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         handler.send({}, {
           'extraUrlParams': {
             'e1': 'e1',
-            'e2': '${v2}',  // check vars are used and not double encoded
+            'e2': '${v2}', // check vars are used and not double encoded
           },
         }, expansionOptions);
         handler.send({}, {'extraUrlParams': {'e1': 'e1'}}, expansionOptions);

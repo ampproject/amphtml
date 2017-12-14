@@ -134,7 +134,7 @@ function printArgvMessages() {
     ie: 'Running tests on IE.',
     edge: 'Running tests on Edge.',
     saucelabs: 'Running integration tests on Sauce Labs browsers.',
-    saucelabs_lite: 'Running tests on a subset of Sauce Labs browsers.',  // eslint-disable-line google-camelcase/google-camelcase
+    saucelabs_lite: 'Running tests on a subset of Sauce Labs browsers.', // eslint-disable-line google-camelcase/google-camelcase
     nobuild: 'Skipping build.',
     watch: 'Enabling watch mode. Editing and saving a file will cause the' +
         ' tests for that file to be re-run in the same browser instance.',
@@ -332,13 +332,13 @@ function runTests() {
         directoryListing: true,
         middleware: [app],
       })
-      .on('kill', function() {
-        util.log(yellow(
-            'Shutting down test responses server on localhost:31862'));
-        process.nextTick(function() {
-          process.exit();
-        });
-      }));
+          .on('kill', function() {
+            util.log(yellow(
+                'Shutting down test responses server on localhost:31862'));
+            process.nextTick(function() {
+              process.exit();
+            });
+          }));
   util.log(yellow(
       'Started test responses server on localhost:31862'));
 

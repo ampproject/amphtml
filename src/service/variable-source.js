@@ -72,8 +72,8 @@ export function getTimingDataSync(win, startEvent, endEvent) {
   }
 
   const metric = (endEvent === undefined)
-      ? timingInfo[startEvent]
-      : timingInfo[endEvent] - timingInfo[startEvent];
+    ? timingInfo[startEvent]
+    : timingInfo[endEvent] - timingInfo[startEvent];
 
   if (!isFiniteNumber(metric)) {
     // The metric is not supported.

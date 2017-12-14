@@ -28,7 +28,7 @@ import {
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {dict} from '../../../src/utils/object';
 import {
-    ADSENSE_A4A_EXPERIMENT_NAME,
+  ADSENSE_A4A_EXPERIMENT_NAME,
 } from '../../../extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
 import {
   DOUBLECLICK_A4A_EXPERIMENT_NAME,
@@ -69,7 +69,7 @@ export function getLifecycleReporter(ampElement, slotId) {
        !!getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME))) {
     setupPageLoadMetricsReporter_(ampElement);
     return new GoogleAdLifecycleReporter(
-      win, ampElement.element, Number(slotId));
+        win, ampElement.element, Number(slotId));
   } else {
     return new BaseLifecycleReporter();
   }
@@ -136,8 +136,8 @@ function setupPageLoadMetricsReporter_(ampElement) {
   const correlator = getCorrelator(win);
   win.ampAnalyticsPageLoadMetricsConfig =
       win.ampAnalyticsPageLoadMetricsConfig || dict({
-        'requests': {
-          'fvt': 'https://csi.gstatic.com/csi?s=a4a' +
+      'requests': {
+        'fvt': 'https://csi.gstatic.com/csi?s=a4a' +
           `&c=${correlator}&met.a4a=` +
           /* TODO(jonkeller): Add remaining metrics commented-out below to cfg
           'makeBodyVisible.${MBV_VALUE}~' +
@@ -147,20 +147,20 @@ function setupPageLoadMetricsReporter_(ampElement) {
           + 'firstContentfulPaint.${FCP_VALUE}~' +
           'firstViewportReady.${FVR_VALUE}'
           */
-          ,
+        ,
+      },
+      'transport': {
+        'beacon': false,
+        'xhrpost': false,
+      },
+      'triggers': {
+        'iniLoad': {
+          'on': 'visible',
+          'request': 'fvt',
+          'selector': 'body',
         },
-        'transport': {
-          'beacon': false,
-          'xhrpost': false,
-        },
-        'triggers': {
-          'iniLoad': {
-            'on': 'visible',
-            'request': 'fvt',
-            'selector': 'body',
-          },
-        },
-      });
+      },
+    });
 
   // Load amp-analytics extensions
   win.ampAnalyticsPageLoadMetricsElement =

@@ -242,13 +242,13 @@ function buildChangelog(gitMetadata) {
       return config.changelogIgnoreFileTypes.test(filename);
     });
   })
-  .map(function(log) {
-    const pr = log.pr;
-    if (!pr) {
-      return '  - ' + log.title;
-    }
-    return `  - ${pr.title.trim()} (#${pr.id})`;
-  }).join('\n');
+      .map(function(log) {
+        const pr = log.pr;
+        if (!pr) {
+          return '  - ' + log.title;
+        }
+        return `  - ${pr.title.trim()} (#${pr.id})`;
+      }).join('\n');
   changelog += '\n\n## Breakdown by component\n\n';
   const sections = buildSections(gitMetadata);
 
