@@ -67,7 +67,7 @@ const BIWEEKLY_DAYS = 14;
 // days for quarterly updates
 const QUARTERLY_DAYS = 89;
 // we need around 10 batches to get 1k issues
-const NUM_BATCHES = 11;
+const NUM_BATCHES = 14;
 
 // We start processing the issues by checking token first
 function processIssues() {
@@ -84,7 +84,23 @@ function processIssues() {
     util.log(util.colors.blue('automation applied'));
   });
 }
-
+/**
+ * Fetches all milestones
+ *
+ * @return {!Promise<*>}
+ */
+function geMilestones() {
+  const options = extend({}, milestoneOptions);
+  options.qs = {
+    'state': 'open',
+    'per_page': 100,
+    'access_token': GITHUB_ACCESS_TOKEN,
+  };
+  return request(options).then(res => {
+    const milestones = JSON.parse(res.body);
+    return milestones;
+  });
+}
 /**
  * Fetches issues?page=${opt_page}
  *
@@ -124,6 +140,7 @@ function updateGitHubIssues() {
         const allIssues = issues;
         allIssues.forEach(function(issue) {
           const labels = issue.labels;
+          const pullRequest = issue.pull_request;
           let issueType;
           const milestone = issue.milestone;
           let milestoneTitle;
@@ -136,6 +153,13 @@ function updateGitHubIssues() {
           const issueLastUpdate = issue.updated_at;
           let biweeklyUpdate = true;
           let quartelyUpdate = true;
+          // if an issue is an pull request will skip it
+          if (pullRequest) {
+            if (isDryrun) {
+              util.log(util.colors.red(issue.number + ' is pull request'));
+            }
+            return;
+          }
           if (getLastUpdate(issueLastUpdate) > QUARTERLY_DAYS) {
             quartelyUpdate = false;
             biweeklyUpdate = false;
