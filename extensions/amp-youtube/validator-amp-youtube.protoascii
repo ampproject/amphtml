@@ -34,13 +34,13 @@ tags: {  # <amp-youtube>
     value_regex_casei: "(include|omit)"
   }
   attrs: {
-    name: "data-videoid"
-    mandatory_oneof: "['data-videoid', 'data-live-channelid']"
+    name: "data-live-channelid"
+    mandatory_oneof: "['data-live-channelid', 'data-videoid']"
     value_regex: "[^=/?:]+"
   }
   attrs: {
-    name: "data-live-channelid"
-    mandatory_oneof: "['data-videoid', 'data-live-channelid']"
+    name: "data-videoid"
+    mandatory_oneof: "['data-live-channelid', 'data-videoid']"
     value_regex: "[^=/?:]+"
   }
   # <amp-bind>
