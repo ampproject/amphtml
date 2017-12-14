@@ -33,6 +33,7 @@ import {
   forceExperimentBranch,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
+import {tryParseJson} from '../../../src/json';
 import {getMode} from '../../../src/mode';
 import {dev, user} from '../../../src/log';
 
@@ -131,8 +132,15 @@ export class DoubleclickA4aEligibility {
           'be supported starting on March 29, 2018. Please refer to ' +
           'https://github.com/ampproject/amphtml/issues/11834 ' +
           'for more information');
+    let json;
+    if (element.hasAttribute('json')) {
+      json = tryParseJson(element.getAttribute('json'));
+    }
     const usdrd = 'useSameDomainRenderingUntilDeprecated';
-    const hasUSDRD = usdrd in element.dataset || element.hasAttribute(usdrd);
+    const hasUSDRD = (json &&
+                      (json['UseSameDomainRenderingUntilDeprecated'] ||
+                       json['useSameDomainRenderingUntilDeprecated'])) ||
+          usdrd in element.dataset || usdrd.toLowerCase() in element.dataset;
     if (hasUSDRD) {
       warnDeprecation(usdrd);
     }

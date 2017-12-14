@@ -30,7 +30,10 @@ export function doubleclick(global, data) {
     'slot', 'targeting', 'categoryExclusions',
     'tagForChildDirectedTreatment', 'cookieOptions',
     'overrideWidth', 'overrideHeight', 'loadingStrategy',
-    'consentNotificationId', 'useSameDomainRenderingUntilDeprecated',
+    'consentNotificationId',
+    'useSameDomainRenderingUntilDeprecated',
+    'usesamedomainrenderinguntildeprecated',
+    'UseSameDomainRenderingUntilDeprecated',
     'experimentId', 'multiSize', 'multiSizeValidation', 'ampSlotIndex',
   ]);
 
@@ -233,6 +236,8 @@ function centerAd(global) {
  */
 export function writeAdScript(global, data) {
   if (data.useSameDomainRenderingUntilDeprecated != undefined
+      || data.usesamedomainrenderinguntildeprecated != undefined
+      || data.UseSameDomainRenderingUntilDeprecated != undefined
       || data.multiSize || (
           global.context && global.context.location &&
             global.context.location.href &&
