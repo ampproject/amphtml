@@ -37,11 +37,6 @@ const ELIGIBLE_TAGS = [
   'amp-instagram',
 ];
 
-const ELIGIBLE_TAP_TAGS = {
-  'amp-img': true,
-  'amp-anim': true,
-};
-
 const DEFAULT_VIEWER_ID = 'amp-lightbox-viewer';
 const VIEWER_TAG = 'amp-lightbox-viewer';
 
@@ -58,7 +53,7 @@ export function autoDiscoverLightboxables(ampdoc) {
   dev().assert(isExperimentOn(ampdoc.win, 'amp-lightbox-viewer'));
   dev().assert(isExperimentOn(ampdoc.win, 'amp-lightbox-viewer-auto'));
 
-  return maybeInstallLightboxViewer(ampdoc).then(viewerId => {
+  return maybeInstallLightboxViewer(ampdoc).then(() => {
     const tagsQuery = ELIGIBLE_TAGS.join(',');
     const matches = ampdoc.getRootNode().querySelectorAll(tagsQuery);
     for (let i = 0; i < matches.length; i++) {
@@ -71,9 +66,6 @@ export function autoDiscoverLightboxables(ampdoc) {
       // TODO(aghassemi): This is best to do via default action. E.g. we can add
       // a tap listener via Action service and invoke lightbox if conditions are
       // met.
-      if (meetsHeuristicsForTap(element)) {
-        element.setAttribute('on', 'tap:' + viewerId + '.activate');
-      }
     }
   });
 }

@@ -295,7 +295,7 @@ export class ImageViewer {
       this.updatePanZoom_();
 
     }).then(() => {
-      this.updateSrc_();
+      return this.updateSrc_();
     });
   }
 

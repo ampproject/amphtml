@@ -48,19 +48,14 @@ export class LightboxManager {
     this.ampdoc_ = ampdoc;
 
     /**
-     * Ordered list of lightboxable elements
-     * @private {?Array<!Element>}
-     **/
-    this.elements_ = null;
-
-    /**
      * Cache for the `maybeInit()` call.
      * @private {?Promise}
      **/
     this.initPromise_ = null;
 
     /**
-     * @private {!Object<string, Array<string>>}
+     * Ordered lists of lightboxable elements according to group
+     * @private {!Object<string, Array<Element>>}
      */
     this.lightboxGroups_ = {
       default: [],
@@ -107,29 +102,26 @@ export class LightboxManager {
    */
   scanLightboxables_() {
     return this.ampdoc_.whenReady().then(() => {
-
       const viewer = elementByTag(this.ampdoc_.getRootNode(), VIEWER_TAG).id;
-
       const matches = this.ampdoc_.getRootNode().querySelectorAll('[lightbox]');
-      this.elements_ = [];
       for (let i = 0; i < matches.length; i++) {
         const element = matches[i];
-        // TODO: allow lightbox groups
-          if (element.tagName == 'AMP-CAROUSEL') {
-            // TODO: special case carousel
+        if (element.tagName == 'AMP-CAROUSEL') {
+          // TODO: special case carousel
+        } else {
+          const lightboxGroupId = element.getAttribute('lightbox');
+          if (lightboxGroupId == '' || lightboxGroupId == 'default') {
+            this.lightboxGroups_.default.push(dev().assertElement(element));
           } else {
-            const lightboxGroupId = element.getAttribute('lightbox');
-            if (lightboxGroupId == '' || lightboxGroupId == 'default') {
-              this.lightboxGroups_.default.push(element);
-            } else {
-              if (!this.lightboxGroups_.hasOwnProperty(lightboxGroupId)) {
-                this.lightboxGroups_[lightboxGroupId] = [];
-              }
-              this.lightboxGroups_[lightboxGroupId].push(element);
+            if (!this.lightboxGroups_.hasOwnProperty(lightboxGroupId)) {
+              this.lightboxGroups_[lightboxGroupId] = [];
             }
-            if (this.meetsHeuristicsForTap_(element)) {
-                element.setAttribute('on', 'tap:' + viewerId + '.activate');
-            }
+            this.lightboxGroups_[lightboxGroupId]
+                .push(dev().assertElement(element));
+          }
+          if (this.meetsHeuristicsForTap_(element)) {
+            element.setAttribute('on', 'tap:' + viewer.id + '.activate');
+          }
         }
       }
     });
@@ -142,7 +134,7 @@ export class LightboxManager {
    */
   getElementsForLightboxGroup(lightboxGroupId) {
     return this.maybeInit_()
-      .then(() => dev().assert(this.lightboxGroups_[lightboxGroupId]));
+        .then(() => dev().assert(this.lightboxGroups_[lightboxGroupId]));
   }
 
   /**
@@ -170,14 +162,16 @@ export class LightboxManager {
    * The function is not implemented yet. Fake for testing.
    * Find or create thumbnails for lightboxed elements.
    * Return a list of thumbnails obj for lightbox gallery view
+   * @param {!string} lightboxGroupId
    * @return {!Array<{url: string, element: !Element}>}
    */
-  getThumbnails() {
+  getThumbnails(lightboxGroupId) {
     const thumbnailList = [];
-    for (let i = 0; i < this.elements_.length; i++) {
+    const elements = this.lightboxGroups_[lightboxGroupId];
+    for (let i = 0; i < elements.length; i++) {
       const thumbnail = {
-        url: this.getThumbnailUrl_(this.elements_[i], i),
-        element: this.elements_[i],
+        url: this.getThumbnailUrl_(dev().assertElement(elements[i]), i),
+        element: elements[i],
       };
       thumbnailList.push(thumbnail);
     }
