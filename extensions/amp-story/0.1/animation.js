@@ -20,9 +20,10 @@ import {
   WebAnimationPlayState,
 } from '../../amp-animation/0.1/web-animation-types';
 import {dev, user} from '../../../src/log';
-import {map} from '../../../src/utils/object';
+import {map, omit} from '../../../src/utils/object';
+import {once} from '../../../src/utils/function';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
+import {setStyles} from '../../../src/style';
 import {
   StoryAnimationDef,
   StoryAnimationDimsDef,
@@ -42,14 +43,6 @@ const ANIMATE_IN_DELAY_ATTRIBUTE_NAME = 'animate-in-delay';
 const ANIMATE_IN_AFTER_ATTRIBUTE_NAME = 'animate-in-after';
 /** const {string} */
 const ANIMATABLE_ELEMENTS_SELECTOR = `[${ANIMATE_IN_ATTRIBUTE_NAME}]`;
-
-/**
- * @param {!Object<string, *>} frameDef
- * @return {!Array<string>}
- */
-function getCssProps(frameDef) {
-  return Object.keys(frameDef).filter(k => k != 'offset');
-}
 
 
 /**
@@ -121,6 +114,10 @@ class AnimationRunner {
         webAnimationBuilderPromise.then(builder =>
             builder.createRunner(webAnimDef)));
 
+    /** @private @const {!function():!Object<string, *>} */
+    this.firstFrameProps_ =
+        this.keyframes_.then(keyframes => omit(keyframes[0], ['offset']));
+
     /** @private {?../../amp-animation/0.1/web-animations.WebAnimationRunner} */
     this.runner_ = null;
 
@@ -190,20 +187,18 @@ class AnimationRunner {
 
   /** @return {!Promise<void>} */
   applyFirstFrame() {
+    if (this.hasStarted()) {
+      return;
+    }
+
     if (this.runner_) {
       this.runner_.cancel();
     }
 
-    return this.keyframes_.then(keyframes => {
-      const firstFrameDef = keyframes[0];
-      const firstFrameProps = getCssProps(firstFrameDef);
-
-      return this.vsync_.mutatePromise(() => {
-        firstFrameProps.forEach(k => {
-          setStyle(this.target_, k, firstFrameDef[k]);
-        });
-      });
-    });
+    return this.firstFrameProps_.then(firstFrameProps =>
+        this.vsync_.mutatePromise(() => {
+          setStyles(this.target_, firstFrameProps);
+        }));
   }
 
   /** Starts or resumes the animation. */
