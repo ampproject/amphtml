@@ -207,8 +207,8 @@ describes.realWin('amp-analytics', {
 
             const variables = variableServiceFor(ampdoc.win);
             const encodeVars = variables.encodeVars;
-            sandbox.stub(variables, 'encodeVars', function(val, name) {
-              val = encodeVars.call(this, val, name);
+            sandbox.stub(variables, 'encodeVars', function(name, val) {
+              val = encodeVars.call(this, name, val);
               if (val == '') {
                 return '$' + name;
               }
