@@ -50,6 +50,11 @@ export class VisibilityModel {
       continuousTimeMin: Number(spec['continuousTimeMin']) || 0,
       continuousTimeMax: Number(spec['continuousTimeMax']) || Infinity,
     };
+    // Above, if visiblePercentageMax was not specified, assume 100%.
+    // Here, do allow 0% to be the value if that is what was specified.
+    if (String(spec['visiblePercentageMax']).trim() === '0') {
+      this.spec_.visiblePercentageMax = 0;
+    }
 
     /** @private {boolean} */
     this.repeat_ = spec['repeat'] === true;
@@ -348,8 +353,15 @@ export class VisibilityModel {
   isVisibilityMatch_(visibility) {
     dev().assert(visibility >= 0 && visibility <= 1,
         'invalid visibility value: %s', visibility);
+    // Special case: If visiblePercentageMin is 100%, then it doesn't make
+    // sense to do the usual (min, max] since that would never be true.
     if (this.spec_.visiblePercentageMin == 1) {
       return visibility == 1;
+    }
+    // Special case: If visiblePercentageMax is 0%, then we
+    // want to ping when the creative becomes not visible.
+    if (this.spec_.visiblePercentageMax == 0) {
+      return visibility == 0;
     }
     return visibility > this.spec_.visiblePercentageMin &&
         visibility <= this.spec_.visiblePercentageMax;
