@@ -199,9 +199,9 @@ export class AbstractAmpContext {
         });
 
     this.client_.sendMessage(MessageType.GET_HTML, dict({
-      selector,
-      attributes,
-      messageId,
+      'selector': selector,
+      'attributes': attributes,
+      'messageId': messageId,
     }));
   }
 
