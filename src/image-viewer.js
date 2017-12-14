@@ -257,7 +257,7 @@ export class ImageViewer {
   measure() {
     return this.lightbox_.getVsync().measurePromise(() => {
       this.viewerBox_ = layoutRectFromDomRect(this.viewer_
-        ./*OK*/getBoundingClientRect());
+          ./*OK*/getBoundingClientRect());
 
       const sourceAspectRatio = this.sourceWidth_ / this.sourceHeight_;
       let height = Math.min(this.viewerBox_.width / sourceAspectRatio,
@@ -375,12 +375,12 @@ export class ImageViewer {
   registerPanningGesture_() {
     // Movable.
     this.unlistenOnSwipePan_ = this.gestures_
-      .onGesture(SwipeXYRecognizer, e => {
-        this.onMove_(e.data.deltaX, e.data.deltaY, false);
-        if (e.data.last) {
-          this.onMoveRelease_(e.data.velocityX, e.data.velocityY);
-        }
-      });
+        .onGesture(SwipeXYRecognizer, e => {
+          this.onMove_(e.data.deltaX, e.data.deltaY, false);
+          if (e.data.last) {
+            this.onMoveRelease_(e.data.velocityX, e.data.velocityY);
+          }
+        });
   }
 
   /**
@@ -602,7 +602,7 @@ export class ImageViewer {
     const newPosX = this.boundX_(this.startX_ + deltaX * newScale, false);
     const newPosY = this.boundY_(this.startY_ + deltaY * newScale, false);
     return /** @type {!Promise|undefined} */ (
-        this.set_(newScale, newPosX, newPosY, animate));
+      this.set_(newScale, newPosX, newPosY, animate));
   }
 
   /**
@@ -675,8 +675,8 @@ export class ImageViewer {
     if (animate) {
       const maxDur = 250;
       dur = Math.min(maxDur, Math.max(
-          maxDur * dist * 0.01,      // Moving component.
-          maxDur * Math.abs(ds)));   // Zooming component.
+          maxDur * dist * 0.01, // Moving component.
+          maxDur * Math.abs(ds))); // Zooming component.
     }
 
     let promise;

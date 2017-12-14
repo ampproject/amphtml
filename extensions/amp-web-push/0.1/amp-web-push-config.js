@@ -185,8 +185,8 @@ export class WebPushConfig extends AMP.BaseElement {
    */
   ensureUniqueElement_() {
     const webPushConfigElements = this.getAmpDoc()
-      .getRootNode()
-      .querySelectorAll('#' + CONFIG_TAG);
+        .getRootNode()
+        .querySelectorAll('#' + CONFIG_TAG);
     if (webPushConfigElements.length > 1) {
       throw user().createError(
           `Only one <${CONFIG_TAG}> element may exist on a page.`

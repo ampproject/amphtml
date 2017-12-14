@@ -71,7 +71,7 @@ export class AmpShareTracking extends AMP.BaseElement {
     dev().fine(TAG, 'vendorHref_: ', this.vendorHref_);
 
     const shareTrackingFragments = Promise.all(
-      [this.getIncomingFragment_(), this.getOutgoingFragment_()]
+        [this.getIncomingFragment_(), this.getOutgoingFragment_()]
     ).then(results => {
       const incomingFragment = results[0];
       const outgoingFragment = results[1];
@@ -196,8 +196,8 @@ export class AmpShareTracking extends AMP.BaseElement {
    */
   getNewViewerFragment_(incomingFragment, outgoingFragment) {
     const fragmentResidual = incomingFragment ?
-        this.originalViewerFragment_.substr(incomingFragment.length + 1) :
-        this.originalViewerFragment_;
+      this.originalViewerFragment_.substr(incomingFragment.length + 1) :
+      this.originalViewerFragment_;
     let result = '.' + outgoingFragment;
     if (fragmentResidual) {
       if (fragmentResidual[0] != '&') {

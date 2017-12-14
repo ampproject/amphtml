@@ -97,11 +97,11 @@ export class AccessService {
 
     /** @const @private {!AccessType} */
     this.type_ = this.buildConfigType_(/** @type {!JsonObject} */ (
-        configJson));
+      configJson));
 
     /** @const @private {!JsonObject} */
     this.loginConfig_ = this.buildConfigLoginMap_(/** @type {!JsonObject} */ (
-        configJson));
+      configJson));
 
     /** @const @private {!JsonObject} */
     this.authorizationFallbackResponse_ =
@@ -264,8 +264,8 @@ export class AccessService {
    */
   buildConfigType_(configJson) {
     let type = configJson['type'] ?
-        user().assertEnumValue(AccessType, configJson['type'], 'access type') :
-        null;
+      user().assertEnumValue(AccessType, configJson['type'], 'access type') :
+      null;
     if (!type) {
       if (configJson['vendor']) {
         type = AccessType.VENDOR;
@@ -441,7 +441,7 @@ export class AccessService {
     return this.getReaderId_().then(readerId => {
       const vars = {
         'READER_ID': readerId,
-        'ACCESS_READER_ID': readerId,  // A synonym.
+        'ACCESS_READER_ID': readerId, // A synonym.
         'ACCESS_TOKEN': () => this.signIn_.getAccessTokenPassive(),
       };
       if (useAuthData) {
@@ -597,7 +597,7 @@ export class AccessService {
     }
     if (renderPromise) {
       return renderPromise.then(() =>
-          this.applyAuthorizationAttrs_(element, on));
+        this.applyAuthorizationAttrs_(element, on));
     }
     return this.applyAuthorizationAttrs_(element, on);
   }

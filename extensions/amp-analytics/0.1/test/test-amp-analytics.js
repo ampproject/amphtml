@@ -33,7 +33,7 @@ import {
 } from '../../../../src/service';
 import {map} from '../../../../src/utils/object';
 import {cidServiceForDocForTesting} from
-    '../../../../src/service/cid-impl';
+  '../../../../src/service/cid-impl';
 import {Services} from '../../../../src/services';
 import * as log from '../../../../src/log';
 
@@ -207,8 +207,8 @@ describes.realWin('amp-analytics', {
 
             const variables = variableServiceFor(ampdoc.win);
             const encodeVars = variables.encodeVars;
-            sandbox.stub(variables, 'encodeVars', function(val, name) {
-              val = encodeVars.call(this, val, name);
+            sandbox.stub(variables, 'encodeVars', function(name, val) {
+              val = encodeVars.call(this, name, val);
               if (val == '') {
                 return '$' + name;
               }
@@ -436,6 +436,33 @@ describes.realWin('amp-analytics', {
       expect(sendRequestSpy.args[0][0]).to.match(/cid=[a-zA-Z\-]+/);
       expect(sendRequestSpy.args[0][0]).to.not.equal(
           'https://example.com/cid=CLIENT_ID(analytics-abc)');
+    });
+  });
+
+  it('fills interally provided trigger vars', function() {
+    const analytics = getAnalyticsTag({
+      'requests': {
+        'timer': 'https://e.com/start=${timerStart}&duration=${timerDuration}',
+        'visible': 'https://e.com/totalVisibleTime=${totalVisibleTime}',
+      },
+      'triggers': {
+        'timerTrigger': {
+          'on': 'timer',
+          'request': 'timer',
+          'timerSpec': {'interval': 1},
+        },
+        'visibility': {'on': 'visible', 'request': 'visible'},
+      },
+    });
+
+    return waitForSendRequest(analytics).then(() => {
+      expect(sendRequestSpy).to.be.calledTwice;
+      const timerRequest = sendRequestSpy.args[0][0];
+      const visibleRequest = sendRequestSpy.args[1][0];
+      expect(visibleRequest).to.equal('https://e.com/totalVisibleTime=0');
+      expect(timerRequest).to.match(/duration=0/);
+      expect(timerRequest).to.not.match(/start=0/);
+      expect(timerRequest).to.match(/start=[0-9]+&duration/);
     });
   });
 
@@ -749,7 +776,7 @@ describes.realWin('amp-analytics', {
 
       const handlerSpy = sandbox.spy();
       analyticsGroup.addTrigger(
-        {'on': 'click', 'selector': '.x', 'vars': {'test': 'bar'}},
+          {'on': 'click', 'selector': '.x', 'vars': {'test': 'bar'}},
           handlerSpy);
       analyticsGroup.root_.getTrackerOptional('click')
           .clickObservable_.fire({target: el1});
@@ -1489,7 +1516,7 @@ describes.realWin('amp-analytics', {
       });
       return expect(waitForNoSendRequest(analytics)).to.be
           .rejectedWith(
-          /iframePing config is only available to vendor config/);
+              /iframePing config is only available to vendor config/);
     });
 
     it('succeeds for iframePing config in vendor config', function() {
@@ -1643,8 +1670,8 @@ describes.realWin('amp-analytics', {
             'var2': 'test2',
           },
         }]}, {
-          'sandbox': 'true',
-        }, true);
+        'sandbox': 'true',
+      }, true);
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.calledOnce).to.be.true;
         expect(sendRequestSpy.args[0][0]).to.equal(
@@ -1718,8 +1745,8 @@ describes.realWin('amp-analytics', {
             'var3': 'CLIENT_ID',
           },
         }]}, {
-          'sandbox': 'true',
-        }, true);
+        'sandbox': 'true',
+      }, true);
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.calledOnce).to.be.true;
         expect(sendRequestSpy.args[0][0]).to.equal(
@@ -1818,7 +1845,7 @@ describes.realWin('amp-analytics', {
       });
       return expect(waitForNoSendRequest(analytics)).to.be
           .rejectedWith(
-          /iframePing config is only available to vendor config/);
+              /iframePing config is only available to vendor config/);
     });
 
     it('succeeds for iframePing config in vendor config', function() {
