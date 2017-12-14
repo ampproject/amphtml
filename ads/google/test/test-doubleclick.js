@@ -48,7 +48,17 @@ describes.sandboxed('writeAdScript', {}, env => {
 
   it('should use GPT when' +
   'useSameDomainRenderingUntilDeprecated is not undefined', () => {
-    const data = {useSameDomainRenderingUntilDeprecated: true};
+    // Note the differences in capitalization in the three uses
+    // of useSameDomainRenderingUntilDeprecated below. All work.
+    let data = {useSameDomainRenderingUntilDeprecated: true};
+    writeAdScript(win, data);
+    verifyScript(win, 'gpt.js');
+
+    data = {UseSameDomainRenderingUntilDeprecated: true};
+    writeAdScript(win, data);
+    verifyScript(win, 'gpt.js');
+
+    data = {usesamedomainrenderinguntildeprecated: true};
     writeAdScript(win, data);
     verifyScript(win, 'gpt.js');
   });
