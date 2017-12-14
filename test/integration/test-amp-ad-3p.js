@@ -164,17 +164,15 @@ function createIframeWithApis(fixture) {
       return lastIO != null;
     });
   }).then(() => {
-    let resolver;
-    let reject;
-    const p = new Promise((r, j) => {resolver = r; reject = j;});
-    iframe.contentWindow.context.getHtml('a', ['href'], content => {
-      if (content === '<a href="http://test.com/test">Test link</a>') {
-        resolver();
-      } else {
-        reject(new Error('Incorrect getHtml result: ' + content));
-      }
+    return new Promise((resolve, reject) => {
+      iframe.contentWindow.context.getHtml('a', ['href'], content => {
+        if (content == '<a href="http://test.com/test">Test link</a>') {
+          resolve();
+        } else {
+          reject(new Error('getHtml wrong result: ' + content));
+        }
+      });
     });
-    return p;
   });
 }
 
