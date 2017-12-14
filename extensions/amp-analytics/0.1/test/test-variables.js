@@ -40,11 +40,16 @@ describe('amp-analytics.VariableService', function() {
 
 
   it('correctly encodes scalars and arrays', () => {
-    expect(variables.encodeVars('abc %&')).to.equal('abc%20%25%26');
+    expect(variables.encodeVars('v', 'abc %&')).to.equal('abc%20%25%26');
+    expect(variables.encodeVars('v', 'SOME_MACRO(abc,123)'))
+        .to.equal('SOME_MACRO(abc,123)');
+
     const array = ['abc %&', 'a b'];
-    expect(variables.encodeVars(array)).to.equal('abc%20%25%26,a%20b');
+    expect(variables.encodeVars('v', array)).to.equal('abc%20%25%26,a%20b');
     // Test non-inplace semantics by testing again.
-    expect(variables.encodeVars(array)).to.equal('abc%20%25%26,a%20b');
+    expect(variables.encodeVars('v', array)).to.equal('abc%20%25%26,a%20b');
+    expect(variables.encodeVars('v', ['12.3', 'SOME_MACRO(abc,123)', 'ab/c']))
+        .to.equal('12.3,SOME_MACRO(abc,123),ab%2Fc');
   });
 
   describe('expandTemplate', () => {
