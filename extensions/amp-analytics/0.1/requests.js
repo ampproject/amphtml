@@ -242,7 +242,7 @@ export class RequestHandler {
       if (v == null) {
         continue;
       } else {
-        const sv = this.variableService_.encodeVars(v, k);
+        const sv = this.variableService_.encodeVars(k, v);
         s.push(`${encodeURIComponent(k)}=${sv}`);
       }
     }

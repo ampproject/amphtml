@@ -248,7 +248,7 @@ export class VariableService {
           // Then encode the value
             const val = options.noEncode
               ? finalRawValue
-              : this.encodeVars(finalRawValue, name);
+              : this.encodeVars(name, finalRawValue);
             return val ? val + argList : val;
           })
           .then(encodedValue => {
@@ -284,17 +284,17 @@ export class VariableService {
   }
 
   /**
+   * @param {string} unusedName Name of the variable. Only used in tests.
    * @param {string|!Array<string>} raw The values to URI encode.
-   * @param {string} unusedName Name of the variable.
    * @return {string} The encoded value.
    */
-  encodeVars(raw, unusedName) {
+  encodeVars(unusedName, raw) {
     if (raw == null) {
       return '';
     }
 
     if (isArray(raw)) {
-      return raw.map(encodeURIComponent).join(',');
+      return raw.map(this.encodeVars.bind(this, unusedName)).join(',');
     }
     // Separate out names and arguments from the value and encode the value.
     const {name, argList} = this.getNameArgs_(String(raw));
