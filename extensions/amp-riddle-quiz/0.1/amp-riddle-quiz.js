@@ -21,7 +21,7 @@ import {user} from '../../../src/log';
 
 export class AmpRiddleQuiz extends AMP.BaseElement {
 
-    /** @param {!AmpElement} element */
+  /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
@@ -103,7 +103,7 @@ export class AmpRiddleQuiz extends AMP.BaseElement {
       this.iframe_ = null;
     }
 
-    return true;  // Call layoutCallback again.
+    return true; // Call layoutCallback again.
   }
 
   /**
