@@ -133,8 +133,8 @@ export class DoubleclickA4aEligibility {
           'https://github.com/ampproject/amphtml/issues/11834 ' +
           'for more information');
     const usdrd = 'useSameDomainRenderingUntilDeprecated';
-    const hasUSDRD = (tryParseJson(element.getAttribute('json')) || {})[usdrd]
-          || usdrd in element.dataset;
+    const hasUSDRD = usdrd in element.dataset ||
+          (tryParseJson(element.getAttribute('json')) || {})[usdrd];
     if (hasUSDRD) {
       warnDeprecation(usdrd);
     }

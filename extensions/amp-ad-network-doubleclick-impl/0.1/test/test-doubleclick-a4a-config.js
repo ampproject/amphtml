@@ -142,7 +142,7 @@ describe('doubleclick-a4a-config', () => {
      * correctly honored in the past. This test checks multiple different
      * ways that this test could be specified to assure they all work.
      */
-    it('should use DF if UseSameDomainRenderingUntilDeprecated in use', () => {
+    it('should use DF if useSameDomainRenderingUntilDeprecated in use', () => {
       // Ensure no selection in order to very experiment attribute.
       sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
           .returns(null);
