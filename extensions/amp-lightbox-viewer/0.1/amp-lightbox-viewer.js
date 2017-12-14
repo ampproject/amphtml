@@ -33,6 +33,7 @@ import {elementByTag} from '../../../src/dom';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
+import {debounce} from '../../../src/utils/rate-limit';
 
 /** @const */
 const TAG = 'amp-lightbox-viewer';
@@ -136,6 +137,12 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
     /** @private {?UnlistenDef} */
     this.unlistenResize_ = null;
+
+    /** @private {?UnlistenDef} */
+    this.unlistenOrientationChange_ = null;
+
+    /** @private {?UnlistenDef} */
+    this.unlistenClick_ = null;
   }
 
   /** @override */
@@ -181,7 +188,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     return this.buildCarousel_().then(() => {
       this.buildDescriptionBox_();
       this.buildTopBar_();
-      this.setupContainerListener_();
+      this.setupEventListeners_();
     });
   }
 
@@ -220,7 +227,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         const container = this.element.ownerDocument.createElement('div');
         container.classList.add('i-amphtml-image-lightbox-container');
         const imageViewer = new ImageViewer(this, this.win,
-          this.loadPromise.bind(this));
+            this.loadPromise.bind(this));
         imageViewer.init(element, elementByTag(element, 'img'));
         container.appendChild(imageViewer.getElement());
         slide = container;
@@ -261,11 +268,13 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   slideChangeHandler_(event) {
+    this.cleanupOnResizeHandler_();
     this.currentElemId_ = getData(event)['index'];
     const tagName = this.elementsMetadata_[this.currentElemId_]
         .tagName;
     if (tagName === 'AMP-IMG') {
-      this.resizeImageViewerDimensions_();
+      this.resizeCurrentImageViewer_();
+      this.registerOnResizeHandler_();
     }
     this.updateDescriptionBox_();
   }
@@ -342,12 +351,12 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       const mutateAnimateDesc = state => {
         const finalDescTextAreaTop =
             state.descBoxHeight > state.descTextAreaHeight ?
-            state.descBoxHeight - state.descBoxPaddingTop -
+              state.descBoxHeight - state.descBoxPaddingTop -
             state.descTextAreaHeight : 0;
         const tempOffsetHeight =
             state.descBoxHeight > state.descTextAreaHeight ?
-            state.descTextAreaHeight - state.prevDescTextAreaHeight :
-            state.descBoxHeight - state.descBoxPaddingTop -
+              state.descTextAreaHeight - state.prevDescTextAreaHeight :
+              state.descBoxHeight - state.descBoxPaddingTop -
             state.prevDescTextAreaHeight;
         this.animateDescOverflow_(tempOffsetHeight, finalDescTextAreaTop);
       };
@@ -393,7 +402,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   animateDescOverflow_(diffTop, finalTop,
-                              duration = 500, curve = 'ease-out') {
+    duration = 500, curve = 'ease-out') {
     const textArea = dev().assertElement(this.descriptionTextArea_);
     const transition = tr.numeric(0, diffTop);
     return Animation.animate(textArea, time => {
@@ -482,13 +491,35 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
-   * Set up container listener.
+   * Set up event listeners.
    * @private
    */
-  setupContainerListener_() {
+  setupEventListeners_() {
     dev().assert(this.container_);
     const toggleControls = this.toggleControls_.bind(this);
-    listen(dev().assertElement(this.container_), 'click', toggleControls);
+    this.unlistenClick_ = listen(dev().assertElement(this.container_),
+        'click', toggleControls);
+  }
+
+  /**
+   * Clean up event listeners.
+   * @private
+   */
+  cleanupEventListeners_() {
+    if (this.unlistenResize_) {
+      this.unlistenResize_();
+      this.unlistenResize_ = null;
+    }
+
+    if (this.unlistenOrientationChange_) {
+      this.unlistenOrientationChange_();
+      this.unlistenOrientationChange_ = null;
+    }
+
+    if (this.unlistenClick_) {
+      this.unlistenClick_();
+      this.unlistenClick_ = null;
+    }
   }
 
   /**
@@ -579,7 +610,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     const tagName = this.elementsMetadata_[this.currentElemId_]
         .tagName;
     if (tagName === 'AMP-IMG') {
-      this.resizeImageViewerDimensions_().then(() => this.enter_(element));
+      this.registerOnResizeHandler_();
+      this.resizeCurrentImageViewer_().then(() => this.enter_(element));
     }
     this.updateDescriptionBox_();
   }
@@ -614,7 +646,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       const rect = layoutRectFromDomRect(sourceImage
           ./*OK*/getBoundingClientRect());
       const imageBox = this.elementsMetadata_[this.currentElemId_]
-        .imageViewer.getImageBox();
+          .imageViewer.getImageBox();
 
       const clone = sourceImage.cloneNode(true);
       clone.className = '';
@@ -663,27 +695,57 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
-   * Resizes the ImageViewer of the current slide so that the image
-   * is centered in the page. Used in open or on slide change. Also
-   * registers a onResize handler to resize the ImageViewer whenever
-   * the screen size changes.
+   * This function resizes the image inside the lightbox.
    * @return {!Promise}
    * @private
    */
-  resizeImageViewerDimensions_() {
+  resizeCurrentImageViewer_() {
     const imgViewer = this.elementsMetadata_[this.currentElemId_].imageViewer;
+    return imgViewer.measure();
+  }
 
-    // Unregister the previous onResize handler to rescale the ImageViewer
+  /**
+   * @private
+   */
+  cleanupOnResizeHandler_() {
     if (this.unlistenResize_) {
       this.unlistenResize_();
     }
 
-    // Register a new onResize handler
+    if (this.unlistenOrientationChange_) {
+      this.unlistenOrientationChange_();
+    }
+  }
+
+  /**
+   * Registers a onResize handler to resize the ImageViewer whenever
+   * the screen size or mobile orientation changes.
+   * @private
+   */
+  registerOnResizeHandler_() {
+    const platform = Services.platformFor(this.win);
+    const onResize = this.resizeCurrentImageViewer_.bind(this);
+
+    // Special case for iOS browsers due to Webkit bug #170595
+    // https://bugs.webkit.org/show_bug.cgi?id=170595
+    // Delay the onResize by 500 ms to ensure correct height and width
+    const debouncedOnResize = debounce(this.win, onResize, 500);
+
+    // Register an onResize handler to resize the image viewer
     this.unlistenResize_ = this.getViewport().onResize(() => {
-      imgViewer.measure();
+      if (platform.isIos() && platform.isSafari()) {
+        debouncedOnResize();
+      } else {
+        onResize();
+      }
     });
 
-    return imgViewer.measure();
+    // iOS non-safari browsers do not reliably fire onResize on orientation
+    // change, so listen to orientationchange to trigger resize
+    if (platform.isIos() && !platform.isSafari()) {
+      this.unlistenOrientationChange_ = listen(this.win,
+          'orientationchange', debouncedOnResize);
+    }
   }
 
   /**
@@ -716,12 +778,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    if (this.unlistenResize_) {
-      this.unlistenResize_();
-      this.unlistenResize_ = null;
-    }
-
     this.active_ = false;
+
+    this.cleanupEventListeners_();
 
     // Reset the state of the description box
     this.descriptionBox_.classList.remove('hide');
@@ -846,7 +905,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       // type checking to work.
       /**@type {?}*/ (this.carousel_).implementation_.showSlideWhenReady(
           this.currentElemId_);
-      this.resizeImageViewerDimensions_();
+      this.resizeCurrentImageViewer_();
+      this.registerOnResizeHandler_();
       this.updateDescriptionBox_();
       event.stopPropagation();
     };

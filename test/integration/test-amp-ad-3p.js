@@ -112,8 +112,8 @@ function createIframeWithApis(fixture) {
     // Nevertheless this only happens in test. In real world AMP will not
     // in srcdoc iframe.
     expect(context.sourceUrl).to.equal(platform.isEdge()
-        ? 'http://localhost:9876/context.html'
-        : 'about:srcdoc');
+      ? 'http://localhost:9876/context.html'
+      : 'about:srcdoc');
 
     expect(context.tagName).to.equal('AMP-AD');
 

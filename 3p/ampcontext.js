@@ -198,11 +198,11 @@ export class AbstractAmpContext {
           }
         });
 
-    this.client_.sendMessage(MessageType.GET_HTML, {
+    this.client_.sendMessage(MessageType.GET_HTML, dict({
       selector,
       attributes,
       messageId,
-    });
+    }));
   }
 
   /**

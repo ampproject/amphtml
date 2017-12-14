@@ -136,7 +136,7 @@ export class AmpIframe extends AMP.BaseElement {
         this.element);
     user().assert(!(endsWith(url.hostname, `.${urls.thirdPartyFrameHost}`) ||
         endsWith(url.hostname, '.ampproject.org')),
-        'amp-iframe does not allow embedding of frames from ' +
+    'amp-iframe does not allow embedding of frames from ' +
         'ampproject.*: %s', src);
     return src;
   }
@@ -297,7 +297,7 @@ export class AmpIframe extends AMP.BaseElement {
     }
 
     const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */(
-        dev().assert(this.iframeLayoutBox_));
+      dev().assert(this.iframeLayoutBox_));
     return moveLayoutRect(iframe, box.left, box.top);
   }
 

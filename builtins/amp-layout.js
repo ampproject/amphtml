@@ -20,7 +20,7 @@ import {registerElement} from '../src/service/custom-element-registry';
 
 class AmpLayout extends BaseElement {
 
-    /** @override */
+  /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }

@@ -373,7 +373,7 @@ describe('FixedLayer', () => {
             `${expected.id}: wrong position`);
         expect(JSON.stringify(actual.selectors))
             .to.equal(JSON.stringify(expected.selectors),
-            `${expected.id}: wrong selectors`);
+                `${expected.id}: wrong selectors`);
       }
 
       expect(fixedLayer.elements_).to.have.length(5);
@@ -557,6 +557,25 @@ describe('FixedLayer', () => {
       expect(state['F0'].fixed).to.be.false;
       expect(state['F1'].fixed).to.be.false;
       expect(state['F4'].sticky).to.be.true;
+    });
+
+    it('should disregard display:none element', () => {
+      element1.computedStyle['position'] = 'fixed';
+      element1.offsetWidth = 10;
+      element1.offsetHeight = 10;
+      element1.computedStyle['display'] = 'none';
+      element5.computedStyle['position'] = 'sticky';
+      element5.offsetWidth = 10;
+      element5.offsetHeight = 10;
+      element5.computedStyle['display'] = 'none';
+
+      expect(vsyncTasks).to.have.length(1);
+      const state = {};
+      vsyncTasks[0].measure(state);
+
+      expect(state['F0'].fixed).to.be.false;
+      expect(state['F1'].fixed).to.be.false;
+      expect(state['F4'].sticky).to.be.false;
     });
 
     it('should tolerate getComputedStyle = null', () => {

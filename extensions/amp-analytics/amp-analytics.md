@@ -142,7 +142,8 @@ The configuration object for `<amp-analytics>` uses the following format:
   "transport": {
     "beacon": *boolean*,
     "xhrpost": *boolean*,
-    "image": *boolean*
+    "image": *boolean*,
+    "iframe": *url*,
   }
 }
 ```
@@ -374,7 +375,7 @@ The `visibilitySpec` is a set of conditions and properties that can be applied t
   - `waitFor` This property indicates that the visibility trigger should wait for a certain signal before tracking visibility. The supported values are     `none`, `ini-load` and `render-start`. If `waitFor` is undefined, it is defaulted to [`ini-load`](#initial-load-trigger) when selector is specified, or to `none` otherwise.
   - `continuousTimeMin` and `continuousTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a continuous amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. The `continuousTimeMin` is defaulted to 0 when not specified.
   - `totalTimeMin` and `totalTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a total amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. The `totalTimeMin` is defaulted to 0 when not specified.
-  - `visiblePercentageMin` and `visiblePercentageMax` These properties indicate that a request should be fired when the proportion of an element that is visible within the viewport is between the minimum and maximum specified percentages. Percentage values between 0 and 100 are valid. Note that the lower bound (`visiblePercentageMin`) is inclusive while the upper bound (`visiblePercentageMax`) is not. When these properties are defined along with other timing related properties, only the time when these properties are met are counted. They default to 0 and 100 when not specified.
+  - `visiblePercentageMin` and `visiblePercentageMax` These properties indicate that a request should be fired when the proportion of an element that is visible within the viewport is between the minimum and maximum specified percentages. Percentage values between 0 and 100 are valid. Note that the upper bound (`visiblePercentageMax`) is inclusive while the lower bound (`visiblePercentageMin`) is not. When these properties are defined along with other timing related properties, only the time when these properties are met are counted. They default to 0 and 100 when not specified.
 
 In addition to the conditions above, `visibilitySpec` also enables certain variables which are documented [here](./analytics-vars.md#visibility-variables).
 
@@ -508,10 +509,11 @@ indicate which transport methods are acceptable.
   - `beacon` Indicates [`navigator.sendBeacon`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon)  can be used to transmit the request. This will send a POST request, with credentials, and an empty body.
   - `xhrpost` Indicates `XMLHttpRequest` can be used to transmit the request. This will send a POST request, with credentials, and an empty body.
   - `image` Indicates the request can be sent by generating an `Image` tag. This will send a GET request.
+  - `iframe` The value is a URL string. Indicates that an iframe should be created, with its `src` attribute set to this URL, and requests will be sent to that iframe via `window.postMessage()`. In this case, requests need not be full-fledged URLs. `iframe` may only be specified in `vendors.js`, not inline within the `amp-analytics` tag, nor via remote configuration. This option is also only available to MRC-accredited vendors.
 
-If more than one of the above transport methods are enabled, the precedence is `beacon` > `xhrpost` > `image`. Only one transport method will be used, and it will be the highest precedence one that is permitted and available. If the client's user agent does not support a method, the next highest precedence method enabled will be used. By default, all three methods above are enabled.
+If more than one of the above transport methods are enabled, the precedence is `iframe` > `beacon` > `xhrpost` > `image`. Only one transport method will be used, and it will be the highest precedence one that is permitted and available. If the client's user agent does not support a method, the next highest precedence method enabled will be used. By default, all four methods above are enabled.
 
-In the example below, `beacon` and `xhrpost` are set to `false`, so they will not be used even though they have higher precedence than `image`. `image` would be set `true` by default, but it is explicitly declared here. If the client's user agent supports the `image` method, then it will be used; otherwise, no request would be sent.
+In the example below, an `iframe` URL is not specified, and `beacon` and `xhrpost` are set to `false`, so they will not be used even though they have higher precedence than `image`. `image` would be set `true` by default, but it is explicitly declared here. If the client's user agent supports the `image` method, then it will be used; otherwise, no request would be sent.
 
 ```javascript
 "transport": {
@@ -520,6 +522,8 @@ In the example below, `beacon` and `xhrpost` are set to `false`, so they will no
   "image": true
 }
 ```
+
+To learn more, see [this example that implements iframe transport client API] (https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport-remote-frame.html) and [this example page that incorporates that iframe](https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport.amp.html). The example loads a [fake ad](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp_ad_with_iframe_transport.html), which contains the `amp-analytics` tag. Note that the fake ad content includes some extra configuration instructions that must be followed. 
 
 ## Validation
 
