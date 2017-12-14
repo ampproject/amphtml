@@ -439,6 +439,33 @@ describes.realWin('amp-analytics', {
     });
   });
 
+  it('fills interally provided trigger vars', function() {
+    const analytics = getAnalyticsTag({
+      'requests': {
+        'timer': 'https://e.com/start=${timerStart}&duration=${timerDuration}',
+        'visible': 'https://e.com/totalVisibleTime=${totalVisibleTime}',
+      },
+      'triggers': {
+        'timerTrigger': {
+          'on': 'timer',
+          'request': 'timer',
+          'timerSpec': {'interval': 1},
+        },
+        'visibility': {'on': 'visible', 'request': 'visible'},
+      },
+    });
+
+    return waitForSendRequest(analytics).then(() => {
+      expect(sendRequestSpy).to.be.calledTwice;
+      const timerRequest = sendRequestSpy.args[0][0];
+      const visibleRequest = sendRequestSpy.args[1][0];
+      expect(visibleRequest).to.equal('https://e.com/totalVisibleTime=0');
+      expect(timerRequest).to.match(/duration=0/);
+      expect(timerRequest).to.not.match(/start=0/);
+      expect(timerRequest).to.match(/start=[0-9]+&duration/);
+    });
+  });
+
   describe('merges requests correctly', function() {
     it('inline and vendor both string', function() {
       const analytics = getAnalyticsTag({

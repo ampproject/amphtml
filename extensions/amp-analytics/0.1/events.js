@@ -559,6 +559,9 @@ class TimerEventHandler {
     this.callImmediate_ = 'immediate' in timerSpec ?
       Boolean(timerSpec['immediate']) : true;
 
+    /** @private {?function()} */
+    this.intervalCallback_ = null;
+
     /** @private {?UnlistenDef} */
     this.unlistenStart_ = null;
 
@@ -570,6 +573,12 @@ class TimerEventHandler {
 
     /** @private @const {?function(): UnlistenDef} */
     this.stopBuilder_ = opt_stopBuilder || null;
+
+    /** @private {number|undefined} */
+    this.startTime_ = undefined; // milliseconds
+
+    /** @private {number|undefined} */
+    this.lastRequestTime_ = undefined; // milliseconds
   }
 
   /**
@@ -639,7 +648,9 @@ class TimerEventHandler {
     if (this.isRunning()) {
       return;
     }
-
+    this.startTime_ = Date.now();
+    this.lastRequestTime_ = undefined;
+    this.intervalCallback_ = timerCallback;
     this.intervalId_ = win.setInterval(() => {
       timerCallback();
     }, this.intervalLength_ * 1000);
@@ -661,14 +672,38 @@ class TimerEventHandler {
   /**
    * @param {!Window} win
    */
-  clearInterval(win) {
+  stopTimer_(win) {
     if (!this.isRunning()) {
       return;
     }
+    this.intervalCallback_();
+    this.intervalCallback_ = null;
     win.clearInterval(this.intervalId_);
     this.intervalId_ = undefined;
+    this.lastRequestTime_ = undefined;
     this.unlistenForStop_();
     this.listenForStart_();
+  }
+
+  /** @private @return {number} */
+  calculateDuration_() {
+    if (this.startTime_) {
+      return Date.now() - (this.lastRequestTime_ || this.startTime_);
+    }
+    return 0;
+  }
+
+  /** @return {{timerDuration: number, timerStart: number}} */
+  getTimerVars() {
+    let timerDuration = 0;
+    if (this.isRunning()) {
+      timerDuration = this.calculateDuration_();
+      this.lastRequestTime_ = Date.now();
+    }
+    return {
+      'timerDuration': timerDuration,
+      'timerStart': this.startTime_ || 0,
+    };
   }
 }
 
@@ -795,7 +830,9 @@ export class TimerEventTracker extends EventTracker {
    */
   startTimer_(timerId, eventType, listener) {
     const timerHandler = this.trackers_[timerId];
-    const timerCallback = listener.bind(this, this.createEvent_(eventType));
+    const timerCallback = () => {
+      listener(this.createEvent_(timerId, eventType));
+    };
     timerHandler.startIntervalInWindow(this.root.ampdoc.win, timerCallback,
         this.removeTracker_.bind(this, timerId));
   }
@@ -805,16 +842,18 @@ export class TimerEventTracker extends EventTracker {
    * @private
    */
   stopTimer_(timerId) {
-    this.trackers_[timerId].clearInterval(this.root.ampdoc.win);
+    this.trackers_[timerId].stopTimer_(this.root.ampdoc.win);
   }
 
   /**
+   * @param {number} timerId
    * @param {string} eventType
    * @return {!AnalyticsEvent}
    * @private
    */
-  createEvent_(eventType) {
-    return new AnalyticsEvent(this.root.getRootElement(), eventType);
+  createEvent_(timerId, eventType) {
+    return new AnalyticsEvent(this.root.getRootElement(), eventType,
+        this.trackers_[timerId].getTimerVars());
   }
 
   /**
