@@ -144,7 +144,7 @@ class AmpYoutube extends AMP.BaseElement {
     // easily caught hence the following hacky-solution.
     // Please don't follow this behavior in other extensions, instead
     // see BaseElement.createPlaceholderCallback.
-    if (!this.getPlaceholder()) {
+    if (!this.getPlaceholder() && this.videoid_) {
       this.buildImagePlaceholder_();
     }
 
@@ -303,9 +303,9 @@ class AmpYoutube extends AMP.BaseElement {
   }
 
   assertDatasourceExists_() {
-    const dataSourceExists = !(this.videoid_ && this.liveChannelid_)
+    const datasourceExists = !(this.videoid_ && this.liveChannelid_)
       && (this.videoid_ || this.liveChannelid_);
-    user().assert(dataSourceExists, 'Exactly one of data-videoid or '
+    user().assert(datasourceExists, 'Exactly one of data-videoid or '
       + 'data-live-channelid should be present for <amp-youtube> ');
   }
 
@@ -382,12 +382,9 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @private */
   buildImagePlaceholder_() {
-    // TODO: add custom placeholder logic for live channels
-    // There is currently no way to get a placeholder image from
-    // the channel id without accessing the Youtube Data API.
     const imgPlaceholder = this.element.ownerDocument.createElement('img');
-    this.assertDatasourceExists_();
-    const videoid = this.videoid_ || this.liveChannelid_ || '';
+    dev().assert(this.videoid_);
+    const videoid = this.videoid_;
 
     setStyles(imgPlaceholder, {
       // Cover matches YouTube Player styling.
