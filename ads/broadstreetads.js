@@ -29,7 +29,7 @@ export function broadstreetads(global,data) {
 
   data.place = data.place || 0;
 
-  const placeholderID = 'broadstreetads_placement_' + data.zone + '_' + data.place;
+  const placeholderID = 'placement_' + data.zone + '_' + data.place;
 
   // placeholder div
   const d = global.document.createElement('div');
@@ -47,7 +47,7 @@ export function broadstreetads(global,data) {
       place: data.place,
       softKeywords: true,
       width: data.width,
-      zoneId: data.zone
+      zoneId: data.zone,
     });
   });
   loadScript(global, 'https://cdn.broadstreetads.com/init-2.min.js');
