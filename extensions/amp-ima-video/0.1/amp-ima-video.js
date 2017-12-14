@@ -60,6 +60,9 @@ class AmpImaVideo extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
+    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = null;
+
     /** @private {?Promise} */
     this.playerReadyPromise_ = null;
 
@@ -83,6 +86,16 @@ class AmpImaVideo extends AMP.BaseElement {
   buildCallback() {
     user().assert(isExperimentOn(this.win, TAG),
         'Experiment ' + TAG + ' is disabled.');
+
+    this.viewport_ = this.getViewport();
+    if (this.element.getAttribute('data-delay-ad-request') === 'true') {
+      this.viewport_.onScroll(() => { this.sendCommand_('onScroll'); });
+      // Request ads after 3 seconds, if something else doesn't trigger an ad
+      // request before that.
+      this.win.setTimeout(
+          () => { this.sendCommand_('onAdRequestTimeout'); }, 3000);
+
+    }
 
     assertHttpsUrl(this.element.getAttribute('data-tag'),
         'The data-tag attribute is required for <amp-video-ima> and must be ' +
@@ -198,7 +211,9 @@ class AmpImaVideo extends AMP.BaseElement {
   }
 
   /**
-   * Sends a command to the player through postMessage.
+   * Sends a command to the player through postMessage. NOTE: All commands sent
+   * before imaVideo fires VideoEvents.LOAD will be queued until that event
+   * fires.
    * @param {string} command
    * @param {Object=} opt_args
    * @private
