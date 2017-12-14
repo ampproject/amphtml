@@ -21,7 +21,6 @@ import {DEFAULT_LOCALE, DEFAULT_FORMAT, FORMAT_STRINGS} from './constants';
 import {DatesList} from './dates-list';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
 import {childElementByAttr, isRTL, removeElement} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {createDateRangePicker} from './date-range-picker';
@@ -35,8 +34,8 @@ import {requireExternal} from '../../../src/module';
 import {sanitizeFormattingHtml} from '../../../src/sanitizer';
 import {toArray} from '../../../src/types';
 import {user} from '../../../src/log';
+import '../../../third_party/react-dates/bundle';
 
-AMP.includeExternalBundle();
 
 /**
  * @typedef {{
@@ -230,7 +229,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * @return {?Promise<!JsonObject|!Array<JsonObject>>}
    */
   fetchSrcTemplates_() {
-    if (assertHttpsUrl(this.element.getAttribute('src'), this.element)) {
+    if (this.element.getAttribute('src')) {
       return fetchBatchedJsonFor(this.ampdoc_, this.element);
     } else {
       return null;

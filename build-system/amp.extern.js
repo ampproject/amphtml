@@ -425,13 +425,3 @@ var rtcResponseDef;
  * @type {!function(string):?}
  */
 AMP.require;
-
-/**
- * `AMP.includeExternalBundle` is replaced with injected code during the
- * build process. Extensions must declare their external bundles in
- * `guplfile.js#EXTENSION_BUNDLE_MAP`. If an extension declares external bundles
- * but does not add an `AMP.includeExternalBundle();` call, the bundle will
- * be prepended to the extension binary.
- * @type {!function()}
- */
-AMP.includeExternalBundle = function() {};
