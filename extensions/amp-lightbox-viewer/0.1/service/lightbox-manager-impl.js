@@ -15,9 +15,15 @@
  */
 
 import {isExperimentOn} from '../../../../src/experiments';
-import {autoDiscoverLightboxables} from './lightbox-manager-discovery';
 import {dev} from '../../../../src/log';
+import {elementByTag} from '../../../../src/dom';
 
+const ELIGIBLE_TAP_TAGS = {
+  'amp-img': true,
+  'amp-anim': true,
+};
+
+const VIEWER_TAG = 'amp-lightbox-viewer';
 
 /**
  * LightboxManager is a document-scoped service responsible for:
@@ -53,6 +59,12 @@ export class LightboxManager {
      **/
     this.initPromise_ = null;
 
+    /**
+     * @private {!Object<string, Array<string>>}
+     */
+    this.lightboxGroups_ = {
+      default: [],
+    };
   }
 
   /**
@@ -64,15 +76,27 @@ export class LightboxManager {
     if (this.initPromise_) {
       return this.initPromise_;
     }
-    if (isExperimentOn(this.ampdoc_.win, 'amp-lightbox-viewer-auto')) {
-      this.initPromise_ = autoDiscoverLightboxables(this.ampdoc_).then(() => {
-        return this.scanLightboxables_();
-      });
-    } else {
-      this.initPromise_ = this.scanLightboxables_();
-    }
-
+    this.initPromise_ = this.scanLightboxables_();
     return this.initPromise_;
+  }
+
+  /**
+   * Decides whether an already lightboxable element should automatically get
+   * a tap handler to open in the lightbox.
+   * @param {!Element} element
+   * @return {!boolean}
+   */
+  meetsHeuristicsForTap_(element) {
+    dev().assert(element);
+    dev().assert(element.hasAttribute('lightbox'));
+
+    if (!ELIGIBLE_TAP_TAGS[element.tagName.toLowerCase()]) {
+      return false;
+    }
+    if (element.hasAttribute('on')) {
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -83,12 +107,29 @@ export class LightboxManager {
    */
   scanLightboxables_() {
     return this.ampdoc_.whenReady().then(() => {
+
+      const viewer = elementByTag(this.ampdoc_.getRootNode(), VIEWER_TAG).id;
+
       const matches = this.ampdoc_.getRootNode().querySelectorAll('[lightbox]');
       this.elements_ = [];
       for (let i = 0; i < matches.length; i++) {
         const element = matches[i];
-        if (element.getAttribute('lightbox').toLowerCase() != 'none') {
-          this.elements_.push(element);
+        // TODO: allow lightbox groups
+          if (element.tagName == 'AMP-CAROUSEL') {
+            // TODO: special case carousel
+          } else {
+            const lightboxGroupId = element.getAttribute('lightbox');
+            if (lightboxGroupId == '' || lightboxGroupId == 'default') {
+              this.lightboxGroups_.default.push(element);
+            } else {
+              if (!this.lightboxGroups_.hasOwnProperty(lightboxGroupId)) {
+                this.lightboxGroups_[lightboxGroupId] = [];
+              }
+              this.lightboxGroups_[lightboxGroupId].push(element);
+            }
+            if (this.meetsHeuristicsForTap_(element)) {
+                element.setAttribute('on', 'tap:' + viewerId + '.activate');
+            }
         }
       }
     });
@@ -96,10 +137,12 @@ export class LightboxManager {
 
   /**
    * Return a list of lightboxable elements
+   * @param {string} lightboxGroupId
    * @return {!Promise<!Array<!Element>>}
    */
-  getElements() {
-    return this.maybeInit_().then(() => dev().assert(this.elements_));
+  getElementsForLightboxGroup(lightboxGroupId) {
+    return this.maybeInit_()
+      .then(() => dev().assert(this.lightboxGroups_[lightboxGroupId]));
   }
 
   /**

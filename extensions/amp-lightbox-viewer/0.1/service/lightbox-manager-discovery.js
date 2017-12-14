@@ -100,24 +100,7 @@ function meetsHeuristics(element) {
   return true;
 }
 
-/**
- * Decides whether an already lightboxable element should automatically get
- * a tap handler to open in the lightbox.
- * @param {!Element} element
- * @return {!boolean}
- */
-function meetsHeuristicsForTap(element) {
-  dev().assert(element);
-  dev().assert(element.hasAttribute('lightbox'));
 
-  if (!ELIGIBLE_TAP_TAGS[element.tagName.toLowerCase()]) {
-    return false;
-  }
-  if (element.hasAttribute('on')) {
-    return false;
-  }
-  return true;
-}
 
 /**
  * Tries to find an existing amp-lightbox-viewer, if there is none, it adds a

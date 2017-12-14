@@ -178,14 +178,15 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
-   * @private
+   * @param {!string} lightboxGroupId
    * @return {!Promise}
+   * @private
    */
-  initializeLightboxIfNecessary_() {
+  initializeLightboxIfNecessary_(lightboxGroupId) {
     if (this.carousel_) {
       return Promise.resolve();
     }
-    return this.buildCarousel_().then(() => {
+    return this.buildCarousel_(lightboxGroupId).then(() => {
       this.buildDescriptionBox_();
       this.buildTopBar_();
       this.setupEventListeners_();
@@ -241,17 +242,18 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
   /**
    * Builds the carousel and appends it to the container.
+   * @param {string} lightboxGroupId
    * @return {!Promise}
    * @private
    */
-  buildCarousel_() {
+  buildCarousel_(lightboxGroupId) {
     dev().assert(this.container_);
     Services.extensionsFor(this.win).installExtensionForDoc(
         this.getAmpDoc(), 'amp-carousel');
     this.carousel_ = this.win.document.createElement('amp-carousel');
     this.carousel_.setAttribute('type', 'slides');
     this.carousel_.setAttribute('layout', 'fill');
-    return this.manager_.getElements().then(list => {
+    return this.manager_.getElementsForLightboxGroup(lightboxGroupId).then(list => {
       return this.vsync_.mutatePromise(() => {
         return this.buildCarouselSlides_(list);
       });
@@ -576,7 +578,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   open_(element) {
-    return this.initializeLightboxIfNecessary_().then(() => {
+    const lightboxGroupId = element.getAttribute('lightbox-group-id')
+      || 'default';
+    return this.initializeLightboxIfNecessary_(lightboxGroupId).then(() => {
       this.getViewport().enterLightboxMode();
 
       toggle(this.element, true);
