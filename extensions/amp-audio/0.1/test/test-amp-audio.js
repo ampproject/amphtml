@@ -88,8 +88,8 @@ describes.realWin('amp-audio', {
     }, [
       {tag: 'source', src: 'https://origin.com/audio.mp3',
         type: 'audio/mpeg'},
-        {tag: 'source', src: 'https://origin.com/audio.ogg', type: 'audio/ogg'},
-        {tag: 'text', text: 'Unsupported.'},
+      {tag: 'source', src: 'https://origin.com/audio.ogg', type: 'audio/ogg'},
+      {tag: 'text', text: 'Unsupported.'},
     ]).then(a => {
       const audio = a.querySelector('audio');
       expect(audio.tagName).to.equal('AUDIO');

@@ -1091,7 +1091,7 @@ describe('Resources discoverWork', () => {
       document,
       getComputedStyle: el => {
         return el.fakeComputedStyle ?
-            el.fakeComputedStyle : window.getComputedStyle(el);
+          el.fakeComputedStyle : window.getComputedStyle(el);
       },
     };
 
@@ -1263,7 +1263,7 @@ describe('Resources discoverWork', () => {
     expect(resource1.isMeasureRequested()).to.be.true;
     expect(resource2.isMeasureRequested()).to.be.true;
     resource2.element.getBoundingClientRect =
-        () => layoutRectLtwh(0, 0, 0, 0);  // Equiv to display:none.
+        () => layoutRectLtwh(0, 0, 0, 0); // Equiv to display:none.
     resources.discoverWork_();
     expect(resource1MeasureStub).to.have.callCount(2);
     expect(resource1UnloadStub).to.have.not.been.called;
@@ -1462,7 +1462,7 @@ describe('Resources discoverWork', () => {
   });
 
   it('should build resource when not built', () => {
-    const schedulePassStub = sandbox.stub(resources, 'schedulePass');
+    const buildResourceSpy = sandbox.spy(resources, 'buildResourceUnsafe_');
     sandbox.stub(resources, 'schedule_');
     resources.documentReady_ = true;
     resource1.element.isBuilt = () => false;
@@ -1473,11 +1473,12 @@ describe('Resources discoverWork', () => {
     resources.discoverWork_();
 
     expect(resource1.build).to.be.calledOnce;
-    expect(schedulePassStub).to.not.be.called;
+    expect(buildResourceSpy).calledWithExactly(
+        resource1, /* schedulePass */ true);
   });
 
   it('should build resource when not built and before doc ready', () => {
-    const schedulePassStub = sandbox.stub(resources, 'schedulePass');
+    const buildResourceSpy = sandbox.spy(resources, 'buildResourceUnsafe_');
     sandbox.stub(resources, 'schedule_');
     resources.documentReady_ = false;
     resource1.element.nextSibling = {};
@@ -1489,7 +1490,25 @@ describe('Resources discoverWork', () => {
     resources.discoverWork_();
 
     expect(resource1.build).to.be.calledOnce;
-    expect(schedulePassStub).to.not.be.called;
+    expect(buildResourceSpy).calledWithExactly(
+        resource1, /* schedulePass */ true);
+  });
+
+  it('should NOT build non-prerenderable resources in prerender', () => {
+    sandbox.stub(resources.viewer_, 'getVisibilityState')
+        .returns(VisibilityState.PRERENDER);
+    sandbox.stub(resources, 'schedule_');
+    resources.documentReady_ = true;
+
+    resource1.element.isBuilt = () => false;
+    resource1.prerenderAllowed = () => false;
+    resource1.state_ = ResourceState.NOT_BUILT;
+    resource1.build = sandbox.spy();
+    resource2.element.idleRenderOutsideViewport = () => false;
+
+    resources.discoverWork_();
+
+    expect(resource1.build).to.not.be.called;
   });
 
   it('should layout resource if outside viewport but idle', () => {
@@ -1603,7 +1622,7 @@ describe('Resources discoverWork', () => {
   });
 });
 
-describes.realWin('Resources scrollHeight', {
+describes.realWin('Resources contentHeight', {
   amp: {
     runtimeOn: true,
   },
@@ -1621,15 +1640,15 @@ describes.realWin('Resources scrollHeight', {
     });
   });
 
-  it('should measure initial scrollHeight', () => {
-    const scrollHeight = resources.viewport_.getScrollHeight();
+  it('should measure initial contentHeight', () => {
+    const contentHeight = resources.viewport_.getContentHeight();
     expect(resources.maybeChangeHeight_).to.equal(false);
     expect(resources.documentReady_).to.equal(true);
-    expect(resources.scrollHeight_).to.equal(scrollHeight);
+    expect(resources.contentHeight_).to.equal(contentHeight);
   });
 
-  it('should send scrollHeight to viewer if height was changed', () => {
-    sandbox.stub(resources.viewport_, 'getScrollHeight', () => {
+  it('should send contentHeight to viewer if height was changed', () => {
+    sandbox.stub(resources.viewport_, 'getContentHeight', () => {
       return 200;
     });
     resources.maybeChangeHeight_ = true;
@@ -1637,33 +1656,33 @@ describes.realWin('Resources scrollHeight', {
     resources.doPass();
 
     expect(resources.maybeChangeHeight_).to.equal(false);
-    expect(resources.scrollHeight_).to.equal(200);
+    expect(resources.contentHeight_).to.equal(200);
     expect(viewerSendMessageStub).to.be.calledOnce;
     expect(viewerSendMessageStub.lastCall.args[0]).to.equal('documentHeight');
     expect(viewerSendMessageStub.lastCall.args[1].height).to.equal(200);
     expect(viewerSendMessageStub.lastCall.args[2]).to.equal(true);
   });
 
-  it('should not send scrollHeight to viewer if height is not changed', () => {
-    const scrollHeight = resources.viewport_.getScrollHeight();
+  it('should not send contentHeight to viewer if height is not changed', () => {
+    const contentHeight = resources.viewport_.getContentHeight();
     resources.maybeChangeHeight_ = true;
 
     resources.doPass();
 
     expect(resources.maybeChangeHeight_).to.equal(false);
-    expect(resources.scrollHeight_).to.equal(scrollHeight);
+    expect(resources.contentHeight_).to.equal(contentHeight);
     expect(viewerSendMessageStub).to.not.be.called;
   });
 
-  it('should send scrollHeight to viewer if viewport resizes', () => {
-    sandbox.stub(resources.viewport_, 'getScrollHeight', () => {
+  it('should send contentHeight to viewer if viewport resizes', () => {
+    sandbox.stub(resources.viewport_, 'getContentHeight', () => {
       return 200;
     });
     resources.viewport_.changed_(/* relayoutAll */ true, /* velocity */ 0);
     resources.doPass();
 
     expect(resources.maybeChangeHeight_).to.equal(false);
-    expect(resources.scrollHeight_).to.equal(200);
+    expect(resources.contentHeight_).to.equal(200);
     expect(viewerSendMessageStub).to.be.calledOnce;
     expect(viewerSendMessageStub.lastCall.args[0]).to.equal('documentHeight');
     expect(viewerSendMessageStub.lastCall.args[1].height).to.equal(200);
@@ -1739,7 +1758,7 @@ describe('Resources changeSize', () => {
     resources.win = {
       getComputedStyle: el => {
         return el.fakeComputedStyle ?
-            el.fakeComputedStyle : window.getComputedStyle(el);
+          el.fakeComputedStyle : window.getComputedStyle(el);
       },
     };
     viewportMock = sandbox.mock(resources.viewport_);
@@ -2640,7 +2659,7 @@ describe('Resources mutateElement and collapse', () => {
 
   it('attemptCollapse should complete collapse if resize succeed', () => {
     sandbox.stub(resources, 'scheduleChangeSize_', (resource, newHeight,
-        newWidth, newMargins, force, callback) => {
+      newWidth, newMargins, force, callback) => {
       callback(true);
     });
     resources.attemptCollapse(resource1.element);
@@ -2649,7 +2668,7 @@ describe('Resources mutateElement and collapse', () => {
 
   it('attemptCollapse should NOT complete collapse if resize fail', () => {
     sandbox.stub(resources, 'scheduleChangeSize_', (resource, newHeight,
-        newWidth, newMargins, force, callback) => {
+      newWidth, newMargins, force, callback) => {
       callback(false);
     });
     resources.attemptCollapse(resource1.element);

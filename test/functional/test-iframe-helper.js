@@ -121,7 +121,7 @@ describe('iframe-helper', function() {
           () => {
             calls++;
             resolve();
-          }, true  /* opt_is3P */, true /* opt_includingNestedWindows */);
+          }, true /* opt_is3P */, true /* opt_includingNestedWindows */);
       insert(testIframe);
     }).then(() => {
       const total = calls;

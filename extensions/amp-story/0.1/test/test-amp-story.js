@@ -55,7 +55,7 @@ describes.realWin('amp-story', {
 
   function createEvent(eventType) {
     const eventObj = document.createEventObject ?
-        document.createEventObject() : document.createEvent('Events');
+      document.createEventObject() : document.createEvent('Events');
     if (eventObj.initEvent) {
       eventObj.initEvent(eventType, true, true);
     }
@@ -64,7 +64,7 @@ describes.realWin('amp-story', {
 
   function stubViewportSize(width, height) {
     sandbox./*OK*/stub(element.implementation_.getViewport(), 'getSize', () =>
-        ({width, height}));
+      ({width, height}));
   }
 
   beforeEach(() => {
@@ -249,7 +249,7 @@ describes.realWin('amp-story', {
     expect(result.length).to.equal(pages.length);
 
     pages.forEach(page =>
-        expect(Array.prototype.includes.call(result, page)).to.be.true);
+      expect(Array.prototype.includes.call(result, page)).to.be.true);
   });
 
   // TODO(newmuis/amphtml-story#187): Re-enable this test.
@@ -312,8 +312,8 @@ describes.realWin('amp-story', {
     eventObj.which = KeyCodes.RIGHT_ARROW;
     const docEl = win.document.documentElement;
     docEl.dispatchEvent ?
-        docEl.dispatchEvent(eventObj) :
-        docEl.fireEvent('onkeydown', eventObj);
+      docEl.dispatchEvent(eventObj) :
+      docEl.fireEvent('onkeydown', eventObj);
 
     expect(pages[0].hasAttribute('active')).to.be.false;
     expect(pages[1].hasAttribute('active')).to.be.true;
@@ -335,6 +335,32 @@ describes.realWin('amp-story', {
     story.prevButton_.dispatchEvent(new Event('click'));
     expect(nextStub).calledOnce;
     expect(prevStub).calledOnce;
+  });
+
+  it('toggles `i-amphtml-story-landscape` based on height and width', () => {
+    story.element.style.width = '11px';
+    story.element.style.height = '10px';
+    const isDesktopStub = sandbox.stub(story, 'isDesktop_').returns(false);
+    story.vsync_ = {
+      run: (task, state) => {
+        if (task.measure) {
+          task.measure(state);
+        }
+        if (task.mutate) {
+          task.mutate(state);
+        }
+      },
+    };
+    story.onResize();
+    expect(isDesktopStub).to.be.calledOnce;
+    expect(story.element.classList.contains('i-amphtml-story-landscape'))
+        .to.be.true;
+    story.element.style.width = '10px';
+    story.element.style.height = '11px';
+    story.onResize();
+    expect(isDesktopStub).to.be.calledTwice;
+    expect(story.element.classList.contains('i-amphtml-story-landscape'))
+        .to.be.false;
   });
 });
 

@@ -38,6 +38,23 @@ const LONG_TASK_REPORTING_THRESHOLD = 5;
 export let FrameData;
 
 /**
+ * Get the URL of the client lib
+ * @param {!Window} ampWin The window object of the AMP document
+ * @param {boolean=} opt_forceProdUrl If true, prod URL will be returned even
+ *     in local/test modes.
+ * @return {string}
+ */
+export function getIframeTransportScriptUrl(ampWin, opt_forceProdUrl) {
+  if ((getMode().localDev || getMode().test) && !opt_forceProdUrl &&
+      ampWin.parent && ampWin.parent.location) {
+    const loc = ampWin.parent.location;
+    return `${loc.protocol}//${loc.host}/dist/iframe-transport-client-lib.js`;
+  }
+  return urls.thirdParty +
+      '/$internalRuntimeVersion$/iframe-transport-client-v0.js';
+}
+
+/**
  * @VisibleForTesting
  */
 export class IframeTransport {
@@ -115,7 +132,7 @@ export class IframeTransport {
     // many-to-many.
     const sentinel = IframeTransport.createUniqueId_();
     const frameName = JSON.stringify(/** @type {JsonObject} */ ({
-      scriptSrc: this.getLibScriptUrl(),
+      scriptSrc: getIframeTransportScriptUrl(this.ampWin_),
       sentinel,
       type: this.type_,
     }));
@@ -142,22 +159,6 @@ export class IframeTransport {
   }
 
   /**
-   * Calculates the URL of the client lib
-   * @param {boolean=} opt_forceProdUrl If true, prod URL will be returned even
-   *     in local/test modes.
-   * @return {string}
-   * @VisibleForTesting
-   */
-  getLibScriptUrl(opt_forceProdUrl) {
-    if ((getMode().localDev || getMode().test) && !opt_forceProdUrl) {
-      const loc = this.ampWin_.parent.location;
-      return `${loc.protocol}//${loc.host}/dist/iframe-transport-client-lib.js`;
-    }
-    return urls.thirdParty +
-        '/$internalRuntimeVersion$/iframe-transport-client-v0.js';
-  }
-
-  /**
    * Uses the Long Task API to create an observer for when 3p vendor frames
    * take more than 50ms of continuous CPU time.
    * Currently the only action in response to that is to log. It will log
@@ -174,29 +175,27 @@ export class IframeTransport {
     // TODO(jonkeller): Consider merging with jank-meter.js
     IframeTransport.performanceObservers_[this.type_] =
         new this.ampWin_.PerformanceObserver(entryList => {
-          if (!entryList) {
-            return;
-          }
-          entryList.getEntries().forEach(entry => {
-            if (entry && entry['entryType'] == 'longtask' &&
-              (entry['name'] == 'cross-origin-descendant' ||
-               (getMode().test &&
-               entry['name'] == 'same-origin-descendant')) &&
+        if (!entryList) {
+          return;
+        }
+        entryList.getEntries().forEach(entry => {
+          if (entry && entry['entryType'] == 'longtask' &&
+              (entry['name'] == 'cross-origin-descendant') &&
               entry.attribution) {
-              entry.attribution.forEach(attrib => {
-                if (this.frameUrl_ == attrib.containerSrc &&
+            entry.attribution.forEach(attrib => {
+              if (this.frameUrl_ == attrib.containerSrc &&
                     ++this.numLongTasks_ % LONG_TASK_REPORTING_THRESHOLD == 0) {
-                  user().warn(TAG_,
-                      'Long Task: ' +
+                user().warn(TAG_,
+                    'Long Task: ' +
                       `Vendor: "${this.type_}" ` +
                       `Src: "${attrib.containerSrc}" ` +
                       `Duration: ${entry.duration}ms ` +
                       `Occurrences: ${this.numLongTasks_}`);
-                }
-              });
-            }
-          });
+              }
+            });
+          }
         });
+      });
     IframeTransport.performanceObservers_[this.type_].observe({
       entryTypes: ['longtask'],
     });

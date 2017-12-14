@@ -27,6 +27,7 @@ import {
   DEFAULT_SAFEFRAME_VERSION,
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
+import {is3pThrottled} from '../../amp-ad/0.1/concurrent-load';
 import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
 import {
   experimentFeatureEnabled,
@@ -374,6 +375,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      * indicates no creative render.
      */
     this.isAmpCreative_ = null;
+
+    /** @private {boolean} */
+    this.isIdleRender_ = false;
   }
 
   /** @override */
@@ -384,6 +388,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (isNaN(vpRange) || this.element.getAttribute('data-loading-strategy')) {
       return false;
     }
+    this.isIdleRender_ = true;
     return vpRange;
   }
 
@@ -539,7 +544,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     dev().assert(this.initialSize_);
     dev().assert(this.jsonTargeting_);
     let sizeStr = this.isFluid_ ?
-        '320x50' : `${this.initialSize_.width}x${this.initialSize_.height}`;
+      '320x50' : `${this.initialSize_.width}x${this.initialSize_.height}`;
     const tfcd = this.jsonTargeting_ && this.jsonTargeting_[TFCD];
     const multiSizeDataStr = this.element.getAttribute('data-multi-size');
     if (multiSizeDataStr) {
@@ -598,9 +603,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const height = Number(this.element.getAttribute('data-override-height')) ||
       Number(this.element.getAttribute('height'));
     this.initialSize_ = this.isFluid_ ? {width: 0, height: 0} :
-        (width && height ?
-         // width/height could be 'auto' in which case we fallback to measured.
-         {width, height} : this.getIntersectionElementLayoutBox());
+      (width && height ?
+        // width/height could be 'auto' in which case we fallback to measured.
+        {width, height} : this.getIntersectionElementLayoutBox());
     this.jsonTargeting_ =
       tryParseJson(this.element.getAttribute('json')) || {};
     this.adKey_ = this.generateAdKey_(
@@ -676,7 +681,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       }
       artc.push(rtcResponse.rtcTime);
       ati.push(!rtcResponse.error ? RTC_ATI_ENUM.RTC_SUCCESS :
-               RTC_ATI_ENUM.RTC_FAILURE);
+        RTC_ATI_ENUM.RTC_FAILURE);
       ard.push(rtcResponse.callout);
       if (rtcResponse.response) {
         if (rtcResponse.response['targeting']) {
@@ -685,9 +690,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               rtcResponse.callout);
           this.jsonTargeting_['targeting'] =
               !!this.jsonTargeting_['targeting'] ?
-              deepMerge(this.jsonTargeting_['targeting'],
-                  rewrittenResponse) :
-              rewrittenResponse;
+                deepMerge(this.jsonTargeting_['targeting'],
+                    rewrittenResponse) :
+                rewrittenResponse;
         }
         if (rtcResponse.response['categoryExclusions']) {
           if (!exclusions) {
@@ -720,7 +725,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   rewriteRtcKeys_(response, callout) {
     // Only perform this substitution for vendor-defined URLs.
-    if (!RTC_VENDORS[callout]) {
+    if (!RTC_VENDORS[callout] || RTC_VENDORS[callout].disableKeyAppend) {
       return response;
     }
     const newResponse = {};
@@ -783,9 +788,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const width = Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('height'));
     return width && height
-        ? {width, height}
-        // width/height could be 'auto' in which case we fallback to measured.
-        : this.getIntersectionElementLayoutBox();
+      ? {width, height}
+      // width/height could be 'auto' in which case we fallback to measured.
+      : this.getIntersectionElementLayoutBox();
   }
 
   /** @override */
@@ -809,6 +814,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.ampAnalyticsConfig_ = null;
     this.jsonTargeting_ = null;
     this.isAmpCreative_ = null;
+    this.isIdleRender_ = false;
     // Reset SRA requests to allow for resumeCallback to re-fetch
     // ad requests.  Assumes that unlayoutCallback will be called for all slots
     // in rapid succession (meaning onLayoutMeasure initiated promise chain
@@ -823,12 +829,26 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   layoutCallback() {
-    if (this.isFluid_) {
-      this.registerListenerForFluid_();
+    const registerFluidAndExec = () => {
+      if (this.isFluid_) {
+        this.registerListenerForFluid_();
+      }
+      return super.layoutCallback();
+    };
+    if (this.postAdResponseExperimentFeatures['render-idle-throttle'] &&
+        this.isIdleRender_) {
+      return this.isVerifiedAmpCreativePromise().then(verified => {
+        // Control concurrent loading of non-AMP creatives executed via
+        // idleRenderOutsideViewport as doing so within
+        // idleRenderOutsideViewport would impose at least 5 second delay due to
+        // scheduler constraints.
+        const throttleFn = () => !verified && is3pThrottled(this.win) ?
+          Services.timerFor(this.win).delay(throttleFn, 1000) :
+          registerFluidAndExec();
+        return throttleFn();
+      });
     }
-    // TODO(keithwrightbos): consider enforcing concurrent load throttle for
-    // non-AMP creatives loaded via idleRenderOutsideViewport.
-    return super.layoutCallback();
+    return registerFluidAndExec();
   }
 
   /** @override  */
@@ -964,7 +984,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             return false;
           }
           if (getEnclosingContainerTypes(this.element).filter(container =>
-                container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
+            container != ValidAdContainerTypes['AMP-CAROUSEL'] &&
                 container != ValidAdContainerTypes['AMP-STICKY-AD']).length) {
             user().warn(TAG,
                 'Refresh not compatible with ad-containers, except for ' +
@@ -1081,116 +1101,119 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // be called for all and we should cancel SRA execution.
     const checkStillCurrent = this.verifyStillCurrent();
     sraRequests = this.groupSlotsForSra()
-      .then(groupIdToBlocksAry => {
-        checkStillCurrent();
-        Object.keys(groupIdToBlocksAry).forEach(networkId => {
-          const blocks = dev().assert(groupIdToBlocksAry[networkId]);
-          // TODO: filter blocks with SRA disabled?
-          Promise.all(blocks).then(instances => {
-            dev().assert(instances.length);
-            checkStillCurrent();
-            // Exclude any instances that do not have an adPromise_ as this
-            // indicates they were invalid.
-            const typeInstances =
+        .then(groupIdToBlocksAry => {
+          checkStillCurrent();
+          Object.keys(groupIdToBlocksAry).forEach(networkId => {
+            const blocks = dev().assert(groupIdToBlocksAry[networkId]);
+            // TODO: filter blocks with SRA disabled?
+            Promise.all(blocks).then(instances => {
+              dev().assert(instances.length);
+              checkStillCurrent();
+              // Exclude any instances that do not have an adPromise_ as this
+              // indicates they were invalid.
+              const typeInstances =
               /** @type {!Array<!AmpAdNetworkDoubleclickImpl>}*/(instances)
-              .filter(instance => {
-                const isValid = instance.hasAdPromise();
-                if (!isValid) {
-                  dev().info(TAG,
-                      'Ignoring instance without ad promise as likely invalid',
-                      instance.element);
-                }
-                return isValid;
-              });
-            if (!typeInstances.length) {
+                    .filter(instance => {
+                      const isValid = instance.hasAdPromise();
+                      if (!isValid) {
+                        dev().info(TAG,
+                            'Ignoring instance without ad promise as ' +
+                            'likely invalid',
+                            instance.element);
+                      }
+                      return isValid;
+                    });
+              if (!typeInstances.length) {
               // Only contained invalid elements.
-              return;
-            }
-            // Determine if more than one block for this element, if not do not
-            // set sra request promise which results in sending as
-            // non-SRA request (benefit is it allows direct cache method).
-            if (typeInstances.length == 1) {
-              dev().info(TAG, `single block in network ${networkId}`);
-              typeInstances[0].sraResponseResolver(null);
-              return;
-            }
-            // Construct and send SRA request.
-            // Chunk hanlder called with metadata and creative for each slot
-            // in order of URLs given.  Construct promise for each slot
-            // such that its resolver will be called.
-            const sraRequestAdUrlResolvers =
+                return;
+              }
+              // Determine if more than one block for this element, if not do not
+              // set sra request promise which results in sending as
+              // non-SRA request (benefit is it allows direct cache method).
+              if (typeInstances.length == 1) {
+                dev().info(TAG, `single block in network ${networkId}`);
+                typeInstances[0].sraResponseResolver(null);
+                return;
+              }
+              // Construct and send SRA request.
+              // Chunk hanlder called with metadata and creative for each slot
+              // in order of URLs given.  Construct promise for each slot
+              // such that its resolver will be called.
+              const sraRequestAdUrlResolvers =
               typeInstances.map(instance => instance.sraResponseResolver);
-            const slotCallback = metaJsonCreativeGrouper(
-                (creative, headersObj, done) => {
-                  checkStillCurrent();
-                // Force safeframe rendering method.
-                  headersObj[RENDERING_TYPE_HEADER] = XORIGIN_MODE.SAFEFRAME;
-                // Construct pseudo fetch response to be passed down the A4A
-                // promise chain for this block.
-                  const headers =
+              const slotCallback = metaJsonCreativeGrouper(
+                  (creative, headersObj, done) => {
+                    checkStillCurrent();
+                    // Force safeframe rendering method.
+                    headersObj[RENDERING_TYPE_HEADER] = XORIGIN_MODE.SAFEFRAME;
+                    // Construct pseudo fetch response to be passed down the A4A
+                    // promise chain for this block.
+                    const headers =
                   /** @type {?../../../src/service/xhr-impl.FetchResponseHeaders} */
                   ({
                     get: name => headersObj[name],
                     has: name => !!headersObj[name],
                   });
-                  const fetchResponse =
+                    const fetchResponse =
                   /** @type {?../../../src/service/xhr-impl.FetchResponse} */
                   ({
                     headers,
                     arrayBuffer: () => utf8Encode(creative),
                   });
-                // Pop head off of the array of resolvers as the response
-                // should match the order of blocks declared in the ad url.
-                // This allows the block to start rendering while the SRA
-                // response is streaming back to the client.
-                  dev().assert(sraRequestAdUrlResolvers.shift())(fetchResponse);
-                // If done, expect array to be empty (ensures ad response
-                // included data for all slots).
-                  if (done && sraRequestAdUrlResolvers.length) {
-                    dev().warn(TAG, 'Premature end of SRA response',
-                        sraRequestAdUrlResolvers.length, sraUrl);
-                  }
-                });
-            // TODO(keithwrightbos) - how do we handle per slot 204 response?
-            let sraUrl;
-            return constructSRARequest_(
-                this.win, this.getAmpDoc(), typeInstances)
-              .then(sraUrlIn => {
-                checkStillCurrent();
-                sraUrl = sraUrlIn;
-                return Services.xhrFor(this.win).fetch(sraUrl, {
-                  mode: 'cors',
-                  method: 'GET',
-                  credentials: 'include',
-                });
-              })
-              .then(response => {
-                checkStillCurrent();
-                return lineDelimitedStreamer(this.win, response, slotCallback);
-              })
-              .catch(error => {
-                assignAdUrlToError(/** @type {!Error} */(error), sraUrl);
-                const canceled = isCancellation(error);
-                if (!canceled) {
-                  this.user().error(TAG, 'SRA request failure', error);
-                }
-                // Collapse all slots on failure so long as they are not
-                // cancellation.
-                typeInstances.forEach(instance => {
-                  // Reset ad url to ensure layoutCallback does not fallback to
-                  // frame get which would lose SRA guarantees.
-                  // TODO(keithwrightbos): publisher should indicate if
-                  // explicit is required!
-                  instance.resetAdUrl();
-                  if (!canceled) {
-                    instance.attemptCollapse();
-                  }
-                  instance.sraResponseRejector(error);
-                });
-              });
+                    // Pop head off of the array of resolvers as the response
+                    // should match the order of blocks declared in the ad url.
+                    // This allows the block to start rendering while the SRA
+                    // response is streaming back to the client.
+                    dev().assert(sraRequestAdUrlResolvers.shift())(
+                        fetchResponse);
+                    // If done, expect array to be empty (ensures ad response
+                    // included data for all slots).
+                    if (done && sraRequestAdUrlResolvers.length) {
+                      dev().warn(TAG, 'Premature end of SRA response',
+                          sraRequestAdUrlResolvers.length, sraUrl);
+                    }
+                  });
+              // TODO(keithwrightbos) - how do we handle per slot 204 response?
+              let sraUrl;
+              return constructSRARequest_(
+                  this.win, this.getAmpDoc(), typeInstances)
+                  .then(sraUrlIn => {
+                    checkStillCurrent();
+                    sraUrl = sraUrlIn;
+                    return Services.xhrFor(this.win).fetch(sraUrl, {
+                      mode: 'cors',
+                      method: 'GET',
+                      credentials: 'include',
+                    });
+                  })
+                  .then(response => {
+                    checkStillCurrent();
+                    return lineDelimitedStreamer(
+                        this.win, response, slotCallback);
+                  })
+                  .catch(error => {
+                    assignAdUrlToError(/** @type {!Error} */(error), sraUrl);
+                    const canceled = isCancellation(error);
+                    if (!canceled) {
+                      this.user().error(TAG, 'SRA request failure', error);
+                    }
+                    // Collapse all slots on failure so long as they are not
+                    // cancellation.
+                    typeInstances.forEach(instance => {
+                      // Reset ad url to ensure layoutCallback does not fallback to
+                      // frame get which would lose SRA guarantees.
+                      // TODO(keithwrightbos): publisher should indicate if
+                      // explicit is required!
+                      instance.resetAdUrl();
+                      if (!canceled) {
+                        instance.attemptCollapse();
+                      }
+                      instance.sraResponseRejector(error);
+                    });
+                  });
+            });
           });
         });
-      });
   }
 
   getPreconnectUrls() {
@@ -1204,7 +1227,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   getNonAmpCreativeRenderingMethod(headerValue) {
     return this.isFluid_ ? XORIGIN_MODE.SAFEFRAME :
-        super.getNonAmpCreativeRenderingMethod(headerValue);
+      super.getNonAmpCreativeRenderingMethod(headerValue);
   }
 
   /** @override */
@@ -1389,8 +1412,8 @@ export function constructSRABlockParameters(instances) {
  */
 function serializeTargeting_(targeting, categoryExclusions) {
   const serialized = targeting ?
-      Object.keys(targeting).map(key => serializeItem_(key, targeting[key])) :
-      [];
+    Object.keys(targeting).map(key => serializeItem_(key, targeting[key])) :
+    [];
   if (categoryExclusions) {
     serialized.push(serializeItem_('excl_cat', categoryExclusions));
   }

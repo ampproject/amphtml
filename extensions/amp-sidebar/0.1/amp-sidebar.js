@@ -116,7 +116,7 @@ export class AmpSidebar extends AMP.BaseElement {
       toolbarElements.forEach(toolbarElement => {
         try {
           this.toolbars_.push(new Toolbar(toolbarElement, this.vsync_,
-            ampdoc));
+              ampdoc));
         } catch (e) {
           this.user().error(TAG, 'Failed to instantiate toolbar', e);
         }
@@ -198,9 +198,11 @@ export class AmpSidebar extends AMP.BaseElement {
   /** @override */
   onLayoutMeasure() {
     if (this.isToolbarExperimentEnabled_) {
-      // Check our toolbars for changes
-      this.toolbars_.forEach(toolbar => {
-        toolbar.onLayoutChange(() => this.onToolbarOpen_());
+      this.getAmpDoc().whenReady().then(() => {
+        // Check our toolbars for changes
+        this.toolbars_.forEach(toolbar => {
+          toolbar.onLayoutChange(() => this.onToolbarOpen_());
+        });
       });
     }
   }

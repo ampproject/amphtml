@@ -132,7 +132,7 @@ export class AmpWebPushPermissionDialog {
       const queryParams = parseQueryString(winLocation.search);
       if (!queryParams['return']) {
         throw new Error(
-          'Expecting return URL query parameter to redirect back.'
+            'Expecting return URL query parameter to redirect back.'
         );
       }
       const redirectLocation = tryDecodeUriComponent(queryParams['return']);
@@ -166,7 +166,7 @@ export class AmpWebPushPermissionDialog {
     this.window_.localStorage.setItem(
         StorageKeys.NOTIFICATION_PERMISSION,
         this.window_.Notification.permission
-     );
+    );
   }
 
   /** @private */
@@ -232,9 +232,9 @@ export class AmpWebPushPermissionDialog {
 
         return this.ampMessenger_
             .send(
-            WindowMessenger.Topics.NOTIFICATION_PERMISSION_STATE,
-            permission
-          )
+                WindowMessenger.Topics.NOTIFICATION_PERMISSION_STATE,
+                permission
+            )
             .then(result => {
               const message = result[0];
               if (message && message.closeFrame) {

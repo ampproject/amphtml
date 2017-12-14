@@ -26,6 +26,7 @@ import {
   VerificationStatus,
 } from '../../../amp-a4a/0.1/signature-verifier';
 import {Services} from '../../../../src/services';
+import {Timer} from '../../../../src/service/timer-impl';
 import {
   AmpAdNetworkDoubleclickImpl,
   getNetworkId,
@@ -101,7 +102,6 @@ function createImplTag(config, element, impl, env) {
   impl.win['goog_identity_prom'] = Promise.resolve({});
   return [element, impl, env];
 }
-
 
 describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
   let win, doc, ampdoc;
@@ -317,7 +317,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
             selectionMethod: 'closest',
           },
         },
-      };      // To placate assertion.
+      }; // To placate assertion.
       impl.responseHeaders_ = {
         get: function(name) {
           if (name == 'X-QQID') {
@@ -349,7 +349,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
       adBody.onclick = function(e) {
         expect(e.defaultPrevented).to.be.false;
-        e.preventDefault();  // Make the test not actually navigate.
+        e.preventDefault(); // Make the test not actually navigate.
         clickHandlerCalled++;
       };
       adBody.innerHTML = '<a ' +
@@ -380,7 +380,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
 
       adBody.onclick = function(e) {
         expect(e.defaultPrevented).to.be.false;
-        e.preventDefault();  // Make the test not actually navigate.
+        e.preventDefault(); // Make the test not actually navigate.
         clickHandlerCalled++;
       };
       adBody.innerHTML = '<a ' +
@@ -512,7 +512,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       return impl.getAdUrl().then(url =>
           // With exp dc-use-attr-for-format off, we can't test for specific
           // numbers, but we know that the values should be numeric.
-          expect(url).to.match(/sz=[0-9]+x[0-9]+/));
+        expect(url).to.match(/sz=[0-9]+x[0-9]+/));
     });
     it('has correct format when width == "auto"',
         () => {
@@ -522,8 +522,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           impl.buildCallback();
           impl.onLayoutMeasure();
           return impl.getAdUrl().then(url =>
-             // Ensure that "auto" doesn't appear anywhere here:
-             expect(url).to.match(/sz=[0-9]+x[0-9]+/));
+              // Ensure that "auto" doesn't appear anywhere here:
+            expect(url).to.match(/sz=[0-9]+x[0-9]+/));
         });
     it('has correct format with height/width override',
         () => {
@@ -533,7 +533,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           impl.buildCallback();
           impl.onLayoutMeasure();
           return impl.getAdUrl().then(url =>
-             expect(url).to.contain('sz=123x456&'));
+            expect(url).to.contain('sz=123x456&'));
         });
     it('has correct format with height/width override and multiSize',
         () => {
@@ -545,7 +545,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           impl.buildCallback();
           impl.onLayoutMeasure();
           return impl.getAdUrl().then(url =>
-             expect(url).to.contain('sz=123x456%7C1x2%7C3x4&'));
+            expect(url).to.contain('sz=123x456%7C1x2%7C3x4&'));
         });
     it('has correct format with auto height/width and multiSize',
         () => {
@@ -557,8 +557,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           impl.buildCallback();
           impl.onLayoutMeasure();
           return impl.getAdUrl().then(url =>
-             // Ensure that "auto" doesn't appear anywhere here:
-             expect(url).to.match(/sz=[0-9]+x[0-9]+%7C1x2%7C3x4&/));
+              // Ensure that "auto" doesn't appear anywhere here:
+            expect(url).to.match(/sz=[0-9]+x[0-9]+%7C1x2%7C3x4&/));
         });
     it('should have the correct ifi numbers - no refresh', function() {
       // When ran locally, this test tends to exceed 2000ms timeout.
@@ -1165,7 +1165,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       const postMessageSpy = sandbox.spy(env.win.opener, 'postMessage');
       impl.win = env.win;
       return impl.postTroubleshootMessage().then(() =>
-          expect(postMessageSpy).to.be.calledOnce);
+        expect(postMessageSpy).to.be.calledOnce);
     });
 
     it('should not emit post message', () => {
@@ -1231,7 +1231,7 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           // attributes, or the actual size of the frame. To make this less of a
           // hassle, we'll just match against regexp.
           expect(style.transform).to.match(new RegExp(
-          'matrix\\(1, 0, 0, 1, -[0-9]+, -[0-9]+\\)'));
+              'matrix\\(1, 0, 0, 1, -[0-9]+, -[0-9]+\\)'));
         }
 
         afterEach(() => env.win.document.body.removeChild(impl.element));
@@ -1347,6 +1347,7 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
         it('should use experiment value', () => {
           impl.postAdResponseExperimentFeatures['render-idle-vp'] = '4';
           expect(impl.idleRenderOutsideViewport()).to.equal(4);
+          expect(impl.isIdleRender_).to.be.true;
         });
 
         it('should return false if using loading strategy', () => {
@@ -1354,11 +1355,83 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           impl.element.setAttribute('data-loading-strategy',
               'prefer-viewability-over-views');
           expect(impl.idleRenderOutsideViewport()).to.be.false;
+          expect(impl.isIdleRender_).to.be.false;
         });
 
         it('should return false if invalid experiment value', () => {
           impl.postAdResponseExperimentFeatures['render-idle-vp'] = 'abc';
           expect(impl.idleRenderOutsideViewport()).to.be.false;
+          expect(impl.isIdleRender_).to.be.false;
+        });
+      });
+
+      describe('idle render layoutCallback', () => {
+        let attemptToRenderCreativeStub;
+        let isVerifiedAmpCreativePromiseStub;
+
+        beforeEach(() => {
+          element = createElementWithAttributes(doc, 'amp-ad', {
+            'width': '200',
+            'height': '50',
+            'type': 'doubleclick',
+          });
+          impl = new AmpAdNetworkDoubleclickImpl(element);
+          impl.postAdResponseExperimentFeatures['render-idle-vp'] = '4';
+          impl.postAdResponseExperimentFeatures['render-idle-throttle'] =
+              'true';
+          attemptToRenderCreativeStub =
+              sandbox.stub(impl, 'attemptToRenderCreative')
+                  .returns(Promise.resolve());
+          isVerifiedAmpCreativePromiseStub =
+              sandbox.stub(impl, 'isVerifiedAmpCreativePromise');
+          sandbox.stub(Timer.prototype, 'delay')
+              .callsFake((fn, timeout) => {
+                expect(timeout).to.equal(1000);
+                impl.win['3pla']--;
+                return fn();
+              });
+        });
+
+        it('should throttle if idle render and non-AMP creative', () => {
+          isVerifiedAmpCreativePromiseStub.returns(Promise.resolve(false));
+          impl.win['3pla'] = 1;
+          expect(impl.idleRenderOutsideViewport()).to.equal(4);
+          return impl.layoutCallback().then(() => {
+            expect(impl.win['3pla']).to.equal(0);
+            expect(attemptToRenderCreativeStub).to.be.calledOnce;
+          });
+        });
+
+        it('should NOT throttle if idle experiment not enabled', () => {
+          isVerifiedAmpCreativePromiseStub.returns(Promise.resolve(false));
+          delete impl.postAdResponseExperimentFeatures['render-idle-vp'];
+          impl.win['3pla'] = 1;
+          expect(impl.idleRenderOutsideViewport()).to.be.false;
+          return impl.layoutCallback().then(() => {
+            expect(impl.win['3pla']).to.equal(1);
+            expect(attemptToRenderCreativeStub).to.be.calledOnce;
+          });
+        });
+
+        it('should NOT throttle if experiment throttle not enabled', () => {
+          isVerifiedAmpCreativePromiseStub.returns(Promise.resolve(false));
+          delete impl.postAdResponseExperimentFeatures['render-idle-throttle'];
+          impl.win['3pla'] = 1;
+          expect(impl.idleRenderOutsideViewport()).to.equal(4);
+          return impl.layoutCallback().then(() => {
+            expect(impl.win['3pla']).to.equal(1);
+            expect(attemptToRenderCreativeStub).to.be.calledOnce;
+          });
+        });
+
+        it('should NOT throttle if idle render and AMP creative', () => {
+          isVerifiedAmpCreativePromiseStub.returns(Promise.resolve(true));
+          impl.win['3pla'] = 1;
+          expect(impl.idleRenderOutsideViewport()).to.equal(4);
+          return impl.layoutCallback().then(() => {
+            expect(impl.win['3pla']).to.equal(1);
+            expect(attemptToRenderCreativeStub).to.be.calledOnce;
+          });
         });
       });
     });

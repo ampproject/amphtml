@@ -122,9 +122,9 @@ describe('FocusHistory', () => {
     const el1 = document.createElement('div');
     const el2 = document.createElement('div');
     clock.tick(100);
-    eventListeners['focus']({target: el1});  // time=100
+    eventListeners['focus']({target: el1}); // time=100
     clock.tick(100);
-    eventListeners['focus']({target: el2});  // time=200
+    eventListeners['focus']({target: el2}); // time=200
 
     focusHistory.purgeBefore(50);
     expect(focusHistory.history_.length).to.equal(2);
