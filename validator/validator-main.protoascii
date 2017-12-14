@@ -3556,11 +3556,11 @@ tags: {  # <amp-pixel>
   html_format: AMP
   html_format: AMP4ADS
   tag_name: "AMP-PIXEL"
+  attrs: { name: "allow-ssr-img" }
   attrs: {
     name: "referrerpolicy"
     value: "no-referrer"
   }
-  attrs: { name: "allow-ssr-img" }
   attrs: {
     name: "src"
     mandatory: true
