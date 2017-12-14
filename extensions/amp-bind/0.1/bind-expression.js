@@ -201,8 +201,10 @@ export class BindExpression {
     /** @const @private {!./bind-expr-defines.AstNode} */
     this.ast_ = parser.parse(this.expressionString);
 
-    // Check if this expression string is too large (for performance).
+    /** @const {number} */
     this.expressionSize = this.numberOfNodesInAst_(this.ast_);
+
+    // Check if this expression string is too large (for performance).
     const maxSize = opt_maxAstSize || DEFAULT_MAX_AST_SIZE;
     const skipConstraint = getMode().localDev && !getMode().test;
     if (this.expressionSize > maxSize && !skipConstraint) {
@@ -227,7 +229,7 @@ export class BindExpression {
    * @private
    */
   numberOfNodesInAst_(ast) {
-    // Include the node count of any nested macros in the expression
+    // Include the node count of any nested macros in the expression.
     if (this.isMacroInvocationNode_(ast)) {
       const macro = this.macros_[String(ast.value)];
       let nodes = macro.getExpressionSize();
@@ -256,8 +258,13 @@ export class BindExpression {
    * @private
    */
   isMacroInvocationNode_(ast) {
-    return !!(ast.type === AstNodeType.INVOCATION && !ast.args[0] &&
-        this.macros_[String(ast.value)]);
+    const isInvocationWithNoCaller =
+        (ast.type === AstNodeType.INVOCATION && !ast.args[0]);
+    if (isInvocationWithNoCaller) {
+      const macroExistsWithValue = this.macros_[String(ast.value)] != null;
+      return macroExistsWithValue;
+    }
+    return false;
   }
 
   /**
@@ -273,7 +280,7 @@ export class BindExpression {
       if (argsNode.args.length === 0) {
         return [];
       } else if (argsNode.args.length === 1 &&
-        argsNode.args[0].type === AstNodeType.ARRAY) {
+          argsNode.args[0].type === AstNodeType.ARRAY) {
         const arrayNode = argsNode.args[0];
         return arrayNode.args || [];
       }
