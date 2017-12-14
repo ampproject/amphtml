@@ -608,9 +608,8 @@ describe('BindExpression', () => {
 
       // The expression add(1, 1) should have an AST size of 3
       expect(
-          new BindExpression(
-          'add(1, 1)', {add: addMacro}, /* maxAstSize */ 3)
-        ).to.not.be.null;
+          new BindExpression('add(1, 1)', {add: addMacro}, /* maxAstSize */ 3)
+      ).to.not.be.null;
 
       expect(() => {
         new BindExpression('add(1, 1)', {add: addMacro}, /* maxAstSize */ 2);
@@ -619,14 +618,12 @@ describe('BindExpression', () => {
       // The expression add(1, 1 + 1) should have an AST size of 5
       expect(
           new BindExpression(
-          'add(1, 1 + 1)', {add: addMacro}, /* maxAstSize */ 5)
-        ).to.not.be.null;
+              'add(1, 1 + 1)', {add: addMacro}, /* maxAstSize */ 5)
+      ).to.not.be.null;
       expect(() => {
         new BindExpression(
-          'add(1, 1 + 1)', {add: addMacro}, /* maxAstSize */ 4);
+            'add(1, 1 + 1)', {add: addMacro}, /* maxAstSize */ 4);
       }).to.throw(expressionSizeExceededError);
-
-
     });
   });
 
