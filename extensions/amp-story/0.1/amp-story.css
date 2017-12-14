@@ -197,6 +197,22 @@ amp-story:not([desktop]) >
   transform: translateY(1000%) !important;
 }
 
+amp-story:not([desktop]) > amp-story-page[distance=0] {
+  transform: translateY(0) !important;
+}
+
+amp-story:not([desktop]) > amp-story-page[distance=1] {
+  transform: translateY(100%) !important;
+}
+
+amp-story:not([desktop]) > amp-story-page[distance=2] {
+  transform: translateY(200%) !important;
+}
+
+amp-story:not([desktop]) > amp-story-page[distance=3] {
+  transform: translateY(300%) !important;
+}
+
 amp-story-page[active] {
   transform: translateY(0) !important;
 }
