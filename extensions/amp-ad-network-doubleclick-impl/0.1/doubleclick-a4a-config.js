@@ -132,14 +132,9 @@ export class DoubleclickA4aEligibility {
           'be supported starting on March 29, 2018. Please refer to ' +
           'https://github.com/ampproject/amphtml/issues/11834 ' +
           'for more information');
-    let json;
-    if (element.hasAttribute('json')) {
-      json = tryParseJson(element.getAttribute('json'));
-    }
     const usdrd = 'useSameDomainRenderingUntilDeprecated';
-    const hasUSDRD =
-          (json && json['useSameDomainRenderingUntilDeprecated']) ||
-          usdrd in element.dataset;
+    const hasUSDRD = (tryParseJson(element.getAttribute('json')) || {})[usdrd]
+          || usdrd in element.dataset;
     if (hasUSDRD) {
       warnDeprecation(usdrd);
     }
