@@ -55,6 +55,9 @@ self.addEventListener('message', function(event) {
       const removeBindings = evaluator.removeBindingsWithExpressionStrings;
       returnValue = removeBindings.apply(evaluator, args);
       break;
+    case 'bind.addMacros':
+      returnValue = evaluator.addMacros.apply(evaluator, args);
+      break;
     case 'bind.evaluateBindings':
       returnValue = evaluator.evaluateBindings.apply(evaluator, args);
       break;
