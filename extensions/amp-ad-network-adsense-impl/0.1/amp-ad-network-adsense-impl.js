@@ -466,7 +466,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  getA4aAnalyticsConfig() {
+  getA4aAnalyticsNetworkConfig() {
     return getCsiAmpAnalyticsConfig();
   }
 

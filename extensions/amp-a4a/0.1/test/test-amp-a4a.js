@@ -24,6 +24,7 @@ import {
   SAFEFRAME_VERSION_HEADER,
   protectFunctionWrapper,
   assignAdUrlToError,
+  resetA4aAnalyticsState,
 } from '../amp-a4a';
 import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
@@ -49,7 +50,6 @@ import * as sinon from 'sinon';
 // The following namespaces are imported so that we can stub and spy on certain
 // methods in tests.
 import * as analytics from '../../../../src/analytics';
-import * as analyticsExtension from '../../../../src/extension-analytics';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
@@ -96,6 +96,7 @@ describe('amp-a4a', () => {
     }
     sandbox.restore();
     resetScheduledElementForTesting(window, 'amp-a4a');
+    resetA4aAnalyticsState();
   });
 
   function setupForAdTesting(fixture) {
@@ -236,16 +237,17 @@ describe('amp-a4a', () => {
   }
 
   function verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy) {
+    const analyticsElement = a4a.win.document.querySelector('amp-analytics');
     expect(triggerAnalyticsEventSpy).to.be.calledWith(
-        a4a.element, 'ad-request-start', {'time': sinon.match.number});
+        analyticsElement, 'ad-request-start', {'time': sinon.match.number});
     expect(triggerAnalyticsEventSpy).to.be.calledWith(
-        a4a.element, 'ad-response-end', {'time': sinon.match.number});
+        analyticsElement, 'ad-response-end', {'time': sinon.match.number});
     expect(triggerAnalyticsEventSpy).to.be.calledWith(
-        a4a.element, 'ad-render-start', {'time': sinon.match.number});
+        analyticsElement, 'ad-render-start', {'time': sinon.match.number});
     expect(triggerAnalyticsEventSpy).to.be.calledWith(
-        a4a.element, 'ad-render-end', {'time': sinon.match.number});
+        analyticsElement, 'ad-render-end', {'time': sinon.match.number});
     expect(triggerAnalyticsEventSpy).to.be.calledWith(
-        a4a.element, 'ad-iframe-loaded', {'time': sinon.match.number});
+        analyticsElement, 'ad-iframe-loaded', {'time': sinon.match.number});
   }
 
   describe('ads are visible', () => {
@@ -435,8 +437,8 @@ describe('amp-a4a', () => {
     });
 
     it('should not fire amp-analytics triggers without config', () => {
-      sandbox.stub(MockA4AImpl.prototype, 'getA4aAnalyticsConfig').callsFake(
-          () => null);
+      sandbox.stub(MockA4AImpl.prototype, 'getA4aAnalyticsNetworkConfig')
+          .returns(null);
       a4a = new MockA4AImpl(a4aElement);
       const triggerAnalyticsEventSpy =
           sandbox.spy(analytics, 'triggerAnalyticsEvent');
@@ -447,25 +449,45 @@ describe('amp-a4a', () => {
       });
     });
 
-    it('should insert an amp-analytics element', () => {
-      sandbox.stub(MockA4AImpl.prototype, 'getA4aAnalyticsConfig').callsFake(
-          () => ({'foo': 'bar'}));
-      a4a = new MockA4AImpl(a4aElement);
-      const insertAnalyticsElementSpy =
-          sandbox.spy(analyticsExtension, 'insertAnalyticsElement');
-      a4a.buildCallback();
-      expect(insertAnalyticsElementSpy).to.be.calledWith(
-          a4a.element, {'foo': 'bar'}, true /* loadAnalytics */);
+    it('should insert an amp-analytics element for each ad network', () => {
+      const a4a1 = new MockA4AImpl(createA4aElement(fixture.doc));
+      a4a1.element.setAttribute('type', 'foo');
+      const a4a2 = new MockA4AImpl(createA4aElement(fixture.doc));
+      a4a2.element.setAttribute('type', 'bar');
+      const a4a3 = new MockA4AImpl(createA4aElement(fixture.doc));
+      a4a3.element.setAttribute('type', 'foo');
+
+      sandbox.stub(a4a1, 'getA4aAnalyticsNetworkConfig')
+          .returns({'foo': 1});
+      sandbox.stub(a4a2, 'getA4aAnalyticsNetworkConfig')
+          .returns({'bar': 2});
+      sandbox.stub(a4a3, 'getA4aAnalyticsNetworkConfig')
+          .returns({'foo': 1});
+
+      a4a1.buildCallback();
+      a4a2.buildCallback();
+      a4a3.buildCallback();
+
+      const analytics = a4a1.win.document.querySelectorAll('amp-analytics');
+
+      // There should be two analytics elements since there are two ad networks.
+      expect(analytics).to.have.lengthOf(2);
+
+      // Check that the analytics element has the config for network type=foo.
+      expect(analytics[0].childNodes).to.have.lengthOf(1);
+      expect(analytics[0].childNodes[0].innerHTML).to.equal('{"foo":1}');
+
+      // Check that the analytics element has the config for network type=bar.
+      expect(analytics[1].childNodes).to.have.lengthOf(1);
+      expect(analytics[1].childNodes[0].innerHTML).to.equal('{"bar":2}');
     });
 
     it('should not insert an amp-analytics element if config is null', () => {
-      sandbox.stub(MockA4AImpl.prototype, 'getA4aAnalyticsConfig').callsFake(
-          () => null);
+      sandbox.stub(MockA4AImpl.prototype, 'getA4aAnalyticsNetworkConfig')
+          .returns(null);
       a4a = new MockA4AImpl(a4aElement);
-      const insertAnalyticsElementSpy =
-          sandbox.spy(analyticsExtension, 'insertAnalyticsElement');
       a4a.buildCallback();
-      expect(insertAnalyticsElementSpy).not.to.be.called;
+      expect(a4a.win.document.querySelector('amp-analytics')).to.be.null;
     });
   });
 

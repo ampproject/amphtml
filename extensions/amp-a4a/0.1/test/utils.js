@@ -48,7 +48,7 @@ export class MockA4AImpl extends AmpA4A {
   }
 
   /** @override */
-  getA4aAnalyticsConfig() {
+  getA4aAnalyticsNetworkConfig() {
     return dict();
   }
 }
