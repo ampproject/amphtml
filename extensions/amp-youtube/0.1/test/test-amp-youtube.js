@@ -72,6 +72,17 @@ describes.realWin('amp-youtube', {
     });
   });
 
+  it('renders for live channel stable urls', () => {
+    return getYt({'data-live-channelid': 'UCB8Kb4pxYzsDsHxzBfnid4Q'})
+        .then(yt => {
+          const iframe = yt.querySelector('iframe');
+          expect(iframe).to.not.be.null;
+          expect(iframe.tagName).to.equal('IFRAME');
+          expect(iframe.src).to.equal( // eslint-disable-next-line max-len
+              'https://www.youtube.com/embed/live_stream?channel=UCB8Kb4pxYzsDsHxzBfnid4Q&enablejsapi=1&playsinline=1');
+        });
+  });
+
   it('uses privacy-enhanced mode', () => {
     return getYt({'data-videoid': 'mGENRKrdoGY', 'credentials': 'omit'})
         .then(yt => {
@@ -92,9 +103,9 @@ describes.realWin('amp-youtube', {
     });
   });
 
-  it('requires data-videoid', () => {
+  it('requires data-videoid or data-live-channelid', () => {
     return getYt({}).should.eventually.be.rejectedWith(
-        /The data-videoid attribute is required for/);
+        /Exactly one of data-videoid or data-live-channel-id should/);
   });
 
   it('adds an img placeholder in prerender mode', () => {
