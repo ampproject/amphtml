@@ -37,6 +37,7 @@ export function broadstreetads(global,data) {
   global.document.getElementById('c').appendChild(d);
 
   global.broadstreet = global.broadstreet || {};
+  global.broadstreet.loadZone = global.broadstreet.loadZone || (() => ({}));
   global.broadstreet.run = global.broadstreet.run || [];
   global.broadstreet.run.push(() => {
     global.broadstreet.loadZone(d, {
