@@ -3560,6 +3560,7 @@ tags: {  # <amp-pixel>
     name: "referrerpolicy"
     value: "no-referrer"
   }
+  attrs: { name: "allow-ssr-img" }
   attrs: {
     name: "src"
     mandatory: true
