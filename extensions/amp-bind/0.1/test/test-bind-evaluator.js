@@ -198,5 +198,44 @@ describe('BindEvaluator', () => {
     expect(errors['addThree(oneplusone, 2, 2)']).to.be.undefined;
   });
 
+  it('should not allow recursive macros', () => {
+    evaluator.addMacros([{
+      id: 'recurse',
+      expressionString: 'recurse()',
+    }]);
 
+    evaluator.addBindings([{
+      tagName: 'P',
+      property: 'text',
+      expressionString: 'recurse()',
+    }]);
+
+    const {results, errors} = evaluator.evaluateBindings({});
+    expect(results['recurse()']).to.be.undefined;
+    expect(errors['recurse()'].message).to.match(
+        /recurse is not a supported function/);
+  });
+
+  it('should not allow cyclic references in macros', () => {
+    evaluator.addMacros([{
+      id: 'foo',
+      argumentNames: ['x'],
+      expressionString: 'bar(x)',
+    }, {
+      id: 'bar',
+      argumentNames: ['x'],
+      expressionString: 'foo(x)',
+    }]);
+
+    evaluator.addBindings([{
+      tagName: 'P',
+      property: 'text',
+      expressionString: 'bar()',
+    }]);
+
+    const {results, errors} = evaluator.evaluateBindings({});
+    expect(results['bar()']).to.be.undefined;
+    expect(errors['bar()'].message).to.match(
+        /bar is not a supported function/);
+  });
 });
