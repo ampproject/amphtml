@@ -503,6 +503,20 @@ tags: {
     mandatory: true
   }
 }
+# AMP metadata, name=amp-ad-doubleclick-sra
+# Enables SRA for amp-ad doubleclick Fast Fetch
+tags: {
+  html_format: AMP
+  tag_name: "META"
+  spec_name: "meta name=amp-ad-doubleclick-sra"
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-ad-doubleclick-sra"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+}
 # AMP4ADS metadata, name=amp4ads-id
 # https://github.com/ampproject/amphtml/issues/7730
 tags: {
@@ -4455,4 +4469,3 @@ error_formats {
   format: "CSS syntax error in tag '%1' - the property '%2' is disallowed "
           "unless the enclosing rule is prefixed with the '%3' qualification."
 }
-
