@@ -168,7 +168,7 @@ function createIframeWithApis(fixture) {
       if (content == '<a href="http://test.com/test">Test link</a>') {
         resolve();
       } else {
-        reject(new Error('getHtml wrong result: ' + content));
+        reject(new Error('Invalid getHtml result: ' + content));
       }
     });
   }));
