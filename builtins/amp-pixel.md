@@ -59,6 +59,13 @@ This attribute is similar to the `referrerpolicy` attribute on `<img>`, however 
     layout="nodisplay"
     referrerpolicy="no-referrer"></amp-pixel>
 ```
+##### i-amphtml-ssr (optional)
+
+This attribute allows for Server Side Rendering optimization for AMP inabox
+creatives such that an img tag can be written directly within the amp-pixel
+tag as part of post-validation transformation.  This allows for the pixel
+to be sent in parallel with fetch/execution of the AMP runtime.
+
 ##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
