@@ -309,9 +309,11 @@ class AmpYoutube extends AMP.BaseElement {
   assertDatasourceExists_() {
     const datasourceExists = !(this.videoid_ && this.liveChannelid_)
       && (this.videoid_ || this.liveChannelid_);
-    user().assert(datasourceExists, 'Exactly one of data-videoid or '
+    user().assert(
+        datasourceExists, 'Exactly one of data-videoid or '
       + 'data-live-channelid should be present for <amp-youtube> %s',
-        this.element);
+        this.element
+    );
   }
 
   /**
