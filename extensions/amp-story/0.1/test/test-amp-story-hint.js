@@ -26,8 +26,10 @@ describes.fakeWin('amp-story hint layer', {}, env => {
   beforeEach(() => {
     win = env.win;
 
-    sandbox.stub(Services, 'vsyncFor', () => ({mutate: task => task()}));
-    sandbox.stub(Services, 'timerFor', () => ({delay: NOOP, cancel: NOOP}));
+    sandbox.stub(Services, 'vsyncFor').callsFake(
+        () => ({mutate: task => task()}));
+    sandbox.stub(Services, 'timerFor').callsFake(
+        () => ({delay: NOOP, cancel: NOOP}));
 
     ampStoryHint = new AmpStoryHint(win);
   });
@@ -38,7 +40,7 @@ describes.fakeWin('amp-story hint layer', {}, env => {
 
   it('should be able to show navigation help overlay', () => {
     const hideAfterTimeoutStub =
-        sandbox.stub(ampStoryHint, 'hideAfterTimeout' , NOOP);
+        sandbox.stub(ampStoryHint, 'hideAfterTimeout').callsFake(NOOP);
 
     const hintContainer = ampStoryHint.buildHintContainer();
 
@@ -52,7 +54,7 @@ describes.fakeWin('amp-story hint layer', {}, env => {
 
   it('should be able to show no previous page help overlay', () => {
     const hideAfterTimeoutStub =
-        sandbox.stub(ampStoryHint, 'hideAfterTimeout' , NOOP);
+        sandbox.stub(ampStoryHint, 'hideAfterTimeout').callsFake(NOOP);
 
     const hintContainer = ampStoryHint.buildHintContainer();
 

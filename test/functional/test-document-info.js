@@ -47,7 +47,7 @@ describe('document-info', () => {
       }
       const win = iframe.win;
       installDocService(win, /* isSingleDoc */ true);
-      sandbox.stub(win.Math, 'random', () => 0.123456789);
+      sandbox.stub(win.Math, 'random').callsFake(() => 0.123456789);
       installDocumentInfoServiceForDoc(win.document);
       return iframe.win;
     });

@@ -100,7 +100,7 @@ describe('reportErrorToServer', () => {
     onError = window.onerror;
     sandbox = sinon.sandbox.create();
     nextRandomNumber = 0;
-    sandbox.stub(Math, 'random', () => nextRandomNumber);
+    sandbox.stub(Math, 'random').callsFake(() => nextRandomNumber);
   });
 
   afterEach(() => {

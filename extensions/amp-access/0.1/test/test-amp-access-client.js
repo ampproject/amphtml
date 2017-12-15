@@ -77,7 +77,7 @@ describes.realWin('AccessClientAdapter', {
     });
 
     it('should allow only lower-than-default timeout in production', () => {
-      sandbox.stub(mode, 'getMode', () => {
+      sandbox.stub(mode, 'getMode').callsFake(() => {
         return {development: false, localDev: false};
       });
 

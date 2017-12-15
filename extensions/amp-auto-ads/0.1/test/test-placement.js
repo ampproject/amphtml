@@ -327,7 +327,7 @@ describes.realWin('placement', {
       });
 
       const resources = Services.resourcesForDoc(anchor);
-      sandbox.stub(resources, 'attemptChangeSize', () => {
+      sandbox.stub(resources, 'attemptChangeSize').callsFake(() => {
         return Promise.reject();
       });
 
@@ -524,7 +524,7 @@ describes.realWin('placement', {
       container.appendChild(anchor);
 
       const resource = Services.resourcesForDoc(anchor);
-      sandbox.stub(resource, 'attemptChangeSize', () => {
+      sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
         return Promise.resolve();
       });
 
@@ -564,7 +564,7 @@ describes.realWin('placement', {
       container.appendChild(anchor);
 
       const resource = Services.resourcesForDoc(anchor);
-      sandbox.stub(resource, 'attemptChangeSize', () => {
+      sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
         return Promise.reject(new Error('Resize failed'));
       });
 

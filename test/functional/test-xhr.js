@@ -537,7 +537,7 @@ describe.configure().skipSafari().run('XHR', function() {
           status: 200,
           responseText: TEST_TEXT,
         };
-        fetchStub = sandbox.stub(xhr, 'fetchAmpCors_',
+        fetchStub = sandbox.stub(xhr, 'fetchAmpCors_').callsFake(
             () => Promise.resolve(new FetchResponse(mockXhr)));
       });
 

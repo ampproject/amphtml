@@ -84,7 +84,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
 
       beforeEach(() => {
         adImpl.config = {renderStartImplemented: true};
-        sandbox.stub(adImpl.uiHandler, 'updateSize', () => {
+        sandbox.stub(adImpl.uiHandler, 'updateSize').callsFake(() => {
           return Promise.resolve({
             success: true,
             newWidth: 114,
@@ -281,7 +281,8 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     });
 
     it('should be able to use embed-state API', () => {
-      sandbox.stub/*OK*/(iframeHandler.viewer_, 'isVisible', () => true);
+      sandbox.stub/*OK*/(iframeHandler.viewer_, 'isVisible').callsFake(
+          () => true);
       iframe.postMessageToParent({
         type: 'send-embed-state',
         sentinel: 'amp3ptest' + testIndex,
@@ -297,7 +298,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     });
 
     it('should be able to use embed-size API, change size deny', () => {
-      sandbox.stub(adImpl.uiHandler, 'updateSize', () => {
+      sandbox.stub(adImpl.uiHandler, 'updateSize').callsFake(() => {
         return Promise.resolve({
           success: false,
           newWidth: 114,
@@ -321,7 +322,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     });
 
     it('should be able to use embed-size API, change size succeed', () => {
-      sandbox.stub(adImpl.uiHandler, 'updateSize', () => {
+      sandbox.stub(adImpl.uiHandler, 'updateSize').callsFake(() => {
         return Promise.resolve({
           success: true,
           newWidth: 114,
@@ -345,7 +346,7 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     });
 
     it('should be able to use embed-size API to resize height only', () => {
-      sandbox.stub(adImpl.uiHandler, 'updateSize', () => {
+      sandbox.stub(adImpl.uiHandler, 'updateSize').callsFake(() => {
         return Promise.resolve({
           success: true,
           newWidth: undefined,
@@ -375,10 +376,11 @@ describe('amp-ad-xorigin-iframe-handler', () => {
       iframe.name = 'test_nomaster';
       iframeHandler.init(iframe);
       sandbox.stub/*OK*/(
-          iframeHandler.viewport_, 'getClientRectAsync', () => {
-            return Promise.resolve(layoutRectLtwh(1, 1, 1, 1));
-          });
-      sandbox.stub/*OK*/(iframeHandler.viewport_, 'getRect', () => {
+          iframeHandler.viewport_,
+          'getClientRectAsync').callsFake(() => {
+        return Promise.resolve(layoutRectLtwh(1, 1, 1, 1));
+      });
+      sandbox.stub/*OK*/(iframeHandler.viewport_, 'getRect').callsFake(() => {
         return layoutRectLtwh(1, 1, 1, 1);
       });
       iframe.postMessageToParent({

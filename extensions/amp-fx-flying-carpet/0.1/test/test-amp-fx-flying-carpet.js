@@ -198,9 +198,9 @@ describes.realWin('amp-fx-flying-carpet', {
       return [pretext, img, posttext];
     }).then(flyingCarpet => {
       const attemptCollapse = sandbox.stub(flyingCarpet.implementation_,
-          'attemptCollapse', () => {
-            return Promise.resolve();
-          });
+          'attemptCollapse').callsFake(() => {
+        return Promise.resolve();
+      });
       expect(flyingCarpet.getBoundingClientRect().height).to.be.gt(0);
       img.collapse();
       expect(attemptCollapse).to.have.been.called;

@@ -63,7 +63,7 @@ describe('Amp custom ad', () => {
     const urlBase1 = '/examples/custom.ad.example.single.json';
     const elem1 = getCustomAd(urlBase1);
     const ad1 = new AmpAdCustom(elem1);
-    sandbox.stub(ad1, 'getFallback', () => {return null;});
+    sandbox.stub(ad1, 'getFallback').callsFake(() => {return null;});
     ad1.buildCallback();
 
     // Single ad with a slot
@@ -71,7 +71,7 @@ describe('Amp custom ad', () => {
     const slot = 'myslot2';
     const elem2 = getCustomAd(urlBase2, slot);
     const ad2 = new AmpAdCustom(elem2);
-    sandbox.stub(ad2, 'getFallback', () => {return null;});
+    sandbox.stub(ad2, 'getFallback').callsFake(() => {return null;});
     ad2.buildCallback();
     const expected2 = urlBase2 + '&ampslots=' + slot;
 
@@ -80,13 +80,13 @@ describe('Amp custom ad', () => {
     const slot3 = 'myslot3';
     const elem3 = getCustomAd(urlBase34, slot3);
     const ad3 = new AmpAdCustom(elem3);
-    sandbox.stub(ad3, 'getFallback', () => {return null;});
+    sandbox.stub(ad3, 'getFallback').callsFake(() => {return null;});
     ad3.buildCallback();
 
     const slot4 = 'myslot4';
     const elem4 = getCustomAd(urlBase34, slot4);
     const ad4 = new AmpAdCustom(elem4);
-    sandbox.stub(ad4, 'getFallback', () => {return null;});
+    sandbox.stub(ad4, 'getFallback').callsFake(() => {return null;});
     ad4.buildCallback();
 
     const expected34 = urlBase34 + '?ampslots=' + slot3 + '%2C' + slot4;

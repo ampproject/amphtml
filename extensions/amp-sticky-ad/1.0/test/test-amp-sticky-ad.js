@@ -45,8 +45,9 @@ describes.realWin('amp-sticky-ad 1.0 version', {
       ampStickyAd.build();
       impl = ampStickyAd.implementation_;
       addToFixedLayerPromise = Promise.resolve();
-      addToFixedLayerStub = sandbox.stub(impl.viewport_, 'addToFixedLayer',
-          () => addToFixedLayerPromise);
+      addToFixedLayerStub =
+          sandbox.stub(impl.viewport_, 'addToFixedLayer').callsFake(
+              () => addToFixedLayerPromise);
     });
 
     it('should listen to scroll event', () => {
@@ -79,8 +80,9 @@ describes.realWin('amp-sticky-ad 1.0 version', {
     });
 
     it('should display once user scroll', () => {
-      const scheduleLayoutSpy = sandbox.stub(impl, 'scheduleLayoutForAd_',
-          () => {});
+      const scheduleLayoutSpy =
+          sandbox.stub(impl, 'scheduleLayoutForAd_').callsFake(
+              () => {});
       const removeOnScrollListenerSpy =
           sandbox.spy(impl, 'removeOnScrollListener_');
 
@@ -132,7 +134,7 @@ describes.realWin('amp-sticky-ad 1.0 version', {
 
     it('should create a close button', () => {
       const addCloseButtonSpy = sandbox.spy(impl, 'addCloseButton_');
-      sandbox.stub(impl, 'scheduleLayoutForAd_', () => {});
+      sandbox.stub(impl, 'scheduleLayoutForAd_').callsFake(() => {});
 
       impl.viewport_.getScrollTop = function() {
         return 100;
@@ -306,7 +308,7 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
     ampStickyAd.build();
     impl = ampStickyAd.implementation_;
     addToFixedLayerPromise = Promise.resolve();
-    sandbox.stub(impl.viewport_, 'addToFixedLayer',
+    sandbox.stub(impl.viewport_, 'addToFixedLayer').callsFake(
         () => addToFixedLayerPromise);
     return ampAd.implementation_.upgradeCallback().then(() => {
       done();

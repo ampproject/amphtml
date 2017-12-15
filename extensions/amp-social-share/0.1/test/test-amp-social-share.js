@@ -46,8 +46,8 @@ describes.realWin('amp-social-share', {
     isIos = false;
     isSafari = false;
     platform = Services.platformFor(win);
-    sandbox.stub(platform, 'isIos', () => isIos);
-    sandbox.stub(platform, 'isSafari', () => isSafari);
+    sandbox.stub(platform, 'isIos').callsFake(() => isIos);
+    sandbox.stub(platform, 'isSafari').callsFake(() => isSafari);
     sandbox./*OK*/stub(win, 'open').returns(true);
   });
 

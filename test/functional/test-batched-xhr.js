@@ -39,7 +39,7 @@ describes.sandboxed('BatchedXhr', {}, env => {
 
     beforeEach(() => {
       xhr = batchedXhrServiceForTesting(env.win);
-      fetchStub = env.sandbox.stub(xhr, 'fetchAmpCors_',
+      fetchStub = env.sandbox.stub(xhr, 'fetchAmpCors_').callsFake(
           () => Promise.resolve(new FetchResponse(mockXhr)));
     });
 
@@ -97,7 +97,7 @@ describes.sandboxed('BatchedXhr', {}, env => {
 
     beforeEach(() => {
       xhr = batchedXhrServiceForTesting(env.win);
-      fetchStub = env.sandbox.stub(xhr, 'fetchAmpCors_',
+      fetchStub = env.sandbox.stub(xhr, 'fetchAmpCors_').callsFake(
           () => Promise.resolve(new FetchResponse(mockXhr)));
     });
 
@@ -151,7 +151,7 @@ describes.sandboxed('BatchedXhr', {}, env => {
         responseType: 'text/html',
       };
       xhr = batchedXhrServiceForTesting(env.win);
-      fetchStub = env.sandbox.stub(xhr, 'fetchAmpCors_',
+      fetchStub = env.sandbox.stub(xhr, 'fetchAmpCors_').callsFake(
           () => Promise.resolve(new FetchResponse(mockXhr)));
     });
 
@@ -189,7 +189,7 @@ describes.sandboxed('BatchedXhr', {}, env => {
 
     beforeEach(() => {
       xhr = batchedXhrServiceForTesting(env.win);
-      fetchStub = env.sandbox.stub(xhr, 'fetchAmpCors_',
+      fetchStub = env.sandbox.stub(xhr, 'fetchAmpCors_').callsFake(
           () => Promise.resolve(new FetchResponse(mockXhr)));
     });
 

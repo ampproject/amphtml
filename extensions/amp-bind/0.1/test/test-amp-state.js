@@ -47,7 +47,8 @@ describes.realWin('AmpState', {
     whenFirstVisiblePromise = new Promise(resolve => {
       whenFirstVisiblePromiseResolve = resolve;
     });
-    env.sandbox.stub(viewer, 'whenFirstVisible', () => whenFirstVisiblePromise);
+    env.sandbox.stub(viewer, 'whenFirstVisible').callsFake(
+        () => whenFirstVisiblePromise);
 
     ampState = getAmpState();
     const impl = ampState.implementation_;

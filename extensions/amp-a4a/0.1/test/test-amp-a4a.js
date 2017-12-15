@@ -352,7 +352,7 @@ describe('amp-a4a', () => {
       });
       const whenIniLoadedStub = sandbox.stub(
           FriendlyIframeEmbed.prototype,
-          'whenIniLoaded',
+          'whenIniLoaded').callsFake(
           () => iniLoadPromise);
       a4a.buildCallback();
       const lifecycleEventStub = sandbox.stub(
@@ -378,7 +378,7 @@ describe('amp-a4a', () => {
       });
       const whenIniLoadedStub = sandbox.stub(
           FriendlyIframeEmbed.prototype,
-          'whenIniLoaded',
+          'whenIniLoaded').callsFake(
           () => iniLoadPromise);
       a4a.buildCallback();
       const triggerAnalyticsEventSpy =
@@ -393,7 +393,7 @@ describe('amp-a4a', () => {
     });
 
     it('should update embed visibility', () => {
-      sandbox.stub(a4a, 'isInViewport', () => false);
+      sandbox.stub(a4a, 'isInViewport').callsFake(() => false);
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       return a4a.layoutCallback().then(() => {
@@ -435,7 +435,8 @@ describe('amp-a4a', () => {
     });
 
     it('should not fire amp-analytics triggers without config', () => {
-      sandbox.stub(MockA4AImpl.prototype, 'getA4aAnalyticsConfig', () => null);
+      sandbox.stub(MockA4AImpl.prototype, 'getA4aAnalyticsConfig').callsFake(
+          () => null);
       a4a = new MockA4AImpl(a4aElement);
       const triggerAnalyticsEventSpy =
           sandbox.spy(analytics, 'triggerAnalyticsEvent');
@@ -447,8 +448,7 @@ describe('amp-a4a', () => {
     });
 
     it('should insert an amp-analytics element', () => {
-      sandbox.stub(
-          MockA4AImpl.prototype, 'getA4aAnalyticsConfig',
+      sandbox.stub(MockA4AImpl.prototype, 'getA4aAnalyticsConfig').callsFake(
           () => ({'foo': 'bar'}));
       a4a = new MockA4AImpl(a4aElement);
       const insertAnalyticsElementSpy =
@@ -459,7 +459,8 @@ describe('amp-a4a', () => {
     });
 
     it('should not insert an amp-analytics element if config is null', () => {
-      sandbox.stub(MockA4AImpl.prototype, 'getA4aAnalyticsConfig', () => null);
+      sandbox.stub(MockA4AImpl.prototype, 'getA4aAnalyticsConfig').callsFake(
+          () => null);
       a4a = new MockA4AImpl(a4aElement);
       const insertAnalyticsElementSpy =
           sandbox.spy(analyticsExtension, 'insertAnalyticsElement');
@@ -862,7 +863,7 @@ describe('amp-a4a', () => {
         return a4a.layoutCallback().then(() => {
           expect(renderAmpCreativeSpy.calledOnce,
               'renderAmpCreative_ called exactly once').to.be.true;
-          sandbox.stub(a4a, 'unlayoutCallback', () => false);
+          sandbox.stub(a4a, 'unlayoutCallback').callsFake(() => false);
           const onLayoutMeasureSpy = sandbox.spy(a4a, 'onLayoutMeasure');
           a4a.resumeCallback();
           expect(onLayoutMeasureSpy).to.not.be.called;
@@ -996,7 +997,7 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
-        sandbox.stub(a4a, 'getAmpAdMetadata_', creative => {
+        sandbox.stub(a4a, 'getAmpAdMetadata_').callsFake(creative => {
           const metaData = AmpA4A.prototype.getAmpAdMetadata_(creative);
           metaData.images = ['https://prefetch.me.com?a=b', 'http://do.not.prefetch.me.com?c=d',
             'https://prefetch.metoo.com?e=f'];
@@ -1626,7 +1627,7 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         a4aElement = createA4aElement(doc);
         a4a = new AmpA4A(a4aElement);
-        sandbox.stub(a4a, 'getFallback', () => {return true;});
+        sandbox.stub(a4a, 'getFallback').callsFake(() => {return true;});
         a4a.buildCallback();
         a4a.adUrl_ = 'https://nowhere.org';
       });
@@ -1837,7 +1838,7 @@ describe('amp-a4a', () => {
 
     it('should send an expected error in prod mode with sampling', () => {
       const error = new Error('intentional');
-      sandbox.stub(Math, 'random', () => 0.005);
+      sandbox.stub(Math, 'random').callsFake(() => 0.005);
       window.AMP_MODE = {development: false};
       a4a.promiseErrorHandler_(error);
       expect(devExpectedErrorStub).to.be.calledOnce;
@@ -1848,7 +1849,7 @@ describe('amp-a4a', () => {
 
     it('should NOT send an expected error in prod mode with sampling', () => {
       const error = new Error('intentional');
-      sandbox.stub(Math, 'random', () => 0.011);
+      sandbox.stub(Math, 'random').callsFake(() => 0.011);
       window.AMP_MODE = {development: false};
       a4a.promiseErrorHandler_(error);
       expect(devExpectedErrorStub).to.not.be.called;
@@ -1999,8 +2000,10 @@ describe('amp-a4a', () => {
          ' shouldPreferentialRenderWithoutCrypto', () => {
         sandbox.stub(Services.cryptoFor(fixture.win), 'isPkcsAvailable')
             .returns(false);
-        sandbox.stub(AmpA4A.prototype,
-            'shouldPreferentialRenderWithoutCrypto', () => true);
+        sandbox.stub(
+            AmpA4A.prototype,
+            'shouldPreferentialRenderWithoutCrypto').callsFake(
+            () => true);
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
@@ -2011,8 +2014,10 @@ describe('amp-a4a', () => {
       it('not allowed if no crypto signature present', () => {
         delete adResponse.headers['AMP-Fast-Fetch-Signature'];
         delete adResponse.headers[AMP_SIGNATURE_HEADER];
-        sandbox.stub(AmpA4A.prototype,
-            'shouldPreferentialRenderWithoutCrypto', () => true);
+        sandbox.stub(
+            AmpA4A.prototype,
+            'shouldPreferentialRenderWithoutCrypto').callsFake(
+            () => true);
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {

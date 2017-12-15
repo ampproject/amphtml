@@ -105,7 +105,7 @@ describe('doubleclick-a4a-config', () => {
 
     it('should enable a4a when native crypto is not supported not CDN', () => {
       sandbox.stub(DoubleclickA4aEligibility.prototype,
-          'isCdnProxy', () => false);
+          'isCdnProxy').callsFake(() => false);
       const elem = testFixture.doc.createElement('div');
       testFixture.doc.body.appendChild(elem);
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
@@ -113,7 +113,7 @@ describe('doubleclick-a4a-config', () => {
 
     it('should allow FF on non-CDN pages', () => {
       sandbox.stub(DoubleclickA4aEligibility.prototype,
-          'isCdnProxy', () => false);
+          'isCdnProxy').callsFake(() => false);
       const elem = testFixture.doc.createElement('div');
       testFixture.doc.body.appendChild(elem);
       const isA4aEnabled = doubleclickIsA4AEnabled(mockWin, elem);
@@ -127,7 +127,7 @@ describe('doubleclick-a4a-config', () => {
       mockWin.location = parseUrl(
           'https://foo.com/some/path/to/content.html?exp=a4a:-1');
       sandbox.stub(DoubleclickA4aEligibility.prototype,
-          'isCdnProxy', () => false);
+          'isCdnProxy').callsFake(() => false);
       const elem = testFixture.doc.createElement('div');
       testFixture.doc.body.appendChild(elem);
       expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.true;
@@ -166,7 +166,7 @@ describe('doubleclick-a4a-config', () => {
 
     it('should select into unconditioned canonical holdback exp', () => {
       sandbox.stub(DoubleclickA4aEligibility.prototype,
-          'isCdnProxy', () => false);
+          'isCdnProxy').callsFake(() => false);
       const elem = testFixture.doc.createElement('div');
       testFixture.doc.body.appendChild(elem);
       sandbox.stub(
@@ -183,7 +183,7 @@ describe('doubleclick-a4a-config', () => {
     });
     it('should select into unconditioned canonical holdback ctl', () => {
       sandbox.stub(DoubleclickA4aEligibility.prototype,
-          'isCdnProxy', () => false);
+          'isCdnProxy').callsFake(() => false);
       const elem = testFixture.doc.createElement('div');
       testFixture.doc.body.appendChild(elem);
       sandbox.stub(

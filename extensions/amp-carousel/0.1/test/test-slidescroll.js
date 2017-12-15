@@ -505,7 +505,7 @@ describes.realWin('SlideScroll', {
   it('should handle custom elastic scroll', () => {
     return getAmpSlideScroll().then(ampSlideScroll => {
       const impl = ampSlideScroll.implementation_;
-      const customSnapSpy = sandbox.stub(impl, 'customSnap_', () => {
+      const customSnapSpy = sandbox.stub(impl, 'customSnap_').callsFake(() => {
         return {
           then: cb => {
             cb();
@@ -532,9 +532,10 @@ describes.realWin('SlideScroll', {
   it('should handle layout measures (orientation changes)', () => {
     return getAmpSlideScroll().then(ampSlideScroll => {
       const impl = ampSlideScroll.implementation_;
-      const getLayoutWidthSpy = sandbox.stub(impl, 'getLayoutWidth', () => {
-        return impl.slideWidth_ == 400 ? 200 : 400;
-      });
+      const getLayoutWidthSpy = sandbox.stub(impl, 'getLayoutWidth').callsFake(
+          () => {
+            return impl.slideWidth_ == 400 ? 200 : 400;
+          });
       impl.onLayoutMeasure();
       expect(getLayoutWidthSpy).to.have.been.called;
       expect(impl.slideWidth_).to.equal(200);

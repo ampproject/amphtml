@@ -64,7 +64,7 @@ describe('ios-scrollfreeze-bug', () => {
     vsyncApi = {
       mutate: () => {},
     };
-    mutateStub = sandbox.stub(vsyncApi, 'mutate', callback => {
+    mutateStub = sandbox.stub(vsyncApi, 'mutate').callsFake(callback => {
       callback();
     });
 

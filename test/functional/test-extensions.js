@@ -270,7 +270,8 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should install elements in shadow doc', () => {
-      sandbox.stub(Services.ampdocServiceFor(win), 'isSingleDoc', () => false);
+      sandbox.stub(Services.ampdocServiceFor(win), 'isSingleDoc').callsFake(
+          () => false);
       expect(win.ampExtendedElements &&
           win.ampExtendedElements['amp-test']).to.be.undefined;
       expect(win.ampExtendedElements &&
@@ -362,7 +363,8 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should install all doc factories to shadow doc', () => {
-      sandbox.stub(Services.ampdocServiceFor(win), 'isSingleDoc', () => false);
+      sandbox.stub(Services.ampdocServiceFor(win), 'isSingleDoc').callsFake(
+          () => false);
       const factory1 = sandbox.spy();
       const factory2 = function() {
         throw new Error('intentional');
@@ -479,7 +481,8 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should install all services to doc', () => {
-      sandbox.stub(Services.ampdocServiceFor(win), 'isSingleDoc', () => false);
+      sandbox.stub(Services.ampdocServiceFor(win), 'isSingleDoc').callsFake(
+          () => false);
       const factory1 = sandbox.spy();
       const factory2Spy = sandbox.spy();
       const factory2 = function() {

@@ -58,7 +58,7 @@ describe('preconnect', () => {
       preconnect.viewer_ = {
         whenFirstVisible: () => {},
       };
-      sandbox.stub(preconnect.viewer_, 'whenFirstVisible', () => {
+      sandbox.stub(preconnect.viewer_, 'whenFirstVisible').callsFake(() => {
         return visible;
       });
       return iframe;

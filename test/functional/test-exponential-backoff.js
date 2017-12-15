@@ -27,7 +27,7 @@ describe('exponentialBackoff', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    sandbox.stub(Math, 'random', () => 1);
+    sandbox.stub(Math, 'random').callsFake(() => 1);
   });
 
   afterEach(() => {

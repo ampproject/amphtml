@@ -113,7 +113,7 @@ describe('cid', () => {
     installExtensionsService(fakeWin);
     const extensions = Services.extensionsFor(fakeWin);
     // stub extensions service to provide crypto-polyfill
-    sandbox.stub(extensions, 'preloadExtension', extensionId => {
+    sandbox.stub(extensions, 'preloadExtension').callsFake(extensionId => {
       expect(extensionId).to.equal('amp-crypto-polyfill');
       installCryptoPolyfill(fakeWin);
       return Promise.resolve();
@@ -122,12 +122,13 @@ describe('cid', () => {
     installViewerServiceForDoc(ampdoc);
     storageGetStub = stubServiceForDoc(sandbox, ampdoc, 'storage', 'get');
     viewer = Services.viewerForDoc(ampdoc);
-    sandbox.stub(viewer, 'whenFirstVisible', function() {
+    sandbox.stub(viewer, 'whenFirstVisible').callsFake(function() {
       return whenFirstVisible;
     });
-    sandbox.stub(viewer, 'isTrustedViewer',
+    sandbox.stub(viewer, 'isTrustedViewer').callsFake(
         () => Promise.resolve(trustedViewer));
-    viewerSendMessageStub = sandbox.stub(viewer, 'sendMessageAwaitResponse',
+    viewerSendMessageStub = sandbox.stub(
+        viewer, 'sendMessageAwaitResponse').callsFake(
         (eventType, opt_data) => {
           if (eventType != 'cid') {
             return Promise.reject();
@@ -142,7 +143,7 @@ describe('cid', () => {
         });
 
     cid = cidServiceForDocForTesting(ampdoc);
-    sandbox.stub(cid.viewerCidApi_, 'isScopeOptedIn', () => null);
+    sandbox.stub(cid.viewerCidApi_, 'isScopeOptedIn').callsFake(() => null);
     installCryptoService(fakeWin);
     crypto = Services.cryptoFor(fakeWin);
   });

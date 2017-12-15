@@ -52,10 +52,10 @@ describe('impression', () => {
     }));
     sandbox.stub(viewer, 'whenFirstVisible').returns(Promise.resolve());
     isTrustedViewer = false;
-    sandbox.stub(viewer, 'isTrustedViewer', () => {
+    sandbox.stub(viewer, 'isTrustedViewer').callsFake(() => {
       return Promise.resolve(isTrustedViewer);
     });
-    sandbox.stub(viewer, 'isTrustedReferrer', () => {
+    sandbox.stub(viewer, 'isTrustedReferrer').callsFake(() => {
       return Promise.resolve(isTrustedReferrer);
     });
     resetTrackImpressionPromiseForTesting();

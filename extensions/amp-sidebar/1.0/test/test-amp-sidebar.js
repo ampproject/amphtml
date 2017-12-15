@@ -62,15 +62,13 @@ describes.realWin('amp-sidebar 1.0 version', {
         // Stub our sidebar operations, doing this here as it will
         // Ease testing our media queries
         const impl = ampSidebar.implementation_;
-        sandbox.stub(impl.vsync_,
-            'mutate', callback => {
-              callback();
-            });
-        sandbox.stub(impl.vsync_,
-            'mutatePromise', callback => {
-              callback();
-              return Promise.resolve();
-            });
+        sandbox.stub(impl.vsync_, 'mutate').callsFake(callback => {
+          callback();
+        });
+        sandbox.stub(impl.vsync_, 'mutatePromise').callsFake(callback => {
+          callback();
+          return Promise.resolve();
+        });
         // Create our individual toolbars
         options.toolbars.forEach(toolbarObj => {
           const navToolbar = doc.createElement('nav');
@@ -121,7 +119,7 @@ describes.realWin('amp-sidebar 1.0 version', {
         return ampSidebar.layoutCallback();
       }).then(() => {
         if (options.toolbars) {
-          sandbox.stub(timer, 'delay', function(callback) {
+          sandbox.stub(timer, 'delay').callsFake(function(callback) {
             callback();
           });
         }
@@ -163,7 +161,7 @@ describes.realWin('amp-sidebar 1.0 version', {
             callback();
           },
         };
-        sandbox.stub(timer, 'delay', function(callback) {
+        sandbox.stub(timer, 'delay').callsFake(function(callback) {
           callback();
         });
         impl.open_();
@@ -211,7 +209,7 @@ describes.realWin('amp-sidebar 1.0 version', {
             callback();
           },
         };
-        sandbox.stub(timer, 'delay', function(callback) {
+        sandbox.stub(timer, 'delay').callsFake(function(callback) {
           callback();
         });
         timer.cancel = sandbox.spy();
@@ -263,7 +261,7 @@ describes.realWin('amp-sidebar 1.0 version', {
             callback();
           },
         };
-        sandbox.stub(timer, 'delay', function(callback) {
+        sandbox.stub(timer, 'delay').callsFake(function(callback) {
           callback();
         });
 
@@ -295,7 +293,7 @@ describes.realWin('amp-sidebar 1.0 version', {
             callback();
           },
         };
-        sandbox.stub(timer, 'delay', function(callback) {
+        sandbox.stub(timer, 'delay').callsFake(function(callback) {
           callback();
         });
         expect(sidebarElement.hasAttribute('open')).to.be.false;
@@ -325,7 +323,7 @@ describes.realWin('amp-sidebar 1.0 version', {
             callback();
           },
         };
-        sandbox.stub(timer, 'delay', function(callback) {
+        sandbox.stub(timer, 'delay').callsFake(function(callback) {
           callback();
         });
         expect(sidebarElement.hasAttribute('open')).to.be.false;
@@ -359,7 +357,7 @@ describes.realWin('amp-sidebar 1.0 version', {
             callback();
           },
         };
-        sandbox.stub(timer, 'delay', function(callback) {
+        sandbox.stub(timer, 'delay').callsFake(function(callback) {
           callback();
         });
         expect(impl.isOpen_()).to.be.false;
@@ -394,7 +392,7 @@ describes.realWin('amp-sidebar 1.0 version', {
             callback();
           },
         };
-        sandbox.stub(timer, 'delay', function(callback) {
+        sandbox.stub(timer, 'delay').callsFake(function(callback) {
           callback();
         });
         const scrollLeakSpy = sandbox.spy(impl, 'fixIosElasticScrollLeak_');
@@ -413,7 +411,7 @@ describes.realWin('amp-sidebar 1.0 version', {
             callback();
           },
         };
-        sandbox.stub(timer, 'delay', function(callback) {
+        sandbox.stub(timer, 'delay').callsFake(function(callback) {
           callback();
         });
         const compensateIosBottombarSpy =
@@ -438,7 +436,7 @@ describes.realWin('amp-sidebar 1.0 version', {
             callback();
           },
         };
-        sandbox.stub(timer, 'delay', function(callback) {
+        sandbox.stub(timer, 'delay').callsFake(function(callback) {
           callback();
         });
         expect(sidebarElement.hasAttribute('open')).to.be.false;
@@ -450,7 +448,7 @@ describes.realWin('amp-sidebar 1.0 version', {
         if (eventObj.initEvent) {
           eventObj.initEvent('click', true, true);
         }
-        sandbox.stub(sidebarElement, 'getAmpDoc', () => {
+        sandbox.stub(sidebarElement, 'getAmpDoc').callsFake(() => {
           return {
             win: {
               location: {
@@ -481,7 +479,7 @@ describes.realWin('amp-sidebar 1.0 version', {
                 callback();
               },
             };
-            sandbox.stub(timer, 'delay', function(callback) {
+            sandbox.stub(timer, 'delay').callsFake(function(callback) {
               callback();
             });
             expect(sidebarElement.hasAttribute('open')).to.be.false;
@@ -494,7 +492,7 @@ describes.realWin('amp-sidebar 1.0 version', {
             if (eventObj.initEvent) {
               eventObj.initEvent('click', true, true);
             }
-            sandbox.stub(sidebarElement, 'getAmpDoc', () => {
+            sandbox.stub(sidebarElement, 'getAmpDoc').callsFake(() => {
               return {
                 win: {
                   location: {
@@ -526,7 +524,7 @@ describes.realWin('amp-sidebar 1.0 version', {
             callback();
           },
         };
-        sandbox.stub(timer, 'delay', function(callback) {
+        sandbox.stub(timer, 'delay').callsFake(function(callback) {
           callback();
         });
         expect(sidebarElement.hasAttribute('open')).to.be.false;
@@ -538,7 +536,7 @@ describes.realWin('amp-sidebar 1.0 version', {
         if (eventObj.initEvent) {
           eventObj.initEvent('click', true, true);
         }
-        sandbox.stub(sidebarElement, 'getAmpDoc', () => {
+        sandbox.stub(sidebarElement, 'getAmpDoc').callsFake(() => {
           return {
             win: {
               location: {
@@ -569,7 +567,7 @@ describes.realWin('amp-sidebar 1.0 version', {
             callback();
           },
         };
-        sandbox.stub(timer, 'delay', function(callback) {
+        sandbox.stub(timer, 'delay').callsFake(function(callback) {
           callback();
         });
         expect(sidebarElement.hasAttribute('open')).to.be.false;

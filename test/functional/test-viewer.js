@@ -80,9 +80,10 @@ describe('Viewer', () => {
     windowApi.history = {
       replaceState: () => {},
     };
-    sandbox.stub(windowApi.history, 'replaceState', (state, title, url) => {
-      windowApi.location.href = url;
-    });
+    sandbox.stub(windowApi.history, 'replaceState').callsFake(
+        (state, title, url) => {
+          windowApi.location.href = url;
+        });
     installDocService(windowApi, /* isSingleDoc */ true);
     installDocumentStateService(windowApi);
     ampdoc = Services.ampdocServiceFor(windowApi).getAmpDoc();
@@ -306,7 +307,7 @@ describe('Viewer', () => {
       const fragment = '#replaceUrl=http://www.example.com/two&b=1';
       setUrl('http://www.example.com/one' + fragment);
       windowApi.history.replaceState.restore();
-      sandbox.stub(windowApi.history, 'replaceState', () => {
+      sandbox.stub(windowApi.history, 'replaceState').callsFake(() => {
         throw new Error('intentional');
       });
       const viewer = new Viewer(ampdoc);
@@ -343,7 +344,7 @@ describe('Viewer', () => {
     it('should NOT replace URL in shadow doc', () => {
       const fragment = '#replaceUrl=http://www.example.com/two&b=1';
       setUrl('http://www.example.com/one' + fragment);
-      sandbox.stub(ampdoc, 'isSingleDoc', () => false);
+      sandbox.stub(ampdoc, 'isSingleDoc').callsFake(() => false);
       const viewer = new Viewer(ampdoc);
       viewer.replaceUrl(viewer.getParam('replaceUrl'));
       expect(windowApi.history.replaceState).to.not.be.called;
