@@ -228,6 +228,13 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Total Time](#total-time) | N/A | `${totalTime}` |
 | [Total Visible Time](#total-visible-time) | N/A | `${totalVisibleTime}` |
 
+### Timers
+
+| Variable Name | Platform Variable | amp-analytics Variable |
+|---------------|-------------------|------------------------|
+| [Timer Duration](#timer-duration) | N/A | `${timerDuration}` |
+| [Timer Start Time](#timer-start) | N/A | `${timerStart}` |
+
 ### Miscellaneous
 
 |  Variable Name | Platform Variable  | amp-analytics Variable |
@@ -1013,6 +1020,20 @@ Provides the total time for which the element has met the `visiblitySpec `condit
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${totalVisibleTime}`
+
+#### Timer Duration
+
+Provides the duration of the triggered timer since last start or interval in milliseconds. For timers stopped before a full interval completes, this will report the partial time.
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${timerDuration}`
+
+#### Timer Start Time
+
+Provides the start time of the triggered timer in milliseconds from epoch. Resets only on timer start.
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${timerStart}`
 
 #### User Agent
 
