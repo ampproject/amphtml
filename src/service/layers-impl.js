@@ -87,20 +87,6 @@ export class LayoutLayers {
   constructor(ampdoc, scrollingElement) {
     const {win} = ampdoc;
 
-    /** @const {!./ampdoc-impl.AmpDoc} */
-    this.ampdoc = ampdoc;
-
-    /** @const {!Window} */
-    this.win = win;
-
-    /**
-     * TODO(@jridgewell) How should this be handled in FIE and Shadow docs?
-     * We could depend on the host docs' Layers and mark the container as a
-     * layer, which seems easy. Need to verify.
-     * @const @private {!Document}
-     */
-    this.document_ = win.document;
-
     /** @const @private {!Element} */
     this.scrollingElement_ = scrollingElement;
 
@@ -121,7 +107,7 @@ export class LayoutLayers {
     // the document (the scrolling element) or an element scrolls.
     // This forwards to our scroll-dirty system, and eventually to the scroll
     // listener.
-    listen(this.document_, 'scroll', event => {
+    listen(win.document, 'scroll', event => {
       const {target} = event;
       const scrolled = target.nodeType == Node.ELEMENT_NODE
           ? target
@@ -365,7 +351,7 @@ export class LayoutElement {
      *
      * @private {!SizeDef}
      */
-    this.size_ = sizewh(0, 0);
+    this.size_ = sizeWh(0, 0);
 
     /**
      * The current cached **offset** position of the element, relative to the
@@ -374,7 +360,7 @@ export class LayoutElement {
      *
      * @private {!PositionDef}
      */
-    this.position_ = positionlt(0, 0);
+    this.position_ = positionLt(0, 0);
 
     /**
      * Whether the element defines a layer with a new coordinate system.
@@ -475,12 +461,12 @@ export class LayoutElement {
       if (el === op) {
         if (computedStyle(win, op).position == 'fixed') {
           // Ensure this fixed-position element is a layer.
-          LayoutLayers.declareLayer(op);
+          Services.layersForDoc(op).declareLayer(op);
 
           // If the op is fixed-position, it defines a new layer. But, if the
           // node is the op, we can't return the node as its own parent layer.
           // In that case, it doesn't have a parent layer.
-          return op === node ? null : op;
+          return op === node ? null : LayoutElement.for(op);
         }
         op = op.offsetParent;
       }
@@ -500,7 +486,7 @@ export class LayoutElement {
    * @return {boolean}
    */
   contains(layout) {
-    return layout !== this && root.contains(layout.element_);
+    return layout !== this && this.element_.contains(layout.element_);
   }
 
   /**
@@ -547,6 +533,9 @@ export class LayoutElement {
    * @param {boolean} isRootLayer
    */
   declareLayer(isRootLayer) {
+    if (this.isLayer_) {
+      return;
+    }
     this.isLayer_ = true;
     this.isRootLayer_ = isRootLayer;
 
@@ -704,7 +693,7 @@ export class LayoutElement {
     for (let l = this; l !== stopAt; l = l.getParentLayer()) {
       const position = l.getOffsetFromParent();
       // Calculate the scrolled position. If the element has offset 200, and
-      // the element is scrolled 150, then the scrolled position is just 150.
+      // the parent is scrolled 150, then the scrolled position is just 50.
       // Note that the scrolled position shouldn't take into account the scroll
       // position of this LayoutElement, so we've already compensated in
       // declaring x and y.

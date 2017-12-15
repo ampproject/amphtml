@@ -41,7 +41,6 @@ import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {
   ViewportBindingIosEmbedWrapper_,
 } from './viewport-binding-ios-embed-wrapper';
-import {isExperimentOn} from '../../experiments';
 
 
 const TAG_ = 'Viewport';
