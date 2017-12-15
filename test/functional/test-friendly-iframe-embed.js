@@ -725,7 +725,7 @@ describe('friendly-iframe-embed', () => {
       };
       iframe = document.createElement('iframe');
 
-      sandbox./*OK*/stub(iframe, 'getBoundingClientRect', () => ({
+      sandbox./*OK*/stub(iframe, 'getBoundingClientRect').callsFake(() => ({
         right: x + w,
         left: x,
         top: y,
@@ -739,9 +739,9 @@ describe('friendly-iframe-embed', () => {
         html: '<body></body>',
       }, Promise.resolve());
 
-      sandbox.stub(fie, 'getVsync', () => vsyncMock);
-      sandbox.stub(fie, 'getResources', () => resourcesMock);
-      sandbox.stub(fie, 'win', win);
+      sandbox.stub(fie, 'getVsync').callsFake(() => vsyncMock);
+      sandbox.stub(fie, 'getResources').callsFake(() => resourcesMock);
+      sandbox.stub(fie, 'win').callsFake(win);
     });
 
     it('should resize body and fixed container when entering', function* () {
@@ -749,7 +749,7 @@ describe('friendly-iframe-embed', () => {
 
       const mutateElementSpy = sandbox.spy(resourcesMock, 'mutateElement');
 
-      sandbox.stub(fie, 'getBodyElement', () => bodyElementMock);
+      sandbox.stub(fie, 'getBodyElement').callsFake(() => bodyElementMock);
 
       yield fie.enterFullOverlayMode();
 
@@ -780,7 +780,7 @@ describe('friendly-iframe-embed', () => {
 
       const mutateElementSpy = sandbox.spy(resourcesMock, 'mutateElement');
 
-      sandbox.stub(fie, 'getBodyElement', () => bodyElementMock);
+      sandbox.stub(fie, 'getBodyElement').callsFake(() => bodyElementMock);
 
       yield fie.enterFullOverlayMode();
       yield fie.leaveFullOverlayMode();
