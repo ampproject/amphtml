@@ -157,15 +157,19 @@ class AmpYoutube extends AMP.BaseElement {
    * @private
    */
   getEmbedUrl_() {
+    this.assertDatasourceExists_();
     let urlSuffix = '';
     if (this.getCredentials_() === 'omit') {
       urlSuffix = '-nocookie';
     }
-    this.assertDatasourceExists_();
+
+    const baseUrl = `https://www.youtube${urlSuffix}.com/embed/`;
     if (this.videoid_) {
-      return `https://www.youtube${urlSuffix}.com/embed/${encodeURIComponent(this.videoid_ || '')}?enablejsapi=1`;
+      const descriptor = `${encodeURIComponent(this.videoid_ || '')}?`;
+      return `${baseUrl}${descriptor}enablejsapi=1`;
     } else {
-      return `https://www.youtube${urlSuffix}.com/embed/live_stream?channel=${encodeURIComponent(this.liveChannelid_ || '')}&enablejsapi=1`;
+      const descriptor = `live_stream?channel=${encodeURIComponent(this.liveChannelid_ || '')}&`;
+      return `${baseUrl}${descriptor}enablejsapi=1`;
     }
   }
 
@@ -383,8 +387,7 @@ class AmpYoutube extends AMP.BaseElement {
   /** @private */
   buildImagePlaceholder_() {
     const imgPlaceholder = this.element.ownerDocument.createElement('img');
-    dev().assert(this.videoid_);
-    const videoid = this.videoid_;
+    const videoid = dev().assertString(this.videoid_);
 
     setStyles(imgPlaceholder, {
       // Cover matches YouTube Player styling.
