@@ -172,7 +172,8 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
 
     container.appendChild(div);
 
-    sandbox.stub(DomFingerprint, 'generate', () => 'MY-MOCK-FINGERPRINT');
+    sandbox.stub(DomFingerprint, 'generate').callsFake(
+        () => 'MY-MOCK-FINGERPRINT');
 
     const iframe = getIframe(window, div, '_ping_', {clientId: 'cidValue'});
     const src = iframe.src;

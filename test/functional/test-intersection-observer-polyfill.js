@@ -148,7 +148,7 @@ describe('getIntersectionChangeEntry', () => {
   let sandbox;
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    sandbox.stub(performance, 'now', () => 100);
+    sandbox.stub(performance, 'now').callsFake(() => 100);
   });
 
   afterEach(() => {
@@ -194,7 +194,7 @@ describe('IntersectionObserverPolyfill', () => {
   let sandbox;
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    sandbox.stub(performance, 'now', () => 100);
+    sandbox.stub(performance, 'now').callsFake(() => 100);
   });
 
   afterEach(() => {

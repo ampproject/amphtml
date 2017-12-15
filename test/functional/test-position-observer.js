@@ -42,7 +42,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
     beforeEach(() => {
       clock = lolex.install(win);
       posOb = new PositionObserver(ampdoc);
-      sandbox.stub(posOb.vsync_, 'measure', callback => {
+      sandbox.stub(posOb.vsync_, 'measure').callsFake(callback => {
         win.setTimeout(callback, 1);
       });
       elem = win.document.createElement('div');
@@ -88,7 +88,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
       let top;
       beforeEach(() => {
         top = 0;
-        sandbox.stub(posOb.viewport_, 'getClientRectAsync', () => {
+        sandbox.stub(posOb.viewport_, 'getClientRectAsync').callsFake(() => {
           return Promise.resolve(layoutRectLtwh(0, top, 0, 0));
         });
       });
@@ -133,7 +133,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
       let top;
       beforeEach(() => {
         top = 0;
-        sandbox.stub(posOb.viewport_, 'getClientRectAsync', () => {
+        sandbox.stub(posOb.viewport_, 'getClientRectAsync').callsFake(() => {
           return Promise.resolve(layoutRectLtwh(2, top, 20, 10));
         });
       });

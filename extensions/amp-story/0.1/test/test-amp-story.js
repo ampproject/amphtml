@@ -75,7 +75,7 @@ describes.realWin('amp-story', {
     story = new AmpStory(element);
     // TODO(alanorozco): Test active page event triggers once the stubbable
     // `Services` module is part of the amphtml-story repo.
-    // sandbox.stub(element.implementation_, 'triggerActiveEventForPage_', NOOP);
+    // sandbox.stub(element.implementation_, 'triggerActiveEventForPage_').callsFake(NOOP);
   });
 
   afterEach(() => {
@@ -99,7 +99,7 @@ describes.realWin('amp-story', {
             'installConsumer');
 
     createPages(element, 5, [firstPageId]);
-    const appendChild = sandbox.stub(element, 'appendChild', NOOP);
+    const appendChild = sandbox.stub(element, 'appendChild').callsFake(NOOP);
 
     element.build();
 
@@ -261,7 +261,7 @@ describes.realWin('amp-story', {
     const page = win.document.createElement('div');
 
     const updateProgressBarStub =
-        sandbox.stub(impl.systemLayer_, 'updateProgressBar', NOOP);
+        sandbox.stub(impl.systemLayer_, 'updateProgressBar').callsFake(NOOP);
 
     appendEmptyPage(element, /* opt_active */ true);
 
@@ -302,10 +302,11 @@ describes.realWin('amp-story', {
     expect(pages[1].hasAttribute('active')).to.be.false;
 
     // Stubbing because we need to assert synchronously
-    sandbox.stub(element.implementation_, 'mutateElement', mutator => {
-      mutator();
-      return Promise.resolve();
-    });
+    sandbox.stub(element.implementation_, 'mutateElement').callsFake(
+        mutator => {
+          mutator();
+          return Promise.resolve();
+        });
 
     const eventObj = createEvent('keydown');
     eventObj.keyCode = KeyCodes.RIGHT_ARROW;

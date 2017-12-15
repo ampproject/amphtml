@@ -63,15 +63,16 @@ describes.sandboxed('ClickHandler', {}, () => {
       handleCustomProtocolSpy = sandbox.spy(handler,
           'handleCustomProtocolClick_');
       win.open = function() {};
-      winOpenStub = sandbox.stub(win, 'open', () => {
+      winOpenStub = sandbox.stub(win, 'open').callsFake(() => {
         return {};
       });
       const viewport = win.services.viewport.obj;
       scrollIntoViewStub = sandbox.stub(viewport, 'scrollIntoView');
       const history = win.services.history.obj;
       replaceStateForTargetPromise = Promise.resolve();
-      replaceStateForTargetStub = sandbox.stub(history,
-          'replaceStateForTarget', () => replaceStateForTargetPromise);
+      replaceStateForTargetStub = sandbox.stub(
+          history, 'replaceStateForTarget').callsFake(
+          () => replaceStateForTargetPromise);
 
       anchor = doc.createElement('a');
       anchor.href = 'https://www.google.com/other';
@@ -476,15 +477,16 @@ describes.sandboxed('ClickHandler', {}, () => {
         embed = env.embed;
 
         handler = win.services.clickhandler.obj;
-        winOpenStub = sandbox.stub(win, 'open', () => {
+        winOpenStub = sandbox.stub(win, 'open').callsFake(() => {
           return {};
         });
         const viewport = parentWin.services.viewport.obj;
         scrollIntoViewStub = sandbox.stub(viewport, 'scrollIntoView');
         const history = parentWin.services.history.obj;
         replaceStateForTargetPromise = Promise.resolve();
-        replaceStateForTargetStub = sandbox.stub(history,
-            'replaceStateForTarget', () => replaceStateForTargetPromise);
+        replaceStateForTargetStub = sandbox.stub(
+            history, 'replaceStateForTarget').callsFake(
+            () => replaceStateForTargetPromise);
 
         anchor = doc.createElement('a');
         anchor.href = 'http://ads.localhost:8000/example';

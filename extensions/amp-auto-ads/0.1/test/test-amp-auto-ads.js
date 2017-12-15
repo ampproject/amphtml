@@ -65,7 +65,7 @@ describes.realWin('amp-auto-ads', {
     sandbox = env.sandbox;
 
     const extensions = Services.extensionsFor(env.win);
-    sandbox.stub(extensions, 'loadElementClass',
+    sandbox.stub(extensions, 'loadElementClass').callsFake(
         () => Promise.resolve(() => {}));
 
     const viewportMock =

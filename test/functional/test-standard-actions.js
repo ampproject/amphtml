@@ -42,9 +42,7 @@ describes.sandboxed('StandardActions', {}, () => {
   }
 
   function stubMutate(methodName) {
-    return sandbox.stub(
-        standardActions.resources_,
-        methodName,
+    return sandbox.stub(standardActions.resources_, methodName).callsFake(
         (unusedElement, mutator) => mutator());
   }
 
@@ -209,7 +207,7 @@ describes.sandboxed('StandardActions', {}, () => {
   describe('"AMP" global target', () => {
     it('should implement navigateTo', () => {
       const expandUrlStub = sandbox.stub(standardActions.urlReplacements_,
-          'expandUrlSync', url => url);
+          'expandUrlSync').callsFake(url => url);
 
       const win = {
         location: 'http://foo.com',

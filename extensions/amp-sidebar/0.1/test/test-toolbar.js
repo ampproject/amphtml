@@ -44,16 +44,14 @@ describe('amp-sidebar - toolbar', () => {
       ampdoc.win.document.body.appendChild(toolbarContainerElement);
       // Stub our toolbar operations, doing this here as it will
       // Ease testing our media queries
-      sandbox.stub(vsync,
-          'mutate', callback => {
-            callback();
-          });
-      sandbox.stub(vsync,
-          'mutatePromise', callback => {
-            callback();
-            return Promise.resolve();
-          });
-      sandbox.stub(timer, 'delay', function(callback) {
+      sandbox.stub(vsync, 'mutate').callsFake(callback => {
+        callback();
+      });
+      sandbox.stub(vsync, 'mutatePromise').callsFake(callback => {
+        callback();
+        return Promise.resolve();
+      });
+      sandbox.stub(timer, 'delay').callsFake(function(callback) {
         callback();
       });
 

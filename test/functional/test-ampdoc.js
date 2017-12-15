@@ -272,7 +272,7 @@ describe('AmpDocService', () => {
       const mockDoc = {body: {nodeType: 1}};
 
       let readyCallback;
-      sandbox.stub(docready, 'whenDocumentReady', () => {
+      sandbox.stub(docready, 'whenDocumentReady').callsFake(() => {
         return new Promise(resolve => {
           readyCallback = resolve;
         });
@@ -347,17 +347,17 @@ describe('AmpDocSingle', () => {
     const win = {document: doc};
 
     let bodyCallback;
-    sandbox.stub(dom, 'waitForBodyPromise', () => {
+    sandbox.stub(dom, 'waitForBodyPromise').callsFake(() => {
       return new Promise(resolve => {
         bodyCallback = resolve;
       });
     });
     let ready = false;
-    sandbox.stub(docready, 'isDocumentReady', () => {
+    sandbox.stub(docready, 'isDocumentReady').callsFake(() => {
       return ready;
     });
     let readyCallback;
-    sandbox.stub(docready, 'whenDocumentReady', () => {
+    sandbox.stub(docready, 'whenDocumentReady').callsFake(() => {
       return new Promise(resolve => {
         readyCallback = resolve;
       });

@@ -50,7 +50,8 @@ describes.fakeWin('dynamic classes are inserted at runtime', {
       win.navigator.userAgent = userAgent;
     }
     if (referrer !== undefined) {
-      sandbox.stub(viewer, 'getUnconfirmedReferrerUrl', () => referrer);
+      sandbox.stub(viewer, 'getUnconfirmedReferrerUrl').callsFake(
+          () => referrer);
     }
     env.installExtension('amp-dynamic-css-classes');
   }

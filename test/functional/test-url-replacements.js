@@ -293,7 +293,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
   });
 
   it('should replace SOURCE_URL and _HOST', () => {
-    sandbox.stub(trackPromise, 'getTrackImpressionPromise', () => {
+    sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
       return Promise.resolve();
     });
     return expandAsync('?url=SOURCE_URL&host=SOURCE_HOST').then(res => {
@@ -303,7 +303,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
   });
 
   it('should replace SOURCE_URL and _HOSTNAME', () => {
-    sandbox.stub(trackPromise, 'getTrackImpressionPromise', () => {
+    sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
       return Promise.resolve();
     });
     return expandAsync('?url=SOURCE_URL&host=SOURCE_HOSTNAME').then(res => {
@@ -315,7 +315,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('should update SOURCE_URL after track impression', () => {
     const win = getFakeWindow();
     win.location = parseUrl('https://wrong.com');
-    sandbox.stub(trackPromise, 'getTrackImpressionPromise', () => {
+    sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
       return new Promise(resolve => {
         win.location = parseUrl('https://example.com?gclid=123456');
         resolve();
@@ -927,7 +927,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('should replace QUERY_PARAM with foo', () => {
     const win = getFakeWindow();
     win.location = parseUrl('https://example.com?query_string_param1=wrong');
-    sandbox.stub(trackPromise, 'getTrackImpressionPromise', () => {
+    sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
       return new Promise(resolve => {
         win.location =
             parseUrl('https://example.com?query_string_param1=foo');
@@ -944,7 +944,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('should replace QUERY_PARAM with ""', () => {
     const win = getFakeWindow();
     win.location = parseUrl('https://example.com');
-    sandbox.stub(trackPromise, 'getTrackImpressionPromise', () => {
+    sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
       return Promise.resolve();
     });
     return Services.urlReplacementsForDoc(win.ampdoc)
@@ -957,7 +957,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('should replace QUERY_PARAM with default_value', () => {
     const win = getFakeWindow();
     win.location = parseUrl('https://example.com');
-    sandbox.stub(trackPromise, 'getTrackImpressionPromise', () => {
+    sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
       return Promise.resolve();
     });
     return Services.urlReplacementsForDoc(win.ampdoc)
@@ -970,7 +970,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
   it('should collect vars', () => {
     const win = getFakeWindow();
     win.location = parseUrl('https://example.com?p1=foo');
-    sandbox.stub(trackPromise, 'getTrackImpressionPromise', () => {
+    sandbox.stub(trackPromise, 'getTrackImpressionPromise').callsFake(() => {
       return Promise.resolve();
     });
     return Services.urlReplacementsForDoc(win.ampdoc)

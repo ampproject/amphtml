@@ -1018,7 +1018,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     action = new ActionService(ampdoc, document);
     const originalTrigger = action.trigger;
     triggerPromise = new Promise((resolve, reject) => {
-      sandbox.stub(action, 'trigger', () => {
+      sandbox.stub(action, 'trigger').callsFake(() => {
         try {
           originalTrigger.apply(action, action.trigger.getCall(0).args);
           resolve();

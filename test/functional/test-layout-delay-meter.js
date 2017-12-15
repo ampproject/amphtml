@@ -36,7 +36,7 @@ describes.realWin('layout-delay-meter', {
     win = env.win;
     installPerformanceService(win);
     const perf = Services.performanceFor(win);
-    sandbox.stub(perf, 'isPerformanceTrackingOn', () => true);
+    sandbox.stub(perf, 'isPerformanceTrackingOn').callsFake(() => true);
     clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
     tickSpy = sandbox.spy(perf, 'tickDelta');
 

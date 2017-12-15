@@ -152,8 +152,8 @@ describes.realWin('BaseElement', {amp: true}, env => {
         .returns(resource);
     const layoutBox = layoutRectLtwh(0, 50, 100, 200);
     const pageLayoutBox = layoutRectLtwh(0, 0, 100, 200);
-    sandbox.stub(resource, 'getLayoutBox', () => layoutBox);
-    sandbox.stub(resource, 'getPageLayoutBox', () => pageLayoutBox);
+    sandbox.stub(resource, 'getLayoutBox').callsFake(() => layoutBox);
+    sandbox.stub(resource, 'getPageLayoutBox').callsFake(() => pageLayoutBox);
     expect(element.getLayoutBox()).to.eql(layoutBox);
     expect(customElement.getLayoutBox()).to.eql(layoutBox);
     expect(element.getPageLayoutBox()).to.eql(pageLayoutBox);

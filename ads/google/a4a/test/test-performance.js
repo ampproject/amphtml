@@ -106,8 +106,10 @@ describe('GoogleAdLifecycleReporter', () => {
     it('should request a single ping', () => {
       return iframe.then(({viewer, reporter}) => {
         const iniTime = reporter.initTime_;
-        sandbox.stub(viewer, 'getFirstVisibleTime', () => iniTime + 11);
-        sandbox.stub(viewer, 'getLastVisibleTime', () => iniTime + 12);
+        sandbox.stub(viewer, 'getFirstVisibleTime').callsFake(
+            () => iniTime + 11);
+        sandbox.stub(viewer, 'getLastVisibleTime').callsFake(
+            () => iniTime + 12);
         expect(emitPingSpy).to.not.be.called;
         reporter.sendPing('adRequestStart');
         expect(emitPingSpy).to.be.calledOnce;

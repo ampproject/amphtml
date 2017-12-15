@@ -103,10 +103,10 @@ describes.realWin('inabox-host:messaging', {}, env => {
     });
 
     it('should send position back', () => {
-      sandbox.stub(host.positionObserver_, 'getViewportRect', () => {
+      sandbox.stub(host.positionObserver_, 'getViewportRect').callsFake(() => {
         return layoutRectLtwh(10, 10, 100, 100);
       });
-      sandbox.stub(host.positionObserver_, 'observe', () => {});
+      sandbox.stub(host.positionObserver_, 'observe').callsFake(() => {});
       iframe1.getBoundingClientRect =
           () => {return layoutRectLtwh(5, 5, 20, 20);};
       host.processMessage({
@@ -208,7 +208,8 @@ describes.realWin('inabox-host:messaging', {}, env => {
       const boxRect = {a: 1, b: 2}; // we don't care
 
       const expandFrame = sandbox./*OK*/stub(
-          host.frameOverlayManager_, 'expandFrame', (iframe, callback) => {
+          host.frameOverlayManager_, 'expandFrame').callsFake(
+          (iframe, callback) => {
             callback(boxRect);
           });
 
@@ -234,7 +235,8 @@ describes.realWin('inabox-host:messaging', {}, env => {
       const boxRect = {c: 1, d: 2}; // we don't care
 
       const collapseFrame = sandbox./*OK*/stub(
-          host.frameOverlayManager_, 'collapseFrame', (iframe, callback) => {
+          host.frameOverlayManager_, 'collapseFrame').callsFake(
+          (iframe, callback) => {
             callback(boxRect);
           });
 

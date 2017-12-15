@@ -406,7 +406,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
       it('should trigger timeline events', () => {
         const triggeredAmpEventNames = [];
         const triggeredEvents = [];
-        sandbox.stub(Services.actionServiceForDoc(ampdoc), 'trigger',
+        sandbox.stub(Services.actionServiceForDoc(ampdoc), 'trigger').callsFake(
             (target, name, event) => {
               triggeredAmpEventNames.push(name);
               triggeredEvents.push(event);

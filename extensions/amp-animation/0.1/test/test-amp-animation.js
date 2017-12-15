@@ -63,8 +63,9 @@ describes.sandboxed('AmpAnimation', {}, () => {
       viewer.setVisibilityState_('hidden');
       runner = new WebAnimationRunner([]);
       runnerMock = sandbox.mock(runner);
-      createRunnerStub = sandbox.stub(AmpAnimation.prototype, 'createRunner_',
-          () => Promise.resolve(runner));
+      createRunnerStub =
+          sandbox.stub(AmpAnimation.prototype, 'createRunner_').callsFake(
+              () => Promise.resolve(runner));
     });
 
     afterEach(() => {
