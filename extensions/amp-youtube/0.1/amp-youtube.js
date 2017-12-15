@@ -162,15 +162,15 @@ class AmpYoutube extends AMP.BaseElement {
     if (this.getCredentials_() === 'omit') {
       urlSuffix = '-nocookie';
     }
-
     const baseUrl = `https://www.youtube${urlSuffix}.com/embed/`;
+    let descriptor = '';
     if (this.videoid_) {
-      const descriptor = `${encodeURIComponent(this.videoid_ || '')}?`;
-      return `${baseUrl}${descriptor}enablejsapi=1`;
+      descriptor = `${encodeURIComponent(this.videoid_ || '')}?`;
     } else {
-      const descriptor = `live_stream?channel=${encodeURIComponent(this.liveChannelid_ || '')}&`;
-      return `${baseUrl}${descriptor}enablejsapi=1`;
+      descriptor = 'live_stream?channel='
+        + `${encodeURIComponent(this.liveChannelid_ || '')}&`;
     }
+    return `${baseUrl}${descriptor}enablejsapi=1`;
   }
 
   /** @return {string} */
@@ -310,7 +310,8 @@ class AmpYoutube extends AMP.BaseElement {
     const datasourceExists = !(this.videoid_ && this.liveChannelid_)
       && (this.videoid_ || this.liveChannelid_);
     user().assert(datasourceExists, 'Exactly one of data-videoid or '
-      + 'data-live-channelid should be present for <amp-youtube> ');
+      + 'data-live-channelid should be present for <amp-youtube> %s',
+        this.element);
   }
 
   /**
