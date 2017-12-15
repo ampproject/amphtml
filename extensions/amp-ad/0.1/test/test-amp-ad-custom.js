@@ -101,7 +101,7 @@ describe('Amp custom ad', () => {
   describe('#getPriority', () => {
     const url = '/examples/custom.ad.example.json';
     const slot = 'myslot';
-    
+
     describes.realWin('with shadow AmpDoc', {
       amp: {
         ampdoc: 'shadow',
@@ -113,7 +113,7 @@ describe('Amp custom ad', () => {
         expect(customAd.getPriority()).to.equal(1);
       });
     });
-  
+
     describes.realWin('with single AmpDoc', {
       amp: {
         ampdoc: 'single',
