@@ -372,7 +372,7 @@ describes.fakeWin('url rewriter', {
     let preloadStub;
 
     beforeEach(() => {
-      deferMutateStub = sandbox.stub(implementation, 'deferMutate',
+      deferMutateStub = sandbox.stub(implementation, 'deferMutate').callsFake(
           callback => callback());
       preloadStub = sandbox.stub(implementation, 'preloadShell_');
       viewer.setVisibilityState_('visible');

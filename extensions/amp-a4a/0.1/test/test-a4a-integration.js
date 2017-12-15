@@ -192,12 +192,11 @@ describe('integration test: a4a', () => {
           .then(() => {
             const a4a = new MockA4AImpl(a4aElement);
             const initiateAdRequestMock = sandbox.stub(
-                MockA4AImpl.prototype,
-                'initiateAdRequest',
+                MockA4AImpl.prototype, 'initiateAdRequest').callsFake(
                 () => {
                   a4a.adPromise_ = Promise.resolve();
-                  // This simulates calling forceCollapse, without tripping up
-                  // any unrelated asserts.
+                  // This simulates calling forceCollapse, without tripping
+                  // up any unrelated asserts.
                   a4a.isRefreshing = false;
                 });
             const tearDownSlotMock =

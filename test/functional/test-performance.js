@@ -268,7 +268,8 @@ describes.realWin('performance', {amp: true}, env => {
       beforeEach(() => {
         tickDeltaStub = sandbox.stub(perf, 'tickDelta');
         firstVisibleTime = null;
-        sandbox.stub(viewer, 'getFirstVisibleTime', () => firstVisibleTime);
+        sandbox.stub(viewer, 'getFirstVisibleTime').callsFake(
+            () => firstVisibleTime);
       });
 
       it('should always be zero before viewer is set', () => {

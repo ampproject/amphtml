@@ -169,7 +169,7 @@ describe('iframe-transport-client', () => {
     const ctx = new IframeTransportContext(window, imc,
         'my_creative', 'my_vendor');
     const response = {foo: 'bar', answer: '42'};
-    sandbox.stub(imc, 'sendMessage', (type, opt_payload) => {
+    sandbox.stub(imc, 'sendMessage').callsFake((type, opt_payload) => {
       expect(type).to.equal(MessageType.IFRAME_TRANSPORT_RESPONSE);
       expect(opt_payload).to.not.be.null;
       expect(opt_payload.creativeId).to.equal('my_creative');

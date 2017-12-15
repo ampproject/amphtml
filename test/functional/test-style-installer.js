@@ -61,7 +61,7 @@ describe('Styles', () => {
     });
 
     it('should ignore resources failures for render-start', () => {
-      sandbox.stub(resources, 'renderStarted', () => {
+      sandbox.stub(resources, 'renderStarted').callsFake(() => {
         throw new Error('intentional');
       });
       styles.makeBodyVisible(doc);
