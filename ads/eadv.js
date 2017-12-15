@@ -21,8 +21,6 @@ import {writeScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function eadv(global, data) {
-  // TODO: check mandatory fields
-  validateData(data, [], ['x', 'u']);
-
+  validateData(data, ['x', 'u'], []);
   writeScript(global, 'https://www.eadv.it/track/?x=' + data.x + '&u=' + data.u);
 }
