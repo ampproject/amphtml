@@ -385,10 +385,7 @@ visibilitySpec: {
 }
 ```
 
-`visiblePercentageThresholds` may be used as a shorthand for creating 
-multiple `visibilitySpec` instances that differ only in 
-`visiblePercentageMin` and `visiblePercentageMax`. For example the following 
-are equivalent:
+`visiblePercentageThresholds` may be used as a shorthand for creating multiple `visibilitySpec` instances that differ only in `visiblePercentageMin` and `visiblePercentageMax`. For example the following are equivalent:
 
 ```javascript
 // Two triggers with visibilitySpecs that only differ in visiblePercentageMin and visiblePercentageMax:
