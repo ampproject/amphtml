@@ -375,7 +375,53 @@ The `visibilitySpec` is a set of conditions and properties that can be applied t
   - `waitFor` This property indicates that the visibility trigger should wait for a certain signal before tracking visibility. The supported values are     `none`, `ini-load` and `render-start`. If `waitFor` is undefined, it is defaulted to [`ini-load`](#initial-load-trigger) when selector is specified, or to `none` otherwise.
   - `continuousTimeMin` and `continuousTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a continuous amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. The `continuousTimeMin` is defaulted to 0 when not specified.
   - `totalTimeMin` and `totalTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a total amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. The `totalTimeMin` is defaulted to 0 when not specified.
-  - `visiblePercentageMin` and `visiblePercentageMax` These properties indicate that a request should be fired when the proportion of an element that is visible within the viewport is between the minimum and maximum specified percentages. Percentage values between 0 and 100 are valid. Note that the upper bound (`visiblePercentageMax`) is inclusive while the lower bound (`visiblePercentageMin`) is not. When these properties are defined along with other timing related properties, only the time when these properties are met are counted. They default to 0 and 100 when not specified.
+  - `visiblePercentageMin` and `visiblePercentageMax` These properties indicate that a request should be fired when the proportion of an element that is visible within the viewport is between the minimum and maximum specified percentages. Percentage values between 0 and 100 are valid. Note that the upper bound (`visiblePercentageMax`) is inclusive. The lower bound (`visiblePercentageMin`) is exclusive, unless both bounds are set to 0 or both are set to 100. If both bounds are set to 0, then the trigger will fire when the element is not visible. If both bounds are set to 100, then the trigger will fire when the element is fully visible. When these properties are defined along with other timing related properties, only the time when these properties are met are counted. They default to 0 and 100 when not specified.
+  - `repeat` If this property is true, then the trigger will fire each time the visibilitySpec conditions are met. For example, if `continuousTimeMin` is set to 1 second and the element remains visible for 3 seconds, then the trigger would fire once if `repeat` is false, but would fire 3 times if `repeat` is true. The value of `repeat` defaults to false if not specified.
+
+`visiblePercentageThresholds` may be used as a shorthand for creating 
+multiple `visibilitySpec` instances that differ only in 
+`visiblePercentageMin` and `visiblePercentageMax`. For example the following 
+are equivalent:
+
+```javascript
+// Two triggers with visibilitySpecs that only differ in visiblePercentageMin and visiblePercentageMax:
+"triggers": {
+  "pageView_30_to_40": {
+    "on": "visible",
+    "request": "pageview",
+    "selector": "#ad1",
+    "visibilitySpec": {
+      "visiblePercentageMin": 30,
+      "visiblePercentageMax": 40,
+      "continuousTimeMin": 1000,
+    }
+  }
+    
+  "pageView_40_to_50": {
+    "on": "visible",
+    "request": "pageview",
+    "selector": "#ad1",
+    "visibilitySpec": {
+      "visiblePercentageMin": 40,
+      "visiblePercentageMax": 50,
+      "continuousTimeMin": 1000,
+    }
+  }
+}
+    
+// A single trigger equivalent to both of the above:
+"triggers": {
+  "pageView": {
+    "on": "visible",
+    "request": "pageview",
+    "selector": "#ad1",
+    "visibilitySpec": {
+      "visiblePercentageThresholds": [[30, 40], [40, 50]],
+      "continuousTimeMin": 1000,
+    }
+  }
+}
+```
 
 In addition to the conditions above, `visibilitySpec` also enables certain variables which are documented [here](./analytics-vars.md#visibility-variables).
 
