@@ -182,10 +182,11 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
             })
             .returns(Promise.resolve(responseDoc))
             .once();
-        const replaceSectionsStub = sandbox.stub(adapter, 'replaceSections_',
-            () => {
-              return Promise.resolve();
-            });
+        const replaceSectionsStub =
+            sandbox.stub(adapter, 'replaceSections_').callsFake(
+                () => {
+                  return Promise.resolve();
+                });
         return adapter.authorize().then(response => {
           expect(response).to.exist;
           expect(response.access).to.equal('A');

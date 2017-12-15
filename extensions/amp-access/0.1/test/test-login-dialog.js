@@ -77,7 +77,7 @@ describes.sandboxed('ViewerLoginDialog', {}, () => {
   });
 
   it('should delegate to viewer with url', () => {
-    const stub = sandbox.stub(viewer, 'sendMessageAwaitResponse',
+    const stub = sandbox.stub(viewer, 'sendMessageAwaitResponse').callsFake(
         () => Promise.resolve('#success=yes'));
     return openLoginDialog(ampdoc, 'http://acme.com/login').then(res => {
       expect(res).to.equal('#success=yes');
@@ -90,7 +90,7 @@ describes.sandboxed('ViewerLoginDialog', {}, () => {
   });
 
   it('should delegate to viewer with url promise', () => {
-    const stub = sandbox.stub(viewer, 'sendMessageAwaitResponse',
+    const stub = sandbox.stub(viewer, 'sendMessageAwaitResponse').callsFake(
         () => Promise.resolve('#success=yes'));
     const urlPromise = Promise.resolve('http://acme.com/login');
     return openLoginDialog(ampdoc, urlPromise).then(res => {
@@ -104,7 +104,7 @@ describes.sandboxed('ViewerLoginDialog', {}, () => {
   });
 
   it('should fail when url promise fails', () => {
-    sandbox.stub(viewer, 'sendMessageAwaitResponse',
+    sandbox.stub(viewer, 'sendMessageAwaitResponse').callsFake(
         () => Promise.resolve('#success=yes'));
     const urlPromise = Promise.reject('expected');
     return openLoginDialog(ampdoc, urlPromise).then(() => {
@@ -115,7 +115,7 @@ describes.sandboxed('ViewerLoginDialog', {}, () => {
   });
 
   it('should fail when viewer fails', () => {
-    sandbox.stub(viewer, 'sendMessageAwaitResponse',
+    sandbox.stub(viewer, 'sendMessageAwaitResponse').callsFake(
         () => Promise.reject('expected'));
     return openLoginDialog(ampdoc, 'http://acme.com/login').then(() => {
       throw new Error('must not be here');
@@ -125,7 +125,7 @@ describes.sandboxed('ViewerLoginDialog', {}, () => {
   });
 
   it('should have correct URL with other parameters', () => {
-    const stub = sandbox.stub(viewer, 'sendMessageAwaitResponse',
+    const stub = sandbox.stub(viewer, 'sendMessageAwaitResponse').callsFake(
         () => Promise.resolve('#success=yes'));
     const url = 'http://acme.com/login?a=b';
     return openLoginDialog(ampdoc, url).then(() => {
@@ -136,7 +136,7 @@ describes.sandboxed('ViewerLoginDialog', {}, () => {
   });
 
   it('should allow alternative form of return URL', () => {
-    const stub = sandbox.stub(viewer, 'sendMessageAwaitResponse',
+    const stub = sandbox.stub(viewer, 'sendMessageAwaitResponse').callsFake(
         () => Promise.resolve('#success=yes'));
     const url = 'http://acme.com/login?a=b&ret1=RETURN_URL';
     return openLoginDialog(ampdoc, url).then(() => {
@@ -228,7 +228,7 @@ describes.sandboxed('WebLoginDialog', {}, () => {
   }
 
   it('should call window.open in the same microtask with url', () => {
-    sandbox.stub(windowApi, 'open', () => dialog);
+    sandbox.stub(windowApi, 'open').callsFake(() => dialog);
     openLoginDialog(ampdoc, 'http://acme.com/login');
     expect(windowApi.open).to.be.calledOnce;
     expect(windowApi.open.firstCall.args[0]).to.match(
@@ -236,7 +236,7 @@ describes.sandboxed('WebLoginDialog', {}, () => {
   });
 
   it('should call window.open in the same microtask with promise', () => {
-    sandbox.stub(windowApi, 'open', () => dialog);
+    sandbox.stub(windowApi, 'open').callsFake(() => dialog);
     openLoginDialog(ampdoc, Promise.resolve('http://acme.com/login'));
     expect(windowApi.open).to.be.calledOnce;
     expect(windowApi.open.firstCall.args[0]).to.equal('');

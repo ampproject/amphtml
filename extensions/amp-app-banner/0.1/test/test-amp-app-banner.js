@@ -136,7 +136,7 @@ describes.realWin('amp-app-banner', {
   }
 
   function testRemoveBannerIfDismissed() {
-    sandbox.stub(AbstractAppBanner.prototype, 'isDismissed', () => {
+    sandbox.stub(AbstractAppBanner.prototype, 'isDismissed').callsFake(() => {
       return Promise.resolve(true);
     });
     return testRemoveBanner();
@@ -285,22 +285,23 @@ describes.realWin('amp-app-banner', {
     doc = win.document;
     ampdoc = env.ampdoc;
     const viewer = Services.viewerForDoc(ampdoc);
-    sandbox.stub(viewer, 'isEmbedded', () => isEmbedded);
-    sandbox.stub(viewer, 'hasCapability', () => hasNavigateToCapability);
+    sandbox.stub(viewer, 'isEmbedded').callsFake(() => isEmbedded);
+    sandbox.stub(viewer, 'hasCapability').callsFake(
+        () => hasNavigateToCapability);
     platform = Services.platformFor(win);
-    sandbox.stub(platform, 'isIos', () => isIos);
-    sandbox.stub(platform, 'isAndroid', () => isAndroid);
-    sandbox.stub(platform, 'isChrome', () => isChrome);
-    sandbox.stub(platform, 'isSafari', () => isSafari);
-    sandbox.stub(platform, 'isFirefox', () => isFirefox);
-    sandbox.stub(platform, 'isEdge', () => isEdge);
+    sandbox.stub(platform, 'isIos').callsFake(() => isIos);
+    sandbox.stub(platform, 'isAndroid').callsFake(() => isAndroid);
+    sandbox.stub(platform, 'isChrome').callsFake(() => isChrome);
+    sandbox.stub(platform, 'isSafari').callsFake(() => isSafari);
+    sandbox.stub(platform, 'isFirefox').callsFake(() => isFirefox);
+    sandbox.stub(platform, 'isEdge').callsFake(() => isEdge);
 
     vsync = Services.vsyncFor(win);
-    sandbox.stub(vsync, 'runPromise', (task, state) => {
+    sandbox.stub(vsync, 'runPromise').callsFake((task, state) => {
       runTask(task, state);
       return Promise.resolve();
     });
-    sandbox.stub(vsync, 'run', runTask);
+    sandbox.stub(vsync, 'run').callsFake(runTask);
   });
 
   describe('Choosing platform', () => {

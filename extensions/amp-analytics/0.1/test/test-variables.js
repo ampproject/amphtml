@@ -131,7 +131,7 @@ describe('amp-analytics.VariableService', function() {
     const vars = new ExpansionOptions({'foo': ' Hello world! '});
 
     beforeEach(() => {
-      sandbox.stub(variables, 'isFilterExperimentOn_', () => true);
+      sandbox.stub(variables, 'isFilterExperimentOn_').callsFake(() => true);
     });
 
     function check(input, output) {
