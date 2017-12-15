@@ -18,7 +18,7 @@
   "dependencies": {
     "colors": "1.1.2",
     "commander": "2.9.0",
-    "promise" : "7.1.1"
+    "promise": "7.1.1"
   },
   "devDependencies": {
     "jasmine": "2.3.2"
