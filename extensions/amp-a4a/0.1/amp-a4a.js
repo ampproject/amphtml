@@ -381,7 +381,7 @@ export class AmpA4A extends AMP.BaseElement {
     // AMP creatives will be injected as part of the promise chain created
     // within onLayoutMeasure, this is only relevant to non-AMP creatives
     // therefore we want this to match the 3p priority.
-    const isPWA = !this.element.ampdoc_.isSingleDoc();
+    const isPWA = !this.element.getAmpDoc().isSingleDoc();
     // give the ad higher priority if it is inside a PWA
     return isPWA ? 1 : 2;
   }
