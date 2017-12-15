@@ -34,41 +34,26 @@ import {
 } from '../../../src/experiments';
 import {dev} from '../../../src/log';
 
-/** @const {!string}  @private */
+/** @const {string} @visibleForTesting */
 export const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-adsense-impl';
 
-/** @const @enum{string} */
-export const ADSENSE_EXPERIMENT_FEATURE = {
-  HOLDBACK_EXTERNAL_CONTROL: '21060732',
-  HOLDBACK_EXTERNAL: '21060733',
-  DELAYED_REQUEST_CONTROL: '21060734',
-  DELAYED_REQUEST: '21060735',
-  HOLDBACK_INTERNAL_CONTROL: '2092615',
-  HOLDBACK_INTERNAL: '2092616',
-};
-
 /** @const @type {!Object<string,?string>} */
 export const URL_EXPERIMENT_MAPPING = {
   '-1': MANUAL_EXPERIMENT_ID,
   '0': null,
-  // Holdback
-  '1': ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL_CONTROL,
-  '2': ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
-  // Delay Request
-  '3': ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_CONTROL,
-  '4': ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST,
 };
 
 /**
  * @param {!Window} win
  * @param {!Element} element
+ * @param {!boolean} useRemoteHtml
  * @returns {boolean}
  */
-export function adsenseIsA4AEnabled(win, element) {
-  if (!isGoogleAdsA4AValidEnvironment(win) ||
+export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {
+  if (useRemoteHtml || !isGoogleAdsA4AValidEnvironment(win) ||
       !element.getAttribute('data-ad-client')) {
     return false;
   }
@@ -79,37 +64,10 @@ export function adsenseIsA4AEnabled(win, element) {
     experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
     dev().info(
         TAG, `url experiment selection ${urlExperimentId}: ${experimentId}.`);
-  } else {
-    // Not set via url so randomly set.
-    const experimentInfoMap =
-        /** @type {!Object<string, !ExperimentInfo>} */ ({});
-    experimentInfoMap[ADSENSE_A4A_EXPERIMENT_NAME] = {
-      isTrafficEligible: () => true,
-      branches: [ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL_CONTROL,
-        ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL],
-    };
-    // Note: Because the same experimentName is being used everywhere here,
-    // randomlySelectUnsetExperiments won't add new IDs if
-    // maybeSetExperimentFromUrl has already set something for this
-    // experimentName.
-    randomlySelectUnsetExperiments(win, experimentInfoMap);
-    experimentId = getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME);
-    dev().info(
-        TAG, `random experiment selection ${urlExperimentId}: ${experimentId}`);
   }
   if (experimentId) {
     addExperimentIdToElement(experimentId, element);
     forceExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME, experimentId);
   }
-  return ![ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_EXTERNAL,
-    ADSENSE_EXPERIMENT_FEATURE.HOLDBACK_INTERNAL].includes(experimentId);
-}
-
-/**
- * @param {!Window} win
- * @param {!ADSENSE_EXPERIMENT_FEATURE} feature
- * @return {boolean} whether feature is enabled
- */
-export function experimentFeatureEnabled(win, feature) {
-  return getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME) == feature;
+  return true;
 }

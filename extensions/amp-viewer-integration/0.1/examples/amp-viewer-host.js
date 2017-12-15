@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import '../../../../third_party/babel/custom-babel-helpers';
 import {
   APP,
   Messaging,
@@ -42,7 +41,7 @@ export class AmpViewerHost {
    * looking at.
    */
   constructor(win, ampIframe, frameOrigin, messageHandler, opt_logsId,
-      opt_isWebview, opt_isHandshakePoll) {
+    opt_isWebview, opt_isHandshakePoll) {
     /** @const {!Window} */
     this.win = win;
     /** @private {!HTMLIFrameElement} */

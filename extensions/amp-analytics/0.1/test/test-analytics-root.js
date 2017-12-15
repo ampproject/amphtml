@@ -97,7 +97,7 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
   });
 
   it('should provide the correct rect for ini-load for main doc', () => {
-    const stub = sandbox.stub(resources, 'getResourcesInRect',
+    const stub = sandbox.stub(resources, 'getResourcesInRect').callsFake(
         () => Promise.resolve([]));
     root.whenIniLoaded();
     expect(stub).to.be.calledOnce;
@@ -112,12 +112,12 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
 
   it('should provide the correct rect for ini-load for inabox', () => {
     win.AMP_MODE = {runtime: 'inabox'};
-    sandbox.stub(viewport, 'getLayoutRect', element => {
+    sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
       if (element == win.document.documentElement) {
         return {left: 10, top: 11, width: 100, height: 200};
       }
     });
-    const stub = sandbox.stub(resources, 'getResourcesInRect',
+    const stub = sandbox.stub(resources, 'getResourcesInRect').callsFake(
         () => Promise.resolve([]));
     root.whenIniLoaded();
     expect(stub).to.be.calledOnce;
@@ -248,7 +248,7 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
 
       // Root on `target` element.
       const ampdoc1 = new AmpDocShadow(win, 'https://amce.org/', target);
-      sandbox.stub(ampdoc1, 'whenReady', () => {
+      sandbox.stub(ampdoc1, 'whenReady').callsFake(() => {
         return Promise.resolve();
       });
       const root1 = new AmpdocAnalyticsRoot(ampdoc1);
@@ -261,7 +261,7 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
 
       // // Root on `child` element.
       const ampdoc2 = new AmpDocShadow(win, 'https://amce.org/', child);
-      sandbox.stub(ampdoc2, 'whenReady', () => {
+      sandbox.stub(ampdoc2, 'whenReady').callsFake(() => {
         return Promise.resolve();
       });
       const root2 = new AmpdocAnalyticsRoot(ampdoc2);
@@ -274,7 +274,7 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
 
       // // Root on `other` element.
       const ampdoc3 = new AmpDocShadow(win, 'https://amce.org/', other);
-      sandbox.stub(ampdoc3, 'whenReady', () => {
+      sandbox.stub(ampdoc3, 'whenReady').callsFake(() => {
         return Promise.resolve();
       });
       const root3 = new AmpdocAnalyticsRoot(ampdoc3);
@@ -395,7 +395,7 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
 
     it('should NOT match nodes not in root', () => {
       expect(matches(body, target, '*')).to.equal(target);
-      sandbox.stub(root, 'contains', () => false);
+      sandbox.stub(root, 'contains').callsFake(() => false);
       expect(matches(body, target, '*')).to.be.null;
     });
   });
@@ -464,12 +464,30 @@ describes.realWin('EmbedAnalyticsRoot', {
     expect(root.getTrackerOptional('custom')).to.be.null;
   });
 
+  it('should create and reuse trackers, but not if not in whitelist', () => {
+    const whitelist = {
+      'custom': CustomEventTracker,
+    };
+    const customTracker = root.getTrackerForWhitelist('custom', whitelist);
+    expect(customTracker).to.be.instanceOf(CustomEventTracker);
+    expect(customTracker.root).to.equal(root);
+
+    const noneTracker = root.getTrackerForWhitelist('none', whitelist);
+    expect(noneTracker).to.be.null;
+
+    expect(root.getTrackerForWhitelist('custom', whitelist))
+        .to.equal(customTracker);
+    expect(root.getTracker('custom', CustomEventTracker))
+        .to.equal(customTracker);
+  });
+
   it('should init with embed signals', () => {
     expect(root.signals()).to.equal(embed.signals());
   });
 
   it('should resolve ini-load signal', () => {
-    const stub = sandbox.stub(embed, 'whenIniLoaded', () => Promise.resolve());
+    const stub = sandbox.stub(embed, 'whenIniLoaded').callsFake(
+        () => Promise.resolve());
     return root.whenIniLoaded().then(() => {
       expect(stub).to.be.calledOnce;
     });
@@ -593,7 +611,7 @@ describes.realWin('EmbedAnalyticsRoot', {
 
     it('should NOT match nodes not in root', () => {
       expect(matches(body, target, '*')).to.equal(target);
-      sandbox.stub(root, 'contains', () => false);
+      sandbox.stub(root, 'contains').callsFake(() => false);
       expect(matches(body, target, '*')).to.be.null;
     });
   });

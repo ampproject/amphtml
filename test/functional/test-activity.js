@@ -23,8 +23,12 @@ import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import {installViewportServiceForDoc} from '../../src/service/viewport-impl';
-import {markElementScheduledForTesting} from '../../src/custom-element';
+import {
+  installViewportServiceForDoc,
+} from '../../src/service/viewport/viewport-impl';
+import {
+  markElementScheduledForTesting,
+} from '../../src/service/custom-element-registry';
 import {installVsyncService} from '../../src/service/vsync-impl';
 import {Observable} from '../../src/observable';
 import * as sinon from 'sinon';
@@ -109,14 +113,14 @@ describe('Activity getTotalEngagedTime', () => {
       whenFirstVisibleResolve = resolve;
     });
     sandbox.stub(viewer, 'whenFirstVisible').returns(whenFirstVisiblePromise);
-    sandbox.stub(viewer, 'onVisibilityChanged', handler => {
+    sandbox.stub(viewer, 'onVisibilityChanged').callsFake(handler => {
       visibilityObservable.add(handler);
     });
 
     installViewportServiceForDoc(ampdoc);
     viewport = Services.viewportForDoc(ampdoc);
 
-    sandbox.stub(viewport, 'onScroll', handler => {
+    sandbox.stub(viewport, 'onScroll').callsFake(handler => {
       scrollObservable.add(handler);
     });
 

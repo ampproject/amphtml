@@ -18,6 +18,7 @@ import {dev, user} from '../log';
 import {endsWith} from '../string';
 import {Services} from '../services';
 import {
+  setImportantStyles,
   setStyle,
   setStyles,
   computedStyle,
@@ -275,7 +276,7 @@ export class FixedLayer {
         // large value (to catch cases where sticky-tops are in a long way
         // down inside a scroller).
         for (let i = 0; i < elements.length; i++) {
-          setStyles(elements[i].element, {
+          setImportantStyles(elements[i].element, {
             top: '',
             bottom: '-9999vh',
             transition: 'none',
@@ -289,10 +290,7 @@ export class FixedLayer {
         }
         // 3. Cleanup the `style.bottom`.
         for (let i = 0; i < elements.length; i++) {
-          setStyles(elements[i].element, {
-            bottom: '',
-            transition: '',
-          });
+          setStyle(elements[i].element, 'bottom', '');
         }
 
         for (let i = 0; i < elements.length; i++) {
@@ -303,6 +301,7 @@ export class FixedLayer {
           const {offsetWidth, offsetHeight, offsetTop} = element;
           const {
             position = '',
+            display = '',
             bottom,
             zIndex,
           } = style;
@@ -313,12 +312,13 @@ export class FixedLayer {
           // Element is indeed fixed. Visibility is added to the test to
           // avoid moving around invisible elements.
           const isFixed = (
-              position == 'fixed' &&
+            position == 'fixed' &&
               (fe.forceTransfer || (offsetWidth > 0 && offsetHeight > 0)));
           // Element is indeed sticky.
           const isSticky = endsWith(position, 'sticky');
+          const isDisplayed = display !== 'none';
 
-          if (!isFixed && !isSticky) {
+          if (!isDisplayed || !(isFixed || isSticky)) {
             state[fe.id] = {
               fixed: false,
               sticky: false,
@@ -348,8 +348,8 @@ export class FixedLayer {
           // transfering of more substantial sections for now. Likely to be
           // relaxed in the future.
           const isTransferrable = isFixed && (
-              fe.forceTransfer || (
-                  opacity > 0 &&
+            fe.forceTransfer || (
+              opacity > 0 &&
                   offsetHeight < 300 &&
                   (this.isAllowedCoord_(top) || this.isAllowedCoord_(bottom))));
           if (isTransferrable) {
@@ -372,12 +372,25 @@ export class FixedLayer {
             transferLayer.className = this.ampdoc.getBody().className;
           }
         }
-        this.elements_.forEach((fe, i) => {
+        const elements = this.elements_;
+        for (let i = 0; i < elements.length; i++) {
+          const fe = elements[i];
           const feState = state[fe.id];
+
+          // Fix a bug with Safari. For some reason, you cannot unset
+          // transition when it's important. You can, however, set it to a valid
+          // non-important value, then unset it.
+          setStyle(fe.element, 'transition', 'none');
+          // Note: This MUST be done after measurements are taken.
+          // Transitions will mess up everything and, depending on when paints
+          // happen, mutates of transition and bottom at the same time may be
+          // make the transition active.
+          setStyle(fe.element, 'transition', '');
+
           if (feState) {
             this.mutateElement_(fe, i, feState);
           }
-        });
+        }
       },
     }, {}).catch(error => {
       // Fail silently.

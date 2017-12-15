@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import '../../third_party/babel/custom-babel-helpers';
 import {urls} from '../config';
 
 /**
@@ -639,7 +638,7 @@ self.addEventListener('install', install => {
   if (install.registerForeignFetch) {
     install.registerForeignFetch({
       scopes: [/** @type {!ServiceWorkerGlobalScope} */(
-          self).registration.scope],
+        self).registration.scope],
       origins: ['*'],
     });
   }

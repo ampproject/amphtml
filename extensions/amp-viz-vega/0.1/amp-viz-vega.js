@@ -162,8 +162,8 @@ export class AmpVizVega extends AMP.BaseElement {
           {
             requireAmpResponseSourceOrigin: false,
           }).then(res => res.json()).then(data => {
-            this.data_ = data;
-          });
+        this.data_ = data;
+      });
     }
   }
 
@@ -255,4 +255,7 @@ export class AmpVizVega extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-viz-vega', AmpVizVega, CSS);
+
+AMP.extension('amp-viz-vega', '0.1', AMP => {
+  AMP.registerElement('amp-viz-vega', AmpVizVega, CSS);
+});

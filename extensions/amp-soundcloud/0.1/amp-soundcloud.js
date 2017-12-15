@@ -43,7 +43,7 @@ class AmpSoundcloud extends AMP.BaseElement {
     this.iframe_ = null;
   }
 
- /**
+  /**
   * @param {boolean=} opt_onLayout
   * @override
   */
@@ -108,6 +108,9 @@ class AmpSoundcloud extends AMP.BaseElement {
           'https://w.soundcloud.com');
     }
   }
-};
+}
 
-AMP.registerElement('amp-soundcloud', AmpSoundcloud);
+
+AMP.extension('amp-soundcloud', '0.1', AMP => {
+  AMP.registerElement('amp-soundcloud', AmpSoundcloud);
+});

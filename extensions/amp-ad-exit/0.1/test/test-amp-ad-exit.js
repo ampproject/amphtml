@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import '../amp-ad-exit';
+import {AmpAdExit} from '../amp-ad-exit';
 import * as sinon from 'sinon';
+import {ANALYTICS_CONFIG} from '../../../amp-analytics/0.1/vendors';
 import {toggleExperiment} from '../../../../src/experiments';
+
+const TEST_3P_VENDOR = '3p-vendor';
 
 const EXIT_CONFIG = {
   targets: {
@@ -25,6 +28,15 @@ const EXIT_CONFIG = {
       'finalUrl': 'http://localhost:8000/simple',
       'filters': ['twoSecond'],
     },
+    borderProtection: {
+      'finalUrl': 'http://localhost:8000/simple',
+      'filters': ['borderProtection'],
+    },
+    borderProtectionRelativeTo: {
+      'finalUrl': 'http://localhost:8000/simple',
+      'filters': ['borderProtectionRelativeTo'],
+    },
+
     tracking: {
       'finalUrl': 'http://localhost:8000/tracking-test',
       'trackingUrls': [
@@ -44,10 +56,30 @@ const EXIT_CONFIG = {
       'finalUrl': 'http://localhost:8000/vars?foo=_foo',
       'trackingUrls': [
         'http://localhost:8000/tracking?bar=_bar',
+        'http://localhost:8000/tracking?numVar=_numVar&boolVar=_boolVar',
       ],
       vars: {
         _foo: {
           defaultValue: 'foo-default',
+        },
+        _bar: {
+          defaultValue: 'bar-default',
+        },
+        _numVar: {
+          defaultValue: 3,
+        },
+        _boolVar: {
+          defaultValue: true,
+        },
+      },
+    },
+    variableFrom3pAnalytics: {
+      'finalUrl': 'http://localhost:8000/vars?foo=_foo',
+      vars: {
+        _foo: {
+          defaultValue: 'foo-default',
+          iframeTransportSignal:
+              `IFRAME_TRANSPORT_SIGNAL(${TEST_3P_VENDOR},collected-data)`,
         },
         _bar: {
           defaultValue: 'bar-default',
@@ -59,6 +91,19 @@ const EXIT_CONFIG = {
     'twoSecond': {
       type: 'clickDelay',
       delay: 2000,
+    },
+    'borderProtection': {
+      type: 'clickLocation',
+      top: 10,
+      right: 20,
+      bottom: 30,
+    },
+    'borderProtectionRelativeTo': {
+      type: 'clickLocation',
+      top: 10,
+      right: 20,
+      bottom: 30,
+      relativeTo: '#ad',
     },
   },
 };
@@ -93,10 +138,35 @@ describes.realWin('amp-ad-exit', {
     return el.build().then(() => el);
   }
 
+  // Ad ad div or the relativeTo element cannot be found.
+  function addAdDiv() {
+    const adDiv = win.document.createElement('div');
+    adDiv.id = 'ad';
+    adDiv.style.position = 'absolute';
+    adDiv.style.left = '100px';
+    adDiv.style.top = '200px';
+    adDiv.style.width = '200px';
+    adDiv.style.height = '200px';
+    win.document.body.appendChild(adDiv);
+    // TODO(jonkeller): Long-term, test with amp-ad-exit enclosed inside amp-ad,
+    // so we don't have to do this hack.
+    sandbox.stub(AmpAdExit.prototype, 'getAmpAdResourceId_').callsFake(
+        () => String(Math.round(Math.random() * 10000)));
+  }
+
   beforeEach(() => {
     sandbox = sinon.sandbox.create({useFakeTimers: true});
     win = env.win;
     toggleExperiment(win, 'amp-ad-exit', true);
+    addAdDiv();
+    // TODO(jonkeller): Remove after rebase
+    win.top.document.body.getResourceId = () => '6789';
+    // TEST_3P_VENDOR must be in ANALYTICS_CONFIG *before* makeElementWithConfig
+    ANALYTICS_CONFIG[TEST_3P_VENDOR] = ANALYTICS_CONFIG[TEST_3P_VENDOR] || {
+      transport: {
+        iframe: '/nowhere.html',
+      },
+    };
     return makeElementWithConfig(EXIT_CONFIG).then(el => {
       element = el;
     });
@@ -105,6 +175,7 @@ describes.realWin('amp-ad-exit', {
   afterEach(() => {
     sandbox.restore();
     env.win.document.body.removeChild(element);
+    env.win.document.body.removeChild(env.win.document.getElementById('ad'));
     element = undefined;
   });
 
@@ -156,7 +227,7 @@ describes.realWin('amp-ad-exit', {
     element.implementation_.executeAction({
       method: 'exit',
       args: {target: 'twoSecondDelay'},
-      event: makeClickEvent(1000),  // 1000 ms + 999 from the previous exit.
+      event: makeClickEvent(1000), // 1000 ms + 999 from the previous exit.
       satisfiesTrust: () => true,
     });
 
@@ -164,7 +235,7 @@ describes.realWin('amp-ad-exit', {
   });
 
   it('should attempt new-tab navigation', () => {
-    const open = sandbox.stub(win, 'open', () => {
+    const open = sandbox.stub(win, 'open').callsFake(() => {
       return {name: 'fakeWin'};
     });
 
@@ -181,7 +252,7 @@ describes.realWin('amp-ad-exit', {
   });
 
   it('should fall back to top navigation', () => {
-    const open = sandbox.stub(win, 'open', () => null);
+    const open = sandbox.stub(win, 'open').callsFake(() => null);
 
     element.implementation_.executeAction({
       method: 'exit',
@@ -198,10 +269,11 @@ describes.realWin('amp-ad-exit', {
   });
 
   it('should ping tracking URLs with sendBeacon', () => {
-    const open = sandbox.stub(win, 'open', () => {
+    const open = sandbox.stub(win, 'open').callsFake(() => {
       return {name: 'fakeWin'};
     });
-    const sendBeacon = sandbox.stub(win.navigator, 'sendBeacon', () => true);
+    const sendBeacon = sandbox.stub(win.navigator, 'sendBeacon').callsFake(
+        () => true);
 
     element.implementation_.executeAction({
       method: 'exit',
@@ -221,13 +293,14 @@ describes.realWin('amp-ad-exit', {
   });
 
   it('should ping tracking URLs with image requests (no sendBeacon)', () => {
-    const open = sandbox.stub(win, 'open', () => {
+    const open = sandbox.stub(win, 'open').callsFake(() => {
       return {name: 'fakeWin'};
     });
 
     let sendBeacon;
     if (win.navigator.sendBeacon) {
-      sendBeacon = sandbox.stub(win.navigator, 'sendBeacon', () => true);
+      sendBeacon = sandbox.stub(win.navigator, 'sendBeacon').callsFake(
+          () => true);
     }
     const createElement = sandbox.spy(win.document, 'createElement');
 
@@ -251,11 +324,12 @@ describes.realWin('amp-ad-exit', {
   });
 
   it('should ping tracking URLs with image requests (sendBeacon fails)', () => {
-    const open = sandbox.stub(win, 'open', () => {
+    const open = sandbox.stub(win, 'open').callsFake(() => {
       return {name: 'fakeWin'};
     });
 
-    const sendBeacon = sandbox.stub(win.navigator, 'sendBeacon', () => false);
+    const sendBeacon = sandbox.stub(win.navigator, 'sendBeacon').callsFake(
+        () => false);
     const createElement = sandbox.spy(win.document, 'createElement');
 
     element.implementation_.executeAction({
@@ -283,11 +357,12 @@ describes.realWin('amp-ad-exit', {
       },
     };
     return makeElementWithConfig(config).then(el => {
-      const open = sandbox.stub(win, 'open', () => {
+      const open = sandbox.stub(win, 'open').callsFake(() => {
         return {name: 'fakeWin'};
       });
 
-      const sendBeacon = sandbox.stub(win.navigator, 'sendBeacon', () => true);
+      const sendBeacon = sandbox.stub(win.navigator, 'sendBeacon').callsFake(
+          () => true);
       const createElement = sandbox.spy(win.document, 'createElement');
 
       el.implementation_.executeAction({
@@ -308,15 +383,15 @@ describes.realWin('amp-ad-exit', {
   });
 
   it('should replace standard URL variables', () => {
-    const open = sandbox.stub(win, 'open', () => {
+    const open = sandbox.stub(win, 'open').callsFake(() => {
       return {name: 'fakeWin'};
     });
 
     if (!win.navigator) {
       win.navigator = {sendBeacon: () => false};
     }
-    const sendBeacon =
-        sandbox.stub(win.navigator, 'sendBeacon', () => true);
+    const sendBeacon = sandbox.stub(win.navigator, 'sendBeacon').callsFake(
+        () => true);
 
     element.implementation_.executeAction({
       method: 'exit',
@@ -335,20 +410,21 @@ describes.realWin('amp-ad-exit', {
     expect(sendBeacon).to.have.been.calledWith(trackingMatcher, '');
   });
 
-  it('should replace custom URL variables', () => {
-    const open = sandbox.stub(win, 'open', () => {
+  it('should replace custom URL variables with vars', () => {
+    const open = sandbox.stub(win, 'open').callsFake(() => {
       return {name: 'fakeWin'};
     });
 
     if (!win.navigator) {
       win.navigator = {sendBeacon: () => false};
     }
-    const sendBeacon =
-        sandbox.stub(win.navigator, 'sendBeacon', () => true);
+    const sendBeacon = sandbox.stub(win.navigator, 'sendBeacon').callsFake(
+        () => true);
 
     element.implementation_.executeAction({
       method: 'exit',
-      args: {target: 'customVars', _foo: 'foo', _bar: 'bar'},
+      args: {target: 'customVars', _foo: 'foo', _bar: 'bar', _numVar: 0,
+        _boolVar: false},
       event: makeClickEvent(1001, 101, 102),
       satisfiesTrust: () => true,
     });
@@ -357,6 +433,170 @@ describes.realWin('amp-ad-exit', {
         'http://localhost:8000/vars?foo=foo', '_blank');
     expect(sendBeacon)
         .to.have.been.calledWith(
-        'http://localhost:8000/tracking?bar=bar', '');
+            'http://localhost:8000/tracking?bar=bar', '');
+    expect(sendBeacon)
+        .to.have.been.calledWith(
+            'http://localhost:8000/tracking?numVar=0&boolVar=false', '');
+  });
+
+  it('border protection', () => {
+    const open = sandbox.stub(win, 'open').callsFake(() => {
+      return {name: 'fakeWin'};
+    });
+
+    win.innerWidth = 1000;
+    win.innerHeight = 2000;
+    // Replace the getVsync function so that the measure can happen at once.
+    element.implementation_.getVsync = () => {
+      return {measure: callback => callback()};
+    };
+    element.implementation_.onLayoutMeasure();
+
+    // The click is within the top border.
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'borderProtection'},
+      event: makeClickEvent(1001, 500, 8),
+      satisfiesTrust: () => true,
+    });
+
+    // The click is within the right border.
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'borderProtection'},
+      event: makeClickEvent(1001, 993, 500),
+      satisfiesTrust: () => true,
+    });
+
+    // The click is within the bottom border.
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'borderProtection'},
+      event: makeClickEvent(1001, 500, 1992),
+      satisfiesTrust: () => true,
+    });
+
+    expect(open).to.not.have.been.called;
+
+    // The click is within the left border but left border protection is not set.
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'borderProtection'},
+      event: makeClickEvent(1001, 8, 500),
+      satisfiesTrust: () => true,
+    });
+
+    // THe click is not within the border area.
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'borderProtection'},
+      event: makeClickEvent(1001, 500, 500),
+      satisfiesTrust: () => true,
+    });
+    expect(open).to.have.been.calledTwice;
+    expect(open).to.have.been.calledWith(
+        EXIT_CONFIG.targets.borderProtection.finalUrl, '_blank');
+  });
+
+  it('border protection relative to div', () => {
+    const open = sandbox.stub(win, 'open').callsFake(() => {
+      return {name: 'fakeWin'};
+    });
+
+    // Replace the getVsync function so that the measure can happen at once.
+    element.implementation_.getVsync = () => {
+      return {measure: callback => callback()};
+    };
+    element.implementation_.onLayoutMeasure();
+
+    // The click is within the top border.
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'borderProtectionRelativeTo'},
+      event: makeClickEvent(1001, 200, 208),
+      satisfiesTrust: () => true,
+    });
+
+    // The click is within the right border.
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'borderProtectionRelativeTo'},
+      event: makeClickEvent(1001, 293, 300),
+      satisfiesTrust: () => true,
+    });
+
+    // The click is within the bottom border.
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'borderProtectionRelativeTo'},
+      event: makeClickEvent(1001, 200, 392),
+      satisfiesTrust: () => true,
+    });
+
+    expect(open).to.not.have.been.called;
+
+    // The click is within the left border but left border protection is not set.
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'borderProtectionRelativeTo'},
+      event: makeClickEvent(1001, 103, 300),
+      satisfiesTrust: () => true,
+    });
+
+    // THe click is not within the border area.
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'borderProtectionRelativeTo'},
+      event: makeClickEvent(1001, 200, 300),
+      satisfiesTrust: () => true,
+    });
+    expect(open).to.have.been.calledTwice;
+    expect(open).to.have.been.calledWith(
+        EXIT_CONFIG.targets.borderProtection.finalUrl, '_blank');
+  });
+
+  it('should replace custom URL variables with 3P Analytics defaults', () => {
+    const open = sandbox.stub(win, 'open').returns({name: 'fakeWin'});
+
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'variableFrom3pAnalytics'},
+      event: makeClickEvent(1004),
+      satisfiesTrust: () => true,
+    });
+
+    expect(open).to.have.been.calledWith(
+        'http://localhost:8000/vars?foo=foo-default', '_blank');
+  });
+
+  it('should replace custom URL variables with 3P Analytics signals', () => {
+    const open = sandbox.stub(win, 'open').callsFake(() => {
+      return {name: 'fakeWin'};
+    });
+
+    element.implementation_.vendorResponses_[TEST_3P_VENDOR] = {
+      'unused': 'unused',
+      'collected-data': 'abc123',
+    };
+
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'variableFrom3pAnalytics'},
+      event: makeClickEvent(1005),
+      satisfiesTrust: () => true,
+    });
+
+    expect(open).to.have.been.calledWith(
+        'http://localhost:8000/vars?foo=abc123', '_blank');
+  });
+
+  it('should reject unrecognized 3P Analytics vendors', () => {
+    const unkVendor = JSON.parse(JSON.stringify(EXIT_CONFIG));
+    unkVendor.targets.variableFrom3pAnalytics.vars._foo.vendorAnalyticsSource =
+        'nonexistent_vendor';
+
+    expect(makeElementWithConfig(unkVendor))
+        .to.eventually.be.rejectedWith(/Unknown vendor/);
   });
 });
+

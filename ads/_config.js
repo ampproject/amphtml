@@ -22,6 +22,7 @@
  *   clientIdScope: (string|undefined),
  *   clientIdCookieName: (string|undefined),
  *   remoteHTMLDisabled: (boolean|undefined),
+ *   fullWidthHeightRatio: (number|undefined),
  * }}
  */
 let AdNetworkConfigDef;
@@ -48,6 +49,11 @@ let AdNetworkConfigDef;
  *   // We highly recommend all networks to implement the API,
  *   // see details in the README.md
  *   renderStartImplemented: boolean
+ *
+ *   // The width / height ratio for full width ad units.
+ *   // If absent, it means the network does not support full width ad units.
+ *   // Example value: 1.2
+ *   fullWidthHeightRatio: number
  * }
  *
  * @const {!Object<string, !AdNetworkConfigDef>}}
@@ -56,6 +62,11 @@ export const adConfig = {
   _ping_: {
     renderStartImplemented: true,
     clientIdScope: '_PING_',
+  },
+
+  '24smi': {
+    prefetch: 'https://jsn.24smi.net/smi.js',
+    preconnect: 'https://data.24smi.net',
   },
 
   a8: {
@@ -69,6 +80,15 @@ export const adConfig = {
 
   accesstrade: {
     prefetch: 'https://h.accesstrade.net/js/amp/amp.js',
+  },
+
+  adagio: {
+    prefetch: 'https://js-ssl.neodatagroup.com/adagio_amp.js',
+    preconnect: [
+      'https://ad-aws-it.neodatagroup.com',
+      'https://tracker.neodatagroup.com',
+    ],
+    renderStartImplemented: true,
   },
 
   adblade: {
@@ -118,6 +138,7 @@ export const adConfig = {
     clientIdCookieName: '_ga',
     remoteHTMLDisabled: true,
     masterFrameAccessibleType: 'google_network',
+    fullWidthHeightRatio: 1.2,
   },
 
   adsnative: {
@@ -247,7 +268,12 @@ export const adConfig = {
     prefetch: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
   },
 
+  connatix: {
+    renderStartImplemented: true,
+  },
+
   contentad: {},
+
 
   criteo: {
     prefetch: 'https://static.criteo.net/js/ld/publishertag.js',
@@ -264,6 +290,10 @@ export const adConfig = {
       'https://api.dable.io',
       'https://images.dable.io',
     ],
+    renderStartImplemented: true,
+  },
+
+  directadvert: {
     renderStartImplemented: true,
   },
 
@@ -349,6 +379,10 @@ export const adConfig = {
     prefetch: 'https://js.gsspcln.jp/l/amp.js',
   },
 
+  giraff: {
+    renderStartImplemented: true,
+  },
+
   gmossp: {
     prefetch: 'https://cdn.gmossp-sp.jp/ads/amp.js',
   },
@@ -422,6 +456,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  lockerdome: {
+    prefetch: 'https://cdn2.lockerdomecdn.com/_js/amp.js',
+    renderStartImplemented: true,
+  },
+
   loka: {
     prefetch: 'https://loka-cdn.akamaized.net/scene/amp.js',
     preconnect: [
@@ -467,7 +506,7 @@ export const adConfig = {
   },
 
   mediavine: {
-    prefetch: 'https://www.googletagservices.com/tag/js/gpt.js',
+    prefetch: 'https://amp.mediavine.com/wrapper.min.js',
     preconnect: [
       'https://partner.googleadservices.com',
       'https://securepubads.g.doubleclick.net',
@@ -501,7 +540,7 @@ export const adConfig = {
 
   mywidget: {
     preconnect: 'https://likemore-fe.go.mail.ru',
-    prefetch: 'https://likemore-go.imgsmail.ru/widget.amp.js',
+    prefetch: 'https://likemore-go.imgsmail.ru/widget_amp.js',
     renderStartImplemented: true,
   },
 
@@ -568,6 +607,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  postquare: {},
+
   pubmatic: {
     prefetch: 'https://ads.pubmatic.com/AdServer/js/amp.js',
   },
@@ -605,6 +646,11 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  revjet: {
+    prefetch: 'https://cdn.revjet.com/~cdn/JS/03/amp.js',
+    renderStartImplemented: true,
+  },
+
   rubicon: {},
 
   sharethrough: {
@@ -633,6 +679,10 @@ export const adConfig = {
   smartclip: {
     prefetch: 'https://cdn.smartclip.net/amp/amp.v0.js',
     preconnect: 'https://des.smartclip.net',
+    renderStartImplemented: true,
+  },
+
+  smi2: {
     renderStartImplemented: true,
   },
 
@@ -698,6 +748,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  viralize: {
+    renderStartImplemented: true,
+  },
+
   vmfive: {
     prefetch: 'https://man.vm5apis.com/dist/adn-web-sdk.js',
     preconnect: [
@@ -745,6 +799,10 @@ export const adConfig = {
 
   yandex: {
     prefetch: 'https://yastatic.net/partner-code/loaders/context_amp.js',
+    renderStartImplemented: true,
+  },
+
+  yengo: {
     renderStartImplemented: true,
   },
 

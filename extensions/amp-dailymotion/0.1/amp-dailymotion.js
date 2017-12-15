@@ -24,9 +24,9 @@ import {
 import {getData, listen} from '../../../src/event-helper';
 import {Services} from '../../../src/services';
 import {
-    parseQueryString,
-    addParamsToUrl,
-    addParamToUrl,
+  parseQueryString,
+  addParamsToUrl,
+  addParamToUrl,
 } from '../../../src/url';
 import {
   getDataParamsFromAttributes,
@@ -108,7 +108,7 @@ class AmpDailymotion extends AMP.BaseElement {
 
   }
 
- /**
+  /**
   * @param {boolean=} opt_onLayout
   * @override
   */
@@ -191,7 +191,7 @@ class AmpDailymotion extends AMP.BaseElement {
       return;
     }
     if (!getData(event) || !event.type || event.type != 'message') {
-      return;  // Event empty
+      return; // Event empty
     }
     const data = parseQueryString(/** @type {string} */ (getData(event)));
     if (data === undefined) {
@@ -204,6 +204,8 @@ class AmpDailymotion extends AMP.BaseElement {
         this.element.dispatchCustomEvent(VideoEvents.LOAD);
         break;
       case DailymotionEvents.END:
+        this.element.dispatchCustomEvent(VideoEvents.ENDED);
+        // Don't break, also dispatch pause
       case DailymotionEvents.PAUSE:
         this.element.dispatchCustomEvent(VideoEvents.PAUSE);
         this.playerState_ = DailymotionEvents.PAUSE;
@@ -215,7 +217,7 @@ class AmpDailymotion extends AMP.BaseElement {
       case DailymotionEvents.VOLUMECHANGE:
         if (this.playerState_ == DailymotionEvents.UNSTARTED
             || this.muted_ != (
-                data['volume'] == 0 || (data['muted'] == 'true'))) {
+              data['volume'] == 0 || (data['muted'] == 'true'))) {
           this.muted_ = (data['volume'] == 0 || (data['muted'] == 'true'));
           if (this.muted_) {
             this.element.dispatchCustomEvent(VideoEvents.MUTED);
@@ -419,6 +421,9 @@ class AmpDailymotion extends AMP.BaseElement {
     // Not supported.
     return [];
   }
-};
+}
 
-AMP.registerElement('amp-dailymotion', AmpDailymotion);
+
+AMP.extension('amp-dailymotion', '0.1', AMP => {
+  AMP.registerElement('amp-dailymotion', AmpDailymotion);
+});

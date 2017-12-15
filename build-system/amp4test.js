@@ -17,9 +17,14 @@
 
 const app = module.exports = require('express').Router();
 
+/*eslint "max-len": 0*/
+
 app.use('/compose-doc', function(req, res) {
   res.setHeader('X-XSS-Protection', '0');
   const mode = process.env.SERVE_MODE == 'compiled' ? '' : 'max.';
+  const frameHtml = process.env.SERVE_MODE == 'compiled'
+    ? 'dist.3p/current-min/frame.html'
+    : 'dist.3p/current/frame.max.html';
   const extensions = req.query.extensions;
   let extensionScripts = '';
   if (!!extensions) {
@@ -33,7 +38,7 @@ app.use('/compose-doc', function(req, res) {
   const experiments = req.query.experiments;
   let metaTag = '';
   let experimentString = '';
-  if (!!experiments) {
+  if (experiments) {
     metaTag = '<meta name="amp-experiments-opt-in" content="' +
       experiments + '">';
     experimentString = '"' + experiments.split(',').join('","') + '"';
@@ -46,15 +51,17 @@ app.use('/compose-doc', function(req, res) {
   <meta charset="utf-8">
   <link rel="canonical" href="http://nonblocking.io/" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-       ${metaTag} 
+  ${metaTag}
   <script>
     window.AMP_CONFIG = window.AMP_CONFIG || {};
-    window.AMP_CONFIG['allow-doc-opt-in'] = 
+    window.AMP_CONFIG['allow-doc-opt-in'] =
     (window.AMP_CONFIG['allow-doc-opt-in'] || []).concat([${experimentString}]);
   </script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="/dist/${process.env.SERVE_MODE == 'compiled' ? 'v0' : 'amp'}.js"></script>
+  <meta name="amp-3p-iframe-src" content="http://localhost:9876/${frameHtml}">
   ${extensionScripts}
+  <style amp-custom>${req.query.css}</style>
 </head>
 <body>
 ${req.query.body}

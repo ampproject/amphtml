@@ -162,8 +162,8 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   handleOoyalaMessages_(event) {
     /** @const {?JsonObject|undefined} */
     const data = /** @type {?JsonObject} */ (isObject(getData(event))
-        ? getData(event)
-        : tryParseJson(getData(event)));
+      ? getData(event)
+      : tryParseJson(getData(event)));
     if (data === undefined) {
       return; // We only process valid JSON.
     }
@@ -286,6 +286,9 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     // Not supported.
     return [];
   }
-};
+}
 
-AMP.registerElement('amp-ooyala-player', AmpOoyalaPlayer);
+
+AMP.extension('amp-ooyala-player', '0.1', AMP => {
+  AMP.registerElement('amp-ooyala-player', AmpOoyalaPlayer);
+});

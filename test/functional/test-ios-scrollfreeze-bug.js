@@ -15,7 +15,7 @@
  */
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {checkAndFix} from '../../src/service/ios-scrollfreeze-bug';
+import {checkAndFix} from '../../src/service/viewport/ios-scrollfreeze-bug';
 import * as sinon from 'sinon';
 
 
@@ -64,7 +64,7 @@ describe('ios-scrollfreeze-bug', () => {
     vsyncApi = {
       mutate: () => {},
     };
-    mutateStub = sandbox.stub(vsyncApi, 'mutate', callback => {
+    mutateStub = sandbox.stub(vsyncApi, 'mutate').callsFake(callback => {
       callback();
     });
 

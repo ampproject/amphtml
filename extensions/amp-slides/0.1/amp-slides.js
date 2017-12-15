@@ -21,7 +21,7 @@ import * as tr from '../../../src/transition';
 
 
 /**
- * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
+ * Deprecated `amp-slides` is deprecated and will be deleted before 1.0.
  * Please see {@link AmpCarousel} with `type=slides` attribute instead.
  */
 class AmpSlides extends AMP.BaseElement {
@@ -133,9 +133,9 @@ class AmpSlides extends AMP.BaseElement {
         Animation.animate(this.element,
             this.createTransition_(oldSlide, newSlide, dir),
             200, 'ease-out').thenAlways(() => {
-              this.commitSwitch_(oldSlide, newSlide);
-              this.preloadNext_(dir);
-            });
+          this.commitSwitch_(oldSlide, newSlide);
+          this.preloadNext_(dir);
+        });
       }
     }
   }
@@ -229,4 +229,7 @@ class AmpSlides extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-slides', AmpSlides);
+
+AMP.extension('amp-slides', '0.1', AMP => {
+  AMP.registerElement('amp-slides', AmpSlides);
+});

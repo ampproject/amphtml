@@ -23,7 +23,6 @@ module.exports = {
     'fixture',
     'browserify',
     'mocha',
-    'chai-as-promised',
     'sinon-chai',
     'chai',
   ],
@@ -40,34 +39,45 @@ module.exports = {
   browserify: {
     watch: true,
     debug: true,
-    transform: ['babelify'],
+    transform: [
+      ['babelify'],
+    ],
     bundleDelay: 900,
   },
 
-  reporters: process.env.TRAVIS ? ['super-dots', 'mocha'] : ['dots', 'mocha'],
+  reporters: ['super-dots', 'karmaSimpleReporter'],
 
   superDotsReporter: {
+    nbDotsPerLine: 100000,
     color: {
-      success : 'green',
-      failure : 'red',
-      ignore  : 'yellow'
+      success: 'green',
+      failure: 'red',
+      ignore: 'yellow',
     },
     icon: {
-      success : '●',
-      failure : '●',
-      ignore  : '○',
+      success: '●',
+      failure: '●',
+      ignore: '○',
     },
   },
 
+  specReporter: {
+    suppressPassed: true,
+    suppressSkipped: true,
+    suppressFailed: false,
+    suppressErrorSummary: true,
+    maxLogLines: 10,
+  },
+
   mochaReporter: {
-    output: 'minimal',
+    output: 'full',
     colors: {
       success: 'green',
       error: 'red',
       info: 'yellow',
     },
     symbols: {
-      success : '●',
+      success: '●',
       error: '●',
       info: '○',
     },
@@ -101,7 +111,7 @@ module.exports = {
   concurrency: 6,
 
   customLaunchers: {
-    /*eslint "google-camelcase/google-camelcase": 0*/
+    /* eslint "google-camelcase/google-camelcase": 0*/
     Chrome_travis_ci: {
       base: 'Chrome',
       flags: ['--no-sandbox', '--disable-extensions'],
@@ -129,45 +139,50 @@ module.exports = {
       browserName: 'chrome',
       version: '45',
     },
-    SL_iOS_8_4: {
+    SL_iOS_latest: {
       base: 'SauceLabs',
       browserName: 'iphone',
-      version: '8.4',
-    },
-    SL_iOS_9_1: {
-      base: 'SauceLabs',
-      browserName: 'iphone',
-      version: '9.1',
+      version: 'latest',
     },
     SL_iOS_10_0: {
       base: 'SauceLabs',
       browserName: 'iphone',
       version: '10.0',
     },
+    SL_iOS_9_1: {
+      base: 'SauceLabs',
+      browserName: 'iphone',
+      version: '9.1',
+    },
     SL_Firefox_latest: {
       base: 'SauceLabs',
       browserName: 'firefox',
       version: 'latest',
     },
-    SL_IE_11: {
+    SL_Safari_latest: {
       base: 'SauceLabs',
-      browserName: 'internet explorer',
-      version: 11,
-    },
-    SL_Edge_latest: {
-      base: 'SauceLabs',
-      browserName: 'microsoftedge',
+      browserName: 'safari',
       version: 'latest',
+    },
+    SL_Safari_10: {
+      base: 'SauceLabs',
+      browserName: 'safari',
+      version: 10,
     },
     SL_Safari_9: {
       base: 'SauceLabs',
       browserName: 'safari',
       version: 9,
     },
-    SL_Safari_8: {
+    SL_Edge_latest: {
       base: 'SauceLabs',
-      browserName: 'safari',
-      version: 8,
+      browserName: 'microsoftedge',
+      version: 'latest',
+    },
+    SL_IE_11: {
+      base: 'SauceLabs',
+      browserName: 'internet explorer',
+      version: 11,
     },
   },
 
@@ -202,16 +217,18 @@ module.exports = {
   plugins: [
     'karma-browserify',
     'karma-chai',
-    'karma-chai-as-promised',
     'karma-chrome-launcher',
+    'karma-coverage',
     'karma-edge-launcher',
     'karma-firefox-launcher',
     'karma-fixture',
     'karma-html2js-preprocessor',
+    'karma-ie-launcher',
     'karma-mocha',
     'karma-mocha-reporter',
     'karma-safari-launcher',
     'karma-sauce-launcher',
+    'karma-simple-reporter',
     'karma-sinon-chai',
     'karma-super-dots-reporter',
     {

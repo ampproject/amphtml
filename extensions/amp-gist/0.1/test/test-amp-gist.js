@@ -14,29 +14,30 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-gist';
-import {adopt} from '../../../../src/runtime';
 
-adopt(window);
 
-describe('amp-gist', () => {
+describes.realWin('amp-gist', {
+  amp: {
+    extensions: ['amp-gist'],
+  },
+}, env => {
+  let win, doc;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+  });
 
   function getIns(gistid, file) {
-    return createIframePromise().then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const ins = iframe.doc.createElement('amp-gist');
-      ins.setAttribute('data-gistid', gistid);
-      ins.setAttribute('height', '237');
-      if (file) {
-        ins.setAttribute('data-file', file);
-      }
-
-      return iframe.addElement(ins);
-    });
+    const ins = doc.createElement('amp-gist');
+    ins.setAttribute('data-gistid', gistid);
+    ins.setAttribute('height', '237');
+    if (file) {
+      ins.setAttribute('data-file', file);
+    }
+    doc.body.appendChild(ins);
+    return ins.build().then(() => ins.layoutCallback()).then(() => ins);
   }
 
   it('renders responsively', () => {

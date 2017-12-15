@@ -92,6 +92,10 @@ If this attribute is present, and the browser supports autoplay:
 
 This attribute is similar to the `controls` attribute in the HTML5 `video`. If this attribute is present, the browser offers controls to allow the user to control video playback.
 
+##### controlsList
+
+Same as [controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList) attribute of HTML5 video element. Only supported by certain browsers. Please see [https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList) for details.
+
 ##### loop
 
 If present, the video will automatically loop back to the start upon reaching the end.
@@ -99,6 +103,10 @@ If present, the video will automatically loop back to the start upon reaching th
 ##### crossorigin
 
 Required if a `track` resource is hosted on a different origin than the document.
+
+##### disableremoteplayback
+
+Determines whether the media element is allowed to have a remote playback UI such as Chromecast or AirPlay.
 
 ##### muted (deprecated)
 
@@ -113,7 +121,7 @@ This element includes [common attributes](https://www.ampproject.org/docs/refere
 
 `amp-video` implements the [Media Session API](https://developers.google.com/web/updates/2017/02/media-session) enabling developers to specify more information about the video file that is playing to be displayed in the notification center of user's devices (along with play/pause controls).
 
-##### poster
+##### artwork
 
 URL to a PNG/JPG/ICO image serving as the video's artwork. If not present, the MediaSessionAPI Helper will use either the `image` field in the `schema.org` definition, the `og:image` or the website's `favicon`.
 
@@ -131,10 +139,15 @@ URL to a PNG/JPG/ICO image serving as the video's artwork. If not present, the M
 
 Example:
 
+Note that this example has both the `poster` and `artwork` attributes, poster will be used as the
+placeholder before the video plays while `artwork` is the image that will be displayed in the
+notification throught the MediaSessionAPI.
+
 ```html
 <amp-audio width="400" height="300"
   src="https://yourhost.com/audios/myaudio.mp3"
   poster="https://yourhost.com/posters/poster.png"
+  artwork="https://yourhost.com/artworks/artwork.png"
   title="Awesome music" artist="Awesome singer"
   album="Amazing album">
   <source type="audio/mpeg" src="foo.mp3">

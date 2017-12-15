@@ -123,8 +123,8 @@ class AmpApesterMedia extends AMP.BaseElement {
     const encodedMediaAttribute = encodeURIComponent(
         dev().assertString(this.mediaAttribute_));
     const suffix = (this.random_) ?
-        `/tokens/${encodedMediaAttribute}/interactions/random` :
-        `/interactions/${encodedMediaAttribute}/display`;
+      `/tokens/${encodedMediaAttribute}/interactions/random` :
+      `/interactions/${encodedMediaAttribute}/display`;
     return `${this.displayBaseUrl_}${suffix}`;
   }
 
@@ -257,7 +257,10 @@ class AmpApesterMedia extends AMP.BaseElement {
         .then(media => {
           this.togglePlaceholder(false);
           this.ready_ = true;
-          const height = 0 || media['data']['size']['height'];
+          let height = 0;
+          if (media && media['data'] && media['data']['size']) {
+            height = media['data']['size']['height'];
+          };
           if (height != this.height_) {
             this.height_ = height;
             if (this.random_) {
@@ -297,4 +300,7 @@ class AmpApesterMedia extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-apester-media', AmpApesterMedia, CSS);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpApesterMedia, CSS);
+});

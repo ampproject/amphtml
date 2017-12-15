@@ -21,8 +21,9 @@ import {waitForBodyPromise} from '../../../src/dom';
 import {allocateVariant} from './variant';
 import {registerServiceBuilder} from '../../../src/service';
 
-/** @const */
+const TAG = 'amp-experiment';
 const ATTR_PREFIX = 'amp-x-';
+
 
 export class AmpExperiment extends AMP.BaseElement {
 
@@ -65,7 +66,7 @@ export class AmpExperiment extends AMP.BaseElement {
         '<script type="application/json"> child.');
 
     return /** @type {!JsonObject} */ (
-        dev().assert(parseJson(children[0].textContent)));
+      dev().assert(parseJson(children[0].textContent)));
   }
 
   /**
@@ -90,4 +91,7 @@ export class AmpExperiment extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-experiment', AmpExperiment);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpExperiment);
+});

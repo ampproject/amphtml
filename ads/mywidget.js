@@ -22,57 +22,8 @@ import {loadScript, validateData} from '../3p/3p';
  */
 export function mywidget(global, data) {
   validateData(data, ['cid']);
-
-  let isReady = false;
-
-  /**
-   * `data.height` can be not a number (`undefined`, if attribute is not set,
-   * for example), that's why condition is not `data.height < 0`
-   */
-  if (!(data.height >= 0)) {
-    return;
-  }
-
-  global.myWidget = {
-    params: {
-      cid: data.cid,
-      container: 'c',
-    },
-
-    renderStart: global.context.renderStart,
-    noContentAvailable: global.context.noContentAvailable,
-
-    /**
-     * @param {{firstIntersectionCallback:function()}} opts
-     */
-    ready(opts) {
-      // Make sure ready() is called only once.
-      if (isReady) {
-        return;
-      } else {
-        isReady = true;
-      }
-
-      if (!opts || !opts.firstIntersectionCallback) {
-        return;
-      }
-
-      /**
-       * Widget want to be informed, when it gets into viewport, so we start
-       * to listen when it happens for the first time.
-       */
-      const unlisten = global.context.observeIntersection(changes => {
-        changes.forEach(c => {
-          if (c.intersectionRect.height) {
-            opts.firstIntersectionCallback();
-            unlisten();
-          }
-        });
-      });
-    },
-  };
+  global.myWidgetInit = data;
 
   // load the myWidget initializer asynchronously
-  loadScript(global, 'https://likemore-go.imgsmail.ru/widget.amp.js', () => {},
-      global.context.noContentAvailable);
+  loadScript(global, 'https://likemore-go.imgsmail.ru/widget_amp.js');
 }

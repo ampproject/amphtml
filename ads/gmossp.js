@@ -16,7 +16,7 @@
 
 import {writeScript, validateData} from '../3p/3p';
 
-const gmosspFields = ['width', 'height', 'id'];
+const gmosspFields = ['id'];
 
 /**
  * @param {!Window} global

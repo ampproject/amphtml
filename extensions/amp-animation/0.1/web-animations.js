@@ -16,7 +16,6 @@
 
 import {CssNumberNode, CssTimeNode, isVarCss} from './css-expr-ast';
 import {Observable} from '../../../src/observable';
-import {ScrollboundPlayer} from './scrollbound-player';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {closestBySelector, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
@@ -69,14 +68,6 @@ let animIdCounter = 0;
  */
 export let InternalWebAnimationRequestDef;
 
-/**
- * @private
- * @enum {string}
- */
-const Tickers = {
-  SCROLL: 'scroll',
-  TIME: 'time',
-};
 
 /**
  * @const {!Object<string, boolean>}
@@ -127,10 +118,10 @@ export class WebAnimationRunner {
   }
 
   /**
+   * Initializes the players but does not change the state.
    */
-  start() {
+  init() {
     dev().assert(!this.players_);
-    this.setPlayState_(WebAnimationPlayState.RUNNING);
     this.players_ = this.requests_.map(request => {
       // Apply vars.
       if (request.vars) {
@@ -139,13 +130,8 @@ export class WebAnimationRunner {
         }
       }
 
-      // Create the player.
-      let player;
-      if (request.timing.ticker == Tickers.SCROLL) {
-        player = new ScrollboundPlayer(request);
-      } else {
-        player = request.target.animate(request.keyframes, request.timing);
-      }
+      const player = request.target.animate(request.keyframes, request.timing);
+      player.pause();
       return player;
     });
     this.runningCount_ = this.players_.length;
@@ -157,6 +143,17 @@ export class WebAnimationRunner {
         }
       };
     });
+  }
+
+  /**
+   * Initializes the players if not already initialized,
+   * and starts playing the animations.
+   */
+  start() {
+    if (!this.players_) {
+      this.init();
+    }
+    this.resume();
   }
 
   /**
@@ -177,6 +174,7 @@ export class WebAnimationRunner {
       return;
     }
     this.setPlayState_(WebAnimationPlayState.RUNNING);
+    this.runningCount_ = this.players_.length;
     this.players_.forEach(player => {
       player.play();
     });
@@ -199,12 +197,20 @@ export class WebAnimationRunner {
     this.setPlayState_(WebAnimationPlayState.PAUSED);
     this.players_.forEach(player => {
       player.pause();
-      if (player instanceof ScrollboundPlayer) {
-        player.tick(time);
-      } else {
-        player.currentTime = time;
-      }
+      player.currentTime = time;
     });
+  }
+
+  /**
+   * Seeks to a relative position within the animation timeline given a
+   * percentage (0 to 1 number).
+   * @param {number} percent between 0 and 1
+   */
+  seekToPercent(percent) {
+    dev().assert(percent >= 0 && percent <= 1);
+    const totalDuration = this.getTotalDuration_();
+    const time = totalDuration * percent;
+    this.seekTo(time);
   }
 
   /**
@@ -234,44 +240,6 @@ export class WebAnimationRunner {
   }
 
   /**
-   */
-  scrollTick(pos) {
-    this.players_.forEach(player => {
-      if (player instanceof ScrollboundPlayer) {
-        player.tick(pos);
-      }
-    });
-  }
-
-  /**
-   */
-  updateScrollDuration(newDuration) {
-    this.requests_.forEach(request => {
-      if (request.timing.ticker == Tickers.SCROLL) {
-        request.timing.duration = newDuration;
-      }
-    });
-
-    this.players_.forEach(player => {
-      if (player instanceof ScrollboundPlayer) {
-        player.onScrollDurationChanged();
-      }
-    });
-  }
-
-  /**
-   */
-  hasScrollboundAnimations() {
-    for (let i = 0; i < this.requests_.length; i++) {
-      if (this.requests_[i].timing.ticker == Tickers.SCROLL) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /**
    * @param {!WebAnimationPlayState} playState
    * @private
    */
@@ -280,6 +248,31 @@ export class WebAnimationRunner {
       this.playState_ = playState;
       this.playStateChangedObservable_.fire(this.playState_);
     }
+  }
+
+  /**
+   * @return {!number} total duration in milliseconds.
+   * @throws {Error} If timeline is infinite.
+   */
+  getTotalDuration_() {
+    let maxTotalDuration = 0;
+    for (let i = 0; i < this.requests_.length; i++) {
+      const timing = this.requests_[i].timing;
+
+      user().assert(isFinite(timing.iterations), 'Animation has infinite ' +
+      'timeline, we can not seek to a relative position within an infinite ' +
+      'timeline. Use "time" for seekTo or remove infinite iterations');
+
+      const iteration = timing.iterations - timing.iterationStart;
+      const totalDuration = (timing.duration * iteration) +
+          timing.delay + timing.endDelay;
+
+      if (totalDuration > maxTotalDuration) {
+        maxTotalDuration = totalDuration;
+      }
+    }
+
+    return maxTotalDuration;
   }
 }
 
@@ -419,7 +412,7 @@ export class Builder {
    * @protected
    */
   resolveRequests(path, spec, args,
-      target = null, index = null, vars = null, timing = null) {
+    target = null, index = null, vars = null, timing = null) {
     const scanner = this.createScanner_(path, target, index, vars, timing);
     return this.vsync_.measurePromise(
         () => scanner.resolveRequests(spec, args));
@@ -490,7 +483,6 @@ export class MeasureScanner extends Scanner {
 
     /** @private {!WebAnimationTimingDef} */
     this.timing_ = timing || {
-      ticker: Tickers.TIME,
       duration: 0,
       delay: 0,
       endDelay: 0,
@@ -668,7 +660,7 @@ export class MeasureScanner extends Scanner {
       const keyframes = [];
       const addStartFrame = array.length == 1 || array[0].offset > 0;
       const startFrame = addStartFrame ? map() :
-          this.css_.resolveCssMap(array[0]);
+        this.css_.resolveCssMap(array[0]);
       keyframes.push(startFrame);
       const start = addStartFrame ? 0 : 1;
       for (let i = start; i < array.length; i++) {
@@ -727,16 +719,16 @@ export class MeasureScanner extends Scanner {
     // Push new context and perform calculations.
     const targets =
         (spec.target || spec.selector) ?
-        this.resolveTargets_(spec) :
-        [null];
+          this.resolveTargets_(spec) :
+          [null];
     targets.forEach((target, index) => {
       this.target_ = target || prevTarget;
       this.index_ = target ? index : prevIndex;
       this.css_.withTarget(this.target_, this.index_, () => {
         const subtargetSpec =
             this.target_ ?
-            this.matchSubtargets_(this.target_, this.index_ || 0, spec) :
-            spec;
+              this.matchSubtargets_(this.target_, this.index_ || 0, spec) :
+              spec;
         this.vars_ = this.mergeVars_(subtargetSpec, prevVars);
         this.css_.withVars(this.vars_, () => {
           this.timing_ = this.mergeTiming_(subtargetSpec, prevTiming);
@@ -773,8 +765,8 @@ export class MeasureScanner extends Scanner {
       }
       const target = user().assertElement(
           typeof spec.target == 'string' ?
-              this.css_.getElementById(spec.target) :
-              spec.target,
+            this.css_.getElementById(spec.target) :
+            spec.target,
           `Target not found: "${spec.target}"`);
       targets = [target];
     } else if (this.target_) {
@@ -895,9 +887,6 @@ export class MeasureScanner extends Scanner {
     const fill = /** @type {!WebAnimationTimingFill} */
         (this.css_.resolveIdent(newTiming.fill, prevTiming.fill));
 
-    // Other.
-    const ticker = newTiming.ticker != null ?
-        newTiming.ticker : prevTiming.ticker;
 
     // Validate.
     this.validateTime_(duration, newTiming.duration, 'duration');
@@ -907,7 +896,7 @@ export class MeasureScanner extends Scanner {
         '"iterations" is invalid: %s', newTiming.iterations);
     user().assert(iterationStart != null &&
         iterationStart >= 0 && isFinite(iterationStart),
-        '"iterationStart" is invalid: %s', newTiming.iterationStart);
+    '"iterationStart" is invalid: %s', newTiming.iterationStart);
     user().assertEnumValue(WebAnimationTimingDirection,
         /** @type {string} */ (direction), 'direction');
     user().assertEnumValue(WebAnimationTimingFill,
@@ -921,7 +910,6 @@ export class MeasureScanner extends Scanner {
       easing,
       direction,
       fill,
-      ticker,
     };
   }
 
@@ -1049,13 +1037,13 @@ class CssContextImpl {
     if (!styles) {
       styles = computedStyle(this.win_, target);
       this.computedStyleCache_[targetId] =
-          /** @type {!CSSStyleDeclaration} */ (styles);
+        /** @type {!CSSStyleDeclaration} */ (styles);
     }
 
     // Resolve a var or a property.
     return startsWith(prop, '--') ?
-        styles.getPropertyValue(prop) :
-        styles[getVendorJsPropertyName(styles, dashToCamelCase(prop))];
+      styles.getPropertyValue(prop) :
+      styles[getVendorJsPropertyName(styles, dashToCamelCase(prop))];
   }
 
   /**
@@ -1231,10 +1219,10 @@ class CssContextImpl {
         `Recursive variable: "${varName}"`);
     this.varPath_.push(varName);
     const rawValue = (this.vars_ && this.vars_[varName] != undefined) ?
-        this.vars_[varName] :
-        this.currentTarget_ ?
-            this.measure(this.currentTarget_, varName) :
-            null;
+      this.vars_[varName] :
+      this.currentTarget_ ?
+        this.measure(this.currentTarget_, varName) :
+        null;
     if (rawValue == null || rawValue === '') {
       user().warn(TAG, `Variable not found: "${varName}"`);
     }

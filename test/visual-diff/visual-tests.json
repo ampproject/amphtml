@@ -63,22 +63,29 @@
    *   "loading_complete_css": [
    *     ".loading-complete-css-class",
    *     ".another-loading-complete-css-class"
+   *   ],
+   *
+   *   // Experiments that must be enabled via cookies.
+   *   "experiments": [
+   *     "amp-feature-one",
+   *     "amp-feature-two"
    *   ]
    * },
    */
-
     {
       "url": "examples/visual-tests/amp-by-example/amp-by-example.html",
       "name": "Amp By Example"
     },
 
     {
-      "url": "examples/visual-tests/article.amp/article.amp.html",
-      "name": "AMP Article",
+      "url": "examples/visual-tests/amp-list/amp-list.amp.html",
+      "name": "AMP List and Mustache",
       "loading_complete_css": [
-        ".article-body"
+        ".list1",
+        ".list2"
       ]
     },
+
     {
       "url": "examples/visual-tests/article-access.amp/article-access.amp.html",
       "name": "AMP Article Access",
@@ -100,6 +107,10 @@
         ".comic-amp-font-loaded",
         ".comic-amp-bold-font-loaded"
       ]
+    },
+    {
+      "url": "examples/visual-tests/amp-layout/amp-layout.amp.html",
+      "name": "AMP Layout"
     }
   ],
 
@@ -125,6 +136,18 @@
       "loading_complete_css": [
         ".comic-amp-font-missing",
         ".comic-amp-bold-font-missing"
+      ]
+    },
+    /**
+      * Fails due to https://github.com/ampproject/amphtml/issues/11496
+      */
+    {
+      "url": "examples/visual-tests/article.amp/article.amp.html",
+      "name": "AMP Article",
+      "loading_complete_css": [
+        ".article-body",
+        ".ad-one",
+        ".ad-two"
       ]
     }
   ]

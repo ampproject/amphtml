@@ -26,7 +26,7 @@ class AmpReachPlayer extends AMP.BaseElement {
     this.iframe_ = null;
   }
 
- /**
+  /**
   * @param {boolean=} opt_onLayout
   * @override
   */
@@ -62,8 +62,9 @@ class AmpReachPlayer extends AMP.BaseElement {
       );
     }
   }
+}
 
-};
 
-AMP.registerElement('amp-reach-player', AmpReachPlayer);
-
+AMP.extension('amp-reach-player', '0.1', AMP => {
+  AMP.registerElement('amp-reach-player', AmpReachPlayer);
+});

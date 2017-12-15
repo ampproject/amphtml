@@ -30,7 +30,7 @@ import {dict} from './utils/object.js';
  * @return {!JsonObject}
  */
 export function getContextMetadata(
-    parentWindow, element, sentinel, attributes) {
+  parentWindow, element, sentinel, attributes) {
   const startTime = Date.now();
   const width = element.getAttribute('width');
   const height = element.getAttribute('height');
@@ -54,7 +54,7 @@ export function getContextMetadata(
   const layoutRect = element.getPageLayoutBox();
   attributes['_context'] = dict({
     'ampcontextVersion': '$internalRuntimeVersion$',
-    'ampcontextFilepath': urls.cdn + '/$internalRuntimeVersion$' +
+    'ampcontextFilepath': urls.thirdParty + '/$internalRuntimeVersion$' +
         '/ampcontext-v0.js',
     'sourceUrl': docInfo.sourceUrl,
     'referrer': referrer,

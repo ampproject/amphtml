@@ -24,10 +24,10 @@ import {dev} from '../log';
 import {dict, map} from '../utils/object';
 import {Services} from '../services';
 
-/** @private @const */
+/** @private @const {string} */
 const TAG_ = 'History';
 
-/** @private @const */
+/** @private @const {string} */
 const HISTORY_PROP_ = 'AMP.History';
 
 /** @typedef {number} */
@@ -753,8 +753,8 @@ export class HistoryBindingVirtual_ {
     this.updateStackIndex_(this.stackIndex_ + 1);
     return this.viewer_.sendMessageAwaitResponse(
         'pushHistory', dict({'stackIndex': this.stackIndex_})).then(() => {
-          return this.stackIndex_;
-        });
+      return this.stackIndex_;
+    });
   }
 
   /** @override */
@@ -764,9 +764,9 @@ export class HistoryBindingVirtual_ {
     }
     return this.viewer_.sendMessageAwaitResponse(
         'popHistory', dict({'stackIndex': this.stackIndex_})).then(() => {
-          this.updateStackIndex_(stackIndex - 1);
-          return this.stackIndex_;
-        });
+      this.updateStackIndex_(stackIndex - 1);
+      return this.stackIndex_;
+    });
   }
 
   /**

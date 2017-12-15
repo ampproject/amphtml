@@ -69,7 +69,7 @@
           'state': T.instructions[T.state][ T.cells[T.head] ].state,
           'cells': T.instructions[T.state][ T.cells[T.head] ].write == null
               ? T.cells
-              : copyAndSplice(T.cells, T.head, 1, T.instructions[T.state][ T.cells[T.head] ].write)
+              : splice(T.cells, T.head, 1, T.instructions[T.state][ T.cells[T.head] ].write)
         },
         'count': T.state == 'return'
             ? T.cells[1] + 2*T.cells[2] + 4*T.cells[3] + 8*T.cells[4] + 16*T.cells[5] + 32*T.cells[6] + 64*T.cells[7] + 128*T.cells[8]

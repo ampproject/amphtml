@@ -215,7 +215,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
               createElement('div', 'pb_feed_placeholder_content',
                   createElement('div', 'pb_feed_placeholder_preloader',
                       loaderImage)
-          )));
+              )));
 
     return loadingPlaceholder;
   }
@@ -302,8 +302,11 @@ class AmpPlaybuzz extends AMP.BaseElement {
       this.iframe_ = null;
       this.iframePromise_ = null;
     }
-    return true;  // Call layoutCallback again.
+    return true; // Call layoutCallback again.
   }
-};
+}
 
-AMP.registerElement('amp-playbuzz', AmpPlaybuzz, CSS);
+
+AMP.extension('amp-playbuzz', '0.1', AMP => {
+  AMP.registerElement('amp-playbuzz', AmpPlaybuzz, CSS);
+});

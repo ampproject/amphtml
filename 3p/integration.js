@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,11 +48,17 @@ import {urls} from '../src/config';
 import {endsWith} from '../src/string';
 import {parseJson} from '../src/json';
 import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
-import {initLogConstructor, setReportError, user} from '../src/log';
+import {
+  initLogConstructor,
+  setReportError,
+  user,
+  isUserErrorMessage,
+} from '../src/log';
 import {dict} from '../src/utils/object.js';
 import {getMode} from '../src/mode';
 import {startsWith} from '../src/string.js';
 import {AmpEvents} from '../src/amp-events';
+import {MessageType} from '../src/3p-frame-messaging';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
@@ -60,11 +66,14 @@ import {github} from './github';
 import {reddit} from './reddit';
 import {twitter} from './twitter';
 
-// 3P Ad Networks - please keep in alphabetic order
 import {_ping_} from '../ads/_ping_';
+
+// 3P Ad Networks - please keep in alphabetic order
+import {_24smi} from '../ads/24smi';
 import {a8} from '../ads/a8';
 import {a9} from '../ads/a9';
 import {accesstrade} from '../ads/accesstrade';
+import {adagio} from '../ads/adagio';
 import {adblade, industrybrains} from '../ads/adblade';
 import {adbutler} from '../ads/adbutler';
 import {adform} from '../ads/adform';
@@ -99,10 +108,12 @@ import {capirs} from '../ads/capirs';
 import {caprofitx} from '../ads/caprofitx';
 import {chargeads} from '../ads/chargeads';
 import {colombia} from '../ads/colombia';
+import {connatix} from '../ads/connatix';
 import {contentad} from '../ads/contentad';
 import {criteo} from '../ads/criteo';
 import {csa} from '../ads/google/csa';
 import {dable} from '../ads/dable';
+import {directadvert} from '../ads/directadvert';
 import {distroscale} from '../ads/distroscale';
 import {ezoic} from '../ads/ezoic';
 import {dotandads} from '../ads/dotandads';
@@ -117,6 +128,7 @@ import {flite} from '../ads/flite';
 import {fluct} from '../ads/fluct';
 import {fusion} from '../ads/fusion';
 import {genieessp} from '../ads/genieessp';
+import {giraff} from '../ads/giraff';
 import {gmossp} from '../ads/gmossp';
 import {gumgum} from '../ads/gumgum';
 import {holder} from '../ads/holder';
@@ -132,6 +144,7 @@ import {kargo} from '../ads/kargo';
 import {kiosked} from '../ads/kiosked';
 import {kixer} from '../ads/kixer';
 import {ligatus} from '../ads/ligatus';
+import {lockerdome} from '../ads/lockerdome';
 import {loka} from '../ads/loka';
 import {mads} from '../ads/mads';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
@@ -153,18 +166,21 @@ import {outbrain} from '../ads/outbrain';
 import {plista} from '../ads/plista';
 import {polymorphicads} from '../ads/polymorphicads';
 import {popin} from '../ads/popin';
+import {postquare} from '../ads/postquare';
 import {pubmatic} from '../ads/pubmatic';
 import {pubmine} from '../ads/pubmine';
 import {pulsepoint} from '../ads/pulsepoint';
 import {purch} from '../ads/purch';
 import {revcontent} from '../ads/revcontent';
 import {relap} from '../ads/relap';
+import {revjet} from '../ads/revjet';
 import {rubicon} from '../ads/rubicon';
 import {sharethrough} from '../ads/sharethrough';
 import {sklik} from '../ads/sklik';
 import {slimcutmedia} from '../ads/slimcutmedia';
 import {smartadserver} from '../ads/smartadserver';
 import {smartclip} from '../ads/smartclip';
+import {smi2} from '../ads/smi2';
 import {sortable} from '../ads/sortable';
 import {sogouad} from '../ads/sogouad';
 import {sovrn} from '../ads/sovrn';
@@ -175,6 +191,7 @@ import {taboola} from '../ads/taboola';
 import {teads} from '../ads/teads';
 import {triplelift} from '../ads/triplelift';
 import {valuecommerce} from '../ads/valuecommerce';
+import {viralize} from '../ads/viralize';
 import {vmfive} from '../ads/vmfive';
 import {webediads} from '../ads/webediads';
 import {weboramaDisplay} from '../ads/weborama';
@@ -183,6 +200,7 @@ import {xlift} from '../ads/xlift';
 import {yahoo} from '../ads/yahoo';
 import {yahoojp} from '../ads/yahoojp';
 import {yandex} from '../ads/yandex';
+import {yengo} from '../ads/yengo';
 import {yieldbot} from '../ads/yieldbot';
 import {yieldmo} from '../ads/yieldmo';
 import {yieldone} from '../ads/yieldone';
@@ -197,6 +215,7 @@ import {zucks} from '../ads/zucks';
  */
 const AMP_EMBED_ALLOWED = {
   _ping_: true,
+  '24smi': true,
   bringhub: true,
   dable: true,
   engageya: true,
@@ -204,7 +223,9 @@ const AMP_EMBED_ALLOWED = {
   mywidget: true,
   outbrain: true,
   plista: true,
+  postquare: true,
   smartclip: true,
+  smi2: true,
   taboola: true,
   zergnet: true,
 };
@@ -223,9 +244,11 @@ if (getMode().test || getMode().localDev) {
 }
 
 // Keep the list in alphabetic order
+register('24smi', _24smi);
 register('a8', a8);
 register('a9', a9);
 register('accesstrade', accesstrade);
+register('adagio', adagio);
 register('adblade', adblade);
 register('adbutler', adbutler);
 register('adform', adform);
@@ -260,10 +283,12 @@ register('capirs', capirs);
 register('caprofitx', caprofitx);
 register('chargeads', chargeads);
 register('colombia', colombia);
+register('connatix',connatix);
 register('contentad', contentad);
 register('criteo', criteo);
 register('csa', csa);
 register('dable', dable);
+register('directadvert', directadvert);
 register('distroscale', distroscale);
 register('dotandads', dotandads);
 register('doubleclick', doubleclick);
@@ -279,6 +304,7 @@ register('flite', flite);
 register('fluct', fluct);
 register('fusion', fusion);
 register('genieessp', genieessp);
+register('giraff', giraff);
 register('github', github);
 register('gmossp', gmossp);
 register('gumgum', gumgum);
@@ -296,6 +322,7 @@ register('kargo', kargo);
 register('kiosked', kiosked);
 register('kixer', kixer);
 register('ligatus', ligatus);
+register('lockerdome', lockerdome);
 register('loka', loka);
 register('mads', mads);
 register('mantis-display', mantisDisplay);
@@ -318,6 +345,7 @@ register('outbrain', outbrain);
 register('plista', plista);
 register('polymorphicads', polymorphicads);
 register('popin', popin);
+register('postquare', postquare);
 register('pubmatic', pubmatic);
 register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);
@@ -325,12 +353,14 @@ register('purch', purch);
 register('reddit', reddit);
 register('relap', relap);
 register('revcontent', revcontent);
+register('revjet', revjet);
 register('rubicon', rubicon);
 register('sharethrough', sharethrough);
 register('sklik', sklik);
 register('slimcutmedia', slimcutmedia);
 register('smartadserver', smartadserver);
 register('smartclip', smartclip);
+register('smi2', smi2);
 register('sortable', sortable);
 register('sogouad', sogouad);
 register('sovrn', sovrn);
@@ -342,6 +372,7 @@ register('teads', teads);
 register('triplelift', triplelift);
 register('twitter', twitter);
 register('valuecommerce', valuecommerce);
+register('viralize', viralize);
 register('vmfive', vmfive);
 register('webediads', webediads);
 register('weborama-display', weboramaDisplay);
@@ -350,6 +381,7 @@ register('xlift' , xlift);
 register('yahoo', yahoo);
 register('yahoojp', yahoojp);
 register('yandex', yandex);
+register('yengo', yengo);
 register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
 register('zergnet', zergnet);
@@ -436,7 +468,7 @@ function isMaster() {
  *     that are allowed to embed this frame.
  */
 window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
-    opt_allowedEmbeddingOrigins) {
+  opt_allowedEmbeddingOrigins) {
   try {
     const data = getAttributeData();
     const location = getLocation();
@@ -470,6 +502,14 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
       nonSensitiveDataPostMessage('bootstrap-loaded');
     }
   } catch (e) {
+    if (window.context && window.context.report3pError) {
+      // window.context has initiated yet
+      if (e.message && isUserErrorMessage(e.message)) {
+        // report user error to parent window
+        window.context.report3pError(e);
+      }
+    }
+
     const c = window.context || {mode: {test: false}};
     if (!c.mode.test) {
       lightweightErrorReport(e, c.canary);
@@ -551,6 +591,8 @@ function installContextUsingStandardImpl(win, data) {
     renderStart: triggerRenderStart,
     reportRenderedEntityIdentifier,
     requestResize: triggerResizeRequest,
+    report3pError,
+
 
     // Using quotes due to bug related to imported variables in object property
     // shorthand + object shorthand lint rule.
@@ -717,6 +759,19 @@ function reportRenderedEntityIdentifier(entityId) {
       'entityId should be a string %s', entityId);
   nonSensitiveDataPostMessage('entity-id', dict({
     'id': entityId,
+  }));
+}
+
+/**
+ * Send 3p error to parent iframe
+ * @param {!Error} e
+ */
+function report3pError(e) {
+  if (!e.message) {
+    return;
+  }
+  nonSensitiveDataPostMessage(MessageType.USER_ERROR_IN_IFRAME, dict({
+    'message': e.message,
   }));
 }
 

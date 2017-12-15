@@ -62,7 +62,9 @@ class AmpReddit extends AMP.BaseElement {
     this.element.appendChild(iframe);
     return this.loadPromise(iframe);
   }
-
 }
 
-AMP.registerElement('amp-reddit', AmpReddit);
+
+AMP.extension('amp-reddit', '0.1', AMP => {
+  AMP.registerElement('amp-reddit', AmpReddit);
+});

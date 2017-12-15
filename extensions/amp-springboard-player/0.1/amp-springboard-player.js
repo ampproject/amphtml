@@ -36,7 +36,7 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
     this.iframe_ = null;
   }
 
- /**
+  /**
   * @param {boolean=} opt_onLayout
   * @override
   */
@@ -126,4 +126,7 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-springboard-player', AmpSpringboardPlayer);
+
+AMP.extension('amp-springboard-player', '0.1', AMP => {
+  AMP.registerElement('amp-springboard-player', AmpSpringboardPlayer);
+});

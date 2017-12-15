@@ -156,8 +156,8 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
         adapter.serviceUrl_ = 'http://localhost:8000/af';
         contextMock.expects('collectUrlVars')
             .withExactArgs(
-            'https://acme.com/a?rid=READER_ID',
-            /* useAuthData */ false)
+                'https://acme.com/a?rid=READER_ID',
+                /* useAuthData */ false)
             .returns(Promise.resolve({
               'READER_ID': 'reader1',
               'OTHER': 123,
@@ -182,10 +182,11 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
             })
             .returns(Promise.resolve(responseDoc))
             .once();
-        const replaceSectionsStub = sandbox.stub(adapter, 'replaceSections_',
-            () => {
-              return Promise.resolve();
-            });
+        const replaceSectionsStub =
+            sandbox.stub(adapter, 'replaceSections_').callsFake(
+                () => {
+                  return Promise.resolve();
+                });
         return adapter.authorize().then(response => {
           expect(response).to.exist;
           expect(response.access).to.equal('A');
@@ -197,8 +198,8 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
         adapter.serviceUrl_ = 'http://localhost:8000/af';
         contextMock.expects('collectUrlVars')
             .withExactArgs(
-            'https://acme.com/a?rid=READER_ID',
-            /* useAuthData */ false)
+                'https://acme.com/a?rid=READER_ID',
+                /* useAuthData */ false)
             .returns(Promise.resolve({
               'READER_ID': 'reader1',
               'OTHER': 123,
@@ -234,8 +235,8 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
         adapter.serviceUrl_ = 'http://localhost:8000/af';
         contextMock.expects('collectUrlVars')
             .withExactArgs(
-            'https://acme.com/a?rid=READER_ID',
-            /* useAuthData */ false)
+                'https://acme.com/a?rid=READER_ID',
+                /* useAuthData */ false)
             .returns(Promise.resolve({
               'READER_ID': 'reader1',
               'OTHER': 123,
@@ -258,7 +259,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
               },
               requireAmpResponseSourceOrigin: false,
             })
-            .returns(new Promise(() => {}))  // Never resolved.
+            .returns(new Promise(() => {})) // Never resolved.
             .once();
         const promise = adapter.authorize();
         return Promise.resolve().then(() => {

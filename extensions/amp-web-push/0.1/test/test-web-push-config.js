@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import {WebPushService} from '../web-push-service';
 import {TAG, CONFIG_TAG} from '../vars';
-import {toggleExperiment} from '../../../../src/experiments';
-import {WebPushConfigAttributes, WebPushConfig} from '../amp-web-push-config';
-import {
-  getElementClassForTesting,
-  registerElement,
-} from '../../../../src/custom-element';
+import {WebPushConfigAttributes} from '../amp-web-push-config';
+import '../amp-web-push';
+
 
 describes.realWin('web-push-config', {
-  amp: true,
+  amp: {
+    extensions: ['amp-web-push'],
+  },
 }, env => {
   let win;
   let webPushConfig = {};
@@ -43,15 +41,9 @@ describes.realWin('web-push-config', {
   beforeEach(() => {
     win = env.win;
     webPushConfig = setDefaultWebPushConfig();
-    toggleExperiment(env.win, TAG, true);
   });
 
   function createConfigElementWithAttributes(attributes) {
-    if (!getElementClassForTesting(win, CONFIG_TAG)) {
-      // Our tests may call this function multiple times, but an element class
-      // can only be registered once
-      registerElement(env.win, CONFIG_TAG, WebPushConfig);
-    }
     const element = env.win.document.createElement(CONFIG_TAG);
     element.setAttribute(WebPushConfigAttributes.HELPER_FRAME_URL,
         attributes[WebPushConfigAttributes.HELPER_FRAME_URL]);
@@ -68,20 +60,6 @@ describes.realWin('web-push-config', {
     const elements = win.document.querySelectorAll(CONFIG_TAG);
     elements.forEach(element => element.remove());
   }
-
-  afterEach(() => {
-    toggleExperiment(env.win, TAG, false);
-  });
-
-  it('should fail if experiment is not enabled', () => {
-    toggleExperiment(env.win, TAG, false);
-    // Experiment check is bypassed on test mode -- make sure it isn't.
-    window.AMP_MODE = {test: false};
-    expect(() => {
-      new WebPushService(env.ampdoc).ensureAmpExperimentEnabled_();
-    }).to.throw(`Experiment "${TAG}" is disabled. Enable it on ` +
-      'https://cdn.ampproject.org/experiments.html.');
-  });
 
   it('should fail if element does not have correct ID', () => {
     return env.ampdoc.whenReady().then(() => {

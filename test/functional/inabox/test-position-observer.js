@@ -48,12 +48,12 @@ describes.realWin('inabox-host:position-observer', {}, env => {
 
   it('observe should work', () => {
     let position1 = {
-      viewport: layoutRectLtwh(0, 0, 200, 300),
-      target: layoutRectLtwh(1, 2, 30, 40),
+      viewportRect: layoutRectLtwh(0, 0, 200, 300),
+      targetRect: layoutRectLtwh(1, 2, 30, 40),
     };
     let position2 = {
-      viewport: layoutRectLtwh(0, 0, 200, 300),
-      target: layoutRectLtwh(3, 4, 30, 40),
+      viewportRect: layoutRectLtwh(0, 0, 200, 300),
+      targetRect: layoutRectLtwh(3, 4, 30, 40),
     };
     const callbackSpy11 = sandbox.stub();
     const callbackSpy12 = sandbox.stub();
@@ -64,17 +64,16 @@ describes.realWin('inabox-host:position-observer', {}, env => {
     expect(callbackSpy12).to.be.calledWith(position1);
     observer.observe(target2, callbackSpy21);
     expect(callbackSpy21).to.be.calledWith(position2);
-
     win.scrollTo(10, 20);
     return new Promise(resolve => {
       setTimeout(() => {
         position1 = {
-          viewport: layoutRectLtwh(10, 20, 200, 300),
-          target: layoutRectLtwh(11, 22, 30, 40),
+          viewportRect: layoutRectLtwh(10, 20, 200, 300),
+          targetRect: layoutRectLtwh(1, 2, 30, 40),
         };
         position2 = {
-          viewport: layoutRectLtwh(10, 20, 200, 300),
-          target: layoutRectLtwh(13, 24, 30, 40),
+          viewportRect: layoutRectLtwh(10, 20, 200, 300),
+          targetRect: layoutRectLtwh(3, 4, 30, 40),
         };
         resolve();
       }, 100);

@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-import {Srcset, parseSrcset, srcsetFromElement} from '../../src/srcset';
+import {
+  Srcset,
+  parseSrcset,
+  srcsetFromElement,
+  srcsetFromSrc,
+} from '../../src/srcset';
 
 
 describe('Srcset parseSrcset', () => {
@@ -261,6 +266,19 @@ describe('Srcset srcsetFromElement', () => {
 });
 
 
+describe('Srcset srcsetFromSrc', () => {
+  it('should construct with undefined width and 1 dpr', () => {
+    const srcset = srcsetFromSrc('image-0.png');
+    expect(srcset.getSources().length).to.equal(1);
+
+    const source = srcset.getSources()[0];
+    expect(source.url).to.equal('image-0.png');
+    expect(source.width).to.be.undefined;
+    expect(source.dpr).to.equal(1);
+  });
+});
+
+
 describe('Srcset construct', () => {
 
   it('should always require descriptor', () => {
@@ -305,16 +323,16 @@ describe('Srcset construct', () => {
   it('should sort sources', () => {
     // Width.
     let res = new Srcset([
-        {url: 'image-10w', width: 10},
-        {url: 'image-100w', width: 100},
+      {url: 'image-10w', width: 10},
+      {url: 'image-100w', width: 100},
     ]);
     expect(res.sources_[0].url).to.equal('image-100w');
     expect(res.sources_[1].url).to.equal('image-10w');
 
     // DPR.
     res = new Srcset([
-        {url: 'image-1x', dpr: 1},
-        {url: 'image-2x', dpr: 2},
+      {url: 'image-1x', dpr: 1},
+      {url: 'image-2x', dpr: 2},
     ]);
     expect(res.sources_[0].url).to.equal('image-2x');
     expect(res.sources_[1].url).to.equal('image-1x');
@@ -325,10 +343,10 @@ describe('Srcset construct', () => {
 describe('Srcset select', () => {
   it('select by width', () => {
     const srcset = new Srcset([
-        {url: 'image-1000', width: 1000},
-        {url: 'image-500', width: 500},
-        {url: 'image-250', width: 250},
-        {url: 'image', width: 50},
+      {url: 'image-1000', width: 1000},
+      {url: 'image-500', width: 500},
+      {url: 'image-250', width: 250},
+      {url: 'image', width: 50},
     ]);
 
     // DPR = 1
@@ -367,10 +385,10 @@ describe('Srcset select', () => {
 
   it('select by width with preference toward higher width', () => {
     const srcset = new Srcset([
-        {url: 'image-1000', width: 1000},
-        {url: 'image-500', width: 500},
-        {url: 'image-250', width: 250},
-        {url: 'image', width: 50},
+      {url: 'image-1000', width: 1000},
+      {url: 'image-500', width: 500},
+      {url: 'image-250', width: 250},
+      {url: 'image', width: 50},
     ]);
 
     // For DPR=1 and 2.
@@ -402,9 +420,9 @@ describe('Srcset select', () => {
 
   it('select by dpr', () => {
     const srcset = new Srcset([
-        {url: 'image-3x', dpr: 3},
-        {url: 'image-2x', dpr: 2},
-        {url: 'image', dpr: 1},
+      {url: 'image-3x', dpr: 3},
+      {url: 'image-2x', dpr: 2},
+      {url: 'image', dpr: 1},
     ]);
 
     expect(srcset.select(2000, 4).url).to.equal('image-3x', 'dpr=4');

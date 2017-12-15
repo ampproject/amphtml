@@ -105,7 +105,9 @@ class AmpKaltura extends AMP.BaseElement {
       })) , '*');
     }
   }
+}
 
-};
 
-AMP.registerElement('amp-kaltura-player', AmpKaltura);
+AMP.extension('amp-kaltura-player', '0.1', AMP => {
+  AMP.registerElement('amp-kaltura-player', AmpKaltura);
+});

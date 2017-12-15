@@ -16,6 +16,7 @@
 
 import {validateData, loadScript} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
+import {getMultiSizeDimensions} from '../ads/google/utils';
 import {rethrowAsync} from '../src/log';
 
 /**
@@ -30,10 +31,20 @@ export function yieldbot(global, data) {
   loadScript(global, 'https://cdn.yldbt.com/js/yieldbot.intent.amp.js', () => {
     global.ybotq.push(() => {
       try {
-        const dimensions = [[
-          parseInt(data.overrideWidth || data.width, 10),
-          parseInt(data.overrideHeight || data.height, 10),
-        ]];
+        const multiSizeDataStr = data.multiSize || null;
+        const primaryWidth = parseInt(data.overrideWidth || data.width, 10);
+        const primaryHeight = parseInt(data.overrideHeight || data.height, 10);
+        let dimensions;
+
+        if (multiSizeDataStr) {
+          dimensions = getMultiSizeDimensions(multiSizeDataStr,
+              primaryWidth,
+              primaryHeight,
+              false);
+          dimensions.unshift([primaryWidth, primaryHeight]);
+        } else {
+          dimensions = [[primaryWidth, primaryHeight]];
+        }
 
         global.yieldbot.psn(data.psn);
         global.yieldbot.enableAsync();

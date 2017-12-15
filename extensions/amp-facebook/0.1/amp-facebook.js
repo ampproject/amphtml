@@ -82,6 +82,9 @@ class AmpFacebook extends AMP.BaseElement {
     }
     return true;
   }
-};
+}
 
-AMP.registerElement('amp-facebook', AmpFacebook);
+
+AMP.extension('amp-facebook', '0.1', AMP => {
+  AMP.registerElement('amp-facebook', AmpFacebook);
+});

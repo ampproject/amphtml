@@ -53,8 +53,7 @@
   left: 0 !important;
   right: 0 !important;
   top: 0 !important;
-  height: 50px;
-  overflow: hidden !important;
+  height: 50px !important;
   background-color: rgba(0,0,0,0.7);
   background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0));
   transition: opacity 1s;
@@ -65,8 +64,13 @@
   opacity: 0;
 }
 
-.i-amphtml-lbv-top-bar.overflow {
-  background: rgba(0,0,0,0.7);
+.i-amphtml-lbv-top-bar.fullscreen .i-amphtml-lbv-top-bar-top-gradient {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: 0 !important;
+  height: 50px !important;
+  background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0));
 }
 
 .i-amphtml-lbv-desc-box {
@@ -78,6 +82,7 @@
   color: #ffffff;
   opacity: 1;
   transition: opacity 1s;
+  z-index: 1;
 }
 
 .i-amphtml-lbv-desc-box.standard {
@@ -90,7 +95,8 @@
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
   background-color: rgba(0,0,0,0.7);
-  top: 50px !important;
+  top: 0px !important;
+  padding-top: 50px !important;
 }
 
 .i-amphtml-lbv-desc-box.hide {
@@ -166,4 +172,33 @@
 
 .i-amphtml-lbv[gallery-view] .amp-lbv-button-slide {
   display: block;
+}
+
+.i-amphtml-image-lightbox-viewer {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* This is necessary due to crbug/248522 where touch events fail after
+    transform */
+  overflow: hidden;
+  transform: translate3d(0, 0, 0);
+}
+
+.i-amphtml-image-lightbox-viewer-image {
+  position: absolute;
+  z-index: 1;
+  display: block;
+}
+
+.i-amphtml-lightbox-viewer-trans {
+  pointer-events: none !important;
+  position: fixed;
+  z-index: 1001;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
 }

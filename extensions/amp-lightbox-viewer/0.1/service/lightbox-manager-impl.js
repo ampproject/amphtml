@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import {whenDocumentReady} from '../../../../src/document-ready';
 import {isExperimentOn} from '../../../../src/experiments';
 import {autoDiscoverLightboxables} from './lightbox-manager-discovery';
 import {dev} from '../../../../src/log';
-import {Services} from '../../../../src/services';
 
 
 /**
@@ -55,20 +53,12 @@ export class LightboxManager {
      **/
     this.initPromise_ = null;
 
-    // TODO(aghassemi): Find a better time to initialize, maybe after the first
-    // layoutPass is done for all elements?
-    // NOTE(aghassemi): Since all methods are async, initialize can run at
-    // any time, if a method call comes in before this timer initializes, we
-    // are still fine since manager will be initialized at that point and method
-    // call will go through.
-    Services.timerFor(ampdoc.win).delay(() => {
-      this.maybeInit_();
-    }, 500);
   }
 
   /**
    * Initializes the manager only once.
    * @return {!Promise}
+   * @private
    */
   maybeInit_() {
     if (this.initPromise_) {
@@ -92,7 +82,7 @@ export class LightboxManager {
    * @return {!Promise}
    */
   scanLightboxables_() {
-    return whenDocumentReady(this.ampdoc_.win.document).then(() => {
+    return this.ampdoc_.whenReady().then(() => {
       const matches = this.ampdoc_.getRootNode().querySelectorAll('[lightbox]');
       this.elements_ = [];
       for (let i = 0; i < matches.length; i++) {
@@ -106,10 +96,10 @@ export class LightboxManager {
 
   /**
    * Return a list of lightboxable elements
-   * @return {!Promise<?Array<!Element>>}
+   * @return {!Promise<!Array<!Element>>}
    */
   getElements() {
-    return this.maybeInit_().then(() => this.elements_);
+    return this.maybeInit_().then(() => dev().assert(this.elements_));
   }
 
   /**

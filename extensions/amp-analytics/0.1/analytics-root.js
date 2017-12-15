@@ -142,11 +142,26 @@ export class AnalyticsRoot {
   getElementById(unusedId) {}
 
   /**
+   * Returns the tracker for the specified name and list of allowed types.
+   *
+   * @param {string} name
+   * @param {!Object<string, function(new:./events.EventTracker)>} whitelist
+   * @return {?./events.EventTracker}
+   */
+  getTrackerForWhitelist(name, whitelist) {
+    const trackerProfile = whitelist[name];
+    if (trackerProfile) {
+      return this.getTracker(name, trackerProfile);
+    }
+    return null;
+  }
+
+  /**
    * Returns the tracker for the specified name and type. If the tracker
    * has not been requested before, it will be created.
    *
    * @param {string} name
-   * @param {function(new:./events.EventTracker, !AnalyticsRoot)} klass
+   * @param {function(new:./events.CustomEventTracker, !AnalyticsRoot)|function(new:./events.ClickEventTracker, !AnalyticsRoot)|function(new:./events.SignalTracker, !AnalyticsRoot)|function(new:./events.IniLoadTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VideoEventTracker, !AnalyticsRoot)|function(new:./events.VisibilityTracker, !AnalyticsRoot)} klass
    * @return {!./events.EventTracker}
    */
   getTracker(name, klass) {
@@ -245,7 +260,7 @@ export class AnalyticsRoot {
    * @return {function(!Event)}
    */
   createSelectiveListener(
-      listener, context, selector, selectionMethod = null) {
+    listener, context, selector, selectionMethod = null) {
     return event => {
       if (selector == ':host') {
         // `:host` is not reachable via selective listener b/c event path

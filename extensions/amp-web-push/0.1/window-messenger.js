@@ -25,6 +25,7 @@ import {dev} from '../../../src/log';
  *    SERVICE_WORKER_STATE: string,
  *    SERVICE_WORKER_REGISTRATION: string,
  *    SERVICE_WORKER_QUERY: string,
+ *    STORAGE_GET: string,
  * }}
  */
 export let MessengerTopics;
@@ -36,7 +37,7 @@ export let MessengerTopics;
  */
 export let MessengerOptions;
 
- /**
+/**
  * @fileoverview
  * A Promise-based PostMessage helper to ease back-and-forth replies.
  *
@@ -122,8 +123,8 @@ export class WindowMessenger {
             reject
         );
       this.window_.addEventListener('message',
-        /** @type {(function (Event): (boolean|undefined)|null)} */
-        (this.onListenConnectionMessageReceivedProc_));
+          /** @type {(function (Event): (boolean|undefined)|null)} */
+          (this.onListenConnectionMessageReceivedProc_));
       if (this.debug_) {
         dev().fine(TAG, 'Listening for a connection message...');
       }
@@ -249,16 +250,16 @@ export class WindowMessenger {
             this.messagePort_,
             expectedRemoteOrigin,
             resolve)
-        ;
+      ;
       this.messagePort_.addEventListener('message',
           this.onConnectConnectionMessageReceivedProc_);
       this.messagePort_.start();
       remoteWindowContext./*OK*/postMessage(
-        /** @type {JsonObject} */ ({
-          topic: WindowMessenger.Topics.CONNECT_HANDSHAKE,
-        }), expectedRemoteOrigin === '*' ?
-                '*' :
-                parseUrl(expectedRemoteOrigin).origin, [this.channel_.port2]);
+          /** @type {JsonObject} */ ({
+            topic: WindowMessenger.Topics.CONNECT_HANDSHAKE,
+          }), expectedRemoteOrigin === '*' ?
+            '*' :
+            parseUrl(expectedRemoteOrigin).origin, [this.channel_.port2]);
       dev().fine(TAG, `Opening channel to ${expectedRemoteOrigin}...`);
     });
   }
@@ -303,6 +304,7 @@ export class WindowMessenger {
       SERVICE_WORKER_STATE: 'topic-service-worker-state',
       SERVICE_WORKER_REGISTRATION: 'topic-service-worker-registration',
       SERVICE_WORKER_QUERY: 'topic-service-worker-query',
+      STORAGE_GET: 'topic-storage-get',
     };
   }
 
@@ -319,7 +321,7 @@ export class WindowMessenger {
       const existingMessage = this.messages_[message['id']];
       delete this.messages_[message['id']];
       const promiseResolver = existingMessage.promiseResolver;
-        // Set new incoming message data on existing message
+      // Set new incoming message data on existing message
       existingMessage.message = message['data'];
       if (this.debug_) {
         dev().fine(TAG, `Received reply for topic '${message['topic']}':`,

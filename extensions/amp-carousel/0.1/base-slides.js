@@ -100,7 +100,7 @@ export class BaseSlides extends BaseCarousel {
    */
   updateViewportState(unusedInViewport) {}
 
- /**
+  /**
   * Checks if a carousel is eligible to loop, regardless of the loop attribute.
   * @returns {boolean}
   * @protected
@@ -109,22 +109,22 @@ export class BaseSlides extends BaseCarousel {
     return false;
   }
 
- /**
+  /**
   * Sets up the `autoplay` configuration.
   * @private
   */
   setupAutoplay_() {
     const delayValue = Number(this.element.getAttribute('delay'));
-   // If it isn't a number and is not greater than 0 then don't assign
-   // and use the default.
+    // If it isn't a number and is not greater than 0 then don't assign
+    // and use the default.
     if (delayValue > 0) {
-     // Guard against autoplayValue that is lower than 1s to prevent
-     // people from crashing the runtime with providing very low delays.
+      // Guard against autoplayValue that is lower than 1s to prevent
+      // people from crashing the runtime with providing very low delays.
       this.autoplayDelay_ = Math.max(1000, delayValue);
     }
 
-   // By default `autoplay` should also mean that the current carousel slide
-   // is looping. (to be able to advance past the last item)
+    // By default `autoplay` should also mean that the current carousel slide
+    // is looping. (to be able to advance past the last item)
     if (!this.hasLoop_) {
       this.element.setAttribute('loop', '');
       this.hasLoop_ = true;
@@ -132,7 +132,7 @@ export class BaseSlides extends BaseCarousel {
     }
   }
 
- /**
+  /**
   * Starts the autoplay delay if allowed.
   * @private
   */
@@ -147,7 +147,7 @@ export class BaseSlides extends BaseCarousel {
         this.autoplayDelay_);
   }
 
- /**
+  /**
   * Clear the autoplay timer.
   * @protected
   */

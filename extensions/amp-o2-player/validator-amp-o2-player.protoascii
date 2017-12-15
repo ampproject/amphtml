@@ -21,7 +21,7 @@ tags: {  # amp-o2-player
     name: "amp-o2-player"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    requires_usage: DEPRECATED_WARNING
+    requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -29,7 +29,6 @@ tags: {  # amp-o2-player
 tags: {  # <amp-o2-player>
   html_format: AMP
   tag_name: "AMP-O2-PLAYER"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-o2-player"
   attrs: {
     name: "data-bcid"

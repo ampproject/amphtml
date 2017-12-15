@@ -87,7 +87,7 @@ class AmpInstagram extends AMP.BaseElement {
     /** @private {string}  */
     this.captioned_ = '';
   }
- /**
+  /**
   * @param {boolean=} opt_onLayout
   * @override
   */
@@ -114,7 +114,7 @@ class AmpInstagram extends AMP.BaseElement {
         'The data-shortcode attribute is required for <amp-instagram> %s',
         this.element);
     this.captioned_ = this.element.hasAttribute('data-captioned') ?
-        'captioned/' : '';
+      'captioned/' : '';
   }
 
   /** @override */
@@ -198,7 +198,7 @@ class AmpInstagram extends AMP.BaseElement {
     const eventData = getData(event);
     if (!eventData || !(isObject(eventData)
         || startsWith(/** @type {string} */ (eventData), '{'))) {
-      return;  // Doesn't look like JSON.
+      return; // Doesn't look like JSON.
     }
     const data = isObject(eventData) ? eventData : tryParseJson(eventData);
     if (data === undefined) {
@@ -232,8 +232,11 @@ class AmpInstagram extends AMP.BaseElement {
     if (this.unlistenMessage_) {
       this.unlistenMessage_();
     }
-    return true;  // Call layoutCallback again.
+    return true; // Call layoutCallback again.
   }
-};
+}
 
-AMP.registerElement('amp-instagram', AmpInstagram, CSS);
+
+AMP.extension('amp-instagram', '0.1', AMP => {
+  AMP.registerElement('amp-instagram', AmpInstagram, CSS);
+});

@@ -18,7 +18,7 @@
 import {ActionTrust} from '../action-trust';
 import {VideoSessionManager} from './video-session-manager';
 import {removeElement, scopedQuerySelector, isRTL} from '../dom';
-import {listen, listenOncePromise} from '../event-helper';
+import {getData, listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
 import {registerServiceBuilderForDoc, getServiceForDoc} from '../service';
@@ -35,9 +35,10 @@ import {
 import {Services} from '../services';
 import {
   installPositionObserverServiceForDoc,
+} from './position-observer/position-observer-impl';
+import {
   PositionObserverFidelity,
-  PositionInViewportEntryDef,
-} from './position-observer-impl';
+} from './position-observer/position-observer-worker';
 import {map} from '../utils/object';
 import {layoutRectLtwh, RelativePositions} from '../layout-rect';
 import {
@@ -137,7 +138,7 @@ export class VideoManager {
     /** @const {!./ampdoc-impl.AmpDoc}  */
     this.ampdoc = ampdoc;
 
-    /** @private {!../service/viewport-impl.Viewport} */
+    /** @private {!../service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private {?Array<!VideoEntry>} */
@@ -149,7 +150,7 @@ export class VideoManager {
     /** @private {boolean} */
     this.resizeListenerInstalled_ = false;
 
-    /** @private {./position-observer-impl.AmpDocPositionObserver} */
+    /** @private {./position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = null;
 
     /** @private {?VideoEntry} */
@@ -159,7 +160,7 @@ export class VideoManager {
     this.timer_ = Services.timerFor(ampdoc.win);
 
     /** @private @const */
-    this.boundSecondsPlaying_ = () => this.secondsPlaying_();;
+    this.boundSecondsPlaying_ = () => this.secondsPlaying_();
 
     // TODO(cvializ, #10599): It would be nice to only create the timer
     // if video analytics are present, since the timer is not needed if
@@ -202,6 +203,8 @@ export class VideoManager {
     this.maybeInstallOrientationObserver_(entry);
     this.entries_.push(entry);
     video.element.dispatchCustomEvent(VideoEvents.REGISTERED);
+    // Add a class to element to indicate it implements the video interface.
+    video.element.classList.add('i-amphtml-video-interface');
   }
 
   /**
@@ -235,8 +238,13 @@ export class VideoManager {
    * @private
    */
   maybeInstallVisibilityObserver_(entry) {
-    listen(entry.video.element, VideoEvents.VISIBILITY, () => {
-      entry.updateVisibility();
+    listen(entry.video.element, VideoEvents.VISIBILITY, details => {
+      const data = getData(details);
+      if (data && data['visible'] == true) {
+        entry.updateVisibility(/* opt_forceVisible */ true);
+      } else {
+        entry.updateVisibility();
+      }
     });
 
     listen(entry.video.element, VideoEvents.RELOAD, () => {
@@ -454,7 +462,7 @@ class VideoEntry {
     /** @private @const {!./ampdoc-impl.AmpDoc}  */
     this.ampdoc_ = manager.ampdoc;
 
-    /** @private {!../service/viewport-impl.Viewport} */
+    /** @private {!../service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc_);
 
     /** @package @const {!../video-interface.VideoInterface} */
@@ -533,7 +541,7 @@ class VideoEntry {
     /** @private {number} */
     this.dockVisibleHeight_ = 0;
 
-    /** @private {?PositionInViewportEntryDef} */
+    /** @private {?./position-observer/position-observer-worker.PositionInViewportEntryDef} */
     this.dockLastPosition_ = null;
 
     /** @private {boolean} */
@@ -861,23 +869,43 @@ class VideoEntry {
     });
 
     // Listen to pause, play and user interaction events.
-    const unlistenInteraction = listen(mask, 'click', onInteraction.bind(this));
+    const unlisteners = [];
+    unlisteners.push(listen(mask, 'click', onInteraction.bind(this)));
+    unlisteners.push(listen(animation, 'click', onInteraction.bind(this)));
 
-    const unlistenPause = listen(this.video.element, VideoEvents.PAUSE,
-        toggleAnimation.bind(this, /*playing*/ false));
+    unlisteners.push(listen(this.video.element, VideoEvents.PAUSE,
+        toggleAnimation.bind(this, /*playing*/ false)));
 
-    const unlistenPlaying = listen(this.video.element, VideoEvents.PLAYING,
-        toggleAnimation.bind(this, /*playing*/ true));
+    unlisteners.push(listen(this.video.element, VideoEvents.PLAYING,
+        toggleAnimation.bind(this, /*playing*/ true)));
+
+    unlisteners.push(listen(this.video.element, VideoEvents.AD_START,
+        adStart.bind(this)));
+
+    unlisteners.push(listen(this.video.element, VideoEvents.AD_END,
+        adEnd.bind(this)));
 
     function onInteraction() {
       this.userInteractedWithAutoPlay_ = true;
       this.video.showControls();
       this.video.unmute();
-      unlistenInteraction();
-      unlistenPause();
-      unlistenPlaying();
+      unlisteners.forEach(unlistener => {
+        unlistener();
+      });
       removeElement(animation);
       removeElement(mask);
+    }
+
+    function adStart() {
+      setStyles(mask, {
+        'display': 'none',
+      });
+    }
+
+    function adEnd() {
+      setStyles(mask, {
+        'display': 'block',
+      });
     }
   }
 
@@ -1043,7 +1071,7 @@ class VideoEntry {
   /**
    * Called when the video's position in the viewport changed (at most once per
    * animation frame)
-   * @param {PositionInViewportEntryDef} newPos
+   * @param {./position-observer/position-observer-worker.PositionInViewportEntryDef} newPos
    */
   onDockableVideoPositionChanged(newPos) {
     this.vsync_.run({
@@ -1107,7 +1135,7 @@ class VideoEntry {
    * Updates the minimization position of the video (in viewport, above or
    * below viewport), also the height of the part of the video that is
    * currently in the viewport (between 0 and the initial video height).
-   * @param {PositionInViewportEntryDef} newPos
+   * @param {./position-observer/position-observer-worker.PositionInViewportEntryDef} newPos
    * @private
    */
   updateDockableVideoPosition_(newPos) {
@@ -1185,10 +1213,10 @@ class VideoEntry {
     if (this.dockPosition_ == DockPositions.INLINE && !isInside) {
       if (isTop) {
         this.dockPosition_ = isRTL(doc) ? DockPositions.TOP_LEFT
-                                       : DockPositions.TOP_RIGHT;
+          : DockPositions.TOP_RIGHT;
       } else if (isBottom) {
         this.dockPosition_ = isRTL(doc) ? DockPositions.BOTTOM_LEFT
-                                       : DockPositions.BOTTOM_RIGHT;
+          : DockPositions.BOTTOM_RIGHT;
       }
     } else if (isInside) {
       this.dockPosition_ = DockPositions.INLINE;
@@ -1657,11 +1685,11 @@ class VideoEntry {
             tr.scale(tr.numeric(DOCK_SCALE, DOCK_SCALE)),
           ]),
         }), 200).thenAlways(() => {
-          // Update the positions
-          this.dragCoordinates_.position.x = newPosX;
-          this.dragCoordinates_.position.y = newPosY;
-          this.isSnapping_ = false;
-        });
+      // Update the positions
+      this.dragCoordinates_.position.x = newPosX;
+      this.dragCoordinates_.position.y = newPosY;
+      this.isSnapping_ = false;
+    });
   }
 
   /**
@@ -1732,18 +1760,23 @@ class VideoEntry {
   /**
    * Called by all possible events that might change the visibility of the video
    * such as scrolling or {@link ../video-interface.VideoEvents#VISIBILITY}.
+   * @param {?boolean=} opt_forceVisible
    * @package
    */
-  updateVisibility() {
+  updateVisibility(opt_forceVisible) {
     const wasVisible = this.isVisible_;
 
     // Measure if video is now in viewport and what percentage of it is visible.
     const measure = () => {
-      // Calculate what percentage of the video is in viewport.
-      const change = this.video.element.getIntersectionChangeEntry();
-      const visiblePercent = !isFiniteNumber(change.intersectionRatio) ? 0
+      if (opt_forceVisible == true) {
+        this.isVisible_ = true;
+      } else {
+        // Calculate what percentage of the video is in viewport.
+        const change = this.video.element.getIntersectionChangeEntry();
+        const visiblePercent = !isFiniteNumber(change.intersectionRatio) ? 0
           : change.intersectionRatio * 100;
-      this.isVisible_ = visiblePercent >= VISIBILITY_PERCENT;
+        this.isVisible_ = visiblePercent >= VISIBILITY_PERCENT;
+      }
     };
 
     // Mutate if visibility changed from previous state
@@ -1893,7 +1926,7 @@ export function supportsAutoplay(win, isLiteViewer) {
 function analyticsEvent(entry, eventType, opt_vars) {
   const video = entry.video;
   const detailsPromise = opt_vars ? Promise.resolve(opt_vars) :
-      entry.getAnalyticsDetails();
+    entry.getAnalyticsDetails();
 
   detailsPromise.then(details => {
     video.element.dispatchCustomEvent(

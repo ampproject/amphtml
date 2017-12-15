@@ -57,7 +57,7 @@ describe('Logging', () => {
       setTimeout: timeoutSpy,
       reportError: error => error,
     };
-    sandbox.stub(self, 'reportError', error => error);
+    sandbox.stub(self, 'reportError').callsFake(error => error);
   });
 
   afterEach(() => {
@@ -707,11 +707,12 @@ describe('Logging', () => {
     });
 
     it('should not create extra identical loggers', () => {
+      element = document.createElement('embed');
       element1 = document.createElement('embed_1');
       element2 = document.createElement('embed_2');
       iframe.contentWindow.document.body.appendChild(element1);
       iframe.contentWindow.document.body.appendChild(element2);
-      expect(user()).to.equal(user(this.element));
+      expect(user()).to.equal(user(element));
       expect(user(element1)).to.equal(user(element2));
       expect(user()).to.not.equal(user(element1));
     });

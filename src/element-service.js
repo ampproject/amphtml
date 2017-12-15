@@ -25,6 +25,7 @@ import {
 } from './service';
 import {user} from './log';
 import * as dom from './dom';
+import {toWin} from './types';
 
 /**
  * Returns a promise for a service for the given id and window. Also expects
@@ -112,7 +113,7 @@ export function getElementServiceForDoc(nodeOrDoc, id, extension, opt_element) {
  * @return {!Promise<?Object>}
  */
 export function getElementServiceIfAvailableForDoc(
-    nodeOrDoc, id, extension, opt_element) {
+  nodeOrDoc, id, extension, opt_element) {
   const ampdoc = getAmpdoc(nodeOrDoc);
   const s = getServicePromiseOrNullForDoc(nodeOrDoc, id);
   if (s) {
@@ -149,15 +150,15 @@ export function getElementServiceIfAvailableForDoc(
  * @return {!Promise<?Object>}
  */
 export function getElementServiceIfAvailableForDocInEmbedScope(
-    nodeOrDoc, id, extension) {
+  nodeOrDoc, id, extension) {
   const s = getExistingServiceForDocInEmbedScope(nodeOrDoc, id);
   if (s) {
     return /** @type {!Promise<?Object>} */ (Promise.resolve(s));
   }
   // Return embed-scope element service promise if scheduled.
   if (nodeOrDoc.nodeType) {
-    const win = /** @type {!Document} */ (
-        nodeOrDoc.ownerDocument || nodeOrDoc).defaultView;
+    const win = toWin(/** @type {!Document} */ (
+      nodeOrDoc.ownerDocument || nodeOrDoc).defaultView);
     const topWin = getTopWindow(win);
     // In embeds, doc-scope services are window-scope. But make sure to
     // only do this for embeds (not the top window), otherwise we'd grab

@@ -28,7 +28,6 @@ const formidable = require('formidable');
 const jsdom = require('jsdom');
 const path = require('path');
 const request = require('request');
-const url = require('url');
 const pc = process;
 
 app.use(bodyParser.json());
@@ -39,7 +38,7 @@ app.use('/amp4test', require('./amp4test'));
 app.use((req, res, next) => {
   if (req.query.csp) {
     res.set({
-      'content-security-policy': "default-src * blob: data:; script-src https://cdn.ampproject.org/rtv/ https://cdn.ampproject.org/v0.js https://cdn.ampproject.org/v0/ https://cdn.ampproject.org/viewer/ http://localhost:8000 https://localhost:8000; object-src 'none'; style-src 'unsafe-inline' https://cloud.typography.com https://fast.fonts.net https://fonts.googleapis.com https://use.typekit.net https://p.typekit.net https://maxcdn.bootstrapcdn.com; report-uri https://csp-collector.appspot.com/csp/amp",
+      'content-security-policy': "default-src * blob: data:; script-src https://cdn.ampproject.org/rtv/ https://cdn.ampproject.org/v0.js https://cdn.ampproject.org/v0/ https://cdn.ampproject.org/viewer/ http://localhost:8000 https://localhost:8000; object-src 'none'; style-src 'unsafe-inline' https://cdn.ampproject.org/rtv/ https://cdn.materialdesignicons.com https://cloud.typography.com https://fast.fonts.net https://fonts.googleapis.com https://maxcdn.bootstrapcdn.com https://p.typekit.net https://use.typekit.net; report-uri https://csp-collector.appspot.com/csp/amp",
     });
   }
   next();
@@ -83,6 +82,10 @@ app.use('/pwa', (req, res) => {
     // pwa.js
     contentType = 'application/javascript';
     file = '/examples/pwa/pwa-sw.js';
+  } else if (req.url == '/ampdoc-shell') {
+    // pwa-ampdoc-shell.html
+    contentType = 'text/html';
+    file = '/examples/pwa/pwa-ampdoc-shell.html';
   } else {
     // Redirect to the underlying resource.
     // TODO(dvoytenko): would be nicer to do forward instead of redirect.
@@ -508,39 +511,24 @@ function getLiveBlogItemWithBindAttributes() {
 }
 
 app.use('/examples/live-blog(-non-floating-button)?.amp.html',
-  (req, res, next) => {
-    if ('amp_latest_update_time' in req.query) {
-      res.setHeader('Content-Type', 'text/html');
-      res.end(getLiveBlogItem());
-      return;
-    }
-    next();
-  });
+    (req, res, next) => {
+      if ('amp_latest_update_time' in req.query) {
+        res.setHeader('Content-Type', 'text/html');
+        res.end(getLiveBlogItem());
+        return;
+      }
+      next();
+    });
 
 app.use('/examples/bind/live-list.amp.html',
-  (req, res, next) => {
-    if ('amp_latest_update_time' in req.query) {
-      res.setHeader('Content-Type', 'text/html');
-      res.end(getLiveBlogItemWithBindAttributes());
-      return;
-    }
-    next();
-  });
-
-app.use('/examples/amp-fresh.amp.html', (req, res, next) => {
-  if ('amp-fresh' in req.query && req.query['amp-fresh']) {
-    res.setHeader('Content-Type', 'text/html');
-    res.end(`<!doctype html>
-        <html ⚡>
-          <body>
-            <amp-fresh id="amp-fresh-1"><span>hello</span> world!</amp-fresh>
-            <amp-fresh id="amp-fresh-2">foo bar</amp-fresh>
-          </body>
-        </html>`);
-    return;
-  }
-  next();
-});
+    (req, res, next) => {
+      if ('amp_latest_update_time' in req.query) {
+        res.setHeader('Content-Type', 'text/html');
+        res.end(getLiveBlogItemWithBindAttributes());
+        return;
+      }
+      next();
+    });
 
 app.use('/impression-proxy/', (req, res) => {
   assertCors(req, res, ['GET']);
@@ -554,6 +542,8 @@ app.use('/impression-proxy/', (req, res) => {
     'gclid': '1234',
   };
   res.send(body);
+
+  // Or fake response with status 204 if viewer replaceUrl is provided
 });
 
 // Proxy with local JS.
@@ -640,7 +630,7 @@ app.use('/inabox/', (req, res) => {
   let adUrl = req.url;
   const templatePath = '/build-system/server-inabox-template.html';
   const urlPrefix = getUrlPrefix(req);
-  if (!adUrl.startsWith('/proxy') &&  // Ignore /proxy
+  if (!adUrl.startsWith('/proxy') && // Ignore /proxy
       urlPrefix.indexOf('//localhost') != -1) {
     // This is a special case for testing. `localhost` URLs are transformed to
     // `ads.localhost` to ensure that the iframe is fully x-origin.
@@ -865,7 +855,7 @@ app.use([cloudflareDataDir], function fakeCors(req, res, next) {
  */
 app.get([fakeAdNetworkDataDir + '/*', cloudflareDataDir + '/*'], (req, res) => {
   let filePath = req.path;
-  let unwrap = !req.path.endsWith('.html');
+  const unwrap = !req.path.endsWith('.html');
   filePath = pc.cwd() + filePath;
   fs.readFileAsync(filePath).then(file => {
     res.setHeader('X-AmpAdRender', 'nameframe');
@@ -971,9 +961,9 @@ app.get('/dist/rtv/9[89]*/*.js', (req, res, next) => {
     if (req.path.includes('v0.js')) {
       const path = req.path.replace(/rtv\/\d+/, '');
       return fs.readFileAsync(pc.cwd() + path, 'utf8')
-        .then(file => {
-          res.end(file);
-        }).catch(next);
+          .then(file => {
+            res.end(file);
+          }).catch(next);
     }
 
     res.end(`
@@ -1044,6 +1034,9 @@ function replaceUrls(mode, file, hostName, inabox) {
         /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
         hostName + '/dist/amp.js');
     file = file.replace(
+        /https:\/\/cdn\.ampproject\.org\/shadow-v0\.js/g,
+        hostName + '/dist/amp-shadow.js');
+    file = file.replace(
         /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.js/g,
         hostName + '/dist/amp-inabox.js');
     file = file.replace(
@@ -1056,6 +1049,9 @@ function replaceUrls(mode, file, hostName, inabox) {
     file = file.replace(
         /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
         hostName + '/dist/v0.js');
+    file = file.replace(
+        /https:\/\/cdn\.ampproject\.org\/shadow-v0\.js/g,
+        hostName + '/dist/shadow-v0.js');
     file = file.replace(
         /https:\/\/cdn\.ampproject\.org\/amp4ads-v0\.js/g,
         hostName + '/dist/amp4ads-v0.js');
@@ -1082,7 +1078,7 @@ function addViewerIntegrationScript(ampJsVersion, file) {
     return file;
   }
   let viewerScript;
-  if (Number.isInteger(ampJsVersion)) {
+  if (Number.isInteger(ampJsVersion)) { // eslint-disable-line no-es2015-number-props
     // Viewer integration script from gws, such as
     // https://cdn.ampproject.org/viewer/google/v7.js
     viewerScript =

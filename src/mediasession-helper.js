@@ -15,6 +15,9 @@
  */
 
 import {tryParseJson} from './json';
+import {isProtocolValid} from './url';
+import {isObject, isArray} from './types';
+import {dev, user} from './log';
 
 /**
  * @typedef {{
@@ -44,15 +47,17 @@ export const EMPTY_METADATA = {
  * @param {function()=} pauseHandler
  */
 export function setMediaSession(win,
-                                metadata,
-                                playHandler,
-                                pauseHandler) {
+  metadata,
+  playHandler,
+  pauseHandler) {
   const navigator = win.navigator;
   if ('mediaSession' in navigator && win.MediaMetadata) {
     // Clear mediaSession (required to fix a bug when switching between two
     // videos)
     navigator.mediaSession.metadata = new win.MediaMetadata(EMPTY_METADATA);
+
     // Add metadata
+    validateMetadata(metadata);
     navigator.mediaSession.metadata = new win.MediaMetadata(metadata);
 
     navigator.mediaSession.setActionHandler('play', playHandler);
@@ -128,3 +133,19 @@ export function parseFavicon(doc) {
     return;
   }
 }
+
+/**
+ * @private
+ */
+function validateMetadata(metadata) {
+  // Ensure src of artwork has valid protocol
+  if (metadata && metadata.artwork) {
+    dev().assert(isArray(metadata.artwork));
+    metadata.artwork.forEach(artwork => {
+      if (artwork) {
+        const src = isObject(artwork) ? artwork.src : artwork;
+        user().assert(isProtocolValid(src));
+      }
+    });
+  }
+};

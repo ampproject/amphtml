@@ -39,6 +39,7 @@ const ATTRIBUTES_TO_PROPAGATE = [
   'allowfullscreen',
   'allowpaymentrequest',
   'allowtransparency',
+  'allow',
   'frameborder',
   'referrerpolicy',
   'scrolling',
@@ -135,7 +136,7 @@ export class AmpIframe extends AMP.BaseElement {
         this.element);
     user().assert(!(endsWith(url.hostname, `.${urls.thirdPartyFrameHost}`) ||
         endsWith(url.hostname, '.ampproject.org')),
-        'amp-iframe does not allow embedding of frames from ' +
+    'amp-iframe does not allow embedding of frames from ' +
         'ampproject.*: %s', src);
     return src;
   }
@@ -296,7 +297,7 @@ export class AmpIframe extends AMP.BaseElement {
     }
 
     const iframe = /** @type {!../../../src/layout-rect.LayoutRectDef} */(
-        dev().assert(this.iframeLayoutBox_));
+      dev().assert(this.iframeLayoutBox_));
     return moveLayoutRect(iframe, box.left, box.top);
   }
 
@@ -480,14 +481,14 @@ export class AmpIframe extends AMP.BaseElement {
    */
   updateSize_(height, width) {
     if (!this.isResizable_) {
-      user().error(TAG_,
+      this.user().error(TAG_,
           'Ignoring embed-size request because this iframe is not resizable',
           this.element);
       return;
     }
 
     if (height < 100) {
-      user().error(TAG_,
+      this.user().error(TAG_,
           'Ignoring embed-size request because the resize height is less ' +
           'than 100px. If you are using amp-iframe to display ads, consider ' +
           'using amp-ad instead.',
@@ -523,7 +524,7 @@ export class AmpIframe extends AMP.BaseElement {
         }
       }, () => {});
     } else {
-      user().error(TAG_,
+      this.user().error(TAG_,
           'Ignoring embed-size request because '
           + 'no width or height value is provided',
           this.element);
@@ -616,4 +617,7 @@ export function setTrackingIframeTimeoutForTesting(ms) {
   trackingIframeTimeout = ms;
 }
 
-AMP.registerElement('amp-iframe', AmpIframe);
+
+AMP.extension(TAG_, '0.1', AMP => {
+  AMP.registerElement(TAG_, AmpIframe);
+});

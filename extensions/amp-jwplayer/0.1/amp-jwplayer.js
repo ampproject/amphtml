@@ -53,7 +53,7 @@ class AmpJWPlayer extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.contentid_ = user().assert(
-      (this.element.getAttribute('data-playlist-id') ||
+        (this.element.getAttribute('data-playlist-id') ||
       this.element.getAttribute('data-media-id')),
         'Either the data-media-id or the data-playlist-id ' +
       'attributes must be specified for <amp-jwplayer> %s',
@@ -113,7 +113,9 @@ class AmpJWPlayer extends AMP.BaseElement {
     placeholder.setAttribute('referrerpolicy', 'origin');
     return placeholder;
   }
+}
 
-};
 
-AMP.registerElement('amp-jwplayer', AmpJWPlayer);
+AMP.extension('amp-jwplayer', '0.1', AMP => {
+  AMP.registerElement('amp-jwplayer', AmpJWPlayer);
+});

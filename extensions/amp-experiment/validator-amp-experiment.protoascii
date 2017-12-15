@@ -22,7 +22,7 @@ tags: {  # amp-experiment
     name: "amp-experiment"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    requires_usage: DEPRECATED_WARNING
+    requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -50,7 +50,6 @@ tags: {  # amp-experiment (json)
 tags: {  # <amp-experiment>
   html_format: AMP
   tag_name: "AMP-EXPERIMENT"
-  disallowed_ancestor: "AMP-SIDEBAR"
   requires_extension: "amp-experiment"
   unique: true
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-experiment"

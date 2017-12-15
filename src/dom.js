@@ -18,6 +18,7 @@ import {dev} from './log';
 import {dict} from './utils/object';
 import {cssEscape} from '../third_party/css-escape/css-escape';
 import {startsWith} from './string';
+import {toWin} from './types';
 
 const HTML_ESCAPE_CHARS = {
   '&': '&amp;',
@@ -50,7 +51,7 @@ export function waitForChild(parent, checkFunc, callback) {
     return;
   }
   /** @const {!Window} */
-  const win = parent.ownerDocument.defaultView;
+  const win = toWin(parent.ownerDocument.defaultView);
   if (win.MutationObserver) {
     /** @const {MutationObserver} */
     const observer = new win.MutationObserver(() => {
@@ -143,6 +144,26 @@ export function copyChildren(from, to) {
     frag.appendChild(n.cloneNode(true));
   }
   to.appendChild(frag);
+}
+
+/**
+ * Insert the element in the root after the element named after or
+ * if that is null at the beginning.
+ * @param {!Element|!ShadowRoot} root
+ * @param {!Element} element
+ * @param {?Node} after
+ */
+export function insertAfterOrAtStart(root, element, after) {
+  if (after) {
+    if (after.nextSibling) {
+      root.insertBefore(element, after.nextSibling);
+    } else {
+      root.appendChild(element);
+    }
+  } else {
+    // Add at the start.
+    root.insertBefore(element, root.firstChild);
+  }
 }
 
 /**
@@ -288,7 +309,7 @@ export function matches(el, selector) {
   if (matcher) {
     return matcher.call(el, selector);
   }
-  return false;  // IE8 always returns false.
+  return false; // IE8 always returns false.
 }
 
 /**
@@ -311,7 +332,7 @@ export function elementByTag(element, tagName) {
  */
 export function childElement(parent, callback) {
   for (let child = parent.firstElementChild; child;
-      child = child.nextElementSibling) {
+    child = child.nextElementSibling) {
     if (callback(child)) {
       return child;
     }
@@ -329,7 +350,7 @@ export function childElement(parent, callback) {
 export function childElements(parent, callback) {
   const children = [];
   for (let child = parent.firstElementChild; child;
-       child = child.nextElementSibling) {
+    child = child.nextElementSibling) {
     if (callback(child)) {
       children.push(child);
     }
@@ -346,7 +367,7 @@ export function childElements(parent, callback) {
  */
 export function lastChildElement(parent, callback) {
   for (let child = parent.lastElementChild; child;
-       child = child.previousElementSibling) {
+    child = child.previousElementSibling) {
     if (callback(child)) {
       return child;
     }
@@ -364,7 +385,7 @@ export function lastChildElement(parent, callback) {
 export function childNodes(parent, callback) {
   const nodes = [];
   for (let child = parent.firstChild; child;
-       child = child.nextSibling) {
+    child = child.nextSibling) {
     if (callback(child)) {
       nodes.push(child);
     }
@@ -387,13 +408,19 @@ export function setScopeSelectorSupportedForTesting(val) {
 }
 
 /**
+ * Test that the :scope selector is supported and behaves correctly.
  * @param {!Element} parent
  * @return {boolean}
  */
 function isScopeSelectorSupported(parent) {
+  const doc = parent.ownerDocument;
   try {
-    parent.ownerDocument.querySelector(':scope');
-    return true;
+    const testElement = doc.createElement('div');
+    const testChild = doc.createElement('div');
+    testElement.appendChild(testChild);
+    // NOTE(cvializ, #12383): Firefox's implementation is incomplete,
+    // therefore we test actual functionality of`:scope` as well.
+    return testElement./*OK*/querySelector(':scope div') === testChild;
   } catch (e) {
     return false;
   }
@@ -559,7 +586,7 @@ export function hasNextNodeInDocumentOrder(element, opt_stopNode) {
 export function ancestorElements(child, predicate) {
   const ancestors = [];
   for (let ancestor = child.parentElement; ancestor;
-       ancestor = ancestor.parentElement) {
+    ancestor = ancestor.parentElement) {
     if (predicate(ancestor)) {
       ancestors.push(ancestor);
     }
@@ -636,6 +663,16 @@ export function openWindowDialog(win, url, target, opt_features) {
 export function isJsonScriptTag(element) {
   return element.tagName == 'SCRIPT' &&
             element.getAttribute('type').toUpperCase() == 'APPLICATION/JSON';
+}
+
+/**
+ * Whether the element is a script tag with application/json type.
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isJsonLdScriptTag(element) {
+  return element.tagName == 'SCRIPT' &&
+      element.getAttribute('type').toUpperCase() == 'APPLICATION/LD+JSON';
 }
 
 /**

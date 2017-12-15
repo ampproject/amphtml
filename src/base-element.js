@@ -19,7 +19,7 @@ import {Layout} from './layout';
 import {getData} from './event-helper';
 import {loadPromise} from './event-helper';
 import {preconnectForElement} from './preconnect';
-import {isArray} from './types';
+import {isArray, toWin} from './types';
 import {Services} from './services';
 import {user} from './log';
 
@@ -140,7 +140,7 @@ export class BaseElement {
     this.inViewport_ = false;
 
     /** @public @const {!Window} */
-    this.win = element.ownerDocument.defaultView;
+    this.win = toWin(element.ownerDocument.defaultView);
 
     /**
      * Maps action name to struct containing the action handler and minimum
@@ -156,6 +156,16 @@ export class BaseElement {
 
     /** @public {?Object} For use by sub classes */
     this.config = null;
+
+    /**
+     * The time at which this element was scheduled for layout relative to the
+     * epoch. This value will be set to 0 until the this element has been
+     * scheduled.
+     * Note that this value may change over time if the element is enqueued,
+     * then dequeued and re-enqueued by the scheduler.
+     * @public {number}
+     */
+    this.layoutScheduleTime = 0;
   }
 
   /**
@@ -393,6 +403,17 @@ export class BaseElement {
   }
 
   /**
+   * Allows for rendering outside of the constraint set by renderOutsideViewport
+   * so long task scheduler is idle.  Integer values less than those returned
+   * by renderOutsideViewport have no effect.  Subclasses can override (default
+   * is disabled).
+   * @return {boolean|number}
+   */
+  idleRenderOutsideViewport() {
+    return false;
+  }
+
+  /**
    * Subclasses can override this method to opt-in into receiving additional
    * {@link layoutCallback} calls. Note that this method is not consulted for
    * the first layout given that each element must be laid out at least once.
@@ -558,7 +579,7 @@ export class BaseElement {
   executeAction(invocation, unusedDeferred) {
     if (invocation.method == 'activate') {
       if (invocation.satisfiesTrust(this.activationTrust())) {
-        this.activate(invocation);
+        return this.activate(invocation);
       }
     } else {
       this.initActionMap_();
@@ -567,7 +588,7 @@ export class BaseElement {
           this);
       const {handler, minTrust} = holder;
       if (invocation.satisfiesTrust(minTrust)) {
-        handler(invocation);
+        return handler(invocation);
       }
     }
   }
@@ -731,7 +752,7 @@ export class BaseElement {
 
   /**
    * Returns the viewport within which the element operates.
-   * @return {!./service/viewport-impl.Viewport}
+   * @return {!./service/viewport/viewport-impl.Viewport}
    */
   getViewport() {
     return Services.viewportForDoc(this.getAmpDoc());
@@ -854,7 +875,7 @@ export class BaseElement {
         this.element, newHeight, /* newWidth */ undefined);
   }
 
- /**
+  /**
   * Return a promise that requests the runtime to update
   * the size of this element to the specified value.
   * The runtime will schedule this request and attempt to process it
@@ -874,7 +895,7 @@ export class BaseElement {
         this.element, newHeight, newWidth);
   }
 
- /**
+  /**
   * Runs the specified mutation on the element and ensures that measures
   * and layouts performed for the affected elements.
   *
@@ -950,4 +971,8 @@ export class BaseElement {
    * @public
    */
   onLayoutMeasure() {}
+
+  user() {
+    return user(this.element);
+  }
 }

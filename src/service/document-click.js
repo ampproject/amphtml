@@ -27,7 +27,16 @@ import {
 import {dev} from '../log';
 import {getMode} from '../mode';
 import {Services} from '../services';
-import {parseUrl, parseUrlWithA} from '../url';
+import {
+  parseUrl,
+  parseUrlWithA,
+} from '../url';
+import {toWin} from '../types';
+import {
+  shouldAppendExtraParams,
+  getExtraParamsUrl,
+} from '../impression';
+
 
 const TAG = 'clickhandler';
 
@@ -64,7 +73,7 @@ export class ClickHandler {
     /** @private @const {!Document|!ShadowRoot} */
     this.rootNode_ = opt_rootNode || ampdoc.getRootNode();
 
-    /** @private @const {!./viewport-impl.Viewport} */
+    /** @private @const {!./viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);
 
     /** @private @const {!./viewer-impl.Viewer} */
@@ -74,6 +83,7 @@ export class ClickHandler {
     this.history_ = Services.historyForDoc(this.ampdoc);
 
     const platform = Services.platformFor(this.ampdoc.win);
+
     /** @private @const {boolean} */
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
 
@@ -96,6 +106,12 @@ export class ClickHandler {
     /** @private @const {!function(!Event)|undefined} */
     this.boundHandle_ = this.handle_.bind(this);
     this.rootNode_.addEventListener('click', this.boundHandle_);
+
+    this.appendExtraParams_ = false;
+
+    shouldAppendExtraParams(this.ampdoc).then(res => {
+      this.appendExtraParams_ = res;
+    });
   }
 
   /** @override */
@@ -132,8 +148,16 @@ export class ClickHandler {
     if (!target || !target.href) {
       return;
     }
-    Services.urlReplacementsForDoc(target).maybeExpandLink(target);
 
+    // First check if need to handle external link decoration.
+    let defaultExpandParamsUrl = null;
+    if (this.appendExtraParams_ && !this.isEmbed_) {
+      // Only decorate outgoing link when needed to and is not in FIE.
+      defaultExpandParamsUrl = getExtraParamsUrl(this.ampdoc.win, target);
+    }
+
+    Services.urlReplacementsForDoc(target).maybeExpandLink(
+        target, defaultExpandParamsUrl);
     const tgtLoc = this.parseUrl_(target.href);
 
     // Handle custom protocols only if the document is iframed.
@@ -156,7 +180,7 @@ export class ClickHandler {
    */
   handleCustomProtocolClick_(e, target, tgtLoc) {
     /** @const {!Window} */
-    const win = target.ownerDocument.defaultView;
+    const win = toWin(target.ownerDocument.defaultView);
     // On Safari iOS, custom protocol links will fail to open apps when the
     // document is iframed - in order to go around this, we set the top.location
     // to the custom protocol href.
@@ -262,7 +286,7 @@ export class ClickHandler {
       // See https://github.com/ampproject/amphtml/issues/5334 for more details.
       this.viewport_./*OK*/scrollIntoView(elem);
       Services.timerFor(this.ampdoc.win).delay(() =>
-          this.viewport_./*OK*/scrollIntoView(dev().assertElement(elem)), 1);
+        this.viewport_./*OK*/scrollIntoView(dev().assertElement(elem)), 1);
     } else {
       dev().warn(TAG,
           `failed to find element with id=${hash} or a[name=${hash}]`);

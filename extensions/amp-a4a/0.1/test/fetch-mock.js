@@ -15,6 +15,13 @@
  */
 
 /**
+ * @fileoverview
+ * @deprecated Do not use this in new code. Use env.fetchMock instead. Its API
+ *     is a superset of this one. TODO(@taymonbeal, #11066): Migrate all
+ *     existing users and then delete this file.
+ */
+
+/**
  * @typedef {(?string|{
  *     body: ?string,
  *     status: (number|undefined),
@@ -110,7 +117,7 @@ export class FetchMock {
     route.called = true;
     return Promise.resolve(
         typeof route.response == 'function' ?
-            route.response() : route.response)
+          route.response() : route.response)
         .then(data => {
           if (data === null || typeof data == 'string') {
             return new Response(data);
