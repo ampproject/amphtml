@@ -376,7 +376,14 @@ The `visibilitySpec` is a set of conditions and properties that can be applied t
   - `continuousTimeMin` and `continuousTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a continuous amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. The `continuousTimeMin` is defaulted to 0 when not specified.
   - `totalTimeMin` and `totalTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a total amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. The `totalTimeMin` is defaulted to 0 when not specified.
   - `visiblePercentageMin` and `visiblePercentageMax` These properties indicate that a request should be fired when the proportion of an element that is visible within the viewport is between the minimum and maximum specified percentages. Percentage values between 0 and 100 are valid. Note that the upper bound (`visiblePercentageMax`) is inclusive. The lower bound (`visiblePercentageMin`) is exclusive, unless both bounds are set to 0 or both are set to 100. If both bounds are set to 0, then the trigger will fire when the element is not visible. If both bounds are set to 100, then the trigger will fire when the element is fully visible. When these properties are defined along with other timing related properties, only the time when these properties are met are counted. They default to 0 and 100 when not specified.
-  - `repeat` If this property is true, then the trigger will fire each time the visibilitySpec conditions are met. For example, if `continuousTimeMin` is set to 1 second and the element remains visible for 3 seconds, then the trigger would fire once if `repeat` is false, but would fire 3 times if `repeat` is true. The value of `repeat` defaults to false if not specified.
+  - `repeat` If this property is true, then the trigger will fire each time the visibilitySpec conditions are met. In the following example, if the element is scrolled to 51% in view, then 49%, then 51% again, the trigger will fire twice. If `repeat` were not true, then it would only fire once. The value of `repeat` defaults to false if not specified.
+
+```javascript
+visibilitySpec: {
+  visiblePercentageMin: 50,
+  repeat: true,
+}
+```
 
 `visiblePercentageThresholds` may be used as a shorthand for creating 
 multiple `visibilitySpec` instances that differ only in 
