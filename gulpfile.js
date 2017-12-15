@@ -115,6 +115,7 @@ declareExtension('amp-pinterest', '0.1', true);
 declareExtension('amp-playbuzz', '0.1', true);
 declareExtension('amp-reach-player', '0.1', false);
 declareExtension('amp-reddit', '0.1', false);
+declareExtension('amp-riddle-quiz', '0.1', false);
 declareExtension('amp-share-tracking', '0.1', false);
 declareExtension('amp-sidebar', '0.1', true);
 declareExtension('amp-sidebar', '1.0', true);
