@@ -219,7 +219,7 @@ describes.realWin('amp-image-lightbox image viewer', {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    clock = lolex.install(win);
+    clock = lolex.install();
 
     lightbox = {
       getDpr: () => 1,
@@ -237,6 +237,7 @@ describes.realWin('amp-image-lightbox image viewer', {
   });
 
   afterEach(() => {
+    clock.uninstall();
     doc.body.removeChild(imageViewer.getElement());
     lightboxMock.verify();
   });
