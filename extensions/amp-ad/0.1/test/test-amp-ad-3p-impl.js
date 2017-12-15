@@ -525,7 +525,7 @@ describes.realWin('amp-ad-3p-impl', {
   });
 });
 
-describe.only('#getPriority', () => {
+describe('#getPriority', () => {
   describes.realWin('with shadow AmpDoc', {
     amp: {
       ampdoc: 'shadow',
