@@ -1289,7 +1289,7 @@ export class Resources {
               minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
               request.resource./*OK*/changeSize(
                   request.newHeight, request.newWidth, request.marginChange ?
-                      request.marginChange.newMargins : undefined);
+                    request.marginChange.newMargins : undefined);
               if (request.callback) {
                 request.callback(/* hasSizeChanged */true);
               }

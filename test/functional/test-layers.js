@@ -16,14 +16,12 @@
 
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {Services} from '../../src/services';
-import {createCustomEvent} from '../../src/event-helper';
 import {
-  LayoutLayers,
   LayoutElement,
   installLayersServiceForDoc,
 } from '../../src/service/layers-impl';
 
-describes.realWin('Layers', {amp: false}, (env) => {
+describes.realWin('Layers', {amp: false}, env => {
   let win;
   let root;
 

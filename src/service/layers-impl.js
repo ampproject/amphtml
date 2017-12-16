@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {layoutRectLtwh} from '../layout-rect';
 import {dev} from '../log';
 import {filterSplice} from '../utils/array';
 import {Services} from '../services';
@@ -110,8 +109,8 @@ export class LayoutLayers {
     listen(win.document, 'scroll', event => {
       const {target} = event;
       const scrolled = target.nodeType == Node.ELEMENT_NODE
-          ? target
-          : scrollingElement;
+        ? target
+        : scrollingElement;
       this.scrolled_(scrolled);
     }, {capture: true, passive: true});
 
@@ -474,7 +473,7 @@ export class LayoutElement {
 
 
     // Use isConnected if available, but always pass if it's not.
-    dev().assert(node.isConnected !== false, 'node not in the DOM tree')
+    dev().assert(node.isConnected !== false, 'node not in the DOM tree');
     return null;
   }
 
@@ -687,7 +686,7 @@ export class LayoutElement {
     // Find the layer to stop measuring at. This is so that you can find the
     // relative position of an element from some parent element, say the
     // position of a slide inside a carousel, without any further measurements.
-    let stopAt = opt_ancestor
+    const stopAt = opt_ancestor
       ? LayoutElement.getParentLayer(opt_ancestor)
       : null;
     for (let l = this; l !== stopAt; l = l.getParentLayer()) {
@@ -721,7 +720,7 @@ export class LayoutElement {
     // Find the layer to stop measuring at. This is so that you can find the
     // relative position of an element from some parent element, say the
     // position of a slide inside a carousel, without any further measurements.
-    let stopAt = opt_ancestor
+    const stopAt = opt_ancestor
       ? LayoutElement.getParentLayer(opt_ancestor)
       : null;
 
@@ -806,8 +805,8 @@ export class LayoutElement {
       top += this.getScrollTop();
     }
     this.position_ = positionLt(
-      left - relative.left,
-      top - relative.top
+        left - relative.left,
+        top - relative.top
     );
 
     // In dev mode, we freeze the structs to prevent consumer from mutating it.
@@ -854,8 +853,8 @@ export class LayoutElement {
 function relativeScrolledPositionForChildren(layer) {
   const position = layer.getScrolledPosition();
   return positionLt(
-    position.left - layer.getScrollLeft(),
-    position.top - layer.getScrollTop()
+      position.left - layer.getScrollLeft(),
+      position.top - layer.getScrollTop()
   );
 }
 
