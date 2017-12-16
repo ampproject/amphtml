@@ -118,7 +118,7 @@ describe('amp-a4a', () => {
     doc.head.appendChild(ampStyle);
   }
 
-  function createA4aElement(doc, opt_rect) {
+  function createA4aElement(doc, opt_rect, body) {
     const element = createElementWithAttributes(doc, 'amp-a4a', {
       'width': opt_rect ? String(opt_rect.width) : '200',
       'height': opt_rect ? String(opt_rect.height) : '50',
@@ -141,7 +141,8 @@ describe('amp-a4a', () => {
     element.renderStarted = () => {
       signals.signal('render-start');
     };
-    doc.body.appendChild(element);
+    body = body || doc.body;
+    body.appendChild(element);
     return element;
   }
 
@@ -1655,8 +1656,30 @@ describe('amp-a4a', () => {
   });
 
   describe('#getPriority', () => {
-    it('validate priority', () => {
-      expect(AmpA4A.prototype.getPriority()).to.equal(2);
+    describes.realWin('with shadow AmpDoc', {
+      amp: {
+        ampdoc: 'shadow',
+      },
+    }, env => {
+      it('should return priority of 1', () => {
+        const body = env.ampdoc.getBody();
+        const a4aElement = createA4aElement(env.win.document, null, body);
+        const a4a = new MockA4AImpl(a4aElement);
+        expect(a4a.getPriority()).to.equal(1);
+      });
+    });
+
+    describes.realWin('with single AmpDoc', {
+      amp: {
+        ampdoc: 'single',
+      },
+    }, env => {
+      it('should return priority of 2', () => {
+        const body = env.ampdoc.getBody();
+        const a4aElement = createA4aElement(env.win.document, null, body);
+        const a4a = new MockA4AImpl(a4aElement);
+        expect(a4a.getPriority()).to.equal(2);
+      });
     });
   });
 
