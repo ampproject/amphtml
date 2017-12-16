@@ -259,8 +259,8 @@ i-amphtml-sizer {
   left: 0px !important;
   /* give it non-zero size, VoiceOver on Safari requires at least 2 pixels
      before allowing buttons to be activated. */
-  width: 2px !important;
-  height: 2px !important;
+  width: 4px !important;
+  height: 4px !important;
   /* visually hide it with overflow and opacity */
   opacity: 0 !important;
   overflow: hidden !important;
@@ -271,6 +271,16 @@ i-amphtml-sizer {
   /* ensure no other style sets display to none */
   display: block !important;
   visibility: visible !important;
+}
+
+.i-amphtml-screen-reader ~ .i-amphtml-screen-reader {
+  left: 8px !important;
+}
+.i-amphtml-screen-reader ~ .i-amphtml-screen-reader ~ .i-amphtml-screen-reader {
+  left: 12px !important;
+}
+.i-amphtml-screen-reader ~ .i-amphtml-screen-reader ~ .i-amphtml-screen-reader ~ .i-amphtml-screen-reader {
+  left: 16px !important;
 }
 
 /* For author styling. */
