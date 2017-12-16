@@ -120,7 +120,9 @@ export class ViewportBindingIosEmbedWrapper_ {
       get: () => body,
     });
 
-     installLayersServiceForDoc(this.ampdoc, this.wrapper_);
+    if (this.useLayers_) {
+      installLayersServiceForDoc(this.ampdoc, this.wrapper_);
+    }
 
     // TODO(dvoytenko): test if checkAndFixIosScrollfreezeBug is required.
 
@@ -182,13 +184,13 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   disableScroll() {
-    // TODO(@jridgewell): Recursively disable scroll
+    // TODO(jridgewell): Recursively disable scroll
     this.wrapper_.classList.add('i-amphtml-scroll-disabled');
   }
 
   /** @override */
   resetScroll() {
-    // TODO(@jridgewell): Recursively disable scroll
+    // TODO(jridgewell): Recursively disable scroll
     this.wrapper_.classList.remove('i-amphtml-scroll-disabled');
   }
 

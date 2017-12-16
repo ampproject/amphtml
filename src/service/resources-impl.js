@@ -226,9 +226,11 @@ export class Resources {
       this.lastScrollTime_ = Date.now();
     });
 
-    Services.layersForDoc(this.ampdoc).onScroll((/* elements */) => {
-      this.schedulePass();
-    });
+    if (this.useLayers_) {
+      Services.layersForDoc(this.ampdoc).onScroll((/* elements */) => {
+        this.schedulePass();
+      });
+    }
 
     // When document becomes visible, e.g. from "prerender" mode, do a
     // simple pass.
@@ -1115,6 +1117,7 @@ export class Resources {
     }
   }
 
+  /** @private */
   mutateWorkViaResources_() {
     // Read all necessary data before mutates.
     // The height changing depends largely on the target element's position
@@ -1307,6 +1310,11 @@ export class Resources {
     }
   }
 
+  /**
+   * TODO(jridgewell): This will be Layer's bread and butter for speed
+   * optimizations.
+   * @private
+   */
   mutateWorkViaLayers_() {
     this.mutateWorkViaResources_();
   }
@@ -1607,7 +1615,7 @@ export class Resources {
    * @private
    */
   calcTaskScore_(task) {
-    // TODO(@jridgewell): these should be taking into account the active
+    // TODO(jridgewell): these should be taking into account the active
     // scroller, which may not be the root scroller. Maybe a weighted average
     // of "scroller scrolls necessary" to see the element.
     // Demo at https://output.jsbin.com/hicigom/quiet

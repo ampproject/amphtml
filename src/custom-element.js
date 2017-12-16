@@ -711,14 +711,14 @@ function createBaseCustomElementClass(win) {
         // Resources can now be initialized since the ampdoc is now available.
         this.resources_ = Services.resourcesForDoc(this.ampdoc_);
       }
-      if (!this.layers_) {
-        // Resources can now be initialized since the ampdoc is now available.
-        this.layers_ = Services.layersForDoc(this.ampdoc_);
-      }
-      this.getResources().add(this);
       if (isExperimentOn(this.ampdoc_.win, 'layers')) {
+        if (!this.layers_) {
+          // Resources can now be initialized since the ampdoc is now available.
+          this.layers_ = Services.layersForDoc(this.ampdoc_);
+        }
         this.getLayers().add(this);
       }
+      this.getResources().add(this);
 
       if (this.everAttached) {
         const reconstruct = this.reconstructWhenReparented();

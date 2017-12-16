@@ -74,7 +74,9 @@ export class ViewportBindingNatural_ {
 
     /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.win, 'layers');
-    installLayersServiceForDoc(this.ampdoc, this.getScrollingElement_());
+    if (this.useLayers_) {
+      installLayersServiceForDoc(this.ampdoc, this.getScrollingElement_());
+    }
 
     dev().fine(TAG_, 'initialized natural viewport');
   }
@@ -137,14 +139,14 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   disableScroll() {
-    // TODO(@jridgewell): Recursively disable scroll
+    // TODO(jridgewell): Recursively disable scroll
     this.win.document.documentElement.classList.add(
         'i-amphtml-scroll-disabled');
   }
 
   /** @override */
   resetScroll() {
-    // TODO(@jridgewell): Recursively disable scroll
+    // TODO(jridgewell): Recursively disable scroll
     this.win.document.documentElement.classList.remove(
         'i-amphtml-scroll-disabled');
   }

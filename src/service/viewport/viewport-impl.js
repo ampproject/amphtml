@@ -512,12 +512,12 @@ export class Viewport {
     let curScrollTop;
 
     if (this.useLayers_) {
+      newScrollTop = elementRect.top + offset;
+      curScrollTop = 0;
+    } else {
       const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
       newScrollTop = Math.max(0, calculatedScrollTop);
       curScrollTop = this.getScrollTop();
-    } else {
-      newScrollTop = elementRect.top + offset;
-      curScrollTop = 0;
     }
     if (newScrollTop == curScrollTop) {
       return Promise.resolve();

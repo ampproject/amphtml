@@ -401,7 +401,6 @@ export class Resource {
    * transitioned to the "ready for layout" state.
    */
   measure() {
-    // TODO
     // Check if the element is ready to be measured.
     // Placeholders are special. They are technically "owned" by parent AMP
     // elements, sized by parents, but laid out independently. This means
@@ -600,7 +599,7 @@ export class Resource {
    */
   isDisplayed() {
     const isFluid = this.element.getLayout() == Layout.FLUID;
-    // TODO #getSize
+    // TODO(jridgewell): #getSize
     const box = this.getLayoutBox();
     const hasNonZeroSize = box.height > 0 && box.width > 0;
     return (isFluid || hasNonZeroSize) &&

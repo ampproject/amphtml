@@ -156,7 +156,7 @@ export class LayoutLayers {
    * This also "dirties" the layout, so if's being reparented it will lazily
    * update appropriately.
    *
-   * TODO(@jridgewell): This won't catch detach events from native DOM
+   * TODO(jridgewell): This won't catch detach events from native DOM
    * elements...
    *
    * @param {!Element} element
@@ -823,7 +823,7 @@ export class LayoutElement {
     if (children.length) {
       const relative = relativeScrolledPositionForChildren(this);
       for (let i = 0; i < children.length; i++) {
-        // TODO(@jridgewell): We can probably optimize this if this layer
+        // TODO(jridgewell): We can probably optimize this if this layer
         // didn't change at all.
         children[i].remeasure_(relative);
       }
