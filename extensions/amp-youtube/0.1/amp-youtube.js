@@ -24,7 +24,7 @@ import {
 import {tryParseJson} from '../../../src/json';
 import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {dev, user} from '../../../src/log';
+import {user, dev} from '../../../src/log';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
@@ -72,6 +72,9 @@ class AmpYoutube extends AMP.BaseElement {
 
     /** @private {?string}  */
     this.videoid_ = null;
+
+    /** @private {?string} */
+    this.liveChannelid_ = null;
 
     /** @private {?boolean}  */
     this.muted_ = false;
@@ -130,6 +133,8 @@ class AmpYoutube extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.videoid_ = this.getVideoId_();
+    this.liveChannelid_ = this.getLiveChannelId_();
+    this.assertDatasourceExists_();
 
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
@@ -139,7 +144,7 @@ class AmpYoutube extends AMP.BaseElement {
     // easily caught hence the following hacky-solution.
     // Please don't follow this behavior in other extensions, instead
     // see BaseElement.createPlaceholderCallback.
-    if (!this.getPlaceholder()) {
+    if (!this.getPlaceholder() && this.videoid_) {
       this.buildImagePlaceholder_();
     }
 
@@ -152,11 +157,20 @@ class AmpYoutube extends AMP.BaseElement {
    * @private
    */
   getEmbedUrl_() {
+    this.assertDatasourceExists_();
     let urlSuffix = '';
     if (this.getCredentials_() === 'omit') {
       urlSuffix = '-nocookie';
     }
-    return `https://www.youtube${urlSuffix}.com/embed/${encodeURIComponent(this.videoid_ || '')}?enablejsapi=1`;
+    const baseUrl = `https://www.youtube${urlSuffix}.com/embed/`;
+    let descriptor = '';
+    if (this.videoid_) {
+      descriptor = `${encodeURIComponent(this.videoid_ || '')}?`;
+    } else {
+      descriptor = 'live_stream?channel='
+        + `${encodeURIComponent(this.liveChannelid_ || '')}&`;
+    }
+    return `${baseUrl}${descriptor}enablejsapi=1`;
   }
 
   /** @return {string} */
@@ -164,7 +178,7 @@ class AmpYoutube extends AMP.BaseElement {
     if (this.videoIframeSrc_) {
       return this.videoIframeSrc_;
     }
-    dev().assert(this.videoid_);
+
     let src = this.getEmbedUrl_();
 
     const params = getDataParamsFromAttributes(this.element);
@@ -268,16 +282,20 @@ class AmpYoutube extends AMP.BaseElement {
       }
     }
   }
+  /**
+   * @return {?string}
+   * @private
+   */
+  getLiveChannelId_() {
+    return this.element.getAttribute('data-live-channelid');
+  }
 
   /**
-   * @return {string}
+   * @return {?string}
    * @private
    */
   getVideoId_() {
-    return user().assert(
-        this.element.getAttribute('data-videoid'),
-        'The data-videoid attribute is required for <amp-youtube> %s',
-        this.element);
+    return this.element.getAttribute('data-videoid');
   }
 
   /**
@@ -286,6 +304,16 @@ class AmpYoutube extends AMP.BaseElement {
    */
   getCredentials_() {
     return this.element.getAttribute('credentials') || 'include';
+  }
+
+  assertDatasourceExists_() {
+    const datasourceExists = !(this.videoid_ && this.liveChannelid_)
+      && (this.videoid_ || this.liveChannelid_);
+    user().assert(
+        datasourceExists, 'Exactly one of data-videoid or '
+      + 'data-live-channelid should be present for <amp-youtube> %s',
+        this.element
+    );
   }
 
   /**
@@ -362,8 +390,7 @@ class AmpYoutube extends AMP.BaseElement {
   /** @private */
   buildImagePlaceholder_() {
     const imgPlaceholder = this.element.ownerDocument.createElement('img');
-    dev().assert(this.videoid_);
-    const videoid = this.videoid_ || '';
+    const videoid = dev().assertString(this.videoid_);
 
     setStyles(imgPlaceholder, {
       // Cover matches YouTube Player styling.
