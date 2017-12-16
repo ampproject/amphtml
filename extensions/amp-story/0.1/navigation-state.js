@@ -22,6 +22,8 @@ import {Observable} from '../../../src/observable';
  */
 export const StateChangeType = {
   ACTIVE_PAGE: 0,
+  BOOKEND_ENTER: 1,
+  BOOKEND_EXIT: 2,
 };
 
 
@@ -45,29 +47,31 @@ export class NavigationState {
 
   /**
    * @param {number} index
+   * @param {number} totalPages
    * @param {string=} opt_pageId
    */
   // TODO(alanorozco): pass whether change was automatic or on user action
-  updateActivePage(index, opt_pageId) {
+  updateActivePage(index, totalPages, opt_pageId) {
     const changeValue = {
       pageIndex: index,
+      totalPages,
     };
 
     if (opt_pageId) {
       changeValue.pageId = opt_pageId;
     }
 
-    this.fire_(StateChangeType.ACTIVE_PAGE, changeValue);
+    this.fire(StateChangeType.ACTIVE_PAGE, changeValue);
   }
 
   /**
    * @param {!StateChangeType} changeType
-   * @param {*} changeValue
+   * @param {*=} opt_changeValue
    */
-  fire_(changeType, changeValue) {
+  fire(changeType, opt_changeValue) {
     this.observable_.fire({
       type: changeType,
-      value: changeValue,
+      value: opt_changeValue,
     });
   }
 }

@@ -25,6 +25,9 @@ export const EventType = {
   // Triggered when the user clicks the enter full screen button
   ENTER_FULLSCREEN: 'ampstory:enterfullscreen',
 
+  // Triggered when the bookend should be opened
+  SHOW_BOOKEND: 'ampstory:showbookend',
+
   // Triggered when the user clicks the close bookend button
   CLOSE_BOOKEND: 'ampstory:closebookend',
 
@@ -42,6 +45,12 @@ export const EventType = {
 
   // Triggered when the story should switch to a specified page
   SWITCH_PAGE: 'ampstory:switchpage',
+
+  // Triggered when the story should switch to the previous page
+  PREVIOUS_PAGE: 'ampstory:previouspage',
+
+  // Triggered when the story should switch to the next page
+  NEXT_PAGE: 'ampstory:nextpage',
 
   // Triggered when a page updates its progress
   PAGE_PROGRESS: 'ampstory:pageprogress',
