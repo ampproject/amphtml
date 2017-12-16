@@ -39,7 +39,7 @@ describe('Amp custom ad', () => {
    * @returns {Element} The completed amp-ad element, which has been added to
    *    the current document body.
    */
-  function getCustomAd(url, slot) {
+  function getCustomAd(url, slot, body = document.body) {
     const ampAdElement = createElementWithAttributes(document, 'amp-ad', {
       type: 'custom',
       width: '500',
@@ -51,7 +51,7 @@ describe('Amp custom ad', () => {
     }
     const template = document.createElement('template');
     ampAdElement.appendChild(template);
-    document.body.appendChild(ampAdElement);
+    body.appendChild(ampAdElement);
     return ampAdElement;
   }
 
@@ -97,4 +97,34 @@ describe('Amp custom ad', () => {
     expect(ad3.getFullUrl_()).to.equal(expected34);
     expect(ad4.getFullUrl_()).to.equal(expected34);
   });
+
+  describe('#getPriority', () => {
+    const url = '/examples/custom.ad.example.json';
+    const slot = 'myslot';
+
+    describes.realWin('with shadow AmpDoc', {
+      amp: {
+        ampdoc: 'shadow',
+      },
+    }, env => {
+      it('should return priority of 1', () => {
+        const adElement = getCustomAd(url, slot, /*body*/env.ampdoc.getBody());
+        const customAd = new AmpAdCustom(adElement);
+        expect(customAd.getPriority()).to.equal(1);
+      });
+    });
+
+    describes.realWin('with single AmpDoc', {
+      amp: {
+        ampdoc: 'single',
+      },
+    }, env => {
+      it('should return priority of 2', () => {
+        const adElement = getCustomAd(url, slot, /*body*/env.ampdoc.getBody());
+        const customAd = new AmpAdCustom(adElement);
+        expect(customAd.getPriority()).to.equal(2);
+      });
+    });
+  });
 });
+

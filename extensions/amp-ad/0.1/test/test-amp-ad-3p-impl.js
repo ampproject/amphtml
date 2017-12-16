@@ -24,7 +24,7 @@ import '../../../amp-sticky-ad/1.0/amp-sticky-ad';
 import {macroTask} from '../../../../testing/yield';
 import * as lolex from 'lolex';
 
-function createAmpAd(win) {
+function createAmpAd(win, attachToAmpdoc = false, ampdoc) {
   const ampAdElement = createElementWithAttributes(win.document, 'amp-ad', {
     type: '_ping_',
     width: 300,
@@ -33,6 +33,11 @@ function createAmpAd(win) {
     'data-valid': 'true',
     'data-width': '6666',
   });
+
+  if (attachToAmpdoc) {
+    ampdoc.getBody().appendChild(ampAdElement);
+  }
+
   ampAdElement.isBuilt = () => {return true;};
 
   return new AmpAd3PImpl(ampAdElement);
@@ -517,6 +522,30 @@ describes.realWin('amp-ad-3p-impl', {
           expect(element.style.marginRight).to.be.equal('-49px');
         });
       });
+    });
+  });
+});
+
+describe('#getPriority', () => {
+  describes.realWin('with shadow AmpDoc', {
+    amp: {
+      ampdoc: 'shadow',
+    },
+  }, env => {
+    it('should return priority of 1', () => {
+      const ad3p = createAmpAd(env.ampdoc.win, /*attach*/ true, env.ampdoc);
+      expect(ad3p.getPriority()).to.equal(1);
+    });
+  });
+
+  describes.realWin('with single AmpDoc', {
+    amp: {
+      ampdoc: 'single',
+    },
+  }, env => {
+    it('should return priority of 2', () => {
+      const ad3p = createAmpAd(env.ampdoc.win, /*attach*/ true, env.ampdoc);
+      expect(ad3p.getPriority()).to.equal(2);
     });
   });
 });
