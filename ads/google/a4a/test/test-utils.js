@@ -66,8 +66,8 @@ function noopMethods(impl, doc, sandbox) {
   impl.element.build = noop;
   impl.element.getPlaceholder = noop;
   impl.element.createPlaceholder = noop;
-  sandbox.stub(impl, 'getAmpDoc', () => doc);
-  sandbox.stub(impl, 'getPageLayoutBox', () => {
+  sandbox.stub(impl, 'getAmpDoc').callsFake(() => doc);
+  sandbox.stub(impl, 'getPageLayoutBox').callsFake(() => {
     return {
       top: 11, left: 12, right: 0, bottom: 0, width: 0, height: 0,
     };

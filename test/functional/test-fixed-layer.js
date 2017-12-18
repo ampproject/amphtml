@@ -765,7 +765,7 @@ describe('FixedLayer', () => {
       expect(state['F0'].top).to.equal('0px');
 
       // Update to transient padding.
-      sandbox.stub(fixedLayer, 'update', () => {});
+      sandbox.stub(fixedLayer, 'update').callsFake(() => {});
       fixedLayer.updatePaddingTop(22, /* transient */ true);
       vsyncTasks[0].measure(state);
       expect(state['F0'].fixed).to.be.true;

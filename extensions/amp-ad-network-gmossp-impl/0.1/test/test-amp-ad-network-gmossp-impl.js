@@ -91,7 +91,8 @@ describes.realWin('amp-ad-network-gmossp-impl', {
     gmosspImplElem = doc.createElement('amp-ad');
     gmosspImplElem.setAttribute('type', 'gmossp');
     gmosspImplElem.setAttribute('data-use-a4a', 'true');
-    sandbox.stub(AmpAdNetworkGmosspImpl.prototype, 'getSigningServiceNames',
+    sandbox.stub(
+        AmpAdNetworkGmosspImpl.prototype, 'getSigningServiceNames').callsFake(
         () => {
           return ['google'];
         });

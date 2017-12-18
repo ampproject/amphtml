@@ -53,6 +53,7 @@ tags: {  # <amp-ad>
   disallowed_ancestor: "AMP-APP-BANNER"
   attrs: { name: "alt" }
   attrs: { name: "json" }
+  attrs: { name: "rtc-config" }
   attrs: {
     name: "src"
     value_url: {
@@ -96,6 +97,7 @@ tags: {  # <amp-ad data-multi-size>
     dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: { name: "json" }
+  attrs: { name: "rtc-config" }
   attrs: {
     name: "src"
     value_url: {
@@ -167,6 +169,7 @@ tags: {  # <amp-embed>
   disallowed_ancestor: "AMP-APP-BANNER"
   attrs: { name: "alt" }
   attrs: { name: "json" }
+  attrs: { name: "rtc-config" }
   attrs: {
     name: "src"
     value_url: {
@@ -208,6 +211,7 @@ tags: {  # <amp-embed data-multi-size>
     dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: { name: "json" }
+  attrs: { name: "rtc-config" }
   attrs: {
     name: "src"
     value_url: {
@@ -228,4 +232,3 @@ tags: {  # <amp-embed data-multi-size>
     supported_layouts: RESPONSIVE
   }
 }
-

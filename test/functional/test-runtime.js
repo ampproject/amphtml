@@ -340,7 +340,7 @@ describes.fakeWin('runtime', {
     const bodyPromise = new Promise(resolve => {
       bodyResolver = resolve;
     });
-    sandbox.stub(dom, 'waitForBodyPromise', () => bodyPromise);
+    sandbox.stub(dom, 'waitForBodyPromise').callsFake(() => bodyPromise);
 
     function skipMicro() {
       return Promise.resolve().then(() => Promise.resolve());
@@ -408,7 +408,7 @@ describes.fakeWin('runtime', {
     const bodyPromise = new Promise(resolve => {
       bodyResolver = resolve;
     });
-    sandbox.stub(dom, 'waitForBodyPromise', () => bodyPromise);
+    sandbox.stub(dom, 'waitForBodyPromise').callsFake(() => bodyPromise);
 
     function skipMicro() {
       return Promise.resolve().then(() => Promise.resolve());
@@ -567,10 +567,11 @@ describes.fakeWin('runtime', {
       const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
       const servicePromise = getServicePromise(win, 'amp-ext');
       let installStylesCallback;
-      const installStylesStub = sandbox.stub(styles, 'installStylesForDoc',
-          (doc, cssText, cb) => {
-            installStylesCallback = cb;
-          });
+      const installStylesStub =
+          sandbox.stub(styles, 'installStylesForDoc').callsFake(
+              (doc, cssText, cb) => {
+                installStylesCallback = cb;
+              });
 
       ampdoc.declareExtension_('amp-ext');
       win.AMP.push({
@@ -731,10 +732,11 @@ describes.fakeWin('runtime', {
     it('should register element with CSS', function* () {
       const servicePromise = getServicePromise(win, 'amp-ext');
       let installStylesCallback;
-      const installStylesStub = sandbox.stub(styles, 'installStylesForDoc',
-          (doc, cssText, cb) => {
-            installStylesCallback = cb;
-          });
+      const installStylesStub =
+          sandbox.stub(styles, 'installStylesForDoc').callsFake(
+              (doc, cssText, cb) => {
+                installStylesCallback = cb;
+              });
 
       win.AMP.push({
         n: 'amp-ext',
