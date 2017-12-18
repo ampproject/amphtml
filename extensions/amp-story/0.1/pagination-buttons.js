@@ -260,6 +260,7 @@ export class PaginationButtons {
   /**
    * @param {number} pageIndex
    * @param {number} totalPages
+   * @private
    */
   onPageActive_(pageIndex, totalPages) {
     if (pageIndex === totalPages - 1) {
