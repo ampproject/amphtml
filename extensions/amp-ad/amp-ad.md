@@ -216,6 +216,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [AdvertServe](../../ads/advertserve.md)
 - [Affiliate-B](../../ads/affiliateb.md)
 - [AMoAd](../../ads/amoad.md)
+- [Ancora](../../ads/ancora.md)
 - [AppNexus](../../ads/appnexus.md)
 - [Atomx](../../ads/atomx.md)
 - [Bidtellect](../../ads/bidtellect.md)

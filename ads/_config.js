@@ -219,6 +219,11 @@ export const adConfig = {
     ],
   },
 
+  ancora: {
+    preconnect: 'https://creatives.ancoraplatform.com',
+    renderStartImplemented: true,
+  },
+
   appnexus: {
     prefetch: 'https://acdn.adnxs.com/ast/ast.js',
     preconnect: 'https://ib.adnxs.com',
