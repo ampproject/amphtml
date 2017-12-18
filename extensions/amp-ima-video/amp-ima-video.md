@@ -90,6 +90,10 @@ The URL of your video content. A relative URL or a URL that uses https protocol.
 An image for the frame to be displayed before video playback has started. By
 default, the first frame is displayed.
 
+##### data-delay-ad-request
+
+If true, delay the ad request until either the user scrolls the page, or for 3 seconds, whichever occurs first. Defaults to false.
+
 ##### common attributes
 
 This element includes

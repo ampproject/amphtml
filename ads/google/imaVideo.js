@@ -125,6 +125,9 @@ let adRequestFailed;
 // IMA SDK AdDisplayContainer object.
 let adDisplayContainer;
 
+// IMA SDK AdsRequest object.
+let adsRequest;
+
 // IMA SDK AdsLoader object.
 let adsLoader;
 
@@ -173,6 +176,9 @@ let imaSettings;
 
 // Player data used for video analytics.
 const playerData = new ImaPlayerData();
+
+// Flag used to track if ads have been requested or not.
+let adsRequested;
 
 /**
  * Loads the IMA SDK library.
@@ -436,15 +442,19 @@ export function imaVideo(global, data) {
 
     videoPlayer.addEventListener('ended', onContentEnded);
 
-    const adsRequest = new global.google.ima.AdsRequest();
+    adsRequest = new global.google.ima.AdsRequest();
     adsRequest.adTagUrl = data.tag;
     adsRequest.linearAdSlotWidth = videoWidth;
     adsRequest.linearAdSlotHeight = videoHeight;
     adsRequest.nonLinearAdSlotWidth = videoWidth;
     adsRequest.nonLinearAdSlotHeight = videoHeight / 3;
 
-    adRequestFailed = false;
-    adsLoader.requestAds(adsRequest);
+    if (!data['delayAdRequest']) {
+      requestAds();
+    } else {
+      // Let amp-ima-video know that we are done set-up.
+      window.parent./*OK*/postMessage({event: VideoEvents.LOAD}, '*');
+    }
   });
 }
 
@@ -491,6 +501,13 @@ export function onClick(global) {
   playAds(global);
 }
 
+
+export function requestAds() {
+  adsRequested = true;
+  adRequestFailed = false;
+  adsLoader.requestAds(adsRequest);
+}
+
 /**
  * Starts ad playback. If the ad request has not yte resolved, calls itself
  * again after 250ms.
@@ -498,7 +515,11 @@ export function onClick(global) {
  * @visibleForTesting
  */
 export function playAds(global) {
-  if (adsManager) {
+  if (!adsRequested) {
+    requestAds();
+    playAds(global);
+    return;
+  } else if (adsManager) {
     // Ad request resolved.
     try {
       adsManager.init(
@@ -970,6 +991,12 @@ function onMessage(global, event) {
             adsManagerWidthOnLoad = msg.args.width;
             adsManagerHeightOnLoad = msg.args.height;
           }
+        }
+        break;
+      case 'onFirstScroll':
+      case 'onAdRequestDelayTimeout':
+        if (!adsRequested) {
+          requestAds();
         }
         break;
     }

@@ -60,6 +60,9 @@ class AmpImaVideo extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
+    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = null;
+
     /** @private {?Promise} */
     this.playerReadyPromise_ = null;
 
@@ -75,6 +78,12 @@ class AmpImaVideo extends AMP.BaseElement {
     /** @private {?String} */
     this.preconnectTrack_ = null;
 
+    /**
+     * Maps events to their unlisteners.
+     * @private {!Object<string, function()>}
+     */
+    this.unlisteners_ = {};
+
     /** @private {!ImaPlayerData} */
     this.playerData_ = new ImaPlayerData();
   }
@@ -83,6 +92,19 @@ class AmpImaVideo extends AMP.BaseElement {
   buildCallback() {
     user().assert(isExperimentOn(this.win, TAG),
         'Experiment ' + TAG + ' is disabled.');
+
+    this.viewport_ = this.getViewport();
+    if (this.element.getAttribute('data-delay-ad-request') === 'true') {
+      this.unlisteners_['onFirstScroll'] =
+          this.viewport_.onScroll(() => {
+            this.sendCommand_('onFirstScroll');
+          });
+      // Request ads after 3 seconds, if something else doesn't trigger an ad
+      // request before that.
+      Services.timerFor(this.win).delay(
+          () => { this.sendCommand_('onAdRequestDelayTimeout'); }, 3000);
+
+    }
 
     assertHttpsUrl(this.element.getAttribute('data-tag'),
         'The data-tag attribute is required for <amp-video-ima> and must be ' +
@@ -198,7 +220,9 @@ class AmpImaVideo extends AMP.BaseElement {
   }
 
   /**
-   * Sends a command to the player through postMessage.
+   * Sends a command to the player through postMessage. NOTE: All commands sent
+   * before imaVideo fires VideoEvents.LOAD will be queued until that event
+   * fires.
    * @param {string} command
    * @param {Object=} opt_args
    * @private
@@ -213,6 +237,10 @@ class AmpImaVideo extends AMP.BaseElement {
           'args': opt_args || '',
         })), '*');
       });
+    }
+    // If we have an unlistener for this command, call it.
+    if (this.unlisteners_[command]) {
+      this.unlisteners_[command]();
     }
   }
 
