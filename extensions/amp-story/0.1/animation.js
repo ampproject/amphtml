@@ -21,7 +21,6 @@ import {
 } from '../../amp-animation/0.1/web-animation-types';
 import {dev, user} from '../../../src/log';
 import {map, omit} from '../../../src/utils/object';
-import {once} from '../../../src/utils/function';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
 import {
@@ -196,9 +195,9 @@ class AnimationRunner {
     }
 
     return this.firstFrameProps_.then(firstFrameProps =>
-        this.vsync_.mutatePromise(() => {
-          setStyles(this.target_, firstFrameProps);
-        }));
+      this.vsync_.mutatePromise(() => {
+        setStyles(this.target_, firstFrameProps);
+      }));
   }
 
   /** Starts or resumes the animation. */
