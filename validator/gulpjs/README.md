@@ -39,9 +39,14 @@ To treat warnings as errors, replace the last line of the validation closure wit
 
 ## Release Notes
 
+### 1.0.2
+
+* Add failAfterWarningOrError option
+* Upgrade amphtml-validator version to 1.0.21
+
 ### 1.0.1
 
-* Set amphtml-validator version to 1.0.18
+* Upgrade amphtml-validator version to 1.0.18
 
 ### 1.0.0
 
