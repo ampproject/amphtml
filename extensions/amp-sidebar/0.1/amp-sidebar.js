@@ -391,7 +391,6 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /**
-   * Get called when animation/transition end when open/close sidebar
    * @private
    */
   triggerEvent_(name) {
