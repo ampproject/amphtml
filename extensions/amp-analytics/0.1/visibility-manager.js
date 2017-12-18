@@ -273,7 +273,8 @@ export class VisibilityManager {
         }
         const min = Number(percents[0]);
         const max = Number(percents[1]);
-        if (min < 0 || max > 100 || min >= max) {
+        if (min < 0 || max > 100 || min > max ||
+            (min == max && min != 100 && max != 0)) {
           user().error(TAG,
               'visiblePercentageThresholds entry invalid min/max value');
           continue;
