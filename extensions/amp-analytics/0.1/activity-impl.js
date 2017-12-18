@@ -74,6 +74,16 @@ class ActivityHistory {
      * @private {ActivityEventDef|undefined}
      */
     this.prevActivityEvent_ = undefined;
+
+    /**
+     * Contains the incrementalEngagedTime timestamps for named timers.
+     * @private {Object}
+     */
+    this.incrementalEngagedTime_ = {
+      /*
+       * "$timerName" : ${lastRequestTimestamp}
+      */
+    };
   }
 
   /**
@@ -105,6 +115,21 @@ class ActivityHistory {
           findEngagedTimeBetween(this.prevActivityEvent_, time);
     }
     return totalEngagedTime;
+  }
+
+  /**
+   * Get the incremental engaged time since the last push and reset it.
+   * @param {string} name
+   * @return {number}
+   */
+  getIncrementalEngagedTime(name = '') {
+    if (!this.incrementalEngagedTime_.hasOwnProperty[name]) {
+      this.incrementalEngagedTime_[name] = this.totalEngagedTime_;
+      return this.incrementalEngagedTime_[name];
+    }
+    const currentIncrementalEngagedTime = this.incrementalEngagedTime_[name];
+    this.incrementalEngagedTime_[name] = this.totalEngagedTime_;
+    return this.totalEngagedTime_ - currentIncrementalEngagedTime;
   }
 }
 
@@ -296,6 +321,15 @@ export class Activity {
   /** @private */
   cleanup_() {
     this.unlisten_();
+  }
+
+  /**
+   * Get the incremental engaged time since the last push.
+   * @param {string} name
+   * @return {number}
+   */
+  getIncrementalEngagedTime(name) {
+    return this.activityHistory_.getIncrementalEngagedTime(name);
   }
 
   /**
