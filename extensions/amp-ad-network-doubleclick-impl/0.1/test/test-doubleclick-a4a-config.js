@@ -135,15 +135,34 @@ describe('doubleclick-a4a-config', () => {
           MANUAL_EXPERIMENT_ID);
     });
 
-    it('should not enable if data-use-same-domain-rendering-until-deprecated',
-        () => {
-          const elem = testFixture.doc.createElement('div');
-          elem.setAttribute(
-              'data-use-same-domain-rendering-until-deprecated', '');
-          testFixture.doc.body.appendChild(elem);
-          expect(doubleclickIsA4AEnabled(mockWin, elem)).to.be.false;
-          expect(elem.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
-        });
+    /**
+     * UseSameDomainRenderingUntilDeprecated is a flag that publishers can
+     * specify that will force them out of Fast Fetch, and force that GPT is
+     * used, not Glade. There have been many issues with this flag not being
+     * correctly honored in the past. This test checks multiple different
+     * ways that this test could be specified to assure they all work.
+     */
+    it('should use DF if useSameDomainRenderingUntilDeprecated in use', () => {
+      // Ensure no selection in order to very experiment attribute.
+      sandbox.stub(DoubleclickA4aEligibility.prototype, 'maybeSelectExperiment')
+          .returns(null);
+      mockWin.location = parseUrl(
+          'https://cdn.ampproject.org/some/path/to/content.html');
+
+      const elem1 = testFixture.doc.createElement('div');
+      elem1.setAttribute(
+          'json', '{"useSameDomainRenderingUntilDeprecated": 1}');
+      testFixture.doc.body.appendChild(elem1);
+      expect(doubleclickIsA4AEnabled(mockWin, elem1)).to.be.false;
+      expect(elem1.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
+
+      const elem2 = testFixture.doc.createElement('div');
+      elem2.setAttribute(
+          'data-use-same-domain-rendering-until-deprecated', '1');
+      testFixture.doc.body.appendChild(elem2);
+      expect(doubleclickIsA4AEnabled(mockWin, elem2)).to.be.false;
+      expect(elem2.getAttribute(EXPERIMENT_ATTRIBUTE)).to.not.be.ok;
+    });
 
     Object.keys(URL_EXPERIMENT_MAPPING).forEach(expFlagValue => {
       it(`exp flag=${expFlagValue} should set eid attribute`, () => {
