@@ -192,11 +192,17 @@ amp-story-page.i-amphtml-layout-container {
   display: block !important;
 }
 
+/* Setting `translateY` distances as a trick so that the runtime schedules
+ * layout for the next N pages. The default value (1000%) means that pages are
+ * not be automatically laid out. Max distance is set to 3 since we don't want
+ * to schedule any further pages. */
+
 amp-story:not([desktop]) >
     amp-story-page.i-amphtml-layout-container:not([active]) {
   transform: translateY(1000%) !important;
 }
 
+amp-story-page[active],
 amp-story:not([desktop]) > amp-story-page[distance=0] {
   transform: translateY(0) !important;
 }
@@ -211,10 +217,6 @@ amp-story:not([desktop]) > amp-story-page[distance=2] {
 
 amp-story:not([desktop]) > amp-story-page[distance=3] {
   transform: translateY(300%) !important;
-}
-
-amp-story-page[active] {
-  transform: translateY(0) !important;
 }
 
 .i-amphtml-story-bookend-active:not([desktop]) > amp-story-page[active] {
