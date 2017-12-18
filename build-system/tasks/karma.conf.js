@@ -190,10 +190,6 @@ module.exports = {
     testName: 'AMP HTML on Sauce',
     tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER,
     startConnect: false,
-    connectOptions: {
-      port: 5757,
-      logfile: 'sauce_connect.log',
-    },
   },
 
   client: {

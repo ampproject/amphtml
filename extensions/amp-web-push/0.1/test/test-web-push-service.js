@@ -594,7 +594,7 @@ describes.realWin('web-push-service subscribing', {
     });
   });
 
-  it('should forward amp-web-push-subscribe message to SW', done => {
+  it('should forward amp-web-push-subscribe message to SW', () => {
     let iframeWindowControllerMock = null;
 
     return setupHelperIframe().then(() => {
@@ -607,7 +607,7 @@ describes.realWin('web-push-service subscribing', {
           'messageServiceWorker').callsFake(
           message => {
             if (message.topic === 'amp-web-push-subscribe') {
-              done();
+              return Promise.resolve();
             }
           });
       webPush.subscribeForPushRemotely();
@@ -717,7 +717,7 @@ describes.realWin('web-push-service unsubscribing', {
     webPush = new WebPushService(env.ampdoc);
   });
 
-  it('should forward amp-web-push-unsubscribe message to SW', done => {
+  it('should forward amp-web-push-unsubscribe message to SW', () => {
     let iframeWindowControllerMock = null;
 
     return setupHelperIframe().then(() => {
@@ -730,7 +730,7 @@ describes.realWin('web-push-service unsubscribing', {
           'messageServiceWorker').callsFake(
           message => {
             if (message.topic === 'amp-web-push-unsubscribe') {
-              done();
+              return Promise.resolve();
             }
           });
       webPush.unsubscribeFromPushRemotely();
