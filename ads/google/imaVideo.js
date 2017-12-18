@@ -993,8 +993,8 @@ function onMessage(global, event) {
           }
         }
         break;
-      case 'onScroll':
-      case 'onAdRequestTimeout':
+      case 'onFirstScroll':
+      case 'onAdRequestDelayTimeout':
         if (!adsRequested) {
           requestAds();
         }

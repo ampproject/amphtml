@@ -78,6 +78,12 @@ class AmpImaVideo extends AMP.BaseElement {
     /** @private {?String} */
     this.preconnectTrack_ = null;
 
+    /**
+     * Maps events to their unlisteners.
+     * @private {!Object<string, function()>}
+     */
+    this.unlisteners_ = {};
+
     /** @private {!ImaPlayerData} */
     this.playerData_ = new ImaPlayerData();
   }
@@ -89,11 +95,14 @@ class AmpImaVideo extends AMP.BaseElement {
 
     this.viewport_ = this.getViewport();
     if (this.element.getAttribute('data-delay-ad-request') === 'true') {
-      this.viewport_.onScroll(() => { this.sendCommand_('onScroll'); });
+      this.unlisteners_['onFirstScroll'] =
+          this.viewport_.onScroll(() => {
+            this.sendCommand_('onFirstScroll');
+          });
       // Request ads after 3 seconds, if something else doesn't trigger an ad
       // request before that.
-      this.win.setTimeout(
-          () => { this.sendCommand_('onAdRequestTimeout'); }, 3000);
+      Services.timerFor(this.win).delay(
+          () => { this.sendCommand_('onAdRequestDelayTimeout'); }, 3000);
 
     }
 
@@ -228,6 +237,10 @@ class AmpImaVideo extends AMP.BaseElement {
           'args': opt_args || '',
         })), '*');
       });
+    }
+    // If we have an unlistener for this command, call it.
+    if (this.unlisteners_[command]) {
+      this.unlisteners_[command]();
     }
   }
 
