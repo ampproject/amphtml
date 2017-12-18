@@ -115,6 +115,7 @@ declareExtension('amp-pinterest', '0.1', true);
 declareExtension('amp-playbuzz', '0.1', true);
 declareExtension('amp-reach-player', '0.1', false);
 declareExtension('amp-reddit', '0.1', false);
+declareExtension('amp-riddle-quiz', '0.1', false);
 declareExtension('amp-share-tracking', '0.1', false);
 declareExtension('amp-sidebar', '0.1', true);
 declareExtension('amp-sidebar', '1.0', true);
@@ -125,6 +126,7 @@ declareExtension('amp-story', '0.1', true);
 declareExtension('amp-selector', '0.1', true);
 declareExtension('amp-web-push', '0.1', true);
 declareExtension('amp-position-observer', '0.1', false);
+declareExtension('amp-date-picker', '0.1', true);
 
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
@@ -545,7 +547,7 @@ function buildExtensionJs(path, name, version, options) {
     watch: options.watch,
     preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
     minify: options.minify,
-    toName:  name + '-' + version + '.max.js',
+    toName: name + '-' + version + '.max.js',
     minifiedName: name + '-' + version + '.js',
     latestName: name + '-latest.js',
     extraGlobs: options.extraGlobs,
@@ -779,19 +781,14 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
       });
 }
 
-/**
- * Synchronously concatenates the given files into the given destination
- *
- * @param {string} destFilePath File path to write the concatenated files to
- * @param {Array<string>} files List of file paths to concatenate
- */
-function concatFiles(destFilePath, files) {
-  var all = files.map(function(filePath) {
-    return fs.readFileSync(filePath, 'utf-8');
-  });
-
-  fs.writeFileSync(destFilePath, all.join(';'), 'utf-8');
-}
+const MODULE_SEPARATOR = ';';
+const EXTENSION_BUNDLE_MAP = {
+  'amp-viz-vega.js': [
+    'third_party/d3/d3.js',
+    'third_party/d3-geo-projection/d3-geo-projection.js',
+    'third_party/vega/vega.js',
+  ],
+};
 
 /**
  * Allows (ap|pre)pending to the already compiled, minified JS file
@@ -800,15 +797,23 @@ function concatFiles(destFilePath, files) {
  * @param {string} destFilePath File path to the compiled JS file
  */
 function appendToCompiledFile(srcFilename, destFilePath) {
-  if (srcFilename == 'amp-viz-vega.js') {
-    // Prepend minified d3 and vega third_party to compiled amp-viz-vega.js
-    concatFiles(destFilePath, [
-      'third_party/d3/d3.js',
-      'third_party/d3-geo-projection/d3-geo-projection.js',
-      'third_party/vega/vega.js',
-      destFilePath,
-    ]);
+  const bundleFiles = EXTENSION_BUNDLE_MAP[srcFilename];
+  if (bundleFiles) {
+    const newSource = concatFilesToString(bundleFiles.concat([destFilePath]));
+    fs.writeFileSync(destFilePath, newSource, 'utf8');
   }
+}
+
+/**
+ * Synchronously concatenates the given files into a string.
+ *
+ * @param {Array<string>} files A list of file paths.
+ * @return {string} The concatenated contents of the given files.
+ */
+function concatFilesToString(files) {
+  return files.map(function(filePath) {
+    return fs.readFileSync(filePath, 'utf8');
+  }).join(MODULE_SEPARATOR);
 }
 
 /**
@@ -834,11 +839,12 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     return closureCompile(
         srcDir + srcFilename, destDir, options.minifiedName, options)
         .then(function() {
-          appendToCompiledFile(srcFilename, destDir + '/' + options.minifiedName);
+          const destPath = destDir + '/' + options.minifiedName;
+          appendToCompiledFile(srcFilename, destPath);
           fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
           if (options.latestName) {
             fs.copySync(
-                destDir + '/' + options.minifiedName,
+                destPath,
                 destDir + '/' + options.latestName);
           }
         })

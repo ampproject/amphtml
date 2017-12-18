@@ -21,6 +21,8 @@ import {
   closestNode,
   escapeCssSelectorIdent,
   iterateCursor,
+  removeElement,
+  childElementsByTag,
 } from './dom';
 import {installCssTransformer} from './style-installer';
 import {
@@ -122,9 +124,9 @@ function createShadowRootPolyfill(hostElement) {
 
   // Shadow root.
   const shadowRoot = /** @type {!ShadowRoot} */ (
-      // Cast to ShadowRoot even though it is an Element
-      // TODO(@dvoytenko) Consider to switch to a type union instead.
-      /** @type {?}  */ (doc.createElement('i-amphtml-shadow-root')));
+    // Cast to ShadowRoot even though it is an Element
+    // TODO(@dvoytenko) Consider to switch to a type union instead.
+    /** @type {?}  */ (doc.createElement('i-amphtml-shadow-root')));
   hostElement.appendChild(shadowRoot);
   hostElement.shadowRoot = hostElement.__AMP_SHADOW_ROOT = shadowRoot;
 
@@ -136,7 +138,7 @@ function createShadowRootPolyfill(hostElement) {
   shadowRoot.getElementById = function(id) {
     const escapedId = escapeCssSelectorIdent(win, id);
     return /** @type {HTMLElement|null} */ (
-        shadowRoot./*OK*/querySelector(`#${escapedId}`));
+      shadowRoot./*OK*/querySelector(`#${escapedId}`));
   };
 
   // The styleSheets property should have a list of local styles.
@@ -554,6 +556,7 @@ export class ShadowDomWriterStreamer {
       const inputBody = dev().assert(this.parser_.body);
       const targetBody = dev().assert(this.targetBody_);
       let transferCount = 0;
+      removeNoScriptElements(inputBody);
       while (inputBody.firstChild) {
         transferCount++;
         targetBody.appendChild(inputBody.firstChild);
@@ -679,6 +682,7 @@ export class ShadowDomWriterBulk {
       const inputBody = doc.body;
       const targetBody = this.onBody_(doc);
       let transferCount = 0;
+      removeNoScriptElements(inputBody);
       while (inputBody.firstChild) {
         transferCount++;
         targetBody.appendChild(inputBody.firstChild);
@@ -691,4 +695,21 @@ export class ShadowDomWriterBulk {
     // EOF.
     this.onEnd_();
   }
+}
+
+/*
+ * Remove any noscript elements.
+ * @param {!Element} parent
+ *
+ * According to the spec (https://w3c.github.io/DOM-Parsing/#the-domparser-interface),
+ * with `DOMParser().parseFromString`, contents of `noscript` get parsed as markup,
+ * so we need to remove them manually.
+ * Why? ¯\_(ツ)_/¯
+ * `createHTMLDocument()` seems to behave the same way.
+ */
+function removeNoScriptElements(parent) {
+  const noscriptElements = childElementsByTag(parent, 'noscript');
+  iterateCursor(noscriptElements, element => {
+    removeElement(element);
+  });
 }

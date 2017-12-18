@@ -24,8 +24,8 @@ const through = require('through2');
 const util = require('gulp-util');
 
 const tableHeaders = [
- ['selector', 'z-index', 'file'],
- ['---', '---', '---'],
+  ['selector', 'z-index', 'file'],
+  ['---', '---', '---'],
 ];
 
 const tableOptions = {

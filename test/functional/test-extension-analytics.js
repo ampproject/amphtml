@@ -15,14 +15,14 @@
  */
 
 import {
-    getServiceForDoc,
-    registerServiceBuilderForDoc,
-    resetServiceForTesting,
+  getServiceForDoc,
+  registerServiceBuilderForDoc,
+  resetServiceForTesting,
 } from '../../src/service';
 import {
-    insertAnalyticsElement,
-    useAnalyticsInSandbox,
-    CustomEventReporterBuilder,
+  insertAnalyticsElement,
+  useAnalyticsInSandbox,
+  CustomEventReporterBuilder,
 } from '../../src/extension-analytics';
 import {registerElement} from '../../src/service/custom-element-registry';
 import {Services} from '../../src/services';
@@ -60,7 +60,7 @@ describes.realWin('extension-analytics', {
       const baseEle = new BaseElement(ele);
       registerServiceBuilderForDoc(
           ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
-            // Force instantiation
+      // Force instantiation
       getServiceForDoc(ampdoc, 'amp-analytics-instrumentation');
       const config = {
         'requests': {
@@ -194,7 +194,7 @@ describes.realWin('extension-analytics', {
       resetServiceForTesting(env.win, 'amp-analytics-instrumentation');
       registerServiceBuilderForDoc(
           ampdoc, 'amp-analytics-instrumentation', MockInstrumentation);
-            // Force instantiation
+      // Force instantiation
       getServiceForDoc(ampdoc, 'amp-analytics-instrumentation');
 
       registerElement(env.win, 'amp-test', BaseElement);
@@ -293,7 +293,7 @@ describes.realWin('extension-analytics', {
         yield macroTask();
         expect(parentEle.querySelector('amp-analytics')).to.be.null;
         parentEle.layoutCallback();
-                //parentEle.signals().signal(CommonSignals.LOAD_START);
+        //parentEle.signals().signal(CommonSignals.LOAD_START);
         yield macroTask();
         expect(parentEle.querySelector('amp-analytics')).to.not.be.null;
       });

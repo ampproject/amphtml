@@ -286,7 +286,7 @@ export class ClickHandler {
       // See https://github.com/ampproject/amphtml/issues/5334 for more details.
       this.viewport_./*OK*/scrollIntoView(elem);
       Services.timerFor(this.ampdoc.win).delay(() =>
-          this.viewport_./*OK*/scrollIntoView(dev().assertElement(elem)), 1);
+        this.viewport_./*OK*/scrollIntoView(dev().assertElement(elem)), 1);
     } else {
       dev().warn(TAG,
           `failed to find element with id=${hash} or a[name=${hash}]`);
