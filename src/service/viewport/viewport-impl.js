@@ -474,9 +474,9 @@ export class Viewport {
    * @return {!Promise}
    */
   animateScrollIntoView(element,
-                        duration = 500,
-                        curve = 'ease-in',
-                        pos = 'top') {
+    duration = 500,
+    curve = 'ease-in',
+    pos = 'top') {
     const elementRect = this.binding_.getLayoutRect(element);
     let offset;
     switch (pos) {
@@ -533,6 +533,11 @@ export class Viewport {
    * @param {!function(!ViewportResizedEventDef)} handler
    * @return {!UnlistenDef}
    */
+
+  // Note that there is a known bug in Webkit that causes window.innerWidth
+  // and window.innerHeight values to be incorrect after resize. A temporary
+  // fix is to add a 500 ms delay before computing these values.
+  // Link: https://bugs.webkit.org/show_bug.cgi?id=170595
   onResize(handler) {
     return this.resizeObservable_.add(handler);
   }
@@ -794,7 +799,7 @@ export class Viewport {
     }
     if (this.viewportMeta_ === undefined) {
       this.viewportMeta_ = /** @type {?HTMLMetaElement} */ (
-          this.globalDoc_.querySelector('meta[name=viewport]'));
+        this.globalDoc_.querySelector('meta[name=viewport]'));
       if (this.viewportMeta_) {
         this.originalViewportMetaString_ = this.viewportMeta_.content;
       }
@@ -974,7 +979,7 @@ export class Viewport {
   resize_() {
     this.rect_ = null;
     const oldSize = this.size_;
-    this.size_ = null;  // Need to recalc.
+    this.size_ = null; // Need to recalc.
     const newSize = this.getSize();
     this.fixedLayer_.update().then(() => {
       const widthChanged = !oldSize || oldSize.width != newSize.width;

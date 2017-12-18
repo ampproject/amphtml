@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../../../src/log';
-import {isFiniteNumber} from '../../../src/types';
+import {dev} from '../../../src/log';
 import {Observable} from '../../../src/observable';
-
-const MIN_REPEAT_INTERVAL = 200;
-
 
 /**
  * This class implements visibility calculations based on the
@@ -54,34 +50,14 @@ export class VisibilityModel {
       continuousTimeMin: Number(spec['continuousTimeMin']) || 0,
       continuousTimeMax: Number(spec['continuousTimeMax']) || Infinity,
     };
+    // Above, if visiblePercentageMax was not specified, assume 100%.
+    // Here, do allow 0% to be the value if that is what was specified.
+    if (String(spec['visiblePercentageMax']).trim() === '0') {
+      this.spec_.visiblePercentageMax = 0;
+    }
 
     /** @private {boolean} */
-    this.repeat_ = false;
-
-    /** @private {?number} */
-    this.repeatInterval_ = null;
-
-    let repeat = spec['repeat'];
-    if (repeat === true) {
-      this.repeat_ = true;
-    } else {
-      repeat = Number(spec['repeat']);
-      if (isFiniteNumber(repeat)) {
-        const repeatInterval = Math.max(
-            this.spec_.totalTimeMin,
-            this.spec_.continuousTimeMin,
-            repeat);
-        if (repeatInterval >= MIN_REPEAT_INTERVAL) {
-          this.repeat_ = true;
-          this.repeatInterval_ = repeatInterval;
-        } else {
-          user().error(
-              'AMP-ANALYTICS',
-              `Cannot repeat with interval less than ${MIN_REPEAT_INTERVAL}, ` +
-              ' repeat set to false');
-        }
-      }
-    }
+    this.repeat_ = spec['repeat'] === true;
 
     /** @private {?function()} */
     this.eventResolver_ = null;
@@ -114,7 +90,7 @@ export class VisibilityModel {
     this.createReportReadyPromise_ = null;
 
     /** @private {?number} */
-    this.scheduledRunId_ = null;
+    this.scheduledUpdateTimeoutId_ = null;
 
     /** @private {boolean} */
     this.matchesVisibility_ = false;
@@ -156,7 +132,7 @@ export class VisibilityModel {
     this.lastVisibleUpdateTime_ = 0;
 
     /** @private {boolean} */
-    this.waitToRefresh_ = false;
+    this.waitToReset_ = false;
 
     /** @private {?number} */
     this.scheduleRepeatId_ = null;
@@ -170,7 +146,7 @@ export class VisibilityModel {
    * Note: loadTimeVisibility is an exception.
    * @private
    */
-  refresh_() {
+  reset_() {
     dev().assert(!this.eventResolver_,
         'Attempt to refresh visible event before previous one resolve');
     this.eventPromise_ = new Promise(resolve => {
@@ -179,7 +155,6 @@ export class VisibilityModel {
     this.eventPromise_.then(() => {
       this.onTriggerObservable_.fire();
     });
-    this.waitToRefresh_ = false;
     this.scheduleRepeatId_ = null;
     this.everMatchedVisibility_ = false;
     this.matchesVisibility_ = false;
@@ -193,42 +168,23 @@ export class VisibilityModel {
     this.minVisiblePercentage_ = 0;
     this.maxVisiblePercentage_ = 0;
     this.lastVisibleUpdateTime_ = 0;
-    this.waitToRefresh_ = false;
+    this.waitToReset_ = false;
   }
 
   /**
    * Function that visibilityManager can used to dispose model or reset model
    */
-  disposeOrReset() {
-    // We may need a maxIntervalWindow to stop visible event even with repeat
-    // true
+  maybeDispose() {
     if (!this.repeat_) {
       this.dispose();
-      return;
-    }
-    if (this.repeatInterval_) {
-      const now = Date.now();
-      const interval = now - this.firstVisibleTime_;
-
-      // Unit in milliseconds
-      const timeUntilRepeat = Math.max(0, this.repeatInterval_ - interval);
-      this.ready_ = false;
-      dev().assert(!this.scheduleRepeatId_, 'Should not repeat twice');
-      this.scheduleRepeatId_ = setTimeout(() => {
-        this.refresh_();
-        this.setReady(true);
-      }, timeUntilRepeat);
-    } else {
-      // Reset after element falls out of (minPercentage, maxPercentage]
-      this.waitToRefresh_ = true;
     }
   }
 
   /** @override */
   dispose() {
-    if (this.scheduledRunId_) {
-      clearTimeout(this.scheduledRunId_);
-      this.scheduledRunId_ = null;
+    if (this.scheduledUpdateTimeoutId_) {
+      clearTimeout(this.scheduledUpdateTimeoutId_);
+      this.scheduledUpdateTimeoutId_ = null;
     }
     if (this.scheduleRepeatId_) {
       clearTimeout(this.scheduleRepeatId_);
@@ -335,9 +291,10 @@ export class VisibilityModel {
    */
   update_(visibility) {
     // Update state and check if all conditions are satisfied
-    if (this.waitToRefresh_) {
+    if (this.waitToReset_) {
       if (!this.isVisibilityMatch_(visibility)) {
-        this.refresh_();
+        // We were waiting for a condition to become unmet, and now it has
+        this.reset_();
       }
       return;
     }
@@ -346,13 +303,18 @@ export class VisibilityModel {
     }
     const conditionsMet = this.updateCounters_(visibility);
     if (conditionsMet) {
-      if (this.scheduledRunId_) {
-        clearTimeout(this.scheduledRunId_);
-        this.scheduledRunId_ = null;
+      if (this.scheduledUpdateTimeoutId_) {
+        clearTimeout(this.scheduledUpdateTimeoutId_);
+        this.scheduledUpdateTimeoutId_ = null;
       }
       if (this.reportReady_) {
+        // TODO(jonkeller): Can we eliminate eventResolver_?
         this.eventResolver_();
         this.eventResolver_ = null;
+        if (this.repeat_) {
+          this.waitToReset_ = true;
+          this.continuousTime_ = 0;
+        }
       } else if (this.createReportReadyPromise_) {
         // Report when report ready promise resolve
         const reportReadyPromise = this.createReportReadyPromise_();
@@ -364,18 +326,22 @@ export class VisibilityModel {
           this.update();
         });
       }
-    } else if (this.matchesVisibility_ && !this.scheduledRunId_) {
+    } else if (this.matchesVisibility_ && !this.scheduledUpdateTimeoutId_) {
       // There is unmet duration condition, schedule a check
       const timeToWait = this.computeTimeToWait_();
       if (timeToWait > 0) {
-        this.scheduledRunId_ = setTimeout(() => {
-          this.scheduledRunId_ = null;
+        this.scheduledUpdateTimeoutId_ = setTimeout(() => {
           this.update();
+          if (!this.eventResolver_) {
+            this.reset_();
+            this.setReady(true);
+          }
+          this.scheduledUpdateTimeoutId_ = null;
         }, timeToWait);
       }
-    } else if (!this.matchesVisibility_ && this.scheduledRunId_) {
-      clearTimeout(this.scheduledRunId_);
-      this.scheduledRunId_ = null;
+    } else if (!this.matchesVisibility_ && this.scheduledUpdateTimeoutId_) {
+      clearTimeout(this.scheduledUpdateTimeoutId_);
+      this.scheduledUpdateTimeoutId_ = null;
     }
   }
 
@@ -387,6 +353,16 @@ export class VisibilityModel {
   isVisibilityMatch_(visibility) {
     dev().assert(visibility >= 0 && visibility <= 1,
         'invalid visibility value: %s', visibility);
+    // Special case: If visiblePercentageMin is 100%, then it doesn't make
+    // sense to do the usual (min, max] since that would never be true.
+    if (this.spec_.visiblePercentageMin == 1) {
+      return visibility == 1;
+    }
+    // Special case: If visiblePercentageMax is 0%, then we
+    // want to ping when the creative becomes not visible.
+    if (this.spec_.visiblePercentageMax == 0) {
+      return visibility == 0;
+    }
     return visibility > this.spec_.visiblePercentageMin &&
         visibility <= this.spec_.visiblePercentageMax;
   }
@@ -431,8 +407,8 @@ export class VisibilityModel {
       this.lastVisibleUpdateTime_ = now;
       this.minVisiblePercentage_ =
           this.minVisiblePercentage_ > 0 ?
-          Math.min(this.minVisiblePercentage_, visibility) :
-          visibility;
+            Math.min(this.minVisiblePercentage_, visibility) :
+            visibility;
       this.maxVisiblePercentage_ =
           Math.max(this.maxVisiblePercentage_, visibility);
       this.lastVisibleTime_ = now;
@@ -447,7 +423,7 @@ export class VisibilityModel {
       // Reset for next visibility event.
       this.lastVisibleUpdateTime_ = 0;
       this.totalVisibleTime_ += timeSinceLastUpdate;
-      this.continuousTime_ = 0;  // Clear only after max is calculated above.
+      this.continuousTime_ = 0; // Clear only after max is calculated above.
       this.lastVisibleTime_ = now;
     }
 

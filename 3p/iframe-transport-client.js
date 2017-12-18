@@ -93,7 +93,7 @@ export class IframeTransportClient {
     return this.creativeIdToContext_[creativeId] ||
         (this.creativeIdToContext_[creativeId] =
             new IframeTransportContext(this.win_, this.iframeMessagingClient_,
-            creativeId, this.vendor_));
+              creativeId, this.vendor_));
   }
 
   /**
@@ -129,7 +129,7 @@ export class IframeTransportContext {
 
     user().assert(win['onNewContextInstance'] &&
         typeof win['onNewContextInstance'] == 'function',
-        'Must implement onNewContextInstance in ' + win.location.href);
+    'Must implement onNewContextInstance in ' + win.location.href);
     win['onNewContextInstance'](this);
   }
 

@@ -113,14 +113,14 @@ describe('Activity getTotalEngagedTime', () => {
       whenFirstVisibleResolve = resolve;
     });
     sandbox.stub(viewer, 'whenFirstVisible').returns(whenFirstVisiblePromise);
-    sandbox.stub(viewer, 'onVisibilityChanged', handler => {
+    sandbox.stub(viewer, 'onVisibilityChanged').callsFake(handler => {
       visibilityObservable.add(handler);
     });
 
     installViewportServiceForDoc(ampdoc);
     viewport = Services.viewportForDoc(ampdoc);
 
-    sandbox.stub(viewport, 'onScroll', handler => {
+    sandbox.stub(viewport, 'onScroll').callsFake(handler => {
       scrollObservable.add(handler);
     });
 
