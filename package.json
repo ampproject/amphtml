@@ -54,7 +54,7 @@
     "chai-as-promised": "7.1.1",
     "chalk": "1.1.3",
     "connect-header": "0.0.5",
-    "cssnano": "3.10.0",
+    "cssnano": "4.0.0-rc.2",
     "del": "2.2.0",
     "derequire": "2.0.6",
     "envify": "4.1.0",
