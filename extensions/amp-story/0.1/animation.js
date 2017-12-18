@@ -113,7 +113,7 @@ class AnimationRunner {
       webAnimationBuilderPromise.then(builder =>
         builder.createRunner(webAnimDef)));
 
-    /** @private @const {!function():!Object<string, *>} */
+    /** @private @const {!Promise<!Object<string, *>>} */
     this.firstFrameProps_ =
         this.keyframes_.then(keyframes => omit(keyframes[0], ['offset']));
 
