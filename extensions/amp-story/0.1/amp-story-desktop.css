@@ -81,9 +81,10 @@ amp-story-page.i-amphtml-story-page-shown {
 
 [desktop] .i-amphtml-story-button-container {
   position: absolute;
-  width: 25vw;
+  width: calc(50vw - (9/16 * 70vh)/2 - 40px);
   top: 0;
   height: 100vh;
+  z-index: 1;
 }
 
 [desktop] .next-container {
@@ -150,8 +151,8 @@ amp-story-page.i-amphtml-story-page-shown {
   left: 50%!important;
   right: auto!important;
   margin: auto!important;
-  max-height: 70vh!important;
-  max-width: calc(9/16 * 70vh) !important;
+  height: 70vh!important;
+  width: calc(9/16 * 70vh) !important;
   box-shadow: 0 0 15px rgba(0, 0, 0, .4)!important;
   min-width: 348px !important;
   min-height: 619px !important;

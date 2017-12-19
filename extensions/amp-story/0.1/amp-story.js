@@ -210,6 +210,12 @@ export class AmpStory extends AMP.BaseElement {
     this.prevButton_ = null;
 
     /** @private {?Element} */
+    this.nextButtonContainer_ = null;
+
+    /** @private {?Element} */
+    this.prevButtonContainer_ = null;
+
+    /** @private {?Element} */
     this.topBar_ = null;
 
     /** @private {?ShareWidget} */
@@ -435,11 +441,17 @@ export class AmpStory extends AMP.BaseElement {
     this.prevButton_ =
         this.element.querySelector('.i-amphtml-story-button-prev');
 
-    this.nextButton_.addEventListener('click', () => {
+    this.nextButtonContainer_ = this.element.querySelector(
+        '.i-amphtml-story-button-container.next-container');
+
+    this.prevButtonContainer_ = this.element.querySelector(
+        '.i-amphtml-story-button-container.prev-container');
+
+    this.nextButtonContainer_.addEventListener('click', () => {
       this.next_();
     });
 
-    this.prevButton_.addEventListener('click', () => {
+    this.prevButtonContainer_.addEventListener('click', () => {
       this.previous_();
     });
   }
