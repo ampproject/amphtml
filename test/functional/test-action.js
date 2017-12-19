@@ -1018,7 +1018,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     action = new ActionService(ampdoc, document);
     const originalTrigger = action.trigger;
     triggerPromise = new Promise((resolve, reject) => {
-      sandbox.stub(action, 'trigger', () => {
+      sandbox.stub(action, 'trigger').callsFake(() => {
         try {
           originalTrigger.apply(action, action.trigger.getCall(0).args);
           resolve();
@@ -1095,7 +1095,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
         element,
         'change',
         sinon.match(object =>
-            object.detail.checked && object.detail.value == 'foo'));
+          object.detail.checked && object.detail.value == 'foo'));
   });
 
   it('should trigger change event for <input type="range"> elements', () => {

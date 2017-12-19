@@ -212,7 +212,7 @@ describes.realWin('amp-install-serviceworker', {
       const appendChild = install.appendChild;
       install.appendChild = child => {
         iframe = child;
-        iframe.complete = true;  // Mark as loaded.
+        iframe.complete = true; // Mark as loaded.
         expect(iframe.src).to.equal(iframeSrc);
         iframe.src = 'about:blank';
         appendChild.call(install, iframe);
@@ -372,7 +372,7 @@ describes.fakeWin('url rewriter', {
     let preloadStub;
 
     beforeEach(() => {
-      deferMutateStub = sandbox.stub(implementation, 'deferMutate',
+      deferMutateStub = sandbox.stub(implementation, 'deferMutate').callsFake(
           callback => callback());
       preloadStub = sandbox.stub(implementation, 'preloadShell_');
       viewer.setVisibilityState_('visible');

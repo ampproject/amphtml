@@ -172,7 +172,8 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
 
     container.appendChild(div);
 
-    sandbox.stub(DomFingerprint, 'generate', () => 'MY-MOCK-FINGERPRINT');
+    sandbox.stub(DomFingerprint, 'generate').callsFake(
+        () => 'MY-MOCK-FINGERPRINT');
 
     const iframe = getIframe(window, div, '_ping_', {clientId: 'cidValue'});
     const src = iframe.src;
@@ -292,12 +293,12 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
     window.AMP_MODE = {};
     let match =
         /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame\.html$/
-        .exec(getDefaultBootstrapBaseUrl(window));
+            .exec(getDefaultBootstrapBaseUrl(window));
     const domain = match && match[1];
     expect(domain).to.be.ok;
     match =
         /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame2\.html$/
-        .exec(getDefaultBootstrapBaseUrl(window, 'frame2'));
+            .exec(getDefaultBootstrapBaseUrl(window, 'frame2'));
     expect(match && match[1]).to.equal(domain);
   });
 

@@ -384,7 +384,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
           const invocationFromEvent2 = {
             method: 'gotoAndPlayNTimes',
             args: {id: 'page1', label: 'foo', N: 1},
-            event: {eventName: 'event-2'},  // Different event.
+            event: {eventName: 'event-2'}, // Different event.
             satisfiesTrust: () => true,
           };
 
@@ -406,7 +406,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
       it('should trigger timeline events', () => {
         const triggeredAmpEventNames = [];
         const triggeredEvents = [];
-        sandbox.stub(Services.actionServiceForDoc(ampdoc), 'trigger',
+        sandbox.stub(Services.actionServiceForDoc(ampdoc), 'trigger').callsFake(
             (target, name, event) => {
               triggeredAmpEventNames.push(name);
               triggeredEvents.push(event);

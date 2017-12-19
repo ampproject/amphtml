@@ -55,7 +55,7 @@ describes.realWin('amp-story', {
 
   function createEvent(eventType) {
     const eventObj = document.createEventObject ?
-        document.createEventObject() : document.createEvent('Events');
+      document.createEventObject() : document.createEvent('Events');
     if (eventObj.initEvent) {
       eventObj.initEvent(eventType, true, true);
     }
@@ -64,7 +64,7 @@ describes.realWin('amp-story', {
 
   function stubViewportSize(width, height) {
     sandbox./*OK*/stub(element.implementation_.getViewport(), 'getSize', () =>
-        ({width, height}));
+      ({width, height}));
   }
 
   beforeEach(() => {
@@ -75,7 +75,7 @@ describes.realWin('amp-story', {
     story = new AmpStory(element);
     // TODO(alanorozco): Test active page event triggers once the stubbable
     // `Services` module is part of the amphtml-story repo.
-    // sandbox.stub(element.implementation_, 'triggerActiveEventForPage_', NOOP);
+    // sandbox.stub(element.implementation_, 'triggerActiveEventForPage_').callsFake(NOOP);
   });
 
   afterEach(() => {
@@ -99,7 +99,7 @@ describes.realWin('amp-story', {
             'installConsumer');
 
     createPages(element, 5, [firstPageId]);
-    const appendChild = sandbox.stub(element, 'appendChild', NOOP);
+    const appendChild = sandbox.stub(element, 'appendChild').callsFake(NOOP);
 
     element.build();
 
@@ -249,7 +249,7 @@ describes.realWin('amp-story', {
     expect(result.length).to.equal(pages.length);
 
     pages.forEach(page =>
-        expect(Array.prototype.includes.call(result, page)).to.be.true);
+      expect(Array.prototype.includes.call(result, page)).to.be.true);
   });
 
   // TODO(newmuis/amphtml-story#187): Re-enable this test.
@@ -261,7 +261,7 @@ describes.realWin('amp-story', {
     const page = win.document.createElement('div');
 
     const updateProgressBarStub =
-        sandbox.stub(impl.systemLayer_, 'updateProgressBar', NOOP);
+        sandbox.stub(impl.systemLayer_, 'updateProgressBar').callsFake(NOOP);
 
     appendEmptyPage(element, /* opt_active */ true);
 
@@ -302,18 +302,19 @@ describes.realWin('amp-story', {
     expect(pages[1].hasAttribute('active')).to.be.false;
 
     // Stubbing because we need to assert synchronously
-    sandbox.stub(element.implementation_, 'mutateElement', mutator => {
-      mutator();
-      return Promise.resolve();
-    });
+    sandbox.stub(element.implementation_, 'mutateElement').callsFake(
+        mutator => {
+          mutator();
+          return Promise.resolve();
+        });
 
     const eventObj = createEvent('keydown');
     eventObj.keyCode = KeyCodes.RIGHT_ARROW;
     eventObj.which = KeyCodes.RIGHT_ARROW;
     const docEl = win.document.documentElement;
     docEl.dispatchEvent ?
-        docEl.dispatchEvent(eventObj) :
-        docEl.fireEvent('onkeydown', eventObj);
+      docEl.dispatchEvent(eventObj) :
+      docEl.fireEvent('onkeydown', eventObj);
 
     expect(pages[0].hasAttribute('active')).to.be.false;
     expect(pages[1].hasAttribute('active')).to.be.true;

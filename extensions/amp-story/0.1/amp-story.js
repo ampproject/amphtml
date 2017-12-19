@@ -246,10 +246,10 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeListenersForDev_();
 
     this.navigationState_.observe(stateChangeEvent =>
-        (new AmpStoryAnalytics(this.element)).onStateChange(stateChangeEvent));
+      (new AmpStoryAnalytics(this.element)).onStateChange(stateChangeEvent));
 
     this.navigationState_.observe(stateChangeEvent =>
-        this.variableService_.onStateChange(stateChangeEvent));
+      this.variableService_.onStateChange(stateChangeEvent));
 
     // Mute `amp-story` in beginning.
     this.mute_();
@@ -695,7 +695,7 @@ export class AmpStory extends AMP.BaseElement {
     // with upstream.
     Services.actionServiceForDoc(this.element)
         .trigger(this.activePage_.element, 'active', /* event */ null,
-        ActionTrust.HIGH);
+            ActionTrust.HIGH);
   }
 
 
@@ -873,7 +873,7 @@ export class AmpStory extends AMP.BaseElement {
     const srcElement = scopedQuerySelector(fillElement, '[src]');
 
     const fillPoster = fillPosterElement ?
-        fillPosterElement.getAttribute('poster') : '';
+      fillPosterElement.getAttribute('poster') : '';
     const src = srcElement ? srcElement.getAttribute('src') : '';
 
     return fillPoster || src;
@@ -909,6 +909,8 @@ export class AmpStory extends AMP.BaseElement {
     this.buildBookend_().then(() => {
       this.systemLayer_.hideDeveloperLog();
 
+      this.activePage_.pause();
+
       this.exitFullScreen_();
 
       this.vsync_.mutate(() => {
@@ -928,9 +930,11 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
+    this.activePage_.setActive(true);
+    this.bookend_.hide();
+
     this.vsync_.mutate(() => {
       this.element.classList.remove('i-amphtml-story-bookend-active');
-      this.bookend_.hide();
     });
   }
 
@@ -1003,9 +1007,7 @@ export class AmpStory extends AMP.BaseElement {
       pagesByDistance.forEach((pageIds, distance) => {
         pageIds.forEach(pageId => {
           const page = this.getPageById_(pageId);
-          setImportantStyles(page.element, {
-            transform: `translateY(${100 * distance}%)`,
-          });
+          page.element.setAttribute('distance', distance);
         });
       });
     });

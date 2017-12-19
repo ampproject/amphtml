@@ -22,7 +22,7 @@ import {
 import {Services} from '../../../../src/services';
 import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
 import {
-  AmpAdXOriginIframeHandler,    // eslint-disable-line no-unused-vars
+  AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {
   createElementWithAttributes,
@@ -64,12 +64,13 @@ describes.realWin('amp-ad-network-adsense-impl', {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
-    sandbox.stub(AmpAdNetworkAdsenseImpl.prototype, 'getSigningServiceNames',
+    sandbox.stub(
+        AmpAdNetworkAdsenseImpl.prototype, 'getSigningServiceNames').callsFake(
         () => {
           return ['google'];
         });
     viewer = win.services.viewer.obj;
-    sandbox.stub(viewer, 'getReferrerUrl',
+    sandbox.stub(viewer, 'getReferrerUrl').callsFake(
         () => Promise.resolve('https://acme.org/'));
     element = createAdsenseImplElement({
       'data-ad-client': 'ca-adsense',
@@ -77,7 +78,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       'height': '50',
       'data-experiment-id': '8675309',
     }, doc);
-    sandbox.stub(element, 'tryUpgrade_', () => {});
+    sandbox.stub(element, 'tryUpgrade_').callsFake(() => {});
     doc.body.appendChild(element);
     impl = new AmpAdNetworkAdsenseImpl(element);
     impl.win['goog_identity_prom'] = Promise.resolve({});
@@ -98,7 +99,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
     // amp-ad.
     const iframe = doc.createElement('iframe');
     element.appendChild(iframe);
-    sandbox.stub(element, 'tryUpgrade_', () => {});
+    sandbox.stub(element, 'tryUpgrade_').callsFake(() => {});
     doc.body.appendChild(element);
     impl = new AmpAdNetworkAdsenseImpl(element);
     impl.buildCallback();
@@ -144,7 +145,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
         'layout': 'fixed',
       });
       impl = new AmpAdNetworkAdsenseImpl(element);
-      sandbox.stub(impl, 'getAmpDoc', () => ampdoc);
+      sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
       const extensions = Services.extensionsFor(impl.win);
       preloadExtensionSpy = sandbox.spy(extensions, 'preloadExtension');
     });
@@ -199,8 +200,8 @@ describes.realWin('amp-ad-network-adsense-impl', {
         'type': 'adsense',
       });
       impl = new AmpAdNetworkAdsenseImpl(element);
-      sandbox.stub(impl, 'getAmpDoc', () => ampdoc);
-      sandbox.stub(env.ampdocService, 'getAmpDoc', () => ampdoc);
+      sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
+      sandbox.stub(env.ampdocService, 'getAmpDoc').callsFake(() => ampdoc);
     });
 
     it('injects amp analytics', () => {
@@ -269,7 +270,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
 
       adBody.onclick = function(e) {
         expect(e.defaultPrevented).to.be.false;
-        e.preventDefault();  // Make the test not actually navigate.
+        e.preventDefault(); // Make the test not actually navigate.
         clickHandlerCalled++;
       };
       adBody.innerHTML = '<a ' +
@@ -300,7 +301,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
 
       adBody.onclick = function(e) {
         expect(e.defaultPrevented).to.be.false;
-        e.preventDefault();  // Make the test not actually navigate.
+        e.preventDefault(); // Make the test not actually navigate.
         clickHandlerCalled++;
       };
       adBody.innerHTML = '<a ' +
@@ -455,7 +456,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
           expect(impl.element.getAttribute('width')).to.equal('auto');
           return impl.getAdUrl().then(url =>
               // Ensure that "auto" doesn't appear anywhere here:
-              expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/));
+            expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/));
         });
     it('includes eid when in amp-auto-ads holdout control', () => {
       forceExperimentBranch(impl.win,
@@ -806,11 +807,11 @@ describes.realWin('amp-ad-network-adsense-impl', {
     }
 
     beforeEach(() => {
-      viewer.toggleRuntime();  // Turn runtime on for these tests.
+      viewer.toggleRuntime(); // Turn runtime on for these tests.
     });
 
     afterEach(() => {
-      viewer.toggleRuntime();  // Turn runtime off again.
+      viewer.toggleRuntime(); // Turn runtime off again.
 
       if (containerContainer != null && containerContainer.parentNode != null) {
         containerContainer.parentNode.removeChild(containerContainer);
