@@ -273,6 +273,11 @@ export class VisibilityManager {
         }
         const min = Number(percents[0]);
         const max = Number(percents[1]);
+        // Min and max must be valid percentages. Min may not be less than max.
+        // Max is inclusive. Min is usually exclusive, but there are two
+        // special cases: if min and max are both 0, or both 100, then both
+        // are inclusive. Otherwise it would not be possible to trigger an
+        // event on exactly 0% or 100%.
         if (min < 0 || max > 100 || min > max ||
             (min == max && min != 100 && max != 0)) {
           user().error(TAG,
