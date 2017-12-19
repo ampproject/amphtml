@@ -487,6 +487,11 @@ amp-story-page.i-amphtml-story-page-shown {
   margin: 0 !important;
 }
 
+[desktop] .i-amphtml-story-bookend-replay {
+  /* This is replaced with the forward button on desktop. */
+  display: none !important;
+}
+
 [desktop] .i-amphtml-story-bookend-overflow {
   margin-top: 0 !important;
   margin-bottom: 0 !important;
