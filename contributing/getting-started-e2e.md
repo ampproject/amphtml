@@ -156,7 +156,7 @@ amphtml uses Node.js, the Yarn package manager and the Gulp build system to buil
 * Install [NodeJS](https://nodejs.org/) version >= 6 (which includes npm)
 
 
-* Install [Yarn](https://yarnpkg.com/) version >= 1.0.2 (instructions [here](https://yarnpkg.com/en/docs/install), this may require elevated privileges using `sudo` on some platforms)
+* Install [Yarn](https://yarnpkg.com/) version >= 1.2.0 (instructions [here](https://yarnpkg.com/en/docs/install), this may require elevated privileges using `sudo` on some platforms)
 
 * In your local repository directory (e.g. `~/src/ampproject/amphtml`), install the packages that AMP uses by running
    ```
