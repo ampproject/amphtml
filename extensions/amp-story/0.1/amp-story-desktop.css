@@ -251,6 +251,10 @@ amp-story-page.i-amphtml-story-page-shown {
 }
 
 .i-amphtml-story-share {
+  display: none;
+}
+
+[desktop] .i-amphtml-story-share {
   display: flex!important;
   position: absolute!important;
   top: 0!important;
