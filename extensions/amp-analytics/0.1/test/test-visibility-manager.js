@@ -260,6 +260,38 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(root.models_).to.have.length(1);
   });
 
+  it('creates model for 0 percent and 100 percent', () => {
+    let spec = {visiblePercentageThresholds: [[0, 0]]};
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(1);
+    root.dispose();
+    spec = {visiblePercentageThresholds: [[100, 100]]};
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(1);
+    root.dispose();
+    spec = {visiblePercentageThresholds: [[0, 0], [100, 100]]};
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(2);
+    root.dispose();
+    spec = {
+      visiblePercentageThresholds: [[0, 0], [0, 50], [50, 100], [100, 100]],
+    };
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(4);
+    root.dispose();
+  });
+
+  it('does not allow min==max, when they are neither 0 nor 100', () => {
+    let spec = {visiblePercentageThresholds: [[50, 50]]};
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(0);
+    root.dispose();
+    spec = {visiblePercentageThresholds: [[0, 10], [10, 10], [30, 30]]};
+    root.listenRoot(spec, null, null, null);
+    expect(root.models_).to.have.length(1);
+    root.dispose();
+  });
+
   it('should dispose everything', () => {
     const modelsDisposed = sandbox.spy();
     const modelsCalled = sandbox.spy();
