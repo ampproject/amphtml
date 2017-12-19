@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Services} from '../../src/services';
 import {
   fontStylesheetTimeout,
 } from '../../src/font-stylesheet-timeout';
@@ -44,7 +43,6 @@ describes.realWin('font-stylesheet-timeout', {
         return responseStart;
       },
     });
-    const platform = Services.platformFor(win);
   });
 
   function addLink(opt_content, opt_href) {
@@ -66,6 +64,8 @@ describes.realWin('font-stylesheet-timeout', {
     clock.tick(10000);
     expect(win.document.querySelectorAll(
         'link[rel="stylesheet"]')).to.have.length(1);
+    expect(win.document.querySelector(
+        'link[rel="stylesheet"]')).to.equal(link);
     expect(win.document.querySelectorAll(
         'link[rel="stylesheet"][i-amphtml-timeout]')).to.have.length(0);
   });
