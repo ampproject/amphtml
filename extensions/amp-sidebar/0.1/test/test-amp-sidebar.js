@@ -131,8 +131,7 @@ describes.realWin('amp-sidebar 0.1 version', {
     });
   }
 
-  // TODO(dvoytenko, #12486): Make this test work with lolex v2.
-  describe.skip('amp-sidebar', () => {
+  describe('amp-sidebar', () => {
     it('should apply overlay class', () => {
       return getAmpSidebar().then(sidebarElement => {
         expect(sidebarElement.classList.contains('i-amphtml-overlay'));
