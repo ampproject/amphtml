@@ -409,7 +409,7 @@ export class AmpStory extends AMP.BaseElement {
   /** @private */
   buildPaginationButtons_() {
     this.paginationButtons_ = PaginationButtons.create(
-        this.getAmpDoc().win.document,
+        this.win.document,
         /* hasBookend */ () => this.loadBookendConfig_().then(bookendConfig =>
           bookendConfig && bookendConfig.relatedArticles &&
           bookendConfig.relatedArticles.length));
@@ -418,6 +418,11 @@ export class AmpStory extends AMP.BaseElement {
 
     this.navigationState_.observe(e =>
       this.paginationButtons_.onNavigationStateChange(e));
+  }
+
+  /** @visibleForTesting */
+  buildPaginationButtonsForTesting() {
+    this.buildPaginationButtons_();
   }
 
   /** @private */
