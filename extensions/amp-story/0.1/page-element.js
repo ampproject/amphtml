@@ -67,8 +67,8 @@ const ELEMENT_FAILED_CLASS_NAME = 'i-amphtml-story-page-element-failed';
 
 
 /**
- * CSS class for an element on an amp-story-page that indicates the element has
- * failed to load.
+ * CSS class for an element on an amp-story-page that indicates the element was
+ * hidden by a media query rule.
  * @const {string}
  */
 const HIDDEN_BY_MEDIA_QUERY_CLASS_NAME = 'i-amphtml-hidden-by-media-query';
