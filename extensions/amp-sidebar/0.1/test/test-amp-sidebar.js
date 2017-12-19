@@ -131,8 +131,7 @@ describes.realWin('amp-sidebar 0.1 version', {
     });
   }
 
-  // TODO(dvoytenko, #12486): Make this test work with lolex v2.
-  describe.skip('amp-sidebar', () => {
+  describe('amp-sidebar', () => {
     it('should apply overlay class', () => {
       return getAmpSidebar().then(sidebarElement => {
         expect(sidebarElement.classList.contains('i-amphtml-overlay'));
@@ -194,7 +193,8 @@ describes.realWin('amp-sidebar 0.1 version', {
     it('should open sidebar on button click', () => {
       return getAmpSidebar().then(sidebarElement => {
         const impl = sidebarElement.implementation_;
-        clock = lolex.install({toFake: ['Date', 'setTimeout']});
+        clock = lolex.install(
+            {target: impl.win, toFake: ['Date', 'setTimeout']});
         const historyPushSpy = sandbox.spy();
         const historyPopSpy = sandbox.spy();
         impl.scheduleLayout = sandbox.spy();
@@ -244,7 +244,8 @@ describes.realWin('amp-sidebar 0.1 version', {
     it('should close sidebar on button click', () => {
       return getAmpSidebar({'open': true}).then(sidebarElement => {
         const impl = sidebarElement.implementation_;
-        clock = lolex.install({toFake: ['Date', 'setTimeout']});
+        clock = lolex.install(
+            {target: impl.win, toFake: ['Date', 'setTimeout']});
         impl.schedulePause = sandbox.spy();
         const historyPushSpy = sandbox.spy();
         const historyPopSpy = sandbox.spy();
@@ -288,7 +289,8 @@ describes.realWin('amp-sidebar 0.1 version', {
     it('should toggle sidebar on button click', () => {
       return getAmpSidebar().then(sidebarElement => {
         const impl = sidebarElement.implementation_;
-        clock = lolex.install({toFake: ['Date', 'setTimeout']});
+        clock = lolex.install(
+            {target: impl.win, toFake: ['Date', 'setTimeout']});
         impl.scheduleLayout = sandbox.spy();
         impl.schedulePause = sandbox.spy();
         impl.vsync_ = {
@@ -320,7 +322,8 @@ describes.realWin('amp-sidebar 0.1 version', {
     it('should close sidebar on escape', () => {
       return getAmpSidebar().then(sidebarElement => {
         const impl = sidebarElement.implementation_;
-        clock = lolex.install({toFake: ['Date', 'setTimeout']});
+        clock = lolex.install(
+            {target: impl.win, toFake: ['Date', 'setTimeout']});
         impl.schedulePause = sandbox.spy();
         impl.vsync_ = {
           mutate(callback) {
@@ -352,7 +355,8 @@ describes.realWin('amp-sidebar 0.1 version', {
     it('should reflect state of the sidebar', () => {
       return getAmpSidebar().then(sidebarElement => {
         const impl = sidebarElement.implementation_;
-        clock = lolex.install({toFake: ['Date', 'setTimeout']});
+        clock = lolex.install(
+            {target: impl.win, toFake: ['Date', 'setTimeout']});
         impl.schedulePause = sandbox.spy();
         impl.scheduleResume = sandbox.spy();
         impl.vsync_ = {
@@ -436,7 +440,8 @@ describes.realWin('amp-sidebar 0.1 version', {
         const anchor = sidebarElement.getElementsByTagName('a')[0];
         anchor.href = '#newloc';
         const impl = sidebarElement.implementation_;
-        clock = lolex.install({toFake: ['Date', 'setTimeout']});
+        clock = lolex.install(
+            {target: impl.win, toFake: ['Date', 'setTimeout']});
         impl.schedulePause = sandbox.spy();
         impl.vsync_ = {
           mutate(callback) {
@@ -597,7 +602,8 @@ describes.realWin('amp-sidebar 0.1 version', {
     it('should listen to animationend/transitionend event', () => {
       return getAmpSidebar().then(sidebarElement => {
         const impl = sidebarElement.implementation_;
-        clock = lolex.install({toFake: ['Date', 'setTimeout']});
+        clock = lolex.install(
+            {target: impl.win, toFake: ['Date', 'setTimeout']});
         impl.boundOnAnimationEnd_ = sandbox.spy();
         impl.buildCallback();
         impl.vsync_ = {
