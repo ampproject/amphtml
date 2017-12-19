@@ -630,7 +630,7 @@ Provides the fraction of the selected element that is visible. The value will be
 
 #### Intersection Rect
 
-Provides the bounds of the rectangle defining portion of the selected element that is visible. For more information, please see the [IntersectionObserverEntry.intersectionRect Documentation](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry/intersectionRect).
+Provides the bounds of the rectangle defining the portion of the selected element that is visible. For more information, please see the [IntersectionObserverEntry.intersectionRect Documentation](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry/intersectionRect).
 
 Example value:
 ```javascript
