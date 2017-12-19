@@ -129,13 +129,14 @@ tags: {
 # 4.2.4 the link element
 attr_lists: {
   name: "common-link-attrs"
+  attrs: { name: "charset" value_casei: "utf-8" }
+  attrs: { name: "color" }
+  attrs: { name: "crossorigin" }
+  attrs: { name: "hreflang" }
   attrs: { name: "media" }
   attrs: { name: "sizes" }
   attrs: { name: "target" }
   attrs: { name: "type" }
-  attrs: { name: "hreflang" }
-  attrs: { name: "charset" value_casei: "utf-8" }
-  attrs: { name: "color" }
 }
 tags: {
   html_format: AMP
@@ -144,7 +145,6 @@ tags: {
   spec_name: "link rel="
   disallowed_ancestor: "TEMPLATE"
   attrs: { name: "href" }
-  attr_lists: "common-link-attrs"
   attrs: {
     name: "rel"
     mandatory: true
@@ -172,6 +172,7 @@ tags: {
   }
   attrs: { name: "sizes" }
   attrs: { name: "type" }
+  attr_lists: "common-link-attrs"
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 }
 tags: {
@@ -191,13 +192,13 @@ tags: {
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  attr_lists: "common-link-attrs"
   attrs: {
     name: "rel"
     value_casei: "canonical"
     mandatory: true
     dispatch_key: NAME_VALUE_DISPATCH
   }
+  attr_lists: "common-link-attrs"
   spec_url: "https://www.ampproject.org/docs/reference/spec#required-markup"
 }
 # Allow <link rel="manifest" ...> but not <link rel="manifest foo" ...>
@@ -217,13 +218,13 @@ tags: {
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  attr_lists: "common-link-attrs"
   attrs: {
     name: "rel"
     value_casei: "manifest"
     mandatory: true
     dispatch_key: NAME_VALUE_DISPATCH
   }
+  attr_lists: "common-link-attrs"
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 }
 # Whitelisted font providers
@@ -249,6 +250,7 @@ tags: {
                  "([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|"
                  "https://use\\.typekit\\.net/[\\w\\p{L}\\p{N}_]+\\.css"
   }
+  attrs: { name: "media" }
   attrs: {
     name: "rel"
     mandatory: true
@@ -259,11 +261,9 @@ tags: {
     name: "type"
     value_casei: "text/css"
   }
-  attrs: { name: "media" }
   # SRI attributes (https://www.w3.org/TR/SRI/)
   attrs: { name: "crossorigin" }
   attrs: { name: "integrity" }
-
   spec_url: "https://www.ampproject.org/docs/reference/spec#custom-fonts"
 }
 # itemprop=sameAs is allowed per schema.org, needs not be in head
