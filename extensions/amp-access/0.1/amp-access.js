@@ -184,7 +184,7 @@ export class AccessService {
     const readerIdFn = this.getReaderId_.bind(this);
     const scheduleViewFn = this.scheduleView_.bind(this);
     return Object.keys(configMap).map(key =>
-        new AccessSource(this.ampdoc, configMap[key], readerIdFn,
+      new AccessSource(this.ampdoc, configMap[key], readerIdFn,
           scheduleViewFn, this.accessElement_)
     );
   }
@@ -201,8 +201,8 @@ export class AccessService {
     if (responseReceived) {
       return this.lastAuthorizationPromises_.then(() => {
         const target = dev().assertElement(event.target);
-        this.applyAuthorizationToRoot_(target,
-          /** @type {!JsonObject} */ (this.combinedResponses()));
+        const responses = /** @type {!JsonObject} */ (this.combinedResponses());
+        this.applyAuthorizationToRoot_(target, responses);
       });
     }
   }
@@ -304,92 +304,46 @@ export class AccessService {
   }
 
   /**
-<<<<<<< HEAD
-   * @return {!Promise<string>}
-   * @private
-   */
-  getReaderId_() {
-    if (!this.readerIdPromise_) {
-      // No consent - an essential part of the access system.
-      const consent = Promise.resolve();
-      this.readerIdPromise_ = this.cid_.then(cid => {
-        return cid.get({scope: 'amp-access', createCookieIfNotPresent: true},
-            consent);
-      });
-    }
-    return this.readerIdPromise_;
-  }
-
-  /**
-   * @param {string} url
-   * @param {boolean} useAuthData Allows `AUTH(field)` URL var substitutions.
-   * @return {!Promise<string>}
-   */
-  buildUrl(url, useAuthData) {
-    return this.prepareUrlVars_(useAuthData).then(vars => {
-      return this.urlReplacements_.expandAsync(url, vars);
-    });
-  }
-
-  /**
-   * @param {string} url
-   * @param {boolean} useAuthData Allows `AUTH(field)` URL var substitutions.
-   * @return {!Promise<!Object<string, *>>}
-   * @private
-   */
-  collectUrlVars_(url, useAuthData) {
-    return this.prepareUrlVars_(useAuthData).then(vars => {
-      return this.urlReplacements_.collectVars(url, vars);
-    });
-  }
-
-  /**
-   * @param {boolean} useAuthData Allows `AUTH(field)` URL var substitutions.
-   * @return {!Promise<!Object<string, *>>}
-   * @private
-   */
-  prepareUrlVars_(useAuthData) {
-    return this.getReaderId_().then(readerId => {
-      const vars = {
-        'READER_ID': readerId,
-        'ACCESS_READER_ID': readerId, // A synonym.
-        'ACCESS_TOKEN': () => this.signIn_.getAccessTokenPassive(),
-      };
-      if (useAuthData) {
-        vars['AUTHDATA'] = field => {
-          if (this.authResponse_) {
-            return getValueForExpr(this.authResponse_, field);
-          }
-          return undefined;
-        };
-      }
-      return vars;
-    });
-  }
-
-  /**
    * Returns the promise that resolves when all authorization work has
    * completed, including authorization endpoint call and UI update.
-   * Note that this promise never fails. UI is updated as each response arrives.
+   * Note that this promise never fails.
    * @param {boolean=} opt_disableFallback
    * @return {!Promise}
    * @private
    */
   runAuthorization_(opt_disableFallback) {
-    const promises = this.sources_.map(source =>
-      source.runAuthorization()
-          .then(response =>
-          response && this.ampdoc.whenReady().then(() =>
-            this.applyAuthorizationToRoot_(this.ampdoc.getRootNode(),
-              /** @type {!JsonObject} */ (this.combinedResponses()))))
-    );
-    const promise = Promise.all(promises);
+    const promise = this.viewer_.whenFirstVisible().then(() => {
+      const promises = this.sources_.map(
+          source => this.runOneAuthorization_(source));
+      return Promise.all(promises);
+    });
 
     // The "first" promises must always succeed first.
     this.lastAuthorizationPromises_ = Promise.all(
         [this.firstAuthorizationPromises_,
           promise]);
     return promise;
+  }
+
+  /**
+   * Make and apply a single authorization call.
+   * @param {AccessSource} source
+   * @return {Promise}
+   * @private
+   */
+  runOneAuthorization_(source) {
+    return source.runAuthorization()
+        .then(response => {
+          if (response) {
+            return this.ampdoc.whenReady().then(() => {
+              const root = this.ampdoc.getRootNode();
+              const responses =
+                  /** @type {!JsonObject} */ (this.combinedResponses());
+              //  UI is updated as each response arrives.
+              return this.applyAuthorizationToRoot_(root, responses);
+            });
+          }
+        });
   }
 
   /**
@@ -406,7 +360,6 @@ export class AccessService {
     if (!this.enabled_) {
       return null;
     }
-    // remove catch?
     return this.lastAuthorizationPromises_.then(() => {
       const responses = this.combinedResponses();
       if (!responses) {
@@ -424,7 +377,6 @@ export class AccessService {
    * @private
    */
   applyAuthorizationToRoot_(root, response) {
-    // user().assert(false, 'apply auth' + JSON.stringify(response));
     const elements = root.querySelectorAll('[amp-access]');
     const promises = [];
     for (let i = 0; i < elements.length; i++) {

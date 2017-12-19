@@ -298,11 +298,7 @@ describes.fakeWin('AccessService authorization', {
     service.sources_[0].adapter_ = adapter;
     adapterMock = sandbox.mock(adapter);
 
-<<<<<<< HEAD
     sandbox.stub(service.resources_, 'mutateElement').callsFake(
-=======
-    sandbox.stub(service.resources_, 'mutateElement',
->>>>>>> Fix warnings and lint
         (unusedElement, mutator) => {
           mutator();
           return Promise.resolve();
@@ -348,13 +344,8 @@ describes.fakeWin('AccessService authorization', {
   function expectGetReaderId(result) {
     cidMock.expects('get')
         .withExactArgs(
-<<<<<<< HEAD
             {scope: 'amp-access', createCookieIfNotPresent: true},
             sinon.match(() => true))
-=======
-      {scope: 'amp-access', createCookieIfNotPresent: true},
-        sinon.match(() => true))
->>>>>>> Fix warnings and lint
         .returns(Promise.resolve(result))
         .once();
   }
@@ -1255,11 +1246,11 @@ describes.fakeWin('AccessService login', {
   it('should succeed login with success=true', () => {
     const source = service.sources_[0];
     const authorizationStub =
-        sandbox.stub(source, 'runAuthorization_').callsFake(
+        sandbox.stub(source, 'runAuthorization').callsFake(
             () => Promise.resolve());
     const viewStub = sandbox.stub(source, 'scheduleView_');
     const broadcastStub = sandbox.stub(source.viewer_, 'broadcast');
-    serviceMock.expects('openLoginDialog_')
+    sourceMock.expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=R')
         .returns(Promise.resolve('#success=true'))
         .once();
@@ -1304,7 +1295,7 @@ describes.fakeWin('AccessService login', {
     const source = service.sources_[0];
     const authorizationStub =
       sandbox.stub(source, 'runAuthorization').callsFake(
-        () => Promise.resolve());
+          () => Promise.resolve());
     const viewStub = sandbox.stub(source, 'scheduleView_');
     const broadcastStub = sandbox.stub(source.viewer_, 'broadcast');
     sourceMock.expects('openLoginDialog_')
@@ -1361,7 +1352,7 @@ describes.fakeWin('AccessService login', {
     };
     const authorizationStub =
       sandbox.stub(source, 'runAuthorization').callsFake(
-            () => Promise.resolve());
+          () => Promise.resolve());
     const broadcastStub = sandbox.stub(source.viewer_,
         'broadcast');
     sourceMock.expects('openLoginDialog_')
@@ -1437,14 +1428,9 @@ describes.fakeWin('AccessService login', {
     const source = service.sources_[0];
     source.signIn_.postLoginResult = sandbox.stub();
     source.signIn_.postLoginResult.returns(Promise.resolve());
-<<<<<<< HEAD
     const authorizationStub =
       sandbox.stub(source, 'runAuthorization').callsFake(
-        () => Promise.resolve());
-=======
-    const authorizationStub = sandbox.stub(source,
-        'runAuthorization', () => Promise.resolve());
->>>>>>> Fix warnings and lint
+          () => Promise.resolve());
     const viewStub = sandbox.stub(source, 'scheduleView_');
     const broadcastStub = sandbox.stub(source.viewer_, 'broadcast');
     sourceMock.expects('openLoginDialog_')
@@ -1498,7 +1484,7 @@ describes.fakeWin('AccessService analytics', {
       return Promise.resolve('reader1');
     };
     service.sources_[0].setAuthResponse_(
-      {views: 3, child: {type: 'premium'}, zero: 0});
+        {views: 3, child: {type: 'premium'}, zero: 0});
   });
 
   afterEach(() => {
@@ -1657,7 +1643,7 @@ describes.fakeWin('AccessService multiple sources', {
     sourceDonuts.adapter_ = adapterDonuts;
     adapterDonutsMock = sandbox.mock(adapterDonuts);
 
-    sandbox.stub(service.resources_, 'mutateElement',
+    sandbox.stub(service.resources_, 'mutateElement').callsFake(
         (unusedElement, mutator) => {
           mutator();
           return Promise.resolve();
@@ -1705,8 +1691,8 @@ describes.fakeWin('AccessService multiple sources', {
   function expectGetReaderId(result) {
     cidMock.expects('get')
         .withExactArgs(
-        {scope: 'amp-access', createCookieIfNotPresent: true},
-        sinon.match(() => true))
+            {scope: 'amp-access', createCookieIfNotPresent: true},
+            sinon.match(() => true))
         .returns(Promise.resolve(result))
         .once();
   }
@@ -1771,8 +1757,9 @@ describes.fakeWin('AccessService multiple sources', {
 
   it('should succeed login flat', () => {
     expectGetReaderId('reader1');
-    const authorizationStub = sandbox.stub(sourceBeer,
-        'runAuthorization', () => Promise.resolve());
+    const authorizationStub =
+      sandbox.stub(sourceBeer, 'runAuthorization').callsFake(
+          () => Promise.resolve());
     const broadcastStub = sandbox.stub(sourceBeer.viewer_,
         'broadcast');
     const sourceBeerMock = sandbox.mock(sourceBeer);
@@ -1802,8 +1789,9 @@ describes.fakeWin('AccessService multiple sources', {
 
   it('should succeed login hierarchy', () => {
     expectGetReaderId('reader1');
-    const authorizationStub = sandbox.stub(sourceDonuts,
-        'runAuthorization', () => Promise.resolve());
+    const authorizationStub =
+      sandbox.stub(sourceDonuts, 'runAuthorization').callsFake(
+          () => Promise.resolve());
     const broadcastStub = sandbox.stub(sourceDonuts.viewer_,
         'broadcast');
     const sourceDonutsMock = sandbox.mock(sourceDonuts);

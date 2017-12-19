@@ -21,9 +21,9 @@ import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
 import {AccessVendorAdapter} from '../amp-access-vendor';
 import {AccessSource} from '../amp-access-source';
 import {cidServiceForDocForTesting} from
-    '../../../../src/service/cid-impl';
+  '../../../../src/service/cid-impl';
 import {installPerformanceService} from
-    '../../../../src/service/performance-impl';
+  '../../../../src/service/performance-impl';
 import {toggleExperiment} from '../../../../src/experiments';
 
 
@@ -225,7 +225,7 @@ describes.fakeWin('AccessSource adapter context', {
     document.body.appendChild(configElement);
 
     source = new AccessSource(ampdoc, config,
-      () => Promise.resolve('reader1'));
+        () => Promise.resolve('reader1'));
     context = source.adapter_.context_;
   });
 
@@ -238,39 +238,39 @@ describes.fakeWin('AccessSource adapter context', {
   it('should resolve URL without auth response and no authdata vars', () => {
     return context.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type)',
         /* useAuthData */ false).then(url => {
-          expect(url).to.equal('?rid=reader1&type=');
-        });
+      expect(url).to.equal('?rid=reader1&type=');
+    });
   });
 
   it('should resolve URL without auth response and with authdata vars', () => {
     return context.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type)',
         /* useAuthData */ true).then(url => {
-          expect(url).to.equal('?rid=reader1&type=');
-        });
+      expect(url).to.equal('?rid=reader1&type=');
+    });
   });
 
   it('should resolve URL with auth response and no authdata vars', () => {
     source.setAuthResponse_({child: {type: 'premium'}});
     return context.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type)',
         /* useAuthData */ false).then(url => {
-          expect(url).to.equal('?rid=reader1&type=');
-        });
+      expect(url).to.equal('?rid=reader1&type=');
+    });
   });
 
   it('should resolve URL with auth response and with authdata vars', () => {
     source.setAuthResponse_({child: {type: 'premium'}});
     return context.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type)',
         /* useAuthData */ true).then(url => {
-          expect(url).to.equal('?rid=reader1&type=premium');
-        });
+      expect(url).to.equal('?rid=reader1&type=premium');
+    });
   });
 
   it('should resolve URL with unknown authdata var', () => {
     source.setAuthResponse_({child: {type: 'premium'}});
     return context.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type2)',
         /* useAuthData */ true).then(url => {
-          expect(url).to.equal('?rid=reader1&type=');
-        });
+      expect(url).to.equal('?rid=reader1&type=');
+    });
   });
 
   it('should resolve URL with ACCESS_TOKEN, but not enabled', () => {
@@ -280,14 +280,14 @@ describes.fakeWin('AccessSource adapter context', {
   });
 
   it('should resolve URL with ACCESS_TOKEN, enabled, but null', () => {
-    sandbox.stub(source.signIn_, 'getAccessTokenPassive', () => null);
+    sandbox.stub(source.signIn_, 'getAccessTokenPassive').callsFake(() => null);
     return context.buildUrl('?at=ACCESS_TOKEN').then(url => {
       expect(url).to.equal('?at=');
     });
   });
 
   it('should resolve URL with ACCESS_TOKEN, enabled, but null promise', () => {
-    sandbox.stub(source.signIn_, 'getAccessTokenPassive',
+    sandbox.stub(source.signIn_, 'getAccessTokenPassive').callsFake(
         () => Promise.resolve(null));
     return context.buildUrl('?at=ACCESS_TOKEN').then(url => {
       expect(url).to.equal('?at=');
@@ -295,7 +295,7 @@ describes.fakeWin('AccessSource adapter context', {
   });
 
   it('should resolve URL with ACCESS_TOKEN, enabled, not null', () => {
-    sandbox.stub(source.signIn_, 'getAccessTokenPassive',
+    sandbox.stub(source.signIn_, 'getAccessTokenPassive').callsFake(
         () => Promise.resolve('access_token'));
     return context.buildUrl('?at=ACCESS_TOKEN').then(url => {
       expect(url).to.equal('?at=access_token');

@@ -55,8 +55,8 @@ export class AccessSource {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} configJson
-   * @param {!Function} readerIdFn
-   * @param {!Function} scheduleViewFn
+   * @param {!function():!Promise<string>} readerIdFn
+   * @param {!function(time)} scheduleViewFn
    * @param {!Element} accessElement
    */
   constructor(ampdoc, configJson, readerIdFn, scheduleViewFn, accessElement) {
@@ -90,9 +90,8 @@ export class AccessSource {
         configJson['authorizationFallbackResponse'];
 
     /** @const {?string} */
-    this.namespace_ = configJson['namespace'];
+    this.namespace_ = configJson['namespace'] || null;
 
-    // TODO: Move type back
     /** @const {!AccessTypeAdapterDef} */
     this.adapter_ = this.createAdapter_(configJson);
 
@@ -119,7 +118,7 @@ export class AccessSource {
 
     /** @const @private {!SignInProtocol} */
     this.signIn_ = new SignInProtocol(ampdoc, this.viewer_, this.pubOrigin_,
-      configJson);
+        configJson);
 
     /** @private {?Function} */
     this.firstAuthorizationResolver_ = null;
@@ -171,7 +170,7 @@ export class AccessSource {
   }
 
   /**
-   * @return {JsonObject}
+   * @return {?JsonObject}
    */
   getAuthResponse() {
     return this.authResponse_;
@@ -350,7 +349,7 @@ export class AccessSource {
     return this.getReaderId_().then(readerId => {
       const vars = {
         'READER_ID': readerId,
-        'ACCESS_READER_ID': readerId,  // A synonym.
+        'ACCESS_READER_ID': readerId, // A synonym.
         'ACCESS_TOKEN': () => this.signIn_.getAccessTokenPassive(),
       };
       if (useAuthData) {
@@ -380,20 +379,18 @@ export class AccessSource {
     }
 
     this.toggleTopClass_('amp-access-loading', true);
-    const startPromise = this.viewer_.whenFirstVisible();
-    const responsePromise = startPromise.then(() => {
-      return this.adapter_.authorize();
-    }).catch(error => {
-      this.analyticsEvent_('access-authorization-failed');
-      if (this.authorizationFallbackResponse_ && !opt_disableFallback) {
-        // Use fallback.
-        user().error(TAG, 'Authorization failed: ', error);
-        return this.authorizationFallbackResponse_;
-      } else {
-        // Rethrow the error, it will be processed in the bottom `catch`.
-        throw error;
-      }
-    });
+    const responsePromise = this.adapter_.authorize()
+        .catch(error => {
+          this.analyticsEvent_('access-authorization-failed');
+          if (this.authorizationFallbackResponse_ && !opt_disableFallback) {
+          // Use fallback.
+            user().error(TAG, 'Authorization failed: ', error);
+            return this.authorizationFallbackResponse_;
+          } else {
+          // Rethrow the error, it will be processed in the bottom `catch`.
+            throw error;
+          }
+        });
     const promise = responsePromise.then(response => {
       dev().fine(TAG, 'Authorization response: ', response);
       this.setAuthResponse_(response);
