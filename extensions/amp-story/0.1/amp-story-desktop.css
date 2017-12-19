@@ -81,7 +81,7 @@ amp-story-page.i-amphtml-story-page-shown {
 
 [desktop] .i-amphtml-story-button-container {
   position: absolute;
-  width: calc(50vw - (9/16 * 70vh)/2 - 40px);
+  width: calc(50vw - (9/16 * 70vh)/2 - 64px);
   top: 0;
   height: 100vh;
   z-index: 1;
@@ -151,12 +151,11 @@ amp-story-page.i-amphtml-story-page-shown {
   left: 50%!important;
   right: auto!important;
   margin: auto!important;
-  height: 70vh!important;
-  width: calc(9/16 * 70vh) !important;
+  height: 75vh!important;
+  width: calc(3/5 * 75vh) !important;
   box-shadow: 0 0 15px rgba(0, 0, 0, .4)!important;
-  min-width: 348px !important;
-  min-height: 619px !important;
-  /* TODO(prateekbh): Add transition here */
+  min-width: 320px !important;
+  min-height: 533px !important;
 }
 
 /* Navigation buttons */
@@ -245,7 +244,7 @@ amp-story-page.i-amphtml-story-page-shown {
 .i-amphtml-story-top {
   position: relative!important;
   display: block!important;
-  height: 104px!important;
+  height: 96px!important;
   width: 100%!important;
   z-index: 1!important;
   background: linear-gradient(to bottom, rgba(33,33,33,0.32) 0%, rgba(33,33,33,0) 100%)!important;
@@ -406,7 +405,7 @@ amp-story-page.i-amphtml-story-page-shown {
 
 @media (max-height: 768px) {
   [desktop] .i-amphtml-story-system-layer {
-    height: 32px !important;
+    height: 96px !important;
   }
 }
 
