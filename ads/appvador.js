@@ -21,20 +21,20 @@ import {writeScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function appvador(global, data) {
-  validateData(data, ['id'], ['options', 'jsType', 'customScript']);
+  validateData(data, ['id'], ['options', 'jsType', 'customScriptSrc']);
 
   const container = global.document.getElementById('c');
   const apvDiv = global.document.createElement('div');
-  apvDiv.setAttribute('id', 'apvad-' + encodeURIComponent(data.id));
+  apvDiv.setAttribute('id', 'apvad-' + data.id);
   container.appendChild(apvDiv);
 
-  const scriptUrl = data.customScript ? encodeURIComponent(data.customScript) :
+  const scriptUrl = data.customScriptSrc ? data.customScriptSrc :
       'https://cdn.apvdr.com/js/' +
       (data.jsType ? encodeURIComponent(data.jsType) : 'VastAdUnit') + '.min.js';
   const apvScript = 'new APV.' +
-      (data.jsType ? encodeURIComponent(data.jsType) : 'VASTAdUnit') +
-      '({s:"' + encodeURIComponent(data.id) + '",isAmpAd:true' +
-      (data.options ? (',' + encodeURIComponent(data.options)) : '') + '}).load();';
+      (data.jsType ? data.jsType : 'VASTAdUnit') +
+      '({s:"' + data.id + '",isAmpAd:true' +
+      (data.options ? (',' + data.options) : '') + '}).load();';
 
   const cb = function() {
     const apvLoadScript = global.document.createElement('script');

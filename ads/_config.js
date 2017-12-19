@@ -193,6 +193,7 @@ export const adConfig = {
       'https://cdn.apvdr.com/js/VideoAdAutoPlay.min.js',
       'https://cdn.apvdr.com/js/VideoAdNative.min.js',
     ],
+    renderStartImplemented: true,
   },
 
   amoad: {

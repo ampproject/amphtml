@@ -35,4 +35,4 @@ For semantics of configuration, please contact [AppVador](http://www.appvador.co
 ### Optional parameters:
 - data-options
 - data-js-type
-- data-custom-script
+- data-custom-script-src
