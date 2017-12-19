@@ -15,6 +15,13 @@
  */
 
 /**
+ * NOTE: This file exists to compare outputs of css file transformation
+ * that passes through postcss from version to version.
+ *
+ * built from sha: 0ca74e671
+ */
+
+/**
  * Horizontal scrolling interferes with embedded scenarios and predominantly
  * the result of the non-responsive design.
  *
