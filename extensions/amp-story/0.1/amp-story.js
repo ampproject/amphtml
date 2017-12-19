@@ -921,7 +921,7 @@ export class AmpStory extends AMP.BaseElement {
 
       this.activePage_.pause();
 
-      this.toggleElementsOnBookend(/* display */ false);
+      this.toggleElementsOnBookend_(/* display */ false);
 
       this.exitFullScreen_();
 
@@ -943,7 +943,7 @@ export class AmpStory extends AMP.BaseElement {
 
     this.activePage_.setActive(true);
 
-    this.toggleElementsOnBookend(/* display */ true);
+    this.toggleElementsOnBookend_(/* display */ true);
 
     this.element.classList.remove('i-amphtml-story-bookend-active');
 
@@ -956,7 +956,7 @@ export class AmpStory extends AMP.BaseElement {
    * @param {boolean} display
    * @private
    */
-  toggleElementsOnBookend(display) {
+  toggleElementsOnBookend_(display) {
     if (!this.isDesktop_()) {
       return;
     }
