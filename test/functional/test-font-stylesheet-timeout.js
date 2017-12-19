@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import {Services} from '../../src/services';
 import {
   fontStylesheetTimeout,
 } from '../../src/font-stylesheet-timeout';
-
 import {toggleExperiment} from '../../src/experiments';
 
 describes.realWin('font-stylesheet-timeout', {
@@ -27,8 +27,10 @@ describes.realWin('font-stylesheet-timeout', {
   let win;
   let readyState;
   let responseStart;
+  let isSafariIsh;
 
   beforeEach(() => {
+    isSafariIsh = false;
     clock = env.sandbox.useFakeTimers();
     win = env.win;
     win.setTimeout = self.setTimeout;
@@ -44,6 +46,9 @@ describes.realWin('font-stylesheet-timeout', {
         return responseStart;
       },
     });
+    const platform = Services.platformFor(win);
+    env.sandbox.stub(platform, 'isIos').callsFake(() => isSafariIsh);
+    env.sandbox.stub(platform, 'isSafari').callsFake(() => isSafariIsh);
   });
 
   function addLink(opt_content, opt_href) {
@@ -57,6 +62,19 @@ describes.realWin('font-stylesheet-timeout', {
   function immediatelyLoadingHref(opt_content) {
     return 'data:text/css;charset=utf-8,' + (opt_content || '');
   }
+
+  it('should skip in safari', () => {
+    isSafariIsh = true;
+    const link = addLink();
+    expect(win.document.querySelector(
+        'link[rel="stylesheet"]')).to.equal(link);
+    fontStylesheetTimeout(win);
+    clock.tick(2000);
+    expect(win.document.querySelectorAll(
+        'link[rel="stylesheet"][i-amphtml-timeout]')).to.have.length(0);
+    expect(win.document.querySelector(
+        'link[rel="stylesheet"]')).to.equal(link);
+  });
 
   // TODO(cramforce, #11827): Make this test work on Safari.
   it.configure().skipSafari().run('should not time out for immediately ' +
