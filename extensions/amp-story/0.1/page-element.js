@@ -67,6 +67,14 @@ const ELEMENT_FAILED_CLASS_NAME = 'i-amphtml-story-page-element-failed';
 
 
 /**
+ * CSS class for an element on an amp-story-page that indicates the element was
+ * hidden by a media query rule.
+ * @const {string}
+ */
+const HIDDEN_BY_MEDIA_QUERY_CLASS_NAME = 'i-amphtml-hidden-by-media-query';
+
+
+/**
  * The minimum amount of a media item (by percentage) that must be loaded in
  * order for that element to be considered "loaded".  Note that if the total
  * size cannot be determined, this criteria is simply ignored.
@@ -154,6 +162,13 @@ export class PageElement {
       this.element.classList
           .toggle(ELEMENT_SHOW_CLASS_NAME, /* force */ this.canBeShown);
     }
+  }
+
+  /**
+   * @return {boolean}
+   */
+  isHiddenByMediaQuery() {
+    return this.element.classList.contains(HIDDEN_BY_MEDIA_QUERY_CLASS_NAME);
   }
 
   /**
