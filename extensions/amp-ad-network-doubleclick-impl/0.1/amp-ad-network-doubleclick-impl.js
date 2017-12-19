@@ -100,6 +100,7 @@ import {
 import {
   addExperimentIdToElement,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {getAdCid} from '../../../src/ad-cid';
 import {RTC_ERROR_ENUM} from '../../amp-a4a/0.1/real-time-config-manager';
 import '../../amp-a4a/0.1/real-time-config-manager';
 
@@ -713,6 +714,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.jsonTargeting_['categoryExclusions'] = Object.keys(exclusions);
     }
     return {'artc': artc.join() || null, 'ati': ati.join(), 'ard': ard.join()};
+  }
+
+  /** @override */
+  getCustomRealTimeConfigMacros_() {
+    const macros = {};
+    macros.href = this.win.location.href;
+    const docInfo = Services.documentInfoForDoc(this.element);
+    macros.pageViewId = docInfo.pageViewId;
+    console.log(this.element);
+    return macros;
   }
 
   /**
