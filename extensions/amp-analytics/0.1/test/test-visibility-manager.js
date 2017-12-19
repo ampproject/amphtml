@@ -261,7 +261,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
   });
 
   it('creates model for 0 percent and 100 percent', () => {
-    spec = {visiblePercentageThresholds: [[0, 0]]};
+    let spec = {visiblePercentageThresholds: [[0, 0]]};
     root.listenRoot(spec, null, null, null);
     expect(root.models_).to.have.length(1);
     root.dispose();
@@ -273,14 +273,16 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     root.listenRoot(spec, null, null, null);
     expect(root.models_).to.have.length(2);
     root.dispose();
-    spec = {visiblePercentageThresholds: [[0, 0], [0, 50], [50, 100], [100, 100]]};
+    spec = {
+        visiblePercentageThresholds: [[0, 0], [0, 50], [50, 100], [100, 100]]
+    };
     root.listenRoot(spec, null, null, null);
     expect(root.models_).to.have.length(4);
     root.dispose();
   });
 
   it('does not allow min==max, when they are neither 0 nor 100', () => {
-    spec = {visiblePercentageThresholds: [[50, 50]]};
+    let spec = {visiblePercentageThresholds: [[50, 50]]};
     root.listenRoot(spec, null, null, null);
     expect(root.models_).to.have.length(0);
     root.dispose();
