@@ -41,7 +41,7 @@ describe('waitForServices', () => {
 
     return createIframePromise().then(iframe => {
       win = iframe.win;
-      clock = lolex.install();
+      clock = lolex.install({target: win});
     });
   });
 
@@ -57,8 +57,7 @@ describe('waitForServices', () => {
     return expect(waitForServices(win)).to.eventually.have.lengthOf(0);
   });
 
-  // TODO(lannka, #12486): Make this test work with lolex v2.
-  it.skip('should timeout if some blocking services are missing', () => {
+  it('should timeout if some blocking services are missing', () => {
     addExtensionScript(win, 'amp-dynamic-css-classes');
     win.document.body.appendChild(win.document.createElement('amp-experiment'));
     expect(hasRenderDelayingServices(win)).to.be.true;
