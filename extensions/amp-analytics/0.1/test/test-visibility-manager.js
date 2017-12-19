@@ -274,7 +274,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(root.models_).to.have.length(2);
     root.dispose();
     spec = {
-        visiblePercentageThresholds: [[0, 0], [0, 50], [50, 100], [100, 100]]
+      visiblePercentageThresholds: [[0, 0], [0, 50], [50, 100], [100, 100]],
     };
     root.listenRoot(spec, null, null, null);
     expect(root.models_).to.have.length(4);
