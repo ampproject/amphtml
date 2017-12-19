@@ -15,6 +15,7 @@
  */
 'use strict';
 
+const getStdout = require('./exec').getStdout;
 const setupInstructionsUrl = 'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md#one-time-setup';
 
 // Color formatting may not yet be available via gulp-util.
@@ -52,8 +53,23 @@ function main() {
     return 1;
   }
 
-  // If yarn is being run, proceed with the install.
-  console/*OK*/.log(green('Detected yarn. Installing packages...'));
+  // If yarn is being run, perform a version check and proceed with the install.
+  const yarnVersion = getStdout('yarn --version').trim();
+  const major = yarnVersion.split('.')[0];
+  const minor = yarnVersion.split('.')[1];
+  if ((major < 1) || (minor < 2)) {
+    console/*OK*/.log(yellow('WARNING: Detected yarn version'),
+        cyan(yarnVersion) + yellow('. Minimum recommended version is'),
+        cyan('1.2.0') + yellow('.'));
+    console/*OK*/.log(yellow('To upgrade, run'),
+        cyan('"curl -o- -L https://yarnpkg.com/install.sh | bash"'),
+        yellow('or see'), cyan('https://yarnpkg.com/docs/install'),
+        yellow('for instructions.'));
+    console/*OK*/.log(yellow('Attempting to install packages...'));
+  } else {
+    console/*OK*/.log(green('Detected yarn version'), cyan(yarnVersion) +
+        green('. Installing packages...'));
+  };
   return 0;
 }
 
