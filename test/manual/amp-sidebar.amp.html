@@ -182,7 +182,7 @@
     }
 
     body#mybody > amp-sidebar {
-      background: blue;
+      background: grey;
     }
   </style>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -196,13 +196,14 @@
 
 </head>
 <body id="mybody">
-  <amp-sidebar id="sidebar1" layout="nodisplay">
+  <amp-sidebar id="sidebar1" layout="nodisplay" on="sidebarOpen:focusOnMe.focus">
     <div>
       <amp-social-share width="57" type="twitter"></amp-social-share>
       <amp-social-share width="57" type="linkedin"></amp-social-share>
       <amp-social-share width="57" type="facebook"></amp-social-share>
     </div>
     <ul>
+      <li><a id="focusOnMe" href="https://google.com">This gets focused on open</a></li>
       <li> Nav item 1</li>
       <li> Nav item 2</li>
       <li> Nav item 3</li>
