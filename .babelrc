@@ -6,7 +6,7 @@
         "browsers": ["Last 2 versions"]
       },
       "modules": "commonjs",
-      sourceType: "module"
+      "sourceType": "module"
     }]
   ],
   "sourceType": "module",
