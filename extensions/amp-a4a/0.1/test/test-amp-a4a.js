@@ -489,6 +489,36 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       expect(a4a.win.document.querySelector('amp-analytics')).to.be.null;
     });
+
+    it('should call getA4aAnalyticsNetworkConfig once when not null', () => {
+      // Note that a4a1 and a4a2 are on the same ad network.
+      const a4a1 = new MockA4AImpl(createA4aElement(fixture.doc));
+      const a4a2 = new MockA4AImpl(createA4aElement(fixture.doc));
+
+      const getA4aAnalyticsNetworkConfigSpy =
+          sandbox.stub(MockA4AImpl.prototype, 'getA4aAnalyticsNetworkConfig')
+              .returns({'foo': 1});
+
+      a4a1.buildCallback();
+      a4a2.buildCallback();
+
+      expect(getA4aAnalyticsNetworkConfigSpy).to.be.calledOnce;
+    });
+
+    it('should call getA4aAnalyticsNetworkConfig once when null', () => {
+      // Note that a4a1 and a4a2 are on the same ad network.
+      const a4a1 = new MockA4AImpl(createA4aElement(fixture.doc));
+      const a4a2 = new MockA4AImpl(createA4aElement(fixture.doc));
+
+      const getA4aAnalyticsNetworkConfigSpy =
+          sandbox.stub(MockA4AImpl.prototype, 'getA4aAnalyticsNetworkConfig')
+              .returns(null);
+
+      a4a1.buildCallback();
+      a4a2.buildCallback();
+
+      expect(getA4aAnalyticsNetworkConfigSpy).to.be.calledOnce;
+    });
   });
 
   describe('layoutCallback cancels properly', () => {

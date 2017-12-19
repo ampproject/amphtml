@@ -441,6 +441,9 @@ export class AmpA4A extends AMP.BaseElement {
         perNetworkAnalyticsElements[networkType] = insertAnalyticsElement(
             this.win.document.body, analyticsConfig, true /* loadAnalytics */);
       } else {
+        // We want to call getA4aAnalyticsNetworkConfig only once per page so
+        // we set the value to null here. Later slots will exit early since the
+        // key is present in the map.
         perNetworkAnalyticsElements[networkType] = null;
       }
     }
@@ -1692,6 +1695,10 @@ export class AmpA4A extends AMP.BaseElement {
       // after the DOM has been cleaned up. I don't expect such scenarios to
       // occur in practice.
       triggerAnalyticsEvent(analyticsElement, analyticsEvent, analyticsVars);
+    } else {
+      dev().warn(
+          'AMP-A4A',
+          'The owner document for amp-analytics mismatches this.win.document.');
     }
   }
 
