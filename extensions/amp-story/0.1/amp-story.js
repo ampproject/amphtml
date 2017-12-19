@@ -54,7 +54,7 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {AudioManager, upgradeBackgroundAudio} from './audio';
-import {setStyle, setImportantStyles} from '../../../src/style';
+import {setStyle, setImportantStyles, resetStyles} from '../../../src/style';
 import {findIndex} from '../../../src/utils/array';
 import {ActionTrust} from '../../../src/action-trust';
 import {getMode} from '../../../src/mode';
@@ -147,6 +147,16 @@ const LANDSCAPE_ORIENTATION_WARNING = [
     ],
   },
 ];
+
+
+/**
+ * Selector for elements that should be hidden when the bookend is open on
+ * desktop view.
+ * @private @const {string}
+ */
+const HIDE_ON_BOOKEND_SELECTOR =
+    'amp-story-page, .i-amphtml-story-system-layer';
+
 
 export class AmpStory extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -911,12 +921,13 @@ export class AmpStory extends AMP.BaseElement {
 
       this.activePage_.pause();
 
+      this.toggleElementsOnBookend_(/* display */ false);
+
       this.exitFullScreen_();
 
-      this.vsync_.mutate(() => {
-        this.element.classList.add('i-amphtml-story-bookend-active');
-        this.bookend_.show();
-      });
+      this.element.classList.add('i-amphtml-story-bookend-active');
+
+      this.bookend_.show();
     });
   }
 
@@ -931,13 +942,39 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     this.activePage_.setActive(true);
-    this.bookend_.hide();
 
-    this.vsync_.mutate(() => {
-      this.element.classList.remove('i-amphtml-story-bookend-active');
-    });
+    this.toggleElementsOnBookend_(/* display */ true);
+
+    this.element.classList.remove('i-amphtml-story-bookend-active');
+
+    this.bookend_.hide();
   }
 
+
+  /**
+   * Toggle content when bookend is opened/closed.
+   * @param {boolean} display
+   * @private
+   */
+  toggleElementsOnBookend_(display) {
+    if (!this.isDesktop_()) {
+      return;
+    }
+
+    const elements =
+        scopedQuerySelectorAll(this.element, HIDE_ON_BOOKEND_SELECTOR);
+
+    Array.prototype.forEach.call(elements, el => {
+      if (display) {
+        resetStyles(el, ['opacity', 'transition']);
+      } else {
+        setImportantStyles(el, {
+          opacity: 0,
+          transition: 'opacity 0.3s',
+        });
+      }
+    });
+  }
 
   /**
    * @return {!Array<!Array<string>>} A 2D array representing lists of pages by
