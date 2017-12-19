@@ -47,6 +47,12 @@ export class InaboxHost {
     initLogConstructor();
     setReportError(reportError);
 
+    if (win[INABOX_AD_IFRAMES_IN_VAR_NAME] &&
+        !isArray(win[INABOX_AD_IFRAMES_IN_VAR_NAME])) {
+      dev().info(`Invalid ${INABOX_AD_IFRAMES_IN_VAR_NAME}`,
+        win[INABOX_AD_IFRAMES_IN_VAR_NAME]);
+      win[INABOX_AD_IFRAMES_IN_VAR_NAME] = [];
+    }
     const host = new InaboxMessagingHost(
       win, win[INABOX_AD_IFRAMES_IN_VAR_NAME]);
 
