@@ -148,6 +148,16 @@ const LANDSCAPE_ORIENTATION_WARNING = [
   },
 ];
 
+
+/**
+ * Selector for elements that should be hidden when the bookend is open on
+ * desktop view.
+ * @private @const {string}
+ */
+const HIDE_ON_BOOKEND_SELECTOR =
+    'amp-story-page, .i-amphtml-story-system-layer';
+
+
 export class AmpStory extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -923,12 +933,13 @@ export class AmpStory extends AMP.BaseElement {
 
       this.activePage_.pause();
 
+      this.toggleElementsOnBookend_(/* display */ false);
+
       this.exitFullScreen_();
 
-      this.vsync_.mutate(() => {
-        this.element.classList.add('i-amphtml-story-bookend-active');
-        this.bookend_.show();
-      });
+      this.element.classList.add('i-amphtml-story-bookend-active');
+
+      this.bookend_.show();
     });
   }
 
@@ -943,13 +954,39 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     this.activePage_.setActive(true);
-    this.bookend_.hide();
 
-    this.vsync_.mutate(() => {
-      this.element.classList.remove('i-amphtml-story-bookend-active');
-    });
+    this.toggleElementsOnBookend_(/* display */ true);
+
+    this.element.classList.remove('i-amphtml-story-bookend-active');
+
+    this.bookend_.hide();
   }
 
+
+  /**
+   * Toggle content when bookend is opened/closed.
+   * @param {boolean} display
+   * @private
+   */
+  toggleElementsOnBookend_(display) {
+    if (!this.isDesktop_()) {
+      return;
+    }
+
+    const elements =
+        scopedQuerySelectorAll(this.element, HIDE_ON_BOOKEND_SELECTOR);
+
+    Array.prototype.forEach.call(elements, el => {
+      if (display) {
+        resetStyles(el, ['opacity', 'transition']);
+      } else {
+        setImportantStyles(el, {
+          opacity: 0,
+          transition: 'opacity 0.3s',
+        });
+      }
+    });
+  }
 
   /**
    * @return {!Array<!Array<string>>} A 2D array representing lists of pages by
@@ -1019,14 +1056,7 @@ export class AmpStory extends AMP.BaseElement {
       pagesByDistance.forEach((pageIds, distance) => {
         pageIds.forEach(pageId => {
           const page = this.getPageById_(pageId);
-
-          if (distance == 0) {
-            resetStyles(page.element, ['transform']);
-          } else {
-            setImportantStyles(page.element, {
-              transform: `translateY(${100 * distance}%)`,
-            });
-          }
+          page.element.setAttribute('distance', distance);
         });
       });
     });
