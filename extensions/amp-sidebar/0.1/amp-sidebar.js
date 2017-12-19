@@ -96,6 +96,9 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @const {function()} */
     this.boundOnAnimationEnd_ =
         debounce(this.win, this.onAnimationEnd_.bind(this), ANIMATION_TIMEOUT);
+
+    /** @private {?Element} */
+    this.openerElement_ = null;
   }
 
   /** @override */
@@ -204,8 +207,8 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /** @override */
-  activate() {
-    this.open_();
+  activate(invocation) {
+    this.open_(invocation);
   }
 
   /** @override */
@@ -239,21 +242,23 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /**
    * Toggles the open/close state of the sidebar.
+   * @param {?../../../src/service/action-impl.ActionInvocation=} opt_invocation
    * @private
    */
-  toggle_() {
+  toggle_(opt_invocation) {
     if (this.isOpen_()) {
       this.close_();
     } else {
-      this.open_();
+      this.open_(opt_invocation);
     }
   }
 
   /**
    * Reveals the sidebar.
+   * @param {?../../../src/service/action-impl.ActionInvocation=} opt_invocation
    * @private
    */
-  open_() {
+  open_(opt_invocation) {
     if (this.isOpen_()) {
       return;
     }
@@ -275,6 +280,9 @@ export class AmpSidebar extends AMP.BaseElement {
     this.getHistory_().push(this.close_.bind(this)).then(historyId => {
       this.historyId_ = historyId;
     });
+    if (opt_invocation) {
+      this.openerElement_ = opt_invocation.source;
+    }
   }
 
   /**
@@ -387,6 +395,10 @@ export class AmpSidebar extends AMP.BaseElement {
       this.vsync_.mutate(() => {
         toggle(this.element, /* display */false);
         this.schedulePause(this.getRealChildren());
+        // Return focus to source element if applicable
+        if (this.openerElement_) {
+          tryFocus(this.openerElement_);
+        }
         this.triggerEvent_(SidebarEvents.CLOSE);
       });
     }
