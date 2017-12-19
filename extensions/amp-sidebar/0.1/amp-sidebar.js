@@ -98,7 +98,7 @@ export class AmpSidebar extends AMP.BaseElement {
         debounce(this.win, this.onAnimationEnd_.bind(this), ANIMATION_TIMEOUT);
 
     /** @private {?Element} */
-    this.sourceElement_ = null;
+    this.openerElement_ = null;
   }
 
   /** @override */
@@ -281,7 +281,7 @@ export class AmpSidebar extends AMP.BaseElement {
       this.historyId_ = historyId;
     });
     if (opt_invocation) {
-      this.sourceElement_ = opt_invocation.source;
+      this.openerElement_ = opt_invocation.source;
     }
   }
 
@@ -396,8 +396,8 @@ export class AmpSidebar extends AMP.BaseElement {
         toggle(this.element, /* display */false);
         this.schedulePause(this.getRealChildren());
         // Return focus to source element if applicable
-        if (this.sourceElement_) {
-          tryFocus(this.sourceElement_);
+        if (this.openerElement_) {
+          tryFocus(this.openerElement_);
         }
         this.triggerEvent_(SidebarEvents.CLOSE);
       });
