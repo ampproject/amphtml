@@ -32,30 +32,33 @@ describes.fakeWin('amp-story navigation state', {}, () => {
 
     observers.forEach(observer => navigationState.observe(observer));
 
-    navigationState.updateActivePage(0, 'my-page-id-1');
+    navigationState.updateActivePage(0, 10, 'my-page-id-1');
 
     observers.forEach(observer => {
       expect(observer).to.have.been.calledWith(sandbox.match(e =>
         e.type == StateChangeType.ACTIVE_PAGE
               && e.value.pageIndex === 0
+              && e.value.totalPages === 10
               && e.value.pageId == 'my-page-id-1'));
     });
 
-    navigationState.updateActivePage(5);
+    navigationState.updateActivePage(5, 15);
 
     observers.forEach(observer => {
       expect(observer).to.have.been.calledWith(sandbox.match(e =>
         e.type == StateChangeType.ACTIVE_PAGE
               && e.value.pageIndex === 5
+              && e.value.totalPages === 15
               && !('pageId' in e.value)));
     });
 
-    navigationState.updateActivePage(2, 'one-two-three');
+    navigationState.updateActivePage(2, 5, 'one-two-three');
 
     observers.forEach(observer => {
       expect(observer).to.have.been.calledWith(sandbox.match(e =>
         e.type == StateChangeType.ACTIVE_PAGE
               && e.value.pageIndex === 2
+              && e.value.totalPages === 5
               && e.value.pageId == 'one-two-three'));
     });
   });
