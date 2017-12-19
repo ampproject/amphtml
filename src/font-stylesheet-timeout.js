@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Services} from './services';
 import {onDocumentReady} from './document-ready';
 import {urls} from './config';
 import {isExperimentOn} from './experiments';
@@ -43,13 +42,6 @@ export function fontStylesheetTimeout(win) {
  */
 function maybeTimeoutFonts(win) {
   timeoutFontFaces(win);
-  const platform = Services.platformFor(win);
-  if (platform.isIos() || platform.isSafari()) {
-    // Deactivate on Safari and iOS (our current best way to estimate a non-
-    // blink WebKit) due to https://bugs.webkit.org/show_bug.cgi?id=180940
-    // TODO(#12520): Reinstate for fixed versions of WebKit.
-    return;
-  }
   let timeSinceResponseStart = 0;
   // If available, we start counting from the time the HTTP response
   // for the page started. The preload scanner should then quickly
@@ -90,27 +82,21 @@ function maybeTimeoutFonts(win) {
     }
 
     for (let i = 0; i < timedoutStyleSheets.length; i++) {
-      const existingLink = timedoutStyleSheets[i];
-      const newLink = existingLink.cloneNode(/* not deep */ false);
+      const link = timedoutStyleSheets[i];
       // To avoid blocking the render, we assign a non-matching media
       // attribute first…
-      const media = existingLink.media || 'all';
-      newLink.media = 'not-matching';
+      const media = link.media || 'all';
+      link.media = 'not-matching';
       // And then switch it back to the original after the stylesheet
       // loaded.
-      newLink.onload = () => {
-        newLink.media = media;
+      link.onload = () => {
+        link.media = media;
         timeoutFontFaces(win);
       };
-      newLink.setAttribute('i-amphtml-timeout', timeout);
-      const parent = existingLink.parentElement;
-      // Insert the stylesheet. We do it right before the existing one,
-      // so that
-      // - we pick up its HTTP request.
-      // - CSS evaluation order doesn't change.
-      parent.insertBefore(newLink, existingLink);
-      // And remove the blocking stylesheet.
-      parent.removeChild(existingLink);
+      link.setAttribute('i-amphtml-timeout', timeout);
+      // Pop/insert the same link. This causes Chrome to unblock, and doesn't
+      // blank out Safari. #12521
+      link.parentNode.insertBefore(link, link.nextSibling);
     }
   }, timeout);
 }
