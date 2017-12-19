@@ -55,8 +55,8 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win);
 
-    /** @const @private {?../../../src/service/action-impl.ActionService} */
-    this.action_ = Services.actionServiceForDoc(this.element);
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.action_ = null;
 
     /** @private {?Element} */
     this.maskElement_ = null;
@@ -110,6 +110,8 @@ export class AmpSidebar extends AMP.BaseElement {
     this.side_ = this.element.getAttribute('side');
 
     this.viewport_ = this.getViewport();
+
+    this.action_ = Services.actionServiceForDoc(this.element);
 
     this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
 
