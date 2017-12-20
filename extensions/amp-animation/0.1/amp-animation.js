@@ -56,7 +56,7 @@ export class AmpAnimation extends AMP.BaseElement {
     /** @private {?../../../src/friendly-iframe-embed.FriendlyIframeEmbed} */
     this.embed_ = null;
 
-    /** @private {?JsonObject} */
+    /** @private {?JsonObject|undefined} */
     this.configJson_ = null;
 
     /** @private {?./web-animations.WebAnimationRunner} */

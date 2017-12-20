@@ -36,7 +36,8 @@ const COOKIE_MAX_AGE_MS = COOKIE_MAX_AGE_DAYS * MS_PER_DAY;
  * @typedef {{
  *   id: string,
  *   name: string,
- *   spec: string
+ *   spec: string,
+ *   cleanupIssue: (string|undefined)
  * }}
  */
 let ExperimentDef;
@@ -489,11 +490,13 @@ function toggleExperiment_(id, name, opt_on) {
  * @param {function()} callback
  */
 function showConfirmation_(message, callback) {
-  const container = dev().assert(document.getElementById('popup-container'));
-  const messageElement = dev().assert(document.getElementById('popup-message'));
-  const confirmButton = dev().assert(
+  const container = dev().assertElement(
+      document.getElementById('popup-container'));
+  const messageElement = dev().assertElement(
+      document.getElementById('popup-message'));
+  const confirmButton = dev().assertElement(
       document.getElementById('popup-button-ok'));
-  const cancelButton = dev().assert(
+  const cancelButton = dev().assertElement(
       document.getElementById('popup-button-cancel'));
   const unlistenSet = [];
   const closePopup = affirmative => {
@@ -536,7 +539,8 @@ function getAmpConfig() {
       throw new Error('Can\'t find AMP_CONFIG in: ' + text);
     }
     // Setting global var to make standard experiment code just work.
-    return self.AMP_CONFIG = JSON.parse(match[1]);
+    return self.AMP_CONFIG = /** @type {!AmpConfigType} */ (
+      JSON.parse(match[1]));
   }).catch(error => {
     console./*OK*/error('Error fetching AMP_CONFIG', error);
     return {};

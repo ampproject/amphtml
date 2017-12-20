@@ -92,6 +92,17 @@ const mode = {
   GEO_OVERRIDE: 2, //  We've been overriden in test by #amp-geo=xx
 };
 
+/**
+ * @typedef {{
+ *   ISOCountry: string,
+ *   matchedISOCountryGroups: !Array<string>,
+ *   allISOCountryGroups: !Array<string>,
+ *   isInCountryGroup: GEO_IN_GROUP,
+ *   ISOCountryGroups: !Array<string>
+ * }}
+ */
+export const GeoDef = {};
+
 
 export class AmpGeo extends AMP.BaseElement {
   /** @param {!AmpElement} element */

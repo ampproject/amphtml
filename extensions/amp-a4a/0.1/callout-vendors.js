@@ -31,6 +31,7 @@ import {getMode} from '../../../src/mode';
 /** @typedef {{
     url: string,
     macros: Array<string>,
+    errorReportingUrl: (string|undefined),
     disableKeyAppend: boolean}} */
 let RtcVendorDef;
 

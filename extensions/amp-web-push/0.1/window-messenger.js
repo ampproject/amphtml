@@ -422,7 +422,7 @@ export class WindowMessenger {
    *
    * @param {string} topic A string, but this must match the receiving end that
    *    expects this topic string.
-   * @param {JsonObject} data Any data that can be serialized using the
+   * @param {*} data Any data that can be serialized using the
    *    structured clone algorithm.
    * @return {Promise}
    */

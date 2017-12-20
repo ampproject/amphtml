@@ -53,6 +53,9 @@ export class AmpViewerHost {
     /** @const {string} */
     this.logsId = opt_logsId;
 
+    /** @private {?Messaging} */
+    this.messaging_ = null;
+
     if (this.isWebview_ || opt_isHandshakePoll) {
       /** @private {number} */
       this.pollingIntervalId_ = setInterval(

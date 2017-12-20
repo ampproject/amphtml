@@ -74,8 +74,6 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
 function cleanupBuildDir() {
   fs.mkdirsSync('build/cc');
   rimraf.sync('build/fake-module');
-  rimraf.sync('build/patched-module');
-  fs.mkdirsSync('build/patched-module/document-register-element/build');
   fs.mkdirsSync('build/fake-module/third_party/babel');
   fs.mkdirsSync('build/fake-module/src/polyfills/');
   fs.mkdirsSync('build/fake-polyfills/src/polyfills');
@@ -154,9 +152,6 @@ function compile(entryModuleFilenames, outputDir,
     if (!options.preventRemoveAndMakeDir) {
       cleanupBuildDir();
     }
-    const unneededFiles = [
-      'build/fake-module/third_party/babel/custom-babel-helpers.js',
-    ];
     let wrapper = '(function(){%output%})();';
     if (options.wrapper) {
       wrapper = options.wrapper.replace('<%= contents %>', '%output%');
@@ -185,7 +180,6 @@ function compile(entryModuleFilenames, outputDir,
       'build/css.js',
       'build/*.css.js',
       'build/fake-module/**/*.js',
-      'build/patched-module/**/*.js',
       'build/experiments/**/*.js',
       // A4A has these cross extension deps.
       'extensions/amp-ad-network*/**/*-config.js',
@@ -208,6 +202,8 @@ function compile(entryModuleFilenames, outputDir,
       'extensions/amp-subscriptions/**/*.js',
       // Needed to access UserNotificationManager from other extensions
       'extensions/amp-user-notification/**/*.js',
+      // Needed to access amp-geo from other extensions
+      'extensions/amp-geo/**/*.js',
       // Needed for VideoService
       'extensions/amp-video-service/**/*.js',
       // Needed to access ConsentPolicyManager from other extensions
@@ -247,6 +243,16 @@ function compile(entryModuleFilenames, outputDir,
       '!**_test.js',
       '!**/test-*.js',
       '!**/*.extern.js',
+      // This is a sample file that doesn't need to be compiled
+      '!build/all/v0/amp-web-push.service-worker.js',
+      // This is a sample file that doesn't need to be compiled
+      '!extensions/amp-web-push/0.1/amp-web-push.service-worker.js',
+      // TODO(erwinm, glevitzky): remove this once type issues are fixed
+      // and when this is actually used.
+      '!extensions/amp-a4a/0.1/friendly-frame-renderer.js',
+      '!extensions/amp-a4a/0.1/name-frame-renderer.js',
+      '!extensions/amp-viewer-integration/0.1/examples/**/*.js',
+      '!third_party/react-externs/externs.js',
     ];
     // Add needed path for extensions.
     // Instead of globbing all extensions, this will only add the actual
@@ -266,45 +272,10 @@ function compile(entryModuleFilenames, outputDir,
           '3p/**/*.js',
           'ads/**/*.js');
     }
-    // Many files include the polyfills, but we only want to deliver them
-    // once. Since all files automatically wait for the main binary to load
-    // this works fine.
-    if (options.includeOnlyESMLevelPolyfills) {
-      const polyfillsShadowList = [
-        'array-includes.js',
-        'document-contains.js',
-        'domtokenlist-toggle.js',
-        'math-sign.js',
-        'object-assign.js',
-        'promise.js',
-      ];
-      srcs.push(
-          '!build/fake-module/src/polyfills.js',
-          '!build/fake-module/src/polyfills/**/*.js',
-          '!build/fake-polyfills/src/polyfills.js',
-          '!src/polyfills/*.js',
-          'build/fake-polyfills/**/*.js');
-      polyfillsShadowList.forEach(polyfillFile => {
-        fs.writeFileSync('build/fake-polyfills/src/polyfills/' + polyfillFile,
-            'export function install() {}');
-      });
-    } else if (options.includePolyfills) {
-      srcs.push(
-          '!build/fake-module/src/polyfills.js',
-          '!build/fake-module/src/polyfills/**/*.js',
-          '!build/fake-polyfills/**/*.js',
-      );
-    } else {
-      srcs.push('!src/polyfills.js', '!build/fake-polyfills/**/*.js',);
-      unneededFiles.push('build/fake-module/src/polyfills.js');
+    if (checkTypes) {
+      srcs.push('!extensions/amp-viewer-integration/0.1/test/**/*.js',
+          '!extensions/amp-a4a/0.1/test/utils.js');
     }
-    unneededFiles.forEach(function(fake) {
-      if (!fs.existsSync(fake)) {
-        fs.writeFileSync(fake,
-            '// Not needed in closure compiler\n' +
-            'export function deadCode() {}');
-      }
-    });
 
     let externs = baseExterns;
     if (options.externs) {
@@ -331,17 +302,11 @@ function compile(entryModuleFilenames, outputDir,
         // respective top level polyfills.js files.
         rewrite_polyfills: false,
         externs,
-        js_module_root: [
-          'node_modules/',
-          'build/patched-module/',
-          'build/fake-module/',
-          'build/fake-polyfills/',
-        ],
         entry_point: entryModuleFilenames,
-        process_common_js_modules: true,
+        module_resolution: 'NODE',
         // This strips all files from the input set that aren't explicitly
         // required.
-        only_closure_dependencies: true,
+        // only_closure_dependencies: true,
         output_wrapper: wrapper,
         create_source_map: intermediateFilename + '.map',
         source_map_location_mapping:
@@ -353,6 +318,7 @@ function compile(entryModuleFilenames, outputDir,
         define,
         hide_warnings_for: hideWarningsFor,
         jscomp_error: [],
+        jscomp_off: [],
       },
     };
 
@@ -367,6 +333,7 @@ function compile(entryModuleFilenames, outputDir,
           'const',
           'constantProperty',
           'globalThis');
+      // TODO(erwinm): remove this when we've typed everything properly
       compilerOptions.compilerFlags.conformance_configs =
           'build-system/conformance-config.textproto';
     }

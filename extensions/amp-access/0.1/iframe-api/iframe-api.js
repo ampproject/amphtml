@@ -65,7 +65,7 @@ export class AmpAccessIframeApi {
     /** @private @const {!Promise} */
     this.connectedPromise_ = deferred.promise;
 
-    /** @private {?function()} */
+    /** @private {?function(*)} */
     this.connectedResolver_ = deferred.resolve;
   }
 
@@ -97,8 +97,8 @@ export class AmpAccessIframeApi {
       const promise = new Promise(resolve => {
         resolve(this.controller_.connect(
             this.messenger_.getTargetOrigin(),
-            this.protocol_,
-            this.config_));
+            /** @type {string} */ (this.protocol_),
+            /** @type {!JsonObject} */ (this.config_)));
       });
       this.connectedResolver_(promise);
       return promise;

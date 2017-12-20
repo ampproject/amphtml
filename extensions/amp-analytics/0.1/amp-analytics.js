@@ -72,9 +72,9 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.isSandbox_ = false;
 
     /**
-     * @private {Object<string, RequestHandler>} A map of request handler with requests
+     * @private {!Object<!RequestHandler>} A map of request handler with requests
      */
-    this.requests_ = {};
+    this.requests_ = Object.create(null);
 
     /**
      * @private {JsonObject}
@@ -160,10 +160,10 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.analyticsGroup_.dispose();
       this.analyticsGroup_ = null;
     }
-    for (let i = 0; i < this.requests_.length; i++) {
-      this.requests_[i].dispose();
-      delete this.requests_[i];
-    }
+    Object.keys(this.requests_).forEach(x => {
+      this.requests_[x].dispose();
+      delete this.requests_[x];
+    });
   }
 
   /** @override */

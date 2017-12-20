@@ -320,8 +320,9 @@ function adoptShared(global, callback) {
   // If the closure passed to maybePumpEarlyFrame didn't execute
   // immediately we need to keep pushing onto preregisteredExtensions
   if (!global.AMP.push) {
-    global.AMP.push = preregisteredExtensions.push.bind(
-        preregisteredExtensions);
+    global.AMP.push = function(fnOrStruct) {
+      preregisteredExtensions.push(fnOrStruct);
+    }
   }
 
   // For iOS we need to set `cursor:pointer` to ensure that click events are

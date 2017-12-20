@@ -68,22 +68,22 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
 
   @Override public void visit(NodeTraversal t, Node n, Node parent) {
     if (isCallRemovable(n)) {
-      maybeEliminateCallExceptFirstParam(n, parent);
+      maybeEliminateCallExceptFirstParam(t, n, parent);
     } else if (isAmpExtensionCall(n)) {
-      inlineAmpExtensionCall(n, parent);
+      inlineAmpExtensionCall(t, n, parent);
     // Remove any `getMode().localDev` and `getMode().test` calls and replace it with `false`.
     } else if (isProd && isFunctionInvokeAndPropAccess(n, "$mode.getMode",
         ImmutableSet.of("localDev", "test"))) {
-      replaceWithBooleanExpression(false, n, parent);
+      replaceWithBooleanExpression(false, t, n, parent);
     // Remove any `getMode().minified` calls and replace it with `true`.
     } else if (isProd && isFunctionInvokeAndPropAccess(n, "$mode.getMode",
         ImmutableSet.of("minified"))) {
-      replaceWithBooleanExpression(true, n, parent);
+      replaceWithBooleanExpression(true, t, n, parent);
     } else {
       if (isProd) {
-        maybeReplaceRValueInVar(n, prodAssignmentReplacements);
+        maybeReplaceRValueInVar(t, n, prodAssignmentReplacements);
       }
-      maybeReplaceRValueInVar(n, assignmentReplacements);
+      maybeReplaceRValueInVar(t, n, assignmentReplacements);
     }
   }
 
@@ -145,7 +145,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
    *   // BODY...
    * })(self.AMP);
    */
-  private void inlineAmpExtensionCall(Node n, Node expr) {
+  private void inlineAmpExtensionCall(NodeTraversal t, Node n, Node expr) {
     if (expr == null || !expr.isExprResult()) {
       return;
     }
@@ -158,7 +158,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
     newcall.putBooleanProp(Node.FREE_CALL, true);
     newcall.addChildToBack(arg1);
     expr.replaceChild(n, newcall);
-    compiler.reportCodeChange();
+    t.reportCodeChange();
   }
 
   private Node getAmpExtensionCallback(Node n) {
@@ -219,14 +219,14 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
     return false;
   }
 
-  private void maybeReplaceRValueInVar(Node n, Map<String, Node> map) {
+  private void maybeReplaceRValueInVar(NodeTraversal t, Node n, Map<String, Node> map) {
     if (n != null && (n.isVar() || n.isLet() || n.isConst())) {
       Node varNode = n.getFirstChild();
       if (varNode != null) {
         for (Map.Entry<String, Node> mapping : map.entrySet()) {
           if (varNode.getString() == mapping.getKey()) {
             varNode.replaceChild(varNode.getFirstChild(), mapping.getValue());
-            compiler.reportCodeChange();
+            t.reportCodeChange();
             return;
           }
         }
@@ -272,24 +272,24 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
     return false;
   }
 
-  private void replaceWithBooleanExpression(boolean bool, Node n, Node parent) {
+  private void replaceWithBooleanExpression(boolean bool, NodeTraversal t, Node n, Node parent) {
     Node booleanNode = bool ? IR.trueNode() : IR.falseNode();
     booleanNode.useSourceInfoIfMissingFrom(n);
     parent.replaceChild(n, booleanNode);
-    compiler.reportCodeChange();
+    t.reportCodeChange();
   }
 
-  private void removeExpression(Node n, Node parent) {
+  private void removeExpression(NodeTraversal t, Node n, Node parent) {
     if (parent.isExprResult()) {
       Node grandparent = parent.getParent();
       grandparent.removeChild(parent);
     } else {
       parent.removeChild(n);
     }
-    compiler.reportCodeChange();
+    t.reportCodeChange();
   }
 
-  private void maybeEliminateCallExceptFirstParam(Node call, Node parent) {
+  private void maybeEliminateCallExceptFirstParam(NodeTraversal t, Node call, Node parent) {
     // Extra precaution if the item we're traversing has already been detached.
     if (call == null || parent == null) {
       return;
@@ -300,13 +300,13 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
     }
     Node firstArg = getprop.getNext();
     if (firstArg == null) {
-      removeExpression(call, parent);
+      removeExpression(t, call, parent);
       return;
     }
 
     firstArg.detachFromParent();
     parent.replaceChild(call, firstArg);
-    compiler.reportCodeChange();
+    t.reportCodeChange();
   }
 
   /**
