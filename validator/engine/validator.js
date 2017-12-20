@@ -904,7 +904,6 @@ class ChildTagMatcher {
    */
   matchChildTagName(encounteredTag, context, result) {
     const childTags = this.parentSpec_.childTags;
-    this.numChildTagsSeen_++;  // Increment this first to allow early exit.
     if (childTags.childTagNameOneof.length > 0) {
       const names = childTags.childTagNameOneof;
       if (names.indexOf(encounteredTag.upperName()) === -1) {
@@ -926,7 +925,7 @@ class ChildTagMatcher {
       }
     }
     if (childTags.firstChildTagNameOneof.length > 0 &&
-        (this.numChildTagsSeen_ - 1) === 0) {
+        this.numChildTagsSeen_ === 0) {
       const names = childTags.firstChildTagNameOneof;
       if (names.indexOf(encounteredTag.upperName()) === -1) {
         if (!amp.validator.LIGHT) {
@@ -947,6 +946,13 @@ class ChildTagMatcher {
         }
       }
     }
+  }
+
+  /**
+   * Record that we have encountered a new child tag.
+   */
+  recordChildTag() {
+    this.numChildTagsSeen_++;
   }
 
   /**
@@ -1312,10 +1318,8 @@ class TagStack {
    * tag, which can trigger validation (e.g., the previous tag may be
    * required to have two child tags).
    * @param {string} tagName
-   * @param {!Context} context
-   * @param {!amp.validator.ValidationResult} result
    */
-  enterTag(tagName, context, result) {
+  enterTag(tagName) {
     this.stack_.push(this.createNewTagStackEntry(tagName));
     this.increaseChildCounterForParent();
   }
@@ -1344,11 +1348,25 @@ class TagStack {
   /**
    * Given a ParsedTagSpec matching the current element, update the tag stack
    * state in ways that affect later validation.
-   * @param {!ParsedTagSpec} parsedTagSpec
+   * @param {!ValidateTagResult} tagResult
    * @param {!ParsedValidatorRules} parsedRules
    * @param {!LineCol} lineCol
    */
-  updateFromMatchingTagSpec(parsedTagSpec, parsedRules, lineCol) {
+  updateFromTagResult(tagResult, parsedRules, lineCol) {
+    const parsedTagSpec = tagResult.bestMatchTagSpec;
+
+    // Record that the parent tag contains an additional child. Skip reference
+    // points, as this update is noting a tag that matches.
+    const childTagMatcher = this.parentStackEntry_().childTagMatcher;
+    if (parsedTagSpec !== null && childTagMatcher !== null &&
+        !parsedTagSpec.isReferencePoint()) {
+      childTagMatcher.recordChildTag();
+    }
+
+    if (tagResult.validationResult.status !==
+        amp.validator.ValidationResult.Status.PASS)
+      return;
+
     if (parsedTagSpec.isReferencePoint())
       this.parentReferencePointMatcher().recordMatch(parsedTagSpec);
     this.setReferencePointMatcher(
@@ -1458,9 +1476,8 @@ class TagStack {
    */
   matchChildTagName(encounteredTag, context, result) {
     const matcher = this.parentStackEntry_().childTagMatcher;
-    if (matcher !== null) {
+    if (matcher !== null)
       matcher.matchChildTagName(encounteredTag, context, result);
-    }
   }
 
   /**
@@ -2371,13 +2388,23 @@ class Context {
   }
 
   /**
-   * Given a ParsedTagSpec matching the current element, update the validator
-   * state in ways that affect later validation.
-   * @param {!ParsedTagSpec} parsedTagSpec
+   * Given the tagResult from validating a single tag, update the overall
+   * result as well as the Context state to affect later validation.
+   * @param {!ValidateTagResult} tagResult
+   * @param {!amp.validator.ValidationResult} result
    */
-  updateFromMatchingTagSpec(parsedTagSpec) {
-    this.tagStack_.updateFromMatchingTagSpec(
-        parsedTagSpec, this.getRules(), this.getLineCol());
+  updateFromTagResult(tagResult, result) {
+    result.mergeFrom(tagResult.validationResult);
+
+    this.tagStack_.updateFromTagResult(
+        tagResult, this.getRules(), this.getLineCol());
+
+    if (tagResult.validationResult.status !==
+        amp.validator.ValidationResult.Status.PASS)
+      return;
+
+    const parsedTagSpec =
+        /** @type {!ParsedTagSpec} */ (tagResult.bestMatchTagSpec);
     this.extensions_.updateFromMatchingTagSpec(parsedTagSpec);
     // If this requires an extension and we are still in the document head,
     // record that we may still need to emit a missing extension error at
@@ -4237,6 +4264,11 @@ function validateTagAgainstSpec(parsedTagSpec, context, encounteredTag) {
   resultForAttempt.status = amp.validator.ValidationResult.Status.PASS;
   validateParentTag(parsedTagSpec, context, resultForAttempt);
   validateAncestorTags(parsedTagSpec, context, resultForAttempt);
+  // Some parent tag specs also define allowed child tag names for the first
+  // child or all children. Validate that we aren't violating any of those
+  // rules either.
+  context.getTagStack().matchChildTagName(
+      encounteredTag, context, resultForAttempt);
   // Only validate attributes if we haven't yet found any errors. The
   // Parent/Ancestor errors are informative without adding additional errors
   // about attributes.
@@ -5116,8 +5148,7 @@ amp.validator.ValidationHandler =
    * @override
    */
   startTag(encounteredTag) {
-    this.context_.getTagStack().enterTag(
-        encounteredTag.upperName(), this.context_, this.validationResult_);
+    this.context_.getTagStack().enterTag(encounteredTag.upperName());
     /** @type {?string} */
     let maybeDuplicateAttrName = encounteredTag.hasDuplicateAttrs();
     if (maybeDuplicateAttrName !== null) {
@@ -5136,14 +5167,8 @@ amp.validator.ValidationHandler =
     if (referencePointMatcher !== null) {
       const resultForReferencePoint =
           referencePointMatcher.validateTag(encounteredTag, this.context_);
-      this.validationResult_.mergeFrom(
-          resultForReferencePoint.validationResult);
-      if (resultForReferencePoint.validationResult.status ===
-          amp.validator.ValidationResult.Status.PASS) {
-        this.context_.updateFromMatchingTagSpec(
-            /** @type {!ParsedTagSpec} */ (
-                resultForReferencePoint.bestMatchTagSpec));
-      }
+      this.context_.updateFromTagResult(
+          resultForReferencePoint, this.validationResult_);
     }
 
     if ('BODY' === encounteredTag.upperName()) {
@@ -5152,14 +5177,7 @@ amp.validator.ValidationHandler =
     }
 
     const resultForTag = validateTag(encounteredTag, this.context_);
-    this.validationResult_.mergeFrom(resultForTag.validationResult);
-    if (resultForTag.validationResult.status !==
-        amp.validator.ValidationResult.Status.FAIL) {
-      this.context_.updateFromMatchingTagSpec(
-          /** @type {!ParsedTagSpec} */ (resultForTag.bestMatchTagSpec));
-    }
-    this.context_.getTagStack().matchChildTagName(
-        encounteredTag, this.context_, this.validationResult_);
+    this.context_.updateFromTagResult(resultForTag, this.validationResult_);
   }
 
   /**
