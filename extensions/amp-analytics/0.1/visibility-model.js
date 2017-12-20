@@ -71,7 +71,9 @@ export class VisibilityModel {
     });
 
     this.eventPromise_.then(() => {
-      this.onTriggerObservable_.fire();
+      if (this.onTriggerObservable_) {
+        this.onTriggerObservable_.fire();
+      }
     });
 
     /** @private {!Array<!UnlistenDef>} */
@@ -153,7 +155,9 @@ export class VisibilityModel {
       this.eventResolver_ = resolve;
     });
     this.eventPromise_.then(() => {
-      this.onTriggerObservable_.fire();
+      if (this.onTriggerObservable_) {
+        this.onTriggerObservable_.fire();
+      }
     });
     this.scheduleRepeatId_ = null;
     this.everMatchedVisibility_ = false;
@@ -196,7 +200,7 @@ export class VisibilityModel {
     this.unsubscribe_.length = 0;
     this.eventResolver_ = null;
     // TODO(jonkeller): Investigate why dispose() can be called twice,
-    // necessitating this "if"
+    // necessitating this "if", and the same "if" elsewhere in this file.
     if (this.onTriggerObservable_) {
       this.onTriggerObservable_.removeAll();
       this.onTriggerObservable_ = null;
@@ -218,7 +222,9 @@ export class VisibilityModel {
    * @param {function()} handler
    */
   onTriggerEvent(handler) {
-    this.onTriggerObservable_.add(handler);
+    if (this.onTriggerObservable_) {
+      this.onTriggerObservable_.add(handler);
+    }
     if (this.eventPromise_ && !this.eventResolver_) {
       // If eventPromise has already resolved, need to call handler manually.
       handler();
