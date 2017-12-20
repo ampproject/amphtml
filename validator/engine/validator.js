@@ -832,9 +832,9 @@ function decodeAttrValue(attrValue) {
 amp.validator.ValidationResult.prototype.mergeFrom = function(other) {
   goog.asserts.assert(this.status !== null);
   goog.asserts.assert(other.status !== null);
-  if (other.status !== amp.validator.ValidationResult.Status.UNKNOWN) {
-    this.status = other.status;
-  }
+  // Copy status only if fail. Failing is a terminal state.
+  if (other.status === amp.validator.ValidationResult.Status.FAIL)
+    this.status = amp.validator.ValidationResult.Status.FAIL;
   if (!amp.validator.LIGHT) {
     Array.prototype.push.apply(this.errors, other.errors);
   }
@@ -1068,7 +1068,7 @@ class ReferencePointMatcher {
   validateTag(tag, context) {
     // Look for a matching reference point, if we find one, record and exit.
     let resultForBestAttempt = new amp.validator.ValidationResult();
-    resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
+    resultForBestAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
     for (const p of this.parsedReferencePoints_.iterate()) {
       // p.tagSpecName here is actually a number, which was replaced in
       // validator_gen_js.py from the name string, so this works.
@@ -1079,8 +1079,8 @@ class ReferencePointMatcher {
       if (context.getRules().betterValidationResultThan(
               resultForAttempt, resultForBestAttempt))
         resultForBestAttempt.copyFrom(resultForAttempt);
-      if (resultForBestAttempt.status !==
-          amp.validator.ValidationResult.Status.FAIL) {
+      if (resultForBestAttempt.status ===
+          amp.validator.ValidationResult.Status.PASS) {
         return {
           validationResult: resultForBestAttempt,
           bestMatchTagSpec: parsedTagSpec
@@ -4234,13 +4234,13 @@ class TagSpecDispatch {
  */
 function validateTagAgainstSpec(parsedTagSpec, context, encounteredTag) {
   let resultForAttempt = new amp.validator.ValidationResult();
-  resultForAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
+  resultForAttempt.status = amp.validator.ValidationResult.Status.PASS;
   validateParentTag(parsedTagSpec, context, resultForAttempt);
   validateAncestorTags(parsedTagSpec, context, resultForAttempt);
   // Only validate attributes if we haven't yet found any errors. The
   // Parent/Ancestor errors are informative without adding additional errors
   // about attributes.
-  if (resultForAttempt.status !== amp.validator.ValidationResult.Status.FAIL) {
+  if (resultForAttempt.status === amp.validator.ValidationResult.Status.PASS) {
     validateAttributes(
         parsedTagSpec, context, encounteredTag, resultForAttempt);
   }
@@ -4255,7 +4255,7 @@ function validateTagAgainstSpec(parsedTagSpec, context, encounteredTag) {
   }
   // Only validate uniqueness if we haven't yet found any errors, as it's
   // likely that this is not the correct tagspec if we have.
-  if (resultForAttempt.status != amp.validator.ValidationResult.Status.FAIL) {
+  if (resultForAttempt.status === amp.validator.ValidationResult.Status.PASS) {
     validateUniqueness(parsedTagSpec, context, resultForAttempt);
   }
 
@@ -4263,7 +4263,7 @@ function validateTagAgainstSpec(parsedTagSpec, context, encounteredTag) {
 
   // Append some warnings, only if no errors.
   if (!amp.validator.LIGHT &&
-      resultForAttempt.status !== amp.validator.ValidationResult.Status.FAIL) {
+      resultForAttempt.status === amp.validator.ValidationResult.Status.PASS) {
     const tagSpec = parsedTagSpec.getSpec();
     if (tagSpec.deprecation !== null) {
       context.addWarning(
@@ -4287,7 +4287,7 @@ function validateTagAgainstSpec(parsedTagSpec, context, encounteredTag) {
 /**
  * Validates the provided |tagName| with respect to the tag
  * specifications in the validator's rules, resturning a ValidationResult
- * with errors for this tag and a FAIL or UNKNWON status. At least one
+ * with errors for this tag and a PASS or FAIL status. At least one
  * specification must validate, or the result will have status FAIL.
  * Also passes back a reference to the tag spec which matched, if a match
  * was found.
@@ -4368,9 +4368,13 @@ function validateTag(encounteredTag, context) {
       return {validationResult: result, bestMatchTagSpec: null};
     }
   }
-  // Validate against all tagspecs.
+  // Validate against all remaining tagspecs. Each tagspec will produce a
+  // different set of errors. Even if none of them match, we only want to
+  // return errors from a single tagspec, not all of them. We keep around
+  // the 'best' attempt until we have found a matching TagSpec or have
+  // tried them all.
   let resultForBestAttempt = new amp.validator.ValidationResult();
-  resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
+  resultForBestAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
   let bestMatchTagSpec = null;
   for (const tagSpecId of tagSpecDispatch.allTagSpecs()) {
     const parsedTagSpec = context.getRules().getByTagSpecId(tagSpecId);
@@ -4380,8 +4384,8 @@ function validateTag(encounteredTag, context) {
             resultForAttempt, resultForBestAttempt)) {
       resultForBestAttempt.copyFrom(resultForAttempt);
       bestMatchTagSpec = parsedTagSpec;
-      if (resultForBestAttempt.status !==
-          amp.validator.ValidationResult.Status.FAIL) {
+      if (resultForBestAttempt.status ===
+          amp.validator.ValidationResult.Status.PASS) {
         return {
           bestMatchTagSpec: bestMatchTagSpec,
           validationResult: resultForBestAttempt
@@ -4665,30 +4669,37 @@ class ParsedValidatorRules {
   };
 
   /**
+   * Returns true iff statusA is a better status than statusB
+   * @param {?amp.validator.ValidationResult.Status} statusA
+   * @param {?amp.validator.ValidationResult.Status} statusB
+   * @return {boolean}
+   * @private
+   */
+  betterValidationStatusThan_(statusA, statusB) {
+    // Equal, so not better than.
+    if (statusA === statusB) return false;
+
+    // PASS > FAIL > UNKNOWN
+    if (statusA === amp.validator.ValidationResult.Status.PASS) return true;
+    if (statusB === amp.validator.ValidationResult.Status.PASS) return false;
+    if (statusA === amp.validator.ValidationResult.Status.FAIL) return true;
+    goog.asserts.assert(
+        statusA === amp.validator.ValidationResult.Status.UNKNOWN);
+    return false;
+  }
+
+  /**
    * Returns true iff resultA is a better result than resultB.
    * @param {!amp.validator.ValidationResult} resultA
    * @param {!amp.validator.ValidationResult} resultB
    * @return {boolean}
    */
   betterValidationResultThan(resultA, resultB) {
-    // Results are either UNKNOWN or FAIL. We only set pass at the end of
-    // validation, where there are no more comparisons to run.
-    goog.asserts.assert(
-        resultA.status !== amp.validator.ValidationResult.Status.PASS);
-    goog.asserts.assert(
-        resultB.status !== amp.validator.ValidationResult.Status.PASS);
-    // A non-failing result is better than a failing one. Results are
-    // either UNKNOWN or FAIL.
-    if (resultA.status !== resultB.status) {
-      return resultA.status === amp.validator.ValidationResult.Status.UNKNOWN;
-    }
+    if (resultA.status !== resultB.status)
+      return this.betterValidationStatusThan_(resultA.status, resultB.status);
 
     // In the light mode, we only have status values.
     if (!amp.validator.LIGHT) {
-      // If one of the results is empty (ie: first attempt), prefer the other.
-      if (resultA.errors.length === 0) return false;
-      if (resultB.errors.length === 0) return true;
-
       // Prefer the attempt with the fewest errors.
       if (resultA.errors.length < resultB.errors.length) return true;
       if (resultB.errors.length < resultA.errors.length) return false;
@@ -5127,8 +5138,8 @@ amp.validator.ValidationHandler =
           referencePointMatcher.validateTag(encounteredTag, this.context_);
       this.validationResult_.mergeFrom(
           resultForReferencePoint.validationResult);
-      if (resultForReferencePoint.validationResult.status !==
-          amp.validator.ValidationResult.Status.FAIL) {
+      if (resultForReferencePoint.validationResult.status ===
+          amp.validator.ValidationResult.Status.PASS) {
         this.context_.updateFromMatchingTagSpec(
             /** @type {!ParsedTagSpec} */ (
                 resultForReferencePoint.bestMatchTagSpec));
