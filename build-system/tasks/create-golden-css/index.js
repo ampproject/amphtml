@@ -20,8 +20,7 @@ const fs = require('fs-extra');
 
 function main() {
   return transformCss('./build-system/tasks/create-golden-css/css/main.css', {
-    // TODO(erwinm): change core to `normalizeWhitespace` when upgraded to 4.0
-    core: false,
+    normalizeWhitespace: false,
     discardComments: false,
   }).then(function(result) {
     fs.writeFileSync('./test/golden-files/main.css', result);
