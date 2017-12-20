@@ -27,7 +27,7 @@ import {InaboxMessagingHost} from './inabox-messaging-host';
 const TAG = 'inabox-host';
 const INITIALIZED_WIN_VAR_NAME = 'ampInaboxInitialized';
 const PENDING_MESSAGES_WIN_VAR_NAME = 'ampInaboxPendingMessages';
-const INABOX_AD_IFRAMES_IN_VAR_NAME= 'ampInaboxIframes';
+const INABOX_AD_IFRAMES_IN_VAR_NAME = 'ampInaboxIframes';
 
 /**
  * Class for initializing host script and consuming queued messages.
@@ -49,12 +49,12 @@ export class InaboxHost {
 
     if (win[INABOX_AD_IFRAMES_IN_VAR_NAME] &&
         !isArray(win[INABOX_AD_IFRAMES_IN_VAR_NAME])) {
-      dev().info(`Invalid ${INABOX_AD_IFRAMES_IN_VAR_NAME}`,
-        win[INABOX_AD_IFRAMES_IN_VAR_NAME]);
+      dev().info(TAG, `Invalid ${INABOX_AD_IFRAMES_IN_VAR_NAME}`,
+          win[INABOX_AD_IFRAMES_IN_VAR_NAME]);
       win[INABOX_AD_IFRAMES_IN_VAR_NAME] = [];
     }
     const host = new InaboxMessagingHost(
-      win, win[INABOX_AD_IFRAMES_IN_VAR_NAME]);
+        win, win[INABOX_AD_IFRAMES_IN_VAR_NAME]);
 
     const queuedMsgs = win[PENDING_MESSAGES_WIN_VAR_NAME];
     if (queuedMsgs) {
@@ -63,7 +63,7 @@ export class InaboxHost {
           try {
             host.processMessage(message);
           } catch (err) {
-            dev().info('Error processing inabox message', message, err);
+            dev().info(TAG, 'Error processing inabox message', message, err);
           }
         });
       } else {

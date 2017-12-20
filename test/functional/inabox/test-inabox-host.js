@@ -22,7 +22,7 @@ describes.fakeWin('inabox-host', {}, env => {
   let processMessageSpy;
   beforeEach(() => {
     processMessageSpy = env.sandbox.spy(
-      InaboxMessagingHost.prototype, 'processMessage');
+        InaboxMessagingHost.prototype, 'processMessage');
   });
 
   it('should process queue', () => {
