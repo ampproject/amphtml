@@ -1260,13 +1260,11 @@ let TagStackEntry;
 /**
  * This abstraction keeps track of the tag names and ChildTagMatchers
  * as we enter / exit tags in the document. Closing tags is tricky:
- * - For tags with no end tag per spec, we close them in EnterTag when
- *   another tag is encountered.
- * - In addition, we assume that all end tags are optional and we close,
- *   that is, pop off tags our stack, lazily as we encounter parent closing
- *   tags. This part differs slightly from the behavior per spec: instead of
- *   closing an <option> tag when a following <option> tag is seen, we close
- *   it when the parent closing tag (in practice <select>) is encountered.
+ * - We assume that all end tags are optional and we close, that is, pop off
+ *   tags our stack, lazily as we encounter parent closing tags. This part
+ *   differs slightly from the behavior per spec: instead of closing an
+ *   <option> tag when a following <option> tag is seen, we close it when the
+ *   parent closing tag (in practice <select>) is encountered.
  * @private
  */
 class TagStack {
