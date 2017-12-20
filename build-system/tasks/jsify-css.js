@@ -40,9 +40,11 @@ const cssNanoDefaultOptions = {
   autoprefixer: false,
   convertValues: false,
   discardUnused: false,
+  cssDeclarationSorter: false,
   // `mergeIdents` this is only unsafe if you rely on those animation names in JavaScript.
   mergeIdents: true,
   reduceIdents: false,
+  reduceInitial: false,
   zindex: false,
   svgo: {
     encode: true,
@@ -63,7 +65,7 @@ const transformCss = exports.transformCss = function(filename, opt_cssnano) {
   // We try and turn off any optimization that is marked unsafe.
   const cssnanoOptions = Object.assign(Object.create(null),
       cssNanoDefaultOptions, opt_cssnano);
-  const cssnanoTransformer = cssnano(cssnanoOptions);
+  const cssnanoTransformer = cssnano({preset: ['default', cssnanoOptions]});
 
   const css = fs.readFileSync(filename, 'utf8');
   const transformers = [postcssImport, cssprefixer, cssnanoTransformer];
