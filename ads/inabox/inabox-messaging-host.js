@@ -224,12 +224,20 @@ export class InaboxMessagingHost {
       return this.iframeMap_[sentinel];
     }
 
-    // Walk up on the window tree until find host's direct child window
-    while (source.parent !== this.win_ && source !== this.win_.top) {
-      source = source.parent;
+    // Walk up on the window tree and verify that there is no cross-domain
+    // frame in between the source of the postMessage and the host doc.
+    // If there is, the host doc will not be able to accurately measure
+    // the creative's positions in the page, so return null.
+    let tempWin = source.parent;
+    while (tempWin !== this.win_ && tempWin !== this.win_.top) {
+      if (tempWin.location.origin !== this.win_.location.origin) {
+        return null;
+      }
+      tempWin = tempWin.parent;
     }
 
-    // Find the iframe element that hosts the message source window
+    // Verify that the source of the postMessage corresponds to one of
+    // the iframes that was registered.
     for (let i = 0; i < this.iframes_.length; i++) {
       const iframe = this.iframes_[i];
       if (iframe.contentWindow === source) {
