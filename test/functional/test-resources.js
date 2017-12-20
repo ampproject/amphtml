@@ -39,7 +39,6 @@ describe('Resources', () => {
   });
 
   afterEach(() => {
-    clock.restore();
     sandbox.restore();
     resources.pass_.cancel();
   });
@@ -583,11 +582,13 @@ describes.fakeWin('Resources startup', {
 }, env => {
   let win;
   let clock;
+  let sandbox;
   let resources;
   let schedulePassStub;
 
   beforeEach(() => {
     win = env.win;
+    sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
     resources = Services.resourcesForDoc(win.document.body);
     resources.relayoutAll_ = false;
@@ -595,7 +596,7 @@ describes.fakeWin('Resources startup', {
   });
 
   afterEach(() => {
-    clock.restore();
+    sandbox.restore();
   });
 
   it('should run a full reload pass on window.onload', () => {
@@ -1780,7 +1781,6 @@ describe('Resources changeSize', () => {
   });
 
   afterEach(() => {
-    clock.restore();
     viewportMock.verify();
     sandbox.restore();
   });
