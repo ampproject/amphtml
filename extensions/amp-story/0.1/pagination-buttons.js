@@ -105,6 +105,23 @@ function setClassOnHover(hoverEl, targetEl, className) {
 }
 
 
+/**
+ * @param {!Element} buttonEl
+ * @param {!Event} e
+ * @param {!AsyncValue<!ButtonStateDef>} buttonState
+ */
+function maybeDispatchOnClick(buttonEl, buttonState) {
+  buttonEl.addEventListener('click', e => {
+    const eventType = buttonState.get().triggers;
+    if (!eventType) {
+      return;
+    }
+    e.preventDefault();
+    dispatch(buttonEl, dev().assert(eventType), /* opt_bubbles */ true);
+  });
+}
+
+
 /** Pagination buttons layer. */
 export class PaginationButtons {
   /**
@@ -154,14 +171,17 @@ export class PaginationButtons {
   /**
    * @param {!Element} el
    * @param {!Event} e
-   * @param {string=} opt_eventType
+   * @param {!AsyncValue<!ButtonStateDef>} state
    */
-  maybeDispatch_(el, e, opt_eventType) {
-    if (!opt_eventType) {
-      return;
-    }
-    e.preventDefault();
-    dispatch(el, dev().assert(opt_eventType), /* opt_bubbles */ true);
+  maybeDispatchOnClick_(el, state) {
+    el.addEventListener('click', e => {
+      const eventType = state.get().triggers;
+      if (!eventType) {
+        return;
+      }
+      e.preventDefault();
+      dispatch(el, dev().assert(eventType), /* opt_bubbles */ true);
+    });
   }
 
   /** @param {!Element} element */
@@ -169,19 +189,14 @@ export class PaginationButtons {
     setClassOnHover(this.forwardButton_, element, 'i-amphtml-story-next-hover');
     setClassOnHover(this.backButton_, element, 'i-amphtml-story-prev-hover');
 
+    maybeDispatchOnClick(this.forwardButton_, this.forwardButtonState_);
+    maybeDispatchOnClick(this.backButton_, this.backButtonState_);
+
     this.forwardButton_.classList.add(this.forwardButtonState_.get().className);
     this.backButton_.classList.add(this.backButtonState_.get().className);
 
     element.appendChild(this.forwardButton_);
     element.appendChild(this.backButton_);
-
-    this.forwardButton_.addEventListener('click', e =>
-      this.maybeDispatch_(this.forwardButton_, e,
-          this.forwardButtonState_.get().triggers));
-
-    this.backButton_.addEventListener('click', e =>
-      this.maybeDispatch_(this.backButton_, e,
-          this.backButtonState_.get().triggers));
   }
 
   /** @param {!./navigation-state.StateChangeEventDef} event */
