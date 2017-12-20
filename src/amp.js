@@ -30,12 +30,7 @@ import {installPlatformService} from './service/platform-impl';
 import {installDocService} from './service/ampdoc-impl';
 import {installCacheServiceWorker} from './service-worker/install';
 import {stubElementsForDoc} from './service/custom-element-registry';
-import {
-  installAmpdocServices,
-  installBuiltins,
-  installRuntimeServices,
-  adopt,
-} from './runtime';
+import {installAmpdocServices, installBuiltins, installRuntimeServices, adopt} from './runtime';
 import {cssText} from '../build/css';
 import {maybeValidate} from './validator-integration';
 import {maybeTrackImpression} from './impression';
