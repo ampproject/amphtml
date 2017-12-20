@@ -1697,7 +1697,7 @@ export class AmpA4A extends AMP.BaseElement {
       triggerAnalyticsEvent(analyticsElement, analyticsEvent, analyticsVars);
     } else {
       dev().warn(
-          'AMP-A4A',
+          TAG,
           'The owner document for amp-analytics mismatches this.win.document.');
     }
   }
