@@ -3771,12 +3771,10 @@ function validateAttributeInExtension(tagSpec, context, attr, result) {
  * Returns true iff the validation is successful.
  * @param {!ParsedTagSpec} parsedTagSpec
  * @param {!Context} context
- * @param {!ParsedTagSpec} parsedSpec
  * @param {!amp.htmlparser.ParsedHtmlTag} encounteredTag
  * @param {!amp.validator.ValidationResult} result
  */
-function validateAttributes(
-    parsedTagSpec, context, parsedSpec, encounteredTag, result) {
+function validateAttributes(parsedTagSpec, context, encounteredTag, result) {
   const spec = parsedTagSpec.getSpec();
   if (spec.ampLayout !== null) {
     validateLayout(parsedTagSpec, context, encounteredTag, result);
@@ -3905,7 +3903,7 @@ function validateAttributes(
     if (attrSpec.mandatory) {
       mandatoryAttrsSeen[parsedAttrSpec.getId()] = true;
     }
-    if (parsedSpec.getSpec().tagName === 'BASE' && attr.name === 'href' &&
+    if (parsedTagSpec.getSpec().tagName === 'BASE' && attr.name === 'href' &&
         context.hasSeenUrl()) {
       if (amp.validator.LIGHT) {
         result.status = amp.validator.ValidationResult.Status.FAIL;
@@ -4154,12 +4152,12 @@ class TagSpecDispatch {
 
 /**
  * Update Global Specs
- * @param {!ParsedTagSpec} parsedSpec
+ * @param {!ParsedTagSpec} parsedTagSpec
  * @param {!amp.htmlparser.ParsedHtmlTag} encounteredTag
  * @param {!Context} context
  */
-function UpdateGlobalSpecs(parsedSpec, encounteredTag, context) {
-  const tagSpec = parsedSpec.getSpec();
+function UpdateGlobalSpecs(parsedTagSpec, encounteredTag, context) {
+  const tagSpec = parsedTagSpec.getSpec();
   var tagStack = context.getTagStack();
 
   if (tagSpec.descendantTagList !== null) {
@@ -4190,72 +4188,14 @@ function UpdateGlobalSpecs(parsedSpec, encounteredTag, context) {
 }
 
 /**
- * Validates the provided |tagName| with respect to a single tag
- * specification.
- * @param {number} tagSpecId
+ * Given a ParsedTagSpec matching the current element, update the validator
+ * state in ways that affect later validation.
+ * @param {!ParsedTagSpec} parsedTagSpec
  * @param {!Context} context
- * @param {!amp.htmlparser.ParsedHtmlTag} encounteredTag
- * @param {!amp.validator.ValidationResult} resultForBestAttempt
  */
-function validateTagAgainstSpec(
-    tagSpecId, context, encounteredTag, resultForBestAttempt) {
-  let resultForAttempt = new amp.validator.ValidationResult();
-  resultForAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
-  const parsedSpec = context.getRules().getByTagSpecId(tagSpecId);
-  validateParentTag(parsedSpec, context, resultForAttempt);
-  validateAncestorTags(parsedSpec, context, resultForAttempt);
-  // Only validate attributes if we haven't yet found any errors. The
-  // Parent/Ancestor errors are informative without adding additional errors
-  // about attributes.
-  if (resultForAttempt.status != amp.validator.ValidationResult.Status.FAIL) {
-    validateAttributes(
-        parsedSpec, context, parsedSpec, encounteredTag, resultForAttempt);
-  }
-  validateDescendantTags(encounteredTag, parsedSpec, context, resultForAttempt);
-  validateNoSiblingsAllowedTags(parsedSpec, context, resultForAttempt);
-  validateLastChildTags(context, resultForAttempt);
-  // If we haven't reached the body element yet, we may not have seen the
-  // necessary extension. That case is handled elsewhere.
-  if (context.getTagStack().hasAncestor('BODY')) {
-    validateRequiredExtensions(parsedSpec, context, resultForAttempt);
-  }
-  // Only validate uniqueness if we haven't yet found any errors, as it's
-  // likely that this is not the correct tagspec if we have.
-  if (resultForAttempt.status != amp.validator.ValidationResult.Status.FAIL) {
-    validateUniqueness(parsedSpec, context, resultForAttempt);
-  }
-
-  validateReferencePointCollision(parsedSpec, context, resultForAttempt);
-
-  resultForBestAttempt.copyFrom(context.getRules().selectBestValidationResult(
-      resultForBestAttempt, resultForAttempt));
-  if (resultForBestAttempt.status ===
-      amp.validator.ValidationResult.Status.FAIL)
-    return;
-
-  // -- This is the successful branch of the code: the tagspec matches. --
-
-  const tagSpec = parsedSpec.getSpec();
-
-  if (!amp.validator.LIGHT) {
-    if (tagSpec.deprecation !== null) {
-      context.addWarning(
-          amp.validator.ValidationError.Code.DEPRECATED_TAG,
-          context.getDocLocator(),
-          /* params */[getTagSpecName(tagSpec), tagSpec.deprecation],
-          tagSpec.deprecationUrl, resultForBestAttempt);
-    }
-    if (tagSpec.uniqueWarning &&
-        context.getTagspecsValidated().hasOwnProperty(tagSpecId)) {
-      context.addWarning(
-          amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG_WARNING,
-          context.getDocLocator(),
-          /* params */[getTagSpecName(tagSpec)], getTagSpecUrl(tagSpec),
-          resultForBestAttempt);
-    }
-  }  // !amp.validator.LIGHT
-
+function updateStateFromTagSpec(parsedTagSpec, context) {
   // If this is an extension, keep track of which extensions are loaded
+  const tagSpec = parsedTagSpec.getSpec();
   const extensionsCtx = context.getExtensions();
   if (tagSpec.extensionSpec !== null) {
     const extensionSpec = tagSpec.extensionSpec;
@@ -4310,12 +4250,12 @@ function validateTagAgainstSpec(
   for (const condition of tagSpec.satisfies) {
     context.satisfyCondition(condition);
   }
-  if (!context.hasSeenUrl() && parsedSpec.containsUrl()) {
+  if (!context.hasSeenUrl() && parsedTagSpec.containsUrl()) {
     context.markUrlSeen(tagSpec);
   }
 
-  if (parsedSpec.shouldRecordTagspecValidated()) {
-    context.recordTagspecValidated(tagSpecId);
+  if (parsedTagSpec.shouldRecordTagspecValidated()) {
+    context.recordTagspecValidated(parsedTagSpec.id());
   }
 
   if (tagSpec.mandatoryAlternatives !== null) {
@@ -4332,13 +4272,84 @@ function validateTagAgainstSpec(
   if (tagSpec.childTags !== null)
     context.setChildTagMatcher(new ChildTagMatcher(tagSpec));
 
-  // Set reference point matcher to parsedSpec.getReferencePoints(),
+  // Set reference point matcher to parsedTagSpec.getReferencePoints(),
   // if present.
-  if (parsedSpec.hasReferencePoints()) {
+  if (parsedTagSpec.hasReferencePoints()) {
     context.setReferencePointMatcher(new ReferencePointMatcher(
-        context.getRules(), parsedSpec.getReferencePoints()));
+        context.getRules(), parsedTagSpec.getReferencePoints()));
   }
 }
+
+/**
+ * Validates the provided |tagName| with respect to a single tag
+ * specification.
+ * @param {number} tagSpecId
+ * @param {!Context} context
+ * @param {!amp.htmlparser.ParsedHtmlTag} encounteredTag
+ * @param {!amp.validator.ValidationResult} resultForBestAttempt
+ */
+function validateTagAgainstSpec(
+    tagSpecId, context, encounteredTag, resultForBestAttempt) {
+  let resultForAttempt = new amp.validator.ValidationResult();
+  resultForAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
+  const parsedTagSpec = context.getRules().getByTagSpecId(tagSpecId);
+  validateParentTag(parsedTagSpec, context, resultForAttempt);
+  validateAncestorTags(parsedTagSpec, context, resultForAttempt);
+  // Only validate attributes if we haven't yet found any errors. The
+  // Parent/Ancestor errors are informative without adding additional errors
+  // about attributes.
+  if (resultForAttempt.status !== amp.validator.ValidationResult.Status.FAIL) {
+    validateAttributes(
+        parsedTagSpec, context, encounteredTag, resultForAttempt);
+  }
+  validateDescendantTags(
+      encounteredTag, parsedTagSpec, context, resultForAttempt);
+  validateNoSiblingsAllowedTags(parsedTagSpec, context, resultForAttempt);
+  validateLastChildTags(context, resultForAttempt);
+  // If we haven't reached the body element yet, we may not have seen the
+  // necessary extension. That case is handled elsewhere.
+  if (context.getTagStack().hasAncestor('BODY')) {
+    validateRequiredExtensions(parsedTagSpec, context, resultForAttempt);
+  }
+  // Only validate uniqueness if we haven't yet found any errors, as it's
+  // likely that this is not the correct tagspec if we have.
+  if (resultForAttempt.status != amp.validator.ValidationResult.Status.FAIL) {
+    validateUniqueness(parsedTagSpec, context, resultForAttempt);
+  }
+
+  validateReferencePointCollision(parsedTagSpec, context, resultForAttempt);
+
+  // Append some warnings, only if no errors.
+  if (!amp.validator.LIGHT &&
+      resultForAttempt.status !== amp.validator.ValidationResult.Status.FAIL) {
+    const tagSpec = parsedTagSpec.getSpec();
+    if (tagSpec.deprecation !== null) {
+      context.addWarning(
+          amp.validator.ValidationError.Code.DEPRECATED_TAG,
+          context.getDocLocator(),
+          /* params */[getTagSpecName(tagSpec), tagSpec.deprecation],
+          tagSpec.deprecationUrl, resultForAttempt);
+    }
+    if (tagSpec.uniqueWarning &&
+        context.getTagspecsValidated().hasOwnProperty(tagSpecId)) {
+      context.addWarning(
+          amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG_WARNING,
+          context.getDocLocator(),
+          /* params */[getTagSpecName(tagSpec)], getTagSpecUrl(tagSpec),
+          resultForAttempt);
+    }
+  }
+
+  resultForBestAttempt.copyFrom(context.getRules().selectBestValidationResult(
+      resultForBestAttempt, resultForAttempt));
+  if (resultForBestAttempt.status !==
+      amp.validator.ValidationResult.Status.FAIL) {
+    // This is the successful branch of the code: the tagspec matches. Update
+    // any global state in context that the tagspec requires.
+    updateStateFromTagSpec(parsedTagSpec, context);
+  }
+}
+
 
 /**
  * This wrapper class provides access to the validation rules.
