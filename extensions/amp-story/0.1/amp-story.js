@@ -369,8 +369,13 @@ export class AmpStory extends AMP.BaseElement {
     const gestures = Gestures.get(this.element,
         /* shouldNotPreventDefault */ true);
 
-    gestures.onGesture(SwipeXYRecognizer, () => {
-      if (this.bookend_.isActive()) {
+    gestures.onGesture(SwipeXYRecognizer, e => {
+      const xSwipe = Math.abs(e.data.deltaX);
+      const ySwipe = Math.abs(e.data.deltaY);
+      const minSwipeDelta = 80;
+      const canShowEducationOverlay =
+          xSwipe > minSwipeDelta || ySwipe > minSwipeDelta;
+      if (this.bookend_.isActive() || !canShowEducationOverlay) {
         return;
       }
       this.ampStoryHint_.showNavigationOverlay();
