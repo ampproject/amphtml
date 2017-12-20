@@ -55,6 +55,7 @@ goog.require('parse_css.ParsedCssUrl');
 goog.require('parse_css.RuleVisitor');
 goog.require('parse_css.extractUrls');
 goog.require('parse_css.parseAStylesheet');
+goog.require('parse_css.stripVendorPrefix');
 goog.require('parse_css.tokenize');
 goog.require('parse_css.validateAmp4AdsCss');
 goog.require('parse_css.validateKeyframesCss');
@@ -1676,7 +1677,7 @@ function isAtRuleValid(cssSpec, atRuleName) {
   for (const atRuleSpec of cssSpec.atRuleSpec) {
     if (atRuleSpec.name === '$DEFAULT') {
       defaultType = atRuleSpec.type;
-    } else if (atRuleSpec.name === atRuleName) {
+    } else if (atRuleSpec.name === parse_css.stripVendorPrefix(atRuleName)) {
       return atRuleSpec.type !==
           amp.validator.AtRuleSpec.BlockType.PARSE_AS_ERROR;
     }
@@ -1694,8 +1695,8 @@ function isAtRuleValid(cssSpec, atRuleName) {
  */
 function IsDeclarationValid(cssSpec, declarationName) {
   if (cssSpec.allowedDeclarations.length === 0) return true;
-  return cssSpec.allowedDeclarations.indexOf(declarationName.toLowerCase()) >
-      -1;
+  return cssSpec.allowedDeclarations.indexOf(
+             parse_css.stripVendorPrefix(declarationName)) > -1;
 }
 
 /**
