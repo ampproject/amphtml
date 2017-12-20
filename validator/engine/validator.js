@@ -646,7 +646,7 @@ class ParsedTagSpec {
 
   /**
    * Whether or not the tag should be recorded via
-   * Context.recordTagspecValidated if it was validated
+   * Context.recordTagspecValidated_ if it was validated
    * successfullly. For performance, this is only done for tags that are
    * mandatory, unique, or possibly required by some other tag.
    * @return {boolean}
@@ -1043,7 +1043,7 @@ class ReferencePointMatcher {
               resultForBestAttempt, resultForAttempt));
       if (resultForBestAttempt.status !==
           amp.validator.ValidationResult.Status.FAIL) {
-        updateContextFromTagSpec(parsedTagSpec, context);
+        context.updateFromMatchingTagSpec(parsedTagSpec);
         this.referencePointsMatched_.push(parsedTagSpec.id());
         return;
       }
@@ -1740,7 +1740,7 @@ class CdataMatcher {
     // DocLocator instance (in Context) over the document, so by the time
     // we know that there's something wrong with the cdata for a tag,
     // we've advanced past the tag. This information gets filled in
-    // by Context.setCdataMatcher.
+    // by Context.setCdataMatcher_.
 
     if (!amp.validator.LIGHT) {
       /** @private @type {!LineCol} */
@@ -2244,8 +2244,9 @@ class Context {
    * @param {!Array<string>} params
    * @param {?string} specUrl a link (URL) to the amphtml spec
    * @return {!amp.validator.ValidationError}
+   * @private
    */
-  populateError(severity, validationErrorCode, lineCol, params, specUrl) {
+  populateError_(severity, validationErrorCode, lineCol, params, specUrl) {
     const error = new amp.validator.ValidationError();
     error.severity = severity;
     error.code = validationErrorCode;
@@ -2266,7 +2267,7 @@ class Context {
    */
   addWarning(validationErrorCode, lineCol, params, specUrl, validationResult) {
     this.addBuiltError(
-        this.populateError(
+        this.populateError_(
             amp.validator.ValidationError.Severity.WARNING, validationErrorCode,
             lineCol, params, specUrl),
         validationResult);
@@ -2282,7 +2283,7 @@ class Context {
    */
   addError(validationErrorCode, lineCol, params, specUrl, validationResult) {
     this.addBuiltError(
-        this.populateError(
+        this.populateError_(
             amp.validator.ValidationError.Severity.ERROR, validationErrorCode,
             lineCol, params, specUrl),
         validationResult);
@@ -2290,12 +2291,140 @@ class Context {
   }
 
   /**
+   * Given a ParsedTagSpec matching the current element, update the validator
+   * state in ways that affect later validation.
+   * @param {!ParsedTagSpec} parsedTagSpec
+   */
+  updateFromMatchingTagSpec(parsedTagSpec) {
+    // If this is an extension, keep track of which extensions are loaded
+    const tagSpec = parsedTagSpec.getSpec();
+    if (tagSpec.extensionSpec !== null) {
+      const extensionSpec = tagSpec.extensionSpec;
+      // This is an always present field if extension spec is set.
+      const extensionName = /** @type{string} */ (extensionSpec.name);
+      this.extensions_.recordExtensionLoaded(extensionName);
+      switch (extensionSpec.requiresUsage) {
+        case amp.validator.ExtensionSpec.ExtensionUsageRequirement
+            .GRANDFATHERED:  // Fallthrough intended:
+        case amp.validator.ExtensionSpec.ExtensionUsageRequirement.NONE:
+          // This extension does not have usage demonstrated by a tag, for
+          // example: amp-dynamic-css-classes
+          break;
+        case amp.validator.ExtensionSpec.ExtensionUsageRequirement.ERROR:
+        // TODO(powdercloud): Make enum proto defaults work in generated
+        // javascript.
+        default:  // Default is error
+          this.extensions_.recordExtensionUnusedRequired(extensionName);
+          break;
+      }
+    }
+
+    // Mark required extensions as used
+    for (let requiredExtension of tagSpec.requiresExtension) {
+      this.extensions_.recordExtensionUsed(requiredExtension);
+    }
+
+    // If this requires an extension and we are still in the document head,
+    // record that we may still need to emit a missing extension error at
+    // the end of the document head.
+    if (this.tagStack_.hasAncestor('HEAD')) {
+      for (let requiredExtension of tagSpec.requiresExtension) {
+        if (!this.extensions_.isExtensionLoaded(requiredExtension)) {
+          if (!amp.validator.LIGHT) {
+            let maybeError = new amp.validator.ValidationError();
+            maybeError.severity = amp.validator.ValidationError.Severity.ERROR;
+            maybeError.code =
+                amp.validator.ValidationError.Code.MISSING_REQUIRED_EXTENSION;
+            maybeError.params = [getTagSpecName(tagSpec), requiredExtension];
+            maybeError.line = this.getDocLocator().getLine();
+            maybeError.col = this.getDocLocator().getCol();
+            maybeError.specUrl = getTagSpecUrl(tagSpec);
+
+            this.extensions_.recordErrorIfMissing(
+                requiredExtension, maybeError);
+          } else {  // amp.validator.LIGHT
+            this.extensions_.recordFailureIfMissing(requiredExtension);
+          }
+        }
+      }
+    }
+
+    // Record document-level conditions which have been satisfied.
+    for (const condition of tagSpec.satisfies) {
+      this.satisfyCondition_(condition);
+    }
+
+    // Record that this document contains an URL.
+    if (!this.hasSeenUrl() && parsedTagSpec.containsUrl()) {
+      this.markUrlSeen_(tagSpec);
+    }
+
+    // Record that this document contains a tag matching a particular tag spec.
+    if (parsedTagSpec.shouldRecordTagspecValidated()) {
+      this.recordTagspecValidated_(parsedTagSpec.id());
+    }
+
+    // Record that this document contains a tag which is a member of
+    // a list of mandatory alternatives.
+    if (tagSpec.mandatoryAlternatives !== null) {
+      const satisfied = tagSpec.mandatoryAlternatives;
+      goog.asserts.assert(satisfied !== null);
+      this.recordMandatoryAlternativeSatisfied_(satisfied);
+    }
+    // (Re)set the cdata matcher to the expectations that this tag
+    // brings with it.
+    if (tagSpec.cdata !== null)
+      this.setCdataMatcher_(new CdataMatcher(tagSpec));
+
+    // Set the child tag matcher so it considers spec.child_tags(), if set.
+    if (tagSpec.childTags !== null)
+      this.setChildTagMatcher_(new ChildTagMatcher(tagSpec));
+
+    // Set reference point matcher to parsedTagSpec.getReferencePoints(),
+    // if present.
+    if (parsedTagSpec.hasReferencePoints()) {
+      this.setReferencePointMatcher_(new ReferencePointMatcher(
+          this.getRules(), parsedTagSpec.getReferencePoints()));
+    }
+
+    // Record that this tag allows only a limited number of descendants.
+    if (tagSpec.descendantTagList !== null) {
+      let allowedDescendantsForThisTag = [];
+      for (const descendantTagList of this.getRules().getDescendantTagLists()) {
+        // Get the list matching this tag's descendant tag name.
+        if (tagSpec.descendantTagList === descendantTagList.name) {
+          for (const tag of descendantTagList.allowedTags) {
+            allowedDescendantsForThisTag.push(tag);
+          }
+        }
+      }
+      this.tagStack_.registerDescendantConstraintList(
+          tagSpec.tagName, allowedDescendantsForThisTag);
+    }
+
+    // Record that this tag must not have any siblings.
+    if (tagSpec.siblingsDisallowed) {
+      this.tagStack_.tellParentNoSiblingsAllowed(
+          tagSpec.tagName, this.getDocLocator());
+    }
+
+    // Record that this tag must be the last child of it's parent.
+    if (tagSpec.mandatoryLastChild) {
+      this.tagStack_.tellParentImTheLastChild(
+          getTagSpecName(tagSpec), getTagSpecUrl(tagSpec),
+          this.getDocLocator());
+    }
+  }
+
+
+  /**
    * Records a condition that's been validated. Returns true iff
    * `condition` has not been seen before.
    * @param {number} condition
    * @return {boolean} whether or not condition has been seen before.
+   * @private
    */
-  satisfyCondition(condition) {
+  satisfyCondition_(condition) {
     if (this.satisfiesCondition(condition)) {
       return false;
     }
@@ -2315,14 +2444,15 @@ class Context {
    * Records that a Tag was seen which contains an URL. Used to note issues
    * with <base href> occurring in the document after an URL.
    * @param {amp.validator.TagSpec} tagSpec
+   * @private
    */
-  markUrlSeen(tagSpec) {
+  markUrlSeen_(tagSpec) {
     this.firstUrlSeenTag_ = tagSpec;
   }
 
   /**
    * Returns true iff the current context has observed a tag which contains
-   * an URL. This is set by calling markUrlSeen above.
+   * an URL. This is set by calling markUrlSeen_ above.
    * @return {boolean}
    */
   hasSeenUrl() {
@@ -2341,8 +2471,9 @@ class Context {
   /**
    * Records a tag spec that's been validated.
    * @param {number} tagSpecId id of tagSpec to record.
+   * @private
    */
-  recordTagspecValidated(tagSpecId) {
+  recordTagspecValidated_(tagSpecId) {
     if (!this.tagspecsValidated_.hasOwnProperty(tagSpecId)) {
       this.tagspecsValidated_[tagSpecId] = true;
     }
@@ -2361,8 +2492,9 @@ class Context {
   /**
    * For use by |ParsedValidatorRules|, which doesn't have any mutable state.
    * @param {number} alternative id of the validated alternative.
+   * @private
    */
-  recordMandatoryAlternativeSatisfied(alternative) {
+  recordMandatoryAlternativeSatisfied_(alternative) {
     this.mandatoryAlternativesSatisfied_.push(alternative);
   }
 
@@ -2375,8 +2507,11 @@ class Context {
     return this.mandatoryAlternativesSatisfied_;
   }
 
-  /** @param {?CdataMatcher} matcher */
-  setCdataMatcher(matcher) {
+  /**
+   * @param {?CdataMatcher} matcher
+   * @private
+   */
+  setCdataMatcher_(matcher) {
     if (!amp.validator.LIGHT) {
       // We store away the position from when the matcher was created
       // so we can use it to generate error messages relating to the
@@ -2387,8 +2522,11 @@ class Context {
     this.tagStack_.setCdataMatcher(matcher);
   }
 
-  /** @param {?ChildTagMatcher} matcher */
-  setChildTagMatcher(matcher) {
+  /**
+   * @param {?ChildTagMatcher} matcher
+   * @private
+   */
+  setChildTagMatcher_(matcher) {
     if (!amp.validator.LIGHT && matcher !== null) {
       matcher.setLineCol(
           new LineCol(this.docLocator_.getLine(), this.docLocator_.getCol()));
@@ -2396,8 +2534,11 @@ class Context {
     this.tagStack_.setChildTagMatcher(matcher);
   }
 
-  /** @param {?ReferencePointMatcher} matcher */
-  setReferencePointMatcher(matcher) {
+  /**
+   * @param {?ReferencePointMatcher} matcher
+   * @private
+   * */
+  setReferencePointMatcher_(matcher) {
     if (!amp.validator.LIGHT && matcher !== null) {
       matcher.setLineCol(
           new LineCol(this.docLocator_.getLine(), this.docLocator_.getCol()));
@@ -4159,135 +4300,6 @@ class TagSpecDispatch {
 }
 
 /**
- * Given a ParsedTagSpec matching the current element, update the validator
- * state in ways that affect later validation.
- * @param {!ParsedTagSpec} parsedTagSpec
- * @param {!Context} context
- */
-function updateContextFromTagSpec(parsedTagSpec, context) {
-  // If this is an extension, keep track of which extensions are loaded
-  const tagSpec = parsedTagSpec.getSpec();
-  const extensionsCtx = context.getExtensions();
-  if (tagSpec.extensionSpec !== null) {
-    const extensionSpec = tagSpec.extensionSpec;
-    // This is an always present field if extension spec is set.
-    const extensionName = /** @type{string} */ (extensionSpec.name);
-    extensionsCtx.recordExtensionLoaded(extensionName);
-    switch (extensionSpec.requiresUsage) {
-      case amp.validator.ExtensionSpec.ExtensionUsageRequirement
-          .GRANDFATHERED:  // Fallthrough intended:
-      case amp.validator.ExtensionSpec.ExtensionUsageRequirement.NONE:
-        // This extension does not have usage demonstrated by a tag, for
-        // example: amp-dynamic-css-classes
-        break;
-      case amp.validator.ExtensionSpec.ExtensionUsageRequirement.ERROR:
-      // TODO(powdercloud): Make enum proto defaults work in generated
-      // javascript.
-      default:  // Default is error
-        extensionsCtx.recordExtensionUnusedRequired(extensionName);
-        break;
-    }
-  }
-
-  // Mark required extensions as used
-  for (let requiredExtension of tagSpec.requiresExtension) {
-    extensionsCtx.recordExtensionUsed(requiredExtension);
-  }
-
-  // If this requires an extension and we are still in the document head,
-  // record that we may still need to emit a missing extension error at
-  // the end of the document head.
-  if (context.getTagStack().hasAncestor('HEAD')) {
-    for (let requiredExtension of tagSpec.requiresExtension) {
-      if (!extensionsCtx.isExtensionLoaded(requiredExtension)) {
-        if (!amp.validator.LIGHT) {
-          let maybeError = new amp.validator.ValidationError();
-          maybeError.severity = amp.validator.ValidationError.Severity.ERROR;
-          maybeError.code =
-              amp.validator.ValidationError.Code.MISSING_REQUIRED_EXTENSION;
-          maybeError.params = [getTagSpecName(tagSpec), requiredExtension];
-          maybeError.line = context.getDocLocator().getLine();
-          maybeError.col = context.getDocLocator().getCol();
-          maybeError.specUrl = getTagSpecUrl(tagSpec);
-
-          extensionsCtx.recordErrorIfMissing(requiredExtension, maybeError);
-        } else {  // amp.validator.LIGHT
-          extensionsCtx.recordFailureIfMissing(requiredExtension);
-        }
-      }
-    }
-  }
-
-  // Record document-level conditions which have been satisfied.
-  for (const condition of tagSpec.satisfies) {
-    context.satisfyCondition(condition);
-  }
-
-  // Record that this document contains an URL.
-  if (!context.hasSeenUrl() && parsedTagSpec.containsUrl()) {
-    context.markUrlSeen(tagSpec);
-  }
-
-  // Record that this document contains a tag matching a particular tag spec.
-  if (parsedTagSpec.shouldRecordTagspecValidated()) {
-    context.recordTagspecValidated(parsedTagSpec.id());
-  }
-
-  // Record that this document contains a tag which is a member of
-  // a list of mandatory alternatives.
-  if (tagSpec.mandatoryAlternatives !== null) {
-    const satisfied = tagSpec.mandatoryAlternatives;
-    goog.asserts.assert(satisfied !== null);
-    context.recordMandatoryAlternativeSatisfied(satisfied);
-  }
-  // (Re)set the cdata matcher to the expectations that this tag
-  // brings with it.
-  if (tagSpec.cdata !== null)
-    context.setCdataMatcher(new CdataMatcher(tagSpec));
-
-  // Set the child tag matcher so it considers spec.child_tags(), if set.
-  if (tagSpec.childTags !== null)
-    context.setChildTagMatcher(new ChildTagMatcher(tagSpec));
-
-  // Set reference point matcher to parsedTagSpec.getReferencePoints(),
-  // if present.
-  if (parsedTagSpec.hasReferencePoints()) {
-    context.setReferencePointMatcher(new ReferencePointMatcher(
-        context.getRules(), parsedTagSpec.getReferencePoints()));
-  }
-
-  // Record that this tag allows only a limited number of descendants.
-  var tagStack = context.getTagStack();
-  if (tagSpec.descendantTagList !== null) {
-    let allowedDescendantsForThisTag = [];
-    for (const descendantTagList of context.getRules()
-             .getDescendantTagLists()) {
-      // Get the list matching this tag's descendant tag name.
-      if (tagSpec.descendantTagList === descendantTagList.name) {
-        for (const tag of descendantTagList.allowedTags) {
-          allowedDescendantsForThisTag.push(tag);
-        }
-      }
-    }
-    tagStack.registerDescendantConstraintList(
-        tagSpec.tagName, allowedDescendantsForThisTag);
-  }
-
-  // Record that this tag must not have any siblings.
-  if (tagSpec.siblingsDisallowed) {
-    tagStack.tellParentNoSiblingsAllowed(
-        tagSpec.tagName, context.getDocLocator());
-  }
-
-  // Record that this tag must be the last child of it's parent.
-  if (tagSpec.mandatoryLastChild) {
-    tagStack.tellParentImTheLastChild(
-        getTagSpecName(tagSpec), getTagSpecUrl(tagSpec),
-        context.getDocLocator());
-  }
-}
-
-/**
  * Validates the provided |tagName| with respect to a single tag
  * specification.
  * @param {!ParsedTagSpec} parsedTagSpec
@@ -5172,7 +5184,7 @@ amp.validator.ValidationHandler =
               validateTagAgainstSpec(parsedTagSpec, this.context_, tag);
           if (resultForBestAttempt.status !==
               amp.validator.ValidationResult.Status.FAIL)
-            updateContextFromTagSpec(parsedTagSpec, this.context_);
+            this.context_.updateFromMatchingTagSpec(parsedTagSpec);
           // Use the dispatched TagSpec validation results, success or fail.
           this.validationResult_.mergeFrom(resultForBestAttempt);
           return;
@@ -5215,7 +5227,7 @@ amp.validator.ValidationHandler =
               resultForBestAttempt, resultForAttempt));
       if (resultForBestAttempt.status !==
           amp.validator.ValidationResult.Status.FAIL) {
-        updateContextFromTagSpec(parsedTagSpec, this.context_);
+        this.context_.updateFromMatchingTagSpec(parsedTagSpec);
         break;  // Exit early on success
       }
     }
