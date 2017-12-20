@@ -29,7 +29,7 @@ gulp.task('compile-access-expr', function() {
 
   const license = fs.readFileSync(
       'build-system/tasks/js-license.txt', 'utf8');
-  const jsExports = 'exports.parser = parser;';
+  const jsExports = 'export const publicParser = parser;';
 
   const out = license + '\n\n' + jsModule + '\n\n' + jsExports + '\n';
   fs.writeFileSync(path + 'access-expr-impl.js', out);

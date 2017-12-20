@@ -74,8 +74,6 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
 function cleanupBuildDir() {
   fs.mkdirsSync('build/cc');
   rimraf.sync('build/fake-module');
-  rimraf.sync('build/patched-module');
-  fs.mkdirsSync('build/patched-module/document-register-element/build');
   fs.mkdirsSync('build/fake-module/third_party/babel');
   fs.mkdirsSync('build/fake-module/src/polyfills/');
   fs.mkdirsSync('build/fake-polyfills/src/polyfills');
@@ -185,7 +183,6 @@ function compile(entryModuleFilenames, outputDir,
       'build/css.js',
       'build/*.css.js',
       'build/fake-module/**/*.js',
-      'build/patched-module/**/*.js',
       'build/experiments/**/*.js',
       // A4A has these cross extension deps.
       'extensions/amp-ad-network*/**/*-config.js',
@@ -333,12 +330,12 @@ function compile(entryModuleFilenames, outputDir,
         externs,
         js_module_root: [
           'node_modules/',
-          'build/patched-module/',
           'build/fake-module/',
           'build/fake-polyfills/',
         ],
         entry_point: entryModuleFilenames,
-        process_common_js_modules: true,
+        //process_common_js_modules: true,
+        module_resolution: 'NODE',
         // This strips all files from the input set that aren't explicitly
         // required.
         only_closure_dependencies: true,

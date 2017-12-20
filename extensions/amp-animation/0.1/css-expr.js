@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {parser} from './css-expr-impl';
+import {publicParser as parser} from './css-expr-impl';
 
 
 /**
