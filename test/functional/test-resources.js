@@ -582,15 +582,21 @@ describes.fakeWin('Resources startup', {
 }, env => {
   let win;
   let clock;
+  let sandbox;
   let resources;
   let schedulePassStub;
 
   beforeEach(() => {
     win = env.win;
+    sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
     resources = Services.resourcesForDoc(win.document.body);
     resources.relayoutAll_ = false;
     schedulePassStub = sandbox.stub(resources, 'schedulePass');
+  });
+
+  afterEach(() => {
+    sandbox.restore();
   });
 
   it('should run a full reload pass on window.onload', () => {
