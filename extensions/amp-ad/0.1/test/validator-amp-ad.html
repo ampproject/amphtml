@@ -40,6 +40,8 @@
   <amp-fx-flying-carpet height="300">
     <amp-ad height="300" type="foo"></amp-ad>
   </amp-fx-flying-carpet>
+  <!-- Valid -->
+  <amp-ad type=doubleclick width="100" height="fluid" layout="fluid"></amp-ad>
   <!-- Invalid: amp-ad in an amp ad container with data-multi-size attr -->
   <amp-fx-flying-carpet height="300">
     <amp-ad data-multi-size="" height="300" type="foo"></amp-ad>
@@ -48,6 +50,7 @@
   <amp-fx-flying-carpet height="300">
     <amp-embed data-multi-size="" height="300" type="foo"></amp-ad>
   </amp-fx-flying-carpet>
-
+  <!-- Invalid: amp-ad missing layout=fluid for fluid ad -->
+  <amp-ad type=doubleclick width="100" height="fluid"></amp-ad>
 </body>
 </html>

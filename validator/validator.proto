@@ -238,6 +238,7 @@ message AmpLayout {
     CONTAINER = 5;
     FILL = 6;
     FLEX_ITEM = 7;
+    FLUID = 8;
   }
   // Specifies which layouts are supported by this element.
   repeated Layout supported_layouts = 1;
@@ -465,10 +466,10 @@ message TagSpec {
   optional ChildTagSpec child_tags = 19;
 
   // If set to true, this tag cannot have any siblings.
-  optional bool siblings_disallowed = 30;
+  optional bool siblings_disallowed = 30 [default = false];
 
   // If set to true, this tag must be the last child of its parent.
-  optional bool mandatory_last_child = 31;
+  optional bool mandatory_last_child = 31 [default = false];
 
   // The reference_points defined by this TagSpec instance determine how
   // specific child tags are identified. Please see the comment for the

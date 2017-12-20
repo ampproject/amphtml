@@ -1,6 +1,7 @@
 FAIL
 amp-story/0.1/test/validator-amp-story-error.html:31:2 The mandatory attribute 'standalone' is missing in tag 'amp-story'. (see https://www.ampproject.org/docs/reference/components/amp-story) [AMP_TAG_PROBLEM]
+amp-story/0.1/test/validator-amp-story-error.html:31:2 The tag 'amp-story' requires including the 'amp-story' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-story) [AMP_TAG_PROBLEM]
 amp-story/0.1/test/validator-amp-story-error.html:32:4 The mandatory attribute 'id' is missing in tag 'amp-story-page'. (see https://www.ampproject.org/docs/reference/components/amp-story) [AMP_TAG_PROBLEM]
+amp-story/0.1/test/validator-amp-story-error.html:32:4 The tag 'amp-story-page' requires including the 'amp-story' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-story) [AMP_TAG_PROBLEM]
 amp-story/0.1/test/validator-amp-story-error.html:33:6 The mandatory attribute 'template' is missing in tag 'amp-story-grid-layer'. [AMP_TAG_PROBLEM]
 amp-story/0.1/test/validator-amp-story-error.html:36:12 The attribute 'height' may not appear in tag 'h4'. [DISALLOWED_HTML]
-amp-story/0.1/test/validator-amp-story-error.html:31:2 Tag 'amp-story' is not allowed to have any sibling tags ('body' should only have 1 child). [AMP_TAG_PROBLEM]
