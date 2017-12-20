@@ -95,7 +95,8 @@ amp-story-page.i-amphtml-story-page-shown {
 
 [desktop] .i-amphtml-story-button-container {
   position: absolute;
-  width: calc(50vw - (9/16 * 70vh)/2 - 64px);
+  /* Todo(prateekbh): find a simpler way maybe */
+  width: calc(50vw - 23vh - 64px);
   top: 0;
   height: 100vh;
   z-index: 1;
