@@ -17,6 +17,7 @@
 import {loadScript} from './3p';
 import {user} from '../src/log';
 import {dashToUnderline} from '../src/string';
+import {setStyle} from '../src/style';
 
 /**
  * Produces the Facebook SDK object for the passed in callback.
@@ -42,6 +43,11 @@ function getFacebookSdk(global, cb) {
  * @return {!Element} div
  */
 function getPostContainer(global, data) {
+  const c = global.document.getElementById('c');
+  const shouldAlignCenter = data.alignCenter || false;
+  if (shouldAlignCenter) {
+    setStyle(c, 'text-align', 'center');
+  }
   const container = global.document.createElement('div');
   const embedAs = data.embedAs || 'post';
   user().assert(['post', 'video'].indexOf(embedAs) !== -1,
