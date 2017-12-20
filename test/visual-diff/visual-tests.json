@@ -99,6 +99,10 @@
     {
       "url": "examples/visual-tests/font.amp/font.amp.html",
       "name": "Fonts",
+      "forbidden_css": [
+        "html.comic-amp-font-missing",
+        "html.comic-amp-bold-font-missing"
+      ],
       "loading_incomplete_css": [
         "html.comic-amp-font-loading",
         "html.comic-amp-bold-font-loading"
