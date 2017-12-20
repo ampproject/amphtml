@@ -46,7 +46,7 @@ function getPostContainer(global, data) {
   const c = global.document.getElementById('c');
   const shouldAlignCenter = data.alignCenter || false;
   if (shouldAlignCenter) {
-    setStyle(global.document.getElementById('c'), 'text-align', 'center');
+    setStyle(c, 'text-align', 'center');
   }
   const container = global.document.createElement('div');
   const embedAs = data.embedAs || 'post';
