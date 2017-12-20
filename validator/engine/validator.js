@@ -3034,8 +3034,10 @@ amp.validator.CssLength = class {
    * @param {string|undefined} input The input attribute value to be parsed.
    * @param {boolean} allowAuto Whether or not to allow the 'auto' value as
    *    a value.
+   * @param {boolean} allowFluid whether or not to allow the 'fluid' value
+   *   as a value.
    */
-  constructor(input, allowAuto) {
+  constructor(input, allowAuto, allowFluid) {
     /**
      * Whether the value or unit is invalid. Note that passing
      * undefined as |input| is considered valid.
@@ -3054,6 +3056,11 @@ amp.validator.CssLength = class {
      * @type {boolean}
      */
     this.isAuto = false;
+    /**
+     * Whether the attribute value is 'fluid'
+     * @type {boolean}
+     */
+    this.isFluid = false;
     /**
      * The numeric value.
      * @type {number}
@@ -3074,6 +3081,9 @@ amp.validator.CssLength = class {
       this.isAuto = true;
       this.isValid = allowAuto;
       return;
+    } else if (input === 'fluid') {
+      this.isFluid = true;
+      this.isValid = allowFluid;
     }
     const re = /^(\d+(?:\.\d+)?)(px|em|rem|vh|vw|vmin|vmax)?$/;
     const match = re.exec(input);
@@ -3099,7 +3109,8 @@ function CalculateWidth(spec, inputLayout, inputWidth) {
   if ((inputLayout === amp.validator.AmpLayout.Layout.UNKNOWN ||
        inputLayout === amp.validator.AmpLayout.Layout.FIXED) &&
       !inputWidth.isSet && spec.definesDefaultWidth) {
-    return new amp.validator.CssLength('1px', /* allowAuto */ false);
+    return new amp.validator.CssLength(
+        '1px', /* allowAuto */ false, /* allowFluid */ false);
   }
   return inputWidth;
 }
@@ -3116,7 +3127,8 @@ function CalculateHeight(spec, inputLayout, inputHeight) {
        inputLayout === amp.validator.AmpLayout.Layout.FIXED ||
        inputLayout === amp.validator.AmpLayout.Layout.FIXED_HEIGHT) &&
       !inputHeight.isSet && spec.definesDefaultHeight) {
-    return new amp.validator.CssLength('1px', /* allowAuto */ false);
+    return new amp.validator.CssLength(
+        '1px', /* allowAuto */ false, /* allowFluid */ false);
   }
   return inputHeight;
 }
@@ -3138,6 +3150,8 @@ function CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr) {
     return inputLayout;
   } else if (!width.isSet && !height.isSet) {
     return amp.validator.AmpLayout.Layout.CONTAINER;
+  } else if (height.isFluid) {
+    return amp.validator.AmpLayout.Layout.FLUID;
   } else if (height.isSet && (!width.isSet || width.isAuto)) {
     return amp.validator.AmpLayout.Layout.FIXED_HEIGHT;
   } else if (
@@ -3560,8 +3574,8 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
     }
     return;
   }
-  const inputWidth =
-      new amp.validator.CssLength(widthAttr, /* allowAuto */ true);
+  const inputWidth = new amp.validator.CssLength(
+      widthAttr, /* allowAuto */ true, /* allowFluid */ false);
   if (!inputWidth.isValid) {
     if (amp.validator.LIGHT) {
       result.status = amp.validator.ValidationResult.Status.FAIL;
@@ -3574,8 +3588,9 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
     }
     return;
   }
-  const inputHeight =
-      new amp.validator.CssLength(heightAttr, /* allowAuto */ true);
+  const inputHeight = new amp.validator.CssLength(
+      heightAttr, /* allowAuto */ true,
+      /* allowFluid */ inputLayout === amp.validator.AmpLayout.Layout.FLUID);
   if (!inputHeight.isValid) {
     if (amp.validator.LIGHT) {
       result.status = amp.validator.ValidationResult.Status.FAIL;
@@ -3627,7 +3642,8 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
   // Check other constraints imposed by the particular layouts.
   if ((layout === amp.validator.AmpLayout.Layout.FIXED ||
        layout === amp.validator.AmpLayout.Layout.FIXED_HEIGHT ||
-       layout === amp.validator.AmpLayout.Layout.RESPONSIVE) &&
+       layout === amp.validator.AmpLayout.Layout.RESPONSIVE ||
+       layout === amp.validator.AmpLayout.Layout.FLUID) &&
       !height.isSet) {
     if (amp.validator.LIGHT) {
       result.status = amp.validator.ValidationResult.Status.FAIL;
@@ -3655,7 +3671,8 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
     return;
   }
   if (layout === amp.validator.AmpLayout.Layout.FIXED ||
-      layout === amp.validator.AmpLayout.Layout.RESPONSIVE) {
+      layout === amp.validator.AmpLayout.Layout.RESPONSIVE ||
+      layout === amp.validator.AmpLayout.Layout.FLUID) {
     if (!width.isSet) {
       if (amp.validator.LIGHT) {
         result.status = amp.validator.ValidationResult.Status.FAIL;
