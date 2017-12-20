@@ -906,6 +906,7 @@ export class AmpStory extends AMP.BaseElement {
       this.exitFullScreen_();
 
       this.element.classList.add('i-amphtml-story-bookend-active');
+
       this.bookend_.show();
     });
   }

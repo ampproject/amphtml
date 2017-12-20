@@ -292,7 +292,7 @@ amp-story-page.i-amphtml-story-page-shown {
   display: block!important;
   height: 104px!important;
   width: 100%!important;
-  z-index: 100002 !important;
+  z-index: 1!important;
   background: linear-gradient(to bottom, rgba(33,33,33,0.32) 0%, rgba(33,33,33,0) 100%)!important;
 }
 
