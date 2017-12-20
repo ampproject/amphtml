@@ -84,6 +84,24 @@ describe('json', () => {
       expect(getValueForExpr(obj, 'num')).to.be.undefined;
       expect(getValueForExpr(obj, '__proto__')).to.be.undefined;
     });
+
+    it('should support array index', () => {
+      const child = {num: 1, str: 'A'};
+      const obj = {foo: [child]};
+      expect(getValueForExpr(obj, 'foo.0.num')).to.equal(1);
+      expect(getValueForExpr(obj, 'foo.0.str')).to.equal('A');
+      expect(getValueForExpr(obj, 'foo.0a.str')).to.be.undefined;
+      expect(getValueForExpr(obj, 'foo.1.num')).to.be.undefined;
+      expect(getValueForExpr(obj, 'foo.1.str')).to.be.undefined;
+    });
+
+    it('should only search in own properties of arrays', () => {
+      const arr = ['A'];
+      expect(getValueForExpr(arr, '0')).to.equal('A');
+      expect(getValueForExpr(arr, '1')).to.be.undefined;
+      expect(getValueForExpr(arr, 'concat')).to.be.undefined;
+      expect(getValueForExpr(arr, '__proto__')).to.be.undefined;
+    });
   });
 
   describe('recreateNonProtoObject', () => {
