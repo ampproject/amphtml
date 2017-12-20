@@ -719,10 +719,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   getCustomRealTimeConfigMacros_() {
     const macros = {};
-    macros.href = this.win.location.href;
     const docInfo = Services.documentInfoForDoc(this.element);
-    macros.pageViewId = docInfo.pageViewId;
-    console.log(this.element);
+    macros['PAGEVIEWID'] = docInfo.pageViewId;
+    macros['HREF'] = this.win.location.href;
+    macros['DATASLOT'] = this.element.getAttribute('data-slot');
+    macros['HEIGHT'] = this.element.getAttribute('height');
+    macros['WIDTH'] = this.element.getAttribute('width');
+    macros['MULTISIZE'] = this.element.getAttribute('data-multi-size');
+    macros['MULTISIZE_VALIDATION'] =
+        this.element.getAttribute('data-multi-size-validation');
     return macros;
   }
 

@@ -24,6 +24,7 @@ import {createElementWithAttributes} from '../../../../src/dom';
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+import {Services} from '../../../../src/services';
 
 describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
   let impl;
@@ -269,6 +270,36 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       };
       expect(impl.rewriteRtcKeys_(response, 'www.customurl.biz'))
           .to.deep.equal(response);
+    });
+  });
+
+  describe('getCustomRealTimeConfigMacros', () => {
+    it('should return correct macros', () => {
+      const macros = {
+        HREF: 'about:srcdoc',
+        DATASLOT: '5678',
+        HEIGHT: '50',
+        WIDTH: '200',
+        MULTISIZE: '300x50,200x100',
+        MULTISIZE_VALIDATION: 'true',
+      };
+      element = createElementWithAttributes(env.win.document, 'amp-ad', {
+        width: macros.WIDTH,
+        height: macros.HEIGHT,
+        type: 'doubleclick',
+        layout: 'fixed',
+        'data-slot': macros.DATASLOT,
+        'data-multi-size': macros.MULTISIZE,
+        'data-multi-size-validation': macros.MULTISIZE_VALIDATION,
+      });
+      env.win.document.body.appendChild(element);
+      const docInfo = Services.documentInfoForDoc(element);
+      macros['PAGEVIEWID'] = docInfo.pageViewId;
+      impl = new AmpAdNetworkDoubleclickImpl(
+          element, env.win.document, env.win);
+      impl.populateAdUrlState();
+      const customMacros = impl.getCustomRealTimeConfigMacros_();
+      expect(customMacros).to.deep.equal(macros);
     });
   });
 });
