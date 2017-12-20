@@ -58,7 +58,7 @@ export function hasTapAction(el) {
 export class AsyncValue {
   /**
    * @params {!T} defaultValue
-   * @params {!function(T)} onChange
+   * @params {!function(T, T)} onChange
    */
   constructor(defaultValue, onChange) {
     /** @private @const */
@@ -71,7 +71,7 @@ export class AsyncValue {
 
   /**
    * @params {!T} defaultValue
-   * @params {!function(T)} onChange
+   * @params {!function(T, T)} onChange
    * @return {!AsyncValue<T>}
    * @template T
    */
