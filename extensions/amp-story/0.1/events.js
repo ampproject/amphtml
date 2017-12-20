@@ -68,7 +68,7 @@ export const EventType = {
 
 
 /**
- * @param {!Element} source
+ * @param {!EventTarget} source
  * @param {string} eventName
  * @param {boolean=} opt_bubbles
  */
@@ -84,7 +84,7 @@ export function dispatch(source, eventName, opt_bubbles) {
 
 /**
  * @param {!Window} win
- * @param {!Element} source
+ * @param {!EventTarget} source
  * @param {string} eventName
  * @param {!Object} payload
  * @param {!CustomEventInit=} opt_eventInit

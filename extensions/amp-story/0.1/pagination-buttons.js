@@ -18,9 +18,10 @@ import {dev} from '../../../src/log';
 import {renderAsElement} from './simple-template';
 import {EventType, dispatch} from './events';
 import {StateChangeType} from './navigation-state';
+import {AsyncValue} from './utils';
 
 
-/** @typedef {{class: string, triggers: (string|undefined)}} */
+/** @typedef {{className: string, triggers: (string|undefined)}} */
 let ButtonStateDef;
 
 
@@ -32,7 +33,7 @@ const BackButtonStates = {
     triggers: EventType.PREVIOUS_PAGE,
   },
   CLOSE_BOOKEND: {
-    className: 'i-amphtml-story-back-prev',
+    className: 'i-amphtml-story-back-close-bookend',
     triggers: EventType.CLOSE_BOOKEND,
   },
 };
@@ -104,70 +105,6 @@ function setClassOnHover(hoverEl, targetEl, className) {
 }
 
 
-/**
- * Button that mutliplexes class name and the event it dispatches based on
- * state.
- */
-class StatefulButton {
-  /**
-   * @param {!Element} element
-   * @param {!ButtonStateDef} defaultState
-   * @param {!Object<string, !ButtonStateDef>} allStates
-   */
-  constructor(element, defaultState, allStates) {
-    /** @const */
-    this.element = element;
-
-    /** @private @const */
-    this.allStates_ = allStates;
-
-    /** @private {!ButtonStateDef} */
-    this.state_ = defaultState;
-
-    /** @private {number} */
-    this.lastUpdateId_ = 0;
-
-    this.setState(defaultState);
-    this.element.addEventListener('click', e => this.onClick_(e));
-  }
-
-  /** @param {!Promise<!ButtonStateDef>|!ButtonStateDef} stateOrPromise */
-  setState(stateOrPromise) {
-    const updateId = ++this.lastUpdateId_;
-
-    Promise.resolve(stateOrPromise).then(state => {
-      if (updateId !== this.lastUpdateId_) {
-        return;
-      }
-
-      const stateClassName =
-          dev().assert((/** @type {!ButtonStateDef} */ (state)).className);
-
-      this.state_ = state;
-
-      const allClassNames =
-          Object.values(this.allStates_).map(s => s.className);
-
-      allClassNames.forEach(className =>
-        this.element.classList.toggle(className, className == stateClassName));
-    });
-  }
-
-  /**
-   * @param {!Event} e
-   * @private
-   */
-  onClick_(e) {
-    if (!this.state_.triggers) {
-      return;
-    }
-    e.preventDefault();
-    dispatch(this.element, dev().assert(this.state_.triggers),
-        /* opt_bubbles */ true);
-  }
-}
-
-
 /** Pagination buttons layer. */
 export class PaginationButtons {
   /**
@@ -178,17 +115,21 @@ export class PaginationButtons {
     /** @private @const {!function():Promise<boolean>} */
     this.hasBookend_ = hasBookend;
 
-    /** @private @const {!StatefulButton} */
-    this.forwardButton_ = new StatefulButton(
-        renderAsElement(doc, FORWARD_BUTTON),
-        ForwardButtonStates.NEXT_PAGE,
-        ForwardButtonStates);
+    /** @private @const */
+    this.forwardButton_ = renderAsElement(doc, FORWARD_BUTTON);
 
-    /** @private @const {!StatefulButton} */
-    this.backButton_ = new StatefulButton(
-        renderAsElement(doc, BACK_BUTTON),
-        BackButtonStates.HIDDEN,
-        BackButtonStates);
+    /** @private @const */
+    this.backButton_ = renderAsElement(doc, BACK_BUTTON);
+
+    /** @private @const {!AsyncValue<!ButtonStateDef>} */
+    this.forwardButtonState_ = AsyncValue.create(ForwardButtonStates.NEXT_PAGE,
+        (state, newState) =>
+          this.onButtonStateChange_(this.forwardButton_, state, newState));
+
+    /** @private @const {!AsyncValue<!ButtonStateDef>} */
+    this.backButtonState_ = AsyncValue.create(BackButtonStates.HIDDEN,
+        (state, newState) =>
+          this.onButtonStateChange_(this.backButton_, state, newState));
   }
 
   /**
@@ -200,16 +141,47 @@ export class PaginationButtons {
     return new PaginationButtons(doc, hasBookend);
   }
 
+  /**
+   * @param {!Element} el
+   * @param {!ButtonStateDef} state
+   * @param {!ButtonStateDef} newState
+   */
+  onButtonStateChange_(el, state, newState) {
+    el.classList.remove(state.className)
+    el.classList.add(newState.className);
+  }
+
+  /**
+   * @param {!Element} el
+   * @param {!Event} e
+   * @param {string=} opt_eventType
+   */
+  maybeDispatch_(el, e, opt_eventType) {
+    if (!opt_eventType) {
+      return;
+    }
+    e.preventDefault();
+    dispatch(el, dev().assert(opt_eventType), /* opt_bubbles */ true);
+  }
+
   /** @param {!Element} element */
   attach(element) {
-    const backButtonEl = this.backButton_.element;
-    const forwardButtonEl = this.forwardButton_.element;
+    setClassOnHover(this.forwardButton_, element, 'i-amphtml-story-next-hover');
+    setClassOnHover(this.backButton_, element, 'i-amphtml-story-prev-hover');
 
-    setClassOnHover(forwardButtonEl, element, 'i-amphtml-story-next-hover');
-    setClassOnHover(backButtonEl, element, 'i-amphtml-story-prev-hover');
+    this.forwardButton_.classList.add(this.forwardButtonState_.get().className);
+    this.backButton_.classList.add(this.backButtonState_.get().className);
 
-    element.appendChild(forwardButtonEl);
-    element.appendChild(backButtonEl);
+    element.appendChild(this.forwardButton_);
+    element.appendChild(this.backButton_);
+
+    this.forwardButton_.addEventListener('click', e =>
+      this.maybeDispatch_(this.forwardButton_, e,
+          this.forwardButtonState_.get().triggers));
+
+    this.backButton_.addEventListener('click', e =>
+      this.maybeDispatch_(this.backButton_, e,
+          this.backButtonState_.get().triggers));
   }
 
   /** @param {!./navigation-state.StateChangeEventDef} event */
@@ -221,15 +193,16 @@ export class PaginationButtons {
           this.onLastPageActive_();
           return;
         }
-        this.backButton_.setState(pageIndex === 0 ?
-            BackButtonStates.HIDDEN :
-            BackButtonStates.PREVIOUS_PAGE);
-        this.forwardButton_.setState(ForwardButtonStates.NEXT_PAGE);
+        this.backButtonState_.set(
+            pageIndex === 0 ?
+              BackButtonStates.HIDDEN :
+              BackButtonStates.PREVIOUS_PAGE);
+        this.forwardButtonState_.set(ForwardButtonStates.NEXT_PAGE);
         break;
 
       case StateChangeType.BOOKEND_ENTER:
-        this.backButton_.setState(BackButtonStates.CLOSE_BOOKEND);
-        this.forwardButton_.setState(ForwardButtonStates.REPLAY);
+        this.backButtonState_.set(BackButtonStates.CLOSE_BOOKEND);
+        this.forwardButtonState_.set(ForwardButtonStates.REPLAY);
         break;
 
       case StateChangeType.BOOKEND_EXIT:
@@ -240,8 +213,8 @@ export class PaginationButtons {
 
   /** @private */
   onLastPageActive_() {
-    this.backButton_.setState(BackButtonStates.PREVIOUS_PAGE);
-    this.forwardButton_.setState(this.hasBookend_().then(hasBookend =>
+    this.backButtonState_.set(BackButtonStates.PREVIOUS_PAGE);
+    this.forwardButtonState_.set(this.hasBookend_().then(hasBookend =>
       hasBookend ?
         ForwardButtonStates.SHOW_BOOKEND :
         ForwardButtonStates.REPLAY));
