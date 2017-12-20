@@ -288,23 +288,27 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @public
    */
   calculateLoadStatus() {
-    if (this.isLoaded_ || this.pageElements_.length == 0) {
+    if (this.isLoaded_) {
+      return true;
+    }
+
+    const visiblePageElements = this.pageElements_.filter(pageElement =>
+      !pageElement.isHiddenByMediaQuery());
+
+    if (visiblePageElements.length == 0) {
       return true;
     }
 
     let isPageLoaded = true;
     let canPageBeShown = false;
 
-    this.pageElements_.forEach(pageElement => {
+    visiblePageElements.forEach(pageElement => {
       pageElement.updateState();
 
-      if (isPageLoaded) {
-        isPageLoaded = pageElement.isLoaded || pageElement.hasFailed;
-      }
+      isPageLoaded =
+          isPageLoaded && (pageElement.isLoaded || pageElement.hasFailed);
 
-      if (!canPageBeShown) {
-        canPageBeShown = pageElement.canBeShown;
-      }
+      canPageBeShown = canPageBeShown || pageElement.canBeShown;
     });
 
     if (isPageLoaded) {

@@ -15,6 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
+import {ActionTrust} from '../../../src/action-trust';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
@@ -23,6 +24,7 @@ import {closestByTag, tryFocus, isRTL} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {setStyles, toggle} from '../../../src/style';
+import {createCustomEvent} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {removeFragment, parseUrl} from '../../../src/url';
 import {toArray} from '../../../src/types';
@@ -36,6 +38,12 @@ const ANIMATION_TIMEOUT = 350;
 /** @const */
 const IOS_SAFARI_BOTTOMBAR_HEIGHT = '10vh';
 
+/**  @enum {string} */
+const SidebarEvents = {
+  OPEN: 'sidebarOpen',
+  CLOSE: 'sidebarClose',
+};
+
 export class AmpSidebar extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -46,6 +54,9 @@ export class AmpSidebar extends AMP.BaseElement {
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win);
+
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.action_ = null;
 
     /** @private {?Element} */
     this.maskElement_ = null;
@@ -85,6 +96,9 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @const {function()} */
     this.boundOnAnimationEnd_ =
         debounce(this.win, this.onAnimationEnd_.bind(this), ANIMATION_TIMEOUT);
+
+    /** @private {?Element} */
+    this.openerElement_ = null;
   }
 
   /** @override */
@@ -99,6 +113,8 @@ export class AmpSidebar extends AMP.BaseElement {
     this.side_ = this.element.getAttribute('side');
 
     this.viewport_ = this.getViewport();
+
+    this.action_ = Services.actionServiceForDoc(this.element);
 
     this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
 
@@ -191,8 +207,8 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /** @override */
-  activate() {
-    this.open_();
+  activate(invocation) {
+    this.open_(invocation);
   }
 
   /** @override */
@@ -226,21 +242,23 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /**
    * Toggles the open/close state of the sidebar.
+   * @param {?../../../src/service/action-impl.ActionInvocation=} opt_invocation
    * @private
    */
-  toggle_() {
+  toggle_(opt_invocation) {
     if (this.isOpen_()) {
       this.close_();
     } else {
-      this.open_();
+      this.open_(opt_invocation);
     }
   }
 
   /**
    * Reveals the sidebar.
+   * @param {?../../../src/service/action-impl.ActionInvocation=} opt_invocation
    * @private
    */
-  open_() {
+  open_(opt_invocation) {
     if (this.isOpen_()) {
       return;
     }
@@ -262,6 +280,9 @@ export class AmpSidebar extends AMP.BaseElement {
     this.getHistory_().push(this.close_.bind(this)).then(historyId => {
       this.historyId_ = historyId;
     });
+    if (opt_invocation) {
+      this.openerElement_ = opt_invocation.source;
+    }
   }
 
   /**
@@ -368,13 +389,27 @@ export class AmpSidebar extends AMP.BaseElement {
       this.scheduleLayout(children);
       this.scheduleResume(children);
       tryFocus(this.element);
+      this.triggerEvent_(SidebarEvents.OPEN);
     } else {
       // On close sidebar
       this.vsync_.mutate(() => {
         toggle(this.element, /* display */false);
         this.schedulePause(this.getRealChildren());
+        // Return focus to source element if applicable
+        if (this.openerElement_) {
+          tryFocus(this.openerElement_);
+        }
+        this.triggerEvent_(SidebarEvents.CLOSE);
       });
     }
+  }
+
+  /**
+   * @private
+   */
+  triggerEvent_(name) {
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
+    this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
   }
 }
 
