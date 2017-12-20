@@ -100,8 +100,6 @@ export class LayoutLayers {
     /** @const @private {!Array<!LayoutElement>} */
     this.layouts_ = [];
 
-
-
     // Listen for scroll events at the document level, so we know when either
     // the document (the scrolling element) or an element scrolls.
     // This forwards to our scroll-dirty system, and eventually to the scroll
@@ -176,7 +174,7 @@ export class LayoutLayers {
       parent.remove(layout);
     }
 
-    // TODO child elements will disappear into the ether.
+    // TODO(jridgewell) child elements will disappear into the ether.
     layout.undeclareLayer();
   }
 
@@ -390,10 +388,16 @@ export class LayoutElement {
      */
     this.needsScrollRemeasure_ = false;
 
-    /** @private {number} */
+    /**
+     * The scrollLeft of the layer (only layers use this).
+     * @private {number}
+     */
     this.scrollLeft_ = 0;
 
-    /** @private {number} */
+    /**
+     * The scrollTop of the layer (only layers use this).
+     * @private {number}
+     */
     this.scrollTop_ = 0;
 
     /**
@@ -470,7 +474,6 @@ export class LayoutElement {
         op = op.offsetParent;
       }
     }
-
 
     // Use isConnected if available, but always pass if it's not.
     dev().assert(node.isConnected !== false, 'node not in the DOM tree');
