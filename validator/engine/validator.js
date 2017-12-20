@@ -1134,13 +1134,10 @@ class ReferencePointMatcher {
   }
 
   /**
-   * @param {?ParsedTagSpec} parsedTagSpec
+   * @param {!ParsedTagSpec} parsedTagSpec
    */
-  updateFromMatchingReferencePoint(parsedTagSpec) {
-    if (parsedTagSpec !== null)
-      this.referencePointsMatched_.push(parsedTagSpec.id());
-    else
-      this.referencePointsMatched_.push(-1);
+  recordMatch(parsedTagSpec) {
+    this.referencePointsMatched_.push(parsedTagSpec.id());
   }
 
   /**
@@ -1155,7 +1152,6 @@ class ReferencePointMatcher {
     if (matched.length === 0) return false;
 
     const tagSpecId = matched[matched.length - 1];
-    if (tagSpecId === -1) return false;
 
     const tagSpec = this.parsedValidatorRules_.getByTagSpecId(tagSpecId);
     return tagSpec.hasAttrWithName(attrName);
@@ -1353,6 +1349,8 @@ class TagStack {
    * @param {!LineCol} lineCol
    */
   updateFromMatchingTagSpec(parsedTagSpec, parsedRules, lineCol) {
+    if (parsedTagSpec.isReferencePoint())
+      this.parentReferencePointMatcher().recordMatch(parsedTagSpec);
     this.setReferencePointMatcher(
         parsedTagSpec.referencePointMatcher(parsedRules, lineCol));
     this.setChildTagMatcher(parsedTagSpec.childTagMatcher(lineCol));
@@ -5135,8 +5133,6 @@ amp.validator.ValidationHandler =
             /** @type {!ParsedTagSpec} */ (
                 resultForReferencePoint.bestMatchTagSpec));
       }
-      referencePointMatcher.updateFromMatchingReferencePoint(
-          resultForReferencePoint.bestMatchTagSpec);
     }
 
     if ('BODY' === encounteredTag.upperName()) {
