@@ -452,13 +452,19 @@ class ParsedTagSpec {
    * @param {!ParsedAttrSpecs} parsedAttrSpecs
    * @param {boolean} shouldRecordTagspecValidated
    * @param {!amp.validator.TagSpec} tagSpec
+   * @param {number} id
    */
-  constructor(parsedAttrSpecs, shouldRecordTagspecValidated, tagSpec) {
+  constructor(parsedAttrSpecs, shouldRecordTagspecValidated, tagSpec, id) {
     /**
      * @type {!amp.validator.TagSpec}
      * @private
      */
     this.spec_ = tagSpec;
+    /**
+     * @type {number}
+     * @private
+     */
+    this.id_ = id;
     /**
      * @type {!ParsedReferencePoints}
      * @private
@@ -588,6 +594,14 @@ class ParsedTagSpec {
         this.containsUrl_ = true;
       }
     }
+  }
+
+  /**
+   * Return the numerical id.
+   * @return {number}
+   */
+  id() {
+    return this.id_;
   }
 
   /**
@@ -3238,11 +3252,10 @@ function validateNoSiblingsAllowedTags(
 
 /**
  * Validates if the 'last child' rule exists.
- * @param {!amp.validator.TagSpec} tagSpec
  * @param {!Context} context
  * @param {!amp.validator.ValidationResult} validationResult
  */
-function validateLastChildTags(tagSpec, context, validationResult) {
+function validateLastChildTags(context, validationResult) {
   const tagStack = context.getTagStack();
 
   if (tagStack.parentHasChildWithLastChildRule() &&
@@ -3262,6 +3275,89 @@ function validateLastChildTags(tagSpec, context, validationResult) {
           ],
           tagStack.parentLastChildUrl(), validationResult);
     }
+  }
+}
+
+/**
+ * If this tag requires an extension and we have processed all extensions,
+ * report an error if that extension has not been loaded.
+ * @param {!ParsedTagSpec} parsedTagSpec
+ * @param {!Context} context
+ * @param {!amp.validator.ValidationResult} validationResult
+ */
+function validateRequiredExtensions(parsedTagSpec, context, validationResult) {
+  const tagSpec = parsedTagSpec.getSpec();
+  const extensionsCtx = context.getExtensions();
+  for (let requiredExtension of tagSpec.requiresExtension) {
+    if (!extensionsCtx.isExtensionLoaded(requiredExtension)) {
+      if (amp.validator.LIGHT) {
+        validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+        return;
+      } else {
+        context.addError(
+            amp.validator.ValidationError.Code.MISSING_REQUIRED_EXTENSION,
+            context.getDocLocator(),
+            /* params */
+            [getTagSpecName(parsedTagSpec.getSpec()), requiredExtension],
+            getTagSpecUrl(parsedTagSpec), validationResult);
+      }
+    }
+  }
+}
+
+/**
+ * Check for duplicates of tags that should be unique, reporting errors for
+ * the second instance of each unique tag.
+ * @param {!ParsedTagSpec} parsedTagSpec
+ * @param {!Context} context
+ * @param {!amp.validator.ValidationResult} validationResult
+ */
+function validateUniqueness(parsedTagSpec, context, validationResult) {
+  const tagSpec = parsedTagSpec.getSpec();
+  if (tagSpec.unique &&
+      context.getTagspecsValidated().hasOwnProperty(parsedTagSpec.id())) {
+    if (amp.validator.LIGHT) {
+      validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+      return;
+    } else {
+      context.addError(
+          amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG,
+          context.getDocLocator(),
+          /* params */[getTagSpecName(tagSpec)], getTagSpecUrl(parsedTagSpec),
+          validationResult);
+    }
+  }
+}
+
+/**
+ * Considering that reference points could be defined by both reference
+ * points and regular tag specs, check that we don't already have a
+ * conflicting matcher, there can be only one.
+ * @param {!ParsedTagSpec} parsedTagSpec
+ * @param {!Context} context
+ * @param {!amp.validator.ValidationResult} validationResult
+ */
+function validateReferencePointCollision(
+    parsedTagSpec, context, validationResult) {
+  if (!parsedTagSpec.hasReferencePoints()) return;
+
+  const currentMatcher = context.getTagStack().currentReferencePointMatcher();
+  if (currentMatcher === null) return;
+
+  if (amp.validator.LIGHT) {
+    validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+    return;
+  } else {
+    context.addError(
+        amp.validator.ValidationError.Code.TAG_REFERENCE_POINT_CONFLICT,
+        context.getDocLocator(),
+        /* params */
+        [
+          getTagSpecName(parsedTagSpec.getSpec()),
+          currentMatcher.getParsedReferencePoints().parentTagSpecName()
+        ],
+        currentMatcher.getParsedReferencePoints().parentSpecUrl(),
+        validationResult);
   }
 }
 
@@ -4117,71 +4213,19 @@ function validateTagAgainstSpec(
   }
   validateDescendantTags(encounteredTag, parsedSpec, context, resultForAttempt);
   validateNoSiblingsAllowedTags(parsedSpec, context, resultForAttempt);
-  validateLastChildTags(parsedSpec.getSpec(), context, resultForAttempt);
-
-  const tagSpec = parsedSpec.getSpec();
-
-  // If this requires an extension and we are in the body, report an error if
-  // that extension has not been loaded.
-  let extensionsCtx = context.getExtensions();
+  validateLastChildTags(context, resultForAttempt);
+  // If we haven't reached the body element yet, we may not have seen the
+  // necessary extension. That case is handled elsewhere.
   if (context.getTagStack().hasAncestor('BODY')) {
-    for (let requiredExtension of tagSpec.requiresExtension) {
-      if (!extensionsCtx.isExtensionLoaded(requiredExtension)) {
-        if (!amp.validator.LIGHT) {
-          context.addError(
-              amp.validator.ValidationError.Code.MISSING_REQUIRED_EXTENSION,
-              context.getDocLocator(),
-              /* params */[getTagSpecName(tagSpec), requiredExtension],
-              getTagSpecUrl(tagSpec), resultForAttempt);
-        } else {
-          resultForAttempt.status = amp.validator.ValidationResult.Status.FAIL;
-          return;
-        }
-      }
-    }
+    validateRequiredExtensions(parsedSpec, context, resultForAttempt);
+  }
+  // Only validate uniqueness if we haven't yet found any errors, as it's
+  // likely that this is not the correct tagspec if we have.
+  if (resultForAttempt.status != amp.validator.ValidationResult.Status.FAIL) {
+    validateUniqueness(parsedSpec, context, resultForAttempt);
   }
 
-  // Check for duplicates of tags that should be unique. Only validate
-  // uniqueness if we haven't yet found any errors, as it's likely that
-  // this is not the correct tagspec if we have.
-  if (tagSpec.unique &&
-      context.getTagspecsValidated().hasOwnProperty(tagSpecId) &&
-      resultForAttempt.status !== amp.validator.ValidationResult.Status.FAIL) {
-    if (amp.validator.LIGHT) {
-      resultForAttempt.status = amp.validator.ValidationResult.Status.FAIL;
-      return;
-    } else {
-      context.addError(
-          amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG,
-          context.getDocLocator(),
-          /* params */[getTagSpecName(tagSpec)], getTagSpecUrl(tagSpec),
-          resultForAttempt);
-    }
-  }
-
-  // Considering that reference points could be defined by both reference
-  // points and regular tag specs, check that we don't already have a
-  // conflicting matcher, there can be only one.
-  if (parsedSpec.hasReferencePoints()) {
-    const currentMatcher = context.getTagStack().currentReferencePointMatcher();
-    if (currentMatcher !== null) {
-      if (amp.validator.LIGHT) {
-        resultForAttempt.status = amp.validator.ValidationResult.Status.FAIL;
-        return;
-      } else {
-        context.addError(
-            amp.validator.ValidationError.Code.TAG_REFERENCE_POINT_CONFLICT,
-            context.getDocLocator(),
-            /* params */
-            [
-              getTagSpecName(tagSpec),
-              currentMatcher.getParsedReferencePoints().parentTagSpecName()
-            ],
-            currentMatcher.getParsedReferencePoints().parentSpecUrl(),
-            resultForAttempt);
-      }
-    }
-  }
+  validateReferencePointCollision(parsedSpec, context, resultForAttempt);
 
   resultForBestAttempt.copyFrom(context.getRules().selectBestValidationResult(
       resultForBestAttempt, resultForAttempt));
@@ -4190,6 +4234,8 @@ function validateTagAgainstSpec(
     return;
 
   // -- This is the successful branch of the code: the tagspec matches. --
+
+  const tagSpec = parsedSpec.getSpec();
 
   if (!amp.validator.LIGHT) {
     if (tagSpec.deprecation !== null) {
@@ -4210,6 +4256,7 @@ function validateTagAgainstSpec(
   }  // !amp.validator.LIGHT
 
   // If this is an extension, keep track of which extensions are loaded
+  const extensionsCtx = context.getExtensions();
   if (tagSpec.extensionSpec !== null) {
     const extensionSpec = tagSpec.extensionSpec;
     // This is an always present field if extension spec is set.
@@ -4769,7 +4816,8 @@ class ParsedValidatorRules {
     goog.asserts.assert(tag !== undefined);
     parsed = new ParsedTagSpec(
         this.parsedAttrSpecs_,
-        shouldRecordTagspecValidated(tag, id, this.tagSpecIdsToTrack_), tag);
+        shouldRecordTagspecValidated(tag, id, this.tagSpecIdsToTrack_), tag,
+        id);
     this.parsedTagSpecById_[id] = parsed;
     return parsed;
   }
