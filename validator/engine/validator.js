@@ -998,6 +998,12 @@ class ChildTagMatcher {
     }
   }
 }
+/**
+ * Return type tuple for ValidateTag.
+ * @typedef {{ validationResult: !amp.validator.ValidationResult,
+ *             bestMatchTagSpec: ?ParsedTagSpec }}
+ */
+let ValidateTagResult;
 
 /**
  * A tag may initialize this ReferencePointMatcher with its reference points.
@@ -1057,9 +1063,9 @@ class ReferencePointMatcher {
    * points and record them in this.referencePointsMatched_.
    * @param {!amp.htmlparser.ParsedHtmlTag} tag
    * @param {!Context} context
-   * @param {!amp.validator.ValidationResult} result
+   * @return {ValidateTagResult} result
    */
-  match(tag, context, result) {
+  validateTag(tag, context) {
     // Look for a matching reference point, if we find one, record and exit.
     let resultForBestAttempt = new amp.validator.ValidationResult();
     resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
@@ -1070,24 +1076,23 @@ class ReferencePointMatcher {
           /** @type {!number} */ (p.tagSpecName));
       const resultForAttempt =
           validateTagAgainstSpec(parsedTagSpec, context, tag);
-      resultForBestAttempt.copyFrom(
-          context.getRules().selectBestValidationResult(
-              resultForBestAttempt, resultForAttempt));
+      if (context.getRules().betterValidationResultThan(
+              resultForAttempt, resultForBestAttempt))
+        resultForBestAttempt.copyFrom(resultForAttempt);
       if (resultForBestAttempt.status !==
           amp.validator.ValidationResult.Status.FAIL) {
-        context.updateFromMatchingTagSpec(parsedTagSpec);
-        this.referencePointsMatched_.push(parsedTagSpec.id());
-        return;
+        return {
+          validationResult: resultForBestAttempt,
+          bestMatchTagSpec: parsedTagSpec
+        };
       }
     }
-    this.referencePointsMatched_.push(-1);
     // This check cannot fail as a successful validation above exits early.
     goog.asserts.assert(
         resultForBestAttempt.status ===
         amp.validator.ValidationResult.Status.FAIL);
     if (amp.validator.LIGHT) {
-      result.status = amp.validator.ValidationResult.Status.FAIL;
-      return;
+      return {validationResult: resultForBestAttempt, bestMatchTagSpec: null};
     }
     // Special case: only one reference point defined - emit a singular
     // error message *and* merge in the errors from the best attempt above.
@@ -1102,9 +1107,8 @@ class ReferencePointMatcher {
             this.parsedValidatorRules_.getReferencePointName(
                 this.parsedReferencePoints_.iterate()[0])
           ],
-          this.parsedReferencePoints_.parentSpecUrl(), result);
-      result.mergeFrom(resultForBestAttempt);
-      return;
+          this.parsedReferencePoints_.parentSpecUrl(), resultForBestAttempt);
+      return {validationResult: resultForBestAttempt, bestMatchTagSpec: null};
     }
     // General case: more than one reference point defined. Emit a plural
     // message with the acceptable reference points listed.
@@ -1112,6 +1116,7 @@ class ReferencePointMatcher {
     for (const p of this.parsedReferencePoints_.iterate()) {
       acceptable.push(this.parsedValidatorRules_.getReferencePointName(p));
     }
+    let resultForMultipleAttempts = new amp.validator.ValidationResult();
     context.addError(
         amp.validator.ValidationError.Code
             .CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT,
@@ -1121,7 +1126,21 @@ class ReferencePointMatcher {
           tag.lowerName(), this.parsedReferencePoints_.parentTagSpecName(),
           acceptable.join(', ')
         ],
-        this.parsedReferencePoints_.parentSpecUrl(), result);
+        this.parsedReferencePoints_.parentSpecUrl(), resultForMultipleAttempts);
+    return {
+      validationResult: resultForMultipleAttempts,
+      bestMatchTagSpec: null
+    };
+  }
+
+  /**
+   * @param {?ParsedTagSpec} parsedTagSpec
+   */
+  updateFromMatchingReferencePoint(parsedTagSpec) {
+    if (parsedTagSpec !== null)
+      this.referencePointsMatched_.push(parsedTagSpec.id());
+    else
+      this.referencePointsMatched_.push(-1);
   }
 
   /**
@@ -4268,6 +4287,117 @@ function validateTagAgainstSpec(parsedTagSpec, context, encounteredTag) {
 }
 
 /**
+ * Validates the provided |tagName| with respect to the tag
+ * specifications in the validator's rules, resturning a ValidationResult
+ * with errors for this tag and a FAIL or UNKNWON status. At least one
+ * specification must validate, or the result will have status FAIL.
+ * Also passes back a reference to the tag spec which matched, if a match
+ * was found.
+ * @param {!amp.htmlparser.ParsedHtmlTag} encounteredTag
+ * @param {!Context} context
+ * @return {ValidateTagResult}
+ */
+function validateTag(encounteredTag, context) {
+  let tagSpecDispatch =
+      context.getRules().dispatchForTagName(encounteredTag.upperName());
+  // If there are no dispatch keys matching the tag name, ex: tag name is
+  // "foo", set a disallowed tag error.
+  if (tagSpecDispatch === undefined) {
+    let result = new amp.validator.ValidationResult();
+    if (amp.validator.LIGHT) {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+    } else {
+      let specUrl = '';
+      // Special case the spec_url for font tags to be slightly more useful.
+      if (encounteredTag.upperName() === 'FONT')
+        specUrl = context.getRules().getStylesSpecUrl();
+      context.addError(
+          amp.validator.ValidationError.Code.DISALLOWED_TAG,
+          context.getLineCol(),
+          /* params */[encounteredTag.lowerName()], specUrl, result);
+    }
+    return {validationResult: result, bestMatchTagSpec: null};
+  }
+
+  // At this point, we have dispatch keys, tagspecs, or both.
+  // The strategy is to look for a matching dispatch key first. A matching
+  // dispatch key does not guarantee that the dispatched tagspec will also
+  // match. If we find a matching dispatch key, we immediately return the
+  // result for that tagspec, success or fail.
+  // If we don't find a matching dispatch key, we must try all of the
+  // tagspecs to see if any of them match. If there are no tagspecs, we want
+  // to return a GENERAL_DISALLOWED_TAG error.
+  // calling HasDispatchKeys here is only an optimization to skip the loop
+  // over encountered attributes in the case where we have no dispatches.
+  if (tagSpecDispatch.hasDispatchKeys()) {
+    for (let attr of encounteredTag.attrs()) {
+      const maybeTagSpecId = tagSpecDispatch.matchingDispatchKey(
+          attr.name,
+          // Attribute values are case-sensitive by default, but we
+          // match dispatch keys in a case-insensitive manner and then
+          // validate using whatever the tagspec requests.
+          attr.value.toLowerCase(), context.getTagStack().parentTagName());
+      if (maybeTagSpecId !== -1) {
+        bestMatchTagSpec = context.getRules().getByTagSpecId(maybeTagSpecId);
+        return {
+          bestMatchTagSpec: bestMatchTagSpec,
+          validationResult:
+              validateTagAgainstSpec(bestMatchTagSpec, context, encounteredTag)
+        };
+      }
+    }
+    // If none of the dispatch tagspecs matched and passed and there are no
+    // non-dispatch tagspecs, consider this a 'generally' disallowed tag,
+    // which gives an error that reads "tag foo is disallowed except in
+    // specific forms".
+    if (!tagSpecDispatch.hasTagSpecs()) {
+      let result = new amp.validator.ValidationResult();
+      if (amp.validator.LIGHT) {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      } else if (encounteredTag.upperName() === 'SCRIPT') {
+        // Special case for <script> tags to produce better error messages.
+        context.addError(
+            amp.validator.ValidationError.Code.DISALLOWED_SCRIPT_TAG,
+            context.getLineCol(),
+            /* params */[], context.getRules().getScriptSpecUrl(), result);
+      } else {
+        context.addError(
+            amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG,
+            context.getLineCol(),
+            /* params */[encounteredTag.lowerName()],
+            /* specUrl */ '', result);
+      }
+      return {validationResult: result, bestMatchTagSpec: null};
+    }
+  }
+  // Validate against all tagspecs.
+  let resultForBestAttempt = new amp.validator.ValidationResult();
+  resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
+  let bestMatchTagSpec = null;
+  for (const tagSpecId of tagSpecDispatch.allTagSpecs()) {
+    const parsedTagSpec = context.getRules().getByTagSpecId(tagSpecId);
+    const resultForAttempt =
+        validateTagAgainstSpec(parsedTagSpec, context, encounteredTag);
+    if (context.getRules().betterValidationResultThan(
+            resultForAttempt, resultForBestAttempt)) {
+      resultForBestAttempt.copyFrom(resultForAttempt);
+      bestMatchTagSpec = parsedTagSpec;
+      if (resultForBestAttempt.status !==
+          amp.validator.ValidationResult.Status.FAIL) {
+        return {
+          bestMatchTagSpec: bestMatchTagSpec,
+          validationResult: resultForBestAttempt
+        };
+      }
+    }
+  }
+  return {
+    bestMatchTagSpec: bestMatchTagSpec,
+    validationResult: resultForBestAttempt
+  };
+}
+
+/**
  * This wrapper class provides access to the validation rules.
  * @private
  */
@@ -4537,43 +4667,45 @@ class ParsedValidatorRules {
   };
 
   /**
-   * Given two ValidationResults, selects the best result and returns it.
-   * If results are equal, will return the first.
+   * Returns true iff resultA is a better result than resultB.
    * @param {!amp.validator.ValidationResult} resultA
    * @param {!amp.validator.ValidationResult} resultB
-   * @return {!amp.validator.ValidationResult} best
+   * @return {boolean}
    */
-  selectBestValidationResult(resultA, resultB) {
+  betterValidationResultThan(resultA, resultB) {
+    // Results are either UNKNOWN or FAIL. We only set pass at the end of
+    // validation, where there are no more comparisons to run.
+    goog.asserts.assert(
+        resultA.status !== amp.validator.ValidationResult.Status.PASS);
+    goog.asserts.assert(
+        resultB.status !== amp.validator.ValidationResult.Status.PASS);
     // A non-failing result is better than a failing one. Results are
     // either UNKNOWN or FAIL.
     if (resultA.status !== resultB.status) {
-      if (resultA.status === amp.validator.ValidationResult.Status.FAIL)
-        return resultB;
-      if (resultB.status === amp.validator.ValidationResult.Status.FAIL)
-        return resultA;
+      return resultA.status === amp.validator.ValidationResult.Status.UNKNOWN;
     }
 
     // In the light mode, we only have status values.
     if (!amp.validator.LIGHT) {
       // If one of the results is empty (ie: first attempt), prefer the other.
-      if (resultA.errors.length === 0) return resultB;
-      if (resultB.errors.length === 0) return resultA;
+      if (resultA.errors.length === 0) return false;
+      if (resultB.errors.length === 0) return true;
 
       // Prefer the attempt with the fewest errors.
-      if (resultA.errors.length < resultB.errors.length) return resultA;
-      if (resultB.errors.length < resultA.errors.length) return resultB;
+      if (resultA.errors.length < resultB.errors.length) return true;
+      if (resultB.errors.length < resultA.errors.length) return false;
 
       // If the same number of errors, prefer the most specific error.
       if (this.maxSpecificity(resultA.errors) >
           this.maxSpecificity(resultB.errors))
-        return resultA;
+        return true;
       if (this.maxSpecificity(resultB.errors) >
           this.maxSpecificity(resultA.errors))
-        return resultB;
+        return false;
     }
 
-    // Default to returning the first argument.
-    return resultA;
+    // Equal, so not better than.
+    return false;
   }
 
   /**
@@ -4989,17 +5121,36 @@ amp.validator.ValidationHandler =
       }
       encounteredTag.dedupeAttrs();
     }
+
     const referencePointMatcher =
         this.context_.getTagStack().parentReferencePointMatcher();
     if (referencePointMatcher !== null) {
-      referencePointMatcher.match(
-          encounteredTag, this.context_, this.validationResult_);
+      const resultForReferencePoint =
+          referencePointMatcher.validateTag(encounteredTag, this.context_);
+      this.validationResult_.mergeFrom(
+          resultForReferencePoint.validationResult);
+      if (resultForReferencePoint.validationResult.status !==
+          amp.validator.ValidationResult.Status.FAIL) {
+        this.context_.updateFromMatchingTagSpec(
+            /** @type {!ParsedTagSpec} */ (
+                resultForReferencePoint.bestMatchTagSpec));
+      }
+      referencePointMatcher.updateFromMatchingReferencePoint(
+          resultForReferencePoint.bestMatchTagSpec);
     }
+
     if ('BODY' === encounteredTag.upperName()) {
       this.context_.recordBodyTag(encounteredTag.attrs());
       this.emitMissingExtensionErrors();
     }
-    this.validateTag(encounteredTag);
+
+    const resultForTag = validateTag(encounteredTag, this.context_);
+    this.validationResult_.mergeFrom(resultForTag.validationResult);
+    if (resultForTag.validationResult.status !==
+        amp.validator.ValidationResult.Status.FAIL) {
+      this.context_.updateFromMatchingTagSpec(
+          /** @type {!ParsedTagSpec} */ (resultForTag.bestMatchTagSpec));
+    }
     this.context_.getTagStack().matchChildTagName(
         encounteredTag, this.context_, this.validationResult_);
   }
@@ -5039,107 +5190,6 @@ amp.validator.ValidationHandler =
     const matcher = this.context_.getTagStack().cdataMatcher();
     if (matcher !== null)
       matcher.match(text, this.context_, this.validationResult_);
-  }
-
-  /**
-   * Validates the provided |tagName| with respect to the tag
-   * specifications that are part of this instance. At least one
-   * specification must validate.
-   * @param {!amp.htmlparser.ParsedHtmlTag} tag
-   */
-  validateTag(tag) {
-    let tagSpecDispatch = this.rules_.dispatchForTagName(tag.upperName());
-    if (tagSpecDispatch === undefined) {
-      if (amp.validator.LIGHT) {
-        this.validationResult_.status =
-            amp.validator.ValidationResult.Status.FAIL;
-      } else {
-        let specUrl = '';
-        if (tag.upperName() === 'FONT')
-          specUrl = this.context_.getRules().getStylesSpecUrl();
-        this.context_.addError(
-            amp.validator.ValidationError.Code.DISALLOWED_TAG,
-            this.context_.getLineCol(),
-            /* params */[tag.lowerName()], specUrl, this.validationResult_);
-      }
-      return;
-    }
-    let resultForBestAttempt = new amp.validator.ValidationResult();
-    resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
-    // At this point, we have dispatch keys, tagspecs, or both.
-    // The strategy is to look for a matching dispatch key first. A matching
-    // dispatch key does not guarantee that the dispatched tagspec will also
-    // match. If we find a matching dispatch key, we immediately return the
-    // result for that tagspec, success or fail.
-    // If we don't find a matching dispatch key, we must try all of the
-    // tagspecs to see if any of them match. If there are no tagspecs, we want
-    // to return a GENERAL_DISALLOWED_TAG error.
-    // calling HasDispatchKeys here is only an optimization to skip the loop
-    // over encountered attributes in the case where we have no dispatches.
-    if (tagSpecDispatch.hasDispatchKeys()) {
-      for (let attr of tag.attrs()) {
-        const maybeTagSpecId = tagSpecDispatch.matchingDispatchKey(
-            attr.name,
-            // Attribute values are case-sensitive by default, but we
-            // match dispatch keys in a case-insensitive manner and then
-            // validate using whatever the tagspec requests.
-            attr.value.toLowerCase(),
-            this.context_.getTagStack().parentTagName());
-        if (maybeTagSpecId !== -1) {
-          const parsedTagSpec =
-              this.context_.getRules().getByTagSpecId(maybeTagSpecId);
-          resultForBestAttempt =
-              validateTagAgainstSpec(parsedTagSpec, this.context_, tag);
-          if (resultForBestAttempt.status !==
-              amp.validator.ValidationResult.Status.FAIL)
-            this.context_.updateFromMatchingTagSpec(parsedTagSpec);
-          // Use the dispatched TagSpec validation results, success or fail.
-          this.validationResult_.mergeFrom(resultForBestAttempt);
-          return;
-        }
-      }
-      // If none of the dispatch tagspecs matched and passed and there are no
-      // non-dispatch tagspecs, consider this a 'generally' disallowed tag,
-      // which gives an error that reads "tag foo is disallowed except in
-      // specific forms".
-      if (!tagSpecDispatch.hasTagSpecs()) {
-        // TODO(gregable): Determine a good way to source a specUrl in these
-        // instances.
-        if (amp.validator.LIGHT) {
-          this.validationResult_.status =
-              amp.validator.ValidationResult.Status.FAIL;
-        } else if (tag.upperName() === 'SCRIPT') {
-          // Special case for <script> tags to produce better error messages.
-          this.context_.addError(
-              amp.validator.ValidationError.Code.DISALLOWED_SCRIPT_TAG,
-              this.context_.getLineCol(),
-              /* params */[], this.rules_.getScriptSpecUrl(),
-              this.validationResult_);
-        } else {
-          this.context_.addError(
-              amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG,
-              this.context_.getLineCol(),
-              /* params */[tag.lowerName()],
-              /* specUrl */ '', this.validationResult_);
-        }
-        return;
-      }
-    }
-    // Validate against all tagspecs.
-    for (const tagSpecId of tagSpecDispatch.allTagSpecs()) {
-      const parsedTagSpec = this.context_.getRules().getByTagSpecId(tagSpecId);
-      const resultForAttempt =
-          validateTagAgainstSpec(parsedTagSpec, this.context_, tag);
-      resultForBestAttempt.copyFrom(
-          this.context_.getRules().selectBestValidationResult(
-              resultForBestAttempt, resultForAttempt));
-      if (resultForBestAttempt.status !==
-          amp.validator.ValidationResult.Status.FAIL) {
-        this.context_.updateFromMatchingTagSpec(parsedTagSpec);
-        break;  // Exit early on success
-      }
-    }
-    this.validationResult_.mergeFrom(resultForBestAttempt);
   }
 };
 
