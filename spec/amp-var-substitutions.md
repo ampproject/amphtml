@@ -219,6 +219,8 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Element Y](#element-y) | N/A | `${elementY}` |
 | [First Seen Time](#first-seen-time) | N/A | `${firstSeenTime}` |
 | [First Visible Time](#first-visible-time) | N/A | `${firstVisibleTime}` |
+| [Intersection Ratio](#intersection-ratio) | N/A | `${intersectionRatio}` |
+| [Intersection Rect](#intersection-rect) | N/A | `${intersectionRect}` |
 | [Last Seen Time](#last-seen-time) | N/A | `${lastSeenTime}` |
 | [Last Visible Time](#last-visible-time) | N/A | `${lastVisibleTime}` |
 | [Load Time Visibility](#load-time-visibility) | N/A | `${loadTimeVisibility}` |
@@ -618,6 +620,25 @@ Provides the horizontal scroll boundary that triggered a scroll event. This vari
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${horizontalScrollBoundary}`
+
+#### Intersection Ratio
+
+Provides the fraction of the selected element that is visible. The value will be between 0.0 and 1.0, inclusive. For more information, please see the [IntersectionObserverEntry.intersectionRatio](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry/intersectionRatio) API documentation.
+ 
+* **platform variable**: N/A
+* **amp-analytics variable**: `${intersectionRatio}`
+
+#### Intersection Rect
+
+Provides the bounds of the rectangle defining the portion of the selected element that is visible. For more information, please see the [IntersectionObserverEntry.intersectionRect](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry/intersectionRect)  API documentation.
+
+Example value:
+```javascript
+{"left":0,"top":74,"width":256,"height":226,"bottom":300,"right":256,"x":0,"y":74}
+```
+
+* **platform variable**: N/A
+* **amp-analytics variable**: `${intersectionRect}`
 
 #### Last Seen Time
 
