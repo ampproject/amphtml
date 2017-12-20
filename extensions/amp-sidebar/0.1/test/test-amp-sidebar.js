@@ -627,7 +627,8 @@ describes.realWin('amp-sidebar 0.1 version', {
     });
 
     // Accessibility
-    it('should return focus to opening element after close', () => {
+    // TODO(cathyxz, 12479)
+    it.skip('should return focus to opening element after close', () => {
       return getAmpSidebar().then(sidebarElement => {
         const impl = sidebarElement.implementation_;
         impl.vsync_ = {

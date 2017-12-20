@@ -395,10 +395,15 @@ export class AmpSidebar extends AMP.BaseElement {
       this.vsync_.mutate(() => {
         toggle(this.element, /* display */false);
         this.schedulePause(this.getRealChildren());
+        // TODO(cathyxz, 12479): Re-enable with updated heuristic on whether
+        // returning focus to opener is the right choice or not. Current
+        // issue is that if an item in sidebar has a .focus, .scrollTo
+        // or just local # navigation before closing the sidebar, moving the
+        // focus would override their effects.
         // Return focus to source element if applicable
-        if (this.openerElement_) {
-          tryFocus(this.openerElement_);
-        }
+        // if (this.openerElement_) {
+        //   tryFocus(this.openerElement_);
+        // }
         this.triggerEvent_(SidebarEvents.CLOSE);
       });
     }
