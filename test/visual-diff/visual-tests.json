@@ -109,6 +109,22 @@
       ]
     },
     {
+      "url": "examples/visual-tests/font.amp.404/font.amp.html",
+      "name": "Fonts 404",
+      "forbidden_css": [
+        "html.comic-amp-font-loaded",
+        "html.comic-amp-bold-font-loaded"
+      ],
+      "loading_incomplete_css": [
+        "html.comic-amp-font-loading",
+        "html.comic-amp-bold-font-loading"
+      ],
+      "loading_complete_css": [
+        "html.comic-amp-font-missing",
+        "html.comic-amp-bold-font-missing"
+      ]
+    },
+    {
       "url": "examples/visual-tests/amp-layout/amp-layout.amp.html",
       "name": "AMP Layout"
     }
@@ -119,25 +135,6 @@
    * block PRs from being merged. Move them back once failures are fixed.
    */
   "failing_webpages": [
-    {
-      /**
-       * Fails due to https://github.com/ampproject/amphtml/issues/10377
-       */
-      "url": "examples/visual-tests/font.amp.404/font.amp.html",
-      "name": "Fonts 404",
-      "forbidden_css": [
-        ".comic-amp-font-loaded",
-        ".comic-amp-bold-font-loaded"
-      ],
-      "loading_incomplete_css": [
-        ".comic-amp-font-loading",
-        ".comic-amp-bold-font-loading"
-      ],
-      "loading_complete_css": [
-        ".comic-amp-font-missing",
-        ".comic-amp-bold-font-missing"
-      ]
-    },
     /**
       * Fails due to https://github.com/ampproject/amphtml/issues/11496
       */
