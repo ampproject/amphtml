@@ -22,7 +22,7 @@ import {
 } from '../amp-image-lightbox';
 import {parseSrcset} from '../../../../src/srcset';
 import * as lolex from 'lolex';
-
+import * as dom from '../../../../src/dom';
 
 describes.realWin('amp-image-lightbox component', {
   amp: {
@@ -148,8 +148,6 @@ describes.realWin('amp-image-lightbox component', {
       const exit = sandbox.spy();
       impl.exit_ = exit;
 
-      const ampImage = doc.createElement('amp-img');
-      ampImage.setAttribute('src', 'data:');
       impl.close();
 
       expect(impl.active_).to.equal(false);
@@ -199,6 +197,24 @@ describes.realWin('amp-image-lightbox component', {
       expect(nullAddEventListenerSpy).to.have.not.been.called;
       impl.activate({source: ampImage});
       expect(nullAddEventListenerSpy).to.have.not.been.called;
+    });
+  });
+
+  // Accessibility
+  it('should return focus to source element after close', () => {
+    return getImageLightbox().then(lightbox => {
+      const impl = lightbox.implementation_;
+
+      impl.enter_ = () => {};
+      const tryFocus = sandbox.spy(dom, 'tryFocus');
+
+      const sourceElement = doc.createElement('amp-img');
+      sourceElement.setAttribute('src', 'data:');
+
+      impl.activate({source: sourceElement});
+      impl.close();
+
+      expect(tryFocus).to.be.calledOnce;
     });
   });
 });
