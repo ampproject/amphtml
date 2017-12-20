@@ -3445,33 +3445,30 @@ function validateUniqueness(parsedTagSpec, context, validationResult) {
 
 /**
  * Considering that reference points could be defined by both reference
- * points and regular tag specs, check that we don't already have a
- * conflicting matcher, there can be only one.
- * @param {!ParsedTagSpec} parsedTagSpec
+ * points and regular tag specs, check that we don't have matchers assigned
+ * from both, there can be only one.
+ * @param {?ParsedTagSpec} refPointSpec
+ * @param {?ParsedTagSpec} tagSpec
  * @param {!Context} context
  * @param {!amp.validator.ValidationResult} validationResult
  */
-function validateReferencePointCollision(
-    parsedTagSpec, context, validationResult) {
-  if (!parsedTagSpec.hasReferencePoints()) return;
-
-  const currentMatcher = context.getTagStack().currentReferencePointMatcher();
-  if (currentMatcher === null) return;
+function checkForReferencePointCollision(
+    refPointSpec, tagSpec, context, validationResult) {
+  if (refPointSpec === null || !refPointSpec.hasReferencePoints()) return;
+  if (tagSpec === null || !tagSpec.hasReferencePoints()) return;
 
   if (amp.validator.LIGHT) {
     validationResult.status = amp.validator.ValidationResult.Status.FAIL;
-    return;
   } else {
     context.addError(
         amp.validator.ValidationError.Code.TAG_REFERENCE_POINT_CONFLICT,
         context.getLineCol(),
         /* params */
         [
-          getTagSpecName(parsedTagSpec.getSpec()),
-          currentMatcher.getParsedReferencePoints().parentTagSpecName()
+          getTagSpecName(tagSpec.getSpec()),
+          refPointSpec.getReferencePoints().parentTagSpecName()
         ],
-        currentMatcher.getParsedReferencePoints().parentSpecUrl(),
-        validationResult);
+        refPointSpec.getReferencePoints().parentSpecUrl(), validationResult);
   }
 }
 
@@ -4306,8 +4303,6 @@ function validateTagAgainstSpec(parsedTagSpec, context, encounteredTag) {
   if (resultForAttempt.status === amp.validator.ValidationResult.Status.PASS) {
     validateUniqueness(parsedTagSpec, context, resultForAttempt);
   }
-
-  validateReferencePointCollision(parsedTagSpec, context, resultForAttempt);
 
   // Append some warnings, only if no errors.
   if (!amp.validator.LIGHT &&
@@ -5164,7 +5159,6 @@ amp.validator.ValidationHandler =
    * @override
    */
   startTag(encounteredTag) {
-    this.context_.getTagStack().enterTag(encounteredTag.upperName());
     /** @type {?string} */
     let maybeDuplicateAttrName = encounteredTag.hasDuplicateAttrs();
     if (maybeDuplicateAttrName !== null) {
@@ -5178,21 +5172,31 @@ amp.validator.ValidationHandler =
       encounteredTag.dedupeAttrs();
     }
 
-    const referencePointMatcher =
-        this.context_.getTagStack().parentReferencePointMatcher();
-    if (referencePointMatcher !== null) {
-      const resultForReferencePoint =
-          referencePointMatcher.validateTag(encounteredTag, this.context_);
-      this.context_.updateFromTagResult(
-          resultForReferencePoint, this.validationResult_);
-    }
-
     if ('BODY' === encounteredTag.upperName()) {
       this.context_.recordBodyTag(encounteredTag.attrs());
       this.emitMissingExtensionErrors();
     }
 
+    this.context_.getTagStack().enterTag(encounteredTag.upperName());
+
+    /** @type {ValidateTagResult} */
+    let resultForReferencePoint = {
+      bestMatchTagSpec: null,
+      validationResult: new amp.validator.ValidationResult()
+    };
+    const referencePointMatcher =
+        this.context_.getTagStack().parentReferencePointMatcher();
+    if (referencePointMatcher !== null) {
+      resultForReferencePoint =
+          referencePointMatcher.validateTag(encounteredTag, this.context_);
+      this.context_.updateFromTagResult(
+          resultForReferencePoint, this.validationResult_);
+    }
+
     const resultForTag = validateTag(encounteredTag, this.context_);
+    checkForReferencePointCollision(
+        resultForReferencePoint.bestMatchTagSpec, resultForTag.bestMatchTagSpec,
+        this.context_, resultForTag.validationResult);
     this.context_.updateFromTagResult(resultForTag, this.validationResult_);
   }
 
