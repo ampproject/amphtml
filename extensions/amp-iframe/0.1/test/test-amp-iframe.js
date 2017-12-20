@@ -37,6 +37,11 @@ describes.realWin('amp-iframe', {
   },
 }, env => {
   describe('amp-iframe', () => {
+    const urlReplacements = {
+      DOCUMENT_REFERRER: 'somereferrer.com',
+      RANDOM: '0.12345',
+      TITLE: 'Test AMP Iframe Page',
+    };
     let iframeSrc;
     let clickableIframeSrc;
     let timer;
@@ -69,6 +74,18 @@ describes.realWin('amp-iframe', {
         }
       });
       setTrackingIframeTimeoutForTesting(20);
+
+      sandbox.stub(Services, 'urlReplacementsForDoc', () => ({
+        expandUrlSync: url =>
+          Object.keys(urlReplacements)
+              .reduce(
+              (changedUrl, key) =>
+                changedUrl.replace(
+                    new RegExp(key, 'g'),
+                    urlReplacements[key]
+                ), url
+              ),
+      }));
     });
 
     function waitForJsInIframe() {
@@ -721,5 +738,24 @@ describes.realWin('amp-iframe', {
           expect(impl.iframeSrc).to.contain(newSrc);
           expect(iframe.getAttribute('src')).to.contain(newSrc);
         });
+
+    it('should substitute variables in the src url', function* () {
+      const qs = 'rand1=RANDOM&title=TITLE&ref=DOCUMENT_REFERRER&rand2=RANDOM';
+      const substitutedQs =
+        `rand1=${urlReplacements.RANDOM}&` +
+        `title=${urlReplacements.TITLE}&` +
+        `ref=${urlReplacements.DOCUMENT_REFERRER}&` +
+        `rand2=${urlReplacements.RANDOM}`;
+      const originalUrl = `${iframeSrc}?${qs}`;
+      const substitutedUrl = `${iframeSrc}?${substitutedQs}`;
+      const ampIframe = createAmpIframe(env, {
+        src: originalUrl,
+        width: 100,
+        height: 100,
+      });
+      yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+      const impl = ampIframe.implementation_;
+      expect(impl.iframeSrc).to.contain(substitutedUrl);
+    });
   });
 });
