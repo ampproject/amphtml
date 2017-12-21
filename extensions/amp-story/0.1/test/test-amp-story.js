@@ -332,8 +332,8 @@ describes.realWin('amp-story', {
     story.buildButtons_();
     const nextStub = sandbox.stub(story, 'next_');
     const prevStub = sandbox.stub(story, 'previous_');
-    story.nextButton_.dispatchEvent(new Event('click'));
-    story.prevButton_.dispatchEvent(new Event('click'));
+    story.nextButtonContainer_.dispatchEvent(new Event('click'));
+    story.prevButtonContainer_.dispatchEvent(new Event('click'));
     expect(nextStub).calledOnce;
     expect(prevStub).calledOnce;
   });

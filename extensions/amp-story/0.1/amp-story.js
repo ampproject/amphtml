@@ -214,6 +214,9 @@ export class AmpStory extends AMP.BaseElement {
     this.background_ = null;
 
     /** @private {?Element} */
+    this.prevButton_ = null;
+
+    /** @private {?Element} */
     this.nextButtonContainer_ = null;
 
     /** @private {?Element} */
@@ -438,6 +441,9 @@ export class AmpStory extends AMP.BaseElement {
     this.element.insertBefore(
         renderSimpleTemplate(this.win.document, PAGE_SWITCH_BUTTONS),
         this.element.firstChild);
+
+    this.prevButton_ =
+        this.element.querySelector('.i-amphtml-story-button-prev');
 
     this.nextButtonContainer_ = this.element.querySelector(
         '.i-amphtml-story-button-container.next-container');
