@@ -42,13 +42,16 @@ export function dable(global, data) {
   }
 
   const itemId = data['itemId'] || '';
+  const opts = {};
 
   if (itemId) {
     global.dable('sendLog', 'view', {id: itemId});
+  } else {
+    opts.ignore_items = true;
   }
 
   // call render widget
-  global.dable('renderWidget', slot.id, itemId, function(hasAd) {
+  global.dable('renderWidget', slot.id, itemId, opts, function(hasAd) {
     if (hasAd) {
       global.context.renderStart();
     } else {
