@@ -5123,6 +5123,14 @@ amp.validator.ValidationHandler =
       this.validationResult_.status =
           amp.validator.ValidationResult.Status.PASS;
     }
+    // As some errors can be inserted out of order, sort errors at the
+    // end based on their line/col numbers.
+    if (!amp.validator.LIGHT) {
+      goog.array.stableSort(this.validationResult_.errors, function(lhs, rhs) {
+        if (lhs.line != rhs.line) return lhs.line - rhs.line;
+        return lhs.col - rhs.col;
+      });
+    }
   }
 
   /**
