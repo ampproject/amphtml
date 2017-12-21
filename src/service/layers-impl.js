@@ -473,7 +473,7 @@ export class LayoutElement {
           // In that case, it doesn't have a parent layer.
           return op === node ? null : LayoutElement.for(op);
         }
-        op = op.offsetParent;
+        op = op./*OK*/offsetParent;
       }
     }
 
@@ -788,7 +788,7 @@ export class LayoutElement {
     this.updateScrollPosition_();
     this.needsRemeasure_ = false;
 
-    const box = this.element_.getBoundingClientRect();
+    const box = this.element_./*OK*/getBoundingClientRect();
     // We need a relative box to measure our offset. Importantly, this box must
     // be negatively offset by it's scroll position, to account for the fact
     // that getBoundingClientRect() will only return scrolled positions.
@@ -841,8 +841,8 @@ export class LayoutElement {
   updateScrollPosition_() {
     if (this.isLayer_ && this.needsScrollRemeasure_) {
       this.needsScrollRemeasure_ = false;
-      this.scrollLeft_ = this.element_.scrollLeft;
-      this.scrollTop_ = this.element_.scrollTop;
+      this.scrollLeft_ = this.element_./*OK*/scrollLeft;
+      this.scrollTop_ = this.element_./*OK*/scrollTop;
     }
   }
 }
