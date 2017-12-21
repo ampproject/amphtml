@@ -47,7 +47,7 @@ export function dable(global, data) {
   if (itemId) {
     global.dable('sendLog', 'view', {id: itemId});
   } else {
-    opts.ignore_items = true;
+    opts.ignoreItems = true;
   }
 
   // call render widget
