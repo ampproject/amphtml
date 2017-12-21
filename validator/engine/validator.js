@@ -1327,33 +1327,42 @@ class TagStack {
   }
 
   /**
-   * Given a ParsedTagSpec matching the current element, update the tag stack
-   * entry at the top of the tag stack to add any constraints from the spec.
-   * @param {!ParsedTagSpec} parsedTagSpec
+   * Given a ValidateTagResult, update the tag stack entry at the top of the
+   * tag stack to add any constraints from the spec.
+   * @param {!ValidateTagResult} result
    * @param {!ParsedValidatorRules} parsedRules
    * @param {!LineCol} lineCol
    */
-  updateStackEntryFromTagSpec(parsedTagSpec, parsedRules, lineCol) {
+  updateStackEntryFromTagResult(result, parsedRules, lineCol) {
+    if (result.bestMatchTagSpec === null) return;
+    const parsedTagSpec = result.bestMatchTagSpec;
+
     this.setReferencePointMatcher(
         parsedTagSpec.referencePointMatcher(parsedRules, lineCol));
-    this.setChildTagMatcher(parsedTagSpec.childTagMatcher(lineCol));
-    this.setCdataMatcher(parsedTagSpec.cdataMatcher(lineCol));
 
-    // Record that this tag allows only a limited number of descendants.
-    if (parsedTagSpec.getSpec().descendantTagList !== null) {
-      let allowedDescendantsForThisTag = [];
-      for (const descendantTagList of parsedRules.getDescendantTagLists()) {
-        // Get the list matching this tag's descendant tag name.
-        if (parsedTagSpec.getSpec().descendantTagList ===
-            descendantTagList.name) {
-          for (const tag of descendantTagList.allowedTags) {
-            allowedDescendantsForThisTag.push(tag);
+    // The following only add new constraints, not new allowances, so
+    // only add the constraints if the validation passed.
+    if (result.validationResult.status ===
+        amp.validator.ValidationResult.Status.PASS) {
+      this.setChildTagMatcher(parsedTagSpec.childTagMatcher(lineCol));
+      this.setCdataMatcher(parsedTagSpec.cdataMatcher(lineCol));
+
+      // Record that this tag allows only a limited number of descendants.
+      if (parsedTagSpec.getSpec().descendantTagList !== null) {
+        let allowedDescendantsForThisTag = [];
+        for (const descendantTagList of parsedRules.getDescendantTagLists()) {
+          // Get the list matching this tag's descendant tag name.
+          if (parsedTagSpec.getSpec().descendantTagList ===
+              descendantTagList.name) {
+            for (const tag of descendantTagList.allowedTags) {
+              allowedDescendantsForThisTag.push(tag);
+            }
           }
         }
+        this.registerDescendantConstraintList(
+            getTagSpecName(parsedTagSpec.getSpec()),
+            allowedDescendantsForThisTag);
       }
-      this.registerDescendantConstraintList(
-          getTagSpecName(parsedTagSpec.getSpec()),
-          allowedDescendantsForThisTag);
     }
   }
 
@@ -1368,18 +1377,20 @@ class TagStack {
    */
   updateFromTagResults(
       encounteredTag, referencePointResult, tagResult, parsedRules, lineCol) {
-    // Record that the parent tag contains an additional child
+    // Always Record that the parent tag contains an additional child
     if (this.parentStackEntry_().childTagMatcher !== null)
       this.parentStackEntry_().childTagMatcher.recordChildTag();
 
-    // Record in the parent element that a reference point has been satisfied.
-    if (referencePointResult.validationResult.status ===
-        amp.validator.ValidationResult.Status.PASS) {
+    // Record in the parent element that a reference point has been satisfied,
+    // even if the reference point didn't match completely.
+    if (referencePointResult.bestMatchTagSpec !== null) {
       goog.asserts.assert(this.parentReferencePointMatcher() !== null);
       this.parentReferencePointMatcher().recordMatch(
           /** @type{!ParsedTagSpec} */ (referencePointResult.bestMatchTagSpec));
     }
 
+    // The following only add new constraints, not new allowances, so
+    // only add the constraints if the validation passed.
     if (tagResult.validationResult.status ===
         amp.validator.ValidationResult.Status.PASS) {
       const parsedTagSpec = tagResult.bestMatchTagSpec;
@@ -1399,18 +1410,9 @@ class TagStack {
     // Add the tag to the stack, and then update the stack entry.
     this.enterTag(encounteredTag.upperName());
 
-    if (referencePointResult.validationResult.status ===
-        amp.validator.ValidationResult.Status.PASS) {
-      this.updateStackEntryFromTagSpec(
-          /** @type{!ParsedTagSpec} */ (referencePointResult.bestMatchTagSpec),
-          parsedRules, lineCol);
-    }
-    if (tagResult.validationResult.status ===
-        amp.validator.ValidationResult.Status.PASS) {
-      this.updateStackEntryFromTagSpec(
-          /** @type{!ParsedTagSpec} */ (tagResult.bestMatchTagSpec),
-          parsedRules, lineCol);
-    }
+    this.updateStackEntryFromTagResult(
+        referencePointResult, parsedRules, lineCol);
+    this.updateStackEntryFromTagResult(tagResult, parsedRules, lineCol);
   }
 
   /**
@@ -2189,9 +2191,11 @@ class ExtensionsContext {
   /**
    * Update ExtensionContext state when we encounter an amp extension or
    * tag using an extension.
-   * @param {!ParsedTagSpec} parsedTagSpec
+   * @param {!ValidateTagResult} result
    */
-  updateFromMatchingTagSpec(parsedTagSpec) {
+  updateFromTagResult(result) {
+    if (result.bestMatchTagSpec === null) return;
+    const parsedTagSpec = result.bestMatchTagSpec;
     const tagSpec = parsedTagSpec.getSpec();
 
     // Keep track of which extensions are loaded.
@@ -2372,24 +2376,37 @@ class Context {
   }
 
   /**
-   * Given a tag spec which is matching, update the Context state to affect
+   * Given a tag result, update the Context state to affect
    * later validation. Does not handle updating the tag stack.
-   * @param {!ParsedTagSpec} parsedTagSpec
+   * @param {!ValidateTagResult} result
    * @private
    */
-  updateFromMatchingTagSpec_(parsedTagSpec) {
-    this.extensions_.updateFromMatchingTagSpec(parsedTagSpec);
+  updateFromTagResult_(result) {
+    if (result.bestMatchTagSpec === null) return;
+    const parsedTagSpec = result.bestMatchTagSpec;
+
+    this.extensions_.updateFromTagResult(result);
     // If this requires an extension and we are still in the document head,
     // record that we may still need to emit a missing extension error at
-    // the end of the document head.
+    // the end of the document head. We do this even for a tag failing
+    // validation since extensions are based on the tag name, and we're still
+    // pretty confident the user forgot to include the extension.
     if (this.tagStack_.hasAncestor('HEAD')) {
       this.extensions_.recordFutureErrorsIfMissing(
           parsedTagSpec, this.getLineCol());
     }
-    this.satisfyConditionsFromMatchingTagSpec_(parsedTagSpec);
-    this.satisfyMandatoryAlternativesFromMatchingTagSpec_(parsedTagSpec);
-    this.markUrlSeenFromMatchingTagSpec_(parsedTagSpec);
-    this.recordValidatedFromMatchingTagSpec_(parsedTagSpec);
+    // We also want to satisfy conditions, to reduce errors seen elsewhere in
+    // the document.
+    this.satisfyConditionsFromTagSpec_(parsedTagSpec);
+    this.satisfyMandatoryAlternativesFromTagSpec_(parsedTagSpec);
+    this.recordValidatedFromTagSpec_(parsedTagSpec);
+
+    if (result.validationResult.status ===
+        amp.validator.ValidationResult.Status.PASS) {
+      // If the tag spec didn't match, we don't know that the tag actually
+      // contained a URL, so no need to complain about it.
+      this.markUrlSeenFromMatchingTagSpec_(parsedTagSpec);
+    }
   }
 
   /**
@@ -2404,14 +2421,8 @@ class Context {
         encounteredTag, referencePointResult, tagResult, this.getRules(),
         this.getLineCol());
 
-    if (referencePointResult.validationResult.status ===
-        amp.validator.ValidationResult.Status.PASS)
-      this.updateFromMatchingTagSpec_(
-          /** @type{!ParsedTagSpec} */ (referencePointResult.bestMatchTagSpec));
-    if (tagResult.validationResult.status ===
-        amp.validator.ValidationResult.Status.PASS)
-      this.updateFromMatchingTagSpec_(
-          /** @type{!ParsedTagSpec} */ (tagResult.bestMatchTagSpec));
+    this.updateFromTagResult_(referencePointResult);
+    this.updateFromTagResult_(tagResult);
   }
 
   /**
@@ -2419,7 +2430,7 @@ class Context {
    * @param {!ParsedTagSpec} parsedTagSpec
    * @private
    */
-  satisfyConditionsFromMatchingTagSpec_(parsedTagSpec) {
+  satisfyConditionsFromTagSpec_(parsedTagSpec) {
     for (const condition of parsedTagSpec.getSpec().satisfies) {
       this.conditionsSatisfied_[condition] = true;
     }
@@ -2467,7 +2478,7 @@ class Context {
    * @param {!ParsedTagSpec} parsedTagSpec
    * @private
    */
-  recordValidatedFromMatchingTagSpec_(parsedTagSpec) {
+  recordValidatedFromTagSpec_(parsedTagSpec) {
     if (!this.tagspecsValidated_.hasOwnProperty(parsedTagSpec.id()))
       this.tagspecsValidated_[parsedTagSpec.id()] = true;
   }
@@ -2488,7 +2499,7 @@ class Context {
    * @param {!ParsedTagSpec} parsedTagSpec
    * @private
    */
-  satisfyMandatoryAlternativesFromMatchingTagSpec_(parsedTagSpec) {
+  satisfyMandatoryAlternativesFromTagSpec_(parsedTagSpec) {
     const tagSpec = parsedTagSpec.getSpec();
     if (tagSpec.mandatoryAlternatives !== null) {
       this.mandatoryAlternativesSatisfied_.push(tagSpec.mandatoryAlternatives);
