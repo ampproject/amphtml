@@ -624,6 +624,19 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(impl.boundOnAnimationEnd_).to.be.calledTwice;
       });
     });
+  });
+
+  describe('amp-sidebar - focus actions', () => {
+    beforeEach(() => {
+      clock = lolex.install({
+        target: win,
+        toFake: ['Date', 'setTimeout'],
+      });
+    });
+
+    afterEach(() => {
+      clock.uninstall();
+    });
 
     // Accessibility
     // TODO(cathyxz, 12479)
@@ -645,8 +658,6 @@ describes.realWin('amp-sidebar 0.1 version', {
             },
           };
         };
-        clock = lolex.install(
-            {target: impl.win, toFake: ['Date', 'setTimeout']});
 
         const openerElement = doc.createElement('button');
         const focusSpy = sandbox.spy(openerElement, 'focus');

@@ -1,0 +1,45 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-sidebar</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="/dist/amp.js"></script>
+  <script async custom-element="amp-sidebar" src="/dist/v0/amp-sidebar-0.1.max.js"></script>
+  <style amp-custom>
+    .block {
+      height: 800px;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <amp-sidebar
+    id="sidebar1"
+    layout="nodisplay"
+    on="sidebarOpen:focusOnMe.focus"
+    side="right">
+    <ul>
+      <li> <a id="focusOnMe" href="https://google.com">Focused on open</a></li>
+      <li> <a href="#section1">Section 1</li>
+      <li> <a href="#section2">Section 2</a></li>
+      <li> <button on="tap:section3.scrollTo">Section 3</button></li>
+      <li> <button on="tap:myInput.focus,sidebar1.close">Click to focus input and close</button></li>
+      <li> <button on="tap:sidebar1.close,myInput.focus">Click to close and focus input</button></li>
+      <li on="tap:sidebar1.close"> Close</li>
+    </ul>
+  </amp-sidebar>
+  <button id="sidebarOpener">Open Sidebar</button>
+  <div class="block">
+    <h1 id="section1">Section 1</h1>
+  </div>
+  <div class="block">
+    <h1 id="section2">Section 2</h1>
+  </div>
+  <div class="block">
+    <h1 id="section3">Section 3</h1>
+  </div>
+</body>
+</html>
