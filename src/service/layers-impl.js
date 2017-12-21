@@ -107,7 +107,7 @@ export class LayoutLayers {
     listen(win.document, 'scroll', event => {
       const {target} = event;
       const scrolled = target.nodeType == Node.ELEMENT_NODE
-        ? target
+        ? dev().assertElement(target)
         : scrollingElement;
       this.scrolled_(scrolled);
     }, {capture: true, passive: true});
@@ -129,7 +129,7 @@ export class LayoutLayers {
    * layout will be remasured when necessary.
    *
    * @param {!Element} element
-   * @return {!Layout}
+   * @return {!LayoutElement}
    */
   add(element) {
     let layout = LayoutElement.forOptional(element);
@@ -216,7 +216,7 @@ export class LayoutLayers {
    */
   getSize(element) {
     const layout = this.add(element);
-    return layout.getSize(element);
+    return layout.getSize();
   }
 
   /**
@@ -251,7 +251,7 @@ export class LayoutLayers {
    * Eagerly creates a Layer for the element.
    *
    * @param {!Element} element
-   * @param {!Boolean} isRootLayer
+   * @param {!boolean} isRootLayer
    * @return {!LayoutElement}
    */
   declareLayer_(element, isRootLayer) {
@@ -289,7 +289,7 @@ export class LayoutLayers {
     if (layer && layer.isLayer()) {
       layer.requestScrollRemeasure();
     } else {
-      layer = this.declareLayer_(element);
+      layer = this.declareLayer_(element, false);
     }
 
     if (this.onScroll_) {
@@ -413,17 +413,18 @@ export class LayoutElement {
   /**
    * Gets the element's LayoutElement instance.
    *
-   * @param {!Element}
+   * @param {!Element} element
    * @return {!LayoutElement}
    */
   static for(element) {
-    return dev().assert(LayoutElement.forOptional(element));
+    return /** @type {!LayoutElement} */ (dev().assert(
+        LayoutElement.forOptional(element)));
   }
 
   /**
    * Gets the element's LayoutElement instance, if the element has one.
    *
-   * @param {!Element}
+   * @param {!Element} element
    * @return {?LayoutElement}
    */
   static forOptional(element) {
@@ -436,8 +437,8 @@ export class LayoutElement {
    * If the element is itself a layer, it still looks in the element's ancestry
    * for a parent layer.
    *
-   * @param {!Node} node
-   * @param {opt_force=} Whether to force a re-lookup
+   * @param {!Element} node
+   * @param {boolean=} opt_force Whether to force a re-lookup
    * @return {?LayoutElement}
    */
   static getParentLayer(node, opt_force) {
@@ -448,7 +449,8 @@ export class LayoutElement {
       }
     }
 
-    const win = node.ownerDocument.defaultView;
+    const win = /** @type {!Window } */ (dev().assert(
+        node.ownerDocument.defaultView));
     let op = node;
     for (let el = node; el; el = el.parentNode) {
       // Ensure the node (if it a layer itself) is not return as the parent
@@ -563,7 +565,8 @@ export class LayoutElement {
     }
 
     this.isLayer_ = false;
-    this.transfer_(this.getParentLayer());
+    this.transfer_(/** @type {!LayoutElement} */ (dev().assert(
+        this.getParentLayer())));
   }
 
   /**
@@ -675,7 +678,7 @@ export class LayoutElement {
    * layer in between.
    *
    * @param {Element=} opt_ancestor
-   * @return {!LayoutRectDef}
+   * @return {!PositionDef}
    */
   getScrolledPosition(opt_ancestor) {
     // Compensate for the fact that the loop below will subtract the current
@@ -714,7 +717,7 @@ export class LayoutElement {
    * of any layer in between.
    *
    * @param {Element=} opt_ancestor
-   * @return {!LayoutRectDef}
+   * @return {!PositionDef}
    */
   getOffsetPosition(opt_ancestor) {
     let x = 0;
@@ -851,7 +854,7 @@ export class LayoutElement {
  * positively applied that scroll position.
  *
  * @param {!LayoutElement} layer
- * @return {!positionLt}
+ * @return {!PositionDef}
  */
 function relativeScrolledPositionForChildren(layer) {
   const position = layer.getScrolledPosition();
