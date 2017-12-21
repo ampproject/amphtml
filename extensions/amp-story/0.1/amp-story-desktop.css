@@ -95,9 +95,11 @@ amp-story-page.i-amphtml-story-page-shown {
 
 [desktop] .i-amphtml-story-button-container {
   position: absolute;
-  width: 25vw;
+  /* Todo(prateekbh): find a simpler way maybe */
+  width: calc(50vw - 23vh - 64px);
   top: 0;
   height: 100vh;
+  z-index: 1;
 }
 
 [desktop] .next-container {
@@ -164,12 +166,11 @@ amp-story-page.i-amphtml-story-page-shown {
   left: 50%!important;
   right: auto!important;
   margin: auto!important;
-  max-height: 70vh!important;
-  max-width: calc(9/16 * 70vh) !important;
+  height: 75vh!important;
+  width: calc(3/5 * 75vh) !important;
   box-shadow: 0 0 15px rgba(0, 0, 0, .4)!important;
-  min-width: 348px !important;
-  min-height: 619px !important;
-  /* TODO(prateekbh): Add transition here */
+  min-width: 320px !important;
+  min-height: 533px !important;
 }
 
 /* Navigation buttons */
@@ -258,13 +259,17 @@ amp-story-page.i-amphtml-story-page-shown {
 .i-amphtml-story-top {
   position: relative!important;
   display: block!important;
-  height: 104px!important;
+  height: 96px!important;
   width: 100%!important;
   z-index: 1!important;
   background: linear-gradient(to bottom, rgba(33,33,33,0.32) 0%, rgba(33,33,33,0) 100%)!important;
 }
 
 .i-amphtml-story-share {
+  display: none;
+}
+
+[desktop] .i-amphtml-story-share {
   display: flex!important;
   position: absolute!important;
   top: 0!important;
@@ -414,13 +419,7 @@ amp-story-page.i-amphtml-story-page-shown {
   background: linear-gradient(to bottom, rgba(33,33,33,0) 0%, rgba(33,33,33,0.32) 100%)!important;
   top: auto!important;
   bottom: 0!important;
-  height: 72px!important;
-}
-
-@media (max-height: 768px) {
-  [desktop] .i-amphtml-story-system-layer {
-    height: 32px !important;
-  }
+  height: 96px!important;
 }
 
 [desktop] .i-amphtml-story-progress-bar {

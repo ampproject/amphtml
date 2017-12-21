@@ -923,24 +923,24 @@ amp-story[standalone] .i-amphtml-story-developer-log {
 }
 
 amp-story[standalone] .i-amphtml-story-no-rotation-overlay {
-  position: fixed!important;
-  z-index: 9999!important;
-  background-color: #000!important;
-  top:0!important;
-  left:0!important;
-  width:100%!important;
-  height: 100%!important;
-  align-items: center!important;
-  justify-content: center!important;
-  display: none!important;
+  position: fixed !important;
+  z-index: 9999 !important;
+  background-color: #000 !important;
+  top:0 !important;
+  left:0 !important;
+  width:100% !important;
+  height: 100% !important;
+  align-items: center !important;
+  justify-content: center !important;
+  display: none !important;
 }
 
 [desktop] .i-amphtml-story-no-rotation-overlay {
-  display: none!important;
+  display: none !important;
 }
 
 amp-story[standalone].i-amphtml-story-landscape .i-amphtml-story-no-rotation-overlay {
-  display: flex!important;
+  display: flex !important;
 }
 
 .i-amphtml-story-no-rotation-overlay{
