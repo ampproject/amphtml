@@ -1315,7 +1315,7 @@ class TagStack {
   exitTag(context, result) {
     goog.asserts.assert(this.stack_.length > 0, 'Exiting an empty tag stack.');
 
-    this.unRegisterDescendantConstraintList();
+    this.unSetDescendantConstraintList();
     const topStackEntry = this.stack_.pop();
     if (topStackEntry.childTagMatcher !== null) {
       topStackEntry.childTagMatcher.exitTag(context, result);
@@ -1346,23 +1346,7 @@ class TagStack {
         amp.validator.ValidationResult.Status.PASS) {
       this.setChildTagMatcher(parsedTagSpec.childTagMatcher(lineCol));
       this.setCdataMatcher(parsedTagSpec.cdataMatcher(lineCol));
-
-      // Record that this tag allows only a limited number of descendants.
-      if (parsedTagSpec.getSpec().descendantTagList !== null) {
-        let allowedDescendantsForThisTag = [];
-        for (const descendantTagList of parsedRules.getDescendantTagLists()) {
-          // Get the list matching this tag's descendant tag name.
-          if (parsedTagSpec.getSpec().descendantTagList ===
-              descendantTagList.name) {
-            for (const tag of descendantTagList.allowedTags) {
-              allowedDescendantsForThisTag.push(tag);
-            }
-          }
-        }
-        this.registerDescendantConstraintList(
-            getTagSpecName(parsedTagSpec.getSpec()),
-            allowedDescendantsForThisTag);
-      }
+      this.setDescendantConstraintList(parsedTagSpec, parsedRules);
     }
   }
 
@@ -1615,13 +1599,27 @@ class TagStack {
   }
 
   /**
-   * @param {string} tagName The tag that has constraints.
-   * @param {!Array<string>} allowedTags The tags whitelisted as descendents of
+   * @param {!ParsedTagSpec} parsedTagSpec
+   * @param {!ParsedValidatorRules} parsedRules
    * tagName.
    */
-  registerDescendantConstraintList(tagName, allowedTags) {
+  setDescendantConstraintList(parsedTagSpec, parsedRules) {
+    if (parsedTagSpec.getSpec().descendantTagList === null) return;
+
+    let allowedDescendantsForThisTag = [];
+    for (const descendantTagList of parsedRules.getDescendantTagLists()) {
+      // Get the list matching this tag's descendant tag name.
+      if (parsedTagSpec.getSpec().descendantTagList ===
+          descendantTagList.name) {
+        for (const tag of descendantTagList.allowedTags) {
+          allowedDescendantsForThisTag.push(tag);
+        }
+      }
+    }
+
     this.allowedDescendantsList_.push(
-        {tagName: tagName, allowedTags: allowedTags});
+        {tagName: getTagSpecName(parsedTagSpec.getSpec()),
+         allowedTags: allowedDescendantsForThisTag});
     this.setHasDescendantConstraintLists(true);
   }
 
@@ -1637,7 +1635,7 @@ class TagStack {
    * Updates the allowed descendants list if a tag introduced constraints. This
    * is called when exiting a tag.
    */
-  unRegisterDescendantConstraintList() {
+  unSetDescendantConstraintList() {
     if (this.hasDescendantConstraintLists()) {
       this.allowedDescendantsList_.pop();
       this.setHasDescendantConstraintLists(false);
