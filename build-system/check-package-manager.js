@@ -39,8 +39,12 @@ function main() {
         '*** The AMP project uses yarn for package management ***'), '\n');
     console/*OK*/.log(yellow('To install all packages:'));
     console/*OK*/.log(cyan('$'), 'yarn', '\n');
-    console/*OK*/.log(yellow(
-        'To install a new package (and update package.json and yarn.lock):'));
+    console/*OK*/.log(
+        yellow('To install a new (runtime) package to "dependencies":'));
+    console/*OK*/.log(cyan('$'),
+        'yarn add --exact [package_name@version]', '\n');
+    console/*OK*/.log(
+        yellow('To install a new (toolset) package to "devDependencies":'));
     console/*OK*/.log(cyan('$'),
         'yarn add --dev --exact [package_name@version]', '\n');
     console/*OK*/.log(yellow('To upgrade a package:'));
