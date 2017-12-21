@@ -431,21 +431,72 @@ export class AmpA4A extends AMP.BaseElement {
           });
         });
 
+    this.initializeAmpAnalyticsForAdNetwork_();
+  }
+
+  /**
+   * Validates that an amp-analytics selector is not out of scope.A
+   * @param {!JsonValue|undefined} triggerOrVisibilitySpec
+   * @private
+   */
+  validateAnalyticsSelector_(triggerOrVisibilitySpec, type) {
+    if (!triggerOrVisibilitySpec ||
+        !triggerOrVisibilitySpec['selector']) {
+      // It's fine to omit selectors.
+      return true;
+    }
+    const selector = triggerOrVisibilitySpec['selector'];
+    if (selector != `amp-ad[type=${type}]`) {
+      dev().warn(
+          TAG,
+          `The amp-analytics config for ${type} is ignored because the ` +
+          `'${selector}' selector does must match amp-ad[type=${type}]`);
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Initializes amp-analytics for the ad network.
+   * @private
+   */
+  initializeAmpAnalyticsForAdNetwork_() {
     const networkType = this.element.getAttribute('type');
-    if (!(networkType in perNetworkAnalyticsElements)) {
-      const analyticsConfig = this.getA4aAnalyticsNetworkConfig();
-      if (analyticsConfig) {
-        this.hasA4aAnalyticsElement_ = true;
-        // NOTE(warrengm): We trigger the event to body because the analytics
-        // instrumentation service is scoped by ampdoc.
-        perNetworkAnalyticsElements[networkType] = insertAnalyticsElement(
-            this.win.document.body, analyticsConfig, true /* loadAnalytics */);
-      } else {
-        // We want to call getA4aAnalyticsNetworkConfig only once per page so
-        // we set the value to null here. Later slots will exit early since the
-        // key is present in the map.
-        perNetworkAnalyticsElements[networkType] = null;
+    if (networkType in perNetworkAnalyticsElements) {
+      // We have already processed. Either the pub has a valid config and amp
+      // analytics has been initialized, or ad network has no analytics
+      // instance on this page.
+      return;
+    }
+
+    let analyticsConfig = this.getA4aAnalyticsNetworkConfig();
+    const triggers = analyticsConfig && analyticsConfig['triggers'] || null;
+    for (const key in triggers) {
+      const trigger = triggers[key];
+      const hasInvalidSelector =
+          !this.validateAnalyticsSelector_(trigger, networkType) ||
+          !this.validateAnalyticsSelector_(
+              trigger['visibilitySpec'], networkType);
+      if (hasInvalidSelector) {
+        // Discard the config;
+        analyticsConfig = null;
       }
+    }
+
+    if (analyticsConfig) {
+      this.hasA4aAnalyticsElement_ = true;
+      // NOTE(warrengm): We trigger the event to body because the analytics
+      // instrumentation service is scoped by ampdoc.
+      perNetworkAnalyticsElements[networkType] = insertAnalyticsElement(
+          this.win.document.body, analyticsConfig, true /* loadAnalytics */);
+
+      // Remove the sandbox element so that it can measure all amp-ad
+      // elements.
+      perNetworkAnalyticsElements[networkType].removeAttribute('sandbox');
+    } else {
+      // Mark that the network has no valid analytics config by setting the
+      // value to null.
+      perNetworkAnalyticsElements[networkType] = null;
     }
   }
 
