@@ -1,7 +1,7 @@
 FAIL
-feature_tests/css_errors.html:35:8 CSS syntax error in tag 'style amp-custom' - unterminated string. [AUTHOR_STYLESHEET_PROBLEM]
-feature_tests/css_errors.html:36:25 CSS syntax error in tag 'style amp-custom' - stray trailing backslash. [AUTHOR_STYLESHEET_PROBLEM]
-feature_tests/css_errors.html:37:4 CSS syntax error in tag 'style amp-custom' - bad url. [AUTHOR_STYLESHEET_PROBLEM]
 feature_tests/css_errors.html:31:8 CSS syntax error in tag 'style amp-custom' - incomplete declaration. [AUTHOR_STYLESHEET_PROBLEM]
 feature_tests/css_errors.html:33:8 CSS syntax error in tag 'style amp-custom' - invalid declaration. [AUTHOR_STYLESHEET_PROBLEM]
 feature_tests/css_errors.html:35:4 CSS syntax error in tag 'style amp-custom' - end of stylesheet encountered in prelude of a qualified rule. [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/css_errors.html:35:8 CSS syntax error in tag 'style amp-custom' - unterminated string. [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/css_errors.html:36:25 CSS syntax error in tag 'style amp-custom' - stray trailing backslash. [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/css_errors.html:37:4 CSS syntax error in tag 'style amp-custom' - bad url. [AUTHOR_STYLESHEET_PROBLEM]
