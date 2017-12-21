@@ -41,3 +41,4 @@ require('./size');
 require('./todos');
 require('./validator');
 require('./visual-diff');
+require('./yarn-check');
