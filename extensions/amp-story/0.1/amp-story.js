@@ -214,10 +214,13 @@ export class AmpStory extends AMP.BaseElement {
     this.background_ = null;
 
     /** @private {?Element} */
-    this.nextButton_ = null;
+    this.prevButton_ = null;
 
     /** @private {?Element} */
-    this.prevButton_ = null;
+    this.nextButtonContainer_ = null;
+
+    /** @private {?Element} */
+    this.prevButtonContainer_ = null;
 
     /** @private {?Element} */
     this.topBar_ = null;
@@ -439,17 +442,20 @@ export class AmpStory extends AMP.BaseElement {
         renderSimpleTemplate(this.win.document, PAGE_SWITCH_BUTTONS),
         this.element.firstChild);
 
-    this.nextButton_ =
-        this.element.querySelector('.i-amphtml-story-button-next');
-
     this.prevButton_ =
         this.element.querySelector('.i-amphtml-story-button-prev');
 
-    this.nextButton_.addEventListener('click', () => {
+    this.nextButtonContainer_ = this.element.querySelector(
+        '.i-amphtml-story-button-container.next-container');
+
+    this.prevButtonContainer_ = this.element.querySelector(
+        '.i-amphtml-story-button-container.prev-container');
+
+    this.nextButtonContainer_.addEventListener('click', () => {
       this.next_();
     });
 
-    this.prevButton_.addEventListener('click', () => {
+    this.prevButtonContainer_.addEventListener('click', () => {
       this.previous_();
     });
   }
@@ -820,7 +826,7 @@ export class AmpStory extends AMP.BaseElement {
   onResize() {
     if (this.isDesktop_()) {
       this.element.setAttribute('desktop','');
-      if (!this.nextButton_) {
+      if (!this.nextButtonContainer_) {
         this.buildButtons_();
       }
       if (!this.topBar_) {
