@@ -224,6 +224,11 @@ export const adConfig = {
     preconnect: 'https://ib.adnxs.com',
   },
 
+  aps: {
+    prefetch: 'https://c.amazon-adsystem.com/aax2/apstag.js',
+    preconnect: 'https://aax.amazon-adsystem.com',
+  },
+
   atomx: {
     prefetch: 'https://s.ato.mx/p.js',
   },
