@@ -55,6 +55,7 @@ function hostCharIsEnd(code) {
   return (code === /* '#' */ 0x23 ||
           code === /* '/' */ 0x2F ||
           code === /* '?' */ 0x3F ||
+          code === /* '\' */ 0x5C ||
           isNaN(code));
 }
 

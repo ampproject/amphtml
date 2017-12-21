@@ -295,4 +295,11 @@ describe('parse_url', () => {
     assertStrictEqual(false, url.isValid);
     assertStrictEqual('', url.host);
   });
+  it ('accepts \\x10 in hostname', () => {
+    let urlString = 'http://example.com\\x10.com/';
+    let url = new parse_url.URL(urlString);
+    assertStrictEqual(true, url.isValid);
+    assertStrictEqual('example.com', url.host);
+  });
+
 });
