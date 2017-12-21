@@ -63,7 +63,8 @@ export class AmpWebPushPermissionDialog {
    * @return {boolean}
    */
   isCurrentDialogPopup() {
-    return !!this.window_.opener && this.window_.opener !== this.window_;
+    return !!this.window_.opener &&
+      this.window_.opener !== this.window_;
   }
 
   /**
@@ -113,9 +114,7 @@ export class AmpWebPushPermissionDialog {
     const closeIcon = this.window_.document.querySelector('#close');
 
     if (closeIcon) {
-      closeIcon.addEventListener('click', () => {
-        this.closeDialog();
-      });
+      closeIcon.addEventListener('click', () => { this.closeDialog(); });
     }
   }
 
@@ -131,9 +130,7 @@ export class AmpWebPushPermissionDialog {
       const winLocation = this.window_.fakeLocation || this.window_.location;
       const queryParams = parseQueryString(winLocation.search);
       if (!queryParams['return']) {
-        throw new Error(
-            'Expecting return URL query parameter to redirect back.'
-        );
+        throw new Error('Missing required parameter.');
       }
       const redirectLocation = tryDecodeUriComponent(queryParams['return']);
       this.redirectToUrl(redirectLocation);
@@ -142,8 +139,7 @@ export class AmpWebPushPermissionDialog {
 
   /** @private */
   onPermissionDenied_() {
-    navigator.permissions
-        .query({name: 'notifications'})
+    navigator.permissions.query({name: 'notifications'})
         .then(permissionStatus => {
           permissionStatus.onchange = () => {
             this.storeNotificationPermission_();
@@ -230,11 +226,10 @@ export class AmpWebPushPermissionDialog {
       if (this.isCurrentDialogPopup()) {
         this.ampMessenger_.connect(opener, '*');
 
-        return this.ampMessenger_
-            .send(
-                WindowMessenger.Topics.NOTIFICATION_PERMISSION_STATE,
-                permission
-            )
+        return this.ampMessenger_.send(
+            WindowMessenger.Topics.NOTIFICATION_PERMISSION_STATE,
+            permission
+        )
             .then(result => {
               const message = result[0];
               if (message && message.closeFrame) {
@@ -255,7 +250,9 @@ export class AmpWebPushPermissionDialog {
    * @param {string} url
    */
   redirectToUrl(url) {
-    this.window_.location.href = url;
+    if (typeof url === 'string' && url.startsWith('http')) {
+      this.window_.location.href = url;
+    }
   }
 }
 
