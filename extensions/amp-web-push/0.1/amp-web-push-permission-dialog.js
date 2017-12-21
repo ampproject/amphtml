@@ -14,7 +14,7 @@
  * the License.
  */
 
-import {tryDecodeUriComponent, parseQueryString} from '../../../src/url.js';
+import {tryDecodeUriComponent, parseQueryString, parseUrl} from '../../../src/url.js';
 import {WindowMessenger} from './window-messenger';
 import {getMode} from '../../../src/mode';
 import {StorageKeys, NotificationPermission} from './vars';
@@ -250,7 +250,13 @@ export class AmpWebPushPermissionDialog {
    * @param {string} url
    */
   redirectToUrl(url) {
-    if (typeof url === 'string' && url.startsWith('http')) {
+    const parsedUrl = parseUrl(url);
+    if (parsedUrl &&
+      (
+        parsedUrl.protocol === 'http:' ||
+        parsedUrl.protocol === 'https:'
+      )
+    ) {
       this.window_.location.href = url;
     }
   }
