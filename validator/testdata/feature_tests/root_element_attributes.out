@@ -1,3 +1,2 @@
 FAIL
 feature_tests/root_element_attributes.html:18:0 The attribute 'allow-xhr-interception' may not appear in tag 'html ⚡ for top-level html'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
-feature_tests/root_element_attributes.html:28:7 The mandatory tag 'html ⚡ for top-level html' is missing or incorrect. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
