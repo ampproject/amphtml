@@ -50,4 +50,5 @@ feature_tests/urls.html:112:2 The attribute 'src' in tag 'amp-img' is set to the
 feature_tests/urls.html:113:2 The attribute 'src' in tag 'amp-pixel' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-pixel) [AMP_TAG_PROBLEM]
 feature_tests/urls.html:114:2 The attribute 'src' in tag 'amp-video' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-video) [AMP_TAG_PROBLEM]
 feature_tests/urls.html:115:2 The attribute 'src' in tag 'amp-video' is set to the invalid value '%5f_amp_source%5forigin'. (see https://www.ampproject.org/docs/reference/components/amp-video) [AMP_TAG_PROBLEM]
-feature_tests/urls.html:117:7 The mandatory tag 'link rel=canonical' is missing or incorrect. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/urls.html:117:7 The tag 'amp-ad extension .js script' is missing or incorrect, but required by 'amp-ad'. This will soon be an error. (see https://www.ampproject.org/docs/reference/components/amp-ad) [DEPRECATION]
+feature_tests/urls.html:117:7 The tag 'amp-video extension .js script' is missing or incorrect, but required by 'amp-video'. This will soon be an error. (see https://www.ampproject.org/docs/reference/components/amp-video) [DEPRECATION]
