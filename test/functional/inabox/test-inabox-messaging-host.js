@@ -259,4 +259,92 @@ describes.realWin('inabox-host:messaging', {}, env => {
     });
 
   });
+
+  describe('getFrameElement', () => {
+    let topWinMock;
+    let intermediateWinMock;
+    let creativeWinMock;
+    let creativeIframeMock;
+    let sentinel;
+
+    beforeEach(() => {
+      topWinMock = {};
+      topWinMock['top'] = topWinMock;
+      intermediateWinMock = {
+        top: topWinMock,
+        location: {
+          href: 'somesite.com',
+        },
+        parent: topWinMock,
+      };
+      creativeWinMock = {
+        top: topWinMock,
+        parent: intermediateWinMock,
+      };
+      creativeIframeMock = {
+        contentWindow: creativeWinMock,
+      };
+      host.win_ = topWinMock;
+      sentinel = '123456789101112';
+    });
+
+    it('should return null if there are intermediate xdomain frames', () => {
+      Object.defineProperty(intermediateWinMock['location'], 'href', {
+        get: () => {
+          throw new Error('Error!!');
+        },
+        set: () => {
+          throw new Error('Error!!');
+        },
+      });
+
+      Object.defineProperty(intermediateWinMock, 'test', {
+        get: () => {
+          throw new Error('Error!!');
+        },
+        set: () => {
+          throw new Error('Error!!');
+        },
+      });
+      expect(host.getFrameElement_(creativeWinMock, sentinel)).to.be.null;
+    });
+
+    it('should return null if there are intermediate xdomain frames - safari',
+        () => {
+          intermediateWinMock['location']['href'] = undefined;
+          Object.defineProperty(intermediateWinMock, 'test', {
+            get: () => {
+              throw new Error('Error!!');
+            },
+            set: () => {
+              throw new Error('Error!!');
+            },
+          });
+          expect(host.getFrameElement_(creativeWinMock, sentinel)).to.be.null;
+        });
+
+    it('should return correct frame', () => {
+      host.iframes_.push(creativeIframeMock);
+      expect(host.getFrameElement_(creativeWinMock, sentinel)
+      ).to.equal(creativeIframeMock);
+    });
+
+    it('should return cached frame', () => {
+      host.win_ = {};
+      // Make any access of host.win_.top throw, so we can detect if
+      // getFrameElement goes past using the cached version.
+      Object.defineProperty(host.win_, 'top', {
+        get: () => {
+          throw new Error('Error!!');
+        },
+      });
+      host.iframeMap_[sentinel] = creativeIframeMock;
+      expect(host.getFrameElement_(creativeWinMock, sentinel)
+      ).to.equal(creativeIframeMock);
+    });
+
+    it('should return null if frame is not registered', () => {
+      expect(host.getFrameElement_(creativeWinMock, sentinel)).to.be.null;
+    });
+  });
 });

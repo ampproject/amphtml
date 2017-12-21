@@ -17,6 +17,7 @@
 import {FrameOverlayManager} from './frame-overlay-manager';
 import {PositionObserver} from './position-observer';
 import {
+  canInspectWindow,
   serializeMessage,
   deserializeMessage,
   MessageType,
@@ -228,9 +229,13 @@ export class InaboxMessagingHost {
     // frame in between the source of the postMessage and the host doc.
     // If there is, the host doc will not be able to accurately measure
     // the creative's positions in the page, so return null.
+    // Limit to 10 iterations.
     let tempWin = source.parent;
-    while (tempWin !== this.win_ && tempWin !== this.win_.top) {
-      if (tempWin.location.origin !== this.win_.location.origin) {
+    for (let i = 0; i < 10; i++) {
+      if (tempWin == this.win_ || tempWin == this.win_.top) {
+        break;
+      }
+      if (!canInspectWindow(tempWin)) {
         return null;
       }
       tempWin = tempWin.parent;

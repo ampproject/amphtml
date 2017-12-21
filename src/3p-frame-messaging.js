@@ -125,6 +125,32 @@ export function isAmpMessage(message) {
       message.indexOf('{') != -1);
 }
 
+
+/**
+ * Returns true if win's properties can be accessed and win is defined.
+ * This functioned is used to determine if a window is cross-domained
+ * from the perspective of the current window.
+ * @param {Window} win
+ * @return {boolean}
+ */
+export function canInspectWindow(win) {
+  try {
+    return !!win && win.location.href != null && canTouchProperty(win, 'test');
+  } catch (err) {
+    return false;
+  }
+}
+
+function canTouchProperty(obj, prop) {
+  try {
+    const /* eslint no-unused-vars: 0 */ unused = obj[prop];
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+
 /** @typedef {{creativeId: string, message: string}} */
 export let IframeTransportEvent;
 // An event, and the transport ID of the amp-analytics tags that
