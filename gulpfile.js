@@ -388,6 +388,36 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
 }
 
 /**
+ * Make the custom element polyfill play well as a common JS module.
+ */
+function patchDocumentRegisterElementPolyfill() {
+  // Copies document-register-element into a new file that has an export.
+  // This works around a bug in closure compiler, where without the
+  // export this module does not generate a goog.provide which fails
+  // compilation.
+  // Details https://github.com/google/closure-compiler/issues/1831
+  const dir = 'build/patched-module/document-register-element/build/';
+  const patchedName = dir + 'document-register-element.patched.js';
+  if (fs.existsSync(patchedName)) {
+    return
+  }
+  let file = fs.readFileSync(
+      'node_modules/document-register-element/build/' +
+      'document-register-element.node.js').toString();
+  // Kill the side effect.
+  file = file.replace('installCustomElements(global);',
+      'installCustomElements(self);');
+  // Closure Compiler does not generate a `default` property even though
+  // to interop CommonJS and ES6 modules. This is the same issue typescript
+  // ran into here https://github.com/Microsoft/TypeScript/issues/2719
+  file = file.replace('module.exports = installCustomElements;',
+      'module.exports = installCustomElements;' +
+      'exports.default = installCustomElements;');
+  fs.mkdirsSync(dir);
+  fs.writeFileSync(patchedName, file);
+}
+
+/**
  * Compile all the css and drop in the build folder
  * @return {!Promise}
  */
@@ -399,6 +429,7 @@ function compileCss() {
         cyan('--nobuild'), 'with your', cyan('gulp test'), 'command.'));
   }
   const startTime = Date.now();
+  patchDocumentRegisterElementPolyfill();
   return jsifyCssAsync('css/amp.css')
   .then(function(css) {
     return toPromise(gulp.src('css/**.css')
@@ -444,7 +475,7 @@ function watch() {
   $$.watch('css/**/*.css', function() {
     compileCss();
   });
-
+  patchDocumentRegisterElementPolyfill();
   return Promise.all([
     compileCss(),
     buildAlp({watch: true}),
@@ -609,6 +640,7 @@ function enableLocalTesting(targetFile) {
 function build() {
   process.env.NODE_ENV = 'development';
   printConfigHelp('gulp build', 'dist/amp.js')
+  patchDocumentRegisterElementPolyfill();
   return compileCss().then(() => {
     return Promise.all([
       polyfillsForTests(),
@@ -634,6 +666,7 @@ function dist() {
   if (argv.fortesting) {
     printConfigHelp('gulp dist --fortesting', 'dist/v0.js')
   }
+  patchDocumentRegisterElementPolyfill();
   return compileCss().then(() => {
     return Promise.all([
       compile(false, true, true),
@@ -699,6 +732,7 @@ function checkTypes() {
     return './extensions/' + extension.name + '/' +
         extension.version + '/' + extension.name + '.js';
   }).sort();
+  patchDocumentRegisterElementPolyfill();
   return compileCss().then(() => {
     return Promise.all([
       closureCompile(compileSrcs.concat(extensionSrcs), './dist',

@@ -31,8 +31,10 @@ import {
 import {cssText} from '../../build/css';
 import {dev, rethrowAsync} from '../log';
 import {getMode} from '../mode';
+/*eslint-disable */
 import installCustomElements from
-  'document-register-element/build/document-register-element.node';
+  '../../build/patched-module/document-register-element/build/document-register-element.patched';
+/*eslint-enable */
 import {install as installDocContains} from '../polyfills/document-contains';
 import {
   install as installDOMTokenListToggle,
