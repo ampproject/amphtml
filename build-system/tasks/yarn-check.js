@@ -25,7 +25,7 @@ const util = require('gulp-util');
 /**
  * Wrapper around yarn check
  */
-function yarnCheck() {
+function yarnCheck(done) {
   let integrityCmd = 'yarn check --integrity';
   if (getStderr(integrityCmd).trim() != "") {
     util.log(util.colors.red('ERROR:'), 'The packages in your local',
@@ -33,6 +33,7 @@ function yarnCheck() {
         util.colors.cyan('yarn'), 'to update them.');
     const verifyTreeCmd = 'yarn check --verify-tree'
     exec(verifyTreeCmd);
+    done('Packages in node_modules are out of date. Run "yarn" to update.');
   } else {
     util.log(util.colors.green('All packages in your local',
         util.colors.cyan('node_modules'), 'are up to date.'));
