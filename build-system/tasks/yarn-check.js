@@ -36,6 +36,7 @@ function yarnCheck(done) {
   } else {
     util.log(util.colors.green('All packages in your local',
         util.colors.cyan('node_modules'), 'are up to date.'));
+    done();
   }
 }
 
