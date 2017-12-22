@@ -154,7 +154,7 @@ let sraRequests = null;
 let TroubleshootData;
 
 /** @private {?JsonObject} */
-let windowLocationQueryParameters = null;
+let windowLocationQueryParameters;
 
 /**
  * Array of functions used to combine block level request parameters for SRA
@@ -538,6 +538,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return {resolver, rejector, promise};
   }
 
+  /** @return {!Object<string,string|boolean|number>} */
+  getPageParameters_() {
+    return Object.assign(PAGE_LEVEL_PARAMS_, {
+      'gct': this.getLocationQueryParameterValue('google_preview') || null,
+    });
+  }
+
   /**
    * Constructs block-level url parameters with side effect of setting
    * size_, jsonTargeting_, and adKey_ fields.
@@ -592,6 +599,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'rc': this.refreshCount_ || null,
       'frc': Number(this.fromResumeCallback) || null,
       'fluid': this.isFluid_ ? 'height' : null,
+      'gct': this.getLocationQueryParameterValue('google_preview') || null,
     }, googleBlockParameters(this));
   }
 
@@ -639,16 +647,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         .then(results => {
           const rtcParams = this.mergeRtcResponses_(results[0]);
           this.identityToken = results[1];
-          const pageParams = Object.assign(
-              PAGE_LEVEL_PARAMS_,
-              {
-                'gct': this.getLocationQueryParameterValue('google_preview') ||
-                    null,
-              });
           return googleAdUrl(
               this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
                   this.getBlockParameters_(), rtcParams,
-                  this.buildIdentityParams_(), pageParams));
+                  this.buildIdentityParams_(), this.getPageParameters_()));
         });
     this.troubleshootData_.adUrl = urlPromise;
     return urlPromise;
@@ -1404,13 +1406,14 @@ export function getNetworkId(element) {
  */
 function constructSRARequest_(win, doc, instances) {
   // TODO(bradfrizzell): Need to add support for RTC.
+  dev().assert(instances && instances.length);
   const startTime = Date.now();
   return googlePageParameters(win, doc, startTime)
       .then(pageLevelParameters => {
         const blockParameters = constructSRABlockParameters(instances);
         return truncAndTimeUrl(DOUBLECLICK_BASE_URL,
-            Object.assign(
-                blockParameters, pageLevelParameters, PAGE_LEVEL_PARAMS_),
+            Object.assign(blockParameters, pageLevelParameters,
+                instances[0].getPageParameters_()),
             startTime);
       });
 }
