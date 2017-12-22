@@ -186,9 +186,7 @@ class AmpVentunoPlayer extends AMP.BaseElement {
 
 		dev().assert(this.pubid_);
 		dev().assert(this.slotid_);
-
-		// let src = `https://vensecure.ventunotech.com/embed/vtnEmbed.html?pType=${pType}&pubKey=${pubid}&slot=${slotid}`;
-		// let src = `http://staging.ventunotech.com/newPlayer/dev/amp/vtnEmbed.html?pFrom=amp&pType=${pType}&pubKey=${pubid}&slot=${slotid}`;
+		
 		let src = `https://venwebsecure.ventunotech.com/embed/embedPlayer.html?pFrom=amp&pType=${pType}&pubKey=${pubid}&slot=${slotid}`;
 
 		if (this.title_) {
