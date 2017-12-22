@@ -665,10 +665,6 @@ describes.realWin('amp-sidebar 0.1 version', {
 
   describe('amp-sidebar - toolbars in amp-sidebar', () => {
 
-    beforeEach(() => {
-      toggleExperiment(win, 'amp-sidebar toolbar', true);
-    });
-
     // Tests for amp-sidebar 1.0
     it('should not create toolbars without <nav toolbar />', () => {
       return getAmpSidebar().then(sidebarElement => {
