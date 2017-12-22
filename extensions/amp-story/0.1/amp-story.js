@@ -31,9 +31,9 @@ import {AmpStoryVariableService} from './variable-service';
 import {AmpStoryBackground} from './background';
 import {Bookend} from './bookend';
 import {CSS} from '../../../build/amp-story-0.1.css';
-import {EventType} from './events';
+import {EventType, dispatch} from './events';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {NavigationState, StateChangeType} from './navigation-state';
+import {NavigationState} from './navigation-state';
 import {SystemLayer} from './system-layer';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
@@ -137,7 +137,7 @@ export class AmpStory extends AMP.BaseElement {
     super(element);
 
     /** @private {!NavigationState} */
-    this.navigationState_ = new NavigationState();
+    this.navigationState_ = new NavigationState(element);
 
     /**
      * Whether entering into fullscreen automatically on navigation is enabled.
@@ -895,8 +895,6 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     this.buildBookend_().then(() => {
-      this.navigationState_.fire(StateChangeType.BOOKEND_ENTER);
-
       this.systemLayer_.hideDeveloperLog();
 
       this.activePage_.pause();
@@ -920,8 +918,6 @@ export class AmpStory extends AMP.BaseElement {
     if (!this.bookend_.isActive()) {
       return;
     }
-
-    this.navigationState_.fire(StateChangeType.BOOKEND_EXIT);
 
     this.activePage_.setActive(true);
 
@@ -1207,7 +1203,11 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   replay_() {
-    this.hideBookend_();
+    if (this.bookend_.isActive()) {
+      // Dispaching event instead of calling method directly so that all
+      // listeners can respond.
+      dispatch(this.element, EventType.CLOSE_BOOKEND);
+    }
     this.switchTo_(dev().assertElement(this.pages_[0].element).id);
   }
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {EventType} from './events';
 import {Observable} from '../../../src/observable';
 
 
@@ -35,9 +36,29 @@ export let StateChangeEventDef;
  * State store to decouple navigation changes from consumers.
  */
 export class NavigationState {
-  constructor() {
+  /** @param {!Element} storyElement */
+  constructor(storyElement) {
     /** @private {!Observable<StateChangeEventDef>} */
     this.observable_ = new Observable();
+
+    /** @private {boolean} */
+    this.isBookendShown_ = false;
+
+    this.atachEvents_(storyElement);
+  }
+
+  /**
+   * @param {!Element} storyElement
+   * @private
+   */
+  atachEvents_(storyElement) {
+    storyElement.addEventListener(EventType.SHOW_BOOKEND, () => {
+      this.fire_(StateChangeType.BOOKEND_ENTER);
+    });
+
+    storyElement.addEventListener(EventType.CLOSE_BOOKEND, () => {
+      this.fire_(StateChangeType.BOOKEND_EXIT);
+    });
   }
 
   /** @param {!function(!StateChangeEventDef):void} stateChangeFn */
@@ -46,32 +67,21 @@ export class NavigationState {
   }
 
   /**
-   * @param {number} index
+   * @param {number} pageIndex
    * @param {number} totalPages
    * @param {string=} opt_pageId
    */
   // TODO(alanorozco): pass whether change was automatic or on user action
-  updateActivePage(index, totalPages, opt_pageId) {
-    const changeValue = {
-      pageIndex: index,
-      totalPages,
-    };
-
-    if (opt_pageId) {
-      changeValue.pageId = opt_pageId;
-    }
-
-    this.fire(StateChangeType.ACTIVE_PAGE, changeValue);
+  updateActivePage(pageIndex, totalPages, opt_pageId) {
+    this.fire_(StateChangeType.ACTIVE_PAGE,
+        {pageIndex, totalPages, pageId: opt_pageId});
   }
 
   /**
-   * @param {!StateChangeType} changeType
+   * @param {!StateChangeType} type
    * @param {*=} opt_changeValue
    */
-  fire(changeType, opt_changeValue) {
-    this.observable_.fire({
-      type: changeType,
-      value: opt_changeValue,
-    });
+  fire_(type, opt_changeValue) {
+    this.observable_.fire({type, value: opt_changeValue});
   }
 }
