@@ -114,7 +114,7 @@ Alternatively, pressing the escape key on the keyboard will also close the sideb
 <button on='tap:sidebar1.close'>x</button>
 ```
 
-### Toolbar (Experimental)
+### Toolbar
 
 You can create a `toolbar` element that displays in the `<body>` by specifying the `toolbar` attribute with a media query and a `toolbar-target` attribute with an element id on a `<nav>` element that is a child of  `<amp-sidebar>`. The `toolbar` duplicates the `<nav>` element and its children and appends the element into the `toolbar-target` element.
 
