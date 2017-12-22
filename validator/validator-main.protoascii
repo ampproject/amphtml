@@ -3247,6 +3247,7 @@ tags {
   spec_name: "FORM > DIV [submit-success]"
   mandatory_parent: "FORM"
   attrs: { name: "align" }
+  attrs: { name: "template" }
   attrs: {
     name: "submit-success"
     mandatory: true
@@ -3271,6 +3272,7 @@ tags {
   spec_name: "FORM > DIV [submit-error]"
   mandatory_parent: "FORM"
   attrs: { name: "align" }
+  attrs: { name: "template" }
   attrs: {
     name: "submit-error"
     mandatory: true
