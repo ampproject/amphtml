@@ -17,7 +17,6 @@
 import {FrameOverlayManager} from './frame-overlay-manager';
 import {PositionObserver} from './position-observer';
 import {
-  canInspectWindow,
   serializeMessage,
   deserializeMessage,
   MessageType,
@@ -225,27 +224,26 @@ export class InaboxMessagingHost {
       return this.iframeMap_[sentinel];
     }
 
-    // Walk up on the window tree and verify that there is no cross-domain
-    // frame in between the source of the postMessage and the host doc.
-    // If there is, the host doc will not be able to accurately measure
-    // the creative's positions in the page, so return null.
-    // Limit to 10 iterations.
-    let tempWin = source.parent;
-    for (let i = 0; i < 10; i++) {
-      if (tempWin == this.win_ || tempWin == this.win_.top) {
-        break;
-      }
-      if (!canInspectWindow(tempWin)) {
-        return null;
-      }
-      tempWin = tempWin.parent;
-    }
-
     // Verify that the source of the postMessage corresponds to one of
     // the iframes that was registered.
     for (let i = 0; i < this.iframes_.length; i++) {
       const iframe = this.iframes_[i];
       if (iframe.contentWindow === source) {
+	  // Walk up on the window tree and verify that there is no cross-domain
+	  // frame in between the source of the postMessage and the host doc.
+	  // If there is, the host doc will not be able to accurately measure
+	  // the creative's positions in the page, so return null.
+	  // Limit to 10 iterations.
+	  let tempWin = source.parent;
+	  for (let i = 0; i < 10; i++) {
+	      if (tempWin == this.win_ || tempWin == this.win_.top) {
+		  break;
+	      }
+	      if (!canInspectWindow(tempWin)) {
+		  return null;
+	      }
+	      tempWin = tempWin.parent;
+	  }
         // Cache the found iframe with its sentinel.
         this.iframeMap_[sentinel] = iframe;
         return iframe;
@@ -254,3 +252,34 @@ export class InaboxMessagingHost {
     return null;
   }
 }
+
+/**
+ * Returns true if win's properties can be accessed and win is defined.
+ * This functioned is used to determine if a window is cross-domained
+ * from the perspective of the current window.
+ * @param {Window} win
+ * @return {boolean}
+ */
+function canInspectWindow(win) {
+  try {
+    return !!win && win.location.href != null && canTouchProperty(win, 'test');
+  } catch (err) {
+    return false;
+  }
+}
+
+/**
+ * Returns whether we can touch the property prop on the object obj.
+ * @param {Object} obj
+ * @param {string} prop
+ * @return {boolean}
+ */
+function canTouchProperty(obj, prop) {
+  try {
+    const /* eslint no-unused-vars: 0 */ unused = obj[prop];
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
