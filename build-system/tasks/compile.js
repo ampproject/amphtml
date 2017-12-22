@@ -328,17 +328,12 @@ function compile(entryModuleFilenames, outputDir,
         // respective top level polyfills.js files.
         rewrite_polyfills: false,
         externs,
-        js_module_root: [
-          'node_modules/',
-          'build/fake-module/',
-          'build/fake-polyfills/',
-        ],
         entry_point: entryModuleFilenames,
-        //process_common_js_modules: true,
+        process_common_js_modules: true,
         module_resolution: 'NODE',
         // This strips all files from the input set that aren't explicitly
         // required.
-        only_closure_dependencies: true,
+        // only_closure_dependencies: true,
         output_wrapper: wrapper,
         create_source_map: intermediateFilename + '.map',
         source_map_location_mapping:
