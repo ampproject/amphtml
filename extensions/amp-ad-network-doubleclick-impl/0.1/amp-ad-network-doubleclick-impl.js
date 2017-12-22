@@ -116,13 +116,6 @@ const RTC_ATI_ENUM = {
   RTC_FAILURE: 3,
 };
 
-/** @private @const {!Object<string,string>} */
-const PAGE_LEVEL_PARAMS_ = {
-  'gdfp_req': '1',
-  'sfv': DEFAULT_SAFEFRAME_VERSION,
-  'u_sd': window.devicePixelRatio,
-};
-
 /** @visibleForTesting @const {string} */
 export const CORRELATOR_CLEAR_EXP_NAME = 'dbclk-correlator-clear';
 
@@ -540,9 +533,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @return {!Object<string,string|boolean|number>} */
   getPageParameters_() {
-    return Object.assign(PAGE_LEVEL_PARAMS_, {
+    return {
+      'gdfp_req': '1',
+      'sfv': DEFAULT_SAFEFRAME_VERSION,
+      'u_sd': this.win.devicePixelRatio,
       'gct': this.getLocationQueryParameterValue('google_preview') || null,
-    });
+    };
   }
 
   /**
@@ -1379,9 +1375,14 @@ AMP.extension(TAG, '0.1', AMP => {
 });
 
 
-/** @visibileForTesting */
+/** @visibleForTesting */
 export function resetSraStateForTesting() {
   sraRequests = null;
+}
+
+/** @visibleForTesting */
+export function resetLocationQueryParametersForTesting() {
+  windowLocationQueryParameters = null;
 }
 
 /**
@@ -1403,15 +1404,15 @@ export function getNetworkId(element) {
  * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instances
  * @return {!Promise<string>} SRA request URL
  */
-function constructSRARequest_(win, doc, instances) {
+export function constructSRARequest_(win, doc, instances) {
   // TODO(bradfrizzell): Need to add support for RTC.
   dev().assert(instances && instances.length);
   const startTime = Date.now();
   return googlePageParameters(win, doc, startTime)
-      .then(pageLevelParameters => {
+      .then(googPageLevelParameters => {
         const blockParameters = constructSRABlockParameters(instances);
         return truncAndTimeUrl(DOUBLECLICK_BASE_URL,
-            Object.assign(blockParameters, pageLevelParameters,
+            Object.assign(blockParameters, googPageLevelParameters,
                 instances[0].getPageParameters_()),
             startTime);
       });

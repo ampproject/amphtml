@@ -33,6 +33,7 @@ import {
   CORRELATOR_CLEAR_EXP_BRANCHES,
   CORRELATOR_CLEAR_EXP_NAME,
   SAFEFRAME_ORIGIN,
+  resetLocationQueryParametersForTesting,
 } from '../amp-ad-network-doubleclick-impl';
 import {
   DOUBLECLICK_A4A_EXPERIMENT_NAME,
@@ -109,11 +110,13 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
   let impl;
 
   beforeEach(() => {
+    resetLocationQueryParametersForTesting();
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
   });
 
+  afterEach(() => resetLocationQueryParametersForTesting);
 
   describe('#isValidElement', () => {
     beforeEach(() => {
@@ -576,9 +579,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
     });
     it('should have google_preview parameter', () => {
       sandbox.stub(impl, 'getLocationQueryParameterValue')
-          .withArgs('google_preview').returns({'google_preview': 'abcdef'});
+          .withArgs('google_preview').returns('abcdef');
       new AmpAd(element).upgradeCallback();
-      expect(impl.getAdUrl()).to.eventually.contain('&gct=abcdef&');
+      expect(impl.getAdUrl()).to.eventually.contain('&gct=abcdef');
     });
     it('should cache getLocationQueryParameterValue', () => {
       impl.win = {location: {search: '?foo=bar'}};
