@@ -83,7 +83,7 @@ import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {isCancellation} from '../../../src/error';
-import {isSecureUrl, parseUrl} from '../../../src/url';
+import {isSecureUrl, parseUrl, parseQueryString} from '../../../src/url';
 import {VisibilityState} from '../../../src/visibility-state';
 import {
   isExperimentOn,
@@ -152,6 +152,9 @@ let sraRequests = null;
       slotIndex: string,
     }} */
 let TroubleshootData;
+
+/** @private {?JsonObject} */
+let windowLocationQueryParameters = null;
 
 /**
  * Array of functions used to combine block level request parameters for SRA
@@ -636,10 +639,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         .then(results => {
           const rtcParams = this.mergeRtcResponses_(results[0]);
           this.identityToken = results[1];
+          const pageParams = Object.assign(
+              PAGE_LEVEL_PARAMS_,
+              {
+                'gct': this.getLocationQueryParameterValue('google_preview') ||
+                    null,
+              });
           return googleAdUrl(
               this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
                   this.getBlockParameters_(), rtcParams,
-                  this.buildIdentityParams_(), PAGE_LEVEL_PARAMS_));
+                  this.buildIdentityParams_(), pageParams));
         });
     this.troubleshootData_.adUrl = urlPromise;
     return urlPromise;
@@ -1228,6 +1237,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getNonAmpCreativeRenderingMethod(headerValue) {
     return this.isFluid_ ? XORIGIN_MODE.SAFEFRAME :
       super.getNonAmpCreativeRenderingMethod(headerValue);
+  }
+
+
+  /**
+   * Note that location is parsed once on first access and cached.
+   * @param {string} parameterName
+   * @return {string|undefined} parameter value from window.location.search
+   * @visibleForTesting
+   */
+  getLocationQueryParameterValue(parameterName) {
+    windowLocationQueryParameters = windowLocationQueryParameters ||
+        parseQueryString((this.win.location && this.win.location.search) || '');
+    return windowLocationQueryParameters[parameterName];
   }
 
   /** @override */

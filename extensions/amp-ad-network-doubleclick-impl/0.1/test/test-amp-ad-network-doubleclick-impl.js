@@ -574,6 +574,18 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         });
       });
     });
+    it('should have google_preview parameter', () => {
+      sandbox.stub(impl, 'getLocationQueryParameterValue')
+          .withArgs('google_preview').returns({'google_preview': 'abcdef'});
+      new AmpAd(element).upgradeCallback();
+      expect(impl.getAdUrl()).to.eventually.contain('&gct=abcdef&');
+    });
+    it('should cache getLocationQueryParameterValue', () => {
+      impl.win = {location: {search: '?foo=bar'}};
+      expect(impl.getLocationQueryParameterValue('foo')).to.equal('bar');
+      impl.win.location.search = '?foo=bar2';
+      expect(impl.getLocationQueryParameterValue('foo')).to.equal('bar');
+    });
     // TODO(bradfrizzell, #12476): Make this test work with sinon 4.0.
     it.skip('has correct rc and ifi after refresh', () => {
       // We don't really care about the behavior of the following methods, so
