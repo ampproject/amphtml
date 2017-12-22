@@ -23,7 +23,6 @@ import {px, setStyle} from '../../style';
 import {waitForBody} from '../../dom';
 import {ViewportBindingDef} from './viewport-binding-def';
 import {isExperimentOn} from '../../experiments';
-import {installLayersServiceForDoc} from '../layers-impl';
 
 const TAG_ = 'Viewport';
 
@@ -39,14 +38,12 @@ const TAG_ = 'Viewport';
 export class ViewportBindingIosEmbedWrapper_ {
 
   /**
-   * @param {!../ampdoc-impl.AmpDoc} ampdoc
+   * @param {!Window} win
    */
-  constructor(ampdoc) {
-    /** @const {!../ampdoc-impl.AmpDoc} */
-    this.ampdoc = ampdoc;
-
+  constructor(win) {
     /** @const {!Window} */
-    this.win = ampdoc.win;
+    this.win = win;
+
     const topClasses = this.win.document.documentElement.className;
     this.win.document.documentElement.className = '';
     this.win.document.documentElement.classList.add('i-amphtml-ios-embed');
@@ -119,10 +116,6 @@ export class ViewportBindingIosEmbedWrapper_ {
     Object.defineProperty(doc, 'body', {
       get: () => body,
     });
-
-    if (this.useLayers_) {
-      installLayersServiceForDoc(this.ampdoc, this.wrapper_);
-    }
 
     // TODO(dvoytenko): test if checkAndFixIosScrollfreezeBug is required.
 
@@ -292,5 +285,10 @@ export class ViewportBindingIosEmbedWrapper_ {
     if (opt_event) {
       this.scrollObservable_.fire();
     }
+  }
+
+  /** @override */
+  getScrollingElement() {
+    return this.wrapper_;
   }
 }

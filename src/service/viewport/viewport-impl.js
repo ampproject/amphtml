@@ -41,6 +41,7 @@ import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {
   ViewportBindingIosEmbedWrapper_,
 } from './viewport-binding-ios-embed-wrapper';
+import {installLayersServiceForDoc} from '../layers-impl';
 
 
 const TAG_ = 'Viewport';
@@ -158,6 +159,11 @@ export class Viewport {
 
     /** @private @const {boolean} */
     this.useLayers_ = isExperimentOn(this.ampdoc.win, 'layers');
+    if (this.useLayers_) {
+      this.layersSetupDone_ = true;
+      installLayersServiceForDoc(this.ampdoc,
+          this.binding_.getScrollingElement());
+    }
 
     /** @private @const {!FixedLayer} */
     this.fixedLayer_ = new FixedLayer(
@@ -1119,7 +1125,7 @@ function createViewport(ampdoc) {
   let binding;
   if (ampdoc.isSingleDoc() &&
       getViewportType(ampdoc.win, viewer) == ViewportType.NATURAL_IOS_EMBED) {
-    binding = new ViewportBindingIosEmbedWrapper_(ampdoc);
+    binding = new ViewportBindingIosEmbedWrapper_(ampdoc.win);
   } else {
     binding = new ViewportBindingNatural_(ampdoc, viewer);
   }
