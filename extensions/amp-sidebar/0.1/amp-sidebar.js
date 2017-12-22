@@ -22,16 +22,13 @@ import {Services} from '../../../src/services';
 import {Toolbar} from './toolbar';
 import {closestByTag, tryFocus, isRTL} from '../../../src/dom';
 import {dev} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
 import {setStyles, toggle} from '../../../src/style';
 import {createCustomEvent} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {removeFragment, parseUrl} from '../../../src/url';
 import {toArray} from '../../../src/types';
-
 /** @const */
 const TAG = 'amp-sidebar toolbar';
-
 /** @const */
 const ANIMATION_TIMEOUT = 350;
 
@@ -72,9 +69,6 @@ export class AmpSidebar extends AMP.BaseElement {
 
     /** @private {Array} */
     this.toolbars_ = [];
-
-    /** @private {boolean} */
-    this.isToolbarExperimentEnabled_ = isExperimentOn(this.win, TAG);
 
     const platform = Services.platformFor(this.win);
 
@@ -123,21 +117,20 @@ export class AmpSidebar extends AMP.BaseElement {
       this.element.setAttribute('side', this.side_);
     }
 
-    if (this.isToolbarExperimentEnabled_) {
-      const ampdoc = this.getAmpDoc();
-      // Get the toolbar attribute from the child navs.
-      const toolbarElements =
-        toArray(this.element.querySelectorAll('nav[toolbar]'));
+    const ampdoc = this.getAmpDoc();
+    // Get the toolbar attribute from the child navs.
+    const toolbarElements =
+      toArray(this.element.querySelectorAll('nav[toolbar]'));
 
-      toolbarElements.forEach(toolbarElement => {
-        try {
-          this.toolbars_.push(new Toolbar(toolbarElement, this.vsync_,
-              ampdoc));
-        } catch (e) {
-          this.user().error(TAG, 'Failed to instantiate toolbar', e);
-        }
-      });
-    }
+    toolbarElements.forEach(toolbarElement => {
+      try {
+        this.toolbars_.push(new Toolbar(toolbarElement, this.vsync_,
+            ampdoc));
+      } catch (e) {
+        this.user().error(TAG, 'Failed to instantiate toolbar', e);
+      }
+    });
+
 
     if (this.isIos_) {
       this.fixIosElasticScrollLeak_();
@@ -213,14 +206,12 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    if (this.isToolbarExperimentEnabled_) {
-      this.getAmpDoc().whenReady().then(() => {
-        // Check our toolbars for changes
-        this.toolbars_.forEach(toolbar => {
-          toolbar.onLayoutChange(() => this.onToolbarOpen_());
-        });
+    this.getAmpDoc().whenReady().then(() => {
+      // Check our toolbars for changes
+      this.toolbars_.forEach(toolbar => {
+        toolbar.onLayoutChange(() => this.onToolbarOpen_());
       });
-    }
+    });
   }
 
   /**
