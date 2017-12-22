@@ -346,5 +346,26 @@ describes.realWin('inabox-host:messaging', {}, env => {
     it('should return null if frame is not registered', () => {
       expect(host.getFrameElement_(creativeWinMock, sentinel)).to.be.null;
     });
+
+    it('should return null if frame is more than 10 levels deep', () => {
+      const makeNestedFrame = parentFrame => {
+        return {
+	    parent: parentFrame,
+	    location: {
+            href: 'foo',
+	    },
+        };
+      };
+      const topFrame = {};
+      let source = topFrame;
+      for (let i = 0; i < 15 ; i++) {
+        source = makeNestedFrame(source);
+      }
+      creativeIframeMock = {
+        contentWindow: source,
+      };
+      host.iframes_.push(creativeIframeMock);
+      expect(host.getFrameElement_(source, sentinel)).to.be.null;
+    });
   });
 });
