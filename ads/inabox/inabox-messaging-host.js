@@ -261,24 +261,10 @@ export class InaboxMessagingHost {
  */
 function canInspectWindow(win) {
   try {
-    return win.location.href != null && canTouchProperty(win, 'test');
-  } catch (err) {
-    return false;
-  }
-}
-
-/**
- * Returns whether we can touch the property prop on the object obj.
- * @param {Object} obj
- * @param {string} prop
- * @return {boolean}
- */
-function canTouchProperty(obj, prop) {
-  try {
-    const /* eslint no-unused-vars: 0 */ unused = obj[prop];
+    const /* eslint no-unused-vars: 0 */ unused =
+      !!win.location.href && win['test'];
     return true;
-  } catch (err) {
+  } catch (unusedErr) {
     return false;
   }
 }
-
