@@ -18,7 +18,6 @@
 import {KeyCodes} from '../../../../src/utils/key-codes';
 import {Services} from '../../../../src/services';
 import {assertScreenReaderElement} from '../../../../testing/test-helper';
-import {toggleExperiment} from '../../../../src/experiments';
 import '../amp-sidebar';
 import * as lolex from 'lolex';
 
@@ -627,7 +626,8 @@ describes.realWin('amp-sidebar 0.1 version', {
     });
 
     // Accessibility
-    it('should return focus to opening element after close', () => {
+    // TODO(cathyxz, 12479)
+    it.skip('should return focus to opening element after close', () => {
       return getAmpSidebar().then(sidebarElement => {
         const impl = sidebarElement.implementation_;
         impl.vsync_ = {
@@ -663,10 +663,6 @@ describes.realWin('amp-sidebar 0.1 version', {
   });
 
   describe('amp-sidebar - toolbars in amp-sidebar', () => {
-
-    beforeEach(() => {
-      toggleExperiment(win, 'amp-sidebar toolbar', true);
-    });
 
     // Tests for amp-sidebar 1.0
     it('should not create toolbars without <nav toolbar />', () => {
