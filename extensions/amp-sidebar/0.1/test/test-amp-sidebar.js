@@ -18,7 +18,6 @@
 import {KeyCodes} from '../../../../src/utils/key-codes';
 import {Services} from '../../../../src/services';
 import {assertScreenReaderElement} from '../../../../testing/test-helper';
-import {toggleExperiment} from '../../../../src/experiments';
 import '../amp-sidebar';
 import * as lolex from 'lolex';
 
@@ -664,10 +663,6 @@ describes.realWin('amp-sidebar 0.1 version', {
   });
 
   describe('amp-sidebar - toolbars in amp-sidebar', () => {
-
-    beforeEach(() => {
-      toggleExperiment(win, 'amp-sidebar toolbar', true);
-    });
 
     // Tests for amp-sidebar 1.0
     it('should not create toolbars without <nav toolbar />', () => {
