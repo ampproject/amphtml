@@ -17,7 +17,6 @@
 
 const exec = require('../exec').exec;
 const getStderr = require('../exec').getStderr;
-const getStdout = require('../exec').getStdout;
 const gulp = require('gulp-help')(require('gulp'));
 const util = require('gulp-util');
 
