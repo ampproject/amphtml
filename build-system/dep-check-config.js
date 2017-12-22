@@ -269,4 +269,25 @@ exports.rules = [
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
     ],
   },
+
+  // Delayed fetch for Doubleclick will be deprecated on March 29, 2018.
+  // Doubleclick.js will be deleted from the repository at that time.
+  // Please see https://github.com/ampproject/amphtml/issues/11834
+  // for more information.
+  {
+    mustNotDependOn: [
+      'ads/google/doubleclick.js',
+    ],
+    whitelist: [
+      'ads/ix.js->ads/google/doubleclick.js',
+      'ads/medianet.js->ads/google/doubleclick.js',
+      'ads/navegg.js->ads/google/doubleclick.js',
+      'ads/openx.js->ads/google/doubleclick.js',
+      'ads/pulsepoint.js->ads/google/doubleclick.js',
+      'ads/rubicon.js->ads/google/doubleclick.js',
+      'ads/yieldbot.js->ads/google/doubleclick.js',
+      'ads/criteo.js->ads/google/doubleclick.js',
+      '3p/integration.js->ads/google/doubleclick.js',
+    ],
+  },
 ];
