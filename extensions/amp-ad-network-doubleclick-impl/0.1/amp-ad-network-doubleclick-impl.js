@@ -599,7 +599,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'rc': this.refreshCount_ || null,
       'frc': Number(this.fromResumeCallback) || null,
       'fluid': this.isFluid_ ? 'height' : null,
-      'gct': this.getLocationQueryParameterValue('google_preview') || null,
     }, googleBlockParameters(this));
   }
 
