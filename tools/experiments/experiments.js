@@ -249,13 +249,6 @@ const EXPERIMENTS = [
     name: 'IMA-integrated Video Player',
   },
   {
-    id: 'amp-sidebar 1.0',
-    name: 'Amp sidebar 1.0 extension',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9803',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-      'amp-sidebar/1.0/amp-sidebar-1.0.md',
-  },
-  {
     id: 'user-error-reporting',
     name: 'Report error to publishers',
     spec: 'https://github.com/ampproject/amphtml/issues/6415',
