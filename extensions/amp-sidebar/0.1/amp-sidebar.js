@@ -93,6 +93,9 @@ export class AmpSidebar extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.openerElement_ = null;
+
+    /** @private {!number} */
+    this.initialScrollY_ = 0;
   }
 
   /** @override */
@@ -265,7 +268,6 @@ export class AmpSidebar extends AMP.BaseElement {
         this.openMask_();
         this.element.setAttribute('open', '');
         this.boundOnAnimationEnd_();
-        this.element.setAttribute('aria-hidden', 'false');
       });
     });
     this.getHistory_().push(this.close_.bind(this)).then(historyId => {
@@ -273,6 +275,7 @@ export class AmpSidebar extends AMP.BaseElement {
     });
     if (opt_invocation) {
       this.openerElement_ = opt_invocation.source;
+      this.initialScrollY_ = window./*REVIEW*/scrollY;
     }
   }
 
@@ -289,7 +292,6 @@ export class AmpSidebar extends AMP.BaseElement {
       this.closeMask_();
       this.element.removeAttribute('open');
       this.boundOnAnimationEnd_();
-      this.element.setAttribute('aria-hidden', 'true');
     });
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
@@ -381,21 +383,21 @@ export class AmpSidebar extends AMP.BaseElement {
       this.scheduleResume(children);
       tryFocus(this.element);
       this.triggerEvent_(SidebarEvents.OPEN);
+      this.element.setAttribute('aria-hidden', 'false');
     } else {
       // On close sidebar
       this.vsync_.mutate(() => {
         toggle(this.element, /* display */false);
         this.schedulePause(this.getRealChildren());
-        // TODO(cathyxz, 12479): Re-enable with updated heuristic on whether
-        // returning focus to opener is the right choice or not. Current
-        // issue is that if an item in sidebar has a .focus, .scrollTo
-        // or just local # navigation before closing the sidebar, moving the
-        // focus would override their effects.
-        // Return focus to source element if applicable
-        // if (this.openerElement_) {
-        //   tryFocus(this.openerElement_);
-        // }
+        const sidebarIsActive =
+          this.element.querySelectorAll(':focus').length > 0;
+        const scrollDidNotChange =
+          (window./*REVIEW*/scrollY == this.initialScrollY_);
+        if (this.openerElement_ && sidebarIsActive && scrollDidNotChange) {
+          tryFocus(this.openerElement_);
+        }
         this.triggerEvent_(SidebarEvents.CLOSE);
+        this.element.setAttribute('aria-hidden', 'true');
       });
     }
   }
