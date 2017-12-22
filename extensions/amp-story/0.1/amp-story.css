@@ -259,6 +259,7 @@ amp-story-page[active] .i-amphtml-story-page-loading-screen {
   display: flex !important;
   margin: 0 !important;
   padding: 0 !important;
+  list-style: none !important;
 }
 
 .i-amphtml-story-page-loading-dot {
@@ -268,10 +269,8 @@ amp-story-page[active] .i-amphtml-story-page-loading-screen {
   list-style-type: none !important;
   margin: 0 8px !important;
   width: 8px !important;
-}
-
-.i-amphtml-story-page-loading-dot {
-  animation: 1s linear infinite alternate i-amphtml-page-dot-grow;
+  padding: 0 !important;
+  animation: 1s linear infinite alternate i-amphtml-page-dot-grow !important;
 }
 
 .i-amphtml-story-page-loading-dot:nth-child(1) {
@@ -284,6 +283,11 @@ amp-story-page[active] .i-amphtml-story-page-loading-screen {
 
 .i-amphtml-story-page-loading-dot:nth-child(3) {
   animation-delay: 1.0s !important;
+}
+
+.i-amphtml-story-page-loading-dot::before,
+.i-amphtml-story-page-loading-dot::after {
+  display: none !important;
 }
 
 @keyframes i-amphtml-page-dot-grow {
@@ -919,24 +923,24 @@ amp-story[standalone] .i-amphtml-story-developer-log {
 }
 
 amp-story[standalone] .i-amphtml-story-no-rotation-overlay {
-  position: fixed!important;
-  z-index: 9999!important;
-  background-color: #000!important;
-  top:0!important;
-  left:0!important;
-  width:100%!important;
-  height: 100%!important;
-  align-items: center!important;
-  justify-content: center!important;
-  display: none!important;
+  position: fixed !important;
+  z-index: 9999 !important;
+  background-color: #000 !important;
+  top:0 !important;
+  left:0 !important;
+  width:100% !important;
+  height: 100% !important;
+  align-items: center !important;
+  justify-content: center !important;
+  display: none !important;
 }
 
 [desktop] .i-amphtml-story-no-rotation-overlay {
-  display: none!important;
+  display: none !important;
 }
 
 amp-story[standalone].i-amphtml-story-landscape .i-amphtml-story-no-rotation-overlay {
-  display: flex!important;
+  display: flex !important;
 }
 
 .i-amphtml-story-no-rotation-overlay{

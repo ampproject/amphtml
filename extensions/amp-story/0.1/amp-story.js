@@ -54,7 +54,7 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {AudioManager, upgradeBackgroundAudio} from './audio';
-import {setStyle, setImportantStyles} from '../../../src/style';
+import {setStyle, setImportantStyles, resetStyles} from '../../../src/style';
 import {findIndex} from '../../../src/utils/array';
 import {ActionTrust} from '../../../src/action-trust';
 import {getMode} from '../../../src/mode';
@@ -148,6 +148,16 @@ const LANDSCAPE_ORIENTATION_WARNING = [
   },
 ];
 
+
+/**
+ * Selector for elements that should be hidden when the bookend is open on
+ * desktop view.
+ * @private @const {string}
+ */
+const HIDE_ON_BOOKEND_SELECTOR =
+    'amp-story-page, .i-amphtml-story-system-layer';
+
+
 export class AmpStory extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -204,10 +214,13 @@ export class AmpStory extends AMP.BaseElement {
     this.background_ = null;
 
     /** @private {?Element} */
-    this.nextButton_ = null;
+    this.prevButton_ = null;
 
     /** @private {?Element} */
-    this.prevButton_ = null;
+    this.nextButtonContainer_ = null;
+
+    /** @private {?Element} */
+    this.prevButtonContainer_ = null;
 
     /** @private {?Element} */
     this.topBar_ = null;
@@ -429,17 +442,20 @@ export class AmpStory extends AMP.BaseElement {
         renderSimpleTemplate(this.win.document, PAGE_SWITCH_BUTTONS),
         this.element.firstChild);
 
-    this.nextButton_ =
-        this.element.querySelector('.i-amphtml-story-button-next');
-
     this.prevButton_ =
         this.element.querySelector('.i-amphtml-story-button-prev');
 
-    this.nextButton_.addEventListener('click', () => {
+    this.nextButtonContainer_ = this.element.querySelector(
+        '.i-amphtml-story-button-container.next-container');
+
+    this.prevButtonContainer_ = this.element.querySelector(
+        '.i-amphtml-story-button-container.prev-container');
+
+    this.nextButtonContainer_.addEventListener('click', () => {
       this.next_();
     });
 
-    this.prevButton_.addEventListener('click', () => {
+    this.prevButtonContainer_.addEventListener('click', () => {
       this.previous_();
     });
   }
@@ -810,7 +826,7 @@ export class AmpStory extends AMP.BaseElement {
   onResize() {
     if (this.isDesktop_()) {
       this.element.setAttribute('desktop','');
-      if (!this.nextButton_) {
+      if (!this.nextButtonContainer_) {
         this.buildButtons_();
       }
       if (!this.topBar_) {
@@ -911,12 +927,13 @@ export class AmpStory extends AMP.BaseElement {
 
       this.activePage_.pause();
 
+      this.toggleElementsOnBookend_(/* display */ false);
+
       this.exitFullScreen_();
 
-      this.vsync_.mutate(() => {
-        this.element.classList.add('i-amphtml-story-bookend-active');
-        this.bookend_.show();
-      });
+      this.element.classList.add('i-amphtml-story-bookend-active');
+
+      this.bookend_.show();
     });
   }
 
@@ -931,13 +948,39 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     this.activePage_.setActive(true);
-    this.bookend_.hide();
 
-    this.vsync_.mutate(() => {
-      this.element.classList.remove('i-amphtml-story-bookend-active');
-    });
+    this.toggleElementsOnBookend_(/* display */ true);
+
+    this.element.classList.remove('i-amphtml-story-bookend-active');
+
+    this.bookend_.hide();
   }
 
+
+  /**
+   * Toggle content when bookend is opened/closed.
+   * @param {boolean} display
+   * @private
+   */
+  toggleElementsOnBookend_(display) {
+    if (!this.isDesktop_()) {
+      return;
+    }
+
+    const elements =
+        scopedQuerySelectorAll(this.element, HIDE_ON_BOOKEND_SELECTOR);
+
+    Array.prototype.forEach.call(elements, el => {
+      if (display) {
+        resetStyles(el, ['opacity', 'transition']);
+      } else {
+        setImportantStyles(el, {
+          opacity: 0,
+          transition: 'opacity 0.3s',
+        });
+      }
+    });
+  }
 
   /**
    * @return {!Array<!Array<string>>} A 2D array representing lists of pages by
