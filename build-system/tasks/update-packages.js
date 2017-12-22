@@ -24,10 +24,10 @@ const util = require('gulp-util');
 /**
  * Does a yarn check on node_modules, and if it is outdated, runs yarn.
  */
-function yarnCheck() {
+function updatePackages() {
   const integrityCmd = 'yarn check --integrity';
   if (getStderr(integrityCmd).trim() != '') {
-    util.log(util.colors.yellow('WARNING:'), 'The packages in your local',
+    util.log(util.colors.yellow('WARNING:'), 'The packages in',
         util.colors.cyan('node_modules'), 'do not match',
         util.colors.cyan('package.json.'));
     const verifyTreeCmd = 'yarn check --verify-tree';
@@ -37,14 +37,14 @@ function yarnCheck() {
     exec(yarnCmd);
   } else {
     if (!process.env.TRAVIS) {
-      util.log(util.colors.green('All packages in your local',
+      util.log(util.colors.green('All packages in',
           util.colors.cyan('node_modules'), 'are up to date.'));
     }
   }
 }
 
 gulp.task(
-    'yarn-check',
-    'Performs a yarn check to ensure that node_modules is up to date.',
-    yarnCheck
+    'update-packages',
+    'Runs yarn if node_modules is not up to date.',
+    updatePackages
 );
