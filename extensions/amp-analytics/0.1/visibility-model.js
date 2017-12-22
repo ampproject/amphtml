@@ -36,7 +36,7 @@ export class VisibilityModel {
     this.calcVisibility_ = calcVisibility;
 
     /** @const @protected */
-    this.ampdoc = ampdoc;
+    this.ampdoc_ = ampdoc;
 
     /**
      * Spec parameters.
@@ -80,7 +80,7 @@ export class VisibilityModel {
     this.eventPromise_.then(() => {
       if (!this.onTriggerObservable_) {
         dev().warn(TAG_, 'onTriggerObservable_ is unexpectedly null. URL=' +
-            this.ampdoc.win.location.href);
+            this.ampdoc_.win.location.href);
         return;
       }
       this.onTriggerObservable_.fire();
@@ -167,7 +167,7 @@ export class VisibilityModel {
     this.eventPromise_.then(() => {
       if (!this.onTriggerObservable_) {
         dev().warn(TAG_, 'onTriggerObservable_ is unexpectedly null. URL=' +
-            this.ampdoc.win.location.href);
+            this.ampdoc_.win.location.href);
         return;
       }
       this.onTriggerObservable_.fire();
@@ -217,7 +217,7 @@ export class VisibilityModel {
     if (!this.onTriggerObservable_) {
       dev().warn(TAG_,
           'dispose() called when onTriggerObservable_ already null. URL=' +
-          this.ampdoc.win.location.href);
+          this.ampdoc_.win.location.href);
       return;
     }
     this.onTriggerObservable_.removeAll();
@@ -243,7 +243,7 @@ export class VisibilityModel {
       this.onTriggerObservable_.add(handler);
     } else {
       dev().warn(TAG_, 'onTriggerObservable_ is unexpectedly null. URL=' +
-          this.ampdoc.win.location.href);
+          this.ampdoc_.win.location.href);
     }
     if (this.eventPromise_ && !this.eventResolver_) {
       // If eventPromise has already resolved, need to call handler manually.
