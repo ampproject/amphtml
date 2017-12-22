@@ -235,7 +235,7 @@ export class InaboxMessagingHost {
         // the creative's positions in the page, so return null.
         // Limit to 10 iterations.
         for (let i = 0, tempWin = source.parent;
-	     tempWin == this.win_ || tempWin == this.win_.top;
+	     tempWin != this.win_ && tempWin != this.win_.top;
 	     i++, tempWin = tempWin.parent) {
 	    if (i == 10 || !canInspectWindow(tempWin)) {
             dev().warn(
