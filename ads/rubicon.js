@@ -17,6 +17,7 @@
 import {writeScript, loadScript, validateData} from '../3p/3p';
 import {getSourceUrl} from '../src/url';
 import {doubleclick} from '../ads/google/doubleclick';
+import {user} from '../src/log';
 
 /* global rubicontag: false */
 
@@ -92,6 +93,12 @@ function fastLane(global, data) {
     if (data['kw']) { delete data['kw']; }
     if (data['visitor']) { delete data['visitor']; }
     if (data['inventory']) { delete data['inventory']; }
+    user().warn(
+        'DOUBLECLICK', 'Delayed Fetch for DoubleClick will be' +
+        'removed by March 29, 2018. Any use of this file will cease' +
+        'to work at that time. Please refer to ' +
+        'https://github.com/ampproject/amphtml/issues/11834 ' +
+        'for more information');
     doubleclick(global, data);
   }
 

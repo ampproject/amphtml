@@ -17,6 +17,7 @@
 import {writeScript, validateData, computeInMasterFrame} from '../3p/3p';
 import {getSourceUrl} from '../src/url';
 import {doubleclick} from '../ads/google/doubleclick';
+import {user} from '../src/log';
 
 const mandatoryParams = ['tagtype', 'cid'],
     optionalParams = [
@@ -160,6 +161,12 @@ function loadHBTag(global, data, publisherUrl, referrerUrl) {
       global.advBidxc.setAmpTargeting(global, data);
     }
     deleteUnexpectedDoubleclickParams();
+    user().warn(
+        'DOUBLECLICK', 'Delayed Fetch for DoubleClick will be' +
+        'removed by March 29, 2018. Any use of this file will cease' +
+        'to work at that time. Please refer to ' +
+        'https://github.com/ampproject/amphtml/issues/11834 ' +
+        'for more information');
     doubleclick(global, data);
   }
 
