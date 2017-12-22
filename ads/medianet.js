@@ -188,7 +188,7 @@ function loadHBTag(global, data, publisherUrl, referrerUrl) {
       setAmpTargeting: () => {},
       renderAmpAd: () => {},
     };
-    writeScript(global, 'https://contextual.media.net/bidexchange.js?https=1&amp=1&cid=' + encodeURIComponent(data.cid), () => {
+    writeScript(global, 'https://contextual.media.net/bidexchange.js?https=1&amp=1&cid=' + encodeURIComponent(data.cid) + '&dn=' + encodeURIComponent(global.context.location.hostname), () => {
       done(null);
     });
   }, mnetHBHandle);
