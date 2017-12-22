@@ -29,14 +29,10 @@ export class VisibilityModel {
   /**
    * @param {!Object<string, *>} spec
    * @param {function():number} calcVisibility
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(spec, calcVisibility, ampdoc) {
+  constructor(spec, calcVisibility) {
     /** @const @private */
     this.calcVisibility_ = calcVisibility;
-
-    /** @const @protected */
-    this.ampdoc_ = ampdoc;
 
     /**
      * Spec parameters.
@@ -79,8 +75,7 @@ export class VisibilityModel {
 
     this.eventPromise_.then(() => {
       if (!this.onTriggerObservable_) {
-        dev().warn(TAG_, 'onTriggerObservable_ is unexpectedly null. URL=' +
-            this.ampdoc_.win.location.href);
+        dev().warn(TAG_, 'onTriggerObservable_ is unexpectedly null.');
         return;
       }
       this.onTriggerObservable_.fire();
@@ -166,8 +161,7 @@ export class VisibilityModel {
     });
     this.eventPromise_.then(() => {
       if (!this.onTriggerObservable_) {
-        dev().warn(TAG_, 'onTriggerObservable_ is unexpectedly null. URL=' +
-            this.ampdoc_.win.location.href);
+        dev().warn(TAG_, 'onTriggerObservable_ is unexpectedly null.');
         return;
       }
       this.onTriggerObservable_.fire();
@@ -216,8 +210,7 @@ export class VisibilityModel {
     // necessitating this "if", and the same "if" elsewhere in this file.
     if (!this.onTriggerObservable_) {
       dev().warn(TAG_,
-          'dispose() called when onTriggerObservable_ already null. URL=' +
-          this.ampdoc_.win.location.href);
+          'dispose() called when onTriggerObservable_ already null.');
       return;
     }
     this.onTriggerObservable_.removeAll();
@@ -242,8 +235,7 @@ export class VisibilityModel {
     if (this.onTriggerObservable_) {
       this.onTriggerObservable_.add(handler);
     } else {
-      dev().warn(TAG_, 'onTriggerObservable_ is unexpectedly null. URL=' +
-          this.ampdoc_.win.location.href);
+      dev().warn(TAG_, 'onTriggerObservable_ is unexpectedly null.');
     }
     if (this.eventPromise_ && !this.eventResolver_) {
       // If eventPromise has already resolved, need to call handler manually.
