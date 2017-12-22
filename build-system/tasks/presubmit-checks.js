@@ -61,6 +61,7 @@ const forbiddenTerms = {
     message: 'Switch to new internal ID form',
     whitelist: [
       'build-system/tasks/extension-generator/index.js',
+      'build-system/tasks/create-golden-css/css/main.css',
       'css/amp.css',
     ],
   },
