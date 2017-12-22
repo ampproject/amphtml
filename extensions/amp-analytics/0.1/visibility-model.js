@@ -17,6 +17,9 @@
 import {dev} from '../../../src/log';
 import {Observable} from '../../../src/observable';
 
+/** @private @const {string} */
+const TAG_ = 'amp-analytics.VisibilityModel';
+
 /**
  * This class implements visibility calculations based on the
  * visibility ratio. It's used for documents, embeds and individual element.
@@ -26,10 +29,14 @@ export class VisibilityModel {
   /**
    * @param {!Object<string, *>} spec
    * @param {function():number} calcVisibility
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(spec, calcVisibility) {
+  constructor(spec, calcVisibility, ampdoc) {
     /** @const @private */
     this.calcVisibility_ = calcVisibility;
+
+    /** @const @protected */
+    this.ampdoc = ampdoc;
 
     /**
      * Spec parameters.
@@ -71,9 +78,12 @@ export class VisibilityModel {
     });
 
     this.eventPromise_.then(() => {
-      if (this.onTriggerObservable_) {
-        this.onTriggerObservable_.fire();
+      if (!this.onTriggerObservable_) {
+        dev().warn(TAG_, 'onTriggerObservable_ is unexpectedly null. URL=' +
+            this.ampdoc.win.location.href);
+        return;
       }
+      this.onTriggerObservable_.fire();
     });
 
     /** @private {!Array<!UnlistenDef>} */
@@ -155,9 +165,12 @@ export class VisibilityModel {
       this.eventResolver_ = resolve;
     });
     this.eventPromise_.then(() => {
-      if (this.onTriggerObservable_) {
-        this.onTriggerObservable_.fire();
+      if (!this.onTriggerObservable_) {
+        dev().warn(TAG_, 'onTriggerObservable_ is unexpectedly null. URL=' +
+            this.ampdoc.win.location.href);
+        return;
       }
+      this.onTriggerObservable_.fire();
     });
     this.scheduleRepeatId_ = null;
     this.everMatchedVisibility_ = false;
@@ -201,10 +214,14 @@ export class VisibilityModel {
     this.eventResolver_ = null;
     // TODO(jonkeller): Investigate why dispose() can be called twice,
     // necessitating this "if", and the same "if" elsewhere in this file.
-    if (this.onTriggerObservable_) {
-      this.onTriggerObservable_.removeAll();
-      this.onTriggerObservable_ = null;
+    if (!this.onTriggerObservable_) {
+      dev().warn(TAG_,
+          'dispose() called when onTriggerObservable_ already null. URL=' +
+          this.ampdoc.win.location.href);
+      return;
     }
+    this.onTriggerObservable_.removeAll();
+    this.onTriggerObservable_ = null;
   }
 
   /**
@@ -224,6 +241,9 @@ export class VisibilityModel {
   onTriggerEvent(handler) {
     if (this.onTriggerObservable_) {
       this.onTriggerObservable_.add(handler);
+    } else {
+      dev().warn(TAG_, 'onTriggerObservable_ is unexpectedly null. URL=' +
+          this.ampdoc.win.location.href);
     }
     if (this.eventPromise_ && !this.eventResolver_) {
       // If eventPromise has already resolved, need to call handler manually.

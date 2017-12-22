@@ -287,7 +287,7 @@ export class VisibilityManager {
         const newSpec = spec;
         newSpec['visiblePercentageMin'] = min;
         newSpec['visiblePercentageMax'] = max;
-        const model = new VisibilityModel(newSpec, calcVisibility);
+        const model = new VisibilityModel(newSpec, calcVisibility, this.ampdoc);
         unlisteners.push(this.listen_(model, spec, readyPromise,
             createReportPromiseFunc, callback, opt_element));
       }
@@ -296,7 +296,7 @@ export class VisibilityManager {
       };
     }
 
-    const model = new VisibilityModel(spec, calcVisibility);
+    const model = new VisibilityModel(spec, calcVisibility, this.ampdoc);
     return this.listen_(model, spec, readyPromise,
         createReportPromiseFunc, callback, opt_element);
   }
