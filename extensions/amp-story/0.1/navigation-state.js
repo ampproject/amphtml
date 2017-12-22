@@ -41,9 +41,6 @@ export class NavigationState {
     /** @private {!Observable<StateChangeEventDef>} */
     this.observable_ = new Observable();
 
-    /** @private {boolean} */
-    this.isBookendShown_ = false;
-
     this.atachEvents_(storyElement);
   }
 
