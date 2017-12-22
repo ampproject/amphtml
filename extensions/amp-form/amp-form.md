@@ -234,7 +234,7 @@ The response is expected to be a valid JSON Object. For example, if the publishe
 
 Both success and error responses should have a `Content-Type: application/json` header. `submit-success` will render for all responses that has a status of `2XX`, all other statuses will render `submit-error`.
 
-Publishers can render these in a nested template inside their forms as follows.
+Publishers can render these in a inlined template inside their forms as follows.
 
 ```html
 <form ...>
@@ -255,7 +255,7 @@ Publishers can render these in a nested template inside their forms as follows.
 </form>
 ```
 
-Publishers can render the responses in a referenced template defined earlier in the document by using the template's id as the value of the `template` attribute, set on the elements with the `submit-success` and `submit-error` attributes.
+  Publishers can render the responses in a referenced template defined earlier in the document by using the template's id as the value of the `template` attribute, set on the elements with the `submit-success` and `submit-error` attributes.
 
 ```html
 <template type="amp-mustache" id="submit_success_template">
