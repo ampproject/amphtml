@@ -18,7 +18,6 @@
 import {KeyCodes} from '../../../../src/utils/key-codes';
 import {Services} from '../../../../src/services';
 import {assertScreenReaderElement} from '../../../../testing/test-helper';
-import {toggleExperiment} from '../../../../src/experiments';
 import '../amp-sidebar';
 import * as lolex from 'lolex';
 
