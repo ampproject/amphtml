@@ -40,7 +40,7 @@ function spawnProcess(cmd, options) {
 exports.exec = function(cmd) {
   const p = spawnProcess(cmd, {'stdio': 'inherit'});
   if (p.status != 0) {
-    console/*OK*/.log('\nCommand failed: ' + cmd);
+    console/*OK*/.log('Command failed: ' + cmd);
   }
 };
 
@@ -52,7 +52,7 @@ exports.exec = function(cmd) {
 exports.execOrDie = function(cmd) {
   const p = spawnProcess(cmd, {'stdio': 'inherit'});
   if (p.status != 0) {
-    console/*OK*/.error('\nCommand failed: ' + cmd);
+    console/*OK*/.error('Command failed: ' + cmd);
     process.exit(p.status);
   }
 };

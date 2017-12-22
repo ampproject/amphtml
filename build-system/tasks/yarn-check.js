@@ -17,31 +17,35 @@
 
 const exec = require('../exec').exec;
 const getStderr = require('../exec').getStderr;
+const getStdout = require('../exec').getStdout;
 const gulp = require('gulp-help')(require('gulp'));
 const util = require('gulp-util');
 
 
 /**
- * Wrapper around yarn check
+ * Does a yarn check on node_modules, and if it is outdated, runs yarn.
  */
-function yarnCheck(done) {
+function yarnCheck() {
   const integrityCmd = 'yarn check --integrity';
   if (getStderr(integrityCmd).trim() != '') {
-    util.log(util.colors.red('ERROR:'), 'The packages in your local',
-        util.colors.cyan('node_modules'), 'are out of date. Run',
-        util.colors.cyan('yarn'), 'to update them.');
+    util.log(util.colors.yellow('WARNING:'), 'The packages in your local',
+        util.colors.cyan('node_modules'), 'do not match',
+        util.colors.cyan('package.json.'));
     const verifyTreeCmd = 'yarn check --verify-tree';
     exec(verifyTreeCmd);
-    done('Packages in node_modules are out of date. Run "yarn" to update.');
+    util.log('Running', util.colors.cyan('yarn'), 'to update packages...');
+    const yarnCmd = 'yarn';
+    exec(yarnCmd);
   } else {
-    util.log(util.colors.green('All packages in your local',
-        util.colors.cyan('node_modules'), 'are up to date.'));
-    done();
+    if (!process.env.TRAVIS) {
+      util.log(util.colors.green('All packages in your local',
+          util.colors.cyan('node_modules'), 'are up to date.'));
+    }
   }
 }
 
 gulp.task(
     'yarn-check',
-    'Performs a yarn check to make sure the local node_modules is up to date.',
+    'Performs a yarn check to ensure that node_modules is up to date.',
     yarnCheck
 );
