@@ -141,6 +141,12 @@ export function canInspectWindow(win) {
   }
 }
 
+/**
+ * Returns whether we can touch the property prop on the object obj.
+ * @param {Object} obj
+ * @param {string} prop
+ * @return {boolean}
+ */
 function canTouchProperty(obj, prop) {
   try {
     const /* eslint no-unused-vars: 0 */ unused = obj[prop];
