@@ -33,6 +33,7 @@ import {
   CORRELATOR_CLEAR_EXP_BRANCHES,
   CORRELATOR_CLEAR_EXP_NAME,
   SAFEFRAME_ORIGIN,
+  resetLocationQueryParametersForTesting,
 } from '../amp-ad-network-doubleclick-impl';
 import {
   DOUBLECLICK_A4A_EXPERIMENT_NAME,
@@ -109,11 +110,13 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
   let impl;
 
   beforeEach(() => {
+    resetLocationQueryParametersForTesting();
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
   });
 
+  afterEach(() => resetLocationQueryParametersForTesting);
 
   describe('#isValidElement', () => {
     beforeEach(() => {
@@ -573,6 +576,18 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           });
         });
       });
+    });
+    it('should have google_preview parameter', () => {
+      sandbox.stub(impl, 'getLocationQueryParameterValue')
+          .withArgs('google_preview').returns('abcdef');
+      new AmpAd(element).upgradeCallback();
+      expect(impl.getAdUrl()).to.eventually.contain('&gct=abcdef');
+    });
+    it('should cache getLocationQueryParameterValue', () => {
+      impl.win = {location: {search: '?foo=bar'}};
+      expect(impl.getLocationQueryParameterValue('foo')).to.equal('bar');
+      impl.win.location.search = '?foo=bar2';
+      expect(impl.getLocationQueryParameterValue('foo')).to.equal('bar');
     });
     // TODO(bradfrizzell, #12476): Make this test work with sinon 4.0.
     it.skip('has correct rc and ifi after refresh', () => {
