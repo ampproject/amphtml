@@ -83,7 +83,7 @@ import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {isCancellation} from '../../../src/error';
-import {isSecureUrl, parseUrl} from '../../../src/url';
+import {isSecureUrl, parseUrl, parseQueryString} from '../../../src/url';
 import {VisibilityState} from '../../../src/visibility-state';
 import {
   isExperimentOn,
@@ -116,13 +116,6 @@ const RTC_ATI_ENUM = {
   RTC_FAILURE: 3,
 };
 
-/** @private @const {!Object<string,string>} */
-const PAGE_LEVEL_PARAMS_ = {
-  'gdfp_req': '1',
-  'sfv': DEFAULT_SAFEFRAME_VERSION,
-  'u_sd': window.devicePixelRatio,
-};
-
 /** @visibleForTesting @const {string} */
 export const CORRELATOR_CLEAR_EXP_NAME = 'dbclk-correlator-clear';
 
@@ -152,6 +145,9 @@ let sraRequests = null;
       slotIndex: string,
     }} */
 let TroubleshootData;
+
+/** @private {?JsonObject} */
+let windowLocationQueryParameters;
 
 /**
  * Array of functions used to combine block level request parameters for SRA
@@ -535,6 +531,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return {resolver, rejector, promise};
   }
 
+  /** @return {!Object<string,string|boolean|number>} */
+  getPageParameters_() {
+    return {
+      'gdfp_req': '1',
+      'sfv': DEFAULT_SAFEFRAME_VERSION,
+      'u_sd': this.win.devicePixelRatio,
+      'gct': this.getLocationQueryParameterValue('google_preview') || null,
+    };
+  }
+
   /**
    * Constructs block-level url parameters with side effect of setting
    * size_, jsonTargeting_, and adKey_ fields.
@@ -639,7 +645,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return googleAdUrl(
               this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
                   this.getBlockParameters_(), rtcParams,
-                  this.buildIdentityParams_(), PAGE_LEVEL_PARAMS_));
+                  this.buildIdentityParams_(), this.getPageParameters_()));
         });
     this.troubleshootData_.adUrl = urlPromise;
     return urlPromise;
@@ -1230,6 +1236,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       super.getNonAmpCreativeRenderingMethod(headerValue);
   }
 
+
+  /**
+   * Note that location is parsed once on first access and cached.
+   * @param {string} parameterName
+   * @return {string|undefined} parameter value from window.location.search
+   * @visibleForTesting
+   */
+  getLocationQueryParameterValue(parameterName) {
+    windowLocationQueryParameters = windowLocationQueryParameters ||
+        parseQueryString((this.win.location && this.win.location.search) || '');
+    return windowLocationQueryParameters[parameterName];
+  }
+
   /** @override */
   getAdditionalContextMetadata() {
     const attributes = dict({});
@@ -1356,9 +1375,14 @@ AMP.extension(TAG, '0.1', AMP => {
 });
 
 
-/** @visibileForTesting */
+/** @visibleForTesting */
 export function resetSraStateForTesting() {
   sraRequests = null;
+}
+
+/** @visibleForTesting */
+export function resetLocationQueryParametersForTesting() {
+  windowLocationQueryParameters = null;
 }
 
 /**
@@ -1380,15 +1404,16 @@ export function getNetworkId(element) {
  * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instances
  * @return {!Promise<string>} SRA request URL
  */
-function constructSRARequest_(win, doc, instances) {
+export function constructSRARequest_(win, doc, instances) {
   // TODO(bradfrizzell): Need to add support for RTC.
+  dev().assert(instances && instances.length);
   const startTime = Date.now();
   return googlePageParameters(win, doc, startTime)
-      .then(pageLevelParameters => {
+      .then(googPageLevelParameters => {
         const blockParameters = constructSRABlockParameters(instances);
         return truncAndTimeUrl(DOUBLECLICK_BASE_URL,
-            Object.assign(
-                blockParameters, pageLevelParameters, PAGE_LEVEL_PARAMS_),
+            Object.assign(blockParameters, googPageLevelParameters,
+                instances[0].getPageParameters_()),
             startTime);
       });
 }
