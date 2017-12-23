@@ -407,8 +407,8 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   isSwipeLargeEnoughForHint_(deltaX, deltaY) {
-    return Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2))
-    > MIN_SWIPE_FOR_HINT_OVERLAY_PX;
+    return (Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2))
+      >= MIN_SWIPE_FOR_HINT_OVERLAY_PX);
   }
 
   /** @private */
