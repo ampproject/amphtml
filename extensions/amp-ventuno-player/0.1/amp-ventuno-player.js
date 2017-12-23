@@ -201,12 +201,12 @@ class AmpVentunoPlayer extends AMP.BaseElement {
     return this.videoIframeSrc_ = src;
   }
 
-	/**
-	 * Sends a command to the player through postMessage.
-	 * @param {string} command
-	 * @param {Array=} opt_args
-	 * @private
-	 */
+  /**
+   * Sends a command to the player through postMessage.
+   * @param {string} command
+   * @param {Array=} opt_args
+   * @private
+   */
   sendCommand_(command) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
@@ -220,9 +220,9 @@ class AmpVentunoPlayer extends AMP.BaseElement {
   }
 
   // VideoInterface Implementation. See ../src/video-interface.VideoInterface
-	/**
-	 * @override
-	 */
+  /**
+   * @override
+   */
   supportsPlatform() {
     return true;
   }
@@ -232,51 +232,51 @@ class AmpVentunoPlayer extends AMP.BaseElement {
     return true;
   }
 
-	/**
-	 * @override
-	 */
+  /**
+   * @override
+   */
   play(unusedIsAutoplay) {
     this.sendCommand_('Play');
   }
 
-	/**
-	 * @override
-	 */
+  /**
+   * @override
+   */
   pause() {
     this.sendCommand_('Pause');
   }
 
-	/**
-	 * @override
-	 */
+  /**
+   * @override
+   */
   mute() {
     this.sendCommand_('Mute');
   }
 
-	/**
-	 * @override
-	 */
+  /**
+   * @override
+   */
   unmute() {
     this.sendCommand_('UnMute');
   }
 
-	/**
-	 * @override
-	 */
+  /**
+   * @override
+   */
   showControls() {
     // Not supported.
   }
 
-	/**
-	 * @override
-	 */
+  /**
+   * @override
+   */
   hideControls() {
     // Not supported.
   }
 
-	/**
-	 * @override
-	 */
+  /**
+   * @override
+   */
   fullscreenEnter() {
     if (!this.iframe_) {
       return;
@@ -284,9 +284,9 @@ class AmpVentunoPlayer extends AMP.BaseElement {
     fullscreenEnter(dev().assertElement(this.iframe_));
   }
 
-	/**
-	 * @override
-	 */
+  /**
+   * @override
+   */
   fullscreenExit() {
     if (!this.iframe_) {
       return;
