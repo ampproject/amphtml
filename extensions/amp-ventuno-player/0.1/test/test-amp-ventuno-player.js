@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {AmpVentunoPlayer} from '../amp-ventuno-player';
+import '../amp-ventuno-player';
 
 describes.realWin('amp-ventuno-player', {
   amp: {
     extensions: ['amp-ventuno-player'],
-  }
+  },
 }, env => {
 
   let win;
@@ -32,72 +32,76 @@ describes.realWin('amp-ventuno-player', {
   });
 
   function getVentunoPlayer(type, pubid, slotid, title, url, meta) {
-	  const player = win.document.createElement('amp-ventuno-player');
-	  if (type) {
-		player.setAttribute('data-player', type);
-	  }
-	  if (pubid) {
-		player.setAttribute('data-pubid', pubid);
-	  }
-	  if (slotid) {
-		player.setAttribute('data-slotid', slotid);
-	  }
-	  if (title) {
-		player.setAttribute('data-title', title);
-	  }
-	  if (url) {
-		player.setAttribute('data-url', url);
-	  }
-	  if (meta) {
-		player.setAttribute('data-meta', meta);
-	  }
-	  win.document.body.appendChild(player);
-	  return player.build()
-	  	.then(() => player.layoutCallback())
-	  	.then(() => player);
+    const player = win.document.createElement('amp-ventuno-player');
+    if (type) {
+      player.setAttribute('data-player', type);
+    }
+    if (pubid) {
+      player.setAttribute('data-pubid', pubid);
+    }
+    if (slotid) {
+      player.setAttribute('data-slotid', slotid);
+    }
+    if (title) {
+      player.setAttribute('data-title', title);
+    }
+    if (url) {
+      player.setAttribute('data-url', url);
+    }
+    if (meta) {
+      player.setAttribute('data-meta', meta);
+    }
+    win.document.body.appendChild(player);
+    return player.build()
+        .then(() => player.layoutCallback())
+        .then(() => player);
   }
 
   it('renders an editorial player with optional params', () => {
-	let actSrc = 'https://venwebsecure.ventunotech.com/embed/embedPlayer.html?pFrom=amp&pType=ep&pubKey=49b792a987103&slot=1000&pTitle=World%20Cup%202018&pUrl=http%3A%2F%2Fventunotech.com%2Ftest%2Fwc2018&pMeta=Sports%2CFootball';
-	  return getVentunoPlayer('ep', '49b792a987103', '1000', 'World Cup 2018', 'http://ventunotech.com/test/wc2018', 'Sports,Football').then(player => {
-		const playerIframe = player.querySelector('iframe');
-		expect(playerIframe).to.not.be.null;
-		expect(playerIframe.src).to.equal(actSrc);
-	  });
+    const actSrc = 'https://venwebsecure.ventunotech.com/embed/embedPlayer.html?pFrom=amp&pType=ep&pubKey=49b792a987103&slot=1000&pTitle=World%20Cup%202018&pUrl=http%3A%2F%2Fventunotech.com%2Ftest%2Fwc2018&pMeta=Sports%2CFootball';
+    return getVentunoPlayer('ep', '49b792a987103', '1000', 'World Cup 2018', 'http://ventunotech.com/test/wc2018', 'Sports,Football').then(player => {
+      const playerIframe = player.querySelector('iframe');
+      expect(playerIframe).to.not.be.null;
+      expect(playerIframe.src).to.equal(actSrc);
+    });
   });
 
   it('renders an editorial player without optional params', () => {
-	let actSrc = 'https://venwebsecure.ventunotech.com/embed/embedPlayer.html?pFrom=amp&pType=ep&pubKey=49b792a987103&slot=1000';
-	  return getVentunoPlayer('ep', '49b792a987103', '1000').then(player => {
-		const playerIframe = player.querySelector('iframe');
-		expect(playerIframe).to.not.be.null;
-		expect(playerIframe.src).to.equal(actSrc);
-	  });
+    const actSrc = 'https://venwebsecure.ventunotech.com/embed/embedPlayer.html?pFrom=amp&pType=ep&pubKey=49b792a987103&slot=1000';
+    return getVentunoPlayer('ep', '49b792a987103', '1000').then(player => {
+      const playerIframe = player.querySelector('iframe');
+      expect(playerIframe).to.not.be.null;
+      expect(playerIframe.src).to.equal(actSrc);
+    });
   });
 
-  it('fails without the player type', () => {	
-	  return getVentunoPlayer(null, '49b792a987103', '1000').should.eventually.be.rejectedWith(
-		  /The data-player attribute is required/
-	  );
+  it('fails without the player type', () => {
+    return getVentunoPlayer(null, '49b792a987103', '1000')
+        .should.eventually.be.rejectedWith(
+            /The data-player attribute is required/
+        );
   });
 
   it('fails without the publisher id', () => {
-	return getVentunoPlayer('ep', null, '1000').should.eventually.be.rejectedWith(
-		/The data-pubid attribute is required/
-	);
+    return getVentunoPlayer('ep', null, '1000')
+        .should.eventually.be.rejectedWith(
+            /The data-pubid attribute is required/
+        );
   });
 
   it('fails without the slot id', () => {
-	return getVentunoPlayer('ep', '49b792a987103', null).should.eventually.be.rejectedWith(
-		/The data-slotid attribute is required/
-	);
+    return getVentunoPlayer('ep', '49b792a987103', null)
+        .should.eventually.be.rejectedWith(
+            /The data-slotid attribute is required/
+        );
   });
 
   it('fails with a player other than ep (Editorial Player)', () => {
-	return getVentunoPlayer('plp', '49b792a987103', '1000').should.eventually.be.rejectedWith(
-		'Only Editorial Player is supported'
-	);
+    return getVentunoPlayer('plp', '49b792a987103', '1000')
+        .should.eventually.be.rejectedWith(
+            'Only Editorial Player is supported'
+        );
   });
-  
+
 
 });

@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-import { isLayoutSizeDefined } from '../../../src/layout';
-import { user, dev } from '../../../src/log';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {user, dev} from '../../../src/log';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import { VideoEvents } from '../../../src/video-interface';
-import { Services } from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
+import {Services} from '../../../src/services';
 import {
-  getDataParamsFromAttributes,
   removeElement,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
 } from '../../../src/dom';
-import { addParamsToUrl } from '../../../src/url';
+import {addParamsToUrl} from '../../../src/url';
 
 
 /**
@@ -137,7 +136,7 @@ class AmpVentunoPlayer extends AMP.BaseElement {
     this.playerReadyPromise_ = new Promise(resolve => {
       this.playerReadyResolver_ = resolve;
     });
-    return true;  // Call layoutCallback again.
+    return true; // Call layoutCallback again.
   }
 
   /** @override */
@@ -147,37 +146,38 @@ class AmpVentunoPlayer extends AMP.BaseElement {
 
   getPlayerType_() {
     return user().assert(
-      this.element.getAttribute('data-player'),
-      'The data-player attribute is required for <amp-ventuno-player> %s',
-      this.element);
+        this.element.getAttribute('data-player'),
+        'The data-player attribute is required for <amp-ventuno-player> %s',
+        this.element);
   }
 
   getPubid_() {
     return user().assert(
-      this.element.getAttribute('data-pubid'),
-      'The data-pubid attribute is required for <amp-ventuno-player> %s',
-      this.element);
+        this.element.getAttribute('data-pubid'),
+        'The data-pubid attribute is required for <amp-ventuno-player> %s',
+        this.element);
   }
 
   getSlotid_() {
     return user().assert(
-      this.element.getAttribute('data-slotid'),
-      'The data-slotid attribute is required for <amp-ventuno-player> %s',
-      this.element);
+        this.element.getAttribute('data-slotid'),
+        'The data-slotid attribute is required for <amp-ventuno-player> %s',
+        this.element);
   }
 
   /** @return {string} */
   getVideoIframeSrc_() {
-    let pubid = encodeURIComponent(this.pubid_ || ''),
-      slotid = encodeURIComponent(this.slotid_ || ''),
-      pType = this.playerType_ || '',
-      optParams = {};
+    const pubid = encodeURIComponent(this.pubid_ || ''),
+        slotid = encodeURIComponent(this.slotid_ || ''),
+        pType = this.playerType_ || '',
+        optParams = {};
 
     if (this.videoIframeSrc_) {
       return this.videoIframeSrc_;
     }
     // As of now, only the 'ep' player type will be supported
-    user().assert(this.playerType_ === 'ep', 'Only Editorial Player is supported');
+    user().assert(this.playerType_ === 'ep',
+        'Only Editorial Player is supported');
 
     dev().assert(this.pubid_);
     dev().assert(this.slotid_);
@@ -213,7 +213,7 @@ class AmpVentunoPlayer extends AMP.BaseElement {
         const message = 'vtn' + command;
         this.iframe_.contentWindow./*OK*/postMessage({
           command: message,
-          from: 'amp'
+          from: 'amp',
         }, '*');
       }
     });
