@@ -58,8 +58,8 @@ describes.realWin('amp-ventuno-player', {
   }
 
   it('renders an editorial player with optional params', () => {
-	let actSrc = 'https://venwebsecure.ventunotech.com/embed/embedPlayer.html?pFrom=amp&pType=ep&pubKey=49b792a987103&slot=380&pTitle=World%20Cup%202018&pUrl=http%3A%2F%2Fventunotech.com%2Ftest%2Fwc2018&pMeta=Sports%2CFootball';
-	  return getVentunoPlayer('ep', '49b792a987103', '380', 'World Cup 2018', 'http://ventunotech.com/test/wc2018', 'Sports,Football').then(player => {
+	let actSrc = 'https://venwebsecure.ventunotech.com/embed/embedPlayer.html?pFrom=amp&pType=ep&pubKey=49b792a987103&slot=1000&pTitle=World%20Cup%202018&pUrl=http%3A%2F%2Fventunotech.com%2Ftest%2Fwc2018&pMeta=Sports%2CFootball';
+	  return getVentunoPlayer('ep', '49b792a987103', '1000', 'World Cup 2018', 'http://ventunotech.com/test/wc2018', 'Sports,Football').then(player => {
 		const playerIframe = player.querySelector('iframe');
 		expect(playerIframe).to.not.be.null;
 		expect(playerIframe.src).to.equal(actSrc);
@@ -67,8 +67,8 @@ describes.realWin('amp-ventuno-player', {
   });
 
   it('renders an editorial player without optional params', () => {
-	let actSrc = 'https://venwebsecure.ventunotech.com/embed/embedPlayer.html?pFrom=amp&pType=ep&pubKey=49b792a987103&slot=380';
-	  return getVentunoPlayer('ep', '49b792a987103', '380').then(player => {
+	let actSrc = 'https://venwebsecure.ventunotech.com/embed/embedPlayer.html?pFrom=amp&pType=ep&pubKey=49b792a987103&slot=1000';
+	  return getVentunoPlayer('ep', '49b792a987103', '1000').then(player => {
 		const playerIframe = player.querySelector('iframe');
 		expect(playerIframe).to.not.be.null;
 		expect(playerIframe.src).to.equal(actSrc);
@@ -76,13 +76,13 @@ describes.realWin('amp-ventuno-player', {
   });
 
   it('fails without the player type', () => {	
-	  return getVentunoPlayer(null, '49b792a987103', '380').should.eventually.be.rejectedWith(
+	  return getVentunoPlayer(null, '49b792a987103', '1000').should.eventually.be.rejectedWith(
 		  /The data-player attribute is required/
 	  );
   });
 
   it('fails without the publisher id', () => {
-	return getVentunoPlayer('ep', null, '380').should.eventually.be.rejectedWith(
+	return getVentunoPlayer('ep', null, '1000').should.eventually.be.rejectedWith(
 		/The data-pubid attribute is required/
 	);
   });
@@ -94,7 +94,7 @@ describes.realWin('amp-ventuno-player', {
   });
 
   it('fails with a player other than ep (Editorial Player)', () => {
-	return getVentunoPlayer('plp', '49b792a987103', '380').should.eventually.be.rejectedWith(
+	return getVentunoPlayer('plp', '49b792a987103', '1000').should.eventually.be.rejectedWith(
 		'Only Editorial Player is supported'
 	);
   });

@@ -37,7 +37,7 @@ limitations under the License.
   <amp-ventuno-player layout="responsive" width="640" height="360"
 	data-player="ep"
 	data-pubid="49b792a987103"
-	data-slotid="380"
+	data-slotid="1000"
 	data-title="World Cup 2018"
 	data-url="http://ventunotech.com/test/wc2018"
 	data-meta="Sports,Football">
