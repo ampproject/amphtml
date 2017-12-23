@@ -439,9 +439,12 @@ export function pollForLayout(win, count, opt_timeout) {
   return poll('Waiting for elements to layout: ' + count, () => {
     return getCount() >= count;
   }, () => {
+    const built = win.document.querySelectorAll('.i-amphtml-element');
     return new Error('Failed to find elements with layout.' +
-        ' Current count: ' + getCount() + ' HTML:\n' +
-        win.document.documentElement./*TEST*/innerHTML);
+        ' Current count: ' + getCount() + '/' + count + ' (' +
+        built.length + ' built) Elements:\n' +
+        Array.from(built).map(e => '  ' + e.tagName + '\t-> ' + e.className)
+        .join('\n'));
   }, opt_timeout);
 }
 
