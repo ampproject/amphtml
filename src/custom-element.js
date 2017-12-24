@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import './polyfills';
 import {AmpEvents} from './amp-events';
 import {CommonSignals} from './common-signals';
 import {ElementStub} from './element-stub';

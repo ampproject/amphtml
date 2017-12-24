@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import '../polyfills';
 import {ElementStub, stubbedElements} from '../element-stub';
 import {createCustomElementClass} from '../custom-element';
 import {declareExtension} from './ampdoc-impl';

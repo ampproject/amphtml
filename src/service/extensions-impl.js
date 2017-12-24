@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import '../polyfills';
 import {Services} from '../services';
 import {declareExtension} from './ampdoc-impl';
 import {

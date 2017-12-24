@@ -447,7 +447,8 @@ export function pollForLayout(win, count, opt_timeout) {
         built.length + ' built) Elements without layout:\n' +
         Array.from(built)
             .filter(e => !e.classList.contains('i-amphtml-layout'))
-            .map(e => '  ' + e.tagName + '->' + e.className)
+            .map(e => '  ' + e.tagName + '->' + e.className + ': ' +
+                e./*test*/outerHTML)
             .join('\n '));
   }, opt_timeout);
 }
