@@ -17,6 +17,7 @@
 import {
   elementByTag,
   childElementsByTag,
+  closestByTag,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
@@ -195,7 +196,11 @@ class AmpVideo extends AMP.BaseElement {
     };
 
     installVideoManagerForDoc(this.element);
-    Services.videoManagerForDoc(this.element).register(this);
+
+    // amp-story coordinates playback based on page activation, as opposed to
+    // visibility.
+    Services.videoManagerForDoc(this.element).register(this,
+        /* manageAutoplay */ !closestByTag(this.element, 'amp-story'));
   }
 
   /** @override */
