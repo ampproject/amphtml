@@ -230,7 +230,9 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       const ampdoc = Services.ampdocServiceFor(iframe.contentWindow).getAmpDoc();
       installExtensionsService(iframe.contentWindow);
       installRuntimeServices(iframe.contentWindow);
-      installCustomElements(iframe.contentWindow);
+      if (!iframe.contentWindow.customElements) {
+        installCustomElements(iframe.contentWindow);
+      }
       installAmpdocServices(ampdoc);
       Services.resourcesForDoc(ampdoc).ampInitComplete();
       // Act like no other elements were loaded by default.
@@ -443,8 +445,8 @@ export function pollForLayout(win, count, opt_timeout) {
     return new Error('Failed to find elements with layout.' +
         ' Current count: ' + getCount() + '/' + count + ' (' +
         built.length + ' built) Elements:\n' +
-        Array.from(built).map(e => '  ' + e.tagName + '\t-> ' + e.className)
-        .join('\n'));
+        Array.from(built).map(e => '  ' + e.tagName + '->' + e.className)
+        .join('; '));
   }, opt_timeout);
 }
 
