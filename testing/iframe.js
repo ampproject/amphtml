@@ -444,9 +444,11 @@ export function pollForLayout(win, count, opt_timeout) {
     const built = win.document.querySelectorAll('.i-amphtml-element');
     return new Error('Failed to find elements with layout.' +
         ' Current count: ' + getCount() + '/' + count + ' (' +
-        built.length + ' built) Elements:\n' +
-        Array.from(built).map(e => '  ' + e.tagName + '->' + e.className)
-        .join('; '));
+        built.length + ' built) Elements without layout:\n' +
+        Array.from(built)
+            .filter(e => !e.classList.contains('i-amphtml-layout'))
+            .map(e => '  ' + e.tagName + '->' + e.className)
+            .join('\n '));
   }, opt_timeout);
 }
 
