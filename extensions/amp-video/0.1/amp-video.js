@@ -17,6 +17,7 @@
 import {
   elementByTag,
   childElementsByTag,
+  childElementByTag,
   closestByTag,
   fullscreenEnter,
   fullscreenExit,
@@ -84,6 +85,9 @@ class AmpVideo extends AMP.BaseElement {
 
     /** @private {!../../../src/mediasession-helper.MetadataDef} */
     this.metadata_ = EMPTY_METADATA;
+
+    /** @private @const {!Array<!UnlistenDef>} */
+    this.unlisteners_ = [];
   }
 
   /**
@@ -401,18 +405,39 @@ class AmpVideo extends AMP.BaseElement {
    */
   installEventHandlers_() {
     const video = dev().assertElement(this.video_);
-    this.forwardEvents(
-        [VideoEvents.PLAYING, VideoEvents.PAUSE, VideoEvents.ENDED], video);
-    listen(video, 'volumechange', () => {
+
+    this.unlisteners_.push(this.forwardEvents(
+        [VideoEvents.PLAYING, VideoEvents.PAUSE, VideoEvents.ENDED], video));
+
+    this.unlisteners_.push(listen(video, 'volumechange', () => {
       if (this.muted_ != this.video_.muted) {
         this.muted_ = this.video_.muted;
         const evt = this.muted_ ? VideoEvents.MUTED : VideoEvents.UNMUTED;
         this.element.dispatchCustomEvent(evt);
       }
-    });
-    listen(video, 'ended', () => {
+    }));
+
+    this.unlisteners_.push(listen(video, 'ended', () => {
       this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-    });
+    }));
+  }
+
+  /** @private */
+  uninstallEventHandlers_() {
+    while (this.unlisteners_.length) {
+      this.unlisteners_.pop().call();
+    }
+  }
+
+  /**
+   * Resets the component if the underlying <video> was changed.
+   * This should only be used in cases when a higher-level component manages
+   * this element's DOM.
+   */
+  resetOnDomChange() {
+    this.video_ = childElementByTag(this.element, 'video');
+    this.uninstallEventHandlers_();
+    this.installEventHandlers_();
   }
 
   /** @override */
