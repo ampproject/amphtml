@@ -35,7 +35,6 @@ import {matches, scopedQuerySelectorAll} from '../../../src/dom';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 import {CommonSignals} from '../../../src/common-signals';
-import {setImportantStyles} from '../../../src/style';
 
 
 /**
@@ -139,13 +138,29 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
-    this.pageInactiveCallback_();
+    this.advancement_.stop();
+
+    this.pauseAllMedia_();
+
+    if (this.animationManager_) {
+      this.animationManager_.cancelAll();
+    }
   }
 
 
   /** @override */
   resumeCallback() {
-    this.pageActiveCallback_();
+    this.markPageAsLoaded_();
+    this.updateAudioIcon_();
+    this.registerAllMedia_();
+
+    if (this.isActive()) {
+      this.advancement_.start();
+      this.maybeStartAnimations();
+      this.playAllMedia_();
+    }
+
+    this.reportDevModeErrors_();
   }
 
 
@@ -163,17 +178,6 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @return {!Promise} */
   beforeVisible() {
     return this.maybeApplyFirstAnimationFrame();
-  }
-
-
-  /** @private */
-  onPageVisible_() {
-    this.markPageAsLoaded_();
-    this.updateAudioIcon_();
-    this.registerAllMedia_();
-    this.playAllMedia_();
-    this.maybeStartAnimations();
-    this.reportDevModeErrors_();
   }
 
 
@@ -254,7 +258,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Pauses all media on this page.
-   * @param {boolean} opt_rewindToBeginning Whether to rewind the currentTime
+   * @param {boolean=} opt_rewindToBeginning Whether to rewind the currentTime
    *     of media items to the beginning.
    * @private
    */
@@ -347,35 +351,10 @@ export class AmpStoryPage extends AMP.BaseElement {
   setActive(isActive) {
     if (isActive) {
       this.element.setAttribute('active', '');
-      this.pageActiveCallback_();
+      this.resumeCallback();
     } else {
       this.element.removeAttribute('active');
-      this.pageInactiveCallback_();
-    }
-  }
-
-
-  /** @private */
-  pageActiveCallback_() {
-    this.advancement_.start();
-    this.onPageVisible_();
-  }
-
-
-  /** @private */
-  pageInactiveCallback_() {
-    this.element.removeAttribute('active');
-
-    this.pause();
-  }
-
-
-  pause() {
-    this.pauseAllMedia_(/* opt_rewindToBeginning */ true);
-    this.advancement_.stop();
-
-    if (this.animationManager_) {
-      this.animationManager_.cancelAll();
+      this.pauseCallback();
     }
   }
 

@@ -918,7 +918,7 @@ export class AmpStory extends AMP.BaseElement {
     this.buildBookend_().then(() => {
       this.systemLayer_.hideDeveloperLog();
 
-      this.activePage_.pause();
+      this.activePage_.pauseCallback();
 
       this.toggleElementsOnBookend_(/* display */ false);
 
@@ -940,7 +940,7 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    this.activePage_.setActive(true);
+    this.activePage_.resumeCallback();
 
     this.toggleElementsOnBookend_(/* display */ true);
 
