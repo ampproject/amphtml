@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 import {NavigationState, StateChangeType} from '../navigation-state';
+import {EventType, dispatch} from '../events';
 
 
-describes.fakeWin('amp-story navigation state', {}, () => {
+describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
   let navigationState;
+  let pageElement;
 
   function createObserver() {
     return sandbox.spy();
   }
 
   beforeEach(() => {
-    navigationState = new NavigationState();
+    pageElement = env.win.document.createElement('div');
+    navigationState = new NavigationState(pageElement);
   });
 
   it('should dispatch active page changes to all observers', () => {
@@ -61,5 +64,19 @@ describes.fakeWin('amp-story navigation state', {}, () => {
               && e.value.totalPages === 5
               && e.value.pageId == 'one-two-three'));
     });
+  });
+
+  it('should dispatch BOOKEND_ENTER and BOOKEND_EXIT', () => {
+    const observer = sandbox.spy();
+
+    navigationState.observe(event => observer(event.type));
+
+    dispatch(pageElement, EventType.SHOW_BOOKEND);
+
+    expect(observer).to.have.been.calledWith(StateChangeType.BOOKEND_ENTER);
+
+    dispatch(pageElement, EventType.CLOSE_BOOKEND);
+
+    expect(observer).to.have.been.calledWith(StateChangeType.BOOKEND_EXIT);
   });
 });

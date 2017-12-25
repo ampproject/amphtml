@@ -70,8 +70,13 @@ export class NavigationState {
    */
   // TODO(alanorozco): pass whether change was automatic or on user action
   updateActivePage(pageIndex, totalPages, opt_pageId) {
-    this.fire_(StateChangeType.ACTIVE_PAGE,
-        {pageIndex, totalPages, pageId: opt_pageId});
+    const changeValue = {pageIndex, totalPages};
+
+    if (opt_pageId) {
+      changeValue.pageId = opt_pageId;
+    }
+
+    this.fire_(StateChangeType.ACTIVE_PAGE, changeValue);
   }
 
   /**
