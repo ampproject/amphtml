@@ -191,6 +191,34 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
+  'umenganalytics': {
+    'vars': {
+      'siteid': '',
+      'initial_view_time': '',
+      'eventName': '',
+      'eventProps': '',
+    },
+    'requests': {
+      'base': 'https://b.pre.cnzz.com/utrack?' +
+        '&_siteid=${siteid}' +
+        '&_distinct_id=${clientId(umeng_amp_id)}' +
+        '&_t=${timestamp}' +
+        '&_s=google' +
+        '&_b=web' +
+        '&_r=${externalReferrer}' +
+        '&_h=${screenHeight}' +
+        '&_w=${screenWidth}' +
+        '&_ivt=${initial_view_time}',
+      'pageview': '${base}&_ename=$w_page_view&_eprops=${eventProps}',
+      'event': '${base}&_ename=${eventName}&_eprops=${eventProps}',
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': true,
+      'image': false,
+    },
+  },
+
   'baiduanalytics': {
     'requests': {
       'host': 'https://hm.baidu.com',
