@@ -34,6 +34,7 @@ amp-story[standalone][desktop] {
  right: 0!important;
  bottom: 0!important;
  left: 0!important;
+ overflow: hidden !important;
 }
 
 .i-amphtml-story-background-overlay,
@@ -62,20 +63,22 @@ amp-story[standalone][desktop] {
 
 .i-amphtml-story-background {
   position: absolute !important;
-  top: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  left: 0 !important;
+  top: -150px !important;
+  right: -150px !important;
+  bottom: -150px !important;
+  left: -150px !important;
   opacity: 0 !important;
   filter: blur(50px) !important;
-  margin: -60px !important;
   background-size: cover !important;
   background-color: transparent !important;
   background-position: center center !important;
+  will-change: opacity !important;
+  z-index: 0 !important;
 }
 
 .i-amphtml-story-background.active {
-  opacity: 1!important;
+  opacity: 1 !important;
+  z-index: 1 !important;
 }
 
 [desktop] amp-story-page {
