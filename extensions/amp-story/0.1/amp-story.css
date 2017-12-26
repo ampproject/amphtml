@@ -156,7 +156,6 @@ amp-story[standalone]:fullscreen {
   height: 100% !important;
   width: 100% !important;
   transform: translateZ(0) scaleX(0) !important; /* 0-width by default */
-  transition: transform 0.2s ease !important;
   transform-origin: left !important;
   will-change: transform !important;
 }
