@@ -19,6 +19,10 @@ import {scopedQuerySelector} from '../../../src/dom';
 import {Services} from '../../../src/services';
 
 
+/** @const {string} */
+const TRANSITION = 'transform 0.2s ease';
+
+
 /**
  * Progress bar for <amp-story>.
  */
@@ -110,13 +114,11 @@ export class ProgressBar {
     this.assertValidPageIndex_(pageIndex);
     for (let i = 0; i < this.pageCount_; i++) {
       if (i < pageIndex) {
-        this.updateProgress(i, 1.0);
-      } else if (i > pageIndex) {
-        this.updateProgress(i, 0.0);
+        this.updateProgress(i, 1.0, /* transition */ i == pageIndex - 1);
       } else {
         // The active page manages its own progress by firing PAGE_PROGRESS
         // events to amp-story.
-        this.updateProgress(i, 0.0);
+        this.updateProgress(i, 0.0, /* transition */ pageIndex != 0);
       }
     }
   }
@@ -128,7 +130,9 @@ export class ProgressBar {
    *     progress of the current page.
    * @public
    */
-  updateProgress(pageIndex, progress) {
+  updateProgress(pageIndex, progress, transition = true) {
+    this.activePageIndex_ = pageIndex;
+
     this.assertValidPageIndex_(pageIndex);
     // Offset the index by 1, since nth-child indices start at 1 while
     // JavaScript indices start at 0.
@@ -139,6 +143,7 @@ export class ProgressBar {
     this.vsync_.mutate(() => {
       setImportantStyles(dev().assertElement(progressEl), {
         'transform': scale(`${progress},1`),
+        'transition': transition ? TRANSITION : 'none',
       });
     });
   }
