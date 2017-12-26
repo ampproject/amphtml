@@ -20,14 +20,16 @@ import {EventType, dispatch} from '../events';
 describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
   let navigationState;
   let pageElement;
+  let hasBookend = false;
 
   function createObserver() {
     return sandbox.spy();
   }
 
   beforeEach(() => {
+    hasBookend = false;
     pageElement = env.win.document.createElement('div');
-    navigationState = new NavigationState(pageElement);
+    navigationState = new NavigationState(pageElement, () => hasBookend);
   });
 
   it('should dispatch active page changes to all observers', () => {
@@ -66,7 +68,35 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
     });
   });
 
-  it('should dispatch BOOKEND_ENTER and BOOKEND_EXIT', () => {
+  it('should dispatch END on last page if story has no bookend'. () => {
+    const observer = sandbox.spy();
+
+    navigationState.observe(event => observer(event));
+
+    hasBookend = false;
+
+    navigationState.updateActivePage(1, 2);
+
+    expect(observer).to.have.been.calledWith(sandbox.match(e =>
+        e.type == StateChangeType.ACTIVE_PAGE
+            && e.value.pageIndex === 1
+            && e.value.totalPages === 2));
+
+    expect(observer).to.have.been.calledWith({type: StateChangeType.END});
+
+    hasBookend = true;
+
+    navigationState.updateActivePage(1, 2);
+
+    expect(observer).to.have.been.calledWith(sandbox.match(e =>
+        e.type == StateChangeType.ACTIVE_PAGE
+            && e.value.pageIndex === 1
+            && e.value.totalPages === 2));
+
+    expect(observer).to.not.have.been.calledWith({type: StateChangeType.END});
+  });
+
+  it('should dispatch BOOKEND_ENTER/END and BOOKEND_EXIT', () => {
     const observer = sandbox.spy();
 
     navigationState.observe(event => observer(event.type));
@@ -74,6 +104,7 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
     dispatch(pageElement, EventType.SHOW_BOOKEND);
 
     expect(observer).to.have.been.calledWith(StateChangeType.BOOKEND_ENTER);
+    expect(observer).to.have.been.calledWith(StateChangeType.END);
 
     dispatch(pageElement, EventType.CLOSE_BOOKEND);
 

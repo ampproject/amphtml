@@ -25,6 +25,7 @@ export const StateChangeType = {
   ACTIVE_PAGE: 0,
   BOOKEND_ENTER: 1,
   BOOKEND_EXIT: 2,
+  END: 3,
 };
 
 
@@ -36,8 +37,14 @@ export let StateChangeEventDef;
  * State store to decouple navigation changes from consumers.
  */
 export class NavigationState {
-  /** @param {!Element} storyElement */
-  constructor(storyElement) {
+  /**
+   * @param {!Element} storyElement
+   * @param {!function():Promise<boolean>} hasBookend
+   */
+  constructor(storyElement, hasBookend) {
+    /** @private @const {!function():Promise<boolean>} */
+    this.hasBookend_ = hasBookend;
+
     /** @private {!Observable<StateChangeEventDef>} */
     this.observable_ = new Observable();
 
@@ -51,6 +58,7 @@ export class NavigationState {
   atachEvents_(storyElement) {
     storyElement.addEventListener(EventType.SHOW_BOOKEND, () => {
       this.fire_(StateChangeType.BOOKEND_ENTER);
+      this.fire_(StateChangeType.END);
     });
 
     storyElement.addEventListener(EventType.CLOSE_BOOKEND, () => {
@@ -77,6 +85,14 @@ export class NavigationState {
     }
 
     this.fire_(StateChangeType.ACTIVE_PAGE, changeValue);
+
+    if (pageIndex === totalPages - 1) {
+      this.hasBookend_().then(hasBookend => {
+        if (!hasBookend) {
+          this.fire_(StateChangeType.END);
+        }
+      });
+    }
   }
 
   /**

@@ -56,9 +56,9 @@ const ForwardButtonStates = {
 
 
 /** @private @const {!./simple-template.ElementDef} */
-const BACK_BUTTON = {
+const BUTTON = {
   tag: 'div',
-  attrs: dict({'class': 'i-amphtml-story-button-container prev-container'}),
+  attrs: dict({'class': 'i-amphtml-story-button-container'}),
   children: [
     {
       tag: 'button',
@@ -67,23 +67,6 @@ const BACK_BUTTON = {
     {
       tag: 'div',
       attrs: dict({'class': 'i-amphtml-story-prev-sentinel'}),
-    },
-  ],
-};
-
-
-/** @private @const {!./simple-template.ElementDef} */
-const FORWARD_BUTTON = {
-  tag: 'div',
-  attrs: dict({'class': 'i-amphtml-story-button-container next-container'}),
-  children: [
-    {
-      tag: 'button',
-      attrs: dict({'class': 'i-amphtml-story-button-move'}),
-    },
-    {
-      tag: 'div',
-      attrs: dict({'class': 'i-amphtml-story-next-sentinel'}),
     },
   ],
 };
@@ -105,73 +88,48 @@ function setClassOnHover(hoverEl, targetEl, className) {
 
 
 /**
- * Guards a function against async results that may come later than the most
- * recent call.
- * @param {!function(T):void} fn
- * @return {!function(T):void}
- * @template T
+ * @param {!Document} doc
+ * @param {!ButtonState} defaultState
+ * @param {string} className
+ * @return {{element: !Element, setState: function(!ButtonStateDef):void}}
  */
-function guardAsync(fn) {
-  let count = 0;
-  return valueOrPromise => {
-    const countAtAdd = ++count;
-    Promise.resolve(valueOrPromise).then(value => {
-      if (count != countAtAdd) {
-        return;
-      }
-      fn(value);
-    });
-  };
-}
+function createButton(doc, defaultState, className) {
+  let state = defaultState;
 
+  const element = renderAsElement(doc, BUTTON);
 
-/**
- * @param {!Event} e
- * @param {!Element} el
- * @param {string=} opt_eventType
- */
-function maybeForwardEvent(e, el, opt_eventType) {
-  if (!opt_eventType) {
-    return;
-  }
-  e.preventDefault();
-  dispatch(el, dev().assert(opt_eventType), /* opt_bubbles */ true);
+  element.classList.add(className, defaultState.className);
+
+  element.addEventListener('click', e => {
+    if (!state.triggers) {
+      return;
+    }
+    e.preventDefault();
+    dispatch(element, dev().assert(state.triggers), /* opt_bubbles */ true);
+  });
+
+  return {element, setState: newState => {
+    if (newState === state) {
+      return;
+    }
+    element.classList.remove(state.className);
+    element.classList.add(newState.className);
+    state = newState;
+  }};
 }
 
 
 /** Pagination buttons layer. */
 export class PaginationButtons {
-  /**
-   * @param {!Document} doc
-   * @param {!function():Promise<boolean>} hasBookend
-   */
-  constructor(doc, hasBookend) {
-    /** @private @const {!function():Promise<boolean>} */
-    this.hasBookend_ = hasBookend;
+  /** @param {!Document} doc */
+  constructor(doc) {
+    /** @private @const */
+    this.forwardButton_ =
+        createButton(doc, ForwardButtonStates.NEXT_PAGE, 'next-container');
 
     /** @private @const */
-    this.forwardButton_ = renderAsElement(doc, FORWARD_BUTTON);
-
-    /** @private @const */
-    this.backButton_ = renderAsElement(doc, BACK_BUTTON);
-
-    /** @private {!ButtonStateDef} */
-    this.forwardButtonState_ = ForwardButtonStates.NEXT_PAGE;
-
-    /** @private {!ButtonStateDef} */
-    this.backButtonState_ = BackButtonStates.HIDDEN;
-
-    /**
-     * @private @const {!function((!Promise<!ButtonStateDef>|!ButtonStateDef))}
-     */
-    this.setForwardButtonState_ =
-        guardAsync(state => this.setForwardButtonStateImpl_(state));
-
-    /**
-     * @private @const {!function((!Promise<!ButtonStateDef>|!ButtonStateDef))}
-     */
-    this.setBackButtonState_ =
-        guardAsync(state => this.setBackButtonStateImpl_(state));
+    this.backButton_ =
+        createButton(doc, BackButtonStates.HIDDEN, 'prev-container');
   }
 
   /**
@@ -183,57 +141,16 @@ export class PaginationButtons {
     return new PaginationButtons(doc, hasBookend);
   }
 
-  /**
-   * @param {!ButtonStateDef} state
-   * @private
-   */
-  setForwardButtonStateImpl_(state) {
-    if (this.forwardButtonState_ == state) {
-      return;
-    }
-    this.setButtonState_(this.forwardButton_, this.forwardButtonState_, state);
-    this.forwardButtonState_ = state;
-  }
-
-  /**
-   * @param {!ButtonStateDef} state
-   * @private
-   */
-  setBackButtonStateImpl_(state) {
-    if (this.backButtonState_ == state) {
-      return;
-    }
-    this.setButtonState_(this.backButton_, this.backButtonState_, state);
-    this.backButtonState_ = state;
-  }
-
-  /**
-   * @param {!Element} el
-   * @param {!ButtonStateDef} state
-   * @param {!ButtonStateDef} newState
-   */
-  setButtonState_(el, state, newState) {
-    el.classList.remove(state.className);
-    el.classList.add(newState.className);
-  }
-
   /** @param {!Element} element */
   attach(element) {
-    setClassOnHover(this.forwardButton_, element, 'i-amphtml-story-next-hover');
-    setClassOnHover(this.backButton_, element, 'i-amphtml-story-prev-hover');
+    setClassOnHover(
+        this.forwardButton_.element, element, 'i-amphtml-story-next-hover');
 
-    this.forwardButton_.addEventListener('click', e =>
-      maybeForwardEvent(e, this.forwardButton_,
-          this.forwardButtonState_.triggers));
+    setClassOnHover(
+        this.backButton_.element, element, 'i-amphtml-story-prev-hover');
 
-    this.backButton_.addEventListener('click', e =>
-      maybeForwardEvent(e, this.backButton_, this.backButtonState_.triggers));
-
-    this.forwardButton_.classList.add(this.forwardButtonState_.className);
-    this.backButton_.classList.add(this.backButtonState_.className);
-
-    element.appendChild(this.forwardButton_);
-    element.appendChild(this.backButton_);
+    element.appendChild(this.forwardButton_.element);
+    element.appendChild(this.backButton_.element);
   }
 
   /** @param {!./navigation-state.StateChangeEventDef} event */
@@ -241,34 +158,30 @@ export class PaginationButtons {
     switch (event.type) {
       case StateChangeType.ACTIVE_PAGE:
         const {pageIndex, totalPages} = event.value;
-        if (pageIndex === totalPages - 1) {
-          this.onLastPageActive_();
-          return;
-        }
-        this.setBackButtonState_(
+
+        this.backButton_.setState(
             pageIndex === 0 ?
               BackButtonStates.HIDDEN :
               BackButtonStates.PREVIOUS_PAGE);
-        this.setForwardButtonState_(ForwardButtonStates.NEXT_PAGE);
+
+        this.forwardButton_.setState(
+            pageIndex === totalPages - 1 ?
+              ForwardButtonStates.SHOW_BOOKEND :
+              ForwardButtonStates.NEXT_PAGE);
         break;
 
       case StateChangeType.BOOKEND_ENTER:
-        this.setBackButtonState_(BackButtonStates.CLOSE_BOOKEND);
-        this.setForwardButtonState_(ForwardButtonStates.REPLAY);
+        this.backButton_.setState(BackButtonStates.CLOSE_BOOKEND);
         break;
 
       case StateChangeType.BOOKEND_EXIT:
-        this.onLastPageActive_();
+        this.backButton_.setState(BackButtonStates.PREVIOUS_PAGE);
+        this.forwardButton_.setState(ForwardButtonStates.SHOW_BOOKEND);
+        break;
+
+      case StateChangeType.END:
+        this.forwardButton_.setState(ForwardButtonStates.REPLAY);
         break;
     }
-  }
-
-  /** @private */
-  onLastPageActive_() {
-    this.setBackButtonState_(BackButtonStates.PREVIOUS_PAGE);
-    this.setForwardButtonState_(this.hasBookend_().then(hasBookend =>
-      hasBookend ?
-        ForwardButtonStates.SHOW_BOOKEND :
-        ForwardButtonStates.REPLAY));
   }
 }

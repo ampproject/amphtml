@@ -566,23 +566,20 @@ export class AmpStoryPage extends AMP.BaseElement {
    *     by an automatic advancement after a timeout.
    */
   next(opt_isAutomaticAdvance) {
-    this.switchTo_(
-        this.getNextPageId_(opt_isAutomaticAdvance), 'i-amphtml-story-bookend');
+    this.switchTo_(this.getNextPageId_(opt_isAutomaticAdvance));
   }
 
 
   /**
    * @param {?string} targetPageIdOrNull
-   * @param {string=} opt_fallbackPageId
    * @private
    */
-  switchTo_(targetPageIdOrNull, opt_fallbackPageId) {
-    const targetPageId = targetPageIdOrNull || opt_fallbackPageId;
-    if (!targetPageId) {
+  switchTo_(targetPageIdOrNull) {
+    if (!targetPageIdOrNull) {
       return;
     }
 
-    const payload = {targetPageId};
+    const payload = {targetPageId: dev().assert(targetPageIdOrNull)};
     const eventInit = {bubbles: true};
     dispatchCustom(this.win, this.element, EventType.SWITCH_PAGE, payload,
         eventInit);

@@ -137,7 +137,8 @@ export class AmpStory extends AMP.BaseElement {
     super(element);
 
     /** @private {!NavigationState} */
-    this.navigationState_ = new NavigationState(element);
+    this.navigationState_ =
+        new NavigationState(element, () => this.hasBookend_());
 
     /**
      * Whether entering into fullscreen automatically on navigation is enabled.
@@ -417,11 +418,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   buildPaginationButtons_() {
-    this.paginationButtons_ = PaginationButtons.create(
-        this.win.document,
-        /* hasBookend */ () => this.loadBookendConfig_().then(bookendConfig =>
-          bookendConfig && bookendConfig.relatedArticles &&
-          bookendConfig.relatedArticles.length));
+    this.paginationButtons_ = PaginationButtons.create(this.win.document);
 
     this.paginationButtons_.attach(this.element);
 
@@ -598,7 +595,17 @@ export class AmpStory extends AMP.BaseElement {
   next_(opt_isAutomaticAdvance) {
     const activePage = dev().assert(this.activePage_,
         'No active page set when navigating to next page.');
-    activePage.next();
+
+    if (this.getPageIndex(activePage) !== this.getPageCount() - 1) {
+      activePage.next();
+      return;
+    }
+
+    this.hasBookend_().then(hasBookend => {
+      if (hasBookend) {
+        dispatch(this.element, EventType.SHOW_BOOKEND);
+      }
+    });
   }
 
 
@@ -611,6 +618,7 @@ export class AmpStory extends AMP.BaseElement {
         'No active page set when navigating to next page.');
     activePage.previous();
   }
+
 
   /**
    * Switches to a particular page.
@@ -1062,6 +1070,19 @@ export class AmpStory extends AMP.BaseElement {
           user().error(TAG, 'Error fetching bookend configuration', e.message);
           return null;
         });
+  }
+
+
+  /**
+   * @return {!Promise<boolean>}
+   * @private
+   */
+  hasBookend_() {
+    if (!this.isDesktop_()) {
+      return Promise.resolve(true);
+    }
+    return this.loadBookendConfig_().then(config =>
+      config && config.relatedArticles && config.relatedArticles.length);
   }
 
 
