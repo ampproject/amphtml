@@ -144,6 +144,9 @@ amp-story[standalone]:fullscreen {
   margin: 0 2px!important;
   overflow: hidden!important;
   width: 100% !important;
+
+  /* An empty image works around Safari not clipping rounded corners. */
+  -webkit-mask-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAA5JREFUeNpiYGBgAAgwAAAEAAGbA+oJAAAAAElFTkSuQmCC) !important;
 }
 
 .i-amphtml-story-page-progress-value {

@@ -41,9 +41,6 @@ export class ProgressBar {
     this.root_ = null;
 
     /** @private {number} */
-    this.activePageIndex_ = -1;
-
-    /** @private {number} */
     this.pageCount_ = 0;
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
@@ -118,7 +115,8 @@ export class ProgressBar {
       } else {
         // The active page manages its own progress by firing PAGE_PROGRESS
         // events to amp-story.
-        this.updateProgress(i, 0.0, /* transition */ pageIndex != 0);
+        this.updateProgress(i, 0.0, /* transition */ (
+            pageIndex != 0 && this.activePageIndex_ != 1));
       }
     }
   }
@@ -131,9 +129,10 @@ export class ProgressBar {
    * @public
    */
   updateProgress(pageIndex, progress, transition = true) {
+    this.assertValidPageIndex_(pageIndex);
+
     this.activePageIndex_ = pageIndex;
 
-    this.assertValidPageIndex_(pageIndex);
     // Offset the index by 1, since nth-child indices start at 1 while
     // JavaScript indices start at 0.
     const nthChildIndex = pageIndex + 1;
