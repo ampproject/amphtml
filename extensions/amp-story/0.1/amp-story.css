@@ -376,11 +376,13 @@ amp-story-grid-layer * {
   right: 0 !important;
   top: 0 !important;
   z-index: 100001 !important;
+  transition: transform 0.3s ease-out !important;
+}
 
-  /* arbitrarily high number to avoid visual jumps before transition starts */
-  /* TODO(alanorozco): Find a better solution for this, as value can be
-  /* overriden. */
-  transform: translateY(4000px);
+.i-amphtml-story-bookend.i-amphtml-hidden {
+  transition-timing-function: ease-in !important;
+  transform: translateY(100vh) !important;
+  pointer-events: none !important;
 }
 
 .i-amphtml-story-bookend-hidden {
