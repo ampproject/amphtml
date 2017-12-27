@@ -1353,6 +1353,7 @@ export class Resources {
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (r.getState() == ResourceState.NOT_BUILT && !r.isBuilding()) {
+        r.element.classList.add('r-1')
         this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true);
       }
       if (relayoutAll ||
@@ -1383,6 +1384,7 @@ export class Resources {
                 r.isMeasureRequested() ||
                 relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop) {
           const wasDisplayed = r.isDisplayed();
+          r.element.classList.add('r-2')
           r.measure();
           if (wasDisplayed && !r.isDisplayed()) {
             if (!toUnload) {
@@ -1427,6 +1429,7 @@ export class Resources {
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (r.getState() == ResourceState.NOT_BUILT || r.hasOwner()) {
+        r.element.classList.add('r-3')
         continue;
       }
       // Note that when the document is not visible, neither are any of its
@@ -1437,6 +1440,7 @@ export class Resources {
       const shouldBeInViewport = (this.visible_ && r.isDisplayed() &&
           r.overlaps(visibleRect));
       r.setInViewport(shouldBeInViewport);
+      r.element.classList.add('r-4')
     }
 
     // Phase 4: Schedule elements for layout within a reasonable distance from
@@ -1445,12 +1449,14 @@ export class Resources {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
         if (r.getState() != ResourceState.READY_FOR_LAYOUT || r.hasOwner()) {
+          r.element.classList.add('r-5')
           continue;
         }
         // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
         // layers. This is currently a short-term fix to the problem that
         // the fixed elements get incorrect top coord.
         if (r.isDisplayed() && r.overlaps(loadRect)) {
+          r.element.classList.add('r-6')
           this.scheduleLayoutOrPreload_(r, /* layout */ true);
         }
       }
@@ -1469,6 +1475,7 @@ export class Resources {
         if (r.getState() == ResourceState.READY_FOR_LAYOUT &&
             !r.hasOwner() && r.isDisplayed() && r.idleRenderOutsideViewport()) {
           dev().fine(TAG_, 'idleRenderOutsideViewport layout:', r.debugid);
+          r.element.classList.add('r-7')
           this.scheduleLayoutOrPreload_(r, /* layout */ false);
           idleScheduledCount++;
         }
@@ -1481,6 +1488,7 @@ export class Resources {
         if (r.getState() == ResourceState.READY_FOR_LAYOUT &&
             !r.hasOwner() && r.isDisplayed()) {
           dev().fine(TAG_, 'idle layout:', r.debugid);
+          r.element.classList.add('r-8')
           this.scheduleLayoutOrPreload_(r, /* layout */ false);
           idleScheduledCount++;
         }
@@ -1796,6 +1804,7 @@ export class Resources {
     // Only built and displayed elements can be loaded.
     if (resource.getState() == ResourceState.NOT_BUILT ||
         !resource.isDisplayed()) {
+      resource.element.classList.add('allowed-1')
       return false;
     }
 
@@ -1804,6 +1813,7 @@ export class Resources {
     if (!this.visible_) {
       if (this.viewer_.getVisibilityState() != VisibilityState.PRERENDER ||
           !resource.prerenderAllowed()) {
+            resource.element.classList.add('allowed-2')
         return false;
       }
     }
@@ -1813,9 +1823,10 @@ export class Resources {
         !resource.isInViewport() &&
         !resource.renderOutsideViewport() &&
         !resource.idleRenderOutsideViewport()) {
+          resource.element.classList.add('allowed-3')
       return false;
     }
-
+    resource.element.classList.add('allowed-4')
     return true;
   }
 
@@ -1829,22 +1840,27 @@ export class Resources {
    */
   scheduleLayoutOrPreload_(resource, layout, opt_parentPriority,
     opt_forceOutsideViewport) {
+    resource.element.classList.add('r-s0')
     dev().assert(resource.getState() != ResourceState.NOT_BUILT &&
         resource.isDisplayed(),
     'Not ready for layout: %s (%s)',
     resource.debugid, resource.getState());
     const forceOutsideViewport = opt_forceOutsideViewport || false;
+    resource.element.classList.add('r-s1')
     if (!this.isLayoutAllowed_(resource, forceOutsideViewport)) {
+      resource.element.classList.add('r-s2')
       return;
     }
 
     if (layout) {
+      resource.element.classList.add('r-s3')
       this.schedule_(resource,
           LAYOUT_TASK_ID_, LAYOUT_TASK_OFFSET_,
           opt_parentPriority || 0,
           forceOutsideViewport,
           resource.startLayout.bind(resource));
     } else {
+      resource.element.classList.add('r-s4')
       this.schedule_(resource,
           PRELOAD_TASK_ID_, PRELOAD_TASK_OFFSET_,
           opt_parentPriority || 0,
@@ -1907,6 +1923,7 @@ export class Resources {
     forceOutsideViewport,
     callback) {
     const taskId = resource.getTaskId(localId);
+    resource.element.classList.add('r-schedule-1')
 
     const task = {
       id: taskId,
@@ -1929,8 +1946,10 @@ export class Resources {
         this.queue_.dequeue(queued);
       }
       this.queue_.enqueue(task);
+      resource.element.classList.add('r-schedule-2')
       this.schedulePass(this.calcTaskTimeout_(task));
     }
+    resource.element.classList.add('r-schedule-3')
     task.resource.layoutScheduled(task.scheduleTime);
   }
 

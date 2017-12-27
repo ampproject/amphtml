@@ -31,7 +31,7 @@ describe.configure().retryOnSaucelabs().run(
     });
 
 function runTest(shouldKillPolyfillableApis) {
-  describe.configure().run('Rendering of released components', function() {
+  describe('Rendering of released components', function() {
     this.timeout(5000);
     let fixture;
     beforeEach(() => {
@@ -50,14 +50,14 @@ function runTest(shouldKillPolyfillableApis) {
     // It never renders the ad, even though it appears to work when looking
     // at the rendering. The test passes when running locally in FF.
     // TODO(lannka, #3561): unmute the test.
-    it.configure().skipFirefox().skipChrome()
+    it.configure().skipFirefox()
         .run('all components should get loaded', function() {
           this.timeout(15000);
-          return pollForLayout(fixture.win, 13, 10000).then(() => {
+          return pollForLayout(fixture.win, 12, 10000).then(() => {
             expect(fixture.doc.querySelectorAll('.i-amphtml-element'))
                 .to.have.length(17);
             expect(fixture.doc.querySelectorAll('.i-amphtml-layout'))
-                .to.have.length(13);
+                .to.have.length(12);
             expect(fixture.doc.querySelectorAll('.i-amphtml-error'))
                 .to.have.length(0);
             checkGlobalScope(fixture.win);

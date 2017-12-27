@@ -319,6 +319,7 @@ export function createCustomElementClass(win, name) {
      * @final @package @this {!Element}
      */
   CustomElementClass.prototype.upgrade = function(newImplClass) {
+    this.classList.add('upgrade-1')
     if (this.isInTemplate_) {
       return;
     }
@@ -326,12 +327,14 @@ export function createCustomElementClass(win, name) {
       // Already upgraded or in progress or failed.
       return;
     }
+    this.classList.add('upgrade-2')
     this.implementation_ = new newImplClass(this);
     if (this.everAttached) {
       // Usually, we do an implementation upgrade when the element is
       // attached to the DOM. But, if it hadn't yet upgraded from
       // ElementStub, we couldn't. Now that it's upgraded from a stub, go
       // ahead and do the full upgrade.
+      this.classList.add('upgrade-3')
       this.tryUpgrade_();
     }
   };
@@ -644,6 +647,7 @@ export function createCustomElementClass(win, name) {
      * @final @this {!Element}
      */
   CustomElementClass.prototype.connectedCallback = function() {
+    this.classList.add('connected-callback')
     if (!this.everAttached) {
       this.classList.add('i-amphtml-element');
       this.classList.add('i-amphtml-notbuilt');
@@ -733,9 +737,11 @@ export function createCustomElementClass(win, name) {
      * @private @final @this {!Element}
      */
   CustomElementClass.prototype.tryUpgrade_ = function() {
+    this.classList.add('try-upgrade')
     const impl = this.implementation_;
     dev().assert(!isStub(impl), 'Implementation must not be a stub');
     if (this.upgradeState_ != UpgradeState.NOT_UPGRADED) {
+      this.classList.add('try-upgrade-0-' + this.upgradeState_)
       // Already upgraded or in progress or failed.
       return;
     }
@@ -747,18 +753,23 @@ export function createCustomElementClass(win, name) {
     const startTime = win.Date.now();
     const res = impl.upgradeCallback();
     if (!res) {
+      this.classList.add('try-upgrade-1')
       // Nothing returned: the current object is the upgraded version.
       this.completeUpgrade_(impl, startTime);
     } else if (typeof res.then == 'function') {
+      this.classList.add('try-upgrade-2')
       // It's a promise: wait until it's done.
       res.then(upgrade => {
+        this.classList.add('try-upgrade-3')
         this.completeUpgrade_(upgrade || impl, startTime);
       }).catch(reason => {
+        this.classList.add('try-upgrade-4')
         this.upgradeState_ = UpgradeState.UPGRADE_FAILED;
         rethrowAsync(reason);
       });
     } else {
       // It's an actual instance: upgrade immediately.
+      this.classList.add('try-upgrade-5')
       this.completeUpgrade_(
           /** @type {!./base-element.BaseElement} */(res), startTime);
     }
