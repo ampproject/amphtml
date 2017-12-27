@@ -35,12 +35,8 @@ const TEMPLATE = {
           children: [
             {
               tag: 'div',
-              attrs: dict({'class': 'i-amphtml-story-icons-container'}),
+              attrs: dict({'class': 'i-amphtml-story-hint-tap-icon'}),
               children: [
-                {
-                  tag: 'div',
-                  attrs: dict({'class': 'i-amphtml-story-hint-tap-icon'}),
-                },
                 {
                   tag: 'div',
                   attrs: dict({'class': 'i-amphtml-story-hint-tap-icon-text'}),
@@ -56,16 +52,11 @@ const TEMPLATE = {
           children: [
             {
               tag: 'div',
-              attrs: dict({'class': 'i-amphtml-story-icons-container'}),
+              attrs: dict({'class': 'i-amphtml-story-hint-tap-icon'}),
               children: [
                 {
                   tag: 'div',
-                  attrs: dict({'class': 'i-amphtml-story-hint-tap-icon'}),
-                },
-                {
-                  tag: 'div',
                   attrs: dict({'class': 'i-amphtml-story-hint-tap-icon-text'}),
-                  text: 'Next page',
                 },
               ],
             },
@@ -84,6 +75,9 @@ const FIRST_PAGE_OVERLAY_CLASS = 'show-first-page-overlay';
 
 /** @type {number} */
 const NAVIGATION_OVERLAY_TIMEOUT = 3000;
+
+/** @type {number} */
+const FIRST_PAGE_NAVIGATION_OVERLAY_TIMEOUT = 300;
 
 /**
  * User Hint Layer for <amp-story>.
@@ -129,14 +123,15 @@ export class AmpStoryHint {
     this.vsync_.mutate(() => {
       this.hintContainer_.classList.toggle(NAVIGATION_OVERLAY_CLASS,
           hintClass == NAVIGATION_OVERLAY_CLASS);
-
       this.hintContainer_.classList.toggle(FIRST_PAGE_OVERLAY_CLASS,
           hintClass == FIRST_PAGE_OVERLAY_CLASS);
-
       this.hintContainer_.classList.remove('i-amphtml-hidden');
+
+      const hideTimeout = hintClass == NAVIGATION_OVERLAY_CLASS
+        ? NAVIGATION_OVERLAY_TIMEOUT : FIRST_PAGE_NAVIGATION_OVERLAY_TIMEOUT;
+      this.hideAfterTimeout(hideTimeout);
     });
 
-    this.hideAfterTimeout();
   }
 
   /**
@@ -153,10 +148,13 @@ export class AmpStoryHint {
     this.showHint_(FIRST_PAGE_OVERLAY_CLASS);
   }
 
-  /** @visibleForTesting */
-  hideAfterTimeout() {
+  /**
+   * Hides the overlay after a given time
+   * @param {number} timeout
+   */
+  hideAfterTimeout(timeout) {
     this.hintTimeout_ = this.timer_.delay(
-        () => this.hideInternal_(), NAVIGATION_OVERLAY_TIMEOUT);
+        () => this.hideInternal_(), timeout);
   }
 
   /**
