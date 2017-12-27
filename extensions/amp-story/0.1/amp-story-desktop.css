@@ -446,7 +446,12 @@ amp-story-page.i-amphtml-story-page-shown {
 [desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-left {
   display: block!important;
   float: left!important;
-  margin: 16px 40px!important;
+  height: 40px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  left: calc(50% - 17vw - 72px);
 }
 [desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-right {
   margin: 16px 40px!important;
