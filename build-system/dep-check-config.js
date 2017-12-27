@@ -235,6 +235,8 @@ exports.rules = [
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/polyfills.js',
     whitelist: [
+      'src/custom-element.js->src/polyfills.js',
+      'src/service/custom-element-registry.js->src/polyfills.js',
       'src/amp.js->src/polyfills.js',
       'src/service.js->src/polyfills.js',
       'src/service/timer-impl.js->src/polyfills.js',
