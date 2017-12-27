@@ -308,10 +308,6 @@ amp-story-page.i-amphtml-story-page-shown {
   right: 0!important;
 }
 
-.i-amphtml-story-share:hover:before {
-  width: calc(100% + 16px)!important;
-}
-
 .i-amphtml-story-share .i-amphtml-story-share-list > li  {
   opacity: 0!important;
   transition: opacity 300ms linear!important;
@@ -321,8 +317,8 @@ amp-story-page.i-amphtml-story-page-shown {
   opacity: 1!important;
 }
 
-.i-amphtml-story-share .i-amphtml-story-share-list > li + li {
-  margin-left: 8px!important;
+.i-amphtml-story-share .i-amphtml-story-share-list > li {
+  margin: 0 !important;
 }
 
 /* Incremental fade in */
@@ -356,62 +352,52 @@ amp-story-page.i-amphtml-story-page-shown {
 
 .i-amphtml-story-share .i-amphtml-story-share-list {
   padding: 0!important;
-  margin: 0 80px 0 0!important;
-}
-
-.i-amphtml-story-share .i-amphtml-story-share-list > li:first-child,
-.i-amphtml-story-share .i-amphtml-story-share-list > li:last-child,
-.i-amphtml-story-share .i-amphtml-story-share-list > li {
-  padding: 0!important;
-  width: 40px!important;
-  height: 40px!important;
+  margin: 0 72px 0 0 !important;
 }
 
 [desktop] .i-amphtml-story-share .i-amphtml-story-share-list > li {
-  width: 56px!important;
-  height: 56px!important;
+  width: 48px !important;
+  height: 48px !important;
+  padding: 0 !important;
 }
 
-.i-amphtml-story-share .i-amphtml-story-share-list > li svg {
-  width: 28px!important;
-  height: 28px!important;
+[desktop] .i-amphtml-story-share:hover:before {
+  width: calc(100% - 32px) !important;
 }
 
-.i-amphtml-story-share:hover:before {
-  width: calc(100% + 16px)!important;
-}
-
-.i-amphtml-story-share .i-amphtml-story-share-icon {
-  display: flex!important;
+[desktop] .i-amphtml-story-share .i-amphtml-story-share-icon {
+  display: flex !important;
   justify-content: center;
   align-items: center;
-  width: 40px!important;
-  height: 40px!important;
-  background-size: 30px 30px;
-  background-color: transparent;
+  width: 48px !important;
+  height: 48px !important;
   padding: 0;
 }
 
 [desktop] .i-amphtml-story-share-icon {
   font-size: 0px!important;
-  background-position-y: 5px!important;
+  background-size: 24px 24px !important;
+  background-position: center center !important;
+  padding: 0 !important;
+}
+
+[desktop] .i-amphtml-story-share-icon.amp-social-share-facebook {
+  /* SVG icon has inner padding, so the glyph renders visually smaller than
+   * other icons, so we work around it by setting a higher background size. */
+  background-size: 28px 28px !important;
+  background-position: center center !important;
 }
 
 [desktop] .i-amphtml-story-share-icon::before {
-  background-color: transparent!important;
+  display: none !important;
 }
 
 [desktop] .i-amphtml-story-share-icon:active::before {
-  background-color: transparent!important;
+  display: none !important;
 }
 
 [desktop] .i-amphtml-story-share-list {
-  margin-right: 100px!important;
-  margin-top: 15px!important;
-}
-
-.i-amphtml-story-share .i-amphtml-story-share-name {
-  display: none!important;
+  margin-right: 72px !important;
 }
 
 /* system layer changes */

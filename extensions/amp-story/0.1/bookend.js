@@ -15,7 +15,7 @@
  */
 import {Animation} from '../../../src/animation';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {ShareWidget} from './share';
+import {ShareWidget, ShareWidgetLayout} from './share';
 import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
@@ -214,7 +214,8 @@ export class Bookend {
     this.closeBtn_ = null;
 
     /** @private {!ShareWidget} */
-    this.shareWidget_ = ShareWidget.create(win);
+    this.shareWidget_ =
+        ShareWidget.create(win, ShareWidgetLayout.ROW_SCROLLABLE);
 
     /** @private {boolean} */
     this.isActive_ = false;

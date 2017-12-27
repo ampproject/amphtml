@@ -43,6 +43,14 @@ const SHARE_PROVIDER_NAME = dict({
 });
 
 
+/** @package @enum */
+export const ShareWidgetLayout = {
+  ROW: 0,
+  ROW_SCROLLABLE: 1,
+  WRAP: 2,
+};
+
+
 /**
  * Default left/right padding for share buttons.
  * @private @const {number}
@@ -86,6 +94,14 @@ const LINK_SHARE_ITEM_TEMPLATE = {
   }),
   text: 'Get Link', // TODO(alanorozco): i18n
 };
+
+
+/** @private @const {string} */
+const ROW_SCROLLABLE_CLASSNAME = 'i-amphtml-story-share-widget-scrollable';
+
+
+/** @private @const {string} */
+const ROW_CLASSNAME = 'i-amphtml-story-share-widget-row';
 
 
 /**
@@ -159,7 +175,7 @@ function buildCopySuccessfulToast(doc, url) {
  */
 export class ShareWidget {
   /** @param {!Window} win */
-  constructor(win) {
+  constructor(win, layout = ShareWidgetLayout.ROW) {
     /** @private {?../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = null;
 
@@ -178,11 +194,14 @@ export class ShareWidget {
 
     /** @private {?Element} */
     this.root_ = null;
+
+    /** @private @const */
+    this.layout_ = layout;
   }
 
   /** @param {!Window} win */
-  static create(win) {
-    return new ShareWidget(win);
+  static create(win, opt_layout) {
+    return new ShareWidget(win, opt_layout);
   }
 
   /**
@@ -195,6 +214,14 @@ export class ShareWidget {
     this.ampdoc_ = ampdoc;
 
     this.root_ = renderAsElement(this.win_.document, TEMPLATE);
+
+    this.root_.classList.toggle(
+        ROW_CLASSNAME,
+        this.layout_ === ShareWidgetLayout.ROW);
+
+    this.root_.classList.toggle(
+        ROW_SCROLLABLE_CLASSNAME,
+        this.layout_ === ShareWidgetLayout.ROW_SCROLLABLE);
 
     this.attachEvents_(ampdoc);
 
@@ -235,6 +262,11 @@ export class ShareWidget {
    * @private
    */
   applyButtonPadding_() {
+    if (!this.layout_ == ShareWidgetLayout.ROW_SCROLLABLE) {
+      // TODO(alanorozco): Generalize algorithm below for the wrap render case.
+      return;
+    }
+
     const items = this.getVisibleItems_();
 
     if (!items.length) {
