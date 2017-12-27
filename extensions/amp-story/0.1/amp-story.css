@@ -875,8 +875,8 @@ amp-story[standalone] .i-amphtml-story-developer-log {
   left: 0 !important;
   right: 0 !important;
   display: inline-block !important;
-  padding: 1.1em 1.2em !important;
-  line-height: 1.4 !important;
+  padding: 1.16em 1.33em !important;
+  line-height: 1.33 !important;
   color: #fff !important;
   background: #212121 !important;
   animation: toast 2.2s !important;
@@ -884,14 +884,14 @@ amp-story[standalone] .i-amphtml-story-developer-log {
   font-family: 'Roboto', sans-serif !important;
   font-weight: 400 !important;
   font-size: 12px !important;
-  max-width: 520px !important;
+  max-width: 640px !important;
 }
 
-@media (min-width: 1024px) and (min-height: 768px) {
+@media (min-width: 640px) {
   .i-amphtml-story-toast {
     right: auto !important;
     font-size: 14px !important;
-    margin: 0 auto 1.2em 1.2em !important;
+    margin: 0 auto 1.16em 1.16em !important;
     border-radius: 6px;
   }
 }
