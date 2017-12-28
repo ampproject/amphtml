@@ -259,7 +259,7 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
     div.setAttribute('width', '50');
     div.setAttribute('height', '100');
     div.setAttribute('title', 'a_title');
-    div.setAttribute('not_whitelisted', 'shouldnt_be_in_iframe')
+    div.setAttribute('not_whitelisted', 'shouldnt_be_in_iframe');
     setupElementFunctions(div);
 
     container.appendChild(div);
