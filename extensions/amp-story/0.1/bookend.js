@@ -13,15 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Animation} from '../../../src/animation';
+import {KeyCodes} from '../../../src/utils/key-codes';
 import {ShareWidget} from './share';
 import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
+import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {getJsonLd} from './jsonld';
 import {isArray} from '../../../src/types';
 import {parseUrl} from '../../../src/url';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
+import {throttle} from '../../../src/utils/rate-limit';
+import * as tr from '../../../src/transition';
 
 
 /**
@@ -33,10 +38,39 @@ import {renderAsElement, renderSimpleTemplate} from './simple-template';
 export let BookendConfigDef;
 
 
+/**
+ * Scroll amount required for full-bleed in px.
+ * @private @const {number}
+ */
+const FULLBLEED_THRESHOLD = 88;
+
+
+/** @private @const {string} */
+const FULLBLEED_CLASSNAME = 'i-amphtml-story-bookend-fullbleed';
+
+
 /** @private @const {!./simple-template.ElementDef} */
 const ROOT_TEMPLATE = {
   tag: 'section',
-  attrs: dict({'class': 'i-amphtml-story-bookend'}),
+  attrs: dict({
+    'class': 'i-amphtml-story-bookend',
+    'hidden': true,
+  }),
+  children: [
+    // Overflow container that gets pushed to the bottom when content height is
+    // smaller than viewport.
+    {
+      tag: 'div',
+      attrs: dict({'class': 'i-amphtml-story-bookend-overflow'}),
+      children: [
+        // Holds bookend content.
+        {
+          tag: 'div',
+          attrs: dict({'class': 'i-amphtml-story-bookend-inner'}),
+        },
+      ],
+    },
+  ],
 };
 
 
@@ -82,8 +116,8 @@ function buildArticleTemplate(articleData) {
           tag: 'img',
           attrs: dict({
             'src': articleData.image,
-            'width': 116,
-            'height': 116,
+            'width': 100,
+            'height': 100,
           }),
         },
       ],
@@ -113,7 +147,7 @@ function buildArticlesContainerTemplate(articleSets) {
       tag: 'div',
       attrs: dict({'class': 'i-amphtml-story-bookend-article-set'}),
       children: articleSet.articles.map(article =>
-          buildArticleTemplate(article)),
+        buildArticleTemplate(article)),
     });
   });
 
@@ -135,19 +169,11 @@ function buildReplayButtonTemplate(doc, title, domainName, opt_imageUrl) {
     children: [
       !opt_imageUrl ? REPLAY_ICON_TEMPLATE : {
         tag: 'div',
-        attrs: dict({'class': 'i-amphtml-story-bookend-replay-image'}),
-        children: [
-          // TODO(alanorozco): Figure out how to use amp-img here
-          {
-            tag: 'img',
-            attrs: dict({
-              'src': opt_imageUrl,
-              'width': 80,
-              'height': 80,
-            }),
-          },
-          REPLAY_ICON_TEMPLATE,
-        ],
+        attrs: dict({
+          'class': 'i-amphtml-story-bookend-replay-image',
+          'style': `background-image: url(${opt_imageUrl}) !important`,
+        }),
+        children: [REPLAY_ICON_TEMPLATE],
       },
       {
         tag: 'h2',
@@ -184,8 +210,14 @@ export class Bookend {
     /** @private {?Element} */
     this.replayBtn_ = null;
 
+    /** @private {?Element} */
+    this.closeBtn_ = null;
+
     /** @private {!ShareWidget} */
     this.shareWidget_ = ShareWidget.create(win);
+
+    /** @private {boolean} */
+    this.isActive_ = false;
   }
 
   /**
@@ -203,8 +235,8 @@ export class Bookend {
 
     this.replayBtn_ = this.buildReplayButton_(ampdoc);
 
-    this.root_.appendChild(this.replayBtn_);
-    this.root_.appendChild(this.shareWidget_.build(ampdoc));
+    this.getInnerContainer_().appendChild(this.replayBtn_);
+    this.getInnerContainer_().appendChild(this.shareWidget_.build(ampdoc));
 
     this.attachEvents_();
 
@@ -214,7 +246,28 @@ export class Bookend {
   /** @private */
   attachEvents_() {
     // TODO(alanorozco): Listen to tap event properly (i.e. fastclick)
+    this.root_.addEventListener('click', e => this.maybeClose_(e));
     this.replayBtn_.addEventListener('click', e => this.onReplayBtnClick_(e));
+
+    this.getOverflowContainer_().addEventListener('scroll',
+        // minInterval is high since this is a step function that does not
+        // require smoothness
+        throttle(this.win_, () => this.onScroll_(), 100));
+
+    this.win_.addEventListener('keyup', e => {
+      if (!this.isActive()) {
+        return;
+      }
+      if (e.keyCode == KeyCodes.ESCAPE) {
+        e.preventDefault();
+        this.dispatchClose_();
+      }
+    });
+  }
+
+  /** @return {boolean} */
+  isActive() {
+    return this.isActive_;
   }
 
   /**
@@ -224,6 +277,96 @@ export class Bookend {
   onReplayBtnClick_(e) {
     e.stopPropagation();
     dispatch(this.getRoot(), EventType.REPLAY, /* opt_bubbles */ true);
+  }
+
+  /**
+   * Closes bookend if tapping outside usable area.
+   * @param {!Event} e
+   * @private
+   */
+  maybeClose_(e) {
+    if (this.elementOutsideUsableArea_(dev().assertElement(e.target))) {
+      e.stopPropagation();
+      this.dispatchClose_();
+    }
+  }
+
+  /** @private */
+  dispatchClose_() {
+    dispatch(this.getRoot(), EventType.CLOSE_BOOKEND, /* opt_bubbles */ true);
+  }
+
+  /**
+   * @param {!Element} el
+   * @return {boolean}
+   */
+  elementOutsideUsableArea_(el) {
+    return !closest(el, el => el == this.getInnerContainer_());
+  }
+
+  /**
+   * Changes between card view and full-bleed based on scroll position.
+   * @private
+   */
+  onScroll_() {
+    if (!this.isActive()) {
+      return;
+    }
+    Services.vsyncFor(this.win_).run({
+      measure: state => {
+        state.shouldBeFullBleed =
+            this.getOverflowContainer_()./*OK*/scrollTop >= FULLBLEED_THRESHOLD;
+      },
+      mutate: state => {
+        this.getRoot().classList.toggle(
+            FULLBLEED_CLASSNAME, state.shouldBeFullBleed);
+      },
+    }, {});
+  }
+
+  /**
+   * Hides bookend with a transition.
+   * Uses animation utils instead of CSS transition for convenience and
+   * coordination (i.e. listening to transition end).
+   */
+  hide() {
+    const transition = tr.setStyles(this.getRoot(), {
+      transform: tr.translateY(tr.numeric(0, this.getViewportHeight_())),
+    });
+
+    this.isActive_ = false;
+
+    Animation.animate(this.getRoot(), transition, 300, 'ease-in')
+        .thenAlways(() => {
+          this.getRoot().setAttribute('hidden', true);
+        });
+  }
+
+  /**
+   * Shows bookend with a transition.
+   * Uses animation utils instead of CSS transition for convenience and
+   * coordination (i.e. listening to transition end).
+   */
+  show() {
+    const transition = tr.setStyles(this.getRoot(), {
+      transform: tr.translateY(tr.numeric(this.getViewportHeight_(), 0)),
+    });
+
+    this.isActive_ = true;
+
+    this.getRoot().classList.remove(FULLBLEED_CLASSNAME);
+    this.getRoot().removeAttribute('hidden');
+    this.getRoot()./*OK*/scrollTop = 0;
+
+    Animation.animate(this.getRoot(), transition, 300, 'ease-out');
+  }
+
+  /**
+   * @return {number}
+   * @private
+   */
+  getViewportHeight_() {
+    return Services.viewportForDoc(this.getRoot()).getSize().height;
   }
 
   /**
@@ -257,7 +400,7 @@ export class Bookend {
    * @private
    */
   setRelatedArticles_(articleSets) {
-    this.getRoot().appendChild(
+    this.getInnerContainer_().appendChild(
         renderSimpleTemplate(this.win_.document,
             buildArticlesContainerTemplate(articleSets)));
   }
@@ -266,6 +409,24 @@ export class Bookend {
   getRoot() {
     this.assertBuilt_();
     return dev().assertElement(this.root_);
+  }
+
+  /**
+   * Gets container for bookend content.
+   * @return {!Element}
+   * @private
+   */
+  getInnerContainer_() {
+    return dev().assertElement(this.getOverflowContainer_().firstElementChild);
+  }
+
+  /**
+   * Gets outer container that gets scrolled.
+   * @return {!Element}
+   * @private
+   */
+  getOverflowContainer_() {
+    return dev().assertElement(this.getRoot().firstElementChild);
   }
 
   /**
@@ -282,10 +443,10 @@ export class Bookend {
 
     const metadata = {
       title: jsonLd && jsonLd['heading'] ?
-          jsonLd['heading'] :
-          user().assertElement(
-              this.win_.document.head.querySelector('title'),
-              'Please set <title> or structured data (JSON-LD).').textContent,
+        jsonLd['heading'] :
+        user().assertElement(
+            this.win_.document.head.querySelector('title'),
+            'Please set <title> or structured data (JSON-LD).').textContent,
 
       domainName:
           parseUrl(Services.documentInfoForDoc(ampdoc).canonicalUrl).hostname,

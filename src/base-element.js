@@ -156,6 +156,16 @@ export class BaseElement {
 
     /** @public {?Object} For use by sub classes */
     this.config = null;
+
+    /**
+     * The time at which this element was scheduled for layout relative to the
+     * epoch. This value will be set to 0 until the this element has been
+     * scheduled.
+     * Note that this value may change over time if the element is enqueued,
+     * then dequeued and re-enqueued by the scheduler.
+     * @public {number}
+     */
+    this.layoutScheduleTime = 0;
   }
 
   /**
@@ -390,6 +400,17 @@ export class BaseElement {
    */
   renderOutsideViewport() {
     return 3;
+  }
+
+  /**
+   * Allows for rendering outside of the constraint set by renderOutsideViewport
+   * so long task scheduler is idle.  Integer values less than those returned
+   * by renderOutsideViewport have no effect.  Subclasses can override (default
+   * is disabled).
+   * @return {boolean|number}
+   */
+  idleRenderOutsideViewport() {
+    return false;
   }
 
   /**
@@ -854,7 +875,7 @@ export class BaseElement {
         this.element, newHeight, /* newWidth */ undefined);
   }
 
- /**
+  /**
   * Return a promise that requests the runtime to update
   * the size of this element to the specified value.
   * The runtime will schedule this request and attempt to process it
@@ -874,7 +895,7 @@ export class BaseElement {
         this.element, newHeight, newWidth);
   }
 
- /**
+  /**
   * Runs the specified mutation on the element and ensures that measures
   * and layouts performed for the affected elements.
   *

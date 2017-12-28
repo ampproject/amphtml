@@ -30,10 +30,12 @@ import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isFiniteNumber} from '../../../src/types';
 import {map} from '../../../src/utils/object';
-import {recursiveEquals} from '../../../src/json';
+import {parseJson, recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
-import {waitForBodyPromise} from '../../../src/dom';
+import {
+  iterateCursor, scopedQuerySelectorAll, waitForBodyPromise,
+} from '../../../src/dom';
 
 const TAG = 'amp-bind';
 
@@ -147,9 +149,9 @@ export class Bind {
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
 
     const bodyPromise = (opt_win)
-        ? waitForBodyPromise(opt_win.document)
-            .then(() => dev().assertElement(opt_win.document.body))
-        : ampdoc.whenBodyAvailable();
+      ? waitForBodyPromise(opt_win.document)
+          .then(() => dev().assertElement(opt_win.document.body))
+      : ampdoc.whenBodyAvailable();
 
     /**
      * Resolved when the service finishes scanning the document for bindings.
@@ -237,10 +239,10 @@ export class Bind {
       // so that we can restore them on history-pop.
       const oldState = map();
       Object.keys(result).forEach(variable => {
-        const s = map();
         const value = this.state_[variable];
-        s[variable] = (value === undefined) ? null : value;
-        deepMerge(oldState, s, MAX_MERGE_DEPTH);
+        // Store a deep copy of `value` to make sure `oldState` isn't
+        // modified by subsequent setState() actions.
+        oldState[variable] = this.copyJsonObject_(value);
       });
 
       const onPop = () => this.setState(oldState);
@@ -269,7 +271,7 @@ export class Bind {
           // Don't reevaluate/apply if there are no bindings.
           if (numberOfBindingsAdded > 0) {
             return this.evaluate_().then(results =>
-                this.applyElements_(results, elements));
+              this.applyElements_(results, elements));
           }
         });
     return this.timer_.timeoutPromise(timeout, rescan,
@@ -283,8 +285,11 @@ export class Bind {
    * @private
    */
   initialize_(rootNode) {
-    dev().fine(TAG, 'Scanning DOM for bindings...');
-    let promise = this.addBindingsForNodes_([rootNode]).then(() => {
+    dev().fine(TAG, 'Scanning DOM for bindings and macros...');
+    let promise = Promise.all([
+      this.addMacros_(),
+      this.addBindingsForNodes_([rootNode])]
+    ).then(() => {
       // Listen for DOM updates (e.g. template render) to rescan for bindings.
       rootNode.addEventListener(AmpEvents.DOM_UPDATE, this.boundOnDomUpdate_);
     });
@@ -328,6 +333,37 @@ export class Bind {
   }
 
   /**
+   * Scans the document for <amp-bind-macro> elements, and adds them to the
+   * bind-evaluator.
+   *
+   * Returns a promise that resolves after macros have been added.
+   *
+   * @return {!Promise<number>}
+   * @private
+   */
+  addMacros_() {
+    const elements =
+        scopedQuerySelectorAll(this.ampdoc.getBody(), 'AMP-BIND-MACRO');
+    const macros =
+        /** @type {!Array<!./amp-bind-macro.AmpBindMacroDef>} */ ([]);
+    iterateCursor(elements, element => {
+      const argumentNames = (element.getAttribute('arguments') || '')
+          .split(',')
+          .map(s => s.trim());
+      macros.push({
+        id: element.getAttribute('id'),
+        argumentNames,
+        expressionString: element.getAttribute('expression'),
+      });
+    });
+    if (macros.length == 0) {
+      return Promise.resolve(0);
+    } else {
+      return this.ww_('bind.addMacros', [macros]).then(() => macros.length);
+    }
+  }
+
+  /**
    * For each node in an array, scans it and its descendants for bindings.
    * This function is not idempotent.
    *
@@ -342,8 +378,8 @@ export class Bind {
     const scanPromises = nodes.map(node => {
       // Limit number of total bindings (unless in local manual testing).
       const limit = (getMode().localDev && !getMode().test)
-          ? Number.POSITIVE_INFINITY
-          : this.maxNumberOfBindings_ - this.numberOfBindings();
+        ? Number.POSITIVE_INFINITY
+        : this.maxNumberOfBindings_ - this.numberOfBindings();
 
       return this.scanNode_(node, limit).then(results => {
         const {
@@ -994,6 +1030,25 @@ export class Bind {
       }
     }
     return true;
+  }
+
+  /**
+   * Copies an object containing JSON data and returns it.
+   * Returns null if input object contains invalid JSON (e.g. undefined or
+   * circular references).
+   * @param {?JsonObject|undefined} o
+   * @return {?JsonObject}
+   */
+  copyJsonObject_(o) {
+    if (o === undefined) {
+      return null;
+    }
+    try {
+      return parseJson(JSON.stringify(o));
+    } catch (e) {
+      dev().error(TAG, 'Failed to copy JSON (' + o + ') with error: ' + e);
+    }
+    return null;
   }
 
   /**

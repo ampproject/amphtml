@@ -53,8 +53,10 @@ export class AmpAdCustom extends AMP.BaseElement {
 
   /** @override */
   getPriority() {
-    // Loads ads after other content.
-    return 2;
+    // Loads ads after other content
+    const isPWA = !this.element.getAmpDoc().isSingleDoc();
+    // give the ad higher priority if it is inside a PWA
+    return isPWA ? 1 : 2;
   }
 
   /** @override **/
@@ -93,7 +95,7 @@ export class AmpAdCustom extends AMP.BaseElement {
       let templateData = data;
       if (this.slot_ !== null) {
         templateData = data.hasOwnProperty(this.slot_) ? data[this.slot_] :
-            null;
+          null;
       }
       // Set UI state
       if (templateData !== null && typeof templateData == 'object') {

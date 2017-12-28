@@ -22,6 +22,9 @@ export const EventType = {
   // Triggered when the user clicks the exit full screen button
   EXIT_FULLSCREEN: 'ampstory:exitfullscreen',
 
+  // Triggered when the user clicks the enter full screen button
+  ENTER_FULLSCREEN: 'ampstory:enterfullscreen',
+
   // Triggered when the user clicks the close bookend button
   CLOSE_BOOKEND: 'ampstory:closebookend',
 
@@ -40,12 +43,18 @@ export const EventType = {
   // Triggered when the story should switch to a specified page
   SWITCH_PAGE: 'ampstory:switchpage',
 
+  // Triggered when a page updates its progress
+  PAGE_PROGRESS: 'ampstory:pageprogress',
+
   // Triggered when the story should be replayed
   REPLAY: 'ampstory:replay',
 
   // DEVELOPMENT MODE ONLY: Triggered when a story page has log entries (e.g.
   // warnings or errors).
   DEV_LOG_ENTRIES_AVAILABLE: 'ampstory:devlogentriesavailable',
+
+  // Triggered when user clicks on left 25% of the first page
+  SHOW_NO_PREVIOUS_PAGE_HELP: 'ampstory:shownopreviouspagehelp',
 };
 
 

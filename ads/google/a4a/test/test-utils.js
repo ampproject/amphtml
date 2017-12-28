@@ -18,6 +18,7 @@ import {
   additionalDimensions,
   addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
+  getCsiAmpAnalyticsVariables,
   EXPERIMENT_ATTRIBUTE,
   googleAdUrl,
   mergeExperimentIds,
@@ -65,8 +66,8 @@ function noopMethods(impl, doc, sandbox) {
   impl.element.build = noop;
   impl.element.getPlaceholder = noop;
   impl.element.createPlaceholder = noop;
-  sandbox.stub(impl, 'getAmpDoc', () => doc);
-  sandbox.stub(impl, 'getPageLayoutBox', () => {
+  sandbox.stub(impl, 'getAmpDoc').callsFake(() => doc);
+  sandbox.stub(impl, 'getPageLayoutBox').callsFake(() => {
     return {
       top: 11, left: 12, right: 0, bottom: 0, width: 0, height: 0,
     };
@@ -344,6 +345,32 @@ describe('Google A4A utils', () => {
       });
     });
 
+    it('should include scroll position', function() {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        doc.win = window;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        const getRect = () => { return {'width': 100, 'height': 200}; };
+        const getSize = () => { return {'width': 100, 'height': 200}; };
+        const getScrollLeft = () => 12;
+        const getScrollTop = () => 34;
+        const viewportStub = sandbox.stub(Services, 'viewportForDoc');
+        viewportStub.returns({getRect, getSize, getScrollTop, getScrollLeft});
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', 0, {}, []).then(url1 => {
+            expect(url1).to.match(/scr_x=12&scr_y=34/);
+          });
+        });
+      });
+    });
+
     it('should include all experiment ids', function() {
       // When ran locally, this test tends to exceed 2000ms timeout.
       this.timeout(5000);
@@ -362,6 +389,28 @@ describe('Google A4A utils', () => {
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, {}, ['789', '098']).then(url1 => {
             expect(url1).to.match(/eid=123%2C456%2C789%2C098/);
+          });
+        });
+      });
+    });
+
+    it('should include debug_experiment_id if local mode w/ deid hash', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        doc.win = fixture.win;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        impl.win.AMP_CONFIG = {type: 'production'};
+        impl.win.location.hash = 'foo,deid=123456,bar';
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', 0, [], []).then(url1 => {
+            expect(url1).to.match(/[&?]debug_experiment_id=123456/);
           });
         });
       });
@@ -566,9 +615,78 @@ describe('Google A4A utils', () => {
 
     it('should handle fetch error', () => {
       sandbox.stub(Services, 'xhrFor').returns(
-        {fetchJson: () => Promise.reject('some network failure')});
+          {fetchJson: () => Promise.reject('some network failure')});
       return getIdentityToken(env.win, env.win.document)
           .then(result => expect(result).to.jsonEqual({}));
+    });
+  });
+
+  describe('variables for amp-analytics', () => {
+    let a4a;
+    let sandbox;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const element = createElementWithAttributes(fixture.doc, 'amp-a4a', {
+          'width': '200',
+          'height': '50',
+          'type': 'adsense',
+          'data-amp-slot-index': '4',
+        });
+        element.getAmpDoc = () => fixture.doc;
+        a4a = new MockA4AImpl(element);
+      });
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+    it('should include the correlator', () => {
+      const vars = getCsiAmpAnalyticsVariables('trigger', a4a, null);
+      expect(vars['correlator']).not.to.be.undefined;
+      expect(vars['correlator']).to.be.greaterThan(0);
+    });
+
+    it('should include the slot index', () => {
+      const vars = getCsiAmpAnalyticsVariables('trigger', a4a, null);
+      expect(vars['slotId']).to.equal('4');
+    });
+
+    it('should include the qqid when provided', () => {
+      const vars = getCsiAmpAnalyticsVariables('trigger', a4a, '<qqid>');
+      expect(vars['qqid']).to.equal('<qqid>');
+    });
+
+    it('should omit the qqid when null', () => {
+      const vars = getCsiAmpAnalyticsVariables('trigger', a4a, null);
+      expect(vars['qqid']).to.be.undefined;
+    });
+
+    it('should include scheduleTime for ad render start triggers', () => {
+      a4a.element.layoutScheduleTime = 200;
+      const vars = getCsiAmpAnalyticsVariables(
+          'ad-render-start', a4a, null);
+      expect(vars['scheduleTime']).to.be.a('number');
+      expect(vars['scheduleTime']).not.to.equal(0);
+    });
+
+    it('should omit scheduleTime by default', () => {
+      a4a.element.layoutScheduleTime = 200;
+      const vars = getCsiAmpAnalyticsVariables('trigger', a4a, null);
+      expect(vars['scheduleTime']).to.be.undefined;
+    });
+
+    it('should include viewer lastVisibleTime', () => {
+      const getLastVisibleTime = () => 300;
+      const viewerStub = sandbox.stub(Services, 'viewerForDoc');
+      viewerStub.returns({getLastVisibleTime});
+
+      const vars = getCsiAmpAnalyticsVariables('trigger', a4a, null);
+      expect(vars['viewerLastVisibleTime']).to.be.a('number');
+      expect(vars['viewerLastVisibleTime']).not.to.equal(0);
     });
   });
 });

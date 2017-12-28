@@ -28,7 +28,7 @@ import '../../src/service/timer-impl';
 initLogConstructor();
 setReportError(reportError);
 
-const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
+const COOKIE_MAX_AGE_DAYS = 180; // 6 month
 
 /**
  * @typedef {{
@@ -185,7 +185,7 @@ const EXPERIMENTS = [
   },
   {
     id: 'amp-animation',
-    name: 'High-performing keyframe animations in AMP.',
+    name: 'High-performing keyframe animations in AMP (launched).',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-animation/amp-animation.md',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
@@ -249,13 +249,6 @@ const EXPERIMENTS = [
     name: 'IMA-integrated Video Player',
   },
   {
-    id: 'amp-sidebar 1.0',
-    name: 'Amp sidebar 1.0 extension',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9803',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-      'amp-sidebar/1.0/amp-sidebar-1.0.md',
-  },
-  {
     id: 'user-error-reporting',
     name: 'Report error to publishers',
     spec: 'https://github.com/ampproject/amphtml/issues/6415',
@@ -277,10 +270,22 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11475',
   },
   {
-    id: 'amp-story-desktop',
-    name: 'A responsive desktop experience for the amp-story component',
+    id: 'disable-amp-story-desktop',
+    name: 'Disables responsive desktop experience for the amp-story component',
     spec: 'https://github.com/ampproject/amphtml/issues/11714',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11715',
+  },
+  {
+    id: 'amp-story-auto-fullscreen',
+    name: 'Enables full-screen mode on first page transition',
+    spec: 'https://github.com/ampproject/amphtml/issues/11974',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11975',
+  },
+  {
+    id: 'amp-date-picker',
+    name: 'Enables the amp-date-picker extension',
+    spec: 'https://github.com/ampproject/amphtml/issues/6469',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12267',
   },
 ];
 
@@ -419,8 +424,8 @@ function toggleExperiment_(id, name, opt_on) {
   const on = opt_on === undefined ? !currentlyOn : opt_on;
   // Protect against click jacking.
   const confirmMessage = on ?
-      'Do you really want to activate the AMP experiment' :
-      'Do you really want to deactivate the AMP experiment';
+    'Do you really want to activate the AMP experiment' :
+    'Do you really want to deactivate the AMP experiment';
 
   showConfirmation_(`${confirmMessage}: "${name}"`, () => {
     if (id == CANARY_EXPERIMENT_ID) {

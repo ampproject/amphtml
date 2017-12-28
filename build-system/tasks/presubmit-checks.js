@@ -61,6 +61,7 @@ const forbiddenTerms = {
     message: 'Switch to new internal ID form',
     whitelist: [
       'build-system/tasks/extension-generator/index.js',
+      'build-system/tasks/create-golden-css/css/main.css',
       'css/amp.css',
     ],
   },
@@ -88,7 +89,7 @@ const forbiddenTerms = {
     whitelist: [
       'build-system/pr-check.js',
       'build-system/app.js',
-      'validator/nodejs/index.js',  // NodeJs only.
+      'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
       'validator/engine/validator.js',
@@ -318,6 +319,7 @@ const forbiddenTerms = {
   '\\.sendMessageAwaitResponse\\(': {
     message: 'Usages must be reviewed.',
     whitelist: [
+      'src/service/xhr-impl.js',
       'src/service/viewer-impl.js',
       'src/service/viewer-cid-api.js',
       'src/service/storage-impl.js',
@@ -354,8 +356,9 @@ const forbiddenTerms = {
       'build-system/test-server.js',
       'src/cookies.js',
       'src/service/cid-impl.js',
-      'extensions/amp-analytics/0.1/vendors.js',
       'testing/fake-dom.js',
+      'extensions/amp-analytics/0.1/vendors.js',
+      'extensions/amp-youtube/0.1/amp-youtube.js',
     ],
   },
   'getCookie\\W': {
@@ -381,6 +384,7 @@ const forbiddenTerms = {
   'isTrustedViewer': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'src/service/xhr-impl.js',
       'src/service/viewer-impl.js',
       'src/service/viewer-cid-api.js',
       'src/inabox/inabox-viewer.js',
@@ -476,7 +480,7 @@ const forbiddenTerms = {
       'src/3p-frame-messaging.js',
       'src/event-helper.js',
       'src/event-helper-listen.js',
-      'dist.3p/current/integration.js',  // includes previous
+      'dist.3p/current/integration.js', // includes previous
     ],
   },
   'setTimeout.*throw': {
@@ -485,7 +489,7 @@ const forbiddenTerms = {
       'src/log.js',
     ],
   },
-  '(dev|user)\\(\\)\\.(fine|info|warn|error)\\((?!\\s*([A-Z0-9-]+|[\'"`][A-Z0-9-]+[\'"`]))[^,)\n]*': {  // eslint-disable-line max-len
+  '(dev|user)\\(\\)\\.(fine|info|warn|error)\\((?!\\s*([A-Z0-9-]+|[\'"`][A-Z0-9-]+[\'"`]))[^,)\n]*': { // eslint-disable-line max-len
     message: 'Logging message require explicitly `TAG`, or an all uppercase' +
         ' string as the first parameter',
   },
@@ -496,9 +500,10 @@ const forbiddenTerms = {
     ],
   },
   '\\.requireLayout\\(': {
-    message: 'requireLayout is restricted b/c it affects non-contained elements',  // eslint-disable-line max-len
+    message: 'requireLayout is restricted b/c it affects non-contained elements', // eslint-disable-line max-len
     whitelist: [
       'extensions/amp-animation/0.1/web-animations.js',
+      'extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.js',
       'src/service/resources-impl.js',
     ],
   },
@@ -524,8 +529,8 @@ const forbiddenTerms = {
   '/\\*\\* @type \\{\\!Element\\} \\*/': {
     message: 'Use assertElement instead of casting to !Element.',
     whitelist: [
-      'src/log.js',  // Has actual implementation of assertElement.
-      'dist.3p/current/integration.js',  // Includes the previous.
+      'src/log.js', // Has actual implementation of assertElement.
+      'dist.3p/current/integration.js', // Includes the previous.
     ],
   },
   'startupChunk\\(': {
@@ -579,12 +584,25 @@ const forbiddenTerms = {
       'src/event-helper.js',
     ],
   },
+  'new FormData\\(': {
+    message: 'Use new FormDataWrapper() instead and call ' +
+        'formDataWrapper.getFormData() to get the native FormData object.',
+    whitelist: [
+      'src/form-data-wrapper.js',
+    ],
+  },
   '([eE]xit|[eE]nter|[cC]ancel|[rR]equest)Full[Ss]creen\\(': {
     message: 'Use fullscreenEnter() and fullscreenExit() from dom.js instead.',
     whitelist: [
       'ads/google/imaVideo.js',
       'dist.3p/current/integration.js',
     ],
+  },
+  '\\.defer\\(\\)': {
+    message: 'Promise.defer() is deprecated and should not be used.',
+  },
+  '(dev|user)\\(\\)\\.assert(Element|String|Number)?\\(\\s*([A-Z][A-Z0-9-]*,)': { // eslint-disable-line max-len
+    message: 'TAG is not an argument to assert(). Will cause false positives.',
   },
 };
 
@@ -695,7 +713,7 @@ const forbiddenTermsSrcInclusive = {
   // Super complicated regex that says "find any querySelector method call that
   // is passed as a variable anything that is not a string, or a string that
   // contains a space.
-  '\\b(?:(?!\\w*[dD]oc\\w*)\\w)+\\.querySelector(?:All)?\\((?=\\s*([^\'"\\s]|[^\\s)]+\\s))[^)]*\\)': {  // eslint-disable-line max-len
+  '\\b(?:(?!\\w*[dD]oc\\w*)\\w)+\\.querySelector(?:All)?\\((?=\\s*([^\'"\\s]|[^\\s)]+\\s))[^)]*\\)': { // eslint-disable-line max-len
     message: 'querySelector is not scoped to the element, but globally and ' +
     'filtered to just the elements inside the element. This leads to ' +
     'obscure bugs if you attempt to match a descendant of a descendant (ie ' +
@@ -716,8 +734,8 @@ const forbiddenTermsSrcInclusive = {
       'src/services.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
-      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',  // eslint-disable-line max-len
-      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',  // eslint-disable-line max-len
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js', // eslint-disable-line max-len
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js', // eslint-disable-line max-len
       'extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.js',
     ],
   },
@@ -840,6 +858,7 @@ const forbiddenTermsSrcInclusive = {
       'validator/engine/validator.js',
     ],
   },
+  '\\.matches\\(': 'Please use matches() helper in src/dom.js',
 };
 
 // Terms that must appear in a source file.

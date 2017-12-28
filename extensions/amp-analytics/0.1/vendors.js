@@ -24,9 +24,9 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'transport': {'beacon': true, 'xhrpost': true, 'image': true},
     'vars': {
       'accessReaderId': 'ACCESS_READER_ID',
-      'adNavTiming': 'AD_NAV_TIMING',  // only available in A4A embeds
-      'adNavType': 'AD_NAV_TYPE',  // only available in A4A embeds
-      'adRedirectCount': 'AD_NAV_REDIRECT_COUNT',  // only available in A4A
+      'adNavTiming': 'AD_NAV_TIMING', // only available in A4A embeds
+      'adNavType': 'AD_NAV_TYPE', // only available in A4A embeds
+      'adRedirectCount': 'AD_NAV_REDIRECT_COUNT', // only available in A4A
       'ampdocHost': 'AMPDOC_HOST',
       'ampdocHostname': 'AMPDOC_HOSTNAME',
       'ampdocUrl': 'AMPDOC_URL',
@@ -138,6 +138,36 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'on': 'visible',
         'request': 'pageview',
       },
+    },
+  },
+
+  'alexametrics': {
+    'requests': {
+      'base': 'https://${ampAtrkHost}/atrk.gif?account=${atrk_acct}&domain=${domain}',
+      'pageview': '${base}&jsv=amp-${ampVersion}' +
+        '&frame_height=${viewportHeight}&frame_width=${viewportWidth}' +
+        '&title=${title}&time=${timestamp}&time_zone_offset=${timezone}' +
+        '&screen_params=${screenWidth}x${screenHeight}x${screenColorDepth}' +
+        '&ref_url=${documentReferrer}&host_url=${sourceUrl}' +
+        '&random_number=${random}&user_cookie=${clientId(__auc)}' +
+        '&user_cookie_flag=0&user_lang=${browserLanguage}' +
+        '&amp_doc_url=${ampdocUrl}',
+    },
+    'vars': {
+      'atrk_acct': '',
+      'domain': '',
+      'ampAtrkHost': 'certify-amp.alexametrics.com',
+    },
+    'triggers': {
+      'trackPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+    'transport': {
+      'xhrpost': false,
+      'beacon': false,
+      'image': true,
     },
   },
 
@@ -616,13 +646,13 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
-  'googleadwords': {
+  'googleadwords': { // https://developers.google.com/adwords/amp/landing-pages
     'requests': {
       'conversion_prefix': 'https://www.googleadservices.com/pagead/conversion/',
       'remarketing_prefix':
           'https://googleads.g.doubleclick.net/pagead/viewthroughconversion/',
       'common_params': '${googleConversionId}/?' +
-          'cv=amp2&' +  // Increment when making changes.
+          'cv=amp2&' + // Increment when making changes.
           'label=${googleConversionLabel}&' +
           'random=${random}&' +
           'url=${sourceUrl}&' +
@@ -1108,6 +1138,49 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'beacon': false,
       'xhrpost': false,
       'image': true,
+    },
+  },
+
+  'newrelic': {
+    'requests': {
+      'pageview': 'https://${beacon}/amp?appId=${appId}' +
+        '&licenseKey=${licenseKey}' +
+        '&ampUrl=${ampdocUrl}' +
+        '&canonicalUrl=${canonicalUrl}' +
+        '&timeToDomContentLoadedEventEnd=' +
+          '${navTiming(domContentLoadedEventEnd)}' +
+        '&timeToDomInteractive=${navTiming(domInteractive)}' +
+        '&timeToDomComplete=${navTiming(domComplete)}' +
+        '&timeToDomLoading=${navTiming(domLoading)}' +
+        '&timeToResponseStart=${navTiming(responseStart)}' +
+        '&timeToResponseEnd=${navTiming(responseEnd)}' +
+        '&timeToLoadEventStart=${navTiming(loadEventStart)}' +
+        '&timeToLoadEventEnd=${navTiming(loadEventEnd)}' +
+        '&timeToConnectStart=${navTiming(connectStart)}' +
+        '&timeToConnectEnd=${navTiming(connectEnd)}' +
+        '&timeToFetchStart=${navTiming(fetchStart)}' +
+        '&timeToRequestStart=${navTiming(requestStart)}' +
+        '&timeToUnloadEventStart=${navTiming(unloadEventStart)}' +
+        '&timeToUnloadEventEnd=${navTiming(unloadEventEnd)}' +
+        '&timeToDomainLookupStart=${navTiming(domainLookupStart)}' +
+        '&timeToDomainLookupEnd=${navTiming(domainLookupEnd)}' +
+        '&timeToRedirectStart=${navTiming(redirectStart)}' +
+        '&timeToRedirectEnd=${navTiming(redirectEnd)}' +
+        '&timeToSecureConnection=${navTiming(secureConnectionStart)}' +
+        '&timestamp=${timestamp}' +
+        '&ampVersion=${ampVersion}' +
+        '&pageLoadTime=${pageLoadTime}',
+    },
+    'vars': {
+      'beacon': 'bam.nr-data.net',
+      'appId': [],
+      'licenseKey': '',
+    },
+    'triggers': {
+      'trackPageview': {
+        'on': 'ini-load',
+        'request': 'pageview',
+      },
     },
   },
 
@@ -1766,8 +1839,8 @@ ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
 ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
-  ['triggers']['pageLoad']['iframe' +
-/* TEMPORARY EXCEPTION */ 'Ping'] = true;
+    ['triggers']['pageLoad']['iframe' +
+      /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
 ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,11 +66,14 @@ import {github} from './github';
 import {reddit} from './reddit';
 import {twitter} from './twitter';
 
-// 3P Ad Networks - please keep in alphabetic order
 import {_ping_} from '../ads/_ping_';
+
+// 3P Ad Networks - please keep in alphabetic order
+import {_24smi} from '../ads/24smi';
 import {a8} from '../ads/a8';
 import {a9} from '../ads/a9';
 import {accesstrade} from '../ads/accesstrade';
+import {adagio} from '../ads/adagio';
 import {adblade, industrybrains} from '../ads/adblade';
 import {adbutler} from '../ads/adbutler';
 import {adform} from '../ads/adform';
@@ -105,6 +108,7 @@ import {capirs} from '../ads/capirs';
 import {caprofitx} from '../ads/caprofitx';
 import {chargeads} from '../ads/chargeads';
 import {colombia} from '../ads/colombia';
+import {connatix} from '../ads/connatix';
 import {contentad} from '../ads/contentad';
 import {criteo} from '../ads/criteo';
 import {csa} from '../ads/google/csa';
@@ -124,6 +128,7 @@ import {flite} from '../ads/flite';
 import {fluct} from '../ads/fluct';
 import {fusion} from '../ads/fusion';
 import {genieessp} from '../ads/genieessp';
+import {giraff} from '../ads/giraff';
 import {gmossp} from '../ads/gmossp';
 import {gumgum} from '../ads/gumgum';
 import {holder} from '../ads/holder';
@@ -139,6 +144,7 @@ import {kargo} from '../ads/kargo';
 import {kiosked} from '../ads/kiosked';
 import {kixer} from '../ads/kixer';
 import {ligatus} from '../ads/ligatus';
+import {lockerdome} from '../ads/lockerdome';
 import {loka} from '../ads/loka';
 import {mads} from '../ads/mads';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
@@ -160,6 +166,7 @@ import {outbrain} from '../ads/outbrain';
 import {plista} from '../ads/plista';
 import {polymorphicads} from '../ads/polymorphicads';
 import {popin} from '../ads/popin';
+import {postquare} from '../ads/postquare';
 import {pubmatic} from '../ads/pubmatic';
 import {pubmine} from '../ads/pubmine';
 import {pulsepoint} from '../ads/pulsepoint';
@@ -184,6 +191,7 @@ import {taboola} from '../ads/taboola';
 import {teads} from '../ads/teads';
 import {triplelift} from '../ads/triplelift';
 import {valuecommerce} from '../ads/valuecommerce';
+import {viralize} from '../ads/viralize';
 import {vmfive} from '../ads/vmfive';
 import {webediads} from '../ads/webediads';
 import {weboramaDisplay} from '../ads/weborama';
@@ -207,6 +215,7 @@ import {zucks} from '../ads/zucks';
  */
 const AMP_EMBED_ALLOWED = {
   _ping_: true,
+  '24smi': true,
   bringhub: true,
   dable: true,
   engageya: true,
@@ -214,6 +223,7 @@ const AMP_EMBED_ALLOWED = {
   mywidget: true,
   outbrain: true,
   plista: true,
+  postquare: true,
   smartclip: true,
   smi2: true,
   taboola: true,
@@ -234,9 +244,11 @@ if (getMode().test || getMode().localDev) {
 }
 
 // Keep the list in alphabetic order
+register('24smi', _24smi);
 register('a8', a8);
 register('a9', a9);
 register('accesstrade', accesstrade);
+register('adagio', adagio);
 register('adblade', adblade);
 register('adbutler', adbutler);
 register('adform', adform);
@@ -271,6 +283,7 @@ register('capirs', capirs);
 register('caprofitx', caprofitx);
 register('chargeads', chargeads);
 register('colombia', colombia);
+register('connatix',connatix);
 register('contentad', contentad);
 register('criteo', criteo);
 register('csa', csa);
@@ -291,6 +304,7 @@ register('flite', flite);
 register('fluct', fluct);
 register('fusion', fusion);
 register('genieessp', genieessp);
+register('giraff', giraff);
 register('github', github);
 register('gmossp', gmossp);
 register('gumgum', gumgum);
@@ -308,6 +322,7 @@ register('kargo', kargo);
 register('kiosked', kiosked);
 register('kixer', kixer);
 register('ligatus', ligatus);
+register('lockerdome', lockerdome);
 register('loka', loka);
 register('mads', mads);
 register('mantis-display', mantisDisplay);
@@ -330,6 +345,7 @@ register('outbrain', outbrain);
 register('plista', plista);
 register('polymorphicads', polymorphicads);
 register('popin', popin);
+register('postquare', postquare);
 register('pubmatic', pubmatic);
 register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);
@@ -356,6 +372,7 @@ register('teads', teads);
 register('triplelift', triplelift);
 register('twitter', twitter);
 register('valuecommerce', valuecommerce);
+register('viralize', viralize);
 register('vmfive', vmfive);
 register('webediads', webediads);
 register('weborama-display', weboramaDisplay);
@@ -451,7 +468,7 @@ function isMaster() {
  *     that are allowed to embed this frame.
  */
 window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
-    opt_allowedEmbeddingOrigins) {
+  opt_allowedEmbeddingOrigins) {
   try {
     const data = getAttributeData();
     const location = getLocation();

@@ -274,11 +274,8 @@ const command = {
   runUnitTests: function() {
     // Unit tests with Travis' default chromium
     timedExecOrDie('gulp test --unit --nobuild');
-    // All unit tests with an old chrome (best we can do right now to pass tests
-    // and not start relying on new features).
-    // Disabled because it regressed. Better to run the other saucelabs tests.
-    // timedExecOrDie(
-    //     `gulp test --nobuild --saucelabs --oldchrome --compiled`);
+    // A subset of unit tests on other browsers via sauce labs
+    timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
   },
   runIntegrationTests: function(compiled) {
     // Integration tests with all saucelabs browsers
@@ -331,7 +328,7 @@ function runAllCommands() {
   if (process.env.BUILD_SHARD == 'integration_tests') {
     command.cleanBuild();
     command.buildRuntimeMinified();
-    command.runPresubmitTests();  // Needs runtime to be built and served.
+    command.runPresubmitTests(); // Needs runtime to be built and served.
     command.runIntegrationTests(/* compiled */ true);
   }
 }
@@ -399,7 +396,8 @@ function main() {
 
   // Run different sets of independent tasks in parallel to reduce build time.
   if (process.env.BUILD_SHARD == 'unit_tests') {
-    if (buildTargets.has('BUILD_SYSTEM')) {
+    if (buildTargets.has('BUILD_SYSTEM') ||
+        buildTargets.has('RUNTIME')) {
       command.testBuildSystem();
     }
     if (buildTargets.has('BUILD_SYSTEM') ||

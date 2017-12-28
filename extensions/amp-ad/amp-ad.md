@@ -123,13 +123,15 @@ Example with fallback:
 ```
 
 ## Serving video ads
-AMP natively supports a number video players like BrightCove, DailyMotion, etc. that can monetize ads. For a full list, see the [media](https://www.ampproject.org/docs/reference/components#media) components.
+There are 3 ways to monetize videos in AMP with video ads:
+1. AMP natively supports a number video players like BrightCove, DailyMotion, etc. that can monetize ads. For a full list, see the [media](https://www.ampproject.org/docs/reference/components#media) components.
 
-If you use a player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://ampbyexample.com/components/amp-iframe/).
+2. Use the [amp-ima-video](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ima-video/amp-ima-video.md) component that comes with a built-in IMA SDK and HTML5 video player
 
+3. If you use a video player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://ampbyexample.com/components/amp-iframe/).
 When using `amp-iframe` approach:
- - Make sure there is a poster if loading the player in the first viewport. [Details](https://www.ampproject.org/docs/reference/components/amp-iframe#iframe-with-placeholder).
- - Video and poster must be served over HTTPS.
+    * Make sure there is a poster if loading the player in the first viewport. [Details](https://www.ampproject.org/docs/reference/components/amp-iframe#iframe-with-placeholder).
+    * Video and poster must be served over HTTPS.
 
 
 ## Running ads from a custom domain
@@ -222,6 +224,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [CA-ProFit-X](../../ads/caprofitx.md)
 - [Chargeads](../../ads/chargeads.md)
 - [Colombia](../../ads/colombia.md)
+- [Connatix](../../ads/connatix.md)
 - [Content.ad](../../ads/contentad.md)
 - [Criteo](../../ads/criteo.md)
 - [CSA](../../ads/google/csa.md)
@@ -240,6 +243,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Flite](../../ads/flite.md)
 - [Fusion](../../ads/fusion.md)
 - [GenieeSSP](../../ads/genieessp.md)
+- [Giraff](../../ads/giraff.md)
 - [GMOSSP](../../ads/gmossp.md)
 - [GumGum](../../ads/gumgum.md)
 - [Holder](../../ads/holder.md)
@@ -255,6 +259,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Kiosked](../../ads/kiosked.md)
 - [Kixer](../../ads/kixer.md)
 - [Ligatus](../../ads/ligatus.md)
+- [LockerDome](../../ads/lockerdome.md)
 - [LOKA](../../ads/loka.md)
 - [MADS](../../ads/mads.md)
 - [MANTIS](../../ads/mantis.md)
@@ -298,6 +303,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Teads](../../ads/teads.md)
 - [TripleLift](../../ads/triplelift.md)
 - [ValueCommerce](../../ads/valuecommerce.md)
+- [Viralize](../../ads/viralize.md)
 - [VMFive](../../ads/vmfive.md)
 - [Webediads](../../ads/webediads.md)
 - [Weborama](../../ads/weborama.md)
@@ -315,10 +321,12 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 
 ## Supported embed types
 
+- [24smi](../../ads/24smi.md)
 - [Bringhub](../../ads/bringhub.md)
 - [Dable](../../ads/dable.md)
 - [Engageya](../../ads/engageya.md)
 - [Outbrain](../../ads/outbrain.md)
+- [Postquare](../../ads/postquare.md)
 - [Smi2](../../ads/smi2.md)
 - [Taboola](../../ads/taboola.md)
 - [ZergNet](../../ads/zergnet.md)

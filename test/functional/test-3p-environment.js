@@ -108,7 +108,7 @@ describe('3p environment', () => {
 
     function installTimer(win) {
       progress = '';
-      clock = lolex.install(win);
+      clock = lolex.install({target: win});
       return clock;
     }
 

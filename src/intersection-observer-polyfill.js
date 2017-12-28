@@ -15,6 +15,7 @@
  */
 
 import {dev} from './log';
+import {isArray, isFiniteNumber} from './types';
 import {dict} from './utils/object';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
 import {SubscriptionApi} from './iframe-helper';
@@ -63,7 +64,7 @@ const INIT_TIME = Date.now();
  * @return {!IntersectionObserverEntry} A change entry.
  */
 export function getIntersectionChangeEntry(
-    element, owner, hostViewport) {
+  element, owner, hostViewport) {
   const intersection = rectIntersection(element, owner, hostViewport) ||
       layoutRectLtwh(0, 0, 0, 0);
   const ratio = intersectionRatio(intersection, element);
@@ -193,15 +194,28 @@ export class IntersectionObserverPolyfill {
     /** @private @const {function(?Array<!IntersectionObserverEntry>)} */
     this.callback_ = callback;
 
+    // The input threshold can be a number or an array of numbers.
+    let threshold = opt_option && opt_option.threshold;
+    if (threshold) {
+      threshold = isArray(threshold) ?
+        threshold : [threshold];
+    } else {
+      threshold = [0];
+    }
+
+    for (let i = 0; i < threshold.length; i++) {
+      dev().assert(isFiniteNumber(threshold[i]), 'Threshold should be a ' +
+          'finite number or an array of finite numbers');
+    }
+
     /**
      * A list of threshold, sorted in increasing numeric order
      * @private @const {!Array}
      */
-    const threshold = opt_option && opt_option.threshold || [0];
     this.threshold_ = threshold.sort();
     dev().assert(this.threshold_[0] >= 0 &&
         this.threshold_[this.threshold_.length - 1] <= 1,
-        'Threshold should be in the range from "[0, 1]"');
+    'Threshold should be in the range from "[0, 1]"');
 
     /** @private {?./layout-rect.LayoutRectDef} */
     this.lastViewportRect_ = null;
@@ -406,7 +420,7 @@ export function getThresholdSlot(sortedThreshold, ratio) {
  * @return {!IntersectionObserverEntry}}
  */
 function calculateChangeEntry(
-    element, hostViewport, intersection, ratio) {
+  element, hostViewport, intersection, ratio) {
   // If element not in an iframe.
   // adjust all LayoutRect to hostViewport Origin.
   let boundingClientRect = element;
@@ -434,7 +448,7 @@ function calculateChangeEntry(
 
   return /** @type {!IntersectionObserverEntry} */ ({
     time: (typeof performance !== 'undefined' && performance.now) ?
-        performance.now() : Date.now() - INIT_TIME,
+      performance.now() : Date.now() - INIT_TIME,
     rootBounds,
     boundingClientRect,
     intersectionRect: intersection,

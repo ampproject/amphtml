@@ -23,9 +23,9 @@ import {AccessService} from '../amp-access';
 import {AmpEvents} from '../../../../src/amp-events';
 import {Observable} from '../../../../src/observable';
 import {cidServiceForDocForTesting} from
-    '../../../../src/service/cid-impl';
+  '../../../../src/service/cid-impl';
 import {installPerformanceService} from
-    '../../../../src/service/performance-impl';
+  '../../../../src/service/performance-impl';
 import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 
@@ -396,39 +396,39 @@ describes.fakeWin('AccessService adapter context', {
   it('should resolve URL without auth response and no authdata vars', () => {
     return context.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type)',
         /* useAuthData */ false).then(url => {
-          expect(url).to.equal('?rid=reader1&type=');
-        });
+      expect(url).to.equal('?rid=reader1&type=');
+    });
   });
 
   it('should resolve URL without auth response and with authdata vars', () => {
     return context.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type)',
         /* useAuthData */ true).then(url => {
-          expect(url).to.equal('?rid=reader1&type=');
-        });
+      expect(url).to.equal('?rid=reader1&type=');
+    });
   });
 
   it('should resolve URL with auth response and no authdata vars', () => {
     service.setAuthResponse_({child: {type: 'premium'}});
     return context.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type)',
         /* useAuthData */ false).then(url => {
-          expect(url).to.equal('?rid=reader1&type=');
-        });
+      expect(url).to.equal('?rid=reader1&type=');
+    });
   });
 
   it('should resolve URL with auth response and with authdata vars', () => {
     service.setAuthResponse_({child: {type: 'premium'}});
     return context.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type)',
         /* useAuthData */ true).then(url => {
-          expect(url).to.equal('?rid=reader1&type=premium');
-        });
+      expect(url).to.equal('?rid=reader1&type=premium');
+    });
   });
 
   it('should resolve URL with unknown authdata var', () => {
     service.setAuthResponse_({child: {type: 'premium'}});
     return context.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type2)',
         /* useAuthData */ true).then(url => {
-          expect(url).to.equal('?rid=reader1&type=');
-        });
+      expect(url).to.equal('?rid=reader1&type=');
+    });
   });
 
   it('should resolve URL with ACCESS_TOKEN, but not enabled', () => {
@@ -438,14 +438,15 @@ describes.fakeWin('AccessService adapter context', {
   });
 
   it('should resolve URL with ACCESS_TOKEN, enabled, but null', () => {
-    sandbox.stub(service.signIn_, 'getAccessTokenPassive', () => null);
+    sandbox.stub(service.signIn_, 'getAccessTokenPassive').callsFake(
+        () => null);
     return context.buildUrl('?at=ACCESS_TOKEN').then(url => {
       expect(url).to.equal('?at=');
     });
   });
 
   it('should resolve URL with ACCESS_TOKEN, enabled, but null promise', () => {
-    sandbox.stub(service.signIn_, 'getAccessTokenPassive',
+    sandbox.stub(service.signIn_, 'getAccessTokenPassive').callsFake(
         () => Promise.resolve(null));
     return context.buildUrl('?at=ACCESS_TOKEN').then(url => {
       expect(url).to.equal('?at=');
@@ -453,7 +454,7 @@ describes.fakeWin('AccessService adapter context', {
   });
 
   it('should resolve URL with ACCESS_TOKEN, enabled, not null', () => {
-    sandbox.stub(service.signIn_, 'getAccessTokenPassive',
+    sandbox.stub(service.signIn_, 'getAccessTokenPassive').callsFake(
         () => Promise.resolve('access_token'));
     return context.buildUrl('?at=ACCESS_TOKEN').then(url => {
       expect(url).to.equal('?at=access_token');
@@ -519,7 +520,7 @@ describes.fakeWin('AccessService authorization', {
     service.adapter_ = adapter;
     adapterMock = sandbox.mock(adapter);
 
-    sandbox.stub(service.resources_, 'mutateElement',
+    sandbox.stub(service.resources_, 'mutateElement').callsFake(
         (unusedElement, mutator) => {
           mutator();
           return Promise.resolve();
@@ -565,7 +566,7 @@ describes.fakeWin('AccessService authorization', {
     cidMock.expects('get')
         .withExactArgs(
             {scope: 'amp-access', createCookieIfNotPresent: true},
-        sinon.match(() => true))
+            sinon.match(() => true))
         .returns(Promise.resolve(result))
         .once();
   }
@@ -792,7 +793,7 @@ describes.fakeWin('AccessService authorization', {
 
   it('should run authorization for broadcast events on same origin', () => {
     let broadcastHandler;
-    sandbox.stub(service.viewer_, 'onBroadcast', handler => {
+    sandbox.stub(service.viewer_, 'onBroadcast').callsFake(handler => {
       broadcastHandler = handler;
     });
     service.runAuthorization_ = sandbox.spy();
@@ -854,11 +855,12 @@ describes.fakeWin('AccessService applyAuthorizationToElement_', {
 
     service = new AccessService(ampdoc);
 
-    mutateElementStub = sandbox.stub(service.resources_, 'mutateElement',
-        (unusedElement, mutator) => {
-          mutator();
-          return Promise.resolve();
-        });
+    mutateElementStub =
+        sandbox.stub(service.resources_, 'mutateElement').callsFake(
+            (unusedElement, mutator) => {
+              mutator();
+              return Promise.resolve();
+            });
     service.vsync_ = {
       mutatePromise: callback => {
         callback();
@@ -1040,7 +1042,7 @@ describes.fakeWin('AccessService pingback', {
     cidMock.expects('get')
         .withExactArgs(
             {scope: 'amp-access', createCookieIfNotPresent: true},
-        sinon.match(() => true))
+            sinon.match(() => true))
         .returns(Promise.resolve(result))
         .once();
   }
@@ -1101,7 +1103,7 @@ describes.fakeWin('AccessService pingback', {
     service.firstAuthorizationPromise_ = new Promise(resolve => {
       firstAuthorizationResolver = resolve;
     });
-    const triggerStart = 1;  // First event is "access-authorization-received".
+    const triggerStart = 1; // First event is "access-authorization-received".
     service.reportViewToServer_ = sandbox.spy();
     service.reportWhenViewed_(/* timeToView */ 2000);
     return Promise.resolve().then(() => {
@@ -1127,7 +1129,7 @@ describes.fakeWin('AccessService pingback', {
     service.lastAuthorizationPromise_ = new Promise(resolve => {
       lastAuthorizationResolver = resolve;
     });
-    const triggerStart = 1;  // First event is "access-authorization-received".
+    const triggerStart = 1; // First event is "access-authorization-received".
     service.reportViewToServer_ = sandbox.spy();
     service.reportWhenViewed_(/* timeToView */ 2000);
     return Promise.resolve().then(() => {
@@ -1232,7 +1234,7 @@ describes.fakeWin('AccessService pingback', {
 
   it('should re-start "viewed" monitoring when directly requested', () => {
     service.lastAuthorizationPromise_ = Promise.resolve();
-    const whenViewedSpy = sandbox.stub(service, 'whenViewed_', () => {
+    const whenViewedSpy = sandbox.stub(service, 'whenViewed_').callsFake(() => {
       return Promise.resolve();
     });
     service.scheduleView_(/* timeToView */ 0);
@@ -1379,7 +1381,7 @@ describes.fakeWin('AccessService login', {
     cidMock.expects('get')
         .withExactArgs(
             {scope: 'amp-access', createCookieIfNotPresent: true},
-        sinon.match(() => true))
+            sinon.match(() => true))
         .returns(Promise.resolve('reader1'))
         .once();
     return service.buildLoginUrls_().then(urls => {
@@ -1397,7 +1399,7 @@ describes.fakeWin('AccessService login', {
     cidMock.expects('get')
         .withExactArgs(
             {scope: 'amp-access', createCookieIfNotPresent: true},
-        sinon.match(() => true))
+            sinon.match(() => true))
         .returns(Promise.resolve('reader1'))
         .atLeast(1);
     return service.buildLoginUrls_().then(urls => {
@@ -1431,7 +1433,7 @@ describes.fakeWin('AccessService login', {
     cidMock.expects('get')
         .withExactArgs(
             {scope: 'amp-access', createCookieIfNotPresent: true},
-        sinon.match(() => true))
+            sinon.match(() => true))
         .returns(Promise.resolve('reader1'))
         .once();
     return service.buildLoginUrls_().then(urls => {
@@ -1458,8 +1460,9 @@ describes.fakeWin('AccessService login', {
   });
 
   it('should succeed login with success=true', () => {
-    const authorizationStub = sandbox.stub(service, 'runAuthorization_',
-        () => Promise.resolve());
+    const authorizationStub =
+        sandbox.stub(service, 'runAuthorization_').callsFake(
+            () => Promise.resolve());
     const viewStub = sandbox.stub(service, 'scheduleView_');
     const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
     serviceMock.expects('openLoginDialog_')
@@ -1503,8 +1506,9 @@ describes.fakeWin('AccessService login', {
   });
 
   it('should fail login with empty response, but re-authorize', () => {
-    const authorizationStub = sandbox.stub(service, 'runAuthorization_',
-        () => Promise.resolve());
+    const authorizationStub =
+        sandbox.stub(service, 'runAuthorization_').callsFake(
+            () => Promise.resolve());
     const viewStub = sandbox.stub(service, 'scheduleView_');
     const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
     serviceMock.expects('openLoginDialog_')
@@ -1557,8 +1561,9 @@ describes.fakeWin('AccessService login', {
       'login1': 'https://acme.com/l1?rid=R',
       'login2': 'https://acme.com/l2?rid=R',
     };
-    const authorizationStub = sandbox.stub(service, 'runAuthorization_',
-        () => Promise.resolve());
+    const authorizationStub =
+        sandbox.stub(service, 'runAuthorization_').callsFake(
+            () => Promise.resolve());
     const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
     serviceMock.expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l2?rid=R')
@@ -1636,8 +1641,9 @@ describes.fakeWin('AccessService login', {
   it('should wait for token exchange post-login with success=true', () => {
     service.signIn_.postLoginResult = sandbox.stub();
     service.signIn_.postLoginResult.returns(Promise.resolve());
-    const authorizationStub = sandbox.stub(service, 'runAuthorization_',
-        () => Promise.resolve());
+    const authorizationStub =
+        sandbox.stub(service, 'runAuthorization_').callsFake(
+            () => Promise.resolve());
     const viewStub = sandbox.stub(service, 'scheduleView_');
     const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
     serviceMock.expects('openLoginDialog_')

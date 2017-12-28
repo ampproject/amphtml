@@ -15,17 +15,21 @@
 #
 
 tags: {  # amp-social-share
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-social-share"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    requires_usage: DEPRECATED_WARNING
+    requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-social-share>
+  html_format: AMP
+  html_format: AMP4ADS
   tag_name: "AMP-SOCIAL-SHARE"
   requires_extension: "amp-social-share"
   attrs: {

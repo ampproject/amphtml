@@ -57,7 +57,7 @@ describe('Logging', () => {
       setTimeout: timeoutSpy,
       reportError: error => error,
     };
-    sandbox.stub(self, 'reportError', error => error);
+    sandbox.stub(self, 'reportError').callsFake(error => error);
   });
 
   afterEach(() => {

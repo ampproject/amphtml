@@ -246,16 +246,16 @@ export class GlobalVariableSource extends VariableSource {
     }, (scope, opt_userNotificationId, opt_cookieName) => {
       user().assertString(scope,
           'The first argument to CLIENT_ID, the fallback c' +
-            /*OK*/'ookie name, is required');
+          /*OK*/'ookie name, is required');
       let consent = Promise.resolve();
 
-        // If no `opt_userNotificationId` argument is provided then
-        // assume consent is given by default.
+      // If no `opt_userNotificationId` argument is provided then
+      // assume consent is given by default.
       if (opt_userNotificationId) {
         consent = Services.userNotificationManagerForDoc(this.ampdoc)
-              .then(service => {
-                return service.get(opt_userNotificationId);
-              });
+            .then(service => {
+              return service.get(opt_userNotificationId);
+            });
       }
       return Services.cidForDoc(this.ampdoc).then(cid => {
         return cid.get({
@@ -313,19 +313,19 @@ export class GlobalVariableSource extends VariableSource {
 
     // Returns incoming share tracking fragment.
     this.setAsync('SHARE_TRACKING_INCOMING', /** @type {AsyncResolverDef} */(
-        () => {
-          return this.getShareTrackingValue_(fragments => {
-            return fragments.incomingFragment;
-          }, 'SHARE_TRACKING_INCOMING');
-        }));
+      () => {
+        return this.getShareTrackingValue_(fragments => {
+          return fragments.incomingFragment;
+        }, 'SHARE_TRACKING_INCOMING');
+      }));
 
     // Returns outgoing share tracking fragment.
     this.setAsync('SHARE_TRACKING_OUTGOING', /** @type {AsyncResolverDef} */(
-        () => {
-          return this.getShareTrackingValue_(fragments => {
-            return fragments.outgoingFragment;
-          }, 'SHARE_TRACKING_OUTGOING');
-        }));
+      () => {
+        return this.getShareTrackingValue_(fragments => {
+          return fragments.outgoingFragment;
+        }, 'SHARE_TRACKING_OUTGOING');
+      }));
 
     // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
     this.set('TIMESTAMP', () => {
@@ -561,7 +561,7 @@ export class GlobalVariableSource extends VariableSource {
     const url = parseUrl(this.ampdoc.win.location.href);
     const params = parseQueryString(url.search);
     return (typeof params[param] !== 'undefined')
-        ? params[param] : defaultValue;
+      ? params[param] : defaultValue;
   }
 
   /**
@@ -600,7 +600,7 @@ export class GlobalVariableSource extends VariableSource {
     return this.shareTrackingFragments_.then(fragments => {
       user().assert(fragments, 'To use variable %s, ' +
           'amp-share-tracking should be configured',
-          expr);
+      expr);
       return getter(/** @type {!ShareTrackingFragmentsDef} */ (fragments));
     });
   }
@@ -689,8 +689,8 @@ export class UrlReplacements {
    */
   expandStringSync(source, opt_bindings, opt_collectVars, opt_whiteList) {
     return /** @type {string} */ (
-        this.expand_(source, opt_bindings, opt_collectVars, /* opt_sync */ true,
-            opt_whiteList));
+      this.expand_(source, opt_bindings, opt_collectVars, /* opt_sync */ true,
+          opt_whiteList));
   }
 
   /**
@@ -734,9 +734,9 @@ export class UrlReplacements {
    */
   expandUrlAsync(url, opt_bindings, opt_whiteList) {
     return /** @type {!Promise<string>} */ (
-        this.expand_(url, opt_bindings, undefined, undefined,
-            opt_whiteList).then(
-            replacement => this.ensureProtocolMatches_(url, replacement)));
+      this.expand_(url, opt_bindings, undefined, undefined,
+          opt_whiteList).then(
+          replacement => this.ensureProtocolMatches_(url, replacement)));
   }
 
   /**
@@ -746,7 +746,7 @@ export class UrlReplacements {
    */
   expandInputValueAsync(element) {
     return /** @type {!Promise<string>} */ (
-        this.expandInputValue_(element, /*opt_sync*/ false));
+      this.expandInputValue_(element, /*opt_sync*/ false));
   }
 
   /**
@@ -756,7 +756,7 @@ export class UrlReplacements {
    */
   expandInputValueSync(element) {
     return /** @type {string} */ (
-        this.expandInputValue_(element, /*opt_sync*/ true));
+      this.expandInputValue_(element, /*opt_sync*/ true));
   }
 
   /**
@@ -768,7 +768,7 @@ export class UrlReplacements {
   expandInputValue_(element, opt_sync) {
     dev().assert(element.tagName == 'INPUT' &&
         (element.getAttribute('type') || '').toLowerCase() == 'hidden',
-        'Input value expansion only works on hidden input fields: %s', element);
+    'Input value expansion only works on hidden input fields: %s', element);
 
     const whitelist = this.getWhitelistForElement_(element);
     if (!whitelist) {
@@ -825,7 +825,6 @@ export class UrlReplacements {
     */
   isAllowedOrigin_(url) {
     const docInfo = Services.documentInfoForDoc(this.ampdoc);
-
     if (url.origin == parseUrl(docInfo.canonicalUrl).origin ||
         url.origin == parseUrl(docInfo.sourceUrl).origin) {
       return true;
@@ -851,18 +850,21 @@ export class UrlReplacements {
    * - the link opts into it (via data-amp-replace argument)
    * - the destination is the source or canonical origin of this doc.
    * @param {!Element} element An anchor element.
+   * @param {?string} defaultUrlParams to expand link if caller request.
    * @return {string|undefined} Replaced string for testing
    */
-  maybeExpandLink(element) {
+  maybeExpandLink(element, defaultUrlParams) {
     dev().assert(element.tagName == 'A');
     const supportedReplacements = {
       'CLIENT_ID': true,
       'QUERY_PARAM': true,
     };
-    const additionalUrlParameters = element.getAttribute('data-amp-addparams');
+    const additionalUrlParameters =
+        element.getAttribute('data-amp-addparams') || '';
     const whitelist = this.getWhitelistForElement_(
         element, supportedReplacements);
-    if (!whitelist && !additionalUrlParameters) {
+
+    if (!whitelist && !additionalUrlParameters && !defaultUrlParams) {
       return;
     }
     // ORIGINAL_HREF_PROPERTY has the value of the href "pre-replacement".
@@ -879,20 +881,45 @@ export class UrlReplacements {
           href,
           parseQueryString(additionalUrlParameters));
     }
-    if (whitelist) {
-      const isAllowedOrigin = this.isAllowedOrigin_(url);
-      if (!isAllowedOrigin) {
+
+    const isAllowedOrigin = this.isAllowedOrigin_(url);
+    if (!isAllowedOrigin) {
+      if (whitelist) {
         user().warn('URL', 'Ignoring link replacement', href,
             ' because the link does not go to the document\'s' +
             ' source, canonical, or whitelisted origin.');
-      } else {
-        href = this.expandSync(
-            href,
+      }
+      return element.href = href;
+    }
+
+    // Note that defaultUrlParams is treated differently than additionalUrlParameters in two ways
+    // #1: If the outgoing url origin is not whitelisted:
+    // additionalUrlParameters are always appended by not expanded,
+    // defaultUrlParams will not be appended.
+    // #2: If the expansion function is not whitelisted:
+    // addionalUrlParamters will not be expanded,
+    // defaultUrlParams will by default support QUERY_PARAM, and will still be expanded.
+    if (defaultUrlParams) {
+      if (!whitelist || !whitelist['QUERY_PARAM']) {
+        // override whitelist and expand defaultUrlParams;
+        const overrideWhitelist = {'QUERY_PARAM': true};
+        defaultUrlParams = this.expandSync(
+            defaultUrlParams,
             /* opt_bindings */ undefined,
             /* opt_collectVars */ undefined,
-            /* opt_whitelist */ whitelist);
+            /* opt_whitelist */ overrideWhitelist);
       }
+      href = addParamsToUrl(href, parseQueryString(defaultUrlParams));
     }
+
+    if (whitelist) {
+      href = this.expandSync(
+          href,
+          /* opt_bindings */ undefined,
+          /* opt_collectVars */ undefined,
+          /* opt_whitelist */ whitelist);
+    }
+
     return element.href = href;
   }
 
@@ -912,7 +939,7 @@ export class UrlReplacements {
     let replacement = url.replace(expr, (match, name, opt_strargs) => {
       let args = [];
       if (typeof opt_strargs == 'string') {
-        args = opt_strargs.split(',');
+        args = opt_strargs.split(/,\s*/);
       }
       if (opt_whiteList && !opt_whiteList[name]) {
         // Do not perform substitution and just return back the original
@@ -936,7 +963,7 @@ export class UrlReplacements {
       let val;
       try {
         val = (typeof binding == 'function') ?
-            binding.apply(null, args) : binding;
+          binding.apply(null, args) : binding;
       } catch (e) {
         // Report error, but do not disrupt URL replacement. This will
         // interpolate as the empty string.

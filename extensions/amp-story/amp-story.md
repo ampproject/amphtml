@@ -43,7 +43,7 @@ This component is experimental and under active development. For any issues, ple
 
 ## Overview
 
-The `amp-story` extension provides a new format for displaying visual content that you can assembled into a story-telling experience. With an AMP Story, you can provide users with bite-sized, visually rich information and content.
+The `amp-story` extension provides a new format for displaying visual content that you can assemble into a story-telling experience. With an AMP Story, you can provide users with bite-sized, visually rich information and content.
 
 <figure class="centered-fig">
   <amp-anim width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story.gif">
@@ -186,19 +186,21 @@ The end screen displays related articles in sections. The heading for the sectio
 
 ```json
 {
-  "More to Read": [
-    {
-      title: "My friends, this is India [...]",
-      url: "http://a-publisher.com/india"
-      image: "./media/b1.jpg"
-    },
-    {
-      title: "A wonderful weekend with Tenturi",
-      url: "http://a-publisher.com/tenturi"
-      image: "./media/b2.jpg"
-    },
-    ...
-  ],
+  "related-articles": {
+    "More to Read": [
+      {
+        title: "My friends, this is India [...]",
+        url: "http://a-publisher.com/india"
+        image: "./media/b1.jpg"
+      },
+      {
+        title: "A wonderful weekend with Tenturi",
+        url: "http://a-publisher.com/tenturi"
+        image: "./media/b2.jpg"
+      },
+      ...
+    ],
+  }
 }
 ```
 
@@ -295,7 +297,7 @@ Layers are stacked on top of one another to create the desired visual effect. Th
 ### Attributes
 
 
-##### template [optional]
+##### template [required]
 
 The `template` attribute determines the layout of the grid layer. Available templates are described in the [Templates](#templates) section below.
 

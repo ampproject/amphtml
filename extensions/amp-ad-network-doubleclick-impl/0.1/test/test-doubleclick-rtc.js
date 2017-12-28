@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {RTC_ERROR_ENUM} from '../../../amp-a4a/0.1/real-time-config-manager';
+import {RTC_VENDORS} from '../../../amp-a4a/0.1/callout-vendors';
 import {
   AmpAdNetworkDoubleclickImpl,
 } from '../amp-ad-network-doubleclick-impl';
@@ -57,7 +58,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
 
   describe('#mergeRtcResponses_', () => {
     function testMergeRtcResponses(
-        rtcResponseArray, expectedParams, expectedJsonTargeting) {
+      rtcResponseArray, expectedParams, expectedJsonTargeting) {
       const rtcUrlParams = impl.mergeRtcResponses_(rtcResponseArray);
       expect(rtcUrlParams).to.deep.equal(expectedParams);
       expect(impl.jsonTargeting_).to.deep.equal(expectedJsonTargeting);
@@ -79,6 +80,95 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       const expectedJsonTargeting = {
         targeting: {
           'a': 'foo', 'b': {c: 'd', e: 'f'}, 'z': [{a: 'b'}, {c: 'd'}]},
+      };
+      testMergeRtcResponses(
+          rtcResponseArray, expectedParams, expectedJsonTargeting);
+    });
+
+    it('should properly merge RTC responses from vendors', () => {
+      RTC_VENDORS['TEMP_VENDOR'] = {
+        'url': 'https://fakevendor2.biz',
+      };
+      const rtcResponseArray = [
+        {response: {targeting: {'a': [1,2,3], 'b': {c: 'd'}}},
+          callout: 'fakevendor', rtcTime: 100},
+        {response: {targeting: {'a': 'foo', 'b': {e: 'f'}}},
+          callout: 'www.exampleB.com', rtcTime: 500},
+        {response: {targeting: {'a': 'bar'}},
+          callout: 'TEMP_VENDOR', rtcTime: 100},
+      ];
+      const expectedParams = {
+        ati: '2,2,2',
+        artc: '100,500,100',
+        ard: 'fakevendor,www.exampleB.com,TEMP_VENDOR',
+      };
+      const expectedJsonTargeting = {
+        targeting: {
+          'a': 'foo', 'b': {e: 'f'}, 'a_fakevendor': [1,2,3],
+          'b_fakevendor': {c: 'd'}, 'a_TEMP_VENDOR': 'bar'},
+      };
+      testMergeRtcResponses(
+          rtcResponseArray, expectedParams, expectedJsonTargeting);
+    });
+
+    it('should properly merge into existing json', () => {
+      element.setAttribute('json', '{"targeting":{"a":"foo"}}');
+      impl = new AmpAdNetworkDoubleclickImpl(
+          element, env.win.document, env.win);
+      impl.populateAdUrlState();
+      const rtcResponseArray = [
+        {response: {targeting: {'a': [1,2,3]}},
+          callout: 'fakevendor', rtcTime: 100},
+      ];
+      const expectedParams = {
+        ati: '2',
+        artc: '100',
+        ard: 'fakevendor',
+      };
+      const expectedJsonTargeting = {
+        targeting: {'a': 'foo', 'a_fakevendor': [1,2,3]}};
+      testMergeRtcResponses(
+          rtcResponseArray, expectedParams, expectedJsonTargeting);
+    });
+
+    it('should properly merge into existing categoryExclusions', () => {
+      element.setAttribute('json', '{"categoryExclusions": ["sports"]}');
+      impl = new AmpAdNetworkDoubleclickImpl(
+          element, env.win.document, env.win);
+      impl.populateAdUrlState();
+      const rtcResponseArray = [
+        {response: {targeting: {'a': [1,2,3]}, categoryExclusions: ['health']},
+          callout: 'fakevendor', rtcTime: 100},
+      ];
+      const expectedParams = {
+        ati: '2',
+        artc: '100',
+        ard: 'fakevendor',
+      };
+      const expectedJsonTargeting = {
+        targeting: {'a_fakevendor': [1,2,3]},
+        categoryExclusions: ['sports', 'health'],
+      };
+      testMergeRtcResponses(
+          rtcResponseArray, expectedParams, expectedJsonTargeting);
+    });
+
+    it('should not allow duplicate categoryExclusions', () => {
+      element.setAttribute('json', '{"categoryExclusions": ["health"]}');
+      impl = new AmpAdNetworkDoubleclickImpl(
+          element, env.win.document, env.win);
+      impl.populateAdUrlState();
+      const rtcResponseArray = [
+        {response: {categoryExclusions: ['health']},
+          callout: 'fakevendor', rtcTime: 100},
+      ];
+      const expectedParams = {
+        ati: '2',
+        artc: '100',
+        ard: 'fakevendor',
+      };
+      const expectedJsonTargeting = {
+        categoryExclusions: ['health'],
       };
       testMergeRtcResponses(
           rtcResponseArray, expectedParams, expectedJsonTargeting);
@@ -110,13 +200,13 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
     it('should properly merge mix of success and errors', () => {
       impl.jsonTargeting_ = {targeting:
                             {'abc': [1,2,3], 'b': {n: 'm'}, 'a': 'TEST'},
-        categoryExclusions: {loc: 'USA'}};
+      categoryExclusions: ['sports']};
       const rtcResponseArray = [
         {error: RTC_ERROR_ENUM.TIMEOUT,
           callout: 'www.exampleA.com', rtcTime: 1500},
         {response: {targeting: {'a': 'foo', 'b': {e: 'f'}},
-          categoryExclusions: {sport: 'baseball'}},
-          callout: 'VendorFoo', rtcTime: 500},
+          categoryExclusions: ['health']},
+        callout: 'VendorFoo', rtcTime: 500},
         {response: {targeting: {'a': [1,2,3], 'b': {c: 'd'}}},
           callout: 'www.exampleB.com', rtcTime: 100},
         {response: {targeting: {'a': [4,5,6], 'b': {x: [1,2]}}},
@@ -136,7 +226,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         targeting: {
           'a': [4,5,6], 'b': {n: 'm', e: 'f', c: 'd', x: [1,2]},
           abc: [1,2,3]},
-        categoryExclusions: {loc: 'USA', sport: 'baseball'},
+        categoryExclusions: ['sports', 'health'],
       };
       testMergeRtcResponses(
           rtcResponseArray, expectedParams, expectedJsonTargeting);
@@ -146,5 +236,39 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       expect(impl.mergeRtcResponses_()).to.be.null;
     });
 
+  });
+
+  describe('rewriteRtcKeys', () => {
+    it('should rewrite key names if vendor', () => {
+      const response = {
+        'a': '1',
+        'b': '2',
+      };
+      const rewrittenResponse = {
+        'a_fakevendor': '1',
+        'b_fakevendor': '2',
+      };
+      expect(impl.rewriteRtcKeys_(response, 'fakevendor'))
+          .to.deep.equal(rewrittenResponse);
+    });
+
+    it('should not rewrite key names if vendor has disableKeyAppend', () => {
+      const response = {
+        'a': '1',
+        'b': '2',
+      };
+      // fakevendor2 has disableKeyAppend set to true, see callout-vendors.js
+      expect(impl.rewriteRtcKeys_(response, 'fakevendor2'))
+          .to.deep.equal(response);
+    });
+
+    it('should not rewrite key names if custom url callout', () => {
+      const response = {
+        'a': '1',
+        'b': '2',
+      };
+      expect(impl.rewriteRtcKeys_(response, 'www.customurl.biz'))
+          .to.deep.equal(response);
+    });
   });
 });
