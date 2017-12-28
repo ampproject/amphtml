@@ -138,7 +138,7 @@ export class AdvancementConfig {
     const autoAdvanceStr = rootEl.getAttribute('auto-advance-after');
 
     const supportedAdvancementModes = [
-      new ManualAdvancement(rootEl),
+      new ManualAdvancement(autoAdvanceStr, rootEl),
       TimeBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win),
       MediaBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
     ].filter(x => x !== null);
@@ -222,9 +222,10 @@ class ManualAdvancement extends AdvancementConfig {
    * @param {!Element} element The element that, when clicked, can cause
    *     advancing to the next page or going back to the previous.
    */
-  constructor(element) {
+  constructor(autoAdvanceStr, element) {
     super();
     this.element_ = element;
+    this.autoAdvanceStr_ = autoAdvanceStr;
     this.clickListener_ = this.maybePerformNavigation_.bind(this);
   }
 
@@ -232,6 +233,9 @@ class ManualAdvancement extends AdvancementConfig {
   start() {
     super.start();
     this.element_.addEventListener('click', this.clickListener_, true);
+    if (!this.autoAdvanceStr_) {
+      this.onProgressUpdate();
+    }
   }
 
   /** @override */
