@@ -48,14 +48,14 @@ export class NavigationState {
     /** @private {!Observable<StateChangeEventDef>} */
     this.observable_ = new Observable();
 
-    this.atachEvents_(storyElement);
+    this.attachEvents_(storyElement);
   }
 
   /**
    * @param {!Element} storyElement
    * @private
    */
-  atachEvents_(storyElement) {
+  attachEvents_(storyElement) {
     storyElement.addEventListener(EventType.SHOW_BOOKEND, () => {
       this.fire_(StateChangeType.BOOKEND_ENTER);
       this.fire_(StateChangeType.END);

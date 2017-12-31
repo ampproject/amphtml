@@ -596,7 +596,7 @@ export class AmpStory extends AMP.BaseElement {
     const activePage = dev().assert(this.activePage_,
         'No active page set when navigating to next page.');
 
-    if (this.getPageIndex(activePage) !== this.getPageCount() - 1) {
+    if (this.getPageIndex(activePage) < this.getPageCount() - 1) {
       activePage.next();
       return;
     }

@@ -87,35 +87,34 @@ function setClassOnHover(hoverEl, targetEl, className) {
 }
 
 
-/**
- * @param {!Document} doc
- * @param {!ButtonState} defaultState
- * @param {string} className
- * @return {{element: !Element, setState: function(!ButtonStateDef):void}}
- */
-function createButton(doc, defaultState, className) {
-  let state = defaultState;
+class PaginationButton {
+  /**
+   * @param {!Document} doc
+   * @param {!ButtonState} initialState
+   */
+  constructor(doc, initialState) {
+    this.state_ = initialState;
+    this.element = renderAsElement(doc, BUTTON);
 
-  const element = renderAsElement(doc, BUTTON);
+    this.element_.addEventListener('click', e => {
+      if (!this.state_.triggers) {
+        return;
+      }
+      e.preventDefault();
+      dispatch(element, dev().assert(this.state_.triggers),
+          /* opt_bubbles */ true);
+    });
+  }
 
-  element.classList.add(className, defaultState.className);
-
-  element.addEventListener('click', e => {
-    if (!state.triggers) {
+  /** @param {!ButtonState} state */
+  updateState(state) {
+    if (state === this.state_) {
       return;
     }
-    e.preventDefault();
-    dispatch(element, dev().assert(state.triggers), /* opt_bubbles */ true);
-  });
-
-  return {element, setState: newState => {
-    if (newState === state) {
-      return;
-    }
-    element.classList.remove(state.className);
-    element.classList.add(newState.className);
-    state = newState;
-  }};
+    element.classList.remove(this.state_.className);
+    element.classList.add(state.className);
+    this.state_ = state;
+  }
 }
 
 
@@ -125,11 +124,13 @@ export class PaginationButtons {
   constructor(doc) {
     /** @private @const */
     this.forwardButton_ =
-        createButton(doc, ForwardButtonStates.NEXT_PAGE, 'next-container');
+        new PaginationButton(doc, ForwardButtonStates.NEXT_PAGE);
 
     /** @private @const */
-    this.backButton_ =
-        createButton(doc, BackButtonStates.HIDDEN, 'prev-container');
+    this.backButton_ = new PaginationButton(doc, BackButtonStates.HIDDEN);
+
+    this.forwardButton_.element.classList.add('next-container');
+    this.backButton_.element.classList.add('prev-container');
   }
 
   /**
@@ -159,28 +160,28 @@ export class PaginationButtons {
       case StateChangeType.ACTIVE_PAGE:
         const {pageIndex, totalPages} = event.value;
 
-        this.backButton_.setState(
+        this.backButton_.updateState(
             pageIndex === 0 ?
               BackButtonStates.HIDDEN :
               BackButtonStates.PREVIOUS_PAGE);
 
-        this.forwardButton_.setState(
+        this.forwardButton_.updateState(
             pageIndex === totalPages - 1 ?
               ForwardButtonStates.SHOW_BOOKEND :
               ForwardButtonStates.NEXT_PAGE);
         break;
 
       case StateChangeType.BOOKEND_ENTER:
-        this.backButton_.setState(BackButtonStates.CLOSE_BOOKEND);
+        this.backButton_.updateState(BackButtonStates.CLOSE_BOOKEND);
         break;
 
       case StateChangeType.BOOKEND_EXIT:
-        this.backButton_.setState(BackButtonStates.PREVIOUS_PAGE);
-        this.forwardButton_.setState(ForwardButtonStates.SHOW_BOOKEND);
+        this.backButton_.updateState(BackButtonStates.PREVIOUS_PAGE);
+        this.forwardButton_.updateState(ForwardButtonStates.SHOW_BOOKEND);
         break;
 
       case StateChangeType.END:
-        this.forwardButton_.setState(ForwardButtonStates.REPLAY);
+        this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
         break;
     }
   }
