@@ -826,6 +826,8 @@ export class AmpStory extends AMP.BaseElement {
   onResize() {
     if (this.isDesktop_()) {
       this.element.setAttribute('desktop','');
+      this.element.classList.remove(LANDSCAPE_OVERLAY_CLASS);
+
       if (!this.nextButtonContainer_) {
         this.buildButtons_();
       }
