@@ -84,6 +84,9 @@ const DESKTOP_WIDTH_THRESHOLD = 1024;
 /** @private @const {number} */
 const DESKTOP_HEIGHT_THRESHOLD = 550;
 
+/** @private @const {number} */
+const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
+
 /**
  * @private @const {string}
  */
@@ -372,10 +375,15 @@ export class AmpStory extends AMP.BaseElement {
     const gestures = Gestures.get(this.element,
         /* shouldNotPreventDefault */ true);
 
-    gestures.onGesture(SwipeXYRecognizer, () => {
+    gestures.onGesture(SwipeXYRecognizer, e => {
       if (this.bookend_.isActive()) {
         return;
       }
+
+      if (!this.isSwipeLargeEnoughForHint_(e.data.deltaX, e.data.deltaY)) {
+        return;
+      }
+
       this.ampStoryHint_.showNavigationOverlay();
     });
 
@@ -395,6 +403,12 @@ export class AmpStory extends AMP.BaseElement {
     this.boundOnResize_ = debounce(this.win, () => this.onResize(), 300);
     this.getViewport().onResize(this.boundOnResize_);
     this.onResize();
+  }
+
+  /** @private */
+  isSwipeLargeEnoughForHint_(deltaX, deltaY) {
+    return (Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2))
+      >= MIN_SWIPE_FOR_HINT_OVERLAY_PX);
   }
 
   /** @private */
