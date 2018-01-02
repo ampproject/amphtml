@@ -21,13 +21,16 @@
 
 import {dev, initLogConstructor, setReportError} from '../../src/log';
 import {reportError} from '../../src/error';
-import {isArray} from '../../src/types';
 import {InaboxMessagingHost} from './inabox-messaging-host';
 
+/** @const {string} */
 const TAG = 'inabox-host';
-const INITIALIZED_WIN_VAR_NAME = 'ampInaboxInitialized';
-const PENDING_MESSAGES_WIN_VAR_NAME = 'ampInaboxPendingMessages';
-const INABOX_AD_IFRAMES_IN_VAR_NAME = 'ampInaboxIframes';
+/** @const {string} */
+const AMP_INABOX_INITIALIZED = 'ampInaboxInitialized';
+/** @const {string} */
+const PENDING_MESSAGES = 'ampInaboxPendingMessages';
+/** @const {string} */
+const INABOX_IFRAMES = 'ampInaboxIframes';
 
 /**
  * Class for initializing host script and consuming queued messages.
@@ -37,28 +40,26 @@ export class InaboxHost {
   /** @param win {!Window}  */
   constructor(win) {
     // Prevent double initialization
-    if (win[INITIALIZED_WIN_VAR_NAME]) {
+    if (win[AMP_INABOX_INITIALIZED]) {
       dev().info(TAG, 'Skip a 2nd attempt of initializing AMP inabox host.');
       return;
     }
 
     // Assume we cannot recover from state initialization errors.
-    win[INITIALIZED_WIN_VAR_NAME] = true;
+    win[AMP_INABOX_INITIALIZED] = true;
     initLogConstructor();
     setReportError(reportError);
 
-    if (win[INABOX_AD_IFRAMES_IN_VAR_NAME] &&
-        !isArray(win[INABOX_AD_IFRAMES_IN_VAR_NAME])) {
-      dev().info(TAG, `Invalid ${INABOX_AD_IFRAMES_IN_VAR_NAME}`,
-          win[INABOX_AD_IFRAMES_IN_VAR_NAME]);
-      win[INABOX_AD_IFRAMES_IN_VAR_NAME] = [];
+    if (win[INABOX_IFRAMES] && !Array.isArray(win[INABOX_IFRAMES])) {
+      dev().info(TAG, `Invalid ${INABOX_IFRAMES}`,
+          win[INABOX_IFRAMES]);
+      win[INABOX_IFRAMES] = [];
     }
-    const host = new InaboxMessagingHost(
-        win, win[INABOX_AD_IFRAMES_IN_VAR_NAME]);
+    const host = new InaboxMessagingHost(win, win[INABOX_IFRAMES]);
 
-    const queuedMsgs = win[PENDING_MESSAGES_WIN_VAR_NAME];
+    const queuedMsgs = win[PENDING_MESSAGES];
     if (queuedMsgs) {
-      if (isArray(queuedMsgs)) {
+      if (Array.isArray(queuedMsgs)) {
         queuedMsgs.forEach(message => {
           try {
             host.processMessage(message);
@@ -67,12 +68,12 @@ export class InaboxHost {
           }
         });
       } else {
-        dev().info(TAG, `Invalid ${PENDING_MESSAGES_WIN_VAR_NAME}`, queuedMsgs);
+        dev().info(TAG, `Invalid ${PENDING_MESSAGES}`, queuedMsgs);
       }
     }
     // Empty and ensure that future messages are no longer stored in the array.
-    win[PENDING_MESSAGES_WIN_VAR_NAME] = [];
-    win[PENDING_MESSAGES_WIN_VAR_NAME]['push'] = () => {};
+    win[PENDING_MESSAGES] = [];
+    win[PENDING_MESSAGES]['push'] = () => {};
     win.addEventListener('message', host.processMessage.bind(host));
   }
 }
