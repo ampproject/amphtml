@@ -1284,16 +1284,17 @@ function toPromise(readable) {
 /**
  * Gulp tasks
  */
-gulp.task('build', 'Builds the AMP library', build, {
+gulp.task('build', 'Builds the AMP library', ['update-packages'], build, {
   options: {
     config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   }
 });
 gulp.task('check-all', 'Run through all presubmit checks', ['lint', 'dep-check', 'check-types', 'presubmit']);
 gulp.task('check-types', 'Check JS types', checkTypes);
-gulp.task('css', 'Recompile css to build directory', compileCss);
-gulp.task('default', 'Same as "watch"', ['watch', 'serve']);
-gulp.task('dist', 'Build production binaries', dist, {
+gulp.task('css', 'Recompile css to build directory', ['update-packages'],
+    compileCss);
+gulp.task('default', 'Same as "watch"', ['update-packages', 'watch', 'serve']);
+gulp.task('dist', 'Build production binaries', ['update-packages'], dist, {
   options: {
     pseudo_names: '  Compiles with readable names. ' +
         'Great for profiling and debugging production code.',
