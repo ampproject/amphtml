@@ -442,8 +442,8 @@ export class Bookend {
     const jsonLd = getJsonLd(ampdoc.getRootNode());
 
     const metadata = {
-      title: jsonLd && jsonLd['heading'] ?
-        jsonLd['heading'] :
+      title: jsonLd && jsonLd['headline'] ?
+        jsonLd['headline'] :
         user().assertElement(
             this.win_.document.head.querySelector('title'),
             'Please set <title> or structured data (JSON-LD).').textContent,
