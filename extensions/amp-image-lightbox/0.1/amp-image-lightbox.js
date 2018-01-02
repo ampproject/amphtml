@@ -58,6 +58,8 @@ const EXIT_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
 /** @private @const {!../../../src/curve.CurveDef} */
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 
+/** @private @const {!number} */
+const DEFAULT_MAX_SCALE = 2;
 
 /**
  * This class is responsible providing all operations necessary for viewing
@@ -122,7 +124,7 @@ export class ImageViewer {
     /** @private {number} */
     this.minScale_ = 1;
     /** @private {number} */
-    this.maxScale_ = 2;
+    this.maxScale_ = DEFAULT_MAX_SCALE;
 
     /** @private {number} */
     this.startX_ = 0;
@@ -290,6 +292,14 @@ export class ImageViewer {
       width: st.px(this.imageBox_.width),
       height: st.px(this.imageBox_.height),
     });
+
+    // If aspect ratio is off by too much, adjust max scale
+    const viewerBoxRatio = this.viewerBox_.width / this.viewerBox_.height;
+    const maxScale = Math.max(
+        viewerBoxRatio / sourceAspectRatio,
+        sourceAspectRatio / viewerBoxRatio
+    );
+    this.maxScale_ = Math.max(DEFAULT_MAX_SCALE, maxScale);
 
     // Reset zoom and pan.
     this.startScale_ = this.scale_ = 1;
