@@ -1112,8 +1112,8 @@ describe('Resources discoverWork', () => {
   });
 
   afterEach(() => {
-    viewportMock.verify();
     sandbox.restore();
+    viewportMock.verify();
   });
 
   it('should set ready-scan signal on first ready pass after amp init', () => {
@@ -1781,8 +1781,8 @@ describe('Resources changeSize', () => {
   });
 
   afterEach(() => {
-    viewportMock.verify();
     sandbox.restore();
+    viewportMock.verify();
   });
 
   it('should schedule separate requests', () => {
@@ -2558,8 +2558,8 @@ describe('Resources mutateElement and collapse', () => {
   });
 
   afterEach(() => {
-    viewportMock.verify();
     sandbox.restore();
+    viewportMock.verify();
   });
 
   it('should mutate from visible to invisible', () => {
