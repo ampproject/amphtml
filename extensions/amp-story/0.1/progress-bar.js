@@ -43,6 +43,9 @@ export class ProgressBar {
     /** @private {number} */
     this.pageCount_ = 0;
 
+    /** @private {number} */
+    this.activePageIndex_ = 0;
+
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
   }
@@ -111,12 +114,12 @@ export class ProgressBar {
     this.assertValidPageIndex_(pageIndex);
     for (let i = 0; i < this.pageCount_; i++) {
       if (i < pageIndex) {
-        this.updateProgress(i, 1.0, /* transition */ i == pageIndex - 1);
+        this.updateProgress(i, 1.0, /* withTransition */ i == pageIndex - 1);
       } else {
         // The active page manages its own progress by firing PAGE_PROGRESS
         // events to amp-story.
-        this.updateProgress(i, 0.0, /* transition */ (
-            pageIndex != 0 && this.activePageIndex_ != 1));
+        this.updateProgress(i, 0.0, /* withTransition */ (
+          pageIndex != 0 && this.activePageIndex_ != 1));
       }
     }
   }
@@ -126,9 +129,10 @@ export class ProgressBar {
    *     changed.
    * @param {number} progress A number from 0.0 to 1.0, representing the
    *     progress of the current page.
+   * @param {boolean=} withTransition
    * @public
    */
-  updateProgress(pageIndex, progress, transition = true) {
+  updateProgress(pageIndex, progress, withTransition = true) {
     this.assertValidPageIndex_(pageIndex);
 
     this.activePageIndex_ = pageIndex;
@@ -142,7 +146,7 @@ export class ProgressBar {
     this.vsync_.mutate(() => {
       setImportantStyles(dev().assertElement(progressEl), {
         'transform': scale(`${progress},1`),
-        'transition': transition ? TRANSITION : 'none',
+        'transition': withTransition ? TRANSITION : 'none',
       });
     });
   }

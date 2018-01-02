@@ -145,7 +145,8 @@ amp-story[standalone]:fullscreen {
   overflow: hidden!important;
   width: 100% !important;
 
-  /* An empty image works around Safari not clipping rounded corners. */
+  /* An empty mask image works around Safari not clipping rounded corners.
+   * https://stackoverflow.com/questions/5736503/how-to-make-css3-rounded-corners-hide-overflow-in-chrome-opera/10296258#10296258 */
   -webkit-mask-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAA5JREFUeNpiYGBgAAgwAAAEAAGbA+oJAAAAAElFTkSuQmCC) !important;
 }
 
@@ -157,7 +158,7 @@ amp-story[standalone]:fullscreen {
   width: 100% !important;
   transform: translateZ(0) scaleX(0) !important; /* 0-width by default */
   transform-origin: left !important;
-  will-change: transform !important;
+  will-change: transform, transition !important;
 }
 
 [dir=rtl] .i-amphtml-story-progress-value {
