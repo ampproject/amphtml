@@ -186,6 +186,22 @@ const LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER = {
 };
 
 /**
+ * A map of ad network types to the page-level singleton amp-analytics instance
+ * for A4A. If an ad network does not provide an analytics config, the instance
+ * will be null. Keys will be absent until an A4A element has been created for
+ * the ad network.
+ * @const {!Object<string, ?Element>}
+ */
+const perNetworkAnalyticsElements = {};
+
+/** @visibleForTesting */
+export function resetA4aAnalyticsState() {
+  for (const type in perNetworkAnalyticsElements) {
+    delete perNetworkAnalyticsElements[type];
+  }
+}
+
+/**
  * Utility function that ensures any error thrown is handled by optional
  * onError handler (if none provided or handler throws, error is swallowed and
  * undefined is returned).
@@ -359,20 +375,10 @@ export class AmpA4A extends AMP.BaseElement {
     this.postAdResponseExperimentFeatures = {};
 
     /**
-     * The configuration for amp-analytics. If null, no amp-analytics element
-     * will be inserted and no analytics events will be fired.
-     * This will be initialized inside of buildCallback.
-     * @private {?JsonObject}
+     * Whether this ad network has an amp-analytics element on the page.
+     * @type {boolean}
      */
-    this.a4aAnalyticsConfig_ = null;
-
-    /**
-     * The amp-analytics element that for this impl's analytics config. It will
-     * be null before buildCallback() executes or if the impl does not provide
-     * an analytice config.
-     * @private {?Element}
-     */
-    this.a4aAnalyticsElement_ = null;
+    this.hasA4aAnalyticsElement_ = false;
   }
 
   /** @override */
@@ -427,12 +433,72 @@ export class AmpA4A extends AMP.BaseElement {
           });
         });
 
-    this.a4aAnalyticsConfig_ = this.getA4aAnalyticsConfig();
-    if (this.a4aAnalyticsConfig_) {
-      // TODO(warrengm): Consider having page-level singletons for networks that
-      // use the same config for all ads.
-      this.a4aAnalyticsElement_ = insertAnalyticsElement(
-          this.element, this.a4aAnalyticsConfig_, true /* loadAnalytics */);
+    this.initializeAmpAnalyticsForAdNetwork_();
+  }
+
+  /**
+   * Validates that an amp-analytics selector is not out of scope.A
+   * @param {!JsonValue|undefined} triggerOrVisibilitySpec
+   * @private
+   */
+  validateAnalyticsSelector_(triggerOrVisibilitySpec, type) {
+    if (!triggerOrVisibilitySpec ||
+        !triggerOrVisibilitySpec['selector']) {
+      // It's fine to omit selectors.
+      return true;
+    }
+    const selector = triggerOrVisibilitySpec['selector'];
+    if (selector != `amp-ad[type=${type}]`) {
+      dev().warn(
+          TAG,
+          `The amp-analytics config for ${type} is ignored because the ` +
+          `'${selector}' selector does must match amp-ad[type=${type}]`);
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Initializes amp-analytics for the ad network.
+   * @private
+   */
+  initializeAmpAnalyticsForAdNetwork_() {
+    const networkType = this.element.getAttribute('type');
+    if (networkType in perNetworkAnalyticsElements) {
+      // We have already processed. Either the pub has a valid config and amp
+      // analytics has been initialized, or ad network has no analytics
+      // instance on this page.
+      return;
+    }
+
+    let analyticsConfig = this.getA4aAnalyticsNetworkConfig();
+    const triggers = analyticsConfig && analyticsConfig['triggers'] || null;
+    for (const key in triggers) {
+      const trigger = triggers[key];
+      const hasInvalidSelector =
+          !this.validateAnalyticsSelector_(trigger, networkType) ||
+          !this.validateAnalyticsSelector_(
+              trigger['visibilitySpec'], networkType);
+      if (hasInvalidSelector) {
+        // Discard the config;
+        analyticsConfig = null;
+      }
+    }
+
+    if (analyticsConfig) {
+      this.hasA4aAnalyticsElement_ = true;
+      // NOTE(warrengm): We trigger the event to body because the analytics
+      // instrumentation service is scoped by ampdoc.
+      perNetworkAnalyticsElements[networkType] = insertAnalyticsElement(
+          this.win.document.body, analyticsConfig, true /* loadAnalytics */);
+
+      // Remove the sandbox element so that it can measure all amp-ad
+      // elements.
+      perNetworkAnalyticsElements[networkType].removeAttribute('sandbox');
+    } else {
+      // Mark that the network has no valid analytics config by setting the
+      // value to null.
+      perNetworkAnalyticsElements[networkType] = null;
     }
   }
 
@@ -1660,7 +1726,9 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   maybeTriggerAnalyticsEvent_(lifecycleStage) {
-    if (!this.a4aAnalyticsConfig_) {
+    const analyticsElement =
+        perNetworkAnalyticsElements[this.element.getAttribute('type')];
+    if (!analyticsElement) {
       // No config exists that will listen to this event.
       return;
     }
@@ -1673,12 +1741,24 @@ export class AmpA4A extends AMP.BaseElement {
     const analyticsVars = Object.assign(
         {'time': Math.round(this.getNow_())},
         this.getA4aAnalyticsVars(analyticsEvent));
-    triggerAnalyticsEvent(this.element, analyticsEvent, analyticsVars);
+    if (this.win.document == analyticsElement.ownerDocument) {
+      // Check if the amp-analytics is still attached to the document before
+      // firing the trigger.
+      // Note that this happens in tests when promise chains continue executing
+      // after the DOM has been cleaned up. I don't expect such scenarios to
+      // occur in practice.
+      triggerAnalyticsEvent(analyticsElement, analyticsEvent, analyticsVars);
+    } else {
+      dev().warn(
+          TAG,
+          'The owner document for amp-analytics mismatches this.win.document.');
+    }
   }
 
   /**
    * Returns variables to be included on an analytics event. This can be
-   * overridden by specific network implementations.
+   * overridden by specific network implementations to provide dynamic variables
+   * for amp-analytics triggers.
    * Note that this function is called for each time an analytics event is
    * fired.
    * @param {string} unusedAnalyticsEvent The name of the analytics event.
@@ -1693,7 +1773,12 @@ export class AmpA4A extends AMP.BaseElement {
    * added to this A4A element and no A4A triggers will be fired.
    * @return {?JsonObject}
    */
-  getA4aAnalyticsConfig() { return null; }
+  getA4aAnalyticsNetworkConfig() { return null; }
+
+  /**
+   * Returns the a4a-analytics singleton instance for this ad network. It will
+   * return null if
+   */
 
   /**
    * To be overriden by network specific implementation.
@@ -1723,7 +1808,7 @@ export class AmpA4A extends AMP.BaseElement {
       }
     } else if (this.element.getAttribute('rtc-config')) {
       user().error(TAG, 'RTC not supported for ad network ' +
-                   `${this.element.getAttribute('type')}`);
+                   this.element.getAttribute('type'));
     }
   }
 
