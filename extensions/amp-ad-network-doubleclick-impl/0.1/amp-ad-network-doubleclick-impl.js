@@ -728,7 +728,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       WIDTH: () => this.element.getAttribute('width'),
       MULTISIZE: () => this.element.getAttribute('data-multi-size'),
       MULTISIZE_VALIDATION:
-      () => this.element.getAttribute('data-multi-size-validation')
+      () => this.element.getAttribute('data-multi-size-validation'),
+      OVERRIDEWIDTH: () => this.element.getAttribute('data-override-width'),
+      OVERRIDEHEIGHT: () => this.element.getAttribute('data-override-height'),
+      JSON: () => this.element.getAttribute('data-json'),
     };
   }
 
