@@ -47,7 +47,6 @@ const SHARE_PROVIDER_NAME = dict({
 export const ShareWidgetLayout = {
   ROW: 0,
   ROW_SCROLLABLE: 1,
-  WRAP: 2,
 };
 
 
