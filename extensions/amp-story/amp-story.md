@@ -140,7 +140,7 @@ The `amp-story` component represents an entire story.  The component itself  imp
   </amp-anim>
 </figure>
 
-### Example 
+### Example
 
 ```html
 <amp-story standalone bookend-config-src="./related.json" background-audio="my.mp3">
@@ -180,12 +180,35 @@ The `bookend-config-src` value is a URL endpoint that returns data for the end s
   </amp-anim>
 </figure>
 
+#### Related articles
+
 The end screen displays related articles in sections. The heading for the section is obtained from the provided string key name (e.g., "More to Read"); the array of articles for that key are displayed for that section. The domain and favicon of each linked article are automatically parsed and fetched from the specified URL for each piece of content.
+
+These are configured in the `related-articles` field of the response object.
+
+#### Social sharing
+
+The configuration for social sharing is defined in the `share-providers` field of the response object (optional).
+
+This field should contain an object with key-value pairs. Each key represents a share provider's name (e.g. `facebook`). The value should be set to a non-empty configuration object for the provider or `true` (when no parameters are required).
+
+The list of available providers is the same as in the [amp-social-share](https://www.ampproject.org/docs/reference/components/amp-social-share) component.
+
+Each of these providers has a different set of available parameters ([see `data-param-*`](https://www.ampproject.org/docs/reference/components/amp-social-share#data-param-*)). The configuration object takes these parameters without the `data-param-` preffix (for example, the `data-param-app_id` would appear in the configuration object as `app_id`).
 
 #### Example JSON response
 
 ```json
 {
+  "share-providers": {
+    "email": true,
+    "twitter": true,
+    "tumblr": true,
+    "facebook": {
+      // Facebook requires an `app_id` param
+      "app_id": "MY_FACEBOOK_APP_ID"
+    }
+  },
   "related-articles": {
     "More to Read": [
       {
@@ -235,7 +258,7 @@ The `<amp-story-page>` component represents the content to display on a single p
     <p>Jon Bersch</p>
     <p>May 18</p>
   </amp-story-grid-layer>
-  <amp-story-grid-layer template="vertical" 
+  <amp-story-grid-layer template="vertical"
       align-content="end" justify-content="end">
     <amp-img src="a-logo.svg"></amp-img>
   </amp-story-grid-layer>
@@ -255,7 +278,7 @@ Specifies when to auto-advance to the next page.  If omitted, the page will not 
   * A positive amount of [time](https://developer.mozilla.org/en-US/docs/Web/CSS/time) to wait before automatically advancing to the next page
   * An ID of an [HTMLMediaElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement) or video-interface video whose completion will trigger the auto-advance
 
-For example: 
+For example:
 
 ```html
 <amp-story-page id="tokyo" auto-advance-after="1s">
@@ -326,7 +349,7 @@ The `fill` template shows its first child full bleed. All other children are not
 
 Names Areas: (none)
 
-Example: 
+Example:
 
 <amp-img alt="Fill template example" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-fill.png" width="145" height="255">
   <noscript>
