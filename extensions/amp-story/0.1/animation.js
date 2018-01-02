@@ -30,7 +30,7 @@ import {
   KeyframesDef,
   StoryAnimationPresetDef,
 } from './animation-types';
-import {timeStrToMillis} from './utils';
+import {timeStrToMillis, unscaledClientRect} from './utils';
 
 /** const {string} */
 const ANIMATE_IN_ATTRIBUTE_NAME = 'animate-in';
@@ -143,16 +143,16 @@ class AnimationRunner {
    */
   getDims() {
     return this.vsync_.measurePromise(() => {
-      const targetBoundingRect = this.target_./*OK*/getBoundingClientRect();
-      const pageBoundingRect = this.page_./*OK*/getBoundingClientRect();
+      const targetRect = unscaledClientRect(this.target_);
+      const pageRect = unscaledClientRect(this.page_);
 
       return /** @type {!StoryAnimationDimsDef} */ ({
-        pageWidth: pageBoundingRect.width,
-        pageHeight: pageBoundingRect.height,
-        targetWidth: targetBoundingRect.width,
-        targetHeight: targetBoundingRect.height,
-        targetX: targetBoundingRect.left - pageBoundingRect.left,
-        targetY: targetBoundingRect.top - pageBoundingRect.top,
+        pageWidth: pageRect.width,
+        pageHeight: pageRect.height,
+        targetWidth: targetRect.width,
+        targetHeight: targetRect.height,
+        targetX: targetRect.left - pageRect.left,
+        targetY: targetRect.top - pageRect.top,
       });
     });
   }
