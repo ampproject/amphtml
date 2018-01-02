@@ -459,11 +459,15 @@ export function createCustomElementClass(win, name) {
         Services.timerFor(toWin(this.ownerDocument.defaultView))
             .delay(this.dequeueActions_.bind(this), 1);
       }
+      try {
       if (!this.getPlaceholder()) {
         const placeholder = this.createPlaceholder();
         if (placeholder) {
           this.appendChild(placeholder);
         }
+      }
+      } catch(e) {
+        reportError(e, this);
       }
     }, reason => {
       this.signals_.rejectSignal(CommonSignals.BUILT,

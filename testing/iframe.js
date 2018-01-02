@@ -139,9 +139,18 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
             file + ':' + line + '\n' +
             (error ? error.stack : 'no stack')));
       };
+      win.errorMessages = '';
+      win.addEventListener('error', event => {
+        win.errorMessages += 'Error: ' + event.message + '\n';
+      });
+      win.addEventListener('unhandledrejection', event => {
+        win.errorMessages += 'Rejection: ' + event.reason.message + '\n';
+      });
       let errors = [];
       win.console.error = function() {
-        errors.push('Error: ' + [].slice.call(arguments).join(' '));
+        const message = [].slice.call(arguments).join(' ');
+        errors.push('Error: ' + message);
+        win.errorMessages += 'Message: ' + message + '\n';
         console.error.apply(console, arguments);
       };
       // Make time go 10x as fast
@@ -449,7 +458,8 @@ export function pollForLayout(win, count, opt_timeout) {
             .filter(e => !e.classList.contains('i-amphtml-layout'))
             .map(e => '  ' + e.tagName + '->' + e.className + ': ' +
                 e./*test*/outerHTML)
-            .join('\n '));
+            .join('\n ') +
+        '\nError messages ' + win.errorMessages);
   }, opt_timeout);
 }
 

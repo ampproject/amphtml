@@ -159,8 +159,9 @@ export function reportError(error, opt_associatedElement) {
       element.classList.add('i-amphtml-error');
       if (getMode().development) {
         element.classList.add('i-amphtml-element-error');
-        element.setAttribute('error-message', error.message);
+
       }
+      element.setAttribute('error-message', error.message);
     }
 
     // Report to console.
