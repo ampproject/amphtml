@@ -115,7 +115,7 @@ export function createCustomElementClass(win, name) {
 
   function CustomElementClass() {
     const self = construct(win.HTMLElement, [], CustomElementClass);
-    self.createdCallback();
+    self.createdCallback_();
     return self;
   }
   CustomElementClass.prototype = win.Object.create(win.HTMLElement.prototype);
@@ -127,6 +127,19 @@ export function createCustomElementClass(win, name) {
      * @final @this {!Element}
      */
   CustomElementClass.prototype.createdCallback = function() {
+    this.createdCallback_();
+  };
+
+  /**
+     * Called when elements is created. Sets instance vars since there is no
+     * constructor.
+     * @final @this {!Element}
+     */
+  CustomElementClass.prototype.createdCallback_ = function() {
+    if (this.created_) {
+      return;
+    }
+    this.created_ = true;
     // Flag "notbuilt" is removed by Resource manager when the resource is
     // considered to be built. See "setBuilt" method.
     /** @private {boolean} */
@@ -202,16 +215,6 @@ export function createCustomElementClass(win, name) {
     /** @private {?Element|undefined} */
     this.overflowElement_ = undefined;
 
-    // `opt_implementationClass` is only used for tests.
-    let Ctor = win.ampExtendedElements &&
-          win.ampExtendedElements[this.elementName()];
-    if (getMode().test && this.implementationClassForTesting) {
-      Ctor = this.implementationClassForTesting;
-    }
-    dev().assert(Ctor);
-    /** @private {!./base-element.BaseElement} */
-    this.implementation_ = new Ctor(this);
-
     /**
        * An element always starts in a unupgraded state until it's added to DOM
        * for the first time in which case it can be upgraded immediately or wait
@@ -252,6 +255,16 @@ export function createCustomElementClass(win, name) {
 
     /** @private {?./layout-delay-meter.LayoutDelayMeter} */
     this.layoutDelayMeter_ = null;
+
+    // `opt_implementationClass` is only used for tests.
+    let Ctor = win.ampExtendedElements &&
+    win.ampExtendedElements[this.elementName()];
+    if (getMode().test && this.implementationClassForTesting) {
+      Ctor = this.implementationClassForTesting;
+    }
+    dev().assert(Ctor);
+    /** @private {!./base-element.BaseElement} */
+    this.implementation_ = new Ctor(this);
 
     if (this[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER]) {
       this[dom.UPGRADE_TO_CUSTOMELEMENT_RESOLVER](this);
@@ -647,7 +660,11 @@ export function createCustomElementClass(win, name) {
      * @final @this {!Element}
      */
   CustomElementClass.prototype.connectedCallback = function() {
-    this.classList.add('connected-callback')
+    if (!this.created_) {
+      this.classList.add('not-created')
+      this.createdCallback_();
+    }
+    this.classList.add('connected-callback-' + this.upgradeState_)
     if (!this.everAttached) {
       this.classList.add('i-amphtml-element');
       this.classList.add('i-amphtml-notbuilt');
@@ -696,13 +713,17 @@ export function createCustomElementClass(win, name) {
 
       try {
         this.layout_ = applyStaticLayout(this);
+        this.classList.add('connected-2-' + this.upgradeState_)
       } catch (e) {
         reportError(e, this);
+        this.classList.add('connected-3-' + this.upgradeState_)
       }
       if (!isStub(this.implementation_)) {
+        this.classList.add('connected-4-' + this.upgradeState_)
         this.tryUpgrade_();
       }
       if (!this.isUpgraded()) {
+        this.classList.add('connected-5-' + this.upgradeState_)
         this.classList.add('amp-unresolved');
         this.classList.add('i-amphtml-unresolved');
         // amp:attached is dispatched from the ElementStub class when it

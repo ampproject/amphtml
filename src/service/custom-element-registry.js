@@ -144,14 +144,7 @@ export function registerElement(win, name, implementationClass) {
   knownElements[name] = implementationClass;
   const klass = createCustomElementClass(win, name);
 
-  const supportsCustomElementsV1 = 'customElements' in win;
-  if (supportsCustomElementsV1) {
-    win['customElements'].define(name, klass);
-  } else {
-    win.document.registerElement(name, {
-      prototype: klass.prototype,
-    });
-  }
+  win['customElements'].define(name, klass);
 }
 
 
