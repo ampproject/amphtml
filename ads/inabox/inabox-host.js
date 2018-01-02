@@ -64,7 +64,7 @@ export class InaboxHost {
           try {
             host.processMessage(message);
           } catch (err) {
-            dev().info(TAG, 'Error processing inabox message', message, err);
+            dev().error(TAG, 'Error processing inabox message', message, err);
           }
         });
       } else {
