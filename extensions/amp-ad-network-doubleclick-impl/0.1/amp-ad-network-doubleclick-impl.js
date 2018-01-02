@@ -100,7 +100,6 @@ import {
 import {
   addExperimentIdToElement,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {getAdCid} from '../../../src/ad-cid';
 import {RTC_ERROR_ENUM} from '../../amp-a4a/0.1/real-time-config-manager';
 import '../../amp-a4a/0.1/real-time-config-manager';
 
@@ -718,17 +717,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getCustomRealTimeConfigMacros_() {
-    const macros = {};
-    const docInfo = Services.documentInfoForDoc(this.element);
-    macros['PAGEVIEWID'] = docInfo.pageViewId;
-    macros['HREF'] = this.win.location.href;
-    macros['DATASLOT'] = this.element.getAttribute('data-slot');
-    macros['HEIGHT'] = this.element.getAttribute('height');
-    macros['WIDTH'] = this.element.getAttribute('width');
-    macros['MULTISIZE'] = this.element.getAttribute('data-multi-size');
-    macros['MULTISIZE_VALIDATION'] =
-        this.element.getAttribute('data-multi-size-validation');
-    return macros;
+    return {
+      PAGEVIEWID: () => {
+        const docInfo = Services.documentInfoForDoc(this.element);
+        return docInfo.pageViewId;
+      },
+      HREF: () => this.win.location.href,
+      DATASLOT: () => this.element.getAttribute('data-slot'),
+      HEIGHT: () => this.element.getAttribute('height'),
+      WIDTH: () => this.element.getAttribute('width'),
+      MULTISIZE: () => this.element.getAttribute('data-multi-size'),
+      MULTISIZE_VALIDATION:
+      () => this.element.getAttribute('data-multi-size-validation')
+    };
   }
 
   /**
