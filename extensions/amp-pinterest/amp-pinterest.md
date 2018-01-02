@@ -106,7 +106,7 @@ height=20 width=40
 Small rectangular button with pin count to the right, using `data-count="beside"`:
 
 ```html
-height=28 width=85
+height=20 width=85
 ```
 
 Small rectangular button with pin count on top, using `data-count="above"`:
@@ -115,7 +115,7 @@ Small rectangular button with pin count on top, using `data-count="above"`:
 height=50 width=40
 ```
 
-Large rectangular button using `data-height="tall"`:
+Large rectangular button using `data-tall="true"`:
 
 ```html
 height=28 width=56
@@ -127,7 +127,7 @@ Large rectangular button with pin count to the right, using `data-tall="true"` a
 height=28 width=107
 ```
 
-Large rectangular button with pin count on top, using `data-height="tall"` and `data-count="above"`:
+Large rectangular button with pin count on top, using `data-tall="true"` and `data-count="above"`:
 
 ```html
 height=66 width=56
@@ -139,7 +139,7 @@ Small circular button using `data-round="true"`:
 height=16 width=16
 ```
 
-Large circular button using `data-round="true"` and `data-height="tall"`:
+Large circular button using `data-round="true"` and `data-tall="true"`:
 
 ```html
 height=32 width=32
