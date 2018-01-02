@@ -72,7 +72,7 @@ amp-story[standalone][desktop] {
   background-size: cover !important;
   background-color: transparent !important;
   background-position: center center !important;
-  will-change: opacity !important;
+  will-change: opacity, z-index !important;
   z-index: 0 !important;
 }
 
