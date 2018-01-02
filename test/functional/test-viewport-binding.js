@@ -221,8 +221,7 @@ describes.realWin('ViewportBindingIosEmbedWrapper', {ampCss: true}, env => {
     installDocService(win, /* isSingleDoc */ true);
     installDocumentStateService(win);
     installVsyncService(win);
-    const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
-    binding = new ViewportBindingIosEmbedWrapper_(ampdoc);
+    binding = new ViewportBindingIosEmbedWrapper_(win);
     binding.connect();
   });
 
