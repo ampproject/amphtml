@@ -29,7 +29,9 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
   beforeEach(() => {
     hasBookend = false;
     pageElement = env.win.document.createElement('div');
-    navigationState = new NavigationState(pageElement, () => hasBookend);
+    navigationState = new NavigationState(pageElement,
+        // Not using `Promise.resolve` since we need synchronicity.
+        () => ({then(fn) { fn(hasBookend); }}));
   });
 
   it('should dispatch active page changes to all observers', () => {
@@ -68,7 +70,7 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
     });
   });
 
-  it('should dispatch END on last page if story has no bookend'. () => {
+  it('should dispatch END on last page if story does NOT have bookend', () => {
     const observer = sandbox.spy();
 
     navigationState.observe(event => observer(event));
@@ -78,22 +80,30 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
     navigationState.updateActivePage(1, 2);
 
     expect(observer).to.have.been.calledWith(sandbox.match(e =>
-        e.type == StateChangeType.ACTIVE_PAGE
-            && e.value.pageIndex === 1
-            && e.value.totalPages === 2));
+      e.type == StateChangeType.ACTIVE_PAGE
+          && e.value.pageIndex === 1
+          && e.value.totalPages === 2));
 
-    expect(observer).to.have.been.calledWith({type: StateChangeType.END});
+    expect(observer).to.have.been.calledWith(sandbox.match(e =>
+      e.type == StateChangeType.END));
+  });
+
+  it('should NOT dispatch END on last page if story has bookend', () => {
+    const observer = sandbox.spy();
+
+    navigationState.observe(event => observer(event));
 
     hasBookend = true;
 
     navigationState.updateActivePage(1, 2);
 
     expect(observer).to.have.been.calledWith(sandbox.match(e =>
-        e.type == StateChangeType.ACTIVE_PAGE
-            && e.value.pageIndex === 1
-            && e.value.totalPages === 2));
+      e.type == StateChangeType.ACTIVE_PAGE
+          && e.value.pageIndex === 1
+          && e.value.totalPages === 2));
 
-    expect(observer).to.not.have.been.calledWith({type: StateChangeType.END});
+    expect(observer).to.not.have.been.calledWith(sandbox.match(e =>
+      e.type == StateChangeType.END));
   });
 
   it('should dispatch BOOKEND_ENTER/END and BOOKEND_EXIT', () => {

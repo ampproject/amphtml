@@ -90,30 +90,39 @@ function setClassOnHover(hoverEl, targetEl, className) {
 class PaginationButton {
   /**
    * @param {!Document} doc
-   * @param {!ButtonState} initialState
+   * @param {!ButtonStateDef} initialState
    */
   constructor(doc, initialState) {
+    /** @private {!ButtonStateDef} */
     this.state_ = initialState;
+
+    /** @public @const */
     this.element = renderAsElement(doc, BUTTON);
 
-    this.element_.addEventListener('click', e => {
-      if (!this.state_.triggers) {
-        return;
-      }
-      e.preventDefault();
-      dispatch(element, dev().assert(this.state_.triggers),
-          /* opt_bubbles */ true);
-    });
+    this.element.addEventListener('click', e => this.onClick_(e));
   }
 
-  /** @param {!ButtonState} state */
+  /** @param {!ButtonStateDef} state */
   updateState(state) {
     if (state === this.state_) {
       return;
     }
-    element.classList.remove(this.state_.className);
-    element.classList.add(state.className);
+    this.element.classList.remove(this.state_.className);
+    this.element.classList.add(state.className);
     this.state_ = state;
+  }
+
+  /**
+   * @param {!Event} e
+   * @private
+   */
+  onClick_(e) {
+    if (!this.state_.triggers) {
+      return;
+    }
+    e.preventDefault();
+    dispatch(this.element, dev().assert(this.state_.triggers),
+        /* opt_bubbles */ true);
   }
 }
 
@@ -135,11 +144,10 @@ export class PaginationButtons {
 
   /**
    * @param {!Document} doc
-   * @param {!function():Promise<boolean>} hasBookend
    * @return {!PaginationButtons}
    */
-  static create(doc, hasBookend) {
-    return new PaginationButtons(doc, hasBookend);
+  static create(doc) {
+    return new PaginationButtons(doc);
   }
 
   /** @param {!Element} element */

@@ -562,7 +562,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Navigates to the next page in the story.
-   * @param {boolean} opt_isAutomaticAdvance Whether this navigation was caused
+   * @param {boolean=} opt_isAutomaticAdvance Whether this navigation was caused
    *     by an automatic advancement after a timeout.
    */
   next(opt_isAutomaticAdvance) {
