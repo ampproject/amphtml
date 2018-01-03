@@ -206,19 +206,23 @@ amp-story:not([desktop]) >
 }
 
 amp-story-page[active],
-amp-story:not([desktop]) > amp-story-page[distance=0] {
+amp-story:not([desktop]) >
+    amp-story-page.i-amphtml-layout-container[distance="0"] {
   transform: translateY(0) !important;
 }
 
-amp-story:not([desktop]) > amp-story-page[distance=1] {
+amp-story:not([desktop]) >
+    amp-story-page.i-amphtml-layout-container[distance="1"] {
   transform: translateY(100%) !important;
 }
 
-amp-story:not([desktop]) > amp-story-page[distance=2] {
+amp-story:not([desktop]) >
+    amp-story-page.i-amphtml-layout-container[distance="2"] {
   transform: translateY(200%) !important;
 }
 
-amp-story:not([desktop]) > amp-story-page[distance=3] {
+amp-story:not([desktop]) >
+    amp-story-page.i-amphtml-layout-container[distance="3"] {
   transform: translateY(300%) !important;
 }
 
