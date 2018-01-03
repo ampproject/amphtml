@@ -718,10 +718,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   getCustomRealTimeConfigMacros_() {
     return {
-      PAGEVIEWID: () => {
-        const docInfo = Services.documentInfoForDoc(this.element);
-        return docInfo.pageViewId;
-      },
+      PAGEVIEWID: () => Services.documentInfoForDoc(this.element).pageViewId,
       HREF: () => this.win.location.href,
       DATASLOT: () => this.element.getAttribute('data-slot'),
       HEIGHT: () => this.element.getAttribute('height'),

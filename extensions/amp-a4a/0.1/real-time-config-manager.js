@@ -27,6 +27,9 @@ const TAG = 'real-time-config';
 /** @type {number} */
 const MAX_RTC_CALLOUTS = 5;
 
+/** @type {number} */
+const MAX_URL_LENGTH = 16384;
+
 /** @enum {string} */
 export const RTC_ERROR_ENUM = {
   // Occurs when response is unparseable as JSON
@@ -157,6 +160,9 @@ function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
         opt_vendor || url);
   }
   seenUrls[url] = true;
+  if (url.length > MAX_URL_LENGTH) {
+    url = url.substr(0, MAX_URL_LENGTH).replace(/%\w?$/, '');
+  }
   promiseArray.push(sendRtcCallout_(
       url, rtcStartTime, win, timeoutMillis, opt_vendor || url));
 }
