@@ -667,10 +667,7 @@ export class AmpStory extends AMP.BaseElement {
     const targetPage = this.getPageById_(targetPageId);
     const pageIndex = this.getPageIndex(targetPage);
 
-    if (this.prevButton_) {
-      this.prevButton_.classList.toggle(
-          'i-amphtml-story-button-move-hidden', pageIndex === 0);
-    }
+    this.togglePreviousPageHideClass_(targetPage);
 
     this.updateBackground_(targetPage.element);
 
@@ -716,6 +713,16 @@ export class AmpStory extends AMP.BaseElement {
         })
         .then(() => this.preloadPagesByDistance_())
         .then(() => this.forceRepaintForSafari_());
+  }
+
+  /** @private */
+  togglePreviousPageHideClass_(targetPage) {
+    const pageIndex = this.getPageIndex(targetPage);
+
+    if (this.prevButton_) {
+      this.prevButton_.classList.toggle(
+          'i-amphtml-story-button-move-hidden', pageIndex === 0);
+    }
   }
 
 
@@ -844,6 +851,8 @@ export class AmpStory extends AMP.BaseElement {
 
       if (!this.nextButtonContainer_) {
         this.buildButtons_();
+        /* Remove hidden class if active page is not the first page.*/
+        this.togglePreviousPageHideClass_(this.activePage_);
       }
       if (!this.topBar_) {
         this.buildTopBar_();
