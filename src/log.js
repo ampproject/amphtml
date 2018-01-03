@@ -159,7 +159,7 @@ export class Log {
       } else if (level == 'WARN') {
         fn = this.win.console.warn || fn;
       }
-      messages.unshift(Date.now() - start, '[' + tag + ']');
+      messages.unshift('[' + tag + ']');
       fn.apply(this.win.console, messages);
     }
   }
