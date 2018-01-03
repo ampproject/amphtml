@@ -717,6 +717,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getCustomRealTimeConfigMacros_() {
+    /**
+     * This whitelist allow attributes on the amp-ad element to be used as
+     * macros for constructing the RTC URL. Add attributes here, in lowercase,
+     * to make them available.
+     */
     const whitelist = {
       'height': true,
       'width': true,
@@ -730,7 +735,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return {
       PAGEVIEWID: () => Services.documentInfoForDoc(this.element).pageViewId,
       HREF: () => this.win.location.href,
-      ATTR: name => !!whitelist[name] && this.element.getAttribute(name),
+      ATTR: name => {
+        return !!whitelist[name.toLowerCase()] &&
+            this.element.getAttribute(name) ||
+            dev().warn('TAG', `Invalid attribute ${name}`);
+      },
     };
   }
 
