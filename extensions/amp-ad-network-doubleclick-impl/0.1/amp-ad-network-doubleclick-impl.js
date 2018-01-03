@@ -721,6 +721,36 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return {'artc': artc.join() || null, 'ati': ati.join(), 'ard': ard.join()};
   }
 
+  /** @override */
+  getCustomRealTimeConfigMacros_() {
+    /**
+     * This whitelist allow attributes on the amp-ad element to be used as
+     * macros for constructing the RTC URL. Add attributes here, in lowercase,
+     * to make them available.
+     */
+    const whitelist = {
+      'height': true,
+      'width': true,
+      'data-slot': true,
+      'data-multi-size': true,
+      'data-multi-size-validation': true,
+      'data-override-width': true,
+      'data-override-height': true,
+      'data-json': true,
+    };
+    return {
+      PAGEVIEWID: () => Services.documentInfoForDoc(this.element).pageViewId,
+      HREF: () => this.win.location.href,
+      ATTR: name => {
+        if (!whitelist[name.toLowerCase()]) {
+          dev().warn('TAG', `Invalid attribute ${name}`);
+        } else {
+          return this.element.getAttribute(name);
+        }
+      },
+    };
+  }
+
   /**
    * Appends the callout value to the keys of response to prevent a collision
    * case caused by multiple vendors returning the same keys.
