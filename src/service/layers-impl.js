@@ -77,6 +77,7 @@ function positionLt(left, top) {
 /**
  * The core class behind the Layers system, this controls layer creation and
  * management.
+ * @implements {../service.Disposable}
  */
 export class LayoutLayers {
   /**
@@ -100,24 +101,36 @@ export class LayoutLayers {
     /** @const @private {!Array<!LayoutElement>} */
     this.layouts_ = [];
 
+    /** @const @private {!Array<function()>} */
+    this.unlisteners_ = [];
+
     // Listen for scroll events at the document level, so we know when either
     // the document (the scrolling element) or an element scrolls.
     // This forwards to our scroll-dirty system, and eventually to the scroll
     // listener.
-    listen(win.document, 'scroll', event => {
+    this.unlisteners_.push(listen(win.document, 'scroll', event => {
       const {target} = event;
       const scrolled = target.nodeType == Node.ELEMENT_NODE
         ? dev().assertElement(target)
         : scrollingElement;
       this.scrolled_(scrolled);
-    }, {capture: true, passive: true});
+    }, {capture: true, passive: true}));
 
     // Destroys the layer tree on document resize, since entirely new CSS may
     // apply to the document now.
-    win.addEventListener('resize', () => this.onResize_());
+    this.unlisteners_.push(listen(win, 'resize', () => this.onResize_(), {
+      capture: true,
+      passive: true,
+    }));
 
     // Finally, declare scrollingElement as the one true scrolling layer.
     this.declareLayer_(scrollingElement, true);
+  }
+
+  /** @override */
+  dispose() {
+    this.unlisteners_.forEach(unlisten => unlisten());
+    this.unlisteners_.length = 0;
   }
 
   /**
