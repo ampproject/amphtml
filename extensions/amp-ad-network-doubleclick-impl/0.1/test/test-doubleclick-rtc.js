@@ -279,10 +279,10 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         'data-slot': '5678',
         'height': '50',
         'width': '200',
-        'data-multi-size': '300x50,200x100',
+        'DATA-MULTI-SIZE': '300x50,200x100',
         'data-multi-size-validation': 'true',
-        'data-override-width': '250',
-        'data-override-height': '75',
+        'data-OVERRIDE-width': '250',
+        'data-override-HEIGHT': '75',
       };
       element = createElementWithAttributes(env.win.document, 'amp-ad', {
         width: macros['width'],
@@ -290,10 +290,10 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         type: 'doubleclick',
         layout: 'fixed',
         'data-slot': macros['data-slot'],
-        'data-multi-size': macros['data-multi-size'],
+        'data-multi-size': macros['DATA-MULTI-SIZE'],
         'data-multi-size-validation': macros['data-multi-size-validation'],
-        'data-override-width': macros['data-override-width'],
-        'data-override-height': macros['data-override-height'],
+        'data-override-width': macros['data-OVERRIDE-width'],
+        'data-override-height': macros['data-override-HEIGHT'],
       });
       env.win.document.body.appendChild(element);
       const docInfo = Services.documentInfoForDoc(element);
