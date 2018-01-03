@@ -100,12 +100,12 @@
       "url": "examples/visual-tests/font.amp/font.amp.html",
       "name": "Fonts",
       "loading_incomplete_css": [
-        ".comic-amp-font-loading",
-        ".comic-amp-bold-font-loading"
+        "html.comic-amp-font-loading",
+        "html.comic-amp-bold-font-loading"
       ],
       "loading_complete_css": [
-        ".comic-amp-font-loaded",
-        ".comic-amp-bold-font-loaded"
+        "html.comic-amp-font-loaded",
+        "html.comic-amp-bold-font-loaded"
       ]
     },
     {

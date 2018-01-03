@@ -52,12 +52,12 @@ describes.fakeWin('amp-pixel with img (inabox)', {amp: true}, env => {
     const src = 'https://foo.com/tracker/foo';
     const pixelElem =
         createElementWithAttributes(env.win.document, 'amp-pixel',
-        {src, 'i-amphtml-ssr': ''});
+            {src, 'i-amphtml-ssr': ''});
     pixelElem.appendChild(
         createElementWithAttributes(env.win.document, 'img', {src}));
     env.win.document.body.appendChild(pixelElem);
     const viewer = Services.viewerForDoc(env.win.document);
-    env.sandbox.stub(viewer, 'whenFirstVisible', () => {
+    env.sandbox.stub(viewer, 'whenFirstVisible').callsFake(() => {
       return Promise.resolve();
     });
     const pixel = new AmpPixel(pixelElem);

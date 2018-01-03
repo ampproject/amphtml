@@ -182,7 +182,7 @@ event.index</pre></td>
   </tr>
 </table>
 
-### amp-selector
+### amp-sidebar
 <table>
   <tr>
     <th width="25%">Event</th>
@@ -190,12 +190,29 @@ event.index</pre></td>
     <th width="40%">Data</th>
   </tr>
   <tr>
-    <td><code>select</code></td>
-    <td>Fired when the user manually selects an option.</td>
-    <td><pre>// The option attribute
-// value of
-// the selected element.
-event.targetOption</pre></td>
+    <td><code>sidebarOpen</code></td>
+    <td>Fired when sidebar is fully opened after transition has ended.</td>
+    <td>None</td>
+  </tr>
+  <tr>
+    <td><code>sidebarClose</code></td>
+    <td>Fired when sidebar is fully closed after transition has ended.</td>
+    <td>None</td>
+  </tr>
+</table>
+
+### amp-carousel[type="slides"]
+<table>
+  <tr>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>slideChange</code></td>
+    <td>Fired when the user manually changes the carousel's current slide. Does not fire on autoplay or the <code>goToSlide</code> action.</td>
+    <td><pre>// Slide number.
+event.index</pre></td>
   </tr>
 </table>
 

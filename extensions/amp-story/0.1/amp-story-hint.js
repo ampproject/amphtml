@@ -14,65 +14,67 @@
  * limitations under the License.
  */
 
-import {renderSimpleTemplate} from './simple-template';
+import {renderAsElement} from './simple-template';
 import {dict} from '../../../src/utils/object';
-import {debounce} from '../../../src/utils/rate-limit';
-import {Animation} from '../../../src/animation';
-import {setImportantStyles, resetStyles} from '../../../src/style';
-import {dev} from '../../../src/log';
+import {Services} from '../../../src/services';
 
-/** @private @const {!Array<!./simple-template.ElementDef>} */
-const NAVIGATION_HELP_OVERLAY = [
-  {
-    tag: 'div',
-    attrs: dict({'class': 'i-amphtml-story-navigation-help-overlay'}),
-    children: [
-      {
-        tag: 'div',
-        attrs: dict({'class': 'i-amphtml-story-navigation-help-section'
-            + ' prev-page'}),
-        children: [
-          {
-            tag: 'div',
-            attrs: dict({'class': 'i-amphtml-story-icons-container'}),
-            children: [
-              {
-                tag: 'div',
-                attrs: dict({'class': 'i-amphtml-story-hint-tap-icon'}),
-              },
-              {
-                tag: 'div',
-                attrs: dict({'class': 'i-amphtml-story-hint-tap-icon-text'}),
-              },
-            ],
-          },
-        ],
-      },
-      {
-        tag: 'div',
-        attrs: dict({'class': 'i-amphtml-story-navigation-help-section'
-            + ' next-page'}),
-        children: [
-          {
-            tag: 'div',
-            attrs: dict({'class': 'i-amphtml-story-icons-container'}),
-            children: [
-              {
-                tag: 'div',
-                attrs: dict({'class': 'i-amphtml-story-hint-tap-icon'}),
-              },
-              {
-                tag: 'div',
-                attrs: dict({'class': 'i-amphtml-story-hint-tap-icon-text'}),
-                text: 'Next page',
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-];
+
+/** @private @const {!./simple-template.ElementDef} */
+const TEMPLATE = {
+  tag: 'aside',
+  attrs: dict({'class': 'i-amphtml-story-hint-container i-amphtml-hidden'}),
+  children: [
+    {
+      tag: 'div',
+      attrs: dict({'class': 'i-amphtml-story-navigation-help-overlay'}),
+      children: [
+        {
+          tag: 'div',
+          attrs: dict({'class': 'i-amphtml-story-navigation-help-section'
+              + ' prev-page'}),
+          children: [
+            {
+              tag: 'div',
+              attrs: dict({'class': 'i-amphtml-story-icons-container'}),
+              children: [
+                {
+                  tag: 'div',
+                  attrs: dict({'class': 'i-amphtml-story-hint-tap-icon'}),
+                },
+                {
+                  tag: 'div',
+                  attrs: dict({'class': 'i-amphtml-story-hint-tap-icon-text'}),
+                },
+              ],
+            },
+          ],
+        },
+        {
+          tag: 'div',
+          attrs: dict({'class': 'i-amphtml-story-navigation-help-section'
+              + ' next-page'}),
+          children: [
+            {
+              tag: 'div',
+              attrs: dict({'class': 'i-amphtml-story-icons-container'}),
+              children: [
+                {
+                  tag: 'div',
+                  attrs: dict({'class': 'i-amphtml-story-hint-tap-icon'}),
+                },
+                {
+                  tag: 'div',
+                  attrs: dict({'class': 'i-amphtml-story-hint-tap-icon-text'}),
+                  text: 'Next page',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
 
 /** @type {string} */
 const NAVIGATION_OVERLAY_CLASS = 'show-navigation-overlay';
@@ -98,21 +100,17 @@ export class AmpStoryHint {
     /** @private {!Document} */
     this.document_ = this.win_.document;
 
+    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(this.win_);
+
+    /** @const @private {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(this.win_);
+
     /** @private {?Element} */
     this.hintContainer_ = null;
 
-    /** @private {?number} */
+    /** @private {?(number|string)} */
     this.hintTimeout_ = null;
-
-    this.fadeoutHints_ = debounce(this.win_, () => {
-      Animation.animate(dev().assertElement(this.hintContainer_), () => {
-        setImportantStyles(
-            dev().assertElement(this.hintContainer_), {'opacity': '0'});
-      }, 200).thenAlways(() => {
-        this.resetContainerStyle_();
-        resetStyles(dev().assertElement(this.hintContainer_), ['opacity']);
-      });
-    }, NAVIGATION_OVERLAY_TIMEOUT);
   }
 
   /**
@@ -120,31 +118,25 @@ export class AmpStoryHint {
    * @return {!Element}
    */
   buildHintContainer() {
-    this.hintContainer_ = this.document_.createElement('aside');
-    this.hintContainer_.classList.add('i-amphtml-story-hint-container');
-    this.buildNavigationOverlay_();
+    this.hintContainer_ = renderAsElement(this.document_, TEMPLATE);
     return this.hintContainer_;
-  }
-
-  /**
-   * Builds navigation overlay DOM.
-   * @private
-   */
-  buildNavigationOverlay_() {
-    this.hintContainer_.appendChild(
-        renderSimpleTemplate(this.document_, NAVIGATION_HELP_OVERLAY));
   }
 
   /**
    * Shows the given hint
    */
   showHint_(hintClass) {
-    if (this.hintContainer_.classList.contains(hintClass)) {
-      return;
-    }
+    this.vsync_.mutate(() => {
+      this.hintContainer_.classList.toggle(NAVIGATION_OVERLAY_CLASS,
+          hintClass == NAVIGATION_OVERLAY_CLASS);
 
-    this.hideAllNavigationHint();
-    this.hintContainer_.classList.add(hintClass);
+      this.hintContainer_.classList.toggle(FIRST_PAGE_OVERLAY_CLASS,
+          hintClass == FIRST_PAGE_OVERLAY_CLASS);
+
+      this.hintContainer_.classList.remove('i-amphtml-hidden');
+    });
+
+    this.hideAfterTimeout();
   }
 
   /**
@@ -161,18 +153,29 @@ export class AmpStoryHint {
     this.showHint_(FIRST_PAGE_OVERLAY_CLASS);
   }
 
+  /** @visibleForTesting */
+  hideAfterTimeout() {
+    this.hintTimeout_ = this.timer_.delay(
+        () => this.hideInternal_(), NAVIGATION_OVERLAY_TIMEOUT);
+  }
+
   /**
    * Hide all navigation hints.
    */
   hideAllNavigationHint() {
-    this.resetContainerStyle_();
-    this.fadeoutHints_();
+    this.hideInternal_();
+
+    if (this.hintTimeout_ !== null) {
+      this.timer_.cancel(this.hintTimeout_);
+      this.hintTimeout_ = null;
+    }
   }
 
   /** @private */
-  resetContainerStyle_() {
-    this.hintContainer_.classList.remove(NAVIGATION_OVERLAY_CLASS);
-    this.hintContainer_.classList.remove(FIRST_PAGE_OVERLAY_CLASS);
+  hideInternal_() {
+    this.vsync_.mutate(() => {
+      this.hintContainer_.classList.add('i-amphtml-hidden');
+    });
   }
 }
 

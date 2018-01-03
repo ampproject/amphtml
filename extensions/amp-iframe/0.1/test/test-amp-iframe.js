@@ -86,7 +86,7 @@ describes.realWin('amp-iframe', {
     }
 
     function createAmpIframe(env, opt_attributes, opt_top, opt_height,
-        opt_translateY, opt_container) {
+      opt_translateY, opt_container) {
       const doc = env.win.document;
       env.win.innerHeight = opt_height;
       const attributes = opt_attributes || {
@@ -177,6 +177,7 @@ describes.realWin('amp-iframe', {
         allowfullscreen: '',
         allowpaymentrequest: '',
         allowtransparency: '',
+        allow: 'microphone; camera',
         referrerpolicy: 'no-referrer',
         frameborder: 3,
         longdesc: 'foo',
@@ -187,6 +188,7 @@ describes.realWin('amp-iframe', {
       expect(iframe.getAttribute('allowfullscreen')).to.equal('');
       expect(iframe.getAttribute('allowpaymentrequest')).to.equal('');
       expect(iframe.getAttribute('allowtransparency')).to.equal('');
+      expect(iframe.getAttribute('allow')).to.equal('microphone; camera');
       expect(iframe.getAttribute('referrerpolicy')).to.equal('no-referrer');
       expect(iframe.getAttribute('frameborder')).to.equal('3');
       // unsupproted attributes

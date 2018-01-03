@@ -211,7 +211,7 @@ export class Vsync {
    */
   mutate(mutator) {
     this.run({
-      measure: undefined,  // For uniform hidden class.
+      measure: undefined, // For uniform hidden class.
       mutate: mutator,
     });
   }
@@ -235,7 +235,7 @@ export class Vsync {
   measure(measurer) {
     this.run({
       measure: measurer,
-      mutate: undefined,  // For uniform hidden class.
+      mutate: undefined, // For uniform hidden class.
     });
   }
 
@@ -315,9 +315,9 @@ export class Vsync {
    */
   createAnimTask(contextNode, task) {
     return /** @type {function(!VsyncStateDef=):boolean} */ (
-        opt_state => {
-          return this.runAnim(contextNode, task, opt_state);
-        });
+      opt_state => {
+        return this.runAnim(contextNode, task, opt_state);
+      });
   }
 
   /**

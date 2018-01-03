@@ -129,7 +129,7 @@ export function getTrackerKeyName(eventType) {
     return 'custom';
   }
   return TRACKER_TYPE.hasOwnProperty(eventType) ?
-      TRACKER_TYPE[eventType].name : eventType;
+    TRACKER_TYPE[eventType].name : eventType;
 }
 
 /**
@@ -276,8 +276,8 @@ export class CustomEventTracker extends EventTracker {
 
     // Push recent events if any.
     const buffer = isSandboxEvent ?
-        this.sandboxBuffer_ && this.sandboxBuffer_[eventType] :
-        this.buffer_ && this.buffer_[eventType];
+      this.sandboxBuffer_ && this.sandboxBuffer_[eventType] :
+      this.buffer_ && this.buffer_[eventType];
 
     if (buffer) {
       const bufferLength = buffer.length;
@@ -434,10 +434,10 @@ export class SignalTracker extends EventTracker {
           (context.parentElement || context),
           selector,
           selectionMethod
-          ).then(element => {
-            target = element;
-            return this.getElementSignal(eventType, target);
-          });
+      ).then(element => {
+        target = element;
+        return this.getElementSignal(eventType, target);
+      });
     }
 
     // Wait for the target and the event signal.
@@ -494,10 +494,10 @@ export class IniLoadTracker extends EventTracker {
           (context.parentElement || context),
           selector,
           selectionMethod
-          ).then(element => {
-            target = element;
-            return this.getElementSignal('ini-load', target);
-          });
+      ).then(element => {
+        target = element;
+        return this.getElementSignal('ini-load', target);
+      });
     }
     // Wait for the target and the event.
     promise.then(() => {
@@ -549,7 +549,7 @@ class TimerEventHandler {
 
     /** @private @const {number} */
     this.maxTimerLength_ = 'maxTimerLength' in timerSpec ?
-        Number(timerSpec['maxTimerLength']) : DEFAULT_MAX_TIMER_LENGTH_SECONDS;
+      Number(timerSpec['maxTimerLength']) : DEFAULT_MAX_TIMER_LENGTH_SECONDS;
     user().assert(this.maxTimerLength_ > 0, 'Bad maxTimerLength specification');
 
     /** @private @const {boolean} */
@@ -557,7 +557,10 @@ class TimerEventHandler {
 
     /** @private @const {boolean} */
     this.callImmediate_ = 'immediate' in timerSpec ?
-        Boolean(timerSpec['immediate']) : true;
+      Boolean(timerSpec['immediate']) : true;
+
+    /** @private {?function()} */
+    this.intervalCallback_ = null;
 
     /** @private {?UnlistenDef} */
     this.unlistenStart_ = null;
@@ -570,6 +573,12 @@ class TimerEventHandler {
 
     /** @private @const {?function(): UnlistenDef} */
     this.stopBuilder_ = opt_stopBuilder || null;
+
+    /** @private {number|undefined} */
+    this.startTime_ = undefined; // milliseconds
+
+    /** @private {number|undefined} */
+    this.lastRequestTime_ = undefined; // milliseconds
   }
 
   /**
@@ -639,7 +648,9 @@ class TimerEventHandler {
     if (this.isRunning()) {
       return;
     }
-
+    this.startTime_ = Date.now();
+    this.lastRequestTime_ = undefined;
+    this.intervalCallback_ = timerCallback;
     this.intervalId_ = win.setInterval(() => {
       timerCallback();
     }, this.intervalLength_ * 1000);
@@ -661,14 +672,38 @@ class TimerEventHandler {
   /**
    * @param {!Window} win
    */
-  clearInterval(win) {
+  stopTimer_(win) {
     if (!this.isRunning()) {
       return;
     }
+    this.intervalCallback_();
+    this.intervalCallback_ = null;
     win.clearInterval(this.intervalId_);
     this.intervalId_ = undefined;
+    this.lastRequestTime_ = undefined;
     this.unlistenForStop_();
     this.listenForStart_();
+  }
+
+  /** @private @return {number} */
+  calculateDuration_() {
+    if (this.startTime_) {
+      return Date.now() - (this.lastRequestTime_ || this.startTime_);
+    }
+    return 0;
+  }
+
+  /** @return {{timerDuration: number, timerStart: number}} */
+  getTimerVars() {
+    let timerDuration = 0;
+    if (this.isRunning()) {
+      timerDuration = this.calculateDuration_();
+      this.lastRequestTime_ = Date.now();
+    }
+    return {
+      'timerDuration': timerDuration,
+      'timerStart': this.startTime_ || 0,
+    };
   }
 }
 
@@ -795,7 +830,9 @@ export class TimerEventTracker extends EventTracker {
    */
   startTimer_(timerId, eventType, listener) {
     const timerHandler = this.trackers_[timerId];
-    const timerCallback = listener.bind(this, this.createEvent_(eventType));
+    const timerCallback = () => {
+      listener(this.createEvent_(timerId, eventType));
+    };
     timerHandler.startIntervalInWindow(this.root.ampdoc.win, timerCallback,
         this.removeTracker_.bind(this, timerId));
   }
@@ -805,16 +842,18 @@ export class TimerEventTracker extends EventTracker {
    * @private
    */
   stopTimer_(timerId) {
-    this.trackers_[timerId].clearInterval(this.root.ampdoc.win);
+    this.trackers_[timerId].stopTimer_(this.root.ampdoc.win);
   }
 
   /**
+   * @param {number} timerId
    * @param {string} eventType
    * @return {!AnalyticsEvent}
    * @private
    */
-  createEvent_(eventType) {
-    return new AnalyticsEvent(this.root.getRootElement(), eventType);
+  createEvent_(timerId, eventType) {
+    return new AnalyticsEvent(this.root.getRootElement(), eventType,
+        this.trackers_[timerId].getTimerVars());
   }
 
   /**
@@ -974,14 +1013,14 @@ export class VisibilityTracker extends EventTracker {
         (context.parentElement || context),
         selector,
         selectionMethod
-        ).then(element => {
-          return visibilityManager.listenElement(
-              element,
-              visibilitySpec,
-              this.getReadyPromise(waitForSpec, selector, element),
-              createReadyReportPromiseFunc,
-              this.onEvent_.bind(this, eventType, listener, element));
-        });
+    ).then(element => {
+      return visibilityManager.listenElement(
+          element,
+          visibilitySpec,
+          this.getReadyPromise(waitForSpec, selector, element),
+          createReadyReportPromiseFunc,
+          this.onEvent_.bind(this, eventType, listener, element));
+    });
     return function() {
       unlistenPromise.then(unlisten => {
         unlisten();
@@ -1031,7 +1070,7 @@ export class VisibilityTracker extends EventTracker {
     const trackerWhitelist = getTrackerTypesForParentType('visible');
     user().assert(waitForSpec == 'none' ||
         trackerWhitelist[waitForSpec] !== undefined,
-        'waitFor value %s not supported', waitForSpec);
+    'waitFor value %s not supported', waitForSpec);
 
     const waitForTracker = this.waitForTrackers_[waitForSpec] ||
         this.root.getTrackerForWhitelist(waitForSpec, trackerWhitelist);
@@ -1043,8 +1082,8 @@ export class VisibilityTracker extends EventTracker {
 
     // Wait for root signal if there's no element selected.
     return opt_element ?
-        waitForTracker.getElementSignal(waitForSpec, opt_element)
-        : waitForTracker.getRootSignal(waitForSpec);
+      waitForTracker.getElementSignal(waitForSpec, opt_element)
+      : waitForTracker.getRootSignal(waitForSpec);
   }
 
   /**

@@ -66,8 +66,8 @@ export class Signals {
       if (result != null) {
         // Immediately resolve signal.
         const promise = typeof result == 'number' ?
-            Promise.resolve(result) :
-            Promise.reject(result);
+          Promise.resolve(result) :
+          Promise.reject(result);
         promiseStruct = {promise};
       } else {
         // Allocate the promise/resolver for when the signal arrives in the
