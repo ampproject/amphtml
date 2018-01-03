@@ -350,10 +350,6 @@ export class VisibilityModel {
       if (timeToWait > 0) {
         this.scheduledUpdateTimeoutId_ = setTimeout(() => {
           this.update();
-          if (!this.eventResolver_) {
-            this.reset_();
-            this.setReady(true);
-          }
           this.scheduledUpdateTimeoutId_ = null;
         }, timeToWait);
       }
