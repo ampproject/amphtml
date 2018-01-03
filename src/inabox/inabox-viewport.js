@@ -207,6 +207,11 @@ export class ViewportBindingInabox {
     return this.viewportRect_.left;
   }
 
+  /** @override */
+  getScrollingElement() {
+    return this.getBodyElement();
+  }
+
   /**
    * @param {?../layout-rect.LayoutRectDef|undefined} positionRect
    * @private

@@ -21,7 +21,8 @@ import {loadPromise} from './event-helper';
 import {preconnectForElement} from './preconnect';
 import {isArray, toWin} from './types';
 import {Services} from './services';
-import {user} from './log';
+import {user, dev} from './log';
+import {isExperimentOn} from './experiments';
 
 /**
  * Base class for all custom element implementations. Instead of inheriting
@@ -974,5 +975,18 @@ export class BaseElement {
 
   user() {
     return user(this.element);
+  }
+
+  /**
+   * Declares a child element (or ourselves) as a Layer
+   * @param {!Element=} opt_element
+   */
+  declareLayer(opt_element) {
+    dev().assert(isExperimentOn(this.win, 'layers'), 'Layers must be enabled' +
+        ' to declare layer.');
+    if (opt_element) {
+      dev().assert(this.element.contains(opt_element));
+    }
+    return this.element.getLayers().declareLayer(opt_element || this.element);
   }
 }

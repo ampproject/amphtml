@@ -205,6 +205,15 @@ export class Services {
 
   /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!./service/layers-impl.LayoutLayers}
+   */
+  static layersForDoc(nodeOrDoc) {
+    return /** @type {!./service/layers-impl.LayoutLayers} */ (
+      getServiceForDoc(nodeOrDoc, 'layers'));
+  }
+
+  /**
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!./service/parallax-impl.ParallaxService}
    */
   static parallaxForDoc(nodeOrDoc) {
