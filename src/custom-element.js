@@ -102,7 +102,7 @@ function isTemplateTagSupported() {
  */
 export function createCustomElementClass(win, name) {
   // Polyfill for Reflect.construct.
-  const construct = typeof win.Reflect === 'object'
+  const construct = win.Reflect
     ? win.Reflect.construct
     : function(Parent, args, Class) {
       const a = [null];
