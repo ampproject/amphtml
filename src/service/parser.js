@@ -1,3 +1,5 @@
+import {user, rethrowAsync} from '../log';
+
 /**
    * Takes array of all matching variable keyword locations and returns only those that we
    * want to evaluate. In the case of overlapping keywords it choose the longer. It also
@@ -6,25 +8,50 @@
    * @param {number} urlLength The length of the url containing the matches
    * @return {!Object<string, *>=}
    */
-export function mergeMatches(matches, urlLength) {
+export function mergeMatches(matches, url, opt_whiteList) {
   if (!matches.length) { return null; }
   // longest keywords have priority over shorter
   // how should we prioritize if same length??
   matches.sort((a, b) => b.length - a.length);
-  const storage = new Array(urlLength).fill(false);
-  const result = [];
-  for (const match of matches) {
-    // check for frozen vars in here
-    if (fillStorage(match, storage)) {
-      result.push(match);
+  const storage = new Array(url.length).fill(false);
+
+  return matches.reduce((results, match) => {
+    if (opt_whiteList && !opt_whiteList[name]) {
+      // Do not perform substitution and just return back the original
+      // match, so that the string doesn't change.
+      return results;
     }
-  }
-  return result;
+    if (fillStorage(match, storage)) {
+      // if this match does not overlap with a longer match
+      results.push(match);
+    }
+    return results;
+  }, []).sort((a, b) => a.start - b.start);
+}
+
+
+export function findMatches(url, expression) {
+  const matches = [];
+  url.replace(expression, (match, name, opt_strargs, startPosition) => {
+    // refactor expression logic in future once legacy code is deprecated.
+    const leftParenIndex = match.indexOf('(');
+    const length = leftParenIndex > 0 ? leftParenIndex : match.length;
+    const stopPosition = length + startPosition - 1;
+    const info = {
+      start: startPosition,
+      stop: stopPosition,
+      name,
+      length,
+    };
+    matches.push(info);
+  });
+  return matches;
 }
 
 
 /**
-   * Given a storage data structure and a match object, it will fill in a 
+   * Given a storage data structure and a match object, it will keep track of indexes
+   * that are already being tracked.
    * @param {!Object<string, *>=} match contains match data
    * @return {boolean} indicates whether a collision was found
    */
@@ -42,80 +69,124 @@ function fillStorage(match, storage) {
   return true;
 }
 
+function evaluateBinding(binding, opt_sync, opt_args,) {
+  // we can evaluate now and move on
+  if (opt_sync) {
+    binding = binding.sync;
+    if (!binding) {
+      user().error('UrlReplacements', 'ignoring async replacement key: ', name);
+      return '';
+    }
+  } else {
+    binding = binding.async || binding.sync;
+  }
+
+  let value;
+  try {
+    value = typeof binding === 'function' ?
+      binding.apply(null, opt_args) : binding;
+  } catch (e) {
+    // Report error, but do not disrupt URL replacement. This will
+    // interpolate as the empty string.
+    if (opt_sync) {
+      value = '';
+    }
+    rethrowAsync(e);
+  }
+
+  // In case the produced value is a promise but we are not expecting it
+  if (value && value.then && opt_sync) {
+    user().error('UrlReplacements', 'ignoring promise value for key: ', name);
+    return '';
+  }
+
+  // value here may be a promise or primitive
+  return Promise.resolve(value);
+}
 
 
-export function parseUrlRecursively(url, matches, variableSource, opt_bindings, opt_collectVars) {
+/**
+ * @param {string} url
+ * @param {!Array<Object<string, *>=>} matches
+ * @param {} variableSource
+ * @param {!Object<string, *>=} opt_bindings
+ * @param {!Object<string, *>=} opt_collectVars
+ * @param {boolean=} opt_sync
+ * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+ *     that can be substituted.
+ * @return {!Promise<string>|string}
+ * @private
+ */
+export function parseUrlRecursively(
+  url,
+  matches,
+  variableSource,
+  opt_sync,
+  opt_bindings,
+  opt_collectVars, // this is not added yet...
+) {
   const stack = [];
   let urlIndex = 0;
   let matchIndex = 0;
+  let match = matches[matchIndex];
 
-  while (urlIndex < url.length && matchIndex < matches.length) {
-    const match = matches[matchIndex];
-    const name = match.name;
-    let binding;
-    // find out where this keyword is coming from
-    if (opt_bindings && opt_bindings.hasOwnProperty(name)) {
-      // the optional bindings
-      binding = opt_bindings[name];
-    } else {
-      // or the global source
-      binding = variableSource.get(name)
-    }
-
-    if (typeof binding === 'function') {
-      stack.push(binding)
-    } else {
-      
-    }
-
-  }
-
-
-  const evaluate = url => {
+  const evaluateNextLevel = () => {
     let builder = '';
     const results = [];
 
-    // while (index < url.length) {
-    //   if (url[index] === '(') {
-    //     stack.push(builder.trim());
-    //     builder = '';
-    //     results.push(evaluate(url, ++index, stack));
-    //   }
+    while (urlIndex < url.length && matchIndex < matches.length) {
 
-  //     else if (url[index] === ',') {
-  //       if (builder.length) {
-  //         results.push(builder.trim());
-  //       }
-  //       builder = '';
-  //       index++;
-  //     }
+      if (urlIndex === match.start) {
+        let binding;
+        // find out where this keyword is coming from
+        if (opt_bindings && opt_bindings.hasOwnProperty(match.name)) {
+          // the optional bindings
+          binding = opt_bindings[match.name];
+        } else {
+          // or the global source
+          binding = variableSource.get(match.name);
+        }
+        
+        urlIndex = match.stop + 1;
 
-  //     else if (url[index] === ')') {
-  //       const lookupName = stack.pop();
-  //       const args = [...results, builder.trim()];
-  //       index++;
+        if (url[urlIndex] === '(') {
+          // if we hit a left parenthesis we still need to get args
+          urlIndex++;
+          stack.push(binding);
+          results.push(builder, evaluateNextLevel());
+        } else {
+          results.push(builder, evaluateBinding(binding, opt_sync));
+        }
+        
+        builder = '';
+        match = matches[++matchIndex];
+      }
 
-  //       if (map.hasOwnProperty(lookupName)) {
+      else if (url[urlIndex] === ',') {
+        if (builder.length) {
+          results.push(builder.trim());
+        }
+        builder = '';
+        urlIndex++;
+      }
 
-  //         if (typeof map[lookupName] === 'function') {
-  //           return map[lookupName].apply(null, args);
-  //         }
+      else if (url[urlIndex] === ')') {
+        urlIndex++;
+        const binding = stack.pop();
+        const args = [...results, builder.trim()];
+        const value = evaluateBinding(binding, opt_sync, args);
+        return value;
+      }
 
-  //         return map[lookupName];
-  //       }
+      else {
+        builder += url[urlIndex];
+        urlIndex++;
+      }
+    }
 
-  //       return '';
-  //     }
-
-  //     else {
-  //       builder += url[index];
-  //       index++;
-  //     }
-
-  //   return results.join('');
-  // };
-
-  // return evaluate(url);
-  // }
+    return opt_sync ? results.join('') :
+      Promise.all(results).then(promiseArray => promiseArray.join(''));
   };
+
+  return evaluateNextLevel();
 }

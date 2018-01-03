@@ -28,7 +28,7 @@ import {
   getSourceUrl,
 } from '../url';
 import {getTrackImpressionPromise} from '../impression.js';
-import {parseUrlRecursively, mergeMatches} from './parser';ß
+import {parseUrlRecursively, findMatches, mergeMatches} from './parser';
 import {
   VariableSource,
   AsyncResolverDef,
@@ -67,7 +67,6 @@ export class GlobalVariableSource extends VariableSource {
 
   constructor(ampdoc) {
     super();
-
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -104,7 +103,6 @@ export class GlobalVariableSource extends VariableSource {
 
   /** @override */
   initialize() {
-
     /** @const {!./viewport/viewport-impl.Viewport} */
     const viewport = Services.viewportForDoc(this.ampdoc);
 
@@ -923,7 +921,7 @@ export class UrlReplacements {
 
     return element.href = href;
   }
-
+  
   /**
    * @param {string} url
    * @param {!Object<string, *>=} opt_bindings
@@ -935,40 +933,23 @@ export class UrlReplacements {
    * @private
    */
   expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
-    if (false) {
+    // ad experimental flag here
+    if (true) {
       if (!url.length) {
-        return url;
+        return Promise.resolve(url);
       }
       const expr = this.variableSource_.getExpr(opt_bindings);
-      const matches = [];
+      const matches = findMatches(url, expr);
+      const mergedPositions = mergeMatches(matches, url);
+      const expanded = parseUrlRecursively(url, mergedPositions, this.variableSource_, 
+        opt_bindings, opt_collectVars);
+  
+      // const encoded = encodeValue(expanded);
+      if (opt_sync) {
+        return expanded;
+      }
+      return expanded;
 
-      url.match(expr, (match, name, opt_strargs, startPosition) => {
-        const length = match.length;
-        const stopPosition = length + startPosition;
-        const info = {
-          start: startPosition,
-          stop: stopPosition,
-          name,
-          length,
-        };
-        matches.push(info);
-      });
-
-      const mergedPositions = mergeMatches(matches, url.length);
-      const parsed = parseUrlRecursively(url, mergedPositions);
-
-
-      // if async 
-        // return promise
-      return parsed;
-    
-    
-    
-    
-    
-    
-    
-    
     } else {
       const expr = this.variableSource_.getExpr(opt_bindings);
       let replacementPromise;
