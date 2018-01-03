@@ -35,11 +35,24 @@ const TEMPLATE = {
           children: [
             {
               tag: 'div',
-              attrs: dict({'class': 'i-amphtml-story-hint-tap-icon'}),
+              attrs: dict({'class': 'i-amphtml-story-hint-placeholder'}),
               children: [
                 {
                   tag: 'div',
-                  attrs: dict({'class': 'i-amphtml-story-hint-tap-icon-text'}),
+                  attrs: dict({'class': 'i-amphtml-story-hint-tap-button'}),
+                  children: [
+                    {
+                      tag: 'div',
+                      attrs: dict({'class':
+                          'i-amphtml-story-hint-tap-button-icon'}),
+                    },
+                  ],
+                },
+                {
+                  tag: 'div',
+                  attrs: dict({'class':
+                      'i-amphtml-story-hint-tap-button-text'}),
+                  text: 'Back',
                 },
               ],
             },
@@ -52,11 +65,24 @@ const TEMPLATE = {
           children: [
             {
               tag: 'div',
-              attrs: dict({'class': 'i-amphtml-story-hint-tap-icon'}),
+              attrs: dict({'class': 'i-amphtml-story-hint-placeholder'}),
               children: [
                 {
                   tag: 'div',
-                  attrs: dict({'class': 'i-amphtml-story-hint-tap-icon-text'}),
+                  attrs: dict({'class': 'i-amphtml-story-hint-tap-button'}),
+                  children: [
+                    {
+                      tag: 'div',
+                      attrs: dict({'class':
+                          'i-amphtml-story-hint-tap-button-icon'}),
+                    },
+                  ],
+                },
+                {
+                  tag: 'div',
+                  attrs: dict({'class':
+                      'i-amphtml-story-hint-tap-button-text'}),
+                  text: 'Next',
                 },
               ],
             },

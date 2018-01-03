@@ -44,6 +44,7 @@
   flex-direction: row !important;
   color: #fff !important;
   font-size: 20px;
+  padding: 16px 0;
 }
 
 .i-amphtml-story-navigation-help-section {
@@ -82,11 +83,11 @@
   display: flex !important;
 }
 
-.show-first-page-overlay .prev-page .i-amphtml-story-hint-tap-icon {
+.show-first-page-overlay .prev-page .i-amphtml-story-hint-tap-button {
   visibility: hidden;
 }
 
-.show-navigation-overlay .prev-page .i-amphtml-story-hint-tap-icon-text:before {
+.show-navigation-overlay .prev-page .i-amphtml-story-hint-tap-button-icon:before {
   content: '' !important;
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="30px" height="30px" viewBox="0 0 24 24" fill="#000000"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
   width: 30px !important;
@@ -94,13 +95,13 @@
   display: inline-block !important;
 }
 
-.i-amphtml-story-hint-tap-icon {
+.i-amphtml-story-hint-tap-button {
   position: relative !important;
   width: 44px !important;
   height: 44px !important;
 }
 
-.i-amphtml-story-hint-tap-icon:before, .i-amphtml-story-hint-tap-icon:after {
+.i-amphtml-story-hint-tap-button:before, .i-amphtml-story-hint-tap-button:after {
   position: absolute !important;
   content: '' !important;
   width: 44px !important;
@@ -109,15 +110,15 @@
   background-color: rgba(255, 255, 255, 0.5) !important;
 }
 
-.i-amphtml-story-hint-tap-icon:before {
+.i-amphtml-story-hint-tap-button:before {
   animation: expandingBubble 1000ms infinite cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-.i-amphtml-story-hint-tap-icon:after {
+.i-amphtml-story-hint-tap-button:after {
   background-color: #fff !important;
 }
 
-.i-amphtml-story-hint-tap-icon-text {
+.i-amphtml-story-hint-tap-button-icon {
   position: absolute !important;
   z-index: 1 !important;
   height: 44px !important;
@@ -127,18 +128,31 @@
   align-items: center !important;
 }
 
-.i-amphtml-story-hint-tap-icon-text:before, .i-amphtml-story-hint-tap-icon-text:after{
+.i-amphtml-story-hint-tap-button-icon:before, .i-amphtml-story-hint-tap-button-icon:after{
   vertical-align: middle !important;
   margin: 0 2px !important;
   background-position: center;
 }
 
-.next-page .i-amphtml-story-hint-tap-icon-text:after {
+.next-page .i-amphtml-story-hint-tap-button-icon:after {
   content: '' !important;
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="30px" height="30px" viewBox="0 0 24 24" fill="#000000"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
   width: 24px !important;
   height: 24px !important;
   display: inline-block !important;
+}
+
+.i-amphtml-story-hint-placeholder {
+  top: 50% !important;
+  position: absolute;
+}
+
+.i-amphtml-story-hint-tap-button-text {
+  color: #fff !important;
+  font-size: 16px !important;
+  font-family: 'Roboto-Medium', sans-serif !important;
+  margin-top: 24px !important;
+  text-align: center !important;
 }
 
 @keyframes expandingBubble {
