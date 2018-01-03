@@ -1,9 +1,58 @@
 FAIL
+|  <!--
+|    Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+|  
+|    Licensed under the Apache License, Version 2.0 (the "License");
+|    you may not use this file except in compliance with the License.
+|    You may obtain a copy of the License at
+|  
+|        http://www.apache.org/licenses/LICENSE-2.0
+|  
+|    Unless required by applicable law or agreed to in writing, software
+|    distributed under the License is distributed on an "AS-IS" BASIS,
+|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+|    See the License for the specific language governing permissions and
+|    limitations under the license.
+|  -->
+|  <!--
+|    Test Description:
+|    Tests errors generated for multiple body tags. This is useful because
+|    body tags are treated special - the attributes from all of them are merged
+|    into the first one. However, for AMPHTML only a single BODY tag is allowed.
+|    In this second variant for the test we show that multiple BODY tags are
+|    detected when the body is started by stray text in the head.
+|    In which case, the manufactured boy tag message also appears.
+|    This is important because otherwise the user might be confused.
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport"
+|          content="width=device-width,minimum-scale=1">some stray text
+>>                                                      ^~~~~~~~~
 feature_tests/multiple_body_tags_3.html:32:53 Tag or text which is only allowed inside the body section found outside of the body section. [DISALLOWED_HTML]
+>>                                                      ^~~~~~~~~
 feature_tests/multiple_body_tags_3.html:32:53 The tag 'BODY' appears more than once in the document. [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+>>   ^~~~~~~~~
 feature_tests/multiple_body_tags_3.html:33:2 The parent tag of tag 'style amp-custom' is 'body', but it can only be 'head'. (see https://www.ampproject.org/docs/reference/spec#stylesheets) [DISALLOWED_HTML]
+>>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ^~~~~~~~~
 feature_tests/multiple_body_tags_3.html:33:641 The tag 'noscript > style[amp-boilerplate]' may only appear as a descendant of tag 'head'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [DISALLOWED_HTML]
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+>>   ^~~~~~~~~
 feature_tests/multiple_body_tags_3.html:34:2 The parent tag of tag 'amphtml engine v0.js script' is 'body', but it can only be 'head'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [DISALLOWED_HTML]
-feature_tests/multiple_body_tags_3.html:41:7 The mandatory tag 'noscript enclosure for boilerplate' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-feature_tests/multiple_body_tags_3.html:41:7 The tag 'head > style[amp-boilerplate]' is missing or incorrect, but required by 'noscript > style[amp-boilerplate]'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [GENERIC]
-feature_tests/multiple_body_tags_3.html:41:7 The mandatory tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+|  </head>
+|  <body class="foo">
+|    <!-- You might think there's only one body in this doc, but this is
+|         the body because "some stray text" above started the actual
+|         body so that counts as the first body tag. -->
+|  </body>
+|  </html>
+>>       ^~~~~~~~~
+feature_tests/multiple_body_tags_3.html:41:6 The mandatory tag 'noscript enclosure for boilerplate' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+>>       ^~~~~~~~~
+feature_tests/multiple_body_tags_3.html:41:6 The tag 'head > style[amp-boilerplate]' is missing or incorrect, but required by 'noscript > style[amp-boilerplate]'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [GENERIC]
+>>       ^~~~~~~~~
+feature_tests/multiple_body_tags_3.html:41:6 The mandatory tag 'head > style[amp-boilerplate]' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
