@@ -1,3 +1,74 @@
 FAIL
+|  <!--
+|    Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+|  
+|    Licensed under the Apache License, Version 2.0 (the "License");
+|    you may not use this file except in compliance with the License.
+|    You may obtain a copy of the License at
+|  
+|        http://www.apache.org/licenses/LICENSE-2.0
+|  
+|    Unless required by applicable law or agreed to in writing, software
+|    distributed under the License is distributed on an "AS-IS" BASIS,
+|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+|    See the License for the specific language governing permissions and
+|    limitations under the license.
+|  -->
+|  <!--
+|    Test Description:
+|    Tests for the amp-animation tag.
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-latest.js"></script>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|    <!-- Valid: Example of amp-animation -->
+|    <amp-animation layout="nodisplay">
+|      <script type="application/json">
+|      {
+|        "target": "target1",
+|        "duration": 1000,
+|        "keyframes": {"opacity": 1}
+|      }
+|      </script>
+|    </amp-animation>
+|  
+|    <span>
+|      <amp-animation layout="nodisplay">
+|        <script type="application/json">
+|        {
+|          "target": "target1",
+|          "duration": 1000,
+|          "keyframes": {"opacity": 1}
+|        }
+|        </script>
+|      </amp-animation>
+|    </span>
+|  
+|    <!-- Invalid: trigger value is not visibility -->
+|    <amp-animation layout="nodisplay" trigger="display">
+>>   ^~~~~~~~~
 amp-animation/0.1/test/validator-amp-animation.html:55:2 The attribute 'trigger' in tag 'amp-animation' is set to the invalid value 'display'. (see https://www.ampproject.org/docs/reference/components/amp-animation) [AMP_TAG_PROBLEM]
+|      <script type="application/json">
+|      {
+|        "target": "target1",
+|        "duration": 1000,
+|        "keyframes": {"opacity": 1}
+|      }
+|      </script>
+|    </amp-animation>
+|  
+|    <!-- Invalid: no child json tag -->
+|    <amp-animation layout="nodisplay">
+>>   ^~~~~~~~~
 amp-animation/0.1/test/validator-amp-animation.html:66:2 Tag 'amp-animation' must have 1 child tags - saw 0 child tags. (see https://www.ampproject.org/docs/reference/components/amp-animation) [AMP_TAG_PROBLEM]
+|    </amp-animation>
+|  </body>
+|  </html>
