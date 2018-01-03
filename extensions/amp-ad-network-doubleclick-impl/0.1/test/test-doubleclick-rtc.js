@@ -282,6 +282,8 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         WIDTH: '200',
         MULTISIZE: '300x50,200x100',
         MULTISIZE_VALIDATION: 'true',
+        OVERRIDEWIDTH: '250',
+        OVERRIDEHEIGHT: '75',
       };
       element = createElementWithAttributes(env.win.document, 'amp-ad', {
         width: macros.WIDTH,
@@ -291,6 +293,8 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         'data-slot': macros.DATASLOT,
         'data-multi-size': macros.MULTISIZE,
         'data-multi-size-validation': macros.MULTISIZE_VALIDATION,
+        'data-override-width': macros.OVERRIDEWIDTH,
+        'data-override-height': macros.OVERRIDEHEIGHT,
       });
       env.win.document.body.appendChild(element);
       const docInfo = Services.documentInfoForDoc(element);
@@ -299,7 +303,10 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
           element, env.win.document, env.win);
       impl.populateAdUrlState();
       const customMacros = impl.getCustomRealTimeConfigMacros_();
-      expect(customMacros).to.deep.equal(macros);
+      expect(customMacros.PAGEVIEWID()).to.equal(docInfo.pageViewId);
+      Object.keys(macros).forEach(macro => {
+        expect(customMacros[macro]()).to.equal(macros[macro]);
+      });
     });
   });
 });
