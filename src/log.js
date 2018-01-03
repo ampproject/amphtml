@@ -590,7 +590,7 @@ function getUserLogger(suffix) {
     if (mode.development || logNum >= 1) {
       return LogLevel.FINE;
     }
-    return LogLevel.OFF;
+    return LogLevel.WARN;
   }, suffix);
 }
 
