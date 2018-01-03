@@ -34,7 +34,10 @@ function createIframeWithApis(fixture) {
   const platform = Services.platformFor(fixture.win);
   return poll('frame to be in DOM', () => {
     return fixture.doc.querySelector('amp-ad > iframe');
-  }, undefined, 5000).then(iframeElement => {
+  }, () => {
+    return new Error('Cannot find ad frame in : ' +
+        fixture.doc.querySelector('amp-ad')./*test*/outerHTML);
+  }, 5000).then(iframeElement => {
     iframe = iframeElement;
     return new Promise(resolve => {
       if (iframe.contentWindow.context) {

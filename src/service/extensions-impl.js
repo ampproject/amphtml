@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import '../polyfills';
 import {Services} from '../services';
 import {declareExtension} from './ampdoc-impl';
 import {
@@ -31,8 +32,10 @@ import {
 import {cssText} from '../../build/css';
 import {dev, rethrowAsync} from '../log';
 import {getMode} from '../mode';
+/*eslint-disable */
 import installCustomElements from
-  'document-register-element/build/document-register-element.node';
+  '../../build/patched-module/document-register-element/build/document-register-element.patched';
+/*eslint-enable */
 import {install as installDocContains} from '../polyfills/document-contains';
 import {
   install as installDOMTokenListToggle,
@@ -695,7 +698,9 @@ export function stubLegacyElements(win) {
 function installPolyfillsInChildWindow(childWin) {
   installDocContains(childWin);
   installDOMTokenListToggle(childWin);
-  installCustomElements(childWin, 'auto');
+  if (!childWin.customElements) {
+    installCustomElements(childWin, 'auto');
+  }
 }
 
 

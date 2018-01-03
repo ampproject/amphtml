@@ -303,18 +303,23 @@ export class Resource {
    * @return {?Promise}
    */
   build() {
+    this.element.classList.add('build-1')
     if (this.isBuilding_ ||
         !this.element.isUpgraded() ||
         !this.resources_.grantBuildPermission()) {
       return null;
     }
+    this.element.classList.add('build-2')
     this.isBuilding_ = true;
     return this.element.build().then(() => {
+      this.element.classList.add('build-3')
       this.isBuilding_ = false;
       if (this.hasBeenMeasured()) {
+        this.element.classList.add('build-4')
         this.state_ = ResourceState.READY_FOR_LAYOUT;
         this.element.updateLayoutBox(this.layoutBox_);
       } else {
+        this.element.classList.add('build-5')
         this.state_ = ResourceState.NOT_LAID_OUT;
       }
       // TODO(dvoytenko): merge with the standard BUILT signal.
@@ -323,6 +328,7 @@ export class Resource {
       // in PROD.
       this.element.dispatchCustomEvent(AmpEvents.BUILT);
     }, reason => {
+      this.element.classList.add('build-6')
       dev().error(TAG, 'failed to build:', this.debugid, reason);
       this.isBuilding_ = false;
       this.element.signals().rejectSignal('res-built', reason);
@@ -725,6 +731,7 @@ export class Resource {
    * @package
    */
   startLayout() {
+    this.element.classList.add('r-layout-1')
     if (this.layoutPromise_) {
       return this.layoutPromise_;
     }
@@ -734,6 +741,7 @@ export class Resource {
     if (this.state_ == ResourceState.LAYOUT_FAILED) {
       return Promise.reject(this.lastLayoutError_);
     }
+    this.element.classList.add('r-layout-2')
 
     dev().assert(this.state_ != ResourceState.NOT_BUILT,
         'Not ready to start layout: %s (%s)', this.debugid, this.state_);
@@ -745,6 +753,7 @@ export class Resource {
       dev().fine(TAG, 'layout canceled since it wasn\'t requested:',
           this.debugid, this.state_);
       this.state_ = ResourceState.LAYOUT_COMPLETE;
+      this.element.classList.add('r-layout-3')
       return Promise.resolve();
     }
 
@@ -754,6 +763,7 @@ export class Resource {
 
     let promise;
     try {
+      this.element.classList.add('r-layout')
       promise = this.element.layoutCallback();
     } catch (e) {
       return Promise.reject(e);

@@ -139,9 +139,18 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
             file + ':' + line + '\n' +
             (error ? error.stack : 'no stack')));
       };
+      win.errorMessages = '';
+      win.addEventListener('error', event => {
+        win.errorMessages += 'Error: ' + event.message + '\n';
+      });
+      win.addEventListener('unhandledrejection', event => {
+        win.errorMessages += 'Rejection: ' + event.reason.message + '\n';
+      });
       let errors = [];
       win.console.error = function() {
-        errors.push('Error: ' + [].slice.call(arguments).join(' '));
+        const message = [].slice.call(arguments).join(' ');
+        errors.push('Error: ' + message);
+        win.errorMessages += 'Message: ' + message + '\n';
         console.error.apply(console, arguments);
       };
       // Make time go 10x as fast
@@ -230,7 +239,9 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       const ampdoc = Services.ampdocServiceFor(iframe.contentWindow).getAmpDoc();
       installExtensionsService(iframe.contentWindow);
       installRuntimeServices(iframe.contentWindow);
-      installCustomElements(iframe.contentWindow);
+      if (!iframe.contentWindow.customElements) {
+        installCustomElements(iframe.contentWindow);
+      }
       installAmpdocServices(ampdoc);
       Services.resourcesForDoc(ampdoc).ampInitComplete();
       // Act like no other elements were loaded by default.
@@ -439,9 +450,16 @@ export function pollForLayout(win, count, opt_timeout) {
   return poll('Waiting for elements to layout: ' + count, () => {
     return getCount() >= count;
   }, () => {
+    const built = win.document.querySelectorAll('.i-amphtml-element,amp-img');
     return new Error('Failed to find elements with layout.' +
-        ' Current count: ' + getCount() + ' HTML:\n' +
-        win.document.documentElement./*TEST*/innerHTML);
+        ' Current count: ' + getCount() + '/' + count + ' (' +
+        built.length + ' built) Elements without layout:\n' +
+        Array.from(built)
+            .filter(e => !e.classList.contains('i-amphtml-layout'))
+            .map(e => '  ' + e.tagName + '->' + e.className + ': ' +
+                e./*test*/outerHTML)
+            .join('\n ') +
+        '\nError messages ' + win.errorMessages);
   }, opt_timeout);
 }
 
