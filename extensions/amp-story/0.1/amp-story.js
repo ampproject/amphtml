@@ -715,9 +715,13 @@ export class AmpStory extends AMP.BaseElement {
         .then(() => this.forceRepaintForSafari_());
   }
 
-  /** @private */
+  /**
+   * Show or hide the previous page button based on page index.
+   * @param {?./amp-story-page.AmpStoryPage} targetPage
+   * @private
+   */
   togglePreviousPageHideClass_(targetPage) {
-    const pageIndex = this.getPageIndex(targetPage);
+    const pageIndex = targetPage ? this.getPageIndex(targetPage) : 0;
 
     if (this.prevButton_) {
       this.prevButton_.classList.toggle(
@@ -851,7 +855,8 @@ export class AmpStory extends AMP.BaseElement {
 
       if (!this.nextButtonContainer_) {
         this.buildButtons_();
-        /* Remove hidden class if active page is not the first page.*/
+        // Remove hidden class if active page is not the first page.
+
         this.togglePreviousPageHideClass_(this.activePage_);
       }
       if (!this.topBar_) {
