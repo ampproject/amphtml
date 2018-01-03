@@ -1,25 +1,119 @@
 FAIL
+|  <!--
+|    Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+|  
+|    Licensed under the Apache License, Version 2.0 (the "License");
+|    you may not use this file except in compliance with the License.
+|    You may obtain a copy of the License at
+|  
+|        http://www.apache.org/licenses/LICENSE-2.0
+|  
+|    Unless required by applicable law or agreed to in writing, software
+|    distributed under the License is distributed on an "AS-IS" BASIS,
+|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+|    See the License for the specific language governing permissions and
+|    limitations under the license.
+|  -->
+|  <!--
+|    Test Description:
+|    This runs some tests which exercise our HTML parser.
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content=width=device-width,minimum-scale=1>
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|  
+|    <!-- Strangely quoted attributes: -->
+|    <a href="foo.html""></a>
+>>   ^~~~~~~~~
 feature_tests/parser.html:32:2 The attribute '"' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+|    <a href='foo.html''></a>
+>>   ^~~~~~~~~
 feature_tests/parser.html:33:2 The attribute ''' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+|    <a href=""foo.html"></a>
+>>   ^~~~~~~~~
 feature_tests/parser.html:34:2 The attribute 'foo.html"' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+|    <a href=''foo.html'></a>
+>>   ^~~~~~~~~
 feature_tests/parser.html:35:2 The attribute 'foo.html'' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+|    <a href=""foo.html""></a>
+>>   ^~~~~~~~~
 feature_tests/parser.html:36:2 The attribute 'foo.html""' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+|    <a href=''foo.html''></a>
+>>   ^~~~~~~~~
 feature_tests/parser.html:37:2 The attribute 'foo.html''' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+|    <a '></a>
+>>   ^~~~~~~~~
 feature_tests/parser.html:38:2 The attribute ''' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+|    <a "></a>
+>>   ^~~~~~~~~
 feature_tests/parser.html:39:2 The attribute '"' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+|    <a href"foo.html"></a>
+>>   ^~~~~~~~~
 feature_tests/parser.html:40:2 The attribute 'href"foo.html"' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+|    <a href'foo.html'></a>
+>>   ^~~~~~~~~
 feature_tests/parser.html:41:2 The attribute 'href'foo.html'' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+|    <a href"foo.html""></a>
+>>   ^~~~~~~~~
 feature_tests/parser.html:42:2 The attribute 'href"foo.html""' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+|    <a href'foo.html''></a>
+>>   ^~~~~~~~~
 feature_tests/parser.html:43:2 The attribute 'href'foo.html''' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+|    <a href""foo.html"></a>
+>>   ^~~~~~~~~
 feature_tests/parser.html:44:2 The attribute 'href""foo.html"' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+|    <a href''foo.html'></a>
+>>   ^~~~~~~~~
 feature_tests/parser.html:45:2 The attribute 'href''foo.html'' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+|    <a href""foo.html""></a>
+>>   ^~~~~~~~~
 feature_tests/parser.html:46:2 The attribute 'href""foo.html""' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+|    <a href''foo.html''></a>
+>>   ^~~~~~~~~
 feature_tests/parser.html:47:2 The attribute 'href''foo.html''' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+|  
+|    <!-- Attributes in closing tags: -->
+|    <a></a foo>
+|    <a></a href>
+|    <a></a foo="foo.html">
+|    <a></a href="foo.html">
+|  
+|    <!-- <, / as attributes: -->
+|    <a < ></a>
+>>   ^~~~~~~~~
 feature_tests/parser.html:56:2 The attribute '<' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+|    <a / ></a>
+>>   ^~~~~~~~~
 feature_tests/parser.html:57:2 The attribute '/' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+|    <a /a></a>
+>>   ^~~~~~~~~
 feature_tests/parser.html:58:2 The attribute '/a' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+|    <a /a ></a>
+>>   ^~~~~~~~~
 feature_tests/parser.html:59:2 The attribute '/a' may not appear in tag 'a'. (see https://www.ampproject.org/docs/reference/spec#links) [DISALLOWED_HTML]
+|  
+|    <!-- Tags that may be processing instructions: -->
+|    <?php ?>
+>>   ^~~~~~~~~
 feature_tests/parser.html:62:2 The tag '?php' is disallowed. [DISALLOWED_HTML]
+|    < ?php ?>
+|    <?php echo 'Hello, World'; ?>
+>>   ^~~~~~~~~
 feature_tests/parser.html:64:2 The tag '?php' is disallowed. [DISALLOWED_HTML]
+|    <?php <span>Content</span> ?>
+>>   ^~~~~~~~~
 feature_tests/parser.html:65:2 The tag '?php' is disallowed. [DISALLOWED_HTML]
+|    <?xml:namespace prefix = o ns = "urn:schemas-microsoft-com:office:office" />
+>>   ^~~~~~~~~
 feature_tests/parser.html:66:2 The tag '?xml:namespace' is disallowed. [DISALLOWED_HTML]
+|    < ?xml:namespace ?>
+|  
+|  </body>
+|  </html>
