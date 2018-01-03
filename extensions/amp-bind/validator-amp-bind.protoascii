@@ -78,3 +78,20 @@ tags: {  # <amp-state>
   }
   spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
 }
+tags: {  # <amp-bind-macro>
+  html_format: AMP
+  tag_name: "AMP-BIND-MACRO"
+  requires_extension: "amp-bind"
+  attrs: {
+    name: "arguments"
+  }
+  attrs: {
+    name: "expression"
+    mandatory: true
+  }
+  attrs: {
+    name: "id"
+    mandatory: true
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-bind"
+}

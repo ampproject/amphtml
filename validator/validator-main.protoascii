@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 265
+min_validator_revision_required: 295
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 527
+spec_file_revision: 543
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -129,13 +129,14 @@ tags: {
 # 4.2.4 the link element
 attr_lists: {
   name: "common-link-attrs"
+  attrs: { name: "charset" value_casei: "utf-8" }
+  attrs: { name: "color" }
+  attrs: { name: "crossorigin" }
+  attrs: { name: "hreflang" }
   attrs: { name: "media" }
   attrs: { name: "sizes" }
   attrs: { name: "target" }
   attrs: { name: "type" }
-  attrs: { name: "hreflang" }
-  attrs: { name: "charset" value_casei: "utf-8" }
-  attrs: { name: "color" }
 }
 tags: {
   html_format: AMP
@@ -144,7 +145,6 @@ tags: {
   spec_name: "link rel="
   disallowed_ancestor: "TEMPLATE"
   attrs: { name: "href" }
-  attr_lists: "common-link-attrs"
   attrs: {
     name: "rel"
     mandatory: true
@@ -172,6 +172,7 @@ tags: {
   }
   attrs: { name: "sizes" }
   attrs: { name: "type" }
+  attr_lists: "common-link-attrs"
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 }
 tags: {
@@ -191,13 +192,13 @@ tags: {
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  attr_lists: "common-link-attrs"
   attrs: {
     name: "rel"
     value_casei: "canonical"
     mandatory: true
     dispatch_key: NAME_VALUE_DISPATCH
   }
+  attr_lists: "common-link-attrs"
   spec_url: "https://www.ampproject.org/docs/reference/spec#required-markup"
 }
 # Allow <link rel="manifest" ...> but not <link rel="manifest foo" ...>
@@ -217,13 +218,13 @@ tags: {
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  attr_lists: "common-link-attrs"
   attrs: {
     name: "rel"
     value_casei: "manifest"
     mandatory: true
     dispatch_key: NAME_VALUE_DISPATCH
   }
+  attr_lists: "common-link-attrs"
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 }
 # Whitelisted font providers
@@ -249,6 +250,7 @@ tags: {
                  "([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|"
                  "https://use\\.typekit\\.net/[\\w\\p{L}\\p{N}_]+\\.css"
   }
+  attrs: { name: "media" }
   attrs: {
     name: "rel"
     mandatory: true
@@ -259,11 +261,9 @@ tags: {
     name: "type"
     value_casei: "text/css"
   }
-  attrs: { name: "media" }
   # SRI attributes (https://www.w3.org/TR/SRI/)
   attrs: { name: "crossorigin" }
   attrs: { name: "integrity" }
-
   spec_url: "https://www.ampproject.org/docs/reference/spec#custom-fonts"
 }
 # itemprop=sameAs is allowed per schema.org, needs not be in head
@@ -503,6 +503,20 @@ tags: {
     mandatory: true
   }
 }
+# AMP metadata, name=amp-ad-doubleclick-sra
+# Enables SRA for amp-ad doubleclick Fast Fetch
+tags: {
+  html_format: AMP
+  tag_name: "META"
+  spec_name: "meta name=amp-ad-doubleclick-sra"
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-ad-doubleclick-sra"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+}
 # AMP4ADS metadata, name=amp4ads-id
 # https://github.com/ampproject/amphtml/issues/7730
 tags: {
@@ -706,6 +720,26 @@ tags: {
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
 }
+# AMP metadata, name=amp-ad-enable-refresh
+# Enables Refresh for amp-ad doubleclick Fast Fetch
+tags: {
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "META"
+  spec_name: "meta name=amp-ad-enable-refresh"
+  mandatory_ancestor: "HEAD"
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-ad-enable-refresh"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+}
+
 
 # 4.2.6 The style
 # Text contents of the style tag will be validated seperately.
@@ -748,18 +782,6 @@ tags: {  # Special custom 'author' spreadsheet for AMP
       }
       at_rule_spec: {
         name: 'supports'
-        type: PARSE_AS_RULES
-      }
-      at_rule_spec: {
-        name: '-moz-keyframes'
-        type: PARSE_AS_RULES
-      }
-      at_rule_spec: {
-        name: '-o-keyframes'
-        type: PARSE_AS_RULES
-      }
-      at_rule_spec: {
-        name: '-webkit-keyframes'
         type: PARSE_AS_RULES
       }
       at_rule_spec: {
@@ -838,18 +860,6 @@ tags: {  # Special custom 'author' spreadsheet for AMP4ADS
       }
       at_rule_spec: {
         name: 'supports'
-        type: PARSE_AS_RULES
-      }
-      at_rule_spec: {
-        name: '-moz-keyframes'
-        type: PARSE_AS_RULES
-      }
-      at_rule_spec: {
-        name: '-o-keyframes'
-        type: PARSE_AS_RULES
-      }
-      at_rule_spec: {
-        name: '-webkit-keyframes'
         type: PARSE_AS_RULES
       }
       at_rule_spec: {
@@ -948,6 +958,7 @@ tags: {
   html_format: AMP4ADS
   tag_name: "STYLE"
   spec_name: "head > style[amp4ads-boilerplate]"
+  mandatory: true
   unique: true
   mandatory_parent: "HEAD"
   attrs: {
@@ -1016,18 +1027,6 @@ tags: {
       }
       at_rule_spec: {
         name: 'supports'
-        type: PARSE_AS_RULES
-      }
-      at_rule_spec: {
-        name: '-moz-keyframes'
-        type: PARSE_AS_RULES
-      }
-      at_rule_spec: {
-        name: '-o-keyframes'
-        type: PARSE_AS_RULES
-      }
-      at_rule_spec: {
-        name: '-webkit-keyframes'
         type: PARSE_AS_RULES
       }
       at_rule_spec: {
@@ -3542,6 +3541,7 @@ tags: {  # <amp-pixel>
   html_format: AMP
   html_format: AMP4ADS
   tag_name: "AMP-PIXEL"
+  attrs: { name: "allow-ssr-img" }
   attrs: {
     name: "referrerpolicy"
     value: "no-referrer"
@@ -4028,16 +4028,20 @@ error_specificity {
   specificity: 109
 }
 error_specificity {
-  code: CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS
+  code: CSS_SYNTAX_INVALID_PROPERTY_NOLIST
   specificity: 110
 }
 error_specificity {
-  code: CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME
+  code: CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS
   specificity: 111
 }
 error_specificity {
-  code: CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME
+  code: CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME
   specificity: 112
+}
+error_specificity {
+  code: CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME
+  specificity: 113
 }
 # Error formats
 error_formats {
@@ -4360,6 +4364,10 @@ error_formats {
           "allowed properties are '%3'."
 }
 error_formats {
+  code: CSS_SYNTAX_INVALID_PROPERTY_NOLIST
+  format: "CSS syntax error in tag '%1' - invalid property '%2'."
+}
+error_formats {
   code: CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS
   format: "CSS syntax error in tag '%1' - qualified rule '%2' has no "
           "declarations."
@@ -4447,4 +4455,3 @@ error_formats {
   format: "CSS syntax error in tag '%1' - the property '%2' is disallowed "
           "unless the enclosing rule is prefixed with the '%3' qualification."
 }
-

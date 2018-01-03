@@ -17,7 +17,7 @@
 import {createIframePromise} from '../../testing/iframe';
 import {Services} from '../../src/services';
 import {installDocumentInfoServiceForDoc} from
-    '../../src/service/document-info-impl';
+  '../../src/service/document-info-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import * as sinon from 'sinon';
 
@@ -47,7 +47,7 @@ describe('document-info', () => {
       }
       const win = iframe.win;
       installDocService(win, /* isSingleDoc */ true);
-      sandbox.stub(win.Math, 'random', () => 0.123456789);
+      sandbox.stub(win.Math, 'random').callsFake(() => 0.123456789);
       installDocumentInfoServiceForDoc(win.document);
       return iframe.win;
     });

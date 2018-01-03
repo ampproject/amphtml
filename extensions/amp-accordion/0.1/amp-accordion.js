@@ -141,7 +141,7 @@ class AmpAccordion extends AMP.BaseElement {
 
       const header = sectionComponents[0];
       header.classList.add('i-amphtml-accordion-header');
-      header.setAttribute('role', 'heading');
+      header.setAttribute('role', 'button');
       header.setAttribute('aria-controls', contentId);
       header.setAttribute('aria-expanded',
           section.hasAttribute('expanded').toString());
@@ -179,9 +179,9 @@ class AmpAccordion extends AMP.BaseElement {
           this.win./*OK*/sessionStorage.getItem(
               dev().assertString(this.sessionId_));
       return sessionStr
-          ? /** @type {!JsonObject} */ (
-              dev().assert(parseJson(dev().assertString(sessionStr))))
-          : dict();
+        ? /** @type {!JsonObject} */ (
+          dev().assert(parseJson(dev().assertString(sessionStr))))
+        : dict();
     } catch (e) {
       dev().fine('AMP-ACCORDION', e.message, e.stack);
       return dict();

@@ -36,7 +36,7 @@ describes.fakeWin('amp-story navigation state', {}, () => {
 
     observers.forEach(observer => {
       expect(observer).to.have.been.calledWith(sandbox.match(e =>
-          e.type == StateChangeType.ACTIVE_PAGE
+        e.type == StateChangeType.ACTIVE_PAGE
               && e.value.pageIndex === 0
               && e.value.pageId == 'my-page-id-1'));
     });
@@ -45,7 +45,7 @@ describes.fakeWin('amp-story navigation state', {}, () => {
 
     observers.forEach(observer => {
       expect(observer).to.have.been.calledWith(sandbox.match(e =>
-          e.type == StateChangeType.ACTIVE_PAGE
+        e.type == StateChangeType.ACTIVE_PAGE
               && e.value.pageIndex === 5
               && !('pageId' in e.value)));
     });
@@ -54,7 +54,7 @@ describes.fakeWin('amp-story navigation state', {}, () => {
 
     observers.forEach(observer => {
       expect(observer).to.have.been.calledWith(sandbox.match(e =>
-          e.type == StateChangeType.ACTIVE_PAGE
+        e.type == StateChangeType.ACTIVE_PAGE
               && e.value.pageIndex === 2
               && e.value.pageId == 'one-two-three'));
     });

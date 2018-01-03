@@ -301,6 +301,7 @@ export class FixedLayer {
           const {offsetWidth, offsetHeight, offsetTop} = element;
           const {
             position = '',
+            display = '',
             bottom,
             zIndex,
           } = style;
@@ -311,12 +312,13 @@ export class FixedLayer {
           // Element is indeed fixed. Visibility is added to the test to
           // avoid moving around invisible elements.
           const isFixed = (
-              position == 'fixed' &&
+            position == 'fixed' &&
               (fe.forceTransfer || (offsetWidth > 0 && offsetHeight > 0)));
           // Element is indeed sticky.
           const isSticky = endsWith(position, 'sticky');
+          const isDisplayed = display !== 'none';
 
-          if (!isFixed && !isSticky) {
+          if (!isDisplayed || !(isFixed || isSticky)) {
             state[fe.id] = {
               fixed: false,
               sticky: false,
@@ -346,8 +348,8 @@ export class FixedLayer {
           // transfering of more substantial sections for now. Likely to be
           // relaxed in the future.
           const isTransferrable = isFixed && (
-              fe.forceTransfer || (
-                  opacity > 0 &&
+            fe.forceTransfer || (
+              opacity > 0 &&
                   offsetHeight < 300 &&
                   (this.isAllowedCoord_(top) || this.isAllowedCoord_(bottom))));
           if (isTransferrable) {

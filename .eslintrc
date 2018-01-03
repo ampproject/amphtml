@@ -1,15 +1,6 @@
 {
   "parser": "babel-eslint",
-  "rulePaths": ["build-system/eslint-rules/"],
   "plugins": ["eslint-plugin-google-camelcase"],
-  "ecmaFeatures": {
-    "modules": true,
-    "arrowFunctions": true,
-    "blockBindings": true,
-    "forOf": false,
-    "destructuring": true,
-    "spread": true
-  },
   "env": {
     "es6": true,
     "browser": true
@@ -53,7 +44,7 @@
     "max-len": [2, 80, 4, {
       "ignoreComments": true,
       "ignoreUrls": true,
-      "ignorePattern": ""
+      "ignorePattern": "^import.*';$"
     }],
     "no-alert": 2,
     "no-array-destructuring": 2,
