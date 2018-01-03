@@ -276,36 +276,35 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
   describe('getCustomRealTimeConfigMacros', () => {
     it('should return correct macros', () => {
       const macros = {
-        HREF: 'about:srcdoc',
-        DATASLOT: '5678',
-        HEIGHT: '50',
-        WIDTH: '200',
-        MULTISIZE: '300x50,200x100',
-        MULTISIZE_VALIDATION: 'true',
-        OVERRIDEWIDTH: '250',
-        OVERRIDEHEIGHT: '75',
+        'data-slot': '5678',
+        'height': '50',
+        'width': '200',
+        'data-multi-size': '300x50,200x100',
+        'data-multi-size-validation': 'true',
+        'data-override-width': '250',
+        'data-override-height': '75',
       };
       element = createElementWithAttributes(env.win.document, 'amp-ad', {
-        width: macros.WIDTH,
-        height: macros.HEIGHT,
+        width: macros['width'],
+        height: macros['height'],
         type: 'doubleclick',
         layout: 'fixed',
-        'data-slot': macros.DATASLOT,
-        'data-multi-size': macros.MULTISIZE,
-        'data-multi-size-validation': macros.MULTISIZE_VALIDATION,
-        'data-override-width': macros.OVERRIDEWIDTH,
-        'data-override-height': macros.OVERRIDEHEIGHT,
+        'data-slot': macros['data-slot'],
+        'data-multi-size': macros['data-multi-size'],
+        'data-multi-size-validation': macros['data-multi-size-validation'],
+        'data-override-width': macros['data-override-width'],
+        'data-override-height': macros['data-override-height'],
       });
       env.win.document.body.appendChild(element);
       const docInfo = Services.documentInfoForDoc(element);
-      macros['PAGEVIEWID'] = docInfo.pageViewId;
       impl = new AmpAdNetworkDoubleclickImpl(
           element, env.win.document, env.win);
       impl.populateAdUrlState();
       const customMacros = impl.getCustomRealTimeConfigMacros_();
       expect(customMacros.PAGEVIEWID()).to.equal(docInfo.pageViewId);
+      expect(customMacros.HREF()).to.equal(env.win.location.href);
       Object.keys(macros).forEach(macro => {
-        expect(customMacros[macro]()).to.equal(macros[macro]);
+        expect(customMacros.ATTR(macro)).to.equal(macros[macro]);
       });
     });
   });

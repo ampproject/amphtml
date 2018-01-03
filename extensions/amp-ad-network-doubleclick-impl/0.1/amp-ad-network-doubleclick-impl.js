@@ -717,18 +717,20 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getCustomRealTimeConfigMacros_() {
+    const whitelist = {
+      'height': true,
+      'width': true,
+      'data-slot': true,
+      'data-multi-size': true,
+      'data-multi-size-validation': true,
+      'data-override-width': true,
+      'data-override-height': true,
+      'data-json': true,
+    };
     return {
       PAGEVIEWID: () => Services.documentInfoForDoc(this.element).pageViewId,
       HREF: () => this.win.location.href,
-      DATASLOT: () => this.element.getAttribute('data-slot'),
-      HEIGHT: () => this.element.getAttribute('height'),
-      WIDTH: () => this.element.getAttribute('width'),
-      MULTISIZE: () => this.element.getAttribute('data-multi-size'),
-      MULTISIZE_VALIDATION:
-      () => this.element.getAttribute('data-multi-size-validation'),
-      OVERRIDEWIDTH: () => this.element.getAttribute('data-override-width'),
-      OVERRIDEHEIGHT: () => this.element.getAttribute('data-override-height'),
-      JSON: () => this.element.getAttribute('data-json'),
+      ATTR: name => !!whitelist[name] && this.element.getAttribute(name),
     };
   }
 
