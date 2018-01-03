@@ -111,6 +111,9 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     const layoutBox = this.element.getLayoutBox();
     const viewport = this.getViewport();
     const viewportHeight = viewport.getHeight();
+    // TODO(jridgewell): This should really be the parent scroller, not
+    // necessarily the root. But, flying carpet only works as a child of the
+    // root scroller, for now.
     const docHeight = viewport.getScrollHeight();
     // Hmm, can the page height change and affect us?
     const minTop = viewportHeight * 0.75;

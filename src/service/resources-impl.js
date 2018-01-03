@@ -36,6 +36,7 @@ import {filterSplice} from '../utils/array';
 import {getSourceUrl} from '../url';
 import {areMarginsChanged} from '../layout-rect';
 import {computedStyle} from '../style';
+import {isExperimentOn} from '../experiments';
 
 const TAG_ = 'Resources';
 const READY_SCAN_SIGNAL_ = 'ready-scan';
@@ -202,6 +203,9 @@ export class Resources {
     /** @private {boolean} */
     this.maybeChangeHeight_ = false;
 
+    /** @private @const {boolean} */
+    this.useLayers_ = isExperimentOn(this.win, 'layers');
+
     /** @private @const {!FiniteStateMachine<!VisibilityState>} */
     this.visibilityStateMachine_ = new FiniteStateMachine(
         this.viewer_.getVisibilityState()
@@ -221,6 +225,12 @@ export class Resources {
     this.viewport_.onScroll(() => {
       this.lastScrollTime_ = Date.now();
     });
+
+    if (this.useLayers_) {
+      Services.layersForDoc(this.ampdoc).onScroll((/* elements */) => {
+        this.schedulePass();
+      });
+    }
 
     // When document becomes visible, e.g. from "prerender" mode, do a
     // simple pass.
@@ -1100,6 +1110,15 @@ export class Resources {
    * @private
    */
   mutateWork_() {
+    if (this.useLayers_) {
+      this.mutateWorkViaLayers_();
+    } else {
+      this.mutateWorkViaResources_();
+    }
+  }
+
+  /** @private */
+  mutateWorkViaResources_() {
     // Read all necessary data before mutates.
     // The height changing depends largely on the target element's position
     // in the active viewport. When not in prerendering, we also consider the
@@ -1292,11 +1311,22 @@ export class Resources {
   }
 
   /**
+   * TODO(jridgewell): This will be Layer's bread and butter for speed
+   * optimizations.
+   * @private
+   */
+  mutateWorkViaLayers_() {
+    this.mutateWorkViaResources_();
+  }
+
+  /**
    * @param {number} relayoutTop
    * @private
    */
   setRelayoutTop_(relayoutTop) {
-    if (this.relayoutTop_ == -1) {
+    if (this.useLayers_) {
+      this.relayoutAll_ = true;
+    } else if (this.relayoutTop_ == -1) {
       this.relayoutTop_ = relayoutTop;
     } else {
       this.relayoutTop_ = Math.min(relayoutTop, this.relayoutTop_);
@@ -1585,6 +1615,10 @@ export class Resources {
    * @private
    */
   calcTaskScore_(task) {
+    // TODO(jridgewell): these should be taking into account the active
+    // scroller, which may not be the root scroller. Maybe a weighted average
+    // of "scroller scrolls necessary" to see the element.
+    // Demo at https://output.jsbin.com/hicigom/quiet
     const viewport = this.viewport_.getRect();
     const box = task.resource.getLayoutBox();
     let posPriority = Math.floor((box.top - viewport.top) / viewport.height);

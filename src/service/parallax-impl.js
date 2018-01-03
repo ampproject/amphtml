@@ -73,6 +73,7 @@ export class ParallaxService {
    * @private
    */
   parallaxMutate_(elements, viewport) {
+    // TODO(jridgewell): I think this should the parent scroller?
     const newScrollTop = viewport.getScrollTop();
     const previousScrollTop = this.getPreviousScroll_();
     const delta = previousScrollTop - newScrollTop;
