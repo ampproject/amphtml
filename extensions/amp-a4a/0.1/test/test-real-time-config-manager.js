@@ -21,6 +21,7 @@ import {
   maybeExecuteRealTimeConfig_,
   validateRtcConfig_,
   RTC_ERROR_ENUM,
+  truncUrl_,
 } from '../real-time-config-manager';
 import {Xhr} from '../../../../src/service/xhr-impl';
 // Need the following side-effect import because in actual production code,
@@ -73,6 +74,19 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
   function setRtcConfig(rtcConfig) {
     element.setAttribute('rtc-config', JSON.stringify(rtcConfig));
   }
+
+  describe('#truncUrl_', () => {
+    it('truncates URL', () => {
+      let url = 'https://www.example.biz/?';
+      for (let i = 0; i < 1000; i++) {
+        url += '&23456=8901234567';
+      }
+      expect(url.length > 16384).to.be.true;
+      url = truncUrl_(url);
+      expect(url.length <= 16384).to.be.true;
+      expect(url.indexOf('&__trunc__=1') > 0).to.be.true;
+    });
+  });
 
   describe('#maybeExecuteRealTimeConfig_', () => {
     function executeTest(args) {
