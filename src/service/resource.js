@@ -25,6 +25,7 @@ import {toggle, computedStyle} from '../style';
 import {AmpEvents} from '../amp-events';
 import {toWin} from '../types';
 import {Layout} from '../layout';
+import {isExperimentOn} from '../experiments';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -200,6 +201,9 @@ export class Resource {
     this.loadPromise_ = new Promise(resolve => {
       this.loadPromiseResolve_ = resolve;
     });
+
+    /** @private @const {boolean} */
+    this.useLayers_ = isExperimentOn(this.hostWin, 'layers');
   }
 
   /**
@@ -313,7 +317,7 @@ export class Resource {
       this.isBuilding_ = false;
       if (this.hasBeenMeasured()) {
         this.state_ = ResourceState.READY_FOR_LAYOUT;
-        this.element.updateLayoutBox(this.layoutBox_);
+        this.element.updateLayoutBox(this.getLayoutBox());
       } else {
         this.state_ = ResourceState.NOT_LAID_OUT;
       }
@@ -414,9 +418,38 @@ export class Resource {
 
     this.isMeasureRequested_ = false;
 
-    let box = this.resources_.getViewport().getLayoutRect(this.element);
-    const oldBox = this.layoutBox_;
+    const oldBox = this.getPageLayoutBox();
+    if (this.useLayers_) {
+      this.measureViaLayers_();
+    } else {
+      this.measureViaResources_();
+    }
+    const box = this.getPageLayoutBox();
+
+    // Note that "left" doesn't affect readiness for the layout.
+    if (this.state_ == ResourceState.NOT_LAID_OUT ||
+          oldBox.top != box.top ||
+          oldBox.width != box.width ||
+          oldBox.height != box.height) {
+
+      if (this.element.isUpgraded() &&
+              this.state_ != ResourceState.NOT_BUILT &&
+              (this.state_ == ResourceState.NOT_LAID_OUT ||
+                  this.element.isRelayoutNeeded())) {
+        this.state_ = ResourceState.READY_FOR_LAYOUT;
+      }
+    }
+
+    if (!this.hasBeenMeasured()) {
+      this.initialLayoutBox_ = box;
+    }
+
+    this.element.updateLayoutBox(box);
+  }
+
+  measureViaResources_() {
     const viewport = this.resources_.getViewport();
+    let box = this.resources_.getViewport().getLayoutRect(this.element);
     this.layoutBox_ = box;
 
     // Calculate whether the element is currently is or in `position:fixed`.
@@ -445,26 +478,12 @@ export class Resource {
       box = this.layoutBox_ = moveLayoutRect(box, -viewport.getScrollLeft(),
           -viewport.getScrollTop());
     }
+  }
 
-    // Note that "left" doesn't affect readiness for the layout.
-    if (this.state_ == ResourceState.NOT_LAID_OUT ||
-          oldBox.top != box.top ||
-          oldBox.width != box.width ||
-          oldBox.height != box.height) {
-
-      if (this.element.isUpgraded() &&
-              this.state_ != ResourceState.NOT_BUILT &&
-              (this.state_ == ResourceState.NOT_LAID_OUT ||
-                  this.element.isRelayoutNeeded())) {
-        this.state_ = ResourceState.READY_FOR_LAYOUT;
-      }
-    }
-
-    if (!this.hasBeenMeasured()) {
-      this.initialLayoutBox_ = box;
-    }
-
-    this.element.updateLayoutBox(box);
+  measureViaLayers_() {
+    const {element} = this;
+    const layers = element.getLayers();
+    layers.remeasure(element);
   }
 
   /**
@@ -473,12 +492,16 @@ export class Resource {
    */
   completeCollapse() {
     toggle(this.element, false);
-    this.layoutBox_ = layoutRectLtwh(
-        this.layoutBox_.left,
-        this.layoutBox_.top,
-        0, 0);
+    if (this.useLayers_) {
+      this.layoutBox_ = layoutRectLtwh(0, 0, 0, 0);
+    } else {
+      this.layoutBox_ = layoutRectLtwh(
+          this.layoutBox_.left,
+          this.layoutBox_.top,
+          0, 0);
+    }
     this.isFixed_ = false;
-    this.element.updateLayoutBox(this.layoutBox_);
+    this.element.updateLayoutBox(this.getLayoutBox());
     const owner = this.getOwner();
     if (owner) {
       owner.collapsedCallback(this.element);
@@ -524,6 +547,16 @@ export class Resource {
    * @return {!../layout-rect.LayoutRectDef}
    */
   getLayoutBox() {
+    if (this.useLayers_) {
+      // TODO(jridgewell): transition all callers to position and/or size calls
+      // directly.
+      const {element} = this;
+      const layers = element.getLayers();
+      const pos = layers.getScrolledPosition(element);
+      const size = layers.getSize(element);
+      return layoutRectLtwh(pos.left, pos.top, size.width, size.height);
+    }
+
     if (!this.isFixed_) {
       return this.layoutBox_;
     }
@@ -538,6 +571,14 @@ export class Resource {
    * @return {!../layout-rect.LayoutRectDef}
    */
   getPageLayoutBox() {
+    if (this.useLayers_) {
+      const {element} = this;
+      const layers = element.getLayers();
+      const pos = layers.getOffsetPosition(element);
+      const size = layers.getSize(element);
+      return layoutRectLtwh(pos.left, pos.top, size.width, size.height);
+    }
+
     return this.layoutBox_;
   }
 
@@ -558,8 +599,9 @@ export class Resource {
    */
   isDisplayed() {
     const isFluid = this.element.getLayout() == Layout.FLUID;
-    const hasNonZeroSize = this.layoutBox_.height > 0 &&
-        this.layoutBox_.width > 0;
+    // TODO(jridgewell): #getSize
+    const box = this.getLayoutBox();
+    const hasNonZeroSize = box.height > 0 && box.width > 0;
     return (isFluid || hasNonZeroSize) &&
         !!this.element.ownerDocument &&
         !!this.element.ownerDocument.defaultView;
@@ -630,6 +672,7 @@ export class Resource {
     if (multiplier === true || multiplier === false) {
       return multiplier;
     }
+
     // Numeric interface, element is allowed to render outside viewport when it
     // is within X times the viewport height of the current viewport.
     const viewportBox = this.resources_.getViewport().getRect();
@@ -638,11 +681,19 @@ export class Resource {
     multiplier = Math.max(multiplier, 0);
     let scrollPenalty = 1;
     let distance;
-    if (viewportBox.right < layoutBox.left ||
-        viewportBox.left > layoutBox.right) {
-      // If outside of viewport's x-axis, element is not in viewport.
-      return false;
+
+    if (this.useLayers_) {
+      distance += Math.max(0,
+          layoutBox.left - viewportBox.right,
+          viewportBox.left - layoutBox.right);
+    } else {
+      if (viewportBox.right < layoutBox.left ||
+          viewportBox.left > layoutBox.right) {
+        // If outside of viewport's x-axis, element is not in viewport.
+        return false;
+      }
     }
+
     if (viewportBox.bottom < layoutBox.top) {
       // Element is below viewport
       distance = layoutBox.top - viewportBox.bottom;
