@@ -78,7 +78,7 @@ Depending on the ad server / provider some methods of rendering ads involve a se
 
 #### Position in viewport
 
-Ads can call the special API `window.context.observeIntersection(changesCallback)` to receive IntersectionObserver style [change records](https://github.com/WICG/IntersectionObserver/blob/gh-pages/explainer.md) of the ad's intersection with the parent viewport.
+Ads can call the special API `window.context.observeIntersection(changesCallback)` to receive IntersectionObserver style [change records](https://github.com/w3c/IntersectionObserver/blob/master/explainer.md) of the ad's intersection with the parent viewport.
 
 The API allows specifying a callback that fires with change records when AMP observes that an ad becomes visible and then while it is visible, changes are reported as they happen.
 
@@ -280,4 +280,4 @@ To speed up the review process, please run `gulp lint` and `gulp check-types`, t
 
 ## Developer announcements for ads related API changes 
 
-For any major Ads API related changes that introduce new functionality or cause backwards compatible changes, we will notify the [amp-ads-announce@googlgroups.com](https://groups.google.com/d/forum/amp-ads-announce) at least 2 weeks in advance to make sure you have enough time to absorb those changes. 
+For any major Ads API related changes that introduce new functionality or cause backwards compatible changes, we will notify the [amp-ads-announce@googlegroups.com](https://groups.google.com/d/forum/amp-ads-announce) at least 2 weeks in advance to make sure you have enough time to absorb those changes. 
