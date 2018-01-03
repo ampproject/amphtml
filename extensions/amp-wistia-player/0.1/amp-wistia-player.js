@@ -20,12 +20,17 @@ import {
   fullscreenExit,
   isFullscreenElement,
 } from '../../../src/dom';
+import {tryParseJson} from '../../../src/json';
+import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user, dev} from '../../../src/log';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
+import {isObject} from '../../../src/types';
+import {VideoEvents} from '../../../src/video-interface';
 import {Services} from '../../../src/services';
+import {startsWith} from '../../../src/string';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -37,6 +42,15 @@ class AmpWistiaPlayer extends AMP.BaseElement {
     super(element);
     /** @private {?Element} */
     this.iframe_ = null;
+
+    /** @private {?Promise} */
+    this.playerReadyPromise_ = null;
+
+    /** @private {?Function} */
+    this.playerReadyResolver_ = null;
+
+    /** @private {?Function} */
+    this.unlistenMessage_ = null;
   }
 
   /**
@@ -53,9 +67,12 @@ class AmpWistiaPlayer extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
-
   /** @override */
   buildCallback() {
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
+
     installVideoManagerForDoc(this.element);
     Services.videoManagerForDoc(this.element).register(this);
   }
@@ -76,9 +93,23 @@ class AmpWistiaPlayer extends AMP.BaseElement {
     iframe.src = '//fast.wistia.net/embed/iframe/' + encodeURIComponent(
         mediaId);
     this.applyFillContent(iframe);
-    this.element.appendChild(iframe);
     this.iframe_ = iframe;
-    return this.loadPromise(iframe);
+
+    this.unlistenMessage_ = listen(
+        this.win,
+        'message',
+        this.handleWistiaMessages_.bind(this)
+    );
+
+    this.element.appendChild(this.iframe_);
+
+    const loaded = this.loadPromise(this.iframe_).then(() => {
+      // Tell Wistia Player we want to receive messages
+      this.listenToFrame_();
+      this.element.dispatchCustomEvent(VideoEvents.LOAD);
+    });
+    this.playerReadyResolver_(loaded);
+    return loaded;
   }
 
   /** @override */
@@ -88,7 +119,20 @@ class AmpWistiaPlayer extends AMP.BaseElement {
       this.iframe_ = null;
     }
 
+    if (this.unlistenMessage_) {
+      this.unlistenMessage_();
+    }
+
+    this.playerReadyPromise_ = new Promise(resolve => {
+      this.playerReadyResolver_ = resolve;
+    });
+
     return true;
+  }
+
+  /** @override */
+  viewportCallback(visible) {
+    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
   }
 
   /** @override */
@@ -98,15 +142,65 @@ class AmpWistiaPlayer extends AMP.BaseElement {
     }
   }
 
+  /** @private */
+  handleWistiaMessages_(event) {
+    if (event.origin !== 'https://fast.wistia.net' ||
+      event.source != this.iframe_.contentWindow) {
+      return;
+    }
+
+    if (!getData(event) || !(isObject(getData(event))
+        || startsWith(/** @type {string} */ (getData(event)), '{'))) {
+      return; // Doesn't look like JSON.
+    }
+    /** @const {?JsonObject} */
+    const data = /** @type {?JsonObject} */ (isObject(getData(event))
+      ? getData(event)
+      : tryParseJson(getData(event)));
+
+    if (data === undefined) {
+      return; // We only process valid JSON.
+    }
+
+    if (data['method'] == 'statechange') {
+      state = (data['args'] ? data['args']['_state'] : undefined)
+      if (state === 'playing') {
+        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
+      } else if (state === 'paused') {
+        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+      } else if (state === 'ended') {
+        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+        this.element.dispatchCustomEvent(VideoEvents.ENDED);
+      }
+    } else if (data['method'] == 'mutechange') {
+      isMuted = (data['args'] ? data['args']['_isMuted'] : undefined)
+      if (isMuted === true) {
+        this.element.dispatchCustomEvent(VideoEvents.MUTED);
+      } else if (isMuted === false) {
+        this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
+      }
+    }
+  }
+
+  /**
+  * Sends 'listening' message to the Wistia iframe to listen for events.
+  * @private
+  */
+  listenToFrame_() {
+    this.sendCommand_('amp-listening');
+  }
+
   /**
    * Sends a command to the player through postMessage.
    * @param {string} command
    * @private
    */
   sendCommand_(command) {
-    if (this.iframe_ && this.iframe_.contentWindow) {
-      this.iframe_.contentWindow./*OK*/postMessage(command, '*');
-    }
+    this.playerReadyPromise_.then(() => {
+      if (this.iframe_ && this.iframe_.contentWindow) {
+        this.iframe_.contentWindow./*OK*/postMessage(command, '*');
+      }
+    });
   }
 
   // VideoInterface Implementation. See ../src/video-interface.VideoInterface
