@@ -20,7 +20,7 @@ import {EventType, dispatch} from './events';
 import {StateChangeType} from './navigation-state';
 
 
-/** @typedef {{className: string, triggers: (string|undefined)}} */
+/** @struct @typedef {{className: string, triggers: (string|undefined)}} */
 let ButtonStateDef;
 
 
@@ -96,7 +96,7 @@ class PaginationButton {
     /** @private {!ButtonStateDef} */
     this.state_ = initialState;
 
-    /** @public @const */
+    /** @public @const {!Element} */
     this.element = renderAsElement(doc, BUTTON);
 
     this.element.addEventListener('click', e => this.onClick_(e));
@@ -131,11 +131,11 @@ class PaginationButton {
 export class PaginationButtons {
   /** @param {!Document} doc */
   constructor(doc) {
-    /** @private @const */
+    /** @private @const {!PaginationButton} */
     this.forwardButton_ =
         new PaginationButton(doc, ForwardButtonStates.NEXT_PAGE);
 
-    /** @private @const */
+    /** @private @const {!PaginationButton} */
     this.backButton_ = new PaginationButton(doc, BackButtonStates.HIDDEN);
 
     this.forwardButton_.element.classList.add('next-container');

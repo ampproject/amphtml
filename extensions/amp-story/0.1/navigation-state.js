@@ -86,7 +86,7 @@ export class NavigationState {
 
     this.fire_(StateChangeType.ACTIVE_PAGE, changeValue);
 
-    if (pageIndex === totalPages - 1) {
+    if (pageIndex >= totalPages - 1) {
       this.hasBookend_().then(hasBookend => {
         if (!hasBookend) {
           this.fire_(StateChangeType.END);

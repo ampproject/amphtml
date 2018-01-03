@@ -610,16 +610,17 @@ export class AmpStory extends AMP.BaseElement {
     const activePage = dev().assert(this.activePage_,
         'No active page set when navigating to next page.');
 
-    if (activePage !== this.pages_[this.getPageCount() - 1]) {
-      activePage.next();
-      return;
-    }
+    const lastPage = this.pages_[this.getPageCount() - 1];
 
-    this.hasBookend_().then(hasBookend => {
-      if (hasBookend) {
-        dispatch(this.element, EventType.SHOW_BOOKEND);
-      }
-    });
+    if (activePage !== lastPage) {
+      activePage.next();
+    } else {
+      this.hasBookend_().then(hasBookend => {
+        if (hasBookend) {
+          dispatch(this.element, EventType.SHOW_BOOKEND);
+        }
+      });
+    }
   }
 
 
@@ -1093,6 +1094,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   hasBookend_() {
+    // On mobile there is always a bookend. On desktop, the bookend will only
+    // be shown if related articles have been configured.
     if (!this.isDesktop_()) {
       return Promise.resolve(true);
     }
