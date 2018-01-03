@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-wistia-player'
+import '../amp-wistia-player';
 
 describes.realWin('amp-wistia-player', {
   amp: {
@@ -28,9 +28,9 @@ describes.realWin('amp-wistia-player', {
     doc = win.document;
   });
 
-  function getWistiaEmbed(media_id) {
+  function getWistiaEmbed(mediaId) {
     const wistiaEmbed = doc.createElement('amp-wistia-player');
-    wistiaEmbed.setAttribute('data-media-hashed-id', media_id);
+    wistiaEmbed.setAttribute('data-media-hashed-id', mediaId);
     wistiaEmbed.setAttribute('width', '512');
     wistiaEmbed.setAttribute('height', '360');
     doc.body.appendChild(wistiaEmbed);

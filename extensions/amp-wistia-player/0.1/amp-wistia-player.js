@@ -25,7 +25,6 @@ import {user, dev} from '../../../src/log';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import {VideoEvents} from '../../../src/video-interface';
 import {Services} from '../../../src/services';
 
 /**
@@ -65,7 +64,8 @@ class AmpWistiaPlayer extends AMP.BaseElement {
   layoutCallback() {
     const mediaId = user().assert(
         this.element.getAttribute('data-media-hashed-id'),
-        'The data-media-hashed-id attribute is required for <amp-wistia-player> %s',
+        'The data-media-hashed-id attribute is required ' +
+            'for <amp-wistia-player> %s',
         this.element);
     const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('title', 'Wistia Video Player');
@@ -94,7 +94,7 @@ class AmpWistiaPlayer extends AMP.BaseElement {
   /** @override */
   pauseCallback() {
     if (this.iframe_) {
-      this.pause()
+      this.pause();
     }
   }
 
@@ -118,7 +118,7 @@ class AmpWistiaPlayer extends AMP.BaseElement {
 
   /** @override */
   pause() {
-    this.sendCommand_('amp-pause')
+    this.sendCommand_('amp-pause');
   }
 
   /** @override */
@@ -151,7 +151,7 @@ class AmpWistiaPlayer extends AMP.BaseElement {
     // Not supported
   }
 
-    /**
+  /**
    * @override
    */
   fullscreenEnter() {
@@ -189,7 +189,7 @@ class AmpWistiaPlayer extends AMP.BaseElement {
     return false;
   }
 
-    /** @override */
+  /** @override */
   getCurrentTime() {
     // Not supported.
     return 0;
