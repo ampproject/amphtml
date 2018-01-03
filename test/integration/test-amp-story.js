@@ -18,20 +18,20 @@ import {poll} from '../../testing/iframe';
 
 const ACTIVE_BOOKEND_SELECTOR = '.i-amphtml-story-bookend:not([hidden])';
 
-const ACTIVE_PAGE_SELECTOR = 'amp-story-page[active]';
+const ACTIVE_PAGE_SELECTOR = 'amp-story-page[active][distance="0"]';
 
 const REPLAY_BUTTON_SELECTOR = '.i-amphtml-story-bookend-replay';
 
 const PAGE_LOADED_CLASS = 'i-amphtml-story-page-loaded';
 
-const STORY_EL_ID = 'amp-story-for-test';
+const STORY_ELEMENT_ID = 'amp-story-for-test';
 
 const AUTO_ADVANCE_TOLERANCE_MS = 1000;
 
 const CSS =
   // <amp-story> dimensions set as to not be bound by testing frame size.
   // Id for selector specificity.
-  `#${STORY_EL_ID} {
+  `#${STORY_ELEMENT_ID} {
     width: 400px !important;
     height: 600px !important;
   }`;
@@ -39,7 +39,7 @@ const CSS =
 
 describe.configure().skip(function() {
   // TODO(alanorozco): Marking pages as loaded is broken in iOS < 11.
-  // Waiting for roll forward MediaPool to enable this test (PR #12604)
+  // Waiting for MediaPool to be rolled forward to enable this test (PR #12604).
   return this.platform.isIos() &&
       this.platform.isSafari() &&
       this.platform.getMajorVersion() < 11;
@@ -65,7 +65,7 @@ describe.configure().skip(function() {
 
   function ampStoryHtml(body) {
     return `
-      <amp-story id="${STORY_EL_ID}" standalone>
+      <amp-story id="${STORY_ELEMENT_ID}" standalone>
         <script type="application/ld+json">
           {"headline": "My AMP Story"}
         </script>
