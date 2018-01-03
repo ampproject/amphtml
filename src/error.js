@@ -67,6 +67,21 @@ let accumulatedErrorMessages = self.AMPErrors || [];
 self.AMPErrors = accumulatedErrorMessages;
 
 /**
+ * Pushes element into array, keeping at most the most recent limit elements
+ *
+ * @param {!Array<T>} array
+ * @param {T} element
+ * @param {number} limit
+ * @template T
+ */
+function pushLimit(array, element, limit) {
+  if (array.length >= limit) {
+    array.splice(0, array.length - limit + 1);
+  }
+  array.push(element);
+}
+
+/**
  * A wrapper around our exponentialBackoff, to lazy initialize it to avoid an
  * un-DCE'able side-effect.
  * @param {function()} work the function to execute after backoff
@@ -425,7 +440,7 @@ export function getErrorReportData(message, filename, line, col, error,
   data['ae'] = accumulatedErrorMessages.join(',');
   data['fr'] = self.location.originalHash || self.location.hash;
 
-  accumulatedErrorMessages.push(message);
+  pushLimit(accumulatedErrorMessages, message, 25);
 
   return data;
 }
