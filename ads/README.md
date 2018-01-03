@@ -78,7 +78,7 @@ Depending on the ad server / provider some methods of rendering ads involve a se
 
 #### Position in viewport
 
-Ads can call the special API `window.context.observeIntersection(changesCallback)` to receive IntersectionObserver style [change records](https://github.com/WICG/IntersectionObserver/blob/gh-pages/explainer.md) of the ad's intersection with the parent viewport.
+Ads can call the special API `window.context.observeIntersection(changesCallback)` to receive IntersectionObserver style [change records](https://github.com/w3c/IntersectionObserver/blob/master/explainer.md) of the ad's intersection with the parent viewport.
 
 The API allows specifying a callback that fires with change records when AMP observes that an ad becomes visible and then while it is visible, changes are reported as they happen.
 
