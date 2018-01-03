@@ -161,7 +161,8 @@ function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
   }
   seenUrls[url] = true;
   if (url.length > MAX_URL_LENGTH) {
-    url = url.substr(0, MAX_URL_LENGTH).replace(/%\w?$/, '');
+    url = url.substr(0, MAX_URL_LENGTH - 12).replace(/%\w?$/, '');
+    url += '&__trunc__=1';
   }
   promiseArray.push(sendRtcCallout_(
       url, rtcStartTime, win, timeoutMillis, opt_vendor || url));

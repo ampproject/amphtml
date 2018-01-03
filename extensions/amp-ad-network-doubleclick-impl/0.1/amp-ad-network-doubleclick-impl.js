@@ -736,9 +736,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       PAGEVIEWID: () => Services.documentInfoForDoc(this.element).pageViewId,
       HREF: () => this.win.location.href,
       ATTR: name => {
-        return !!whitelist[name.toLowerCase()] &&
-            this.element.getAttribute(name) ||
-            dev().warn('TAG', `Invalid attribute ${name}`);
+        if (!whitelist[name.toLowerCase()]) {
+          dev().warn('TAG', `Invalid attribute ${name}`);
+        } else {
+          return this.element.getAttribute(name);
+        }
       },
     };
   }
