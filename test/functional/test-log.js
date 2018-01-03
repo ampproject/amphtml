@@ -112,10 +112,10 @@ describe('Logging', () => {
       log.error('error');
 
       expect(logSpy).to.have.callCount(4);
-      expect(logSpy.args[0][1]).to.equal('[fine]');
-      expect(logSpy.args[1][1]).to.equal('[info]');
-      expect(logSpy.args[2][1]).to.equal('[warn]');
-      expect(logSpy.args[3][1]).to.equal('[error]');
+      expect(logSpy.args[0][0]).to.equal('[fine]');
+      expect(logSpy.args[1][0]).to.equal('[info]');
+      expect(logSpy.args[2][0]).to.equal('[warn]');
+      expect(logSpy.args[3][0]).to.equal('[error]');
       expect(timeoutSpy).to.have.not.been.called;
     });
 
@@ -129,9 +129,9 @@ describe('Logging', () => {
       log.error('error');
 
       expect(logSpy).to.have.callCount(3);
-      expect(logSpy.args[0][1]).to.equal('[info]');
-      expect(logSpy.args[1][1]).to.equal('[warn]');
-      expect(logSpy.args[2][1]).to.equal('[error]');
+      expect(logSpy.args[0][0]).to.equal('[info]');
+      expect(logSpy.args[1][0]).to.equal('[warn]');
+      expect(logSpy.args[2][0]).to.equal('[error]');
       expect(timeoutSpy).to.have.not.been.called;
     });
 
@@ -145,8 +145,8 @@ describe('Logging', () => {
       log.error('error');
 
       expect(logSpy).to.have.callCount(2);
-      expect(logSpy.args[0][1]).to.equal('[warn]');
-      expect(logSpy.args[1][1]).to.equal('[error]');
+      expect(logSpy.args[0][0]).to.equal('[warn]');
+      expect(logSpy.args[1][0]).to.equal('[error]');
       expect(timeoutSpy).to.have.not.been.called;
     });
 
@@ -160,7 +160,7 @@ describe('Logging', () => {
       log.error('error');
 
       expect(logSpy).to.be.calledOnce;
-      expect(logSpy.args[0][1]).to.equal('[error]');
+      expect(logSpy.args[0][0]).to.equal('[error]');
       expect(timeoutSpy).to.have.not.been.called;
     });
 
@@ -228,8 +228,8 @@ describe('Logging', () => {
 
   describe('UserLog', () => {
 
-    it('should be disabled by default', () => {
-      expect(user().levelFunc_(mode)).to.equal(LogLevel.OFF);
+    it('should be WARN by default', () => {
+      expect(user().levelFunc_(mode)).to.equal(LogLevel.WARN);
     });
 
     it('should be enabled in development mode', () => {
