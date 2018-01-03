@@ -85,7 +85,7 @@ describes.realWin(
         attemptChangeSizeSpy = sandbox.spy(
             media.implementation_,
             'attemptChangeHeight'
-      );
+        );
         xhrMock = sandbox.mock(Services.xhrFor(win));
         if (attributes) {
           xhrMock.expects('fetchJson').returns(
@@ -94,7 +94,7 @@ describes.realWin(
                   return Promise.resolve(currentResopnse);
                 },
               })
-        );
+          );
         } else {
           xhrMock.expects('fetchJson').never();
         }
@@ -103,7 +103,7 @@ describes.realWin(
         }
         media.setAttribute('width', '600');
         media.setAttribute('height', '390');
-      //todo test width?
+        //todo test width?
         if (opt_responsive) {
           media.setAttribute('layout', 'responsive');
         }
@@ -154,7 +154,7 @@ describes.realWin(
         });
       });
 
-    //todo responsive layout isn't fully supported yet, just a stub
+      //todo responsive layout isn't fully supported yet, just a stub
       it('renders responsively', () => {
         return getApester(
             {
@@ -162,10 +162,10 @@ describes.realWin(
               width: '500',
             },
             true
-      ).then(ape => {
-        const iframe = ape.querySelector('iframe');
-        expect(iframe.className).to.match(/i-amphtml-fill-content/);
-      });
+        ).then(ape => {
+          const iframe = ape.querySelector('iframe');
+          expect(iframe.className).to.match(/i-amphtml-fill-content/);
+        });
       });
 
       it('removes iframe after unlayoutCallback', () => {
@@ -189,7 +189,7 @@ describes.realWin(
       it('requires media-id or channel-token', () => {
         expect(getApester()).to.be.rejectedWith(
             /The media-id attribute is required for/
-      );
+        );
       });
     }
 );

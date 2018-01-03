@@ -319,40 +319,41 @@ class AmpApesterMedia extends AMP.BaseElement {
     return (
       this.queryMedia_()
           .then(
-          response => {
-            const payload = response['payload'];
-            // If it's a playlist we choose a media randomly.
-            // The response will be an array.
-            const media = this.embedOptions_.playlist
-              ? payload[Math.floor(Math.random() * payload.length)]
-              : payload;
-            const src = this.constructUrlFromMedia_(media['interactionId']);
-            const iframe = this.constructIframe_(src);
-            const overflow = this.constructOverflow_();
-            const mutate = state => {
-              state.element.classList.add('i-amphtml-apester-iframe-ready');
-            };
-            const state = {
-              element: iframe,
-              mutator: mutate,
-            };
-            this.mediaId_ = media['interactionId'];
-            this.iframe_ = iframe;
-            this.element.appendChild(overflow);
-            this.element.appendChild(iframe);
-            this.registerToApesterEvents_();
+              response => {
+                const payload = response['payload'];
+                // If it's a playlist we choose a media randomly.
+                // The response will be an array.
+                const media = this.embedOptions_.playlist
+                  ? payload[Math.floor(Math.random() * payload.length)]
+                  : payload;
+                const src = this.constructUrlFromMedia_(media['interactionId']);
+                const iframe = this.constructIframe_(src);
+                const overflow = this.constructOverflow_();
+                const mutate = state => {
+                  state.element.classList.add('i-amphtml-apester-iframe-ready');
+                };
+                const state = {
+                  element: iframe,
+                  mutator: mutate,
+                };
+                this.mediaId_ = media['interactionId'];
+                this.iframe_ = iframe;
+                this.element.appendChild(overflow);
+                this.element.appendChild(iframe);
+                this.registerToApesterEvents_();
 
-            return (this.iframePromise_ = this.loadPromise(iframe).then(() => {
-              Services.vsyncFor(this.win).runPromise({mutate}, state);
-              return media;
-            }));
-          },
-          error => {
-            dev().error(TAG, 'Display', error);
-            return undefined;
-          }
-        )
-        /** @param {!JsonObject} media */
+                return (this.iframePromise_ = this.loadPromise(iframe)
+                    .then(() => {
+                      Services.vsyncFor(this.win).runPromise({mutate}, state);
+                      return media;
+                    }));
+              },
+              error => {
+                dev().error(TAG, 'Display', error);
+                return undefined;
+              }
+          )
+    /** @param {!JsonObject} media */
           .then(media => {
             this.togglePlaceholder(false);
             this.ready_ = true;
