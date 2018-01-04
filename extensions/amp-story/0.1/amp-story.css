@@ -974,3 +974,7 @@ amp-story[standalone].i-amphtml-story-landscape .i-amphtml-story-no-rotation-ove
   width: 24px!important;
   margin: 16px auto!important;
 }
+
+.i-amphtml-story-button-container {
+  display: none !important;
+}
