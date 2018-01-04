@@ -17,7 +17,6 @@ import {KeyCodes} from '../../../src/utils/key-codes';
 import {ShareWidget} from './share';
 import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
-import {listenOnce} from '../../../src/event-helper';
 import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
