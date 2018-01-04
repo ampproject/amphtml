@@ -69,18 +69,8 @@ function fillStorage(match, storage) {
   return true;
 }
 
-function evaluateBinding(binding, opt_sync, opt_args,) {
-  // we can evaluate now and move on
-  if (opt_sync) {
-    binding = binding.sync;
-    if (!binding) {
-      user().error('UrlReplacements', 'ignoring async replacement key: ', name);
-      return '';
-    }
-  } else {
-    binding = binding.async || binding.sync;
-  }
-
+function evaluateBinding(binding, opt_args) {
+  binding = binding.async || binding.sync;
   let value;
   try {
     value = typeof binding === 'function' ?
@@ -88,18 +78,9 @@ function evaluateBinding(binding, opt_sync, opt_args,) {
   } catch (e) {
     // Report error, but do not disrupt URL replacement. This will
     // interpolate as the empty string.
-    if (opt_sync) {
-      value = '';
-    }
     rethrowAsync(e);
+    value = '';
   }
-
-  // In case the produced value is a promise but we are not expecting it
-  if (value && value.then && opt_sync) {
-    user().error('UrlReplacements', 'ignoring promise value for key: ', name);
-    return '';
-  }
-
   // value here may be a promise or primitive
   return Promise.resolve(value);
 }
@@ -121,9 +102,7 @@ export function parseUrlRecursively(
   url,
   matches,
   variableSource,
-  opt_sync,
-  opt_bindings,
-  opt_collectVars, // this is not added yet...
+  opt_bindings
 ) {
   const stack = [];
   let urlIndex = 0;
@@ -146,7 +125,7 @@ export function parseUrlRecursively(
           // or the global source
           binding = variableSource.get(match.name);
         }
-        
+
         urlIndex = match.stop + 1;
 
         if (url[urlIndex] === '(') {
@@ -155,9 +134,9 @@ export function parseUrlRecursively(
           stack.push(binding);
           results.push(builder, evaluateNextLevel());
         } else {
-          results.push(builder, evaluateBinding(binding, opt_sync));
+          results.push(builder, evaluateBinding(binding));
         }
-        
+
         builder = '';
         match = matches[++matchIndex];
       }
@@ -174,7 +153,7 @@ export function parseUrlRecursively(
         urlIndex++;
         const binding = stack.pop();
         const args = [...results, builder.trim()];
-        const value = evaluateBinding(binding, opt_sync, args);
+        const value = evaluateBinding(binding, args);
         return value;
       }
 
@@ -184,8 +163,7 @@ export function parseUrlRecursively(
       }
     }
 
-    return opt_sync ? results.join('') :
-      Promise.all(results).then(promiseArray => promiseArray.join(''));
+    return Promise.all(results).then(promiseArray => promiseArray.join(''));
   };
 
   return evaluateNextLevel();

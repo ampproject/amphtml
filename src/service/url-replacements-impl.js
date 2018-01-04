@@ -934,7 +934,7 @@ export class UrlReplacements {
    */
   expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
     // ad experimental flag here
-    if (true) {
+    if (true && !opt_sync) {
       if (!url.length) {
         return Promise.resolve(url);
       }
@@ -943,7 +943,8 @@ export class UrlReplacements {
       const mergedPositions = mergeMatches(matches, url);
       const expanded = parseUrlRecursively(url, mergedPositions, this.variableSource_, 
         opt_bindings, opt_collectVars);
-  
+      
+      // NEED TO ENCODE:  DONT FORGET!
       // const encoded = encodeValue(expanded);
       if (opt_sync) {
         return expanded;
