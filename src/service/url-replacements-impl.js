@@ -28,7 +28,6 @@ import {
   getSourceUrl,
 } from '../url';
 import {getTrackImpressionPromise} from '../impression.js';
-import {parseUrlRecursively, findMatches, mergeMatches} from './parser';
 import {
   VariableSource,
   AsyncResolverDef,
@@ -40,6 +39,7 @@ import {
 } from './variable-source';
 import {isProtocolValid} from '../url';
 import {WindowInterface} from '../window-interface';
+import {Parser} from './urlExpander/parser';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -638,6 +638,9 @@ export class UrlReplacements {
 
     /** @type {VariableSource} */
     this.variableSource_ = variableSource;
+
+    /** @type {Parser} */
+    this.parser_ = new Parser(this.variableSource_);
   }
 
   /**
@@ -921,7 +924,7 @@ export class UrlReplacements {
 
     return element.href = href;
   }
-  
+
   /**
    * @param {string} url
    * @param {!Object<string, *>=} opt_bindings
@@ -933,16 +936,12 @@ export class UrlReplacements {
    * @private
    */
   expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
-    // ad experimental flag here
-    if (true && !opt_sync) {
+    // not supporting syncronous version or collect_vars with this new structure
+    if (/* add experimental flag */ true && !opt_collectVars && !opt_sync) {
       if (!url.length) {
         return Promise.resolve(url);
       }
-      const expr = this.variableSource_.getExpr(opt_bindings);
-      const matches = findMatches(url, expr);
-      const mergedPositions = mergeMatches(matches, url);
-      const expanded = parseUrlRecursively(url, mergedPositions, this.variableSource_, 
-        opt_bindings, opt_collectVars);
+      const expanded = this.parser_.expand(url, opt_bindings, opt_whiteList);
       
       // NEED TO ENCODE:  DONT FORGET!
       // const encoded = encodeValue(expanded);
@@ -1114,4 +1113,5 @@ export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
  *   outgoingFragment: string,
  * }}
  */
+
 let ShareTrackingFragmentsDef;
