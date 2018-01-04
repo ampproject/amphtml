@@ -15,7 +15,7 @@
  */
 
 
-import * as Promise from 'promise-pjs/promise';
+import PJPromise from 'promise-pjs/promise';
 
 /**
  * Sets the Promise polyfill if it does not exist.
@@ -23,17 +23,17 @@ import * as Promise from 'promise-pjs/promise';
  */
 export function install(win) {
   if (!win.Promise) {
-    win.Promise = /** @type {?} */ (Promise);
+    win.Promise = /** @type {!Promise} */ (PJPromise);
     // In babel the * export is an Object with a default property.
     // In closure compiler it is the Promise function itself.
     if (Promise.default) {
-      win.Promise = Promise.default;
+      win.Promise = PJPromise.default;
     }
     // We copy the individual static methods, because closure
     // compiler flattens the polyfill namespace.
-    win.Promise.resolve = Promise.resolve;
-    win.Promise.reject = Promise.reject;
-    win.Promise.all = Promise.all;
-    win.Promise.race = Promise.race;
+    win.Promise.resolve = PJPromise.resolve;
+    win.Promise.reject = PJPromise.reject;
+    win.Promise.all = PJPromise.all;
+    win.Promise.race = PJPromise.race;
   }
 }

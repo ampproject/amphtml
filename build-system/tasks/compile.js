@@ -152,9 +152,9 @@ function compile(entryModuleFilenames, outputDir,
     if (!options.preventRemoveAndMakeDir) {
       cleanupBuildDir();
     }
-    const unneededFiles = [
-      'build/fake-module/third_party/babel/custom-babel-helpers.js',
-    ];
+    //const unneededFiles = [
+      //'build/fake-module/third_party/babel/custom-babel-helpers.js',
+    //];
     let wrapper = '(function(){%output%})();';
     if (options.wrapper) {
       wrapper = options.wrapper.replace('<%= contents %>', '%output%');
@@ -266,42 +266,22 @@ function compile(entryModuleFilenames, outputDir,
     // Many files include the polyfills, but we only want to deliver them
     // once. Since all files automatically wait for the main binary to load
     // this works fine.
-    if (options.includeOnlyESMLevelPolyfills) {
-      const polyfillsShadowList = [
-        'array-includes.js',
-        'document-contains.js',
-        'domtokenlist-toggle.js',
-        'math-sign.js',
-        'object-assign.js',
-        'promise.js',
-      ];
-      srcs.push(
-          '!build/fake-module/src/polyfills.js',
-          '!build/fake-module/src/polyfills/**/*.js',
-          '!build/fake-polyfills/src/polyfills.js',
-          '!src/polyfills/*.js',
-          'build/fake-polyfills/**/*.js');
-      polyfillsShadowList.forEach(polyfillFile => {
-        fs.writeFileSync('build/fake-polyfills/src/polyfills/' + polyfillFile,
-            'export function install() {}');
-      });
-    } else if (options.includePolyfills) {
-      srcs.push(
-          '!build/fake-module/src/polyfills.js',
-          '!build/fake-module/src/polyfills/**/*.js',
-          '!build/fake-polyfills/**/*.js',
-      );
+    if (options.includePolyfills) {
+      //srcs.push(
+          //'!build/fake-module/src/polyfills.js',
+          //'!build/fake-module/src/polyfills/**/*.js'
+      //);
     } else {
-      srcs.push('!src/polyfills.js', '!build/fake-polyfills/**/*.js',);
-      unneededFiles.push('build/fake-module/src/polyfills.js');
+      //srcs.push('!src/polyfills.js');
+      //unneededFiles.push('build/fake-module/src/polyfills.js');
     }
-    unneededFiles.forEach(function(fake) {
-      if (!fs.existsSync(fake)) {
-        fs.writeFileSync(fake,
-            '// Not needed in closure compiler\n' +
-            'export function deadCode() {}');
-      }
-    });
+    //unneededFiles.forEach(function(fake) {
+      //if (!fs.existsSync(fake)) {
+        //fs.writeFileSync(fake,
+            //'// Not needed in closure compiler\n' +
+            //'export function deadCode() {}');
+      //}
+    //});
 
     let externs = baseExterns;
     if (options.externs) {

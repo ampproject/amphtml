@@ -376,19 +376,6 @@ AmpStoryVariableService.pageId;
 
 var AMP = {};
 window.AMP;
-// Externed explicitly because we do not export Class shaped names
-// by default.
-/**
- * This uses the internal name of the type, because there appears to be no
- * other way to reference an ES6 type from an extern that is defined in
- * the app.
- * @constructor @struct
- * @extends {BaseElement$$module$src$base_element}
- */
-AMP.BaseElement = class {
-  /** @param {!AmpElement} element */
-  constructor(element) {}
-};
 
 /**
  * This uses the internal name of the type, because there appears to be no
