@@ -34,6 +34,7 @@ amp-story[standalone][desktop] {
  right: 0!important;
  bottom: 0!important;
  left: 0!important;
+ overflow: hidden !important;
 }
 
 .i-amphtml-story-background-overlay,
@@ -62,20 +63,22 @@ amp-story[standalone][desktop] {
 
 .i-amphtml-story-background {
   position: absolute !important;
-  top: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  left: 0 !important;
+  top: -150px !important;
+  right: -150px !important;
+  bottom: -150px !important;
+  left: -150px !important;
   opacity: 0 !important;
   filter: blur(50px) !important;
-  margin: -60px !important;
   background-size: cover !important;
   background-color: transparent !important;
   background-position: center center !important;
+  will-change: opacity, z-index !important;
+  z-index: 0 !important;
 }
 
 .i-amphtml-story-background.active {
-  opacity: 1!important;
+  opacity: 1 !important;
+  z-index: 1 !important;
 }
 
 [desktop] amp-story-page {
@@ -112,13 +115,14 @@ amp-story-page.i-amphtml-story-page-shown {
   width: calc(50vw - 23vh - 32px) !important;
 }
 
-.i-amphtml-story-button-container > .i-amphtml-story-button-move,
-.i-amphtml-story-fwd-next > .i-amphtml-story-next-sentinel,
-.i-amphtml-story-back-prev > .i-amphtml-story-prev-sentinel {
+.i-amphtml-story-button-move,
+.i-amphtml-story-fwd-next > .i-amphtml-story-page-sentinel,
+.i-amphtml-story-back-prev > .i-amphtml-story-page-sentinel {
   pointer-events: all !important;
 }
 
 .i-amphtml-story-button-hidden > .i-amphtml-story-button-move {
+  cursor: default !important;
   pointer-events: none !important;
   opacity: 0 !important;
 }
@@ -138,7 +142,7 @@ amp-story-page.i-amphtml-story-page-shown {
 }
 
 [desktop] amp-story-page[pre-active],
-.i-amphtml-story-prev-sentinel {
+.prev-container > .i-amphtml-story-page-sentinel {
   /* -150% + 15% */
   transform: scale(0.9) translateX(calc(-150% - 64px)) translateY(0%) !important;
 }
@@ -149,7 +153,7 @@ amp-story-page.i-amphtml-story-page-shown {
 }
 
 [desktop] amp-story-page[active] + amp-story-page,
-.i-amphtml-story-next-sentinel {
+.next-container > .i-amphtml-story-page-sentinel {
   /* 50% - 15% */
   transform: scale(0.9) translate(calc(50% + 64px), 0%) !important;
 }
@@ -184,8 +188,7 @@ amp-story-page.i-amphtml-story-page-shown {
 }
 
 [desktop] > amp-story-page,
-.i-amphtml-story-next-sentinel,
-.i-amphtml-story-prev-sentinel {
+.i-amphtml-story-page-sentinel {
   left: 50%!important;
   right: auto !important;
   margin: auto !important;
@@ -199,8 +202,7 @@ amp-story-page.i-amphtml-story-page-shown {
   box-shadow: 0 0 15px rgba(0, 0, 0, .4)!important;
 }
 
-.i-amphtml-story-next-sentinel,
-.i-amphtml-story-prev-sentinel {
+.i-amphtml-story-page-sentinel {
   position: absolute !important;
   width: 100vw !important;
   height: 100vh !important;
@@ -270,6 +272,12 @@ amp-story-page.i-amphtml-story-page-shown {
 .i-amphtml-story-prev-hover > .prev-container > .i-amphtml-story-button-move {
   transform: scale(1.1) !important;
   opacity: 1!important;
+}
+
+/* Do not display when hidden. */
+.i-amphtml-story-prev-hover > .i-amphtml-story-button-hidden >
+    .i-amphtml-story-button-move {
+  opacity: 0 !important;
 }
 
 /* On forward (next) button mouseover */
