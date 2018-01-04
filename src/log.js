@@ -156,7 +156,9 @@ export class Log {
       } else if (level == 'WARN') {
         fn = this.win.console.warn || fn;
       }
-      messages.unshift('[' + tag + ']');
+      if (getMode().localDev) {
+        messages.unshift('[' + tag + ']');
+      }
       fn.apply(this.win.console, messages);
     }
   }
