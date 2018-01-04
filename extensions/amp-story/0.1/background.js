@@ -133,28 +133,19 @@ export class AmpStoryBackground {
     // Color will always be swapped on timeout.
     whenFresh(Promise.race([imgLoad, timeout]), () => {
       setStyle(hidden, 'background-color', color);
-      this.rotateActiveBackground_(/* withTransition */ !initial);
+      this.rotateActiveBackground_();
     });
   }
 
   /*
    * Rotates the classes on page background to bring the new bacground in foreground.
-   * @param {boolean} withTransition
    * @private
    */
-  rotateActiveBackground_(withTransition) {
+  rotateActiveBackground_() {
     const newHidden = this.active_;
     this.active_ = this.hidden_;
     this.hidden_ = newHidden;
     this.active_.classList.add('active');
     this.hidden_.classList.remove('active');
-
-    if (withTransition) {
-      setStyle(this.active_, 'transition', `opacity ${XFADE_DURATION_MS}ms 0s`);
-      setStyle(this.hidden_, 'transition', `opacity 0s ${XFADE_DURATION_MS}ms`);
-    } else {
-      setStyle(this.active_, 'transition', 'none');
-      setStyle(this.hidden_, 'transition', 'none');
-    }
   }
 }

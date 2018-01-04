@@ -31,7 +31,7 @@ import {AmpStoryVariableService} from './variable-service';
 import {AmpStoryBackground} from './background';
 import {Bookend} from './bookend';
 import {CSS} from '../../../build/amp-story-0.1.css';
-import {EventType} from './events';
+import {EventType, dispatch} from './events';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {NavigationState} from './navigation-state';
 import {SystemLayer} from './system-layer';
@@ -70,6 +70,8 @@ import {Gestures} from '../../../src/gesture';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {dict} from '../../../src/utils/object';
 import {renderSimpleTemplate} from './simple-template';
+import {PaginationButtons} from './pagination-buttons';
+
 
 /** @private @const {string} */
 const PRE_ACTIVE_PAGE_ATTRIBUTE_NAME = 'pre-active';
@@ -89,6 +91,9 @@ const DESKTOP_WIDTH_THRESHOLD = 1024;
 /** @private @const {number} */
 const DESKTOP_HEIGHT_THRESHOLD = 550;
 
+/** @private @const {number} */
+const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
+
 /**
  * @private @const {string}
  */
@@ -97,38 +102,9 @@ const AUDIO_MUTED_ATTRIBUTE = 'muted';
 /** @type {string} */
 const TAG = 'amp-story';
 
-/** @type {string} */
-const NEXT_BUTTON_CLASS = 'i-amphtml-story-button-move'
-    + ' i-amphtml-story-button-next';
-
-/** @type {string} */
-const PREV_BUTTON_CLASS = 'i-amphtml-story-button-move'
-    + ' i-amphtml-story-button-prev i-amphtml-story-button-move-hidden';
-
 const LANDSCAPE_OVERLAY_CLASS = 'i-amphtml-story-landscape';
 
-const PAGE_SWITCH_BUTTONS = [
-  {
-    tag: 'div',
-    attrs: dict({'class': 'i-amphtml-story-button-container next-container'}),
-    children: [
-      {
-        tag: 'button',
-        attrs: dict({'class': NEXT_BUTTON_CLASS}),
-      },
-    ],
-  },
-  {
-    tag: 'div',
-    attrs: dict({'class': 'i-amphtml-story-button-container prev-container'}),
-    children: [
-      {
-        tag: 'button',
-        attrs: dict({'class': PREV_BUTTON_CLASS}),
-      },
-    ],
-  },
-];
+
 
 const LANDSCAPE_ORIENTATION_WARNING = [
   {
@@ -169,7 +145,8 @@ export class AmpStory extends AMP.BaseElement {
     super(element);
 
     /** @private {!NavigationState} */
-    this.navigationState_ = new NavigationState();
+    this.navigationState_ =
+        new NavigationState(element, () => this.hasBookend_());
 
     /**
      * Whether entering into fullscreen automatically on navigation is enabled.
@@ -218,14 +195,8 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?AmpStoryBackground} */
     this.background_ = null;
 
-    /** @private {?Element} */
-    this.prevButton_ = null;
-
-    /** @private {?Element} */
-    this.nextButtonContainer_ = null;
-
-    /** @private {?Element} */
-    this.prevButtonContainer_ = null;
+    /** @private {?./pagination-buttons.PaginationButtons} */
+    this.paginationButtons_ = null;
 
     /** @private {?Element} */
     this.topBar_ = null;
@@ -305,8 +276,20 @@ export class AmpStory extends AMP.BaseElement {
       this.exitFullScreen_(/* opt_explicitUserAction */ true);
     });
 
+    this.element.addEventListener(EventType.NEXT_PAGE, () => {
+      this.next_();
+    });
+
+    this.element.addEventListener(EventType.PREVIOUS_PAGE, () => {
+      this.previous_();
+    });
+
     this.element.addEventListener(EventType.ENTER_FULLSCREEN, () => {
       this.enterFullScreen_();
+    });
+
+    this.element.addEventListener(EventType.SHOW_BOOKEND, () => {
+      this.showBookend_();
     });
 
     this.element.addEventListener(EventType.CLOSE_BOOKEND, () => {
@@ -377,10 +360,15 @@ export class AmpStory extends AMP.BaseElement {
     const gestures = Gestures.get(this.element,
         /* shouldNotPreventDefault */ true);
 
-    gestures.onGesture(SwipeXYRecognizer, () => {
+    gestures.onGesture(SwipeXYRecognizer, e => {
       if (this.bookend_.isActive()) {
         return;
       }
+
+      if (!this.isSwipeLargeEnoughForHint_(e.data.deltaX, e.data.deltaY)) {
+        return;
+      }
+
       this.ampStoryHint_.showNavigationOverlay();
     });
 
@@ -400,6 +388,12 @@ export class AmpStory extends AMP.BaseElement {
     this.boundOnResize_ = debounce(this.win, () => this.onResize(), 300);
     this.getViewport().onResize(this.boundOnResize_);
     this.onResize();
+  }
+
+  /** @private */
+  isSwipeLargeEnoughForHint_(deltaX, deltaY) {
+    return (Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2))
+      >= MIN_SWIPE_FOR_HINT_OVERLAY_PX);
   }
 
   /** @private */
@@ -442,27 +436,18 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /** @private */
-  buildButtons_() {
-    this.element.insertBefore(
-        renderSimpleTemplate(this.win.document, PAGE_SWITCH_BUTTONS),
-        this.element.firstChild);
+  buildPaginationButtons_() {
+    this.paginationButtons_ = PaginationButtons.create(this.win.document);
 
-    this.prevButton_ =
-        this.element.querySelector('.i-amphtml-story-button-prev');
+    this.paginationButtons_.attach(this.element);
 
-    this.nextButtonContainer_ = this.element.querySelector(
-        '.i-amphtml-story-button-container.next-container');
+    this.navigationState_.observe(e =>
+      this.paginationButtons_.onNavigationStateChange(e));
+  }
 
-    this.prevButtonContainer_ = this.element.querySelector(
-        '.i-amphtml-story-button-container.prev-container');
-
-    this.nextButtonContainer_.addEventListener('click', () => {
-      this.next_();
-    });
-
-    this.prevButtonContainer_.addEventListener('click', () => {
-      this.previous_();
-    });
+  /** @visibleForTesting */
+  buildPaginationButtonsForTesting() {
+    this.buildPaginationButtons_();
   }
 
   /** @private */
@@ -629,7 +614,18 @@ export class AmpStory extends AMP.BaseElement {
   next_(opt_isAutomaticAdvance) {
     const activePage = dev().assert(this.activePage_,
         'No active page set when navigating to next page.');
-    activePage.next();
+
+    const lastPage = this.pages_[this.getPageCount() - 1];
+
+    if (activePage !== lastPage) {
+      activePage.next();
+    } else {
+      this.hasBookend_().then(hasBookend => {
+        if (hasBookend) {
+          dispatch(this.element, EventType.SHOW_BOOKEND);
+        }
+      });
+    }
   }
 
 
@@ -642,6 +638,7 @@ export class AmpStory extends AMP.BaseElement {
         'No active page set when navigating to next page.');
     activePage.previous();
   }
+
 
   /**
    * Switches to a particular page.
@@ -658,22 +655,20 @@ export class AmpStory extends AMP.BaseElement {
     const targetPage = this.getPageById_(targetPageId);
     const pageIndex = this.getPageIndex(targetPage);
 
-    if (this.prevButton_) {
-      this.prevButton_.classList.toggle(
-          'i-amphtml-story-button-move-hidden', pageIndex === 0);
-    }
-
-    this.updateBackground_(targetPage.element, /* initial */ !this.activePage_);
-
     if (this.shouldEnterFullScreenOnSwitch_()) {
       this.enterFullScreen_();
     }
+
+    this.updateBackground_(targetPage.element, /* initial */ !this.activePage_);
 
     // TODO(alanorozco): decouple this using NavigationState
     this.systemLayer_.setActivePageIndex(pageIndex);
 
     // TODO(alanorozco): check if autoplay
-    this.navigationState_.updateActivePage(pageIndex, targetPage.element.id);
+    this.navigationState_.updateActivePage(
+        pageIndex,
+        this.getPageCount(),
+        targetPage.element.id);
 
     const oldPage = this.activePage_;
 
@@ -831,8 +826,9 @@ export class AmpStory extends AMP.BaseElement {
   onResize() {
     if (this.isDesktop_()) {
       this.element.setAttribute('desktop','');
-      if (!this.nextButtonContainer_) {
-        this.buildButtons_();
+      this.element.classList.remove(LANDSCAPE_OVERLAY_CLASS);
+      if (!this.paginationButtons_) {
+        this.buildPaginationButtons_();
       }
       if (!this.topBar_) {
         this.buildTopBar_();
@@ -971,7 +967,6 @@ export class AmpStory extends AMP.BaseElement {
     this.bookend_.hide();
   }
 
-
   /**
    * Toggle content when bookend is opened/closed.
    * @param {boolean} display
@@ -1106,6 +1101,21 @@ export class AmpStory extends AMP.BaseElement {
           user().error(TAG, 'Error fetching bookend configuration', e.message);
           return null;
         });
+  }
+
+
+  /**
+   * @return {!Promise<boolean>}
+   * @private
+   */
+  hasBookend_() {
+    // On mobile there is always a bookend. On desktop, the bookend will only
+    // be shown if related articles have been configured.
+    if (!this.isDesktop_()) {
+      return Promise.resolve(true);
+    }
+    return this.loadBookendConfig_().then(config =>
+      config && config.relatedArticles && config.relatedArticles.length);
   }
 
 
@@ -1247,7 +1257,11 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   replay_() {
-    this.hideBookend_();
+    if (this.bookend_.isActive()) {
+      // Dispaching event instead of calling method directly so that all
+      // listeners can respond.
+      dispatch(this.element, EventType.CLOSE_BOOKEND);
+    }
     this.switchTo_(dev().assertElement(this.pages_[0].element).id);
   }
 }

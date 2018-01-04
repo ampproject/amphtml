@@ -33,15 +33,12 @@ function spawnProcess(cmd, options) {
 }
 
 /**
- * Executes the provided command, and prints a message if the command fails.
+ * Executes the provided command.
  *
  * @param {string} cmd Command line to execute.
  */
 exports.exec = function(cmd) {
-  const p = spawnProcess(cmd, {'stdio': 'inherit'});
-  if (p.status != 0) {
-    console/*OK*/.log('\nCommand failed: ' + cmd);
-  }
+  spawnProcess(cmd, {'stdio': 'inherit'});
 };
 
 /**
@@ -52,7 +49,6 @@ exports.exec = function(cmd) {
 exports.execOrDie = function(cmd) {
   const p = spawnProcess(cmd, {'stdio': 'inherit'});
   if (p.status != 0) {
-    console/*OK*/.error('\nCommand failed: ' + cmd);
     process.exit(p.status);
   }
 };
