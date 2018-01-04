@@ -68,7 +68,8 @@ function getMode_(win) {
   const IS_MINIFIED = false;
 
   const localDevEnabled = !!(self.AMP_CONFIG && self.AMP_CONFIG.localDev);
-  const isLocalDev = IS_DEV && localDevEnabled;
+  const runningTests = IS_DEV && !!(win.AMP_TEST || win.__karma__);
+  const isLocalDev = IS_DEV && (localDevEnabled || runningTests);
   const hashQuery = parseQueryString_(
       // location.originalHash is set by the viewer when it removes the fragment
       // from the URL.
@@ -87,8 +88,7 @@ function getMode_(win) {
   return {
     localDev: isLocalDev,
     // Triggers validation
-    development: !!(hashQuery['development'] == '1' ||
-        win.AMP_DEV_MODE),
+    development: !!(hashQuery['development'] == '1' || win.AMP_DEV_MODE),
     examiner: hashQuery['development'] == '2',
     // Allows filtering validation errors by error category. For the
     // available categories, see ErrorCategory in validator/validator.proto.
@@ -97,7 +97,7 @@ function getMode_(win) {
     // Whether document is in an amp-lite viewer. It signal that the user
     // would prefer to use less bandwidth.
     lite: searchQuery['amp_lite'] != undefined,
-    test: IS_DEV && !!(win.AMP_TEST || win.__karma__),
+    test: runningTests,
     log: hashQuery['log'],
     version,
     rtvVersion,
