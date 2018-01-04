@@ -69,22 +69,15 @@ export function getMode(opt_win) {
 function getMode_(win) {
   // Magic constants that are replaced by closure compiler.
   // IS_MINIFIED is always replaced with true when closure compiler is used
-  // while IS_DEV is only replaced when the --fortesting flag is NOT used.
+  // while IS_DEV is only replaced when `gulp dist` is called without the
+  // --fortesting flag.
   const IS_DEV = true;
   const IS_MINIFIED = false;
-  const FORCE_LOCALDEV = !!(self.AMP_CONFIG && self.AMP_CONFIG.localDev);
+  const LOCALDEV_ENABLED = !!(self.AMP_CONFIG && self.AMP_CONFIG.localDev);
   const AMP_CONFIG_3P_FRAME_HOST = self.AMP_CONFIG &&
       self.AMP_CONFIG.thirdPartyFrameHost;
 
-  const isLocalDev = IS_DEV && !!(win.location.hostname == 'localhost' ||
-      (FORCE_LOCALDEV && win.location.hostname == AMP_CONFIG_3P_FRAME_HOST) ||
-      (win.location.ancestorOrigins && win.location.ancestorOrigins[0] &&
-        startsWith(win.location.ancestorOrigins[0], 'http://localhost:'))) &&
-      // Filter out localhost running against a prod script.
-      // Because all allowed scripts are ours, we know that these can only
-      // occur during local dev.
-      (!win.document || !!win.document.querySelector(developmentScriptQuery));
-
+  const isLocalDev = IS_DEV && LOCALDEV_ENABLED;
   const hashQuery = parseQueryString_(
       // location.originalHash is set by the viewer when it removes the fragment
       // from the URL.
