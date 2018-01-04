@@ -66,7 +66,7 @@ const BUTTON = {
     },
     {
       tag: 'div',
-      attrs: dict({'class': 'i-amphtml-story-prev-sentinel'}),
+      attrs: dict({'class': 'i-amphtml-story-page-sentinel'}),
     },
   ],
 };
@@ -98,6 +98,8 @@ class PaginationButton {
 
     /** @public @const {!Element} */
     this.element = renderAsElement(doc, BUTTON);
+
+    this.element.classList.add(initialState.className);
 
     this.element.addEventListener('click', e => this.onClick_(e));
   }
