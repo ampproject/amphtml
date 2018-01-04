@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {startsWith} from './string';
 import {parseQueryString_} from './url-parse-query-string';
 
 /**
@@ -43,12 +42,6 @@ const version = '$internalRuntimeVersion$';
 let rtvVersion = '';
 
 /**
- * A #querySelector query to see if we have any scripts with development paths.
- * @type {string}
- */
-const developmentScriptQuery = 'script[src*="/dist/"],script[src*="/base/"]';
-
-/**
  * Provides info about the current app.
  * @param {?Window=} opt_win
  * @return {!ModeDef}
@@ -73,11 +66,9 @@ function getMode_(win) {
   // --fortesting flag.
   const IS_DEV = true;
   const IS_MINIFIED = false;
-  const LOCALDEV_ENABLED = !!(self.AMP_CONFIG && self.AMP_CONFIG.localDev);
-  const AMP_CONFIG_3P_FRAME_HOST = self.AMP_CONFIG &&
-      self.AMP_CONFIG.thirdPartyFrameHost;
 
-  const isLocalDev = IS_DEV && LOCALDEV_ENABLED;
+  const localDevEnabled = !!(self.AMP_CONFIG && self.AMP_CONFIG.localDev);
+  const isLocalDev = IS_DEV && localDevEnabled;
   const hashQuery = parseQueryString_(
       // location.originalHash is set by the viewer when it removes the fragment
       // from the URL.
