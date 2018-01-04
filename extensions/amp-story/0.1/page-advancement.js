@@ -138,7 +138,7 @@ export class AdvancementConfig {
     const autoAdvanceStr = rootEl.getAttribute('auto-advance-after');
 
     const supportedAdvancementModes = [
-      new ManualAdvancement(rootEl),
+      new ManualAdvancement(page),
       TimeBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win),
       MediaBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
     ].filter(x => x !== null);
@@ -222,9 +222,10 @@ class ManualAdvancement extends AdvancementConfig {
    * @param {!Element} element The element that, when clicked, can cause
    *     advancing to the next page or going back to the previous.
    */
-  constructor(element) {
+  constructor(page) {
     super();
-    this.element_ = element;
+    this.page_ = page;
+    this.element_ = page.element;
     this.clickListener_ = this.maybePerformNavigation_.bind(this);
   }
 
@@ -286,7 +287,8 @@ class ManualAdvancement extends AdvancementConfig {
         ((1 - NEXT_SCREEN_AREA_RATIO) * offsetWidth);
     const nextScreenAreaMax = offsetLeft + offsetWidth;
 
-    if (event.pageX >= nextScreenAreaMin && event.pageX < nextScreenAreaMax) {
+    if ((event.pageX >= nextScreenAreaMin && event.pageX < nextScreenAreaMax)
+        || (this.page_.isDesktop())) {
       this.onAdvance();
     } else if (event.pageX >= offsetLeft && event.pageX < nextScreenAreaMin) {
       this.onPrevious();

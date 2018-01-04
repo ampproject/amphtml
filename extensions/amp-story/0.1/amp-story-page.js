@@ -456,6 +456,12 @@ export class AmpStoryPage extends AMP.BaseElement {
     return this.element.hasAttribute('active');
   }
 
+  /**
+   * @return {boolean} Whether the page is in desktop mode.
+   */
+  isDesktop() {
+    return matches(this.element, `[desktop] #${this.element.id}`);
+  }
 
   /**
    * Emits an event indicating that the progress of the current page has changed
