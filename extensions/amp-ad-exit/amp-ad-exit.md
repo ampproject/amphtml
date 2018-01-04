@@ -56,10 +56,10 @@ exposes an "exit" action to other elements in the [A4A (AMP for Ads)](../amp-a4a
       "finalUrl": "https://example.com/artisan-baking/?from=_clickArea",
       "vars": {
         "_clickArea": {
-          "defaultValue": "headline",
+          "defaultValue": "headline"
         }
       }
-    }
+    },
     "flour": {
       "finalUrl": "https://adclickserver.example.com/click?id=af319adec901&x=CLICK_X&y=CLICK_Y&adurl=https://example.com/artisan-baking/flour",
       "filters": ["3sClick", "borderProtection"]
@@ -68,7 +68,7 @@ exposes an "exit" action to other elements in the [A4A (AMP for Ads)](../amp-a4a
       "finalUrl": "https://example.com/artisan-baking/bannetons",
       "trackingUrls": [
         "https://adclickserver.example.com/click?id=af319adec901&x=CLICK_X&y=CLICK_Y",
-        "https://tracker.adnetwork.example.com/?url=example.com",
+        "https://tracker.adnetwork.example.com/?url=example.com"
       ],
       "filters": ["3sClick", "borderProtection"]
     }
