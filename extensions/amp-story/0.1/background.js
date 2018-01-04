@@ -23,10 +23,6 @@ import {setStyle} from '../../../src/style';
 const SWAP_TIMEOUT_MS = 500;
 
 
-/** @const {number} */
-const XFADE_DURATION_MS = 300;
-
-
 const BACKGROUND_CLASS = 'i-amphtml-story-background';
 
 const BACKGROUND_CONTAINER_CLASS = 'i-amphtml-story-background-container';
