@@ -478,6 +478,10 @@ export class AmpStory extends AMP.BaseElement {
         scopedQuerySelector(this.element, 'amp-story-page'),
         'Story must have at least one page.');
 
+    if (!this.paginationButtons_) {
+      this.buildPaginationButtons_();
+    }
+
     return this.initializePages_()
         .then(() => this.buildSystemLayer_())
         .then(() => this.buildHintLayer_())
@@ -827,9 +831,6 @@ export class AmpStory extends AMP.BaseElement {
     if (this.isDesktop_()) {
       this.element.setAttribute('desktop','');
       this.element.classList.remove(LANDSCAPE_OVERLAY_CLASS);
-      if (!this.paginationButtons_) {
-        this.buildPaginationButtons_();
-      }
       if (!this.topBar_) {
         this.buildTopBar_();
       }
