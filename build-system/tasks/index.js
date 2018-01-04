@@ -39,5 +39,6 @@ require('./runtime-test');
 require('./serve');
 require('./size');
 require('./todos');
+require('./update-packages');
 require('./validator');
 require('./visual-diff');
