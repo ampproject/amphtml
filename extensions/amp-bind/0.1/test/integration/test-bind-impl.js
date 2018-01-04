@@ -379,6 +379,31 @@ describe.configure().ifNewChrome().run('Bind', function() {
       });
     });
 
+    it('should support binding to CSS classes with a null value', () => {
+      const element = createElement(env, container, '[class]="null"');
+      expect(toArray(element.classList)).to.deep.equal([]);
+      return onBindReadyAndSetState(env, bind, {}).then(() => {
+        expect(toArray(element.classList)).to.deep.equal([]);
+      });
+    });
+
+    it('should support binding to CSS classes for svg tags', () => {
+      const element = createElement(
+          env, container, '[class]="[\'abc\']"', 'svg');
+      expect(toArray(element.classList)).to.deep.equal([]);
+      return onBindReadyAndSetState(env, bind, {}).then(() => {
+        expect(toArray(element.classList)).to.deep.equal(['abc']);
+      });
+    });
+
+    it('supports binding to CSS classes for svg tags with a null value', () => {
+      const element = createElement(env, container, '[class]="null"', 'svg');
+      expect(toArray(element.classList)).to.deep.equal([]);
+      return onBindReadyAndSetState(env, bind, {}).then(() => {
+        expect(toArray(element.classList)).to.deep.equal([]);
+      });
+    });
+
     it('should support parsing exprs in setStateWithExpression()', () => {
       const element = createElement(env, container, '[text]="onePlusOne"');
       expect(element.textContent).to.equal('');
