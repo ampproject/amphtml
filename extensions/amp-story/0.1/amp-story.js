@@ -1037,9 +1037,6 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   preloadPagesByDistance_() {
-    if (this.isDesktop_()) {
-      return;
-    }
     const pagesByDistance = this.getPagesByDistance_();
 
     this.mutateElement(() => {
