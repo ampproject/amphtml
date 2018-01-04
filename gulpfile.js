@@ -52,6 +52,9 @@ var yellow = $$.util.colors.yellow;
 var red = $$.util.colors.red;
 var cyan = $$.util.colors.cyan;
 
+var minifiedRuntimeTarget = 'dist/v0.js';
+var unminifiedRuntimeTarget = 'dist/amp.js';
+
 // Each extension and version must be listed individually here.
 declareExtension('amp-3q-player', '0.1', false);
 declareExtension('amp-access', '0.1', true);
@@ -441,6 +444,7 @@ function copyCss() {
  * @return {!Promise}
  */
 function watch() {
+  printConfigHelp('gulp watch', unminifiedRuntimeTarget);
   $$.watch('css/**/*.css', function() {
     compileCss();
   });
@@ -451,7 +455,9 @@ function watch() {
     buildExaminer({watch: true}),
     buildExtensions({watch: true}),
     compile(true),
-  ]);
+  ]).then(() => {
+    return enableLocalTesting(unminifiedRuntimeTarget);
+  });
 }
 
 /**
@@ -608,7 +614,7 @@ function enableLocalTesting(targetFile) {
  */
 function build() {
   process.env.NODE_ENV = 'development';
-  printConfigHelp('gulp build', 'dist/amp.js')
+  printConfigHelp('gulp build', unminifiedRuntimeTarget);
   return compileCss().then(() => {
     return Promise.all([
       polyfillsForTests(),
@@ -620,7 +626,7 @@ function build() {
       compile(),
     ]);
   }).then(() => {
-    return enableLocalTesting('dist/amp.js');
+    return enableLocalTesting(unminifiedRuntimeTarget);
   });
 }
 
@@ -632,7 +638,7 @@ function dist() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   if (argv.fortesting) {
-    printConfigHelp('gulp dist --fortesting', 'dist/v0.js')
+    printConfigHelp('gulp dist --fortesting', minifiedRuntimeTarget)
   }
   return compileCss().then(() => {
     return Promise.all([
@@ -654,7 +660,7 @@ function dist() {
     copyAliasExtensions();
   }).then(() => {
     if (argv.fortesting) {
-      return enableLocalTesting('dist/v0.js');
+      return enableLocalTesting(minifiedRuntimeTarget);
     }
   });
 }
@@ -1304,11 +1310,12 @@ gulp.task('dist', 'Build production binaries', ['update-packages'], dist, {
   }
 });
 gulp.task('extensions', 'Build AMP Extensions', buildExtensions);
-gulp.task('watch', 'Watches for changes in files, re-build', watch, {
-  options: {
-    with_inabox: '  Also watch and build the amp-inabox.js binary.',
-    with_shadow: '  Also watch and build the amp-shadow.js binary.',
-  }
+gulp.task('watch', 'Watches for changes in files, re-builds when detected',
+    ['update-packages'], watch, {
+      options: {
+        with_inabox: '  Also watch and build the amp-inabox.js binary.',
+        with_shadow: '  Also watch and build the amp-shadow.js binary.',
+      }
 });
 gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
 gulp.task('build-login-done', 'Builds login-done.html/js', buildLoginDone);
