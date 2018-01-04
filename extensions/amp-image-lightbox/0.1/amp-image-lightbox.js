@@ -58,7 +58,7 @@ const EXIT_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
 /** @private @const {!../../../src/curve.CurveDef} */
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 
-/** @private @const {!number} */
+/** @private @const {number} */
 const DEFAULT_MAX_SCALE = 2;
 
 /**
