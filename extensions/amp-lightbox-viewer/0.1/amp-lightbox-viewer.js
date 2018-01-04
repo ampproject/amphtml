@@ -160,11 +160,14 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         `Experiment ${TAG} disabled`);
     this.manager_ = dev().assert(manager_);
     this.vsync_ = this.getVsync();
-    this.container_ = this.win.document.createElement('div');
-    this.container_.classList.add('i-amphtml-lbv');
     this.resources_ = Services.resourcesForDoc(this.getAmpDoc());
-    this.buildMask_();
-    this.element.appendChild(this.container_);
+    this.vsync_.mutate(() => {
+      this.container_ = this.win.document.createElement('div');
+      this.container_.classList.add('i-amphtml-lbv');
+      this.element.appendChild(this.container_);
+      this.manager_.maybeInit();
+      this.buildMask_();
+    });
   }
 
   /** @override */
@@ -226,6 +229,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       if (clonedNode.tagName === 'AMP-IMG') {
         const container = this.element.ownerDocument.createElement('div');
         container.classList.add('i-amphtml-image-lightbox-container');
+        // TODO: make image viewer an amp component to deal with lazy images
         const imageViewer = new ImageViewer(this, this.win,
             this.loadPromise.bind(this));
         imageViewer.init(element, elementByTag(element, 'img'));
