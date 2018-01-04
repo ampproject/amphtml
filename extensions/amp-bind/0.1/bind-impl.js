@@ -845,9 +845,9 @@ export class Bind {
           }
         }
         if (Array.isArray(newValue) || typeof newValue === 'string') {
-          element.className = ampClasses.concat(newValue).join(' ');
+          element.setAttribute('class', ampClasses.concat(newValue).join(' '));
         } else if (newValue === null) {
-          element.className = ampClasses.join(' ');
+          element.setAttribute('class', ampClasses.join(' '));
         } else {
           const err = user().createError(
               `${TAG}: "${newValue}" is not a valid result for [class].`);
