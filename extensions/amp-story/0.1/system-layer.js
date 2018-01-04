@@ -174,7 +174,7 @@ export class SystemLayer {
     this.root_ = renderAsElement(this.win_.document, TEMPLATE);
 
     this.root_.insertBefore(
-        this.progressBar_.build(pageCount), this.root_.firstChild);
+        this.progressBar_.build(pageCount), this.root_.lastChild);
 
     this.leftButtonTray_ =
         this.root_.querySelector('.i-amphtml-story-ui-left');

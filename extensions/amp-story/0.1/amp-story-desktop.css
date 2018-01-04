@@ -462,14 +462,16 @@ amp-story-page.i-amphtml-story-page-shown {
   top: auto!important;
   bottom: 0!important;
   height: 96px!important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 [desktop] .i-amphtml-story-progress-bar {
- height: 3px!important;
- width: calc(100vw/3)!important;
- margin: auto!important;
- top: 0!important;
- bottom: 0!important;
+  position: relative !important;
+  height: 3px !important;
+  width: calc(100vw/3) !important;
+  margin: 0px !important;
 }
 
 [desktop] .i-amphtml-story-page-progress-bar {
@@ -486,12 +488,17 @@ amp-story-page.i-amphtml-story-page-shown {
 }
 
 [desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-left {
-  display: block!important;
-  float: left!important;
-  margin: 16px 40px!important;
+  display: flex !important;
+  height: 40px !important;
+  flex: 1 !important;
+  min-width: 200px;
+  align-items: center;
+  justify-content: flex-end;
+  margin-right: 32px;
 }
 [desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-right {
-  margin: 16px 40px!important;
+  display: block !important;
+  flex: 1 !important;
 }
 
 [desktop] .i-amphtml-story-top {
