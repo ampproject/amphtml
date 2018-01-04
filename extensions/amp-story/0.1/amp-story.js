@@ -75,6 +75,7 @@ import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
 
 
+
 /** @private @const {string} */
 const PRE_ACTIVE_PAGE_ATTRIBUTE_NAME = 'pre-active';
 
@@ -324,14 +325,7 @@ export class AmpStory extends AMP.BaseElement {
     });
 
     this.element.addEventListener(EventType.SWITCH_PAGE, e => {
-      const targetPageId = e.detail.targetPageId;
-
-      if (targetPageId === 'i-amphtml-story-bookend') {
-        this.showBookend_();
-      } else {
-        this.switchTo_(targetPageId);
-      }
-
+      this.switchTo_(e.detail.targetPageId);
       this.ampStoryHint_.hideAllNavigationHint();
     });
 

@@ -490,14 +490,14 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Navigates to the previous page in the story.
    */
   previous() {
-    const pageId = this.getPreviousPageId_();
+    const targetPageId = this.getPreviousPageId_();
 
-    if (pageId === null) {
+    if (targetPageId === null) {
       dispatch(this.element, EventType.SHOW_NO_PREVIOUS_PAGE_HELP, true);
       return;
     }
 
-    this.switchTo_(pageId);
+    this.switchTo_(targetPageId);
   }
 
 
@@ -507,20 +507,23 @@ export class AmpStoryPage extends AMP.BaseElement {
    *     by an automatic advancement after a timeout.
    */
   next(opt_isAutomaticAdvance) {
-    this.switchTo_(this.getNextPageId_(opt_isAutomaticAdvance));
+    const targetPageId = this.getNextPageId_(opt_isAutomaticAdvance);
+
+    if (targetPageId === null) {
+      dispatch(this.element, EventType.SHOW_BOOKEND, /* opt_bubbles */ true);
+      return;
+    }
+
+    this.switchTo_(targetPageId);
   }
 
 
   /**
-   * @param {?string} targetPageIdOrNull
+   * @param {string} targetPageId
    * @private
    */
-  switchTo_(targetPageIdOrNull) {
-    if (!targetPageIdOrNull) {
-      return;
-    }
-
-    const payload = {targetPageId: dev().assert(targetPageIdOrNull)};
+  switchTo_(targetPageId) {
+    const payload = {targetPageId};
     const eventInit = {bubbles: true};
     dispatchCustom(this.win, this.element, EventType.SWITCH_PAGE, payload,
         eventInit);
