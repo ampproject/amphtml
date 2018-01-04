@@ -728,20 +728,26 @@ export class AmpStory extends AMP.BaseElement {
    */
   forceRepaintForSafari_() {
     const platform = Services.platformFor(this.win);
-    if (platform.isSafari() || platform.isIos()) {
-      this.mutateElement(() => {
-        setStyle(this.element, 'display', 'none');
-
-        // Reading the height is what forces the repaint.  The conditional exists
-        // only to workaround the fact that the closure compiler would otherwise
-        // think that only reading the height has no effect.  Since the height is
-        // always >= 0, this conditional will always be executed.
-        const height = this.element./*OK*/offsetHeight;
-        if (height >= 0) {
-          setStyle(this.element, 'display', '');
-        }
-      });
+    if (!platform.isSafari() && !platform.isIos()) {
+      return;
     }
+    if (this.isDesktop_()) {
+      // Force repaint is only needed when transitioning from invisible to visible
+      return;
+    }
+
+    this.mutateElement(() => {
+      setStyle(this.element, 'display', 'none');
+
+      // Reading the height is what forces the repaint.  The conditional exists
+      // only to workaround the fact that the closure compiler would otherwise
+      // think that only reading the height has no effect.  Since the height is
+      // always >= 0, this conditional will always be executed.
+      const height = this.element./*OK*/offsetHeight;
+      if (height >= 0) {
+        setStyle(this.element, 'display', '');
+      }
+    });
   }
 
 
