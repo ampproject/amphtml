@@ -226,7 +226,8 @@ amp-story:not([desktop]) >
   transform: translateY(300%) !important;
 }
 
-.i-amphtml-story-bookend-active:not([desktop]) > amp-story-page[active] {
+.i-amphtml-story-bookend-active:not([desktop]) >
+    amp-story-page.i-amphtml-layout-container[active] {
   transform: translateY(0) scale(1.2) !important;
   filter: blur(15px) !important;
 }
