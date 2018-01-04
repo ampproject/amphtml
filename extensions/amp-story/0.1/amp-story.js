@@ -54,7 +54,12 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {registerServiceBuilder} from '../../../src/service';
 import {AudioManager, upgradeBackgroundAudio} from './audio';
-import {setStyle, setImportantStyles, resetStyles} from '../../../src/style';
+import {
+  computedStyle,
+  setStyle,
+  setImportantStyles,
+  resetStyles,
+} from '../../../src/style';
 import {findIndex} from '../../../src/utils/array';
 import {ActionTrust} from '../../../src/action-trust';
 import {getMode} from '../../../src/mode';
@@ -654,7 +659,7 @@ export class AmpStory extends AMP.BaseElement {
       this.enterFullScreen_();
     }
 
-    this.updateBackground_(targetPage.element);
+    this.updateBackground_(targetPage.element, /* initial */ !this.activePage_);
 
     // TODO(alanorozco): decouple this using NavigationState
     this.systemLayer_.setActivePageIndex(pageIndex);
@@ -829,11 +834,11 @@ export class AmpStory extends AMP.BaseElement {
         this.buildTopBar_();
       }
       if (!this.background_) {
-        this.background_ = new AmpStoryBackground(this.element);
+        this.background_ = new AmpStoryBackground(this.win, this.element);
         this.background_.attach();
       }
       if (this.activePage_) {
-        this.updateBackground_(this.activePage_.element);
+        this.updateBackground_(this.activePage_.element, /* initial */ true);
       }
     } else {
       this.vsync_.run({
@@ -873,7 +878,8 @@ export class AmpStory extends AMP.BaseElement {
    * @return {?string} The URL of the background resource
    */
   getBackgroundUrl_(pageElement) {
-    let fillElement = scopedQuerySelector(pageElement, '[template="fill"]');
+    let fillElement = scopedQuerySelector(pageElement,
+        '[template="fill"]:not(.i-amphtml-hidden-by-media-query)');
 
     if (!fillElement) {
       return null;
@@ -881,8 +887,11 @@ export class AmpStory extends AMP.BaseElement {
 
     fillElement = dev().assertElement(fillElement);
 
-    const fillPosterElement = scopedQuerySelector(fillElement, '[poster]');
-    const srcElement = scopedQuerySelector(fillElement, '[src]');
+    const fillPosterElement = scopedQuerySelector(fillElement,
+        '[poster]:not(.i-amphtml-hidden-by-media-query)');
+
+    const srcElement = scopedQuerySelector(fillElement,
+        '[src]:not(.i-amphtml-hidden-by-media-query)');
 
     const fillPoster = fillPosterElement ?
       fillPosterElement.getAttribute('poster') : '';
@@ -891,21 +900,27 @@ export class AmpStory extends AMP.BaseElement {
     return fillPoster || src;
   }
 
+
   /**
    * Update the background to the specified page's background.
    * @param {!Element} pageElement
+   * @param {boolean=} initial
    */
-  updateBackground_(pageElement) {
+  updateBackground_(pageElement, initial = false) {
     if (!this.background_) {
       return;
     }
 
-    const backgroundUrl = this.getBackgroundUrl_(pageElement);
-    if (backgroundUrl) {
-      this.background_.setBackground(backgroundUrl);
-    } else {
-      this.background_.removeBackground();
-    }
+    this.getVsync().run({
+      measure: state => {
+        state.url = this.getBackgroundUrl_(pageElement);
+        state.color = computedStyle(this.win, pageElement)
+            .getPropertyValue('background-color');
+      },
+      mutate: state => {
+        this.background_.setBackground(state.color, state.url, initial);
+      },
+    }, {});
   }
 
 
