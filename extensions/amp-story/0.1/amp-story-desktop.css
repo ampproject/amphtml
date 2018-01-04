@@ -104,6 +104,7 @@ amp-story-page.i-amphtml-story-page-shown {
   right: 0 !important;
   z-index: 100002 !important;
   pointer-events: none !important;
+  display: block !important;
 }
 
 [desktop] .i-amphtml-story-button-container::before {
