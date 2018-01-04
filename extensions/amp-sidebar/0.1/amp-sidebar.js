@@ -94,8 +94,8 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {?Element} */
     this.openerElement_ = null;
 
-    /** @private {!number} */
-    this.initialScrollY_ = 0;
+    /** @private {number} */
+    this.initialScrollTop_ = 0;
   }
 
   /** @override */
@@ -275,7 +275,7 @@ export class AmpSidebar extends AMP.BaseElement {
     });
     if (opt_invocation) {
       this.openerElement_ = opt_invocation.source;
-      this.initialScrollY_ = window./*REVIEW*/scrollY;
+      this.initialScrollTop_ = this.viewport_.getScrollTop();
     }
   }
 
@@ -288,6 +288,10 @@ export class AmpSidebar extends AMP.BaseElement {
       return;
     }
     this.viewport_.leaveOverlayMode();
+    const scrollDidNotChange =
+      (this.initialScrollTop_ == this.viewport_.getScrollTop());
+    const sidebarIsActive =
+        this.element.contains(this.document_.activeElement);
     this.vsync_.mutate(() => {
       this.closeMask_();
       this.element.removeAttribute('open');
@@ -296,6 +300,9 @@ export class AmpSidebar extends AMP.BaseElement {
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
       this.historyId_ = -1;
+    }
+    if (this.openerElement_ && sidebarIsActive && scrollDidNotChange) {
+      tryFocus(this.openerElement_);
     }
   }
 
@@ -389,13 +396,6 @@ export class AmpSidebar extends AMP.BaseElement {
       this.vsync_.mutate(() => {
         toggle(this.element, /* display */false);
         this.schedulePause(this.getRealChildren());
-        const sidebarIsActive =
-          this.element.querySelectorAll(':focus').length > 0;
-        const scrollDidNotChange =
-          (window./*REVIEW*/scrollY == this.initialScrollY_);
-        if (this.openerElement_ && sidebarIsActive && scrollDidNotChange) {
-          tryFocus(this.openerElement_);
-        }
         this.triggerEvent_(SidebarEvents.CLOSE);
         this.element.setAttribute('aria-hidden', 'true');
       });
@@ -408,6 +408,7 @@ export class AmpSidebar extends AMP.BaseElement {
   triggerEvent_(name) {
     const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
     this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
+    this.element.dispatchCustomEvent(name);
   }
 }
 

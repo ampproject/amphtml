@@ -15,6 +15,7 @@
  */
 
 import {poll} from '../../testing/iframe';
+import {listenOncePromise} from '../../src/event-helper';
 
 const config = describe.configure().ifNewChrome();
 
@@ -35,6 +36,12 @@ config.run('amp-sidebar', function() {
           Close
         </button>
       </li>
+      <li>
+      <button id="scrollButton"
+        on="tap:section2.scrollTo('position' = 'top', 'duration' = '0')">
+        Close
+      </button>
+    </li>
     </ul>
   </amp-sidebar>
   <button id="sidebarOpener" on="tap:sidebar1.toggle">Open Sidebar</button>
@@ -58,11 +65,14 @@ config.run('amp-sidebar', function() {
     it('should focus on opener on close', () => {
       return new Promise((resolve, reject) => {
         const openerButton = win.document.getElementById('sidebarOpener');
+        const sidebar = win.document.getElementById('sidebar1');
+        const openedPromise = listenOncePromise(sidebar, 'sidebarOpen');
         openerButton.click();
-        return waitForSidebarOpen(win.document).then(() => {
+        return openedPromise.then(() => {
           const closerButton = win.document.getElementById('sidebarCloser');
+          const closedPromise = listenOncePromise(sidebar, 'sidebarClose');
           closerButton.click();
-          return waitForSidebarClose(win.document);
+          return closedPromise;
         }).then(() => {
           try {
             expect(win.document.activeElement).to.equal(openerButton);
@@ -74,19 +84,31 @@ config.run('amp-sidebar', function() {
       });
     });
 
-    it('should not change scroll after close', () => {
+    it('should not change scroll position after close', () => {
       return new Promise((resolve, reject) => {
         const openerButton = win.document.getElementById('sidebarOpener');
+        const sidebar = win.document.getElementById('sidebar1');
+        const openedPromise = listenOncePromise(sidebar, 'sidebarOpen');
         openerButton.click();
         let scrollY = win.scrollY;
-        return waitForSidebarOpen(win.document).then(() => {
+        expect(scrollY).to.equal(0);
+        return openedPromise.then(() => {
           try {
-            const closerButton = win.document.getElementById('sidebarCloser');
-            win.scrollTo(0, 1000);
+            const scrollButton = win.document.getElementById('scrollButton');
+            const scrollCompletePromise = waitForScrollFinish(win, 1000);
+            scrollButton.click();
+            return scrollCompletePromise;
+          } catch (e) {
+            reject(e);
+          }
+        }).then(() => {
+          try {
             scrollY = win.scrollY;
-            expect(scrollY).to.equal(1000);
+            expect(win.scrollY).to.equal(1000);
+            const closerButton = win.document.getElementById('sidebarCloser');
+            const closedPromise = listenOncePromise(sidebar, 'sidebarClose');
             closerButton.click();
-            return waitForSidebarClose(win.document);
+            return closedPromise;
           } catch (e) {
             reject(e);
           }
@@ -104,16 +126,8 @@ config.run('amp-sidebar', function() {
   });
 });
 
-function waitForSidebarOpen(document) {
-  return poll('wait for sidebar to open', () => {
-    const sidebar = document.getElementById('sidebar1');
-    return sidebar.getAttribute('aria-hidden') == 'false';
-  });
-}
-
-function waitForSidebarClose(document) {
-  return poll('wait for sidebar to open', () => {
-    const sidebar = document.getElementById('sidebar1');
-    return sidebar.getAttribute('aria-hidden') == 'true';
+function waitForScrollFinish(win, position) {
+  return poll('wait for scroll to finish', () => {
+    return win.scrollY == position;
   });
 }
