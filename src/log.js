@@ -18,9 +18,6 @@ import {getMode} from './mode';
 import {getModeObject} from './mode-object';
 import {isEnumValue} from './types';
 
-/** @const Time when this JS loaded.  */
-const start = Date.now();
-
 /**
  * Triple zero width space.
  *
@@ -159,7 +156,9 @@ export class Log {
       } else if (level == 'WARN') {
         fn = this.win.console.warn || fn;
       }
-      messages.unshift(Date.now() - start, '[' + tag + ']');
+      if (getMode().localDev) {
+        messages.unshift('[' + tag + ']');
+      }
       fn.apply(this.win.console, messages);
     }
   }
@@ -590,7 +589,7 @@ function getUserLogger(suffix) {
     if (mode.development || logNum >= 1) {
       return LogLevel.FINE;
     }
-    return LogLevel.OFF;
+    return LogLevel.WARN;
   }, suffix);
 }
 
