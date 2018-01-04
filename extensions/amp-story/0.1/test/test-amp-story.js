@@ -17,6 +17,7 @@ import {AnalyticsTrigger} from '../analytics';
 import {AmpStory} from '../amp-story';
 import {EventType} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
+import {PaginationButtons} from '../pagination-buttons';
 import {VariableService} from '../variable-service';
 
 
@@ -328,14 +329,14 @@ describes.realWin('amp-story', {
         .to.be.equal('hidden');
   });
 
-  it('adds event listener for buttons', () => {
-    story.buildButtons_();
-    const nextStub = sandbox.stub(story, 'next_');
-    const prevStub = sandbox.stub(story, 'previous_');
-    story.nextButtonContainer_.dispatchEvent(new Event('click'));
-    story.prevButtonContainer_.dispatchEvent(new Event('click'));
-    expect(nextStub).calledOnce;
-    expect(prevStub).calledOnce;
+  it('builds and attaches pagination buttons ', () => {
+    const paginationButtonsStub = {
+      attach: sandbox.spy(),
+      onNavigationStateChange: sandbox.spy(),
+    };
+    sandbox.stub(PaginationButtons, 'create').returns(paginationButtonsStub);
+    story.buildPaginationButtonsForTesting();
+    expect(paginationButtonsStub.attach).to.have.been.calledWith(story.element);
   });
 
   it('toggles `i-amphtml-story-landscape` based on height and width', () => {
