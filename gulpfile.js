@@ -441,6 +441,7 @@ function copyCss() {
  * @return {!Promise}
  */
 function watch() {
+  printConfigHelp('gulp watch', 'dist/amp.js');
   $$.watch('css/**/*.css', function() {
     compileCss();
   });
@@ -451,7 +452,9 @@ function watch() {
     buildExaminer({watch: true}),
     buildExtensions({watch: true}),
     compile(true),
-  ]);
+  ]).then(() => {
+    return enableLocalTesting('dist/amp.js');
+  });
 }
 
 /**
@@ -608,7 +611,7 @@ function enableLocalTesting(targetFile) {
  */
 function build() {
   process.env.NODE_ENV = 'development';
-  printConfigHelp('gulp build', 'dist/amp.js')
+  printConfigHelp('gulp build', 'dist/amp.js');
   return compileCss().then(() => {
     return Promise.all([
       polyfillsForTests(),
@@ -1304,11 +1307,12 @@ gulp.task('dist', 'Build production binaries', ['update-packages'], dist, {
   }
 });
 gulp.task('extensions', 'Build AMP Extensions', buildExtensions);
-gulp.task('watch', 'Watches for changes in files, re-build', watch, {
-  options: {
-    with_inabox: '  Also watch and build the amp-inabox.js binary.',
-    with_shadow: '  Also watch and build the amp-shadow.js binary.',
-  }
+gulp.task('watch', 'Watches for changes in files, re-builds when detected',
+    ['update-packages'], watch, {
+      options: {
+        with_inabox: '  Also watch and build the amp-inabox.js binary.',
+        with_shadow: '  Also watch and build the amp-shadow.js binary.',
+      }
 });
 gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
 gulp.task('build-login-done', 'Builds login-done.html/js', buildLoginDone);
