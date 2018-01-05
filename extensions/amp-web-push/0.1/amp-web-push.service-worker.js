@@ -27,7 +27,11 @@
   which broadcasts the reply back to the AMP page.
  */
 
-/** @enum {string} */
+const self = /** @type {!ServiceWorkerGlobalScope} */ (self);
+
+/**
+ * @enum {string}
+ */
 const WorkerMessengerCommand = {
   /*
     Used to request the current subscription state.
@@ -84,8 +88,9 @@ self.addEventListener('message', event => {
 
 /**
   Broadcasts a single boolean describing whether the user is subscribed.
+  * @param {!Object=} opt_payload
  */
-function onMessageReceivedSubscriptionState() {
+function onMessageReceivedSubscriptionState(opt_payload) {
   let retrievedPushSubscription = null;
   self.registration.pushManager.getSubscription()
       .then(pushSubscription => {
@@ -113,8 +118,9 @@ function onMessageReceivedSubscriptionState() {
   Subscribes the visitor to push.
 
   The broadcast value is null (not used in the AMP page).
+  * @param {!Object=} opt_payload
  */
-function onMessageReceivedSubscribe() {
+function onMessageReceivedSubscribe(opt_payload) {
   /*
     If you're integrating amp-web-push with an existing service worker, use your
     existing subscription code. The subscribe() call below is only present to
@@ -132,7 +138,7 @@ function onMessageReceivedSubscribe() {
     applicationServerKey: 'fake-demo-key',
   }).then(() => {
     // IMPLEMENT: Forward the push subscription to your server here
-    broadcastReply(WorkerMessengerCommand.AMP_SUBSCRIBE, null);
+    broadcastReply(WorkerMessengerCommand.AMP_SUBSCRIBE, opt_payload);
   });
 }
 
@@ -141,29 +147,30 @@ function onMessageReceivedSubscribe() {
   Unsubscribes the subscriber from push.
 
   The broadcast value is null (not used in the AMP page).
+  * @param {!Object=} opt_payload
  */
-function onMessageReceivedUnsubscribe() {
-  self.registration.pushManager.getSubscription()
+function onMessageReceivedUnsubscribe(opt_payload) {
+  /** @type {!ServiceWorkerGlobalScope} */ (self).registration.pushManager.getSubscription()
       .then(subscription => subscription.unsubscribe())
       .then(() => {
         // OPTIONALLY IMPLEMENT: Forward the unsubscription to your server here
-        broadcastReply(WorkerMessengerCommand.AMP_UNSUBSCRIBE, null);
+        broadcastReply(WorkerMessengerCommand.AMP_UNSUBSCRIBE, opt_payload);
       });
 }
 
 /**
  * Sends a postMessage() to all window frames the service worker controls.
  * @param {string} command
- * @param {!JsonObject} payload
+ * @param {!JsonObject} opt_payload
  */
-function broadcastReply(command, payload) {
+function broadcastReply(command, opt_payload) {
   self.clients.matchAll()
       .then(clients => {
         for (let i = 0; i < clients.length; i++) {
           const client = clients[i];
           client./*OK*/postMessage({
             command,
-            payload,
+            payload: opt_payload,
           });
         }
       });

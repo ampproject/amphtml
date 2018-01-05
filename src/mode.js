@@ -27,6 +27,7 @@ import {parseQueryString_} from './url-parse-query-string';
  *   log: (string|undefined),
  *   version: string,
  *   rtvVersion: string,
+ *   runtime: (string|undefined)
  * }}
  */
 export let ModeDef;
@@ -105,6 +106,7 @@ function getMode_(win) {
     log: hashQuery['log'],
     version,
     rtvVersion,
+    runtime: '',
   };
 }
 

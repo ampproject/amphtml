@@ -152,9 +152,6 @@ function compile(entryModuleFilenames, outputDir,
     if (!options.preventRemoveAndMakeDir) {
       cleanupBuildDir();
     }
-    //const unneededFiles = [
-      //'build/fake-module/third_party/babel/custom-babel-helpers.js',
-    //];
     let wrapper = '(function(){%output%})();';
     if (options.wrapper) {
       wrapper = options.wrapper.replace('<%= contents %>', '%output%');
@@ -244,6 +241,10 @@ function compile(entryModuleFilenames, outputDir,
       '!**_test.js',
       '!**/test-*.js',
       '!**/*.extern.js',
+      // This is a sample file that doesn't need to be compiled
+      '!build/all/v0/amp-web-push.service-worker.js',
+      // This is a sample file that doesn't need to be compiled
+      '!extensions/amp-web-push/0.1/amp-web-push.service-worker.js',
     ];
     // Add needed path for extensions.
     // Instead of globbing all extensions, this will only add the actual
@@ -263,25 +264,6 @@ function compile(entryModuleFilenames, outputDir,
           '3p/**/*.js',
           'ads/**/*.js');
     }
-    // Many files include the polyfills, but we only want to deliver them
-    // once. Since all files automatically wait for the main binary to load
-    // this works fine.
-    if (options.includePolyfills) {
-      //srcs.push(
-          //'!build/fake-module/src/polyfills.js',
-          //'!build/fake-module/src/polyfills/**/*.js'
-      //);
-    } else {
-      //srcs.push('!src/polyfills.js');
-      //unneededFiles.push('build/fake-module/src/polyfills.js');
-    }
-    //unneededFiles.forEach(function(fake) {
-      //if (!fs.existsSync(fake)) {
-        //fs.writeFileSync(fake,
-            //'// Not needed in closure compiler\n' +
-            //'export function deadCode() {}');
-      //}
-    //});
 
     let externs = baseExterns;
     if (options.externs) {
@@ -309,7 +291,7 @@ function compile(entryModuleFilenames, outputDir,
         rewrite_polyfills: false,
         externs,
         entry_point: entryModuleFilenames,
-        process_common_js_modules: true,
+        //process_common_js_modules: true,
         module_resolution: 'NODE',
         // This strips all files from the input set that aren't explicitly
         // required.
