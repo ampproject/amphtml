@@ -229,8 +229,10 @@ export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
 }
 
 function getAdsLocalhost(win) {
-  return 'http://ads.localhost:'
-      + (win.location.port || win.parent.location.port);
+  const hostname = getMode().thirdPartyFrameHost ?
+    getMode().thirdPartyFrameHost : 'ads.localhost';
+  return 'http://' + hostname + ':' +
+      (win.location.port || win.parent.location.port);
 }
 
 /**
