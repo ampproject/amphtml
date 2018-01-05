@@ -20,7 +20,7 @@ export class Parser {
    * @param {string} url The url to be expanded.
    * @return {!Object<string, string|number>}
    */
-  eliminateOverlaps(matches, url, opt_whiteList) {
+  eliminateOverlaps_(matches, url, opt_whiteList) {
     if (!matches.length) { return null; }
     // longest keywords have priority over shorter
     // how should we prioritize if same length??
@@ -33,7 +33,7 @@ export class Parser {
         // match, so that the string doesn't change.
         return results;
       }
-      if (this.fillStorage(match, storage)) {
+      if (this.fillStorage_(match, storage)) {
         // if this match does not overlap with a longer match
         results.push(match);
       }
@@ -48,7 +48,7 @@ export class Parser {
    * @return {!Object<string, string|number>} array of objects representing
    *  matching keywords
    */
-  findMatches(url, expression) {
+  findMatches_(url, expression) {
     const matches = [];
     url.replace(expression, (match, name, opt_strargs, startPosition) => {
       // refactor expression logic in future once legacy code is deprecated.
@@ -72,7 +72,7 @@ export class Parser {
    * @param {!Object<string, *>} match contains match data
    * @return {boolean} indicates whether a collision was found
    */
-  fillStorage(match, storage) {
+  fillStorage_(match, storage) {
     for (let i = match.start; i <= match.stop; i++) {
       if (storage[i]) {
         // toggle off what we thought was to be filled
@@ -92,7 +92,7 @@ export class Parser {
    * @param {?Array=} opt_args arguments to be passed if binding is function
    * @return {!Promise<string>} resolved value
    */
-  evaluateBinding(binding, opt_args) {
+  evaluateBinding_(binding, opt_args) {
     binding = binding.async || binding.sync;
     let value;
     try {
@@ -117,10 +117,14 @@ export class Parser {
    * @return {!Promise<string>}
    */
   expand(url, opt_bindings, opt_whiteList) {
+    if (!url.length) { 
+      return Promise.resolve(url);
+    }
     const expr = this.variableSource_.getExpr(opt_bindings);
-    const matches = this.findMatches(url, expr);
-    const mergedPositions = this.eliminateOverlaps(matches, url, opt_whiteList);
-    return this.parseUrlRecursively_(url, mergedPositions, opt_bindings);
+    const matches = this.findMatches_(url, expr);
+    const mergedPositions = this.eliminateOverlaps_(matches, url, opt_whiteList);
+    return this.parseUrlRecursively_(url, mergedPositions, opt_bindings)
+        .then(encodeURI);
   }
 
   /**
@@ -161,7 +165,7 @@ export class Parser {
             stack.push(binding);
             results.push(builder, evaluateNextLevel());
           } else {
-            results.push(builder, this.evaluateBinding(binding));
+            results.push(builder, this.evaluateBinding_(binding));
           }
 
           builder = '';
@@ -181,7 +185,7 @@ export class Parser {
           urlIndex++;
           const binding = stack.pop();
           const args = [...results, builder.trim()];
-          const value = this.evaluateBinding(binding, args);
+          const value = this.evaluateBinding_(binding, args);
           return value;
         }
 

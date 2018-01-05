@@ -938,18 +938,7 @@ export class UrlReplacements {
   expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
     // not supporting syncronous version or collect_vars with this new structure
     if (/* add experimental flag */ true && !opt_collectVars && !opt_sync) {
-      if (!url.length) {
-        return Promise.resolve(url);
-      }
-      const expanded = this.parser_.expand(url, opt_bindings, opt_whiteList);
-      
-      // NEED TO ENCODE:  DONT FORGET!
-      // const encoded = encodeValue(expanded);
-      if (opt_sync) {
-        return expanded;
-      }
-      return expanded;
-
+      return this.parser_.expand(url, opt_bindings, opt_whiteList);
     } else {
       const expr = this.variableSource_.getExpr(opt_bindings);
       let replacementPromise;

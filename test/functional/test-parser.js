@@ -1,115 +1,145 @@
+import {Parser} from '../../src/service/urlExpander/parser';
 import {GlobalVariableSource} from '../../src/service/url-replacements-impl';
-import {findMatches, mergeMatches, parseUrlRecursively} from '../../src/service/parser';
 
-describe('mergePositions', () => {
-  const url = 'http://www.google.com/?client=CLIENT_ID(__ga)&canon=CANONICAL_URL&random=RANDOM';
-
-  it('should handle empty', () => {
-    const array = [];
-    const expected = null;
-    expect(mergeMatches(array, url)).to.deep.equal(expected);
-  });
-
-  it('should return single item', () => {
-    const array = [
-      {start: 58, stop: 64, length: 6, name: 'RANDOM'},
-    ];
-    const expected = [
-      {start: 58, stop: 64, length: 6, name: 'RANDOM'},
-    ];
-    expect(mergeMatches(array, url)).to.deep.equal(expected);
-  });
-
-  it('should sort basic case', () => {
-    const array = [
-      {start: 58, stop: 64, length: 6, name: 'RANDOM'},
-      {start: 37, stop: 50, length: 13, name: 'CANONICAL_URL'},
-    ];
-    const expected = [
-      {start: 37, stop: 50, length: 13, name: 'CANONICAL_URL'},
-      {start: 58, stop: 64, length: 6, name: 'RANDOM'},
-    ];
-    expect(mergeMatches(array, url)).to.deep.equal(expected);
-  });
-
-  it('should sort overlapping case', () => {
-    const array = [
-      {start: 58, stop: 64, length: 6, name: 'RANDOM'},
-      {start: 37, stop: 50, length: 13, name: 'CANONICAL_URL'},
-      {start: 45, stop: 70, length: 15, name: '123456789012345'},
-    ];
-    const expected = [
-      {start: 45, stop: 70, length: 15, name: '123456789012345'},
-    ];
-    expect(mergeMatches(array, url)).to.deep.equal(expected);
-  });
-
-  it('should handle same start', () => {
-    const array = [
-      {start: 58, stop: 90, length: 13, name: 'CANONICAL_URL'},
-      {start: 58, stop: 64, length: 6, name: 'RANDOM'},
-    ];
-    const expected = [
-      {start: 58, stop: 90, length: 13, name: 'CANONICAL_URL'},
-    ];
-    expect(mergeMatches(array, url)).to.deep.equal(expected);
-  });
-
-  it('should handle keywords next to each other', () => {
-    const array = [
-      {start: 58, stop: 64, length: 13, name: 'CANONICAL_URL'},
-      {start: 65, stop: 71, length: 6, name: 'RANDOM'},
-    ];
-    const expected = [
-      {start: 58, stop: 64, length: 13, name: 'CANONICAL_URL'},
-      {start: 65, stop: 71, length: 6, name: 'RANDOM'},
-    ];
-    expect(mergeMatches(array, url)).to.deep.equal(expected);
-  });
-});
-
-function prep(url, varSource, opt_bindings) {
-  const expr = varSource.getExpr(opt_bindings);
-  const rawMatches = findMatches(url, expr);
-  return mergeMatches(rawMatches);
-}
-
-function mockClientId(str) {
+function mockClientIdFn(str) {
   if (str === '__ga') {
-    return 'amp-GA578';
+    return Promise.resolve('amp-GA12345');
   }
-  return 'amp-987654321';
+  return Promise.resolve('amp-987654321');
 }
 
-// parseUrlRecursively(url, matches, variableSource, opt_bindings, opt_collectVars)
-describes.realWin('parseUrlRecursively', {
+describes.fakeWin('Parser', {
   amp: {
     ampdoc: 'single',
   },
 }, env => {
+
+  let parser;
   let ampdoc;
-  let globalVarSource;
+  let variableSource;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
-    globalVarSource = new GlobalVariableSource(env.ampdoc);
+    variableSource = new GlobalVariableSource(env.ampdoc);
+    parser = new Parser(variableSource);
   });
 
-  const mockBindings = {
-    RANDOM: () => 123456,
-    CANONICAL_URL: 'www.google.com',
-    CLIENT_ID: mockClientId,
-  };
-
-  it('should work', () => {
+  describe('#eliminateOverlaps', () => {
     const url = 'http://www.google.com/?client=CLIENT_ID(__ga)&canon=CANONICAL_URL&random=RANDOM';
-    const expected = 'http://www.google.com/?client=amp-GA578&canon=www.google.com&random=123456';
-    debugger;
-    const matches = prep(url, globalVarSource);
-    
-    expect(parseUrlRecursively(url, matches).toBe(expected));
+
+    it('should handle empty', () => {
+      const array = [];
+      const expected = null;
+      expect(parser.eliminateOverlaps_(array, url)).to.deep.equal(expected);
+    });
+
+    it('should return single item', () => {
+      const array = [
+        { start: 58, stop: 64, length: 6, name: 'RANDOM' },
+      ];
+      const expected = [
+        { start: 58, stop: 64, length: 6, name: 'RANDOM' },
+      ];
+      expect(parser.eliminateOverlaps_(array, url)).to.deep.equal(expected);
+    });
+
+    it('should sort basic case', () => {
+      const array = [
+        { start: 58, stop: 64, length: 6, name: 'RANDOM' },
+        { start: 37, stop: 50, length: 13, name: 'CANONICAL_URL' },
+      ];
+      const expected = [
+        { start: 37, stop: 50, length: 13, name: 'CANONICAL_URL' },
+        { start: 58, stop: 64, length: 6, name: 'RANDOM' },
+      ];
+      expect(parser.eliminateOverlaps_(array, url)).to.deep.equal(expected);
+    });
+
+    it('should sort overlapping case', () => {
+      const array = [
+        { start: 58, stop: 64, length: 6, name: 'RANDOM' },
+        { start: 37, stop: 50, length: 13, name: 'CANONICAL_URL' },
+        { start: 45, stop: 70, length: 15, name: '123456789012345' },
+      ];
+      const expected = [
+        { start: 45, stop: 70, length: 15, name: '123456789012345' },
+      ];
+      expect(parser.eliminateOverlaps_(array, url)).to.deep.equal(expected);
+    });
+
+    it('should handle same start', () => {
+      const array = [
+        { start: 58, stop: 90, length: 13, name: 'CANONICAL_URL' },
+        { start: 58, stop: 64, length: 6, name: 'RANDOM' },
+      ];
+      const expected = [
+        { start: 58, stop: 90, length: 13, name: 'CANONICAL_URL' },
+      ];
+      expect(parser.eliminateOverlaps_(array, url)).to.deep.equal(expected);
+    });
+
+    it('should handle keywords next to each other', () => {
+      const array = [
+        { start: 58, stop: 64, length: 13, name: 'CANONICAL_URL' },
+        { start: 65, stop: 71, length: 6, name: 'RANDOM' },
+      ];
+      const expected = [
+        { start: 58, stop: 64, length: 13, name: 'CANONICAL_URL' },
+        { start: 65, stop: 71, length: 6, name: 'RANDOM' },
+      ];
+      expect(parser.eliminateOverlaps_(array, url)).to.deep.equal(expected);
+    });
+  });
+
+  describe('#expand', () => {
+    const mockBindings = {
+      CLIENT_ID: mockClientIdFn,
+      CANONICAL_URL: 'www.google.com',
+      RANDOM: () => 123456,
+      TRIM: String.trim,
+    };
+
+    it('should handle empty urls', () => {
+      const url = '';
+      const expected = '';
+      expect(parser.expand(url, mockBindings)).to.eventually.equal(expected);
+    });
+
+    it('parses one function, one argument', () =>
+      expect(parser.expand('TRIM(aaaaa    )', mockBindings)).toBe('aaaaa')
+    );
   });
 });
+
+
+// describes.fakeWin('parseUrlRecursively', {
+//   amp: {
+//     ampdoc: 'single',
+//   },
+// }, env => {
+//   let ampdoc;
+//   let globalVarSource;
+
+//   beforeEach(() => {
+//     ampdoc = env.ampdoc;
+//     globalVarSource = new GlobalVariableSource(env.ampdoc);
+//   });
+
+//   const mockBindings = {
+//     RANDOM: () => 123456,
+//     CANONICAL_URL: 'www.google.com',
+//     CLIENT_ID: mockClientId,
+//   };
+
+//   it('should work', () => {
+//     const url = 'http://www.google.com/?client=CLIENT_ID(__ga)&canon=CANONICAL_URL&random=RANDOM';
+//     const expected = 'http://www.google.com/?client=amp-GA578&canon=www.google.com&random=123456';
+//     debugger;
+//     const matches = prep(url, globalVarSource);
+
+//     expect(parseUrlRecursively(url, matches).toBe(expected));
+//   });
+// });
 
 // test('one function, one argument', () =>
 //   expect(evaluateStringRecursively_('TRIM(aaaaa    )')).toBe('aaaaa')
