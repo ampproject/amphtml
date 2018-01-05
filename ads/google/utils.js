@@ -17,6 +17,12 @@
 import {user} from '../../src/log';
 
 /**
+ * Approved height for AdSense full-width responsive ads.
+ * @const {number}
+ */
+export const ADSENSE_RSPV_WHITELISTED_HEIGHT = 320;
+
+/**
  * Given the amp-ad data attribute containing the multi-size dimensions, and a
  * set of primary dimensions, this function will return all valid multi-size
  * [width, height] pairs in an array.
