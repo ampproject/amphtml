@@ -202,9 +202,10 @@ export class VariableSource {
    * Returns a Regular expression that can be used to detect all the variables
    * in a template.
    * @param {!Object<string, *>=} opt_bindings
+   * @param {Boolean=} opt_ignoreArgs flag to ignore capture of argsß
    * @return {!RegExp}
    */
-  getExpr(opt_bindings) {
+  getExpr(opt_bindings, opt_ignoreArgs) {
     if (!this.initialized_) {
       this.initialize_();
     }
@@ -217,20 +218,22 @@ export class VariableSource {
           allKeys.push(key);
         }
       });
-      return this.buildExpr_(allKeys);
+      return this.buildExpr_(allKeys, opt_ignoreArgs);
     }
     if (!this.replacementExpr_) {
-      this.replacementExpr_ = this.buildExpr_(Object.keys(this.replacements_));
+      this.replacementExpr_ = this.buildExpr_(
+          Object.keys(this.replacements_), opt_ignoreArgs);
     }
     return this.replacementExpr_;
   }
 
   /**
    * @param {!Array<string>} keys
+   * @param {Boolean=} opt_ignoreArgs flag to ignore capture of args
    * @return {!RegExp}
    * @private
    */
-  buildExpr_(keys) {
+  buildExpr_(keys, opt_ignoreArgs) {
     // The keys must be sorted to ensure that the longest keys are considered
     // first. This avoids a problem where a RANDOM conflicts with RANDOM_ONE.
     keys.sort((s1, s2) => s2.length - s1.length);
@@ -242,7 +245,11 @@ export class VariableSource {
     // FOO_BAR(arg1)
     // FOO_BAR(arg1,arg2)
     // FOO_BAR(arg1, arg2)
-    return new RegExp('\\$?(' + all + ')' +
-        '(?:\\(((?:\\s*[0-9a-zA-Z-_.]*\\s*(?=,|\\)),?)*)\\s*\\))?', 'g');
+    let regexStr = '\\$?(' + all + ')';
+    // ignore the capturing of arguments in new parser
+    if (!opt_ignoreArgs) {
+      regexStr += '(?:\\(((?:\\s*[0-9a-zA-Z-_.]*\\s*(?=,|\\)),?)*)\\s*\\))?';
+    }
+    return new RegExp(regexStr, 'g');
   }
 }

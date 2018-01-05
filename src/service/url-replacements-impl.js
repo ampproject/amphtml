@@ -39,7 +39,7 @@ import {
 } from './variable-source';
 import {isProtocolValid} from '../url';
 import {WindowInterface} from '../window-interface';
-import {Parser} from './urlExpander/parser';
+import {Parser} from './url-expander/parser';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -1008,11 +1008,11 @@ export class UrlReplacements {
         }
         return encodeValue(val);
       });
-  
+
       if (replacementPromise) {
         replacementPromise = replacementPromise.then(() => replacement);
       }
-  
+
       if (opt_sync) {
         return replacement;
       }

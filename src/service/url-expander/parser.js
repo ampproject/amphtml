@@ -50,10 +50,8 @@ export class Parser {
    */
   findMatches_(url, expression) {
     const matches = [];
-    url.replace(expression, (match, name, opt_strargs, startPosition) => {
-      // refactor expression logic in future once legacy code is deprecated.
-      const leftParenIndex = match.indexOf('(');
-      const length = leftParenIndex > 0 ? leftParenIndex : match.length;
+    url.replace(expression, (match, name, startPosition) => {
+      const length = match.length;
       const stopPosition = length + startPosition - 1;
       const info = {
         start: startPosition,
@@ -93,19 +91,21 @@ export class Parser {
    * @return {!Promise<string>} resolved value
    */
   evaluateBinding_(binding, opt_args) {
-    binding = binding.async || binding.sync;
-    let value;
     try {
-      value = typeof binding === 'function' ?
-        binding.apply(null, opt_args) : binding;
+      if (typeof binding === 'function') {
+        if (opt_args) {
+          return Promise.all(opt_args)
+              .then(args => binding.apply(null, args));
+        }
+        return Promise.resolve(binding.apply(null, opt_args))
+      }
+      return Promise.resolve(binding);
     } catch (e) {
       // Report error, but do not disrupt URL replacement. This will
       // interpolate as the empty string.
       rethrowAsync(e);
-      value = '';
+      return Promise.resolve('');
     }
-    // value here may be a promise or primitive
-    return Promise.resolve(value);
   }
 
   /**
@@ -117,10 +117,10 @@ export class Parser {
    * @return {!Promise<string>}
    */
   expand(url, opt_bindings, opt_whiteList) {
-    if (!url.length) { 
+    if (!url.length) {
       return Promise.resolve(url);
     }
-    const expr = this.variableSource_.getExpr(opt_bindings);
+    const expr = this.variableSource_.getExpr(opt_bindings, /*opt_ignoreArgs */ true);
     const matches = this.findMatches_(url, expr);
     const mergedPositions = this.eliminateOverlaps_(matches, url, opt_whiteList);
     return this.parseUrlRecursively_(url, mergedPositions, opt_bindings)
@@ -144,9 +144,9 @@ export class Parser {
       let builder = '';
       const results = [];
 
-      while (urlIndex < url.length && matchIndex < matches.length) {
+      while (urlIndex < url.length && matchIndex <= matches.length) {
 
-        if (urlIndex === match.start) {
+        if (match && urlIndex === match.start) {
           let binding;
           // find out where this keyword is coming from
           if (opt_bindings && opt_bindings.hasOwnProperty(match.name)) {
@@ -155,21 +155,28 @@ export class Parser {
           } else {
             // or the global source
             binding = this.variableSource_.get(match.name);
+            binding = binding.async || binding.sync;
           }
 
           urlIndex = match.stop + 1;
+          match = matches[++matchIndex];
 
           if (url[urlIndex] === '(') {
             // if we hit a left parenthesis we still need to get args
             urlIndex++;
             stack.push(binding);
-            results.push(builder, evaluateNextLevel());
+            if (builder.length) {
+              results.push(builder);
+            }
+            results.push(evaluateNextLevel());
           } else {
-            results.push(builder, this.evaluateBinding_(binding));
+            if (builder.length) {
+              results.push(builder);
+            }
+            results.push(this.evaluateBinding_(binding));
           }
 
           builder = '';
-          match = matches[++matchIndex];
         }
 
         else if (url[urlIndex] === ',') {
@@ -194,7 +201,12 @@ export class Parser {
           urlIndex++;
         }
       }
-      return Promise.all(results).then(promiseArray => promiseArray.join(''));
+      return Promise.all(results)
+          .then(promiseArray => promiseArray.join(''))
+          .catch(e => {
+            rethrowAsync(e);
+            return '';
+          });
     };
 
     return evaluateNextLevel();
