@@ -15,8 +15,10 @@
  */
 
 import {validateData} from '../../3p/3p';
+import {user} from '../../src/log';
 import {setStyles} from '../../src/style';
 import {camelCaseToDash} from '../../src/string';
+import {ADSENSE_RSPV_WHITELISTED_HEIGHT} from './utils';
 
 /**
  * Make an adsense iframe.
@@ -28,6 +30,14 @@ export function adsense(global, data) {
   validateData(data, [],
       ['adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin', 'experimentId',
         'ampSlotIndex', 'adChannel', 'autoFormat', 'fullWidth']);
+
+  user().assert(
+      data['autoFormat'] !== 'rspv' ||
+        data['height'] == ADSENSE_RSPV_WHITELISTED_HEIGHT,
+      'Specified height ' + data['height'] +
+      ' in <amp-ad> tag is not equal to the required height of ' +
+      ADSENSE_RSPV_WHITELISTED_HEIGHT +
+      ' for responsive AdSense ad units.');
 
   if (global.context.clientId) {
     // Read by GPT for GA/GPT integration.
