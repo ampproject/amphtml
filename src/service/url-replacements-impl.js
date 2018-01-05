@@ -513,6 +513,18 @@ export class GlobalVariableSource extends VariableSource {
       return this.getStoryValue_(storyVariables => storyVariables.pageId,
           'STORY_PAGE_ID');
     });
+
+    this.setAsync('FIRST_CONTENTFUL_PAINT', () => {
+      return Services.performanceFor(this.ampdoc.win).getFirstContentfulPaint();
+    });
+
+    this.setAsync('FIRST_VIEWPORT_READY', () => {
+      return Services.performanceFor(this.ampdoc.win).getFirstViewportReady();
+    });
+
+    this.setAsync('MAKE_BODY_VISIBLE', () => {
+      return Services.performanceFor(this.ampdoc.win).getMakeBodyVisible();
+    });
   }
 
   /**

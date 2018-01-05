@@ -64,9 +64,9 @@ export const PROFILING_BRANCHES = {
 export function getLifecycleReporter(ampElement, slotId) {
   const win = ampElement.win;
   randomlySelectUnsetExperiments(win, PROFILING_BRANCHES);
-  if (isReportingEnabled(ampElement) &&
+  if (true) /*(isReportingEnabled(ampElement) &&
       (!!getExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME) ||
-       !!getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME))) {
+       !!getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME))) */ {
     setupPageLoadMetricsReporter_(ampElement);
     return new GoogleAdLifecycleReporter(
         win, ampElement.element, Number(slotId));
@@ -138,16 +138,11 @@ function setupPageLoadMetricsReporter_(ampElement) {
       win.ampAnalyticsPageLoadMetricsConfig || dict({
       'requests': {
         'fvt': 'https://csi.gstatic.com/csi?s=a4a' +
-          `&c=${correlator}&met.a4a=` +
-          /* TODO(jonkeller): Add remaining metrics commented-out below to cfg
-          'makeBodyVisible.${MBV_VALUE}~' +
-          */
-          'firstVisibleTime.${firstVisibleTime}'
-          /*
-          + 'firstContentfulPaint.${FCP_VALUE}~' +
-          'firstViewportReady.${FVR_VALUE}'
-          */
-        ,
+            `&c=${correlator}&met.a4a=` +
+	    'makeBodyVisible.${makeBodyVisible}~' +
+	    'firstVisibleTime.${firstVisibleTime}~' +
+	    'firstContentfulPaint.${firstContentfulPaint}~' +
+	    'firstViewportReady.${firstViewportReady}',
       },
       'transport': {
         'beacon': false,

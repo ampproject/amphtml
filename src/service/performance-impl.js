@@ -97,6 +97,13 @@ export class Performance {
     /** @private {string} */
     this.ampexp_ = '';
 
+    /** @private {number} */
+    this.makeBodyVisible_ = null;
+    /** @private {number} */
+    this.firstContentfulPaint_ = null;
+    /** @private {number} */
+    this.firstViewportReady_ = null;
+
     // Add RTV version as experiment ID, so we can slice the data by version.
     this.addEnabledExperiment('rtv-' + getMode(this.win).rtvVersion);
     if (isCanary(this.win)) {
@@ -314,6 +321,18 @@ export class Performance {
     if (arguments.length == 1) {
       this.mark(label);
     }
+
+    // Store certain page visibility metrics to be exposed as an analytics variable.
+    const storedVal = opt_delta != null ? Math.max(opt_delta, 0) : value - this.initTime_;
+    if (label == 'fcp') {
+      this.firstContentfulPaint_ = storedVal;
+    }
+    if (label == 'pc') {
+      this.firstViewportReady_ = storedVal;
+    }
+    if (label == 'mbv') {
+      this.makeBodyVisible_ = storedVal;
+    }
   }
 
   /**
@@ -438,6 +457,18 @@ export class Performance {
    */
   isPerformanceTrackingOn() {
     return this.isPerformanceTrackingOn_;
+  }
+
+  getFirstContentfulPaint() {
+    return this.firstContentfulPaint_;
+  }
+
+  getMakeBodyVisible() {
+    return this.makeBodyVisible_;
+  }
+
+  getFirstViewportReady() {
+    return this.firstViewportReady_;
   }
 }
 
