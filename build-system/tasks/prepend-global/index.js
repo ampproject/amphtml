@@ -169,6 +169,7 @@ function enableLocalDev(config, target, configJson) {
   const TESTING_HOST = process.env.AMP_TESTING_HOST;
   if (typeof TESTING_HOST == 'string') {
     LOCAL_DEV_AMP_CONFIG = Object.assign(LOCAL_DEV_AMP_CONFIG, {
+      thirdPartyUrl: 'http://' + TESTING_HOST,
       thirdPartyFrameHost: TESTING_HOST,
       thirdPartyFrameRegex: TESTING_HOST,
     });
