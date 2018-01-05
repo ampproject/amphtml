@@ -229,7 +229,7 @@ export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
 }
 
 function getAdsLocalhost(win) {
-  return (self.AMP_CONFIG['thirdPartyUrl'] || 'http://ads.localhost') + ':' +
+  return (getMode().thirdPartyUrl || 'http://ads.localhost') + ':' +
       (win.location.port || win.parent.location.port);
 }
 
