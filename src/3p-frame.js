@@ -229,8 +229,11 @@ export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
 }
 
 function getAdsLocalhost(win) {
-  return (getMode().thirdPartyUrl || 'http://ads.localhost') + ':' +
-      (win.location.port || win.parent.location.port);
+  let adsUrl = urls.thirdParty;
+  if (adsUrl == 'https://3p.ampproject.net') {
+    adsUrl = 'http://ads.localhost';
+  }
+  return adsUrl + ':' + (win.location.port || win.parent.location.port);
 }
 
 /**
