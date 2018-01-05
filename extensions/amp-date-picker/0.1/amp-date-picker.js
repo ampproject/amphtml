@@ -26,8 +26,8 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {createDateRangePicker} from './date-range-picker';
 import {createDeferred} from './react-utils';
 import {createSingleDatePicker} from './single-date-picker';
-import {fetchBatchedJsonFor} from '../../../src/batched-json';
 import {dashToCamelCase} from '../../../src/string';
+import {fetchBatchedJsonFor} from '../../../src/batched-json';
 import {isExperimentOn} from '../../../src/experiments';
 import {map} from '../../../src/utils/object';
 import {requireExternal} from '../../../src/module';
@@ -61,12 +61,21 @@ let DatesChangeDetailsDef;
 let DateChangeDetailsDef;
 
 /**
- * @typedef {{
- *   date: string,
- *   id: ?string
- * }}
+ * @dict
  */
-let BindDatesDef;
+class BindDatesDetails {
+  /**
+   * @param {string} date
+   * @param {?string} id
+   */
+  constructor(date, id) {
+    /** @const */
+    this['date'] = date;
+
+    /** @const */
+    this['id'] = id;
+  }
+}
 
 const TAG = 'amp-date-picker';
 const DATE_SEPARATOR = ' ';
@@ -371,7 +380,7 @@ class AmpDatePicker extends AMP.BaseElement {
   /**
    * Create a date object to be consumed by AMP actions and events or amp-bind.
    * @param {?moment} date
-   * @return {?BindDatesDef}
+   * @return {?BindDatesDetails}
    */
   getBindDate_(date) {
     if (!date) {
@@ -379,10 +388,9 @@ class AmpDatePicker extends AMP.BaseElement {
     }
 
     const template = this.getDayTemplate_(date);
-    return {
-      date: this.getFormattedDate_(date),
-      id: template && template.id,
-    };
+    const details = new BindDatesDetails(
+        this.getFormattedDate_(date), template && template.id);
+    return details;
   }
 
   /**
@@ -390,7 +398,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * or amp-bind.
    * @param {!moment} startDate
    * @param {?moment} endDate
-   * @return {!Array<!BindDatesDef>}
+   * @return {!Array<!BindDatesDetails>}
    */
   getBindDates_(startDate, endDate) {
     const dates = [];
