@@ -19,7 +19,6 @@ import {dev, user} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {isArray, isObject} from '../../../src/types';
 import {isSecureUrl} from '../../../src/url';
-import {getMode} from '../../../src/mode';
 
 /** @type {string} */
 const TAG = 'real-time-config';
@@ -151,7 +150,7 @@ function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
     url = urlReplacements.expandUrlSync(
         url, macros, /** opt_collectVars */undefined, whitelist);
   }
-  if (!isSecureUrl(url) && !(getMode(win).localDev || getMode(win).test)) {
+  if (!isSecureUrl(url)) {
     return logAndAddErrorResponse_(promiseArray, RTC_ERROR_ENUM.INSECURE_URL,
         opt_vendor || url);
   }
