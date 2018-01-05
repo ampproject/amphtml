@@ -98,6 +98,7 @@ export default class AmpShadowDocLoader extends AMP.BaseElement {
   }
 
   handleDocRequestError_(error) {
+    error.message += ` uri: ${this.docUrl_}`;
     this.dispatchEvent_('error', error);
     this.createRetryButton_();
   }
