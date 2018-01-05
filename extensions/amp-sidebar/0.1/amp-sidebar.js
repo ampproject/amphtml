@@ -268,6 +268,7 @@ export class AmpSidebar extends AMP.BaseElement {
         this.openMask_();
         this.element.setAttribute('open', '');
         this.boundOnAnimationEnd_();
+        this.element.setAttribute('aria-hidden', 'false');
       });
     });
     this.getHistory_().push(this.close_.bind(this)).then(historyId => {
@@ -296,6 +297,7 @@ export class AmpSidebar extends AMP.BaseElement {
       this.closeMask_();
       this.element.removeAttribute('open');
       this.boundOnAnimationEnd_();
+      this.element.setAttribute('aria-hidden', 'true');
     });
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
@@ -390,14 +392,12 @@ export class AmpSidebar extends AMP.BaseElement {
       this.scheduleResume(children);
       tryFocus(this.element);
       this.triggerEvent_(SidebarEvents.OPEN);
-      this.element.setAttribute('aria-hidden', 'false');
     } else {
       // On close sidebar
       this.vsync_.mutate(() => {
         toggle(this.element, /* display */false);
         this.schedulePause(this.getRealChildren());
         this.triggerEvent_(SidebarEvents.CLOSE);
-        this.element.setAttribute('aria-hidden', 'true');
       });
     }
   }
