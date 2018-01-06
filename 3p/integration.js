@@ -64,6 +64,7 @@ import {MessageType} from '../src/3p-frame-messaging';
 import {facebook} from './facebook';
 import {github} from './github';
 import {reddit} from './reddit';
+import {yotpo} from './yotpo';
 import {twitter} from './twitter';
 
 import {_ping_} from '../ads/_ping_';
@@ -382,6 +383,7 @@ register('yahoo', yahoo);
 register('yahoojp', yahoojp);
 register('yandex', yandex);
 register('yengo', yengo);
+register('yotpo', yotpo);
 register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
 register('zergnet', zergnet);
