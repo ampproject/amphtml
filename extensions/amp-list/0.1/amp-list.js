@@ -153,7 +153,7 @@ export class AmpList extends AMP.BaseElement {
     return this.fetch_(itemsExpr).then(items => {
       if (this.element.hasAttribute('single-item')) {
         user().assert(typeof items !== 'undefined' ,
-            'Response must contain an arrary or object at "%s". %s',
+            'Response must contain an array or object at "%s". %s',
             itemsExpr, this.element);
         if (!isArray(items)) {
           items = [items];
