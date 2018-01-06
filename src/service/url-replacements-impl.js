@@ -40,7 +40,7 @@ import {
 import {isProtocolValid} from '../url';
 import {WindowInterface} from '../window-interface';
 import {Parser} from './url-expander/parser';
-import {isExperimentOn} from './experiments';
+import {isExperimentOn} from '../experiments';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
