@@ -71,4 +71,10 @@ describes.realWin('adsenseDelayedFetch', {}, env => {
       hid: pageViewId,
     });
   });
+
+  it('throws on invalid responsive ad unit height', () => {
+    const data = {'autoFormat': 'rspv', 'height': '666'};
+    expect(() => adsense(env.win, data)).to.throw(
+        /Specified height 666 in <amp-ad> tag is not equal to the required/);
+  });
 });

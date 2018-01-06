@@ -52,6 +52,9 @@ var yellow = $$.util.colors.yellow;
 var red = $$.util.colors.red;
 var cyan = $$.util.colors.cyan;
 
+var minifiedRuntimeTarget = 'dist/v0.js';
+var unminifiedRuntimeTarget = 'dist/amp.js';
+
 // Each extension and version must be listed individually here.
 declareExtension('amp-3q-player', '0.1', false);
 declareExtension('amp-access', '0.1', true);
@@ -203,7 +206,7 @@ function endBuildStep(stepName, targetName, startTime) {
   const endTime = Date.now();
   const executionTime = new Date(endTime - startTime);
   const secs = executionTime.getSeconds();
-  const ms = executionTime.getMilliseconds().toString().padStart(3, '0');
+  const ms = ('000' + executionTime.getMilliseconds().toString()).slice(-3);
   var timeString = '(';
   if (secs === 0) {
     timeString += ms + ' ms)';
@@ -441,6 +444,7 @@ function copyCss() {
  * @return {!Promise}
  */
 function watch() {
+  printConfigHelp('gulp watch', unminifiedRuntimeTarget);
   $$.watch('css/**/*.css', function() {
     compileCss();
   });
@@ -451,7 +455,9 @@ function watch() {
     buildExaminer({watch: true}),
     buildExtensions({watch: true}),
     compile(true),
-  ]);
+  ]).then(() => {
+    return enableLocalTesting(unminifiedRuntimeTarget);
+  });
 }
 
 /**
@@ -608,7 +614,7 @@ function enableLocalTesting(targetFile) {
  */
 function build() {
   process.env.NODE_ENV = 'development';
-  printConfigHelp('gulp build', 'dist/amp.js')
+  printConfigHelp('gulp build', unminifiedRuntimeTarget);
   return compileCss().then(() => {
     return Promise.all([
       polyfillsForTests(),
@@ -620,7 +626,7 @@ function build() {
       compile(),
     ]);
   }).then(() => {
-    return enableLocalTesting('dist/amp.js');
+    return enableLocalTesting(unminifiedRuntimeTarget);
   });
 }
 
@@ -632,7 +638,7 @@ function dist() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   if (argv.fortesting) {
-    printConfigHelp('gulp dist --fortesting', 'dist/v0.js')
+    printConfigHelp('gulp dist --fortesting', minifiedRuntimeTarget)
   }
   return compileCss().then(() => {
     return Promise.all([
@@ -654,7 +660,7 @@ function dist() {
     copyAliasExtensions();
   }).then(() => {
     if (argv.fortesting) {
-      return enableLocalTesting('dist/v0.js');
+      return enableLocalTesting(minifiedRuntimeTarget);
     }
   });
 }
@@ -1284,16 +1290,17 @@ function toPromise(readable) {
 /**
  * Gulp tasks
  */
-gulp.task('build', 'Builds the AMP library', build, {
+gulp.task('build', 'Builds the AMP library', ['update-packages'], build, {
   options: {
     config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   }
 });
 gulp.task('check-all', 'Run through all presubmit checks', ['lint', 'dep-check', 'check-types', 'presubmit']);
 gulp.task('check-types', 'Check JS types', checkTypes);
-gulp.task('css', 'Recompile css to build directory', compileCss);
-gulp.task('default', 'Same as "watch"', ['watch', 'serve']);
-gulp.task('dist', 'Build production binaries', dist, {
+gulp.task('css', 'Recompile css to build directory', ['update-packages'],
+    compileCss);
+gulp.task('default', 'Same as "watch"', ['update-packages', 'watch', 'serve']);
+gulp.task('dist', 'Build production binaries', ['update-packages'], dist, {
   options: {
     pseudo_names: '  Compiles with readable names. ' +
         'Great for profiling and debugging production code.',
@@ -1303,11 +1310,12 @@ gulp.task('dist', 'Build production binaries', dist, {
   }
 });
 gulp.task('extensions', 'Build AMP Extensions', buildExtensions);
-gulp.task('watch', 'Watches for changes in files, re-build', watch, {
-  options: {
-    with_inabox: '  Also watch and build the amp-inabox.js binary.',
-    with_shadow: '  Also watch and build the amp-shadow.js binary.',
-  }
+gulp.task('watch', 'Watches for changes in files, re-builds when detected',
+    ['update-packages'], watch, {
+      options: {
+        with_inabox: '  Also watch and build the amp-inabox.js binary.',
+        with_shadow: '  Also watch and build the amp-shadow.js binary.',
+      }
 });
 gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
 gulp.task('build-login-done', 'Builds login-done.html/js', buildLoginDone);

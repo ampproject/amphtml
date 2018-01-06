@@ -19,6 +19,10 @@ import {scopedQuerySelector} from '../../../src/dom';
 import {Services} from '../../../src/services';
 
 
+/** @const {string} */
+const TRANSITION = 'transform 0.2s ease';
+
+
 /**
  * Progress bar for <amp-story>.
  */
@@ -37,10 +41,10 @@ export class ProgressBar {
     this.root_ = null;
 
     /** @private {number} */
-    this.activePageIndex_ = -1;
+    this.pageCount_ = 0;
 
     /** @private {number} */
-    this.pageCount_ = 0;
+    this.activePageIndex_ = 0;
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
@@ -111,14 +115,15 @@ export class ProgressBar {
     for (let i = 0; i < this.pageCount_; i++) {
       if (i < pageIndex) {
         // Fill progress bar for pages that precede the active page
-        this.updateProgress(i, 1.0);
+        this.updateProgress(i, 1.0, /* withTransition */ i == pageIndex - 1);
       } else {
         // The active page manages its own progress:
         // if 'auto-advance-after' attribute exists it fires PAGE_PROGRESS
         // events to amp-story.
         // If it doesn't then it just fills its own progress bar.
         // All subsequent bars are un-filled.
-        this.updateProgress(i, 0.0);
+        this.updateProgress(i, 0.0, /* withTransition */ (
+          pageIndex != 0 && this.activePageIndex_ != 1));
       }
     }
   }
@@ -128,10 +133,14 @@ export class ProgressBar {
    *     changed.
    * @param {number} progress A number from 0.0 to 1.0, representing the
    *     progress of the current page.
+   * @param {boolean=} withTransition
    * @public
    */
-  updateProgress(pageIndex, progress) {
+  updateProgress(pageIndex, progress, withTransition = true) {
     this.assertValidPageIndex_(pageIndex);
+
+    this.activePageIndex_ = pageIndex;
+
     // Offset the index by 1, since nth-child indices start at 1 while
     // JavaScript indices start at 0.
     const nthChildIndex = pageIndex + 1;
@@ -141,6 +150,7 @@ export class ProgressBar {
     this.vsync_.mutate(() => {
       setImportantStyles(dev().assertElement(progressEl), {
         'transform': scale(`${progress},1`),
+        'transition': withTransition ? TRANSITION : 'none',
       });
     });
   }
