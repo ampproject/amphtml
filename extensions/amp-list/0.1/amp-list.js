@@ -36,12 +36,6 @@ export class AmpList extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @const {!function(!Array<!Element>)} */
-    this.boundRendered_ = this.rendered_.bind(this);
-
-    /** @const {!function(!Array<!Element>):!Promise<!Array<!Element>>} */
-    this.boundUpdateBindings_ = this.updateBindings_.bind(this);
-
     /** @private {?Element} */
     this.container_ = null;
 
@@ -179,8 +173,8 @@ export class AmpList extends AMP.BaseElement {
    */
   renderItems_(items) {
     return this.templates_.findAndRenderTemplateArray(this.element, items)
-        .then(this.boundUpdateBindings_)
-        .then(this.boundRendered_);
+        .then(elements => this.updateBindings_(elements))
+        .then(elements => this.rendered_(elements));
   }
 
   /**
