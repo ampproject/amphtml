@@ -482,8 +482,6 @@ describes.realWin('amp-sidebar 0.1 version', {
             const anchor = sidebarElement.getElementsByTagName('a')[0];
             anchor.href = '#newloc';
             const impl = sidebarElement.implementation_;
-            clock = lolex.install(
-                {target: impl.win, toFake: ['Date', 'setTimeout']});
             impl.schedulePause = sandbox.spy();
             impl.vsync_ = {
               mutate(callback) {
@@ -519,7 +517,6 @@ describes.realWin('amp-sidebar 0.1 version', {
             expect(sidebarElement.hasAttribute('open')).to.be.true;
             expect(sidebarElement.getAttribute('aria-hidden')).to.equal(
                 'false');
-            clock.tick(600);
             expect(sidebarElement.style.display).to.equal('');
             expect(impl.schedulePause).to.have.not.been.called;
           });
