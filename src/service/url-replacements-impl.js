@@ -40,6 +40,7 @@ import {
 import {isProtocolValid} from '../url';
 import {WindowInterface} from '../window-interface';
 import {Parser} from './url-expander/parser';
+import {isExperimentOn} from './experiments';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -53,7 +54,7 @@ const ORIGINAL_VALUE_PROPERTY = 'amp-original-value';
  * @param {*} val
  * @return {string}
  */
-function encodeValue(val) {
+export function encodeValue(val) {
   if (val == null) {
     return '';
   }
@@ -936,8 +937,10 @@ export class UrlReplacements {
    * @private
    */
   expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
-    // not supporting syncronous version or collect_vars with this new structure
-    if (/* add experimental flag */ true && !opt_collectVars && !opt_sync) {
+    const parserExperimentOn = isExperimentOn(this.win, 'core-parser');
+    
+    if (parserExperimentOn && !opt_collectVars && !opt_sync) {
+      // not supporting syncronous version or collect_vars with this new structure
       return this.parser_.expand(url, opt_bindings, opt_whiteList);
     } else {
       const expr = this.variableSource_.getExpr(opt_bindings);

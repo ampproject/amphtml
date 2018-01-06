@@ -1,4 +1,5 @@
 import {rethrowAsync} from '../../log';
+import {encodeValue} from '../url-replacements-impl';
 
 /** Simple parser class to handle nested Url replacement. */
 export class Parser {
@@ -91,15 +92,19 @@ export class Parser {
    * @return {!Promise<string>} resolved value
    */
   evaluateBinding_(binding, opt_args) {
+    let value;
     try {
       if (typeof binding === 'function') {
         if (opt_args) {
-          return Promise.all(opt_args)
+          value = Promise.all(opt_args)
               .then(args => binding.apply(null, args));
+        } else {
+          value = Promise.resolve(binding.apply(null, opt_args));
         }
-        return Promise.resolve(binding.apply(null, opt_args))
+      } else {
+        value = Promise.resolve(binding);
       }
-      return Promise.resolve(binding);
+      return value.then(encodeValue);
     } catch (e) {
       // Report error, but do not disrupt URL replacement. This will
       // interpolate as the empty string.
@@ -122,9 +127,12 @@ export class Parser {
     }
     const expr = this.variableSource_.getExpr(opt_bindings, /*opt_ignoreArgs */ true);
     const matches = this.findMatches_(url, expr);
+    // if no keywords move on
+    if (!matches.length) {
+      return Promise.resolve(url);
+    }
     const mergedPositions = this.eliminateOverlaps_(matches, url, opt_whiteList);
-    return this.parseUrlRecursively_(url, mergedPositions, opt_bindings)
-        .then(encodeURI);
+    return this.parseUrlRecursively_(url, mergedPositions, opt_bindings);
   }
 
   /**
@@ -199,6 +207,11 @@ export class Parser {
         else {
           builder += url[urlIndex];
           urlIndex++;
+        }
+
+        //capture trailing characters
+        if (urlIndex === url.length && builder.length) {
+          results.push(builder);
         }
       }
       return Promise.all(results)

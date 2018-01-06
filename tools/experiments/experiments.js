@@ -169,7 +169,7 @@ const EXPERIMENTS = [
   {
     id: 'ios-embed-wrapper',
     name: 'A new iOS embedded viewport model that wraps the body into' +
-        ' a synthetic root (launched)',
+    ' a synthetic root (launched)',
     spec: '',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5639',
   },
@@ -286,6 +286,12 @@ const EXPERIMENTS = [
     name: 'Enables the amp-date-picker extension',
     spec: 'https://github.com/ampproject/amphtml/issues/6469',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12267',
+  },
+  {
+    id: 'core-parser',
+    name: 'new parsing engine for url variables',
+    spec: 'https://github.com/ampproject/amphtml/issues/12119',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
   },
 ];
 
