@@ -36,12 +36,6 @@ config.run('amp-sidebar', function() {
           Close
         </button>
       </li>
-      <li>
-      <button id="scrollButton"
-        on="tap:section2.scrollTo('position' = 'top', 'duration' = '0')">
-        Close
-      </button>
-    </li>
     </ul>
   </amp-sidebar>
   <button id="sidebarOpener" on="tap:sidebar1.toggle">Open Sidebar</button>
@@ -88,23 +82,14 @@ config.run('amp-sidebar', function() {
       return new Promise((resolve, reject) => {
         const openerButton = win.document.getElementById('sidebarOpener');
         const sidebar = win.document.getElementById('sidebar1');
+        const viewport = sidebar.implementation_.getViewport();
         const openedPromise = listenOncePromise(sidebar, 'sidebarOpen');
         openerButton.click();
-        let scrollY = win.scrollY;
-        expect(scrollY).to.equal(0);
+        expect(viewport.getScrollTop()).to.equal(0);
         return openedPromise.then(() => {
           try {
-            const scrollButton = win.document.getElementById('scrollButton');
-            const scrollCompletePromise = waitForScrollFinish(win, 1000);
-            scrollButton.click();
-            return scrollCompletePromise;
-          } catch (e) {
-            reject(e);
-          }
-        }).then(() => {
-          try {
-            scrollY = win.scrollY;
-            expect(win.scrollY).to.equal(1000);
+            viewport.setScrollTop(1000);
+            expect(viewport.getScrollTop()).to.equal(1000);
             const closerButton = win.document.getElementById('sidebarCloser');
             const closedPromise = listenOncePromise(sidebar, 'sidebarClose');
             closerButton.click();
@@ -114,7 +99,7 @@ config.run('amp-sidebar', function() {
           }
         }).then(() => {
           try {
-            expect(win.scrollY).to.equal(scrollY);
+            expect(viewport.getScrollTop()).to.equal(1000);
             expect(win.document.activeElement).to.not.equal(openerButton);
             resolve();
           } catch (e) {
@@ -128,6 +113,6 @@ config.run('amp-sidebar', function() {
 
 function waitForScrollFinish(win, position) {
   return poll('wait for scroll to finish', () => {
-    return win.scrollY == position;
+    return win.document.scrollingElement.scrollTop == position;
   });
 }
