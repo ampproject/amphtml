@@ -1,12 +1,12 @@
 import {rethrowAsync} from '../../log';
 import {encodeValue} from '../url-replacements-impl';
 
-/** Simple parser class to handle nested Url replacement. */
+/** Rudamentary parser to handle nested Url replacement. */
 export class Parser {
 
   /**
    * Link this instance of parser to the calling UrlReplacment
-   * @param {VariablSource} variableSource the keywords to replace
+   * @param {VariableSource} variableSource the keywords to replace
    */
   constructor(variableSource) {
     this.variableSource_ = variableSource;

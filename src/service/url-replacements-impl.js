@@ -938,89 +938,89 @@ export class UrlReplacements {
    */
   expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
     const parserExperimentOn = isExperimentOn(this.win, 'core-parser');
-    
     if (parserExperimentOn && !opt_collectVars && !opt_sync) {
       // not supporting syncronous version or collect_vars with this new structure
       return this.parser_.expand(url, opt_bindings, opt_whiteList);
-    } else {
-      const expr = this.variableSource_.getExpr(opt_bindings);
-      let replacementPromise;
-      let replacement = url.replace(expr, (match, name, opt_strargs) => {
-        let args = [];
-        if (typeof opt_strargs == 'string') {
-          args = opt_strargs.split(/,\s*/);
-        }
-        if (opt_whiteList && !opt_whiteList[name]) {
-          // Do not perform substitution and just return back the original
-          // match, so that the string doesn't change.
-          return match;
-        }
-        let binding;
-        if (opt_bindings && (name in opt_bindings)) {
-          binding = opt_bindings[name];
-        } else if ((binding = this.variableSource_.get(name))) {
-          if (opt_sync) {
-            binding = binding.sync;
-            if (!binding) {
-              user().error(TAG, 'ignoring async replacement key: ', name);
-              return '';
-            }
-          } else {
-            binding = binding.async || binding.sync;
-          }
-        }
-        let val;
-        try {
-          val = (typeof binding == 'function') ?
-            binding.apply(null, args) : binding;
-        } catch (e) {
-          // Report error, but do not disrupt URL replacement. This will
-          // interpolate as the empty string.
-          if (opt_sync) {
-            val = '';
-          }
-          rethrowAsync(e);
-        }
-        // In case the produced value is a promise, we don't actually
-        // replace anything here, but do it again when the promise resolves.
-        if (val && val.then) {
-          if (opt_sync) {
-            user().error(TAG, 'ignoring promise value for key: ', name);
+    }
+
+    // legacy parsing
+    const expr = this.variableSource_.getExpr(opt_bindings);
+    let replacementPromise;
+    let replacement = url.replace(expr, (match, name, opt_strargs) => {
+      let args = [];
+      if (typeof opt_strargs == 'string') {
+        args = opt_strargs.split(/,\s*/);
+      }
+      if (opt_whiteList && !opt_whiteList[name]) {
+        // Do not perform substitution and just return back the original
+        // match, so that the string doesn't change.
+        return match;
+      }
+      let binding;
+      if (opt_bindings && (name in opt_bindings)) {
+        binding = opt_bindings[name];
+      } else if ((binding = this.variableSource_.get(name))) {
+        if (opt_sync) {
+          binding = binding.sync;
+          if (!binding) {
+            user().error(TAG, 'ignoring async replacement key: ', name);
             return '';
           }
-          /** @const {Promise<string>} */
-          const p = val.catch(err => {
-            // Report error, but do not disrupt URL replacement. This will
-            // interpolate as the empty string.
-            rethrowAsync(err);
-          }).then(v => {
-            replacement = replacement.replace(match, encodeValue(v));
-            if (opt_collectVars) {
-              opt_collectVars[match] = v;
-            }
-          });
-          if (replacementPromise) {
-            replacementPromise = replacementPromise.then(() => p);
-          } else {
-            replacementPromise = p;
+        } else {
+          binding = binding.async || binding.sync;
+        }
+      }
+      let val;
+      try {
+        val = (typeof binding == 'function') ?
+          binding.apply(null, args) : binding;
+      } catch (e) {
+        // Report error, but do not disrupt URL replacement. This will
+        // interpolate as the empty string.
+        if (opt_sync) {
+          val = '';
+        }
+        rethrowAsync(e);
+      }
+      // In case the produced value is a promise, we don't actually
+      // replace anything here, but do it again when the promise resolves.
+      if (val && val.then) {
+        if (opt_sync) {
+          user().error(TAG, 'ignoring promise value for key: ', name);
+          return '';
+        }
+        /** @const {Promise<string>} */
+        const p = val.catch(err => {
+          // Report error, but do not disrupt URL replacement. This will
+          // interpolate as the empty string.
+          rethrowAsync(err);
+        }).then(v => {
+          replacement = replacement.replace(match, encodeValue(v));
+          if (opt_collectVars) {
+            opt_collectVars[match] = v;
           }
-          return match;
+        });
+        if (replacementPromise) {
+          replacementPromise = replacementPromise.then(() => p);
+        } else {
+          replacementPromise = p;
         }
-        if (opt_collectVars) {
-          opt_collectVars[match] = val;
-        }
-        return encodeValue(val);
-      });
-
-      if (replacementPromise) {
-        replacementPromise = replacementPromise.then(() => replacement);
+        return match;
       }
-
-      if (opt_sync) {
-        return replacement;
+      if (opt_collectVars) {
+        opt_collectVars[match] = val;
       }
-      return replacementPromise || Promise.resolve(replacement);
+      return encodeValue(val);
+    });
+
+    if (replacementPromise) {
+      replacementPromise = replacementPromise.then(() => replacement);
     }
+
+    if (opt_sync) {
+      return replacement;
+    }
+    return replacementPromise || Promise.resolve(replacement);
   }
 
   /**
