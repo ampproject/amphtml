@@ -60,14 +60,15 @@ describes.realWin('amp-list component', {
     listMock.verify();
   });
 
+  const DEFAULT_LIST_OPTS = {expr: 'items', maxItems: 0, singleItem: false};
+
   /**
    * @param {!Array|!Object} fetched
    * @param {!Array<!Element>} rendered
    * @param {Object=} opts
    * @return {!Promise}
    */
-  function expectFetchAndRender(fetched, rendered,
-      opts = {expr: 'items', maxItems: 0, singleItem: false}) {
+  function expectFetchAndRender(fetched, rendered, opts = DEFAULT_LIST_OPTS) {
     const fetch = Promise.resolve(fetched);
     listMock.expects('fetch_').withExactArgs(opts.expr).returns(fetch).once();
 
