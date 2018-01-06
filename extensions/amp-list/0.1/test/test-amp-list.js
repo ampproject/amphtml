@@ -176,8 +176,8 @@ describes.realWin('amp-list component', {
     });
   });
 
-  it('should call rescanAndEvaluate() if Bind is available', () => {
-    const fakeBind = {rescanAndEvaluate: sandbox.spy()};
+  it('should call scanAndApply() if Bind is available', () => {
+    const fakeBind = {scanAndApply: sandbox.spy()};
     bindStub.returns(Promise.resolve(fakeBind));
 
     const items = [{title: 'Title1'}];
@@ -192,8 +192,8 @@ describes.realWin('amp-list component', {
     return list.layoutCallback().then(() => {
       return Promise.all([fetchPromise, renderPromise]);
     }).then(() => {
-      expect(fakeBind.rescanAndEvaluate).to.have.been.calledOnce;
-      expect(fakeBind.rescanAndEvaluate).calledWithExactly(rendered);
+      expect(fakeBind.scanAndApply).to.have.been.calledOnce;
+      expect(fakeBind.scanAndApply).calledWithExactly(rendered);
     });
   });
 

@@ -40,7 +40,7 @@ export class AmpList extends AMP.BaseElement {
     this.boundRendered_ = this.rendered_.bind(this);
 
     /** @const {!function(!Array<!Element>):!Promise<!Array<!Element>>} */
-    this.boundScanForBindings_ = this.scanForBindings_.bind(this);
+    this.boundUpdateBindings_ = this.updateBindings_.bind(this);
 
     /** @private {?Element} */
     this.container_ = null;
@@ -102,7 +102,11 @@ export class AmpList extends AMP.BaseElement {
     if (src !== undefined) {
       const typeOfSrc = typeof src;
       if (typeOfSrc === 'string') {
-        this.fetchList_();
+        // Don't fetch if we aren't laid out yet since we also fetch in
+        // layoutCallback().
+        if (this.getLayoutWidth() > 0) {
+          this.fetchList_();
+        }
       } else if (typeOfSrc === 'object') {
         const items = isArray(src) ? src : [src];
         this.renderItems_(items);
@@ -175,7 +179,7 @@ export class AmpList extends AMP.BaseElement {
    */
   renderItems_(items) {
     return this.templates_.findAndRenderTemplateArray(this.element, items)
-        .then(this.boundScanForBindings_)
+        .then(this.boundUpdateBindings_)
         .then(this.boundRendered_);
   }
 
@@ -184,11 +188,11 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise<!Array<!Element>>}
    * @private
    */
-  scanForBindings_(elements) {
+  updateBindings_(elements) {
     const forwardElements = () => elements;
     return Services.bindForDocOrNull(this.element).then(bind => {
       if (bind) {
-        return bind.rescanAndEvaluate(elements);
+        return bind.scanAndApply(elements, [this.container_]);
       }
     // Forward elements to chained promise on success or failure.
     }).then(forwardElements, forwardElements);
