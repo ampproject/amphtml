@@ -272,7 +272,7 @@ export class Bind {
           // Don't reevaluate/apply if there are no bindings.
           if (numberOfBindingsAdded > 0) {
             return this.evaluate_().then(results =>
-                this.applyElements_(results, added));
+              this.applyElements_(results, added));
           }
         });
     return this.timer_.timeoutPromise(timeout, promise,
@@ -457,7 +457,7 @@ export class Bind {
     const after = this.numberOfBindings();
     if (after < before) {
       dev().fine(TAG, `Removed ${before - after} bindings from ${nodes.length} `
-          + `elements and their descendants.`);
+          + 'elements and their descendants.');
     }
     // Eliminate elements from the expression to elements map that
     // have node as an ancestor. Delete expressions that are no longer
