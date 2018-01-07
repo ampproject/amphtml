@@ -479,8 +479,12 @@ describe('Google A4A utils', () => {
       });
       const ampAdElem = env.win.document.createElement('amp-ad');
       prevContainer.appendChild(ampAdElem);
+      const ValidAdContainerTypeValues =
+          Object.keys(ValidAdContainerTypes).map(function(key) {
+            return ValidAdContainerTypes[key];
+          });
       expect(getEnclosingContainerTypes(ampAdElem).sort())
-          .to.deep.equal(Object.values(ValidAdContainerTypes).sort());
+          .to.deep.equal(ValidAdContainerTypeValues.sort());
     });
   });
 

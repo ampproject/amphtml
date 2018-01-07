@@ -699,7 +699,10 @@ function checkTypes() {
     './src/service-worker/kill.js',
     './src/web-worker/web-worker.js',
   ];
-  var extensionSrcs = Object.values(extensions).filter(function(extension) {
+  var extensionValues = Object.keys(extensions).map(function(key) {
+    return extensions[key];
+  });
+  var extensionSrcs = extensionValues.filter(function(extension) {
     return !extension.noTypeCheck;
   }).map(function(extension) {
     return './extensions/' + extension.name + '/' +
