@@ -226,7 +226,7 @@ function updateGitHubIssues() {
                   updates.push(applyMilestone(issue, issueNewMilestone));
                 } else if (issueType === 'Related to: Documentation' ||
                     issueType === 'Type: Design Review' ||
-                    issueType === 'Type: Weekly Status') {
+                    issueType === 'Type: Status Update') {
                   issueNewMilestone = MILESTONE_DOCS_UPDATES;
                   updates.push(applyMilestone(issue, issueNewMilestone));
                 } else if (issueType === 'Type: Bug' ||
