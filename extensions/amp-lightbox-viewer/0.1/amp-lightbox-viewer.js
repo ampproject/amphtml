@@ -822,7 +822,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       this.container_.removeAttribute('gallery-view');
 
       if (this.gallery_) {
-        this.gallery_.classList.add('i-amphtml-lbv-gallery-hidden')
+        this.gallery_.classList.add('i-amphtml-lbv-gallery-hidden');
         this.gallery_ = null;
       }
     });
@@ -892,7 +892,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     const galleryId = 'amp-lightbox-gallery-' + this.currentLightboxGroupId_;
     this.gallery_ = this.win.document.getElementById(galleryId);
     if (this.gallery_) {
-      this.gallery_.classList.remove('i-amphtml-lbv-gallery-hidden')
+      this.gallery_.classList.remove('i-amphtml-lbv-gallery-hidden');
     } else {
       // Build gallery
       this.gallery_ = this.win.document.createElement('div');
@@ -916,10 +916,10 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   updateThumbnails_() {
     const thumbnails = [];
     this.manager_.getThumbnails(this.currentLightboxGroupId_)
-      .forEach(thumbnail => {
-        const thumbnailElement = this.createThumbnailElement_(thumbnail);
-        thumbnails.push(thumbnailElement);
-      });
+        .forEach(thumbnail => {
+          const thumbnailElement = this.createThumbnailElement_(thumbnail);
+          thumbnails.push(thumbnailElement);
+        });
     this.vsync_.mutate(() => {
       thumbnails.forEach(thumbnailElement => {
         this.gallery_.appendChild(thumbnailElement);
