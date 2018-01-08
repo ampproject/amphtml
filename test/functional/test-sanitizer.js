@@ -187,7 +187,7 @@ describe('sanitizeHtml', () => {
         .equal('<p>hello</p>');
   });
 
-  it('should NOT output security-sensitive amp-bind attributes', () => {
+  it('should NOT output security-sensitive binding attributes', () => {
     expect(sanitizeHtml('a<a [onclick]="alert">b</a>')).to.be.equal(
         'a<a>b</a>');
     expect(sanitizeHtml('a<a [style]="color: red;">b</a>')).to.be.equal(
@@ -210,6 +210,12 @@ describe('sanitizeHtml', () => {
         'a<a target="_top">b</a>');
     expect(sanitizeHtml('a<a [href]="</script">b</a>')).to.be.equal(
         'a<a target="_top">b</a>');
+  });
+
+  it('should NOT rewrite values of binding attributes', () => {
+    // Should not change "foo.bar" but should add target="_top".
+    expect(sanitizeHtml('<a [href]="foo.bar">link</a>'))
+        .to.equal('<a [href]="foo.bar" target="_top">link</a>');
   });
 });
 
