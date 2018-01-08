@@ -75,7 +75,7 @@ export class VisibilityModel {
 
     this.eventPromise_.then(() => {
       if (!this.onTriggerObservable_) {
-        dev().warn(TAG_, 'onTriggerObservable_ is unexpectedly null.');
+        dev().error(TAG_, 'onTriggerObservable_ is unexpectedly null.');
         return;
       }
       this.onTriggerObservable_.fire();
@@ -161,7 +161,7 @@ export class VisibilityModel {
     });
     this.eventPromise_.then(() => {
       if (!this.onTriggerObservable_) {
-        dev().warn(TAG_, 'onTriggerObservable_ is unexpectedly null.');
+        dev().error(TAG_, 'onTriggerObservable_ is unexpectedly null.');
         return;
       }
       this.onTriggerObservable_.fire();
@@ -209,7 +209,7 @@ export class VisibilityModel {
     // TODO(jonkeller): Investigate why dispose() can be called twice,
     // necessitating this "if", and the same "if" elsewhere in this file.
     if (!this.onTriggerObservable_) {
-      dev().warn(TAG_,
+      dev().error(TAG_,
           'dispose() called when onTriggerObservable_ already null.');
       return;
     }
@@ -235,7 +235,7 @@ export class VisibilityModel {
     if (this.onTriggerObservable_) {
       this.onTriggerObservable_.add(handler);
     } else {
-      dev().warn(TAG_, 'onTriggerObservable_ is unexpectedly null.');
+      dev().error(TAG_, 'onTriggerObservable_ is unexpectedly null.');
     }
     if (this.eventPromise_ && !this.eventResolver_) {
       // If eventPromise has already resolved, need to call handler manually.
