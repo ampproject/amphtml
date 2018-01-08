@@ -170,15 +170,22 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * to an amp-ad-adsense element. Thus, if we are an amp-ad, we can be sure
      * that it has been verified.
      */
-    const height = this.element.getAttribute('height');
-    if (this.isResponsive_() &&
-        height != ADSENSE_RSPV_WHITELISTED_HEIGHT) {
-      user().error(TAG,
-          'Specified height ' + height +
-          ' in <amp-ad> tag is not equal to the required height of ' +
-          ADSENSE_RSPV_WHITELISTED_HEIGHT +
-          ' for responsive AdSense ad units.');
-      return false;
+    if (this.isResponsive_()) {
+      const height = this.element.getAttribute('height');
+      const width = this.element.getAttribute('width');
+      if (height != ADSENSE_RSPV_WHITELISTED_HEIGHT) {
+        user().error(TAG,
+            `Specified height ${height} in <amp-ad> tag is not equal to the ` +
+            `required height of ${ADSENSE_RSPV_WHITELISTED_HEIGHT} for ` +
+            'responsive AdSense ad units.');
+        return false;
+      }
+      if (width != '100vw') {
+        user().error(TAG,
+            `Invalid width ${width} for full-width responsive <amp-ad> tag. ` +
+            'Width must be 100vw.');
+        return false;
+      }
     }
     return !!this.element.getAttribute('data-ad-client') &&
         this.isAmpAdElement();
