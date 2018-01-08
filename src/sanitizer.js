@@ -187,13 +187,13 @@ export function sanitizeHtml(html) {
         }
         return;
       }
-      const bindAttribsIndices = map();
-      // Special handling for attributes for amp-bind which are formatted as
-      // [attr]. The brackets are restored at the end of this function.
+      const isBinding = map();
+      // Preprocess "binding" attributes (e.g. [attr]) by stripping enclosing
+      // brackets before custom validation and readding them afterwards.
       for (let i = 0; i < attribs.length; i += 2) {
         const attr = attribs[i];
         if (attr && attr[0] == '[' && attr[attr.length - 1] == ']') {
-          bindAttribsIndices[i] = true;
+          isBinding[i] = true;
           attribs[i] = attr.slice(1, -1);
         }
       }
@@ -263,15 +263,19 @@ export function sanitizeHtml(html) {
           continue;
         }
         emit(' ');
-        if (bindAttribsIndices[i]) {
+        if (isBinding[i]) {
           emit('[' + attrName + ']');
         } else {
           emit(attrName);
         }
         emit('="');
         if (attrValue) {
-          emit(htmlSanitizer.escapeAttrib(rewriteAttributeValue(
-              tagName, attrName, attrValue)));
+          // Rewrite attribute values unless this attribute is a binding.
+          // Bindings contain expressions not scalars and shouldn't be modified.
+          const rewrite = (isBinding[i])
+            ? attrValue
+            : rewriteAttributeValue(tagName, attrName, attrValue);
+          emit(htmlSanitizer.escapeAttrib(rewrite));
         }
         emit('"');
       }
