@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {listenOncePromise} from '../../src/event-helper';
+import {listenOncePromise} from '../../../../../src/event-helper';
 
 const config = describe.configure().ifNewChrome();
 
