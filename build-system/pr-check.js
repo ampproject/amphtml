@@ -271,22 +271,36 @@ const command = {
     timedExecOrDie('gulp dep-check');
     timedExecOrDie('gulp check-types');
   },
-  runUnitTests: function() {
+  runUnitTests: function(saucelabs) {
     // Unit tests with Travis' default chromium
     timedExecOrDie('gulp test --unit --nobuild');
-    // A subset of unit tests on other browsers via sauce labs
-    timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
+    if (saucelabs) {
+      // A subset of unit tests on other browsers via sauce labs
+      timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
+    }
   },
-  runIntegrationTests: function(compiled) {
-    // Integration tests with all saucelabs browsers
-    let cmd = 'gulp test --nobuild --saucelabs --integration';
+  runIntegrationTests: function(compiled, saucelabs) {
+    // Integration tests on chrome, or on all saucelabs browsers if requested
+    let cmd = 'gulp test --nobuild --integration';
     if (compiled) {
       cmd += ' --compiled';
+    }
+    if (saucelabs) {
+      cmd += ' --saucelabs';
     }
     timedExecOrDie(cmd);
   },
   runVisualDiffTests: function(opt_mode) {
-    process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
+    if (process.env.TRAVIS) {
+      process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
+    } else if (!process.env.PERCY_PROJECT || !process.env.PERCY_TOKEN) {
+      console.log(
+          '\n' + fileLogPrefix, 'Could not find environment variables',
+          util.colors.cyan('PERCY_PROJECT'), 'and',
+          util.colors.cyan('PERCY_TOKEN') + '. Skipping visual diff tests.',
+          '\n');
+      return;
+    }
     let cmd = 'gulp visual-diff';
     if (opt_mode === 'skip') {
       cmd += ' --skip';
@@ -296,6 +310,14 @@ const command = {
     timedExecOrDie(cmd);
   },
   verifyVisualDiffTests: function() {
+    if (!process.env.PERCY_PROJECT || !process.env.PERCY_TOKEN) {
+      console.log(
+          '\n' + fileLogPrefix, 'Could not find environment variables',
+          util.colors.cyan('PERCY_PROJECT'), 'and',
+          util.colors.cyan('PERCY_TOKEN') +
+          '. Skipping verification of visual diff tests.', '\n');
+      return;
+    }
     timedExecOrDie('gulp visual-diff --verify');
   },
   runPresubmitTests: function() {
@@ -319,7 +341,7 @@ function runAllCommands() {
     command.runLintCheck();
     command.runJsonCheck();
     command.runDepAndTypeChecks();
-    command.runUnitTests();
+    command.runUnitTests(/* saucelabs */ true);
     command.verifyVisualDiffTests();
     // command.testDocumentLinks() is skipped during push builds.
     command.buildValidatorWebUI();
@@ -328,9 +350,33 @@ function runAllCommands() {
   if (process.env.BUILD_SHARD == 'integration_tests') {
     command.cleanBuild();
     command.buildRuntimeMinified();
-    command.runPresubmitTests(); // Needs runtime to be built and served.
-    command.runIntegrationTests(/* compiled */ true);
+    command.runPresubmitTests();
+    command.runIntegrationTests(/* compiled */ true, /* saucelabs */ true);
   }
+}
+
+function runAllCommandsLocally() {
+  // These tasks don't need a build. Run them first and fail early.
+  command.testBuildSystem();
+  command.runLintCheck();
+  command.runJsonCheck();
+  command.runDepAndTypeChecks();
+  command.testDocumentLinks();
+
+  // Build if required.
+  command.cleanBuild();
+  command.buildRuntime();
+
+  // These tests need a build.
+  command.runPresubmitTests();
+  command.runVisualDiffTests();
+  command.runUnitTests(/* saucelabs */ false);
+  command.runIntegrationTests(/* compiled */ false, /* saucelabs */ false);
+  command.verifyVisualDiffTests();
+
+  // Validator tests.
+  command.buildValidatorWebUI();
+  command.buildValidator();
 }
 
 /**
@@ -340,6 +386,15 @@ function runAllCommands() {
  */
 function main() {
   const startTime = startTimer('pr-check.js');
+
+  // Run the local version of all tests.
+  if (!process.env.TRAVIS) {
+    console.log(fileLogPrefix, 'Running all pr-check commands locally.');
+    runAllCommandsLocally();
+    stopTimer('pr-check.js', startTime);
+    return 0;
+  }
+
   console.log(
       fileLogPrefix, 'Running build shard',
       util.colors.cyan(process.env.BUILD_SHARD),
@@ -417,7 +472,7 @@ function main() {
       command.runDepAndTypeChecks();
       // Run unit tests only if the PR contains runtime changes.
       if (buildTargets.has('RUNTIME')) {
-        command.runUnitTests();
+        command.runUnitTests(/* saucelabs */ true);
       }
     }
   }
@@ -434,7 +489,7 @@ function main() {
       if (buildTargets.has('INTEGRATION_TEST') ||
           buildTargets.has('RUNTIME')) {
         command.runPresubmitTests();
-        command.runIntegrationTests(/* compiled */ false);
+        command.runIntegrationTests(/* compiled */ false, /* saucelabs */ true);
       }
       command.verifyVisualDiffTests();
     } else {
