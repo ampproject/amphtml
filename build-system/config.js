@@ -141,6 +141,8 @@ module.exports = {
     '!validator/dist/**/*.*',
     '!validator/node_modules/**/*.*',
     '!validator/nodejs/node_modules/**/*.*',
+    '!validator/webui/dist/**/*.*',
+    '!validator/webui/node_modules/**/*.*',
     '!build-system/tasks/presubmit-checks.js',
     '!build/polyfills.js',
     '!build/polyfills/*.js',
