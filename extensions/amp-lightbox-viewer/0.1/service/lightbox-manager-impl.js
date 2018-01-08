@@ -16,7 +16,7 @@
 
 import {isExperimentOn} from '../../../../src/experiments';
 import {dev} from '../../../../src/log';
-import {elementByTag} from '../../../../src/dom';
+import {elementByTag, iterateCursor} from '../../../../src/dom';
 
 const ELIGIBLE_TAP_TAGS = {
   'amp-img': true,
@@ -24,6 +24,12 @@ const ELIGIBLE_TAP_TAGS = {
 };
 
 const VIEWER_TAG = 'amp-lightbox-viewer';
+
+/** @typedef {{
+ *  url: string,
+ *  element: !Element
+ * }} */
+let LightboxThumbnailDataDef;
 
 /**
  * LightboxManager is a document-scoped service responsible for:
@@ -55,7 +61,7 @@ export class LightboxManager {
 
     /**
      * Ordered lists of lightboxable elements according to group
-     * @private {!Object<string, Array<Element>>}
+     * @private {!Object<string, !Array<!Element>>}
      */
     this.lightboxGroups_ = {
       default: [],
@@ -102,29 +108,32 @@ export class LightboxManager {
    */
   scanLightboxables_() {
     return this.ampdoc_.whenReady().then(() => {
-      const viewer = elementByTag(this.ampdoc_.getRootNode(), VIEWER_TAG).id;
       const matches = this.ampdoc_.getRootNode().querySelectorAll('[lightbox]');
-      for (let i = 0; i < matches.length; i++) {
-        const element = matches[i];
-        if (element.tagName == 'AMP-CAROUSEL') {
-          // TODO: special case carousel
-        } else {
-          const lightboxGroupId = element.getAttribute('lightbox');
-          if (lightboxGroupId == '' || lightboxGroupId == 'default') {
-            this.lightboxGroups_.default.push(dev().assertElement(element));
-          } else {
-            if (!this.lightboxGroups_.hasOwnProperty(lightboxGroupId)) {
-              this.lightboxGroups_[lightboxGroupId] = [];
-            }
-            this.lightboxGroups_[lightboxGroupId]
-                .push(dev().assertElement(element));
-          }
-          if (this.meetsHeuristicsForTap_(element)) {
-            element.setAttribute('on', 'tap:' + viewer.id + '.activate');
-          }
-        }
-      }
+      const processLightboxElement = this.processLightboxElement_.bind(this);
+      iterateCursor(matches, processLightboxElement);
     });
+  }
+
+  /**
+   * Adds element to correct lightbox group, installs tap handler.
+   * @param {!Element} element
+   * @private
+   */
+  processLightboxElement_(element) {
+    if (element.tagName == 'AMP-CAROUSEL') {
+      // TODO: special case carousel
+    } else {
+      const lightboxGroupId = element.getAttribute('lightbox') || 'default';
+      if (!this.lightboxGroups_[lightboxGroupId]) {
+        this.lightboxGroups_[lightboxGroupId] = [];
+      }
+      this.lightboxGroups_[lightboxGroupId]
+          .push(dev().assertElement(element));
+      if (this.meetsHeuristicsForTap_(element)) {
+        const viewer = elementByTag(this.ampdoc_.getRootNode(), VIEWER_TAG).id;
+        element.setAttribute('on', 'tap:' + viewer.id + '.activate');
+      }
+    }
   }
 
   /**
@@ -162,20 +171,16 @@ export class LightboxManager {
    * The function is not implemented yet. Fake for testing.
    * Find or create thumbnails for lightboxed elements.
    * Return a list of thumbnails obj for lightbox gallery view
-   * @param {!string} lightboxGroupId
-   * @return {!Array<{url: string, element: !Element}>}
+   * @param {string} lightboxGroupId
+   * @return {!Array<!LightboxThumbnailDataDef>}
    */
   getThumbnails(lightboxGroupId) {
-    const thumbnailList = [];
-    const elements = this.lightboxGroups_[lightboxGroupId];
-    for (let i = 0; i < elements.length; i++) {
-      const thumbnail = {
-        url: this.getThumbnailUrl_(dev().assertElement(elements[i]), i),
-        element: elements[i],
-      };
-      thumbnailList.push(thumbnail);
-    }
-    return thumbnailList;
+    return this.lightboxGroups_[lightboxGroupId]
+        .map((element, i) => ({
+          url: this.getThumbnailUrl_(dev().assertElement(element), i),
+          element,
+        }));
+    ;
   }
 
   /**
@@ -190,6 +195,7 @@ export class LightboxManager {
     if (element.tagName == 'AMP-IMG') {
       return element.getAttribute('src');
     } else {
+      // TODO(#12713): implement default thumbnails
       return 'https://placehold.it/128x128?text=' + index;
     }
   }

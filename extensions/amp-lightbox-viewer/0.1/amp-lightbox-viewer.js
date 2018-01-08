@@ -140,7 +140,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     /** @private {?UnlistenDef} */
     this.unlistenClick_ = null;
 
-    /** @private {!string} */
+    /** @private {string} */
     this.currentLightboxGroupId_ = 'default';
   }
 
@@ -177,7 +177,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
-   * @param {!string} lightboxGroupId
+   * @param {string} lightboxGroupId
    * @return {!Promise}
    * @private
    */
@@ -247,7 +247,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    */
   findOrBuildCarousel_(lightboxGroupId) {
     dev().assert(this.container_);
-    const existingCarousel = this.win.document.getElementById(
+    const existingCarousel = this.getAmpDoc().getElementById(
         'amp-lightbox-carousel-' + lightboxGroupId);
     if (existingCarousel) {
       this.carousel_ = existingCarousel;
@@ -272,7 +272,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.carousel_.setAttribute('type', 'slides');
     this.carousel_.setAttribute('layout', 'fill');
     const id = 'amp-lightbox-carousel-' + lightboxGroupId;
-    this.carousel_.setAttribute('id', id);
+    this.carousel_.id = id;
     return this.manager_.getElementsForLightboxGroup(lightboxGroupId)
         .then(list => {
           return this.vsync_.mutatePromise(() => {
@@ -472,8 +472,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
   /**
    * Builds a button and appends it to the container.
-   * @param {!string} label Text of the button for a11y
-   * @param {!string} className Css classname
+   * @param {string} label Text of the button for a11y
+   * @param {string} className Css classname
    * @param {!function()} action function to call when tapped
    * @private
    */
@@ -586,7 +586,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     let target = invocation.source;
     if (invocation.args && invocation.args['id']) {
       const targetId = invocation.args['id'];
-      target = this.win.document.getElementById(targetId);
+      target = this.getAmpDoc().getElementById(targetId);
       user().assert(target,
           'amp-lightbox-viewer.open: element with id: %s not found', targetId);
     }
@@ -619,7 +619,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
           'keydown', this.boundHandleKeyboardEvents_);
 
       this.carousel_.addEventListener(
-          'slideChange', event => {this.slideChangeHandler_(event);}
+          'slideChange', event => this.slideChangeHandler_(event)
       );
 
       this.setupGestures_();
@@ -897,7 +897,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       // Build gallery
       this.gallery_ = this.win.document.createElement('div');
       this.gallery_.classList.add('i-amphtml-lbv-gallery');
-      this.gallery_.setAttribute('id', galleryId);
+      this.gallery_.id = galleryId;
 
       // Initialize thumbnails
       this.updateThumbnails_();
