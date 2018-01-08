@@ -191,6 +191,9 @@ describes.realWin('amp-list component', {
     const foo = doc.createElement('div');
     const rendered = expectFetchAndRender(items, [foo]);
 
+    // Return zero width to simulate pre-layout behavior.
+    listMock.expects('getLayoutWidth').returns(0);
+
     return list.layoutCallback().then(() => rendered).then(() => {
       expect(list.container_.contains(foo)).to.be.true;
 
@@ -207,8 +210,7 @@ describes.realWin('amp-list component', {
     const foo = doc.createElement('div');
     const rendered = expectFetchAndRender(items, [foo]);
 
-    // mutatedAttributesCallback() checks layout width to determine whether
-    // the element has been laid out yet.
+    // Return non-zero width to simulate post-layout behavior.
     listMock.expects('getLayoutWidth').returns(100);
 
     return list.layoutCallback().then(() => rendered).then(() => {

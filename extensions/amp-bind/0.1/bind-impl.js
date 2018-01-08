@@ -444,7 +444,7 @@ export class Bind {
    * @visibleForTesting
    */
   removeBindingsForNodes_(nodes) {
-    const before = this.numberOfBindings();
+    const before = (getMode().development) ? this.numberOfBindings() : 0;
     // Eliminate bound elements that are descendants of `nodes`.
     filterSplice(this.boundElements_, boundElement => {
       for (let i = 0; i < nodes.length; i++) {
@@ -454,7 +454,7 @@ export class Bind {
       }
       return true;
     });
-    const after = this.numberOfBindings();
+    const after = (getMode().development) ? this.numberOfBindings() : 0;
     if (after < before) {
       dev().fine(TAG, `Removed ${before - after} bindings from ${nodes.length} `
           + 'elements and their descendants.');
