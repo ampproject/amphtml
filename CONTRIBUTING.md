@@ -17,7 +17,7 @@ We hope you'll become an ongoing participant in our open source community but we
 - [Contributor License Agreement](#contributor-license-agreement)
 - [Ongoing participation](#ongoing-participation)
   * [Discussion channels](#discussion-channels)
-  * [Weekly status updates](#weekly-status-updates)
+  * [Status updates](#status-updates)
   * [Weekly design reviews](#weekly-design-reviews)
   * [Working groups](#working-groups)
   * [See Also](#see-also)
@@ -118,11 +118,11 @@ Technical issues, designs, etc. are discussed using several different channels:
 - [Slack](https://amphtml.slack.com) ([signup](https://docs.google.com/forms/d/1wAE8w3K5preZnBkRk-MD1QkX8FmlRDxd_vs4bFSeJlQ/viewform?fbzx=4406980310789882877))
 - the [amphtml-discuss Google Group](https://groups.google.com/forum/#!forum/amphtml-discuss)
 
-### Weekly status updates
+### Status updates
 
-Weekly updates from members of the community are tracked using [Weekly Status GitHub issues](https://github.com/ampproject/amphtml/issues?q=label%3A%22Type%3A+Weekly+Status%22).
+Status updates from members of the community are tracked using approximately bi-weekly [Status Update GitHub issues](https://github.com/ampproject/amphtml/issues?q=label%3A%22Type%3A+Status+Update%22).
 
-We encourage everyone who is actively contributing to AMP to add a comment to the relevant Weekly Status issue.
+We encourage everyone who is actively contributing to AMP to add a comment to the relevant Status Update issue.
 
 ### Weekly design reviews
 
