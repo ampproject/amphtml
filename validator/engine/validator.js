@@ -1226,7 +1226,11 @@ class ReferencePointMatcher {
 let DescendantConstraints;
 
 /**
+ * tagSpec and referencePoint are the ParsedTagSpecs that best matched the
+ * stack entry. May be null. May not fully match.
  * @typedef {{ tagName: string,
+ *             tagSpec: ?ParsedTagSpec,
+ *             referencePoint: ?ParsedTagSpec,
  *             hasDescendantConstraintLists: boolean,
  *             numChildren: number,
  *             onlyChildTagName: string,
@@ -1279,6 +1283,8 @@ class TagStack {
   createNewTagStackEntry(tagName) {
     return {
       tagName: tagName,
+      tagSpec: null,
+      referencePoint: null,
       hasDescendantConstraintLists: false,
       numChildren: 0,
       onlyChildTagName: '',
@@ -1294,15 +1300,20 @@ class TagStack {
   }
 
   /**
-   * Enter a tag, opening a scope for child tags. Reason |context| and
-   * |result| are provided is that entering a tag can close the previous
-   * tag, which can trigger validation (e.g., the previous tag may be
-   * required to have two child tags).
+   * Enter a tag, opening a scope for child tags.
    * @param {string} tagName
+   * @param {!ValidateTagResult} referencePointResult
+   * @param {!ValidateTagResult} tagResult
    */
-  enterTag(tagName) {
+  enterTag(tagName, referencePointResult, tagResult) {
+    // Keep track of the number of direct children this tag has, even as we
+    // pop in and out of them on the stack.
     this.increaseChildCounterForParent();
-    this.stack_.push(this.createNewTagStackEntry(tagName));
+
+    let stackEntry = this.createNewTagStackEntry(tagName);
+    stackEntry.referencePoint = referencePointResult.bestMatchTagSpec;
+    stackEntry.tagSpec = tagResult.bestMatchTagSpec;
+    this.stack_.push(stackEntry);
   }
 
   /**
@@ -1392,7 +1403,7 @@ class TagStack {
     }
 
     // Add the tag to the stack, and then update the stack entry.
-    this.enterTag(encounteredTag.upperName());
+    this.enterTag(encounteredTag.upperName(), referencePointResult, tagResult);
 
     this.updateStackEntryFromTagResult(
         referencePointResult, parsedRules, lineCol);
@@ -1584,7 +1595,8 @@ class TagStack {
   }
 
   /**
-   * Returns true if the current tag has ancestor with the given tag name.
+   * Returns true if the current tag has ancestor with the given tag name or
+   * specName.
    * @param {string} ancestor
    * @return {boolean}
    */
@@ -1592,6 +1604,10 @@ class TagStack {
     // Skip the first element, which is "$ROOT".
     for (let i = 1; i < this.stack_.length; ++i) {
       if (this.stack_[i].tagName === ancestor) {
+        return true;
+      }
+      if ((this.stack_[i].tagSpec !== null) &&
+          (this.stack_[i].tagSpec.getSpec().specName === ancestor)) {
         return true;
       }
     }
@@ -5883,7 +5899,7 @@ amp.validator.categorizeError = function(error) {
   }
   if (error.code ===
           amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR &&
-      (error.params[1] === 'template')) {
+      ((error.params[0] === 'template') || (error.params[1] === 'template'))) {
     return amp.validator.ErrorCategory.Code.AMP_HTML_TEMPLATE_PROBLEM;
   }
   if (error.code ===
