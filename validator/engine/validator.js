@@ -1595,7 +1595,8 @@ class TagStack {
   }
 
   /**
-   * Returns true if the current tag has ancestor with the given tag name.
+   * Returns true if the current tag has ancestor with the given tag name or
+   * specName.
    * @param {string} ancestor
    * @return {boolean}
    */
@@ -1603,6 +1604,10 @@ class TagStack {
     // Skip the first element, which is "$ROOT".
     for (let i = 1; i < this.stack_.length; ++i) {
       if (this.stack_[i].tagName === ancestor) {
+        return true;
+      }
+      if ((this.stack_[i].tagSpec !== null) &&
+          (this.stack_[i].tagSpec.getSpec().specName === ancestor)) {
         return true;
       }
     }
@@ -5894,7 +5899,7 @@ amp.validator.categorizeError = function(error) {
   }
   if (error.code ===
           amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR &&
-      (error.params[1] === 'template')) {
+      ((error.params[0] === 'template') || (error.params[1] === 'template'))) {
     return amp.validator.ErrorCategory.Code.AMP_HTML_TEMPLATE_PROBLEM;
   }
   if (error.code ===
