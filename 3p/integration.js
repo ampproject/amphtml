@@ -813,7 +813,7 @@ export function validateAllowedTypes(window, type, allowedTypes) {
   if (urls.thirdPartyFrameRegex.test(window.location.hostname)) {
     return;
   }
-  if (window.location.hostname == 'ads.localhost' || getMode().localDev) {
+  if (window.location.hostname == 'ads.localhost') {
     return;
   }
   if (defaultAllowedTypesInCustomFrame.indexOf(type) != -1) {
