@@ -121,6 +121,10 @@
   align-content: flex-start;
 }
 
+.i-amphtml-lbv[gallery-view] .i-amphtml-lbv-gallery.i-amphtml-lbv-gallery-hidden {
+  display: none;
+}
+
 .i-amphtml-lbv-gallery-thumbnail {
   width: calc(100vw/3);
   height: calc(100vw/3);

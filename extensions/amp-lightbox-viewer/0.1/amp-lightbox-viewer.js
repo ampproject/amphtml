@@ -29,7 +29,7 @@ import {toggle, setStyle} from '../../../src/style';
 import {getData, listen} from '../../../src/event-helper';
 import {LightboxManager} from './service/lightbox-manager-impl';
 import {layoutRectFromDomRect} from '../../../src/layout-rect';
-import {elementByTag, removeElement} from '../../../src/dom';
+import {elementByTag} from '../../../src/dom';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
@@ -121,9 +121,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
     /** @private  {?Element} */
     this.gallery_ = null;
-
-    /** @private {?Array<{string, Element}>} */
-    this.thumbnails_ = null;
 
     /** @private  {?Element} */
     this.topBar_ = null;
@@ -490,6 +487,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     button.addEventListener('click', event => {
       action();
       event.stopPropagation();
+      event.preventDefault();
     });
 
     this.topBar_.appendChild(button);
@@ -823,9 +821,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       // If there's gallery, set gallery to display none
       this.container_.removeAttribute('gallery-view');
 
-      this.thumbnails_ = null;
       if (this.gallery_) {
-        removeElement(this.gallery_);
+        this.gallery_.classList.add('i-amphtml-lbv-gallery-hidden')
         this.gallery_ = null;
       }
     });
@@ -867,7 +864,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   openGallery_() {
     // Build gallery div for the first time
     if (!this.gallery_) {
-      this.buildGallery_();
+      this.findOrBuildGallery_();
     }
     this.container_.setAttribute('gallery-view', '');
     this.topBar_.classList.add('fullscreen');
@@ -889,21 +886,26 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
-   * Build lightbox gallery. This is called only once when user enter gallery
-   * view for the first time.
    * @private
    */
-  buildGallery_() {
-    // Build gallery
-    this.gallery_ = this.win.document.createElement('div');
-    this.gallery_.classList.add('i-amphtml-lbv-gallery');
+  findOrBuildGallery_() {
+    const galleryId = 'amp-lightbox-gallery-' + this.currentLightboxGroupId_;
+    this.gallery_ = this.win.document.getElementById(galleryId);
+    if (this.gallery_) {
+      this.gallery_.classList.remove('i-amphtml-lbv-gallery-hidden')
+    } else {
+      // Build gallery
+      this.gallery_ = this.win.document.createElement('div');
+      this.gallery_.classList.add('i-amphtml-lbv-gallery');
+      this.gallery_.setAttribute('id', galleryId);
 
-    // Initialize thumbnails
-    this.updateThumbnails_();
+      // Initialize thumbnails
+      this.updateThumbnails_();
 
-    this.vsync_.mutate(() => {
-      this.container_.appendChild(this.gallery_);
-    });
+      this.vsync_.mutate(() => {
+        this.container_.appendChild(this.gallery_);
+      });
+    }
   }
 
   /**
@@ -912,18 +914,14 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   updateThumbnails_() {
-    if (this.thumbnails_) {
-      return;
-    }
-    this.thumbnails_ = [];
-    const lightboxGid = this.currentLightboxGroupId_;
-    const thumbnailList = this.manager_.getThumbnails(lightboxGid);
-    thumbnailList.forEach(thumbnail => {
-      const thumbnailElement = this.createThumbnailElement_(thumbnail);
-      this.thumbnails_.push(thumbnailElement);
-    });
+    const thumbnails = [];
+    this.manager_.getThumbnails(this.currentLightboxGroupId_)
+      .forEach(thumbnail => {
+        const thumbnailElement = this.createThumbnailElement_(thumbnail);
+        thumbnails.push(thumbnailElement);
+      });
     this.vsync_.mutate(() => {
-      this.thumbnails_.forEach(thumbnailElement => {
+      thumbnails.forEach(thumbnailElement => {
         this.gallery_.appendChild(thumbnailElement);
       });
     });
