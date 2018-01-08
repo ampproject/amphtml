@@ -885,6 +885,7 @@ function checkTypes() {
           }),
       // Type check 3p/ads code.
       closureCompile(['./3p/integration.js'], './dist',
+<<<<<<< HEAD
           'integration-check-types.js', {
             externs: ['ads/ads.extern.js'],
             include3pDirectories: true,
@@ -905,6 +906,25 @@ function checkTypes() {
             includePolyfills: true,
             typeCheckOnly: true,
           }),
+=======
+        'integration-check-types.js', {
+          include3pDirectories: true,
+          includePolyfills: true,
+          checkTypes: true,
+        }),
+      closureCompile(['./3p/ampcontext-lib.js'], './dist',
+        'ampcontext-check-types.js', {
+          include3pDirectories: true,
+          includePolyfills: true,
+          checkTypes: true,
+        }),
+      closureCompile(['./3p/iframe-transport-client-lib.js'], './dist',
+        'iframe-transport-client-check-types.js', {
+          include3pDirectories: true,
+          includePolyfills: true,
+          checkTypes: true,
+        }),
+>>>>>>> fix a few more type issues
     ]);
   }).then(() => {
     if (process.env.TRAVIS) {

@@ -18,6 +18,7 @@ import {TAG} from './vars';
 import {WindowMessenger} from './window-messenger';
 import {getMode} from '../../../src/mode';
 import {parseQueryString} from '../../../src/url.js';
+import {getData} from '../../../src/event-helper';
 import {user} from '../../../src/log';
 
 /**
@@ -303,7 +304,9 @@ export class AmpWebPushHelperFrame {
    * @private
    */
   onPageMessageReceivedFromServiceWorker_(event) {
-    const {command, payload} = event.data;
+    const data = getData(event);
+    const command = data['command'];
+    const payload = data['payload'];
     const callbackPromiseResolver = this.allowedWorkerMessageTopics_[command];
 
     if (typeof callbackPromiseResolver === 'function') {
