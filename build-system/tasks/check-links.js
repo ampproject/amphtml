@@ -35,18 +35,11 @@ function getMarkdownFiles() {
   if (!!argv.files) {
     return argv.files.split(',');
   }
-  if (!!process.env.TRAVIS_PULL_REQUEST_SHA) {
-    // On Travis, derive the list of .md files from the latest commit.
-    const filesInPr =
-          getStdout('git diff --name-only master...HEAD').trim().split('\n');
-    return filesInPr.filter(function(file) {
-      return path.extname(file) == '.md';
-    });
-  }
-  // A list of files is required when check-links is run locally.
-  util.log(util.colors.red(
-      'Error: A list of markdown files must be specified via --files'));
-  process.exit(1);
+  const filesInPr =
+        getStdout('git diff --name-only master...HEAD').trim().split('\n');
+  return filesInPr.filter(function(file) {
+    return path.extname(file) == '.md';
+  });
 }
 
 /**
@@ -110,7 +103,7 @@ function checkLinks() {
         } else {
           util.log(
               util.colors.green('SUCCESS'),
-              'All links in all markdown files in this PR are alive.');
+              'All links in all markdown files in this branch are alive.');
         }
       });
 }
