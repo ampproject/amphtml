@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {poll} from '../../testing/iframe';
 import {listenOncePromise} from '../../src/event-helper';
 
 const config = describe.configure().ifNewChrome();
@@ -110,9 +109,3 @@ config.run('amp-sidebar', function() {
     });
   });
 });
-
-function waitForScrollFinish(win, position) {
-  return poll('wait for scroll to finish', () => {
-    return win.document.scrollingElement.scrollTop == position;
-  });
-}
