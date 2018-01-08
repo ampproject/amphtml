@@ -53,7 +53,9 @@ var red = $$.util.colors.red;
 var cyan = $$.util.colors.cyan;
 
 var minifiedRuntimeTarget = 'dist/v0.js';
+var minified3pTarget = 'dist.3p/current-min/f.js';
 var unminifiedRuntimeTarget = 'dist/amp.js';
+var unminified3pTarget = 'dist.3p/current/integration.js';
 
 // Each extension and version must be listed individually here.
 declareExtension('amp-3q-player', '0.1', false);
@@ -444,7 +446,7 @@ function copyCss() {
  * @return {!Promise}
  */
 function watch() {
-  printConfigHelp('gulp watch', unminifiedRuntimeTarget);
+  printConfigHelp('gulp watch');
   $$.watch('css/**/*.css', function() {
     compileCss();
   });
@@ -457,6 +459,8 @@ function watch() {
     compile(true),
   ]).then(() => {
     return enableLocalTesting(unminifiedRuntimeTarget);
+  }).then(() => {
+    return enableLocalTesting(unminified3pTarget);
   });
 }
 
@@ -571,24 +575,17 @@ function buildExtensionJs(path, name, version, options) {
 /**
  * Prints a helpful message that lets the developer know how to switch configs.
  * @param {string} command Command being run.
- * @param {string} targetFile File to which the config is to be written.
  */
-function printConfigHelp(command, targetFile) {
+function printConfigHelp(command) {
   if (!process.env.TRAVIS) {
     $$.util.log(
         green('Building the runtime for local testing with the'),
         cyan((argv.config === 'canary') ? 'canary' : 'prod'),
         green('AMP config'));
     $$.util.log(
-        green('- To specify which config to apply:'),
-        cyan(command), cyan('--config={canary|prod}'));
-    $$.util.log(
-        green('- To switch configs after building:'),
-        cyan('gulp prepend-global {--canary|--prod} --local_dev --target ' +
-            targetFile));
-    $$.util.log(
-        green('- To remove any existing config:'),
-        cyan('gulp prepend-global --remove --target ' + targetFile));
+        green('To specify which config to apply, use',
+            cyan('--config={canary|prod}'), 'with your',
+            cyan(command), 'command'));
   }
 }
 
@@ -614,7 +611,7 @@ function enableLocalTesting(targetFile) {
  */
 function build() {
   process.env.NODE_ENV = 'development';
-  printConfigHelp('gulp build', unminifiedRuntimeTarget);
+  printConfigHelp('gulp build');
   return compileCss().then(() => {
     return Promise.all([
       polyfillsForTests(),
@@ -627,6 +624,8 @@ function build() {
     ]);
   }).then(() => {
     return enableLocalTesting(unminifiedRuntimeTarget);
+  }).then(() => {
+    return enableLocalTesting(unminified3pTarget);
   });
 }
 
@@ -638,7 +637,7 @@ function dist() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   if (argv.fortesting) {
-    printConfigHelp('gulp dist --fortesting', minifiedRuntimeTarget)
+    printConfigHelp('gulp dist --fortesting')
   }
   return compileCss().then(() => {
     return Promise.all([
@@ -661,6 +660,10 @@ function dist() {
   }).then(() => {
     if (argv.fortesting) {
       return enableLocalTesting(minifiedRuntimeTarget);
+    }
+  }).then(() => {
+    if (argv.fortesting) {
+      return enableLocalTesting(minified3pTarget);
     }
   });
 }

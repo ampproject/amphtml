@@ -178,14 +178,7 @@ function enableLocalDev(config, target, configJson) {
           'in', cyan(target));
     }
   }
-  LOCAL_DEV_AMP_CONFIG = Object.assign(LOCAL_DEV_AMP_CONFIG, configJson);
-  const herokuConfigFile = 'node_modules/AMP_CONFIG.json';
-  fs.writeFileSync(herokuConfigFile, JSON.stringify(LOCAL_DEV_AMP_CONFIG));
-  if (!process.env.TRAVIS) {
-    util.log('Wrote', cyan(config), 'AMP config to', cyan(herokuConfigFile),
-        'for use with Heroku');
-  }
-  return LOCAL_DEV_AMP_CONFIG;
+  return Object.assign(LOCAL_DEV_AMP_CONFIG, configJson);
 }
 
 /**
