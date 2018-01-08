@@ -31,13 +31,16 @@ export function adsense(global, data) {
       ['adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin', 'experimentId',
         'ampSlotIndex', 'adChannel', 'autoFormat', 'fullWidth']);
 
-  user().assert(
-      data['autoFormat'] !== 'rspv' ||
-        data['height'] == ADSENSE_RSPV_WHITELISTED_HEIGHT,
-      'Specified height ' + data['height'] +
-      ' in <amp-ad> tag is not equal to the required height of ' +
-      ADSENSE_RSPV_WHITELISTED_HEIGHT +
-      ' for responsive AdSense ad units.');
+  if (data['autoFormat'] == 'rspv') {
+    user().assert(data['height'] == ADSENSE_RSPV_WHITELISTED_HEIGHT,
+        `Specified height ${data['height']} in <amp-ad> tag is not equal to ` +
+        `the required height of ${ADSENSE_RSPV_WHITELISTED_HEIGHT} for ` +
+        'responsive AdSense ad units.');
+
+    user().assert(data['width'] == '100vw',
+        `Invalid width ${data['width']} for full-width responsive <amp-ad> ` +
+        'tag. Width must be 100vw.');
+  }
 
   if (global.context.clientId) {
     // Read by GPT for GA/GPT integration.
