@@ -188,7 +188,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     return this.buildCarousel_().then(() => {
       this.buildDescriptionBox_();
       this.buildTopBar_();
-      this.setupEventListeners_();
     });
   }
 
@@ -589,6 +588,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
           'keydown', this.boundHandleKeyboardEvents_);
 
       this.setupGestures_();
+      this.setupEventListeners_();
 
       return this.resources_.requireLayout(dev().assertElement(this.carousel_));
     }).then(() => this.openLightboxForElement_(element));

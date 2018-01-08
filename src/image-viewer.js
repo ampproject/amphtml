@@ -325,18 +325,18 @@ export class ImageViewer {
 
   /** @private */
   setupGestures_() {
-    const gesturesWithoutPreventDefault = Gestures.get(this.image_,
+    this.gestures_ = Gestures.get(this.viewer_,
         /* opt_shouldNotPreventDefault */true);
-    gesturesWithoutPreventDefault.onPointerDown(() => {
+    this.gestures_.onPointerDown(() => {
       if (this.motion_) {
         this.motion_.halt();
+        event.preventDefault();
       }
     });
 
-    this.gestures_ = Gestures.get(this.viewer_);
-
     // Zoomable.
     this.gestures_.onGesture(DoubletapRecognizer, e => {
+      event.preventDefault();
       let newScale;
       if (this.scale_ == 1) {
         newScale = this.maxScale_;
@@ -351,6 +351,7 @@ export class ImageViewer {
     });
 
     this.gestures_.onGesture(TapzoomRecognizer, e => {
+      event.preventDefault();
       this.onTapZoom_(e.data.centerClientX, e.data.centerClientY,
           e.data.deltaX, e.data.deltaY);
       if (e.data.last) {
@@ -360,6 +361,7 @@ export class ImageViewer {
     });
 
     this.gestures_.onGesture(PinchRecognizer, e => {
+      event.preventDefault();
       this.onPinchZoom_(e.data.centerClientX, e.data.centerClientY,
           e.data.deltaX, e.data.deltaY, e.data.dir);
       if (e.data.last) {
@@ -376,6 +378,7 @@ export class ImageViewer {
     // Movable.
     this.unlistenOnSwipePan_ = this.gestures_
         .onGesture(SwipeXYRecognizer, e => {
+          event.preventDefault();
           this.onMove_(e.data.deltaX, e.data.deltaY, false);
           if (e.data.last) {
             this.onMoveRelease_(e.data.velocityX, e.data.velocityY);
