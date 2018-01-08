@@ -37,6 +37,11 @@ let RtcVendorDef;
 /** @const {!Object<string, RtcVendorDef>} */
 export const RTC_VENDORS = {
   // Add vendors here
+  medianet: {
+    url: 'https://amprtc.media.net/rtb/getrtc?cid=CID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&tgt=TGT&purl=HREF',
+    macros: ['CID'],
+    disableKeyAppend: true,
+  },
 };
 
 // DO NOT MODIFY: Setup for tests
