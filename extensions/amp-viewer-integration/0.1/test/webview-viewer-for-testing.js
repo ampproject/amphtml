@@ -51,10 +51,14 @@ export class WebviewViewerForTesting {
     /** @type {Element} */
     this.containerEl = containerEl;
 
-    /** @type {Window} */
+    /** @type {!Window} */
     this.win = window;
 
-    this.messageHandlers_ = [];
+    /** @private {string} */
+    this.id_ = id;
+
+    /** @private @const {!Object<string, function(!Event)>} */
+    this.messageHandlers_ = Object.create(null);
 
     /** @type {Element} */
     this.iframe = document.createElement('iframe');
@@ -70,17 +74,31 @@ export class WebviewViewerForTesting {
     this.pollingIntervalIds_ = [];
     this.intervalCtr = 0;
 
+    /** @private {?function()} */
+    this.handshakeResponseResolve_ = null;
+
     /** @private @const {!Promise} */
     this.handshakeReceivedPromise_ = new Promise(resolve => {
-      /** @private {?function()} */
       this.handshakeResponseResolve_ = resolve;
     });
 
+    /** @private {?function()} */
+    this.documentLoadedResolve_ = null;
+
     /** @private @const {!Promise} */
     this.documentLoadedPromise_ = new Promise(resolve => {
-      /** @private {?function()} */
       this.documentLoadedResolve_ = resolve;
     });
+
+    /**
+     * @private {?Messaging}
+     */
+    this.messaging_ = null;
+
+    /**
+     * @type {number}
+     */
+    this.prerenderSize = 0;
   }
 
   /**
@@ -149,7 +167,7 @@ export class WebviewViewerForTesting {
 
 
   completeHandshake_(channel, requestId) {
-    this.log('Viewer ' + this.id + ' messaging established!');
+    this.log('Viewer ' + this.id_ + ' messaging established!');
     const message = {
       app: APP,
       requestid: requestId,
@@ -158,12 +176,28 @@ export class WebviewViewerForTesting {
     this.log('############## viewer posting1 Message', message);
     channel.port1./*OK*/postMessage(JSON.stringify(message));
 
-    class WindowPortEmulator {
+    /**
+     * @extends {../messaging/messaging.WindowPortEmulator}
+     */
+    class FakeWindowPortEmulator {
       constructor(messageHandlers, id, log) {
+        /**
+         * @private @const {!Object<string, function(!Event)>}
+         */
         this.messageHandlers_ = messageHandlers;
+
+        /**
+         * @type {string}
+         */
         this.id_ = id;
+
+
+        /**
+         * @private {function(...*)}
+         */
         this.log_ = log;
       }
+
       addEventListener(messageType, messageHandler) {
         this.log_('messageHandler', messageHandler);
         this.messageHandlers_[this.id_] = messageHandler;
@@ -175,7 +209,7 @@ export class WebviewViewerForTesting {
       start() {}
     }
     this.messaging_ = new Messaging(this.win,
-        new WindowPortEmulator(this.messageHandlers_, this.id, this.log));
+        new FakeWindowPortEmulator(this.messageHandlers_, this.id_, this.log));
 
     this.messaging_.setDefaultHandler((type, payload, awaitResponse) => {
       console/*OK*/.log(
@@ -200,8 +234,8 @@ export class WebviewViewerForTesting {
   }
 
   handleMessage_(e) {
-    if (this.messageHandlers_[this.id]) {
-      this.messageHandlers_[this.id](e);
+    if (this.messageHandlers_[this.id_]) {
+      this.messageHandlers_[this.id_](e);
     }
 
     this.log('************** viewer got a message,', e.data);
@@ -241,8 +275,11 @@ export class WebviewViewerForTesting {
     }
   }
 
-  log() {
-    const var_args = Array.prototype.slice.call(arguments, 0);
+  /**
+   * @param {...*} var_args
+   */
+  log(var_args) {
+    var_args = Array.prototype.slice.call(arguments, 0);
     console/*OK*/.log.apply(console, var_args);
   }
 }

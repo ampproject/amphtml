@@ -202,7 +202,7 @@ export class AmpWebPushPermissionDialog {
   /**
    * Toggles a predefined visiblity class name on the specified DOM element.
    *
-   * @param {HTMLElement} domElement
+   * @param {Element} domElement
    * @param {boolean} isVisible
    * @private
    *

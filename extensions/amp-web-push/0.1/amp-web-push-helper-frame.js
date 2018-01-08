@@ -108,7 +108,7 @@ export class AmpWebPushHelperFrame {
   /**
    * Ensures replies to the AMP page messenger have a consistent payload format.
    *
-   * @param {function(?, function())} replyToFrameFunction
+   * @param {function(?)} replyToFrameFunction
    * @param {boolean} wasSuccessful
    * @param {?} errorPayload
    * @param {?} successPayload
@@ -129,7 +129,7 @@ export class AmpWebPushHelperFrame {
 
   /**
    * @param {NotificationPermissionStateMessage} message
-   * @param {function(?, function())} replyToFrame
+   * @param {function(?)} replyToFrame
    * @private
    */
   onAmpPageMessageReceivedNotificationPermissionState_(message, replyToFrame) {
@@ -161,7 +161,7 @@ export class AmpWebPushHelperFrame {
 
   /**
    * @param {StorageGetMessage} message
-   * @param {function(?, function())} replyToFrame
+   * @param {function(?)} replyToFrame
    * @private
    */
   onAmpPageMessageReceivedStorageGet_(message, replyToFrame) {
@@ -184,7 +184,7 @@ export class AmpWebPushHelperFrame {
 
   /**
    * @param {?} _
-   * @param {function(?, function())} replyToFrame
+   * @param {function(?)} replyToFrame
    * @private
    */
   onAmpPageMessageReceivedServiceWorkerState_(_, replyToFrame) {
@@ -219,7 +219,7 @@ export class AmpWebPushHelperFrame {
 
   /**
    * @param {ServiceWorkerRegistrationMessage} message
-   * @param {function(?, function())} replyToFrame
+   * @param {function(?)} replyToFrame
    * @private
    */
   onAmpPageMessageReceivedServiceWorkerRegistration_(message, replyToFrame) {
@@ -257,8 +257,8 @@ export class AmpWebPushHelperFrame {
   }
 
   /**
-   * @param {ServiceWorkerRegistrationMessage} message
-   * @param {function(?, function())} replyToFrame
+   * @param {ServiceWorkerMessage} message
+   * @param {function(?)} replyToFrame
    * @private
    */
   onAmpPageMessageReceivedServiceWorkerQuery_(message, replyToFrame) {
@@ -330,7 +330,7 @@ export class AmpWebPushHelperFrame {
     * @private
     */
   isWorkerControllingPage_() {
-    return (
+    return !!(
       this.window_.navigator.serviceWorker &&
       this.window_.navigator.serviceWorker.controller &&
       this.window_.navigator.serviceWorker.controller.state === 'activated'
