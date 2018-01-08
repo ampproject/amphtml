@@ -219,7 +219,7 @@ class MultipleAdvancementConfig extends AdvancementConfig {
  */
 class ManualAdvancement extends AdvancementConfig {
   /**
-   * @param {!Element} element The element that, when clicked, can cause
+   * @param {!./amp-story-page.AmpStoryPage} page The page that, when clicked, can cause
    *     advancing to the next page or going back to the previous.
    */
   constructor(page) {
