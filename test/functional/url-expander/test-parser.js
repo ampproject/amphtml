@@ -1,3 +1,19 @@
+/**
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import {Parser} from '../../../src/service/url-expander/parser';
 import {GlobalVariableSource} from '../../../src/service/url-replacements-impl';
 
@@ -15,11 +31,9 @@ describes.fakeWin('Parser', {
 }, env => {
 
   let parser;
-  let ampdoc;
   let variableSource;
 
   beforeEach(() => {
-    ampdoc = env.ampdoc;
     variableSource = new GlobalVariableSource(env.ampdoc);
     parser = new Parser(variableSource);
   });
@@ -149,20 +163,23 @@ describes.fakeWin('Parser', {
           .to.eventually.equal('aaaBBB')
     );
 
-    it('parses function with two funcs as args', () =>
-      expect(parser.expand('CONCAT(LOWERCASE(AAA),UPPERCASE(bbb)', mockBindings))
-          .to.eventually.equal('aaaBBB')
-    );
+    it('parses function with two funcs as args', () => {
+      const url = 'CONCAT(LOWERCASE(AAA),UPPERCASE(bbb)';
+      return expect(parser.expand(url, mockBindings))
+          .to.eventually.equal('aaaBBB');
+    });
 
-    it('parses function with three funcs as args', () =>
-      expect(parser.expand('CAT_THREE(LOWERCASE(AAA),UPPERCASE(bbb),LOWERCASE(CCC))', mockBindings))
-          .to.eventually.equal('aaaBBBccc')
-    );
+    it('parses function with three funcs as args', () => {
+      const url = 'CAT_THREE(LOWERCASE(AAA),UPPERCASE(bbb),LOWERCASE(CCC))';
+      return expect(parser.expand(url, mockBindings))
+          .to.eventually.equal('aaaBBBccc');
+    });
 
     it('should handle real urls', () => {
       const url = 'http://www.amp.google.com/?client=CLIENT_ID(__ga)&canon=CANONICAL_URL&random=RANDOM';
       const expected = 'http://www.amp.google.com/?client=amp-GA12345&canon=www.google.com&random=123456';
-      return expect(parser.expand(url, mockBindings)).to.eventually.equal(expected);
+      return expect(parser.expand(url, mockBindings))
+          .to.eventually.equal(expected);
     });
 
     it.skip('parses one unknown function, one argument', () =>

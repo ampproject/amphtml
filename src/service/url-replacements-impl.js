@@ -721,8 +721,8 @@ export class UrlReplacements {
    */
   expandUrlSync(url, opt_bindings, opt_collectVars, opt_whiteList) {
     return this.ensureProtocolMatches_(url, /** @type {string} */ (this.expand_(
-      url, opt_bindings, opt_collectVars, /* opt_sync */ true,
-      opt_whiteList)));
+        url, opt_bindings, opt_collectVars, /* opt_sync */ true,
+        opt_whiteList)));
   }
 
   /**

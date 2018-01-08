@@ -141,13 +141,16 @@ export class Parser {
     if (!url.length) {
       return Promise.resolve(url);
     }
-    const expr = this.variableSource_.getExpr(opt_bindings, /*opt_ignoreArgs */ true);
+    const expr = this.variableSource_
+        .getExpr(opt_bindings, /*opt_ignoreArgs */ true);
+
     const matches = this.findMatches_(url, expr);
     // if no keywords move on
     if (!matches.length) {
       return Promise.resolve(url);
     }
-    const mergedPositions = this.eliminateOverlaps_(matches, url, opt_whiteList);
+    const mergedPositions = this.eliminateOverlaps_(matches, url,
+        opt_whiteList);
     return this.parseUrlRecursively_(url, mergedPositions, opt_bindings);
   }
 
@@ -215,8 +218,8 @@ export class Parser {
         else if (url[urlIndex] === ')') {
           urlIndex++;
           const binding = stack.pop();
-          const args = [...results, builder.trim()];
-          const value = this.evaluateBinding_(binding, args);
+          results.push(builder.trim());
+          const value = this.evaluateBinding_(binding, results);
           return value;
         }
 
