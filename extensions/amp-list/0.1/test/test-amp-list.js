@@ -187,22 +187,13 @@ describes.realWin('amp-list component', {
   });
 
   it('should _not_ reload if [src] attribute changes (before layout)', () => {
-    const items = [{title: 'foo'}];
-    const foo = doc.createElement('div');
-    const rendered = expectFetchAndRender(items, [foo]);
-
     // Return zero width to simulate pre-layout behavior.
     listMock.expects('getLayoutWidth').returns(0);
+    // Not allowed before layout.
+    listMock.expects('fetchList_').never();
 
-    return list.layoutCallback().then(() => rendered).then(() => {
-      expect(list.container_.contains(foo)).to.be.true;
-
-      // Not allowed before layout.
-      listMock.expects('fetchList_').never();
-
-      element.setAttribute('src', 'https://new.com/list.json');
-      list.mutatedAttributesCallback({'src': 'https://new.com/list.json'});
-    });
+    element.setAttribute('src', 'https://new.com/list.json');
+    list.mutatedAttributesCallback({'src': 'https://new.com/list.json'});
   });
 
   it('should reload if [src] attribute changes (after layout)', () => {
