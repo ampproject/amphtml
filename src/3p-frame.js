@@ -111,6 +111,9 @@ export function getIframe(
   if (attributes['height']) {
     iframe.height = attributes['height'];
   }
+  if (attributes['title']) {
+    iframe.title = attributes['title'];
+  }
   iframe.setAttribute('scrolling', 'no');
   setStyle(iframe, 'border', 'none');
   /** @this {!Element} */
