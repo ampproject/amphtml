@@ -61,10 +61,10 @@ function buildCodeownersFile(dirs) {
         // ```
         const subItemUsername = Object.keys(item)[0];
         const username = subItemUsername.indexOf('@') !== 0 ?
-            `@${subItemUsername}` : subItemUsername;
+          `@${subItemUsername}` : subItemUsername;
         item[subItemUsername].forEach(function(pattern) {
           codeowners += `${dirpath === '*' ? pattern :
-              `${dirpath}/${pattern}`} ${username}`;
+            `${dirpath}/${pattern}`} ${username}`;
         });
       }
     });

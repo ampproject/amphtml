@@ -198,8 +198,8 @@ function getLogEntriesForType(rootElement, logType) {
   const precondition = logType.precondition || (unusedEl => true);
 
   const elements = logType.selector ?
-      [].slice.call(scopedQuerySelectorAll(rootElement, logType.selector)) :
-      [rootElement];
+    [].slice.call(scopedQuerySelectorAll(rootElement, logType.selector)) :
+    [rootElement];
 
   return elements
       .filter(precondition)

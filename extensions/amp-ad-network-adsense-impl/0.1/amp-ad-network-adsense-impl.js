@@ -49,7 +49,7 @@ import {
 import {removeElement} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/string';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {clamp} from '../../../src/utils/math';
@@ -63,6 +63,7 @@ import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
   getAdSenseAmpAutoAdsExpBranch,
 } from '../../../ads/google/adsense-amp-auto-ads';
+import {ADSENSE_RSPV_WHITELISTED_HEIGHT} from '../../../ads/google/utils';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
@@ -154,6 +155,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /**
    * @return {boolean}
    * @private
+   * @visibleForTesting
    */
   isResponsive_() {
     return this.autoFormat_ == 'rspv';
@@ -168,6 +170,16 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * to an amp-ad-adsense element. Thus, if we are an amp-ad, we can be sure
      * that it has been verified.
      */
+    const height = this.element.getAttribute('height');
+    if (this.isResponsive_() &&
+        height != ADSENSE_RSPV_WHITELISTED_HEIGHT) {
+      user().error(TAG,
+          'Specified height ' + height +
+          ' in <amp-ad> tag is not equal to the required height of ' +
+          ADSENSE_RSPV_WHITELISTED_HEIGHT +
+          ' for responsive AdSense ad units.');
+      return false;
+    }
     return !!this.element.getAttribute('data-ad-client') &&
         this.isAmpAdElement();
   }
@@ -221,8 +233,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         && !isNaN(width) && width > 0
         && !isNaN(height) && height > 0;
     this.size_ = useDefinedSizes
-        ? {width, height}
-        : this.getIntersectionElementLayoutBox();
+      ? {width, height}
+      : this.getIntersectionElementLayoutBox();
     const format = `${this.size_.width}x${this.size_.height}`;
     const slotId = this.element.getAttribute('data-amp-slot-index');
     // data-amp-slot-index is set by the upgradeCallback method of amp-ad.
@@ -252,6 +264,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'bc': global.SVGElement && global.document.createElementNS ? '1' : null,
       'ctypes': this.getCtypes_(),
       'host': this.element.getAttribute('data-ad-host'),
+      'hl': this.element.getAttribute('data-language'),
       'to': this.element.getAttribute('data-tag-origin'),
       'pv': sharedStateParams.pv,
       'channel': this.element.getAttribute('data-ad-channel'),

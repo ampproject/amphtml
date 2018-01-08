@@ -328,7 +328,7 @@ function runAllCommands() {
   if (process.env.BUILD_SHARD == 'integration_tests') {
     command.cleanBuild();
     command.buildRuntimeMinified();
-    command.runPresubmitTests();  // Needs runtime to be built and served.
+    command.runPresubmitTests(); // Needs runtime to be built and served.
     command.runIntegrationTests(/* compiled */ true);
   }
 }
@@ -396,7 +396,8 @@ function main() {
 
   // Run different sets of independent tasks in parallel to reduce build time.
   if (process.env.BUILD_SHARD == 'unit_tests') {
-    if (buildTargets.has('BUILD_SYSTEM')) {
+    if (buildTargets.has('BUILD_SYSTEM') ||
+        buildTargets.has('RUNTIME')) {
       command.testBuildSystem();
     }
     if (buildTargets.has('BUILD_SYSTEM') ||

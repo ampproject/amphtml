@@ -26,6 +26,7 @@ import {
   DoubletapRecognizer,
   SwipeXYRecognizer,
   TapzoomRecognizer,
+  PinchRecognizer,
 } from './gesture-recognizers';
 import {bezierCurve} from './curve';
 import {isLoaded} from './event-helper';
@@ -118,6 +119,10 @@ export class ImageViewer {
     this.maxX_ = 0;
     /** @private {number} */
     this.maxY_ = 0;
+    /** @private {?./gesture.Gestures} */
+    this.gestures_ = null;
+    /** @private {?function()} */
+    this.unlistenOnSwipePan_ = null;
 
     /** @private {?./motion.Motion} */
     this.motion_ = null;
@@ -236,25 +241,35 @@ export class ImageViewer {
       // It will be updated later.
       this.image_.setAttribute('src', sourceImage.src);
     }
+
+    st.setStyles(this.image_, {
+      top: st.px(0),
+      left: st.px(0),
+      width: st.px(0),
+      height: st.px(0),
+    });
   }
 
   /**
    * Measures the image viewer and image sizes and positioning.
+   * @return {!Promise}
    */
   measure() {
-    this.lightbox_.getVsync().measure(() => {
+    return this.lightbox_.getVsync().measurePromise(() => {
       this.viewerBox_ = layoutRectFromDomRect(this.viewer_
-        ./*OK*/getBoundingClientRect());
+          ./*OK*/getBoundingClientRect());
 
-      const sf = Math.min(this.viewerBox_.width / this.sourceWidth_,
-          this.viewerBox_.height / this.sourceHeight_);
-      let width = Math.min(this.sourceWidth_ * sf, this.viewerBox_.width);
-      let height = Math.min(this.sourceHeight_ * sf, this.viewerBox_.height);
+      const sourceAspectRatio = this.sourceWidth_ / this.sourceHeight_;
+      let height = Math.min(this.viewerBox_.width / sourceAspectRatio,
+          this.viewerBox_.height);
+      let width = Math.min(this.viewerBox_.height * sourceAspectRatio,
+          this.viewerBox_.width);
 
       // TODO(dvoytenko): This is to reduce very small expansions that often
       // look like a stutter. To be evaluated if this is still the right
       // idea.
-      if (width - this.sourceWidth_ <= 16) {
+      if (width - this.sourceWidth_ <= 16
+          && height - this.sourceHeight_ <= 16) {
         width = this.sourceWidth_;
         height = this.sourceHeight_;
       }
@@ -279,6 +294,7 @@ export class ImageViewer {
       this.updatePanZoomBounds_(this.scale_);
       this.updatePanZoom_();
 
+    }).then(() => {
       this.updateSrc_();
     });
   }
@@ -309,27 +325,18 @@ export class ImageViewer {
 
   /** @private */
   setupGestures_() {
-    const gestures = Gestures.get(this.image_,
-        /* opt_shouldNotPreventDefault */ true);
-
-    // Movable.
-    gestures.onGesture(SwipeXYRecognizer, e => {
-      if (this.isScaled()) {
-        event.preventDefault();
-        this.onMove_(e.data.deltaX, e.data.deltaY, false);
-        if (e.data.last) {
-          this.onMoveRelease_(e.data.velocityX, e.data.velocityY);
-        }
-      }
-    });
-    gestures.onPointerDown(() => {
+    const gesturesWithoutPreventDefault = Gestures.get(this.image_,
+        /* opt_shouldNotPreventDefault */true);
+    gesturesWithoutPreventDefault.onPointerDown(() => {
       if (this.motion_) {
         this.motion_.halt();
       }
     });
 
+    this.gestures_ = Gestures.get(this.viewer_);
+
     // Zoomable.
-    gestures.onGesture(DoubletapRecognizer, e => {
+    this.gestures_.onGesture(DoubletapRecognizer, e => {
       let newScale;
       if (this.scale_ == 1) {
         newScale = this.maxScale_;
@@ -339,17 +346,53 @@ export class ImageViewer {
       const deltaX = this.viewerBox_.width / 2 - e.data.clientX;
       const deltaY = this.viewerBox_.height / 2 - e.data.clientY;
       this.onZoom_(newScale, deltaX, deltaY, true).then(() => {
-        return this.onZoomRelease_(0, 0, 0, 0, 0, 0);
+        return this.onZoomRelease_();
       });
     });
-    gestures.onGesture(TapzoomRecognizer, e => {
-      this.onZoomInc_(e.data.centerClientX, e.data.centerClientY,
+
+    this.gestures_.onGesture(TapzoomRecognizer, e => {
+      this.onTapZoom_(e.data.centerClientX, e.data.centerClientY,
           e.data.deltaX, e.data.deltaY);
       if (e.data.last) {
-        this.onZoomRelease_(e.data.centerClientX, e.data.centerClientY,
+        this.onTapZoomRelease_(e.data.centerClientX, e.data.centerClientY,
             e.data.deltaX, e.data.deltaY, e.data.velocityY, e.data.velocityY);
       }
     });
+
+    this.gestures_.onGesture(PinchRecognizer, e => {
+      this.onPinchZoom_(e.data.centerClientX, e.data.centerClientY,
+          e.data.deltaX, e.data.deltaY, e.data.dir);
+      if (e.data.last) {
+        this.onZoomRelease_();
+      }
+    });
+  }
+
+  /**
+   * Registers a Swipe gesture to handle panning when the image is zoomed.
+   * @private
+   */
+  registerPanningGesture_() {
+    // Movable.
+    this.unlistenOnSwipePan_ = this.gestures_
+        .onGesture(SwipeXYRecognizer, e => {
+          this.onMove_(e.data.deltaX, e.data.deltaY, false);
+          if (e.data.last) {
+            this.onMoveRelease_(e.data.velocityX, e.data.velocityY);
+          }
+        });
+  }
+
+  /**
+   * Deregisters the Swipe gesture for panning when the image is zoomed out.
+   * @private
+   */
+  unregisterPanningGesture_() {
+    if (this.unlistenOnSwipePan_) {
+      this.unlistenOnSwipePan_();
+      this.unlistenOnSwipePan_ = null;
+      this.gestures_.removeGesture(SwipeXYRecognizer);
+    }
   }
 
   /**
@@ -490,23 +533,48 @@ export class ImageViewer {
   }
 
   /**
-   * Performs a one-step zoom action.
+   * Performs a one-step pinch zoom action.
+   * @param {number} centerClientX
+   * @param {number} centerClientY
+   * @param {number} deltaX
+   * @param {number} deltaY
+   *  @param {number} dir
+   * @private
+   */
+  onPinchZoom_(centerClientX, centerClientY, deltaX, deltaY, dir) {
+    this.zoomToPoint_(centerClientX, centerClientY, deltaX, deltaY, dir);
+  }
+
+  /**
+   * Performs a one-step tap zoom action.
    * @param {number} centerClientX
    * @param {number} centerClientY
    * @param {number} deltaX
    * @param {number} deltaY
    * @private
    */
-  onZoomInc_(centerClientX, centerClientY, deltaX, deltaY) {
-    const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+  onTapZoom_(centerClientX, centerClientY, deltaX, deltaY) {
+    const dir = Math.abs(deltaY) > Math.abs(deltaX) ?
+      Math.sign(deltaY) : Math.sign(-deltaX);
+    this.zoomToPoint_(centerClientX, centerClientY, deltaX, deltaY, dir);
+  }
 
-    const zoomSign = Math.abs(deltaY) > Math.abs(deltaX) ?
-        Math.sign(deltaY) : Math.sign(-deltaX);
-    if (zoomSign == 0) {
+  /**
+   * Given center position, zoom delta, and zoom position, computes
+   * and updates a zoom action on the image.
+   * @param {number} centerClientX
+   * @param {number} centerClientY
+   * @param {number} deltaX
+   * @param {number} deltaY
+   * @param {number} dir
+   * @private
+   */
+  zoomToPoint_(centerClientX, centerClientY, deltaX, deltaY, dir) {
+    if (dir == 0) {
       return;
     }
-
-    const newScale = this.startScale_ * (1 + zoomSign * dist / 100);
+    const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const newScale = this.startScale_ * (1 + dir * dist / 100);
     const deltaCenterX = this.viewerBox_.width / 2 - centerClientX;
     const deltaCenterY = this.viewerBox_.height / 2 - centerClientY;
     deltaX = Math.min(deltaCenterX, deltaCenterX * (dist / 100));
@@ -534,7 +602,7 @@ export class ImageViewer {
     const newPosX = this.boundX_(this.startX_ + deltaX * newScale, false);
     const newPosY = this.boundY_(this.startY_ + deltaY * newScale, false);
     return /** @type {!Promise|undefined} */ (
-        this.set_(newScale, newPosX, newPosY, animate));
+      this.set_(newScale, newPosX, newPosY, animate));
   }
 
   /**
@@ -549,7 +617,8 @@ export class ImageViewer {
    * @return {!Promise}
    * @private
    */
-  onZoomRelease_(centerClientX, centerClientY, deltaX, deltaY, veloX, veloY) {
+  onTapZoomRelease_(centerClientX, centerClientY,
+    deltaX, deltaY, veloX, veloY) {
     let promise;
     if (veloX == 0 && veloY == 0) {
       promise = Promise.resolve();
@@ -557,17 +626,32 @@ export class ImageViewer {
       promise = continueMotion(this.image_,
           deltaX, deltaY, veloX, veloY,
           (x, y) => {
-            this.onZoomInc_(centerClientX, centerClientY, x, y);
+            this.onTapZoom_(centerClientX, centerClientY, x, y);
             return true;
           }).thenAlways();
     }
-
-    const relayout = this.scale_ > this.startScale_;
     return promise.then(() => {
-      return this.release_();
-    }).then(() => {
+      this.onZoomRelease_();
+    });
+  }
+
+  /**
+   * Performs actions after the gesture that was performing zooming has been
+   * released.
+   * @return {!Promise}
+   * @private
+   */
+  onZoomRelease_() {
+    const relayout = this.scale_ > this.startScale_;
+    return this.release_().then(() => {
       if (relayout) {
         this.updateSrc_();
+      }
+      // After the scale is updated, also register or unregister panning
+      if (this.scale_ <= 1) {
+        this.unregisterPanningGesture_();
+      } else {
+        this.registerPanningGesture_();
       }
     });
   }
@@ -591,8 +675,8 @@ export class ImageViewer {
     if (animate) {
       const maxDur = 250;
       dur = Math.min(maxDur, Math.max(
-          maxDur * dist * 0.01,      // Moving component.
-          maxDur * Math.abs(ds)));   // Zooming component.
+          maxDur * dist * 0.01, // Moving component.
+          maxDur * Math.abs(ds))); // Zooming component.
     }
 
     let promise;

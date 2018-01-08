@@ -21,6 +21,7 @@ import {
   maybeExecuteRealTimeConfig_,
   validateRtcConfig_,
   RTC_ERROR_ENUM,
+  truncUrl_,
 } from '../real-time-config-manager';
 import {Xhr} from '../../../../src/service/xhr-impl';
 // Need the following side-effect import because in actual production code,
@@ -61,7 +62,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
     } else {
       const textFunction = () => {
         return !isString ? Promise.resolve(JSON.stringify(response)) :
-            Promise.resolve(response);
+          Promise.resolve(response);
       };
       fetchJsonStub.withArgs(params).returns(Promise.resolve({
         status: 200,
@@ -74,11 +75,24 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
     element.setAttribute('rtc-config', JSON.stringify(rtcConfig));
   }
 
+  describe('#truncUrl_', () => {
+    it('truncates URL', () => {
+      let url = 'https://www.example.biz/?';
+      for (let i = 0; i < 1000; i++) {
+        url += '&23456=8901234567';
+      }
+      expect(url.length > 16384).to.be.true;
+      url = truncUrl_(url);
+      expect(url.length <= 16384).to.be.true;
+      expect(url.indexOf('&__trunc__=1') > 0).to.be.true;
+    });
+  });
+
   describe('#maybeExecuteRealTimeConfig_', () => {
     function executeTest(args) {
       const {urls, vendors, timeoutMillis, rtcCalloutResponses,
-           expectedCalloutUrls, responseIsString, failXhr,
-           customMacros, expectedRtcArray, calloutCount} = args;
+        expectedCalloutUrls, responseIsString, failXhr,
+        customMacros, expectedRtcArray, calloutCount} = args;
       setRtcConfig({urls, vendors, timeoutMillis});
       (expectedCalloutUrls || []).forEach((expectedUrl, i) => {
         setFetchJsonStubBehavior(expectedUrl, rtcCalloutResponses[i],
@@ -122,7 +136,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
 
     function rtcEntry(response, callout, error) {
       return response ? {response, callout, rtcTime: 10} :
-      {callout, error, rtcTime: 10};
+        {callout, error, rtcTime: 10};
     }
 
     function generateCalloutResponses(numGoodResponses) {
@@ -320,8 +334,6 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
     });
 
     it('should not send an RTC callout to an insecure url', () => {
-      env.win.AMP_MODE.test = false;
-      env.win.AMP_MODE.localdev = false;
       const urls = [
         'https://www.1.com/',
         'https://www.2.com',
@@ -446,14 +458,14 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
 
     // Test various misconfigurations that are missing vendors or urls.
     [{'timeoutMillis': 500}, {'vendors': {}}, {'urls': []},
-     {'vendors': {}, 'urls': []},
-     {'vendors': 'incorrect', 'urls': 'incorrect'}].forEach(rtcConfig => {
-       it('should return null for rtcConfig missing required values', () => {
-         setRtcConfig(rtcConfig);
-         validatedRtcConfig = validateRtcConfig_(element);
-         expect(validatedRtcConfig).to.be.null;
-       });
-     });
+      {'vendors': {}, 'urls': []},
+      {'vendors': 'incorrect', 'urls': 'incorrect'}].forEach(rtcConfig => {
+      it('should return null for rtcConfig missing required values', () => {
+        setRtcConfig(rtcConfig);
+        validatedRtcConfig = validateRtcConfig_(element);
+        expect(validatedRtcConfig).to.be.null;
+      });
+    });
 
     it('should return false for bad JSON rtcConfig', () => {
       const rtcConfig = '{"urls" : ["https://google.com"]';

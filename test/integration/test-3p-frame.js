@@ -172,7 +172,8 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
 
     container.appendChild(div);
 
-    sandbox.stub(DomFingerprint, 'generate', () => 'MY-MOCK-FINGERPRINT');
+    sandbox.stub(DomFingerprint, 'generate').callsFake(
+        () => 'MY-MOCK-FINGERPRINT');
 
     const iframe = getIframe(window, div, '_ping_', {clientId: 'cidValue'});
     const src = iframe.src;
@@ -253,6 +254,24 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
     });
   });
 
+  it('should copy attributes to iframe', () => {
+    const div = document.createElement('my-element');
+    div.setAttribute('width', '50');
+    div.setAttribute('height', '100');
+    div.setAttribute('title', 'a_title');
+    div.setAttribute('not_whitelisted', 'shouldnt_be_in_iframe');
+    setupElementFunctions(div);
+
+    container.appendChild(div);
+
+    const iframe = getIframe(window, div, 'none');
+
+    expect(iframe.width).to.equal('50');
+    expect(iframe.height).to.equal('100');
+    expect(iframe.title).to.equal('a_title');
+    expect(iframe.not_whitelisted).to.equal(undefined);
+  });
+
   it('should pick the right bootstrap url for local-dev mode', () => {
     window.AMP_MODE = {localDev: true};
     expect(getBootstrapBaseUrl(window)).to.equal(
@@ -292,12 +311,12 @@ describe.configure().ifNewChrome().run('3p-frame', () => {
     window.AMP_MODE = {};
     let match =
         /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame\.html$/
-        .exec(getDefaultBootstrapBaseUrl(window));
+            .exec(getDefaultBootstrapBaseUrl(window));
     const domain = match && match[1];
     expect(domain).to.be.ok;
     match =
         /^https:\/\/(d-\d+\.ampproject\.net)\/\$\internal\w+\$\/frame2\.html$/
-        .exec(getDefaultBootstrapBaseUrl(window, 'frame2'));
+            .exec(getDefaultBootstrapBaseUrl(window, 'frame2'));
     expect(match && match[1]).to.equal(domain);
   });
 

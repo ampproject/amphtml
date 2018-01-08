@@ -17,6 +17,12 @@
 import {user} from '../../src/log';
 
 /**
+ * Approved height for AdSense full-width responsive ads.
+ * @const {number}
+ */
+export const ADSENSE_RSPV_WHITELISTED_HEIGHT = 320;
+
+/**
  * Given the amp-ad data attribute containing the multi-size dimensions, and a
  * set of primary dimensions, this function will return all valid multi-size
  * [width, height] pairs in an array.
@@ -32,11 +38,11 @@ import {user} from '../../src/log';
  * @return {?Array<!Array<number>>} An array of dimensions.
  */
 export function getMultiSizeDimensions(
-    multiSizeDataStr,
-    primaryWidth,
-    primaryHeight,
-    multiSizeValidation,
-    isFluid = false) {
+  multiSizeDataStr,
+  primaryWidth,
+  primaryHeight,
+  multiSizeValidation,
+  isFluid = false) {
 
   const dimensions = [];
   const arrayOfSizeStrs = multiSizeDataStr.split(',');
@@ -60,7 +66,7 @@ export function getMultiSizeDimensions(
         w => isNaN(w) || w <= 0,
         h => isNaN(h) || h <= 0,
         badParams => badParams.map(badParam =>
-            `Invalid ${badParam.dim} of ${badParam.val} ` +
+          `Invalid ${badParam.dim} of ${badParam.val} ` +
             'given for secondary size.').join(' '))) {
       continue;
     }
@@ -70,7 +76,7 @@ export function getMultiSizeDimensions(
         w => w > primaryWidth,
         h => h > primaryHeight,
         badParams => badParams.map(badParam =>
-            `Secondary ${badParam.dim} ${badParam.val} ` +
+          `Secondary ${badParam.dim} ${badParam.val} ` +
             `can't be larger than the primary ${badParam.dim}.`).join(' '))) {
       continue;
     }
@@ -87,7 +93,7 @@ export function getMultiSizeDimensions(
           w => w < minWidth,
           h => h < minHeight,
           badParams => badParams.map(badParam =>
-              `Secondary ${badParam.dim} ${badParam.val} is ` +
+            `Secondary ${badParam.dim} ${badParam.val} is ` +
               `smaller than 2/3rds of the primary ${badParam.dim}.`)
               .join(' '))) {
         continue;

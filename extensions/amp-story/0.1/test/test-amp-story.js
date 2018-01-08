@@ -17,6 +17,7 @@ import {AnalyticsTrigger} from '../analytics';
 import {AmpStory} from '../amp-story';
 import {EventType} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
+import {PaginationButtons} from '../pagination-buttons';
 import {VariableService} from '../variable-service';
 
 
@@ -55,7 +56,7 @@ describes.realWin('amp-story', {
 
   function createEvent(eventType) {
     const eventObj = document.createEventObject ?
-        document.createEventObject() : document.createEvent('Events');
+      document.createEventObject() : document.createEvent('Events');
     if (eventObj.initEvent) {
       eventObj.initEvent(eventType, true, true);
     }
@@ -64,7 +65,7 @@ describes.realWin('amp-story', {
 
   function stubViewportSize(width, height) {
     sandbox./*OK*/stub(element.implementation_.getViewport(), 'getSize', () =>
-        ({width, height}));
+      ({width, height}));
   }
 
   beforeEach(() => {
@@ -75,7 +76,7 @@ describes.realWin('amp-story', {
     story = new AmpStory(element);
     // TODO(alanorozco): Test active page event triggers once the stubbable
     // `Services` module is part of the amphtml-story repo.
-    // sandbox.stub(element.implementation_, 'triggerActiveEventForPage_', NOOP);
+    // sandbox.stub(element.implementation_, 'triggerActiveEventForPage_').callsFake(NOOP);
   });
 
   afterEach(() => {
@@ -99,7 +100,7 @@ describes.realWin('amp-story', {
             'installConsumer');
 
     createPages(element, 5, [firstPageId]);
-    const appendChild = sandbox.stub(element, 'appendChild', NOOP);
+    const appendChild = sandbox.stub(element, 'appendChild').callsFake(NOOP);
 
     element.build();
 
@@ -249,7 +250,7 @@ describes.realWin('amp-story', {
     expect(result.length).to.equal(pages.length);
 
     pages.forEach(page =>
-        expect(Array.prototype.includes.call(result, page)).to.be.true);
+      expect(Array.prototype.includes.call(result, page)).to.be.true);
   });
 
   // TODO(newmuis/amphtml-story#187): Re-enable this test.
@@ -261,7 +262,7 @@ describes.realWin('amp-story', {
     const page = win.document.createElement('div');
 
     const updateProgressBarStub =
-        sandbox.stub(impl.systemLayer_, 'updateProgressBar', NOOP);
+        sandbox.stub(impl.systemLayer_, 'updateProgressBar').callsFake(NOOP);
 
     appendEmptyPage(element, /* opt_active */ true);
 
@@ -302,18 +303,19 @@ describes.realWin('amp-story', {
     expect(pages[1].hasAttribute('active')).to.be.false;
 
     // Stubbing because we need to assert synchronously
-    sandbox.stub(element.implementation_, 'mutateElement', mutator => {
-      mutator();
-      return Promise.resolve();
-    });
+    sandbox.stub(element.implementation_, 'mutateElement').callsFake(
+        mutator => {
+          mutator();
+          return Promise.resolve();
+        });
 
     const eventObj = createEvent('keydown');
     eventObj.keyCode = KeyCodes.RIGHT_ARROW;
     eventObj.which = KeyCodes.RIGHT_ARROW;
     const docEl = win.document.documentElement;
     docEl.dispatchEvent ?
-        docEl.dispatchEvent(eventObj) :
-        docEl.fireEvent('onkeydown', eventObj);
+      docEl.dispatchEvent(eventObj) :
+      docEl.fireEvent('onkeydown', eventObj);
 
     expect(pages[0].hasAttribute('active')).to.be.false;
     expect(pages[1].hasAttribute('active')).to.be.true;
@@ -327,14 +329,40 @@ describes.realWin('amp-story', {
         .to.be.equal('hidden');
   });
 
-  it('adds event listener for buttons', () => {
-    story.buildButtons_();
-    const nextStub = sandbox.stub(story, 'next_');
-    const prevStub = sandbox.stub(story, 'previous_');
-    story.nextButton_.dispatchEvent(new Event('click'));
-    story.prevButton_.dispatchEvent(new Event('click'));
-    expect(nextStub).calledOnce;
-    expect(prevStub).calledOnce;
+  it('builds and attaches pagination buttons ', () => {
+    const paginationButtonsStub = {
+      attach: sandbox.spy(),
+      onNavigationStateChange: sandbox.spy(),
+    };
+    sandbox.stub(PaginationButtons, 'create').returns(paginationButtonsStub);
+    story.buildPaginationButtonsForTesting();
+    expect(paginationButtonsStub.attach).to.have.been.calledWith(story.element);
+  });
+
+  it('toggles `i-amphtml-story-landscape` based on height and width', () => {
+    story.element.style.width = '11px';
+    story.element.style.height = '10px';
+    const isDesktopStub = sandbox.stub(story, 'isDesktop_').returns(false);
+    story.vsync_ = {
+      run: (task, state) => {
+        if (task.measure) {
+          task.measure(state);
+        }
+        if (task.mutate) {
+          task.mutate(state);
+        }
+      },
+    };
+    story.onResize();
+    expect(isDesktopStub).to.be.calledOnce;
+    expect(story.element.classList.contains('i-amphtml-story-landscape'))
+        .to.be.true;
+    story.element.style.width = '10px';
+    story.element.style.height = '11px';
+    story.onResize();
+    expect(isDesktopStub).to.be.calledTwice;
+    expect(story.element.classList.contains('i-amphtml-story-landscape'))
+        .to.be.false;
   });
 });
 

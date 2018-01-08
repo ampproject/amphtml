@@ -31,7 +31,7 @@ describe('amp-img', () => {
     windowWidth = 320;
     sandbox.stub(BaseElement.prototype, 'isInViewport')
         .returns(true);
-    sandbox.stub(BaseElement.prototype, 'getViewport', () => {
+    sandbox.stub(BaseElement.prototype, 'getViewport').callsFake(() => {
       return {
         getWidth: () => windowWidth,
       };
@@ -79,7 +79,7 @@ describe('amp-img', () => {
       expect(img.getAttribute('alt')).to.equal('An image');
       expect(img.getAttribute('title')).to.equal('Image title');
       expect(img.getAttribute('referrerpolicy')).to.equal('origin');
-      expect(img.hasAttribute('async')).to.be.true;
+      expect(img.getAttribute('decoding')).to.equal('async');
     });
   });
 
@@ -176,7 +176,8 @@ describe('amp-img', () => {
     });
   });
 
-  it('should handle attribute mutations', () => {
+  // TODO(cvializ, #12336): unskip
+  it.skip('should handle attribute mutations', () => {
     return getImg({
       src: 'test.jpg',
       srcset: 'large.jpg 2000w, small.jpg 1000w',

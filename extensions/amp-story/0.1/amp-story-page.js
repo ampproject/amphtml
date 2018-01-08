@@ -36,7 +36,7 @@ import {EventType, dispatch, dispatchCustom} from './events';
 import {PageElement} from './page-element';
 import {AdvancementConfig} from './page-advancement';
 import {dict} from '../../../src/utils/object';
-import {scopedQuerySelectorAll} from '../../../src/dom';
+import {matches, scopedQuerySelectorAll} from '../../../src/dom';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 
@@ -72,7 +72,6 @@ const LOADING_SCREEN_TEMPLATE = [
     ],
   },
 ];
-
 
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
@@ -143,6 +142,10 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {!AdvancementConfig} */
     this.advancement_ = AdvancementConfig.forPage(this);
+
+    /** @private @const {boolean} Only prerender the first story page. */
+    this.prerenderAllowed_ = matches(this.element,
+        'amp-story-page:first-of-type');
   }
 
 
@@ -223,15 +226,18 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.pageActiveCallback_();
   }
 
+
   /** @override */
   layoutCallback() {
     return this.beforeVisible();
   }
 
+
   /** @return {!Promise} */
   beforeVisible() {
     return this.maybeApplyFirstAnimationFrame();
   }
+
 
   /** @private */
   onPageVisible_() {
@@ -263,7 +269,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   updateAudioIcon_() {
     // Dispatch event to signal whether audio is playing.
     const eventType = this.hasAudio_() ?
-        EventType.AUDIO_PLAYING : EventType.AUDIO_STOPPED;
+      EventType.AUDIO_PLAYING : EventType.AUDIO_STOPPED;
     dispatch(this.element, eventType, /* opt_bubbles */ true);
   }
 
@@ -282,23 +288,27 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @public
    */
   calculateLoadStatus() {
-    if (this.isLoaded_ || this.pageElements_.length == 0) {
+    if (this.isLoaded_) {
+      return true;
+    }
+
+    const visiblePageElements = this.pageElements_.filter(pageElement =>
+      !pageElement.isHiddenByMediaQuery());
+
+    if (visiblePageElements.length == 0) {
       return true;
     }
 
     let isPageLoaded = true;
     let canPageBeShown = false;
 
-    this.pageElements_.forEach(pageElement => {
+    visiblePageElements.forEach(pageElement => {
       pageElement.updateState();
 
-      if (isPageLoaded) {
-        isPageLoaded = pageElement.isLoaded || pageElement.hasFailed;
-      }
+      isPageLoaded =
+          isPageLoaded && (pageElement.isLoaded || pageElement.hasFailed);
 
-      if (!canPageBeShown) {
-        canPageBeShown = pageElement.canBeShown;
-      }
+      canPageBeShown = canPageBeShown || pageElement.canBeShown;
     });
 
     if (isPageLoaded) {
@@ -315,7 +325,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   prerenderAllowed() {
-    return true;
+    return this.prerenderAllowed_;
   }
 
 
@@ -421,6 +431,11 @@ export class AmpStoryPage extends AMP.BaseElement {
   pageInactiveCallback_() {
     this.element.removeAttribute('active');
 
+    this.pause();
+  }
+
+
+  pause() {
     this.pauseAllMedia_(/* opt_rewindToBeginning */ true);
     this.pageElements_.forEach(pageElement => {
       pageElement.pauseCallback();
@@ -547,27 +562,24 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Navigates to the next page in the story.
-   * @param {boolean} opt_isAutomaticAdvance Whether this navigation was caused
+   * @param {boolean=} opt_isAutomaticAdvance Whether this navigation was caused
    *     by an automatic advancement after a timeout.
    */
   next(opt_isAutomaticAdvance) {
-    this.switchTo_(
-        this.getNextPageId_(opt_isAutomaticAdvance), 'i-amphtml-story-bookend');
+    this.switchTo_(this.getNextPageId_(opt_isAutomaticAdvance));
   }
 
 
   /**
    * @param {?string} targetPageIdOrNull
-   * @param {string=} opt_fallbackPageId
    * @private
    */
-  switchTo_(targetPageIdOrNull, opt_fallbackPageId) {
-    const targetPageId = targetPageIdOrNull || opt_fallbackPageId;
-    if (!targetPageId) {
+  switchTo_(targetPageIdOrNull) {
+    if (!targetPageIdOrNull) {
       return;
     }
 
-    const payload = {targetPageId};
+    const payload = {targetPageId: dev().assert(targetPageIdOrNull)};
     const eventInit = {bubbles: true};
     dispatchCustom(this.win, this.element, EventType.SWITCH_PAGE, payload,
         eventInit);

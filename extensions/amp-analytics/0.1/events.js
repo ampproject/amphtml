@@ -24,6 +24,7 @@ import {
 import {dev, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
+import {isEnumValue} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 
 const MIN_TIMER_INTERVAL_SECONDS = 0.5;
@@ -31,6 +32,120 @@ const DEFAULT_MAX_TIMER_LENGTH_SECONDS = 7200;
 const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 const NO_UNLISTEN = function() {};
 const TAG = 'analytics-events';
+
+/**
+ * Events that can result in analytics data to be sent.
+ * @const
+ * @enum {string}
+ */
+export const AnalyticsEventType = {
+  VISIBLE: 'visible',
+  CLICK: 'click',
+  TIMER: 'timer',
+  SCROLL: 'scroll',
+  HIDDEN: 'hidden',
+};
+
+const ALLOWED_FOR_ALL_ROOT_TYPES = ['ampdoc', 'embed'];
+
+/**
+ * Events that can result in analytics data to be sent.
+ * @const {!Object<string, {
+ *     name: string,
+ *     allowedFor: !Array<string>,
+ *     klass: function(new:./events.EventTracker)
+ *   }>}
+ */
+const TRACKER_TYPE = Object.freeze({
+  'click': {
+    name: 'click',
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
+    // Escape the temporal dead zone by not referencing a class directly.
+    klass: function(root) { return new ClickEventTracker(root); },
+  },
+  'custom': {
+    name: 'custom',
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
+    klass: function(root) { return new CustomEventTracker(root); },
+  },
+  'render-start': {
+    name: 'render-start',
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer', 'visible']),
+    klass: function(root) { return new SignalTracker(root); },
+  },
+  'ini-load': {
+    name: 'ini-load',
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer', 'visible']),
+    klass: function(root) { return new IniLoadTracker(root); },
+  },
+  'timer': {
+    name: 'timer',
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
+    klass: function(root) { return new TimerEventTracker(root); },
+  },
+  'visible': {
+    name: 'visible',
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
+    klass: function(root) { return new VisibilityTracker(root); },
+  },
+  'hidden': {
+    name: 'visible', // Reuse tracker with visibility
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
+    klass: function(root) { return new VisibilityTracker(root); },
+  },
+  'video': {
+    name: 'video',
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
+    klass: function(root) { return new VideoEventTracker(root); },
+  },
+});
+
+/**
+ * @param {string} triggerType
+ * @return {boolean}
+ */
+function isVideoTriggerType(triggerType) {
+  return startsWith(triggerType, 'video');
+}
+
+/**
+ * @param {string} triggerType
+ * @return {boolean}
+ */
+function isReservedTriggerType(triggerType) {
+  return !!TRACKER_TYPE[triggerType] ||
+      isEnumValue(AnalyticsEventType, triggerType);
+}
+
+/**
+ * @param {string} eventType
+ * @return {string}
+ */
+export function getTrackerKeyName(eventType) {
+  if (isVideoTriggerType(eventType)) {
+    return 'video';
+  }
+  if (!isReservedTriggerType(eventType)) {
+    return 'custom';
+  }
+  return TRACKER_TYPE.hasOwnProperty(eventType) ?
+    TRACKER_TYPE[eventType].name : eventType;
+}
+
+/**
+ * @param {string} parentType
+ * @return {!Object<string, function(new:EventTracker)>}
+ */
+export function getTrackerTypesForParentType(parentType) {
+  const filtered = {};
+  Object.keys(TRACKER_TYPE).forEach(key => {
+    if (TRACKER_TYPE.hasOwnProperty(key) &&
+        TRACKER_TYPE[key].allowedFor.indexOf(parentType) != -1) {
+      filtered[key] = TRACKER_TYPE[key].klass;
+    }
+  }, this);
+  return filtered;
+}
 
 /**
  * @interface
@@ -161,8 +276,8 @@ export class CustomEventTracker extends EventTracker {
 
     // Push recent events if any.
     const buffer = isSandboxEvent ?
-        this.sandboxBuffer_ && this.sandboxBuffer_[eventType] :
-        this.buffer_ && this.buffer_[eventType];
+      this.sandboxBuffer_ && this.sandboxBuffer_[eventType] :
+      this.buffer_ && this.buffer_[eventType];
 
     if (buffer) {
       const bufferLength = buffer.length;
@@ -319,10 +434,10 @@ export class SignalTracker extends EventTracker {
           (context.parentElement || context),
           selector,
           selectionMethod
-          ).then(element => {
-            target = element;
-            return this.getElementSignal(eventType, target);
-          });
+      ).then(element => {
+        target = element;
+        return this.getElementSignal(eventType, target);
+      });
     }
 
     // Wait for the target and the event signal.
@@ -379,10 +494,10 @@ export class IniLoadTracker extends EventTracker {
           (context.parentElement || context),
           selector,
           selectionMethod
-          ).then(element => {
-            target = element;
-            return this.getElementSignal('ini-load', target);
-          });
+      ).then(element => {
+        target = element;
+        return this.getElementSignal('ini-load', target);
+      });
     }
     // Wait for the target and the event.
     promise.then(() => {
@@ -411,6 +526,189 @@ export class IniLoadTracker extends EventTracker {
 
 
 /**
+ * Timer event handler.
+ */
+class TimerEventHandler {
+  /**
+   * @param {JsonObject} timerSpec The timer specification.
+   * @param {function(): UnlistenDef=} opt_startBuilder Factory for building
+   *     start trackers for this timer.
+   * @param {function(): UnlistenDef=} opt_stopBuilder Factory for building stop
+   *     trackers for this timer.
+   */
+  constructor(timerSpec, opt_startBuilder, opt_stopBuilder) {
+    /** @private {number|undefined} */
+    this.intervalId_ = undefined;
+
+    user().assert('interval' in timerSpec,
+        'Timer interval specification required');
+    /** @private @const {number} */
+    this.intervalLength_ = Number(timerSpec['interval']) || 0;
+    user().assert(this.intervalLength_ >= MIN_TIMER_INTERVAL_SECONDS,
+        'Bad timer interval specification');
+
+    /** @private @const {number} */
+    this.maxTimerLength_ = 'maxTimerLength' in timerSpec ?
+      Number(timerSpec['maxTimerLength']) : DEFAULT_MAX_TIMER_LENGTH_SECONDS;
+    user().assert(this.maxTimerLength_ > 0, 'Bad maxTimerLength specification');
+
+    /** @private @const {boolean} */
+    this.maxTimerInSpec_ = 'maxTimerLength' in timerSpec;
+
+    /** @private @const {boolean} */
+    this.callImmediate_ = 'immediate' in timerSpec ?
+      Boolean(timerSpec['immediate']) : true;
+
+    /** @private {?function()} */
+    this.intervalCallback_ = null;
+
+    /** @private {?UnlistenDef} */
+    this.unlistenStart_ = null;
+
+    /** @private {?UnlistenDef} */
+    this.unlistenStop_ = null;
+
+    /** @private @const {?function(): UnlistenDef} */
+    this.startBuilder_ = opt_startBuilder || null;
+
+    /** @private @const {?function(): UnlistenDef} */
+    this.stopBuilder_ = opt_stopBuilder || null;
+
+    /** @private {number|undefined} */
+    this.startTime_ = undefined; // milliseconds
+
+    /** @private {number|undefined} */
+    this.lastRequestTime_ = undefined; // milliseconds
+  }
+
+  /**
+   * @param {function()} startTimer
+   */
+  init(startTimer) {
+    if (!this.startBuilder_) {
+      // Timer starts on load.
+      startTimer();
+    } else {
+      // Timer starts on event.
+      this.listenForStart_();
+    }
+  }
+
+  dispose() {
+    this.unlistenForStop_();
+    this.unlistenForStart_();
+  }
+
+  /** @private */
+  listenForStart_() {
+    if (this.startBuilder_) {
+      this.unlistenStart_ = this.startBuilder_();
+    }
+  }
+
+  /** @private */
+  unlistenForStart_() {
+    if (this.unlistenStart_) {
+      this.unlistenStart_();
+      this.unlistenStart_ = null;
+    }
+  }
+
+  /** @private */
+  listenForStop_() {
+    if (this.stopBuilder_) {
+      try {
+        this.unlistenStop_ = this.stopBuilder_();
+      } catch (e) {
+        this.dispose(); // Stop timer and then throw error.
+        throw e;
+      }
+    }
+  }
+
+  /** @private */
+  unlistenForStop_() {
+    if (this.unlistenStop_) {
+      this.unlistenStop_();
+      this.unlistenStop_ = null;
+    }
+  }
+
+  /** @return {boolean} */
+  isRunning() {
+    return !!this.intervalId_;
+  }
+
+  /**
+   * @param {!Window} win
+   * @param {function()} timerCallback
+   * @param {function()} timeoutCallback
+   */
+  startIntervalInWindow(win, timerCallback, timeoutCallback) {
+    if (this.isRunning()) {
+      return;
+    }
+    this.startTime_ = Date.now();
+    this.lastRequestTime_ = undefined;
+    this.intervalCallback_ = timerCallback;
+    this.intervalId_ = win.setInterval(() => {
+      timerCallback();
+    }, this.intervalLength_ * 1000);
+
+    // If there's no way to turn off the timer, cap it.
+    if (!this.stopBuilder_ || (this.stopBuilder_ && this.maxTimerInSpec_)) {
+      win.setTimeout(() => {
+        timeoutCallback();
+      }, this.maxTimerLength_ * 1000);
+    }
+
+    this.unlistenForStart_();
+    if (this.callImmediate_) {
+      timerCallback();
+    }
+    this.listenForStop_();
+  }
+
+  /**
+   * @param {!Window} win
+   */
+  stopTimer_(win) {
+    if (!this.isRunning()) {
+      return;
+    }
+    this.intervalCallback_();
+    this.intervalCallback_ = null;
+    win.clearInterval(this.intervalId_);
+    this.intervalId_ = undefined;
+    this.lastRequestTime_ = undefined;
+    this.unlistenForStop_();
+    this.listenForStart_();
+  }
+
+  /** @private @return {number} */
+  calculateDuration_() {
+    if (this.startTime_) {
+      return Date.now() - (this.lastRequestTime_ || this.startTime_);
+    }
+    return 0;
+  }
+
+  /** @return {{timerDuration: number, timerStart: number}} */
+  getTimerVars() {
+    let timerDuration = 0;
+    if (this.isRunning()) {
+      timerDuration = this.calculateDuration_();
+      this.lastRequestTime_ = Date.now();
+    }
+    return {
+      'timerDuration': timerDuration,
+      'timerStart': this.startTime_ || 0,
+    };
+  }
+}
+
+
+/**
  * Tracks timer events.
  */
 export class TimerEventTracker extends EventTracker {
@@ -419,15 +717,25 @@ export class TimerEventTracker extends EventTracker {
    */
   constructor(root) {
     super(root);
-    /** @const @private {!Array<number>} */
-    this.trackers_ = [];
+    /** @const @private {!Object<number, TimerEventHandler>} */
+    this.trackers_ = {};
+
+    /** @private {number} */
+    this.timerIdSequence_ = 1;
+  }
+
+  /**
+   * @return {!Array<number>}
+   * @visibleForTesting
+   */
+  getTrackedTimerKeys() {
+    return /** @type {!Array<number>} */ (Object.keys(this.trackers_));
   }
 
   /** @override */
   dispose() {
-    const win = this.root.ampdoc.win;
-    this.trackers_.forEach(intervalId => {
-      win.clearInterval(intervalId);
+    this.getTrackedTimerKeys().forEach(timerId => {
+      this.removeTracker_(timerId);
     });
   }
 
@@ -436,53 +744,127 @@ export class TimerEventTracker extends EventTracker {
     const timerSpec = config['timerSpec'];
     user().assert(timerSpec && typeof timerSpec == 'object',
         'Bad timer specification');
-    user().assert('interval' in timerSpec,
-        'Timer interval specification required');
-    const interval = Number(timerSpec['interval']) || 0;
-    user().assert(interval >= MIN_TIMER_INTERVAL_SECONDS,
-        'Bad timer interval specification');
-    const maxTimerLength = 'maxTimerLength' in timerSpec ?
-        Number(timerSpec['maxTimerLength']) : DEFAULT_MAX_TIMER_LENGTH_SECONDS;
-    user().assert(maxTimerLength == null || maxTimerLength > 0,
-        'Bad maxTimerLength specification');
-    const callImmediate = 'immediate' in timerSpec ?
-        Boolean(timerSpec['immediate']) : true;
+    const timerStart = 'startSpec' in timerSpec ? timerSpec['startSpec'] : null;
+    user().assert(!timerStart || typeof timerStart == 'object',
+        'Bad timer start specification');
+    const timerStop = 'stopSpec' in timerSpec ? timerSpec['stopSpec'] : null;
+    user().assert((!timerStart && !timerStop) || typeof timerStop == 'object',
+        'Bad timer stop specification');
 
-    const win = this.root.ampdoc.win;
-    const intervalId = win.setInterval(() => {
-      listener(this.createEvent_(eventType));
-    }, interval * 1000);
-    this.trackers_.push(intervalId);
-    win.setTimeout(() => {
-      this.removeTracker_(intervalId);
-    }, maxTimerLength * 1000);
-    if (callImmediate) {
-      listener(this.createEvent_(eventType));
+    const timerId = this.generateTimerId_();
+    let startBuilder;
+    let stopBuilder;
+    if (timerStart) {
+      const startTracker = this.getTracker_(timerStart);
+      user().assert(startTracker, 'Cannot track timer start');
+      startBuilder = startTracker.add.bind(startTracker, context,
+          timerStart['on'], timerStart,
+          this.handleTimerToggle_.bind(this, timerId, eventType, listener));
     }
+    if (timerStop) {
+      const stopTracker = this.getTracker_(timerStop);
+      user().assert(stopTracker, 'Cannot track timer stop');
+      stopBuilder = stopTracker.add.bind(stopTracker, context,
+          timerStop['on'], timerStop,
+          this.handleTimerToggle_.bind(this, timerId, eventType, listener));
+    }
+
+    const timerHandler = new TimerEventHandler(
+        timerSpec, startBuilder, stopBuilder);
+    this.trackers_[timerId] = timerHandler;
+
+    timerHandler.init(
+        this.startTimer_.bind(this, timerId, eventType, listener));
     return () => {
-      this.removeTracker_(intervalId);
+      this.removeTracker_(timerId);
     };
   }
 
   /**
+   * @return {number}
+   * @private
+   */
+  generateTimerId_() {
+    return ++this.timerIdSequence_;
+  }
+
+  /**
+   * @param {!JsonObject} config
+   * @return {?EventTracker}
+   * @private
+   */
+  getTracker_(config) {
+    const eventType = user().assertString(config['on']);
+    const trackerKey = getTrackerKeyName(eventType);
+
+    return this.root.getTrackerForWhitelist(
+        trackerKey, getTrackerTypesForParentType('timer'));
+  }
+
+  /**
+   * Toggles which listeners are active depending on timer state, so no race
+   * conditions can occur in the case where the timer starts and stops on the
+   * same event type from the same target.
+   * @param {number} timerId
+   * @param {string} eventType
+   * @param {function(!AnalyticsEvent)} listener
+   * @private
+   */
+  handleTimerToggle_(timerId, eventType, listener) {
+    const timerHandler = this.trackers_[timerId];
+    if (!timerHandler) {
+      return;
+    }
+    if (timerHandler.isRunning()) {
+      this.stopTimer_(timerId);
+    } else {
+      this.startTimer_(timerId, eventType, listener);
+    }
+  }
+
+  /**
+   * @param {number} timerId
+   * @param {string} eventType
+   * @param {function(!AnalyticsEvent)} listener
+   * @private
+   */
+  startTimer_(timerId, eventType, listener) {
+    const timerHandler = this.trackers_[timerId];
+    const timerCallback = () => {
+      listener(this.createEvent_(timerId, eventType));
+    };
+    timerHandler.startIntervalInWindow(this.root.ampdoc.win, timerCallback,
+        this.removeTracker_.bind(this, timerId));
+  }
+
+  /**
+   * @param {number} timerId
+   * @private
+   */
+  stopTimer_(timerId) {
+    this.trackers_[timerId].stopTimer_(this.root.ampdoc.win);
+  }
+
+  /**
+   * @param {number} timerId
    * @param {string} eventType
    * @return {!AnalyticsEvent}
    * @private
    */
-  createEvent_(eventType) {
-    return new AnalyticsEvent(this.root.getRootElement(), eventType);
+  createEvent_(timerId, eventType) {
+    return new AnalyticsEvent(this.root.getRootElement(), eventType,
+        this.trackers_[timerId].getTimerVars());
   }
 
   /**
-   * @param {number} intervalId
+   * @param {number} timerId
    * @private
    */
-  removeTracker_(intervalId) {
-    const win = this.root.ampdoc.win;
-    win.clearInterval(intervalId);
-    const index = this.trackers_.indexOf(intervalId);
-    if (index != -1) {
-      this.trackers_.splice(index, 1);
+  removeTracker_(timerId) {
+    if (this.trackers_[timerId]) {
+      this.stopTimer_(timerId);
+      this.trackers_[timerId].dispose();
+      delete this.trackers_[timerId];
     }
   }
 }
@@ -631,14 +1013,14 @@ export class VisibilityTracker extends EventTracker {
         (context.parentElement || context),
         selector,
         selectionMethod
-        ).then(element => {
-          return visibilityManager.listenElement(
-              element,
-              visibilitySpec,
-              this.getReadyPromise(waitForSpec, selector, element),
-              createReadyReportPromiseFunc,
-              this.onEvent_.bind(this, eventType, listener, element));
-        });
+    ).then(element => {
+      return visibilityManager.listenElement(
+          element,
+          visibilitySpec,
+          this.getReadyPromise(waitForSpec, selector, element),
+          createReadyReportPromiseFunc,
+          this.onEvent_.bind(this, eventType, listener, element));
+    });
     return function() {
       unlistenPromise.then(unlisten => {
         unlisten();
@@ -669,11 +1051,11 @@ export class VisibilityTracker extends EventTracker {
   /**
    * @param {string|undefined} waitForSpec
    * @param {string|undefined} selector
-   * @param {Element=} element
+   * @param {Element=} opt_element
    * @return {?Promise}
    * @visibleForTesting
    */
-  getReadyPromise(waitForSpec, selector, element) {
+  getReadyPromise(waitForSpec, selector, opt_element) {
     if (!waitForSpec) {
       // Default case:
       if (!selector) {
@@ -685,11 +1067,13 @@ export class VisibilityTracker extends EventTracker {
       }
     }
 
-    user().assert(SUPPORT_WAITFOR_TRACKERS[waitForSpec] !== undefined,
-        'waitFor value %s not supported', waitForSpec);
+    const trackerWhitelist = getTrackerTypesForParentType('visible');
+    user().assert(waitForSpec == 'none' ||
+        trackerWhitelist[waitForSpec] !== undefined,
+    'waitFor value %s not supported', waitForSpec);
 
     const waitForTracker = this.waitForTrackers_[waitForSpec] ||
-        this.root.getTrackerForWhitelist(waitForSpec, SUPPORT_WAITFOR_TRACKERS);
+        this.root.getTrackerForWhitelist(waitForSpec, trackerWhitelist);
     if (waitForTracker) {
       this.waitForTrackers_[waitForSpec] = waitForTracker;
     } else {
@@ -697,8 +1081,9 @@ export class VisibilityTracker extends EventTracker {
     }
 
     // Wait for root signal if there's no element selected.
-    return element ? waitForTracker.getElementSignal(waitForSpec, element)
-        : waitForTracker.getRootSignal(waitForSpec);
+    return opt_element ?
+      waitForTracker.getElementSignal(waitForSpec, opt_element)
+      : waitForTracker.getRootSignal(waitForSpec);
   }
 
   /**
@@ -719,10 +1104,3 @@ export class VisibilityTracker extends EventTracker {
     listener(new AnalyticsEvent(target, eventType, state));
   }
 }
-
-/** @const @private */
-const SUPPORT_WAITFOR_TRACKERS = {
-  'none': null,
-  'ini-load': IniLoadTracker,
-  'render-start': SignalTracker,
-};

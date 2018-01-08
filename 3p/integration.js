@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -73,6 +73,7 @@ import {_24smi} from '../ads/24smi';
 import {a8} from '../ads/a8';
 import {a9} from '../ads/a9';
 import {accesstrade} from '../ads/accesstrade';
+import {adagio} from '../ads/adagio';
 import {adblade, industrybrains} from '../ads/adblade';
 import {adbutler} from '../ads/adbutler';
 import {adform} from '../ads/adform';
@@ -127,6 +128,7 @@ import {flite} from '../ads/flite';
 import {fluct} from '../ads/fluct';
 import {fusion} from '../ads/fusion';
 import {genieessp} from '../ads/genieessp';
+import {giraff} from '../ads/giraff';
 import {gmossp} from '../ads/gmossp';
 import {gumgum} from '../ads/gumgum';
 import {holder} from '../ads/holder';
@@ -189,6 +191,7 @@ import {taboola} from '../ads/taboola';
 import {teads} from '../ads/teads';
 import {triplelift} from '../ads/triplelift';
 import {valuecommerce} from '../ads/valuecommerce';
+import {viralize} from '../ads/viralize';
 import {vmfive} from '../ads/vmfive';
 import {webediads} from '../ads/webediads';
 import {weboramaDisplay} from '../ads/weborama';
@@ -245,6 +248,7 @@ register('24smi', _24smi);
 register('a8', a8);
 register('a9', a9);
 register('accesstrade', accesstrade);
+register('adagio', adagio);
 register('adblade', adblade);
 register('adbutler', adbutler);
 register('adform', adform);
@@ -300,6 +304,7 @@ register('flite', flite);
 register('fluct', fluct);
 register('fusion', fusion);
 register('genieessp', genieessp);
+register('giraff', giraff);
 register('github', github);
 register('gmossp', gmossp);
 register('gumgum', gumgum);
@@ -367,6 +372,7 @@ register('teads', teads);
 register('triplelift', triplelift);
 register('twitter', twitter);
 register('valuecommerce', valuecommerce);
+register('viralize', viralize);
 register('vmfive', vmfive);
 register('webediads', webediads);
 register('weborama-display', weboramaDisplay);
@@ -462,7 +468,7 @@ function isMaster() {
  *     that are allowed to embed this frame.
  */
 window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
-    opt_allowedEmbeddingOrigins) {
+  opt_allowedEmbeddingOrigins) {
   try {
     const data = getAttributeData();
     const location = getLocation();

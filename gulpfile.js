@@ -52,6 +52,9 @@ var yellow = $$.util.colors.yellow;
 var red = $$.util.colors.red;
 var cyan = $$.util.colors.cyan;
 
+var minifiedRuntimeTarget = 'dist/v0.js';
+var unminifiedRuntimeTarget = 'dist/amp.js';
+
 // Each extension and version must be listed individually here.
 declareExtension('amp-3q-player', '0.1', false);
 declareExtension('amp-access', '0.1', true);
@@ -115,9 +118,9 @@ declareExtension('amp-pinterest', '0.1', true);
 declareExtension('amp-playbuzz', '0.1', true);
 declareExtension('amp-reach-player', '0.1', false);
 declareExtension('amp-reddit', '0.1', false);
+declareExtension('amp-riddle-quiz', '0.1', false);
 declareExtension('amp-share-tracking', '0.1', false);
 declareExtension('amp-sidebar', '0.1', true);
-declareExtension('amp-sidebar', '1.0', true);
 declareExtension('amp-soundcloud', '0.1', false);
 declareExtension('amp-springboard-player', '0.1', false);
 declareExtension('amp-sticky-ad', '1.0', true);
@@ -125,6 +128,7 @@ declareExtension('amp-story', '0.1', true);
 declareExtension('amp-selector', '0.1', true);
 declareExtension('amp-web-push', '0.1', true);
 declareExtension('amp-position-observer', '0.1', false);
+declareExtension('amp-date-picker', '0.1', true);
 
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
@@ -202,7 +206,7 @@ function endBuildStep(stepName, targetName, startTime) {
   const endTime = Date.now();
   const executionTime = new Date(endTime - startTime);
   const secs = executionTime.getSeconds();
-  const ms = executionTime.getMilliseconds().toString().padStart(3, '0');
+  const ms = ('000' + executionTime.getMilliseconds().toString()).slice(-3);
   var timeString = '(';
   if (secs === 0) {
     timeString += ms + ' ms)';
@@ -440,6 +444,7 @@ function copyCss() {
  * @return {!Promise}
  */
 function watch() {
+  printConfigHelp('gulp watch', unminifiedRuntimeTarget);
   $$.watch('css/**/*.css', function() {
     compileCss();
   });
@@ -450,7 +455,9 @@ function watch() {
     buildExaminer({watch: true}),
     buildExtensions({watch: true}),
     compile(true),
-  ]);
+  ]).then(() => {
+    return enableLocalTesting(unminifiedRuntimeTarget);
+  });
 }
 
 /**
@@ -545,7 +552,7 @@ function buildExtensionJs(path, name, version, options) {
     watch: options.watch,
     preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
     minify: options.minify,
-    toName:  name + '-' + version + '.max.js',
+    toName: name + '-' + version + '.max.js',
     minifiedName: name + '-' + version + '.js',
     latestName: name + '-latest.js',
     extraGlobs: options.extraGlobs,
@@ -607,7 +614,7 @@ function enableLocalTesting(targetFile) {
  */
 function build() {
   process.env.NODE_ENV = 'development';
-  printConfigHelp('gulp build', 'dist/amp.js')
+  printConfigHelp('gulp build', unminifiedRuntimeTarget);
   return compileCss().then(() => {
     return Promise.all([
       polyfillsForTests(),
@@ -619,7 +626,7 @@ function build() {
       compile(),
     ]);
   }).then(() => {
-    return enableLocalTesting('dist/amp.js');
+    return enableLocalTesting(unminifiedRuntimeTarget);
   });
 }
 
@@ -631,7 +638,7 @@ function dist() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   if (argv.fortesting) {
-    printConfigHelp('gulp dist --fortesting', 'dist/v0.js')
+    printConfigHelp('gulp dist --fortesting', minifiedRuntimeTarget)
   }
   return compileCss().then(() => {
     return Promise.all([
@@ -653,7 +660,7 @@ function dist() {
     copyAliasExtensions();
   }).then(() => {
     if (argv.fortesting) {
-      return enableLocalTesting('dist/v0.js');
+      return enableLocalTesting(minifiedRuntimeTarget);
     }
   });
 }
@@ -692,7 +699,10 @@ function checkTypes() {
     './src/service-worker/kill.js',
     './src/web-worker/web-worker.js',
   ];
-  var extensionSrcs = Object.values(extensions).filter(function(extension) {
+  var extensionValues = Object.keys(extensions).map(function(key) {
+    return extensions[key];
+  });
+  var extensionSrcs = extensionValues.filter(function(extension) {
     return !extension.noTypeCheck;
   }).map(function(extension) {
     return './extensions/' + extension.name + '/' +
@@ -779,19 +789,14 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
       });
 }
 
-/**
- * Synchronously concatenates the given files into the given destination
- *
- * @param {string} destFilePath File path to write the concatenated files to
- * @param {Array<string>} files List of file paths to concatenate
- */
-function concatFiles(destFilePath, files) {
-  var all = files.map(function(filePath) {
-    return fs.readFileSync(filePath, 'utf-8');
-  });
-
-  fs.writeFileSync(destFilePath, all.join(';'), 'utf-8');
-}
+const MODULE_SEPARATOR = ';';
+const EXTENSION_BUNDLE_MAP = {
+  'amp-viz-vega.js': [
+    'third_party/d3/d3.js',
+    'third_party/d3-geo-projection/d3-geo-projection.js',
+    'third_party/vega/vega.js',
+  ],
+};
 
 /**
  * Allows (ap|pre)pending to the already compiled, minified JS file
@@ -800,15 +805,23 @@ function concatFiles(destFilePath, files) {
  * @param {string} destFilePath File path to the compiled JS file
  */
 function appendToCompiledFile(srcFilename, destFilePath) {
-  if (srcFilename == 'amp-viz-vega.js') {
-    // Prepend minified d3 and vega third_party to compiled amp-viz-vega.js
-    concatFiles(destFilePath, [
-      'third_party/d3/d3.js',
-      'third_party/d3-geo-projection/d3-geo-projection.js',
-      'third_party/vega/vega.js',
-      destFilePath,
-    ]);
+  const bundleFiles = EXTENSION_BUNDLE_MAP[srcFilename];
+  if (bundleFiles) {
+    const newSource = concatFilesToString(bundleFiles.concat([destFilePath]));
+    fs.writeFileSync(destFilePath, newSource, 'utf8');
   }
+}
+
+/**
+ * Synchronously concatenates the given files into a string.
+ *
+ * @param {Array<string>} files A list of file paths.
+ * @return {string} The concatenated contents of the given files.
+ */
+function concatFilesToString(files) {
+  return files.map(function(filePath) {
+    return fs.readFileSync(filePath, 'utf8');
+  }).join(MODULE_SEPARATOR);
 }
 
 /**
@@ -834,11 +847,12 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     return closureCompile(
         srcDir + srcFilename, destDir, options.minifiedName, options)
         .then(function() {
-          appendToCompiledFile(srcFilename, destDir + '/' + options.minifiedName);
+          const destPath = destDir + '/' + options.minifiedName;
+          appendToCompiledFile(srcFilename, destPath);
           fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
           if (options.latestName) {
             fs.copySync(
-                destDir + '/' + options.minifiedName,
+                destPath,
                 destDir + '/' + options.latestName);
           }
         })
@@ -1279,16 +1293,17 @@ function toPromise(readable) {
 /**
  * Gulp tasks
  */
-gulp.task('build', 'Builds the AMP library', build, {
+gulp.task('build', 'Builds the AMP library', ['update-packages'], build, {
   options: {
     config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   }
 });
 gulp.task('check-all', 'Run through all presubmit checks', ['lint', 'dep-check', 'check-types', 'presubmit']);
 gulp.task('check-types', 'Check JS types', checkTypes);
-gulp.task('css', 'Recompile css to build directory', compileCss);
-gulp.task('default', 'Same as "watch"', ['watch', 'serve']);
-gulp.task('dist', 'Build production binaries', dist, {
+gulp.task('css', 'Recompile css to build directory', ['update-packages'],
+    compileCss);
+gulp.task('default', 'Same as "watch"', ['update-packages', 'watch', 'serve']);
+gulp.task('dist', 'Build production binaries', ['update-packages'], dist, {
   options: {
     pseudo_names: '  Compiles with readable names. ' +
         'Great for profiling and debugging production code.',
@@ -1298,11 +1313,12 @@ gulp.task('dist', 'Build production binaries', dist, {
   }
 });
 gulp.task('extensions', 'Build AMP Extensions', buildExtensions);
-gulp.task('watch', 'Watches for changes in files, re-build', watch, {
-  options: {
-    with_inabox: '  Also watch and build the amp-inabox.js binary.',
-    with_shadow: '  Also watch and build the amp-shadow.js binary.',
-  }
+gulp.task('watch', 'Watches for changes in files, re-builds when detected',
+    ['update-packages'], watch, {
+      options: {
+        with_inabox: '  Also watch and build the amp-inabox.js binary.',
+        with_shadow: '  Also watch and build the amp-shadow.js binary.',
+      }
 });
 gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
 gulp.task('build-login-done', 'Builds login-done.html/js', buildLoginDone);

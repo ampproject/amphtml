@@ -24,6 +24,7 @@ import {createElementWithAttributes} from '../../../../src/dom';
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+import {Services} from '../../../../src/services';
 
 describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
   let impl;
@@ -58,7 +59,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
 
   describe('#mergeRtcResponses_', () => {
     function testMergeRtcResponses(
-        rtcResponseArray, expectedParams, expectedJsonTargeting) {
+      rtcResponseArray, expectedParams, expectedJsonTargeting) {
       const rtcUrlParams = impl.mergeRtcResponses_(rtcResponseArray);
       expect(rtcUrlParams).to.deep.equal(expectedParams);
       expect(impl.jsonTargeting_).to.deep.equal(expectedJsonTargeting);
@@ -86,7 +87,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
     });
 
     it('should properly merge RTC responses from vendors', () => {
-      RTC_VENDORS['fakevendor2'] = {
+      RTC_VENDORS['TEMP_VENDOR'] = {
         'url': 'https://fakevendor2.biz',
       };
       const rtcResponseArray = [
@@ -95,17 +96,17 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         {response: {targeting: {'a': 'foo', 'b': {e: 'f'}}},
           callout: 'www.exampleB.com', rtcTime: 500},
         {response: {targeting: {'a': 'bar'}},
-          callout: 'fakevendor2', rtcTime: 100},
+          callout: 'TEMP_VENDOR', rtcTime: 100},
       ];
       const expectedParams = {
         ati: '2,2,2',
         artc: '100,500,100',
-        ard: 'fakevendor,www.exampleB.com,fakevendor2',
+        ard: 'fakevendor,www.exampleB.com,TEMP_VENDOR',
       };
       const expectedJsonTargeting = {
         targeting: {
           'a': 'foo', 'b': {e: 'f'}, 'a_fakevendor': [1,2,3],
-          'b_fakevendor': {c: 'd'}, 'a_fakevendor2': 'bar'},
+          'b_fakevendor': {c: 'd'}, 'a_TEMP_VENDOR': 'bar'},
       };
       testMergeRtcResponses(
           rtcResponseArray, expectedParams, expectedJsonTargeting);
@@ -200,13 +201,13 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
     it('should properly merge mix of success and errors', () => {
       impl.jsonTargeting_ = {targeting:
                             {'abc': [1,2,3], 'b': {n: 'm'}, 'a': 'TEST'},
-        categoryExclusions: ['sports']};
+      categoryExclusions: ['sports']};
       const rtcResponseArray = [
         {error: RTC_ERROR_ENUM.TIMEOUT,
           callout: 'www.exampleA.com', rtcTime: 1500},
         {response: {targeting: {'a': 'foo', 'b': {e: 'f'}},
           categoryExclusions: ['health']},
-          callout: 'VendorFoo', rtcTime: 500},
+        callout: 'VendorFoo', rtcTime: 500},
         {response: {targeting: {'a': [1,2,3], 'b': {c: 'd'}}},
           callout: 'www.exampleB.com', rtcTime: 100},
         {response: {targeting: {'a': [4,5,6], 'b': {x: [1,2]}}},
@@ -252,6 +253,16 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
           .to.deep.equal(rewrittenResponse);
     });
 
+    it('should not rewrite key names if vendor has disableKeyAppend', () => {
+      const response = {
+        'a': '1',
+        'b': '2',
+      };
+      // fakevendor2 has disableKeyAppend set to true, see callout-vendors.js
+      expect(impl.rewriteRtcKeys_(response, 'fakevendor2'))
+          .to.deep.equal(response);
+    });
+
     it('should not rewrite key names if custom url callout', () => {
       const response = {
         'a': '1',
@@ -259,6 +270,42 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       };
       expect(impl.rewriteRtcKeys_(response, 'www.customurl.biz'))
           .to.deep.equal(response);
+    });
+  });
+
+  describe('getCustomRealTimeConfigMacros', () => {
+    it('should return correct macros', () => {
+      const macros = {
+        'data-slot': '5678',
+        'height': '50',
+        'width': '200',
+        'DATA-MULTI-SIZE': '300x50,200x100',
+        'data-multi-size-validation': 'true',
+        'data-OVERRIDE-width': '250',
+        'data-override-HEIGHT': '75',
+      };
+      element = createElementWithAttributes(env.win.document, 'amp-ad', {
+        width: macros['width'],
+        height: macros['height'],
+        type: 'doubleclick',
+        layout: 'fixed',
+        'data-slot': macros['data-slot'],
+        'data-multi-size': macros['DATA-MULTI-SIZE'],
+        'data-multi-size-validation': macros['data-multi-size-validation'],
+        'data-override-width': macros['data-OVERRIDE-width'],
+        'data-override-height': macros['data-override-HEIGHT'],
+      });
+      env.win.document.body.appendChild(element);
+      const docInfo = Services.documentInfoForDoc(element);
+      impl = new AmpAdNetworkDoubleclickImpl(
+          element, env.win.document, env.win);
+      impl.populateAdUrlState();
+      const customMacros = impl.getCustomRealTimeConfigMacros_();
+      expect(customMacros.PAGEVIEWID()).to.equal(docInfo.pageViewId);
+      expect(customMacros.HREF()).to.equal(env.win.location.href);
+      Object.keys(macros).forEach(macro => {
+        expect(customMacros.ATTR(macro)).to.equal(macros[macro]);
+      });
     });
   });
 });

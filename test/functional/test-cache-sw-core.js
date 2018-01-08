@@ -354,8 +354,8 @@ runner.run('Cache SW', () => {
 
     beforeEach(() => {
       calls = 0;
-      sandbox.stub(response, 'clone', () => response);
-      fetch = sandbox.stub(window, 'fetch', () => {
+      sandbox.stub(response, 'clone').callsFake(() => response);
+      fetch = sandbox.stub(window, 'fetch').callsFake(() => {
         calls++;
         if (calls == 1) {
           return Promise.resolve(response);
@@ -434,7 +434,7 @@ runner.run('Cache SW', () => {
       it('stores response into cache', () => {
         response.clone.restore();
         const cloned = {};
-        sandbox.stub(response, 'clone', () => cloned);
+        sandbox.stub(response, 'clone').callsFake(() => cloned);
         return sw.fetchAndCache(cache, request).then(() => {
           expect(put).to.have.been.calledWith(request, cloned);
         });
@@ -480,13 +480,13 @@ runner.run('Cache SW', () => {
 
       // "Previous" cached requests
       cache.cached.push(
-        [{url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0.js`}, new Response('')],
-        // A different file
-        [{url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-comp-0.1.js`}, new Response('')],
-        // A diversion of v0
-        [{url: `https://cdn.ampproject.org/rtv/${prevDiversionRtv}/v0.js`}, new Response('', {headers: expires})],
-        // A diversion of amp-comp
-        [{url: `https://cdn.ampproject.org/rtv/${prevDiversionRtv}/v0/amp-comp-0.1.js`}, , new Response('', {headers: expires})]
+          [{url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0.js`}, new Response('')],
+          // A different file
+          [{url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0/amp-comp-0.1.js`}, new Response('')],
+          // A diversion of v0
+          [{url: `https://cdn.ampproject.org/rtv/${prevDiversionRtv}/v0.js`}, new Response('', {headers: expires})],
+          // A diversion of amp-comp
+          [{url: `https://cdn.ampproject.org/rtv/${prevDiversionRtv}/v0/amp-comp-0.1.js`}, , new Response('', {headers: expires})]
       );
       deleter = sandbox.stub(cache, 'delete');
       fetch = sandbox.stub(window, 'fetch');
@@ -552,10 +552,11 @@ runner.run('Cache SW', () => {
 
         function waitForDiversions() {
           return sw.fetchJsFile(cache, request, rtv, '/v0.js').then(() => {
-            const setTimeout = sandbox.stub(window, 'setTimeout', callback => {
-              setTimeout.restore();
-              callback();
-            });
+            const setTimeout =
+                sandbox.stub(window, 'setTimeout').callsFake(callback => {
+                  setTimeout.restore();
+                  callback();
+                });
             return sw.diversions(cache).then(() => {
               return new Promise(resolve => setTimeout(resolve, 10));
             });
@@ -630,10 +631,11 @@ runner.run('Cache SW', () => {
       function waitForDiversions() {
         return sw.fetchJsFile(cache, request, diversionRtv, '/v0.js')
             .then(() => {
-              const setTimeout = sandbox.stub(window, 'setTimeout', cb => {
-                setTimeout.restore();
-                cb();
-              });
+              const setTimeout =
+                  sandbox.stub(window, 'setTimeout').callsFake(cb => {
+                    setTimeout.restore();
+                    cb();
+                  });
               return sw.diversions(cache).then(() => {
                 return new Promise(resolve => setTimeout(resolve, 10));
               });
@@ -711,7 +713,7 @@ runner.run('Cache SW', () => {
     let keys;
     beforeEach(() => {
       keys = [{url: `https://cdn.ampproject.org/rtv/${prevRtv}/v0.js`}];
-      sandbox.stub(cache, 'keys', () => {
+      sandbox.stub(cache, 'keys').callsFake(() => {
         return Promise.resolve(keys);
       });
     });
@@ -817,7 +819,7 @@ runner.run('Cache SW', () => {
     function responseFromRequest(req) {
       const res = new Response('');
       Object.defineProperty(res, 'url', {value: req.url});
-      sandbox.stub(res, 'clone', () => res);
+      sandbox.stub(res, 'clone').callsFake(() => res);
       return res;
     }
 
@@ -828,7 +830,7 @@ runner.run('Cache SW', () => {
       blacklistedRequest = new Request(`https://cdn.ampproject.org/rtv/${blacklistedRtv}/v0/amp-comp-0.1.js`);
 
       clientId++;
-      fetch = sandbox.stub(window, 'fetch', req => {
+      fetch = sandbox.stub(window, 'fetch').callsFake(req => {
         return Promise.resolve(responseFromRequest(req));
       });
     });

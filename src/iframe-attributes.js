@@ -30,13 +30,16 @@ import {dict} from './utils/object.js';
  * @return {!JsonObject}
  */
 export function getContextMetadata(
-    parentWindow, element, sentinel, attributes) {
+  parentWindow, element, sentinel, attributes) {
   const startTime = Date.now();
   const width = element.getAttribute('width');
   const height = element.getAttribute('height');
   attributes = attributes ? attributes : dict();
   attributes['width'] = getLengthNumeral(width);
   attributes['height'] = getLengthNumeral(height);
+  if (element.getAttribute('title')) {
+    attributes['title'] = element.getAttribute('title');
+  }
   let locationHref = parentWindow.location.href;
   // This is really only needed for tests, but whatever. Children
   // see us as the logical origin, so telling them we are about:srcdoc
