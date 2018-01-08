@@ -937,7 +937,7 @@ export class UrlReplacements {
    * @private
    */
   expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
-    const parserExperimentOn = isExperimentOn(this.win, 'core-parser');
+    const parserExperimentOn = isExperimentOn(this.ampdoc.win, 'core-parser');
     if (parserExperimentOn && !opt_collectVars && !opt_sync) {
       // not supporting syncronous version or collect_vars with this new structure
       return this.parser_.expand(url, opt_bindings, opt_whiteList);

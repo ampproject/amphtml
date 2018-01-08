@@ -1,5 +1,5 @@
-import { Parser } from '../../../src/service/url-expander/parser';
-import { GlobalVariableSource } from '../../../src/service/url-replacements-impl';
+import {Parser} from '../../../src/service/url-expander/parser';
+import {GlobalVariableSource} from '../../../src/service/url-replacements-impl';
 
 function mockClientIdFn(str) {
   if (str === '__ga') {
@@ -35,57 +35,57 @@ describes.fakeWin('Parser', {
 
     it('should return single item', () => {
       const array = [
-        { start: 58, stop: 64, length: 6, name: 'RANDOM' },
+        {start: 58, stop: 64, length: 6, name: 'RANDOM'},
       ];
       const expected = [
-        { start: 58, stop: 64, length: 6, name: 'RANDOM' },
+        {start: 58, stop: 64, length: 6, name: 'RANDOM'},
       ];
       expect(parser.eliminateOverlaps_(array, url)).to.deep.equal(expected);
     });
 
     it('should sort basic case', () => {
       const array = [
-        { start: 58, stop: 64, length: 6, name: 'RANDOM' },
-        { start: 37, stop: 50, length: 13, name: 'CANONICAL_URL' },
+        {start: 58, stop: 64, length: 6, name: 'RANDOM'},
+        {start: 37, stop: 50, length: 13, name: 'CANONICAL_URL'},
       ];
       const expected = [
-        { start: 37, stop: 50, length: 13, name: 'CANONICAL_URL' },
-        { start: 58, stop: 64, length: 6, name: 'RANDOM' },
+        {start: 37, stop: 50, length: 13, name: 'CANONICAL_URL'},
+        {start: 58, stop: 64, length: 6, name: 'RANDOM'},
       ];
       expect(parser.eliminateOverlaps_(array, url)).to.deep.equal(expected);
     });
 
     it('should sort overlapping case', () => {
       const array = [
-        { start: 58, stop: 64, length: 6, name: 'RANDOM' },
-        { start: 37, stop: 50, length: 13, name: 'CANONICAL_URL' },
-        { start: 45, stop: 70, length: 15, name: '123456789012345' },
+        {start: 58, stop: 64, length: 6, name: 'RANDOM'},
+        {start: 37, stop: 50, length: 13, name: 'CANONICAL_URL'},
+        {start: 45, stop: 70, length: 15, name: '123456789012345'},
       ];
       const expected = [
-        { start: 45, stop: 70, length: 15, name: '123456789012345' },
+        {start: 45, stop: 70, length: 15, name: '123456789012345'},
       ];
       expect(parser.eliminateOverlaps_(array, url)).to.deep.equal(expected);
     });
 
     it('should handle same start', () => {
       const array = [
-        { start: 58, stop: 90, length: 13, name: 'CANONICAL_URL' },
-        { start: 58, stop: 64, length: 6, name: 'RANDOM' },
+        {start: 58, stop: 90, length: 13, name: 'CANONICAL_URL'},
+        {start: 58, stop: 64, length: 6, name: 'RANDOM'},
       ];
       const expected = [
-        { start: 58, stop: 90, length: 13, name: 'CANONICAL_URL' },
+        {start: 58, stop: 90, length: 13, name: 'CANONICAL_URL'},
       ];
       expect(parser.eliminateOverlaps_(array, url)).to.deep.equal(expected);
     });
 
     it('should handle keywords next to each other', () => {
       const array = [
-        { start: 58, stop: 64, length: 13, name: 'CANONICAL_URL' },
-        { start: 65, stop: 71, length: 6, name: 'RANDOM' },
+        {start: 58, stop: 64, length: 13, name: 'CANONICAL_URL'},
+        {start: 65, stop: 71, length: 6, name: 'RANDOM'},
       ];
       const expected = [
-        { start: 58, stop: 64, length: 13, name: 'CANONICAL_URL' },
-        { start: 65, stop: 71, length: 6, name: 'RANDOM' },
+        {start: 58, stop: 64, length: 13, name: 'CANONICAL_URL'},
+        {start: 65, stop: 71, length: 6, name: 'RANDOM'},
       ];
       expect(parser.eliminateOverlaps_(array, url)).to.deep.equal(expected);
     });
