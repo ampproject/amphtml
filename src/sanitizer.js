@@ -273,8 +273,8 @@ export function sanitizeHtml(html) {
           // Rewrite attribute values unless this attribute is a binding.
           // Bindings contain expressions not scalars and shouldn't be modified.
           const rewrite = (isBinding[i])
-              ? attrValue
-              : rewriteAttributeValue(tagName, attrName, attrValue);
+            ? attrValue
+            : rewriteAttributeValue(tagName, attrName, attrValue);
           emit(htmlSanitizer.escapeAttrib(rewrite));
         }
         emit('"');

@@ -216,7 +216,7 @@ describe('sanitizeHtml', () => {
     // Should not change "foo.bar" but should add target="_top".
     expect(sanitizeHtml('<a [href]="foo.bar">link</a>'))
         .to.equal('<a [href]="foo.bar" target="_top">link</a>');
-  })
+  });
 });
 
 
