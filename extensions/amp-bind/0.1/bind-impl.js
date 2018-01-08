@@ -253,28 +253,29 @@ export class Bind {
   }
 
   /**
-   * Rescans elements for bindings, evaluates corresponding expressions
-   * and applies the results to only those elements. Does _not_ mutate other
-   * elements in the document.
+   * Removes bindings from `removed` elements and scans `added` for bindings.
+   * Then, evaluates all expressions and applies results to `added` elements.
+   * Does _not_ mutate any other elements.
    *
-   * Returned promise is resolved when rescan and evaluation complete.
-   * If it doesn't complete within `timeout` ms, the promise is rejected.
+   * Returned promise is resolved when all operations complete.
+   * If they don't complete within `timeout` ms, the promise is rejected.
    *
-   * @param {!Array<!Element>} elements
+   * @param {!Array<!Element>} added
+   * @param {!Array<!Element>} removed
    * @param {number} timeout Timeout in milliseconds.
    * @return {!Promise}
    */
-  rescanAndEvaluate(elements, timeout = 2000) {
-    const rescan = this.removeBindingsForNodes_(elements)
-        .then(() => this.addBindingsForNodes_(elements))
+  scanAndApply(added, removed, timeout = 2000) {
+    const promise = this.removeBindingsForNodes_(removed)
+        .then(() => this.addBindingsForNodes_(added))
         .then(numberOfBindingsAdded => {
           // Don't reevaluate/apply if there are no bindings.
           if (numberOfBindingsAdded > 0) {
             return this.evaluate_().then(results =>
-              this.applyElements_(results, elements));
+              this.applyElements_(results, added));
           }
         });
-    return this.timer_.timeoutPromise(timeout, rescan,
+    return this.timer_.timeoutPromise(timeout, promise,
         'Timed out waiting for amp-bind to process rendered template.');
   }
 
@@ -389,9 +390,6 @@ export class Bind {
         this.boundElements_ = this.boundElements_.concat(boundElements);
         Object.assign(this.expressionToElements_, expressionToElements);
 
-        dev().fine(TAG, `Scanned ${bindings.length} bindings from ` +
-            `${boundElements.length} elements.`);
-
         if (limitExceeded) {
           user().error(TAG, 'Maximum number of bindings reached ' +
               `(${this.maxNumberOfBindings_}). Additional elements with ` +
@@ -408,6 +406,8 @@ export class Bind {
       // `results` is a 2D array where results[i] is an array of bindings.
       // Flatten this into a 1D array of bindings via concat.
       const bindings = Array.prototype.concat.apply([], results);
+      dev().fine(TAG, `Scanned ${bindings.length} bindings from ` +
+          `${nodes.length} elements and their descendants.`);
       if (bindings.length == 0) {
         return bindings.length;
       } else {
@@ -444,6 +444,7 @@ export class Bind {
    * @visibleForTesting
    */
   removeBindingsForNodes_(nodes) {
+    const before = (getMode().development) ? this.numberOfBindings() : 0;
     // Eliminate bound elements that are descendants of `nodes`.
     filterSplice(this.boundElements_, boundElement => {
       for (let i = 0; i < nodes.length; i++) {
@@ -453,7 +454,11 @@ export class Bind {
       }
       return true;
     });
-
+    const after = (getMode().development) ? this.numberOfBindings() : 0;
+    if (after < before) {
+      dev().fine(TAG, `Removed ${before - after} bindings from ${nodes.length} `
+          + 'elements and their descendants.');
+    }
     // Eliminate elements from the expression to elements map that
     // have node as an ancestor. Delete expressions that are no longer
     // bound to elements.
@@ -993,9 +998,17 @@ export class Bind {
    * @param {!Event} event
    */
   onDomUpdate_(event) {
-    const templateContainer = dev().assertElement(event.target);
-    this.removeBindingsForNodes_([templateContainer]).then(() => {
-      return this.addBindingsForNodes_([templateContainer]);
+    const target = dev().assertElement(event.target);
+
+    // Skip amp-list since there's already a custom integration for it.
+    const parent = target.parentNode;
+    if (parent && parent.tagName == 'AMP-LIST') {
+      dev().info(TAG, 'Skipping DOM_UPDATE rescan of:', target);
+      return;
+    }
+
+    this.removeBindingsForNodes_([target]).then(() => {
+      return this.addBindingsForNodes_([target]);
     }).then(() => {
       this.dispatchEventForTesting_(BindEvents.RESCAN_TEMPLATE);
     });
