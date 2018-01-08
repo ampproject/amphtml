@@ -38,6 +38,7 @@ tags: {
   tag_name: "TEMPLATE"
   # <template> tags may not be nested inside other <template> tags.
   disallowed_ancestor: "TEMPLATE"
+  disallowed_ancestor: "FORM > DIV [submit-success][template]"
   requires_extension: "amp-mustache"
   attrs: {
     name: "type"
