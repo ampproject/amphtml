@@ -18,7 +18,6 @@ var globals = {};
 globals.ampCacheBgcolor = "#ffffff";
 globals.ampCacheIconPrefix = "amp-link";
 globals.ampCacheTitle = chrome.i18n.getMessage("pageFromAmpCacheTitle");
-globals.ampPopup = "amp-validator.build.html";
 globals.invalidAmpBgcolor = "#8b0000";
 globals.invalidAmpIconPrefix = "invalid";
 globals.invalidAmpTitle = chrome.i18n.getMessage("pageFailsValidationTitle");
@@ -29,6 +28,12 @@ globals.tabToUrl = {};
 globals.validAmpBgcolor = "#ffd700";
 globals.validAmpIconPrefix = "valid";
 globals.validAmpTitle = chrome.i18n.getMessage("pagePassesValidationTitle");
+globals.validatorNotPresentBadge = chrome.i18n.getMessage("validatorNotPresentBadge");
+globals.validatorNotPresentBgColor = "#b71c1c";
+globals.validatorNotPresentIconPrefix = "validator-not-present";
+globals.validatorNotPresentPopup = "popup-validator-not-present.build.html";
+globals.validatorNotPresentTitle = chrome.i18n.getMessage("validatorNotPresentTitle");
+globals.validatorPopup = "popup-validator.build.html";
 
 /**
  * Format a hex value (HTML colors such as #ffffff) as an RGBA.
@@ -161,6 +166,18 @@ function handleAmpPass(tabId, validationResult) {
   if (numWarnings > 0) updateTabPopup(tabId);
 }
 
+function handleValidatorNotPresent(tabId) {
+  updateTabStatus(tabId, globals.validatorNotPresentIconPrefix,
+      globals.validatorNotPresentTitle, globals.validatorNotPresentBadge,
+      globals.validatorNotPresentBgColor);
+  chrome.tabs.get(tabId, function(tab) {
+    if (!chrome.runtime.lastError) {
+      chrome.browserAction.setPopup(
+          {tabId: tabId, popup: globals.validatorNotPresentPopup});
+    }
+  });
+}
+
 /**
  * Returns whether the url is forbidden for the extension to act on.
  *
@@ -186,7 +203,7 @@ function updateTab(tab) {
           } else if (response && response.isAmp) {
             validateUrlFromTab(tab);
           } else if (response && !response.isAmp && response.ampHref) {
-             handleAmpLink(tab.id, response.ampHref);
+            handleAmpLink(tab.id, response.ampHref);
           }
         }
     );
@@ -201,7 +218,8 @@ function updateTabPopup(tabId) {
   // Verify tab still exists
   chrome.tabs.get(tabId, function(tab) {
     if (!chrome.runtime.lastError) {
-      chrome.browserAction.setPopup({tabId: tabId, popup: globals.ampPopup});
+      chrome.browserAction.setPopup(
+          {tabId: tabId, popup: globals.validatorPopup});
     }
   });
 }
@@ -240,6 +258,11 @@ function updateTabStatus(tabId, iconPrefix, title, text, color) {
  * @param {Tab} tab The Tab which triggered the event.
  */
 function validateUrlFromTab(tab) {
+  // Verify amp and amp.validator are defined.
+  if (typeof amp === 'undefined' || typeof amp.validator === 'undefined') {
+    handleValidatorNotPresent(tab.id);
+    return;
+  }
   var xhr = new XMLHttpRequest();
   xhr.open('GET', tab.url, true);
   xhr.onreadystatechange = function() {
@@ -288,3 +311,8 @@ chrome.tabs.onReplaced.addListener(function(addedTabId, removedTabId) {
     updateTab(tab);
   });
 });
+
+/**
+ * Reload every hour to retrieve the most recent AMP Validator.
+ */
+window.setTimeout(() => { location.reload(); } , 60*60*1000);
