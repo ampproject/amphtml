@@ -334,8 +334,6 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
     });
 
     it('should not send an RTC callout to an insecure url', () => {
-      env.win.AMP_MODE.test = false;
-      env.win.AMP_MODE.localdev = false;
       const urls = [
         'https://www.1.com/',
         'https://www.2.com',

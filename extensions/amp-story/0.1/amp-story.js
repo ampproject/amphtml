@@ -430,7 +430,11 @@ export class AmpStory extends AMP.BaseElement {
         screen.mozLockOrientation || screen.msLockOrientation ||
         (unusedOrientation => {});
 
-    lockOrientation('portrait');
+    try {
+      lockOrientation('portrait');
+    } catch (e) {
+      dev().warn(TAG, 'Failed to lock screen orientation:', e.message);
+    }
   }
 
   /** @private */
@@ -475,6 +479,10 @@ export class AmpStory extends AMP.BaseElement {
     const firstPageEl = user().assertElement(
         scopedQuerySelector(this.element, 'amp-story-page'),
         'Story must have at least one page.');
+
+    if (!this.paginationButtons_) {
+      this.buildPaginationButtons_();
+    }
 
     return this.initializePages_()
         .then(() => this.buildSystemLayer_())
@@ -717,20 +725,26 @@ export class AmpStory extends AMP.BaseElement {
    */
   forceRepaintForSafari_() {
     const platform = Services.platformFor(this.win);
-    if (platform.isSafari() || platform.isIos()) {
-      this.mutateElement(() => {
-        setStyle(this.element, 'display', 'none');
-
-        // Reading the height is what forces the repaint.  The conditional exists
-        // only to workaround the fact that the closure compiler would otherwise
-        // think that only reading the height has no effect.  Since the height is
-        // always >= 0, this conditional will always be executed.
-        const height = this.element./*OK*/offsetHeight;
-        if (height >= 0) {
-          setStyle(this.element, 'display', '');
-        }
-      });
+    if (!platform.isSafari() && !platform.isIos()) {
+      return;
     }
+    if (this.isDesktop_()) {
+      // Force repaint is only needed when transitioning from invisible to visible
+      return;
+    }
+
+    this.mutateElement(() => {
+      setStyle(this.element, 'display', 'none');
+
+      // Reading the height is what forces the repaint.  The conditional exists
+      // only to workaround the fact that the closure compiler would otherwise
+      // think that only reading the height has no effect.  Since the height is
+      // always >= 0, this conditional will always be executed.
+      const height = this.element./*OK*/offsetHeight;
+      if (height >= 0) {
+        setStyle(this.element, 'display', '');
+      }
+    });
   }
 
 
@@ -820,9 +834,6 @@ export class AmpStory extends AMP.BaseElement {
     if (this.isDesktop_()) {
       this.element.setAttribute('desktop','');
       this.element.classList.remove(LANDSCAPE_OVERLAY_CLASS);
-      if (!this.paginationButtons_) {
-        this.buildPaginationButtons_();
-      }
       if (!this.topBar_) {
         this.buildTopBar_();
       }
