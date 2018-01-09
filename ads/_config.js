@@ -219,11 +219,6 @@ export const adConfig = {
     ],
   },
 
-  ancora: {
-    preconnect: 'https://creatives.ancoraplatform.com',
-    renderStartImplemented: true,
-  },
-
   appnexus: {
     prefetch: 'https://acdn.adnxs.com/ast/ast.js',
     preconnect: 'https://ib.adnxs.com',
@@ -830,6 +825,11 @@ export const adConfig = {
 
   yieldone: {
     prefetch: 'https://img.ak.impact-ad.jp/ic/pone/commonjs/yone-amp.js',
+  },
+
+  yieldpro: {
+    preconnect: 'https://creatives.yieldpro.eu',
+    renderStartImplemented: true,
   },
 
   zedo: {
