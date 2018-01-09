@@ -449,8 +449,8 @@ export class AmpStory extends AMP.BaseElement {
 
     try {
       lockOrientation('portrait');
-    } catch(e) {
-      dev().info(TAG, 'Could not lock screen orientation:', e.message);
+    } catch (e) {
+      dev().warn(TAG, 'Could not lock screen orientation:', e.message);
     }
   }
 
