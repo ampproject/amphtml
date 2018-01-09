@@ -29,7 +29,7 @@ import {toggle, setStyle} from '../../../src/style';
 import {getData, listen} from '../../../src/event-helper';
 import {LightboxManager} from './service/lightbox-manager-impl';
 import {layoutRectFromDomRect} from '../../../src/layout-rect';
-import {elementByTag} from '../../../src/dom';
+import {elementByTag, scopedQuerySelector} from '../../../src/dom';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
@@ -114,7 +114,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     /** @private {?Element} */
     this.descriptionTextArea_ = null;
 
-    /** @private {!Object<string,Array<!LightboxElementMetadataDef_>>} */
+    /** @private {!Object<string,!Array<!LightboxElementMetadataDef_>>} */
     this.elementsMetadata_ = {
       default: [],
     };
@@ -247,7 +247,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    */
   findOrBuildCarousel_(lightboxGroupId) {
     dev().assert(this.container_);
-    const existingCarousel = this.element.querySelector(
+    const existingCarousel = scopedQuerySelector(
+        this.element,
         'amp-carousel[amp-lightbox-group=' + lightboxGroupId + ']'
     );
     if (existingCarousel) {
@@ -895,9 +896,11 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   findOrBuildGallery_() {
-    this.gallery_ = this.element.querySelector(
+    this.gallery_ = scopedQuerySelector(
+        this.element,
         '.i-amphtml-lbv-gallery[amp-lightbox-group='
-      + this.currentLightboxGroupId_ + ']');
+        + this.currentLightboxGroupId_ + ']'
+    );
     if (this.gallery_) {
       this.gallery_.classList.remove('i-amphtml-lbv-gallery-hidden');
     } else {
