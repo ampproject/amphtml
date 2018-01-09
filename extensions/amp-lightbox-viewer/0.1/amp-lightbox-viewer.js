@@ -247,8 +247,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    */
   findOrBuildCarousel_(lightboxGroupId) {
     dev().assert(this.container_);
-    const existingCarousel = this.getAmpDoc().getElementById(
-        'amp-lightbox-carousel-' + lightboxGroupId);
+    const existingCarousel = this.element.querySelector(
+        'amp-carousel[amp-lightbox-group=' + lightboxGroupId + ']'
+    );
     if (existingCarousel) {
       this.carousel_ = existingCarousel;
       return this.vsync_.mutatePromise(() => {
@@ -271,8 +272,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.carousel_ = this.win.document.createElement('amp-carousel');
     this.carousel_.setAttribute('type', 'slides');
     this.carousel_.setAttribute('layout', 'fill');
-    const id = 'amp-lightbox-carousel-' + lightboxGroupId;
-    this.carousel_.id = id;
+    this.carousel_.setAttribute('amp-lightbox-group', lightboxGroupId);
     return this.manager_.getElementsForLightboxGroup(lightboxGroupId)
         .then(list => {
           return this.vsync_.mutatePromise(() => {
@@ -554,9 +554,15 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     });
   }
 
+  /**
+   * @return {!LightboxElementMetadataDef_}
+   * @private
+   */
   getCurrentElement_() {
     const lbgId = this.currentLightboxGroupId_;
-    return this.elementsMetadata_[lbgId][this.currentElemId_];
+    return dev().assert(
+        this.elementsMetadata_[lbgId][this.currentElemId_]
+    );
   }
 
   /**
@@ -889,15 +895,17 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   findOrBuildGallery_() {
-    const galleryId = 'amp-lightbox-gallery-' + this.currentLightboxGroupId_;
-    this.gallery_ = this.win.document.getElementById(galleryId);
+    this.gallery_ = this.element.querySelector(
+        '.i-amphtml-lbv-gallery[amp-lightbox-group='
+      + this.currentLightboxGroupId_ + ']');
     if (this.gallery_) {
       this.gallery_.classList.remove('i-amphtml-lbv-gallery-hidden');
     } else {
       // Build gallery
       this.gallery_ = this.win.document.createElement('div');
       this.gallery_.classList.add('i-amphtml-lbv-gallery');
-      this.gallery_.id = galleryId;
+      this.gallery_.setAttribute('amp-lightbox-group',
+          this.currentLightboxGroupId_);
 
       // Initialize thumbnails
       this.updateThumbnails_();
