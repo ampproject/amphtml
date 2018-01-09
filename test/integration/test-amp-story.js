@@ -26,6 +26,8 @@ const PAGE_LOADED_CLASS = 'i-amphtml-story-page-loaded';
 
 const STORY_ELEMENT_ID = 'amp-story-for-test';
 
+const DEFAULT_TIMEOUT = 3000;
+
 const AUTO_ADVANCE_TOLERANCE_MS = 1000;
 
 const CSS =
@@ -37,13 +39,7 @@ const CSS =
   }`;
 
 
-describe.configure().skip(function() {
-  // TODO(alanorozco): Marking pages as loaded is broken in iOS < 11.
-  // Waiting for MediaPool to be rolled forward to enable this test (PR #12604).
-  return this.platform.isIos() &&
-      this.platform.isSafari() &&
-      this.platform.getMajorVersion() < 11;
-}).run('amp-story', function() {
+describe.configure().run('amp-story', function() {
   let win;
 
   function describesAmpStoryIntegration(name, pagesHtml, fn) {
@@ -174,7 +170,8 @@ describe.configure().skip(function() {
 
           // Backwards.
           .then(() => expectActivePageAfterClickBackward('page-1'))
-          .then(() => expectActivePageAfterClickBackward('page-0')));
+          .then(() => expectActivePageAfterClickBackward('page-0')))
+        .timeout(DEFAULT_TIMEOUT);
 
     it('should activate bookend and replay on click', () =>
       expectActivePage('page-0')
@@ -187,14 +184,16 @@ describe.configure().skip(function() {
           .then(() => {
             win.document.querySelector(REPLAY_BUTTON_SELECTOR).click();
             return expectActivePage('page-0');
-          }));
+          }))
+        .timeout(DEFAULT_TIMEOUT);
   });
 
   const TIME_PAGE_0 = 800;
   const TIME_PAGE_1 = 1500;
   const TIME_PAGE_2 = 1000;
 
-  const TIME_ADVANCE_TIMEOUT = 2000 +
+  const TIME_ADVANCE_TIMEOUT =
+      DEFAULT_TIMEOUT +
       TIME_PAGE_0 +
       TIME_PAGE_1 +
       TIME_PAGE_2 +
