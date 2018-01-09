@@ -408,7 +408,6 @@ export class AmpSidebar extends AMP.BaseElement {
   triggerEvent_(name) {
     const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
     this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
-    this.element.dispatchCustomEventForTesting(name);
   }
 }
 

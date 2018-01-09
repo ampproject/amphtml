@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {listenOncePromise} from '../../../../../src/event-helper';
+import {poll} from '../../../../../testing/iframe';
 
 describe.configure().run('amp-sidebar', function() {
 
@@ -24,7 +24,8 @@ describe.configure().run('amp-sidebar', function() {
   <amp-sidebar
     id="sidebar1"
     layout="nodisplay"
-    on="sidebarOpen:focusOnMe.focus">
+    // eslint-disable-next-line
+    on="sidebarOpen:focusOnMe.focus,dummy.hide;sidebarClose:dummy.show">
     <ul>
       <li> <a id="focusOnMe" href="https://google.com">Focused on open</a></li>
       <li>
@@ -41,6 +42,8 @@ describe.configure().run('amp-sidebar', function() {
   <div id="section3" style="position: absolute; top: 2000px;">
     <h1 >Section 3</h1>
   </div>
+
+  <div id="dummy"></div>
   `;
   describes.integration('sidebar focus', {
     body: sidebarBody,
@@ -54,12 +57,11 @@ describe.configure().run('amp-sidebar', function() {
 
     it('should focus on opener on close', () => {
       const openerButton = win.document.getElementById('sidebarOpener');
-      const sidebar = win.document.getElementById('sidebar1');
-      const openedPromise = listenOncePromise(sidebar, 'sidebarOpen');
+      const openedPromise = waitForSidebarOpen(win.document);
       openerButton.click();
       return openedPromise.then(() => {
         const closerButton = win.document.getElementById('sidebarCloser');
-        const closedPromise = listenOncePromise(sidebar, 'sidebarClose');
+        const closedPromise = waitForSidebarClose(win.document);
         closerButton.click();
         return closedPromise;
       }).then(() => {
@@ -71,14 +73,14 @@ describe.configure().run('amp-sidebar', function() {
       const openerButton = win.document.getElementById('sidebarOpener');
       const sidebar = win.document.getElementById('sidebar1');
       const viewport = sidebar.implementation_.getViewport();
-      const openedPromise = listenOncePromise(sidebar, 'sidebarOpen');
+      const openedPromise = waitForSidebarOpen(win.document);
       openerButton.click();
       expect(viewport.getScrollTop()).to.equal(0);
       return openedPromise.then(() => {
         viewport.setScrollTop(1000);
         expect(viewport.getScrollTop()).to.equal(1000);
         const closerButton = win.document.getElementById('sidebarCloser');
-        const closedPromise = listenOncePromise(sidebar, 'sidebarClose');
+        const closedPromise = waitForSidebarClose(win.document);
         closerButton.click();
         return closedPromise;
       }).then(() => {
@@ -88,3 +90,17 @@ describe.configure().run('amp-sidebar', function() {
     });
   });
 });
+
+function waitForSidebarOpen(document) {
+  return poll('wait for sidebar to open', () => {
+    const dummy = document.getElementById('dummy');
+    return dummy.style.display == 'none';
+  });
+}
+
+function waitForSidebarClose(document) {
+  return poll('wait for sidebar to open', () => {
+    const dummy = document.getElementById('dummy');
+    return dummy.style.display == '';
+  });
+}
