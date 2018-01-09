@@ -57,10 +57,25 @@ function main() {
     return 1;
   }
 
+  // Perform a node version check and print a warning if it is not node 6.
+  const nodeVersion = getStdout('node --version').trim();
+  if (nodeVersion.split('.')[0] != 'v6') {
+    console/*OK*/.log(yellow('WARNING: Detected node version'),
+        cyan(nodeVersion) + yellow('. Recommended version is'),
+        cyan('v6') + yellow('.'));
+    console/*OK*/.log(yellow('To fix this, run'),
+        cyan('"nvm install 6"'), yellow('or see'),
+        cyan('https://nodejs.org/en/download/package-manager'),
+        yellow('for instructions.'));
+  } else {
+    console/*OK*/.log(green('Detected node version'), cyan(nodeVersion) +
+        green('.'));
+  }
+
   // If yarn is being run, perform a version check and proceed with the install.
   const yarnVersion = getStdout('yarn --version').trim();
-  const major = yarnVersion.split('.')[0];
-  const minor = yarnVersion.split('.')[1];
+  const major = parseInt(yarnVersion.split('.')[0]);
+  const minor = parseInt(yarnVersion.split('.')[1]);
   if ((major < 1) || (minor < 2)) {
     console/*OK*/.log(yellow('WARNING: Detected yarn version'),
         cyan(yarnVersion) + yellow('. Minimum recommended version is'),
