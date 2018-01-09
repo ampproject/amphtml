@@ -479,7 +479,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   buildTopBarShare_() {
-     const container =
+    const container =
         renderSimpleTemplate(this.win.document, SHARE_WIDGET_PILL_CONTAINER);
 
     this.shareWidget_ = new ShareWidget(this.win);
