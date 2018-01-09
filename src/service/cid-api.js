@@ -18,7 +18,7 @@ import {getCookie, setCookie} from '../cookies';
 import {Services} from '../services';
 import {dev} from '../log';
 import {dict} from '../utils/object';
-import {isProxyOrigin} from '../url';
+import {isProxyOrigin, parseUrl} from '../url';
 import {WindowInterface} from '../window-interface';
 
 const GOOGLE_API_URL = 'https://ampcid.google.com/v1/publisher:getClientId?key=';
@@ -44,11 +44,12 @@ const YEAR = 365 * DAY;
  */
 export class GoogleCidApi {
 
-  /**
-   * @param {!Window} win
-   */
-  constructor(win) {
-    this.win_ = win;
+  /** @param {!./ampdoc-impl.AmpDoc} ampdoc */
+  constructor(ampdoc) {
+    /**
+     * @private {!Window}
+     */
+    this.win_ = ampdoc.win;
     /**
      * @private {!./timer-impl.Timer}
      */
@@ -58,6 +59,11 @@ export class GoogleCidApi {
      * @private {!Object<string, !Promise<?string>>}
      */
     this.cidPromise_ = {};
+
+    const canonicalUrl = Services.documentInfoForDoc(ampdoc).canonicalUrl;
+
+    /** @private {?string} */
+    this.canonicalOrigin_ = canonicalUrl ? parseUrl(canonicalUrl).origin : null;
   }
 
   /**
@@ -123,6 +129,7 @@ export class GoogleCidApi {
   fetchCid_(url, scope, token) {
     const payload = dict({
       'originScope': scope,
+      'canonicalOrigin': this.canonicalOrigin_,
     });
     if (token) {
       payload['securityToken'] = token;
