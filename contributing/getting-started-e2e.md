@@ -354,7 +354,13 @@ Sometimes, it can be useful to pre-emptively eliminate errors in your pull reque
 gulp pr-check
 ```
 
-To run all Travis CI checks, but restrict the unit tests and integration tests to just a subset of files, you can run:
+To run all Travis CI checks, but skip the `gulp build` step, you can run:
+
+```
+gulp pr-check --nobuild
+```
+
+To run all Travis CI checks, and restrict the unit tests and integration tests to just a subset of files, you can run:
 
 ```
 gulp pr-check --files=<test-files-path-glob>
