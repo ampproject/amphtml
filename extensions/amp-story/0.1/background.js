@@ -22,8 +22,6 @@ import {setStyle} from '../../../src/style';
 /** @const {number} */
 const SWAP_TIMEOUT_MS = 500;
 
-/** @const {number} */
-const XFADE_DURATION_MS = 300;
 
 const BACKGROUND_CLASS = 'i-amphtml-story-background';
 
@@ -135,7 +133,7 @@ export class AmpStoryBackground {
     });
   }
 
-  /*
+  /**
    * Rotates the classes on page background to bring the new bacground in foreground.
    * @private
    */
