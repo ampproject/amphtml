@@ -24,6 +24,7 @@
  * This script attempts to introduce some granularity for our
  * presubmit checking, via the determineBuildTargets method.
  */
+const argv = require('minimist')(process.argv.slice(2));
 const atob = require('atob');
 const execOrDie = require('./exec').execOrDie;
 const getStdout = require('./exec').getStdout;
@@ -271,21 +272,29 @@ const command = {
     timedExecOrDie('gulp dep-check');
     timedExecOrDie('gulp check-types');
   },
-  runUnitTests: function(saucelabs) {
+  runUnitTests: function() {
+    let cmd = 'gulp test --unit --nobuild';
+    if (argv.files) {
+      cmd = cmd + ' --files ' + argv.files;
+    }
     // Unit tests with Travis' default chromium
-    timedExecOrDie('gulp test --unit --nobuild');
-    if (saucelabs) {
+    timedExecOrDie(cmd);
+    if (!!process.env.SAUCE_USERNAME && !!process.env.SAUCE_ACCESS_KEY) {
       // A subset of unit tests on other browsers via sauce labs
-      timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
+      cmd = cmd + ' --saucelabs_lite';
+      timedExecOrDie(cmd);
     }
   },
-  runIntegrationTests: function(compiled, saucelabs) {
-    // Integration tests on chrome, or on all saucelabs browsers if requested
+  runIntegrationTests: function(compiled) {
+    // Integration tests on chrome, or on all saucelabs browsers if set up
     let cmd = 'gulp test --nobuild --integration';
+    if (argv.files) {
+      cmd = cmd + ' --files ' + argv.files;
+    }
     if (compiled) {
       cmd += ' --compiled';
     }
-    if (saucelabs) {
+    if (!!process.env.SAUCE_USERNAME && !!process.env.SAUCE_ACCESS_KEY) {
       cmd += ' --saucelabs';
     }
     timedExecOrDie(cmd);
@@ -297,8 +306,7 @@ const command = {
       console.log(
           '\n' + fileLogPrefix, 'Could not find environment variables',
           util.colors.cyan('PERCY_PROJECT'), 'and',
-          util.colors.cyan('PERCY_TOKEN') + '. Skipping visual diff tests.',
-          '\n');
+          util.colors.cyan('PERCY_TOKEN') + '. Skipping visual diff tests.');
       return;
     }
     let cmd = 'gulp visual-diff';
@@ -315,7 +323,7 @@ const command = {
           '\n' + fileLogPrefix, 'Could not find environment variables',
           util.colors.cyan('PERCY_PROJECT'), 'and',
           util.colors.cyan('PERCY_TOKEN') +
-          '. Skipping verification of visual diff tests.', '\n');
+          '. Skipping verification of visual diff tests.');
       return;
     }
     timedExecOrDie('gulp visual-diff --verify');
@@ -341,7 +349,7 @@ function runAllCommands() {
     command.runLintCheck();
     command.runJsonCheck();
     command.runDepAndTypeChecks();
-    command.runUnitTests(/* saucelabs */ true);
+    command.runUnitTests();
     command.verifyVisualDiffTests();
     // command.testDocumentLinks() is skipped during push builds.
     command.buildValidatorWebUI();
@@ -351,7 +359,7 @@ function runAllCommands() {
     command.cleanBuild();
     command.buildRuntimeMinified();
     command.runPresubmitTests();
-    command.runIntegrationTests(/* compiled */ true, /* saucelabs */ true);
+    command.runIntegrationTests(/* compiled */ true);
   }
 }
 
@@ -364,14 +372,16 @@ function runAllCommandsLocally() {
   command.testDocumentLinks();
 
   // Build if required.
-  command.cleanBuild();
-  command.buildRuntime();
+  if (!argv.nobuild) {
+    command.cleanBuild();
+    command.buildRuntime();
+  }
 
   // These tests need a build.
   command.runPresubmitTests();
   command.runVisualDiffTests();
-  command.runUnitTests(/* saucelabs */ false);
-  command.runIntegrationTests(/* compiled */ false, /* saucelabs */ false);
+  command.runUnitTests();
+  command.runIntegrationTests(/* compiled */ false);
   command.verifyVisualDiffTests();
 
   // Validator tests.
@@ -472,7 +482,7 @@ function main() {
       command.runDepAndTypeChecks();
       // Run unit tests only if the PR contains runtime changes.
       if (buildTargets.has('RUNTIME')) {
-        command.runUnitTests(/* saucelabs */ true);
+        command.runUnitTests();
       }
     }
   }
@@ -489,7 +499,7 @@ function main() {
       if (buildTargets.has('INTEGRATION_TEST') ||
           buildTargets.has('RUNTIME')) {
         command.runPresubmitTests();
-        command.runIntegrationTests(/* compiled */ false, /* saucelabs */ true);
+        command.runIntegrationTests(/* compiled */ false);
       }
       command.verifyVisualDiffTests();
     } else {
