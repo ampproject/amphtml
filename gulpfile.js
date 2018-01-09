@@ -206,7 +206,7 @@ function endBuildStep(stepName, targetName, startTime) {
   const endTime = Date.now();
   const executionTime = new Date(endTime - startTime);
   const secs = executionTime.getSeconds();
-  const ms = executionTime.getMilliseconds().toString().padStart(3, '0');
+  const ms = ('000' + executionTime.getMilliseconds().toString()).slice(-3);
   var timeString = '(';
   if (secs === 0) {
     timeString += ms + ' ms)';
@@ -699,7 +699,10 @@ function checkTypes() {
     './src/service-worker/kill.js',
     './src/web-worker/web-worker.js',
   ];
-  var extensionSrcs = Object.values(extensions).filter(function(extension) {
+  var extensionValues = Object.keys(extensions).map(function(key) {
+    return extensions[key];
+  });
+  var extensionSrcs = extensionValues.filter(function(extension) {
     return !extension.noTypeCheck;
   }).map(function(extension) {
     return './extensions/' + extension.name + '/' +
