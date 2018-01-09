@@ -15,7 +15,7 @@
  */
 
 import {writeScript, validateData, computeInMasterFrame} from '../3p/3p';
-import {getSourceUrl} from '../src/url';
+import {parseUrl, getSourceUrl} from '../src/url';
 import {doubleclick} from '../ads/google/doubleclick';
 
 const mandatoryParams = ['tagtype', 'cid'],
@@ -188,7 +188,8 @@ function loadHBTag(global, data, publisherUrl, referrerUrl) {
       setAmpTargeting: () => {},
       renderAmpAd: () => {},
     };
-    writeScript(global, 'https://contextual.media.net/bidexchange.js?https=1&amp=1&cid=' + encodeURIComponent(data.cid) + '&dn=' + encodeURIComponent(global.context.location.hostname), () => {
+    const publisherDomain = parseUrl(publisherUrl).hostname;
+    writeScript(global, 'https://contextual.media.net/bidexchange.js?https=1&amp=1&cid=' + encodeURIComponent(data.cid) + '&dn=' + encodeURIComponent(publisherDomain), () => {
       done(null);
     });
   }, mnetHBHandle);
