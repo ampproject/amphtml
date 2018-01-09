@@ -313,14 +313,12 @@ export class AmpStory extends AMP.BaseElement {
     });
 
     this.element.addEventListener(EventType.SWITCH_PAGE, e => {
-      const targetPageId = e.detail.targetPageId;
-
-      if (targetPageId === 'i-amphtml-story-bookend') {
-        this.showBookend_();
-      } else {
-        this.switchTo_(targetPageId);
+      if (this.bookend_.isActive()) {
+        // Disallow switching pages while the bookend is active.
+        return;
       }
 
+      this.switchTo_(e.detail.targetPageId);
       this.ampStoryHint_.hideAllNavigationHint();
     });
 
@@ -655,11 +653,6 @@ export class AmpStory extends AMP.BaseElement {
    */
   // TODO(newmuis): Update history state
   switchTo_(targetPageId) {
-    if (this.bookend_.isActive()) {
-      // Disallow switching pages while the bookend is active.
-      return Promise.resolve();
-    }
-
     const targetPage = this.getPageById_(targetPageId);
     const pageIndex = this.getPageIndex(targetPage);
 
