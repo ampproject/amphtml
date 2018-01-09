@@ -209,9 +209,23 @@ export class InaboxMessagingHost {
     return true;
   }
 
-  /**
-   * Returns source window's ancestor iframe who is the direct child of host
-   * doc. The sentinel should be unique to the source window, and the result
+  /** This method is doing two things.
+   *    1. It checks that the source of the message is valid.
+   *       Validity means that the message comes from a frame that
+   *       is either directly registered in this.iframes_, or is a
+   *       child of one of those frames.
+   *    2. It returns whichever iframe is the deepest frame in the source's
+   *       hierarchy that the outer host window can still access, thus being
+   *       able to measure.
+   * EXAMPLE:
+   *   If we have a frame hierarchy:
+   *     Host -> Friendly Frame -> X Domain Frame 1 -> Message Source Frame
+   *     and "Friendly Frame" is registered in this.iframes_, then
+   *     "Message Source Frame" is valid, because one of its parent frames
+   *     is registered in this.iframes_, and the result of the call to
+   *     getFrameElement_ would be the iframe "X Domain Frame 1" as it is
+   *     the deepest frame that the host doc can accurately measure.
+   * Note: The sentinel should be unique to the source window, and the result
    * is cached using the sentinel as the key.
    *
    * @param source {!Window}
@@ -223,30 +237,18 @@ export class InaboxMessagingHost {
     if (this.iframeMap_[sentinel]) {
       return this.iframeMap_[sentinel];
     }
-
-    // Verify that the source of the postMessage corresponds to one of
-    // the iframes that was registered.
     for (let i = 0; i < this.iframes_.length; i++) {
       const iframe = this.iframes_[i];
-      if (iframe.contentWindow === source) {
-        // Walk up on the window tree and verify that there is no cross-domain
-        // frame in between the source of the postMessage and the host doc.
-        // If there is, the host doc will not be able to accurately measure
-        // the creative's positions in the page, so return null.
-        // Limit to 10 iterations.
-        for (let i = 0, tempWin = source.parent;
-	     tempWin != this.win_ && tempWin != this.win_.top;
-	     i++, tempWin = tempWin.parent) {
-	    if (i == 10 || !canInspectWindow(tempWin)) {
-            dev().warn(
-		    TAG, 'Ignored message from within cross-domain iframe', tempWin);
-	      return null;
-	  }
-        }
-        // Cache the found iframe with its sentinel.
-        this.iframeMap_[sentinel] = iframe;
-        return iframe;
-      }
+      for (let j = 0, tempWin = source, deepestAccessibleWin;
+           j < 10; j++) {
+             if (canInspectWindow(tempWin) && !deepestAccesibleWin) {
+               deepestAccessibleWin = tempWin;
+             }
+             if (iframe.contentWindow == tempWin) {
+               this.iframeMap_[sentinel] = deepestAccessibleWin.frameElement;
+               return deepestAccesibleWin.frameElement;
+             }
+           }
     }
     return null;
   }
