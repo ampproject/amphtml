@@ -632,6 +632,13 @@ PASS
 |        data-slot="/4119129/mobile_ad_banner">
 |    </amp-ad>
 |  
+|    <h2>Doubleclick with RTC config</h2>
+|    <amp-ad width="320" height="50"
+|        type="doubleclick"
+|        data-slot="/4119129/mobile_ad_banner"
+|        rtc-config="{foo: bar}">
+|    </amp-ad>
+|  
 |    <h2>Doubleclick with JSON based parameters</h2>
 |    <amp-ad width="320" height="50"
 |        type="doubleclick"
