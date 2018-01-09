@@ -129,7 +129,6 @@
     "morgan": "1.9.0",
     "nodemon": "1.14.7",
     "path": "0.12.7",
-    "phantomjs-prebuilt": "2.1.16",
     "postcss": "6.0.15",
     "postcss-import": "11.0.0",
     "pretty-bytes": "4.0.2",
