@@ -18,7 +18,6 @@ var globals = {};
 globals.ampCacheBgcolor = "#ffffff";
 globals.ampCacheIconPrefix = "amp-link";
 globals.ampCacheTitle = chrome.i18n.getMessage("pageFromAmpCacheTitle");
-globals.ampPopup = "popup-validator.build.html";
 globals.invalidAmpBgcolor = "#8b0000";
 globals.invalidAmpIconPrefix = "invalid";
 globals.invalidAmpTitle = chrome.i18n.getMessage("pageFailsValidationTitle");
@@ -34,6 +33,7 @@ globals.validatorNotPresentBgColor = "#b71c1c";
 globals.validatorNotPresentIconPrefix = "validator-not-present";
 globals.validatorNotPresentPopup = "popup-validator-not-present.build.html";
 globals.validatorNotPresentTitle = chrome.i18n.getMessage("validatorNotPresentTitle");
+globals.validatorPopup = "popup-validator.build.html";
 
 /**
  * Format a hex value (HTML colors such as #ffffff) as an RGBA.
@@ -218,7 +218,8 @@ function updateTabPopup(tabId) {
   // Verify tab still exists
   chrome.tabs.get(tabId, function(tab) {
     if (!chrome.runtime.lastError) {
-      chrome.browserAction.setPopup({tabId: tabId, popup: globals.ampPopup});
+      chrome.browserAction.setPopup(
+          {tabId: tabId, popup: globals.validatorPopup});
     }
   });
 }
