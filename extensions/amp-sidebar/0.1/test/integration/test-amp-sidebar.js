@@ -16,10 +16,7 @@
 
 import {listenOncePromise} from '../../../../../src/event-helper';
 
-const config = describe.configure().ifNewChrome();
-
-config.run('amp-sidebar', function() {
-  this.timeout(100000);
+describe.configure().run('amp-sidebar', function() {
 
   const extensions = ['amp-sidebar'];
 
@@ -56,55 +53,37 @@ config.run('amp-sidebar', function() {
     });
 
     it('should focus on opener on close', () => {
-      return new Promise((resolve, reject) => {
-        const openerButton = win.document.getElementById('sidebarOpener');
-        const sidebar = win.document.getElementById('sidebar1');
-        const openedPromise = listenOncePromise(sidebar, 'sidebarOpen');
-        openerButton.click();
-        return openedPromise.then(() => {
-          const closerButton = win.document.getElementById('sidebarCloser');
-          const closedPromise = listenOncePromise(sidebar, 'sidebarClose');
-          closerButton.click();
-          return closedPromise;
-        }).then(() => {
-          try {
-            expect(win.document.activeElement).to.equal(openerButton);
-            resolve();
-          } catch (e) {
-            reject(e);
-          }
-        });
+      const openerButton = win.document.getElementById('sidebarOpener');
+      const sidebar = win.document.getElementById('sidebar1');
+      const openedPromise = listenOncePromise(sidebar, 'sidebarOpen');
+      openerButton.click();
+      return openedPromise.then(() => {
+        const closerButton = win.document.getElementById('sidebarCloser');
+        const closedPromise = listenOncePromise(sidebar, 'sidebarClose');
+        closerButton.click();
+        return closedPromise;
+      }).then(() => {
+        expect(win.document.activeElement).to.equal(openerButton);
       });
     });
 
     it('should not change scroll position after close', () => {
-      return new Promise((resolve, reject) => {
-        const openerButton = win.document.getElementById('sidebarOpener');
-        const sidebar = win.document.getElementById('sidebar1');
-        const viewport = sidebar.implementation_.getViewport();
-        const openedPromise = listenOncePromise(sidebar, 'sidebarOpen');
-        openerButton.click();
-        expect(viewport.getScrollTop()).to.equal(0);
-        return openedPromise.then(() => {
-          try {
-            viewport.setScrollTop(1000);
-            expect(viewport.getScrollTop()).to.equal(1000);
-            const closerButton = win.document.getElementById('sidebarCloser');
-            const closedPromise = listenOncePromise(sidebar, 'sidebarClose');
-            closerButton.click();
-            return closedPromise;
-          } catch (e) {
-            reject(e);
-          }
-        }).then(() => {
-          try {
-            expect(viewport.getScrollTop()).to.equal(1000);
-            expect(win.document.activeElement).to.not.equal(openerButton);
-            resolve();
-          } catch (e) {
-            reject(e);
-          }
-        });
+      const openerButton = win.document.getElementById('sidebarOpener');
+      const sidebar = win.document.getElementById('sidebar1');
+      const viewport = sidebar.implementation_.getViewport();
+      const openedPromise = listenOncePromise(sidebar, 'sidebarOpen');
+      openerButton.click();
+      expect(viewport.getScrollTop()).to.equal(0);
+      return openedPromise.then(() => {
+        viewport.setScrollTop(1000);
+        expect(viewport.getScrollTop()).to.equal(1000);
+        const closerButton = win.document.getElementById('sidebarCloser');
+        const closedPromise = listenOncePromise(sidebar, 'sidebarClose');
+        closerButton.click();
+        return closedPromise;
+      }).then(() => {
+        expect(viewport.getScrollTop()).to.equal(1000);
+        expect(win.document.activeElement).to.not.equal(openerButton);
       });
     });
   });
