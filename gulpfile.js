@@ -52,6 +52,11 @@ var yellow = $$.util.colors.yellow;
 var red = $$.util.colors.red;
 var cyan = $$.util.colors.cyan;
 
+var minifiedRuntimeTarget = 'dist/v0.js';
+var minified3pTarget = 'dist.3p/current-min/f.js';
+var unminifiedRuntimeTarget = 'dist/amp.js';
+var unminified3pTarget = 'dist.3p/current/integration.js';
+
 // Each extension and version must be listed individually here.
 declareExtension('amp-3q-player', '0.1', false);
 declareExtension('amp-access', '0.1', true);
@@ -203,7 +208,7 @@ function endBuildStep(stepName, targetName, startTime) {
   const endTime = Date.now();
   const executionTime = new Date(endTime - startTime);
   const secs = executionTime.getSeconds();
-  const ms = executionTime.getMilliseconds().toString().padStart(3, '0');
+  const ms = ('000' + executionTime.getMilliseconds().toString()).slice(-3);
   var timeString = '(';
   if (secs === 0) {
     timeString += ms + ' ms)';
@@ -441,6 +446,7 @@ function copyCss() {
  * @return {!Promise}
  */
 function watch() {
+  printConfigHelp('gulp watch');
   $$.watch('css/**/*.css', function() {
     compileCss();
   });
@@ -451,7 +457,11 @@ function watch() {
     buildExaminer({watch: true}),
     buildExtensions({watch: true}),
     compile(true),
-  ]);
+  ]).then(() => {
+    return enableLocalTesting(unminifiedRuntimeTarget);
+  }).then(() => {
+    return enableLocalTesting(unminified3pTarget);
+  });
 }
 
 /**
@@ -565,24 +575,17 @@ function buildExtensionJs(path, name, version, options) {
 /**
  * Prints a helpful message that lets the developer know how to switch configs.
  * @param {string} command Command being run.
- * @param {string} targetFile File to which the config is to be written.
  */
-function printConfigHelp(command, targetFile) {
+function printConfigHelp(command) {
   if (!process.env.TRAVIS) {
     $$.util.log(
         green('Building the runtime for local testing with the'),
         cyan((argv.config === 'canary') ? 'canary' : 'prod'),
         green('AMP config'));
     $$.util.log(
-        green('- To specify which config to apply:'),
-        cyan(command), cyan('--config={canary|prod}'));
-    $$.util.log(
-        green('- To switch configs after building:'),
-        cyan('gulp prepend-global {--canary|--prod} --local_dev --target ' +
-            targetFile));
-    $$.util.log(
-        green('- To remove any existing config:'),
-        cyan('gulp prepend-global --remove --target ' + targetFile));
+        green('To specify which config to apply, use',
+            cyan('--config={canary|prod}'), 'with your',
+            cyan(command), 'command'));
   }
 }
 
@@ -608,7 +611,7 @@ function enableLocalTesting(targetFile) {
  */
 function build() {
   process.env.NODE_ENV = 'development';
-  printConfigHelp('gulp build', 'dist/amp.js')
+  printConfigHelp('gulp build');
   return compileCss().then(() => {
     return Promise.all([
       polyfillsForTests(),
@@ -620,7 +623,9 @@ function build() {
       compile(),
     ]);
   }).then(() => {
-    return enableLocalTesting('dist/amp.js');
+    return enableLocalTesting(unminifiedRuntimeTarget);
+  }).then(() => {
+    return enableLocalTesting(unminified3pTarget);
   });
 }
 
@@ -632,7 +637,7 @@ function dist() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   if (argv.fortesting) {
-    printConfigHelp('gulp dist --fortesting', 'dist/v0.js')
+    printConfigHelp('gulp dist --fortesting')
   }
   return compileCss().then(() => {
     return Promise.all([
@@ -654,7 +659,11 @@ function dist() {
     copyAliasExtensions();
   }).then(() => {
     if (argv.fortesting) {
-      return enableLocalTesting('dist/v0.js');
+      return enableLocalTesting(minifiedRuntimeTarget);
+    }
+  }).then(() => {
+    if (argv.fortesting) {
+      return enableLocalTesting(minified3pTarget);
     }
   });
 }
@@ -693,7 +702,10 @@ function checkTypes() {
     './src/service-worker/kill.js',
     './src/web-worker/web-worker.js',
   ];
-  var extensionSrcs = Object.values(extensions).filter(function(extension) {
+  var extensionValues = Object.keys(extensions).map(function(key) {
+    return extensions[key];
+  });
+  var extensionSrcs = extensionValues.filter(function(extension) {
     return !extension.noTypeCheck;
   }).map(function(extension) {
     return './extensions/' + extension.name + '/' +
@@ -1304,11 +1316,12 @@ gulp.task('dist', 'Build production binaries', ['update-packages'], dist, {
   }
 });
 gulp.task('extensions', 'Build AMP Extensions', buildExtensions);
-gulp.task('watch', 'Watches for changes in files, re-build', watch, {
-  options: {
-    with_inabox: '  Also watch and build the amp-inabox.js binary.',
-    with_shadow: '  Also watch and build the amp-shadow.js binary.',
-  }
+gulp.task('watch', 'Watches for changes in files, re-builds when detected',
+    ['update-packages'], watch, {
+      options: {
+        with_inabox: '  Also watch and build the amp-inabox.js binary.',
+        with_shadow: '  Also watch and build the amp-shadow.js binary.',
+      }
 });
 gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
 gulp.task('build-login-done', 'Builds login-done.html/js', buildLoginDone);
