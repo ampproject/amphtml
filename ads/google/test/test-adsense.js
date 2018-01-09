@@ -73,10 +73,9 @@ describes.realWin('adsenseDelayedFetch', {}, env => {
     });
   });
 
-  it('should not throw for valid responsive ad unit width and height', () => {
+  it('should not throw for valid responsive ad unit height', () => {
     data['autoFormat'] = 'rspv';
     data['height'] = '320';
-    data['width'] = '100vw';
     expect(() => adsense(env.win, data)).to.not.throw();
   });
 
@@ -85,13 +84,5 @@ describes.realWin('adsenseDelayedFetch', {}, env => {
     data['height'] = '666';
     expect(() => adsense(env.win, data)).to.throw(
         /Specified height 666 in <amp-ad> tag is not equal to the required/);
-  });
-
-  it('should throw on invalid responsive ad unit width', () => {
-    data['autoFormat'] = 'rspv';
-    data['height'] = '320';
-    data['width'] = '666';
-    expect(() => adsense(env.win, data)).to.throw(
-        /Invalid width/);
   });
 });
