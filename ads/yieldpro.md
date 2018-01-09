@@ -83,4 +83,4 @@ Supported parameters:
                     Will translate into: arrayKey=value1&arrayKey=1&stringKey=stringValue...
 - `adServerUrl`: optional 
 - `cacheSafe`: optional
-- `pageIdModifier`: optional
+- `pageIdModifier`: optional 
