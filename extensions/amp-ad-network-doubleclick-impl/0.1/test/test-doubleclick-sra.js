@@ -213,11 +213,13 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
       const iuParts = encodeURIComponent(
           validInstances[0].element.getAttribute('data-slot').split(/\//)
               .splice(1).join());
+      sandbox.stub(validInstances[0], 'getLocationQueryParameterValue')
+          .withArgs('google_preview').returns('abcdef');
       const xhrWithArgs = xhrMock.withArgs(
-          sinon.match(
-              new RegExp('^https:\/\/securepubads\\.g\\.doubleclick\\.net' +
-            '\/gampad\/ads\\?output=ldjh&impl=fifs&iu_parts=' +
-            `${iuParts}&enc_prev_ius=`)),
+          sinon.match(new RegExp(
+              '^https:\/\/securepubads\\.g\\.doubleclick\\.net' +
+              '\/gampad\/ads\\?output=ldjh&impl=fifs&iu_parts=' +
+              `${iuParts}&enc_prev_ius=.*&gct=abcdef`)),
           {
             mode: 'cors',
             method: 'GET',
