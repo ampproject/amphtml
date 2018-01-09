@@ -35,7 +35,7 @@ function createDeferred_() {
 
     /** @override */
     shouldComponentUpdate() {
-      return !!this.state.value;
+      return !this.state.value;
     }
 
     /** @override */
