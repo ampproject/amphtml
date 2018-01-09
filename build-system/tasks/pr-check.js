@@ -28,6 +28,9 @@ function prCheck() {
   if (argv.files) {
     cmd = cmd + ' --files ' + argv.files;
   }
+  if (argv.nobuild) {
+    cmd = cmd + ' --nobuild';
+  }
   execOrDie(cmd);
 }
 
@@ -38,6 +41,7 @@ gulp.task(
     {
       options: {
         'files': '  Restricts unit / integration tests to just these files',
+        'nobuild': '  Skips building the runtime via `gulp build`.',
       },
     }
 );

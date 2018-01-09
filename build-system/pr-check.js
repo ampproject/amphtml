@@ -372,8 +372,10 @@ function runAllCommandsLocally() {
   command.testDocumentLinks();
 
   // Build if required.
-  command.cleanBuild();
-  command.buildRuntime();
+  if (!argv.nobuild) {
+    command.cleanBuild();
+    command.buildRuntime();
+  }
 
   // These tests need a build.
   command.runPresubmitTests();
