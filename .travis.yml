@@ -30,6 +30,7 @@ branches:
     - release
     - canary
     - /^amp-release-.*$/
+    - /^greenkeeper/.*$/
 env:
   global:
     - SAUCE_USERNAME="amphtml"
