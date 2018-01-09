@@ -271,21 +271,21 @@ const command = {
     timedExecOrDie('gulp dep-check');
     timedExecOrDie('gulp check-types');
   },
-  runUnitTests: function(saucelabs) {
+  runUnitTests: function() {
     // Unit tests with Travis' default chromium
     timedExecOrDie('gulp test --unit --nobuild');
-    if (saucelabs) {
+    if (!!process.env.SAUCE_USERNAME && !!process.env.SAUCE_ACCESS_KEY) {
       // A subset of unit tests on other browsers via sauce labs
       timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
     }
   },
-  runIntegrationTests: function(compiled, saucelabs) {
-    // Integration tests on chrome, or on all saucelabs browsers if requested
+  runIntegrationTests: function(compiled) {
+    // Integration tests on chrome, or on all saucelabs browsers if set up
     let cmd = 'gulp test --nobuild --integration';
     if (compiled) {
       cmd += ' --compiled';
     }
-    if (saucelabs) {
+    if (!!process.env.SAUCE_USERNAME && !!process.env.SAUCE_ACCESS_KEY) {
       cmd += ' --saucelabs';
     }
     timedExecOrDie(cmd);
@@ -341,7 +341,7 @@ function runAllCommands() {
     command.runLintCheck();
     command.runJsonCheck();
     command.runDepAndTypeChecks();
-    command.runUnitTests(/* saucelabs */ true);
+    command.runUnitTests();
     command.verifyVisualDiffTests();
     // command.testDocumentLinks() is skipped during push builds.
     command.buildValidatorWebUI();
@@ -351,7 +351,7 @@ function runAllCommands() {
     command.cleanBuild();
     command.buildRuntimeMinified();
     command.runPresubmitTests();
-    command.runIntegrationTests(/* compiled */ true, /* saucelabs */ true);
+    command.runIntegrationTests(/* compiled */ true);
   }
 }
 
@@ -370,8 +370,8 @@ function runAllCommandsLocally() {
   // These tests need a build.
   command.runPresubmitTests();
   command.runVisualDiffTests();
-  command.runUnitTests(/* saucelabs */ false);
-  command.runIntegrationTests(/* compiled */ false, /* saucelabs */ false);
+  command.runUnitTests();
+  command.runIntegrationTests(/* compiled */ false);
   command.verifyVisualDiffTests();
 
   // Validator tests.
@@ -472,7 +472,7 @@ function main() {
       command.runDepAndTypeChecks();
       // Run unit tests only if the PR contains runtime changes.
       if (buildTargets.has('RUNTIME')) {
-        command.runUnitTests(/* saucelabs */ true);
+        command.runUnitTests();
       }
     }
   }
@@ -489,7 +489,7 @@ function main() {
       if (buildTargets.has('INTEGRATION_TEST') ||
           buildTargets.has('RUNTIME')) {
         command.runPresubmitTests();
-        command.runIntegrationTests(/* compiled */ false, /* saucelabs */ true);
+        command.runIntegrationTests(/* compiled */ false);
       }
       command.verifyVisualDiffTests();
     } else {
