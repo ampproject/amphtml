@@ -108,7 +108,7 @@ export class GoogleCidApi {
           })
           .catch(e => {
             this.persistToken_(TokenStatus.ERROR, TIMEOUT);
-            if (e.response) {
+            if (e && e.response) {
               e.response.json().then(res => {
                 dev().error(TAG, JSON.stringify(res));
               });
