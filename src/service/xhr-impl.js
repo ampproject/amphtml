@@ -760,7 +760,12 @@ export class FetchResponse {
     this.bodyUsed = true;
     user().assert(this.xhr_.responseXML,
         'responseXML should exist. Make sure to return ' +
-        'Content-Type: text/html header.');
+        'Content-Type: text/html header. ' +
+        'Status code: ' + this.xhr_.status +
+        'Headers: ' + this.headers.get('content-type') +
+        'ResponseType: ' + this.xhr_.responseType
+      );
+      
     return /** @type {!Promise<!Document>} */ (
       Promise.resolve(dev().assert(this.xhr_.responseXML)));
   }
