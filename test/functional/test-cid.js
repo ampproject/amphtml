@@ -24,6 +24,7 @@ import {
 import {installCryptoService, Crypto} from '../../src/service/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentStateService} from '../../src/service/document-state';
+import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
 import {parseUrl} from '../../src/url';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
@@ -98,10 +99,12 @@ describe('cid', () => {
       document: {
         nodeType: /* DOCUMENT */ 9,
         body: {},
+        querySelector: () => {},
       },
       navigator: window.navigator,
       setTimeout: window.setTimeout,
       clearTimeout: window.clearTimeout,
+      Math: window.Math,
     };
     fakeWin.document.defaultView = fakeWin;
     installDocService(fakeWin, /* isSingleDoc */ true);
@@ -109,6 +112,7 @@ describe('cid', () => {
     ampdoc = Services.ampdocServiceFor(fakeWin).getAmpDoc();
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
+    installDocumentInfoServiceForDoc(ampdoc);
 
     installExtensionsService(fakeWin);
     const extensions = Services.extensionsFor(fakeWin);

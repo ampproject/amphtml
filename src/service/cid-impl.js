@@ -99,7 +99,7 @@ export class Cid {
      */
     this.viewerCidApi_ = new ViewerCidApi(ampdoc);
 
-    this.cidApi_ = new GoogleCidApi(ampdoc.win);
+    this.cidApi_ = new GoogleCidApi(ampdoc);
   }
 
   /**
