@@ -466,24 +466,33 @@ export class AmpStory extends AMP.BaseElement {
   /** @private */
   buildTopBar_() {
     const doc = this.element.ownerDocument;
+
     this.topBar_ = doc.createElement('div');
     this.topBar_.classList.add('i-amphtml-story-top');
+    this.topBar_.appendChild(this.buildTopBarShare_());
+
+    this.element.insertBefore(this.topBar_, this.element.firstChild);
+  }
+
+  /**
+   * @return {!Element}
+   * @private
+   */
+  buildTopBarShare_() {
+     const container =
+        renderSimpleTemplate(this.win.document, SHARE_WIDGET_PILL_CONTAINER);
 
     this.shareWidget_ = new ShareWidget(this.win);
 
-    const shareContainer =
-        renderSimpleTemplate(this.win.document, SHARE_WIDGET_PILL_CONTAINER)
-
-    shareContainer.appendChild(this.shareWidget_.build(this.getAmpDoc()));
-
-    this.topBar_.appendChild(shareContainer);
-    this.element.insertBefore(this.topBar_, this.element.firstChild);
+    container.appendChild(this.shareWidget_.build(this.getAmpDoc()));
 
     this.loadBookendConfig_().then(bookendConfig => {
       if (bookendConfig !== null) {
         this.shareWidget_.setProviders(bookendConfig.shareProviders);
       }
     });
+
+    return container;
   }
 
   /** @override */
