@@ -593,18 +593,18 @@ amp-story-grid-layer * {
   padding-right: 16px !important;
 }
 
-.i-amphtml-story-share-list > li {
+.i-amphtml-story-share-item {
   width: 48px !important;
   height: 66px !important;
   padding: 0 16px !important;
 }
 
-.i-amphtml-story-share-widget-scrollable > .i-amphtml-story-share-list > li {
+.i-amphtml-story-share-widget-scrollable > * > .i-amphtml-story-share-item {
   display: block !important;
   margin: 0 !important;
 }
 
-.i-amphtml-story-share-list > li:empty {
+.i-amphtml-story-share-item:empty {
   display: none !important;
 }
 

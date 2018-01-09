@@ -74,7 +74,10 @@ const TEMPLATE = {
 
 
 /** @private @const {!./simple-template.ElementDef} */
-const SHARE_ITEM_TEMPLATE = {tag: 'li'};
+const SHARE_ITEM_TEMPLATE = {
+  tag: 'li',
+  attrs: dict({'class': 'i-amphtml-story-share-item'}),
+};
 
 
 /** @private @const {!./simple-template.ElementDef} */
