@@ -216,7 +216,6 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [AdvertServe](../../ads/advertserve.md)
 - [Affiliate-B](../../ads/affiliateb.md)
 - [AMoAd](../../ads/amoad.md)
-- [Ancora](../../ads/ancora.md)
 - [AppNexus](../../ads/appnexus.md)
 - [Atomx](../../ads/atomx.md)
 - [Bidtellect](../../ads/bidtellect.md)
@@ -317,6 +316,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Yieldbot](../../ads/yieldbot.md)
 - [Yieldmo](../../ads/yieldmo.md)
 - [Yieldone](../../ads/yieldone.md)
+- [Yieldpro](../../ads/yieldpro.md)
 - [Zedo](../../ads/zedo.md)
 - [Zucks](../../ads/zucks.md)
 
