@@ -203,6 +203,7 @@ class AmpVideo extends AMP.BaseElement {
 
     // amp-story coordinates playback based on page activation, as opposed to
     // visibility.
+    // TODO(alanorozco, #12712): amp-story should coordinate resumeCallback.
     Services.videoManagerForDoc(this.element).register(this,
         /* manageAutoplay */ !closestByTag(this.element, 'amp-story'));
   }
