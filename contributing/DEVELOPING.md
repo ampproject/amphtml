@@ -47,6 +47,7 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp css`<sup>[[1]](#footnote-1)</sup>                                 | Recompiles css to build directory and builds the embedded css into js files for the AMP library. |
 | `gulp extensions`                                                       | Build AMP Extensions.                                                 |
 | `gulp watch`<sup>[[1]](#footnote-1)</sup>                               | Watches for changes in files, re-build.                               |
+| `gulp pr-check`<sup>[[1]](#footnote-1)</sup>                            | Runs all the Travis CI checks locally.         |
 | `gulp test`<sup>[[1]](#footnote-1)</sup>                                | Runs tests in Chrome.                                                 |
 | `gulp test --verbose`<sup>[[1]](#footnote-1)</sup>                      | Runs tests in Chrome with logging enabled.                            |
 | `gulp test --nobuild`                                                   | Runs tests without re-build.                                          |
