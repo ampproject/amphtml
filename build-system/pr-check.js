@@ -279,8 +279,8 @@ const command = {
     }
     // Unit tests with Travis' default chromium
     timedExecOrDie(cmd);
-    // A subset of unit tests on other browsers via sauce labs
     if (!!process.env.SAUCE_USERNAME && !!process.env.SAUCE_ACCESS_KEY) {
+      // A subset of unit tests on other browsers via sauce labs
       cmd = cmd + ' --saucelabs_lite';
       timedExecOrDie(cmd);
     }
@@ -306,8 +306,7 @@ const command = {
       console.log(
           '\n' + fileLogPrefix, 'Could not find environment variables',
           util.colors.cyan('PERCY_PROJECT'), 'and',
-          util.colors.cyan('PERCY_TOKEN') + '. Skipping visual diff tests.',
-          '\n');
+          util.colors.cyan('PERCY_TOKEN') + '. Skipping visual diff tests.');
       return;
     }
     let cmd = 'gulp visual-diff';
@@ -324,7 +323,7 @@ const command = {
           '\n' + fileLogPrefix, 'Could not find environment variables',
           util.colors.cyan('PERCY_PROJECT'), 'and',
           util.colors.cyan('PERCY_TOKEN') +
-          '. Skipping verification of visual diff tests.', '\n');
+          '. Skipping verification of visual diff tests.');
       return;
     }
     timedExecOrDie('gulp visual-diff --verify');
