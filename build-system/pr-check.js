@@ -24,6 +24,7 @@
  * This script attempts to introduce some granularity for our
  * presubmit checking, via the determineBuildTargets method.
  */
+const argv = require('minimist')(process.argv.slice(2));
 const atob = require('atob');
 const execOrDie = require('./exec').execOrDie;
 const getStdout = require('./exec').getStdout;
@@ -272,16 +273,24 @@ const command = {
     timedExecOrDie('gulp check-types');
   },
   runUnitTests: function() {
+    let cmd = 'gulp test --unit --nobuild';
+    if (argv.files) {
+      cmd = cmd + ' --files ' + argv.files;
+    }
     // Unit tests with Travis' default chromium
-    timedExecOrDie('gulp test --unit --nobuild');
+    timedExecOrDie(cmd);
+    // A subset of unit tests on other browsers via sauce labs
     if (!!process.env.SAUCE_USERNAME && !!process.env.SAUCE_ACCESS_KEY) {
-      // A subset of unit tests on other browsers via sauce labs
-      timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
+      cmd = cmd + ' --saucelabs_lite';
+      timedExecOrDie(cmd);
     }
   },
   runIntegrationTests: function(compiled) {
     // Integration tests on chrome, or on all saucelabs browsers if set up
     let cmd = 'gulp test --nobuild --integration';
+    if (argv.files) {
+      cmd = cmd + ' --files ' + argv.files;
+    }
     if (compiled) {
       cmd += ' --compiled';
     }
