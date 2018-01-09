@@ -312,5 +312,20 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         expect(customMacros.ATTR(macro)).to.equal(macros[macro]);
       });
     });
+
+    it('should handle TGT macro when targeting not set', () => {
+      const json = {
+        'NOTTARGETING': {'a': '123'},
+      };
+      element = createElementWithAttributes(env.win.document, 'amp-ad', {
+        'data-json': JSON.stringify(json),
+      });
+      env.win.document.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(
+          element, env.win.document, env.win);
+      impl.populateAdUrlState();
+      const customMacros = impl.getCustomRealTimeConfigMacros_();
+      expect(customMacros.TGT()).to.deep.equal(json['targeting']);
+    });
   });
 });
