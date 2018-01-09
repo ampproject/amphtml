@@ -17,6 +17,7 @@ limitations under the License.
 <html>
   <head>
     <link href="polymer.html" rel="import">
+    <link href="polymer-extension-toolbar.html" rel="import">
     <script src="https://cdn.ampproject.org/v0/validator.js"></script>
     <style is="custom-style">
       body {
@@ -31,57 +32,6 @@ limitations under the License.
     </style>
   </head>
   <body unresolved>
-    <dom-module id="extension-toolbar">
-      <style scope="extension-toolbar">
-        paper-toolbar {
-          background-color: #fff;
-          color: #000;
-          z-index: 1000;
-          --paper-toolbar-title: {
-            font-weight: inherit;
-            margin-left: 0 !important;
-            overflow: visible;
-          };
-        }
-        #ampLogo {
-          background-image: url('icon-128.png');
-          background-position: center left;
-          background-repeat: no-repeat;
-          background-size: 30px 30px;
-          padding: 30px 20px;
-          white-space: nowrap;
-        }
-        paper-spinner {
-          float: right;
-          height: 24px;
-          width: 24px;
-          --paper-spinner-stroke-width: 2px;
-        }
-      </style>
-      <template>
-        <paper-toolbar>
-          <span class="title">
-            <span id="ampLogo"></span>
-            {{ extensionName }}
-            <paper-spinner id="spinner" active></paper-spinner>
-          </span>
-        </paper-toolbar>
-      </template>
-      <script>
-        Polymer({
-          is: 'extension-toolbar',
-          changeSpinnerState: function(state) {
-            this.$.spinner.active = state;
-          },
-          properties: {
-            extensionName: {
-              type: String,
-              value: chrome.i18n.getMessage("extensionName"),
-            },
-          },
-        });
-      </script>
-    </dom-module>
     <dom-module id="results-page">
       <style scope="results-page">
         a {
@@ -238,8 +188,8 @@ limitations under the License.
         });
       </script>
     </dom-module>
-    <dom-module id="amp-validator">
-      <style scope="amp-validator">
+    <dom-module id="popup-validator">
+      <style scope="popup-validator">
         #content {
           display: none;
         }
@@ -250,7 +200,7 @@ limitations under the License.
       </template>
       <script>
         Polymer({
-          is: 'amp-validator',
+          is: 'popup-validator',
           ready: function() {
             var toolbar = this.$.toolbar;
             var content = this.$.content;
@@ -309,6 +259,6 @@ limitations under the License.
         }
       </script>
     </dom-module>
-    <amp-validator></amp-validator>
+    <popup-validator></popup-validator>
   </body>
 </html>

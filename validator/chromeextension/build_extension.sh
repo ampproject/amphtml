@@ -19,8 +19,9 @@
 echo 'Installing web components'
 bower install
 
-echo 'Polybuild AMP Validator'
-polybuild amp-validator.html
+echo 'Polybuild AMP Validator popups'
+polybuild popup-validator.html
+polybuild popup-validator-not-present.html
 
 echo 'Removing web components'
 rm -rf bower_components
