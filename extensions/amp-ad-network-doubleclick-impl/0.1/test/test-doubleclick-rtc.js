@@ -284,6 +284,9 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         'data-OVERRIDE-width': '250',
         'data-override-HEIGHT': '75',
       };
+      const json = {
+        'targeting': {'a': '123'},
+      };
       element = createElementWithAttributes(env.win.document, 'amp-ad', {
         width: macros['width'],
         height: macros['height'],
@@ -294,6 +297,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         'data-multi-size-validation': macros['data-multi-size-validation'],
         'data-override-width': macros['data-OVERRIDE-width'],
         'data-override-height': macros['data-override-HEIGHT'],
+        'data-json': JSON.stringify(json),
       });
       env.win.document.body.appendChild(element);
       const docInfo = Services.documentInfoForDoc(element);
@@ -303,9 +307,25 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       const customMacros = impl.getCustomRealTimeConfigMacros_();
       expect(customMacros.PAGEVIEWID()).to.equal(docInfo.pageViewId);
       expect(customMacros.HREF()).to.equal(env.win.location.href);
+      expect(customMacros.TGT()).to.deep.equal(json['targeting']);
       Object.keys(macros).forEach(macro => {
         expect(customMacros.ATTR(macro)).to.equal(macros[macro]);
       });
+    });
+
+    it('should handle TGT macro when targeting not set', () => {
+      const json = {
+        'NOTTARGETING': {'a': '123'},
+      };
+      element = createElementWithAttributes(env.win.document, 'amp-ad', {
+        'data-json': JSON.stringify(json),
+      });
+      env.win.document.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(
+          element, env.win.document, env.win);
+      impl.populateAdUrlState();
+      const customMacros = impl.getCustomRealTimeConfigMacros_();
+      expect(customMacros.TGT()).to.deep.equal(json['targeting']);
     });
   });
 });
