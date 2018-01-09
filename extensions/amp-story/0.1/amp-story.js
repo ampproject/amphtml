@@ -475,7 +475,7 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * @return {!Element}
+   * @return {!Node}
    * @private
    */
   buildTopBarShare_() {
