@@ -763,8 +763,7 @@ export class FetchResponse {
         'Content-Type: text/html header. ' +
         'Status code: ' + this.xhr_.status +
         'Headers: ' + this.headers.get('content-type') +
-        'ResponseType: ' + this.xhr_.responseType +
-        'ResponseText: ' + this.xhr_.responseText
+        'ResponseType: ' + this.xhr_.responseType
       );
       
     return /** @type {!Promise<!Document>} */ (
