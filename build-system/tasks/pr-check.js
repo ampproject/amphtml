@@ -37,7 +37,7 @@ gulp.task(
     prCheck,
     {
       options: {
-        'files': '  Restricts unit / integration tests to just these files'
+        'files': '  Restricts unit / integration tests to just these files',
       },
     }
-  );
+);
