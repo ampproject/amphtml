@@ -507,14 +507,14 @@ export class AmpStoryPage extends AMP.BaseElement {
    *     by an automatic advancement after a timeout.
    */
   next(opt_isAutomaticAdvance) {
-    const targetPageId = this.getNextPageId_(opt_isAutomaticAdvance);
+    const pageId = this.getNextPageId_(opt_isAutomaticAdvance);
 
-    if (targetPageId === null) {
+    if (pageId === null) {
       dispatch(this.element, EventType.SHOW_BOOKEND, /* opt_bubbles */ true);
       return;
     }
 
-    this.switchTo_(targetPageId);
+    this.switchTo_(pageId);
   }
 
 
