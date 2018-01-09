@@ -188,7 +188,6 @@ export class IframeTransport {
                 user().error(TAG_,
                     'Long Task: ' +
                       `Vendor: "${this.type_}" ` +
-                      `Src: "${attrib.containerSrc}" ` +
                       `Duration: ${entry.duration}ms ` +
                       `Occurrences: ${this.numLongTasks_}`);
               }
