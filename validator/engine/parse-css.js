@@ -33,9 +33,11 @@ goog.provide('parse_css.extractAFunction');
 goog.provide('parse_css.extractASimpleBlock');
 goog.provide('parse_css.extractUrls');
 goog.provide('parse_css.parseAStylesheet');
+goog.provide('parse_css.stripVendorPrefix');
 goog.require('amp.validator.LIGHT');
 goog.require('amp.validator.ValidationError.Code');
 goog.require('goog.asserts');
+goog.require('goog.string');
 goog.require('parse_css.EOFToken');
 goog.require('parse_css.ErrorToken');
 goog.require('parse_css.TRIVIAL_EOF_TOKEN');
@@ -120,6 +122,27 @@ parse_css.TokenStream = class {
   reconsume() {
     this.pos--;
   }
+};
+
+/**
+ * Strips vendor prefixes from identifiers, e.g. property names or names
+ * of at rules. E.g., "-moz-keyframes" -> "keyframes".
+ * @param {string} prefixedString
+ * @return {string}
+ */
+parse_css.stripVendorPrefix = function(prefixedString) {
+  // Checking for '-' is an optimization.
+  if (prefixedString !== '' && prefixedString[0] === '-') {
+    if (goog.string./*OK*/ startsWith(prefixedString, '-o-'))
+      return prefixedString.substr('-o-'.length);
+    if (goog.string./*OK*/ startsWith(prefixedString, '-moz-'))
+      return prefixedString.substr('-moz-'.length);
+    if (goog.string./*OK*/ startsWith(prefixedString, '-ms-'))
+      return prefixedString.substr('-ms-'.length);
+    if (goog.string./*OK*/ startsWith(prefixedString, '-webkit-'))
+      return prefixedString.substr('-webkit-'.length);
+  }
+  return prefixedString;
 };
 
 /**
@@ -399,7 +422,8 @@ class Canonicalizer {
    * @return {!parse_css.BlockType}
    */
   blockTypeFor(atRule) {
-    const maybeBlockType = this.atRuleSpec_[atRule.name];
+    const maybeBlockType =
+        this.atRuleSpec_[parse_css.stripVendorPrefix(atRule.name)];
     if (maybeBlockType !== undefined) {
       return maybeBlockType;
     } else {

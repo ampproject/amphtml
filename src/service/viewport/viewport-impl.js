@@ -41,6 +41,7 @@ import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {
   ViewportBindingIosEmbedWrapper_,
 } from './viewport-binding-ios-embed-wrapper';
+import {installLayersServiceForDoc} from '../layers-impl';
 
 
 const TAG_ = 'Viewport';
@@ -155,6 +156,14 @@ export class Viewport {
 
     /** @private {string|undefined} */
     this.originalViewportMetaString_ = undefined;
+
+    /** @private @const {boolean} */
+    this.useLayers_ = isExperimentOn(this.ampdoc.win, 'layers');
+    if (this.useLayers_) {
+      this.layersSetupDone_ = true;
+      installLayersServiceForDoc(this.ampdoc,
+          this.binding_.getScrollingElement());
+    }
 
     /** @private @const {!FixedLayer} */
     this.fixedLayer_ = new FixedLayer(
@@ -376,8 +385,12 @@ export class Viewport {
    */
   getRect() {
     if (this.rect_ == null) {
-      const scrollTop = this.getScrollTop();
-      const scrollLeft = this.getScrollLeft();
+      let scrollTop = 0;
+      let scrollLeft = 0;
+      if (!this.useLayers_) {
+        scrollTop = this.getScrollTop();
+        scrollLeft = this.getScrollLeft();
+      }
       const size = this.getSize();
       this.rect_ =
           layoutRectLtwh(scrollLeft, scrollTop, size.width, size.height);
@@ -419,6 +432,12 @@ export class Viewport {
    * @return {!Promise<!../../layout-rect.LayoutRectDef>}
    */
   getClientRectAsync(el) {
+    if (this.useLayers_) {
+      return this.vsync_.measurePromise(() => {
+        return this.getLayoutRect(el);
+      });
+    }
+
     const local = this.vsync_.measurePromise(() => {
       return el./*OK*/getBoundingClientRect();
     });
@@ -458,7 +477,12 @@ export class Viewport {
    */
   scrollIntoView(element) {
     const elementTop = this.binding_.getLayoutRect(element).top;
-    const newScrollTop = Math.max(0, elementTop - this.paddingTop_);
+    let newScrollTop;
+    if (this.useLayers_) {
+      newScrollTop = elementTop + this.getScrollTop();
+    } else {
+      newScrollTop = Math.max(0, elementTop - this.paddingTop_);
+    }
     this.binding_.setScrollTop(newScrollTop);
   }
 
@@ -490,9 +514,17 @@ export class Viewport {
         offset = 0;
         break;
     }
-    const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
-    const newScrollTop = Math.max(0, calculatedScrollTop);
-    const curScrollTop = this.getScrollTop();
+    let newScrollTop;
+    let curScrollTop;
+
+    if (this.useLayers_) {
+      newScrollTop = elementRect.top + offset;
+      curScrollTop = 0;
+    } else {
+      const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
+      newScrollTop = Math.max(0, calculatedScrollTop);
+      curScrollTop = this.getScrollTop();
+    }
     if (newScrollTop == curScrollTop) {
       return Promise.resolve();
     }

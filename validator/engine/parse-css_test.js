@@ -25,7 +25,10 @@ goog.provide('parse_css.ParseCssTest');
 goog.require('goog.asserts');
 goog.require('json_testutil.makeJsonKeyCmpFn');
 goog.require('json_testutil.renderJSON');
+goog.require('parse_css.BlockType');
+goog.require('parse_css.QualifiedRule');
 goog.require('parse_css.RuleVisitor');
+goog.require('parse_css.Selector');
 goog.require('parse_css.SelectorVisitor');
 goog.require('parse_css.TokenStream');
 goog.require('parse_css.extractUrls');
@@ -36,6 +39,7 @@ goog.require('parse_css.parseASimpleSelectorSequence');
 goog.require('parse_css.parseAStylesheet');
 goog.require('parse_css.parseATypeSelector');
 goog.require('parse_css.parseAnIdSelector');
+goog.require('parse_css.stripVendorPrefix');
 goog.require('parse_css.tokenize');
 goog.require('parse_css.traverseSelectors');
 
@@ -48,6 +52,19 @@ goog.require('parse_css.traverseSelectors');
 function assertStrictEqual(expected, saw) {
   assert.ok(expected === saw, 'expected: ' + expected + ' saw: ' + saw);
 }
+
+describe('stripVendorPrefix', () => {
+  it('removes typical vendor prefixes', () => {
+    assertStrictEqual('foo', parse_css.stripVendorPrefix('-moz-foo'));
+    assertStrictEqual('foo', parse_css.stripVendorPrefix('-ms-foo'));
+    assertStrictEqual('foo', parse_css.stripVendorPrefix('-o-foo'));
+    assertStrictEqual('foo', parse_css.stripVendorPrefix('-webkit-foo'));
+    assertStrictEqual('foo', parse_css.stripVendorPrefix('foo'));
+    assertStrictEqual('foo-foo', parse_css.stripVendorPrefix('foo-foo'));
+    assertStrictEqual('-d-foo-foo', parse_css.stripVendorPrefix('-d-foo-foo'));
+    assertStrictEqual('-foo', parse_css.stripVendorPrefix('-foo'));
+  });
+});
 
 /**
  * For emitting json output with keys in logical order for the CSS parser's AST.
@@ -668,7 +685,7 @@ describe('parseAStylesheet', () => {
         'color: red;\n';  // declaration outside qualified rule.
     const errors = [];
     const tokenlist = parse_css.tokenize(css, 1, 0, errors);
-    const sheet = parse_css.parseAStylesheet(
+    parse_css.parseAStylesheet(
         tokenlist, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     assertJSONEquals(
@@ -1655,7 +1672,6 @@ describe('css_selectors', () => {
     const tokens = parseSelectorForTest('foo bar 9');
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
-    const errors = [];
     const selector = parse_css.parseASelectorsGroup(tokenStream);
     assertJSONEquals(
         {

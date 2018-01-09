@@ -52,3 +52,24 @@ export function hasTapAction(el) {
   return el.hasAttribute('on') &&
       !!el.getAttribute('on').match(/(^|;)\s*tap\s*:/);
 }
+
+
+/**
+ * Calculates a client rect without applying scaling transformations.
+ * @note Must be run in a vsync measure context.
+ * @param {!Element} el
+ * @return {!ClientRect}
+ */
+export function unscaledClientRect(el) {
+  const boundingClientRect = el./*OK*/getBoundingClientRect();
+
+  const scaleFactorX = boundingClientRect.width / el./*OK*/offsetWidth;
+  const scaleFactorY = boundingClientRect.height / el./*OK*/offsetHeight;
+
+  return /** @type {!ClientRect} */ ({
+    left: boundingClientRect.left / scaleFactorX,
+    top: boundingClientRect.top / scaleFactorY,
+    width: boundingClientRect.width / scaleFactorX,
+    height: boundingClientRect.height / scaleFactorY,
+  });
+}

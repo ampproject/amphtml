@@ -37,6 +37,9 @@ export function getContextMetadata(
   attributes = attributes ? attributes : dict();
   attributes['width'] = getLengthNumeral(width);
   attributes['height'] = getLengthNumeral(height);
+  if (element.getAttribute('title')) {
+    attributes['title'] = element.getAttribute('title');
+  }
   let locationHref = parentWindow.location.href;
   // This is really only needed for tests, but whatever. Children
   // see us as the logical origin, so telling them we are about:srcdoc

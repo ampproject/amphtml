@@ -295,7 +295,7 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
   let ampStickyAd;
   let impl;
   let addToFixedLayerPromise;
-  beforeEach(done => {
+  beforeEach(() => {
     win = env.win;
     ampStickyAd = win.document.createElement('amp-sticky-ad');
     ampStickyAd.setAttribute('layout', 'nodisplay');
@@ -310,9 +310,7 @@ describes.realWin('amp-sticky-ad 1.0 with real ad child', {
     addToFixedLayerPromise = Promise.resolve();
     sandbox.stub(impl.viewport_, 'addToFixedLayer').callsFake(
         () => addToFixedLayerPromise);
-    return ampAd.implementation_.upgradeCallback().then(() => {
-      done();
-    });
+    return ampAd.implementation_.upgradeCallback();
   });
 
   it('close button should close ad and reset body borderBottom', () => {

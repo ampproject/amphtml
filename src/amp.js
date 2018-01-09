@@ -26,15 +26,11 @@ import {installPerformanceService} from './service/performance-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
 import {installStylesForDoc, makeBodyVisible} from './style-installer';
 import {installErrorReporting} from './error';
+import {installPlatformService} from './service/platform-impl';
 import {installDocService} from './service/ampdoc-impl';
 import {installCacheServiceWorker} from './service-worker/install';
 import {stubElementsForDoc} from './service/custom-element-registry';
-import {
-  installAmpdocServices,
-  installBuiltins,
-  installRuntimeServices,
-  adopt,
-} from './runtime';
+import {installAmpdocServices, installBuiltins, installRuntimeServices, adopt} from './runtime';
 import {cssText} from '../build/css';
 import {maybeValidate} from './validator-integration';
 import {maybeTrackImpression} from './impression';
@@ -72,6 +68,7 @@ startupChunk(self.document, function initial() {
   if (self.document.documentElement.hasAttribute('i-amphtml-no-boilerplate')) {
     perf.addEnabledExperiment('no-boilerplate');
   }
+  installPlatformService(self);
   fontStylesheetTimeout(self);
   perf.tick('is');
   installStylesForDoc(ampdoc, cssText, () => {

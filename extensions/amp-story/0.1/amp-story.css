@@ -144,6 +144,10 @@ amp-story[standalone]:fullscreen {
   margin: 0 2px!important;
   overflow: hidden!important;
   width: 100% !important;
+
+  /* An empty mask image works around Safari not clipping rounded corners.
+   * https://stackoverflow.com/questions/5736503/how-to-make-css3-rounded-corners-hide-overflow-in-chrome-opera/10296258#10296258 */
+  -webkit-mask-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAA5JREFUeNpiYGBgAAgwAAAEAAGbA+oJAAAAAElFTkSuQmCC) !important;
 }
 
 .i-amphtml-story-page-progress-value {
@@ -153,9 +157,8 @@ amp-story[standalone]:fullscreen {
   height: 100% !important;
   width: 100% !important;
   transform: translateZ(0) scaleX(0) !important; /* 0-width by default */
-  transition: transform 0.2s ease !important;
   transform-origin: left !important;
-  will-change: transform !important;
+  will-change: transform, transition !important;
 }
 
 [dir=rtl] .i-amphtml-story-progress-value {
@@ -192,13 +195,35 @@ amp-story-page.i-amphtml-layout-container {
   display: block !important;
 }
 
+/* Setting `translateY` distances as a trick so that the runtime schedules
+ * layout for the next N pages. The default value (1000%) means that pages are
+ * not be automatically laid out. Max distance is set to 3 since we don't want
+ * to schedule any further pages. */
+
 amp-story:not([desktop]) >
     amp-story-page.i-amphtml-layout-container:not([active]) {
   transform: translateY(1000%) !important;
 }
 
-amp-story-page[active] {
+amp-story-page[active],
+amp-story:not([desktop]) >
+    amp-story-page.i-amphtml-layout-container[distance="0"] {
   transform: translateY(0) !important;
+}
+
+amp-story:not([desktop]) >
+    amp-story-page.i-amphtml-layout-container[distance="1"] {
+  transform: translateY(100%) !important;
+}
+
+amp-story:not([desktop]) >
+    amp-story-page.i-amphtml-layout-container[distance="2"] {
+  transform: translateY(200%) !important;
+}
+
+amp-story:not([desktop]) >
+    amp-story-page.i-amphtml-layout-container[distance="3"] {
+  transform: translateY(300%) !important;
 }
 
 .i-amphtml-story-bookend-active:not([desktop]) > amp-story-page[active] {
@@ -241,6 +266,7 @@ amp-story-page[active] .i-amphtml-story-page-loading-screen {
   display: flex !important;
   margin: 0 !important;
   padding: 0 !important;
+  list-style: none !important;
 }
 
 .i-amphtml-story-page-loading-dot {
@@ -250,10 +276,8 @@ amp-story-page[active] .i-amphtml-story-page-loading-screen {
   list-style-type: none !important;
   margin: 0 8px !important;
   width: 8px !important;
-}
-
-.i-amphtml-story-page-loading-dot {
-  animation: 1s linear infinite alternate i-amphtml-page-dot-grow;
+  padding: 0 !important;
+  animation: 1s linear infinite alternate i-amphtml-page-dot-grow !important;
 }
 
 .i-amphtml-story-page-loading-dot:nth-child(1) {
@@ -266,6 +290,11 @@ amp-story-page[active] .i-amphtml-story-page-loading-screen {
 
 .i-amphtml-story-page-loading-dot:nth-child(3) {
   animation-delay: 1.0s !important;
+}
+
+.i-amphtml-story-page-loading-dot::before,
+.i-amphtml-story-page-loading-dot::after {
+  display: none !important;
 }
 
 @keyframes i-amphtml-page-dot-grow {
@@ -847,15 +876,14 @@ amp-story[standalone] .i-amphtml-story-developer-log {
   z-index: 1 !important;
 }
 
-/* TODO(alanorozco): Toast styling for desktop */
 .i-amphtml-story-toast {
   position: fixed !important;
   bottom: 0 !important;
   left: 0 !important;
   right: 0 !important;
   display: inline-block !important;
-  padding: 14px 16px !important;
-  line-height: 16px !important;
+  padding: 1.16em 1.33em !important;
+  line-height: 1.33 !important;
   color: #fff !important;
   background: #212121 !important;
   animation: toast 2.2s !important;
@@ -863,22 +891,32 @@ amp-story[standalone] .i-amphtml-story-developer-log {
   font-family: 'Roboto', sans-serif !important;
   font-weight: 400 !important;
   font-size: 12px !important;
+  max-width: 640px !important;
+}
+
+@media (min-width: 640px) {
+  .i-amphtml-story-toast {
+    right: auto !important;
+    font-size: 14px !important;
+    margin: 0 auto 1.16em 1.16em !important;
+    border-radius: 6px;
+  }
 }
 
 @keyframes toast {
   0% {
-    transform: translateY(100px) !important;
-    easing: cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+    transform: translateY(100px);
+    easing: cubic-bezier(0.0, 0.0, 0.2, 1);
   }
   8% {
-    transform: translateY(0) !important;
+    transform: translateY(0);
   }
   92% {
-    transform: translateY(0) !important;
-    easing: cubic-bezier(0.4, 0.0, 1, 1) !important;
+    transform: translateY(0);
+    easing: cubic-bezier(0.4, 0.0, 1, 1);
   }
   100% {
-    transform: translateY(100px) !important;
+    transform: translateY(100px);
   }
 }
 
@@ -901,24 +939,24 @@ amp-story[standalone] .i-amphtml-story-developer-log {
 }
 
 amp-story[standalone] .i-amphtml-story-no-rotation-overlay {
-  position: fixed!important;
-  z-index: 9999!important;
-  background-color: #000!important;
-  top:0!important;
-  left:0!important;
-  width:100%!important;
-  height: 100%!important;
-  align-items: center!important;
-  justify-content: center!important;
-  display: none!important;
+  position: fixed !important;
+  z-index: 9999 !important;
+  background-color: #000 !important;
+  top:0 !important;
+  left:0 !important;
+  width:100% !important;
+  height: 100% !important;
+  align-items: center !important;
+  justify-content: center !important;
+  display: none !important;
 }
 
 [desktop] .i-amphtml-story-no-rotation-overlay {
-  display: none!important;
+  display: none !important;
 }
 
 amp-story[standalone].i-amphtml-story-landscape .i-amphtml-story-no-rotation-overlay {
-  display: flex!important;
+  display: flex !important;
 }
 
 .i-amphtml-story-no-rotation-overlay{
@@ -935,4 +973,8 @@ amp-story[standalone].i-amphtml-story-landscape .i-amphtml-story-no-rotation-ove
   height: 24px!important;
   width: 24px!important;
   margin: 16px auto!important;
+}
+
+.i-amphtml-story-button-container {
+  display: none !important;
 }
