@@ -211,11 +211,19 @@ export class AnalyticsRoot {
       let result = null;
       // Query search based on the selection method.
       if (selectionMethod == 'scope') {
-        found = scopedQuerySelector(context, selector);
+        try {
+          found = scopedQuerySelector(context, selector);
+        } catch (e) {
+          user().error(TAG, 'Invalid query selector :', selector, e);
+        }
       } else if (selectionMethod == 'closest') {
         found = closestBySelector(context, selector);
       } else {
-        found = this.getRoot().querySelector(selector);
+        try {
+          found = this.getRoot().querySelector(selector);
+        } catch (e) {
+          user().error(TAG, 'Invalid query selector :', selector, e);
+        }
       }
       // DOM search can "look" outside the boundaries of the root, thus make
       // sure the result is contained.
