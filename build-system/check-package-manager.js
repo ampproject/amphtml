@@ -74,8 +74,8 @@ function main() {
 
   // If yarn is being run, perform a version check and proceed with the install.
   const yarnVersion = getStdout('yarn --version').trim();
-  const major = parseInt(yarnVersion.split('.')[0]);
-  const minor = parseInt(yarnVersion.split('.')[1]);
+  const major = parseInt(yarnVersion.split('.')[0], 10);
+  const minor = parseInt(yarnVersion.split('.')[1], 10);
   if ((major < 1) || (minor < 2)) {
     console/*OK*/.log(yellow('WARNING: Detected yarn version'),
         cyan(yarnVersion) + yellow('. Minimum recommended version is'),
