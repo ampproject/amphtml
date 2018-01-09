@@ -652,9 +652,7 @@ export class LayoutElement {
    * @return {!SizeDef}
    */
   getSize() {
-    if (this.needsRemeasure_) {
-      this.remeasure();
-    }
+    this.remeasure();
     return this.size_;
   }
 
@@ -665,9 +663,7 @@ export class LayoutElement {
    * @return {!PositionDef}
    */
   getOffsetFromParent() {
-    if (this.needsRemeasure_) {
-      this.remeasure();
-    }
+    this.remeasure();
     return this.position_;
   }
 
@@ -795,7 +791,9 @@ export class LayoutElement {
       }
     }
 
-    layer.remeasure_();
+    if (layer.needsRemeasure_) {
+      layer.remeasure_();
+    }
   }
 
   /**
