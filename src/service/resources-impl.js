@@ -143,7 +143,11 @@ export class Resources {
     /** @private {boolean} */
     this.relayoutAll_ = true;
 
-    /** @private {number} */
+    /**
+     * TODO(jridgewell): relayoutTop should be replaced with parent layer
+     * dirtying.
+     * @private {number}
+     */
     this.relayoutTop_ = -1;
 
     /** @private {time} */
@@ -915,6 +919,7 @@ export class Resources {
       mutate: () => {
         mutator();
 
+        // TODO(jridgewell): Mark parent layer as dirty, skip the rest of this.
         // Mark itself and children for re-measurement.
         if (element.classList.contains('i-amphtml-element')) {
           const r = Resource.forElement(element);
@@ -976,6 +981,7 @@ export class Resources {
     const box = this.viewport_.getLayoutRect(element);
     const resource = Resource.forElement(element);
     if (box.width != 0 && box.height != 0) {
+      // TODO setRelayoutTop_ is being deprecated.
       this.setRelayoutTop_(box.top);
     }
     resource.completeCollapse();
