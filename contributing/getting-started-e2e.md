@@ -348,13 +348,18 @@ Fixing the tests will depend heavily on the change you are making and what tests
 
 ## Running all the Travis CI checks locally
 
-Sometimes, it can be useful to run all the Travis CI checks for a pull request on your local machine. You can do so by running:
+Sometimes, it can be useful to pre-emptively eliminate errors in your pull request by running all the Travis CI checks on your local machine. You can do so by running:
 
 ```
 gulp pr-check
 ```
 
-Note that this will force a clean build and run all the PR checks one by one. Just like on Travis, a failing check will prevent subsequent checks from being run. This can be useful to pre-emptively eliminate errors in your PR before pushing your PR to your GitHub branch.
+Notes:
+
+* This will force a clean build and run all the PR checks one by one.
+* Just like on Travis, a failing check will prevent subsequent checks from being run.
+* The `gulp visual-diff` check will be skipped unless you have set up a Percy account as described [here](https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md#running-visual-diff-tests-locally).
+* The AMP unit and integration tests will be run on local Chrome unless you have set up a Sauce labs account as described [here](https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md#testing-on-sauce-labs).
 
 ## Adding tests for your change
 
