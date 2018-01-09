@@ -166,6 +166,7 @@ export class Parser {
     let urlIndex = 0;
     let matchIndex = 0;
     let match = matches[matchIndex];
+    let numOfPendingCalls = 0;
 
     const evaluateNextLevel = () => {
       let builder = '';
@@ -191,6 +192,7 @@ export class Parser {
           if (url[urlIndex] === '(') {
             // if we hit a left parenthesis we still need to get args
             urlIndex++;
+            numOfPendingCalls++;
             stack.push(binding);
             if (builder.length) {
               results.push(builder);
@@ -206,17 +208,23 @@ export class Parser {
           builder = '';
         }
 
-        else if (url[urlIndex] === ',') {
+        else if (numOfPendingCalls && url[urlIndex] === ',') {
           if (builder.length) {
             results.push(builder.trim());
           }
+          // support legacy two comma format
+          // eg CLIENT_ID(__ga,,ga-url)
+          if (url[urlIndex + 1] === ',') {
+            results.push('');
+            urlIndex++;
+          }
           builder = '';
           urlIndex++;
-
         }
 
         else if (url[urlIndex] === ')') {
           urlIndex++;
+          numOfPendingCalls--;
           const binding = stack.pop();
           results.push(builder.trim());
           const value = this.evaluateBinding_(binding, results);
