@@ -29,6 +29,8 @@
   "content_security_policy": "script-src 'self' https://cdn.ampproject.org; object-src 'self'",
   "homepage_url": "https://www.ampproject.org",
   "permissions": [
+    "webRequest",
+    "webRequestBlocking",
     "tabs",
     "<all_urls>"
   ]
