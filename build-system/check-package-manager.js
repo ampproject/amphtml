@@ -57,9 +57,14 @@ function main() {
     return 1;
   }
 
-  // Perform a node version check and print a warning if it is not node 6.
+  // Perform a node version check and print a warning if it is < v6 or == v7.
   const nodeVersion = getStdout('node --version').trim();
-  if (nodeVersion.split('.')[0] != 'v6') {
+  let majorVersion = nodeVersion.split('.')[0];
+  if (majorVersion.charAt(0) === 'v') {
+    majorVersion = majorVersion.slice(1);
+  }
+  majorVersion = parseInt(majorVersion, 10);
+  if (majorVersion < 6 || majorVersion == 7) {
     console/*OK*/.log(yellow('WARNING: Detected node version'),
         cyan(nodeVersion) + yellow('. Recommended version is'),
         cyan('v6') + yellow('.'));
