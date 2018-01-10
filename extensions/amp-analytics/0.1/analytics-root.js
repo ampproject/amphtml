@@ -210,28 +210,24 @@ export class AnalyticsRoot {
       let found;
       let result = null;
       // Query search based on the selection method.
-      if (selectionMethod == 'scope') {
-        try {
+      try {
+        if (selectionMethod == 'scope') {
           found = scopedQuerySelector(context, selector);
-        } catch (e) {
-          user().error(TAG, 'Invalid query selector :', selector, e);
-        }
-      } else if (selectionMethod == 'closest') {
-        found = closestBySelector(context, selector);
-      } else {
-        try {
+        } else if (selectionMethod == 'closest') {
+          found = closestBySelector(context, selector);
+        } else {
           found = this.getRoot().querySelector(selector);
-        } catch (e) {
-          user().error(TAG, 'Invalid query selector :', selector, e);
         }
+        // DOM search can "look" outside the boundaries of the root, thus make
+        // sure the result is contained.
+        if (found && this.contains(found)) {
+          result = found;
+        }
+        return user().assertElement(
+            result, `Element "${selector}" not found`);
+      } catch (e) {
+        user().assert(false, `Invalid query selector ${selector}`);
       }
-      // DOM search can "look" outside the boundaries of the root, thus make
-      // sure the result is contained.
-      if (found && this.contains(found)) {
-        result = found;
-      }
-      return user().assertElement(
-          result, `Element "${selector}" not found`);
     });
   }
 
