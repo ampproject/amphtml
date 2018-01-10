@@ -362,7 +362,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.resumeCallback();
     } else {
       this.element.removeAttribute('active');
-      this.pauseCallback(/* rewindToBeginning */ false);
+      this.pauseCallback();
     }
   }
 

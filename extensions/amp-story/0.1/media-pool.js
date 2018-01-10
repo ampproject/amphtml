@@ -674,8 +674,6 @@ export class MediaPool {
   /**
    * Rewinds a specified media element in the DOM to 0.
    * @param {!HTMLMediaElement} domMediaEl The media element to be paused.
-   * @param {boolean=} opt_rewindToBeginning Whether to rewind the currentTime
-   *     of media items to the beginning.
    */
   rewindToBeginning(domMediaEl) {
     const mediaType = this.getMediaType_(domMediaEl);

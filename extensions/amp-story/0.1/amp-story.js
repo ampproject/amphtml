@@ -685,7 +685,7 @@ export class AmpStory extends AMP.BaseElement {
     this.systemLayer_.setDeveloperLogContextString(
         this.activePage_.element.id);
 
-    targetPage.beforeVisible().then(() => {
+    return targetPage.beforeVisible().then(() => {
       this.triggerActiveEventForPage_();
 
       if (oldPage) {
