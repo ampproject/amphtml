@@ -94,10 +94,10 @@ function generate(root, target, writeToDisk) {
       .on('end', function() {
         if (writeToDisk) {
           fs.removeSync(target);
-          const codeowners = buildCodeownersFile(dirs, target, writeToDisk);
+          const codeowners = buildCodeownersFile(dirs);
           fs.writeFileSync(target, codeowners);
         } else {
-          const codeowners = buildCodeownersFile(dirs, target, writeToDisk);
+          const codeowners = buildCodeownersFile(dirs);
           util.log(codeowners);
         }
       });

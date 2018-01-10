@@ -703,7 +703,7 @@ const forbiddenTermsSrcInclusive = {
   },
   'Text(Encoder|Decoder)\\(': {
     message: 'TextEncoder/TextDecoder is not supported in all browsers.' +
-        'Please use UTF8 utilities from src/bytes.js',
+        ' Please use UTF8 utilities from src/bytes.js',
     whitelist: [
       'ads/google/a4a/line-delimited-response-handler.js',
       'examples/pwa/pwa.js',

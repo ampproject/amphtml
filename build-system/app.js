@@ -731,7 +731,13 @@ app.get(['/examples/*.html', '/test/manual/*.html'], (req, res, next) => {
   });
 });
 
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function elementExtractor(tagName, type) {
+  tagName = escapeRegExp(tagName);
+  type = escapeRegExp(type);
   return new RegExp(
       `<${tagName} [^>]*['"]${type}['"][^>]*>([\\s\\S]+?)</${tagName}>`,
       'gm');
