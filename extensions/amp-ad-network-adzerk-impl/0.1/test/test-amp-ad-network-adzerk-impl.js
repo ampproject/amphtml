@@ -34,6 +34,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
 
   beforeEach(() => {
     win = env.win;
+    win.AMP_MODE = {localDev: false};
     doc = win.document;
     fetchTextMock = sandbox.stub(Xhr.prototype, 'fetchText');
     element = createElementWithAttributes(doc, 'amp-ad', {
@@ -49,7 +50,6 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
   describe('#getAdUrl', () => {
     it('should be valid', () => {
       win['DOMParser'] = true;
-      win.AMP_MODE = {localDev: false};
       ['https://adzerk.com?id=1234',
         'https://aDzErK.com?id=1234',
         'https://adzerk.com?id=9'].forEach(src => {
@@ -61,7 +61,6 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
 
     it('should not be valid', () => {
       win['DOMParser'] = true;
-      win.AMP_MODE = {localDev: false};
       ['http://adzerk.com?id=1234',
         'https://adzerk.com?id=a',
         'https://www.adzerk.com?id=1234',
@@ -75,7 +74,6 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
 
     it('should not be valid if missing DOMParser', () => {
       win['DOMParser'] = false;
-      win.AMP_MODE = {localDev: false};
       expect(impl.isValidElement()).to.be.false;
     });
   });
