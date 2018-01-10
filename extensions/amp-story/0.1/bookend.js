@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {ShareWidget} from './share';
+import {ScrollableShareWidget} from './share';
 import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
@@ -212,8 +212,8 @@ export class Bookend {
     /** @private {?Element} */
     this.closeBtn_ = null;
 
-    /** @private {!ShareWidget} */
-    this.shareWidget_ = ShareWidget.create(win);
+    /** @private {!ScrollableShareWidget} */
+    this.shareWidget_ = ScrollableShareWidget.create(win);
   }
 
   /**

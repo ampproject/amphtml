@@ -562,9 +562,13 @@ amp-story-grid-layer * {
 
 .i-amphtml-story-share-widget {
   display: flex !important;
+  margin: 16px 8px !important;
+}
+
+.i-amphtml-story-share-widget-scrollable {
+  padding: 16px 0 !important;
+  height: 66px !important;
   overflow: auto !important;
-  margin: 32px 8px !important;
-  height: 80px !important;
 }
 
 .i-amphtml-story-bookend-fullbleed .i-amphtml-story-share-widget {
@@ -578,10 +582,10 @@ amp-story-grid-layer * {
 }
 
 .i-amphtml-story-share-list {
-  display: flex !important;
   list-style: none !important;
   padding: 0 8px !important;
   margin: 0 !important;
+  display: flex !important;
 }
 
 .i-amphtml-story-bookend-fullbleed .i-amphtml-story-share-list {
@@ -589,13 +593,18 @@ amp-story-grid-layer * {
   padding-right: 16px !important;
 }
 
-.i-amphtml-story-share-list > li {
+.i-amphtml-story-share-item {
   width: 48px !important;
   height: 66px !important;
   padding: 0 16px !important;
 }
 
-.i-amphtml-story-share-list > li:empty {
+.i-amphtml-story-share-widget-scrollable > * > .i-amphtml-story-share-item {
+  display: block !important;
+  margin: 0 !important;
+}
+
+.i-amphtml-story-share-item:empty {
   display: none !important;
 }
 
@@ -613,11 +622,19 @@ amp-story-grid-layer * {
   line-height: 10px !important;
   font-size: 10px !important;
   text-align: center !important;
+  cursor: pointer !important;
 
   /* for svg backgrounds: */
   background-position: 8px 8px !important;
   background-size: 32px 32px !important;
   background-repeat: no-repeat !important;
+}
+
+.i-amphtml-story-share-icon.amp-social-share-facebook {
+  /* SVG icon has inner padding, so the glyph renders visually smaller than
+   * other icons, so we work around it by setting a higher background size. */
+  background-size: 38px 38px !important;
+  background-position: 5px 5px !important;
 }
 
 .i-amphtml-story-share-icon::before {
