@@ -198,7 +198,7 @@ export class AccessService {
 
     return Object.keys(configMap).map(key =>
       new AccessSource(this.ampdoc, configMap[key], readerIdFn, scheduleViewFn,
-        broadcastReauthorizeFn, this.accessElement_)
+          broadcastReauthorizeFn, this.accessElement_)
     );
   }
 
