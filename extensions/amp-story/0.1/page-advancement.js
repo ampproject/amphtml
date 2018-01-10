@@ -28,6 +28,9 @@ const NEXT_SCREEN_AREA_RATIO = 0.75;
 /** @const {number} */
 const POLL_INTERVAL_MS = 250;
 
+//TODO: get audio elements too
+/** @const {string} */
+const MEDIA_ELEMENT_SELECTOR = 'amp-video';
 
 /**
  * Base class for the AdvancementConfig.  By default, does nothing other than
@@ -304,7 +307,7 @@ class ManualAdvancement extends AdvancementConfig {
    *     otherwise returns a new manual-advancement.
    */
   static fromAutoAdvanceString(autoAdvanceStr, rootEl) {
-    const element = scopedQuerySelector(rootEl, '.i-amphtml-video-interface'); // audio<-
+    const element = scopedQuerySelector(rootEl, MEDIA_ELEMENT_SELECTOR);
 
     if (autoAdvanceStr || element) {
       return null;
@@ -548,8 +551,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
    */
   static fromAutoAdvanceString(autoAdvanceStr, win, rootEl) {
     try {
-      //TODO: get audio elements too
-      const element = scopedQuerySelector(rootEl, 'amp-video');
+      const element = scopedQuerySelector(rootEl, MEDIA_ELEMENT_SELECTOR);
 
       if (!element) {
         return null;
