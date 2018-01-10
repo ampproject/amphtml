@@ -74,7 +74,10 @@ const TEMPLATE = {
 
 
 /** @private @const {!./simple-template.ElementDef} */
-const SHARE_ITEM_TEMPLATE = {tag: 'li'};
+const SHARE_ITEM_TEMPLATE = {
+  tag: 'li',
+  attrs: dict({'class': 'i-amphtml-story-share-item'}),
+};
 
 
 /** @private @const {!./simple-template.ElementDef} */
@@ -86,6 +89,10 @@ const LINK_SHARE_ITEM_TEMPLATE = {
   }),
   text: 'Get Link', // TODO(alanorozco): i18n
 };
+
+
+/** @private @const {string} */
+const SCROLLABLE_CLASSNAME = 'i-amphtml-story-share-widget-scrollable';
 
 
 /**
@@ -166,16 +173,6 @@ export class ShareWidget {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(win);
-
-    /**
-     * Container width is being tracked to prevent unnecessary layout
-     * calculations.
-     * @private {?number}
-     */
-    this.containerWidth_ = null;
-
     /** @private {?Element} */
     this.root_ = null;
   }
@@ -196,19 +193,10 @@ export class ShareWidget {
 
     this.root_ = renderAsElement(this.win_.document, TEMPLATE);
 
-    this.attachEvents_(ampdoc);
-
     this.maybeAddLinkShareButton_();
     this.maybeAddSystemShareButton_();
 
     return this.root_;
-  }
-
-  /** @private */
-  attachEvents_(ampdoc) {
-    Services.viewportForDoc(ampdoc).onResize(
-        // we don't require a lot of smoothness here, so we throttle
-        throttle(this.win_, () => this.applyButtonPadding_(), 100));
   }
 
   /** @private */
@@ -227,84 +215,6 @@ export class ShareWidget {
       e.preventDefault();
       this.copyUrlToClipboard_();
     });
-  }
-
-  /**
-   * Calculates padding between buttons so that the result is that there's
-   * always one item visually "cut off" for scroll affordance.
-   * @private
-   */
-  applyButtonPadding_() {
-    const items = this.getVisibleItems_();
-
-    if (!items.length) {
-      return;
-    }
-
-    this.vsync_.run({
-      measure: state => {
-        const containerWidth = this.root_./*OK*/clientWidth;
-
-        if (containerWidth == this.containerWidth_) {
-          // Don't recalculate if width has not changed (i.e. onscreen keyboard)
-          state.noop = true;
-          return;
-        }
-
-        const icon = dev().assert(items[0].firstElementChild);
-
-        const leftMargin = icon./*OK*/offsetLeft - this.root_./*OK*/offsetLeft;
-        const iconWidth = icon./*OK*/offsetWidth;
-
-        // Total width that the buttons will occupy with minimum padding.
-        const totalItemWidth =
-            (iconWidth * items.length + 2 * MIN_BUTTON_PADDING *
-                (items.length - 1));
-
-        // If buttons don't fit within the available area, calculate padding so
-        // that there will be an element cut-off.
-        if (totalItemWidth > (containerWidth - leftMargin * 2)) {
-          const availableWidth = containerWidth - leftMargin - iconWidth / 2;
-          const amountVisible =
-              Math.floor(availableWidth / (iconWidth + MIN_BUTTON_PADDING * 2));
-
-          state.padding = 0.5 * (availableWidth / amountVisible - iconWidth);
-        } else {
-          // Otherwise, calculate padding in from MIN_PADDING to DEFAULT_PADDING
-          // so that all elements fit and take as much area as possible.
-          const totalPadding =
-              ((containerWidth - leftMargin * 2) - iconWidth * items.length) /
-              (items.length - 1);
-
-          state.padding = Math.min(DEFAULT_BUTTON_PADDING, 0.5 * totalPadding);
-        }
-
-        this.containerWidth_ = containerWidth;
-      },
-      mutate: state => {
-        if (state.noop) {
-          return;
-        }
-        items.forEach((el, i) => {
-          if (i != 0) {
-            setImportantStyles(el, {'padding-left': px(state.padding)});
-          }
-          if (i != items.length - 1) {
-            setImportantStyles(el, {'padding-right': px(state.padding)});
-          }
-        });
-      },
-    }, {});
-  }
-
-  /**
-   * @return {!Array<!Element>}
-   * @private
-   */
-  getVisibleItems_() {
-    return Array.prototype.filter.call(
-        scopedQuerySelectorAll(dev().assertElement(this.root_), 'li'),
-        el => !!el.firstElementChild);
   }
 
   /** @private */
@@ -388,8 +298,6 @@ export class ShareWidget {
           'Value must be `true` or a params object.',
           type);
     });
-
-    this.applyButtonPadding_();
   }
 
   /** @private */
@@ -414,5 +322,142 @@ export class ShareWidget {
     // `lastElementChild` is the system share button container, which should
     // always be last in list
     list.insertBefore(item, list.lastElementChild);
+  }
+}
+
+
+/**
+ * Social share widget for story bookend with a scrollable layout.
+ * This class is coupled to the DOM structure for ShareWidget, but that's ok.
+ */
+export class ScrollableShareWidget {
+  /** @param {!Window} win */
+  constructor(win) {
+    /** @private @const {!Window} */
+    this.win_ = win;
+
+    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(win);
+
+    /** @private @const {!ShareWidget} */
+    this.mixin_ = ShareWidget.create(win);
+
+    /**
+     * Container width is being tracked to prevent unnecessary layout
+     * calculations.
+     * @private {?number}
+     */
+    this.containerWidth_ = null;
+
+    /** @private {?Element} */
+    this.root_ = null;
+  }
+
+  /** @param {!Window} win */
+  static create(win) {
+    return new ScrollableShareWidget(win);
+  }
+
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @return {!Element}
+   */
+  build(ampdoc) {
+    this.root_ = this.mixin_.build(ampdoc);
+
+    this.root_.classList.add(SCROLLABLE_CLASSNAME);
+
+    Services.viewportForDoc(ampdoc).onResize(
+        // we don't require a lot of smoothness here, so we throttle
+        throttle(this.win_, () => this.applyButtonPadding_(), 100));
+
+    return this.root_;
+  }
+
+  /**
+   * Calculates padding between buttons so that the result is that there's
+   * always one item visually "cut off" for scroll affordance.
+   * @private
+   */
+  applyButtonPadding_() {
+    const items = this.getVisibleItems_();
+
+    if (!items.length) {
+      return;
+    }
+
+    this.vsync_.run({
+      measure: state => {
+        const containerWidth = this.root_./*OK*/clientWidth;
+
+        if (containerWidth == this.containerWidth_) {
+          // Don't recalculate if width has not changed (i.e. onscreen keyboard)
+          state.noop = true;
+          return;
+        }
+
+        const icon = dev().assert(items[0].firstElementChild);
+
+        const leftMargin = icon./*OK*/offsetLeft - this.root_./*OK*/offsetLeft;
+        const iconWidth = icon./*OK*/offsetWidth;
+
+        // Total width that the buttons will occupy with minimum padding.
+        const totalItemWidth =
+            (iconWidth * items.length + 2 * MIN_BUTTON_PADDING *
+                (items.length - 1));
+
+        // If buttons don't fit within the available area, calculate padding so
+        // that there will be an element cut-off.
+        if (totalItemWidth > (containerWidth - leftMargin * 2)) {
+          const availableWidth = containerWidth - leftMargin - iconWidth / 2;
+          const amountVisible =
+              Math.floor(availableWidth / (iconWidth + MIN_BUTTON_PADDING * 2));
+
+          state.padding = 0.5 * (availableWidth / amountVisible - iconWidth);
+        } else {
+          // Otherwise, calculate padding in from MIN_PADDING to DEFAULT_PADDING
+          // so that all elements fit and take as much area as possible.
+          const totalPadding =
+              ((containerWidth - leftMargin * 2) - iconWidth * items.length) /
+              (items.length - 1);
+
+          state.padding = Math.min(DEFAULT_BUTTON_PADDING, 0.5 * totalPadding);
+        }
+
+        this.containerWidth_ = containerWidth;
+      },
+      mutate: state => {
+        if (state.noop) {
+          return;
+        }
+        items.forEach((el, i) => {
+          if (i != 0) {
+            setImportantStyles(el, {'padding-left': px(state.padding)});
+          }
+          if (i != items.length - 1) {
+            setImportantStyles(el, {'padding-right': px(state.padding)});
+          }
+        });
+      },
+    }, {});
+  }
+
+  /**
+   * @return {!Array<!Element>}
+   * @private
+   */
+  getVisibleItems_() {
+    return Array.prototype.filter.call(
+        scopedQuerySelectorAll(dev().assertElement(this.root_), 'li'),
+        el => !!el.firstElementChild);
+  }
+
+  /**
+   * @param {!Object<string, (!JsonObject|boolean)>} providers
+   * @public
+   */
+  setProviders(providers) {
+    this.mixin_.setProviders(providers);
+    this.applyButtonPadding_();
   }
 }
