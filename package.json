@@ -128,7 +128,7 @@
     "mocha": "4.1.0",
     "moment": "2.20.1",
     "morgan": "1.9.0",
-    "nodemon": "1.14.7",
+    "nodemon": "1.14.10",
     "path": "0.12.7",
     "postcss": "6.0.15",
     "postcss-import": "11.0.0",
