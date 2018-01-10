@@ -337,20 +337,20 @@ class AmpLightbox extends AMP.BaseElement {
     const containerHeight = this.getSize_().height;
     const descendants = this.getComponentDescendants_();
     for (let i = 0; i < descendants.length; i++) {
-      const child = descendants[i];
+      const descendant = descendants[i];
       let offsetTop = 0;
-      for (let n = child; n && this.element.contains(n);
+      for (let n = descendant;
+        n && this.element.contains(n);
         n = n./*OK*/offsetParent) {
-
         offsetTop += n./*OK*/offsetTop;
       }
       // Check whether child element is almost visible in the lightbox given
       // current scrollTop position of lightbox
       // We consider element visible if within 2x containerHeight distance.
       const visibilityMargin = 2 * containerHeight;
-      if (offsetTop + child./*OK*/offsetHeight >= pos - visibilityMargin &&
+      if (offsetTop + descendant./*OK*/offsetHeight >= pos - visibilityMargin &&
         offsetTop <= pos + visibilityMargin) {
-        callback(child);
+        callback(descendant);
       }
     }
   }
