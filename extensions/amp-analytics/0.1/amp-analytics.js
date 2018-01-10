@@ -305,6 +305,10 @@ export class AmpAnalytics extends AMP.BaseElement {
           // replace selector and selectionMethod
           if (this.isSandbox_) {
             // Only support selection of parent element for analytics in scope
+            if (!this.element.parentElement) {
+              // In case parent element has been removed from DOM, do nothing
+              return;
+            }
             trigger['selector'] = this.element.parentElement.tagName;
             trigger['selectionMethod'] = 'closest';
             this.addTriggerNoInline_(trigger);
