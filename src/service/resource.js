@@ -475,7 +475,7 @@ export class Resource {
       // For fixed position elements, we need the relative position to the
       // viewport. When accessing the layoutBox through #getLayoutBox, we'll
       // return the new absolute position.
-      box = this.layoutBox_ = moveLayoutRect(box, -viewport.getScrollLeft(),
+      this.layoutBox_ = moveLayoutRect(box, -viewport.getScrollLeft(),
           -viewport.getScrollTop());
     }
   }
@@ -680,7 +680,7 @@ export class Resource {
     const scrollDirection = this.resources_.getScrollDirection();
     multiplier = Math.max(multiplier, 0);
     let scrollPenalty = 1;
-    let distance;
+    let distance = 0;
 
     if (this.useLayers_) {
       distance += Math.max(0,

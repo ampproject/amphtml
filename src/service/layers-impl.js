@@ -302,7 +302,7 @@ export class LayoutLayers {
     if (layer && layer.isLayer()) {
       layer.requestScrollRemeasure();
     } else {
-      layer = this.declareLayer_(element, false);
+      this.declareLayer_(element, false);
     }
 
     if (this.onScroll_) {
