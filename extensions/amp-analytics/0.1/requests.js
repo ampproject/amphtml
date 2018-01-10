@@ -167,7 +167,7 @@ export class RequestHandler {
       } else {
         preUrl = appendEncodedParamStringToUrl(preUrl, extraUrlParamsStr);
       }
-      return baseUrlTemplatePromise.then(() => {
+      return baseUrlTemplatePromise.then(preUrl => {
         this.preconnect_.url(preUrl, true);
         return baseUrlPromise.then(request => {
           if (request.indexOf('${extraUrlParams}') >= 0) {
