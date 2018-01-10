@@ -522,7 +522,6 @@ function onBigPlayTouchEnd() {
     // Reset state and ignore this tap.
     userTappedAndDragged = false;
   } else {
-    console.log('tap without drag');
     var tapWithoutDragEvent = new Event('tapwithoutdrag');
     bigPlayDiv.dispatchEvent(tapWithoutDragEvent);
   }
