@@ -53,7 +53,7 @@ describe.configure().run('amp-story', function() {
         win = env.win;
       });
       afterEach(() => {
-        win = null; // GC
+        // win = null; // GC
       });
       fn(env);
     });
