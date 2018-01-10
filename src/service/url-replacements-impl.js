@@ -246,7 +246,7 @@ export class GlobalVariableSource extends VariableSource {
     }, (scope, opt_userNotificationId, opt_cookieName) => {
       user().assertString(scope,
           'The first argument to CLIENT_ID, the fallback' +
-          /*OK*/' cookie name, is required');
+          /*OK*/' Cookie name, is required');
       let consent = Promise.resolve();
 
       // If no `opt_userNotificationId` argument is provided then
