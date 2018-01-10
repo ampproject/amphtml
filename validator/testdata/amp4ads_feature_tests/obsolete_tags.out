@@ -1,15 +1,77 @@
 FAIL
+|  <!--
+|    Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+|  
+|    Licensed under the Apache License, Version 2.0 (the "License");
+|    you may not use this file except in compliance with the License.
+|    You may obtain a copy of the License at
+|  
+|        http://www.apache.org/licenses/LICENSE-2.0
+|  
+|    Unless required by applicable law or agreed to in writing, software
+|    distributed under the License is distributed on an "AS-IS" BASIS,
+|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+|    See the License for the specific language governing permissions and
+|    limitations under the license.
+|  -->
+|  <!--
+|    Test Description:
+|    This tests that A4A does not allow obsolete non-conforming tags, which AMP
+|    does.
+|  -->
+|  <!doctype html>
+|  <html ⚡4ads>
+|  <head>
+|    <meta charset="utf-8">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp4ads-boilerplate>body{visibility:hidden}</style>
+|    <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+|  </head>
+|  <body>
+|  These tags are not allowed:
+|  <ACRONYM></ACRONYM>
+>> ^~~~~~~~~
 amp4ads_feature_tests/obsolete_tags.html:31:0 The tag 'acronym' is disallowed. [DISALLOWED_HTML]
+|  <BIG></BIG>
+>> ^~~~~~~~~
 amp4ads_feature_tests/obsolete_tags.html:32:0 The tag 'big' is disallowed. [DISALLOWED_HTML]
+|  <CENTER></CENTER>
+>> ^~~~~~~~~
 amp4ads_feature_tests/obsolete_tags.html:33:0 The tag 'center' is disallowed. [DISALLOWED_HTML]
+|  <DIR></DIR>
+>> ^~~~~~~~~
 amp4ads_feature_tests/obsolete_tags.html:34:0 The tag 'dir' is disallowed. [DISALLOWED_HTML]
+|  <HGROUP></HGROUP>
+>> ^~~~~~~~~
 amp4ads_feature_tests/obsolete_tags.html:35:0 The tag 'hgroup' is disallowed. [DISALLOWED_HTML]
+|  <LISTING></LISTING>
+>> ^~~~~~~~~
 amp4ads_feature_tests/obsolete_tags.html:36:0 The tag 'listing' is disallowed. [DISALLOWED_HTML]
+|  <MULTICOL></MULTICOL>
+>> ^~~~~~~~~
 amp4ads_feature_tests/obsolete_tags.html:37:0 The tag 'multicol' is disallowed. [DISALLOWED_HTML]
+|  <NEXTID></NEXTID>
+>> ^~~~~~~~~
 amp4ads_feature_tests/obsolete_tags.html:38:0 The tag 'nextid' is disallowed. [DISALLOWED_HTML]
+|  <NOBR></NOBR>
+>> ^~~~~~~~~
 amp4ads_feature_tests/obsolete_tags.html:39:0 The tag 'nobr' is disallowed. [DISALLOWED_HTML]
+|  <SPACER></SPACER>
+>> ^~~~~~~~~
 amp4ads_feature_tests/obsolete_tags.html:40:0 The tag 'spacer' is disallowed. [DISALLOWED_HTML]
+|  <STRIKE></STRIKE>
+>> ^~~~~~~~~
 amp4ads_feature_tests/obsolete_tags.html:41:0 The tag 'strike' is disallowed. [DISALLOWED_HTML]
+|  <TT></TT>
+>> ^~~~~~~~~
 amp4ads_feature_tests/obsolete_tags.html:42:0 The tag 'tt' is disallowed. [DISALLOWED_HTML]
+|  <XMP></XMP>
+>> ^~~~~~~~~
 amp4ads_feature_tests/obsolete_tags.html:43:0 The tag 'xmp' is disallowed. [DISALLOWED_HTML]
+|  <o:p></o:p>
+>> ^~~~~~~~~
 amp4ads_feature_tests/obsolete_tags.html:44:0 The tag 'o:p' is disallowed. [DISALLOWED_HTML]
+|  
+|  
+|  </body>
+|  </html>

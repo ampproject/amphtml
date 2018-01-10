@@ -64,8 +64,8 @@ it('built validator rejects the empty file', function(done) {
 
 it('accepts the minimum valid AMP file', function(done) {
   // Note: This will use the validator that was built with build.py.
-  var mini =
-      fs.readFileSync('../testdata/feature_tests/minimum_valid_amp.html', 'utf-8');
+  var mini = fs.readFileSync(
+      '../testdata/feature_tests/minimum_valid_amp.html', 'utf-8').trim();
   ampValidator.getInstance(/*validatorJs*/ '../dist/validator_minified.js')
       .then(function(instance) {
         var validationResult = instance.validateString(mini);
@@ -81,7 +81,8 @@ it('accepts the minimum valid AMP file', function(done) {
 it('accepts the minimum valid AMP4ADS file', function(done) {
   // Note: This will use the validator that was built with build.py.
   var mini = fs.readFileSync(
-      '../testdata/amp4ads_feature_tests/min_valid_amp4ads.html', 'utf-8');
+      '../testdata/amp4ads_feature_tests/min_valid_amp4ads.html', 'utf-8')
+      .trim();
   ampValidator.getInstance(/*validatorJs*/ '../dist/validator_minified.js')
       .then(function(instance) {
         var validationResult = instance.validateString(mini, 'AMP4ADS');
@@ -94,12 +95,27 @@ it('accepts the minimum valid AMP4ADS file', function(done) {
       });
 });
 
+/**
+ * Given a line read from a test .out file, returns true iff the line is an
+ * actual error, instead of the input file inlined.
+ * @param {string} line
+ * @return {boolean}
+ */
+function isErrorLine(line) {
+  return !(line.startsWith('|') || line.startsWith('>>'));
+}
+
 it('rejects a specific file that is known to have errors', function(done) {
   // Note: This will use the validator that was built with build.py.
   var severalErrorsHtml =
-      fs.readFileSync('../testdata/feature_tests/several_errors.html', 'utf-8');
+      fs.readFileSync('../testdata/feature_tests/several_errors.html', 'utf-8')
+          .trim();
   var severalErrorsOut =
-      fs.readFileSync('../testdata/feature_tests/several_errors.out', 'utf-8');
+      fs.readFileSync('../testdata/feature_tests/several_errors.out', 'utf-8')
+          .split('\n')
+          .filter(isErrorLine)
+          .join('\n');
+
   ampValidator.getInstance(/*validatorJs*/ '../dist/validator_minified.js')
       .then(function(instance) {
         var validationResult = instance.validateString(severalErrorsHtml);
@@ -142,7 +158,7 @@ it('handles syntax errors in validator file', function(done) {
 
 it('also works with newInstance', function() {
   var mini = fs.readFileSync(
-      '../testdata/feature_tests/minimum_valid_amp.html', 'utf-8');
+      '../testdata/feature_tests/minimum_valid_amp.html', 'utf-8').trim();
   var validatorJsContents =
       fs.readFileSync('../dist/validator_minified.js', 'utf-8');
   var resultForMini =
@@ -150,7 +166,8 @@ it('also works with newInstance', function() {
   expect(resultForMini.status).toBe('PASS');
 
   var severalErrorsHtml =
-      fs.readFileSync('../testdata/feature_tests/several_errors.html', 'utf-8');
+      fs.readFileSync('../testdata/feature_tests/several_errors.html', 'utf-8')
+          .trim();
   var resultForSeveralErrors = ampValidator.newInstance(validatorJsContents)
                                    .validateString(severalErrorsHtml);
   expect(resultForSeveralErrors.status).toBe('FAIL');
@@ -160,6 +177,7 @@ it('emits text if --format=text is specified on command line', function(done) {
   var severalErrorsOut =
       fs.readFileSync('../testdata/feature_tests/several_errors.out', 'utf-8')
           .split('\n')
+          .filter(isErrorLine)
           .splice(1)  // trim 1st line
           .join('\n')
           .replace(/ \[[A-Z_]+\]/g, '');  // trim error categories
@@ -215,6 +233,7 @@ it('supports AMP4ADS with --html_format command line option', function(done) {
             '../testdata/amp4ads_feature_tests/style-amp-custom.out',
             'utf-8')
           .split('\n')
+          .filter(isErrorLine)
           .splice(1)  // trim 1st line
           .join('\n')
           .replace(/ \[[A-Z_]+\]/g, '');  // trim error categories

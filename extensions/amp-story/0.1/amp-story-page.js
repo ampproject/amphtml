@@ -562,26 +562,26 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Navigates to the next page in the story.
-   * @param {boolean} opt_isAutomaticAdvance Whether this navigation was caused
+   * @param {boolean=} opt_isAutomaticAdvance Whether this navigation was caused
    *     by an automatic advancement after a timeout.
    */
   next(opt_isAutomaticAdvance) {
-    this.switchTo_(
-        this.getNextPageId_(opt_isAutomaticAdvance), 'i-amphtml-story-bookend');
+    const pageId = this.getNextPageId_(opt_isAutomaticAdvance);
+
+    if (pageId === null) {
+      dispatch(this.element, EventType.SHOW_BOOKEND, /* opt_bubbles */ true);
+      return;
+    }
+
+    this.switchTo_(pageId);
   }
 
 
   /**
-   * @param {?string} targetPageIdOrNull
-   * @param {string=} opt_fallbackPageId
+   * @param {string} targetPageId
    * @private
    */
-  switchTo_(targetPageIdOrNull, opt_fallbackPageId) {
-    const targetPageId = targetPageIdOrNull || opt_fallbackPageId;
-    if (!targetPageId) {
-      return;
-    }
-
+  switchTo_(targetPageId) {
     const payload = {targetPageId};
     const eventInit = {bubbles: true};
     dispatchCustom(this.win, this.element, EventType.SWITCH_PAGE, payload,
