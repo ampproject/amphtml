@@ -45,12 +45,12 @@ const PROP_PROMISE_ = '__AMP_WAIT_';
 export class BaseTemplate {
 
   /** @param {!Element} element */
-  constructor(element) {
+  constructor(element, win) {
     /** @public @const */
     this.element = element;
 
     /** @public @const {!Window} */
-    this.win = toWin(element.ownerDocument.defaultView);
+    this.win = element.ownerDocument.defaultView || win;
 
     this.compileCallback();
   }
@@ -266,7 +266,7 @@ export class Templates {
     }
 
     promise = this.waitForTemplateClass_(element, type).then(templateClass => {
-      const impl = element[PROP_] = new templateClass(element);
+      const impl = element[PROP_] = new templateClass(element, this.win_);
       delete element[PROP_PROMISE_];
       return impl;
     });
