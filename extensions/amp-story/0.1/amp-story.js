@@ -725,9 +725,9 @@ export class AmpStory extends AMP.BaseElement {
       }
 
       this.preloadPagesByDistance_();
-
       this.reapplyMuting_();
       this.forceRepaintForSafari_();
+      this.maybePreloadBookend_();
     });
   }
 
@@ -1091,6 +1091,18 @@ export class AmpStory extends AMP.BaseElement {
         });
       });
     });
+  }
+
+
+  /**
+   * Preloads the bookend config if on the last page.
+   * @private
+   */
+  maybePreloadBookend_() {
+    const pageIndex = this.getPageIndex(this.activePage_);
+    if (pageIndex + 1 >= this.getPageCount()) {
+      this.loadBookendConfig_();
+    }
   }
 
 
