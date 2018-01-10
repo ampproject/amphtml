@@ -307,12 +307,8 @@ amp-story-page.i-amphtml-story-page-shown {
   background: linear-gradient(to bottom, rgba(33,33,33,0.32) 0%, rgba(33,33,33,0) 100%)!important;
 }
 
-.i-amphtml-story-share {
-  display: none;
-}
-
-[desktop] .i-amphtml-story-share {
-  display: flex!important;
+.i-amphtml-story-share-pill {
+  display: none !important;
   position: absolute!important;
   top: 0!important;
   right: 40px!important;
@@ -322,8 +318,12 @@ amp-story-page.i-amphtml-story-page-shown {
   align-items: center!important;
 }
 
+[desktop] .i-amphtml-story-share-pill {
+  display: flex !important;
+}
+
 /* Share text for share box */
-.i-amphtml-story-share:after {
+.i-amphtml-story-share-pill:after {
   font-family: 'Roboto', sans-serif!important;
   content: 'SHARE'!important;
   position: absolute!important;
@@ -338,7 +338,7 @@ amp-story-page.i-amphtml-story-page-shown {
 }
 
 /* background for the share box */
-.i-amphtml-story-share:before {
+.i-amphtml-story-share-pill:before {
   position: absolute!important;
   content: ''!important;
   width: 58px!important;
@@ -350,110 +350,102 @@ amp-story-page.i-amphtml-story-page-shown {
   right: 0!important;
 }
 
-.i-amphtml-story-share:hover:before {
-  width: calc(100% + 16px)!important;
-}
-
-.i-amphtml-story-share .i-amphtml-story-share-list > li  {
+.i-amphtml-story-share-pill .i-amphtml-story-share-item  {
   opacity: 0!important;
   transition: opacity 300ms linear!important;
 }
 
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li {
+.i-amphtml-story-share-pill:hover .i-amphtml-story-share-item {
   opacity: 1!important;
 }
 
-.i-amphtml-story-share .i-amphtml-story-share-list > li + li {
-  margin-left: 8px!important;
+.i-amphtml-story-share-pill .i-amphtml-story-share-item {
+  margin: 0 !important;
+  width: 48px !important;
+  height: 48px !important;
+  padding: 0 !important;
 }
 
 /* Incremental fade in */
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(9) {
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(9) {
   transition-delay: calc(30ms * 1)!important;
 }
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(8) {
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(8) {
   transition-delay: calc(30ms * 2)!important;
 }
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(7) {
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(7) {
   transition-delay: calc(30ms * 3)!important;
 }
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(6) {
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(6) {
   transition-delay: calc(30ms * 4)!important;
 }
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(5) {
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(5) {
   transition-delay: calc(30ms * 5)!important;
 }
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(4) {
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(4) {
   transition-delay: calc(30ms * 6)!important;
 }
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(3) {
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(3) {
   transition-delay: calc(30ms * 7)!important;
 }
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(2) {
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(2) {
   transition-delay: calc(30ms * 8)!important;
 }
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(1) {
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(1) {
   transition-delay: calc(30ms * 9)!important;
 }
 
-.i-amphtml-story-share .i-amphtml-story-share-list {
+.i-amphtml-story-share-pill .i-amphtml-story-share-list {
   padding: 0!important;
-  margin: 0 80px 0 0!important;
+  margin: 0 72px 0 0 !important;
 }
 
-.i-amphtml-story-share .i-amphtml-story-share-list > li:first-child,
-.i-amphtml-story-share .i-amphtml-story-share-list > li:last-child,
-.i-amphtml-story-share .i-amphtml-story-share-list > li {
-  padding: 0!important;
-  width: 40px!important;
-  height: 40px!important;
+.i-amphtml-story-share-pill:hover:before {
+  width: calc(100% - 32px) !important;
 }
 
-[desktop] .i-amphtml-story-share .i-amphtml-story-share-list > li {
-  width: 56px!important;
-  height: 56px!important;
-}
-
-.i-amphtml-story-share .i-amphtml-story-share-list > li svg {
-  width: 28px!important;
-  height: 28px!important;
-}
-
-.i-amphtml-story-share:hover:before {
-  width: calc(100% + 16px)!important;
-}
-
-.i-amphtml-story-share .i-amphtml-story-share-icon {
-  display: flex!important;
+.i-amphtml-story-share-pill .i-amphtml-story-share-icon {
+  display: flex !important;
   justify-content: center;
   align-items: center;
-  width: 40px!important;
-  height: 40px!important;
-  background-size: 30px 30px;
-  background-color: transparent;
+  width: 48px !important;
+  height: 48px !important;
   padding: 0;
 }
 
 [desktop] .i-amphtml-story-share-icon {
   font-size: 0px!important;
-  background-position-y: 5px!important;
+  background-size: 24px 24px !important;
+  background-position: center center !important;
+  padding: 0 !important;
+}
+
+[desktop] .i-amphtml-story-share-icon.amp-social-share-facebook {
+  /* SVG icon has inner padding, so the glyph renders visually smaller than
+   * other icons, so we work around it by setting a higher background size. */
+  background-size: 28px 28px !important;
+  background-position: center center !important;
 }
 
 [desktop] .i-amphtml-story-share-icon::before {
-  background-color: transparent!important;
+  display: none !important;
 }
 
 [desktop] .i-amphtml-story-share-icon:active::before {
-  background-color: transparent!important;
+  display: none !important;
 }
 
 [desktop] .i-amphtml-story-share-list {
-  margin-right: 100px!important;
-  margin-top: 15px!important;
-}
-
-.i-amphtml-story-share .i-amphtml-story-share-name {
-  display: none!important;
+  margin-right: 72px !important;
 }
 
 /* system layer changes */
