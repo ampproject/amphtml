@@ -117,11 +117,8 @@ export class ProgressBar {
         // Fill progress bar for pages that precede the active page
         this.updateProgress(i, 1.0, /* withTransition */ i == pageIndex - 1);
       } else {
-        // The active page manages its own progress:
-        // if 'auto-advance-after' attribute exists it fires PAGE_PROGRESS
+        // The active page manages its own progress by firing PAGE_PROGRESS
         // events to amp-story.
-        // If it doesn't then it just fills its own progress bar.
-        // All subsequent bars are un-filled.
         this.updateProgress(i, 0.0, /* withTransition */ (
           pageIndex != 0 && this.activePageIndex_ != 1));
       }

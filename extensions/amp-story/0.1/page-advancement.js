@@ -138,7 +138,7 @@ export class AdvancementConfig {
     const autoAdvanceStr = rootEl.getAttribute('auto-advance-after');
 
     const supportedAdvancementModes = [
-      new ManualAdvancement(autoAdvanceStr, rootEl),
+      ManualAdvancement.fromAutoAdvanceString(autoAdvanceStr, rootEl),
       TimeBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win),
       MediaBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
     ].filter(x => x !== null);
@@ -222,10 +222,9 @@ class ManualAdvancement extends AdvancementConfig {
    * @param {!Element} element The element that, when clicked, can cause
    *     advancing to the next page or going back to the previous.
    */
-  constructor(autoAdvanceStr, element) {
+  constructor(element) {
     super();
     this.element_ = element;
-    this.autoAdvanceStr_ = autoAdvanceStr;
     this.clickListener_ = this.maybePerformNavigation_.bind(this);
   }
 
@@ -233,9 +232,7 @@ class ManualAdvancement extends AdvancementConfig {
   start() {
     super.start();
     this.element_.addEventListener('click', this.clickListener_, true);
-    if (!this.autoAdvanceStr_) {
-      this.onProgressUpdate();
-    }
+    this.onProgressUpdate();
   }
 
   /** @override */
@@ -295,6 +292,25 @@ class ManualAdvancement extends AdvancementConfig {
     } else if (event.pageX >= offsetLeft && event.pageX < nextScreenAreaMin) {
       this.onPrevious();
     }
+  }
+
+  /**
+   * Gets an instance of ManualAdvancement based on the value of the
+   * auto-advance string (from the 'auto-advance-after' attribute on the page).
+   * @param {string} autoAdvanceStr The value of the auto-advance-after
+   *     attribute.
+   * @return {?AdvancementConfig} An AdvancementConfig, if an auto-advance string
+   *     exists or the rootEl has a media-element-based child then returns null,
+   *     otherwise returns a new manual-advancement.
+   */
+  static fromAutoAdvanceString(autoAdvanceStr, rootEl) {
+    const element = scopedQuerySelector(rootEl, '.i-amphtml-video-interface'); // audio<-
+
+    if (autoAdvanceStr || element) {
+      return null;
+    }
+
+    return new ManualAdvancement(rootEl);
   }
 }
 
