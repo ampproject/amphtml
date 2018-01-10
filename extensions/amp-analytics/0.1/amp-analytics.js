@@ -160,16 +160,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
   }
 
-  /**
-   * Prefetches and preconnects URLs related to the analytics.
-   * @param {boolean=} opt_onLayout
-   * @override
-   */
-  preconnectCallback(opt_onLayout) {
-    const url = getIframeTransportScriptUrl(this.getAmpDoc().win);
-    this.preconnect.preload(url, 'script');
-  }
-
   /** @override */
   layoutCallback() {
     // Now that we are rendered, stop rendering the element to reduce
@@ -341,6 +331,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.iframeTransport_) {
       return;
     }
+    const url = getIframeTransportScriptUrl(this.getAmpDoc().win);
+    this.preconnect.preload(url, 'script');
     const TAG = this.getName_();
     const ampAdResourceId = user().assertString(
         getAmpAdResourceId(this.element, getTopWindow(this.win)),
