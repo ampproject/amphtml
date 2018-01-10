@@ -72,7 +72,7 @@ describes.realWin('amp-lightbox-viewer', {
     runTests(/*autoLightbox*/false);
   });
 
-  describe('with auto lightboxing', function() {
+  describe.skip('with auto lightboxing', function() {
     runTests(/*autoLightbox*/true);
   });
 
