@@ -161,12 +161,6 @@ export class RequestHandler {
     return Promise.all(extraUrlParamsPromise).then(paramStrs => {
       filterSplice(paramStrs, item => {return !!item;});
       const extraUrlParamsStr = paramStrs.join('&');
-      let preUrl = this.baseUrl;
-      if (preUrl.indexOf('${extraUrlParams}') >= 0) {
-        preUrl = preUrl.replace('${extraUrlParams}', extraUrlParamsStr);
-      } else {
-        preUrl = appendEncodedParamStringToUrl(preUrl, extraUrlParamsStr);
-      }
       return baseUrlTemplatePromise.then(preUrl => {
         this.preconnect_.url(preUrl, true);
         return baseUrlPromise.then(request => {
