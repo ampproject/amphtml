@@ -273,13 +273,16 @@ describes.realWin('inabox-host:messaging', {}, env => {
       intermediateWinMock = {
         top: topWinMock,
         location: {
-          href: 'somesite.com',
+          href: 'intermediate.com',
         },
         parent: topWinMock,
       };
       creativeWinMock = {
         top: topWinMock,
         parent: intermediateWinMock,
+        location: {
+          href: 'creative.com',
+        },
       };
       creativeIframeMock = {
         contentWindow: creativeWinMock,
@@ -288,24 +291,20 @@ describes.realWin('inabox-host:messaging', {}, env => {
       sentinel = '123456789101112';
     });
 
-    it('should return null if there are intermediate xdomain frames', () => {
-      Object.defineProperty(intermediateWinMock['location'], 'href', {
-        get: () => {
-          throw new Error('Error!!');
-        },
-        set: () => {
-          throw new Error('Error!!');
-        },
+    function breakCanInspectWindowForWindow(win) {
+      Object.defineProperty(win['location'], 'href', {
+        get: () => throw new Error('Error!!'),
       });
+      Object.defineProperty(win, 'test', {
+        get: () => throw new Error('Error!!'),
+      });
+    }
 
-      Object.defineProperty(intermediateWinMock, 'test', {
-        get: () => {
-          throw new Error('Error!!');
-        },
-        set: () => {
-          throw new Error('Error!!');
-        },
-      });
+    it('should return null if there are intermediate xdomain frames', () => {
+      let hrefCalled = false;
+      let testCalled = false;
+      breakCanInspectWindowForWindow(intermediateWinMock);
+      breakCanInspectWindowForWindow(creativeWinMock);
       expect(host.getFrameElement_(creativeWinMock, sentinel)).to.be.null;
     });
 

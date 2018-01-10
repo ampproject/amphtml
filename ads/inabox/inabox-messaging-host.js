@@ -215,8 +215,8 @@ export class InaboxMessagingHost {
    *       is either directly registered in this.iframes_, or is a
    *       child of one of those frames.
    *    2. It returns whichever iframe is the deepest frame in the source's
-   *       hierarchy that the outer host window can still access, thus being
-   *       able to measure.
+   *       hierarchy that the outer host window can still measure, which is
+   *       the top most cross domained frame, or the creative frame.
    * EXAMPLE:
    *   If we have a frame hierarchy:
    *     Host -> Friendly Frame -> X Domain Frame 1 -> Message Source Frame
@@ -239,14 +239,32 @@ export class InaboxMessagingHost {
     }
     for (let i = 0; i < this.iframes_.length; i++) {
       const iframe = this.iframes_[i];
-      for (let j = 0, tempWin = source, deepestAccessibleWin;
-           j < 10; j++) {
-             if (canInspectWindow(tempWin) && !deepestAccesibleWin) {
-               deepestAccessibleWin = tempWin;
+      for (let j = 0, tempWin = source, topInaccessibleWin;
+           j < 10; j++, tempWin = tempWin.parent) {
+             if (!canInspectWindow(tempWin)) {
+               topInaccessibleWin = tempWin;
              }
              if (iframe.contentWindow == tempWin) {
-               this.iframeMap_[sentinel] = deepestAccessibleWin.frameElement;
-               return deepestAccesibleWin.frameElement;
+               // We have verified that the source is nested below
+               // a valid frame.
+               if (!topInaccessibleWin) {
+                 // If there was no xdomain frame, we can just return
+                 // the source frame.
+                 this.iframeMap_[sentinel] = source.frameElement;
+                 return source.frameElement;
+               }
+               // Now we need to find the frameElement for the
+               // topInaccessibleWin, because we can not get it directly
+               // if it is xdomain.
+               const parent = topInaccessibleWin.parent;
+               const iframes = parent.document.querySelectorAll('iframe');
+               for (let k = 0, frame = iframes[k]; k < iframes.length;
+                    k++, frame = iframes[k]) {
+                      if (frame.contentWindow == topInaccessibleWin) {
+                        this.iframeMap_[sentinel] = frame;
+                        return frame;
+                      }
+                    }
              }
            }
     }
