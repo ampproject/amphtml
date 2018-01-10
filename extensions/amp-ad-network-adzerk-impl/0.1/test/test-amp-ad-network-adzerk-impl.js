@@ -111,13 +111,13 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
           '<link rel="stylesheet" type="text/css" ' +
           'href="https://fonts.googleapis.com/css?family=Raleway">' +
         '</head>' +
-        '<body>' +
+        '<body><template type="amp-mustache">' +
           '<amp-fit-text width="300" height="200">hello {{USER_NAME}}! ' +
           '{{USER_NUM}}</amp-fit-text>' +
           'Expect encoding {{HTML_CONTENT}}' +
           '<amp-img src={{IMG_SRC}}/>' +
           'Missing {{UNKNOWN}} item' +
-        '</body>' +
+        '</template></body>' +
         '</html>';
       fetchTextMock.withArgs(
           'https://cdn.ampproject.org/c/s/adzerk/456',
