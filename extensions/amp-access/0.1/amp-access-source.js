@@ -73,6 +73,9 @@ export class AccessSource {
     this.scheduleView_ = scheduleViewFn;
 
     /** @const */
+    this.broadcastReauthorize_ = broadcastReauthorizeFn;
+
+    /** @const */
     this.accessElement_ = accessElement;
 
     /** @const @private {boolean} */

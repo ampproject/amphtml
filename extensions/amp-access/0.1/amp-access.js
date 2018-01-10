@@ -194,7 +194,7 @@ export class AccessService {
 
     const readerIdFn = this.getReaderId_.bind(this);
     const scheduleViewFn = this.scheduleView_.bind(this);
-    const broadcastReauthorizeFn = this.broadcastReauthorize_().bind(this);
+    const broadcastReauthorizeFn = this.broadcastReauthorize_.bind(this);
 
     return Object.keys(configMap).map(key =>
       new AccessSource(this.ampdoc, configMap[key], readerIdFn, scheduleViewFn,
@@ -662,10 +662,11 @@ export class AccessService {
    */
   combinedResponses() {
     if (this.sources_.length == 1 && !this.sources_[0].getNamespace()) {
-      return this.sources_[0].getAuthResponse() || {};
+      return /** @type {!JsonObject} */ (this.sources_[0].getAuthResponse() ||
+        {});
     }
 
-    const combined = /** @type {JsonObject} */ ({});
+    const combined = /** @type {!JsonObject} */ ({});
     this.sources_.forEach(source =>
       combined[source.getNamespace()] = source.getAuthResponse());
     return combined;
