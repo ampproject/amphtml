@@ -237,38 +237,54 @@ export class InaboxMessagingHost {
     if (this.iframeMap_[sentinel]) {
       return this.iframeMap_[sentinel];
     }
+    const measureableFrame = this.getMeasureableFrame(source);
+    const measureableWin = measureableFrame.contentWindow;
     for (let i = 0; i < this.iframes_.length; i++) {
       const iframe = this.iframes_[i];
-      for (let j = 0, tempWin = source, topInaccessibleWin;
+      for (let j = 0, tempWin = measureableWin;
            j < 10; j++, tempWin = tempWin.parent) {
-             if (!canInspectWindow(tempWin)) {
-               topInaccessibleWin = tempWin;
-             }
              if (iframe.contentWindow == tempWin) {
-               // We have verified that the source is nested below
-               // a valid frame.
-               if (!topInaccessibleWin) {
-                 // If there was no xdomain frame, we can just return
-                 // the source frame.
-                 this.iframeMap_[sentinel] = source.frameElement;
-                 return source.frameElement;
-               }
-               // Now we need to find the frameElement for the
-               // topInaccessibleWin, because we can not get it directly
-               // if it is xdomain.
-               const parent = topInaccessibleWin.parent;
-               const iframes = parent.document.querySelectorAll('iframe');
-               for (let k = 0, frame = iframes[k]; k < iframes.length;
-                    k++, frame = iframes[k]) {
-                      if (frame.contentWindow == topInaccessibleWin) {
-                        this.iframeMap_[sentinel] = frame;
-                        return frame;
-                      }
-                    }
+               this.iframeMap_[sentinel] = measureableFrame;
+               return measureableFrame;
              }
            }
+      return null;
     }
-    return null;
+  }
+
+  /**
+   * Returns whichever window in win's parent hierarchy is the deepest window
+   * that is measurable from the perspective of the current window.
+   * For when win is nested within a x-domain frame, walks up the window's
+   * parent hierarchy until the top-most x-domain frame in the hierarchy
+   * is found. Then, it returns the frame element for that window.
+   * For when win is friendly framed, returns the frame element for win.
+   * @param {!Window} win
+   * @returns {!HTMLIframeElement}
+   */
+  getMeasureableFrame(win) {
+    let measureableWin, measureableFrame;
+    for (let j = 0, tempWin = win; j < 10 && tempWin != tempWin.top;
+         j++, tempWin = tempWin.parent) {
+           if (!canInspectWindow(tempWin)) {
+               measureableWin = tempWin;
+           } else {
+             break;
+           }
+         }
+    if (!!measureableWin) {
+      const parent = measureableWin.parent;
+      const iframes = parent.document.querySelectorAll('iframe');
+      for (let k = 0, frame = iframes[k]; k < iframes.length;
+           k++, frame = iframes[k]) {
+             if (frame.contentWindow == measureableWin) {
+               measureableFrame = frame;
+             }
+           }
+    } else {
+      measureableFrame = win.frameElement;
+    }
+    return measureableFrame;
   }
 }
 

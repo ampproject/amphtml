@@ -260,6 +260,69 @@ describes.realWin('inabox-host:messaging', {}, env => {
 
   });
 
+  function createNestedIframeMocks(depth, numXDomain) {
+    numXDomain = numXDomain || 0;
+    const topWin = {};
+    topWin['top'] = topWin['parent'] = topWin;
+    let parent = topWin;
+    for (let i = 1; i < depth; i++) {
+      const win = {
+        top: topWin,
+        parent: parent,
+        location: {
+          href: `www.${i}.com`,
+        },
+      };
+      win.parent['document'] = {
+        querySelectorAll: () => {
+          const frame = {
+            contentWindow: win,
+          };
+          return [frame];
+        }
+      }
+      if (depth - i <= numXDomain) {
+        breakCanInspectWindowForWindow(win);
+      } else {
+        win['frameElement'] = {
+          contentWindow: win,
+        };
+      }
+      parent = win;
+    }
+    return parent;
+  }
+
+  function breakCanInspectWindowForWindow(win) {
+    Object.defineProperty(win['location'], 'href', {
+      get: () => {throw new Error('Error!!')}
+    });
+    Object.defineProperty(win, 'test', {
+      get: () => {throw new Error('Error!!')},
+    });
+  }
+
+  describe('getMeasureableFrame', () => {
+    it('should return correct frame multiple level of xdomain', () => {
+      const source = createNestedIframeMocks(6,3);
+      const expectedMeasurableWin = source.parent.parent;
+      expect(host.getMeasureableFrame(source).contentWindow).to.deep.equal(
+          expectedMeasurableWin);
+    });
+
+    it('should return correct frame for single xdomain frame', () => {
+      const source = createNestedIframeMocks(10,1);
+      expect(host.getMeasureableFrame(source).contentWindow).to.deep.equal(
+          source);
+    });
+
+    it('should return correct frame for no xdomain frames', () => {
+      const source = createNestedIframeMocks(5);
+      expect(host.getMeasureableFrame(source).contentWindow).to.deep.equal(
+          source);
+    });
+  });
+
   describe('getFrameElement', () => {
     let topWinMock;
     let intermediateWinMock;
@@ -291,14 +354,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
       sentinel = '123456789101112';
     });
 
-    function breakCanInspectWindowForWindow(win) {
-      Object.defineProperty(win['location'], 'href', {
-        get: () => throw new Error('Error!!'),
-      });
-      Object.defineProperty(win, 'test', {
-        get: () => throw new Error('Error!!'),
-      });
-    }
+
 
     it('should return null if there are intermediate xdomain frames', () => {
       let hrefCalled = false;
