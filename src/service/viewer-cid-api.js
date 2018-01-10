@@ -17,6 +17,7 @@
 import {Services} from '../services';
 import {dict} from '../utils/object';
 import {user} from '../log';
+import {parseUrl} from '../url';
 
 const GOOGLE_CLIENT_ID_API_META_NAME = 'amp-google-client-id-api';
 const CID_API_SCOPE_WHITELIST = {
@@ -42,6 +43,11 @@ export class ViewerCidApi {
 
     /** @private {?Object<string, string>} */
     this.apiKeyMap_ = null;
+
+    const canonicalUrl = Services.documentInfoForDoc(this.ampdoc_).canonicalUrl;
+
+    /** @private {?string} */
+    this.canonicalOrigin_ = canonicalUrl ? parseUrl(canonicalUrl).origin : null;
   }
 
   /**
@@ -65,6 +71,7 @@ export class ViewerCidApi {
     const payload = dict({
       'scope': scope,
       'clientIdApi': !!apiKey,
+      'canonicalOrigin': this.canonicalOrigin_,
     });
     if (apiKey) {
       payload['apiKey'] = apiKey;

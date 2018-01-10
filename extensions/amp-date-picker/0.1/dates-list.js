@@ -19,7 +19,7 @@ import {rrulestr} from '../../../third_party/rrule/rrule';
 
 
 /** @enum {string} */
-export const DateType = {
+const DateType = {
   INVALID: 'invalid',
   RRULE: 'rrule',
   DATE: 'date',
@@ -33,6 +33,7 @@ export class DatesList {
    * @param {!Array<string>} dates
    */
   constructor(dates) {
+
     /** @private @const */
     this.ReactDates_ = requireExternal('react-dates');
 
@@ -57,12 +58,13 @@ export class DatesList {
    * @return {boolean}
    */
   contains(date) {
-    return this.matchesDate_(date) || this.matchesRrule_(date);
+    const m = this.moment_(date);
+    return this.matchesDate_(m) || this.matchesRrule_(m);
   }
 
   /**
    * Determines if any internal moment object matches the given date.
-   * @param {!moment|string} date
+   * @param {!moment} date
    * @return {boolean}
    * @private
    */
@@ -72,13 +74,13 @@ export class DatesList {
 
   /**
    * Determines if any internal RRULE object matches the given date.
-   * @param {!moment|string} date
+   * @param {!moment} date
    * @return {boolean}
    * @private
    */
   matchesRrule_(date) {
+    const nextDate = date.clone().startOf('day').add(1, 'day').toDate();
     return this.rrulestrs_.some(rrule => {
-      const nextDate = date.clone().startOf('day').add(1, 'day').toDate();
       const rruleDay = this.moment_(rrule.before(nextDate));
       return this.ReactDates_.isSameDay(rruleDay, date);
     });
