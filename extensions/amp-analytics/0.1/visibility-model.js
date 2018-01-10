@@ -349,8 +349,8 @@ export class VisibilityModel {
       const timeToWait = this.computeTimeToWait_();
       if (timeToWait > 0) {
         this.scheduledUpdateTimeoutId_ = setTimeout(() => {
-          this.update();
           this.scheduledUpdateTimeoutId_ = null;
+          this.update();
         }, timeToWait);
       }
     } else if (!this.matchesVisibility_ && this.scheduledUpdateTimeoutId_) {
