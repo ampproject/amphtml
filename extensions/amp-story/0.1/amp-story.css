@@ -566,8 +566,8 @@ amp-story-grid-layer * {
 }
 
 .i-amphtml-story-share-widget-scrollable {
-  padding: 16px 0;
-  height: 66px;
+  padding: 16px 0 !important;
+  height: 66px !important;
   overflow: auto !important;
 }
 
