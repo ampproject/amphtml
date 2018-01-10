@@ -937,10 +937,11 @@ export class UrlReplacements {
    * @private
    */
   expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
-    const isV2ExperimentOn = isExperimentOn(this.ampdoc.win, 'url-replacement-v2');
+    const isV2ExperimentOn = isExperimentOn(this.ampdoc.win,
+        'url-replacement-v2');
     if (isV2ExperimentOn && !opt_collectVars && !opt_sync) {
       // not supporting syncronous version (yet) or collect_vars with this new structure
-      return this.expander_.expand(url, opt_bindings, opt_whiteList);
+      return this.expander_./*OK*/expand(url, opt_bindings, opt_whiteList);
     }
 
     // legacy parsing
