@@ -288,7 +288,7 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12267',
   },
   {
-    id: 'core-parser',
+    id: 'url-replacement-v2',
     name: 'new parsing engine for url variables',
     spec: 'https://github.com/ampproject/amphtml/issues/12119',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',

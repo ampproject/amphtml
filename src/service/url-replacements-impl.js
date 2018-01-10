@@ -39,7 +39,7 @@ import {
 } from './variable-source';
 import {isProtocolValid} from '../url';
 import {WindowInterface} from '../window-interface';
-import {Parser} from './url-expander/parser';
+import {Expander} from './url-expander/expander';
 import {isExperimentOn} from '../experiments';
 
 /** @private @const {string} */
@@ -640,8 +640,8 @@ export class UrlReplacements {
     /** @type {VariableSource} */
     this.variableSource_ = variableSource;
 
-    /** @type {Parser} */
-    this.parser_ = new Parser(this.variableSource_);
+    /** @type {Expander} */
+    this.expander_ = new Expander(this.variableSource_);
   }
 
   /**
@@ -937,10 +937,10 @@ export class UrlReplacements {
    * @private
    */
   expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
-    const parserExperimentOn = isExperimentOn(this.ampdoc.win, 'core-parser');
-    if (parserExperimentOn && !opt_collectVars && !opt_sync) {
-      // not supporting syncronous version or collect_vars with this new structure
-      return this.parser_.expand(url, opt_bindings, opt_whiteList);
+    const isV2ExperimentOn = isExperimentOn(this.ampdoc.win, 'url-replacement-v2');
+    if (isV2ExperimentOn && !opt_collectVars && !opt_sync) {
+      // not supporting syncronous version (yet) or collect_vars with this new structure
+      return this.expander_.expand(url, opt_bindings, opt_whiteList);
     }
 
     // legacy parsing

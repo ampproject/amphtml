@@ -17,7 +17,7 @@
 import {rethrowAsync} from '../../log';
 
 /** Rudamentary parser to handle nested Url replacement. */
-export class Parser {
+export class Expander {
 
   /**
    * Link this instance of parser to the calling UrlReplacment
@@ -28,33 +28,28 @@ export class Parser {
   }
 
   /**
-   * Takes array of all matching variable keyword locations and returns only those that we
-   * want to evaluate. In the case of overlapping keywords it choose the longer. It also
-   * excludes protected keywords.
-   * @param {!Array<Object<string, string|number>>} matches array of objects representing
-   *  matching keywords
-   * @param {string} url The url to be expanded.
-   * @return {!Object<string, string|number>}
+   * take the template url and return a promise of its evaluated value
+   * @param {string} url url to be substituted
+   * @param {!Object<string, *>=} opt_bindings additional one-off bindings
+   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   *     that can be substituted.
+   * @return {!Promise<string>}
    */
-  eliminateOverlaps_(matches, url, opt_whiteList) {
-    if (!matches.length) { return null; }
-    // longest keywords have priority over shorter
-    // how should we prioritize if same length??
-    matches.sort((a, b) => b.length - a.length);
-    const storage = new Array(url.length).fill(false);
+  expand(url, opt_bindings, opt_whiteList) {
+    if (!url.length) {
+      return Promise.resolve(url);
+    }
+    const expr = this.variableSource_
+        .getExpr(opt_bindings, /*opt_ignoreArgs */ true);
 
-    return matches.reduce((results, match) => {
-      if (opt_whiteList && !opt_whiteList[match.name]) {
-        // Do not perform substitution and just return back the original
-        // match, so that the string doesn't change.
-        return results;
-      }
-      if (this.fillStorage_(match, storage)) {
-        // if this match does not overlap with a longer match
-        results.push(match);
-      }
-      return results;
-    }, []).sort((a, b) => a.start - b.start);
+    const matches = this.findMatches_(url, expr);
+    // if no keywords move on
+    if (!matches.length) {
+      return Promise.resolve(url);
+    }
+    const mergedPositions = this.eliminateOverlaps_(matches, url,
+        opt_whiteList);
+    return this.parseUrlRecursively_(url, mergedPositions, opt_bindings);
   }
 
   /**
@@ -81,81 +76,59 @@ export class Parser {
   }
 
   /**
-   * Given a storage data structure and a match object, it will keep track of indexes
-   * that are already being tracked.
+   * Takes array of all matching variable keyword locations and returns only those that we
+   * want to evaluate. In the case of overlapping keywords it choose the longer. It also
+   * excludes protected keywords.
+   * @param {!Array<Object<string, string|number>>} matches array of objects representing
+   *  matching keywords
+   * @param {string} url The url to be expanded.
+   * @return {!Object<string, string|number>}
+   */
+  eliminateOverlaps_(matches, url, opt_whiteList) {
+    if (!matches.length) { return null; }
+    // longest keywords have priority over shorter
+    // if same length alphabetical precidence
+    matches.sort((a, b) => {
+      if (a.length === b.length) {
+        return a.name > b.name;
+      }
+      return b.length - a.length;
+    });
+
+    const keywordMarker = new Array(url.length).fill(false);
+
+    return matches.reduce((results, match) => {
+      if (opt_whiteList && !opt_whiteList[match.name]) {
+        // Do not perform substitution and just return back the original
+        // match, so that the string doesn't change.
+        return results;
+      }
+      if (this.fillStorage_(match, keywordMarker)) {
+        // if this match does not overlap with a longer match
+        results.push(match);
+      }
+      return results;
+    }, []).sort((a, b) => a.start - b.start);
+  }
+
+  /**
+   * Given a keyword marking data structure and a match object, it will keep track of
+   * indexes that are already being tracked.
    * @param {!Object<string, *>} match contains match data
    * @return {boolean} indicates whether a collision was found
    */
-  fillStorage_(match, storage) {
+  fillStorage_(match, keywordMarker) {
     for (let i = match.start; i <= match.stop; i++) {
-      if (storage[i]) {
+      if (keywordMarker[i]) {
         // toggle off what we thought was to be filled
         for (let j = match.start; j < i; j++) {
-          storage[j] = false;
+          keywordMarker[j] = false;
         }
         return false;
       }
-      storage[i] = true;
+      keywordMarker[i] = true;
     }
     return true;
-  }
-
-  /**
-   * resolves binding to value to be substituted
-   * @param {!Object<string, *>} binding container for sync/async resolutions
-   * @param {?Array=} opt_args arguments to be passed if binding is function
-   * @return {!Promise<string>} resolved value
-   */
-  evaluateBinding_(binding, opt_args) {
-    let value;
-    try {
-      if (typeof binding === 'function') {
-        if (opt_args) {
-          value = Promise.all(opt_args)
-              .then(args => binding.apply(null, args));
-        } else {
-          value = Promise.resolve(binding.apply(null, opt_args));
-        }
-      } else {
-        value = Promise.resolve(binding);
-      }
-      return value.then(val => val == null ? '' : encodeURIComponent(val))
-          .catch(e => {
-            rethrowAsync(e);
-            return '';
-          });
-
-    } catch (e) {
-      // Report error, but do not disrupt URL replacement. This will
-      // interpolate as the empty string.
-      rethrowAsync(e);
-      return Promise.resolve('');
-    }
-  }
-
-  /**
-   * take the template url and return a promise of its evaluated value
-   * @param {string} url url to be substituted
-   * @param {!Object<string, *>=} opt_bindings additional one-off bindings
-   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
-   *     that can be substituted.
-   * @return {!Promise<string>}
-   */
-  expand(url, opt_bindings, opt_whiteList) {
-    if (!url.length) {
-      return Promise.resolve(url);
-    }
-    const expr = this.variableSource_
-        .getExpr(opt_bindings, /*opt_ignoreArgs */ true);
-
-    const matches = this.findMatches_(url, expr);
-    // if no keywords move on
-    if (!matches.length) {
-      return Promise.resolve(url);
-    }
-    const mergedPositions = this.eliminateOverlaps_(matches, url,
-        opt_whiteList);
-    return this.parseUrlRecursively_(url, mergedPositions, opt_bindings);
   }
 
   /**
@@ -254,5 +227,38 @@ export class Parser {
     };
 
     return evaluateNextLevel();
+  }
+
+  /**
+   * resolves binding to value to be substituted
+   * @param {!Object<string, *>} binding container for sync/async resolutions
+   * @param {?Array=} opt_args arguments to be passed if binding is function
+   * @return {!Promise<string>} resolved value
+   */
+  evaluateBinding_(binding, opt_args) {
+    let value;
+    try {
+      if (typeof binding === 'function') {
+        if (opt_args) {
+          value = Promise.all(opt_args)
+              .then(args => binding.apply(null, args));
+        } else {
+          value = Promise.resolve(binding.apply(null, opt_args));
+        }
+      } else {
+        value = Promise.resolve(binding);
+      }
+      return value.then(val => val == null ? '' : encodeURIComponent(val))
+          .catch(e => {
+            rethrowAsync(e);
+            return '';
+          });
+
+    } catch (e) {
+      // Report error, but do not disrupt URL replacement. This will
+      // interpolate as the empty string.
+      rethrowAsync(e);
+      return Promise.resolve('');
+    }
   }
 }
