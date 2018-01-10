@@ -15,7 +15,6 @@
  */
 
 import {rethrowAsync} from '../../log';
-import {encodeValue} from '../url-replacements-impl';
 
 /** Rudamentary parser to handle nested Url replacement. */
 export class Parser {
@@ -45,7 +44,7 @@ export class Parser {
     const storage = new Array(url.length).fill(false);
 
     return matches.reduce((results, match) => {
-      if (opt_whiteList && !opt_whiteList[name]) {
+      if (opt_whiteList && !opt_whiteList[match.name]) {
         // Do not perform substitution and just return back the original
         // match, so that the string doesn't change.
         return results;
@@ -120,7 +119,12 @@ export class Parser {
       } else {
         value = Promise.resolve(binding);
       }
-      return value.then(encodeValue);
+      return value.then(val => val == null ? '' : encodeURIComponent(val))
+          .catch(e => {
+            rethrowAsync(e);
+            return '';
+          });
+
     } catch (e) {
       // Report error, but do not disrupt URL replacement. This will
       // interpolate as the empty string.

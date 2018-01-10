@@ -113,6 +113,9 @@ export class VariableSource {
     /** @private {!RegExp|undefined} */
     this.replacementExpr_ = undefined;
 
+    /** @private {!RegExp|undefined} */
+    this.replacementExprWithoutArgs_ = undefined;
+
     /** @private @const {!Object<string, !ReplacementDef>} */
     this.replacements_ = Object.create(null);
 
@@ -165,6 +168,7 @@ export class VariableSource {
         this.replacements_[varName] || {sync: undefined, async: undefined};
     this.replacements_[varName].sync = syncResolver;
     this.replacementExpr_ = undefined;
+    this.replacementExprWithoutArgs_ = undefined;
     return this;
   }
 
@@ -184,6 +188,7 @@ export class VariableSource {
         this.replacements_[varName] || {sync: undefined, async: undefined};
     this.replacements_[varName].async = asyncResolver;
     this.replacementExpr_ = undefined;
+    this.replacementExprWithoutArgs_ = undefined;
     return this;
   }
 
@@ -220,11 +225,19 @@ export class VariableSource {
       });
       return this.buildExpr_(allKeys, opt_ignoreArgs);
     }
-    if (!this.replacementExpr_) {
+    if (!this.replacementExpr_ && !opt_ignoreArgs) {
       this.replacementExpr_ = this.buildExpr_(
+          Object.keys(this.replacements_));
+    }
+    // sometimes the v1 expand will be called before the v2
+    // so we need to cache both versions
+    if (!this.replacementExprWithoutArgs_ && opt_ignoreArgs) {
+      this.replacementExprWithoutArgs_ = this.buildExpr_(
           Object.keys(this.replacements_), opt_ignoreArgs);
     }
-    return this.replacementExpr_;
+
+    return opt_ignoreArgs ? this.replacementExprWithoutArgs_ :
+      this.replacementExpr_;
   }
 
   /**
