@@ -644,7 +644,6 @@ export class MediaPool {
       return;
     }
 
-    poolMediaEl.currentTime = 0;
     poolMediaEl.play();
   }
 
@@ -669,6 +668,25 @@ export class MediaPool {
     if (opt_rewindToBeginning) {
       poolMediaEl.currentTime = 0;
     }
+  }
+
+
+  /**
+   * Rewinds a specified media element in the DOM to 0.
+   * @param {!HTMLMediaElement} domMediaEl The media element to be paused.
+   * @param {boolean=} opt_rewindToBeginning Whether to rewind the currentTime
+   *     of media items to the beginning.
+   */
+  rewindToBeginning(domMediaEl) {
+    const mediaType = this.getMediaType_(domMediaEl);
+    const poolMediaEl =
+        this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
+
+    if (!poolMediaEl) {
+      return;
+    }
+
+    poolMediaEl.currentTime = 0;
   }
 
 

@@ -140,7 +140,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   pauseCallback() {
     this.advancement_.stop();
 
-    this.pauseAllMedia_();
+    this.pauseAllMedia_(/* opt_rewindToBeginning */ false);
 
     if (this.animationManager_) {
       this.animationManager_.cancelAll();
@@ -177,6 +177,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @return {!Promise} */
   beforeVisible() {
+    this.rewindAllMediaToBeginning_();
     return this.maybeApplyFirstAnimationFrame();
   }
 
@@ -291,6 +292,13 @@ export class AmpStoryPage extends AMP.BaseElement {
     });
   }
 
+  /** @private */
+  rewindAllMediaToBeginning_() {
+    this.forEachMediaElement_((mediaPool, mediaEl) => {
+      mediaPool.rewindToBeginning(/** @type {!HTMLMediaElement} */ (mediaEl));
+    });
+  }
+
 
   /**
    * Mutes all media on this page.
@@ -354,7 +362,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.resumeCallback();
     } else {
       this.element.removeAttribute('active');
-      this.pauseCallback();
+      this.pauseCallback(/* rewindToBeginning */ false);
     }
   }
 

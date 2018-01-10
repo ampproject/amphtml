@@ -679,32 +679,35 @@ export class AmpStory extends AMP.BaseElement {
     const previousActivePriorSibling = scopedQuerySelector(
         this.element, `[${PRE_ACTIVE_PAGE_ATTRIBUTE_NAME}]`);
 
-    return this.mutateElement(() => {
-      this.activePage_ = targetPage;
-      this.triggerActiveEventForPage_();
-      this.systemLayer_.resetDeveloperLogs();
-      this.systemLayer_.setDeveloperLogContextString(
-          this.activePage_.element.id);
-    })
-        .then(() => targetPage.beforeVisible())
-        .then(() => {
-          if (oldPage) {
-            oldPage.setActive(false);
-          }
-          targetPage.setActive(true);
+    this.activePage_ = targetPage;
 
-          if (activePriorSibling &&
-              matches(activePriorSibling, 'amp-story-page')) {
-            activePriorSibling.setAttribute(PRE_ACTIVE_PAGE_ATTRIBUTE_NAME, '');
-          }
-          if (previousActivePriorSibling) {
-            previousActivePriorSibling.removeAttribute(
-                PRE_ACTIVE_PAGE_ATTRIBUTE_NAME);
-          }
-        })
-        .then(() => this.preloadPagesByDistance_())
-        .then(() => this.reapplyMuting_())
-        .then(() => this.forceRepaintForSafari_());
+    this.systemLayer_.resetDeveloperLogs();
+    this.systemLayer_.setDeveloperLogContextString(
+        this.activePage_.element.id);
+
+    targetPage.beforeVisible().then(() => {
+      this.triggerActiveEventForPage_();
+
+      if (oldPage) {
+        oldPage.setActive(false);
+      }
+
+      targetPage.setActive(true);
+
+      if (activePriorSibling &&
+          matches(activePriorSibling, 'amp-story-page')) {
+        activePriorSibling.setAttribute(PRE_ACTIVE_PAGE_ATTRIBUTE_NAME, '');
+      }
+      if (previousActivePriorSibling) {
+        previousActivePriorSibling.removeAttribute(
+            PRE_ACTIVE_PAGE_ATTRIBUTE_NAME);
+      }
+
+      this.preloadPagesByDistance_();
+
+      this.reapplyMuting_();
+      this.forceRepaintForSafari_()
+    });
   }
 
 
