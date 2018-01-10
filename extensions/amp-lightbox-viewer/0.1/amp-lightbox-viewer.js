@@ -561,9 +561,10 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    */
   getCurrentElement_() {
     const lbgId = this.currentLightboxGroupId_;
-    return dev().assert(
+    const currentElement = dev().assert(
         this.elementsMetadata_[lbgId][this.currentElemId_]
     );
+    return currentElement;
   }
 
   /**
