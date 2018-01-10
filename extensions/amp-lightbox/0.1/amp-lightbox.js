@@ -15,6 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-lightbox-0.1.css';
+import {AmpEvents} from '../../../src/amp-events';
 import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
@@ -23,6 +24,7 @@ import {computedStyle, setImportantStyles} from '../../../src/style';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {Services} from '../../../src/services';
+import {toArray} from '../../../src/types';
 import {debounce} from '../../../src/utils/rate-limit';
 import * as st from '../../../src/style';
 
@@ -43,7 +45,7 @@ class AmpLightbox extends AMP.BaseElement {
     this.container_ = null;
 
     /** @private {?Array<!Element>} */
-    this.children_ = null;
+    this.componentDescendants_ = null;
 
     /** @private {number} */
     this.historyId_ = -1;
@@ -86,6 +88,31 @@ class AmpLightbox extends AMP.BaseElement {
   }
 
   /**
+   * Takes ownership of all AMP element descendants.
+   * @private
+   */
+  takeOwnershipOfDescendants_() {
+    dev().assert(this.isScrollable_);
+    this.getComponentDescendants_(/* opt_refresh */ true).forEach(child => {
+      this.setAsOwner(child);
+    });
+  }
+
+  /**
+   * Gets a list of all AMP element descendants.
+   * @param {boolean=} opt_refresh Whether to requery the descendants.
+   * @return {!Array<!Element>}
+   * @private
+   */
+  getComponentDescendants_(opt_refresh) {
+    if (!this.componentDescendants_ || opt_refresh) {
+      this.componentDescendants_ = toArray(
+          this.element.getElementsByClassName('i-amphtml-element'));
+    }
+    return this.componentDescendants_;
+  }
+
+  /**
    * Lazily builds the lightbox DOM on the first open.
    * @private
    */
@@ -96,7 +123,7 @@ class AmpLightbox extends AMP.BaseElement {
 
     this.isScrollable_ = this.element.hasAttribute('scrollable');
 
-    this.children_ = this.getRealChildren();
+    const children = this.getRealChildren();
 
     this.container_ = this.element.ownerDocument.createElement('div');
     if (!this.isScrollable_) {
@@ -104,14 +131,20 @@ class AmpLightbox extends AMP.BaseElement {
     }
     this.element.appendChild(this.container_);
 
-    this.children_.forEach(child => {
-      if (this.isScrollable_) {
-        this.setAsOwner(child);
-      }
+    children.forEach(child => {
       this.container_.appendChild(child);
     });
 
+    // If scrollable, take ownership of existing children and all future
+    // dynamically created children as well.
     if (this.isScrollable_) {
+      this.takeOwnershipOfDescendants_();
+
+      this.element.addEventListener(AmpEvents.DOM_UPDATE, () => {
+        this.takeOwnershipOfDescendants_();
+        this.updateChildrenInViewport_(this.pos_, this.pos_);
+      });
+
       this.element.addEventListener('scroll', this.scrollHandler_.bind(this));
     }
 
@@ -282,6 +315,7 @@ class AmpLightbox extends AMP.BaseElement {
     this.forEachVisibleChild_(newPos, cell => {
       seen.push(cell);
       this.updateInViewport(cell, true);
+      this.scheduleLayout(cell);
     });
     if (oldPos != newPos) {
       this.forEachVisibleChild_(oldPos, cell => {
@@ -301,13 +335,22 @@ class AmpLightbox extends AMP.BaseElement {
    */
   forEachVisibleChild_(pos, callback) {
     const containerHeight = this.getSize_().height;
-    for (let i = 0; i < this.children_.length; i++) {
-      const child = this.children_[i];
-      // Check whether child element is visible in the lightbox given
+    const descendants = this.getComponentDescendants_();
+    for (let i = 0; i < descendants.length; i++) {
+      const descendant = descendants[i];
+      let offsetTop = 0;
+      for (let n = descendant;
+        n && this.element.contains(n);
+        n = n./*OK*/offsetParent) {
+        offsetTop += n./*OK*/offsetTop;
+      }
+      // Check whether child element is almost visible in the lightbox given
       // current scrollTop position of lightbox
-      if (child./*OK*/offsetTop + child./*OK*/offsetHeight >= pos &&
-          child./*OK*/offsetTop <= pos + containerHeight) {
-        callback(child);
+      // We consider element visible if within 2x containerHeight distance.
+      const visibilityMargin = 2 * containerHeight;
+      if (offsetTop + descendant./*OK*/offsetHeight >= pos - visibilityMargin &&
+        offsetTop <= pos + visibilityMargin) {
+        callback(descendant);
       }
     }
   }
