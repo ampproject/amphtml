@@ -509,7 +509,7 @@ amp.htmlparser.HtmlParser = class {
 
           tagName = eflags = openTag = void 0;
           attribs.length = 0;
-          if (inTag && locator) {
+          if (locator) {
             locator.snapshotPos();
           }
           inTag = false;
@@ -519,7 +519,7 @@ amp.htmlparser.HtmlParser = class {
           tagStack.pcdata(m[0]);
         } else if (m[3]) {  // Tag.
           openTag = !m[2];
-          if (!inTag && locator) {
+          if (locator) {
             locator.snapshotPos();
           }
           inTag = true;
@@ -528,7 +528,7 @@ amp.htmlparser.HtmlParser = class {
               amp.htmlparser.HtmlParser.Elements[tagName] :
               amp.htmlparser.HtmlParser.EFlags.UNKNOWN_OR_CUSTOM;
         } else if (m[4]) {  // Text.
-          if (!inTag && locator) {
+          if (locator) {
             locator.snapshotPos();
           }
           tagStack.pcdata(m[4]);
