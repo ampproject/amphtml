@@ -15,9 +15,21 @@
  */
 
 import {isExperimentOn} from '../../../../src/experiments';
-import {autoDiscoverLightboxables} from './lightbox-manager-discovery';
 import {dev} from '../../../../src/log';
+import {elementByTag, iterateCursor} from '../../../../src/dom';
 
+const ELIGIBLE_TAP_TAGS = {
+  'amp-img': true,
+  'amp-anim': true,
+};
+
+const VIEWER_TAG = 'amp-lightbox-viewer';
+
+/** @typedef {{
+ *  url: string,
+ *  element: !Element
+ * }} */
+let LightboxThumbnailDataDef;
 
 /**
  * LightboxManager is a document-scoped service responsible for:
@@ -42,17 +54,18 @@ export class LightboxManager {
     this.ampdoc_ = ampdoc;
 
     /**
-     * Ordered list of lightboxable elements
-     * @private {?Array<!Element>}
-     **/
-    this.elements_ = null;
-
-    /**
      * Cache for the `maybeInit()` call.
      * @private {?Promise}
      **/
     this.initPromise_ = null;
 
+    /**
+     * Ordered lists of lightboxable elements according to group
+     * @private {!Object<string, !Array<!Element>>}
+     */
+    this.lightboxGroups_ = {
+      default: [],
+    };
   }
 
   /**
@@ -64,15 +77,27 @@ export class LightboxManager {
     if (this.initPromise_) {
       return this.initPromise_;
     }
-    if (isExperimentOn(this.ampdoc_.win, 'amp-lightbox-viewer-auto')) {
-      this.initPromise_ = autoDiscoverLightboxables(this.ampdoc_).then(() => {
-        return this.scanLightboxables_();
-      });
-    } else {
-      this.initPromise_ = this.scanLightboxables_();
-    }
-
+    this.initPromise_ = this.scanLightboxables_();
     return this.initPromise_;
+  }
+
+  /**
+   * Decides whether an already lightboxable element should automatically get
+   * a tap handler to open in the lightbox.
+   * @param {!Element} element
+   * @return {!boolean}
+   */
+  meetsHeuristicsForTap_(element) {
+    dev().assert(element);
+    dev().assert(element.hasAttribute('lightbox'));
+
+    if (!ELIGIBLE_TAP_TAGS[element.tagName.toLowerCase()]) {
+      return false;
+    }
+    if (element.hasAttribute('on')) {
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -84,22 +109,41 @@ export class LightboxManager {
   scanLightboxables_() {
     return this.ampdoc_.whenReady().then(() => {
       const matches = this.ampdoc_.getRootNode().querySelectorAll('[lightbox]');
-      this.elements_ = [];
-      for (let i = 0; i < matches.length; i++) {
-        const element = matches[i];
-        if (element.getAttribute('lightbox').toLowerCase() != 'none') {
-          this.elements_.push(element);
-        }
-      }
+      const processLightboxElement = this.processLightboxElement_.bind(this);
+      iterateCursor(matches, processLightboxElement);
     });
   }
 
   /**
+   * Adds element to correct lightbox group, installs tap handler.
+   * @param {!Element} element
+   * @private
+   */
+  processLightboxElement_(element) {
+    if (element.tagName == 'AMP-CAROUSEL') {
+      // TODO: special case carousel
+    } else {
+      const lightboxGroupId = element.getAttribute('lightbox') || 'default';
+      if (!this.lightboxGroups_[lightboxGroupId]) {
+        this.lightboxGroups_[lightboxGroupId] = [];
+      }
+      this.lightboxGroups_[lightboxGroupId]
+          .push(dev().assertElement(element));
+      if (this.meetsHeuristicsForTap_(element)) {
+        const viewer = elementByTag(this.ampdoc_.getRootNode(), VIEWER_TAG).id;
+        element.setAttribute('on', 'tap:' + viewer.id + '.activate');
+      }
+    }
+  }
+
+  /**
    * Return a list of lightboxable elements
+   * @param {string} lightboxGroupId
    * @return {!Promise<!Array<!Element>>}
    */
-  getElements() {
-    return this.maybeInit_().then(() => dev().assert(this.elements_));
+  getElementsForLightboxGroup(lightboxGroupId) {
+    return this.maybeInit_()
+        .then(() => dev().assert(this.lightboxGroups_[lightboxGroupId]));
   }
 
   /**
@@ -127,18 +171,16 @@ export class LightboxManager {
    * The function is not implemented yet. Fake for testing.
    * Find or create thumbnails for lightboxed elements.
    * Return a list of thumbnails obj for lightbox gallery view
-   * @return {!Array<{url: string, element: !Element}>}
+   * @param {string} lightboxGroupId
+   * @return {!Array<!LightboxThumbnailDataDef>}
    */
-  getThumbnails() {
-    const thumbnailList = [];
-    for (let i = 0; i < this.elements_.length; i++) {
-      const thumbnail = {
-        url: this.getThumbnailUrl_(this.elements_[i], i),
-        element: this.elements_[i],
-      };
-      thumbnailList.push(thumbnail);
-    }
-    return thumbnailList;
+  getThumbnails(lightboxGroupId) {
+    return this.lightboxGroups_[lightboxGroupId]
+        .map((element, i) => ({
+          url: this.getThumbnailUrl_(dev().assertElement(element), i),
+          element,
+        }));
+    ;
   }
 
   /**
@@ -153,6 +195,7 @@ export class LightboxManager {
     if (element.tagName == 'AMP-IMG') {
       return element.getAttribute('src');
     } else {
+      // TODO(#12713): implement default thumbnails
       return 'https://placehold.it/128x128?text=' + index;
     }
   }
