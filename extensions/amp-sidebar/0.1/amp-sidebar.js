@@ -93,6 +93,9 @@ export class AmpSidebar extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.openerElement_ = null;
+
+    /** @private {number} */
+    this.initialScrollTop_ = 0;
   }
 
   /** @override */
@@ -273,6 +276,7 @@ export class AmpSidebar extends AMP.BaseElement {
     });
     if (opt_invocation) {
       this.openerElement_ = opt_invocation.source;
+      this.initialScrollTop_ = this.viewport_.getScrollTop();
     }
   }
 
@@ -285,6 +289,10 @@ export class AmpSidebar extends AMP.BaseElement {
       return;
     }
     this.viewport_.leaveOverlayMode();
+    const scrollDidNotChange =
+      (this.initialScrollTop_ == this.viewport_.getScrollTop());
+    const sidebarIsActive =
+        this.element.contains(this.document_.activeElement);
     this.vsync_.mutate(() => {
       this.closeMask_();
       this.element.removeAttribute('open');
@@ -294,6 +302,9 @@ export class AmpSidebar extends AMP.BaseElement {
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
       this.historyId_ = -1;
+    }
+    if (this.openerElement_ && sidebarIsActive && scrollDidNotChange) {
+      tryFocus(this.openerElement_);
     }
   }
 
@@ -386,15 +397,6 @@ export class AmpSidebar extends AMP.BaseElement {
       this.vsync_.mutate(() => {
         toggle(this.element, /* display */false);
         this.schedulePause(this.getRealChildren());
-        // TODO(cathyxz, 12479): Re-enable with updated heuristic on whether
-        // returning focus to opener is the right choice or not. Current
-        // issue is that if an item in sidebar has a .focus, .scrollTo
-        // or just local # navigation before closing the sidebar, moving the
-        // focus would override their effects.
-        // Return focus to source element if applicable
-        // if (this.openerElement_) {
-        //   tryFocus(this.openerElement_);
-        // }
         this.triggerEvent_(SidebarEvents.CLOSE);
       });
     }

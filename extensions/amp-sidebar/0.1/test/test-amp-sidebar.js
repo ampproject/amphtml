@@ -624,42 +624,6 @@ describes.realWin('amp-sidebar 0.1 version', {
         expect(impl.boundOnAnimationEnd_).to.be.calledTwice;
       });
     });
-
-    // Accessibility
-    // TODO(cathyxz, 12479)
-    it.skip('should return focus to opening element after close', () => {
-      return getAmpSidebar().then(sidebarElement => {
-        const impl = sidebarElement.implementation_;
-        impl.vsync_ = {
-          mutate(callback) {
-            callback();
-          },
-        };
-        impl.getHistory_ = function() {
-          return {
-            push() {
-              return Promise.resolve(11);
-            },
-            pop() {
-              return Promise.resolve(11);
-            },
-          };
-        };
-        clock = lolex.install(
-            {target: impl.win, toFake: ['Date', 'setTimeout']});
-
-        const openerElement = doc.createElement('button');
-        const focusSpy = sandbox.spy(openerElement, 'focus');
-
-        impl.open_({source: openerElement});
-        expect(impl.openerElement_).to.equal(openerElement);
-
-        impl.close_();
-        clock.tick(600);
-
-        expect(focusSpy).to.have.been.called;
-      });
-    });
   });
 
   describe('amp-sidebar - toolbars in amp-sidebar', () => {
