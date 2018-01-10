@@ -4393,6 +4393,7 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
   // to return a GENERAL_DISALLOWED_TAG error.
   // calling HasDispatchKeys here is only an optimization to skip the loop
   // over encountered attributes in the case where we have no dispatches.
+  let bestMatchTagSpec = null;
   if (tagSpecDispatch.hasDispatchKeys()) {
     for (let attr of encounteredTag.attrs()) {
       const maybeTagSpecId = tagSpecDispatch.matchingDispatchKey(
@@ -4442,7 +4443,6 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
   // tried them all.
   let resultForBestAttempt = new amp.validator.ValidationResult();
   resultForBestAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
-  let bestMatchTagSpec = null;
   for (const tagSpecId of tagSpecDispatch.allTagSpecs()) {
     const parsedTagSpec = context.getRules().getByTagSpecId(tagSpecId);
     const resultForAttempt = validateTagAgainstSpec(
