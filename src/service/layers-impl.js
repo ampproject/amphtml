@@ -298,7 +298,7 @@ export class LayoutLayers {
    * @param {!Element} element
    */
   scrolled_(element) {
-    let layer = LayoutElement.forOptional(element);
+    const layer = LayoutElement.forOptional(element);
     if (layer && layer.isLayer()) {
       layer.requestScrollRemeasure();
     } else {

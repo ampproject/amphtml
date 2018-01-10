@@ -449,7 +449,7 @@ export class Resource {
 
   measureViaResources_() {
     const viewport = this.resources_.getViewport();
-    let box = this.resources_.getViewport().getLayoutRect(this.element);
+    const box = this.resources_.getViewport().getLayoutRect(this.element);
     this.layoutBox_ = box;
 
     // Calculate whether the element is currently is or in `position:fixed`.
