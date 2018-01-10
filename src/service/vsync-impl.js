@@ -298,8 +298,8 @@ export class Vsync {
   runAnim(contextNode, task, opt_state) {
     // Do not request animation frames when the document is not visible.
     if (!this.canAnimate_(contextNode)) {
-      dev().warn('VSYNC', 'Did not schedule a vsync request, because doc' +
-          'ument was invisible');
+      dev().warn('VSYNC', 'Did not schedule a vsync request, because' +
+          ' document was invisible');
       return false;
     }
     this.run(task, opt_state);
