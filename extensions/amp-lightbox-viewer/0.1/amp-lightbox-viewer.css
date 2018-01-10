@@ -57,7 +57,7 @@
   background-color: rgba(0,0,0,0.7);
   background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0));
   transition: opacity 1s;
-  z-index: 1;
+  z-index: 2;
 }
 
 .i-amphtml-lbv-top-bar.hide {
@@ -82,7 +82,7 @@
   color: #ffffff;
   opacity: 1;
   transition: opacity 1s;
-  z-index: 1;
+  z-index: 2;
 }
 
 .i-amphtml-lbv-desc-box.standard {
@@ -119,6 +119,10 @@
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;
+}
+
+.i-amphtml-lbv[gallery-view] .i-amphtml-lbv-gallery.i-amphtml-lbv-gallery-hidden {
+  display: none;
 }
 
 .i-amphtml-lbv-gallery-thumbnail {
