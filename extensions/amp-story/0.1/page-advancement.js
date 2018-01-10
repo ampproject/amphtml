@@ -548,7 +548,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
    */
   static fromAutoAdvanceString(autoAdvanceStr, win, rootEl) {
     try {
-      const element = scopedQuerySelector(rootEl, '.i-amphtml-video-interface');
+      const element = scopedQuerySelector(rootEl, 'amp-video');
 
       if (!element) {
         return null;
