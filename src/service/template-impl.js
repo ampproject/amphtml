@@ -17,7 +17,6 @@
 import {childElementByTag, scopedQuerySelector} from '../dom';
 import {getService, registerServiceBuilder} from '../service';
 import {dev, user} from '../log';
-import {toWin} from '../types';
 
 
 /**
@@ -44,7 +43,10 @@ const PROP_PROMISE_ = '__AMP_WAIT_';
  */
 export class BaseTemplate {
 
-  /** @param {!Element} element */
+  /**
+   * @param {!Element} element
+   * @param {!Window} win
+   */
   constructor(element, win) {
     /** @public @const */
     this.element = element;
