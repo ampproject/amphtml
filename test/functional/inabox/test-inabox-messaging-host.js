@@ -324,59 +324,13 @@ describes.realWin('inabox-host:messaging', {}, env => {
   });
 
   describe('getFrameElement', () => {
-    let topWinMock;
-    let intermediateWinMock;
-    let creativeWinMock;
-    let creativeIframeMock;
-    let sentinel;
+    const sentinel = '123456789101112';
 
-    beforeEach(() => {
-      topWinMock = {};
-      topWinMock['top'] = topWinMock;
-      intermediateWinMock = {
-        top: topWinMock,
-        location: {
-          href: 'intermediate.com',
-        },
-        parent: topWinMock,
-      };
-      creativeWinMock = {
-        top: topWinMock,
-        parent: intermediateWinMock,
-        location: {
-          href: 'creative.com',
-        },
-      };
-      creativeIframeMock = {
-        contentWindow: creativeWinMock,
-      };
-      host.win_ = topWinMock;
-      sentinel = '123456789101112';
+    it('should return correct frame when intermediate xdomain frames', () => {
+      const source = createNestedIframeMocks(6,3)
+      const expectedWin = source.parent.parent;
+      expect(host.getFrameElement_(creativeWinMock, sentinel).win).to.deep.equal(expectedWin);
     });
-
-
-
-    it('should return null if there are intermediate xdomain frames', () => {
-      let hrefCalled = false;
-      let testCalled = false;
-      breakCanInspectWindowForWindow(intermediateWinMock);
-      breakCanInspectWindowForWindow(creativeWinMock);
-      expect(host.getFrameElement_(creativeWinMock, sentinel)).to.be.null;
-    });
-
-    it('should return null if there are intermediate xdomain frames - safari',
-        () => {
-          intermediateWinMock['location']['href'] = undefined;
-          Object.defineProperty(intermediateWinMock, 'test', {
-            get: () => {
-              throw new Error('Error!!');
-            },
-            set: () => {
-              throw new Error('Error!!');
-            },
-          });
-          expect(host.getFrameElement_(creativeWinMock, sentinel)).to.be.null;
-        });
 
     it('should return correct frame', () => {
       host.iframes_.push(creativeIframeMock);
