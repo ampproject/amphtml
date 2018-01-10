@@ -57,9 +57,11 @@ export class AccessSource {
    * @param {!JsonObject} configJson
    * @param {!function():!Promise<string>} readerIdFn
    * @param {!function(time)} scheduleViewFn
+   * @param {!function()} broadcastReauthorizeFn
    * @param {!Element} accessElement
    */
-  constructor(ampdoc, configJson, readerIdFn, scheduleViewFn, accessElement) {
+  constructor(ampdoc, configJson, readerIdFn, scheduleViewFn,
+    broadcastReauthorizeFn, accessElement) {
 
     /** @const */
     this.ampdoc = ampdoc;
@@ -107,9 +109,6 @@ export class AccessSource {
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(ampdoc);
 
-    /** @private @const {?../../../src/service/performance-impl.Performance} */
-    this.performance_ = Services.performanceForOrNull(ampdoc.win);
-
     /** @private @const {function(string):Promise<string>} */
     this.openLoginDialog_ = openLoginDialog.bind(null, ampdoc);
 
@@ -141,15 +140,6 @@ export class AccessSource {
 
     /** @private {!time} */
     this.loginStartTime_ = 0;
-
-    this.firstAuthorizationPromise_.then(() => {
-      this.analyticsEvent_('access-authorization-received');
-      if (this.performance_) {
-        this.performance_.tick('aaa');
-        this.performance_.tickSinceVisible('aaav');
-        this.performance_.flush();
-      }
-    });
   }
 
   /**
@@ -307,14 +297,6 @@ export class AccessSource {
 
     // Start authorization XHR immediately.
     this.runAuthorization();
-  }
-
-  /** @private */
-  broadcastReauthorize_() {
-    this.viewer_.broadcast(dict({
-      'type': 'amp-access-reauthorize',
-      'origin': this.pubOrigin_,
-    }));
   }
 
   /**

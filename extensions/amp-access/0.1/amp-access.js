@@ -123,6 +123,17 @@ export class AccessService {
     /** @private {?Promise} */
     this.reportViewPromise_ = null;
 
+    // This will fire after the first received authorization, even if
+    //t here are multiple sources.
+    this.firstAuthorizationPromises_.then(() => {
+      this.analyticsEvent_('access-authorization-received');
+      if (this.performance_) {
+        this.performance_.tick('aaa');
+        this.performance_.tickSinceVisible('aaav');
+        this.performance_.flush();
+      }
+    });
+
     // Re-authorize newly added sections.
     ampdoc.getRootNode().addEventListener(AmpEvents.DOM_UPDATE,
         this.onDomUpdate_.bind(this));
@@ -183,9 +194,11 @@ export class AccessService {
 
     const readerIdFn = this.getReaderId_.bind(this);
     const scheduleViewFn = this.scheduleView_.bind(this);
+    const broadcastReauthorizeFn = this.broadcastReauthorize_().bind(this);
+
     return Object.keys(configMap).map(key =>
-      new AccessSource(this.ampdoc, configMap[key], readerIdFn,
-          scheduleViewFn, this.accessElement_)
+      new AccessSource(this.ampdoc, configMap[key], readerIdFn, scheduleViewFn,
+        broadcastReauthorizeFn, this.accessElement_)
     );
   }
 
@@ -201,7 +214,7 @@ export class AccessService {
     if (responseReceived) {
       return this.lastAuthorizationPromises_.then(() => {
         const target = dev().assertElement(event.target);
-        const responses = /** @type {!JsonObject} */ (this.combinedResponses());
+        const responses = this.combinedResponses();
         this.applyAuthorizationToRoot_(target, responses);
       });
     }
@@ -337,8 +350,7 @@ export class AccessService {
           if (response) {
             return this.ampdoc.whenReady().then(() => {
               const root = this.ampdoc.getRootNode();
-              const responses =
-                  /** @type {!JsonObject} */ (this.combinedResponses());
+              const responses = (this.combinedResponses());
               //  UI is updated as each response arrives.
               return this.applyAuthorizationToRoot_(root, responses);
             });
@@ -362,9 +374,6 @@ export class AccessService {
     }
     return this.lastAuthorizationPromises_.then(() => {
       const responses = this.combinedResponses();
-      if (!responses) {
-        return null;
-      }
       const v = getValueForExpr(responses, field);
       return v !== undefined ? v : null;
     });
@@ -529,7 +538,8 @@ export class AccessService {
           throw reason;
         });
 
-    // Why does this happen?
+    // Support pre-rendering with metering by possibly hiding content
+    // after view is recorded.
     this.reportViewPromise_.then(this.broadcastReauthorize_.bind(this));
 
     return this.reportViewPromise_;
@@ -585,7 +595,9 @@ export class AccessService {
   reportViewToServer_() {
     const promises = [];
     for (let i = 0; i < this.sources_.length; i++) {
-      promises.push(this.sources_[i].reportViewToServer());
+      if (this.sources_[i].getAdapter().isPingbackEnabled()) {
+        promises.push(this.sources_[i].reportViewToServer());
+      }
     }
     return Promise.all(promises);
   }
@@ -646,11 +658,11 @@ export class AccessService {
   /**
    * Either combine namespaced responses or just return the single one.
    *
-   * @return {?JsonObject}
+   * @return {!JsonObject}
    */
   combinedResponses() {
     if (this.sources_.length == 1 && !this.sources_[0].getNamespace()) {
-      return this.sources_[0].getAuthResponse();
+      return this.sources_[0].getAuthResponse() || {};
     }
 
     const combined = /** @type {JsonObject} */ ({});
