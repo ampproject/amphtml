@@ -19,13 +19,11 @@ import {
   NO_CONTENT_RESPONSE,
   CreativeMetaDataDef,
 } from '../../amp-a4a/0.1/amp-a4a';
-import {parse as mustacheParse, render as mustacheRender,
-  setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
+import {AmpMustache} from '../../amp-mustache/0.1/amp-mustache';
 import {urls} from '../../../src/config';
 import {tryParseJson} from '../../../src/json';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {sanitizeHtml, sanitizeFormattingHtml} from '../../../src/sanitizer';
 import {Services} from '../../../src/services';
 import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
 
@@ -61,9 +59,6 @@ const TEMPLATE_CORS_CONFIG = {
   credentials: 'omit',
 };
 
-// Configure inline sanitizer for unescaped values.
-setUnescapedSanitizier(sanitizeFormattingHtml);
-
 /**
  * Fast Fetch implementation for AdZerk network that allows AMP creative
  * preferential render via AMP cache stored template expansion using
@@ -92,6 +87,8 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
 
     /** @private {?CreativeMetaDataDef} */
     this.creativeMetaData_ = null;
+
+    this.win.AMP.registerTemplate('amp-mustache', AmpMustache);
   };
 
   /**
@@ -166,7 +163,6 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
    * @private
    */
   parseTemplate_(template) {
-    mustacheParse(template);
     // TODO(keithwrightbos): this is temporary until AMP cache can be modified
     // to parse and supply this information as opposed to requiring client
     // side parsing.  For now build metadata and remove portions of template.
@@ -242,14 +238,19 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
             // amp-animation).
             this.creativeMetaData_ = Object.assign({}, parsedTemplate.metadata);
             const origDocBody = parsedTemplate.doc.body./*OK*/innerHTML;
-            parsedTemplate.doc.body./*OK*/innerHTML =
-                sanitizeHtml(mustacheRender(
-                    parsedTemplate.doc.body./*OK*/innerHTML,
-                    ampCreativeJson.templateMacroValues || {}));
-            this.creativeMetaData_.minifiedCreative =
-                parsedTemplate.doc.documentElement./*OK*/outerHTML;
-            parsedTemplate.doc.body./*OK*/innerHTML = origDocBody;
-            return utf8Encode(this.creativeMetaData_.minifiedCreative);
+            return Services.templatesFor(this.win)
+                .findAndRenderTemplate(
+                    parsedTemplate.doc.body,
+                    ampCreativeJson.templateMacroValues ||
+                    /** @type{!JsonObject} */ ({}))
+                .then(element => {
+                  parsedTemplate.doc.body./*OK*/innerHTML =
+                      element./*OK*/innerHTML;
+                  this.creativeMetaData_.minifiedCreative =
+                      parsedTemplate.doc.documentElement./*OK*/outerHTML;
+                  parsedTemplate.doc.body./*OK*/innerHTML = origDocBody;
+                  return utf8Encode(this.creativeMetaData_.minifiedCreative);
+                });
           })
           .catch(error => {
             dev().warn(TAG, 'Error fetching/expanding template',
