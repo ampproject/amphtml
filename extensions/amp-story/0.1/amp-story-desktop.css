@@ -350,7 +350,7 @@ amp-story-page.i-amphtml-story-page-shown {
   right: 0!important;
 }
 
-.i-amphtml-story-share-pill > * > * > .i-amphtml-story-share-item  {
+.i-amphtml-story-share-pill .i-amphtml-story-share-item  {
   opacity: 0!important;
   transition: opacity 300ms linear!important;
 }
@@ -359,7 +359,7 @@ amp-story-page.i-amphtml-story-page-shown {
   opacity: 1!important;
 }
 
-.i-amphtml-story-share-pill > * > * > .i-amphtml-story-share-item {
+.i-amphtml-story-share-pill .i-amphtml-story-share-item {
   margin: 0 !important;
   width: 48px !important;
   height: 48px !important;
@@ -367,44 +367,44 @@ amp-story-page.i-amphtml-story-page-shown {
 }
 
 /* Incremental fade in */
-.i-amphtml-story-share-pill:hover > * > * >
+.i-amphtml-story-share-pill:hover
     .i-amphtml-story-share-item:nth-child(9) {
   transition-delay: calc(30ms * 1)!important;
 }
-.i-amphtml-story-share-pill:hover > * > * >
+.i-amphtml-story-share-pill:hover
     .i-amphtml-story-share-item:nth-child(8) {
   transition-delay: calc(30ms * 2)!important;
 }
-.i-amphtml-story-share-pill:hover > * > * >
+.i-amphtml-story-share-pill:hover
     .i-amphtml-story-share-item:nth-child(7) {
   transition-delay: calc(30ms * 3)!important;
 }
-.i-amphtml-story-share-pill:hover > * > * >
+.i-amphtml-story-share-pill:hover
     .i-amphtml-story-share-item:nth-child(6) {
   transition-delay: calc(30ms * 4)!important;
 }
-.i-amphtml-story-share-pill:hover > * > * >
+.i-amphtml-story-share-pill:hover
     .i-amphtml-story-share-item:nth-child(5) {
   transition-delay: calc(30ms * 5)!important;
 }
-.i-amphtml-story-share-pill:hover > * > * >
+.i-amphtml-story-share-pill:hover
     .i-amphtml-story-share-item:nth-child(4) {
   transition-delay: calc(30ms * 6)!important;
 }
-.i-amphtml-story-share-pill:hover > * > * >
+.i-amphtml-story-share-pill:hover
     .i-amphtml-story-share-item:nth-child(3) {
   transition-delay: calc(30ms * 7)!important;
 }
-.i-amphtml-story-share-pill:hover > * > * >
+.i-amphtml-story-share-pill:hover
     .i-amphtml-story-share-item:nth-child(2) {
   transition-delay: calc(30ms * 8)!important;
 }
-.i-amphtml-story-share-pill:hover > * > * >
+.i-amphtml-story-share-pill:hover
     .i-amphtml-story-share-item:nth-child(1) {
   transition-delay: calc(30ms * 9)!important;
 }
 
-.i-amphtml-story-share-pill > * > .i-amphtml-story-share-list {
+.i-amphtml-story-share-pill .i-amphtml-story-share-list {
   padding: 0!important;
   margin: 0 72px 0 0 !important;
 }
