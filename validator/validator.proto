@@ -420,13 +420,15 @@ message TagSpec {
   //   specified mandatory parent tag.
   optional string mandatory_parent = 6;
   // If set, the tag must descend from (not necessarily direct parent of) the
-  // specified mandatory parent string.
+  // specified mandatory parent string which is either a tag name or a tag
+  // spec_name (e.g. tag.name = "!DOCTYPE" or tag.spec_name = "html doctype").
   optional string mandatory_ancestor = 15;
   // Use only for tags where mandatory_ancestor is set. If tag validation fails
   // due to the mandatory_ancestor, and this field is set, then the error
   // detail will suggest the tag specified here as an alternative to consider.
   optional string mandatory_ancestor_suggested_alternative = 16;
-  // This tag may not descend from any tag with any of these tag names.
+  // This tag may not descend from any tag with any of these tag names or tag
+  // spec_names (e.g. tag.name = "!DOCTYPE" or tag.spec_name = "html doctype").
   repeated string disallowed_ancestor = 13;
 
   // If set, all of the tag's descendants must be tags from the named list.

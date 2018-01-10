@@ -131,6 +131,17 @@ const LANDSCAPE_ORIENTATION_WARNING = [
 
 
 /**
+ * Container for "pill-style" share widget, rendered on desktop.
+ * @private @const {!./simple-template.ElementDef}
+ */
+const SHARE_WIDGET_PILL_CONTAINER = {
+  tag: 'div',
+  attrs: dict({'class': 'i-amphtml-story-share-pill'}),
+};
+
+
+
+/**
  * Selector for elements that should be hidden when the bookend is open on
  * desktop view.
  * @private @const {string}
@@ -313,14 +324,12 @@ export class AmpStory extends AMP.BaseElement {
     });
 
     this.element.addEventListener(EventType.SWITCH_PAGE, e => {
-      const targetPageId = e.detail.targetPageId;
-
-      if (targetPageId === 'i-amphtml-story-bookend') {
-        this.showBookend_();
-      } else {
-        this.switchTo_(targetPageId);
+      if (this.bookend_.isActive()) {
+        // Disallow switching pages while the bookend is active.
+        return;
       }
 
+      this.switchTo_(e.detail.targetPageId);
       this.ampStoryHint_.hideAllNavigationHint();
     });
 
@@ -432,7 +441,11 @@ export class AmpStory extends AMP.BaseElement {
         screen.mozLockOrientation || screen.msLockOrientation ||
         (unusedOrientation => {});
 
-    lockOrientation('portrait');
+    try {
+      lockOrientation('portrait');
+    } catch (e) {
+      dev().warn(TAG, 'Failed to lock screen orientation:', e.message);
+    }
   }
 
   /** @private */
@@ -453,14 +466,25 @@ export class AmpStory extends AMP.BaseElement {
   /** @private */
   buildTopBar_() {
     const doc = this.element.ownerDocument;
+
     this.topBar_ = doc.createElement('div');
     this.topBar_.classList.add('i-amphtml-story-top');
+    this.topBar_.appendChild(this.buildTopBarShare_());
 
-    const share = doc.createElement('div');
-    share.classList.add('i-amphtml-story-share');
+    this.element.insertBefore(this.topBar_, this.element.firstChild);
+  }
+
+  /**
+   * @return {!Node}
+   * @private
+   */
+  buildTopBarShare_() {
+    const container =
+        renderSimpleTemplate(this.win.document, SHARE_WIDGET_PILL_CONTAINER);
 
     this.shareWidget_ = new ShareWidget(this.win);
-    share.appendChild(this.shareWidget_.build(this.getAmpDoc()));
+
+    container.appendChild(this.shareWidget_.build(this.getAmpDoc()));
 
     this.loadBookendConfig_().then(bookendConfig => {
       if (bookendConfig !== null) {
@@ -468,8 +492,7 @@ export class AmpStory extends AMP.BaseElement {
       }
     });
 
-    this.topBar_.appendChild(share);
-    this.element.insertBefore(this.topBar_, this.element.firstChild);
+    return container;
   }
 
   /** @override */
@@ -651,11 +674,6 @@ export class AmpStory extends AMP.BaseElement {
    */
   // TODO(newmuis): Update history state
   switchTo_(targetPageId) {
-    if (this.bookend_.isActive()) {
-      // Disallow switching pages while the bookend is active.
-      return Promise.resolve();
-    }
-
     const targetPage = this.getPageById_(targetPageId);
     const pageIndex = this.getPageIndex(targetPage);
 
