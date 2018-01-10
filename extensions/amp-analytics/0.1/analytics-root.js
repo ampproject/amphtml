@@ -218,16 +218,17 @@ export class AnalyticsRoot {
         } else {
           found = this.getRoot().querySelector(selector);
         }
-        // DOM search can "look" outside the boundaries of the root, thus make
-        // sure the result is contained.
-        if (found && this.contains(found)) {
-          result = found;
-        }
-        return user().assertElement(
-            result, `Element "${selector}" not found`);
       } catch (e) {
         user().assert(false, `Invalid query selector ${selector}`);
       }
+
+      // DOM search can "look" outside the boundaries of the root, thus make
+      // sure the result is contained.
+      if (found && this.contains(found)) {
+        result = found;
+      }
+      return user().assertElement(
+          result, `Element "${selector}" not found`);
     });
   }
 
