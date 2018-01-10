@@ -131,11 +131,8 @@ export class Cid {
         'The CID scope and cookie name must only use the characters ' +
         '[a-zA-Z0-9-_.]+\nInstead found: %s',
         getCidStruct.scope);
-    const viewer = Services.viewerForDoc(this.ampdoc);
-    // TODO(zhouyx, #11888): Cleanup after tracing error
-    const trace = new Error('CID trace for: ');
     return consent.then(() => {
-      return viewer.whenFirstVisible();
+      return Services.viewerForDoc(this.ampdoc).whenFirstVisible();
     }).then(() => {
       // Check if user has globally opted out of CID, we do this after
       // consent check since user can optout during consent process.
@@ -144,25 +141,15 @@ export class Cid {
       if (optedOut) {
         return '';
       }
-      return viewer.whenNextVisible().then(() => {
-        const cidPromise = this.getExternalCid_(
-            getCidStruct, opt_persistenceConsent || consent);
-        // Getting the CID might involve an HTTP request. We timeout after 10s.
-        // NOTE: If viewer gets invisible afterwards we also timeout after 10s now. May need improvement
-        return Services.timerFor(this.ampdoc.win)
-            .timeoutPromise(10000, cidPromise,
-                `Getting cid for "${getCidStruct.scope}" timed out`)
-            .catch(error => {
-              const docVisible = viewer.isVisible();
-              const hasVisible = viewer.hasBeenVisible();
-              trace.message += error.message;
-              trace.message +=
-                  ` EXTRA INFO: doc isVisible: ${docVisible},` +
-                  ` doc hasBeenVisible ${hasVisible}`;
-              dev().error('CID', trace);
-              rethrowAsync(error);
-            });
-      });
+      const cidPromise = this.getExternalCid_(
+          getCidStruct, opt_persistenceConsent || consent);
+      // Getting the CID might involve an HTTP request. We timeout after 10s.
+      return Services.timerFor(this.ampdoc.win)
+          .timeoutPromise(10000, cidPromise,
+              `Getting cid for "${getCidStruct.scope}" timed out`)
+          .catch(error => {
+            rethrowAsync(error);
+          });
     });
   }
 
@@ -414,20 +401,19 @@ export function viewerBaseCid(ampdoc, opt_data) {
     }
     // TODO(lannka, #11060): clean up when all Viewers get migrated
     dev().expectedError('CID', 'Viewer does not provide cap=cid');
-    return viewer.whenNextVisible().then(() => {
-      return viewer.sendMessageAwaitResponse('cid', opt_data);
-    }).then(data => {
-      // For backward compatibility: #4029
-      if (data && !tryParseJson(data)) {
-        // TODO(lannka, #11060): clean up when all Viewers get migrated
-        dev().expectedError('CID', 'invalid cid format');
-        return JSON.stringify(dict({
-          'time': Date.now(), // CID returned from old API is always fresh
-          'cid': data,
-        }));
-      }
-      return data;
-    });
+    return viewer.sendMessageAwaitResponse('cid', opt_data)
+        .then(data => {
+          // For backward compatibility: #4029
+          if (data && !tryParseJson(data)) {
+            // TODO(lannka, #11060): clean up when all Viewers get migrated
+            dev().expectedError('CID', 'invalid cid format');
+            return JSON.stringify(dict({
+              'time': Date.now(), // CID returned from old API is always fresh
+              'cid': data,
+            }));
+          }
+          return data;
+        });
   });
 }
 
