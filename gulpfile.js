@@ -1029,7 +1029,7 @@ function buildWebPushPublisherFilesVersion(version, options) {
     var copy = Object.create(options);
     copy.watch = false;
     $$.watch(path + '/*', function() {
-      buildWebPushPublisherFiles(version, copy);
+      buildWebPushPublisherFiles(version);
     });
   }
 
