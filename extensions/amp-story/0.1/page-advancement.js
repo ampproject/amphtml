@@ -548,6 +548,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
    */
   static fromAutoAdvanceString(autoAdvanceStr, win, rootEl) {
     try {
+      //TODO: get audio elements too
       const element = scopedQuerySelector(rootEl, 'amp-video');
 
       if (!element) {

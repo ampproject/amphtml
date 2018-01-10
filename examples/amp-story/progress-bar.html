@@ -29,14 +29,21 @@
   <body>
     <amp-story standalone bookend-config-src="bookend.json">
 
-      <amp-story-page id="cover" auto-advance-after="3s">
+      <amp-story-page id="cover">
         <amp-story-grid-layer template="vertical">
-          <h1>Media Page with bookend</h1>
-          <p>This is the cover page.</p>
+          <h1>Progress Bar examples with bookend</h1>
+          <p>This is the cover page. It does not have auto-advance enabled</p>
         </amp-story-grid-layer>
       </amp-story-page>
 
-      <amp-story-page id="page-1">
+      <amp-story-page id="page-1" auto-advance-after="4s">
+        <amp-story-grid-layer template="vertical">
+          <h1>Auto advance page</h1>
+          <p>This page has auto-advance enabled</p>
+        </amp-story-grid-layer>
+      </amp-story-page>
+
+      <amp-story-page id="page-2">
         <amp-story-grid-layer template="vertical">
           <h1>Short version of video</h1>
           <amp-video
@@ -49,7 +56,7 @@
         </amp-story-grid-layer>
       </amp-story-page>
 
-      <amp-story-page id="page-2">
+      <amp-story-page id="page-3">
         <amp-story-grid-layer template="vertical">
           <h1>Full length video</h1>
           <amp-video
@@ -77,10 +84,10 @@
         </amp-story-grid-layer>
       </amp-story-page> -->
 
-      <amp-story-page id="page-3">
+      <amp-story-page id="page-4">
         <amp-story-grid-layer template="vertical">
-          <h1>Third Page</h1>
-          <p>This is the third page of this story.</p>
+          <h1>Fourth Page</h1>
+          <p>This is the fourth page of this story.</p>
         </amp-story-grid-layer>
       </amp-story-page>
     </amp-story>
