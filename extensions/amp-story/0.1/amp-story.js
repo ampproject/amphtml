@@ -706,7 +706,7 @@ export class AmpStory extends AMP.BaseElement {
       this.preloadPagesByDistance_();
 
       this.reapplyMuting_();
-      this.forceRepaintForSafari_()
+      this.forceRepaintForSafari_();
     });
   }
 
