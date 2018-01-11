@@ -16,6 +16,7 @@ before_install:
   - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
   - sudo dpkg -i google-chrome*.deb
   - yarn global add greenkeeper-lockfile@1
+  - export PATH=$PATH:`yarn global bin`
 before_script:
   - pip install --user protobuf
   - gem install percy-capybara phantomjs poltergeist
