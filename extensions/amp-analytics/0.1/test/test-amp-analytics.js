@@ -250,13 +250,44 @@ describes.realWin('amp-analytics', {
     }
   });
 
-  it('preload script', function() {
+  it('does not unnecessarily preload iframe transport script', function() {
     const el = doc.createElement('amp-analytics');
     doc.body.appendChild(el);
     const analytics = new AmpAnalytics(el);
     analytics.buildCallback();
     analytics.preconnectCallback();
-    return Promise.resolve().then(() => {
+    return analytics.layoutCallback().then(() => {
+      const preloads = doc.querySelectorAll('link[rel=preload]');
+      expect(preloads).to.have.length(0);
+    });
+  });
+
+  it('preloads iframe transport script if relevant', function() {
+    const el = doc.createElement('amp-analytics');
+    el.setAttribute('type', 'foo');
+    doc.body.appendChild(el);
+    const analytics = new AmpAnalytics(el);
+    analytics.predefinedConfig_['foo'] = {
+      'transport': {
+        'iframe': 'https://www.google.com'
+      },
+      'triggers': {
+        'sample_visibility_trigger': {
+          'on': 'visible',
+          'request': 'sample_visibility_request',
+        },
+      },
+      'requests': {
+        'sample_visibility_request': 'hi',
+      },
+    };
+    analytics.buildCallback();
+    analytics.preconnectCallback();
+    debugger;
+    return analytics.layoutCallback().catch((err) => {
+      // Hitting this error is expected. But that happens after the preload
+      // should happen, and that is what we care about.
+      expect(err.message).to.match(/No friendly amp-ad ancestor element/);
       const preloads = doc.querySelectorAll('link[rel=preload]');
       expect(preloads).to.have.length(1);
       expect(preloads[0]).to.have.property(
