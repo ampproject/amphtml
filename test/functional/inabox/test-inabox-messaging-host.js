@@ -303,6 +303,21 @@ describes.realWin('inabox-host:messaging', {}, env => {
   }
 
   describe('getMeasureableFrame', () => {
+    it('should return correct frame when many iframes at same level', () => {
+      const source = createNestedIframeMocks(6,3).source;
+      const expectedMeasureableWin = source.parent.parent;
+      const correctFrame =
+            expectedMeasureableWin.parent.document.querySelectorAll()[0];
+      expectedMeasureableWin.parent.document.querySelectorAll = () => {
+        const f1 = {};
+        const f2 = {};
+        const f3 = {};
+        return [f1, f2, correctFrame, f3];
+      };
+      expect(host.getMeasureableFrame(source).contentWindow).to.deep.equal(
+          expectedMeasureableWin);
+    });
+
     it('should return correct frame multiple level of xdomain', () => {
       const source = createNestedIframeMocks(6,3).source;
       const expectedMeasurableWin = source.parent.parent;

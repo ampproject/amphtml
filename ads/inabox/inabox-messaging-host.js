@@ -261,17 +261,16 @@ export class InaboxMessagingHost {
    * For when win is friendly framed, returns the frame element for win.
    * @param {!Window} win
    * @return {?Element}
+   * @visibleForTesting
    */
   getMeasureableFrame(win) {
     let measureableWin;
-    let measureableFrame = win.frameElement;
-    for (let j = 0, tempWin = win; j < 5 && tempWin != tempWin.top;
+    for (let j = 0, tempWin = win; j < 10 && tempWin != tempWin.top;
       j++, tempWin = tempWin.parent) {
-      if (!canInspectWindow(tempWin)) {
-        measureableWin = tempWin;
-      } else {
+      if (canInspectWindow(tempWin)) {
         break;
       }
+      measureableWin = tempWin;
     }
     if (!!measureableWin) {
       const parent = measureableWin.parent;
@@ -279,11 +278,11 @@ export class InaboxMessagingHost {
       for (let k = 0, frame = iframes[k]; k < iframes.length;
         k++, frame = iframes[k]) {
         if (frame.contentWindow == measureableWin) {
-          measureableFrame = frame;
+          return frame;
         }
       }
     }
-    return measureableFrame;
+    return win.frameElement;
   }
 }
 
@@ -293,6 +292,7 @@ export class InaboxMessagingHost {
  * from the perspective of the current window.
  * @param {Window} win
  * @return {boolean}
+ * @private
  */
 function canInspectWindow(win) {
   try {
