@@ -269,7 +269,7 @@ describes.realWin('amp-analytics', {
     const analytics = new AmpAnalytics(el);
     analytics.predefinedConfig_['foo'] = {
       'transport': {
-        'iframe': 'https://www.google.com'
+        'iframe': 'https://www.google.com',
       },
       'triggers': {
         'sample_visibility_trigger': {
@@ -283,7 +283,7 @@ describes.realWin('amp-analytics', {
     };
     analytics.buildCallback();
     analytics.preconnectCallback();
-    return analytics.layoutCallback().catch((err) => {
+    return analytics.layoutCallback().catch(err => {
       // Hitting this error is expected. But that happens after the preload
       // should happen, and that is what we care about.
       expect(err.message).to.match(/No friendly amp-ad ancestor element/);
