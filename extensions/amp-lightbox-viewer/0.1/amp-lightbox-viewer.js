@@ -34,6 +34,8 @@ import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
 import {debounce} from '../../../src/utils/rate-limit';
+import {CommonSignals} from '../../../src/common-signals';
+
 
 /** @const */
 const TAG = 'amp-lightbox-viewer';
@@ -81,9 +83,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {?../../../src/service/resources-impl.Resources} */
-    this.resources_ = null;
 
     /** @private {!boolean} */
     this.active_ = false;
@@ -160,7 +159,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         `Experiment ${TAG} disabled`);
     this.manager_ = dev().assert(manager_);
     this.vsync_ = this.getVsync();
-    this.resources_ = Services.resourcesForDoc(this.getAmpDoc());
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.whenFirstVisible().then(() => {
       this.container_ = this.win.document.createElement('div');
@@ -638,7 +636,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       this.setupGestures_();
       this.setupEventListeners_();
 
-      return this.resources_.requireLayout(dev().assertElement(this.carousel_));
+      return this.carousel_.signals().whenSignal(CommonSignals.LOAD_END);
     }).then(() => this.openLightboxForElement_(element));
   }
 
