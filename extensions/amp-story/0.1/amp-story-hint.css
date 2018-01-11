@@ -70,7 +70,7 @@
 }
 
 .show-first-page-overlay .i-amphtml-story-hint-placeholder {
-  display: none;
+  display: none !important;
 }
 
 .next-page {
