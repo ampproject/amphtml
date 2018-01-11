@@ -245,8 +245,8 @@ export class GlobalVariableSource extends VariableSource {
       return clientIds[dev().assertString(scope)];
     }, (scope, opt_userNotificationId, opt_cookieName) => {
       user().assertString(scope,
-          'The first argument to CLIENT_ID, the fallback c' +
-          /*OK*/'ookie name, is required');
+          'The first argument to CLIENT_ID, the fallback' +
+          /*OK*/' Cookie name, is required');
       let consent = Promise.resolve();
 
       // If no `opt_userNotificationId` argument is provided then
@@ -808,10 +808,9 @@ export class UrlReplacements {
     const requestedReplacements = {};
     whitelist.trim().split(/\s+/).forEach(replacement => {
       if (!opt_supportedReplacement ||
-          (opt_supportedReplacement &&
-           opt_supportedReplacement.hasOwnProperty(replacement))) {
+          opt_supportedReplacement.hasOwnProperty(replacement)) {
         requestedReplacements[replacement] = true;
-      } else if (opt_supportedReplacement) {
+      } else {
         user().warn('URL', 'Ignoring unsupported replacement', replacement);
       }
     });

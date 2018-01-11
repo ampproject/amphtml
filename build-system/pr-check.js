@@ -24,6 +24,7 @@
  * This script attempts to introduce some granularity for our
  * presubmit checking, via the determineBuildTargets method.
  */
+const argv = require('minimist')(process.argv.slice(2));
 const atob = require('atob');
 const execOrDie = require('./exec').execOrDie;
 const getStdout = require('./exec').getStdout;
@@ -272,21 +273,42 @@ const command = {
     timedExecOrDie('gulp check-types');
   },
   runUnitTests: function() {
+    let cmd = 'gulp test --unit --nobuild';
+    if (argv.files) {
+      cmd = cmd + ' --files ' + argv.files;
+    }
     // Unit tests with Travis' default chromium
-    timedExecOrDie('gulp test --unit --nobuild');
-    // A subset of unit tests on other browsers via sauce labs
-    timedExecOrDie('gulp test --unit --nobuild --saucelabs_lite');
+    timedExecOrDie(cmd);
+    if (!!process.env.SAUCE_USERNAME && !!process.env.SAUCE_ACCESS_KEY) {
+      // A subset of unit tests on other browsers via sauce labs
+      cmd = cmd + ' --saucelabs_lite';
+      timedExecOrDie(cmd);
+    }
   },
   runIntegrationTests: function(compiled) {
-    // Integration tests with all saucelabs browsers
-    let cmd = 'gulp test --nobuild --saucelabs --integration';
+    // Integration tests on chrome, or on all saucelabs browsers if set up
+    let cmd = 'gulp test --nobuild --integration';
+    if (argv.files) {
+      cmd = cmd + ' --files ' + argv.files;
+    }
     if (compiled) {
       cmd += ' --compiled';
+    }
+    if (!!process.env.SAUCE_USERNAME && !!process.env.SAUCE_ACCESS_KEY) {
+      cmd += ' --saucelabs';
     }
     timedExecOrDie(cmd);
   },
   runVisualDiffTests: function(opt_mode) {
-    process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
+    if (process.env.TRAVIS) {
+      process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
+    } else if (!process.env.PERCY_PROJECT || !process.env.PERCY_TOKEN) {
+      console.log(
+          '\n' + fileLogPrefix, 'Could not find environment variables',
+          util.colors.cyan('PERCY_PROJECT'), 'and',
+          util.colors.cyan('PERCY_TOKEN') + '. Skipping visual diff tests.');
+      return;
+    }
     let cmd = 'gulp visual-diff';
     if (opt_mode === 'skip') {
       cmd += ' --skip';
@@ -296,6 +318,14 @@ const command = {
     timedExecOrDie(cmd);
   },
   verifyVisualDiffTests: function() {
+    if (!process.env.PERCY_PROJECT || !process.env.PERCY_TOKEN) {
+      console.log(
+          '\n' + fileLogPrefix, 'Could not find environment variables',
+          util.colors.cyan('PERCY_PROJECT'), 'and',
+          util.colors.cyan('PERCY_TOKEN') +
+          '. Skipping verification of visual diff tests.');
+      return;
+    }
     timedExecOrDie('gulp visual-diff --verify');
   },
   runPresubmitTests: function() {
@@ -328,9 +358,35 @@ function runAllCommands() {
   if (process.env.BUILD_SHARD == 'integration_tests') {
     command.cleanBuild();
     command.buildRuntimeMinified();
-    command.runPresubmitTests(); // Needs runtime to be built and served.
+    command.runPresubmitTests();
     command.runIntegrationTests(/* compiled */ true);
   }
+}
+
+function runAllCommandsLocally() {
+  // These tasks don't need a build. Run them first and fail early.
+  command.testBuildSystem();
+  command.runLintCheck();
+  command.runJsonCheck();
+  command.runDepAndTypeChecks();
+  command.testDocumentLinks();
+
+  // Build if required.
+  if (!argv.nobuild) {
+    command.cleanBuild();
+    command.buildRuntime();
+  }
+
+  // These tests need a build.
+  command.runPresubmitTests();
+  command.runVisualDiffTests();
+  command.runUnitTests();
+  command.runIntegrationTests(/* compiled */ false);
+  command.verifyVisualDiffTests();
+
+  // Validator tests.
+  command.buildValidatorWebUI();
+  command.buildValidator();
 }
 
 /**
@@ -340,6 +396,15 @@ function runAllCommands() {
  */
 function main() {
   const startTime = startTimer('pr-check.js');
+
+  // Run the local version of all tests.
+  if (!process.env.TRAVIS) {
+    console.log(fileLogPrefix, 'Running all pr-check commands locally.');
+    runAllCommandsLocally();
+    stopTimer('pr-check.js', startTime);
+    return 0;
+  }
+
   console.log(
       fileLogPrefix, 'Running build shard',
       util.colors.cyan(process.env.BUILD_SHARD),
