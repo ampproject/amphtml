@@ -416,6 +416,17 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       expect(validatedRtcConfig).to.deep.equal(rtcConfig);
     });
 
+    it('should stringify objects given as macro values', () => {
+      const rtcConfig = {
+        'vendors': {'fakeVendor': {'SLOT_ID': {'key': 'value'}}}};
+      setRtcConfig(rtcConfig);
+      validatedRtcConfig = validateRtcConfig_(element);
+      expect(validatedRtcConfig).to.be.ok;
+      expect(validatedRtcConfig).to.not.deep.equal(rtcConfig);
+      expect(validatedRtcConfig['vendors']['fakeVendor']['SLOT_ID']
+      ).to.equal('{"key":"value"}');
+    });
+
     it('should allow timeout of 0', () => {
       const rtcConfig = {
         'vendors': {'fakeVendor': {'SLOT_ID': '1', 'PAGE_ID': '1'},

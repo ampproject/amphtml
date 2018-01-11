@@ -283,6 +283,15 @@ export function validateRtcConfig_(element) {
     return null;
   }
 
+  const vendors = rtcConfig['vendors'] || {};
+  Object.keys(vendors).forEach(vendor => {
+    Object.keys(vendors[vendor]).forEach(key => {
+      if (isObject(vendors[vendor][key])) {
+        vendors[vendor][key] = JSON.stringify(vendors[vendor][key]);
+      }
+    });
+  });
+
   rtcConfig['timeoutMillis'] = timeout !== undefined ?
     timeout : defaultTimeoutMillis;
   return rtcConfig;
