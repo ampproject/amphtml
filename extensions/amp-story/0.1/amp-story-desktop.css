@@ -88,12 +88,11 @@ amp-story[standalone][desktop] {
   border-radius: 16px!important;
 }
 
-amp-story-page.i-amphtml-story-page-shown {
-  transition: none!important;
-}
-
-[desktop] amp-story-page.i-amphtml-story-page-shown {
-  transition: opacity 300ms linear, transform 300ms cubic-bezier(0.4, 0.0, 0.2, 1)!important;
+[desktop] amp-story-page[distance="0"],
+[desktop] amp-story-page[distance="1"] {
+  /* TODO(alanorozco): Enable transition for distance = 2.
+   * For some reason, enabling it breaks layout scheduling. */
+  transition: opacity 300ms linear, transform 300ms cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
 
 [desktop] .i-amphtml-story-button-container {
