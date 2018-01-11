@@ -207,7 +207,9 @@ export class AmpBysidePlaceholder extends AMP.BaseElement {
       'opacity': 0,
     });
 
-    this.generateSrcUrl_().then(src => {
+    const self = this;
+
+    return this.generateSrcUrl_().then(src => {
       this.iframeSrc_ = src;
       iframe.src = this.iframeSrc_;
 
@@ -217,17 +219,19 @@ export class AmpBysidePlaceholder extends AMP.BaseElement {
 
       this.applyFillContent(iframe);
       this.element.appendChild(iframe);
-    });
+    }).then(resolve => {
+      this.iframePromise_ = this.loadPromise(iframe).then(() => {
+        this.getVsync().mutate(() => {
+          setStyles(iframe, {
+            'opacity': 1,
+            'width': width + 'px',
+            'height': height + 'px',
+		  });
 
-    return this.iframePromise_ = this.loadPromise(iframe).then(() => {
-      this.getVsync().mutate(() => {
-        setStyles(iframe, {
-          'opacity': 1,
-          'width': width + 'px',
-          'height': height + 'px',
+		  resolve();
         });
       });
-    });
+    }).then(() => self);
   }
 
   /** @private */
@@ -334,4 +338,6 @@ export class AmpBysidePlaceholder extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-byside-placeholder', AmpBysidePlaceholder);
+AMP.extension('amp-byside-placeholder', '0.1', AMP => {
+  AMP.registerElement('amp-byside-placeholder', AmpBysidePlaceholder);
+});

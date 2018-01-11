@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpBysidePlaceholder} from '../amp-byside-placeholder';
+import '../amp-byside-placeholder';
 
 describes.realWin('amp-byside-placeholder', {
   amp: {
@@ -28,39 +28,48 @@ describes.realWin('amp-byside-placeholder', {
     doc = win.document;
   });
 
-  function getElement(data, opts) {
+  function getElement(data, attr) {
     const elem = doc.createElement('amp-byside-placeholder');
     elem.setAttribute('data-label', data.label || '');
+    if (attr.label) {
+      elem.setAttribute('label', attr.label);
+    }
     elem.setAttribute('data-webcareId', data.webcareId || '');
-    elem.setAttribute('width', '111');
-    elem.setAttribute('height', '222');
-    elem.setAttribute('alt', 'Testing BySide Placeholder');
+    if (attr.webcareId) {
+      elem.setAttribute('webcareId', attr.webcareId);
+    }
+    elem.setAttribute('width', attr.width || '111');
+    elem.setAttribute('height', attr.height || '222');
+    elem.setAttribute('alt', attr.alt || 'Testing BySide Placeholder');
+
+    if (attr.resizable) {
+      elem.setAttribute('resizable');
+    }
 
     doc.body.appendChild(elem);
-    return elem.build().then(() => {
-      return elem.layoutCallback();
-    }).then(() => elem);
-  }
 
-  function testIframe(iframe, elem, data) {
-    expect(iframe).to.not.be.null;
-    expect(iframe.src).to.startsWith(elem.baseURL_);
+    return elem.build().then(() => elem.layoutCallback()).then(() => elem);
   }
 
   it('renders', () => {
-    const data = {label: 'amp', webcareId: 'F15B000CB5'};
+    const data = {label: 'amp-simple', webcareId: 'D6604AE5D0'};
     const attr = {};
 
     return getElement(data, attr).then(elem => {
-      testIframe(elem.querySelector('iframe'), elem, data);
+      const iframe = elem.querySelector('iframe');
+
+      expect(iframe).to.not.be.null;
+      expect(iframe.fakeSrc).to.satisfy(src => {
+        return src.startsWith(elem.implementation_.baseUrl_);
+      });
     });
   });
 
   it('requires data-label', () => {
-    const data = {webcareId: 'xxxx'};
+    const data = {webcareId: 'D6604AE5D0'};
     const attr = {};
 
-    expect(getElement(data, attr)).to.be.rejectedWith(
+    expect(getElement(data, attr)).to.eventually.be.rejectedWith(
         /The data-label attribute is required for/);
   });
 
@@ -68,7 +77,33 @@ describes.realWin('amp-byside-placeholder', {
     const data = {label: 'placholder-label'};
     const attr = {};
 
-    expect(getElement(data, attr)).to.be.rejectedWith(
+    expect(getElement(data, attr)).to.eventually.be.rejectedWith(
         /The data-webcareId attribute is required for/);
+  });
+
+  it('generates correct default origin', () => {
+    const data = {
+      label: 'placholder-label',
+      webcareId: 'xxxx',
+    };
+    const attr = {};
+
+    expect(getElement(data, attr)).to.eventually.satisfy(function(elem) {
+      return elem.implementation_.origin_ === 'https://webcare.byside.com';
+    });
+  });
+
+  it('generates correct provided agent domain', () => {
+    const agentDomain = 'sa1';
+    const data = {
+      label: 'placholder-label',
+      webcareId: 'xxxx',
+      agentDomain,
+    };
+    const attr = {};
+
+    expect(getElement(data, attr)).to.eventually.satisfy(function(elem) {
+      return elem.implementation_.origin_ === 'https://' + agentDomain + '.byside.com';
+    });
   });
 });
