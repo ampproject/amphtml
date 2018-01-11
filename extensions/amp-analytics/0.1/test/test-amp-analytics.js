@@ -280,7 +280,7 @@ describes.realWin('amp-analytics', {
         },
       },
       'requests': {
-        'sample_visibility_request': 'fake_request',
+        'sample_visibility_request': 'fake-request',
       },
     };
     analytics.buildCallback();
