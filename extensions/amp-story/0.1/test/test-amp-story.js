@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {AnalyticsTrigger} from '../analytics';
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
 import {EventType} from '../events';
 import {KeyCodes} from '../../../../src/utils/key-codes';
 import {PaginationButtons} from '../pagination-buttons';
 import {Services} from '../../../../src/services';
-import {VariableService} from '../variable-service';
 
 
 const NOOP = () => {};
@@ -106,16 +104,16 @@ describes.realWin('amp-story', {
           // Getting all the AmpStoryPage objets.
           const pageElements =
               story.element.getElementsByTagName('amp-story-page');
-          const pages = Array.from(pageElements).map((el) => el.getImpl());
+          const pages = Array.from(pageElements).map(el => el.getImpl());
 
           return Promise.all(pages);
         })
-        .then((pages) => {
+        .then(pages => {
           // Only the first page should be active.
           for (let i = 0; i < pages.length; i++) {
             i === 0 ?
-                expect(pages[i].isActive()).to.be.true :
-                expect(pages[i].isActive()).to.be.false;
+              expect(pages[i].isActive()).to.be.true :
+              expect(pages[i].isActive()).to.be.false;
           }
         });
   });
@@ -140,11 +138,11 @@ describes.realWin('amp-story', {
     story.element.setAttribute('bookend-config-src', bookendUrl);
 
     const fakeBookendElement = win.document.createElement('div');
-    sinon.stub(story.bookend_, 'build').returns(fakeBookendElement);
-    sinon.stub(story.bookend_, 'getRoot').returns(fakeBookendElement);
+    sandbox.stub(story.bookend_, 'build').returns(fakeBookendElement);
+    sandbox.stub(story.bookend_, 'getRoot').returns(fakeBookendElement);
 
     const xhr = Services.xhrFor(win);
-    fetchJsonStub = sandbox.stub(xhr, 'fetchJson');
+    const fetchJsonStub = sandbox.stub(xhr, 'fetchJson');
 
     return story.layoutCallback()
         .then(() => {
@@ -158,10 +156,10 @@ describes.realWin('amp-story', {
     createPages(story.element, 1, ['cover']);
     const fakeBookendElement = win.document.createElement('div');
     const buildBookendStub =
-        sinon.stub(story.bookend_, 'build').returns(fakeBookendElement);
-    sinon.stub(story.bookend_, 'getRoot').returns(fakeBookendElement);
+        sandbox.stub(story.bookend_, 'build').returns(fakeBookendElement);
+    sandbox.stub(story.bookend_, 'getRoot').returns(fakeBookendElement);
 
-    const appendChildSpy = sinon.spy(story.element, 'appendChild');
+    const appendChildSpy = sandbox.spy(story.element, 'appendChild');
 
     return story.layoutCallback()
         .then(() => {
@@ -174,11 +172,11 @@ describes.realWin('amp-story', {
     createPages(story.element, 1, ['cover']);
 
     const fakeBookendElement = win.document.createElement('div');
-    sinon.stub(story.bookend_, 'build').returns(fakeBookendElement);
-    sinon.stub(story.bookend_, 'getRoot').returns(fakeBookendElement);
+    sandbox.stub(story.bookend_, 'build').returns(fakeBookendElement);
+    sandbox.stub(story.bookend_, 'getRoot').returns(fakeBookendElement);
 
     const xhr = Services.xhrFor(win);
-    fetchJsonStub = sandbox.stub(xhr, 'fetchJson');
+    const fetchJsonStub = sandbox.stub(xhr, 'fetchJson');
 
     return story.layoutCallback()
         .then(() => {
@@ -191,7 +189,7 @@ describes.realWin('amp-story', {
     story.element.setAttribute('bookend-config-src', 'foo.com');
 
     const xhr = Services.xhrFor(win);
-    fetchJsonStub = sandbox.stub(xhr, 'fetchJson');
+    const fetchJsonStub = sandbox.stub(xhr, 'fetchJson');
 
     return story.layoutCallback()
         .then(() => {

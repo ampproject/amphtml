@@ -1099,7 +1099,12 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   maybePreloadBookend_() {
+    if (!this.activePage_) {
+      return;
+    }
+
     const pageIndex = this.getPageIndex(this.activePage_);
+
     if (pageIndex + 1 >= this.getPageCount()) {
       this.buildBookend_();
     }
