@@ -278,15 +278,13 @@ describes.realWin('amp-analytics', {
         },
       },
       'requests': {
-        'sample_visibility_request': 'hi',
+        'sample_visibility_request': 'fake_request',
       },
     };
     analytics.buildCallback();
     analytics.preconnectCallback();
-    return analytics.layoutCallback().catch(err => {
-      // Hitting this error is expected. But that happens after the preload
-      // should happen, and that is what we care about.
-      expect(err.message).to.match(/No friendly amp-ad ancestor element/);
+    sandbox.stub(analytics, 'assertAmpAdResourceId').callsFake(() => 'fakeId');
+    return analytics.layoutCallback().then(() => {
       const preloads = doc.querySelectorAll('link[rel=preload]');
       expect(preloads).to.have.length(1);
       expect(preloads[0]).to.have.property(

@@ -333,17 +333,27 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     const url = getIframeTransportScriptUrl(this.getAmpDoc().win);
     this.preconnect.preload(url, 'script');
-    const TAG = this.getName_();
-    const ampAdResourceId = user().assertString(
-        getAmpAdResourceId(this.element, getTopWindow(this.win)),
-        `${TAG}: No friendly amp-ad ancestor element was found for ` +
-        'amp-analytics tag with iframe transport.');
+    const ampAdResourceId = this.assertAmpAdResourceId();
 
     this.iframeTransport_ = new IframeTransport(
         // Create  3p transport frame within creative frame if inabox.
         this.isInabox_ ? this.win : this.getAmpDoc().win,
         this.element.getAttribute('type'),
         this.config_['transport'], ampAdResourceId);
+  }
+
+  /**
+   * Gets the resourceID of the parent amp-ad element.
+   * Throws an exception if no such element.
+   * @returns {string}
+   * @VisibleForTesting
+   */
+  assertAmpAdResourceId() {
+    const TAG = this.getName_();
+    return user().assertString(
+        getAmpAdResourceId(this.element, getTopWindow(this.win)),
+        `${TAG}: No friendly amp-ad ancestor element was found for ` +
+        'amp-analytics tag with iframe transport.');
   }
 
   /**
