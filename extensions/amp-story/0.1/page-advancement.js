@@ -28,6 +28,11 @@ const NEXT_SCREEN_AREA_RATIO = 0.75;
 /** @const {number} */
 const POLL_INTERVAL_MS = 250;
 
+/** @const @enum */
+export const TapNavigationDirection = {
+  'NEXT': 1,
+  'PREVIOUS': 2,
+};
 
 /**
  * Base class for the AdvancementConfig.  By default, does nothing other than
@@ -44,6 +49,9 @@ export class AdvancementConfig {
 
     /** @private @const {!Array<function()>} */
     this.previousListeners_ = [];
+
+    /** @private @const {!Array<function(number)>} */
+    this.tapNavigationListeners_ = [];
 
     /** @private {boolean} */
     this.isRunning_ = false;
@@ -73,6 +81,14 @@ export class AdvancementConfig {
    */
   addPreviousListener(previousListener) {
     this.previousListeners_.push(previousListener);
+  }
+
+  /**
+   * @param {function(number)} onTapNavigationListener A function that handles when a
+   * navigation listener to be fired.
+   */
+  addOnTapNavigationListener(onTapNavigationListener) {
+    this.tapNavigationListeners_.push(onTapNavigationListener);
   }
 
   /**
@@ -128,6 +144,16 @@ export class AdvancementConfig {
   }
 
   /**
+   * @param {number} navigationDirection Direction of navigation
+   * @protected
+   */
+  onNavigate(navigationDirection) {
+    this.tapNavigationListeners_.forEach(navigationListener => {
+      navigationListener(navigationDirection);
+    });
+  }
+
+  /**
    * Provides an AdvancementConfig object for the specified amp-story-page.
    * @param {!./amp-story-page.AmpStoryPage} page
    * @return {!AdvancementConfig}
@@ -138,7 +164,7 @@ export class AdvancementConfig {
     const autoAdvanceStr = rootEl.getAttribute('auto-advance-after');
 
     const supportedAdvancementModes = [
-      new ManualAdvancement(page),
+      new ManualAdvancement(rootEl),
       TimeBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win),
       MediaBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
     ].filter(x => x !== null);
@@ -219,13 +245,12 @@ class MultipleAdvancementConfig extends AdvancementConfig {
  */
 class ManualAdvancement extends AdvancementConfig {
   /**
-   * @param {!./amp-story-page.AmpStoryPage} page The page that, when clicked, can cause
+   * @param {!Element} element The element that, when clicked, can cause
    *     advancing to the next page or going back to the previous.
    */
-  constructor(page) {
+  constructor(element) {
     super();
-    this.page_ = page;
-    this.element_ = page.element;
+    this.element_ = element;
     this.clickListener_ = this.maybePerformNavigation_.bind(this);
   }
 
@@ -287,11 +312,10 @@ class ManualAdvancement extends AdvancementConfig {
         ((1 - NEXT_SCREEN_AREA_RATIO) * offsetWidth);
     const nextScreenAreaMax = offsetLeft + offsetWidth;
 
-    if ((event.pageX >= nextScreenAreaMin && event.pageX < nextScreenAreaMax)
-        || (this.page_.isDesktop())) {
-      this.onAdvance();
+    if (event.pageX >= nextScreenAreaMin && event.pageX < nextScreenAreaMax) {
+      this.onNavigate(NAVIGATION_DIRECTION.NEXT);
     } else if (event.pageX >= offsetLeft && event.pageX < nextScreenAreaMin) {
-      this.onPrevious();
+      this.onNavigate(NAVIGATION_DIRECTION.PREVIOUS);
     }
   }
 }
