@@ -450,6 +450,13 @@ class MediaBasedAdvancement extends AdvancementConfig {
   start() {
     super.start();
 
+    // Prevents race condition when checking for video interface classname.
+    (this.element_.whenBuilt ? this.element_.whenBuilt() : Promise.resolve())
+        .then(() => this.startWhenBuilt_());
+  }
+
+  /** @private */
+  startWhenBuilt_() {
     if (this.isVideoInterfaceVideo_()) {
       this.startVideoInterfaceElement_();
       return;
