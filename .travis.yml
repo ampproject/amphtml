@@ -15,9 +15,6 @@ before_install:
   - sh -e /etc/init.d/xvfb start
   - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
   - sudo dpkg -i google-chrome*.deb
-  # Set up Greenkeeper token
-  - yarn global add btoa-atob
-  - export GH_TOKEN=`echo $GREENKEEPER_TOKEN_ENCODED | atob`
   # Required due to https://github.com/greenkeeperio/greenkeeper-lockfile/issues/98#issuecomment-352087908
   - export PATH="`yarn global bin`:$PATH"
   - yarn global add greenkeeper-lockfile@1
@@ -26,6 +23,8 @@ before_script:
   - gem install percy-capybara phantomjs poltergeist
   # Poltergeist requires an absolute path to find phantomjs. See #10305.
   - export PATH="`pwd`/node_modules/.bin:$PATH"
+  # Set up a token for Greenkeeper and update the yarn lock file
+  - export GH_TOKEN=`node -e "console.log(require('atob')(process.env.GREENKEEPER_TOKEN_ENCODED))"`
   - greenkeeper-lockfile-update
 script: node build-system/pr-check.js
 after_script: greenkeeper-lockfile-upload
