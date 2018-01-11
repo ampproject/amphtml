@@ -36,6 +36,8 @@ function createDateRangePickerBase() {
     DateRangePickerShape,
   } = requireExternal('react-dates');
 
+  React.options.syncComponentUpdates = false;
+
   const propTypes = {
     // example props for the demo
     autoFocus: PropTypes.bool,
