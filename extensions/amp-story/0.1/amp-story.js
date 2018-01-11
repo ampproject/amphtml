@@ -725,9 +725,9 @@ export class AmpStory extends AMP.BaseElement {
       }
 
       this.preloadPagesByDistance_();
-
       this.reapplyMuting_();
       this.forceRepaintForSafari_();
+      this.maybePreloadBookend_();
     });
   }
 
@@ -1094,6 +1094,23 @@ export class AmpStory extends AMP.BaseElement {
   }
 
 
+  /**
+   * Preloads the bookend config if on the last page.
+   * @private
+   */
+  maybePreloadBookend_() {
+    if (!this.activePage_) {
+      return;
+    }
+
+    const pageIndex = this.getPageIndex(this.activePage_);
+
+    if (pageIndex + 1 >= this.getPageCount()) {
+      this.buildBookend_();
+    }
+  }
+
+
   /** @private */
   buildBookend_() {
     if (this.bookend_.isBuilt()) {
@@ -1101,7 +1118,6 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     this.element.appendChild(this.bookend_.build(this.getAmpDoc()));
-
     this.setAsOwner(this.bookend_.getRoot());
 
     return this.loadBookendConfig_().then(bookendConfig => {
@@ -1351,4 +1367,7 @@ export class AmpStory extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-story', AmpStory, CSS);
+
+AMP.extension('amp-story', '0.1', AMP => {
+  AMP.registerElement('amp-story', AmpStory, CSS);
+});
