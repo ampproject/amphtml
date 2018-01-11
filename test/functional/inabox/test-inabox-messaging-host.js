@@ -348,6 +348,20 @@ describes.realWin('inabox-host:messaging', {}, env => {
       ).to.deep.equal(expectedWin);
     });
 
+    it('should return correct frame when many frames registered', () => {
+      const iframeObj = createNestedIframeMocks(6);
+      const sourceMock = iframeObj.source;
+      const topWinMock = iframeObj.topWin;
+      const frameMockWrong1 = {};
+      const frameMockWrong2 = {};
+      const frameMock = topWinMock.document.querySelectorAll()[0];
+      const expectedWin = sourceMock;
+      host = new InaboxMessagingHost(
+          win, [frameMockWrong1, frameMockWrong2, frameMock]);
+      expect(host.getFrameElement_(sourceMock, sentinel).contentWindow
+      ).to.deep.equal(expectedWin);
+    });
+
     it('should return cached frame', () => {
       host.getMeasureableFrame = () => {
         throw new Error('Error!!');

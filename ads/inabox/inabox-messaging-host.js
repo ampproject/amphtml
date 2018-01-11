@@ -230,7 +230,7 @@ export class InaboxMessagingHost {
    *
    * @param source {!Window}
    * @param sentinel {string}
-   * @returns {?HTMLIFrameElement}
+   * @return {?Element}
    * @private
    */
   getFrameElement_(source, sentinel) {
@@ -248,8 +248,8 @@ export class InaboxMessagingHost {
           return measureableFrame;
         }
       }
-      return null;
     }
+    return null;
   }
 
   /**
@@ -260,10 +260,11 @@ export class InaboxMessagingHost {
    * is found. Then, it returns the frame element for that window.
    * For when win is friendly framed, returns the frame element for win.
    * @param {!Window} win
-   * @returns {!HTMLIframeElement}
+   * @return {?Element}
    */
   getMeasureableFrame(win) {
-    let measureableWin, measureableFrame;
+    let measureableWin;
+    let measureableFrame = win.frameElement;
     for (let j = 0, tempWin = win; j < 5 && tempWin != tempWin.top;
       j++, tempWin = tempWin.parent) {
       if (!canInspectWindow(tempWin)) {
@@ -281,8 +282,6 @@ export class InaboxMessagingHost {
           measureableFrame = frame;
         }
       }
-    } else {
-      measureableFrame = win.frameElement;
     }
     return measureableFrame;
   }
