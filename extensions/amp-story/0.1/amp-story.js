@@ -41,9 +41,6 @@ import {relatedArticlesFromJson} from './related-articles';
 import {ShareWidget} from './share';
 import {
   closest,
-  fullscreenEnter,
-  fullscreenExit,
-  isFullscreenElement,
   matches,
   removeElement,
   scopedQuerySelector,
@@ -84,9 +81,6 @@ const BOOKEND_CONFIG_ATTRIBUTE_NAME = 'bookend-config-src';
 
 /** @private @const {string} */
 const AMP_STORY_STANDALONE_ATTRIBUTE = 'standalone';
-
-/** @private @const {number} */
-const FULLSCREEN_THRESHOLD = 1024;
 
 /** @private @const {number} */
 const DESKTOP_WIDTH_THRESHOLD = 1024;
@@ -169,13 +163,6 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {!NavigationState} */
     this.navigationState_ =
         new NavigationState(element, () => this.hasBookend_());
-
-    /**
-     * Whether entering into fullscreen automatically on navigation is enabled.
-     * @private {boolean}
-     */
-    this.isAutoFullScreenEnabled_ =
-        isExperimentOn(this.win, 'amp-story-auto-fullscreen');
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
@@ -295,20 +282,12 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   initializeListeners_() {
-    this.element.addEventListener(EventType.EXIT_FULLSCREEN, () => {
-      this.exitFullScreen_(/* opt_explicitUserAction */ true);
-    });
-
     this.element.addEventListener(EventType.NEXT_PAGE, () => {
       this.next_();
     });
 
     this.element.addEventListener(EventType.PREVIOUS_PAGE, () => {
       this.previous_();
-    });
-
-    this.element.addEventListener(EventType.ENTER_FULLSCREEN, () => {
-      this.enterFullScreen_();
     });
 
     this.element.addEventListener(EventType.SHOW_BOOKEND, () => {
@@ -384,15 +363,6 @@ export class AmpStory extends AMP.BaseElement {
     this.win.document.addEventListener('keydown', e => {
       this.onKeyDown_(e);
     }, true);
-
-    this.win.document.addEventListener('fullscreenchange',
-        () => { this.onFullscreenChanged_(); });
-
-    this.win.document.addEventListener('webkitfullscreenchange',
-        () => { this.onFullscreenChanged_(); });
-
-    this.win.document.addEventListener('mozfullscreenchange',
-        () => { this.onFullscreenChanged_(); });
 
     this.boundOnResize_ = debounce(this.win, () => this.onResize(), 300);
     this.getViewport().onResize(this.boundOnResize_);
@@ -678,10 +648,6 @@ export class AmpStory extends AMP.BaseElement {
     const targetPage = this.getPageById_(targetPageId);
     const pageIndex = this.getPageIndex(targetPage);
 
-    if (this.shouldEnterFullScreenOnSwitch_()) {
-      this.enterFullScreen_();
-    }
-
     this.updateBackground_(targetPage.element, /* initial */ !this.activePage_);
 
     // TODO(alanorozco): decouple this using NavigationState
@@ -775,24 +741,6 @@ export class AmpStory extends AMP.BaseElement {
 
 
   /**
-   * @return {boolean}
-   * @private
-   */
-  shouldEnterFullScreenOnSwitch_() {
-    if (this.isDesktop_()) {
-      return false;
-    }
-
-    const {width, height} = this.getViewport().getSize();
-
-    const inFullScreenThreshold =
-        width <= FULLSCREEN_THRESHOLD && height <= FULLSCREEN_THRESHOLD;
-
-    return inFullScreenThreshold && this.isAutoFullScreenEnabled_;
-  }
-
-
-  /**
    * Handles all key presses within the story.
    * @param {!Event} e The keydown event.
    * @private
@@ -812,45 +760,6 @@ export class AmpStory extends AMP.BaseElement {
         break;
     }
   }
-
-
-  /**
-   * @param {boolean} isEnabled
-   */
-  setAutoFullScreen(isEnabled) {
-    this.isAutoFullScreenEnabled_ = isEnabled;
-  }
-
-
-  /** @private */
-  enterFullScreen_() {
-    fullscreenEnter(this.element);
-  }
-
-
-  /**
-   * @param {boolean=} opt_explicitUserAction
-   * @private
-   */
-  exitFullScreen_(opt_explicitUserAction) {
-    if (opt_explicitUserAction) {
-      this.setAutoFullScreen(false);
-    }
-
-    fullscreenExit(this.element);
-  }
-
-
-  /**
-   * Invoked when the document has actually transitioned into or out of
-   * fullscreen mode.
-   * @private
-   */
-  onFullscreenChanged_() {
-    const isFullscreen = isFullscreenElement(this.element);
-    this.systemLayer_.setInFullScreen(isFullscreen);
-  }
-
 
 
   /**
@@ -969,8 +878,6 @@ export class AmpStory extends AMP.BaseElement {
       this.activePage_.pauseCallback();
 
       this.toggleElementsOnBookend_(/* display */ false);
-
-      this.exitFullScreen_();
 
       this.element.classList.add('i-amphtml-story-bookend-active');
 
