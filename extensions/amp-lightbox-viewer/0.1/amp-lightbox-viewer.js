@@ -161,7 +161,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.manager_ = dev().assert(manager_);
     this.vsync_ = this.getVsync();
     this.resources_ = Services.resourcesForDoc(this.getAmpDoc());
-    this.vsync_.mutate(() => {
+    const viewer = Services.viewerForDoc(this.getAmpDoc());
+    viewer.whenFirstVisible().then(() => {
       this.container_ = this.win.document.createElement('div');
       this.container_.classList.add('i-amphtml-lbv');
       this.element.appendChild(this.container_);
