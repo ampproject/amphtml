@@ -25,6 +25,7 @@ globals.linkToAmpBgColor = "#ffffff";
 globals.linkToAmpIconPrefix = "amp-link";
 globals.linkToAmpTitle = chrome.i18n.getMessage("pageHasAmpAltTitle");
 globals.tabToUrl = {};
+globals.userAgentHeader = 'X-AMP-Validator-UA';
 globals.validAmpBgcolor = "#ffd700";
 globals.validAmpIconPrefix = "valid";
 globals.validAmpTitle = chrome.i18n.getMessage("pagePassesValidationTitle");
@@ -201,7 +202,7 @@ function updateTab(tab) {
           if (response && response.fromAmpCache && response.ampHref) {
             handleAmpCache(tab.id, response.ampHref);
           } else if (response && response.isAmp) {
-            validateUrlFromTab(tab);
+            validateUrlFromTab(tab, response.userAgent);
           } else if (response && !response.isAmp && response.ampHref) {
             handleAmpLink(tab.id, response.ampHref);
           }
@@ -256,20 +257,40 @@ function updateTabStatus(tabId, iconPrefix, title, text, color) {
  * extension's icons with pass/fail.
  *
  * @param {Tab} tab The Tab which triggered the event.
+ * @param {userAgent} string Tab's current user agent.
  */
-function validateUrlFromTab(tab) {
+function validateUrlFromTab(tab, userAgent) {
   // Verify amp and amp.validator are defined.
   if (typeof amp === 'undefined' || typeof amp.validator === 'undefined') {
     handleValidatorNotPresent(tab.id);
     return;
   }
   var xhr = new XMLHttpRequest();
-  xhr.open('GET', tab.url, true);
+  var url = tab.url.split('#')[0];
+  xhr.open('GET', url, true);
+
+  // We can't set the User-Agent header directly, but we can set this header
+  // and let the onBeforeSendHeaders handler rename it for us.
+  // Add the listener now. It'll be removed after the request is made.
+  // It's not possible to set filters on the listener to only capture our
+  // traffic, so this approach will interfere as little as possible with the
+  // 99.9% of requests which aren't for AMP validation.
+  chrome.webRequest.onBeforeSendHeaders.addListener(
+    updateSendHeadersUserAgent,
+    {urls: [url], types: ["xmlhttprequest"], tabId: -1},
+    ["requestHeaders", "blocking"]
+  );
+  // Add the temporary header to the request
+  xhr.setRequestHeader(globals.userAgentHeader, userAgent);
+
   xhr.onreadystatechange = function() {
     if (xhr.readyState === 4) {
+      // The request is complete; remove our temporary listener.
+      chrome.webRequest.onBeforeSendHeaders.removeListener(
+          updateSendHeadersUserAgent);
       const doc = xhr.responseText;
       const validationResult = amp.validator.validateString(doc);
-      window.sessionStorage.setItem(tab.url, JSON.stringify(validationResult));
+      window.sessionStorage.setItem(url, JSON.stringify(validationResult));
       if (validationResult.status == 'PASS') {
         handleAmpPass(tab.id, validationResult);
       } else {
@@ -278,6 +299,41 @@ function validateUrlFromTab(tab) {
     }
   };
   xhr.send();
+}
+
+/**
+ * Event handler which gets called for onBeforeSendHeaders
+ * (developer.chrome.com/extensions/webRequest#event-onBeforeSendHeaders) and
+ * updates the User-Agent header to the value that's been specified.
+ *
+ * @param {!Object<OnBeforeSendHeadersDetails>} details Details object as
+ *   defined by Chrome.
+ * @return {Object<HttpHeaders>} Object with HttpHeaders value
+ *   (https://developer.chrome.com/extensions/webRequest#type-HttpHeaders)
+ */
+function updateSendHeadersUserAgent(details) {
+  let newUserAgent,
+    headers = details.requestHeaders;
+  // Using var instead of let keeps the index in scope for later
+  for (var i = 0; i < headers.length; i++) {
+    if (headers[i].name === globals.userAgentHeader) {
+      // Found a header with our internal User Agent Header
+      newUserAgent = headers[i].value;
+      break;
+    }
+  }
+  if (newUserAgent) {
+    // We previously found our UA header. Delete that by the index.
+    headers.splice(i, 1);
+    // And then update the actual User-Agent header
+    for (i = 0; i < headers.length; i++) {
+      if (headers[i].name == 'User-Agent') {
+        headers[i].value = newUserAgent;
+        break;
+      }
+    }
+    return {requestHeaders: headers};
+  }
 }
 
 /**
