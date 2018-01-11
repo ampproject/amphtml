@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "__MSG_extensionName__",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAg4Hh0CWPCdY5pfyjgk3ORL0jyKNCrnI6jP/wG7ljiCm/T9ndy7soTWYC+uICXJqcKnen2v5G1GZPexsffRY4BesQyZJy3zu0ctrwe2NHcxlZLcN8iEGDK65DHPO2LZyS2xF13Z2vxsYWqZIDNEdpmaDyEg1s5oRPWqVe4M2OxYwxiFdKNpVx5/MTEG3yZEIL4lmVAYzgS1V/oWyCogEqWBOOPYzl5DXtLb9muo84gvbRXhvM4yZ6nwA5OZiWgeQvHZG2i99X2iqZALwgc9YL4DqeGKmmL+fpL9w89qowdKmlx9fLtjQO9cf39rfPGt7cDfWTewuYox8dROfp6tuf6wIDAQAB",
   "default_locale": "en",
   "description": "__MSG_extensionDescription__",
@@ -30,6 +30,9 @@
   "homepage_url": "https://www.ampproject.org",
   "permissions": [
     "tabs",
+    "webRequest",
+    "webRequestBlocking",
+    "*://*/",
     "<all_urls>"
   ]
 }

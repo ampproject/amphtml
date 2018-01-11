@@ -211,7 +211,7 @@ limitations under the License.
           },
         });
         function processTab(tabs, toolbar, content) {
-          var url = tabs[0].url;
+          var url = tabs[0].url.split('#')[0];
           var validationResult;
           chrome.runtime.getBackgroundPage(function(backgroundPage) {
             validationResult =
