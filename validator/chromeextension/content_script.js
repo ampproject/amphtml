@@ -111,6 +111,8 @@ function isAmpDocument() {
  * - fromAmpCache: Is the page from an AMP Cache.
  * - ampHref: the href to an AMP page if the page is not an AMP page but there
  *   is an <link rel="amphtml"> or if the page is from an AMP Cache.
+ * - userAgent: Tab's current userAgent, which may have been modified by
+ *   device emulation.
  *
  * Requests for loadAmp and has ampHref, then redirects the browser to ampHref.
  */
@@ -123,6 +125,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (fromAmpCache) ampHref = getAmpCacheHref();
     sendResponse({
       'isAmp': isAmp, 'fromAmpCache': fromAmpCache, 'ampHref': ampHref,
+      'userAgent': navigator.userAgent,
     });
   }
   if (request.loadAmp && request.ampHref) {
