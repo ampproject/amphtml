@@ -268,7 +268,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
     for (let i = 1; i < depth; i++) {
       const win = {
         top: topWin,
-        parent: parent,
+        parent,
         location: {
           href: `www.${i}.com`,
         },
@@ -279,8 +279,8 @@ describes.realWin('inabox-host:messaging', {}, env => {
             contentWindow: win,
           };
           return [frame];
-        }
-      }
+        },
+      };
       if (depth - i <= numXDomain) {
         breakCanInspectWindowForWindow(win);
       } else {
@@ -290,34 +290,34 @@ describes.realWin('inabox-host:messaging', {}, env => {
       }
       parent = win;
     }
-    return parent;
+    return {source: parent, topWin};
   }
 
   function breakCanInspectWindowForWindow(win) {
     Object.defineProperty(win['location'], 'href', {
-      get: () => {throw new Error('Error!!')}
+      get: () => {throw new Error('Error!!');},
     });
     Object.defineProperty(win, 'test', {
-      get: () => {throw new Error('Error!!')},
+      get: () => {throw new Error('Error!!');},
     });
   }
 
   describe('getMeasureableFrame', () => {
     it('should return correct frame multiple level of xdomain', () => {
-      const source = createNestedIframeMocks(6,3);
+      const source = createNestedIframeMocks(6,3).source;
       const expectedMeasurableWin = source.parent.parent;
       expect(host.getMeasureableFrame(source).contentWindow).to.deep.equal(
           expectedMeasurableWin);
     });
 
     it('should return correct frame for single xdomain frame', () => {
-      const source = createNestedIframeMocks(10,1);
+      const source = createNestedIframeMocks(10,1).source;
       expect(host.getMeasureableFrame(source).contentWindow).to.deep.equal(
           source);
     });
 
     it('should return correct frame for no xdomain frames', () => {
-      const source = createNestedIframeMocks(5);
+      const source = createNestedIframeMocks(5).source;
       expect(host.getMeasureableFrame(source).contentWindow).to.deep.equal(
           source);
     });
@@ -327,54 +327,51 @@ describes.realWin('inabox-host:messaging', {}, env => {
     const sentinel = '123456789101112';
 
     it('should return correct frame when intermediate xdomain frames', () => {
-      const source = createNestedIframeMocks(6,3)
-      const expectedWin = source.parent.parent;
-      expect(host.getFrameElement_(creativeWinMock, sentinel).win).to.deep.equal(expectedWin);
+      const iframeObj = createNestedIframeMocks(6,3);
+      const sourceMock = iframeObj.source;
+      const topWinMock = iframeObj.topWin;
+      const frameMock = topWinMock.document.querySelectorAll()[0];
+      const expectedWin = sourceMock.parent.parent;
+      host = new InaboxMessagingHost(win, [frameMock]);
+      expect(host.getFrameElement_(sourceMock, sentinel).contentWindow
+      ).to.deep.equal(expectedWin);
     });
 
-    it('should return correct frame', () => {
-      host.iframes_.push(creativeIframeMock);
-      expect(host.getFrameElement_(creativeWinMock, sentinel)
-      ).to.equal(creativeIframeMock);
+    it('should return correct frame when all frames friendly', () => {
+      const iframeObj = createNestedIframeMocks(6);
+      const sourceMock = iframeObj.source;
+      const topWinMock = iframeObj.topWin;
+      const frameMock = topWinMock.document.querySelectorAll()[0];
+      const expectedWin = sourceMock;
+      host = new InaboxMessagingHost(win, [frameMock]);
+      expect(host.getFrameElement_(sourceMock, sentinel).contentWindow
+      ).to.deep.equal(expectedWin);
     });
 
     it('should return cached frame', () => {
-      host.win_ = {};
-      // Make any access of host.win_.top throw, so we can detect if
-      // getFrameElement goes past using the cached version.
-      Object.defineProperty(host.win_, 'top', {
-        get: () => {
-          throw new Error('Error!!');
-        },
-      });
+      host.getMeasureableFrame = () => {
+        throw new Error('Error!!');
+      };
+      const creativeWinMock = {};
+      const creativeIframeMock = {};
       host.iframeMap_[sentinel] = creativeIframeMock;
       expect(host.getFrameElement_(creativeWinMock, sentinel)
       ).to.equal(creativeIframeMock);
     });
 
     it('should return null if frame is not registered', () => {
-      expect(host.getFrameElement_(creativeWinMock, sentinel)).to.be.null;
+      const iframeObj = createNestedIframeMocks(6,3);
+      const sourceMock = iframeObj.source;
+      expect(host.getFrameElement_(sourceMock, sentinel)).to.be.null;
     });
 
     it('should return null if frame is more than 10 levels deep', () => {
-      const makeNestedFrame = parentFrame => {
-        return {
-	    parent: parentFrame,
-	    location: {
-            href: 'foo',
-	    },
-        };
-      };
-      const topFrame = {};
-      let source = topFrame;
-      for (let i = 0; i < 15 ; i++) {
-        source = makeNestedFrame(source);
-      }
-      creativeIframeMock = {
-        contentWindow: source,
-      };
-      host.iframes_.push(creativeIframeMock);
-      expect(host.getFrameElement_(source, sentinel)).to.be.null;
+      const iframeObj = createNestedIframeMocks(12,1);
+      const sourceMock = iframeObj.source;
+      const topWinMock = iframeObj.topWin;
+      const frameMock = topWinMock.document.querySelectorAll()[0];
+      host = new InaboxMessagingHost(win, [frameMock]);
+      expect(host.getFrameElement_(sourceMock, sentinel)).to.be.null;
     });
   });
 });

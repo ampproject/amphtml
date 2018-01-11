@@ -242,12 +242,12 @@ export class InaboxMessagingHost {
     for (let i = 0; i < this.iframes_.length; i++) {
       const iframe = this.iframes_[i];
       for (let j = 0, tempWin = measureableWin;
-           j < 10; j++, tempWin = tempWin.parent) {
-             if (iframe.contentWindow == tempWin) {
-               this.iframeMap_[sentinel] = measureableFrame;
-               return measureableFrame;
-             }
-           }
+        j < 10; j++, tempWin = tempWin.parent) {
+        if (iframe.contentWindow == tempWin) {
+          this.iframeMap_[sentinel] = measureableFrame;
+          return measureableFrame;
+        }
+      }
       return null;
     }
   }
@@ -264,23 +264,23 @@ export class InaboxMessagingHost {
    */
   getMeasureableFrame(win) {
     let measureableWin, measureableFrame;
-    for (let j = 0, tempWin = win; j < 10 && tempWin != tempWin.top;
-         j++, tempWin = tempWin.parent) {
-           if (!canInspectWindow(tempWin)) {
-               measureableWin = tempWin;
-           } else {
-             break;
-           }
-         }
+    for (let j = 0, tempWin = win; j < 5 && tempWin != tempWin.top;
+      j++, tempWin = tempWin.parent) {
+      if (!canInspectWindow(tempWin)) {
+        measureableWin = tempWin;
+      } else {
+        break;
+      }
+    }
     if (!!measureableWin) {
       const parent = measureableWin.parent;
       const iframes = parent.document.querySelectorAll('iframe');
       for (let k = 0, frame = iframes[k]; k < iframes.length;
-           k++, frame = iframes[k]) {
-             if (frame.contentWindow == measureableWin) {
-               measureableFrame = frame;
-             }
-           }
+        k++, frame = iframes[k]) {
+        if (frame.contentWindow == measureableWin) {
+          measureableFrame = frame;
+        }
+      }
     } else {
       measureableFrame = win.frameElement;
     }
