@@ -283,7 +283,6 @@ describes.realWin('amp-analytics', {
     };
     analytics.buildCallback();
     analytics.preconnectCallback();
-    debugger;
     return analytics.layoutCallback().catch((err) => {
       // Hitting this error is expected. But that happens after the preload
       // should happen, and that is what we care about.
