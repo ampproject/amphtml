@@ -244,31 +244,31 @@ export class AmpBysidePlaceholder extends AMP.BaseElement {
   /** @private */
   generateSrcUrl_() {
     const src = this.baseUrl_ + 'placeholder.php';
-    const params = {
-      'label': this.label_,
-      'webcare_id': this.webcareId_,
-      'bwch': this.channel_ || '',
-      'lang': this.lang_ || '',
-      'fid': this.fid_ || '',
-      'bwit': (this.fid_ ? 'I' : 'A'),
-      'tuid': 'CLIENT_ID(byside_webcare_tuid)',
-      'suid': '',
-      'puid': 'PAGE_VIEW_IDpTIMESTAMP',
-      'referrer': 'DOCUMENT_REFERRER',
-      'page': 'SOURCE_URL',
-      'amppage': 'AMPDOC_URL',
-      'bwpt': 'TITLE',
-      'bres': 'VIEWPORT_WIDTHxVIEWPORT_HEIGHT',
-      'res': 'SCREEN_WIDTHxSCREEN_HEIGHT',
-      'v': 'v20171116a',
-      'ampv': 'AMP_VERSION',
-      'viewer': 'VIEWER',
-      'ua': 'USER_AGENT',
-      'r': 'RANDOM',
-    };
+    const params = dict();
+
+    params['label'] = this.label_;
+    params['webcare_id'] = this.webcareId_;
+    params['bwch'] = this.channel_ || '';
+    params['lang'] = this.lang_ || '';
+    params['fid'] = this.fid_ || '';
+    params['bwit'] = (this.fid_ ? 'I' : 'A');
+    params['tuid'] = 'CLIENT_ID(byside_webcare_tuid)';
+    params['suid'] = '';
+    params['puid'] = 'PAGE_VIEW_IDpTIMESTAMP';
+    params['referrer'] = 'DOCUMENT_REFERRER';
+    params['page'] = 'SOURCE_URL';
+    params['amppage'] = 'AMPDOC_URL';
+    params['bwpt'] = 'TITLE';
+    params['bres'] = 'VIEWPORT_WIDTHxVIEWPORT_HEIGHT';
+    params['res'] = 'SCREEN_WIDTHxSCREEN_HEIGHT';
+    params['v'] = 'v20171116a';
+    params['ampv'] = 'AMP_VERSION';
+    params['viewer'] = 'VIEWER';
+    params['ua'] = 'USER_AGENT';
+    params['r'] = 'RANDOM';
 
     if (this.isResizable_) {
-      params._resize = 1;
+      params['_resize'] = 1;
     }
 
     return Services.urlReplacementsForDoc(this.element)
@@ -310,7 +310,7 @@ export class AmpBysidePlaceholder extends AMP.BaseElement {
 
     if (newHeight !== undefined || newWidth !== undefined) {
       // Force change size as requested
-      this.element.getResources().changeSize(this.element, newHeight, newWidth,
+      this.element.getResources()./*OK*/changeSize(this.element, newHeight, newWidth,
           () => {
             if (newHeight !== undefined) {
               this.element.setAttribute('height', newHeight);
