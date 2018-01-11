@@ -331,8 +331,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.iframeTransport_) {
       return;
     }
-    const url = getIframeTransportScriptUrl(this.getAmpDoc().win);
-    this.preconnect.preload(url, 'script');
+    this.preload(getIframeTransportScriptUrl(this.getAmpDoc().win), 'script');
     const ampAdResourceId = this.assertAmpAdResourceId();
 
     this.iframeTransport_ = new IframeTransport(
@@ -343,17 +342,29 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
+   * Asks the browser to preload a URL. Always also does a preconnect
+   * because browser support for that is better.
+   *
+   * @param {!./service/viewer-impl.Viewer} viewer
+   * @param {string} url
+   * @param {string=} opt_preloadAs
+   * @VisibleForTesting
+   */
+  preload(viewer, url, opt_preloadAs) {
+    this.preconnect.preload(viewer, url, opt_preloadAs);
+  }
+
+  /**
    * Gets the resourceID of the parent amp-ad element.
    * Throws an exception if no such element.
    * @returns {string}
    * @VisibleForTesting
    */
   assertAmpAdResourceId() {
-    const TAG = this.getName_();
     return user().assertString(
         getAmpAdResourceId(this.element, getTopWindow(this.win)),
-        `${TAG}: No friendly amp-ad ancestor element was found for ` +
-        'amp-analytics tag with iframe transport.');
+        `${this.getName_()}: No friendly amp-ad ancestor element was found ` +
+        'for amp-analytics tag with iframe transport.');
   }
 
   /**

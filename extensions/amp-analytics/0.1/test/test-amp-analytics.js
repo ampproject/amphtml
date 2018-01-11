@@ -255,11 +255,11 @@ describes.realWin('amp-analytics', {
     doc.body.appendChild(el);
     const analytics = new AmpAnalytics(el);
     sandbox.stub(analytics, 'assertAmpAdResourceId').callsFake(() => 'fakeId');
+    const preloadSpy = sandbox.spy(analytics, 'preload');
     analytics.buildCallback();
     analytics.preconnectCallback();
     return analytics.layoutCallback().then(() => {
-      const preloads = doc.querySelectorAll('link[rel=preload]');
-      expect(preloads).to.have.length(0);
+      expect(preloadSpy).to.have.not.been.called;
     });
   });
 
@@ -269,6 +269,7 @@ describes.realWin('amp-analytics', {
     doc.body.appendChild(el);
     const analytics = new AmpAnalytics(el);
     sandbox.stub(analytics, 'assertAmpAdResourceId').callsFake(() => 'fakeId');
+    const preloadSpy = sandbox.spy(analytics, 'preload');
     analytics.predefinedConfig_['foo'] = {
       'transport': {
         'iframe': 'https://www.google.com',
@@ -286,11 +287,10 @@ describes.realWin('amp-analytics', {
     analytics.buildCallback();
     analytics.preconnectCallback();
     return analytics.layoutCallback().then(() => {
-      const preloads = doc.querySelectorAll('link[rel=preload]');
-      expect(preloads).to.have.length(1);
-      expect(preloads[0]).to.have.property(
-          'href',
-          'http://localhost:9876/dist/iframe-transport-client-lib.js');
+      expect(preloadSpy).to.have.been.calledOnce;
+      expect(preloadSpy).to.have.been.calledWith(
+          'http://localhost:9876/dist/iframe-transport-client-lib.js',
+          'script');
     });
   });
 
