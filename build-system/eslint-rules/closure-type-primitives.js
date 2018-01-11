@@ -99,17 +99,18 @@ function checkClosureComments(context, closureComment) {
     }
 
     const {type, name} = astNode.expression;
-    if (type === 'NameExpression' && isPrimitive(name)) {
+    if (type === 'NameExpression' && isNonNullablePrimitive(name)) {
       reportNonNullablePrimitive(context, node, name);
     }
   });
 }
 
 /** @enum {string} */
-const PRIMITIVES = [
+const NON_NULLABLE_PRIMITIVES = [
   'boolean',
   'number',
   'string',
+  'symbol',
 ];
 
 /**
@@ -117,8 +118,8 @@ const PRIMITIVES = [
  * @param {string} name
  * @return {boolean}
  */
-function isPrimitive(name) {
-  return PRIMITIVES.includes(name);
+function isNonNullablePrimitive(name) {
+  return NON_NULLABLE_PRIMITIVES.includes(name);
 }
 
 /**
