@@ -1101,7 +1101,7 @@ export class AmpStory extends AMP.BaseElement {
   maybePreloadBookend_() {
     const pageIndex = this.getPageIndex(this.activePage_);
     if (pageIndex + 1 >= this.getPageCount()) {
-      this.loadBookendConfig_();
+      this.buildBookend_();
     }
   }
 
@@ -1113,7 +1113,6 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     this.element.appendChild(this.bookend_.build(this.getAmpDoc()));
-
     this.setAsOwner(this.bookend_.getRoot());
 
     return this.loadBookendConfig_().then(bookendConfig => {

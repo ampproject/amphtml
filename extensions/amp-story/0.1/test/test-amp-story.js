@@ -122,13 +122,15 @@ describes.realWin('amp-story', {
 
   it('should update the navigation state when built', () => {
     const firstPageId = 'cover';
-    createPages(story.element, 2, [firstPageId, 'page-1']);
+    const pageCount = 2;
+    createPages(story.element, pageCount, [firstPageId, 'page-1']);
     const updateActivePageStub =
         sandbox.stub(story.navigationState_, 'updateActivePage');
 
     return story.layoutCallback()
         .then(() => {
-          expect(updateActivePageStub).to.have.been.calledWith(0, firstPageId);
+          expect(updateActivePageStub)
+              .to.have.been.calledWith(0, pageCount, firstPageId);
         });
   });
 
@@ -136,6 +138,10 @@ describes.realWin('amp-story', {
     createPages(story.element, 1, ['cover']);
     const bookendUrl = 'foo.com';
     story.element.setAttribute('bookend-config-src', bookendUrl);
+
+    const fakeBookendElement = win.document.createElement('div');
+    sinon.stub(story.bookend_, 'build').returns(fakeBookendElement);
+    sinon.stub(story.bookend_, 'getRoot').returns(fakeBookendElement);
 
     const xhr = Services.xhrFor(win);
     fetchJsonStub = sandbox.stub(xhr, 'fetchJson');
@@ -147,8 +153,29 @@ describes.realWin('amp-story', {
         });
   });
 
+  // The empty bookend is built even if no bookend-config-src attribute was set.
+  it('should prerender the bookend if navigating to the last page', () => {
+    createPages(story.element, 1, ['cover']);
+    const fakeBookendElement = win.document.createElement('div');
+    const buildBookendStub =
+        sinon.stub(story.bookend_, 'build').returns(fakeBookendElement);
+    sinon.stub(story.bookend_, 'getRoot').returns(fakeBookendElement);
+
+    const appendChildSpy = sinon.spy(story.element, 'appendChild');
+
+    return story.layoutCallback()
+        .then(() => {
+          expect(buildBookendStub).to.have.been.calledWith(story.getAmpDoc());
+          expect(appendChildSpy).to.have.been.calledWith(fakeBookendElement);
+        });
+  });
+
   it('should not preload the bookend if no attribute was set', () => {
     createPages(story.element, 1, ['cover']);
+
+    const fakeBookendElement = win.document.createElement('div');
+    sinon.stub(story.bookend_, 'build').returns(fakeBookendElement);
+    sinon.stub(story.bookend_, 'getRoot').returns(fakeBookendElement);
 
     const xhr = Services.xhrFor(win);
     fetchJsonStub = sandbox.stub(xhr, 'fetchJson');
