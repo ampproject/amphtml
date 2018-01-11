@@ -254,6 +254,7 @@ describes.realWin('amp-analytics', {
     const el = doc.createElement('amp-analytics');
     doc.body.appendChild(el);
     const analytics = new AmpAnalytics(el);
+    sandbox.stub(analytics, 'assertAmpAdResourceId').callsFake(() => 'fakeId');
     analytics.buildCallback();
     analytics.preconnectCallback();
     return analytics.layoutCallback().then(() => {
@@ -267,6 +268,7 @@ describes.realWin('amp-analytics', {
     el.setAttribute('type', 'foo');
     doc.body.appendChild(el);
     const analytics = new AmpAnalytics(el);
+    sandbox.stub(analytics, 'assertAmpAdResourceId').callsFake(() => 'fakeId');
     analytics.predefinedConfig_['foo'] = {
       'transport': {
         'iframe': 'https://www.google.com',
@@ -283,7 +285,6 @@ describes.realWin('amp-analytics', {
     };
     analytics.buildCallback();
     analytics.preconnectCallback();
-    sandbox.stub(analytics, 'assertAmpAdResourceId').callsFake(() => 'fakeId');
     return analytics.layoutCallback().then(() => {
       const preloads = doc.querySelectorAll('link[rel=preload]');
       expect(preloads).to.have.length(1);
