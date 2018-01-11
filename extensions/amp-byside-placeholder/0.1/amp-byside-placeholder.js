@@ -39,6 +39,7 @@ import {removeElement} from '../../../src/dom';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {listenFor} from '../../../src/iframe-helper';
+import {dict} from '../../../src/utils/object';
 
 /** @const {string} */
 const TAG_ = 'amp-byside-placeholder';
@@ -64,7 +65,7 @@ export class AmpBysidePlaceholder extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {string} */
+    /** @private {?string} */
     this.iframeSrc_ = null;
 
     /** @private {?Element} */
@@ -271,7 +272,7 @@ export class AmpBysidePlaceholder extends AMP.BaseElement {
     }
 
     return Services.urlReplacementsForDoc(this.element)
-        .expandAsync(addParamsToUrl(src, params));
+        .expandAsync(addParamsToUrl(src, dict(params)));
   }
 
   /**
