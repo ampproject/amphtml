@@ -28,10 +28,6 @@ const MUTE_CLASS = 'i-amphtml-story-mute-audio-control';
 
 const UNMUTE_CLASS = 'i-amphtml-story-unmute-audio-control';
 
-const ENTER_FULLSCREEN_CLASS = 'i-amphtml-story-enter-fullscreen';
-
-const EXIT_FULLSCREEN_CLASS = 'i-amphtml-story-exit-fullscreen';
-
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
   tag: 'aside',
@@ -75,22 +71,6 @@ const TEMPLATE = {
             'class': MUTE_CLASS + ' i-amphtml-story-button',
           }),
         },
-        {
-          tag: 'div',
-          attrs: dict({
-            'role': 'button',
-            'class': ENTER_FULLSCREEN_CLASS + ' i-amphtml-story-button',
-            'hidden': true,
-          }),
-        },
-        {
-          tag: 'div',
-          attrs: dict({
-            'role': 'button',
-            'class': EXIT_FULLSCREEN_CLASS + ' i-amphtml-story-button',
-            'hidden': true,
-          }),
-        },
       ],
     },
   ],
@@ -98,26 +78,9 @@ const TEMPLATE = {
 
 
 /**
- * @param {!../../../src/service/vsync-impl.Vsync} vsync
- * @param {!Element} el
- * @param {boolean} isHidden
- */
-function toggleHiddenAttribute(vsync, el, isHidden) {
-  vsync.mutate(() => {
-    if (isHidden) {
-      el.setAttribute('hidden', 'hidden');
-    } else {
-      el.removeAttribute('hidden');
-    }
-  });
-}
-
-
-/**
  * System Layer (i.e. UI Chrome) for <amp-story>.
  * Chrome contains:
  *   - mute/unmute button
- *   - fullscreen button
  *   - story progress bar
  *   - bookend close butotn
  */
@@ -134,12 +97,6 @@ export class SystemLayer {
 
     /** @private {?Element} */
     this.root_ = null;
-
-    /** @private {?Element} */
-    this.exitFullScreenBtn_ = null;
-
-    /** @private {?Element} */
-    this.enterFullScreenBtn_ = null;
 
     /** @private {?Element} */
     this.muteAudioBtn_ = null;
@@ -181,12 +138,6 @@ export class SystemLayer {
 
     this.buildForDevelopmentMode_();
 
-    this.exitFullScreenBtn_ =
-        this.root_.querySelector('.i-amphtml-story-exit-fullscreen');
-
-    this.enterFullScreenBtn_ =
-        this.root_.querySelector('.i-amphtml-story-enter-fullscreen');
-
     this.addEventHandlers_();
 
     return this.getRoot();
@@ -213,13 +164,7 @@ export class SystemLayer {
     this.root_.addEventListener('click', e => {
       const target = dev().assertElement(e.target);
 
-      if (matches(target,
-          `.${EXIT_FULLSCREEN_CLASS}, .${EXIT_FULLSCREEN_CLASS} *`)) {
-        this.onExitFullScreenClick_(e);
-      } else if (matches(target,
-          `.${ENTER_FULLSCREEN_CLASS}, .${ENTER_FULLSCREEN_CLASS} *`)) {
-        this.onEnterFullScreenClick_(e);
-      } else if (matches(target, `.${MUTE_CLASS}, .${MUTE_CLASS} *`)) {
+      if (matches(target, `.${MUTE_CLASS}, .${MUTE_CLASS} *`)) {
         this.onMuteAudioClick_(e);
       } else if (matches(target, `.${UNMUTE_CLASS}, .${UNMUTE_CLASS} *`)) {
         this.onUnmuteAudioClick_(e);
@@ -233,52 +178,6 @@ export class SystemLayer {
    */
   getRoot() {
     return dev().assertElement(this.root_);
-  }
-
-  /**
-   * @param {boolean} inFullScreen
-   */
-  setInFullScreen(inFullScreen) {
-    this.toggleExitFullScreenBtn_(inFullScreen);
-    this.toggleEnterFullScreenBtn_(inFullScreen);
-  }
-
-  /**
-   * @param {boolean} isEnabled
-   * @private
-   */
-  toggleExitFullScreenBtn_(isEnabled) {
-    toggleHiddenAttribute(
-        Services.vsyncFor(this.win_),
-        dev().assertElement(this.exitFullScreenBtn_),
-        /* opt_isHidden */ !isEnabled);
-  }
-
-  /**
-   * @param {boolean} isEnabled
-   * @private
-   */
-  toggleEnterFullScreenBtn_(isEnabled) {
-    toggleHiddenAttribute(
-        Services.vsyncFor(this.win_),
-        dev().assertElement(this.enterFullScreenBtn_),
-        /* opt_isHidden */ isEnabled);
-  }
-
-  /**
-   * @param {!Event} e
-   * @private
-   */
-  onExitFullScreenClick_(e) {
-    this.dispatch_(EventType.EXIT_FULLSCREEN, e);
-  }
-
-  /**
-   * @param {!Event} e
-   * @private
-   */
-  onEnterFullScreenClick_(e) {
-    this.dispatch_(EventType.ENTER_FULLSCREEN, e);
   }
 
   /**
