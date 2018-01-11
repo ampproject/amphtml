@@ -16,11 +16,7 @@
 
 import {isExperimentOn} from '../../../../src/experiments';
 import {dev} from '../../../../src/log';
-import {
-  elementByTag,
-  iterateCursor,
-  scopedQuerySelectorAll,
-} from '../../../../src/dom';
+import {elementByTag, iterateCursor} from '../../../../src/dom';
 import {toArray} from '../../../../src/types';
 import {CommonSignals} from '../../../../src/common-signals';
 
@@ -171,7 +167,7 @@ export class LightboxManager {
    */
   getSlidesFromCarousel_(element) {
     return element.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
-      return toArray(scopedQuerySelectorAll(element, SLIDE_SELECTOR));
+      return toArray(element./*OK*/querySelectorAll(SLIDE_SELECTOR));
     });
   }
 
