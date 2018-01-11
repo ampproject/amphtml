@@ -65,11 +65,6 @@ describes.realWin('amp-story', {
     return eventObj;
   }
 
-  function stubViewportSize(width, height) {
-    sandbox./*OK*/stub(element.implementation_.getViewport(), 'getSize', () =>
-      ({width, height}));
-  }
-
   beforeEach(() => {
     win = env.win;
     element = win.document.createElement('amp-story');
@@ -195,100 +190,6 @@ describes.realWin('amp-story', {
         .then(() => {
           expect(fetchJsonStub).to.not.have.been.called;
         });
-  });
-
-  // TODO(newmuis/amphtml-story#187): Re-enable this test.
-  it.skip('should enter fullscreen when switching pages', () => {
-    const requestFullScreen = sandbox.spy();
-    const systemLayerSetInFullScreen = sandbox.stub(
-        element.implementation_.systemLayer_, 'setInFullScreen', NOOP);
-
-    appendEmptyPage(element, /* opt_active */ true);
-    // eslint-disable-next-line no-undef
-    stubFullScreenForTesting(/* isSupported */ true, requestFullScreen, NOOP);
-    stubViewportSize(320, 480); // "mobile" as long as both dimensions <= 1024px
-
-    element.implementation_.switchTo_(win.document.createElement('div'));
-
-    expect(requestFullScreen).to.be.calledOnce;
-    expect(systemLayerSetInFullScreen)
-        .to.have.been.calledWith(/* inFullScreen */ true);
-  });
-
-  // TODO(newmuis/amphtml-story#187): Re-enable this test.
-  it.skip('should not enter fullscreen when switching if auto is disabled',
-      () => {
-        const enterFullScreen = sandbox.stub(
-            element.implementation_, 'enterFullScreen_', NOOP);
-
-        appendEmptyPage(element, /* opt_active */ true);
-        stubViewportSize(320, 480); // "mobile" as long as both dimensions <= 1024px
-
-        element.implementation_.setAutoFullScreen(false);
-        element.implementation_.switchTo_(win.document.createElement('div'));
-
-        expect(enterFullScreen).to.not.have.been.called;
-      });
-
-  // TODO(newmuis/amphtml-story#187): Re-enable this test.
-  it.skip('should not enter fullscreen when switching if on "desktop"', () => {
-    const enterFullScreen = sandbox.stub(
-        element.implementation_, 'enterFullScreen_', NOOP);
-
-    appendEmptyPage(element, /* opt_active */ true);
-    stubViewportSize(1200, 1200); // "desktop" as long as one dimension > 1024px
-
-    element.implementation_.switchTo_(win.document.createElement('div'));
-
-    expect(enterFullScreen).to.not.have.been.called;
-  });
-
-  // TODO(newmuis/amphtml-story#187): Re-enable this test.
-  it.skip('should exit fullscreen when switching to the bookend page', () => {
-    const exitFullScreen = sandbox.spy();
-    const systemLayerSetInFullScreen = sandbox.stub(
-        element.implementation_.systemLayer_, 'setInFullScreen', NOOP);
-
-    appendEmptyPage(element);
-    // eslint-disable-next-line no-undef
-    stubFullScreenForTesting(/* isSupported */ true, NOOP, exitFullScreen);
-
-    element.build();
-    element.implementation_.buildBookend_();
-    element.implementation_.showBookend_();
-
-    expect(exitFullScreen).to.be.calledOnce;
-    expect(systemLayerSetInFullScreen)
-        .to.have.been.calledWith(/* inFullScreen */ false);
-  });
-
-  // TODO(newmuis/amphtml-story#187): Re-enable this test.
-  it.skip('should disable auto fullscreen when exiting explicitly', () => {
-    const setAutoFullScreenSpy = sandbox.spy(
-        element.implementation_, 'setAutoFullScreen');
-
-    // eslint-disable-next-line no-undef
-    stubFullScreenForTesting(/* isSupported */ true, NOOP, NOOP);
-
-    element.implementation_.exitFullScreen_(/* opt_explicitUserAction */ true);
-
-    expect(setAutoFullScreenSpy)
-        .to.have.been.calledWith(/* isEnabled */ false);
-  });
-
-  // TODO(newmuis/amphtml-story#187): Re-enable this test.
-  it.skip('should exit fullscreen when EXIT_FULLSCREEN is triggered', () => {
-    /* eslint-disable no-unused-vars no-undef */
-    const exitFullScreenStub = sandbox.stub(
-        element.implementation_, 'exitFullScreen_', NOOP);
-
-    createPages(element, 5);
-    element.build();
-
-    element.dispatchEvent(new Event(EventType.EXIT_FULLSCREEN));
-
-    expect(exitFullScreenStub)
-        .to.have.been.calledWith(/* opt_explicitUserAction */ true);
   });
 
   // TODO(newmuis/amphtml-story#187): Re-enable this test.
