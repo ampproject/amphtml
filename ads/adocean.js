@@ -35,7 +35,7 @@ function isFalseString(str) {
 }
 
 /**
- * @param {!string} mode
+ * @param {string} mode
  * @param {!Window} global
  */
 function setupAdoConfig(mode, global) {
@@ -67,7 +67,7 @@ function setupPreview(global, data) {
 }
 
 /**
- * @param {!string} str
+ * @param {string} str
  * @returns (Object|undefined}
  * @throws {SyntaxError}
  */
@@ -122,7 +122,7 @@ function runSync(global, cb) {
 }
 
 /**
- * @param {!string} mode
+ * @param {string} mode
  * @param {!Window} global
  * @param {!Object} data
  */

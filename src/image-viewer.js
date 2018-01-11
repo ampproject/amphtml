@@ -164,7 +164,7 @@ export class ImageViewer {
 
   /**
    * Returns true if the image is enlarged and not at its original scale
-   * @return {!boolean}
+   * @return {boolean}
    */
   isScaled() {
     return this.scale_ !== 1;

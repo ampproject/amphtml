@@ -71,7 +71,7 @@ export const QQID_HEADER = 'X-QQID';
  * implementations of AMP tags, e.g., by AMPHTML implementors.  It should not be
  * added by a publisher page.
  *
- * @const {!string}
+ * @const {string}
  * @visibleForTesting
  */
 export const EXPERIMENT_ATTRIBUTE = 'data-experiment-id';

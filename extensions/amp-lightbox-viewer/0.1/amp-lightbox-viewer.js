@@ -84,7 +84,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {!boolean} */
+    /** @private {boolean} */
     this.active_ = false;
 
     /** @private {number} */

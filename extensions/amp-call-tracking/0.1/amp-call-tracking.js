@@ -22,7 +22,7 @@ import {user} from '../../../src/log';
 
 /**
  * Bookkeeps all unique URL requests so that no URL is called twice.
- * @type {!Object<!string, !Promise>}
+ * @type {!Object<string, !Promise>}
  */
 let cachedResponsePromises_ = {};
 
@@ -30,7 +30,7 @@ let cachedResponsePromises_ = {};
 /**
  * Fetches vendor response.
  * @param {!Window} win
- * @param {!string} url
+ * @param {string} url
  * @return {!Promise<JsonObject>}
  */
 function fetch_(win, url) {

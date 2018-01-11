@@ -757,7 +757,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    * Appends the callout value to the keys of response to prevent a collision
    * case caused by multiple vendors returning the same keys.
    * @param {!Object<string, string>} response
-   * @param {!string} callout
+   * @param {string} callout
    * @return {!Object<string, string>}
    * @private
    */

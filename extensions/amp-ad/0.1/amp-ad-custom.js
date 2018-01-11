@@ -22,7 +22,7 @@ import {ancestorElementsByTag} from '../../../src/dom';
 import {removeChildren} from '../../../src/dom';
 import {AmpAdUIHandler} from './amp-ad-ui';
 
-/** @const {!string} Tag name for custom ad implementation. */
+/** @const {string} Tag name for custom ad implementation. */
 export const TAG_AD_CUSTOM = 'amp-ad-custom';
 
 /** @var {Object} A map of promises for each value of data-url. The promise
