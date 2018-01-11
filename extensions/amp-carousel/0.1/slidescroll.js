@@ -508,16 +508,19 @@ export class AmpSlideScroll extends BaseSlides {
    */
   showSlideWhenReady(value) {
     const index = parseInt(value, 10);
-    if (isFinite(index) && index >= 0 && index < this.noOfSlides_) {
-      // If we haven't been laid out yet, set `initialSlideIndex_` instead.
-      if (this.slideIndex_ === null) {
-        this.initialSlideIndex_ = index;
-      } else {
-        this.showSlide_(index);
-      }
-    } else {
+
+    if (!isFinite(index) || index < 0 || index >= this.noOfSlides_) {
       this.user().error(TAG, 'Invalid [slide] value: %s', value);
+      return;
     }
+
+    // If we haven't been laid out, set `initialSlideIndex_` for layout time.
+    if (this.slideIndex_ === null) {
+      this.initialSlideIndex_ = index;
+      return;
+    }
+
+    this.showSlideAndTriggerAction_(index);
   }
 
   /**
