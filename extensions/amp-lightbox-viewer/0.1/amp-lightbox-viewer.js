@@ -34,6 +34,8 @@ import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
 import {debounce} from '../../../src/utils/rate-limit';
+import {CommonSignals} from '../../../src/common-signals';
+
 
 /** @const */
 const TAG = 'amp-lightbox-viewer';
@@ -81,9 +83,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {?../../../src/service/resources-impl.Resources} */
-    this.resources_ = null;
 
     /** @private {!boolean} */
     this.active_ = false;
@@ -160,11 +159,14 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         `Experiment ${TAG} disabled`);
     this.manager_ = dev().assert(manager_);
     this.vsync_ = this.getVsync();
-    this.container_ = this.win.document.createElement('div');
-    this.container_.classList.add('i-amphtml-lbv');
-    this.resources_ = Services.resourcesForDoc(this.getAmpDoc());
-    this.buildMask_();
-    this.element.appendChild(this.container_);
+    const viewer = Services.viewerForDoc(this.getAmpDoc());
+    viewer.whenFirstVisible().then(() => {
+      this.container_ = this.win.document.createElement('div');
+      this.container_.classList.add('i-amphtml-lbv');
+      this.element.appendChild(this.container_);
+      this.manager_.maybeInit();
+      this.buildMask_();
+    });
   }
 
   /** @override */
@@ -226,6 +228,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       if (clonedNode.tagName === 'AMP-IMG') {
         const container = this.element.ownerDocument.createElement('div');
         container.classList.add('i-amphtml-image-lightbox-container');
+        // TODO: make image viewer an amp component to deal with lazy images
         const imageViewer = new ImageViewer(this, this.win,
             this.loadPromise.bind(this));
         imageViewer.init(element, elementByTag(element, 'img'));
@@ -633,7 +636,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       this.setupGestures_();
       this.setupEventListeners_();
 
-      return this.resources_.requireLayout(dev().assertElement(this.carousel_));
+      return this.carousel_.signals().whenSignal(CommonSignals.LOAD_END);
     }).then(() => this.openLightboxForElement_(element));
   }
 
