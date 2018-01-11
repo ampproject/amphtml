@@ -17,6 +17,9 @@
 import {isExperimentOn} from '../../../../src/experiments';
 import {dev} from '../../../../src/log';
 import {elementByTag, iterateCursor} from '../../../../src/dom';
+import {toArray} from '../../../../src/types';
+import {CommonSignals} from '../../../../src/common-signals';
+
 
 const ELIGIBLE_TAP_TAGS = {
   'amp-img': true,
@@ -24,6 +27,8 @@ const ELIGIBLE_TAP_TAGS = {
 };
 
 const VIEWER_TAG = 'amp-lightbox-viewer';
+const CAROUSEL_TAG = 'amp-carousel';
+const SLIDE_SELECTOR = '.amp-carousel-slide';
 
 /** @typedef {{
  *  url: string,
@@ -66,14 +71,19 @@ export class LightboxManager {
     this.lightboxGroups_ = {
       default: [],
     };
+
+    /**
+     * Counter tracking number of carousels without ids
+     * @private {number}
+     */
+    this.counter_ = 0;
   }
 
   /**
    * Initializes the manager only once.
    * @return {!Promise}
-   * @private
    */
-  maybeInit_() {
+  maybeInit() {
     if (this.initPromise_) {
       return this.initPromise_;
     }
@@ -120,20 +130,45 @@ export class LightboxManager {
    * @private
    */
   processLightboxElement_(element) {
-    if (element.tagName == 'AMP-CAROUSEL') {
-      // TODO: special case carousel
+    if (element.tagName.toLowerCase() == CAROUSEL_TAG) {
+      const lightboxGroupId = element.getAttribute('lightbox') ||
+       'carousel' + (element.getAttribute('id') || this.counter_++);
+      this.getSlidesFromCarousel_(element).then(slides => {
+        slides.forEach(slide => {
+          // TODO: review naming conventions for component attributes
+          if (!slide.hasAttribute('lightbox-exclude')) {
+            slide.setAttribute('lightbox', lightboxGroupId);
+            this.processBaseLightboxElement_(slide, lightboxGroupId);
+          }
+        });
+      });
     } else {
       const lightboxGroupId = element.getAttribute('lightbox') || 'default';
-      if (!this.lightboxGroups_[lightboxGroupId]) {
-        this.lightboxGroups_[lightboxGroupId] = [];
-      }
-      this.lightboxGroups_[lightboxGroupId]
-          .push(dev().assertElement(element));
-      if (this.meetsHeuristicsForTap_(element)) {
-        const viewer = elementByTag(this.ampdoc_.getRootNode(), VIEWER_TAG).id;
-        element.setAttribute('on', 'tap:' + viewer.id + '.activate');
-      }
+      this.processBaseLightboxElement_(element, lightboxGroupId);
     }
+  }
+
+  processBaseLightboxElement_(element, lightboxGroupId) {
+    if (!this.lightboxGroups_[lightboxGroupId]) {
+      this.lightboxGroups_[lightboxGroupId] = [];
+    }
+    this.lightboxGroups_[lightboxGroupId]
+        .push(dev().assertElement(element));
+    if (this.meetsHeuristicsForTap_(element)) {
+      const viewer = elementByTag(this.ampdoc_.getRootNode(), VIEWER_TAG);
+      element.setAttribute('on', `tap:${viewer.id}.activate`);
+    }
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {!Promise<!Array<!Element>>}
+   * @private
+   */
+  getSlidesFromCarousel_(element) {
+    return element.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
+      return toArray(element./*OK*/querySelectorAll(SLIDE_SELECTOR));
+    });
   }
 
   /**
@@ -142,7 +177,7 @@ export class LightboxManager {
    * @return {!Promise<!Array<!Element>>}
    */
   getElementsForLightboxGroup(lightboxGroupId) {
-    return this.maybeInit_()
+    return this.maybeInit()
         .then(() => dev().assert(this.lightboxGroups_[lightboxGroupId]));
   }
 
