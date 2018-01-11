@@ -63,11 +63,6 @@ describes.realWin('amp-story', {
     return eventObj;
   }
 
-  function stubViewportSize(width, height) {
-    sandbox./*OK*/stub(element.implementation_.getViewport(), 'getSize', () =>
-      ({width, height}));
-  }
-
   beforeEach(() => {
     win = env.win;
     element = win.document.createElement('amp-story');

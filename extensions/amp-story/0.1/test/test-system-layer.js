@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import {SystemLayer} from '../system-layer';
-import {EventType} from '../events';
 import {ProgressBar} from '../progress-bar';
 import {Services} from '../../../../src/services';
 
@@ -27,24 +26,6 @@ describes.fakeWin('amp-story system layer', {}, env => {
   let systemLayer;
   let progressBarStub;
   let progressBarRoot;
-
-  function matchEvent(name, bubbles) {
-    return sandbox.match.has('type', name)
-        .and(sandbox.match.has('bubbles', bubbles));
-  }
-
-  function expectEventTransform(eventHandler, expectedEventType) {
-    const dispatchEvent = sandbox.spy();
-    const stopPropagation = sandbox.spy();
-
-    sandbox.stub(systemLayer, 'getRoot').returns({dispatchEvent});
-
-    eventHandler({stopPropagation});
-
-    expect(stopPropagation).to.be.calledOnce;
-    expect(dispatchEvent).to.have.been.calledWith(
-        matchEvent(expectedEventType, /* bubbles */ true));
-  }
 
   beforeEach(() => {
     win = env.win;

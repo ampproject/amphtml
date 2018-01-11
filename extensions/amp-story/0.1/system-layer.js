@@ -78,22 +78,6 @@ const TEMPLATE = {
 
 
 /**
- * @param {!../../../src/service/vsync-impl.Vsync} vsync
- * @param {!Element} el
- * @param {boolean} isHidden
- */
-function toggleHiddenAttribute(vsync, el, isHidden) {
-  vsync.mutate(() => {
-    if (isHidden) {
-      el.setAttribute('hidden', 'hidden');
-    } else {
-      el.removeAttribute('hidden');
-    }
-  });
-}
-
-
-/**
  * System Layer (i.e. UI Chrome) for <amp-story>.
  * Chrome contains:
  *   - mute/unmute button
