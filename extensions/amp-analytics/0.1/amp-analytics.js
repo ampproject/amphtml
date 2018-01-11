@@ -345,13 +345,12 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Asks the browser to preload a URL. Always also does a preconnect
    * because browser support for that is better.
    *
-   * @param {!./service/viewer-impl.Viewer} viewer
    * @param {string} url
    * @param {string=} opt_preloadAs
    * @VisibleForTesting
    */
-  preload(viewer, url, opt_preloadAs) {
-    this.preconnect.preload(viewer, url, opt_preloadAs);
+  preload(url, opt_preloadAs) {
+    this.preconnect.preload(url, opt_preloadAs);
   }
 
   /**
