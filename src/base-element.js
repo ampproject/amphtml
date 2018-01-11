@@ -16,7 +16,7 @@
 
 import {ActionTrust} from './action-trust';
 import {Layout} from './layout';
-import {getData} from './event-helper';
+import {getData, listen} from './event-helper';
 import {loadPromise} from './event-helper';
 import {preconnectForElement} from './preconnect';
 import {isArray, toWin} from './types';
@@ -638,14 +638,15 @@ export class BaseElement {
    * @param  {string|!Array<string>} events
    * @param  {!Element} element
    * @public @final
+   * @return {!UnlistenDef}
    */
   forwardEvents(events, element) {
-    events = isArray(events) ? events : [events];
-    for (let i = 0; i < events.length; i++) {
-      element.addEventListener(events[i], event => {
-        this.element.dispatchCustomEvent(events[i], getData(event) || {});
-      });
-    }
+    const unlisteners = (isArray(events) ? events : [events]).map(eventType =>
+      listen(element, eventType, event => {
+        this.element.dispatchCustomEvent(eventType, getData(event) || {});
+      }));
+
+    return () => unlisteners.forEach(unlisten => unlisten());
   }
 
   /**
