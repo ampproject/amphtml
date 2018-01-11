@@ -149,7 +149,7 @@ export function validateSrcPrefix(prefix, src) {
     prefix = [prefix];
   }
   if (src !== undefined) {
-    for (let p = 0; p <= prefix.length; p++) {
+    for (let p = 0; p < prefix.length; p++) {
       const protocolIndex = src.indexOf(prefix[p]);
       if (protocolIndex == 0) {
         return;

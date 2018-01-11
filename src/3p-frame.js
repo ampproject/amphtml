@@ -299,8 +299,8 @@ function getCustomBootstrapBaseUrl(
   const parsed = parseUrl(url);
   user().assert((parsed.hostname == 'localhost' && !opt_strictForUnitTest) ||
       parsed.origin != parseUrl(parentWindow.location.href).origin,
-  '3p iframe url must not be on the same origin as the current doc' +
-      'ument %s (%s) in element %s. See https://github.com/ampproject/amphtml' +
+  '3p iframe url must not be on the same origin as the current document ' +
+      '%s (%s) in element %s. See https://github.com/ampproject/amphtml' +
       '/blob/master/spec/amp-iframe-origin-policy.md for details.', url,
   parsed.origin, meta);
   return url + '?$internalRuntimeVersion$';
