@@ -908,7 +908,7 @@ export class AmpStory extends AMP.BaseElement {
     if (!this.bookend_.isActive()) {
       return;
     }
-    // xxx
+
     this.activePage_.resumeCallback();
 
     this.toggleElementsOnBookend_(/* display */ true);
