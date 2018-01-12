@@ -108,7 +108,7 @@ export class DoubleclickA4aEligibility {
    * @param {!Window} win
    * @param {!Element} element
    * @param {!Array<string>} branches
-   * @param {!string} expName
+   * @param {string} expName
    */
   selectAndSetUnconditionedExp(win, element, branches, expName) {
     const experimentId = this.maybeSelectExperiment(
@@ -122,7 +122,7 @@ export class DoubleclickA4aEligibility {
   /** Whether Fast Fetch is enabled
    * @param {!Window} win
    * @param {!Element} element
-   * @param {!boolean} useRemoteHtml
+   * @param {boolean} useRemoteHtml
    * @return {boolean}
    */
   isA4aEnabled(win, element, useRemoteHtml) {
@@ -183,7 +183,7 @@ export class DoubleclickA4aEligibility {
    * @param {!Window} win
    * @param {!Element} element
    * @param {!Array<string>} selectionBranches
-   * @param {!string} experimentName}
+   * @param {string} experimentName}
    * @return {?string} Experiment branch ID or null if not selected.
    * @visibileForTesting
    */
@@ -205,7 +205,7 @@ const singleton = new DoubleclickA4aEligibility();
 /**
  * @param {!Window} win
  * @param {!Element} element
- * @param {!boolean} useRemoteHtml
+ * @param {boolean} useRemoteHtml
  * @returns {boolean}
  */
 export function doubleclickIsA4AEnabled(win, element, useRemoteHtml) {
