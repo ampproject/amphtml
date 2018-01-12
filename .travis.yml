@@ -23,8 +23,6 @@ before_script:
   - gem install percy-capybara phantomjs poltergeist
   # Poltergeist requires an absolute path to find phantomjs. See #10305.
   - export PATH="`pwd`/node_modules/.bin:$PATH"
-  # Set up a token for Greenkeeper and update the yarn lock file
-  - export GH_TOKEN=`node -e "console.log(require('atob')(process.env.GREENKEEPER_TOKEN_ENCODED))"`
   - greenkeeper-lockfile-update
 script: node build-system/pr-check.js
 after_script: greenkeeper-lockfile-upload
