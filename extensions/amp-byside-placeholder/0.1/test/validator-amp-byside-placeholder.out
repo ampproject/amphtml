@@ -50,9 +50,9 @@ FAIL
 |         leaving them out results in an error. -->
 |    <amp-byside-placeholder
 >>   ^~~~~~~~~
-amp-byside-placeholder/0.1/test/validator-amp-byside-placeholder.html:50:2 The mandatory attribute 'data-webcare-id' is missing in tag 'amp-byside-placeholder'. (see https://www.ampproject.org/docs/reference/components/amp-byside-placeholder) [AMP_TAG_PROBLEM]
->>   ^~~~~~~~~
 amp-byside-placeholder/0.1/test/validator-amp-byside-placeholder.html:50:2 The mandatory attribute 'data-label' is missing in tag 'amp-byside-placeholder'. (see https://www.ampproject.org/docs/reference/components/amp-byside-placeholder) [AMP_TAG_PROBLEM]
+>>   ^~~~~~~~~
+amp-byside-placeholder/0.1/test/validator-amp-byside-placeholder.html:50:2 The mandatory attribute 'data-webcare-id' is missing in tag 'amp-byside-placeholder'. (see https://www.ampproject.org/docs/reference/components/amp-byside-placeholder) [AMP_TAG_PROBLEM]
 |        data-lang="en"
 |        data-channel="en"
 |        height="300"
