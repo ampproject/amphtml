@@ -70,7 +70,7 @@ import {dict} from '../../../src/utils/object';
 import {renderSimpleTemplate} from './simple-template';
 import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
-
+import {TapNavigationDirection} from './page-advancement';
 
 
 /** @private @const {string} */
@@ -343,6 +343,21 @@ export class AmpStory extends AMP.BaseElement {
 
     this.element.addEventListener(EventType.SHOW_NO_PREVIOUS_PAGE_HELP, () => {
       this.ampStoryHint_.showFirstPageHintOverlay();
+    });
+
+    this.element.addEventListener(EventType.TAP_NAVIGATION, e => {
+      const {direction} = e.detail;
+
+      if (this.isDesktop_()) {
+        this.next_();
+        return;
+      }
+
+      if (direction === TapNavigationDirection.NEXT) {
+        this.next_();
+      } else if (direction === TapNavigationDirection.PREVIOUS) {
+        this.previous_();
+      }
     });
 
     const gestures = Gestures.get(this.element,

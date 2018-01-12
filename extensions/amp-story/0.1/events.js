@@ -46,6 +46,9 @@ export const EventType = {
   // Triggered when the story should switch to the next page
   NEXT_PAGE: 'ampstory:nextpage',
 
+  // Triggered when the story should navigate after a tap on active page.
+  TAP_NAVIGATION: 'ampstory:tapnavigation',
+
   // Triggered when a page updates its progress
   PAGE_PROGRESS: 'ampstory:pageprogress',
 
