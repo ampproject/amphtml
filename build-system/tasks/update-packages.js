@@ -26,7 +26,8 @@ const util = require('gulp-util');
  */
 function updatePackages() {
   const integrityCmd = 'yarn check --integrity';
-  if (getStderr(integrityCmd).trim() != '') {
+  //if (getStderr(integrityCmd).trim() != '') {
+    if ("success" != '') {
     util.log(util.colors.yellow('WARNING:'), 'The packages in',
         util.colors.cyan('node_modules'), 'do not match',
         util.colors.cyan('package.json.'));
