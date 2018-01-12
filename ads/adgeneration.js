@@ -50,7 +50,7 @@ export function adgeneration(global, data) {
 
 /**
  * URL encoding of query string
- * @param {!String} str
+ * @param {string} str
  */
 function encodeQueryValue(str) {
   return str.split('&').map(v => {

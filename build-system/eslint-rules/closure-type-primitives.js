@@ -93,20 +93,82 @@ function checkClosureComments(context, closureComment) {
 
   const {parsed, node} = closureComment;
   traverse(parsed).forEach(astNode => {
-    const isNonNullableType = (astNode && astNode.type === 'NonNullableType');
-    if (!isNonNullableType || !astNode.expression) {
+    if (!astNode) {
       return;
     }
 
-    const {type, name} = astNode.expression;
-    if (type === 'FunctionType') {
-      reportNonNullablePrimitive(context, node, 'function');
-    } else if (type === 'UndefinedLiteral') {
-      reportNonNullablePrimitive(context, node, 'undefined');
-    } else if (type === 'NameExpression' && isNonNullablePrimitiveName(name)) {
-      reportNonNullablePrimitive(context, node, name);
+    const name = astNode.name;
+    if (astNode.type === 'NameExpression' && isPrimitiveWrapperName(name)) {
+      reportPrimitiveWrapper(context, node, name);
+    }
+    if (astNode.type === 'NonNullableType') {
+      checkNonNullableNodes(context, node, astNode);
     }
   });
+}
+
+/** @enum {string} */
+const PRIMITIVE_WRAPPER_NAMES = [
+  'Boolean',
+  'Number',
+  'String',
+  'Symbol',
+];
+
+/**
+ * Disallowed primitives wrappers, from go/es6-style#disallowed-features-wrapper-objects
+ * @param {string} name
+ * @return {boolean}
+ */
+function isPrimitiveWrapperName(name) {
+  return PRIMITIVE_WRAPPER_NAMES.includes(name);
+}
+
+/**
+ * Report the existence of a primitive wrapper. If --fix is specified,
+ * the name will be converted to the non-wrapper primitive.
+ * @param {!EslintContextDef} context
+ * @param {!EslintNodeDef} node
+ * @param {string} name
+ */
+function reportPrimitiveWrapper(context, node, name) {
+  context.report({
+    node,
+    message: 'Forbidden primitive wrapper {{ name }}.',
+    data: {name},
+    fix(fixer) {
+      const badTextIndex = node.value.indexOf(name);
+      if (badTextIndex === -1) {
+        return;
+      }
+
+      const start = node.range[0] + badTextIndex + 2;
+      const end = start + name.length;
+      return fixer.replaceTextRange([start, end], name.toLowerCase());
+    },
+  });
+}
+
+/**
+ * Check if a Closure Compiler comment contains a primitive redundantly
+ * specified as non-nullable with a !
+ * @param {!EslintContextDef} context
+ * @param {!EslintNodeDef} node
+ * @param {!Object} astNode
+ */
+function checkNonNullableNodes(context, node, astNode) {
+  if (!astNode.expression) {
+    return;
+  }
+
+  const {type, name} = astNode.expression;
+  if (type === 'FunctionType') {
+    reportNonNullablePrimitive(context, node, 'function');
+  } else if (type === 'UndefinedLiteral') {
+    reportNonNullablePrimitive(context, node, 'undefined');
+  } else if (type === 'NameExpression' && isNonNullablePrimitiveName(name)) {
+    reportNonNullablePrimitive(context, node, name);
+  }
 }
 
 /**

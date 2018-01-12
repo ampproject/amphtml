@@ -49,7 +49,7 @@ function startTimer(functionName) {
 /**
  * Stops the timer for the given function and prints the execution time.
  * @param {string} functionName
- * @return {Number}
+ * @return {number}
  */
 function stopTimer(functionName, startTime) {
   const endTime = Date.now();
