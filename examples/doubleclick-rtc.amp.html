@@ -30,5 +30,17 @@
             rtc-config='{"urls": ["https://www.example.biz/?pvi=PAGEVIEWID&href=HREF&ds=ATTR(data-slot)&h=ATTR(height)&w=ATTR(width)&ovw=ATTR(data-override-width)&json=ATTR(data-json)&ovh=ATTR(data-override-height)"], "timeoutMillis": 500}'
             json='{"targeting":{"food":["burgers","chicken"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":0}'>
     </amp-ad>
+
+    <amp-ad width="320" height="50"
+            type="doubleclick"
+            data-slot="/4119129/mobile_ad_banner"
+            rtc-config='{
+            "vendors": {
+            "fakeVendor": {
+            "SLOT_ID": {"key":"param"}
+            }
+            }
+            }'>
+    </amp-ad>
 </body>
 </html>
