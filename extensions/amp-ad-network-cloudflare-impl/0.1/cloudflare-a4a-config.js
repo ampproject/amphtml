@@ -18,7 +18,7 @@
  * Determines which tags desire A4A handling
  * @param {!Window} win
  * @param {!Element} element
- * @param {!boolean} useRemoteHtml
+ * @param {boolean} useRemoteHtml
  * @returns {boolean}
  */
 export function cloudflareIsA4AEnabled(win, element, useRemoteHtml) {

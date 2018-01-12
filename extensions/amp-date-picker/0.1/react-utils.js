@@ -19,7 +19,7 @@ import {requireExternal} from '../../../src/module';
 
 /**
  * Create a React component that can render Promises
- * @return {!function(new:React.Component, !Object)}
+ * @return {function(new:React.Component, !Object)}
  */
 function createDeferred_() {
   const React = requireExternal('react');
@@ -57,7 +57,7 @@ let Deferred_ = null;
 
 /**
  * Creates a single date picker.
- * @return {!function(new:React.Component, !Object)} A date picker class
+ * @return {function(new:React.Component, !Object)} A date picker class
  */
 export function createDeferred() {
   if (!Deferred_) {

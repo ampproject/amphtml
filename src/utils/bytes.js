@@ -42,7 +42,7 @@ export function utf8Decode(bytes) {
 /**
  * Interpret a byte array as a UTF-8 string.
  * @param {!BufferSource} bytes
- * @return {!string}
+ * @return {string}
  */
 export function utf8DecodeSync(bytes) {
   if (typeof TextDecoder !== 'undefined') {
@@ -140,7 +140,7 @@ export function bytesToUInt32(bytes) {
 /**
  * Generate a random bytes array with specific length using
  * win.crypto.getRandomValues. Return null if it is not available.
- * @param {!number} length
+ * @param {number} length
  * @return {?Uint8Array}
  */
 export function getCryptoRandomBytesArray(win, length) {

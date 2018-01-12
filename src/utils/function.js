@@ -18,8 +18,8 @@
 /**
  * Creates a function that is evaluated only once and returns the cached result
  * subsequently.
- * @param {!function():(T|undefined)} fn
- * @return {!function():(T|undefined)}
+ * @param {function():(T|undefined)} fn
+ * @return {function():(T|undefined)}
  * @template T
  * @suppress {checkTypes} Compiler complains about "fn = null" for GC.
  */

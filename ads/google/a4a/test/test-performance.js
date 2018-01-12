@@ -25,7 +25,7 @@ import * as sinon from 'sinon';
 /**
  * Verify that `address` matches all of the patterns in `matchlist`.
  *
- * @param {!string} address
+ * @param {string} address
  * @param {!Array<!RegExp>} matchList
  */
 function expectMatchesAll(address, matchList) {

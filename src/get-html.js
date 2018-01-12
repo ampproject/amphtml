@@ -79,7 +79,7 @@ function appendToResult(node, attrs, result) {
 /**
  *
  * @param {!Element} node
- * @return {!boolean}
+ * @return {boolean}
  */
 function isApplicableNode(node) {
   const tagName = node.tagName.toLowerCase();

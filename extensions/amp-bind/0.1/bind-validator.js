@@ -79,8 +79,8 @@ export class BindValidator {
    * Returns true if (tag, property) binding is allowed.
    * Otherwise, returns false.
    * @note `tag` and `property` are case-sensitive.
-   * @param {!string} tag
-   * @param {!string} property
+   * @param {string} tag
+   * @param {string} property
    * @return {boolean}
    */
   canBind(tag, property) {
@@ -90,8 +90,8 @@ export class BindValidator {
   /**
    * Returns true if `value` is a valid result for a (tag, property) binding.
    * Otherwise, returns false.
-   * @param {!string} tag
-   * @param {!string} property
+   * @param {string} tag
+   * @param {string} property
    * @param {?string} value
    * @return {boolean}
    */

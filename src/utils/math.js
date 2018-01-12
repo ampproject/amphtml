@@ -28,12 +28,12 @@
  * Ex1: -2 in the range [0, 10] is interpreted as 0 and thus gives 40 in [40,80]
  * Ex2: 19 in the range [0, 5] is interpreted as 5 and thus gives 80 in [40,80]
  *
- * @param {!number} val the value in the source range
- * @param {!number} min1 the lower bound of the source range
- * @param {!number} max1 the upper bound of the source range
- * @param {!number} min2 the lower bound of the target range
- * @param {!number} max2 the upper bound of the target range
- * @return {!number} the equivalent value in the target range
+ * @param {number} val the value in the source range
+ * @param {number} min1 the lower bound of the source range
+ * @param {number} max1 the upper bound of the source range
+ * @param {number} min2 the lower bound of the target range
+ * @param {number} max2 the upper bound of the target range
+ * @return {number} the equivalent value in the target range
  */
 export function mapRange(val, min1, max1, min2, max2) {
 
@@ -61,10 +61,10 @@ export function mapRange(val, min1, max1, min2, max2) {
  * clamp(1.5, 0, 1) -> 1
  * clamp(-0.5, 0, 1) -> 0
  *
- * @param {!number} val the value to clamp.
- * @param {!number} min the lower bound.
- * @param {!number} max the upper bound.
- * @return {!number} the clamped value.
+ * @param {number} val the value to clamp.
+ * @param {number} min the lower bound.
+ * @param {number} max the upper bound.
+ * @return {number} the clamped value.
  */
 export function clamp(val, min, max) {
   return Math.min(Math.max(val, min), max);

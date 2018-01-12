@@ -119,7 +119,7 @@ export class AmpAdUIHandler {
           width - iframeWidth, width);
     }
 
-    /** @type {!Object<!boolean, number|undefined, number|undefined>} */
+    /** @type {!Object<boolean, number|undefined, number|undefined>} */
     const resizeInfo = {
       success: true,
       newWidth,

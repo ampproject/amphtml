@@ -84,13 +84,13 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {!boolean} */
+    /** @private {boolean} */
     this.active_ = false;
 
     /** @private {number} */
     this.currentElemId_ = -1;
 
-    /** @private {!function(!Event)} */
+    /** @private {function(!Event)} */
     this.boundHandleKeyboardEvents_ = this.handleKeyboardEvents_.bind(this);
 
     /**
@@ -478,7 +478,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * Builds a button and appends it to the container.
    * @param {string} label Text of the button for a11y
    * @param {string} className Css classname
-   * @param {!function()} action function to call when tapped
+   * @param {function()} action function to call when tapped
    * @private
    */
   buildButton_(label, className, action) {

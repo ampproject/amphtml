@@ -124,7 +124,7 @@ export class Messaging {
     this.port_ = port;
     /** @const @private */
     this.isWebview_ = !!opt_isWebview;
-    /** @private {!number} */
+    /** @private {number} */
     this.requestIdCounter_ = 0;
     /** @private {!Object<number, {resolve: function(*), reject: function(!Error)}>} */
     this.waitingForResponse_ = {};

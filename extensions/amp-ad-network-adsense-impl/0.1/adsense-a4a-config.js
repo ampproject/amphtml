@@ -49,7 +49,7 @@ export const URL_EXPERIMENT_MAPPING = {
 /**
  * @param {!Window} win
  * @param {!Element} element
- * @param {!boolean} useRemoteHtml
+ * @param {boolean} useRemoteHtml
  * @returns {boolean}
  */
 export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {

@@ -504,7 +504,7 @@ export class MediaPool {
 
   /**
    * Invokes a function for all media managed by the media pool.
-   * @param {!function(!HTMLMediaElement)} callbackFn The function to be
+   * @param {function(!HTMLMediaElement)} callbackFn The function to be
    *     invoked.
    * @private
    */

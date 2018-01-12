@@ -36,7 +36,7 @@ export class Toolbar {
     /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private {!string} */
+    /** @private {string} */
     this.toolbarMedia_ = this.toolbarDomElement_.getAttribute('toolbar');
 
     /** @private {?Element} */
@@ -45,7 +45,7 @@ export class Toolbar {
     /** @private {Element|undefined} */
     this.toolbarTarget_ = undefined;
 
-    /** @private {!boolean} **/
+    /** @private {boolean} **/
     this.toolbarShown_ = false;
 
     // Default to toolbar target being hidden

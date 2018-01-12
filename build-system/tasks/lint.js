@@ -60,7 +60,7 @@ function initializeStream(globs, streamOptions) {
 
 /**
  * Runs the linter on the given stream using the given options.
- * @param {!string} path
+ * @param {string} path
  * @param {!ReadableStream} stream
  * @param {!Object} options
  * @return {boolean}

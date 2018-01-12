@@ -21,8 +21,8 @@ import {omit} from '../../../src/utils/object';
 /**
  * A higher-order component that wraps a specific date-picker implmentation
  * with common functionality.
- * @param {!function(new:React.Component, !Object)} WrappedComponent A date-picker component to wrap
- * @return {!function(new:React.Component, !Object)} A date picker component with common functionality
+ * @param {function(new:React.Component, !Object)} WrappedComponent A date-picker component to wrap
+ * @return {function(new:React.Component, !Object)} A date picker component with common functionality
  */
 export function withDatePickerCommon(WrappedComponent) {
   const {

@@ -61,7 +61,7 @@ let originExperiments;
 
 /**
  * @typedef {{
- *   isTrafficEligible: !function(!Window):boolean,
+ *   isTrafficEligible: function(!Window):boolean,
  *   branches: !Array<string>
  * }}
  */
@@ -418,7 +418,7 @@ export function randomlySelectUnsetExperiments(win, experiments) {
  * For example, 'control' or 'experiment'.
  *
  * @param {!Window} win Window context to check for experiment state.
- * @param {!string} experimentName Name of the experiment to check.
+ * @param {string} experimentName Name of the experiment to check.
  * @return {?string} Active experiment branch ID for experimentName (possibly
  *     null if experimentName has been tested but no branch was enabled).
  */
@@ -431,7 +431,7 @@ export function getExperimentBranch(win, experimentName) {
  * Disables the experiment name altogether if branchId is falseish.
  *
  * @param {!Window} win Window context to check for experiment state.
- * @param {!string} experimentName Name of the experiment to check.
+ * @param {string} experimentName Name of the experiment to check.
  * @param {?string} branchId ID of branch to force or null to disable
  *     altogether.
  * @visibleForTesting

@@ -58,7 +58,7 @@ export class Timer {
    * be close to 0 and this will NOT yield to the event queue.
    *
    * Returns the timer ID that can be used to cancel the timer (cancel method).
-   * @param {!function()} callback
+   * @param {function()} callback
    * @param {number=} opt_delay
    * @return {number|string}
    */

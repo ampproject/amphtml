@@ -32,7 +32,7 @@ export class RequestHandler {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} request
    * @param {!../../../src/preconnect.Preconnect} preconnect
-   * @param {!function(string, !JsonObject)} handler
+   * @param {function(string, !JsonObject)} handler
    * @param {boolean} isSandbox
    */
   constructor(ampdoc, request, preconnect, handler, isSandbox) {
@@ -65,7 +65,7 @@ export class RequestHandler {
     /** @private {!../../../src/preconnect.Preconnect} */
     this.preconnect_ = preconnect;
 
-    /** @private {!function(string, !JsonObject)} */
+    /** @private {function(string, !JsonObject)} */
     this.handler_ = handler;
 
     /** @const @private {!Object|undefined} */

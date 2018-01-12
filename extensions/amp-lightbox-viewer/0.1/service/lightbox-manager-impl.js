@@ -95,7 +95,7 @@ export class LightboxManager {
    * Decides whether an already lightboxable element should automatically get
    * a tap handler to open in the lightbox.
    * @param {!Element} element
-   * @return {!boolean}
+   * @return {boolean}
    */
   meetsHeuristicsForTap_(element) {
     dev().assert(element);

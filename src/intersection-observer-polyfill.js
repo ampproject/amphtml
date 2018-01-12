@@ -95,10 +95,10 @@ export class IntersectionObserverApi {
     /** @private {?IntersectionObserverPolyfill} */
     this.intersectionObserver_ = null;
 
-    /** @private {!boolean} */
+    /** @private {boolean} */
     this.shouldObserve_ = false;
 
-    /** @private {!boolean} */
+    /** @private {boolean} */
     this.isInViewport_ = false;
 
     /** @private {?function()} */
@@ -153,7 +153,7 @@ export class IntersectionObserverApi {
 
   /**
    * Enable to the PositionObserver to listen to viewport events
-   * @param {!boolean} inViewport
+   * @param {boolean} inViewport
    */
   onViewportCallback(inViewport) {
     this.isInViewport_ = inViewport;
@@ -187,7 +187,7 @@ export class IntersectionObserverApi {
  */
 export class IntersectionObserverPolyfill {
   /**
-   * @param {!function(?Array<!IntersectionObserverEntry>)} callback.
+   * @param {function(?Array<!IntersectionObserverEntry>)} callback.
    * @param {Object=} opt_option
    */
   constructor(callback, opt_option) {

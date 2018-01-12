@@ -69,13 +69,13 @@ let LaterpayConfigDef;
 
 /**
  * @typedef {{
- *   description: !string,
+ *   description: string,
  *   price: !Object<string, number>,
- *   purchase_type: !string,
- *   purchase_url: !string,
- *   title: !string,
- *   validity_unit: !string,
- *   validity_value: !number
+ *   purchase_type: string,
+ *   purchase_url: string,
+ *   title: string,
+ *   validity_unit: string,
+ *   validity_value: number
  * }}
  */
 let PurchaseOptionDef;
@@ -125,7 +125,7 @@ export class LaterpayVendor {
     /** @const @private {!Array<function()>} */
     this.purchaseOptionListeners_ = [];
 
-    /** @private {!boolean} */
+    /** @private {boolean} */
     this.containerEmpty_ = true;
 
     /** @private {?Node} */
@@ -167,7 +167,7 @@ export class LaterpayVendor {
 
   /**
    * @private
-   * @return {!string}
+   * @return {string}
    */
   getConfigUrl_() {
     const region = this.laterpayConfig_['region'] || DEFAULT_REGION;
@@ -249,7 +249,7 @@ export class LaterpayVendor {
   }
 
   /**
-   * @return {!string}
+   * @return {string}
    * @private
    */
   getArticleTitle_() {
@@ -360,7 +360,7 @@ export class LaterpayVendor {
 
   /**
    * @private
-   * @param {!string} area
+   * @param {string} area
    */
   renderTextBlock_(area) {
     if (this.i18n_[area]) {
@@ -458,8 +458,8 @@ export class LaterpayVendor {
   }
 
   /**
-   * @param {!number} priceValue
-   * @return {!string}
+   * @param {number} priceValue
+   * @return {string}
    * @private
    */
   formatPrice_(priceValue) {
@@ -472,7 +472,7 @@ export class LaterpayVendor {
   }
 
   /**
-   * @param {!string} href
+   * @param {string} href
    * @return {!Element}
   */
   createAlreadyPurchasedLink_(href) {
@@ -516,8 +516,8 @@ export class LaterpayVendor {
 
   /**
    * @param {!Event} ev
-   * @param {!string} purchaseUrl
-   * @param {!string} purchaseType
+   * @param {string} purchaseUrl
+   * @param {string} purchaseType
    * @private
    */
   handlePurchase_(ev, purchaseUrl, purchaseType) {

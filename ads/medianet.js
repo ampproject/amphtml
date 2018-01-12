@@ -59,7 +59,7 @@ export function medianet(global, data) {
 /**
  * @param {!Window} global
  * @param {!Object} data
- * @param {!string} publisherUrl
+ * @param {string} publisherUrl
  * @param {?string} referrerUrl
  */
 function loadCMTag(global, data, publisherUrl, referrerUrl) {
@@ -123,7 +123,7 @@ function loadCMTag(global, data, publisherUrl, referrerUrl) {
 /**
  * @param {!Window} global
  * @param {!Object} data
- * @param {!string} publisherUrl
+ * @param {string} publisherUrl
  * @param {?string} referrerUrl
  */
 function loadHBTag(global, data, publisherUrl, referrerUrl) {

@@ -370,7 +370,7 @@ class AmpVideo extends AMP.BaseElement {
   }
 
   /**
-   * @param {!string} src
+   * @param {string} src
    * @param {?string} type
    * @return {!Element} source element
    * @private
