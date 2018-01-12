@@ -372,7 +372,7 @@ export function imaVideo(global, data) {
     playbackStarted = false;
     nativeFullscreen = false;
 
-    var mobileBrowser = false;
+    let mobileBrowser = false;
     interactEvent = 'click';
     mouseDownEvent = 'mousedown';
     mouseMoveEvent = 'mousemove';
@@ -522,7 +522,7 @@ function onBigPlayTouchEnd() {
     // Reset state and ignore this tap.
     userTappedAndDragged = false;
   } else {
-    var tapWithoutDragEvent = new Event('tapwithoutdrag');
+    const tapWithoutDragEvent = new Event('tapwithoutdrag');
     bigPlayDiv.dispatchEvent(tapWithoutDragEvent);
   }
 }
