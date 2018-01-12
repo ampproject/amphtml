@@ -540,7 +540,7 @@ export class Viewport {
 
   /**
    * Registers the handler for ViewportChangedEventDef events.
-   * @param {!function(!ViewportChangedEventDef)} handler
+   * @param {function(!ViewportChangedEventDef)} handler
    * @return {!UnlistenDef}
    */
   onChanged(handler) {
@@ -553,7 +553,7 @@ export class Viewport {
    * event handler. The primary use case for this handler is to inform that
    * scrolling might be going on. To get more information {@link onChanged}
    * handler should be used.
-   * @param {!function()} handler
+   * @param {function()} handler
    * @return {!UnlistenDef}
    */
   onScroll(handler) {
@@ -562,7 +562,7 @@ export class Viewport {
 
   /**
    * Registers the handler for ViewportResizedEventDef events.
-   * @param {!function(!ViewportResizedEventDef)} handler
+   * @param {function(!ViewportResizedEventDef)} handler
    * @return {!UnlistenDef}
    */
 

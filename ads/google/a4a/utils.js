@@ -71,7 +71,7 @@ export const QQID_HEADER = 'X-QQID';
  * implementations of AMP tags, e.g., by AMPHTML implementors.  It should not be
  * added by a publisher page.
  *
- * @const {!string}
+ * @const {string}
  * @visibleForTesting
  */
 export const EXPERIMENT_ATTRIBUTE = 'data-experiment-id';
@@ -185,7 +185,7 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
 /**
  * @param {!Window} win
  * @param {string} type matching typing attribute.
- * @param {!function(!Element):string} groupFn
+ * @param {function(!Element):string} groupFn
  * @return {!Promise<!Object<string,!Array<!Promise<!../../../src/base-element.BaseElement>>>>}
  */
 export function groupAmpAdsByType(win, type, groupFn) {

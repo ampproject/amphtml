@@ -264,7 +264,7 @@ export class LayoutLayers {
    * Eagerly creates a Layer for the element.
    *
    * @param {!Element} element
-   * @param {!boolean} isRootLayer
+   * @param {boolean} isRootLayer
    * @return {!LayoutElement}
    */
   declareLayer_(element, isRootLayer) {

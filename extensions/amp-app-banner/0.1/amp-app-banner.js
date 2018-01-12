@@ -476,7 +476,7 @@ function measureBanner(state) {
 
 /**
  * Updates viewport padding to add padding on the bottom.
- * @param {!Object} state.
+ * @param {!Object} state
  */
 function updateViewportPadding(state) {
   state.viewport.updatePaddingBottom(state.bannerHeight);

@@ -24,7 +24,7 @@
  *
  * @param {!Window} win
  * @param {!Element} element
- * @param {!boolean} useRemoteHtml
+ * @param {boolean} useRemoteHtml
  * @returns {boolean}
  */
 export function fakeIsA4AEnabled(win, element, useRemoteHtml) {

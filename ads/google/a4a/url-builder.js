@@ -21,7 +21,7 @@ export let QueryParameterDef;
  * Builds a URL from query parameters, truncating to a maximum length if
  * necessary.
  * @param {string} baseUrl scheme, domain, and path for the URL.
- * @param {!Object<string,!string|number|null>} queryParams query parameters for
+ * @param {!Object<string,string|number|null>} queryParams query parameters for
  *     the URL.
  * @param {number} maxLength length to truncate the URL to if necessary.
  * @param {?QueryParameterDef=} opt_truncationQueryParam query parameter to

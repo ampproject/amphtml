@@ -48,7 +48,7 @@ export class ImageViewer {
   /**
    * @param {!./base-element.BaseElement} lightbox
    * @param {!Window} win
-   * @param {!function(T, number=):Promise<T>} parentLoadPromise
+   * @param {function(T, number=):Promise<T>} parentLoadPromise
    * @template T
    */
   constructor(lightbox, win, parentLoadPromise) {
@@ -164,7 +164,7 @@ export class ImageViewer {
 
   /**
    * Returns true if the image is enlarged and not at its original scale
-   * @return {!boolean}
+   * @return {boolean}
    */
   isScaled() {
     return this.scale_ !== 1;

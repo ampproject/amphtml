@@ -251,7 +251,7 @@ export class WebAnimationRunner {
   }
 
   /**
-   * @return {!number} total duration in milliseconds.
+   * @return {number} total duration in milliseconds.
    * @throws {Error} If timeline is infinite.
    */
   getTotalDuration_() {

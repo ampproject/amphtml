@@ -460,7 +460,7 @@ export class EmbedAnalyticsRoot extends AnalyticsRoot {
 
 /**
  * @param  {!Element} el
- * @param  {!string} selector
+ * @param  {string} selector
  * @return {boolean}
  */
 function matchesNoInline(el, selector) {

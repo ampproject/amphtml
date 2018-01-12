@@ -659,13 +659,13 @@ function triggerRenderStart(opt_data) {
 
 /**
  * Id for getHtml postMessage.
- * @type {!number}
+ * @type {number}
  */
 let currentMessageId = 0;
 
 /**
  * See readme for window.context.getHtml
- * @param {!string} selector - CSS selector of the node to take content from
+ * @param {string} selector - CSS selector of the node to take content from
  * @param {!Array<string>} attributes - tag attributes to be left in the stringified HTML
  * @param {!Function} callback
  */
@@ -692,7 +692,7 @@ function getHtml(selector, attributes, callback) {
  * the IntersectionObserver spec callback.
  * http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#callbackdef-intersectionobservercallback
  * @param {function(!Array<IntersectionObserverEntry>)} observerCallback
- * @returns {!function()} A function which removes the event listener that
+ * @returns {function()} A function which removes the event listener that
  *    observes for intersection messages.
  */
 function observeIntersection(observerCallback) {
@@ -726,7 +726,7 @@ function dispatchVisibilityChangeEvent(win, isHidden) {
 /**
  * Registers a callback for communicating when a resize request succeeds.
  * @param {function(number, number)} observerCallback
- * @returns {!function()} A function which removes the event listener that
+ * @returns {function()} A function which removes the event listener that
  *    observes for resize status messages.
  */
 function onResizeSuccess(observerCallback) {
@@ -738,7 +738,7 @@ function onResizeSuccess(observerCallback) {
 /**
  * Registers a callback for communicating when a resize request is denied.
  * @param {function(number, number)} observerCallback
- * @returns {!function()} A function which removes the event listener that
+ * @returns {function()} A function which removes the event listener that
  *    observes for resize status messages.
  */
 function onResizeDenied(observerCallback) {

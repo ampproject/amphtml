@@ -155,7 +155,7 @@ const TaskState = {
  */
 class Task {
   /**
-   * @param {!function(?IdleDeadline)} fn
+   * @param {function(?IdleDeadline)} fn
    */
   constructor(fn) {
     /** @public {TaskState} */
@@ -229,7 +229,7 @@ class Task {
  */
 class StartupTask extends Task {
   /**
-   * @param {!function(?IdleDeadline)} fn
+   * @param {function(?IdleDeadline)} fn
    * @param {!Window} win
    * @param {!Promise<!./service/viewer-impl.Viewer>} viewerPromise
    */

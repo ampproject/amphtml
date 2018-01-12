@@ -40,7 +40,7 @@ class Filter {
    * @param {boolean=} opt_allowNull
    */
   constructor(filter, opt_allowNull) {
-    /** @type {!function(...?):(string|!Promise<string>)} */
+    /** @type {function(...?):(string|!Promise<string>)} */
     this.filter = filter;
 
     /** @type{boolean} */
@@ -201,7 +201,7 @@ export class VariableService {
   /**
    * @param {string} template The template to expand
    * @param {!ExpansionOptions} options configuration to use for expansion
-   * @return {!Promise<!string>} The expanded string
+   * @return {!Promise<string>} The expanded string
    */
   expandTemplate(template, options) {
     if (options.iterations < 0) {

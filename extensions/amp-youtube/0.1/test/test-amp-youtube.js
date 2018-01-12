@@ -78,7 +78,7 @@ describes.realWin('amp-youtube', {
   /**
    * This function runs generic tests for components based on
    * data-videoid or data-live-channelid.
-   * @param {!string} datasource
+   * @param {string} datasource
    */
   function runTestsForDatasource(datasource) {
     it('renders responsively', () => {

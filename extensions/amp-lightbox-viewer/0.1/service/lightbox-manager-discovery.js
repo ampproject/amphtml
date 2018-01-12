@@ -73,7 +73,7 @@ export function autoDiscoverLightboxables(ampdoc) {
 /**
  * Decides whether an element meets the heuristics to become lightboxable.
  * @param {!Element} element
- * @return {!boolean}
+ * @return {boolean}
  */
 function meetsHeuristics(element) {
   dev().assert(element);

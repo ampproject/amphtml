@@ -21,7 +21,7 @@ import {tryParseJson} from '../../../src/json';
   * Uses streaming where possible otherwise falls back to text.
   * @param {!Window} win
   * @param {!../../../src/service/xhr-impl.FetchResponse} response
-  * @param {!function(string, boolean)} lineCallback
+  * @param {function(string, boolean)} lineCallback
   * @private
   */
 export function lineDelimitedStreamer(win, response, lineCallback) {
@@ -65,7 +65,7 @@ export function lineDelimitedStreamer(win, response, lineCallback) {
 /**
   * Given each line, groups such that the first is JSON parsed and second
   * html unescaped.
-  * @param {!function(string, !Object<string, *>, boolean)} callback
+  * @param {function(string, !Object<string, *>, boolean)} callback
   * @private
   */
 export function metaJsonCreativeGrouper(callback) {
