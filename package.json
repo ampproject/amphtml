@@ -93,7 +93,6 @@
     "gulp-replace": "0.6.1",
     "gulp-sourcemaps": "2.6.3",
     "gulp-uglify": "3.0.0",
-    "gulp-util": "3.0.8",
     "gulp-watch": "4.3.11",
     "gulp-webserver": "0.9.1",
     "gulp-wrap": "0.13.0",
