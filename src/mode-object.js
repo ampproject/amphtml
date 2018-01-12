@@ -24,7 +24,7 @@ import {getMode} from './mode';
  */
 export function getModeObject(opt_win) {
   return {
-    localDev: true,// getMode(opt_win).localDev,
+    localDev: getMode(opt_win).localDev,
     development: getMode(opt_win).development,
     filter: getMode(opt_win).filter,
     minified: getMode(opt_win).minified,
