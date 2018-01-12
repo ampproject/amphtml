@@ -46,8 +46,7 @@ export class AmpMathml extends AMP.BaseElement {
     }, function ( data ) {
       console.log( data );
       if ( !data.errors ) {
-        this.img_ = data.svg;
-        this.element.appendChild( this.img_ );
+        this.element.appendChild( data.svg );
       }
     } );
 
