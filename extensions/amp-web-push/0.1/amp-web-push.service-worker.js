@@ -67,7 +67,7 @@ self.addEventListener('message', event => {
     - payload: An optional JavaScript object containing extra data relevant to
       the command.
    */
-  const {command, payload} = event.data; // eslint-disable-line no-unused-vars
+  const {command} = event.data;
 
   switch (command) {
     case WorkerMessengerCommand.AMP_SUBSCRIPION_STATE:
