@@ -71,13 +71,13 @@ self.addEventListener('message', event => {
 
   switch (command) {
     case WorkerMessengerCommand.AMP_SUBSCRIPION_STATE:
-      onMessageReceivedSubscriptionState(payload);
+      onMessageReceivedSubscriptionState();
       break;
     case WorkerMessengerCommand.AMP_SUBSCRIBE:
-      onMessageReceivedSubscribe(payload);
+      onMessageReceivedSubscribe();
       break;
     case WorkerMessengerCommand.AMP_UNSUBSCRIBE:
-      onMessageReceivedUnsubscribe(payload);
+      onMessageReceivedUnsubscribe();
       break;
   }
 });
