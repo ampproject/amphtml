@@ -58,7 +58,7 @@ export class AmpSlideScroll extends BaseSlides {
     /** @private {?../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = null;
 
-    /** @private {!boolean} */
+    /** @private {boolean} */
     this.hasNativeSnapPoints_ = false;
 
     /** @private {!Array<!Element>} */

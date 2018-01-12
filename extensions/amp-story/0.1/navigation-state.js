@@ -39,7 +39,7 @@ export let StateChangeEventDef;
 export class NavigationState {
   /**
    * @param {!Element} storyElement
-   * @param {!function():Promise<boolean>} hasBookend
+   * @param {function():Promise<boolean>} hasBookend
    */
   constructor(storyElement, hasBookend) {
     /** @private @const {!function():Promise<boolean>} */
@@ -66,7 +66,7 @@ export class NavigationState {
     });
   }
 
-  /** @param {!function(!StateChangeEventDef):void} stateChangeFn */
+  /** @param {function(!StateChangeEventDef):void} stateChangeFn */
   observe(stateChangeFn) {
     this.observable_.add(stateChangeFn);
   }

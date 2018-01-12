@@ -65,7 +65,7 @@ const BLACKLISTED_ANCESTOR_TAGS = [
 ];
 
 /**
- * @const {!Object<!Position, !function(!Element, !Element)>}
+ * @const {!Object<!Position, function(!Element, !Element)>}
  */
 const INJECTORS = {};
 INJECTORS[Position.BEFORE] = (anchorElement, elementToInject) => {
@@ -88,7 +88,7 @@ export class Placement {
    * @param {!../../../src/service/resources-impl.Resources} resources
    * @param {!Element} anchorElement
    * @param {!Position} position
-   * @param {!function(!Element, !Element)} injector
+   * @param {function(!Element, !Element)} injector
    * @param {!JsonObject<string, string>} attributes
    * @param {!../../../src/layout-rect.LayoutMarginsChangeDef=} opt_margins
    */

@@ -71,7 +71,7 @@ export class ImageViewer {
   /**
    * @param {!AmpImageLightbox} lightbox
    * @param {!Window} win
-   * @param {!function(T, number=):Promise<T>} loadPromise
+   * @param {function(T, number=):Promise<T>} loadPromise
    * @template T
    */
   constructor(lightbox, win, loadPromise) {

@@ -138,7 +138,7 @@ export class IframeTransportContext {
    * is received.
    * Note that calling this a second time will result in the first listener
    * being removed - the events will not be sent to both callbacks.
-   * @param {!function(string)} listener
+   * @param {function(string)} listener
    */
   onAnalyticsEvent(listener) {
     this.listener_ = listener;

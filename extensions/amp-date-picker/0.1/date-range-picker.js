@@ -21,7 +21,7 @@ import {withDatePickerCommon} from './date-picker-common';
 
 /**
  * Create a DateRangePicker React component
- * @return {!function(new:React.Component, !Object)} A date range picker component class
+ * @return {function(new:React.Component, !Object)} A date range picker component class
  */
 function createDateRangePickerBase() {
   const React = requireExternal('react');
@@ -207,7 +207,7 @@ let DateRangePicker_ = null;
 
 /**
  * Creates a date range picker, injecting its dependencies.
- * @return {!function(new:React.Component, !Object)} A date range picker component class
+ * @return {function(new:React.Component, !Object)} A date range picker component class
  */
 export function createDateRangePicker() {
   if (!DateRangePicker_) {

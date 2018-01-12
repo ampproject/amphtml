@@ -117,7 +117,7 @@ export function deserializeMessage(message) {
 /**
  *  Returns true if message looks like it is an AMP postMessage
  *  @param {*} message
- *  @return {!boolean}
+ *  @return {boolean}
  */
 export function isAmpMessage(message) {
   return (typeof message == 'string' &&

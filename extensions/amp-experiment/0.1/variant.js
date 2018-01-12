@@ -115,7 +115,7 @@ function validateConfig(config) {
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} group
  * @param {string=} opt_cidScope
- * @return {!Promise<!number>} a float number in the range of [0, 100)
+ * @return {!Promise<number>} a float number in the range of [0, 100)
  */
 function getBucketTicket(ampdoc, group, opt_cidScope) {
   if (!opt_cidScope) {

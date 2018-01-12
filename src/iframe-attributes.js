@@ -25,7 +25,7 @@ import {dict} from './utils/object.js';
  * Produces the attributes for the ad template.
  * @param {!Window} parentWindow
  * @param {!AmpElement} element
- * @param {!string} sentinel
+ * @param {string} sentinel
  * @param {!JsonObject=} attributes
  * @return {!JsonObject}
  */

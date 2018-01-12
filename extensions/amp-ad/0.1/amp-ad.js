@@ -30,7 +30,7 @@ import {hasOwn} from '../../../src/utils/object';
  * omits the version number and '.js' suffix for the extension script, which
  * will be handled by the extension loader.
  *
- * @param {!string} type
+ * @param {string} type
  * @return !string
  * @private
  */

@@ -319,7 +319,7 @@ export class Resources {
    * Returns a subset of resources which are (1) belong to the specified host
    * window, and (2) meet the filterFn given.
    * @param {!Window} hostWin
-   * @param {!function(!Resource):boolean} filterFn
+   * @param {function(!Resource):boolean} filterFn
    * @return {!Promise<!Array<!Resource>>}
    */
   getMeasuredResources(hostWin, filterFn) {

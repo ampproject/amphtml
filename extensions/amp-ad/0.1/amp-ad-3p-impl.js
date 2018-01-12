@@ -41,7 +41,7 @@ import {
   setStyle,
 } from '../../../src/style';
 
-/** @const {!string} Tag name for 3P AD implementation. */
+/** @const {string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';
 
 /** @const {number} */

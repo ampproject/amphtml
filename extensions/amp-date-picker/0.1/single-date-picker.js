@@ -21,7 +21,7 @@ import {withDatePickerCommon} from './date-picker-common';
 
 /**
  * Create a SingleDatePicker React component
- * @return {!function(new:React.Component, !Object)} A single date picker component class
+ * @return {function(new:React.Component, !Object)} A single date picker component class
  */
 function createSingleDatePickerBase() {
   const React = requireExternal('react');
@@ -180,7 +180,7 @@ let SingleDatePicker_ = null;
 
 /**
  * Creates a single date picker, injecting its dependencies
- * @return {!function(new:React.Component, !Object)} A date picker component class
+ * @return {function(new:React.Component, !Object)} A date picker component class
  */
 export function createSingleDatePicker() {
   if (!SingleDatePicker_) {

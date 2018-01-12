@@ -118,7 +118,7 @@ export class ParallaxService {
 
   /**
    * Add listeners to parallax scroll events.
-   * @param {!function()} cb
+   * @param {function()} cb
    * @private
    * @visibleForTesting
    */
@@ -128,7 +128,7 @@ export class ParallaxService {
 
   /**
    * Remove listeners from parallax scroll events.
-   * @param {!function()} cb
+   * @param {function()} cb
    * @private
    * @visibleForTesting
    */
@@ -152,7 +152,7 @@ export class ParallaxService {
 export class ParallaxElement {
   /**
    * @param {!Element} element The element to give a parallax effect.
-   * @param {!function(number):string} transform Computes the transform from the position.
+   * @param {function(number):string} transform Computes the transform from the position.
    */
   constructor(element, transform) {
     const factor = element.getAttribute(ATTR);
