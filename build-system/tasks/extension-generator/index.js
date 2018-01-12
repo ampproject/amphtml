@@ -20,6 +20,7 @@ const fs = require('fs-extra');
 const gulp = require('gulp-help')(require('gulp'));
 const util = require('gulp-util');
 const colors = require('ansi-colors');
+const log = require('fancy-log');
 
 const year = new Date().getFullYear();
 
@@ -273,7 +274,7 @@ function getExamplesFile(name) {
 
 function makeExtension() {
   if (!argv.name) {
-    util.log(colors.red(
+    log(colors.red(
         'Error! Please pass in the "--name" flag with a value'));
   }
   const name = argv.name;

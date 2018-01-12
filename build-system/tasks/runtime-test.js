@@ -30,6 +30,7 @@ const app = require('../test-server').app;
 const karmaDefault = require('./karma.conf');
 const shuffleSeed = require('shuffle-seed');
 const colors = require('ansi-colors');
+const log = require('fancy-log');
 
 
 const green = colors.green;
@@ -154,22 +155,22 @@ function printArgvMessages() {
         cyan(argv.grep) + '".',
   };
   if (!process.env.TRAVIS) {
-    util.log(green('Run', cyan('gulp help'),
+    log(green('Run', cyan('gulp help'),
         'to see a list of all test flags. (Use', cyan('--nohelp'),
         'to silence these messages.)'));
     if (!argv.unit && !argv.integration && !argv.files) {
-      util.log(green('Running all tests. Use',
+      log(green('Running all tests. Use',
           cyan('--unit'), 'or', cyan('--integration'),
           'to run just the unit tests or integration tests.'));
     }
     if (!argv.compiled) {
-      util.log(green('Running tests against unminified code.'));
+      log(green('Running tests against unminified code.'));
     }
-    util.log(green('Setting the runtime\'s AMP config to'), cyan(ampConfig));
+    log(green('Setting the runtime\'s AMP config to'), cyan(ampConfig));
     Object.keys(argv).forEach(arg => {
       const message = argvMessages[arg];
       if (message) {
-        util.log(yellow('--' + arg + ':'), green(message));
+        log(yellow('--' + arg + ':'), green(message));
       }
     });
   }
@@ -218,9 +219,9 @@ function runTests() {
   }
 
   if (argv.saucelabs && !argv.integration) {
-    util.log(red('Only integration tests may be run on the full set of ' +
+    log(red('Only integration tests may be run on the full set of ' +
         'Sauce Labs browsers'));
-    util.log(
+    log(
         red('Use'), cyan('--saucelabs'), red('with'), cyan('--integration'));
     process.exit();
   }
@@ -253,10 +254,10 @@ function runTests() {
 
     if (argv.randomize || argv.a4a) {
       const seed = argv.seed || Math.random();
-      util.log(
+      log(
           yellow('Randomizing:'),
           cyan('Seeding with value', seed));
-      util.log(
+      log(
           yellow('To rerun same ordering, append'),
           cyan(`--seed=${seed}`),
           yellow('to your invocation of'),
@@ -297,7 +298,7 @@ function runTests() {
   }
 
   if (argv.coverage) {
-    util.log(cyan('Including code coverage tests'));
+    log(cyan('Including code coverage tests'));
     c.browserify.transform.push(
         ['browserify-istanbul', {instrumenterConfig: {embedSource: true}}]);
     c.reporters = c.reporters.concat(['progress', 'coverage']);
@@ -334,13 +335,13 @@ function runTests() {
         middleware: [app],
       })
           .on('kill', function() {
-            util.log(yellow(
+            log(yellow(
                 'Shutting down test responses server on localhost:31862'));
             process.nextTick(function() {
               process.exit();
             });
           }));
-  util.log(yellow(
+  log(yellow(
       'Started test responses server on localhost:31862'));
 
   let resolver;
@@ -348,7 +349,7 @@ function runTests() {
   new Karma(c, function(exitCode) {
     server.emit('kill');
     if (exitCode) {
-      util.log(
+      log(
           red('ERROR:'),
           yellow('Karma test failed with exit code', exitCode));
       process.exit(exitCode);

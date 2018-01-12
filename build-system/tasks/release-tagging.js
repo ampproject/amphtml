@@ -23,6 +23,7 @@ const gulp = require('gulp-help')(require('gulp'));
 const request = BBPromise.promisify(require('request'));
 const util = require('gulp-util');
 const colors = require('ansi-colors');
+const log = require('fancy-log');
 
 const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
 const gitExec = BBPromise.promisify(git.exec);
@@ -42,7 +43,7 @@ const LABELS = {
  * @return {!Promise}
  */
 function releaseTagFor(type, dir) {
-  util.log('Tag release for: ', type);
+  log('Tag release for: ', type);
   let promise = Promise.resolve();
   const ampDir = dir + '/amphtml';
 
@@ -64,7 +65,7 @@ function releaseTagFor(type, dir) {
 
   // Checkout tag.
   promise = promise.then(function() {
-    util.log('Git tag: ', tag);
+    log('Git tag: ', tag);
     return gitExec({
       cwd: ampDir,
       args: 'checkout ' + tag,
@@ -100,7 +101,7 @@ function releaseTagFor(type, dir) {
   // Update.
   const label = LABELS[type];
   promise = promise.then(function() {
-    util.log('Update ' + pullRequests.length + ' pull requests');
+    log('Update ' + pullRequests.length + ' pull requests');
     const updates = [];
     pullRequests.forEach(function(pullRequest) {
       updates.push(applyLabel(pullRequest, label));
@@ -109,7 +110,7 @@ function releaseTagFor(type, dir) {
   });
 
   return promise.then(function() {
-    util.log(colors.green('Tag release for ' + type + ' done.'));
+    log(colors.green('Tag release for ' + type + ' done.'));
   });
 }
 
@@ -120,7 +121,7 @@ function releaseTagFor(type, dir) {
  */
 function applyLabel(pullRequest, label) {
   if (verbose && isDryrun) {
-    util.log('Apply label ' + label + ' for #' + pullRequest);
+    log('Apply label ' + label + ' for #' + pullRequest);
   }
   if (isDryrun) {
     return Promise.resolve();
@@ -130,7 +131,7 @@ function applyLabel(pullRequest, label) {
       'POST',
       [label]).then(function() {
     if (verbose) {
-      util.log(colors.green(
+      log(colors.green(
           'Label applied ' + label + ' for #' + pullRequest));
     }
   });
@@ -193,7 +194,7 @@ function releaseTag() {
   let promise = Promise.resolve();
 
   const dir = 'build/tagging';
-  util.log('Work dir: ', dir);
+  log('Work dir: ', dir);
   fs.mkdirpSync(dir);
   promise = promise.then(function() {
     return gitFetch(dir);

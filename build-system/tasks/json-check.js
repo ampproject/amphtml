@@ -20,6 +20,7 @@ const jsonGlobs = require('../config').jsonGlobs;
 const util = require('gulp-util');
 const through2 = require('through2');
 const colors = require('ansi-colors');
+const log = require('fancy-log');
 
 /**
  * Fail if JSON files are valid.
@@ -31,7 +32,7 @@ function checkValidJson() {
         try {
           JSON.parse(file.contents.toString());
         } catch (e) {
-          util.log(colors.red('Invalid JSON in '
+          log(colors.red('Invalid JSON in '
               + file.relative + ': ' + e.message));
           hasError = true;
         }

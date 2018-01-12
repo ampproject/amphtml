@@ -28,11 +28,12 @@ const source = require('vinyl-source-stream');
 const through = require('through2');
 const util = require('gulp-util');
 const colors = require('ansi-colors');
+const log = require('fancy-log');
 
 
 const root = process.cwd();
 const absPathRegExp = new RegExp(`^${root}/`);
-const red = msg => util.log(colors.red(msg));
+const red = msg => log(colors.red(msg));
 
 
 /**

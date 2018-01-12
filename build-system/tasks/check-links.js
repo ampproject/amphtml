@@ -25,6 +25,7 @@ const gulp = require('gulp-help')(require('gulp'));
 const markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
 const util = require('gulp-util');
 const colors = require('ansi-colors');
+const log = require('fancy-log');
 
 
 /**
@@ -71,38 +72,38 @@ function checkLinks() {
             if (result.status === 'dead') {
               deadLinksFound = true;
               deadLinksFoundInFile = true;
-              util.log('[%s] %s', chalk.red('✖'), result.link);
+              log('[%s] %s', chalk.red('✖'), result.link);
             } else if (!process.env.TRAVIS) {
-              util.log('[%s] %s', chalk.green('✔'), result.link);
+              log('[%s] %s', chalk.green('✔'), result.link);
             }
           });
           if (deadLinksFoundInFile) {
             filesWithDeadLinks.push(markdownFiles[index]);
-            util.log(
+            log(
                 colors.red('ERROR'),
                 'Possible dead link(s) found in',
                 colors.magenta(markdownFiles[index]));
           } else {
-            util.log(
+            log(
                 colors.green('SUCCESS'),
                 'All links in',
                 colors.magenta(markdownFiles[index]), 'are alive.');
           }
         });
         if (deadLinksFound) {
-          util.log(
+          log(
               colors.red('ERROR'),
               'Please update dead link(s) in',
               colors.magenta(filesWithDeadLinks.join(',')),
               'or whitelist them in build-system/tasks/check-links.js');
-          util.log(
+          log(
               colors.yellow('NOTE'),
               'If the link(s) above are not meant to resolve to a real webpage',
               'surrounding them with backticks will exempt them from the link',
               'checker.');
           process.exit(1);
         } else {
-          util.log(
+          log(
               colors.green('SUCCESS'),
               'All links in all markdown files in this branch are alive.');
         }

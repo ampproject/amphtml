@@ -21,6 +21,7 @@ const srcGlobs = require('../config').presubmitGlobs;
 const util = require('gulp-util');
 const through2 = require('through2');
 const colors = require('ansi-colors');
+const log = require('fancy-log');
 
 const dedicatedCopyrightNoteSources = /(\.js|\.css|\.go)$/;
 
@@ -947,7 +948,7 @@ function matchTerms(file, terms) {
         }
       }
 
-      util.log(colors.red('Found forbidden: "' + match[0] +
+      log(colors.red('Found forbidden: "' + match[0] +
           '" in ' + relative + ':' + line + ':' + column));
       if (typeof terms[term] === 'string') {
         fix = terms[term];
@@ -957,9 +958,9 @@ function matchTerms(file, terms) {
 
       // log the possible fix information if provided for the term.
       if (fix) {
-        util.log(colors.blue(fix));
+        log(colors.blue(fix));
       }
-      util.log(colors.blue('=========='));
+      log(colors.blue('=========='));
     }
 
     return hasTerm;
@@ -1022,9 +1023,9 @@ function isMissingTerms(file) {
 
     const matches = contents.match(new RegExp(term));
     if (!matches) {
-      util.log(colors.red('Did not find required: "' + term +
+      log(colors.red('Did not find required: "' + term +
           '" in ' + file.relative));
-      util.log(colors.blue('=========='));
+      log(colors.blue('=========='));
       return true;
     }
     return false;
@@ -1048,11 +1049,11 @@ function checkForbiddenAndRequiredTerms() {
       }))
       .on('end', function() {
         if (forbiddenFound) {
-          util.log(colors.blue(
+          log(colors.blue(
               'Please remove these usages or consult with the AMP team.'));
         }
         if (missingRequirements) {
-          util.log(colors.blue(
+          log(colors.blue(
               'Adding these terms (e.g. by adding a required LICENSE ' +
             'to the file)'));
         }

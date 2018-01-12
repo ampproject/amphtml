@@ -33,6 +33,7 @@ const gulp = require('gulp-help')(require('gulp'));
 const request = BBPromise.promisify(require('request'));
 const util = require('gulp-util');
 const colors = require('ansi-colors');
+const log = require('fancy-log');
 
 const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
 const exec = BBPromise.promisify(childProcess.exec);
@@ -101,9 +102,9 @@ let PrMetadataDef;
 
 function changelog() {
   if (!GITHUB_ACCESS_TOKEN) {
-    util.log(colors.red('Warning! You have not set the ' +
+    log(colors.red('Warning! You have not set the ' +
         'GITHUB_ACCESS_TOKEN env var. Aborting "changelog" task.'));
-    util.log(colors.green('See https://help.github.com/articles/' +
+    log(colors.green('See https://help.github.com/articles/' +
         'creating-an-access-token-for-command-line-use/ ' +
         'for instructions on how to create a github access token. We only ' +
         'need `public_repo` scope.'));
@@ -129,7 +130,7 @@ function getGitMetadata() {
       .then(getBaseCanaryVersion)
       .then(buildChangelog)
       .then(function(gitMetadata) {
-        util.log(colors.blue('\n' + gitMetadata.changelog));
+        log(colors.blue('\n' + gitMetadata.changelog));
         if (isDryrun) {
           return;
         }
@@ -206,7 +207,7 @@ function submitReleaseNotes(version, changelog, sha) {
   }
 
   return request(options).then(function() {
-    util.log(colors.green('Release Notes submitted'));
+    log(colors.green('Release Notes submitted'));
   });
 }
 
@@ -486,7 +487,7 @@ function errHandler(err) {
   if (err.message) {
     msg = err.message;
   }
-  util.log(colors.red(msg));
+  log(colors.red(msg));
 }
 
 /**
@@ -544,16 +545,16 @@ function buildPrMetadata(pr) {
 
 function changelogUpdate() {
   if (!GITHUB_ACCESS_TOKEN) {
-    util.log(colors.red('Warning! You have not set the ' +
+    log(colors.red('Warning! You have not set the ' +
         'GITHUB_ACCESS_TOKEN env var. Aborting "changelog" task.'));
-    util.log(colors.green('See https://help.github.com/articles/' +
+    log(colors.green('See https://help.github.com/articles/' +
         'creating-an-access-token-for-command-line-use/ ' +
         'for instructions on how to create a github access token. We only ' +
         'need `public_repo` scope.'));
     return;
   }
   if (!argv.message) {
-    util.log(colors.red('--message flag must be set.'));
+    log(colors.red('--message flag must be set.'));
   }
   return update();
 }
@@ -603,10 +604,10 @@ function update() {
       releasesOptions.body.body = argv.message + release.body;
     }
     return request(releasesOptions).then(() => {
-      util.log(colors.green('Update Successful.'));
+      log(colors.green('Update Successful.'));
     })
         .catch(e => {
-          util.log(colors.red('Update Failed. ' + e.message));
+          log(colors.red('Update Failed. ' + e.message));
         });
   });
 }

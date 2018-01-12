@@ -22,6 +22,7 @@ const fs = BBPromise.promisifyAll(require('fs-extra'));
 const exec = require('child_process').execSync;
 const util = require('gulp-util');
 const colors = require('ansi-colors');
+const log = require('fancy-log');
 
 test('sync - build out correct CODEOWNERS', t => {
   const owners = {
@@ -60,7 +61,7 @@ test.skip('CODEOWNERS must be in sync with OWNERS.yaml', t => {
       'CODEOWNERS is out of sync. Please re-generate CODEOWNERS by ' +
       'running `gulp gen-codeowners`');
   if (!isInSync) {
-    util.log(colors.red('CODEOWNERS is out of sync. Please re-generate ' +
+    log(colors.red('CODEOWNERS is out of sync. Please re-generate ' +
         'CODEOWNERS by running `gulp gen-codeowners`'));
   }
   fs.removeSync(tmppath);

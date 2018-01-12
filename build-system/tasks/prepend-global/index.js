@@ -23,6 +23,7 @@ const fs = BBPromise.promisifyAll(require('fs'));
 const gulp = require('gulp-help')(require('gulp'));
 const util = require('gulp-util');
 const colors = require('ansi-colors');
+const log = require('fancy-log');
 
 const red = colors.red;
 const cyan = colors.cyan;
@@ -93,8 +94,8 @@ function prependConfig(configString, fileString) {
  */
 function writeTarget(filename, fileString, opt_dryrun) {
   if (opt_dryrun) {
-    util.log(cyan(`overwriting: ${filename}`));
-    util.log(fileString);
+    log(cyan(`overwriting: ${filename}`));
+    log(fileString);
     return Promise.resolve();
   }
   return fs.writeFileAsync(filename, fileString);
@@ -135,7 +136,7 @@ function applyConfig(
         try {
           configJson = JSON.parse(files[0].toString());
         } catch (e) {
-          util.log(red(`Error parsing config file: ${filename}`));
+          log(red(`Error parsing config file: ${filename}`));
           throw e;
         }
         if (opt_localDev) {
@@ -151,7 +152,7 @@ function applyConfig(
       })
       .then(() => {
         if (!process.env.TRAVIS) {
-          util.log('Wrote', cyan(config), 'AMP config to', cyan(target));
+          log('Wrote', cyan(config), 'AMP config to', cyan(target));
         }
       });
 }
@@ -165,7 +166,7 @@ function applyConfig(
 function enableLocalDev(config, target, configJson) {
   let LOCAL_DEV_AMP_CONFIG = {localDev: true};
   if (!process.env.TRAVIS) {
-    util.log('Enabled local development mode in', cyan(target));
+    log('Enabled local development mode in', cyan(target));
   }
   const TESTING_HOST = process.env.AMP_TESTING_HOST;
   if (typeof TESTING_HOST == 'string') {
@@ -175,7 +176,7 @@ function enableLocalDev(config, target, configJson) {
       thirdPartyFrameRegex: TESTING_HOST,
     });
     if (!process.env.TRAVIS) {
-      util.log('Set', cyan('TESTING_HOST'), 'to', cyan(TESTING_HOST),
+      log('Set', cyan('TESTING_HOST'), 'to', cyan(TESTING_HOST),
           'in', cyan(target));
     }
   }
@@ -192,7 +193,7 @@ function removeConfig(target) {
         let contents = file.toString();
         if (numConfigs(contents) == 0) {
           if (!process.env.TRAVIS) {
-            util.log('No configs found in', cyan(target));
+            log('No configs found in', cyan(target));
           }
           return Promise.resolve();
         }
@@ -202,7 +203,7 @@ function removeConfig(target) {
         contents = contents.replace(config, '');
         return writeTarget(target, contents, argv.dryrun).then(() => {
           if (!process.env.TRAVIS) {
-            util.log('Removed existing config from', cyan(target));
+            log('Removed existing config from', cyan(target));
           }
         });
       });
@@ -213,7 +214,7 @@ function main() {
   const target = argv.target || TESTING_HOST;
 
   if (!target) {
-    util.log(red('Missing --target.'));
+    log(red('Missing --target.'));
     return;
   }
 
@@ -222,7 +223,7 @@ function main() {
   }
 
   if (!(argv.prod || argv.canary)) {
-    util.log(red('One of --prod or --canary should be provided.'));
+    log(red('One of --prod or --canary should be provided.'));
     return;
   }
 
