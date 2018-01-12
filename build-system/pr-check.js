@@ -32,7 +32,7 @@ const getStderr = require('./exec').getStderr;
 const path = require('path');
 const colors = require('ansi-colors');
 
-const fileLogPrefix = colors.yellow.bold('pr-check.js:');
+const fileLogPrefix = colors.bold(colors.yellow('pr-check.js:'));
 
 /**
  * Starts a timer to measure the execution time of the given function.
