@@ -16,16 +16,13 @@
 
 import {Layout} from '../../../src/layout';
 import {cssstyle} from 'cssstyle';
-import {mathjaxNode} from 'mathjax-node';
+import {typeset} from 'mathjax-node';
 
 export class AmpMathml extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {string} */
-    this.myText_ = 'hello world!!';
 
     /** @private {!Element} */
     this.container_ = this.win.document.createElement('div');
@@ -37,22 +34,16 @@ export class AmpMathml extends AMP.BaseElement {
     if(! formula || '' === formula){
       return;
     }
-    console.log( mathjaxNode.typeset );
-    mathjaxNode.typeset( {
+    typeset( {
       math: this.element.getAttribute( 'formula' ),
       format: "MathML",
       mml: true,
       svg: true,
     }, function ( data ) {
-      console.log( data );
       if ( !data.errors ) {
         this.element.appendChild( data.svg );
       }
     } );
-
-    this.container_.textContent = this.myText_ + this.element.getAttribute( 'formula' );
-    this.element.appendChild( this.container_ );
-    this.applyFillContent( this.container_, /* replacedContent */ true );
    }
 
   /** @override */
