@@ -204,6 +204,7 @@ import {yengo} from '../ads/yengo';
 import {yieldbot} from '../ads/yieldbot';
 import {yieldmo} from '../ads/yieldmo';
 import {yieldone} from '../ads/yieldone';
+import {yieldpro} from '../ads/yieldpro';
 import {zedo} from '../ads/zedo';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
@@ -384,8 +385,9 @@ register('yandex', yandex);
 register('yengo', yengo);
 register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
-register('zergnet', zergnet);
 register('yieldone', yieldone);
+register('yieldpro', yieldpro);
+register('zergnet', zergnet);
 register('zedo', zedo);
 register('zucks', zucks);
 
