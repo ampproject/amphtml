@@ -63,7 +63,7 @@ export class ViewerCidApi {
 
   /**
    * Returns scoped CID retrieved from the Viewer.
-   * @param {!string} scope
+   * @param {string} scope
    * @return {!Promise<?JsonObject|string|undefined>}
    */
   getScopedCid(scope) {
