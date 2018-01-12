@@ -28,17 +28,17 @@ tags: {  # <amp-byside-placeholder>
   html_format: AMP
   tag_name: "AMP-BYSIDE-PLACEHOLDER"
   requires_extension: "amp-byside-placeholder"
-  attrs: {
-    name: "data-webcare-id"
-	mandatory: true
-  }
-  attrs: {
-    name: "data-label"
-	mandatory: true
-  }
-  attrs: {name: "data-lang"}
   attrs: {name: "data-channel"}
   attrs: {name: "data-fid"}
+  attrs: {
+    name: "data-label"
+    mandatory: true
+  }
+  attrs: {name: "data-lang"}
+  attrs: {
+    name: "data-webcare-id"
+    mandatory: true
+  }
   attrs: {name: "data-webcare-zone"}
   attrs: {name: "resizable"}
   attr_lists: "extended-amp-global"
