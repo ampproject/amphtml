@@ -29,7 +29,7 @@ limitations under the License.
   </tr>
   <tr>
     <td><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>All. This element is hidden.</td>
+    <td>`nodisplay` or unspecified. The element is not presentational.</td>
   </tr>
 </table>
 
