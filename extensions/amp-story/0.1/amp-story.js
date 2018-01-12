@@ -353,7 +353,7 @@ export class AmpStory extends AMP.BaseElement {
         return;
       }
 
-      if (!this.isSwipeLargeEnoughForHint_(e.data.deltaX, e.data.deltaY)) {
+      if (!this.isSwipeLargeEnoughForHint_(e.data.deltaX)) {
         return;
       }
 
@@ -370,9 +370,8 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /** @private */
-  isSwipeLargeEnoughForHint_(deltaX, deltaY) {
-    return (Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2))
-      >= MIN_SWIPE_FOR_HINT_OVERLAY_PX);
+  isSwipeLargeEnoughForHint_(deltaX) {
+    return (Math.abs(deltaX) >= MIN_SWIPE_FOR_HINT_OVERLAY_PX);
   }
 
   /** @private */
