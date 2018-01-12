@@ -41,8 +41,6 @@ limitations under the License.
 
 ## Behavior
 
-FILL THIS IN. What does this extension do?
-
 An `amp-byside-placeholder` component displays dynamic content that can be retrieved from the [BySide](https://www.byside.com) customization mechanisms, for a valid BySide client.
 
 The `data-webcare-id` and `data-label` attributes are required for the content embed to work.
