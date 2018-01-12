@@ -31,8 +31,4 @@ describes.realWin('amp-mathml', {
     win.document.body.appendChild(element);
   });
 
-  it('should have hello world when built', () => {
-    element.build();
-    expect(element.querySelector('div').textContent).to.equal('hello world');
-  });
 });
