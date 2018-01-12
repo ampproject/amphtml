@@ -515,7 +515,7 @@ export const adConfig = {
     renderStartImplemented: true,
   },
   medyanet: {
-    prefetch: 'https://medyanet.doracdn.net/devteam/AMP/init.js',
+    prefetch: 'https://medyanet.doracdn.com/devteam/AMP/init.js',
     renderStartImplemented: true,  
   },
   meg: {

@@ -46,7 +46,7 @@ function setTargeting(global, data, targeting) {
     dblParams['targeting'] = dblParams['targeting'] || {};
     dblParams['width'] = data.width;
     dblParams['height'] = data.height;
-    dblParams['type'] = 'medyanet';
+    dblParams['type'] = 'doubleclick';
 
     for (const i in targeting) {
         dblParams['targeting'][i] = targeting[i];
