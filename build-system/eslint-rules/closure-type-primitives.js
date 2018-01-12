@@ -75,7 +75,7 @@ function parseClosureComments(context, node) {
 function reportUnparseableNode(context, node) {
   context.report({
     node,
-    message: 'A Closure comment syntax error was encountered.',
+    message: 'A Closure JSDoc syntax error was encountered.',
   });
 }
 
@@ -99,14 +99,24 @@ function checkClosureComments(context, closureComment) {
     }
 
     const {type, name} = astNode.expression;
-    if (type === 'NameExpression' && isNonNullablePrimitive(name)) {
+    if (type === 'FunctionType') {
+      reportNonNullablePrimitive(context, node, 'function');
+    } else if (type === 'UndefinedLiteral') {
+      reportNonNullablePrimitive(context, node, 'undefined');
+    } else if (type === 'NameExpression' && isNonNullablePrimitiveName(name)) {
       reportNonNullablePrimitive(context, node, name);
     }
   });
 }
 
-/** @enum {string} */
-const NON_NULLABLE_PRIMITIVES = [
+/**
+ * Default non-nullable primitives, from go/es6-style#jsdoc-nullability
+ * Technically `undefined` and `function()` are primitives in Closure,
+ * but doctrine gives their expression nodes a different type than the others,
+ * so we don't add them to this list.
+ * @enum {string}
+ */
+const NON_NULLABLE_PRIMITIVE_NAMES = [
   'boolean',
   'number',
   'string',
@@ -118,8 +128,8 @@ const NON_NULLABLE_PRIMITIVES = [
  * @param {string} name
  * @return {boolean}
  */
-function isNonNullablePrimitive(name) {
-  return NON_NULLABLE_PRIMITIVES.includes(name);
+function isNonNullablePrimitiveName(name) {
+  return NON_NULLABLE_PRIMITIVE_NAMES.includes(name);
 }
 
 /**
