@@ -232,6 +232,58 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       expect(fireDelayedImpressionsSpy.withArgs(
           'https://c.com?e=f,https://d.com?g=h', true)).to.be.calledOnce;
     });
+
+    it('should initialize refresh manager', () => {
+      impl.extractSize({
+        get(name) {
+          return name == 'amp-force-refresh' ? '30' : undefined;
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      });
+      expect(impl.element.getAttribute(DATA_ATTR_NAME)).to.equal('30');
+    });
+
+    it('should not override publisher\'s refresh settings', () => {
+      impl.refreshManager_ = {refreshInterval_: '45'};
+      impl.extractSize({
+        get(name) {
+          return name == 'amp-force-refresh' ? '30' : undefined;
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      });
+      expect(impl.refreshManager_.refreshInterval_).to.equal('45');
+    });
+
+    it('should specify nameframe loading behavior; single arg', () => {
+      impl.extractSize({
+        get(name) {
+          return name == 'amp-nameframe-exp' ? 'instantLoad' : undefined;
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      });
+      expect(impl.nameframeExperimentConfig_.instantLoad).to.be.true;
+      expect(impl.nameframeExperimentConfig_.writeInBody).to.be.false;
+    });
+
+    it('should specify nameframe loading behavior; two args', () => {
+      impl.extractSize({
+        get(name) {
+          return name == 'amp-nameframe-exp' ?
+              'instantLoad;writeInBody' : undefined;
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      });
+      expect(impl.nameframeExperimentConfig_.instantLoad).to.be.true;
+      expect(impl.nameframeExperimentConfig_.writeInBody).to.be.true;
+    });
   });
 
   describe('#onCreativeRender', () => {

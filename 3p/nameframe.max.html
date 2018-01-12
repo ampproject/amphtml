@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <script>
     var name_data;
-    var writeInHead = true;
-    var waitForOnload = true;
+    var writeInBody = false;
+    var instantLoad = false;
 
     var tryProtected = function(blockFn) {
       try {
@@ -19,8 +19,8 @@
 
     tryProtected(function() {
       name_data = JSON.parse(window.name);
-      writeInHead = name_data['writeInHead'];
-      waitForOnload = name_data['waitForOnload'];
+      writeInBody = name_data['writeInBody'];
+      instantLoad = name_data['instantLoad'];
       if (!name_data || !name_data['creative']) {
         throw new Error('Missing or incorrectly formatted JSON ' +
             'input to nameframe');
@@ -36,19 +36,18 @@
         window.name = JSON.stringify(name_data);
       });
     };
-
-    if (writeInHead && waitForOnload) {
+    if (!writeInBody && !instantLoad) {
       window.onload = render;
-    } else if (writeInHead) {
+    } else if (!writeInBody) {
       render();
     }
   </script>
 </head>
 <body>
   <script>
-    if (!writeInHead && waitForOnload) {
+    if (writeInBody && !instantLoad) {
       window.onload = render;
-    } else if (!writeInHead) {
+    } else if (writeInBody) {
       render();
     }
   </script>

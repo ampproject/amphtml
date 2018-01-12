@@ -376,11 +376,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {boolean} */
     this.isIdleRender_ = false;
 
-    /** @private {{writeInHead: boolean, waitForOnload: boolean, control: true}} */
+    /** @private {{instantLoad: boolean, writeInBody: boolean}} */
     this.nameframeExperimentConfig_ = {
-      waitForOnload: true,
-      writeInHead: true,
-      control: true,
+      instantLoad: false,
+      writeInBody: false,
     };
   }
 
@@ -809,18 +808,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.getAmpDoc(), 'amp-analytics');
     }
 
-    const nameframeExperimentConfig = responseHeaders.get('amp-nameframe-exp') || 'writeInHead';
+    const nameframeExperimentConfig = responseHeaders.get('amp-nameframe-exp');
     if (nameframeExperimentConfig) {
-      nameframeExperimentConfig.split(';').map(config => { debugger;
-        switch (config) {
-          case 'waitForOnload':
-          case 'writeInHead':
-            // Both parameters are true by default; we flip those sent back on
-            // the header.
-            this.nameframeExperimentConfig_[config] = false;
+      nameframeExperimentConfig.split(';').forEach(config => {
+        if (config == 'instantLoad' || config == 'writeInBody') {
+          this.nameframeExperimentConfig_[config] = true;
         }
       });
-      this.nameframeExperimentConfig_['control'] = false;
     }
 
     if (this.isFluid_) {

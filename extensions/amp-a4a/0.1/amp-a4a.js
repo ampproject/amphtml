@@ -742,7 +742,9 @@ export class AmpA4A extends AMP.BaseElement {
           const {bytes, headers} = responseParts;
           const size = this.extractSize(responseParts.headers);
           this.creativeSize_ = size || this.creativeSize_;
-          if (bytes) {
+          if (this.experimentalNonAmpCreativeRenderMethod_ !=
+              XORIGIN_MODE.CLIENT_CACHE &&
+              bytes) {
             this.creativeBody_ = bytes;
           }
           return this.maybeValidateAmpCreative(bytes, headers);
@@ -992,7 +994,7 @@ export class AmpA4A extends AMP.BaseElement {
         this.handleLifecycleStage_('iframeAlreadyExists');
         return Promise.resolve();
       }
-      if (!creativeMetaData || true) {
+      if (!creativeMetaData) {
         // Non-AMP creative case, will verify ad url existence.
         return this.renderNonAmpCreative();
       }
@@ -1286,7 +1288,7 @@ export class AmpA4A extends AMP.BaseElement {
     const method = this.experimentalNonAmpCreativeRenderMethod_;
     let renderPromise = Promise.resolve(false);
     if ((method == XORIGIN_MODE.SAFEFRAME ||
-         method == XORIGIN_MODE.NAMEFRAME || true) &&
+         method == XORIGIN_MODE.NAMEFRAME) &&
         this.creativeBody_) {
       renderPromise = this.renderViaNameAttrOfXOriginIframe_(
           this.creativeBody_);
@@ -1466,7 +1468,7 @@ export class AmpA4A extends AMP.BaseElement {
    */
   renderViaNameAttrOfXOriginIframe_(creativeBody) {
     /** @type {string} */
-    const method = 'nameframe';//this.experimentalNonAmpCreativeRenderMethod_;
+    const method = this.experimentalNonAmpCreativeRenderMethod_;
     dev().assert(method == XORIGIN_MODE.SAFEFRAME ||
         method == XORIGIN_MODE.NAMEFRAME,
     'Unrecognized A4A cross-domain rendering mode: %s', method);
