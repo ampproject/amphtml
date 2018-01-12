@@ -264,24 +264,35 @@ export class InaboxMessagingHost {
    * @visibleForTesting
    */
   getMeasureableFrame(win) {
-    let measureableWin;
+    // First, we try to find the top-most x-domain window in win's parent
+    // hierarchy. If win is not nested within x-domain framing, then
+    // this loop breaks immediately.
+    let topXDomainWin;
     for (let j = 0, tempWin = win; j < 10 && tempWin != tempWin.top;
       j++, tempWin = tempWin.parent) {
       if (canInspectWindow(tempWin)) {
         break;
       }
-      measureableWin = tempWin;
+      topXDomainWin = tempWin;
     }
-    if (!!measureableWin) {
-      const parent = measureableWin.parent;
+    // If topXDomainWin exists, we know that the frame we want to measure
+    // is a x-domain frame. Unfortunately, you can not access properties
+    // on a x-domain window, so we can not do window.frameElement, and
+    // instead must instead get topXDomainWin's parent, and then iterate
+    // over that parent's child iframes until we find the frame element
+    // that corresponds to topXDomainWin.
+    if (!!topXDomainWin) {
+      const parent = topXDomainWin.parent;
       const iframes = parent.document.querySelectorAll('iframe');
       for (let k = 0, frame = iframes[k]; k < iframes.length;
         k++, frame = iframes[k]) {
-        if (frame.contentWindow == measureableWin) {
+        if (frame.contentWindow == topXDomainWin) {
           return frame;
         }
       }
     }
+    // If topXDomainWin does not exist, then win is friendly, and we can
+    // just return its frameElement directly.
     return win.frameElement;
   }
 }
