@@ -244,6 +244,8 @@ export class ShareWidget {
         dev().assertElement(this.root_),
         '.i-amphtml-story-share-system');
 
+    this.loadRequiredExtensions_();
+
     container.appendChild(buildProvider(this.win_.document, 'system'));
   }
 
