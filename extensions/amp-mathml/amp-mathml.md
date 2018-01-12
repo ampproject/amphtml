@@ -1,5 +1,5 @@
 <!--
-Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,68 +19,33 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Displays a Math.</td>
+    <td>FILL THIS IN</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>FILL THIS IN</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-mathml" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fixed-height</td>
+    <td>FILL THIS IN</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-mathml/">Annotated code example for amp-mathml</a></td>
+    <td>FILL THIS IN</td>
   </tr>
 </table>
 
-[TOC]
-
 ## Behavior
 
-This extension creates an iframe and displays a [gist from GitHub](https://help.github.com/articles/about-gists/).
-
-#### Example: Embedding multiple files
-
-```html
-<amp-mathml
-    data-gistid="b9bb35bc68df68259af94430f012425f"
-    layout="fixed-height"
-    height="225">
-</amp-mathml>
-```
-
-#### Example: Embedding a single file
-
-```html
-<amp-mathml
-    data-gistid="a19e811dcd7df10c4da0931641538497"
-    data-file="hi.c"
-    layout="fixed-height"
-    height="185">
-</amp-mathml>
-```
+FILL THIS IN. What does this extension do?
 
 ## Attributes
 
-##### data-gistid (required)
-
-The ID of the gist to embed.
-
-##### layout (required)
-
-Currently only supports `fixed-height`.
-
-##### height (required)
-
-The height of the gist or gist file in pixels.
-
-**Note**: You must find the height of the gist by inspecting it with your browser (e.g., Chrome Developer Tools).
-
-##### data-file (optional)
-
-If specified, display only one file in a gist.
+FILL THIS IN. Does this extension allow for properties to configure?
 
 ## Validation
-See [amp-mathml rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mathml/validator-amp-gist.protoascii) in the AMP validator specification.
+See [amp-mathml rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mathml/validator-amp-mathml.protoascii) in the AMP validator specification.

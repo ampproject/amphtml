@@ -1,5 +1,5 @@
 #
-# Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+# Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,24 +17,53 @@
 tags: {  # amp-mathml
   html_format: AMP
   tag_name: "SCRIPT"
-  extension_spec: {
-    name: "amp-mathml"
-    allowed_versions: "0.1"
-    allowed_versions: "latest"
+  spec_name: "amp-mathml extension .js script"
+  satisfies: "amp-mathml extension .js script"
+  requires: "amp-mathml"
+  mandatory_parent: "HEAD"
+  unique: true
+  extension_unused_unless_tag_present: "amp-mathml"
+  attrs: {
+    name: "async"
+    mandatory: true
+    value: ""
   }
-  attr_lists: "common-extension-attrs"
+  attrs: {
+    name: "formula"
+    mandatory: true
+  }
+  attrs: {
+    name: "custom-element"
+    mandatory: true
+    value: "amp-mathml"
+    dispatch_key: true
+  }
+  attrs: { name: "nonce" }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_regex: "https://cdn\.ampproject\.org/v0/amp-mathml-(latest|0\.1).js"
+  }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-mathml"
 }
 tags: {  # <amp-mathml>
   html_format: AMP
-  tag_name: "AMP-mathml"
-  requires_extension: "amp-mathml"
-  attrs: {
-    name: "data-formula"
-    mandatory: true
-  }
+  tag_name: "AMP-MATHML"
+  satisfies: "amp-mathml"
+  requires: "amp-mathml extension .js script"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-mathml"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-hello-world"
   amp_layout: {
-    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
   }
 }

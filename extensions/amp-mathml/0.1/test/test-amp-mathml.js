@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,51 +14,25 @@
  * limitations under the License.
  */
 
-import '../amp-mathml';
-
+import {AmpMathml} from '../amp-mathml';
 
 describes.realWin('amp-mathml', {
   amp: {
     extensions: ['amp-mathml'],
-  },
+  }
 }, env => {
-  let win, doc;
+
+  let win;
+  let element;
 
   beforeEach(() => {
     win = env.win;
-    doc = win.document;
+    element = win.document.createElement('amp-mathml');
+    win.document.body.appendChild(element);
   });
 
-  function getIns(formula, file) {
-    const ins = doc.createElement('amp-mathml');
-    ins.setAttribute('data-formula', formula);
-    ins.setAttribute('height', '237');
-    if (file) {
-      ins.setAttribute('data-file', file);
-    }
-    doc.body.appendChild(ins);
-    return ins.build().then(() => ins.layoutCallback()).then(() => ins);
-  }
-
-  it('renders responsively', () => {
-    return getIns('b9bb35bc68df68259af94430f012425f').then(ins => {
-      const iframe = ins.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.className).to.match(/i-amphtml-fill-content/);
-    });
-  });
-
-  it('renders responsively with specific file', () => {
-    return getIns('b9bb35bc68df68259af94430f012425f', 'hello-world.html')
-        .then(ins => {
-          const iframe = ins.querySelector('iframe');
-          expect(iframe).to.not.be.null;
-          expect(iframe.className).to.match(/i-amphtml-fill-content/);
-        });
-  });
-
-  it('Rejects because data-formula is missing', () => {
-    expect(getIns('')).to.be.rejectedWith(
-        /The data-formula attribute is required for/);
+  it('should have hello world when built', () => {
+    element.build();
+    expect(element.querySelector('div').textContent).to.equal('hello world');
   });
 });
