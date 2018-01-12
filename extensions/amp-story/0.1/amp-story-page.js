@@ -113,7 +113,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.advancement_
         .addAdvanceListener(() => this.next(/* opt_isAutomaticAdvance */ true));
     this.advancement_.addOnTapNavigationListener(
-        navigationDirection => this.navigate(navigationDirection));
+        navigationDirection => this.navigateOnTap(navigationDirection));
     this.advancement_
         .addProgressListener(progress => this.emitProgress_(progress));
   }
@@ -529,7 +529,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Delegated the navigation decision to AMP-STORY via event.
    * @param {number} direction The direction in which navigation needs to takes place.
    */
-  navigate(direction) {
+  navigateOnTap(direction) {
     const payload = {direction};
     const eventInit = {bubbles: true};
     dispatchCustom(this.win, this.element, EventType.TAP_NAVIGATION, payload,

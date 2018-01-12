@@ -147,7 +147,7 @@ export class AdvancementConfig {
    * @param {number} navigationDirection Direction of navigation
    * @protected
    */
-  onNavigate(navigationDirection) {
+  onTapNavigation(navigationDirection) {
     this.tapNavigationListeners_.forEach(navigationListener => {
       navigationListener(navigationDirection);
     });
@@ -313,9 +313,9 @@ class ManualAdvancement extends AdvancementConfig {
     const nextScreenAreaMax = offsetLeft + offsetWidth;
 
     if (event.pageX >= nextScreenAreaMin && event.pageX < nextScreenAreaMax) {
-      this.onNavigate(TapNavigationDirection.NEXT);
+      this.onTapNavigation(TapNavigationDirection.NEXT);
     } else if (event.pageX >= offsetLeft && event.pageX < nextScreenAreaMin) {
-      this.onNavigate(TapNavigationDirection.PREVIOUS);
+      this.onTapNavigation(TapNavigationDirection.PREVIOUS);
     }
   }
 }
