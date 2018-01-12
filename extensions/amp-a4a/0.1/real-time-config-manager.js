@@ -108,7 +108,9 @@ export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
     const validVendorMacros = {};
     Object.keys(rtcConfig['vendors'][vendor]).forEach(macro => {
       if (vendorObject.macros && vendorObject.macros.includes(macro)) {
-        validVendorMacros[macro] = rtcConfig['vendors'][vendor][macro];
+        const value = rtcConfig['vendors'][vendor][macro];
+        validVendorMacros[macro] = isObject(value) || isArray(value) ?
+          JSON.stringify(value) : value;
       } else {
         user().warn(TAG, `Unknown macro: ${macro} for vendor: ${vendor}`);
       }
@@ -282,22 +284,6 @@ export function validateRtcConfig_(element) {
     // This error would be due to the asserts above.
     return null;
   }
-
-  // The following loop is to allow vendor macros to be set as objects.
-  // We simply stringify the objects, or ignore if already a string.
-  // I.e. a valid rtcConfig could look like:
-  //   {"vendors": {"fakeVendor": {"MACRO1" : {"key": "value"}}}}
-  //   and then the macro MACRO1 would be replaced with the result of
-  //   stringifying {"key": "value"}.
-  const vendors = rtcConfig['vendors'] || {};
-  Object.keys(vendors).forEach(vendor => {
-    Object.keys(vendors[vendor]).forEach(key => {
-      if (isObject(vendors[vendor][key])) {
-        vendors[vendor][key] = JSON.stringify(vendors[vendor][key]);
-      }
-    });
-  });
-
   rtcConfig['timeoutMillis'] = timeout !== undefined ?
     timeout : defaultTimeoutMillis;
   return rtcConfig;
