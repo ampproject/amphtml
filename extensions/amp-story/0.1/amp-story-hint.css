@@ -69,6 +69,10 @@
   opacity: 0 !important;
 }
 
+.show-first-page-overlay .i-amphtml-story-hint-placeholder {
+  display: none !important;
+}
+
 .next-page {
   flex: 3 !important;
   border-left: 1px dashed transparent;
