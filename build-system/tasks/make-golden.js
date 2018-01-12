@@ -24,6 +24,7 @@ const gulp = require('gulp');
 // requirement.
 const imageDiff = require('gulp-image-diff');
 const util = require('gulp-util');
+const colors = require('ansi-colors');
 
 
 /**
@@ -51,13 +52,13 @@ function doScreenshot(host, path, output, device, verbose, cb) {
       '"' + device + '" ',
   function(err, stdout, stderr) {
     if (verbose) {
-      util.log(util.colors.gray('stdout: ', stdout));
+      util.log(colors.gray('stdout: ', stdout));
       if (stderr.length) {
-        util.log(util.colors.red('stderr: ', stderr));
+        util.log(colors.red('stderr: ', stderr));
       }
     }
     if (err != null) {
-      util.log(util.colors.red('exec error: ', err));
+      util.log(colors.red('exec error: ', err));
     }
     cb();
   });
@@ -146,19 +147,19 @@ function testScreenshots(cb) {
       reportRecord(reportFile, file, dir, res);
       if (res.error || res.disparity > 0) {
         errorCount++;
-        util.log(util.colors.red('Screenshot diff failed: ', file,
+        util.log(colors.red('Screenshot diff failed: ', file,
             JSON.stringify(res)));
       } else if (verbose) {
-        util.log(util.colors.green('Screenshot diff successful: ', file));
+        util.log(colors.green('Screenshot diff successful: ', file));
       }
 
       todo--;
       if (todo == 0) {
         reportPostambule(reportFile);
         if (errorCount == 0) {
-          util.log(util.colors.green('Screenshots tests successful'));
+          util.log(colors.green('Screenshots tests successful'));
         } else {
-          util.log(util.colors.red('Screenshots tests failed: ', errorCount,
+          util.log(colors.red('Screenshots tests failed: ', errorCount,
               reportFile));
           process.exit(1);
         }
@@ -201,7 +202,7 @@ function diffScreenshot_(file, dir, host, verbose, cb) {
         .pipe(imageDiff.jsonReporter())
         .pipe(gulp.dest(diffFile + '.json'))
         .on('error', function(error) {
-          util.log(util.colors.red('Screenshot diff failed: ', file, error));
+          util.log(colors.red('Screenshot diff failed: ', file, error));
           cb({error});
         })
         .on('end', function() {

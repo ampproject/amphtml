@@ -21,6 +21,7 @@ const extend = require('util')._extend;
 const gulp = require('gulp-help')(require('gulp'));
 const request = BBPromise.promisify(require('request'));
 const util = require('gulp-util');
+const colors = require('ansi-colors');
 
 const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
 
@@ -72,16 +73,16 @@ const NUM_BATCHES = 14;
 // We start processing the issues by checking token first
 function processIssues() {
   if (!GITHUB_ACCESS_TOKEN) {
-    util.log(util.colors.red('You have not set the ' +
+    util.log(colors.red('You have not set the ' +
         'GITHUB_ACCESS_TOKEN env var.'));
-    util.log(util.colors.green('See https://help.github.com/articles/' +
+    util.log(colors.green('See https://help.github.com/articles/' +
         'creating-an-access-token-for-command-line-use/ ' +
         'for instructions on how to create a github access token. We only ' +
         'need `public_repo` scope.'));
     return;
   }
   return updateGitHubIssues().then(function() {
-    util.log(util.colors.blue('automation applied'));
+    util.log(colors.blue('automation applied'));
   });
 }
 /**
@@ -139,7 +140,7 @@ function updateGitHubIssues() {
           // if an issue is a pull request, we'll skip it
           if (pullRequest) {
             if (isDryrun) {
-              util.log(util.colors.red(issue.number + ' is a pull request'));
+              util.log(colors.red(issue.number + ' is a pull request'));
             }
             return;
           }
@@ -261,7 +262,7 @@ function updateGitHubIssues() {
                   issueNewMilestone == null ||
                   issueNewMilestone === MILESTONE_GREAT_ISSUES) {
                 if (isDryrun) {
-                  util.log(util.colors.green('No comment needed '
+                  util.log(colors.green('No comment needed '
                       + ' for #' + issue.number));
                 }
               } else {
@@ -293,7 +294,7 @@ function applyMilestone(issue, milestoneNumber) {
 
   issue.milestone = milestoneNumber;
   if (isDryrun) {
-    util.log(util.colors.green('Milestone applied ' + milestoneNumber +
+    util.log(colors.green('Milestone applied ' + milestoneNumber +
         ' for #' + issue.number));
     return;
   } else {
@@ -315,7 +316,7 @@ function applyLabel(issue, label) {
     'access_token': GITHUB_ACCESS_TOKEN,
   };
   if (isDryrun) {
-    util.log(util.colors.green('Label applied ' +
+    util.log(colors.green('Label applied ' +
         label + ' for #' + issue.number));
     return;
   } else {
@@ -341,8 +342,8 @@ function applyComment(issue, comment) {
   const promise = new Promise(resolve => setTimeout(resolve, 120000));
   return promise.then(function() {
     if (isDryrun) {
-      util.log(util.colors.blue('waited 2 minutes to avoid gh rate limits'));
-      util.log(util.colors.green('Comment applied after ' +
+      util.log(colors.blue('waited 2 minutes to avoid gh rate limits'));
+      util.log(colors.green('Comment applied after ' +
           'waiting 2 minutes to avoid github rate limits: ' + comment +
           ' for #' + issue.number));
       return;

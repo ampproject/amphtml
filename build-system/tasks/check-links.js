@@ -24,6 +24,7 @@ const getStdout = require('../exec').getStdout;
 const gulp = require('gulp-help')(require('gulp'));
 const markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
 const util = require('gulp-util');
+const colors = require('ansi-colors');
 
 
 /**
@@ -78,31 +79,31 @@ function checkLinks() {
           if (deadLinksFoundInFile) {
             filesWithDeadLinks.push(markdownFiles[index]);
             util.log(
-                util.colors.red('ERROR'),
+                colors.red('ERROR'),
                 'Possible dead link(s) found in',
-                util.colors.magenta(markdownFiles[index]));
+                colors.magenta(markdownFiles[index]));
           } else {
             util.log(
-                util.colors.green('SUCCESS'),
+                colors.green('SUCCESS'),
                 'All links in',
-                util.colors.magenta(markdownFiles[index]), 'are alive.');
+                colors.magenta(markdownFiles[index]), 'are alive.');
           }
         });
         if (deadLinksFound) {
           util.log(
-              util.colors.red('ERROR'),
+              colors.red('ERROR'),
               'Please update dead link(s) in',
-              util.colors.magenta(filesWithDeadLinks.join(',')),
+              colors.magenta(filesWithDeadLinks.join(',')),
               'or whitelist them in build-system/tasks/check-links.js');
           util.log(
-              util.colors.yellow('NOTE'),
+              colors.yellow('NOTE'),
               'If the link(s) above are not meant to resolve to a real webpage',
               'surrounding them with backticks will exempt them from the link',
               'checker.');
           process.exit(1);
         } else {
           util.log(
-              util.colors.green('SUCCESS'),
+              colors.green('SUCCESS'),
               'All links in all markdown files in this branch are alive.');
         }
       });

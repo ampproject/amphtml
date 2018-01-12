@@ -19,6 +19,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const gulp = require('gulp-help')(require('gulp'));
 const util = require('gulp-util');
 const nodemon = require('nodemon');
+const colors = require('ansi-colors');
 
 const host = argv.host || 'localhost';
 const port = argv.port || process.env.PORT || 8000;
@@ -33,13 +34,13 @@ function serve() {
   // Get the serve mode
   if (argv.compiled) {
     process.env.SERVE_MODE = 'compiled';
-    util.log(util.colors.green('Serving minified js'));
+    util.log(colors.green('Serving minified js'));
   } else if (argv.cdn) {
     process.env.SERVE_MODE = 'cdn';
-    util.log(util.colors.green('Serving current prod js'));
+    util.log(colors.green('Serving current prod js'));
   } else {
     process.env.SERVE_MODE = 'default';
-    util.log(util.colors.green('Serving unminified js'));
+    util.log(colors.green('Serving unminified js'));
   }
 
   nodemon({
@@ -60,10 +61,10 @@ function serve() {
     stdout: !quiet,
   })
       .once('quit', function() {
-        util.log(util.colors.green('Shutting down server'));
+        util.log(colors.green('Shutting down server'));
       });
   if (!quiet) {
-    util.log(util.colors.yellow('Run `gulp build` then go to '
+    util.log(colors.yellow('Run `gulp build` then go to '
         + getHost() + '/examples/article.amp.html'
     ));
   }

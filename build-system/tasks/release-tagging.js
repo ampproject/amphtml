@@ -22,6 +22,7 @@ const git = require('gulp-git');
 const gulp = require('gulp-help')(require('gulp'));
 const request = BBPromise.promisify(require('request'));
 const util = require('gulp-util');
+const colors = require('ansi-colors');
 
 const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
 const gitExec = BBPromise.promisify(git.exec);
@@ -108,7 +109,7 @@ function releaseTagFor(type, dir) {
   });
 
   return promise.then(function() {
-    util.log(util.colors.green('Tag release for ' + type + ' done.'));
+    util.log(colors.green('Tag release for ' + type + ' done.'));
   });
 }
 
@@ -129,7 +130,7 @@ function applyLabel(pullRequest, label) {
       'POST',
       [label]).then(function() {
     if (verbose) {
-      util.log(util.colors.green(
+      util.log(colors.green(
           'Label applied ' + label + ' for #' + pullRequest));
     }
   });

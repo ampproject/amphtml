@@ -19,7 +19,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs-extra');
 const gulp = require('gulp-help')(require('gulp'));
 const util = require('gulp-util');
-
+const colors = require('ansi-colors');
 
 const year = new Date().getFullYear();
 
@@ -273,7 +273,7 @@ function getExamplesFile(name) {
 
 function makeExtension() {
   if (!argv.name) {
-    util.log(util.colors.red(
+    util.log(colors.red(
         'Error! Please pass in the "--name" flag with a value'));
   }
   const name = argv.name;

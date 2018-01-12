@@ -22,9 +22,10 @@ const exec = BBPromise.promisify(childProcess.exec);
 const fs = BBPromise.promisifyAll(require('fs'));
 const gulp = require('gulp-help')(require('gulp'));
 const util = require('gulp-util');
+const colors = require('ansi-colors');
 
-const red = util.colors.red;
-const cyan = util.colors.cyan;
+const red = colors.red;
+const cyan = colors.cyan;
 
 /**
  * Returns the number of AMP_CONFIG matches in the given config string.

@@ -29,12 +29,13 @@ const webserver = require('gulp-webserver');
 const app = require('../test-server').app;
 const karmaDefault = require('./karma.conf');
 const shuffleSeed = require('shuffle-seed');
+const colors = require('ansi-colors');
 
 
-const green = util.colors.green;
-const yellow = util.colors.yellow;
-const cyan = util.colors.cyan;
-const red = util.colors.red;
+const green = colors.green;
+const yellow = colors.yellow;
+const cyan = colors.cyan;
+const red = colors.red;
 
 const preTestTasks = argv.nobuild ? [] : (argv.unit ? ['css'] : ['build']);
 const ampConfig = (argv.config === 'canary') ? 'canary' : 'prod';

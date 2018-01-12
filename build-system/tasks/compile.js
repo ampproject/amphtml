@@ -26,6 +26,7 @@ const internalRuntimeVersion = require('../internal-version').VERSION;
 const internalRuntimeToken = require('../internal-version').TOKEN;
 const shortenLicense = require('../shorten-license');
 const rimraf = require('rimraf');
+const colors = require('ansi-colors');
 
 const isProdBuild = !!argv.type;
 const queue = [];
@@ -52,7 +53,7 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
             next();
             resolve();
           }, function(e) {
-            console./* OK*/error(util.colors.red('Compilation error',
+            console./* OK*/error(colors.red('Compilation error',
                 e.message));
             process.exit(1);
           });
@@ -340,9 +341,9 @@ function compile(entryModuleFilenames, outputDir,
     let stream = gulp.src(srcs)
         .pipe(closureCompiler(compilerOptions))
         .on('error', function(err) {
-          console./* OK*/error(util.colors.red('Error compiling',
+          console./* OK*/error(colors.red('Error compiling',
               entryModuleFilenames));
-          console./* OK*/error(util.colors.red(err.message));
+          console./* OK*/error(colors.red(err.message));
           process.exit(1);
         });
 

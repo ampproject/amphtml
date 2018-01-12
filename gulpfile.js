@@ -35,6 +35,7 @@ var touch = require('touch');
 var watchify = require('watchify');
 var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
 var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
+var colors = require('ansi-colors');
 
 var argv = minimist(process.argv.slice(2), {boolean: ['strictBabelTransform']});
 
@@ -47,10 +48,10 @@ var hostname3p = argv.hostname3p || '3p.ampproject.net';
 var extensions = {};
 var extensionAliasFilePath = {};
 
-var green = $$.util.colors.green;
-var yellow = $$.util.colors.yellow;
-var red = $$.util.colors.red;
-var cyan = $$.util.colors.cyan;
+var green = colors.green;
+var yellow = colors.yellow;
+var red = colors.red;
+var cyan = colors.cyan;
 
 var minifiedRuntimeTarget = 'dist/v0.js';
 var minified3pTarget = 'dist.3p/current-min/f.js';
