@@ -283,6 +283,12 @@ export function validateRtcConfig_(element) {
     return null;
   }
 
+  // The following loop is to allow vendor macros to be set as objects.
+  // We simply stringify the objects, or ignore if already a string.
+  // I.e. a valid rtcConfig could look like:
+  //   {"vendors": {"fakeVendor": {"MACRO1" : {"key": "value"}}}}
+  //   and then the macro MACRO1 would be replaced with the result of
+  //   stringifying {"key": "value"}.
   const vendors = rtcConfig['vendors'] || {};
   Object.keys(vendors).forEach(vendor => {
     Object.keys(vendors[vendor]).forEach(key => {
