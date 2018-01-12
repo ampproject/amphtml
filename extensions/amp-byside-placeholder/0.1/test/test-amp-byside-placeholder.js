@@ -34,9 +34,9 @@ describes.realWin('amp-byside-placeholder', {
     if (attr.label) {
       elem.setAttribute('label', attr.label);
     }
-    elem.setAttribute('data-webcareId', data.webcareId || '');
+    elem.setAttribute('data-webcare-id', data.webcareId || '');
     if (attr.webcareId) {
-      elem.setAttribute('webcareId', attr.webcareId);
+      elem.setAttribute('webcare-id', attr.webcareId);
     }
     elem.setAttribute('width', attr.width || '111');
     elem.setAttribute('height', attr.height || '222');
@@ -73,18 +73,18 @@ describes.realWin('amp-byside-placeholder', {
         /The data-label attribute is required for/);
   });
 
-  it('requires data-webcareId', () => {
+  it('requires data-webcare-id', () => {
     const data = {label: 'placholder-label'};
     const attr = {};
 
     expect(getElement(data, attr)).to.eventually.be.rejectedWith(
-        /The data-webcareId attribute is required for/);
+        /The data-webcare-id attribute is required for/);
   });
 
   it('generates correct default origin', () => {
     const data = {
       label: 'placholder-label',
-      webcareId: 'xxxx',
+      webcareId: 'D6604AE5D0',
     };
     const attr = {};
 
@@ -97,7 +97,7 @@ describes.realWin('amp-byside-placeholder', {
     const agentDomain = 'sa1';
     const data = {
       label: 'placholder-label',
-      webcareId: 'xxxx',
+      webcareId: 'D6604AE5D0',
       agentDomain,
     };
     const attr = {};

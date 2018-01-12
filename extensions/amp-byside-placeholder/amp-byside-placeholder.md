@@ -45,12 +45,12 @@ FILL THIS IN. What does this extension do?
 
 An `amp-byside-placeholder` component displays dynamic content that can be retrieved from the [BySide](https://www.byside.com) customization mechanisms, for a valid BySide client.
 
-The `data-webcareId` and `data-label` attributes are required for the content embed to work.
+The `data-webcare-id` and `data-label` attributes are required for the content embed to work.
 
 Example:
 ```html
 <amp-byside-placeholder
-	data-webcareId="D6604AE5D0"
+	data-webcare-id="D6604AE5D0"
 	data-label="amp"
 	data-lang="en"
 	width="400"
@@ -62,7 +62,7 @@ Example:
 
 ## Attributes
 
-**data-webcareId**
+**data-webcare-id**
 
 The **required** BySide customer account id.
 

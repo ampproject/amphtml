@@ -29,7 +29,7 @@ tags: {  # <amp-byside-placeholder>
   tag_name: "AMP-BYSIDE-PLACEHOLDER"
   requires_extension: "amp-byside-placeholder"
   attrs: {
-    name: "data-webcareId"
+    name: "data-webcare-id"
 	mandatory: true
   }
   attrs: {

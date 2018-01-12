@@ -20,7 +20,7 @@
  * attributes as seen in the following example:
  * <code>
  * <amp-byside-placeholder
- * 	 data-webcareId="<<<webcare_id>>>"
+ * 	 data-webcare-id="<<<webcare_id>>>"
  * 	 data-channel="<<<channel>>>"
  * 	 data-lang="<<<lang>>>"
  *   data-label="<<<placeholder_label>>>"
@@ -133,9 +133,9 @@ export class AmpBysidePlaceholder extends AMP.BaseElement {
     this.isResizable_ = this.element.hasAttribute('resizable');
 
     this.webcareId_ = user().assert(
-        (this.element.getAttribute('data-webcareId') ||
-        this.element.getAttribute('webcareId')),
-        'The data-webcareId attribute is required for <' + TAG_ + '> %s',
+        (this.element.getAttribute('data-webcare-id') ||
+        this.element.getAttribute('webcare-id')),
+        'The data-webcare-id attribute is required for <' + TAG_ + '> %s',
         this.element);
 
     this.label_ = user().assert(
@@ -220,16 +220,14 @@ export class AmpBysidePlaceholder extends AMP.BaseElement {
 
       this.applyFillContent(iframe);
       this.element.appendChild(iframe);
-    }).then(resolve => {
+    }).then(() => {
       this.iframePromise_ = this.loadPromise(iframe).then(() => {
         this.getVsync().mutate(() => {
           setStyles(iframe, {
             'opacity': 1,
             'width': width + 'px',
             'height': height + 'px',
-		  });
-
-		  resolve();
+          });
         });
       });
     }).then(() => self);
