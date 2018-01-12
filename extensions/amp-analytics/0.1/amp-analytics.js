@@ -160,16 +160,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
   }
 
-  /**
-   * Prefetches and preconnects URLs related to the analytics.
-   * @param {boolean=} opt_onLayout
-   * @override
-   */
-  preconnectCallback(opt_onLayout) {
-    const url = getIframeTransportScriptUrl(this.getAmpDoc().win);
-    this.preconnect.preload(url, 'script');
-  }
-
   /** @override */
   layoutCallback() {
     // Now that we are rendered, stop rendering the element to reduce
@@ -341,17 +331,39 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.iframeTransport_) {
       return;
     }
-    const TAG = this.getName_();
-    const ampAdResourceId = user().assertString(
-        getAmpAdResourceId(this.element, getTopWindow(this.win)),
-        `${TAG}: No friendly amp-ad ancestor element was found for ` +
-        'amp-analytics tag with iframe transport.');
+    this.preload(getIframeTransportScriptUrl(this.getAmpDoc().win), 'script');
+    const ampAdResourceId = this.assertAmpAdResourceId();
 
     this.iframeTransport_ = new IframeTransport(
         // Create  3p transport frame within creative frame if inabox.
         this.isInabox_ ? this.win : this.getAmpDoc().win,
         this.element.getAttribute('type'),
         this.config_['transport'], ampAdResourceId);
+  }
+
+  /**
+   * Asks the browser to preload a URL. Always also does a preconnect
+   * because browser support for that is better.
+   *
+   * @param {string} url
+   * @param {string=} opt_preloadAs
+   * @VisibleForTesting
+   */
+  preload(url, opt_preloadAs) {
+    this.preconnect.preload(url, opt_preloadAs);
+  }
+
+  /**
+   * Gets the resourceID of the parent amp-ad element.
+   * Throws an exception if no such element.
+   * @returns {string}
+   * @VisibleForTesting
+   */
+  assertAmpAdResourceId() {
+    return user().assertString(
+        getAmpAdResourceId(this.element, getTopWindow(this.win)),
+        `${this.getName_()}: No friendly amp-ad ancestor element was found ` +
+        'for amp-analytics tag with iframe transport.');
   }
 
   /**
