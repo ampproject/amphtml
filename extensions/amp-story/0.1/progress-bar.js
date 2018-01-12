@@ -114,7 +114,6 @@ export class ProgressBar {
     this.assertValidPageIndex_(pageIndex);
     for (let i = 0; i < this.pageCount_; i++) {
       if (i < pageIndex) {
-        // Fill progress bar for pages that precede the active page
         this.updateProgress(i, 1.0, /* withTransition */ i == pageIndex - 1);
       } else {
         // The active page manages its own progress by firing PAGE_PROGRESS
