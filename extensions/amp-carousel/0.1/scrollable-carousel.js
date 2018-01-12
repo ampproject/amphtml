@@ -140,7 +140,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
   }
 
   /**
-   * @param {!number} startingScrollLeft
+   * @param {number} startingScrollLeft
    * @private
    */
   waitForScroll_(startingScrollLeft) {
