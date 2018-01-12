@@ -70,6 +70,11 @@ const forbiddenTerms = {
   'describes.*\\.only': '',
   'it\\.only': '',
   'Math\.random[^;()]*=': 'Use Sinon to stub!!!',
+  'gulp-util': {
+    message: '`gulp-util` will be deprecated soon. See ' +
+        'https://medium.com/gulpjs/gulp-util-ca3b1f9f9ac5 ' +
+        'for a list of alternatives.',
+  },
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
   },
