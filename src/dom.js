@@ -615,7 +615,7 @@ export function ancestorElementsByTag(child, tagName) {
  * `undefined` to avoid checking the `length` property.
  * Test cases: https://jsperf.com/iterating-over-collections-of-elements
  * @param {!IArrayLike<T>} iterable
- * @param {!function(T, number)} cb
+ * @param {function(T, number)} cb
  * @template T
  */
 export function iterateCursor(iterable, cb) {

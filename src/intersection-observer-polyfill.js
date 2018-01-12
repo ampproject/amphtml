@@ -187,7 +187,7 @@ export class IntersectionObserverApi {
  */
 export class IntersectionObserverPolyfill {
   /**
-   * @param {!function(?Array<!IntersectionObserverEntry>)} callback.
+   * @param {function(?Array<!IntersectionObserverEntry>)} callback.
    * @param {Object=} opt_option
    */
   constructor(callback, opt_option) {

@@ -61,7 +61,7 @@ let originExperiments;
 
 /**
  * @typedef {{
- *   isTrafficEligible: !function(!Window):boolean,
+ *   isTrafficEligible: function(!Window):boolean,
  *   branches: !Array<string>
  * }}
  */

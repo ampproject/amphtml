@@ -112,7 +112,7 @@ let runSyncCount = 0;
 
 /**
  * @param {!Window} global
- * @param {!function()} cb
+ * @param {function()} cb
  */
 function runSync(global, cb) {
   global['__aoPrivFnct' + ++runSyncCount] = cb;

@@ -1491,7 +1491,7 @@ function serializeItem_(key, value) {
 
 /**
  * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instances
- * @param {!function(AmpAdNetworkDoubleclickImpl):?T} extractFn
+ * @param {function(AmpAdNetworkDoubleclickImpl):?T} extractFn
  * @return {?T} value of first instance with non-null/undefined value or null
  *    if none can be found
  * @template T

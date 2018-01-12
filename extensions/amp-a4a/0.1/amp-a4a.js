@@ -1128,7 +1128,7 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * @return {!function()} function that when called will verify if current
+   * @return {function()} function that when called will verify if current
    *    ad retrieval is current (meaning unlayoutCallback was not executed).
    *    If not, will throw cancellation exception;
    * @throws {Error}

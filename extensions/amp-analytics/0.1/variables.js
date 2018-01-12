@@ -40,7 +40,7 @@ class Filter {
    * @param {boolean=} opt_allowNull
    */
   constructor(filter, opt_allowNull) {
-    /** @type {!function(...?):(string|!Promise<string>)} */
+    /** @type {function(...?):(string|!Promise<string>)} */
     this.filter = filter;
 
     /** @type{boolean} */
