@@ -1128,7 +1128,7 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * @return {!function()} function that when called will verify if current
+   * @return {function()} function that when called will verify if current
    *    ad retrieval is current (meaning unlayoutCallback was not executed).
    *    If not, will throw cancellation exception;
    * @throws {Error}
@@ -1740,7 +1740,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Whether preferential render should still be utilized if web crypto is unavailable,
    * and crypto signature header is present.
-   * @return {!boolean}
+   * @return {boolean}
    */
   shouldPreferentialRenderWithoutCrypto() {
     return false;

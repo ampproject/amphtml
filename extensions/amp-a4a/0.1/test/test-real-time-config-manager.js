@@ -233,6 +233,29 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         vendors, customMacros, inflatedUrls, rtcCalloutResponses,
         calloutCount, expectedCalloutUrls: inflatedUrls, expectedRtcArray});
     });
+    it('should send callouts to vendor URLs with object/array macros', () => {
+      const vendors = {
+        'fAkeVeNdOR': {
+          SLOT_ID: {'key': 'value'},
+          PAGE_ID: [1,2,3],
+          FOO_ID: 'String',
+        },
+      };
+      const inflatedUrls = [
+        'https://localhost:8000/examples/rtcE1.json?slot_id=%7B%22key%22%3A%22' +
+            'value%22%7D&page_id=%5B1%2C2%2C3%5D&foo_id=String',
+      ];
+      const rtcCalloutResponses = [
+        {'response1': {'fooArray': ['foo']}},
+      ];
+      const calloutCount = 1;
+      const expectedRtcArray = [];
+      expectedRtcArray.push(rtcEntry(rtcCalloutResponses[0],
+          Object.keys(vendors)[0].toLowerCase()));
+      return executeTest({
+        vendors, inflatedUrls, rtcCalloutResponses,
+        calloutCount, expectedCalloutUrls: inflatedUrls, expectedRtcArray});
+    });
     it('should send RTC callouts to inflated publisher and vendor URLs', () => {
       const urls = generateUrls(2,2);
       const vendors = {

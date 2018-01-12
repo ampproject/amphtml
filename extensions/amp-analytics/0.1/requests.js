@@ -32,7 +32,7 @@ export class RequestHandler {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} request
    * @param {!../../../src/preconnect.Preconnect} preconnect
-   * @param {!function(string, !JsonObject)} handler
+   * @param {function(string, !JsonObject)} handler
    * @param {boolean} isSandbox
    */
   constructor(ampdoc, request, preconnect, handler, isSandbox) {
@@ -65,7 +65,7 @@ export class RequestHandler {
     /** @private {!../../../src/preconnect.Preconnect} */
     this.preconnect_ = preconnect;
 
-    /** @private {!function(string, !JsonObject)} */
+    /** @private {function(string, !JsonObject)} */
     this.handler_ = handler;
 
     /** @const @private {!Object|undefined} */
@@ -161,12 +161,6 @@ export class RequestHandler {
     return Promise.all(extraUrlParamsPromise).then(paramStrs => {
       filterSplice(paramStrs, item => {return !!item;});
       const extraUrlParamsStr = paramStrs.join('&');
-      let preUrl = this.baseUrl;
-      if (preUrl.indexOf('${extraUrlParams}') >= 0) {
-        preUrl = preUrl.replace('${extraUrlParams}', extraUrlParamsStr);
-      } else {
-        preUrl = appendEncodedParamStringToUrl(preUrl, extraUrlParamsStr);
-      }
       return baseUrlTemplatePromise.then(preUrl => {
         this.preconnect_.url(preUrl, true);
         return baseUrlPromise.then(request => {

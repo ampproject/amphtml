@@ -32,6 +32,12 @@ const POLL_INTERVAL_MS = 250;
 /** @const {string} */
 const MEDIA_ELEMENT_SELECTOR = 'amp-video';
 
+/** @const @enum */
+export const TapNavigationDirection = {
+  'NEXT': 1,
+  'PREVIOUS': 2,
+};
+
 /**
  * Base class for the AdvancementConfig.  By default, does nothing other than
  * tracking its internal state when started/stopped, and listeners will never be
@@ -47,6 +53,9 @@ export class AdvancementConfig {
 
     /** @private @const {!Array<function()>} */
     this.previousListeners_ = [];
+
+    /** @private @const {!Array<function(number)>} */
+    this.tapNavigationListeners_ = [];
 
     /** @private {boolean} */
     this.isRunning_ = false;
@@ -76,6 +85,14 @@ export class AdvancementConfig {
    */
   addPreviousListener(previousListener) {
     this.previousListeners_.push(previousListener);
+  }
+
+  /**
+   * @param {function(number)} onTapNavigationListener A function that handles when a
+   * navigation listener to be fired.
+   */
+  addOnTapNavigationListener(onTapNavigationListener) {
+    this.tapNavigationListeners_.push(onTapNavigationListener);
   }
 
   /**
@@ -127,6 +144,16 @@ export class AdvancementConfig {
   onPrevious() {
     this.previousListeners_.forEach(previousListener => {
       previousListener();
+    });
+  }
+
+  /**
+   * @param {number} navigationDirection Direction of navigation
+   * @protected
+   */
+  onTapNavigation(navigationDirection) {
+    this.tapNavigationListeners_.forEach(navigationListener => {
+      navigationListener(navigationDirection);
     });
   }
 
@@ -291,9 +318,9 @@ class ManualAdvancement extends AdvancementConfig {
     const nextScreenAreaMax = offsetLeft + offsetWidth;
 
     if (event.pageX >= nextScreenAreaMin && event.pageX < nextScreenAreaMax) {
-      this.onAdvance();
+      this.onTapNavigation(TapNavigationDirection.NEXT);
     } else if (event.pageX >= offsetLeft && event.pageX < nextScreenAreaMin) {
-      this.onPrevious();
+      this.onTapNavigation(TapNavigationDirection.PREVIOUS);
     }
   }
 
@@ -473,6 +500,13 @@ class MediaBasedAdvancement extends AdvancementConfig {
   start() {
     super.start();
 
+    // Prevents race condition when checking for video interface classname.
+    (this.element_.whenBuilt ? this.element_.whenBuilt() : Promise.resolve())
+        .then(() => this.startWhenBuilt_());
+  }
+
+  /** @private */
+  startWhenBuilt_() {
     if (this.isVideoInterfaceVideo_()) {
       this.startVideoInterfaceElement_();
       return;

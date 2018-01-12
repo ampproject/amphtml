@@ -160,5 +160,25 @@ feature_tests/forms.html:133:2 The mandatory attribute 'action' is missing in ta
 >>   ^~~~~~~~~
 feature_tests/forms.html:136:2 The mandatory attribute 'action' is missing in tag 'FORM [method=GET]'. (see https://www.ampproject.org/docs/reference/components/amp-form) [DISALLOWED_HTML]
 |    </form>
+|    <!-- Valid: inlined template, referenced template -->
+|    <template type="amp-mustache" id="submit_success_template">
+|      Success in referenced template
+|    </template>
+|    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+|      <input type="submit" value="Subscribe">
+|      <div submit-success template="submit_success_template"></div>
+|      <div submit-error>
+|        <template type="amp-mustache">Error in inlined template</template>
+|      </div>
+|    </form>
+|    <!-- Invalid: inlined and referenced template for the same div -->
+|    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
+|      <input type="submit" value="Subscribe">
+|      <div submit-success template="submit_success_template">
+|        <template type="amp-mustache">Success in inlined inlined</template>
+>>       ^~~~~~~~~
+feature_tests/forms.html:153:6 The tag 'template' may not appear as a descendant of tag 'form > div [submit-success][template]'. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
+|      </div>
+|    </form>
 |  </body>
 |  </html>

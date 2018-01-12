@@ -37,6 +37,7 @@ If you do not yet have a specific code contribution project in mind as you go th
 - [Edit files and commit them](#edit-files-and-commit-them)
 - [Testing your changes](#testing-your-changes)
   * [Running tests locally](#running-tests-locally)
+  * [Running all the Travis CI checks locally](#running-all-the-travis-ci-checks-locally)
   * [Adding tests for your change](#adding-tests-for-your-change)
 - [Push your changes to your GitHub fork](#push-your-changes-to-your-github-fork)
 - [Send a Pull Request (i.e. request a code review)](#send-a-pull-request-ie-request-a-code-review)
@@ -331,7 +332,9 @@ Before sending your code changes for review, you will want to make sure that all
 
 Make sure you are in the branch that has your changes (`git checkout <branch name>`), pull in the latest changes from the remote amphtml repository and then simply run:
 
-`gulp test`
+```
+gulp test
+```
 
 You'll see some messages about stuff being compiled and then after a short time you will see a new Chrome window open up that says "Karma" at the top.  In the window where you ran `gulp test`, you'll see a bunch of tests scrolling by (`Executed NNNN of MMMM`) and hopefully a lot of `SUCCESS` messages.
 
@@ -342,6 +345,33 @@ If the tests have failed you will need to determine whether the failure is relat
 If the failing test looks completely unrelated to your change, it *might* be due to bad code/tests that have made it into the amphtml repository.  You can check the latest [amphtml test run on Travis](https://travis-ci.org/ampproject/amphtml/builds).  If it's green (meaning the tests pass) then it's more likely the failure is a problem with your change.  If it's red, you can click through to see if the failing tests are the same as the ones you see locally.
 
 Fixing the tests will depend heavily on the change you are making and what tests are failing.  If you need help to fix them you can ask on the GitHub issue you're working on or reach out to the community as described in [How to get help](#how-to-get-help).
+
+## Running all the Travis CI checks locally
+
+Sometimes, it can be useful to pre-emptively eliminate errors in your pull request by running all the Travis CI checks on your local machine. You can do so by running:
+
+```
+gulp pr-check
+```
+
+To run all Travis CI checks, but skip the `gulp build` step, you can run:
+
+```
+gulp pr-check --nobuild
+```
+
+To run all Travis CI checks, and restrict the unit tests and integration tests to just a subset of files, you can run:
+
+```
+gulp pr-check --files=<test-files-path-glob>
+```
+
+Notes:
+
+* This will force a clean build and run all the PR checks one by one.
+* Just like on Travis, a failing check will prevent subsequent checks from being run.
+* The `gulp visual-diff` check will be skipped unless you have set up a Percy account as described [here](https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md#running-visual-diff-tests-locally).
+* The AMP unit and integration tests will be run on local Chrome unless you have set up a Sauce Labs account as described [here](https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md#testing-on-sauce-labs).
 
 ## Adding tests for your change
 

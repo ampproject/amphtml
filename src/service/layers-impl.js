@@ -264,7 +264,7 @@ export class LayoutLayers {
    * Eagerly creates a Layer for the element.
    *
    * @param {!Element} element
-   * @param {!boolean} isRootLayer
+   * @param {boolean} isRootLayer
    * @return {!LayoutElement}
    */
   declareLayer_(element, isRootLayer) {
@@ -298,11 +298,11 @@ export class LayoutLayers {
    * @param {!Element} element
    */
   scrolled_(element) {
-    let layer = LayoutElement.forOptional(element);
+    const layer = LayoutElement.forOptional(element);
     if (layer && layer.isLayer()) {
       layer.requestScrollRemeasure();
     } else {
-      layer = this.declareLayer_(element, false);
+      this.declareLayer_(element, false);
     }
 
     if (this.onScroll_) {
