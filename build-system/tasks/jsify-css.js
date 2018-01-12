@@ -16,7 +16,6 @@
 'use strict';
 
 
-const $$ = require('gulp-load-plugins')();
 const autoprefixer = require('autoprefixer');
 const cssnano = require('cssnano');
 const fs = require('fs-extra');
