@@ -21,6 +21,7 @@ const gulp = require('gulp-help')(require('gulp'));
 const postcss = require('postcss');
 const table = require('text-table');
 const through = require('through2');
+const PluginError = require('plugin-error');
 
 const tableHeaders = [
   ['selector', 'z-index', 'file'],
@@ -66,7 +67,7 @@ function onFileThrough(file, enc, cb) {
   }
 
   if (file.isStream()) {
-    cb(new util.PluginError('size', 'Stream not supported'));
+    cb(new PluginError('size', 'Stream not supported'));
     return;
   }
 
