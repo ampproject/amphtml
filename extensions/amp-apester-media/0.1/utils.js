@@ -57,7 +57,7 @@ function extractElementTags(element) {
 /**
  * Extracts tags from a given element and document.
  * @param element
- * @return {Array<String>}
+ * @return {Array<string>}
  */
 export function extractTags(element) {
   const extractags = extractElementTags(element);
