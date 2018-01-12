@@ -19,12 +19,6 @@ import {createCustomEvent} from '../../../src/event-helper';
 
 /** @const {!Object<string, string>} */
 export const EventType = {
-  // Triggered when the user clicks the exit full screen button
-  EXIT_FULLSCREEN: 'ampstory:exitfullscreen',
-
-  // Triggered when the user clicks the enter full screen button
-  ENTER_FULLSCREEN: 'ampstory:enterfullscreen',
-
   // Triggered when the bookend should be opened
   SHOW_BOOKEND: 'ampstory:showbookend',
 

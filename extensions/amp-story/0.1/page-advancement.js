@@ -313,9 +313,9 @@ class ManualAdvancement extends AdvancementConfig {
     const nextScreenAreaMax = offsetLeft + offsetWidth;
 
     if (event.pageX >= nextScreenAreaMin && event.pageX < nextScreenAreaMax) {
-      this.onNavigate(NAVIGATION_DIRECTION.NEXT);
+      this.onNavigate(TapNavigationDirection.NEXT);
     } else if (event.pageX >= offsetLeft && event.pageX < nextScreenAreaMin) {
-      this.onNavigate(NAVIGATION_DIRECTION.PREVIOUS);
+      this.onNavigate(TapNavigationDirection.PREVIOUS);
     }
   }
 }
@@ -476,6 +476,13 @@ class MediaBasedAdvancement extends AdvancementConfig {
   start() {
     super.start();
 
+    // Prevents race condition when checking for video interface classname.
+    (this.element_.whenBuilt ? this.element_.whenBuilt() : Promise.resolve())
+        .then(() => this.startWhenBuilt_());
+  }
+
+  /** @private */
+  startWhenBuilt_() {
     if (this.isVideoInterfaceVideo_()) {
       this.startVideoInterfaceElement_();
       return;
