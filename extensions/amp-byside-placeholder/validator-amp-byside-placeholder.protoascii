@@ -17,48 +17,34 @@
 tags: {  # amp-byside-placeholder
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "amp-byside-placeholder extension .js script"
-  satisfies: "amp-byside-placeholder extension .js script"
-  requires: "amp-byside-placeholder"
-  mandatory_parent: "HEAD"
-  unique: true
-  extension_unused_unless_tag_present: "amp-byside-placeholder"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
+  extension_spec: {
+    name: "amp-byside-placeholder"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
   }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-byside-placeholder"
-    dispatch_key: true
-  }
-  attrs: { name: "nonce" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\.ampproject\.org/v0/amp-byside-placeholder-(latest|0\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-byside-placeholder"
+  attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-byside-placeholder>
   html_format: AMP
   tag_name: "AMP-BYSIDE-PLACEHOLDER"
-  satisfies: "amp-byside-placeholder"
-  requires: "amp-byside-placeholder extension .js script"
+  requires_extension: "amp-byside-placeholder"
+  attrs: {
+    name: "data-webcareId"
+	mandatory_oneof: "['data-webcareId', 'webcareId']"
+  }
+  attrs: {
+    name: "webcareId"
+	mandatory_oneof: "['data-webcareId', 'webcareId']"
+  }
+  attrs: {
+    name: "data-label"
+	mandatory_oneof: "['data-label', 'label']"
+  }
+  attrs: {
+    name: "label"
+	mandatory_oneof: "['data-label', 'label']"
+  }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-byside-placeholder"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

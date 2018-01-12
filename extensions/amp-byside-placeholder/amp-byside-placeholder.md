@@ -50,7 +50,7 @@ The `data-webcareId` and `data-label` attributes are required for the content em
 Example:
 ```html
 <amp-byside-placeholder
-	data-webcareId="F15B000CB5"
+	data-webcareId="D6604AE5D0"
 	data-label="amp"
 	data-lang="en"
 	width="400"

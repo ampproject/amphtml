@@ -272,7 +272,7 @@ export class AmpBysidePlaceholder extends AMP.BaseElement {
     }
 
     return Services.urlReplacementsForDoc(this.element)
-        .expandAsync(addParamsToUrl(src, dict(params)));
+        .expandAsync(addParamsToUrl(src, params));
   }
 
   /**
@@ -310,8 +310,8 @@ export class AmpBysidePlaceholder extends AMP.BaseElement {
 
     if (newHeight !== undefined || newWidth !== undefined) {
       // Force change size as requested
-      this.element.getResources()./*OK*/changeSize(this.element, newHeight, newWidth,
-          () => {
+      this.element.getResources()./*OK*/changeSize(
+		  this.element, newHeight, newWidth, () => {
             if (newHeight !== undefined) {
               this.element.setAttribute('height', newHeight);
             }
