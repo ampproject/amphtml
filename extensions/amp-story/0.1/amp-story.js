@@ -965,8 +965,6 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    this.activePage_.setActive(true);
-
     this.toggleElementsOnBookend_(/* display */ true);
 
     this.element.classList.remove('i-amphtml-story-bookend-active');
