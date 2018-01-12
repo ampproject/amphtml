@@ -30,7 +30,6 @@ const execOrDie = require('./exec').execOrDie;
 const getStdout = require('./exec').getStdout;
 const getStderr = require('./exec').getStderr;
 const path = require('path');
-const util = require('gulp-util');
 const colors = require('ansi-colors');
 
 const fileLogPrefix = colors.yellow.bold('pr-check.js:');

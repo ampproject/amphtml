@@ -18,7 +18,6 @@
 const exec = require('../exec').exec;
 const getStderr = require('../exec').getStderr;
 const gulp = require('gulp-help')(require('gulp'));
-const util = require('gulp-util');
 const colors = require('ansi-colors');
 const log = require('fancy-log');
 

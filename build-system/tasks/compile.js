@@ -21,7 +21,6 @@ const closureCompiler = require('gulp-closure-compiler');
 const gulp = require('gulp');
 const rename = require('gulp-rename');
 const replace = require('gulp-replace');
-const util = require('gulp-util');
 const internalRuntimeVersion = require('../internal-version').VERSION;
 const internalRuntimeToken = require('../internal-version').TOKEN;
 const shortenLicense = require('../shorten-license');

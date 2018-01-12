@@ -21,7 +21,6 @@ const childProcess = require('child_process');
 const exec = BBPromise.promisify(childProcess.exec);
 const fs = BBPromise.promisifyAll(require('fs'));
 const gulp = require('gulp-help')(require('gulp'));
-const util = require('gulp-util');
 const colors = require('ansi-colors');
 const log = require('fancy-log');
 

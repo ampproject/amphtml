@@ -21,7 +21,6 @@ const fs = require('fs-extra');
 const git = require('gulp-git');
 const gulp = require('gulp-help')(require('gulp'));
 const request = BBPromise.promisify(require('request'));
-const util = require('gulp-util');
 const colors = require('ansi-colors');
 const log = require('fancy-log');
 

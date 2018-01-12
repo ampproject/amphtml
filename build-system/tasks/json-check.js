@@ -17,7 +17,6 @@
 
 const gulp = require('gulp-help')(require('gulp'));
 const jsonGlobs = require('../config').jsonGlobs;
-const util = require('gulp-util');
 const through2 = require('through2');
 const colors = require('ansi-colors');
 const log = require('fancy-log');

@@ -18,7 +18,6 @@
 const BBPromise = require('bluebird');
 const gulp = require('gulp-help')(require('gulp'));
 const srcGlobs = require('../config').presubmitGlobs;
-const util = require('gulp-util');
 const through2 = require('through2');
 const request = BBPromise.promisify(require('request'));
 const colors = require('ansi-colors');

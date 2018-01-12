@@ -20,7 +20,6 @@ const m = require('./');
 const BBPromise = require('bluebird');
 const fs = BBPromise.promisifyAll(require('fs-extra'));
 const exec = require('child_process').execSync;
-const util = require('gulp-util');
 const colors = require('ansi-colors');
 const log = require('fancy-log');
 

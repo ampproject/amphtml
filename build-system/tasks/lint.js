@@ -22,7 +22,6 @@ const eslint = require('gulp-eslint');
 const gulp = require('gulp-help')(require('gulp'));
 const gulpIf = require('gulp-if');
 const lazypipe = require('lazypipe');
-const util = require('gulp-util');
 const watch = require('gulp-watch');
 const colors = require('ansi-colors');
 const log = require('fancy-log');

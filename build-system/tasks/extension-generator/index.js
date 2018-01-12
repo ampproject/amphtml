@@ -18,7 +18,6 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs-extra');
 const gulp = require('gulp-help')(require('gulp'));
-const util = require('gulp-util');
 const colors = require('ansi-colors');
 const log = require('fancy-log');
 

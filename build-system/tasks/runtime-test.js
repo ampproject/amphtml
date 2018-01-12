@@ -24,7 +24,6 @@ const applyConfig = require('./prepend-global/index.js').applyConfig;
 const removeConfig = require('./prepend-global/index.js').removeConfig;
 const fs = require('fs');
 const path = require('path');
-const util = require('gulp-util');
 const webserver = require('gulp-webserver');
 const app = require('../test-server').app;
 const karmaDefault = require('./karma.conf');

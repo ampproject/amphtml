@@ -22,7 +22,6 @@ const gzipSize = require('gzip-size');
 const prettyBytes = require('pretty-bytes');
 const table = require('text-table');
 const through = require('through2');
-const util = require('gulp-util');
 
 
 const tempFolderName = '__size-temp';

@@ -23,7 +23,6 @@ const app = require(require.resolve('./app.js'));
 const isRunning = require('is-running');
 const gulp = require('gulp-help')(require('gulp'));
 const morgan = require('morgan');
-const util = require('gulp-util');
 const webserver = require('gulp-webserver');
 const colors = require('ansi-colors');
 const log = require('fancy-log');

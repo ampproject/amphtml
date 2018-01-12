@@ -21,7 +21,6 @@ const gulp = require('gulp-help')(require('gulp'));
 const postcss = require('postcss');
 const table = require('text-table');
 const through = require('through2');
-const util = require('gulp-util');
 
 const tableHeaders = [
   ['selector', 'z-index', 'file'],

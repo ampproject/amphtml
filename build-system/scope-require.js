@@ -23,7 +23,6 @@ const rocambole = require('rocambole');
 const fs = require('fs');
 const program = require('commander');
 const es = require('event-stream');
-const util = require('gulp-util');
 const colors = require('ansi-colors');
 
 /**

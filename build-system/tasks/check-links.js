@@ -23,7 +23,6 @@ const fs = require('fs-extra');
 const getStdout = require('../exec').getStdout;
 const gulp = require('gulp-help')(require('gulp'));
 const markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
-const util = require('gulp-util');
 const colors = require('ansi-colors');
 const log = require('fancy-log');
 
