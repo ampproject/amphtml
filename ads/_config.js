@@ -201,6 +201,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  adzerk: {},
+
   affiliateb: {
     prefetch: 'https://track.affiliate-b.com/amp/a.js',
     renderStartImplemented: true,

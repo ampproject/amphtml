@@ -19,7 +19,6 @@ import {
   NO_CONTENT_RESPONSE,
   CreativeMetaDataDef,
 } from '../../amp-a4a/0.1/amp-a4a';
-import {AmpMustache} from '../../amp-mustache/0.1/amp-mustache';
 import {urls} from '../../../src/config';
 import {tryParseJson} from '../../../src/json';
 import {dev} from '../../../src/log';
@@ -87,8 +86,6 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
 
     /** @private {?CreativeMetaDataDef} */
     this.creativeMetaData_ = null;
-
-    this.win.AMP.registerTemplate('amp-mustache', AmpMustache);
   };
 
   /**

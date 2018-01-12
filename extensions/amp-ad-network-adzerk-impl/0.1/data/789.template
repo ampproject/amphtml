@@ -33,33 +33,35 @@
     </style>
   </head>
   <body>
-    <amp-animation id="clockAnim" layout="nodisplay">
-      <script type="application/json">
-      {
-        "duration": "6s",
-        "fill": "both",
-        "direction": "alternate",
-        "animations": [
-          {
-            "target": "clockHand",
-            "keyframes": [
-              { "transform": "rotate(-180deg)" },
-              { "transform": "rotate(0deg)" }
-            ]
-          }
-        ]
-      }
-      </script>
-    </amp-animation>
-    <div class="container">
-      <amp-position-observer
-        intersection-ratios="1"
-        viewport-margins="5vh"
-        on="scroll:clockAnim.seekTo(percent=event.percent)"
-        layout="nodisplay"></amp-position-observer>
-      <amp-img id="clock-bg" layout="fill" src="{{CLOCK_IMG}}">
-      </amp-img>
-      <div id="clockHand" class="clock-hand"></div>
-    </div>
+    <template type="amp-mustache">
+      <amp-animation id="clockAnim" layout="nodisplay">
+        <script type="application/json">
+        {
+          "duration": "6s",
+          "fill": "both",
+          "direction": "alternate",
+          "animations": [
+            {
+              "target": "clockHand",
+              "keyframes": [
+                { "transform": "rotate(-180deg)" },
+                { "transform": "rotate(0deg)" }
+              ]
+            }
+          ]
+        }
+        </script>
+      </amp-animation>
+      <div class="container">
+        <amp-position-observer
+          intersection-ratios="1"
+          viewport-margins="5vh"
+          on="scroll:clockAnim.seekTo(percent=event.percent)"
+          layout="nodisplay"></amp-position-observer>
+        <amp-img id="clock-bg" layout="fill" src="{{CLOCK_IMG}}">
+        </amp-img>
+        <div id="clockHand" class="clock-hand"></div>
+      </div>
+    </template>
   </body>
 </html>

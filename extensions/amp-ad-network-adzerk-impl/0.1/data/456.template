@@ -10,9 +10,11 @@
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Raleway">
   </head>
   <body>
-    <amp-fit-text width="200" height="40">hello {{USER_NAME}}! {{USER_NUM}}</amp-fit-text><br>
-    Expect encoding {{HTML_CONTENT}}<br>
-    <amp-img src={{IMG_SRC}} height=159 width=318></amp-img><br>
-    Missing {{UNKNOWN}} item
+    <template type="amp-mustache">
+      <amp-fit-text width="200" height="40">hello {{USER_NAME}}! {{USER_NUM}}</amp-fit-text><br>
+      Expect encoding {{HTML_CONTENT}}<br>
+      <amp-img src={{IMG_SRC}} height=159 width=318></amp-img><br>
+      Missing {{UNKNOWN}} item
+    </template>
   </body>
 </html>
