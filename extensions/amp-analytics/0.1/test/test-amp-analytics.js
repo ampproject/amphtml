@@ -287,10 +287,9 @@ describes.realWin('amp-analytics', {
     analytics.buildCallback();
     analytics.preconnectCallback();
     return analytics.layoutCallback().then(() => {
-      expect(preloadSpy).to.have.been.calledOnce;
-      expect(preloadSpy).to.have.been.calledWith(
+      expect(preloadSpy.withArgs(
           'http://localhost:9876/dist/iframe-transport-client-lib.js',
-          'script');
+          'script')).to.be.calledOnce;
     });
   });
 
