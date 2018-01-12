@@ -355,7 +355,7 @@ export class AmpStory extends AMP.BaseElement {
 
       if (direction === TapNavigationDirection.NEXT) {
         this.next_();
-      } else {
+      } else if (direction === TapNavigationDirection.PREVIOUS) {
         this.previous_();
       }
     });
