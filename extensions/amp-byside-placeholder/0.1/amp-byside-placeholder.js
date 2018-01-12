@@ -45,7 +45,13 @@ import {dict} from '../../../src/utils/object';
 const TAG_ = 'amp-byside-placeholder';
 
 /** @const {string} */
-const DEFAULT_AGENT_DOMAIN_ = 'webcare';
+const DEFAULT_WEBCARE_ZONE_ = 'main';
+
+/** @const {string} */
+const MAIN_WEBCARE_ZONE_ = 'main';
+
+/** @const {string} */
+const MAIN_WEBCARE_ZONE_SUBDOMAIN_ = 'webcare';
 
 /** @const {string} */
 const DEFAULT_LANG_ = 'pt';
@@ -74,11 +80,11 @@ export class AmpBysidePlaceholder extends AMP.BaseElement {
     /** @private {?Promise} */
     this.iframePromise_ = null;
 
-    /** @private {string}  */
-    this.agentDomain_ = 'webcare';
-
     /** @private {boolean} */
     this.isResizable_ = false;
+
+    /** @private {string}  */
+    this.webcareZone_ = 'main';
 
     /** @private {string}  */
     this.webcareId_ = '';
@@ -124,13 +130,11 @@ export class AmpBysidePlaceholder extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    // Get attributes, assertions of values, assign instance variables.
-    // Build lightweight DOM and append to this.element.
-
-    this.agentDomain_ = (this.element.getAttribute('data-agentDomain') ||
-            this.element.getAttribute('agentDomain') ||
-            DEFAULT_AGENT_DOMAIN_);
     this.isResizable_ = this.element.hasAttribute('resizable');
+
+    this.webcareZone_ = (this.element.getAttribute('data-webcare-zone') ||
+		this.element.getAttribute('webcare-zone') ||
+		DEFAULT_WEBCARE_ZONE_);
 
     this.webcareId_ = user().assert(
         (this.element.getAttribute('data-webcare-id') ||
@@ -235,8 +239,10 @@ export class AmpBysidePlaceholder extends AMP.BaseElement {
 
   /** @private */
   generateOrigin_() {
-    const domain = this.agentDomain_ === 'main' ? 'webcare' : this.agentDomain_;
-    return 'https://' + domain + '.byside.com';
+    const subDomain = this.webcareZone_ === MAIN_WEBCARE_ZONE_ ?
+      MAIN_WEBCARE_ZONE_SUBDOMAIN_ :
+      this.webcareZone_;
+    return 'https://' + subDomain + '.byside.com';
   }
 
   /** @private */

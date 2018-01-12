@@ -42,6 +42,10 @@ describes.realWin('amp-byside-placeholder', {
     elem.setAttribute('height', attr.height || '222');
     elem.setAttribute('alt', attr.alt || 'Testing BySide Placeholder');
 
+    if (data.webcareZone) {
+      elem.setAttribute('data-webcare-zone', data.webcareZone);
+    }
+
     if (attr.resizable) {
       elem.setAttribute('resizable');
     }
@@ -69,7 +73,7 @@ describes.realWin('amp-byside-placeholder', {
     const data = {webcareId: 'D6604AE5D0'};
     const attr = {};
 
-    expect(getElement(data, attr)).to.eventually.be.rejectedWith(
+    expect(getElement(data, attr)).to.be.rejectedWith(
         /The data-label attribute is required for/);
   });
 
@@ -77,7 +81,7 @@ describes.realWin('amp-byside-placeholder', {
     const data = {label: 'placholder-label'};
     const attr = {};
 
-    expect(getElement(data, attr)).to.eventually.be.rejectedWith(
+    expect(getElement(data, attr)).to.be.rejectedWith(
         /The data-webcare-id attribute is required for/);
   });
 
@@ -88,22 +92,26 @@ describes.realWin('amp-byside-placeholder', {
     };
     const attr = {};
 
-    expect(getElement(data, attr)).to.eventually.satisfy(function(elem) {
-      return elem.implementation_.origin_ === 'https://webcare.byside.com';
+    return getElement(data, attr).then(elem => {
+      expect(elem.implementation_.origin_).to.equal(
+		  'https://webcare.byside.com'
+      );
     });
   });
 
-  it('generates correct provided agent domain', () => {
-    const agentDomain = 'sa1';
+  it('generates correct provided webcare zone', () => {
+    const webcareZone = 'sa1';
     const data = {
       label: 'placholder-label',
       webcareId: 'D6604AE5D0',
-      agentDomain,
+      webcareZone,
     };
     const attr = {};
 
-    expect(getElement(data, attr)).to.eventually.satisfy(function(elem) {
-      return elem.implementation_.origin_ === 'https://' + agentDomain + '.byside.com';
+    return getElement(data, attr).then(elem => {
+      expect(elem.implementation_.origin_).to.equal(
+          'https://' + webcareZone + '.byside.com'
+      );
     });
   });
 });

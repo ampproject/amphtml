@@ -39,7 +39,7 @@ tags: {  # <amp-byside-placeholder>
   attrs: {name: "data-lang"}
   attrs: {name: "data-channel"}
   attrs: {name: "data-fid"}
-  attrs: {name: "data-agentDomain"}
+  attrs: {name: "data-webcare-zone"}
   attrs: {name: "resizable"}
   attr_lists: "extended-amp-global"
   amp_layout: {
