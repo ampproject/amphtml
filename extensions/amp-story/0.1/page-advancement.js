@@ -28,6 +28,11 @@ const NEXT_SCREEN_AREA_RATIO = 0.75;
 /** @const {number} */
 const POLL_INTERVAL_MS = 250;
 
+/** @const @enum */
+export const TapNavigationDirection = {
+  'NEXT': 1,
+  'PREVIOUS': 2,
+};
 
 /**
  * Base class for the AdvancementConfig.  By default, does nothing other than
@@ -44,6 +49,9 @@ export class AdvancementConfig {
 
     /** @private @const {!Array<function()>} */
     this.previousListeners_ = [];
+
+    /** @private @const {!Array<function(number)>} */
+    this.tapNavigationListeners_ = [];
 
     /** @private {boolean} */
     this.isRunning_ = false;
@@ -73,6 +81,14 @@ export class AdvancementConfig {
    */
   addPreviousListener(previousListener) {
     this.previousListeners_.push(previousListener);
+  }
+
+  /**
+   * @param {function(number)} onTapNavigationListener A function that handles when a
+   * navigation listener to be fired.
+   */
+  addOnTapNavigationListener(onTapNavigationListener) {
+    this.tapNavigationListeners_.push(onTapNavigationListener);
   }
 
   /**
@@ -124,6 +140,16 @@ export class AdvancementConfig {
   onPrevious() {
     this.previousListeners_.forEach(previousListener => {
       previousListener();
+    });
+  }
+
+  /**
+   * @param {number} navigationDirection Direction of navigation
+   * @protected
+   */
+  onTapNavigation(navigationDirection) {
+    this.tapNavigationListeners_.forEach(navigationListener => {
+      navigationListener(navigationDirection);
     });
   }
 
@@ -287,9 +313,9 @@ class ManualAdvancement extends AdvancementConfig {
     const nextScreenAreaMax = offsetLeft + offsetWidth;
 
     if (event.pageX >= nextScreenAreaMin && event.pageX < nextScreenAreaMax) {
-      this.onAdvance();
+      this.onTapNavigation(TapNavigationDirection.NEXT);
     } else if (event.pageX >= offsetLeft && event.pageX < nextScreenAreaMin) {
-      this.onPrevious();
+      this.onTapNavigation(TapNavigationDirection.PREVIOUS);
     }
   }
 }

@@ -112,6 +112,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.advancement_.addPreviousListener(() => this.previous());
     this.advancement_
         .addAdvanceListener(() => this.next(/* opt_isAutomaticAdvance */ true));
+    this.advancement_.addOnTapNavigationListener(
+        navigationDirection => this.navigateOnTap(navigationDirection));
     this.advancement_
         .addProgressListener(progress => this.emitProgress_(progress));
   }
@@ -404,7 +406,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     return this.element.hasAttribute('active');
   }
 
-
   /**
    * Emits an event indicating that the progress of the current page has changed
    * to the specified value.
@@ -522,6 +523,17 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     this.switchTo_(pageId);
+  }
+
+  /**
+   * Delegated the navigation decision to AMP-STORY via event.
+   * @param {number} direction The direction in which navigation needs to takes place.
+   */
+  navigateOnTap(direction) {
+    const payload = {direction};
+    const eventInit = {bubbles: true};
+    dispatchCustom(this.win, this.element, EventType.TAP_NAVIGATION, payload,
+        eventInit);
   }
 
 
