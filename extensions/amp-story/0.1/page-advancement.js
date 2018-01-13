@@ -28,8 +28,11 @@ const NEXT_SCREEN_AREA_RATIO = 0.75;
 /** @const {number} */
 const POLL_INTERVAL_MS = 250;
 
-//TODO: get audio elements too
-/** @const {string} */
+/**
+ * Selector for media element.
+ * TODO: make audio elements work: amp-audio, .i-amphtml-story-background-audio
+ * @const {string}
+*/
 const MEDIA_ELEMENT_SELECTOR = 'amp-video';
 
 /** @const @enum */
