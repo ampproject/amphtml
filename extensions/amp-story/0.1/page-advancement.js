@@ -171,7 +171,7 @@ export class AdvancementConfig {
     const autoAdvanceStr = rootEl.getAttribute('auto-advance-after');
 
     const supportedAdvancementModes = [
-      ManualAdvancement.fromAutoAdvanceString(autoAdvanceStr, rootEl),
+      new ManualAdvancement(rootEl),
       TimeBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win),
       MediaBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
     ].filter(x => x !== null);
@@ -325,25 +325,6 @@ class ManualAdvancement extends AdvancementConfig {
     } else if (event.pageX >= offsetLeft && event.pageX < nextScreenAreaMin) {
       this.onTapNavigation(TapNavigationDirection.PREVIOUS);
     }
-  }
-
-  /**
-   * Gets an instance of ManualAdvancement if the page can not have any other
-   * type of advancement.
-   * @param {string} autoAdvanceStr The value of the auto-advance-after
-   *     attribute.
-   * @return {?AdvancementConfig} An AdvancementConfig, if an auto-advance string
-   *     exists or the rootEl has a media-element-based child then returns null,
-   *     otherwise returns a new manual-advancement.
-   */
-  static fromAutoAdvanceString(autoAdvanceStr, rootEl) {
-    const element = scopedQuerySelector(rootEl, MEDIA_ELEMENT_SELECTOR);
-
-    if (autoAdvanceStr || element) {
-      return null;
-    }
-
-    return new ManualAdvancement(rootEl);
   }
 }
 
