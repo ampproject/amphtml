@@ -905,11 +905,9 @@ class AmpImageLightbox extends AMP.BaseElement {
     let caption = null;
 
     // 1. Check <figure> and <figcaption>.
-    if (!caption) {
-      const figure = dom.closestByTag(sourceElement, 'figure');
-      if (figure) {
-        caption = dom.elementByTag(figure, 'figcaption');
-      }
+    const figure = dom.closestByTag(sourceElement, 'figure');
+    if (figure) {
+      caption = dom.elementByTag(figure, 'figcaption');
     }
 
     // 2. Check "aria-describedby".
