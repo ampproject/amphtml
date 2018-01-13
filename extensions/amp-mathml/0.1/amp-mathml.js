@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {Layout} from '../../../src/layout';
 import {cssstyle} from 'cssstyle';
-import {typeset} from 'mathjax-node';
+import {getIframe} from '../../../src/3p-frame';
+import { addParamsToUrl } from '../../../src/url';
+import { getDataParamsFromAttributes, removeElement } from '../../../src/dom';
+import { listenFor } from '../../../src/iframe-helper';
 
 export class AmpMathml extends AMP.BaseElement {
 
@@ -26,30 +29,82 @@ export class AmpMathml extends AMP.BaseElement {
 
     /** @private {!Element} */
     this.container_ = this.win.document.createElement('div');
+
+    /** @private {?HTMLIFrameElement} */
+    this.iframe_ = null;
   }
 
+  /**
+  * @param {boolean=} opt_onLayout
+  * @override
+  */
+  preconnectCallback () {
+    this.preconnect.url('https://cdnjs.cloudflare.com');
+  }
   /** @override */
   buildCallback() {
-    const formula = this.element.getAttribute( 'formula' );
-    if(! formula || '' === formula){
+    const formula = this.element.getAttribute('formula');
+    if ( !formula || '' === formula ) {
       return;
     }
-    typeset( {
-      math: this.element.getAttribute( 'formula' ),
-      format: "MathML",
-      mml: true,
-      svg: true,
-    }, function ( data ) {
-      if ( !data.errors ) {
-        this.element.appendChild( data.svg );
-      }
-    } );
-   }
+    this._formula = formula;
+  }
+
+  getIframeHeader () {
+    return "<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML'></script>";
+  }
+  getIframeContents() {
+
+    const formula = this.element.getAttribute( 'formula' );
+    if ( !formula || '' === formula ) {
+      return false;
+    }
+
+    let src = formula +
+     ' <script type="text/javascript">' +
+     '   ' +
+     '   document.addEventListener( "DOMContentLoaded", function () {' +
+     '     window.parent.postMessage( {' +
+     '       sentinel: "amp",' +
+     '       type: "embed-size",' +
+     '       height: document.body.scrollHeight' +
+     '     }, "*" );' +
+     '   } );' +
+     '   </script>';
+    return src;
+  }
+
+  layoutCallback () {
+    const iframe = this.element.ownerDocument.createElement('iframe');
+
+    iframe.setAttribute( 'frameborder', '0' );
+    iframe.setAttribute('scrolling', 'no');
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('sandbox','allow-scripts allow-same-origin allow-popups');
+    const html =
+      '<head>' + this.getIframeHeader() + '</head>' +
+      '<body>' + this.getIframeContents() + '</body>';
+    if (html) {
+      iframe.src = 'data:text/html;charset=utf-8,' + encodeURI(html);
+      this.element.appendChild(iframe);
+      this.iframe_ = iframe;
+    }
+    return this.loadPromise(iframe);
+  }
+
+  unlayoutCallback () {
+    if ( this.iframe_ ) {
+      removeElement( this.iframe_ );
+      this.iframe_ = null;
+    }
+    return true;
+  }
 
   /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+  isLayoutSupported (layout) {
+    return isLayoutSizeDefined(layout);
   }
+
 }
 
 
