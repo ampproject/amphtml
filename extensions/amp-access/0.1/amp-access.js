@@ -105,14 +105,11 @@ export class AccessService {
 
     /**
      * Track most recent requests and block reporting and refreshes if
-     * outstanding. Existing tests rely on this not resolving on failure
-     * (firstAuthorizationResolver_ is not called if AccessSource fails) but
-     * in a multi-source case this lets one bad apple stop everything, so
-     * just wait for one completion if there are multiple sources.
+     * outstanding. Future optimizations may choose to take action as soon
+     * as a single request completes.
      * @private {!Promise}
      */
-    this.lastAuthorizationPromises_ = this.sources_.length > 1 ?
-      Promise.race(promises) : Promise.all(promises);
+    this.lastAuthorizationPromises_ = Promise.all(promises);
 
     /**
      * Used to make sure first requests succeed before subsequent ones.
@@ -124,7 +121,7 @@ export class AccessService {
     this.reportViewPromise_ = null;
 
     // This will fire after the first received authorization, even if
-    //t here are multiple sources.
+    // there are multiple sources.
     this.firstAuthorizationPromises_.then(() => {
       this.analyticsEvent_('access-authorization-received');
       if (this.performance_) {
@@ -325,36 +322,39 @@ export class AccessService {
    * @private
    */
   runAuthorization_(opt_disableFallback) {
-    const promise = this.viewer_.whenFirstVisible().then(() => {
-      const promises = this.sources_.map(
-          source => this.runOneAuthorization_(source));
-      return Promise.all(promises);
+    this.toggleTopClass_('amp-access-loading', true);
+
+    const authorizations = this.viewer_.whenFirstVisible().then(() => {
+      return Promise.all(
+          this.sources_.map(source => this.runOneAuthorization_(source)));
+    });
+
+    const rendered = authorizations.then(() => {
+      this.toggleTopClass_('amp-access-loading', false);
+      return this.ampdoc.whenReady().then(() => {
+        const root = this.ampdoc.getRootNode();
+        const responses = this.combinedResponses();
+        return this.applyAuthorizationToRoot_(root, responses);
+      });
     });
 
     // The "first" promises must always succeed first.
     this.lastAuthorizationPromises_ = Promise.all(
-        [this.firstAuthorizationPromises_,
-          promise]);
-    return promise;
+        [this.firstAuthorizationPromises_, rendered]);
+
+    return rendered;
   }
 
   /**
-   * Make and apply a single authorization call.
+   * Make a single authorization call.
    * @param {AccessSource} source
    * @return {Promise}
    * @private
    */
   runOneAuthorization_(source) {
     return source.runAuthorization()
-        .then(response => {
-          if (response) {
-            return this.ampdoc.whenReady().then(() => {
-              const root = this.ampdoc.getRootNode();
-              const responses = (this.combinedResponses());
-              //  UI is updated as each response arrives.
-              return this.applyAuthorizationToRoot_(root, responses);
-            });
-          }
+        .catch(() => {
+          this.toggleTopClass_('amp-access-error', true);
         });
   }
 
@@ -602,6 +602,17 @@ export class AccessService {
     return Promise.all(promises);
   }
 
+  /**
+   * @param {string} className
+   * @param {boolean} on
+   * @private
+   */
+  toggleTopClass_(className, on) {
+    this.vsync_.mutate(() => {
+      this.getRootElement_().classList.toggle(className, on);
+    });
+
+  }
   /**
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    * @return {?Promise}

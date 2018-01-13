@@ -103,9 +103,6 @@ export class AccessSource {
     /** @const @private {!string} */
     this.pubOrigin_ = getSourceOrigin(ampdoc.win.location);
 
-    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(ampdoc.win);
-
     /** @const @private {!../../../src/service/url-replacements-impl.UrlReplacements} */
     this.urlReplacements_ = Services.urlReplacementsForDoc(ampdoc);
 
@@ -350,8 +347,7 @@ export class AccessSource {
   }
 
   /**
-   * Returns the promise that resolves when all authorization work has
-   * completed, including authorization endpoint call and UI update.
+   * Returns the promise that resolves when authorization call has completed.
    * Note that this promise never fails.
    * @param {boolean=} opt_disableFallback
    * @return {!Promise}
@@ -363,32 +359,30 @@ export class AccessSource {
       return Promise.resolve();
     }
 
-    this.toggleTopClass_('amp-access-loading', true);
-    const responsePromise = this.adapter_.authorize()
-        .catch(error => {
-          this.analyticsEvent_('access-authorization-failed');
-          if (this.authorizationFallbackResponse_ && !opt_disableFallback) {
+    const responsePromise =
+      this.adapter_.authorize().catch(error => {
+        this.analyticsEvent_('access-authorization-failed');
+        if (this.authorizationFallbackResponse_ && !opt_disableFallback) {
           // Use fallback.
-            user().error(TAG, 'Authorization failed: ', error);
-            return this.authorizationFallbackResponse_;
-          } else {
+          user().error(TAG, 'Authorization failed: ', error);
+          return this.authorizationFallbackResponse_;
+        } else {
           // Rethrow the error, it will be processed in the bottom `catch`.
-            throw error;
-          }
-        });
+          throw error;
+        }
+      });
+
     const promise = responsePromise.then(response => {
       dev().fine(TAG, 'Authorization response: ', response);
       this.setAuthResponse_(response);
-      this.toggleTopClass_('amp-access-loading', false);
-      this.toggleTopClass_('amp-access-error', false);
       this.buildLoginUrls_();
       return response;
     }).catch(error => {
       user().error(TAG, 'Authorization failed: ', error);
-      this.toggleTopClass_('amp-access-loading', false);
-      this.toggleTopClass_('amp-access-error', true);
-      return null;
+      this.firstAuthorizationResolver_();
+      throw error;
     });
+
     return promise;
   }
 
@@ -411,17 +405,6 @@ export class AccessSource {
     }).catch(error => {
       this.analyticsEvent_('access-pingback-failed');
       throw user().createError('Pingback failed: ', error);
-    });
-  }
-
-  /**
-   * @param {string} className
-   * @param {boolean} on
-   * @private
-   */
-  toggleTopClass_(className, on) {
-    this.vsync_.mutate(() => {
-      this.getRootElement_().classList.toggle(className, on);
     });
   }
 

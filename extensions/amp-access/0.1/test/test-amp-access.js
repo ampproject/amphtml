@@ -288,6 +288,13 @@ describes.fakeWin('AccessService authorization', {
     document.body.appendChild(elementError);
 
     service = new AccessService(ampdoc);
+    service.viewer_ = {
+      isVisible: () => true,
+      whenFirstVisible: () => Promise.resolve(),
+      onVisibilityChanged: () => {},
+      broadcast: () => {},
+      onBroadcast: () => {},
+    };
 
     const adapter = {
       getConfig: () => {},
@@ -303,7 +310,7 @@ describes.fakeWin('AccessService authorization', {
           mutator();
           return Promise.resolve();
         });
-    service.vsync_ = service.sources_[0].vsync_ = {
+    service.vsync_ = {
       mutate: callback => {
         callback();
       },
@@ -358,7 +365,7 @@ describes.fakeWin('AccessService authorization', {
     adapterMock.expects('authorize').never();
     cidMock.expects('get').never();
     const promise = service.runAuthorization_();
-    expect(document.documentElement).not.to.have.class('amp-access-loading');
+    expect(document.documentElement).to.have.class('amp-access-loading');
     expect(document.documentElement).not.to.have.class('amp-access-error');
     return promise.then(() => {
       expect(document.documentElement).not.to.have.class('amp-access-loading');
@@ -370,19 +377,21 @@ describes.fakeWin('AccessService authorization', {
     });
   });
 
-  it('should run authorization flow', () => {
+  it('should run authorization flow zzz', () => {
     const source = service.sources_[0];
-    expectGetReaderId('reader1');
     adapterMock.expects('authorize')
         .withExactArgs()
         .returns(Promise.resolve({access: true}))
         .once();
+    expectGetReaderId('reader1');
     source.buildLoginUrls_ = sandbox.spy();
     expect(service.lastAuthorizationPromises_).to.equal(
         service.firstAuthorizationPromises_);
     const promise = service.runAuthorization_();
     const lastPromise = service.lastAuthorizationPromises_;
     expect(lastPromise).to.not.equal(service.firstAuthorizationPromises_);
+    // debugger;
+    console.log('reading', document.documentElement.classList);
     expect(document.documentElement).to.have.class('amp-access-loading');
     expect(document.documentElement).not.to.have.class('amp-access-error');
     expect(source.buildLoginUrls_).to.have.not.been.called;
@@ -411,7 +420,7 @@ describes.fakeWin('AccessService authorization', {
     return promise.then(() => {
       expect(document.documentElement).not.to.have.class('amp-access-loading');
       expect(document.documentElement).to.have.class('amp-access-error');
-      expect(elementOn).not.to.have.attribute('amp-access-hide');
+      expect(elementOn).to.have.attribute('amp-access-hide');
       expect(elementOff).not.to.have.attribute('amp-access-hide');
     });
   });
@@ -462,10 +471,11 @@ describes.fakeWin('AccessService authorization', {
   });
 
   it('should NOT resolve last promise until first success', () => {
+    let firstResolver;
     expectGetReaderId('reader1');
     adapterMock.expects('authorize')
         .withExactArgs()
-        .returns(Promise.reject('intentional'))
+        .returns(new Promise(resolve => firstResolver = resolve))
         .once();
     const promise = service.runAuthorization_();
     let lastResolved = false;
@@ -481,7 +491,7 @@ describes.fakeWin('AccessService authorization', {
       // The authorization promise succeeded, but not the last promise.
       expect(lastResolved).to.be.false;
       // Resolve the first promise.
-      service.sources_[0].firstAuthorizationResolver_();
+      firstResolver();
       return service.lastAuthorizationPromises_;
     }).then(() => {
       // After first promise has been resolved, the last promised is resolved
@@ -882,6 +892,7 @@ describes.fakeWin('AccessService pingback', {
     service.sources_[0].firstAuthorizationPromise_ = new Promise(resolve => {
       firstAuthorizationResolver = resolve;
     });
+    const triggerStart = 1; // First event is "access-authorization-received".
     service.reportViewToServer_ = sandbox.spy();
     service.reportWhenViewed_(/* timeToView */ 2000);
     return Promise.resolve().then(() => {
@@ -890,14 +901,14 @@ describes.fakeWin('AccessService pingback', {
     }).then(() => {
       expect(service.reportViewToServer_).to.have.not.been.called;
       // First event is "access-authorization-received"
-      expect(service.sources_[0].analyticsEvent_.callCount).to.equal(1);
+      expect(service.analyticsEvent_.callCount).to.equal(triggerStart);
       firstAuthorizationResolver();
       return Promise.all([service.firstAuthorizationPromises_,
         service.reportViewPromise_]);
     }).then(() => {
       expect(service.reportViewToServer_).to.be.calledOnce;
-      expect(service.analyticsEvent_.callCount).to.equal(1);
-      expect(service.analyticsEvent_.getCall(0).args[0])
+      expect(service.analyticsEvent_.callCount).to.equal(triggerStart + 1);
+      expect(service.analyticsEvent_.getCall(triggerStart).args[0])
           .to.equal('access-viewed');
     });
   });
@@ -908,6 +919,7 @@ describes.fakeWin('AccessService pingback', {
     service.lastAuthorizationPromises_ = new Promise(resolve => {
       lastAuthorizationResolver = resolve;
     });
+    const triggerStart = 1; // First event is "access-authorization-received".
     service.reportViewToServer_ = sandbox.spy();
     service.reportWhenViewed_(/* timeToView */ 2000);
     return Promise.resolve().then(() => {
@@ -916,14 +928,14 @@ describes.fakeWin('AccessService pingback', {
     }).then(() => {
       expect(service.reportViewToServer_).to.have.not.been.called;
       // First event is "access-authorization-received".
-      expect(service.sources_[0].analyticsEvent_.callCount).to.equal(1);
+      expect(service.analyticsEvent_.callCount).to.equal(triggerStart);
       lastAuthorizationResolver();
       return Promise.all([service.lastAuthorizationPromises_,
         service.reportViewPromise_]);
     }).then(() => {
       expect(service.reportViewToServer_).to.be.calledOnce;
-      expect(service.analyticsEvent_.callCount).to.equal(1);
-      expect(service.analyticsEvent_.getCall(0).args[0])
+      expect(service.analyticsEvent_.callCount).to.equal(triggerStart + 1);
+      expect(service.analyticsEvent_.getCall(triggerStart).args[0])
           .to.equal('access-viewed');
     });
   });
@@ -1249,7 +1261,7 @@ describes.fakeWin('AccessService login', {
         sandbox.stub(source, 'runAuthorization').callsFake(
             () => Promise.resolve());
     const viewStub = sandbox.stub(source, 'scheduleView_');
-    const broadcastStub = sandbox.stub(source.viewer_, 'broadcast');
+    const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
     sourceMock.expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=R')
         .returns(Promise.resolve('#success=true'))
@@ -1297,7 +1309,7 @@ describes.fakeWin('AccessService login', {
       sandbox.stub(source, 'runAuthorization').callsFake(
           () => Promise.resolve());
     const viewStub = sandbox.stub(source, 'scheduleView_');
-    const broadcastStub = sandbox.stub(source.viewer_, 'broadcast');
+    const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
     sourceMock.expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=R')
         .returns(Promise.resolve(''))
@@ -1353,8 +1365,7 @@ describes.fakeWin('AccessService login', {
     const authorizationStub =
       sandbox.stub(source, 'runAuthorization').callsFake(
           () => Promise.resolve());
-    const broadcastStub = sandbox.stub(source.viewer_,
-        'broadcast');
+    const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
     sourceMock.expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l2?rid=R')
         .returns(Promise.resolve('#success=true'))
@@ -1432,7 +1443,7 @@ describes.fakeWin('AccessService login', {
       sandbox.stub(source, 'runAuthorization').callsFake(
           () => Promise.resolve());
     const viewStub = sandbox.stub(source, 'scheduleView_');
-    const broadcastStub = sandbox.stub(source.viewer_, 'broadcast');
+    const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
     sourceMock.expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=R')
         .returns(Promise.resolve('#success=true'))
@@ -1648,7 +1659,7 @@ describes.fakeWin('AccessService multiple sources', {
           mutator();
           return Promise.resolve();
         });
-    service.vsync_ = sourceBeer.vsync_ = sourceDonuts.vsync_ = {
+    service.vsync_ = {
       mutate: callback => {
         callback();
       },
