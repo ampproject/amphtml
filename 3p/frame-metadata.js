@@ -54,13 +54,14 @@ const FALLBACK = dict({
   }),
 });
 
+let winForTesting;
 
 /**
  * Gets metadata encoded in iframe name attribute.
  * @return {!JsonObject}
  */
 const allMetadata = once(() => {
-  const iframeName = window.name;
+  const iframeName = (winForTesting || window).name;
 
   try {
     // TODO(bradfrizzell@): Change the data structure of the attributes
@@ -131,12 +132,15 @@ export function getLocation() {
 
 
 /**
+ * @param {Window=} opt_win
  * @return {!ContextStateDef}
  */
-export function getContextState() {
-  const rawContext = allMetadata()['attributes']['_context'];
+export function getContextState(opt_win) {
+  winForTesting = opt_win;
+  const attributes = allMetadata()['attributes'];
+  const rawContext = attributes['_context'];
 
-  return {
+  const context = {
     ampcontextFilepath: rawContext['ampcontextFilepath'],
     ampcontextVersion: rawContext['ampcontextVersion'],
     canary: rawContext['canary'],
@@ -155,6 +159,11 @@ export function getContextState() {
     startTime: rawContext['startTime'],
     tagName: rawContext['tagName'],
   };
+  if (attributes['useSameDomainRenderingUntilDeprecated']) {
+    context['useSameDomainRenderingUntilDeprecated'] =
+      attributes['useSameDomainRenderingUntilDeprecated'];
+  }
+  return context;
 };
 
 
