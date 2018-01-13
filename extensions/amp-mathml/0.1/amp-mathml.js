@@ -75,20 +75,18 @@ export class AmpMathml extends AMP.BaseElement {
   }
 
   layoutCallback () {
-    const iframe = this.element.ownerDocument.createElement('iframe');
-
-    iframe.setAttribute( 'frameborder', '0' );
-    iframe.setAttribute('scrolling', 'no');
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('sandbox','allow-scripts allow-same-origin allow-popups');
+    const iframe = getIframe( this.win, this.element, 'mathml' );
+    this.applyFillContent( iframe );
+    listenFor( iframe, 'embed-size', data => {
+      this./*OK*/changeHeight( data[ 'height' ] );
+    }, /* opt_is3P */true );
     const html =
       '<head>' + this.getIframeHeader() + '</head>' +
       '<body>' + this.getIframeContents() + '</body>';
-    if (html) {
-      iframe.src = 'data:text/html;charset=utf-8,' + encodeURI(html);
-      this.element.appendChild(iframe);
-      this.iframe_ = iframe;
-    }
+    iframe.src = 'data:text/html;charset=utf-8,' + encodeURI(html);
+    this.element.appendChild(iframe);
+    this.iframe_ = iframe;
+    con
     return this.loadPromise(iframe);
   }
 
