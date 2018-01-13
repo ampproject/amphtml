@@ -187,6 +187,14 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  adventive: {
+    preconnect: [
+      'https://ads.adventive.com',
+      'https://amp.adventivedev.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   adverline: {
     prefetch: 'https://ads.adverline.com/richmedias/amp.js',
     preconnect: [

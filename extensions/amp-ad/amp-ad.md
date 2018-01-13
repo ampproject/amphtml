@@ -211,6 +211,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [AdTech](../../ads/adtech.md)
 - [AdThrive](../../ads/adthrive.md)
 - [Ad Up Technology](../../ads/aduptech.md)
+- [Adventive](../../ads/adventive.md)
 - [Adverline](../../ads/adverline.md)
 - [Adverticum](../../ads/adverticum.md)
 - [AdvertServe](../../ads/advertserve.md)
