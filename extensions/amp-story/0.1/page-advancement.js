@@ -328,8 +328,8 @@ class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
-   * Gets an instance of ManualAdvancement based on the value of the
-   * auto-advance string (from the 'auto-advance-after' attribute on the page).
+   * Gets an instance of ManualAdvancement if the page can not have any other
+   * type of advancement.
    * @param {string} autoAdvanceStr The value of the auto-advance-after
    *     attribute.
    * @return {?AdvancementConfig} An AdvancementConfig, if an auto-advance string
