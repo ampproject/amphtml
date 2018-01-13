@@ -103,7 +103,7 @@ function buildProviderParams(opt_params) {
   const attrs = dict();
 
   if (opt_params) {
-    Object.keys(opt_params || {}).forEach(field => {
+    Object.keys(opt_params).forEach(field => {
       attrs[`data-param-${field}`] = opt_params[field];
     });
   }

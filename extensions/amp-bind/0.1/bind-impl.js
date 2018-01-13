@@ -935,7 +935,7 @@ export class Bind {
     }
 
     let initialValue;
-    let match = true;
+    let match;
 
     switch (property) {
       case 'text':

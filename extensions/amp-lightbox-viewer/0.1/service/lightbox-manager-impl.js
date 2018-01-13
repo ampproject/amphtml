@@ -215,7 +215,6 @@ export class LightboxManager {
           url: this.getThumbnailUrl_(dev().assertElement(element), i),
           element,
         }));
-    ;
   }
 
   /**
