@@ -20,6 +20,7 @@ import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest} from '../../../src/dom';
 import {hasTapAction, timeStrToMillis} from './utils';
+import {AmpStoryPage} from './amp-story-page';
 
 
 /** @private @const {number} */
@@ -319,6 +320,11 @@ class ManualAdvancement extends AdvancementConfig {
     const nextScreenAreaMin = offsetLeft +
         ((1 - NEXT_SCREEN_AREA_RATIO) * offsetWidth);
     const nextScreenAreaMax = offsetLeft + offsetWidth;
+
+    if (this.tapNavigationListeners_.length < 1) {
+      this.addOnTapNavigationListener(navigationDirection =>
+        new AmpStoryPage(this.element_).navigateOnTap(navigationDirection));
+    }
 
     if (event.pageX >= nextScreenAreaMin && event.pageX < nextScreenAreaMax) {
       this.onTapNavigation(TapNavigationDirection.NEXT);
