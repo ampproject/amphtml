@@ -67,17 +67,17 @@ self.addEventListener('message', event => {
     - payload: An optional JavaScript object containing extra data relevant to
       the command.
    */
-  const {command, payload} = event.data;
+  const {command} = event.data;
 
   switch (command) {
     case WorkerMessengerCommand.AMP_SUBSCRIPION_STATE:
-      onMessageReceivedSubscriptionState(payload);
+      onMessageReceivedSubscriptionState();
       break;
     case WorkerMessengerCommand.AMP_SUBSCRIBE:
-      onMessageReceivedSubscribe(payload);
+      onMessageReceivedSubscribe();
       break;
     case WorkerMessengerCommand.AMP_UNSUBSCRIBE:
-      onMessageReceivedUnsubscribe(payload);
+      onMessageReceivedUnsubscribe();
       break;
   }
 });
