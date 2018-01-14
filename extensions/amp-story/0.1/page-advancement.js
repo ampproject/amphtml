@@ -261,7 +261,8 @@ class ManualAdvancement extends AdvancementConfig {
     this.element_ = element;
     this.clickListener_ = this.maybePerformNavigation_.bind(this);
     this.hasAutoAdvanceStr_ = this.element_.getAttribute('auto-advance-after');
-    this.isMediaElement_ = scopedQuerySelector(this.element_, MEDIA_ELEMENT_SELECTOR);
+    this.isMediaElement_ = scopedQuerySelector(
+        this.element_, MEDIA_ELEMENT_SELECTOR);
   }
 
   /** @override */
