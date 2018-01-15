@@ -65,6 +65,10 @@ For example:
 
 Required if no `<source>` children are present. Must be HTTPS.
 
+##### preload
+
+If present, specifies if and how the author thinks that the audio file should be loaded when the page loads.
+
 ##### autoplay
 
 If present, the attribute implies that the audio will start playing as soon as
