@@ -18,10 +18,10 @@ export function nativo(global, data) {
   let ntvAd;
   (function(ntvAd, global, data) {
     global
-      .history
-      .replaceState(null,
-        null,
-        location.pathname + location.hash.replace(/({).*(})/, ''));
+        .history
+        .replaceState(null,
+            null,
+            location.pathname + location.hash.replace(/({).*(})/, ''));
     // Private
     let delayedAdLoad = false;
     let percentageOfadViewed;
@@ -46,11 +46,11 @@ export function nativo(global, data) {
         const coordinates = getLastPositionCoordinates(positions);
         if (typeof coordinates.rootBounds != 'undefined'
             && (coordinates
-              .intersectionRect
-              .top == (coordinates
-              .rootBounds.top + coordinates
-              .boundingClientRect
-              .y))) {
+                .intersectionRect
+                .top == (coordinates
+                  .rootBounds.top + coordinates
+                    .boundingClientRect
+                    .y))) {
           if (isDelayedViewStart(data) && !delayedAdLoad) {
             g.PostRelease.Start();
             delayedAdLoad = true;
@@ -75,10 +75,10 @@ export function nativo(global, data) {
     function viewabilityConfiguration(positions) {
       const coordinates = getLastPositionCoordinates(positions);
       setPercentageOfadViewed(
-        (((coordinates.intersectionRect
-            .height * 100) / coordinates
-            .boundingClientRect
-            .height) / 100));
+          (((coordinates.intersectionRect
+              .height * 100) / coordinates
+                .boundingClientRect
+                .height) / 100));
       global.PostRelease.checkIsAdVisible();
     }
     // Public

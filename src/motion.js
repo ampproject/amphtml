@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {vsyncFor} from './vsync';
+import {Services} from './services';
 
 /** @const {function()} */
 const NOOP_CALLBACK_ = function() {};
@@ -80,7 +80,7 @@ export function calcVelocity(deltaV, deltaTime, prevVelocity) {
  * @return {!Motion}
  */
 export function continueMotion(contextNode, startX, startY, veloX, veloY,
-    callback, opt_vsync) {
+  callback, opt_vsync) {
   return new Motion(contextNode, startX, startY, veloX, veloY,
       callback, opt_vsync).start_();
 }
@@ -107,7 +107,7 @@ export class Motion {
    */
   constructor(contextNode, startX, startY, veloX, veloY, callback, opt_vsync) {
     /** @private @const {!./service/vsync-impl.Vsync} */
-    this.vsync_ = opt_vsync || vsyncFor(self);
+    this.vsync_ = opt_vsync || Services.vsyncFor(self);
 
     /** @private @const {!Node} */
     this.contextNode_ = contextNode;

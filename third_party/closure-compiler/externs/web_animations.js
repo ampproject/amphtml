@@ -25,6 +25,13 @@
  * @extend {EventTarget}
  */
 class Animation {
+  constructor() {
+    /**
+     * Current time of the animation.
+     * @type {number}
+     */
+    this.currentTime;
+  }
 
   /**
    * Starts or resumes playing of an animation, or begins the animation again
@@ -55,6 +62,48 @@ class Animation {
    * beginning.
    */
   reverse() {}
+}
+
+
+/**
+ * @extends {CSSRule}
+ * @see https://drafts.csswg.org/css-conditional-3/#the-csssupportsrule-interface
+ */
+class CSSSupportsRule {
+  constructor() {
+    /** @type {string} */
+    this.conditionText;
+    /** @type {!CSSRuleList} */
+    this.cssRules;
+  }
+}
+
+
+/**
+ * @extends {CSSRule}
+ * @see https://www.w3.org/TR/2009/WD-css3-animations-20090320/#DOM-CSSKeyframesRule
+ */
+class CSSKeyframesRule {
+  constructor() {
+    /** @type {string} */
+    this.name;
+    /** @type {!CSSRuleList} */
+    this.cssRules;
+  }
+}
+
+
+/**
+ * @extends {CSSRule}
+ * @see https://www.w3.org/TR/2009/WD-css3-animations-20090320/#DOM-CSSKeyframeRule
+ */
+class CSSKeyframeRule {
+  constructor() {
+    /** @type {string} */
+    this.keyText;
+    /** @type {!CSSStyleDeclaration} */
+    this.style;
+  }
 }
 
 

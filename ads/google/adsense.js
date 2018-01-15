@@ -15,7 +15,10 @@
  */
 
 import {validateData} from '../../3p/3p';
+import {user} from '../../src/log';
 import {setStyles} from '../../src/style';
+import {camelCaseToDash} from '../../src/string';
+import {ADSENSE_RSPV_WHITELISTED_HEIGHT} from './utils';
 
 /**
  * Make an adsense iframe.
@@ -26,12 +29,19 @@ export function adsense(global, data) {
   // TODO: check mandatory fields
   validateData(data, [],
       ['adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin', 'experimentId',
-       'ampSlotIndex']);
+        'ampSlotIndex', 'adChannel', 'autoFormat', 'fullWidth']);
+
+  user().assert(
+      data['autoFormat'] != 'rspv'
+        || data['height'] == ADSENSE_RSPV_WHITELISTED_HEIGHT,
+      `Specified height ${data['height']} in <amp-ad> tag is not equal to ` +
+      `the required height of ${ADSENSE_RSPV_WHITELISTED_HEIGHT} for ` +
+      'responsive AdSense ad units.');
 
   if (global.context.clientId) {
     // Read by GPT for GA/GPT integration.
     global.gaGlobal = {
-      vid: global.context.clientId,
+      cid: global.context.clientId,
       hid: global.context.pageViewId,
     };
   }
@@ -40,19 +50,12 @@ export function adsense(global, data) {
   global.document.body.appendChild(s);
 
   const i = global.document.createElement('ins');
-  i.setAttribute('data-ad-client', data['adClient']);
-  if (data['adSlot']) {
-    i.setAttribute('data-ad-slot', data['adSlot']);
-  }
-  if (data['adHost']) {
-    i.setAttribute('data-ad-host', data['adHost']);
-  }
-  if (data['adtest'] != null) {
-    i.setAttribute('data-adtest', data['adtest']);
-  }
-  if (data['tagOrigin']) {
-    i.setAttribute('data-tag-origin', data['tagOrigin']);
-  }
+  ['adChannel', 'adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin']
+      .forEach(datum => {
+        if (data[datum]) {
+          i.setAttribute('data-' + camelCaseToDash(datum), data[datum]);
+        }
+      });
   i.setAttribute('data-page-url', global.context.canonicalUrl);
   i.setAttribute('class', 'adsbygoogle');
   setStyles(i, {

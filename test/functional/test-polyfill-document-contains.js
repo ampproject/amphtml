@@ -37,12 +37,14 @@ describe('HTMLDocument.contains', () => {
       HTMLDocument: class {
         contains() {}
       },
+      Object: window.Object,
     };
     nativeContains = fakeWinWithContains.HTMLDocument.prototype.contains;
 
     fakeWinWithoutContains = {
       HTMLDocument: class {
       },
+      Object: window.Object,
     };
     install(fakeWinWithoutContains);
     polyfillContains = fakeWinWithoutContains.HTMLDocument.prototype.contains;

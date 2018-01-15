@@ -21,10 +21,24 @@ import * as tr from '../../../src/transition';
 
 
 /**
- * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
+ * Deprecated `amp-slides` is deprecated and will be deleted before 1.0.
  * Please see {@link AmpCarousel} with `type=slides` attribute instead.
  */
 class AmpSlides extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+    /** @private {?Array<!Element>} */
+    this.slides_ = null;
+
+    /** @private {number} */
+    this.currentIndex_ = 0;
+
+    this.prevButton_ = null;
+
+    this.nextButton_ = null;
+  }
 
   /** @override */
   isLayoutSupported(layout) {
@@ -33,7 +47,6 @@ class AmpSlides extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @private {!Array<!Element>} */
     this.slides_ = this.getRealChildren();
     this.slides_.forEach((slide, i) => {
       this.setAsOwner(slide);
@@ -41,9 +54,6 @@ class AmpSlides extends AMP.BaseElement {
       st.setStyle(slide, 'display', i > 0 ? 'none' : 'block');
       this.applyFillContent(slide);
     });
-
-    /** @private {number} */
-    this.currentIndex_ = 0;
 
     this.prevButton_ = this.element.ownerDocument.createElement('button');
     this.prevButton_.textContent = '\u276E';
@@ -123,9 +133,9 @@ class AmpSlides extends AMP.BaseElement {
         Animation.animate(this.element,
             this.createTransition_(oldSlide, newSlide, dir),
             200, 'ease-out').thenAlways(() => {
-              this.commitSwitch_(oldSlide, newSlide);
-              this.preloadNext_(dir);
-            });
+          this.commitSwitch_(oldSlide, newSlide);
+          this.preloadNext_(dir);
+        });
       }
     }
   }
@@ -149,7 +159,7 @@ class AmpSlides extends AMP.BaseElement {
    * @param {!Element} oldSlide
    * @param {!Element} newSlide
    * @param {number} dir
-   * @return {!Transition}
+   * @return {!TransitionDef}
    */
   createTransition_(oldSlide, newSlide, dir) {
     const containerWidth = this.element./*OK*/offsetWidth;
@@ -219,4 +229,7 @@ class AmpSlides extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-slides', AmpSlides);
+
+AMP.extension('amp-slides', '0.1', AMP => {
+  AMP.registerElement('amp-slides', AmpSlides);
+});

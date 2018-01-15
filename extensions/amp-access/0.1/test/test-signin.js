@@ -17,27 +17,28 @@
 import {SignInProtocol} from '../signin';
 import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
-import * as sinon from 'sinon';
 
 
-describe('SignInProtocol', () => {
+describes.realWin('SignInProtocol', {amp: true}, env => {
 
   const ORIGIN = 'https://example.com';
   const AUTHORITY = 'https://authority.example.net';
 
-  let sandbox;
+  let win;
+  let ampdoc;
   let viewer, viewerMock;
   let configJson;
   let errorStub;
   let signin;
 
   function create() {
-    return new SignInProtocol(window, viewer, ORIGIN, configJson);
+    return new SignInProtocol(ampdoc, viewer, ORIGIN, configJson);
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    toggleExperiment(window, 'amp-access-signin', true);
+    win = env.win;
+    ampdoc = env.ampdoc;
+    toggleExperiment(win, 'amp-access-signin', true);
 
     errorStub = sandbox.stub(user(), 'error');
 
@@ -52,7 +53,7 @@ describe('SignInProtocol', () => {
         }
         return undefined;
       },
-      sendMessage: () => Promise.resolve({}),
+      sendMessageAwaitResponse: () => Promise.resolve({}),
     };
     viewerMock = sandbox.mock(viewer);
 
@@ -66,8 +67,7 @@ describe('SignInProtocol', () => {
 
   afterEach(() => {
     viewerMock.verify();
-    sandbox.restore();
-    toggleExperiment(window, 'amp-access-signin', false);
+    toggleExperiment(win, 'amp-access-signin', false);
   });
 
 
@@ -80,7 +80,7 @@ describe('SignInProtocol', () => {
     });
 
     it('should be disabled without expriment', () => {
-      toggleExperiment(window, 'amp-access-signin', false);
+      toggleExperiment(win, 'amp-access-signin', false);
       const signin = create();
       expect(signin.isEnabled()).to.be.false;
       expect(signin.acceptAccessToken_).to.be.false;
@@ -142,28 +142,28 @@ describe('SignInProtocol', () => {
     });
 
     it('should call viewer for access token', () => {
-      viewerMock.expects('sendMessage')
+      viewerMock.expects('sendMessageAwaitResponse')
           .withExactArgs('getAccessTokenPassive', {
             origin: ORIGIN,
-          }, /* awaitResponse */ true)
+          })
           .returns(Promise.resolve('access token'))
           .once();
       return signin.getAccessTokenPassive().then(token => {
         expect(token).to.equal('access token');
-        expect(errorStub.callCount).to.equal(0);
+        expect(errorStub).to.have.not.been.called;
       });
     });
 
     it('should return null on viewer error for access token', () => {
-      viewerMock.expects('sendMessage')
+      viewerMock.expects('sendMessageAwaitResponse')
           .withExactArgs('getAccessTokenPassive', {
             origin: ORIGIN,
-          }, /* awaitResponse */ true)
+          })
           .returns(Promise.reject(new Error('intentional')))
           .once();
       return signin.getAccessTokenPassive().then(token => {
         expect(token).to.be.null;
-        expect(errorStub.callCount).to.equal(1);
+        expect(errorStub).to.be.calledOnce;
 
         // Second call doesn't call viewer.
         signin.getAccessTokenPassive();
@@ -171,21 +171,21 @@ describe('SignInProtocol', () => {
     });
 
     it('should return null for post-login when no auth code in query', () => {
-      viewerMock.expects('sendMessage').never();
+      viewerMock.expects('sendMessageAwaitResponse').never();
       expect(signin.postLoginResult({})).to.be.null;
     });
 
     it('should call viewer for post-login with auth code', () => {
-      viewerMock.expects('sendMessage')
+      viewerMock.expects('sendMessageAwaitResponse')
           .withExactArgs('storeAccessToken', {
             origin: ORIGIN,
             authorizationCode: 'X',
-          }, /* awaitResponse */ true)
+          })
           .returns(Promise.resolve('access token X'))
           .once();
       return signin.postLoginResult({'code': 'X'}).then(token => {
         expect(token).to.equal('access token X');
-        expect(errorStub.callCount).to.equal(0);
+        expect(errorStub).to.have.not.been.called;
         // The previous token is updated as well.
         return signin.getAccessTokenPassive().then(token => {
           expect(token).to.equal('access token X');
@@ -195,16 +195,16 @@ describe('SignInProtocol', () => {
 
     it('should recorver from viewer error on post-login with auth code', () => {
       signin.updateAccessToken_('access token');
-      viewerMock.expects('sendMessage')
+      viewerMock.expects('sendMessageAwaitResponse')
           .withExactArgs('storeAccessToken', {
             origin: ORIGIN,
             authorizationCode: 'X',
-          }, /* awaitResponse */ true)
+          })
           .returns(Promise.reject(new Error('intentional')))
           .once();
       return signin.postLoginResult({'code': 'X'}).then(token => {
         expect(token).to.be.null;
-        expect(errorStub.callCount).to.equal(1);
+        expect(errorStub).to.be.calledOnce;
         // The previous token is left unchanged.
         return signin.getAccessTokenPassive().then(token => {
           expect(token).to.equal('access token');
@@ -214,11 +214,11 @@ describe('SignInProtocol', () => {
 
     it('should call viewer for request sign-in', () => {
       const loginUrl = 'https://acme.com/login';
-      viewerMock.expects('sendMessage')
+      viewerMock.expects('sendMessageAwaitResponse')
           .withExactArgs('requestSignIn', {
             origin: ORIGIN,
             url: loginUrl,
-          }, /* awaitResponse */ true)
+          })
           .returns(Promise.resolve('access token X'))
           .once();
       return signin.requestSignIn(loginUrl).then(result => {
@@ -232,11 +232,11 @@ describe('SignInProtocol', () => {
 
     it('should fail on viewer error for request sign-in', () => {
       const loginUrl = 'https://acme.com/login';
-      viewerMock.expects('sendMessage')
+      viewerMock.expects('sendMessageAwaitResponse')
           .withExactArgs('requestSignIn', {
             origin: ORIGIN,
             url: loginUrl,
-          }, /* awaitResponse */ true)
+          })
           .returns(Promise.reject(new Error('intentional')))
           .once();
       return signin.requestSignIn(loginUrl).then(() => {
@@ -267,17 +267,17 @@ describe('SignInProtocol', () => {
     });
 
     it('should never call viewer for access token', () => {
-      viewerMock.expects('sendMessage').never();
+      viewerMock.expects('sendMessageAwaitResponse').never();
       signin.getAccessTokenPassive();
     });
 
     it('should return null for post-login', () => {
-      viewerMock.expects('sendMessage').never();
+      viewerMock.expects('sendMessageAwaitResponse').never();
       expect(signin.postLoginResult({'code': 'X'})).to.be.null;
     });
 
     it('should return null for request sign-in', () => {
-      viewerMock.expects('sendMessage').never();
+      viewerMock.expects('sendMessageAwaitResponse').never();
       expect(signin.requestSignIn('https://acme.com/login')).to.be.null;
     });
   });

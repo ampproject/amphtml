@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {calculateScriptBaseUrl} from '../service/extensions-impl';
+import {calculateEntryPointScriptUrl} from '../service/extension-location';
 import {isExperimentOn} from '../experiments';
 import {dev} from '../log';
 import {getMode} from '../mode';
-import {timerFor} from '../timer';
+import {Services} from '../services';
 import {parseUrl} from '../url';
 import {urls} from '../config';
 
@@ -29,7 +29,7 @@ const TAG = 'cache-service-worker';
  * Registers the Google AMP Cache service worker if the browser supports SWs.
  */
 export function installCacheServiceWorker(win) {
-  timerFor(win).delay(() => {
+  Services.timerFor(win).delay(() => {
     if (!isExperimentOn(win, TAG)) {
       return;
     }
@@ -40,12 +40,12 @@ export function installCacheServiceWorker(win) {
         win.location.hostname !== parseUrl(urls.cdn).hostname) {
       return;
     }
-    const base = calculateScriptBaseUrl(win.location, getMode().localDev,
-        getMode().test);
     // The kill experiment is really just a configuration that allows us to
     // quickly kill the cache service worker without cutting a new version.
     const kill = isExperimentOn(win, `${TAG}-kill`);
-    const url = `${base}/sw${kill ? '-kill' : ''}.js`;
+    const entryPoint = `sw${kill ? '-kill' : ''}`;
+    const url = calculateEntryPointScriptUrl(location, entryPoint,
+        getMode().localDev);
     navigator.serviceWorker.register(url).then(reg => {
       dev().info(TAG, 'ServiceWorker registration successful: ', reg);
     }, err => {

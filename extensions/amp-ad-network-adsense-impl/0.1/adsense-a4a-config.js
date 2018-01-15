@@ -21,53 +21,53 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import {
-  googleAdsIsA4AEnabled,
+  MANUAL_EXPERIMENT_ID,
+  extractUrlExperimentId,
+  addExperimentIdToElement,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
+import {
+  /* eslint no-unused-vars: 0 */ ExperimentInfo,
+  getExperimentBranch,
+  forceExperimentBranch,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
+import {dev} from '../../../src/log';
 
-/** @const {!string}  @private */
-const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
+/** @const {string} @visibleForTesting */
+export const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
 
-// The following experiment IDs are used by Google-side servers to
-// understand what experiment is running and what mode the A4A code is
-// running in.  In this experiment phase, we're testing 8 different
-// configurations, resulting from the Cartesian product of the following:
-//   - Traditional 3p iframe ad rendering (control) vs A4A rendering
-//     (experiment)
-//   - Experiment triggered by an external page, such as the Google Search
-//     page vs. triggered internally in the client code.
-//   - Doubleclick vs Adsense
-// The following two objects contain experiment IDs for the first two
-// categories for Adsense ads.  They are attached to the ad request by
-// ads/google/a4a/traffic-experiments.js#googleAdsIsA4AEnabled when it works
-// out whether a given ad request is in the overall experiment and, if so,
-// which branch it's on.
+/** @type {string} */
+const TAG = 'amp-ad-network-adsense-impl';
 
-// We would prefer the following constants to remain private, but we need to
-// refer to them directly in amp-ad-3p-impl.js and amp-a4a.js in order to check
-// whether we're in the experiment or not, for the purposes of enabling
-// debug traffic profiling.  Once we have debugged the a4a implementation and
-// can disable profiling again, we can return these constants to being
-// private to this file.
-/** const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo}  */
-export const ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES = {
-  control: '117152650',
-  experiment: '117152651',
-};
-
-/** @const {!../../../ads/google/a4a/traffic-experiments.ExperimentInfo}  */
-export const ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES = {
-  control: '117152670',
-  experiment: '117152671',
+/** @const @type {!Object<string,?string>} */
+export const URL_EXPERIMENT_MAPPING = {
+  '-1': MANUAL_EXPERIMENT_ID,
+  '0': null,
 };
 
 /**
  * @param {!Window} win
  * @param {!Element} element
+ * @param {boolean} useRemoteHtml
  * @returns {boolean}
  */
-export function adsenseIsA4AEnabled(win, element) {
-  return googleAdsIsA4AEnabled(
-      win, element, ADSENSE_A4A_EXPERIMENT_NAME,
-      ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
-      ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES);
+export function adsenseIsA4AEnabled(win, element, useRemoteHtml) {
+  if (useRemoteHtml || !isGoogleAdsA4AValidEnvironment(win) ||
+      !element.getAttribute('data-ad-client')) {
+    return false;
+  }
+  // See if in holdback control/experiment.
+  let experimentId;
+  const urlExperimentId = extractUrlExperimentId(win, element);
+  if (urlExperimentId != undefined) {
+    experimentId = URL_EXPERIMENT_MAPPING[urlExperimentId];
+    dev().info(
+        TAG, `url experiment selection ${urlExperimentId}: ${experimentId}.`);
+  }
+  if (experimentId) {
+    addExperimentIdToElement(experimentId, element);
+    forceExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME, experimentId);
+  }
+  return true;
 }

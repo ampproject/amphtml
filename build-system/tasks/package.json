@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "markdown-link-check": "^3.0.3"
+  }
+}

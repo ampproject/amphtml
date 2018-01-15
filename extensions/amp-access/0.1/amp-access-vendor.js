@@ -15,6 +15,7 @@
  */
 
 import {dev, user} from '../../../src/log';
+import './access-vendor';
 
 /** @const {string} */
 const TAG = 'amp-access-vendor';
@@ -25,39 +26,45 @@ const TAG = 'amp-access-vendor';
  * interface and delivered via a separate extension. The vendor implementation
  * mainly requires two method: `authorize` and `pingback`. The actual
  * extension is registered via `registerVendor` method.
- * @implements {AccessTypeAdapterDef}
+ * @implements {./amp-access.AccessTypeAdapterDef}
  */
 export class AccessVendorAdapter {
 
   /**
-   * @param {!Window} win
-   * @param {!JSONType} configJson
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!JsonObject} configJson
    */
-  constructor(win, configJson) {
-    /** @const {!Window} */
-    this.win = win;
+  constructor(ampdoc, configJson) {
+    /** @const */
+    this.ampdoc = ampdoc;
 
     /** @const @private {string} */
     this.vendorName_ = user().assert(configJson['vendor'],
         '"vendor" name must be specified');
 
+    /** @const @private {JsonObject} */
+    this.vendorConfig_ = configJson[this.vendorName_];
+
+    /** @const @private {boolean} */
+    this.isPingbackEnabled_ = !configJson['noPingback'];
+
+    /** @private {?function(!./access-vendor.AccessVendor)} */
+    this.vendorResolve_ = null;
+
     /** @const @private {!Promise<!./access-vendor.AccessVendor>} */
     this.vendorPromise_ = new Promise(resolve => {
-      /** @private {function(!./access-vendor.AccessVendor)|undefined} */
       this.vendorResolve_ = resolve;
     });
   }
 
   /** @override */
   getConfig() {
-    return {
-      'vendor': this.vendorName_,
-    };
+    return this.vendorConfig_;
   }
 
   /**
    * @param {string} name
-   * @param {./access-vendor.AccessVendor} vendor
+   * @param {!./access-vendor.AccessVendor} vendor
    */
   registerVendor(name, vendor) {
     user().assert(this.vendorResolve_, 'Vendor has already been registered');
@@ -65,7 +72,7 @@ export class AccessVendorAdapter {
         'Vendor "%s" doesn\'t match the configured vendor "%s"',
         name, this.vendorName_);
     this.vendorResolve_(vendor);
-    this.vendorResolve_ = undefined;
+    this.vendorResolve_ = null;
   }
 
   /** @override */
@@ -83,7 +90,7 @@ export class AccessVendorAdapter {
 
   /** @override */
   isPingbackEnabled() {
-    return true;
+    return this.isPingbackEnabled_;
   }
 
   /** @override */

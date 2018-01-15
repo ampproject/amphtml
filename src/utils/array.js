@@ -25,13 +25,55 @@
  */
 export function filterSplice(array, filter) {
   const splice = [];
+  let index = 0;
   for (let i = 0; i < array.length; i++) {
     const item = array[i];
-    if (!filter(item, i, array)) {
+    if (filter(item, i, array)) {
+      if (index < i) {
+        array[index] = item;
+      }
+      index++;
+    } else {
       splice.push(item);
-      array.splice(i, 1);
-      i--;
     }
   }
+
+  if (index < array.length) {
+    array.length = index;
+  }
+
   return splice;
+}
+
+/**
+ * Returns the index of the first element matching the predicate.
+ * Like Array#findIndex.
+ *
+ * @param {!Array<T>} array
+ * @param {function(T, number, !Array<T>):boolean} predicate
+ * @return {number}
+ * @template T
+ */
+export function findIndex(array, predicate) {
+  for (let i = 0; i < array.length; i++) {
+    if (predicate(array[i], i, array)) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+/**
+ * Converts the given iterator to an array.
+ *
+ * @param {!Iterator<T>} iterator
+ * @return {Array<T>}
+ * @template T
+ */
+export function fromIterator(iterator) {
+  const array = [];
+  for (let e = iterator.next(); !e.done; e = iterator.next()) {
+    array.push(e.value);
+  }
+  return array;
 }

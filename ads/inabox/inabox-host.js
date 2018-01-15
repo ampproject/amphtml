@@ -19,45 +19,63 @@
  * its embed AMP content (such as an ad created in AMP).
  */
 
-import '../../third_party/babel/custom-babel-helpers';
-import {dev, initLogConstructor} from '../../src/log';
+import {dev, initLogConstructor, setReportError} from '../../src/log';
+import {reportError} from '../../src/error';
+import {InaboxMessagingHost} from './inabox-messaging-host';
 
-initLogConstructor();
-
+/** @const {string} */
 const TAG = 'inabox-host';
+/** @const {string} */
+const AMP_INABOX_INITIALIZED = 'ampInaboxInitialized';
+/** @const {string} */
+const PENDING_MESSAGES = 'ampInaboxPendingMessages';
+/** @const {string} */
+const INABOX_IFRAMES = 'ampInaboxIframes';
 
-run(self);
-
-function run(win) {
-  win['ampInaboxPendingMessages'].forEach(message => {
-    processMessage(win, message);
-  });
-
-  win.addEventListener('message', processMessage.bind(null, win));
-}
-
-function processMessage(win, message) {
-  if (!isInaboxMessage(message.data)) {
-    return;
-  }
-  const iframeElement =
-      getFrameElement(win, win['ampInaboxIframes'], message.source);
-  // TODO: build a map from source to iframeElement.
-  dev().info(TAG, '[' + iframeElement.id + '] ' + message.data);
-}
-
-function getFrameElement(win, iframes, source) {
-  while (source.parent !== win && source !== win.top) {
-    source = source.parent;
-  }
-
-  for (let i = 0; i < iframes.length; i++) {
-    if (iframes[i].contentWindow === source) {
-      return iframes[i];
+/**
+ * Class for initializing host script and consuming queued messages.
+ * @visibleForTesting
+ */
+export class InaboxHost {
+  /** @param win {!Window}  */
+  constructor(win) {
+    // Prevent double initialization
+    if (win[AMP_INABOX_INITIALIZED]) {
+      dev().info(TAG, 'Skip a 2nd attempt of initializing AMP inabox host.');
+      return;
     }
+
+    // Assume we cannot recover from state initialization errors.
+    win[AMP_INABOX_INITIALIZED] = true;
+    initLogConstructor();
+    setReportError(reportError);
+
+    if (win[INABOX_IFRAMES] && !Array.isArray(win[INABOX_IFRAMES])) {
+      dev().info(TAG, `Invalid ${INABOX_IFRAMES}`,
+          win[INABOX_IFRAMES]);
+      win[INABOX_IFRAMES] = [];
+    }
+    const host = new InaboxMessagingHost(win, win[INABOX_IFRAMES]);
+
+    const queuedMsgs = win[PENDING_MESSAGES];
+    if (queuedMsgs) {
+      if (Array.isArray(queuedMsgs)) {
+        queuedMsgs.forEach(message => {
+          try {
+            host.processMessage(message);
+          } catch (err) {
+            dev().error(TAG, 'Error processing inabox message', message, err);
+          }
+        });
+      } else {
+        dev().info(TAG, `Invalid ${PENDING_MESSAGES}`, queuedMsgs);
+      }
+    }
+    // Empty and ensure that future messages are no longer stored in the array.
+    win[PENDING_MESSAGES] = [];
+    win[PENDING_MESSAGES]['push'] = () => {};
+    win.addEventListener('message', host.processMessage.bind(host));
   }
 }
 
-function isInaboxMessage(message) {
-  return typeof message === 'string' && message.indexOf('amp-inabox:') == 0;
-}
+new InaboxHost(self);

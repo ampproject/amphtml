@@ -16,6 +16,7 @@
  */
 goog.provide('parse_srcset.SrcsetParsingResult');
 goog.provide('parse_srcset.parseSrcset');
+goog.require('amp.validator.LIGHT');
 goog.require('amp.validator.ValidationError');
 goog.require('goog.structs.Set');
 
@@ -30,13 +31,18 @@ parse_srcset.SrcsetSourceDef;
 
 /**
  * Return value for parseSrcset.
- * @typedef {{
- *   success: boolean,
- *   errorCode: !amp.validator.ValidationError.Code,
- *   srcsetImages: !Array<!parse_srcset.SrcsetSourceDef>
- * }}
+ * @constructor @struct
  */
-parse_srcset.SrcsetParsingResult;
+parse_srcset.SrcsetParsingResult = function() {
+  /** @type {boolean} */
+  this.success = false;
+  if (!amp.validator.LIGHT) {
+    /** @type {!amp.validator.ValidationError.Code} */
+    this.errorCode = amp.validator.ValidationError.Code.UNKNOWN_CODE;
+  }
+  /** @type {!Array<!parse_srcset.SrcsetSourceDef>} */
+  this.srcsetImages = [];
+};
 
 /**
  * Parses the text representation of srcset into array of SrcsetSourceDef.
@@ -87,8 +93,10 @@ parse_srcset.parseSrcset = function(srcset) {
   let remainingSrcset = srcset;
   /** @type {!goog.structs.Set<string>} */
   let seenWidthOrPixelDensity = new goog.structs.Set();
+  /** @type {!parse_srcset.SrcsetParsingResult} */
+  const result = new parse_srcset.SrcsetParsingResult();
   /** @type {!Array<parse_srcset.SrcsetSourceDef>} */
-  let srcsetImages = [];
+  const srcsetImages = result.srcsetImages;
   let source;
   while (source = imageCandidateRegex.exec(srcset)) {
     let url = source[1];
@@ -99,11 +107,10 @@ parse_srcset.parseSrcset = function(srcset) {
     }
     // Duplicate width or pixel density in srcset.
     if (seenWidthOrPixelDensity.contains(widthOrPixelDensity)) {
-      return {
-        success: false,
-        errorCode: amp.validator.ValidationError.Code.DUPLICATE_DIMENSION,
-        srcsetImages: srcsetImages
-      };
+      if (!amp.validator.LIGHT) {
+        result.errorCode = amp.validator.ValidationError.Code.DUPLICATE_DIMENSION;
+      }
+      return result;
     }
     seenWidthOrPixelDensity.add(widthOrPixelDensity);
     srcsetImages.push({url: url, widthOrPixelDensity: widthOrPixelDensity});
@@ -114,25 +121,26 @@ parse_srcset.parseSrcset = function(srcset) {
     }
     // More srcset, comma expected as separator for image candidates.
     if (comma === undefined) {
-      return {
-        success: false,
-        errorCode: amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-        srcsetImages: srcsetImages
-      };
+      if (!amp.validator.LIGHT) {
+        result.errorCode = amp.validator.ValidationError.Code.INVALID_ATTR_VALUE;
+      }
+      return result;
     }
   }
   // Regex didn't consume all of the srcset string
   if (remainingSrcset !== '') {
-    return {
-      success: false,
-      errorCode: amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-      srcsetImages: srcsetImages
-    };
+    if (!amp.validator.LIGHT) {
+      result.errorCode = amp.validator.ValidationError.Code.INVALID_ATTR_VALUE;
+    }
+    return result;
   }
   // Must have at least one image candidate.
-  return {
-    success: srcsetImages.length > 0,
-    errorCode: amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-    srcsetImages: srcsetImages
-  };
+  if (srcsetImages.length === 0) {
+    if (!amp.validator.LIGHT) {
+      result.errorCode = amp.validator.ValidationError.Code.INVALID_ATTR_VALUE;
+    }
+    return result;
+  }
+  result.success = true;
+  return result;
 };

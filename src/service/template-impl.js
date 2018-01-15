@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {childElementByTag} from '../dom';
-import {fromClass} from '../service';
+import {childElementByTag, scopedQuerySelector} from '../dom';
+import {getService, registerServiceBuilder} from '../service';
 import {dev, user} from '../log';
+import {toWin} from '../types';
 
 
 /**
@@ -49,7 +50,7 @@ export class BaseTemplate {
     this.element = element;
 
     /** @public @const {!Window} */
-    this.win = element.ownerDocument.defaultView;
+    this.win = toWin(element.ownerDocument.defaultView);
 
     this.compileCallback();
   }
@@ -64,7 +65,7 @@ export class BaseTemplate {
 
   /**
    * To be implemented by subclasses.
-   * @param {!JSONType} unusedData
+   * @param {!JsonObject} unusedData
    * @return {!Element}
    */
   render(unusedData) {
@@ -135,7 +136,7 @@ export class Templates {
   /**
    * Renders the specified template element using the supplied data.
    * @param {!Element} templateElement
-   * @param {!JSONType} data
+   * @param {!JsonObject} data
    * @return {!Promise<!Element>}
    */
   renderTemplate(templateElement, data) {
@@ -148,7 +149,7 @@ export class Templates {
    * Renders the specified template element using the supplied array of data
    * and returns an array of resulting elements.
    * @param {!Element} templateElement
-   * @param {!Array<!JSONType>} array
+   * @param {!Array<!JsonObject>} array
    * @return {!Promise<!Array<!Element>>}
    */
   renderTemplateArray(templateElement, array) {
@@ -168,11 +169,14 @@ export class Templates {
    * attribute  or as a child "template" element. When specified via "template"
    * attribute, the value indicates the ID of the template element.
    * @param {!Element} parent
-   * @param {!JSONType} data
+   * @param {!JsonObject} data
+   * @param {string=} opt_querySelector
    * @return {!Promise<!Element>}
    */
-  findAndRenderTemplate(parent, data) {
-    return this.renderTemplate(this.findTemplate_(parent), data);
+  findAndRenderTemplate(parent, data, opt_querySelector) {
+    return this.renderTemplate(
+        this.findTemplate_(parent, opt_querySelector),
+        data);
   }
 
   /**
@@ -182,33 +186,61 @@ export class Templates {
    * attribute, the value indicates the ID of the template element. Returns
    * the array of the rendered elements.
    * @param {!Element} parent
-   * @param {!Array<!JSONType>} array
+   * @param {!Array<!JsonObject>} array
+   * @param {string=} opt_querySelector
    * @return {!Promise<!Array<!Element>>}
    */
-  findAndRenderTemplateArray(parent, array) {
-    return this.renderTemplateArray(this.findTemplate_(parent), array);
+  findAndRenderTemplateArray(parent, array, opt_querySelector) {
+    return this.renderTemplateArray(
+        this.findTemplate_(parent, opt_querySelector),
+        array);
   }
 
   /**
-   * The template can be specified either via "template" attribute or as a
-   * child "template" element. When specified via "template" attribute,
-   * the value indicates the ID of the template element.
+   * Detect if a template is present inside the parent.
    * @param {!Element} parent
+   * @param {string=} opt_querySelector
+   * @return {boolean}
+   */
+  hasTemplate(parent, opt_querySelector) {
+    return !!this.maybeFindTemplate_(parent, opt_querySelector);
+  }
+
+  /**
+   * Find a specified template inside the parent. Fail if the template is
+   * not present.
+   * @param {!Element} parent
+   * @param {string=} opt_querySelector
    * @return {!Element}
    * @private
    */
-  findTemplate_(parent) {
-    let templateElement = null;
-    const templateId = parent.getAttribute('template');
-    if (templateId) {
-      templateElement = parent.ownerDocument.getElementById(templateId);
-    } else {
-      templateElement = childElementByTag(parent, 'template');
-    }
+  findTemplate_(parent, opt_querySelector) {
+    const templateElement = this.maybeFindTemplate_(parent, opt_querySelector);
     user().assert(templateElement, 'Template not found for %s', parent);
     user().assert(templateElement.tagName == 'TEMPLATE',
         'Template element must be a "template" tag %s', templateElement);
     return templateElement;
+  }
+
+  /**
+   * Find a specified template inside the parent. Returns null if not present.
+   * The template can be specified either via "template" attribute or as a
+   * child "template" element. When specified via "template" attribute,
+   * the value indicates the ID of the template element.
+   * @param {!Element} parent
+   * @param {string=} opt_querySelector
+   * @return {?Element}
+   * @private
+   */
+  maybeFindTemplate_(parent, opt_querySelector) {
+    const templateId = parent.getAttribute('template');
+    if (templateId) {
+      return parent.ownerDocument.getElementById(templateId);
+    } else if (opt_querySelector) {
+      return scopedQuerySelector(parent, opt_querySelector);
+    } else {
+      return childElementByTag(parent, 'template');
+    }
   }
 
   /**
@@ -308,7 +340,7 @@ export class Templates {
 
   /**
    * @param {!BaseTemplate} impl
-   * @param {!JSONType} data
+   * @param {!JsonObject} data
    * @private
    */
   render_(impl, data) {
@@ -316,6 +348,13 @@ export class Templates {
   }
 }
 
+
+/**
+ * @param {!Window} win
+ */
+export function installTemplatesService(win) {
+  registerServiceBuilder(win, 'templates', Templates);
+}
 
 /**
  * Registers an extended template. This function should typically be called
@@ -326,14 +365,6 @@ export class Templates {
  * @package
  */
 export function registerExtendedTemplate(win, type, templateClass) {
-  return installTemplatesService(win).registerTemplate_(type, templateClass);
+  const templatesService = getService(win, 'templates');
+  return templatesService.registerTemplate_(type, templateClass);
 }
-
-
-/**
- * @param {!Window} window
- * @return {!Templates}
- */
-export function installTemplatesService(window) {
-  return fromClass(window, 'templates', Templates);
-};

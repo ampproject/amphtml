@@ -16,8 +16,8 @@
 
 import {createIframePromise} from '../../../../testing/iframe';
 import {A4AVariableSource} from '../a4a-variable-source';
-import {installDocumentInfoServiceForDoc,} from
-    '../../../../src/service/document-info-impl';
+import {installDocumentInfoServiceForDoc} from
+  '../../../../src/service/document-info-impl';
 
 
 describe('A4AVariableSource', () => {

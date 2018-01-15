@@ -16,6 +16,7 @@
 
 import {
   assertHttpsUrl,
+  getSourceOrigin,
   isProxyOrigin,
   isSecureUrl,
   parseUrl,
@@ -23,12 +24,10 @@ import {
 } from '../../../src/url';
 import {closestByTag, removeElement} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {documentInfoForDoc} from '../../../src/document-info';
+import {Services} from '../../../src/services';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
-import {timerFor} from '../../../src/timer';
 import {toggle} from '../../../src/style';
-import {viewerForDoc} from '../../../src/viewer';
 import {setStyle} from '../../../src/style';
 
 /** @private @const {string} */
@@ -67,7 +66,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
       if (iframeSrc) {
         assertHttpsUrl(iframeSrc, this.element);
         const origin = parseUrl(iframeSrc).origin;
-        const docInfo = documentInfoForDoc(this.element);
+        const docInfo = Services.documentInfoForDoc(this.element);
         const sourceUrl = parseUrl(docInfo.sourceUrl);
         const canonicalUrl = parseUrl(docInfo.canonicalUrl);
         user().assert(
@@ -87,7 +86,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
         return install(this.win, src);
       });
     } else {
-      user().error(TAG,
+      this.user().error(TAG,
           'Did not install ServiceWorker because it does not ' +
           'match the current origin: ' + src);
     }
@@ -95,14 +94,14 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
 
   /** @private */
   scheduleIframeLoad_() {
-    viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
-      // If the user is longer than 20 seconds on this page, load
+    Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
+      // If the user is longer than 10 seconds on this page, load
       // the external iframe to install the ServiceWorker. The wait is
       // introduced to avoid installing SWs for content that the user
       // only engaged with superficially.
-      timerFor(this.win).delay(() => {
+      Services.timerFor(this.win).delay(() => {
         this.deferMutate(this.insertIframe_.bind(this));
-      }, 20000);
+      }, 10000);
     });
   }
 
@@ -110,7 +109,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
   insertIframe_() {
     // If we are no longer visible, we will not do a SW registration on this
     // page view.
-    if (!viewerForDoc(this.getAmpDoc()).isVisible()) {
+    if (!Services.viewerForDoc(this.getAmpDoc()).isVisible()) {
       return;
     }
     // The iframe will stil be loaded.
@@ -131,11 +130,6 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     const ampdoc = this.getAmpDoc();
     const win = this.win;
     const winUrl = parseUrl(win.location.href);
-
-    // Cannot install url rewrite on proxy.
-    if (isProxyOrigin(winUrl)) {
-      return;
-    }
 
     // Read the url-rewrite config.
     const urlMatch = this.element.getAttribute(
@@ -159,8 +153,8 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
       throw user().createError(
           'Invalid "data-no-service-worker-fallback-url-match" expression', e);
     }
-    user().assert(winUrl.origin == parseUrl(shellUrl).origin,
-        'Shell origin "%s" must be the same as source origin "%s"',
+    user().assert(getSourceOrigin(winUrl) == parseUrl(shellUrl).origin,
+        'Shell source origin "%s" must be the same as source origin "%s"',
         shellUrl, winUrl.href);
 
     // Install URL rewriter.
@@ -180,7 +174,8 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
   waitToPreloadShell_(shellUrl) {
     // Ensure that document is loaded and visible first.
     const whenReady = this.loadPromise(this.win);
-    const whenVisible = viewerForDoc(this.getAmpDoc()).whenFirstVisible();
+    const whenVisible =
+        Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible();
     return Promise.all([whenReady, whenVisible]).then(() => {
       this.deferMutate(() => this.preloadShell_(shellUrl));
     });
@@ -195,7 +190,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
 
     // Preload the shell by via an iframe with `#preload` fragment.
     const iframe = win.document.createElement('iframe');
-    iframe.id = 'i-amp-shell-preload';
+    iframe.id = 'i-amphtml-shell-preload';
     iframe.setAttribute('src', shellUrl + '#preload');
 
     // Make the iframe hidden.
@@ -266,7 +261,7 @@ class UrlRewriter_ {
     }
 
     // Check if this URL was already rewritten.
-    if (target.getAttribute('i-amp-orig-href')) {
+    if (target.getAttribute('i-amphtml-orig-href')) {
       return;
     }
 
@@ -278,7 +273,7 @@ class UrlRewriter_ {
     }
 
     // Rewrite URL.
-    target.setAttribute('i-amp-orig-href', target.href);
+    target.setAttribute('i-amphtml-orig-href', target.href);
     target.href = this.shellUrl_ + '#href=' + encodeURIComponent(
         `${tgtLoc.pathname}${tgtLoc.search}${tgtLoc.hash}`);
   }
@@ -304,5 +299,6 @@ function install(win, src) {
 }
 
 
-AMP.registerElement('amp-install-serviceworker',
-    AmpInstallServiceWorker);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpInstallServiceWorker);
+});

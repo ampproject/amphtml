@@ -15,7 +15,7 @@
  */
 
 import {dev} from '../log';
-import {platformFor} from '../platform';
+import {Services} from '../services';
 
 
 const TAG = 'ie-media-bug';
@@ -31,7 +31,7 @@ const TAG = 'ie-media-bug';
  * @package
  */
 export function checkAndFix(win, opt_platform) {
-  const platform = opt_platform || platformFor(win);
+  const platform = opt_platform || Services.platformFor(win);
   if (!platform.isIe() || matchMediaIeQuite(win)) {
     return null;
   }
@@ -61,8 +61,12 @@ export function checkAndFix(win, opt_platform) {
  * @private
  */
 function matchMediaIeQuite(win) {
-  const q = `(min-width: ${win./*OK*/innerWidth}px)` +
-      ` AND (max-width: ${win./*OK*/innerWidth}px)`;
+  // The expression is `min-width <= W <= max-width`.
+  // In IE `min-width: X` actually compares string `<`, thus we add -1 to
+  // `min-width` and add +1 to `max-width`. Given the expression above, it's
+  // a non-essential correction by 1px.
+  const q = `(min-width: ${win./*OK*/innerWidth - 1}px)` +
+      ` AND (max-width: ${win./*OK*/innerWidth + 1}px)`;
   try {
     return win.matchMedia(q).matches;
   } catch (e) {

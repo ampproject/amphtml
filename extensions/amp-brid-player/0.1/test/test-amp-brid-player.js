@@ -14,31 +14,50 @@
  * limitations under the License.
  */
 
-import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
-} from '../../../../testing/iframe';
 import '../amp-brid-player';
-import {adopt} from '../../../../src/runtime';
+import {listenOncePromise} from '../../../../src/event-helper';
+import {Services} from '../../../../src/services';
+import {VideoEvents} from '../../../../src/video-interface';
 
-adopt(window);
 
-describe('amp-brid-player', () => {
+describes.realWin('amp-brid-player', {
+  amp: {
+    extensions: ['amp-brid-player'],
+  },
+}, env => {
+  let win, doc;
+  let timer;
+
+  beforeEach(() => {
+    win = env.win;
+    doc = win.document;
+    timer = Services.timerFor(win);
+  });
 
   function getBridPlayer(attributes, opt_responsive) {
-    return createIframePromise().then(iframe => {
-      doNotLoadExternalResourcesInTest(iframe.win);
-      const bc = iframe.doc.createElement('amp-brid-player');
-      for (const key in attributes) {
-        bc.setAttribute(key, attributes[key]);
-      }
-      bc.setAttribute('width', '640');
-      bc.setAttribute('height', '360');
-      if (opt_responsive) {
-        bc.setAttribute('layout', 'responsive');
-      }
-      return iframe.addElement(bc);
+    const bc = doc.createElement('amp-brid-player');
+
+    for (const key in attributes) {
+      bc.setAttribute(key, attributes[key]);
+    }
+    bc.setAttribute('width', '640');
+    bc.setAttribute('height', '360');
+    if (opt_responsive) {
+      bc.setAttribute('layout', 'responsive');
+    }
+
+    // see yt test implementation
+    timer.promise(50).then(() => {
+      const bridTimerIframe = bc.querySelector('iframe');
+
+      bc.implementation_.handleBridMessages_({
+        origin: 'https://services.brid.tv',
+        source: bridTimerIframe.contentWindow,
+        data: 'Brid|0|trigger|ready',
+      });
     });
+    doc.body.appendChild(bc);
+    return bc.build().then(() => bc.layoutCallback()).then(() => bc);
   }
 
   it('renders', () => {
@@ -63,7 +82,7 @@ describe('amp-brid-player', () => {
     }, true).then(bc => {
       const iframe = bc.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.className).to.match(/-amp-fill-content/);
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
   });
 
@@ -82,6 +101,47 @@ describe('amp-brid-player', () => {
     }).should.eventually.be.rejectedWith(
         /The data-player attribute is required for/);
   });
+
+  it('should forward events from brid-player to the amp element', () => {
+    return getBridPlayer({
+      'data-partner': '1177',
+      'data-player': '979',
+      'data-video': '5204',
+    }, true).then(bc => {
+      const iframe = bc.querySelector('iframe');
+
+      return Promise.resolve()
+          .then(() => {
+            const p = listenOncePromise(bc, VideoEvents.PLAYING);
+            sendFakeMessage(bc, iframe, 'trigger|play');
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(bc, VideoEvents.MUTED);
+            sendFakeMessage(bc, iframe, 'volume|0');
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(bc, VideoEvents.PAUSE);
+            sendFakeMessage(bc, iframe, 'trigger|pause');
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(bc, VideoEvents.UNMUTED);
+            sendFakeMessage(bc, iframe, 'volume|1');
+            return p;
+          });
+    });
+  });
+
+
+  function sendFakeMessage(bc, iframe, command) {
+    bc.implementation_.handleBridMessages_({
+      origin: 'https://services.brid.tv',
+      source: iframe.contentWindow,
+      data: 'Brid|0|' + command,
+    });
+  }
 
   describe('createPlaceholderCallback', () => {
     it('should create a placeholder image', () => {

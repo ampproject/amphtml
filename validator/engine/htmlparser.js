@@ -39,6 +39,7 @@ goog.provide('amp.htmlparser.HtmlParser.Entities');
 goog.require('amp.htmlparser.DocLocator');
 goog.require('amp.htmlparser.HtmlSaxHandler');
 goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
+goog.require('amp.htmlparser.ParsedHtmlTag');
 
 
 /**
@@ -199,56 +200,82 @@ class TagNameStack {
      * @private
      */
     this.isBodyStarted_ = false;
+
+    /**
+     * Keeps track of the attributes from all body tags encountered within the
+     * document.
+     * @type {!Array<!Object>}
+     * @private
+     */
+    this.effectiveBodyAttribs_ = [];
+  }
+
+  /**
+   * Returns the attributes from all body tags within the document.
+   * @return {!Array<!Object>}
+   */
+  effectiveBodyAttribs() {
+    return this.effectiveBodyAttribs_;
   }
 
   /**
    * Enter a tag, opening a scope for child tags. Entering a tag can close the
    * previous tag or enter other tags (such as opening a <body> tag when
    * encountering a tag not allowed outside the body.
-   * @param {!string} tagName
-   * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
+   * @param {!amp.htmlparser.ParsedHtmlTag} tag
    */
-  startTag(tagName, encounteredAttrs) {
+  startTag(tag) {
+    // We only report the first body for each document - either
+    // a manufactured one, or the first one encountered. However,
+    // we collect all attributes in this.effectiveBodyAttribs_.
+    if (tag.upperName() === 'BODY') {
+      this.effectiveBodyAttribs_ =
+          this.effectiveBodyAttribs_.concat(tag.attrs().slice());
+    }
+
     // This section deals with manufacturing <head>, </head>, and <body> tags
     // if the document has left them out or placed them in the wrong location.
     switch (this.region_) {
       case TagRegion.PRE_HEAD:
-        if (tagName === 'HEAD') {
+        if (tag.upperName() === 'HEAD') {
           this.region_ = TagRegion.IN_HEAD;
-        } else if (tagName === 'BODY') {
+        } else if (tag.upperName() === 'BODY') {
           this.region_ = TagRegion.IN_BODY;
-        } else if (!HtmlStructureElements.hasOwnProperty(tagName)) {
-          if (HeadElements.hasOwnProperty(tagName)) {
-            this.startTag('HEAD', []);
+        } else if (!HtmlStructureElements.hasOwnProperty(tag.upperName())) {
+          if (HeadElements.hasOwnProperty(tag.upperName())) {
+            this.startTag(new amp.htmlparser.ParsedHtmlTag('HEAD'));
           } else {
             if (this.handler_.markManufacturedBody)
               this.handler_.markManufacturedBody();
-            this.startTag('BODY', []);
+            this.startTag(new amp.htmlparser.ParsedHtmlTag('BODY'));
           }
         }
         break;
       case TagRegion.IN_HEAD:
-        if (!HeadElements.hasOwnProperty(tagName)) {
-          this.endTag('HEAD');
-          if (tagName !== 'BODY') {
+        if (!HeadElements.hasOwnProperty(tag.upperName())) {
+          this.endTag(new amp.htmlparser.ParsedHtmlTag('HEAD'));
+          if (tag.upperName() !== 'BODY') {
             if (this.handler_.markManufacturedBody)
               this.handler_.markManufacturedBody();
-            this.startTag('BODY', []);
+            this.startTag(new amp.htmlparser.ParsedHtmlTag('BODY'));
+          } else {
+            this.region_ = TagRegion.IN_BODY;
           }
         }
         break;
       case TagRegion.PRE_BODY:
-        if (tagName !== 'BODY') {
+        if (tag.upperName() !== 'BODY') {
           if (this.handler_.markManufacturedBody)
             this.handler_.markManufacturedBody();
-          this.startTag('BODY', []);
+          this.startTag(new amp.htmlparser.ParsedHtmlTag('BODY'));
         } else {
           this.region_ = TagRegion.IN_BODY;
         }
         break;
       case TagRegion.IN_BODY:
-        if (tagName === 'BODY') {
-          // If we've manufactured a body, then ignore the later body.
+        if (tag.upperName() === 'BODY') {
+          // We only report the first body for each document - either
+          // a manufactured one, or the first one encountered.
           return;
         }
         // Check implicit tag closing due to opening tags.
@@ -257,17 +284,18 @@ class TagNameStack {
           // <p> tags can be implicitly closed by certain other start tags.
           // See https://www.w3.org/TR/html-markup/p.html
           if (parentTagName === 'P' &&
-              ElementsWhichClosePTag.hasOwnProperty(tagName)) {
-            this.endTag('P');
-          // <dd> and <dt> tags can be implicitly closed by other <dd> and <dt>
-          // tags. See https://www.w3.org/TR/html-markup/dd.html
-          } else if ((tagName == 'DD' || tagName == 'DT') &&
-                     (parentTagName == 'DD' || parentTagName == 'DT')) {
-            this.endTag(parentTagName);
-          // <li> tags can be implicitly closed by other <li> tags.
-          // See https://www.w3.org/TR/html-markup/li.html
-          } else if (tagName == 'LI' && parentTagName == 'LI') {
-            this.endTag('LI');
+              ElementsWhichClosePTag.hasOwnProperty(tag.upperName())) {
+            this.endTag(new amp.htmlparser.ParsedHtmlTag('P'));
+            // <dd> and <dt> tags can be implicitly closed by other <dd> and
+            // <dt> tags. See https://www.w3.org/TR/html-markup/dd.html
+          } else if (
+              (tag.upperName() == 'DD' || tag.upperName() == 'DT') &&
+              (parentTagName == 'DD' || parentTagName == 'DT')) {
+            this.endTag(new amp.htmlparser.ParsedHtmlTag(parentTagName));
+            // <li> tags can be implicitly closed by other <li> tags.
+            // See https://www.w3.org/TR/html-markup/li.html
+          } else if (tag.upperName() == 'LI' && parentTagName == 'LI') {
+            this.endTag(new amp.htmlparser.ParsedHtmlTag('LI'));
           }
         }
         break;
@@ -276,14 +304,15 @@ class TagNameStack {
     }
 
     if (this.handler_.startTag) {
-      this.handler_.startTag(tagName, encounteredAttrs);
+      this.handler_.startTag(tag);
     }
-    if (ElementsWithNoEndElements.hasOwnProperty(tagName)) {
+    if (ElementsWithNoEndElements.hasOwnProperty(tag.upperName())) {
       if (this.handler_.endTag) {
-        this.handler_.endTag(tagName);
+        // Ignore attributes in end tags.
+        this.handler_.endTag(new amp.htmlparser.ParsedHtmlTag(tag.upperName()));
       }
     } else {
-      this.stack_.push(tagName);
+      this.stack_.push(tag.upperName());
     }
   }
 
@@ -299,13 +328,13 @@ class TagNameStack {
         case TagRegion.PRE_BODY:
           if (this.handler_.markManufacturedBody)
             this.handler_.markManufacturedBody();
-          this.startTag('BODY', []);
+          this.startTag(new amp.htmlparser.ParsedHtmlTag('BODY'));
           break;
         case TagRegion.IN_HEAD:
-          this.endTag('HEAD');
+          this.endTag(new amp.htmlparser.ParsedHtmlTag('HEAD'));
           if (this.handler_.markManufacturedBody)
             this.handler_.markManufacturedBody();
-          this.startTag('BODY', []);
+          this.startTag(new amp.htmlparser.ParsedHtmlTag('BODY'));
           break;
         default:
           break;
@@ -317,10 +346,10 @@ class TagNameStack {
   /**
    * Upon exiting a tag, validation for the current matcher is triggered,
    * e.g. for checking that the tag had some specified number of children.
-   * @param {!string} tagName
+   * @param {!amp.htmlparser.ParsedHtmlTag} tag
    */
-  endTag(tagName) {
-    if (this.region_ == TagRegion.IN_HEAD && tagName === 'HEAD')
+  endTag(tag) {
+    if (this.region_ == TagRegion.IN_HEAD && tag.upperName() === 'HEAD')
       this.region_ = TagRegion.PRE_BODY;
 
     // We ignore close body tags (</body) and instead insert them when their
@@ -328,18 +357,19 @@ class TagNameStack {
     // works. The idea here is if other tags are found after the <body>,
     // (ex: <div>) which are only allowed in the <body>, we will effectively
     // move them into the body section.
-    if (tagName === 'BODY') return;
+    if (tag.upperName() === 'BODY') return;
 
-    // We look for tagName from the end. If we can find it, we pop
+    // We look for tag.upperName() from the end. If we can find it, we pop
     // everything from thereon off the stack. If we can't find it,
     // we don't bother with closing the tag, since it doesn't have
     // a matching open tag, though in practice the HtmlParser class
     // will have already manufactured a start tag.
     for (let idx = this.stack_.length - 1; idx >= 0; idx--) {
-      if (this.stack_[idx] === tagName) {
+      if (this.stack_[idx] === tag.upperName()) {
         while (this.stack_.length > idx) {
           if (this.handler_.endTag) {
-            this.handler_.endTag(this.stack_.pop());
+            this.handler_.endTag(
+                new amp.htmlparser.ParsedHtmlTag(this.stack_.pop()));
           }
         }
         return;
@@ -355,11 +385,13 @@ class TagNameStack {
   exitRemainingTags() {
     while (this.stack_.length > 0) {
       if (this.handler_.endTag) {
-        this.handler_.endTag(this.stack_.pop());
+        this.handler_.endTag(
+            new amp.htmlparser.ParsedHtmlTag(this.stack_.pop()));
       }
     }
   }
 }
+
 
 /**
  * An Html parser: {@code parse} takes a string and calls methods on
@@ -441,9 +473,11 @@ amp.htmlparser.HtmlParser = class {
         } else if (m[4]) {
           if (eflags !== void 0) {  // False if not in whitelist.
             if (openTag) {
-              tagStack.startTag(/** @type {string} */ (tagName), attribs);
+              tagStack.startTag(new amp.htmlparser.ParsedHtmlTag(
+                  /** @type {string} */ (tagName), attribs));
             } else {
-              tagStack.endTag(/** @type {string} */ (tagName));
+              tagStack.endTag(new amp.htmlparser.ParsedHtmlTag(
+                  /** @type {string} */ (tagName)));
             }
           }
 
@@ -475,7 +509,7 @@ amp.htmlparser.HtmlParser = class {
 
           tagName = eflags = openTag = void 0;
           attribs.length = 0;
-          if (inTag && locator) {
+          if (locator) {
             locator.snapshotPos();
           }
           inTag = false;
@@ -485,7 +519,7 @@ amp.htmlparser.HtmlParser = class {
           tagStack.pcdata(m[0]);
         } else if (m[3]) {  // Tag.
           openTag = !m[2];
-          if (!inTag && locator) {
+          if (locator) {
             locator.snapshotPos();
           }
           inTag = true;
@@ -494,6 +528,9 @@ amp.htmlparser.HtmlParser = class {
               amp.htmlparser.HtmlParser.Elements[tagName] :
               amp.htmlparser.HtmlParser.EFlags.UNKNOWN_OR_CUSTOM;
         } else if (m[4]) {  // Text.
+          if (locator) {
+            locator.snapshotPos();
+          }
           tagStack.pcdata(m[4]);
         } else if (m[5]) {  // Cruft.
           switch (m[5]) {
@@ -516,6 +553,7 @@ amp.htmlparser.HtmlParser = class {
     }
     // Lets the handler know that we are done parsing the document.
     tagStack.exitRemainingTags();
+    handler.effectiveBodyTag(tagStack.effectiveBodyAttribs());
     handler.endDoc();
   }
 
@@ -578,7 +616,7 @@ amp.htmlparser.HtmlParser = class {
         .replace(amp.htmlparser.HtmlParser.LT_RE, '&lt;')
         .replace(amp.htmlparser.HtmlParser.GT_RE, '&gt;');
   }
-}
+};
 
 
 /**
@@ -836,8 +874,9 @@ amp.htmlparser.HtmlParser.HEX_ESCAPE_RE_ = /^#x([0-9A-Fa-f]+)$/;
  * @private
  */
 amp.htmlparser.HtmlParser.INSIDE_TAG_TOKEN_ = new RegExp(
-    // Don't capture space.
-    '^\\s*(?:' +
+    // Don't capture space. In this case, we don't use \s because it includes a
+    // nonbreaking space which gets included as an attribute in our validation.
+    '^[ \\t\\n\\f\\r\\v]*(?:' +
         // Capture an attribute name in group 1, and value in group 3.
         // We capture the fact that there was an attribute in group 2, since
         // interpreters are inconsistent in whether a group that matches nothing
@@ -889,7 +928,11 @@ amp.htmlparser.HtmlParser.OUTSIDE_TAG_TOKEN_ = new RegExp(
         // Comments not captured.
         '|<[!]--[\\s\\S]*?(?:-->|$)' +
         // '/' captured in group 2 for close tags, and name captured in group 3.
-        '|<(/)?([a-z!\\?][a-z0-9_:-]*)' +
+        // The first character of a tag (after possibly '/') can be A-Z, a-z,
+        // '!' or '?'. The remaining characters are more easily expressed as a
+        // negative set of: '\0', ' ', '\n', '\r', '\t', '\f', '\v', '>', or
+        // '/'.
+        '|<(/)?([a-z!\\?][^\\0 \\n\\r\\t\\f\\v>/]*)' +
         // Text captured in group 4.
         '|([^<&>]+)' +
         // Cruft captured in group 5.

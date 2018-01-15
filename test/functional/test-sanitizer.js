@@ -16,6 +16,7 @@
 
 import {
   resolveUrlAttr,
+  rewriteAttributeValue,
   sanitizeFormattingHtml,
   sanitizeHtml,
 } from '../../src/sanitizer';
@@ -85,7 +86,7 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml(
         '<a href="">a</a>'
         + '<a href="" target="">c</a>'
-        )).to.equal(
+    )).to.equal(
         '<a href="" target="_top">a</a>'
         + '<a href="" target="_top">c</a>');
   });
@@ -94,7 +95,7 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml(
         '<a>b</a>'
         + '<a target="">d</a>'
-        )).to.equal(
+    )).to.equal(
         '<a>b</a>'
         + '<a target="_top">d</a>');
   });
@@ -116,7 +117,7 @@ describe('sanitizeHtml', () => {
         + '<a target="_other">_other</a>'
         + '<a target="_OTHER">_OTHER</a>'
         + '<a target="other">other</a>'
-        )).to.equal(
+    )).to.equal(
         '<a target="_top">_self</a>'
         + '<a target="_top">_parent</a>'
         + '<a target="_top">_other</a>'
@@ -155,6 +156,8 @@ describe('sanitizeHtml', () => {
 
   it('should NOT output security-sensitive attributes', () => {
     expect(sanitizeHtml('a<a onclick="alert">b</a>')).to.be.equal('a<a>b</a>');
+    expect(sanitizeHtml('a<a [onclick]="alert">b</a>')).to.be
+        .equal('a<a>b</a>');
   });
 
   it('should apply html4/caja restrictions', () => {
@@ -162,6 +165,71 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml('a<dialog>b<img>d</dialog>c')).to.be.equal('ac');
     expect(sanitizeHtml('<div class="c" src="d">b</div>')).to.be
         .equal('<div class="c" src="">b</div>');
+  });
+
+  it('should output [text] and [class] attributes', () => {
+    expect(sanitizeHtml('<p [text]="foo" [class]="bar"></p>')).to.be
+        .equal('<p [text]="foo" [class]="bar"></p>');
+  });
+
+  it('should NOT output blacklisted values for class attributes', () => {
+    expect(sanitizeHtml('<p class="i-amphtml-">hello</p>')).to.be
+        .equal('<p>hello</p>');
+    expect(sanitizeHtml('<p class="i-amphtml-class">hello</p>')).to.be
+        .equal('<p>hello</p>');
+    expect(sanitizeHtml('<p class="foo-i-amphtml-bar">hello</p>')).to.be
+        .equal('<p>hello</p>');
+    expect(sanitizeHtml('<p [class]="i-amphtml-">hello</p>')).to.be
+        .equal('<p>hello</p>');
+    expect(sanitizeHtml('<p [class]="i-amphtml-class">hello</p>')).to.be
+        .equal('<p>hello</p>');
+    expect(sanitizeHtml('<p [class]="foo-i-amphtml-bar">hello</p>')).to.be
+        .equal('<p>hello</p>');
+  });
+
+  it('should NOT output security-sensitive binding attributes', () => {
+    expect(sanitizeHtml('a<a [onclick]="alert">b</a>')).to.be.equal(
+        'a<a>b</a>');
+    expect(sanitizeHtml('a<a [style]="color: red;">b</a>')).to.be.equal(
+        'a<a>b</a>');
+    expect(sanitizeHtml('a<a [STYLE]="color: red;">b</a>')).to.be.equal(
+        'a<a>b</a>');
+    expect(sanitizeHtml('a<a [href]="javascript:alert">b</a>')).to.be.equal(
+        'a<a target="_top">b</a>');
+    expect(sanitizeHtml('a<a [href]="JAVASCRIPT:alert">b</a>')).to.be.equal(
+        'a<a target="_top">b</a>');
+    expect(sanitizeHtml('a<a [href]="vbscript:alert">b</a>')).to.be.equal(
+        'a<a target="_top">b</a>');
+    expect(sanitizeHtml('a<a [href]="VBSCRIPT:alert">b</a>')).to.be.equal(
+        'a<a target="_top">b</a>');
+    expect(sanitizeHtml('a<a [href]="data:alert">b</a>')).to.be.equal(
+        'a<a target="_top">b</a>');
+    expect(sanitizeHtml('a<a [href]="DATA:alert">b</a>')).to.be.equal(
+        'a<a target="_top">b</a>');
+    expect(sanitizeHtml('a<a [href]="<script">b</a>')).to.be.equal(
+        'a<a target="_top">b</a>');
+    expect(sanitizeHtml('a<a [href]="</script">b</a>')).to.be.equal(
+        'a<a target="_top">b</a>');
+  });
+
+  it('should NOT rewrite values of binding attributes', () => {
+    // Should not change "foo.bar" but should add target="_top".
+    expect(sanitizeHtml('<a [href]="foo.bar">link</a>'))
+        .to.equal('<a [href]="foo.bar" target="_top">link</a>');
+  });
+});
+
+
+describe('rewriteAttributeValue', () => {
+
+  it('should be case-insensitive to tag and attribute name', () => {
+    expect(rewriteAttributeValue('a', 'href', '/doc2'))
+        .to.equal(rewriteAttributeValue('A', 'HREF', '/doc2'));
+    expect(rewriteAttributeValue('amp-img', 'src', '/jpeg1'))
+        .to.equal(rewriteAttributeValue('AMP-IMG', 'SRC', '/jpeg1'));
+    expect(rewriteAttributeValue('amp-img', 'srcset', '/jpeg2 2x, /jpeg1 1x'))
+        .to.equal(rewriteAttributeValue(
+            'AMP-IMG', 'SRCSET', '/jpeg2 2x, /jpeg1 1x'));
   });
 });
 
@@ -172,7 +240,7 @@ describe('resolveUrlAttr', () => {
     expect(() => resolveUrlAttr('a', 'href',
         '/doc2?__amp_source_origin=https://google.com',
         'http://acme.org/doc1'))
-            .to.throw(/Source origin is not allowed in/);
+        .to.throw(/Source origin is not allowed in/);
   });
 
   it('should be called by sanitizer', () => {

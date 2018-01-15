@@ -15,7 +15,7 @@
  */
 
 import {parse as mustacheParse, render as mustacheRender,
-    setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
+  setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
 import {sanitizeHtml, sanitizeFormattingHtml} from '../../../src/sanitizer';
 
 // Configure inline sanitizer for unescaped values.
@@ -27,6 +27,7 @@ setUnescapedSanitizier(sanitizeFormattingHtml);
  * See {@link https://github.com/janl/mustache.js/}.
  *
  * @private Visible for testing.
+ * @extends {BaseTemplate$$module$src$service$template_impl}
  */
 export class AmpMustache extends AMP.BaseTemplate {
 

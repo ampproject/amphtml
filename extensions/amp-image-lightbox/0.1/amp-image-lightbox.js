@@ -16,17 +16,18 @@
 
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-image-lightbox-0.1.css';
-import {Gestures} from '../../../src/gesture';
 import {
   DoubletapRecognizer,
   SwipeXYRecognizer,
   TapRecognizer,
   TapzoomRecognizer,
 } from '../../../src/gesture-recognizers';
+import {Gestures} from '../../../src/gesture';
+import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
-import {historyForDoc} from '../../../src/history';
+import {Services} from '../../../src/services';
 import {isLoaded} from '../../../src/event-helper';
 import {
   layoutRectFromDomRect,
@@ -34,12 +35,13 @@ import {
   moveLayoutRect,
 } from '../../../src/layout-rect';
 import {srcsetFromElement} from '../../../src/srcset';
-import {timerFor} from '../../../src/timer';
 import {user, dev} from '../../../src/log';
+import {startsWith} from '../../../src/string';
 import * as dom from '../../../src/dom';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 
+const TAG = 'amp-image-lightbox';
 
 /** @private @const {!Object<string, boolean>} */
 const SUPPORTED_ELEMENTS_ = {
@@ -56,6 +58,8 @@ const EXIT_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
 /** @private @const {!../../../src/curve.CurveDef} */
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 
+/** @private @const {number} */
+const DEFAULT_MAX_SCALE = 2;
 
 /**
  * This class is responsible providing all operations necessary for viewing
@@ -67,7 +71,7 @@ export class ImageViewer {
   /**
    * @param {!AmpImageLightbox} lightbox
    * @param {!Window} win
-   * @param {!function(T, number=):Promise<T>} loadPromise
+   * @param {function(T, number=):Promise<T>} loadPromise
    * @template T
    */
   constructor(lightbox, win, loadPromise) {
@@ -82,11 +86,11 @@ export class ImageViewer {
 
     /** @private {!Element} */
     this.viewer_ = lightbox.element.ownerDocument.createElement('div');
-    this.viewer_.classList.add('-amp-image-lightbox-viewer');
+    this.viewer_.classList.add('i-amphtml-image-lightbox-viewer');
 
     /** @private {!Element} */
     this.image_ = lightbox.element.ownerDocument.createElement('img');
-    this.image_.classList.add('-amp-image-lightbox-viewer-image');
+    this.image_.classList.add('i-amphtml-image-lightbox-viewer-image');
     this.viewer_.appendChild(this.image_);
 
     /** @private {?../../../src/srcset.Srcset} */
@@ -120,7 +124,7 @@ export class ImageViewer {
     /** @private {number} */
     this.minScale_ = 1;
     /** @private {number} */
-    this.maxScale_ = 2;
+    this.maxScale_ = DEFAULT_MAX_SCALE;
 
     /** @private {number} */
     this.startX_ = 0;
@@ -257,16 +261,21 @@ export class ImageViewer {
   measure() {
     this.viewerBox_ = layoutRectFromDomRect(this.viewer_
         ./*OK*/getBoundingClientRect());
-
-    const sf = Math.min(this.viewerBox_.width / this.sourceWidth_,
-        this.viewerBox_.height / this.sourceHeight_);
-    let width = Math.min(this.sourceWidth_ * sf, this.viewerBox_.width);
-    let height = Math.min(this.sourceHeight_ * sf, this.viewerBox_.height);
+    const sourceAspectRatio = this.sourceWidth_ / this.sourceHeight_;
+    let height = Math.min(
+        this.viewerBox_.width / sourceAspectRatio,
+        this.viewerBox_.height
+    );
+    let width = Math.min(
+        this.viewerBox_.height * sourceAspectRatio,
+        this.viewerBox_.width
+    );
 
     // TODO(dvoytenko): This is to reduce very small expansions that often
     // look like a stutter. To be evaluated if this is still the right
     // idea.
-    if (width - this.sourceWidth_ <= 16) {
+    if (Math.abs(width - this.sourceWidth_) <= 16
+        && Math.abs(height - this.sourceHeight_) <= 16) {
       width = this.sourceWidth_;
       height = this.sourceHeight_;
     }
@@ -283,6 +292,14 @@ export class ImageViewer {
       width: st.px(this.imageBox_.width),
       height: st.px(this.imageBox_.height),
     });
+
+    // If aspect ratio is off by too much, adjust max scale
+    const viewerBoxRatio = this.viewerBox_.width / this.viewerBox_.height;
+    const maxScale = Math.max(
+        viewerBoxRatio / sourceAspectRatio,
+        sourceAspectRatio / viewerBoxRatio
+    );
+    this.maxScale_ = Math.max(DEFAULT_MAX_SCALE, maxScale);
 
     // Reset zoom and pan.
     this.startScale_ = this.scale_ = 1;
@@ -312,7 +329,7 @@ export class ImageViewer {
     // Notice that we will wait until the next event cycle to set the "src".
     // This ensures that the already available image will show immediately
     // and then naturally upgrade to a higher quality image.
-    return timerFor(this.win).promise(1).then(() => {
+    return Services.timerFor(this.win).promise(1).then(() => {
       this.image_.setAttribute('src', src);
       return this.loadPromise_(this.image_);
     });
@@ -522,7 +539,7 @@ export class ImageViewer {
     const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
     const zoomSign = Math.abs(deltaY) > Math.abs(deltaX) ?
-        Math.sign(deltaY) : Math.sign(-deltaX);
+      Math.sign(deltaY) : Math.sign(-deltaX);
     if (zoomSign == 0) {
       return;
     }
@@ -555,7 +572,7 @@ export class ImageViewer {
     const newPosX = this.boundX_(this.startX_ + deltaX * newScale, false);
     const newPosY = this.boundY_(this.startY_ + deltaY * newScale, false);
     return /** @type {!Promise|undefined} */ (
-        this.set_(newScale, newPosX, newPosY, animate));
+      this.set_(newScale, newPosX, newPosY, animate));
   }
 
   /**
@@ -612,8 +629,8 @@ export class ImageViewer {
     if (animate) {
       const maxDur = 250;
       dur = Math.min(maxDur, Math.max(
-          maxDur * dist * 0.01,      // Moving component.
-          maxDur * Math.abs(ds)));   // Zooming component.
+          maxDur * dist * 0.01, // Moving component.
+          maxDur * Math.abs(ds))); // Zooming component.
     }
 
     let promise;
@@ -716,10 +733,16 @@ class AmpImageLightbox extends AMP.BaseElement {
     return layout == Layout.NODISPLAY;
   }
 
-  /** @override */
-  buildCallback() {
+  /**
+  * Lazily builds the image-lightbox DOM on the first open.
+  * @private
+  * */
+  buildLightbox_() {
+    if (this.container_) {
+      return;
+    }
     this.container_ = this.element.ownerDocument.createElement('div');
-    this.container_.classList.add('-amp-image-lightbox-container');
+    this.container_.classList.add('i-amphtml-image-lightbox-container');
     this.element.appendChild(this.container_);
 
     this.imageViewer_ = new ImageViewer(this, this.win,
@@ -733,15 +756,18 @@ class AmpImageLightbox extends AMP.BaseElement {
         + '-caption');
 
     this.captionElement_.classList.add('amp-image-lightbox-caption');
-    this.captionElement_.classList.add('-amp-image-lightbox-caption');
+    this.captionElement_.classList.add('i-amphtml-image-lightbox-caption');
     this.container_.appendChild(this.captionElement_);
 
     // Invisible close button at the end of lightbox for screen-readers.
     const screenReaderCloseButton = this.element.ownerDocument
         .createElement('button');
     // TODO(aghassemi, #4146) i18n
-    screenReaderCloseButton.textContent = 'Close the lightbox';
-    screenReaderCloseButton.classList.add('-amp-screen-reader');
+    const ariaLabel = this.element.getAttribute('data-close-button-aria-label')
+        || 'Close the lightbox';
+    screenReaderCloseButton.textContent = ariaLabel;
+    screenReaderCloseButton.classList.add('i-amphtml-screen-reader');
+
     // This is for screen-readers only, should not get a tab stop.
     screenReaderCloseButton.tabIndex = -1;
     screenReaderCloseButton.addEventListener('click', () => {
@@ -753,7 +779,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.element.addEventListener('click', e => {
       if (!this.entering_ &&
             !this.imageViewer_.getImage().contains(/** @type {?Node} */ (
-                e.target))) {
+              e.target))) {
         this.close();
       }
     });
@@ -772,6 +798,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     if (this.active_) {
       return;
     }
+    this.buildLightbox_();
 
     const source = invocation.source;
     user().assert(source && SUPPORTED_ELEMENTS_[source.tagName.toLowerCase()],
@@ -791,7 +818,18 @@ class AmpImageLightbox extends AMP.BaseElement {
 
     this.unlistenViewport_ = this.getViewport().onChanged(() => {
       if (this.active_) {
-        this.imageViewer_.measure();
+        // In IOS 10.3, the measured size of an element is incorrect if the
+        // element size depends on window size directly and the measurement
+        // happens in window.resize event. Adding a timeout for correct
+        // measurement. See https://github.com/ampproject/amphtml/issues/8479
+        if (startsWith(
+            Services.platformFor(this.win).getIosVersionString(), '10.3')) {
+          Services.timerFor(this.win).delay(() => {
+            this.imageViewer_.measure();
+          }, 500);
+        } else {
+          this.imageViewer_.measure();
+        }
       }
     });
 
@@ -806,7 +844,7 @@ class AmpImageLightbox extends AMP.BaseElement {
    * @private
    */
   closeOnEscape_(event) {
-    if (event.keyCode == 27) {
+    if (event.keyCode == KeyCodes.ESCAPE) {
       this.close();
     }
   }
@@ -834,7 +872,9 @@ class AmpImageLightbox extends AMP.BaseElement {
     }
     this.win.document.documentElement.removeEventListener(
         'keydown', this.boundCloseOnEscape_);
-    this.boundCloseOnEscape_ = null;
+    if (this.sourceElement_) {
+      dom.tryFocus(this.sourceElement_);
+    }
   }
 
   /**
@@ -843,9 +883,10 @@ class AmpImageLightbox extends AMP.BaseElement {
    */
   toggleViewMode(opt_on) {
     if (opt_on !== undefined) {
-      this.container_.classList.toggle('-amp-image-lightbox-view-mode', opt_on);
+      this.container_.classList.toggle(
+          'i-amphtml-image-lightbox-view-mode', opt_on);
     } else {
-      this.container_.classList.toggle('-amp-image-lightbox-view-mode');
+      this.container_.classList.toggle('i-amphtml-image-lightbox-view-mode');
     }
   }
 
@@ -864,11 +905,9 @@ class AmpImageLightbox extends AMP.BaseElement {
     let caption = null;
 
     // 1. Check <figure> and <figcaption>.
-    if (!caption) {
-      const figure = dom.closestByTag(sourceElement, 'figure');
-      if (figure) {
-        caption = dom.elementByTag(figure, 'figcaption');
-      }
+    const figure = dom.closestByTag(sourceElement, 'figure');
+    if (figure) {
+      caption = dom.elementByTag(figure, 'figcaption');
     }
 
     // 2. Check "aria-describedby".
@@ -883,7 +922,7 @@ class AmpImageLightbox extends AMP.BaseElement {
           this.captionElement_.getAttribute('id'));
     }
 
-    this.captionElement_.classList.toggle('-amp-empty', !caption);
+    this.captionElement_.classList.toggle('i-amphtml-empty', !caption);
   }
 
   /** @private */
@@ -921,7 +960,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     if (this.sourceImage_ && isLoaded(this.sourceImage_) &&
             this.sourceImage_.src) {
       transLayer = this.element.ownerDocument.createElement('div');
-      transLayer.classList.add('-amp-image-lightbox-trans');
+      transLayer.classList.add('i-amphtml-image-lightbox-trans');
       this.element.ownerDocument.body.appendChild(transLayer);
 
       const rect = layoutRectFromDomRect(this.sourceImage_
@@ -940,7 +979,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       });
       transLayer.appendChild(clone);
 
-      this.sourceImage_.classList.add('-amp-ghost');
+      this.sourceImage_.classList.add('i-amphtml-ghost');
 
       // Move and resize the image to the location given by the lightbox.
       const dx = imageBox.left - rect.left;
@@ -998,7 +1037,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     let transLayer = null;
     if (isLoaded(image) && image.src && this.sourceImage_) {
       transLayer = this.element.ownerDocument.createElement('div');
-      transLayer.classList.add('-amp-image-lightbox-trans');
+      transLayer.classList.add('i-amphtml-image-lightbox-trans');
       this.element.ownerDocument.body.appendChild(transLayer);
 
       const rect = layoutRectFromDomRect(this.sourceImage_
@@ -1040,7 +1079,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       anim.add(Math.min(0.8 - motionTime, 0.2), (time, complete) => {
         moveAndScale(time);
         if (complete) {
-          this.sourceImage_.classList.remove('-amp-ghost');
+          this.sourceImage_.classList.remove('i-amphtml-ghost');
         }
       }, motionTime, EXIT_CURVE_);
 
@@ -1056,7 +1095,7 @@ class AmpImageLightbox extends AMP.BaseElement {
 
     return anim.start(dur).thenAlways(() => {
       if (this.sourceImage_) {
-        this.sourceImage_.classList.remove('-amp-ghost');
+        this.sourceImage_.classList.remove('i-amphtml-ghost');
       }
       this./*OK*/collapse();
       st.setStyles(this.element, {
@@ -1072,8 +1111,11 @@ class AmpImageLightbox extends AMP.BaseElement {
 
   /** @private @return {!../../../src/service/history-impl.History} */
   getHistory_() {
-    return historyForDoc(this.getAmpDoc());
+    return Services.historyForDoc(this.getAmpDoc());
   }
 }
 
-AMP.registerElement('amp-image-lightbox', AmpImageLightbox, CSS);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpImageLightbox, CSS);
+});

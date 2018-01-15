@@ -14,32 +14,21 @@
  * limitations under the License.
  */
 
-import {Pass} from '../pass';
-import {fromClass, getServiceForDoc} from '../service';
+import {
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+  getService,
+} from '../service';
 import {getMode} from '../mode';
 import {dev} from '../log';
-import {timerFor} from '../timer';
-import {viewerForDoc} from '../viewer';
+import {dict, map} from '../utils/object';
+import {Services} from '../services';
 
-
-/** @private @const */
+/** @private @const {string} */
 const TAG_ = 'History';
 
-
-/** @private @const */
+/** @private @const {string} */
 const HISTORY_PROP_ = 'AMP.History';
-
-
-/**
- * @return {*}
- * @private
- */
-function historyState_(stackIndex) {
-  const state = {};
-  state[HISTORY_PROP_] = stackIndex;
-  return state;
-}
-
 
 /** @typedef {number} */
 let HistoryIdDef;
@@ -52,8 +41,11 @@ export class History {
    * @param {!HistoryBindingInterface} binding
    */
   constructor(ampdoc, binding) {
+    /** @private @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
     /** @private @const {!../service/timer-impl.Timer} */
-    this.timer_ = timerFor(ampdoc.win);
+    this.timer_ = Services.timerFor(ampdoc.win);
 
     /** @private @const {!HistoryBindingInterface} */
     this.binding_ = binding;
@@ -64,7 +56,13 @@ export class History {
     /** @private {!Array<!Function|undefined>} */
     this.stackOnPop_ = [];
 
-    /** @private {!Array<!{callback:function():!Promise, resolve:!Function,reject:!Function}>} */
+    /**
+     * @private {!Array<!{
+     *   callback: function():!Promise,
+     *   resolve: !Function,
+     *   reject: !Function,
+     *   trace: (!Error|undefined)
+     * }>} */
     this.queue_ = [];
 
     this.binding_.setOnStackIndexUpdated(this.onStackIndexUpdated_.bind(this));
@@ -90,7 +88,7 @@ export class History {
         }
         return stackIndex;
       });
-    });
+    }, 'push');
   }
 
   /**
@@ -105,7 +103,65 @@ export class History {
       return this.binding_.pop(stateId).then(stackIndex => {
         this.onStackIndexUpdated_(stackIndex);
       });
+    }, 'pop');
+  }
+
+  /**
+   * Requests navigation one step back. This request is only satisifed
+   * when the history has at least one step to go back in the context
+   * of this document.
+   * @return {!Promise}
+   */
+  goBack() {
+    return this.enque_(() => {
+      if (this.stackIndex_ <= 0) {
+        // Nothing left to pop.
+        return Promise.resolve();
+      }
+      // Pop the current state. The binding will ignore the request if
+      // it cannot satisfy it.
+      return this.binding_.pop(this.stackIndex_).then(stackIndex => {
+        this.onStackIndexUpdated_(stackIndex);
+      });
+    }, 'goBack');
+  }
+
+  /**
+   * Helper method to handle navigation to a local target, e.g. When a user clicks an
+   * anchor link to a local hash - <a href="#section1">Go to section 1</a>.
+   *
+   * @param {string} target
+   * @return {!Promise}
+   */
+  replaceStateForTarget(target) {
+    dev().assert(target[0] == '#', 'target should start with a #');
+    const previousHash = this.ampdoc_.win.location.hash;
+    return this.push(() => {
+      this.ampdoc_.win.location.replace(previousHash || '#');
+    }).then(() => {
+      this.binding_.replaceStateForTarget(target);
     });
+  }
+
+  /**
+   * Get the fragment from the url or the viewer.
+   * Strip leading '#' in the fragment
+   * @return {!Promise<string>}
+   */
+  getFragment() {
+    return this.binding_.getFragment();
+  }
+
+  /**
+   * Update the page url fragment
+   * @param {string} fragment
+   * @return {!Promise}
+   */
+  updateFragment(fragment) {
+    if (fragment[0] == '#') {
+      fragment = fragment.substr(1);
+    }
+    return this.binding_.updateFragment(fragment);
   }
 
   /**
@@ -143,11 +199,12 @@ export class History {
 
   /**
    * @param {function():!Promise<RESULT>} callback
+   * @param {string} name
    * @return {!Promise<RESULT>}
    * @template RESULT
    * @private
    */
-  enque_(callback) {
+  enque_(callback, name) {
     let resolve;
     let reject;
     const promise = new Promise((aResolve, aReject) => {
@@ -155,11 +212,12 @@ export class History {
       reject = aReject;
     });
 
-    this.queue_.push({callback, resolve, reject});
+    // TODO(dvoytenko, #8785): cleanup after tracing.
+    const trace = new Error('history trace for ' + name + ': ');
+    this.queue_.push({callback, resolve, reject, trace});
     if (this.queue_.length == 1) {
       this.deque_();
     }
-
     return promise;
   }
 
@@ -183,6 +241,11 @@ export class History {
       task.resolve(result);
     }, reason => {
       dev().error(TAG_, 'failed to execute a task:', reason);
+      // TODO(dvoytenko, #8785): cleanup after tracing.
+      if (task.trace) {
+        task.trace.message += reason;
+        dev().error(TAG_, task.trace);
+      }
       task.reject(reason);
     }).then(() => {
       this.queue_.splice(0, 1);
@@ -224,6 +287,26 @@ class HistoryBindingInterface {
    * @return {!Promise<number>}
    */
   pop(unusedStackIndex) {}
+
+  /**
+   * Replaces the state for local target navigation.
+   * @param unusedTarget
+   */
+  replaceStateForTarget(unusedTarget) {}
+
+  /**
+   * Get the fragment from the url or the viewer.
+   * Strip leading '#' in the fragment
+   * @return {!Promise<string>}
+   */
+  getFragment() {}
+
+  /**
+   * Update the page url fragment
+   * @param {string} unusedFragment
+   * @return {!Promise}
+   */
+  updateFragment(unusedFragment) {}
 }
 
 
@@ -245,7 +328,7 @@ export class HistoryBindingNatural_ {
     this.win = win;
 
     /** @private @const {!../service/timer-impl.Timer} */
-    this.timer_ = timerFor(win);
+    this.timer_ = Services.timerFor(win);
 
     const history = this.win.history;
 
@@ -274,7 +357,7 @@ export class HistoryBindingNatural_ {
     this.supportsState_ = 'state' in history;
 
     /** @private {*} */
-    this.unsupportedState_ = historyState_(this.stackIndex_);
+    this.unsupportedState_ = this.historyState_(this.stackIndex_);
 
     // There are still browsers who do not support push/replaceState.
     let pushState, replaceState;
@@ -287,7 +370,10 @@ export class HistoryBindingNatural_ {
           history.replaceState.bind(history);
       pushState = (state, opt_title, opt_url) => {
         this.unsupportedState_ = state;
-        this.origPushState_(state, opt_title, opt_url);
+        this.origPushState_(state, opt_title,
+            // A bug in edge causes paths to become undefined if URL is
+            // undefined, filed here: https://goo.gl/KlImZu
+            opt_url || null);
       };
       replaceState = (state, opt_title, opt_url) => {
         this.unsupportedState_ = state;
@@ -321,7 +407,8 @@ export class HistoryBindingNatural_ {
     this.replaceState_ = replaceState;
 
     try {
-      this.replaceState_(historyState_(this.stackIndex_));
+      this.replaceState_(this.historyState_(this.stackIndex_,
+          /* replace */ true));
     } catch (e) {
       dev().error(TAG_, 'Initial replaceState failed: ' + e.message);
     }
@@ -329,19 +416,12 @@ export class HistoryBindingNatural_ {
     history.pushState = this.historyPushState_.bind(this);
     history.replaceState = this.historyReplaceState_.bind(this);
 
-    const eventPass = new Pass(this.win, this.onHistoryEvent_.bind(this), 50);
     this.popstateHandler_ = e => {
       dev().fine(TAG_, 'popstate event: ' + this.win.history.length + ', ' +
           JSON.stringify(e.state));
-      eventPass.schedule();
-    };
-    this.hashchangeHandler_ = () => {
-      dev().fine(TAG_, 'hashchange event: ' + this.win.history.length + ', ' +
-          this.win.location.hash);
-      eventPass.schedule();
+      this.onHistoryEvent_();
     };
     this.win.addEventListener('popstate', this.popstateHandler_);
-    this.win.addEventListener('hashchange', this.hashchangeHandler_);
   }
 
   /** @override */
@@ -353,7 +433,17 @@ export class HistoryBindingNatural_ {
       this.win.history.replaceState = this.origReplaceState_;
     }
     this.win.removeEventListener('popstate', this.popstateHandler_);
-    this.win.removeEventListener('hashchange', this.hashchangeHandler_);
+  }
+
+  /**
+   * @param {boolean=} opt_replace
+   * @return {*}
+   * @private
+   */
+  historyState_(stackIndex, opt_replace) {
+    const state = map(opt_replace ? this.getState_() : undefined);
+    state[HISTORY_PROP_] = stackIndex;
+    return state;
   }
 
   /** @override */
@@ -408,7 +498,7 @@ export class HistoryBindingNatural_ {
     }
 
     if (stackIndex == undefined) {
-      // A new navigation forward by the user().
+      // A new navigation forward by the user.
       newStackIndex = newStackIndex + 1;
     } else if (stackIndex < this.win.history.length) {
       // A simple trip back.
@@ -494,7 +584,7 @@ export class HistoryBindingNatural_ {
     if (steps <= 0) {
       return Promise.resolve(this.stackIndex_);
     }
-    this.unsupportedState_ = historyState_(this.stackIndex_ - steps);
+    this.unsupportedState_ = this.historyState_(this.stackIndex_ - steps);
     const promise = this.wait_();
     this.win.history.go(-steps);
     return promise.then(() => {
@@ -522,6 +612,38 @@ export class HistoryBindingNatural_ {
       this.replaceState_(state);
     }
     this.updateStackIndex_(stackIndex);
+  }
+
+  /**
+   * If this is a hash update the choice of `location.replace` vs
+   * `history.replaceState` is important. Due to bugs, not every browser
+   * triggers `:target` pseudo-class when `replaceState` is called.
+   * See http://www.zachleat.com/web/moving-target/ for more details.
+   * location.replace will trigger a `popstate` event, we temporarily
+   * disable handling it.
+   * @param {string} target
+   *
+   * @override
+   */
+  replaceStateForTarget(target) {
+    dev().assert(target[0] == '#', 'target should start with a #');
+    this.whenReady_(() => {
+      // location.replace will fire a popstate event which is not a history
+      // event, so temporarily remove the event listener and re-add it after.
+      // As explained above in the function comment, typically we'd just do
+      // replaceState here but in order to trigger :target re-eval we have to
+      // use location.replace.
+      this.win.removeEventListener('popstate', this.popstateHandler_);
+      try {
+        // TODO(mkhatib, #6095): Chrome iOS will add extra states for
+        // location.replace.
+        this.win.location.replace(target);
+      } finally {
+        this.win.addEventListener('popstate', this.popstateHandler_);
+      }
+      this.historyReplaceState_();
+      return Promise.resolve();
+    });
   }
 
   /**
@@ -557,6 +679,22 @@ export class HistoryBindingNatural_ {
       }
     }
   }
+
+  /** @override */
+  getFragment() {
+    let hash = this.win.location.hash;
+    /* Strip leading '#' */
+    hash = hash.substr(1);
+    return Promise.resolve(hash);
+  }
+
+  /** @override */
+  updateFragment(fragment) {
+    if (this.win.history.replaceState) {
+      this.win.history.replaceState({}, '', '#' + fragment);
+    }
+    return Promise.resolve();
+  }
 }
 
 
@@ -572,10 +710,14 @@ export class HistoryBindingNatural_ {
 export class HistoryBindingVirtual_ {
 
   /**
+   * @param {!Window} win
    * @param {!./viewer-impl.Viewer} viewer
    */
-  constructor(viewer) {
-    /** @private @const */
+  constructor(win, viewer) {
+    /** @const {!Window} */
+    this.win = win;
+
+    /** @private @const {!./viewer-impl.Viewer} */
     this.viewer_ = viewer;
 
     /** @private {number} */
@@ -585,8 +727,14 @@ export class HistoryBindingVirtual_ {
     this.onStackIndexUpdated_ = null;
 
     /** @private {!UnlistenDef} */
-    this.unlistenOnHistoryPopped_ = this.viewer_.onHistoryPoppedEvent(
+    this.unlistenOnHistoryPopped_ = this.viewer_.onMessage('historyPopped',
         this.onHistoryPopped_.bind(this));
+  }
+
+  /** @override */
+  replaceStateForTarget(target) {
+    dev().assert(target[0] == '#', 'target should start with a #');
+    this.win.location.replace(target);
   }
 
   /** @override */
@@ -603,8 +751,10 @@ export class HistoryBindingVirtual_ {
   push() {
     // Current implementation doesn't wait for response from viewer.
     this.updateStackIndex_(this.stackIndex_ + 1);
-    this.viewer_.postPushHistory(this.stackIndex_);
-    return Promise.resolve(this.stackIndex_);
+    return this.viewer_.sendMessageAwaitResponse(
+        'pushHistory', dict({'stackIndex': this.stackIndex_})).then(() => {
+      return this.stackIndex_;
+    });
   }
 
   /** @override */
@@ -612,17 +762,19 @@ export class HistoryBindingVirtual_ {
     if (stackIndex > this.stackIndex_) {
       return Promise.resolve(this.stackIndex_);
     }
-    this.viewer_.postPopHistory(stackIndex);
-    this.updateStackIndex_(stackIndex - 1);
-    return Promise.resolve(this.stackIndex_);
+    return this.viewer_.sendMessageAwaitResponse(
+        'popHistory', dict({'stackIndex': this.stackIndex_})).then(() => {
+      this.updateStackIndex_(stackIndex - 1);
+      return this.stackIndex_;
+    });
   }
 
   /**
-   * @param {!./viewer-impl.ViewerHistoryPoppedEventDef} event
+   * @param {!JsonObject} data
    * @private
    */
-  onHistoryPopped_(event) {
-    this.updateStackIndex_(event.newStackIndex);
+  onHistoryPopped_(data) {
+    this.updateStackIndex_(data['newStackIndex']);
   }
 
   /**
@@ -639,6 +791,36 @@ export class HistoryBindingVirtual_ {
       }
     }
   }
+
+  /** @override */
+  getFragment() {
+    if (!this.viewer_.hasCapability('fragment')) {
+      return Promise.resolve('');
+    }
+    return this.viewer_.sendMessageAwaitResponse('getFragment', undefined,
+        /* cancelUnsent */true).then(
+        data => {
+          if (!data) {
+            return '';
+          }
+          let hash = dev().assertString(data);
+          /* Strip leading '#'*/
+          if (hash[0] == '#') {
+            hash = hash.substr(1);
+          }
+          return hash;
+        });
+  }
+
+  /** @override */
+  updateFragment(fragment) {
+    if (!this.viewer_.hasCapability('fragment')) {
+      return Promise.resolve();
+    }
+    return /** @type {!Promise} */ (this.viewer_.sendMessageAwaitResponse(
+        'replaceHistory', dict({'fragment': fragment}),
+        /* cancelUnsent */true));
+  }
 }
 
 
@@ -648,16 +830,19 @@ export class HistoryBindingVirtual_ {
  * @private
  */
 function createHistory(ampdoc) {
-  const viewer = viewerForDoc(ampdoc);
+  const viewer = Services.viewerForDoc(ampdoc);
   let binding;
   if (viewer.isOvertakeHistory() || getMode(ampdoc.win).test ||
           ampdoc.win.AMP_TEST_IFRAME) {
-    binding = new HistoryBindingVirtual_(viewer);
+    binding = new HistoryBindingVirtual_(ampdoc.win, viewer);
   } else {
     // Only one global "natural" binding is allowed since it works with the
     // global history stack.
-    binding = fromClass(ampdoc.win, 'global-history-binding',
+    registerServiceBuilder(
+        ampdoc.win,
+        'global-history-binding',
         HistoryBindingNatural_);
+    binding = getService(ampdoc.win, 'global-history-binding');
   }
   return new History(ampdoc, binding);
 }
@@ -665,9 +850,7 @@ function createHistory(ampdoc) {
 
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @return {!History}
  */
 export function installHistoryServiceForDoc(ampdoc) {
-  return /** @type {!History} */ (getServiceForDoc(ampdoc, 'history',
-      ampdoc => createHistory(ampdoc)));
+  registerServiceBuilderForDoc(ampdoc, 'history', createHistory);
 }

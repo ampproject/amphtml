@@ -14,14 +14,31 @@
  * limitations under the License.
  */
 
+import {CommonSignals} from './common-signals';
+import {Observable} from './observable';
+import {Signals} from './utils/signals';
 import {dev, rethrowAsync} from './log';
 import {disposeServicesForEmbed, getTopWindow} from './service';
 import {escapeHtml} from './dom';
-import {extensionsFor} from './extensions';
+import {Services} from './services';
 import {isDocumentReady} from './document-ready';
+import {layoutRectLtwh} from './layout-rect';
 import {loadPromise} from './event-helper';
-import {resourcesForDoc} from './resources';
-import {setStyle, setStyles} from './style';
+import {
+  px,
+  resetStyles,
+  setImportantStyles,
+  setStyle,
+  setStyles,
+} from './style';
+import {toWin} from './types';
+
+
+/** @const {string} */
+const EMBED_PROP = '__AMP_EMBED__';
+
+/** @const {!Array<string>} */
+const EXCLUDE_INI_LOAD = ['AMP-AD', 'AMP-ANALYTICS', 'AMP-PIXEL'];
 
 
 /**
@@ -34,6 +51,7 @@ import {setStyle, setStyles} from './style';
  * - fonts: An optional array of fonts used in this embed.
  *
  * @typedef {{
+ *   host: (?AmpElement|undefined),
  *   url: string,
  *   html: string,
  *   extensionIds: (?Array<string>|undefined),
@@ -70,6 +88,30 @@ function isSrcdocSupported() {
 
 
 /**
+ * Sets whether the embed is currently visible. The interpretation of visibility
+ * is up to the embed parent. However, most of typical cases would rely on
+ * whether the embed is currently in the viewport.
+ * @param {!FriendlyIframeEmbed} embed
+ * @param {boolean} visible
+ * @restricted
+ * TODO(dvoytenko): Re-evaluate and probably drop once layers are ready.
+ */
+export function setFriendlyIframeEmbedVisible(embed, visible) {
+  embed.setVisible_(visible);
+}
+
+
+/**
+ * Returns the embed created using `installFriendlyIframeEmbed` or `null`.
+ * @param {!HTMLIFrameElement} iframe
+ * @return {?FriendlyIframeEmbed}
+ */
+export function getFriendlyIframeEmbedOptional(iframe) {
+  return /** @type {?FriendlyIframeEmbed} */ (iframe[EMBED_PROP]);
+}
+
+
+/**
  * Creates the requested "friendly iframe" embed. Returns the promise that
  * will be resolved as soon as the embed is available. The actual
  * initialization of the embed will start as soon as the `iframe` is added
@@ -78,14 +120,14 @@ function isSrcdocSupported() {
  * @param {!Element} container
  * @param {!FriendlyIframeSpec} spec
  * @param {function(!Window)=} opt_preinstallCallback
- * @return {!Promise<FriendlyIframeEmbed>}
+ * @return {!Promise<!FriendlyIframeEmbed>}
  */
 export function installFriendlyIframeEmbed(iframe, container, spec,
-    opt_preinstallCallback) {
+  opt_preinstallCallback) {
   /** @const {!Window} */
-  const win = getTopWindow(iframe.ownerDocument.defaultView);
+  const win = getTopWindow(toWin(iframe.ownerDocument.defaultView));
   /** @const {!./service/extensions-impl.Extensions} */
-  const extensions = extensionsFor(win);
+  const extensions = Services.extensionsFor(win);
 
   setStyle(iframe, 'visibility', 'hidden');
   iframe.setAttribute('referrerpolicy', 'unsafe-url');
@@ -93,7 +135,7 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
   // Pre-load extensions.
   if (spec.extensionIds) {
     spec.extensionIds.forEach(
-        extensionId => extensions.loadExtension(extensionId));
+        extensionId => extensions.preloadExtension(extensionId));
   }
 
   const html = mergeHtml(spec);
@@ -103,16 +145,24 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
     // Chrome does not reflect the iframe readystate.
     iframe.readyState = 'complete';
   };
+  const registerViolationListener = () => {
+    iframe.contentWindow.addEventListener('securitypolicyviolation',
+        violationEvent => {
+          dev().warn('FIE', 'security policy violation', violationEvent);
+        });
+  };
   let loadedPromise;
   if (isSrcdocSupported()) {
     iframe.srcdoc = html;
     loadedPromise = loadPromise(iframe);
     container.appendChild(iframe);
+    registerViolationListener();
   } else {
     iframe.src = 'about:blank';
     container.appendChild(iframe);
     const childDoc = iframe.contentWindow.document;
     childDoc.open();
+    registerViolationListener();
     childDoc.write(html);
     // With document.write, `iframe.onload` arrives almost immediately, thus
     // we need to wait for child's `window.onload`.
@@ -151,20 +201,16 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
   }
 
   return readyPromise.then(() => {
+    const embed = new FriendlyIframeEmbed(iframe, spec, loadedPromise);
+    iframe[EMBED_PROP] = embed;
+
     const childWin = /** @type {!Window} */ (iframe.contentWindow);
     // Add extensions.
     extensions.installExtensionsInChildWindow(
         childWin, spec.extensionIds || [], opt_preinstallCallback);
     // Ready to be shown.
-    setStyle(iframe, 'visibility', '');
-    if (childWin.document && childWin.document.body) {
-      setStyles(dev().assertElement(childWin.document.body), {
-        opacity: 1,
-        visibility: 'visible',
-        animation: 'none',
-      });
-    }
-    return new FriendlyIframeEmbed(iframe, spec, loadedPromise);
+    embed.startRender_();
+    return embed;
   });
 }
 
@@ -229,6 +275,10 @@ function mergeHtml(spec) {
     });
   }
 
+  // Load CSP
+  result.push('<meta http-equiv=Content-Security-Policy ' +
+      'content="script-src \'none\';object-src \'none\';child-src \'none\'">');
+
   // Postambule.
   if (ip > 0) {
     result.push(originalHtml.substring(ip));
@@ -277,24 +327,292 @@ export class FriendlyIframeEmbed {
     /** @const {!FriendlyIframeSpec} */
     this.spec = spec;
 
-    /** @private @const {!Promise} */
-    this.loadedPromise_ = loadedPromise;
-  }
+    /** @const {?AmpElement} */
+    this.host = spec.host || null;
 
-  /**
-   * Returns promise that will resolve when the child window has fully been
-   * loaded.
-   * @return {!Promise}
-   */
-  whenLoaded() {
-    return this.loadedPromise_;
+    /** @const @private {time} */
+    this.startTime_ = Date.now();
+
+    /**
+     * Starts out as invisible. The interpretation of this flag is up to
+     * the emded parent.
+     * @private {boolean}
+     */
+    this.visible_ = false;
+
+    /** @private {!Observable<boolean>} */
+    this.visibilityObservable_ = new Observable();
+
+    /** @private @const */
+    this.signals_ = this.host ? this.host.signals() : new Signals();
+
+    /** @private @const {!Promise} */
+    this.winLoadedPromise_ = Promise.all([loadedPromise, this.whenReady()]);
   }
 
   /**
    * Ensures that all resources from this iframe have been released.
    */
   destroy() {
-    resourcesForDoc(this.iframe).removeForChildWindow(this.win);
+    Services.resourcesForDoc(this.iframe).removeForChildWindow(this.win);
     disposeServicesForEmbed(this.win);
   }
+
+  /**
+   * @return {time}
+   */
+  getStartTime() {
+    return this.startTime_;
+  }
+
+  /**
+   * Returns the base URL for the embedded document.
+   * @return {string}
+   */
+  getUrl() {
+    return this.spec.url;
+  }
+
+  /** @return {!Signals} */
+  signals() {
+    return this.signals_;
+  }
+
+  /**
+   * Returns a promise that will resolve when the embed document is ready.
+   * Notice that this signal coincides with the embed's `render-start`.
+   * @return {!Promise}
+   */
+  whenReady() {
+    return this.signals_.whenSignal(CommonSignals.RENDER_START);
+  }
+
+  /**
+   * Returns a promise that will resolve when the child window's `onload` event
+   * has been emitted. In friendly iframes this typically only includes font
+   * loading.
+   * @return {!Promise}
+   */
+  whenWindowLoaded() {
+    return this.winLoadedPromise_;
+  }
+
+  /**
+   * Returns a promise that will resolve when the initial load  of the embed's
+   * content has been completed.
+   * @return {!Promise}
+   */
+  whenIniLoaded() {
+    return this.signals_.whenSignal(CommonSignals.INI_LOAD);
+  }
+
+  /** @private */
+  startRender_() {
+    if (this.host) {
+      this.host.renderStarted();
+    } else {
+      this.signals_.signal(CommonSignals.RENDER_START);
+    }
+    setStyle(this.iframe, 'visibility', '');
+    if (this.win.document && this.win.document.body) {
+      this.win.document.documentElement.classList.add('i-amphtml-fie');
+      setStyles(dev().assertElement(this.win.document.body), {
+        opacity: 1,
+        visibility: 'visible',
+        animation: 'none',
+      });
+    }
+
+    // Initial load signal signal.
+    let rect;
+    if (this.host) {
+      rect = this.host.getLayoutBox();
+    } else {
+      rect = layoutRectLtwh(
+          0, 0,
+          this.win./*OK*/innerWidth,
+          this.win./*OK*/innerHeight);
+    }
+    Promise.all([
+      this.whenReady(),
+      whenContentIniLoad(this.iframe, this.win, rect),
+    ]).then(() => {
+      this.signals_.signal(CommonSignals.INI_LOAD);
+    });
+  }
+
+  /**
+   * Whether the embed is currently visible. The interpretation of visibility
+   * is up to the embed parent. However, most of typical cases would rely on
+   * whether the embed is currently in the viewport.
+   * @return {boolean}
+   * TODO(dvoytenko): Re-evaluate and probably drop once layers are ready.
+   */
+  isVisible() {
+    return this.visible_;
+  }
+
+  /**
+   * See `isVisible` for more info.
+   * @param {function(boolean)} handler
+   * @return {!UnlistenDef}
+   */
+  onVisibilityChanged(handler) {
+    return this.visibilityObservable_.add(handler);
+  }
+
+  /**
+   * @param {boolean} visible
+   * @private
+   */
+  setVisible_(visible) {
+    if (this.visible_ != visible) {
+      this.visible_ = visible;
+      this.visibilityObservable_.fire(this.visible_);
+    }
+  }
+
+  /**
+   * @return {!HTMLBodyElement}
+   * @visibleForTesting
+   */
+  getBodyElement() {
+    return /** @type {!HTMLBodyElement} */ (
+      (this.iframe.contentDocument || this.iframe.contentWindow.document)
+          .body);
+  }
+
+  /**
+   * @return {!./service/vsync-impl.Vsync}
+   * @visibleForTesting
+   */
+  getVsync() {
+    return Services.vsyncFor(this.win);
+  }
+
+  /**
+   * @return {!./service/resources-impl.Resources}
+   * @visibleForTesting
+   */
+  getResources() {
+    return Services.resourcesForDoc(this.iframe);
+  }
+
+  /**
+   * Runs a measure/mutate cycle ensuring that the iframe change is propagated
+   * to the resource manager.
+   * @param {{measure: (Function|undefined), mutate: (Function|undefined)}} task
+   * @param {!Object=} opt_state
+   * @return {!Promise}
+   * @private
+   */
+  runVsyncOnIframe_(task, opt_state) {
+    if (task.mutate && !task.measure) {
+      return this.getResources().mutateElement(this.iframe, () => {
+        task.mutate(opt_state);
+      });
+    }
+    return new Promise(resolve => {
+      this.getVsync().measure(() => {
+        task.measure(opt_state);
+
+        if (!task.mutate) {
+          return resolve();
+        }
+
+        this.runVsyncOnIframe_({mutate: task.mutate}, opt_state)
+            .then(resolve);
+      });
+    });
+  }
+
+  /**
+   * @return {!Promise}
+   */
+  enterFullOverlayMode() {
+    return this.runVsyncOnIframe_({
+      measure: state => {
+        const iframeRect = this.iframe./*OK*/getBoundingClientRect();
+
+        state.bodyStyle = {
+          'background': 'transparent',
+          'position': 'absolute',
+          'top': px(iframeRect.top),
+          'left': px(iframeRect.left),
+          'width': px(iframeRect.width),
+          'height': px(iframeRect.height),
+          'bottom': 'auto',
+          'right': 'auto',
+        };
+      },
+      mutate: state => {
+        setStyles(this.iframe, {
+          'position': 'fixed',
+          'left': 0,
+          'right': 0,
+          'top': 0,
+          'bottom': 0,
+          'width': '100vw',
+          'height': '100vh',
+        });
+
+        // We need to override runtime-level !important rules
+        setImportantStyles(this.getBodyElement(), state.bodyStyle);
+      },
+    }, {});
+  }
+
+  /**
+   * @return {!Promise}
+   */
+  leaveFullOverlayMode() {
+    return this.runVsyncOnIframe_({
+      mutate: () => {
+        resetStyles(this.iframe, [
+          'position',
+          'left',
+          'right',
+          'top',
+          'bottom',
+          'width',
+          'height',
+        ]);
+
+        // we're not resetting background here as we need to set it to
+        // transparent permanently (see TODO)
+        resetStyles(this.getBodyElement(), [
+          'position',
+          'top',
+          'left',
+          'width',
+          'height',
+          'bottom',
+          'right',
+        ]);
+      },
+    });
+  }
+}
+
+
+/**
+ * Returns the promise that will be resolved when all content elements
+ * have been loaded in the initially visible set.
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} context
+ * @param {!Window} hostWin
+ * @param {!./layout-rect.LayoutRectDef} rect
+ * @return {!Promise}
+ */
+export function whenContentIniLoad(context, hostWin, rect) {
+  return Services.resourcesForDoc(context)
+      .getResourcesInRect(hostWin, rect)
+      .then(resources => {
+        const promises = [];
+        resources.forEach(r => {
+          if (!EXCLUDE_INI_LOAD.includes(r.element.tagName)) {
+            promises.push(r.loadedOnce());
+          }
+        });
+        return Promise.all(promises);
+      });
 }

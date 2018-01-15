@@ -25,6 +25,7 @@ import {parseUrl, resolveRelativeUrl} from '../src/url';
  *   location: (string|undefined),
  *   navigator: ({userAgent:(string|undefined)}|undefined),
  *   readyState: (boolean|undefined),
+ *   top: (FakeWindowSpec|undefined),
  * }}
  */
 export let FakeWindowSpec;
@@ -40,7 +41,10 @@ export class FakeWindow {
 
     const spec = opt_spec || {};
 
-    /** @type {string} */
+    /**
+     * This value is reflected on this.document.readyState.
+     * @type {string}
+     */
     this.readyState = spec.readyState || 'complete';
 
     // Passthrough.
@@ -48,6 +52,29 @@ export class FakeWindow {
     this.Object = window.Object;
     /** @const */
     this.HTMLElement = window.HTMLElement;
+    /** @const */
+    this.HTMLFormElement = window.HTMLFormElement;
+    /** @const */
+    this.Element = window.Element;
+    /** @const */
+    this.Node = window.Node;
+    /** @const */
+    this.EventTarget = window.EventTarget;
+    /** @const */
+    this.DOMTokenList = window.DOMTokenList;
+    /** @const */
+    this.Math = window.Math;
+
+    /** @const */
+    this.crypto = window.crypto || window.msCrypto;
+
+    // Parent Window points to itself if spec.parent was not passed.
+    /** @const @type {!Window} */
+    this.parent = spec.parent ? new FakeWindow(spec.parent) : this;
+
+    // Top Window points to parent if spec.top was not passed.
+    /** @const */
+    this.top = spec.top ? new FakeWindow(spec.top) : this.parent;
 
     // Events.
     EventListeners.intercept(this);
@@ -57,6 +84,20 @@ export class FakeWindow {
     this.document = self.document.implementation.createHTMLDocument('');
     Object.defineProperty(this.document, 'defaultView', {
       get: () => this,
+    });
+    Object.defineProperty(this.document, 'readyState', {
+      get: () => this.readyState,
+    });
+    if (!this.document.fonts) {
+      this.document.fonts = {};
+    }
+    Object.defineProperty(this.document.fonts, 'ready', {
+      get: () => Promise.resolve(),
+    });
+    let fontStatus = 'loaded';
+    Object.defineProperty(this.document.fonts, 'status', {
+      get: () => fontStatus,
+      set: val => fontStatus = val,
     });
 
     EventListeners.intercept(this.document);
@@ -72,6 +113,35 @@ export class FakeWindow {
         this.documentHidden_ = value;
         this.document.eventListeners.fire({type: 'visibilitychange'});
       },
+    });
+
+    /** @private {!Array<string>} */
+    this.cookie_ = [];
+    Object.defineProperty(this.document, 'cookie', {
+      get: () => {
+        let cookie = [];
+        for (let i = 0; i < this.cookie_.length; i += 2) {
+          cookie.push(`${this.cookie_[i]}=${this.cookie_[i + 1]}`);
+        }
+        return cookie.join(';');
+      },
+      set: value => {
+        const semi = value.indexOf(';');
+        const cookie = value.match(/^([^=]*)=([^;]*)/);
+        const expiresMatch = value.match(/expires=([^;]*)(;|$)/);
+        const expires = expiresMatch ? Date.parse(expiresMatch[1]) : Infinity;
+        let i = 0;
+        for (; i < this.cookie_.length; i += 2) {
+          if (this.cookie_[i] == cookie[1]) {
+            break;
+          }
+        }
+        if (Date.now() >= expires) {
+          this.cookie_.splice(i, 2);
+        } else {
+          this.cookie_.splice(i, 2, cookie[1], cookie[2]);
+        }
+      }
     });
 
     // Create element to enhance test elements.
@@ -102,10 +172,10 @@ export class FakeWindow {
 
     // Navigator.
     /** @const {!Navigator} */
-    this.navigator = freeze({
+    this.navigator = {
       userAgent: spec.navigator && spec.navigator.userAgent ||
           window.navigator.userAgent,
-    });
+    };
 
     // Storage.
     /** @const {!FakeStorage|undefined} */
@@ -113,20 +183,8 @@ export class FakeWindow {
         undefined : new FakeStorage(this);
 
     // Timers and animation frames.
-    /**
-     * @param {function()} handler
-     * @param {number=} timeout
-     * @param {...*} var_args
-     * @return {number}
-     * @const
-     */
-    this.setTimeout = window.setTimeout;
-
-    /**
-     * @param {number} id
-     * @const
-     */
-    this.clearTimeout = window.clearTimeout;
+    /** @const */
+    this.Date = window.Date;
 
     /**
      * @param {function()} handler
@@ -135,13 +193,36 @@ export class FakeWindow {
      * @return {number}
      * @const
      */
-    this.setInterval = window.setInterval;
+    this.setTimeout = function () {
+      return window.setTimeout.apply(window, arguments);
+    };
 
     /**
      * @param {number} id
      * @const
      */
-    this.clearInterval = window.clearInterval;
+    this.clearTimeout = function () {
+      return window.clearTimeout.apply(window, arguments);
+    };
+
+    /**
+     * @param {function()} handler
+     * @param {number=} timeout
+     * @param {...*} var_args
+     * @return {number}
+     * @const
+     */
+    this.setInterval = function () {
+      return window.setInterval.apply(window, arguments);
+    };
+
+    /**
+     * @param {number} id
+     * @const
+     */
+    this.clearInterval = function () {
+      return window.clearInterval.apply(window, arguments);
+    };
 
     let raf = window.requestAnimationFrame
         || window.webkitRequestAnimationFrame;
@@ -300,7 +381,7 @@ export function interceptEventListeners(target) {
 /**
  * @extends {!Location}
  */
-class FakeLocation {
+export class FakeLocation {
 
   /**
    * @param {string} href
@@ -357,7 +438,7 @@ class FakeLocation {
    */
   change_(args) {
     const change = parseUrl(this.url_.href);
-    Object.assign(change, args);
+    Object.assign({}, change, args);
     this.changes.push(change);
   }
 
@@ -453,6 +534,10 @@ export class FakeHistory {
       throw new Error('can\'t go forward');
     }
     this.index = newIndex;
+    // Make sure to restore the location href before firing popstate to match
+    // real browsers behaviors.
+    this.win.location.resetHref(this.stack[this.index].url);
+    this.win.eventListeners.fire({type: 'popstate'});
   }
 
   /**

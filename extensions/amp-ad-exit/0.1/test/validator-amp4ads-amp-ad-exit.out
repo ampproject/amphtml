@@ -1,0 +1,4 @@
+FAIL
+amp-ad-exit/0.1/test/validator-amp4ads-amp-ad-exit.html:53:0 The specified layout 'FILL' is not supported by tag 'amp-ad-exit'. (see https://www.ampproject.org/docs/reference/components/amp-ad-exit) [AMP_LAYOUT_PROBLEM]
+amp-ad-exit/0.1/test/validator-amp4ads-amp-ad-exit.html:59:0 Tag 'amp-ad-exit' must have 1 child tags - saw 2 child tags. (see https://www.ampproject.org/docs/reference/components/amp-ad-exit) [AMP_TAG_PROBLEM]
+amp-ad-exit/0.1/test/validator-amp4ads-amp-ad-exit.html:63:0 Tag 'p' is disallowed as child of tag 'amp-ad-exit'. Child tag must be one of ['script']. (see https://www.ampproject.org/docs/reference/components/amp-ad-exit) [AMP_TAG_PROBLEM]

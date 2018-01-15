@@ -28,7 +28,7 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see [ad network documentation](https://support.google.com/adsense/answer/7183212?hl=en).
+For semantics of configuration, please see [ad network documentation](https://support.google.com/adsense/answer/7183212?hl=en).  For AdSense for Search and AdSense for Shopping, please see the [CSA AMP ad type](https://github.com/ampproject/amphtml/blob/master/ads/google/csa.md).
 
 Supported parameters:
 
@@ -37,3 +37,4 @@ Supported parameters:
 - data-ad-host
 - data-adtest
 - data-tag-origin
+- data-language

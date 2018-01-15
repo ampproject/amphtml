@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {parseQueryString_} from './url-parse-query-string';
 
 /**
  * @typedef {{
@@ -41,12 +42,6 @@ const version = '$internalRuntimeVersion$';
 let rtvVersion = '';
 
 /**
- * A #querySelector query to see if we have any scripts with development paths.
- * @type {string}
- */
-const developmentScriptQuery = 'script[src*="/dist/"],script[src*="/base/"]';
-
-/**
  * Provides info about the current app.
  * @param {?Window=} opt_win
  * @return {!ModeDef}
@@ -65,29 +60,16 @@ export function getMode(opt_win) {
  * @return {!ModeDef}
  */
 function getMode_(win) {
-  // For 3p integration code
-  if (win.context && win.context.mode) {
-    return win.context.mode;
-  }
-
   // Magic constants that are replaced by closure compiler.
   // IS_MINIFIED is always replaced with true when closure compiler is used
-  // while IS_DEV is only replaced when the --fortesting flag is NOT used.
+  // while IS_DEV is only replaced when `gulp dist` is called without the
+  // --fortesting flag.
   const IS_DEV = true;
   const IS_MINIFIED = false;
-  const FORCE_LOCALDEV = !!(self.AMP_CONFIG && self.AMP_CONFIG.localDev);
-  const AMP_CONFIG_3P_FRAME_HOST = self.AMP_CONFIG &&
-      self.AMP_CONFIG.thirdPartyFrameHost;
 
-  const isLocalDev = IS_DEV && !!(win.location.hostname == 'localhost' ||
-      (FORCE_LOCALDEV && win.location.hostname == AMP_CONFIG_3P_FRAME_HOST) ||
-      (win.location.ancestorOrigins && win.location.ancestorOrigins[0] &&
-        win.location.ancestorOrigins[0].indexOf('http://localhost:') == 0)) &&
-      // Filter out localhost running against a prod script.
-      // Because all allowed scripts are ours, we know that these can only
-      // occur during local dev.
-      (!win.document || !!win.document.querySelector(developmentScriptQuery));
-
+  const localDevEnabled = !!(self.AMP_CONFIG && self.AMP_CONFIG.localDev);
+  const runningTests = IS_DEV && !!(win.AMP_TEST || win.__karma__);
+  const isLocalDev = IS_DEV && (localDevEnabled || runningTests);
   const hashQuery = parseQueryString_(
       // location.originalHash is set by the viewer when it removes the fragment
       // from the URL.
@@ -106,8 +88,8 @@ function getMode_(win) {
   return {
     localDev: isLocalDev,
     // Triggers validation
-    development: !!(hashQuery['development'] == '1' ||
-        win.AMP_DEV_MODE),
+    development: !!(hashQuery['development'] == '1' || win.AMP_DEV_MODE),
+    examiner: hashQuery['development'] == '2',
     // Allows filtering validation errors by error category. For the
     // available categories, see ErrorCategory in validator/validator.proto.
     filter: hashQuery['filter'],
@@ -115,7 +97,7 @@ function getMode_(win) {
     // Whether document is in an amp-lite viewer. It signal that the user
     // would prefer to use less bandwidth.
     lite: searchQuery['amp_lite'] != undefined,
-    test: IS_DEV && !!(win.AMP_TEST || win.__karma__),
+    test: runningTests,
     log: hashQuery['log'],
     version,
     rtvVersion,
@@ -123,45 +105,8 @@ function getMode_(win) {
 }
 
 /**
- * Parses the query string of an URL. This method returns a simple key/value
- * map. If there are duplicate keys the latest value is returned.
- * @param {string} queryString
- * @return {!Object<string, string>}
- * TODO(dvoytenko): dedupe with `url.js:parseQueryString`. This is currently
- * necessary here because `url.js` itself inderectly depends on `mode.js`.
- */
-function parseQueryString_(queryString) {
-  const params = Object.create(null);
-  if (!queryString) {
-    return params;
-  }
-  if (queryString.indexOf('?') == 0 || queryString.indexOf('#') == 0) {
-    queryString = queryString.substr(1);
-  }
-  const pairs = queryString.split('&');
-  for (let i = 0; i < pairs.length; i++) {
-    const pair = pairs[i];
-    const eqIndex = pair.indexOf('=');
-    let name;
-    let value;
-    if (eqIndex != -1) {
-      name = decodeURIComponent(pair.substring(0, eqIndex)).trim();
-      value = decodeURIComponent(pair.substring(eqIndex + 1)).trim();
-    } else {
-      name = decodeURIComponent(pair).trim();
-      value = '';
-    }
-    if (name) {
-      params[name] = value;
-    }
-  }
-  return params;
-}
-
-
-/**
  * Retrieve the `rtvVersion` which will have a numeric prefix
- * denoting canary/prod/experiment.
+ * denoting canary/prod/experiment (unless `isLocalDev` is true).
  *
  * @param {!Window} win
  * @param {boolean} isLocalDev

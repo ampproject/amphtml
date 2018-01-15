@@ -22,10 +22,6 @@ limitations under the License.
     <td>Allows for a “lightbox” or similar experience where upon user interaction, a component expands to fill the viewport until it is closed again by the user.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js">&lt;/script></code></td>
   </tr>
@@ -38,6 +34,8 @@ limitations under the License.
     <td><a href="https://ampbyexample.com/components/amp-lightbox/">Annotated code example for amp-lightbox</a></td>
   </tr>
 </table>
+
+[TOC]
 
 ## Behavior
 
@@ -63,7 +61,7 @@ Example:
 The `amp-lightbox` component can be styled with standard CSS.
 
 ## Actions
-The `amp-lightbox` exposes the following actions you can use [AMP on-syntax to trigger](../../../src/spec/amp-actions-and-events.md):
+The `amp-lightbox` exposes the following actions you can use [AMP on-syntax to trigger](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md):
 
 <table>
   <tr>
@@ -83,13 +81,28 @@ The `amp-lightbox` exposes the following actions you can use [AMP on-syntax to t
 ### Examples
 
 ```html
-<button on="tap:tweets-lb.open">See Quote</button>
+<button on="tap:tweets-lb">See Quote</button>
 <amp-lightbox id="tweets-lb" layout="nodisplay">
     <blockquote>"Don't talk to me about JavaScript fatigue" - Horse JS</blockquote>
     <button on="tap:tweets-lb.close">Nice!</button>
 </amp-lightbox>
 ```
 
+## Attributes
+
+##### id (required)
+
+A unique identifer for the lightbox.
+
+##### layout
+
+Must be set to `nodisplay`.
+
+##### scrollable
+
+When `scrollable` attribute is present, the content of the lightbox can scroll
+when overflowing the height of the lightbox.
+
 ## Validation
 
-See [amp-lightbox rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-lightbox/0.1/validator-amp-lightbox.protoascii) in the AMP validator specification.
+See [amp-lightbox rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-lightbox/validator-amp-lightbox.protoascii) in the AMP validator specification.

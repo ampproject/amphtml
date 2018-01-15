@@ -28,7 +28,7 @@ export function taboola(global, data) {
   // ensure we have vlid publisher, placement and mode
   // and exactly one page-type
   validateData(data, ['publisher', 'placement', 'mode',
-    ['article', 'video', 'photo', 'search', 'category', 'homepage', 'others']]);
+    ['article', 'video', 'photo', 'search', 'category', 'homepage', 'other']]);
 
   // setup default values for referrer and url
   const params = {
@@ -52,8 +52,8 @@ export function taboola(global, data) {
     framework: 'amp',
     container: 'c',
   },
-    params,
-    {flush: true}]
+  params,
+  {flush: true}]
   );
 
   // install observation on entering/leaving the view

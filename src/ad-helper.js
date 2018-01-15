@@ -15,6 +15,10 @@
  */
 
 import {dev} from './log';
+import {computedStyle} from './style';
+import {getParentWindowFrameElement} from './service';
+
+const AD_CONTAINER_PROP = '__AMP__AD_CONTAINER';
 
 /**
  * Tags that are allowed to have fixed positioning
@@ -34,7 +38,9 @@ const CONTAINERS = {
  * @return {boolean}
  */
 function isPositionFixed(el, win) {
-  return win./*OK*/getComputedStyle(el).position == 'fixed';
+  const position = computedStyle(win, el).position;
+  // We consider sticky positions as fixed, since they can be fixed.
+  return position == 'fixed' || position == 'sticky';
 }
 
 /**
@@ -74,12 +80,37 @@ export function isAdPositionAllowed(element, win) {
  * @return {?string}
  */
 export function getAdContainer(element) {
-  let el = element;
-  do {
-    el = el.parentElement;
-    if (CONTAINERS[el.tagName]) {
-      return el.tagName;
+  if (element[AD_CONTAINER_PROP] === undefined) {
+    let el = element;
+    do {
+      el = el.parentElement;
+      if (CONTAINERS[el.tagName]) {
+        return element[AD_CONTAINER_PROP] = el.tagName;
+      }
+    } while (el && el.tagName != 'BODY');
+    element[AD_CONTAINER_PROP] = null;
+  }
+  return element[AD_CONTAINER_PROP];
+}
+
+/**
+ * Gets the resource ID of the amp-ad element containing the passed node.
+ * If there is no containing amp-ad tag, then null will be returned.
+ * TODO(jonkeller): Investigate whether non-A4A use case is needed. Issue 11436
+ * @return {?string}
+ */
+export function getAmpAdResourceId(node, topWin) {
+  try {
+    const frameParent = getParentWindowFrameElement(node, topWin).parentElement;
+    if (frameParent.nodeName == 'AMP-AD') {
+      return String(frameParent.getResourceId());
     }
-  } while (el && el.tagName != 'BODY');
+  } catch (e) {
+  }
+  // Whether we entered the catch above (e.g. due to attempt to access
+  // across xdomain boundary), or failed to enter the if further above, the
+  // node is not within a friendly amp-ad tag. So, there is no amp-ad
+  // resource ID. How to handle that is up to the caller, but see TODO above.
   return null;
 }
+

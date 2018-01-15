@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {timerFor} from '../../../src/timer';
+import {Services} from '../../../src/services';
 import {BaseCarousel} from './base-carousel';
 
 export class BaseSlides extends BaseCarousel {
@@ -100,61 +100,61 @@ export class BaseSlides extends BaseCarousel {
    */
   updateViewportState(unusedInViewport) {}
 
- /**
+  /**
   * Checks if a carousel is eligible to loop, regardless of the loop attribute.
   * @returns {boolean}
   * @protected
   */
- isLoopingEligible() {
-   return false;
- }
+  isLoopingEligible() {
+    return false;
+  }
 
- /**
+  /**
   * Sets up the `autoplay` configuration.
   * @private
   */
- setupAutoplay_() {
-   const delayValue = Number(this.element.getAttribute('delay'));
-   // If it isn't a number and is not greater than 0 then don't assign
-   // and use the default.
-   if (delayValue > 0) {
-     // Guard against autoplayValue that is lower than 1s to prevent
-     // people from crashing the runtime with providing very low delays.
-     this.autoplayDelay_ = Math.max(1000, delayValue);
-   }
+  setupAutoplay_() {
+    const delayValue = Number(this.element.getAttribute('delay'));
+    // If it isn't a number and is not greater than 0 then don't assign
+    // and use the default.
+    if (delayValue > 0) {
+      // Guard against autoplayValue that is lower than 1s to prevent
+      // people from crashing the runtime with providing very low delays.
+      this.autoplayDelay_ = Math.max(1000, delayValue);
+    }
 
-   // By default `autoplay` should also mean that the current carousel slide
-   // is looping. (to be able to advance past the last item)
-   if (!this.hasLoop_) {
-     this.element.setAttribute('loop', '');
-     this.hasLoop_ = true;
-     this.shouldLoop = true;
-   }
- }
+    // By default `autoplay` should also mean that the current carousel slide
+    // is looping. (to be able to advance past the last item)
+    if (!this.hasLoop_) {
+      this.element.setAttribute('loop', '');
+      this.hasLoop_ = true;
+      this.shouldLoop = true;
+    }
+  }
 
- /**
+  /**
   * Starts the autoplay delay if allowed.
   * @private
   */
- autoplay_() {
-   if (!this.shouldAutoplay_) {
-     return;
-   }
-   this.clearAutoplay();
-   this.autoplayTimeoutId_ = timerFor(this.win).delay(
-       this.go.bind(
-           this, /* dir */ 1, /* animate */ true, /* autoplay */ true),
-       this.autoplayDelay_);
- }
+  autoplay_() {
+    if (!this.shouldAutoplay_) {
+      return;
+    }
+    this.clearAutoplay();
+    this.autoplayTimeoutId_ = Services.timerFor(this.win).delay(
+        this.go.bind(
+            this, /* dir */ 1, /* animate */ true, /* autoplay */ true),
+        this.autoplayDelay_);
+  }
 
- /**
+  /**
   * Clear the autoplay timer.
   * @protected
   */
- clearAutoplay() {
-   if (this.autoplayTimeoutId_ !== null) {
-     timerFor(this.win).cancel(this.autoplayTimeoutId_);
-     this.autoplayTimeoutId_ = null;
-   }
- }
+  clearAutoplay() {
+    if (this.autoplayTimeoutId_ !== null) {
+      Services.timerFor(this.win).cancel(this.autoplayTimeoutId_);
+      this.autoplayTimeoutId_ = null;
+    }
+  }
 }

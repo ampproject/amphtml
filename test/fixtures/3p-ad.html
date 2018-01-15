@@ -1,0 +1,38 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>We can render an ad</title>
+  <link rel="canonical" href="https://www.example.com/doubleclick.html" >
+  <style>
+    .fill {
+      width: 100px;
+      min-height: 1000px;
+      display: block;
+    }
+  </style>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="/dist/amp.js"></script>
+  <script async custom-element="amp-ad" src="/dist/v0/amp-ad-0.1.max.js"></script>
+  <!-- use custom url to force same origin -->
+  <meta name="amp-3p-iframe-src" content="http://localhost:9876/dist.3p/current/frame.max.html">
+</head>
+<body>
+  <div class='fill'></div>
+  <!-- amp-lightbox is used for ad container testing, no script needed -->
+  <amp-lightbox>
+    <amp-ad width=300 height=250
+          type="_ping_"
+          data-id='0'
+          data-url='https://example.com/a?b=c&d=e'
+          data-valid='true'
+          data-custom-value=123
+          data-other_value="foo"
+          data-html-access-allowed>
+    </amp-ad>
+  </amp-lightbox>
+  <a href="http://test.com/test">Test link</a>
+</body>
+<div class='fill'></div>
+</html>

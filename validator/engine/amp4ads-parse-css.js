@@ -15,25 +15,16 @@
  * limitations under the license.
  */
 
-goog.provide('parse_css.stripVendorPrefix');
 goog.provide('parse_css.validateAmp4AdsCss');
 
-goog.require('parse_css.DelimToken');
+goog.require('amp.validator.LIGHT');
+goog.require('amp.validator.ValidationError');
 goog.require('parse_css.ErrorToken');
-goog.require('parse_css.IdentToken');
 goog.require('parse_css.RuleVisitor');
 goog.require('parse_css.Stylesheet');
-
-/**
- * Strips vendor prefixes from identifiers, e.g. property names or names
- * of at rules. E.g., "-moz-keyframes" -> "keyframes".
- * TODO(powdercloud): Revisit which vendor prefixes to cover.
- * @param {string} identifier
- * @return {string}
- */
-parse_css.stripVendorPrefix = function(identifier) {
-  return identifier.replace(/^-[a-z]+-/, '');
-};
+goog.require('parse_css.TRIVIAL_ERROR_TOKEN');
+goog.require('parse_css.TokenType');
+goog.require('parse_css.stripVendorPrefix');
 
 /**
  * Fills an ErrorToken with the provided position, code, and params.
@@ -69,29 +60,6 @@ function firstIdent(tokens) {
   return '';
 }
 
-/**
- * For a qualified |rule|, determine whether its selector starts with
- * '.amp-animate'.
- * @param {!parse_css.QualifiedRule} rule
- * @return {boolean}
- */
-function hasAmpAnimate(rule) {
-  /** @type {!Array<!parse_css.Token>} */
-  const prelude = rule.prelude;
-  if (prelude.length < 2) {
-    return false;
-  }
-  if (prelude[0].tokenType !== parse_css.TokenType.DELIM) {
-    return false;
-  }
-  const first = /** @type {!parse_css.DelimToken} */ (prelude[0]);
-  if (prelude[1].tokenType !== parse_css.TokenType.IDENT) {
-    return false;
-  }
-  const second = /** @type {!parse_css.IdentToken} */ (prelude[1]);
-  return first.value === '.' && second.value === 'amp-animate';
-}
-
 /** @private */
 class Amp4AdsVisitor extends parse_css.RuleVisitor {
   /**
@@ -115,6 +83,10 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
     }
     const ident = firstIdent(declaration.value);
     if (ident === 'fixed' || ident === 'sticky') {
+      if (amp.validator.LIGHT) {
+        this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
+        return;
+      }
       this.errors.push(createParseErrorTokenAt(
           declaration, amp.validator.ValidationError.Code
                            .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
@@ -142,6 +114,10 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
             parse_css.stripVendorPrefix(transitionedProperty);
         if (transitionedPropertyStripped !== 'opacity' &&
             transitionedPropertyStripped !== 'transform') {
+          if (amp.validator.LIGHT) {
+            this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
+            return;
+          }
           this.errors.push(createParseErrorTokenAt(
               decl, amp.validator.ValidationError.Code
                         .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT,
@@ -151,23 +127,27 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
               ]));
         }
       }
-      // This is the @keyframes variant for identifying transitions; still,
-      // the only properties that may be transitioned are opacity and transform.
+      // This is the @keyframes variant for identifying transitions;
+      // the only properties that may be specified within a transition
+      // are opacity, transform, and animation-timing-function.
       if (this.inKeyframes !== null && name !== 'transform' &&
-          name !== 'opacity') {
+          name !== 'opacity' && name !== 'animation-timing-function') {
+        if (amp.validator.LIGHT) {
+          this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
+          return;
+        }
         this.errors.push(createParseErrorTokenAt(
             decl, amp.validator.ValidationError.Code
                       .CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE,
             [
               'style', decl.name, this.inKeyframes.name,
-              '[\'opacity\', \'transform\']'
+              '[\'animation-timing-function\', \'opacity\', \'transform\']'
             ]));
       }
     }
 
     // If transition or animation are present:
-    // (1) Only transition, animation, transform, visibility, opacity allowed.
-    // (2) Must be qualified with .amp_animate.
+    // Only transition, animation, transform, visibility, opacity allowed.
     if (transitionOrAnimation === null) {
       return;
     }
@@ -178,6 +158,10 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
       if (allowed.indexOf(parse_css.stripVendorPrefix(decl.name)) !== -1) {
         continue;
       }
+      if (amp.validator.LIGHT) {
+        this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
+        return;
+      }
       this.errors.push(createParseErrorTokenAt(
           decl, amp.validator.ValidationError.Code
                     .CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH,
@@ -185,13 +169,6 @@ class Amp4AdsVisitor extends parse_css.RuleVisitor {
             'style', decl.name, transitionOrAnimation.name,
             '[\'' + allowed.join('\', \'') + '\']'
           ]));
-    }
-    // (2) Check that the rule is qualified with .amp-animate.
-    if (!hasAmpAnimate(qualifiedRule)) {
-      this.errors.push(createParseErrorTokenAt(
-          qualifiedRule, amp.validator.ValidationError.Code
-                             .CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION,
-          ['style', transitionOrAnimation.name, '.amp-animate']));
     }
   }
 

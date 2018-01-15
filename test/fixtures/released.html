@@ -5,7 +5,8 @@
   <title>Released AMP components</title>
   <link rel="canonical" href="amps.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <script async custom-element="amp-ad" src="/dist/v0/amp-ad-0.1.max.js"></script>
+  <script async custom-element="amp-video" src="/dist/v0/amp-video-0.1.max.js"></script>
   <script async custom-element="amp-audio" src="/dist/v0/amp-audio-0.1.max.js"></script>
   <script async custom-element="amp-anim" src="/dist/v0/amp-anim-0.1.max.js"></script>
   <script async custom-element="amp-iframe" src="/dist/v0/amp-iframe-0.1.max.js"></script>
@@ -39,22 +40,25 @@
   <p>
     <amp-img id="img1" src="/examples/img/sample.jpg" width=264 height=96></amp-img>
   </p>
-  <h2>Hidden image</h2>
+  <h2>Hidden image using nodisplay layout</h2>
   <p>
     <amp-img id="img2" src="/examples/img/sample.jpg" width=527 height=193 layout="nodisplay"></amp-img>
   </p>
-
+  <h2>Hidden image using hidden attribute</h2>
+  <p>
+    <amp-img hidden id="img2" src="/examples/img/sample.jpg" width=527 height=193 layout="responsive"></amp-img>
+  </p>
 
   <section>
     <h2>Media query selection<h2>
     <amp-img
         media="(min-width: 650px)"
-        id="img6" src="https://lh5.googleusercontent.com/-vmSp-YN10lA/VcH6S35gAWI/AAAAAAABYqk/6wuA5T3ApSk/w1832-h1376-no/IMG_20150805_131745-ANIMATION.gif"
+        id="img6" src="/examples/img/hero@2x.jpg"
         width=466
         height=355 layout="responsive" ></amp-img>
     <amp-img
         media="(max-width: 649px)"
-        id="img7" src="/examples/img/sample.jpg"
+        id="img7" src="/examples/img/hero@1x.jpg"
         width=527
         height=193 layout="responsive" ></amp-img>
   </section>
@@ -62,20 +66,20 @@
 
   <p>
     <amp-anim
-        src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h225-no"
+        src="/examples/img/cats-anim.gif"
         width="400" height="225" layout="responsive">
       <amp-img placeholder
-          src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h225-no-k"
+          src="/examples/img/cats-anim-placeholder.gif"
           width="400" height="225" layout="responsive"></amp-img>
     </amp-anim>
   </p>
 
   <h2>Audio</h2>
-    <amp-audio src="https://ia801402.us.archive.org/16/items/EDIS-SRP-0197-06/EDIS-SRP-0197-06.mp3"></amp-audio>
+    <amp-audio src="/examples/av/audio.mp3"></amp-audio>
 
   <h2>Video</h2>
   <amp-video
-      src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+      src="/examples/av/ForBiggerJoyrides.mp4"
       width="358"
       height="204"
       layout="responsive"

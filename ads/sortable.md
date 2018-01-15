@@ -30,6 +30,15 @@ limitations under the License.
       data-name="medrec"
       data-site="ampproject.org">
   </amp-ad>
+
+  <!-- Responsive Ad -->
+
+  <amp-ad width=300 height=250
+      type="sortable"
+      data-name="medrec"
+      data-site="ampproject.org"
+      data-responsive="true">
+  </amp-ad>
 ```
 
 ## Configuration
@@ -43,6 +52,10 @@ __Required:__
 `width` + `height` - Required for all `<amp-ad>` units. Specifies the ad size.
 
 `type` - always set to "sortable"
+
+__Optional:__
+
+`data-reponsive` - when set to true indicates that the ad slot has multiple potential sizes.
  
 
 No explicit configuration is needed for a given sortable amp-ad, though each site must be set up beforehand with [Sortable](http://sortable.com). The site name `ampproject.org` can be used for testing. Note that only the two examples above will show an ad properly.

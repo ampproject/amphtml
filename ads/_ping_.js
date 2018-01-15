@@ -14,14 +14,32 @@
  * limitations under the License.
  */
 
-import {dev} from '../src/log';
+import {validateData} from '../3p/3p';
+import {dev, user} from '../src/log';
 
 /**
+ * A fake ad network integration that is mainly used for testing
+ * and demo purposes. This implementation gets stripped out in compiled
+ * production code.
  * @param {!Window} global
  * @param {!Object} data
  */
 export function _ping_(global, data) {
+  // for testing only. see #10628
+  global.networkIntegrationDataParamForTesting = data;
+
+  validateData(data, []);
+  user().assert(!data['error'], 'Fake user error!');
   global.document.getElementById('c').textContent = data.ping;
+  global.ping = Object.create(null);
+
+  global.context.onResizeSuccess(() => {
+    global.ping.resizeSuccess = true;
+  });
+
+  global.context.onResizeDenied(() => {
+    global.ping.resizeSuccess = false;
+  });
 
   if (data.ad_container) {
     dev().assert(
@@ -31,6 +49,8 @@ export function _ping_(global, data) {
     const img = document.createElement('img');
     if (data.url) {
       img.setAttribute('src', data.url);
+      img.setAttribute('width', data.width);
+      img.setAttribute('height', data.height);
     }
     let width, height;
     if (data.adHeight) {
@@ -47,13 +67,22 @@ export function _ping_(global, data) {
     } else {
       global.context.renderStart();
     }
-    global.context.observeIntersection(function(changes) {
-      changes.forEach(function(c) {
-        dev().info('AMP-AD', 'Intersection: (WxH)' +
-            `${c.intersectionRect.width}x${c.intersectionRect.height}`);
+    if (data.enableIo) {
+      global.context.observeIntersection(function(changes) {
+        changes.forEach(function(c) {
+          dev().info('AMP-AD', 'Intersection: (WxH)' +
+              `${c.intersectionRect.width}x${c.intersectionRect.height}`);
+        });
+        // store changes to global.lastIO for testing purpose
+        global.ping.lastIO = changes[changes.length - 1];
       });
+    }
+    global.context.getHtml('a', ['href'], function(html) {
+      dev().info('GET-HTML', html);
     });
   } else {
-    global.context.noContentAvailable();
+    global.setTimeout(() => {
+      global.context.noContentAvailable();
+    }, 1000);
   }
 }

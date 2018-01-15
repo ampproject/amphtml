@@ -14,19 +14,37 @@
  * limitations under the License.
  */
 
-import {urlReplacementsForDoc} from '../../../src/url-replacements';
-import {assertHttpsUrl} from '../../../src/url';
+import {AmpEvents} from '../../../src/amp-events';
+import {createCustomEvent} from '../../../src/event-helper';
+import {fetchBatchedJsonFor} from '../../../src/batched-json';
+import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {templatesFor} from '../../../src/template';
-import {user} from '../../../src/log';
-import {xhrFor} from '../../../src/xhr';
+import {removeChildren} from '../../../src/dom';
+import {Services} from '../../../src/services';
+import {dev, user} from '../../../src/log';
 
+/** @const {string} */
+const TAG = 'amp-list';
 
 /**
  * The implementation of `amp-list` component. See {@link ../amp-list.md} for
  * the spec.
  */
 export class AmpList extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?Element} */
+    this.container_ = null;
+
+    /** @private {boolean} */
+    this.fallbackDisplayed_ = false;
+
+    /** @const {!../../../src/service/template-impl.Templates} */
+    this.templates_ = Services.templatesFor(this.win);
+  }
 
   /** @override */
   isLayoutSupported(layout) {
@@ -35,40 +53,143 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @const {!Element} */
     this.container_ = this.win.document.createElement('div');
     this.applyFillContent(this.container_, true);
     this.element.appendChild(this.container_);
+
     if (!this.container_.hasAttribute('role')) {
       this.container_.setAttribute('role', 'list');
     }
 
-    /** @private @const {!UrlReplacements} */
-    this.urlReplacements_ = urlReplacementsForDoc(this.getAmpDoc());
+    if (!this.element.hasAttribute('aria-live')) {
+      this.element.setAttribute('aria-live', 'polite');
+    }
+  }
+
+  /** @override */
+  reconstructWhenReparented() {
+    return false;
   }
 
   /** @override */
   layoutCallback() {
-    return this.urlReplacements_.expandAsync(assertHttpsUrl(
-        this.element.getAttribute('src'), this.element)).then(src => {
-          const opts = {};
-          if (this.element.hasAttribute('credentials')) {
-            opts.credentials = this.element.getAttribute('credentials');
-          }
-          if (opts.credentials) {
-            opts.requireAmpResponseSourceOrigin = true;
-          }
-          return xhrFor(this.win).fetchJson(src, opts);
-        }).then(data => {
-          user().assert(data != null
-              && typeof data == 'object'
-              && Array.isArray(data['items']),
-              'Response must be {items: []} object %s %s',
-              this.element, data);
-          const items = data['items'];
-          return templatesFor(this.win).findAndRenderTemplateArray(
-              this.element, items).then(this.rendered_.bind(this));
+    const fetch = this.fetchList_();
+    if (this.getFallback()) {
+      fetch.then(() => {
+        // Hide in case fallback was displayed for a previous fetch.
+        this.toggleFallbackInMutate_(false);
+      }, unusedError => {
+        // On fetch success, firstLayoutCompleted() hides placeholder.
+        // On fetch error, hide placeholder if fallback exists.
+        this.togglePlaceholder(false);
+        this.toggleFallbackInMutate_(true);
+      });
+    }
+    return fetch;
+  }
+
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    const src = mutations['src'];
+    const state = mutations['state'];
+
+    if (src !== undefined) {
+      const typeOfSrc = typeof src;
+      if (typeOfSrc === 'string') {
+        // Don't fetch if we aren't laid out yet since we also fetch in
+        // layoutCallback().
+        if (this.getLayoutWidth() > 0) {
+          this.fetchList_();
+        }
+      } else if (typeOfSrc === 'object') {
+        const items = isArray(src) ? src : [src];
+        this.renderItems_(items);
+      } else {
+        this.user().error(TAG, 'Unexpected "src" type: ' + src);
+      }
+    } else if (state !== undefined) {
+      const items = isArray(state) ? state : [state];
+      this.renderItems_(items);
+      user().warn(TAG, '[state] is deprecated, please use [src] instead.');
+    }
+  }
+
+  /**
+   * Wraps `toggleFallback()` in a mutate context.
+   * @param {boolean} state
+   * @private
+   */
+  toggleFallbackInMutate_(state) {
+    if (state) {
+      this.getVsync().mutate(() => {
+        this.toggleFallback(true);
+        this.fallbackDisplayed_ = true;
+      });
+    } else {
+      // Don't queue mutate if fallback isn't already visible.
+      if (this.fallbackDisplayed_) {
+        this.getVsync().mutate(() => {
+          this.toggleFallback(false);
+          this.fallbackDisplayed_ = false;
         });
+      }
+    }
+  }
+
+  /**
+   * Request list data from `src` and return a promise that resolves when
+   * the list has been populated with rendered list items.
+   * @return {!Promise}
+   * @private
+   */
+  fetchList_() {
+    const itemsExpr = this.element.getAttribute('items') || 'items';
+    return this.fetch_(itemsExpr).then(items => {
+      if (this.element.hasAttribute('single-item')) {
+        user().assert(typeof items !== 'undefined' ,
+            'Response must contain an array or object at "%s". %s',
+            itemsExpr, this.element);
+        if (!isArray(items)) {
+          items = [items];
+        }
+      }
+      user().assert(isArray(items),
+          'Response must contain an array at "%s". %s',
+          itemsExpr, this.element);
+      const maxLen = parseInt(this.element.getAttribute('max-items'), 10);
+      if (maxLen < items.length) {
+        items = items.slice(0, maxLen);
+      }
+      return this.renderItems_(items);
+    }, error => {
+      throw user().createError('Error fetching amp-list', error);
+    });
+  }
+
+  /**
+   * @param {!Array} items
+   * @return {!Promise}
+   * @private
+   */
+  renderItems_(items) {
+    return this.templates_.findAndRenderTemplateArray(this.element, items)
+        .then(elements => this.updateBindings_(elements))
+        .then(elements => this.rendered_(elements));
+  }
+
+  /**
+   * @param {!Array<!Element>} elements
+   * @return {!Promise<!Array<!Element>>}
+   * @private
+   */
+  updateBindings_(elements) {
+    const forwardElements = () => elements;
+    return Services.bindForDocOrNull(this.element).then(bind => {
+      if (bind) {
+        return bind.scanAndApply(elements, [this.container_]);
+      }
+    // Forward elements to chained promise on success or failure.
+    }).then(forwardElements, forwardElements);
   }
 
   /**
@@ -76,12 +197,17 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   rendered_(elements) {
+    removeChildren(dev().assertElement(this.container_));
     elements.forEach(element => {
       if (!element.hasAttribute('role')) {
         element.setAttribute('role', 'listitem');
       }
       this.container_.appendChild(element);
     });
+
+    const event = createCustomEvent(this.win,
+        AmpEvents.DOM_UPDATE, /* detail */ null, {bubbles: true});
+    this.container_.dispatchEvent(event);
 
     // Change height if needed.
     this.getVsync().measure(() => {
@@ -92,6 +218,18 @@ export class AmpList extends AMP.BaseElement {
       }
     });
   }
+
+  /**
+   * @param {string} itemsExpr
+   * @visibleForTesting
+   * @private
+   */
+  fetch_(itemsExpr) {
+    return fetchBatchedJsonFor(this.getAmpDoc(), this.element, itemsExpr);
+  }
 }
 
-AMP.registerElement('amp-list', AmpList);
+
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpList);
+});

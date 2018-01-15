@@ -26,7 +26,7 @@ class AmpReachPlayer extends AMP.BaseElement {
     this.iframe_ = null;
   }
 
- /**
+  /**
   * @param {boolean=} opt_onLayout
   * @override
   */
@@ -57,13 +57,14 @@ class AmpReachPlayer extends AMP.BaseElement {
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
       this.iframe_.contentWindow./*OK*/postMessage(
-        'pause',
-        'https://player-cdn.beachfrontmedia.com'
+          'pause',
+          'https://player-cdn.beachfrontmedia.com'
       );
     }
   }
+}
 
-};
 
-AMP.registerElement('amp-reach-player', AmpReachPlayer);
-
+AMP.extension('amp-reach-player', '0.1', AMP => {
+  AMP.registerElement('amp-reach-player', AmpReachPlayer);
+});

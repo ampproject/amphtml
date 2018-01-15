@@ -1,0 +1,57 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-bind : basic</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="/dist/amp.js"></script>
+  <script async custom-element="amp-bind" src="/dist/v0/amp-bind-0.1.max.js"></script>
+  <style amp-custom>
+    .original {
+      background-color:green;
+    }
+    .new {
+      background-color:blue;
+    }
+  </style>
+</head>
+<body>
+  <!-- text and class -->
+  <button on="tap:AMP.setState({boundText: 'hello world'})" id="changeTextButton"></button>
+  <button on="tap:AMP.setState({boundClass: 'new'})" id="changeTextClassButton"></button>
+  <p id="textElement" class="original" [class]="boundClass" [text]="boundText">unbound</p>
+
+  <!-- amp-img -->
+  <button on="tap:AMP.setState({imageSrc: 'http://www.google.com/image2'})" id="changeImgSrcButton"></button>
+  <button on="tap:AMP.setState({imageSrc: '?__amp_source_origin'})" id="invalidSrcButton"></button>
+  <button on="tap:AMP.setState({imageSrc: 'ftp://foo:bar@192.168.1.1/lol.jpg'})" id="ftpSrcButton"></button>
+  <button on="tap:AMP.setState({imageSrc: 'tel:1-555-867-5309'})" id="telSrcButton"></button>
+  <button on="tap:AMP.setState({imageAlt: 'hello world'})" id="changeImgAltButton"></button>
+  <button on="tap:AMP.setState({imageWidth: 300, imageHeight: 300})" id="changeImgDimensButton"></button>
+  <amp-img id="image"
+    src="http://www.google.com/image1" [src]="imageSrc"
+    alt="unbound" [alt]="imageAlt"
+    width="200" [width]="imageWidth"
+    height="200" [height]="imageHeight"
+    layout="responsive"></amp-img>
+
+  <!-- amp-state -->
+  <button id="ampStateSrcButton" on="tap:AMP.setState({ampState: {stateSrc: 'https://www.google.com/bind/second/source'}})">Change amp-state</button>
+  <amp-state id="ampState" src="https://www.google.com/bind/first/source" [src]="ampState.stateSrc">
+  </amp-state>
+
+  <!-- various input tags -->
+  <input type="range" min="0" max="100" value="0" on="change:AMP.setState({rangeChange: event})" id="range">
+  <p id="rangeText" [text]="rangeChange.min + ' <= ' + rangeChange.value + ' <= ' + rangeChange.max">Unbound</p>
+  <input type="checkbox" on="change:AMP.setState({checkboxChange: event})" id="checkbox">
+  <p id="checkboxText" [text]="'Checked: ' + checkboxChange.checked" id="checkboxText">Unbound</p>
+  <input type="radio" on="change:AMP.setState({radioChange: event})" id="radio">
+  <p id="radioText" [text]="'Checked: ' + radioChange.checked" id="radioText">Unbound</p>
+  <input type="checkbox" [checked]="isChecked" id="checkedBound">
+  <button on="tap:AMP.setState({isChecked: isChecked != null ? !isChecked : false})" id="toggleCheckedButton"></button>
+
+  <button id="triggerBindApplicationButton" on="tap:AMP.setState({})">Trigger application</button>
+</body>
+</html>

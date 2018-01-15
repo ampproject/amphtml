@@ -1,0 +1,63 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-bind: Errors</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Questrial" rel="stylesheet" type="text/css">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+
+  <style amp-custom>
+    .redBackground {
+      background-color: red;
+    }
+    button {
+      border: solid 1px black;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>Error &amp; warning examples</h2>
+  <p>This page lists the different types of runtime user errors that amp-bind can throw.</p>
+  <hr>
+
+  <h3>1. Binding to unsupported property</h3>
+  <p [asdf]="">This paragraph element attempts to bind to "asdf".</p>
+
+  <h3>2. Malformed expressions</h3>
+  <p [text]="(">This expression is missing a closing parens.</p>
+
+  <h3>3. Invalid function invocation</h3>
+  <p [text]="123.substring(2)">This expression calls `substring` on a number.</p>
+
+  <h3>4.a Invalid expression result (validator)</h3>
+  <a [href]="'javascript:alert(1)'">This expression contains an invalid URL protocol.</a>
+
+  <h3>4.b Invalid expression result (css)</h3>
+  <p [class]="123">This expression contains an invalid [class] result (only string/array/null supported).</p>
+
+  <h3>5. (WARN) Undefined variables and members</h3>
+  <p [text]="foo">null</p><p>Expression above references an undefined variable `foo`.</p>
+  <p [text]="myState.qux">null</p><p>Expression above references an undefined member `myState.qux`.</p>
+
+  <h3>6. (WARN) Invalid member access</h3>
+  <p [text]="myState[true]">null</p><p>Expression above tries to access a boolean member.</p>
+  <p [text]="true[3]">null</p><p>Expression above tries to access a member of a boolean.</p>
+  <p [text]="myState[null]">null</p><p>Expression above tries to access a null member.</p>
+  <p [text]="null[3]">null</p><p>Expression above tries to access a member of null.</p>
+
+  <h3>7. Mismatched initial state</h3>
+  <h4>(Only with '#development=1')</h4>
+  <p [text]="myState.foo">This paragraph's initial `text` state doesn't match the evaluated expression result.</p>
+
+  <amp-state id="myState">
+    <script type="application/json">
+      { "foo": "bar" }
+    </script>
+  </amp-state>
+</body>
+</html>
