@@ -297,7 +297,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         'data-multi-size-validation': macros['data-multi-size-validation'],
         'data-override-width': macros['data-OVERRIDE-width'],
         'data-override-height': macros['data-override-HEIGHT'],
-        'data-json': JSON.stringify(json),
+        'json': JSON.stringify(json),
       });
       env.win.document.body.appendChild(element);
       const docInfo = Services.documentInfoForDoc(element);
@@ -318,7 +318,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         'NOTTARGETING': {'a': '123'},
       };
       element = createElementWithAttributes(env.win.document, 'amp-ad', {
-        'data-json': JSON.stringify(json),
+        'json': JSON.stringify(json),
       });
       env.win.document.body.appendChild(element);
       impl = new AmpAdNetworkDoubleclickImpl(
