@@ -72,10 +72,10 @@ class AmpImaVideo extends AMP.BaseElement {
     /** @private {?Function} */
     this.unlistenMessage_ = null;
 
-    /** @private {?String} */
+    /** @private {?string} */
     this.preconnectSource_ = null;
 
-    /** @private {?String} */
+    /** @private {?string} */
     this.preconnectTrack_ = null;
 
     /**

@@ -51,8 +51,8 @@ export const RTC_ERROR_ENUM = {
 
 /**
  * @param {!Array<!Promise<!rtcResponseDef>>} promiseArray
- * @param {!string} error
- * @param {!string} callout
+ * @param {string} error
+ * @param {string} callout
  * @private
  */
 function logAndAddErrorResponse_(promiseArray, error, callout) {
@@ -61,8 +61,8 @@ function logAndAddErrorResponse_(promiseArray, error, callout) {
 }
 
 /**
- * @param {!string} error
- * @param {!string} callout
+ * @param {string} error
+ * @param {string} callout
  * @param {number=} opt_rtcTime
  * @return {!Promise<!rtcResponseDef>}
  * @private
@@ -108,7 +108,9 @@ export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
     const validVendorMacros = {};
     Object.keys(rtcConfig['vendors'][vendor]).forEach(macro => {
       if (vendorObject.macros && vendorObject.macros.includes(macro)) {
-        validVendorMacros[macro] = rtcConfig['vendors'][vendor][macro];
+        const value = rtcConfig['vendors'][vendor][macro];
+        validVendorMacros[macro] = isObject(value) || isArray(value) ?
+          JSON.stringify(value) : value;
       } else {
         user().warn(TAG, `Unknown macro: ${macro} for vendor: ${vendor}`);
       }
@@ -124,12 +126,12 @@ export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
 
 /**
  * @param {!AMP.BaseElement} a4aElement
- * @param {!string} url
+ * @param {string} url
  * @param {!Object<string, boolean>} seenUrls
  * @param {!Array<!Promise<!rtcResponseDef>>} promiseArray
- * @param {!number} rtcStartTime
+ * @param {number} rtcStartTime
  * @param {!Object<string, !../../../src/service/variable-source.SyncResolverDef>} macros
- * @param {!number} timeoutMillis
+ * @param {number} timeoutMillis
  * @param {string=} opt_vendor
  * @private
  */
@@ -167,8 +169,8 @@ function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
 }
 
 /**
- * @param {!string} url
- * @return {!string}
+ * @param {string} url
+ * @return {string}
  * @visibleForTesting
  */
 export function truncUrl_(url) {
@@ -177,11 +179,11 @@ export function truncUrl_(url) {
 }
 
 /**
- * @param {!string} url
- * @param {!number} rtcStartTime
+ * @param {string} url
+ * @param {number} rtcStartTime
  * @param {!Window} win
- * @param {!number} timeoutMillis
- * @param {!string} callout
+ * @param {number} timeoutMillis
+ * @param {string} callout
  * @return {!Promise<!rtcResponseDef>}
  * @private
  */
@@ -282,7 +284,6 @@ export function validateRtcConfig_(element) {
     // This error would be due to the asserts above.
     return null;
   }
-
   rtcConfig['timeoutMillis'] = timeout !== undefined ?
     timeout : defaultTimeoutMillis;
   return rtcConfig;

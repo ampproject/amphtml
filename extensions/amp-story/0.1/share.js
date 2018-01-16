@@ -103,7 +103,7 @@ function buildProviderParams(opt_params) {
   const attrs = dict();
 
   if (opt_params) {
-    Object.keys(opt_params || {}).forEach(field => {
+    Object.keys(opt_params).forEach(field => {
       attrs[`data-param-${field}`] = opt_params[field];
     });
   }
@@ -243,6 +243,8 @@ export class ShareWidget {
     const container = scopedQuerySelector(
         dev().assertElement(this.root_),
         '.i-amphtml-story-share-system');
+
+    this.loadRequiredExtensions_();
 
     container.appendChild(buildProvider(this.win_.document, 'system'));
   }

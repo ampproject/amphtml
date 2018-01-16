@@ -70,7 +70,7 @@ import {dict} from '../../../src/utils/object';
 import {renderSimpleTemplate} from './simple-template';
 import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
-
+import {TapNavigationDirection} from './page-advancement';
 
 
 /** @private @const {string} */
@@ -345,6 +345,21 @@ export class AmpStory extends AMP.BaseElement {
       this.ampStoryHint_.showFirstPageHintOverlay();
     });
 
+    this.element.addEventListener(EventType.TAP_NAVIGATION, e => {
+      const {direction} = e.detail;
+
+      if (this.isDesktop_()) {
+        this.next_();
+        return;
+      }
+
+      if (direction === TapNavigationDirection.NEXT) {
+        this.next_();
+      } else if (direction === TapNavigationDirection.PREVIOUS) {
+        this.previous_();
+      }
+    });
+
     const gestures = Gestures.get(this.element,
         /* shouldNotPreventDefault */ true);
 
@@ -353,7 +368,7 @@ export class AmpStory extends AMP.BaseElement {
         return;
       }
 
-      if (!this.isSwipeLargeEnoughForHint_(e.data.deltaX, e.data.deltaY)) {
+      if (!this.isSwipeLargeEnoughForHint_(e.data.deltaX)) {
         return;
       }
 
@@ -370,9 +385,8 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /** @private */
-  isSwipeLargeEnoughForHint_(deltaX, deltaY) {
-    return (Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2))
-      >= MIN_SWIPE_FOR_HINT_OVERLAY_PX);
+  isSwipeLargeEnoughForHint_(deltaX) {
+    return (Math.abs(deltaX) >= MIN_SWIPE_FOR_HINT_OVERLAY_PX);
   }
 
   /** @private */

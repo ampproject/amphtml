@@ -93,6 +93,7 @@ import {adstir} from '../ads/adstir';
 import {adtech} from '../ads/adtech';
 import {adthrive} from '../ads/adthrive';
 import {aduptech} from '../ads/aduptech';
+import {adventive} from '../ads/adventive';
 import {adverline} from '../ads/adverline';
 import {adverticum} from '../ads/adverticum';
 import {advertserve} from '../ads/advertserve';
@@ -115,12 +116,12 @@ import {csa} from '../ads/google/csa';
 import {dable} from '../ads/dable';
 import {directadvert} from '../ads/directadvert';
 import {distroscale} from '../ads/distroscale';
-import {ezoic} from '../ads/ezoic';
 import {dotandads} from '../ads/dotandads';
 import {doubleclick} from '../ads/google/doubleclick';
 import {eas} from '../ads/eas';
 import {engageya} from '../ads/engageya';
 import {eplanning} from '../ads/eplanning';
+import {ezoic} from '../ads/ezoic';
 import {f1e} from '../ads/f1e';
 import {f1h} from '../ads/f1h';
 import {felmat} from '../ads/felmat';
@@ -171,8 +172,8 @@ import {pubmatic} from '../ads/pubmatic';
 import {pubmine} from '../ads/pubmine';
 import {pulsepoint} from '../ads/pulsepoint';
 import {purch} from '../ads/purch';
-import {revcontent} from '../ads/revcontent';
 import {relap} from '../ads/relap';
+import {revcontent} from '../ads/revcontent';
 import {revjet} from '../ads/revjet';
 import {rubicon} from '../ads/rubicon';
 import {sharethrough} from '../ads/sharethrough';
@@ -181,8 +182,8 @@ import {slimcutmedia} from '../ads/slimcutmedia';
 import {smartadserver} from '../ads/smartadserver';
 import {smartclip} from '../ads/smartclip';
 import {smi2} from '../ads/smi2';
-import {sortable} from '../ads/sortable';
 import {sogouad} from '../ads/sogouad';
+import {sortable} from '../ads/sortable';
 import {sovrn} from '../ads/sovrn';
 import {spotx} from '../ads/spotx';
 import {sunmedia} from '../ads/sunmedia';
@@ -204,6 +205,7 @@ import {yengo} from '../ads/yengo';
 import {yieldbot} from '../ads/yieldbot';
 import {yieldmo} from '../ads/yieldmo';
 import {yieldone} from '../ads/yieldone';
+import {yieldpro} from '../ads/yieldpro';
 import {zedo} from '../ads/zedo';
 import {zergnet} from '../ads/zergnet';
 import {zucks} from '../ads/zucks';
@@ -268,6 +270,7 @@ register('adstir', adstir);
 register('adtech', adtech);
 register('adthrive', adthrive);
 register('aduptech', aduptech);
+register('adventive', adventive);
 register('adverline', adverline);
 register('adverticum', adverticum);
 register('advertserve', advertserve);
@@ -361,8 +364,8 @@ register('slimcutmedia', slimcutmedia);
 register('smartadserver', smartadserver);
 register('smartclip', smartclip);
 register('smi2', smi2);
-register('sortable', sortable);
 register('sogouad', sogouad);
+register('sortable', sortable);
 register('sovrn', sovrn);
 register('spotx', spotx);
 register('sunmedia', sunmedia);
@@ -384,9 +387,10 @@ register('yandex', yandex);
 register('yengo', yengo);
 register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
-register('zergnet', zergnet);
 register('yieldone', yieldone);
+register('yieldpro', yieldpro);
 register('zedo', zedo);
+register('zergnet', zergnet);
 register('zucks', zucks);
 
 // For backward compat, we always allow these types without the iframe
@@ -657,13 +661,13 @@ function triggerRenderStart(opt_data) {
 
 /**
  * Id for getHtml postMessage.
- * @type {!number}
+ * @type {number}
  */
 let currentMessageId = 0;
 
 /**
  * See readme for window.context.getHtml
- * @param {!string} selector - CSS selector of the node to take content from
+ * @param {string} selector - CSS selector of the node to take content from
  * @param {!Array<string>} attributes - tag attributes to be left in the stringified HTML
  * @param {!Function} callback
  */
@@ -690,7 +694,7 @@ function getHtml(selector, attributes, callback) {
  * the IntersectionObserver spec callback.
  * http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#callbackdef-intersectionobservercallback
  * @param {function(!Array<IntersectionObserverEntry>)} observerCallback
- * @returns {!function()} A function which removes the event listener that
+ * @returns {function()} A function which removes the event listener that
  *    observes for intersection messages.
  */
 function observeIntersection(observerCallback) {
@@ -724,7 +728,7 @@ function dispatchVisibilityChangeEvent(win, isHidden) {
 /**
  * Registers a callback for communicating when a resize request succeeds.
  * @param {function(number, number)} observerCallback
- * @returns {!function()} A function which removes the event listener that
+ * @returns {function()} A function which removes the event listener that
  *    observes for resize status messages.
  */
 function onResizeSuccess(observerCallback) {
@@ -736,7 +740,7 @@ function onResizeSuccess(observerCallback) {
 /**
  * Registers a callback for communicating when a resize request is denied.
  * @param {function(number, number)} observerCallback
- * @returns {!function()} A function which removes the event listener that
+ * @returns {function()} A function which removes the event listener that
  *    observes for resize status messages.
  */
 function onResizeDenied(observerCallback) {
