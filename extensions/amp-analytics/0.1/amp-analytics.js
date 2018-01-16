@@ -608,10 +608,15 @@ export class AmpAnalytics extends AMP.BaseElement {
       for (const k in this.config_['requests']) {
         if (hasOwn(this.config_['requests'], k)) {
           const request = this.config_['requests'][k];
-          requests[k] = new RequestHandler(
-              this.getAmpDoc(), request, this.preconnect,
-              this.sendRequest_.bind(this),
-              this.isSandbox_);
+          try {
+            requests[k] = new RequestHandler(
+                this.getAmpDoc(), request, this.preconnect,
+                this.sendRequest_.bind(this),
+                this.isSandbox_);
+          } catch (e) {
+            const TAG = this.getName_();
+            this.user().error(TAG, `Ignoring request ${k}: `, e);
+          }
         }
       }
       this.requests_ = requests;
