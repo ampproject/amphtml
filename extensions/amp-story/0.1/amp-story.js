@@ -507,7 +507,7 @@ export class AmpStory extends AMP.BaseElement {
   isLayoutSupported(layout) {
     return layout == Layout.CONTAINER;
   }
-
+ 
 
   /** @override */
   prerenderAllowed() {
