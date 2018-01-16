@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {iterateCursor} from '../../../src/dom';
 import {parse as mustacheParse, render as mustacheRender,
   setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
 import {sanitizeHtml, sanitizeFormattingHtml} from '../../../src/sanitizer';
@@ -37,14 +38,14 @@ export class AmpMustache extends AMP.BaseTemplate {
     const shadowTemplate = this.element.cloneNode(true);
     this.nestedTemplates_ = {};
     let index = 0;
-    shadowTemplate.content.querySelectorAll('template').forEach(
+    iterateCursor(shadowTemplate.content.querySelectorAll('template'),
         nestedTemplate => {
           const nestedTemplateKey = `__AMP_NESTED_TEMPLATE_${index}`;
           this.nestedTemplates_[nestedTemplateKey] =
               nestedTemplate./*OK*/outerHTML;
 
-          const nestedTemplateAsVariable = document.createTextNode(
-              `{{{${nestedTemplateKey}}}}`);
+          const nestedTemplateAsVariable = this.element.ownerDocument
+              .createTextNode(`{{{${nestedTemplateKey}}}}`);
           nestedTemplate.parentNode.replaceChild(nestedTemplateAsVariable,
               nestedTemplate);
           index++;

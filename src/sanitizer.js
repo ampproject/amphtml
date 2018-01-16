@@ -109,14 +109,13 @@ const WHITELISTED_ATTRS = [
   'option',
   'submit-success',
   'submit-error',
+  /* Attributes added for amp-bind */
+  // TODO(kmh287): Add more whitelisted attributes for bind?
+  'text',
 ];
 
 /** @const {!Object<string, !Array<string>>} */
 const WHITELISTED_ATTRS_BY_TAGS = {
-  'amp-bind': [
-    // TODO(kmh287): Add more whitelisted attributes for bind?
-    'text',
-  ],
   'div': [
     'template',
   ],
