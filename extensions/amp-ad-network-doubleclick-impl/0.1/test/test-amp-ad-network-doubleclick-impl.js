@@ -275,7 +275,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.extractSize({
         get(name) {
           return name == 'amp-nameframe-exp' ?
-              'instantLoad;writeInBody' : undefined;
+            'instantLoad;writeInBody' : undefined;
         },
         has(name) {
           return !!this.get(name);
