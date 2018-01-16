@@ -274,7 +274,7 @@ export class InaboxMessagingHost {
     let topXDomainWin;
     for (let j = 0, tempWin = win;
       j < 10 && tempWin != tempWin.top && !canInspectWindow_(tempWin);
-      j++, tempWin = tempWin.parent, topXDomainWin = tempWin) {}
+      j++, topXDomainWin = tempWin, tempWin = tempWin.parent) {}
     // If topXDomainWin exists, we know that the frame we want to measure
     // is a x-domain frame. Unfortunately, you can not access properties
     // on a x-domain window, so we can not do window.frameElement, and
