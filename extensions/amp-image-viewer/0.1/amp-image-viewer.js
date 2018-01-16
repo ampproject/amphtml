@@ -134,7 +134,6 @@ export class AmpImageViewer extends AMP.BaseElement {
   buildCallback() {
     this.vsync_ = this.getVsync();
     this.element.classList.add('i-amphtml-image-lightbox-viewer');
-
     const children = this.getRealChildren();
     dev().assert(children.length == 1);
     this.sourceElement_ = children[0];
@@ -160,16 +159,16 @@ export class AmpImageViewer extends AMP.BaseElement {
               this.image_ = this.win.document.createElement('img');
               this.image_.classList.add('i-amphtml-image-viewer-image');
 
-              this.init_(this.sourceElement_);
+              this.init_();
               this.element.appendChild(this.image_);
 
-              // TODO (cathyxz): make this a LOT more robust, handle srcset
-              this.image_.src = this.sourceElement_.getAttribute('src');
               this.element.removeChild(this.sourceElement_);
               this.sourceElement_ = null;
+
             }
             this.setupGestures_();
             this.measure();
+            this.updateSrc_();
             this.registerOnResizeHandler_();
           });
         });
@@ -263,14 +262,14 @@ export class AmpImageViewer extends AMP.BaseElement {
    * "amp-img". The target image element may or may not yet have the img
    * element initialized.
    */
-  init_(sourceElement) {
-    this.sourceWidth_ = sourceElement./*OK*/offsetWidth;
-    this.sourceHeight_ = sourceElement./*OK*/offsetHeight;
-    this.srcset_ = srcsetFromElement(sourceElement);
+  init_() {
+    this.sourceWidth_ = this.sourceElement_./*OK*/offsetWidth;
+    this.sourceHeight_ = this.sourceElement_./*OK*/offsetHeight;
+    this.srcset_ = srcsetFromElement(this.sourceElement_);
 
     ARIA_ATTRIBUTES.forEach(key => {
-      if (sourceElement.hasOwnProperty(key)) {
-        this.image_.setAttribute(key, sourceElement[key]);
+      if (this.sourceElement_.hasOwnProperty(key)) {
+        this.image_.setAttribute(key, this.sourceElement_[key]);
       }
     });
     st.setStyles(dev().assertElement(this.image_), {
@@ -283,6 +282,8 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /**
    * Measures the image viewer and image sizes and positioning.
+   * This must be called AFTER the source element has already been
+   * laid out.
    * @return {!Promise}
    */
   measure() {
@@ -296,11 +297,8 @@ export class AmpImageViewer extends AMP.BaseElement {
       let width = Math.min(this.elementBox_.height * sourceAspectRatio,
           this.elementBox_.width);
 
-      // TODO(dvoytenko): This is to reduce very small expansions that often
-      // look like a stutter. To be evaluated if this is still the right
-      // idea.
-      if (width - this.sourceWidth_ <= 16
-          && height - this.sourceHeight_ <= 16) {
+      if (Math.abs(width - this.sourceWidth_) <= 16
+          && Math.abs(height - this.sourceHeight_ <= 16)) {
         width = this.sourceWidth_;
         height = this.sourceHeight_;
       }
@@ -333,13 +331,14 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @private
    */
   updateSrc_() {
-    // TODO(cathyxz): handle srcset
     if (!this.srcset_) {
-      // Do not update source if the lightbox has already exited.
       return Promise.resolve();
     }
     this.maxSeenScale_ = Math.max(this.maxSeenScale_, this.scale_);
-    const width = this.imageBox_.width * this.maxSeenScale_;
+    const width = Math.max(
+        this.imageBox_.width * this.maxSeenScale_,
+        this.sourceWidth_
+    );
     const src = this.srcset_.select(width, this.getDpr()).url;
     if (src == this.image_.getAttribute('src')) {
       return Promise.resolve();
