@@ -50,43 +50,25 @@ export class AmpMathml extends AMP.BaseElement {
     this._formula = formula;
   }
 
-  getIframeHeader () {
-    return "<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML'></script>";
-  }
+
   getIframeContents() {
 
-    const formula = this.element.getAttribute( 'formula' );
+    const formula = this.element.getAttribute('formula');
     if ( !formula || '' === formula ) {
       return false;
     }
 
-    let src = formula +
-     ' <script type="text/javascript">' +
-     '   ' +
-     '   document.addEventListener( "DOMContentLoaded", function () {' +
-     '     window.parent.postMessage( {' +
-     '       sentinel: "amp",' +
-     '       type: "embed-size",' +
-     '       height: document.body.scrollHeight' +
-     '     }, "*" );' +
-     '   } );' +
-     '   </script>';
-    return src;
+    return formula;
   }
-
   layoutCallback () {
-    const iframe = getIframe( this.win, this.element, 'mathml' );
-    this.applyFillContent( iframe );
-    listenFor( iframe, 'embed-size', data => {
-      this./*OK*/changeHeight( data[ 'height' ] );
+    const iframe = getIframe(this.win, this.element, 'mathml');
+    this.applyFillContent(iframe);
+    // Triggered by context.updateDimensions() inside the iframe.
+    listenFor(iframe, 'embed-size', data => {
+      this.updateSize_( data[ 'height' ], data[ 'width' ] );
     }, /* opt_is3P */true );
-    const html =
-      '<head>' + this.getIframeHeader() + '</head>' +
-      '<body>' + this.getIframeContents() + '</body>';
-    iframe.src = 'data:text/html;charset=utf-8,' + encodeURI(html);
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
-    con
     return this.loadPromise(iframe);
   }
 
@@ -106,4 +88,6 @@ export class AmpMathml extends AMP.BaseElement {
 }
 
 
-AMP.registerElement('amp-mathml', AmpMathml);
+AMP.extension('amp-mathl', '0.1', AMP => {
+  AMP.registerElement('amp-mathl', AmpMathml);
+} );
