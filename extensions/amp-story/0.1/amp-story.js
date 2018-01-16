@@ -535,8 +535,8 @@ export class AmpStory extends AMP.BaseElement {
    */
   whenPagesLoaded_(timeoutMs = 0) {
     const pagesToWaitFor = this.isDesktop_() ?
-        [this.pages_[0], this.pages_[1]] :
-        [this.pages_[0]];
+      [this.pages_[0], this.pages_[1]] :
+      [this.pages_[0]];
 
     const loadPromise = Promise.all(
         pagesToWaitFor.map(page => page.whenLoaded()));
@@ -544,28 +544,6 @@ export class AmpStory extends AMP.BaseElement {
     return this.timer_.timeoutPromise(timeoutMs, loadPromise).catch(() => {});
   }
 
-  /**
-   * @param {!Array<!./amp-story-page.AmpStoryPage>} pagesToWaitFor The page(s)
-   *     to wait for.
-   * @param {number=} opt_timeoutMs The maximum amount of time to wait, in
-   *     milliseconds.  Waits indefinitely if unspecified.
-   * @return {!Promise} A promise that is resolved when the page is loaded or
-   *     the timeout has been exceeded, whichever happens first.
-   * @private
-   */
-  waitForPageLoadOrTimeout_(pagesToWaitFor, opt_timeoutMs) {
-    const loadPromise = Promise.all(
-        pagesToWaitFor.map(page => page.whenLoaded()));
-
-    if (opt_timeoutMs === undefined) {
-      return loadPromise;
-    }
-
-    return Promise.race([
-      loadPromise,
-      this.timer_.promise(opt_timeoutMs),
-    ]);
-  }
 
   /** @private */
   markStoryAsLoaded_() {

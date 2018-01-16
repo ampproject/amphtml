@@ -34,8 +34,6 @@ import {AdvancementConfig} from './page-advancement';
 import {matches, scopedQuerySelectorAll} from '../../../src/dom';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
-import {CommonSignals} from '../../../src/common-signals';
-import { map } from '../../../src/utils/object';
 
 
 /**
