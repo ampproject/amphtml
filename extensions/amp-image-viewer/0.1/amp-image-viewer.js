@@ -38,6 +38,8 @@ import {srcsetFromElement} from '../../../src/srcset';
 import {debounce} from '../../../src/utils/rate-limit';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
+import {CommonSignals} from '../../../src/common-signals';
+
 
 /**
  * TODO (cathyxz):
@@ -50,6 +52,9 @@ import * as tr from '../../../src/transition';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-image-viewer';
+
+const ARIA_ATTRIBUTES = ['aria-label', 'aria-describedby',
+  'aria-labelledby'];
 
 export class AmpImageViewer extends AMP.BaseElement {
 
@@ -66,13 +71,6 @@ export class AmpImageViewer extends AMP.BaseElement {
 
     /** @private {?../../../src/srcset.Srcset} */
     this.srcset_ = null;
-
-    /** @private {!Object} */
-    this.ariaAttributes_ = {
-      'alt': null,
-      'aria-label': null,
-      'aria-labelledby': null,
-    };
 
     /** @private {number} */
     this.sourceWidth_ = 0;
@@ -128,38 +126,53 @@ export class AmpImageViewer extends AMP.BaseElement {
     /** @private {?../../../src/motion.Motion} */
     this.motion_ = null;
 
+    /** @private {?Element} */
+    this.sourceElement_ = null;
   }
 
   /** @override */
   buildCallback() {
     this.vsync_ = this.getVsync();
     this.element.classList.add('i-amphtml-image-lightbox-viewer');
+
+    const children = this.getRealChildren();
+    dev().assert(children.length == 1);
+    this.sourceElement_ = children[0];
+    this.setAsOwner(this.sourceElement_);
   }
 
   /** @override */
   layoutCallback() {
-    return this.vsync_.mutatePromise(() => {
-      const children = this.getRealChildren();
+    let loadPromise = Promise.resolve();
+    if (this.sourceElement_) {
+      this.scheduleLayout(this.sourceElement_);
+      loadPromise = this.sourceElement_.signals()
+          .whenSignal(CommonSignals.LOAD_END);
+    }
+    return loadPromise
+        .then(() => {
+          return this.vsync_.mutatePromise(() => {
+            if (!this.image_) {
+            // We assume that amp-image-viewer has one child, which is the
+            // target image, either an <img> or an <amp-img>.
+            // TODO (cathyxz): revisit this assumption
 
-      // We assume that amp-image-viewer has one child, which is the target
-      // image, either an <img> or an <amp-img>.
-      // TODO (cathyxz): revisit this assumption
-      dev().assert(children.length == 1);
-      const sourceElement = children[0];
-      this.image_ = this.win.document.createElement('img');
-      this.image_.classList.add('i-amphtml-image-lightbox-viewer-image');
+              this.image_ = this.win.document.createElement('img');
+              this.image_.classList.add('i-amphtml-image-viewer-image');
 
-      this.init_(sourceElement);
+              this.init_(this.sourceElement_);
+              this.element.appendChild(this.image_);
 
-      // TODO (cathyxz): make this a LOT more robust, handle srcset
-      this.image_.src = sourceElement.getAttribute('src');
-      this.element.appendChild(this.image_);
-      this.element.removeChild(sourceElement);
-
-      this.setupGestures_();
-      this.measure();
-      this.registerOnResizeHandler_();
-    });
+              // TODO (cathyxz): make this a LOT more robust, handle srcset
+              this.image_.src = this.sourceElement_.getAttribute('src');
+              this.element.removeChild(this.sourceElement_);
+              this.sourceElement_ = null;
+            }
+            this.setupGestures_();
+            this.measure();
+            this.registerOnResizeHandler_();
+          });
+        });
   }
 
   /** @override */
@@ -209,19 +222,18 @@ export class AmpImageViewer extends AMP.BaseElement {
    */
   registerOnResizeHandler_() {
     const platform = Services.platformFor(this.win);
-    const onResize = this.measure().bind(this);
 
     // Special case for iOS browsers due to Webkit bug #170595
     // https://bugs.webkit.org/show_bug.cgi?id=170595
     // Delay the onResize by 500 ms to ensure correct height and width
-    const debouncedOnResize = debounce(this.win, onResize, 500);
+    const debouncedOnResize = debounce(this.win, () => this.measure(), 500);
 
     // Register an onResize handler to resize the image viewer
     this.unlistenResize_ = this.getViewport().onResize(() => {
       if (platform.isIos() && platform.isSafari()) {
         debouncedOnResize();
       } else {
-        onResize();
+        this.measure();
       }
     });
 
@@ -256,13 +268,11 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.sourceHeight_ = sourceElement./*OK*/offsetHeight;
     this.srcset_ = srcsetFromElement(sourceElement);
 
-    Object.keys(this.ariaAttributes_).forEach(key => {
-      this.ariaAttributes_[key] = sourceElement.getAttribute(key);
-      if (this.ariaAttributes_[key]) {
-        this.image_.setAttribute(key, this.ariaAttributes_[key]);
+    ARIA_ATTRIBUTES.forEach(key => {
+      if (sourceElement.hasOwnProperty(key)) {
+        this.image_.setAttribute(key, sourceElement[key]);
       }
     });
-
     st.setStyles(dev().assertElement(this.image_), {
       top: st.px(0),
       left: st.px(0),

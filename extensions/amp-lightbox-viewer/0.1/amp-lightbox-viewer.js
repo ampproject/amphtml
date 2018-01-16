@@ -220,7 +220,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       if (clonedNode.tagName === 'AMP-IMG') {
         const container = this.element.ownerDocument.createElement('div');
         container.classList.add('i-amphtml-image-lightbox-container');
-        // TODO: make image viewer an amp component to deal with lazy images
         const imageViewer = this.win.document.createElement('amp-image-viewer');
         imageViewer.setAttribute('layout', 'fill');
         imageViewer.appendChild(clonedNode);
@@ -633,7 +632,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         this.currentElemId_);
     const tagName = this.getCurrentElement_().tagName;
     if (tagName === 'AMP-IMG') {
-      this.enter_(element);
+      this.getCurrentElement_().imageViewer.signals()
+          .whenSignal(CommonSignals.LOAD_END)
+          .then(() => this.enter_(element));
     }
     this.updateDescriptionBox_();
   }
