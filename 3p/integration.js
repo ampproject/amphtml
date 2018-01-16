@@ -331,6 +331,7 @@ register('mantis-recommend', mantisRecommend);
 register('mediaimpact', mediaimpact);
 register('medianet', medianet);
 register('mediavine', mediavine);
+register('medyanet', medyanet);
 register('meg', meg);
 register('microad', microad);
 register('mixpo', mixpo);

@@ -26,7 +26,7 @@ import { tryParseJson } from '../src/json';
 
 export function medyanet(global, data) {
     loadScript(global,
-        'https://medyanet.doracdn.net/devteam/AMP/init.js',
+        'https://medyanet.doracdn.com/devteam/AMP/init.js',
         () => {
             console.log("script loaded");
             global.testFunc();
