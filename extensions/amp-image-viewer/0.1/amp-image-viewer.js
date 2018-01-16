@@ -40,16 +40,6 @@ import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 import {CommonSignals} from '../../../src/common-signals';
 
-
-/**
- * TODO (cathyxz):
- * 1. Fix the whole positioning weirdness in the manual test.
- * 2. Handle the resize stuff here.
- * 3. Get amp-lightbox-viewer to manage layout callback.
- * 4. Make sure ImageBox initializes correctly.
- * 5. Remove unnecessary APIs.
- */
-
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-image-viewer';
 
@@ -152,10 +142,6 @@ export class AmpImageViewer extends AMP.BaseElement {
         .then(() => {
           return this.vsync_.mutatePromise(() => {
             if (!this.image_) {
-            // We assume that amp-image-viewer has one child, which is the
-            // target image, either an <img> or an <amp-img>.
-            // TODO (cathyxz): revisit this assumption
-
               this.image_ = this.win.document.createElement('img');
               this.image_.classList.add('i-amphtml-image-viewer-image');
 
@@ -164,7 +150,6 @@ export class AmpImageViewer extends AMP.BaseElement {
 
               this.element.removeChild(this.sourceElement_);
               this.sourceElement_ = null;
-
             }
             this.setupGestures_();
             this.measure();
@@ -183,10 +168,7 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    // TODO (cathyxz): what layouts ARE appropriate to support?
-    return layout == Layout.RESPONSIVE
-      || layout == Layout.CONTAINER
-      || layout == Layout.FILL;
+    return layout == Layout.FILL;
   }
 
   /** @override */
@@ -219,6 +201,7 @@ export class AmpImageViewer extends AMP.BaseElement {
    * the screen size or mobile orientation changes.
    * @private
    */
+  // TODO (cathyxz): test on mobile and verify this works.
   registerOnResizeHandler_() {
     const platform = Services.platformFor(this.win);
 
