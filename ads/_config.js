@@ -187,6 +187,14 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  adventive: {
+    preconnect: [
+      'https://ads.adventive.com',
+      'https://amp.adventivedev.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   adverline: {
     prefetch: 'https://ads.adverline.com/richmedias/amp.js',
     preconnect: [
@@ -825,6 +833,11 @@ export const adConfig = {
 
   yieldone: {
     prefetch: 'https://img.ak.impact-ad.jp/ic/pone/commonjs/yone-amp.js',
+  },
+
+  yieldpro: {
+    preconnect: 'https://creatives.yieldpro.eu',
+    renderStartImplemented: true,
   },
 
   zedo: {
