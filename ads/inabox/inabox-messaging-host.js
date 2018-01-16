@@ -247,6 +247,9 @@ export class InaboxMessagingHost {
           this.iframeMap_[sentinel] = measureableFrame;
           return measureableFrame;
         }
+        if (tempWin == window.top) {
+          break;
+        }
       }
     }
     return null;
