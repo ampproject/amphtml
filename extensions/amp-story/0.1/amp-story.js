@@ -519,19 +519,29 @@ export class AmpStory extends AMP.BaseElement {
 
     // Do not block the layout callback on the completion of these promises, as
     // that prevents descendents from being laid out (and therefore loaded).
-    storyLayoutPromise.then(() => this.waitForInitialLoad_())
+    storyLayoutPromise.then(() => this.whenPagesLoaded_(PAGE_LOAD_TIMEOUT_MS))
         .then(() => this.markStoryAsLoaded_());
 
     return storyLayoutPromise;
   }
 
 
-  /** @private */
-  waitForInitialLoad_() {
-    const pagesToWaitFor = this.isDesktop_()
-      ? [this.pages_[0], this.pages_[1]] : [this.pages_[0]];
+  /**
+   * @param {number} timeoutMs The maximum amount of time to wait, in
+   *     milliseconds.
+   * @return {!Promise} A promise that is resolved when the page is loaded or
+   *     the timeout has been exceeded, whichever happens first.
+   * @private
+   */
+  whenPagesLoaded_(timeoutMs = 0) {
+    const pagesToWaitFor = this.isDesktop_() ?
+        [this.pages_[0], this.pages_[1]] :
+        [this.pages_[0]];
 
-    return this.waitForPageLoadOrTimeout_(pagesToWaitFor, PAGE_LOAD_TIMEOUT_MS);
+    const loadPromise = Promise.all(
+        pagesToWaitFor.map(page => page.whenLoaded()));
+
+    return this.timer_.timeoutPromise(timeoutMs, loadPromise).catch(() => {});
   }
 
   /**
