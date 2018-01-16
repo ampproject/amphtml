@@ -399,6 +399,8 @@ export const adConfig = {
     prefetch: 'https://g2.gumgum.com/javascripts/ad.js',
     renderStartImplemented: true,
   },
+  
+  hbnetwork: {},
 
   holder: {
     prefetch: 'https://i.holder.com.ua/js2/holder/ajax/ampv1.js',
