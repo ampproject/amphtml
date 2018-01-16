@@ -44,28 +44,17 @@ export class AmpMathml extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const formula = this.element.getAttribute('formula');
-    if ( !formula || '' === formula ) {
+    if (!formula || '' === formula) {
       return;
     }
     this._formula = formula;
-  }
-
-
-  getIframeContents() {
-
-    const formula = this.element.getAttribute('formula');
-    if ( !formula || '' === formula ) {
-      return false;
-    }
-
-    return formula;
   }
   layoutCallback () {
     const iframe = getIframe(this.win, this.element, 'mathml');
     this.applyFillContent(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
     listenFor(iframe, 'embed-size', data => {
-      this.updateSize_( data[ 'height' ], data[ 'width' ] );
+      this./*OK*/changeHeight(data['height']);
     }, /* opt_is3P */true );
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
@@ -73,8 +62,8 @@ export class AmpMathml extends AMP.BaseElement {
   }
 
   unlayoutCallback () {
-    if ( this.iframe_ ) {
-      removeElement( this.iframe_ );
+    if (this.iframe_) {
+      removeElement(this.iframe_);
       this.iframe_ = null;
     }
     return true;
@@ -88,6 +77,6 @@ export class AmpMathml extends AMP.BaseElement {
 }
 
 
-AMP.extension('amp-mathl', '0.1', AMP => {
-  AMP.registerElement('amp-mathl', AmpMathml);
+AMP.extension('amp-mathml', '0.1', AMP => {
+  AMP.registerElement('amp-mathml', AmpMathml);
 } );
