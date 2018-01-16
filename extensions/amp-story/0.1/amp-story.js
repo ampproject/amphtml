@@ -523,14 +523,14 @@ export class AmpStory extends AMP.BaseElement {
   /** @private */
   waitForInitialLoad_() {
     const pagesToWaitFor = this.isDesktop_()
-        ? [this.pages_[0], this.pages_[1]]
-        : [this.pages_[0]];
+      ? [this.pages_[0], this.pages_[1]] : [this.pages_[0]];
 
     return this.waitForPageLoadOrTimeout_(pagesToWaitFor, PAGE_LOAD_TIMEOUT_MS);
   }
 
   /**
-   * @param {!Array<!AmpStoryPage>} pagesToWaitFor The page(s) to wait for.
+   * @param {!Array<!./amp-story-page.AmpStoryPage>} pagesToWaitFor The page(s)
+   *     to wait for.
    * @param {number=} opt_timeoutMs The maximum amount of time to wait, in
    *     milliseconds.  Waits indefinitely if unspecified.
    * @return {!Promise} A promise that is resolved when the page is loaded or
