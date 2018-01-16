@@ -736,7 +736,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'data-multi-size-validation': true,
       'data-override-width': true,
       'data-override-height': true,
-      'json': true,
     };
     return {
       PAGEVIEWID: () => Services.documentInfoForDoc(this.element).pageViewId,
