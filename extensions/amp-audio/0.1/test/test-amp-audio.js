@@ -81,7 +81,7 @@ describes.realWin('amp-audio', {
   it('should not preload audio', () => {
     return attachAndRun({
       src: 'https://origin.com/audio.mp3',
-      preload: 'none'
+      preload: 'none',
     }).then(a => {
       const audio = a.querySelector('audio');
       expect(audio.getAttribute('preload')).to.be.equal('none');
@@ -91,7 +91,7 @@ describes.realWin('amp-audio', {
   it('should only preload audio metadata', () => {
     return attachAndRun({
       src: 'https://origin.com/audio.mp3',
-      preload: 'metadata'
+      preload: 'metadata',
     }).then(a => {
       const audio = a.querySelector('audio');
       expect(audio.getAttribute('preload')).to.be.equal('metadata');
