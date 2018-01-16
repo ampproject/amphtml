@@ -48,7 +48,6 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml('a<style>b</style>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<img>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<iframe></iframe>c')).to.be.equal('ac');
-    expect(sanitizeHtml('a<template></template>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<frame></frame>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<video></video>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<audio></audio>c')).to.be.equal('ac');

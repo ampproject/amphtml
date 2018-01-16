@@ -34,13 +34,29 @@ export class AmpMustache extends AMP.BaseTemplate {
   /** @override */
   compileCallback() {
     /** @private @const {string} */
-    this.template_ = this.element./*OK*/innerHTML;
+    const shadowTemplate = this.element.cloneNode(true);
+    this.nestedTemplates_ = {};
+    let index = 0;
+    shadowTemplate.content.querySelectorAll('template').forEach(
+        nestedTemplate => {
+          const nestedTemplateKey = `__AMP_NESTED_TEMPLATE_${index}`;
+          this.nestedTemplates_[nestedTemplateKey] =
+              nestedTemplate./*OK*/outerHTML;
+
+          const nestedTemplateAsVariable = document.createTextNode(
+              `{{{${nestedTemplateKey}}}}`);
+          nestedTemplate.parentNode.replaceChild(nestedTemplateAsVariable,
+              nestedTemplate);
+          index++;
+        });
+    this.template_ = shadowTemplate./*OK*/innerHTML;
     mustacheParse(this.template_);
   }
 
   /** @override */
   render(data) {
-    const html = mustacheRender(this.template_, data);
+    const html = mustacheRender(this.template_,
+        Object.assign({}, data, this.nestedTemplates_));
     const sanitized = sanitizeHtml(html);
     const root = this.win.document.createElement('div');
     root./*OK*/innerHTML = sanitized;
