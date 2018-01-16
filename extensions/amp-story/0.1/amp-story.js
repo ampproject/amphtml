@@ -92,10 +92,11 @@ const DESKTOP_HEIGHT_THRESHOLD = 550;
 const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
 
 /**
- * The duration of time (in milliseconds) to wait for a page to be loaded.
+ * The duration of time (in milliseconds) to wait for a page to be loaded,
+ * before the story becomes visible.
  * @const {number}
  */
-const PAGE_LOAD_TIMEOUT_MS = 8000;
+const PAGE_LOAD_TIMEOUT_MS = 5000;
 
 
 /**
@@ -505,9 +506,7 @@ export class AmpStory extends AMP.BaseElement {
       this.buildPaginationButtons_();
     }
 
-    return this.initializePages_()
-        .then(() => this.waitForInitialLoad_())
-        .then(() => this.markStoryAsLoaded_())
+    const storyLayoutPromise = this.initializePages_()
         .then(() => this.buildSystemLayer_())
         .then(() => this.buildHintLayer_())
         .then(() => {
@@ -517,6 +516,13 @@ export class AmpStory extends AMP.BaseElement {
         })
         .then(() => this.switchTo_(firstPageEl.id))
         .then(() => this.preloadPagesByDistance_());
+
+    // Do not block the layout callback on the completion of these promises, as
+    // that prevents descendents from being laid out (and therefore loaded).
+    storyLayoutPromise.then(() => this.waitForInitialLoad_())
+        .then(() => this.markStoryAsLoaded_());
+
+    return storyLayoutPromise;
   }
 
 
@@ -539,7 +545,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   waitForPageLoadOrTimeout_(pagesToWaitFor, opt_timeoutMs) {
     const loadPromise = Promise.all(
-        pagesToWaitFor.map(page => page.waitUntilLoaded()));
+        pagesToWaitFor.map(page => page.whenLoaded()));
 
     if (opt_timeoutMs === undefined) {
       return loadPromise;
@@ -553,8 +559,10 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   markStoryAsLoaded_() {
-    dispatch(this.element, EventType.STORY_LOADED, true);
-    this.element.classList.add(STORY_LOADED_CLASS_NAME);
+    this.mutateElement(() => {
+      dispatch(this.element, EventType.STORY_LOADED, true);
+      this.element.classList.add(STORY_LOADED_CLASS_NAME);
+    });
   }
 
 
@@ -1337,6 +1345,7 @@ export class AmpStory extends AMP.BaseElement {
     if (this.bookend_.isActive()) {
       // Dispaching event instead of calling method directly so that all
       // listeners can respond.
+      dispatch(this.element, EventType.CLOSE_BOOKEND);
     }
     this.switchTo_(dev().assertElement(this.pages_[0].element).id);
   }

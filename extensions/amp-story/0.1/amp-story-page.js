@@ -35,6 +35,7 @@ import {matches, scopedQuerySelectorAll} from '../../../src/dom';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 import {CommonSignals} from '../../../src/common-signals';
+import { map } from '../../../src/utils/object';
 
 
 /**
@@ -195,7 +196,32 @@ export class AmpStoryPage extends AMP.BaseElement {
   waitForMediaLayout_() {
     const mediaSet = scopedQuerySelectorAll(this.element, PAGE_MEDIA_SELECTOR);
     const mediaPromises = Array.prototype.map.call(mediaSet, mediaEl => {
-      return mediaEl.signals().whenSignal(CommonSignals.LOAD_END);
+      return new Promise(resolve => {
+        switch (mediaEl.tagName.toLowerCase()) {
+          case 'amp-img':
+          case 'amp-anim':
+            mediaEl.addEventListener('load', resolve, true /* useCapture */);
+            break;
+          case 'amp-audio':
+          case 'amp-video':
+            if (mediaEl.readyState >= 2) {
+              resolve();
+              return;
+            }
+
+            mediaEl.addEventListener('canplay', resolve, true /* useCapture */);
+            break;
+          default:
+            // Any other tags should not block loading.
+            resolve();
+        }
+
+        // We suppress errors so that Promise.all will still wait for all
+        // promises to complete, even if one has failed.  We do nothing with the
+        // error, as the resource itself and/or code that loads it should handle
+        // the error.
+        mediaEl.addEventListener('error', resolve, true /* useCapture */);
+      });
     });
 
     return Promise.all(mediaPromises);
@@ -203,15 +229,17 @@ export class AmpStoryPage extends AMP.BaseElement {
 
 
   /** @return {!Promise} */
-  waitUntilLoaded() {
+  whenLoaded() {
     return this.loadPromise_;
   }
 
 
   /** @private */
   markPageAsLoaded_() {
-    dispatch(this.element, EventType.PAGE_LOADED, true);
-    this.element.classList.add(PAGE_LOADED_CLASS_NAME);
+    this.mutateElement(() => {
+      dispatch(this.element, EventType.PAGE_LOADED, true);
+      this.element.classList.add(PAGE_LOADED_CLASS_NAME);
+    });
   }
 
 
