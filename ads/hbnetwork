@@ -20,7 +20,7 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Window} global
  * @param {!Object} data
  */
-export function adthrive(global, data) {
+export function hbnetwork(global, data) {
   validateData(data, ['siteId', 'adUnit'], ['sizes']);
   loadScript(global, 'https://www.adwidecenter.com/adlscript/showads.php?idpub='+data.siteId);
 }
