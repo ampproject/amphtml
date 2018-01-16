@@ -195,16 +195,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
 
   /** @private */
-  onPageVisible_() {
-    this.markPageAsLoaded_();
-    this.playAllMedia_();
-    this.advancement_.start();
-    this.maybeStartAnimations();
-    this.reportDevModeErrors_();
-  }
-
-
-  /** @private */
   markPageAsLoaded_() {
     this.element.classList.add(PAGE_LOADED_CLASS_NAME);
   }
