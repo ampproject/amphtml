@@ -73,6 +73,11 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!Promise} */
     this.mediaLayoutPromise_ = this.waitForMediaLayout_();
 
+    /** @private @const {!Promise} */
+    this.loadPromise_ = this.mediaLayoutPromise_.then(() => {
+      this.markPageAsLoaded_();
+    });
+
     /** @private @const {!Promise<!./media-pool.MediaPool>} */
     this.mediaPoolPromise_ = new Promise((resolve, reject) => {
       this.setMediaPool = mediaPool => {
@@ -152,7 +157,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   resumeCallback() {
-    this.markPageAsLoaded_();
     this.updateAudioIcon_();
     this.registerAllMedia_();
 
@@ -184,7 +188,10 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
 
-  /** @private */
+  /**
+   * @return {!Promise}
+   * @private
+   */
   waitForMediaLayout_() {
     const mediaSet = scopedQuerySelectorAll(this.element, PAGE_MEDIA_SELECTOR);
     const mediaPromises = Array.prototype.map.call(mediaSet, mediaEl => {
@@ -195,8 +202,15 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
 
+  /** @return {!Promise} */
+  waitUntilLoaded() {
+    return this.loadPromise_;
+  }
+
+
   /** @private */
   markPageAsLoaded_() {
+    dispatch(this.element, EventType.PAGE_LOADED, true);
     this.element.classList.add(PAGE_LOADED_CLASS_NAME);
   }
 

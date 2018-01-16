@@ -794,13 +794,25 @@ amp-accordion > section[expanded] > :last-child {
 /**
  * amp-story
  */
- amp-story, amp-story-page {
+amp-story[standalone], amp-story-page {
   display: block;
   height: 100vh;
   margin: 0;
   padding: 0;
   overflow: hidden;
   width: 100%;
+}
+
+amp-story[standalone] {
+  background-color: #fff !important;
+}
+
+/**
+ * Position pages in unloaded stories offscreen along the X-axis (so as not to
+ * conflict with the Y positioning used for resource prioritization).
+ */
+amp-story[standalone]:not(.i-amphtml-story-loaded) > amp-story-page {
+  transform: translateX(100vh) !important;
 }
 
 amp-story-page {

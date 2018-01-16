@@ -91,6 +91,19 @@ const DESKTOP_HEIGHT_THRESHOLD = 550;
 /** @private @const {number} */
 const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
 
+/**
+ * The duration of time (in milliseconds) to wait for a page to be loaded.
+ * @const {number}
+ */
+const PAGE_LOAD_TIMEOUT_MS = 8000;
+
+
+/**
+ * CSS class for an amp-story that indicates the initial load for the story has
+ * completed.
+ * @const {string}
+ */
+const STORY_LOADED_CLASS_NAME = 'i-amphtml-story-loaded';
 
 /** @const {!Object<string, number>} */
 const MAX_MEDIA_ELEMENT_COUNTS = {
@@ -226,6 +239,9 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {!MediaPool} */
     this.mediaPool_ = new MediaPool(this.win, MAX_MEDIA_ELEMENT_COUNTS,
         element => this.getElementDistanceFromActivePage_(element));
+
+    /** @private @const {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(this.win);
   }
 
 
@@ -490,6 +506,8 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     return this.initializePages_()
+        .then(() => this.waitForInitialLoad_())
+        .then(() => this.markStoryAsLoaded_())
         .then(() => this.buildSystemLayer_())
         .then(() => this.buildHintLayer_())
         .then(() => {
@@ -502,11 +520,48 @@ export class AmpStory extends AMP.BaseElement {
   }
 
 
+  /** @private */
+  waitForInitialLoad_() {
+    const pagesToWaitFor = this.isDesktop_()
+        ? [this.pages_[0], this.pages_[1]]
+        : [this.pages_[0]];
+
+    return this.waitForPageLoadOrTimeout_(pagesToWaitFor, PAGE_LOAD_TIMEOUT_MS);
+  }
+
+  /**
+   * @param {!Array<!AmpStoryPage>} pagesToWaitFor The page(s) to wait for.
+   * @param {number=} opt_timeoutMs The maximum amount of time to wait, in
+   *     milliseconds.  Waits indefinitely if unspecified.
+   * @return {!Promise} A promise that is resolved when the page is loaded or
+   *     the timeout has been exceeded, whichever happens first.
+   * @private
+   */
+  waitForPageLoadOrTimeout_(pagesToWaitFor, opt_timeoutMs) {
+    const loadPromise = Promise.all(
+        pagesToWaitFor.map(page => page.waitUntilLoaded()));
+
+    if (opt_timeoutMs === undefined) {
+      return loadPromise;
+    }
+
+    return Promise.race([
+      loadPromise,
+      this.timer_.promise(opt_timeoutMs),
+    ]);
+  }
+
+  /** @private */
+  markStoryAsLoaded_() {
+    dispatch(this.element, EventType.STORY_LOADED, true);
+    this.element.classList.add(STORY_LOADED_CLASS_NAME);
+  }
+
+
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.CONTAINER;
   }
-
 
   /** @override */
   prerenderAllowed() {
@@ -1282,7 +1337,6 @@ export class AmpStory extends AMP.BaseElement {
     if (this.bookend_.isActive()) {
       // Dispaching event instead of calling method directly so that all
       // listeners can respond.
-      dispatch(this.element, EventType.CLOSE_BOOKEND);
     }
     this.switchTo_(dev().assertElement(this.pages_[0].element).id);
   }
