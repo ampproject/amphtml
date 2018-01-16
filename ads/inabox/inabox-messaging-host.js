@@ -230,14 +230,15 @@ export class InaboxMessagingHost {
    *
    * @param source {!Window}
    * @param sentinel {string}
-   * @return {?Element}
+   * @return {?HTMLIFrameElement}
    * @private
    */
   getFrameElement_(source, sentinel) {
     if (this.iframeMap_[sentinel]) {
       return this.iframeMap_[sentinel];
     }
-    const measureableFrame = this.getMeasureableFrame(source);
+    const measureableFrame =
+        /** @type {HTMLIFrameElement} */(this.getMeasureableFrame(source));
     const measureableWin = measureableFrame.contentWindow;
     for (let i = 0; i < this.iframes_.length; i++) {
       const iframe = this.iframes_[i];
@@ -271,13 +272,9 @@ export class InaboxMessagingHost {
     // hierarchy. If win is not nested within x-domain framing, then
     // this loop breaks immediately.
     let topXDomainWin;
-    for (let j = 0, tempWin = win; j < 10 && tempWin != tempWin.top;
-      j++, tempWin = tempWin.parent) {
-      if (canInspectWindow(tempWin)) {
-        break;
-      }
-      topXDomainWin = tempWin;
-    }
+    for (let j = 0, tempWin = win;
+      j < 10 && tempWin != tempWin.top && !canInspectWindow_(tempWin);
+      j++, tempWin = tempWin.parent, topXDomainWin = tempWin) {}
     // If topXDomainWin exists, we know that the frame we want to measure
     // is a x-domain frame. Unfortunately, you can not access properties
     // on a x-domain window, so we can not do window.frameElement, and
@@ -285,8 +282,8 @@ export class InaboxMessagingHost {
     // over that parent's child iframes until we find the frame element
     // that corresponds to topXDomainWin.
     if (!!topXDomainWin) {
-      const parent = topXDomainWin.parent;
-      const iframes = parent.document.querySelectorAll('iframe');
+      const iframes =
+            topXDomainWin.parent.document.querySelectorAll('iframe');
       for (let k = 0, frame = iframes[k]; k < iframes.length;
         k++, frame = iframes[k]) {
         if (frame.contentWindow == topXDomainWin) {
@@ -304,11 +301,11 @@ export class InaboxMessagingHost {
  * Returns true if win's properties can be accessed and win is defined.
  * This functioned is used to determine if a window is cross-domained
  * from the perspective of the current window.
- * @param {Window} win
+ * @param {!Window} win
  * @return {boolean}
  * @private
  */
-function canInspectWindow(win) {
+function canInspectWindow_(win) {
   try {
     const /* eslint no-unused-vars: 0 */ unused =
       !!win.location.href && win['test'];
