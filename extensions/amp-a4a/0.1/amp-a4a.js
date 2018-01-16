@@ -33,7 +33,7 @@ import {dev, user, duplicateErrorIfNecessary} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, isEnumValue} from '../../../src/types';
-import {utf8Decode} from '../../../src/utils/bytes';
+import {utf8DecodeSync} from '../../../src/utils/bytes';
 import {getBinaryType, isExperimentOn} from '../../../src/experiments';
 import {setStyle} from '../../../src/style';
 import {
@@ -797,7 +797,7 @@ export class AmpA4A extends AMP.BaseElement {
           // viewport but cannot wait on promise.  Sadly, need a state a
           // variable.
           this.isVerifiedAmpCreative_ = !!creative;
-          return creative && utf8Decode(creative);
+          return creative && utf8DecodeSync(creative);
         })
         // This block returns CreativeMetaDataDef iff the creative was verified
         // as AMP and could be properly parsed for friendly iframe render.

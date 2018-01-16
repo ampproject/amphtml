@@ -31,7 +31,7 @@ import {
 import {
   EXPERIMENT_ATTRIBUTE,
 } from '../../../../ads/google/a4a/utils';
-import {utf8Encode} from '../../../../src/utils/bytes';
+import {utf8EncodeSync} from '../../../../src/utils/bytes';
 import {BaseElement} from '../../../../src/base-element';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
@@ -264,7 +264,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
             method: 'GET',
             credentials: 'include',
           }).returns(Promise.resolve({
-            arrayBuffer: () => utf8Encode(creative),
+            arrayBuffer: () => utf8EncodeSync(creative),
             bodyUsed: false,
             headers: new FetchResponseHeaders({
               getResponseHeader(name) {
