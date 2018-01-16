@@ -166,7 +166,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'eventProps': '',
     },
     'requests': {
-      'base': 'https://b.pre.cnzz.com/utrack?' +
+      'base': 'https://b.cnzz.com/utrack?' +
         '&_siteid=${siteid}' +
         '&_distinct_id=${clientId(umeng_amp_id)}' +
         '&_t=${timestamp}' +
@@ -181,8 +181,8 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
     'transport': {
       'beacon': false,
-      'xhrpost': true,
-      'image': false,
+      'xhrpost': false,
+      'image': true,
     },
   },
 
