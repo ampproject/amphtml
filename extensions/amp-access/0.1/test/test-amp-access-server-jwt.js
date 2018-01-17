@@ -34,7 +34,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
-    clock = lolex.install();
+    clock = lolex.install({target: win});
 
     validConfig = {
       'authorization': 'https://acme.com/a?rid=READER_ID',
@@ -277,8 +277,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
         });
       });
 
-      // TODO(dvoytenko, #12486): Make this test work with lolex v2.
-      it.skip('should fail when authorize-and-fill times out', () => {
+      it('should fail when authorize-and-fill times out', () => {
         adapter.serviceUrl_ = 'http://localhost:8000/af';
         const authdata = {};
         const jwt = {'amp_authdata': authdata};
@@ -408,8 +407,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
         });
       });
 
-      // TODO(dvoytenko, #12486): Make this test work with lolex v2.
-      it.skip('should fail when JWT fetch times out', () => {
+      it('should fail when JWT fetch times out', () => {
         contextMock.expects('buildUrl')
             .withExactArgs(
                 'https://acme.com/a?rid=READER_ID',
