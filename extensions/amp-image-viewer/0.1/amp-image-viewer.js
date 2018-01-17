@@ -270,7 +270,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.srcset_ = srcsetFromElement(this.sourceElement_);
 
     ARIA_ATTRIBUTES.forEach(key => {
-      if (this.sourceElement_.hasOwnProperty(key)) {
+      if (this.sourceElement_.hasAttribute(key)) {
         this.image_.setAttribute(key, this.sourceElement_[key]);
       }
     });
