@@ -74,13 +74,13 @@ export class AmpImageViewer extends AMP.BaseElement {
     /** @private {!../../../src/layout-rect.LayoutRectDef} */
     this.imageBox_ = layoutRectLtwh(0, 0, 0, 0);
 
-    /** @private {?UnlistenDef} */
+    /** @private {!UnlistenDef|null} */
     this.unlistenResize_ = null;
 
-    /** @private {?UnlistenDef} */
+    /** @private {!UnlistenDef|null} */
     this.unlistenOrientationChange_ = null;
 
-    /** @private {?UnlistenDef} */
+    /** @private {!UnlistenDef|null} */
     this.unlistenOnSwipePan_ = null;
 
     /** @private {number} */
@@ -163,8 +163,24 @@ export class AmpImageViewer extends AMP.BaseElement {
   }
 
   /** @override */
+  pauseCallback() {
+    this.cleanupGestures_();
+    this.cleanupOnResizeHandler_();
+  }
+
+  /** @override */
+  resumeCallback() {
+    if (!this.gestures_) {
+      this.setupGestures_();
+    }
+    if (!this.cleanupOnResizeHandler_) {
+      this.registerOnResizeHandler_();
+    }
+  }
+
+  /** @override */
   unlayoutCallback() {
-    this.gestures_.cleanup();
+    this.cleanupGestures_();
     this.cleanupOnResizeHandler_();
     return true;
   }
@@ -336,6 +352,14 @@ export class AmpImageViewer extends AMP.BaseElement {
       this.image_.setAttribute('src', src);
       return this.image_;
     });
+  }
+
+  /** @private */
+  cleanupGestures_() {
+    if (this.gestures_) {
+      this.gestures_.cleanup();
+      this.gestures_ = null;
+    }
   }
 
   /** @private */
