@@ -18,8 +18,9 @@
 const gulp = require('gulp-help')(require('gulp'));
 const path = require('path');
 const srcGlobs = require('../config').presubmitGlobs;
-const util = require('gulp-util');
 const through2 = require('through2');
+const colors = require('ansi-colors');
+const log = require('fancy-log');
 
 const dedicatedCopyrightNoteSources = /(\.js|\.css|\.go)$/;
 
@@ -69,6 +70,11 @@ const forbiddenTerms = {
   'describes.*\\.only': '',
   'it\\.only': '',
   'Math\.random[^;()]*=': 'Use Sinon to stub!!!',
+  'gulp-util': {
+    message: '`gulp-util` will be deprecated soon. See ' +
+        'https://medium.com/gulpjs/gulp-util-ca3b1f9f9ac5 ' +
+        'for a list of alternatives.',
+  },
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
   },
@@ -946,7 +952,7 @@ function matchTerms(file, terms) {
         }
       }
 
-      util.log(util.colors.red('Found forbidden: "' + match[0] +
+      log(colors.red('Found forbidden: "' + match[0] +
           '" in ' + relative + ':' + line + ':' + column));
       if (typeof terms[term] === 'string') {
         fix = terms[term];
@@ -956,9 +962,9 @@ function matchTerms(file, terms) {
 
       // log the possible fix information if provided for the term.
       if (fix) {
-        util.log(util.colors.blue(fix));
+        log(colors.blue(fix));
       }
-      util.log(util.colors.blue('=========='));
+      log(colors.blue('=========='));
     }
 
     return hasTerm;
@@ -1021,9 +1027,9 @@ function isMissingTerms(file) {
 
     const matches = contents.match(new RegExp(term));
     if (!matches) {
-      util.log(util.colors.red('Did not find required: "' + term +
+      log(colors.red('Did not find required: "' + term +
           '" in ' + file.relative));
-      util.log(util.colors.blue('=========='));
+      log(colors.blue('=========='));
       return true;
     }
     return false;
@@ -1047,11 +1053,11 @@ function checkForbiddenAndRequiredTerms() {
       }))
       .on('end', function() {
         if (forbiddenFound) {
-          util.log(util.colors.blue(
+          log(colors.blue(
               'Please remove these usages or consult with the AMP team.'));
         }
         if (missingRequirements) {
-          util.log(util.colors.blue(
+          log(colors.blue(
               'Adding these terms (e.g. by adding a required LICENSE ' +
             'to the file)'));
         }
