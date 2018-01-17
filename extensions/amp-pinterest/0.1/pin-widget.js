@@ -110,12 +110,17 @@ export class PinWidget {
       'data-pin-log': 'embed_pin',
     }});
 
+    // If no alternate text is set, set it to the title gotten from the pin data
+    if (!this.alt)
+      this.alt = pin['attribution']['title'];
+
     const img = Util.make(this.element.ownerDocument, {'img': {
       'src': imgUrl,
       'className': '-amp-pinterest-embed-pin-image',
       'data-pin-no-hover': true,
       'data-pin-href': 'https://www.pinterest.com/pin/' + pin['id'] + '/',
       'data-pin-log': 'embed_pin_img',
+      'alt': this.alt,
     }});
     container.appendChild(img);
 
@@ -237,6 +242,7 @@ export class PinWidget {
     this.pinUrl = this.element.getAttribute('data-url');
     this.width = this.element.getAttribute('data-width');
     this.layout = this.element.getAttribute('layout');
+    this.alt = this.element.getAttribute('alt');
 
     this.pinId = '';
     try {

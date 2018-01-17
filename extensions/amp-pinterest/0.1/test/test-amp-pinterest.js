@@ -25,7 +25,7 @@ describes.realWin('amp-pinterest', {
   },
 }, env => {
 
-  function getPin(pinDo, pinUrl, pinMedia, pinDescription) {
+  function getPin(pinDo, pinUrl, pinMedia, pinDescription, pinAlt) {
     const div = document.createElement('div');
     env.win.document.body.appendChild(div);
 
@@ -34,6 +34,7 @@ describes.realWin('amp-pinterest', {
     pin.setAttribute('data-url', pinUrl);
     pin.setAttribute('data-media', pinMedia);
     pin.setAttribute('data-description', pinDescription);
+    pin.setAttribute('alt', pinAlt);
     div.appendChild(pin);
     return pin.implementation_.layoutCallback().then(() => {
       return pin;
@@ -44,7 +45,8 @@ describes.realWin('amp-pinterest', {
     return getPin('buttonPin',
         'http://www.flickr.com/photos/kentbrew/6851755809/',
         'http://c2.staticflickr.com/8/7027/6851755809_df5b2051c9_b.jpg',
-        'Next stop: Pinterest'
+        'Next stop: Pinterest',
+        'Hands making heart over Pinterest logo'
     ).then(pin => {
       const a = pin.querySelector('a');
       const href = a.href.replace(/&guid=\w+/, '');
@@ -57,4 +59,18 @@ describes.realWin('amp-pinterest', {
         'scription=Next%20stop%3A%20Pinterest');
     });
   });
+
+  it('sets alternate text', () => {
+    return getPin('embedPin',
+        'https://www.pinterest.com/pin/99360735500167749/',
+        null,
+        null,
+        'Hands making heart over Pinterest logo'
+    ).then(pin => {
+      const img = pin.querySelector('img');
+      img.getAttribute('alt').to.equal('Hands making heart over ' +
+        'Pinterest logo');
+    });
+  });
+
 });
