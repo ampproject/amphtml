@@ -20,7 +20,6 @@ import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest} from '../../../src/dom';
 import {hasTapAction, timeStrToMillis} from './utils';
-import {AmpStoryPage} from './amp-story-page';
 
 
 /** @private @const {number} */
@@ -104,6 +103,7 @@ export class AdvancementConfig {
    */
   start() {
     this.isRunning_ = true;
+    // this.onProgressUpdate();
   }
 
   /**
