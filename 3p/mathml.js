@@ -28,7 +28,7 @@ import {user} from '../src/log';
  */
 function getMathmlJs(global, scriptSource, cb) {
  writeScript(global, scriptSource, function() {
-    cb(global.gist);
+   cb(global.MathJax);
   });
 }
 
