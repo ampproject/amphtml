@@ -53,7 +53,7 @@ export function mathml(global, data) {
       div.setAttribute('id','mathmlformula');
       div.innerHTML = data.formula;
       document.body.appendChild(div);
-      MathJax.Hub.Queue( function () {
+      mathjax.Hub.Queue( function () {
         const rendered = document.getElementById('MathJax-Element-1-Frame');
         context.requestResize(
                 rendered./*OK*/offsetWidth + 20,
