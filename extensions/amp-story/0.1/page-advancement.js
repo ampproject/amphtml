@@ -215,6 +215,13 @@ class MultipleAdvancementConfig extends AdvancementConfig {
   }
 
   /** @override */
+  addOnTapNavigationListener(onTapNavigationListener) {
+    this.advancementModes_.forEach(advancementMode => {
+      advancementMode.addOnTapNavigationListener(onTapNavigationListener);
+    });
+  }
+
+  /** @override */
   addAdvanceListener(advanceListener) {
     this.advancementModes_.forEach(advancementMode => {
       advancementMode.addAdvanceListener(advanceListener);
