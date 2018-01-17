@@ -19,7 +19,7 @@ import {Animation} from '../../../src/animation';
 import {bezierCurve} from '../../../src/curve';
 import {listen} from '../../../src/event-helper';
 import {Gestures} from '../../../src/gesture';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {
   DoubletapRecognizer,
   SwipeXYRecognizer,
@@ -125,7 +125,10 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.vsync_ = this.getVsync();
     this.element.classList.add('i-amphtml-image-lightbox-viewer');
     const children = this.getRealChildren();
-    dev().assert(children.length == 1);
+    user().assert(
+        children.length == 1 && children[0].tagName == 'AMP-IMG',
+        'amp-image-viewer should have an amp-img as its one and only child'
+    );
     this.sourceElement_ = children[0];
     this.setAsOwner(this.sourceElement_);
   }
@@ -142,20 +145,20 @@ export class AmpImageViewer extends AMP.BaseElement {
         .then(() => {
           return this.vsync_.mutatePromise(() => {
             if (!this.image_) {
-              this.image_ = this.win.document.createElement('img');
+              this.image_ = this.element.ownerDocument.createElement('img');
               this.image_.classList.add('i-amphtml-image-viewer-image');
 
               this.init_();
               this.element.appendChild(this.image_);
-
               this.element.removeChild(this.sourceElement_);
               this.sourceElement_ = null;
             }
-            this.setupGestures_();
-            this.measure();
-            this.updateSrc_();
-            this.registerOnResizeHandler_();
           });
+        }).then(() => {
+          return this.measure();
+        }).then(() => {
+          this.setupGestures_();
+          this.registerOnResizeHandler_();
         });
   }
 
@@ -331,7 +334,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     // and then naturally upgrade to a higher quality image.
     return Services.timerFor(this.win).promise(1).then(() => {
       this.image_.setAttribute('src', src);
-      return Promise.resolve(this.image_);
+      return this.image_;
     });
   }
 
