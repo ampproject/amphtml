@@ -18,7 +18,8 @@
 const exec = require('../exec').exec;
 const getStderr = require('../exec').getStderr;
 const gulp = require('gulp-help')(require('gulp'));
-const util = require('gulp-util');
+const colors = require('ansi-colors');
+const log = require('fancy-log');
 
 
 /**
@@ -27,18 +28,18 @@ const util = require('gulp-util');
 function updatePackages() {
   const integrityCmd = 'yarn check --integrity';
   if (getStderr(integrityCmd).trim() != '') {
-    util.log(util.colors.yellow('WARNING:'), 'The packages in',
-        util.colors.cyan('node_modules'), 'do not match',
-        util.colors.cyan('package.json.'));
+    log(colors.yellow('WARNING:'), 'The packages in',
+        colors.cyan('node_modules'), 'do not match',
+        colors.cyan('package.json.'));
     const verifyTreeCmd = 'yarn check --verify-tree';
     exec(verifyTreeCmd);
-    util.log('Running', util.colors.cyan('yarn'), 'to update packages...');
+    log('Running', colors.cyan('yarn'), 'to update packages...');
     const yarnCmd = 'yarn';
     exec(yarnCmd);
   } else {
     if (!process.env.TRAVIS) {
-      util.log(util.colors.green('All packages in',
-          util.colors.cyan('node_modules'), 'are up to date.'));
+      log(colors.green('All packages in'),
+          colors.cyan('node_modules'), colors.green('are up to date.'));
     }
   }
 }
