@@ -307,7 +307,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       const customMacros = impl.getCustomRealTimeConfigMacros_();
       expect(customMacros.PAGEVIEWID()).to.equal(docInfo.pageViewId);
       expect(customMacros.HREF()).to.equal(env.win.location.href);
-      expect(customMacros.TGT()).to.deep.equal(json['targeting']);
+      expect(customMacros.TGT()).to.equal(JSON.stringify(json['targeting']));
       Object.keys(macros).forEach(macro => {
         expect(customMacros.ATTR(macro)).to.equal(macros[macro]);
       });
@@ -325,7 +325,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
           element, env.win.document, env.win);
       impl.populateAdUrlState();
       const customMacros = impl.getCustomRealTimeConfigMacros_();
-      expect(customMacros.TGT()).to.deep.equal(json['targeting']);
+      expect(customMacros.TGT()).to.equal(JSON.stringify(json['targeting']));
     });
   });
 });
