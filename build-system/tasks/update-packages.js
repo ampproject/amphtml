@@ -38,8 +38,8 @@ function updatePackages() {
     exec(yarnCmd);
   } else {
     if (!process.env.TRAVIS) {
-      log(colors.green('All packages in',
-          colors.cyan('node_modules'), 'are up to date.'));
+      log(colors.green('All packages in'),
+          colors.cyan('node_modules'), colors.green('are up to date.'));
     }
   }
 }
