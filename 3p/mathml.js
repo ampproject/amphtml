@@ -52,7 +52,7 @@ export function mathml(global, data) {
       const div = document.createElement('div');
       div.setAttribute('id','mathmlformula');
       div.textContent = data.formula;
-      document.body.appendChild(div);
+      global.document.body.appendChild(div);
       mathjax.Hub.Queue( function () {
         const rendered = document.getElementById('MathJax-Element-1-Frame');
         context.requestResize(
