@@ -16,6 +16,7 @@
 
 import {validateData} from '../3p/3p';
 import {parseUrl} from '../src/url';
+import {setStyles} from '../src/style';
 
 /**
  * @param {!Window} global
@@ -43,7 +44,10 @@ export function cedato(global, data) {
   /* Create div for ad to target */
   const playerDiv = global.document.createElement('div');
   playerDiv.id = 'video' + data.id + cb;
-  playerDiv.style = 'width: 100%; height: 100%;';
+  setStyles(playerDiv, {
+    width: '100%',
+    height: '100%',
+  });
   const playerScript = global.document.createElement('script');
   const srcParams = [
     'https://p.' + (data.servingDomain || 'algovid.com') + '/player/player.js',
