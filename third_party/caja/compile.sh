@@ -18,15 +18,18 @@ pushd $CAJA_HOME
 ant MinifiedJs
 popd
 
+# Add generation message to top of file, remove references to window['html'] and window['URI']
 echo "/* Generated from CAJA Sanitizer library commit $GIT_COMMIT */" > html-sanitizer.js
 echo "" >> html-sanitizer.js
 cat $CAJA_HOME/ant-lib/com/google/caja/plugin/html-sanitizer-bundle.js \
     | grep -v "window\['html" | grep -v "window\['URI"  >> html-sanitizer.js
-echo "" >> html-sanitizer.js
-echo "export var htmlSanitizer = html;" >> html-sanitizer.js
 
-# Change html attribute regex to optionally accept bracketed attribute names for amp-bind
-OLD_PATTERN="'([-.:\\\\w]+)'"
-NEW_PATTERN="'(\\\\\\\\[[-.:\\\\\\\\w]+\\\\\\\\]|[-.:\\\\\\\\w]+)'"  # literally '(\\[[-.:\\w]+\\]|[-.:\\w]+)'
-LINENUMBER=$(grep -F -n "$OLD_PATTERN" html-sanitizer.js | cut -d ':' -f1)
-sed -i "${LINENUMBER}s/'.*'/$NEW_PATTERN/" html-sanitizer.js
+# Remove trailing whitespace from generated file
+sed -i 's/[[:space:]]*$//' html-sanitizer.js
+
+# Apply all the patches in third_party/caja/patches/
+for patchfile in patches/*.patch
+do
+  echo "Applying patch $patchfile"
+  patch < $patchfile
+done
