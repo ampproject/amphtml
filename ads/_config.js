@@ -270,6 +270,8 @@ export const adConfig = {
     preconnect: 'https://ad.caprofitx.adtdp.com',
   },
 
+  cedato: {},
+
   chargeads: {},
 
   colombia: {
