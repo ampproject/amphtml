@@ -105,7 +105,7 @@ export class AmpList extends AMP.BaseElement {
         const items = isArray(src) ? src : [src];
         this.renderItems_(items);
         // Remove the 'src' now that local data is used to render the list.
-        this.element.setAttribute('src', 'Yo');
+        this.element.setAttribute('src', '');
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
       }
