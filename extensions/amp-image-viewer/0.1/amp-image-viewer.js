@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,71 +14,53 @@
  * limitations under the License.
  */
 
-/**
- * This class is responsible providing all operations necessary for viewing
- * an image, such as full-bleed display, zoom and pan, etc.
- * // TODO (cathyzhu): figure out what package visibility means
- * @package  Visible for testing only!
- */
-import {Animation} from './animation';
-import {Gestures} from './gesture';
+import {CSS} from '../../../build/amp-image-viewer-0.1.css';
+import {Animation} from '../../../src/animation';
+import {bezierCurve} from '../../../src/curve';
+import {listen} from '../../../src/event-helper';
+import {Gestures} from '../../../src/gesture';
+import {dev, user} from '../../../src/log';
 import {
   DoubletapRecognizer,
   SwipeXYRecognizer,
   TapzoomRecognizer,
   PinchRecognizer,
-} from './gesture-recognizers';
-import {bezierCurve} from './curve';
-import {isLoaded} from './event-helper';
-import {Services} from './services';
-import {continueMotion} from './motion';
-import {srcsetFromElement} from './srcset';
+} from '../../../src/gesture-recognizers';
+import {Layout} from '../../../src/layout';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
-} from './layout-rect';
-import * as st from './style';
-import * as tr from './transition';
+} from '../../../src/layout-rect';
+import {continueMotion} from '../../../src/motion';
+import {Services} from '../../../src/services';
+import {srcsetFromElement} from '../../../src/srcset';
+import {debounce} from '../../../src/utils/rate-limit';
+import * as st from '../../../src/style';
+import * as tr from '../../../src/transition';
+import {CommonSignals} from '../../../src/common-signals';
 
-/** @private @const {!./curve.CurveDef} */
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
+const TAG = 'amp-image-viewer';
 
-export class ImageViewer {
-  /**
-   * @param {!./base-element.BaseElement} lightbox
-   * @param {!Window} win
-   * @param {function(T, number=):Promise<T>} parentLoadPromise
-   * @template T
-   */
-  constructor(lightbox, win, parentLoadPromise) {
-    /** @private {!./base-element.BaseElement} */
-    this.lightbox_ = lightbox;
+const ARIA_ATTRIBUTES = ['aria-label', 'aria-describedby',
+  'aria-labelledby'];
 
-    /** @const {!Window} */
-    this.win = win;
+export class AmpImageViewer extends AMP.BaseElement {
 
-    /** @private {function(T, number=):Promise<T>} */
-    this.loadPromise_ = parentLoadPromise;
+  /** @param {!AmpElement} element */
+  constructor(element) {
 
-    /** @private {!Element} */
-    this.viewer_ = lightbox.element.ownerDocument.createElement('div');
-    this.viewer_.classList.add('i-amphtml-image-lightbox-viewer');
+    super(element);
 
-    /** @private {!Element} */
-    this.image_ = lightbox.element.ownerDocument.createElement('img');
-    this.image_.classList.add('i-amphtml-image-lightbox-viewer-image');
-    this.viewer_.appendChild(this.image_);
+    /** @private {?Element} */
+    this.image_ = null;
 
-    /** @private {./srcset.Srcset} */
+    /** @private {?../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = null;
+
+    /** @private {?../../../src/srcset.Srcset} */
     this.srcset_ = null;
-
-    /** @private {!Object} */
-    this.ariaAttributes_ = {
-      'alt': null,
-      'aria-label': null,
-      'aria-labelledby': null,
-    };
 
     /** @private {number} */
     this.sourceWidth_ = 0;
@@ -86,11 +68,20 @@ export class ImageViewer {
     /** @private {number} */
     this.sourceHeight_ = 0;
 
-    /** @private {./layout-rect.LayoutRectDef} */
-    this.viewerBox_ = layoutRectLtwh(0, 0, 0, 0);
+    /** @private {!../../../src/layout-rect.LayoutRectDef} */
+    this.elementBox_ = layoutRectLtwh(0, 0, 0, 0);
 
-    /** @private {./layout-rect.LayoutRectDef} */
+    /** @private {!../../../src/layout-rect.LayoutRectDef} */
     this.imageBox_ = layoutRectLtwh(0, 0, 0, 0);
+
+    /** @private {!UnlistenDef|null} */
+    this.unlistenResize_ = null;
+
+    /** @private {!UnlistenDef|null} */
+    this.unlistenOrientationChange_ = null;
+
+    /** @private {!UnlistenDef|null} */
+    this.unlistenOnSwipePan_ = null;
 
     /** @private {number} */
     this.scale_ = 1;
@@ -102,7 +93,6 @@ export class ImageViewer {
     this.minScale_ = 1;
     /** @private {number} */
     this.maxScale_ = 2;
-
     /** @private {number} */
     this.startX_ = 0;
     /** @private {number} */
@@ -119,61 +109,104 @@ export class ImageViewer {
     this.maxX_ = 0;
     /** @private {number} */
     this.maxY_ = 0;
-    /** @private {?./gesture.Gestures} */
-    this.gestures_ = null;
-    /** @private {?function()} */
-    this.unlistenOnSwipePan_ = null;
 
-    /** @private {?./motion.Motion} */
+    /** @private {?../../../src/gesture.Gestures} */
+    this.gestures_ = null;
+
+    /** @private {?../../../src/motion.Motion} */
     this.motion_ = null;
 
-    this.setupGestures_();
+    /** @private {?Element} */
+    this.sourceElement_ = null;
   }
 
-  /**
-   * Returns the root element of the image viewer.
-   * @return {!Element}
-   */
-  getElement() {
-    return this.viewer_;
+  /** @override */
+  buildCallback() {
+    this.vsync_ = this.getVsync();
+    this.element.classList.add('i-amphtml-image-lightbox-viewer');
+    const children = this.getRealChildren();
+    user().assert(
+        children.length == 1 && children[0].tagName == 'AMP-IMG',
+        'amp-image-viewer should have an amp-img as its one and only child'
+    );
+    this.sourceElement_ = children[0];
+    this.setAsOwner(this.sourceElement_);
   }
 
-  /**
-   * Returns the img element of the image viewer.
-   * @return {!Element}
-   */
-  getImage() {
-    return this.image_;
+  /** @override */
+  layoutCallback() {
+    let elementLayoutPromise = Promise.resolve();
+    if (this.sourceElement_) {
+      this.scheduleLayout(this.sourceElement_);
+      elementLayoutPromise = this.sourceElement_.signals()
+          .whenSignal(CommonSignals.LOAD_END);
+    }
+    return elementLayoutPromise
+        .then(() => {
+          return this.vsync_.mutatePromise(() => {
+            if (!this.image_) {
+              this.image_ = this.element.ownerDocument.createElement('img');
+              this.image_.classList.add('i-amphtml-image-viewer-image');
+
+              this.init_();
+              this.element.appendChild(this.image_);
+              this.element.removeChild(this.sourceElement_);
+              this.sourceElement_ = null;
+            }
+          });
+        }).then(() => {
+          return this.measure();
+        }).then(() => {
+          this.setupGestures_();
+          this.registerOnResizeHandler_();
+        });
   }
 
-  /**
-   * Returns the boundaries of the viewer.
-   * @return {!./layout-rect.LayoutRectDef}
-   */
-  getViewerBox() {
-    return this.viewerBox_;
+  /** @override */
+  pauseCallback() {
+    this.cleanupGestures_();
+    this.cleanupOnResizeHandler_();
+  }
+
+  /** @override */
+  resumeCallback() {
+    if (!this.gestures_) {
+      this.setupGestures_();
+    }
+    if (!this.cleanupOnResizeHandler_) {
+      this.registerOnResizeHandler_();
+    }
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    this.cleanupGestures_();
+    this.cleanupOnResizeHandler_();
+    return true;
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return layout == Layout.FILL;
+  }
+
+  /** @override */
+  isRelayoutNeeded() {
+    return true;
   }
 
   /**
    * Returns the boundaries of the image element.
-   * @return {!./layout-rect.LayoutRectDef}
+   * @return {!../../../src/layout-rect.LayoutRectDef}
    */
   getImageBox() {
     return this.imageBox_;
   }
 
   /**
-   * Returns true if the image is enlarged and not at its original scale
-   * @return {boolean}
-   */
-  isScaled() {
-    return this.scale_ !== 1;
-  }
-
-  /**
    * Returns the boundaries of the image element with the offset if it was
    * moved by a gesture.
-   * @return {!./layout-rect.LayoutRectDef}
+   * @return {!../../../src/layout-rect.LayoutRectDef}
    */
   getImageBoxWithOffset() {
     if (this.posX_ == 0 && this.posY_ == 0) {
@@ -183,66 +216,65 @@ export class ImageViewer {
   }
 
   /**
-   * Resets the image viewer to the initial state.
+   * Registers a onResize handler to resize the ImageViewer whenever
+   * the screen size or mobile orientation changes.
+   * @private
    */
-  reset() {
-    this.image_.setAttribute('src', '');
-    Object.keys(this.ariaAttributes_).forEach(key => {
-      this.image_.removeAttribute(key);
-      this.ariaAttributes_[key] = null;
+  // TODO (cathyxz): test on mobile and verify this works.
+  registerOnResizeHandler_() {
+    const platform = Services.platformFor(this.win);
+
+    // Special case for iOS browsers due to Webkit bug #170595
+    // https://bugs.webkit.org/show_bug.cgi?id=170595
+    // Delay the onResize by 500 ms to ensure correct height and width
+    const debouncedOnResize = debounce(this.win, () => this.measure(), 500);
+
+    // Register an onResize handler to resize the image viewer
+    this.unlistenResize_ = this.getViewport().onResize(() => {
+      if (platform.isIos() && platform.isSafari()) {
+        debouncedOnResize();
+      } else {
+        this.measure();
+      }
     });
-    this.image_.removeAttribute('aria-describedby');
-    this.srcset_ = null;
-    this.imageBox_ = layoutRectLtwh(0, 0, 0, 0);
-    this.sourceWidth_ = 0;
-    this.sourceHeight_ = 0;
 
-    this.maxSeenScale_ = 1;
-    this.scale_ = 1;
-    this.startScale_ = 1;
-    this.maxScale_ = 2;
-
-    this.startX_ = 0;
-    this.startY_ = 0;
-    this.posX_ = 0;
-    this.posY_ = 0;
-    this.minX_ = 0;
-    this.minY_ = 0;
-    this.maxX_ = 0;
-    this.maxY_ = 0;
-
-    if (this.motion_) {
-      this.motion_.halt();
+    // iOS non-safari browsers do not reliably fire onResize on orientation
+    // change, so listen to orientationchange to trigger resize
+    if (platform.isIos() && !platform.isSafari()) {
+      this.unlistenOrientationChange_ = listen(this.win,
+          'orientationchange', debouncedOnResize);
     }
-    this.motion_ = null;
+  }
+
+  /**
+   * @private
+   */
+  cleanupOnResizeHandler_() {
+    if (this.unlistenResize_) {
+      this.unlistenResize_();
+    }
+
+    if (this.unlistenOrientationChange_) {
+      this.unlistenOrientationChange_();
+    }
   }
 
   /**
    * Initializes the image viewer to the target image element such as
    * "amp-img". The target image element may or may not yet have the img
    * element initialized.
-   * @param {!Element} sourceElement
-   * @param {?Element} sourceImage
    */
-  init(sourceElement, sourceImage = null) {
-    this.sourceWidth_ = sourceElement./*OK*/offsetWidth;
-    this.sourceHeight_ = sourceElement./*OK*/offsetHeight;
-    this.srcset_ = srcsetFromElement(sourceElement);
+  init_() {
+    this.sourceWidth_ = this.sourceElement_./*OK*/offsetWidth;
+    this.sourceHeight_ = this.sourceElement_./*OK*/offsetHeight;
+    this.srcset_ = srcsetFromElement(this.sourceElement_);
 
-    Object.keys(this.ariaAttributes_).forEach(key => {
-      this.ariaAttributes_[key] = sourceElement.getAttribute(key);
-      if (this.ariaAttributes_[key]) {
-        this.image_.setAttribute(key, this.ariaAttributes_[key]);
+    ARIA_ATTRIBUTES.forEach(key => {
+      if (this.sourceElement_.hasAttribute(key)) {
+        this.image_.setAttribute(key, this.sourceElement_[key]);
       }
     });
-
-    if (sourceImage && isLoaded(sourceImage) && sourceImage.src) {
-      // Set src provisionally to the known loaded value for fast display.
-      // It will be updated later.
-      this.image_.setAttribute('src', sourceImage.src);
-    }
-
-    st.setStyles(this.image_, {
+    st.setStyles(dev().assertElement(this.image_), {
       top: st.px(0),
       left: st.px(0),
       width: st.px(0),
@@ -252,35 +284,34 @@ export class ImageViewer {
 
   /**
    * Measures the image viewer and image sizes and positioning.
+   * This must be called AFTER the source element has already been
+   * laid out.
    * @return {!Promise}
    */
   measure() {
-    return this.lightbox_.getVsync().measurePromise(() => {
-      this.viewerBox_ = layoutRectFromDomRect(this.viewer_
+    return this.vsync_.measurePromise(() => {
+      this.elementBox_ = layoutRectFromDomRect(this.element
           ./*OK*/getBoundingClientRect());
 
       const sourceAspectRatio = this.sourceWidth_ / this.sourceHeight_;
-      let height = Math.min(this.viewerBox_.width / sourceAspectRatio,
-          this.viewerBox_.height);
-      let width = Math.min(this.viewerBox_.height * sourceAspectRatio,
-          this.viewerBox_.width);
+      let height = Math.min(this.elementBox_.width / sourceAspectRatio,
+          this.elementBox_.height);
+      let width = Math.min(this.elementBox_.height * sourceAspectRatio,
+          this.elementBox_.width);
 
-      // TODO(dvoytenko): This is to reduce very small expansions that often
-      // look like a stutter. To be evaluated if this is still the right
-      // idea.
-      if (width - this.sourceWidth_ <= 16
-          && height - this.sourceHeight_ <= 16) {
+      if (Math.abs(width - this.sourceWidth_) <= 16
+          && Math.abs(height - this.sourceHeight_ <= 16)) {
         width = this.sourceWidth_;
         height = this.sourceHeight_;
       }
 
       this.imageBox_ = layoutRectLtwh(
-          Math.round((this.viewerBox_.width - width) / 2),
-          Math.round((this.viewerBox_.height - height) / 2),
+          Math.round((this.elementBox_.width - width) / 2),
+          Math.round((this.elementBox_.height - height) / 2),
           Math.round(width),
           Math.round(height));
 
-      st.setStyles(this.image_, {
+      st.setStyles(dev().assertElement(this.image_), {
         top: st.px(this.imageBox_.top),
         left: st.px(this.imageBox_.left),
         width: st.px(this.imageBox_.width),
@@ -303,12 +334,14 @@ export class ImageViewer {
    */
   updateSrc_() {
     if (!this.srcset_) {
-      // Do not update source if the lightbox has already exited.
       return Promise.resolve();
     }
     this.maxSeenScale_ = Math.max(this.maxSeenScale_, this.scale_);
-    const width = this.imageBox_.width * this.maxSeenScale_;
-    const src = this.srcset_.select(width, this.lightbox_.getDpr()).url;
+    const width = Math.max(
+        this.imageBox_.width * this.maxSeenScale_,
+        this.sourceWidth_
+    );
+    const src = this.srcset_.select(width, this.getDpr()).url;
     if (src == this.image_.getAttribute('src')) {
       return Promise.resolve();
     }
@@ -317,21 +350,31 @@ export class ImageViewer {
     // and then naturally upgrade to a higher quality image.
     return Services.timerFor(this.win).promise(1).then(() => {
       this.image_.setAttribute('src', src);
-      return this.loadPromise_(this.image_);
+      return this.image_;
     });
   }
 
   /** @private */
+  cleanupGestures_() {
+    if (this.gestures_) {
+      this.gestures_.cleanup();
+      this.gestures_ = null;
+    }
+  }
+
+  /** @private */
   setupGestures_() {
-    const gesturesWithoutPreventDefault = Gestures.get(this.image_,
-        /* opt_shouldNotPreventDefault */true);
+    const gesturesWithoutPreventDefault = Gestures.get(
+        dev().assertElement(this.image_),
+        /* opt_shouldNotPreventDefault */true
+    );
     gesturesWithoutPreventDefault.onPointerDown(() => {
       if (this.motion_) {
         this.motion_.halt();
       }
     });
 
-    this.gestures_ = Gestures.get(this.viewer_);
+    this.gestures_ = Gestures.get(this.element);
 
     // Zoomable.
     this.gestures_.onGesture(DoubletapRecognizer, e => {
@@ -341,8 +384,8 @@ export class ImageViewer {
       } else {
         newScale = this.minScale_;
       }
-      const deltaX = this.viewerBox_.width / 2 - e.data.clientX;
-      const deltaY = this.viewerBox_.height / 2 - e.data.clientY;
+      const deltaX = this.elementBox_.width / 2 - e.data.clientX;
+      const deltaY = this.elementBox_.height / 2 - e.data.clientY;
       this.onZoom_(newScale, deltaX, deltaY, true).then(() => {
         return this.onZoomRelease_();
       });
@@ -427,7 +470,7 @@ export class ImageViewer {
    */
   boundX_(x, allowExtent) {
     return this.boundValue_(x, this.minX_, this.maxX_,
-        allowExtent && this.scale_ > 1 ? this.viewerBox_.width * 0.25 : 0);
+        allowExtent && this.scale_ > 1 ? this.elementBox_.width * 0.25 : 0);
   }
 
   /**
@@ -439,7 +482,7 @@ export class ImageViewer {
    */
   boundY_(y, allowExtent) {
     return this.boundValue_(y, this.minY_, this.maxY_,
-        allowExtent ? this.viewerBox_.height * 0.25 : 0);
+        allowExtent ? this.elementBox_.height * 0.25 : 0);
   }
 
   /**
@@ -452,7 +495,7 @@ export class ImageViewer {
   updatePanZoomBounds_(scale) {
     let maxY = 0;
     let minY = 0;
-    const dh = this.viewerBox_.height - this.imageBox_.height * scale;
+    const dh = this.elementBox_.height - this.imageBox_.height * scale;
     if (dh >= 0) {
       minY = maxY = 0;
     } else {
@@ -462,7 +505,7 @@ export class ImageViewer {
 
     let maxX = 0;
     let minX = 0;
-    const dw = this.viewerBox_.width - this.imageBox_.width * scale;
+    const dw = this.elementBox_.width - this.imageBox_.width * scale;
     if (dw >= 0) {
       minX = maxX = 0;
     } else {
@@ -481,7 +524,7 @@ export class ImageViewer {
    * @private
    */
   updatePanZoom_() {
-    st.setStyles(this.image_, {
+    st.setStyles(dev().assertElement(this.image_), {
       transform: st.translate(this.posX_, this.posY_) +
           ' ' + st.scale(this.scale_),
     });
@@ -509,7 +552,7 @@ export class ImageViewer {
    */
   onMoveRelease_(veloX, veloY) {
     // Continue motion.
-    this.motion_ = continueMotion(this.image_,
+    this.motion_ = continueMotion(dev().assertElement(this.image_),
         this.posX_, this.posY_, veloX, veloY,
         (x, y) => {
           const newPosX = this.boundX_(x, true);
@@ -573,8 +616,8 @@ export class ImageViewer {
     }
     const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
     const newScale = this.startScale_ * (1 + dir * dist / 100);
-    const deltaCenterX = this.viewerBox_.width / 2 - centerClientX;
-    const deltaCenterY = this.viewerBox_.height / 2 - centerClientY;
+    const deltaCenterX = this.elementBox_.width / 2 - centerClientX;
+    const deltaCenterY = this.elementBox_.height / 2 - centerClientY;
     deltaX = Math.min(deltaCenterX, deltaCenterX * (dist / 100));
     deltaY = Math.min(deltaCenterY, deltaCenterY * (dist / 100));
     this.onZoom_(newScale, deltaX, deltaY, false);
@@ -621,7 +664,7 @@ export class ImageViewer {
     if (veloX == 0 && veloY == 0) {
       promise = Promise.resolve();
     } else {
-      promise = continueMotion(this.image_,
+      promise = continueMotion(dev().assertElement(this.image_),
           deltaX, deltaY, veloX, veloY,
           (x, y) => {
             this.onTapZoom_(centerClientX, centerClientY, x, y);
@@ -685,7 +728,7 @@ export class ImageViewer {
       const xFunc = tr.numeric(this.posX_, newPosX);
       /** @const {!TransitionDef<number>} */
       const yFunc = tr.numeric(this.posY_, newPosY);
-      promise = Animation.animate(this.image_, time => {
+      promise = Animation.animate(dev().assertElement(this.image_), time => {
         this.scale_ = scaleFunc(time);
         this.posX_ = xFunc(time);
         this.posY_ = yFunc(time);
@@ -731,3 +774,6 @@ export class ImageViewer {
   }
 }
 
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpImageViewer, CSS);
+});
