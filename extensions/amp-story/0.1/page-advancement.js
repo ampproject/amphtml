@@ -333,11 +333,6 @@ class ManualAdvancement extends AdvancementConfig {
         ((1 - NEXT_SCREEN_AREA_RATIO) * offsetWidth);
     const nextScreenAreaMax = offsetLeft + offsetWidth;
 
-    if (this.tapNavigationListeners_.length < 1) {
-      this.addOnTapNavigationListener(navigationDirection =>
-        new AmpStoryPage(this.element_).navigateOnTap(navigationDirection));
-    }
-
     if (event.pageX >= nextScreenAreaMin && event.pageX < nextScreenAreaMax) {
       this.onTapNavigation(TapNavigationDirection.NEXT);
     } else if (event.pageX >= offsetLeft && event.pageX < nextScreenAreaMin) {
