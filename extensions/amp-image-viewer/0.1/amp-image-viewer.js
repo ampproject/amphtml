@@ -271,7 +271,7 @@ export class AmpImageViewer extends AMP.BaseElement {
 
     ARIA_ATTRIBUTES.forEach(key => {
       if (this.sourceElement_.hasAttribute(key)) {
-        this.image_.setAttribute(key, this.sourceElement_[key]);
+        this.image_.setAttribute(key, this.sourceElement_.getAttribute(key));
       }
     });
     st.setStyles(dev().assertElement(this.image_), {
