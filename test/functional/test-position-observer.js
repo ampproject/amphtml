@@ -40,7 +40,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
     let elem1;
     let clock;
     beforeEach(() => {
-      clock = lolex.install();
+      clock = lolex.install({target: ampdoc.win});
       posOb = new PositionObserver(ampdoc);
       sandbox.stub(posOb.vsync_, 'measure').callsFake(callback => {
         win.setTimeout(callback, 1);
@@ -88,8 +88,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
       });
     });
 
-    // TODO(zhouyx, #12486): Make this test work with lolex v2.
-    describe.skip('update position info at correct time', () => {
+    describe('update position info at correct time', () => {
       let top;
       beforeEach(() => {
         top = 0;
@@ -134,8 +133,7 @@ describes.realWin('PositionObserver', {amp: 1}, env => {
       });
     });
 
-    // TODO(zhouyx, #12486): Make this test work with lolex v2.
-    describe.skip('should provide correct position data', () => {
+    describe('should provide correct position data', () => {
       let top;
       beforeEach(() => {
         top = 0;

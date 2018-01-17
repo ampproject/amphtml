@@ -65,15 +65,15 @@ describes.realWin('concurrent-load', {}, env => {
     }
   });
 
-  // TODO(lannka, #12486): Make this test work with lolex v2.
-  describe.skip('incrementLoadingAds', () => {
+  describe('incrementLoadingAds', () => {
 
     let win;
     let clock;
 
     beforeEach(() => {
       win = env.win;
-      clock = lolex.install({toFake: ['Date', 'setTimeout', 'clearTimeout']});
+      clock = lolex.install({
+        target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
       installTimerService(win);
     });
 
