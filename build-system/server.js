@@ -23,8 +23,9 @@ const app = require(require.resolve('./app.js'));
 const isRunning = require('is-running');
 const gulp = require('gulp-help')(require('gulp'));
 const morgan = require('morgan');
-const util = require('gulp-util');
 const webserver = require('gulp-webserver');
+const colors = require('ansi-colors');
+const log = require('fancy-log');
 
 const host = process.env.SERVE_HOST;
 const port = process.env.SERVE_PORT;
@@ -37,9 +38,9 @@ const header = require('connect-header');
 // Exit if the port is in use.
 process.on('uncaughtException', function(err) {
   if (err.errno === 'EADDRINUSE') {
-    util.log(util.colors.red('Port', port, 'in use, shutting down server'));
+    log(colors.red('Port', port, 'in use, shutting down server'));
   } else {
-    util.log(util.colors.red(err));
+    log(colors.red(err));
   }
   process.kill(gulpProcess, 'SIGINT');
   process.exit(1);

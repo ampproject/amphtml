@@ -22,8 +22,9 @@ const eslint = require('gulp-eslint');
 const gulp = require('gulp-help')(require('gulp'));
 const gulpIf = require('gulp-if');
 const lazypipe = require('lazypipe');
-const util = require('gulp-util');
 const watch = require('gulp-watch');
+const colors = require('ansi-colors');
+const log = require('fancy-log');
 
 const isWatching = (argv.watch || argv.w) || false;
 
@@ -70,18 +71,18 @@ function runLinter(path, stream, options) {
   return stream.pipe(eslint(options))
       .pipe(eslint.formatEach('stylish', function(msg) {
         errorsFound = true;
-        util.log(msg);
+        log(msg);
       }))
       .pipe(gulpIf(isFixed, gulp.dest(path)))
       .pipe(eslint.failAfterError())
       .on('error', function() {
         if (errorsFound && !options.fix) {
-          util.log(util.colors.red('ERROR:'),
+          log(colors.red('ERROR:'),
               'Lint errors found.');
-          util.log(util.colors.yellow('NOTE:'),
-              'You can run', util.colors.cyan('gulp lint --fix'),
+          log(colors.yellow('NOTE:'),
+              'You can run', colors.cyan('gulp lint --fix'),
               'to automatically fix some of these lint errors.');
-          util.log(util.colors.yellow('WARNING:'),
+          log(colors.yellow('WARNING:'),
               'Since this is a destructive operation (operates on the file',
               'system), make sure you commit before running the command.');
         }

@@ -21,7 +21,6 @@
   },
   "dependencies": {
     "amphtml-validator": "1.0.21",
-    "gulp-util": "^3.0.7",
     "through2": "^2.0.1"
   },
   "devDependencies": {

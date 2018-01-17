@@ -22,7 +22,7 @@ const gzipSize = require('gzip-size');
 const prettyBytes = require('pretty-bytes');
 const table = require('text-table');
 const through = require('through2');
-const util = require('gulp-util');
+const PluginError = require('plugin-error');
 
 
 const tempFolderName = '__size-temp';
@@ -173,7 +173,7 @@ function onFileThrough(rows, file, enc, cb) {
   }
 
   if (file.isStream()) {
-    cb(new util.PluginError('size', 'Stream not supported'));
+    cb(new PluginError('size', 'Stream not supported'));
     return;
   }
 
