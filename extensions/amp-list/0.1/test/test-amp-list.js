@@ -83,7 +83,7 @@ describes.realWin('amp-list component', {
     templatesMock.expects('findAndRenderTemplateArray')
         .withExactArgs(element, itemsToRender)
         .returns(render)
-        .once();
+        .atLeast(1);
 
     return Promise.all([fetch, render]);
   }
@@ -194,6 +194,25 @@ describes.realWin('amp-list component', {
 
     element.setAttribute('src', 'https://new.com/list.json');
     list.mutatedAttributesCallback({'src': 'https://new.com/list.json'});
+    expect(element.getAttribute('src')).to.equal('https://new.com/list.json');
+  });
+
+  it('should render and remove `src` if [src] points to local data', () => {
+    const items = [{title: 'foo'}];
+    const foo = doc.createElement('div');
+    const rendered = expectFetchAndRender(items, [foo]);
+
+    listMock.expects('getLayoutWidth').never();
+
+    return list.layoutCallback().then(() => rendered).then(() => {
+      expect(list.container_.contains(foo)).to.be.true;
+
+      listMock.expects('fetchList_').never();
+
+      element.setAttribute('src', 'https://new.com/list.json');
+      list.mutatedAttributesCallback({'src': items});
+      expect(element.getAttribute('src')).to.equal('');
+    });
   });
 
   it('should reload if [src] attribute changes (after layout)', () => {
@@ -212,6 +231,15 @@ describes.realWin('amp-list component', {
 
       element.setAttribute('src', 'https://new.com/list.json');
       list.mutatedAttributesCallback({'src': 'https://new.com/list.json'});
+    });
+  });
+
+  it('fetch should resolve if `src` is empty', () => {
+    const spy = sandbox.spy(list, 'fetchList_');
+    element.setAttribute('src', '');
+
+    return list.layoutCallback().then(() => {
+      expect(spy).to.have.been.calledOnce;
     });
   });
 
