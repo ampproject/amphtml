@@ -62,7 +62,7 @@
 }
 
 .show-first-page-overlay .prev-page {
-  background: linear-gradient(to right, rgba(0,0,0,0.5) , rgba(0,0,0,0));
+  background: linear-gradient(to right, rgba(0,0,0,0.5) , rgba(0,0,0,0)) !important;
 }
 
 .show-first-page-overlay .next-page {
@@ -71,6 +71,10 @@
 
 .show-first-page-overlay .i-amphtml-story-hint-placeholder {
   display: none !important;
+}
+
+.show-first-page-overlay .i-amphtml-story-navigation-help-overlay {
+  padding: 0px !important;
 }
 
 .next-page {
