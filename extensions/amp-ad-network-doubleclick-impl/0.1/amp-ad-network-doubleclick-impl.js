@@ -741,7 +741,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       PAGEVIEWID: () => Services.documentInfoForDoc(this.element).pageViewId,
       HREF: () => this.win.location.href,
       TGT: () =>
-        (tryParseJson(this.element.getAttribute('json')) || {})['targeting'],
+        JSON.stringify(
+            (tryParseJson(
+                this.element.getAttribute('json')) || {})['targeting']),
       ATTR: name => {
         if (!whitelist[name.toLowerCase()]) {
           dev().warn('TAG', `Invalid attribute ${name}`);
