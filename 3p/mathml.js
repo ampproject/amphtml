@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-console.log( 'mathml.js' );
-
 import {writeScript} from './3p';
 import {user} from '../src/log';
 
