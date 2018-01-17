@@ -135,13 +135,13 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    let loadPromise = Promise.resolve();
+    let elementLayoutPromise = Promise.resolve();
     if (this.sourceElement_) {
       this.scheduleLayout(this.sourceElement_);
-      loadPromise = this.sourceElement_.signals()
+      elementLayoutPromise = this.sourceElement_.signals()
           .whenSignal(CommonSignals.LOAD_END);
     }
-    return loadPromise
+    return elementLayoutPromise
         .then(() => {
           return this.vsync_.mutatePromise(() => {
             if (!this.image_) {
