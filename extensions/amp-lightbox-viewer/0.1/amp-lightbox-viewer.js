@@ -133,6 +133,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
     /** @private {string} */
     this.currentLightboxGroupId_ = 'default';
+
+    /** @private {?Element} */
+    this.sourceElement_ = null;
   }
 
   /** @override */
@@ -588,6 +591,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   open_(element) {
+    this.sourceElement_ = element;
     const lightboxGroupId = element.getAttribute('lightbox')
       || 'default';
     this.currentLightboxGroupId_ = lightboxGroupId;
@@ -647,7 +651,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   // TODO (cathyxz): make this generalizable to more than just images
   enter_(sourceImage) {
     const anim = new Animation(this.element);
-    const dur = 500;
+    let dur = 1000;
     let transLayer = null;
     return this.vsync_.measurePromise(() => {
       // Lightbox background fades in.
@@ -664,7 +668,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
             ./*OK*/getBoundingClientRect());
 
         const imageBox = /**@type {?}*/ (this.getCurrentElement_().imageViewer)
-            .implementation_.getImageBox();
+            .implementation_.getImageBoxWithOffset();
 
         const clone = sourceImage.cloneNode(true);
         clone.className = '';
@@ -685,6 +689,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         const dx = imageBox.left - rect.left;
         const dy = imageBox.top - rect.top;
         const scaleX = rect.width != 0 ? imageBox.width / rect.width : 1;
+        dur = Math.max(Math.min(Math.abs(dy) / 250 * dur, dur), 300);
 
         // Duration will be somewhere between 0.2 and 0.8 depending on how far
         // the image needs to move.
@@ -707,7 +712,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     }).then(() => {
       return anim.start(dur).thenAlways(() => {
         return this.vsync_.mutatePromise(() => {
-          sourceImage.classList.remove('i-amphtml-ghost');
           st.setStyles(this.element, {opacity: ''});
           st.setStyles(dev().assertElement(this.carousel_), {opacity: ''});
           if (transLayer) {
@@ -726,15 +730,88 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   exit_() {
     // TODO (cathyxz): settle on a real animation
     const anim = new Animation(this.element);
-    const dur = 1000;
+    let dur = 1000;
+    const imageBox = /**@type {?}*/ (this.getCurrentElement_().imageViewer)
+        .implementation_.getImageBoxWithOffset();
+    const image = /**@type {?}*/ (this.getCurrentElement_().imageViewer)
+        .implementation_.getImage();
+    // Try to transition to the source image.
+    let transLayer = null;
+    return this.vsync_.measurePromise(() => {
+      if (this.sourceElement_) {
+        transLayer = this.element.ownerDocument.createElement('div');
+        transLayer.classList.add('i-amphtml-lightbox-viewer-trans');
+        this.element.ownerDocument.body.appendChild(transLayer);
 
-    anim.add(0, tr.setStyles(this.element, {
-      opacity: tr.numeric(1, 0),
-    }), 0.9, EXIT_CURVE_);
+        const rect = layoutRectFromDomRect(this.sourceElement_
+            ./*OK*/getBoundingClientRect());
+        const clone = image.cloneNode(true);
+        st.setStyles(clone, {
+          position: 'absolute',
+          top: st.px(imageBox.top),
+          left: st.px(imageBox.left),
+          width: st.px(imageBox.width),
+          height: st.px(imageBox.height),
+          transform: '',
+          transformOrigin: 'top left',
+          willChange: 'transform',
+        });
+        transLayer.appendChild(clone);
 
-    return anim.start(dur).thenAlways(() => {
-      this./*OK*/collapse();
-      st.setStyles(this.element, {opacity: ''});
+        // Fade out the container.
+        anim.add(0, tr.setStyles(dev().assertElement(this.container_), {
+          opacity: tr.numeric(1, 0),
+        }), 0.1, EXIT_CURVE_);
+
+        // Move and resize the image back to where it is in the article.
+        const dx = rect.left - imageBox.left;
+        const dy = rect.top - imageBox.top;
+        const scaleX = imageBox.width != 0 ? rect.width / imageBox.width : 1;
+        /** @const {!TransitionDef<void>} */
+        const moveAndScale = tr.setStyles(clone, {
+          transform: tr.concat([
+            tr.translate(tr.numeric(0, dx), tr.numeric(0, dy)),
+            tr.scale(tr.numeric(1, scaleX)),
+          ]),
+        });
+
+        // Duration will be somewhere between 0.2 and 0.8 depending on how far
+        // the image needs to move. Start the motion later too, but no later
+        // than 0.2.
+        const motionTime = Math.max(0.2,
+            Math.min(0.8, Math.abs(dy) / 250 * 0.8));
+        anim.add(Math.min(0.8 - motionTime, 0.2), (time, complete) => {
+          moveAndScale(time);
+          if (complete) {
+            this.sourceElement_.classList.remove('i-amphtml-ghost');
+          }
+        }, motionTime, EXIT_CURVE_);
+
+        // Fade out the transition image.
+        anim.add(0.8, tr.setStyles(transLayer, {
+          opacity: tr.numeric(1, 0.01),
+        }), 0.2, EXIT_CURVE_);
+
+        // Duration will be somewhere between 300ms and 700ms depending on
+        // how far the image needs to move.
+        dur = Math.max(Math.min(Math.abs(dy) / 250 * dur, dur), 300);
+      }
+    }).then(() => {
+      return anim.start(dur).thenAlways(() => {
+        return this.vsync_.mutatePromise(() => {
+          if (this.sourceElement_) {
+            this.sourceElement_.classList.remove('i-amphtml-ghost');
+          }
+          this./*OK*/collapse();
+          st.setStyles(this.element, {
+            opacity: '',
+          });
+          st.setStyles(dev().assertElement(this.container_), {opacity: ''});
+          if (transLayer) {
+            this.element.ownerDocument.body.removeChild(transLayer);
+          }
+        });
+      });
     });
   }
 
