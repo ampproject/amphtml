@@ -756,7 +756,7 @@ export class AmpA4A extends AMP.BaseElement {
           // viewport but cannot wait on promise.  Sadly, need a state a
           // variable.
           this.isVerifiedAmpCreative_ = !!creative;
-          return creative && utf8Decode(creative);
+          return creative && Promise.resolve(utf8Decode(creative));
         })
         // This block returns CreativeMetaDataDef iff the creative was verified
         // as AMP and could be properly parsed for friendly iframe render.
