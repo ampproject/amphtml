@@ -329,7 +329,7 @@ export function sanitizeFormattingHtml(html) {
       function(tagName, attribs) {
         if (tagName == 'template') {
           for (let i = 0; i < attribs.length; i += 2) {
-            if (attribs[i] == 'type' && attribs[i+1] == 'amp-mustache') {
+            if (attribs[i] == 'type' && attribs[i + 1] == 'amp-mustache') {
               return {
                 tagName,
                 attribs: ['type', 'amp-mustache'],
