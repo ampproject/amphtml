@@ -21,7 +21,8 @@ const childProcess = require('child_process');
 const exec = BBPromise.promisify(childProcess.exec);
 const fs = BBPromise.promisifyAll(require('fs'));
 const gulp = require('gulp-help')(require('gulp'));
-const util = require('gulp-util');
+const colors = require('ansi-colors');
+const log = require('fancy-log');
 
 
 const prettyBytesUnits = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
@@ -235,7 +236,7 @@ function serializeCheckout(logs) {
           tables.push([]);
           return tables;
         }
-        util.log(util.colors.red(e.message));
+        log(colors.red(e.message));
       });
     });
   }, Promise.resolve(tables));

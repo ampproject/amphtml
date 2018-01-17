@@ -30,9 +30,9 @@ const execOrDie = require('./exec').execOrDie;
 const getStdout = require('./exec').getStdout;
 const getStderr = require('./exec').getStderr;
 const path = require('path');
-const util = require('gulp-util');
+const colors = require('ansi-colors');
 
-const fileLogPrefix = util.colors.yellow.bold('pr-check.js:');
+const fileLogPrefix = colors.bold(colors.yellow('pr-check.js:'));
 
 /**
  * Starts a timer to measure the execution time of the given function.
@@ -42,7 +42,7 @@ const fileLogPrefix = util.colors.yellow.bold('pr-check.js:');
 function startTimer(functionName) {
   const startTime = Date.now();
   console.log(
-      '\n' + fileLogPrefix, 'Running', util.colors.cyan(functionName) + '...');
+      '\n' + fileLogPrefix, 'Running', colors.cyan(functionName) + '...');
   return startTime;
 }
 
@@ -57,8 +57,8 @@ function stopTimer(functionName, startTime) {
   const mins = executionTime.getMinutes();
   const secs = executionTime.getSeconds();
   console.log(
-      fileLogPrefix, 'Done running', util.colors.cyan(functionName),
-      'Total time:', util.colors.green(mins + 'm ' + secs + 's'));
+      fileLogPrefix, 'Done running', colors.cyan(functionName),
+      'Total time:', colors.green(mins + 'm ' + secs + 's'));
 }
 
 /**
@@ -84,7 +84,7 @@ function filesInPr() {
       getStdout('git -c color.ui=always diff --stat master...HEAD');
   console.log(fileLogPrefix,
       'Testing the following changes at commit',
-      util.colors.cyan(process.env.TRAVIS_PULL_REQUEST_SHA));
+      colors.cyan(process.env.TRAVIS_PULL_REQUEST_SHA));
   console.log(changeSummary);
   return files;
 }
@@ -305,8 +305,8 @@ const command = {
     } else if (!process.env.PERCY_PROJECT || !process.env.PERCY_TOKEN) {
       console.log(
           '\n' + fileLogPrefix, 'Could not find environment variables',
-          util.colors.cyan('PERCY_PROJECT'), 'and',
-          util.colors.cyan('PERCY_TOKEN') + '. Skipping visual diff tests.');
+          colors.cyan('PERCY_PROJECT'), 'and',
+          colors.cyan('PERCY_TOKEN') + '. Skipping visual diff tests.');
       return;
     }
     let cmd = 'gulp visual-diff';
@@ -321,8 +321,8 @@ const command = {
     if (!process.env.PERCY_PROJECT || !process.env.PERCY_TOKEN) {
       console.log(
           '\n' + fileLogPrefix, 'Could not find environment variables',
-          util.colors.cyan('PERCY_PROJECT'), 'and',
-          util.colors.cyan('PERCY_TOKEN') +
+          colors.cyan('PERCY_PROJECT'), 'and',
+          colors.cyan('PERCY_TOKEN') +
           '. Skipping verification of visual diff tests.');
       return;
     }
@@ -407,7 +407,7 @@ function main() {
 
   console.log(
       fileLogPrefix, 'Running build shard',
-      util.colors.cyan(process.env.BUILD_SHARD),
+      colors.cyan(process.env.BUILD_SHARD),
       '\n');
 
   // If $TRAVIS_PULL_REQUEST_SHA is empty then it is a push build and not a PR.
@@ -422,14 +422,14 @@ function main() {
 
   // Exit early if flag-config files are mixed with non-flag-config files.
   if (buildTargets.has('FLAG_CONFIG') && buildTargets.size !== 1) {
-    console.log(fileLogPrefix, util.colors.red('ERROR:'),
+    console.log(fileLogPrefix, colors.red('ERROR:'),
         'Looks like your PR contains',
-        util.colors.cyan('{prod|canary}-config.json'),
+        colors.cyan('{prod|canary}-config.json'),
         'in addition to some other files');
     const nonFlagConfigFiles = files.filter(file => !isFlagConfig(file));
-    console.log(fileLogPrefix, util.colors.red('ERROR:'),
+    console.log(fileLogPrefix, colors.red('ERROR:'),
         'Please move these files to a separate PR:',
-        util.colors.cyan(nonFlagConfigFiles.join(', ')));
+        colors.cyan(nonFlagConfigFiles.join(', ')));
     stopTimer('pr-check.js', startTime);
     process.exit(1);
   }
@@ -438,18 +438,18 @@ function main() {
   if (files.indexOf('package.json') != -1 || files.indexOf('yarn.lock') != -1) {
     const yarnIntegrityCheck = getStderr('yarn check --integrity').trim();
     if (yarnIntegrityCheck.includes('error')) {
-      console.error(fileLogPrefix, util.colors.red('ERROR:'),
-          'Found the following', util.colors.cyan('yarn'), 'errors:\n' +
-          util.colors.cyan(yarnIntegrityCheck));
-      console.error(fileLogPrefix, util.colors.red('ERROR:'),
-          'Updates to', util.colors.cyan('package.json'),
+      console.error(fileLogPrefix, colors.red('ERROR:'),
+          'Found the following', colors.cyan('yarn'), 'errors:\n' +
+          colors.cyan(yarnIntegrityCheck));
+      console.error(fileLogPrefix, colors.red('ERROR:'),
+          'Updates to', colors.cyan('package.json'),
           'must be accompanied by a corresponding update to',
-          util.colors.cyan('yarn.lock'));
-      console.error(fileLogPrefix, util.colors.yellow('NOTE:'),
-          'To update', util.colors.cyan('yarn.lock'), 'after changing',
-          util.colors.cyan('package.json') + ',', 'run',
-          '"' + util.colors.cyan('yarn install') + '"',
-          'and include the updated', util.colors.cyan('yarn.lock'),
+          colors.cyan('yarn.lock'));
+      console.error(fileLogPrefix, colors.yellow('NOTE:'),
+          'To update', colors.cyan('yarn.lock'), 'after changing',
+          colors.cyan('package.json') + ',', 'run',
+          '"' + colors.cyan('yarn install') + '"',
+          'and include the updated', colors.cyan('yarn.lock'),
           'in your PR.');
       process.exit(1);
     }
@@ -457,7 +457,7 @@ function main() {
 
   console.log(
       fileLogPrefix, 'Detected build targets:',
-      util.colors.cyan(Array.from(buildTargets).sort().join(', ')));
+      colors.cyan(Array.from(buildTargets).sort().join(', ')));
 
   // Run different sets of independent tasks in parallel to reduce build time.
   if (process.env.BUILD_SHARD == 'unit_tests') {
