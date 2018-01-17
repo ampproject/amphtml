@@ -52,7 +52,6 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml('a<video></video>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<audio></audio>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<applet></applet>c')).to.be.equal('ac');
-    expect(sanitizeHtml('a<form></form>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<link>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<meta>c')).to.be.equal('ac');
   });
