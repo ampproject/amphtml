@@ -22,7 +22,15 @@ import {parseUrl} from '../src/url';
  * @param {!Object} data
  */
 export function cedato(global, data) {
-  validateData(data, ['id'], ['domain', 'servingDomain', 'subid', 'version', 'extraParams']);
+  const requiredParams = ['id'];
+  const optionalParams = [
+    'domain',
+    'servingDomain',
+    'subid',
+    'version',
+    'extraParams',
+  ];
+  validateData(data, requiredParams, optionalParams);
 
   if (!data || !data.id) {
     global.context.noContentAvailable();
@@ -30,7 +38,7 @@ export function cedato(global, data) {
   }
 
   const cb = (Math.random() * 10000 | 0);
-  const domain = data.domain || parseUrl(global.context.sourceUrl).origin || null;
+  const domain = data.domain || parseUrl(global.context.sourceUrl).origin;
 
   /* Create div for ad to target */
   const playerDiv = global.document.createElement('div');
