@@ -944,7 +944,7 @@ export class UrlReplacements {
       return this.expander_./*OK*/expand(url, opt_bindings, opt_whiteList);
     }
 
-    // legacy parsing
+    // existing parsing method
     const expr = this.variableSource_.getExpr(opt_bindings);
     let replacementPromise;
     let replacement = url.replace(expr, (match, name, opt_strargs) => {

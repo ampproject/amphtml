@@ -88,27 +88,19 @@ export class Expander {
     if (!matches.length) { return null; }
     // longest keywords have priority over shorter
     // if same length alphabetical precidence
-    matches.sort((a, b) => {
-      if (a.length === b.length) {
-        return a.name > b.name;
-      }
-      return b.length - a.length;
-    });
+    matches.sort(sortByLengthThenName);
 
-    const keywordMarker = new Array(url.length).fill(false);
+    const usedRanges = [];
 
-    return matches.reduce((results, match) => {
+    return matches.filter(match => {
       if (opt_whiteList && !opt_whiteList[match.name]) {
         // Do not perform substitution and just return back the original
         // match, so that the string doesn't change.
-        return results;
+        return false;
       }
-      if (this.fillStorage_(match, keywordMarker)) {
-        // if this match does not overlap with a longer match
-        results.push(match);
-      }
-      return results;
-    }, []).sort((a, b) => a.start - b.start);
+      // if this match does not overlap with a longer match
+      return this.markKeywords_(match, usedRanges);
+    }).sort(sortByStart);
   }
 
   /**
@@ -117,19 +109,23 @@ export class Expander {
    * @param {!Object<string, *>} match contains match data
    * @return {boolean} indicates whether a collision was found
    */
-  fillStorage_(match, keywordMarker) {
-    for (let i = match.start; i <= match.stop; i++) {
-      if (keywordMarker[i]) {
-        // toggle off what we thought was to be filled
-        for (let j = match.start; j < i; j++) {
-          keywordMarker[j] = false;
-        }
+  markKeywords_(match, usedRanges) {
+    // check each match against range of existing (longer) keywords
+    for (let i = 0; i < usedRanges.length; i++) {
+      if (hasOverlap(match, usedRanges[i])) {
         return false;
       }
-      keywordMarker[i] = true;
-    }
+    };
+    usedRanges.push([match.start, match.stop]);
     return true;
+
+    // check conflicts helper fn
+    function hasOverlap(match, range) {
+      return match.start >= range[0] && match.start <= range[1] ||
+          match.stop >= range[0] && match.stop <= range[1];
+    }
   }
+
 
   /**
    * @param {string} url
@@ -189,7 +185,7 @@ export class Expander {
           if (builder.length) {
             results.push(builder.trim());
           }
-          // support legacy two comma format
+          // support existing two comma format
           // eg CLIENT_ID(__ga,,ga-url)
           if (url[urlIndex + 1] === ',') {
             results.push('');
@@ -261,4 +257,15 @@ export class Expander {
       return Promise.resolve('');
     }
   }
+}
+
+function sortByLengthThenName(a, b) {
+  if (a.length === b.length) {
+    return a.name > b.name;
+  }
+  return b.length - a.length;
+}
+
+function sortByStart(a, b) {
+  return a.start - b.start;
 }

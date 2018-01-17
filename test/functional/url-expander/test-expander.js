@@ -418,23 +418,6 @@ describes.realWin('Expander', {
       return expect(res).to.eventually.match(/^\?a=12345.54321&b=12345.54321/);
     });
 
-    // TODO(calebcordry): This is testing an old feature of UrlReplacements that
-    // is currently not ported to this new structure. Figure out where this should
-    // live or add the functionality in future.
-    // TODO(alanorozco, #11827): Make this test work on Safari.
-    // it.configure().skipSafari().run('should replace CLIENT_ID synchronously ' +
-    //     'when available', () => {
-    //   setCookie(window, 'url-abc', 'cid-for-abc');
-    //   setCookie(window, 'url-xyz', 'cid-for-xyz');
-    //   // Only requests cid-for-xyz in async path
-    //   const res1 = expander.expand('b=CLIENT_ID(url-xyz)');
-    //   const assert1 = expect(res1).to.eventually.equal('b=cid-for-xyz');
-    //   const res2 = expander.expandSync(
-    //       '?a=CLIENT_ID(url-abc)&b=CLIENT_ID(url-xyz)&c=CLIENT_ID(other)');
-    //   const assert2 = expect(res2).to.eventually.equal('?a=&b=cid-for-xyz&c=');
-    //   return Promise.all([assert1, assert2]);
-    // });
-
     it('should replace VARIANT', () => {
       sandbox.stub(Services, 'variantForOrNull')
           .returns(Promise.resolve({
