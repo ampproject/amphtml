@@ -146,10 +146,8 @@ export class RequestHandler {
             })
             .then(finalExtraUrlParams => {
               if (this.batchingPlugin_) {
-                console.log(finalExtraUrlParams);
                 batchSegment['extraUrlParams'] =
                     parseQueryString(finalExtraUrlParams);
-               console.log(parseQueryString(finalExtraUrlParams));
                 batchSegmentResolver(batchSegment);
               }
               return finalExtraUrlParams;
