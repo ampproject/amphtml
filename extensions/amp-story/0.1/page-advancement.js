@@ -103,7 +103,6 @@ export class AdvancementConfig {
    */
   start() {
     this.isRunning_ = true;
-    // this.onProgressUpdate();
   }
 
   /**
