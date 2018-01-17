@@ -589,7 +589,7 @@ describes.realWin('Expander', {
           .withArgs('video')
           .returns(document.createElement('video'));
 
-      const res = expander.expand('?sh=VIDEO_STATE(video,currentTime)')
+      const res = expander.expand('?sh=VIDEO_STATE(video,currentTime)');
       return expect(res).to.eventually.equal('?sh=1.5');
     });
 
@@ -608,11 +608,12 @@ describes.realWin('Expander', {
     });
 
     it('should replace NAV_TIMING when attribute names are invalid', () => {
-      return expander.expand('?a=NAV_TIMING(invalid)&b=NAV_TIMING(invalid,invalid)' +
+      return expander
+          .expand('?a=NAV_TIMING(invalid)&b=NAV_TIMING(invalid,invalid)' +
           '&c=NAV_TIMING(navigationStart,invalid)' +
           '&d=NAV_TIMING(invalid,responseStart)').then(res => {
-        expect(res).to.match(/a=&b=&c=&d=/);
-      });
+            expect(res).to.match(/a=&b=&c=&d=/);
+          });
     });
 
     it('should replace NAV_TYPE', () => {
@@ -712,7 +713,7 @@ describes.realWin('Expander', {
       it('should replace VIEWER with empty string', () => {
         sandbox.stub(viewer, 'getViewerOrigin').returns(
             Promise.resolve(''));
-        const res = expander.expand('?sh=VIEWER')
+        const res = expander.expand('?sh=VIEWER');
         return expect(res).to.eventually.equal('?sh=');
       });
     });
@@ -740,7 +741,7 @@ describes.realWin('Expander', {
     });
 
     it('should replace several substitutions', () => {
-      const res = expander.expand('?a=UNKNOWN&href=CANONICAL_URL&title=TITLE')
+      const res = expander.expand('?a=UNKNOWN&href=CANONICAL_URL&title=TITLE');
       expect(res).to.eventually.equal('?a=UNKNOWN' +
                 '&href=https%3A%2F%2Fpinterest.com%3A8080%2Fpin1' +
                 '&title=Pixel%20Test');
@@ -800,7 +801,8 @@ describes.realWin('Expander', {
     });
 
     it('should expand bindings as functions', () => {
-      return expander.expand('rid=FUNC(abc)?', {'FUNC': value => 'func_' + value})
+      return expander
+          .expand('rid=FUNC(abc)?', {'FUNC': value => 'func_' + value})
           .then(
               res => {
                 expect(res).to.match(/rid=func_abc\?$/);

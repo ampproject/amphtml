@@ -207,7 +207,7 @@ export class VariableSource {
    * Returns a Regular expression that can be used to detect all the variables
    * in a template.
    * @param {!Object<string, *>=} opt_bindings
-   * @param {Boolean=} opt_ignoreArgs flag to ignore capture of args
+   * @param {boolean=} opt_ignoreArgs flag to ignore capture of args
    * @return {!RegExp}
    */
   getExpr(opt_bindings, opt_ignoreArgs) {
@@ -242,7 +242,7 @@ export class VariableSource {
 
   /**
    * @param {!Array<string>} keys
-   * @param {Boolean=} opt_ignoreArgs flag to ignore capture of args
+   * @param {boolean=} opt_ignoreArgs flag to ignore capture of args
    * @return {!RegExp}
    * @private
    */
