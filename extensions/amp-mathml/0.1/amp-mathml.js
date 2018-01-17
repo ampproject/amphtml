@@ -27,9 +27,6 @@ export class AmpMathml extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {!Element} */
-    this.container_ = this.win.document.createElement('div');
-
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
   }
