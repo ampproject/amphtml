@@ -35,6 +35,8 @@ var touch = require('touch');
 var watchify = require('watchify');
 var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
 var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
+var colors = require('ansi-colors');
+var log = require('fancy-log');
 
 var argv = minimist(process.argv.slice(2), {boolean: ['strictBabelTransform']});
 
@@ -47,10 +49,10 @@ var hostname3p = argv.hostname3p || '3p.ampproject.net';
 var extensions = {};
 var extensionAliasFilePath = {};
 
-var green = $$.util.colors.green;
-var yellow = $$.util.colors.yellow;
-var red = $$.util.colors.red;
-var cyan = $$.util.colors.cyan;
+var green = colors.green;
+var yellow = colors.yellow;
+var red = colors.red;
+var cyan = colors.cyan;
 
 var minifiedRuntimeTarget = 'dist/v0.js';
 var minified3pTarget = 'dist.3p/current-min/f.js';
@@ -217,7 +219,7 @@ function endBuildStep(stepName, targetName, startTime) {
     timeString += secs + '.' + ms + ' s)';
   }
   if (!process.env.TRAVIS) {
-    $$.util.log(stepName, cyan(targetName), green(timeString));
+    log(stepName, cyan(targetName), green(timeString));
   }
 }
 
@@ -400,7 +402,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
 function compileCss() {
   // Print a message that could help speed up local development.
   if (!process.env.TRAVIS && argv['_'].indexOf('test') != -1) {
-    $$.util.log(
+    log(
         green('To skip building during future test runs, use',
         cyan('--nobuild'), 'with your', cyan('gulp test'), 'command.'));
   }
@@ -579,11 +581,11 @@ function buildExtensionJs(path, name, version, options) {
  */
 function printConfigHelp(command) {
   if (!process.env.TRAVIS) {
-    $$.util.log(
+    log(
         green('Building the runtime for local testing with the'),
         cyan((argv.config === 'canary') ? 'canary' : 'prod'),
         green('AMP config'));
-    $$.util.log(
+    log(
         green('To specify which config to apply, use',
             cyan('--config={canary|prod}'), 'with your',
             cyan(command), 'command'));
@@ -843,7 +845,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     if (argv.minimal_set
         && !(/integration|babel|amp-ad|lightbox|sidebar|analytics|app-banner/
             .test(srcFilename))) {
-      $$.util.log(
+      log(
           'Skipping', cyan(srcFilename), 'because of --minimal_set');
       return Promise.resolve();
     }
@@ -1251,8 +1253,8 @@ function buildWebWorker(options) {
 function checkMinVersion() {
   var majorVersion = Number(process.version.replace(/v/, '').split('.')[0]);
   if (majorVersion < 4) {
-    $$.util.log('Please run AMP with node.js version 4 or newer.');
-    $$.util.log('Your version is', process.version);
+    log('Please run AMP with node.js version 4 or newer.');
+    log('Your version is', process.version);
     process.exit(1);
   }
 }

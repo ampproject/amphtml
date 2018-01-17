@@ -18,11 +18,12 @@
 'use strict';
 
 const through = require('through2');
-const gutil = require('gulp-util');
 const amphtmlValidator = require('amphtml-validator');
+const colors = require('ansi-colors');
+const log = require('fancy-log');
 
 const PLUGIN_NAME = 'gulp-amphtml-validator';
-const PluginError = gutil.PluginError;
+const PluginError = require('plugin-error');
 
 const STATUS_FAIL = 'FAIL';
 const STATUS_PASS = 'PASS';
@@ -60,7 +61,7 @@ module.exports.validate = function(validator) {
           // build, but map the exception to an validation error instead. This
           // makes it possible to configure via failAfterError whether this
           // should fail the build or not.
-          gutil.log(gutil.colors.red(err.message));
+          log(colors.red(err.message));
           file.ampValidationResult = {
             status: STATUS_UNKNOWN,
           };
@@ -81,7 +82,7 @@ module.exports.format = function(logger) {
 
   const results = [];
   if (!logger) {
-    logger = gutil;
+    logger = log;
   }
 
   function collectResults(file, encoding, callback) {
@@ -100,15 +101,15 @@ module.exports.format = function(logger) {
     const validationResult = file.ampValidationResult;
     let report = file.relative + ': ';
     if (validationResult.status === STATUS_PASS) {
-      report += gutil.colors.green(validationResult.status);
+      report += colors.green(validationResult.status);
     } else if (validationResult.status === STATUS_UNKNOWN) {
-      report += gutil.colors.red(validationResult.status);
+      report += colors.red(validationResult.status);
     } else {
-      report += gutil.colors.red(validationResult.status);
+      report += colors.red(validationResult.status);
       for (let ii = 0; ii < validationResult.errors.length; ii++) {
         const error = validationResult.errors[ii];
         let msg = file.relative + ':' + error.line + ':' + error.col + ' ' +
-          gutil.colors.red(error.message);
+          colors.red(error.message);
         if (error.specUrl) {
           msg += ' (see ' + error.specUrl + ')';
         }

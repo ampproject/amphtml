@@ -21,7 +21,7 @@ const gulp = require('gulp-help')(require('gulp'));
 const intercept = require('gulp-intercept');
 const path = require('path');
 const minimist = require('minimist');
-const util = require('gulp-util');
+const log = require('fancy-log');
 
 const argv = minimist(process.argv.slice(2));
 
@@ -98,7 +98,7 @@ function generate(root, target, writeToDisk) {
           fs.writeFileSync(target, codeowners);
         } else {
           const codeowners = buildCodeownersFile(dirs);
-          util.log(codeowners);
+          log(codeowners);
         }
       });
 }

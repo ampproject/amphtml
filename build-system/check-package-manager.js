@@ -18,7 +18,7 @@
 const getStdout = require('./exec').getStdout;
 const setupInstructionsUrl = 'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-quick.md#one-time-setup';
 
-// Color formatting may not yet be available via gulp-util.
+// Color formatting libraries may not be available when this script is run.
 function red(text) {return '\x1b[31m' + text + '\x1b[0m';}
 function cyan(text) {return '\x1b[36m' + text + '\x1b[0m';}
 function green(text) {return '\x1b[32m' + text + '\x1b[0m';}
