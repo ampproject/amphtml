@@ -290,6 +290,23 @@ describe('amp-mustache template', () => {
       });
       expect(nestedResult./*OK*/innerHTML).to.equal('nested: Nested');
     });
+
+    it('should not allow users to pass data having key that starts with ' +
+        '__AMP_NESTED_TEMPLATE_', () => {
+      const templateElement = document.createElement('template');
+      templateElement./*OK*/innerHTML =
+          'outer: {{value}} {{__AMP_NESTED_TEMPLATE_XYZ}} ' +
+          '<template type="amp-mustache">nested: {{value}}</template>';
+      const template = new AmpMustache(templateElement);
+      template.compileCallback();
+      const result = template.render({
+        __AMP_NESTED_TEMPLATE_XYZ: 'MUST NOT RENDER THIS',
+        value: 'Outer',
+      });
+      expect(result./*OK*/innerHTML).to.equal(
+          'outer: Outer  ' +
+          '<template type="amp-mustache">nested: {{value}}</template>');
+    });
   });
 
   it('should sanitize triple-mustache', () => {
