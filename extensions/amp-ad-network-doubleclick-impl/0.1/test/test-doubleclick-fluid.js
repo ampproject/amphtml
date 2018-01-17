@@ -16,7 +16,7 @@
 
 import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {utf8EncodeSync} from '../../../../src/utils/bytes';
+import {utf8Encode} from '../../../../src/utils/bytes';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
@@ -148,7 +148,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
 
   it('should style iframe/slot correctly on multi-size creative', () => {
     multiSizeImpl.buildCallback();
-    return utf8EncodeSync('foo').then(creative => {
+    return utf8Encode('foo').then(creative => {
       multiSizeImpl.sentinel = 'sentinel';
       multiSizeImpl.adPromise_ = Promise.resolve();
       multiSizeImpl.creativeBody_ = creative;
