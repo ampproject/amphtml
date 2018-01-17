@@ -51,7 +51,7 @@ export function mathml(global, data) {
       delete data.height;
       const div = document.createElement('div');
       div.setAttribute('id','mathmlformula');
-      div.innerHTML = data.formula;
+      div.textContent = data.formula;
       document.body.appendChild(div);
       mathjax.Hub.Queue( function () {
         const rendered = document.getElementById('MathJax-Element-1-Frame');
