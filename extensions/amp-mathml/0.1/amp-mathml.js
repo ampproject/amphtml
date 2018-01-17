@@ -38,14 +38,7 @@ export class AmpMathml extends AMP.BaseElement {
   preconnectCallback () {
     this.preconnect.url('https://cdnjs.cloudflare.com');
   }
-  /** @override */
-  buildCallback() {
-    const formula = this.element.getAttribute('formula');
-    if (!formula || '' === formula) {
-      return;
-    }
-    this._formula = formula;
-  }
+
   layoutCallback () {
     const iframe = getIframe(this.win, this.element, 'mathml');
     this.applyFillContent(iframe);
