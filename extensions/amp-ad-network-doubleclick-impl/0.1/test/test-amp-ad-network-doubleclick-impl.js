@@ -20,7 +20,6 @@ import {
   CREATIVE_SIZE_HEADER,
   signatureVerifierFor,
 } from '../../../amp-a4a/0.1/amp-a4a';
-import {DATA_ATTR_NAME} from '../../../amp-a4a/0.1/refresh-manager';
 import {
   AMP_SIGNATURE_HEADER,
   VerificationStatus,
