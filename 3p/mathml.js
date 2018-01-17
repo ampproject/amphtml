@@ -17,7 +17,7 @@ import {writeScript} from './3p';
 import {user} from '../src/log';
 
 /**
- * Get the correct script for the gist.
+ * Get the correct script for the mathml formula.
  *
  * Use writeScript: Failed to execute 'write' on 'Document': It isn't possible
  * to write into a document from an asynchronously-loaded external script unless
