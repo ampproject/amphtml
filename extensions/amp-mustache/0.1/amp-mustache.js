@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import {dict} from '../../../src/utils/object';
 import {iterateCursor} from '../../../src/dom';
 import {parse as mustacheParse, render as mustacheRender,
   setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
 import {sanitizeHtml, sanitizeFormattingHtml} from '../../../src/sanitizer';
+import {startsWith} from '../../../src/string';
 
 // Configure inline sanitizer for unescaped values.
 setUnescapedSanitizier(sanitizeFormattingHtml);
@@ -34,9 +36,9 @@ export class AmpMustache extends AMP.BaseTemplate {
 
   /** @override */
   compileCallback() {
-    /** @private @const {string} */
+    /** @private @const {!JsonObject} */
+    this.nestedTemplates_ = dict();
     const shadowTemplate = this.element.cloneNode(true);
-    this.nestedTemplates_ = {};
     let index = 0;
     iterateCursor(shadowTemplate.content.querySelectorAll('template'),
         nestedTemplate => {
@@ -50,6 +52,7 @@ export class AmpMustache extends AMP.BaseTemplate {
               nestedTemplate);
           index++;
         });
+    /** @private @const {string} */
     this.template_ = shadowTemplate./*OK*/innerHTML;
     mustacheParse(this.template_);
   }
@@ -57,7 +60,7 @@ export class AmpMustache extends AMP.BaseTemplate {
   /** @override */
   render(rawData) {
     const filteredData = Object.keys(rawData)
-        .filter(key => !key.startsWith('__AMP_NESTED_TEMPLATE_'))
+        .filter(key => !startsWith(key, '__AMP_NESTED_TEMPLATE_'))
         .reduce((data, key) => {
           data[key] = rawData[key];
           return data;
