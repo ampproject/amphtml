@@ -235,7 +235,6 @@ describes.realWin('amp-list component', {
   });
 
   it('fetch should resolve if `src` is empty', () => {
-    // Return non-zero width to simulate post-layout behavior.
     const spy = sandbox.spy(list, 'fetchList_');
     element.setAttribute('src', '');
 
