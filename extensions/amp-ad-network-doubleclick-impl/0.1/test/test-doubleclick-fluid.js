@@ -148,7 +148,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
 
   it('should style iframe/slot correctly on multi-size creative', () => {
     multiSizeImpl.buildCallback();
-    return utf8Encode('foo').then(creative => {
+    return Promise.resolve(utf8Encode('foo')).then(creative => {
       multiSizeImpl.sentinel = 'sentinel';
       multiSizeImpl.adPromise_ = Promise.resolve();
       multiSizeImpl.creativeBody_ = creative;
@@ -165,7 +165,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
 
   it('should have an iframe child with initial size 0x0', () => {
     impl.buildCallback();
-    return utf8Encode('foo').then(creative => {
+    return Promise.resolve(utf8Encode('foo')).then(creative => {
       impl.sentinel = 'sentinel';
       impl.adPromise_ = Promise.resolve();
       impl.creativeBody_ = creative;
@@ -202,7 +202,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
         sandbox.spy(impl, 'connectFluidMessagingChannel');
     const onFluidResizeSpy = sandbox.spy(impl, 'onFluidResize_');
     impl.attemptChangeHeight = () => Promise.resolve();
-    return utf8Encode(rawCreative).then(creative => {
+    return Promise.resolve(utf8Encode(rawCreative)).then(creative => {
       impl.sentinel = 'sentinel';
       impl.initiateAdRequest();
       return impl.adPromise_.then(() => {
