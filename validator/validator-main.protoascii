@@ -2887,7 +2887,6 @@ tags {
   attrs: {
     name: "template"
     mandatory: true
-    dispatch_key: NAME_DISPATCH
   }
 }
 tags {
@@ -2912,7 +2911,6 @@ tags {
   attrs: {
     name: "template"
     mandatory: true
-    dispatch_key: NAME_DISPATCH
   }
 }
 attr_lists: {
