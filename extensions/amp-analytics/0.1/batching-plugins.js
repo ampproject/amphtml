@@ -40,7 +40,7 @@ export const BatchingPluginFunctions = {
  */
 function ping(unusedBaseUrl, unusedSegments) {
   if (getMode().localDev || getMode().test) {
-    return 'testingFinalUrl';
+    return 'testFinalUrl';
   }
-  throw new Error('batching plugin _ping_ is for testing only');
+  throw new Error('batchPlugin _ping_ is for testing only');
 }

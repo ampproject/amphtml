@@ -117,8 +117,8 @@ export class RequestHandler {
     this.lastTrigger_ = trigger;
     const triggerParams = trigger['extraUrlParams'];
     const batchSegment = dict({
-      'triggers': trigger['on'],
-      'timestamp': Date.now(),
+      'trigger': trigger['on'],
+      'timestamp': this.win.Date.now(),
       'extraUrlParams': null,
     });
     if (!this.baseUrlPromise_) {
@@ -146,8 +146,10 @@ export class RequestHandler {
             })
             .then(finalExtraUrlParams => {
               if (this.batchingPlugin_) {
+                console.log(finalExtraUrlParams);
                 batchSegment['extraUrlParams'] =
                     parseQueryString(finalExtraUrlParams);
+               console.log(parseQueryString(finalExtraUrlParams));
                 batchSegmentResolver(batchSegment);
               }
               return finalExtraUrlParams;
@@ -206,13 +208,8 @@ export class RequestHandler {
       return baseUrlPromise.then(baseUrl => {
         let requestUrlPromise;
         if (this.batchingPlugin_) {
-          try {
-            requestUrlPromise =
+          requestUrlPromise =
               this.constructBatchSegments_(baseUrl, batchSegmentsPromise);
-          } catch (e) {
-            dev().error(TAG, 'Error construction batchSegments', e);
-            return '';
-          }
         } else {
           requestUrlPromise =
               this.constructExtraUrlParamStrs_(baseUrl, extraUrlParamsPromise);
@@ -255,7 +252,13 @@ export class RequestHandler {
         'constructBatchSegments_ with invalid batchingPlugin function');
 
     return Promise.all(batchSegmentsPromise).then(batchSegments => {
-      return this.batchingPlugin_(baseUrl, batchSegments);
+      try {
+        return this.batchingPlugin_(baseUrl, batchSegments);
+      } catch (e) {
+        dev().error(TAG,
+            `Error: batchPlugin function ${this.batchPluginId_}`, e);
+        return '';
+      }
     });
   }
 
