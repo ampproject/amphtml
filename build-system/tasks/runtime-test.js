@@ -154,13 +154,13 @@ function printArgvMessages() {
         cyan(argv.grep) + '".',
   };
   if (!process.env.TRAVIS) {
-    log(green('Run', cyan('gulp help'),
-        'to see a list of all test flags. (Use', cyan('--nohelp'),
-        'to silence these messages.)'));
+    log(green('Run'), cyan('gulp help'),
+        green('to see a list of all test flags. (Use'), cyan('--nohelp'),
+        green('to silence these messages.)'));
     if (!argv.unit && !argv.integration && !argv.files) {
-      log(green('Running all tests. Use',
-          cyan('--unit'), 'or', cyan('--integration'),
-          'to run just the unit tests or integration tests.'));
+      log(green('Running all tests. Use'),
+          cyan('--unit'), green('or'), cyan('--integration'),
+          green('to run just the unit tests or integration tests.'));
     }
     if (!argv.compiled) {
       log(green('Running tests against unminified code.'));
