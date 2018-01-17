@@ -291,9 +291,8 @@ describes.realWin('amp-ad-3p-impl', {
       expect(ad3p.renderOutsideViewport()).to.equal(1.25);
     });
 
-    // TODO(lannka, #12486): Make this test work with lolex v2.
-    it.skip('should only allow rendering one ad per second', function* () {
-      const clock = lolex.install();
+    it('should only allow rendering one ad per second', function* () {
+      const clock = lolex.install({target: win});
       const ad3p2 = createAmpAd(win);
       expect(ad3p.renderOutsideViewport()).to.equal(3);
       expect(ad3p2.renderOutsideViewport()).to.equal(3);

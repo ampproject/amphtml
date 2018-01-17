@@ -29,7 +29,7 @@ describes.realWin('Requests', {amp: 1}, env => {
   beforeEach(() => {
     installVariableService(env.win);
     ampdoc = env.ampdoc;
-    clock = lolex.install();
+    clock = lolex.install({target: ampdoc.win});
     preconnectSpy = sandbox.spy();
     preconnect = {
       url: preconnectSpy,
@@ -40,8 +40,7 @@ describes.realWin('Requests', {amp: 1}, env => {
     clock.uninstall();
   });
 
-  // TODO(lannka, #12486): Make this test work with lolex v2.
-  describe.skip('RequestHandler', () => {
+  describe('RequestHandler', () => {
     describe('batch Delay', () => {
       it('maxDelay should  be a number', () => {
         const r1 = {'baseUrl': 'r1', 'maxDelay': 1};
