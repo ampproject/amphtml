@@ -328,7 +328,7 @@ export function sanitizeFormattingHtml(html) {
   return htmlSanitizer.sanitizeWithPolicy(html,
       function(tagName, attribs) {
         if (tagName == 'template') {
-          for (var i = 0; i < attribs.length; i += 2) {
+          for (let i = 0; i < attribs.length; i += 2) {
             if (attribs[i] == 'type' && attribs[i+1] == 'amp-mustache') {
               return {
                 tagName,
