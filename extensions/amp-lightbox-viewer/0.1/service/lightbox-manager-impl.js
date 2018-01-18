@@ -218,7 +218,6 @@ export class LightboxManager {
   }
 
   /**
-   * The function is not implemented yet. Fake for testing.
    * Get thumbnail url for single element.
    * @param {!Element} element
    * @param {number=} index fake it for testing only, will delete later
@@ -226,7 +225,9 @@ export class LightboxManager {
    * @private
    */
   getThumbnailUrl_(element, index) {
-    if (element.tagName == 'AMP-IMG') {
+    if (element.hasAttribute('lightbox-thumbnail-src')) {
+      return element.getAttribute('lightbox-thumbnail-src');
+    } else if (element.tagName == 'AMP-IMG') {
       return element.getAttribute('src');
     } else {
       // TODO(#12713): implement default thumbnails
