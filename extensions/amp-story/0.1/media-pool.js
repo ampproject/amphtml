@@ -563,9 +563,9 @@ export class MediaPool {
 
 
   /**
-   * "Blesses" the specified media element for playback.  In order for this to
-   * bless the media element, this function must be invoked in response to a
-   * user gesture.
+   * "Blesses" the specified media element for future playback without a user
+   * gesture.  In order for this to bless the media element, this function must
+   * be invoked in response to a user gesture.
    * @param {!HTMLMediaElement} mediaEl The media element to bless.
    * @return {!Promise} A promise that is resolved when blessing the media
    *     element is complete.
@@ -725,7 +725,9 @@ export class MediaPool {
 
 
   /**
-   * Unmutes all media elements in the media pool.
+   * "Blesses" all media elements in the media pool for future playback without
+   * a user gesture.  In order for this to bless the media elements, this
+   * function must be invoked in response to a user gesture.
    * @return {!Promise} A promise that is resolved when all media elements in
    *     the pool are blessed.
    */
