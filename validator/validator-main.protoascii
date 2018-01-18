@@ -2887,7 +2887,6 @@ tags {
   attrs: {
     name: "template"
     mandatory: true
-    dispatch_key: NAME_DISPATCH
   }
 }
 tags {
@@ -2898,8 +2897,20 @@ tags {
   attrs: {
     name: "submit-error"
     mandatory: true
-    # Avoid triggering errors for non-form divs.
-    dispatch_key: NAME_DISPATCH
+  }
+}
+tags {
+  tag_name: "DIV"
+  spec_name: "FORM > DIV [submit-error][template]"
+  mandatory_parent: "FORM"
+  attrs: { name: "align" }
+  attrs: {
+    name: "submit-error"
+    mandatory: true
+  }
+  attrs: {
+    name: "template"
+    mandatory: true
   }
 }
 attr_lists: {
