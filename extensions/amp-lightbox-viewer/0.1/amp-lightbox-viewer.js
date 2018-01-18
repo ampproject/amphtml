@@ -28,7 +28,7 @@ import {toggle, setStyle} from '../../../src/style';
 import {getData, listen} from '../../../src/event-helper';
 import {LightboxManager} from './service/lightbox-manager-impl';
 import {layoutRectFromDomRect} from '../../../src/layout-rect';
-import {elementByTag, scopedQuerySelector, waitForBodyPromise} from '../../../src/dom';
+import {elementByTag, scopedQuerySelector} from '../../../src/dom';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
@@ -920,19 +920,18 @@ export function installLightboxManager(win) {
 function installLightboxViewer(win) {
   const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
   // TODO (#12859): make this work for more than singleDoc mode
-  return waitForBodyPromise(/**@type {!Document}*/ (ampdoc.getRootNode()))
-      .then(() => {
-        const existingViewer = elementByTag(ampdoc.getRootNode(), TAG);
-        if (!existingViewer) {
-          const matches = ampdoc.getRootNode().querySelectorAll('[lightbox]');
-          if (matches.length > 0) {
-            const viewer = ampdoc.getRootNode().createElement(TAG);
-            viewer.setAttribute('layout', 'nodisplay');
-            viewer.setAttribute('id', DEFAULT_VIEWER_ID);
-            ampdoc.getRootNode().body.appendChild(viewer);
-          }
-        }
-      });
+  return ampdoc.whenBodyAvailable().then(body => {
+    const existingViewer = elementByTag(ampdoc.getRootNode(), TAG);
+    if (!existingViewer) {
+      const matches = ampdoc.getRootNode().querySelectorAll('[lightbox]');
+      if (matches.length > 0) {
+        const viewer = ampdoc.getRootNode().createElement(TAG);
+        viewer.setAttribute('layout', 'nodisplay');
+        viewer.setAttribute('id', DEFAULT_VIEWER_ID);
+        body.appendChild(viewer);
+      }
+    }
+  });
 }
 
 AMP.extension(TAG, '0.1', AMP => {
