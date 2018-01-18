@@ -28,7 +28,7 @@ import {toggle, setStyle} from '../../../src/style';
 import {getData, listen} from '../../../src/event-helper';
 import {LightboxManager} from './service/lightbox-manager-impl';
 import {layoutRectFromDomRect} from '../../../src/layout-rect';
-import {scopedQuerySelector} from '../../../src/dom';
+import {elementByTag, scopedQuerySelector} from '../../../src/dom';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
@@ -37,6 +37,7 @@ import {CommonSignals} from '../../../src/common-signals';
 
 /** @const */
 const TAG = 'amp-lightbox-viewer';
+const DEFAULT_VIEWER_ID = 'amp-lightbox-viewer';
 
 /**
  * Set of namespaces that indicate the lightbox controls mode.
@@ -903,14 +904,38 @@ export class AmpLightboxViewer extends AMP.BaseElement {
  */
 export function installLightboxManager(win) {
   if (isExperimentOn(win, TAG)) {
-    // TODO(aghassemi): This only works for singleDoc mode. We will move
+    // TODO (#12859): This only works for singleDoc mode. We will move
     // installation of LightboxManager to core after the experiment, okay for now.
     const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
     manager_ = new LightboxManager(ampdoc);
   }
 }
 
+/**
+ * Tries to find an existing amp-lightbox-viewer, if there is none, it adds a
+ * default one.
+ * @param {!Window} win
+ * @return {!Promise}
+ */
+function installLightboxViewer(win) {
+  const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
+  // TODO (#12859): make this work for more than singleDoc mode
+  return ampdoc.whenBodyAvailable().then(body => {
+    const existingViewer = elementByTag(ampdoc.getRootNode(), TAG);
+    if (!existingViewer) {
+      const matches = ampdoc.getRootNode().querySelectorAll('[lightbox]');
+      if (matches.length > 0) {
+        const viewer = ampdoc.getRootNode().createElement(TAG);
+        viewer.setAttribute('layout', 'nodisplay');
+        viewer.setAttribute('id', DEFAULT_VIEWER_ID);
+        body.appendChild(viewer);
+      }
+    }
+  });
+}
+
 AMP.extension(TAG, '0.1', AMP => {
-  installLightboxManager(AMP.win);
   AMP.registerElement(TAG, AmpLightboxViewer, CSS);
+  installLightboxManager(AMP.win);
+  installLightboxViewer(AMP.win);
 });
