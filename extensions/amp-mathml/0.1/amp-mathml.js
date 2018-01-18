@@ -44,7 +44,12 @@ export class AmpMathml extends AMP.BaseElement {
     this.applyFillContent(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
     listenFor(iframe, 'embed-size', data => {
-      this./*OK*/changeHeight(data['height']);
+      if(!this.element.hasAttribute('inline') ) {
+        // Don't change the width if not inlined.
+        newWidth = undefined;
+        }
+      this.element.getResources()./*OK*/changeSize(
+      this.element, newHeight, /* newWidth */ newWidth);
     }, /* opt_is3P */true );
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
