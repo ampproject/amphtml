@@ -49,7 +49,7 @@ import {
 import {removeElement} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
 import {stringHash32} from '../../../src/string';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {clamp} from '../../../src/utils/math';
@@ -63,6 +63,7 @@ import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
   getAdSenseAmpAutoAdsExpBranch,
 } from '../../../ads/google/adsense-amp-auto-ads';
+import {ADSENSE_RSPV_WHITELISTED_HEIGHT} from '../../../ads/google/utils';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
@@ -154,6 +155,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   /**
    * @return {boolean}
    * @private
+   * @visibleForTesting
    */
   isResponsive_() {
     return this.autoFormat_ == 'rspv';
@@ -168,6 +170,23 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      * to an amp-ad-adsense element. Thus, if we are an amp-ad, we can be sure
      * that it has been verified.
      */
+    if (this.isResponsive_()) {
+      const height = this.element.getAttribute('height');
+      const width = this.element.getAttribute('width');
+      if (height != ADSENSE_RSPV_WHITELISTED_HEIGHT) {
+        user().error(TAG,
+            `Specified height ${height} in <amp-ad> tag is not equal to the ` +
+            `required height of ${ADSENSE_RSPV_WHITELISTED_HEIGHT} for ` +
+            'responsive AdSense ad units.');
+        return false;
+      }
+      if (width != '100vw') {
+        user().error(TAG,
+            `Invalid width ${width} for full-width responsive <amp-ad> tag. ` +
+            'Width must be 100vw.');
+        return false;
+      }
+    }
     return !!this.element.getAttribute('data-ad-client') &&
         this.isAmpAdElement();
   }
@@ -221,8 +240,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         && !isNaN(width) && width > 0
         && !isNaN(height) && height > 0;
     this.size_ = useDefinedSizes
-        ? {width, height}
-        : this.getIntersectionElementLayoutBox();
+      ? {width, height}
+      : this.getIntersectionElementLayoutBox();
     const format = `${this.size_.width}x${this.size_.height}`;
     const slotId = this.element.getAttribute('data-amp-slot-index');
     // data-amp-slot-index is set by the upgradeCallback method of amp-ad.

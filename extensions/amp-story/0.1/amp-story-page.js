@@ -31,12 +31,10 @@ import {Layout} from '../../../src/layout';
 import {upgradeBackgroundAudio} from './audio';
 import {EventType, dispatch, dispatchCustom} from './events';
 import {AdvancementConfig} from './page-advancement';
-import {scopedQuerySelectorAll} from '../../../src/dom';
+import {matches, scopedQuerySelectorAll} from '../../../src/dom';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 import {CommonSignals} from '../../../src/common-signals';
-import {setImportantStyles} from '../../../src/style';
-
 
 
 /**
@@ -83,6 +81,10 @@ export class AmpStoryPage extends AMP.BaseElement {
             .catch(reject);
       };
     });
+
+    /** @private @const {boolean} Only prerender the first story page. */
+    this.prerenderAllowed_ = matches(this.element,
+        'amp-story-page:first-of-type');
   }
 
 
@@ -110,6 +112,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.advancement_.addPreviousListener(() => this.previous());
     this.advancement_
         .addAdvanceListener(() => this.next(/* opt_isAutomaticAdvance */ true));
+    this.advancement_.addOnTapNavigationListener(
+        navigationDirection => this.navigateOnTap(navigationDirection));
     this.advancement_
         .addProgressListener(progress => this.emitProgress_(progress));
   }
@@ -136,14 +140,31 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
-    this.pageInactiveCallback_();
+    this.advancement_.stop();
+
+    this.pauseAllMedia_(/* opt_rewindToBeginning */ false);
+
+    if (this.animationManager_) {
+      this.animationManager_.cancelAll();
+    }
   }
 
 
   /** @override */
   resumeCallback() {
-    this.pageActiveCallback_();
+    this.markPageAsLoaded_();
+    this.updateAudioIcon_();
+    this.registerAllMedia_();
+
+    if (this.isActive()) {
+      this.advancement_.start();
+      this.maybeStartAnimations();
+      this.playAllMedia_();
+    }
+
+    this.reportDevModeErrors_();
   }
+
 
   /** @override */
   layoutCallback() {
@@ -155,19 +176,11 @@ export class AmpStoryPage extends AMP.BaseElement {
     ]);
   }
 
+
   /** @return {!Promise} */
   beforeVisible() {
+    this.rewindAllMediaToBeginning_();
     return this.maybeApplyFirstAnimationFrame();
-  }
-
-  /** @private */
-  onPageVisible_() {
-    this.markPageAsLoaded_();
-    this.updateAudioIcon_();
-    this.registerAllMedia_();
-    this.playAllMedia_();
-    this.maybeStartAnimations();
-    this.reportDevModeErrors_();
   }
 
 
@@ -192,7 +205,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   updateAudioIcon_() {
     // Dispatch event to signal whether audio is playing.
     const eventType = this.hasAudio_() ?
-        EventType.AUDIO_PLAYING : EventType.AUDIO_STOPPED;
+      EventType.AUDIO_PLAYING : EventType.AUDIO_STOPPED;
     dispatch(this.element, eventType, /* opt_bubbles */ true);
   }
 
@@ -216,7 +229,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   prerenderAllowed() {
-    return true;
+    return this.prerenderAllowed_;
   }
 
 
@@ -248,7 +261,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Pauses all media on this page.
-   * @param {boolean} opt_rewindToBeginning Whether to rewind the currentTime
+   * @param {boolean=} opt_rewindToBeginning Whether to rewind the currentTime
    *     of media items to the beginning.
    * @private
    */
@@ -278,6 +291,13 @@ export class AmpStoryPage extends AMP.BaseElement {
   preloadAllMedia_() {
     this.forEachMediaElement_((mediaPool, mediaEl) => {
       mediaPool.preload(/** @type {!HTMLMediaElement} */ (mediaEl));
+    });
+  }
+
+  /** @private */
+  rewindAllMediaToBeginning_() {
+    this.forEachMediaElement_((mediaPool, mediaEl) => {
+      mediaPool.rewindToBeginning(/** @type {!HTMLMediaElement} */ (mediaEl));
     });
   }
 
@@ -341,28 +361,10 @@ export class AmpStoryPage extends AMP.BaseElement {
   setActive(isActive) {
     if (isActive) {
       this.element.setAttribute('active', '');
-      this.pageActiveCallback_();
+      this.resumeCallback();
     } else {
       this.element.removeAttribute('active');
-      this.pageInactiveCallback_();
-    }
-  }
-
-
-  /** @private */
-  pageActiveCallback_() {
-    this.advancement_.start();
-    this.onPageVisible_();
-  }
-
-
-  /** @private */
-  pageInactiveCallback_() {
-    this.pauseAllMedia_(/* opt_rewindToBeginning */ true);
-    this.advancement_.stop();
-
-    if (this.animationManager_) {
-      this.animationManager_.cancelAll();
+      this.pauseCallback();
     }
   }
 
@@ -381,9 +383,6 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   setDistance(distance) {
     this.element.setAttribute('distance', distance);
-    setImportantStyles(this.element, {
-      transform: `translateY(${100 * distance}%)`,
-    });
 
     this.registerAllMedia_();
     if (distance > 0 && distance <= 2) {
@@ -406,7 +405,6 @@ export class AmpStoryPage extends AMP.BaseElement {
   isActive() {
     return this.element.hasAttribute('active');
   }
-
 
   /**
    * Emits an event indicating that the progress of the current page has changed
@@ -500,39 +498,50 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Navigates to the previous page in the story.
    */
   previous() {
-    const pageId = this.getPreviousPageId_();
+    const targetPageId = this.getPreviousPageId_();
+
+    if (targetPageId === null) {
+      dispatch(this.element, EventType.SHOW_NO_PREVIOUS_PAGE_HELP, true);
+      return;
+    }
+
+    this.switchTo_(targetPageId);
+  }
+
+
+  /**
+   * Navigates to the next page in the story.
+   * @param {boolean=} opt_isAutomaticAdvance Whether this navigation was caused
+   *     by an automatic advancement after a timeout.
+   */
+  next(opt_isAutomaticAdvance) {
+    const pageId = this.getNextPageId_(opt_isAutomaticAdvance);
 
     if (pageId === null) {
-      dispatch(this.element, EventType.SHOW_NO_PREVIOUS_PAGE_HELP, true);
+      dispatch(this.element, EventType.SHOW_BOOKEND, /* opt_bubbles */ true);
       return;
     }
 
     this.switchTo_(pageId);
   }
 
-
   /**
-   * Navigates to the next page in the story.
-   * @param {boolean} opt_isAutomaticAdvance Whether this navigation was caused
-   *     by an automatic advancement after a timeout.
+   * Delegated the navigation decision to AMP-STORY via event.
+   * @param {number} direction The direction in which navigation needs to takes place.
    */
-  next(opt_isAutomaticAdvance) {
-    this.switchTo_(
-        this.getNextPageId_(opt_isAutomaticAdvance), 'i-amphtml-story-bookend');
+  navigateOnTap(direction) {
+    const payload = {direction};
+    const eventInit = {bubbles: true};
+    dispatchCustom(this.win, this.element, EventType.TAP_NAVIGATION, payload,
+        eventInit);
   }
 
 
   /**
-   * @param {?string} targetPageIdOrNull
-   * @param {string=} opt_fallbackPageId
+   * @param {string} targetPageId
    * @private
    */
-  switchTo_(targetPageIdOrNull, opt_fallbackPageId) {
-    const targetPageId = targetPageIdOrNull || opt_fallbackPageId;
-    if (!targetPageId) {
-      return;
-    }
-
+  switchTo_(targetPageId) {
     const payload = {targetPageId};
     const eventInit = {bubbles: true};
     dispatchCustom(this.win, this.element, EventType.SWITCH_PAGE, payload,

@@ -297,7 +297,7 @@ export function closestBySelector(element, selector) {
 /**
  * Checks if the given element matches the selector
  * @param  {!Element} el The element to verify
- * @param  {!string} selector The selector to check against
+ * @param  {string} selector The selector to check against
  * @return {boolean} True if the element matched the selector. False otherwise.
  */
 export function matches(el, selector) {
@@ -309,7 +309,7 @@ export function matches(el, selector) {
   if (matcher) {
     return matcher.call(el, selector);
   }
-  return false;  // IE8 always returns false.
+  return false; // IE8 always returns false.
 }
 
 /**
@@ -332,7 +332,7 @@ export function elementByTag(element, tagName) {
  */
 export function childElement(parent, callback) {
   for (let child = parent.firstElementChild; child;
-      child = child.nextElementSibling) {
+    child = child.nextElementSibling) {
     if (callback(child)) {
       return child;
     }
@@ -350,7 +350,7 @@ export function childElement(parent, callback) {
 export function childElements(parent, callback) {
   const children = [];
   for (let child = parent.firstElementChild; child;
-       child = child.nextElementSibling) {
+    child = child.nextElementSibling) {
     if (callback(child)) {
       children.push(child);
     }
@@ -367,7 +367,7 @@ export function childElements(parent, callback) {
  */
 export function lastChildElement(parent, callback) {
   for (let child = parent.lastElementChild; child;
-       child = child.previousElementSibling) {
+    child = child.previousElementSibling) {
     if (callback(child)) {
       return child;
     }
@@ -385,7 +385,7 @@ export function lastChildElement(parent, callback) {
 export function childNodes(parent, callback) {
   const nodes = [];
   for (let child = parent.firstChild; child;
-       child = child.nextSibling) {
+    child = child.nextSibling) {
     if (callback(child)) {
       nodes.push(child);
     }
@@ -408,13 +408,19 @@ export function setScopeSelectorSupportedForTesting(val) {
 }
 
 /**
+ * Test that the :scope selector is supported and behaves correctly.
  * @param {!Element} parent
  * @return {boolean}
  */
 function isScopeSelectorSupported(parent) {
+  const doc = parent.ownerDocument;
   try {
-    parent.ownerDocument.querySelector(':scope');
-    return true;
+    const testElement = doc.createElement('div');
+    const testChild = doc.createElement('div');
+    testElement.appendChild(testChild);
+    // NOTE(cvializ, #12383): Firefox's implementation is incomplete,
+    // therefore we test actual functionality of`:scope` as well.
+    return testElement./*OK*/querySelector(':scope div') === testChild;
   } catch (e) {
     return false;
   }
@@ -580,7 +586,7 @@ export function hasNextNodeInDocumentOrder(element, opt_stopNode) {
 export function ancestorElements(child, predicate) {
   const ancestors = [];
   for (let ancestor = child.parentElement; ancestor;
-       ancestor = ancestor.parentElement) {
+    ancestor = ancestor.parentElement) {
     if (predicate(ancestor)) {
       ancestors.push(ancestor);
     }
@@ -609,7 +615,7 @@ export function ancestorElementsByTag(child, tagName) {
  * `undefined` to avoid checking the `length` property.
  * Test cases: https://jsperf.com/iterating-over-collections-of-elements
  * @param {!IArrayLike<T>} iterable
- * @param {!function(T, number)} cb
+ * @param {function(T, number)} cb
  * @template T
  */
 export function iterateCursor(iterable, cb) {

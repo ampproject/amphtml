@@ -32,8 +32,8 @@ import {getMode} from '../../../src/mode';
 import {Activity} from './activity-impl';
 import {AnalyticsEventType} from './events';
 import {
-    InstrumentationService,
-    instrumentationServicePromiseForDoc,
+  InstrumentationService,
+  instrumentationServicePromiseForDoc,
 } from './instrumentation';
 import {
   ExpansionOptions,
@@ -158,16 +158,6 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.element.getAttribute('trigger') == 'immediate') {
       this.ensureInitialized_();
     }
-  }
-
-  /**
-   * Prefetches and preconnects URLs related to the analytics.
-   * @param {boolean=} opt_onLayout
-   * @override
-   */
-  preconnectCallback(opt_onLayout) {
-    const url = getIframeTransportScriptUrl(this.getAmpDoc().win);
-    this.preconnect.preload(url, 'script');
   }
 
   /** @override */
@@ -305,6 +295,10 @@ export class AmpAnalytics extends AMP.BaseElement {
           // replace selector and selectionMethod
           if (this.isSandbox_) {
             // Only support selection of parent element for analytics in scope
+            if (!this.element.parentElement) {
+              // In case parent element has been removed from DOM, do nothing
+              return;
+            }
             trigger['selector'] = this.element.parentElement.tagName;
             trigger['selectionMethod'] = 'closest';
             this.addTriggerNoInline_(trigger);
@@ -337,17 +331,39 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.iframeTransport_) {
       return;
     }
-    const TAG = this.getName_();
-    const ampAdResourceId = user().assertString(
-        getAmpAdResourceId(this.element, getTopWindow(this.win)),
-        `${TAG}: No friendly parent amp-ad element was found for ` +
-        'amp-analytics tag with iframe transport.');
+    this.preload(getIframeTransportScriptUrl(this.getAmpDoc().win), 'script');
+    const ampAdResourceId = this.assertAmpAdResourceId();
 
     this.iframeTransport_ = new IframeTransport(
         // Create  3p transport frame within creative frame if inabox.
         this.isInabox_ ? this.win : this.getAmpDoc().win,
         this.element.getAttribute('type'),
         this.config_['transport'], ampAdResourceId);
+  }
+
+  /**
+   * Asks the browser to preload a URL. Always also does a preconnect
+   * because browser support for that is better.
+   *
+   * @param {string} url
+   * @param {string=} opt_preloadAs
+   * @VisibleForTesting
+   */
+  preload(url, opt_preloadAs) {
+    this.preconnect.preload(url, opt_preloadAs);
+  }
+
+  /**
+   * Gets the resourceID of the parent amp-ad element.
+   * Throws an exception if no such element.
+   * @returns {string}
+   * @VisibleForTesting
+   */
+  assertAmpAdResourceId() {
+    return user().assertString(
+        getAmpAdResourceId(this.element, getTopWindow(this.win)),
+        `${this.getName_()}: No friendly amp-ad ancestor element was found ` +
+        'for amp-analytics tag with iframe transport.');
   }
 
   /**
@@ -420,7 +436,9 @@ export class AmpAnalytics extends AMP.BaseElement {
     assertHttpsUrl(remoteConfigUrl, this.element);
     const TAG = this.getName_();
     dev().fine(TAG, 'Fetching remote config', remoteConfigUrl);
-    const fetchConfig = {};
+    const fetchConfig = {
+      ampCors: false,
+    };
     if (this.element.hasAttribute('data-credentials')) {
       fetchConfig.credentials = this.element.getAttribute('data-credentials');
     }
@@ -625,7 +643,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   handleEvent_(trigger, event) {
     const requests = isArray(trigger['request'])
-        ? trigger['request'] : [trigger['request']];
+      ? trigger['request'] : [trigger['request']];
 
     const resultPromises = [];
     for (let r = 0; r < requests.length; r++) {
@@ -785,7 +803,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       if (v == null) {
         continue;
       } else {
-        const sv = this.variableService_.encodeVars(v, k);
+        const sv = this.variableService_.encodeVars(k, v);
         s.push(`${encodeURIComponent(k)}=${sv}`);
       }
     }
@@ -852,7 +870,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     // that is already being used in the wild.
     user().assert(opt_predefinedConfig || !from || !from['optout'] ||
         from['optout'] == '_gaUserPrefs.ioo',
-        'optout property is only available to vendor config.');
+    'optout property is only available to vendor config.');
 
     for (const property in from) {
       user().assert(opt_predefinedConfig || property != 'iframePing',

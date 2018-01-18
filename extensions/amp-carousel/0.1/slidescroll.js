@@ -58,7 +58,7 @@ export class AmpSlideScroll extends BaseSlides {
     /** @private {?../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = null;
 
-    /** @private {!boolean} */
+    /** @private {boolean} */
     this.hasNativeSnapPoints_ = false;
 
     /** @private {!Array<!Element>} */
@@ -140,7 +140,7 @@ export class AmpSlideScroll extends BaseSlides {
     this.action_ = Services.actionServiceForDoc(this.element);
 
     this.hasNativeSnapPoints_ = (
-        getStyle(this.element, 'scrollSnapType') != undefined);
+      getStyle(this.element, 'scrollSnapType') != undefined);
 
     if (this.shouldDisableCssSnap_) {
       this.hasNativeSnapPoints_ = false;
@@ -251,7 +251,7 @@ export class AmpSlideScroll extends BaseSlides {
         Services.timerFor(this.win).cancel(this.scrollTimeout_);
       }
       const timeout = this.shouldDisableCssSnap_ ? IOS_TOUCH_TIMEOUT
-          : NATIVE_TOUCH_TIMEOUT;
+        : NATIVE_TOUCH_TIMEOUT;
       // Timer that detects scroll end and/or end of snap scroll.
       this.touchEndTimeout_ = Services.timerFor(this.win).delay(() => {
         const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
@@ -356,7 +356,7 @@ export class AmpSlideScroll extends BaseSlides {
 
     if (!this.touchEndTimeout_) {
       const timeout = this.hasNativeSnapPoints_ ? NATIVE_SNAP_TIMEOUT : (
-          this.isIos_ ? IOS_CUSTOM_SNAP_TIMEOUT : CUSTOM_SNAP_TIMEOUT);
+        this.isIos_ ? IOS_CUSTOM_SNAP_TIMEOUT : CUSTOM_SNAP_TIMEOUT);
       // Timer that detects scroll end and/or end of snap scroll.
       this.scrollTimeout_ = Services.timerFor(this.win).delay(() => {
 
@@ -467,10 +467,10 @@ export class AmpSlideScroll extends BaseSlides {
 
     if (this.shouldLoop) {
       newIndex = (newIndex < 0) ? this.noOfSlides_ - 1 :
-          (newIndex >= this.noOfSlides_) ? 0 : newIndex;
+        (newIndex >= this.noOfSlides_) ? 0 : newIndex;
     } else {
       newIndex = (newIndex < 0) ? 0 :
-          (newIndex >= this.noOfSlides_) ? this.noOfSlides_ - 1 : newIndex;
+        (newIndex >= this.noOfSlides_) ? this.noOfSlides_ - 1 : newIndex;
     }
     return newIndex;
   }
@@ -508,16 +508,19 @@ export class AmpSlideScroll extends BaseSlides {
    */
   showSlideWhenReady(value) {
     const index = parseInt(value, 10);
-    if (isFinite(index) && index >= 0 && index < this.noOfSlides_) {
-      // If we haven't been laid out yet, set `initialSlideIndex_` instead.
-      if (this.slideIndex_ === null) {
-        this.initialSlideIndex_ = index;
-      } else {
-        this.showSlide_(index);
-      }
-    } else {
+
+    if (!isFinite(index) || index < 0 || index >= this.noOfSlides_) {
       this.user().error(TAG, 'Invalid [slide] value: %s', value);
+      return;
     }
+
+    // If we haven't been laid out, set `initialSlideIndex_` for layout time.
+    if (this.slideIndex_ === null) {
+      this.initialSlideIndex_ = index;
+      return;
+    }
+
+    this.showSlideAndTriggerAction_(index);
   }
 
   /**
@@ -537,9 +540,9 @@ export class AmpSlideScroll extends BaseSlides {
       return false;
     }
     const prevIndex = (newIndex - 1 >= 0) ? newIndex - 1 :
-        (this.shouldLoop) ? noOfSlides_ - 1 : null;
+      (this.shouldLoop) ? noOfSlides_ - 1 : null;
     const nextIndex = (newIndex + 1 < noOfSlides_) ? newIndex + 1 :
-        (this.shouldLoop) ? 0 : null;
+      (this.shouldLoop) ? 0 : null;
 
     const showIndexArr = [];
     if (prevIndex != null) {
@@ -705,7 +708,7 @@ export class AmpSlideScroll extends BaseSlides {
     }
     const fromSlide =
         this.slideIndex_ === null ?
-            'null' : this.dataSlideIdArr_[dev().assertNumber(this.slideIndex_)];
+          'null' : this.dataSlideIdArr_[dev().assertNumber(this.slideIndex_)];
 
     const vars = {
       fromSlide,

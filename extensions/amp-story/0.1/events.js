@@ -19,11 +19,8 @@ import {createCustomEvent} from '../../../src/event-helper';
 
 /** @const {!Object<string, string>} */
 export const EventType = {
-  // Triggered when the user clicks the exit full screen button
-  EXIT_FULLSCREEN: 'ampstory:exitfullscreen',
-
-  // Triggered when the user clicks the enter full screen button
-  ENTER_FULLSCREEN: 'ampstory:enterfullscreen',
+  // Triggered when the bookend should be opened
+  SHOW_BOOKEND: 'ampstory:showbookend',
 
   // Triggered when the user clicks the close bookend button
   CLOSE_BOOKEND: 'ampstory:closebookend',
@@ -43,6 +40,15 @@ export const EventType = {
   // Triggered when the story should switch to a specified page
   SWITCH_PAGE: 'ampstory:switchpage',
 
+  // Triggered when the story should switch to the previous page
+  PREVIOUS_PAGE: 'ampstory:previouspage',
+
+  // Triggered when the story should switch to the next page
+  NEXT_PAGE: 'ampstory:nextpage',
+
+  // Triggered when the story should navigate after a tap on active page.
+  TAP_NAVIGATION: 'ampstory:tapnavigation',
+
   // Triggered when a page updates its progress
   PAGE_PROGRESS: 'ampstory:pageprogress',
 
@@ -59,7 +65,7 @@ export const EventType = {
 
 
 /**
- * @param {!Element} source
+ * @param {!EventTarget} source
  * @param {string} eventName
  * @param {boolean=} opt_bubbles
  */
@@ -75,7 +81,7 @@ export function dispatch(source, eventName, opt_bubbles) {
 
 /**
  * @param {!Window} win
- * @param {!Element} source
+ * @param {!EventTarget} source
  * @param {string} eventName
  * @param {!Object} payload
  * @param {!CustomEventInit=} opt_eventInit

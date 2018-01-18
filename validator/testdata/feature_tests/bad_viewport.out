@@ -1,5 +1,39 @@
 FAIL
+|  <!--
+|    Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+|  
+|    Licensed under the Apache License, Version 2.0 (the "License");
+|    you may not use this file except in compliance with the License.
+|    You may obtain a copy of the License at
+|  
+|        http://www.apache.org/licenses/LICENSE-2.0
+|  
+|    Unless required by applicable law or agreed to in writing, software
+|    distributed under the License is distributed on an "AS-IS" BASIS,
+|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+|    See the License for the specific language governing permissions and
+|    limitations under the license.
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <!--
+|      Test Description:
+|      Tests what happens when bad viewport properties are specified.
+|    -->
+|    <meta name="viewport" content="minimum-scale=not-a-number,foo=bar">
+>>   ^~~~~~~~~
 feature_tests/bad_viewport.html:25:2 The property 'foo' in attribute 'content' in tag 'meta name=viewport' is disallowed. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+>>   ^~~~~~~~~
 feature_tests/bad_viewport.html:25:2 The property 'minimum-scale' in attribute 'content' in tag 'meta name=viewport' is set to 'not-a-number', which is invalid. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+>>   ^~~~~~~~~
 feature_tests/bad_viewport.html:25:2 The property 'width' is missing from attribute 'content' in tag 'meta name=viewport'. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-feature_tests/bad_viewport.html:32:7 The mandatory tag 'meta name=viewport' is missing or incorrect. (see https://www.ampproject.org/docs/reference/spec#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|  Hello, world.
+|  </body>
+|  </html>

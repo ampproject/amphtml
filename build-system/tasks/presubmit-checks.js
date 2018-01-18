@@ -18,8 +18,9 @@
 const gulp = require('gulp-help')(require('gulp'));
 const path = require('path');
 const srcGlobs = require('../config').presubmitGlobs;
-const util = require('gulp-util');
 const through2 = require('through2');
+const colors = require('ansi-colors');
+const log = require('fancy-log');
 
 const dedicatedCopyrightNoteSources = /(\.js|\.css|\.go)$/;
 
@@ -61,6 +62,7 @@ const forbiddenTerms = {
     message: 'Switch to new internal ID form',
     whitelist: [
       'build-system/tasks/extension-generator/index.js',
+      'build-system/tasks/create-golden-css/css/main.css',
       'css/amp.css',
     ],
   },
@@ -68,6 +70,11 @@ const forbiddenTerms = {
   'describes.*\\.only': '',
   'it\\.only': '',
   'Math\.random[^;()]*=': 'Use Sinon to stub!!!',
+  'gulp-util': {
+    message: '`gulp-util` will be deprecated soon. See ' +
+        'https://medium.com/gulpjs/gulp-util-ca3b1f9f9ac5 ' +
+        'for a list of alternatives.',
+  },
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
   },
@@ -88,7 +95,7 @@ const forbiddenTerms = {
     whitelist: [
       'build-system/pr-check.js',
       'build-system/app.js',
-      'validator/nodejs/index.js',  // NodeJs only.
+      'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
       'validator/engine/validator.js',
@@ -479,7 +486,7 @@ const forbiddenTerms = {
       'src/3p-frame-messaging.js',
       'src/event-helper.js',
       'src/event-helper-listen.js',
-      'dist.3p/current/integration.js',  // includes previous
+      'dist.3p/current/integration.js', // includes previous
     ],
   },
   'setTimeout.*throw': {
@@ -488,7 +495,7 @@ const forbiddenTerms = {
       'src/log.js',
     ],
   },
-  '(dev|user)\\(\\)\\.(fine|info|warn|error)\\((?!\\s*([A-Z0-9-]+|[\'"`][A-Z0-9-]+[\'"`]))[^,)\n]*': {  // eslint-disable-line max-len
+  '(dev|user)\\(\\)\\.(fine|info|warn|error)\\((?!\\s*([A-Z0-9-]+|[\'"`][A-Z0-9-]+[\'"`]))[^,)\n]*': { // eslint-disable-line max-len
     message: 'Logging message require explicitly `TAG`, or an all uppercase' +
         ' string as the first parameter',
   },
@@ -499,7 +506,7 @@ const forbiddenTerms = {
     ],
   },
   '\\.requireLayout\\(': {
-    message: 'requireLayout is restricted b/c it affects non-contained elements',  // eslint-disable-line max-len
+    message: 'requireLayout is restricted b/c it affects non-contained elements', // eslint-disable-line max-len
     whitelist: [
       'extensions/amp-animation/0.1/web-animations.js',
       'extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.js',
@@ -528,8 +535,8 @@ const forbiddenTerms = {
   '/\\*\\* @type \\{\\!Element\\} \\*/': {
     message: 'Use assertElement instead of casting to !Element.',
     whitelist: [
-      'src/log.js',  // Has actual implementation of assertElement.
-      'dist.3p/current/integration.js',  // Includes the previous.
+      'src/log.js', // Has actual implementation of assertElement.
+      'dist.3p/current/integration.js', // Includes the previous.
     ],
   },
   'startupChunk\\(': {
@@ -600,7 +607,7 @@ const forbiddenTerms = {
   '\\.defer\\(\\)': {
     message: 'Promise.defer() is deprecated and should not be used.',
   },
-  '(dev|user)\\(\\)\\.assert(Element|String|Number)?\\(\\s*([A-Z][A-Z0-9-]*,)': {  // eslint-disable-line max-len
+  '(dev|user)\\(\\)\\.assert(Element|String|Number)?\\(\\s*([A-Z][A-Z0-9-]*,)': { // eslint-disable-line max-len
     message: 'TAG is not an argument to assert(). Will cause false positives.',
   },
 };
@@ -702,7 +709,7 @@ const forbiddenTermsSrcInclusive = {
   },
   'Text(Encoder|Decoder)\\(': {
     message: 'TextEncoder/TextDecoder is not supported in all browsers.' +
-        'Please use UTF8 utilities from src/bytes.js',
+        ' Please use UTF8 utilities from src/bytes.js',
     whitelist: [
       'ads/google/a4a/line-delimited-response-handler.js',
       'examples/pwa/pwa.js',
@@ -712,7 +719,7 @@ const forbiddenTermsSrcInclusive = {
   // Super complicated regex that says "find any querySelector method call that
   // is passed as a variable anything that is not a string, or a string that
   // contains a space.
-  '\\b(?:(?!\\w*[dD]oc\\w*)\\w)+\\.querySelector(?:All)?\\((?=\\s*([^\'"\\s]|[^\\s)]+\\s))[^)]*\\)': {  // eslint-disable-line max-len
+  '\\b(?:(?!\\w*[dD]oc\\w*)\\w)+\\.querySelector(?:All)?\\((?=\\s*([^\'"\\s]|[^\\s)]+\\s))[^)]*\\)': { // eslint-disable-line max-len
     message: 'querySelector is not scoped to the element, but globally and ' +
     'filtered to just the elements inside the element. This leads to ' +
     'obscure bugs if you attempt to match a descendant of a descendant (ie ' +
@@ -733,8 +740,8 @@ const forbiddenTermsSrcInclusive = {
       'src/services.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
-      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',  // eslint-disable-line max-len
-      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',  // eslint-disable-line max-len
+      'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js', // eslint-disable-line max-len
+      'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js', // eslint-disable-line max-len
       'extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.js',
     ],
   },
@@ -857,11 +864,12 @@ const forbiddenTermsSrcInclusive = {
       'validator/engine/validator.js',
     ],
   },
+  '\\.matches\\(': 'Please use matches() helper in src/dom.js',
 };
 
 // Terms that must appear in a source file.
 const requiredTerms = {
-  'Copyright 20(15|16|17) The AMP HTML Authors\\.':
+  'Copyright 20(15|16|17|18) The AMP HTML Authors\\.':
       dedicatedCopyrightNoteSources,
   'Licensed under the Apache License, Version 2\\.0':
       dedicatedCopyrightNoteSources,
@@ -944,7 +952,7 @@ function matchTerms(file, terms) {
         }
       }
 
-      util.log(util.colors.red('Found forbidden: "' + match[0] +
+      log(colors.red('Found forbidden: "' + match[0] +
           '" in ' + relative + ':' + line + ':' + column));
       if (typeof terms[term] === 'string') {
         fix = terms[term];
@@ -954,9 +962,9 @@ function matchTerms(file, terms) {
 
       // log the possible fix information if provided for the term.
       if (fix) {
-        util.log(util.colors.blue(fix));
+        log(colors.blue(fix));
       }
-      util.log(util.colors.blue('=========='));
+      log(colors.blue('=========='));
     }
 
     return hasTerm;
@@ -1019,9 +1027,9 @@ function isMissingTerms(file) {
 
     const matches = contents.match(new RegExp(term));
     if (!matches) {
-      util.log(util.colors.red('Did not find required: "' + term +
+      log(colors.red('Did not find required: "' + term +
           '" in ' + file.relative));
-      util.log(util.colors.blue('=========='));
+      log(colors.blue('=========='));
       return true;
     }
     return false;
@@ -1045,11 +1053,11 @@ function checkForbiddenAndRequiredTerms() {
       }))
       .on('end', function() {
         if (forbiddenFound) {
-          util.log(util.colors.blue(
+          log(colors.blue(
               'Please remove these usages or consult with the AMP team.'));
         }
         if (missingRequirements) {
-          util.log(util.colors.blue(
+          log(colors.blue(
               'Adding these terms (e.g. by adding a required LICENSE ' +
             'to the file)'));
         }

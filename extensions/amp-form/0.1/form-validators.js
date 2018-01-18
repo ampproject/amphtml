@@ -213,7 +213,7 @@ export class AbstractCustomValidator extends FormValidator {
 
   /**
    * @param {!Element} input
-   * @param {!string} invalidType
+   * @param {string} invalidType
    * @return {?Element}
    */
   getValidationFor(input, invalidType) {

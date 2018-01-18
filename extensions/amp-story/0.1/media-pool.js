@@ -15,7 +15,7 @@
  */
 
 import {
-  closest,
+  closestBySelector,
   isConnectedNode,
   removeElement,
   scopedQuerySelectorAll,
@@ -73,6 +73,16 @@ const PROTECTED_ATTRIBUTES = [
   'autoplay',
   REPLACED_MEDIA_ATTRIBUTE,
 ];
+
+
+/**
+ * Finds an amp-video/amp-audio ancestor.
+ * @param {!Element} el
+ * @return {?AmpElement}
+ */
+function ampMediaElementFor(el) {
+  return closestBySelector(el, 'amp-video, amp-audio');
+}
 
 
 export class MediaPool {
@@ -378,11 +388,35 @@ export class MediaPool {
    * @private
    */
   swapPoolMediaElementIntoDom_(domMediaEl, poolMediaEl, sources) {
+    const ampMediaForPoolEl = ampMediaElementFor(poolMediaEl);
+    const ampMediaForDomEl = ampMediaElementFor(domMediaEl);
+
     this.copyCssClasses_(domMediaEl, poolMediaEl);
     this.copyAttributes_(domMediaEl, poolMediaEl);
     sources.applyToElement(poolMediaEl);
     poolMediaEl.setAttribute(REPLACED_MEDIA_ATTRIBUTE, domMediaEl.id);
     domMediaEl.parentElement.replaceChild(poolMediaEl, domMediaEl);
+
+    this.maybeResetAmpMedia_(ampMediaForPoolEl);
+    this.maybeResetAmpMedia_(ampMediaForDomEl);
+  }
+
+
+  /**
+   * @param {?Element} componentEl
+   * @private
+   */
+  maybeResetAmpMedia_(componentEl) {
+    if (!componentEl) {
+      return;
+    }
+
+    if (componentEl.tagName.toLowerCase() == 'amp-audio') {
+      // TODO(alanorozco): Implement reset for amp-audio
+      return;
+    }
+
+    componentEl.getImpl().then(impl => impl.resetOnDomChange());
   }
 
 
@@ -470,7 +504,7 @@ export class MediaPool {
 
   /**
    * Invokes a function for all media managed by the media pool.
-   * @param {!function(!HTMLMediaElement)} callbackFn The function to be
+   * @param {function(!HTMLMediaElement)} callbackFn The function to be
    *     invoked.
    * @private
    */
@@ -617,7 +651,7 @@ export class MediaPool {
   /**
    * Pauses the specified media element in the DOM.
    * @param {!HTMLMediaElement} domMediaEl The media element to be paused.
-   * @param {boolean} opt_rewindToBeginning Whether to rewind the currentTime
+   * @param {boolean=} opt_rewindToBeginning Whether to rewind the currentTime
    *     of media items to the beginning.
    */
   pause(domMediaEl, opt_rewindToBeginning) {
@@ -634,6 +668,23 @@ export class MediaPool {
     if (opt_rewindToBeginning) {
       poolMediaEl.currentTime = 0;
     }
+  }
+
+
+  /**
+   * Rewinds a specified media element in the DOM to 0.
+   * @param {!HTMLMediaElement} domMediaEl The media element to be paused.
+   */
+  rewindToBeginning(domMediaEl) {
+    const mediaType = this.getMediaType_(domMediaEl);
+    const poolMediaEl =
+        this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
+
+    if (!poolMediaEl) {
+      return;
+    }
+
+    poolMediaEl.currentTime = 0;
   }
 
 
@@ -703,8 +754,8 @@ class Sources {
    *     element.
    */
   constructor(srcAttr, srcEls) {
-    /** @private @const {string} */
-    this.srcAttr_ = srcAttr || '';
+    /** @private @const {?string} */
+    this.srcAttr_ = srcAttr && srcAttr.length ? srcAttr : null;
 
     /** @private @const {!IArrayLike<!Element>} */
     this.srcEls_ = srcEls;
@@ -718,9 +769,18 @@ class Sources {
    */
   applyToElement(element) {
     Sources.removeFrom(element);
-    element.setAttribute('src', this.srcAttr_);
+
+    if (!this.srcAttr_) {
+      element.removeAttribute('src');
+    } else {
+      element.setAttribute('src', this.srcAttr_);
+    }
+
     Array.prototype.forEach.call(this.srcEls_,
         srcEl => element.appendChild(srcEl));
+
+    // Reset media element after changing sources.
+    element.load();
   }
 
 
@@ -732,12 +792,7 @@ class Sources {
    *     element.
    */
   static removeFrom(element) {
-    const ampMediaEl = closest(element, el => {
-      const tagName = el.tagName.toLowerCase();
-      return tagName === 'amp-audio' || tagName === 'amp-video';
-    });
-
-    const elementToUse = ampMediaEl || element;
+    const elementToUse = ampMediaElementFor(element) || element;
     const srcAttr = elementToUse.getAttribute('src');
     elementToUse.removeAttribute('src');
     const srcEls = scopedQuerySelectorAll(elementToUse, 'source');

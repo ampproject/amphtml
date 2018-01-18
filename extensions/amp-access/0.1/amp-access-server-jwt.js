@@ -106,7 +106,7 @@ export class AccessServerJwtAdapter {
 
     /** @private @const {?string} */
     this.serverState_ = stateElement ?
-        stateElement.getAttribute('content') : null;
+      stateElement.getAttribute('content') : null;
 
     const isInExperiment = isExperimentOn(ampdoc.win, TAG);
 
@@ -114,7 +114,7 @@ export class AccessServerJwtAdapter {
     this.isProxyOrigin_ = isProxyOrigin(ampdoc.win.location) || isInExperiment;
 
     const serviceUrlOverride = isInExperiment ?
-        this.viewer_.getParam('serverAccessService') : null;
+      this.viewer_.getParam('serverAccessService') : null;
 
     /** @private @const {string} */
     this.serviceUrl_ = serviceUrlOverride ||
@@ -316,9 +316,9 @@ export class AccessServerJwtAdapter {
             },
             requireAmpResponseSourceOrigin: false,
           })).then(response => {
-            dev().fine(TAG, 'Authorization response: ', response);
-            return this.replaceSections_(response);
-          }).then(() => accessData);
+        dev().fine(TAG, 'Authorization response: ', response);
+        return this.replaceSections_(response);
+      }).then(() => accessData);
     });
   }
 

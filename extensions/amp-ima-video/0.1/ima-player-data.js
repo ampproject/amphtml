@@ -19,8 +19,8 @@ export class ImaPlayerData {
   /**
    * Create a new ImaPlayerData object.
    *
-   * @param {!Number} curentTime
-   * @param {!Number} duration
+   * @param {number} curentTime
+   * @param {number} duration
    * @param {!Array} playedRanges
    */
   constructor(currentTime = 0, duration = 1, playedRanges = []) {

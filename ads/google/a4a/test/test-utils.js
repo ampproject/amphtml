@@ -66,8 +66,8 @@ function noopMethods(impl, doc, sandbox) {
   impl.element.build = noop;
   impl.element.getPlaceholder = noop;
   impl.element.createPlaceholder = noop;
-  sandbox.stub(impl, 'getAmpDoc', () => doc);
-  sandbox.stub(impl, 'getPageLayoutBox', () => {
+  sandbox.stub(impl, 'getAmpDoc').callsFake(() => doc);
+  sandbox.stub(impl, 'getPageLayoutBox').callsFake(() => {
     return {
       top: 11, left: 12, right: 0, bottom: 0, width: 0, height: 0,
     };
@@ -345,6 +345,32 @@ describe('Google A4A utils', () => {
       });
     });
 
+    it('should include scroll position', function() {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        doc.win = window;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        const getRect = () => { return {'width': 100, 'height': 200}; };
+        const getSize = () => { return {'width': 100, 'height': 200}; };
+        const getScrollLeft = () => 12;
+        const getScrollTop = () => 34;
+        const viewportStub = sandbox.stub(Services, 'viewportForDoc');
+        viewportStub.returns({getRect, getSize, getScrollTop, getScrollLeft});
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', 0, {}, []).then(url1 => {
+            expect(url1).to.match(/scr_x=12&scr_y=34/);
+          });
+        });
+      });
+    });
+
     it('should include all experiment ids', function() {
       // When ran locally, this test tends to exceed 2000ms timeout.
       this.timeout(5000);
@@ -453,8 +479,12 @@ describe('Google A4A utils', () => {
       });
       const ampAdElem = env.win.document.createElement('amp-ad');
       prevContainer.appendChild(ampAdElem);
+      const ValidAdContainerTypeValues =
+          Object.keys(ValidAdContainerTypes).map(function(key) {
+            return ValidAdContainerTypes[key];
+          });
       expect(getEnclosingContainerTypes(ampAdElem).sort())
-          .to.deep.equal(Object.values(ValidAdContainerTypes).sort());
+          .to.deep.equal(ValidAdContainerTypeValues.sort());
     });
   });
 
@@ -589,7 +619,7 @@ describe('Google A4A utils', () => {
 
     it('should handle fetch error', () => {
       sandbox.stub(Services, 'xhrFor').returns(
-        {fetchJson: () => Promise.reject('some network failure')});
+          {fetchJson: () => Promise.reject('some network failure')});
       return getIdentityToken(env.win, env.win.document)
           .then(result => expect(result).to.jsonEqual({}));
     });

@@ -36,7 +36,7 @@ export class Toolbar {
     /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private {!string} */
+    /** @private {string} */
     this.toolbarMedia_ = this.toolbarDomElement_.getAttribute('toolbar');
 
     /** @private {?Element} */
@@ -45,7 +45,7 @@ export class Toolbar {
     /** @private {Element|undefined} */
     this.toolbarTarget_ = undefined;
 
-    /** @private {!boolean} **/
+    /** @private {boolean} **/
     this.toolbarShown_ = false;
 
     // Default to toolbar target being hidden
@@ -83,7 +83,7 @@ export class Toolbar {
     this.toolbarClone_ = this.toolbarDomElement_.cloneNode(true);
     const targetId = user().assert(this.toolbarDomElement_
         .getAttribute('toolbar-target'), '"toolbar-target" is required',
-        this.toolbarDomElement_);
+    this.toolbarDomElement_);
     // Set the target element to the toolbar clone if it exists.
     this.ampdoc_.whenReady().then(() => {
       const targetElement = this.ampdoc_.getElementById(targetId);
