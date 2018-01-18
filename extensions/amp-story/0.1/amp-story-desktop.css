@@ -188,14 +188,19 @@ amp-story[standalone][desktop] {
 }
 
 [desktop] > amp-story-page,
-.i-amphtml-story-page-sentinel {
-  left: 50%!important;
-  right: auto !important;
-  margin: auto !important;
+[desktop] > .i-amphtml-story-page-sizer,
+[desktop] .i-amphtml-story-page-sentinel {
   max-height: 75vh !important;
   max-width: calc(3/5 * 75vh) !important;
   min-width: 320px !important;
   min-height: 533px !important;
+}
+
+[desktop] > amp-story-page,
+[desktop] .i-amphtml-story-page-sentinel {
+  left: 50%!important;
+  right: auto !important;
+  margin: auto !important;
 }
 
 [desktop] > amp-story-page {

@@ -233,6 +233,10 @@ export class AmpStory extends AMP.BaseElement {
   buildCallback() {
     this.assertAmpStoryExperiment_();
 
+    if (this.isDesktop_()) {
+      this.element.setAttribute('desktop','');
+    }
+
     if (this.element.hasAttribute(AMP_STORY_STANDALONE_ATTRIBUTE)) {
       this.getAmpDoc().win.document.documentElement.classList
           .add('i-amphtml-story-standalone');
@@ -920,6 +924,7 @@ export class AmpStory extends AMP.BaseElement {
 
     this.bookend_.hide();
   }
+
 
   /**
    * Toggle content when bookend is opened/closed.

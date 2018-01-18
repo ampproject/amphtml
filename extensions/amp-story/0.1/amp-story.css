@@ -180,14 +180,24 @@ amp-story .amp-video-eq {
 }
 
 /** Page level */
-amp-story-page {
+amp-story-page,
+.i-amphtml-story-page-sizer {
   bottom: 0 !important;
-  display: none !important;
   height: auto !important;
   left: 0 !important;
   position: absolute !important;
   right: 0 !important;
   top: 0 !important;
+}
+
+.i-amphtml-story-page-sizer {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  contain: strict !important;
+}
+
+amp-story-page {
+  display: none !important;
   transition: none !important;
 }
 

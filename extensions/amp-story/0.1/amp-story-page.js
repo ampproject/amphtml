@@ -32,9 +32,11 @@ import {upgradeBackgroundAudio} from './audio';
 import {EventType, dispatch, dispatchCustom} from './events';
 import {AdvancementConfig} from './page-advancement';
 import {matches, scopedQuerySelectorAll} from '../../../src/dom';
+import {dev} from '../../../src/log';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
 import {CommonSignals} from '../../../src/common-signals';
+import {PageScalingService} from './page-scaling';
 
 
 /**
@@ -179,7 +181,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @return {!Promise} */
   beforeVisible() {
     this.rewindAllMediaToBeginning_();
-    return this.maybeApplyFirstAnimationFrame();
+    return this.scale_().then(() => this.maybeApplyFirstAnimationFrame());
   }
 
 
@@ -327,6 +329,14 @@ export class AmpStoryPage extends AMP.BaseElement {
     return this.animationManager_.applyFirstFrame();
   }
 
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  scale_() {
+    const storyEl = dev().assertElement(this.element.parentNode);
+    return PageScalingService.for(this.win, storyEl).scale(this.element);
+  }
 
   /**
    * @param {boolean} isActive
@@ -356,10 +366,10 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   setDistance(distance) {
     this.element.setAttribute('distance', distance);
-
     this.registerAllMedia_();
     if (distance > 0 && distance <= 2) {
       this.preloadAllMedia_();
+      this.scale_();
     }
   }
 
