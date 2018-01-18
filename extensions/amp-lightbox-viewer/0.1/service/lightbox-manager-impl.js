@@ -20,7 +20,6 @@ import {elementByTag, iterateCursor} from '../../../../src/dom';
 import {toArray} from '../../../../src/types';
 import {CommonSignals} from '../../../../src/common-signals';
 
-
 const ELIGIBLE_TAP_TAGS = {
   'amp-img': true,
   'amp-anim': true,
