@@ -61,7 +61,7 @@ export class AmpMathml extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported (layout) {
-    return isLayoutSizeDefined(layout);
+    return layout == Layout.CONTAINER;
   }
 
 }
