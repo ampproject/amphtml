@@ -87,9 +87,10 @@ export class RequestHandler {
    * @param {?JsonObject} configParams
    * @param {!JsonObject} trigger
    * @param {!./variables.ExpansionOptions} expansionOption
+   * @param {!Object<string, *>} dynamicBindings
    * @return {!Promise<string>}
    */
-  send(configParams, trigger, expansionOption) {
+  send(configParams, trigger, expansionOption, dynamicBindings) {
     this.lastTrigger_ = trigger;
     const triggerParams = trigger['extraUrlParams'];
     if (!this.baseUrlPromise_) {
@@ -98,7 +99,7 @@ export class RequestHandler {
           this.variableService_.expandTemplate(this.baseUrl, expansionOption);
       this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then(baseUrl => {
         return this.urlReplacementService_.expandAsync(
-            baseUrl, undefined, this.whiteList_);
+            baseUrl, dynamicBindings, this.whiteList_);
       });
     };
 
@@ -106,7 +107,7 @@ export class RequestHandler {
         this.expandExtraUrlParams_(configParams, triggerParams, expansionOption)
             .then(expandExtraUrlParams => {
               return this.urlReplacementService_.expandAsync(
-                  expandExtraUrlParams, undefined, this.whiteList_);
+                  expandExtraUrlParams, dynamicBindings, this.whiteList_);
             })
             .then(finalExtraUrlParams => {
               return finalExtraUrlParams;
