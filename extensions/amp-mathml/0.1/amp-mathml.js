@@ -17,9 +17,9 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {Layout} from '../../../src/layout';
 import {cssstyle} from 'cssstyle';
 import {getIframe} from '../../../src/3p-frame';
-import { addParamsToUrl } from '../../../src/url';
-import { getDataParamsFromAttributes, removeElement } from '../../../src/dom';
-import { listenFor } from '../../../src/iframe-helper';
+import {addParamsToUrl} from '../../../src/url';
+import {getDataParamsFromAttributes, removeElement} from '../../../src/dom';
+import {listenFor} from '../../../src/iframe-helper';
 import {CSS} from '../../../build/amp-mathml-0.1.css';
 
 export class AmpMathml extends AMP.BaseElement {
@@ -47,10 +47,10 @@ export class AmpMathml extends AMP.BaseElement {
     listenFor(iframe, 'embed-size', data => {
       if(!this.element.hasAttribute('inline') ) {
         // Don't change the width if not inlined.
-        newWidth = undefined;
+        data['width'] = undefined;
         }
       this.element.getResources()./*OK*/changeSize(
-      this.element, newHeight, /* newWidth */ newWidth);
+      this.element, data['height'], /* newWidth */ data['width']);
     }, /* opt_is3P */true );
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
