@@ -47,6 +47,11 @@ export let SizeDef;
 export let PositionDef;
 
 /**
+ * @typedef {Object<string, *>}
+ */
+let AncestryStateDef;
+
+/**
  * Creates a Size.
  *
  * @param {number} width
@@ -73,6 +78,19 @@ function positionLt(left, top) {
     top,
   };
 }
+
+/**
+ * Stores an LayoutElement's parent layer ancestry (temporarily).
+ * See {@link LayoutElement#ancestry}.
+ * @const {!Array<!LayoutElement>}
+ */
+const ANCESTRY_STORE = [];
+
+/**
+ * A unique "id" counter, to give each LayoutElement a unique id.
+ * @type {number}
+ */
+let layoutId = 0;
 
 /**
  * The core class behind the Layers system, this controls layer creation and
@@ -123,8 +141,14 @@ export class LayoutLayers {
       passive: true,
     }));
 
-    // Finally, declare scrollingElement as the one true scrolling layer.
-    this.declareLayer_(scrollingElement, true);
+    // Declare scrollingElement as the one true scrolling layer.
+    const root = this.declareLayer_(scrollingElement, true);
+
+    /**
+     * Stores the most recently scrolled layer.
+     * @private {!LayoutElement}
+     */
+    this.activeLayer_ = root;
   }
 
   /** @override */
@@ -305,6 +329,8 @@ export class LayoutLayers {
       this.declareLayer_(element, false);
     }
 
+    this.activeLayer_ = layer;
+
     if (this.onScroll_) {
       this.onScroll_(/* layer.getElements() */);
     }
@@ -317,6 +343,33 @@ export class LayoutLayers {
    */
   onScroll(handler) {
     this.onScroll_ = handler;
+  }
+
+  /**
+   * Returns the most recently scrolled layer.
+   *
+   * @return {!LayoutElement}
+   */
+  getActiveLayer() {
+    return this.activeLayer_;
+  }
+
+  /**
+   * Iterates the layout's parent layer ancestry, starting from the root down
+   * to the layout.
+   *
+   * This sets a whether the layer isActive during that layer's iteration. Any
+   * attempts to access #isActive outside of the iterator call will fail.
+   *
+   * @param {!Element} element
+   * @param {function(T, !LayoutElement, number, !AncestryStateDef):T} iterator
+   * @param {!AncestryStateDef} state
+   * @return {T}
+   * @template T
+   */
+  ancestry(element, iterator, state) {
+    const layout = this.add(element);
+    return layout.ancestry(iterator, state);
   }
 }
 
@@ -332,6 +385,9 @@ export class LayoutElement {
 
     /** @const @private {!Element} */
     this.element_ = element;
+
+    /** @const private {number} */
+    this.id_ = layoutId++;
 
     /**
      * The parent layer of the current element. Note that even if _this_
@@ -373,6 +429,17 @@ export class LayoutElement {
     this.position_ = positionLt(0, 0);
 
     /**
+     * Whether the layout is a descendant of the most recently scrolled layer.
+     *
+     * Note: This attribute is `undefined`, unless the ancestry tree is currently
+     * being iterated with #ancestry. This is the only time it can be determined
+     * without a ton of DOM checks.
+     *
+     * @private {boolean|undefined}
+     */
+    this.isActive_ = undefined;
+
+    /**
      * Whether the element defines a layer with a new coordinate system.
      * Elements may freely transition to/from being a layer, causing child
      * elements to redefine their offset positions.
@@ -412,6 +479,9 @@ export class LayoutElement {
      * @private {number}
      */
     this.scrollTop_ = 0;
+
+    /**
+     *
 
     /**
      * The child LayoutElements of this layer. Only a layer (which means it
@@ -497,6 +567,15 @@ export class LayoutElement {
     // Use isConnected if available, but always pass if it's not.
     dev().assert(node.isConnected !== false, 'node not in the DOM tree');
     return null;
+  }
+
+  /**
+   * Returns the unique identifier for each layout.
+   *
+   * @return {number}
+   */
+  getId() {
+    return this.id_;
   }
 
   /**
@@ -667,6 +746,62 @@ export class LayoutElement {
     return this.position_;
   }
 
+  /**
+   * Whether the layout is a descendant of the most recently scrolled layer.
+   *
+   * This MUST NOT be called unless inside an #ancestry iterator function.
+   * "Activeness" is only determined for the lifespan of the #ancestry call.
+   *
+   * @return {boolean}
+   */
+  isActive() {
+    return dev().assertBoolean(this.isActive_);
+  }
+
+  /**
+   * Gets the minimal horizontal distance of this element from it's parent's
+   * "viewport".
+   */
+  getHorizontalDistanceFromParent() {
+    const parent = this.getParentLayer();
+    if (!parent) {
+      return 0;
+    }
+
+    const {left} = this.getOffsetFromParent();
+    const {width} = this.getSize();
+    const scrollLeft = parent.getScrollLeft();
+    const parentWidth = parent.getSize().width;
+    const distance = Math.max(
+        0,
+        scrollLeft - (left + width),
+        left - (scrollLeft + parentWidth)
+    );
+    return distance / parentWidth;
+  }
+
+  /**
+   * Gets the minimal vertical distance of this element from it's parent's
+   * "viewport".
+   */
+  getVerticalDistanceFromParent() {
+    const parent = this.getParentLayer();
+    if (!parent) {
+      return 0;
+    }
+
+    const {top} = this.getOffsetFromParent();
+    const {height} = this.getSize();
+    const scrollTop = parent.getScrollTop();
+    const parentHeight = parent.getSize().height;
+    const distance = Math.max(
+        0,
+        scrollTop - (top + height),
+        top - (scrollTop + parentHeight)
+    );
+    return distance / parentHeight;
+  }
+
   /*
    * Gets the current scrollTop of this layer.
    *
@@ -794,6 +929,47 @@ export class LayoutElement {
     if (layer.needsRemeasure_) {
       layer.remeasure_();
     }
+  }
+
+  /**
+   * Iterates the layout's parent layer ancestry, starting from the root down
+   * to the layout.
+   *
+   * This sets a whether the layer isActive during that layer's iteration. Any
+   * attempts to access #isActive outside of the iterator call will fail.
+   *
+   * @param {function(T, !LayoutElement, number, !AncestryStateDef):T} iterator
+   * @param {!AncestryStateDef} state
+   * @return {T}
+   * @template T
+   */
+  ancestry(iterator, state) {
+    const activeLayer = Services.layersForDoc(this.element_).getActiveLayer();
+
+    // Gather, and update whether the layers are descendants of the active
+    // layer.
+    let isActive = activeLayer === this || activeLayer.contains(this);
+
+    let layer = this;
+    while (layer) {
+      ANCESTRY_STORE.push(layer);
+
+      layer.isActive_ = isActive;
+      if (layer === activeLayer) {
+        isActive = false;
+      }
+
+      layer = layer.getParentLayer();
+    }
+
+    let value;
+    const length = ANCESTRY_STORE.length;
+    for (let i = 0; i < length; i++) {
+      const layer = ANCESTRY_STORE.pop();
+      value = iterator(value, layer, i, state);
+      layer.isActive_ = undefined;
+    }
+    return value;
   }
 
   /**

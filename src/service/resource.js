@@ -682,6 +682,8 @@ export class Resource {
     let scrollPenalty = 1;
     let distance = 0;
 
+    // TODO
+
     if (this.useLayers_) {
       distance += Math.max(0,
           layoutBox.left - viewportBox.right,
