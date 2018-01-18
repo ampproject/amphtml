@@ -54,8 +54,10 @@ const DESC_BOX_PADDING_TOP = 50;
 const SWIPE_TO_CLOSE_THRESHOLD = 10;
 
 const ENTER_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
-
 const EXIT_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
+const MAX_TRANSITION_DURATION = 1000; // ms
+const MIN_TRANSITION_DURATION = 300; // ms
+const MAX_DISTANCE_APPROXIMATION = 250; // px
 
 /**
  * TODO(aghassemi): Make lightbox-manager into a doc-level service.
@@ -134,6 +136,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
     /** @private {string} */
     this.currentLightboxGroupId_ = 'default';
+
+    /** @private {?Element} */
+    this.sourceElement_ = null;
   }
 
   /** @override */
@@ -589,6 +594,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   open_(element) {
+    this.sourceElement_ = element;
     const lightboxGroupId = element.getAttribute('lightbox')
       || 'default';
     this.currentLightboxGroupId_ = lightboxGroupId;
@@ -635,20 +641,20 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     if (tagName === 'AMP-IMG') {
       this.getCurrentElement_().imageViewer.signals()
           .whenSignal(CommonSignals.LOAD_END)
-          .then(() => this.enter_(element));
+          .then(() => this.enter_());
     }
     this.updateDescriptionBox_();
   }
 
   /**
    * Entry animation to transition in a lightboxable image
-   * @param {!Element} sourceImage
+   * @return {!Promise}
    * @private
    */
   // TODO (cathyxz): make this generalizable to more than just images
-  enter_(sourceImage) {
+  enter_() {
     const anim = new Animation(this.element);
-    const dur = 500;
+    let duration = MAX_TRANSITION_DURATION;
     let transLayer = null;
     return this.vsync_.measurePromise(() => {
       // Lightbox background fades in.
@@ -657,17 +663,17 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       }), 0.6, ENTER_CURVE_);
 
       // Try to transition from the source image.
-      if (sourceImage && isLoaded(sourceImage)) {
+      if (this.sourceElement_ && isLoaded(this.sourceElement_)) {
         transLayer = this.element.ownerDocument.createElement('div');
         transLayer.classList.add('i-amphtml-lightbox-viewer-trans');
         this.element.ownerDocument.body.appendChild(transLayer);
-        const rect = layoutRectFromDomRect(sourceImage
+        const rect = layoutRectFromDomRect(this.sourceElement_
             ./*OK*/getBoundingClientRect());
 
         const imageBox = /**@type {?}*/ (this.getCurrentElement_().imageViewer)
-            .implementation_.getImageBox();
+            .implementation_.getImageBoxWithOffset();
 
-        const clone = sourceImage.cloneNode(true);
+        const clone = this.sourceElement_.cloneNode(true);
         clone.className = '';
         st.setStyles(clone, {
           position: 'absolute',
@@ -680,18 +686,20 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         });
         transLayer.appendChild(clone);
 
-        sourceImage.classList.add('i-amphtml-ghost');
+        this.sourceElement_.classList.add('i-amphtml-ghost');
 
         // Move and resize the image to the location given by the lightbox.
         const dx = imageBox.left - rect.left;
         const dy = imageBox.top - rect.top;
         const scaleX = rect.width != 0 ? imageBox.width / rect.width : 1;
 
+        duration = this.getTransitionDuration_(dy);
+
         // Duration will be somewhere between 0.2 and 0.8 depending on how far
         // the image needs to move.
         const motionTime = Math.max(
             0.2,
-            Math.min(0.8, Math.abs(dy) / 250 * 0.8)
+            Math.min(0.8, Math.abs(dy) / MAX_DISTANCE_APPROXIMATION * 0.8)
         );
         anim.add(0, tr.setStyles(clone, {
           transform: tr.concat([
@@ -706,9 +714,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         }), 0.1, EXIT_CURVE_);
       }
     }).then(() => {
-      return anim.start(dur).thenAlways(() => {
+      return anim.start(duration).thenAlways(() => {
         return this.vsync_.mutatePromise(() => {
-          sourceImage.classList.remove('i-amphtml-ghost');
           st.setStyles(this.element, {opacity: ''});
           st.setStyles(dev().assertElement(this.carousel_), {opacity: ''});
           if (transLayer) {
@@ -727,18 +734,103 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   exit_() {
     // TODO (cathyxz): settle on a real animation
     const anim = new Animation(this.element);
-    const dur = 1000;
+    let duration = MAX_TRANSITION_DURATION;
+    const imageBox = /**@type {?}*/ (this.getCurrentElement_().imageViewer)
+        .implementation_.getImageBoxWithOffset();
+    const image = /**@type {?}*/ (this.getCurrentElement_().imageViewer)
+        .implementation_.getImage();
+    // Try to transition to the source image.
+    let transLayer = null;
+    return this.vsync_.measurePromise(() => {
+      if (this.sourceElement_) {
+        transLayer = this.element.ownerDocument.createElement('div');
+        transLayer.classList.add('i-amphtml-lightbox-viewer-trans');
+        this.element.ownerDocument.body.appendChild(transLayer);
 
-    anim.add(0, tr.setStyles(this.element, {
-      opacity: tr.numeric(1, 0),
-    }), 0.9, EXIT_CURVE_);
+        const rect = layoutRectFromDomRect(this.sourceElement_
+            ./*OK*/getBoundingClientRect());
+        const clone = image.cloneNode(true);
+        st.setStyles(clone, {
+          position: 'absolute',
+          top: st.px(imageBox.top),
+          left: st.px(imageBox.left),
+          width: st.px(imageBox.width),
+          height: st.px(imageBox.height),
+          transform: '',
+          transformOrigin: 'top left',
+          willChange: 'transform',
+        });
+        transLayer.appendChild(clone);
 
-    return anim.start(dur).thenAlways(() => {
-      this./*OK*/collapse();
-      st.setStyles(this.element, {opacity: ''});
+        // Fade out the container.
+        anim.add(0, tr.setStyles(dev().assertElement(this.container_), {
+          opacity: tr.numeric(1, 0),
+        }), 0.1, EXIT_CURVE_);
+
+        // Move and resize the image back to where it is in the article.
+        const dx = rect.left - imageBox.left;
+        const dy = rect.top - imageBox.top;
+        const scaleX = imageBox.width != 0 ? rect.width / imageBox.width : 1;
+        /** @const {!TransitionDef<void>} */
+        const moveAndScale = tr.setStyles(clone, {
+          transform: tr.concat([
+            tr.translate(tr.numeric(0, dx), tr.numeric(0, dy)),
+            tr.scale(tr.numeric(1, scaleX)),
+          ]),
+        });
+
+        // Duration will be somewhere between 0.2 and 0.8 depending on how far
+        // the image needs to move. Start the motion later too, but no later
+        // than 0.2.
+        const motionTime = Math.max(0.2,
+            Math.min(0.8, Math.abs(dy) / MAX_DISTANCE_APPROXIMATION * 0.8));
+        anim.add(Math.min(0.8 - motionTime, 0.2), (time, complete) => {
+          moveAndScale(time);
+          if (complete) {
+            this.sourceElement_.classList.remove('i-amphtml-ghost');
+          }
+        }, motionTime, EXIT_CURVE_);
+
+        // Fade out the transition image.
+        anim.add(0.8, tr.setStyles(transLayer, {
+          opacity: tr.numeric(1, 0.01),
+        }), 0.2, EXIT_CURVE_);
+
+        duration = this.getTransitionDuration_(dy);
+      }
+    }).then(() => {
+      return anim.start(duration).thenAlways(() => {
+        return this.vsync_.mutatePromise(() => {
+          if (this.sourceElement_) {
+            this.sourceElement_.classList.remove('i-amphtml-ghost');
+          }
+          st.setStyles(this.element, {
+            opacity: '',
+          });
+          st.setStyles(dev().assertElement(this.container_), {opacity: ''});
+          if (transLayer) {
+            this.element.ownerDocument.body.removeChild(transLayer);
+          }
+        });
+      });
     });
   }
 
+  /**
+   * Calculates transition duration from vertical distance traveled
+   * @param {number} dy
+   * @return {number}
+   * @private
+   */
+  getTransitionDuration_(dy) {
+    const distanceAdjustedDuration =
+      Math.abs(dy) / MAX_DISTANCE_APPROXIMATION * MAX_TRANSITION_DURATION;
+    // clamp duration to MIN and MAX duration constants
+    return Math.max(
+        Math.min(distanceAdjustedDuration, MAX_TRANSITION_DURATION),
+        MIN_TRANSITION_DURATION
+    );
+  }
   /**
    * Closes the lightbox-viewer
    * @return {!Promise}
