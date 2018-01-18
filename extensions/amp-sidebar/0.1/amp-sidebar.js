@@ -113,8 +113,6 @@ export class AmpSidebar extends AMP.BaseElement {
 
     this.action_ = Services.actionServiceForDoc(this.element);
 
-    this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
-
     if (this.side_ != 'left' && this.side_ != 'right') {
       this.side_ = isRTL(this.document_) ? 'right' : 'left';
       this.element.setAttribute('side', this.side_);
@@ -259,6 +257,8 @@ export class AmpSidebar extends AMP.BaseElement {
     this.viewport_.enterOverlayMode();
     this.vsync_.mutate(() => {
       toggle(this.element, /* display */true);
+      this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
+
       if (this.isIos_ && this.isSafari_) {
         this.compensateIosBottombar_();
       }
