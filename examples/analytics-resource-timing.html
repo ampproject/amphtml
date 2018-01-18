@@ -24,7 +24,7 @@
       "on": "ini-load",
       "request": "endpoint",
       "extraUrlParams": {
-        "rt": "$resourceTiming(analytics)"
+        "rt": "${resourceTiming}"
       },
       "resourceTimingSpec": {
         "resources": {
@@ -34,7 +34,7 @@
           }
         },
         "encoding": {
-          "entry": "${key}.${initiatorType}.${startTime}.${duration}",
+          "entry": "${key}.${initiatorType|substr:0:3}.${startTime}.${duration}",
           "delim": "~",
           "base": 36
         }

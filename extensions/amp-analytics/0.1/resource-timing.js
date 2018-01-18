@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import { dev } from '../../../src/log';
-import { parseUrl } from '../../../src/url';
-import { find } from '../../../src/utils/array';
-import {
-  variableServiceFor,
-  ExpansionOptions,
-} from './variables';
+import {dev} from '../../../src/log';
+import {parseUrl} from '../../../src/url';
+import {find} from '../../../src/utils/array';
+
+import {ExpansionOptions, variableServiceFor,} from './variables';
 
 /**
  * A user-supplied JSON object that defines a resource to be reported. It is
@@ -41,22 +39,15 @@ import {
 let IndividualResourceSpec;
 
 /**
- * Defines a single resource (i.e. assigns a name) according to RegExps for the
- * URL's path and query string.
- * @typedef{{
- *  name: string,
- *  pathPattern: !RegExp,
- *  queryPattern: !RegExp,
- * }}
- */
-let ParsedResourceSpec;
-
-/**
- * A set of resources to be matched against for a specific host or set of hosts
- * as defined by a RegExp.
+ * A parsed resource spec for a specific host or sets of hosts (as defined by
+ * the hostPattern).
  * @typedef{{
  *   hostPattern: !RegExp,
- *   resouces: !Array<!ParsedResourceSpec>,
+ *   resouces: !Array<{
+ *     name: string,
+ *     pathPattern: !RegExp,
+ *     queryPattern: !RegExp,
+ *   }>,
  * }}
  */
 let ResourceSpecForHost;
@@ -67,8 +58,9 @@ let ResourceSpecForHost;
  */
 let ResourceTimingEntryVars;
 
-// DO NOT SUBMIT -- move to a generic place.
 /**
+ * Yields the thread before running the function to avoid causing jank. (i.e. a
+ * task that takes over 16ms.)
  * @param {function(): OUT} fn
  * @return {!Promise<OUT>}
  * @template OUT
@@ -106,7 +98,7 @@ function getResourceTimingEntries(win) {
     return [];
   }
   return /** @type {!Array<!PerformanceResourceTiming>} */ (
-    win.performance.getEntriesByType('resource'));
+      win.performance.getEntriesByType('resource'));
 }
 
 /**
@@ -118,7 +110,7 @@ function getResourceTimingEntries(win) {
  */
 function entryToResourceVars(entry, name, base) {
   const format = (val, relativeTo = 0) =>
-    Math.round(val - relativeTo).toString(base);
+      Math.round(val - relativeTo).toString(base);
   return {
     'key': name,
     'startTime': format(entry.startTime),
@@ -164,18 +156,6 @@ function groupDefsByHost(resourceDefs) {
 }
 
 /**
- * Returns the first resource definition that matches the given URL, or
- * undefined if no such definition exists.
- * @param {!Location} url
- * @param {!Array<!ParsedResourceSpec>} resources
- * @return {!ParsedResourceSpec|undefined}
- */
-function findMatchForHost(url, resources) {
-  return find(resources, res => res.pathPattern.test(url.pathname) &&
-    res.queryPattern.test(url.search));
-}
-
-/**
  * Returns the variables for the given resource timing entry if it matches one
  * of the defined resources, or null otherwise.
  * @param {!PerformanceResourceTiming} entry
@@ -186,16 +166,19 @@ function findMatchForHost(url, resources) {
 function getVarsForEntry(entry, resourcesByHost, base) {
   const url = parseUrl(entry.name);
   for (const h in resourcesByHost) {
-    const { hostPattern, resources } = resourcesByHost[h];
+    const {hostPattern, resources} = resourcesByHost[h];
     if (!hostPattern.test(url.host)) {
       continue;
     }
-    const resource = findMatchForHost(url, resources);
+    const resource = find(
+        resources,
+        res => res.pathPattern.test(url.pathname) &&
+            res.queryPattern.test(url.search));
     if (resource) {
       return entryToResourceVars(entry, resource.name, base);
     }
   }
-  return null; // No match.
+  return null;  // No match.
 }
 
 /**
@@ -214,7 +197,7 @@ function entriesToVariables(entries, resourceDefs, base) {
 
   const results = [];
   entries.forEach(entry => {
-    const resource = findMatch(entry, byHost);
+    const resource = getVarsForEntry(entry, byHost, base);
     if (resource) {
       results.push(resource);
     }
@@ -232,11 +215,14 @@ function entriesToVariables(entries, resourceDefs, base) {
  */
 function serialize(resources, encodingSpec, win) {
   const variableService = variableServiceFor(win);
-  return Promise.all(resources.map(res => {
-    const expansionOptions = new ExpansionOptions(res, 1 /* opt_iterations */);
-    return variableService.expandTemplate(
-      encodingSpec['entry'], expansionOptions);
-  })).then(vars => vars.join(encodingSpec['delim']));
+  return Promise
+      .all(resources.map(res => {
+        const expansionOptions =
+            new ExpansionOptions(res, 1 /* opt_iterations */);
+        return variableService.expandTemplate(
+            encodingSpec['entry'], expansionOptions);
+      }))
+      .then(vars => vars.join(encodingSpec['delim']));
 }
 
 /**
@@ -254,10 +240,13 @@ export function getResourceTimingBinding(resourceTimingSpec, win) {
     return '';
   }
 
-  return yieldThread(() => {
-    const resources = entriesToVariables(
-      entries, resourceTimingSpec['resources'],
-      resourceTimingSpec['encoding']['base']);
-    return serialize(resources, resourceTimingSpec['encoding'], win);
+  // Yield the thread in case iterating over all resources takes a long time.
+  const promise = yieldThread(() => {
+    const base = resourceTimingSpec['encoding']['base'] || 10;
+    const resources =
+        entriesToVariables(entries, resourceTimingSpec['resources'], base);
+    const value = serialize(resources, resourceTimingSpec['encoding'], win);
+    return value;
   });
+  return promise;
 }

@@ -689,7 +689,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   /**
    * @param {!JsonObject} trigger JSON config block that resulted in this event.
    * @param {!ExpansionOptions} expansionOptions Expansion options.
-   * @return {!Object<string, function(...string): (string|!Promise<string>)>}
+   * @return {!Object<string, (string|!Promise<string>|function(): string)>}
    * @private
    */
   getDynamicVariableBindings_(trigger, expansionOptions) {
