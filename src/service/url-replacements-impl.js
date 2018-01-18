@@ -54,7 +54,7 @@ const ORIGINAL_VALUE_PROPERTY = 'amp-original-value';
  * @param {*} val
  * @return {string}
  */
-export function encodeValue(val) {
+function encodeValue(val) {
   if (val == null) {
     return '';
   }
@@ -640,7 +640,7 @@ export class UrlReplacements {
     /** @type {VariableSource} */
     this.variableSource_ = variableSource;
 
-    /** @type {Expander} */
+    /** @type {!Expander} */
     this.expander_ = new Expander(this.variableSource_);
   }
 

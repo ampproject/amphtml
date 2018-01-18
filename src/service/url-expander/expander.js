@@ -21,7 +21,7 @@ export class Expander {
 
   /**
    * Link this instance of parser to the calling UrlReplacment
-   * @param {VariableSource} variableSource the keywords to replace
+   * @param {!../url-replacements-impl.GlobalVariableSource} variableSource the keywords to replace
    */
   constructor(variableSource) {
     this.variableSource_ = variableSource;
