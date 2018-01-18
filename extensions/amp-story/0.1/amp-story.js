@@ -349,16 +349,18 @@ export class AmpStory extends AMP.BaseElement {
     this.element.addEventListener(EventType.TAP_NAVIGATION, e => {
       const {direction} = e.detail;
 
-      if (this.isDesktop_()) {
-        this.next_();
-        return;
-      }
+      this.mediaPool_.blessAll().then(() => {
+        if (this.isDesktop_()) {
+          this.next_();
+          return;
+        }
 
-      if (direction === TapNavigationDirection.NEXT) {
-        this.next_();
-      } else if (direction === TapNavigationDirection.PREVIOUS) {
-        this.previous_();
-      }
+        if (direction === TapNavigationDirection.NEXT) {
+          this.next_();
+        } else if (direction === TapNavigationDirection.PREVIOUS) {
+          this.previous_();
+        }
+      });
     });
 
     const gestures = Gestures.get(this.element,
