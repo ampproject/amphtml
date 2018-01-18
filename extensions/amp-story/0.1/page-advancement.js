@@ -102,6 +102,7 @@ export class AdvancementConfig {
    * Invoked when the advancement configuration should begin taking effect.
    */
   start() {
+    this.onProgressUpdate();
     this.isRunning_ = true;
   }
 
@@ -275,9 +276,6 @@ class ManualAdvancement extends AdvancementConfig {
   start() {
     super.start();
     this.element_.addEventListener('click', this.clickListener_, true);
-    if (!this.hasAutoAdvanceStr_ && !this.isMediaElement_) {
-      super.onProgressUpdate();
-    }
   }
 
   /** @override */
