@@ -1,11 +1,7 @@
 {
   "ampCreativeTemplateId": 0,
   "templateMacroValues": {
-    "title": "TITLE",
-    "width": "250px",
-    "height": "100px",
-    "url": "https://www.google.com",
-    "externalUrl": "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png",
-    "impressionUrl": "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png"
+     "url": "https://www.google.com",
+    "externalUrl": "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png"
   }
 }

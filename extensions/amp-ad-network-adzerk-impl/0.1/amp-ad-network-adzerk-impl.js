@@ -167,9 +167,19 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
   parseTemplate_(template) {
     // TODO(keithwrightbos): support dynamic creation of amp-pixel and
     // amp-analytics.
-    this.creativeMetadata_ = super.getAmpAdMetadata(template);
+    let dataString = '';
+    if (this.ampCreativeJson_ && this.ampCreativeJson_.templateMacroValues) {
+      dataString = '<amp-state><script type="application/json">' +
+          JSON.stringify(this.ampCreativeJson_.templateMacroValues) +
+          '</script></amp-state>';
+    }
+    const splitTemplate = template.split('<amp-state></amp-state>');
+    const templateWithAmpState =
+        splitTemplate[0] + dataString + splitTemplate[1];
+    this.creativeMetadata_ = /** @type {!CreativeMetaDataDef} */
+        (super.getAmpAdMetadata(templateWithAmpState));
     return {
-      template,
+      template: templateWithAmpState,
       metadata: this.creativeMetadata_,
       access: Date.now(),
     };
@@ -184,8 +194,8 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
     const checkStillCurrent = this.verifyStillCurrent();
     return utf8Decode(bytes).then(body => {
       checkStillCurrent();
-      this.ampCreativeJson_ =
-          /** @type {!AmpTemplateCreativeDef} */(tryParseJson(body) || {});
+      this.ampCreativeJson_ = /** @type {!AmpTemplateCreativeDef} */
+        (tryParseJson(body) || {});
       if (isNaN(parseInt(this.ampCreativeJson_.ampCreativeTemplateId, 10))) {
         dev().warn(TAG, 'AMP creative missing/invalid template path',
             this.ampCreativeJson_);
@@ -195,10 +205,10 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
       // TODO(keithwrightbos): macro value validation?  E.g. http invalid?
       return this.retrieveTemplate_(this.ampCreativeJson_.ampCreativeTemplateId)
           .then(parsedTemplate =>
-              utf8Encode(parsedTemplate.metadata.minifiedCreative))
+            utf8Encode(parsedTemplate.metadata.minifiedCreative))
           .catch(error => {
             dev().warn(TAG, 'Error fetching/expanding template',
-                ampCreativeJson, error);
+                this.ampCreativeJson_, error);
             this.forceCollapse();
             return Promise.reject(NO_CONTENT_RESPONSE);
           });
@@ -211,7 +221,7 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
   }
 
   /** @override */
-  onCreativeRender(unusedMetadata) { debugger;
+  onCreativeRender(unusedMetadata) {
     if (this.ampCreativeJson_ && this.ampCreativeJson_.templateMacroValues) {
       const bind = new Bind(getAmpdoc(this.iframe.contentWindow.document.body),
           this.iframe.contentWindow);
