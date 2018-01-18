@@ -1911,7 +1911,8 @@ describes.realWin('amp-analytics', {
           },
         },
         'encoding': {
-          'entry': '${key}-${initiatorType}-${startTime}-${duration}-${transferSize}',
+          'entry':
+              '${key}-${initiatorType}-${startTime}-${duration}-${transferSize}',
           'delim': '~'
         },
       };
@@ -1947,7 +1948,7 @@ describes.realWin('amp-analytics', {
         redirectStart: 0,
         redirectEnd: 0,
         domainLookupStart: startTime,
-        domainLookupEnd: startTime +  dnsTime,
+        domainLookupEnd: startTime + dnsTime,
         connectStart: startTime + dnsTime,
         connectEnd: startTime + dnsTime + tcpTime,
         requestStart: startTime + dnsTime + tcpTime,
@@ -1955,35 +1956,34 @@ describes.realWin('amp-analytics', {
         responseEnd: startTime + dnsTime + tcpTime + serverTime + transferTime,
         decodedBodySize: bodySize,
         encodedBodySize: bodySize * 0.7,
-        transferSize: cached ? 0 : bodySize * 0.7 + 200, // includes headers
+        transferSize: cached ? 0 : bodySize * 0.7 + 200,  // includes headers
       };
     };
 
-    it('should evaluate ${resourceTiming} to be empty by default', () => {
-      const analytics = getAnalyticsTag(newConfig());
+    const runResourceTimingTest = function(entries, config, expectedPing) {
+      const getEntriesByTypeStub =
+          sandbox.stub(win.performance, 'getEntriesByType').returns([entries]);
+      const analytics = getAnalyticsTag(config);
       return waitForSendRequest(analytics).then(() => {
+        expect(getEntriesByTypeStub).to.be.calledWith('resource');
         expect(sendRequestSpy).to.be.calledOnce;
-        expect(sendRequestSpy.args[0][0]).to.equal(
-            'https://ping.example.com/endpoint?rt=')
+        expect(sendRequestSpy.args[0][0]).to.equal(expectedPing);
       });
+    };
+
+    it('should evaluate ${resourceTiming} to be empty by default', () => {
+      runResourceTimingTest(
+          [], newConfig(), 'https://ping.example.com/endpoint?rt=');
     });
 
     it('should capture matching resources', () => {
       const entry = newPerformanceResourceTiming(
-          'http://foo.example.com/lib.js?v=123', 'script', 100, 500,
-          10 * 1000, false);
-      const getEntriesByTypeStub =
-          sandbox.stub(win.performance, 'getEntriesByType').returns([entry]);
-
-      const analytics = getAnalyticsTag(newConfig());
-      return waitForSendRequest(analytics).then(() => {
-        expect(getEntriesByTypeStub).to.be.calledWith('resource');
-        expect(sendRequestSpy).to.be.calledOnce;
-        expect(sendRequestSpy.args[0][0])
-            .to.equal(
-                'https://ping.example.com/endpoint?rt=' +
-                'foo_bar-script-100-500-7200');
-      });
+          'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
+          false);
+      runResourceTimingTest(
+          [entry], newConfig(),
+          'https://ping.example.com/endpoint?rt=' +
+              'foo_bar-script-100-500-7200');
     });
 
     it('should capture multiple matching resources', () => {
@@ -1992,54 +1992,96 @@ describes.realWin('amp-analytics', {
           false);
       const entry2 = newPerformanceResourceTiming(
           'http://bar.example.com/lib.js', 'script', 700, 100, 80 * 1000, true);
-      const getEntriesByTypeStub =
-          sandbox.stub(win.performance, 'getEntriesByType').returns([
-            entry1, entry2,
-          ]);
-
-      const analytics = getAnalyticsTag(newConfig());
-      return waitForSendRequest(analytics).then(() => {
-        expect(getEntriesByTypeStub).to.be.calledWith('resource');
-        expect(sendRequestSpy).to.be.calledOnce;
-        expect(sendRequestSpy.args[0][0])
-            .to.equal(
-                'https://ping.example.com/endpoint?rt=' +
-                'foo_bar-script-100-500-7200~' +
-                'foo_bar-script-700-100-0');
-      });
+      runResourceTimingTest(
+          [entry1, entry2], newConfig(),
+          'https://ping.example.com/endpoint?rt=' +
+              'foo_bar-script-100-500-7200~' +
+              'foo_bar-script-700-100-0');
     });
 
     it('should match against the first matching resource', () => {
       const entry = newPerformanceResourceTiming(
-          'http://foo.example.com/lib.js?v=123', 'script', 100, 500,
-          10 * 1000, false);
+          'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
+          false);
 
-      const getEntriesByTypeStub =
-          sandbox.stub(win.performance, 'getEntriesByType').returns([entry]);
       const config = newConfig();
       // Note that both spec'd resources match.
       config.triggers[0].resourceTimingSpec.resources = {
-          'foo_bar': {
-            'host': '(foo|bar).example.com',
-            'path': '/lib.js',
-          },
-          'foo': {
-            'host': 'foo.example.com',
-            'path': '/lib.js',
-          },
+        'foo_bar': {
+          'host': '(foo|bar).example.com',
+          'path': '/lib.js',
+        },
+        'foo': {
+          'host': 'foo.example.com',
+          'path': '/lib.js',
+        },
       };
 
-      const analytics = getAnalyticsTag(newConfig());
-      return waitForSendRequest(analytics).then(() => {
-        expect(getEntriesByTypeStub).to.be.calledWith('resource');
-        expect(sendRequestSpy).to.be.calledOnce;
-        expect(sendRequestSpy.args[0][0])
-            .to.equal(
-                'https://ping.example.com/endpoint?rt=' +
-                'foo_bar-script-100-500-7200');
-      });
+      runResourceTimingTest(
+          [entry], config,
+          'https://ping.example.com/endpoint?rt=' +
+              'foo_bar-script-100-500-7200');
     });
 
+    it('should should only report resources if the host matches', () => {
+      const entry1 = newPerformanceResourceTiming(
+          'http://foo.example.com/lib.js', 'script', 100, 500, 10 * 1000,
+          false);
+      const entry2 = newPerformanceResourceTiming(
+          'http://baz.example.com/lib.js', 'script', 700, 100, 80 * 1000, true);
 
+      const config = newConfig();
+      const resourceTimingSpec = config.triggers[0].resourceTimingSpec;
+      resourceTimingSpec.resources = {'foo': {'host': 'foo.example.com'}};
+
+      runResourceTimingTest(
+          [entry1, entry2], config,
+          'https://ping.example.com/endpoint?rt=' +
+              'foo-script-100-500-7200');
+    });
+
+    it('should should only report resources if the path matches', () => {
+      const entry1 = newPerformanceResourceTiming(
+          'http://foo.example.com/lib.js', 'script', 100, 500, 10 * 1000,
+          false);
+      const entry2 = newPerformanceResourceTiming(
+          'http://foo.example.com/extra.js', 'script', 700, 100, 80 * 1000,
+          true);
+
+      const config = newConfig();
+      const resourceTimingSpec = config.triggers[0].resourceTimingSpec;
+      resourceTimingSpec.resources = {
+        'foo': {'host': 'foo.example.com', 'path': 'lib.js'},
+      };
+
+      runResourceTimingTest(
+          [entry1, entry2], config,
+          'https://ping.example.com/endpoint?rt=' +
+              'foo-script-100-500-7200');
+    });
+
+    it('should should only report resources if the query matches', () => {
+      const entry1 = newPerformanceResourceTiming(
+          'http://foo.example.com/lib.js?v=200', 'script', 100, 500, 10 * 1000,
+          false);
+      const entry2 = newPerformanceResourceTiming(
+          'http://foo.example.com/lib.js?v=test', 'script', 700, 100, 80 * 1000,
+          true);
+
+      const config = newConfig();
+      const resourceTimingSpec = config.triggers[0].resourceTimingSpec;
+      resourceTimingSpec.resources = {
+        'foo': {
+          'host': 'foo.example.com',
+          'path': 'lib.js',
+          'query': '^\\?v=\\d+',
+        },
+      };
+
+      runResourceTimingTest(
+          [entry1, entry2], config,
+          'https://ping.example.com/endpoint?rt=' +
+              'foo-script-100-500-7200');
+    });
   });
 });
