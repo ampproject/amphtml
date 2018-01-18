@@ -55,11 +55,10 @@ export class RequestHandler {
     /** @private @const {boolean} */
     this.isBatched_ = !!this.maxDelay_;
 
-    // TODO: Can we do lazy load of batching-plugin functions
     /** @private @const {string} */
     this.batchPluginId_ = request['batchPlugin'];
 
-    user().assert(!(!this.isBatched_ && this.batchPluginId_),
+    user().assert((this.batchPluginId_ ? this.isBatched_ : true),
         'Invalid request: batchPlugin cannot be set on non-batched request');
 
     /** @const {?function(string, !Array<!batchSegmentDef>)} */
@@ -84,7 +83,7 @@ export class RequestHandler {
     this.extraUrlParamsPromise_ = [];
 
     /** @private {!Array<!Promise<!batchSegmentDef>>} */
-    this.batchSegmentsPromise_ = [];
+    this.batchSegmentPromises_ = [];
 
     /** @private {!../../../src/preconnect.Preconnect} */
     this.preconnect_ = preconnect;
@@ -116,11 +115,7 @@ export class RequestHandler {
   send(configParams, trigger, expansionOption) {
     this.lastTrigger_ = trigger;
     const triggerParams = trigger['extraUrlParams'];
-    const batchSegment = dict({
-      'trigger': trigger['on'],
-      'timestamp': this.win.Date.now(),
-      'extraUrlParams': null,
-    });
+
     if (!this.baseUrlPromise_) {
       expansionOption.freezeVar('extraUrlParams');
       this.baseUrlTemplatePromise_ =
@@ -131,27 +126,30 @@ export class RequestHandler {
       });
     };
 
-    let batchSegmentResolver = null;
-    this.batchSegmentsPromise_.push(new Promise(resolve => {
-      batchSegmentResolver = resolve;
-    }));
-    this.extraUrlParamsPromise_.push(
-        this.expandExtraUrlParams_(configParams, triggerParams, expansionOption)
-            .then(expandExtraUrlParams => {
-              // Construct the extraUrlParamsString: Remove null param and encode component
-              const expandedExtraUrlParamsStr = this.getExtraUrlParamsString_(
-                  expandExtraUrlParams, !!this.batchingPlugin_);
-              return this.urlReplacementService_.expandAsync(
-                  expandedExtraUrlParamsStr, undefined, this.whiteList_);
-            })
-            .then(finalExtraUrlParams => {
-              if (this.batchingPlugin_) {
-                batchSegment['extraUrlParams'] =
-                    parseQueryString(finalExtraUrlParams);
-                batchSegmentResolver(batchSegment);
-              }
-              return finalExtraUrlParams;
-            }));
+    const extraUrlParamsPromise = this.expandExtraUrlParams_(
+        configParams, triggerParams, expansionOption)
+        .then(expandExtraUrlParams => {
+          // Construct the extraUrlParamsString: Remove null param and encode component
+          const expandedExtraUrlParamsStr = this.getExtraUrlParamsString_(
+              expandExtraUrlParams, !!this.batchingPlugin_);
+          return this.urlReplacementService_.expandAsync(
+              expandedExtraUrlParamsStr, undefined, this.whiteList_);
+        });
+
+    if (this.batchingPlugin_) {
+      const batchSegment = dict({
+        'trigger': trigger['on'],
+        'timestamp': this.win.Date.now(),
+        'extraUrlParams': null,
+      });
+      this.batchSegmentPromises_.push(extraUrlParamsPromise.then(str => {
+        batchSegment['extraUrlParams'] =
+                parseQueryString(str);
+        return batchSegment;
+      }));
+    }
+
+    this.extraUrlParamsPromise_.push(extraUrlParamsPromise);
 
     return this.trigger_();
   }
@@ -197,7 +195,7 @@ export class RequestHandler {
     const extraUrlParamsPromise = this.extraUrlParamsPromise_;
     const baseUrlTemplatePromise = this.baseUrlTemplatePromise_;
     const baseUrlPromise = this.baseUrlPromise_;
-    const batchSegmentsPromise = this.batchSegmentsPromise_;
+    const batchSegmentsPromise = this.batchSegmentPromises_;
     const lastTrigger = /** @type {!JsonObject} */ (this.lastTrigger_);
     this.reset_();
 
@@ -268,7 +266,7 @@ export class RequestHandler {
     this.baseUrlPromise_ = null;
     this.baseUrlTemplatePromise_ = null;
     this.extraUrlParamsPromise_ = [];
-    this.batchSegmentsPromise_ = [];
+    this.batchSegmentPromises_ = [];
     this.timeoutId_ = null;
     this.lastTrigger_ = null;
     this.sendPromise_ = null;
