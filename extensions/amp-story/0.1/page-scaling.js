@@ -209,7 +209,8 @@ export class PageScalingService {
       } else if (Services.platformFor(win).isFirefox()) {
         // Firefox does not support `zoom`.
         // TODO(alanorozco): Use `scale` on Firefox.
-        user().warn('`amp-story-scaling` ignored: Firefox is not supported.');
+        user().warn('AMP-STORY',
+            '`amp-story-scaling` ignored: Firefox is not supported.');
         pageScalingService = MOCK_PAGE_SCALING_SERVICE;
       } else {
         pageScalingService = new PageScalingService(win, story);
