@@ -20,6 +20,7 @@ import {getIframe} from '../../../src/3p-frame';
 import { addParamsToUrl } from '../../../src/url';
 import { getDataParamsFromAttributes, removeElement } from '../../../src/dom';
 import { listenFor } from '../../../src/iframe-helper';
+import {CSS} from '../../../build/amp-mathml-0.1.css';
 
 export class AmpMathml extends AMP.BaseElement {
 
@@ -73,5 +74,5 @@ export class AmpMathml extends AMP.BaseElement {
 
 
 AMP.extension('amp-mathml', '0.1', AMP => {
-  AMP.registerElement('amp-mathml', AmpMathml);
+  AMP.registerElement('amp-mathml', AmpMathml, CSS);
 } );
