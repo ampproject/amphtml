@@ -606,9 +606,7 @@ function enableLocalTesting(targetFile) {
  * @return {!Promise}
  */
 function performBuild(watch) {
-  if (!watch) {
-    process.env.NODE_ENV = 'development';
-  }
+  process.env.NODE_ENV = 'development';
   printConfigHelp(watch ? 'gulp watch' : 'gulp build');
   return compileCss(watch).then(() => {
     return Promise.all([
