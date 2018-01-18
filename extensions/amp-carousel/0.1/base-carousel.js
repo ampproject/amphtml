@@ -37,7 +37,9 @@ export class BaseCarousel extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.showControls_ = this.element.hasAttribute('controls');
+    const input = Services.inputFor(this.win);
+    this.showControls_ = input.isMouseDetected() ||
+        this.element.hasAttribute('controls');
 
     if (this.showControls_) {
       this.element.classList.add('i-amphtml-carousel-has-controls');
