@@ -94,3 +94,4 @@ function getHost() {
   return (useHttps ? 'https' : 'http') + '://' + host + ':' + port;
 }
 
+exports.serve = serve;

@@ -25,6 +25,7 @@ var cleanupBuildDir = require('./build-system/tasks/compile').cleanupBuildDir;
 var jsifyCssAsync = require('./build-system/tasks/jsify-css').jsifyCssAsync;
 var applyConfig = require('./build-system/tasks/prepend-global/index.js').applyConfig;
 var removeConfig = require('./build-system/tasks/prepend-global/index.js').removeConfig;
+var serve = require('./build-system/tasks/serve.js').serve;
 var fs = require('fs-extra');
 var gulp = $$.help(require('gulp'));
 var lazypipe = require('lazypipe');
@@ -1304,11 +1305,13 @@ gulp.task('build', 'Builds the AMP library', ['update-packages'], build, {
     config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   }
 });
-gulp.task('check-all', 'Run through all presubmit checks', ['lint', 'dep-check', 'check-types', 'presubmit']);
+gulp.task('check-all', 'Run through all presubmit checks',
+    ['lint', 'dep-check', 'check-types', 'presubmit']);
 gulp.task('check-types', 'Check JS types', checkTypes);
 gulp.task('css', 'Recompile css to build directory', ['update-packages'],
     compileCss);
-gulp.task('default', 'Same as "watch"', ['update-packages', 'watch', 'serve']);
+gulp.task('default', 'Runs "watch" and then "serve"',
+    ['update-packages', 'watch'], serve);
 gulp.task('dist', 'Build production binaries', ['update-packages'], dist, {
   options: {
     pseudo_names: '  Compiles with readable names. ' +
