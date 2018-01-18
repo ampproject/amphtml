@@ -234,8 +234,8 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @private */
   markPageAsLoaded_() {
+    dispatch(this.element, EventType.PAGE_LOADED, true);
     this.mutateElement(() => {
-      dispatch(this.element, EventType.PAGE_LOADED, true);
       this.element.classList.add(PAGE_LOADED_CLASS_NAME);
     });
   }

@@ -547,8 +547,8 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   markStoryAsLoaded_() {
+    dispatch(this.element, EventType.STORY_LOADED, true);
     this.mutateElement(() => {
-      dispatch(this.element, EventType.STORY_LOADED, true);
       this.element.classList.add(STORY_LOADED_CLASS_NAME);
     });
   }
