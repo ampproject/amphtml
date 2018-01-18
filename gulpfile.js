@@ -403,9 +403,9 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
 function compileCss() {
   // Print a message that could help speed up local development.
   if (!process.env.TRAVIS && argv['_'].indexOf('test') != -1) {
-    log(
-        green('To skip building during future test runs, use',
-        cyan('--nobuild'), 'with your', cyan('gulp test'), 'command.'));
+    log(green('To skip building during future test runs, use'),
+        cyan('--nobuild'), green('with your'), cyan('gulp test'),
+        green('command.'));
   }
   const startTime = Date.now();
   return jsifyCssAsync('css/amp.css')
@@ -582,14 +582,12 @@ function buildExtensionJs(path, name, version, options) {
  */
 function printConfigHelp(command) {
   if (!process.env.TRAVIS) {
-    log(
-        green('Building the runtime for local testing with the'),
+    log(green('Building the runtime for local testing with the'),
         cyan((argv.config === 'canary') ? 'canary' : 'prod'),
         green('AMP config'));
-    log(
-        green('To specify which config to apply, use',
-            cyan('--config={canary|prod}'), 'with your',
-            cyan(command), 'command'));
+    log(green('To specify which config to apply, use'),
+        cyan('--config={canary|prod}'), green('with your'),
+        cyan(command), green('command'));
   }
 }
 
@@ -846,8 +844,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     if (argv.minimal_set
         && !(/integration|babel|amp-ad|lightbox|sidebar|analytics|app-banner/
             .test(srcFilename))) {
-      log(
-          'Skipping', cyan(srcFilename), 'because of --minimal_set');
+      log('Skipping', cyan(srcFilename), 'because of --minimal_set');
       return Promise.resolve();
     }
     const startTime = Date.now();

@@ -59,15 +59,9 @@ function serve() {
       'SERVE_CACHING_HEADERS': sendCachingHeaders,
     },
     stdout: !quiet,
-  })
-      .once('quit', function() {
-        log(colors.green('Shutting down server'));
-      });
-  if (!quiet) {
-    log(colors.yellow('Run `gulp build` then go to '
-        + getHost() + '/examples/article.amp.html'
-    ));
-  }
+  }).once('quit', function() {
+    log(colors.green('Shutting down server'));
+  });
 }
 
 process.on('SIGINT', function() {
