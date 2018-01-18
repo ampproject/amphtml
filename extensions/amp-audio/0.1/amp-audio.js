@@ -65,7 +65,7 @@ export class AmpAudio extends AMP.BaseElement {
       assertHttpsUrl(this.element.getAttribute('src'), this.element);
     }
     this.propagateAttributes(
-        ['src', 'autoplay', 'muted', 'loop', 'aria-label',
+        ['src', 'preload', 'autoplay', 'muted', 'loop', 'aria-label',
           'aria-describedby', 'aria-labelledby', 'controlsList'],
         audio);
 
