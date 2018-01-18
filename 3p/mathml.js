@@ -57,13 +57,14 @@ export function mathml(global, data) {
         const rendered = document.getElementById('MathJax-Element-1-Frame');
         // Remove built in mathjax margins.
         const display = document.getElementsByClassName('MJXc-display');
-        display[0].setAttribute('style','margin-top:0;margin-bottom:0');
-        context.requestResize(
-                rendered./*OK*/offsetWidth,
-                rendered./*OK*/offsetHeight
-            );
+        if (display[0]) {
+          display[0].setAttribute('style','margin-top:0;margin-bottom:0');
+          context.requestResize(
+              rendered./*OK*/offsetWidth,
+              rendered./*OK*/offsetHeight
+          );
+        }
       } );
-
     }
   );
 }
