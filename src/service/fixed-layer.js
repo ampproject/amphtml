@@ -192,6 +192,12 @@ export class FixedLayer {
    * @return {!Promise}
    */
   addElement(element, opt_forceTransfer) {
+    const win = this.ampdoc.win;
+    if (!element./*OK*/offsetParent &&
+        computedStyle(win, element).display === 'none') {
+      dev().error(TAG, 'Tried to add display:none element to FixedLayer',
+          element.tagName);
+    }
     this.setupElement_(
         element,
         /* selector */ '*',
@@ -479,8 +485,10 @@ export class FixedLayer {
     }
     const isFixed = position == 'fixed';
     if (fe) {
-      // Already seen.
-      fe.selectors.push(selector);
+      if (!fe.selectors.includes(selector)) {
+        // Already seen.
+        fe.selectors.push(selector);
+      }
     } else {
       // A new entry.
       const id = 'F' + (this.counter_++);
