@@ -47,9 +47,7 @@ export class Expander {
     if (!matches.length) {
       return Promise.resolve(url);
     }
-    const mergedPositions = this.eliminateOverlaps_(matches, url,
-        opt_whiteList);
-    return this.parseUrlRecursively_(url, mergedPositions, opt_bindings);
+    return this.parseUrlRecursively_(url, matches, opt_bindings);
   }
 
   /**
@@ -74,58 +72,6 @@ export class Expander {
     });
     return matches;
   }
-
-  /**
-   * Takes array of all matching variable keyword locations and returns only those that we
-   * want to evaluate. In the case of overlapping keywords it choose the longer. It also
-   * excludes protected keywords.
-   * @param {!Array<Object<string, string|number>>} matches array of objects representing
-   *  matching keywords
-   * @param {string} url The url to be expanded.
-   * @return {!Object<string, string|number>}
-   */
-  eliminateOverlaps_(matches, url, opt_whiteList) {
-    if (!matches.length) { return null; }
-    // longest keywords have priority over shorter
-    // if same length alphabetical precidence
-    matches.sort(sortByLengthThenName);
-
-    const usedRanges = [];
-
-    return matches.filter(match => {
-      if (opt_whiteList && !opt_whiteList[match.name]) {
-        // Do not perform substitution and just return back the original
-        // match, so that the string doesn't change.
-        return false;
-      }
-      // if this match does not overlap with a longer match
-      return this.markKeywords_(match, usedRanges);
-    }).sort(sortByStart);
-  }
-
-  /**
-   * Given a keyword marking data structure and a match object, it will keep track of
-   * indexes that are already being tracked.
-   * @param {!Object<string, *>} match contains match data
-   * @return {boolean} indicates whether a collision was found
-   */
-  markKeywords_(match, usedRanges) {
-    // check each match against range of existing (longer) keywords
-    for (let i = 0; i < usedRanges.length; i++) {
-      if (hasOverlap(match, usedRanges[i])) {
-        return false;
-      }
-    };
-    usedRanges.push([match.start, match.stop]);
-    return true;
-
-    // check conflicts helper fn
-    function hasOverlap(match, range) {
-      return match.start >= range[0] && match.start <= range[1] ||
-          match.stop >= range[0] && match.stop <= range[1];
-    }
-  }
-
 
   /**
    * @param {string} url
@@ -257,15 +203,4 @@ export class Expander {
       return Promise.resolve('');
     }
   }
-}
-
-function sortByLengthThenName(a, b) {
-  if (a.length === b.length) {
-    return a.name > b.name;
-  }
-  return b.length - a.length;
-}
-
-function sortByStart(a, b) {
-  return a.start - b.start;
 }
