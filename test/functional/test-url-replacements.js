@@ -458,6 +458,16 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
+  it('should replace NOW_MS', () => {
+    return expandAsync('NOW_MS').then(res => {
+      expect(res).to.match(/^\d+$/);
+
+      const time = parseInt(res, 10);
+      expect(time).to.be.greaterThan(0);
+      expect(time).to.be.lessThan(Math.ceil(performance.now()));
+    });
+  });
+
   it('should return correct ISO timestamp', () => {
     const fakeTime = 1499979336612;
     sandbox.useFakeTimers(fakeTime);
