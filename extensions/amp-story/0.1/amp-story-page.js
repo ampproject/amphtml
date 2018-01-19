@@ -186,7 +186,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
 
-  /**
+  /** 
    * @return {!Promise}
    * @private
    */
