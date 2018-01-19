@@ -78,11 +78,32 @@ describes.realWin('amp-audio', {
     });
   });
 
+  it('should not preload audio', () => {
+    return attachAndRun({
+      src: 'https://origin.com/audio.mp3',
+      preload: 'none',
+    }).then(a => {
+      const audio = a.querySelector('audio');
+      expect(audio.getAttribute('preload')).to.be.equal('none');
+    });
+  });
+
+  it('should only preload audio metadata', () => {
+    return attachAndRun({
+      src: 'https://origin.com/audio.mp3',
+      preload: 'metadata',
+    }).then(a => {
+      const audio = a.querySelector('audio');
+      expect(audio.getAttribute('preload')).to.be.equal('metadata');
+    });
+  });
+
   it('should load audio through sources', () => {
     return attachAndRun({
       width: 503,
       height: 53,
       autoplay: '',
+      preload: '',
       muted: '',
       loop: '',
     }, [
@@ -100,6 +121,7 @@ describes.realWin('amp-audio', {
       expect(audio.hasAttribute('controls')).to.be.true;
       expect(audio.hasAttribute('autoplay')).to.be.true;
       expect(audio.hasAttribute('muted')).to.be.true;
+      expect(audio.hasAttribute('preload')).to.be.true;
       expect(audio.hasAttribute('loop')).to.be.true;
       expect(audio.hasAttribute('src')).to.be.false;
       expect(audio.childNodes[0].tagName).to.equal('SOURCE');
