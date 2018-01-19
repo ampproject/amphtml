@@ -136,7 +136,7 @@ export function removeChildren(parent) {
  * are deeply cloned. Notice, that this method should be used with care and
  * preferably on smaller subtrees.
  * @param {!Element} from
- * @param {!Element} to
+ * @param {!Element|!DocumentFragment} to
  */
 export function copyChildren(from, to) {
   const frag = to.ownerDocument.createDocumentFragment();
@@ -606,6 +606,25 @@ export function ancestorElementsByTag(child, tagName) {
   return ancestorElements(child, el => {
     return el.tagName == tagName;
   });
+}
+
+/**
+ * Returns the inner content of a template element.
+ *
+ * Polyfill to replace .content access for browsers that do not support
+ * HTMLTemplateElements natively.
+ *
+ * @param {!HTMLTemplateElement|!Element} template
+ * @return {!DocumentFragment}
+ */
+export function templateContent(template) {
+  if ('content' in template) {
+    return template.content;
+  } else {
+    const content = template.ownerDocument.createDocumentFragment();
+    copyChildren(template, content);
+    return content;
+  }
 }
 
 /**

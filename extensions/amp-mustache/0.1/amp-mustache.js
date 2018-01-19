@@ -15,7 +15,7 @@
  */
 
 import {dict} from '../../../src/utils/object';
-import {iterateCursor} from '../../../src/dom';
+import {iterateCursor, templateContent} from '../../../src/dom';
 import {parse as mustacheParse, render as mustacheRender,
   setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
 import {sanitizeHtml, sanitizeFormattingHtml} from '../../../src/sanitizer';
@@ -40,7 +40,7 @@ export class AmpMustache extends AMP.BaseTemplate {
     this.nestedTemplates_ = dict();
     const shadowTemplate = this.element.cloneNode(true);
     let index = 0;
-    iterateCursor(shadowTemplate.content.querySelectorAll('template'),
+    iterateCursor(templateContent(shadowTemplate).querySelectorAll('template'),
         nestedTemplate => {
           const nestedTemplateKey = `__AMP_NESTED_TEMPLATE_${index}`;
           this.nestedTemplates_[nestedTemplateKey] =
