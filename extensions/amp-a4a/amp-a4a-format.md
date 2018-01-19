@@ -188,14 +188,13 @@ the [general AMP boilerplate](https://github.com/ampproject/amphtml/blob/master/
 The `transition` and `animation` properties are only allowed on selectors that:
 - Contain only `transition`, `animation`, `transform`, `visibility`, or
   `opacity` properties.
-- Start with `.amp-animate` followed by a space.
 
   _Rationale:_ This allows the AMP runtime to remove this  class from context
    to deactivate animations, when necessary for page performance.
 
 **Good**
 ```css
-.amp-animate .box {
+.box {
     transform: rotate(180deg);
     transition: transform 2s;
 }
@@ -205,16 +204,8 @@ The `transition` and `animation` properties are only allowed on selectors that:
 
 Property not allowed in CSS class.
 ```css
-.amp-animate .box {
-    color: red;  // non-animation property not allowed in animation selector
-    transform: rotate(180deg);
-    transition: transform 2s;
-}
-```
-
-Missing context class `.amp-animate`.
-```css
 .box {
+    color: red;  // non-animation property not allowed in animation selector
     transform: rotate(180deg);
     transition: transform 2s;
 }
