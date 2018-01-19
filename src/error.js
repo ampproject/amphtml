@@ -285,9 +285,7 @@ function reportErrorToServer(message, filename, line, col, error) {
       // Report the error to viewer if it has the capability. The data passed
       // to the viewer is exactly the same as the data passed to the server
       // below.
-      if (self.AMP && self.AMP.viewer) {
-        maybeReportErrorToViewer(self.AMP.viewer, data);
-      }
+      maybeReportErrorToViewer(data);
       const xhr = new XMLHttpRequest();
       xhr.open('POST', urls.errorReporting, true);
       xhr.send(JSON.stringify(data));
@@ -296,16 +294,47 @@ function reportErrorToServer(message, filename, line, col, error) {
 }
 
 /**
- * Reports the given error to the viewer if it has the 'errorReporting'
- * capability. The error data can be obtained by calling #getErrorReportData.
- * @param {!Viewer} viewer
- * @param {!JsonObject} error data from #getErrorReportData
- * visibleForTesting
+ * Passes the given error data to the viewer if the following criteria is met:
+ * - The AMP doc is in single doc mode
+ * - The viewer is a trusted viewer
+ * - The AMP doc is opted-in for error interception (`<html>` tag has the 
+ *   `allow-error-interception` attribute)
+ *
+ * @param {!JsonObject} error data from `getErrorReportData`
+ * @return {!Promise<boolean|undefined>}
+ *     True if the error was sent to the viewer, `Promise<undefined>`
+ *     otherwise.
+ * @this {!Window|undefined}
+ * @visibleForTesting
  */
-export function maybeReportErrorToViewer(viewer, data) {
-  if (viewer.hasCapability('errorReporting')) {
-    viewer.sendMessage('error', data);
+export function maybeReportErrorToViewer(data) {
+  if (!this || !data) {
+    return Promise.resolve();
   }
+
+  const ampdocService = Services.ampdocServiceFor(self);
+  if (!ampdocService.isSingleDoc()) {
+    return Promise.resolve();
+  }
+  const ampdocSingle = ampdocService.getAmpDoc();
+  const htmlElement = ampdocSingle.getRootNode().documentElement;
+  const docOptedIn = htmlElement.hasAttribute('allow-error-interception');
+  if (!docOptedIn) {
+    return Promise.resolve();
+  }
+
+  const viewer = Services.viewerForDoc(ampdocSingle);
+  if (!viewer.hasCapability('errorReporting')) {
+    return Promise.resolve();
+  }
+
+  return viewer.isTrustedViewer().then(viewerTrusted => {
+    if (!viewerTrusted) {
+      return Promise.resolve();
+    }
+    viewer.sendMessage('error', data);
+    return Promise.resolve(true);
+  });
 }
 
 /**

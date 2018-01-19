@@ -36,6 +36,7 @@ import {
   getMode,
   getRtvVersionForTesting,
 } from '../../src/mode';
+import {Services} from '../../src/services';
 
 describes.fakeWin('installErrorReporting', {}, env => {
   let sandbox;
@@ -94,37 +95,75 @@ describes.fakeWin('installErrorReporting', {}, env => {
 describe('maybeReportErrorToViewer', () => {
   let viewer;
   let sandbox;
+  let ampdocServiceForStub;
+  let viewerForDocStub;
   let sendMessageStub;
+
+  const data = getErrorReportData(undefined, undefined, undefined, undefined,
+      new Error('XYZ', false));
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+
+    const optedInDoc = window.document.implementation.createHTMLDocument('');
+    optedInDoc.documentElement.setAttribute('allow-error-interception', '');
+
+    ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
+    ampdocServiceForStub.returns({
+      isSingleDoc: () => true,
+      getAmpDoc: () => ({getRootNode: () => optedInDoc}),
+    });
+
     viewer = {
       hasCapability: () => true,
+      isTrustedViewer: () => Promise.resolve(true),
       sendMessage: () => true,
     };
     sendMessageStub = sandbox.stub(viewer, 'sendMessage');
+
+    viewerForDocStub = sandbox.stub(Services, 'viewerForDoc').returns(viewer);
   });
 
   afterEach(() => {
     sandbox.restore();
   });
 
-  it('viewer errorReporting capability enabled', () => {
-    const e = new Error('XYZ');
-    const data = getErrorReportData(undefined, undefined, undefined, undefined,
-        e, false);
-    maybeReportErrorToViewer(viewer, data);
-    expect(sendMessageStub).to.have.been.calledWith('error', data);
+  it('should not intercept if AMP doc is not single', () => {
+    ampdocServiceForStub.returns({isSingleDoc: () => false});
+    return maybeReportErrorToViewer(data)
+        .then(() => expect(sendMessageStub).to.not.have.been.called);
   });
 
-  it('viewer errorReporting capability disabled', () => {
-    viewer.hasCapability = () => false;
-    const e = new Error('XYZ');
-    const data = getErrorReportData(undefined, undefined, undefined, undefined,
-        e, false);
-    maybeReportErrorToViewer(viewer, data);
-    expect(sendMessageStub).to.not.have.been.called;
+  it('should not intercept if AMP doc is not opted in', () => {
+    const nonOptedInDoc =
+          window.document.implementation.createHTMLDocument('');
+    ampdocServiceForStub.returns({
+      isSingleDoc: () => true,
+      getAmpDoc: () => ({getRootNode: () => nonOptedInDoc}),
+    });
+    return maybeReportErrorToViewer(data)
+        .then(() => expect(sendMessageStub).to.not.have.been.called);
   });
+
+  it('should not intercept if viewer is not capable', () => {
+    sandbox.stub(viewer, 'hasCapability').withArgs('errorReporting')
+          .returns(false);
+    viewer.hasCapability = () => false;
+    return maybeReportErrorToViewer(data)
+        .then(() => expect(sendMessageStub).to.not.have.been.called);
+  });
+
+  it('should not intercept if viewer is not trusted', () => {
+    sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
+    return maybeReportErrorToViewer(data)
+        .then(() => expect(sendMessageStub).to.not.have.been.called);
+  });
+
+  it('should send viewer message named `error`', () => {
+    return maybeReportErrorToViewer(data)
+        .then(() => expect(sendMessageStub).to.have.been
+            .calledWith('error', data));
+  });  
 });
 
 describe('reportErrorToServer', () => {
