@@ -167,19 +167,10 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
   parseTemplate_(template) {
     // TODO(keithwrightbos): support dynamic creation of amp-pixel and
     // amp-analytics.
-    let dataString = '';
-    if (this.ampCreativeJson_ && this.ampCreativeJson_.templateMacroValues) {
-      dataString = '<amp-state><script type="application/json">' +
-          JSON.stringify(this.ampCreativeJson_.templateMacroValues) +
-          '</script></amp-state>';
-    }
-    const splitTemplate = template.split('<amp-state></amp-state>');
-    const templateWithAmpState =
-        splitTemplate[0] + dataString + splitTemplate[1];
     this.creativeMetadata_ = /** @type {!CreativeMetaDataDef} */
-        (super.getAmpAdMetadata(templateWithAmpState));
+        (super.getAmpAdMetadata(template));
     return {
-      template: templateWithAmpState,
+      template,
       metadata: this.creativeMetadata_,
       access: Date.now(),
     };

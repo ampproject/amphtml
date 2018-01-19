@@ -3,7 +3,6 @@
     <meta name="viewport" content="width=device-width,minimum-scale=1">
   </head>
   <body>
-    <amp-state></amp-state>
     <a [href]="url" rel="nofollow" target="_blank">
       <amp-img [src]="externalUrl" [srcset]="externalUrl" src="/examples/img/ampicon.png" width="250px" height="150px" layout="responsive"></amp-img>
     </a>
