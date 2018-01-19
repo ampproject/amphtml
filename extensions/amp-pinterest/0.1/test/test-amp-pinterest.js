@@ -28,6 +28,7 @@ describes.realWin('amp-pinterest', {
   function getPin(pinDo, pinUrl, pinMedia, pinDescription, pinAlt) {
     const div = document.createElement('div');
     env.win.document.body.appendChild(div);
+    env.fetchMock.fallbackResponse = '200';
 
     const pin = env.win.document.createElement('amp-pinterest');
     pin.setAttribute('data-do', pinDo);
@@ -60,7 +61,7 @@ describes.realWin('amp-pinterest', {
     });
   });
 
-  it('sets alternate text', () => {
+  it('sets provided alternate text', () => {
     return getPin('embedPin',
         'https://www.pinterest.com/pin/99360735500167749/',
         null,
@@ -73,4 +74,24 @@ describes.realWin('amp-pinterest', {
     });
   });
 
+  it('sets alternate text from pin data provided by Pinterest API', () => {
+    return getPin('embedPin',
+        'https://www.pinterest.com/pin/228065168607834583/'
+    ).then(pin => {
+      const img = pin.querySelector('img');
+      img.getAttribute('alt').to.equal('End of the line Riding the rails in SF, ' +
+        'cable car rails #cablecar #sanfrancisco #endoftheline #tourist #rails ' +
+        '#saturdayafternoon #california');
+    });
+  });
+
+
+  it('no alternate text and no title provided by the Pinterest API', () => {
+    return getPin('embedPin',
+        'https://www.pinterest.com/pin/445786063109072175/'
+    ).then(pin => {
+      const img = pin.querySelector('img');
+      expect(img.getAttribute('alt')).to.be.null;
+    });
+  });
 });

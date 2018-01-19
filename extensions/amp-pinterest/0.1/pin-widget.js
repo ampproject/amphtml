@@ -111,8 +111,9 @@ export class PinWidget {
     }});
 
     // If no alternate text is set, set it to the title gotten from the pin data
-    if (!this.alt)
+    if (!this.alt && pin['attribution']) {
       this.alt = pin['attribution']['title'];
+    }
 
     const img = Util.make(this.element.ownerDocument, {'img': {
       'src': imgUrl,

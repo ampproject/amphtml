@@ -95,10 +95,6 @@ Contains the fully-qualified URL of the image intended to be pinned. If the pin 
 
 Contains the default description that appears in the pin create form; please choose carefully, since many Pinners will close the form without pinning if it doesn't make sense.
 
-##### alt
-
-This property like the the `alt` attribute on an `<img>` tag specifies the alternate ext to be rendered in case the image specified can't be rendered.
-
 ### Sizing the Pin It button
 
 Default small rectangular button:
@@ -176,6 +172,10 @@ Must contain the fully-qualified URL of the Pinterest resource to be shown as a 
 ```html
 data-url="https://www.pinterest.com/pin/99360735500167749/"
 ```
+
+##### alt
+
+This property like the the `alt` attribute on an `<img>` tag specifies the alternate text. If not provided it will be infered from the pin data provided by the Pinterest API.
 
 ## Validation
 
