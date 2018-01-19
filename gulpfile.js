@@ -615,7 +615,7 @@ function performBuild(watch) {
       buildExaminer({watch: watch}),
       buildSw({watch: watch}),
       buildWebWorker({watch: watch}),
-      buildExtensions({bundleOnlyIfListedInFiles: watch}),
+      buildExtensions({bundleOnlyIfListedInFiles: !watch, watch: watch}),
       compile(watch),
     ]);
   });
