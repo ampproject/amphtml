@@ -302,6 +302,10 @@ data.queue;
 // imedia.js
 data.positions
 
+// imonomy.js
+data.pid;
+data.subId;
+
 // improvedigital.js
 data.placement;
 data.optin;
