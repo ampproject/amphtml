@@ -193,12 +193,12 @@ In this example, all requests are valid.
 Some analytics providers have an already-provided configuration, which you use via the `type` attribute. If you are using an analytics provider, you may not need to include requests information. See your vendor documentation to find out if requests need to be configured, and how.
 
 ##### Batching configs
-To reduce number of request pings, one can specify batching behaviors in request configuration. [`extraUrlParams`](#extra-url-params) from triggers that use the same request will all be appended to the baseUrl of the request.
+To reduce the number of request pings, you can specify batching behaviors in the request configuration. Any [`extraUrlParams`](#extra-url-params) from `triggers` that use the same request are appended to the `baseUrl` of the request.
 
 The batching properties are:
-  - `maxDelay` This property is used to specify the time to wait before sending out request ping in the unit of second. `maxDelay` acts as a counter that starts upon triggering of the first batched request.
+  - `maxDelay`: This property specifies the time to wait (in seconds) before sending out a request ping. `maxDelay` acts as a counter that starts upon the triggering of the first batched request.
 
-For example, the following config will only send out a single request ping after 3 secs, with final request ping looks like `https://example.com/analytics?rc=1&rc=2&rc=3` .
+For example, the following config sends out a single request ping after 3 seconds, with the final request ping looking like `https://example.com/analytics?rc=1&rc=2&rc=3` .
 
 ```javascript
 "requests": {
