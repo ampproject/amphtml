@@ -15,10 +15,8 @@
  */
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {Layout} from '../../../src/layout';
-import {cssstyle} from 'cssstyle';
 import {getIframe} from '../../../src/3p-frame';
-import {addParamsToUrl} from '../../../src/url';
-import {getDataParamsFromAttributes, removeElement} from '../../../src/dom';
+import {removeElement} from '../../../src/dom';
 import {listenFor} from '../../../src/iframe-helper';
 import {CSS} from '../../../build/amp-mathml-0.1.css';
 
@@ -36,28 +34,28 @@ export class AmpMathml extends AMP.BaseElement {
   * @param {boolean=} opt_onLayout
   * @override
   */
-  preconnectCallback () {
+  preconnectCallback() {
     this.preconnect.url('https://cdnjs.cloudflare.com');
   }
 
-  layoutCallback () {
+  layoutCallback() {
     const iframe = getIframe(this.win, this.element, 'mathml');
     this.applyFillContent(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
     listenFor(iframe, 'embed-size', data => {
-      if(!this.element.hasAttribute('inline') ) {
+      if (!this.element.hasAttribute('inline')) {
         // Don't change the width if not inlined.
         data['width'] = undefined;
-        }
+      }
       this.element.getResources()./*OK*/changeSize(
-      this.element, data['height'], /* newWidth */ data['width']);
-    }, /* opt_is3P */true );
+          this.element, data['height'], data['width']);
+    }, /* opt_is3P */true);
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
     return this.loadPromise(iframe);
   }
 
-  unlayoutCallback () {
+  unlayoutCallback() {
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
@@ -66,7 +64,7 @@ export class AmpMathml extends AMP.BaseElement {
   }
 
   /** @override */
-  isLayoutSupported (layout) {
+  isLayoutSupported(layout) {
     return layout == Layout.CONTAINER;
   }
 
@@ -75,4 +73,4 @@ export class AmpMathml extends AMP.BaseElement {
 
 AMP.extension('amp-mathml', '0.1', AMP => {
   AMP.registerElement('amp-mathml', AmpMathml, CSS);
-} );
+});

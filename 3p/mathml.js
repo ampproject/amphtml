@@ -27,8 +27,8 @@ import {user} from '../src/log';
  * @param {string} scriptSource The source of the script, different for post and comment embeds.
  */
 function getMathmlJs(global, scriptSource, cb) {
- writeScript(global, scriptSource, function() {
-   cb(global.MathJax);
+  writeScript(global, scriptSource, function() {
+    cb(global.MathJax);
   });
 }
 
@@ -43,28 +43,28 @@ export function mathml(global, data) {
       data.element);
 
   getMathmlJs(
-    global,
-    'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML',
-    mathjax => {
-      // Dimensions are given by the parent frame.
-      delete data.width;
-      delete data.height;
-      const div = document.createElement('div');
-      div.setAttribute('id','mathmlformula');
-      div.textContent = data.formula;
-      global.document.body.appendChild(div);
-      mathjax.Hub.Queue( function () {
-        const rendered = document.getElementById('MathJax-Element-1-Frame');
-        // Remove built in mathjax margins.
-        const display = document.getElementsByClassName('MJXc-display');
-        if (display[0]) {
-          display[0].setAttribute('style','margin-top:0;margin-bottom:0');
-          context.requestResize(
-              rendered./*OK*/offsetWidth,
-              rendered./*OK*/offsetHeight
-          );
-        }
-      } );
-    }
+      global,
+      'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML',
+      mathjax => {
+        // Dimensions are given by the parent frame.
+        delete data.width;
+        delete data.height;
+        const div = document.createElement('div');
+        div.setAttribute('id','mathmlformula');
+        div.textContent = data.formula;
+        global.document.body.appendChild(div);
+        mathjax.Hub.Queue(function() {
+          const rendered = document.getElementById('MathJax-Element-1-Frame');
+          // Remove built in mathjax margins.
+          const display = document.getElementsByClassName('MJXc-display');
+          if (display[0]) {
+            display[0].setAttribute('style','margin-top:0;margin-bottom:0');
+            context.requestResize(
+                rendered./*OK*/offsetWidth,
+                rendered./*OK*/offsetHeight
+            );
+          }
+        });
+      }
   );
 }

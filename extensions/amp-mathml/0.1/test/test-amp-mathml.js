@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import {AmpMathml} from '../amp-mathml';
-
 describes.realWin('amp-mathml', {
   amp: {
     extensions: ['amp-mathml'],
-  }
+  },
 }, env => {
 
   let win;
