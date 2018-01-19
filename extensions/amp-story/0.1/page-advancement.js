@@ -28,13 +28,6 @@ const NEXT_SCREEN_AREA_RATIO = 0.75;
 /** @const {number} */
 const POLL_INTERVAL_MS = 250;
 
-/**
- * Selector for media element.
- * TODO: make audio elements work: amp-audio, .i-amphtml-story-background-audio
- * @const {string}
-*/
-const MEDIA_ELEMENT_SELECTOR = 'amp-video';
-
 /** @const @enum */
 export const TapNavigationDirection = {
   'NEXT': 1,
@@ -267,15 +260,13 @@ class ManualAdvancement extends AdvancementConfig {
     this.element_ = element;
     this.clickListener_ = this.maybePerformNavigation_.bind(this);
     this.hasAutoAdvanceStr_ = this.element_.getAttribute('auto-advance-after');
-    this.isMediaElement_ = scopedQuerySelector(
-        this.element_, MEDIA_ELEMENT_SELECTOR);
   }
 
   /** @override */
   start() {
     super.start();
     this.element_.addEventListener('click', this.clickListener_, true);
-    if (!this.hasAutoAdvanceStr_ && !this.isMediaElement_) {
+    if (!this.hasAutoAdvanceStr_) {
       super.onProgressUpdate();
     }
   }
@@ -581,7 +572,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
    */
   static fromAutoAdvanceString(autoAdvanceStr, win, rootEl) {
     try {
-      const element = scopedQuerySelector(rootEl, MEDIA_ELEMENT_SELECTOR);
+      const element = scopedQuerySelector(rootEl, `#${autoAdvanceStr}`);
 
       if (!element) {
         return null;
