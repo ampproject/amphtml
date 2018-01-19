@@ -114,7 +114,13 @@ export class GoogleCidApi {
           })
           .catch(e => {
             this.persistToken_(TokenStatus.ERROR, TIMEOUT);
-            dev().error(TAG, e);
+            if (e && e.response) {
+              e.response.json().then(res => {
+                dev().error(TAG, JSON.stringify(res));
+              });
+            } else {
+              dev().error(TAG, e);
+            }
             return null;
           });
     });
