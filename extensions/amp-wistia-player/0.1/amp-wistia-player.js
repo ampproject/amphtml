@@ -163,7 +163,7 @@ class AmpWistiaPlayer extends AMP.BaseElement {
     }
 
     if (data['method'] == 'statechange') {
-      state = (data['args'] ? data['args']['_state'] : undefined)
+      const state = (data['args'] ? data['args']['_state'] : undefined)
       if (state === 'playing') {
         this.element.dispatchCustomEvent(VideoEvents.PLAYING);
       } else if (state === 'paused') {
@@ -173,7 +173,7 @@ class AmpWistiaPlayer extends AMP.BaseElement {
         this.element.dispatchCustomEvent(VideoEvents.ENDED);
       }
     } else if (data['method'] == 'mutechange') {
-      isMuted = (data['args'] ? data['args']['_isMuted'] : undefined)
+      const isMuted = (data['args'] ? data['args']['_isMuted'] : undefined)
       if (isMuted === true) {
         this.element.dispatchCustomEvent(VideoEvents.MUTED);
       } else if (isMuted === false) {
