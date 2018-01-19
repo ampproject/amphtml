@@ -147,8 +147,12 @@ function nameForEntry(entry, resourcesByHost) {
 }
 
 /**
+ * Groups all resource specs (which are defined in terms of {host, path, query}
+ * patterns) by host pattern. This is used downstream to avoid running RegExps
+ * for host patterns multiple times because we expect multiple resources to
+ * use the same host pattern.
  * @param {!Object<string, !IndividualResourceSpecDef>} resourceDefs A map of
- *     names to specs of which resources match the name.
+ *     names to the resource spec for that name.
  * @return {!Object<string, !ResourceSpecForHostDef>}
  */
 function groupSpecsByHost(resourceDefs) {
@@ -175,8 +179,9 @@ function groupSpecsByHost(resourceDefs) {
 }
 
 /**
- * Finds names for resource timing entries and omits ones that are missing
- * names.
+ * Filters out resource timing entries that don't have a name defined in
+ * resourceDefs. It returns a new array where each element contains a
+ * resource timing entry and the corresponding name.
  * @param {!Array<!PerformanceResourceTiming>} entries
  * @param {!Object<string, !IndividualResourceSpecDef>} resourceDefs
  * @return {!Array<{entry: !PerformanceResourceTiming, name: string}>}
@@ -196,7 +201,7 @@ function filterEntries(entries, resourceDefs) {
 }
 
 /**
- * Serializes an array of variables corresponding to individual resources into a
+ * Serializes resource timing entries that match the resourceTimingSpec into a
  * single string.
  * @param {!Array<!PerformanceResourceTiming>} entries
  * @param {!JsonObject} resourceTimingSpec
@@ -228,12 +233,10 @@ export function serializeResourceTiming(resourceTimingSpec, win) {
   if (!validateResourceTimingSpec(resourceTimingSpec)) {
     return '';
   }
-
   const entries = getResourceTimingEntries(win);
   if (!entries.length) {
     return '';
   }
-
   // Yield the thread in case iterating over all resources takes a long time.
   return yieldThread(() => serialize(entries, resourceTimingSpec, win));
 }
