@@ -99,12 +99,12 @@ export function installRuntimeServices(global) {
   installCryptoService(global);
   installBatchedXhrService(global);
   installDocumentStateService(global);
-  installInputService(global);
   installPlatformService(global);
   installTemplatesService(global);
   installTimerService(global);
   installVsyncService(global);
   installXhrService(global);
+  installInputService(global);
 }
 
 
