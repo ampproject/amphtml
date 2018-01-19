@@ -33,6 +33,11 @@ amp-story {
   width: 100% !important;
 }
 
+/** Removes overlay that blocks viewing during initial load */
+amp-story[standalone].i-amphtml-story-loaded::after {
+  display: none !important;
+}
+
 html.i-amphtml-story-standalone,
 html.i-amphtml-story-standalone body {
   height: 100% !important;
@@ -242,75 +247,6 @@ amp-story:not([desktop]) >
   position: absolute !important;
   background: rgba(117, 117, 117, 0.3) !important;
   z-index: 2 !important;
-}
-
-.i-amphtml-story-page-loading-screen {
-  align-items: center !important;
-  background-color: #000 !important;
-  bottom: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
-  left: 0 !important;
-  opacity: 1 !important;
-  position: absolute !important;
-  right: 0 !important;
-  top: 0 !important;
-  z-index: 9999 !important;
-}
-
-amp-story-page[active] .i-amphtml-story-page-loading-screen {
-  transition: opacity 0.2s ease !important;
-}
-
-.i-amphtml-story-page-loading-dots {
-  display: flex !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  list-style: none !important;
-}
-
-.i-amphtml-story-page-loading-dot {
-  background-color: #fff !important;
-  border-radius: 50% !important;
-  height: 8px !important;
-  list-style-type: none !important;
-  margin: 0 8px !important;
-  width: 8px !important;
-  padding: 0 !important;
-  animation: 1s linear infinite alternate i-amphtml-page-dot-grow !important;
-}
-
-.i-amphtml-story-page-loading-dot:nth-child(1) {
-  animation-delay: 0.0s !important;
-}
-
-.i-amphtml-story-page-loading-dot:nth-child(2) {
-  animation-delay: 0.5s !important;
-}
-
-.i-amphtml-story-page-loading-dot:nth-child(3) {
-  animation-delay: 1.0s !important;
-}
-
-.i-amphtml-story-page-loading-dot::before,
-.i-amphtml-story-page-loading-dot::after {
-  display: none !important;
-}
-
-@keyframes i-amphtml-page-dot-grow {
-  from { transform: scale(1) !important; }
-  to { transform: scale(2) !important; }
-}
-
-.i-amphtml-story-page-loading-text {
-  margin: 38px 0 0 !important;
-  font-size: 14px !important;
-}
-
-amp-story-page.i-amphtml-story-page-shown > .i-amphtml-story-page-loading-screen {
-  opacity: 0 !important;
-  pointer-events: none !important;
 }
 
 /** Grid level */

@@ -34,7 +34,6 @@ import {AdvancementConfig} from './page-advancement';
 import {matches, scopedQuerySelectorAll} from '../../../src/dom';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
-import {CommonSignals} from '../../../src/common-signals';
 
 
 /**
@@ -72,6 +71,11 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private @const {!Promise} */
     this.mediaLayoutPromise_ = this.waitForMediaLayout_();
+
+    /** @private @const {!Promise} */
+    this.pageLoadPromise_ = this.mediaLayoutPromise_.then(() => {
+      this.markPageAsLoaded_();
+    });
 
     /** @private @const {!Promise<!./media-pool.MediaPool>} */
     this.mediaPoolPromise_ = new Promise((resolve, reject) => {
@@ -152,7 +156,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   resumeCallback() {
-    this.markPageAsLoaded_();
     this.registerAllMedia_();
 
     if (this.isActive()) {
@@ -183,20 +186,57 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
 
-  /** @private */
+  /**
+   * @return {!Promise}
+   * @private
+   */
   waitForMediaLayout_() {
     const mediaSet = scopedQuerySelectorAll(this.element, PAGE_MEDIA_SELECTOR);
     const mediaPromises = Array.prototype.map.call(mediaSet, mediaEl => {
-      return mediaEl.signals().whenSignal(CommonSignals.LOAD_END);
+      return new Promise(resolve => {
+        switch (mediaEl.tagName.toLowerCase()) {
+          case 'amp-img':
+          case 'amp-anim':
+            mediaEl.addEventListener('load', resolve, true /* useCapture */);
+            break;
+          case 'amp-audio':
+          case 'amp-video':
+            if (mediaEl.readyState >= 2) {
+              resolve();
+              return;
+            }
+
+            mediaEl.addEventListener('canplay', resolve, true /* useCapture */);
+            break;
+          default:
+            // Any other tags should not block loading.
+            resolve();
+        }
+
+        // We suppress errors so that Promise.all will still wait for all
+        // promises to complete, even if one has failed.  We do nothing with the
+        // error, as the resource itself and/or code that loads it should handle
+        // the error.
+        mediaEl.addEventListener('error', resolve, true /* useCapture */);
+      });
     });
 
     return Promise.all(mediaPromises);
   }
 
 
+  /** @return {!Promise} */
+  whenLoaded() {
+    return this.pageLoadPromise_;
+  }
+
+
   /** @private */
   markPageAsLoaded_() {
-    this.element.classList.add(PAGE_LOADED_CLASS_NAME);
+    dispatch(this.element, EventType.PAGE_LOADED, true);
+    this.mutateElement(() => {
+      this.element.classList.add(PAGE_LOADED_CLASS_NAME);
+    });
   }
 
 
