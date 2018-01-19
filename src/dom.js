@@ -609,7 +609,7 @@ export function ancestorElementsByTag(child, tagName) {
 }
 
 /**
- * Returns the inner content of a template element.
+ * Returns a clone of the content of a template element.
  *
  * Polyfill to replace .content access for browsers that do not support
  * HTMLTemplateElements natively.
@@ -617,9 +617,9 @@ export function ancestorElementsByTag(child, tagName) {
  * @param {!HTMLTemplateElement|!Element} template
  * @return {!DocumentFragment}
  */
-export function templateContent(template) {
+export function templateContentClone(template) {
   if ('content' in template) {
-    return template.content;
+    return template.content.cloneNode(true);
   } else {
     const content = template.ownerDocument.createDocumentFragment();
     copyChildren(template, content);

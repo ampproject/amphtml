@@ -15,7 +15,7 @@
  */
 
 import {dict} from '../../../src/utils/object';
-import {iterateCursor, templateContent} from '../../../src/dom';
+import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {parse as mustacheParse, render as mustacheRender,
   setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
 import {sanitizeHtml, sanitizeFormattingHtml} from '../../../src/sanitizer';
@@ -38,22 +38,22 @@ export class AmpMustache extends AMP.BaseTemplate {
   compileCallback() {
     /** @private @const {!JsonObject} */
     this.nestedTemplates_ = dict();
-    const shadowTemplate = this.element.cloneNode(true);
     let index = 0;
-    iterateCursor(templateContent(shadowTemplate).querySelectorAll('template'),
-        nestedTemplate => {
-          const nestedTemplateKey = `__AMP_NESTED_TEMPLATE_${index}`;
-          this.nestedTemplates_[nestedTemplateKey] =
-              nestedTemplate./*OK*/outerHTML;
+    const content = templateContentClone(this.element);
+    iterateCursor(content.querySelectorAll('template'), nestedTemplate => {
+      const nestedTemplateKey = `__AMP_NESTED_TEMPLATE_${index}`;
+      this.nestedTemplates_[nestedTemplateKey] = nestedTemplate./*OK*/outerHTML;
 
-          const nestedTemplateAsVariable = this.element.ownerDocument
-              .createTextNode(`{{{${nestedTemplateKey}}}}`);
-          nestedTemplate.parentNode.replaceChild(nestedTemplateAsVariable,
-              nestedTemplate);
-          index++;
-        });
+      const nestedTemplateAsVariable = this.element.ownerDocument
+          .createTextNode(`{{{${nestedTemplateKey}}}}`);
+      nestedTemplate.parentNode.replaceChild(nestedTemplateAsVariable,
+          nestedTemplate);
+      index++;
+    });
+    const container = this.element.ownerDocument.createElement('div');
+    container.appendChild(content);
     /** @private @const {string} */
-    this.template_ = shadowTemplate./*OK*/innerHTML;
+    this.template_ = container./*OK*/innerHTML;
     mustacheParse(this.template_);
   }
 
