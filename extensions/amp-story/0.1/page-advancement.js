@@ -259,12 +259,16 @@ class ManualAdvancement extends AdvancementConfig {
     super();
     this.element_ = element;
     this.clickListener_ = this.maybePerformNavigation_.bind(this);
+    this.hasAutoAdvanceStr_ = this.element_.getAttribute('auto-advance-after');
   }
 
   /** @override */
   start() {
     super.start();
     this.element_.addEventListener('click', this.clickListener_, true);
+    if (!this.hasAutoAdvanceStr_) {
+      super.onProgressUpdate();
+    }
   }
 
   /** @override */
