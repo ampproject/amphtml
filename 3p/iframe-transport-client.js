@@ -17,6 +17,7 @@
 import {tryParseJson} from '../src/json';
 import {dev, user} from '../src/log';
 import {MessageType} from '../src/3p-frame-messaging';
+import {dict} from '../src/utils/object';
 import {IframeMessagingClient} from './iframe-messaging-client';
 
 /** @private @const {string} */
@@ -121,8 +122,11 @@ export class IframeTransportContext {
     /** @private {!IframeMessagingClient} */
     this.iframeMessagingClient_ = iframeMessagingClient;
 
-    /** @private @const {!Object} */
-    this.baseMessage_ = {creativeId, vendor};
+    /** @private @const {string} */
+    this.creativeId_ = creativeId;
+
+    /** @private @const {string} */
+    this.vendor_ = vendor;
 
     /** @private {?function(string)} */
     this.listener_ = null;
@@ -160,7 +164,29 @@ export class IframeTransportContext {
   sendResponseToCreative(data) {
     this.iframeMessagingClient_./*OK*/sendMessage(
         MessageType.IFRAME_TRANSPORT_RESPONSE,
-        /** @type {!JsonObject} */
-        (Object.assign({message: data}, this.baseMessage_)));
+        dict({
+          'message': data,
+          'creativeId': this.creativeId_,
+          'vendor': this.vendor_,
+        }));
+  }
+
+  /**
+   * Requests IntersectionObserver data to be sent.
+   * @param {!function(!JsonObject)} callback The function to
+   *     which the IntersectionObserver data should be passed.
+   */
+  observeIntersection(callback) {
+    this.iframeMessagingClient_.registerCallback(
+        MessageType.INTERSECTION_OBSERVER_EVENTS,
+        eventData => {
+          if (eventData &&
+              eventData['creativeId'] == this.creativeId_) {
+            callback(/** @type {!JsonObject} */ (eventData['entries']));
+          }
+        });
+    this.iframeMessagingClient_./*OK*/sendMessage(
+        MessageType.SEND_INTERSECTION_OBSERVER_EVENTS,
+        dict({'creativeId': this.creativeId_}));
   }
 }
