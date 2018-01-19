@@ -208,7 +208,6 @@ export class VariableSource {
    * in a template.
    * @param {!Object<string, *>=} opt_bindings
    * @param {boolean=} isV2 flag to ignore capture of args
-   * @return {!RegExp}
    */
   getExpr(opt_bindings, isV2) {
     if (!this.initialized_) {

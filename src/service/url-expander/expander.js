@@ -21,7 +21,7 @@ export class Expander {
 
   /**
    * Link this instance of parser to the calling UrlReplacment
-   * @param {!../url-replacements-impl.GlobalVariableSource} variableSource the keywords to replace
+   * @param {!../variable-source.VariableSource|null} variableSource the keywords to replace
    */
   constructor(variableSource) {
     this.variableSource_ = variableSource;
@@ -54,7 +54,7 @@ export class Expander {
    * Structures the regex matching into the desired format
    * @param {string} url url to be substituted
    * @param {RegExp} expression regex containing all keywords
-   * @return {!Object<string, string|number>} array of objects representing
+   * @return {Array<Object<string, string|number>>} array of objects representing
    *  matching keywords
    */
   findMatches_(url, expression) {
@@ -173,7 +173,7 @@ export class Expander {
 
   /**
    * resolves binding to value to be substituted
-   * @param {!Object<string, *>} binding container for sync/async resolutions
+   * @param {*} binding container for sync/async resolutions
    * @param {?Array=} opt_args arguments to be passed if binding is function
    * @return {!Promise<string>} resolved value
    */
