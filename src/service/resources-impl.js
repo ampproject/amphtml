@@ -365,7 +365,6 @@ export class Resources {
 
   /** @private */
   monitorInput_() {
-    installInputService(this.win);
     const input = Services.inputFor(this.win);
     input.onTouchDetected(detected => {
       this.toggleInputClass_('amp-mode-touch', detected);

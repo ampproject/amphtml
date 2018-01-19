@@ -15,7 +15,6 @@
  */
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
-import {installInputService} from '../../../src/input';
 
 /**
  * @abstract
@@ -38,7 +37,6 @@ export class BaseCarousel extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    installInputService(this.win);
     const input = Services.inputFor(this.win);
     this.showControls_ = input.isMouseDetected() ||
         this.element.hasAttribute('controls');
