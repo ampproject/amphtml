@@ -31,8 +31,6 @@
  */
 
 import {BaseSlides} from '../base-slides';
-import {installInputService} from '../../../../src/input';
-
 
 describes.fakeWin('BaseSlides', {amp: true}, env => {
   let win, doc;
@@ -54,7 +52,6 @@ describes.fakeWin('BaseSlides', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    installInputService(win);
     buildSlidesSpy = sandbox.spy();
     onViewportCallbackSpy = sandbox.spy();
     hasPrevSpy = sandbox.spy();
