@@ -291,22 +291,58 @@ describe('amp-mustache template', () => {
       expect(nestedResult./*OK*/innerHTML).to.equal('nested: Nested');
     });
 
+    it('should sanitize the inner template when it gets rendered', () => {
+      const outerTemplateElement = document.createElement('template');
+      outerTemplateElement./*OK*/innerHTML =
+          'outer: {{value}} ' +
+          '<template type="amp-mustache">' +
+          '<div onClick="javascript:alert(\'I am evil\')">nested</div>: ' +
+          '{{value}}</template>';
+      const outerTemplate = new AmpMustache(outerTemplateElement);
+      outerTemplate.compileCallback();
+      const outerResult = outerTemplate.render({
+        value: 'Outer',
+      });
+      const nestedTemplateElement = outerResult.querySelector('template');
+      const nestedTemplate = new AmpMustache(nestedTemplateElement);
+      nestedTemplate.compileCallback();
+      const nestedResult = nestedTemplate.render({
+        value: 'Nested',
+      });
+      expect(nestedResult./*OK*/innerHTML).to.equal(
+          '<div>nested</div>: Nested');
+    });
+
     it('should not allow users to pass data having key that starts with ' +
-        '__AMP_NESTED_TEMPLATE_', () => {
+        '__AMP_NESTED_TEMPLATE_0 when there is a nested template', () => {
       const templateElement = document.createElement('template');
       templateElement./*OK*/innerHTML =
-          'outer: {{value}} {{__AMP_NESTED_TEMPLATE_XYZ}} ' +
+          'outer: {{value}} ' +
           '<template type="amp-mustache">nested: {{value}}</template>';
       const template = new AmpMustache(templateElement);
       template.compileCallback();
       const result = template.render({
-        __AMP_NESTED_TEMPLATE_XYZ: 'MUST NOT RENDER THIS',
+        __AMP_NESTED_TEMPLATE_0: 'MUST NOT RENDER THIS',
         value: 'Outer',
       });
       expect(result./*OK*/innerHTML).to.equal(
-          'outer: Outer  ' +
+          'outer: Outer ' +
           '<template type="amp-mustache">nested: {{value}}</template>');
     });
+
+    it('should render user data with a key __AMP_NESTED_TEMPLATE_0 when' +
+        ' there are no nested templates, even though it is not a weird name' +
+        ' for a template variable', () => {
+      const templateElement = document.createElement('template');
+      templateElement./*OK*/innerHTML = '{{__AMP_NESTED_TEMPLATE_0}}';
+      const template = new AmpMustache(templateElement);
+      template.compileCallback();
+      const result = template.render({
+        __AMP_NESTED_TEMPLATE_0: '123',
+      });
+      expect(result./*OK*/innerHTML).to.equal('123');
+    });
+
   });
 
   it('should sanitize triple-mustache', () => {

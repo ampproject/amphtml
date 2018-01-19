@@ -58,15 +58,9 @@ export class AmpMustache extends AMP.BaseTemplate {
   }
 
   /** @override */
-  render(rawData) {
-    const filteredData = Object.keys(rawData)
-        .filter(key => !startsWith(key, '__AMP_NESTED_TEMPLATE_'))
-        .reduce((data, key) => {
-          data[key] = rawData[key];
-          return data;
-        }, {});
-    Object.assign(filteredData, this.nestedTemplates_);
-    const html = mustacheRender(this.template_, filteredData);
+  render(data) {
+    const html = mustacheRender(this.template_,
+        Object.assign({}, data, this.nestedTemplates_));
     const sanitized = sanitizeHtml(html);
     const root = this.win.document.createElement('div');
     root./*OK*/innerHTML = sanitized;
