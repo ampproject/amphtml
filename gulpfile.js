@@ -912,7 +912,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     return toPromise(bundler.bundle()
       .on('error', function(err) {
         if (err instanceof SyntaxError) {
-          console.error(red('Syntax error:', err.message));
+          console.error(red('Syntax error: ' + err.message));
         } else {
           console.error(red(err.message));
         }
