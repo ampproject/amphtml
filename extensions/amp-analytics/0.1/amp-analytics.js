@@ -45,7 +45,7 @@ import {
   expandConfigRequest,
   RequestHandler,
 } from './requests';
-import {getResourceTimingBinding} from './resource-timing';
+import {serializeResourceTiming} from './resource-timing';
 
 const TAG = 'amp-analytics';
 
@@ -701,7 +701,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       // TODO(warrengm): Consider limiting resource timings to avoid duplicates
       // by excluding timings that were previously reported.
       dynamicBindings[binding] =
-          getResourceTimingBinding(resourceTimingSpec, this.win);
+          serializeResourceTiming(resourceTimingSpec, this.win);
       expansionOptions.vars[analyticsVar] = binding;
     }
     return dynamicBindings;

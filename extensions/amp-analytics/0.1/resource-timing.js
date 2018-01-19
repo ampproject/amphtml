@@ -17,7 +17,6 @@
 import {dev} from '../../../src/log';
 import {parseUrl} from '../../../src/url';
 import {find} from '../../../src/utils/array';
-
 import {ExpansionOptions, variableServiceFor} from './variables';
 
 /**
@@ -51,12 +50,6 @@ let IndividualResourceSpecDef;
  * }}
  */
 let ResourceSpecForHostDef;
-
-/**
- * Variables for an individual resource timing entry.
- * @typedef {!Object<string, string>}
- */
-let ResourceTimingEntryVarsDef;
 
 /**
  * Yields the thread before running the function to avoid causing jank. (i.e. a
@@ -105,13 +98,12 @@ function getResourceTimingEntries(win) {
  * Converts a resource timing entry to the variables for this resource.
  * @param {!PerformanceResourceTiming} entry
  * @param {string} name Name of the resource set by the resourceTimingSpec.
- * @param {number} base The radix for formatting numbers.
- * @return {!ResourceTimingEntryVarsDef}
+ * @param {function(number,number=): string} format A function to format
+ *    timestamps and intervals. (Two numbers will be passed in for intervals.)
+ * @return {!ExpansionOptions}
  */
-function entryToResourceVars(entry, name, base) {
-  const format = (val, relativeTo = 0) =>
-    Math.round(val - relativeTo).toString(base);
-  return {
+function entryToExpansionOptions(entry, name, format) {
+  const vars = {
     'key': name,
     'startTime': format(entry.startTime),
     'redirectTime': format(entry.redirectEnd, entry.redirectStart),
@@ -119,20 +111,47 @@ function entryToResourceVars(entry, name, base) {
     'tcpConnectTime': format(entry.connectEnd, entry.connectStart),
     'serverResponseTime': format(entry.responseStart, entry.requestStart),
     'networkTransferTime': format(entry.responseEnd, entry.responseStart),
-    'transferSize': format(entry.transferSize),
-    'encodedBodySize': format(entry.encodedBodySize),
-    'decodedBodySize': format(entry.decodedBodySize),
+    'transferSize': format(entry.transferSize || 0),
+    'encodedBodySize': format(entry.encodedBodySize || 0),
+    'decodedBodySize': format(entry.decodedBodySize || 0),
     'duration': format(entry.duration),
     'initiatorType': entry.initiatorType,
   };
+  return new ExpansionOptions(vars, 1 /* opt_iterations */);
 };
 
 /**
- * @param {!Object<string, !IndividualResourceSpecDef>} resourceDefs A map of names
- *     to specs of which resources match the name.
+ * Returns the variables for the given resource timing entry if it matches one
+ * of the defined resources, or null otherwise.
+ * @param {!PerformanceResourceTiming} entry
+ * @param {!Object<string, !ResourceSpecForHostDef>} resourcesByHost A map of host
+ *     patterns to the spec for resources that match the host pattern.
+ * @return {?string} The name of the entry, or null if no matching name exists.
+ */
+function nameForEntry(entry, resourcesByHost) {
+  const url = parseUrl(entry.name);
+  for (const h in resourcesByHost) {
+    const {hostPattern, resources} = resourcesByHost[h];
+    if (!hostPattern.test(url.host)) {
+      continue;
+    }
+    const resource = find(
+        resources,
+        res => res.pathPattern.test(url.pathname) &&
+            res.queryPattern.test(url.search));
+    if (resource) {
+      return resource.name;
+    }
+  }
+  return null; // No match.
+}
+
+/**
+ * @param {!Object<string, !IndividualResourceSpecDef>} resourceDefs A map of
+ *     names to specs of which resources match the name.
  * @return {!Object<string, !ResourceSpecForHostDef>}
  */
-function groupDefsByHost(resourceDefs) {
+function groupSpecsByHost(resourceDefs) {
   const byHost = {};
   for (const name in resourceDefs) {
     const host = resourceDefs[name]['host'] || '';
@@ -156,50 +175,21 @@ function groupDefsByHost(resourceDefs) {
 }
 
 /**
- * Returns the variables for the given resource timing entry if it matches one
- * of the defined resources, or null otherwise.
- * @param {!PerformanceResourceTiming} entry
- * @param {!Object<string, !ResourceSpecForHostDef>} resourcesByHost A map of host
- *     patterns to the spec for resources that match the host pattern.
- * @param {number} base The radix for serializing numbers.
- */
-function getVarsForEntry(entry, resourcesByHost, base) {
-  const url = parseUrl(entry.name);
-  for (const h in resourcesByHost) {
-    const {hostPattern, resources} = resourcesByHost[h];
-    if (!hostPattern.test(url.host)) {
-      continue;
-    }
-    const resource = find(
-        resources,
-        res => res.pathPattern.test(url.pathname) &&
-            res.queryPattern.test(url.search));
-    if (resource) {
-      return entryToResourceVars(entry, resource.name, base);
-    }
-  }
-  return null; // No match.
-}
-
-/**
- * Converts the resource timing entries to sets of variables to be serialized
- * according to the list of resources to be matched against. Any resource timing
- * entry that doesn't match one of the resources definitions will be omitted.
+ * Finds names for resource timing entries and omits ones that are missing
+ * names.
  * @param {!Array<!PerformanceResourceTiming>} entries
  * @param {!Object<string, !IndividualResourceSpecDef>} resourceDefs
- * @param {number} base The radix for serializing numbers.
- * @return {!Array<!ResourceTimingEntryVarsDef>}
+ * @return {!Array<{entry: !PerformanceResourceTiming, name: string}>}
  */
-function entriesToVariables(entries, resourceDefs, base) {
+function filterEntries(entries, resourceDefs) {
   // Group resource timing definitions by host since we expect multiple
   // definitions to have the same host.
-  const byHost = groupDefsByHost(resourceDefs);
-
+  const byHost = groupSpecsByHost(resourceDefs);
   const results = [];
   entries.forEach(entry => {
-    const resource = getVarsForEntry(entry, byHost, base);
-    if (resource) {
-      results.push(resource);
+    const name = nameForEntry(entry, byHost);
+    if (name) {
+      results.push({entry, name});
     }
   });
   return results;
@@ -208,29 +198,33 @@ function entriesToVariables(entries, resourceDefs, base) {
 /**
  * Serializes an array of variables corresponding to individual resources into a
  * single string.
- * @param {!Array<!ResourceTimingEntryVarsDef>} resources
- * @param {!JsonObject} encodingSpec
+ * @param {!Array<!PerformanceResourceTiming>} entries
+ * @param {!JsonObject} resourceTimingSpec
  * @param {!Window} win
  * @return {!Promise<string>}
  */
-function serialize(resources, encodingSpec, win) {
+function serialize(entries, resourceTimingSpec, win) {
+  const resources = resourceTimingSpec['resources'];
+  const encoding = resourceTimingSpec['encoding'];
+
   const variableService = variableServiceFor(win);
-  return Promise
-      .all(resources.map(res => {
-        const expansionOptions =
-            new ExpansionOptions(res, 1 /* opt_iterations */);
-        return variableService.expandTemplate(
-            encodingSpec['entry'], expansionOptions);
-      }))
-      .then(vars => vars.join(encodingSpec['delim']));
+  const format = (val, relativeTo = 0) =>
+    Math.round(val - relativeTo).toString(encoding['base'] || 10);
+
+  const promises = filterEntries(entries, resources)
+      .map(({entry, name}) => entryToExpansionOptions(entry, name, format))
+      .map(expansion =>
+        variableService.expandTemplate(encoding['entry'], expansion));
+  return Promise.all(promises).then(vars => vars.join(encoding['delim']));
 }
 
 /**
+ * Serializes resource timing entries according to the resource timing spec.
  * @param {!JsonObject} resourceTimingSpec
  * @param {!Window} win
  * @return {!Promise<string>|string}
  */
-export function getResourceTimingBinding(resourceTimingSpec, win) {
+export function serializeResourceTiming(resourceTimingSpec, win) {
   if (!validateResourceTimingSpec(resourceTimingSpec)) {
     return '';
   }
@@ -241,12 +235,5 @@ export function getResourceTimingBinding(resourceTimingSpec, win) {
   }
 
   // Yield the thread in case iterating over all resources takes a long time.
-  const promise = yieldThread(() => {
-    const base = resourceTimingSpec['encoding']['base'] || 10;
-    const resources =
-        entriesToVariables(entries, resourceTimingSpec['resources'], base);
-    const value = serialize(resources, resourceTimingSpec['encoding'], win);
-    return value;
-  });
-  return promise;
+  return yieldThread(() => serialize(entries, resourceTimingSpec, win));
 }
