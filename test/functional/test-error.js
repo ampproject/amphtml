@@ -16,12 +16,13 @@
 
 import {
   cancellation,
+  detectJsEngineFromStack,
   detectNonAmpJs,
   getErrorReportData,
   installErrorReporting,
   isCancellation,
+  maybeReportErrorToViewer,
   reportError,
-  detectJsEngineFromStack,
   reportErrorToAnalytics,
 } from '../../src/error';
 import {user} from '../../src/log';
@@ -90,6 +91,41 @@ describes.fakeWin('installErrorReporting', {}, env => {
   });
 });
 
+describe('maybeReportErrorToViewer', () => {
+  let viewer;
+  let sandbox;
+  let sendMessageStub;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    viewer = {
+      hasCapability: () => true,
+      sendMessage: () => true,
+    };
+    sendMessageStub = sandbox.stub(viewer, 'sendMessage');
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('viewer errorReporting capability enabled', () => {
+    const e = new Error('XYZ');
+    const data = getErrorReportData(undefined, undefined, undefined, undefined,
+        e, false);
+    maybeReportErrorToViewer(viewer, data);
+    expect(sendMessageStub).to.have.been.calledWith('error', data);
+  });
+
+  it('viewer errorReporting capability disabled', () => {
+    viewer.hasCapability = () => false;
+    const e = new Error('XYZ');
+    const data = getErrorReportData(undefined, undefined, undefined, undefined,
+        e, false);
+    maybeReportErrorToViewer(viewer, data);
+    expect(sendMessageStub).to.not.have.been.called;
+  });
+});
 
 describe('reportErrorToServer', () => {
   let sandbox;
