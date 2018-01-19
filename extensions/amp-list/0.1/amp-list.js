@@ -104,6 +104,8 @@ export class AmpList extends AMP.BaseElement {
       } else if (typeOfSrc === 'object') {
         const items = isArray(src) ? src : [src];
         this.renderItems_(items);
+        // Remove the 'src' now that local data is used to render the list.
+        this.element.setAttribute('src', '');
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
       }
@@ -143,6 +145,9 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   fetchList_() {
+    if (!this.element.getAttribute('src')) {
+      return Promise.resolve();
+    }
     const itemsExpr = this.element.getAttribute('items') || 'items';
     return this.fetch_(itemsExpr).then(items => {
       if (this.element.hasAttribute('single-item')) {

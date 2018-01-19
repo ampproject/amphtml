@@ -25,6 +25,7 @@ var cleanupBuildDir = require('./build-system/tasks/compile').cleanupBuildDir;
 var jsifyCssAsync = require('./build-system/tasks/jsify-css').jsifyCssAsync;
 var applyConfig = require('./build-system/tasks/prepend-global/index.js').applyConfig;
 var removeConfig = require('./build-system/tasks/prepend-global/index.js').removeConfig;
+var serve = require('./build-system/tasks/serve.js').serve;
 var fs = require('fs-extra');
 var gulp = $$.help(require('gulp'));
 var lazypipe = require('lazypipe');
@@ -35,6 +36,8 @@ var touch = require('touch');
 var watchify = require('watchify');
 var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
 var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
+var colors = require('ansi-colors');
+var log = require('fancy-log');
 
 var argv = minimist(process.argv.slice(2), {boolean: ['strictBabelTransform']});
 
@@ -47,10 +50,10 @@ var hostname3p = argv.hostname3p || '3p.ampproject.net';
 var extensions = {};
 var extensionAliasFilePath = {};
 
-var green = $$.util.colors.green;
-var yellow = $$.util.colors.yellow;
-var red = $$.util.colors.red;
-var cyan = $$.util.colors.cyan;
+var green = colors.green;
+var yellow = colors.yellow;
+var red = colors.red;
+var cyan = colors.cyan;
 
 var minifiedRuntimeTarget = 'dist/v0.js';
 var minified3pTarget = 'dist.3p/current-min/f.js';
@@ -131,6 +134,7 @@ declareExtension('amp-selector', '0.1', true);
 declareExtension('amp-web-push', '0.1', true);
 declareExtension('amp-position-observer', '0.1', false);
 declareExtension('amp-date-picker', '0.1', true);
+declareExtension('amp-image-viewer', '0.1', true);
 
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
@@ -216,7 +220,7 @@ function endBuildStep(stepName, targetName, startTime) {
     timeString += secs + '.' + ms + ' s)';
   }
   if (!process.env.TRAVIS) {
-    $$.util.log(stepName, cyan(targetName), green(timeString));
+    log(stepName, cyan(targetName), green(timeString));
   }
 }
 
@@ -393,16 +397,32 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
 }
 
 /**
- * Compile all the css and drop in the build folder
+ * Entry point for 'gulp css'
  * @return {!Promise}
  */
-function compileCss() {
+function css() {
+  return compileCss();
+}
+
+/**
+ * Compile all the css and drop in the build folder
+ * @param {boolean} watch
+ * @return {!Promise}
+ */
+function compileCss(watch) {
   // Print a message that could help speed up local development.
   if (!process.env.TRAVIS && argv['_'].indexOf('test') != -1) {
-    $$.util.log(
-        green('To skip building during future test runs, use',
-        cyan('--nobuild'), 'with your', cyan('gulp test'), 'command.'));
+    log(green('To skip building during future test runs, use'),
+        cyan('--nobuild'), green('with your'), cyan('gulp test'),
+        green('command.'));
   }
+
+  if (watch) {
+    $$.watch('css/**/*.css', function() {
+      compileCss();
+    });
+  }
+
   const startTime = Date.now();
   return jsifyCssAsync('css/amp.css')
   .then(function(css) {
@@ -439,29 +459,6 @@ function copyCss() {
       .then(() => {
         endBuildStep('Copied', 'build/css/v0.css to dist/v0.css', startTime);
       });
-}
-
-/**
- * Enables watching for file changes in css, extensions.
- * @return {!Promise}
- */
-function watch() {
-  printConfigHelp('gulp watch');
-  $$.watch('css/**/*.css', function() {
-    compileCss();
-  });
-
-  return Promise.all([
-    compileCss(),
-    buildAlp({watch: true}),
-    buildExaminer({watch: true}),
-    buildExtensions({watch: true}),
-    compile(true),
-  ]).then(() => {
-    return enableLocalTesting(unminifiedRuntimeTarget);
-  }).then(() => {
-    return enableLocalTesting(unminified3pTarget);
-  });
 }
 
 /**
@@ -578,14 +575,12 @@ function buildExtensionJs(path, name, version, options) {
  */
 function printConfigHelp(command) {
   if (!process.env.TRAVIS) {
-    $$.util.log(
-        green('Building the runtime for local testing with the'),
+    log(green('Building the runtime for local testing with the'),
         cyan((argv.config === 'canary') ? 'canary' : 'prod'),
         green('AMP config'));
-    $$.util.log(
-        green('To specify which config to apply, use',
-            cyan('--config={canary|prod}'), 'with your',
-            cyan(command), 'command'));
+    log(green('To specify which config to apply, use'),
+        cyan('--config={canary|prod}'), green('with your'),
+        cyan(command), green('command'));
   }
 }
 
@@ -606,27 +601,40 @@ function enableLocalTesting(targetFile) {
 }
 
 /**
+ * Performs the build steps for gulp build and gulp watch
+ * @param {boolean} watch
+ * @return {!Promise}
+ */
+function performBuild(watch) {
+  process.env.NODE_ENV = 'development';
+  printConfigHelp(watch ? 'gulp watch' : 'gulp build');
+  return compileCss(watch).then(() => {
+    return Promise.all([
+      polyfillsForTests(),
+      buildAlp({watch: watch}),
+      buildExaminer({watch: watch}),
+      buildSw({watch: watch}),
+      buildWebWorker({watch: watch}),
+      buildExtensions({bundleOnlyIfListedInFiles: watch}),
+      compile(watch),
+    ]);
+  });
+}
+
+/**
+ * Enables watching for file changes in css, extensions.
+ * @return {!Promise}
+ */
+function watch() {
+  return performBuild(true);
+}
+
+/**
  * Main build
  * @return {!Promise}
  */
 function build() {
-  process.env.NODE_ENV = 'development';
-  printConfigHelp('gulp build');
-  return compileCss().then(() => {
-    return Promise.all([
-      polyfillsForTests(),
-      buildAlp(),
-      buildExaminer(),
-      buildSw(),
-      buildWebWorker(),
-      buildExtensions({bundleOnlyIfListedInFiles: true}),
-      compile(),
-    ]);
-  }).then(() => {
-    return enableLocalTesting(unminifiedRuntimeTarget);
-  }).then(() => {
-    return enableLocalTesting(unminified3pTarget);
-  });
+  return performBuild();
 }
 
 /**
@@ -842,8 +850,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     if (argv.minimal_set
         && !(/integration|babel|amp-ad|lightbox|sidebar|analytics|app-banner/
             .test(srcFilename))) {
-      $$.util.log(
-          'Skipping', cyan(srcFilename), 'because of --minimal_set');
+      log('Skipping', cyan(srcFilename), 'because of --minimal_set');
       return Promise.resolve();
     }
     const startTime = Date.now();
@@ -917,6 +924,18 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         appendToCompiledFile(srcFilename, destDir + '/' + destFilename);
       })).then(() => {
         endBuildStep('Compiled', srcFilename, startTime);
+      }).then(() => {
+        if (process.env.NODE_ENV === 'development') {
+          if (srcFilename === 'amp-babel.js') {
+            return enableLocalTesting(unminifiedRuntimeTarget);
+          } else if (srcFilename === 'integration.js') {
+            return enableLocalTesting(unminified3pTarget);
+          } else {
+            return Promise.resolve();
+          }
+        } else {
+          return Promise.resolve();
+        }
       });
   }
 
@@ -1250,8 +1269,8 @@ function buildWebWorker(options) {
 function checkMinVersion() {
   var majorVersion = Number(process.version.replace(/v/, '').split('.')[0]);
   if (majorVersion < 4) {
-    $$.util.log('Please run AMP with node.js version 4 or newer.');
-    $$.util.log('Your version is', process.version);
+    log('Please run AMP with node.js version 4 or newer.');
+    log('Your version is', process.version);
     process.exit(1);
   }
 }
@@ -1301,11 +1320,12 @@ gulp.task('build', 'Builds the AMP library', ['update-packages'], build, {
     config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   }
 });
-gulp.task('check-all', 'Run through all presubmit checks', ['lint', 'dep-check', 'check-types', 'presubmit']);
+gulp.task('check-all', 'Run through all presubmit checks',
+    ['lint', 'dep-check', 'check-types', 'presubmit']);
 gulp.task('check-types', 'Check JS types', checkTypes);
-gulp.task('css', 'Recompile css to build directory', ['update-packages'],
-    compileCss);
-gulp.task('default', 'Same as "watch"', ['update-packages', 'watch', 'serve']);
+gulp.task('css', 'Recompile css to build directory', ['update-packages'], css);
+gulp.task('default', 'Runs "watch" and then "serve"',
+    ['update-packages', 'watch'], serve);
 gulp.task('dist', 'Build production binaries', ['update-packages'], dist, {
   options: {
     pseudo_names: '  Compiles with readable names. ' +
