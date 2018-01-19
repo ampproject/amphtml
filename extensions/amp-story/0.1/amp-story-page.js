@@ -73,7 +73,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.mediaLayoutPromise_ = this.waitForMediaLayout_();
 
     /** @private @const {!Promise} */
-    this.loadPromise_ = this.mediaLayoutPromise_.then(() => {
+    this.pageLoadPromise_ = this.mediaLayoutPromise_.then(() => {
       this.markPageAsLoaded_();
     });
 
@@ -227,7 +227,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @return {!Promise} */
   whenLoaded() {
-    return this.loadPromise_;
+    return this.pageLoadPromise_;
   }
 
 

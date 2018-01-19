@@ -539,10 +539,10 @@ export class AmpStory extends AMP.BaseElement {
       [this.pages_[0], this.pages_[1]] :
       [this.pages_[0]];
 
-    const loadPromise = Promise.all(
+    const storyLoadPromise = Promise.all(
         pagesToWaitFor.map(page => page.whenLoaded()));
 
-    return this.timer_.timeoutPromise(timeoutMs, loadPromise).catch(() => {});
+    return this.timer_.timeoutPromise(timeoutMs, storyLoadPromise).catch(() => {});
   }
 
 
