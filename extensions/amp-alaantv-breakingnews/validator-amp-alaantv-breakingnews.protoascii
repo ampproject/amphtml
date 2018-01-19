@@ -1,0 +1,58 @@
+#
+# Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS-IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the license.
+#
+
+tags: {  # amp-alaantv-breakingnews
+    html_format: AMP
+    tag_name: "SCRIPT"
+    extension_spec: {
+        name: "amp-alaantv-breakingnews"
+        allowed_versions: "0.1"
+        allowed_versions: "latest"
+    }
+    attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-alaantv-breakingnews>
+    html_format: AMP
+    tag_name: "AMP-ALAANTV-BREAKINGNEWS"
+    requires_extension: "amp-alaantv-breakingnews"
+    attrs: {
+            name: "animation"
+            value_regex: "(rtl|ltr)"
+        }
+    attrs: { name: "credentials" }
+    attrs: { name: "data-poll-interval" }
+    attrs: { name: "items" }
+    attrs: { name: "max-items" }
+    attrs: { name: "single-item" }
+    attrs: {
+        name: "src"
+        mandatory: true
+        value_url: {
+            allowed_protocol: "https"
+            allow_relative: true
+        }
+        blacklisted_value_regex: "__amp_source_origin"
+    }
+    attrs: { name: "template" }
+    attr_lists: "extended-amp-global"
+    amp_layout: {
+        supported_layouts: FILL
+        supported_layouts: FIXED
+        supported_layouts: FIXED_HEIGHT
+        supported_layouts: FLEX_ITEM
+        supported_layouts: RESPONSIVE
+    }
+}
