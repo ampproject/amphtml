@@ -794,17 +794,35 @@ amp-accordion > section[expanded] > :last-child {
 /**
  * amp-story
  */
- amp-story, amp-story-page {
-  display: block;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  width: 100%;
+amp-story[standalone], amp-story-page {
+  display: block !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  width: 100% !important;
+}
+
+amp-story[standalone] {
+  background-color: #fff !important;
+  position: relative !important;
 }
 
 amp-story-page {
   background-color: #757575;
+}
+
+/** Overlay that blocks viewing during initial load */
+amp-story[standalone]::after {
+  background-color: #fff !important;
+  bottom: 0 !important;
+  content: ' ' !important;
+  display: block !important;
+  left: 0 !important;
+  position: absolute !important;
+  right: 0 !important;
+  top: 0 !important;
+  z-index: 999999 !important;
 }
 
 amp-date-picker {
