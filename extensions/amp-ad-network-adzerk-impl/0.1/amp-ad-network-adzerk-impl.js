@@ -169,11 +169,11 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
     // amp-analytics.
     let dataString = '';
     if (this.ampCreativeJson_ && this.ampCreativeJson_.templateMacroValues) {
-      dataString = '<amp-state><script type="application/json">' +
+      dataString = '<amp-state id="model"><script type="application/json">' +
           JSON.stringify(this.ampCreativeJson_.templateMacroValues) +
           '</script></amp-state>';
     }
-    const splitTemplate = template.split('<amp-state></amp-state>');
+    const splitTemplate = template.split('<amp-state id="model"></amp-state>');
     const templateWithAmpState =
         splitTemplate[0] + dataString + splitTemplate[1];
     this.creativeMetadata_ = /** @type {!CreativeMetaDataDef} */

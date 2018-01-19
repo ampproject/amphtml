@@ -3,13 +3,22 @@
     <meta name="viewport" content="width=device-width,minimum-scale=1">
   </head>
   <body>
-    <amp-state></amp-state>
+    <amp-state id="model"></amp-state>
     <a [href]="url" rel="nofollow" target="_blank">
       <amp-img [src]="externalUrl" [srcset]="externalUrl" src="/examples/img/ampicon.png" width="250px" height="150px" layout="responsive"></amp-img>
     </a>
     <script amp-ad-metadata type=application/json>
     {
-      "ampRuntimeUtf16CharOffsets" : [ 57, 127 ]
+      "ampRuntimeUtf16CharOffsets" : [ 57, 127 ],
+      "customElementExtensions": [
+        "amp-bind"
+      ],
+      "extensions": [
+        {
+          "custom-element": "amp-bind",
+          "src": "https://cdn.ampproject.org/v0/amp-bind-0.1.js"
+        }
+      ]
     }
     </script>
   </body>
