@@ -88,6 +88,12 @@ const TRUSTED_REFERRER_HOSTS = [
 ];
 
 /**
+ * @typedef {function(string, *, boolean):(!Promise<*>|undefined)}
+ */
+export let RequestHandler;
+
+
+/**
  * An AMP representation of the Viewer. This class doesn't do any work itself
  * but instead delegates everything to the actual viewer. This class and the
  * actual Viewer are connected via "AMP.viewer" using three methods:
@@ -128,8 +134,8 @@ export class Viewer {
     /** @private {number} */
     this.prerenderSize_ = 1;
 
-    /** @private {!Object<string, !Observable<!JsonObject>>} */
-    this.messageObservables_ = map();
+    /** @private {!Object<string, !RequestHandler>} */
+    this.messageHandlers_ = map();
 
     /** @private {!Observable<boolean>} */
     this.runtimeOnObservable_ = new Observable();
@@ -791,27 +797,27 @@ export class Viewer {
   /**
    * Adds a eventType listener for viewer events.
    * @param {string} eventType
-   * @param {function(!JsonObject)} handler
+   * @param {!RequestHandler} handler
    * @return {!UnlistenDef}
    */
   onMessage(eventType, handler) {
-    let observable = this.messageObservables_[eventType];
-    if (!observable) {
-      observable = new Observable();
-      this.messageObservables_[eventType] = observable;
-    }
-    return observable.add(handler);
+    this.messageHandlers_[eventType] = handler;
+    return () => {
+      if (this.messageHandlers_[eventType] === handler) {
+        delete this.messageHandlers_[eventType];
+      }
+    };
   }
 
   /**
    * Requests AMP document to receive a message from Viewer.
    * @param {string} eventType
    * @param {!JsonObject} data
-   * @param {boolean} unusedAwaitResponse
+   * @param {boolean} awaitResponse
    * @return {(!Promise<*>|undefined)}
    * @export
    */
-  receiveMessage(eventType, data, unusedAwaitResponse) {
+  receiveMessage(eventType, data, awaitResponse) {
     if (eventType == 'visibilitychange') {
       if (data['prerenderSize'] !== undefined) {
         this.prerenderSize_ = data['prerenderSize'];
@@ -825,10 +831,9 @@ export class Viewer {
           /** @type {!JsonObject|undefined} */ (data));
       return Promise.resolve();
     }
-    const observable = this.messageObservables_[eventType];
-    if (observable) {
-      observable.fire(data);
-      return Promise.resolve();
+    const handler = this.messageHandlers_[eventType];
+    if (handler) {
+      return handler(eventType, data, awaitResponse);
     }
     dev().fine(TAG_, 'unknown message:', eventType);
     return undefined;

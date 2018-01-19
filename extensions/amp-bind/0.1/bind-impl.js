@@ -124,6 +124,9 @@ export class Bind {
     /** @private {!../../../src/service/history-impl.History} */
     this.history_ = Services.historyForDoc(ampdoc);
 
+    /** @private {!Array<string>} */
+    this.overridableKeys_ = [];
+
     /**
      * Upper limit on number of bindings for performance.
      * @private {number}
@@ -147,6 +150,7 @@ export class Bind {
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
+    this.viewer_.onMessage('premutate', this.premutate_.bind(this));
 
     const bodyPromise = (opt_win)
       ? waitForBodyPromise(opt_win.document)
@@ -331,6 +335,39 @@ export class Bind {
   /** @return {!../../../src/service/history-impl.History} */
   historyForTesting() {
     return this.history_;
+  }
+
+  /**
+   * @param {string} eventType
+   * @param {*} data
+   * @private
+   */
+  premutate_(eventType, data) {
+    const ignoredKeys = [];
+    return this.initializePromise_
+        .then(() => {
+          Object.keys(data.state).forEach(key => {
+            if (!this.overridableKeys_.includes(key)) {
+              delete data.state[key];
+              ignoredKeys.push(key);
+            }
+          });
+          if (ignoredKeys.length > 0) {
+            user().warn(TAG, 'Some state keys could not be premutated ' +
+              'because they are missing the overridable attribute: ' +
+              ignoredKeys.join(', '));
+          }
+          return this.setState(data.state);
+        });
+  }
+
+  /**
+   * Marks the given key as overridable so that it can be overriden by
+   * a premutate message from the viewer.
+   * @param {string} key
+   */
+  makeStateKeyOverridable(key) {
+    this.overridableKeys_.push(key);
   }
 
   /**
