@@ -618,10 +618,6 @@ function performBuild(watch) {
       buildExtensions({bundleOnlyIfListedInFiles: watch}),
       compile(watch),
     ]);
-  }).then(() => {
-    return enableLocalTesting(unminifiedRuntimeTarget);
-  }).then(() => {
-    return enableLocalTesting(unminified3pTarget);
   });
 }
 
@@ -928,6 +924,18 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         appendToCompiledFile(srcFilename, destDir + '/' + destFilename);
       })).then(() => {
         endBuildStep('Compiled', srcFilename, startTime);
+      }).then(() => {
+        if (process.env.NODE_ENV === 'development') {
+          if (srcFilename === 'amp-babel.js') {
+            return enableLocalTesting(unminifiedRuntimeTarget);
+          } else if (srcFilename === 'integration.js') {
+            return enableLocalTesting(unminified3pTarget);
+          } else {
+            return Promise.resolve();
+          }
+        } else {
+          return Promise.resolve();
+        }
       });
   }
 
