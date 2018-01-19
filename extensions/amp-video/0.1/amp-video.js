@@ -417,10 +417,6 @@ class AmpVideo extends AMP.BaseElement {
         this.element.dispatchCustomEvent(evt);
       }
     }));
-
-    this.unlisteners_.push(listen(video, 'ended', () => {
-      this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-    }));
   }
 
   /** @private */
