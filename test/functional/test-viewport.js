@@ -538,8 +538,8 @@ describes.fakeWin('Viewport', {}, env => {
         .withExactArgs(/* paddingTop */ 0, /* transient */ true)
         .once();
     bindingMock.expects('hideViewerHeader').withArgs(true, 19).once();
-    viewerViewportHandler('viewport', {paddingTop: 0, duation: 300, curve: 'ease-in',
-      transient: true});
+    viewerViewportHandler('viewport', {paddingTop: 0, duation: 300,
+      curve: 'ease-in', transient: true});
     bindingMock.verify();
     fixedLayerMock.verify();
   });
@@ -549,8 +549,8 @@ describes.fakeWin('Viewport', {}, env => {
     viewport.fixedLayer_ = {updatePaddingTop: () => {}};
     const fixedLayerMock = sandbox.mock(viewport.fixedLayer_);
     fixedLayerMock.expects('updatePaddingTop').withArgs(0).once();
-    viewerViewportHandler('viewport', {paddingTop: 0, duation: 300, curve: 'ease-in',
-      transient: 'true'});
+    viewerViewportHandler('viewport', {paddingTop: 0, duation: 300,
+      curve: 'ease-in', transient: 'true'});
     fixedLayerMock.verify();
   });
 
