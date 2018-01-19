@@ -156,7 +156,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   resumeCallback() {
-    this.updateAudioIcon_();
     this.registerAllMedia_();
 
     if (this.isActive()) {
@@ -237,32 +236,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     dispatch(this.element, EventType.PAGE_LOADED, true);
     this.mutateElement(() => {
       this.element.classList.add(PAGE_LOADED_CLASS_NAME);
-    });
-  }
-
-
-  /** @private */
-  updateAudioIcon_() {
-    // Dispatch event to signal whether audio is playing.
-    const eventType = this.hasAudio_() ?
-      EventType.AUDIO_PLAYING : EventType.AUDIO_STOPPED;
-    dispatch(this.element, eventType, /* opt_bubbles */ true);
-  }
-
-
-  /**
-   * @return {boolean}
-   * @private
-   */
-  hasAudio_() {
-    return Array.prototype.some.call(this.getAllMedia_(), mediaEl => {
-      if (!(mediaEl instanceof HTMLMediaElement)) {
-        return false;
-      }
-
-      return mediaEl.mozHasAudio ||
-          Boolean(mediaEl['webkitAudioDecodedByteCount']) ||
-          Boolean(mediaEl.audioTracks && mediaEl.audioTracks.length);
     });
   }
 
