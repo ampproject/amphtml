@@ -16,6 +16,7 @@
 
 import {dev} from '../../../src/log';
 import {parseUrl} from '../../../src/url';
+import {isObject} from '../../../src/types';
 import {find} from '../../../src/utils/array';
 import {ExpansionOptions, variableServiceFor} from './variables';
 
@@ -70,12 +71,16 @@ function yieldThread(fn) {
  * @return {boolean}
  */
 function validateResourceTimingSpec(spec) {
-  if (!spec['resources']) {
-    dev().warn('ANALYTICS', 'resourceTimingSpec has no specified resources');
+  if (!isObject(spec['resources'])) {
+    dev().warn(
+        'ANALYTICS', 'resourceTimingSpec missing "resources" field');
     return false;
   }
-  if (!spec['encoding']) {
-    dev().warn('ANALYTICS', 'resourceTimingSpec has no specified encoding');
+  if (!spec['encoding'] &&
+      !spec['encoding']['entry'] && !spec['encoding']['delim']) {
+    dev().warn(
+        'ANALYTICS',
+        'resourceTimingSpec is missing or has incomplete encoding options');
     return false;
   }
   return true;
