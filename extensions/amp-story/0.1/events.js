@@ -61,6 +61,12 @@ export const EventType = {
 
   // Triggered when user clicks on left 25% of the first page
   SHOW_NO_PREVIOUS_PAGE_HELP: 'ampstory:shownopreviouspagehelp',
+
+  // Triggered when a story has loaded at least its initial set of pages.
+  STORY_LOADED: 'ampstory:load',
+
+  // Triggered when a page has loaded at least one frame of all of its media.
+  PAGE_LOADED: 'ampstory:pageload',
 };
 
 
