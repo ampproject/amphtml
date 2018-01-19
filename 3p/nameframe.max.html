@@ -7,48 +7,44 @@
     var writeInBody = false;
     var instantLoad = false;
 
-    var tryProtected = function(blockFn) {
-      try {
-        blockFn();
-      } catch (err) {
-        window.parent.postMessage(
-            {type: 'no-content', error: err.message}, '*');
-        window.name = '';
-      }
-    };
-
-    tryProtected(function() {
-      name_data = JSON.parse(window.name);
-      writeInBody = name_data['writeInBody'];
-      instantLoad = name_data['instantLoad'];
-      if (!name_data || !name_data['creative']) {
-        throw new Error('Missing or incorrectly formatted JSON ' +
-            'input to nameframe');
-      }
-    });
+    var errorHandler = function(err) {
+      window.parent.postMessage({type: 'no-content', error: err.message}, '*');
+      window.name = '';
+    }
 
     var render = function() {
-      tryProtected(function() {
+      try {
         document.open();
         document.write(name_data['creative']);
         document.close();
         delete name_data['creative'];
         window.name = JSON.stringify(name_data);
-      });
+      } catch (e) {
+        errorHandler(e);
+      }
     };
-    if (!writeInBody && !instantLoad) {
-      window.onload = render;
-    } else if (!writeInBody) {
-      render();
+
+    try {
+      name_data = JSON.parse(window.name);
+      writeInBody = name_data['writeInBody'];
+      instantLoad = name_data['instantLoad'];
+      if (name_data && name_data['creative']) {
+        if (!writeInBody) {
+          instantLoad ? render() : (window.onload = render);
+        }
+      } else {
+        throw new Error('Missing or incorrectly formatted JSON ' +
+            'input to nameframe');
+      }
+    } catch (e) {
+      errorHandler(e);
     }
   </script>
 </head>
 <body>
   <script>
-    if (writeInBody && !instantLoad) {
-      window.onload = render;
-    } else if (writeInBody) {
-      render();
+    if (writeInBody) {
+      instantLoad ? render() : (window.onload = render);
     }
   </script>
 </body>
