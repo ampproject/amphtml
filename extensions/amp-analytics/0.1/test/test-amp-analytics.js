@@ -1912,8 +1912,8 @@ describes.realWin('amp-analytics', {
         },
         'encoding': {
           'entry':
-              '${key}-${initiatorType}-${startTime}-${duration}-${transferSize}',
-          'delim': '~'
+            '${key}-${initiatorType}-${startTime}-${duration}-${transferSize}',
+          'delim': '~',
         },
       };
     };
@@ -1935,7 +1935,7 @@ describes.realWin('amp-analytics', {
     };
 
     const newPerformanceResourceTiming = function(
-        url, initiatorType, startTime, duration, bodySize, cached) {
+      url, initiatorType, startTime, duration, bodySize, cached) {
       const dnsTime = cached ? 0 : duration * 0.1;
       const tcpTime = cached ? 0 : duration * 0.2;
       const serverTime = cached ? duration : duration * 0.5;
@@ -1956,7 +1956,7 @@ describes.realWin('amp-analytics', {
         responseEnd: startTime + dnsTime + tcpTime + serverTime + transferTime,
         decodedBodySize: bodySize,
         encodedBodySize: bodySize * 0.7,
-        transferSize: cached ? 0 : bodySize * 0.7 + 200,  // includes headers
+        transferSize: cached ? 0 : bodySize * 0.7 + 200, // +200 for header size
       };
     };
 

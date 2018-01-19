@@ -18,7 +18,7 @@ import {dev} from '../../../src/log';
 import {parseUrl} from '../../../src/url';
 import {find} from '../../../src/utils/array';
 
-import {ExpansionOptions, variableServiceFor,} from './variables';
+import {ExpansionOptions, variableServiceFor} from './variables';
 
 /**
  * A user-supplied JSON object that defines a resource to be reported. It is
@@ -36,7 +36,7 @@ import {ExpansionOptions, variableServiceFor,} from './variables';
  *     RegExp will match all query strings if omitted.
  * @typedef {!JsonObject}
  */
-let IndividualResourceSpec;
+let IndividualResourceSpecDef;
 
 /**
  * A parsed resource spec for a specific host or sets of hosts (as defined by
@@ -50,13 +50,13 @@ let IndividualResourceSpec;
  *   }>,
  * }}
  */
-let ResourceSpecForHost;
+let ResourceSpecForHostDef;
 
 /**
  * Variables for an individual resource timing entry.
  * @typedef {!Object<string, string>}
  */
-let ResourceTimingEntryVars;
+let ResourceTimingEntryVarsDef;
 
 /**
  * Yields the thread before running the function to avoid causing jank. (i.e. a
@@ -98,7 +98,7 @@ function getResourceTimingEntries(win) {
     return [];
   }
   return /** @type {!Array<!PerformanceResourceTiming>} */ (
-      win.performance.getEntriesByType('resource'));
+    win.performance.getEntriesByType('resource'));
 }
 
 /**
@@ -106,11 +106,11 @@ function getResourceTimingEntries(win) {
  * @param {!PerformanceResourceTiming} entry
  * @param {string} name Name of the resource set by the resourceTimingSpec.
  * @param {number} base The radix for formatting numbers.
- * @return {!ResourceTimingEntryVars}
+ * @return {!ResourceTimingEntryVarsDef}
  */
 function entryToResourceVars(entry, name, base) {
   const format = (val, relativeTo = 0) =>
-      Math.round(val - relativeTo).toString(base);
+    Math.round(val - relativeTo).toString(base);
   return {
     'key': name,
     'startTime': format(entry.startTime),
@@ -128,9 +128,9 @@ function entryToResourceVars(entry, name, base) {
 };
 
 /**
- * @param {!Object<string, !IndividualResourceSpec>} resourceDefs A map of names
+ * @param {!Object<string, !IndividualResourceSpecDef>} resourceDefs A map of names
  *     to specs of which resources match the name.
- * @return {!Object<string, !ResourceSpecForHost>}
+ * @return {!Object<string, !ResourceSpecForHostDef>}
  */
 function groupDefsByHost(resourceDefs) {
   const byHost = {};
@@ -159,7 +159,7 @@ function groupDefsByHost(resourceDefs) {
  * Returns the variables for the given resource timing entry if it matches one
  * of the defined resources, or null otherwise.
  * @param {!PerformanceResourceTiming} entry
- * @param {!Object<string, !ResourceSpecForHost>} resourcesByHost A map of host
+ * @param {!Object<string, !ResourceSpecForHostDef>} resourcesByHost A map of host
  *     patterns to the spec for resources that match the host pattern.
  * @param {number} base The radix for serializing numbers.
  */
@@ -178,7 +178,7 @@ function getVarsForEntry(entry, resourcesByHost, base) {
       return entryToResourceVars(entry, resource.name, base);
     }
   }
-  return null;  // No match.
+  return null; // No match.
 }
 
 /**
@@ -186,9 +186,9 @@ function getVarsForEntry(entry, resourcesByHost, base) {
  * according to the list of resources to be matched against. Any resource timing
  * entry that doesn't match one of the resources definitions will be omitted.
  * @param {!Array<!PerformanceResourceTiming>} entries
- * @param {!Object<string, !IndividualResourceSpec>} resourceDefs
+ * @param {!Object<string, !IndividualResourceSpecDef>} resourceDefs
  * @param {number} base The radix for serializing numbers.
- * @return {!Array<!ResourceTimingEntryVars>}
+ * @return {!Array<!ResourceTimingEntryVarsDef>}
  */
 function entriesToVariables(entries, resourceDefs, base) {
   // Group resource timing definitions by host since we expect multiple
@@ -208,7 +208,7 @@ function entriesToVariables(entries, resourceDefs, base) {
 /**
  * Serializes an array of variables corresponding to individual resources into a
  * single string.
- * @param {!Array<!ResourceTimingEntryVars>} resources
+ * @param {!Array<!ResourceTimingEntryVarsDef>} resources
  * @param {!JsonObject} encodingSpec
  * @param {!Window} win
  * @return {!Promise<string>}
