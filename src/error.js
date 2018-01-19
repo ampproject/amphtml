@@ -282,10 +282,29 @@ function reportErrorToServer(message, filename, line, col, error) {
       hasNonAmpJs);
   if (data) {
     reportingBackoff(() => {
+      // Report the error to viewer if it has the capability. The data passed
+      // to the viewer is exactly the same as the data passed to the server
+      // below.
+      if (self.AMP && self.AMP.viewer) {
+        maybeReportErrorToViewer(self.AMP.viewer, data);
+      }
       const xhr = new XMLHttpRequest();
       xhr.open('POST', urls.errorReporting, true);
       xhr.send(JSON.stringify(data));
     });
+  }
+}
+
+/**
+ * Reports the given error to the viewer if it has the 'errorReporting'
+ * capability. The error data can be obtained by calling #getErrorReportData.
+ * @param {!Viewer} viewer
+ * @param {!JsonObject} error data from #getErrorReportData
+ * visibleForTesting
+ */
+export function maybeReportErrorToViewer(viewer, data) {
+  if (viewer.hasCapability('errorReporting')) {
+    viewer.sendMessage('error', data);
   }
 }
 
