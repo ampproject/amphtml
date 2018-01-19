@@ -173,16 +173,53 @@ In this example, we specify the `config` attribute to load the configuration dat
 ###  Configuration data objects
 
 ####  Requests
-The `requests` configuration object specifies the URLs used to transmit data to an analytics platform. The `request-name` specifies what request should be sent in response to a particular event (e.g., `pageview`, `event`, etc.) . The `request-value` is an https URL. These values may include placeholder tokens that can reference other requests or variables.
+The `requests` configuration object specifies the URLs used to transmit data to an analytics platform as well as batching behavior of the request. The `request-name` specifies what request should be sent in response to a particular event (e.g., `pageview`, `event`, etc.) . The `request-value` contains a https URL, the value may include placeholder tokens that can reference other requests or variables. The `request-value` can also be an object that contain optional batching configs.
+
+In this example, all requests are valid.
 
 ```javascript
 "requests": {
   "base": "https://example.com/analytics?a=${account}&u=${canonicalUrl}&t=${title}",
-  "pageview": "${base}&type=pageview",
-  "event": "${base}&type=event&eventId=${eventId}"
+  "pageview": {
+    "baseUrl": "${base}&type=pageview"
+  },
+  "event": {
+    "baseUrl": "${base}&type=event&eventId=${eventId}",
+    "maxDelay": 5
+  }
 }
 ```
+
 Some analytics providers have an already-provided configuration, which you use via the `type` attribute. If you are using an analytics provider, you may not need to include requests information. See your vendor documentation to find out if requests need to be configured, and how.
+
+##### Batching configs
+To reduce number of request pings, one can specify batching behaviors in request configuration. [`extraUrlParams`](#extra-url-params) from triggers that use the same request will all be appended to the baseUrl of the request.
+
+The batching properties are:
+  - `maxDelay` This property is used to specify the time to wait before sending out request ping in the unit of second. `maxDelay` acts as a counter that starts upon triggering of the first batched request.
+
+For example, the following config will only send out a single request ping after 3 secs, with final request ping looks like `https://example.com/analytics?rc=1&rc=2&rc=3` .
+
+```javascript
+"requests": {
+  "timer": {
+    "baseUrl": "https://example.com/analytics?",
+    "maxDelay": 3,
+  }
+}
+"triggers": {
+  "timer": {
+    "on": "timer",
+    "request" : "timer",
+    "timerSpec": {
+      "interval": 1
+    },
+    "extraUrlParams": {
+      "rc": "${requestCount}"
+    }
+  }
+}
+```
 
 #### Vars
 
@@ -400,7 +437,7 @@ visibilitySpec: {
       "continuousTimeMin": 1000,
     }
   }
-    
+
   "pageView_40_to_50": {
     "on": "visible",
     "request": "pageview",
@@ -412,7 +449,7 @@ visibilitySpec: {
     }
   }
 }
-    
+
 // A single trigger equivalent to both of the above:
 "triggers": {
   "pageView": {
@@ -573,7 +610,7 @@ In the example below, an `iframe` URL is not specified, and `beacon` and `xhrpos
 }
 ```
 
-To learn more, see [this example that implements iframe transport client API] (https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport-remote-frame.html) and [this example page that incorporates that iframe](https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport.amp.html). The example loads a [fake ad](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp_ad_with_iframe_transport.html), which contains the `amp-analytics` tag. Note that the fake ad content includes some extra configuration instructions that must be followed. 
+To learn more, see [this example that implements iframe transport client API] (https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport-remote-frame.html) and [this example page that incorporates that iframe](https://github.com/ampproject/amphtml/blob/master/examples/analytics-iframe-transport.amp.html). The example loads a [fake ad](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-fake-impl/0.1/data/fake_amp_ad_with_iframe_transport.html), which contains the `amp-analytics` tag. Note that the fake ad content includes some extra configuration instructions that must be followed.
 
 ## Validation
 
