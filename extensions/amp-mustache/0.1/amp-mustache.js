@@ -19,7 +19,6 @@ import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {parse as mustacheParse, render as mustacheRender,
   setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
 import {sanitizeHtml, sanitizeFormattingHtml} from '../../../src/sanitizer';
-import {startsWith} from '../../../src/string';
 
 // Configure inline sanitizer for unescaped values.
 setUnescapedSanitizier(sanitizeFormattingHtml);
