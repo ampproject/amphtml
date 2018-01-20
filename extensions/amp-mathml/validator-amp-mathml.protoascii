@@ -33,6 +33,9 @@ tags: {  # <amp-mathml>
     name: "formula"
     mandatory: true
   }
+  attrs: {
+    name: "inline"
+  }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: CONTAINER
