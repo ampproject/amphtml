@@ -296,7 +296,7 @@ describe('amp-mustache template', () => {
       outerTemplateElement./*OK*/innerHTML =
           'outer: {{value}} ' +
           '<template type="amp-mustache">' +
-          '<div onClick="javascript:alert(\'I am evil\')">nested</div>: ' +
+          '<div onclick="javascript:alert(\'I am evil\')">nested</div>: ' +
           '{{value}}</template>';
       const outerTemplate = new AmpMustache(outerTemplateElement);
       outerTemplate.compileCallback();
