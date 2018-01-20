@@ -30,10 +30,6 @@ export class AmpMathml extends AMP.BaseElement {
     this.iframe_ = null;
   }
 
-  /**
-  * @param {boolean=} opt_onLayout
-  * @override
-  */
   preconnectCallback() {
     this.preconnect.url('https://cdnjs.cloudflare.com');
   }
