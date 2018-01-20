@@ -42,7 +42,6 @@ const BLACKLISTED_TAGS = {
   'audio': true,
   'base': true,
   'embed': true,
-  'form': true,
   'frame': true,
   'frameset': true,
   'iframe': true,
@@ -55,7 +54,6 @@ const BLACKLISTED_TAGS = {
   // TODO(dvoytenko, #1156): SVG is blacklisted temporarily. There's no
   // intention to keep this block for any longer than we have to.
   'svg': true,
-  'template': true,
   'video': true,
 };
 
@@ -109,10 +107,27 @@ const WHITELISTED_ATTRS = [
   'on',
   'placeholder',
   'option',
+  'submit-success',
+  'submit-error',
   /* Attributes added for amp-bind */
   // TODO(kmh287): Add more whitelisted attributes for bind?
   'text',
 ];
+
+/** @const {!Object<string, !Array<string>>} */
+const WHITELISTED_ATTRS_BY_TAGS = {
+  'div': [
+    'template',
+  ],
+  'form': [
+    'action-xhr',
+    'custom-validation-reporting',
+    'target',
+  ],
+  'template': [
+    'type',
+  ],
+};
 
 
 /** @const {!RegExp} */
@@ -216,6 +231,9 @@ export function sanitizeHtml(html) {
               attribs[i + 1] = savedAttribs[i + 1];
             } else if (attrib.search(WHITELISTED_ATTR_PREFIX_REGEX) == 0) {
               attribs[i + 1] = savedAttribs[i + 1];
+            } else if (WHITELISTED_ATTRS_BY_TAGS[tagName] &&
+                       WHITELISTED_ATTRS_BY_TAGS[tagName].includes(attrib)) {
+              attribs[i + 1] = savedAttribs[i + 1];
             }
           }
         }
@@ -308,7 +326,17 @@ export function sanitizeHtml(html) {
  */
 export function sanitizeFormattingHtml(html) {
   return htmlSanitizer.sanitizeWithPolicy(html,
-      function(tagName, unusedAttrs) {
+      function(tagName, attribs) {
+        if (tagName == 'template') {
+          for (let i = 0; i < attribs.length; i += 2) {
+            if (attribs[i] == 'type' && attribs[i + 1] == 'amp-mustache') {
+              return {
+                tagName,
+                attribs: ['type', 'amp-mustache'],
+              };
+            }
+          }
+        }
         if (!WHITELISTED_FORMAT_TAGS.includes(tagName)) {
           return null;
         }

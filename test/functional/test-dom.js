@@ -929,6 +929,30 @@ describes.sandboxed('DOM', {}, env => {
     b.appendChild(c);
     expect(dom.isEnabled(a)).to.be.true;
   });
+
+  it('templateContentClone on a <template> element (browser supports' +
+      ' HTMLTemplateElement)', () => {
+    const template = document.createElement('template');
+    template.innerHTML = '<span>123</span><span>456<em>789</em></span>';
+    const content = dom.templateContentClone(template);
+
+    const spans = content.querySelectorAll('span');
+    expect(spans.length).to.equal(2);
+    expect(spans[0].innerHTML).to.equal('123');
+    expect(spans[1].innerHTML).to.equal('456<em>789</em>');
+  });
+
+  it('templateContentClone on a <template> element (simulate a browser' +
+      ' that does not support HTMLTemplateElement)', () => {
+    const template = document.createElement('div');
+    template.innerHTML = '<span>123</span><span>456<em>789</em></span>';
+    const content = dom.templateContentClone(template);
+
+    const spans = content.querySelectorAll('span');
+    expect(spans.length).to.equal(2);
+    expect(spans[0].innerHTML).to.equal('123');
+    expect(spans[1].innerHTML).to.equal('456<em>789</em>');
+  });
 });
 
 describes.realWin('DOM', {
