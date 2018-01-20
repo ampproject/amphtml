@@ -69,7 +69,7 @@
     "doctrine": "2.1.0",
     "envify": "4.1.0",
     "escodegen": "1.9.0",
-    "eslint": "4.14.0",
+    "eslint": "4.16.0",
     "eslint-plugin-google-camelcase": "0.0.2",
     "esprima": "4.0.0",
     "express": "4.16.2",
