@@ -21,7 +21,7 @@
 <template type="amp-mustache" id="successTemplate">Success! {{reply}}</template>
 <template type="amp-mustache" id="errorTemplate">Error in response!</template>
 <amp-list width="auto" height="100" layout="fixed-height" src="https://ampbyexample.com/json/examples.json" class="m1">
-  <template type="amp-mustache" id="amp-template-id">
+  <template type="amp-mustache">
     <div>
       <a href="{{url}}">{{title}}</a>
       <form method="post" action-xhr="/form/echo-json/post" target="_blank">
@@ -36,7 +36,7 @@
 </amp-list>
 <h2>&lt;form&gt; has nested &lt;template&gt;s</h2>
 <amp-list width="auto" height="100" layout="fixed-height" src="https://ampbyexample.com/json/examples.json" class="m1">
-  <template type="amp-mustache" id="amp-template-id">
+  <template type="amp-mustache">
     <div>
       <a href="{{url}}">{{title}}</a>
       <form method="post" action-xhr="/form/echo-json/post" target="_blank">
