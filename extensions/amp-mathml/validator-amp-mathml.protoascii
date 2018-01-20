@@ -30,10 +30,6 @@ tags: {  # <amp-mathml>
   tag_name: "AMP-mathml"
   requires_extension: "amp-mathml"
   attrs: {
-    name: "data-selected-cat"
-    value_regex_casei: "(oscar|chloe|bella)"
-  }
-  attrs: {
     name: "formula"
     mandatory: true
   }
