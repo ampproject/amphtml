@@ -281,6 +281,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/6469',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12267',
   },
+  {
+    id: 'url-replacement-v2',
+    name: 'new parsing engine for url variables',
+    spec: 'https://github.com/ampproject/amphtml/issues/12119',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
+  },
 ];
 
 if (getMode().localDev) {
