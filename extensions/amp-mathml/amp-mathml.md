@@ -61,7 +61,6 @@ This extension creates an iframe and renders a MathML formula.
 #### Example: Inline formula.
 
 This is an example of a formula placed  inline in the middle of a block of text. `<amp-mathml layout="container" inline data-formula="\[ \cos(θ+φ) \]"></amp-mathml>` This shows how the formula will fit inside a block of text and can be styled with CSS.
-## Attributes
 
 ## Attributes
 
