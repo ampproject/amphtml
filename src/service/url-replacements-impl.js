@@ -39,6 +39,8 @@ import {
 } from './variable-source';
 import {isProtocolValid} from '../url';
 import {WindowInterface} from '../window-interface';
+import {Expander} from './url-expander/expander';
+import {isExperimentOn} from '../experiments';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -66,7 +68,6 @@ export class GlobalVariableSource extends VariableSource {
 
   constructor(ampdoc) {
     super();
-
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -103,7 +104,6 @@ export class GlobalVariableSource extends VariableSource {
 
   /** @override */
   initialize() {
-
     /** @const {!./viewport/viewport-impl.Viewport} */
     const viewport = Services.viewportForDoc(this.ampdoc);
 
@@ -639,6 +639,9 @@ export class UrlReplacements {
 
     /** @type {VariableSource} */
     this.variableSource_ = variableSource;
+
+    /** @type {!Expander} */
+    this.expander_ = new Expander(this.variableSource_);
   }
 
   /**
@@ -933,6 +936,14 @@ export class UrlReplacements {
    * @private
    */
   expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
+    const isV2ExperimentOn = isExperimentOn(this.ampdoc.win,
+        'url-replacement-v2');
+    if (isV2ExperimentOn && !opt_collectVars && !opt_sync) {
+      // not supporting syncronous version (yet) or collect_vars with this new structure
+      return this.expander_./*OK*/expand(url, opt_bindings, opt_whiteList);
+    }
+
+    // existing parsing method
     const expr = this.variableSource_.getExpr(opt_bindings);
     let replacementPromise;
     let replacement = url.replace(expr, (match, name, opt_strargs) => {
@@ -1094,4 +1105,5 @@ export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
  *   outgoingFragment: string,
  * }}
  */
+
 let ShareTrackingFragmentsDef;
