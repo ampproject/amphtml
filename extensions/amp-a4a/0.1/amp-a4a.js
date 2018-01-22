@@ -1475,6 +1475,7 @@ export class AmpA4A extends AMP.BaseElement {
       'releaseType': this.releaseType_,
     });
     const checkStillCurrent = this.verifyStillCurrent();
+    this.setupSafeframe();
     return utf8Decode(creativeBody).then(creative => {
       checkStillCurrent();
       let srcPath;
@@ -1499,7 +1500,7 @@ export class AmpA4A extends AMP.BaseElement {
       // TODO(bradfrizzell): change name of function and var
       let contextMetadata = getContextMetadata(
           this.win, this.element, this.sentinel,
-          this.getAdditionalContextMetadata());
+          this.getAdditionalContextMetadata(method == XORIGIN_MODE.SAFEFRAME));
       // TODO(bradfrizzell) Clean up name assigning.
       if (method == XORIGIN_MODE.NAMEFRAME) {
         contextMetadata['creative'] = creative;
@@ -1512,6 +1513,8 @@ export class AmpA4A extends AMP.BaseElement {
       return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
     });
   }
+
+  setupSafeframe() {}
 
   /**
    *

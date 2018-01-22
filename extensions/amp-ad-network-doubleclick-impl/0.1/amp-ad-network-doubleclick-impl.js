@@ -798,11 +798,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
+  setupSafeframe() {
+    if (!this.safeframeApi) {
+      this.safeframeApi = new SafeframeApi(this, this.win, this.sentinel);
+      this.safeframeApi.registerSafeframeListener();
+    }
+  }
+
+  /** @override */
   layoutCallback() {
     const registerFluidAndExec = () => {
       if (this.isFluid_) {
-        this.safeframeApi = new SafeframeApi(this, this.iframe, this.win, this.sentinel);
-        this.safeframeApi.registerSafeframeListener();
+        this.setupSafeframe();
       }
       return super.layoutCallback();
     };
@@ -1203,9 +1210,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdditionalContextMetadata() {
+  getAdditionalContextMetadata(isSafeframe) {
     const attributes = dict({});
-    if (this.isFluid_) {
+    if (this.isFluid_ || isSafeframe) {
       attributes['uid'] = 1;
       attributes['hostPeerName'] = this.win.location.origin;
       // The initial geometry isn't used for anything important, but it is

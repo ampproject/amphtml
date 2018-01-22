@@ -2,6 +2,7 @@ import {tryParseJson} from '../../../src/json';
 import {getData} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {IntersectionObserver} from '../../../src/intersection-observer';
 
 /**
  * Used to manage messages for different fluid ad slots.
@@ -37,27 +38,25 @@ function safeframeListener() {
     return;
   }
   const payload = tryParseJson(data['p']);
-  if (!payload || !payload['sentinel']) {
+  if (!payload /**|| !payload['sentinel']*/) {
     return;
   }
-  const listener = safeframeListeners[payload['sentinel']];
+  const listener = safeframeListeners[Object.keys(safeframeListeners)[0]/**payload['sentinel']*/];
   if (!listener) {
     dev().warn(TAG, `Listener for sentinel ${payload['sentinel']} not found.`);
     return;
   }
-  if (data['s'] != 'creative_geometry_update') {
-    return;
-  }
-  listener.instance.processMessage_(payload);
+  listener.instance.processMessage_(payload, data['s']);
 
 }
 
 export class SafeframeApi {
 
-  constructor(baseInstance, iframe, win, sentinel) {
+  constructor(baseInstance, win, sentinel) {
     this.baseInstance = baseInstance;
     this.win = win;
     this.sentinel = sentinel;
+    this.IntersectionObserver = null;
   }
 
   registerSafeframeListener() {
@@ -72,14 +71,69 @@ export class SafeframeApi {
 
   connectMessagingChannel(data) {
     dev().assert(this.baseInstance.iframe.contentWindow,
-        'Frame contentWindow unavailable.');
-    this.baseInstance.iframe.contentWindow./*OK*/postMessage(
-        JSON.stringify(dict({'message': 'connect', 'c': data.c})),
-        SAFEFRAME_ORIGIN);
+                 'Frame contentWindow unavailable.');
+    this.setupSafeframeApi();
+    this.sendMessage(JSON.stringify(dict({'message': 'connect', 'c': data.c})));
+    this.startSendingGeom();
   }
 
-  processMessage_(payload) {
-    this.handleFluidMessage_(payload);
+  setupSafeframeApi() {
+    this.IntersectionObserver = new IntersectionObserver(
+        this.baseInstance, this.baseInstance.iframe, false, this);
+    this.IntersectionObserver.startSendingIntersectionChanges_();
+
+  }
+
+  send(unused_trash, changes) {
+    console.log("Overwrote send");
+    console.log(JSON.stringify(changes));
+  }
+
+  startSendingGeom() {
+
+  }
+
+  formatGeom() {
+    const message =   {
+      'windowCoords_t': this.windowCoords.top,
+      'windowCoords_r': this.windowCoords.right,
+      'windowCoords_b': this.windowCoords.bottom,
+      'windowCoords_l': this.windowCoords.left,
+      'frameCoords_t': this.frameCoords.top,
+      'frameCoords_r': this.frameCoords.right,
+      'frameCoords_b': this.frameCoords.bottom,
+      'frameCoords_l': this.frameCoords.left,
+      'styleZIndex': this.styleZIndex,
+      'allowedExpansion_t': this.allowedExpansion.top,
+      'allowedExpansion_r': this.allowedExpansion.right,
+      'allowedExpansion_b': this.allowedExpansion.bottom,
+      'allowedExpansion_l': this.allowedExpansion.left,
+      'xInView': this.xInView,
+      'yInView': this.yInView
+    };
+    return message;
+  }
+
+  sendMessage(message) {
+    this.baseInstance.iframe.contentWindow./*OK*/postMessage(
+        message,
+        SAFEFRAME_ORIGIN
+    );
+  }
+
+  processMessage_(payload, messageType) {
+    switch (messageType) {
+      case 'creative_geometry_update':
+        this.handleFluidMessage_(payload);
+        break;
+      case 'expand_request':
+        this.handleExpandRequest_(payload);
+    }
+    return;
+  }
+
+  handleExpandRequest_(payload) {
+    console.log("Handling expand request");
   }
 
   /**
