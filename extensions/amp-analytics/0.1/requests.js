@@ -87,7 +87,9 @@ export class RequestHandler {
    * @param {?JsonObject} configParams
    * @param {!JsonObject} trigger
    * @param {!./variables.ExpansionOptions} expansionOption
-   * @param {!Object<string, *>} dynamicBindings
+   * @param {!Object<string, *>} dynamicBindings A mapping of variables to
+   *     stringable values. For example, values could be strings, functions that
+   *     return strings, promises, etc.
    * @return {!Promise<string>}
    */
   send(configParams, trigger, expansionOption, dynamicBindings) {
