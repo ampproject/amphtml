@@ -239,7 +239,7 @@ def GenValidatorGeneratedLightAmpJs(out_dir):
       specfile='%s/validator.protoascii' % out_dir,
       validator_pb2=validator_pb2,
       text_format=text_format,
-      html_format=validator_pb2.TagSpec.AMP,
+      html_format=validator_pb2.HtmlFormat.AMP,
       light=True,
       descriptor=descriptor,
       out=out)
