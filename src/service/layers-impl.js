@@ -267,10 +267,9 @@ export class LayoutLayers {
    * @param {!Element} element A regular or AMP Element
    */
   remeasure(element) {
-    const layer = LayoutElement.getParentLayer(element);
-    if (layer) {
-      layer.remeasure();
-    }
+    const layout = this.add(element);
+    layout.requestRemeasure();
+    layout.remeasure();
   }
 
   /**
