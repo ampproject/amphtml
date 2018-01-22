@@ -43,14 +43,14 @@ export function newResourceTimingSpec() {
 
 /**
  * Returns a sample PerformanceResourceTiming entry. Timing intervals are fixed
- * fractions of the total duration. For example, dnsTime will be a tenth of the
- * duration if cached = false.
+ * fractions of the total duration. For example, domainLookupTime will be a
+ * tenth of the duration if cached = false.
  * @param {string} url
  * @param {string} initiatorType
  * @param {number} startTime
- * @param {number] duration
- * @param {number] bodySize
- * @param {boolean] cached
+ * @param {number} duration
+ * @param {number} bodySize
+ * @param {boolean} cached;
  * @return {!JsonObject}
  */
 export function newPerformanceResourceTiming(
