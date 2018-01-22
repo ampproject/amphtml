@@ -74,16 +74,6 @@ class ActivityHistory {
      * @private {ActivityEventDef|undefined}
      */
     this.prevActivityEvent_ = undefined;
-
-    /**
-     * Contains the incrementalEngagedTime timestamps for named timers.
-     * @private {Object}
-     */
-    this.incrementalEngagedTime_ = {
-      /*
-       * "$timerName" : ${lastRequestTimestamp}
-      */
-    };
   }
 
   /**
@@ -117,20 +107,6 @@ class ActivityHistory {
     return totalEngagedTime;
   }
 
-  /**
-   * Get the incremental engaged time since the last push and reset it.
-   * @param {string} name
-   * @return {number}
-   */
-  getIncrementalEngagedTime(name = '') {
-    if (!this.incrementalEngagedTime_.hasOwnProperty[name]) {
-      this.incrementalEngagedTime_[name] = this.totalEngagedTime_;
-      return this.incrementalEngagedTime_[name];
-    }
-    const currentIncrementalEngagedTime = this.incrementalEngagedTime_[name];
-    this.incrementalEngagedTime_[name] = this.totalEngagedTime_;
-    return this.totalEngagedTime_ - currentIncrementalEngagedTime;
-  }
 }
 
 
@@ -187,6 +163,16 @@ export class Activity {
 
     /** @private @const {function()} */
     this.boundHandleVisibilityChange_ = this.handleVisibilityChange_.bind(this);
+
+    /**
+     * Contains the incrementalEngagedTime timestamps for named triggers.
+     * @private {Object<string, number>}
+     */
+    this.previousTotalEngagedTimeByTrigger_ = {
+      /*
+       * "$triggerName" : ${lastRequestTimestamp}
+      */
+    };
 
     /** @private {Array<!UnlistenDef>} */
     this.unlistenFuncs_ = [];
@@ -339,5 +325,20 @@ export class Activity {
   getTotalEngagedTime() {
     const secondsSinceStart = Math.floor(this.getTimeSinceStart_() / 1000);
     return this.activityHistory_.getTotalEngagedTime(secondsSinceStart);
+  }
+  /**
+   * Get the incremental engaged time since the last push and reset it.
+   * @param {string} name
+   * @return {number}
+   */
+  getIncrementalEngagedTime(name = '') {
+    if (!this.timers.hasOwnProperty[name]) {
+      this.previousTotalEngagedTimeByTrigger_[name] = this.totalEngagedTime_;
+      return this.previousTotalEngagedTimeByTrigger_[name];
+    }
+    const currentIncrementalEngagedTime =
+      this.previousTotalEngagedTimeByTrigger_[name];
+    this.previousTotalEngagedTimeByTrigger_[name] = this.totalEngagedTime_;
+    return this.totalEngagedTime_ - currentIncrementalEngagedTime;
   }
 };

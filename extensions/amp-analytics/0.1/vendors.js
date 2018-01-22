@@ -1340,7 +1340,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'ampid=${clientId(_parsely_visitor)}',
       'pageview': '${basePrefix}&action=pageview',
       'heartbeat': '${basePrefix}&action=heartbeat' +
-      '&tt=${totalEngagedTime}&inc=${incrementalEngagedTime}',
+      '&tt=${totalEngagedTime}&inc=${incrementalEngagedTime(parsely-js)}',
     },
     'triggers': {
       'defaultPageview': {
@@ -1351,7 +1351,9 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'on': 'timer',
         'timerSpec': {
           'interval': 5,
-          'name': 'parsely-js',
+          'vars': {
+            'name': 'parsely-js',
+          },
         },
         'request': 'heartbeat',
       },

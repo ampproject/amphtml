@@ -462,7 +462,8 @@ export class GlobalVariableSource extends VariableSource {
       });
     });
 
-    // Returns the incremental engaged time since the last push.
+    // Returns the incremental engaged time since the last push under the
+    // same name.
     this.setAsync('INCREMENTAL_ENGAGED_TIME', name => {
       return Services.activityForDoc(this.ampdoc).then(activity => {
         return activity.getIncrementalEngagedTime(name);

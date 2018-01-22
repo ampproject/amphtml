@@ -555,10 +555,6 @@ class TimerEventHandler {
     /** @private @const {boolean} */
     this.maxTimerInSpec_ = 'maxTimerLength' in timerSpec;
 
-    /** @private @const {string} */
-    this.name_ = 'name' in timerSpec ?
-      timerSpec['name'] : '';
-
     /** @private @const {boolean} */
     this.callImmediate_ = 'immediate' in timerSpec ?
       Boolean(timerSpec['immediate']) : true;
