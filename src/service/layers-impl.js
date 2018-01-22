@@ -989,8 +989,8 @@ export class LayoutElement {
   remeasure_(opt_relativeTo) {
     this.updateScrollPosition_();
     this.needsRemeasure_ = false;
+    const element = this.element_;
 
-    const box = this.element_./*OK*/getBoundingClientRect();
     // We need a relative box to measure our offset. Importantly, this box must
     // be negatively offset by it's scroll position, to account for the fact
     // that getBoundingClientRect() will only return scrolled positions.
@@ -1002,9 +1002,9 @@ export class LayoutElement {
         positionLt(0, 0);
     }
 
-    this.size_ = sizeWh(box.width, box.height);
+    this.size_ = sizeWh(element.clientWidth, element.clientHeight);
 
-    let {left, top} = box;
+    let {left, top} = element./*OK*/getBoundingClientRect();
     // Root layers are really screwed up. Their positions will **double** count
     // their scroll position (left === -scrollLeft, top === -scrollTop), which
     // breaks with every other scroll box on the page.
