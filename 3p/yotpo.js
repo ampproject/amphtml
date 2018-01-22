@@ -78,6 +78,28 @@ function getReviewsCarouselContainer(global, data) {
 }
 
 /**
+ * Create DOM element for the Yotpo UGC Gallery plugin:
+ * @param {!Window} global
+ * @param {!Object} data The element data
+ * @return {!Element} div
+ */
+function getUgcGalleryContainer(global, data) {
+    const container = global.document.createElement('div');
+    container.className = 'yotpo yotpo-pictures-gallery';
+    container.setAttribute('data-layout', data.layout);
+    container.setAttribute('data-layout-scroll', data.layoutScroll);
+    container.setAttribute('data-spacing', data.spacing);
+    container.setAttribute('data-source', data.source);
+    container.setAttribute('data-title', data.title);
+    container.setAttribute('data-hover-color', data.hoverColor);
+    container.setAttribute('data-hover-opacity', data.hoverOpacity);
+    container.setAttribute('data-hover-icon', data.hoverIcon);
+    container.setAttribute('data-cta-text', data.ctaText);
+    container.setAttribute('data-cta-color', data.ctaColor);
+    return container;
+}
+
+/**
  * @param {!Window} global
  * @param {!Object} data
  */
@@ -92,6 +114,8 @@ export function yotpo(global, data) {
         container = getMainWidgetContainer(global, data);
     } else if (widgetType == "ReviewsCarousel") {
         container = getReviewsCarouselContainer(global, data);
+    } else if (widgetType == "PicturesGallery") {
+        container = getUgcGalleryContainer(global, data);
     }
 
     global.document.getElementById('c').appendChild(container);
