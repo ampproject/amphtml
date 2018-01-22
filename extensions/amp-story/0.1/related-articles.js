@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {dev, user} from '../../../src/log';
-import {parseUrl} from '../../../src/url';
+import {isProtocolValid, parseUrl} from '../../../src/url';
 
 
 const TAG = 'amp-story';
@@ -51,6 +51,9 @@ function buildArticleFromJson_(articleJson) {
     return null;
   }
 
+  user().assert(isProtocolValid(articleJson['url']),
+      `Unsupported protocol for article URL ${articleJson['url']}`);
+
   const article = {
     title: dev().assert(articleJson['title']),
     url: dev().assert(articleJson['url']),
@@ -58,7 +61,9 @@ function buildArticleFromJson_(articleJson) {
   };
 
   if (articleJson['image']) {
-    article.image = articleJson['image'];
+    user().assert(isProtocolValid(articleJson['image']),
+        `Unsupported protocol for article image URL ${articleJson['image']}`);
+    article.image = dev().assert(articleJson['image']);
   }
 
   return /** @type {!RelatedArticleDef} */ (article);
