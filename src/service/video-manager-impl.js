@@ -604,6 +604,7 @@ class VideoEntry {
     listen(element, VideoEvents.PLAYING, () => this.videoPlayed_());
     listen(element, VideoEvents.MUTED, () => this.muted_ = true);
     listen(element, VideoEvents.UNMUTED, () => this.muted_ = false);
+    listen(element, VideoEvents.ENDED, () => this.videoEnded_());
 
     // Currently we only register after video player is build.
     this.videoBuilt_();
@@ -658,11 +659,7 @@ class VideoEntry {
    * @private
    */
   videoPaused_() {
-    if (this.video.getCurrentTime() === this.video.getDuration()) {
-      analyticsEvent(this, VideoAnalyticsEvents.ENDED);
-    } else {
-      analyticsEvent(this, VideoAnalyticsEvents.PAUSE);
-    }
+    analyticsEvent(this, VideoAnalyticsEvents.PAUSE);
     this.isPlaying_ = false;
 
     // Prevent double-trigger of session if video is autoplay and the video
@@ -673,6 +670,14 @@ class VideoEntry {
       // reset the flag
       this.pauseCalledByAutoplay_ = false;
     }
+  }
+
+  /**
+   * Callback for when the video has ended
+   * @private
+   */
+  videoEnded_() {
+    analyticsEvent(this, VideoAnalyticsEvents.ENDED);
   }
 
   /**

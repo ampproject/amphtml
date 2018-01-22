@@ -32,7 +32,6 @@
 
 import {BaseSlides} from '../base-slides';
 
-
 describes.fakeWin('BaseSlides', {amp: true}, env => {
   let win, doc;
   let buildSlidesSpy;
