@@ -45,12 +45,12 @@ const PROP_PROMISE_ = '__AMP_WAIT_';
 export class BaseTemplate {
 
   /** @param {!Element} element */
-  constructor(element, win) {
+  constructor(element) {
     /** @public @const */
     this.element = element;
 
     /** @public @const {!Window} */
-    this.win = element.ownerDocument.defaultView;
+    this.win = toWin(element.ownerDocument.defaultView);
 
     this.compileCallback();
   }

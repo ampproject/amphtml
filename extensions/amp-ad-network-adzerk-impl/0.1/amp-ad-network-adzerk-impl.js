@@ -19,16 +19,14 @@ import {
   NO_CONTENT_RESPONSE,
   CreativeMetaDataDef,
 } from '../../amp-a4a/0.1/amp-a4a';
-import {Bind} from '../../amp-bind/0.1/bind-impl';
-import {urls} from '../../../src/config';
+
 import {tryParseJson} from '../../../src/json';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {Services} from '../../../src/services';
 import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
 import {
   CachedTemplateDef,
-  AmpAdTemplate
+  AmpAdTemplate,
 } from '../../amp-ad-template/0.1/amp-ad-template';
 
 /** @type {string} */
@@ -42,9 +40,6 @@ export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-template-amp-creative';
       templateMacroValues: (JsonObject|undefined),
     }} */
 let AmpTemplateCreativeDef;
-
-/** @private {!Object<number, !Promise<!CachedTemplateDef>>} */
-const TemplateCache = {};
 
 /** @private {?AmpAdTemplate} */
 let ampAdTemplate;
@@ -124,7 +119,7 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
    * @param {string} template
    * @private
    */
-  parseTemplate_(template) { debugger;
+  parseTemplate_(template) {
     // TODO(keithwrightbos): support dynamic creation of amp-pixel and
     // amp-analytics.
     this.creativeMetadata_ = /** @type {!CreativeMetaDataDef} */
@@ -153,11 +148,11 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
           .retrieveTemplate(this.ampCreativeJson_.ampCreativeTemplateId)
           .templatePromise
           .then(unusedParsedTemplate =>
-              // We don't want to use the above parsed template, as it has not
-              // been minified. However, by the time this promise resolves, we
-              // are guaranteed to have this.creativeMetadata_.minifiedCreative
-              // available.
-              utf8Encode(this.creativeMetadata_.minifiedCreative))
+            // We don't want to use the above parsed template, as it has not
+            // been minified. However, by the time this promise resolves, we
+            // are guaranteed to have this.creativeMetadata_.minifiedCreative
+            // available.
+            utf8Encode(this.creativeMetadata_.minifiedCreative))
           .catch(error => {
             dev().warn(TAG, 'Error fetching/expanding template',
                 this.ampCreativeJson_, error);

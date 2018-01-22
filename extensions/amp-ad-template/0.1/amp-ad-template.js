@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import {urls} from '../../../src/config';
 import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
-import {Bind} from '../../amp-bind/0.1/bind-impl';
+import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {getAmpdoc} from '../../../src/service';
+import {Bind} from '../../amp-bind/0.1/bind-impl';
 
 /** @typedef {{
       templatePromise: Promise<string>,
@@ -45,7 +46,7 @@ export class AmpAdTemplate {
    * @param {!Window} win
    * @param {function(string)=} opt_onRetrieve
    */
-  constructor(win, opt_onRetrieve = template => {}) {
+  constructor(win, opt_onRetrieve = unusedTemplate => {}) {
     /** @private {!Window} */
     this.win_ = win;
 
@@ -67,17 +68,17 @@ export class AmpAdTemplate {
     this.templateCache_[templateId] = this.templateCache_[templateId] ||
     {
       templatePromise: Services.xhrFor(this.win_)
-            .fetchText(getMode(this.win_).localDev ?
-              `http://ads.localhost:${this.win_.location.port}` +
-                `/a4a_template/adzerk/${templateId}` :
-              `${urls.cdn}/c/s/adzerk/${templateId}`,
-            TEMPLATE_CORS_CONFIG)
-            .then(response => response.text())
-            .then(template => {
-              this.onRetrieve_(template);
-              return template;
-            }),
-      access: Date.now()
+          .fetchText(getMode(this.win_).localDev ?
+            `http://ads.localhost:${this.win_.location.port}` +
+            `/a4a_template/adzerk/${templateId}` :
+            `${urls.cdn}/c/s/adzerk/${templateId}`,
+          TEMPLATE_CORS_CONFIG)
+          .then(response => response.text())
+          .then(template => {
+            this.onRetrieve_(template);
+            return template;
+          }),
+      access: Date.now(),
     };
     const cacheKeys = /**@type {!Array<number>}*/
         (Object.keys(this.templateCache_));

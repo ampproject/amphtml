@@ -1559,8 +1559,8 @@ export class AmpA4A extends AMP.BaseElement {
       return null;
     }
     try {
-      const slicedCreative = creative.slice(metadataStart + metadataString.length, metadataEnd);
-      const metaDataObj = parseJson(slicedCreative);
+      const metaDataObj = parseJson(
+          creative.slice(metadataStart + metadataString.length, metadataEnd));
       const ampRuntimeUtf16CharOffsets =
         metaDataObj['ampRuntimeUtf16CharOffsets'];
       if (!isArray(ampRuntimeUtf16CharOffsets) ||
