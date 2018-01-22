@@ -100,6 +100,7 @@ import {
 import {
   addExperimentIdToElement,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {SafeframeApi} from './safeframe-host';
 import {RTC_ERROR_ENUM} from '../../amp-a4a/0.1/real-time-config-manager';
 import '../../amp-a4a/0.1/real-time-config-manager';
 
@@ -230,52 +231,6 @@ const BLOCK_SRA_COMBINERS_ = [
   instances => getFirstInstanceValue_(instances,
       instance => instance.buildIdentityParams_()),
 ];
-
-/**
- * Used to manage messages for different fluid ad slots.
- *
- * Maps a sentinel value to an object consisting of the impl to which that
- * sentinel value belongs and the corresponding message handler for that impl.
- * @type{!Object<string, !{instance: !AmpAdNetworkDoubleclickImpl, connectionEstablished: boolean}>}
- */
-const fluidListeners = {};
-
-/**
- * @param {!Event} event
- * @private
- */
-function fluidMessageListener_(event) {
-  const data = tryParseJson(getData(event));
-  if (event.origin != SAFEFRAME_ORIGIN || !data) {
-    return;
-  }
-  if (data['e']) {
-    // This is a request to establish a postmessaging connection.
-    const listener = fluidListeners[data['e']];
-    if (!listener) {
-      dev().warn(TAG, `Listener for sentinel ${data['e']} not found.`);
-      return;
-    }
-    if (!listener.connectionEstablished) {
-      listener.instance.connectFluidMessagingChannel();
-      listener.connectionEstablished = true;
-    }
-    return;
-  }
-  const payload = tryParseJson(data['p']);
-  if (!payload || !payload['sentinel']) {
-    return;
-  }
-  const listener = fluidListeners[payload['sentinel']];
-  if (!listener) {
-    dev().warn(TAG, `Listener for sentinel ${payload['sentinel']} not found.`);
-    return;
-  }
-  if (data['s'] != 'creative_geometry_update') {
-    return;
-  }
-  listener.instance.receiveMessageForFluid_(payload);
-}
 
 /** @final */
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
@@ -483,26 +438,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         }
       }
     });
-  }
-
-  /**
-   * Handles Fluid-related messages dispatched from SafeFrame.
-   * @param {!JsonObject} payload
-   * @private
-   */
-  receiveMessageForFluid_(payload) {
-    let newHeight;
-    if (!payload || !(newHeight = parseInt(payload['height'], 10))) {
-      // TODO(levitzky) Add actual error handling here.
-      this.forceCollapse();
-      return;
-    }
-    this.attemptChangeHeight(newHeight)
-        .then(() => this.onFluidResize_())
-        .catch(() => {
-          // TODO(levitzky) Add more error handling here
-          this.forceCollapse();
-        });
   }
 
   /** @override */
@@ -866,7 +801,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   layoutCallback() {
     const registerFluidAndExec = () => {
       if (this.isFluid_) {
-        this.registerListenerForFluid_();
+        this.safeframeApi = new SafeframeApi(this, this.iframe, this.win, this.sentinel);
+        this.safeframeApi.registerSafeframeListener();
       }
       return super.layoutCallback();
     };
@@ -910,18 +846,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const superResult = super.unlayoutCallback();
     this.maybeRemoveListenerForFluid();
     return superResult;
-  }
-
-  /**
-   * Postmessages an initial message to the fluid creative.
-   * @visibleForTesting
-   */
-  connectFluidMessagingChannel() {
-    dev().assert(this.iframe.contentWindow,
-        'Frame contentWindow unavailable.');
-    this.iframe.contentWindow./*OK*/postMessage(
-        JSON.stringify(dict({'message': 'connect', 'c': 'sfchannel1'})),
-        SAFEFRAME_ORIGIN);
   }
 
   /**
@@ -1324,28 +1248,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       attributes['sentinel'] = this.sentinel;
     }
     return attributes;
-  }
-
-  /** @private  */
-  registerListenerForFluid_() {
-    fluidListeners[this.sentinel] = fluidListeners[this.sentinel] || {
-      instance: this,
-      connectionEstablished: false,
-    };
-    if (Object.keys(fluidListeners).length == 1) {
-      this.win.addEventListener('message', fluidMessageListener_, false);
-    }
-  }
-
-  /** @visibleForTesting */
-  maybeRemoveListenerForFluid() {
-    if (!this.isFluid_) {
-      return;
-    }
-    delete fluidListeners[this.sentinel];
-    if (!Object.keys(fluidListeners).length) {
-      this.win.removeEventListener('message', fluidMessageListener_);
-    }
   }
 
   /**
