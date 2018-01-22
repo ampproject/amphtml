@@ -130,8 +130,8 @@ export class RequestHandler {
         configParams, triggerParams, expansionOption)
         .then(expandExtraUrlParams => {
           // Construct the extraUrlParamsString: Remove null param and encode component
-          const expandedExtraUrlParamsStr = this.getExtraUrlParamsString_(
-              expandExtraUrlParams, !!this.batchingPlugin_);
+          const expandedExtraUrlParamsStr =
+              this.getExtraUrlParamsString_(expandExtraUrlParams);
           return this.urlReplacementService_.expandAsync(
               expandedExtraUrlParamsStr, undefined, this.whiteList_);
         });
@@ -308,14 +308,13 @@ export class RequestHandler {
   /**
    * Handle the params map and form the final extraUrlParams string
    * @param {!Object} params
-   * @param {boolean} opt_includeNull
    * @return {string}
    */
-  getExtraUrlParamsString_(params, opt_includeNull) {
+  getExtraUrlParamsString_(params) {
     const s = [];
     for (const k in params) {
       const v = params[k];
-      if (v == null && !opt_includeNull) {
+      if (v == null) {
         continue;
       } else {
         const sv = this.variableService_.encodeVars(k, v);
