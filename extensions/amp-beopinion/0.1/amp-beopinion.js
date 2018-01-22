@@ -20,9 +20,6 @@ import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 
 /** @const */
-const EXPERIMENT = 'amp-beopinion';
-
-/** @const */
 const TAG = 'amp-beopinion';
 
 class AmpBeOpinion extends AMP.BaseElement {
@@ -88,4 +85,4 @@ class AmpBeOpinion extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-beopinion', AmpBeOpinion);
+AMP.registerElement(TAG, AmpBeOpinion);

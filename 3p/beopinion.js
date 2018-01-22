@@ -41,9 +41,9 @@ function getBeOpinion(global, cb) {
 export function beopinion(global, data) {
   const div = global.document.createElement('div');
   div.className = "BeOpinionWidget";
-  div.setAttribute('data-content', "5a5c735846e0fb0001d6f2b0");
+  div.setAttribute('data-content', data.contentid);
   setStyles(div, {
-    width: '100%',
+    width: '500px', // '100%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -51,7 +51,7 @@ export function beopinion(global, data) {
   global.document.getElementById('c').appendChild(div);
   getBeOpinion(global, function(beopinion) {
     global.BeOpinionSDK.init({
-      account: "591dc92946e0fb000159ff7c"
+      account: data.accountid
     });
     global.BeOpinionSDK.watch();
     //     global.context.noContentAvailable();
