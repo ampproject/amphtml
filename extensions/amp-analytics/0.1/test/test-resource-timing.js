@@ -54,7 +54,7 @@ export function newResourceTimingSpec() {
  * @return {!JsonObject}
  */
 export function newPerformanceResourceTiming(
-    url, initiatorType, startTime, duration, bodySize, cached) {
+  url, initiatorType, startTime, duration, bodySize, cached) {
   const dnsTime = cached ? 0 : duration * 0.1;
   const tcpTime = cached ? 0 : duration * 0.2;
   const serverTime = cached ? duration : duration * 0.4;
@@ -75,7 +75,7 @@ export function newPerformanceResourceTiming(
     responseEnd: startTime + dnsTime + tcpTime + serverTime + transferTime,
     decodedBodySize: bodySize,
     encodedBodySize: bodySize * 0.7,
-    transferSize: cached ? 0 : bodySize * 0.7 + 200,  // +200 for header size
+    transferSize: cached ? 0 : bodySize * 0.7 + 200, // +200 for header size
   };
 };
 
@@ -89,9 +89,8 @@ describes.fakeWin('resourceTiming', {amp: true}, env => {
    * @return {!Promise<undefined>}
    */
   const runSerializeTest = function(
-      fakeEntries, resourceTimingSpec, expectedResult) {
-    const getEntriesByTypeStub =
-        sandbox.stub(win.performance, 'getEntriesByType').returns(fakeEntries);
+    fakeEntries, resourceTimingSpec, expectedResult) {
+    sandbox.stub(win.performance, 'getEntriesByType').returns(fakeEntries);
     return serializeResourceTiming(resourceTimingSpec, win).then(result => {
       expect(result).to.equal(expectedResult);
     });
@@ -274,16 +273,16 @@ describes.fakeWin('resourceTiming', {amp: true}, env => {
     return runSerializeTest([entry], spec, '200.150');
   });
 
-  it('should replace ${transferSize}, ${encodedBodySize}, and ${decodedBodySize}',
-     () => {
-       const entry = newPerformanceResourceTiming(
-           'http://foo.example.com/style.css?v=200', 'link', 100, 500,
-           10 * 1000, false);
-       const spec = newResourceTimingSpec();
-       spec['encoding']['entry'] =
+  it('should replace ${transferSize}, ${encodedBodySize}, ${decodedBodySize}',
+      () => {
+        const entry = newPerformanceResourceTiming(
+            'http://foo.example.com/style.css?v=200', 'link', 100, 500,
+            10 * 1000, false);
+        const spec = newResourceTimingSpec();
+        spec['encoding']['entry'] =
            '${transferSize}.${encodedBodySize}.${decodedBodySize}';
-       return runSerializeTest([entry], spec, '7200.7000.10000');
-     });
+        return runSerializeTest([entry], spec, '7200.7000.10000');
+      });
 
   it('should use the base specified in encoding', () => {
     const entry = newPerformanceResourceTiming(

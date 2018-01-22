@@ -1922,8 +1922,7 @@ describes.realWin('amp-analytics', {
     };
 
     const runResourceTimingTest = function(entries, config, expectedPing) {
-      const getEntriesByTypeStub =
-          sandbox.stub(win.performance, 'getEntriesByType').returns([entries]);
+      sandbox.stub(win.performance, 'getEntriesByType').returns([entries]);
       const analytics = getAnalyticsTag(config);
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.args[0][0]).to.equal(expectedPing);

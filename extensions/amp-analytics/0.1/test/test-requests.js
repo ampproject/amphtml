@@ -221,7 +221,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         'key3': '${param3}',
       },
     };
-    handler.send({}, params, expansionOptions, bindings).then(result => {
+    handler.send({}, params, expansionOptions, bindings).then(() => {
       expect(spy).to.be.calledOnce;
       expect(spy.args[0][0]).to.equal(
           'r1&val_base&key1=val1&key2=val2&key3=val3');

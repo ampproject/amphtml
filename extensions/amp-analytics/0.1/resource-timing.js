@@ -102,7 +102,7 @@ function getResourceTimingEntries(win) {
     return [];
   }
   return /** @type {!Array<!PerformanceResourceTiming>} */ (
-      win.performance.getEntriesByType('resource'));
+    win.performance.getEntriesByType('resource'));
 }
 
 /**
@@ -154,7 +154,7 @@ function nameForEntry(entry, resourcesByHost) {
       return resource.name;
     }
   }
-  return null;  // No match.
+  return null; // No match.
 }
 
 /**
@@ -225,14 +225,14 @@ function serialize(entries, resourceTimingSpec, win) {
 
   const variableService = variableServiceFor(win);
   const format = (val, relativeTo = 0) =>
-      Math.round(val - relativeTo).toString(encoding['base'] || 10);
+    Math.round(val - relativeTo).toString(encoding['base'] || 10);
 
   const promises =
       filterEntries(entries, resources)
           .map(({entry, name}) => entryToExpansionOptions(entry, name, format))
           .map(
               expansion =>
-                  variableService.expandTemplate(encoding['entry'], expansion));
+                variableService.expandTemplate(encoding['entry'], expansion));
   return Promise.all(promises).then(vars => vars.join(encoding['delim']));
 }
 
