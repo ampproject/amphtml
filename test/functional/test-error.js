@@ -106,7 +106,7 @@ describe('maybeReportErrorToViewer', () => {
     sandbox = sinon.sandbox.create();
 
     const optedInDoc = window.document.implementation.createHTMLDocument('');
-    optedInDoc.documentElement.setAttribute('allow-error-interception', '');
+    optedInDoc.documentElement.setAttribute('allow-error-reporting-to-viewer', '');
 
     ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
     ampdocServiceForStub.returns({
@@ -128,13 +128,13 @@ describe('maybeReportErrorToViewer', () => {
     sandbox.restore();
   });
 
-  it('should not intercept if AMP doc is not single', () => {
+  it('should not report if AMP doc is not single', () => {
     ampdocServiceForStub.returns({isSingleDoc: () => false});
     return maybeReportErrorToViewer(data)
         .then(() => expect(sendMessageStub).to.not.have.been.called);
   });
 
-  it('should not intercept if AMP doc is not opted in', () => {
+  it('should not report if AMP doc is not opted in', () => {
     const nonOptedInDoc =
           window.document.implementation.createHTMLDocument('');
     ampdocServiceForStub.returns({
@@ -145,7 +145,7 @@ describe('maybeReportErrorToViewer', () => {
         .then(() => expect(sendMessageStub).to.not.have.been.called);
   });
 
-  it('should not intercept if viewer is not capable', () => {
+  it('should not report if viewer is not capable', () => {
     sandbox.stub(viewer, 'hasCapability').withArgs('errorReporting')
           .returns(false);
     viewer.hasCapability = () => false;
@@ -153,7 +153,7 @@ describe('maybeReportErrorToViewer', () => {
         .then(() => expect(sendMessageStub).to.not.have.been.called);
   });
 
-  it('should not intercept if viewer is not trusted', () => {
+  it('should not report if viewer is not trusted', () => {
     sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
     return maybeReportErrorToViewer(data)
         .then(() => expect(sendMessageStub).to.not.have.been.called);

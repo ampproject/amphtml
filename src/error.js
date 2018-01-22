@@ -281,11 +281,11 @@ function reportErrorToServer(message, filename, line, col, error) {
   const data = getErrorReportData(message, filename, line, col, error,
       hasNonAmpJs);
   if (data) {
+    // Report the error to viewer if it has the capability. The data passed
+    // to the viewer is exactly the same as the data passed to the server
+    // below.
+    maybeReportErrorToViewer(data);
     reportingBackoff(() => {
-      // Report the error to viewer if it has the capability. The data passed
-      // to the viewer is exactly the same as the data passed to the server
-      // below.
-      maybeReportErrorToViewer(data);
       const xhr = new XMLHttpRequest();
       xhr.open('POST', urls.errorReporting, true);
       xhr.send(JSON.stringify(data));
@@ -295,20 +295,20 @@ function reportErrorToServer(message, filename, line, col, error) {
 
 /**
  * Passes the given error data to the viewer if the following criteria is met:
- * - The AMP doc is in single doc mode
  * - The viewer is a trusted viewer
+ * - The viewer has the `errorReporter` capability
+ * - The AMP doc is in single doc mode
  * - The AMP doc is opted-in for error interception (`<html>` tag has the 
- *   `allow-error-interception` attribute)
+ *   `allow-error-reporting-to-viewer` attribute)
  *
- * @param {!JsonObject} error data from `getErrorReportData`
- * @return {!Promise<boolean|undefined>}
- *     True if the error was sent to the viewer, `Promise<undefined>`
- *     otherwise.
+ * @param {!JsonObject} error Data from `getErrorReportData`.
+ * @return {!Promise<boolean|undefined>} True if the error was sent to the
+ *     viewer, `Promise<undefined>` otherwise.
  * @this {!Window|undefined}
  * @visibleForTesting
  */
 export function maybeReportErrorToViewer(data) {
-  if (!this || !data) {
+  if (!this) {
     return Promise.resolve();
   }
 
@@ -318,13 +318,13 @@ export function maybeReportErrorToViewer(data) {
   }
   const ampdocSingle = ampdocService.getAmpDoc();
   const htmlElement = ampdocSingle.getRootNode().documentElement;
-  const docOptedIn = htmlElement.hasAttribute('allow-error-interception');
+  const docOptedIn = htmlElement.hasAttribute('allow-error-reporting-to-viewer');
   if (!docOptedIn) {
     return Promise.resolve();
   }
 
   const viewer = Services.viewerForDoc(ampdocSingle);
-  if (!viewer.hasCapability('errorReporting')) {
+  if (!viewer.hasCapability('errorReporter')) {
     return Promise.resolve();
   }
 
