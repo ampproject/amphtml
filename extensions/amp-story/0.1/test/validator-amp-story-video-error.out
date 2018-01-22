@@ -38,7 +38,9 @@ FAIL
 |          <!-- This should fail because amp-video doesn't have the [poster] attribute. -->
 |          <amp-video width="480"
 >>         ^~~~~~~~~
-amp-story/0.1/test/validator-amp-story-video-error.html:38:8 The tag 'amp-video' may not appear as a descendant of tag 'amp-story'. (see https://www.ampproject.org/docs/reference/components/amp-video) [AMP_TAG_PROBLEM]
+amp-story/0.1/test/validator-amp-story-video-error.html:38:8 The mandatory attribute 'autoplay' is missing in tag 'amp-story >> amp-video'. (see https://www.ampproject.org/docs/reference/components/amp-video) [AMP_TAG_PROBLEM]
+>>         ^~~~~~~~~
+amp-story/0.1/test/validator-amp-story-video-error.html:38:8 The mandatory attribute 'poster' is missing in tag 'amp-story >> amp-video'. (see https://www.ampproject.org/docs/reference/components/amp-video) [AMP_TAG_PROBLEM]
 |                     height="270"
 |                     src="/video/tokyo.mp4"
 |                     layout="responsive"
