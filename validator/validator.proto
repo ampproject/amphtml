@@ -360,24 +360,27 @@ message ExtensionSpec {
   extensions 5;
 }
 
+// The HtmlFormat is the declared format in the top-level html tag, which
+// prescribes a particular set of validation rules.
+message HtmlFormat {
+  enum Code {
+    AMP = 1;
+    AMP4ADS = 2;
+    EXPERIMENTAL = 3;  // Currently unused
+  }
+}
+
 // Tags that are not covered by at least one of these specs are disallowed.
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
 // NEXT AVAILABLE TAG: 32
 message TagSpec {
-  // The HtmlFormat field tells the validator which html formats
-  // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is relevant for.)
+  // The html_format field tells the validator for which html formats
+  // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is allowed to validate.
   // If the repeated field is empty, this indicates that the TagSpec is allowed
   // for all formats, rather than none.
-  enum HtmlFormat {
-    AMP = 1;
-    AMP4ADS = 2;
-    EXPERIMENTAL = 3;  // Currently unused
-  }
-  // Specifies which AMP HTML document formats we allow this TagSpec to
-  // validate. If empty, then this TagSpec validates all formats.
-  repeated HtmlFormat html_format = 21;
+  repeated HtmlFormat.Code html_format = 21;
 
   // Use UPPER-CASE tag names only. If adding the same tag twice, then they must
   // also have a spec_name string which is unique throughout all detail.

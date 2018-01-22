@@ -4517,7 +4517,7 @@ class ParsedValidatorRules {
        */
       this.isTagSpecCorrectHtmlFormat_ = function(tagSpec) {
         const castedHtmlFormat =
-            /** @type {amp.validator.TagSpec.HtmlFormat<string>} */ (
+            /** @type {amp.validator.HtmlFormat.Code<string>} */ (
                 /** @type {*} */ (htmlFormat));
         return tagSpec.htmlFormat.length === 0 ||
             tagSpec.htmlFormat.indexOf(castedHtmlFormat) !== -1;
