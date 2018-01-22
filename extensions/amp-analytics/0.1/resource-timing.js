@@ -15,9 +15,10 @@
  */
 
 import {dev} from '../../../src/log';
-import {parseUrl} from '../../../src/url';
 import {isObject} from '../../../src/types';
+import {parseUrl} from '../../../src/url';
 import {find} from '../../../src/utils/array';
+
 import {ExpansionOptions, variableServiceFor} from './variables';
 
 /**
@@ -72,15 +73,20 @@ function yieldThread(fn) {
  */
 function validateResourceTimingSpec(spec) {
   if (!isObject(spec['resources'])) {
-    dev().warn(
-        'ANALYTICS', 'resourceTimingSpec missing "resources" field');
+    dev().warn('ANALYTICS', 'resourceTimingSpec missing "resources" field');
     return false;
   }
-  if (!spec['encoding'] &&
-      !spec['encoding']['entry'] && !spec['encoding']['delim']) {
+  if (!spec['encoding'] || !spec['encoding']['entry'] ||
+      !spec['encoding']['delim']) {
     dev().warn(
         'ANALYTICS',
         'resourceTimingSpec is missing or has incomplete encoding options');
+    return false;
+  }
+  if (spec['encoding']['base'] < 2 || spec['encoding']['base'] > 36) {
+    dev().warn(
+        'ANALYTICS',
+        'resource timing variables only supports bases between 2 and 36');
     return false;
   }
   return true;
@@ -96,7 +102,7 @@ function getResourceTimingEntries(win) {
     return [];
   }
   return /** @type {!Array<!PerformanceResourceTiming>} */ (
-    win.performance.getEntriesByType('resource'));
+      win.performance.getEntriesByType('resource'));
 }
 
 /**
@@ -129,8 +135,8 @@ function entryToExpansionOptions(entry, name, format) {
  * Returns the variables for the given resource timing entry if it matches one
  * of the defined resources, or null otherwise.
  * @param {!PerformanceResourceTiming} entry
- * @param {!Object<string, !ResourceSpecForHostDef>} resourcesByHost A map of host
- *     patterns to the spec for resources that match the host pattern.
+ * @param {!Object<string, !ResourceSpecForHostDef>} resourcesByHost A map of
+ *     host patterns to the spec for resources that match the host pattern.
  * @return {?string} The name of the entry, or null if no matching name exists.
  */
 function nameForEntry(entry, resourcesByHost) {
@@ -148,7 +154,7 @@ function nameForEntry(entry, resourcesByHost) {
       return resource.name;
     }
   }
-  return null; // No match.
+  return null;  // No match.
 }
 
 /**
@@ -219,12 +225,14 @@ function serialize(entries, resourceTimingSpec, win) {
 
   const variableService = variableServiceFor(win);
   const format = (val, relativeTo = 0) =>
-    Math.round(val - relativeTo).toString(encoding['base'] || 10);
+      Math.round(val - relativeTo).toString(encoding['base'] || 10);
 
-  const promises = filterEntries(entries, resources)
-      .map(({entry, name}) => entryToExpansionOptions(entry, name, format))
-      .map(expansion =>
-        variableService.expandTemplate(encoding['entry'], expansion));
+  const promises =
+      filterEntries(entries, resources)
+          .map(({entry, name}) => entryToExpansionOptions(entry, name, format))
+          .map(
+              expansion =>
+                  variableService.expandTemplate(encoding['entry'], expansion));
   return Promise.all(promises).then(vars => vars.join(encoding['delim']));
 }
 
@@ -236,11 +244,11 @@ function serialize(entries, resourceTimingSpec, win) {
  */
 export function serializeResourceTiming(resourceTimingSpec, win) {
   if (!validateResourceTimingSpec(resourceTimingSpec)) {
-    return '';
+    return Promise.resolve('');
   }
   const entries = getResourceTimingEntries(win);
   if (!entries.length) {
-    return '';
+    return Promise.resolve('');
   }
   // Yield the thread in case iterating over all resources takes a long time.
   return yieldThread(() => serialize(entries, resourceTimingSpec, win));

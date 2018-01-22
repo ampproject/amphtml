@@ -35,6 +35,7 @@ import {map} from '../../../../src/utils/object';
 import {cidServiceForDocForTesting} from
   '../../../../src/service/cid-impl';
 import {Services} from '../../../../src/services';
+import {newPerformanceResourceTiming, newResourceTimingSpec} from './test-resource-timing';
 import * as log from '../../../../src/log';
 
 /* global require: false */
@@ -1902,22 +1903,8 @@ describes.realWin('amp-analytics', {
   });
 
   describe('resourceTiming', () => {
-    const newSpec = function() {
-      return {
-        'resources': {
-          'foo_bar': {
-            'host': '(foo|bar).example.com',
-            'path': '/lib.js',
-          },
-        },
-        'encoding': {
-          'entry':
-            '${key}-${initiatorType}-${startTime}-${duration}-${transferSize}',
-          'delim': '~',
-        },
-      };
-    };
-
+    // NOTE: The following tests verify plumbing for resource timing variables.
+    // More tests for resource timing can be found in test-resource-timing.js.
     const newConfig = function() {
       return {
         'requests': {
@@ -1929,34 +1916,8 @@ describes.realWin('amp-analytics', {
           'extraUrlParams': {
             'rt': '${resourceTiming}',
           },
-          'resourceTimingSpec': newSpec(),
+          'resourceTimingSpec': newResourceTimingSpec(),
         }],
-      };
-    };
-
-    const newPerformanceResourceTiming = function(
-      url, initiatorType, startTime, duration, bodySize, cached) {
-      const dnsTime = cached ? 0 : duration * 0.1;
-      const tcpTime = cached ? 0 : duration * 0.2;
-      const serverTime = cached ? duration : duration * 0.5;
-      const transferTime = cached ? 0 : duration * 0.2;
-      return {
-        name: url,
-        initiatorType,
-        startTime,
-        duration,
-        redirectStart: 0,
-        redirectEnd: 0,
-        domainLookupStart: startTime,
-        domainLookupEnd: startTime + dnsTime,
-        connectStart: startTime + dnsTime,
-        connectEnd: startTime + dnsTime + tcpTime,
-        requestStart: startTime + dnsTime + tcpTime,
-        responseStart: startTime + dnsTime + tcpTime + serverTime,
-        responseEnd: startTime + dnsTime + tcpTime + serverTime + transferTime,
-        decodedBodySize: bodySize,
-        encodedBodySize: bodySize * 0.7,
-        transferSize: cached ? 0 : bodySize * 0.7 + 200, // +200 for header size
       };
     };
 
@@ -1965,8 +1926,6 @@ describes.realWin('amp-analytics', {
           sandbox.stub(win.performance, 'getEntriesByType').returns([entries]);
       const analytics = getAnalyticsTag(config);
       return waitForSendRequest(analytics).then(() => {
-        expect(getEntriesByTypeStub).to.be.calledWith('resource');
-        expect(sendRequestSpy).to.be.calledOnce;
         expect(sendRequestSpy.args[0][0]).to.equal(expectedPing);
       });
     };
@@ -1974,16 +1933,6 @@ describes.realWin('amp-analytics', {
     it('should evaluate ${resourceTiming} to be empty by default', () => {
       runResourceTimingTest(
           [], newConfig(), 'https://ping.example.com/endpoint?rt=');
-    });
-
-    it('should capture matching resources', () => {
-      const entry = newPerformanceResourceTiming(
-          'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
-          false);
-      runResourceTimingTest(
-          [entry], newConfig(),
-          'https://ping.example.com/endpoint?rt=' +
-              'foo_bar-script-100-500-7200');
     });
 
     it('should capture multiple matching resources', () => {
@@ -1999,89 +1948,16 @@ describes.realWin('amp-analytics', {
               'foo_bar-script-700-100-0');
     });
 
-    it('should match against the first matching resource', () => {
+    it('should ignore resourceTimingSpec outside of triggers', () => {
       const entry = newPerformanceResourceTiming(
           'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
           false);
-
       const config = newConfig();
-      // Note that both spec'd resources match.
-      config.triggers[0].resourceTimingSpec.resources = {
-        'foo_bar': {
-          'host': '(foo|bar).example.com',
-          'path': '/lib.js',
-        },
-        'foo': {
-          'host': 'foo.example.com',
-          'path': '/lib.js',
-        },
-      };
-
+      config['resourceTimingSpec'] =
+          config['triggers'][0]['resourceTimingSpec'];
+      delete config['triggers'][0]['resourceTimingSpec'];
       runResourceTimingTest(
-          [entry], config,
-          'https://ping.example.com/endpoint?rt=' +
-              'foo_bar-script-100-500-7200');
-    });
-
-    it('should should only report resources if the host matches', () => {
-      const entry1 = newPerformanceResourceTiming(
-          'http://foo.example.com/lib.js', 'script', 100, 500, 10 * 1000,
-          false);
-      const entry2 = newPerformanceResourceTiming(
-          'http://baz.example.com/lib.js', 'script', 700, 100, 80 * 1000, true);
-
-      const config = newConfig();
-      const resourceTimingSpec = config.triggers[0].resourceTimingSpec;
-      resourceTimingSpec.resources = {'foo': {'host': 'foo.example.com'}};
-
-      runResourceTimingTest(
-          [entry1, entry2], config,
-          'https://ping.example.com/endpoint?rt=' +
-              'foo-script-100-500-7200');
-    });
-
-    it('should should only report resources if the path matches', () => {
-      const entry1 = newPerformanceResourceTiming(
-          'http://foo.example.com/lib.js', 'script', 100, 500, 10 * 1000,
-          false);
-      const entry2 = newPerformanceResourceTiming(
-          'http://foo.example.com/extra.js', 'script', 700, 100, 80 * 1000,
-          true);
-
-      const config = newConfig();
-      const resourceTimingSpec = config.triggers[0].resourceTimingSpec;
-      resourceTimingSpec.resources = {
-        'foo': {'host': 'foo.example.com', 'path': 'lib.js'},
-      };
-
-      runResourceTimingTest(
-          [entry1, entry2], config,
-          'https://ping.example.com/endpoint?rt=' +
-              'foo-script-100-500-7200');
-    });
-
-    it('should should only report resources if the query matches', () => {
-      const entry1 = newPerformanceResourceTiming(
-          'http://foo.example.com/lib.js?v=200', 'script', 100, 500, 10 * 1000,
-          false);
-      const entry2 = newPerformanceResourceTiming(
-          'http://foo.example.com/lib.js?v=test', 'script', 700, 100, 80 * 1000,
-          true);
-
-      const config = newConfig();
-      const resourceTimingSpec = config.triggers[0].resourceTimingSpec;
-      resourceTimingSpec.resources = {
-        'foo': {
-          'host': 'foo.example.com',
-          'path': 'lib.js',
-          'query': '^\\?v=\\d+',
-        },
-      };
-
-      runResourceTimingTest(
-          [entry1, entry2], config,
-          'https://ping.example.com/endpoint?rt=' +
-              'foo-script-100-500-7200');
+          [entry], newConfig(), 'https://ping.example.com/endpoint?rt=');
     });
   });
 });
