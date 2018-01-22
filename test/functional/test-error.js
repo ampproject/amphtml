@@ -148,7 +148,6 @@ describe('maybeReportErrorToViewer', () => {
   it('should not report if viewer is not capable', () => {
     sandbox.stub(viewer, 'hasCapability').withArgs('errorReporting')
           .returns(false);
-    viewer.hasCapability = () => false;
     return maybeReportErrorToViewer(data)
         .then(() => expect(sendMessageStub).to.not.have.been.called);
   });
