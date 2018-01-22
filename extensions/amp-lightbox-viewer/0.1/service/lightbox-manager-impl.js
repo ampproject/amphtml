@@ -15,10 +15,25 @@
  */
 
 import {isExperimentOn} from '../../../../src/experiments';
-import {autoDiscoverLightboxables} from './lightbox-manager-discovery';
 import {dev} from '../../../../src/log';
-import {Services} from '../../../../src/services';
+import {elementByTag, iterateCursor} from '../../../../src/dom';
+import {toArray} from '../../../../src/types';
+import {CommonSignals} from '../../../../src/common-signals';
 
+const ELIGIBLE_TAP_TAGS = {
+  'amp-img': true,
+  'amp-anim': true,
+};
+
+const VIEWER_TAG = 'amp-lightbox-viewer';
+const CAROUSEL_TAG = 'amp-carousel';
+const SLIDE_SELECTOR = '.amp-carousel-slide';
+
+/** @typedef {{
+ *  url: string,
+ *  element: !Element
+ * }} */
+let LightboxThumbnailDataDef;
 
 /**
  * LightboxManager is a document-scoped service responsible for:
@@ -43,45 +58,55 @@ export class LightboxManager {
     this.ampdoc_ = ampdoc;
 
     /**
-     * Ordered list of lightboxable elements
-     * @private {?Array<!Element>}
-     **/
-    this.elements_ = null;
-
-    /**
      * Cache for the `maybeInit()` call.
      * @private {?Promise}
      **/
     this.initPromise_ = null;
 
-    // TODO(aghassemi): Find a better time to initialize, maybe after the first
-    // layoutPass is done for all elements?
-    // NOTE(aghassemi): Since all methods are async, initialize can run at
-    // any time, if a method call comes in before this timer initializes, we
-    // are still fine since manager will be initialized at that point and method
-    // call will go through.
-    Services.timerFor(ampdoc.win).delay(() => {
-      this.maybeInit_();
-    }, 500);
+    /**
+     * Ordered lists of lightboxable elements according to group
+     * @private {!Object<string, !Array<!Element>>}
+     */
+    this.lightboxGroups_ = {
+      default: [],
+    };
+
+    /**
+     * Counter tracking number of carousels without ids
+     * @private {number}
+     */
+    this.counter_ = 0;
   }
 
   /**
    * Initializes the manager only once.
    * @return {!Promise}
    */
-  maybeInit_() {
+  maybeInit() {
     if (this.initPromise_) {
       return this.initPromise_;
     }
-    if (isExperimentOn(this.ampdoc_.win, 'amp-lightbox-viewer-auto')) {
-      this.initPromise_ = autoDiscoverLightboxables(this.ampdoc_).then(() => {
-        return this.scanLightboxables_();
-      });
-    } else {
-      this.initPromise_ = this.scanLightboxables_();
-    }
-
+    this.initPromise_ = this.scanLightboxables_();
     return this.initPromise_;
+  }
+
+  /**
+   * Decides whether an already lightboxable element should automatically get
+   * a tap handler to open in the lightbox.
+   * @param {!Element} element
+   * @return {boolean}
+   */
+  meetsHeuristicsForTap_(element) {
+    dev().assert(element);
+    dev().assert(element.hasAttribute('lightbox'));
+
+    if (!ELIGIBLE_TAP_TAGS[element.tagName.toLowerCase()]) {
+      return false;
+    }
+    if (element.hasAttribute('on')) {
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -93,22 +118,66 @@ export class LightboxManager {
   scanLightboxables_() {
     return this.ampdoc_.whenReady().then(() => {
       const matches = this.ampdoc_.getRootNode().querySelectorAll('[lightbox]');
-      this.elements_ = [];
-      for (let i = 0; i < matches.length; i++) {
-        const element = matches[i];
-        if (element.getAttribute('lightbox').toLowerCase() != 'none') {
-          this.elements_.push(element);
-        }
-      }
+      const processLightboxElement = this.processLightboxElement_.bind(this);
+      iterateCursor(matches, processLightboxElement);
+    });
+  }
+
+  /**
+   * Adds element to correct lightbox group, installs tap handler.
+   * @param {!Element} element
+   * @private
+   */
+  processLightboxElement_(element) {
+    if (element.tagName.toLowerCase() == CAROUSEL_TAG) {
+      const lightboxGroupId = element.getAttribute('lightbox') ||
+       'carousel' + (element.getAttribute('id') || this.counter_++);
+      this.getSlidesFromCarousel_(element).then(slides => {
+        slides.forEach(slide => {
+          // TODO: review naming conventions for component attributes
+          if (!slide.hasAttribute('lightbox-exclude')) {
+            slide.setAttribute('lightbox', lightboxGroupId);
+            this.processBaseLightboxElement_(slide, lightboxGroupId);
+          }
+        });
+      });
+    } else {
+      const lightboxGroupId = element.getAttribute('lightbox') || 'default';
+      this.processBaseLightboxElement_(element, lightboxGroupId);
+    }
+  }
+
+  processBaseLightboxElement_(element, lightboxGroupId) {
+    if (!this.lightboxGroups_[lightboxGroupId]) {
+      this.lightboxGroups_[lightboxGroupId] = [];
+    }
+    this.lightboxGroups_[lightboxGroupId]
+        .push(dev().assertElement(element));
+    if (this.meetsHeuristicsForTap_(element)) {
+      const viewer = elementByTag(this.ampdoc_.getRootNode(), VIEWER_TAG);
+      element.setAttribute('on', `tap:${viewer.id}.activate`);
+    }
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {!Promise<!Array<!Element>>}
+   * @private
+   */
+  getSlidesFromCarousel_(element) {
+    return element.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
+      return toArray(element./*OK*/querySelectorAll(SLIDE_SELECTOR));
     });
   }
 
   /**
    * Return a list of lightboxable elements
-   * @return {!Promise<?Array<!Element>>}
+   * @param {string} lightboxGroupId
+   * @return {!Promise<!Array<!Element>>}
    */
-  getElements() {
-    return this.maybeInit_().then(() => this.elements_);
+  getElementsForLightboxGroup(lightboxGroupId) {
+    return this.maybeInit()
+        .then(() => dev().assert(this.lightboxGroups_[lightboxGroupId]));
   }
 
   /**
@@ -136,22 +205,18 @@ export class LightboxManager {
    * The function is not implemented yet. Fake for testing.
    * Find or create thumbnails for lightboxed elements.
    * Return a list of thumbnails obj for lightbox gallery view
-   * @return {!Array<{url: string, element: !Element}>}
+   * @param {string} lightboxGroupId
+   * @return {!Array<!LightboxThumbnailDataDef>}
    */
-  getThumbnails() {
-    const thumbnailList = [];
-    for (let i = 0; i < this.elements_.length; i++) {
-      const thumbnail = {
-        url: this.getThumbnailUrl_(this.elements_[i], i),
-        element: this.elements_[i],
-      };
-      thumbnailList.push(thumbnail);
-    }
-    return thumbnailList;
+  getThumbnails(lightboxGroupId) {
+    return this.lightboxGroups_[lightboxGroupId]
+        .map((element, i) => ({
+          url: this.getThumbnailUrl_(dev().assertElement(element), i),
+          element,
+        }));
   }
 
   /**
-   * The function is not implemented yet. Fake for testing.
    * Get thumbnail url for single element.
    * @param {!Element} element
    * @param {number=} index fake it for testing only, will delete later
@@ -159,9 +224,12 @@ export class LightboxManager {
    * @private
    */
   getThumbnailUrl_(element, index) {
-    if (element.tagName == 'AMP-IMG') {
+    if (element.hasAttribute('lightbox-thumbnail-src')) {
+      return element.getAttribute('lightbox-thumbnail-src');
+    } else if (element.tagName == 'AMP-IMG') {
       return element.getAttribute('src');
     } else {
+      // TODO(#12713): implement default thumbnails
       return 'https://placehold.it/128x128?text=' + index;
     }
   }

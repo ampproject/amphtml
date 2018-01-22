@@ -21,6 +21,7 @@ import {filterSplice} from '../../../src/utils/array';
 import {appendEncodedParamStringToUrl} from '../../../src/url';
 import {
   variableServiceFor,
+  ExpansionOptions,
 } from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
@@ -31,7 +32,7 @@ export class RequestHandler {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} request
    * @param {!../../../src/preconnect.Preconnect} preconnect
-   * @param {!function(string, !JsonObject)} handler
+   * @param {function(string, !JsonObject)} handler
    * @param {boolean} isSandbox
    */
   constructor(ampdoc, request, preconnect, handler, isSandbox) {
@@ -64,7 +65,7 @@ export class RequestHandler {
     /** @private {!../../../src/preconnect.Preconnect} */
     this.preconnect_ = preconnect;
 
-    /** @private {!function(string, !JsonObject)} */
+    /** @private {function(string, !JsonObject)} */
     this.handler_ = handler;
 
     /** @const @private {!Object|undefined} */
@@ -160,12 +161,6 @@ export class RequestHandler {
     return Promise.all(extraUrlParamsPromise).then(paramStrs => {
       filterSplice(paramStrs, item => {return !!item;});
       const extraUrlParamsStr = paramStrs.join('&');
-      let preUrl = this.baseUrl;
-      if (preUrl.indexOf('${extraUrlParams}') >= 0) {
-        preUrl = preUrl.replace('${extraUrlParams}', extraUrlParamsStr);
-      } else {
-        preUrl = appendEncodedParamStringToUrl(preUrl, extraUrlParamsStr);
-      }
       return baseUrlTemplatePromise.then(preUrl => {
         this.preconnect_.url(preUrl, true);
         return baseUrlPromise.then(request => {
@@ -207,13 +202,19 @@ export class RequestHandler {
   expandExtraUrlParams_(configParams, triggerParams, expansionOption) {
     const requestPromises = [];
     const params = map();
+    // Don't encode param values here,
+    // as we'll do it later in the getExtraUrlParamsString_ call.
+    const option = new ExpansionOptions(
+        expansionOption.vars,
+        expansionOption.iterations,
+        true /* noEncode */);
     // Add any given extraUrlParams as query string param
     if (configParams || triggerParams) {
       Object.assign(params, configParams, triggerParams);
       for (const k in params) {
         if (typeof params[k] == 'string') {
           requestPromises.push(
-              this.variableService_.expandTemplate(params[k], expansionOption)
+              this.variableService_.expandTemplate(params[k], option)
                   .then(value => { params[k] = value; }));
         }
       }
@@ -235,7 +236,7 @@ export class RequestHandler {
       if (v == null) {
         continue;
       } else {
-        const sv = this.variableService_.encodeVars(v, k);
+        const sv = this.variableService_.encodeVars(k, v);
         s.push(`${encodeURIComponent(k)}=${sv}`);
       }
     }

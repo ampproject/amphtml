@@ -19,13 +19,15 @@ import {dev, user} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {isArray, isObject} from '../../../src/types';
 import {isSecureUrl} from '../../../src/url';
-import {getMode} from '../../../src/mode';
 
 /** @type {string} */
 const TAG = 'real-time-config';
 
 /** @type {number} */
 const MAX_RTC_CALLOUTS = 5;
+
+/** @type {number} */
+const MAX_URL_LENGTH = 16384;
 
 /** @enum {string} */
 export const RTC_ERROR_ENUM = {
@@ -49,8 +51,8 @@ export const RTC_ERROR_ENUM = {
 
 /**
  * @param {!Array<!Promise<!rtcResponseDef>>} promiseArray
- * @param {!string} error
- * @param {!string} callout
+ * @param {string} error
+ * @param {string} callout
  * @private
  */
 function logAndAddErrorResponse_(promiseArray, error, callout) {
@@ -59,15 +61,15 @@ function logAndAddErrorResponse_(promiseArray, error, callout) {
 }
 
 /**
- * @param {!string} error
- * @param {!string} callout
+ * @param {string} error
+ * @param {string} callout
  * @param {number=} opt_rtcTime
  * @return {!Promise<!rtcResponseDef>}
  * @private
  */
 function buildErrorResponse_(error, callout, opt_rtcTime) {
   return Promise.resolve(/**@type {rtcResponseDef} */(
-      {error, callout, rtcTime: opt_rtcTime || 0}));
+    {error, callout, rtcTime: opt_rtcTime || 0}));
 }
 
 /**
@@ -106,7 +108,9 @@ export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
     const validVendorMacros = {};
     Object.keys(rtcConfig['vendors'][vendor]).forEach(macro => {
       if (vendorObject.macros && vendorObject.macros.includes(macro)) {
-        validVendorMacros[macro] = rtcConfig['vendors'][vendor][macro];
+        const value = rtcConfig['vendors'][vendor][macro];
+        validVendorMacros[macro] = isObject(value) || isArray(value) ?
+          JSON.stringify(value) : value;
       } else {
         user().warn(TAG, `Unknown macro: ${macro} for vendor: ${vendor}`);
       }
@@ -122,18 +126,18 @@ export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
 
 /**
  * @param {!AMP.BaseElement} a4aElement
- * @param {!string} url
+ * @param {string} url
  * @param {!Object<string, boolean>} seenUrls
  * @param {!Array<!Promise<!rtcResponseDef>>} promiseArray
- * @param {!number} rtcStartTime
+ * @param {number} rtcStartTime
  * @param {!Object<string, !../../../src/service/variable-source.SyncResolverDef>} macros
- * @param {!number} timeoutMillis
+ * @param {number} timeoutMillis
  * @param {string=} opt_vendor
  * @private
  */
 function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
-                            rtcStartTime, macros, timeoutMillis,
-                            opt_vendor) {
+  rtcStartTime, macros, timeoutMillis,
+  opt_vendor) {
   const win = a4aElement.win;
   const ampDoc = a4aElement.getAmpDoc();
   if (Object.keys(seenUrls).length == MAX_RTC_CALLOUTS) {
@@ -148,7 +152,7 @@ function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
     url = urlReplacements.expandUrlSync(
         url, macros, /** opt_collectVars */undefined, whitelist);
   }
-  if (!isSecureUrl(url) && !(getMode(win).localDev || getMode(win).test)) {
+  if (!isSecureUrl(url)) {
     return logAndAddErrorResponse_(promiseArray, RTC_ERROR_ENUM.INSECURE_URL,
         opt_vendor || url);
   }
@@ -157,21 +161,34 @@ function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
         opt_vendor || url);
   }
   seenUrls[url] = true;
+  if (url.length > MAX_URL_LENGTH) {
+    url = truncUrl_(url);
+  }
   promiseArray.push(sendRtcCallout_(
       url, rtcStartTime, win, timeoutMillis, opt_vendor || url));
 }
 
 /**
- * @param {!string} url
- * @param {!number} rtcStartTime
+ * @param {string} url
+ * @return {string}
+ * @visibleForTesting
+ */
+export function truncUrl_(url) {
+  url = url.substr(0, MAX_URL_LENGTH - 12).replace(/%\w?$/, '');
+  return url + '&__trunc__=1';
+}
+
+/**
+ * @param {string} url
+ * @param {number} rtcStartTime
  * @param {!Window} win
- * @param {!number} timeoutMillis
- * @param {!string} callout
+ * @param {number} timeoutMillis
+ * @param {string} callout
  * @return {!Promise<!rtcResponseDef>}
  * @private
  */
 function sendRtcCallout_(
-    url, rtcStartTime, win, timeoutMillis, callout) {
+  url, rtcStartTime, win, timeoutMillis, callout) {
   /**
    * Note: Timeout is enforced by timerFor, not the value of
    *   rtcTime. There are situations where rtcTime could thus
@@ -184,27 +201,27 @@ function sendRtcCallout_(
           // the request to be cached across sites but for now assume that
           // is not a required feature.
           url, {credentials: 'include'}).then(res => {
-            return res.text().then(text => {
-              const rtcTime = Date.now() - rtcStartTime;
-              // An empty text response is allowed, not an error.
-              if (!text) {
-                return {rtcTime, callout};
-              }
-              const response = tryParseJson(text);
-              return response ? {response, rtcTime, callout} :
-              buildErrorResponse_(
-                  RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE, callout, rtcTime);
-            });
-          })).catch(error => {
-            return buildErrorResponse_(
-                // The relevant error message for timeout looks like it is
-                // just 'message' but is in fact 'messageXXX' where the
-                // X's are hidden special characters. That's why we use
-                // match here.
-                (error.message && error.message.match(/^timeout/)) ?
-                  RTC_ERROR_ENUM.TIMEOUT : RTC_ERROR_ENUM.NETWORK_FAILURE,
-                callout, Date.now() - rtcStartTime);
-          });
+        return res.text().then(text => {
+          const rtcTime = Date.now() - rtcStartTime;
+          // An empty text response is allowed, not an error.
+          if (!text) {
+            return {rtcTime, callout};
+          }
+          const response = tryParseJson(text);
+          return response ? {response, rtcTime, callout} :
+            buildErrorResponse_(
+                RTC_ERROR_ENUM.MALFORMED_JSON_RESPONSE, callout, rtcTime);
+        });
+      })).catch(error => {
+    return buildErrorResponse_(
+        // The relevant error message for timeout looks like it is
+        // just 'message' but is in fact 'messageXXX' where the
+        // X's are hidden special characters. That's why we use
+        // match here.
+        (error.message && error.message.match(/^timeout/)) ?
+          RTC_ERROR_ENUM.TIMEOUT : RTC_ERROR_ENUM.NETWORK_FAILURE,
+        callout, Date.now() - rtcStartTime);
+  });
 }
 
 /**
@@ -267,9 +284,8 @@ export function validateRtcConfig_(element) {
     // This error would be due to the asserts above.
     return null;
   }
-
   rtcConfig['timeoutMillis'] = timeout !== undefined ?
-      timeout : defaultTimeoutMillis;
+    timeout : defaultTimeoutMillis;
   return rtcConfig;
 }
 

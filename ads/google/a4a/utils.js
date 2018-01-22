@@ -71,7 +71,7 @@ export const QQID_HEADER = 'X-QQID';
  * implementations of AMP tags, e.g., by AMPHTML implementors.  It should not be
  * added by a publisher page.
  *
- * @const {!string}
+ * @const {string}
  * @visibleForTesting
  */
 export const EXPERIMENT_ATTRIBUTE = 'data-experiment-id';
@@ -113,7 +113,7 @@ export function isGoogleAdsA4AValidEnvironment(win) {
   const googleCdnProxyRegex =
         /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
   return supportsNativeCrypto(win) && (
-      !!googleCdnProxyRegex.test(win.location.origin) ||
+    !!googleCdnProxyRegex.test(win.location.origin) ||
         getMode(win).localDev || getMode(win).test);
 }
 
@@ -185,7 +185,7 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
 /**
  * @param {!Window} win
  * @param {string} type matching typing attribute.
- * @param {!function(!Element):string} groupFn
+ * @param {function(!Element):string} groupFn
  * @return {!Promise<!Object<string,!Array<!Promise<!../../../src/base-element.BaseElement>>>>}
  */
 export function groupAmpAdsByType(win, type, groupFn) {
@@ -209,9 +209,11 @@ export function groupAmpAdsByType(win, type, groupFn) {
  * @return {!Promise<!Object<string,null|number|string>>}
  */
 export function googlePageParameters(win, nodeOrDoc, startTime) {
-  const referrerPromise = Services.viewerForDoc(nodeOrDoc).getReferrerUrl();
-  return getOrCreateAdCid(nodeOrDoc, 'AMP_ECID_GOOGLE', '_ga')
-      .then(clientId => referrerPromise.then(referrer => {
+  return Promise.all([
+    getOrCreateAdCid(nodeOrDoc, 'AMP_ECID_GOOGLE', '_ga'),
+    Services.viewerForDoc(nodeOrDoc).getReferrerUrl()])
+      .then(promiseResults => {
+        const clientId = promiseResults[0];
         const documentInfo = Services.documentInfoForDoc(nodeOrDoc);
         // Read by GPT for GA/GPT integration.
         win.gaGlobal = win.gaGlobal ||
@@ -242,15 +244,17 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
           'ish': win != win.top ? viewportSize.height : null,
           'art': art == '0' ? null : art,
           'vis': visibilityStateCodes[visibilityState] || '0',
+          'scr_x': viewport.getScrollLeft(),
+          'scr_y': viewport.getScrollTop(),
           'debug_experiment_id':
               (/,?deid=(\d+)/i.exec(win.location.hash) || [])[1] || null,
           'url': documentInfo.canonicalUrl,
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
           'loc': win.location.href == documentInfo.canonicalUrl ?
-          null : win.location.href,
-          'ref': referrer,
+            null : win.location.href,
+          'ref': promiseResults[1] || null,
         };
-      }));
+      });
 }
 
 /**
@@ -264,7 +268,7 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
  * @return {!Promise<string>}
  */
 export function googleAdUrl(
-    a4a, baseUrl, startTime, parameters, opt_experimentIds) {
+  a4a, baseUrl, startTime, parameters, opt_experimentIds) {
   // TODO: Maybe add checks in case these promises fail.
   const blockLevelParameters = googleBlockParameters(a4a, opt_experimentIds);
   return googlePageParameters(a4a.win, a4a.getAmpDoc(), startTime)
@@ -439,7 +443,7 @@ function csiTrigger(on, params) {
       // sampleOn spec so that the hash is orthogonal to any other sampling in
       // amp.
       'sampleOn': 'a4a-csi-${pageViewId}',
-      'threshold': 1,  // 1% sample
+      'threshold': 1, // 1% sample
     },
     'selector': 'amp-ad',
     'selectionMethod': 'closest',
@@ -608,7 +612,7 @@ export function mergeExperimentIds(newIds, currentIdString) {
  * @return {?JsonObject} config or null if invalid/missing.
  */
 export function addCsiSignalsToAmpAnalyticsConfig(win, element, config,
-    qqid, isVerifiedAmpCreative, deltaTime, initTime) {
+  qqid, isVerifiedAmpCreative, deltaTime, initTime) {
   // Add CSI pingbacks.
   const correlator = getCorrelator(win);
   const slotId = Number(element.getAttribute('data-amp-slot-index'));
@@ -656,7 +660,7 @@ export function addCsiSignalsToAmpAnalyticsConfig(win, element, config,
 export function getEnclosingContainerTypes(adElement) {
   const containerTypeSet = {};
   for (let el = adElement.parentElement, counter = 0;
-      el && counter < 20; el = el.parentElement, counter++) {
+    el && counter < 20; el = el.parentElement, counter++) {
     const tagName = el.tagName.toUpperCase();
     if (ValidAdContainerTypes[tagName]) {
       containerTypeSet[ValidAdContainerTypes[tagName]] = true;
@@ -734,7 +738,7 @@ export function getIdentityToken(win, nodeOrDoc) {
  * @return {!Promise<!IdentityToken>}
  */
 function executeIdentityTokenFetch(win, nodeOrDoc, redirectsRemaining = 1,
-    domain = undefined, startTime = Date.now()) {
+  domain = undefined, startTime = Date.now()) {
   const url = getIdentityTokenRequestUrl(win, nodeOrDoc, domain);
   return Services.xhrFor(win).fetchJson(url, {
     mode: 'cors',

@@ -21,11 +21,11 @@ const closureCompiler = require('gulp-closure-compiler');
 const gulp = require('gulp');
 const rename = require('gulp-rename');
 const replace = require('gulp-replace');
-const util = require('gulp-util');
 const internalRuntimeVersion = require('../internal-version').VERSION;
 const internalRuntimeToken = require('../internal-version').TOKEN;
 const shortenLicense = require('../shorten-license');
 const rimraf = require('rimraf');
+const colors = require('ansi-colors');
 
 const isProdBuild = !!argv.type;
 const queue = [];
@@ -36,7 +36,7 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS = 4;
 // production use. During development we intent to continue using
 // babel, as it has much faster incremental compilation.
 exports.closureCompile = function(entryModuleFilename, outputDir,
-    outputFilename, options) {
+  outputFilename, options) {
   // Rate limit closure compilation to MAX_PARALLEL_CLOSURE_INVOCATIONS
   // concurrent processes.
   return new Promise(function(resolve) {
@@ -52,7 +52,7 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
             next();
             resolve();
           }, function(e) {
-            console./* OK*/error(util.colors.red('Compilation error',
+            console./* OK*/error(colors.red('Compilation error',
                 e.message));
             process.exit(1);
           });
@@ -86,7 +86,7 @@ function cleanupBuildDir() {
 exports.cleanupBuildDir = cleanupBuildDir;
 
 function compile(entryModuleFilenames, outputDir,
-    outputFilename, options) {
+  outputFilename, options) {
   return new Promise(function(resolve) {
     let entryModuleFilename;
     if (entryModuleFilenames instanceof Array) {
@@ -172,6 +172,8 @@ function compile(entryModuleFilenames, outputDir,
       'third_party/vega/**/*.js',
       'third_party/d3/**/*.js',
       'third_party/webcomponentsjs/ShadowCSS.js',
+      'third_party/rrule/rrule.js',
+      'third_party/react-dates/bundle.js',
       'node_modules/promise-pjs/promise.js',
       'node_modules/web-animations-js/web-animations.install.js',
       'build/patched-module/document-register-element/build/' +
@@ -230,6 +232,8 @@ function compile(entryModuleFilenames, outputDir,
       'third_party/closure-compiler/externs/shadow_dom.js',
       'third_party/closure-compiler/externs/streams.js',
       'third_party/closure-compiler/externs/web_animations.js',
+      'third_party/moment/moment.extern.js',
+      'third_party/react-externs/externs.js',
     ];
     if (options.externs) {
       externs = externs.concat(options.externs);
@@ -242,7 +246,7 @@ function compile(entryModuleFilenames, outputDir,
       compilerPath: 'build-system/runner/dist/runner.jar',
       fileName: intermediateFilename,
       continueWithWarnings: false,
-      tieredCompilation: true,  // Magic speed up.
+      tieredCompilation: true, // Magic speed up.
       compilerFlags: {
         compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
         // Turns on more optimizations.
@@ -281,6 +285,8 @@ function compile(entryModuleFilenames, outputDir,
           'third_party/mustache/',
           'third_party/vega/',
           'third_party/webcomponentsjs/',
+          'third_party/rrule/',
+          'third_party/react-dates/',
           'node_modules/',
           'build/patched-module/',
           // Can't seem to suppress `(0, win.eval)` suspicious code warning
@@ -334,26 +340,26 @@ function compile(entryModuleFilenames, outputDir,
     let stream = gulp.src(srcs)
         .pipe(closureCompiler(compilerOptions))
         .on('error', function(err) {
-          console./* OK*/error(util.colors.red('Error compiling',
+          console./* OK*/error(colors.red('Error compiling',
               entryModuleFilenames));
-          console./* OK*/error(util.colors.red(err.message));
+          console./* OK*/error(colors.red(err.message));
           process.exit(1);
         });
 
     // If we're only doing type checking, no need to output the files.
     if (!argv.typecheck_only) {
       stream = stream
-        .pipe(rename(outputFilename))
-        .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
-        .pipe(replace(/\$internalRuntimeToken\$/g, internalRuntimeToken))
-        .pipe(shortenLicense())
-        .pipe(gulp.dest(outputDir))
-        .on('end', function() {
-          gulp.src(intermediateFilename + '.map')
-              .pipe(rename(outputFilename + '.map'))
-              .pipe(gulp.dest(outputDir))
-              .on('end', resolve);
-        });
+          .pipe(rename(outputFilename))
+          .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
+          .pipe(replace(/\$internalRuntimeToken\$/g, internalRuntimeToken))
+          .pipe(shortenLicense())
+          .pipe(gulp.dest(outputDir))
+          .on('end', function() {
+            gulp.src(intermediateFilename + '.map')
+                .pipe(rename(outputFilename + '.map'))
+                .pipe(gulp.dest(outputDir))
+                .on('end', resolve);
+          });
     }
     return stream;
   });

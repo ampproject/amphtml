@@ -214,6 +214,21 @@ data.debug;
 data.adUnits;
 data.target;
 
+// adventive.js
+const adventive = {};
+adventive.Ad;
+adventive.addArgs = () => {};
+adventive.addInstance = () => {};
+adventive.ads;
+adventive.args;
+adventive.instances;
+adventive.isLibLoaded;
+adventive.modes;
+adventive.Plugin;
+adventive.plugins;
+adventive.utility;
+window.adventive = adventive;
+
 // colombia.js
 data.clmb_slot;
 data.clmb_position;

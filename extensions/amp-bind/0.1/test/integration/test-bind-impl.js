@@ -379,6 +379,31 @@ describe.configure().ifNewChrome().run('Bind', function() {
       });
     });
 
+    it('should support binding to CSS classes with a null value', () => {
+      const element = createElement(env, container, '[class]="null"');
+      expect(toArray(element.classList)).to.deep.equal([]);
+      return onBindReadyAndSetState(env, bind, {}).then(() => {
+        expect(toArray(element.classList)).to.deep.equal([]);
+      });
+    });
+
+    it('should support binding to CSS classes for svg tags', () => {
+      const element = createElement(
+          env, container, '[class]="[\'abc\']"', 'svg');
+      expect(toArray(element.classList)).to.deep.equal([]);
+      return onBindReadyAndSetState(env, bind, {}).then(() => {
+        expect(toArray(element.classList)).to.deep.equal(['abc']);
+      });
+    });
+
+    it('supports binding to CSS classes for svg tags with a null value', () => {
+      const element = createElement(env, container, '[class]="null"', 'svg');
+      expect(toArray(element.classList)).to.deep.equal([]);
+      return onBindReadyAndSetState(env, bind, {}).then(() => {
+        expect(toArray(element.classList)).to.deep.equal([]);
+      });
+    });
+
     it('should support parsing exprs in setStateWithExpression()', () => {
       const element = createElement(env, container, '[text]="onePlusOne"');
       expect(element.textContent).to.equal('');
@@ -406,6 +431,30 @@ describe.configure().ifNewChrome().run('Bind', function() {
         return onPopCallback();
       }).then(() => {
         expect(element.textContent).to.equal('null');
+      });
+    });
+
+    it('pushStateWithExpression() should work with nested objects', () => {
+      const pushHistorySpy =
+        env.sandbox.spy(bind.historyForTesting(), 'push');
+
+      const element = createElement(env, container, '[text]="foo.bar"');
+      expect(element.textContent).to.equal('');
+      return bind.pushStateWithExpression('{foo: {bar: 0}}', {}).then(() => {
+        env.flushVsync();
+        expect(element.textContent).to.equal('0');
+
+        return bind.pushStateWithExpression('{foo: {bar: 1}}', {});
+      }).then(() => {
+        env.flushVsync();
+        expect(element.textContent).to.equal('1');
+
+        expect(pushHistorySpy).calledTwice;
+        // Pop callback should restore `foo.bar` to second pushed value (0).
+        const onPopCallback = pushHistorySpy.secondCall.args[0];
+        return onPopCallback();
+      }).then(() => {
+        expect(element.textContent).to.equal('0');
       });
     });
 

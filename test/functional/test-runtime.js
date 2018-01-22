@@ -340,7 +340,7 @@ describes.fakeWin('runtime', {
     const bodyPromise = new Promise(resolve => {
       bodyResolver = resolve;
     });
-    sandbox.stub(dom, 'waitForBodyPromise', () => bodyPromise);
+    sandbox.stub(dom, 'waitForBodyPromise').callsFake(() => bodyPromise);
 
     function skipMicro() {
       return Promise.resolve().then(() => Promise.resolve());
@@ -408,7 +408,7 @@ describes.fakeWin('runtime', {
     const bodyPromise = new Promise(resolve => {
       bodyResolver = resolve;
     });
-    sandbox.stub(dom, 'waitForBodyPromise', () => bodyPromise);
+    sandbox.stub(dom, 'waitForBodyPromise').callsFake(() => bodyPromise);
 
     function skipMicro() {
       return Promise.resolve().then(() => Promise.resolve());
@@ -567,10 +567,11 @@ describes.fakeWin('runtime', {
       const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
       const servicePromise = getServicePromise(win, 'amp-ext');
       let installStylesCallback;
-      const installStylesStub = sandbox.stub(styles, 'installStylesForDoc',
-          (doc, cssText, cb) => {
-            installStylesCallback = cb;
-          });
+      const installStylesStub =
+          sandbox.stub(styles, 'installStylesForDoc').callsFake(
+              (doc, cssText, cb) => {
+                installStylesCallback = cb;
+              });
 
       ampdoc.declareExtension_('amp-ext');
       win.AMP.push({
@@ -731,10 +732,11 @@ describes.fakeWin('runtime', {
     it('should register element with CSS', function* () {
       const servicePromise = getServicePromise(win, 'amp-ext');
       let installStylesCallback;
-      const installStylesStub = sandbox.stub(styles, 'installStylesForDoc',
-          (doc, cssText, cb) => {
-            installStylesCallback = cb;
-          });
+      const installStylesStub =
+          sandbox.stub(styles, 'installStylesForDoc').callsFake(
+              (doc, cssText, cb) => {
+                installStylesCallback = cb;
+              });
 
       win.AMP.push({
         n: 'amp-ext',
@@ -847,8 +849,8 @@ describes.realWin('runtime multidoc', {
 
       ampdocServiceMock.expects('installShadowDoc_')
           .withExactArgs(
-          docUrl,
-          sinon.match(arg => arg == getShadowRoot(hostElement)))
+              docUrl,
+              sinon.match(arg => arg == getShadowRoot(hostElement)))
           .returns(ampdoc)
           .atLeast(0);
       ampdocServiceMock.expects('getAmpDoc')
@@ -1040,7 +1042,7 @@ describes.realWin('runtime multidoc', {
 
     it('should import extension element', () => {
       extensionsMock.expects('preloadExtension')
-          .withExactArgs('amp-ext1')
+          .withExactArgs('amp-ext1', '0.1')
           .returns(Promise.resolve({
             elements: {
               'amp-ext1': function() {},
@@ -1057,9 +1059,28 @@ describes.realWin('runtime multidoc', {
           .to.not.exist;
     });
 
+    it('should import extension element with version ≠ 0.1', () => {
+      extensionsMock.expects('preloadExtension')
+          .withExactArgs('amp-ext1', '1.0')
+          .returns(Promise.resolve({
+            elements: {
+              'amp-ext1': function() { },
+            },
+          }))
+          .once();
+
+      const scriptEl = win.document.createElement('script');
+      scriptEl.setAttribute('custom-element', 'amp-ext1');
+      scriptEl.setAttribute('src', 'https://cdn.ampproject.org/v0/amp-ext1-1.0.js');
+      importDoc.head.appendChild(scriptEl);
+      win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      expect(win.document.querySelector('script[custom-element="amp-ext1"]'))
+          .to.not.exist;
+    });
+
     it('should import extension template', () => {
       extensionsMock.expects('preloadExtension')
-          .withExactArgs('amp-ext1')
+          .withExactArgs('amp-ext1', '0.1')
           .returns(Promise.resolve({elements: {}}))
           .once();
 
@@ -1152,8 +1173,8 @@ describes.realWin('runtime multidoc', {
 
       ampdocServiceMock.expects('installShadowDoc_')
           .withExactArgs(
-          docUrl,
-          sinon.match(arg => arg == getShadowRoot(hostElement)))
+              docUrl,
+              sinon.match(arg => arg == getShadowRoot(hostElement)))
           .returns(ampdoc)
           .atLeast(0);
       ampdocServiceMock.expects('getAmpDoc')
@@ -1367,7 +1388,7 @@ describes.realWin('runtime multidoc', {
       shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
       writer = shadowDoc.writer;
       extensionsMock.expects('preloadExtension')
-          .withExactArgs('amp-ext1')
+          .withExactArgs('amp-ext1', '0.1')
           .returns(Promise.resolve({
             elements: {
               'amp-ext1': function() {},
@@ -1387,7 +1408,7 @@ describes.realWin('runtime multidoc', {
       shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
       writer = shadowDoc.writer;
       extensionsMock.expects('preloadExtension')
-          .withExactArgs('amp-ext1')
+          .withExactArgs('amp-ext1', '0.1')
           .returns(Promise.resolve({elements: {}}))
           .once();
       writer.write(
@@ -1499,8 +1520,8 @@ describes.realWin('runtime multidoc', {
 
       ampdocServiceMock.expects('installShadowDoc_')
           .withExactArgs(
-          docUrl,
-          sinon.match(arg => arg == getShadowRoot(hostElement)))
+              docUrl,
+              sinon.match(arg => arg == getShadowRoot(hostElement)))
           .returns(ampdoc)
           .atLeast(0);
       ampdocServiceMock.expects('getAmpDoc')

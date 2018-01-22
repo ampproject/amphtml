@@ -30,7 +30,7 @@ describes.realWin('amp-instagram', {
   });
 
   function getIns(shortcode, opt_responsive,
-      opt_beforeLayoutCallback, opt_captioned) {
+    opt_beforeLayoutCallback, opt_captioned) {
     const ins = doc.createElement('amp-instagram');
     ins.setAttribute('data-shortcode', shortcode);
     ins.setAttribute('width', '111');

@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Animation} from '../../../src/animation';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {ShareWidget} from './share';
+import {ScrollableShareWidget} from './share';
 import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
+import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {getJsonLd} from './jsonld';
@@ -25,7 +25,6 @@ import {isArray} from '../../../src/types';
 import {parseUrl} from '../../../src/url';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
 import {throttle} from '../../../src/utils/rate-limit';
-import * as tr from '../../../src/transition';
 
 
 /**
@@ -41,20 +40,21 @@ export let BookendConfigDef;
  * Scroll amount required for full-bleed in px.
  * @private @const {number}
  */
-const FULLBLEED_THRESHOLD = 60;
+const FULLBLEED_THRESHOLD = 88;
 
 
 /** @private @const {string} */
 const FULLBLEED_CLASSNAME = 'i-amphtml-story-bookend-fullbleed';
 
 
+/** @private @const {string} */
+const HIDDEN_CLASSNAME = 'i-amphtml-hidden';
+
+
 /** @private @const {!./simple-template.ElementDef} */
 const ROOT_TEMPLATE = {
   tag: 'section',
-  attrs: dict({
-    'class': 'i-amphtml-story-bookend',
-    'hidden': true,
-  }),
+  attrs: dict({'class': `i-amphtml-story-bookend ${HIDDEN_CLASSNAME}`}),
   children: [
     // Overflow container that gets pushed to the bottom when content height is
     // smaller than viewport.
@@ -66,16 +66,6 @@ const ROOT_TEMPLATE = {
         {
           tag: 'div',
           attrs: dict({'class': 'i-amphtml-story-bookend-inner'}),
-          children: [
-            {
-              tag: 'div',
-              attrs: dict({
-                'role': 'button',
-                'class':
-                    'i-amphtml-story-bookend-close i-amphtml-story-button',
-              }),
-            },
-          ],
         },
       ],
     },
@@ -125,8 +115,8 @@ function buildArticleTemplate(articleData) {
           tag: 'img',
           attrs: dict({
             'src': articleData.image,
-            'width': 116,
-            'height': 116,
+            'width': 100,
+            'height': 100,
           }),
         },
       ],
@@ -156,7 +146,7 @@ function buildArticlesContainerTemplate(articleSets) {
       tag: 'div',
       attrs: dict({'class': 'i-amphtml-story-bookend-article-set'}),
       children: articleSet.articles.map(article =>
-          buildArticleTemplate(article)),
+        buildArticleTemplate(article)),
     });
   });
 
@@ -178,19 +168,11 @@ function buildReplayButtonTemplate(doc, title, domainName, opt_imageUrl) {
     children: [
       !opt_imageUrl ? REPLAY_ICON_TEMPLATE : {
         tag: 'div',
-        attrs: dict({'class': 'i-amphtml-story-bookend-replay-image'}),
-        children: [
-          REPLAY_ICON_TEMPLATE,
-          // TODO(alanorozco): Figure out how to use amp-img here
-          {
-            tag: 'img',
-            attrs: dict({
-              'src': opt_imageUrl,
-              'width': 80,
-              'height': 80,
-            }),
-          },
-        ],
+        attrs: dict({
+          'class': 'i-amphtml-story-bookend-replay-image',
+          'style': `background-image: url(${opt_imageUrl}) !important`,
+        }),
+        children: [REPLAY_ICON_TEMPLATE],
       },
       {
         tag: 'h2',
@@ -230,8 +212,8 @@ export class Bookend {
     /** @private {?Element} */
     this.closeBtn_ = null;
 
-    /** @private {!ShareWidget} */
-    this.shareWidget_ = ShareWidget.create(win);
+    /** @private {!ScrollableShareWidget} */
+    this.shareWidget_ = ScrollableShareWidget.create(win);
   }
 
   /**
@@ -249,9 +231,6 @@ export class Bookend {
 
     this.replayBtn_ = this.buildReplayButton_(ampdoc);
 
-    this.closeBtn_ =
-        this.root_.querySelector('.i-amphtml-story-bookend-close');
-
     this.getInnerContainer_().appendChild(this.replayBtn_);
     this.getInnerContainer_().appendChild(this.shareWidget_.build(ampdoc));
 
@@ -263,8 +242,8 @@ export class Bookend {
   /** @private */
   attachEvents_() {
     // TODO(alanorozco): Listen to tap event properly (i.e. fastclick)
+    this.root_.addEventListener('click', e => this.maybeClose_(e));
     this.replayBtn_.addEventListener('click', e => this.onReplayBtnClick_(e));
-    this.closeBtn_.addEventListener('click', e => this.onClose_(e));
 
     this.getOverflowContainer_().addEventListener('scroll',
         // minInterval is high since this is a step function that does not
@@ -272,18 +251,20 @@ export class Bookend {
         throttle(this.win_, () => this.onScroll_(), 100));
 
     this.win_.addEventListener('keyup', e => {
-      if (!this.isActive) {
+      if (!this.isActive()) {
         return;
       }
       if (e.keyCode == KeyCodes.ESCAPE) {
-        this.onClose_(e);
+        e.preventDefault();
+        this.dispatchClose_();
       }
     });
   }
 
   /** @return {boolean} */
   isActive() {
-    return this.isBuilt_ && !this.getRoot().hasAttribute('hidden');
+    return this.isBuilt() &&
+        !this.getRoot().classList.contains(HIDDEN_CLASSNAME);
   }
 
   /**
@@ -296,12 +277,28 @@ export class Bookend {
   }
 
   /**
+   * Closes bookend if tapping outside usable area.
    * @param {!Event} e
    * @private
    */
-  onClose_(e) {
-    e.stopPropagation();
+  maybeClose_(e) {
+    if (this.elementOutsideUsableArea_(dev().assertElement(e.target))) {
+      e.stopPropagation();
+      this.dispatchClose_();
+    }
+  }
+
+  /** @private */
+  dispatchClose_() {
     dispatch(this.getRoot(), EventType.CLOSE_BOOKEND, /* opt_bubbles */ true);
+  }
+
+  /**
+   * @param {!Element} el
+   * @return {boolean}
+   */
+  elementOutsideUsableArea_(el) {
+    return !closest(el, el => el == this.getInnerContainer_());
   }
 
   /**
@@ -324,45 +321,24 @@ export class Bookend {
     }, {});
   }
 
-  /**
-   * Hides bookend with a transition.
-   * Uses animation utils instead of CSS transition for convenience and
-   * coordination (i.e. listening to transition end).
-   */
+  /** Hides bookend with a transition. */
   hide() {
-    const transition = tr.setStyles(this.getRoot(), {
-      transform: tr.translateY(tr.numeric(0, this.getViewportHeight_())),
-    });
-
-    Animation.animate(this.getRoot(), transition, 300, 'ease-in')
-        .thenAlways(() => {
-          this.getRoot().setAttribute('hidden', true);
-        });
+    this.toggle_(false);
   }
 
-  /**
-   * Shows bookend with a transition.
-   * Uses animation utils instead of CSS transition for convenience and
-   * coordination (i.e. listening to transition end).
-   */
+  /** Shows bookend with a transition. */
   show() {
-    const transition = tr.setStyles(this.getRoot(), {
-      transform: tr.translateY(tr.numeric(this.getViewportHeight_(), 0)),
-    });
-
-    this.getRoot().classList.remove(FULLBLEED_CLASSNAME);
-    this.getRoot().removeAttribute('hidden');
-    this.getRoot()./*OK*/scrollTop = 0;
-
-    Animation.animate(this.getRoot(), transition, 300, 'ease-out');
+    this.toggle_(true);
   }
 
   /**
-   * @return {number}
+   * @param {boolean} show
    * @private
    */
-  getViewportHeight_() {
-    return Services.viewportForDoc(this.getRoot()).getSize().height;
+  toggle_(show) {
+    Services.vsyncFor(this.win_).mutate(() => {
+      this.getRoot().classList.toggle(HIDDEN_CLASSNAME, !show);
+    });
   }
 
   /**
@@ -438,11 +414,11 @@ export class Bookend {
     const jsonLd = getJsonLd(ampdoc.getRootNode());
 
     const metadata = {
-      title: jsonLd && jsonLd['heading'] ?
-          jsonLd['heading'] :
-          user().assertElement(
-              this.win_.document.head.querySelector('title'),
-              'Please set <title> or structured data (JSON-LD).').textContent,
+      title: jsonLd && jsonLd['headline'] ?
+        jsonLd['headline'] :
+        user().assertElement(
+            this.win_.document.head.querySelector('title'),
+            'Please set <title> or structured data (JSON-LD).').textContent,
 
       domainName:
           parseUrl(Services.documentInfoForDoc(ampdoc).canonicalUrl).hostname,

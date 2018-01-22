@@ -85,7 +85,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
     const script = document.createElement('script');
     script.setAttribute('custom-element', 'amp-element2');
     head.appendChild(script);
-    sandbox.stub(ampdoc, 'getHeadNode', () => head);
+    sandbox.stub(ampdoc, 'getHeadNode').callsFake(() => head);
 
     stubElementsForDoc(ampdoc);
     expect(ampdoc.declaresExtension('amp-element2')).to.be.true;
@@ -222,7 +222,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
     });
 
     it('should repeat stubbing when body is not available', () => {
-      doc.body = null;  // Body not available
+      doc.body = null; // Body not available
 
       stubElementsForDoc(ampdoc);
 

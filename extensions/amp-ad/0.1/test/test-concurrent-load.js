@@ -72,8 +72,13 @@ describes.realWin('concurrent-load', {}, env => {
 
     beforeEach(() => {
       win = env.win;
-      clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
+      clock = lolex.install({
+        target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
       installTimerService(win);
+    });
+
+    afterEach(() => {
+      clock.uninstall();
     });
 
     it('should throttle ad loading one per second', function* () {

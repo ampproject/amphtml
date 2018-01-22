@@ -49,28 +49,28 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    /** @private {!boolean} */
+    /** @private {boolean} */
     this.isVisible_ = false;
 
     /** @private {?../../../src/service/position-observer/position-observer-impl.PositionObserver} */
     this.positionObserver_ = null;
 
-    /** @private {!number} */
+    /** @private {number} */
     this.topRatio_ = 0;
 
-    /** @private {!number} */
+    /** @private {number} */
     this.bottomRatio_ = 0;
 
-    /** @private {!string} */
+    /** @private {string} */
     this.topMarginExpr_ = '0';
 
-    /** @private {!string} */
+    /** @private {string} */
     this.bottomMarginExpr_ = '0';
 
-    /** @private {!number} */
+    /** @private {number} */
     this.resolvedTopMargin_ = 0;
 
-    /** @private {!number} */
+    /** @private {number} */
     this.resolvedBottomMargin_ = 0;
 
     /** @private {?../../../src/layout-rect.LayoutRectDef} */
@@ -79,7 +79,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     /** @private {?string} */
     this.targetId_ = null;
 
-    /** @private {!number} */
+    /** @private {number} */
     this.scrollProgress_ = 0;
   }
 
@@ -211,7 +211,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     }
 
     const ratioToUse = relativePos == RelativePositions.TOP ?
-        this.topRatio_ : this.bottomRatio_;
+      this.topRatio_ : this.bottomRatio_;
 
     const offset = positionRect.height * ratioToUse;
     if (relativePos == RelativePositions.BOTTOM) {
@@ -251,7 +251,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
         (adjustedViewportRect.height -
             (positionRect.height * this.bottomRatio_)
         )
-      );
+    );
 
     this.scrollProgress_ = topOffset / totalProgress;
   }
@@ -314,7 +314,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
    * Parses and validates margins.
    * @private
    * @param {string} val
-   * @return {!number} resolved margin
+   * @return {number} resolved margin
    */
   validateAndResolveMargin_(val) {
     val = assertLength(parseLength(val));
@@ -335,7 +335,7 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   /**
    * Parses and validates ratios.
    * @param {string} val
-   * @return {!number} resolved ratio
+   * @return {number} resolved ratio
    * @private
    */
   validateAndResolveRatio_(val) {

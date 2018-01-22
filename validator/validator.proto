@@ -238,6 +238,7 @@ message AmpLayout {
     CONTAINER = 5;
     FILL = 6;
     FLEX_ITEM = 7;
+    FLUID = 8;
   }
   // Specifies which layouts are supported by this element.
   repeated Layout supported_layouts = 1;
@@ -419,18 +420,20 @@ message TagSpec {
   //   specified mandatory parent tag.
   optional string mandatory_parent = 6;
   // If set, the tag must descend from (not necessarily direct parent of) the
-  // specified mandatory parent string.
+  // specified mandatory parent string which is either a tag name or a tag
+  // spec_name (e.g. tag.name = "!DOCTYPE" or tag.spec_name = "html doctype").
   optional string mandatory_ancestor = 15;
   // Use only for tags where mandatory_ancestor is set. If tag validation fails
   // due to the mandatory_ancestor, and this field is set, then the error
   // detail will suggest the tag specified here as an alternative to consider.
   optional string mandatory_ancestor_suggested_alternative = 16;
-  // This tag may not descend from any tag with any of these tag names.
+  // This tag may not descend from any tag with any of these tag names or tag
+  // spec_names (e.g. tag.name = "!DOCTYPE" or tag.spec_name = "html doctype").
   repeated string disallowed_ancestor = 13;
 
-  // If set, all of the tag's descendants must be tags from the list. A tag not
-  // in the list will generate an error.
-  repeated string descendant_tag_lists = 29;
+  // If set, all of the tag's descendants must be tags from the named list.
+  // A tag not in the named list will generate an error.
+  optional string descendant_tag_list = 29;
 
   // If set, other tags - identified by their detail string - must be
   // present as well or a warning will be issued (will not invalidate doc).
@@ -465,10 +468,10 @@ message TagSpec {
   optional ChildTagSpec child_tags = 19;
 
   // If set to true, this tag cannot have any siblings.
-  optional bool siblings_disallowed = 30;
+  optional bool siblings_disallowed = 30 [default = false];
 
   // If set to true, this tag must be the last child of its parent.
-  optional bool mandatory_last_child = 31;
+  optional bool mandatory_last_child = 31 [default = false];
 
   // The reference_points defined by this TagSpec instance determine how
   // specific child tags are identified. Please see the comment for the
@@ -511,7 +514,7 @@ message ValidatorRules {
   repeated ErrorFormat error_formats = 9;
   repeated ErrorSpecificity error_specificity = 13;
 
-  repeated DescendantTagList descendant_tag_lists = 16;
+  repeated DescendantTagList descendant_tag_list = 16;
 
   // Deprecated fields, do not reuse.
   extensions 2, 5, 11, 12, 14;
@@ -571,7 +574,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 95
+  // NEXT AVAILABLE TAG: 96
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -657,6 +660,7 @@ message ValidationError {
     CSS_SYNTAX_DISALLOWED_RELATIVE_URL = 55;
     CSS_SYNTAX_INVALID_ATTR_SELECTOR = 59;
     CSS_SYNTAX_INVALID_PROPERTY = 90;
+    CSS_SYNTAX_INVALID_PROPERTY_NOLIST = 95;
     CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS = 91;
     CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME = 92;
     CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME = 93;

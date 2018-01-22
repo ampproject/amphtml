@@ -259,8 +259,8 @@ i-amphtml-sizer {
   left: 0px !important;
   /* give it non-zero size, VoiceOver on Safari requires at least 2 pixels
      before allowing buttons to be activated. */
-  width: 2px !important;
-  height: 2px !important;
+  width: 4px !important;
+  height: 4px !important;
   /* visually hide it with overflow and opacity */
   opacity: 0 !important;
   overflow: hidden !important;
@@ -271,6 +271,16 @@ i-amphtml-sizer {
   /* ensure no other style sets display to none */
   display: block !important;
   visibility: visible !important;
+}
+
+.i-amphtml-screen-reader ~ .i-amphtml-screen-reader {
+  left: 8px !important;
+}
+.i-amphtml-screen-reader ~ .i-amphtml-screen-reader ~ .i-amphtml-screen-reader {
+  left: 12px !important;
+}
+.i-amphtml-screen-reader ~ .i-amphtml-screen-reader ~ .i-amphtml-screen-reader ~ .i-amphtml-screen-reader {
+  left: 16px !important;
 }
 
 /* For author styling. */
@@ -784,15 +794,77 @@ amp-accordion > section[expanded] > :last-child {
 /**
  * amp-story
  */
- amp-story, amp-story-page {
-  display: block;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  width: 100%;
+amp-story[standalone], amp-story-page {
+  display: block !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  width: 100% !important;
+}
+
+amp-story[standalone] {
+  background-color: #fff !important;
+  position: relative !important;
 }
 
 amp-story-page {
   background-color: #757575;
+}
+
+/** Overlay that blocks viewing during initial load */
+amp-story[standalone]::after {
+  background-color: #fff !important;
+  bottom: 0 !important;
+  content: ' ' !important;
+  display: block !important;
+  left: 0 !important;
+  position: absolute !important;
+  right: 0 !important;
+  top: 0 !important;
+  z-index: 999999 !important;
+}
+
+amp-date-picker {
+  display: block;
+}
+
+amp-date-picker:not([i-amphtml-date-picker-attached])  {
+  display: flex;
+  width: 200px;
+  height: 50px;
+  border: 1px solid #dbdbdb;
+}
+
+amp-date-picker[type="range"]:not([i-amphtml-date-picker-attached]) {
+  width: 400px;
+}
+
+amp-date-picker[i-amphtml-date-picker-attached] [amp-date-placeholder],
+amp-date-picker[type="range"][i-amphtml-date-picker-attached] [amp-date-placeholder-start],
+amp-date-picker[type="range"][i-amphtml-date-picker-attached] [amp-date-placeholder-end] {
+  display: none;
+}
+
+amp-date-picker [amp-date-placeholder],
+amp-date-picker[type="range"] [amp-date-placeholder-start],
+amp-date-picker[type="range"] [amp-date-placeholder-end] {
+  border: 0;
+  font-weight: 200;
+  font-size: 18px;
+  line-height: 24px;
+  color: #333;
+  font-family: serif;
+  padding: 4px 8px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+amp-date [amp-date-placeholder]::placeholder,
+amp-date-picker[type="range"] [amp-date-placeholder-start]::placeholder,
+amp-date-picker[type="range"] [amp-date-placeholder-end]::placeholder {
+  color: #757575;
 }
