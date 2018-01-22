@@ -17,25 +17,10 @@
 import {poll} from '../../../../../testing/iframe';
 
 describe.configure().skipSafari().skipEdge().run('amp-mathml', function() {
-  this.timeout(5000);
   const extensions = ['amp-mathml'];
 
-  const mathmlBody = `
-  <h2>The Quadratic Formula</h2>
-  <amp-mathml layout="container" data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]">
-  </amp-mathml>
-  <h2>Cauchy's Integral Formula</h2>
-  <amp-mathml layout="container" data-formula="\[f(a) = \frac{1}{2\pi i} \oint\frac{f(z)}{z-a}dz\]">
-  </amp-mathml>
-  <h2>Double angle formula for Cosines</h2>
-  <amp-mathml layout="container" data-formula="\[ \cos(θ+φ)=\cos(θ)\cos(φ)−\sin(θ)\sin(φ) \]">
-  </amp-mathml>
-  <h2>Inline formula.</h2>
-  This is an example of a formula placed  inline in the middle of a block of text. <amp-mathml layout="container" inline data-formula="\[ \cos(θ+φ) \]"></amp-mathml> This shows how the formula will fit inside a block of text and can be styled with CSS.
-
-  `;
   describes.integration('mathml render', {
-    body: '<amp-mathml layout="container" data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"></amp-mathml>',
+    body: '<div id="mathml-test"><amp-mathml layout="container" data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"></amp-mathml></div>',
     extensions,
   }, env => {
 
@@ -43,15 +28,14 @@ describe.configure().skipSafari().skipEdge().run('amp-mathml', function() {
     beforeEach(() => {
       win = env.win;
     });
-console.log('test';)
     it('should create iframe that is resized to something bigger than 1px', () => {
-      const mathiframe = win.document.getElementById('sidebarOpener');
-      console.log( 'waitForIframeToLoad' );
+      const mathiframe = win.document.getElementById('mathml-test');
       const openedPromise = waitForIframeToLoad(win.document);
 
       return openedPromise.then(() => {
-
-        expect(win.document.activeElement).to.equal(openerButton);
+        this.timeout(15000);
+        expect(mathiframe.innerHeight>1).to.be(true);
+        expect(mathiframe.innerWidth>1).to.be(true);
       });
     });
   });
@@ -59,7 +43,7 @@ console.log('test';)
 
 function waitForIframeToLoad(document) {
   return poll('wait for mathml iframe to render', () => {
-    const rendered = document.getElementById('MathJax-Element-1-Frame');
-    return rendered.style.display == '';
+    const mathmltest = document.getElementById('mathml-test');
+    return mathmltest.style.display == 'none';
   });
 }
