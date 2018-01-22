@@ -4758,17 +4758,18 @@ class ParsedValidatorRules {
 
     // In the light mode, we only have status values.
     if (!amp.validator.LIGHT) {
-      // Prefer the attempt with the fewest errors.
-      if (resultA.errors.length < resultB.errors.length) return true;
-      if (resultB.errors.length < resultA.errors.length) return false;
-
-      // If the same number of errors, prefer the most specific error.
+      // Prefer the most specific error found in either set.
       if (this.maxSpecificity(resultA.errors) >
           this.maxSpecificity(resultB.errors))
         return true;
       if (this.maxSpecificity(resultB.errors) >
           this.maxSpecificity(resultA.errors))
         return false;
+
+      // Prefer the attempt with the fewest errors if the most specific errors
+      // are the same.
+      if (resultA.errors.length < resultB.errors.length) return true;
+      if (resultB.errors.length < resultA.errors.length) return false;
     }
 
     // Equal, so not better than.

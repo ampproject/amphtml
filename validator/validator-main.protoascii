@@ -25,7 +25,7 @@ min_validator_revision_required: 295
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 549
+spec_file_revision: 550
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -3938,25 +3938,25 @@ error_specificity { code: UNKNOWN_CODE specificity: 0 }
 error_specificity { code: MANDATORY_CDATA_MISSING_OR_INCORRECT specificity: 1 }
 error_specificity { code: CDATA_VIOLATES_BLACKLIST specificity: 2 }
 error_specificity { code: NON_WHITESPACE_CDATA_ENCOUNTERED specificity: 3 }
-error_specificity { code: WRONG_PARENT_TAG specificity: 4 }
-error_specificity { code: DISALLOWED_TAG_ANCESTOR specificity: 5 }
-error_specificity { code: MANDATORY_TAG_ANCESTOR specificity: 6 }
-error_specificity { code: MANDATORY_TAG_ANCESTOR_WITH_HINT specificity: 7 }
-error_specificity { code: MANDATORY_TAG_MISSING specificity: 8 }
+error_specificity { code: DISALLOWED_TAG_ANCESTOR specificity: 4 }
+error_specificity { code: MANDATORY_TAG_ANCESTOR specificity: 5 }
+error_specificity { code: MANDATORY_TAG_ANCESTOR_WITH_HINT specificity: 6 }
+error_specificity { code: MANDATORY_TAG_MISSING specificity: 7 }
+error_specificity { code: WRONG_PARENT_TAG specificity: 8 }
 error_specificity { code: TAG_REQUIRED_BY_MISSING specificity: 9 }
 error_specificity { code: MISSING_REQUIRED_EXTENSION specificity: 10 }
 error_specificity { code: WARNING_TAG_REQUIRED_BY_MISSING specificity: 11 }
 error_specificity { code: EXTENSION_UNUSED specificity: 12 }
 error_specificity { code: WARNING_EXTENSION_UNUSED specificity: 13 }
 error_specificity { code: WARNING_EXTENSION_DEPRECATED_VERSION specificity: 14 }
-error_specificity { code: ATTR_REQUIRED_BUT_MISSING specificity: 15 }
-error_specificity { code: DISALLOWED_TAG specificity: 16 }
-error_specificity { code: DISALLOWED_ATTR specificity: 17 }
-error_specificity { code: INVALID_ATTR_VALUE specificity: 18 }
-error_specificity { code: DUPLICATE_ATTRIBUTE specificity: 19 }
-error_specificity { code: ATTR_VALUE_REQUIRED_BY_LAYOUT specificity: 20 }
-error_specificity { code: MANDATORY_ATTR_MISSING specificity: 21 }
-error_specificity { code: MANDATORY_ONEOF_ATTR_MISSING specificity: 22 }
+error_specificity { code: DISALLOWED_TAG specificity: 15 }
+error_specificity { code: DISALLOWED_ATTR specificity: 16 }
+error_specificity { code: INVALID_ATTR_VALUE specificity: 17 }
+error_specificity { code: DUPLICATE_ATTRIBUTE specificity: 18 }
+error_specificity { code: ATTR_VALUE_REQUIRED_BY_LAYOUT specificity: 19 }
+error_specificity { code: MANDATORY_ATTR_MISSING specificity: 20 }
+error_specificity { code: MANDATORY_ONEOF_ATTR_MISSING specificity: 21 }
+error_specificity { code: ATTR_REQUIRED_BUT_MISSING specificity: 22 }
 error_specificity { code: DUPLICATE_UNIQUE_TAG specificity: 23 }
 error_specificity { code: DUPLICATE_UNIQUE_TAG_WARNING specificity: 24 }
 error_specificity { code: STYLESHEET_TOO_LONG specificity: 25 }
