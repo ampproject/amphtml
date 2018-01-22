@@ -320,11 +320,11 @@ export class LayoutLayers {
    * @param {!Element} element
    */
   scrolled_(element) {
-    const layer = LayoutElement.forOptional(element);
+    let layer = LayoutElement.forOptional(element);
     if (layer && layer.isLayer()) {
       layer.requestScrollRemeasure();
     } else {
-      this.declareLayer_(element, false);
+      layer = this.declareLayer_(element, false);
     }
 
     this.activeLayer_ = layer;
@@ -384,8 +384,8 @@ export class LayoutElement {
     /** @const @private {!Element} */
     this.element_ = element;
 
-    /** @const private {number} */
-    this.id_ = layoutId++;
+    /** @const private {string} */
+    this.id_ = `${element.tagName}-${layoutId++}`;
 
     /**
      * The parent layer of the current element. Note that even if _this_
@@ -570,7 +570,7 @@ export class LayoutElement {
   /**
    * Returns the unique identifier for each layout.
    *
-   * @return {number}
+   * @return {string}
    */
   getId() {
     return this.id_;

@@ -176,9 +176,9 @@ export class Resources {
 
     let boundScorer;
     if (this.useLayers_) {
-      boundScorer = this.calcTaskScore_.bind(this);
-    } else {
       boundScorer = this.calcTaskScoreLayers_.bind(this);
+    } else {
+      boundScorer = this.calcTaskScore_.bind(this);
     }
     /** @const {!function(./task-queue.TaskDef, !Object<string, *>):number} */
     this.boundTaskScorer_ = boundScorer;
@@ -1682,7 +1682,7 @@ export class Resources {
    * @return {number}
    */
   calcLayoutScore_(currentScore, layout, depth, cache) {
-    const id = String(layout.getId());
+    const id = layout.getId();
     if (hasOwn(cache, id)) {
       return dev().assertNumber(cache[id]);
     }
@@ -1692,7 +1692,7 @@ export class Resources {
     const nonActivePenalty = layout.isActive() ? 1 : 2;
     const distance = layout.getHorizontalDistanceFromParent() +
         layout.getVerticalDistanceFromParent();
-    return score * nonActivePenalty * depthPenalty * distance;
+    return cache[id] = score + nonActivePenalty * depthPenalty * distance;
   }
 
   /**
