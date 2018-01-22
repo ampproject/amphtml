@@ -44,7 +44,7 @@ describes.realWin('amp-wistia-player', {
       const iframe = wistiaEmbed.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal('//fast.wistia.net/embed/iframe/u8p9wq6mq8');
+      expect(iframe.src).to.equal('https://fast.wistia.net/embed/iframe/u8p9wq6mq8');
     });
   });
 
