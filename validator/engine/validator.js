@@ -875,12 +875,6 @@ class ChildTagMatcher {
      */
     this.parentSpec_ = parentSpec;
 
-    /**
-     * @type {number}
-     * @private
-     */
-    this.numChildTagsSeen_ = 0;
-
     if (!amp.validator.LIGHT) {
       /**
        * @type {!LineCol}
@@ -905,6 +899,9 @@ class ChildTagMatcher {
    */
   matchChildTagName(encounteredTag, context, result) {
     const childTags = this.parentSpec_.childTags;
+    // Enforce child_tag_name_oneof: If at least one tag name is specified,
+    // then the child tags of the parent tag must have one of the provided
+    // tag names.
     if (childTags.childTagNameOneof.length > 0) {
       const names = childTags.childTagNameOneof;
       if (names.indexOf(encounteredTag.upperName()) === -1) {
@@ -925,8 +922,11 @@ class ChildTagMatcher {
         }
       }
     }
+    // Enforce first_child_tag_name_oneof: If at least one tag name is
+    // specified, then the first child of the parent tag must have one
+    // of the provided tag names.
     if (childTags.firstChildTagNameOneof.length > 0 &&
-        this.numChildTagsSeen_ === 0) {
+        context.getTagStack().parentChildCount() === 0) {
       const names = childTags.firstChildTagNameOneof;
       if (names.indexOf(encounteredTag.upperName()) === -1) {
         if (!amp.validator.LIGHT) {
@@ -950,13 +950,6 @@ class ChildTagMatcher {
   }
 
   /**
-   * Record that we have encountered a new child tag.
-   */
-  recordChildTag() {
-    this.numChildTagsSeen_++;
-  }
-
-  /**
    * @param {!Context} context
    * @param {!amp.validator.ValidationResult} result
    */
@@ -964,7 +957,7 @@ class ChildTagMatcher {
     const expectedNumChildTags =
         this.parentSpec_.childTags.mandatoryNumChildTags;
     if (expectedNumChildTags !== -1 &&
-        expectedNumChildTags !== this.numChildTagsSeen_) {
+        expectedNumChildTags !== context.getTagStack().parentChildCount()) {
       if (amp.validator.LIGHT) {
         result.status = amp.validator.ValidationResult.Status.FAIL;
         return;
@@ -975,7 +968,7 @@ class ChildTagMatcher {
             /* params */
             [
               getTagSpecName(this.parentSpec_), expectedNumChildTags.toString(),
-              this.numChildTagsSeen_.toString()
+              context.getTagStack().parentChildCount().toString()
             ],
             getTagSpecUrl(this.parentSpec_), result);
         return;
@@ -985,7 +978,7 @@ class ChildTagMatcher {
     const expectedMinNumChildTags =
         this.parentSpec_.childTags.mandatoryMinNumChildTags;
     if (expectedMinNumChildTags !== -1 &&
-        this.numChildTagsSeen_ < expectedMinNumChildTags) {
+        context.getTagStack().parentChildCount() < expectedMinNumChildTags) {
       if (amp.validator.LIGHT) {
         result.status = amp.validator.ValidationResult.Status.FAIL;
         return;
@@ -997,7 +990,7 @@ class ChildTagMatcher {
             [
               getTagSpecName(this.parentSpec_),
               expectedMinNumChildTags.toString(),
-              this.numChildTagsSeen_.toString()
+              context.getTagStack().parentChildCount().toString()
             ],
             getTagSpecUrl(this.parentSpec_), result);
         return;
@@ -1306,10 +1299,6 @@ class TagStack {
    * @param {!ValidateTagResult} tagResult
    */
   enterTag(tagName, referencePointResult, tagResult) {
-    // Keep track of the number of direct children this tag has, even as we
-    // pop in and out of them on the stack.
-    this.increaseChildCounterForParent();
-
     let stackEntry = this.createNewTagStackEntry(tagName);
     stackEntry.referencePoint = referencePointResult.bestMatchTagSpec;
     stackEntry.tagSpec = tagResult.bestMatchTagSpec;
@@ -1327,13 +1316,14 @@ class TagStack {
     goog.asserts.assert(this.stack_.length > 0, 'Exiting an empty tag stack.');
 
     this.unSetDescendantConstraintList();
-    const topStackEntry = this.stack_.pop();
+    const topStackEntry = this.back_();
     if (topStackEntry.childTagMatcher !== null) {
       topStackEntry.childTagMatcher.exitTag(context, result);
     }
     if (topStackEntry.referencePointMatcher !== null) {
       topStackEntry.referencePointMatcher.exitParentTag(context, result);
     }
+    this.stack_.pop();
 
   }
 
@@ -1343,8 +1333,9 @@ class TagStack {
    * @param {!ValidateTagResult} result
    * @param {!ParsedValidatorRules} parsedRules
    * @param {!LineCol} lineCol
+   * @private
    */
-  updateStackEntryFromTagResult(result, parsedRules, lineCol) {
+  updateStackEntryFromTagResult_(result, parsedRules, lineCol) {
     if (result.bestMatchTagSpec === null) return;
     const parsedTagSpec = result.bestMatchTagSpec;
 
@@ -1372,9 +1363,9 @@ class TagStack {
    */
   updateFromTagResults(
       encounteredTag, referencePointResult, tagResult, parsedRules, lineCol) {
-    // Always Record that the parent tag contains an additional child
-    if (this.parentStackEntry_().childTagMatcher !== null)
-      this.parentStackEntry_().childTagMatcher.recordChildTag();
+    // Keep track of the number of direct children this tag has, even as we
+    // pop in and out of them on the stack.
+    this.parentStackEntry_().numChildren++;
 
     // Record in the parent element that a reference point has been satisfied,
     // even if the reference point didn't match completely.
@@ -1405,9 +1396,9 @@ class TagStack {
     // Add the tag to the stack, and then update the stack entry.
     this.enterTag(encounteredTag.upperName(), referencePointResult, tagResult);
 
-    this.updateStackEntryFromTagResult(
+    this.updateStackEntryFromTagResult_(
         referencePointResult, parsedRules, lineCol);
-    this.updateStackEntryFromTagResult(tagResult, parsedRules, lineCol);
+    this.updateStackEntryFromTagResult_(tagResult, parsedRules, lineCol);
   }
 
   /**
@@ -1507,13 +1498,6 @@ class TagStack {
    */
   parentChildCount() {
     return this.parentStackEntry_().numChildren;
-  }
-
-  /**
-   * Increases the Parent tag's child count.
-   */
-  increaseChildCounterForParent() {
-    this.parentStackEntry_().numChildren++;
   }
 
   /**
@@ -4393,7 +4377,6 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
   // to return a GENERAL_DISALLOWED_TAG error.
   // calling HasDispatchKeys here is only an optimization to skip the loop
   // over encountered attributes in the case where we have no dispatches.
-  let bestMatchTagSpec = null;
   if (tagSpecDispatch.hasDispatchKeys()) {
     for (let attr of encounteredTag.attrs()) {
       const maybeTagSpecId = tagSpecDispatch.matchingDispatchKey(
@@ -4443,6 +4426,7 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
   // tried them all.
   let resultForBestAttempt = new amp.validator.ValidationResult();
   resultForBestAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
+  let bestMatchTagSpec = null;
   for (const tagSpecId of tagSpecDispatch.allTagSpecs()) {
     const parsedTagSpec = context.getRules().getByTagSpecId(tagSpecId);
     const resultForAttempt = validateTagAgainstSpec(
