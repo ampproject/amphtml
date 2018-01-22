@@ -25,7 +25,7 @@ min_validator_revision_required: 295
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 546
+spec_file_revision: 547
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -4058,6 +4058,10 @@ error_specificity {
   code: CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME
   specificity: 113
 }
+error_specificity {
+  code: INVALID_UTF8
+  specificity: 114
+}
 # Error formats
 error_formats {
   code: UNKNOWN_CODE
@@ -4340,6 +4344,10 @@ error_formats {
 error_formats {
   code: DOCUMENT_TOO_COMPLEX
   format: "The document is too complex."
+}
+error_formats {
+  code: INVALID_UTF8
+  format: "The document contains invalid UTF8."
 }
 
 # CSS Errors. All of these use %1 for the tag name (in practice 'style'

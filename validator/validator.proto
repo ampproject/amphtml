@@ -578,7 +578,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 96
+  // NEXT AVAILABLE TAG: 97
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -643,6 +643,7 @@ message ValidationError {
     BASE_TAG_MUST_PRECEED_ALL_URLS = 78;
     MISSING_REQUIRED_EXTENSION = 83;
     DOCUMENT_TOO_COMPLEX = 86;
+    INVALID_UTF8 = 96;
 
     CSS_SYNTAX = 13;  // Deprecated, remove after 2016-06-01.
     CSS_SYNTAX_INVALID_AT_RULE = 29;
