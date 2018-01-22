@@ -103,14 +103,14 @@ export class Gestures {
     /** @private {boolean} */
     this.shouldNotPreventDefault_ = shouldNotPreventDefault;
 
-    /** @private {string} */
-    this.lastEventType_ = '';
-
     /** @private {?EventTarget} */
     this.lastEventTarget_ = null;
 
-    this.refire_ = new Pass(toWin(element.ownerDocument.defaultView),
-        this.maybeRefireLastEvent_.bind(this));
+    /** @private {!Pass} */
+    this.expirePendingRecognizers_ = new Pass(
+        toWin(element.ownerDocument.defaultView),
+        this.stopTrackingExpiredRecognizers_.bind(this)
+    );
 
     /**
      * This variable indicates that the eventing has stopped on this
@@ -427,12 +427,11 @@ export class Gestures {
     }
     if (cancelEvent) {
       if (event.type == 'touchend') {
-        this.lastEventType_ = event.type;
         this.lastEventTarget_ = event.target;
         const waitTime = this.findWaitTime_();
         if (waitTime > 0) {
-          this.refire_.cancel();
-          this.refire_.schedule(waitTime);
+          this.expirePendingRecognizers_.cancel();
+          this.expirePendingRecognizers_.schedule(waitTime);
         }
       }
       event.stopPropagation();
@@ -458,15 +457,17 @@ export class Gestures {
     return waitTime;
   }
 
-  maybeRefireLastEvent_() {
+  stopTrackingExpiredRecognizers_() {
     const now = Date.now();
     for (let i = 0; i < this.recognizers_.length; i++) {
-      if (this.ready_[i] || this.pending_[i] && this.pending_[i] > now) {
-        return;
+      if (!this.ready_[i] && this.pending_[i] && this.pending_[i] < now) {
+        this.stopTracking_(i);
       }
     }
-    this.lastEventTarget_.dispatchEvent(new Event(this.lastEventType_));
-    if (this.lastEventType_ == 'touchend') {
+  }
+
+  refireLastTouchEnd_() {
+    if (this.lastEventTarget_) {
       this.lastEventTarget_.click();
     }
   }
@@ -503,7 +504,7 @@ export class Gestures {
     const waitTime = this.findWaitTime_();
     if (waitTime < 2) {
       // We waited long enough.
-      this.refire_.cancel();
+      this.expirePendingRecognizers_.cancel();
       this.startEventing_(readyIndex);
       return;
     }
@@ -548,6 +549,9 @@ export class Gestures {
     this.pending_[index] = 0;
     if (!this.ready_[index]) {
       this.recognizers_[index].acceptCancel();
+      if (this.recognizers_[index].getType() == 'tapzoom') {
+        this.refireLastTouchEnd_();
+      }
     }
   }
 
