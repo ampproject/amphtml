@@ -3610,7 +3610,7 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
   const layout =
       CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr);
 
-  // height="auto" is only allowed if the layout is FLEX_ITEM.
+  // Only FLEX_ITEM allows for height to be set to auto.
   if (height.isAuto && layout !== amp.validator.AmpLayout.Layout.FLEX_ITEM) {
     if (amp.validator.LIGHT) {
       result.status = amp.validator.ValidationResult.Status.FAIL;
@@ -3639,11 +3639,12 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
     }
     return;
   }
-  // Check other constraints imposed by the particular layouts.
+  // FIXED, FIXED_HEIGHT, FLUID, INTRINSIC, RESPONSIVE must have height set.
   if ((layout === amp.validator.AmpLayout.Layout.FIXED ||
        layout === amp.validator.AmpLayout.Layout.FIXED_HEIGHT ||
-       layout === amp.validator.AmpLayout.Layout.RESPONSIVE ||
-       layout === amp.validator.AmpLayout.Layout.FLUID) &&
+       layout === amp.validator.AmpLayout.Layout.FLUID ||
+       layout === amp.validator.AmpLayout.Layout.INTRINSIC ||
+       layout === amp.validator.AmpLayout.Layout.RESPONSIVE) &&
       !height.isSet) {
     if (amp.validator.LIGHT) {
       result.status = amp.validator.ValidationResult.Status.FAIL;
@@ -3656,6 +3657,7 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
     }
     return;
   }
+  // For FIXED_HEIGHT if width is set it must be auto.
   if (layout === amp.validator.AmpLayout.Layout.FIXED_HEIGHT && width.isSet &&
       !width.isAuto) {
     if (amp.validator.LIGHT) {
@@ -3670,9 +3672,11 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
     }
     return;
   }
+  // FIXED, FLUID, INTRINSIC, RESPONSIVE must have width set and not be auto.
   if (layout === amp.validator.AmpLayout.Layout.FIXED ||
-      layout === amp.validator.AmpLayout.Layout.RESPONSIVE ||
-      layout === amp.validator.AmpLayout.Layout.FLUID) {
+      layout === amp.validator.AmpLayout.Layout.FLUID ||
+      layout === amp.validator.AmpLayout.Layout.INTRINSIC ||
+      layout === amp.validator.AmpLayout.Layout.RESPONSIVE) {
     if (!width.isSet) {
       if (amp.validator.LIGHT) {
         result.status = amp.validator.ValidationResult.Status.FAIL;
@@ -3697,7 +3701,9 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
       return;
     }
   }
-  if (layout === amp.validator.AmpLayout.Layout.RESPONSIVE &&
+  // INTRINSIC, RESPONSIVE must have same units for height and width.
+  if ((layout === amp.validator.AmpLayout.Layout.INTRINSIC ||
+       layout === amp.validator.AmpLayout.Layout.RESPONSIVE) &&
       width.unit !== height.unit) {
     if (amp.validator.LIGHT) {
       result.status = amp.validator.ValidationResult.Status.FAIL;
@@ -3711,6 +3717,7 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
     }
     return;
   }
+  // RESPONSIVE only allows heights attribute.
   if (heightsAttr !== undefined &&
       layout !== amp.validator.AmpLayout.Layout.RESPONSIVE) {
     if (amp.validator.LIGHT) {

@@ -239,6 +239,7 @@ message AmpLayout {
     FILL = 6;
     FLEX_ITEM = 7;
     FLUID = 8;
+    INTRINSIC = 9;
   }
   // Specifies which layouts are supported by this element.
   repeated Layout supported_layouts = 1;

@@ -25,7 +25,7 @@ min_validator_revision_required: 295
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 545
+spec_file_revision: 546
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -1206,10 +1206,10 @@ tags: {
   attrs: {
     name: "href"
     value_url: {
+      # Maintain the same whitelist of protocols here as for the <CITE> tag.
       allow_empty: true
       allow_relative: true
       allowed_protocol: "ftp"
-      allowed_protocol: "geo"
       allowed_protocol: "http"
       allowed_protocol: "https"
       allowed_protocol: "mailto"
@@ -2887,6 +2887,7 @@ tags {
   attrs: {
     name: "template"
     mandatory: true
+    dispatch_key: NAME_DISPATCH
   }
 }
 tags {
@@ -2897,20 +2898,8 @@ tags {
   attrs: {
     name: "submit-error"
     mandatory: true
-  }
-}
-tags {
-  tag_name: "DIV"
-  spec_name: "FORM > DIV [submit-error][template]"
-  mandatory_parent: "FORM"
-  attrs: { name: "align" }
-  attrs: {
-    name: "submit-error"
-    mandatory: true
-  }
-  attrs: {
-    name: "template"
-    mandatory: true
+    # Avoid triggering errors for non-form divs.
+    dispatch_key: NAME_DISPATCH
   }
 }
 attr_lists: {
@@ -3542,6 +3531,7 @@ tags: {  # <amp-img>
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
@@ -3557,6 +3547,7 @@ tags: {  # <amp-layout>
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
