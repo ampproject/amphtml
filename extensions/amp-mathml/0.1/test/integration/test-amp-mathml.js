@@ -18,9 +18,17 @@ import {poll} from '../../../../../testing/iframe';
 
 describe.configure().skipSafari().skipEdge().run('amp-mathml', function() {
   const extensions = ['amp-mathml'];
+  const mathbody = `
+    <div id="mathml-test">
+      <amp-mathml
+        layout="container"
+        data-formul  a="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]">
+      </amp-mathml>
+    </div>
+  `;
 
   describes.integration('mathml render', {
-    body: '<div id="mathml-test"><amp-mathml layout="container" data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"></amp-mathml></div>',
+    body: mathbody,
     extensions,
   }, env => {
 
@@ -28,14 +36,14 @@ describe.configure().skipSafari().skipEdge().run('amp-mathml', function() {
     beforeEach(() => {
       win = env.win;
     });
-    it('should create iframe that is resized to something bigger than 1px', () => {
+    it('should create an iframe larger than 1px', () => {
       const mathiframe = win.document.getElementById('mathml-test');
       const openedPromise = waitForIframeToLoad(win.document);
 
       return openedPromise.then(() => {
         this.timeout(15000);
-        expect(mathiframe.innerHeight>1).to.be(true);
-        expect(mathiframe.innerWidth>1).to.be(true);
+        expect(mathiframe.innerHeight > 1).to.be(true);
+        expect(mathiframe.innerWidth > 1).to.be(true);
       });
     });
   });
