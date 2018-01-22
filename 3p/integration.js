@@ -70,6 +70,7 @@ import {facebook} from './facebook';
 import {github} from './github';
 import {mathml} from './mathml';
 import {reddit} from './reddit';
+import {beopinion} from './beopinion';
 import {twitter} from './twitter';
 
 import {_ping_} from '../ads/_ping_';
@@ -398,6 +399,7 @@ register('sogouad', sogouad);
 register('sortable', sortable);
 register('sovrn', sovrn);
 register('spotx', spotx);
+register('beopinion', beopinion);
 register('sunmedia', sunmedia);
 register('swoop', swoop);
 register('taboola', taboola);
