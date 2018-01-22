@@ -162,22 +162,25 @@ class AmpWistiaPlayer extends AMP.BaseElement {
       return; // We only process valid JSON.
     }
 
-    if (data['method'] == 'statechange') {
-      const state = (data['args'] ? data['args']['_state'] : undefined)
-      if (state === 'playing') {
-        this.element.dispatchCustomEvent(VideoEvents.PLAYING);
-      } else if (state === 'paused') {
-        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-      } else if (state === 'ended') {
-        this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-        this.element.dispatchCustomEvent(VideoEvents.ENDED);
-      }
-    } else if (data['method'] == 'mutechange') {
-      const isMuted = (data['args'] ? data['args']['_isMuted'] : undefined)
-      if (isMuted === true) {
-        this.element.dispatchCustomEvent(VideoEvents.MUTED);
-      } else if (isMuted === false) {
-        this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
+    if (data['method'] == '_trigger') {
+      const playerEvent = (data['args'] ? data['args'][0] : undefined);
+      if (playerEvent === 'statechange') {
+        const state = (data['args'] ? data['args'][1] : undefined);
+        if (state === 'playing') {
+          this.element.dispatchCustomEvent(VideoEvents.PLAYING);
+        } else if (state === 'paused') {
+          this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+        } else if (state === 'ended') {
+          this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+          this.element.dispatchCustomEvent(VideoEvents.ENDED);
+        }
+      } else if (playerEvent == 'mutechange') {
+        const isMuted = (data['args'] ? data['args'][1] : undefined);
+        if (isMuted === true) {
+          this.element.dispatchCustomEvent(VideoEvents.MUTED);
+        } else if (isMuted === false) {
+          this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
+        }
       }
     }
   }
