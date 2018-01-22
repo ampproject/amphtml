@@ -17,6 +17,7 @@
 import {
   filterSplice,
   findIndex,
+  find,
   fromIterator,
 } from '../../../src/utils/array';
 
@@ -69,6 +70,29 @@ describe('findIndex', function() {
 
   it('should pass the original array as the 3rd param to the predicate', () => {
     findIndex([1, 2, 3], (element, i, array) => {
+      expect(array).to.deep.equal([1, 2, 3]);
+    });
+  });
+});
+
+describe('find', function() {
+  it('should return the index of first matching element', () => {
+    const found = find([4, 1, 5, 3, 4, 5], elem => elem > 4);
+    expect(found).to.equal(5);
+  });
+
+  it('should return undefined if no matching element', () => {
+    const found = find([4, 1, 5, 3, 4, 5], elem => elem > 5);
+    expect(found).to.be.undefined;
+  });
+
+  it('should pass index as the 2nd param to the predicate function', () => {
+    const found = find([4, 1, 5, 0, 4, 5], (elem, i) => i == 3);
+    expect(found).to.equal(0);
+  });
+
+  it('should pass the original array as the 3rd param to the predicate', () => {
+    find([1, 2, 3], (element, i, array) => {
       expect(array).to.deep.equal([1, 2, 3]);
     });
   });
