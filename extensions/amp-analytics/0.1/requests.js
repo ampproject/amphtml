@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
+import {user, dev} from '../../../src/log';
 import {isObject} from '../../../src/types';
 import {hasOwn, map} from '../../../src/utils/object';
 import {filterSplice} from '../../../src/utils/array';
@@ -25,6 +25,11 @@ import {
 } from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
+import {batchSegmentDef, BatchingPluginFunctions} from './batching-plugins';
+import {parseQueryString} from '../../../src/url';
+import {dict} from '../../../src/utils/object';
+
+const TAG = 'AMP-ANALYTICS';
 
 
 export class RequestHandler {
@@ -47,6 +52,21 @@ export class RequestHandler {
     // TODO: to support intervalDelay that start timeout during construction.
     this.maxDelay_ = Number(request['maxDelay']) || 0; //unit is sec
 
+    /** @private @const {boolean} */
+    this.isBatched_ = !!this.maxDelay_;
+
+    /** @private @const {string} */
+    this.batchPluginId_ = request['batchPlugin'];
+
+    user().assert((this.batchPluginId_ ? this.isBatched_ : true),
+        'Invalid request: batchPlugin cannot be set on non-batched request');
+
+    /** @const {?function(string, !Array<!batchSegmentDef>)} */
+    this.batchingPlugin_ = this.batchPluginId_
+      ? user().assert(BatchingPluginFunctions[this.batchPluginId_],
+          `Invalid request: unsupported batch plugin ${this.batchPluginId_}`)
+      : null;
+
     /** @private {!./variables.VariableService} */
     this.variableService_ = variableServiceFor(this.win);
 
@@ -61,6 +81,9 @@ export class RequestHandler {
 
     /** @private {!Array<!Promise<string>>}*/
     this.extraUrlParamsPromise_ = [];
+
+    /** @private {!Array<!Promise<!batchSegmentDef>>} */
+    this.batchSegmentPromises_ = [];
 
     /** @private {!../../../src/preconnect.Preconnect} */
     this.preconnect_ = preconnect;
@@ -92,6 +115,7 @@ export class RequestHandler {
   send(configParams, trigger, expansionOption) {
     this.lastTrigger_ = trigger;
     const triggerParams = trigger['extraUrlParams'];
+
     if (!this.baseUrlPromise_) {
       expansionOption.freezeVar('extraUrlParams');
       this.baseUrlTemplatePromise_ =
@@ -102,15 +126,30 @@ export class RequestHandler {
       });
     };
 
-    this.extraUrlParamsPromise_.push(
-        this.expandExtraUrlParams_(configParams, triggerParams, expansionOption)
-            .then(expandExtraUrlParams => {
-              return this.urlReplacementService_.expandAsync(
-                  expandExtraUrlParams, undefined, this.whiteList_);
-            })
-            .then(finalExtraUrlParams => {
-              return finalExtraUrlParams;
-            }));
+    const extraUrlParamsPromise = this.expandExtraUrlParams_(
+        configParams, triggerParams, expansionOption)
+        .then(expandExtraUrlParams => {
+          // Construct the extraUrlParamsString: Remove null param and encode component
+          const expandedExtraUrlParamsStr =
+              this.getExtraUrlParamsString_(expandExtraUrlParams);
+          return this.urlReplacementService_.expandAsync(
+              expandedExtraUrlParamsStr, undefined, this.whiteList_);
+        });
+
+    if (this.batchingPlugin_) {
+      const batchSegment = dict({
+        'trigger': trigger['on'],
+        'timestamp': this.win.Date.now(),
+        'extraUrlParams': null,
+      });
+      this.batchSegmentPromises_.push(extraUrlParamsPromise.then(str => {
+        batchSegment['extraUrlParams'] =
+                parseQueryString(str);
+        return batchSegment;
+      }));
+    }
+
+    this.extraUrlParamsPromise_.push(extraUrlParamsPromise);
 
     return this.trigger_();
   }
@@ -130,7 +169,7 @@ export class RequestHandler {
    * @private
    */
   trigger_() {
-    if (this.maxDelay_ == 0) {
+    if (!this.isBatched_) {
       return this.fire_();
     }
     // If is batched
@@ -156,25 +195,66 @@ export class RequestHandler {
     const extraUrlParamsPromise = this.extraUrlParamsPromise_;
     const baseUrlTemplatePromise = this.baseUrlTemplatePromise_;
     const baseUrlPromise = this.baseUrlPromise_;
+    const batchSegmentsPromise = this.batchSegmentPromises_;
     const lastTrigger = /** @type {!JsonObject} */ (this.lastTrigger_);
     this.reset_();
-    return Promise.all(extraUrlParamsPromise).then(paramStrs => {
-      filterSplice(paramStrs, item => {return !!item;});
-      const extraUrlParamsStr = paramStrs.join('&');
-      return baseUrlTemplatePromise.then(preUrl => {
-        this.preconnect_.url(preUrl, true);
-        return baseUrlPromise.then(request => {
-          if (request.indexOf('${extraUrlParams}') >= 0) {
-            request = request.replace('${extraUrlParams}', extraUrlParamsStr);
-          } else {
-            request = appendEncodedParamStringToUrl(request, extraUrlParamsStr);
-          }
-          return request;
-        }).then(request => {
-          this.handler_(request, lastTrigger);
-          return request;
+
+    return baseUrlTemplatePromise.then(preUrl => {
+      this.preconnect_.url(preUrl, true);
+      return baseUrlPromise.then(baseUrl => {
+        let requestUrlPromise;
+        if (this.batchingPlugin_) {
+          requestUrlPromise =
+              this.constructBatchSegments_(baseUrl, batchSegmentsPromise);
+        } else {
+          requestUrlPromise =
+              this.constructExtraUrlParamStrs_(baseUrl, extraUrlParamsPromise);
+        }
+        return requestUrlPromise.then(requestUrl => {
+          this.handler_(requestUrl, lastTrigger);
+          return requestUrl;
         });
       });
+    });
+  }
+
+  /**
+   * Construct the final requestUrl with baseUrl and extraUrlParams
+   * @param {string} baseUrl
+   * @param {!Array<!Promise<string>>} extraUrlParamStrsPromise
+   */
+  constructExtraUrlParamStrs_(baseUrl, extraUrlParamStrsPromise) {
+    return Promise.all(extraUrlParamStrsPromise).then(paramStrs => {
+      filterSplice(paramStrs, item => {return !!item;});
+      const extraUrlParamsStr = paramStrs.join('&');
+      let requestUrl;
+      if (baseUrl.indexOf('${extraUrlParams}') >= 0) {
+        requestUrl = baseUrl.replace('${extraUrlParams}', extraUrlParamsStr);
+      } else {
+        requestUrl = appendEncodedParamStringToUrl(baseUrl, extraUrlParamsStr);
+      }
+      return requestUrl;
+    });
+  }
+
+  /**
+   * Construct the final requestUrl by calling the batch plugin function
+   * @param {string} baseUrl
+   * @param {!Array<!Promise<batchSegmentDef>>} batchSegmentsPromise
+   */
+  constructBatchSegments_(baseUrl, batchSegmentsPromise) {
+    dev().assert(this.batchingPlugin_ &&
+        typeof this.batchingPlugin_ == 'function', 'Should never call ' +
+        'constructBatchSegments_ with invalid batchingPlugin function');
+
+    return Promise.all(batchSegmentsPromise).then(batchSegments => {
+      try {
+        return this.batchingPlugin_(baseUrl, batchSegments);
+      } catch (e) {
+        dev().error(TAG,
+            `Error: batchPlugin function ${this.batchPluginId_}`, e);
+        return '';
+      }
     });
   }
 
@@ -186,6 +266,7 @@ export class RequestHandler {
     this.baseUrlPromise_ = null;
     this.baseUrlTemplatePromise_ = null;
     this.extraUrlParamsPromise_ = [];
+    this.batchSegmentPromises_ = [];
     this.timeoutId_ = null;
     this.lastTrigger_ = null;
     this.sendPromise_ = null;
@@ -196,7 +277,7 @@ export class RequestHandler {
    * @param {?JsonObject} configParams
    * @param {?JsonObject} triggerParams
    * @param {!./variables.ExpansionOptions} expansionOption
-   * @return {!Promise<string>}
+   * @return {!Promise<!JsonObject>}
    * @private
    */
   expandExtraUrlParams_(configParams, triggerParams, expansionOption) {
@@ -220,7 +301,7 @@ export class RequestHandler {
       }
     }
     return Promise.all(requestPromises).then(() => {
-      return this.getExtraUrlParamsString_(params);
+      return params;
     });
   }
 
