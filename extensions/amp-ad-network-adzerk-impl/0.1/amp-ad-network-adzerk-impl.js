@@ -24,9 +24,12 @@ import {urls} from '../../../src/config';
 import {tryParseJson} from '../../../src/json';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {getAmpdoc} from '../../../src/service';
 import {Services} from '../../../src/services';
 import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
+import {
+  CachedTemplateDef,
+  AmpAdTemplate
+} from '../../amp-ad-template/0.1/amp-ad-template';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-adzerk-impl';
@@ -40,25 +43,11 @@ export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-template-amp-creative';
     }} */
 let AmpTemplateCreativeDef;
 
-/** @typedef {{
-      template: string,
-      metadata: !CreativeMetaDataDef,
-      access: number
-    }} */
-let CachedTemplateDef;
-
 /** @private {!Object<number, !Promise<!CachedTemplateDef>>} */
 const TemplateCache = {};
 
-/** @private {!Object<string, string|boolean>} */
-const TEMPLATE_CORS_CONFIG = {
-  mode: 'cors',
-  method: 'GET',
-  // This should be cached across publisher domains, so don't append
-  // __amp_source_origin to the URL.
-  ampCors: false,
-  credentials: 'omit',
-};
+/** @private {?AmpAdTemplate} */
+let ampAdTemplate;
 
 /**
  * Fast Fetch implementation for AdZerk network that allows AMP creative
@@ -91,6 +80,9 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
 
     /** @private {?AmpTemplateCreativeDef} */
     this.ampCreativeJson_ = null;
+
+    ampAdTemplate = ampAdTemplate ||
+        new AmpAdTemplate(this.win, this.parseTemplate_.bind(this));
   }
 
   /**
@@ -128,61 +120,15 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
   }
 
   /**
-   * Fetch and parse template from AMP cache.  Result is stored in global in
-   * order to reduce overhead when template is used multiple times.
-   * @param {number} templateId
-   * @return {!Promise<!CachedTemplateDef>}
-   * @private
-   */
-  retrieveTemplate_(templateId) {
-    // Retrieve template from AMP cache.
-    TemplateCache[templateId] = TemplateCache[templateId] ||
-        Services.xhrFor(this.win)
-            .fetchText(getMode(this.win).localDev ?
-              `http://ads.localhost:${this.win.location.port}` +
-                `/a4a_template/adzerk/${templateId}` :
-              `${urls.cdn}/c/s/adzerk/${templateId}`,
-            TEMPLATE_CORS_CONFIG)
-            .then(response => response.text())
-            .then(template => this.parseTemplate_(template));
-    TemplateCache[templateId].access = Date.now();
-    const cacheKeys = /**@type {!Array<number>}*/(Object.keys(TemplateCache));
-    if (cacheKeys.length > 5) {
-      dev().warn(TAG, 'Trimming template cache');
-      // Evict oldest entry to ensure memory usage is minimized.
-      cacheKeys.sort((a, b) =>
-        TemplateCache[b].access - TemplateCache[a].access);
-      delete TemplateCache[cacheKeys[cacheKeys.length - 1]];
-    }
-    dev().assert(TemplateCache[templateId]);
-    return TemplateCache[templateId];
-  }
-
-  /**
    * Extracts metadata from template head used for preferential render.
    * @param {string} template
-   * @return {!CachedTemplateDef}
    * @private
    */
-  parseTemplate_(template) {
+  parseTemplate_(template) { debugger;
     // TODO(keithwrightbos): support dynamic creation of amp-pixel and
     // amp-analytics.
-    let dataString = '';
-    if (this.ampCreativeJson_ && this.ampCreativeJson_.templateMacroValues) {
-      dataString = '<amp-state id="model"><script type="application/json">' +
-          JSON.stringify(this.ampCreativeJson_.templateMacroValues) +
-          '</script></amp-state>';
-    }
-    const splitTemplate = template.split('<amp-state id="model"></amp-state>');
-    const templateWithAmpState =
-        splitTemplate[0] + dataString + splitTemplate[1];
     this.creativeMetadata_ = /** @type {!CreativeMetaDataDef} */
-        (super.getAmpAdMetadata(templateWithAmpState));
-    return {
-      template: templateWithAmpState,
-      metadata: this.creativeMetadata_,
-      access: Date.now(),
-    };
+        (super.getAmpAdMetadata(template));
   }
 
   /** @override */
@@ -203,9 +149,15 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
         return Promise.reject(NO_CONTENT_RESPONSE);
       }
       // TODO(keithwrightbos): macro value validation?  E.g. http invalid?
-      return this.retrieveTemplate_(this.ampCreativeJson_.ampCreativeTemplateId)
-          .then(parsedTemplate =>
-            utf8Encode(parsedTemplate.metadata.minifiedCreative))
+      return ampAdTemplate
+          .retrieveTemplate(this.ampCreativeJson_.ampCreativeTemplateId)
+          .templatePromise
+          .then(unusedParsedTemplate =>
+              // We don't want to use the above parsed template, as it has not
+              // been minified. However, by the time this promise resolves, we
+              // are guaranteed to have this.creativeMetadata_.minifiedCreative
+              // available.
+              utf8Encode(this.creativeMetadata_.minifiedCreative))
           .catch(error => {
             dev().warn(TAG, 'Error fetching/expanding template',
                 this.ampCreativeJson_, error);
@@ -223,9 +175,10 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
   /** @override */
   onCreativeRender(unusedMetadata) {
     if (this.ampCreativeJson_ && this.ampCreativeJson_.templateMacroValues) {
-      const bind = new Bind(getAmpdoc(this.iframe.contentWindow.document.body),
+      ampAdTemplate.populateTemplate(
+          this.ampCreativeJson_.templateMacroValues,
+          this.iframe.contentWindow.document.body,
           this.iframe.contentWindow);
-      bind.setState(this.ampCreativeJson_.templateMacroValues);
     }
   }
 }

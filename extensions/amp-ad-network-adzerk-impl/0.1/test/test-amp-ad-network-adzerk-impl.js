@@ -97,28 +97,29 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
           IMG_SRC: 'https://some.img.com?a=b',
         },
       };
-      const template = '<!doctype html>' +
-          '<html ⚡4ads><head>' +
+      const template = '<!doctype html><html ⚡4ads><head>' +
           '<meta charset="utf-8">' +
-          '<meta name="viewport" content="width=device-width,' +
-          'minimum-scale=1">' +
+          '<meta name="viewport" content="width=device-width, minimum-scale=1">' +
           '<style amp4ads-boilerplate>body{visibility:hidden}</style>' +
           '<style amp-custom>amp-fit-text: {border: 1px;}</style>' +
           '<script async src="https://cdn.ampproject.org/amp4ads-v0.js">' +
-          '</script>' +
-          '<script async custom-element="amp-fit-text" ' +
+          '</script><script async custom-element="amp-fit-text" ' +
           'src="https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"></script>' +
           '<link rel="stylesheet" type="text/css" ' +
           'href="https://fonts.googleapis.com/css?family=Raleway">' +
-        '</head>' +
-        '<body><template type="amp-mustache">' +
-          '<amp-fit-text width="300" height="200">hello {{USER_NAME}}! ' +
-          '{{USER_NUM}}</amp-fit-text>' +
-          'Expect encoding {{HTML_CONTENT}}' +
-          '<amp-img src={{IMG_SRC}}/>' +
-          'Missing {{UNKNOWN}} item' +
-        '</template></body>' +
-        '</html>';
+          '</head><body>' +
+          '<amp-fit-text width="300" height="200" ' +
+          '[text]="\'hello \' + USER_NAME + \'!\' + USER_NUM "></amp-fit-text>' +
+          '<p [text]="\'Expect encoding \' + HTML_CONTENT"></p>' +
+          '<amp-img [src]="IMG_SRC" [srcset]="IMG_SRC"/>' +
+          '<p [text]="\'Missing \' + UNKNOWN + \' item\'"></p>' +
+          '<script amp-ad-metadata type=application/json>' +
+          '{ "ampRuntimeUtf16CharOffsets" : [ 235, 414 ], ' +
+          '"customElementExtensions": [ "amp-bind" ], ' +
+          '"extensions": [ { ' +
+          '"custom-element": "amp-fit-text",' +
+          '"src": "https://cdn.ampproject.org/v0/amp-fit-text-0.1.js" } ] }' +
+          '</script></body></html>';
       fetchTextMock.withArgs(
           'https://cdn.ampproject.org/c/s/adzerk/456',
           {
@@ -141,21 +142,28 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
           },
           () => {})
           .then(buffer => utf8Decode(buffer))
-          .then(creative => {
-            expect(creative).to.equal(
-                '<html ⚡4ads=""><head><meta charset="utf-8">' +
-              '<meta name="viewport" content="width=device-width,' +
-              'minimum-scale=1"><style amp-custom="">amp-fit-text: ' +
-              '{border: 1px;}</style></head><body><amp-fit-text ' +
-              'width="300" height="200">hello some_user! 9876</amp-fit-text>' +
-              'Expect encoding &lt;img src=https://img.com/&gt;<amp-img ' +
-              'src="https://some.img.com/?a=b/">Missing  item</amp-img>' +
-              '</body></html>');
-            expect(impl.getAmpAdMetadata()).to.jsonEqual({
-              minifiedCreative: creative,
-              customElementExtensions: ['amp-fit-text'],
-              customStylesheets: [
+          .then(creative => { debugger;
+            let resolver;
+            const promise = new Promise((resolve, unusedReject) => {
+              resolver = resolve;
+            });
+            impl.iframe = doc.createElement('iframe');
+            impl.iframe.setAttribute('srcdoc', creative);
+            impl.iframe.onload = () => resolver();
+            impl.element.appendChild(impl.iframe);
+            return promise.then(() => { debugger;
+              const iframeDoc = impl.iframe.contentWindow.document;
+              iframeDoc.open();
+              iframeDoc.write(creative);
+              iframeDoc.close();
+              impl.onCreativeRender();
+              expect(doc.documentElement.outerHTML).to.equal('');
+              expect(impl.getAmpAdMetadata()).to.jsonEqual({
+                minifiedCreative: creative,
+                customElementExtensions: ['amp-fit-text'],
+                customStylesheets: [
                 {'href': 'https://fonts.googleapis.com/css?family=Raleway'}],
+              });
             });
           });
     });

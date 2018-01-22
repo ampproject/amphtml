@@ -17,6 +17,7 @@
 import {childElementByTag, scopedQuerySelector} from '../dom';
 import {getService, registerServiceBuilder} from '../service';
 import {dev, user} from '../log';
+import {toWin} from '../types';
 
 
 /**
@@ -27,7 +28,7 @@ import {dev, user} from '../log';
 
 
 /**
- * @typedef {function(new:BaseTemplate, !Element, !Window)}
+ * @typedef {function(new:BaseTemplate, !Element)}
  */
 let TemplateClassDef;
 
@@ -43,16 +44,13 @@ const PROP_PROMISE_ = '__AMP_WAIT_';
  */
 export class BaseTemplate {
 
-  /**
-   * @param {!Element} element
-   * @param {!Window} win
-   */
+  /** @param {!Element} element */
   constructor(element, win) {
     /** @public @const */
     this.element = element;
 
     /** @public @const {!Window} */
-    this.win = element.ownerDocument.defaultView || win;
+    this.win = element.ownerDocument.defaultView;
 
     this.compileCallback();
   }
@@ -268,7 +266,7 @@ export class Templates {
     }
 
     promise = this.waitForTemplateClass_(element, type).then(templateClass => {
-      const impl = element[PROP_] = new templateClass(element, this.win_);
+      const impl = element[PROP_] = new templateClass(element);
       delete element[PROP_PROMISE_];
       return impl;
     });
