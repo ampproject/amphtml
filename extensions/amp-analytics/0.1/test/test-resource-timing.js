@@ -185,13 +185,28 @@ describes.fakeWin('resourceTiming', {amp: true}, env => {
         'host': '(foo|bar).example.com',
         'path': '/lib.js',
       },
-      'foo': {
-        'host': 'foo.example.com',
+      'any': {},
+    };
+
+    return runSerializeTest([entry], spec, 'foo_bar-script-100-500-7200');
+  });
+
+  it('should accept empty per-resource specs', () => {
+    const entry = newPerformanceResourceTiming(
+        'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
+        false);
+
+    const spec = newResourceTimingSpec();
+    // Note that both spec'd resources match.
+    spec.resources = {
+      'any': {},
+      'foo_bar': {
+        'host': '(foo|bar).example.com',
         'path': '/lib.js',
       },
     };
 
-    return runSerializeTest([entry], spec, 'foo_bar-script-100-500-7200');
+    return runSerializeTest([entry], spec, 'any-script-100-500-7200');
   });
 
   it('should should only report resources if the host matches', () => {
