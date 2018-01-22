@@ -44,7 +44,9 @@ export class AmpAdTemplate {
 
   /**
    * @param {!Window} win
-   * @param {function(string)=} opt_onRetrieve
+   * @param {function(string)=} opt_onRetrieve Function to be executed upon
+   *   the successful retrieval of a template. If one is not supplied, we will
+   *   default to a no-op.
    */
   constructor(win, opt_onRetrieve = unusedTemplate => {}) {
     /** @private {!Window} */
