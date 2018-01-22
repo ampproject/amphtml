@@ -90,7 +90,7 @@ class AmpWistiaPlayer extends AMP.BaseElement {
     iframe.setAttribute('scrolling', 'no');
     iframe.setAttribute('allowtransparency', '');
     iframe.setAttribute('allowfullscreen', 'true');
-    iframe.src = '//fast.wistia.net/embed/iframe/' + encodeURIComponent(
+    iframe.src = 'https://fast.wistia.net/embed/iframe/' + encodeURIComponent(
         mediaId);
     this.applyFillContent(iframe);
     this.iframe_ = iframe;
