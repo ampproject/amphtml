@@ -25,6 +25,7 @@ import {isArray} from '../../../src/types';
 import {parseUrl} from '../../../src/url';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
 import {throttle} from '../../../src/utils/rate-limit';
+import {isProtocolValid} from '../../../src/url';
 
 
 /**
@@ -425,6 +426,8 @@ export class Bookend {
     };
 
     if (jsonLd && isArray(jsonLd['image']) && jsonLd['image'].length) {
+      user().assert(isProtocolValid(jsonLd['image']),
+          `Unsupported protocol for story image URL ${jsonLd['image']}`);
       metadata.imageUrl = jsonLd['image'][0];
     }
 
