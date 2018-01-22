@@ -85,7 +85,8 @@ class AmpWistiaPlayer extends AMP.BaseElement {
             'for <amp-wistia-player> %s',
         this.element);
     const iframe = this.element.ownerDocument.createElement('iframe');
-    iframe.setAttribute('title', this.element.getAttribute('title') || 'Wistia Video Player');
+    iframe.setAttribute('title',
+        this.element.getAttribute('title') || 'Wistia Video Player');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('scrolling', 'no');
     iframe.setAttribute('allowtransparency', '');
