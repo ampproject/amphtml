@@ -211,7 +211,6 @@ export class LayoutLayers {
       parent.remove(layout);
     }
 
-    // TODO(jridgewell) child elements will disappear into the ether.
     layout.undeclareLayer();
   }
 
@@ -663,9 +662,19 @@ export class LayoutElement {
       return;
     }
 
+    const element = this.element_;
+    const win = element.ownerDocument.defaultView;
+    // If it remains fixed, it will still be a layer.
+    if (computedStyle(win, element).position === 'fixed') {
+      return;
+    }
+
     this.isLayer_ = false;
-    this.transfer_(/** @type {!LayoutElement} */ (dev().assert(
-        this.getParentLayer())));
+    // Handle if this was a fixed position layer (and therefore had null parent
+    // layer).
+    const parent = this.getParentLayer() ||
+        LayoutElement.getParentLayer(this.element_, true);
+    this.transfer_(/** @type {!LayoutElement} */ (dev().assert(parent)));
   }
 
   /**
