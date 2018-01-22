@@ -374,6 +374,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   setActive(isActive) {
     if (isActive) {
       this.element.setAttribute('active', '');
+      this.beforeVisible();
       this.resumeCallback();
     } else {
       this.element.removeAttribute('active');
