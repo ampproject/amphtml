@@ -16,10 +16,8 @@
 
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {listenFor} from '../../../src/iframe-helper';
+import {getIframe} from '../../../src/3p-frame';
 import {removeElement} from '../../../src/dom';
-import {dashToUnderline} from '../../../src/string';
 import {user} from '../../../src/log';
 
 export class AmpYotpo extends AMP.BaseElement {
