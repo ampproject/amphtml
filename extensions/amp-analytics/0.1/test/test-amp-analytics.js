@@ -1947,6 +1947,23 @@ describes.realWin('amp-analytics', {
               'foo_bar-script-700-100-0');
     });
 
+    it('should url encode variables', () => {
+      const entry1 = newPerformanceResourceTiming(
+          'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
+          false);
+      const entry2 = newPerformanceResourceTiming(
+          'http://bar.example.com/lib.js', 'script', 700, 100, 80 * 1000, true);
+      const config = newConfig();
+      const spec = config['triggers'][0]['resourceTimingSpec'];
+      spec['encoding']['entry'] = '${key}?${startTime},${duration}';
+      spec['encoding']['delim'] = ':';
+      runResourceTimingTest(
+          [entry1, entry2], config,
+          'https://ping.example.com/endpoint?rt=' +
+              'foo_bar%3F100%2C500%3Afoo_bar%3F700%2C100');
+    });
+
+
     it('should ignore resourceTimingSpec outside of triggers', () => {
       const entry = newPerformanceResourceTiming(
           'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
