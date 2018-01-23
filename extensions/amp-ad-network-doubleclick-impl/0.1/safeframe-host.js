@@ -57,6 +57,7 @@ export class SafeframeApi {
     this.win = win;
     this.sentinel = sentinel;
     this.IntersectionObserver = null;
+    this.channel = null;
   }
 
   registerSafeframeListener() {
@@ -74,7 +75,6 @@ export class SafeframeApi {
                  'Frame contentWindow unavailable.');
     this.setupSafeframeApi();
     this.sendMessage(JSON.stringify(dict({'message': 'connect', 'c': data.c})));
-    this.startSendingGeom();
   }
 
   setupSafeframeApi() {
@@ -84,32 +84,41 @@ export class SafeframeApi {
 
   }
 
+  /**
+   *  Do not change name. This is named as 'send' as a hack to allow us to use
+   *  IntersectionObserver without needing to do any major refactoring of it.
+   */
   send(unused_trash, changes) {
-    console.log("Overwrote send");
-    console.log(JSON.stringify(changes));
+    this.sendGeom(changes);
   }
 
-  startSendingGeom() {
-
+  sendGeom(changes) {
+    const geomChanges = this.formatGeom(changes['changes'][0]);
+    newGeometry = JSON.stringify(geomChanges);
+    const geomMessage = JSON.stringify({
+      'uid': 1,
+      newGeometry,
+    });
+    this.sendMessage(geomMessage);
   }
 
-  formatGeom() {
+  formatGeom(changes) {
     const message =   {
-      'windowCoords_t': this.windowCoords.top,
-      'windowCoords_r': this.windowCoords.right,
-      'windowCoords_b': this.windowCoords.bottom,
-      'windowCoords_l': this.windowCoords.left,
-      'frameCoords_t': this.frameCoords.top,
-      'frameCoords_r': this.frameCoords.right,
-      'frameCoords_b': this.frameCoords.bottom,
-      'frameCoords_l': this.frameCoords.left,
-      'styleZIndex': this.styleZIndex,
-      'allowedExpansion_t': this.allowedExpansion.top,
-      'allowedExpansion_r': this.allowedExpansion.right,
-      'allowedExpansion_b': this.allowedExpansion.bottom,
-      'allowedExpansion_l': this.allowedExpansion.left,
-      'xInView': this.xInView,
-      'yInView': this.yInView
+      'windowCoords_t': changes.rootBounds.top,
+      'windowCoords_r': changes.rootBounds.right,
+      'windowCoords_b': changes.rootBounds.bottom,
+      'windowCoords_l': changes.rootBounds.left,
+      'frameCoords_t': changes.boundingClientRect.top,
+      'frameCoords_r': changes.boundingClientRect.right,
+      'frameCoords_b': changes.boundingClientRect.bottom,
+      'frameCoords_l': changes.boundingClientRect.left,
+      'styleZIndex': 0,
+      'allowedExpansion_t': 0,
+      'allowedExpansion_r': 0,
+      'allowedExpansion_b': 0,
+      'allowedExpansion_l': 0,
+      'xInView': 0,
+      'yInView': 0
     };
     return message;
   }
