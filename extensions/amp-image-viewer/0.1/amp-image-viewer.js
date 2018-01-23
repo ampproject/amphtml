@@ -380,20 +380,21 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @private */
   setupGestures_() {
-    const gesturesWithoutPreventDefault = Gestures.get(
-        dev().assertElement(this.image_),
+    this.gestures_ = Gestures.get(
+        this.element,
         /* opt_shouldNotPreventDefault */true
     );
-    gesturesWithoutPreventDefault.onPointerDown(() => {
+
+    this.gestures_.onPointerDown(() => {
       if (this.motion_) {
         this.motion_.halt();
+        event.preventDefault();
       }
     });
 
-    this.gestures_ = Gestures.get(this.element);
-
     // Zoomable.
     this.gestures_.onGesture(DoubletapRecognizer, e => {
+      event.preventDefault();
       let newScale;
       if (this.scale_ == 1) {
         newScale = this.maxScale_;
@@ -408,6 +409,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     });
 
     this.gestures_.onGesture(TapzoomRecognizer, e => {
+      event.preventDefault();
       this.onTapZoom_(e.data.centerClientX, e.data.centerClientY,
           e.data.deltaX, e.data.deltaY);
       if (e.data.last) {
@@ -417,6 +419,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     });
 
     this.gestures_.onGesture(PinchRecognizer, e => {
+      event.preventDefault();
       this.onPinchZoom_(e.data.centerClientX, e.data.centerClientY,
           e.data.deltaX, e.data.deltaY, e.data.dir);
       if (e.data.last) {
