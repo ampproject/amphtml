@@ -22,6 +22,7 @@ import {
 } from '../variables';
 import {adopt} from '../../../../src/runtime';
 import * as sinon from 'sinon';
+import {Services} from '../../../../src/services';
 
 adopt(window);
 
@@ -127,56 +128,63 @@ describe('amp-analytics.VariableService', function() {
         new ExpansionOptions({'foo': ' Hello world! '}))
         .then(actual => expect(actual).to.equal('')));
 
-  describe('filter:', () => {
-    const vars = new ExpansionOptions({'foo': ' Hello world! '});
+  describes.fakeWin('filters', {amp: true}, env => {
+    let ampdoc;
+    let urlReplacementService;
 
     beforeEach(() => {
+      ampdoc = env.ampdoc;
+      urlReplacementService = Services.urlReplacementsForDoc(ampdoc);
       sandbox.stub(variables, 'isFilterExperimentOn_').callsFake(() => true);
     });
 
     function check(input, output) {
-      return variables.expandTemplate(input, vars).then(actual =>
-        expect(actual).to.equal(output));
+      const filters = variables.getFilters();
+      debugger;
+      const expanded = urlReplacementService.expandAsync(input, filters);
+      return expect(expanded).to.eventually.equal(output);
     }
 
-    it('default works', () => check('${bar|default:baz}', 'baz'));
+    it('default works', () => check('DEFAULT(one,two)', 'one'));
+    it('default works without first arg', () => check('DEFAULT(,two)', 'two'));
 
-    it('hash works', () => check('${foo|hash}',
-        '8R9LfzzIKtjQOwqNEUN5Tw3-oUTgU2UvtufGxDh4wRiiacsW5yga9nqHSYBoBkkp'));
+    it('hash works', () => check('HASH(test)',
+        'doQSMg97CqWBL85CjcRwazyuUOAqZMqhangiSb_o78S37xzLEmJV0ZYEff7fF6Cp'));
 
-    it('substr works', () => check('${foo|substr:2:4}', 'ello'));
+    it('substr works', () => check('SUBSTR(Hello world!, 1, 4)', 'ello'));
 
-    it('trim works', () => check('${foo|trim}', 'Hello%20world!'));
+    it('trim works', () => check('TRIM(hello      )', 'hello'));
 
     it('json works', () =>
       // " Hello world! "
-      check('${foo|json}', '%22%20Hello%20world!%20%22'));
+      check('JSON(Hello world!)', '%22Hello%20world!%22'));
 
     it('toLowerCase works', () =>
-      check('${foo|toLowerCase}', '%20hello%20world!%20'));
+      check('TOLOWERCASE(HeLLO WOrld!)', 'hello%20world!'));
 
     it('toUpperCase works', () => {
-      return check('${foo|toUpperCase}', '%20HELLO%20WORLD!%20');
+      return check('TOUPPERCASE(HeLLO WOrld!)', 'HELLO%20WORLD!');
     });
 
-    it('not works (truth-y value)', () => check('${foo|not}', 'false'));
+    it('not works (truth-y value)', () => check('NOT(hello)', 'false'));
 
-    it('not works (false-y value)', () => check('${bar|not}', 'true'));
+    it('not works (false-y value)', () => check('NOT()', 'true'));
 
     it('base64 works', () => {
-      return check('${foo|base64}', 'IEhlbGxvIHdvcmxkISA%3D');
+      return check('BASE64(Hello World!)', 'SGVsbG8gV29ybGQh');
     });
 
-    it('if works', () => check('${foo|if:yey:boo}', 'yey'));
+    it('if works', () => check('IF(hey, truthy, falsey)', 'truthy'));
 
     it('chaining works', () => {
-      return check('${foo|substr:6}', '%20world!%20').then(() =>
-        check('${foo|substr:6|trim}', 'world!')).then(() =>
-        check('${foo|substr:6|trim|toUpperCase}', 'WORLD!')).then(() =>
-        check('${foo|substr:6|trim|toUpperCase|base64}', 'V09STEQh')).then(() =>
-        check('${foo|substr:6|trim|toUpperCase|base64|hash}',
-            'OPTTt2IGW8-R31MrIF_cRUwLTZ9jLDOXEuhNz_QS7Uc5ZmODduHWdplzrZ7Jsnqx')
-      );
+      return check('SUBSTR(Hello world!, 6)', 'world!').then(() =>
+        check('TOUPPERCASE(SUBSTR(Hello world!, 6))', 'WORLD!')).then(() =>
+        check('BASE64(TOUPPERCASE(SUBSTR(Hello world!, 6)))', 'V09STEQh'))
+          .then(() =>
+            check('HASH(BASE64(TOUPPERCASE(SUBSTR(Hello world!, 6))))',
+                'OPTTt2IGW8-R31MrIF_cRUwLTZ9jLDOXEuhNz_Q' +
+                'S7Uc5ZmODduHWdplzrZ7Jsnqx')
+          );
     });
   });
 
