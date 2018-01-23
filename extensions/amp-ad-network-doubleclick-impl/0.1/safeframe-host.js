@@ -13,6 +13,8 @@ import {IntersectionObserver} from '../../../src/intersection-observer';
  */
 const safeframeListeners = {};
 
+let safeframeListenerCreated = false;
+
 const MESSAGE_FIELDS = {
   CHANNEL_NAME: 'c',
   SENTINEL: 'e',
@@ -23,14 +25,23 @@ const TAG = "AMP DOUBLECLICK SAFEFRAME";
 /** @const {string} */
 export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
 
-/** JSDOC */
+/**
+ * Event listener callback for message events. If message is a Safeframe message,
+ * handles the message.
+ * Registered within SafeframeApi
+ *
+ */
 function safeframeListener() {
   const data = tryParseJson(getData(event));
   if (event.origin != SAFEFRAME_ORIGIN || !data) {
     return;
   }
+
+  /**
+   * If the sentinel is provided at the top level, this is a message simply
+   * to setup the postMessage channel, so set it up.
+   */
   if (data[MESSAGE_FIELDS.SENTINEL]) {
-    // This is a request to establish a postmessaging connection.
     const listener = safeframeListeners[data[MESSAGE_FIELDS.SENTINEL]];
     if (!listener) {
       dev().warn(TAG, `Listener for sentinel ${data[MESSAGE_FIELDS.SENTINEL]} not found.`);
@@ -43,6 +54,10 @@ function safeframeListener() {
     }
     return;
   }
+
+  /**
+   * If sentinel not provided at top level, parse the payload and process the message.
+   */
   const payload = tryParseJson(data['p']);
   if (!payload || !payload['sentinel']) {
     return;
@@ -56,15 +71,39 @@ function safeframeListener() {
 
 }
 
+/**
+ * This class is designed to setup the host for GPT Safeframe.
+ */
 export class SafeframeApi {
 
-  constructor(baseInstance, win, sentinel) {
+  /**
+   * @param {AmpAdNetworkDoubleclickImpl} baseInstance
+   *
+   */
+  constructor(baseInstance) {
+    /** @private {AmpAdNetworkDoubleclickImpl} */
     this.baseInstance = baseInstance;
+
+    /** {?AMP.AmpAdUIHandler} */
     this.uiHandler = baseInstance.uiHandler;
-    this.win = win;
-    this.sentinel = sentinel;
+
+    /** {Window} */
+    this.win = baseInstance.win;
+
+    /** {string} */
+    this.sentinel = baseInstance.sentinel;
+
+    /** @private {?IntersectionObserver} */
     this.IntersectionObserver = null;
+
+    /** {string} */
     this.channel = null;
+
+    /** {number} */
+    this.initialHeight = null;
+
+    /** {number} */
+    this.initialWidth = null;
   }
 
   registerSafeframeListener() {
@@ -72,7 +111,8 @@ export class SafeframeApi {
       instance: this,
       connectionEstablished: false,
     };
-    if (Object.keys(safeframeListeners).length == 1) {
+    if (!safeframeListenerCreated) {
+      safeframeListenerCreated = true;
       this.win.addEventListener('message', safeframeListener, false);
     }
   }
@@ -87,16 +127,25 @@ export class SafeframeApi {
     })));
   }
 
+  /**
+   * Creates IntersectionObserver instance for this SafeframeAPI instance.
+   * We utilize the existing IntersectionObserver class, by passing in this
+   * class for IO to use instead of SubscriptionApi for sending its update
+   * messages. The method 'send' below is triggered by IO every time that
+   * an update occurs.
+   */
   setupSafeframeApi() {
     this.IntersectionObserver = new IntersectionObserver(
         this.baseInstance, this.baseInstance.iframe, false, this);
     this.IntersectionObserver.startSendingIntersectionChanges_();
-
   }
 
   /**
-   *  Do not change name. This is named as 'send' as a hack to allow us to use
-   *  IntersectionObserver without needing to do any major refactoring of it.
+   * Do not change name. This is named as 'send' as a hack to allow us to use
+   * IntersectionObserver without needing to do any major refactoring of it.
+   * Every time that the IntersectionObserver instance sends an update, instead
+   * of utilizing the SubscriptionApi, we have overridden its typical behavior
+   * to instead call this method.
    */
   send(unused_trash, changes) {
     this.sendGeom(changes);
@@ -117,6 +166,10 @@ export class SafeframeApi {
     this.sendMessage(geomMessage);
   }
 
+  /**
+   * Converts an IntersectionObserver-formatted change message to the
+   * geometry update format expected by GPT Safeframe.
+   */
   formatGeom(changes) {
     const percInView = (a1, b1, a2, b2) => {
       const lengthInView = (b2 >= b1) ? b1 - a2 : b2;
@@ -140,8 +193,8 @@ export class SafeframeApi {
       'frameCoords_l': changes.boundingClientRect.left,
       'styleZIndex': '1',
       'allowedExpansion_t': 0,
-      'allowedExpansion_r': 0,
-      'allowedExpansion_b': 0,
+      'allowedExpansion_r': 320,
+      'allowedExpansion_b': 50,
       'allowedExpansion_l': 0,
       'xInView': percInView(changes.rootBounds.top,
                             changes.rootBounds.bottom,
@@ -182,7 +235,9 @@ export class SafeframeApi {
   }
 
   handleExpandRequest_(payload) {
-    console.log("Handling expand request");
+    const width = payload.expand_r - payload.expand_l;
+    const height = payload.expand_b - payload.expand_t;
+    this.baseInstance.handleResize_(width, height);
   }
 
   /**

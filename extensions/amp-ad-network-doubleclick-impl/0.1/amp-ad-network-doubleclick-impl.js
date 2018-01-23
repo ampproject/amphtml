@@ -800,7 +800,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   setupSafeframe() {
     if (!this.safeframeApi) {
-      this.safeframeApi = new SafeframeApi(this, this.win, this.sentinel);
+      this.safeframeApi = new SafeframeApi(this);
       this.safeframeApi.registerSafeframeListener();
     }
   }
