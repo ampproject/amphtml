@@ -49,6 +49,13 @@ data.src;
 //twitter.js
 data.tweetid
 
+//mathml.js
+data.formula
+var mathjax
+mathjax.Hub
+mathjax.Hub.Queue
+window.MathJax
+
 // Under ads/google folder
 
 // adsense.js
