@@ -40,6 +40,7 @@ export class PinWidget {
     this.element = rootElement;
     this.xhr = Services.xhrFor(toWin(rootElement.ownerDocument.defaultView));
     this.pinId = '';
+    this.alt = '';
     this.pinUrl = '';
     this.width = '';
     this.layout = '';
