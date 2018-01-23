@@ -310,15 +310,6 @@ export class Activity {
   }
 
   /**
-   * Get the incremental engaged time since the last push.
-   * @param {string} name
-   * @return {number}
-   */
-  getIncrementalEngagedTime(name) {
-    return this.activityHistory_.getIncrementalEngagedTime(name);
-  }
-
-  /**
    * Get total engaged time since the page became visible.
    * @return {number}
    */
@@ -332,13 +323,15 @@ export class Activity {
    * @return {number}
    */
   getIncrementalEngagedTime(name = '') {
-    if (!this.timers.hasOwnProperty[name]) {
-      this.previousTotalEngagedTimeByTrigger_[name] = this.totalEngagedTime_;
+    if (!this.previousTotalEngagedTimeByTrigger_.hasOwnProperty[name]) {
+      this.previousTotalEngagedTimeByTrigger_[name] =
+        this.getTotalEngagedTime();
       return this.previousTotalEngagedTimeByTrigger_[name];
     }
     const currentIncrementalEngagedTime =
       this.previousTotalEngagedTimeByTrigger_[name];
-    this.previousTotalEngagedTimeByTrigger_[name] = this.totalEngagedTime_;
-    return this.totalEngagedTime_ - currentIncrementalEngagedTime;
+    this.previousTotalEngagedTimeByTrigger_[name] = this.getTotalEngagedTime();
+    return this.previousTotalEngagedTimeByTrigger_[name] -
+      currentIncrementalEngagedTime;
   }
 };
