@@ -44,7 +44,34 @@ describes.realWin('Requests', {amp: 1}, env => {
   });
 
   describe('RequestHandler', () => {
-    describe('batch Delay', () => {
+    describe('batch', () => {
+      it('should batch multiple send', function* () {
+        const spy = sandbox.spy();
+        const r = {'baseUrl': 'r2', 'maxDelay': 1};
+        const handler = new RequestHandler(ampdoc, r, preconnect, spy, false);
+        const expansionOptions = new ExpansionOptions({});
+        handler.send({}, {}, expansionOptions, {});
+        handler.send({}, {}, expansionOptions, {});
+        clock.tick(500);
+        handler.send({}, {}, expansionOptions, {});
+        clock.tick(500);
+        yield macroTask();
+        expect(spy).to.be.calledOnce;
+      });
+
+      it('should preconnect', function* () {
+        const r = {'baseUrl': 'r2?cid=CLIENT_ID(scope)&var=${test}'};
+        const handler =
+            new RequestHandler(ampdoc, r, preconnect, sandbox.spy(), false);
+        const expansionOptions = new ExpansionOptions({'test': 'expanded'});
+        handler.send({}, {}, expansionOptions, {});
+        yield macroTask();
+        expect(preconnectSpy).to.be.calledWith(
+            'r2?cid=CLIENT_ID(scope)&var=expanded');
+      });
+    });
+
+    describe('batch with maxDelay', () => {
       it('maxDelay should  be a number', () => {
         const r1 = {'baseUrl': 'r1', 'maxDelay': 1};
         const r2 = {'baseUrl': 'r2', 'maxDelay': '2'};
@@ -120,32 +147,134 @@ describes.realWin('Requests', {amp: 1}, env => {
         expect(spy).to.be.calledOnce;
         expect(spy.args[0][0]).to.equal('r?e=4');
       });
+    });
 
-      it('should batch multiple send', function* () {
-        const spy = sandbox.spy();
-        const r = {'baseUrl': 'r2', 'maxDelay': 1};
+    describe('batch with batchInterval', () => {
+      let spy;
+      beforeEach(() => {
+        spy = sandbox.spy();
+      });
+
+      it('should support number', () => {
+        const r = {'baseUrl': 'r1', 'batchInterval': 5};
+        const handler = new RequestHandler(ampdoc, r, preconnect, spy, false);
+        expect(handler.batchIntervalPointer_).to.be.null;
+        expect(handler.batchInterval_).to.equal(5000);
+      });
+
+      it('should support array', () => {
+        const r = {'baseUrl': 'r1', 'batchInterval': [0, 2, 3]};
+        const handler = new RequestHandler(ampdoc, r, preconnect, spy, false);
+        expect(handler.batchIntervalPointer_).to.not.be.null;
+        expect(handler.batchInterval_).to.deep.equal([0, 2000, 1000]);
+      });
+
+      it('should check batchInterval is valid', () => {
+        //Should be number
+        const r1 = {'baseUrl': 'r', 'batchInterval': 'invalid'};
+        const r2 = {'baseUrl': 'r', 'batchInterval': ['invalid']};
+        try {
+          new RequestHandler(ampdoc, r1, preconnect, spy, false);
+          throw new Error('should never happen');
+        } catch (e) {
+          expect(e).to.match(/Invalid batchInterval value/);
+        }
+        try {
+          new RequestHandler(ampdoc, r2, preconnect, spy, false);
+          throw new Error('should never happen');
+        } catch (e) {
+          expect(e).to.match(/Invalid batchInterval value/);
+        }
+
+        //Should be greater than BATCH_INTERVAL_MIN
+        const r3 = {'baseUrl': 'r', 'batchInterval': 0.01};
+        const r4 = {'baseUrl': 'r', 'batchInterval': [-1, 5]};
+        const r5 = {'baseUrl': 'r', 'batchInterval': [1, 1.01]};
+        try {
+          new RequestHandler(ampdoc, r3, preconnect, spy, false);
+          throw new Error('should never happen');
+        } catch (e) {
+          expect(e).to.match(/Invalid batchInterval value/);
+        }
+        try {
+          new RequestHandler(ampdoc, r4, preconnect, spy, false);
+          throw new Error('should never happen');
+        } catch (e) {
+          expect(e).to.match(/Invalid batchInterval value/);
+        }
+        try {
+          new RequestHandler(ampdoc, r5, preconnect, spy, false);
+          throw new Error('should never happen');
+        } catch (e) {
+          expect(e).to.match(/Invalid batchInterval value/);
+        }
+      });
+
+      it('should overwrite maxDelay', () => {
+        const r = {'baseUrl': 'r', 'batchInterval': 1, 'maxDelay': 5};
+        const handler = new RequestHandler(ampdoc, r, preconnect, spy, false);
+        expect(handler.maxDelay_).to.equal(0);
+      });
+
+      it('should schedule send request', function* () {
+        const r = {'baseUrl': 'r', 'batchInterval': 1};
         const handler = new RequestHandler(ampdoc, r, preconnect, spy, false);
         const expansionOptions = new ExpansionOptions({});
+        clock.tick(998);
         handler.send({}, {}, expansionOptions, {});
+        yield macroTask();
+        expect(spy).to.not.be.called;
+        clock.tick(1);
         handler.send({}, {}, expansionOptions, {});
-        clock.tick(500);
-        handler.send({}, {}, expansionOptions, {});
-        clock.tick(500);
+        yield macroTask();
+        expect(spy).to.not.be.called;
+        clock.tick(2);
         yield macroTask();
         expect(spy).to.be.calledOnce;
       });
 
-      it('should preconnect', function* () {
-        const r = {'baseUrl': 'r2?cid=CLIENT_ID(scope)&var=${test}'};
-        const handler =
-            new RequestHandler(ampdoc, r, preconnect, sandbox.spy(), false);
-        const expansionOptions = new ExpansionOptions({'test': 'expanded'});
+      it('should schedule send request with interval array', function* () {
+        const r = {'baseUrl': 'r', 'batchInterval': [1, 3]};
+        const handler = new RequestHandler(ampdoc, r, preconnect, spy, false);
+        const expansionOptions = new ExpansionOptions({});
+        clock.tick(998);
         handler.send({}, {}, expansionOptions, {});
+        clock.tick(2);
         yield macroTask();
-        expect(preconnectSpy).to.be.calledWith(
-            'r2?cid=CLIENT_ID(scope)&var=expanded');
+        expect(spy).to.be.calledOnce;
+        spy.reset();
+        handler.send({}, {}, expansionOptions, {});
+        clock.tick(1000);
+        yield macroTask();
+        expect(spy).to.not.be.called;
+        handler.send({}, {}, expansionOptions, {});
+        clock.tick(1000);
+        yield macroTask();
+        expect(spy).to.be.calledOnce;
+      });
 
+      it('should not schedule send request w/o trigger', function* () {
+        const r = {'baseUrl': 'r', 'batchInterval': [1]};
+        new RequestHandler(ampdoc, r, preconnect, spy, false);
+        clock.tick(1000);
+        yield macroTask();
+        expect(spy).to.not.be.called;
+      });
 
+      it('should schedule send independent of trigger immediate', function* () {
+        const r = {'baseUrl': 'r', 'batchInterval': [1, 2]};
+        const handler = new RequestHandler(ampdoc, r, preconnect, spy, false);
+        const expansionOptions = new ExpansionOptions({});
+        handler.send({}, {}, expansionOptions, {});
+        clock.tick(999);
+        handler.send({}, {'immediate': true}, expansionOptions, {});
+        yield macroTask();
+        expect(spy).to.be.calledOnce;
+        spy.reset();
+        handler.send({}, {}, expansionOptions, {});
+        clock.tick(1);
+        yield macroTask();
+        expect(spy).to.be.calledOnce;
       });
     });
 
