@@ -189,7 +189,7 @@ export class LightboxManager {
     if (element.tagName == 'FIGURE') {
       const figCaption = element.getElementsByTagName('figcaption')[0];
       if (figCaption) {
-        return figCaption.innerText;
+        return figCaption./*OK*/innerText;
       }
     }
     const alt = element.getAttribute('alt');
@@ -201,7 +201,7 @@ export class LightboxManager {
       const descriptionElement = element.ownerDocument
           .getElementById(ariaDescribedBy);
       if (descriptionElement) {
-        return descriptionElement.innerText;
+        return descriptionElement./*OK*/innerText;
       }
     }
     const ariaLabel = element.getAttribute('aria-label');

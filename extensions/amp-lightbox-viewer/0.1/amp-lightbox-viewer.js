@@ -336,7 +336,11 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    */
   updateDescriptionBox_() {
     const descText = this.getCurrentElement_().descriptionText;
-    this.descriptionTextArea_.innerText = descText;
+    // The problem with setting innerText is that it not only removes child
+    // nodes from the element, but also permanently destroys all descendant
+    // text nodes. It is okay in this case because the description text
+    // area is a div that does not contain descendant elements.
+    this.descriptionTextArea_./*OK*/innerText = descText;
     if (!descText) {
       this.descriptionBox_.classList.add('hide');
     }
