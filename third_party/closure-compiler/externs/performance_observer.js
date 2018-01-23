@@ -71,3 +71,4 @@ class PerformanceObserverEntryList {
  * }}
  */
 var TaskAttributionTiming;
+
