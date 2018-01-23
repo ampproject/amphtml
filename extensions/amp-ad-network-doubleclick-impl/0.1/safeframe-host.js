@@ -13,6 +13,11 @@ import {IntersectionObserver} from '../../../src/intersection-observer';
  */
 const safeframeListeners = {};
 
+const MESSAGE_FIELDS = {
+  CHANNEL_NAME: 'c',
+  SENTINEL: 'e',
+}
+
 const TAG = "AMP DOUBLECLICK SAFEFRAME";
 
 /** @const {string} */
@@ -24,16 +29,17 @@ function safeframeListener() {
   if (event.origin != SAFEFRAME_ORIGIN || !data) {
     return;
   }
-  if (data['e']) {
+  if (data[MESSAGE_FIELDS.SENTINEL]) {
     // This is a request to establish a postmessaging connection.
-    const listener = safeframeListeners[data['e']];
+    const listener = safeframeListeners[data[MESSAGE_FIELDS.SENTINEL]];
     if (!listener) {
-      dev().warn(TAG, `Listener for sentinel ${data['e']} not found.`);
+      dev().warn(TAG, `Listener for sentinel ${data[MESSAGE_FIELDS.SENTINEL]} not found.`);
       return;
     }
     if (!listener.connectionEstablished) {
       listener.instance.connectMessagingChannel(data);
       listener.connectionEstablished = true;
+      listener.instance.channel = data[MESSAGE_FIELDS.CHANNEL_NAME];
     }
     return;
   }
@@ -74,7 +80,10 @@ export class SafeframeApi {
     dev().assert(this.baseInstance.iframe.contentWindow,
                  'Frame contentWindow unavailable.');
     this.setupSafeframeApi();
-    this.sendMessage(JSON.stringify(dict({'message': 'connect', 'c': data.c})));
+    this.sendMessage(JSON.stringify(dict({
+      'message': 'connect',
+      c: data[MESSAGE_FIELDS.CHANNEL_NAME]
+    })));
   }
 
   setupSafeframeApi() {
@@ -96,9 +105,14 @@ export class SafeframeApi {
     const geomChanges = this.formatGeom(changes['changes'][0]);
     newGeometry = JSON.stringify(geomChanges);
     const geomMessage = JSON.stringify({
-      'uid': 1,
-      newGeometry,
+      s: "geometry_update",
+      p: JSON.stringify({
+        newGeometry,
+        uid: 1,
+      }),
+      c: this.channel,
     });
+
     this.sendMessage(geomMessage);
   }
 
@@ -112,7 +126,7 @@ export class SafeframeApi {
       'frameCoords_r': changes.boundingClientRect.right,
       'frameCoords_b': changes.boundingClientRect.bottom,
       'frameCoords_l': changes.boundingClientRect.left,
-      'styleZIndex': 0,
+      'styleZIndex': '1',
       'allowedExpansion_t': 0,
       'allowedExpansion_r': 0,
       'allowedExpansion_b': 0,
