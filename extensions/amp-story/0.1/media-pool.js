@@ -744,6 +744,8 @@ export class MediaPool {
     return Promise.all(blessPromises)
         .then(() => {
           this.blessed_ = true;
+        }).catch(reason => {
+          dev().expectedError('AMP-STORY', 'Blessing media failed: ', reason);
         });
   }
 }
