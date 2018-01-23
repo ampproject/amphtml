@@ -342,6 +342,6 @@ describes.fakeWin('resourceTiming', {amp: true}, env => {
     spec['encoding']['entry'] = '${key}?${startTime},${duration}';
     spec['encoding']['delim'] = ':';
     return runSerializeTest(
-        [entry1, entry2], spec, 'foo_bar%3F100%2C500%3Afoo_bar%3F700%2C100');
+        [entry1, entry2], spec, 'foo_bar?100,500:foo_bar?700,100');
   });
 });
