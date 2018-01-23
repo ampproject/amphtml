@@ -63,6 +63,7 @@ import {MessageType} from '../src/3p-frame-messaging';
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
 import {github} from './github';
+import {mathml} from './mathml';
 import {reddit} from './reddit';
 import {twitter} from './twitter';
 
@@ -330,6 +331,7 @@ register('loka', loka);
 register('mads', mads);
 register('mantis-display', mantisDisplay);
 register('mantis-recommend', mantisRecommend);
+register('mathml', mathml);
 register('mediaimpact', mediaimpact);
 register('medianet', medianet);
 register('mediavine', mediavine);
