@@ -15,7 +15,6 @@
 #
 
 tags: {  # amp-gwd-animation
-  html_format: AMP
   html_format: AMP4ADS
   tag_name: "SCRIPT"
   extension_spec: {
@@ -26,7 +25,6 @@ tags: {  # amp-gwd-animation
   attr_lists: "common-extension-attrs"
 }
 tags: {  # <amp-gwd-animation>
-  html_format: AMP
   html_format: AMP4ADS
   tag_name: "AMP-GWD-ANIMATION"
   requires_extension: "amp-gwd-animation"
