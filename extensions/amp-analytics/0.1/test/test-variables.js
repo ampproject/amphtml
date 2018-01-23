@@ -23,6 +23,7 @@ import {
 import {adopt} from '../../../../src/runtime';
 import * as sinon from 'sinon';
 import {Services} from '../../../../src/services';
+import {toggleExperiment} from '../../../../src/experiments';
 
 adopt(window);
 
@@ -133,6 +134,7 @@ describe('amp-analytics.VariableService', function() {
     let urlReplacementService;
 
     beforeEach(() => {
+      toggleExperiment(env.win, 'url-replacement-v2', true);
       ampdoc = env.ampdoc;
       urlReplacementService = Services.urlReplacementsForDoc(ampdoc);
       sandbox.stub(variables, 'isFilterExperimentOn_').callsFake(() => true);
@@ -140,7 +142,6 @@ describe('amp-analytics.VariableService', function() {
 
     function check(input, output) {
       const filters = variables.getFilters();
-      debugger;
       const expanded = urlReplacementService.expandAsync(input, filters);
       return expect(expanded).to.eventually.equal(output);
     }
