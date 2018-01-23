@@ -298,27 +298,23 @@ function reportErrorToServer(message, filename, line, col, error) {
  * - The viewer is a trusted viewer
  * - The viewer has the `errorReporter` capability
  * - The AMP doc is in single doc mode
- * - The AMP doc is opted-in for error interception (`<html>` tag has the 
+ * - The AMP doc is opted-in for error interception (`<html>` tag has the
  *   `allow-error-reporting-to-viewer` attribute)
  *
- * @param {!JsonObject} error Data from `getErrorReportData`.
+ * @param {!JsonObject} data Data from `getErrorReportData`.
  * @return {!Promise<boolean|undefined>} True if the error was sent to the
  *     viewer, `Promise<undefined>` otherwise.
- * @this {!Window|undefined}
  * @visibleForTesting
  */
 export function maybeReportErrorToViewer(data) {
-  if (!this) {
-    return Promise.resolve();
-  }
-
   const ampdocService = Services.ampdocServiceFor(self);
   if (!ampdocService.isSingleDoc()) {
     return Promise.resolve();
   }
   const ampdocSingle = ampdocService.getAmpDoc();
   const htmlElement = ampdocSingle.getRootNode().documentElement;
-  const docOptedIn = htmlElement.hasAttribute('allow-error-reporting-to-viewer');
+  const docOptedIn =
+      htmlElement.hasAttribute('allow-error-reporting-to-viewer');
   if (!docOptedIn) {
     return Promise.resolve();
   }

@@ -309,6 +309,7 @@ const forbiddenTerms = {
     message: 'Usages must be reviewed.',
     whitelist: [
       // viewer-impl.sendMessage
+      'src/error.js',
       'src/service/viewer-impl.js',
       'src/service/viewport/viewport-impl.js',
       'src/service/performance-impl.js',
@@ -390,6 +391,7 @@ const forbiddenTerms = {
   'isTrustedViewer': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'src/error.js',
       'src/service/xhr-impl.js',
       'src/service/viewer-impl.js',
       'src/service/viewer-cid-api.js',

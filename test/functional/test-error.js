@@ -96,7 +96,6 @@ describe('maybeReportErrorToViewer', () => {
   let viewer;
   let sandbox;
   let ampdocServiceForStub;
-  let viewerForDocStub;
   let sendMessageStub;
 
   const data = getErrorReportData(undefined, undefined, undefined, undefined,
@@ -106,7 +105,8 @@ describe('maybeReportErrorToViewer', () => {
     sandbox = sinon.sandbox.create();
 
     const optedInDoc = window.document.implementation.createHTMLDocument('');
-    optedInDoc.documentElement.setAttribute('allow-error-reporting-to-viewer', '');
+    optedInDoc.documentElement.setAttribute(
+        'allow-error-reporting-to-viewer', '');
 
     ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
     ampdocServiceForStub.returns({
@@ -121,7 +121,7 @@ describe('maybeReportErrorToViewer', () => {
     };
     sendMessageStub = sandbox.stub(viewer, 'sendMessage');
 
-    viewerForDocStub = sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+    sandbox.stub(Services, 'viewerForDoc').returns(viewer);
   });
 
   afterEach(() => {
@@ -147,7 +147,7 @@ describe('maybeReportErrorToViewer', () => {
 
   it('should not report if viewer is not capable', () => {
     sandbox.stub(viewer, 'hasCapability').withArgs('errorReporting')
-          .returns(false);
+        .returns(false);
     return maybeReportErrorToViewer(data)
         .then(() => expect(sendMessageStub).to.not.have.been.called);
   });
@@ -162,7 +162,7 @@ describe('maybeReportErrorToViewer', () => {
     return maybeReportErrorToViewer(data)
         .then(() => expect(sendMessageStub).to.have.been
             .calledWith('error', data));
-  });  
+  });
 });
 
 describe('reportErrorToServer', () => {
