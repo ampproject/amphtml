@@ -366,11 +366,6 @@ export class AmpStory extends AMP.BaseElement {
     this.element.addEventListener(EventType.TAP_NAVIGATION, e => {
       const {direction} = e.detail;
 
-      // We fire and forget this, because we do not want to block navigation on
-      // an asynchronous call.  Blessing can also fail, so we do not want to
-      // risk that either.  Otherwise, this can cause #12966.
-      this.mediaPool_.blessAll();
-
       if (this.isDesktop_()) {
         this.next_();
         return;
@@ -381,6 +376,11 @@ export class AmpStory extends AMP.BaseElement {
       } else if (direction === TapNavigationDirection.PREVIOUS) {
         this.previous_();
       }
+
+      // We do this after navigation, because we do not want to block navigation
+      // on an asynchronous call.  Blessing can also fail, so we do not want to
+      // risk that either.  Otherwise, this can cause #12966.
+      this.mediaPool_.blessAll();
     });
 
     const gestures = Gestures.get(this.element,
