@@ -61,7 +61,6 @@ const SPINNER =  {
   ],
 };
 
-
 export class LoadingSpinner {
   /**
    * @param {!Document} doc
@@ -74,12 +73,10 @@ export class LoadingSpinner {
     this.isActive_ = false;
   }
 
-
   /** @param {!Element} element */
   attach(element) {
     element.appendChild(this.element_);
   }
-
 
   /** @param {boolean} state */
   toggle(isActive) {
@@ -87,10 +84,10 @@ export class LoadingSpinner {
       return;
     }
     if (isActive) {
-      this.element_.setAttribute('active', '');
+      this.element_.setAttribute(SPINNER_ACTIVE_ATTRIBUTE, '');
       this.element_.setAttribute('aria-hidden', 'false');
     } else {
-      this.element_.removeAttribute('active');
+      this.element_.removeAttribute(SPINNER_ACTIVE_ATTRIBUTE);
       this.element_.setAttribute('aria-hidden', 'true');
     }
     this.isActive_ = isActive;
