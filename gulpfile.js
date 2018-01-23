@@ -133,6 +133,7 @@ declareExtension('amp-sticky-ad', '1.0', true);
 declareExtension('amp-story', '0.1', true);
 declareExtension('amp-selector', '0.1', true);
 declareExtension('amp-web-push', '0.1', true);
+declareExtension('amp-wistia-player', '0.1', false);
 declareExtension('amp-position-observer', '0.1', false);
 declareExtension('amp-date-picker', '0.1', true);
 declareExtension('amp-image-viewer', '0.1', true);
