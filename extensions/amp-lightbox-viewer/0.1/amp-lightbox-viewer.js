@@ -213,8 +213,17 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         'i-amphtml-element');
     let clonedNode = element.cloneNode(deepClone);
     if (element.tagName == 'FIGURE') {
-      clonedNode = element.getElementsByTagName('amp-img')[0]
-          .cloneNode(deepClone);
+      const ampImg = element.getElementsByTagName('amp-img');
+      user().assert(ampImg.length <= 1,
+          'You cannot have more than one amp-img in a figure');
+      if (ampImg.length == 1) {
+        clonedNode = ampImg[0].cloneNode(deepClone);
+      } else {
+        const img = element.getElementsByTagName('img');
+        user().assert(img.length == 1,
+            'You must have exactly one img or amp-img in a figure');
+        clonedNode = img[0].cloneNode(deepClone);
+      }
     }
     clonedNode.removeAttribute('on');
     clonedNode.removeAttribute('id');
