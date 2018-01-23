@@ -187,6 +187,16 @@ export class LightboxManager {
    * @return {?string}
    */
   getDescription(element) {
+    if (element.tagName == 'FIGURE') {
+      const figCaption = element.getElementsByTagName('figcaption')[0];
+      if (figCaption) {
+        return figCaption.textContent;
+      }
+    }
+    const alt = element.getAttribute('alt');
+    if (alt) {
+      return alt;
+    }
     const aria = element.getAttribute('aria-describedby');
     if (aria) {
       const descriptionElement = element.ownerDocument.getElementById(aria);
@@ -194,10 +204,7 @@ export class LightboxManager {
         return descriptionElement.textContent;
       }
     }
-    const alt = element.getAttribute('alt');
-    if (alt) {
-      return alt;
-    }
+
     return null;
   }
 

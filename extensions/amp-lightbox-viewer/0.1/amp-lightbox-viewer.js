@@ -203,6 +203,24 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
+   * Return a cleaned clone of the given element for building
+   * carousel slides with.
+   * @param {!Element} element
+   * @private
+   */
+  cloneLightboxableElement_(element) {
+    const deepClone = !element.classList.contains(
+        'i-amphtml-element');
+    let clonedNode = element.cloneNode(deepClone);
+    if (element.tagName == 'FIGURE') {
+      clonedNode = element.getElementsByTagName('amp-img')[0]
+          .cloneNode(deepClone);
+    }
+    clonedNode.removeAttribute('on');
+    clonedNode.removeAttribute('id');
+    return clonedNode;
+  }
+  /**
    * Given a list of lightboxable elements, build the internal carousel slides
    * @param {!Array<!Element>} lightboxableElements
    * @private
@@ -212,11 +230,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.elementsMetadata_[this.currentLightboxGroupId_] = [];
     lightboxableElements.forEach(element => {
       element.lightboxItemId = index++;
-      const deepClone = !element.classList.contains(
-          'i-amphtml-element');
-      const clonedNode = element.cloneNode(deepClone);
-      clonedNode.removeAttribute('on');
-      clonedNode.removeAttribute('id');
+      const clonedNode = this.cloneLightboxableElement_(element);
       const descText = this.manager_.getDescription(element);
       const metadata = {
         descriptionText: descText,
