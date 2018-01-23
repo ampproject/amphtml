@@ -55,9 +55,9 @@ export class AccessSource {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} configJson
-   * @param {!function():!Promise<string>} readerIdFn
-   * @param {!function(time)} scheduleViewFn
-   * @param {!function()} broadcastReauthorizeFn
+   * @param {function():!Promise<string>} readerIdFn
+   * @param {function(time)} scheduleViewFn
+   * @param {function()} broadcastReauthorizeFn
    * @param {!Element} accessElement
    */
   constructor(ampdoc, configJson, readerIdFn, scheduleViewFn,
@@ -123,9 +123,8 @@ export class AccessSource {
     this.firstAuthorizationResolver_ = null;
 
     /**
-     * Create a resolver we can call whenever we want. Attach analytics
-     * and use to block other behavior on our first and/or most recent
-     * auth call until resolver is explicitly called.
+     * This pattern allows AccessService to attach behavior to authorization
+     * before runAuthorization() is actually called.
      * @const @private {!Promise}
      */
     this.firstAuthorizationPromise_ = new Promise(resolve => {
@@ -159,9 +158,7 @@ export class AccessSource {
     return this.adapter_;
   }
 
-  /**
-   * @return {?JsonObject}
-   */
+  /** @return {?JsonObject} */
   getAuthResponse() {
     return this.authResponse_;
   }

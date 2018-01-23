@@ -103,26 +103,24 @@ export class AccessService {
 
     const promises = this.sources_.map(source => source.whenFirstAuthorized());
 
+    /** @private {boolean} */
+    this.firstAuthorizationsCompleted_ = false;
+
     /**
      * Track most recent requests and block reporting and refreshes if
      * outstanding. Future optimizations may choose to take action as soon
-     * as a single request completes.
+     * as a single request completes. These complete even on failure.
      * @private {!Promise}
      */
     this.lastAuthorizationPromises_ = Promise.all(promises);
-
-    /**
-     * Used to make sure first requests succeed before subsequent ones.
-     * @private {!Promise}
-     */
-    this.firstAuthorizationPromises_ = this.lastAuthorizationPromises_;
 
     /** @private {?Promise} */
     this.reportViewPromise_ = null;
 
     // This will fire after the first received authorization, even if
     // there are multiple sources.
-    this.firstAuthorizationPromises_.then(() => {
+    this.lastAuthorizationPromises_.then(() => {
+      this.firstAuthorizationsCompleted_ = true;
       this.analyticsEvent_('access-authorization-received');
       if (this.performance_) {
         this.performance_.tick('aaa');
@@ -204,11 +202,10 @@ export class AccessService {
    * @private
    */
   onDomUpdate_(event) {
-    // Only re-authorize sections if a response is already available.
-    // Otherwise, just wait for the authorization - it will cover new sections.
-    // But wait for the last authorization operation to complete.
-    const responseReceived = this.sources_.some(s => !!s.getAuthResponse());
-    if (responseReceived) {
+    // Only re-authorize sections if authorization already fired, otherwise
+    // just wait and existing callback will cover new sections.
+    if (this.firstAuthorizationsCompleted_) {
+      // Guard against anything else in flight.
       return this.lastAuthorizationPromises_.then(() => {
         const target = dev().assertElement(event.target);
         const responses = this.combinedResponses();
@@ -338,9 +335,7 @@ export class AccessService {
       });
     });
 
-    // The "first" promises must always succeed first.
-    this.lastAuthorizationPromises_ = Promise.all(
-        [this.firstAuthorizationPromises_, rendered]);
+    this.lastAuthorizationPromises_ = rendered;
 
     return rendered;
   }

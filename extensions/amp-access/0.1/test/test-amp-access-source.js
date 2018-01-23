@@ -188,8 +188,6 @@ describes.fakeWin('AccessSource', {
         .once();
     source.loginWithUrl('https://url');
   });
-
-
 });
 
 
@@ -306,5 +304,57 @@ describes.fakeWin('AccessSource adapter context', {
     sandbox.stub(source.adapter_, 'getConfig');
     source.getAdapterConfig();
     expect(source.adapter_.getConfig.called).to.be.true;
+  });
+});
+
+
+describes.fakeWin('AccessSource authorization', {
+  amp: true,
+  location: 'https://pub.com/doc1',
+}, env => {
+  let win, ampdoc;
+  let clock;
+  let adapterMock;
+  let source;
+
+  beforeEach(() => {
+    win = env.win;
+    ampdoc = env.ampdoc;
+    clock = sandbox.useFakeTimers();
+    clock.tick(0);
+
+    cidServiceForDocForTesting(ampdoc);
+    installPerformanceService(win);
+
+    const config = {
+      'authorization': 'https://acme.com/a?rid=READER_ID',
+      'pingback': 'https://acme.com/p?rid=READER_ID',
+      'login': 'https://acme.com/l?rid=READER_ID',
+    };
+    source = new AccessSource(ampdoc, config, () => Promise.resolve('reader1'));
+    const adapter = {
+      getConfig: () => {
+      },
+      isAuthorizationEnabled: () => true,
+      isPingbackEnabled: () => true,
+      authorize: () => {
+      },
+    };
+    source.adapter_ = adapter;
+    adapterMock = sandbox.mock(adapter);
+  });
+
+  afterEach(() => {
+    adapterMock.verify();
+  });
+
+  it('should resolve first-authorization promise after response', () => {
+    adapterMock.expects('authorize')
+        .withExactArgs()
+        .returns(Promise.resolve({access: true}))
+        .once();
+    return source.runAuthorization().then(() => {
+      return source.whenFirstAuthorized();
+    });
   });
 });

@@ -370,14 +370,13 @@ describes.fakeWin('AccessService authorization', {
     return promise.then(() => {
       expect(document.documentElement).not.to.have.class('amp-access-loading');
       expect(document.documentElement).not.to.have.class('amp-access-error');
-      expect(service.firstAuthorizationPromises_).to.exist;
-      return service.firstAuthorizationPromises_;
+      return service.lastAuthorizationPromises_;
     }).then(() => {
       expect(service.sources_[0].authResponse_).to.be.null;
     });
   });
 
-  it('should run authorization flow zzz', () => {
+  it('should run authorization flow', () => {
     const source = service.sources_[0];
     adapterMock.expects('authorize')
         .withExactArgs()
@@ -385,13 +384,11 @@ describes.fakeWin('AccessService authorization', {
         .once();
     expectGetReaderId('reader1');
     source.buildLoginUrls_ = sandbox.spy();
-    expect(service.lastAuthorizationPromises_).to.equal(
-        service.firstAuthorizationPromises_);
+    const firstPromise = service.lastAuthorizationPromises_;
     const promise = service.runAuthorization_();
+    expect(firstPromise).not.to.equal(promise);
     const lastPromise = service.lastAuthorizationPromises_;
-    expect(lastPromise).to.not.equal(service.firstAuthorizationPromises_);
-    // debugger;
-    console.log('reading', document.documentElement.classList);
+    expect(lastPromise).to.equal(promise);
     expect(document.documentElement).to.have.class('amp-access-loading');
     expect(document.documentElement).not.to.have.class('amp-access-error');
     expect(source.buildLoginUrls_).to.have.not.been.called;
@@ -470,36 +467,6 @@ describes.fakeWin('AccessService authorization', {
     });
   });
 
-  it('should NOT resolve last promise until first success', () => {
-    let firstResolver;
-    expectGetReaderId('reader1');
-    adapterMock.expects('authorize')
-        .withExactArgs()
-        .returns(new Promise(resolve => firstResolver = resolve))
-        .once();
-    const promise = service.runAuthorization_();
-    let lastResolved = false;
-    service.lastAuthorizationPromises_.then(() => {
-      lastResolved = true;
-    });
-    expect(service.lastAuthorizationPromises_).to.not.equal(promise);
-    expect(service.lastAuthorizationPromises_).to.not.equal(
-        service.firstAuthorizationPromises_);
-    return promise.then(() => {
-      // Skip microtask.
-    }).then(() => {
-      // The authorization promise succeeded, but not the last promise.
-      expect(lastResolved).to.be.false;
-      // Resolve the first promise.
-      firstResolver();
-      return service.lastAuthorizationPromises_;
-    }).then(() => {
-      // After first promise has been resolved, the last promised is resolved
-      // as well.
-      expect(lastResolved).to.be.true;
-    });
-  });
-
   it('should use fallback on authorization failure when available', () => {
     expectGetReaderId('reader1');
     adapterMock.expects('authorize')
@@ -531,51 +498,6 @@ describes.fakeWin('AccessService authorization', {
     expect(document.documentElement).not.to.have.class('amp-access-error');
     return promise.then(() => {
       expect(document.documentElement).to.have.class('amp-access-error');
-    });
-  });
-
-  it('should resolve first-authorization promise after success', () => {
-    expectGetReaderId('reader1');
-    adapterMock.expects('authorize')
-        .withExactArgs()
-        .returns(Promise.resolve({access: true}))
-        .once();
-    performanceMock.expects('tick')
-        .withExactArgs('aaa')
-        .once();
-    performanceMock.expects('tickSinceVisible')
-        .withExactArgs('aaav')
-        .once();
-    expect(service.firstAuthorizationPromises_).to.exist;
-    return service.runAuthorization_().then(() => {
-      return service.sources_[0].whenFirstAuthorized().then(() => {
-        expect(service.sources_[0].analyticsEvent_).to.have.been.calledOnce;
-        expect(service.sources_[0].analyticsEvent_).to.have.been.calledWith(
-            'access-authorization-received');
-      });
-    });
-  });
-
-  it('should NOT resolve first-authorization promise after failure', () => {
-    expectGetReaderId('reader1');
-    adapterMock.expects('authorize')
-        .withExactArgs()
-        .returns(Promise.reject('intentional'))
-        .once();
-    return service.runAuthorization_().then(() => {
-      expect(service.firstAuthorizationPromises_).to.exist;
-      let resolved = false;
-      service.firstAuthorizationPromises_.then(() => {
-        resolved = true;
-      });
-      return Promise.resolve().then(() => {
-        expect(resolved).to.be.false;
-        expect(service.sources_[0].analyticsEvent_).to.have.been.calledOnce;
-        expect(service.sources_[0].analyticsEvent_).to.not.have.been.calledWith(
-            'access-authorization-received');
-        expect(service.sources_[0].analyticsEvent_).to.have.been.calledWith(
-            'access-authorization-failed');
-      });
     });
   });
 
@@ -883,33 +805,6 @@ describes.fakeWin('AccessService pingback', {
       expect(visibilityChanged.getHandlerCount()).to.equal(0);
       expect(scrolled.getHandlerCount()).to.equal(0);
       expect(service.analyticsEvent_).to.have.been.calledWith('access-viewed');
-    });
-  });
-
-  it('should wait for first authorization completion', () => {
-    expect(service.firstAuthorizationPromises_).to.exist;
-    let firstAuthorizationResolver;
-    service.sources_[0].firstAuthorizationPromise_ = new Promise(resolve => {
-      firstAuthorizationResolver = resolve;
-    });
-    const triggerStart = 1; // First event is "access-authorization-received".
-    service.reportViewToServer_ = sandbox.spy();
-    service.reportWhenViewed_(/* timeToView */ 2000);
-    return Promise.resolve().then(() => {
-      clock.tick(2001);
-      return Promise.resolve();
-    }).then(() => {
-      expect(service.reportViewToServer_).to.have.not.been.called;
-      // First event is "access-authorization-received"
-      expect(service.analyticsEvent_.callCount).to.equal(triggerStart);
-      firstAuthorizationResolver();
-      return Promise.all([service.firstAuthorizationPromises_,
-        service.reportViewPromise_]);
-    }).then(() => {
-      expect(service.reportViewToServer_).to.be.calledOnce;
-      expect(service.analyticsEvent_.callCount).to.equal(triggerStart + 1);
-      expect(service.analyticsEvent_.getCall(triggerStart).args[0])
-          .to.equal('access-viewed');
     });
   });
 
@@ -1719,11 +1614,9 @@ describes.fakeWin('AccessService multiple sources', {
         .returns(Promise.resolve({access: true}))
         .once();
 
-    expect(service.lastAuthorizationPromises_).to.equal(
-        service.firstAuthorizationPromises_);
     const promise = service.runAuthorization_();
     const lastPromise = service.lastAuthorizationPromises_;
-    expect(lastPromise).to.not.equal(service.firstAuthorizationPromises_);
+    expect(lastPromise).to.equal(promise);
     expect(document.documentElement).to.have.class('amp-access-loading');
     expect(document.documentElement).not.to.have.class('amp-access-error');
     return promise.then(() => {
