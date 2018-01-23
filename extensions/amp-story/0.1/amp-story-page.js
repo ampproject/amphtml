@@ -272,7 +272,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
 
-   /**
+  /**
    * Gets all video elements on this page.
    * @return {!NodeList<!Element>}
    * @private
@@ -628,7 +628,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     this.debounceToggleLoadingSpinner_(true);
-    videos.forEach((videoEl) => {
+    videos.forEach(videoEl => {
       this.unlisteners_.push(listen(
           videoEl, 'playing', () => this.debounceToggleLoadingSpinner_(false)));
       this.unlisteners_.push(listen(

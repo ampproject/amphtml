@@ -22,7 +22,7 @@ const SPINNER_ACTIVE_ATTRIBUTE = 'active';
 
 
 /** @private @const {!./simple-template.ElementDef} */
-const SPINNER =  {
+const SPINNER = {
   tag: 'div',
   attrs: dict({
     'class': 'i-amphtml-story-spinner',
