@@ -23,7 +23,6 @@ import {
   fullscreenExit,
   isFullscreenElement,
   insertAfterOrAtStart,
-  scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {toArray} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
