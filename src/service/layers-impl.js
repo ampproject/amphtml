@@ -265,11 +265,15 @@ export class LayoutLayers {
    * #buildCallback, #layoutCallback, viewport changes size).
    *
    * @param {!Element} element A regular or AMP Element
+   * @param {boolean=} opt_force
    */
-  remeasure(element) {
+  remeasure(element, opt_force) {
     const layout = this.add(element);
-    layout.requestRemeasure();
-    layout.remeasure();
+    const from = layout.getParentLayer() || layout;
+    if (opt_force) {
+      from.requestRemeasure();
+    }
+    from.remeasure();
   }
 
   /**
