@@ -516,7 +516,7 @@ describes.fakeWin('Viewport', {}, env => {
 
   it('should not do anything if padding is not changed', () => {
     const bindingMock = sandbox.mock(binding);
-    viewerViewportHandler('viewport', {paddingTop: 19});
+    viewerViewportHandler({paddingTop: 19});
     bindingMock.verify();
   });
 
@@ -526,7 +526,7 @@ describes.fakeWin('Viewport', {}, env => {
     fixedLayerMock.expects('updatePaddingTop')
         .withExactArgs(/* paddingTop */ 0, /* transient */ undefined)
         .once();
-    viewerViewportHandler('viewport', {paddingTop: 0});
+    viewerViewportHandler({paddingTop: 0});
     bindingMock.verify();
     fixedLayerMock.verify();
   });
@@ -538,8 +538,8 @@ describes.fakeWin('Viewport', {}, env => {
         .withExactArgs(/* paddingTop */ 0, /* transient */ true)
         .once();
     bindingMock.expects('hideViewerHeader').withArgs(true, 19).once();
-    viewerViewportHandler('viewport', {paddingTop: 0, duation: 300,
-      curve: 'ease-in', transient: true});
+    viewerViewportHandler({paddingTop: 0, duation: 300, curve: 'ease-in',
+      transient: true});
     bindingMock.verify();
     fixedLayerMock.verify();
   });
@@ -549,8 +549,8 @@ describes.fakeWin('Viewport', {}, env => {
     viewport.fixedLayer_ = {updatePaddingTop: () => {}};
     const fixedLayerMock = sandbox.mock(viewport.fixedLayer_);
     fixedLayerMock.expects('updatePaddingTop').withArgs(0).once();
-    viewerViewportHandler('viewport', {paddingTop: 0, duation: 300,
-      curve: 'ease-in', transient: 'true'});
+    viewerViewportHandler({paddingTop: 0, duation: 300, curve: 'ease-in',
+      transient: 'true'});
     fixedLayerMock.verify();
   });
 
@@ -658,7 +658,7 @@ describes.fakeWin('Viewport', {}, env => {
   it('should disable scrolling based on requests', () => {
     const disableScrollStub = sandbox.stub(viewport, 'disableScroll');
 
-    viewerDisableScrollHandler('disableScroll', true);
+    viewerDisableScrollHandler(true);
 
     expect(disableScrollStub).to.be.calledOnce;
   });
@@ -666,7 +666,7 @@ describes.fakeWin('Viewport', {}, env => {
   it('should reset scrolling based on requests', () => {
     const resetScrollStub = sandbox.stub(viewport, 'resetScroll');
 
-    viewerDisableScrollHandler('disableScroll', false);
+    viewerDisableScrollHandler(false);
 
     expect(resetScrollStub).to.be.calledOnce;
   });
@@ -895,7 +895,7 @@ describes.fakeWin('Viewport', {}, env => {
   it('should scroll to target position when the viewer sets scrollTop', () => {
     const bindingMock = sandbox.mock(binding);
     bindingMock.expects('setScrollTop').withArgs(117).once();
-    viewerScrollDocHandler('scroll', {scrollTop: 117});
+    viewerScrollDocHandler({scrollTop: 117});
     bindingMock.verify();
   });
 

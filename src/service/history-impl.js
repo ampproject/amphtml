@@ -770,11 +770,10 @@ export class HistoryBindingVirtual_ {
   }
 
   /**
-   * @param {string} eventType
-   * @param {*} data
+   * @param {!JsonObject} data
    * @private
    */
-  onHistoryPopped_(eventType, data) {
+  onHistoryPopped_(data) {
     this.updateStackIndex_(data['newStackIndex']);
   }
 

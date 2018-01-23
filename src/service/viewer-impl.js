@@ -90,7 +90,7 @@ const TRUSTED_REFERRER_HOSTS = [
 /**
  * @typedef {function(string, *, boolean):(!Promise<*>|undefined)}
  */
-export let RequestHandler;
+export let RequestResponder;
 
 
 /**
@@ -134,8 +134,11 @@ export class Viewer {
     /** @private {number} */
     this.prerenderSize_ = 1;
 
-    /** @private {!Object<string, !RequestHandler>} */
-    this.messageHandlers_ = map();
+    /** @private {!Object<string, !Observable<!JsonObject>>} */
+    this.messageObservables_ = map();
+
+    /** @private {!Object<string, !RequestResponder>} */
+    this.messageResponders_ = map();
 
     /** @private {!Observable<boolean>} */
     this.runtimeOnObservable_ = new Observable();
@@ -797,14 +800,29 @@ export class Viewer {
   /**
    * Adds a eventType listener for viewer events.
    * @param {string} eventType
-   * @param {!RequestHandler} handler
+   * @param {function(!JsonObject)} handler
    * @return {!UnlistenDef}
    */
   onMessage(eventType, handler) {
-    this.messageHandlers_[eventType] = handler;
+    let observable = this.messageObservables_[eventType];
+    if (!observable) {
+      observable = new Observable();
+      this.messageObservables_[eventType] = observable;
+    }
+    return observable.add(handler);
+  }
+
+  /**
+   * Adds a eventType listener for viewer events.
+   * @param {string} eventType
+   * @param {!RequestResponder} responder
+   * @return {!UnlistenDef}
+   */
+  onMessageRespond(eventType, responder) {
+    this.messageResponders_[eventType] = responder;
     return () => {
-      if (this.messageHandlers_[eventType] === handler) {
-        delete this.messageHandlers_[eventType];
+      if (this.messageResponders_[eventType] === responder) {
+        delete this.messageResponders_[eventType];
       }
     };
   }
@@ -831,9 +849,15 @@ export class Viewer {
           /** @type {!JsonObject|undefined} */ (data));
       return Promise.resolve();
     }
-    const handler = this.messageHandlers_[eventType];
-    if (handler) {
-      return handler(eventType, data, awaitResponse);
+    const observable = this.messageObservables_[eventType];
+    if (observable) {
+      observable.fire(data);
+    }
+    const responder = this.messageResponders_[eventType];
+    if (responder) {
+      return responder(eventType, data, awaitResponse);
+    } else if (observable) {
+      return Promise.resolve();
     }
     dev().fine(TAG_, 'unknown message:', eventType);
     return undefined;

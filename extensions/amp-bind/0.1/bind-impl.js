@@ -150,7 +150,7 @@ export class Bind {
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
-    this.viewer_.onMessage('premutate', this.premutate_.bind(this));
+    this.viewer_.onMessageRespond('premutate', this.premutate_.bind(this));
 
     const bodyPromise = (opt_win)
       ? waitForBodyPromise(opt_win.document)
@@ -338,27 +338,28 @@ export class Bind {
   }
 
   /**
+   * Calls setState(s), where s is data.state with the non-overridable keys removed.
    * @param {string} eventType
    * @param {*} data
+   * @return {!Promise}
    * @private
    */
   premutate_(eventType, data) {
     const ignoredKeys = [];
-    return this.initializePromise_
-        .then(() => {
-          Object.keys(data.state).forEach(key => {
-            if (!this.overridableKeys_.includes(key)) {
-              delete data.state[key];
-              ignoredKeys.push(key);
-            }
-          });
-          if (ignoredKeys.length > 0) {
-            user().warn(TAG, 'Some state keys could not be premutated ' +
+    return this.initializePromise_.then(() => {
+      Object.keys(data.state).forEach(key => {
+        if (!this.overridableKeys_.includes(key)) {
+          delete data.state[key];
+          ignoredKeys.push(key);
+        }
+      });
+      if (ignoredKeys.length > 0) {
+        user().warn(TAG, 'Some state keys could not be premutated ' +
               'because they are missing the overridable attribute: ' +
               ignoredKeys.join(', '));
-          }
-          return this.setState(data.state);
-        });
+      }
+      return this.setState(data.state);
+    });
   }
 
   /**

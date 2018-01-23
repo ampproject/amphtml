@@ -840,21 +840,19 @@ export class Viewport {
   }
 
   /**
-   * @param {string} eventType
-   * @param {*} data
+   * @param {!JsonObject} data
    * @private
    */
-  viewerSetScrollTop_(eventType, data) {
+  viewerSetScrollTop_(data) {
     const targetScrollTop = data['scrollTop'];
     this.setScrollTop(targetScrollTop);
   }
 
   /**
-   * @param {string} eventType
-   * @param {*} data
+   * @param {!JsonObject} data
    * @private
    */
-  updateOnViewportEvent_(eventType, data) {
+  updateOnViewportEvent_(data) {
     const paddingTop = data['paddingTop'];
     const duration = data['duration'] || 0;
     const curve = data['curve'];
@@ -879,11 +877,10 @@ export class Viewport {
   }
 
   /**
-   * @param {string} eventType
-   * @param {*} data
+   * @param {!JsonObject} data
    * @private
    */
-  disableScrollEventHandler_(eventType, data) {
+  disableScrollEventHandler_(data) {
     if (!!data) {
       this.disableScroll();
     } else {

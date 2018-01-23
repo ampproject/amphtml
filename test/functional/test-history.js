@@ -470,7 +470,7 @@ describe('HistoryBindingVirtual', () => {
       expect(stackIndex).to.equal(1);
       expect(onStackIndexUpdated).to.be.calledOnce;
       expect(onStackIndexUpdated.getCall(0).args[0]).to.equal(1);
-      viewerHistoryPoppedHandler('historyPopped', {newStackIndex: 0});
+      viewerHistoryPoppedHandler({newStackIndex: 0});
       clock.tick(1);
       expect(history.stackIndex_).to.equal(0);
       expect(onStackIndexUpdated).to.have.callCount(2);
