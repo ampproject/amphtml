@@ -103,6 +103,15 @@ export class Gestures {
     /** @private {boolean} */
     this.shouldNotPreventDefault_ = shouldNotPreventDefault;
 
+    /** @private {?EventTarget} */
+    this.lastEventTarget_ = null;
+
+    /** @private {!Pass} */
+    this.expirePendingRecognizers_ = new Pass(
+        toWin(element.ownerDocument.defaultView),
+        this.stopTrackingExpiredRecognizers_.bind(this)
+    );
+
     /**
      * This variable indicates that the eventing has stopped on this
      * event cycle.
@@ -417,6 +426,14 @@ export class Gestures {
       }
     }
     if (cancelEvent) {
+      if (event.type == 'touchend') {
+        this.lastEventTarget_ = event.target;
+        const waitTime = this.findWaitTime_();
+        if (waitTime > 0) {
+          this.expirePendingRecognizers_.cancel();
+          this.expirePendingRecognizers_.schedule(waitTime);
+        }
+      }
       event.stopPropagation();
       if (!this.shouldNotPreventDefault_) {
         event.preventDefault();
@@ -428,6 +445,33 @@ export class Gestures {
     }
   }
 
+  findWaitTime_() {
+    const now = Date.now();
+    let waitTime = 0;
+    for (let i = 0; i < this.recognizers_.length; i++) {
+      if (this.ready_[i] || !this.tracking_[i]) {
+        continue;
+      }
+      waitTime = Math.max(waitTime, this.pending_[i] - now);
+    }
+    return waitTime;
+  }
+
+  stopTrackingExpiredRecognizers_() {
+    const now = Date.now();
+    for (let i = 0; i < this.recognizers_.length; i++) {
+      if (!this.ready_[i] && this.pending_[i] && this.pending_[i] < now) {
+        this.stopTracking_(i);
+      }
+    }
+  }
+
+  refireLastTouchEnd_() {
+    if (this.lastEventTarget_) {
+      this.lastEventTarget_.click();
+    }
+  }
+
   /**
    * The pass that decides which recognizers can start emitting and which
    * are canceled.
@@ -435,7 +479,6 @@ export class Gestures {
    */
   doPass_() {
     const now = Date.now();
-
     // The "most ready" recognizer is the youngest in the "ready" set.
     // Otherwise we wouldn't wait for it at all.
     let readyIndex = -1;
@@ -458,16 +501,10 @@ export class Gestures {
     }
 
     // Look for conflicts.
-    let waitTime = 0;
-    for (let i = 0; i < this.recognizers_.length; i++) {
-      if (this.ready_[i] || !this.tracking_[i]) {
-        continue;
-      }
-      waitTime = Math.max(waitTime, this.pending_[i] - now);
-    }
-
+    const waitTime = this.findWaitTime_();
     if (waitTime < 2) {
       // We waited long enough.
+      this.expirePendingRecognizers_.cancel();
       this.startEventing_(readyIndex);
       return;
     }
@@ -512,6 +549,9 @@ export class Gestures {
     this.pending_[index] = 0;
     if (!this.ready_[index]) {
       this.recognizers_[index].acceptCancel();
+      if (this.recognizers_[index].getType() == 'tapzoom') {
+        this.refireLastTouchEnd_();
+      }
     }
   }
 
