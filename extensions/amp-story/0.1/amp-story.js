@@ -366,7 +366,9 @@ export class AmpStory extends AMP.BaseElement {
     this.element.addEventListener(EventType.TAP_NAVIGATION, e => {
       const {direction} = e.detail;
 
+      debugger;
       this.mediaPool_.blessAll().then(() => {
+        debugger;
         if (this.isDesktop_()) {
           this.next_();
           return;
