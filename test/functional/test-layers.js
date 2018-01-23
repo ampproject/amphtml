@@ -21,7 +21,7 @@ import {
   installLayersServiceForDoc,
 } from '../../src/service/layers-impl';
 
-describes.realWin.only('Layers', {amp: false}, env => {
+describes.realWin('Layers', {amp: false}, env => {
   let win;
   let root;
 

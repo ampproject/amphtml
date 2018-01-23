@@ -666,7 +666,8 @@ export class LayoutElement {
     }
 
     const element = this.element_;
-    const win = element.ownerDocument.defaultView;
+    const win = /** @type {!Window } */ (dev().assert(
+        element.ownerDocument.defaultView));
     // If it remains fixed, it will still be a layer.
     if (computedStyle(win, element).position === 'fixed') {
       return;
@@ -1006,7 +1007,7 @@ export class LayoutElement {
         positionLt(0, 0);
     }
 
-    this.size_ = sizeWh(element.clientWidth, element.clientHeight);
+    this.size_ = sizeWh(element./*OK*/clientWidth, element./*OK*/clientHeight);
 
     let {left, top} = element./*OK*/getBoundingClientRect();
     // Root layers are really screwed up. Their positions will **double** count
