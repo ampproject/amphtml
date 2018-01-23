@@ -24,6 +24,8 @@ import {tryParseJson} from '../../../src/json';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
+import {urls} from '../../../src/config';
+import {startsWith} from '../../../src/string';
 import {parseUrl} from '../../../src/url';
 
 /** @type {string} */
@@ -145,11 +147,11 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
    */
   getTemplateProxyUrl_(url) {
     const loc = parseUrl(url);
-    const hostClean = loc.host.indexOf('www.') == 0
+    const hostClean = startsWith(loc.host, 'www.')
       ? loc.host.slice(4)
       : loc.host;
-    return loc.protocol + '//' + hostClean.replace('.', '-') +
-        '.cdn.ampproject.org/a/s/' + hostClean + loc.pathname;
+    return loc.protocol + '//' + hostClean.replace('.', '-') + '.' +
+        urls.cdn.slice(8) + '/a/s/' + hostClean + loc.pathname;
   }
 
   /** @override */
