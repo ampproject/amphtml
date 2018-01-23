@@ -366,20 +366,21 @@ export class AmpStory extends AMP.BaseElement {
     this.element.addEventListener(EventType.TAP_NAVIGATION, e => {
       const {direction} = e.detail;
 
-      debugger;
-      this.mediaPool_.blessAll().then(() => {
-        debugger;
-        if (this.isDesktop_()) {
-          this.next_();
-          return;
-        }
+      // We fire and forget this, because we do not want to block navigation on
+      // an asynchronous call.  Blessing can also fail, so we do not want to
+      // risk that either.  Otherwise, this can cause #12966.
+      this.mediaPool_.blessAll();
 
-        if (direction === TapNavigationDirection.NEXT) {
-          this.next_();
-        } else if (direction === TapNavigationDirection.PREVIOUS) {
-          this.previous_();
-        }
-      });
+      if (this.isDesktop_()) {
+        this.next_();
+        return;
+      }
+
+      if (direction === TapNavigationDirection.NEXT) {
+        this.next_();
+      } else if (direction === TapNavigationDirection.PREVIOUS) {
+        this.previous_();
+      }
     });
 
     const gestures = Gestures.get(this.element,
