@@ -189,7 +189,7 @@ export class LightboxManager {
     if (element.tagName == 'FIGURE') {
       const figCaption = element.getElementsByTagName('figcaption')[0];
       if (figCaption) {
-        return figCaption.textContent;
+        return figCaption.innerText;
       }
     }
     const alt = element.getAttribute('alt');
@@ -201,7 +201,7 @@ export class LightboxManager {
       const descriptionElement = element.ownerDocument
           .getElementById(ariaDescribedBy);
       if (descriptionElement) {
-        return descriptionElement.textContent;
+        return descriptionElement.innerText;
       }
     }
     const ariaLabel = element.getAttribute('aria-label');
@@ -213,7 +213,7 @@ export class LightboxManager {
       const descriptionElement = element.ownerDocument
           .getElementById(ariaLabelledBy);
       if (descriptionElement) {
-        return descriptionElement.textContent;
+        return descriptionElement.innerText;
       }
     }
 

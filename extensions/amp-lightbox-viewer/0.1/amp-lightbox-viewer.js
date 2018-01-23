@@ -336,7 +336,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    */
   updateDescriptionBox_() {
     const descText = this.getCurrentElement_().descriptionText;
-    this.descriptionTextArea_.textContent = descText;
+    this.descriptionTextArea_.innerText = descText;
     if (!descText) {
       this.descriptionBox_.classList.add('hide');
     }
