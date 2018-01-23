@@ -77,8 +77,10 @@ class AmpStickyAd extends AMP.BaseElement {
     this.element.insertBefore(paddingBar, this.ad_);
 
     // On viewport scroll, check requirements for amp-stick-ad to display.
-    this.scrollUnlisten_ =
+    this.win.setTimeout(() => {
+      this.scrollUnlisten_ =
         this.viewport_.onScroll(() => this.onScroll_());
+    });
   }
 
   /** @override */
