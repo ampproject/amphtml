@@ -81,10 +81,6 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
    * @override
    */
   isValidElement() {
-    if (!this.win['DOMParser']) {
-      dev().error(TAG, 'Missing DOM Parser');
-      return false;
-    }
     return !!this.getAdUrl();
   }
 
@@ -149,8 +145,11 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
    */
   getTemplateProxyUrl_(url) {
     const loc = parseUrl(url);
-    return loc.protocol + '//' + loc.host.replace('.', '-') +
-        'cdn.ampproject.org/a/s/' + loc.host + loc.pathname;
+    const hostClean = loc.host.indexOf('www.') == 0
+      ? loc.host.slice(4)
+      : loc.host;
+    return loc.protocol + '//' + hostClean.replace('.', '-') +
+        '.cdn.ampproject.org/a/s/' + hostClean + loc.pathname;
   }
 
   /** @override */

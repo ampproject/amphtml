@@ -51,7 +51,6 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
 
   describe('#getAdUrl', () => {
     it('should be valid', () => {
-      win['DOMParser'] = true;
       ['https://adzerk.com?id=1234',
         'https://aDzErK.com?id=1234',
         'https://adzerk.com?id=9'].forEach(src => {
@@ -62,7 +61,6 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
     });
 
     it('should not be valid', () => {
-      win['DOMParser'] = true;
       ['http://adzerk.com?id=1234',
         'https://adzerk.com?id=a',
         'https://www.adzerk.com?id=1234',
@@ -72,11 +70,6 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
         expect(impl.isValidElement()).to.be.false;
         expect(impl.getAdUrl()).to.equal('');
       });
-    });
-
-    it('should not be valid if missing DOMParser', () => {
-      win['DOMParser'] = false;
-      expect(impl.isValidElement()).to.be.false;
     });
   });
 
@@ -89,7 +82,8 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
   describe('#maybeValidateAmpCreative', () => {
     it('should properly inflate template', () => {
       const adResponseBody = {
-        ampCreativeTemplateId: 456,
+        ampCreativeTemplateUrl:
+            'https://www.adzerk.com/456',
         templateMacroValues: {
           USER_NAME: 'some_user',
           USER_NUM: 9876,
@@ -121,7 +115,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
           '"src": "https://cdn.ampproject.org/v0/amp-fit-text-0.1.js" } ] }' +
           '</script></body></html>';
       fetchTextMock.withArgs(
-          'https://cdn.ampproject.org/c/s/adzerk/456',
+          'https://adzerk-com.cdn.ampproject.org/a/s/adzerk.com/456',
           {
             mode: 'cors',
             method: 'GET',
@@ -143,27 +137,9 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
           () => {})
           .then(buffer => utf8Decode(buffer))
           .then(creative => {
-            let resolver;
-            const promise = new Promise((resolve, unusedReject) => {
-              resolver = resolve;
-            });
-            impl.iframe = doc.createElement('iframe');
-            impl.iframe.setAttribute('srcdoc', creative);
-            impl.iframe.onload = () => resolver();
-            impl.element.appendChild(impl.iframe);
-            return promise.then(() => {
-              const iframeDoc = impl.iframe.contentWindow.document;
-              iframeDoc.open();
-              iframeDoc.write(creative);
-              iframeDoc.close();
-              impl.onCreativeRender();
-              expect(doc.documentElement.outerHTML).to.equal('');
-              expect(impl.getAmpAdMetadata()).to.jsonEqual({
-                minifiedCreative: creative,
-                customElementExtensions: ['amp-fit-text'],
-                customStylesheets: [
-                  {'href': 'https://fonts.googleapis.com/css?family=Raleway'}],
-              });
+            expect(impl.getAmpAdMetadata()).to.jsonEqual({
+              minifiedCreative: creative,
+              customElementExtensions: ['amp-bind'],
             });
           });
     });
