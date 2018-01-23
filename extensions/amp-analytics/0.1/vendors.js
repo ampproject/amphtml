@@ -48,6 +48,7 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'domainLookupTime': 'DOMAIN_LOOKUP_TIME',
       'domInteractiveTime': 'DOM_INTERACTIVE_TIME',
       'externalReferrer': 'EXTERNAL_REFERRER',
+      'htmlAttr': 'HTML_ATTR',
       'navRedirectCount': 'NAV_REDIRECT_COUNT',
       'navTiming': 'NAV_TIMING',
       'navType': 'NAV_TYPE',

@@ -397,6 +397,13 @@ export class GlobalVariableSource extends VariableSource {
       return nav.userAgent;
     });
 
+    this.set('HTML_ATTR', (selector, ...attributes) => {
+      debugger;
+      console.log(selector);
+      console.log(attributes);
+      return 'IOU_' + selector;
+    });
+
     // Returns the time it took to load the whole page. (excludes amp-* elements
     // that are not rendered by the system yet.)
     this.setTimingResolver_(
