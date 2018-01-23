@@ -181,7 +181,6 @@ export class LightboxManager {
   }
 
   /**
-   * The function is simplified for testing now.
    * Get the description for single lightboxed item.
    * @param {!Element} element
    * @return {?string}
@@ -197,9 +196,22 @@ export class LightboxManager {
     if (alt) {
       return alt;
     }
-    const aria = element.getAttribute('aria-describedby');
-    if (aria) {
-      const descriptionElement = element.ownerDocument.getElementById(aria);
+    const ariaDescribedBy = element.getAttribute('aria-describedby');
+    if (ariaDescribedBy) {
+      const descriptionElement = element.ownerDocument
+          .getElementById(ariaDescribedBy);
+      if (descriptionElement) {
+        return descriptionElement.textContent;
+      }
+    }
+    const ariaLabel = element.getAttribute('aria-label');
+    if (ariaLabel) {
+      return ariaLabel;
+    }
+    const ariaLabelledBy = element.getAttribute('aria-labelledby');
+    if (ariaLabelledBy) {
+      const descriptionElement = element.ownerDocument
+          .getElementById(ariaLabelledBy);
       if (descriptionElement) {
         return descriptionElement.textContent;
       }

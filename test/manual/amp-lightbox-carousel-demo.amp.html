@@ -180,15 +180,15 @@
     <amp-img src="https://picsum.photos/300/200/?image=32"
       width="300"
       height="200"
-      alt="and another sample image"></amp-img>
+      aria-label="Aria labels are cool."></amp-img>
     <amp-img src="https://picsum.photos/300/200/?image=33"
       width="300"
       height="200"
-      alt="and another sample image"></amp-img>
+      aria-describedby="my-aria-describe"></amp-img>
     <amp-img src="https://picsum.photos/300/200/?image=34"
       width="300"
       height="200"
-      alt="and another sample image"></amp-img>
+      aria-labelledby="my-aria-label"></amp-img>
     <amp-img src="https://picsum.photos/300/200/?image=35"
       width="300"
       height="200"
@@ -215,6 +215,11 @@
       layout="responsive"
       width="480" height="270"></amp-youtube>
   </amp-carousel>
-
+  <div id='my-aria-describe'>
+    This is an aria described by a div.
+  </div>
+  <div id='my-aria-label'>
+    This is an aria labelled by a div.
+  </div>
 </body>
 </html>
