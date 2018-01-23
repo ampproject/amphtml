@@ -60,6 +60,7 @@ export class SafeframeApi {
 
   constructor(baseInstance, win, sentinel) {
     this.baseInstance = baseInstance;
+    this.uiHandler = baseInstance.uiHandler;
     this.win = win;
     this.sentinel = sentinel;
     this.IntersectionObserver = null;
@@ -117,6 +118,17 @@ export class SafeframeApi {
   }
 
   formatGeom(changes) {
+    const percInView = (a1, b1, a2, b2) => {
+      const lengthInView = (b2 >= b1) ? b1 - a2 : b2;
+      const percInView = lengthInView / (b2 - a2);
+      if (percInView < 0) {
+        return 0;
+      } else if (percInView > 1) {
+        return 1;
+      } else {
+        return percInView;
+      }
+    };
     const message =   {
       'windowCoords_t': changes.rootBounds.top,
       'windowCoords_r': changes.rootBounds.right,
@@ -131,9 +143,16 @@ export class SafeframeApi {
       'allowedExpansion_r': 0,
       'allowedExpansion_b': 0,
       'allowedExpansion_l': 0,
-      'xInView': 0,
-      'yInView': 0
+      'xInView': percInView(changes.rootBounds.top,
+                            changes.rootBounds.bottom,
+                            changes.boundingClientRect.top,
+                            changes.boundingClientRect.bottom),
+      'yInView': percInView(changes.rootBounds.left,
+                            changes.rootBounds.right,
+                            changes.boundingClientRect.left,
+                            changes.boundingClientRect.right),
     };
+    console.log(JSON.stringify(message));
     return message;
   }
 
