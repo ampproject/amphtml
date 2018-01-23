@@ -27,6 +27,7 @@ const ELIGIBLE_TAP_TAGS = {
 
 const VIEWER_TAG = 'amp-lightbox-viewer';
 const CAROUSEL_TAG = 'amp-carousel';
+const FIGURE_TAG = 'figure';
 const SLIDE_SELECTOR = '.amp-carousel-slide';
 
 /** @typedef {{
@@ -134,7 +135,6 @@ export class LightboxManager {
        'carousel' + (element.getAttribute('id') || this.counter_++);
       this.getSlidesFromCarousel_(element).then(slides => {
         slides.forEach(slide => {
-          // TODO: review naming conventions for component attributes
           if (!slide.hasAttribute('lightbox-exclude')) {
             slide.setAttribute('lightbox', lightboxGroupId);
             this.processBaseLightboxElement_(slide, lightboxGroupId);
@@ -148,6 +148,10 @@ export class LightboxManager {
   }
 
   processBaseLightboxElement_(element, lightboxGroupId) {
+    if (element.tagName.toLowerCase() == FIGURE_TAG) {
+      element = elementByTag(element, 'amp-img');
+      element.setAttribute('lightbox', lightboxGroupId);
+    }
     if (!this.lightboxGroups_[lightboxGroupId]) {
       this.lightboxGroups_[lightboxGroupId] = [];
     }
@@ -186,8 +190,8 @@ export class LightboxManager {
    * @return {?string}
    */
   getDescription(element) {
-    if (element.tagName == 'FIGURE') {
-      const figCaption = element.getElementsByTagName('figcaption')[0];
+    if (element.parentElement.tagName == 'FIGURE') {
+      const figCaption = elementByTag(element.parentElement, 'figcaption');
       if (figCaption) {
         return figCaption./*OK*/innerText;
       }

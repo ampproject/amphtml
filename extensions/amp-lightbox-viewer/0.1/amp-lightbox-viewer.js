@@ -211,13 +211,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   cloneLightboxableElement_(element) {
     const deepClone = !element.classList.contains(
         'i-amphtml-element');
-    let clonedNode = element.cloneNode(deepClone);
-    if (element.tagName == 'FIGURE') {
-      const ampImg = element.getElementsByTagName('amp-img');
-      user().assert(ampImg.length == 1,
-          'You must have exactly one amp-img in a figure');
-      clonedNode = ampImg[0].cloneNode(deepClone);
-    }
+    const clonedNode = element.cloneNode(deepClone);
     clonedNode.removeAttribute('on');
     clonedNode.removeAttribute('id');
     return clonedNode;
@@ -338,10 +332,10 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    */
   updateDescriptionBox_() {
     const descText = this.getCurrentElement_().descriptionText;
-    // The problem with setting innerText is that it not only removes child
-    // nodes from the element, but also permanently destroys all descendant
-    // text nodes. It is okay in this case because the description text
-    // area is a div that does not contain descendant elements.
+    // The problem with setting this attribute is that it not only removes
+    // child nodes from the element, but also permanently destroys all
+    // descendant text nodes. It is okay in this case because the description
+    // text area is a div that does not contain descendant elements.
     this.descriptionTextArea_./*OK*/innerText = descText;
     if (!descText) {
       this.descriptionBox_.classList.add('hide');
