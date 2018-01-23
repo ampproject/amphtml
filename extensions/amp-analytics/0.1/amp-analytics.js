@@ -698,13 +698,21 @@ export class AmpAnalytics extends AMP.BaseElement {
     const dynamicBindings = {};
     const resourceTimingSpec = trigger['resourceTimingSpec'];
     if (resourceTimingSpec) {
-      const binding = 'RESOURCE_TIMING';
-      const analyticsVar = 'resourceTiming';
-      // TODO(warrengm): Consider limiting resource timings to avoid duplicates
-      // by excluding timings that were previously reported.
-      dynamicBindings[binding] =
-          serializeResourceTiming(resourceTimingSpec, this.win);
-      expansionOptions.vars[analyticsVar] = binding;
+      const on = trigger['on'];
+      if (on == 'ini-load') {
+        const binding = 'RESOURCE_TIMING';
+        const analyticsVar = 'resourceTiming';
+        // TODO(warrengm): Consider limiting resource timings to avoid
+        // duplicates by excluding timings that were previously reported.
+        dynamicBindings[binding] =
+            serializeResourceTiming(resourceTimingSpec, this.win);
+        expansionOptions.vars[analyticsVar] = binding;
+      } else {
+        // TODO(warrengm): Instead of limiting resource timing to ini-load,
+        // analytics should have throttling or de-dupe timings that have already
+        // been reported.
+        dev().warn(TAG, 'resource timing is only allowed on ini-load triggers');
+      }
     }
     return dynamicBindings;
   }

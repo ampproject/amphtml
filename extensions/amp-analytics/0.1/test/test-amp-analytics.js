@@ -1911,7 +1911,7 @@ describes.realWin('amp-analytics', {
           'pageview': 'https://ping.example.com/endpoint',
         },
         'triggers': [{
-          'on': 'visible',
+          'on': 'ini-load',
           'request': 'pageview',
           'extraUrlParams': {
             'rt': '${resourceTiming}',
@@ -1957,6 +1957,16 @@ describes.realWin('amp-analytics', {
       delete config['triggers'][0]['resourceTimingSpec'];
       runResourceTimingTest(
           [entry], newConfig(), 'https://ping.example.com/endpoint?rt=');
+    });
+
+    it('should only report timings on ini-load', () => {
+      const entry = newPerformanceResourceTiming(
+          'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
+          false);
+      const config = newConfig();
+      config['triggers'][0]['on'] = 'visible';
+      runResourceTimingTest(
+          [entry], config, 'https://ping.example.com/endpoint?rt=');
     });
   });
 });
