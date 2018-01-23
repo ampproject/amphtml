@@ -42,6 +42,11 @@ Integer in felis at lacus mattis facilisis. Curabitur tincidunt, felis porttitor
       "batch": {
         "baseUrl": "https://fake.com/batch-analytics?",
         "maxDelay": 5
+      },
+      "batchplugin": {
+        "baseUrl": "https://fake.com/batch-analytics?",
+        "maxDelay": 5,
+        "batchPlugin": "_ping_"
       }
     },
     "triggers": {
@@ -62,8 +67,20 @@ Integer in felis at lacus mattis facilisis. Curabitur tincidunt, felis porttitor
         },
         "batchSegment": "&timer",
         "extraUrlParams": {
-          "extra": "34",
-          "extra2": "${requestCount}"
+          "extra": null,
+          "extra2": "&&${requestCount}"
+        }
+      },
+      "batch-plugin-timer": {
+        "on": "timer",
+        "request": "batchplugin",
+        "timerSpec": {
+          "interval": 2,
+          "maxTimerLength": 10
+        },
+        "batchSegment": "&timer",
+        "extraUrlParams": {
+          "extra2": null
         }
       }
     },
