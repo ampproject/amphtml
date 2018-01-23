@@ -243,20 +243,21 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
+
+    // This must be done before buildCallback() so the body CSS can be applied
+    // before measure. This avoids incorrect measurements in prerender.
+    if (this.element.hasAttribute(AMP_STORY_STANDALONE_ATTRIBUTE)) {
+      this.win.document.documentElement.classList
+          .add('i-amphtml-story-standalone');
+      // Lock body to prevent overflow.
+      this.lockBody_();
+    }
   }
 
 
   /** @override */
   buildCallback() {
     this.assertAmpStoryExperiment_();
-
-    if (this.element.hasAttribute(AMP_STORY_STANDALONE_ATTRIBUTE)) {
-      this.getAmpDoc().win.document.documentElement.classList
-          .add('i-amphtml-story-standalone');
-
-      // Lock body to prevent overflow.
-      this.lockBody_();
-    }
 
     this.initializeListeners_();
     this.initializeListenersForDev_();
