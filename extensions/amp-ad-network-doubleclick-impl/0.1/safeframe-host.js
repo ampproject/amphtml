@@ -44,10 +44,10 @@ function safeframeListener() {
     return;
   }
   const payload = tryParseJson(data['p']);
-  if (!payload /**|| !payload['sentinel']*/) {
+  if (!payload || !payload['sentinel']) {
     return;
   }
-  const listener = safeframeListeners[Object.keys(safeframeListeners)[0]/**payload['sentinel']*/];
+  const listener = safeframeListeners[payload['sentinel']];
   if (!listener) {
     dev().warn(TAG, `Listener for sentinel ${payload['sentinel']} not found.`);
     return;
@@ -170,8 +170,15 @@ export class SafeframeApi {
         break;
       case 'expand_request':
         this.handleExpandRequest_(payload);
+      case 'register_done':
+        this.handleRegisterDone_(payload);
     }
     return;
+  }
+
+  handleRegisterDone_(payload) {
+    this.initialHeight = payload.initialHeight;
+    this.initialWidth = payload.initialWidth;
   }
 
   handleExpandRequest_(payload) {
