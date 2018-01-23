@@ -45,9 +45,6 @@ export class AmpAdTemplates {
     /** @private {!Window} */
     this.win_ = win;
 
-    /** @private {function(string)} */
-    this.onRetrieve_ = opt_onRetrieve;
-
     /** @private {LRUCache} */
     this.cache_ = new LRUCache(5);
   }
@@ -66,11 +63,7 @@ export class AmpAdTemplates {
             ? `http://ads.localhost:${this.win_.location.port}` +
                 `/a4a_template/adzerk/${templateUrl}`
             : templateUrl, TEMPLATE_CORS_CONFIG)
-          .then(response => response.text())
-          .then(template => {
-            this.onRetrieve_(template);
-            return template;
-          });
+          .then(response => response.text());
       this.cache_.put(templateUrl, templatePromise);
     }
     dev().assert(templatePromise);
