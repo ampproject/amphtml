@@ -19,15 +19,12 @@ import {
   NO_CONTENT_RESPONSE,
   CreativeMetaDataDef,
 } from '../../amp-a4a/0.1/amp-a4a';
-
+import {AmpAdTemplates} from '../../amp-a4a/0.1/amp-ad-templates';
 import {tryParseJson} from '../../../src/json';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
-import {
-  CachedTemplateDef,
-  AmpAdTemplate,
-} from '../../amp-ad-template/0.1/amp-ad-template';
+import {parseUrl} from '../../../src/url';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-adzerk-impl';
@@ -36,13 +33,13 @@ const TAG = 'amp-ad-network-adzerk-impl';
 export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-template-amp-creative';
 
 /** @typedef {{
-      ampCreativeTemplateId: number,
+      ampCreativeTemplateUrl: string,
       templateMacroValues: (JsonObject|undefined),
     }} */
 let AmpTemplateCreativeDef;
 
-/** @private {?AmpAdTemplate} */
-let ampAdTemplate;
+/** @private {?AmpAdTemplates} */
+let ampAdTemplates;
 
 /**
  * Fast Fetch implementation for AdZerk network that allows AMP creative
@@ -76,8 +73,8 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
     /** @private {?AmpTemplateCreativeDef} */
     this.ampCreativeJson_ = null;
 
-    ampAdTemplate = ampAdTemplate ||
-        new AmpAdTemplate(this.win, this.parseTemplate_.bind(this));
+    ampAdTemplates = ampAdTemplates ||
+        new AmpAdTemplates(this.win, this.parseTemplate_.bind(this));
   }
 
   /**
@@ -137,16 +134,13 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
       checkStillCurrent();
       this.ampCreativeJson_ = /** @type {!AmpTemplateCreativeDef} */
         (tryParseJson(body) || {});
-      if (isNaN(parseInt(this.ampCreativeJson_.ampCreativeTemplateId, 10))) {
-        dev().warn(TAG, 'AMP creative missing/invalid template path',
-            this.ampCreativeJson_);
-        this.forceCollapse();
-        return Promise.reject(NO_CONTENT_RESPONSE);
-      }
+      const proxyUrl = getMode(this.win).localDev
+        ? this.ampCreativeJson_.ampCreativeTemplateUrl
+        : this.getTemplateProxyUrl_(
+            this.ampCreativeJson_.ampCreativeTemplateUrl);
       // TODO(keithwrightbos): macro value validation?  E.g. http invalid?
-      return ampAdTemplate
-          .retrieveTemplate(this.ampCreativeJson_.ampCreativeTemplateId)
-          .templatePromise
+      return ampAdTemplates
+          .fetch(proxyUrl)
           .then(unusedParsedTemplate =>
             // We don't want to use the above parsed template, as it has not
             // been minified. However, by the time this promise resolves, we
@@ -162,6 +156,17 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
     });
   }
 
+  /**
+   * Converts the canonical template URL to the CDN proxy URL.
+   * @param {string} url
+   * @return {string}
+   */
+  getTemplateProxyUrl_(url) {
+    const loc = parseUrl(url);
+    return loc.protocol + '//' + loc.host.replace('.', '-') +
+        'cdn.ampproject.org/a/s/' + loc.host + loc.pathname;
+  }
+
   /** @override */
   getAmpAdMetadata(unusedCreative) {
     return /**@type {?CreativeMetaDataDef}*/(this.creativeMetadata_);
@@ -170,10 +175,9 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
   /** @override */
   onCreativeRender(unusedMetadata) {
     if (this.ampCreativeJson_ && this.ampCreativeJson_.templateMacroValues) {
-      ampAdTemplate.populateTemplate(
+      ampAdTemplates.render(
           this.ampCreativeJson_.templateMacroValues,
-          this.iframe.contentWindow.document.body,
-          this.iframe.contentWindow);
+          this.iframe.contentWindow.document.body);
     }
   }
 }

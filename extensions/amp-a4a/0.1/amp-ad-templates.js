@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-import {urls} from '../../../src/config';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {getAmpdoc} from '../../../src/service';
 import {Bind} from '../../amp-bind/0.1/bind-impl';
-
-/** @typedef {{
-      templatePromise: Promise<string>,
-      access: number
-    }} */
-export let CachedTemplateDef;
 
 /** @private {!Object<string, string|boolean>} */
 const TEMPLATE_CORS_CONFIG = {
@@ -38,9 +31,9 @@ const TEMPLATE_CORS_CONFIG = {
 };
 
 /** @const {string} */
-const TAG = 'amp-ad-template';
+const TAG = 'amp-ad-templates';
 
-export class AmpAdTemplate {
+export class AmpAdTemplates {
 
   /**
    * @param {!Window} win
@@ -52,60 +45,87 @@ export class AmpAdTemplate {
     /** @private {!Window} */
     this.win_ = win;
 
-    /** @private {!Object<number, !CachedTemplateDef>} */
-    this.templateCache_ = {};
-
     /** @private {function(string)} */
     this.onRetrieve_ = opt_onRetrieve;
+
+    /** @private {LRUCache} */
+    this.cache_ = new LRUCache(5);
   }
 
   /**
    * Fetch and parse template from AMP cache.  Result is stored in global in
    * order to reduce overhead when template is used multiple times.
-   * @param {number} templateId
-   * @return {!CachedTemplateDef}
+   * @param {string} templateUrl CDN Proxy URL to template.
+   * @return {!Promise<string>}
    */
-  retrieveTemplate(templateId) {
-    // Retrieve template from AMP cache.
-    this.templateCache_[templateId] = this.templateCache_[templateId] ||
-    {
-      templatePromise: Services.xhrFor(this.win_)
-          .fetchText(getMode(this.win_).localDev ?
-            `http://ads.localhost:${this.win_.location.port}` +
-            `/a4a_template/adzerk/${templateId}` :
-            `${urls.cdn}/c/s/adzerk/${templateId}`,
-          TEMPLATE_CORS_CONFIG)
+  fetch(templateUrl) {
+    let templatePromise = this.cache_.get(templateUrl);
+    if (!templatePromise) {
+      templatePromise = Services.xhrFor(this.win_)
+          .fetchText(getMode(this.win_).localDev
+            ? `http://ads.localhost:${this.win_.location.port}` +
+                `/a4a_template/adzerk/${templateUrl}`
+            : templateUrl, TEMPLATE_CORS_CONFIG)
           .then(response => response.text())
           .then(template => {
             this.onRetrieve_(template);
             return template;
-          }),
-      access: Date.now(),
-    };
-    const cacheKeys = /**@type {!Array<number>}*/
-        (Object.keys(this.templateCache_));
-    if (cacheKeys.length > 5) {
-      dev().warn(TAG, 'Trimming template cache');
-      // Evict oldest entry to ensure memory usage is minimized.
-      cacheKeys.sort((a, b) =>
-        this.templateCache_[b].access - this.templateCache_[a].access);
-      delete this.templateCache_[cacheKeys[cacheKeys.length - 1]];
+          });
+      this.cache_.put(templateUrl, templatePromise);
     }
-    dev().assert(this.templateCache_[templateId]);
-    return this.templateCache_[templateId];
+    dev().assert(templatePromise);
+    return /** @type{!Promise<string>} */ (templatePromise);
   }
 
   /**
    * @param {!JsonObject} templateValues The values to macro in.
    * @param {!Element} element Parent element containing template.
-   * @param {!Window=} opt_window
    */
-  populateTemplate(templateValues, element, opt_window) {
-    const bind = new Bind(getAmpdoc(element), opt_window);
-    bind.setState(templateValues);
+  render(templateValues, element) {
+    const win = element.ownerDocument.defaultView;
+    if (win) {
+      const bind = new Bind(getAmpdoc(element), win);
+      bind.setState(templateValues);
+    }
   }
 }
 
-AMP.extension('amp-ad-template', '0.1', AMP => {
-  AMP.registerElement('amp-ad-template', AmpAdTemplate);
-});
+/** @typedef {{
+      payload: *,
+      access: number,
+    }} */
+export let Cacheable;
+
+class LRUCache {
+  /** @param {number} capacity */
+  constructor(capacity) {
+    /** @private {number} */
+    this.capacity_ = capacity;
+
+    /** @private {!Object<(number|string), !Cacheable>} */
+    this.cache_ = {};
+  }
+
+  /**
+   * @param {number|string} id
+   * @return {*} The cached payload.
+   */
+  get(id) {
+    return this.cache_[id] ? this.cache_[id].payload : undefined;
+  }
+
+  /**
+   * @param {number|string} id
+   * @param {*} payload The payload to cache.
+   */
+  put(id, payload) {
+    this.cache_[id] = {payload, access: Date.now()};
+    const cacheKeys = /**@type {!Array<number>}*/ (Object.keys(this.cache_));
+    if (cacheKeys.length > this.capacity_) {
+      dev().warn(TAG, 'Trimming template cache');
+      // Evict oldest entry to ensure memory usage is minimized.
+      cacheKeys.sort((a, b) => this.cache_[b].access - this.cache_[a].access);
+      delete this.cache_[cacheKeys[cacheKeys.length - 1]];
+    }
+  }
+}
