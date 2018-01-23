@@ -29,7 +29,7 @@ import {parseUrl} from '../src/url';
  * @param {function(!Object)} cb
  */
 function getBeOpinion(global, cb) {
-  loadScript(global, 'https://widget.beopinion.com/sdk.js', () => {
+  loadScript(global, 'https://widget.beopinion.com/sdk.js', function() {
     cb(global.beopinion);
   });
 }
@@ -41,9 +41,17 @@ function getBeOpinion(global, cb) {
 export function beopinion(global, data) {
   const div = global.document.createElement('div');
   div.className = "BeOpinionWidget";
-  div.setAttribute('data-content', data.contentid);
+  if (data['content'] !== null) {
+    div.setAttribute('data-content', data['content']);
+  }
+  if (data['my-content'] !== null) {
+    div.setAttribute('data-my-content', data['my-content']);
+  }
+  if (data['name'] !== null) {
+    div.setAttribute('data-name', data['name']);
+  }
   setStyles(div, {
-    width: '500px', // '100%',
+    width: '500px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -51,7 +59,7 @@ export function beopinion(global, data) {
   global.document.getElementById('c').appendChild(div);
   getBeOpinion(global, function(beopinion) {
     global.BeOpinionSDK.init({
-      account: data.accountid
+      account: data.account
     });
     global.BeOpinionSDK.watch();
     //     global.context.noContentAvailable();
