@@ -711,7 +711,8 @@ export class AmpAnalytics extends AMP.BaseElement {
         // TODO(warrengm): Instead of limiting resource timing to ini-load,
         // analytics should have throttling or de-dupe timings that have already
         // been reported.
-        dev().warn(TAG, 'resource timing is only allowed on ini-load triggers');
+        user().warn(
+            TAG, 'resource timing is only allowed on ini-load triggers');
       }
     }
     return dynamicBindings;

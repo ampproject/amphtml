@@ -331,4 +331,17 @@ describes.fakeWin('resourceTiming', {amp: true}, env => {
     // The counter is incremented for each entry.
     return runSerializeTest([entry1, entry2], spec, '100..~700..');
   });
+
+  it('should URL-encode the results', () => {
+    const entry1 = newPerformanceResourceTiming(
+        'http://foo.example.com/lib.js?v=123', 'script', 100, 500, 10 * 1000,
+        false);
+    const entry2 = newPerformanceResourceTiming(
+        'http://bar.example.com/lib.js', 'script', 700, 100, 80 * 1000, true);
+    const spec = newResourceTimingSpec();
+    spec['encoding']['entry'] = '${key}?${startTime},${duration}';
+    spec['encoding']['delim'] = ':';
+    return runSerializeTest(
+        [entry1, entry2], spec, 'foo_bar%3F100%2C500%3Afoo_bar%3F700%2C100');
+  });
 });

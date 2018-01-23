@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
+import {user} from '../../../src/log';
 import {isObject} from '../../../src/types';
 import {parseUrl} from '../../../src/url';
 import {find} from '../../../src/utils/array';
@@ -73,18 +73,18 @@ function yieldThread(fn) {
  */
 function validateResourceTimingSpec(spec) {
   if (!isObject(spec['resources'])) {
-    dev().warn('ANALYTICS', 'resourceTimingSpec missing "resources" field');
+    user().warn('ANALYTICS', 'resourceTimingSpec missing "resources" field');
     return false;
   }
   if (!spec['encoding'] || !spec['encoding']['entry'] ||
       !spec['encoding']['delim']) {
-    dev().warn(
+    user().warn(
         'ANALYTICS',
         'resourceTimingSpec is missing or has incomplete encoding options');
     return false;
   }
   if (spec['encoding']['base'] < 2 || spec['encoding']['base'] > 36) {
-    dev().warn(
+    user().warn(
         'ANALYTICS',
         'resource timing variables only supports bases between 2 and 36');
     return false;
@@ -109,12 +109,15 @@ function getResourceTimingEntries(win) {
  * Converts a resource timing entry to the variables for this resource.
  * @param {!PerformanceResourceTiming} entry
  * @param {string} name Name of the resource set by the resourceTimingSpec.
- * @param {function(number,number=): string} format A function to format
+ * @param {function(number, number=): string} format A function to format
  *    timestamps and intervals. (Two numbers will be passed in for intervals.)
  * @return {!ExpansionOptions}
  */
 function entryToExpansionOptions(entry, name, format) {
   const vars = {
+    // ${key} is the name of the resource from the resourceTimingSpec. i.e. it's
+    // the key of the object that specifies the host and path patterns that this
+    // resource matched against.
     'key': name,
     'startTime': format(entry.startTime),
     'redirectTime': format(entry.redirectEnd, entry.redirectStart),
@@ -135,14 +138,14 @@ function entryToExpansionOptions(entry, name, format) {
  * Returns the variables for the given resource timing entry if it matches one
  * of the defined resources, or null otherwise.
  * @param {!PerformanceResourceTiming} entry
- * @param {!Object<string, !ResourceSpecForHostDef>} resourcesByHost A map of
- *     host patterns to the spec for resources that match the host pattern.
+ * @param {!Array<!ResourceSpecForHostDef>} resourcesByHost An array of resource
+ *     specs to match against.
  * @return {?string} The name of the entry, or null if no matching name exists.
  */
 function nameForEntry(entry, resourcesByHost) {
   const url = parseUrl(entry.name);
-  for (const h in resourcesByHost) {
-    const {hostPattern, resources} = resourcesByHost[h];
+  for (let i = 0; i < resourcesByHost.length; ++i) {
+    const {hostPattern, resources} = resourcesByHost[i];
     if (!hostPattern.test(url.host)) {
       continue;
     }
@@ -164,7 +167,7 @@ function nameForEntry(entry, resourcesByHost) {
  * use the same host pattern.
  * @param {!Object<string, !IndividualResourceSpecDef>} resourceDefs A map of
  *     names to the resource spec for that name.
- * @return {!Object<string, !ResourceSpecForHostDef>}
+ * @return {!Array<!ResourceSpecForHostDef>}
  */
 function groupSpecsByHost(resourceDefs) {
   const byHost = {};
@@ -186,7 +189,11 @@ function groupSpecsByHost(resourceDefs) {
       };
     }
   }
-  return byHost;
+  const byHostArray = [];
+  for (const host in byHost) {
+    byHostArray.push(byHost[host]);
+  }
+  return byHostArray;
 }
 
 /**
@@ -240,7 +247,7 @@ function serialize(entries, resourceTimingSpec, win) {
  * Serializes resource timing entries according to the resource timing spec.
  * @param {!JsonObject} resourceTimingSpec
  * @param {!Window} win
- * @return {!Promise<string>|string}
+ * @return {!Promise<string>}
  */
 export function serializeResourceTiming(resourceTimingSpec, win) {
   if (!validateResourceTimingSpec(resourceTimingSpec)) {
