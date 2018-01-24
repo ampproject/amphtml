@@ -15,19 +15,32 @@
  */
 
 import {isExperimentOn} from '../../../../src/experiments';
-import {dev} from '../../../../src/log';
-import {elementByTag, iterateCursor} from '../../../../src/dom';
+import {dev, user} from '../../../../src/log';
+import {
+  childElement,
+  closestByTag,
+  elementByTag,
+  iterateCursor,
+} from '../../../../src/dom';
 import {toArray} from '../../../../src/types';
 import {CommonSignals} from '../../../../src/common-signals';
 
+const LIGHTBOX_ELIGIBLE_TAGS = {
+  'amp-img': true,
+};
+
 const ELIGIBLE_TAP_TAGS = {
   'amp-img': true,
-  'amp-anim': true,
 };
 
 const VIEWER_TAG = 'amp-lightbox-viewer';
 const CAROUSEL_TAG = 'amp-carousel';
+const FIGURE_TAG = 'figure';
 const SLIDE_SELECTOR = '.amp-carousel-slide';
+
+const VALIDATION_ERROR_MSG = `lightbox attribute is only supported for the
+  <amp-img> tag and <figure> and <amp-carousel> tags containing the <amp-img>
+  tag right now.`;
 
 /** @typedef {{
  *  url: string,
@@ -124,33 +137,88 @@ export class LightboxManager {
   }
 
   /**
+   * Checks to see if a root element is supported.
+   * @param {Element} element
+   * @return {boolean}
+   * @private
+   */
+  baseElementIsSupported_(element) {
+    return LIGHTBOX_ELIGIBLE_TAGS[element.tagName.toLowerCase()];
+  }
+
+  /**
+   * Process an amp-carousel element for lightbox, assigns a lightbox
+   * group id, installs the lightbox attribute and tap handlers to open
+   * the lightbox on the eligible slide elements.
+   * @param {!Element} carousel
+   */
+  processLightboxCarousel_(carousel) {
+    const lightboxGroupId = carousel.getAttribute('lightbox') ||
+    'carousel' + (carousel.getAttribute('id') || this.counter_++);
+    this.getSlidesFromCarousel_(carousel).then(slides => {
+      slides.forEach(slide => {
+        if (!slide.hasAttribute('lightbox-exclude')) {
+          slide.setAttribute('lightbox', lightboxGroupId);
+          this.processBaseLightboxElement_(slide, lightboxGroupId);
+        }
+      });
+    });
+  }
+  /**
    * Adds element to correct lightbox group, installs tap handler.
    * @param {!Element} element
    * @private
    */
   processLightboxElement_(element) {
     if (element.tagName.toLowerCase() == CAROUSEL_TAG) {
-      const lightboxGroupId = element.getAttribute('lightbox') ||
-       'carousel' + (element.getAttribute('id') || this.counter_++);
-      this.getSlidesFromCarousel_(element).then(slides => {
-        slides.forEach(slide => {
-          // TODO: review naming conventions for component attributes
-          if (!slide.hasAttribute('lightbox-exclude')) {
-            slide.setAttribute('lightbox', lightboxGroupId);
-            this.processBaseLightboxElement_(slide, lightboxGroupId);
-          }
-        });
-      });
+      this.processLightboxCarousel_(element);
     } else {
       const lightboxGroupId = element.getAttribute('lightbox') || 'default';
       this.processBaseLightboxElement_(element, lightboxGroupId);
     }
   }
 
+  /**
+   * Unwraps a figure element and lightboxes the
+   * @param {!Element} figure
+   * @param {string} lightboxGroupId
+   * @return {?Element}
+   * @private
+   */
+  unwrapLightboxedFigure_(figure, lightboxGroupId) {
+    // Assume that the lightbox target is whichever element inside the figure
+    // that is not the figcaption.
+    const element = childElement(figure,
+        child => child.tagName !== 'FIGCAPTION');
+    if (element) {
+      element.setAttribute('lightbox', lightboxGroupId);
+    }
+    return element;
+  }
+
+  /**
+   * Assigns each lightboxed element to a lightbox group and adds
+   * the on tap activate attribute.
+   * @param {!Element} element
+   * @param {string} lightboxGroupId
+   */
   processBaseLightboxElement_(element, lightboxGroupId) {
+    if (element.tagName.toLowerCase() == FIGURE_TAG) {
+      const unwrappedFigureElement = this.unwrapLightboxedFigure_(element,
+          lightboxGroupId);
+      if (!unwrappedFigureElement) {
+        return;
+      } else {
+        element = unwrappedFigureElement;
+      }
+    }
+
+    user().assert(this.baseElementIsSupported_(element), VALIDATION_ERROR_MSG);
+
     if (!this.lightboxGroups_[lightboxGroupId]) {
       this.lightboxGroups_[lightboxGroupId] = [];
     }
+
     this.lightboxGroups_[lightboxGroupId]
         .push(dev().assertElement(element));
     if (this.meetsHeuristicsForTap_(element)) {
@@ -181,23 +249,45 @@ export class LightboxManager {
   }
 
   /**
-   * The function is simplified for testing now.
    * Get the description for single lightboxed item.
    * @param {!Element} element
-   * @return {?string}
+   * @return {string|null}
    */
   getDescription(element) {
-    const aria = element.getAttribute('aria-describedby');
-    if (aria) {
-      const descriptionElement = element.ownerDocument.getElementById(aria);
-      if (descriptionElement) {
-        return descriptionElement.textContent;
+    // If the element in question is the descendant of a figure element
+    // try using the figure caption as the lightbox description.
+    const figureParent = closestByTag(element, 'figure');
+    if (figureParent) {
+      const figCaption = elementByTag(figureParent, 'figcaption');
+      if (figCaption) {
+        return figCaption./*OK*/innerText;
       }
     }
     const alt = element.getAttribute('alt');
     if (alt) {
       return alt;
     }
+    const ariaDescribedBy = element.getAttribute('aria-describedby');
+    if (ariaDescribedBy) {
+      const descriptionElement = element.ownerDocument
+          .getElementById(ariaDescribedBy);
+      if (descriptionElement) {
+        return descriptionElement./*OK*/innerText;
+      }
+    }
+    const ariaLabel = element.getAttribute('aria-label');
+    if (ariaLabel) {
+      return ariaLabel;
+    }
+    const ariaLabelledBy = element.getAttribute('aria-labelledby');
+    if (ariaLabelledBy) {
+      const descriptionElement = element.ownerDocument
+          .getElementById(ariaLabelledBy);
+      if (descriptionElement) {
+        return descriptionElement./*OK*/innerText;
+      }
+    }
+
     return null;
   }
 
