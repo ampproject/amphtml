@@ -44,6 +44,12 @@ export class AmpList extends AMP.BaseElement {
 
     /** @const {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win);
+
+    /**
+     * Has layoutCallback() been called yet?
+     * @private {boolean}
+     */
+    this.layoutCompleted_ = false;
   }
 
   /** @override */
@@ -73,6 +79,8 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.layoutCompleted_ = true;
+
     const fetch = this.fetchList_();
     if (this.getFallback()) {
       fetch.then(() => {
@@ -96,9 +104,8 @@ export class AmpList extends AMP.BaseElement {
     if (src !== undefined) {
       const typeOfSrc = typeof src;
       if (typeOfSrc === 'string') {
-        // Don't fetch if we aren't laid out yet since we also fetch in
-        // layoutCallback().
-        if (this.getLayoutWidth() > 0) {
+        // Defer to fetch in layoutCallback() before first layout.
+        if (this.layoutCompleted_) {
           this.fetchList_();
         }
       } else if (typeOfSrc === 'object') {
