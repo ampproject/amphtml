@@ -284,7 +284,7 @@ export class LightboxManager {
       const descriptionElement = element.ownerDocument
           .getElementById(ariaLabelledBy);
       if (descriptionElement) {
-        return descriptionElement.innerText;
+        return descriptionElement./*OK*/innerText;
       }
     }
 
