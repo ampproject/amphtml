@@ -100,7 +100,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.debounceToggleLoadingSpinner_ = debounce(
         this.win, isActive => this.toggleLoadingSpinner_(!!isActive), 100);
 
-    /** @const @private {!Array<function()>} */
+    /** @private {!Array<function()>} */
     this.unlisteners_ = [];
   }
 
