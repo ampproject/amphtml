@@ -264,6 +264,55 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
+  'byside': {
+    'vars': {
+	  'agentDomain': 'webcare',
+      'webcareId': '',
+      'channel': '',
+      'fid': '',
+	  'lang': 'pt',
+    },
+    'requests': {
+      'host': '//${agentDomain}.byside.com/',
+      'base': '${host}BWA${webcare_id}/amp/',
+      'pageview': '${base}pixel.php',
+	  'event': '${base}signal.php?event_id=${eventId}' +
+	    '&event_label=${eventLabel}&fields=${fields}',
+    },
+    'extraUrlParams': {
+      'webcare_id': '${webcareId}',
+      'bwch': '${channel}',
+      'lang': '${lang}',
+      'fid': '${fid}',
+      'bwit': 'A',
+      'tuid': '${clientId(byside_webcare_tuid)}',
+      'suid': '',
+      'puid': '${pageViewId}p${timestamp}',
+      'referrer': '${documentReferrer}',
+      'page': '${sourceUrl}',
+      'amppage': '${ampdocUrl}',
+      'bwpt': '${title}',
+      'bres': '${viewportWidth}x${viewportHeight}',
+      'res': '${screenWidth}x${screenHeight}',
+      'v': 'v20171116a',
+      'ampv': '${ampVersion}',
+      'viewer': '${viewer}',
+      'ua': '${userAgent}',
+      'r': '${random}',
+    },
+    'triggers': {
+      'pageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
   'chartbeat': {
     'requests': {
       'host': 'https://ping.chartbeat.net',
