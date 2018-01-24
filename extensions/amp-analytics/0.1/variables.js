@@ -109,7 +109,7 @@ export class VariableService {
     /** @private {!Window} */
     this.win_ = window;
 
-    /** @private {!Object<string, !Filter>} */
+    /** @private {!Object<string, *>} */
     this.filters_ = {};
 
     this.register_('DEFAULT', defaultFilter);
@@ -134,7 +134,7 @@ export class VariableService {
 
   /**
    * @param {string} name
-   * @param {!Filter} filter
+   * @param {*} filter
    */
   register_(name, filter) {
     dev().assert(!this.filters_[name], 'Filter "' + name
