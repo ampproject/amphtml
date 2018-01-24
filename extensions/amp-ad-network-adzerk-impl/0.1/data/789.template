@@ -4,9 +4,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,minimum-scale=1">
     <style amp4ads-boilerplate>body{visibility:hidden}</style>
-    <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
-    <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
-    <script async custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js"></script>
     <style amp-custom>
       amp-img img {
         object-fit: cover;
@@ -63,5 +60,25 @@
         <div id="clockHand" class="clock-hand"></div>
       </div>
     </template>
+    <script amp-ad-metadata type=application/json>
+    {
+      "ampRuntimeUtf16CharOffsets" : [ 0, 0 ],
+      "customElementExtensions": [
+        "amp-animation",
+        "amp-position-observer"
+      ],
+      "extensions": [
+        {
+          "custom-element": "amp-animation",
+          "src": "https://cdn.ampproject.org/v0/amp-animation-0.1.js"
+        },
+        {
+          "custom-element": "amp-position-observer",
+          "src": "https://cdn.ampproject.org/v0/amp-position-observer-0.1.js"
+        }
+      ]
+    }
+    </script>
+
   </body>
 </html>

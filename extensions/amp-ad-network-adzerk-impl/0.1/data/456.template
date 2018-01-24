@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width,minimum-scale=1">
     <style amp4ads-boilerplate>body{visibility:hidden}</style>
     <style amp-custom>amp-fit-text {border: solid 1px;font: 500 11px/13px "Raleway";}</style>
-    <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
-    <script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"></script>
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Raleway">
   </head>
   <body>
@@ -16,5 +14,19 @@
       <amp-img src={{IMG_SRC}} height=159 width=318></amp-img><br>
       Missing {{UNKNOWN}} item
     </template>
+    <script amp-ad-metadata type=application/json>
+    {
+      "ampRuntimeUtf16CharOffsets" : [ 0, 0 ],
+      "customElementExtensions": [
+        "amp-fit-text"
+      ],
+      "extensions": [
+        {
+          "custom-element": "amp-fit-text",
+          "src": "https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"
+        }
+      ]
+    }
+    </script>
   </body>
 </html>

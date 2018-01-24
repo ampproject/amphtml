@@ -82,9 +82,8 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
   describe('#maybeValidateAmpCreative', () => {
     it('should properly inflate template', () => {
       const adResponseBody = {
-        ampCreativeTemplateUrl:
-            'https://www.adzerk.com/456',
-        templateMacroValues: {
+        templateUrl: 'https://www.adzerk.com/456',
+        data: {
           USER_NAME: 'some_user',
           USER_NUM: 9876,
           HTML_CONTENT: '<img src=https://img.com/>',
@@ -115,7 +114,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
           '"src": "https://cdn.ampproject.org/v0/amp-fit-text-0.1.js" } ] }' +
           '</script></body></html>';
       fetchTextMock.withArgs(
-          'https://adzerk-com.cdn.ampproject.org/a/s/adzerk.com/456',
+          'https://www-adzerk-com.cdn.ampproject.org/a/s/www.adzerk.com/456',
           {
             mode: 'cors',
             method: 'GET',

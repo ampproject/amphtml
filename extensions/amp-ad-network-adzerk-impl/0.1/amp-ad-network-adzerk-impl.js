@@ -25,7 +25,6 @@ import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
 import {urls} from '../../../src/config';
-import {startsWith} from '../../../src/string';
 import {parseUrl} from '../../../src/url';
 
 /** @type {string} */
@@ -35,8 +34,8 @@ const TAG = 'amp-ad-network-adzerk-impl';
 export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-template-amp-creative';
 
 /** @typedef {{
-      ampCreativeTemplateUrl: string,
-      templateMacroValues: (JsonObject|undefined),
+      templateUrl: string,
+      data: (JsonObject|undefined),
     }} */
 let AmpTemplateCreativeDef;
 
@@ -49,13 +48,13 @@ let ampAdTemplates;
  * amp-mustache.  AMP creative response will consist of the following JSON
  * object with two fields:
  *
- * - ampCreativeTemplateId: number value for template ID.  Template must already
+ * - templateUrl: number value for template ID.  Template must already
  *    have been stored in the AMP cache.
- * - templateMacroValues: optional JSON object mapping of macro name to its
+ * - data: optional JSON object mapping of macro name to its
  *    string value used to dynamically update the template
  *
  * Additionally, ad response must include header indicating AMP creative
- * template response: AMP-template-amp-creative: true
+ * template type, e.g.: `AMP-template-amp-creative: amp-mustache`.
  *
  * Failure to properly fetch or expand template will result in slot collapsing.
  * Non-AMP creatives (defined as those not including AMP-template-amp-creative)
@@ -120,9 +119,8 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
       this.ampCreativeJson_ = /** @type {!AmpTemplateCreativeDef} */
         (tryParseJson(body) || {});
       const proxyUrl = getMode(this.win).localDev
-        ? this.ampCreativeJson_.ampCreativeTemplateUrl
-        : this.getTemplateProxyUrl_(
-            this.ampCreativeJson_.ampCreativeTemplateUrl);
+        ? this.ampCreativeJson_.templateUrl
+        : this.getTemplateProxyUrl_(this.ampCreativeJson_.templateUrl);
       // TODO(keithwrightbos): macro value validation?  E.g. http invalid?
       return ampAdTemplates
           .fetch(proxyUrl)
@@ -147,11 +145,9 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
    */
   getTemplateProxyUrl_(url) {
     const loc = parseUrl(url);
-    const hostClean = startsWith(loc.host, 'www.')
-      ? loc.host.slice(4)
-      : loc.host;
-    return loc.protocol + '//' + hostClean.replace('.', '-') + '.' +
-        urls.cdn.slice(8) + '/a/s/' + hostClean + loc.pathname;
+    return loc.protocol + '//' +
+        loc.hostname.replace(/-/g, '--').replace(/\./g, '-') +
+        '.' + urls.cdn.slice(8) + '/a/s/' + loc.hostname + loc.pathname;
   }
 
   /** @override */
@@ -161,9 +157,9 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
 
   /** @override */
   onCreativeRender(unusedMetadata) {
-    if (this.ampCreativeJson_ && this.ampCreativeJson_.templateMacroValues) {
+    if (this.ampCreativeJson_ && this.ampCreativeJson_.data) {
       ampAdTemplates.render(
-          this.ampCreativeJson_.templateMacroValues,
+          this.ampCreativeJson_.data,
           this.iframe.contentWindow.document.body)
           .then(renderedElement => {
             this.iframe.contentWindow.document.body./*OK*/innerHTML =

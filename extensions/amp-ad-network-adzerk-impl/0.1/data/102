@@ -1,6 +1,6 @@
 {
-  "ampCreativeTemplateId": 789,
-  "templateMacroValues": {
+  "templateUrl": "789",
+  "data": {
     "CLOCK_IMG": "../examples/img/clock.jpg"
   }
 }

@@ -1,6 +1,6 @@
 {
-  "ampCreativeTemplateUrl": "456",
-  "templateMacroValues": {
+  "templateUrl": "456",
+  "data": {
     "USER_NAME": "bar",
     "USER_NUM": 1234,
     "HTML_CONTENT": "<img src=https://img.com/>",
