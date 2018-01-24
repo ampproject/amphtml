@@ -105,7 +105,8 @@ function getTrackingUrl(data) {
       isClient = false,
       tier = 0;
   const baseUrl = '//srv.imonomy.com/internal/reporter';
-  let unitCodeUrl = `${baseUrl}?v=2&subid=${subId}&sid=${pid}&format=${unitFormat}&ai=`;
+  let unitCodeUrl = `${baseUrl}?v=2&subid=${subId}&sid=${pid}&`;
+  unitCodeUrl = unitCodeUrl + `format=${unitFormat}&ai=`;
   unitCodeUrl = unitCodeUrl + `${trackId}&ctxu=${pageLocation}&fb=${notFirst}&`;
   unitCodeUrl = unitCodeUrl + `cid=${cid} &ab=${abLabel}&cbs=${rand}`;
   if (uid) {
