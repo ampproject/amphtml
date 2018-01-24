@@ -104,6 +104,8 @@ export class SafeframeApi {
 
     /** {number} */
     this.initialWidth = null;
+
+    this.currentGeometry = null;
   }
 
   registerSafeframeListener() {
@@ -182,7 +184,7 @@ export class SafeframeApi {
         return percInView;
       }
     };
-    const message =   {
+    this.currentGeometry =   {
       'windowCoords_t': changes.rootBounds.top,
       'windowCoords_r': changes.rootBounds.right,
       'windowCoords_b': changes.rootBounds.bottom,
@@ -193,8 +195,8 @@ export class SafeframeApi {
       'frameCoords_l': changes.boundingClientRect.left,
       'styleZIndex': '1',
       'allowedExpansion_t': 0,
-      'allowedExpansion_r': 320,
-      'allowedExpansion_b': 50,
+      'allowedExpansion_r': 1000,
+      'allowedExpansion_b': 1000,
       'allowedExpansion_l': 0,
       'xInView': percInView(changes.rootBounds.top,
                             changes.rootBounds.bottom,
@@ -205,8 +207,8 @@ export class SafeframeApi {
                             changes.boundingClientRect.left,
                             changes.boundingClientRect.right),
     };
-    console.log(JSON.stringify(message));
-    return message;
+    console.log(JSON.stringify(this.currentGeometry));
+    return this.currentGeometry;
   }
 
   sendMessage(message) {
@@ -237,7 +239,29 @@ export class SafeframeApi {
   handleExpandRequest_(payload) {
     const width = payload.expand_r - payload.expand_l;
     const height = payload.expand_b - payload.expand_t;
-    this.baseInstance.handleResize_(width, height);
+    this.baseInstance.attemptChangeSize(height, width).catch(() => {});
+    //this.baseInstance.handleResize_(width, height);
+    const p = {
+      uid: 1,
+      success: true,
+      newGeometry: JSON.stringify(this.currentGeometry),
+      expand_t: this.currentGeometry.allowedExpansion_t,
+      expand_b: this.currentGeometry.allowedExpansion_b,
+      expand_r: this.currentGeometry.allowedExpansion_r,
+      expand_l: this.currentGeometry.allowedExpansion_l,
+      push: true,
+    };
+    const serviceName = 'expand_repsonse';
+    const channel = this.channelName;
+    const endpointIdentity = 1;
+    const message = {
+      c: channel,
+      p: p,
+      e: serviceName,
+    }
+    this.baseInstance.iframe.contentWindow./*OK*/postMessage(
+        JSON.stringify(message),
+        SAFEFRAME_ORIGIN);
   }
 
   /**
