@@ -29,6 +29,15 @@ describe('amp-mustache template', () => {
     expect(result./*OK*/innerHTML).to.equal('value = abc');
   });
 
+  it('should render {{.}} from string', () => {
+    const templateElement = document.createElement('template');
+    templateElement.content.textContent = 'value = {{.}}';
+    const template = new AmpMustache(templateElement);
+    template.compileCallback();
+    const result = template.render('abc');
+    expect(result./*OK*/innerHTML).to.equal('value = abc');
+  });
+
   it('should sanitize output', () => {
     const templateElement = document.createElement('template');
     templateElement./*OK*/innerHTML =
