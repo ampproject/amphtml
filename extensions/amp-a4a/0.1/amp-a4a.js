@@ -87,7 +87,7 @@ export const EXPERIMENT_FEATURE_HEADER_NAME = 'amp-ff-exps';
 const TAG = 'amp-a4a';
 
 /** @type {string} */
-const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
+export const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
 
 /** @enum {string} */
 export const XORIGIN_MODE = {
@@ -115,7 +115,7 @@ export let SizeInfoDef;
       customStylesheets: !Array<{href: string}>,
       images: (Array<string>|undefined),
     }} */
-let CreativeMetaDataDef;
+export let CreativeMetaDataDef;
 
 /** @private */
 export const LIFECYCLE_STAGES = {
@@ -735,8 +735,6 @@ export class AmpA4A extends AMP.BaseElement {
             };
           });
         })
-        // This block returns the ad creative if it exists and validates as AMP;
-        // null otherwise.
         /** @return {!Promise<?ArrayBuffer>} */
         .then(responseParts => {
           checkStillCurrent();
@@ -758,40 +756,7 @@ export class AmpA4A extends AMP.BaseElement {
               bytes) {
             this.creativeBody_ = bytes;
           }
-          this.handleLifecycleStage_('adResponseValidateStart');
-          return this.keysetPromise_
-              .then(() => signatureVerifierFor(this.win)
-                  .verify(bytes, headers, (eventName, extraVariables) => {
-                    this.handleLifecycleStage_(
-                        eventName, extraVariables);
-                  }))
-              .then(status => {
-                if (getMode().localDev &&
-                    this.element.getAttribute('type') == 'fake') {
-                  // do not verify signature for fake type ad
-                  status = VerificationStatus.OK;
-                }
-                this.handleLifecycleStage_('adResponseValidateEnd', {
-                  'signatureValidationResult': status,
-                  'releaseType': this.releaseType_,
-                });
-                switch (status) {
-                  case VerificationStatus.OK:
-                    return bytes;
-                  case VerificationStatus.UNVERIFIED:
-                    return null;
-                  case VerificationStatus.CRYPTO_UNAVAILABLE:
-                    return this.shouldPreferentialRenderWithoutCrypto() ?
-                      bytes : null;
-                  // TODO(@taymonbeal, #9274): differentiate between these
-                  case VerificationStatus.ERROR_KEY_NOT_FOUND:
-                  case VerificationStatus.ERROR_SIGNATURE_MISMATCH:
-                    user().error(
-                        TAG, this.element.getAttribute('type'),
-                        'Signature verification failed');
-                    return null;
-                }
-              });
+          return this.maybeValidateAmpCreative(bytes, headers);
         })
         .then(creative => {
           checkStillCurrent();
@@ -806,13 +771,13 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {?CreativeMetaDataDef} */
         .then(creativeDecoded => {
           checkStillCurrent();
-          // Note: It's critical that #getAmpAdMetadata_ be called
+          // Note: It's critical that #getAmpAdMetadata be called
           // on precisely the same creative that was validated
           // via #validateAdResponse_.  See GitHub issue
           // https://github.com/ampproject/amphtml/issues/4187
           let creativeMetaDataDef;
           if (!creativeDecoded ||
-            !(creativeMetaDataDef = this.getAmpAdMetadata_(creativeDecoded))) {
+            !(creativeMetaDataDef = this.getAmpAdMetadata(creativeDecoded))) {
             return null;
           }
           // Update priority.
@@ -843,6 +808,52 @@ export class AmpA4A extends AMP.BaseElement {
           // url or creative exist.
           this.promiseErrorHandler_(error);
           return null;
+        });
+  }
+
+  /**
+   * This block returns the ad creative if it exists and validates as AMP;
+   * null otherwise.
+   * @param {!ArrayBuffer} bytes
+   * @param {!Headers} headers
+   * @return {!Promise<?ArrayBuffer>}
+   */
+  maybeValidateAmpCreative(bytes, headers) {
+    this.handleLifecycleStage_('adResponseValidateStart');
+    const checkStillCurrent = this.verifyStillCurrent();
+    return this.keysetPromise_
+        .then(() => signatureVerifierFor(this.win)
+            .verify(bytes, headers, (eventName, extraVariables) => {
+              this.handleLifecycleStage_(
+                  eventName, extraVariables);
+            }))
+        .then(status => {
+          checkStillCurrent();
+          if (getMode().localDev &&
+              this.element.getAttribute('type') == 'fake') {
+            // do not verify signature for fake type ad
+            status = VerificationStatus.OK;
+          }
+          this.handleLifecycleStage_('adResponseValidateEnd', {
+            'signatureValidationResult': status,
+            'releaseType': this.releaseType_,
+          });
+          switch (status) {
+            case VerificationStatus.OK:
+              return bytes;
+            case VerificationStatus.UNVERIFIED:
+              return null;
+            case VerificationStatus.CRYPTO_UNAVAILABLE:
+              return this.shouldPreferentialRenderWithoutCrypto() ?
+                bytes : null;
+            // TODO(@taymonbeal, #9274): differentiate between these
+            case VerificationStatus.ERROR_KEY_NOT_FOUND:
+            case VerificationStatus.ERROR_SIGNATURE_MISMATCH:
+              user().error(
+                  TAG, this.element.getAttribute('type'),
+                  'Signature verification failed');
+              return null;
+          }
         });
   }
 
@@ -1521,10 +1532,9 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {?CreativeMetaDataDef} Object result of parsing JSON data blob inside
    *     the metadata markers on the ad text, or null if no metadata markers are
    *     found.
-   * @private
    * TODO(keithwrightbos@): report error cases
    */
-  getAmpAdMetadata_(creative) {
+  getAmpAdMetadata(creative) {
     let metadataStart = -1;
     let metadataString;
     for (let i = 0; i < METADATA_STRINGS.length; i++) {

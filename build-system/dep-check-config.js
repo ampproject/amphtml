@@ -42,6 +42,8 @@ exports.rules = [
     mustNotDependOn: 'src/sanitizer.js',
     whitelist: [
       'extensions/amp-mustache/0.1/amp-mustache.js->src/sanitizer.js',
+      'extensions/amp-ad-network-adzerk-impl/0.1/' +
+          'amp-ad-network-adzerk-impl.js->src/sanitizer.js',
       'extensions/amp-bind/0.1/bind-impl.js->src/sanitizer.js',
       'extensions/amp-date-picker/0.1/amp-date-picker.js->src/sanitizer.js',
     ],
@@ -61,6 +63,8 @@ exports.rules = [
           'third_party/closure-library/sha384-generated.js',
       'extensions/amp-mustache/0.1/amp-mustache.js->' +
           'third_party/mustache/mustache.js',
+      'extensions/amp-ad-network-adzerk-impl/0.1/' +
+          'amp-ad-network-adzerk-impl.js->third_party/mustache/mustache.js',
       'extensions/amp-timeago/0.1/amp-timeago.js->' +
           'third_party/timeagojs/timeago.js',
       '3p/polyfills.js->third_party/babel/custom-babel-helpers.js',

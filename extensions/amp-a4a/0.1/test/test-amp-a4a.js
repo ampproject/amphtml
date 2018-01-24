@@ -998,8 +998,8 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
-        sandbox.stub(a4a, 'getAmpAdMetadata_').callsFake(creative => {
-          const metaData = AmpA4A.prototype.getAmpAdMetadata_(creative);
+        sandbox.stub(a4a, 'getAmpAdMetadata').callsFake(creative => {
+          const metaData = AmpA4A.prototype.getAmpAdMetadata(creative);
           metaData.images = ['https://prefetch.me.com?a=b', 'http://do.not.prefetch.me.com?c=d',
             'https://prefetch.metoo.com?e=f'];
           return metaData;
@@ -1491,7 +1491,7 @@ describe('amp-a4a', () => {
     });
   });
 
-  describe('#getAmpAdMetadata_', () => {
+  describe('#getAmpAdMetadata', () => {
     let a4a;
     let metaData;
     beforeEach(() => {
@@ -1510,7 +1510,7 @@ describe('amp-a4a', () => {
       });
     });
     it('should parse metadata', () => {
-      const actual = a4a.getAmpAdMetadata_(buildCreativeString(metaData));
+      const actual = a4a.getAmpAdMetadata(buildCreativeString(metaData));
       const expected = Object.assign(metaData, {
         minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
       });
@@ -1522,7 +1522,7 @@ describe('amp-a4a', () => {
       const creative = buildCreativeString(metaData).replace(
           '<script type="application/json" amp-ad-metadata>',
           '<script type=application/json amp-ad-metadata>');
-      const actual = a4a.getAmpAdMetadata_(creative);
+      const actual = a4a.getAmpAdMetadata(creative);
       const expected = Object.assign({
         minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
       }, metaData);
@@ -1532,35 +1532,35 @@ describe('amp-a4a', () => {
       const creative = buildCreativeString(metaData).replace(
           '<script type="application/json" amp-ad-metadata>',
           '<script type=application/json" amp-ad-metadata>');
-      expect(a4a.getAmpAdMetadata_(creative)).to.be.null;
+      expect(a4a.getAmpAdMetadata(creative)).to.be.null;
     });
 
     it('should return null if missing ampRuntimeUtf16CharOffsets', () => {
       const baseTestDoc = testFragments.minimalDocOneStyle;
       const splicePoint = baseTestDoc.indexOf('</body>');
-      expect(a4a.getAmpAdMetadata_(
+      expect(a4a.getAmpAdMetadata(
           baseTestDoc.slice(0, splicePoint) +
         '<script type="application/json" amp-ad-metadata></script>' +
         baseTestDoc.slice(splicePoint))).to.be.null;
     });
     it('should return null if invalid extensions', () => {
       metaData.customElementExtensions = 'amp-vine';
-      expect(a4a.getAmpAdMetadata_(buildCreativeString(metaData))).to.be.null;
+      expect(a4a.getAmpAdMetadata(buildCreativeString(metaData))).to.be.null;
     });
     it('should return null if non-array stylesheets', () => {
       metaData.customStylesheets = 'https://fonts.googleapis.com/css?foobar';
-      expect(a4a.getAmpAdMetadata_(buildCreativeString(metaData))).to.be.null;
+      expect(a4a.getAmpAdMetadata(buildCreativeString(metaData))).to.be.null;
     });
     it('should return null if invalid stylesheet object', () => {
       metaData.customStylesheets = [
         {href: 'https://fonts.googleapis.com/css?foobar'},
         {foo: 'https://fonts.com/css?helloworld'},
       ];
-      expect(a4a.getAmpAdMetadata_(buildCreativeString(metaData))).to.be.null;
+      expect(a4a.getAmpAdMetadata(buildCreativeString(metaData))).to.be.null;
     });
     it('should not include amp images if not an array', () => {
       metaData.images = 'https://foo.com';
-      const actual = a4a.getAmpAdMetadata_(buildCreativeString(metaData));
+      const actual = a4a.getAmpAdMetadata(buildCreativeString(metaData));
       const expected = Object.assign({
         minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
       }, metaData);
@@ -1569,7 +1569,7 @@ describe('amp-a4a', () => {
     });
     it('should tolerate missing images', () => {
       delete metaData.images;
-      const actual = a4a.getAmpAdMetadata_(buildCreativeString(metaData));
+      const actual = a4a.getAmpAdMetadata(buildCreativeString(metaData));
       const expected = Object.assign({
         minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
       }, metaData);
@@ -1580,7 +1580,7 @@ describe('amp-a4a', () => {
       while (metaData.images.length < 10) {
         metaData.images.push('https://another.image.com?abc=def');
       }
-      expect(a4a.getAmpAdMetadata_(buildCreativeString(metaData)).images.length)
+      expect(a4a.getAmpAdMetadata(buildCreativeString(metaData)).images.length)
           .to.equal(5);
     });
     // FAILURE cases here
@@ -1619,7 +1619,7 @@ describe('amp-a4a', () => {
   });
 
   describe('#renderAmpCreative_', () => {
-    const metaData = AmpA4A.prototype.getAmpAdMetadata_(buildCreativeString());
+    const metaData = AmpA4A.prototype.getAmpAdMetadata(buildCreativeString());
     let a4aElement;
     let a4a;
     beforeEach(() => {
