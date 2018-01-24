@@ -204,6 +204,20 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
+   * Return a cleaned clone of the given element for building
+   * carousel slides with.
+   * @param {!Element} element
+   * @private
+   */
+  cloneLightboxableElement_(element) {
+    const deepClone = !element.classList.contains(
+        'i-amphtml-element');
+    const clonedNode = element.cloneNode(deepClone);
+    clonedNode.removeAttribute('on');
+    clonedNode.removeAttribute('id');
+    return clonedNode;
+  }
+  /**
    * Given a list of lightboxable elements, build the internal carousel slides
    * @param {!Array<!Element>} lightboxableElements
    * @private
@@ -213,11 +227,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.elementsMetadata_[this.currentLightboxGroupId_] = [];
     lightboxableElements.forEach(element => {
       element.lightboxItemId = index++;
-      const deepClone = !element.classList.contains(
-          'i-amphtml-element');
-      const clonedNode = element.cloneNode(deepClone);
-      clonedNode.removeAttribute('on');
-      clonedNode.removeAttribute('id');
+      const clonedNode = this.cloneLightboxableElement_(element);
       const descText = this.manager_.getDescription(element);
       const metadata = {
         descriptionText: descText,
@@ -323,7 +333,11 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    */
   updateDescriptionBox_() {
     const descText = this.getCurrentElement_().descriptionText;
-    this.descriptionTextArea_.textContent = descText;
+    // The problem with setting innerText is that it not only removes
+    // child nodes from the element, but also permanently destroys all
+    // descendant text nodes. It is okay in this case because the description
+    // text area is a div that does not contain descendant elements.
+    this.descriptionTextArea_./*OK*/innerText = descText;
     if (!descText) {
       this.descriptionBox_.classList.add('hide');
     }
