@@ -284,11 +284,7 @@ export class ClickEventTracker extends EventTracker {
         target,
         /* computeParamNameFunc */ undefined,
         VARIABLE_DATA_ATTRIBUTE_KEY);
-    const linkUrlParams = getDataParamsFromLinkUrl(
-        target,
-        /* computeParamNameFunc */ undefined);
-    const params = Object.assign(attributesParams, linkUrlParams);
-    listener(new AnalyticsEvent(target, 'click', params));
+    listener(new AnalyticsEvent(target, 'click', attributesParams));
   }
 }
 

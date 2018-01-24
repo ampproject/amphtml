@@ -519,8 +519,12 @@ export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
   opt_paramPattern) {
   const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
   const dataset = element.dataset;
+  const attributes = element.attributes;
   const params = dict();
   const paramPattern = opt_paramPattern ? opt_paramPattern : /^param(.+)/;
+  for (const key in attributes) {
+    params[computeParamNameFunc(key)] = element.getAttribute(key);
+  }
   for (const key in dataset) {
     const matches = key.match(paramPattern);
     if (matches) {

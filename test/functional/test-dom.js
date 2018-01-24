@@ -627,9 +627,9 @@ describes.sandboxed('DOM', {}, env => {
       element.setAttribute('data-param-hello', '2');
       element.setAttribute('data-param-from-the-other-side', '3');
       const params = dom.getDataParamsFromAttributes(element);
+      expect(params.attr1).to.be.equal('1');
       expect(params.hello).to.be.equal('2');
       expect(params.fromTheOtherSide).to.be.equal('3');
-      expect(params.attr1).to.be.undefined;
     });
 
     it('should return key-value for custom data attributes', () => {
@@ -645,36 +645,8 @@ describes.sandboxed('DOM', {}, env => {
     it('should return key-value for link of https://example.com/index.html?query#hash', () => {
       const element = document.createElement('a');
       element.setAttribute('href', 'https://example.com/index.html?query#hash');
-      const params = dom.getDataParamsFromLinkUrl(element);
-      expect(params.clickHostname).to.be.equal('example.com');
-      expect(params.clickProtocol).to.be.equal('https');
-      expect(params.clickPathname).to.be.equal('/index.html');
-      expect(params.clickQuery).to.be.equal('query');
-      expect(params.clickHash).to.be.equal('hash');
-      expect(params.clickUrl).to.be.equal('https://example.com/index.html?query#hash');
-    });
-
-    it('should return key-value for link of relative path', () => {
-      const element = document.createElement('a');
-      element.setAttribute('href', './test/example.html');
-      const params = dom.getDataParamsFromLinkUrl(element);
-      expect(params.clickHostname).to.be.equal('localhost');
-      expect(params.clickProtocol).to.be.equal('http');
-      expect(params.clickPathname).to.be.equal('/test/example.html');
-      expect(params.clickQuery).to.be.equal('');
-      expect(params.clickHash).to.be.equal('');
-      expect(params.clickUrl).to.be.equal('http://localhost:9876/test/example.html');
-    });
-
-    it('should return empty object for link do not have href attrubute', () => {
-      const element = document.createElement('a');
-      const params = dom.getDataParamsFromLinkUrl(element);
-      expect(params.clickHostname).to.be.equal(undefined);
-      expect(params.clickProtocol).to.be.equal(undefined);
-      expect(params.clickPathname).to.be.equal(undefined);
-      expect(params.clickQuery).to.be.equal(undefined);
-      expect(params.clickHash).to.be.equal(undefined);
-      expect(params.clickUrl).to.be.equal(undefined);
+      const params = dom.getDataParamsFromAttributes(element, null);
+      expect(params.href).to.be.equal('https://example.com/index.html?query#hash');
     });
   });
 
