@@ -15,6 +15,7 @@
  */
 import {writeScript} from './3p';
 import {user} from '../src/log';
+import {setStyle} from '../src/style';
 
 /**
  * Get the correct script for the mathml formula.
@@ -52,6 +53,7 @@ export function mathml(global, data) {
         const div = document.createElement('div');
         div.setAttribute('id','mathmlformula');
         div.textContent = data.formula;
+        setStyle(div, 'visibility', 'hidden');
         global.document.body.appendChild(div);
         mathjax.Hub.Queue(function() {
           const rendered = document.getElementById('MathJax-Element-1-Frame');
@@ -63,6 +65,7 @@ export function mathml(global, data) {
                 rendered./*OK*/offsetWidth,
                 rendered./*OK*/offsetHeight
             );
+            setStyle(div, 'visibility', 'visible');
           }
         });
       }
