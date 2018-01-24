@@ -16,15 +16,15 @@
 
 /**
  * @fileoverview Displays BySide placeholder content.
- * The client settings and placeholder label should be added as component
+ * The client settings and placeholder content label should be added as component
  * attributes as seen in the following example:
  * <code>
- * <amp-byside-placeholder
+ * <amp-byside-content
  * 	 data-webcare-id="<<<webcare_id>>>"
  * 	 data-channel="<<<channel>>>"
  * 	 data-lang="<<<lang>>>"
- *   data-label="<<<placeholder_label>>>"
- *   alt="Content title"
+ *   data-label="<<<content_label>>>"
+ *   title="Content title"
  *   width="320"
  *   height="392"
  *   layout="fixed">
@@ -32,17 +32,23 @@
  * </code>
  */
 
+import {CSS} from '../../../build/amp-byside-content-0.1.css';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
 import {setStyles} from '../../../src/style';
 import {removeElement} from '../../../src/dom';
 import {Services} from '../../../src/services';
-import {addParamsToUrl} from '../../../src/url';
+import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
 import {listenFor} from '../../../src/iframe-helper';
 import {dict} from '../../../src/utils/object';
+import {debounce} from '../../../src/utils/rate-limit';
+import * as utils from './utils';
 
 /** @const {string} */
-const TAG_ = 'amp-byside-placeholder';
+const TAG_ = 'amp-byside-content';
+
+/** @const {string} */
+const BYSIDE_DOMAIN_ = 'byside.com';
 
 /** @const {string} */
 const DEFAULT_WEBCARE_ZONE_ = 'main';
@@ -56,20 +62,20 @@ const MAIN_WEBCARE_ZONE_SUBDOMAIN_ = 'webcare';
 /** @const {string} */
 const DEFAULT_LANG_ = 'pt';
 
-/** @const {string} */
-const DEFAULT_IFRAME_WIDTH_ = '400';
-
-/** @const {string} */
-const DEFAULT_IFRAME_HEIGHT_ = '400';
-
 /** @type {number}  */
 let iframeCount_ = 0;
 
-export class AmpBysidePlaceholder extends AMP.BaseElement {
+export class AmpBysideContent extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
+
+    /** @private {?Element} */
+    this.win_ = null;
+
+    /** @private {Array<Function>} */
+    this.unlisteners_ = [];
 
     /** @private {?string} */
     this.iframeSrc_ = null;
@@ -80,11 +86,8 @@ export class AmpBysidePlaceholder extends AMP.BaseElement {
     /** @private {?Promise} */
     this.iframePromise_ = null;
 
-    /** @private {boolean} */
-    this.isResizable_ = false;
-
     /** @private {string}  */
-    this.webcareZone_ = 'main';
+    this.webcareZone_ = MAIN_WEBCARE_ZONE_;
 
     /** @private {string}  */
     this.webcareId_ = '';
@@ -113,11 +116,6 @@ export class AmpBysidePlaceholder extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
-  /** @override */
-  renderOutsideViewport() {
-    return false;
-  }
-
   /**
    * @param {boolean=} onLayout
    * @override
@@ -130,60 +128,37 @@ export class AmpBysidePlaceholder extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.isResizable_ = this.element.hasAttribute('resizable');
-
-    this.webcareZone_ = (this.element.getAttribute('data-webcare-zone') ||
-		this.element.getAttribute('webcare-zone') ||
-		DEFAULT_WEBCARE_ZONE_);
+    this.win_ = this.win;
 
     this.webcareId_ = user().assert(
-        (this.element.getAttribute('data-webcare-id') ||
-        this.element.getAttribute('webcare-id')),
+        this.element.getAttribute('data-webcare-id'),
         'The data-webcare-id attribute is required for <' + TAG_ + '> %s',
         this.element);
 
     this.label_ = user().assert(
-        (this.element.getAttribute('data-label') ||
-        this.element.getAttribute('label')),
+	this.element.getAttribute('data-label'),
         'The data-label attribute is required for <' + TAG_ + '> %s',
         this.element);
 
-    this.channel_ = (this.element.getAttribute('data-channel') ||
-        this.element.getAttribute('channel') || '');
-    this.lang_ = (this.element.getAttribute('data-lang') ||
-            this.element.getAttribute('lang') || DEFAULT_LANG_);
-    this.fid_ = (this.element.getAttribute('data-fid') ||
-            this.element.getAttribute('fid') || '');
+    this.webcareZone_ = (this.element.getAttribute('data-webcare-zone') ||
+		DEFAULT_WEBCARE_ZONE_);
+    this.channel_ = (this.element.getAttribute('data-channel') || '');
+    this.lang_ = (this.element.getAttribute('data-lang') || DEFAULT_LANG_);
+    this.fid_ = (this.element.getAttribute('data-fid') || '');
 
-    this.origin_ = this.generateOrigin_();
-    this.baseUrl_ = this.origin_ + '/BWA' + this.webcareId_ + '/amp/';
-
-    if (this.isResizable_) {
-      this.element.setAttribute('scrolling', 'no');
-    }
-
-    if (!this.element.hasAttribute('frameborder')) {
-      this.element.setAttribute('frameborder', '0');
-    }
+    this.origin_ = this.composeOrigin_();
+    this.baseUrl_ = this.origin_ + '/BWA' +
+		encodeURIComponent(this.webcareId_) + '/amp/';
   }
 
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('div');
     placeholder.setAttribute('placeholder', '');
-    const image = this.win.document.createElement('amp-img');
-    image.setAttribute('noprerender', '');
-    image.setAttribute('layout', 'fill');
-    image.setAttribute('referrerpolicy', 'origin');
+    placeholder.appendChild(this.createBySideLoader_());
 
-    this.propagateAttributes(['alt'], image);
+    this.applyFillContent(placeholder);
 
-    // Use custom placeholder or use default transparent placeholder image
-    const placeholderImg = this.element.getAttribute('placeholder') ||
-      this.baseUrl_ + 'images/placeholder.png';
-    image.setAttribute('src', placeholderImg);
-
-    placeholder.appendChild(image);
     return placeholder;
   }
 
@@ -192,91 +167,119 @@ export class AmpBysidePlaceholder extends AMP.BaseElement {
     const iframe = this.element.ownerDocument.createElement('iframe');
     this.iframe_ = iframe;
 
-    const width = this.element.getAttribute('width') || DEFAULT_IFRAME_WIDTH_;
-    const height = this.element.getAttribute('height') ||
-        DEFAULT_IFRAME_HEIGHT_;
-
-    iframe.name = 'amp_byside_placeholder_iframe' + iframeCount_++;
+    iframe.name = 'amp_byside_content_iframe' + iframeCount_++;
+    iframe.setAttribute('scrolling', 'no');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
-    iframe.setAttribute('title', this.element.getAttribute('alt') || '');
-
-    if (this.element.hasAttribute('width')) {
-      iframe.setAttribute('width', width);
-    }
-    if (this.element.hasAttribute('height')) {
-      iframe.setAttribute('height', height);
-    }
+    iframe.setAttribute('allowfullscreen', 'true');
+    iframe.setAttribute('title', this.element.getAttribute('title') || '');
 
     setStyles(iframe, {
       'opacity': 0,
     });
 
-    const self = this;
+    this.element.appendChild(this.getOverflowElement_());
+    this.applyFillContent(iframe);
 
-    return this.generateSrcUrl_().then(src => {
-      this.iframeSrc_ = src;
+    return this.composeSrcUrl_().then(src => {
+      this.iframeSrc_ = assertHttpsUrl(src, this.element, this.getName_());
       iframe.src = this.iframeSrc_;
 
-      listenFor(iframe, 'embed-size', data => {
-        this.updateSize_(data['height'], data['width']);
-      });
+	  const unlisten = listenFor(iframe, 'embed-size',
+		  debounce(this.win_, this.updateSize_.bind(this), 100)
+	  );
+	  this.unlisteners_.push(unlisten);
 
-      this.applyFillContent(iframe);
-      this.element.appendChild(iframe);
-    }).then(() => {
-      this.iframePromise_ = this.loadPromise(iframe).then(() => {
+	  this.element.appendChild(iframe);
+	  this.iframePromise_ = this.loadPromise(iframe).then(() => {
         this.getVsync().mutate(() => {
           setStyles(iframe, {
             'opacity': 1,
-            'width': width + 'px',
-            'height': height + 'px',
           });
         });
       });
-    }).then(() => self);
+    }).then(() => this);
   }
 
   /** @private */
-  generateOrigin_() {
+  composeOrigin_() {
     const subDomain = this.webcareZone_ === MAIN_WEBCARE_ZONE_ ?
       MAIN_WEBCARE_ZONE_SUBDOMAIN_ :
-      this.webcareZone_;
-    return 'https://' + subDomain + '.byside.com';
+	  this.webcareZone_;
+
+    return 'https://' + subDomain + '.' + BYSIDE_DOMAIN_;
   }
 
   /** @private */
-  generateSrcUrl_() {
+  composeSrcUrl_() {
     const src = this.baseUrl_ + 'placeholder.php';
-    const params = dict();
-
-    params['label'] = this.label_;
-    params['webcare_id'] = this.webcareId_;
-    params['bwch'] = this.channel_ || '';
-    params['lang'] = this.lang_ || '';
-    params['fid'] = this.fid_ || '';
-    params['bwit'] = (this.fid_ ? 'I' : 'A');
-    params['tuid'] = 'CLIENT_ID(byside_webcare_tuid)';
-    params['suid'] = '';
-    params['puid'] = 'PAGE_VIEW_IDpTIMESTAMP';
-    params['referrer'] = 'DOCUMENT_REFERRER';
-    params['page'] = 'SOURCE_URL';
-    params['amppage'] = 'AMPDOC_URL';
-    params['bwpt'] = 'TITLE';
-    params['bres'] = 'VIEWPORT_WIDTHxVIEWPORT_HEIGHT';
-    params['res'] = 'SCREEN_WIDTHxSCREEN_HEIGHT';
-    params['v'] = 'v20171116a';
-    params['ampv'] = 'AMP_VERSION';
-    params['viewer'] = 'VIEWER';
-    params['ua'] = 'USER_AGENT';
-    params['r'] = 'RANDOM';
-
-    if (this.isResizable_) {
-      params['_resize'] = 1;
-    }
+    const params = dict({
+      'label': this.label_,
+      'webcare_id': this.webcareId_,
+      'bwch': this.channel_ || '',
+      'lang': this.lang_ || '',
+      'fid': this.fid_ || '',
+      'bwit': (this.fid_ ? 'I' : 'A'),
+      'tuid': 'CLIENT_ID(byside_webcare_tuid)',
+      'suid': '',
+      'puid': 'PAGE_VIEW_IDpTIMESTAMP',
+      'referrer': 'DOCUMENT_REFERRER',
+      'page': 'SOURCE_URL',
+      'amppage': 'AMPDOC_URL',
+      'bwpt': 'TITLE',
+      'bres': 'VIEWPORT_WIDTHxVIEWPORT_HEIGHT',
+      'res': 'SCREEN_WIDTHxSCREEN_HEIGHT',
+      'v': 'v20171116a',
+      'ampv': 'AMP_VERSION',
+      'viewer': 'VIEWER',
+      'ua': 'USER_AGENT',
+      'r': 'RANDOM',
+      '_resize': '1',
+    });
 
     return Services.urlReplacementsForDoc(this.element)
         .expandAsync(addParamsToUrl(src, params));
+  }
+
+  /**
+   * @return {string} Returns a string to identify this tag. May not be unique
+   * if the element label is not unique.
+   * @private
+   */
+  getName_() {
+    let suffix = this.webcareId_ || '';
+    suffix += suffix && this.label_ ? ': ' : '';
+    suffix += this.label_ || '';
+
+    return 'amp-byside-content: ' + (suffix || '<unknown tag>');
+  }
+
+  /**
+   * @returns {!Element} Returns the overflow element
+   * @private
+   */
+  getOverflowElement_() {
+    const createElement = utils.getElementCreator(this.element.ownerDocument);
+
+    const overflow = createElement('div', 'bs-overflow',
+        createElement('div', 'bs-overflow-content',
+            createElement('i', 'bs-arrow-down')
+        ));
+    overflow.setAttribute('overflow', '');
+
+    return overflow;
+  }
+
+  /** @return {!Element} @private */
+  createBySideLoader_() {
+    const createElement = utils.getElementCreator(this.element.ownerDocument);
+
+    const loadingPlaceholder =
+      createElement('div', 'bs-loading-container',
+          createElement('div', 'bs-loading-animation')
+      );
+
+    return loadingPlaceholder;
   }
 
   /**
@@ -286,25 +289,19 @@ export class AmpBysidePlaceholder extends AMP.BaseElement {
    * @param {number|undefined} width
    * @private
    */
-  updateSize_(height, width) {
-    if (!this.isResizable_) {
-      this.user().error(TAG_,
-          'Ignoring embed-size request because this iframe is not resizable',
-          this.element);
-      return;
-    }
-
+  updateSize_(data) {
+	  console.info('updateSize_: data:', data);
     // Calculate new width and height of the container to include the padding.
     // If padding is negative, just use the requested width and height directly.
     let newHeight, newWidth;
-    height = parseInt(height, 10);
+    const height = parseInt(data['height'], 10);
     if (!isNaN(height)) {
       newHeight = Math.max(
           height + (this.element./*OK*/offsetHeight
               - this.iframe_./*OK*/offsetHeight),
           height);
     }
-    width = parseInt(width, 10);
+    const width = parseInt(data['width'], 10);
     if (!isNaN(width)) {
       newWidth = Math.max(
           width + (this.element./*OK*/offsetWidth
@@ -314,8 +311,8 @@ export class AmpBysidePlaceholder extends AMP.BaseElement {
 
     if (newHeight !== undefined || newWidth !== undefined) {
       // Force change size as requested
-      this.element.getResources()./*OK*/changeSize(
-		  this.element, newHeight, newWidth, () => {
+      this.element.getResources().attemptChangeSize(
+          this.element, newHeight, newWidth, () => {
             if (newHeight !== undefined) {
               this.element.setAttribute('height', newHeight);
             }
@@ -323,7 +320,7 @@ export class AmpBysidePlaceholder extends AMP.BaseElement {
               this.element.setAttribute('width', newWidth);
             }
           }
-      );
+      ).catch(() => {/* do nothing */ });
     } else {
       this.user().error(TAG_,
           'Ignoring embed-size request because '
@@ -334,6 +331,9 @@ export class AmpBysidePlaceholder extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
+    this.unlisteners_.forEach(unlisten => unlisten());
+    this.unlisteners_.length = 0;
+
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
@@ -343,6 +343,6 @@ export class AmpBysidePlaceholder extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-byside-placeholder', '0.1', AMP => {
-  AMP.registerElement('amp-byside-placeholder', AmpBysidePlaceholder);
+AMP.extension('amp-byside-content', '0.1', AMP => {
+  AMP.registerElement('amp-byside-content', AmpBysideContent, CSS);
 });

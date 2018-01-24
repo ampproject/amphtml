@@ -14,20 +14,20 @@
 # limitations under the license.
 #
 
-tags: {  # amp-byside-placeholder
+tags: {  # amp-byside-content
   html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
-    name: "amp-byside-placeholder"
+    name: "amp-byside-content"
     allowed_versions: "0.1"
     allowed_versions: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-byside-placeholder>
+tags: {  # <amp-byside-content>
   html_format: AMP
-  tag_name: "AMP-BYSIDE-PLACEHOLDER"
-  requires_extension: "amp-byside-placeholder"
+  tag_name: "AMP-BYSIDE-CONTENT"
+  requires_extension: "amp-byside-content"
   attrs: {name: "data-channel"}
   attrs: {name: "data-fid"}
   attrs: {
@@ -40,7 +40,6 @@ tags: {  # <amp-byside-placeholder>
     mandatory: true
   }
   attrs: {name: "data-webcare-zone"}
-  attrs: {name: "resizable"}
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FILL
