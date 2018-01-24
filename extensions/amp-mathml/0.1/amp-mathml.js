@@ -48,9 +48,6 @@ export class AmpMathml extends AMP.BaseElement {
       });
     });
 
-    // set data-formula so 3P script case use it.
-    this.element.setAttribute('data-formula',
-        this.element.getAttribute('formula'));
   }
   layoutCallback() {
     const iframe = getIframe(this.win, this.element, 'mathml');

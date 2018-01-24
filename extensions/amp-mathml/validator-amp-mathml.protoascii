@@ -30,7 +30,7 @@ tags: {  # <amp-mathml>
   tag_name: "AMP-MATHML"
   requires_extension: "amp-mathml"
   attrs: {
-    name: "formula"
+    name: "data-formula"
     mandatory: true
   }
   attrs: {
