@@ -52,7 +52,7 @@ PASS
 |        height=330
 |        data-do="embedPin"
 |        data-url="https://www.pinterest.com/pin/99360735500167749"
-|		 alt="Hands making heart over Pinterest logo">
+|        alt="Hands making heart over Pinterest logo">
 |    </amp-pinterest>
 |  </body>
 |  </html>
