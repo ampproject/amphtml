@@ -19,8 +19,8 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>An AMP Ad tag which requests early by XHR and renders natively
-    within the page if a valid AMP Ad is returned.  Tag should not appear on the
+    <td>An AMPHTML ad tag which requests early by XHR and renders natively
+    within the page if a valid AMPHTML ad is returned.  Tag should not appear on the
     page but rather ad networks specific extensions.  
     See <a href="https://github.com/ampproject/amphtml/issues/3133">Intent to implement</a>.</td>
   </tr>
