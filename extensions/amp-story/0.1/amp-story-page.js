@@ -628,12 +628,12 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     this.debounceToggleLoadingSpinner_(true);
-    for (let videoEl of videos) {
+    Array.prototype.forEach.call(videos, videoEl => {
       this.unlisteners_.push(listen(
           videoEl, 'playing', () => this.debounceToggleLoadingSpinner_(false)));
       this.unlisteners_.push(listen(
           videoEl, 'waiting', () => this.debounceToggleLoadingSpinner_(true)));
-    }
+    });
   }
 
 
