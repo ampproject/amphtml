@@ -16,6 +16,7 @@
 
 import {writeScript, loadScript} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
+import {getSourceUrl} from '../src/url';
 
 const DEFAULT_TIMEOUT = 500; // ms
 const EVENT_SUCCESS = 0;
@@ -91,7 +92,7 @@ function getTrackingUrl(data) {
   const subId = data.subId,
       pid = data.pid,
       trackId = 'AMP',
-      pageLocation = escape(document.location),
+      pageLocation = getSourceUrl(global.context.location.href),
       notFirst = true,
       cid = '',
       abLabel = '',
