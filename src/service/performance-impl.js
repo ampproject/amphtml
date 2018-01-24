@@ -97,11 +97,11 @@ export class Performance {
     /** @private {string} */
     this.ampexp_ = '';
 
-    /** @private {number} */
+    /** @private {number|null} */
     this.makeBodyVisible_ = null;
-    /** @private {number} */
+    /** @private {number|null} */
     this.firstContentfulPaint_ = null;
-    /** @private {number} */
+    /** @private {number|null} */
     this.firstViewportReady_ = null;
 
     // Add RTV version as experiment ID, so we can slice the data by version.
@@ -322,8 +322,9 @@ export class Performance {
       this.mark(label);
     }
 
-    // Store certain page visibility metrics to be exposed as an analytics variable.
-    const storedVal = opt_delta != null ? Math.max(opt_delta, 0) : value - this.initTime_;
+    // Store certain page visibility metrics to be exposed as analytics variables.
+    const storedVal = Math.round(opt_delta != null ? Math.max(opt_delta, 0)
+				 : value - this.initTime_);
     if (label == 'fcp') {
       this.firstContentfulPaint_ = storedVal;
     }

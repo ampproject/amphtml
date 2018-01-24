@@ -64,9 +64,9 @@ export const PROFILING_BRANCHES = {
 export function getLifecycleReporter(ampElement, slotId) {
   const win = ampElement.win;
   randomlySelectUnsetExperiments(win, PROFILING_BRANCHES);
-  if (true) /*(isReportingEnabled(ampElement) &&
+  if (isReportingEnabled(ampElement) &&
       (!!getExperimentBranch(win, DOUBLECLICK_A4A_EXPERIMENT_NAME) ||
-       !!getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME))) */ {
+       !!getExperimentBranch(win, ADSENSE_A4A_EXPERIMENT_NAME))) {
     setupPageLoadMetricsReporter_(ampElement);
     return new GoogleAdLifecycleReporter(
         win, ampElement.element, Number(slotId));
