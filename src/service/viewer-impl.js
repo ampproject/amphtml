@@ -88,7 +88,7 @@ const TRUSTED_REFERRER_HOSTS = [
 ];
 
 /**
- * @typedef {function(string, *, boolean):(!Promise<*>|undefined)}
+ * @typedef {function(*):(!Promise<*>|undefined)}
  */
 export let RequestResponder;
 
@@ -831,11 +831,11 @@ export class Viewer {
    * Requests AMP document to receive a message from Viewer.
    * @param {string} eventType
    * @param {!JsonObject} data
-   * @param {boolean} awaitResponse
+   * @param {boolean} unusedAwaitResponse
    * @return {(!Promise<*>|undefined)}
    * @export
    */
-  receiveMessage(eventType, data, awaitResponse) {
+  receiveMessage(eventType, data, unusedAwaitResponse) {
     if (eventType == 'visibilitychange') {
       if (data['prerenderSize'] !== undefined) {
         this.prerenderSize_ = data['prerenderSize'];
@@ -855,7 +855,7 @@ export class Viewer {
     }
     const responder = this.messageResponders_[eventType];
     if (responder) {
-      return responder(eventType, data, awaitResponse);
+      return responder(data);
     } else if (observable) {
       return Promise.resolve();
     }

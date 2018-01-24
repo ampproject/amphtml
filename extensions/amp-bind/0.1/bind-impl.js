@@ -339,12 +339,11 @@ export class Bind {
 
   /**
    * Calls setState(s), where s is data.state with the non-overridable keys removed.
-   * @param {string} eventType
    * @param {*} data
    * @return {!Promise}
    * @private
    */
-  premutate_(eventType, data) {
+  premutate_(data) {
     const ignoredKeys = [];
     return this.initializePromise_.then(() => {
       Object.keys(data.state).forEach(key => {
