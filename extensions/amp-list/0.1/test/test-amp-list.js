@@ -187,8 +187,6 @@ describes.realWin('amp-list component', {
   });
 
   it('should _not_ reload if [src] attribute changes (before layout)', () => {
-    // Return zero width to simulate pre-layout behavior.
-    listMock.expects('getLayoutWidth').returns(0);
     // Not allowed before layout.
     listMock.expects('fetchList_').never();
 
@@ -201,8 +199,6 @@ describes.realWin('amp-list component', {
     const items = [{title: 'foo'}];
     const foo = doc.createElement('div');
     const rendered = expectFetchAndRender(items, [foo]);
-
-    listMock.expects('getLayoutWidth').never();
 
     return list.layoutCallback().then(() => rendered).then(() => {
       expect(list.container_.contains(foo)).to.be.true;
@@ -219,9 +215,6 @@ describes.realWin('amp-list component', {
     const items = [{title: 'foo'}];
     const foo = doc.createElement('div');
     const rendered = expectFetchAndRender(items, [foo]);
-
-    // Return non-zero width to simulate post-layout behavior.
-    listMock.expects('getLayoutWidth').returns(100);
 
     return list.layoutCallback().then(() => rendered).then(() => {
       expect(list.container_.contains(foo)).to.be.true;
