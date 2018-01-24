@@ -139,6 +139,10 @@ describe('amp-analytics.VariableService', function() {
       urlReplacementService = Services.urlReplacementsForDoc(ampdoc);
     });
 
+    afterEach(() => {
+      toggleExperiment(env.win, 'url-replacement-v2');
+    });
+    
     function check(input, output) {
       const filters = variables.getFilters();
       const expanded = urlReplacementService.expandAsync(input, filters);
