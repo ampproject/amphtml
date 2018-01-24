@@ -255,6 +255,15 @@ export const adConfig = {
     prefetch: 'https://s.ato.mx/p.js',
   },
 
+  beopinion: {
+    prefetch: 'https://widget.beopinion.com/sdkjs',
+    preconnect: [
+      'https://t.beopinion.com',
+      'https://c.beopinion.com',
+      'https://data.beopinion.com',
+    ],
+  },
+
   bidtellect: {},
 
   brainy: {},
