@@ -35,7 +35,8 @@ describes.fakeWin('amp-ad-templates', {amp: true}, env => {
   it('should return a promise resolving to a string template', () => {
     const template = 'content not important here';
     fetchTextMock.withArgs(
-        'https://adserver.com/amp_template_1',
+        'https://adserver-com.cdn.ampproject.org/c/s/' +
+        'adserver.com/amp_template_1',
         {
           mode: 'cors',
           method: 'GET',

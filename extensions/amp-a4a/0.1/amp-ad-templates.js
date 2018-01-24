@@ -17,6 +17,8 @@
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {urls} from '../../../src/config';
+import {parseUrl} from '../../../src/url';
 import {LRUCache} from '../../../src/utils/lru-cache';
 
 /** @private {!Object<string, string|boolean>} */
@@ -49,18 +51,18 @@ export class AmpAdTemplates {
    * @return {!Promise<string>}
    */
   fetch(templateUrl) {
-    const proxyUrl = getMode(this.win).localDev
-        ? templateUrl
-        : this.getTemplateProxyUrl_(templateUrl);
-    let templatePromise = this.cache_.get(templateUrl);
+    const proxyUrl = getMode(this.win_).localDev
+      ? templateUrl
+      : this.getTemplateProxyUrl_(templateUrl);
+    let templatePromise = this.cache_.get(proxyUrl);
     if (!templatePromise) {
       templatePromise = Services.xhrFor(this.win_)
           .fetchText(getMode(this.win_).localDev
             ? `http://ads.localhost:${this.win_.location.port}` +
-                `/a4a_template/adzerk/${templateUrl}`
-            : templateUrl, TEMPLATE_CORS_CONFIG)
+                `/a4a_template/adzerk/${proxyUrl}`
+            : proxyUrl, TEMPLATE_CORS_CONFIG)
           .then(response => response.text());
-      this.cache_.put(templateUrl, templatePromise);
+      this.cache_.put(proxyUrl, templatePromise);
     }
     dev().assert(templatePromise);
     return /** @type{!Promise<string>} */ (templatePromise);
@@ -85,6 +87,6 @@ export class AmpAdTemplates {
     const loc = parseUrl(url);
     return 'https://' +
         loc.hostname.replace(/-/g, '--').replace(/\./g, '-') +
-        '.' + urls.cdn.slice(8) + '/a/s/' + loc.hostname + loc.pathname;
+        '.' + urls.cdn.slice(8) + '/c/s/' + loc.hostname + loc.pathname;
   }
 }

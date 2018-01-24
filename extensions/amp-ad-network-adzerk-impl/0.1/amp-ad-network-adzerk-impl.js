@@ -24,8 +24,6 @@ import {tryParseJson} from '../../../src/json';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
-import {urls} from '../../../src/config';
-import {parseUrl} from '../../../src/url';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-adzerk-impl';
