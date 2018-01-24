@@ -83,10 +83,10 @@ describe.configure().enableIe().retryOnSaucelabs().run('Rendering of' +
         expect(context.referrer).to.contain('http://localhost:' + location.port);
       }
       expect(context.pageViewId).to.be.greaterThan(0);
-      expect(context.initialLayoutRect).to.be.defined;
-      expect(context.initialLayoutRect.top).to.be.defined;
-      expect(context.initialIntersection).to.be.defined;
-      expect(context.initialIntersection.rootBounds).to.be.defined;
+      expect(context.initialLayoutRect).to.exist;
+      expect(context.initialLayoutRect.top).to.exist;
+      expect(context.initialIntersection).to.exist;
+      expect(context.initialIntersection.rootBounds).to.exist;
       expect(context.data.tagForChildDirectedTreatment).to.equal(0);
       expect(context.data.categoryExclusions).to.be.jsonEqual(['health']);
       expect(context.data.targeting).to.be.jsonEqual(
@@ -94,7 +94,7 @@ describe.configure().enableIe().retryOnSaucelabs().run('Rendering of' +
       return poll('main ad JS is injected', () => {
         return iframe.contentWindow.document.querySelector(
             'script[src="https://www.googletagservices.com/tag/js/gpt.js"]');
-      }, undefined,  /* timeout */ 5000);
+      }, undefined, /* timeout */ 5000);
     }).then(() => {
       return poll('render-start message received', () => {
         return fixture.messages.filter(message => {

@@ -443,7 +443,7 @@ describes.sandboxed('DOM', {}, env => {
 
     const bSpy = sandbox.spy();
     dom.iterateCursor(fragment.querySelectorAll('b'), bSpy);
-    expect(bSpy).to.be.notCalled;
+    expect(bSpy).to.have.not.been.called;
   });
 
   it('iterateCursor should allow null elements in a list', () => {
@@ -938,6 +938,30 @@ describes.sandboxed('DOM', {}, env => {
     b.appendChild(c);
     expect(dom.isEnabled(a)).to.be.true;
   });
+
+  it('templateContentClone on a <template> element (browser supports' +
+      ' HTMLTemplateElement)', () => {
+    const template = document.createElement('template');
+    template.innerHTML = '<span>123</span><span>456<em>789</em></span>';
+    const content = dom.templateContentClone(template);
+
+    const spans = content.querySelectorAll('span');
+    expect(spans.length).to.equal(2);
+    expect(spans[0].innerHTML).to.equal('123');
+    expect(spans[1].innerHTML).to.equal('456<em>789</em>');
+  });
+
+  it('templateContentClone on a <template> element (simulate a browser' +
+      ' that does not support HTMLTemplateElement)', () => {
+    const template = document.createElement('div');
+    template.innerHTML = '<span>123</span><span>456<em>789</em></span>';
+    const content = dom.templateContentClone(template);
+
+    const spans = content.querySelectorAll('span');
+    expect(spans.length).to.equal(2);
+    expect(spans[0].innerHTML).to.equal('123');
+    expect(spans[1].innerHTML).to.equal('456<em>789</em>');
+  });
 });
 
 describes.realWin('DOM', {
@@ -962,7 +986,7 @@ describes.realWin('DOM', {
       const element = doc.createElement('amp-img');
       doc.body.appendChild(element);
       return dom.whenUpgradedToCustomElement(element).then(element => {
-        expect(element.whenBuilt).to.not.be.undefined;
+        expect(element.whenBuilt).to.exist;
       });
     });
 
@@ -976,7 +1000,7 @@ describes.realWin('DOM', {
         });
       }, 100);
       return dom.whenUpgradedToCustomElement(element).then(element => {
-        expect(element.whenBuilt).to.not.be.undefined;
+        expect(element.whenBuilt).to.exist;
       });
     });
   });

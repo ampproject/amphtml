@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import '../../third_party/babel/custom-babel-helpers';
 import '../../src/polyfills';
 import {dev, initLogConstructor, setReportError} from '../../src/log';
 import {reportError} from '../../src/error';
@@ -29,7 +28,7 @@ import '../../src/service/timer-impl';
 initLogConstructor();
 setReportError(reportError);
 
-const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
+const COOKIE_MAX_AGE_DAYS = 180; // 6 month
 
 /**
  * @typedef {{
@@ -106,6 +105,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
+    id: 'amp-gwd-animation',
+    name: 'AMP GWD Animation',
+    spec: 'https://github.com/ampproject/amphtml/issues/9949',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11238',
+  },
+  {
     id: 'no-auth-in-prerender',
     name: 'Delay amp-access auth request until doc becomes visible.',
     spec: '',
@@ -151,12 +156,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/4152',
   },
   {
-    id: 'amp-fresh',
-    name: 'Guaranteed minimum freshness on sections of a page',
-    spec: '',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4715',
-  },
-  {
     id: 'amp-playbuzz',
     name: 'AMP extension for playbuzz items (launched)',
     spec: 'https://github.com/ampproject/amphtml/issues/6106',
@@ -186,7 +185,7 @@ const EXPERIMENTS = [
   },
   {
     id: 'amp-animation',
-    name: 'High-performing keyframe animations in AMP.',
+    name: 'High-performing keyframe animations in AMP (launched).',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-animation/amp-animation.md',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
@@ -250,13 +249,6 @@ const EXPERIMENTS = [
     name: 'IMA-integrated Video Player',
   },
   {
-    id: 'amp-sidebar 1.0',
-    name: 'Amp sidebar 1.0 extension',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9803',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-      'amp-sidebar/1.0/amp-sidebar-1.0.md',
-  },
-  {
     id: 'user-error-reporting',
     name: 'Report error to publishers',
     spec: 'https://github.com/ampproject/amphtml/issues/6415',
@@ -267,16 +259,39 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/8551',
   },
   {
-    id: 'amp-position-observer',
-    name: 'Amp extension for monitoring position of an element within viewport',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/10875',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-      'amp-position-observer/amp-position-observer.md',
-  },
-  {
     id: 'inabox-position-api',
     name: 'Position API for foreign iframe',
     spec: 'https://github.com/ampproject/amphtml/issues/10995',
+  },
+  {
+    id: 'amp-story',
+    name: 'Visual storytelling in AMP',
+    spec: 'https://github.com/ampproject/amphtml/issues/11329',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11475',
+  },
+  {
+    id: 'disable-amp-story-desktop',
+    name: 'Disables responsive desktop experience for the amp-story component',
+    spec: 'https://github.com/ampproject/amphtml/issues/11714',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11715',
+  },
+  {
+    id: 'amp-date-picker',
+    name: 'Enables the amp-date-picker extension',
+    spec: 'https://github.com/ampproject/amphtml/issues/6469',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12267',
+  },
+  {
+    id: 'url-replacement-v2',
+    name: 'new parsing engine for url variables',
+    spec: 'https://github.com/ampproject/amphtml/issues/12119',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
+  },
+  {
+    id: 'disable-amp-story-hls',
+    name: 'Disables usage of HTTP Live Streaming (HLS) within amp-story',
+    spec: 'https://github.com/ampproject/amphtml/issues/12965',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12978',
   },
 ];
 
@@ -415,8 +430,8 @@ function toggleExperiment_(id, name, opt_on) {
   const on = opt_on === undefined ? !currentlyOn : opt_on;
   // Protect against click jacking.
   const confirmMessage = on ?
-      'Do you really want to activate the AMP experiment' :
-      'Do you really want to deactivate the AMP experiment';
+    'Do you really want to activate the AMP experiment' :
+    'Do you really want to deactivate the AMP experiment';
 
   showConfirmation_(`${confirmMessage}: "${name}"`, () => {
     if (id == CANARY_EXPERIMENT_ID) {

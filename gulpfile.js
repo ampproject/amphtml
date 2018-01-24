@@ -23,6 +23,9 @@ var buffer = require('vinyl-buffer');
 var closureCompile = require('./build-system/tasks/compile').closureCompile;
 var cleanupBuildDir = require('./build-system/tasks/compile').cleanupBuildDir;
 var jsifyCssAsync = require('./build-system/tasks/jsify-css').jsifyCssAsync;
+var applyConfig = require('./build-system/tasks/prepend-global/index.js').applyConfig;
+var removeConfig = require('./build-system/tasks/prepend-global/index.js').removeConfig;
+var serve = require('./build-system/tasks/serve.js').serve;
 var fs = require('fs-extra');
 var gulp = $$.help(require('gulp'));
 var lazypipe = require('lazypipe');
@@ -33,6 +36,8 @@ var touch = require('touch');
 var watchify = require('watchify');
 var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
 var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
+var colors = require('ansi-colors');
+var log = require('fancy-log');
 
 var argv = minimist(process.argv.slice(2), {boolean: ['strictBabelTransform']});
 
@@ -44,6 +49,16 @@ var hostname3p = argv.hostname3p || '3p.ampproject.net';
 // All declared extensions.
 var extensions = {};
 var extensionAliasFilePath = {};
+
+var green = colors.green;
+var yellow = colors.yellow;
+var red = colors.red;
+var cyan = colors.cyan;
+
+var minifiedRuntimeTarget = 'dist/v0.js';
+var minified3pTarget = 'dist.3p/current-min/f.js';
+var unminifiedRuntimeTarget = 'dist/amp.js';
+var unminified3pTarget = 'dist.3p/current/integration.js';
 
 // Each extension and version must be listed individually here.
 declareExtension('amp-3q-player', '0.1', false);
@@ -82,11 +97,11 @@ declareExtension('amp-facebook-like', '0.1', false);
 declareExtension('amp-fit-text', '0.1', true);
 declareExtension('amp-font', '0.1', false);
 declareExtension('amp-form', '0.1', true);
-declareExtension('amp-fresh', '0.1', true);
 declareExtension('amp-fx-flying-carpet', '0.1', true);
 declareExtension('amp-fx-parallax', '0.1', false);
 declareExtension('amp-gfycat', '0.1', false);
 declareExtension('amp-gist', '0.1', false);
+declareExtension('amp-gwd-animation', '0.1', true);
 declareExtension('amp-hulu', '0.1', false);
 declareExtension('amp-iframe', '0.1', false);
 declareExtension('amp-ima-video', '0.1', false);
@@ -100,6 +115,7 @@ declareExtension('amp-lightbox', '0.1', true);
 declareExtension('amp-lightbox-viewer', '0.1', true);
 declareExtension('amp-list', '0.1', false);
 declareExtension('amp-live-list', '0.1', true);
+declareExtension('amp-mathml', '0.1', true);
 declareExtension('amp-mustache', '0.1', false);
 declareExtension('amp-nexxtv-player', '0.1', false);
 declareExtension('amp-o2-player', '0.1', false);
@@ -108,15 +124,19 @@ declareExtension('amp-pinterest', '0.1', true);
 declareExtension('amp-playbuzz', '0.1', true);
 declareExtension('amp-reach-player', '0.1', false);
 declareExtension('amp-reddit', '0.1', false);
+declareExtension('amp-riddle-quiz', '0.1', false);
 declareExtension('amp-share-tracking', '0.1', false);
 declareExtension('amp-sidebar', '0.1', true);
-declareExtension('amp-sidebar', '1.0', true);
 declareExtension('amp-soundcloud', '0.1', false);
 declareExtension('amp-springboard-player', '0.1', false);
 declareExtension('amp-sticky-ad', '1.0', true);
+declareExtension('amp-story', '0.1', true);
 declareExtension('amp-selector', '0.1', true);
 declareExtension('amp-web-push', '0.1', true);
+declareExtension('amp-wistia-player', '0.1', false);
 declareExtension('amp-position-observer', '0.1', false);
+declareExtension('amp-date-picker', '0.1', true);
+declareExtension('amp-image-viewer', '0.1', true);
 
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
@@ -139,6 +159,7 @@ declareExtension('amp-viewer-integration', '0.1', {
   loadPriority: 'high',
 });
 declareExtension('amp-video', '0.1', false);
+declareExtension('amp-vk', '0.1', false);
 declareExtension('amp-youtube', '0.1', false);
 declareExtensionVersionAlias(
     'amp-sticky-ad', '0.1', /* lastestVersion */ '1.0', /* hasCss */ true);
@@ -193,7 +214,7 @@ function endBuildStep(stepName, targetName, startTime) {
   const endTime = Date.now();
   const executionTime = new Date(endTime - startTime);
   const secs = executionTime.getSeconds();
-  const ms = executionTime.getMilliseconds().toString().padStart(3, '0');
+  const ms = ('000' + executionTime.getMilliseconds().toString()).slice(-3);
   var timeString = '(';
   if (secs === 0) {
     timeString += ms + ' ms)';
@@ -201,10 +222,7 @@ function endBuildStep(stepName, targetName, startTime) {
     timeString += secs + '.' + ms + ' s)';
   }
   if (!process.env.TRAVIS) {
-    $$.util.log(
-        stepName,
-        $$.util.colors.cyan(targetName),
-        $$.util.colors.green(timeString));
+    log(stepName, cyan(targetName), green(timeString));
   }
 }
 
@@ -381,17 +399,32 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
 }
 
 /**
- * Compile all the css and drop in the build folder
+ * Entry point for 'gulp css'
  * @return {!Promise}
  */
-function compileCss() {
+function css() {
+  return compileCss();
+}
+
+/**
+ * Compile all the css and drop in the build folder
+ * @param {boolean} watch
+ * @return {!Promise}
+ */
+function compileCss(watch) {
   // Print a message that could help speed up local development.
   if (!process.env.TRAVIS && argv['_'].indexOf('test') != -1) {
-    $$.util.log(
-        $$.util.colors.green('To skip building during future test runs, use',
-            $$.util.colors.cyan('--nobuild'), 'with your',
-            $$.util.colors.cyan('gulp test'), 'command.'));
+    log(green('To skip building during future test runs, use'),
+        cyan('--nobuild'), green('with your'), cyan('gulp test'),
+        green('command.'));
   }
+
+  if (watch) {
+    $$.watch('css/**/*.css', function() {
+      compileCss();
+    });
+  }
+
   const startTime = Date.now();
   return jsifyCssAsync('css/amp.css')
   .then(function(css) {
@@ -410,7 +443,7 @@ function compileCss() {
   })
   .then(() => {
     return buildExtensions({
-      bundleOnlyIfListedInFiles: true,
+      bundleOnlyIfListedInFiles: false,
       compileOnlyCss: true
     });
   });
@@ -428,24 +461,6 @@ function copyCss() {
       .then(() => {
         endBuildStep('Copied', 'build/css/v0.css to dist/v0.css', startTime);
       });
-}
-
-/**
- * Enables watching for file changes in css, extensions.
- * @return {!Promise}
- */
-function watch() {
-  $$.watch('css/**/*.css', function() {
-    compileCss();
-  });
-
-  return Promise.all([
-    compileCss(),
-    buildAlp({watch: true}),
-    buildExaminer({watch: true}),
-    buildExtensions({watch: true}),
-    compile(true),
-  ]);
 }
 
 /**
@@ -540,7 +555,7 @@ function buildExtensionJs(path, name, version, options) {
     watch: options.watch,
     preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
     minify: options.minify,
-    toName:  name + '-' + version + '.max.js',
+    toName: name + '-' + version + '.max.js',
     minifiedName: name + '-' + version + '.js',
     latestName: name + '-latest.js',
     extraGlobs: options.extraGlobs,
@@ -557,23 +572,63 @@ function buildExtensionJs(path, name, version, options) {
 }
 
 /**
- * Writes the AMP config to file if AMP_TESTING_HOST is set.
+ * Prints a helpful message that lets the developer know how to switch configs.
+ * @param {string} command Command being run.
  */
-function writeAmpConfig() {
-  var TESTING_HOST = process.env.AMP_TESTING_HOST;
-  if (argv.fortesting && typeof TESTING_HOST == 'string') {
-    var AMP_CONFIG = {
-      thirdPartyFrameHost: TESTING_HOST,
-      thirdPartyFrameRegex: TESTING_HOST,
-      localDev: true,
-    };
-    AMP_CONFIG = Object.assign(AMP_CONFIG, JSON.parse(fs.readFileSync(
-        'build-system/global-configs/prod-config.json').toString()));
-    $$.util.log($$.util.colors.green('trying to write AMP_CONFIG.'));
-    fs.writeFileSync('node_modules/AMP_CONFIG.json',
-        JSON.stringify(AMP_CONFIG));
-    $$.util.log($$.util.colors.green('AMP_CONFIG written successfully.'));
+function printConfigHelp(command) {
+  if (!process.env.TRAVIS) {
+    log(green('Building the runtime for local testing with the'),
+        cyan((argv.config === 'canary') ? 'canary' : 'prod'),
+        green('AMP config'));
+    log(green('To specify which config to apply, use'),
+        cyan('--config={canary|prod}'), green('with your'),
+        cyan(command), green('command'));
   }
+}
+
+/**
+ * Enables runtime to be used for local testing by writing AMP_CONFIG to file.
+ * Called at the end of "gulp build" and "gulp dist --fortesting".
+ * @param {string} targetFile File to which the config is to be written.
+ */
+function enableLocalTesting(targetFile) {
+  let config = (argv.config === 'canary') ? 'canary' : 'prod';
+  let baseConfigFile = 'build-system/global-configs/' + config + '-config.json';
+
+  return removeConfig(targetFile).then(() => {
+    return applyConfig(
+        config, targetFile, baseConfigFile,
+        /* opt_localDev */ true, /* opt_localBranch */ true);
+  });
+}
+
+/**
+ * Performs the build steps for gulp build and gulp watch
+ * @param {boolean} watch
+ * @return {!Promise}
+ */
+function performBuild(watch) {
+  process.env.NODE_ENV = 'development';
+  printConfigHelp(watch ? 'gulp watch' : 'gulp build');
+  return compileCss(watch).then(() => {
+    return Promise.all([
+      polyfillsForTests(),
+      buildAlp({watch: watch}),
+      buildExaminer({watch: watch}),
+      buildSw({watch: watch}),
+      buildWebWorker({watch: watch}),
+      buildExtensions({bundleOnlyIfListedInFiles: !watch, watch: watch}),
+      compile(watch),
+    ]);
+  });
+}
+
+/**
+ * Enables watching for file changes in css, extensions.
+ * @return {!Promise}
+ */
+function watch() {
+  return performBuild(true);
 }
 
 /**
@@ -581,19 +636,7 @@ function writeAmpConfig() {
  * @return {!Promise}
  */
 function build() {
-  process.env.NODE_ENV = 'development';
-  writeAmpConfig();
-  return compileCss().then(() => {
-    return Promise.all([
-      polyfillsForTests(),
-      buildAlp(),
-      buildExaminer(),
-      buildSw(),
-      buildWebWorker(),
-      buildExtensions({bundleOnlyIfListedInFiles: true}),
-      compile(),
-    ]);
-  });
+  return performBuild();
 }
 
 /**
@@ -602,8 +645,10 @@ function build() {
  */
 function dist() {
   process.env.NODE_ENV = 'production';
-  writeAmpConfig();
   cleanupBuildDir();
+  if (argv.fortesting) {
+    printConfigHelp('gulp dist --fortesting')
+  }
   return compileCss().then(() => {
     return Promise.all([
       compile(false, true, true),
@@ -622,6 +667,14 @@ function dist() {
     ]);
   }).then(() => {
     copyAliasExtensions();
+  }).then(() => {
+    if (argv.fortesting) {
+      return enableLocalTesting(minifiedRuntimeTarget);
+    }
+  }).then(() => {
+    if (argv.fortesting) {
+      return enableLocalTesting(minified3pTarget);
+    }
   });
 }
 
@@ -659,7 +712,10 @@ function checkTypes() {
     './src/service-worker/kill.js',
     './src/web-worker/web-worker.js',
   ];
-  var extensionSrcs = Object.values(extensions).filter(function(extension) {
+  var extensionValues = Object.keys(extensions).map(function(key) {
+    return extensions[key];
+  });
+  var extensionSrcs = extensionValues.filter(function(extension) {
     return !extension.noTypeCheck;
   }).map(function(extension) {
     return './extensions/' + extension.name + '/' +
@@ -746,19 +802,14 @@ function thirdPartyBootstrap(input, outputName, shouldMinify) {
       });
 }
 
-/**
- * Synchronously concatenates the given files into the given destination
- *
- * @param {string} destFilePath File path to write the concatenated files to
- * @param {Array<string>} files List of file paths to concatenate
- */
-function concatFiles(destFilePath, files) {
-  var all = files.map(function(filePath) {
-    return fs.readFileSync(filePath, 'utf-8');
-  });
-
-  fs.writeFileSync(destFilePath, all.join(';'), 'utf-8');
-}
+const MODULE_SEPARATOR = ';';
+const EXTENSION_BUNDLE_MAP = {
+  'amp-viz-vega.js': [
+    'third_party/d3/d3.js',
+    'third_party/d3-geo-projection/d3-geo-projection.js',
+    'third_party/vega/vega.js',
+  ],
+};
 
 /**
  * Allows (ap|pre)pending to the already compiled, minified JS file
@@ -767,15 +818,23 @@ function concatFiles(destFilePath, files) {
  * @param {string} destFilePath File path to the compiled JS file
  */
 function appendToCompiledFile(srcFilename, destFilePath) {
-  if (srcFilename == 'amp-viz-vega.js') {
-    // Prepend minified d3 and vega third_party to compiled amp-viz-vega.js
-    concatFiles(destFilePath, [
-      'third_party/d3/d3.js',
-      'third_party/d3-geo-projection/d3-geo-projection.js',
-      'third_party/vega/vega.js',
-      destFilePath,
-    ]);
+  const bundleFiles = EXTENSION_BUNDLE_MAP[srcFilename];
+  if (bundleFiles) {
+    const newSource = concatFilesToString(bundleFiles.concat([destFilePath]));
+    fs.writeFileSync(destFilePath, newSource, 'utf8');
   }
+}
+
+/**
+ * Synchronously concatenates the given files into a string.
+ *
+ * @param {Array<string>} files A list of file paths.
+ * @return {string} The concatenated contents of the given files.
+ */
+function concatFilesToString(files) {
+  return files.map(function(filePath) {
+    return fs.readFileSync(filePath, 'utf8');
+  }).join(MODULE_SEPARATOR);
 }
 
 /**
@@ -793,21 +852,19 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     if (argv.minimal_set
         && !(/integration|babel|amp-ad|lightbox|sidebar|analytics|app-banner/
             .test(srcFilename))) {
-      $$.util.log(
-          'Skipping',
-          $$.util.colors.cyan(srcFilename),
-          'because of --minimal_set');
+      log('Skipping', cyan(srcFilename), 'because of --minimal_set');
       return Promise.resolve();
     }
     const startTime = Date.now();
     return closureCompile(
         srcDir + srcFilename, destDir, options.minifiedName, options)
         .then(function() {
-          appendToCompiledFile(srcFilename, destDir + '/' + options.minifiedName);
+          const destPath = destDir + '/' + options.minifiedName;
+          appendToCompiledFile(srcFilename, destPath);
           fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
           if (options.latestName) {
             fs.copySync(
-                destDir + '/' + options.minifiedName,
+                destPath,
                 destDir + '/' + options.latestName);
           }
         })
@@ -816,8 +873,23 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         });
   }
 
+  var browsers = [];
+  if (process.env.TRAVIS) {
+    browsers.push('last 2 versions', 'safari >= 9');
+  } else {
+    browsers.push('Last 4 Chrome versions');
+  }
+
   var bundler = browserify(srcDir + srcFilename, {debug: true})
-      .transform(babel, {loose: argv.strictBabelTransform ? undefined : 'all'});
+      .transform(babel, {
+        presets: [
+          ["env", {
+            targets: {
+              browsers: browsers,
+            },
+          }]
+        ],
+      });
   if (options.watch) {
     bundler = watchify(bundler);
   }
@@ -842,9 +914,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     return toPromise(bundler.bundle()
       .on('error', function(err) {
         if (err instanceof SyntaxError) {
-          console.error($$.util.colors.red('Syntax error:', err.message));
+          console.error(red('Syntax error: ' + err.message));
         } else {
-          console.error($$.util.colors.red(err.message));
+          console.error(red(err.message));
         }
       })
       .pipe(lazybuild())
@@ -854,6 +926,18 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         appendToCompiledFile(srcFilename, destDir + '/' + destFilename);
       })).then(() => {
         endBuildStep('Compiled', srcFilename, startTime);
+      }).then(() => {
+        if (process.env.NODE_ENV === 'development') {
+          if (srcFilename === 'amp-babel.js') {
+            return enableLocalTesting(unminifiedRuntimeTarget);
+          } else if (srcFilename === 'integration.js') {
+            return enableLocalTesting(unminified3pTarget);
+          } else {
+            return Promise.resolve();
+          }
+        } else {
+          return Promise.resolve();
+        }
       });
   }
 
@@ -966,7 +1050,7 @@ function buildWebPushPublisherFilesVersion(version, options) {
     var copy = Object.create(options);
     copy.watch = false;
     $$.watch(path + '/*', function() {
-      buildWebPushPublisherFiles(version, copy);
+      buildWebPushPublisherFiles(version);
     });
   }
 
@@ -1060,9 +1144,17 @@ function buildLoginDoneVersion(version, options) {
 
   // Build HTML.
   var html = fs.readFileSync(htmlPath, 'utf8');
-  var minHtml = html.replace(
-      '../../../dist/v0/amp-login-done-' + version + '.max.js',
-      `https://${hostname}/v0/amp-login-done-` + version + '.js');
+  var minJs = `https://${hostname}/v0/amp-login-done-${version}.js`;
+  var minHtml = html
+      .replace(
+          `../../../dist/v0/amp-login-done-${version}.max.js`,
+          minJs)
+      .replace(
+          `../../../dist/v0/amp-login-done-${version}.js`,
+          minJs);
+  if (minHtml.indexOf(minJs) == -1) {
+    throw new Error('Failed to correctly set JS in login-done.html');
+  }
 
   mkdirSync('dist');
   mkdirSync('dist/v0');
@@ -1179,8 +1271,8 @@ function buildWebWorker(options) {
 function checkMinVersion() {
   var majorVersion = Number(process.version.replace(/v/, '').split('.')[0]);
   if (majorVersion < 4) {
-    $$.util.log('Please run AMP with node.js version 4 or newer.');
-    $$.util.log('Your version is', process.version);
+    log('Please run AMP with node.js version 4 or newer.');
+    log('Your version is', process.version);
     process.exit(1);
   }
 }
@@ -1225,25 +1317,33 @@ function toPromise(readable) {
 /**
  * Gulp tasks
  */
-gulp.task('build', 'Builds the AMP library', build);
-gulp.task('check-all', 'Run through all presubmit checks', ['lint', 'dep-check', 'check-types', 'presubmit']);
-gulp.task('check-types', 'Check JS types', checkTypes);
-gulp.task('css', 'Recompile css to build directory', compileCss);
-gulp.task('default', 'Same as "watch"', ['watch', 'serve']);
-gulp.task('dist', 'Build production binaries', dist, {
+gulp.task('build', 'Builds the AMP library', ['update-packages'], build, {
   options: {
-    pseudo_names: 'Compiles with readable names. ' +
+    config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+  }
+});
+gulp.task('check-all', 'Run through all presubmit checks',
+    ['lint', 'dep-check', 'check-types', 'presubmit']);
+gulp.task('check-types', 'Check JS types', checkTypes);
+gulp.task('css', 'Recompile css to build directory', ['update-packages'], css);
+gulp.task('default', 'Runs "watch" and then "serve"',
+    ['update-packages', 'watch'], serve);
+gulp.task('dist', 'Build production binaries', ['update-packages'], dist, {
+  options: {
+    pseudo_names: '  Compiles with readable names. ' +
         'Great for profiling and debugging production code.',
-    fortesting: 'Compiles with `getMode().test` set to true',
-    minimal_set: 'Only compile files needed to load article.amp.html',
+    fortesting: '  Compiles production binaries for local testing',
+    config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+    minimal_set: '  Only compile files needed to load article.amp.html',
   }
 });
 gulp.task('extensions', 'Build AMP Extensions', buildExtensions);
-gulp.task('watch', 'Watches for changes in files, re-build', watch, {
-  options: {
-    with_inabox: 'Also watch and build the amp-inabox.js binary.',
-    with_shadow: 'Also watch and build the amp-shadow.js binary.',
-  }
+gulp.task('watch', 'Watches for changes in files, re-builds when detected',
+    ['update-packages'], watch, {
+      options: {
+        with_inabox: '  Also watch and build the amp-inabox.js binary.',
+        with_shadow: '  Also watch and build the amp-shadow.js binary.',
+      }
 });
 gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
 gulp.task('build-login-done', 'Builds login-done.html/js', buildLoginDone);

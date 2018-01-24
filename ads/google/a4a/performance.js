@@ -161,9 +161,10 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     /** @private {time} @const */
     this.initTime_ = initTime;
 
-    /** @const {!function():number} */
-    this.getDeltaTime = (win.performance && win.performance.now.bind(
-        win.performance)) || (() => {return Date.now() - this.initTime_;});
+    /** @const {function():number} */
+    this.getDeltaTime = (win.performance && win.performance.now) ?
+      win.performance.now.bind(win.performance) :
+      () => Date.now() - this.initTime_;
 
     /** (Not constant b/c this can be overridden for testing.) @private */
     this.pingbackAddress_ = 'https://csi.gstatic.com/csi';
@@ -292,7 +293,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
           });
       // 50% vis w ini load
       vis.listenElement(element,
-                        {visiblePercentageMin: 50},
+          {visiblePercentageMin: 50},
           readyPromise, null,
           () => {
             this.sendPing('visHalfIniLoad');

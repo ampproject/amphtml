@@ -26,12 +26,13 @@ import {
   scopeShadowCss,
   setShadowDomStreamingSupportedForTesting,
 } from '../../src/shadow-embed';
+import {toArray} from '../../src/types';
 import {installStylesForDoc} from '../../src/style-installer';
 import {
   setShadowDomSupportedVersionForTesting,
+  setShadowCssSupportedForTesting,
   ShadowDomVersion,
 } from '../../src/web-components';
-
 
 describes.sandboxed('shadow-embed', {}, () => {
   afterEach(() => {
@@ -46,6 +47,7 @@ describes.sandboxed('shadow-embed', {}, () => {
           beforeEach(function() {
             hostElement = document.createElement('div');
             setShadowDomSupportedVersionForTesting(scenario);
+            setShadowCssSupportedForTesting(undefined);
 
             if (scenario == ShadowDomVersion.V0 &&
                 !Element.prototype.createShadowRoot) {
@@ -123,6 +125,37 @@ describes.sandboxed('shadow-embed', {}, () => {
                 doc.body.removeChild(hostElement);
               });
             }
+
+            // Test scenarios where Shadow Css is not supported
+            it('Should add an id and class for CSS \
+              encapsulation to the shadow root', () => {
+                  setShadowCssSupportedForTesting(false);
+                  const shadowRoot = createShadowRoot(hostElement);
+                  expect(shadowRoot.id).to.match(/i-amphtml-sd-\d+/);
+                  // Browserify does not support arrow functions with params.
+                  // Using Old School for
+                  const shadowRootClassListArray =
+                toArray(shadowRoot.host.classList);
+                  let foundShadowCssClass = false;
+                  for (let i = 0; i < shadowRootClassListArray.length; i++) {
+                    if (shadowRootClassListArray[i].match(/i-amphtml-sd-\d+/)) {
+                      foundShadowCssClass = true;
+                      break;
+                    }
+                  }
+                  expect(foundShadowCssClass).to.be.ok;
+                });
+
+            it('Should transform CSS for the shadow root', () => {
+              setShadowCssSupportedForTesting(false);
+              const shadowRoot = createShadowRoot(hostElement);
+              const ampdoc = new AmpDocShadow(
+                  window, 'https://a.org/', shadowRoot);
+              const style = installStylesForDoc(ampdoc, 'body {}', null, true);
+              expect(shadowRoot.contains(style)).to.be.true;
+              const css = style.textContent.replace(/\s/g, '');
+              expect(css).to.match(/amp-body/);
+            });
           });
 
           describe('stylesheets', () => {
@@ -153,7 +186,8 @@ describes.sandboxed('shadow-embed', {}, () => {
             });
           });
 
-          describe('importShadowBody', () => {
+          // TODO(aghassemi, #12499): Make this work with latest mocha / karma.
+          describe.skip('importShadowBody', () => {
             let shadowRoot, source, child1, child2;
 
             beforeEach(() => {
@@ -278,22 +312,22 @@ describes.sandboxed('shadow-embed', {}, () => {
     }
 
     it('should replace root selectors', () => {
-      expect(scope('html {}')).to.equal('#h amp-html {}');
-      expect(scope('body {}')).to.equal('#h amp-body {}');
+      expect(scope('html {}')).to.equal('.h amp-html {}');
+      expect(scope('body {}')).to.equal('.h amp-body {}');
       expect(scope('html {} body {}')).to.equal(
-          '#h amp-html {}#h amp-body {}');
-      expect(scope('html, body {}')).to.equal('#h amp-html, #h amp-body {}');
-      expect(scope('body.x {}')).to.equal('#h amp-body.x {}');
-      expect(scope('body::after {}')).to.equal('#h amp-body::after {}');
-      expect(scope('body[x] {}')).to.equal('#h amp-body[x] {}');
+          '.h amp-html {}.h amp-body {}');
+      expect(scope('html, body {}')).to.equal('.h amp-html, .h amp-body {}');
+      expect(scope('body.x {}')).to.equal('.h amp-body.x {}');
+      expect(scope('body::after {}')).to.equal('.h amp-body::after {}');
+      expect(scope('body[x] {}')).to.equal('.h amp-body[x] {}');
     });
 
     it('should avoid false positives for root selectors', () => {
-      expect(scope('.body {}')).to.equal('#h .body {}');
-      expect(scope('x-body {}')).to.equal('#h x-body {}');
-      expect(scope('body-x {}')).to.equal('#h body-x {}');
-      expect(scope('body_x {}')).to.equal('#h body_x {}');
-      expect(scope('body1 {}')).to.equal('#h body1 {}');
+      expect(scope('.body {}')).to.equal('.h .body {}');
+      expect(scope('x-body {}')).to.equal('.h x-body {}');
+      expect(scope('body-x {}')).to.equal('.h body-x {}');
+      expect(scope('body_x {}')).to.equal('.h body_x {}');
+      expect(scope('body1 {}')).to.equal('.h body1 {}');
     });
   });
 
@@ -445,6 +479,41 @@ describes.sandboxed('shadow-embed', {}, () => {
         });
       });
     });
+
+    it('should not parse noscript as markup', () => {
+      writer.write('<body><child1></child1><noscript><child2></child2>' +
+          '</noscript>');
+      return waitForNextBodyChunk().then(() => {
+        expect(win.document.body.querySelector('child1')).to.exist;
+        expect(win.document.body.querySelector('child2')).not.to.exist;
+        writer.write('<noscript><child3></child3></noscript>');
+        writer.write('<child4></child4>');
+        writer.close();
+        env.flushVsync();
+
+        return onEndPromise.then(() => {
+          expect(win.document.body.querySelector('child3')).not.to.exist;
+          expect(win.document.body.querySelector('child4')).to.exist;
+        });
+      });
+    });
+
+    it('should not parse noscript as markup across writes', () => {
+      writer.write('<body><child1></child1><noscript><child2>');
+      return waitForNextBodyChunk().then(() => {
+        expect(win.document.body.querySelector('child1')).to.exist;
+        writer.write('</child2></noscript>');
+        writer.write('<child3></child3>');
+        writer.close();
+        env.flushVsync();
+
+        return onEndPromise.then(() => {
+          expect(win.document.body.querySelector('child1')).to.exist;
+          expect(win.document.body.querySelector('child2')).not.to.exist;
+          expect(win.document.body.querySelector('child3')).to.exist;
+        });
+      });
+    });
   });
 
   describes.fakeWin('ShadowDomWriterBulk', {amp: true}, env => {
@@ -524,6 +593,18 @@ describes.sandboxed('shadow-embed', {}, () => {
       expect(win.document.body.querySelector('child')).to.exist;
       expect(win.document.body.querySelector('child2')).to.exist;
       expect(writer.eof_).to.be.true;
+      return Promise.all([onBodyPromise, onEndPromise]);
+    });
+
+    it('should not parse noscript as markup', () => {
+      writer.write('<body>');
+      writer.write('<child1></child1><noscript><child2></child2></noscript>');
+      writer.write('<child3></child3>');
+      writer.close();
+      env.flushVsync();
+      expect(win.document.body.querySelector('child1')).to.exist;
+      expect(win.document.body.querySelector('child2')).not.to.exist;
+      expect(win.document.body.querySelector('child3')).to.exist;
       return Promise.all([onBodyPromise, onEndPromise]);
     });
   });

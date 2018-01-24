@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import 'regenerator-runtime/runtime';
 import * as lolex from 'lolex';
 import {macroTask} from '../../testing/yield';
 
@@ -24,7 +24,12 @@ describes.realWin('yield', {}, env => {
 
   beforeEach(() => {
     win = env.win;
-    clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
+    clock = lolex.install(
+        {target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
+  });
+
+  afterEach(() => {
+    clock.uninstall();
   });
 
   it('should work with nested promises', function* () {

@@ -28,6 +28,12 @@ import {
 import * as dom from '../../src/dom';
 import * as docready from '../../src/document-ready';
 import {createShadowRoot} from '../../src/shadow-embed';
+import {
+  ShadowDomVersion,
+  isShadowDomSupported,
+  getShadowDomSupportedVersion,
+  setShadowDomSupportedVersionForTesting,
+} from '../../src/web-components';
 import * as sinon from 'sinon';
 
 
@@ -75,8 +81,12 @@ describe('AmpDocService', () => {
       service = new AmpDocService(window, /* isSingleDoc */ false);
       content = document.createElement('span');
       host = document.createElement('div');
-      if (host.createShadowRoot) {
-        shadowRoot = host.createShadowRoot();
+      if (isShadowDomSupported()) {
+        if (getShadowDomSupportedVersion() == ShadowDomVersion.V1) {
+          shadowRoot = host.attachShadow({mode: 'open'});
+        } else {
+          shadowRoot = host.createShadowRoot();
+        }
         shadowRoot.appendChild(content);
       }
       document.body.appendChild(host);
@@ -156,7 +166,8 @@ describe('AmpDocService', () => {
       }).to.throw(/The shadow root already contains ampdoc/);
     });
 
-    it('should navigate via host', () => {
+    // TODO(dvoytenko, #11827): Make this test work on Safari.
+    it.configure().skipSafari().run('should navigate via host', () => {
       if (!shadowRoot) {
         return;
       }
@@ -184,10 +195,14 @@ describe('AmpDocService', () => {
   describe('install AmpDocShell', () => {
     let sandbox;
     let ampdocService;
+    let host, content;
 
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
       ampdocService = new AmpDocService(window, /* isSingleDoc */ false);
+      content = document.createElement('span');
+      host = document.createElement('div');
+      document.body.appendChild(host);
     });
 
     afterEach(() => {
@@ -217,11 +232,47 @@ describe('AmpDocService', () => {
       expect(ampdocService.getAmpDoc(window.document)).to.equal(ampdocShell);
     });
 
+    it('should yield AmpDocShell for custom-element', () => {
+      const ampdocShell = installShadowDocForShell(ampdocService);
+      window.document.body.appendChild(content);
+
+      expect(ampdocService.getAmpDoc(content)).to.equal(ampdocShell);
+    });
+
+    it('should yield AmpDocShell for custom-element when Shadow Dom is ' +
+        'not supported', () => {
+      setShadowDomSupportedVersionForTesting(ShadowDomVersion.NONE);
+      const ampdocShell = installShadowDocForShell(ampdocService);
+      window.document.body.appendChild(content);
+
+      expect(ampdocService.getAmpDoc(content)).to.equal(ampdocShell);
+    });
+
+    it('should yield custom-element shadow-doc', () => {
+      const shadowRoot = createShadowRoot(host);
+      shadowRoot.appendChild(content);
+      const ampDoc = {};
+      shadowRoot['__AMPDOC'] = ampDoc;
+
+      expect(ampdocService.getAmpDoc(content)).to.equal(ampDoc);
+    });
+
+    it('should yield custom-element shadow-doc when Shadow Dom is ' +
+        'not supported', () => {
+      setShadowDomSupportedVersionForTesting(ShadowDomVersion.NONE);
+      const shadowRoot = createShadowRoot(host);
+      shadowRoot.appendChild(content);
+      const ampDoc = {};
+      shadowRoot['__AMPDOC'] = ampDoc;
+
+      expect(ampdocService.getAmpDoc(content)).to.equal(ampDoc);
+    });
+
     it('waits for document ready to set body', () => {
       const mockDoc = {body: {nodeType: 1}};
 
       let readyCallback;
-      sandbox.stub(docready, 'whenDocumentReady', () => {
+      sandbox.stub(docready, 'whenDocumentReady').callsFake(() => {
         return new Promise(resolve => {
           readyCallback = resolve;
         });
@@ -296,17 +347,17 @@ describe('AmpDocSingle', () => {
     const win = {document: doc};
 
     let bodyCallback;
-    sandbox.stub(dom, 'waitForBodyPromise', () => {
+    sandbox.stub(dom, 'waitForBodyPromise').callsFake(() => {
       return new Promise(resolve => {
         bodyCallback = resolve;
       });
     });
     let ready = false;
-    sandbox.stub(docready, 'isDocumentReady', () => {
+    sandbox.stub(docready, 'isDocumentReady').callsFake(() => {
       return ready;
     });
     let readyCallback;
-    sandbox.stub(docready, 'whenDocumentReady', () => {
+    sandbox.stub(docready, 'whenDocumentReady').callsFake(() => {
       return new Promise(resolve => {
         readyCallback = resolve;
       });

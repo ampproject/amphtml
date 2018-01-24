@@ -18,6 +18,7 @@ import {
 } from '../../3p/ampcontext';
 import {MessageType, serializeMessage} from '../../src/3p-frame-messaging';
 import * as sinon from 'sinon';
+import {Platform} from '../../src/service/platform-impl';
 
 const NOOP = () => {};
 
@@ -60,21 +61,21 @@ describe('3p ampcontext.js', () => {
     windowMessageHandler = undefined;
   });
 
-  it('should send error message with report3pError_', () => {
+  it('should send error message with report3pError', () => {
     win.name = generateSerializedAttributes();
     const context = new AmpContext(win);
     expect(context).to.be.ok;
 
     // Resetting since a message is sent on construction.
     windowPostMessageSpy.reset();
-    win.onerror('message');
+    context.report3pError(new Error('test'));
     expect(windowPostMessageSpy).to.be.called;
     expect(windowPostMessageSpy).to.be.calledWith(serializeMessage(
         'user-error-in-iframe',
         '1-291921',
-        {'message': 'message'},
+        {'message': 'test'},
         '$internalRuntimeVersion$'
-      ));
+    ));
   });
 
   it('should add metadata to window.context using name as per 3P.', () => {
@@ -154,7 +155,9 @@ describe('3p ampcontext.js', () => {
 
   it('should throw error if metadata missing', () => {
     win.name = generateIncorrectAttributes();
-    expect(() => new AmpContext(win)).to.throw(/Cannot read property/);
+    const platform = new Platform(window);
+    expect(() => new AmpContext(win)).to.throw(platform.isSafari() ?
+      /undefined is not an object/ : /Cannot read property/);
   });
 
   it('should be able to send an intersection observer request', () => {

@@ -19,6 +19,7 @@ import {AccessOtherAdapter} from './amp-access-other';
 import {AccessServerAdapter} from './amp-access-server';
 import {AccessServerJwtAdapter} from './amp-access-server-jwt';
 import {AccessVendorAdapter} from './amp-access-vendor';
+import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {SignInProtocol} from './signin';
 import {Services} from '../../../src/services';
@@ -96,11 +97,11 @@ export class AccessService {
 
     /** @const @private {!AccessType} */
     this.type_ = this.buildConfigType_(/** @type {!JsonObject} */ (
-        configJson));
+      configJson));
 
     /** @const @private {!JsonObject} */
     this.loginConfig_ = this.buildConfigLoginMap_(/** @type {!JsonObject} */ (
-        configJson));
+      configJson));
 
     /** @const @private {!JsonObject} */
     this.authorizationFallbackResponse_ =
@@ -185,6 +186,28 @@ export class AccessService {
         this.performance_.flush();
       }
     });
+
+    // Re-authorize newly added sections.
+    ampdoc.getRootNode().addEventListener(AmpEvents.DOM_UPDATE,
+        this.onDomUpdate_.bind(this));
+  }
+
+  /**
+   * @param {!Event} event
+   * @private
+   */
+  onDomUpdate_(event) {
+    // Only re-authorize sections if the response is already available.
+    // Otherwise, just wait for the authorization - it will cover new sections.
+    // But wait for the last authorization operation to complete.
+    const response = this.authResponse_;
+    if (response) {
+      return this.lastAuthorizationPromise_.then(() => {
+        const target = dev().assertElement(event.target);
+        this.applyAuthorizationToRoot_(target,
+            /** @type {!JsonObject} */ (response));
+      });
+    }
   }
 
   /**
@@ -241,8 +264,8 @@ export class AccessService {
    */
   buildConfigType_(configJson) {
     let type = configJson['type'] ?
-        user().assertEnumValue(AccessType, configJson['type'], 'access type') :
-        null;
+      user().assertEnumValue(AccessType, configJson['type'], 'access type') :
+      null;
     if (!type) {
       if (configJson['vendor']) {
         type = AccessType.VENDOR;
@@ -418,7 +441,7 @@ export class AccessService {
     return this.getReaderId_().then(readerId => {
       const vars = {
         'READER_ID': readerId,
-        'ACCESS_READER_ID': readerId,  // A synonym.
+        'ACCESS_READER_ID': readerId, // A synonym.
         'ACCESS_TOKEN': () => this.signIn_.getAccessTokenPassive(),
       };
       if (useAuthData) {
@@ -541,7 +564,17 @@ export class AccessService {
    * @private
    */
   applyAuthorization_(response) {
-    const elements = this.ampdoc.getRootNode().querySelectorAll('[amp-access]');
+    return this.applyAuthorizationToRoot_(this.ampdoc.getRootNode(), response);
+  }
+
+  /**
+   * @param {!Document|!ShadowRoot|!Element} root
+   * @param {!JsonObject} response
+   * @return {!Promise}
+   * @private
+   */
+  applyAuthorizationToRoot_(root, response) {
+    const elements = root.querySelectorAll('[amp-access]');
     const promises = [];
     for (let i = 0; i < elements.length; i++) {
       promises.push(this.applyAuthorizationToElement_(elements[i], response));
@@ -564,7 +597,7 @@ export class AccessService {
     }
     if (renderPromise) {
       return renderPromise.then(() =>
-          this.applyAuthorizationAttrs_(element, on));
+        this.applyAuthorizationAttrs_(element, on));
     }
     return this.applyAuthorizationAttrs_(element, on);
   }

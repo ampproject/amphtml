@@ -98,6 +98,9 @@ export class AbstractAmpContext {
     /** @type {?string} */
     this.tagName = null;
 
+    /** @type {number} */
+    this.getHtmlMessageId_ = 1;
+
     this.findAndSetMetadata_();
 
     /** @protected {!IframeMessagingClient} */
@@ -106,7 +109,6 @@ export class AbstractAmpContext {
     this.client_.setSentinel(dev().assertString(this.sentinel));
 
     this.listenForPageVisibility_();
-    this.report3pError_();
   }
 
   /**
@@ -177,6 +179,31 @@ export class AbstractAmpContext {
 
     return unlisten;
   };
+
+  /**
+   *  Requests HTML snippet from the parent window.
+   *  @param {string} selector CSS selector
+   *  @param {!Array<string>} attributes whitelisted attributes to be kept
+   *    in the returned HTML string
+   *  @param {function(string)} callback to be invoked with the HTML string
+   */
+  getHtml(selector, attributes, callback) {
+    const messageId = this.getHtmlMessageId_++;
+    const unlisten = this.client_.registerCallback(
+        MessageType.GET_HTML_RESULT,
+        result => {
+          if (result['messageId'] && (result['messageId'] == messageId)) {
+            unlisten();
+            callback(result['content']);
+          }
+        });
+
+    this.client_.sendMessage(MessageType.GET_HTML, dict({
+      'selector': selector,
+      'attributes': attributes,
+      'messageId': messageId,
+    }));
+  }
 
   /**
    *  Send message to runtime requesting to resize ad to height and width.
@@ -302,7 +329,7 @@ export class AbstractAmpContext {
     // TODO(alanorozco): why the heck could AMP_CONTEXT_DATA be two different
     // types? FIX THIS.
     if (isObject(this.win_.sf_) && this.win_.sf_.cfg) {
-      this.setupMetadata_(/** @type {!string}*/(this.win_.sf_.cfg));
+      this.setupMetadata_(/** @type {string}*/(this.win_.sf_.cfg));
     } else if (this.win_.AMP_CONTEXT_DATA) {
       if (typeof this.win_.AMP_CONTEXT_DATA == 'string') {
         this.sentinel = this.win_.AMP_CONTEXT_DATA;
@@ -316,17 +343,15 @@ export class AbstractAmpContext {
 
   /**
    * Send 3p error to parent iframe
-   * @private
+   * @param {!Error} e
    */
-  report3pError_() {
-    this.win_.onerror = message => {
-      if (message) {
-        this.client_.sendMessage(MessageType.USER_ERROR_IN_IFRAME, dict({
-          'message': message,
-        }));
-      }
-      return false;
-    };
+  report3pError(e) {
+    if (!e.message) {
+      return;
+    }
+    this.client_.sendMessage(MessageType.USER_ERROR_IN_IFRAME, dict({
+      'message': e.message,
+    }));
   }
 }
 

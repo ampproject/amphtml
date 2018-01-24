@@ -20,14 +20,15 @@ const m = require('./');
 const BBPromise = require('bluebird');
 const fs = BBPromise.promisifyAll(require('fs-extra'));
 const exec = require('child_process').execSync;
-const util = require('gulp-util');
+const colors = require('ansi-colors');
+const log = require('fancy-log');
 
 test('sync - build out correct CODEOWNERS', t => {
   const owners = {
     '*': [
       'username1',
       '@username2',
-      {'ampproject/group': ['*.protoascii']}
+      {'ampproject/group': ['*.protoascii']},
     ],
     ads: ['username3', '@username1'],
     'some/deeply/nested/dir': ['username5', {'ampproject/group2': ['some.js']}],
@@ -59,7 +60,7 @@ test.skip('CODEOWNERS must be in sync with OWNERS.yaml', t => {
       'CODEOWNERS is out of sync. Please re-generate CODEOWNERS by ' +
       'running `gulp gen-codeowners`');
   if (!isInSync) {
-    util.log(util.colors.red('CODEOWNERS is out of sync. Please re-generate ' +
+    log(colors.red('CODEOWNERS is out of sync. Please re-generate ' +
         'CODEOWNERS by running `gulp gen-codeowners`'));
   }
   fs.removeSync(tmppath);

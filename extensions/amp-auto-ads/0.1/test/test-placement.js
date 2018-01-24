@@ -298,7 +298,7 @@ describes.realWin('placement', {
           });
     });
 
-    it('should place an ad with i-amphtml-layout-awaiting-size class', () => {
+    it('should place an ad with i-amphtml-layout-awaiting-size class.', () => {
       const anchor = doc.createElement('div');
       anchor.id = 'anId';
       container.appendChild(anchor);
@@ -325,6 +325,12 @@ describes.realWin('placement', {
         subsequentMinSpacing: [],
         maxAdCount: 10,
       });
+
+      const resources = Services.resourcesForDoc(anchor);
+      sandbox.stub(resources, 'attemptChangeSize').callsFake(() => {
+        return Promise.reject();
+      });
+
       return placements[0].placeAd(baseAttributes, adTracker)
           .then(() => {
             const adElement = anchor.firstChild;
@@ -333,7 +339,7 @@ describes.realWin('placement', {
             expect(adElement.getAttribute('layout')).to.equal('fixed-height');
             expect(adElement.getAttribute('height')).to.equal('0');
             expect(adElement.classList.contains(
-                'i-amphtml-layout-awaiting-size')).to.equal.true;
+                'i-amphtml-layout-awaiting-size')).to.be.true;
           });
     });
 
@@ -518,7 +524,7 @@ describes.realWin('placement', {
       container.appendChild(anchor);
 
       const resource = Services.resourcesForDoc(anchor);
-      sandbox.stub(resource, 'attemptChangeSize', () => {
+      sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
         return Promise.resolve();
       });
 
@@ -558,7 +564,7 @@ describes.realWin('placement', {
       container.appendChild(anchor);
 
       const resource = Services.resourcesForDoc(anchor);
-      sandbox.stub(resource, 'attemptChangeSize', () => {
+      sandbox.stub(resource, 'attemptChangeSize').callsFake(() => {
         return Promise.reject(new Error('Resize failed'));
       });
 

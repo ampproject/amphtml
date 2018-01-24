@@ -19,8 +19,16 @@ import {FormEvents} from './form-events';
 import {installFormProxy} from './form-proxy';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {createCustomEvent} from '../../../src/event-helper';
-import {iterateCursor} from '../../../src/dom';
-import {formOrNullForElement, setFormForElement} from '../../../src/form';
+import {
+  iterateCursor,
+  tryFocus,
+} from '../../../src/dom';
+import {
+  formOrNullForElement,
+  setFormForElement,
+  getFormAsObject,
+} from '../../../src/form';
+import {FormDataWrapper} from '../../../src/form-data-wrapper';
 import {
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
@@ -135,6 +143,9 @@ export class AmpForm {
     /** @const @private {!../../../src/service/resources-impl.Resources} */
     this.resources_ = Services.resourcesForDoc(this.form_);
 
+    /** @const @private */
+    this.viewer_ = Services.viewerForDoc(this.form_);
+
     /** @const @private {string} */
     this.method_ = (this.form_.getAttribute('method') || 'GET').toUpperCase();
 
@@ -247,6 +258,13 @@ export class AmpForm {
 
   /** @private */
   installEventHandlers_() {
+    this.viewer_.whenNextVisible().then(() => {
+      const autofocus = this.form_.querySelector('[autofocus]');
+      if (autofocus) {
+        tryFocus(autofocus);
+      }
+    });
+
     this.form_.addEventListener(
         'submit', this.handleSubmitEvent_.bind(this), true);
 
@@ -407,9 +425,9 @@ export class AmpForm {
         })
         .then(() => this.doActionXhr_())
         .then(response => this.handleXhrSubmitSuccess_(response),
-        error => {
-          return this.handleXhrSubmitFailure_(/** @type {!Error} */(error));
-        });
+            error => {
+              return this.handleXhrSubmitFailure_(/** @type {!Error} */(error));
+            });
 
     if (getMode().test) {
       this.xhrSubmitPromise_ = p;
@@ -470,7 +488,7 @@ export class AmpForm {
       xhrUrl = addParamsToUrl(url, values);
     } else {
       xhrUrl = url;
-      body = new FormData(this.form_);
+      body = new FormDataWrapper(this.form_);
       for (const key in opt_extraFields) {
         body.append(key, opt_extraFields[key]);
       }
@@ -530,7 +548,7 @@ export class AmpForm {
   handleNonXhrPost_() {
     // non-XHR POST requests are not supported.
     user().assert(false,
-        'Only XHR based (via action-xhr attribute) submissions are support ' +
+        'Only XHR based (via action-xhr attribute) submissions are supported ' +
         'for POST requests. %s',
         this.form_);
   }
@@ -635,27 +653,7 @@ export class AmpForm {
    * @private
    */
   getFormAsObject_() {
-    const data = /** @type {!JsonObject} */ ({});
-    const inputs = this.form_.elements;
-    const submittableTagsRegex = /^(?:input|select|textarea)$/i;
-    const unsubmittableTypesRegex = /^(?:button|image|file|reset)$/i;
-    const checkableType = /^(?:checkbox|radio)$/i;
-    for (let i = 0; i < inputs.length; i++) {
-      const input = inputs[i];
-      if (!input.name || isDisabled_(input) ||
-          !submittableTagsRegex.test(input.tagName) ||
-          unsubmittableTypesRegex.test(input.type) ||
-          (checkableType.test(input.type) && !input.checked)) {
-        continue;
-      }
-
-      if (data[input.name] === undefined) {
-        data[input.name] = [];
-      }
-      data[input.name].push(input.value);
-    }
-
-    return data;
+    return getFormAsObject(this.form_);
   }
 
   /**
@@ -875,26 +873,6 @@ function checkUserValidity(element, propagate = false) {
  */
 export function checkUserValidityAfterInteraction_(input) {
   checkUserValidity(input, /* propagate */ true);
-}
-
-
-/**
- * Checks if a field is disabled.
- * @param {!Element} element
- * @private
- */
-function isDisabled_(element) {
-  if (element.disabled) {
-    return true;
-  }
-
-  const ancestors = ancestorElementsByTag(element, 'fieldset');
-  for (let i = 0; i < ancestors.length; i++) {
-    if (ancestors[i].disabled) {
-      return true;
-    }
-  }
-  return false;
 }
 
 

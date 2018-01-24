@@ -63,15 +63,17 @@
              run a local server.
           2) keep the list in alphabetic order
         -->
+        <option>24smi</option>
         <option>a8</option>
         <option>a9</option>
         <option>accesstrade</option>
+        <option>adagio</option>
         <option>adblade</option>
         <option>adbutler</option>
         <option>adfox</option>
-        <option>adition</option>
         <option>adgeneration</option>
         <option>adhese</option>
+        <option>adition</option>
         <option>adman</option>
         <option>admanmedia</option>
         <option>adocean</option>
@@ -84,6 +86,7 @@
         <option>adtech</option>
         <option>adthrive</option>
         <option>aduptech</option>
+        <option>adventive</option>
         <option>adverline</option>
         <option>adverticum</option>
         <option>advertserve</option>
@@ -95,8 +98,10 @@
         <option>brainy</option>
         <option>bringhub</option>
         <option>caajainfeed</option>
+        <option>capirs</option>
         <option>caprofitx</option>
         <option>chargeads</option>
+        <option>connatix</option>
         <option>contentad</option>
         <option>criteo</option>
         <option>csa</option>
@@ -117,20 +122,22 @@
         <option>fluct</option>
         <option>fusion</option>
         <option>genieessp</option>
+        <option>giraff</option>
         <option>gmossp</option>
         <option>gumgum</option>
         <option>holder</option>
         <option>ibillboard</option>
-        <option>imobile</option>
         <option>imedia</option>
+        <option>imobile</option>
         <option>industrybrains</option>
         <option>inmobi</option>
         <option>innity</option>
         <option>ix</option>
-        <option>kiosked</option>
         <option>kargo</option>
+        <option>kiosked</option>
         <option>kixer</option>
         <option>ligatus</option>
+        <option>lockerdome</option>
         <option>loka</option>
         <option>mads</option>
         <option>mantis-display</option>
@@ -155,15 +162,16 @@
         <option>pubmine</option>
         <option>pulsepoint</option>
         <option>purch</option>
-        <option>capirs</option>
         <option>relap</option>
         <option>revcontent</option>
+        <option>revjet</option>
         <option>rubicon</option>
         <option>sharethrough</option>
         <option>sklik</option>
         <option>slimcutmedia</option>
         <option>smartadserver</option>
         <option>smartclip</option>
+        <option>smi2</option>
         <option>sogouad</option>
         <option>sortable</option>
         <option>sovrn</option>
@@ -174,6 +182,7 @@
         <option>teads</option>
         <option>triplelift</option>
         <option>valuecommerce</option>
+        <option>viralize</option>
         <option>vmfive</option>
         <option>webediads</option>
         <option>weborama</option>
@@ -182,9 +191,10 @@
         <option>yahoo</option>
         <option>yahoojp</option>
         <option>yandex</option>
+        <option>yengo</option>
         <option>yieldbot</option>
-        <option>yieldone</option>
         <option>yieldmo</option>
+        <option>yieldpro</option>
         <option>zedo</option>
         <option>zergnet</option>
         <option>zucks</option>
@@ -192,6 +202,12 @@
       <input type="submit" value="Go">
     </form>
   </div>
+
+  <h2>24smi</h2>
+  <amp-embed width="250" height="250"
+      type="24smi"
+      src="https://jsn.24smi.net/c/2/11232.js">
+  </amp-embed>
 
   <h2>A8</h2>
   <amp-ad width="300" height="250"
@@ -217,6 +233,15 @@
       type="accesstrade"
       data-atops="r"
       data-atrotid="00000000000008c06y">
+  </amp-ad>
+
+  <h2>Ad.Agio</h2>
+  <amp-ad width=300 height=250
+      type="adagio"
+      data-sid="39"
+      data-loc="amp_ampw_amps_ampp_300x250"
+      data-keywords=""
+      data-uservars="">
   </amp-ad>
 
   <h2>Adblade</h2>
@@ -395,6 +420,12 @@
       data-adtest="1">
   </amp-ad>
 
+  <h2>Adventive</h2>
+  <amp-ad width="300" height="250"
+    data-src="https://ads.adventive.com/ad?j&pid=c72f8c57-4bdb-4f84-ba46-8b34a2512501&type=4"
+    type="adventive">
+  </amp-ad>
+
   <h2>Adverline</h2>
   <amp-ad width="300" height="250"
       type="adverline"
@@ -499,6 +530,12 @@
       src="https://www.chargeplatform.com/ads/?id=1288491435">
   </amp-ad>
 
+  <h2>Connatix</h2>
+  <amp-ad width="300" height="250"
+      type="connatix"
+      data-connatix={"data-connatix-token":"755145ed-72aa-4a35-bc6e-d5dcfb8837d2"}>
+  </amp-ad>
+
   <h2>Content.ad Banner 320x50</h2>
   <amp-ad width="320" height="50"
       type="contentad"
@@ -592,7 +629,7 @@
       data-slot="1"
       data-url="/examples/custom.ad.example.json">
     <template type="amp-mustache" id="amp-template-id-leader">
-      <a href="{{href}}" target='_blank'>
+      <a href="{{href}}" target='_blank' rel="noopener noreferrer">
         <amp-img layout='fixed' width="500" height="60" src="{{src}}" data-info="{{info}}"></amp-img>
       </a>
     </template>
@@ -604,7 +641,7 @@
       data-slot="2"
       data-url="/examples/custom.ad.example.json">
     <template type="amp-mustache">
-      <a href="{{href}}" target="_blank">
+      <a href="{{href}}" target="_blank" rel="noopener noreferrer">
         <amp-img layout='fixed' height="200" width="200" src="{{src}}" data-info="{{info}}"></amp-img>
       </a>
     </template>
@@ -615,7 +652,7 @@
       type="custom"
       data-url="/examples/custom.ad.example.single.json">
     <template type="amp-mustache" id="amp-template-id-no-slot">
-      <a href="{{href}}" target="_blank">
+      <a href="{{href}}" target="_blank" rel="noopener noreferrer">
         <amp-img layout='fixed' height="60" width="500" src="{{src}}" data-info="{{info}}"></amp-img>
       </a>
     </template>
@@ -783,6 +820,12 @@
       data-zid="1077330">
   </amp-ad>
 
+  <h2>Giraff</h2>
+  <amp-ad width="300" height="480"
+      type="giraff"
+      data-block-name="novotekaru">
+  </amp-ad>
+
   <h2 class="broken">GMOSSP 320x50 banner</h2>
   <amp-ad width="320" height="50"
       type="gmossp"
@@ -891,6 +934,12 @@
       src="https://a-ssl.ligatus.com/?ids=88443&t=js&s=1&bc=2">
   </amp-ad>
 
+  <h2>LockerDome</h2>
+  <amp-ad width="300" height="250"
+      type="lockerdome"
+      data-slot="10238273616545382">
+  </amp-ad>
+
   <h2>LOKA</h2>
   <amp-ad width="300" height="250"
       type="loka"
@@ -947,8 +996,7 @@
   <h2>Mediavine</h2>
   <amp-ad width="300" height="250"
       type="mediavine"
-      data-site="amp-project"
-      data-sizes="300x250,320x50">
+      data-site="amp-project">
       <div placeholder></div>
       <div fallback></div>
   </amp-ad>
@@ -1082,6 +1130,15 @@
       data-mediaid="popin_amp">
   </amp-ad>
 
+  <h2>Postquare widget</h2>
+  <amp-embed width="200" height="200"
+      type="postquare"
+      layout="responsive"
+      data-widgetIds="112264"
+      data-websiteId="115219"
+      data-publisherId="157552">
+  </amp-embed>
+
   <h2>Pubmine 300x250</h2>
   <amp-ad width="300" height="250"
       type="pubmine"
@@ -1121,6 +1178,7 @@
       layout="responsive"
       data-begun-auto-pad="434906118"
       data-begun-block-id="434908944"
+      data-custom-css="div[id^=begun_block] iframe{margin:0 auto;}"
       json='{"params":{"p1":"bvpkq","p2":"y","pct":"a"}}'>
   </amp-ad>
 
@@ -1152,6 +1210,14 @@
         86vw"
       data-wrapper="rcjsload_2ff711"
       data-id="203">
+  </amp-ad>
+
+  <h2>RevJet Tag</h2>
+  <amp-ad width="300" height="250"
+      type="revjet"
+      data-tag="tag3777"
+      data-key="705"
+      data-opts='{"delivery_method": "banner"}'>
   </amp-ad>
 
   <h2>Rubicon Project Smart Tag</h2>
@@ -1212,6 +1278,12 @@
       data-plc="84555"
       data-sz="400x320">
   </amp-ad>
+
+  <h2>SMI2</h2>
+  <amp-embed height="284"
+             type="smi2"
+             data-blockid="90223">
+  </amp-embed>
 
   <h2>sogou ad</h2>
   <amp-ad width="20" height="3"
@@ -1349,6 +1421,12 @@
       data-block-id="R-I-106712-3">
   </amp-ad>
 
+  <h2>Yengo</h2>
+  <amp-ad width="300" height="250"
+      type="yengo"
+      data-block-id="152431">
+  </amp-ad>
+
   <h2>Yieldbot</h2>
   <amp-ad width="300" height="250"
       type="yieldbot"
@@ -1372,11 +1450,27 @@
       data-ymid="1349317029731662884">
   </amp-ad>
 
+  <h2>Yieldpro</h2>
+  <amp-ad width="300" height="250"
+      type="yieldpro"
+      data-pubnetwork="12c6fc06"
+      data-section-id="1299"
+      data-slot="960">
+  </amp-ad>
+
   <h2>ValueCommerce</h2>
   <amp-ad width="300" height="250"
       type="valuecommerce"
       data-sid="3008"
       data-pid="884466614">
+  </amp-ad>
+
+  <h2>Viralize</h2>
+  <amp-ad width="300" height="169"
+      type="viralize"
+      layout="responsive"
+      data-zid="AACX6WjIMkl-yoGV"
+      data-extra='{"lid":"22486","cid":"22572","preview":"1","f":"gallery"}'>
   </amp-ad>
 
   <h2>VMFive</h2>
@@ -1421,5 +1515,6 @@
       type="zucks"
       data-frame-id="_bda46cf5ac">
   </amp-ad>
+  
 </body>
 </html>

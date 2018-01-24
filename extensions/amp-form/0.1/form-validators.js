@@ -213,7 +213,7 @@ export class AbstractCustomValidator extends FormValidator {
 
   /**
    * @param {!Element} input
-   * @param {!string} invalidType
+   * @param {string} invalidType
    * @return {?Element}
    */
   getValidationFor(input, invalidType) {
@@ -285,7 +285,9 @@ export class AbstractCustomValidator extends FormValidator {
    */
   onInteraction(event) {
     const input = dev().assertElement(event.target);
-    const shouldValidate = this.shouldValidateOnInteraction(input);
+    const shouldValidate =
+        !!input.checkValidity && this.shouldValidateOnInteraction(input);
+
     this.hideValidationFor(input);
     if (shouldValidate && !input.checkValidity()) {
       this.reportInput(input);

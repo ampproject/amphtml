@@ -36,6 +36,7 @@ export const Layout = {
   CONTAINER: 'container',
   FILL: 'fill',
   FLEX_ITEM: 'flex-item',
+  FLUID: 'fluid',
 };
 
 
@@ -130,7 +131,8 @@ export function isLayoutSizeDefined(layout) {
       layout == Layout.FIXED_HEIGHT ||
       layout == Layout.RESPONSIVE ||
       layout == Layout.FILL ||
-      layout == Layout.FLEX_ITEM);
+      layout == Layout.FLEX_ITEM ||
+      layout == Layout.FLUID);
 }
 
 
@@ -331,9 +333,10 @@ export function applyStaticLayout(element) {
   const inputLayout = layoutAttr ? parseLayout(layoutAttr) : null;
   user().assert(inputLayout !== undefined, 'Unknown layout: %s', layoutAttr);
   const inputWidth = (widthAttr && widthAttr != 'auto') ?
-      parseLength(widthAttr) : widthAttr;
+    parseLength(widthAttr) : widthAttr;
   user().assert(inputWidth !== undefined, 'Invalid width value: %s', widthAttr);
-  const inputHeight = heightAttr ? parseLength(heightAttr) : null;
+  const inputHeight = (heightAttr && heightAttr != 'fluid') ?
+    parseLength(heightAttr) : heightAttr;
   user().assert(inputHeight !== undefined, 'Invalid height value: %s',
       heightAttr);
 
@@ -350,7 +353,7 @@ export function applyStaticLayout(element) {
     // width/height and are defined to have natural browser dimensions.
     const dimensions = getNaturalDimensions(element);
     width = (inputWidth || inputLayout == Layout.FIXED_HEIGHT) ? inputWidth :
-        dimensions.width;
+      dimensions.width;
     height = inputHeight || dimensions.height;
   } else {
     width = inputWidth;
@@ -362,6 +365,8 @@ export function applyStaticLayout(element) {
     layout = inputLayout;
   } else if (!width && !height) {
     layout = Layout.CONTAINER;
+  } else if (height == 'fluid') {
+    layout = Layout.FLUID;
   } else if (height && (!width || width == 'auto')) {
     layout = Layout.FIXED_HEIGHT;
   } else if (height && width && (sizesAttr || heightsAttr)) {
@@ -434,6 +439,12 @@ export function applyStaticLayout(element) {
     if (height) {
       setStyle(element, 'height', height);
     }
+  } else if (layout == Layout.FLUID) {
+    element.classList.add('i-amphtml-layout-awaiting-size');
+    if (width) {
+      setStyle(element, 'width', width);
+    }
+    setStyle(element, 'height', 0);
   }
   return layout;
 }

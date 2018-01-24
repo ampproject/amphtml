@@ -21,12 +21,11 @@
  * Experiments page: https://cdn.ampproject.org/experiments.html *
  */
 
-import {bytesToUInt32, stringToBytes, utf8DecodeSync} from './utils/bytes';
+import {OriginExperiments} from './origin-experiments';
+import {Services} from './services';
 import {getCookie, setCookie} from './cookies';
-import {getServicePromise} from './service';
-import {getSourceOrigin, parseQueryString, parseUrl} from './url';
+import {parseQueryString} from './url';
 import {user} from './log';
-import {parseJson} from './json';
 
 /** @const {string} */
 const TAG = 'experiments';
@@ -35,7 +34,7 @@ const TAG = 'experiments';
 const COOKIE_NAME = 'AMP_EXP';
 
 /** @const {number} */
-const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
+const COOKIE_MAX_AGE_DAYS = 180; // 6 month
 
 /** @const {time} */
 const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
@@ -43,15 +42,26 @@ const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 /** @const {string} */
 const TOGGLES_WINDOW_PROPERTY = '__AMP__EXPERIMENT_TOGGLES';
 
-//TODO(kmh287, #8331) Uncomment and replace empty object literal with real
-// experiment public key jwk.
-/** @type {!Promise<undefined>} */
-const originTrialsPromise = Promise.resolve();
-// const originTrialsPromise = enableExperimentsForOriginTrials(self, {});
+/** @const {!webCrypto.JsonWebKey} */
+const ORIGIN_EXPERIMENTS_PUBLIC_JWK = /** @type {!webCrypto.JsonWebKey} */ ({
+  'alg': 'RS256',
+  'e': 'AQAB',
+  'ext': true,
+  'key_ops': ['verify'],
+  'kty': 'RSA',
+  /*eslint "max-len": 0*/
+  'n': 'uAGSMYKze8Fit508UaGHz1eZowfX4YsA0lmyi-65xQfjF7nMo61c4Iz4erdqgRp-ov662yVPquhPmTxgB-nzNcTPrj15Jo05Js78Q9hS2hrPIjKMlzcKSYQN_08QieWKOSmVbLSv_-4n9Ms5ta8nRs4pwc_2nX5n7m5B5GH4VerGbqIWIn9FRNYMShBRQ9TCHpb6BIUTwUn6iwmJLenq0A1xhGrQ9rswGC1QJhjotkeReKXZDLLWaFr0uRw-IyvRa5RiiEGntgOvcbvamM5TnbKavc2rxvg2TWTCNQnb7lWSAzldJA_yAOYet_MjnHMyj2srUdbQSDCk8kPWWuafiQ',
+});
+
+/** @type {?Promise} */
+let originExperimentsPromise;
+
+/** @private {?OriginExperiments} */
+let originExperiments;
 
 /**
  * @typedef {{
- *   isTrafficEligible: !function(!Window):boolean,
+ *   isTrafficEligible: function(!Window):boolean,
  *   branches: !Array<string>
  * }}
  */
@@ -73,138 +83,80 @@ export function isCanary(win) {
  */
 export function getBinaryType(win) {
   return win.AMP_CONFIG && win.AMP_CONFIG.type ?
-      win.AMP_CONFIG.type : 'unknown';
+    win.AMP_CONFIG.type : 'unknown';
 }
 
-
 /**
- * Enable experiments detailed in an origin trials token iff the token is
- * valid. A token is invalid if *
- *   1. The token is malformed (e.g. non-existant version number)
- *   2. The token is not for this origin
- *   3. The experiments data was not signed with our private key
+ * Verifies a single origin experiment token and enables the corresponding
+ * experiment on success. If token verification fails, a user error is logged.
  * @param {!Window} win
  * @param {string} token
- * @param {!./service/crypto-impl.Crypto} crypto Crypto service
- * @param {!webCrypto.CryptoKey} key Public key used to verify the token's
- *    signature.
- * @return {!Promise<undefined>}
+ * @param {!./service/crypto-impl.Crypto} crypto
+ * @param {!webCrypto.CryptoKey} publicKey
+ * @return {!Promise}
+ * @private
  */
-function enableExperimentsFromToken(win, token, crypto, key) {
+function verifyOriginExperimentToken(win, token, crypto, publicKey) {
   if (!crypto.isPkcsAvailable()) {
-    user().warn(TAG, 'Crypto is unavailable');
+    user().error(TAG, 'Crypto is unavailable.');
     return Promise.resolve();
   }
-  /**
-   * token = encode64(version + length + config +
-   *    sign(version + length + config, private_key))
-   * version = 1 byte version of the token format (starting at 0x0)
-   */
-  let current = 0;
-  const bytes = stringToBytes(atob(token));
-  const version = bytes[current];
-  if (version !== 0) {
-    // Unrecognized version number
-    return Promise.reject(
-        new Error(`Unrecognized experiments token version: ${version}`));
+  if (!originExperiments) {
+    originExperiments = new OriginExperiments(crypto);
   }
-  current++;
-  /**
-   * Version 0:
-   * length = 4 bytes representing number of bytes in config
-   * config = string containing the experiment ID, origin URL, etc.
-   */
-  const bytesForConfigSize = 4;
-  const configSize =
-      bytesToUInt32(bytes.subarray(current, current + bytesForConfigSize));
-  current += bytesForConfigSize;
-  if (configSize > bytes.length - current) {
-    return Promise.reject(
-        new Error('Specified len extends past end of buffer'));
-  }
-  const configBytes = bytes.subarray(current, current + configSize);
-  current += configSize;
-  const signedBytes = bytes.subarray(0, current);
-  const signatureBytes = bytes.subarray(current);
-
-  return crypto.verifyPkcs(key, signatureBytes, signedBytes)
-      .then(verified => {
-        if (!verified) {
-          throw new Error('Failed to verify config signature');
-        }
-        const configStr = utf8DecodeSync(configBytes);
-        const config = parseJson(configStr);
-
-        const approvedOrigin = parseUrl(config['origin']).origin;
-        const sourceOrigin = getSourceOrigin(win.location);
-        if (approvedOrigin !== sourceOrigin) {
-          throw new Error('Config does not match current origin');
-        }
-
-        const experimentId = config['experiment'];
-        const expiration = config['expiration'];
-        const now = Date.now();
-        if (expiration >= now) {
-          toggleExperiment(win,
-              experimentId,
-              /* opt_on */ true,
-              /* opt_transientExperiment */ true);
-        } else {
-          throw new Error(`Experiment ${experimentId} has expired`);
-        }
-      });
-}
-
-
-/**
- * Scan the page for origin trial tokens. Enable experiments detailed in the
- * tokens iff the token is well-formed. A token
- * @param {!Window} win
-  *@param {!Object} publicJwk Used for testing only.
- * @return {!Promise<undefined>}
- */
-export function enableExperimentsForOriginTrials(win, publicJwk) {
-  const metas =
-      win.document.head.querySelectorAll('meta[name="amp-experiment-token"]');
-  if (metas.length == 0 || Object.keys(publicJwk).length == 0) {
-    return Promise.resolve();
-  }
-  let crypto;
-  return getServicePromise(win, 'crypto').then(c => {
-    crypto = /** @type {!./service/crypto-impl.Crypto} */ (c);
-    return crypto.importPkcsKey(publicJwk);
-  }).then(key => {
-    const tokenPromises = [];
-    for (let i = 0; i < metas.length; i++) {
-      const meta = metas[i];
-      const token = meta.getAttribute('content');
-      if (token) {
-        const tokenPromise =
-            enableExperimentsFromToken(win, token, crypto, key)
-                .catch(err => {
-                  // Log message but do not prevent scans of other tokens.
-                  user().warn(TAG, err);
-                });
-        tokenPromises.push(tokenPromise);
-      } else {
-        user().warn(TAG, 'Unable to read experiments token');
-      }
-    }
-    return Promise.all(tokenPromises);
+  const verify = originExperiments.verifyToken(token, win.location, publicKey);
+  return verify.then(experimentId => {
+    toggleExperiment(win, experimentId, true, /* transientExperiment */ true);
+  }, error => {
+    user().error(TAG, 'Failed to verify experiment token:' + error);
   });
 }
 
 /**
- * Determines if the specified experiment is on or off for origin trials.
- * Callers should check if the experiment is already enabled before calling this
- * function.
- *
+ * Scan the page for origin experiment tokens, verifies them, and enables
+ * the corresponding experiments for verified tokens.
+ * @param {!Window} win
+ * @param {!webCrypto.JsonWebKey} publicJwk
+ * @return {!Promise}
+ * @private
+ */
+function scanForOriginExperimentTokens(win, publicJwk) {
+  const metas =
+      win.document.head.querySelectorAll('meta[name="amp-experiment-token"]');
+  if (metas.length == 0) {
+    return Promise.resolve();
+  }
+  const crypto = Services.cryptoFor(win);
+  return crypto.importPkcsKey(publicJwk).then(publicKey => {
+    const promises = [];
+    for (let i = 0; i < metas.length; i++) {
+      const meta = metas[i];
+      const token = meta.getAttribute('content');
+      if (token) {
+        const p = verifyOriginExperimentToken(win, token, crypto, publicKey);
+        promises.push(p);
+      } else {
+        user().error(TAG, 'Missing content for experiment token.');
+      }
+    }
+    return Promise.all(promises);
+  });
+}
+
+/**
+ * Asynchronously checks whether the specified origin experiment is on or off.
+ * On the first invocation, triggers scan of origin experiment tokens on page.
  * @param {!Window} win
  * @param {string} experimentId
+ * @param {boolean=} opt_forceScan Forces rescan of page for experiment tokens.
  * @return {!Promise<boolean>}
  */
-export function isExperimentOnForOriginTrial(win, experimentId) {
-  return originTrialsPromise.then(() => isExperimentOn(win, experimentId));
+export function isOriginExperimentOn(win, experimentId, opt_forceScan) {
+  if (!originExperimentsPromise || opt_forceScan) {
+    originExperimentsPromise =
+        scanForOriginExperimentTokens(win, ORIGIN_EXPERIMENTS_PUBLIC_JWK);
+  }
+  return originExperimentsPromise.then(() => isExperimentOn(win, experimentId));
 }
 
 /**
@@ -231,7 +183,7 @@ export function isExperimentOn(win, experimentId) {
  * @return {boolean} New state for experimentId.
  */
 export function toggleExperiment(win, experimentId, opt_on,
-    opt_transientExperiment) {
+  opt_transientExperiment) {
   const currentlyOn = isExperimentOn(win, experimentId);
   const on = !!(opt_on !== undefined ? opt_on : !currentlyOn);
   if (on != currentlyOn) {
@@ -466,7 +418,7 @@ export function randomlySelectUnsetExperiments(win, experiments) {
  * For example, 'control' or 'experiment'.
  *
  * @param {!Window} win Window context to check for experiment state.
- * @param {!string} experimentName Name of the experiment to check.
+ * @param {string} experimentName Name of the experiment to check.
  * @return {?string} Active experiment branch ID for experimentName (possibly
  *     null if experimentName has been tested but no branch was enabled).
  */
@@ -479,7 +431,7 @@ export function getExperimentBranch(win, experimentName) {
  * Disables the experiment name altogether if branchId is falseish.
  *
  * @param {!Window} win Window context to check for experiment state.
- * @param {!string} experimentName Name of the experiment to check.
+ * @param {string} experimentName Name of the experiment to check.
  * @param {?string} branchId ID of branch to force or null to disable
  *     altogether.
  * @visibleForTesting

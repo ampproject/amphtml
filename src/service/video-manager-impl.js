@@ -18,7 +18,7 @@
 import {ActionTrust} from '../action-trust';
 import {VideoSessionManager} from './video-session-manager';
 import {removeElement, scopedQuerySelector, isRTL} from '../dom';
-import {listen, listenOncePromise} from '../event-helper';
+import {getData, listen, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
 import {registerServiceBuilderForDoc, getServiceForDoc} from '../service';
@@ -186,8 +186,9 @@ export class VideoManager {
   /**
    * Registers a video component that implements the VideoInterface.
    * @param {!../video-interface.VideoInterface} video
+   * @param {boolean=} manageAutoplay
    */
-  register(video) {
+  register(video, manageAutoplay = true) {
     dev().assert(video);
 
     this.registerCommonActions_(video);
@@ -197,7 +198,7 @@ export class VideoManager {
     }
 
     this.entries_ = this.entries_ || [];
-    const entry = new VideoEntry(this, video);
+    const entry = new VideoEntry(this, video, manageAutoplay);
     this.maybeInstallVisibilityObserver_(entry);
     this.maybeInstallPositionObserver_(entry);
     this.maybeInstallOrientationObserver_(entry);
@@ -238,8 +239,13 @@ export class VideoManager {
    * @private
    */
   maybeInstallVisibilityObserver_(entry) {
-    listen(entry.video.element, VideoEvents.VISIBILITY, () => {
-      entry.updateVisibility();
+    listen(entry.video.element, VideoEvents.VISIBILITY, details => {
+      const data = getData(details);
+      if (data && data['visible'] == true) {
+        entry.updateVisibility(/* opt_forceVisible */ true);
+      } else {
+        entry.updateVisibility();
+      }
     });
 
     listen(entry.video.element, VideoEvents.RELOAD, () => {
@@ -448,8 +454,9 @@ class VideoEntry {
   /**
    * @param {!VideoManager} manager
    * @param {!../video-interface.VideoInterface} video
+   * @param {boolean} allowAutoplay
    */
-  constructor(manager, video) {
+  constructor(manager, video, allowAutoplay) {
 
     /** @private @const {!VideoManager} */
     this.manager_ = manager;
@@ -462,6 +469,9 @@ class VideoEntry {
 
     /** @package @const {!../video-interface.VideoInterface} */
     this.video = video;
+
+    /** @private @const {boolean} */
+    this.allowAutoplay_ = allowAutoplay;
 
     /** @private {?Element} */
     this.autoplayAnimation_ = null;
@@ -594,6 +604,7 @@ class VideoEntry {
     listen(element, VideoEvents.PLAYING, () => this.videoPlayed_());
     listen(element, VideoEvents.MUTED, () => this.muted_ = true);
     listen(element, VideoEvents.UNMUTED, () => this.muted_ = false);
+    listen(element, VideoEvents.ENDED, () => this.videoEnded_());
 
     // Currently we only register after video player is build.
     this.videoBuilt_();
@@ -648,11 +659,7 @@ class VideoEntry {
    * @private
    */
   videoPaused_() {
-    if (this.video.getCurrentTime() === this.video.getDuration()) {
-      analyticsEvent(this, VideoAnalyticsEvents.ENDED);
-    } else {
-      analyticsEvent(this, VideoAnalyticsEvents.PAUSE);
-    }
+    analyticsEvent(this, VideoAnalyticsEvents.PAUSE);
     this.isPlaying_ = false;
 
     // Prevent double-trigger of session if video is autoplay and the video
@@ -663,6 +670,14 @@ class VideoEntry {
       // reset the flag
       this.pauseCalledByAutoplay_ = false;
     }
+  }
+
+  /**
+   * Callback for when the video has ended
+   * @private
+   */
+  videoEnded_() {
+    analyticsEvent(this, VideoAnalyticsEvents.ENDED);
   }
 
   /**
@@ -909,6 +924,9 @@ class VideoEntry {
    * @private
    */
   autoplayLoadedVideoVisibilityChanged_() {
+    if (!this.allowAutoplay_) {
+      return;
+    }
     if (this.isVisible_) {
       this.visibilitySessionManager_.beginSession();
       this.video.play(/*autoplay*/ true);
@@ -1208,10 +1226,10 @@ class VideoEntry {
     if (this.dockPosition_ == DockPositions.INLINE && !isInside) {
       if (isTop) {
         this.dockPosition_ = isRTL(doc) ? DockPositions.TOP_LEFT
-                                       : DockPositions.TOP_RIGHT;
+          : DockPositions.TOP_RIGHT;
       } else if (isBottom) {
         this.dockPosition_ = isRTL(doc) ? DockPositions.BOTTOM_LEFT
-                                       : DockPositions.BOTTOM_RIGHT;
+          : DockPositions.BOTTOM_RIGHT;
       }
     } else if (isInside) {
       this.dockPosition_ = DockPositions.INLINE;
@@ -1680,11 +1698,11 @@ class VideoEntry {
             tr.scale(tr.numeric(DOCK_SCALE, DOCK_SCALE)),
           ]),
         }), 200).thenAlways(() => {
-          // Update the positions
-          this.dragCoordinates_.position.x = newPosX;
-          this.dragCoordinates_.position.y = newPosY;
-          this.isSnapping_ = false;
-        });
+      // Update the positions
+      this.dragCoordinates_.position.x = newPosX;
+      this.dragCoordinates_.position.y = newPosY;
+      this.isSnapping_ = false;
+    });
   }
 
   /**
@@ -1755,18 +1773,23 @@ class VideoEntry {
   /**
    * Called by all possible events that might change the visibility of the video
    * such as scrolling or {@link ../video-interface.VideoEvents#VISIBILITY}.
+   * @param {?boolean=} opt_forceVisible
    * @package
    */
-  updateVisibility() {
+  updateVisibility(opt_forceVisible) {
     const wasVisible = this.isVisible_;
 
     // Measure if video is now in viewport and what percentage of it is visible.
     const measure = () => {
-      // Calculate what percentage of the video is in viewport.
-      const change = this.video.element.getIntersectionChangeEntry();
-      const visiblePercent = !isFiniteNumber(change.intersectionRatio) ? 0
+      if (opt_forceVisible == true) {
+        this.isVisible_ = true;
+      } else {
+        // Calculate what percentage of the video is in viewport.
+        const change = this.video.element.getIntersectionChangeEntry();
+        const visiblePercent = !isFiniteNumber(change.intersectionRatio) ? 0
           : change.intersectionRatio * 100;
-      this.isVisible_ = visiblePercent >= VISIBILITY_PERCENT;
+        this.isVisible_ = visiblePercent >= VISIBILITY_PERCENT;
+      }
     };
 
     // Mutate if visibility changed from previous state
@@ -1916,7 +1939,7 @@ export function supportsAutoplay(win, isLiteViewer) {
 function analyticsEvent(entry, eventType, opt_vars) {
   const video = entry.video;
   const detailsPromise = opt_vars ? Promise.resolve(opt_vars) :
-      entry.getAnalyticsDetails();
+    entry.getAnalyticsDetails();
 
   detailsPromise.then(details => {
     video.element.dispatchCustomEvent(

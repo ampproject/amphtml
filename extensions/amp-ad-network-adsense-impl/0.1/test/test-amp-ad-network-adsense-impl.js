@@ -19,16 +19,10 @@ import {
   AmpAdNetworkAdsenseImpl,
   resetSharedState,
 } from '../amp-ad-network-adsense-impl';
-import {
-  ADSENSE_A4A_EXPERIMENT_NAME,
-  FF_DR_EXP_NAME,
-  ADSENSE_EXPERIMENT_FEATURE,
-  INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP,
-} from '../adsense-a4a-config';
 import {Services} from '../../../../src/services';
 import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
 import {
-  AmpAdXOriginIframeHandler,    // eslint-disable-line no-unused-vars
+  AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {
   createElementWithAttributes,
@@ -65,17 +59,19 @@ describes.realWin('amp-ad-network-adsense-impl', {
   let win, doc, ampdoc, viewer;
   let impl;
   let element;
+  let isResponsiveStub;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
-    sandbox.stub(AmpAdNetworkAdsenseImpl.prototype, 'getSigningServiceNames',
+    sandbox.stub(
+        AmpAdNetworkAdsenseImpl.prototype, 'getSigningServiceNames').callsFake(
         () => {
           return ['google'];
         });
     viewer = win.services.viewer.obj;
-    sandbox.stub(viewer, 'getReferrerUrl',
+    sandbox.stub(viewer, 'getReferrerUrl').callsFake(
         () => Promise.resolve('https://acme.org/'));
     element = createAdsenseImplElement({
       'data-ad-client': 'ca-adsense',
@@ -83,9 +79,11 @@ describes.realWin('amp-ad-network-adsense-impl', {
       'height': '50',
       'data-experiment-id': '8675309',
     }, doc);
-    sandbox.stub(element, 'tryUpgrade_', () => {});
+    sandbox.stub(element, 'tryUpgrade_').callsFake(() => {});
     doc.body.appendChild(element);
     impl = new AmpAdNetworkAdsenseImpl(element);
+    impl.win['goog_identity_prom'] = Promise.resolve({});
+    isResponsiveStub = sandbox.stub(impl, 'isResponsive_');
   });
 
   /**
@@ -103,7 +101,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
     // amp-ad.
     const iframe = doc.createElement('iframe');
     element.appendChild(iframe);
-    sandbox.stub(element, 'tryUpgrade_', () => {});
+    sandbox.stub(element, 'tryUpgrade_').callsFake(() => {});
     doc.body.appendChild(element);
     impl = new AmpAdNetworkAdsenseImpl(element);
     impl.buildCallback();
@@ -116,8 +114,21 @@ describes.realWin('amp-ad-network-adsense-impl', {
       expect(impl.isValidElement()).to.be.true;
     });
     it('should be valid (responsive)', () => {
-      element.setAttribute('data-auto-format', 'rspv');
+      isResponsiveStub.callsFake(() => true);
+      element.setAttribute('height', '320');
+      element.setAttribute('width', '100vw');
       expect(impl.isValidElement()).to.be.true;
+    });
+    it('should NOT be valid (responsive with wrong height)', () => {
+      isResponsiveStub.callsFake(() => true);
+      element.setAttribute('height', '666');
+      expect(impl.isValidElement()).to.be.false;
+    });
+    it('should NOT be valid (responsive with wrong width)', () => {
+      isResponsiveStub.callsFake(() => true);
+      element.setAttribute('height', '320');
+      element.setAttribute('width', '666');
+      expect(impl.isValidElement()).to.be.false;
     });
     it('should NOT be valid (impl tag name)', () => {
       element = createAdsenseImplElement({'data-ad-client': 'ca-adsense'},
@@ -125,7 +136,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       impl = new AmpAdNetworkAdsenseImpl(element);
       expect(impl.isValidElement()).to.be.false;
     });
-    it('should be NOT valid (missing ad client)', () => {
+    it('should NOT be valid (missing ad client)', () => {
       element.setAttribute('data-ad-client', '');
       element.setAttribute('type', 'adsense');
       expect(impl.isValidElement()).to.be.false;
@@ -149,7 +160,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
         'layout': 'fixed',
       });
       impl = new AmpAdNetworkAdsenseImpl(element);
-      sandbox.stub(impl, 'getAmpDoc', () => ampdoc);
+      sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
       const extensions = Services.extensionsFor(impl.win);
       preloadExtensionSpy = sandbox.spy(extensions, 'preloadExtension');
     });
@@ -204,8 +215,8 @@ describes.realWin('amp-ad-network-adsense-impl', {
         'type': 'adsense',
       });
       impl = new AmpAdNetworkAdsenseImpl(element);
-      sandbox.stub(impl, 'getAmpDoc', () => ampdoc);
-      sandbox.stub(env.ampdocService, 'getAmpDoc', () => ampdoc);
+      sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
+      sandbox.stub(env.ampdocService, 'getAmpDoc').callsFake(() => ampdoc);
     });
 
     it('injects amp analytics', () => {
@@ -264,6 +275,68 @@ describes.realWin('amp-ad-network-adsense-impl', {
       // Exact format of amp-analytics element covered in
       // test/functional/test-analytics.js.
       // Just ensure extensions is loaded, and analytics element appended.
+    });
+
+    it('should register click listener', () => {
+      impl.iframe = impl.win.document.createElement('iframe');
+      impl.win.document.body.appendChild(impl.iframe);
+      const adBody = impl.iframe.contentDocument.body;
+      let clickHandlerCalled = 0;
+
+      adBody.onclick = function(e) {
+        expect(e.defaultPrevented).to.be.false;
+        e.preventDefault(); // Make the test not actually navigate.
+        clickHandlerCalled++;
+      };
+      adBody.innerHTML = '<a ' +
+          'href="https://f.co?CLICK_X,CLICK_Y,RANDOM">' +
+          '<button id="target"><button></div>';
+      const button = adBody.querySelector('#target');
+      const a = adBody.querySelector('a');
+      const ev1 = new Event('click', {bubbles: true});
+      ev1.pageX = 10;
+      ev1.pageY = 20;
+      sandbox.stub(impl, 'getResource').returns(
+          {
+            getUpgradeDelayMs: () => 1,
+          });
+      impl.buildCallback();
+      impl.size_ = {width: 123, height: 456};
+      impl.onCreativeRender({customElementExtensions: []});
+      button.dispatchEvent(ev1);
+      expect(a.href).to.equal('https://f.co/?10,20,RANDOM');
+      expect(clickHandlerCalled).to.equal(1);
+    });
+
+    it('should not register click listener is amp-ad-exit', () => {
+      impl.iframe = impl.win.document.createElement('iframe');
+      impl.win.document.body.appendChild(impl.iframe);
+      const adBody = impl.iframe.contentDocument.body;
+      let clickHandlerCalled = 0;
+
+      adBody.onclick = function(e) {
+        expect(e.defaultPrevented).to.be.false;
+        e.preventDefault(); // Make the test not actually navigate.
+        clickHandlerCalled++;
+      };
+      adBody.innerHTML = '<a ' +
+          'href="https://f.co?CLICK_X,CLICK_Y,RANDOM">' +
+          '<button id="target"><button></div>';
+      const button = adBody.querySelector('#target');
+      const a = adBody.querySelector('a');
+      const ev1 = new Event('click', {bubbles: true});
+      ev1.pageX = 10;
+      ev1.pageY = 20;
+      sandbox.stub(impl, 'getResource').returns(
+          {
+            getUpgradeDelayMs: () => 1,
+          });
+      impl.buildCallback();
+      impl.size_ = {width: 123, height: 456};
+      impl.onCreativeRender({customElementExtensions: ['amp-ad-exit']});
+      button.dispatchEvent(ev1);
+      expect(a.href).to.equal('https://f.co/?CLICK_X,CLICK_Y,RANDOM');
+      expect(clickHandlerCalled).to.equal(1);
     });
   });
 
@@ -398,7 +471,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
           expect(impl.element.getAttribute('width')).to.equal('auto');
           return impl.getAdUrl().then(url =>
               // Ensure that "auto" doesn't appear anywhere here:
-              expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/));
+            expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/));
         });
     it('includes eid when in amp-auto-ads holdout control', () => {
       forceExperimentBranch(impl.win,
@@ -420,6 +493,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
     });
     it('returns the right URL', () => {
       element.setAttribute('data-ad-slot', 'some_slot');
+      element.setAttribute('data-language', 'lxz');
       return impl.getAdUrl().then(url => {
         [
           /^https:\/\/googleads\.g\.doubleclick\.net\/pagead\/ads/,
@@ -429,6 +503,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
           /(\?|&)client=ca-adsense(&|$)/,
           /(\?|&)format=\d+x\d+(&|$)/,
           /(\?|&)iu=some_slot(&|$)/,
+          /(\?|&)output=html(&|$)/,
           /(\?|&)w=\d+(&|$)/,
           /(\?|&)h=\d+(&|$)/,
           /(\?|&)d_imp=1(&|$)/,
@@ -451,6 +526,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
           /(\?|&)isw=\d+(&|$)/,
           /(\?|&)ish=\d+(&|$)/,
           /(\?|&)pfx=(1|0)(&|$)/,
+          /(\?|&)hl=lxz(&|$)/,
           /(\?|&)url=https?%3A%2F%2F[a-zA-Z0-9.:%]+(&|$)/,
           /(\?|&)top=localhost(&|$)/,
           /(\?|&)ref=https%3A%2F%2Facme.org%2F(&|$)/,
@@ -485,6 +561,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
         'width': '320',
         'height': '50',
         'data-experiment-id': '8675309',
+        'data-ad-slot': 'slotname_foo',
       }, doc, 'amp-ad');
       doc.body.appendChild(elem2);
       const elem3 = createAdsenseImplElement({
@@ -498,17 +575,16 @@ describes.realWin('amp-ad-network-adsense-impl', {
       const impl2 = new AmpAdNetworkAdsenseImpl(elem2);
       const impl3 = new AmpAdNetworkAdsenseImpl(elem3);
       toggleExperiment(impl1.win, 'as-use-attr-for-format', true);
-      //new AmpAd(elem1).upgradeCallback();
       return impl1.getAdUrl().then(adUrl1 => {
         expect(adUrl1).to.match(/pv=2/);
         expect(adUrl1).to.not.match(/prev_fmts/);
+        expect(adUrl1).to.not.match(/prev_slotnames/);
         expect(adUrl1).to.match(/ifi=1/);
-        //new AmpAd(elem2).upgradeCallback();
         return impl2.getAdUrl().then(adUrl2 => {
           expect(adUrl2).to.match(/pv=1/);
           expect(adUrl2).to.match(/prev_fmts=320x50/);
+          expect(adUrl2).to.not.match(/prev_slotnames/);
           expect(adUrl2).to.match(/ifi=2/);
-          //new AmpAd(elem3).upgradeCallback();
           return impl3.getAdUrl().then(adUrl3 => {
             expect(adUrl3).to.match(/pv=2/);
             // By some quirk of the test infrastructure, when this test
@@ -517,45 +593,126 @@ describes.realWin('amp-ad-network-adsense-impl', {
             // test here is the number of previous formats.
             expect(adUrl3).to.match(
                 /prev_fmts=(320x50%2C320x50|320x50%2C0x0)/);
+            expect(adUrl3).to.match(/prev_slotnames=slotname_foo/);
             expect(adUrl3).to.match(/ifi=3/);
           });
         });
       });
     });
+
+    it('should include identity', () => {
+      // Force get identity result by overloading window variable.
+      const token = /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({
+        token: 'abcdef', jar: 'some_jar', pucrd: 'some_pucrd',
+      });
+      impl.win['goog_identity_prom'] = Promise.resolve(token);
+      impl.buildCallback();
+      return impl.getAdUrl().then(url => {
+        [/(\?|&)adsid=abcdef(&|$)/,
+          /(\?|&)jar=some_jar(&|$)/,
+          /(\?|&)pucrd=some_pucrd(&|$)/].forEach(
+            regexp => expect(url).to.match(regexp));
+      });
+    });
   });
 
   describe('#unlayoutCallback', () => {
+    beforeEach(() => {
+      createImplTag({
+        width: '300',
+        height: '150',
+      });
+      impl.win.ampAdSlotIdCounter = 1;
+      expect(impl.element.getAttribute('data-amp-slot-index')).to.not.be.ok;
+      impl.layoutMeasureExecuted_ = true;
+      impl.uiHandler = {applyUnlayoutUI: () => {}};
+      const placeholder = doc.createElement('div');
+      placeholder.setAttribute('placeholder', '');
+      const fallback = doc.createElement('div');
+      fallback.setAttribute('fallback', '');
+      impl.element.appendChild(placeholder);
+      impl.element.appendChild(fallback);
+      impl.size_ = {width: 123, height: 456};
+    });
+
+    it('should reset state to null on non-FIE unlayoutCallback', () => {
+      impl.onCreativeRender();
+      expect(impl.unlayoutCallback()).to.be.true;
+      expect(impl.iframe).is.not.ok;
+    });
+
+    it('should not reset state to null on FIE unlayoutCallback', () => {
+      impl.onCreativeRender({customElementExtensions: []});
+      expect(impl.unlayoutCallback()).to.be.false;
+      expect(impl.iframe).is.ok;
+    });
+
+    it('should remove FIE if in all exp', () => {
+      impl.onCreativeRender({customElementExtensions: []});
+      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'all';
+      expect(impl.unlayoutCallback()).to.be.true;
+      expect(impl.iframe).is.not.ok;
+      expect(impl.isAmpCreative_).to.be.null;
+    });
+
+    it('should remove non-FIE if in all exp', () => {
+      impl.onCreativeRender();
+      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'all';
+      expect(impl.unlayoutCallback()).to.be.true;
+      expect(impl.iframe).is.not.ok;
+      expect(impl.isAmpCreative_).to.be.null;
+    });
+
+    it('should not remove FIE if in remain exp', () => {
+      impl.onCreativeRender({customElementExtensions: []});
+      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
+      expect(impl.unlayoutCallback()).to.be.false;
+      expect(impl.iframe).is.ok;
+    });
+
+    it('should remove rendered non-FIE if in remain exp', () => {
+      impl.onCreativeRender();
+      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
+      expect(impl.unlayoutCallback()).to.be.true;
+      expect(impl.iframe).is.not.ok;
+      expect(impl.isAmpCreative_).to.be.null;
+    });
+
+    it('should not destroy ad promise for unrendered if in remain exp', () => {
+      impl.onCreativeRender();
+      impl.qqid_ = 'abcdef';
+      impl.isAmpCreative_ = null;
+      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
+      expect(impl.unlayoutCallback()).to.be.false;
+      expect(impl.isAmpCreative_).to.be.null;
+    });
+
+    it('should destroy ad promise if ad response not yet received and in ' +
+        'remain exp', () => {
+      impl.onCreativeRender();
+      impl.qqid_ = null;
+      impl.isAmpCreative_ = null;
+      impl.postAdResponseExperimentFeatures['unlayout_exp'] = 'remain';
+      expect(impl.unlayoutCallback()).to.be.true;
+      expect(impl.isAmpCreative_).to.be.null;
+    });
+
     it('should call #resetSlot, remove child iframe, but keep other children',
         () => {
-          createImplTag({
-            width: '300',
-            height: '150',
-          });
-          impl.win.ampAdSlotIdCounter = 1;
-          expect(impl.element.getAttribute('data-amp-slot-index')).to.not.be.ok;
-
-          impl.layoutMeasureExecuted_ = true;
-          impl.uiHandler = {applyUnlayoutUI: () => {}};
-          const placeholder = doc.createElement('div');
-          placeholder.setAttribute('placeholder', '');
-          const fallback = doc.createElement('div');
-          fallback.setAttribute('fallback', '');
-          impl.element.appendChild(placeholder);
-          impl.element.appendChild(fallback);
           impl.ampAnalyticsConfig_ = {};
           impl.ampAnalyticsElement_ =
-              doc.createElement('amp-analytics');
+             doc.createElement('amp-analytics');
           impl.element.appendChild(impl.ampAnalyticsElement_);
-
           expect(impl.iframe).to.be.ok;
-          expect(impl.ampAnalyticsConfig_).to.be.ok;
           expect(impl.element.querySelector('iframe')).to.be.ok;
-          expect(impl.element.querySelector('amp-analytics')).to.be.ok;
           impl.unlayoutCallback();
           expect(impl.element.querySelector('div[placeholder]')).to.be.ok;
           expect(impl.element.querySelector('div[fallback]')).to.be.ok;
           expect(impl.element.querySelector('iframe')).to.be.null;
-          expect(impl.element.querySelector('amp-analytics')).to.be.null;
+          expect(impl.element.querySelectorAll('amp-analytics'))
+              .to.have.lengthOf(1);
+          expect(impl.element.querySelector('amp-analytics')).to.equal(
+              impl.a4aAnalyticsElement_);
           expect(impl.iframe).to.be.null;
           expect(impl.ampAnalyticsConfig_).to.be.null;
           expect(impl.ampAnalyticsElement_).to.be.null;
@@ -605,7 +762,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       });
 
       const callback = impl.buildCallback();
-      expect(callback).to.not.be.undefined;
+      expect(callback).to.exist;
 
       // The returned promise fails for some reason.
       return callback.then(() => {
@@ -665,11 +822,11 @@ describes.realWin('amp-ad-network-adsense-impl', {
     }
 
     beforeEach(() => {
-      viewer.toggleRuntime();  // Turn runtime on for these tests.
+      viewer.toggleRuntime(); // Turn runtime on for these tests.
     });
 
     afterEach(() => {
-      viewer.toggleRuntime();  // Turn runtime off again.
+      viewer.toggleRuntime(); // Turn runtime off again.
 
       if (containerContainer != null && containerContainer.parentNode != null) {
         containerContainer.parentNode.removeChild(containerContainer);
@@ -736,40 +893,9 @@ describes.realWin('amp-ad-network-adsense-impl', {
   });
 
   describe('#delayAdRequestEnabled', () => {
-    let impl;
-    beforeEach(() => {
-      impl = new AmpAdNetworkAdsenseImpl(
-        createElementWithAttributes(doc, 'amp-ad', {
-          type: 'adsense',
-        }));
-    });
-
-    [
-      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL_CONTROL, {
-        layer: ADSENSE_A4A_EXPERIMENT_NAME,
-        result: false,
-      }],
-      [ADSENSE_EXPERIMENT_FEATURE.DELAYED_REQUEST_EXTERNAL, {
-        layer: ADSENSE_A4A_EXPERIMENT_NAME,
-        result: true,
-      }],
-      [INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP.CONTROL, {
-        layer: FF_DR_EXP_NAME,
-        result: false,
-      }],
-      [INTERNAL_FAST_FETCH_DELAY_REQUEST_EXP.EXPERIMENT, {
-        layer: FF_DR_EXP_NAME,
-        result: true,
-      }],
-    ].forEach(item => {
-      it(`should return ${item[1].result} if in ${item[0]} experiment`, () => {
-        forceExperimentBranch(impl.win, item[1].layer, item[0]);
-        expect(impl.delayAdRequestEnabled()).to.equal(item[1].result);
-      });
-    });
-
-    it('should return false if not in any experiments', () => {
-      expect(impl.delayAdRequestEnabled()).to.be.false;
+    it('should return true', () => {
+      expect(AmpAdNetworkAdsenseImpl.prototype.delayAdRequestEnabled())
+          .to.be.true;
     });
   });
 });

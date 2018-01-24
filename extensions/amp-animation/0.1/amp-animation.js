@@ -20,10 +20,9 @@ import {Pass} from '../../../src/pass';
 import {WebAnimationPlayState} from './web-animation-types';
 import {childElementByTag} from '../../../src/dom';
 import {getFriendlyIframeEmbedOptional}
-    from '../../../src/friendly-iframe-embed';
+  from '../../../src/friendly-iframe-embed';
 import {getParentWindowFrameElement} from '../../../src/service';
-import {isExperimentOn} from '../../../src/experiments';
-import {installWebAnimations} from 'web-animations-js/web-animations.install';
+import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
 import {listen} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
@@ -31,9 +30,9 @@ import {user} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {isFiniteNumber} from '../../../src/types';
 import {clamp} from '../../../src/utils/math';
+import {WebAnimationService} from './web-animation-service';
 
 const TAG = 'amp-animation';
-const POLYFILLED = '__AMP_WA';
 
 
 export class AmpAnimation extends AMP.BaseElement {
@@ -72,13 +71,7 @@ export class AmpAnimation extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG),
-        `Experiment "${TAG}" is disabled.`);
-
-    // TODO(dvoytenko): Remove once we support direct parent visibility.
-    user().assert(this.element.parentNode == this.element.ownerDocument.body,
-        `${TAG} is only allowed as a direct child of <body> element.` +
-        ' This restriction will be removed soon.');
+    const ampdoc = this.getAmpDoc();
 
     // Trigger.
     const trigger = this.element.getAttribute('trigger');
@@ -87,6 +80,16 @@ export class AmpAnimation extends AMP.BaseElement {
           trigger == 'visibility',
           'Only allowed value for "trigger" is "visibility": %s',
           this.element);
+    }
+
+    // TODO(dvoytenko): Remove once we support direct parent visibility.
+    if (trigger == 'visibility') {
+      user().assert(
+          this.element.parentNode == this.element.ownerDocument.body ||
+          this.element.parentNode == ampdoc.getBody(),
+          `${TAG} is only allowed as a direct child of <body> element` +
+          ' when trigger is visibility.' +
+          ' This restriction will be removed soon.');
     }
 
     // Parse config.
@@ -124,7 +127,6 @@ export class AmpAnimation extends AMP.BaseElement {
         /* delay */ 50);
 
     // Visibility.
-    const ampdoc = this.getAmpDoc();
     const frameElement = getParentWindowFrameElement(this.element, ampdoc.win);
     const embed =
         frameElement ? getFriendlyIframeEmbedOptional(frameElement) : null;
@@ -447,16 +449,16 @@ export class AmpAnimation extends AMP.BaseElement {
     // Force cast to `WebAnimationDef`. It will be validated during preparation
     // phase.
     const configJson = /** @type {!./web-animation-types.WebAnimationDef} */ (
-        this.configJson_);
+      this.configJson_);
     const args = /** @type {?./web-animation-types.WebAnimationDef} */ (
-        opt_args || null);
+      opt_args || null);
 
     // Ensure polyfill is installed.
-    ensurePolyfillInstalled(this.win);
+    installWebAnimationsIfNecessary(this.win);
 
     const ampdoc = this.getAmpDoc();
     const readyPromise = this.embed_ ? this.embed_.whenReady() :
-        ampdoc.whenReady();
+      ampdoc.whenReady();
     const hostWin = this.embed_ ? this.embed_.win : this.win;
     const baseUrl = this.embed_ ? this.embed_.getUrl() : ampdoc.getUrl();
     return readyPromise.then(() => {
@@ -476,8 +478,8 @@ export class AmpAnimation extends AMP.BaseElement {
    */
   getRootNode_() {
     return this.embed_ ?
-        this.embed_.win.document :
-        this.getAmpDoc().getRootNode();
+      this.embed_.win.document :
+      this.getAmpDoc().getRootNode();
   }
 
   /** @private */
@@ -498,16 +500,9 @@ export class AmpAnimation extends AMP.BaseElement {
   }
 }
 
-/**
- * @param {!Window} win
- */
-function ensurePolyfillInstalled(win) {
-  if (!win[POLYFILLED]) {
-    win[POLYFILLED] = true;
-    installWebAnimations(win);
-  }
-}
+
 
 AMP.extension(TAG, '0.1', function(AMP) {
   AMP.registerElement(TAG, AmpAnimation);
+  AMP.registerServiceForDoc('web-animation', WebAnimationService);
 });

@@ -21,9 +21,12 @@ import {
   closestNode,
   escapeCssSelectorIdent,
   iterateCursor,
+  removeElement,
+  childElementsByTag,
 } from './dom';
 import {installCssTransformer} from './style-installer';
 import {
+  isShadowCssSupported,
   isShadowDomSupported,
   getShadowDomSupportedVersion,
   ShadowDomVersion,
@@ -56,16 +59,18 @@ let shadowDomStreamingSupported;
  * @return {!ShadowRoot}
  */
 export function createShadowRoot(hostElement) {
+  const win = toWin(hostElement.ownerDocument.defaultView);
+
   const existingRoot = hostElement.shadowRoot || hostElement.__AMP_SHADOW_ROOT;
   if (existingRoot) {
     existingRoot./*OK*/innerHTML = '';
     return existingRoot;
   }
 
-  // Native support.
+  let shadowRoot;
   const shadowDomSupported = getShadowDomSupportedVersion();
   if (shadowDomSupported == ShadowDomVersion.V1) {
-    const shadowRoot = hostElement.attachShadow({mode: 'open'});
+    shadowRoot = hostElement.attachShadow({mode: 'open'});
     if (!shadowRoot.styleSheets) {
       Object.defineProperty(shadowRoot, 'styleSheets', {
         get: function() {
@@ -79,13 +84,24 @@ export function createShadowRoot(hostElement) {
         },
       });
     }
-    return shadowRoot;
   } else if (shadowDomSupported == ShadowDomVersion.V0) {
-    return hostElement.createShadowRoot();
+    shadowRoot = hostElement.createShadowRoot();
+  } else {
+    shadowRoot = createShadowRootPolyfill(hostElement);
   }
 
-  // Polyfill.
-  return createShadowRootPolyfill(hostElement);
+  if (!isShadowCssSupported()) {
+    const rootId = `i-amphtml-sd-${win.Math.floor(win.Math.random() * 10000)}`;
+    shadowRoot.id = rootId;
+    shadowRoot.host.classList.add(rootId);
+
+    // CSS isolation.
+    installCssTransformer(shadowRoot, css => {
+      return transformShadowCss(shadowRoot, css);
+    });
+  }
+
+  return shadowRoot;
 }
 
 
@@ -96,7 +112,6 @@ export function createShadowRoot(hostElement) {
  */
 function createShadowRootPolyfill(hostElement) {
   const doc = hostElement.ownerDocument;
-  /** @const {!Window} */
   const win = toWin(doc.defaultView);
 
   // Host CSS polyfill.
@@ -109,10 +124,9 @@ function createShadowRootPolyfill(hostElement) {
 
   // Shadow root.
   const shadowRoot = /** @type {!ShadowRoot} */ (
-      // Cast to ShadowRoot even though it is an Element
-      // TODO(@dvoytenko) Consider to switch to a type union instead.
-      /** @type {?}  */ (doc.createElement('i-amphtml-shadow-root')));
-  shadowRoot.id = 'i-amphtml-sd-' + Math.floor(win.Math.random() * 10000);
+    // Cast to ShadowRoot even though it is an Element
+    // TODO(@dvoytenko) Consider to switch to a type union instead.
+    /** @type {?}  */ (doc.createElement('i-amphtml-shadow-root')));
   hostElement.appendChild(shadowRoot);
   hostElement.shadowRoot = hostElement.__AMP_SHADOW_ROOT = shadowRoot;
 
@@ -124,7 +138,7 @@ function createShadowRootPolyfill(hostElement) {
   shadowRoot.getElementById = function(id) {
     const escapedId = escapeCssSelectorIdent(win, id);
     return /** @type {HTMLElement|null} */ (
-        shadowRoot./*OK*/querySelector(`#${escapedId}`));
+      shadowRoot./*OK*/querySelector(`#${escapedId}`));
   };
 
   // The styleSheets property should have a list of local styles.
@@ -136,11 +150,6 @@ function createShadowRootPolyfill(hostElement) {
       return toArray(doc.styleSheets).filter(
           styleSheet => shadowRoot.contains(styleSheet.ownerNode));
     },
-  });
-
-  // CSS isolation.
-  installCssTransformer(shadowRoot, css => {
-    return transformShadowCss(shadowRoot, css);
   });
 
   return shadowRoot;
@@ -190,7 +199,7 @@ export function getShadowRootNode(node) {
 export function importShadowBody(shadowRoot, body, deep) {
   const doc = shadowRoot.ownerDocument;
   let resultBody;
-  if (isShadowDomSupported()) {
+  if (isShadowCssSupported()) {
     resultBody = dev().assertElement(doc.importNode(body, deep));
   } else {
     resultBody = doc.createElement('amp-body');
@@ -220,9 +229,6 @@ export function importShadowBody(shadowRoot, body, deep) {
  * @return {string}
  */
 export function transformShadowCss(shadowRoot, css) {
-  if (isShadowDomSupported()) {
-    return css;
-  }
   return scopeShadowCss(shadowRoot, css);
 }
 
@@ -231,7 +237,7 @@ export function transformShadowCss(shadowRoot, css) {
  * Transforms CSS to isolate AMP CSS within the shadow root and reduce the
  * possibility of high-level conflicts. There are two types of transformations:
  * 1. Root transformation: `body` -> `amp-body`, etc.
- * 2. Scoping: `a {}` -> `#i-amphtml-sd-123 a {}`.
+ * 2. Scoping: `a {}` -> `.i-amphtml-sd-123 a {}`.
  *
  * @param {!ShadowRoot} shadowRoot
  * @param {string} css
@@ -266,7 +272,7 @@ export function scopeShadowCss(shadowRoot, css) {
   // Invoke `ShadowCSS.scopeRules` via `call` because the way it uses `this`
   // internally conflicts with Closure compiler's advanced optimizations.
   const scopeRules = ShadowCSS.scopeRules;
-  return scopeRules.call(ShadowCSS, rules, `#${id}`, transformRootSelectors);
+  return scopeRules.call(ShadowCSS, rules, `.${id}`, transformRootSelectors);
 }
 
 
@@ -550,6 +556,7 @@ export class ShadowDomWriterStreamer {
       const inputBody = dev().assert(this.parser_.body);
       const targetBody = dev().assert(this.targetBody_);
       let transferCount = 0;
+      removeNoScriptElements(inputBody);
       while (inputBody.firstChild) {
         transferCount++;
         targetBody.appendChild(inputBody.firstChild);
@@ -675,6 +682,7 @@ export class ShadowDomWriterBulk {
       const inputBody = doc.body;
       const targetBody = this.onBody_(doc);
       let transferCount = 0;
+      removeNoScriptElements(inputBody);
       while (inputBody.firstChild) {
         transferCount++;
         targetBody.appendChild(inputBody.firstChild);
@@ -687,4 +695,21 @@ export class ShadowDomWriterBulk {
     // EOF.
     this.onEnd_();
   }
+}
+
+/*
+ * Remove any noscript elements.
+ * @param {!Element} parent
+ *
+ * According to the spec (https://w3c.github.io/DOM-Parsing/#the-domparser-interface),
+ * with `DOMParser().parseFromString`, contents of `noscript` get parsed as markup,
+ * so we need to remove them manually.
+ * Why? ¯\_(ツ)_/¯
+ * `createHTMLDocument()` seems to behave the same way.
+ */
+function removeNoScriptElements(parent) {
+  const noscriptElements = childElementsByTag(parent, 'noscript');
+  iterateCursor(noscriptElements, element => {
+    removeElement(element);
+  });
 }

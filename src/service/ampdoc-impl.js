@@ -189,6 +189,10 @@ export class AmpDocService {
       // Shadow doc.
       const shadowRoot = getShadowRootNode(n);
       if (!shadowRoot) {
+        // If not inside a shadow root, it may belong to AmpDocShell
+        if (this.shellShadowDoc_) {
+          return this.shellShadowDoc_;
+        }
         break;
       }
 
@@ -415,8 +419,8 @@ export class AmpDocSingle extends AmpDoc {
 
     /** @private @const {!Promise<!Element>} */
     this.bodyPromise_ = this.win.document.body ?
-        Promise.resolve(this.win.document.body) :
-        waitForBodyPromise(this.win.document).then(() => this.getBody());
+      Promise.resolve(this.win.document.body) :
+      waitForBodyPromise(this.win.document).then(() => this.getBody());
 
     /** @private @const {!Promise} */
     this.readyPromise_ = whenDocumentReady(this.win.document);

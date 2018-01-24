@@ -1,18 +1,13 @@
 {
   "parser": "babel-eslint",
-  "rulePaths": ["build-system/eslint-rules/"],
   "plugins": ["eslint-plugin-google-camelcase"],
-  "ecmaFeatures": {
-    "modules": true,
-    "arrowFunctions": true,
-    "blockBindings": true,
-    "forOf": false,
-    "destructuring": true,
-    "spread": true
-  },
   "env": {
     "es6": true,
     "browser": true
+  },
+ "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module"
   },
   "globals": {
     "it": false,
@@ -39,6 +34,7 @@
     "computed-property-spacing": [2, "never"],
     "curly": 2,
     "dict-string-keys": 2,
+    "closure-type-primitives": 2,
     "dot-location": [2, "property"],
     "enforce-private-props": 2,
     "todo-format": 0,
@@ -49,7 +45,7 @@
     "max-len": [2, 80, 4, {
       "ignoreComments": true,
       "ignoreUrls": true,
-      "ignorePattern": ""
+      "ignorePattern": "^import.*';$"
     }],
     "no-alert": 2,
     "no-array-destructuring": 2,

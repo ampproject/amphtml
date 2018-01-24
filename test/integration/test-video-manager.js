@@ -29,7 +29,9 @@ import {
 import * as sinon from 'sinon';
 import {toArray} from '../../src/types';
 
-describe.configure().ifNewChrome().run('Fake Video Player' +
+// TODO(dvoytenko): These tests time out when run with the prod AMP config.
+// See #11588.
+describe.configure().skip('Fake Video Player' +
     'Integration Tests', () => {
   // We run the video player integration tests on a fake video player as part
   // of functional testing. Same tests run on real video players such as
@@ -218,33 +220,33 @@ describe.configure().ifNewChrome().run('VideoManager', function() {
     it(`no autoplay - should be paused if the
         user pressed pause after playing`, () => {
 
-      videoManager.register(impl);
-      const entry = videoManager.getEntryForVideo_(impl);
-      entry.isVisible_ = false;
+          videoManager.register(impl);
+          const entry = videoManager.getEntryForVideo_(impl);
+          entry.isVisible_ = false;
 
-      impl.play();
-      return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
-        impl.pause();
-        listenOncePromise(video, VideoEvents.PAUSE).then(() => {
-          const curState = videoManager.getPlayingState(impl);
-          expect(curState).to.equal(PlayingStates.PAUSED);
+          impl.play();
+          return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+            impl.pause();
+            listenOncePromise(video, VideoEvents.PAUSE).then(() => {
+              const curState = videoManager.getPlayingState(impl);
+              expect(curState).to.equal(PlayingStates.PAUSED);
+            });
+          });
         });
-      });
-    });
 
     it(`no autoplay - should be playing manual
         whenever video is playing`, () => {
 
-      videoManager.register(impl);
-      const entry = videoManager.getEntryForVideo_(impl);
-      entry.isVisible_ = false;
+          videoManager.register(impl);
+          const entry = videoManager.getEntryForVideo_(impl);
+          entry.isVisible_ = false;
 
-      impl.play();
-      return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
-        const curState = videoManager.getPlayingState(impl);
-        expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
-      });
-    });
+          impl.play();
+          return listenOncePromise(video, VideoEvents.PLAYING).then(() => {
+            const curState = videoManager.getPlayingState(impl);
+            expect(curState).to.equal(PlayingStates.PLAYING_MANUAL);
+          });
+        });
 
     beforeEach(() => {
       sandbox = sinon.sandbox.create();

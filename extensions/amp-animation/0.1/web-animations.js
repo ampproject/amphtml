@@ -174,6 +174,7 @@ export class WebAnimationRunner {
       return;
     }
     this.setPlayState_(WebAnimationPlayState.RUNNING);
+    this.runningCount_ = this.players_.length;
     this.players_.forEach(player => {
       player.play();
     });
@@ -250,7 +251,7 @@ export class WebAnimationRunner {
   }
 
   /**
-   * @return {!number} total duration in milliseconds.
+   * @return {number} total duration in milliseconds.
    * @throws {Error} If timeline is infinite.
    */
   getTotalDuration_() {
@@ -411,7 +412,7 @@ export class Builder {
    * @protected
    */
   resolveRequests(path, spec, args,
-      target = null, index = null, vars = null, timing = null) {
+    target = null, index = null, vars = null, timing = null) {
     const scanner = this.createScanner_(path, target, index, vars, timing);
     return this.vsync_.measurePromise(
         () => scanner.resolveRequests(spec, args));
@@ -593,14 +594,6 @@ export class MeasureScanner extends Scanner {
   onKeyframeAnimation(spec) {
     this.with_(spec, () => {
       const target = user().assertElement(this.target_, 'No target specified');
-      //TODO(aghassemi,#10911): Remove this warning later.
-      if (spec && spec.ticker) {
-        user().error(TAG, 'Experimental `ticker` property has been removed. ' +
-          'For scroll-bound animations, please see the new approach at ' +
-          'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-          'amp-position-observer/amp-position-observer.md'
-        );
-      }
       const keyframes = this.createKeyframes_(target, spec);
       this.requests_.push({
         target,
@@ -667,7 +660,7 @@ export class MeasureScanner extends Scanner {
       const keyframes = [];
       const addStartFrame = array.length == 1 || array[0].offset > 0;
       const startFrame = addStartFrame ? map() :
-          this.css_.resolveCssMap(array[0]);
+        this.css_.resolveCssMap(array[0]);
       keyframes.push(startFrame);
       const start = addStartFrame ? 0 : 1;
       for (let i = start; i < array.length; i++) {
@@ -726,16 +719,16 @@ export class MeasureScanner extends Scanner {
     // Push new context and perform calculations.
     const targets =
         (spec.target || spec.selector) ?
-        this.resolveTargets_(spec) :
-        [null];
+          this.resolveTargets_(spec) :
+          [null];
     targets.forEach((target, index) => {
       this.target_ = target || prevTarget;
       this.index_ = target ? index : prevIndex;
       this.css_.withTarget(this.target_, this.index_, () => {
         const subtargetSpec =
             this.target_ ?
-            this.matchSubtargets_(this.target_, this.index_ || 0, spec) :
-            spec;
+              this.matchSubtargets_(this.target_, this.index_ || 0, spec) :
+              spec;
         this.vars_ = this.mergeVars_(subtargetSpec, prevVars);
         this.css_.withVars(this.vars_, () => {
           this.timing_ = this.mergeTiming_(subtargetSpec, prevTiming);
@@ -772,8 +765,8 @@ export class MeasureScanner extends Scanner {
       }
       const target = user().assertElement(
           typeof spec.target == 'string' ?
-              this.css_.getElementById(spec.target) :
-              spec.target,
+            this.css_.getElementById(spec.target) :
+            spec.target,
           `Target not found: "${spec.target}"`);
       targets = [target];
     } else if (this.target_) {
@@ -903,7 +896,7 @@ export class MeasureScanner extends Scanner {
         '"iterations" is invalid: %s', newTiming.iterations);
     user().assert(iterationStart != null &&
         iterationStart >= 0 && isFinite(iterationStart),
-        '"iterationStart" is invalid: %s', newTiming.iterationStart);
+    '"iterationStart" is invalid: %s', newTiming.iterationStart);
     user().assertEnumValue(WebAnimationTimingDirection,
         /** @type {string} */ (direction), 'direction');
     user().assertEnumValue(WebAnimationTimingFill,
@@ -1044,13 +1037,13 @@ class CssContextImpl {
     if (!styles) {
       styles = computedStyle(this.win_, target);
       this.computedStyleCache_[targetId] =
-          /** @type {!CSSStyleDeclaration} */ (styles);
+        /** @type {!CSSStyleDeclaration} */ (styles);
     }
 
     // Resolve a var or a property.
     return startsWith(prop, '--') ?
-        styles.getPropertyValue(prop) :
-        styles[getVendorJsPropertyName(styles, dashToCamelCase(prop))];
+      styles.getPropertyValue(prop) :
+      styles[getVendorJsPropertyName(styles, dashToCamelCase(prop))];
   }
 
   /**
@@ -1226,10 +1219,10 @@ class CssContextImpl {
         `Recursive variable: "${varName}"`);
     this.varPath_.push(varName);
     const rawValue = (this.vars_ && this.vars_[varName] != undefined) ?
-        this.vars_[varName] :
-        this.currentTarget_ ?
-            this.measure(this.currentTarget_, varName) :
-            null;
+      this.vars_[varName] :
+      this.currentTarget_ ?
+        this.measure(this.currentTarget_, varName) :
+        null;
     if (rawValue == null || rawValue === '') {
       user().warn(TAG, `Variable not found: "${varName}"`);
     }

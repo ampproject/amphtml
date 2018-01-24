@@ -30,23 +30,26 @@ Before you start developing in AMP, check out these resources:
 
 For most developers the instructions in the [Getting Started Quick Start Guide](getting-started-quick.md) will be sufficient for building/running/testing during development.  This section provides a more detailed reference.
 
-The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setup) has instructions for installing Node.js, Yarn, and Gulp which you'll need before running these commands.
+The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setup) has instructions for installing Node.js, yarn, and Gulp which you'll need before running these commands.
 
 | Command                                                                 | Description                                                           |
 | ----------------------------------------------------------------------- | --------------------------------------------------------------------- |
 | **`gulp`**<sup>[[1]](#footnote-1)</sup>                                 | Runs "watch" and "serve". Use this for standard local dev.            |
 | `gulp dist`<sup>[[1]](#footnote-1)</sup>                                | Builds production binaries.                                           |
-| `gulp dist --fortesting`<sup>[[1]](#footnote-1)</sup>                   | Indicates the production binaries are used for local testing. Without this ads, tweets and similar use cases are expected to break locally when using minified sources. |
+| `gulp dist --fortesting`<sup>[[1]](#footnote-1)</sup>                   | Builds production binaries for local testing. (Allows use cases like ads, tweets, etc. to work with minified sources. Overrides `TESTING_HOST` if specified. Uses the production `AMP_CONFIG` by default.) |
+| `gulp dist --fortesting --config=<config>`<sup>[[1]](#footnote-1)</sup> | Builds production binaries for local testing, with the specified `AMP_CONFIG`. `config` can be `prod` or `canary`. (Defaults to `prod`.) |
 | `gulp lint`                                                             | Validates against Google Closure Linter.                              |
 | `gulp lint --watch`                                                     | Watches for changes in files, Validates against Google Closure Linter.|
 | `gulp lint --fix`                                                       | Fixes simple lint warnings/errors automatically.                      |
 | `gulp build`<sup>[[1]](#footnote-1)</sup>                               | Builds the AMP library.                                               |
-| `gulp build --fortesting`<sup>[[1]](#footnote-1)</sup>                  | Builds the AMP library and will read the AMP_TESTING_HOST environment variable to write out an override AMP_CONFIG. |
 | `gulp check-links --files foo.md,bar.md`                                | Reports dead links in `.md` files.                                                 |
 | `gulp clean`                                                            | Removes build output.                                                 |
 | `gulp css`<sup>[[1]](#footnote-1)</sup>                                 | Recompiles css to build directory and builds the embedded css into js files for the AMP library. |
 | `gulp extensions`                                                       | Build AMP Extensions.                                                 |
 | `gulp watch`<sup>[[1]](#footnote-1)</sup>                               | Watches for changes in files, re-build.                               |
+| `gulp pr-check`<sup>[[1]](#footnote-1)</sup>                            | Runs all the Travis CI checks locally.         |
+| `gulp pr-check --nobuild`<sup>[[1]](#footnote-1)</sup>                  | Runs all the Travis CI checks locally, but skips the `gulp build` step.         |
+| `gulp pr-check --files=<test-files-path-glob>`<sup>[[1]](#footnote-1)</sup>   | Runs all the Travis CI checks locally, and restricts tests to the files provided.  |
 | `gulp test`<sup>[[1]](#footnote-1)</sup>                                | Runs tests in Chrome.                                                 |
 | `gulp test --verbose`<sup>[[1]](#footnote-1)</sup>                      | Runs tests in Chrome with logging enabled.                            |
 | `gulp test --nobuild`                                                   | Runs tests without re-build.                                          |
@@ -60,6 +63,7 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp test --testnames`<sup>[[1]](#footnote-1)</sup>                    | Lists the name of each test being run, and prints a summary at the end.  |
 | `gulp serve`                                                            | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples/. Serve unminified AMP by default. |
 | `gulp serve --quiet`                                                    | Same as `serve`, with logging silenced. |
+| `gulp serve --port 9000`                                                | Same as `serve`, but uses a port number other than the default of 8000. |
 | `gulp check-types`                                                      | Verifies that there are no errors associated with Closure typing. Run automatically upon push.  |
 | `gulp dep-check`                                                        | Runs a dependency check on each module. Run automatically upon push.  |
 | `gulp presubmit`                                                        | Run validation against files to check for forbidden and required terms. Run automatically upon push.  |
@@ -92,11 +96,11 @@ The content in the `examples` directory can be reached at: http://localhost:8000
 
 AMP ships with a local proxy for testing production AMP documents with the local JS version.
 
-For any public AMP document like: http://output.jsbin.com/pegizoq/quiet,
+For any public AMP document like: `http://output.jsbin.com/pegizoq/quiet`,
 
 You can access it with the local JS at
 
-http://localhost:8000/proxy/output.jsbin.com/pegizoq/quiet.
+`http://localhost:8000/proxy/output.jsbin.com/pegizoq/quiet`.
 
 **Note** The local proxy will serve minified or unminified JS based on the current serve mode. When serve mode is `cdn`, the local proxy will serve remote JS.
 When accessing minified JS make sure you run `gulp dist` with the `--fortesting`

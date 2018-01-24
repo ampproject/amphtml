@@ -14,7 +14,7 @@
  * the License.
  */
 
- /** @fileoverview
+/** @fileoverview
   This file is an example implementation for a service worker compatible with
   amp-web-push. This means the service worker accepts window messages (listened
   to via the service worker's 'message' handler), performs some action, and
@@ -27,7 +27,7 @@
   which broadcasts the reply back to the AMP page.
  */
 
- /** @enum {string} */
+/** @enum {string} */
 const WorkerMessengerCommand = {
   /*
     Used to request the current subscription state.
@@ -67,17 +67,17 @@ self.addEventListener('message', event => {
     - payload: An optional JavaScript object containing extra data relevant to
       the command.
    */
-  const {command, payload} = event.data;
+  const {command} = event.data;
 
   switch (command) {
     case WorkerMessengerCommand.AMP_SUBSCRIPION_STATE:
-      onMessageReceivedSubscriptionState(payload);
+      onMessageReceivedSubscriptionState();
       break;
     case WorkerMessengerCommand.AMP_SUBSCRIBE:
-      onMessageReceivedSubscribe(payload);
+      onMessageReceivedSubscribe();
       break;
     case WorkerMessengerCommand.AMP_UNSUBSCRIBE:
-      onMessageReceivedUnsubscribe(payload);
+      onMessageReceivedUnsubscribe();
       break;
   }
 });
@@ -95,7 +95,7 @@ function onMessageReceivedSubscriptionState() {
         } else {
           return self.registration.pushManager.permissionState(
               pushSubscription.options
-        );
+          );
         }
       }).then(permissionStateOrNull => {
         if (permissionStateOrNull == null) {

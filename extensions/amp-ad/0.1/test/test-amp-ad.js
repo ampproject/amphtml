@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {a4aRegistry} from '../../../../ads/_a4a-config';
+import {getA4ARegistry} from '../../../../ads/_a4a-config';
 import {adConfig} from '../../../../ads/_config';
 import {AmpAd} from '../amp-ad';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
@@ -24,6 +24,7 @@ import {stubService} from '../../../../testing/test-helper';
 
 describes.realWin('Ad loader', {amp: true}, env => {
   let win, doc;
+  const a4aRegistry = getA4ARegistry();
   let a4aRegistryBackup;
   let registryBackup;
   const tagNames = ['amp-ad', 'amp-embed'];
@@ -123,7 +124,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
             .returns(Promise.reject(new Error('I failed!')));
         ampAd = new AmpAd(ampAdElement);
         return ampAd.upgradeCallback().then(baseElement => {
-          expect(extensionsStub).to.be.calledAtLeastOnce;
+          expect(extensionsStub).to.be.called;
           expect(ampAdElement.getAttribute(
               'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
           expect(baseElement).to.be.instanceof(AmpAd3PImpl);
@@ -135,8 +136,8 @@ describes.realWin('Ad loader', {amp: true}, env => {
         meta.setAttribute('name', 'amp-3p-iframe-src');
         meta.setAttribute('content', 'https://example.com/remote.html');
         doc.head.appendChild(meta);
-        a4aRegistry['zort'] = () => {
-          throw new Error('predicate should not execute if remote.html!');
+        a4aRegistry['zort'] = (win, element, useRemoteHtml) => {
+          return !useRemoteHtml;
         };
         ampAdElement.setAttribute('type', 'zort');
         const upgraded = new AmpAd(ampAdElement).upgradeCallback();
@@ -144,13 +145,12 @@ describes.realWin('Ad loader', {amp: true}, env => {
       });
 
       it('uses Fast Fetch if just RTC is used', () => {
-        const rtcConfig = doc.createElement('script');
-        rtcConfig.setAttribute('id', 'amp-rtc');
-        doc.head.appendChild(rtcConfig);
         a4aRegistry['zort'] = function() {
           return true;
         };
         ampAdElement.setAttribute('type', 'zort');
+        ampAdElement.setAttribute('type', 'zort');
+        ampAdElement.setAttribute('rtc-config', '{"urls": ["https://a.qqq"]}');
         const zortInstance = {};
         const zortConstructor = function() { return zortInstance; };
         const extensions = Services.extensionsFor(win);
@@ -159,7 +159,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
             .returns(Promise.resolve(zortConstructor));
         ampAd = new AmpAd(ampAdElement);
         return ampAd.upgradeCallback().then(baseElement => {
-          expect(extensionsStub).to.be.calledAtLeastOnce;
+          expect(extensionsStub).to.be.called;
           expect(ampAdElement.getAttribute(
               'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
           expect(baseElement).to.equal(zortInstance);
@@ -171,13 +171,11 @@ describes.realWin('Ad loader', {amp: true}, env => {
         meta.setAttribute('name', 'amp-3p-iframe-src');
         meta.setAttribute('content', 'https://example.com/remote.html');
         doc.head.appendChild(meta);
-        const rtcConfig = doc.createElement('script');
-        rtcConfig.setAttribute('id', 'amp-rtc');
-        doc.head.appendChild(rtcConfig);
         a4aRegistry['zort'] = function() {
           return true;
         };
         ampAdElement.setAttribute('type', 'zort');
+        ampAdElement.setAttribute('rtc-config', '{"urls": ["https://a.qqq"]}');
         const zortInstance = {};
         const zortConstructor = function() { return zortInstance; };
         const extensions = Services.extensionsFor(win);
@@ -186,7 +184,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
             .returns(Promise.resolve(zortConstructor));
         ampAd = new AmpAd(ampAdElement);
         return ampAd.upgradeCallback().then(baseElement => {
-          expect(extensionsStub).to.be.calledAtLeastOnce;
+          expect(extensionsStub).to.be.called;
           expect(ampAdElement.getAttribute(
               'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
           expect(baseElement).to.equal(zortInstance);
@@ -211,7 +209,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
             .returns(Promise.resolve(zortConstructor));
         ampAd = new AmpAd(ampAdElement);
         return ampAd.upgradeCallback().then(baseElement => {
-          expect(extensionsStub).to.be.calledAtLeastOnce;
+          expect(extensionsStub).to.be.called;
           expect(ampAdElement.getAttribute(
               'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
           expect(baseElement).to.equal(zortInstance);
@@ -231,7 +229,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
             .returns(Promise.resolve(zortConstructor));
         ampAd = new AmpAd(ampAdElement);
         return ampAd.upgradeCallback().then(baseElement => {
-          expect(extensionsStub).to.be.calledAtLeastOnce;
+          expect(extensionsStub).to.be.called;
           expect(ampAdElement.getAttribute(
               'data-a4a-upgrade-type')).to.equal('amp-ad-network-zort-impl');
           expect(baseElement).to.equal(zortInstance);

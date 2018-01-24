@@ -17,7 +17,7 @@ We hope you'll become an ongoing participant in our open source community but we
 - [Contributor License Agreement](#contributor-license-agreement)
 - [Ongoing participation](#ongoing-participation)
   * [Discussion channels](#discussion-channels)
-  * [Weekly status updates](#weekly-status-updates)
+  * [Status updates](#status-updates)
   * [Weekly design reviews](#weekly-design-reviews)
   * [Working groups](#working-groups)
   * [See Also](#see-also)
@@ -50,9 +50,9 @@ If you are new to contributing to an open source project, Git/GitHub, etc. welco
 
 The [Getting Started End-to-End Guide](contributing/getting-started-e2e.md) provides step-by-step instructions for everything from creating a GitHub account to getting your code reviewed and merged.  Even if you've never contributed to an open source project before you'll soon be building AMP, making improvements and seeing your code live across the web.
 
-The community has created a list of [Great First Issues](https://github.com/ampproject/amphtml/labels/Great%20First%20Issue) specifically for new contributors to the project.  Feel free to find one of the [unclaimed Great First Issues](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=is%3Aopen%20label%3A%22Great%20First%20Issue%22%20-label%3A%22GFI%20Claimed!%22) that interests you, claim it by adding a comment to it and jump in!
+The community has created a list of [Good First Issues](https://github.com/ampproject/amphtml/labels/good%20first%20issue) specifically for new contributors to the project.  Feel free to find one of the [unclaimed Good First Issues](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=is%3Aopen%20label%3A%22good%20first%20issue%22%20-label%3A%22GFI%20Claimed!%22) that interests you, claim it by adding a comment to it and jump in!
 
-If you're interested in helping out but can't find a Great First Issue that matches your skills/interests, [sign up for our Slack](https://docs.google.com/forms/d/e/1FAIpQLSd83J2IZA6cdR6jPwABGsJE8YL4pkypAbKMGgUZZriU7Qu6Tg/viewform?fbzx=4406980310789882877) and then reach out in the [#welcome-contributors channel](https://amphtml.slack.com/messages/welcome-contributors/) or send a Direct Message to [mrjoro](https://amphtml.slack.com/team/mrjoro/).
+If you're interested in helping out but can't find a Good First Issue that matches your skills/interests, [sign up for our Slack](https://docs.google.com/forms/d/e/1FAIpQLSd83J2IZA6cdR6jPwABGsJE8YL4pkypAbKMGgUZZriU7Qu6Tg/viewform?fbzx=4406980310789882877) and then reach out in the [#welcome-contributors channel](https://amphtml.slack.com/messages/welcome-contributors/) or send a Direct Message to [mrjoro](https://amphtml.slack.com/team/mrjoro/).
 
 If you run into any problems we have plenty of people who are willing to help; see the [How to get help](contributing/getting-started-e2e.md#how-to-get-help) section of the Getting Started guide.
 
@@ -96,15 +96,16 @@ For further detail on integrating third party services, fonts, embeds, etc. see 
 
 ## Contributor License Agreement
 
-The AMP Project hosted at GitHub requires all contributors to sign a Contributor License Agreement in order to protect contributors and users in issues of intellectual property.
+The AMP Project hosted at GitHub requires all contributors to either sign an individual Contributor License Agreement or be covered by a corporate Contributor License Agreement in order to protect contributors and users in issues of intellectual property.
 
-We recommend signing the CLA *before* you send a pull request to avoid problems, though this is not absolutely necessary until your code is ready to be merged in.
+We recommend you handle signing/being covered by a CLA *before* you send a pull request to avoid problems, though this is not absolutely necessary until your code is ready to be merged in.
 
-**Make sure that you sign the CLA with the same email address you associate with your commits (likely via the `user.email` Git config as described on GitHub's [Set up Git](https://help.github.com/articles/set-up-git/) page).**
+**Make sure that the email you associate with your CLA is the same email address you associate with your commits (likely via the `user.email` Git config as described on GitHub's [Set up Git](https://help.github.com/articles/set-up-git/) page).**
 
-* If you are contributing code on your own behalf you can sign the ([individual CLA](https://developers.google.com/open-source/cla/individual) instantly online.
-* If you are planning on contributing code on behalf of your company your company will need to agree to a [corporate CLA](https://developers.google.com/open-source/cla/corporate) if it has not already done so.  Although this is a relatively straightforward process, it requires approval from an authorized signer at your company and a manual verification process, so to ensure you can get your code reviewed and merged quickly please start this process as soon as possible.
-* If your company has already agreed to a corporate CLA you can indicate agreement to the CLA by having the appropriate person at your company add your email address added to the Google Group associated with your corporate CLA.
+* **If you are contributing code on your own behalf** you can sign the ([individual CLA](https://developers.google.com/open-source/cla/individual) instantly online.
+* **If you are planning on contributing code on behalf of your company:**
+  * Your company will need to agree to a [corporate CLA](https://developers.google.com/open-source/cla/corporate) if it has not already done so.  Although this is a relatively straightforward process, it requires approval from an authorized signer at your company and a manual verification process that may take a couple of days.  To ensure you can get your code reviewed and merged quickly please start this process as soon as possible.  The signer of your corporate CLA will associate a Google Group to the corporate CLA, and any email address added to this Google Group will be considered to be covered by this corporate CLA.
+  * To be covered by your company's corporate CLA the owner of the Google Group associated with the corporate CLA (someone at your company) will need to add your address to this Google Group.
 
 ## Ongoing participation
 
@@ -118,11 +119,11 @@ Technical issues, designs, etc. are discussed using several different channels:
 - [Slack](https://amphtml.slack.com) ([signup](https://docs.google.com/forms/d/1wAE8w3K5preZnBkRk-MD1QkX8FmlRDxd_vs4bFSeJlQ/viewform?fbzx=4406980310789882877))
 - the [amphtml-discuss Google Group](https://groups.google.com/forum/#!forum/amphtml-discuss)
 
-### Weekly status updates
+### Status updates
 
-Weekly updates from members of the community are tracked using [Weekly Status GitHub issues](https://github.com/ampproject/amphtml/issues?q=label%3A%22Type%3A+Weekly+Status%22).
+Status updates from members of the community are tracked using approximately bi-weekly [Status Update GitHub issues](https://github.com/ampproject/amphtml/issues?q=label%3A%22Type%3A+Status+Update%22).
 
-We encourage everyone who is actively contributing to AMP to add a comment to the relevant Weekly Status issue.
+We encourage everyone who is actively contributing to AMP to add a comment to the relevant Status Update issue.
 
 ### Weekly design reviews
 

@@ -51,17 +51,20 @@ export class AmpAutoAds extends AMP.BaseElement {
     Services.extensionsFor(this.win)./*OK*/installExtensionForDoc(
         ampdoc, AD_TAG);
 
-    const configPromise = this.getConfig_(adNetwork.getConfigUrl());
-    Promise.all([configPromise, ampdoc.whenReady()]).then(values => {
-      const configObj = values[0];
+    const viewer = Services.viewerForDoc(this.getAmpDoc());
+    const whenVisible = viewer.whenFirstVisible();
+
+    whenVisible.then(() => {
+      return this.getConfig_(adNetwork.getConfigUrl());
+    }).then(configObj => {
       if (!configObj) {
         return;
       }
 
       const placements = getPlacementsFromConfigObj(ampdoc, configObj);
       const attributes = /** @type {!JsonObject} */ (
-          Object.assign(adNetwork.getAttributes(),
-              getAttributesFromConfigObj(configObj)));
+        Object.assign(adNetwork.getAttributes(),
+            getAttributesFromConfigObj(configObj)));
       const adTracker =
           new AdTracker(getExistingAds(ampdoc), adNetwork.getAdConstraints());
       new AdStrategy(placements, attributes, adTracker).run();

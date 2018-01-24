@@ -20,7 +20,7 @@ tags: {  # amp-fit-text
     name: "amp-fit-text"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    requires_usage: DEPRECATED_WARNING
+    requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -36,6 +36,7 @@ tags: {  # <amp-fit-text>
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }

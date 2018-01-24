@@ -15,13 +15,15 @@
  */
 'use strict';
 
-var argv = require('minimist')(process.argv.slice(2));
-var fs = require('fs-extra');
-var gulp = require('gulp-help')(require('gulp'));
-var util = require('gulp-util');
-
+const argv = require('minimist')(process.argv.slice(2));
+const fs = require('fs-extra');
+const gulp = require('gulp-help')(require('gulp'));
+const colors = require('ansi-colors');
+const log = require('fancy-log');
 
 const year = new Date().getFullYear();
+
+/*eslint "max-len": 0*/
 
 function pascalCase(str) {
   return str[0].toUpperCase() + str.slice(1).replace(/-([a-z])/g,
@@ -98,7 +100,7 @@ tags: {  # <${name}>
 }
 
 function getMarkdownExtensionFile(name) {
-return `<!--
+  return `<!--
 Copyright ${year} The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -246,7 +248,7 @@ AMP.registerElement('${name}', ${className});
 }
 
 function getExamplesFile(name) {
-return `<!doctype html>
+  return `<!doctype html>
 <html ⚡>
 <head>
   <meta charset="utf-8">
@@ -271,7 +273,7 @@ return `<!doctype html>
 
 function makeExtension() {
   if (!argv.name) {
-    util.log(util.colors.red(
+    log(colors.red(
         'Error! Please pass in the "--name" flag with a value'));
   }
   const name = argv.name;
@@ -295,5 +297,5 @@ function makeExtension() {
 gulp.task('make-extension', 'Create an extension skeleton', makeExtension, {
   options: {
     name: '  The name of the extension. Preferable prefixed with `amp-*`',
-  }
+  },
 });

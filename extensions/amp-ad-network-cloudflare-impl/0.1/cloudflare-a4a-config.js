@@ -16,11 +16,13 @@
 
 /**
  * Determines which tags desire A4A handling
- *
+ * @param {!Window} win
+ * @param {!Element} element
+ * @param {boolean} useRemoteHtml
  * @returns {boolean}
  */
-export function cloudflareIsA4AEnabled() {
+export function cloudflareIsA4AEnabled(win, element, useRemoteHtml) {
   // We assume fast fetch for all content, but this will gracefully degrade,
   // when non-a4a content is delivered
-  return true;
+  return !useRemoteHtml;
 }

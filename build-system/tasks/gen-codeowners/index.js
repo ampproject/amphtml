@@ -18,11 +18,10 @@ const BBPromise = require('bluebird');
 const yaml = require('yamljs');
 const fs = BBPromise.promisifyAll(require('fs-extra'));
 const gulp = require('gulp-help')(require('gulp'));
-const glob = BBPromise.promisify(require('glob'));
 const intercept = require('gulp-intercept');
 const path = require('path');
 const minimist = require('minimist');
-const util = require('gulp-util');
+const log = require('fancy-log');
 
 const argv = minimist(process.argv.slice(2));
 
@@ -39,9 +38,9 @@ function buildCodeownersFile(dirs) {
       if (typeof item === 'string') {
         // Allow leading `@` to be optional
         codeowners += item.indexOf('@') !== 0 ? `@${item}` : item;
-        let nextItem = arr[i + 1];
+        const nextItem = arr[i + 1];
         // Look ahead if we need to add a space
-        if (nextItem && typeof nextItem  === 'string') {
+        if (nextItem && typeof nextItem === 'string') {
           codeowners += ' ';
         }
       } else {
@@ -60,12 +59,12 @@ function buildCodeownersFile(dirs) {
         // ```js
         // {'ampproject/somegroup': ['some.js']}
         // ```
-        let subItemUsername = Object.keys(item)[0];
-        let username = subItemUsername.indexOf('@') !== 0 ?
-            `@${subItemUsername}` : subItemUsername;
+        const subItemUsername = Object.keys(item)[0];
+        const username = subItemUsername.indexOf('@') !== 0 ?
+          `@${subItemUsername}` : subItemUsername;
         item[subItemUsername].forEach(function(pattern) {
           codeowners += `${dirpath === '*' ? pattern :
-              `${dirpath}/${pattern}`} ${username}`;
+            `${dirpath}/${pattern}`} ${username}`;
         });
       }
     });
@@ -92,14 +91,14 @@ function generate(root, target, writeToDisk) {
         const dirname = path.relative(process.cwd(), path.dirname(file.path));
         dirs[dirname || '*'] = yaml.parse(file.contents.toString());
       }))
-      .on('end', function(cb) {
+      .on('end', function() {
         if (writeToDisk) {
           fs.removeSync(target);
-          const codeowners = buildCodeownersFile(dirs, target, writeToDisk);
+          const codeowners = buildCodeownersFile(dirs);
           fs.writeFileSync(target, codeowners);
         } else {
-          const codeowners = buildCodeownersFile(dirs, target, writeToDisk);
-          util.log(codeowners);
+          const codeowners = buildCodeownersFile(dirs);
+          log(codeowners);
         }
       });
 }

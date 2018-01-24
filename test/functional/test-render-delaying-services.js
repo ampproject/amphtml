@@ -41,11 +41,12 @@ describe('waitForServices', () => {
 
     return createIframePromise().then(iframe => {
       win = iframe.win;
-      clock = lolex.install(iframe.win);
+      clock = lolex.install({target: win});
     });
   });
 
   afterEach(() => {
+    clock.uninstall();
     sandbox.restore();
   });
 
