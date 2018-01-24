@@ -59,7 +59,7 @@ export class AmpMustache extends AMP.BaseTemplate {
   /** @override */
   render(data) {
     let mustacheData = data;
-    if (typeof mustacheData === 'object') {
+    if (typeof data === 'object') {
       mustacheData = Object.assign({}, data, this.nestedTemplates_);
     }
     const html = mustacheRender(this.template_, mustacheData);
