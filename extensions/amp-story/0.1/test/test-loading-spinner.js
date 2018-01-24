@@ -24,31 +24,23 @@ describes.realWin('loading-spinner', {}, env => {
     loadingSpinner = new LoadingSpinner(win.document);
   });
 
-  it('should attach the loading spinner', () => {
-    const container = win.document.createElement('div');
-    loadingSpinner.attach(container);
-
-    expect(container.children).to.have.length(1);
-    expect(container.children[0].className)
-        .to.contain('i-amphtml-story-spinner');
+  it('should build the loading spinner', () => {
+    const loadingSpinnerEl = loadingSpinner.build();
+    expect(loadingSpinnerEl.className).to.contain('i-amphtml-story-spinner');
   });
 
   it('should be hidden by default', () => {
-    const container = win.document.createElement('div');
-    loadingSpinner.attach(container);
+    const loadingSpinnerEl = loadingSpinner.build();
 
-    const loadingSpinnerEl = container.children[0];
     expect(loadingSpinnerEl).not.to.have.attribute('active');
     expect(loadingSpinnerEl).to.have.attribute('aria-hidden');
     expect(loadingSpinnerEl.getAttribute('aria-hidden')).to.equal('true');
   });
 
   it('should toggle the loading spinner', () => {
-    const container = win.document.createElement('div');
-    loadingSpinner.attach(container);
+    const loadingSpinnerEl = loadingSpinner.build();
     loadingSpinner.toggle(true);
 
-    const loadingSpinnerEl = container.children[0];
     expect(loadingSpinnerEl).to.have.attribute('active');
     expect(loadingSpinnerEl).to.have.attribute('aria-hidden');
     expect(loadingSpinnerEl.getAttribute('aria-hidden')).to.equal('false');

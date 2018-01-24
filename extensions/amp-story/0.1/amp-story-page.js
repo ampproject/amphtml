@@ -98,7 +98,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @const @private {!function()} */
     this.debounceToggleLoadingSpinner_ = debounce(
-        this.win, isActive => this.toggleLoadingSpinner_(isActive), 100);
+        this.win, isActive => this.toggleLoadingSpinner_(!!isActive), 100);
 
     /** @const @private {!Array<function()>} */
     this.unlisteners_ = [];
@@ -628,12 +628,12 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     this.debounceToggleLoadingSpinner_(true);
-    videos.forEach(videoEl => {
+    for (let videoEl of videos) {
       this.unlisteners_.push(listen(
           videoEl, 'playing', () => this.debounceToggleLoadingSpinner_(false)));
       this.unlisteners_.push(listen(
           videoEl, 'waiting', () => this.debounceToggleLoadingSpinner_(true)));
-    });
+    }
   }
 
 
@@ -649,9 +649,9 @@ export class AmpStoryPage extends AMP.BaseElement {
   /**
    * @private
    */
-  buildAndAttachLoadingSpinner_() {
+  buildAndAppendLoadingSpinner_() {
     this.loadingSpinner_ = new LoadingSpinner(this.win.document);
-    this.loadingSpinner_.attach(this.element);
+    this.element.appendChild(this.loadingSpinner_.build());
   }
 
 
@@ -664,9 +664,9 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   toggleLoadingSpinner_(isActive) {
-    this.getVsync(this).mutate(() => {
+    this.getVsync().mutate(() => {
       if (!this.loadingSpinner_) {
-        this.buildAndAttachLoadingSpinner_();
+        this.buildAndAppendLoadingSpinner_();
       }
 
       this.loadingSpinner_.toggle(isActive);

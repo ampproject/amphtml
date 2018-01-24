@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {dev} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {renderAsElement} from './simple-template';
 
@@ -66,29 +67,42 @@ export class LoadingSpinner {
    * @param {!Document} doc
    */
   constructor(doc) {
-    /** @public @const {!Element} */
-    this.element_ = renderAsElement(doc, SPINNER);
+    /** @private @const {!Document} */
+    this.doc_ = doc;
+
+    /** @public {?Element} */
+    this.root_ = null;
 
     /** @private {boolean} */
     this.isActive_ = false;
   }
 
-  /** @param {!Element} element */
-  attach(element) {
-    element.appendChild(this.element_);
+  build() {
+    if (this.root_) {
+      return this.root_;
+    }
+
+    this.root_ = renderAsElement(this.doc_, SPINNER);
+
+    return this.getRoot();
   }
 
-  /** @param {boolean} state */
+  /** @return {!Element} */
+  getRoot() {
+    return dev().assertElement(this.root_);
+  }
+
+  /** @param {boolean} isActive */
   toggle(isActive) {
     if (isActive === this.isActive_) {
       return;
     }
     if (isActive) {
-      this.element_.setAttribute(SPINNER_ACTIVE_ATTRIBUTE, '');
-      this.element_.setAttribute('aria-hidden', 'false');
+      this.root_.setAttribute(SPINNER_ACTIVE_ATTRIBUTE, '');
+      this.root_.setAttribute('aria-hidden', 'false');
     } else {
-      this.element_.removeAttribute(SPINNER_ACTIVE_ATTRIBUTE);
-      this.element_.setAttribute('aria-hidden', 'true');
+      this.root_.removeAttribute(SPINNER_ACTIVE_ATTRIBUTE);
+      this.root_.setAttribute('aria-hidden', 'true');
     }
     this.isActive_ = isActive;
   }
