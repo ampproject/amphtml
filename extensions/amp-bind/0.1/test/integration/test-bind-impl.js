@@ -23,6 +23,7 @@ import * as sinon from 'sinon';
 import {AmpEvents} from '../../../../../src/amp-events';
 import {Bind} from '../../bind-impl';
 import {BindEvents} from '../../bind-events';
+import {Services} from '../../../../../src/services';
 import {chunkInstanceForTesting} from '../../../../../src/chunk';
 import {toArray} from '../../../../../src/types';
 import {user} from '../../../../../src/log';
@@ -210,11 +211,13 @@ describe.configure().ifNewChrome().run('Bind', function() {
   }, env => {
     let bind;
     let container;
+    let viewer;
 
     beforeEach(() => {
       // Make sure we have a chunk instance for testing.
       chunkInstanceForTesting(env.ampdoc);
 
+      viewer = Services.viewerForDoc(env.ampdoc);
       bind = new Bind(env.ampdoc);
       // Connected <div> element created by describes.js.
       container = env.win.document.getElementById('parent');
@@ -581,6 +584,33 @@ describe.configure().ifNewChrome().run('Bind', function() {
 
         expect(errorStub).to.have.been.calledWith('amp-bind',
             sinon.match(/Maximum number of bindings reached/));
+      });
+    });
+
+    it('should update premutate keys that are overridable', () => {
+      bind.makeStateKeyOverridable('foo');
+      bind.makeStateKeyOverridable('bar');
+      const foo = createElement(env, container, '[text]="foo"');
+      const bar = createElement(env, container, '[text]="bar"');
+      const baz = createElement(env, container, '[text]="baz"');
+      const qux = createElement(env, container, '[text]="qux"');
+
+      return onBindReadyAndSetState(env, bind, {
+        foo: 1, bar: 2, baz: 3, qux: 4,
+      }).then(() => {
+        return viewer.receiveMessage('premutate', {
+          state: {
+            foo: 'foo',
+            bar: 'bar',
+            baz: 'baz',
+            qux: 'qux',
+          },
+        }).then(() => {
+          expect(foo.textContent).to.equal('foo');
+          expect(bar.textContent).to.equal('bar');
+          expect(baz.textContent).to.be.equal('3');
+          expect(qux.textContent).to.be.equal('4');
+        });
       });
     });
   }); // in single ampdoc

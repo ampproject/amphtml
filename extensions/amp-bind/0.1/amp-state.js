@@ -80,6 +80,12 @@ export class AmpState extends AMP.BaseElement {
 
   /** @private */
   initialize_() {
+    if (this.element.hasAttribute('overridable')) {
+      Services.bindForDocOrNull(this.element).then(bind => {
+        dev().assert(bind, 'Bind service can not be found.');
+        bind.makeStateKeyOverridable(this.element.getAttribute('id'));
+      });
+    }
     // Parse child script tag and/or fetch JSON from endpoint at `src`
     // attribute, with the latter taking priority.
     const children = this.element.children;
