@@ -58,10 +58,11 @@ export class AmpMustache extends AMP.BaseTemplate {
 
   /** @override */
   render(data) {
-    if (typeof data !== 'string') {
-      data = Object.assign({}, data, this.nestedTemplates_);
+    let mustacheData = data;
+    if (typeof mustacheData === 'object') {
+      mustacheData = Object.assign({}, data, this.nestedTemplates_);
     }
-    const html = mustacheRender(this.template_, data);
+    const html = mustacheRender(this.template_, mustacheData);
     const sanitized = sanitizeHtml(html);
     const root = this.win.document.createElement('div');
     root./*OK*/innerHTML = sanitized;
