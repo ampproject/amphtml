@@ -110,9 +110,12 @@ export class RequestHandler {
    * @param {?JsonObject} configParams
    * @param {!JsonObject} trigger
    * @param {!./variables.ExpansionOptions} expansionOption
+   * @param {!Object<string, *>} dynamicBindings A mapping of variables to
+   *     stringable values. For example, values could be strings, functions that
+   *     return strings, promises, etc.
    * @return {!Promise<string>}
    */
-  send(configParams, trigger, expansionOption) {
+  send(configParams, trigger, expansionOption, dynamicBindings) {
     this.lastTrigger_ = trigger;
     const triggerParams = trigger['extraUrlParams'];
 
@@ -122,7 +125,7 @@ export class RequestHandler {
           this.variableService_.expandTemplate(this.baseUrl, expansionOption);
       this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then(baseUrl => {
         return this.urlReplacementService_.expandAsync(
-            baseUrl, undefined, this.whiteList_);
+            baseUrl, dynamicBindings, this.whiteList_);
       });
     };
 
@@ -133,7 +136,7 @@ export class RequestHandler {
           const expandedExtraUrlParamsStr =
               this.getExtraUrlParamsString_(expandExtraUrlParams);
           return this.urlReplacementService_.expandAsync(
-              expandedExtraUrlParamsStr, undefined, this.whiteList_);
+              expandedExtraUrlParamsStr, dynamicBindings, this.whiteList_);
         });
 
     if (this.batchingPlugin_) {
