@@ -67,7 +67,7 @@ export class BaseTemplate {
 
   /**
    * To be implemented by subclasses.
-   * @param {!JsonObject} unusedData
+   * @param {!JsonObject|string} unusedData
    * @return {!Element}
    */
   render(unusedData) {
