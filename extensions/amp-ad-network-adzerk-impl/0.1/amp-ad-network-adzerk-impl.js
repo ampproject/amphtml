@@ -118,12 +118,9 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
       checkStillCurrent();
       this.ampCreativeJson_ = /** @type {!AmpTemplateCreativeDef} */
         (tryParseJson(body) || {});
-      const proxyUrl = getMode(this.win).localDev
-        ? this.ampCreativeJson_.templateUrl
-        : this.getTemplateProxyUrl_(this.ampCreativeJson_.templateUrl);
       // TODO(keithwrightbos): macro value validation?  E.g. http invalid?
       return ampAdTemplates
-          .fetch(proxyUrl)
+          .fetch(this.ampCreativeJson_.templateUrl)
           .then(parsedTemplate => {
             this.creativeMetadata_ = /** @type {!CreativeMetaDataDef} */
                 (super.getAmpAdMetadata(parsedTemplate));
@@ -136,18 +133,6 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
             return Promise.reject(NO_CONTENT_RESPONSE);
           });
     });
-  }
-
-  /**
-   * Converts the canonical template URL to the CDN proxy URL.
-   * @param {string} url
-   * @return {string}
-   */
-  getTemplateProxyUrl_(url) {
-    const loc = parseUrl(url);
-    return loc.protocol + '//' +
-        loc.hostname.replace(/-/g, '--').replace(/\./g, '-') +
-        '.' + urls.cdn.slice(8) + '/a/s/' + loc.hostname + loc.pathname;
   }
 
   /** @override */

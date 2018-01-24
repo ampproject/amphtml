@@ -49,6 +49,9 @@ export class AmpAdTemplates {
    * @return {!Promise<string>}
    */
   fetch(templateUrl) {
+    const proxyUrl = getMode(this.win).localDev
+        ? templateUrl
+        : this.getTemplateProxyUrl_(templateUrl);
     let templatePromise = this.cache_.get(templateUrl);
     if (!templatePromise) {
       templatePromise = Services.xhrFor(this.win_)
@@ -71,5 +74,17 @@ export class AmpAdTemplates {
   render(templateValues, element) {
     return Services.templatesFor(this.win_)
         .findAndRenderTemplate(element, templateValues);
+  }
+
+  /**
+   * Converts the canonical template URL to the CDN proxy URL.
+   * @param {string} url
+   * @return {string}
+   */
+  getTemplateProxyUrl_(url) {
+    const loc = parseUrl(url);
+    return 'https://' +
+        loc.hostname.replace(/-/g, '--').replace(/\./g, '-') +
+        '.' + urls.cdn.slice(8) + '/a/s/' + loc.hostname + loc.pathname;
   }
 }
