@@ -643,11 +643,9 @@ export class AmpAnalytics extends AMP.BaseElement {
     const requests = isArray(trigger['request'])
       ? trigger['request'] : [trigger['request']];
 
-    const resultPromises = [];
     for (let r = 0; r < requests.length; r++) {
       const requestName = requests[r];
-      resultPromises.push(
-          this.handleRequestForEvent_(requestName, trigger, event));
+      this.handleRequestForEvent_(requestName, trigger, event);
     }
   }
 
