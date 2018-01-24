@@ -18,7 +18,7 @@ tags: {  # amp-mathml
   html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
-    name: "amp-html"
+    name: "amp-mathml"
     allowed_versions: "0.1"
     allowed_versions: "latest"
   }
