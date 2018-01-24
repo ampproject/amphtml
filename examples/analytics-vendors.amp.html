@@ -52,6 +52,7 @@
       <option>afsanalytics</option>
       <option>baiduanalytics</option>
       <option>burt</option>
+      <option>byside</option>
       <option>chartbeat</option>
       <option>clicky</option>
       <option>colanalytics</option>
@@ -68,7 +69,7 @@
       <option>linkpulse</option>
       <option>lotame</option>
       <option>mediametrie</option>
-      <option>mediarithmics</option>            
+      <option>mediarithmics</option>
       <option>mediator</option>
       <option>mparticle</option>
       <option>mpulse</option>
@@ -274,6 +275,32 @@ For complete documentation and additional examples please see: https://marketing
   </script>
 </amp-analytics>
 <!-- End Burt example -->
+
+<!-- BySide tracking -->
+<amp-analytics type="byside" id="byside">
+  <script type="application/json">
+    {
+      "vars": {
+        "webcareId": "D6604AE5D0",
+        "channel": "",
+        "lang": "pt"
+      },
+      "triggers": {
+        "trackEvent": {
+          "on": "click",
+          "selector": "#test1",
+          "request": "event",
+          "vars": {
+            "eventId": "shop",
+            "eventLabel": "Clicked on shop button",
+            "fields": "{\"product\": \"the_essentials\", \"name\": \"The essentials\"}"
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End BySide example -->
 
 <!-- Chartbeat tracking -->
 <amp-analytics type="chartbeat" id="chartbeat">
@@ -588,7 +615,7 @@ For complete documentation and additional examples please see: https://marketing
       "vars": {
         "site_token": "amp-test17",
         "event_name": "amp-test-pageview"
-      }, 
+      },
       "extraUrlParams": {
         "prop1": "value1",
         "prop2": "value2"
