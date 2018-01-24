@@ -83,7 +83,7 @@
     "gulp-ava": "0.18.0",
     "gulp-batch-replace": "0.0.0",
     "gulp-closure-compiler": "0.4.0",
-    "gulp-eslint": "4.0.1",
+    "gulp-eslint": "4.0.2",
     "gulp-exec": "3.0.1",
     "gulp-file": "0.4.0",
     "gulp-git": "2.5.0",
