@@ -642,7 +642,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   stopListeningToVideoEvents_() {
     this.unlisteners_.forEach(unlisten => unlisten());
-    this.unlisteners_.length = 0;
+    this.unlisteners_ = [];
   }
 
 
