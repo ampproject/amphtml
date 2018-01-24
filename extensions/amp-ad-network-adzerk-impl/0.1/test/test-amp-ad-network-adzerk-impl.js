@@ -130,7 +130,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
           {
             get: name => {
               expect(name).to.equal(AMP_TEMPLATED_CREATIVE_HEADER_NAME);
-              return 'true';
+              return 'amp-mustache';
             },
           },
           () => {})

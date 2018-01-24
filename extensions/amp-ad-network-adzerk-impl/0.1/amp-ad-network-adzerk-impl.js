@@ -107,7 +107,7 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
 
   /** @override */
   maybeValidateAmpCreative(bytes, headers) {
-    if (headers.get(AMP_TEMPLATED_CREATIVE_HEADER_NAME) !== 'true') {
+    if (headers.get(AMP_TEMPLATED_CREATIVE_HEADER_NAME) !== 'amp-mustache') {
       return /**@type {!Promise<(ArrayBuffer|null)>}*/ (Promise.resolve(null));
     }
     // Shorthand for: reject promise if current promise chain is out of date.
