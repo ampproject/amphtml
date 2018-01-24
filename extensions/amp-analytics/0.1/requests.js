@@ -118,7 +118,7 @@ export class RequestHandler {
         (trigger['immediate'] === true) || (this.maxDelay_ == 0);
 
     const filters = this.variableService_.getFilters();
-    const bindings = {...dynamicBindings, ...filters};
+    const bindings = Object.assign({}, dynamicBindings, filters);
 
     if (!this.baseUrlPromise_) {
       expansionOption.freezeVar('extraUrlParams');
