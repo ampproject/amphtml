@@ -396,14 +396,6 @@ export class AmpA4A extends AMP.BaseElement {
     return this.isRelayoutNeededFlag;
   }
 
-  /**
-   * @return {!Promise<boolean>} promise blocked on ad promise whose result is
-   *    whether creative returned is validated as AMP.
-   */
-  isVerifiedAmpCreativePromise() {
-    return this.adPromise_.then(() => this.isVerifiedAmpCreative_);
-  }
-
   /** @override */
   buildCallback() {
     this.creativeSize_ = {
@@ -1005,7 +997,7 @@ export class AmpA4A extends AMP.BaseElement {
       }
       if (!creativeMetaData) {
         // Non-AMP creative case, will verify ad url existence.
-        return this.renderNonAmpCreative_();
+        return this.renderNonAmpCreative();
       }
       // Must be an AMP creative.
       return this.renderAmpCreative_(creativeMetaData)
@@ -1016,7 +1008,7 @@ export class AmpA4A extends AMP.BaseElement {
             user().error(TAG, this.element.getAttribute('type'),
                 'Error injecting creative in friendly frame', err);
             this.promiseErrorHandler_(err);
-            return this.renderNonAmpCreative_();
+            return this.renderNonAmpCreative();
           });
     }).catch(error => {
       this.promiseErrorHandler_(error);
@@ -1280,10 +1272,11 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Render non-AMP creative within cross domain iframe.
+   * @param {boolean=} throttleApplied Whether incrementLoadingAds has already
+   *    been called
    * @return {Promise<boolean>} Whether the creative was successfully rendered.
-   * @private
    */
-  renderNonAmpCreative_() {
+  renderNonAmpCreative(throttleApplied) {
     if (this.element.getAttribute('disable3pfallback') == 'true') {
       user().warn(TAG, this.element.getAttribute('type'),
           'fallback to 3p disabled');
@@ -1312,7 +1305,9 @@ export class AmpA4A extends AMP.BaseElement {
       user().warn(TAG, this.element.getAttribute('type'),
           'No creative or URL available -- A4A can\'t render any ad');
     }
-    incrementLoadingAds(this.win, renderPromise);
+    if (!throttleApplied) {
+      incrementLoadingAds(this.win, renderPromise);
+    }
     return renderPromise.then(
         result => {
           this.handleLifecycleStage_('crossDomainIframeLoaded');

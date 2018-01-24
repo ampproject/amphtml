@@ -27,7 +27,11 @@ import {
   DEFAULT_SAFEFRAME_VERSION,
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
-import {is3pThrottled} from '../../amp-ad/0.1/concurrent-load';
+import {
+  is3pThrottled,
+  waitFor3pThrottle,
+  incrementLoadingAds,
+} from '../../amp-ad/0.1/concurrent-load';
 import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
 import {
   experimentFeatureEnabled,
@@ -385,9 +389,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       return false;
     }
     this.isIdleRender_ = true;
+    // NOTE(keithwrightbos): handle race condition where previous
+    // idleRenderOutsideViewport marked slot as idle render despite never
+    // being schedule due to being beyond viewport max offset.  If slot
+    // comes within standard outside viewport range, then ensure throttling
+    // will not be applied.
+    this.getResource().whenWithinRenderOutsideViewport().then(
+        () => this.isIdleRender_ = false);
     return vpRange;
   }
-
   /** @override */
   isLayoutSupported(layout) {
     this.isFluid_ = layout == Layout.FLUID;
@@ -863,27 +873,29 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  layoutCallback() {
-    const registerFluidAndExec = () => {
-      if (this.isFluid_) {
-        this.registerListenerForFluid_();
-      }
-      return super.layoutCallback();
-    };
+  renderNonAmpCreative() {
+    // If render idle with throttling, impose one second render delay for
+    // non-AMP creatives.  This is not done in the scheduler to ensure as many
+    // slots as possible are marked for layout given scheduler imposes 5 seconds
+    // past previous execution.
     if (this.postAdResponseExperimentFeatures['render-idle-throttle'] &&
-        this.isIdleRender_) {
-      return this.isVerifiedAmpCreativePromise().then(verified => {
-        // Control concurrent loading of non-AMP creatives executed via
-        // idleRenderOutsideViewport as doing so within
-        // idleRenderOutsideViewport would impose at least 5 second delay due to
-        // scheduler constraints.
-        const throttleFn = () => !verified && is3pThrottled(this.win) ?
-          Services.timerFor(this.win).delay(throttleFn, 1000) :
-          registerFluidAndExec();
-        return throttleFn();
-      });
+          this.isIdleRender_) {
+      if (is3pThrottled(this.win)) {
+        return waitFor3pThrottle().then(() => super.renderNonAmpCreative());
+      } else {
+        incrementLoadingAds(this.win);
+        return super.renderNonAmpCreative(true);
+      }
     }
-    return registerFluidAndExec();
+    return super.renderNonAmpCreative();
+  }
+
+  /** @override */
+  layoutCallback() {
+    if (this.isFluid_) {
+      this.registerListenerForFluid_();
+    }
+    return super.layoutCallback();
   }
 
   /** @override  */
