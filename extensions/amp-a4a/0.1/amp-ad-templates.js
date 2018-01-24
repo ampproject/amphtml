@@ -47,7 +47,7 @@ export class AmpAdTemplates {
   /**
    * Fetch and parse template from AMP cache.  Result is stored in global in
    * order to reduce overhead when template is used multiple times.
-   * @param {string} templateUrl CDN Proxy URL to template.
+   * @param {string} templateUrl Canonical URL to template.
    * @return {!Promise<string>}
    */
   fetch(templateUrl) {

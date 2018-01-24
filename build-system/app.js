@@ -581,7 +581,7 @@ app.get('/a4a_template/*', (req, res) => {
       `0.1/data/${match[2]}.template`;
   fs.readFileAsync(filePath).then(file => {
     res.setHeader('Content-Type', 'application/json');
-    res.setHeader('AMP-template-amp-creative', 'true');
+    res.setHeader('AMP-template-amp-creative', 'amp-mustache');
     res.end(file);
   }).error(() => {
     res.status(404);
@@ -912,7 +912,7 @@ app.get('/adzerk/*', (req, res) => {
       pc.cwd() + '/extensions/amp-ad-network-adzerk-impl/0.1/data/' + match[1];
   fs.readFileAsync(filePath).then(file => {
     res.setHeader('Content-Type', 'application/json');
-    res.setHeader('AMP-template-amp-creative', 'true');
+    res.setHeader('AMP-template-amp-creative', 'amp-mustache');
     res.end(file);
   }).error(() => {
     res.status(404);
