@@ -58,6 +58,7 @@ const EXIT_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
 const MAX_TRANSITION_DURATION = 1000; // ms
 const MIN_TRANSITION_DURATION = 300; // ms
 const MAX_DISTANCE_APPROXIMATION = 250; // px
+const MOTION_DURATION_RATIO = 0.8; // fraction of animation
 
 /**
  * TODO(aghassemi): Make lightbox-manager into a doc-level service.
@@ -605,6 +606,12 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         opacity: 0,
         display: '',
       });
+
+      st.setStyles(dev().assertElement(this.carousel_), {
+        opacity: 0,
+        display: '',
+      });
+
       this.active_ = true;
 
       this.updateInViewport(dev().assertElement(this.container_), true);
@@ -660,7 +667,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       // Lightbox background fades in.
       anim.add(0, tr.setStyles(this.element, {
         opacity: tr.numeric(0, 1),
-      }), 0.6, ENTER_CURVE_);
+      }), MOTION_DURATION_RATIO, ENTER_CURVE_);
 
       // Try to transition from the source image.
       if (this.sourceElement_ && isLoaded(this.sourceElement_)) {
@@ -695,18 +702,17 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
         duration = this.getTransitionDuration_(dy);
 
-        // Duration will be somewhere between 0.2 and 0.8 depending on how far
-        // the image needs to move.
-        const motionTime = Math.max(
-            0.2,
-            Math.min(0.8, Math.abs(dy) / MAX_DISTANCE_APPROXIMATION * 0.8)
-        );
+        anim.add(MOTION_DURATION_RATIO - 0.01,
+            tr.setStyles(dev().assertElement(this.carousel_), {
+              opacity: tr.numeric(0, 1),
+            }), 0.01);
+
         anim.add(0, tr.setStyles(clone, {
           transform: tr.concat([
             tr.translate(tr.numeric(0, dx), tr.numeric(0, dy)),
             tr.scale(tr.numeric(1, scaleX)),
           ]),
-        }), motionTime, ENTER_CURVE_);
+        }), MOTION_DURATION_RATIO, ENTER_CURVE_);
 
         // At the end, fade out the transition image.
         anim.add(0.9, tr.setStyles(transLayer, {
@@ -718,6 +724,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         return this.vsync_.mutatePromise(() => {
           st.setStyles(this.element, {opacity: ''});
           st.setStyles(dev().assertElement(this.carousel_), {opacity: ''});
+
           if (transLayer) {
             this.element.ownerDocument.body.removeChild(transLayer);
           }
@@ -762,10 +769,13 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         });
         transLayer.appendChild(clone);
 
-        // Fade out the container.
-        anim.add(0, tr.setStyles(dev().assertElement(this.container_), {
+        st.setStyles(dev().assertElement(this.carousel_), {
+          opacity: 0,
+        });
+
+        anim.add(0, tr.setStyles(dev().assertElement(this.element), {
           opacity: tr.numeric(1, 0),
-        }), 0.1, EXIT_CURVE_);
+        }), MOTION_DURATION_RATIO, EXIT_CURVE_);
 
         // Move and resize the image back to where it is in the article.
         const dx = rect.left - imageBox.left;
@@ -779,20 +789,15 @@ export class AmpLightboxViewer extends AMP.BaseElement {
           ]),
         });
 
-        // Duration will be somewhere between 0.2 and 0.8 depending on how far
-        // the image needs to move. Start the motion later too, but no later
-        // than 0.2.
-        const motionTime = Math.max(0.2,
-            Math.min(0.8, Math.abs(dy) / MAX_DISTANCE_APPROXIMATION * 0.8));
-        anim.add(Math.min(0.8 - motionTime, 0.2), (time, complete) => {
+        anim.add(0, (time, complete) => {
           moveAndScale(time);
           if (complete) {
             this.sourceElement_.classList.remove('i-amphtml-ghost');
           }
-        }, motionTime, EXIT_CURVE_);
+        }, MOTION_DURATION_RATIO, EXIT_CURVE_);
 
         // Fade out the transition image.
-        anim.add(0.8, tr.setStyles(transLayer, {
+        anim.add(MOTION_DURATION_RATIO, tr.setStyles(transLayer, {
           opacity: tr.numeric(1, 0.01),
         }), 0.2, EXIT_CURVE_);
 
@@ -807,7 +812,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
           st.setStyles(this.element, {
             opacity: '',
           });
-          st.setStyles(dev().assertElement(this.container_), {opacity: ''});
+          st.setStyles(dev().assertElement(this.carousel_), {
+            opacity: '',
+          });
           if (transLayer) {
             this.element.ownerDocument.body.removeChild(transLayer);
           }
