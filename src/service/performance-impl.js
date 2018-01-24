@@ -325,14 +325,16 @@ export class Performance {
     // Store certain page visibility metrics to be exposed as analytics variables.
     const storedVal = Math.round(opt_delta != null ? Math.max(opt_delta, 0)
 				 : value - this.initTime_);
-    if (label == 'fcp') {
-      this.firstContentfulPaint_ = storedVal;
-    }
-    if (label == 'pc') {
-      this.firstViewportReady_ = storedVal;
-    }
-    if (label == 'mbv') {
-      this.makeBodyVisible_ = storedVal;
+    switch (label) {
+      case 'fcp':
+        this.firstContentfulPaint_ = storedVal;
+        break;
+      case 'pc':
+        this.firstViewportReady_ = storedVal;
+        break;
+      case 'mbv':
+        this.makeBodyVisible_ = storedVal;
+        break;
     }
   }
 
