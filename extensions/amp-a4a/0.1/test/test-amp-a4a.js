@@ -495,7 +495,7 @@ describe('amp-a4a', () => {
       const layoutCallbackPromise = a4a.layoutCallback();
       a4a.unlayoutCallback();
       const renderNonAmpCreativeSpy = sandbox.spy(
-          AmpA4A.prototype, 'renderNonAmpCreative_');
+          AmpA4A.prototype, 'renderNonAmpCreative');
       promiseResolver();
       layoutCallbackPromise.then(() => {
         // We should never get in here.
@@ -827,13 +827,13 @@ describe('amp-a4a', () => {
         doc.head.appendChild(s);
         const a4a = new MockA4AImpl(a4aElement);
         const renderNonAmpCreativeSpy =
-          sandbox.spy(a4a, 'renderNonAmpCreative_');
+          sandbox.spy(a4a, 'renderNonAmpCreative');
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.ok;
         return a4a.layoutCallback().then(() => {
           expect(renderNonAmpCreativeSpy.calledOnce,
-              'renderNonAmpCreative_ called exactly once').to.be.true;
+              'renderNonAmpCreative called exactly once').to.be.true;
           a4a.unlayoutCallback();
           getResourceStub.returns({
             'hasBeenMeasured': () => true,
@@ -888,13 +888,13 @@ describe('amp-a4a', () => {
         doc.head.appendChild(s);
         const a4a = new MockA4AImpl(a4aElement);
         const renderNonAmpCreativeSpy =
-          sandbox.spy(a4a, 'renderNonAmpCreative_');
+          sandbox.spy(a4a, 'renderNonAmpCreative');
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.ok;
         return a4a.layoutCallback().then(() => {
           expect(renderNonAmpCreativeSpy.calledOnce,
-              'renderNonAmpCreative_ called exactly once').to.be.true;
+              'renderNonAmpCreative called exactly once').to.be.true;
           a4a.unlayoutCallback();
           const onLayoutMeasureSpy = sandbox.spy(a4a, 'onLayoutMeasure');
           getResourceStub.returns({'hasBeenMeasured': () => false});
