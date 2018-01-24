@@ -173,6 +173,10 @@ Must contain the fully-qualified URL of the Pinterest resource to be shown as a 
 data-url="https://www.pinterest.com/pin/99360735500167749/"
 ```
 
+##### alt
+
+This property like the the `alt` attribute on an `<img>` tag specifies the alternate text. If not provided it will be infered from the pin data provided by the Pinterest API.
+
 ## Validation
 
 See [amp-pinterest rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/validator-amp-pinterest.protoascii) in the AMP validator specification.
