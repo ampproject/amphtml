@@ -813,7 +813,7 @@ amp-story-page {
 }
 
 /** Overlay that blocks viewing during initial load */
-amp-story[standalone]::after {
+.i-amphtml-embedded amp-story[standalone]::after {
   background-color: #fff !important;
   bottom: 0 !important;
   content: ' ' !important;
