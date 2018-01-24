@@ -91,6 +91,20 @@ const DESKTOP_HEIGHT_THRESHOLD = 550;
 /** @private @const {number} */
 const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
 
+/**
+ * The duration of time (in milliseconds) to wait for a page to be loaded,
+ * before the story becomes visible.
+ * @const {number}
+ */
+const PAGE_LOAD_TIMEOUT_MS = 5000;
+
+
+/**
+ * CSS class for an amp-story that indicates the initial load for the story has
+ * completed.
+ * @const {string}
+ */
+const STORY_LOADED_CLASS_NAME = 'i-amphtml-story-loaded';
 
 /** @const {!Object<string, number>} */
 const MAX_MEDIA_ELEMENT_COUNTS = {
@@ -226,6 +240,9 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {!MediaPool} */
     this.mediaPool_ = new MediaPool(this.win, MAX_MEDIA_ELEMENT_COUNTS,
         element => this.getElementDistanceFromActivePage_(element));
+
+    /** @private @const {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(this.win);
   }
 
 
@@ -234,11 +251,14 @@ export class AmpStory extends AMP.BaseElement {
     this.assertAmpStoryExperiment_();
 
     if (this.element.hasAttribute(AMP_STORY_STANDALONE_ATTRIBUTE)) {
-      this.getAmpDoc().win.document.documentElement.classList
-          .add('i-amphtml-story-standalone');
-
-      // Lock body to prevent overflow.
-      this.lockBody_();
+      const html = this.win.document.documentElement;
+      this.mutateElement(() => {
+        html.classList.add('i-amphtml-story-standalone');
+        // Lock body to prevent overflow.
+        this.lockBody_();
+        // Standalone CSS affects sizing of the entire page.
+        this.onResize();
+      }, html);
     }
 
     this.initializeListeners_();
@@ -359,6 +379,11 @@ export class AmpStory extends AMP.BaseElement {
       } else if (direction === TapNavigationDirection.PREVIOUS) {
         this.previous_();
       }
+
+      // We do this after navigation, because we do not want to block navigation
+      // on an asynchronous call.  Blessing can also fail, so we do not want to
+      // risk that either.  Otherwise, this can cause #12966.
+      this.mediaPool_.blessAll();
     });
 
     const gestures = Gestures.get(this.element,
@@ -382,7 +407,6 @@ export class AmpStory extends AMP.BaseElement {
 
     this.boundOnResize_ = debounce(this.win, () => this.onResize(), 300);
     this.getViewport().onResize(this.boundOnResize_);
-    this.onResize();
   }
 
   /** @private */
@@ -490,7 +514,7 @@ export class AmpStory extends AMP.BaseElement {
       this.buildPaginationButtons_();
     }
 
-    return this.initializePages_()
+    const storyLayoutPromise = this.initializePages_()
         .then(() => this.buildSystemLayer_())
         .then(() => this.buildHintLayer_())
         .then(() => {
@@ -500,6 +524,42 @@ export class AmpStory extends AMP.BaseElement {
         })
         .then(() => this.switchTo_(firstPageEl.id))
         .then(() => this.preloadPagesByDistance_());
+
+    // Do not block the layout callback on the completion of these promises, as
+    // that prevents descendents from being laid out (and therefore loaded).
+    storyLayoutPromise.then(() => this.whenPagesLoaded_(PAGE_LOAD_TIMEOUT_MS))
+        .then(() => this.markStoryAsLoaded_());
+
+    return storyLayoutPromise;
+  }
+
+
+  /**
+   * @param {number} timeoutMs The maximum amount of time to wait, in
+   *     milliseconds.
+   * @return {!Promise} A promise that is resolved when the page is loaded or
+   *     the timeout has been exceeded, whichever happens first.
+   * @private
+   */
+  whenPagesLoaded_(timeoutMs = 0) {
+    const pagesToWaitFor = this.isDesktop_() ?
+      [this.pages_[0], this.pages_[1]] :
+      [this.pages_[0]];
+
+    const storyLoadPromise = Promise.all(
+        pagesToWaitFor.map(page => page.whenLoaded()));
+
+    return this.timer_.timeoutPromise(timeoutMs, storyLoadPromise)
+        .catch(() => {});
+  }
+
+
+  /** @private */
+  markStoryAsLoaded_() {
+    dispatch(this.element, EventType.STORY_LOADED, true);
+    this.mutateElement(() => {
+      this.element.classList.add(STORY_LOADED_CLASS_NAME);
+    });
   }
 
 
@@ -507,7 +567,6 @@ export class AmpStory extends AMP.BaseElement {
   isLayoutSupported(layout) {
     return layout == Layout.CONTAINER;
   }
-
 
   /** @override */
   prerenderAllowed() {

@@ -275,6 +275,18 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/6469',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12267',
   },
+  {
+    id: 'url-replacement-v2',
+    name: 'new parsing engine for url variables',
+    spec: 'https://github.com/ampproject/amphtml/issues/12119',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
+  },
+  {
+    id: 'disable-amp-story-hls',
+    name: 'Disables usage of HTTP Live Streaming (HLS) within amp-story',
+    spec: 'https://github.com/ampproject/amphtml/issues/12965',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12978',
+  },
 ];
 
 if (getMode().localDev) {
