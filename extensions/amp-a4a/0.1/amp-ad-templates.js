@@ -17,9 +17,7 @@
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {getAmpdoc} from '../../../src/service';
 import {LRUCache} from '../../../src/utils/lru-cache';
-import {Bind} from '../../amp-bind/0.1/bind-impl';
 
 /** @private {!Object<string, string|boolean>} */
 const TEMPLATE_CORS_CONFIG = {
@@ -68,15 +66,10 @@ export class AmpAdTemplates {
   /**
    * @param {!JsonObject} templateValues The values to macro in.
    * @param {!Element} element Parent element containing template.
-   * @return {!Promise} Promise which resolves after rendering completes.The
-   *   return value is mainly used for testing.
+   * @return {!Promise<!Element>} Promise which resolves after rendering completes.
    */
   render(templateValues, element) {
-    const win = element.ownerDocument.defaultView;
-    if (win) {
-      const bind = new Bind(getAmpdoc(element), win);
-      return bind.setState(templateValues);
-    }
-    return Promise.resolve(null);
+    return Services.templatesFor(this.win_)
+        .findAndRenderTemplate(element, templateValues);
   }
 }

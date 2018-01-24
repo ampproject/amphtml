@@ -1,5 +1,5 @@
 {
-  "ampCreativeTemplateId": 456,
+  "ampCreativeTemplateUrl": "456",
   "templateMacroValues": {
     "USER_NAME": "bar",
     "USER_NUM": 1234,

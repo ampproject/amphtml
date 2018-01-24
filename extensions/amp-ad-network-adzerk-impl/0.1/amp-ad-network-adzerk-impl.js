@@ -164,7 +164,11 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
     if (this.ampCreativeJson_ && this.ampCreativeJson_.templateMacroValues) {
       ampAdTemplates.render(
           this.ampCreativeJson_.templateMacroValues,
-          this.iframe.contentWindow.document.body);
+          this.iframe.contentWindow.document.body)
+          .then(renderedElement => {
+            this.iframe.contentWindow.document.body./*OK*/innerHTML =
+                renderedElement./*OK*/innerHTML;
+          });
     }
   }
 }

@@ -15,6 +15,7 @@
  */
 
 import {AmpAdTemplates} from '../amp-ad-templates';
+import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
 import {Xhr} from '../../../../src/service/xhr-impl';
 
 
@@ -51,12 +52,14 @@ describes.fakeWin('amp-ad-templates', {amp: true}, env => {
   });
 
   it('should render a template with correct values', () => {
+    win.AMP.registerTemplate('amp-mustache', AmpMustache);
     const parentDiv = doc.createElement('div');
-    parentDiv./*OK*/innerHTML = '<p [text]="foo"></p>';
+    parentDiv./*OK*/innerHTML =
+        '<template type="amp-mustache"><p>{{foo}}</p></template>';
     doc.body.appendChild(parentDiv);
-    ampAdTemplates.render({foo: 'bar'}, parentDiv).then(result => {
+    return ampAdTemplates.render({foo: 'bar'}, parentDiv).then(result => {
       expect(result).to.not.be.null;
-      expect(parentDiv./*OK*/innerHTML).to.equal('');
+      expect(result./*OK*/innerHTML).to.equal('bar');
     });
   });
 
