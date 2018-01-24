@@ -88,6 +88,12 @@ const TRUSTED_REFERRER_HOSTS = [
 ];
 
 /**
+ * @typedef {function(*):(!Promise<*>|undefined)}
+ */
+export let RequestResponder;
+
+
+/**
  * An AMP representation of the Viewer. This class doesn't do any work itself
  * but instead delegates everything to the actual viewer. This class and the
  * actual Viewer are connected via "AMP.viewer" using three methods:
@@ -130,6 +136,9 @@ export class Viewer {
 
     /** @private {!Object<string, !Observable<!JsonObject>>} */
     this.messageObservables_ = map();
+
+    /** @private {!Object<string, !RequestResponder>} */
+    this.messageResponders_ = map();
 
     /** @private {!Observable<boolean>} */
     this.runtimeOnObservable_ = new Observable();
@@ -804,6 +813,21 @@ export class Viewer {
   }
 
   /**
+   * Adds a eventType listener for viewer events.
+   * @param {string} eventType
+   * @param {!RequestResponder} responder
+   * @return {!UnlistenDef}
+   */
+  onMessageRespond(eventType, responder) {
+    this.messageResponders_[eventType] = responder;
+    return () => {
+      if (this.messageResponders_[eventType] === responder) {
+        delete this.messageResponders_[eventType];
+      }
+    };
+  }
+
+  /**
    * Requests AMP document to receive a message from Viewer.
    * @param {string} eventType
    * @param {!JsonObject} data
@@ -828,6 +852,11 @@ export class Viewer {
     const observable = this.messageObservables_[eventType];
     if (observable) {
       observable.fire(data);
+    }
+    const responder = this.messageResponders_[eventType];
+    if (responder) {
+      return responder(data);
+    } else if (observable) {
       return Promise.resolve();
     }
     dev().fine(TAG_, 'unknown message:', eventType);
