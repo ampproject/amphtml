@@ -64,6 +64,9 @@ tags: {  # <amp-state>
     mandatory: true
   }
   attrs: {
+    name: "overridable"
+  }
+  attrs: {
     name: "src"
     value_url: {
       allowed_protocol: "https"
