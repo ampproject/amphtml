@@ -437,7 +437,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     const TAG = this.getName_();
     dev().fine(TAG, 'Fetching remote config', remoteConfigUrl);
     const fetchConfig = {
-      ampCors: false,
+      requireAmpResponseSourceOrigin: false,
     };
     if (this.element.hasAttribute('data-credentials')) {
       fetchConfig.credentials = this.element.getAttribute('data-credentials');
