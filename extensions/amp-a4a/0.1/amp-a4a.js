@@ -942,7 +942,6 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.isRefreshing) {
       this.destroyFrame(true);
     }
-    user().info(TAG, `layoutCallback ${Date.now()}`);
     return this.attemptToRenderCreative();
   }
 
@@ -1267,7 +1266,6 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {Promise<boolean>} Whether the creative was successfully rendered.
    */
   renderNonAmpCreative(throttleApplied) {
-    user().info(TAG, `renderNonAmpCreative start ${Date.now()}`);
     if (this.element.getAttribute('disable3pfallback') == 'true') {
       user().warn(TAG, this.element.getAttribute('type'),
           'fallback to 3p disabled');
