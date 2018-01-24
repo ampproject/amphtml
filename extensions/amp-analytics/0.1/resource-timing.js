@@ -17,8 +17,7 @@
 import {user} from '../../../src/log';
 import {isObject} from '../../../src/types';
 import {parseUrl} from '../../../src/url';
-import {find} from '../../../src/utils/array';
-
+import {findIndex} from '../../../src/utils/array';
 import {ExpansionOptions, variableServiceFor} from './variables';
 
 /**
@@ -149,12 +148,12 @@ function nameForEntry(entry, resourcesByHost) {
     if (!hostPattern.test(url.host)) {
       continue;
     }
-    const resource = find(
+    const index = findIndex(
         resources,
         res => res.pathPattern.test(url.pathname) &&
             res.queryPattern.test(url.search));
-    if (resource) {
-      return resource.name;
+    if (index != -1) {
+      return resources[index].name;
     }
   }
   return null; // No match.
