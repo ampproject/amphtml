@@ -66,8 +66,8 @@ describes.realWin('Requests', {amp: 1}, env => {
         const r = {'baseUrl': 'r1'};
         const handler = new RequestHandler(ampdoc, r, preconnect, spy, false);
         const expansionOptions = new ExpansionOptions({});
-        handler.send({}, {}, expansionOptions);
-        handler.send({}, {}, expansionOptions);
+        handler.send({}, {}, expansionOptions, {});
+        handler.send({}, {}, expansionOptions, {});
         yield macroTask();
         expect(spy).to.be.calledTwice;
       });
@@ -82,9 +82,9 @@ describes.realWin('Requests', {amp: 1}, env => {
         const handler2 =
             new RequestHandler(ampdoc, r2, preconnect, h2Spy, false);
         const expansionOptions = new ExpansionOptions({});
-        handler1.send({}, {}, expansionOptions);
-        handler1.send({}, {}, expansionOptions);
-        handler2.send({}, {}, expansionOptions);
+        handler1.send({}, {}, expansionOptions, {});
+        handler1.send({}, {}, expansionOptions, {});
+        handler2.send({}, {}, expansionOptions, {});
         yield macroTask();
         expect(h1Spy).to.be.calledTwice;
         clock.tick(999);
@@ -100,10 +100,10 @@ describes.realWin('Requests', {amp: 1}, env => {
         const r = {'baseUrl': 'r2', 'maxDelay': 1};
         const handler = new RequestHandler(ampdoc, r, preconnect, spy, false);
         const expansionOptions = new ExpansionOptions({});
-        handler.send({}, {}, expansionOptions);
-        handler.send({}, {}, expansionOptions);
+        handler.send({}, {}, expansionOptions, {});
+        handler.send({}, {}, expansionOptions, {});
         clock.tick(500);
-        handler.send({}, {}, expansionOptions);
+        handler.send({}, {}, expansionOptions, {});
         clock.tick(500);
         yield macroTask();
         expect(spy).to.be.calledOnce;
@@ -114,7 +114,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         const handler =
             new RequestHandler(ampdoc, r, preconnect, sandbox.spy(), false);
         const expansionOptions = new ExpansionOptions({'test': 'expanded'});
-        handler.send({}, {}, expansionOptions);
+        handler.send({}, {}, expansionOptions, {});
         yield macroTask();
         expect(preconnectSpy).to.be.calledWith(
             'r2?cid=CLIENT_ID(scope)&var=expanded');
@@ -129,8 +129,8 @@ describes.realWin('Requests', {amp: 1}, env => {
         const r = {'baseUrl': 'r1', 'maxDelay': 1};
         const handler = new RequestHandler(ampdoc, r, preconnect, spy, false);
         const expansionOptions = new ExpansionOptions({});
-        handler.send({'e1': 'e1'}, {}, expansionOptions);
-        handler.send({'e1': 'e1'}, {}, expansionOptions);
+        handler.send({'e1': 'e1'}, {}, expansionOptions, {});
+        handler.send({'e1': 'e1'}, {}, expansionOptions, {});
         clock.tick(1000);
         yield macroTask();
         expect(spy).to.be.calledOnce;
@@ -147,8 +147,9 @@ describes.realWin('Requests', {amp: 1}, env => {
             'e1': 'e1',
             'e2': '${v2}', // check vars are used and not double encoded
           },
-        }, expansionOptions);
-        handler.send({}, {'extraUrlParams': {'e1': 'e1'}}, expansionOptions);
+        }, expansionOptions, {});
+        handler.send(
+            {}, {'extraUrlParams': {'e1': 'e1'}}, expansionOptions, {});
         clock.tick(1000);
         yield macroTask();
         expect(spy).to.be.calledOnce;
@@ -160,8 +161,10 @@ describes.realWin('Requests', {amp: 1}, env => {
         const r = {'baseUrl': 'r1&${extraUrlParams}&r2', 'maxDelay': 1};
         const handler = new RequestHandler(ampdoc, r, preconnect, spy, false);
         const expansionOptions = new ExpansionOptions({});
-        handler.send({}, {'extraUrlParams': {'e1': 'e1'}}, expansionOptions);
-        handler.send({}, {'extraUrlParams': {'e2': 'e2'}}, expansionOptions);
+        handler.send(
+            {}, {'extraUrlParams': {'e1': 'e1'}}, expansionOptions, {});
+        handler.send(
+            {}, {'extraUrlParams': {'e2': 'e2'}}, expansionOptions, {});
         clock.tick(1000);
         yield macroTask();
         expect(spy).to.be.calledOnce;
@@ -272,6 +275,35 @@ describes.realWin('Requests', {amp: 1}, env => {
         },
         'foobar': {},
       },
+    });
+  });
+
+  it('should replace dynamic bindings', function() {
+    const spy = sandbox.spy();
+    const r = {'baseUrl': 'r1&${extraUrlParams}&BASE_VALUE', 'maxDelay': 1};
+    const handler = new RequestHandler(ampdoc, r, preconnect, spy, false);
+    const expansionOptions = new ExpansionOptions({
+      'param1': 'PARAM_1',
+      'param2': 'PARAM_2',
+      'param3': 'PARAM_3',
+    });
+    const bindings = {
+      'PARAM_1': 'val1',
+      'PARAM_2': () => 'val2',
+      'PARAM_3': Promise.resolve('val3'),
+      'BASE_VALUE': 'val_base',
+    };
+    const params = {
+      'extraUrlParams': {
+        'key1': '${param1}',
+        'key2': '${param2}',
+        'key3': '${param3}',
+      },
+    };
+    handler.send({}, params, expansionOptions, bindings).then(() => {
+      expect(spy).to.be.calledOnce;
+      expect(spy.args[0][0]).to.equal(
+          'r1&val_base&key1=val1&key2=val2&key3=val3');
     });
   });
 });

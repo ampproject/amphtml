@@ -45,6 +45,7 @@ import {
   expandConfigRequest,
   RequestHandler,
 } from './requests';
+import {serializeResourceTiming} from './resource-timing';
 
 const TAG = 'amp-analytics';
 
@@ -688,6 +689,36 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
+   * @param {!JsonObject} trigger JSON config block that resulted in this event.
+   * @param {!ExpansionOptions} expansionOptions Expansion options.
+   * @return {!Object<string, (string|!Promise<string>|function(): string)>}
+   * @private
+   */
+  getDynamicVariableBindings_(trigger, expansionOptions) {
+    const dynamicBindings = {};
+    const resourceTimingSpec = trigger['resourceTimingSpec'];
+    if (resourceTimingSpec) {
+      const on = trigger['on'];
+      if (on == 'ini-load') {
+        const binding = 'RESOURCE_TIMING';
+        const analyticsVar = 'resourceTiming';
+        // TODO(warrengm): Consider limiting resource timings to avoid
+        // duplicates by excluding timings that were previously reported.
+        dynamicBindings[binding] =
+            serializeResourceTiming(resourceTimingSpec, this.win);
+        expansionOptions.vars[analyticsVar] = binding;
+      } else {
+        // TODO(warrengm): Instead of limiting resource timing to ini-load,
+        // analytics should have throttling or de-dupe timings that have already
+        // been reported.
+        user().warn(
+            TAG, 'resource timing is only allowed on ini-load triggers');
+      }
+    }
+    return dynamicBindings;
+  }
+
+  /**
    * @param {RequestHandler} request The request to process.
    * @param {!JsonObject} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
@@ -697,9 +728,12 @@ export class AmpAnalytics extends AMP.BaseElement {
   expandAndSendRequest_(request, trigger, event) {
     this.config_['vars']['requestCount']++;
     const expansionOptions = this.expansionOptions_(event, trigger);
+    const dynamicBindings =
+        this.getDynamicVariableBindings_(trigger, expansionOptions);
     //TODO: get rid of handleEvent promise eventually.
     return request.send(
-        this.config_['extraUrlParams'], trigger, expansionOptions);
+        this.config_['extraUrlParams'], trigger, expansionOptions,
+        dynamicBindings);
   }
 
   /**
