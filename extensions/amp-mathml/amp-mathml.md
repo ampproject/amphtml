@@ -68,5 +68,9 @@ This is an example of a formula placed  inline in the middle of a block of text.
 
 The formula to render.
 
+##### inline (optional)
+
+If specified, the component will render inline (`inline-block` in CSS).
+
 ## Validation
 See [amp-mathml rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mathml/validator-amp-mathml.protoascii) in the AMP validator specification.

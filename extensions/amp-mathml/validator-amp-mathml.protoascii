@@ -18,7 +18,7 @@ tags: {  # amp-mathml
   html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
-    name: "amp-html"
+    name: "amp-mathml"
     allowed_versions: "0.1"
     allowed_versions: "latest"
   }
@@ -30,7 +30,7 @@ tags: {  # <amp-mathml>
   tag_name: "AMP-MATHML"
   requires_extension: "amp-mathml"
   attrs: {
-    name: "formula"
+    name: "data-formula"
     mandatory: true
   }
   attrs: {
