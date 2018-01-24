@@ -1,0 +1,24 @@
+<!doctype html><html amp4ads><head><meta charset="utf-8"><script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+    <style amp4ads-boilerplate>body{visibility:hidden}</style>
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+  </head>
+  <body><template type="amp-mustache">
+    <a href={{url}} rel="nofollow" target="_blank">
+      <amp-img src={{externalUrl}} width="250px" height="150px" layout="responsive"></amp-img>
+    </a>
+    <script amp-ad-metadata type=application/json>
+    {
+      "ampRuntimeUtf16CharOffsets" : [ 57, 127 ],
+      "customElementExtensions": [
+        "amp-bind"
+      ],
+      "extensions": [
+        {
+          "custom-element": "amp-bind",
+          "src": "https://cdn.ampproject.org/v0/amp-bind-0.1.js"
+        }
+      ]
+    }
+    </script>
+    </template></body>
+</html>

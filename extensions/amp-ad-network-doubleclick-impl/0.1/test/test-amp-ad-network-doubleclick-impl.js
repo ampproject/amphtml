@@ -832,7 +832,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         impl.element.setAttribute('width', width);
         return Promise.resolve();
       });
-      sandbox.stub(impl, 'getAmpAdMetadata_').callsFake(() => {
+      sandbox.stub(impl, 'getAmpAdMetadata').callsFake(() => {
         return {
           customElementExtensions: [],
           minifiedCreative: '<html><body>Hello, World!</body></html>',
