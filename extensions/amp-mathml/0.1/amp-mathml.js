@@ -17,6 +17,7 @@ import {Layout} from '../../../src/layout';
 import {getIframe} from '../../../src/3p-frame';
 import {removeElement} from '../../../src/dom';
 import {listenFor} from '../../../src/iframe-helper';
+import {setStyles} from '../../../src/style';
 import {CSS} from '../../../build/amp-mathml-0.1.css';
 
 export class AmpMathml extends AMP.BaseElement {
@@ -33,6 +34,21 @@ export class AmpMathml extends AMP.BaseElement {
     this.preconnect.url('https://cdnjs.cloudflare.com');
   }
 
+  buildCallback() {
+    // Make the element minimally displayed to make sure that `layoutCallback`
+    // is called.
+    let sizingWidth;
+    if (this.element.hasAttribute('inline')) {
+      sizingWidth = '1px';
+    }
+    this.mutateElement(() => {
+      setStyles(this.element, {
+        width: sizingWidth,
+        height: '1rem',
+      });
+    });
+
+  }
   layoutCallback() {
     const iframe = getIframe(this.win, this.element, 'mathml');
     this.applyFillContent(iframe);
@@ -62,9 +78,7 @@ export class AmpMathml extends AMP.BaseElement {
   isLayoutSupported(layout) {
     return layout == Layout.CONTAINER;
   }
-
 }
-
 
 AMP.extension('amp-mathml', '0.1', AMP => {
   AMP.registerElement('amp-mathml', AmpMathml, CSS);
