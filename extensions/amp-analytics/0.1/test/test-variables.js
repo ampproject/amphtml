@@ -137,7 +137,6 @@ describe('amp-analytics.VariableService', function() {
       toggleExperiment(env.win, 'url-replacement-v2', true);
       ampdoc = env.ampdoc;
       urlReplacementService = Services.urlReplacementsForDoc(ampdoc);
-      sandbox.stub(variables, 'isFilterExperimentOn_').callsFake(() => true);
     });
 
     function check(input, output) {
