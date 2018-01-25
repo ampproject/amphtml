@@ -35,7 +35,11 @@ import {map} from '../../../../src/utils/object';
 import {cidServiceForDocForTesting} from
   '../../../../src/service/cid-impl';
 import {Services} from '../../../../src/services';
-import {newPerformanceResourceTiming, newResourceTimingSpec} from './test-resource-timing';
+import {
+  newPerformanceResourceTiming,
+  newResourceTimingSpec,
+} from './test-resource-timing';
+import {macroTask} from '../../../../testing/yield';
 import * as log from '../../../../src/log';
 
 /* global require: false */
@@ -185,7 +189,7 @@ describes.realWin('amp-analytics', {
       describe('analytics vendor: ' + vendor, function() {
         for (const name in config.requests) {
           it('should produce request: ' + name +
-              '. If this test fails update vendor-requests.json', () => {
+              '. If this test fails update vendor-requests.json', function* () {
             const urlReplacements =
                 Services.urlReplacementsForDoc(ampdoc);
             const analytics = getAnalyticsTag(clearVendorOnlyConfig(config));
@@ -218,33 +222,42 @@ describes.realWin('amp-analytics', {
                 });
             analytics.createdCallback();
             analytics.buildCallback();
-            return analytics.layoutCallback().then(() => {
-              return analytics.handleEvent_({
-                request: name,
-              }, {
-                vars: Object.create(null),
-              }).then(urls => {
-                const url = urls[0];
-                const vendorData = VENDOR_REQUESTS[vendor];
-                if (!vendorData) {
-                  throw new Error('Add vendor ' + vendor +
-                      ' to vendor-requests.json');
-                }
-                const val = vendorData[name];
-                if (val == '<ignore for test>') {
-                  return;
-                }
-                if (val == null) {
-                  throw new Error('Define ' + vendor + '.' + name +
-                      ' in vendor-requests.json. Expected value: ' + url);
-                }
-                actualResults[vendor][name] = url;
-                // Write this out for easy copy pasting.
-                // top.document.documentElement.setAttribute('json',
-                //     JSON.stringify(actualResults, null, '  '));
-                expect(url).to.equal(val);
-              });
+            yield analytics.layoutCallback();
+
+            // Wait for event queue to clear and reset sendRequestSpy
+            // to avoid pageView pings.
+            yield macroTask();
+            sendRequestSpy.reset();
+
+
+            analytics.handleEvent_({
+              request: name,
+            }, {
+              vars: Object.create(null),
             });
+            yield macroTask();
+            expect(sendRequestSpy).to.be.calledOnce;
+            const url = sendRequestSpy.args[0][0];
+
+            expect(sendRequestSpy).to.be.calledOnce;
+            const vendorData = VENDOR_REQUESTS[vendor];
+            if (!vendorData) {
+              throw new Error('Add vendor ' + vendor +
+                  ' to vendor-requests.json');
+            }
+            const val = vendorData[name];
+            if (val == '<ignore for test>') {
+              return;
+            }
+            if (val == null) {
+              throw new Error('Define ' + vendor + '.' + name +
+                  ' in vendor-requests.json. Expected value: ' + url);
+            }
+            actualResults[vendor][name] = url;
+            // Write this out for easy copy pasting.
+            // top.document.documentElement.setAttribute('json',
+            //     JSON.stringify(actualResults, null, '  '));
+            expect(url).to.equal(val);
           });
         }
       });
