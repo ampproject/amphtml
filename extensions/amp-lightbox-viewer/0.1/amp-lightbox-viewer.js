@@ -339,25 +339,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     // text area is a div that does not contain descendant elements.
     this.descriptionTextArea_./*OK*/innerText = descText;
     if (!descText) {
-      this.descriptionBox_.classList.add('hide');
-    }
-  }
-
-  /**
-   * Toggle description box if it has text content
-   * @param {boolean=} opt_display
-   * @private
-   */
-  toggleDescriptionBox_(opt_display) {
-    this.updateDescriptionBox_();
-    dev().assert(this.descriptionBox_);
-    if (opt_display == undefined) {
-      opt_display = this.descriptionBox_.classList.contains('hide');
-    }
-    if (this.descriptionBox_.textContent) {
-      this.descriptionBox_.classList.toggle('hide', !opt_display);
-    } else {
-      this.descriptionBox_.classList.add('hide');
+      toggle(dev().assertElement(this.descriptionBox_), false);
     }
   }
 
@@ -366,6 +348,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   toggleDescriptionOverflow_() {
+    // TODO: if there is nothing to expand into, don't shim.
     if (this.descriptionBox_.classList.contains('standard')) {
       const measureBeforeExpandingDescTextArea = state => {
         state.prevDescTextAreaHeight =
@@ -445,19 +428,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
-   * Toggle lightbox top bar
-   * @param {boolean=} opt_display
-   * @private
-   */
-  toggleTopBar_(opt_display) {
-    dev().assert(this.topBar_);
-    if (opt_display == undefined) {
-      opt_display = this.topBar_.classList.contains('hide');
-    }
-    this.topBar_.classList.toggle('hide', !opt_display);
-  }
-
-  /**
    * Builds the top bar containing buttons and appends them to the container.
    * @private
    */
@@ -511,12 +481,15 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    */
   toggleControls_() {
     if (this.controlsMode_ == LightboxControlsModes.CONTROLS_HIDDEN) {
-      this.toggleDescriptionBox_(/* opt_display */true);
-      this.toggleTopBar_(/* opt_display */true);
+      toggle(dev().assertElement(this.topBar_), true);
+      if (!this.container_.hasAttribute('gallery-view')) {
+        this.updateDescriptionBox_();
+        toggle(dev().assertElement(this.descriptionBox_), true);
+      }
       this.controlsMode_ = LightboxControlsModes.CONTROLS_DISPLAYED;
     } else {
-      this.toggleDescriptionBox_(/* opt_display */false);
-      this.toggleTopBar_(/* opt_display */false);
+      toggle(dev().assertElement(this.descriptionBox_), false);
+      toggle(dev().assertElement(this.topBar_), false);
       this.controlsMode_ = LightboxControlsModes.CONTROLS_HIDDEN;
     }
   }
@@ -867,9 +840,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.cleanupEventListeners_();
 
     this.vsync_.mutate(() => {
-      // Reset the state of the description box
-      this.descriptionBox_.classList.remove('hide');
-
       // If there's gallery, set gallery to display none
       this.container_.removeAttribute('gallery-view');
 
@@ -921,7 +891,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.container_.setAttribute('gallery-view', '');
     this.topBar_.classList.add('fullscreen');
     toggle(dev().assertElement(this.carousel_), false);
-    this.toggleDescriptionBox_(false);
+    toggle(dev().assertElement(this.descriptionBox_), false);
   }
 
   /**
@@ -934,7 +904,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       this.topBar_.classList.remove('fullscreen');
     }
     toggle(dev().assertElement(this.carousel_), true);
-    this.toggleDescriptionBox_(true);
+    this.updateDescriptionBox_();
+    toggle(dev().assertElement(this.descriptionBox_), true);
   }
 
   /**
