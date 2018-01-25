@@ -161,21 +161,24 @@ describes.fakeWin('AccessService', {
     expect(service.pubOrigin_).to.match(/^http.*/);
   });
 
-  it('should register vendor', () => {
+  it('should find and register vendor', () => {
     const config = {
       'vendor': 'vendor1',
     };
     element.textContent = JSON.stringify(config);
     const accessService = new AccessService(ampdoc);
+    const source = accessService.getVendorSource('vendor1');
+    expect(source).to.equal(accessService.sources_[0]);
+
     class Vendor1 {};
     const vendor1 = new Vendor1();
-    accessService.registerVendor('vendor1', vendor1);
-    return accessService.sources_[0].adapter_.vendorPromise_.then(vendor => {
+    source.getAdapter().registerVendor(vendor1);
+    return source.adapter_.vendorPromise_.then(vendor => {
       expect(vendor).to.equal(vendor1);
     });
   });
 
-  it('should prohibit vendor registration for non-vendor config', () => {
+  it('should fail to find non-existent vendor', () => {
     const config = {
       'authorization': 'https://acme.com/a',
       'pingback': 'https://acme.com/p',
@@ -183,10 +186,8 @@ describes.fakeWin('AccessService', {
     };
     element.textContent = JSON.stringify(config);
     const accessService = new AccessService(ampdoc);
-    class Vendor1 {};
-    const vendor1 = new Vendor1();
     expect(() => {
-      accessService.registerVendor('vendor1', vendor1);
+      accessService.getVendorSource('vendor1');
     }).to.throw(/can only be used for "type=vendor"/);
   });
 

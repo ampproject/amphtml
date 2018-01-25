@@ -165,7 +165,7 @@ export class AccessService {
   }
 
   /**
-   * @return {!Array<AccessSource>}
+   * @return {!Array<!AccessSource>}
    * @private
    */
   parseConfig_() {
@@ -216,22 +216,26 @@ export class AccessService {
 
   /**
    * @param {string} name
-   * @param {!./access-vendor.AccessVendor} vendor
+   * @return {!AccessSource}
    */
-  registerVendor(name, vendor) {
+  getVendorSource(name) {
     for (let i = 0; i < this.sources_.length; i++) {
       const source = this.sources_[i];
       if (source.getType() == AccessType.VENDOR) {
         const vendorAdapter =
           /** @type {!./amp-access-vendor.AccessVendorAdapter} */ (
-            source.getAdapter());
-        vendorAdapter.registerVendor(name, vendor);
-        return;
+            source.getAdapter()
+          );
+        if (vendorAdapter.getVendorName() == name) {
+          return source;
+        }
       }
     }
     user().assert(false,
         'Access vendor "%s" can only be used for "type=vendor", but none found',
         name);
+    // Should not happen, just to appease type checking.
+    return this.sources_[0];
   }
 
   /**
@@ -282,7 +286,7 @@ export class AccessService {
       this.sources_[i].start();
     }
 
-    // Run authorization immediately
+    // Run authorization as soon as visible.
     this.runAuthorization_();
 
     // Wait for the "view" signal.
@@ -631,9 +635,11 @@ export class AccessService {
   /**
    * Expose the underlying AccessSource for use by laterpay.
    *
-   * @return {?AccessSource}
+   * @return {!AccessSource}
    */
   getSource(index) {
+    user().assert(index >= 0 && index < this.sources_.length,
+        'Invalid index: %d', index);
     return this.sources_[index];
   }
 

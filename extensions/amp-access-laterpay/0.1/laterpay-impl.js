@@ -99,13 +99,14 @@ export class LaterpayVendor {
 
   /**
    * @param {!../../amp-access/0.1/amp-access.AccessService} accessService
+   * @param {!../../amp-access/0.1/amp-access-source.AccessSource} accessSource
    */
-  constructor(accessService) {
+  constructor(accessService, accessSource) {
     /** @const */
     this.ampdoc = accessService.ampdoc;
 
-    /** @const @private {?../../amp-access/0.1/amp-access-source.AccessSource} */
-    this.accessSource_ = accessService.getSource(0);
+    /** @const @private {!../../amp-access/0.1/amp-access-source.AccessSource} */
+    this.accessSource_ = accessSource;
 
     /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc);

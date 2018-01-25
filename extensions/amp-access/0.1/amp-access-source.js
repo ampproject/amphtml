@@ -280,7 +280,7 @@ export class AccessSource {
   }
 
   /**
-   * Start authorization and sign in.
+   * Do some initial setup.
    */
   start() {
     dev().fine(TAG, 'config:', this.type_, this.loginConfig_,
@@ -291,9 +291,6 @@ export class AccessSource {
 
     // Start sign-in.
     this.signIn_.start();
-
-    // Start authorization XHR immediately.
-    this.runAuthorization();
   }
 
   /**

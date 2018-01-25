@@ -60,7 +60,7 @@ describes.fakeWin('LaterpayVendor', {
     articleTitle.textContent = 'test title';
     document.body.appendChild(articleTitle);
 
-    vendor = new LaterpayVendor(accessService);
+    vendor = new LaterpayVendor(accessService, accessSource);
     xhrMock = sandbox.mock(vendor.xhr_);
   });
 

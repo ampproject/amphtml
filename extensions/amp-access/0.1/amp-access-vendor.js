@@ -57,20 +57,21 @@ export class AccessVendorAdapter {
     });
   }
 
+  /** @return {string} */
+  getVendorName() {
+    return this.vendorName_;
+  }
+
   /** @override */
   getConfig() {
     return this.vendorConfig_;
   }
 
   /**
-   * @param {string} name
    * @param {!./access-vendor.AccessVendor} vendor
    */
-  registerVendor(name, vendor) {
+  registerVendor(vendor) {
     user().assert(this.vendorResolve_, 'Vendor has already been registered');
-    user().assert(name == this.vendorName_,
-        'Vendor "%s" doesn\'t match the configured vendor "%s"',
-        name, this.vendorName_);
     this.vendorResolve_(vendor);
     this.vendorResolve_ = null;
   }
