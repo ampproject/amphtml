@@ -92,6 +92,7 @@ amp-story[standalone]:fullscreen {
   padding: 4px 0 0 !important;
   box-sizing: border-box !important;
   transition: opacity 0.3s !important;
+  pointer-events: none !important;
 }
 
 .i-amphtml-story-bookend-active > .i-amphtml-story-system-layer {
@@ -101,6 +102,7 @@ amp-story[standalone]:fullscreen {
 .i-amphtml-story-ui-right {
   float: right !important;
   margin: 0 8px !important;
+  pointer-events: auto !important;
 }
 
 .i-amphtml-story-button {
