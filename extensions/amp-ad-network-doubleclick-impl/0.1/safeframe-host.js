@@ -18,9 +18,9 @@ let safeframeListenerCreated = false;
 const MESSAGE_FIELDS = {
   CHANNEL_NAME: 'c',
   SENTINEL: 'e',
-}
+};
 
-const TAG = "AMP DOUBLECLICK SAFEFRAME";
+const TAG = 'AMP DOUBLECLICK SAFEFRAME';
 
 /** @const {string} */
 export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
@@ -121,11 +121,11 @@ export class SafeframeApi {
 
   connectMessagingChannel(data) {
     dev().assert(this.baseInstance.iframe.contentWindow,
-                 'Frame contentWindow unavailable.');
+        'Frame contentWindow unavailable.');
     this.setupSafeframeApi();
     this.sendMessage(JSON.stringify(dict({
       'message': 'connect',
-      c: data[MESSAGE_FIELDS.CHANNEL_NAME]
+      c: data[MESSAGE_FIELDS.CHANNEL_NAME],
     })));
   }
 
@@ -155,9 +155,9 @@ export class SafeframeApi {
 
   sendGeom(changes) {
     const geomChanges = this.formatGeom(changes['changes'][0]);
-    newGeometry = JSON.stringify(geomChanges);
+    let newGeometry = JSON.stringify(geomChanges);
     const geomMessage = JSON.stringify({
-      s: "geometry_update",
+      s: 'geometry_update',
       p: JSON.stringify({
         newGeometry,
         uid: 1,
@@ -184,7 +184,7 @@ export class SafeframeApi {
         return percInView;
       }
     };
-    this.currentGeometry =   {
+    this.currentGeometry = {
       'windowCoords_t': changes.rootBounds.top,
       'windowCoords_r': changes.rootBounds.right,
       'windowCoords_b': changes.rootBounds.bottom,
@@ -199,13 +199,13 @@ export class SafeframeApi {
       'allowedExpansion_b': 1000,
       'allowedExpansion_l': 0,
       'xInView': percInView(changes.rootBounds.top,
-                            changes.rootBounds.bottom,
-                            changes.boundingClientRect.top,
-                            changes.boundingClientRect.bottom),
+          changes.rootBounds.bottom,
+          changes.boundingClientRect.top,
+          changes.boundingClientRect.bottom),
       'yInView': percInView(changes.rootBounds.left,
-                            changes.rootBounds.right,
-                            changes.boundingClientRect.left,
-                            changes.boundingClientRect.right),
+          changes.rootBounds.right,
+          changes.boundingClientRect.left,
+          changes.boundingClientRect.right),
     };
     console.log(JSON.stringify(this.currentGeometry));
     return this.currentGeometry;
@@ -241,7 +241,7 @@ export class SafeframeApi {
     const height = payload.expand_b - payload.expand_t;
     this.baseInstance.attemptChangeSize(height, width).catch(() => {});
     //this.baseInstance.handleResize_(width, height);
-    const p = {
+    const p = JSON.stringify({
       uid: 1,
       success: true,
       newGeometry: JSON.stringify(this.currentGeometry),
@@ -250,15 +250,15 @@ export class SafeframeApi {
       expand_r: this.currentGeometry.allowedExpansion_r,
       expand_l: this.currentGeometry.allowedExpansion_l,
       push: true,
-    };
-    const serviceName = 'expand_repsonse';
-    const channel = this.channelName;
+    });
+    const serviceName = 'expand_response';
     const endpointIdentity = 1;
     const message = {
-      c: channel,
-      p: p,
-      e: serviceName,
-    }
+      c: this.channel,
+      p,
+      s: serviceName,
+      e: endpointIdentity,
+    };
     this.baseInstance.iframe.contentWindow./*OK*/postMessage(
         JSON.stringify(message),
         SAFEFRAME_ORIGIN);
