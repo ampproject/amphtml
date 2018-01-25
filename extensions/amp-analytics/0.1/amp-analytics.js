@@ -443,7 +443,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     const ampdoc = this.getAmpDoc();
     return Services.urlReplacementsForDoc(this.element)
-        .expandAsync(remoteConfigUrl)
+        .expandUrlAsync(remoteConfigUrl)
         .then(expandedUrl => {
           remoteConfigUrl = expandedUrl;
           return Services.xhrFor(ampdoc.win).fetchJson(

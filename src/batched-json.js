@@ -32,18 +32,19 @@ import {getValueForExpr} from './json';
  */
 export function fetchBatchedJsonFor(ampdoc, element, opt_expr) {
   const url = assertHttpsUrl(element.getAttribute('src'), element);
-  return Services.urlReplacementsForDoc(ampdoc).expandAsync(url).then(src => {
-    const opts = {};
-    if (element.hasAttribute('credentials')) {
-      opts.credentials = element.getAttribute('credentials');
-    } else {
-      opts.requireAmpResponseSourceOrigin = false;
-    }
-    return Services.batchedXhrFor(ampdoc.win).fetchJson(src, opts);
-  }).then(res => res.json()).then(data => {
-    if (data == null) {
-      throw new Error('Response is undefined.');
-    }
-    return getValueForExpr(data, opt_expr || '.');
-  });
+  return Services.urlReplacementsForDoc(ampdoc).expandUrlAsync(url)
+      .then(src => {
+        const opts = {};
+        if (element.hasAttribute('credentials')) {
+          opts.credentials = element.getAttribute('credentials');
+        } else {
+          opts.requireAmpResponseSourceOrigin = false;
+        }
+        return Services.batchedXhrFor(ampdoc.win).fetchJson(src, opts);
+      }).then(res => res.json()).then(data => {
+        if (data == null) {
+          throw new Error('Response is undefined.');
+        }
+        return getValueForExpr(data, opt_expr || '.');
+      });
 }
