@@ -243,10 +243,6 @@ export class VariableService {
   hashMacro_(value) {
     return Services.cryptoFor(this.win_).sha384Base64(value);
   }
-
-  isMacroExperimentOn_() {
-    return isExperimentOn(this.win_, 'variable-macros');
-  }
 }
 
 
