@@ -140,6 +140,77 @@ describe('Activity getTotalEngagedTime', () => {
     return expect(activity.viewer_).to.equal(viewer);
   });
 
+  it('should have 0 incremental engaged time if there is no activity', () => {
+    return expect(activity.getIncrementalEngagedTime('test')).to.equal(0);
+  });
+
+  it('should have 5 seconds of engaged time after viewer becomes' +
+     ' visible', () => {
+    whenFirstVisibleResolve();
+    return viewer.whenFirstVisible().then(() => {
+      clock.tick(10000);
+      return expect(activity.getIncrementalEngagedTime('test')).to.equal(5);
+    });
+  });
+
+  it('should have 4 seconds of engaged time 4 seconds after visible', () => {
+    whenFirstVisibleResolve();
+    return viewer.whenFirstVisible().then(() => {
+      clock.tick(4000);
+      return expect(activity.getIncrementalEngagedTime('test')).to.equal(4);
+    });
+  });
+
+  it('should have 10 seconds of engaged time', () => {
+    whenFirstVisibleResolve();
+    return viewer.whenFirstVisible().then(() => {
+      clock.tick(6000);
+      mousedownObservable.fire();
+      clock.tick(20000);
+      return expect(activity.getIncrementalEngagedTime('test')).to.equal(10);
+    });
+  });
+
+  it('should have the same engaged time in separate requests', () => {
+    whenFirstVisibleResolve();
+    return viewer.whenFirstVisible().then(() => {
+      clock.tick(3456);
+      mousedownObservable.fire();
+      clock.tick(10232);
+      const first = activity.getIncrementalEngagedTime('test');
+      clock.tick(25255);
+      return expect(activity.getIncrementalEngagedTime('test')).to.equal(first);
+    });
+  });
+
+  it('should not accumulate engaged time after inactivity', () => {
+    const isVisibleStub = sandbox.stub(viewer, 'isVisible').returns(true);
+    whenFirstVisibleResolve();
+    return viewer.whenFirstVisible().then(() => {
+      clock.tick(3000);
+      mousedownObservable.fire();
+      clock.tick(1000);
+      isVisibleStub.returns(false);
+      visibilityObservable.fire();
+      clock.tick(10000);
+      return expect(activity.getIncrementalEngagedTime('test')).to.equal(4);
+    });
+  });
+
+  it('should accumulate engaged time over multiple activities', () => {
+    whenFirstVisibleResolve();
+    return viewer.whenFirstVisible().then(() => {
+      clock.tick(10000);
+      mousedownObservable.fire();
+      clock.tick(10000);
+      scrollObservable.fire();
+      clock.tick(10000);
+      mousedownObservable.fire();
+      clock.tick(10000);
+      return expect(activity.getIncrementalEngagedTime('test')).to.equal(20);
+    });
+  });
+
   it('should have 0 engaged time if there is no activity', () => {
     return expect(activity.getTotalEngagedTime()).to.equal(0);
   });

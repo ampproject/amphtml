@@ -1351,9 +1351,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'on': 'timer',
         'timerSpec': {
           'interval': 5,
-          'vars': {
-            'name': 'parsely-js',
-          },
         },
         'request': 'heartbeat',
       },

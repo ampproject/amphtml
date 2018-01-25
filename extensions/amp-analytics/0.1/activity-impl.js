@@ -168,7 +168,7 @@ export class Activity {
      * Contains the incrementalEngagedTime timestamps for named triggers.
      * @private {Object<string, number>}
      */
-    this.previousTotalEngagedTimeByTrigger_ = {
+    this.totalEngagedTimeByTrigger_ = {
       /*
        * "$triggerName" : ${lastRequestTimestamp}
       */
@@ -323,15 +323,15 @@ export class Activity {
    * @return {number}
    */
   getIncrementalEngagedTime(name = '') {
-    if (!this.previousTotalEngagedTimeByTrigger_.hasOwnProperty[name]) {
-      this.previousTotalEngagedTimeByTrigger_[name] =
+    if (!this.totalEngagedTimeByTrigger_.hasOwnProperty[name]) {
+      this.totalEngagedTimeByTrigger_[name] =
         this.getTotalEngagedTime();
-      return this.previousTotalEngagedTimeByTrigger_[name];
+      return this.totalEngagedTimeByTrigger_[name];
     }
     const currentIncrementalEngagedTime =
-      this.previousTotalEngagedTimeByTrigger_[name];
-    this.previousTotalEngagedTimeByTrigger_[name] = this.getTotalEngagedTime();
-    return this.previousTotalEngagedTimeByTrigger_[name] -
+      this.totalEngagedTimeByTrigger_[name];
+    this.totalEngagedTimeByTrigger_[name] = this.getTotalEngagedTime();
+    return this.totalEngagedTimeByTrigger_[name] -
       currentIncrementalEngagedTime;
   }
 };

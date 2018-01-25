@@ -510,28 +510,6 @@ describes.realWin('amp-analytics', {
     });
   });
 
-  it.skip('engaged time with named timer functions correctly', function() {
-    const analytics = getAnalyticsTag({
-      'requests': {'foo': 'https://example.com?tt=${totalEngagedTime}&inc=${incrementalEngagedTime(bar)}'},
-      'triggers': {
-        'heartbeat': {
-          'on': 'timer',
-          'timerSpec': {
-            'interval': 1,
-            'vars': {
-              'name': 'bar',
-            },
-          },
-          'request': 'heartbeat',
-        },
-        'visibility': {'on': 'visible', 'request': 'visible'},
-      },
-    });
-    return waitForSendRequest(analytics).then(() => {
-      expect(sendRequestSpy.args[0][0]).to.equal('https://example.com?tt=1&inc=1');
-    });
-  });
-
   describe('merges requests correctly', function() {
     it('inline and vendor both string', function() {
       const analytics = getAnalyticsTag({
