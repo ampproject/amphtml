@@ -642,6 +642,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   stopListeningToVideoEvents_() {
+    this.debounceToggleLoadingSpinner_(false);
     this.unlisteners_.forEach(unlisten => unlisten());
     this.unlisteners_ = [];
   }
