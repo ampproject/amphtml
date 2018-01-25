@@ -776,7 +776,7 @@ export class FetchResponse {
    */
   arrayBuffer() {
     return /** @type {!Promise<!ArrayBuffer>} */ (
-      this.drainText_().then(utf8EncodeSync));
+      this.drainText_().then(utf8Encode));
   }
 }
 
