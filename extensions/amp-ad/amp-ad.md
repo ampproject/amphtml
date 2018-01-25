@@ -235,6 +235,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [DistroScale](../../ads/distroscale.md)
 - [Dot and Media](../../ads/dotandads.md)
 - [Doubleclick](../../ads/google/doubleclick.md)
+- [eADV](../../ads/eadv.md)
 - [E-Planning](../../ads/eplanning.md)
 - [Ezoic](../../ads/ezoic.md)
 - [Felmat](../../ads/felmat.md)
