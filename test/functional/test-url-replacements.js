@@ -528,39 +528,45 @@ describes.sandboxed('UrlReplacements', {}, () => {
   });
 
   it('should replace FIRST_CONTENTFUL_PAINT', () => {
+    const win = getFakeWindow();
     sandbox.stub(Services, 'performanceFor')
         .returns({
           getFirstContentfulPaint() {
             return 1;
           },
         });
-    return expandAsync('FIRST_CONTENTFUL_PAINT').then(res => {
-      expect(res).to.match(/^\d+$/);
-    });
+    return Services.urlReplacementsForDoc(win.ampdoc)
+        .expandUrlAsync('FIRST_CONTENTFUL_PAINT').then(res => {
+          expect(res).to.match(/^\d+$/);
+        });
   });
 
   it('should replace FIRST_VIEWPORT_READY', () => {
+    const win = getFakeWindow();
     sandbox.stub(Services, 'performanceFor')
         .returns({
           getFirstViewportReady() {
             return 1;
           },
         });
-    return expandAsync('FIRST_VIEWPORT_READY').then(res => {
-      expect(res).to.match(/^\d+$/);
-    });
+    return Services.urlReplacementsForDoc(win.ampdoc)
+        .expandUrlAsync('FIRST_VIEWPORT_READY').then(res => {
+          expect(res).to.match(/^\d+$/);
+        });
   });
 
   it('should replace MAKE_BODY_VISIBLE', () => {
+    const win = getFakeWindow();
     sandbox.stub(Services, 'performanceFor')
         .returns({
           getMakeBodyVisible() {
             return 1;
           },
         });
-    return expandAsync('MAKE_BODY_VISIBLE').then(res => {
-      expect(res).to.match(/^\d+$/);
-    });
+    return Services.urlReplacementsForDoc(win.ampdoc)
+        .expandUrlAsync('MAKE_BODY_VISIBLE').then(res => {
+          expect(res).to.match(/^\d+$/);
+        });
   });
 
   it('should reject protocol changes', () => {
