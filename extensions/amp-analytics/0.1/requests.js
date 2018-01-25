@@ -120,7 +120,7 @@ export class RequestHandler {
       this.baseUrlTemplatePromise_ =
           this.variableService_.expandTemplate(this.baseUrl, expansionOption);
       this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then(baseUrl => {
-        return this.urlReplacementService_.expandAsync(
+        return this.urlReplacementService_.expandUrlAsync(
             baseUrl, dynamicBindings, this.whiteList_);
       });
     };
@@ -131,7 +131,7 @@ export class RequestHandler {
           // Construct the extraUrlParamsString: Remove null param and encode component
           const expandedExtraUrlParamsStr =
               this.getExtraUrlParamsString_(expandExtraUrlParams);
-          return this.urlReplacementService_.expandAsync(
+          return this.urlReplacementService_.expandUrlAsync(
               expandedExtraUrlParamsStr, dynamicBindings, this.whiteList_);
         });
 
