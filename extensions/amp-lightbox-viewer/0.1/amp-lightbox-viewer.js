@@ -668,6 +668,20 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
+   * @param {!Element} ampImage
+   * @return {boolean}
+   * @private
+   */
+  aspectRatioChanged_(ampImage) {
+    const img = elementByTag(dev().assertElement(ampImage), 'img');
+    const naturalAspectRatio = img.naturalWidth / img.naturalHeight;
+    const elementHeight = ampImage./*OK*/offsetHeight;
+    const elementWidth = ampImage./*OK*/offsetWidth;
+    const ampImageAspectRatio = elementWidth / elementHeight;
+    return Math.abs(naturalAspectRatio - ampImageAspectRatio) > 0.001;
+  }
+
+  /**
    * Entry animation to transition in a lightboxable image
    * @return {!Promise}
    * @private
@@ -675,7 +689,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   // TODO (cathyxz): make this generalizable to more than just images
   enter_() {
     const anim = new Animation(this.element);
-    let duration = MAX_TRANSITION_DURATION;
+    let duration = MIN_TRANSITION_DURATION;
     let transLayer = null;
     return this.vsync_.measurePromise(() => {
       // Lightbox background fades in.
@@ -684,7 +698,10 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       }), MOTION_DURATION_RATIO, ENTER_CURVE_);
 
       // Try to transition from the source image.
-      if (this.sourceElement_ && isLoaded(this.sourceElement_)) {
+      if (this.sourceElement_ && isLoaded(this.sourceElement_)
+        && !this.aspectRatioChanged_(this.sourceElement_)) {
+
+        // TODO (#13039): implement crop and object fit contain transitions
         transLayer = this.element.ownerDocument.createElement('div');
         transLayer.classList.add('i-amphtml-lightbox-viewer-trans');
         this.element.ownerDocument.body.appendChild(transLayer);
@@ -695,6 +712,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
             .implementation_.getImageBoxWithOffset();
 
         const clone = this.sourceElement_.cloneNode(true);
+
         clone.className = '';
         st.setStyles(clone, {
           position: 'absolute',
@@ -719,7 +737,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         anim.add(MOTION_DURATION_RATIO - 0.01,
             tr.setStyles(dev().assertElement(this.carousel_), {
               opacity: tr.numeric(0, 1),
-            }), 0.01);
+            }),
+            0.01
+        );
 
         anim.add(0, tr.setStyles(clone, {
           transform: tr.concat([
@@ -753,9 +773,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   exit_() {
-    // TODO (cathyxz): settle on a real animation
     const anim = new Animation(this.element);
-    let duration = MAX_TRANSITION_DURATION;
+    let duration = MIN_TRANSITION_DURATION;
     const imageBox = /**@type {?}*/ (this.getCurrentElement_().imageViewer)
         .implementation_.getImageBoxWithOffset();
     const image = /**@type {?}*/ (this.getCurrentElement_().imageViewer)
@@ -763,7 +782,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     // Try to transition to the source image.
     let transLayer = null;
     return this.vsync_.measurePromise(() => {
-      if (this.sourceElement_) {
+      if (this.sourceElement_ && image
+          && !this.aspectRatioChanged_(this.sourceElement_)) {
+        // TODO (#13013): if current image is not the original image, don't transition
         transLayer = this.element.ownerDocument.createElement('div');
         transLayer.classList.add('i-amphtml-lightbox-viewer-trans');
         this.element.ownerDocument.body.appendChild(transLayer);

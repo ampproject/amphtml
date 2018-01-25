@@ -209,7 +209,7 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /**
    * Returns the boundaries of the image element.
-   * @return {!Element}
+   * @return {?Element}
    */
   getImage() {
     return dev().assertElement(this.image_);
