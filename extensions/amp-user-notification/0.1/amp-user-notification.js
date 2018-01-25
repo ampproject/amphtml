@@ -175,7 +175,7 @@ export class AmpUserNotification extends AMP.BaseElement {
    */
   buildGetHref_(ampUserId) {
     const showIfHref = dev().assertString(this.showIfHref_);
-    return this.urlReplacements_.expandAsync(showIfHref).then(href => {
+    return this.urlReplacements_.expandUrlAsync(showIfHref).then(href => {
       const data = /** @type {!JsonObject} */({
         'elementId': this.elementId_,
         'ampUserId': ampUserId,

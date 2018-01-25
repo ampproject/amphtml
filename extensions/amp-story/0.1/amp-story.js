@@ -1158,7 +1158,7 @@ export class AmpStory extends AMP.BaseElement {
     opts.requireAmpResponseSourceOrigin = false;
 
     return Services.urlReplacementsForDoc(this.getAmpDoc())
-        .expandAsync(user().assertString(rawUrl))
+        .expandUrlAsync(user().assertString(rawUrl))
         .then(url => Services.xhrFor(this.win).fetchJson(url, opts))
         .then(response => {
           user().assert(response.ok, 'Invalid HTTP response for bookend JSON');
