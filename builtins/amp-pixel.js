@@ -88,7 +88,7 @@ export class AmpPixel extends BaseElement {
         return;
       }
       return Services.urlReplacementsForDoc(this.element)
-          .expandAsync(this.assertSource_(src))
+          .expandUrlAsync(this.assertSource_(src))
           .then(src => {
             const pixel = this.referrerPolicy_
               ? createNoReferrerPixel(this.element, src)
