@@ -118,7 +118,7 @@ export class RequestHandler {
     const isImmediate =
         (trigger['immediate'] === true) || (this.maxDelay_ == 0);
 
-    const isV2ExpansionON = isExperimentOn(this.ampdoc.win,
+    const isV2ExpansionON = this.ampdoc && isExperimentOn(this.ampdoc.win,
         'url-replacement-v2');
     let bindings;
     if (isV2ExpansionON) {

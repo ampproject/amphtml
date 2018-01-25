@@ -129,7 +129,7 @@ describe('amp-analytics.VariableService', function() {
         new ExpansionOptions({'foo': ' Hello world! '}))
         .then(actual => expect(actual).to.equal('')));
 
-  describes.fakeWin('filters', {amp: true}, env => {
+  describes.fakeWin('macros', {amp: true}, env => {
     let ampdoc;
     let urlReplacementService;
 
@@ -144,8 +144,8 @@ describe('amp-analytics.VariableService', function() {
     });
 
     function check(input, output) {
-      const filters = variables.getFilters();
-      const expanded = urlReplacementService.expandAsync(input, filters);
+      const macros = variables.getMacros();
+      const expanded = urlReplacementService.expandUrlAsync(input, macros);
       return expect(expanded).to.eventually.equal(output);
     }
 
