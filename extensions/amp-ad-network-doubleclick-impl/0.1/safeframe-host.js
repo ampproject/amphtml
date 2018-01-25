@@ -5,13 +5,13 @@ import {dict} from '../../../src/utils/object';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 
 /**
- * Used to manage messages for different fluid ad slots.
+ * Used to manage messages for different Safeframe ad slots.
  *
  * Maps a sentinel value to an object consisting of the impl to which that
  * sentinel value belongs and the corresponding message handler for that impl.
  * @type{!Object<string, !{instance: !AmpAdNetworkDoubleclickImpl, connectionEstablished: boolean}>}
  */
-const safeframeListeners = {};
+const safeframeHosts = {};
 
 let safeframeListenerCreated = false;
 
@@ -20,7 +20,7 @@ const MESSAGE_FIELDS = {
   SENTINEL: 'e',
 };
 
-const TAG = 'AMP DOUBLECLICK SAFEFRAME';
+const TAG = 'AMP-DOUBLECLICK-SAFEFRAME';
 
 /** @const {string} */
 export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
@@ -42,15 +42,14 @@ function safeframeListener() {
    * to setup the postMessage channel, so set it up.
    */
   if (data[MESSAGE_FIELDS.SENTINEL]) {
-    const listener = safeframeListeners[data[MESSAGE_FIELDS.SENTINEL]];
-    if (!listener) {
-      dev().warn(TAG, `Listener for sentinel ${data[MESSAGE_FIELDS.SENTINEL]} not found.`);
+    const safeframeHost = safeframeHosts[data[MESSAGE_FIELDS.SENTINEL]];
+    if (!safeframeHost) {
+      dev().warn(TAG, `Safeframe Host for sentinel ${data[MESSAGE_FIELDS.SENTINEL]} not found.`);
       return;
     }
-    if (!listener.connectionEstablished) {
-      listener.instance.connectMessagingChannel(data);
-      listener.connectionEstablished = true;
-      listener.instance.channel = data[MESSAGE_FIELDS.CHANNEL_NAME];
+    if (!safeframeHost.channel) {
+      safeframeHost.connectMessagingChannel(data);
+      safeframeHost.channel = data[MESSAGE_FIELDS.CHANNEL_NAME];
     }
     return;
   }
@@ -62,19 +61,19 @@ function safeframeListener() {
   if (!payload || !payload['sentinel']) {
     return;
   }
-  const listener = safeframeListeners[payload['sentinel']];
-  if (!listener) {
-    dev().warn(TAG, `Listener for sentinel ${payload['sentinel']} not found.`);
+  const safeframeHost = safeframeHosts[payload['sentinel']];
+  if (!safeframeHost) {
+    dev().warn(TAG, `Safeframe Host for sentinel ${payload['sentinel']} not found.`);
     return;
   }
-  listener.instance.processMessage_(payload, data['s']);
+  safeframeHost.processMessage_(payload, data['s']);
 
 }
 
 /**
- * This class is designed to setup the host for GPT Safeframe.
+ * This class is sets up the host for GPT Safeframe.
  */
-export class SafeframeApi {
+export class SafeframeHostApi {
 
   /**
    * @param {AmpAdNetworkDoubleclickImpl} baseInstance
@@ -109,10 +108,7 @@ export class SafeframeApi {
   }
 
   registerSafeframeListener() {
-    safeframeListeners[this.sentinel] = safeframeListeners[this.sentinel] || {
-      instance: this,
-      connectionEstablished: false,
-    };
+    safeframeHosts[this.sentinel] = safeframeHosts[this.sentinel] || this;
     if (!safeframeListenerCreated) {
       safeframeListenerCreated = true;
       this.win.addEventListener('message', safeframeListener, false);
@@ -123,10 +119,10 @@ export class SafeframeApi {
     dev().assert(this.baseInstance.iframe.contentWindow,
         'Frame contentWindow unavailable.');
     this.setupSafeframeApi();
-    this.sendMessage(JSON.stringify(dict({
+    this.sendMessage(dict({
       'message': 'connect',
       c: data[MESSAGE_FIELDS.CHANNEL_NAME],
-    })));
+    }));
   }
 
   /**
@@ -143,34 +139,34 @@ export class SafeframeApi {
   }
 
   /**
-   * Do not change name. This is named as 'send' as a hack to allow us to use
+   * DO NOT CHANGE NAME OF METHOD.
+   * This is named as 'send' as a hack to allow us to use
    * IntersectionObserver without needing to do any major refactoring of it.
    * Every time that the IntersectionObserver instance sends an update, instead
    * of utilizing the SubscriptionApi, we have overridden its typical behavior
    * to instead call this method.
+   * This method actually handles sending the geometry update message to the
+   * safeframe container, which allows $sf.ext.geom() to work. This method
+   * is triggered whenever the page is scrolled or visibility otherwise
+   * changes.
    */
   send(unused_trash, changes) {
-    this.sendGeom(changes);
-  }
-
-  sendGeom(changes) {
-    const geomChanges = this.formatGeom(changes['changes'][0]);
-    let newGeometry = JSON.stringify(geomChanges);
-    const geomMessage = JSON.stringify({
+    this.sendMessage({
       s: 'geometry_update',
       p: JSON.stringify({
-        newGeometry,
+        newGeometry: this.formatGeom(changes['changes'][0]),
         uid: 1,
       }),
       c: this.channel,
     });
-
-    this.sendMessage(geomMessage);
   }
 
   /**
    * Converts an IntersectionObserver-formatted change message to the
    * geometry update format expected by GPT Safeframe.
+   * @param {!Object} changes IntersectionObserver formatted
+   *   changes.
+   * @return {!string} Safeframe formatted changes.
    */
   formatGeom(changes) {
     const percInView = (a1, b1, a2, b2) => {
@@ -207,13 +203,12 @@ export class SafeframeApi {
           changes.boundingClientRect.left,
           changes.boundingClientRect.right),
     };
-    console.log(JSON.stringify(this.currentGeometry));
-    return this.currentGeometry;
+    return JSON.stringify(this.currentGeometry);
   }
 
   sendMessage(message) {
     this.baseInstance.iframe.contentWindow./*OK*/postMessage(
-        message,
+        JSON.stringify(message),
         SAFEFRAME_ORIGIN
     );
   }
@@ -245,7 +240,7 @@ export class SafeframeApi {
       uid: 1,
       success: true,
       newGeometry: JSON.stringify(this.currentGeometry),
-      expand_t: this.currentGeometry.allowedExpansion_t,
+      /** OK */expand_t: this.currentGeometry.allowedExpansion_t,
       expand_b: this.currentGeometry.allowedExpansion_b,
       expand_r: this.currentGeometry.allowedExpansion_r,
       expand_l: this.currentGeometry.allowedExpansion_l,

@@ -100,7 +100,7 @@ import {
 import {
   addExperimentIdToElement,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {SafeframeApi} from './safeframe-host';
+import {SafeframeHostApi} from './safeframe-host';
 import {RTC_ERROR_ENUM} from '../../amp-a4a/0.1/real-time-config-manager';
 import '../../amp-a4a/0.1/real-time-config-manager';
 
@@ -800,7 +800,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   setupSafeframe() {
     if (!this.safeframeApi) {
-      this.safeframeApi = new SafeframeApi(this);
+      this.safeframeApi = new SafeframeHostApi(this);
       this.safeframeApi.registerSafeframeListener();
     }
   }
