@@ -16,3 +16,20 @@ Bullet points like
 really help with making this more readable.
 
 Fixes/Closes/Related-to #1 (enter issue number, except in rare cases where none exists).
+
+It is also helpful to add an emoji before the commit message to identify the kind of work done on a single commit. See the following suggestions belowf
+
+- :bug: - `:bug:` bug fix
+- :sparkles: - `:sparkles:` new feature
+- :exclamation: - `:exclamation:` tests
+- :fire: - `:fire:` P0
+- :rocket: - `:rocket:` performance improvements
+- :lipstick: - `:lipstick:` css/styling
+- :wheelchair: - `:wheelchair:` accessibility
+- :globe_with_meridians: - `:globe_with_meridians:` i18n
+- :book: - `:book:` documentation
+- :recycle: - `:recycle:` refactoring (like moving around code w/o any changes)
+- :building_construction: - `:building_construction:` infrastructure/tooling/builds/CI
+- :rewind: - `:rewind:` revert
+- :feelsgood: - `:feelsgood:` submitting a hacky PR
+- :put_litter_in_its_place: - `:put_litter_in_its_place:` deleting code
