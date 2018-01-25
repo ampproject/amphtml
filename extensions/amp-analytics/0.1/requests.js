@@ -122,8 +122,8 @@ export class RequestHandler {
         'url-replacement-v2');
     let bindings;
     if (isV2ExpansionON) {
-      const filters = this.variableService_.getFilters();
-      bindings = Object.assign({}, dynamicBindings, filters);
+      const macros = this.variableService_.getMacros();
+      bindings = Object.assign({}, dynamicBindings, macros);
     } else {
       bindings = dynamicBindings;
     }
@@ -133,7 +133,7 @@ export class RequestHandler {
       this.baseUrlTemplatePromise_ =
           this.variableService_.expandTemplate(this.baseUrl, expansionOption);
       this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then(baseUrl => {
-        return this.urlReplacementService_.expandAsync(
+        return this.urlReplacementService_.expandUrlAsync(
             baseUrl, bindings, this.whiteList_);
       });
     };
@@ -144,7 +144,7 @@ export class RequestHandler {
           // Construct the extraUrlParamsString: Remove null param and encode component
           const expandedExtraUrlParamsStr =
               this.getExtraUrlParamsString_(expandExtraUrlParams);
-          return this.urlReplacementService_.expandAsync(
+          return this.urlReplacementService_.expandUrlAsync(
               expandedExtraUrlParamsStr, bindings, this.whiteList_);
         });
 

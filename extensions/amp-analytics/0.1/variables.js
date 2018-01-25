@@ -69,15 +69,15 @@ export class ExpansionOptions {
  * @param {string=} opt_l
  * @return {string}
  */
-function substrFilter(str, s, opt_l) {
+function substrMacro(str, s, opt_l) {
   const start = Number(s);
   let length = str.length;
   user().assert(isFiniteNumber(start),
-      'Start index ' + start + 'in substr filter should be a number');
+      'Start index ' + start + 'in substr macro should be a number');
   if (opt_l) {
     length = Number(opt_l);
     user().assert(isFiniteNumber(length),
-        'Length ' + length + ' in substr filter should be a number');
+        'Length ' + length + ' in substr macro should be a number');
   }
 
   return str.substr(start, length);
@@ -88,7 +88,7 @@ function substrFilter(str, s, opt_l) {
  * @param {string} defaultValue
  * @return {string}
  */
-function defaultFilter(value, defaultValue) {
+function defaultMacro(value, defaultValue) {
   if (!value || !value.length) {
     return user().assertString(defaultValue);
   }
@@ -98,7 +98,7 @@ function defaultFilter(value, defaultValue) {
 
 /**
  * Provides support for processing of advanced variable syntax like nested
- * expansions filters etc.
+ * expansions macros etc.
  */
 export class VariableService {
   /**
@@ -110,36 +110,36 @@ export class VariableService {
     this.win_ = window;
 
     /** @private {!Object<string, *>} */
-    this.filters_ = {};
+    this.macros_ = {};
 
-    this.register_('DEFAULT', defaultFilter);
-    this.register_('SUBSTR', substrFilter);
+    this.register_('DEFAULT', defaultMacro);
+    this.register_('SUBSTR', substrMacro);
     this.register_('TRIM', value => value.trim());
     this.register_('JSON', value => JSON.stringify(value));
     this.register_('TOLOWERCASE', value => value.toLowerCase());
     this.register_('TOUPPERCASE', value => value.toUpperCase());
     this.register_('NOT', value => String(!value));
     this.register_('BASE64', value => btoa(value));
-    this.register_('HASH', this.hashFilter_.bind(this));
+    this.register_('HASH', this.hashMacro_.bind(this));
     this.register_('IF',
         (value, thenValue, elseValue) => value ? thenValue : elseValue);
   }
 
   /**
-   * @return {!Object} contains all registered filters
+   * @return {!Object} contains all registered macros
    */
-  getFilters() {
-    return this.filters_;
+  getMacros() {
+    return this.macros_;
   }
 
   /**
    * @param {string} name
-   * @param {*} filter
+   * @param {*} macro
    */
-  register_(name, filter) {
-    dev().assert(!this.filters_[name], 'Filter "' + name
+  register_(name, macro) {
+    dev().assert(!this.macros_[name], 'Macro "' + name
         + '" already registered.');
-    this.filters_[name] = filter;
+    this.macros_[name] = macro;
   }
 
   /**
@@ -240,12 +240,12 @@ export class VariableService {
    * @param {string} value
    * @return {!Promise<string>}
    */
-  hashFilter_(value) {
+  hashMacro_(value) {
     return Services.cryptoFor(this.win_).sha384Base64(value);
   }
 
-  isFilterExperimentOn_() {
-    return isExperimentOn(this.win_, 'variable-filters');
+  isMacroExperimentOn_() {
+    return isExperimentOn(this.win_, 'variable-macros');
   }
 }
 
