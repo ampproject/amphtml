@@ -20,13 +20,11 @@ import {
   CREATIVE_SIZE_HEADER,
   signatureVerifierFor,
 } from '../../../amp-a4a/0.1/amp-a4a';
-import {DATA_ATTR_NAME} from '../../../amp-a4a/0.1/refresh-manager';
 import {
   AMP_SIGNATURE_HEADER,
   VerificationStatus,
 } from '../../../amp-a4a/0.1/signature-verifier';
 import {Services} from '../../../../src/services';
-import {Timer} from '../../../../src/service/timer-impl';
 import {
   AmpAdNetworkDoubleclickImpl,
   getNetworkId,
@@ -234,32 +232,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       expect(fireDelayedImpressionsSpy.withArgs(
           'https://c.com?e=f,https://d.com?g=h', true)).to.be.calledOnce;
     });
-
-    it('should initialize refresh manager', () => {
-      impl.extractSize({
-        get(name) {
-          return name == 'amp-force-refresh' ? '30' : undefined;
-        },
-        has(name) {
-          return !!this.get(name);
-        },
-      });
-      expect(impl.element.getAttribute(DATA_ATTR_NAME)).to.equal('30');
-    });
-
-    it('should not override publisher\'s refresh settings', () => {
-      impl.refreshManager_ = {refreshInterval_: '45'};
-      impl.extractSize({
-        get(name) {
-          return name == 'amp-force-refresh' ? '30' : undefined;
-        },
-        has(name) {
-          return !!this.get(name);
-        },
-      });
-      expect(impl.refreshManager_.refreshInterval_).to.equal('45');
-    });
-
   });
 
   describe('#onCreativeRender', () => {
@@ -859,7 +831,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         impl.element.setAttribute('width', width);
         return Promise.resolve();
       });
-      sandbox.stub(impl, 'getAmpAdMetadata_').callsFake(() => {
+      sandbox.stub(impl, 'getAmpAdMetadata').callsFake(() => {
         return {
           customElementExtensions: [],
           minifiedCreative: '<html><body>Hello, World!</body></html>',
@@ -1356,6 +1328,8 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
             'type': 'doubleclick',
           });
           impl = new AmpAdNetworkDoubleclickImpl(element);
+          sandbox.stub(impl, 'getResource').returns(
+              {whenWithinRenderOutsideViewport: () => Promise.resolve()});
         });
 
         it('should use experiment value', () => {
@@ -1379,9 +1353,7 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
         });
       });
 
-      describe('idle render layoutCallback', () => {
-        let attemptToRenderCreativeStub;
-        let isVerifiedAmpCreativePromiseStub;
+      describe('idle renderNonAmpCreative', () => {
 
         beforeEach(() => {
           element = createElementWithAttributes(doc, 'amp-ad', {
@@ -1393,58 +1365,40 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           impl.postAdResponseExperimentFeatures['render-idle-vp'] = '4';
           impl.postAdResponseExperimentFeatures['render-idle-throttle'] =
               'true';
-          attemptToRenderCreativeStub =
-              sandbox.stub(impl, 'attemptToRenderCreative')
-                  .returns(Promise.resolve());
-          isVerifiedAmpCreativePromiseStub =
-              sandbox.stub(impl, 'isVerifiedAmpCreativePromise');
-          sandbox.stub(Timer.prototype, 'delay')
-              .callsFake((fn, timeout) => {
-                expect(timeout).to.equal(1000);
-                impl.win['3pla']--;
-                return fn();
-              });
+          sandbox.stub(AmpA4A.prototype, 'renderNonAmpCreative')
+              .returns(Promise.resolve());
         });
 
         it('should throttle if idle render and non-AMP creative', () => {
-          isVerifiedAmpCreativePromiseStub.returns(Promise.resolve(false));
           impl.win['3pla'] = 1;
-          expect(impl.idleRenderOutsideViewport()).to.equal(4);
-          return impl.layoutCallback().then(() => {
-            expect(impl.win['3pla']).to.equal(0);
-            expect(attemptToRenderCreativeStub).to.be.calledOnce;
+          const startTime = Date.now();
+          return impl.renderNonAmpCreative().then(() => {
+            expect(Date.now() - startTime >= 1000);
           });
         });
 
         it('should NOT throttle if idle experiment not enabled', () => {
-          isVerifiedAmpCreativePromiseStub.returns(Promise.resolve(false));
-          delete impl.postAdResponseExperimentFeatures['render-idle-vp'];
           impl.win['3pla'] = 1;
-          expect(impl.idleRenderOutsideViewport()).to.be.false;
-          return impl.layoutCallback().then(() => {
-            expect(impl.win['3pla']).to.equal(1);
-            expect(attemptToRenderCreativeStub).to.be.calledOnce;
+          delete impl.postAdResponseExperimentFeatures['render-idle-vp'];
+          const startTime = Date.now();
+          return impl.renderNonAmpCreative().then(() => {
+            expect(Date.now() - startTime <= 50);
           });
         });
 
         it('should NOT throttle if experiment throttle not enabled', () => {
-          isVerifiedAmpCreativePromiseStub.returns(Promise.resolve(false));
-          delete impl.postAdResponseExperimentFeatures['render-idle-throttle'];
           impl.win['3pla'] = 1;
-          expect(impl.idleRenderOutsideViewport()).to.equal(4);
-          return impl.layoutCallback().then(() => {
-            expect(impl.win['3pla']).to.equal(1);
-            expect(attemptToRenderCreativeStub).to.be.calledOnce;
+          const startTime = Date.now();
+          return impl.renderNonAmpCreative().then(() => {
+            expect(Date.now() - startTime <= 50);
           });
         });
 
-        it('should NOT throttle if idle render and AMP creative', () => {
-          isVerifiedAmpCreativePromiseStub.returns(Promise.resolve(true));
-          impl.win['3pla'] = 1;
-          expect(impl.idleRenderOutsideViewport()).to.equal(4);
-          return impl.layoutCallback().then(() => {
-            expect(impl.win['3pla']).to.equal(1);
-            expect(attemptToRenderCreativeStub).to.be.calledOnce;
+        it('should NOT throttle if idle render and no previous', () => {
+          impl.win['3pla'] = 0;
+          const startTime = Date.now();
+          return impl.renderNonAmpCreative().then(() => {
+            expect(Date.now() - startTime <= 50);
           });
         });
       });

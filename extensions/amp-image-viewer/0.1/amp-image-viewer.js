@@ -28,6 +28,7 @@ import {
 } from '../../../src/gesture-recognizers';
 import {Layout} from '../../../src/layout';
 import {
+  expandLayoutRect,
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
@@ -170,12 +171,14 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @override */
   resumeCallback() {
-    if (!this.gestures_) {
-      this.setupGestures_();
-    }
-    if (!this.cleanupOnResizeHandler_) {
-      this.registerOnResizeHandler_();
-    }
+    this.element.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
+      if (!this.gestures_) {
+        this.setupGestures_();
+      }
+      if (!this.cleanupOnResizeHandler_) {
+        this.registerOnResizeHandler_();
+      }
+    });
   }
 
   /** @override */
@@ -204,6 +207,14 @@ export class AmpImageViewer extends AMP.BaseElement {
   }
 
   /**
+   * Returns the boundaries of the image element.
+   * @return {!Element}
+   */
+  getImage() {
+    return dev().assertElement(this.image_);
+  }
+
+  /**
    * Returns the boundaries of the image element with the offset if it was
    * moved by a gesture.
    * @return {!../../../src/layout-rect.LayoutRectDef}
@@ -212,7 +223,12 @@ export class AmpImageViewer extends AMP.BaseElement {
     if (this.posX_ == 0 && this.posY_ == 0) {
       return this.imageBox_;
     }
-    return moveLayoutRect(this.imageBox_, this.posX_, this.posY_);
+    const expansionScale = (this.scale_ - 1) / 2;
+    return moveLayoutRect(
+        expandLayoutRect(this.imageBox_, expansionScale, expansionScale),
+        this.posX_,
+        this.posY_
+    );
   }
 
   /**
@@ -364,20 +380,21 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @private */
   setupGestures_() {
-    const gesturesWithoutPreventDefault = Gestures.get(
-        dev().assertElement(this.image_),
+    this.gestures_ = Gestures.get(
+        this.element,
         /* opt_shouldNotPreventDefault */true
     );
-    gesturesWithoutPreventDefault.onPointerDown(() => {
+
+    this.gestures_.onPointerDown(() => {
       if (this.motion_) {
         this.motion_.halt();
+        event.preventDefault();
       }
     });
 
-    this.gestures_ = Gestures.get(this.element);
-
     // Zoomable.
     this.gestures_.onGesture(DoubletapRecognizer, e => {
+      event.preventDefault();
       let newScale;
       if (this.scale_ == 1) {
         newScale = this.maxScale_;
@@ -392,6 +409,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     });
 
     this.gestures_.onGesture(TapzoomRecognizer, e => {
+      event.preventDefault();
       this.onTapZoom_(e.data.centerClientX, e.data.centerClientY,
           e.data.deltaX, e.data.deltaY);
       if (e.data.last) {
@@ -401,6 +419,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     });
 
     this.gestures_.onGesture(PinchRecognizer, e => {
+      event.preventDefault();
       this.onPinchZoom_(e.data.centerClientX, e.data.centerClientY,
           e.data.deltaX, e.data.deltaY, e.data.dir);
       if (e.data.last) {
