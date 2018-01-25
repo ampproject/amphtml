@@ -278,9 +278,9 @@ describes.realWin('Requests', {amp: 1}, env => {
     });
   });
 
-  it('should replace dynamic bindings', function() {
+  it('should replace dynamic bindings', function* () {
     const spy = sandbox.spy();
-    const r = {'baseUrl': 'r1&${extraUrlParams}&BASE_VALUE', 'maxDelay': 1};
+    const r = {'baseUrl': 'r1&${extraUrlParams}&BASE_VALUE'};
     const handler = new RequestHandler(ampdoc, r, preconnect, spy, false);
     const expansionOptions = new ExpansionOptions({
       'param1': 'PARAM_1',
@@ -300,10 +300,10 @@ describes.realWin('Requests', {amp: 1}, env => {
         'key3': '${param3}',
       },
     };
-    handler.send({}, params, expansionOptions, bindings).then(() => {
-      expect(spy).to.be.calledOnce;
-      expect(spy.args[0][0]).to.equal(
-          'r1&val_base&key1=val1&key2=val2&key3=val3');
-    });
+    handler.send({}, params, expansionOptions, bindings);
+    yield macroTask();
+    expect(spy).to.be.calledOnce;
+    expect(spy.args[0][0]).to.equal(
+        'r1&key1=val1&key2=val2&key3=val3&val_base');
   });
 });
