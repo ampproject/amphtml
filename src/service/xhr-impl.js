@@ -758,11 +758,24 @@ export class FetchResponse {
   document_() {
     dev().assert(!this.bodyUsed, 'Body already used');
     this.bodyUsed = true;
-    user().assert(this.xhr_.responseXML,
-        'responseXML should exist. Make sure to return ' +
-        'Content-Type: text/html header.');
+
+    let body = '';
+    if (!this.xhr_.responseXML ) {
+      body = this.httpGet(this.xhr_.responseURL);
+    }
+
+    user().assert(this.xhr_.responseXML,'responseXML should exist. Make sure to return ' +
+    'Content-Type: text/html header. URL ' + this.xhr_.responseURL + ' Body: ' + body);
     return /** @type {!Promise<!Document>} */ (
       Promise.resolve(dev().assert(this.xhr_.responseXML)));
+  }
+
+  httpGet(theUrl)
+  {
+      var xmlHttp = new XMLHttpRequest();
+      xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+      xmlHttp.send( null );
+      return xmlHttp.responseText;
   }
 
   /**
