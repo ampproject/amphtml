@@ -114,7 +114,8 @@ export class RequestHandler {
   send(configParams, trigger, expansionOption, dynamicBindings) {
     this.lastTrigger_ = trigger;
     const triggerParams = trigger['extraUrlParams'];
-
+    const isImmediate =
+        (trigger['immediate'] === true) || (this.maxDelay_ == 0);
     if (!this.baseUrlPromise_) {
       expansionOption.freezeVar('extraUrlParams');
       this.baseUrlTemplatePromise_ =
@@ -149,29 +150,28 @@ export class RequestHandler {
     }
 
     this.extraUrlParamsPromise_.push(extraUrlParamsPromise);
-    this.trigger_();
+    this.trigger_(isImmediate);
   }
 
   /**
-   * Dispose function that clear reqeust handler state.
+   * Dispose function that clear request handler state.
    */
   dispose() {
-    if (this.timeoutId_) {
-      this.win.clearTimeout(this.timeoutId_);
-    }
     this.reset_();
   }
 
   /**
    * Function that schedule the actual request send.
+   * @param {boolean} isImmediate
    * @private
    */
-  trigger_() {
-    if (!this.isBatched_) {
+  trigger_(isImmediate) {
+    if (isImmediate) {
       this.fire_();
       return;
     }
-    // If is batched
+
+    // If is batched and not immediate
     if (!this.timeoutId_) {
       // schedule fire_ after certain time
       this.timeoutId_ = this.win.setTimeout(() => {
@@ -256,6 +256,9 @@ export class RequestHandler {
    * @private
    */
   reset_() {
+    if (this.timeoutId_) {
+      this.win.clearTimeout(this.timeoutId_);
+    }
     this.baseUrlPromise_ = null;
     this.baseUrlTemplatePromise_ = null;
     this.extraUrlParamsPromise_ = [];
