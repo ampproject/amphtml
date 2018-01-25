@@ -95,6 +95,30 @@ describes.realWin('Requests', {amp: 1}, env => {
         expect(h2Spy).to.be.calledOnce;
       });
 
+      it('should respect trigger immediate', function* () {
+        const spy = sandbox.spy();
+        const r = {'baseUrl': 'r', 'maxDelay': 1};
+        const handler = new RequestHandler(ampdoc, r, preconnect, spy, false);
+        const expansionOptions = new ExpansionOptions({});
+        handler.send({'e': '1'}, {}, expansionOptions);
+        clock.tick(100);
+        handler.send({'e': '2'}, {'immediate': 'str'}, expansionOptions);
+        clock.tick(100);
+        handler.send({'e': '3'}, {'immediate': true}, expansionOptions);
+        yield macroTask();
+        expect(spy).to.be.calledOnce;
+        expect(spy.args[0][0]).to.equal('r?e=1&e=2&e=3');
+        spy.reset();
+        handler.send({'e': '4'}, {}, expansionOptions);
+        clock.tick(800);
+        yield macroTask();
+        expect(spy).to.not.be.called;
+        clock.tick(200);
+        yield macroTask();
+        expect(spy).to.be.calledOnce;
+        expect(spy.args[0][0]).to.equal('r?e=4');
+      });
+
       it('should batch multiple send', function* () {
         const spy = sandbox.spy();
         const r = {'baseUrl': 'r2', 'maxDelay': 1};
