@@ -41,7 +41,6 @@ import {Services} from '../../../src/services';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
 import {listenFor} from '../../../src/iframe-helper';
 import {dict} from '../../../src/utils/object';
-import {debounce} from '../../../src/utils/rate-limit';
 import * as utils from './utils';
 
 /** @const {string} */
@@ -70,9 +69,6 @@ export class AmpBysideContent extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    /** @private {?Element} */
-    this.win_ = null;
 
     /** @private {Array<Function>} */
     this.unlisteners_ = [];
@@ -109,6 +105,10 @@ export class AmpBysideContent extends AMP.BaseElement {
 
     /** @private {string}  */
     this.baseUrl_ = '';
+
+    /** @const {function()} */
+    this.boundUpdateSize_ =
+		utils.debounce(this.updateSize_.bind(this), 100);
   }
 
   /** @override */
@@ -128,8 +128,6 @@ export class AmpBysideContent extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.win_ = this.win;
-
     this.webcareId_ = user().assert(
         this.element.getAttribute('data-webcare-id'),
         'The data-webcare-id attribute is required for <' + TAG_ + '> %s',
@@ -185,9 +183,7 @@ export class AmpBysideContent extends AMP.BaseElement {
       this.iframeSrc_ = assertHttpsUrl(src, this.element, this.getName_());
       iframe.src = this.iframeSrc_;
 
-	  const unlisten = listenFor(iframe, 'embed-size',
-		  debounce(this.win_, this.updateSize_.bind(this), 100)
-	  );
+	  const unlisten = listenFor(iframe, 'embed-size', this.boundUpdateSize_);
 	  this.unlisteners_.push(unlisten);
 
 	  this.element.appendChild(iframe);
@@ -285,14 +281,16 @@ export class AmpBysideContent extends AMP.BaseElement {
   /**
    * Updates the element's dimensions to accommodate the iframe's
    *    requested dimensions.
-   * @param {number|undefined} height
-   * @param {number|undefined} width
+   * @param {Object} data
    * @private
    */
   updateSize_(data) {
-	  console.info('updateSize_: data:', data);
     // Calculate new width and height of the container to include the padding.
     // If padding is negative, just use the requested width and height directly.
+    if (!data) {
+      return;
+    }
+
     let newHeight, newWidth;
     const height = parseInt(data['height'], 10);
     if (!isNaN(height)) {
