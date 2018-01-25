@@ -410,20 +410,13 @@ function main() {
       colors.cyan(process.env.BUILD_SHARD),
       '\n');
 
+  // If $TRAVIS_PULL_REQUEST_SHA is empty then it is a push build and not a PR.
   if (!process.env.TRAVIS_PULL_REQUEST_SHA) {
-    // If $TRAVIS_PULL_REQUEST_SHA is empty, it's a push build. Run all tests.
     console.log(fileLogPrefix, 'Running all commands on push build.');
     runAllCommands();
     stopTimer('pr-check.js', startTime);
     return 0;
-  } else if (process.env.TRAVIS_BRANCH.indexOf('greenkeeper/') != -1) {
-    // If it's a PR build on a greenkeeper branch, there's nothing to do.
-    console.log(fileLogPrefix, 'Skipping tests for greenkeeper PR builds.');
-    stopTimer('pr-check.js', startTime);
-    return 0;
   }
-
-  // Determine which tests to run based on the files being touched by the PR.
   const files = filesInPr();
   const buildTargets = determineBuildTargets(files);
 
