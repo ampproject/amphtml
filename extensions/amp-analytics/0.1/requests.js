@@ -99,9 +99,6 @@ export class RequestHandler {
 
     /** @private {?JsonObject} */
     this.lastTrigger_ = null;
-
-    /** @private {?Promise<string>} */
-    this.sendPromise_ = null;
   }
 
   /**
@@ -113,7 +110,6 @@ export class RequestHandler {
    * @param {!Object<string, *>} dynamicBindings A mapping of variables to
    *     stringable values. For example, values could be strings, functions that
    *     return strings, promises, etc.
-   * @return {!Promise<string>}
    */
   send(configParams, trigger, expansionOption, dynamicBindings) {
     this.lastTrigger_ = trigger;
@@ -153,8 +149,7 @@ export class RequestHandler {
     }
 
     this.extraUrlParamsPromise_.push(extraUrlParamsPromise);
-
-    return this.trigger_();
+    this.trigger_();
   }
 
   /**
@@ -173,21 +168,16 @@ export class RequestHandler {
    */
   trigger_() {
     if (!this.isBatched_) {
-      return this.fire_();
+      this.fire_();
+      return;
     }
     // If is batched
     if (!this.timeoutId_) {
       // schedule fire_ after certain time
-      return this.sendPromise_ = new Promise(resolve => {
-        this.timeoutId_ = this.win.setTimeout(() => {
-          this.fire_().then(request => {
-            resolve(request);
-          });
-        }, this.maxDelay_ * 1000);
-      });
+      this.timeoutId_ = this.win.setTimeout(() => {
+        this.fire_();
+      }, this.maxDelay_ * 1000);
     }
-
-    return this.sendPromise_;
   }
 
   /**
@@ -202,9 +192,10 @@ export class RequestHandler {
     const lastTrigger = /** @type {!JsonObject} */ (this.lastTrigger_);
     this.reset_();
 
-    return baseUrlTemplatePromise.then(preUrl => {
+
+    baseUrlTemplatePromise.then(preUrl => {
       this.preconnect_.url(preUrl, true);
-      return baseUrlPromise.then(baseUrl => {
+      baseUrlPromise.then(baseUrl => {
         let requestUrlPromise;
         if (this.batchingPlugin_) {
           requestUrlPromise =
@@ -213,9 +204,8 @@ export class RequestHandler {
           requestUrlPromise =
               this.constructExtraUrlParamStrs_(baseUrl, extraUrlParamsPromise);
         }
-        return requestUrlPromise.then(requestUrl => {
+        requestUrlPromise.then(requestUrl => {
           this.handler_(requestUrl, lastTrigger);
-          return requestUrl;
         });
       });
     });
@@ -272,7 +262,6 @@ export class RequestHandler {
     this.batchSegmentPromises_ = [];
     this.timeoutId_ = null;
     this.lastTrigger_ = null;
-    this.sendPromise_ = null;
   }
 
   /**
