@@ -28,7 +28,7 @@ import {toggle, setStyle} from '../../../src/style';
 import {getData, listen} from '../../../src/event-helper';
 import {LightboxManager} from './service/lightbox-manager-impl';
 import {layoutRectFromDomRect} from '../../../src/layout-rect';
-import {elementByTag, scopedQuerySelector} from '../../../src/dom';
+import {closest, elementByTag, scopedQuerySelector} from '../../../src/dom';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
@@ -506,10 +506,31 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
+   * Check to see if the triggering click happened on something that is a button
+   * or any other element that should consume the event.
+   * @param {!Event} e
+   * @return {boolean}
+   */
+  shouldTriggerClick_(e) {
+    const target = dev().assertElement(e.target);
+    const consumingElement = closest(target, element => {
+      return element.tagName == 'BUTTON'
+        || element.getAttribute('role') == 'button';
+    }, this.container_);
+
+    return consumingElement == null;
+  }
+
+  /**
    * Toggle lightbox controls including topbar and description.
+   * @param {!Event} e
    * @private
    */
-  toggleControls_() {
+  toggleControls_(e) {
+    if (!this.shouldTriggerClick_(e)) {
+      return;
+    }
+
     if (this.controlsMode_ == LightboxControlsModes.CONTROLS_HIDDEN) {
       this.toggleDescriptionBox_(/* opt_display */true);
       this.toggleTopBar_(/* opt_display */true);
