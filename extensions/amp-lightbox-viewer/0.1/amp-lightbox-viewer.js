@@ -476,6 +476,16 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
+   * Toggle description box if it has text content
+   * @param {boolean} display
+   * @private
+   */
+  toggleDescriptionBox_(display) {
+    this.updateDescriptionBox_();
+    toggle(dev().assertElement(this.descriptionBox_), display);
+  }
+
+  /**
    * Toggle lightbox controls including topbar and description.
    * @private
    */
@@ -483,12 +493,11 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     if (this.controlsMode_ == LightboxControlsModes.CONTROLS_HIDDEN) {
       toggle(dev().assertElement(this.topBar_), true);
       if (!this.container_.hasAttribute('gallery-view')) {
-        this.updateDescriptionBox_();
-        toggle(dev().assertElement(this.descriptionBox_), true);
+        this.toggleDescriptionBox_(true);
       }
       this.controlsMode_ = LightboxControlsModes.CONTROLS_DISPLAYED;
     } else {
-      toggle(dev().assertElement(this.descriptionBox_), false);
+      this.toggleDescriptionBox_(false);
       toggle(dev().assertElement(this.topBar_), false);
       this.controlsMode_ = LightboxControlsModes.CONTROLS_HIDDEN;
     }
