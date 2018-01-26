@@ -43,10 +43,11 @@
         </amp-story-grid-layer>
       </amp-story-page>
 
-      <amp-story-page id="page-2">
+      <amp-story-page id="page-2" auto-advance-after="vid1">
         <amp-story-grid-layer template="vertical">
           <h1>Short version of video</h1>
           <amp-video
+            id="vid1"
             src="../av/ForBiggerJoyrides-short.mp4"
             width="720"
             height="405"
@@ -56,10 +57,11 @@
         </amp-story-grid-layer>
       </amp-story-page>
 
-      <amp-story-page id="page-3">
+      <amp-story-page id="page-3" auto-advance-after="vid2">
         <amp-story-grid-layer template="vertical">
           <h1>Full length video</h1>
           <amp-video
+            id="vid2"
             src="../av/ForBiggerJoyrides.mp4"
             width="720"
             height="405"
@@ -69,10 +71,12 @@
         </amp-story-grid-layer>
       </amp-story-page>
 
-      <!-- <amp-story-page id="page-4">
+      <amp-story-page id="page-4" auto-advance-after="aud1">
         <amp-story-grid-layer template="vertical">
           <h1>Audio</h1>
-          <amp-audio src="https://storage.googleapis.com/media-session/sintel/snow-fight.mp3"
+          <amp-audio
+            id="aud1"
+            src="https://storage.googleapis.com/media-session/sintel/snow-fight.mp3"
             artwork="https://storage.googleapis.com/media-session/sintel/artwork-512.png"
             title="Snow Fight"
             album="Jan Morgenstern"
@@ -82,12 +86,12 @@
             controls>
           </amp-audio>
         </amp-story-grid-layer>
-      </amp-story-page> -->
+      </amp-story-page>
 
-      <amp-story-page id="page-4">
+      <amp-story-page id="page-5">
         <amp-story-grid-layer template="vertical">
-          <h1>Fourth Page</h1>
-          <p>This is the fourth page of this story.</p>
+          <h1>Fifth Page</h1>
+          <p>This is the fifth page of this story.</p>
         </amp-story-grid-layer>
       </amp-story-page>
     </amp-story>
