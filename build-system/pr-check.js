@@ -410,6 +410,16 @@ function main() {
       colors.cyan(process.env.BUILD_SHARD),
       '\n');
 
+  // TESTING: Eliminate unnecesasry testing.
+  if (process.env.TRAVIS_BRANCH.indexOf('TestSkipBuild') != -1 &&
+      (process.env.TRAVIS_COMMIT_MESSAGE.indexOf('testing enabled') == -1)) {
+    console.log(fileLogPrefix,
+        'Skipping unnecessary testing on greenkeeper branches. ' +
+        'Tests will only be run for the push build with the lockfile update.');
+    stopTimer('pr-check.js', startTime);
+    return 0;
+  }
+
   // If $TRAVIS_PULL_REQUEST_SHA is empty then it is a push build and not a PR.
   if (!process.env.TRAVIS_PULL_REQUEST_SHA) {
     console.log(fileLogPrefix, 'Running all commands on push build.');
