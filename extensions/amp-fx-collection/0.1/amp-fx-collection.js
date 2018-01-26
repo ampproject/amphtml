@@ -34,7 +34,7 @@ const FxType = {
 
 /**
  * Map of fx type to fx provider class.
- * @type {Object<FxType, FxProviderInterface>}
+ * @type {Object<FxType, function(new:FxProviderInterface, !../../../src/service/ampdoc-impl.AmpDoc)>}
  */
 const fxProviders = map();
 fxProviders[FxType.PARALLAX] = ParallaxProvider;
@@ -65,7 +65,7 @@ class AmpFxCollection {
     /** @private @const {!Object<FxType, FxProviderInterface>} */
     this.fxProviderInstances_ = map();
 
-    ampdoc.whenReady().then(this.viewer_.whenFirstVisible()).then(() => {
+    ampdoc.whenReady().then(() => this.viewer_.whenFirstVisible()).then(() => {
       // Scan when page becomes visible.
       this.scan_();
       // Rescan as DOM changes happen.
@@ -139,7 +139,7 @@ class AmpFxCollection {
   /**
    * Given an fx type, instantiates the appropriate provider if needed and
    * returns it.
-   * @param {*} fxType
+   * @param {FxType} fxType
    */
   getFxProvider_(fxType) {
     dev().assert(fxProviders[fxType],
