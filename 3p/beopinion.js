@@ -30,6 +30,7 @@ import {parseUrl} from '../src/url';
  */
 function getBeOpinion(global, cb) {
   loadScript(global, 'https://widget.beopinion.com/sdk.js', function() {
+  // loadScript(global, 'http://localhost:8081/dist/widget/fr/sdk-4.0.0.js', function() {
     cb(global.beopinion);
   });
 }
@@ -39,11 +40,19 @@ function getBeOpinion(global, cb) {
  * @param {!Object} data
  */
 export function beopinion(global, data) {
+  const canonicalUrl = global.context.canonicalUrl;
+  if (canonicalUrl) {
+    const link = global.document.createElement('link');
+    link.setAttribute('rel', 'canonical');
+    link.setAttribute('href', canonicalUrl);
+    global.document.head.appendChild(link);
+  }
+
   const div = global.document.createElement('div');
   div.className = "BeOpinionWidget";
-  if (data['content'] !== null) {
-    div.setAttribute('data-content', data['content']);
-  }
+  // if (data['content'] !== null) {
+    div.setAttribute('data-content', null);//data['content']);
+  // }
   if (data['my-content'] !== null) {
     div.setAttribute('data-my-content', data['my-content']);
   }
