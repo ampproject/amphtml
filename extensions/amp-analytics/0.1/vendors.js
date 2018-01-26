@@ -1665,6 +1665,41 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 
+  'treasuredata': {
+    'vars': {
+      'host': 'in.treasuredata.com',
+      'writeKey': '',
+      'database': '',
+      'table': 'events',
+    },
+    'requests': {
+      'base': 'https://${host}/postback/v3/event/${database}',
+      'baseParams': 'td_format=pixel' +
+        '&td_write_key=${writeKey}' +
+        '&td_global_id=td_global_id' +
+        '&td_client_id=CLIENT_ID(td_client_id)' +
+        '&td_charset=DOCUMENT_CHARSET' +
+        '&td_language=BROWSER_LANGUAGE' +
+        '&td_color=SCREEN_COLOR_DEPTH' +
+        '&td_screen=${screenWidth}x${scrollHeight}' +
+        '&td_viewport=${availableScreenWidth}x${availableScreenHeight}' +
+        '&td_title=TITLE' +
+        '&td_url=SOURCE_URL' +
+        '&td_user_agent=USER_AGENT' +
+        '&td_host=SOURCE_HOST' +
+        '&td_path=SOURCE_PATH' +
+        '&td_referrer=DOCUMENT_REFERRER' +
+        '&td_ip=td_ip',
+      'pageview': '${base}/${table}?${baseParams}',
+      'event': '${base}/${table}?${baseParams}',
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
   'webtrekk': {
     'requests': {
       'trackURL': 'https://${trackDomain}/${trackId}/wt',

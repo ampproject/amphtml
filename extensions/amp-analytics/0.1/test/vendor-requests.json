@@ -268,6 +268,15 @@
     "_domain": "https://top-fwz1.mail.ru",
     "_basicMessage": "js=13;id=$id;u=_source_url_;r=_document_referrer_;s=_screen_width_*_screen_height_;vp=_viewport_width_*_viewport_height_;st=$start;gender=$gender;age=$age;pid=$pid;userid=$userid;device=$device;params=$params;_=_random_"
   },
+  "treasuredata": {
+    "host": "in.treasuredata.com",
+    "database": "testdb",
+    "writeKey": "123/deadbeaf",
+    "base": "https://in.treasuredata.com/postback/v3/event/$database",
+    "baseParams": "td_format=pixel&td_write_key=$writeKey&td_global_id=td_global_id&td_client_id=_client_id_&td_charset=_document_charset_&td_language=_browser_language_&td_color=_screen_color_depth_&td_screen=_screen_width_x_scroll_height_&td_viewport=_available_screen_width_x_available_screen_height_&td_title=_title_&td_url=_source_url_&td_user_agent=_user_agent_&td_host=_source_host_&td_path=_source_path_&td_referrer=_document_referrer_&td_ip=td_ip",
+    "pageview": "https://in.treasuredata.com/postback/v3/event/$database/events?td_format=pixel&td_write_key=$writeKey&td_global_id=td_global_id&td_client_id=_client_id_&td_charset=_document_charset_&td_language=_browser_language_&td_color=_screen_color_depth_&td_screen=_screen_width_x_scroll_height_&td_viewport=_available_screen_width_x_available_screen_height_&td_title=_title_&td_url=_source_url_&td_user_agent=_user_agent_&td_host=_source_host_&td_path=_source_path_&td_referrer=_document_referrer_&td_ip=td_ip",
+    "event": "https://in.treasuredata.com/postback/v3/event/$database/events?td_format=pixel&td_write_key=$writeKey&td_global_id=td_global_id&td_client_id=_client_id_&td_charset=_document_charset_&td_language=_browser_language_&td_color=_screen_color_depth_&td_screen=_screen_width_x_scroll_height_&td_viewport=_available_screen_width_x_available_screen_height_&td_title=_title_&td_url=_source_url_&td_user_agent=_user_agent_&td_host=_source_host_&td_path=_source_path_&td_referrer=_document_referrer_&td_ip=td_ip"
+  },
   "webtrekk": {
     "trackURL": "https://$trackDomain/$trackId/wt",
     "parameterPrefix": "?p=432,$contentId,1,_screen_width_x_screen_height_,_screen_color_depth_,1,_timestamp_,_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id_&la=_browser_language_",
