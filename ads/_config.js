@@ -628,6 +628,8 @@ export const adConfig = {
 
   postquare: {},
 
+  pubexchange: {},
+
   pubmatic: {
     prefetch: 'https://ads.pubmatic.com/AdServer/js/amp.js',
   },
