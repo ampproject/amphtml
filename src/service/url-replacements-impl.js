@@ -921,6 +921,7 @@ export class UrlReplacements {
    * @private
    */
   expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
+    //debugger;
     const isV2ExperimentOn = isExperimentOn(this.ampdoc.win,
         'url-replacement-v2');
     if (isV2ExperimentOn && !opt_collectVars && !opt_sync) {
