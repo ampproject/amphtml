@@ -245,6 +245,7 @@ class AmpDatePicker extends AMP.BaseElement {
   /**
    * Fetch the JSON from the URL specified in the src attribute.
    * @return {?Promise<!JsonObject|!Array<JsonObject>>}
+   * @private
    */
   fetchSrcTemplates_() {
     if (this.element.getAttribute('src')) {
@@ -258,6 +259,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * Create an array of objects mapping dates to templates.
    * @param {?Promise<!JsonObject|!Array<JsonObject>>} srcTemplatePromise
    * @return {!Promise<undefined>}
+   * @private
    */
   parseSrcTemplates_(srcTemplatePromise) {
     if (!srcTemplatePromise) {
@@ -293,6 +295,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * Iterate over template element children and map their IDs
    * to a list of dates
    * @return {!Array<!DateTemplateMapDef>}
+   * @private
    */
   parseElementTemplates_() {
     const templates = toArray(
@@ -311,6 +314,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * Convert the kebab-case html attributes to camelCase React props,
    * and consume the placeholder input elements.
    * @return {!Object} Initialized props for the react component.
+   * @private
    */
   getProps_() {
     const props = attributesToForward.reduce((acc, attr) => {
@@ -390,6 +394,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * Create a date object to be consumed by AMP actions and events or amp-bind.
    * @param {?moment} date
    * @return {?BindDatesDetails}
+   * @private
    */
   getBindDate_(date) {
     if (!date) {
@@ -408,6 +413,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * @param {!moment} startDate
    * @param {?moment} endDate
    * @return {!Array<!BindDatesDetails>}
+   * @private
    */
   getBindDates_(startDate, endDate) {
     const dates = [];
@@ -429,6 +435,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * Formats a date in the page's locale and the element's configured format.
    * @param {?moment} date
    * @return {string}
+   * @private
    */
   getFormattedDate_(date) {
     const isUnixTimestamp = this.format_.match(/[Xx]/);
@@ -456,6 +463,7 @@ class AmpDatePicker extends AMP.BaseElement {
   /**
    * Returns `true` if a day template exists.
    * @return {boolean}
+   * @private
    */
   hasDayTemplate_() {
     return this.templates_.hasTemplate(this.element, '[date-template]');
@@ -465,6 +473,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * @param {!Array<!DateTemplateMapDef>} templates
    * @param {!moment} date
    * @return {?Element}
+   * @private
    */
   getTemplate_(templates, date) {
     for (let i = 0; i < templates.length; i++) {
@@ -479,6 +488,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * Get the template tag corresponding to a given date.
    * @param {!moment} date
    * @return {?Element}
+   * @private
    */
   getDayTemplate_(date) {
     return (
@@ -493,6 +503,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * Render the template that corresponds to the date with its data.
    * @param {!moment} day
    * @param {!JsonObject} data
+   * @private
    */
   renderDayTemplate_(day, data) {
     const template = this.getDayTemplate_(day);
@@ -512,12 +523,17 @@ class AmpDatePicker extends AMP.BaseElement {
   /**
    * Returns `true` if an info template exists.
    * @return {boolean}
+   * @private
    */
   hasInfoTemplate_() {
     return this.templates_.hasTemplate(this.element, '[info-template]');
   }
 
-  /** @return {!Promise<string>} */
+  /**
+   * Render any template for the info section of the date picker.
+   * @return {!Promise<string>}
+   * @private
+   */
   renderInfoTemplate_() {
     const template = this.element.querySelector('[info-template]');
     if (template) {
@@ -536,18 +552,10 @@ class AmpDatePicker extends AMP.BaseElement {
    * @param {!Element} template
    * @param {!JsonObject=} opt_data
    * @return {!Promise<!Element>}
+   * @private
    */
   renderTemplateElement_(template, opt_data = /** @type {!JsonObject} */ ({})) {
-    const renderPromise = this.templates_.renderTemplate(template, opt_data);
-    renderPromise.then(() => {
-      const renderedEvent = createCustomEvent(
-          this.win_,
-          AmpEvents.DOM_UPDATE,
-          /* detail */ null,
-          {bubbles: true});
-      this.container_.dispatchEvent(renderedEvent);
-    });
-    return renderPromise;
+    return this.templates_.renderTemplate(template, opt_data);
   }
 
   /**
@@ -558,6 +566,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * @param {!JsonObject=} opt_data
    * @param {string=} opt_fallback
    * @return {!Promise<string>}
+   * @private
    */
   renderTemplate_(template, opt_data, opt_fallback = '') {
     if (template) {
@@ -572,6 +581,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * Convert a rendered template element to a string
    * @param {!Element} rendered
    * @return {string}
+   * @private
    */
   getRenderedTemplateString_(rendered) {
     return rendered./*OK*/outerHTML;
@@ -581,6 +591,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * Create the data needed to render a day template
    * @param {!moment} date
    * @return {!JsonObject}
+   * @private
    */
   getDayTemplateData_(date) {
     const templateData = FORMAT_STRINGS.reduce((acc, key) => {
@@ -602,6 +613,7 @@ class AmpDatePicker extends AMP.BaseElement {
    * Render asynchronous HTML into a React component.
    * @param {!Promise<string>} templatePromise
    * @return {React.Component}
+   * @private
    */
   renderPromiseIntoReact_(templatePromise) {
     if (!this.templateThen_) {
@@ -616,6 +628,19 @@ class AmpDatePicker extends AMP.BaseElement {
       promise: templatePromise,
       then: this.templateThen_,
     });
+  }
+
+  /**
+   * Notify any listener (like bind) that a DOM update occurred.
+   * @private
+   */
+  emitUpdate_() {
+    const renderedEvent = createCustomEvent(
+      this.win_,
+      AmpEvents.DOM_UPDATE,
+      /* detail */ null,
+      {bubbles: true});
+    this.element.dispatchEvent(renderedEvent);
   }
 
   /**
@@ -643,6 +668,7 @@ class AmpDatePicker extends AMP.BaseElement {
           highlighted: this.highlighted_,
           firstDayOfWeek: this.firstDayOfWeek_,
           daySize: this.daySize_,
+          emitUpdate: () => this.emitUpdate_(),
         })),
         this.container_);
   }

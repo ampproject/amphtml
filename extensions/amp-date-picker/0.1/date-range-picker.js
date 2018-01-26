@@ -179,6 +179,9 @@ function createDateRangePickerBase() {
      * @param {?string} focusedInput
      */
     onFocusChange(focusedInput) {
+      if (this.props.emitUpdate) {
+        this.props.emitUpdate();
+      }
       this.setState({focusedInput});
     }
 

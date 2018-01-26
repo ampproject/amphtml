@@ -7,7 +7,8 @@
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <style amp-custom>
   body {
-    margin: 10px;
+    padding: 20px;
+    min-height: 125vh;
   }
   .highlight-corner {
     position: absolute;
@@ -106,6 +107,7 @@
     blocked="2017-10-15 2017-09-17 2017-10-19 2017-10-21"
     highlighted="2018-01-29"
     keep-open-on-date-select
+    number-of-months="1"
     show-clear-dates
   >
     <input amp-date-placeholder-start placeholder="Start date" id="start" />
@@ -113,10 +115,7 @@
     <template type="amp-mustache" date-template default>
       {{^isBlocked}}{{^isHighlighted}}{{D}}{{/isHighlighted}}{{/isBlocked}}
       {{#isBlocked}}:({{/isBlocked}}
-      {{#isHighlighted}}
-        {{D}}
-        <span class="highlight-corner"></span>
-      {{/isHighlighted}}
+      {{#isHighlighted}}{{D}}!{{/isHighlighted}}
     </template>
     <template type="amp-mustache" date-template dates="FREQ=WEEKLY;DTSTART=20170101T160000Z;INTERVAL=2;WKST=SU;BYDAY=TU" id="tacos2">
       <span>🌮</span>
@@ -126,8 +125,7 @@
       <span>+$10</span>
     </template>
     <template type="amp-mustache" info-template>
-      <span [text]="tacoTuesdays != null ? 'You chose ' + tacoTuesdays + ' taco tuesdays!' : ''">Cool</span>
-      <span [text]="containsSales ? 'This is a sale' : ''">Cool</span>
+      <span [text]="tacoTuesdays != null ? 'You chose ' + tacoTuesdays + ' taco tuesdays!' : ''"></span>
     </template>
   </amp-date-picker>
 

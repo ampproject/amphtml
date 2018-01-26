@@ -104,6 +104,12 @@ export function withDatePickerCommon(WrappedComponent) {
       this.isOutsideRange = this.isOutsideRange.bind(this);
     }
 
+    componentDidMount() {
+      if (this.props.emitUpdate) {
+        this.props.emitUpdate();
+      }
+    }
+
     /**
      * @param {!moment} day
      * @return {boolean}
