@@ -275,8 +275,6 @@ export class PageScalingService {
           // Required since layer now has a width/height set.
           Object.assign(style, {'box-sizing': 'border-box'});
 
-          console.log(style);
-
           setImportantStyles(el, style);
         });
         markScalingApplied(page);
