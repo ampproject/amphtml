@@ -17,7 +17,7 @@
 goog.provide('amp.validator.ValidatorTest');
 
 goog.require('amp.validator.CssLength');
-goog.require('amp.validator.TagSpec');
+goog.require('amp.validator.HtmlFormat');
 goog.require('amp.validator.ValidationError');
 goog.require('amp.validator.annotateWithErrorCategories');
 goog.require('amp.validator.createRules');
@@ -666,7 +666,7 @@ describe('ValidatorRulesMakeSense', () => {
     if ((tagSpec.tagName.indexOf('AMP-') === 0) &&
         ((tagSpec.htmlFormat.length === 0) ||
          (tagSpec.htmlFormat.indexOf(
-              amp.validator.TagSpec.HtmlFormat.AMP4ADS) !== -1))) {
+              amp.validator.HtmlFormat.Code.AMP4ADS) !== -1))) {
       // AMP4ADS Creative Format document is the source of this whitelist.
       // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
       const whitelistedAmp4AdsExtensions = {

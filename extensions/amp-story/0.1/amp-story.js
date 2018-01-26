@@ -260,11 +260,14 @@ export class AmpStory extends AMP.BaseElement {
     this.element.querySelector('amp-story-page').setAttribute('active', '');
 
     if (this.element.hasAttribute(AMP_STORY_STANDALONE_ATTRIBUTE)) {
-      this.getAmpDoc().win.document.documentElement.classList
-          .add('i-amphtml-story-standalone');
-
-      // Lock body to prevent overflow.
-      this.lockBody_();
+      const html = this.win.document.documentElement;
+      this.mutateElement(() => {
+        html.classList.add('i-amphtml-story-standalone');
+        // Lock body to prevent overflow.
+        this.lockBody_();
+        // Standalone CSS affects sizing of the entire page.
+        this.onResize();
+      }, html);
     }
 
     this.initializeListeners_();
@@ -375,18 +378,21 @@ export class AmpStory extends AMP.BaseElement {
     this.element.addEventListener(EventType.TAP_NAVIGATION, e => {
       const {direction} = e.detail;
 
-      this.mediaPool_.blessAll().then(() => {
-        if (this.isDesktop_()) {
-          this.next_();
-          return;
-        }
+      if (this.isDesktop_()) {
+        this.next_();
+        return;
+      }
 
-        if (direction === TapNavigationDirection.NEXT) {
-          this.next_();
-        } else if (direction === TapNavigationDirection.PREVIOUS) {
-          this.previous_();
-        }
-      });
+      if (direction === TapNavigationDirection.NEXT) {
+        this.next_();
+      } else if (direction === TapNavigationDirection.PREVIOUS) {
+        this.previous_();
+      }
+
+      // We do this after navigation, because we do not want to block navigation
+      // on an asynchronous call.  Blessing can also fail, so we do not want to
+      // risk that either.  Otherwise, this can cause #12966.
+      this.mediaPool_.blessAll();
     });
 
     const gestures = Gestures.get(this.element,
@@ -410,7 +416,6 @@ export class AmpStory extends AMP.BaseElement {
 
     this.boundOnResize_ = debounce(this.win, () => this.onResize(), 300);
     this.getViewport().onResize(this.boundOnResize_);
-    this.onResize();
   }
 
   /** @private */
@@ -1163,7 +1168,7 @@ export class AmpStory extends AMP.BaseElement {
     opts.requireAmpResponseSourceOrigin = false;
 
     return Services.urlReplacementsForDoc(this.getAmpDoc())
-        .expandAsync(user().assertString(rawUrl))
+        .expandUrlAsync(user().assertString(rawUrl))
         .then(url => Services.xhrFor(this.win).fetchJson(url, opts))
         .then(response => {
           user().assert(response.ok, 'Invalid HTTP response for bookend JSON');

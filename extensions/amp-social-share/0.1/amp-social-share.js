@@ -102,7 +102,7 @@ class AmpSocialShare extends AMP.BaseElement {
       });
     }
 
-    urlReplacements.expandAsync(hrefWithVars, bindings).then(href => {
+    urlReplacements.expandUrlAsync(hrefWithVars, bindings).then(href => {
       this.href_ = href;
       // mailto:, whatsapp: protocols breaks when opened in _blank on iOS Safari
       const protocol = parseUrl(href).protocol;

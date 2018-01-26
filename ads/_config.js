@@ -209,6 +209,8 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  adzerk: {},
+
   affiliateb: {
     prefetch: 'https://track.affiliate-b.com/amp/a.js',
     renderStartImplemented: true,
@@ -332,6 +334,15 @@ export const adConfig = {
     clientIdCookieName: '_ga',
     renderStartImplemented: true,
     masterFrameAccessibleType: 'google_network',
+  },
+
+  eadv: {
+    renderStartImplemented: true,
+    clientIdScope: 'AMP_ECID_EADV',
+    prefetch: [
+      'https://www.eadv.it/track/esr.min.js',
+      'https://www.eadv.it/track/ead.min.js',
+    ],
   },
 
   eas: {
@@ -616,6 +627,8 @@ export const adConfig = {
   },
 
   postquare: {},
+
+  pubexchange: {},
 
   pubmatic: {
     prefetch: 'https://ads.pubmatic.com/AdServer/js/amp.js',

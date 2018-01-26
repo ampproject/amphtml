@@ -67,6 +67,7 @@ declareExtension('amp-access-laterpay', '0.1', true);
 declareExtension('amp-accordion', '0.1', false);
 declareExtension('amp-ad', '0.1', true);
 declareExtension('amp-ad-network-adsense-impl', 0.1, false);
+declareExtension('amp-ad-network-adzerk-impl', 0.1, false);
 declareExtension('amp-ad-network-doubleclick-impl', 0.1, false);
 declareExtension('amp-ad-network-fake-impl', 0.1, false);
 declareExtension('amp-ad-network-triplelift-impl', 0.1, false);
@@ -115,6 +116,7 @@ declareExtension('amp-lightbox', '0.1', true);
 declareExtension('amp-lightbox-viewer', '0.1', true);
 declareExtension('amp-list', '0.1', false);
 declareExtension('amp-live-list', '0.1', true);
+declareExtension('amp-mathml', '0.1', true);
 declareExtension('amp-mustache', '0.1', false);
 declareExtension('amp-nexxtv-player', '0.1', false);
 declareExtension('amp-o2-player', '0.1', false);
@@ -132,6 +134,7 @@ declareExtension('amp-sticky-ad', '1.0', true);
 declareExtension('amp-story', '0.1', true);
 declareExtension('amp-selector', '0.1', true);
 declareExtension('amp-web-push', '0.1', true);
+declareExtension('amp-wistia-player', '0.1', false);
 declareExtension('amp-position-observer', '0.1', false);
 declareExtension('amp-date-picker', '0.1', true);
 declareExtension('amp-image-viewer', '0.1', true);
@@ -912,7 +915,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     return toPromise(bundler.bundle()
       .on('error', function(err) {
         if (err instanceof SyntaxError) {
-          console.error(red('Syntax error:', err.message));
+          console.error(red('Syntax error: ' + err.message));
         } else {
           console.error(red(err.message));
         }

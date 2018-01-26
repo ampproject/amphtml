@@ -63,6 +63,7 @@ import {MessageType} from '../src/3p-frame-messaging';
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
 import {github} from './github';
+import {mathml} from './mathml';
 import {reddit} from './reddit';
 import {twitter} from './twitter';
 
@@ -118,6 +119,7 @@ import {directadvert} from '../ads/directadvert';
 import {distroscale} from '../ads/distroscale';
 import {dotandads} from '../ads/dotandads';
 import {doubleclick} from '../ads/google/doubleclick';
+import {eadv} from '../ads/eadv';
 import {eas} from '../ads/eas';
 import {engageya} from '../ads/engageya';
 import {eplanning} from '../ads/eplanning';
@@ -168,6 +170,7 @@ import {plista} from '../ads/plista';
 import {polymorphicads} from '../ads/polymorphicads';
 import {popin} from '../ads/popin';
 import {postquare} from '../ads/postquare';
+import {pubexchange} from '../ads/pubexchange';
 import {pubmatic} from '../ads/pubmatic';
 import {pubmine} from '../ads/pubmine';
 import {pulsepoint} from '../ads/pulsepoint';
@@ -226,6 +229,7 @@ const AMP_EMBED_ALLOWED = {
   outbrain: true,
   plista: true,
   postquare: true,
+  pubexchange: true,
   smartclip: true,
   smi2: true,
   taboola: true,
@@ -295,6 +299,7 @@ register('directadvert', directadvert);
 register('distroscale', distroscale);
 register('dotandads', dotandads);
 register('doubleclick', doubleclick);
+register('eadv', eadv);
 register('eas', eas);
 register('engageya', engageya);
 register('eplanning', eplanning);
@@ -330,6 +335,7 @@ register('loka', loka);
 register('mads', mads);
 register('mantis-display', mantisDisplay);
 register('mantis-recommend', mantisRecommend);
+register('mathml', mathml);
 register('mediaimpact', mediaimpact);
 register('medianet', medianet);
 register('mediavine', mediavine);
@@ -349,6 +355,7 @@ register('plista', plista);
 register('polymorphicads', polymorphicads);
 register('popin', popin);
 register('postquare', postquare);
+register('pubexchange', pubexchange);
 register('pubmatic', pubmatic);
 register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);
