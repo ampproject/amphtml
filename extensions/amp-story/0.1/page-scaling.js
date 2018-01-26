@@ -118,7 +118,7 @@ function isScalingEnabled(page) {
   if (isExperimentOn(win, 'amp-story-scaling')) {
     return true;
   }
-  return page.getAttribute('scaling') == 'outside-range';
+  return page.getAttribute('scaling') == 'relative';
 }
 
 
@@ -220,7 +220,8 @@ export class PageScalingService {
     // instances in one doc.
     const win = toWin(story.ownerDocument.defaultView);
     if (!pageScalingService) {
-      if (!isCssZoomSupported(win)) {
+      // Falling back to transform on iOS because of font scaling issue.
+      if (!isCssZoomSupported(win) || Services.platformFor(win).isIos()) {
         // TODO(alanorozco, #12934): Combine transform matrix.
         user().warn('AMP-STORY',
             '`amp-story-scaling` using CSS transforms as fallback.',
@@ -273,6 +274,8 @@ export class PageScalingService {
 
           // Required since layer now has a width/height set.
           Object.assign(style, {'box-sizing': 'border-box'});
+
+          console.log(style);
 
           setImportantStyles(el, style);
         });
