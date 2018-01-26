@@ -196,15 +196,37 @@ Some analytics providers have an already-provided configuration, which you use v
 To reduce the number of request pings, you can specify batching behaviors in the request configuration. Any [`extraUrlParams`](#extra-url-params) from `triggers` that use the same request are appended to the `baseUrl` of the request.
 
 The batching properties are:
-  - `batchInterval`: This property specifies the max time interval to wait (in seconds) before sending out a request ping. `batchInterval` can be a number or an array of numbers. Request will respect every item value in the array, and repeat the last interval value (or the single value) when reach the end of the array.
+  - `batchInterval`: This property specifies the time interval (in seconds) to flush request pings in  the batching queue. `batchInterval` can be a number or an array of numbers (The minimum time interval is 200ms). Request will respect every item value in the array, and repeat the last interval value (or the single value) when reach the end of the array.
+  - `batchPlugin`: This property specifies the alternative plugin function to use to construct the final request url. Please reach out to the vendor to ask for the correct batch plugin to use.
 
-For example, the following config sends out a single request ping every 3 seconds, with the first request ping looking like `https://example.com/analytics?rc=1&rc=2&rc=3` .
-
+For example, the following config sends out a single request ping every 2 seconds, with one sample request ping looking like `https://example.com/analytics?rc=1&rc=2`.
 ```javascript
 "requests": {
   "timer": {
     "baseUrl": "https://example.com/analytics?",
-    "batchInterval": 3,
+    "batchInterval": 2,
+  }
+}
+"triggers": {
+  "timer": {
+    "on": "timer",
+    "request" : "timer",
+    "timerSpec": {
+      "interval": 1
+    },
+    "extraUrlParams": {
+      "rc": "${requestCount}"
+    }
+  }
+}
+```
+
+The following config sends out the first request ping after 1 second and then send out a request every 3 seconds. The first request ping looks like `https://example.com/analytics?rc=1`, the second request ping looks like `https://example.com/analytics?rc=2&rc=3&rc=4`.
+```javascript
+"requests": {
+  "timer": {
+    "baseUrl": "https://example.com/analytics?",
+    "batchInterval": [1, 3],
   }
 }
 "triggers": {
