@@ -397,11 +397,35 @@ export class GlobalVariableSource extends VariableSource {
       return nav.userAgent;
     });
 
-    this.set('HTML_ATTR', (selector, ...attributes) => {
-      debugger;
-      console.log(selector);
-      console.log(attributes);
-      return 'IOU_' + selector;
+    const HTML_ATTR_MAX_RETURN_SIZE = 10;
+    this.set('HTML_ATTR', (doc, cssSelector, ...attributeNames) => {
+      const result = [];
+      if (!doc || !cssSelector || !attributeNames ||
+          attributeNames.length == 0) {
+        return JSON.stringify(result);
+      }
+      try {
+        const elements = doc.querySelectorAll(cssSelector);
+        if (!elements) {
+          return JSON.stringify(result);
+        }
+        for (let i = 0; i < elements.length &&
+               result.length < HTML_ATTR_MAX_RETURN_SIZE; ++i) {
+          const currentResult = {};
+          attributeNames.forEach(attributeName => {
+            const attributeValue = elements[i].getAttribute(attributeName);
+            if (attributeValue) {
+              currentResult[attributeName] = attributeValue;
+            }
+          });
+          if (Object.keys(currentResult).length != 0) {
+            result.push(currentResult);
+          }
+        }
+      } catch (e) {
+        // invalid selector, return empty array
+      }
+      return JSON.stringify(result);
     });
 
     // Returns the time it took to load the whole page. (excludes amp-* elements
@@ -718,12 +742,14 @@ export class UrlReplacements {
    * @param {!Object<string, *>=} opt_bindings
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
    *     that can be substituted.
+   * @param {Document=} opt_contextDoc Used if any of the expansion variables
+   *     will be inspecting the document context
    * @return {!Promise<string>}
    */
-  expandUrlAsync(url, opt_bindings, opt_whiteList) {
+  expandUrlAsync(url, opt_bindings, opt_whiteList, opt_contextDoc) {
     return /** @type {!Promise<string>} */ (
       this.expand_(url, opt_bindings, undefined, undefined,
-          opt_whiteList).then(
+          opt_whiteList, opt_contextDoc).then(
           replacement => this.ensureProtocolMatches_(url, replacement)));
   }
 
@@ -917,10 +943,13 @@ export class UrlReplacements {
    * @param {boolean=} opt_sync
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
    *     that can be substituted.
+   * @param {Document=} opt_contextDoc Used if any of the expansion variables
+   *     will be inspecting the document context
    * @return {!Promise<string>|string}
    * @private
    */
-  expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
+  expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList,
+    opt_contextDoc) {
     const isV2ExperimentOn = isExperimentOn(this.ampdoc.win,
         'url-replacement-v2');
     if (isV2ExperimentOn && !opt_collectVars && !opt_sync) {
@@ -953,6 +982,9 @@ export class UrlReplacements {
           }
         } else {
           binding = binding.async || binding.sync;
+        }
+        if (opt_contextDoc) {
+          args.unshift(opt_contextDoc);
         }
       }
       let val;
