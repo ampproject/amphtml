@@ -17,6 +17,7 @@
 import {CSS} from '../../../build/amp-image-viewer-0.1.css';
 import {Animation} from '../../../src/animation';
 import {bezierCurve} from '../../../src/curve';
+import {elementByTag} from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
 import {Gestures} from '../../../src/gesture';
 import {dev, user} from '../../../src/log';
@@ -28,6 +29,7 @@ import {
 } from '../../../src/gesture-recognizers';
 import {Layout} from '../../../src/layout';
 import {
+  expandLayoutRect,
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
@@ -117,7 +119,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.motion_ = null;
 
     /** @private {?Element} */
-    this.sourceElement_ = null;
+    this.sourceAmpImage_ = null;
   }
 
   /** @override */
@@ -129,16 +131,16 @@ export class AmpImageViewer extends AMP.BaseElement {
         children.length == 1 && children[0].tagName == 'AMP-IMG',
         'amp-image-viewer should have an amp-img as its one and only child'
     );
-    this.sourceElement_ = children[0];
-    this.setAsOwner(this.sourceElement_);
+    this.sourceAmpImage_ = children[0];
+    this.setAsOwner(this.sourceAmpImage_);
   }
 
   /** @override */
   layoutCallback() {
     let elementLayoutPromise = Promise.resolve();
-    if (this.sourceElement_) {
-      this.scheduleLayout(this.sourceElement_);
-      elementLayoutPromise = this.sourceElement_.signals()
+    if (this.sourceAmpImage_) {
+      this.scheduleLayout(this.sourceAmpImage_);
+      elementLayoutPromise = this.sourceAmpImage_.signals()
           .whenSignal(CommonSignals.LOAD_END);
     }
     return elementLayoutPromise
@@ -150,8 +152,8 @@ export class AmpImageViewer extends AMP.BaseElement {
 
               this.init_();
               this.element.appendChild(this.image_);
-              this.element.removeChild(this.sourceElement_);
-              this.sourceElement_ = null;
+              this.element.removeChild(this.sourceAmpImage_);
+              this.sourceAmpImage_ = null;
             }
           });
         }).then(() => {
@@ -170,12 +172,14 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @override */
   resumeCallback() {
-    if (!this.gestures_) {
-      this.setupGestures_();
-    }
-    if (!this.cleanupOnResizeHandler_) {
-      this.registerOnResizeHandler_();
-    }
+    this.element.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
+      if (!this.gestures_) {
+        this.setupGestures_();
+      }
+      if (!this.cleanupOnResizeHandler_) {
+        this.registerOnResizeHandler_();
+      }
+    });
   }
 
   /** @override */
@@ -204,6 +208,14 @@ export class AmpImageViewer extends AMP.BaseElement {
   }
 
   /**
+   * Returns the boundaries of the image element.
+   * @return {?Element}
+   */
+  getImage() {
+    return this.image_;
+  }
+
+  /**
    * Returns the boundaries of the image element with the offset if it was
    * moved by a gesture.
    * @return {!../../../src/layout-rect.LayoutRectDef}
@@ -212,7 +224,12 @@ export class AmpImageViewer extends AMP.BaseElement {
     if (this.posX_ == 0 && this.posY_ == 0) {
       return this.imageBox_;
     }
-    return moveLayoutRect(this.imageBox_, this.posX_, this.posY_);
+    const expansionScale = (this.scale_ - 1) / 2;
+    return moveLayoutRect(
+        expandLayoutRect(this.imageBox_, expansionScale, expansionScale),
+        this.posX_,
+        this.posY_
+    );
   }
 
   /**
@@ -260,18 +277,46 @@ export class AmpImageViewer extends AMP.BaseElement {
   }
 
   /**
+   * @return {number}
+   * @private
+   */
+  getSourceWidth_() {
+    if (this.sourceAmpImage_.hasAttribute('width')) {
+      return parseInt(this.sourceAmpImage_.getAttribute('width'), 10);
+    } else {
+      const img = elementByTag(dev().assertElement(this.sourceAmpImage_),
+          'img');
+      return img ? img.naturalWidth : this.sourceAmpImage_./*OK*/offsetWidth;
+    }
+  }
+
+  /**
+   * @return {number}
+   * @private
+   */
+  getSourceHeight_() {
+    if (this.sourceAmpImage_.hasAttribute('height')) {
+      return parseInt(this.sourceAmpImage_.getAttribute('height'), 10);
+    } else {
+      const img = elementByTag(dev().assertElement(this.sourceAmpImage_),
+          'img');
+      return img ? img.naturalHeight : this.sourceAmpImage_./*OK*/offsetHeight;
+    }
+  }
+
+  /**
    * Initializes the image viewer to the target image element such as
    * "amp-img". The target image element may or may not yet have the img
    * element initialized.
    */
   init_() {
-    this.sourceWidth_ = this.sourceElement_./*OK*/offsetWidth;
-    this.sourceHeight_ = this.sourceElement_./*OK*/offsetHeight;
-    this.srcset_ = srcsetFromElement(this.sourceElement_);
+    this.sourceWidth_ = this.getSourceWidth_();
+    this.sourceHeight_ = this.getSourceHeight_();
+    this.srcset_ = srcsetFromElement(dev().assertElement(this.sourceAmpImage_));
 
     ARIA_ATTRIBUTES.forEach(key => {
-      if (this.sourceElement_.hasAttribute(key)) {
-        this.image_.setAttribute(key, this.sourceElement_[key]);
+      if (this.sourceAmpImage_.hasAttribute(key)) {
+        this.image_.setAttribute(key, this.sourceAmpImage_.getAttribute(key));
       }
     });
     st.setStyles(dev().assertElement(this.image_), {
@@ -364,20 +409,21 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @private */
   setupGestures_() {
-    const gesturesWithoutPreventDefault = Gestures.get(
-        dev().assertElement(this.image_),
+    this.gestures_ = Gestures.get(
+        this.element,
         /* opt_shouldNotPreventDefault */true
     );
-    gesturesWithoutPreventDefault.onPointerDown(() => {
+
+    this.gestures_.onPointerDown(() => {
       if (this.motion_) {
         this.motion_.halt();
+        event.preventDefault();
       }
     });
 
-    this.gestures_ = Gestures.get(this.element);
-
     // Zoomable.
     this.gestures_.onGesture(DoubletapRecognizer, e => {
+      event.preventDefault();
       let newScale;
       if (this.scale_ == 1) {
         newScale = this.maxScale_;
@@ -392,6 +438,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     });
 
     this.gestures_.onGesture(TapzoomRecognizer, e => {
+      event.preventDefault();
       this.onTapZoom_(e.data.centerClientX, e.data.centerClientY,
           e.data.deltaX, e.data.deltaY);
       if (e.data.last) {
@@ -401,6 +448,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     });
 
     this.gestures_.onGesture(PinchRecognizer, e => {
+      event.preventDefault();
       this.onPinchZoom_(e.data.centerClientX, e.data.centerClientY,
           e.data.deltaX, e.data.deltaY, e.data.dir);
       if (e.data.last) {

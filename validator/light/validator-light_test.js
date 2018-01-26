@@ -96,6 +96,7 @@ function findHtmlFilesRelativeToTestdata() {
       // TODO(gregable): Remove this hack once the js validator knows how
       // to validate A4A documents.
       if (candidate.match(/^.*.html/g) &&
+          !candidate.match(/amp4ads/g) &&
           !entry.subdir.match(/amp4ads_feature_tests/g)) {
         testFiles.push(path.join(entry.subdir, candidate));
       }

@@ -20,7 +20,6 @@ import {ImaPlayerData} from '../../../ads/google/ima-player-data';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {
   isObject,
@@ -40,7 +39,7 @@ import {
   isJsonScriptTag,
   removeElement,
 } from '../../../src/dom';
-import {user, dev} from '../../../src/log';
+import {dev} from '../../../src/log';
 import {VideoEvents} from '../../../src/video-interface';
 import {Services} from '../../../src/services';
 import {isEnumValue} from '../../../src/types';
@@ -90,9 +89,6 @@ class AmpImaVideo extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user().assert(isExperimentOn(this.win, TAG),
-        'Experiment ' + TAG + ' is disabled.');
-
     this.viewport_ = this.getViewport();
     if (this.element.getAttribute('data-delay-ad-request') === 'true') {
       this.unlisteners_['onFirstScroll'] =

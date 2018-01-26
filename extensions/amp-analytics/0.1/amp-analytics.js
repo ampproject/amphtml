@@ -45,6 +45,7 @@ import {
   expandConfigRequest,
   RequestHandler,
 } from './requests';
+import {serializeResourceTiming} from './resource-timing';
 
 const TAG = 'amp-analytics';
 
@@ -437,14 +438,14 @@ export class AmpAnalytics extends AMP.BaseElement {
     const TAG = this.getName_();
     dev().fine(TAG, 'Fetching remote config', remoteConfigUrl);
     const fetchConfig = {
-      ampCors: false,
+      requireAmpResponseSourceOrigin: false,
     };
     if (this.element.hasAttribute('data-credentials')) {
       fetchConfig.credentials = this.element.getAttribute('data-credentials');
     }
     const ampdoc = this.getAmpDoc();
     return Services.urlReplacementsForDoc(this.element)
-        .expandAsync(remoteConfigUrl)
+        .expandUrlAsync(remoteConfigUrl)
         .then(expandedUrl => {
           remoteConfigUrl = expandedUrl;
           return Services.xhrFor(ampdoc.win).fetchJson(
@@ -638,20 +639,16 @@ export class AmpAnalytics extends AMP.BaseElement {
    *
    * @param {!JsonObject} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
-   * @return {!Promise} The request that was sent out.
    * @private
    */
   handleEvent_(trigger, event) {
     const requests = isArray(trigger['request'])
       ? trigger['request'] : [trigger['request']];
 
-    const resultPromises = [];
     for (let r = 0; r < requests.length; r++) {
       const requestName = requests[r];
-      resultPromises.push(
-          this.handleRequestForEvent_(requestName, trigger, event));
+      this.handleRequestForEvent_(requestName, trigger, event);
     }
-    return Promise.all(resultPromises);
   }
 
   /**
@@ -660,14 +657,12 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @param {string} requestName The requestName to process.
    * @param {!JsonObject} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
-   * @return {!Promise<string|undefined>} The request that was sent out.
    * @private
    */
   handleRequestForEvent_(requestName, trigger, event) {
     if (!this.element.ownerDocument.defaultView) {
       const TAG = this.getName_();
       dev().warn(TAG, 'request against destroyed embed: ', trigger['on']);
-      return Promise.resolve();
     }
 
     const request = this.requests_[requestName];
@@ -676,30 +671,60 @@ export class AmpAnalytics extends AMP.BaseElement {
       const TAG = this.getName_();
       this.user().error(TAG, 'Ignoring event. Request string ' +
           'not found: ', trigger['request']);
-      return Promise.resolve();
     }
 
-    return this.checkTriggerEnabled_(trigger, event).then(enabled => {
+    this.checkTriggerEnabled_(trigger, event).then(enabled => {
       if (!enabled) {
         return;
       }
-      return this.expandAndSendRequest_(request, trigger, event);
+      this.expandAndSendRequest_(request, trigger, event);
     });
+  }
+
+  /**
+   * @param {!JsonObject} trigger JSON config block that resulted in this event.
+   * @param {!ExpansionOptions} expansionOptions Expansion options.
+   * @return {!Object<string, (string|!Promise<string>|function(): string)>}
+   * @private
+   */
+  getDynamicVariableBindings_(trigger, expansionOptions) {
+    const dynamicBindings = {};
+    const resourceTimingSpec = trigger['resourceTimingSpec'];
+    if (resourceTimingSpec) {
+      const on = trigger['on'];
+      if (on == 'ini-load') {
+        const binding = 'RESOURCE_TIMING';
+        const analyticsVar = 'resourceTiming';
+        // TODO(warrengm): Consider limiting resource timings to avoid
+        // duplicates by excluding timings that were previously reported.
+        dynamicBindings[binding] =
+            serializeResourceTiming(resourceTimingSpec, this.win);
+        expansionOptions.vars[analyticsVar] = binding;
+      } else {
+        // TODO(warrengm): Instead of limiting resource timing to ini-load,
+        // analytics should have throttling or de-dupe timings that have already
+        // been reported.
+        user().warn(
+            TAG, 'resource timing is only allowed on ini-load triggers');
+      }
+    }
+    return dynamicBindings;
   }
 
   /**
    * @param {RequestHandler} request The request to process.
    * @param {!JsonObject} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
-   * @return {!Promise<string>} The request that was sent out.
    * @private
    */
   expandAndSendRequest_(request, trigger, event) {
     this.config_['vars']['requestCount']++;
     const expansionOptions = this.expansionOptions_(event, trigger);
-    //TODO: get rid of handleEvent promise eventually.
-    return request.send(
-        this.config_['extraUrlParams'], trigger, expansionOptions);
+    const dynamicBindings =
+        this.getDynamicVariableBindings_(trigger, expansionOptions);
+    request.send(
+        this.config_['extraUrlParams'], trigger, expansionOptions,
+        dynamicBindings);
   }
 
   /**

@@ -42,6 +42,8 @@ exports.rules = [
     mustNotDependOn: 'src/sanitizer.js',
     whitelist: [
       'extensions/amp-mustache/0.1/amp-mustache.js->src/sanitizer.js',
+      'extensions/amp-ad-network-adzerk-impl/0.1/' +
+          'amp-ad-network-adzerk-impl.js->src/sanitizer.js',
       'extensions/amp-bind/0.1/bind-impl.js->src/sanitizer.js',
       'extensions/amp-date-picker/0.1/amp-date-picker.js->src/sanitizer.js',
     ],
@@ -61,6 +63,8 @@ exports.rules = [
           'third_party/closure-library/sha384-generated.js',
       'extensions/amp-mustache/0.1/amp-mustache.js->' +
           'third_party/mustache/mustache.js',
+      'extensions/amp-ad-network-adzerk-impl/0.1/' +
+          'amp-ad-network-adzerk-impl.js->third_party/mustache/mustache.js',
       'extensions/amp-timeago/0.1/amp-timeago.js->' +
           'third_party/timeagojs/timeago.js',
       '3p/polyfills.js->third_party/babel/custom-babel-helpers.js',
@@ -195,6 +199,8 @@ exports.rules = [
       'extensions/amp-3q-player/0.1/amp-3q-player.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-ima-video/0.1/amp-ima-video.js->' +
+          'src/service/video-manager-impl.js',
+      'extensions/amp-wistia-player/0.1/amp-wistia-player.js->' +
           'src/service/video-manager-impl.js',
       'extensions/amp-fx-parallax/0.1/amp-fx-parallax.js->' +
           'src/service/parallax-impl.js',
