@@ -8,6 +8,9 @@ python:
 notifications:
   webhooks:
     - http://savage.nonblocking.io:8080/savage/travis
+# Test for skipping PR builds on this particular branch
+# if: NOT branch =~ TestSkipPrBuilds OR type = push
+if: sender =~ "Raghu Simha"
 before_install:
   - export CHROME_BIN=google-chrome
   - export DISPLAY=:99.0
