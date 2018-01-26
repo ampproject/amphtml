@@ -25,6 +25,7 @@ import {ParallaxProvider} from './providers/parallax';
 const TAG = 'amp-fx-collection';
 
 /**
+ * Enum for list of supported visual effects.
  * @enum {string}
  */
 const FxType = {
@@ -32,8 +33,8 @@ const FxType = {
 };
 
 /**
- * Map of Fx Type to Fx Provider class.
- * @type {Object<FxType, FxProviderInterface}
+ * Map of fx type to fx provider class.
+ * @type {Object<FxType, FxProviderInterface>}
  */
 const fxProviders = map();
 fxProviders[FxType.PARALLAX] = ParallaxProvider;
@@ -58,18 +59,23 @@ class AmpFxCollection {
     /** @private @const {!Array<!Element>} */
     this.seen_ = [];
 
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = Services.viewerForDoc(ampdoc);
+
     /** @private @const {!Object<FxType, FxProviderInterface>} */
     this.fxProviderInstances_ = map();
 
-    Services.viewerForDoc(ampdoc).whenFirstVisible().then(() => {
+    ampdoc.whenReady().then(this.viewer_.whenFirstVisible()).then(() => {
+      // Scan when page becomes visible.
       this.scan_();
+      // Rescan as DOM changes happen.
       listen(this.root_, AmpEvents.DOM_UPDATE, this.scan_.bind(this));
     });
   }
 
   /**
-   * Scans the root for fx-enabled elements and registers them with them with
-   * the fx provider.
+   * Scans the root for fx-enabled elements and registers them with the
+   * fx provider.
    */
   scan_() {
     const fxElements = this.root_.querySelectorAll('[amp-fx]');
@@ -78,25 +84,27 @@ class AmpFxCollection {
         return;
       }
 
-      // Don't break fx on all components if only a subset are misconfigured.
+      // Don't break for all components if only a subset are misconfigured.
       try {
         this.register_(fxElement);
       } catch (e) {
         rethrowAsync(e);
       }
-
     });
   }
 
   /**
+   * Registers an fx-enabled element with its requested fx providers.
    * @param {!Element} fxElement
    */
   register_(fxElement) {
     dev().assert(fxElement.hasAttribute('amp-fx'));
     dev().assert(!this.seen_.includes(fxElement));
+    dev().assert(this.viewer_.isVisible());
 
     /** @type {!Array<!FxType>} */
     const fxTypes = this.getFxTypes_(fxElement);
+
     fxTypes.forEach(fxType => {
       const fxProvider = this.getFxProvider_(fxType);
       fxProvider.installOn(fxElement);
@@ -120,6 +128,7 @@ class AmpFxCollection {
 
     user().assert(fxTypes.length, 'No value provided for `amp-fx` attribute');
 
+    // Validate that we support the requested fx types.
     fxTypes.forEach(fxType => {
       user().assertEnumValue(FxType, fxType, 'amp-fx');
     });
@@ -128,19 +137,23 @@ class AmpFxCollection {
   }
 
   /**
-   *
+   * Given an fx type, instantiates the appropriate provider if needed and
+   * returns it.
    * @param {*} fxType
    */
   getFxProvider_(fxType) {
+    dev().assert(fxProviders[fxType],
+        `No provider for ${fxType} found, did you forget to register it?`);
+
     if (!this.fxProviderInstances_[fxType]) {
       this.fxProviderInstances_[fxType] = new fxProviders[fxType](this.ampdoc_);
     }
-
     return this.fxProviderInstances_[fxType];
   }
 }
 
 /**
+ * Defines the expected interface all FxProviders need to implement.
  * @interface
  */
 export class FxProviderInterface {
