@@ -19,6 +19,7 @@ import {bezierCurve} from '../../../src/curve';
 import {CSS} from '../../../build/amp-lightbox-viewer-0.1.css';
 import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
+import {clamp} from '../../../src/utils/math';
 import {Services} from '../../../src/services';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLoaded} from '../../../src/event-helper';
@@ -59,6 +60,7 @@ const MAX_TRANSITION_DURATION = 1000; // ms
 const MIN_TRANSITION_DURATION = 300; // ms
 const MAX_DISTANCE_APPROXIMATION = 250; // px
 const MOTION_DURATION_RATIO = 0.8; // fraction of animation
+const EPSILON = 0.001; // precision for approx equals
 
 /**
  * TODO(aghassemi): Make lightbox-manager into a doc-level service.
@@ -678,7 +680,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     const elementHeight = ampImage./*OK*/offsetHeight;
     const elementWidth = ampImage./*OK*/offsetWidth;
     const ampImageAspectRatio = elementWidth / elementHeight;
-    return Math.abs(naturalAspectRatio - ampImageAspectRatio) > 0.001;
+    return Math.abs(naturalAspectRatio - ampImageAspectRatio) > EPSILON;
   }
 
   /**
@@ -867,10 +869,10 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   getTransitionDuration_(dy) {
     const distanceAdjustedDuration =
       Math.abs(dy) / MAX_DISTANCE_APPROXIMATION * MAX_TRANSITION_DURATION;
-    // clamp duration to MIN and MAX duration constants
-    return Math.max(
-        Math.min(distanceAdjustedDuration, MAX_TRANSITION_DURATION),
-        MIN_TRANSITION_DURATION
+    return clamp(
+        distanceAdjustedDuration,
+        MIN_TRANSITION_DURATION,
+        MAX_TRANSITION_DURATION
     );
   }
   /**

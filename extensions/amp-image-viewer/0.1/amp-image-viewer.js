@@ -212,7 +212,7 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @return {?Element}
    */
   getImage() {
-    return dev().assertElement(this.image_);
+    return this.image_;
   }
 
   /**
@@ -286,11 +286,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     } else {
       const img = elementByTag(dev().assertElement(this.sourceAmpImage_),
           'img');
-      if (img) {
-        return img.naturalWidth;
-      } else {
-        return this.sourceAmpImage_./*OK*/offsetWidth;
-      }
+      return img ? img.naturalWidth : this.sourceAmpImage_./*OK*/offsetWidth;
     }
   }
 
@@ -304,11 +300,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     } else {
       const img = elementByTag(dev().assertElement(this.sourceAmpImage_),
           'img');
-      if (img) {
-        return img.naturalHeight;
-      } else {
-        return this.sourceAmpImage_./*OK*/offsetHeight;
-      }
+      return img ? img.naturalHeight : this.sourceAmpImage_./*OK*/offsetHeight;
     }
   }
 
