@@ -17,6 +17,7 @@
 import {assertHttpsUrl} from './url';
 import {Services} from './services';
 import {getValueForExpr} from './json';
+import {user} from './log';
 
 /**
  * Batch fetches the JSON endpoint at the given element's `src` attribute.
@@ -27,24 +28,44 @@ import {getValueForExpr} from './json';
  * @param {!Element} element
  * @param {string=} opt_expr Dot-syntax reference to subdata of JSON result
  *     to return. If not specified, entire JSON result is returned.
+ * @param {string=} opt_expandUrl If 'all', expands the URL without opt-in.
+ *     If 'opt', expands the URL with opt-in. Otherwise, doesn't expand.
  * @return {!Promise<!JsonObject|!Array<JsonObject>>} Resolved with JSON
  *     result or rejected if response is invalid.
  */
-export function fetchBatchedJsonFor(ampdoc, element, opt_expr) {
+export function fetchBatchedJsonFor(
+  ampdoc, element, opt_expr = '.', opt_expandUrl = 'none')
+{
   const url = assertHttpsUrl(element.getAttribute('src'), element);
-  return Services.urlReplacementsForDoc(ampdoc).expandUrlAsync(url)
-      .then(src => {
-        const opts = {};
-        if (element.hasAttribute('credentials')) {
-          opts.credentials = element.getAttribute('credentials');
-        } else {
-          opts.requireAmpResponseSourceOrigin = false;
-        }
-        return Services.batchedXhrFor(ampdoc.win).fetchJson(src, opts);
-      }).then(res => res.json()).then(data => {
-        if (data == null) {
-          throw new Error('Response is undefined.');
-        }
-        return getValueForExpr(data, opt_expr || '.');
-      });
+
+  const urlReplacements = Services.urlReplacementsForDoc(ampdoc);
+  const srcPromise = (opt_expandUrl in ['all', 'opt'])
+    ? urlReplacements.expandUrlAsync(url)
+    : Promise.resolve(url);
+
+  return srcPromise.then(src => {
+    // Throw user error if this element is performing URL substitutions
+    // without the soon-to-be-required opt-in (#12498).
+    if (opt_expandUrl == 'opt') {
+      const unwhitelisted = urlReplacements.collectUnwhitelistedVars(element);
+      if (unwhitelisted.length > 0) {
+        const TAG = element.tagName;
+        user().error(TAG, 'Variable substitutions will soon require opt-in. ' +
+            `Please add data-amp-replace="${unwhitelisted.join(' ')}" to ` +
+            `the <${TAG}> element. This will stop working soon!`);
+      }
+    }
+    const opts = {};
+    if (element.hasAttribute('credentials')) {
+      opts.credentials = element.getAttribute('credentials');
+    } else {
+      opts.requireAmpResponseSourceOrigin = false;
+    }
+    return Services.batchedXhrFor(ampdoc.win).fetchJson(src, opts);
+  }).then(res => res.json()).then(data => {
+    if (data == null) {
+      throw new Error('Response is undefined.');
+    }
+    return getValueForExpr(data, opt_expr);
+  });
 }

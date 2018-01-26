@@ -1001,6 +1001,7 @@ export class UrlReplacements {
     return replacementPromise || Promise.resolve(replacement);
   }
 
+
   /**
    * Collects all substitutions in the provided URL and expands them to the
    * values for known variables. Optional `opt_bindings` can be used to add
@@ -1012,6 +1013,21 @@ export class UrlReplacements {
   collectVars(url, opt_bindings) {
     const vars = Object.create(null);
     return this.expand_(url, opt_bindings, vars).then(() => vars);
+  }
+
+
+  /**
+   * Collects substitutions in the `src` attribute of the given element
+   * that are _not_ whitelisted via `data-amp-replace` opt-in attribute.
+   * @param {!Element} element
+   * @return {!Promise<!Array<string>>}
+   */
+  collectUnwhitelistedVars(element) {
+    const url = element.getAttribute('src');
+    return this.collectVars(url).then(vars => {
+      const whitelist = this.getWhitelistForElement_(element);
+      return Object.keys(vars).filter(v => !whitelist[v]);
+    });
   }
 
 
