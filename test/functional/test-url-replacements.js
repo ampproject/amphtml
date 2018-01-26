@@ -367,7 +367,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     return expandUrlAsync(
         '?a=CLIENT_ID(abc,,url-abc)&b=CLIENT_ID(xyz,,url-xyz)',
         /*opt_bindings*/undefined, {withCid: true}).then(res => {
-      expect(res).to.match(/^\?a=cid-for-abc\&b=amp-([a-zA-Z2-9_-]+){10,}/);
+      expect(res).to.match(/^\?a=cid-for-abc\&b=amp-([a-zA-Z0-9_-]+){10,}/);
     });
   });
 
