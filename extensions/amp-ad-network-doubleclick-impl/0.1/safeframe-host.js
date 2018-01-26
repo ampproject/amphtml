@@ -16,8 +16,16 @@ const safeframeHosts = {};
 let safeframeListenerCreated = false;
 
 const MESSAGE_FIELDS = {
-  CHANNEL_NAME: 'c',
+  CHANNEL: 'c',
   SENTINEL: 'e',
+  ENDPOINT_IDENTITY: 'e',
+  PAYLOAD: 'p',
+  SERVICE: 's',
+};
+
+const SERVICE = {
+  GEOMETRY_UPDATE: 'geometry_update',
+  EXPAND_RESPONSE: 'expand_response',
 };
 
 const TAG = 'AMP-DOUBLECLICK-SAFEFRAME';
@@ -44,20 +52,18 @@ function safeframeListener() {
   if (data[MESSAGE_FIELDS.SENTINEL]) {
     const safeframeHost = safeframeHosts[data[MESSAGE_FIELDS.SENTINEL]];
     if (!safeframeHost) {
-      dev().warn(TAG, `Safeframe Host for sentinel ${data[MESSAGE_FIELDS.SENTINEL]} not found.`);
+      dev().warn(TAG, 'Safeframe Host for sentinel ' +
+                 `${data[MESSAGE_FIELDS.SENTINEL]} not found.`);
       return;
     }
-    if (!safeframeHost.channel) {
-      safeframeHost.connectMessagingChannel(data);
-      safeframeHost.channel = data[MESSAGE_FIELDS.CHANNEL_NAME];
-    }
+    !!safeframeHost.channel || safeframeHost.connectMessagingChannel(data);
     return;
   }
 
   /**
    * If sentinel not provided at top level, parse the payload and process the message.
    */
-  const payload = tryParseJson(data['p']);
+  const payload = tryParseJson(data[MESSAGE_FIELDS.PAYLOAD]);
   if (!payload || !payload['sentinel']) {
     return;
   }
@@ -116,12 +122,13 @@ export class SafeframeHostApi {
   }
 
   connectMessagingChannel(data) {
+    this.channel = data[MESSAGE_FIELDS.CHANNEL];
     dev().assert(this.baseInstance.iframe.contentWindow,
         'Frame contentWindow unavailable.');
     this.setupSafeframeApi();
     this.sendMessage(dict({
       'message': 'connect',
-      c: data[MESSAGE_FIELDS.CHANNEL_NAME],
+      c: data[MESSAGE_FIELDS.CHANNEL],
     }));
   }
 
@@ -151,14 +158,11 @@ export class SafeframeHostApi {
    * changes.
    */
   send(unused_trash, changes) {
-    this.sendMessage({
-      s: 'geometry_update',
-      p: JSON.stringify({
+    this.sendMessage(JSON.stringify({
         newGeometry: this.formatGeom(changes['changes'][0]),
         uid: 1,
-      }),
-      c: this.channel,
-    });
+      }), SERVICE.GEOMETRY_UPDATE
+    );
   }
 
   /**
@@ -206,11 +210,14 @@ export class SafeframeHostApi {
     return JSON.stringify(this.currentGeometry);
   }
 
-  sendMessage(message) {
+  sendMessage(payload, serviceName) {
+    const message = {};
+    message[MESSAGE_FIELDS.CHANNEL] = this.channel;
+    message[MESSAGE_FIELDS.PAYLOAD] = payload;
+    message[MESSAGE_FIELDS.SERVICE] = serviceName;
+    message[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = this.sentinel;
     this.baseInstance.iframe.contentWindow./*OK*/postMessage(
-        JSON.stringify(message),
-        SAFEFRAME_ORIGIN
-    );
+        JSON.stringify(message), SAFEFRAME_ORIGIN);
   }
 
   processMessage_(payload, messageType) {
@@ -236,27 +243,17 @@ export class SafeframeHostApi {
     const height = payload.expand_b - payload.expand_t;
     this.baseInstance.attemptChangeSize(height, width).catch(() => {});
     //this.baseInstance.handleResize_(width, height);
-    const p = JSON.stringify({
+    const responsePayload = JSON.stringify({
       uid: 1,
       success: true,
       newGeometry: JSON.stringify(this.currentGeometry),
-      /** OK */expand_t: this.currentGeometry.allowedExpansion_t,
-      expand_b: this.currentGeometry.allowedExpansion_b,
-      expand_r: this.currentGeometry.allowedExpansion_r,
-      expand_l: this.currentGeometry.allowedExpansion_l,
+      'expand_t': this.currentGeometry.allowedExpansion_t,
+      'expand_b': this.currentGeometry.allowedExpansion_b,
+      'expand_r': this.currentGeometry.allowedExpansion_r,
+      'expand_l': this.currentGeometry.allowedExpansion_l,
       push: true,
     });
-    const serviceName = 'expand_response';
-    const endpointIdentity = 1;
-    const message = {
-      c: this.channel,
-      p,
-      s: serviceName,
-      e: endpointIdentity,
-    };
-    this.baseInstance.iframe.contentWindow./*OK*/postMessage(
-        JSON.stringify(message),
-        SAFEFRAME_ORIGIN);
+    this.sendMessage(responsePayload, SERVICE.EXPAND_RESPONSE);
   }
 
   /**
@@ -278,4 +275,4 @@ export class SafeframeHostApi {
           this.baseInstance.forceCollapse();
         });
   }
-};
+}
