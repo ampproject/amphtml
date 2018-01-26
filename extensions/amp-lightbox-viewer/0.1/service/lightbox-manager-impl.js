@@ -89,6 +89,13 @@ export class LightboxManager {
      * @private {number}
      */
     this.counter_ = 0;
+
+    /**
+     * If the lightbox group is a carousel, this object contains a
+     * mapping of the lightbox group id to the carousel element.
+     * @private {!Object<string, !Element>}
+     */
+    this.lightboxSourceCarousels_ = {};
   }
 
   /**
@@ -103,6 +110,18 @@ export class LightboxManager {
     return this.initPromise_;
   }
 
+  /**
+   * Returns a reference to the source carousel of the lightbox
+   * group if one exits.
+   * @param {string} lightboxGroupId
+   * @return {Element|null}
+   */
+  getCarouselForLightboxGroup(lightboxGroupId) {
+    if (this.lightboxSourceCarousels_.hasOwnProperty(lightboxGroupId)) {
+      return this.lightboxSourceCarousels_[lightboxGroupId];
+    }
+    return null;
+  }
   /**
    * Decides whether an already lightboxable element should automatically get
    * a tap handler to open in the lightbox.
@@ -155,6 +174,7 @@ export class LightboxManager {
   processLightboxCarousel_(carousel) {
     const lightboxGroupId = carousel.getAttribute('lightbox') ||
     'carousel' + (carousel.getAttribute('id') || this.counter_++);
+    this.lightboxSourceCarousels_[lightboxGroupId] = carousel;
     this.getSlidesFromCarousel_(carousel).then(slides => {
       slides.forEach(slide => {
         if (!slide.hasAttribute('lightbox-exclude')) {

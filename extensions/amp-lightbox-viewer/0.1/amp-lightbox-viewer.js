@@ -74,7 +74,8 @@ let manager_;
  * @typedef {{
  *   descriptionText: string,
  *   tagName: string,
- *   imageViewer: ?Element
+ *   imageViewer: ?Element,
+ *   sourceElement: !Element
  * }}
  */
 let LightboxElementMetadataDef_;
@@ -234,6 +235,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       const metadata = {
         descriptionText: descText,
         tagName: clonedNode.tagName,
+        sourceElement: element,
       };
       let slide = clonedNode;
       if (clonedNode.tagName === 'AMP-IMG') {
@@ -306,6 +308,12 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   slideChangeHandler_(event) {
     this.currentElemId_ = getData(event)['index'];
     this.updateDescriptionBox_();
+    const sourceCarousel = this.manager_
+        .getCarouselForLightboxGroup(this.currentLightboxGroupId_);
+    if (sourceCarousel) {
+      /**@type {?}*/ (sourceCarousel).implementation_
+          .showSlideWhenReady(this.currentElemId_);
+    }
   }
 
   /**
@@ -617,7 +625,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   open_(element) {
-    this.sourceElement_ = element;
+    // this.sourceElement_ = element;
     const lightboxGroupId = element.getAttribute('lightbox')
       || 'default';
     this.currentLightboxGroupId_ = lightboxGroupId;
