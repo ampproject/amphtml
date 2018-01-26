@@ -284,7 +284,7 @@ function reportErrorToServer(message, filename, line, col, error) {
     // Report the error to viewer if it has the capability. The data passed
     // to the viewer is exactly the same as the data passed to the server
     // below.
-    maybeReportErrorToViewer(data);
+    maybeReportErrorToViewer(this, data);
     reportingBackoff(() => {
       const xhr = new XMLHttpRequest();
       xhr.open('POST', urls.errorReporting, true);
@@ -299,37 +299,37 @@ function reportErrorToServer(message, filename, line, col, error) {
  * - The viewer has the `errorReporter` capability
  * - The AMP doc is in single doc mode
  * - The AMP doc is opted-in for error interception (`<html>` tag has the
- *   `allow-error-reporting-to-viewer` attribute)
+ *   `report-errors-to-viewer` attribute)
  *
+ * @param {!Window} win
  * @param {!JsonObject} data Data from `getErrorReportData`.
- * @return {!Promise<boolean|undefined>} True if the error was sent to the
- *     viewer, `Promise<undefined>` otherwise.
+ * @return {!Promise<boolean>} `Promise<True>` if the error was sent to the
+ *     viewer, `Promise<False>` otherwise.
  * @visibleForTesting
  */
-export function maybeReportErrorToViewer(data) {
-  const ampdocService = Services.ampdocServiceFor(self);
+export function maybeReportErrorToViewer(win, data) {
+  const ampdocService = Services.ampdocServiceFor(win);
   if (!ampdocService.isSingleDoc()) {
-    return Promise.resolve();
+    return Promise.resolve(false);
   }
   const ampdocSingle = ampdocService.getAmpDoc();
   const htmlElement = ampdocSingle.getRootNode().documentElement;
-  const docOptedIn =
-      htmlElement.hasAttribute('allow-error-reporting-to-viewer');
+  const docOptedIn = htmlElement.hasAttribute('report-errors-to-viewer');
   if (!docOptedIn) {
-    return Promise.resolve();
+    return Promise.resolve(false);
   }
 
   const viewer = Services.viewerForDoc(ampdocSingle);
   if (!viewer.hasCapability('errorReporter')) {
-    return Promise.resolve();
+    return Promise.resolve(false);
   }
 
   return viewer.isTrustedViewer().then(viewerTrusted => {
     if (!viewerTrusted) {
-      return Promise.resolve();
+      return false;
     }
     viewer.sendMessage('error', data);
-    return Promise.resolve(true);
+    return true;
   });
 }
 

@@ -93,6 +93,7 @@ describes.fakeWin('installErrorReporting', {}, env => {
 });
 
 describe('maybeReportErrorToViewer', () => {
+  let win;
   let viewer;
   let sandbox;
   let ampdocServiceForStub;
@@ -105,8 +106,7 @@ describe('maybeReportErrorToViewer', () => {
     sandbox = sinon.sandbox.create();
 
     const optedInDoc = window.document.implementation.createHTMLDocument('');
-    optedInDoc.documentElement.setAttribute(
-        'allow-error-reporting-to-viewer', '');
+    optedInDoc.documentElement.setAttribute('report-errors-to-viewer', '');
 
     ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
     ampdocServiceForStub.returns({
@@ -130,7 +130,7 @@ describe('maybeReportErrorToViewer', () => {
 
   it('should not report if AMP doc is not single', () => {
     ampdocServiceForStub.returns({isSingleDoc: () => false});
-    return maybeReportErrorToViewer(data)
+    return maybeReportErrorToViewer(win, data)
         .then(() => expect(sendMessageStub).to.not.have.been.called);
   });
 
@@ -141,25 +141,25 @@ describe('maybeReportErrorToViewer', () => {
       isSingleDoc: () => true,
       getAmpDoc: () => ({getRootNode: () => nonOptedInDoc}),
     });
-    return maybeReportErrorToViewer(data)
+    return maybeReportErrorToViewer(win, data)
         .then(() => expect(sendMessageStub).to.not.have.been.called);
   });
 
   it('should not report if viewer is not capable', () => {
     sandbox.stub(viewer, 'hasCapability').withArgs('errorReporting')
         .returns(false);
-    return maybeReportErrorToViewer(data)
+    return maybeReportErrorToViewer(win, data)
         .then(() => expect(sendMessageStub).to.not.have.been.called);
   });
 
   it('should not report if viewer is not trusted', () => {
     sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
-    return maybeReportErrorToViewer(data)
+    return maybeReportErrorToViewer(win, data)
         .then(() => expect(sendMessageStub).to.not.have.been.called);
   });
 
   it('should send viewer message named `error`', () => {
-    return maybeReportErrorToViewer(data)
+    return maybeReportErrorToViewer(win, data)
         .then(() => expect(sendMessageStub).to.have.been
             .calledWith('error', data));
   });
