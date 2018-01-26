@@ -14,43 +14,41 @@
  * limitations under the License.
  */
 
-import { loadScript } from '../3p/3p';
-import { doubleclick } from '../ads/google/doubleclick';
-import { tryParseJson } from '../src/json';
-
-
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 
 export function medyanet(global, data) {
-    loadScript(global,
-        'https://medyanet.doracdn.com/devteam/AMP/init.js',
-        () => {
-            console.log("script loaded");
-            global.testFunc();
-            setTargeting(global, data, null);
-        });
-}
+    global.adunit = data.slot;
+    global.size = "[" + data.width + "," + data.height + "]";
 
+    if (global.adunit && global.size) {
+        medyanetAds(global, data);
+    }
+}
 
 /**
  * @param {!Window} global
  * @param {!Object} data
- * @param {?Object} targeting
  */
-function setTargeting(global, data, targeting) {
-    const dblParams = tryParseJson(data.gpt) || {};
-    dblParams['slot'] = data.slot;
-    dblParams['targeting'] = dblParams['targeting'] || {};
-    dblParams['width'] = data.width;
-    dblParams['height'] = data.height;
-    dblParams['type'] = 'doubleclick';
-
-    for (const i in targeting) {
-        dblParams['targeting'][i] = targeting[i];
-    }
-
-    doubleclick(global, dblParams);
+function medyanetAds(global, data) {
+    var f = document.createElement('iframe');
+    f.id = "adframe";
+    f.width = data.width;
+    f.height = data.height;
+    f.marginheight = "0";
+    f.marginwidth = "0";
+    f.style = "border:0 none transparent; position: relative;";
+    f.frameborder = "0";
+    f.allowfullscreen = "true";
+    f.scrolling = "no";
+    f.onload = function () {
+        window.context.renderStart();
+    };
+    f.src = 'https://medyanet.doracdn.com/devteam/AMP/Test17.html?bidderData=fanatik.com.tr&adunit=' + global.adunit + '&' + 'size=' + global.size;
+    document.body.appendChild(f);
 }
+
+
+

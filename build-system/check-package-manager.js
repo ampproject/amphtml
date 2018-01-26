@@ -58,7 +58,7 @@ function main() {
   }
 
   // Perform a node version check and print a warning if it is < v6 or == v7.
-    const nodeVersion = 'v8.9.1'; // getStdout('node --version').trim();
+  getStdout('node --version').trim();
   let majorVersion = nodeVersion.split('.')[0];
   if (majorVersion.charAt(0) === 'v') {
     majorVersion = majorVersion.slice(1);
@@ -78,7 +78,7 @@ function main() {
   }
 
   // If yarn is being run, perform a version check and proceed with the install.
-    const yarnVersion = '1.3.2';// getStdout('yarn --version').trim();
+  getStdout('yarn --version').trim();
   const major = parseInt(yarnVersion.split('.')[0], 10);
   const minor = parseInt(yarnVersion.split('.')[1], 10);
   if ((major < 1) || (minor < 2)) {

@@ -21,8 +21,6 @@ limitations under the License.
 ```html
 <amp-ad width=300 height=250
     type="medyanet"
-    data-timeout="700"
     data-slot="/2729856/AMP_Medyanet_AdUnit"
-    data-gpt='{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"]}'>
 </amp-ad>
 ```
