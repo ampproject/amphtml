@@ -220,7 +220,7 @@ export class PageScalingService {
     // instances in one doc.
     const win = toWin(story.ownerDocument.defaultView);
     if (!pageScalingService) {
-      // Falling back to transform on iOS because of font scaling issue.
+      // TODO(alanorozco, #13064): Falling back to transform on iOS
       if (!isCssZoomSupported(win) || Services.platformFor(win).isIos()) {
         // TODO(alanorozco, #12934): Combine transform matrix.
         user().warn('AMP-STORY',
