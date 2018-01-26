@@ -804,8 +804,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         opacity: tr.numeric(1, 0),
       }), MOTION_DURATION_RATIO, ENTER_CURVE_);
 
-
       if (sourceElement !== null
+        && sourceElement.tagName == 'AMP-IMG'
         && !this.aspectRatioChanged_(sourceElement)
         && (sourceElement == this.sourceElement_
         || this.manager_.hasCarousel(this.currentLightboxGroupId_))) {

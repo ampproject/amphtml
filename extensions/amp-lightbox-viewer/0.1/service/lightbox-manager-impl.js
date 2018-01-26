@@ -184,7 +184,11 @@ export class LightboxManager {
   processLightboxCarousel_(carousel) {
     const lightboxGroupId = carousel.getAttribute('lightbox') ||
     'carousel' + (carousel.getAttribute('id') || this.counter_++);
-    this.lightboxSourceCarousels_[lightboxGroupId] = carousel;
+    if (carousel.getAttribute('type') == 'slides') {
+      this.lightboxSourceCarousels_[lightboxGroupId] = carousel;
+      // TODO (#13011): scroll carousel needs to support goToSlide
+      // before we can use it for lightbox, so they currently don't count.
+    }
     this.getSlidesFromCarousel_(carousel).then(slides => {
       slides.forEach(slide => {
         if (!slide.hasAttribute('lightbox-exclude')) {
