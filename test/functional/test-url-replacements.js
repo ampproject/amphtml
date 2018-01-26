@@ -1156,7 +1156,8 @@ describes.sandboxed('UrlReplacements', {}, () => {
           }
           return Promise.resolve(accessService);
         };
-        return replacements.expandUrlAsync(url);
+        return replacements.expandUrlAsync(url, null, null,
+            url.match(/HTML_ATTR/) ? iframe.doc : null);
       });
     }
 
@@ -1177,6 +1178,13 @@ describes.sandboxed('UrlReplacements', {}, () => {
           .once();
       return expandUrlAsync('?a=AUTHDATA(field1)').then(res => {
         expect(res).to.match(/a=value1/);
+        expect(userErrorStub).to.have.not.been.called;
+      });
+    });
+
+    it('should replace HTML_ATTR', () => {
+      return expandUrlAsync('?a=HTML_ATTR(div,id)').then(res => {
+        expect(decodeURIComponent(res)).to.equal('?a=[{"id":"parent"}]');
         expect(userErrorStub).to.have.not.been.called;
       });
     });
