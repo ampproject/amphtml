@@ -110,7 +110,7 @@ export class RequestHandler {
    * @param {!Object<string, *>} dynamicBindings A mapping of variables to
    *     stringable values. For example, values could be strings, functions that
    *     return strings, promises, etc.
-   * @param {Document=} opt_contextDoc Used if any of the expansion variables
+   * @param {!Document=} opt_contextDoc Used if any of the expansion variables
    *     will be inspecting the document context
    */
   send(configParams, trigger, expansionOption, dynamicBindings,

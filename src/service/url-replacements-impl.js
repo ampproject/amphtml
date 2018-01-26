@@ -410,7 +410,7 @@ export class GlobalVariableSource extends VariableSource {
           return JSON.stringify(result);
         }
         for (let i = 0; i < elements.length &&
-               result.length < HTML_ATTR_MAX_RETURN_SIZE; ++i) {
+             result.length < HTML_ATTR_MAX_RETURN_SIZE; ++i) {
           const currentResult = {};
           attributeNames.forEach(attributeName => {
             const attributeValue = elements[i].getAttribute(attributeName);
@@ -742,7 +742,7 @@ export class UrlReplacements {
    * @param {!Object<string, *>=} opt_bindings
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
    *     that can be substituted.
-   * @param {Document=} opt_contextDoc Used if any of the expansion variables
+   * @param {!Document=} opt_contextDoc Used if any of the expansion variables
    *     will be inspecting the document context
    * @return {!Promise<string>}
    */
@@ -943,7 +943,7 @@ export class UrlReplacements {
    * @param {boolean=} opt_sync
    * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
    *     that can be substituted.
-   * @param {Document=} opt_contextDoc Used if any of the expansion variables
+   * @param {!Document=} opt_contextDoc Used if any of the expansion variables
    *     will be inspecting the document context
    * @return {!Promise<string>|string}
    * @private
