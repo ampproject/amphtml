@@ -194,11 +194,9 @@ export class PageScalingService {
     /** @private @const */
     this.vsync_ = Services.vsyncFor(win);
 
-    /** @private @const {!Element} */
+    /** @private @const {?Element} */
     // Assumes active page to be determinant of the target size.
-    this.sizer_ = dev().assertElement(
-        scopedQuerySelector(rootEl, 'amp-story-page[active]'),
-        'No active page found when initializing scaling service.');
+    this.sizer_ = scopedQuerySelector(rootEl, 'amp-story-page[active]');
 
     /** @private {?TargetDimensionsDef} */
     this.targetDimensions_ = null;
@@ -285,7 +283,8 @@ export class PageScalingService {
    */
   measureTargetDimensions_() {
     if (!this.targetDimensions_) {
-      const dimensions = targetDimensionsFor(this.sizer_);
+      const sizer = dev().assertElement(this.sizer_, 'No sizer.');
+      const dimensions = targetDimensionsFor(sizer);
       this.targetDimensions_ = dimensions;
       this.updateRootProps(dimensions);
     }
