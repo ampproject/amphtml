@@ -22,7 +22,7 @@ import {map} from '../../../src/utils/object';
 import {Services} from '../../../src/services';
 import {ParallaxProvider} from './providers/parallax';
 
-const TAG = 'amp-fx-presets';
+const TAG = 'amp-fx-collection';
 
 /**
  * @enum {string}
@@ -42,7 +42,7 @@ fxProviders[FxType.PARALLAX] = ParallaxProvider;
  * Bootstraps elements that have `amp-fx=<fx1 fx2>` attribute and installs
  * the specified effects on them.
  */
-class AmpFxPresets {
+class AmpFxCollection {
 
   /**
    * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -158,5 +158,5 @@ export class FxProviderInterface {
 };
 
 AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerServiceForDoc(TAG, AmpFxPresets);
+  AMP.registerServiceForDoc(TAG, AmpFxCollection);
 });

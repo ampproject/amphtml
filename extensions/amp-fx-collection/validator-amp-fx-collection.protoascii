@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 #
-
-tags: {  # amp-fx-presets
-  # Accepted amp-fx-presets attributes can be found in validator-main.protoascii
+tags: {  # amp-fx-collection
+  # Accepted amp-fx-collection attributes can be found in validator-main.protoascii
+  html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
-    name: "amp-fx-presets"
+    name: "amp-fx-collection"
     allowed_versions: "0.1"
     allowed_versions: "latest"
     # amp-fx-parallax has no associated tag which indicates usage of the extension.
