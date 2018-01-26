@@ -16,7 +16,6 @@
 
 import {CSS} from '../../../build/amp-access-scroll-0.1.css';
 import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client';
-import {Services} from '../../../src/services';
 import {installStylesForDoc} from '../../../src/style-installer';
 
 const TAG = 'amp-access-scroll-elt';
@@ -32,6 +31,7 @@ const CONFIG = /** @type {!JsonObject} */ ({
   'namespace': 'scroll',
 });
 
+
 /**
  * amp-access vendor that authenticates against the scroll.com service.
  * If the user is authenticated, also adds a fixed position iframe
@@ -42,46 +42,56 @@ const CONFIG = /** @type {!JsonObject} */ ({
  * @implements {../../amp-access/0.1/access-vendor.AccessVendor}
  */
 export class ScrollAccessVendor extends AccessClientAdapter {
+  /**
+   * @param ampdoc {!../../../src/service/ampdoc-impl.AmpDoc}
+   * @param accessService {!../../amp-access/0.1/amp-access.AccessService}
+   */
   constructor(ampdoc, accessService) {
     super(ampdoc, CONFIG, {
       buildUrl: accessService.buildUrl.bind(accessService),
       collectUrlVars: accessService.collectUrlVars_.bind(accessService),
     });
-    this.element_ = null;
+
+    /** @private {!../../amp-access/0.1/amp-access.AccessService} */
+    this.accessService_ = accessService;
   }
 
   authorize() {
     return super.authorize()
         .then(response => {
           if (response && response.scroll) {
-            this.element_ = new ScrollElement(this.ampdoc);
-            this.ampdoc.getBody().appendChild(this.element_);
-            this.element_.show();
+            new ScrollElement(this.ampdoc).show(this.accessService_);
           }
         });
   }
 }
 
 /**
- * @extends {HTMLElement}
+ * UI for logged-in Scroll users.
+ *
+ * Presents a fixed bar at the bottom of the screen.
  */
-class ScrollElement extends HTMLElement {
+class ScrollElement {
+  /**
+   * @param ampdoc {!../../../src/service/ampdoc-impl.AmpDoc}
+   */
   constructor(ampdoc) {
-    super();
     installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
 
+    /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
+    /** @const {!Element} */
     this.wrapper_ = document.createElement('div');
     this.wrapper_.classList.add('amp-access-scroll-bar');
-    this.appendChild(this.wrapper_);
+    ampdoc.getBody().appendChild(this.wrapper_);
 
-
+    /** @const {!Element} */
     this.placeholder_ = document.createElement('div');
     this.placeholder_.classList.add('amp-access-scroll-placeholder');
     this.wrapper_.appendChild(this.placeholder_);
 
-    const img = document.createElement('amp-img');
+    const img = document.createElement('img');
     img.setAttribute('src',
         'https://static.scroll.com/assets/icn-scroll-logo.svg');
     img.setAttribute('layout', 'fixed');
@@ -89,6 +99,7 @@ class ScrollElement extends HTMLElement {
     img.setAttribute('height', 26);
     this.placeholder_.appendChild(img);
 
+    /** @const {!Element} */
     this.iframe_ = document.createElement('iframe');
     this.iframe_.setAttribute('scrolling', 'no');
     this.iframe_.setAttribute('frameborder', '0');
@@ -96,21 +107,25 @@ class ScrollElement extends HTMLElement {
     this.iframe_.setAttribute('title', 'Scroll');
     this.iframe_.setAttribute('width', '100%');
     this.iframe_.setAttribute('height', '100%');
+    this.iframe_.setAttribute('sandbox', 'allow-scripts allow-same-origin ' +
+                                         'allow-top-navigation allow-popups ' +
+                                         'allow-popups-to-escape-sandbox');
     this.wrapper_.appendChild(this.iframe_);
+
   }
 
-  show() {
-    Services.accessServiceForDoc(this.ampdoc)
-        .then(accessService => accessService.getAccessReaderId())
+  /**
+   * @param accessService {!../../amp-access/0.1/amp-access.AccessService}
+   */
+  show(accessService) {
+    accessService.getAccessReaderId()
         .then(readerId => {
           this.iframe_.onload = () => {
             this.wrapper_.removeChild(this.placeholder_);
           };
           this.iframe_.setAttribute('src',
-              'https://connect.scroll.com/amp/scrollbar?readerId=' + readerId);
+              'https://connect.scroll.com/amp/scrollbar?readerId=' +
+              encodeURIComponent(readerId));
         });
   }
 }
-
-customElements.define('amp-access-scroll-elt',
-    /** @type {function(new:HTMLElement)} */ (ScrollElement));
