@@ -262,6 +262,11 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/12965',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12978',
   },
+  {
+    id: 'amp-document-recommendations',
+    name: 'Docment level recommendations and infinte scroll',
+    spec: 'https://github.com/ampproject/amphtml/issues/12945',
+  },
 ];
 
 if (getMode().localDev) {

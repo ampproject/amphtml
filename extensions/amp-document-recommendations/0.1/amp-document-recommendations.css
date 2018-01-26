@@ -1,0 +1,43 @@
+-amp-document-recommendations {}
+
+.-amp-document-recommendations {
+  background: white;
+}
+
+.amp-document-recommendations-division {
+  border-bottom: 1px solid rgba(0,0,0,0.12);
+}
+
+.amp-document-recommendations-image {
+}
+
+.amp-document-recommendations-text {
+  color: #3c4043;
+  font-family: sans-serif;
+  font-size: 17px;
+}
+
+.-reco-holder-article {
+  padding-top:10px;
+  padding-bottom:10px;
+  height:72px;
+}
+
+.-next-article-image {
+  width: 72px;
+  height: 72px;
+  float: left;
+  margin-left: 10px;
+  background-size: cover;
+  background-position: center;
+}
+
+.-next-article-title {
+  position: relative;
+  left: 10px;
+  top: 5px;
+  height: 60px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  margin-right: 30px;
+}
