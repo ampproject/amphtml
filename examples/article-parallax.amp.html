@@ -21,8 +21,7 @@
       position: relative;
     }
 
-    article,
-    header h1 {
+    h1 {
       margin: 0px 10px;
     }
 
@@ -33,7 +32,7 @@
       z-index: 1;
     }
 
-    header h1 span {
+    header h1 span, .title {
       background-color: black;
       color: white;
       line-height: 1.2em;
@@ -46,10 +45,6 @@
     .overlay, .overlay-top {
       position: absolute;
       bottom: 0;
-      padding: 10px;
-      color: #E91E63;
-      font-size: 2rem;
-      text-shadow:1px 1px 1px #F06292;
     }
 
     .overlay-top {
@@ -67,6 +62,21 @@
       padding: 10px;
       max-width: 412px;
       margin: auto;
+    }
+
+    a, a:visited, a:active {
+      color: #2196F3;
+      text-decoration: none;
+      display: block;
+      padding: 5px;
+    }
+
+    .overflow-window {
+      overflow: hidden;
+    }
+
+    .overflow-window amp-img {
+      margin-bottom: -80%;
     }
 
   </style>
@@ -140,28 +150,27 @@
   <main>
     <header>
       <h1 amp-fx="parallax" data-parallax-factor="1.5">
-          <span>Lorem Ipsum Dolor Sit Amet Consectetur Adipiscing<span>
+          <span class="title">Lorem Ipsum Dolor Sit Lorem Ipsum<span>
       </h1>
-      <amp-img height="50vh" layout="fixed-height" src="img/hero@1x.jpg"></amp-img>
+      <amp-img height="50vh" layout="fixed-height" src="https://picsum.photos/1600/900?image=1069"></amp-img>
     </header>
 
     <article>
-      <a href="#" on="tap:scrollToMe.scrollTo(duration=2000)">Scroll To middle slowly</a>
-      <a href="#scrollToMe">Scroll To middle fast</a>
+      <p>
+        <a href="#" on="tap:scrollToMe.scrollTo(duration=2000)">Tap to auto scroll slowly</a>
+        <a href="#scrollToMe">Tap to auto scroll fast</a>
+      </p>
+
       <div class="spacer"></div>
       <div class="overlay-container" id="scrollToMe">
-          <amp-img layout=responsive width=640 height=480 src="img/sea@1x.jpg"></amp-img>
-          <div class="overlay" amp-fx="parallax" data-parallax-factor="1.2">
-              Shelly sells seashells by the seashore
-          </div>
+          <amp-img layout=responsive width=1600 height=900 src="https://picsum.photos/1600/900?image=981"></amp-img>
+          <h1 class="overlay-top" amp-fx="parallax" data-parallax-factor="0.8">
+              <span class="title">Slow Lorem Ipsum Dolor Sit Lorem Ipsum<span>
+          </h1>
       </div>
       <div class="spacer"></div>
-      <div class="spacer"></div>
-      <div class="overlay-container" >
-          <amp-img layout=responsive width=640 height=480 src="img/hero@1x.jpg"></amp-img>
-          <div class="overlay-top" amp-fx="parallax" data-parallax-factor="0.8">
-              Slower!
-          </div>
+      <div class="overflow-window">
+          <amp-img amp-fx="parallax" data-parallax-factor="1.2" layout=responsive width=900 height=1600 src="https://picsum.photos/900/1600?image=736"></amp-img>
       </div>
       <div class="spacer"></div>
       <div class="spacer"></div>
