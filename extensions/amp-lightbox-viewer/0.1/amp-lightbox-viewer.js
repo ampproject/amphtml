@@ -27,7 +27,10 @@ import {Layout} from '../../../src/layout';
 import {user, dev} from '../../../src/log';
 import {toggle, setStyle} from '../../../src/style';
 import {getData, listen} from '../../../src/event-helper';
-import {LightboxManager} from './service/lightbox-manager-impl';
+import {
+  LightboxManager,
+  LightboxedCarouselMetadataDef,
+} from './service/lightbox-manager-impl';
 import {layoutRectFromDomRect} from '../../../src/layout-rect';
 import {closest, elementByTag, scopedQuerySelector} from '../../../src/dom';
 import * as st from '../../../src/style';
@@ -308,12 +311,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   slideChangeHandler_(event) {
     this.currentElemId_ = getData(event)['index'];
     this.updateDescriptionBox_();
-    const sourceCarousel = this.manager_
-        .getCarouselForLightboxGroup(this.currentLightboxGroupId_);
-    if (sourceCarousel) {
-      /**@type {?}*/ (sourceCarousel).implementation_
-          .showSlideWhenReady(this.currentElemId_);
-    }
   }
 
   /**
@@ -906,6 +903,27 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         MAX_TRANSITION_DURATION
     );
   }
+
+  maybeSyncSourceCarousel_() {
+    if (this.manager_.hasCarousel(this.currentLightboxGroupId_)) {
+      const lightboxCarouselMetadata = this.manager_
+          .getCarouselMetadataForLightboxGroup(this.currentLightboxGroupId_);
+
+      let returnSlideIndex = this.currentElemId_;
+
+      lightboxCarouselMetadata.excludedIndexes.some(i => {
+        if (i <= returnSlideIndex) {
+          returnSlideIndex++;
+        } else {
+          return true;
+        }
+      });
+
+      /**@type {?}*/ (lightboxCarouselMetadata.sourceCarousel).implementation_
+          .showSlideWhenReady(returnSlideIndex);
+    }
+  }
+
   /**
    * Closes the lightbox-viewer
    * @return {!Promise}
@@ -919,6 +937,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.active_ = false;
 
     this.cleanupEventListeners_();
+
+    this.maybeSyncSourceCarousel_();
 
     this.vsync_.mutate(() => {
       // If there's gallery, set gallery to display none
