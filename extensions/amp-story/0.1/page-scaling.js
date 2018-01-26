@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
+import {
+  childElementsByTag,
+  matches,
+  scopedQuerySelector,
+} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
-import {childElementsByTag, matches} from '../../../src/dom';
 import {px, setImportantStyles} from '../../../src/style';
-import {renderAsElement} from './simple-template';
 import {throttle} from '../../../src/utils/rate-limit';
-import {toArray} from '../../../src/types';
+import {toArray, toWin} from '../../../src/types';
+import {unscaledClientRect} from './utils';
 
 
 /** @private @const {number} */
@@ -36,27 +39,27 @@ const MAX_LAYER_WIDTH_PX = 520;
 const SCALING_APPLIED_CLASSNAME = 'i-amphtml-story-scaled';
 
 
-/** @private @const {!./simple-template.ElementDef} */
-const SIZER_TEMPLATE = {
-  tag: 'div',
-  attrs: dict({'class': 'i-amphtml-story-page-sizer'}),
-};
-
-
 /** @struct @typedef {{factor: number, width: number, height: number}} */
-let DimensionsDef;
+let TargetDimensionsDef;
 
 
-/** @typedef {{scale: function(!Element):!Promise}} */
-let PageScalingServiceInterface;
+/**
+ * @struct
+ * @typedef {{
+ *   relativeWidth: number,
+ *   relativeHeight: number,
+ *   matrix: ?Array<number>,
+ * }}
+ */
+let ScalableDimensionsDef;
 
 
 /**
  * @param {!Element} sizer
- * @return {!DimensionsDef}
+ * @return {!TargetDimensionsDef}
  */
 function targetDimensionsFor(sizer) {
-  const {width, height} = sizer./*OK*/getBoundingClientRect();
+  const {width, height} = unscaledClientRect(sizer);
 
   const ratio = width / height;
 
@@ -67,28 +70,30 @@ function targetDimensionsFor(sizer) {
 
   const factor = width / targetWidth;
 
-  return {width: targetWidth, height: targetHeight, factor};
+  return {factor, width: targetWidth, height: targetHeight};
 }
 
 
 /**
- * @param {!Element} page
- * @param {!DimensionsDef} dimensions
+ * @param {number} factor
+ * @param {number} width
+ * @param {number} height
+ * @param {!Array<number>} matrix
+ * @return {!Object<string, *>}
  */
-function applyScaling(page, dimensions) {
-  const {width, height, factor} = dimensions;
-  // TODO(alanorozco): Calculate relative layer dimensions for cases where
-  // they won't fill the entire page.
-  const style = {
-    'width': px(width),
-    'height': px(height),
-    'zoom': `${factor * 100}%`,
-    'box-sizing': 'border-box',
-  };
-  scalableChildren(page).forEach(el => {
-    setImportantStyles(el, style);
-  });
-  markScalingApplied(page);
+function scaleTransform(factor, width, height, matrix) {
+  // TODO(alanorozco, #12934): Translate values are not correctly calculated if
+  // `scale`, `skew` or `rotate` have been user-defined.
+  const translateX = width * factor / 2 - width / 2;
+  const translateY = height * factor / 2 - height / 2;
+  return [
+    matrix[0] * factor,
+    matrix[1],
+    matrix[2],
+    matrix[3] * factor,
+    matrix[4] + translateX,
+    matrix[5] + translateY,
+  ];
 }
 
 
@@ -96,7 +101,7 @@ function applyScaling(page, dimensions) {
  * @param {!Element} page
  * @return {!Array<!Element>}
  */
-function scalableChildren(page) {
+function scalableElements(page) {
   return toArray(childElementsByTag(page, 'amp-story-grid-layer'));
 }
 
@@ -106,7 +111,14 @@ function scalableChildren(page) {
  * @return {boolean}
  */
 function isScalingEnabled(page) {
-  return page.getAttribute('scaling') != 'disabled';
+  // TODO(alanorozco, #12902): Clean up experiment flag.
+  // NOTE(alanorozco): Experiment flag is temporary. No need to clutter the
+  // signatures in this function path by adding `win` as a parameter.
+  const win = toWin(page.ownerDocument.defaultView);
+  if (isExperimentOn(win, 'amp-story-scaling')) {
+    return true;
+  }
+  return page.getAttribute('scaling') == 'outside-range';
 }
 
 
@@ -139,34 +151,25 @@ function withinRange(page) {
 
 
 /**
- * @param {!Element} page
+ * @param {!Window} win
  * @return {boolean}
  */
-function needsScaling(page) {
-  return isScalingEnabled(page) && !isScalingApplied(page) && withinRange(page);
+function isCssZoomSupported(win) {
+  // IE supports `zoom`, but not `CSS.supports`.
+  return Services.platformFor(win).isIe() || win.CSS.supports('zoom', '1');
 }
 
 
 /**
- * @param {!Document} doc
- * @param {!Element} container
+ * @param {!Window} win
+ * @return {boolean}
  */
-function createSizer(doc, container) {
-  const element = renderAsElement(doc, SIZER_TEMPLATE);
-  container.appendChild(element);
-  return element;
+function isCssCustomPropsSupported(win) {
+  return !Services.platformFor(win).isIe() && win.CSS.supports('(--foo: red)');
 }
 
 
-/** @private @const {!PageScalingServiceInterface} */
-const MOCK_PAGE_SCALING_SERVICE = {
-  scale(unusedPage) {
-    return Promise.resolve();
-  },
-};
-
-
-/** @private {?PageScalingServiceInterface} */
+/** @private {?PageScalingService} */
 let pageScalingService = null;
 
 
@@ -177,43 +180,58 @@ let pageScalingService = null;
 // TODO(alanorozco): Make this part of the runtime layout system to prevent
 // FOUC-like jump and allow for SSR.
 export class PageScalingService {
-  constructor(win, story) {
+  /**
+   * @param {!Window} win
+   * @param {!Element} rootEl
+   */
+  constructor(win, rootEl) {
+    /** @private @const {!Window} */
+    this.win_ = win;
+
     /** @private @const {!Element} */
-    this.story_ = story;
+    this.rootEl_ = rootEl;
 
     /** @private @const */
     this.vsync_ = Services.vsyncFor(win);
 
     /** @private @const {!Element} */
-    this.sizer_ = createSizer(win.document, story);
+    // Assumes active page to be determinant of the target size.
+    this.sizer_ = dev().assertElement(
+        scopedQuerySelector(rootEl, 'amp-story-page[active]'),
+        'No active page found when initializing scaler.');
 
-    /** @private {?DimensionsDef} */
-    this.dimensions_ = null;
+    /** @private {?TargetDimensionsDef} */
+    this.targetDimensions_ = null;
 
-    Services.viewportForDoc(story).onResize(
+    /** @private {!Object<string, !Array<!ScalableDimensionsDef>>} */
+    this.scalableElsDimensions_ = {};
+
+    Services.viewportForDoc(rootEl).onResize(
         throttle(win, () => this.onViewportResize_(), 100));
   }
 
   /**
-   * @param {!Window} win
    * @param {!Element} story
-   * @return {!PageScalingServiceInterface}
+   * @return {!PageScalingService}
    */
-  static for(win, story) {
+  static for(story) {
     // Implemented as singleton for now, should be mapped to story element.
     // TODO(alanorozco): Implement mapping to support multiple <amp-story>
     // instances in one doc.
+    const win = toWin(story.ownerDocument.defaultView);
     if (!pageScalingService) {
-      if (!isExperimentOn(win, 'amp-story-scaling')) {
-        pageScalingService = MOCK_PAGE_SCALING_SERVICE;
-      } else if (Services.platformFor(win).isFirefox()) {
-        // Firefox does not support `zoom`.
-        // TODO(alanorozco): Use `scale` on Firefox.
+      if (!isCssZoomSupported(win)) {
+        // TODO(alanorozco, #12934): Combine transform matrix.
         user().warn('AMP-STORY',
-            '`amp-story-scaling` ignored: Firefox is not supported.');
-        pageScalingService = MOCK_PAGE_SCALING_SERVICE;
+            '`amp-story-scaling` using CSS transforms as fallback.',
+            'Any `amp-story-grid-layer` with user-defined CSS transforms will',
+            'break.',
+            'See https://github.com/ampproject/amphtml/issues/12934');
+        pageScalingService = new TransformScalingService(win, story);
+      } else if (isCssCustomPropsSupported(win)) {
+        pageScalingService = new CssPropsZoomScalingService(win, story);
       } else {
-        pageScalingService = new PageScalingService(win, story);
+        pageScalingService = new ZoomScalingService(win, story);
       }
     }
     return pageScalingService;
@@ -224,30 +242,216 @@ export class PageScalingService {
    * @return {!Promise}
    */
   scale(page) {
-    if (!needsScaling(page)) {
-      return Promise.resolve();
+    return Promise.resolve(this.scale_(page));
+  }
+
+  /**
+   * @param {!Element} page
+   * @return {!Promise|undefined}
+   * @private
+   */
+  scale_(page) {
+    if (isScalingApplied(page)) {
+      return;
+    }
+    if (!isScalingEnabled(page)) {
+      return;
+    }
+    if (!withinRange(page)) {
+      return;
     }
     return this.vsync_.runPromise({
-      measure: () => {
-        if (!this.dimensions_) {
-          this.dimensions_ = targetDimensionsFor(this.sizer_);
-        }
+      measure: state => {
+        state.targetDimensions = this.measureTargetDimensions_();
+        state.scalableElsDimensions = this.measureScalableElements(page);
       },
-      mutate: () => {
-        const dimensions =
-            /** @type {!DimensionsDef} */ (dev().assert(this.dimensions_));
-        applyScaling(page, dimensions);
+      mutate: state => {
+        const {targetDimensions, scalableElsDimensions} = state;
+        scalableElements(page).forEach((el, i) => {
+          const elementDimensions = scalableElsDimensions[i];
+          const style = this.scalingStyles(targetDimensions, elementDimensions);
+
+          // Required since layer now has a width/height set.
+          Object.assign(style, {'box-sizing': 'border-box'});
+
+          setImportantStyles(el, style);
+        });
+        markScalingApplied(page);
       },
+    }, /* state */ {});
+  }
+
+  /**
+   * @param {!TargetDimensionsDef} unusedTargetDimensions
+   * @param {!ScalableDimensionsDef} unusedScalableElDimensions
+   * @return {!Object<string, *>}
+   * @protected
+   */
+  scalingStyles(unusedTargetDimensions, unusedScalableElDimensions) {
+    dev().assert(false, 'Empty PageScalingService implementation.');
+    return {};
+  }
+
+  /**
+   * @return {!TargetDimensionsDef}
+   * @private
+   */
+  measureTargetDimensions_() {
+    if (!this.targetDimensions_) {
+      const dimensions = targetDimensionsFor(this.sizer_);
+      this.targetDimensions_ = dimensions;
+      this.updateRootProps(dimensions);
+    }
+    return /** @type {!TargetDimensionsDef} */ (
+      dev().assert(this.targetDimensions_));
+  }
+
+  /**
+   * Updates properties on root element when target dimensions have been
+   * re-measured.
+   * @param {!TargetDimensionsDef} unusedTargetDimensions
+   */
+  updateRootProps(unusedTargetDimensions) {
+    // Intentionally left blank.
+  }
+
+  /**
+   * @param {!Element} page
+   * @return {!Array<!ScalableDimensionsDef>}
+   * @protected
+   */
+  measureScalableElements(page) {
+    const pageId = user().assert(page.id, 'No page id.');
+
+    if (!this.scalableElsDimensions_[pageId]) {
+      this.scalableElsDimensions_[pageId] = this.measureScalableElsFor(page);
+    }
+
+    return /** @type {!Array<!ScalableDimensionsDef>} */ (
+      dev().assert(this.scalableElsDimensions_[pageId]));
+  }
+
+  /**
+   * Measures scalable elements in a page.
+   * @param {!Element} page
+   * @return {!Array<!ScalableDimensionsDef>}
+   */
+  measureScalableElsFor(page) {
+    const {width, height} = unscaledClientRect(page);
+    const pageWidth = width;
+    const pageHeight = height;
+    return scalableElements(page).map(el => {
+      const {width, height} = unscaledClientRect(el);
+      return {
+        matrix: this.getTransformMatrix(el),
+        relativeWidth: width / pageWidth,
+        relativeHeight: height / pageHeight,
+      };
     });
+  }
+
+  /**
+   * Gets an element's transform matrix.
+   * @param {!Element} unusedEl
+   * @return {?Array<number>}
+   */
+  getTransformMatrix(unusedEl) {
+    // Calculating a transform matrix is optional depending on scaling
+    // implementation.
+    return null;
   }
 
   /** @private */
   onViewportResize_() {
-    const pages = toArray(childElementsByTag(this.story_, 'amp-story-page'));
-    this.dimensions_ = null;
+    this.targetDimensions_ = null;
+    this.vsync_.measure(() => {
+      this.measureTargetDimensions_();
+    });
+    this.updatePagesOnResize();
+  }
+
+  /** @protected */
+  updatePagesOnResize() {
+    const pages = toArray(childElementsByTag(this.rootEl_, 'amp-story-page'));
     pages.forEach(page => {
       markScalingApplied(page, false);
-      this.scale(page);
+      this.scale_(page);
     });
+  }
+}
+
+
+/** Uses CSS zoom as scaling method. */
+class ZoomScalingService extends PageScalingService {
+  /** @override */
+  scalingStyles(targetDimensions, elementDimensions) {
+    const {width, height, factor} = targetDimensions;
+    const {relativeWidth, relativeHeight} = elementDimensions;
+    return {
+      'width': px(width * relativeWidth),
+      'height': px(height * relativeHeight),
+      'zoom': factor,
+    };
+  }
+}
+
+
+/** Uses combined CSS transform as scaling method. */
+class TransformScalingService extends PageScalingService {
+  /** @override */
+  getTransformMatrix(unusedEl) {
+    // TODO(alanorozco, #12934): Implement.
+    return [1, 0, 0, 1, 0, 0];
+  }
+
+  /** @override */
+  scalingStyles(targetDimensions, elementDimensions) {
+    const {width, height, factor} = targetDimensions;
+    const {relativeWidth, relativeHeight, matrix} = elementDimensions;
+    const initialMatrix = /** @type {!Array<number>} */ (
+        dev().assert(matrix, 'No initial matrix'));
+    const transformedMatrix =
+        scaleTransform(factor, width, height, initialMatrix);
+    return {
+      'width': px(width * relativeWidth),
+      'height': px(height * relativeHeight),
+      'transform': `matrix(${transformedMatrix.join()})`,
+    };
+  }
+}
+
+
+/** Uses CSS zoom and custom CSS properties as scaling method. */
+class CssPropsZoomScalingService extends PageScalingService {
+  /** @override */
+  measureScalableElements(page) {
+    // Circumvents layer cache as layers are only mutated once per page.
+    return this.measureScalableElsFor(page);
+  }
+
+  /** @override */
+  updateRootProps() {
+    const {width, height, factor} = this.targetDimensions_;
+    this.vsync_.mutate(() => {
+      this.rootEl_.style.setProperty('--i-amphtml-story-width', px(width));
+      this.rootEl_.style.setProperty('--i-amphtml-story-height', px(height));
+      this.rootEl_.style.setProperty('--i-amphtml-story-factor',
+          factor.toString());
+    });
+  }
+
+  /** @override */
+  updatePagesOnResize() {
+    // No need to update.
+  }
+
+  /** @override */
+  scalingStyles(unusedTargetDimensions, elementDimensions) {
+    const {relativeWidth, relativeHeight} = elementDimensions;
+    return {
+      'width': `calc(var(--i-amphtml-story-width) * ${relativeWidth})`,
+      'height': `calc(var(--i-amphtml-story-height) * ${relativeHeight})`,
+      'zoom': 'var(--i-amphtml-story-factor)',
+    };
   }
 }

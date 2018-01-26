@@ -375,7 +375,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   scale_() {
     const storyEl = dev().assertElement(this.element.parentNode);
-    return PageScalingService.for(this.win, storyEl).scale(this.element);
+    return PageScalingService.for(storyEl).scale(this.element);
   }
 
   /**
