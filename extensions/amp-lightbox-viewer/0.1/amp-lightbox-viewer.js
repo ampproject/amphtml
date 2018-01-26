@@ -625,7 +625,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   open_(element) {
-    // this.sourceElement_ = element;
+    this.sourceElement_ = element;
     const lightboxGroupId = element.getAttribute('lightbox')
       || 'default';
     this.currentLightboxGroupId_ = lightboxGroupId;
@@ -707,6 +707,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     const anim = new Animation(this.element);
     let duration = MIN_TRANSITION_DURATION;
     let transLayer = null;
+    const sourceElement = this.getCurrentElement_().sourceElement;
     return this.vsync_.measurePromise(() => {
       // Lightbox background fades in.
       anim.add(0, tr.setStyles(this.element, {
@@ -714,21 +715,20 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       }), MOTION_DURATION_RATIO, ENTER_CURVE_);
 
       // Try to transition from the source image.
-      if (this.sourceElement_ && isLoaded(this.sourceElement_)
-        && !this.aspectRatioChanged_(this.sourceElement_)) {
+      if (sourceElement && isLoaded(sourceElement)
+        && !this.aspectRatioChanged_(sourceElement)) {
 
         // TODO (#13039): implement crop and object fit contain transitions
         transLayer = this.element.ownerDocument.createElement('div');
         transLayer.classList.add('i-amphtml-lightbox-viewer-trans');
         this.element.ownerDocument.body.appendChild(transLayer);
-        const rect = layoutRectFromDomRect(this.sourceElement_
+        const rect = layoutRectFromDomRect(sourceElement
             ./*OK*/getBoundingClientRect());
 
         const imageBox = /**@type {?}*/ (this.getCurrentElement_().imageViewer)
             .implementation_.getImageBoxWithOffset();
 
-        const clone = this.sourceElement_.cloneNode(true);
-
+        const clone = sourceElement.cloneNode(true);
         clone.className = '';
         st.setStyles(clone, {
           position: 'absolute',
@@ -740,8 +740,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
           willChange: 'transform',
         });
         transLayer.appendChild(clone);
-
-        this.sourceElement_.classList.add('i-amphtml-ghost');
 
         // Move and resize the image to the location given by the lightbox.
         const dx = imageBox.left - rect.left;
@@ -791,21 +789,32 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   exit_() {
     const anim = new Animation(this.element);
     let duration = MIN_TRANSITION_DURATION;
-    const imageBox = /**@type {?}*/ (this.getCurrentElement_().imageViewer)
+    const currentElementMetadata = this.getCurrentElement_();
+    const imageBox = /**@type {?}*/ (currentElementMetadata.imageViewer)
         .implementation_.getImageBoxWithOffset();
-    const image = /**@type {?}*/ (this.getCurrentElement_().imageViewer)
+    const image = /**@type {?}*/ (currentElementMetadata.imageViewer)
         .implementation_.getImage();
+    const sourceElement = currentElementMetadata.sourceElement;
     // Try to transition to the source image.
     let transLayer = null;
+
     return this.vsync_.measurePromise(() => {
-      if (this.sourceElement_ && image
-          && !this.aspectRatioChanged_(this.sourceElement_)) {
-        // TODO (#13013): if current image is not the original image, don't transition
+      // Lightbox background fades out.
+      anim.add(0, tr.setStyles(this.element, {
+        opacity: tr.numeric(1, 0),
+      }), MOTION_DURATION_RATIO, ENTER_CURVE_);
+
+
+      if (sourceElement !== null
+        && !this.aspectRatioChanged_(sourceElement)
+        && (sourceElement == this.sourceElement_
+        || this.manager_.hasCarousel(this.currentLightboxGroupId_))) {
         transLayer = this.element.ownerDocument.createElement('div');
         transLayer.classList.add('i-amphtml-lightbox-viewer-trans');
         this.element.ownerDocument.body.appendChild(transLayer);
+        sourceElement.classList.add('i-amphtml-ghost');
 
-        const rect = layoutRectFromDomRect(this.sourceElement_
+        const rect = layoutRectFromDomRect(sourceElement
             ./*OK*/getBoundingClientRect());
         const clone = image.cloneNode(true);
         st.setStyles(clone, {
@@ -843,7 +852,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         anim.add(0, (time, complete) => {
           moveAndScale(time);
           if (complete) {
-            this.sourceElement_.classList.remove('i-amphtml-ghost');
+            sourceElement.classList.remove('i-amphtml-ghost');
           }
         }, MOTION_DURATION_RATIO, EXIT_CURVE_);
 
@@ -857,8 +866,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     }).then(() => {
       return anim.start(duration).thenAlways(() => {
         return this.vsync_.mutatePromise(() => {
-          if (this.sourceElement_) {
-            this.sourceElement_.classList.remove('i-amphtml-ghost');
+          if (sourceElement) {
+            sourceElement.classList.remove('i-amphtml-ghost');
           }
           st.setStyles(this.element, {
             opacity: '',

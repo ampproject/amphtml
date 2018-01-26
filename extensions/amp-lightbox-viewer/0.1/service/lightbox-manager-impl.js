@@ -112,7 +112,7 @@ export class LightboxManager {
 
   /**
    * Returns a reference to the source carousel of the lightbox
-   * group if one exits.
+   * group if one exists.
    * @param {string} lightboxGroupId
    * @return {Element|null}
    */
@@ -122,6 +122,16 @@ export class LightboxManager {
     }
     return null;
   }
+
+  /**
+   * Returns true if the lightboxGroupId belongs to an amp carousel
+   * @param {string} lightboxGroupId
+   * @return {boolean}
+   */
+  hasCarousel(lightboxGroupId) {
+    return this.lightboxSourceCarousels_.hasOwnProperty(lightboxGroupId);
+  }
+
   /**
    * Decides whether an already lightboxable element should automatically get
    * a tap handler to open in the lightbox.
