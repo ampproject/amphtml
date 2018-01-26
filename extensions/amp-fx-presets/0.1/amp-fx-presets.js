@@ -17,7 +17,7 @@
 import {AmpEvents} from '../../../src/amp-events';
 import {listen} from '../../../src/event-helper';
 import {iterateCursor} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
+import {dev, user, rethrowAsync} from '../../../src/log';
 import {map} from '../../../src/utils/object';
 import {Services} from '../../../src/services';
 import {ParallaxProvider} from './providers/parallax';
@@ -33,7 +33,7 @@ const FxType = {
 
 /**
  * Map of Fx Type to Fx Provider class.
- * @type {Object<FxType, FxProviderInterface>}
+ * @type {Object<FxType, FxProviderInterface}
  */
 const fxProviders = map();
 fxProviders[FxType.PARALLAX] = ParallaxProvider;
@@ -58,6 +58,9 @@ class AmpFxPresets {
     /** @private @const {!Array<!Element>} */
     this.seen_ = [];
 
+    /** @private @const {!Object<FxType, FxProviderInterface>} */
+    this.fxProviderInstances_ = map();
+
     Services.viewerForDoc(ampdoc).whenFirstVisible().then(() => {
       this.scan_();
       listen(this.root_, AmpEvents.DOM_UPDATE, this.scan_.bind(this));
@@ -69,13 +72,19 @@ class AmpFxPresets {
    * the fx provider.
    */
   scan_() {
-    const fxElements = this.root_.querySelectorAll(['amp-fx']);
+    const fxElements = this.root_.querySelectorAll('[amp-fx]');
     iterateCursor(fxElements, fxElement => {
       if (this.seen_.includes(fxElement)) {
         return;
       }
 
-      this.register_(fxElement);
+      // Don't break fx on all components if only a subset are misconfigured.
+      try {
+        this.register_(fxElement);
+      } catch (e) {
+        rethrowAsync(e);
+      }
+
     });
   }
 
@@ -103,8 +112,8 @@ class AmpFxPresets {
    * @returns {!Array<!FxType>}
    */
   getFxTypes_(fxElement) {
-
-    const fxTypes = fxElement.getAttribute('fx-type')
+    dev().assert(fxElement.hasAttribute('amp-fx'));
+    const fxTypes = fxElement.getAttribute('amp-fx')
         .trim()
         .toLowerCase()
         .split(/\s+/);
@@ -124,7 +133,7 @@ class AmpFxPresets {
    */
   getFxProvider_(fxType) {
     if (!this.fxProviderInstances_[fxType]) {
-      this.fxProviderInstances_[fxType] = new fxProviders[fxType](this.ampdoc);
+      this.fxProviderInstances_[fxType] = new fxProviders[fxType](this.ampdoc_);
     }
 
     return this.fxProviderInstances_[fxType];
