@@ -684,17 +684,25 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Element} ampImage
+   * This function verifies that the source element is an amp-img and contains
+   * an img element and preserves the natural aspect ratio of the original img.
+   * @param {!Element} element
    * @return {boolean}
    * @private
    */
-  aspectRatioChanged_(ampImage) {
-    const img = elementByTag(dev().assertElement(ampImage), 'img');
+  shouldAnimate_(element) {
+    if (element.tagName !== 'AMP-IMG') {
+      return false;
+    }
+    const img = elementByTag(dev().assertElement(element), 'img');
+    if (!img) {
+      return false;
+    }
     const naturalAspectRatio = img.naturalWidth / img.naturalHeight;
-    const elementHeight = ampImage./*OK*/offsetHeight;
-    const elementWidth = ampImage./*OK*/offsetWidth;
+    const elementHeight = element./*OK*/offsetHeight;
+    const elementWidth = element./*OK*/offsetWidth;
     const ampImageAspectRatio = elementWidth / elementHeight;
-    return Math.abs(naturalAspectRatio - ampImageAspectRatio) > EPSILON;
+    return Math.abs(naturalAspectRatio - ampImageAspectRatio) < EPSILON;
   }
 
   /**
@@ -716,7 +724,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
       // Try to transition from the source image.
       if (sourceElement && isLoaded(sourceElement)
-        && !this.aspectRatioChanged_(sourceElement)) {
+        && this.shouldAnimate_(sourceElement)) {
 
         // TODO (#13039): implement crop and object fit contain transitions
         transLayer = this.element.ownerDocument.createElement('div');
@@ -806,7 +814,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
       if (sourceElement !== null
         && sourceElement.tagName == 'AMP-IMG'
-        && !this.aspectRatioChanged_(sourceElement)
+        && this.shouldAnimate_(sourceElement)
         && (sourceElement == this.sourceElement_
         || this.manager_.hasCarousel(this.currentLightboxGroupId_))) {
         transLayer = this.element.ownerDocument.createElement('div');
