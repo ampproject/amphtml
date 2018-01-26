@@ -17,6 +17,7 @@
 import {CSS} from '../../../build/amp-image-viewer-0.1.css';
 import {Animation} from '../../../src/animation';
 import {bezierCurve} from '../../../src/curve';
+import {elementByTag} from '../../../src/dom';
 import {listen} from '../../../src/event-helper';
 import {Gestures} from '../../../src/gesture';
 import {dev, user} from '../../../src/log';
@@ -118,7 +119,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.motion_ = null;
 
     /** @private {?Element} */
-    this.sourceElement_ = null;
+    this.sourceAmpImage_ = null;
   }
 
   /** @override */
@@ -130,16 +131,16 @@ export class AmpImageViewer extends AMP.BaseElement {
         children.length == 1 && children[0].tagName == 'AMP-IMG',
         'amp-image-viewer should have an amp-img as its one and only child'
     );
-    this.sourceElement_ = children[0];
-    this.setAsOwner(this.sourceElement_);
+    this.sourceAmpImage_ = children[0];
+    this.setAsOwner(this.sourceAmpImage_);
   }
 
   /** @override */
   layoutCallback() {
     let elementLayoutPromise = Promise.resolve();
-    if (this.sourceElement_) {
-      this.scheduleLayout(this.sourceElement_);
-      elementLayoutPromise = this.sourceElement_.signals()
+    if (this.sourceAmpImage_) {
+      this.scheduleLayout(this.sourceAmpImage_);
+      elementLayoutPromise = this.sourceAmpImage_.signals()
           .whenSignal(CommonSignals.LOAD_END);
     }
     return elementLayoutPromise
@@ -151,8 +152,8 @@ export class AmpImageViewer extends AMP.BaseElement {
 
               this.init_();
               this.element.appendChild(this.image_);
-              this.element.removeChild(this.sourceElement_);
-              this.sourceElement_ = null;
+              this.element.removeChild(this.sourceAmpImage_);
+              this.sourceAmpImage_ = null;
             }
           });
         }).then(() => {
@@ -208,10 +209,10 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /**
    * Returns the boundaries of the image element.
-   * @return {!Element}
+   * @return {?Element}
    */
   getImage() {
-    return dev().assertElement(this.image_);
+    return this.image_;
   }
 
   /**
@@ -276,18 +277,46 @@ export class AmpImageViewer extends AMP.BaseElement {
   }
 
   /**
+   * @return {number}
+   * @private
+   */
+  getSourceWidth_() {
+    if (this.sourceAmpImage_.hasAttribute('width')) {
+      return parseInt(this.sourceAmpImage_.getAttribute('width'), 10);
+    } else {
+      const img = elementByTag(dev().assertElement(this.sourceAmpImage_),
+          'img');
+      return img ? img.naturalWidth : this.sourceAmpImage_./*OK*/offsetWidth;
+    }
+  }
+
+  /**
+   * @return {number}
+   * @private
+   */
+  getSourceHeight_() {
+    if (this.sourceAmpImage_.hasAttribute('height')) {
+      return parseInt(this.sourceAmpImage_.getAttribute('height'), 10);
+    } else {
+      const img = elementByTag(dev().assertElement(this.sourceAmpImage_),
+          'img');
+      return img ? img.naturalHeight : this.sourceAmpImage_./*OK*/offsetHeight;
+    }
+  }
+
+  /**
    * Initializes the image viewer to the target image element such as
    * "amp-img". The target image element may or may not yet have the img
    * element initialized.
    */
   init_() {
-    this.sourceWidth_ = this.sourceElement_./*OK*/offsetWidth;
-    this.sourceHeight_ = this.sourceElement_./*OK*/offsetHeight;
-    this.srcset_ = srcsetFromElement(this.sourceElement_);
+    this.sourceWidth_ = this.getSourceWidth_();
+    this.sourceHeight_ = this.getSourceHeight_();
+    this.srcset_ = srcsetFromElement(dev().assertElement(this.sourceAmpImage_));
 
     ARIA_ATTRIBUTES.forEach(key => {
-      if (this.sourceElement_.hasAttribute(key)) {
-        this.image_.setAttribute(key, this.sourceElement_.getAttribute(key));
+      if (this.sourceAmpImage_.hasAttribute(key)) {
+        this.image_.setAttribute(key, this.sourceAmpImage_.getAttribute(key));
       }
     });
     st.setStyles(dev().assertElement(this.image_), {
