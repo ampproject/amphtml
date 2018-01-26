@@ -410,7 +410,7 @@ function main() {
       colors.cyan(process.env.BUILD_SHARD),
       '\n');
 
-  // TESTING: Eliminate unnecesasry testing.
+  // TESTING: Eliminate unnecesasry testing negative test.
   if (process.env.TRAVIS_BRANCH.indexOf('TestSkipBuild') != -1 &&
       (process.env.TRAVIS_COMMIT_MESSAGE.indexOf('testing enabled') == -1)) {
     console.log(fileLogPrefix,
