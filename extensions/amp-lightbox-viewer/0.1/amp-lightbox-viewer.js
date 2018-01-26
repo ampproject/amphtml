@@ -515,7 +515,10 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     const target = dev().assertElement(e.target);
     const consumingElement = closest(target, element => {
       return element.tagName == 'BUTTON'
-        || element.getAttribute('role') == 'button';
+        || element.tagName == 'A'
+        || element.getAttribute('role') == 'button'
+        || (element.hasAttribute('on')
+        && element.getAttribute('on')./*OK*/matches(/(^|;)\s*tap\s*/));
     }, this.container_);
 
     return consumingElement == null;
