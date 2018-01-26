@@ -25,7 +25,7 @@
   "a4aFastFetchAdSenseLaunched": 0,
   "a4a-measure-get-ad-urls": 1,
   "a4a-new-signature-verifier": 1,
-  "3p-use-ampcontext": 0,
+  "3p-use-ampcontext": 1,
   "amp-animation": 1,
   "amp-sidebar toolbar": 1,
   "a4a-safeframe-preloading-off": 0.01,
