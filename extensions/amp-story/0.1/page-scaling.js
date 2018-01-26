@@ -198,7 +198,7 @@ export class PageScalingService {
     // Assumes active page to be determinant of the target size.
     this.sizer_ = dev().assertElement(
         scopedQuerySelector(rootEl, 'amp-story-page[active]'),
-        'No active page found when initializing scaler.');
+        'No active page found when initializing scaling service.');
 
     /** @private {?TargetDimensionsDef} */
     this.targetDimensions_ = null;
@@ -264,33 +264,19 @@ export class PageScalingService {
     return this.vsync_.runPromise({
       measure: state => {
         state.targetDimensions = this.measureTargetDimensions_();
-        state.scalableElsDimensions = this.measureScalableElements(page);
+        state.scalableElsDimensions = this.getOrMeasureScalableElsFor(page);
       },
       mutate: state => {
         const {targetDimensions, scalableElsDimensions} = state;
         scalableElements(page).forEach((el, i) => {
-          const elementDimensions = scalableElsDimensions[i];
-          const style = this.scalingStyles(targetDimensions, elementDimensions);
-
-          // Required since layer now has a width/height set.
-          Object.assign(style, {'box-sizing': 'border-box'});
-
-          setImportantStyles(el, style);
+          // `border-box` required since layer now has a width/height set.
+          setImportantStyles(el, {'box-sizing': 'border-box'});
+          setImportantStyles(el,
+              this.scalingStyles(targetDimensions, scalableElsDimensions[i]));
         });
         markScalingApplied(page);
       },
     }, /* state */ {});
-  }
-
-  /**
-   * @param {!TargetDimensionsDef} unusedTargetDimensions
-   * @param {!ScalableDimensionsDef} unusedScalableElDimensions
-   * @return {!Object<string, *>}
-   * @protected
-   */
-  scalingStyles(unusedTargetDimensions, unusedScalableElDimensions) {
-    dev().assert(false, 'Empty PageScalingService implementation.');
-    return {};
   }
 
   /**
@@ -308,20 +294,11 @@ export class PageScalingService {
   }
 
   /**
-   * Updates properties on root element when target dimensions have been
-   * re-measured.
-   * @param {!TargetDimensionsDef} unusedTargetDimensions
-   */
-  updateRootProps(unusedTargetDimensions) {
-    // Intentionally left blank.
-  }
-
-  /**
    * @param {!Element} page
    * @return {!Array<!ScalableDimensionsDef>}
    * @protected
    */
-  measureScalableElements(page) {
+  getOrMeasureScalableElsFor(page) {
     const pageId = user().assert(page.id, 'No page id.');
 
     if (!this.scalableElsDimensions_[pageId]) {
@@ -336,6 +313,7 @@ export class PageScalingService {
    * Measures scalable elements in a page.
    * @param {!Element} page
    * @return {!Array<!ScalableDimensionsDef>}
+   * @protected
    */
   measureScalableElsFor(page) {
     const {width, height} = unscaledClientRect(page);
@@ -351,6 +329,38 @@ export class PageScalingService {
     });
   }
 
+  /** @private */
+  onViewportResize_() {
+    this.targetDimensions_ = null;
+    this.vsync_.measure(() => {
+      this.measureTargetDimensions_();
+    });
+    this.updatePagesOnResize();
+  }
+
+  /** @protected */
+  scaleAll() {
+    const pages = toArray(childElementsByTag(this.rootEl_, 'amp-story-page'));
+    pages.forEach(page => {
+      markScalingApplied(page, false);
+      this.scale_(page);
+    });
+  }
+
+  /**
+   * Updates properties on root element when target dimensions have been
+   * re-measured.
+   * @param {!TargetDimensionsDef} unusedTargetDimensions
+   */
+  updateRootProps(unusedTargetDimensions) {
+    // Intentionally left blank.
+  }
+
+  /** @protected */
+  updatePagesOnResize() {
+    // Intentionally left blank.
+  }
+
   /**
    * Gets an element's transform matrix.
    * @param {!Element} unusedEl
@@ -362,28 +372,26 @@ export class PageScalingService {
     return null;
   }
 
-  /** @private */
-  onViewportResize_() {
-    this.targetDimensions_ = null;
-    this.vsync_.measure(() => {
-      this.measureTargetDimensions_();
-    });
-    this.updatePagesOnResize();
-  }
-
-  /** @protected */
-  updatePagesOnResize() {
-    const pages = toArray(childElementsByTag(this.rootEl_, 'amp-story-page'));
-    pages.forEach(page => {
-      markScalingApplied(page, false);
-      this.scale_(page);
-    });
+  /**
+   * @param {!TargetDimensionsDef} unusedTargetDimensions
+   * @param {!ScalableDimensionsDef} unusedScalableElDimensions
+   * @return {!Object<string, *>}
+   * @protected
+   */
+  scalingStyles(unusedTargetDimensions, unusedScalableElDimensions) {
+    dev().assert(false, 'Empty PageScalingService implementation.');
+    return {};
   }
 }
 
 
 /** Uses CSS zoom as scaling method. */
 class ZoomScalingService extends PageScalingService {
+  /** @protected */
+  updatePagesOnResize() {
+    this.scaleAll();
+  }
+
   /** @override */
   scalingStyles(targetDimensions, elementDimensions) {
     const {width, height, factor} = targetDimensions;
@@ -399,6 +407,11 @@ class ZoomScalingService extends PageScalingService {
 
 /** Uses combined CSS transform as scaling method. */
 class TransformScalingService extends PageScalingService {
+  /** @protected */
+  updatePagesOnResize() {
+    this.scaleAll();
+  }
+
   /** @override */
   getTransformMatrix(unusedEl) {
     // TODO(alanorozco, #12934): Implement.
@@ -409,10 +422,9 @@ class TransformScalingService extends PageScalingService {
   scalingStyles(targetDimensions, elementDimensions) {
     const {width, height, factor} = targetDimensions;
     const {relativeWidth, relativeHeight, matrix} = elementDimensions;
-    const initialMatrix = /** @type {!Array<number>} */ (
-        dev().assert(matrix, 'No initial matrix'));
+    const initialMatrix = /** @type {!Array<number>} */ (dev().assert(matrix));
     const transformedMatrix =
-        scaleTransform(factor, width, height, initialMatrix);
+      scaleTransform(factor, width, height, initialMatrix);
     return {
       'width': px(width * relativeWidth),
       'height': px(height * relativeHeight),
@@ -425,8 +437,8 @@ class TransformScalingService extends PageScalingService {
 /** Uses CSS zoom and custom CSS properties as scaling method. */
 class CssPropsZoomScalingService extends PageScalingService {
   /** @override */
-  measureScalableElements(page) {
-    // Circumvents layer cache as layers are only mutated once per page.
+  getOrMeasureScalableElsFor(page) {
+    // Circumvents element dimensions cache as layers are only mutated once.
     return this.measureScalableElsFor(page);
   }
 
@@ -439,11 +451,6 @@ class CssPropsZoomScalingService extends PageScalingService {
       this.rootEl_.style.setProperty('--i-amphtml-story-factor',
           factor.toString());
     });
-  }
-
-  /** @override */
-  updatePagesOnResize() {
-    // No need to update.
   }
 
   /** @override */
