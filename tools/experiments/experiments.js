@@ -267,7 +267,7 @@ const EXPERIMENTS = [
   },
   {
     id: 'amp-story-scaling',
-    name: 'Enables dynamic page scaling in amp-story',
+    name: 'Scale pages dynamically in amp-story by default',
     spec: 'https://github.com/ampproject/amphtml/issues/12902',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12902',
   },
