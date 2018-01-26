@@ -792,7 +792,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
   });
 
   it('should replace INCREMENTAL_ENGAGED_TIME', () => {
-    return expandAsync('?sh=' +
+    return expandUrlAsync('?sh=' +
       'INCREMENTAL_ENGAGED_TIME', /*opt_bindings*/undefined,
     {withActivity: true}).then(res => {
       expect(res).to.match(/sh=\d+/);
