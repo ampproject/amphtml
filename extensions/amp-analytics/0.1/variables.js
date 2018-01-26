@@ -19,6 +19,7 @@ import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
+import {REPLACEMENT_EXP_NAME} from '../../../src/service/url-replacements-impl';
 
 /** @const {string} */
 const TAG = 'Analytics.Variables';
@@ -129,7 +130,9 @@ export class VariableService {
    * @return {!Object} contains all registered macros
    */
   getMacros() {
-    return this.macros_;
+    const isV2ExpansionOn = this.win_ && isExperimentOn(this.win_,
+        REPLACEMENT_EXP_NAME);
+    return isV2ExpansionOn ? this.macros_ : {};
   }
 
   /**

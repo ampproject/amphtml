@@ -24,6 +24,7 @@ import {adopt} from '../../../../src/runtime';
 import * as sinon from 'sinon';
 import {Services} from '../../../../src/services';
 import {toggleExperiment} from '../../../../src/experiments';
+import {REPLACEMENT_EXP_NAME} from '../../../../src/service/url-replacements-impl';
 
 adopt(window);
 
@@ -130,17 +131,21 @@ describe('amp-analytics.VariableService', function() {
         .then(actual => expect(actual).to.equal('')));
 
   describes.fakeWin('macros', {amp: true}, env => {
+    let win;
     let ampdoc;
     let urlReplacementService;
 
     beforeEach(() => {
-      toggleExperiment(env.win, 'url-replacement-v2', true);
       ampdoc = env.ampdoc;
+      win = env.win;
+      toggleExperiment(env.win, REPLACEMENT_EXP_NAME, true);
+      installVariableService(win);
+      variables = variableServiceFor(win);
       urlReplacementService = Services.urlReplacementsForDoc(ampdoc);
     });
 
     afterEach(() => {
-      toggleExperiment(env.win, 'url-replacement-v2');
+      toggleExperiment(env.win, REPLACEMENT_EXP_NAME);
     });
 
     function check(input, output) {
@@ -150,7 +155,11 @@ describe('amp-analytics.VariableService', function() {
     }
 
     it('default works', () => check('DEFAULT(one,two)', 'one'));
+
     it('default works without first arg', () => check('DEFAULT(,two)', 'two'));
+
+    it('default works without first arg length',
+        () => check('DEFAULT(TRIM(), two)', 'two'));
 
     it('hash works', () => check('HASH(test)',
         'doQSMg97CqWBL85CjcRwazyuUOAqZMqhangiSb_o78S37xzLEmJV0ZYEff7fF6Cp'));
@@ -160,7 +169,6 @@ describe('amp-analytics.VariableService', function() {
     it('trim works', () => check('TRIM(hello      )', 'hello'));
 
     it('json works', () =>
-      // " Hello world! "
       check('JSON(Hello world!)', '%22Hello%20world!%22'));
 
     it('toLowerCase works', () =>

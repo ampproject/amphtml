@@ -28,7 +28,6 @@ import {Services} from '../../../src/services';
 import {batchSegmentDef, BatchingPluginFunctions} from './batching-plugins';
 import {parseQueryString} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
 
 const TAG = 'AMP-ANALYTICS';
 
@@ -118,16 +117,8 @@ export class RequestHandler {
     const isImmediate =
         (trigger['immediate'] === true) || (this.maxDelay_ == 0);
 
-    const isV2ExpansionON = this.ampdoc && isExperimentOn(this.ampdoc.win,
-        'url-replacement-v2');
-    let bindings;
-    if (isV2ExpansionON) {
-      const macros = this.variableService_.getMacros();
-      bindings = Object.assign({}, dynamicBindings, macros);
-    } else {
-      bindings = dynamicBindings;
-    }
-
+    const macros = this.variableService_.getMacros();
+    const bindings = Object.assign({}, dynamicBindings, macros);
     if (!this.baseUrlPromise_) {
       expansionOption.freezeVar('extraUrlParams');
       this.baseUrlTemplatePromise_ =
