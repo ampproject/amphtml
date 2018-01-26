@@ -1001,7 +1001,6 @@ export class UrlReplacements {
     return replacementPromise || Promise.resolve(replacement);
   }
 
-
   /**
    * Collects all substitutions in the provided URL and expands them to the
    * values for known variables. Optional `opt_bindings` can be used to add
@@ -1014,7 +1013,6 @@ export class UrlReplacements {
     const vars = Object.create(null);
     return this.expand_(url, opt_bindings, vars).then(() => vars);
   }
-
 
   /**
    * Collects substitutions in the `src` attribute of the given element
@@ -1029,7 +1027,6 @@ export class UrlReplacements {
       return Object.keys(vars).filter(v => !whitelist[v]);
     });
   }
-
 
   /**
    * Ensures that the protocol of the original url matches the protocol of the
