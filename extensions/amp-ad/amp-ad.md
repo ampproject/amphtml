@@ -330,6 +330,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Engageya](../../ads/engageya.md)
 - [Outbrain](../../ads/outbrain.md)
 - [Postquare](../../ads/postquare.md)
+- [PubExchange](../../ads/pubexchange.md)
 - [Smi2](../../ads/smi2.md)
 - [Taboola](../../ads/taboola.md)
 - [ZergNet](../../ads/zergnet.md)
