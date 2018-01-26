@@ -24,6 +24,7 @@ import {
 } from '../../../../src/dom';
 import {toArray} from '../../../../src/types';
 import {CommonSignals} from '../../../../src/common-signals';
+import {hasOwn, map} from '../../../../src/utils/object';
 
 const LIGHTBOX_ELIGIBLE_TAGS = {
   'amp-img': true,
@@ -46,7 +47,13 @@ const VALIDATION_ERROR_MSG = `lightbox attribute is only supported for the
  *  url: string,
  *  element: !Element
  * }} */
-let LightboxThumbnailDataDef;
+export let LightboxThumbnailDataDef;
+
+/** @typedef {{
+ *  sourceCarousel: !Element,
+ *  excludedIndexes: !Array<number>
+ * }} */
+let LightboxedCarouselMetadataDef;
 
 /**
  * LightboxManager is a document-scoped service responsible for:
@@ -80,15 +87,22 @@ export class LightboxManager {
      * Ordered lists of lightboxable elements according to group
      * @private {!Object<string, !Array<!Element>>}
      */
-    this.lightboxGroups_ = {
+    this.lightboxGroups_ = map({
       default: [],
-    };
+    });
 
     /**
      * Counter tracking number of carousels without ids
      * @private {number}
      */
     this.counter_ = 0;
+
+    /**
+     * If the lightbox group is a carousel, this object contains a
+     * mapping of the lightbox group id to the carousel element.
+     * @private {!Object<string, !LightboxedCarouselMetadataDef>}
+     */
+    this.lightboxSourceCarousels_ = map();
   }
 
   /**
@@ -101,6 +115,28 @@ export class LightboxManager {
     }
     this.initPromise_ = this.scanLightboxables_();
     return this.initPromise_;
+  }
+
+  /**
+   * Returns a reference to the source carousel of the lightbox
+   * group if one exists.
+   * @param {string} lightboxGroupId
+   * @return {!LightboxedCarouselMetadataDef|null}
+   */
+  getCarouselMetadataForLightboxGroup(lightboxGroupId) {
+    if (hasOwn(this.lightboxSourceCarousels_, lightboxGroupId)) {
+      return this.lightboxSourceCarousels_[lightboxGroupId];
+    }
+    return null;
+  }
+
+  /**
+   * Returns true if the lightboxGroupId belongs to an amp carousel
+   * @param {string} lightboxGroupId
+   * @return {boolean}
+   */
+  hasCarousel(lightboxGroupId) {
+    return hasOwn(this.lightboxSourceCarousels_, lightboxGroupId);
   }
 
   /**
@@ -155,9 +191,23 @@ export class LightboxManager {
   processLightboxCarousel_(carousel) {
     const lightboxGroupId = carousel.getAttribute('lightbox') ||
     'carousel' + (carousel.getAttribute('id') || this.counter_++);
+    if (carousel.getAttribute('type') == 'slides') {
+      this.lightboxSourceCarousels_[lightboxGroupId] = map({
+        'sourceCarousel': carousel,
+        'excludedIndexes': [],
+      });
+      // TODO (#13011): scroll carousel needs to support goToSlide
+      // before we can use it for lightbox, so they currently don't count.
+    }
     this.getSlidesFromCarousel_(carousel).then(slides => {
-      slides.forEach(slide => {
-        if (!slide.hasAttribute('lightbox-exclude')) {
+      slides.forEach((slide, index) => {
+        const shouldExcludeSlide = slide.hasAttribute('lightbox-exclude')
+            || (slide.hasAttribute('lightbox')
+                && slide.getAttribute('lightbox') !== lightboxGroupId);
+        if (shouldExcludeSlide) {
+          this.lightboxSourceCarousels_[lightboxGroupId]
+              .excludedIndexes.push(index);
+        } else {
           slide.setAttribute('lightbox', lightboxGroupId);
           this.processBaseLightboxElement_(slide, lightboxGroupId);
         }
