@@ -107,11 +107,14 @@ const attributesToForward = [
   'with-portal',
   'day-size',
   'week-day-format',
+  'month-format',
 ];
 
 const DEFAULT_DATE_SIZE = 45; // px
 
 const DEFAULT_FIRST_DAY_OF_WEEK = 0; // Sunday
+
+const DEFAULT_WEEK_DAY_FORMAT_CSS = 'i-amphtml-default-week-day-format';
 
 class AmpDatePicker extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -167,6 +170,7 @@ class AmpDatePicker extends AMP.BaseElement {
     this.firstDayOfWeek_ = this.element.getAttribute('first-day-of-week') ||
         DEFAULT_FIRST_DAY_OF_WEEK;
 
+    /** @private @const */
     this.daySize_ = this.element.getAttribute('day-size') || DEFAULT_DATE_SIZE;
 
     const blocked = this.element.getAttribute('blocked');
@@ -226,6 +230,11 @@ class AmpDatePicker extends AMP.BaseElement {
     this.element.appendChild(this.container_);
     this.render();
     this.element.setAttribute('i-amphtml-date-picker-attached', '');
+    // NOTE(cvializ): There is no standard date format for just the first letter
+    // of the week-day. So we hack it in with this CSS class and don't apply the
+    // CSS class if there is a week-day-format specified.
+    this.element.classList.toggle(DEFAULT_WEEK_DAY_FORMAT_CSS,
+        !this.element.getAttribute('week-day-format'));
   }
 
   /** @override */
@@ -511,12 +520,38 @@ class AmpDatePicker extends AMP.BaseElement {
   /** @return {!Promise<string>} */
   renderInfoTemplate_() {
     const template = this.element.querySelector('[info-template]');
-    return this.renderTemplate_(template);
+    if (template) {
+      return this.renderTemplateElement_(template)
+          .then(element => {
+            element.classList.add('i-amphtml-amp-date-picker-info');
+            return this.getRenderedTemplateString_(element);
+          });
+    } else {
+      return Promise.resolve('');
+    }
   }
 
   /**
-   * Render the given template with the given data. If the template does not
-   * exist, use a fallback string.
+   * Render the given template into an element with the given data.
+   * @param {!Element} template
+   * @param {!JsonObject=} opt_data
+   * @return {!Promise<!Element>}
+   */
+  renderTemplateElement_(template, opt_data = /** @type {!JsonObject} */ ({})) {
+    const renderPromise = this.templates_.renderTemplate(template, opt_data);
+    renderPromise.then(() => {
+      const renderedEvent = createCustomEvent(
+          this.win_,
+          AmpEvents.DOM_UPDATE,
+          /* detail */ null,
+          {bubbles: true});
+      this.container_.dispatchEvent(renderedEvent);
+    });
+    return renderPromise;
+  }
+
+  /**
+   * Render the given template into text with the given data.
    * The fallback string will be rendered directly into the DOM so it must
    * not contain unsanitized user-supplied values.
    * @param {?Element} template
@@ -526,20 +561,20 @@ class AmpDatePicker extends AMP.BaseElement {
    */
   renderTemplate_(template, opt_data, opt_fallback = '') {
     if (template) {
-      const data = opt_data || /** @type {!JsonObject} */ ({});
-      return this.templates_.renderTemplate(template, data)
-          .then(rendered => {
-            const renderedEvent = createCustomEvent(
-                this.win_,
-                AmpEvents.DOM_UPDATE,
-                /* detail */ null,
-                {bubbles: true});
-            this.container_.dispatchEvent(renderedEvent);
-            return rendered./*REVIEW*/outerHTML;
-          });
+      return this.renderTemplateElement_(template, opt_data)
+          .then(rendered => this.getRenderedTemplateString_(rendered));
     } else {
       return Promise.resolve(sanitizeFormattingHtml(opt_fallback));
     }
+  }
+
+  /**
+   * Convert a rendered template element to a string
+   * @param {!Element} rendered
+   * @return {string}
+   */
+  getRenderedTemplateString_(rendered) {
+    return rendered./*OK*/outerHTML;
   }
 
   /**

@@ -34,6 +34,7 @@ function createDateRangePickerBase() {
   const {
     DateRangePicker: DatePicker,
     DateRangePickerShape,
+    DateRangePickerPhrases,
   } = requireExternal('react-dates');
 
   React.options.syncComponentUpdates = false;
@@ -108,6 +109,13 @@ function createDateRangePickerBase() {
     displayFormat: () => moment.localeData().longDateFormat('L'),
     monthFormat: 'MMMM YYYY',
 
+    // TODO(cvializ): make these configurable for i18n
+    phrases: Object.assign({}, DateRangePickerPhrases, {
+      chooseAvailableStartDate: ({date}) => `Choose ${date} as the first date.`,
+      chooseAvailableEndDate: ({date}) => `Choose ${date} as the last date.`,
+      dateIsUnavailable: ({date}) => `The date ${date} is unavailable.`,
+      dateIsSelected: ({date}) => `The date ${date} is selected.`,
+    }),
     registerAction: null,
   };
 
