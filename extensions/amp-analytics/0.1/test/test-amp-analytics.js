@@ -81,7 +81,7 @@ describes.realWin('amp-analytics', {
     resetServiceForTesting(win, 'xhr');
     registerServiceBuilder(win, 'xhr', function() {
       return {fetchJson: (url, init) => {
-        expect(init.requireAmpResponseSourceOrigin).to.be.undefined;
+        expect(init.requireAmpResponseSourceOrigin).to.be.false;
         if (configWithCredentials) {
           expect(init.credentials).to.equal('include');
         } else {
