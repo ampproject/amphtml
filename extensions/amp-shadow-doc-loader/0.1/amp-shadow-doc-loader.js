@@ -98,10 +98,19 @@ export default class AmpShadowDocLoader extends AMP.BaseElement {
   }
 
   handleDocRequestError_(error) {
-    error.message += ` uri: ${this.docUrl_}`;
+    error.message += ` --- uri: ${this.docUrl_}`;
+    error.message += ` --- body: ${this.httpGet(this.docUrl_)}`;
+
     this.dispatchEvent_('error', error);
     this.createRetryButton_();
   }
+
+  httpGet(theUrl) {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( 'GET', theUrl, false );
+    xmlHttp.send( null );
+    return xmlHttp.responseText;
+}
 
   attachAMPDocument_(doc) {
     return new Promise(resolve => {
