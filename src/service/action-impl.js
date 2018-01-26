@@ -20,7 +20,7 @@ import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
 import {dev, user} from '../log';
 import {isArray, isFiniteNumber, toWin} from '../types';
-import {isEnabled} from '../dom';
+import {closest, isEnabled} from '../dom';
 import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
 import {map} from '../utils/object';
@@ -645,6 +645,16 @@ export function parseActionMap(s, context) {
   const assertToken = assertTokenForParser.bind(null, s, context);
 
   let actionMap = null;
+
+  const isStandaloneStory = !!closest(context, el => {
+    return el.classList.contains('i-amphtml-story-standalone');
+  });
+
+  if (isStandaloneStory) {
+    // We do not currently allow AMP actions and events to be used with
+    // amp-story[standalone].
+    return null;
+  }
 
   const toks = new ParserTokenizer(s);
   let tok;
