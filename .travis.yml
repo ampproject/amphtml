@@ -8,8 +8,6 @@ python:
 notifications:
   webhooks:
     - http://savage.nonblocking.io:8080/savage/travis
-# Skip greenkeeper PR builds
-if: NOT ((branch = ^greenkeeper/.*$) AND (type = pull_request))
 before_install:
   - export CHROME_BIN=google-chrome
   - export DISPLAY=:99.0
