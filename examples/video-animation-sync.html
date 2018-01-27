@@ -58,34 +58,14 @@
 </head>
 
 <body>
-  <amp-animation id="clockAnim1" layout="nodisplay">
-    <script type="application/json">
-      {
-      "duration": "3s",
-      "fill": "both",
-      "direction": "alternate",
-      "animations": [
-        {
-          "selector": "#clock-scene-1 .clock-hand",
-          "keyframes": [
-            { "transform": "rotate(-180deg)" },
-            { "transform": "rotate(0deg)" }
-          ]
-        }
-      ]
-    }
-    </script>
-  </amp-animation>
-
-  <amp-animation id="clockAnim2" layout="nodisplay">
+  <amp-animation id="clockAnim" layout="nodisplay">
     <script type="application/json">
       {
       "duration": "6s",
       "fill": "both",
-      "iterations": "infinity",
       "animations": [
         {
-          "selector": "#clock-scene-2 .clock-hand",
+          "selector": "#clock-scene .clock-hand",
           "keyframes": [
             { "transform": "rotate(-180deg)" },
             { "transform": "rotate(180deg)" }
@@ -96,76 +76,21 @@
     </script>
   </amp-animation>
   <main>
-    <div class="spacer"></div>
-
-    <h2>Scrollbound animations with amp-position-observer and amp-animation</h2>
-    <h3>The following animation does one round (12pm-6pm) via scrolling when fully visible between the middle 80% of the viewport</h3>
-
-    <div id="clock-scene-1" class="clock-scene">
-      <amp-position-observer
-        intersection-ratios="1"
-        viewport-margins="10vh"
-        on="scroll:clockAnim1.seekTo(percent=event.percent)"
-        layout="nodisplay">
-      </amp-position-observer>
-
+    <h1>The clock animation timeline is synced with youtube animation timeline</h1>
+    <div id="clock-scene" class="clock-scene">
       <amp-img layout="responsive" width=2 height=1.5 src="./img/clock.jpg">
         <div class="clock-hand"></div>
       </amp-img>
     </div>
-
-    <div class="spacer"></div>
-
-    <h2>Custom visibility start-end with amp-position-observer and amp-animation</h2>
-    <h3>The following animation will start when the scene is 50% visible and pauses when 50% invisible</h3>
-
-    <div id="clock-scene-2" class="clock-scene">
-      <amp-position-observer
-        intersection-ratios="0.5"
-        on="enter:clockAnim2.start;exit:clockAnim2.pause"
-        layout="nodisplay">
-      </amp-position-observer>
-
-      <amp-img layout="responsive" width=2 height=1.5 src="./img/clock.jpg">
-        <div class="clock-hand"></div>
-      </amp-img>
-    </div>
-
-    <div class="spacer"></div>
-    <h2>Seek video via scroll</h2>
-    <h3>Similar to animations, videos can be seeked via scroll as well</h3>
-    <div>
-      <amp-position-observer
-        intersection-ratios="1"
-        on="scroll:myVideo.seekTo(percent=event.percent),myYouTube.seekTo(percent=event.percent);
-        enter:myVideo.play,myYouTube.play;
-        exit:myVideo.pause,myYouTube.pause;"
-        layout="nodisplay">
-      </amp-position-observer>
-
-      <amp-video
-        id=myVideo
-        title="Big Buck Bunny"
-        artist="Blender Foundation"
-        poster="img/bigbuckbunny.jpg"
-        album="The Peach Open Movie Project"
-        src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-        width="720"
-        height="405"
-        layout="responsive"
-        preload="metadata"
-        controls>
-    </amp-video>
     <amp-youtube
+        on="time-update:clockAnim.seekTo(percent=event.percent)"
         id="myYouTube"
-        data-videoid="lBTCB7yLs8Y"
+        data-videoid="VrS6akzR3sk"
         width="358"
         height="204"
         layout="responsive">
     </amp-youtube>
     </div>
-
-    <div class="spacer"></div>
     <div class="spacer"></div>
   </main>
 </body>

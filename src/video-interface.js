@@ -105,6 +105,20 @@ export class VideoInterface {
   hideControls() {}
 
   /**
+   * Seeks to a particular time in the video
+   *
+   * @param {number} unusedTime in seconds to seek to.
+   */
+  seekTo(unusedTime) {}
+
+  /**
+   * Seeks to a particular percentage of the video
+   *
+   * @param {number} unusedPercent Number between 0 and 1.
+   */
+  seekToPercent(unusedTime) {}
+
+  /**
    * Returns video's meta data (artwork, title, artist, album, etc.) for use
    * with the Media Session API
    * artwork (Array): URL to the poster image (preferably a 512x512 PNG)

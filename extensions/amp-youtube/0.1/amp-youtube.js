@@ -91,6 +91,11 @@ class AmpYoutube extends AMP.BaseElement {
     /** @private {?Function} */
     this.playerReadyResolver_ = null;
 
+    /** @private @const {Promise} */
+    this.loadedMetadataPromise_ = new Promise(resolve => {
+      this.loadedMetadataResolver_ = resolve;
+    });
+
     /** @private {?Function} */
     this.unlistenMessage_ = null;
   }
@@ -371,6 +376,12 @@ class AmpYoutube extends AMP.BaseElement {
         const evt = this.muted_ ? VideoEvents.MUTED : VideoEvents.UNMUTED;
         this.element.dispatchCustomEvent(evt);
       }
+    } else if (data['event'] == 'initialDelivery' && data['info']) {
+      this.loadedMetadataResolver_();
+      this.metadata_ = data['info'];
+    } else if (data['event'] == 'infoDelivery' && data['info'] &&
+        data['info']['currentTime'] !== undefined) {
+      this.metadata_.currentTime = data['info']['currentTime'];
     }
   }
 
@@ -492,6 +503,16 @@ class AmpYoutube extends AMP.BaseElement {
     // Not supported.
   }
 
+  seekTo(time) {
+    this.sendCommand_('seekTo', [time, true]);
+  }
+
+  seekToPercent(percent) {
+    this.loadedMetadataPromise_.then(() => {
+      this.seekTo(percent * this.getDuration());
+    });
+  }
+
   /**
    * @override
    */
@@ -534,12 +555,17 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   getCurrentTime() {
-    // Not supported.
+    if (this.metadata_) {
+      return this.metadata_.currentTime;
+    }
     return 0;
   }
 
   /** @override */
   getDuration() {
+    if (this.metadata_) {
+      return this.metadata_.duration;
+    }
     // Not supported.
     return 1;
   }

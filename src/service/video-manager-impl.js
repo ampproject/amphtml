@@ -18,7 +18,12 @@
 import {ActionTrust} from '../action-trust';
 import {VideoSessionManager} from './video-session-manager';
 import {removeElement, scopedQuerySelector, isRTL} from '../dom';
-import {getData, listen, listenOncePromise} from '../event-helper';
+import {
+  getData,
+  listen,
+  listenOncePromise,
+  createCustomEvent,
+} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
 import {registerServiceBuilderForDoc, getServiceForDoc} from '../service';
@@ -159,6 +164,8 @@ export class VideoManager {
     /** @private @const */
     this.timer_ = Services.timerFor(ampdoc.win);
 
+    this.actions_ = Services.actionServiceForDoc(ampdoc);
+
     /** @private @const */
     this.boundSecondsPlaying_ = () => this.secondsPlaying_();
 
@@ -178,9 +185,21 @@ export class VideoManager {
       const entry = this.entries_[i];
       if (entry.getPlayingState() !== PlayingStates.PAUSED) {
         analyticsEvent(entry, VideoAnalyticsEvents.SECONDS_PLAYED);
+        this.timeUpdateActionEvent_(entry);
       }
     }
     this.timer_.delay(this.boundSecondsPlaying_, SECONDS_PLAYED_MIN_DELAY);
+  }
+
+  timeUpdateActionEvent_(entry) {
+    const name = 'time-update';
+    const currentTime = entry.video.getCurrentTime();
+    if (isFiniteNumber(currentTime)) {
+      const perc = currentTime / entry.video.getDuration();
+      const event = createCustomEvent(this.ampdoc.win, `${TAG}.${name}`,
+          {time: currentTime, percent: perc});
+      this.actions_.trigger(entry.video.element, name, event, ActionTrust.LOW);
+    }
   }
 
   /**
@@ -226,6 +245,18 @@ export class VideoManager {
     video.registerAction('unmute', video.unmute.bind(video), ActionTrust.LOW);
     video.registerAction('fullscreen', video.fullscreenEnter.bind(video),
         ActionTrust.LOW);
+    video.registerAction('seekTo', invocation => {
+      // time based seek
+      const time = parseFloat(invocation.args && invocation.args['time']);
+      if (isFiniteNumber(time)) {
+        video.seekTo(time);
+      }
+      // percent based seek
+      const percent = parseFloat(invocation.args && invocation.args['percent']);
+      if (isFiniteNumber(percent)) {
+        video.seekToPercent(percent);
+      }
+    }, ActionTrust.LOW);
   }
 
   /**
