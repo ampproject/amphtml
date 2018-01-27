@@ -15,8 +15,8 @@
  */
 
 import {Services} from '../../../src/services';
+import {batchFetchJsonFor} from '../../../src/batched-json';
 import {map} from '../../../src/utils/object';
-import {fetchBatchedJsonFor} from '../../../src/batched-json';
 import {isJsonScriptTag} from '../../../src/dom';
 import {toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
@@ -129,8 +129,8 @@ export class AmpState extends AMP.BaseElement {
    * @return {!Promise}
    * @visibleForTesting
    */
-  fetchBatchedJsonFor_(ampdoc, element) {
-    return fetchBatchedJsonFor(ampdoc, element);
+  batchFetchJsonFor_(ampdoc, element) {
+    return batchFetchJsonFor(ampdoc, element);
   }
 
   /**
@@ -140,7 +140,7 @@ export class AmpState extends AMP.BaseElement {
    */
   fetchSrcAndUpdateState_(isInit) {
     const ampdoc = this.getAmpDoc();
-    return this.fetchBatchedJsonFor_(ampdoc, this.element).then(json => {
+    return this.batchFetchJsonFor_(ampdoc, this.element).then(json => {
       this.updateState_(json, isInit);
     });
   }

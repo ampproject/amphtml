@@ -33,13 +33,14 @@ import {user} from './log';
  * @return {!Promise<!JsonObject|!Array<JsonObject>>} Resolved with JSON
  *     result or rejected if response is invalid.
  */
-export function fetchBatchedJsonFor(
+export function batchFetchJsonFor(
   ampdoc, element, opt_expr = '.', opt_expandUrl = 'none')
 {
   const url = assertHttpsUrl(element.getAttribute('src'), element);
 
+  // Replace vars in URL if desired.
   const urlReplacements = Services.urlReplacementsForDoc(ampdoc);
-  const srcPromise = (opt_expandUrl in ['all', 'opt'])
+  const srcPromise = (['all', 'opt'].includes(opt_expandUrl))
     ? urlReplacements.expandUrlAsync(url)
     : Promise.resolve(url);
 
@@ -66,6 +67,6 @@ export function fetchBatchedJsonFor(
     if (data == null) {
       throw new Error('Response is undefined.');
     }
-    return getValueForExpr(data, opt_expr);
+    return getValueForExpr(data, opt_expr || '.');
   });
 }

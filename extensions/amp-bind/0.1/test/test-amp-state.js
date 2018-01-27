@@ -25,7 +25,7 @@ describes.realWin('AmpState', {
 }, env => {
   let ampState;
   let fetchSpy;
-  let batchedJsonStub;
+  let batchFetchStub;
   let updateStub;
 
   let stubFetchPromise;
@@ -57,8 +57,8 @@ describes.realWin('AmpState', {
 
     fetchSpy = env.sandbox.spy(impl, 'fetchSrcAndUpdateState_');
     updateStub = env.sandbox.stub(impl, 'updateState_');
-    batchedJsonStub = env.sandbox.stub(impl, 'fetchBatchedJsonFor_');
-    batchedJsonStub.returns(stubFetchPromise);
+    batchFetchStub = env.sandbox.stub(impl, 'batchFetchJsonFor_');
+    batchFetchStub.returns(stubFetchPromise);
   });
 
   it('should fetch json if `src` attribute exists', () => {
@@ -67,7 +67,7 @@ describes.realWin('AmpState', {
 
     // IMPORTANT: No CORS fetch should happen until viewer is visible.
     expect(fetchSpy).to.not.have.been.called;
-    expect(batchedJsonStub).to.not.have.been.called;
+    expect(batchFetchStub).to.not.have.been.called;
     expect(updateStub).to.not.have.been.called;
 
     whenFirstVisiblePromiseResolve();
@@ -86,7 +86,7 @@ describes.realWin('AmpState', {
 
     // IMPORTANT: No parsing should happen until viewer is visible.
     expect(fetchSpy).to.not.have.been.called;
-    expect(batchedJsonStub).to.not.have.been.called;
+    expect(batchFetchStub).to.not.have.been.called;
     expect(updateStub).to.not.have.been.called;
 
     whenFirstVisiblePromiseResolve();
@@ -104,7 +104,7 @@ describes.realWin('AmpState', {
 
     // IMPORTANT: No fetching or parsing should happen until viewer is visible.
     expect(fetchSpy).to.not.have.been.called;
-    expect(batchedJsonStub).to.not.have.been.called;
+    expect(batchFetchStub).to.not.have.been.called;
     expect(updateStub).to.not.have.been.called;
 
     whenFirstVisiblePromiseResolve();
@@ -126,7 +126,7 @@ describes.realWin('AmpState', {
     isVisibleStub.returns(false);
     ampState.mutatedAttributesCallback({src: 'https://foo.com/bar?baz=1'});
     expect(fetchSpy).to.not.have.been.called;
-    expect(batchedJsonStub).to.not.have.been.called;
+    expect(batchFetchStub).to.not.have.been.called;
 
     isVisibleStub.returns(true);
     ampState.mutatedAttributesCallback({src: 'https://foo.com/bar?baz=1'});
