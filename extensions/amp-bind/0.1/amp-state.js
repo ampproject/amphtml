@@ -130,13 +130,14 @@ export class AmpState extends AMP.BaseElement {
    * @return {!Promise}
    * @visibleForTesting
    */
-  fetch_(ampdoc, element) {
+  fetch_(ampdoc, element, isInit) {
     // Require opt-in for URL variable replacements on fetches triggered
     // by [src] mutation. @see spec/amp-var-substitutions.md
     const policy = isInit
       ? UrlReplacementPolicy.ALL
       : UrlReplacementPolicy.OPT_IN;
-    return batchFetchJsonFor(ampdoc, element, /* opt_expr */ null, policy);
+    return batchFetchJsonFor(
+        ampdoc, element, /* opt_expr */ undefined, policy);
   }
 
   /**

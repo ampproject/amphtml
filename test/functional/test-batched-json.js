@@ -81,7 +81,7 @@ describe('batchFetchJsonFor', () => {
           .returns(Promise.resolve('https://data.com?x=abc&y=BAR'));
       urlReplacements.collectUnwhitelistedVars
           .withArgs(el)
-          .returns(['BAR']);
+          .returns(Promise.resolve(['BAR']));
       const userError = sandbox.stub(user(), 'error');
 
       const optIn = UrlReplacementPolicy.OPT_IN;
