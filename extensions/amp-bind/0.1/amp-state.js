@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
-import {batchFetchJsonFor} from '../../../src/batched-json';
+import {UrlReplacementPolicy, batchFetchJsonFor} from '../../../src/batched-json';
 import {map} from '../../../src/utils/object';
 import {isJsonScriptTag} from '../../../src/dom';
 import {toggle} from '../../../src/style';
@@ -130,7 +130,7 @@ export class AmpState extends AMP.BaseElement {
    * @visibleForTesting
    */
   batchFetchJsonFor_(ampdoc, element) {
-    return batchFetchJsonFor(ampdoc, element);
+    return batchFetchJsonFor(ampdoc, element, undefined, UrlReplacementPolicy.OPT_IN);
   }
 
   /**

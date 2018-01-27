@@ -15,18 +15,20 @@
  */
 
 import {Services} from '../../src/services';
-import {batchFetchJsonFor} from '../../src/batched-json';
+import {UrlReplacementPolicy, batchFetchJsonFor} from '../../src/batched-json';
 import {user} from '../../src/log';
 
 describe('batchFetchJsonFor', () => {
   let sandbox;
   // Fakes.
-  let ampdoc = {win: null};
+  const ampdoc = {win: null};
   // Service fakes.
   let urlReplacements;
   let batchedXhr;
+  // Function stubs.
+  let fetchJson;
   // Mutable return variables.
-  let data = {'foo': 'bar'};
+  const data = {'foo': 'bar'};
 
   /**
    * @param {string} src
@@ -48,11 +50,10 @@ describe('batchFetchJsonFor', () => {
     };
     sandbox.stub(Services, 'urlReplacementsForDoc').returns(urlReplacements);
 
-    batchedXhr = {
-      fetchJson: sandbox.stub().returns(Promise.resolve({
-        json: () => Promise.resolve(data)
-      })
-    )};
+    fetchJson = sandbox.stub().returns(Promise.resolve({
+      json: () => Promise.resolve(data),
+    }));
+    batchedXhr = {fetchJson};
     sandbox.stub(Services, 'batchedXhrFor').returns(batchedXhr);
   });
 
@@ -61,43 +62,46 @@ describe('batchFetchJsonFor', () => {
   });
 
   describe('URL replacement', () => {
-    it('should not replace URL vars if opt_expand is not passed', () => {
+    it('should not replace URL vars if opt_urlReplacement == NONE', () => {
       const el = element('https://data.com?x=FOO&y=BAR');
 
       return batchFetchJsonFor(ampdoc, el).then(() => {
-        expect(batchedXhr.fetchJson).to.be.calledWith('https://data.com?x=FOO&y=BAR');
+        expect(fetchJson).to.be.calledWith('https://data.com?x=FOO&y=BAR');
         expect(urlReplacements.expandUrlAsync).to.not.be.called;
         expect(urlReplacements.collectUnwhitelistedVars).to.not.be.called;
       });
     });
 
-    it('should throw user error if expanding non-whitelisted vars and opt_expand is `opt`', () => {
+    it('should throw user error if expanding non-whitelisted vars with ' +
+      'opt_urlReplacement == OPT_IN', () => {
       const el = element('https://data.com?x=FOO&y=BAR');
 
       urlReplacements.expandUrlAsync
           .withArgs('https://data.com?x=FOO&y=BAR')
-          .returns(Promise.resolve('https://data.com?x=expandedFoo&y=BAR'));
+          .returns(Promise.resolve('https://data.com?x=abc&y=BAR'));
       urlReplacements.collectUnwhitelistedVars
           .withArgs(el)
           .returns(['BAR']);
       const userError = sandbox.stub(user(), 'error');
 
-      return batchFetchJsonFor(ampdoc, el, /* opt_expr */ null, 'opt').then(() => {
-        expect(batchedXhr.fetchJson).to.be.calledWith('https://data.com?x=expandedFoo&y=BAR');
+      const optIn = UrlReplacementPolicy.OPT_IN;
+      return batchFetchJsonFor(ampdoc, el, null, optIn).then(() => {
+        expect(fetchJson).to.be.calledWith('https://data.com?x=abc&y=BAR');
         expect(userError).calledWithMatch('AMP-LIST', /data-amp-replace="BAR"/);
       });
     });
 
-    it('should replace all URL vars if opt_expand is `all`', () => {
+    it('should replace all URL vars if opt_urlReplacement == ALL', () => {
       const el = element('https://data.com?x=FOO&y=BAR');
 
       urlReplacements.expandUrlAsync
           .withArgs('https://data.com?x=FOO&y=BAR')
-          .returns(Promise.resolve('https://data.com?x=expandedFoo&y=BAR'));
+          .returns(Promise.resolve('https://data.com?x=abc&y=BAR'));
       const userError = sandbox.stub(user(), 'error');
 
-      return batchFetchJsonFor(ampdoc, el, /* opt_expr */ null, 'all').then(() => {
-        expect(batchedXhr.fetchJson).to.be.calledWith('https://data.com?x=expandedFoo&y=BAR');
+      const all = UrlReplacementPolicy.ALL;
+      return batchFetchJsonFor(ampdoc, el, null, all).then(() => {
+        expect(fetchJson).to.be.calledWith('https://data.com?x=abc&y=BAR');
         expect(urlReplacements.collectUnwhitelistedVars).to.not.be.called;
         expect(userError).to.not.be.called;
       });

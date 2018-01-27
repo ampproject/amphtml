@@ -15,7 +15,7 @@
  */
 
 import {AmpEvents} from '../../../src/amp-events';
-import {batchFetchJsonFor} from '../../../src/batched-json';
+import {UrlReplacementPolicy, batchFetchJsonFor} from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
 import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -237,7 +237,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   fetch_(itemsExpr) {
-    return batchFetchJsonFor(this.getAmpDoc(), this.element, itemsExpr);
+    return batchFetchJsonFor(this.getAmpDoc(), this.element, itemsExpr, UrlReplacementPolicy.OPT_IN);
   }
 }
 

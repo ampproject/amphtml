@@ -20,6 +20,15 @@ import {getValueForExpr} from './json';
 import {user} from './log';
 
 /**
+ * @enum {number}
+ */
+export const UrlReplacementPolicy = {
+  NONE: 0,
+  OPT_IN: 1,
+  ALL: 2,
+};
+
+/**
  * Batch fetches the JSON endpoint at the given element's `src` attribute.
  * Sets the fetch credentials option from the element's `credentials` attribute,
  * if it exists.
@@ -28,26 +37,29 @@ import {user} from './log';
  * @param {!Element} element
  * @param {string=} opt_expr Dot-syntax reference to subdata of JSON result
  *     to return. If not specified, entire JSON result is returned.
- * @param {string=} opt_expandUrl If 'all', expands the URL without opt-in.
- *     If 'opt', expands the URL with opt-in. Otherwise, doesn't expand.
+ * @param {UrlReplacementPolicy=} opt_urlReplacement If ALL, replaces all URL vars.
+ *     If OPT_IN, replaces whitelisted URL vars. Otherwise, don't expand.
  * @return {!Promise<!JsonObject|!Array<JsonObject>>} Resolved with JSON
  *     result or rejected if response is invalid.
  */
 export function batchFetchJsonFor(
-  ampdoc, element, opt_expr = '.', opt_expandUrl = 'none')
+  ampdoc,
+  element,
+  opt_expr = '.',
+  opt_urlReplacement = UrlReplacementPolicy.NONE)
 {
   const url = assertHttpsUrl(element.getAttribute('src'), element);
 
   // Replace vars in URL if desired.
   const urlReplacements = Services.urlReplacementsForDoc(ampdoc);
-  const srcPromise = (['all', 'opt'].includes(opt_expandUrl))
+  const srcPromise = (opt_urlReplacement >= UrlReplacementPolicy.OPT_IN)
     ? urlReplacements.expandUrlAsync(url)
     : Promise.resolve(url);
 
   return srcPromise.then(src => {
     // Throw user error if this element is performing URL substitutions
     // without the soon-to-be-required opt-in (#12498).
-    if (opt_expandUrl == 'opt') {
+    if (opt_urlReplacement == UrlReplacementPolicy.OPT_IN) {
       const unwhitelisted = urlReplacements.collectUnwhitelistedVars(element);
       if (unwhitelisted.length > 0) {
         const TAG = element.tagName;
