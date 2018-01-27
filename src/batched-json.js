@@ -60,13 +60,14 @@ export function batchFetchJsonFor(
     // Throw user error if this element is performing URL substitutions
     // without the soon-to-be-required opt-in (#12498).
     if (opt_urlReplacement == UrlReplacementPolicy.OPT_IN) {
-      const unwhitelisted = urlReplacements.collectUnwhitelistedVars(element);
-      if (unwhitelisted.length > 0) {
-        const TAG = element.tagName;
-        user().error(TAG, 'Variable substitutions will soon require opt-in. ' +
-            `Please add data-amp-replace="${unwhitelisted.join(' ')}" to ` +
-            `the <${TAG}> element. This will stop working soon!`);
-      }
+      urlReplacements.collectUnwhitelistedVars(element).then(unwhitelisted => {
+        if (unwhitelisted.length > 0) {
+          const TAG = element.tagName;
+          user().error(TAG, 'Variable substitutions will soon require opt-in. ' +
+              `Please add data-amp-replace="${unwhitelisted.join(' ')}" to ` +
+              `the <${TAG}> element. This will stop working soon!`);
+        }
+      });
     }
     const opts = {};
     if (element.hasAttribute('credentials')) {

@@ -68,7 +68,7 @@ export class AmpState extends AMP.BaseElement {
     }
     const src = mutations['src'];
     if (src !== undefined) {
-      this.fetchSrcAndUpdateState_(/* isInit */ false);
+      this.fetchAndUpdate_(/* isInit */ false);
     }
   }
 
@@ -93,7 +93,7 @@ export class AmpState extends AMP.BaseElement {
       this.parseChildAndUpdateState_();
     }
     if (this.element.hasAttribute('src')) {
-      this.fetchSrcAndUpdateState_(/* isInit */ true);
+      this.fetchAndUpdate_(/* isInit */ true);
     }
   }
 
@@ -126,12 +126,17 @@ export class AmpState extends AMP.BaseElement {
    * Wrapper to stub during testing.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!Element} element
+   * @param {boolean} isInit
    * @return {!Promise}
    * @visibleForTesting
    */
-  batchFetchJsonFor_(ampdoc, element) {
-    return batchFetchJsonFor(
-        ampdoc, element, undefined, UrlReplacementPolicy.OPT_IN);
+  fetch_(ampdoc, element) {
+    // Require opt-in for URL variable replacements on fetches triggered
+    // by [src] mutation. @see spec/amp-var-substitutions.md
+    const policy = isInit
+      ? UrlReplacementPolicy.ALL
+      : UrlReplacementPolicy.OPT_IN;
+    return batchFetchJsonFor(ampdoc, element, /* opt_expr */ null, policy);
   }
 
   /**
@@ -139,9 +144,9 @@ export class AmpState extends AMP.BaseElement {
    * @returm {!Promise}
    * @private
    */
-  fetchSrcAndUpdateState_(isInit) {
+  fetchAndUpdate_(isInit) {
     const ampdoc = this.getAmpDoc();
-    return this.batchFetchJsonFor_(ampdoc, this.element).then(json => {
+    return this.fetch_(ampdoc, this.element, isInit).then(json => {
       this.updateState_(json, isInit);
     });
   }

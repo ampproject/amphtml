@@ -50,6 +50,9 @@ export class AmpList extends AMP.BaseElement {
      * @private {boolean}
      */
     this.layoutCompleted_ = false;
+
+    /** @const @private {string} */
+    this.initialSrc_ = element.getAttribute('src');
   }
 
   /** @override */
@@ -237,8 +240,12 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   fetch_(itemsExpr) {
-    return batchFetchJsonFor(this.getAmpDoc(), this.element, itemsExpr,
-        UrlReplacementPolicy.OPT_IN);
+    // Require opt-in for URL variable replacements on fetches triggered
+    // by [src] mutation. @see spec/amp-var-substitutions.md
+    const policy = (this.element.getAttribute('src') == this.initialSrc_)
+      ? UrlReplacementPolicy.ALL
+      : UrlReplacementPolicy.OPT_IN;
+    return batchFetchJsonFor(this.getAmpDoc(), this.element, itemsExpr, policy);
   }
 }
 
