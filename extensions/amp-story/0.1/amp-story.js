@@ -166,7 +166,7 @@ const SHARE_WIDGET_PILL_CONTAINER = {
  * @private @const {string}
  */
 const HIDE_ON_BOOKEND_SELECTOR =
-  'amp-story-page, .i-amphtml-story-system-layer';
+    'amp-story-page, .i-amphtml-story-system-layer';
 
 
 export class AmpStory extends AMP.BaseElement {
