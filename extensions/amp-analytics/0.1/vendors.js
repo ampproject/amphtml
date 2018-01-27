@@ -1133,21 +1133,13 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         '%3a${contentLoadTime}%7d',
     },
     'triggers': {
-      'ampstart': {
+      'triggerName': {
         'on': 'visible',
-        'request': 'ampstart',
+        'request': ['ampstart', 'pageload', 'pagedcl'],
       },
       'pageview': {
         'on': 'ini-load',
         'request': 'pageview',
-      },
-      'pageload': {
-        'on': 'visible',
-        'request': 'pageload',
-      },
-      'pagedcl': {
-        'on': 'visible',
-        'request': 'pagedcl',
       },
     },
     'transport': {
