@@ -130,7 +130,8 @@ export class AmpState extends AMP.BaseElement {
    * @visibleForTesting
    */
   batchFetchJsonFor_(ampdoc, element) {
-    return batchFetchJsonFor(ampdoc, element, undefined, UrlReplacementPolicy.OPT_IN);
+    return batchFetchJsonFor(
+        ampdoc, element, undefined, UrlReplacementPolicy.OPT_IN);
   }
 
   /**

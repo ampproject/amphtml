@@ -237,7 +237,8 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   fetch_(itemsExpr) {
-    return batchFetchJsonFor(this.getAmpDoc(), this.element, itemsExpr, UrlReplacementPolicy.OPT_IN);
+    return batchFetchJsonFor(this.getAmpDoc(), this.element, itemsExpr,
+        UrlReplacementPolicy.OPT_IN);
   }
 }
 
