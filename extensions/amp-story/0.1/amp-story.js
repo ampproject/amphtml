@@ -984,7 +984,6 @@ export class AmpStory extends AMP.BaseElement {
     this.bookend_.hide();
   }
 
-
   /**
    * Toggle content when bookend is opened/closed.
    * @param {boolean} display
