@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import {
-  EXPERIMENT,
   GWD_PAGEDECK_ID,
   TAG,
   addAction,
@@ -27,7 +26,6 @@ import {
   PlaybackCssClass,
   AmpGwdRuntimeService,
 } from '../amp-gwd-animation-impl';
-import {toggleExperiment} from '../../../../src/experiments';
 import {getServiceForDoc} from '../../../../src/service';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {Services} from '../../../../src/services';
@@ -99,9 +97,6 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
       });
 
       beforeEach(() => {
-        // TODO(sklobovskaya): Remove experiment guard.
-        toggleExperiment(env.win, EXPERIMENT, true);
-
         ampdoc = env.ampdoc;
 
         ampdoc.getBody().innerHTML =

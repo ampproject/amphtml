@@ -20,7 +20,6 @@ import {
 } from './amp-gwd-animation-impl';
 import {CSS} from '../../../build/amp-gwd-animation-0.1.css';
 import {ActionTrust} from '../../../src/action-trust';
-import {isExperimentOn} from '../../../src/experiments';
 import {getValueForExpr} from '../../../src/json';
 import {user} from '../../../src/log';
 import {getServiceForDoc} from '../../../src/service';
@@ -28,9 +27,6 @@ import {Services} from '../../../src/services';
 
 /** @const {string} The custom element tag name for this extension. */
 export const TAG = 'amp-gwd-animation';
-
-/** @const {string} Experiment flag name. TODO(sklobovskaya): Remove. */
-export const EXPERIMENT = TAG;
 
 /** @const {string} */
 export const GWD_PAGEDECK_ID = 'pagedeck';
@@ -73,11 +69,6 @@ export class GwdAnimation extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    // TODO(sklobovskaya): Remove experiment guard.
-    user().assert(
-        isExperimentOn(this.getAmpDoc().win, EXPERIMENT),
-        `Experiment ${EXPERIMENT} is disabled.`);
-
     this.timelineEventPrefix_ =
         this.element.getAttribute('timeline-event-prefix') || '';
 
