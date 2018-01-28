@@ -198,15 +198,13 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
         sandbox.spy(impl, 'connectFluidMessagingChannel');
     const onFluidResizeSpy = sandbox.spy(impl, 'onFluidResize_');
     impl.attemptChangeHeight = () => Promise.resolve();
-    return utf8Encode(rawCreative).then(creative => {
-      impl.sentinel = 'sentinel';
-      impl.initiateAdRequest();
-      return impl.adPromise_.then(() => {
-        impl.creativeBody_ = creative;
-        return impl.layoutCallback().then(() => {
-          expect(connectFluidMessagingChannelSpy).to.be.calledOnce;
-          expect(onFluidResizeSpy).to.be.calledOnce;
-        });
+    impl.sentinel = 'sentinel';
+    impl.initiateAdRequest();
+    return impl.adPromise_.then(() => {
+      impl.creativeBody_ = utf8Encode(rawCreative);
+      return impl.layoutCallback().then(() => {
+        expect(connectFluidMessagingChannelSpy).to.be.calledOnce;
+        expect(onFluidResizeSpy).to.be.calledOnce;
       });
     });
   });
