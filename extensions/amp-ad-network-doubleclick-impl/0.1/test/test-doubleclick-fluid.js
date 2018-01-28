@@ -148,32 +148,28 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
 
   it('should style iframe/slot correctly on multi-size creative', () => {
     multiSizeImpl.buildCallback();
-    return utf8Encode('foo').then(creative => {
-      multiSizeImpl.sentinel = 'sentinel';
-      multiSizeImpl.adPromise_ = Promise.resolve();
-      multiSizeImpl.creativeBody_ = creative;
-      multiSizeImpl.returnedSize_ = {width: 250, height: 100};
-      return multiSizeImpl.layoutCallback().then(() => {
-        const iframeStyleString = multiSizeImpl.iframe.getAttribute('style');
-        const slotStyleString = multiSizeImpl.element.getAttribute('style');
-        expect(slotStyleString).to.match(/width: 250px/);
-        expect(iframeStyleString).to.match(/position: relative/);
-        expect(multiSizeImpl.element.getAttribute('height')).to.be.null;
-      });
+    multiSizeImpl.sentinel = 'sentinel';
+    multiSizeImpl.adPromise_ = Promise.resolve();
+    multiSizeImpl.creativeBody_ = utf8Encode('foo');
+    multiSizeImpl.returnedSize_ = {width: 250, height: 100};
+    return multiSizeImpl.layoutCallback().then(() => {
+      const iframeStyleString = multiSizeImpl.iframe.getAttribute('style');
+      const slotStyleString = multiSizeImpl.element.getAttribute('style');
+      expect(slotStyleString).to.match(/width: 250px/);
+      expect(iframeStyleString).to.match(/position: relative/);
+      expect(multiSizeImpl.element.getAttribute('height')).to.be.null;
     });
   });
 
   it('should have an iframe child with initial size 0x0', () => {
     impl.buildCallback();
-    return utf8Encode('foo').then(creative => {
-      impl.sentinel = 'sentinel';
-      impl.adPromise_ = Promise.resolve();
-      impl.creativeBody_ = creative;
-      return impl.layoutCallback().then(() => {
-        const styleString = impl.iframe.getAttribute('style');
-        expect(styleString).to.match(/width: 0px/);
-        expect(styleString).to.match(/height: 0px/);
-      });
+    impl.sentinel = 'sentinel';
+    impl.adPromise_ = Promise.resolve();
+    impl.creativeBody_ = utf8Encode('foo');
+    return impl.layoutCallback().then(() => {
+      const styleString = impl.iframe.getAttribute('style');
+      expect(styleString).to.match(/width: 0px/);
+      expect(styleString).to.match(/height: 0px/);
     });
   });
 
