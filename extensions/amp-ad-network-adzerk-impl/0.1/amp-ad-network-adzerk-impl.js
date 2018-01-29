@@ -120,10 +120,7 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
       return ampAdTemplates
           .fetch(this.ampCreativeJson_.templateUrl)
           .then(parsedTemplate => {
-            this.creativeMetadata_ = /** @type {!CreativeMetaDataDef} */
-                (super.getAmpAdMetadata(parsedTemplate));
-            return Promise.resolve(
-                utf8Encode(this.creativeMetadata_.minifiedCreative));
+            return utf8Encode(this.parseMetadataFromCreative(parsedTemplate));
           })
           .catch(error => {
             dev().warn(TAG, 'Error fetching/expanding template',
@@ -132,6 +129,27 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
             return Promise.reject(NO_CONTENT_RESPONSE);
           });
     });
+  }
+
+  /**
+   * Parses out required extensions and returns a minified version of the
+   * creative.
+   * @param {string} creative
+   * @return {string} A minified version of the creative, suitable to be
+   *   rendered as an amp4ads ad.
+   */
+  parseMetadataFromCreative(creative) {
+    // TODO(levitzky) The following minification is for demo purposes only. Once
+    // launched this will either be performed server-side, or will be replaced
+    // by more sophisticated logic.
+    const minifiedCreative = creative.replace(
+        /<script async.+?<\/script>/g, '');
+    this.creativeMetadata_ = /** @type {?CreativeMetaDataDef} */ ({
+      minifiedCreative,
+      customElementExtensions: [],
+      extensions: [],
+    });
+    return minifiedCreative;
   }
 
   /** @override */
