@@ -1211,50 +1211,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getAdditionalContextMetadata(isSafeframe) {
-    const attributes = dict({});
-    if (this.isFluid_ || isSafeframe) {
-      attributes['uid'] = 1;
-      attributes['hostPeerName'] = this.win.location.origin;
-      // The initial geometry isn't used for anything important, but it is
-      // expected, so we pass this string with all zero values.
-      attributes['initialGeometry'] = JSON.stringify(
-          dict({
-            'windowCoords_t': 0,
-            'windowCoords_r': 0,
-            'windowCoords_b': 0,
-            'windowCoords_l': 0,
-            'frameCoords_t': 0,
-            'frameCoords_r': 0,
-            'frameCoords_b': 0,
-            'frameCoords_l': 0,
-            'styleZIndex': 'auto',
-            'allowedExpansion_t': 0,
-            'allowedExpansion_r': 0,
-            'allowedExpansion_b': 0,
-            'allowedExpansion_l': 0,
-            'xInView': 0,
-            'yInView': 0,
-          }));
-      attributes['permissions'] = JSON.stringify(
-          dict({
-            'expandByOverlay': false,
-            'expandByPush': false,
-            'readCookie': false,
-            'writeCookie': false,
-          }));
-      attributes['metadata'] = JSON.stringify(
-          dict({
-            'shared': {
-              'sf_ver': this.safeframeVersion,
-              'ck_on': 1,
-              'flash_ver': '26.0.0',
-            },
-          }));
-      attributes['reportCreativeGeometry'] = true;
-      attributes['isDifferentSourceWindow'] = false;
-      attributes['sentinel'] = this.sentinel;
-    }
-    return attributes;
+    return (this.isFluid_ || isSafeframe) ? this.safeframeApi.getSafeframeName() : {};
   }
 
   /**

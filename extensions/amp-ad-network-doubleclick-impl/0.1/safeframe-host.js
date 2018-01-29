@@ -117,6 +117,33 @@ export class SafeframeHostApi {
     this.endpointIdentity_ = Math.random();
   }
 
+  getSafeframeName() {
+    const attributes = dict({});
+    attributes['uid'] = 1;
+    attributes['hostPeerName'] = this.win_.location.origin;
+    attributes['initialGeometry'] = this.formatGeom_(
+        this.baseInstance_.element.getIntersectionChangeEntry());
+    attributes['permissions'] = JSON.stringify(
+        dict({
+          'expandByOverlay': false,
+          'expandByPush': false,
+          'readCookie': false,
+          'writeCookie': false,
+        }));
+    attributes['metadata'] = JSON.stringify(
+        dict({
+          'shared': {
+            'sf_ver': this.baseInstance_.safeframeVersion,
+            'ck_on': 1,
+            'flash_ver': '26.0.0',
+          },
+        }));
+    attributes['reportCreativeGeometry'] = this.baseInstance_.isFluid_;
+    attributes['isDifferentSourceWindow'] = false;
+    attributes['sentinel'] = this.sentinel_;
+    return attributes;
+  }
+
   /**
    * Registers this instance as the host API for the current sentinel.
    * If the global safeframe listener has not yet been created, it creates
