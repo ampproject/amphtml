@@ -40,6 +40,16 @@ import {
 
 const TAG = 'amp-position-observer';
 
+/**
+ * Minimum number of pixels in height that need to change before we consider
+ * a resize has happened.
+ * We have this threshold  because we do not want viewport height changes
+ * caused by hide/show of addressbar on mobile browsers cause jumps in
+ * scrollbound animations.
+ * 150 pixels accounts for most addressbar sizes on mobile browsers.
+ */
+const RESIZE_THRESHOLD = 150;
+
 export class AmpVisibilityObserver extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
@@ -78,6 +88,9 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
 
     /** @private {?string} */
     this.targetId_ = null;
+
+    /** @private {?number} */
+    this.initialViewportHeight_ = null;
 
     /** @private {number} */
     this.scrollProgress_ = 0;
@@ -156,6 +169,8 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
   positionChanged_(entry) {
     const wasVisible = this.isVisible_;
     const prevViewportHeight = this.viewportRect_ && this.viewportRect_.height;
+
+    this.adjustForSmallViewportResize_(entry);
 
     this.viewportRect_ = entry.viewportRect;
 
@@ -377,6 +392,34 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     );
 
     return rect;
+  }
+
+  /**
+   * Detects whether viewport height has changed and if that change
+   * is within our acceptable threshold.
+   * If within, we offset calculation by the delta so that small viewport
+   * changes caused by hide/show of addressbar on mobile browsers do not
+   * cause jumps in scrollbond animations.
+   * @param {!../../../src/service/position-observer/position-observer-worker.PositionInViewportEntryDef} entry PositionObserver entry
+   */
+  adjustForSmallViewportResize_(entry) {
+    if (!this.initialViewportHeight_) {
+      this.initialViewportHeight_ = entry.viewportRect.height;
+    }
+    const viewportHeightChangeDelta = (this.initialViewportHeight_ -
+      entry.viewportRect.height);
+    let resizeOffset = 0;
+    if (Math.abs(viewportHeightChangeDelta) < RESIZE_THRESHOLD) {
+      resizeOffset = viewportHeightChangeDelta;
+    } else {
+      this.initialViewportHeight_ = null;
+    }
+    entry.viewportRect = layoutRectLtwh(
+        entry.viewportRect.left,
+        entry.viewportRect.top,
+        entry.viewportRect.width,
+        entry.viewportRect.height + resizeOffset
+    );
   }
 
   /**
