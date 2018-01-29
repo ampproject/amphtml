@@ -104,6 +104,7 @@ export function withDatePickerCommon(WrappedComponent) {
       this.isOutsideRange = this.isOutsideRange.bind(this);
     }
 
+    /** @override */
     componentDidMount() {
       if (this.props.emitUpdate) {
         this.props.emitUpdate();
