@@ -462,6 +462,14 @@ export class GlobalVariableSource extends VariableSource {
       });
     });
 
+    // Returns the incremental engaged time since the last push under the
+    // same name.
+    this.setAsync('INCREMENTAL_ENGAGED_TIME', name => {
+      return Services.activityForDoc(this.ampdoc).then(activity => {
+        return activity.getIncrementalEngagedTime(name);
+      });
+    });
+
     this.set('NAV_TIMING', (startAttribute, endAttribute) => {
       user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
           'start attribute name, is required');
