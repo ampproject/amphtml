@@ -245,7 +245,7 @@ export class Resources {
         this.schedulePass();
       });
 
-      /** @const */
+      /** @private @const {function(number, !./layers-impl.LayoutElement, number, !Object<string, *>):number} */
       this.boundCalcLayoutScore_ = this.calcLayoutScore_.bind(this);
     }
 
@@ -1667,13 +1667,14 @@ export class Resources {
    * @private
    */
   calcTaskScoreLayers_(task, cache) {
-    const layerScore = this.layers_.ancestry(task.resource.element,
+    const layerScore = this.layers_.iterateAncestry(task.resource.element,
         this.boundCalcLayoutScore_, cache);
     return task.priority * PRIORITY_BASE_ + layerScore;
   }
 
   /**
-   * Calculates the ancestry score... todo description trololololol.
+   * Calculates the layout's distance from viewport score, using an iterative
+   * (and cacheable) calculation based on tree depth and distance.
    *
    * @param {number} currentScore
    * @param {!./layers-impl.LayoutElement} layout

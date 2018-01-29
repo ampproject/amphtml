@@ -84,7 +84,7 @@ function positionLt(left, top) {
  * See {@link LayoutElement#ancestry}.
  * @const {!Array<!LayoutElement>}
  */
-const ANCESTRY_STORE = [];
+const ANCESTRY_CACHE = [];
 
 /**
  * A unique "id" counter, to give each LayoutElement a unique id.
@@ -271,7 +271,7 @@ export class LayoutLayers {
     const layout = this.add(element);
     const from = layout.getParentLayer() || layout;
     if (opt_force) {
-      from.requestRemeasure();
+      from.dirtyMeasurements();
     }
     from.remeasure();
   }
@@ -326,7 +326,7 @@ export class LayoutLayers {
   scrolled_(element) {
     let layer = LayoutElement.forOptional(element);
     if (layer && layer.isLayer()) {
-      layer.requestScrollRemeasure();
+      layer.dirtyScrollMeasurements();
     } else {
       layer = this.declareLayer_(element, false);
     }
@@ -361,7 +361,7 @@ export class LayoutLayers {
    * to the layout.
    *
    * This sets a whether the layer isActive during that layer's iteration. Any
-   * attempts to access #isActive outside of the iterator call will fail.
+   * attempts to access #isActiveUnsafe outside of the iterator call will fail.
    *
    * @param {!Element} element
    * @param {function(T, !LayoutElement, number, !AncestryStateDef):T} iterator
@@ -369,9 +369,9 @@ export class LayoutLayers {
    * @return {T}
    * @template T
    */
-  ancestry(element, iterator, state) {
+  iterateAncestry(element, iterator, state) {
     const layout = this.add(element);
-    return layout.ancestry(iterator, state);
+    return layout.iterateAncestry(iterator, state);
   }
 }
 
@@ -393,7 +393,7 @@ export class LayoutElement {
 
     /**
      * The parent layer of the current element. Note that even if _this_
-     * element is a layer, it's parent layer will be an ancestor (if there is a
+     * element is a layer, its parent layer will be an ancestor (if there is a
      * parent layer).
      *
      * If the parent is null, that means the element does not have a parent
@@ -434,8 +434,8 @@ export class LayoutElement {
      * Whether the layout is a descendant of the most recently scrolled layer.
      *
      * Note: This attribute is `undefined`, unless the ancestry tree is currently
-     * being iterated with #ancestry. This is the only time it can be determined
-     * without a ton of DOM checks.
+     * being iterated with #iterateAncestry. This is the only time it can be
+     * determined without a ton of DOM checks.
      *
      * @private {boolean|undefined}
      */
@@ -695,7 +695,7 @@ export class LayoutElement {
 
     filterSplice(this.children_, layout => {
       if (contained || layer.contains(layout)) {
-        // Mark the layout as needing a remeasure, since it's offset position
+        // Mark the layout as needing a remeasure, since its offset position
         // has likely changed.
         layout.needsRemeasure_ = true;
 
@@ -762,18 +762,21 @@ export class LayoutElement {
   /**
    * Whether the layout is a descendant of the most recently scrolled layer.
    *
-   * This MUST NOT be called unless inside an #ancestry iterator function.
-   * "Activeness" is only determined for the lifespan of the #ancestry call.
+   * This MUST NOT be called unless inside an #iterateAncestry iterator
+   * function.  "Activeness" is only determined for the lifespan of the
+   * #iterateAncestry call.
    *
    * @return {boolean}
    */
-  isActive() {
+  isActiveUnsafe() {
     return dev().assertBoolean(this.isActive_);
   }
 
   /**
-   * Gets the minimal horizontal distance of this element from it's parent's
+   * Gets the minimal horizontal distance of this element from its parent's
    * "viewport".
+   *
+   * @return {number}
    */
   getHorizontalDistanceFromParent() {
     const parent = this.getParentLayer();
@@ -785,17 +788,24 @@ export class LayoutElement {
     const {width} = this.getSize();
     const scrollLeft = parent.getScrollLeft();
     const parentWidth = parent.getSize().width;
-    const distance = Math.max(
-        0,
-        scrollLeft - (left + width),
-        left - (scrollLeft + parentWidth)
-    );
-    return distance / parentWidth;
+
+    if (left + width < scrollLeft) {
+      // Element is to the left of the parent viewport
+      return scrollLeft - (left + width);
+    }
+    if (scrollLeft + parentWidth < left) {
+      // Element is to the right of the parent viewport
+      return left - (scrollLeft + parentWidth);
+    }
+    // Element intersects
+    return 0;
   }
 
   /**
-   * Gets the minimal vertical distance of this element from it's parent's
+   * Gets the minimal vertical distance of this element from its parent's
    * "viewport".
+   *
+   * @return {number}
    */
   getVerticalDistanceFromParent() {
     const parent = this.getParentLayer();
@@ -807,12 +817,17 @@ export class LayoutElement {
     const {height} = this.getSize();
     const scrollTop = parent.getScrollTop();
     const parentHeight = parent.getSize().height;
-    const distance = Math.max(
-        0,
-        scrollTop - (top + height),
-        top - (scrollTop + parentHeight)
-    );
-    return distance / parentHeight;
+
+    if (top + height < scrollTop) {
+      // Element is above the parent viewport
+      return scrollTop - (top + height);
+    }
+    if (scrollTop + parentHeight < top) {
+      // Element is below the parent viewport
+      return top - (scrollTop + parentHeight);
+    }
+    // Element intersects
+    return 0;
   }
 
   /*
@@ -847,7 +862,7 @@ export class LayoutElement {
   getScrolledPosition(opt_ancestor) {
     // Compensate for the fact that the loop below will subtract the current
     // scroll position of this element. But, this element's scroll position
-    // doesn't affect it's overall position, only its children.
+    // doesn't affect its overall position, only its children.
     // This is fine because the loop is guaranteed to roll at least once,
     // zeroing the scroll.
     let x = this.getScrollLeft();
@@ -908,7 +923,7 @@ export class LayoutElement {
    * Dirties the element, so the next size/position calculation will remeasure
    * the element.
    */
-  requestRemeasure() {
+  dirtyMeasurements() {
     this.needsRemeasure_ = true;
   }
 
@@ -916,7 +931,7 @@ export class LayoutElement {
    * Dirties the layer, so the next position calculation will remeasure the
    * scroll positions.
    */
-  requestScrollRemeasure() {
+  dirtyScrollMeasurements() {
     this.needsScrollRemeasure_ = true;
   }
 
@@ -949,14 +964,14 @@ export class LayoutElement {
    * to the layout.
    *
    * This sets a whether the layer isActive during that layer's iteration. Any
-   * attempts to access #isActive outside of the iterator call will fail.
+   * attempts to access #isActiveUnsafe outside of the iterator call will fail.
    *
    * @param {function(T, !LayoutElement, number, !AncestryStateDef):T} iterator
    * @param {!AncestryStateDef} state
    * @return {T}
    * @template T
    */
-  ancestry(iterator, state) {
+  iterateAncestry(iterator, state) {
     const activeLayer = Services.layersForDoc(this.element_).getActiveLayer();
 
     // Gather, and update whether the layers are descendants of the active
@@ -965,7 +980,7 @@ export class LayoutElement {
 
     let layer = this;
     while (layer) {
-      ANCESTRY_STORE.push(layer);
+      ANCESTRY_CACHE.push(layer);
 
       layer.isActive_ = isActive;
       if (layer === activeLayer) {
@@ -975,14 +990,14 @@ export class LayoutElement {
       layer = layer.getParentLayer();
     }
 
-    let value;
-    const length = ANCESTRY_STORE.length;
+    let accumulator = undefined;
+    const length = ANCESTRY_CACHE.length;
     for (let i = 0; i < length; i++) {
-      const layer = ANCESTRY_STORE.pop();
-      value = iterator(value, layer, i, state);
+      const layer = ANCESTRY_CACHE.pop();
+      accumulator = iterator(accumulator, layer, i, state);
       layer.isActive_ = undefined;
     }
-    return value;
+    return accumulator;
   }
 
   /**
@@ -997,7 +1012,7 @@ export class LayoutElement {
     const element = this.element_;
 
     // We need a relative box to measure our offset. Importantly, this box must
-    // be negatively offset by it's scroll position, to account for the fact
+    // be negatively offset by its scroll position, to account for the fact
     // that getBoundingClientRect() will only return scrolled positions.
     let relative = opt_relativeTo;
     if (!relative) {

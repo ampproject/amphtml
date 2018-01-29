@@ -693,7 +693,8 @@ export class Resource {
     let scrollPenalty = 1;
     let distance = 0;
 
-    // TODO
+    // TODO(jridgewell): Switch all viewport distance calculations to use
+    // Layer's definition of ancestry layer viewports.
 
     if (this.useLayers_) {
       distance += Math.max(0,
