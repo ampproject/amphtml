@@ -22,6 +22,7 @@ import {
 } from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
+import {toWin} from '../../../src/types';
 import {BLANK_AUDIO_SRC, BLANK_VIDEO_SRC} from './default-media';
 
 
@@ -778,17 +779,20 @@ export class MediaPool {
    * @return {!MediaPool}
    */
   static for(root) {
-    const existingId = root.element.getAttribute(POOL_MEDIA_ELEMENT_ATTRIBUTE);
+    const element = root.getElement();
+    const existingId = element.getAttribute(POOL_MEDIA_ELEMENT_ATTRIBUTE);
     const hasInstanceAllocated = existingId && instances[existingId];
 
     if (hasInstanceAllocated) {
       return instances[existingId];
     }
 
-    const newId = nextInstanceId++;
-    root.element.setAttribute(POOL_MEDIA_ELEMENT_ATTRIBUTE, newId);
-    instances[newId] = new MediaPool(root.win,
-        root.getMaxMediaElementCounts(), root.getElementDistance);
+    const newId = String(nextInstanceId++);
+    element.setAttribute(POOL_MEDIA_ELEMENT_ATTRIBUTE, newId);
+    instances[newId] = new MediaPool(
+        toWin(root.getElement().ownerDocument.defaultView),
+        root.getMaxMediaElementCounts(),
+        root.getElementDistance);
 
     return instances[newId];
   }
@@ -852,15 +856,19 @@ class Sources {
 
 
 /**
- * Defines a common interface for elements that contain a MediaPool.  Components
- * implementing this interface must also extend
- * {@link ./base-element.BaseElement}.
+ * Defines a common interface for elements that contain a MediaPool.
  *
  * @interface
  */
 export class MediaPoolRoot {
   /**
-   * @param {!Element} element The element whose distance should be retrieved.
+   * @return {!Element} The root element of this media pool.
+   */
+  getElement() {};
+
+  /**
+   * @param {!Element} unusedElement The element whose distance should be
+   *    retrieved.
    * @return {number} A numerical distance representing how far the specified
    *     element is from the user's current position in the document.  The
    *     absolute magnitude of this number is irrelevant; the relative magnitude
@@ -868,16 +876,12 @@ export class MediaPoolRoot {
    *     furthest from the user's current position in the document are evicted
    *     from the MediaPool first).
    */
-  getElementDistance() {
-    return 0;
-  };
+  getElementDistance(unusedElement) {};
 
 
   /**
    * @return {!Object<!MediaType, number>} The maximum amount of each media
    *     type to allow within this element.
    */
-  getMaxMediaElementCounts() {
-    return {};
-  };
+  getMaxMediaElementCounts() {};
 }

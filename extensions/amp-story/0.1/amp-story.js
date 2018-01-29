@@ -240,7 +240,7 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {!AmpStoryHint} */
     this.ampStoryHint_ = new AmpStoryHint(this.win);
 
-    /** @private {!Promise<!MediaPool>} */
+    /** @private {!MediaPool} */
     this.mediaPool_ = MediaPool.for(this);
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
@@ -588,12 +588,6 @@ export class AmpStory extends AMP.BaseElement {
    */
   hashOrigin_(domain) {
     return stringHash32(domain.toLowerCase());
-  }
-
-
-  /** @override */
-  getWindow() {
-    return this.win;
   }
 
 
@@ -1282,6 +1276,12 @@ export class AmpStory extends AMP.BaseElement {
   /** @override */
   getMaxMediaElementCounts() {
     return MAX_MEDIA_ELEMENT_COUNTS;
+  }
+
+
+  /** @override */
+  getElement() {
+    return this.element;
   }
 
 

@@ -91,11 +91,19 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.markPageAsLoaded_();
     });
 
+    let mediaPoolResolveFn, mediaPoolRejectFn;
+
     /** @private @const {!Promise<!MediaPool>} */
     this.mediaPoolPromise_ = new Promise((resolve, reject) => {
-      this.mediaPoolResolveFn_ = resolve;
-      this.mediaPoolRejectFn_ = reject;
+      mediaPoolResolveFn = resolve;
+      mediaPoolRejectFn = reject;
     });
+
+    /** @private @const {!function(!MediaPool)} */
+    this.mediaPoolResolveFn_ = mediaPoolResolveFn;
+
+    /** @private @const {!function(*)} */
+    this.mediaPoolRejectFn_ = mediaPoolRejectFn;
 
     /** @private @const {boolean} Only prerender the first story page. */
     this.prerenderAllowed_ = matches(this.element,
