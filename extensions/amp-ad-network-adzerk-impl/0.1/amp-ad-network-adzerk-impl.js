@@ -112,7 +112,7 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
     }
     // Shorthand for: reject promise if current promise chain is out of date.
     const checkStillCurrent = this.verifyStillCurrent();
-    return utf8Decode(bytes).then(body => {
+    return Promise.resolve(utf8Decode(bytes)).then(body => {
       checkStillCurrent();
       this.ampCreativeJson_ = /** @type {!AmpTemplateCreativeDef} */
         (tryParseJson(body) || {});
@@ -122,7 +122,8 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
           .then(parsedTemplate => {
             this.creativeMetadata_ = /** @type {!CreativeMetaDataDef} */
                 (super.getAmpAdMetadata(parsedTemplate));
-            return utf8Encode(this.creativeMetadata_.minifiedCreative);
+            return Promise.resolve(
+                utf8Encode(this.creativeMetadata_.minifiedCreative));
           })
           .catch(error => {
             dev().warn(TAG, 'Error fetching/expanding template',
