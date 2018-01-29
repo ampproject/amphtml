@@ -234,3 +234,170 @@ describe('Activity getTotalEngagedTime', () => {
     });
   });
 });
+
+describe('Activity getIncrementalEngagedTime', () => {
+
+  let sandbox;
+  let clock;
+  let fakeDoc;
+  let fakeWin;
+  let ampdoc;
+  let viewer;
+  let viewport;
+  let activity;
+  let whenFirstVisibleResolve;
+  let visibilityObservable;
+  let mousedownObservable;
+  let scrollObservable;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
+
+    // start at something other than 0
+    clock.tick(123456);
+
+    visibilityObservable = new Observable();
+    mousedownObservable = new Observable();
+    scrollObservable = new Observable();
+
+    fakeDoc = {
+      nodeType: /* DOCUMENT */ 9,
+      addEventListener(eventName, callback) {
+        if (eventName === 'mousedown') {
+          mousedownObservable.add(callback);
+        }
+      },
+      documentElement: {
+        style: {
+          // required to instantiate Viewport service
+          paddingTop: 0,
+        },
+        classList: {
+          add: () => {},
+        },
+      },
+      body: {
+        nodeType: 1,
+        style: {},
+      },
+    };
+
+    fakeWin = {
+      services: {},
+      document: fakeDoc,
+      location: {
+        href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
+      },
+      navigator: window.navigator,
+      setTimeout: window.setTimeout,
+      clearTimeout: window.clearTimeout,
+      // required to instantiate Viewport service
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    };
+    fakeDoc.defaultView = fakeWin;
+
+    ampdoc = new AmpDocSingle(fakeWin);
+    fakeWin.services['ampdoc'] = {obj: {
+      getAmpDoc: () => ampdoc,
+      isSingleDoc: () => true,
+    }};
+
+    installDocumentStateService(fakeWin);
+    installTimerService(fakeWin);
+    installVsyncService(fakeWin);
+    installPlatformService(fakeWin);
+    installViewerServiceForDoc(ampdoc);
+    viewer = Services.viewerForDoc(ampdoc);
+
+    const whenFirstVisiblePromise = new Promise(resolve => {
+      whenFirstVisibleResolve = resolve;
+    });
+    sandbox.stub(viewer, 'whenFirstVisible').returns(whenFirstVisiblePromise);
+    sandbox.stub(viewer, 'onVisibilityChanged').callsFake(handler => {
+      visibilityObservable.add(handler);
+    });
+
+    installViewportServiceForDoc(ampdoc);
+    viewport = Services.viewportForDoc(ampdoc);
+
+    sandbox.stub(viewport, 'onScroll').callsFake(handler => {
+      scrollObservable.add(handler);
+    });
+
+    markElementScheduledForTesting(fakeWin, 'amp-analytics');
+    installActivityServiceForTesting(ampdoc);
+
+    return Services.activityForDoc(ampdoc).then(a => {
+      activity = a;
+    });
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('should have 0 seconds of incremental engaged' +
+  'time with no activity', () => {
+    return expect(activity.getIncrementalEngagedTime('tests')).to.equal(0);
+  });
+
+  it('should have 5 seconds of incremental engaged time after viewer ' +
+    'becomes visible', () => {
+    whenFirstVisibleResolve();
+    return viewer.whenFirstVisible().then(() => {
+      clock.tick(10000);
+      return expect(activity.getIncrementalEngagedTime('tests')).to.equal(5);
+    });
+  });
+
+  it('should have 4 seconds of incremental engaged time after 4' +
+  ' seconds', () => {
+    whenFirstVisibleResolve();
+    return viewer.whenFirstVisible().then(() => {
+      clock.tick(4000);
+      return expect(activity.getIncrementalEngagedTime('tests')).to.equal(4);
+    });
+  });
+
+  it('should reset incremental engaged time after each poll', () => {
+    whenFirstVisibleResolve();
+    return viewer.whenFirstVisible().then(() => {
+      clock.tick(10000);
+      mousedownObservable.fire();
+      const first = activity.getIncrementalEngagedTime('tests');
+      expect(first).to.equal(5);
+      expect(first).to.equal(activity.getTotalEngagedTime());
+      expect(activity.getIncrementalEngagedTime('tests')).to.equal(0);
+      clock.tick(10000);
+      const second = activity.getIncrementalEngagedTime('tests');
+      expect(second).to.equal(5);
+      return expect(second).not.to.equal(activity.getTotalEngagedTime());
+    });
+  });
+
+  it('should keep individual incremental engaged times per name', () => {
+    whenFirstVisibleResolve();
+    return viewer.whenFirstVisible().then(() => {
+      clock.tick(10000);
+      mousedownObservable.fire();
+      const alpha = activity.getIncrementalEngagedTime('alpha');
+      const bravo = activity.getIncrementalEngagedTime('bravo');
+      // both names should be equal
+      expect(alpha).to.equal(bravo);
+      mousedownObservable.fire();
+      clock.tick(10000);
+      // check alpha and not bravo to reset alpha
+      const alpha2 = activity.getIncrementalEngagedTime('alpha');
+      expect(alpha2).to.equal(5);
+      mousedownObservable.fire();
+      clock.tick(10000);
+      // check bravo and alpha, alpha should be half bravo
+      const bravo2 = activity.getIncrementalEngagedTime('bravo');
+      const alpha3 = activity.getIncrementalEngagedTime('alpha');
+      expect(bravo2).to.equal(10);
+      return expect(alpha3).to.equal(5);
+    });
+  });
+});
