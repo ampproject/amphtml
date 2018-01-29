@@ -482,7 +482,6 @@ export class Xhr {
    * @return {!Promise<!Document>}
    */
   fetchDocument(input, opt_init) {
-    const caller = arguments.callee.caller;
     const init = setupInit(opt_init, 'text/html');
     init.responseType = 'document';
     return this.fetch(input, init)
