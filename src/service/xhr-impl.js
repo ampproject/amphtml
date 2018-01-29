@@ -482,10 +482,11 @@ export class Xhr {
    * @return {!Promise<!Document>}
    */
   fetchDocument(input, opt_init) {
+    const caller = arguments.callee.caller;
     const init = setupInit(opt_init, 'text/html');
     init.responseType = 'document';
     return this.fetch(input, init)
-        .then(response => response.document_());
+        .then(response => response.document_(input, caller));
   }
 
   /**
@@ -755,13 +756,13 @@ export class FetchResponse {
    * @return {!Promise<!Document>}
    * @private
    */
-  document_() {
+  document_(url = '', prevCallee = '') {
     dev().assert(!this.bodyUsed, 'Body already used');
     this.bodyUsed = true;
 
     user().assert(this.xhr_.responseXML,
       'responseXML should exist. Make sure to return ' +
-      'Content-Type: text/html header. URL: ' + this.xhr_.responseURL );
+      'Content-Type: text/html header. URL: ' + url + ' - CALLEE: ' + prevCallee);
     return /** @type {!Promise<!Document>} */ (
       Promise.resolve(dev().assert(this.xhr_.responseXML)));
   }
