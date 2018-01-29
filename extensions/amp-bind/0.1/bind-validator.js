@@ -246,6 +246,7 @@ function createElementRules_() {
       'state': null,
     },
     'AMP-SELECTOR': {
+      'disabled': null,
       'selected': null,
     },
     'AMP-STATE': {
