@@ -411,7 +411,11 @@ function main() {
       '\n');
 
   // TESTING: Eliminate unnecesasry testing negative test.
-  if (process.env.TRAVIS_BRANCH.indexOf('TestSkipBuild') != -1 &&
+  console.log(
+      'TRAVIS_PULL_REQUEST_BRANCH:', process.env.TRAVIS_PULL_REQUEST_BRANCH);
+  console.log('TRAVIS_COMMIT_MESSAGE:', process.env.TRAVIS_COMMIT_MESSAGE);
+  console.log('TRAVIS_EVENT_TYPE:', process.env.TRAVIS_EVENT_TYPE);
+  if (process.env.TRAVIS_PULL_REQUEST_BRANCH.indexOf('TestSkipBuild') != -1 &&
       (process.env.TRAVIS_COMMIT_MESSAGE.indexOf('testing enabled') == -1)) {
     console.log(fileLogPrefix,
         'Skipping unnecessary testing on greenkeeper branches. ' +
