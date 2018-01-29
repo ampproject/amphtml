@@ -68,6 +68,18 @@ describes.fakeWin('amp-ad-templates', {amp: true}, env => {
     win.AMP.registerTemplate('amp-mustache', AmpMustache);
   });
 
+  it('should render a template with correct values', () => {
+    win.AMP.registerTemplate('amp-mustache', AmpMustache);
+    const parentDiv = doc.createElement('div');
+    parentDiv./*OK*/innerHTML =
+        '<template type="amp-mustache"><p>{{foo}}</p></template>';
+    doc.body.appendChild(parentDiv);
+    return ampAdTemplates.render({foo: 'bar'}, parentDiv).then(result => {
+      expect(result).to.not.be.null;
+      expect(result./*OK*/innerHTML).to.equal('bar');
+    });
+  });
+
   it('should insert analytics component', () => {
     const parentDiv = doc.createElement('div');
     parentDiv./*OK*/innerHTML =
@@ -81,7 +93,6 @@ describes.fakeWin('amp-ad-templates', {amp: true}, env => {
     }, {
       'type': 'googleanalytics',
     }];
-    console.log(parentDiv);
     ampAdTemplates.insertAnalytics(parentDiv, analytics);
     expect(parentDiv.childNodes.length).to.equal(3);
     expect(parentDiv.innerHTML).to.equal('<p>123</p>' +

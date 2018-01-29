@@ -22,6 +22,7 @@ import {parseUrl} from '../../../src/url';
 import {LRUCache} from '../../../src/utils/lru-cache';
 import {isArray} from '../../../src/types';
 import {createElementWithAttributes} from '../../../src/dom';
+import {dict} from '../../../src/utils/object';
 
 /** @private {!Object<string, string|boolean>} */
 const TEMPLATE_CORS_CONFIG = {
@@ -85,17 +86,12 @@ export class AmpAdTemplates {
 
   /**
    * @param {!Element} element
-   * @param {!JsonObject|undefined} analyticsValue
+   * @param {!Array|!JsonObject} analyticsValue
    */
   insertAnalytics(element, analyticsValue) {
-    if (!analyticsValue) {
-      return;
-    }
-
-    analyticsValue =
-        isArray(analyticsValue) ? analyticsValue : [analyticsValue];
+    analyticsValue = /**@type {!Array}*/
+        (isArray(analyticsValue) ? analyticsValue : [analyticsValue]);
     for (let i = 0; i < analyticsValue.length; i++) {
-      console.log('i is ', i);
       const config = analyticsValue[i];
       const analyticsEle = document.createElement('amp-analytics');
       if (config['config']) {
@@ -107,13 +103,12 @@ export class AmpAdTemplates {
       if (config['json']) {
         const scriptElem = createElementWithAttributes(
             document,
-            'script', {
+            'script', dict({
               'type': 'application/json',
-            });
+            }));
         scriptElem.textContent = JSON.stringify(config['json']);
         analyticsEle.appendChild(scriptElem);
       }
-      console.log('new', analyticsEle);
       element.appendChild(analyticsEle);
     }
   }
