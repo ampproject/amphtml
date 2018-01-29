@@ -62,7 +62,7 @@ const WHITELIST_EVENT_IN_SANDBOX = [
 let DynamicVariableBindingDef;
 
 /**
- * @typedef {function(!string, ...?): string}
+ * @typedef {function(string, ...?): string}
  */
 let HtmlAttrBindingDef;
 
@@ -744,7 +744,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * this one needs access to this.win.document, which if the amp-analytics
    * tag is contained within an amp-ad tag will NOT be the parent/publisher
    * page. Hence the need to put it here.
-   * @param {!string} cssSelector Elements matching this selector will be
+   * @param {string} cssSelector Elements matching this selector will be
    *     included, provided they have at least one of the attributeNames
    *     set, up to a max of 10.
    * @param attributeNames The attributes whose values will be returned
