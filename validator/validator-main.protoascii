@@ -1034,6 +1034,7 @@ tags: {
         type: PARSE_AS_ERROR
       }
       validate_keyframes: true
+      allowed_declarations: "animation-timing-function"
       allowed_declarations: "offset-distance"
       allowed_declarations: "opacity"
       allowed_declarations: "transform"
