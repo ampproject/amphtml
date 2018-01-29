@@ -7,9 +7,9 @@ import {IntersectionObserver} from '../../../src/intersection-observer';
 /**
  * Used to manage messages for different Safeframe ad slots.
  *
- * Maps a sentinel value to an object consisting of the impl to which that
- * sentinel value belongs and the corresponding message handler for that impl.
- * @type{!Object<string, !{instance: !AmpAdNetworkDoubleclickImpl, connectionEstablished: boolean}>}
+ * Maps a sentinel value to an instance of the SafeframeHostApi to which that
+ * sentinel value belongs.
+ * @type{!Object<string, !AmpAdNetworkDoubleclickImpl>}
  */
 const safeframeHosts = {};
 
@@ -18,14 +18,17 @@ let safeframeListenerCreated = false;
 const MESSAGE_FIELDS = {
   CHANNEL: 'c',
   SENTINEL: 'e',
-  ENDPOINT_IDENTITY: 'e',
+  ENDPOINT_IDENTITY: 'i',
   PAYLOAD: 'p',
   SERVICE: 's',
 };
 
 const SERVICE = {
   GEOMETRY_UPDATE: 'geometry_update',
+  CREATIVE_GEOMETRY_UPDATE: 'creative_geometry_update',
+  EXPAND_REQUEST: 'expand_request',
   EXPAND_RESPONSE: 'expand_response',
+  REGISTER_DONE: 'register_done',
 };
 
 const TAG = 'AMP-DOUBLECLICK-SAFEFRAME';
@@ -36,8 +39,7 @@ export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
 /**
  * Event listener callback for message events. If message is a Safeframe message,
  * handles the message.
- * Registered within SafeframeApi
- *
+ * This listener is registered within SafeframeHostApi.
  */
 function safeframeListener() {
   const data = tryParseJson(getData(event));
@@ -56,7 +58,8 @@ function safeframeListener() {
                  `${data[MESSAGE_FIELDS.SENTINEL]} not found.`);
       return;
     }
-    !!safeframeHost.channel || safeframeHost.connectMessagingChannel(data);
+    !!safeframeHost.channel ||
+        safeframeHost.connectMessagingChannel(data[MESSAGE_FIELDS.CHANNEL]);
     return;
   }
 
@@ -69,10 +72,11 @@ function safeframeListener() {
   }
   const safeframeHost = safeframeHosts[payload['sentinel']];
   if (!safeframeHost) {
-    dev().warn(TAG, `Safeframe Host for sentinel ${payload['sentinel']} not found.`);
+    dev().warn(
+        TAG, `Safeframe Host for sentinel ${payload['sentinel']} not found.`);
     return;
   }
-  safeframeHost.processMessage_(payload, data['s']);
+  safeframeHost.processMessage(payload, data['s']);
 
 }
 
@@ -83,52 +87,61 @@ export class SafeframeHostApi {
 
   /**
    * @param {AmpAdNetworkDoubleclickImpl} baseInstance
-   *
    */
   constructor(baseInstance) {
     /** @private {AmpAdNetworkDoubleclickImpl} */
-    this.baseInstance = baseInstance;
+    this.baseInstance_ = baseInstance;
 
-    /** {?AMP.AmpAdUIHandler} */
-    this.uiHandler = baseInstance.uiHandler;
+    /** @private {Window} */
+    this.win_ = this.baseInstance_.win;
 
-    /** {Window} */
-    this.win = baseInstance.win;
-
-    /** {string} */
-    this.sentinel = baseInstance.sentinel;
+    /** @private {string} */
+    this.sentinel_ = this.baseInstance_.sentinel;
 
     /** @private {?IntersectionObserver} */
-    this.IntersectionObserver = null;
+    this.IntersectionObserver_ = null;
 
-    /** {string} */
+    /** @type {string} */
     this.channel = null;
 
-    /** {number} */
-    this.initialHeight = null;
+    /** @private {number} */
+    this.initialHeight_ = null;
 
-    /** {number} */
-    this.initialWidth = null;
+    /** @private {number} */
+    this.initialWidth_ = null;
 
-    this.currentGeometry = null;
+    /** @private {Object} */
+    this.currentGeometry_ = null;
+
+    /** @private {number} */
+    this.endpointIdentity_ = Math.random();
   }
 
-  registerSafeframeListener() {
-    safeframeHosts[this.sentinel] = safeframeHosts[this.sentinel] || this;
+  /**
+   * Registers this instance as the host API for the current sentinel.
+   * If the global safeframe listener has not yet been created, it creates
+   * that as well.
+   */
+  registerSafeframeHost() {
+    safeframeHosts[this.sentinel_] = safeframeHosts[this.sentinel_] || this;
     if (!safeframeListenerCreated) {
       safeframeListenerCreated = true;
-      this.win.addEventListener('message', safeframeListener, false);
+      this.win_.addEventListener('message', safeframeListener, false);
     }
   }
 
-  connectMessagingChannel(data) {
-    this.channel = data[MESSAGE_FIELDS.CHANNEL];
-    dev().assert(this.baseInstance.iframe.contentWindow,
+  /**
+   * Sends initial connection message to the safeframe to finish initialization.
+   * Also initializes the sending of geometry update messages to the frame.
+   */
+  connectMessagingChannel(channel) {
+    this.channel = channel;
+    dev().assert(this.baseInstance_.iframe.contentWindow,
         'Frame contentWindow unavailable.');
-    this.setupSafeframeApi();
-    this.sendMessage(dict({
+    this.setupGeom_();
+    this.sendMessage_(dict({
       'message': 'connect',
-      c: data[MESSAGE_FIELDS.CHANNEL],
+      'c': this.channel,
     }));
   }
 
@@ -138,11 +151,12 @@ export class SafeframeHostApi {
    * class for IO to use instead of SubscriptionApi for sending its update
    * messages. The method 'send' below is triggered by IO every time that
    * an update occurs.
+   * @private
    */
-  setupSafeframeApi() {
-    this.IntersectionObserver = new IntersectionObserver(
-        this.baseInstance, this.baseInstance.iframe, false, this);
-    this.IntersectionObserver.startSendingIntersectionChanges_();
+  setupGeom_() {
+    this.IntersectionObserver_ = new IntersectionObserver(
+        this.baseInstance_, this.baseInstance_.iframe, false, this);
+    this.IntersectionObserver_.startSendingIntersectionChanges_();
   }
 
   /**
@@ -157,11 +171,11 @@ export class SafeframeHostApi {
    * is triggered whenever the page is scrolled or visibility otherwise
    * changes.
    */
-  send(unused_trash, changes) {
-    this.sendMessage(JSON.stringify({
-        newGeometry: this.formatGeom(changes['changes'][0]),
-        uid: 1,
-      }), SERVICE.GEOMETRY_UPDATE
+  send(unusedTrash, changes) {
+    this.sendMessage_(JSON.stringify({
+      newGeometry: this.formatGeom_(changes['changes'][0]),
+      uid: 1,
+    }), SERVICE.GEOMETRY_UPDATE
     );
   }
 
@@ -170,9 +184,10 @@ export class SafeframeHostApi {
    * geometry update format expected by GPT Safeframe.
    * @param {!Object} changes IntersectionObserver formatted
    *   changes.
-   * @return {!string} Safeframe formatted changes.
+   * @return {string} Safeframe formatted changes.
+   * @private
    */
-  formatGeom(changes) {
+  formatGeom_(changes) {
     const percInView = (a1, b1, a2, b2) => {
       const lengthInView = (b2 >= b1) ? b1 - a2 : b2;
       const percInView = lengthInView / (b2 - a2);
@@ -184,7 +199,7 @@ export class SafeframeHostApi {
         return percInView;
       }
     };
-    this.currentGeometry = {
+    this.currentGeometry_ = {
       'windowCoords_t': changes.rootBounds.top,
       'windowCoords_r': changes.rootBounds.right,
       'windowCoords_b': changes.rootBounds.bottom,
@@ -193,7 +208,7 @@ export class SafeframeHostApi {
       'frameCoords_r': changes.boundingClientRect.right,
       'frameCoords_b': changes.boundingClientRect.bottom,
       'frameCoords_l': changes.boundingClientRect.left,
-      'styleZIndex': '1',
+      'styleZIndex': this.baseInstance_.element.style.zIndex,
       'allowedExpansion_t': changes.rootBounds.top,
       'allowedExpansion_r': changes.rootBounds.right,
       'allowedExpansion_b': changes.rootBounds.bottom,
@@ -207,53 +222,74 @@ export class SafeframeHostApi {
           changes.boundingClientRect.left,
           changes.boundingClientRect.right),
     };
-    return JSON.stringify(this.currentGeometry);
+    return JSON.stringify(this.currentGeometry_);
   }
 
-  sendMessage(payload, serviceName) {
+  /**
+   * Handles serializing and sending messages to the safeframe.
+   * @param {Object} payload
+   * @param {string} serviceName
+   * @private
+   */
+  sendMessage_(payload, serviceName) {
     const message = {};
     message[MESSAGE_FIELDS.CHANNEL] = this.channel;
     message[MESSAGE_FIELDS.PAYLOAD] = payload;
     message[MESSAGE_FIELDS.SERVICE] = serviceName;
-    message[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = this.sentinel;
-    this.baseInstance.iframe.contentWindow./*OK*/postMessage(
+    message[MESSAGE_FIELDS.SENTINEL] = this.sentinel_;
+    message[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = this.endpointIdentity_;
+    this.baseInstance_.iframe.contentWindow./*OK*/postMessage(
         JSON.stringify(message), SAFEFRAME_ORIGIN);
   }
 
-  processMessage_(payload, messageType) {
-    switch (messageType) {
-      case 'creative_geometry_update':
+  /**
+   * Routes messages to their appropriate handler.
+   * @param {Object} payload
+   * @param {string} service
+   */
+  processMessage(payload, service) {
+    switch (service) {
+      case SERVICE.CREATIVE_GEOMETRY_UPDATE:
         this.handleFluidMessage_(payload);
         break;
-      case 'expand_request':
+      case SERVICE.EXPAND_REQUEST:
         this.handleExpandRequest_(payload);
-      case 'register_done':
+      case SERVICE.REGISTER_DONE:
         this.handleRegisterDone_(payload);
     }
     return;
   }
 
+  /**
+   * @param {!Object} payload
+   * @private
+   */
   handleRegisterDone_(payload) {
-    this.initialHeight = payload.initialHeight;
-    this.initialWidth = payload.initialWidth;
+    this.initialHeight_ = payload.initialHeight;
+    this.initialWidth_ = payload.initialWidth;
   }
 
+  /**
+   * @param {!Object} payload
+   * @private
+   */
   handleExpandRequest_(payload) {
     const width = payload.expand_r - payload.expand_l;
     const height = payload.expand_b - payload.expand_t;
-    this.baseInstance.attemptChangeSize(height, width).catch(() => {});
-    //this.baseInstance.handleResize_(width, height);
+    this.baseInstance_.attemptChangeSize(height, width).catch(() => {});
+    //this.baseInstance_.handleResize_(width, height);
+    // TODO : make the response accurate, right now just defaults to success
     const responsePayload = JSON.stringify({
       uid: 1,
       success: true,
-      newGeometry: JSON.stringify(this.currentGeometry),
-      'expand_t': this.currentGeometry.allowedExpansion_t,
-      'expand_b': this.currentGeometry.allowedExpansion_b,
-      'expand_r': this.currentGeometry.allowedExpansion_r,
-      'expand_l': this.currentGeometry.allowedExpansion_l,
+      newGeometry: JSON.stringify(this.currentGeometry_),
+      'expand_t': this.currentGeometry_.allowedExpansion_t,
+      'expand_b': this.currentGeometry_.allowedExpansion_b,
+      'expand_r': this.currentGeometry_.allowedExpansion_r,
+      'expand_l': this.currentGeometry_.allowedExpansion_l,
       push: true,
     });
-    this.sendMessage(responsePayload, SERVICE.EXPAND_RESPONSE);
+    this.sendMessage_(responsePayload, SERVICE.EXPAND_RESPONSE);
   }
 
   /**
@@ -265,14 +301,14 @@ export class SafeframeHostApi {
     let newHeight;
     if (!payload || !(newHeight = parseInt(payload['height'], 10))) {
       // TODO(levitzky) Add actual error handling here.
-      this.baseInstance.forceCollapse();
+      this.baseInstance_.forceCollapse();
       return;
     }
-    this.baseInstance.attemptChangeHeight(newHeight)
-        .then(() => this.baseInstance.onFluidResize_())
+    this.baseInstance_.attemptChangeHeight(newHeight)
+        .then(() => this.baseInstance_.onFluidResize_())
         .catch(() => {
           // TODO(levitzky) Add more error handling here
-          this.baseInstance.forceCollapse();
+          this.baseInstance_.forceCollapse();
         });
   }
 }

@@ -801,7 +801,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   setupSafeframe() {
     if (!this.safeframeApi) {
       this.safeframeApi = new SafeframeHostApi(this);
-      this.safeframeApi.registerSafeframeListener();
+      this.safeframeApi.registerSafeframeHost();
     }
   }
 
