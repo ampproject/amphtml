@@ -52,9 +52,17 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
     it('should be valid', () => {
       const r = '{"p":[{"n":1234,"t":[5],"s":677496}]}';
       element.setAttribute('data-r', r);
-      const encodedQueryParam = encodeURIComponent(`'${r}'`);
       expect(impl.getAdUrl()).to.equal(
-          `https://engine.adzerk.net/amp?r=${encodedQueryParam}`);
+          `https://engine.adzerk.net/amp?r=${encodeURIComponent(r)}`);
+    });
+
+    it('should be valid #2', () => {
+      element.setAttribute('data-r',
+          '{"p":[{"t":[5],"s":333999,"a":5603000}]}');
+      expect(impl.getAdUrl()).to.equal(
+          'https://engine.adzerk.net' +
+          '/amp?r=%7B%22p%22%3A%5B%7B%22t%22%3A%5B5%5D%2C%22s%22%3A333999' +
+          '%2C%22a%22%3A5603000%7D%5D%7D');
     });
 
     it('should be invalid', () => {

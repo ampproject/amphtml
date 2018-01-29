@@ -99,8 +99,7 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
       return `http://ads.localhost:${this.win.location.port}` +
           '/adzerk/' + data;
     }
-    const encodedQueryParam = encodeURIComponent(`'${data}'`);
-    return `https://engine.adzerk.net/amp?r=${encodedQueryParam}`;
+    return `https://engine.adzerk.net/amp?r=${encodeURIComponent(data)}`;
   }
 
   /** @override */
