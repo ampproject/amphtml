@@ -177,7 +177,9 @@ export class GoogleCidApi {
    */
   persistToken_(tokenValue, expires) {
     if (tokenValue) {
-      setCookie(this.win_, AMP_TOKEN, tokenValue, this.expiresIn_(expires));
+      setCookie(this.win_, AMP_TOKEN, tokenValue, this.expiresIn_(expires), {
+        highestAvailableDomain: true,
+      });
     }
   }
 
