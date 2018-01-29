@@ -84,6 +84,11 @@ const unitTestPaths = commonTestPaths.concat([
   'extensions/**/test/*.js',
 ]);
 
+const unitTestOnSaucePaths = commonTestPaths.concat([
+  'test/functional/**/*.js',
+  'ads/**/test/test-*.js',
+]);
+
 const integrationTestPaths = commonTestPaths.concat([
   'test/integration/**/*.js',
   'test/functional/test-error.js',
@@ -99,6 +104,7 @@ module.exports = {
   a4aTestPaths,
   chaiAsPromised,
   unitTestPaths,
+  unitTestOnSaucePaths,
   integrationTestPaths,
   lintGlobs: [
     '**/*.js',
@@ -135,6 +141,8 @@ module.exports = {
     '!validator/dist/**/*.*',
     '!validator/node_modules/**/*.*',
     '!validator/nodejs/node_modules/**/*.*',
+    '!validator/webui/dist/**/*.*',
+    '!validator/webui/node_modules/**/*.*',
     '!build-system/tasks/presubmit-checks.js',
     '!build/polyfills.js',
     '!build/polyfills/*.js',

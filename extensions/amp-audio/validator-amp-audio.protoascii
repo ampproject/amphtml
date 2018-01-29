@@ -20,7 +20,7 @@ tags: {  # amp-audio
     allowed_versions: "0.1"
     allowed_versions: "latest"
     deprecated_allow_duplicates: true
-    requires_usage: DEPRECATED_WARNING
+    requires_usage: GRANDFATHERED
   }
   attr_lists: "common-extension-attrs"
 }
@@ -45,10 +45,16 @@ attr_lists: { # amp-audio attributes that are common to both AMP and A4A format.
 tags: {  # <amp-audio> for AMP (autoplay attribute allowed)
   html_format: AMP
   tag_name: "AMP-AUDIO"
+  # There is an alternate spec for amp-video in amp-story.
+  disallowed_ancestor: "AMP-STORY"
   requires_extension: "amp-audio"
   attrs: {
     name: "autoplay"
     value: ""
+  }
+  attrs: {
+    name: "preload"
+    value_regex_casei: "(auto|metadata|none|)"
   }
   attr_lists: "amp-audio-common"
   attr_lists: "extended-amp-global"
@@ -64,6 +70,32 @@ tags: {  # <amp-audio> for AMP (autoplay attribute allowed)
     supported_layouts: NODISPLAY
   }
 }
+tags: {  # <amp-audio> for AMP, amp-story (autoplay attribute mandatory)
+  html_format: AMP
+  tag_name: "AMP-AUDIO"
+  spec_name: "amp-story >> amp-audio"
+  mandatory_ancestor: "AMP-STORY"
+  requires_extension: "amp-audio"
+  attrs: {
+    name: "autoplay"
+    value: ""
+    mandatory: true
+  }
+  attr_lists: "amp-audio-common"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-audio"
+  amp_layout {
+    defines_default_height: true
+    # TODO(johannes): in the longer run, defines_default_width should
+    # be false, to make it a fixed height layout per default, rather
+    # than a fixed one.
+    defines_default_width: true
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: NODISPLAY
+  }
+}
+
 tags: {  # <amp-audio> for A4A (autoplay attribute disallowed)
   html_format: AMP4ADS
   tag_name: "AMP-AUDIO"

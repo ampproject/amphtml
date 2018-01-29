@@ -17,7 +17,7 @@
 import {ActionTrust} from '../action-trust';
 import {KeyCodes} from '../utils/key-codes';
 import {Services} from '../services';
-import {debounce} from '../utils/rate-limit';
+import {debounce, throttle} from '../utils/rate-limit';
 import {dev, user} from '../log';
 import {isArray, isFiniteNumber, toWin} from '../types';
 import {isEnabled} from '../dom';
@@ -52,6 +52,9 @@ const DEFAULT_METHOD_ = 'activate';
 
 /** @const {number} */
 const DEFAULT_DEBOUNCE_WAIT = 300; // ms
+
+/** @const {number} */
+const DEFAULT_THROTTLE_INTERVAL = 100; // ms
 
 /** @const {!Object<string,!Array<string>>} */
 const ELEMENTS_ACTIONS_MAP_ = {
@@ -198,6 +201,7 @@ export class ActionService {
     this.addEvent('submit');
     this.addEvent('change');
     this.addEvent('input-debounced');
+    this.addEvent('input-throttled');
     this.addEvent('valid');
     this.addEvent('invalid');
   }
@@ -258,6 +262,18 @@ export class ActionService {
         const deferredEvent = new DeferredEvent(event);
         this.addTargetPropertiesAsDetail_(deferredEvent);
         debouncedInput(deferredEvent);
+      });
+    } else if (name == 'input-throttled') {
+      const throttledInput = throttle(this.ampdoc.win, event => {
+        const target = dev().assertElement(event.target);
+        this.trigger(target, name, /** @type {!ActionEventDef} */ (event),
+            ActionTrust.HIGH);
+      }, DEFAULT_THROTTLE_INTERVAL);
+
+      this.root_.addEventListener('input', event => {
+        const deferredEvent = new DeferredEvent(event);
+        this.addTargetPropertiesAsDetail_(deferredEvent);
+        throttledInput(deferredEvent);
       });
     } else if (name == 'valid' || name == 'invalid') {
       this.root_.addEventListener(name, event => {
@@ -324,7 +340,7 @@ export class ActionService {
     const debugid = target.tagName + '#' + targetId;
     dev().assert((targetId && targetId.substring(0, 4) == 'amp-') ||
         target.tagName.toLowerCase() in ELEMENTS_ACTIONS_MAP_,
-        'AMP element or a whitelisted target element is expected: %s', debugid);
+    'AMP element or a whitelisted target element is expected: %s', debugid);
 
     if (target[ACTION_HANDLER_]) {
       dev().error(TAG_, `Action handler already installed for ${target}`);
@@ -399,8 +415,8 @@ export class ActionService {
 
       // Wait for the previous action, if applicable.
       currentPromise = (currentPromise)
-          ? currentPromise.then(invoke)
-          : invoke();
+        ? currentPromise.then(invoke)
+        : invoke();
     });
   }
 
@@ -443,7 +459,7 @@ export class ActionService {
         this.actionInfoError_('Unrecognized AMP element "' +
             lowerTagName + '". ' +
             'Did you forget to include it via <script custom-element>?',
-            actionInfo, target);
+        actionInfo, target);
       }
       return null;
     }
@@ -661,14 +677,14 @@ export function parseActionMap(s, context) {
 
         peek = toks.peek();
         if (peek.type == TokenType.SEPARATOR && peek.value == '.') {
-          toks.next();  // Skip '.'
+          toks.next(); // Skip '.'
           method = assertToken(
               toks.next(), [TokenType.LITERAL, TokenType.ID]).value || method;
 
           // Optionally, there may be arguments: "(key = value, key = value)".
           peek = toks.peek();
           if (peek.type == TokenType.SEPARATOR && peek.value == '(') {
-            toks.next();  // Skip '('
+            toks.next(); // Skip '('
             args = tokenizeMethodArguments(toks, assertToken, assertAction);
           }
         }
@@ -678,7 +694,7 @@ export function parseActionMap(s, context) {
           target,
           method,
           args: (args && getMode().test && Object.freeze) ?
-              Object.freeze(args) : args,
+            Object.freeze(args) : args,
           str: s,
         });
 
@@ -740,8 +756,8 @@ function tokenizeMethodArguments(toks, assertToken, assertAction) {
         // Expressions have one or more dereferences: ".identifier"
         if (tok.type == TokenType.ID) {
           for (peek = toks.peek();
-              peek.type == TokenType.SEPARATOR && peek.value == '.';
-              peek = toks.peek()) {
+            peek.type == TokenType.SEPARATOR && peek.value == '.';
+            peek = toks.peek()) {
             toks.next(); // Skip '.'.
             tok = assertToken(toks.next(false), [TokenType.ID]);
             argValueTokens.push(tok);

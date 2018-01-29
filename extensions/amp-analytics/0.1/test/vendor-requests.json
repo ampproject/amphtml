@@ -11,6 +11,10 @@
    "pageview": "//www.afsanalytics.com/cgi_bin/connect.cgi?usr=xxxxxxxxPauto&js=1&amp=1&title=_title_&url=_canonical_url_&refer=_document_referrer_&resolution=_screen_width_x_screen_height_&color=_screen_color_depth_&Tips=_random_",
    "click":   "//www.afsanalytics.com/cgi_bin/click.cgi?usr=xxxxxxxx&event=click&exit=clicked%20from%20AMP%20page"
   },
+  "alexametrics": {
+    "base": "https://certify-amp.alexametrics.com/atrk.gif?account=$atrk_acct&domain=$domain",
+    "pageview": "https://certify-amp.alexametrics.com/atrk.gif?account=$atrk_acct&domain=$domain&jsv=amp-_amp_version_&frame_height=_viewport_height_&frame_width=_viewport_width_&title=_title_&time=_timestamp_&time_zone_offset=_timezone_&screen_params=_screen_width_x_screen_height_x_screen_color_depth_&ref_url=_document_referrer_&host_url=_source_url_&random_number=_random_&user_cookie=_client_id_&user_cookie_flag=0&user_lang=_browser_language_&amp_doc_url=_ampdoc_url_"
+  },
   "atinternet": {
     "base": "https://$log$domain/hit.xiti?s=$site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_",
     "suffix": "&medium=amp&&ref=_document_referrer_",
@@ -28,6 +32,12 @@
     "base": "//ignore.c.richmetrics.com/imglog?e=ignore&pi=ignore|_page_view_id_|_canonical_path_|_client_id_&ui=_client_id_&v=amp&ts=_timestamp_&sn=3&",
     "pageview": "//ignore.c.richmetrics.com/imglog?e=ignore&pi=ignore|_page_view_id_|_canonical_path_|_client_id_&ui=_client_id_&v=amp&ts=_timestamp_&sn=3&type=page&ca=$category&sc=$subCategory&ln=_browser_language_&lr=_document_referrer_&eu=_source_url_&tz=_timezone_&pd=_scroll_width_x_scroll_height_&sd=_screen_width_x_screen_height_&wd=_available_screen_width_x_available_screen_height_&ws=_scroll_left_x_scroll_top_",
     "pageping": "//ignore.c.richmetrics.com/imglog?e=ignore&pi=ignore|_page_view_id_|_canonical_path_|_client_id_&ui=_client_id_&v=amp&ts=_timestamp_&sn=3&type=pageping"
+  },
+  "byside": {
+    "host": "//webcare.byside.com/?webcare_id=$webcare_id&bwch=$bwch&lang=pt&fid=$fid&bwit=A&tuid=_client_id_&suid=$suid&puid=_page_view_id_p_timestamp_&referrer=_document_referrer_&page=_source_url_&amppage=_ampdoc_url_&bwpt=_title_&bres=_viewport_width_x_viewport_height_&res=_screen_width_x_screen_height_&v=v20171116a&ampv=_amp_version_&viewer=_viewer_&ua=_user_agent_&r=_random_",
+    "base": "//webcare.byside.com/BWA$webcare_id/amp/?webcare_id=$webcare_id&bwch=$bwch&lang=pt&fid=$fid&bwit=A&tuid=_client_id_&suid=$suid&puid=_page_view_id_p_timestamp_&referrer=_document_referrer_&page=_source_url_&amppage=_ampdoc_url_&bwpt=_title_&bres=_viewport_width_x_viewport_height_&res=_screen_width_x_screen_height_&v=v20171116a&ampv=_amp_version_&viewer=_viewer_&ua=_user_agent_&r=_random_",
+    "pageview": "//webcare.byside.com/BWA$webcare_id/amp/pixel.php?webcare_id=$webcare_id&bwch=$bwch&lang=pt&fid=$fid&bwit=A&tuid=_client_id_&suid=$suid&puid=_page_view_id_p_timestamp_&referrer=_document_referrer_&page=_source_url_&amppage=_ampdoc_url_&bwpt=_title_&bres=_viewport_width_x_viewport_height_&res=_screen_width_x_screen_height_&v=v20171116a&ampv=_amp_version_&viewer=_viewer_&ua=_user_agent_&r=_random_",
+    "event": "//webcare.byside.com/BWA$webcare_id/amp/signal.php?event_id=$eventId&event_label=$eventLabel&fields=$fields&webcare_id=$webcare_id&bwch=$bwch&lang=pt&fid=$fid&bwit=A&tuid=_client_id_&suid=$suid&puid=_page_view_id_p_timestamp_&referrer=_document_referrer_&page=_source_url_&amppage=_ampdoc_url_&bwpt=_title_&bres=_viewport_width_x_viewport_height_&res=_screen_width_x_screen_height_&v=v20171116a&ampv=_amp_version_&viewer=_viewer_&ua=_user_agent_&r=_random_"
   },
   "chartbeat": {
     "host": "https://ping.chartbeat.net",
@@ -173,9 +183,12 @@
     "pageview": "https://pixels.mparticle.com/v1/$apiKey/Pixel?dt=ScreenView&n=_canonical_path_&hn=_ampdoc_url_&ttl=_title_&et=Unknown&amp_id=_client_id_&attrs_k=$eventAttributes_Keys&attrs_v=$eventAttributes_Values&ua_k=$userAttributes_Keys&ua_v=$userAttributes_Values&ui_t=$userIdentities_Types&ui_v=$userIdentities_Values&flags_k=$customFlags_Keys&flags_v=$customFlags_Values&ct=_timestamp_&dbg=false&lc=$location&av=$appVersion",
     "event": "https://pixels.mparticle.com/v1/$apiKey/Pixel?dt=AppEvent&n=$eventName&et=Unknown&amp_id=_client_id_&attrs_k=$eventAttributes_Keys&attrs_v=$eventAttributes_Values&ua_k=$userAttributes_Keys&ua_v=$userAttributes_Values&ui_t=$userIdentities_Types&ui_v=$userIdentities_Values&flags_k=$customFlags_Keys&flags_v=$customFlags_Values&ct=_timestamp_&dbg=false&lc=$location&av=$appVersion"
   },
+  "newrelic": {
+    "pageview": "https://bam.nr-data.net/amp?appId=$appId&licenseKey=$licenseKey&ampUrl=_ampdoc_url_&canonicalUrl=_canonical_url_&timeToDomContentLoadedEventEnd=_nav_timing_&timeToDomInteractive=_nav_timing_&timeToDomComplete=_nav_timing_&timeToDomLoading=_nav_timing_&timeToResponseStart=_nav_timing_&timeToResponseEnd=_nav_timing_&timeToLoadEventStart=_nav_timing_&timeToLoadEventEnd=_nav_timing_&timeToConnectStart=_nav_timing_&timeToConnectEnd=_nav_timing_&timeToFetchStart=_nav_timing_&timeToRequestStart=_nav_timing_&timeToUnloadEventStart=_nav_timing_&timeToUnloadEventEnd=_nav_timing_&timeToDomainLookupStart=_nav_timing_&timeToDomainLookupEnd=_nav_timing_&timeToRedirectStart=_nav_timing_&timeToRedirectEnd=_nav_timing_&timeToSecureConnection=_nav_timing_&timestamp=_timestamp_&ampVersion=_amp_version_&pageLoadTime=_page_load_time_"
+  },
   "nielsen": {
-    "session": "https://uaid-linkage.imrworldwide.com/cgi-bin/gn?prd=session&c13=asid,P$apid&sessionId=_client_id_&pingtype=4&enc=false&c61=createtm,_timestamp_&rnd=_random_",
-    "cloudapi": "https://cloudapi.imrworldwide.com/nmapi/v2/$apid/_client_id_/a?b=%7B%22devInfo%22%3A%7B%22devId%22%3A%22_client_id_%22%2C%22apn%22%3A%22$apn%22%2C%22apv%22%3A%22$apv%22%2C%22apid%22%3A%22$apid%22%7D%2C%22metadata%22%3A%7B%22static%22%3A%7B%22type%22%3A%22static%22%2C%22section%22%3A%22$section%22%2C%22assetid%22%3A%22_page_view_id_%22%2C%22segA%22%3A%22$segA%22%2C%22segB%22%3A%22$segB%22%2C%22segC%22%3A%22$segC%22%2C%22adModel%22%3A%220%22%2C%22dataSrc%22%3A%22cms%22%7D%2C%22content%22%3A%7B%7D%2C%22ad%22%3A%7B%7D%7D%2C%22event%22%3A%22playhead%22%2C%22position%22%3A%22_timestamp_%22%2C%22data%22%3A%7B%22hidden%22%3A%22_background_state_%22%2C%22blur%22%3A%22_background_state_%22%2C%22position%22%3A%22_timestamp_%22%7D%2C%22type%22%3A%22static%22%2C%22utc%22%3A%22_timestamp_%22%2C%22index%22%3A%223%22%7D",
+    "session": "https://$prefixuaid-linkage.imrworldwide.com/cgi-bin/gn?prd=session&c13=asid,P$apid&sessionId=_client_id___page_view_id_&pingtype=4&enc=false&c61=createtm,_timestamp_&rnd=_random_",
+    "cloudapi": "https://$prefixcloudapi.imrworldwide.com/nmapi/v2/$apid/_client_id___page_view_id_/a?b=%7B%22devInfo%22%3A%7B%22devId%22%3A%22_client_id_%22%2C%22apn%22%3A%22$apn%22%2C%22apv%22%3A%22$apv%22%2C%22apid%22%3A%22$apid%22%7D%2C%22metadata%22%3A%7B%22static%22%3A%7B%22type%22%3A%22static%22%2C%22section%22%3A%22$section%22%2C%22assetid%22%3A%22_page_view_id_%22%2C%22segA%22%3A%22$segA%22%2C%22segB%22%3A%22$segB%22%2C%22segC%22%3A%22$segC%22%2C%22adModel%22%3A%220%22%2C%22dataSrc%22%3A%22cms%22%7D%2C%22content%22%3A%7B%7D%2C%22ad%22%3A%7B%7D%7D%2C%22event%22%3A%22playhead%22%2C%22position%22%3A%22_timestamp_%22%2C%22data%22%3A%7B%22hidden%22%3A%22_background_state_%22%2C%22blur%22%3A%22_background_state_%22%2C%22position%22%3A%22_timestamp_%22%7D%2C%22type%22%3A%22static%22%2C%22utc%22%3A%22_timestamp_%22%2C%22index%22%3A%223%22%7D",
   },
   "nielsen-marketing-cloud": {
     "host": "loadeu.exelator.com",

@@ -1018,7 +1018,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
     action = new ActionService(ampdoc, document);
     const originalTrigger = action.trigger;
     triggerPromise = new Promise((resolve, reject) => {
-      sandbox.stub(action, 'trigger', () => {
+      sandbox.stub(action, 'trigger').callsFake(() => {
         try {
           originalTrigger.apply(action, action.trigger.getCall(0).args);
           resolve();
@@ -1095,7 +1095,7 @@ describes.fakeWin('Core events', {amp: true}, env => {
         element,
         'change',
         sinon.match(object =>
-            object.detail.checked && object.detail.value == 'foo'));
+          object.detail.checked && object.detail.value == 'foo'));
   });
 
   it('should trigger change event for <input type="range"> elements', () => {
@@ -1181,6 +1181,28 @@ describes.fakeWin('Core events', {amp: true}, env => {
       expect(action.trigger).to.have.been.calledWith(
           element,
           'input-debounced',
+          sinon.match(event => {
+            const value = event.target.value;
+            return value == 'foo bar baz';
+          }));
+    });
+  });
+
+  it('should trigger input-throttled event on input', () => {
+    sandbox.stub(action, 'invoke_');
+    const handler = window.document.addEventListener.getCall(5).args[1];
+    const element = document.createElement('input');
+    element.id = 'test';
+    element.setAttribute('on', 'input-throttled:test.hide');
+    element.value = 'foo bar baz';
+    const event = {target: element};
+    document.body.appendChild(element);
+    handler(event);
+
+    return triggerPromise.then(() => {
+      expect(action.trigger).to.have.been.calledWith(
+          element,
+          'input-throttled',
           sinon.match(event => {
             const value = event.target.value;
             return value == 'foo bar baz';

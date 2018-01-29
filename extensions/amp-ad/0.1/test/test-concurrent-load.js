@@ -18,6 +18,7 @@ import {
   getAmpAdRenderOutsideViewport,
   is3pThrottled,
   incrementLoadingAds,
+  waitFor3pThrottle,
 } from '../concurrent-load';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {installTimerService} from '../../../../src/service/timer-impl';
@@ -72,8 +73,13 @@ describes.realWin('concurrent-load', {}, env => {
 
     beforeEach(() => {
       win = env.win;
-      clock = lolex.install(win, 0, ['Date', 'setTimeout', 'clearTimeout']);
+      clock = lolex.install({
+        target: win, toFake: ['Date', 'setTimeout', 'clearTimeout']});
       installTimerService(win);
+    });
+
+    afterEach(() => {
+      clock.uninstall();
     });
 
     it('should throttle ad loading one per second', function* () {
@@ -98,6 +104,25 @@ describes.realWin('concurrent-load', {}, env => {
       resolver();
       yield macroTask();
       expect(is3pThrottled(win)).to.be.false;
+    });
+  });
+
+  describe('waitFor3pThrottle', () => {
+    beforeEach(() => {
+      installTimerService(env.win);
+    });
+
+    it('should block if incremented', () => {
+      incrementLoadingAds(env.win);
+      const start = Date.now();
+      return waitFor3pThrottle(env.win).then(
+          () => expect(Date.now() - start >= 1000));
+    });
+
+    it('should not block if never incremented', () => {
+      const start = Date.now();
+      return waitFor3pThrottle(env.win).then(
+          () => expect(Date.now() - start <= 50));
     });
   });
 });

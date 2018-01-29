@@ -36,12 +36,6 @@ export class AmpList extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @const {!function(!Array<!Element>)} */
-    this.boundRendered_ = this.rendered_.bind(this);
-
-    /** @const {!function(!Array<!Element>):!Promise<!Array<!Element>>} */
-    this.boundScanForBindings_ = this.scanForBindings_.bind(this);
-
     /** @private {?Element} */
     this.container_ = null;
 
@@ -50,6 +44,12 @@ export class AmpList extends AMP.BaseElement {
 
     /** @const {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win);
+
+    /**
+     * Has layoutCallback() been called yet?
+     * @private {boolean}
+     */
+    this.layoutCompleted_ = false;
   }
 
   /** @override */
@@ -79,6 +79,8 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.layoutCompleted_ = true;
+
     const fetch = this.fetchList_();
     if (this.getFallback()) {
       fetch.then(() => {
@@ -102,10 +104,15 @@ export class AmpList extends AMP.BaseElement {
     if (src !== undefined) {
       const typeOfSrc = typeof src;
       if (typeOfSrc === 'string') {
-        this.fetchList_();
+        // Defer to fetch in layoutCallback() before first layout.
+        if (this.layoutCompleted_) {
+          this.fetchList_();
+        }
       } else if (typeOfSrc === 'object') {
         const items = isArray(src) ? src : [src];
         this.renderItems_(items);
+        // Remove the 'src' now that local data is used to render the list.
+        this.element.setAttribute('src', '');
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
       }
@@ -145,11 +152,14 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   fetchList_() {
+    if (!this.element.getAttribute('src')) {
+      return Promise.resolve();
+    }
     const itemsExpr = this.element.getAttribute('items') || 'items';
     return this.fetch_(itemsExpr).then(items => {
       if (this.element.hasAttribute('single-item')) {
         user().assert(typeof items !== 'undefined' ,
-            'Response must contain an arrary or object at "%s". %s',
+            'Response must contain an array or object at "%s". %s',
             itemsExpr, this.element);
         if (!isArray(items)) {
           items = [items];
@@ -175,8 +185,8 @@ export class AmpList extends AMP.BaseElement {
    */
   renderItems_(items) {
     return this.templates_.findAndRenderTemplateArray(this.element, items)
-        .then(this.boundScanForBindings_)
-        .then(this.boundRendered_);
+        .then(elements => this.updateBindings_(elements))
+        .then(elements => this.rendered_(elements));
   }
 
   /**
@@ -184,11 +194,11 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise<!Array<!Element>>}
    * @private
    */
-  scanForBindings_(elements) {
+  updateBindings_(elements) {
     const forwardElements = () => elements;
     return Services.bindForDocOrNull(this.element).then(bind => {
       if (bind) {
-        return bind.rescanAndEvaluate(elements);
+        return bind.scanAndApply(elements, [this.container_]);
       }
     // Forward elements to chained promise on success or failure.
     }).then(forwardElements, forwardElements);

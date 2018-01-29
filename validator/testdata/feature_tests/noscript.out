@@ -1,7 +1,78 @@
 FAIL
-feature_tests/noscript.html:43:6 The parent tag of tag 'amp-video > source' is 'audio', but it can only be 'amp-video'. (see https://www.ampproject.org/docs/reference/components/amp-video) [AMP_TAG_PROBLEM]
+|  <!--
+|    Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+|  
+|    Licensed under the Apache License, Version 2.0 (the "License");
+|    you may not use this file except in compliance with the License.
+|    You may obtain a copy of the License at
+|  
+|        http://www.apache.org/licenses/LICENSE-2.0
+|  
+|    Unless required by applicable law or agreed to in writing, software
+|    distributed under the License is distributed on an "AS-IS" BASIS,
+|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+|    See the License for the specific language governing permissions and
+|    limitations under the license.
+|  -->
+|  <!--
+|    Test Description:
+|    This tests the logic for <noscript> tags and it's child tags.
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|  <head>
+|    <meta charset="utf-8">
+|    <link rel="canonical" href="./regular-html-version.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|  </head>
+|  <body>
+|    <!-- Example of a valid noscript -->
+|    <noscript>
+|      <audio controls>
+|        <source src="https://example.com/howl-of-the-lemur.mp3" type="audio/mpeg">
+|      </audio>
+|      <img alt="Iconic Lemurs" height="200" src="https://example.com/lemurs.png" width="80">
+|      <video controls height="480" width="640">
+|        <source src="https://example.com/island-of-lemurs.mp4" type="video/mp4">
+|      </video>
+|    </noscript>
+|    <!-- Invalid: audio's source must have src and type; controls are optional -->
+|    <noscript>
+|      <audio>
+|        <source>
+>>       ^~~~~~~~~
+feature_tests/noscript.html:43:6 The mandatory attribute 'src' is missing in tag 'audio > source'. (see https://www.ampproject.org/docs/reference/components/amp-audio) [DISALLOWED_HTML]
+>>       ^~~~~~~~~
+feature_tests/noscript.html:43:6 The mandatory attribute 'type' is missing in tag 'audio > source'. (see https://www.ampproject.org/docs/reference/components/amp-audio) [DISALLOWED_HTML]
+|      </audio>
+|    </noscript>
+|    <!-- Invalid: img must have src; alt, height and width are optional -->
+|    <noscript>
+|      <img alt="Iconic Lemurs">
+>>     ^~~~~~~~~
 feature_tests/noscript.html:48:4 The mandatory attribute 'src' is missing in tag 'img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML]
+|    </noscript>
+|    <!-- Invalid: audio must be in a noscript tag -->
+|    <audio controls>
+>>   ^~~~~~~~~
 feature_tests/noscript.html:51:2 The tag 'audio' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-audio'? (see https://www.ampproject.org/docs/reference/components/amp-audio) [DISALLOWED_HTML_WITH_AMP_EQUIVALENT]
+|      <source src="https://example.com/howl-of-the-lemur.mp3" type="audio/mpeg">
+|    </audio>
+|    <!-- Invalid: img must be in a noscript tag -->
+|    <img alt="Iconic Lemurs" height="200" src="https://example.com/lemurs.png" width="80">
+>>   ^~~~~~~~~
 feature_tests/noscript.html:55:2 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://www.ampproject.org/docs/reference/components/amp-img) [DISALLOWED_HTML_WITH_AMP_EQUIVALENT]
+|    <!-- Invalid: video must be in a noscript tag -->
+|    <video controls height="480" width="640">
+>>   ^~~~~~~~~
 feature_tests/noscript.html:57:2 The tag 'video' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-video'? (see https://www.ampproject.org/docs/reference/components/amp-video) [DISALLOWED_HTML_WITH_AMP_EQUIVALENT]
-feature_tests/noscript.html:61:13 The tag 'noscript' may not appear as a descendant of tag 'noscript'. [GENERIC]
+|      <source src="https://example.com/island-of-lemurs.mp4" type="video/mp4">
+|    </video>
+|    <!-- Invalid: nested noscript tags don't correctly parse. -->
+|    <noscript> <noscript> </noscript> </noscript>
+>>              ^~~~~~~~~
+feature_tests/noscript.html:61:13 The parent tag of tag 'noscript enclosure for boilerplate' is 'noscript', but it can only be 'head'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [DISALLOWED_HTML]
+|  </body>
+|  </html>

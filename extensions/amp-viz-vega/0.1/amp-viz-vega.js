@@ -162,8 +162,8 @@ export class AmpVizVega extends AMP.BaseElement {
           {
             requireAmpResponseSourceOrigin: false,
           }).then(res => res.json()).then(data => {
-            this.data_ = data;
-          });
+        this.data_ = data;
+      });
     }
   }
 
@@ -222,8 +222,8 @@ export class AmpVizVega extends AMP.BaseElement {
 
   /**
    * Gets the padding defined in the Vega data for either width or height.
-   * @param {!string} widthOrHeight One of 'width' or 'height' string values.
-   * @return {!number}
+   * @param {string} widthOrHeight One of 'width' or 'height' string values.
+   * @return {number}
    * @private
    */
   getDataPadding_(widthOrHeight) {

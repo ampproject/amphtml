@@ -102,7 +102,7 @@ class AmpSocialShare extends AMP.BaseElement {
       });
     }
 
-    urlReplacements.expandAsync(hrefWithVars, bindings).then(href => {
+    urlReplacements.expandUrlAsync(hrefWithVars, bindings).then(href => {
       this.href_ = href;
       // mailto:, whatsapp: protocols breaks when opened in _blank on iOS Safari
       const protocol = parseUrl(href).protocol;
@@ -111,7 +111,7 @@ class AmpSocialShare extends AMP.BaseElement {
       const isSms = protocol === 'sms:';
       const isIosSafari = this.platform_.isIos() && this.platform_.isSafari();
       this.target_ = (isIosSafari && (isMailTo || isWhatsApp || isSms))
-          ? '_top' : '_blank';
+        ? '_top' : '_blank';
       if (isSms) {
         // http://stackoverflow.com/a/19126326
         // This code path seems to be stable for both iOS and Android.

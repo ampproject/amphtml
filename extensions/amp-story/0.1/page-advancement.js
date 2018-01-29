@@ -28,6 +28,11 @@ const NEXT_SCREEN_AREA_RATIO = 0.75;
 /** @const {number} */
 const POLL_INTERVAL_MS = 250;
 
+/** @const @enum */
+export const TapNavigationDirection = {
+  'NEXT': 1,
+  'PREVIOUS': 2,
+};
 
 /**
  * Base class for the AdvancementConfig.  By default, does nothing other than
@@ -44,6 +49,9 @@ export class AdvancementConfig {
 
     /** @private @const {!Array<function()>} */
     this.previousListeners_ = [];
+
+    /** @private @const {!Array<function(number)>} */
+    this.tapNavigationListeners_ = [];
 
     /** @private {boolean} */
     this.isRunning_ = false;
@@ -73,6 +81,14 @@ export class AdvancementConfig {
    */
   addPreviousListener(previousListener) {
     this.previousListeners_.push(previousListener);
+  }
+
+  /**
+   * @param {function(number)} onTapNavigationListener A function that handles when a
+   * navigation listener to be fired.
+   */
+  addOnTapNavigationListener(onTapNavigationListener) {
+    this.tapNavigationListeners_.push(onTapNavigationListener);
   }
 
   /**
@@ -124,6 +140,16 @@ export class AdvancementConfig {
   onPrevious() {
     this.previousListeners_.forEach(previousListener => {
       previousListener();
+    });
+  }
+
+  /**
+   * @param {number} navigationDirection Direction of navigation
+   * @protected
+   */
+  onTapNavigation(navigationDirection) {
+    this.tapNavigationListeners_.forEach(navigationListener => {
+      navigationListener(navigationDirection);
     });
   }
 
@@ -181,6 +207,13 @@ class MultipleAdvancementConfig extends AdvancementConfig {
   }
 
   /** @override */
+  addOnTapNavigationListener(onTapNavigationListener) {
+    this.advancementModes_.forEach(advancementMode => {
+      advancementMode.addOnTapNavigationListener(onTapNavigationListener);
+    });
+  }
+
+  /** @override */
   addAdvanceListener(advanceListener) {
     this.advancementModes_.forEach(advancementMode => {
       advancementMode.addAdvanceListener(advanceListener);
@@ -226,12 +259,16 @@ class ManualAdvancement extends AdvancementConfig {
     super();
     this.element_ = element;
     this.clickListener_ = this.maybePerformNavigation_.bind(this);
+    this.hasAutoAdvanceStr_ = this.element_.getAttribute('auto-advance-after');
   }
 
   /** @override */
   start() {
     super.start();
     this.element_.addEventListener('click', this.clickListener_, true);
+    if (!this.hasAutoAdvanceStr_) {
+      super.onProgressUpdate();
+    }
   }
 
   /** @override */
@@ -276,16 +313,20 @@ class ManualAdvancement extends AdvancementConfig {
 
     // TODO(newmuis): This will need to be flipped for RTL.
     const elRect = this.element_./*OK*/getBoundingClientRect();
-    const offsetLeft = elRect.x;
+
+    // Using `left` as a fallback since Safari returns a ClientRect in some
+    // cases.
+    const offsetLeft = ('x' in elRect) ? elRect.x : elRect.left;
     const offsetWidth = elRect.width;
+
     const nextScreenAreaMin = offsetLeft +
         ((1 - NEXT_SCREEN_AREA_RATIO) * offsetWidth);
     const nextScreenAreaMax = offsetLeft + offsetWidth;
 
     if (event.pageX >= nextScreenAreaMin && event.pageX < nextScreenAreaMax) {
-      this.onAdvance();
+      this.onTapNavigation(TapNavigationDirection.NEXT);
     } else if (event.pageX >= offsetLeft && event.pageX < nextScreenAreaMin) {
-      this.onPrevious();
+      this.onTapNavigation(TapNavigationDirection.PREVIOUS);
     }
   }
 }
@@ -446,6 +487,13 @@ class MediaBasedAdvancement extends AdvancementConfig {
   start() {
     super.start();
 
+    // Prevents race condition when checking for video interface classname.
+    (this.element_.whenBuilt ? this.element_.whenBuilt() : Promise.resolve())
+        .then(() => this.startWhenBuilt_());
+  }
+
+  /** @private */
+  startWhenBuilt_() {
     if (this.isVideoInterfaceVideo_()) {
       this.startVideoInterfaceElement_();
       return;

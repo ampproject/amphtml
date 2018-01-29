@@ -20,7 +20,7 @@ tags: {  # amp-youtube
     name: "amp-youtube"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    requires_usage: DEPRECATED_WARNING
+    requires_usage: GRANDFATHERED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -30,8 +30,17 @@ tags: {  # <amp-youtube>
   requires_extension: "amp-youtube"
   attrs: { name: "autoplay" }
   attrs: {
+    name: "credentials"
+    value_regex_casei: "(include|omit)"
+  }
+  attrs: {
+    name: "data-live-channelid"
+    mandatory_oneof: "['data-live-channelid', 'data-videoid']"
+    value_regex: "[^=/?:]+"
+  }
+  attrs: {
     name: "data-videoid"
-    mandatory: true
+    mandatory_oneof: "['data-live-channelid', 'data-videoid']"
     value_regex: "[^=/?:]+"
   }
   # <amp-bind>

@@ -19,7 +19,7 @@ import {FetchMock, networkFailure} from './fetch-mock';
 import {MockA4AImpl, TEST_URL} from './utils';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
-    data as validCSSAmp,
+  data as validCSSAmp,
 } from './testdata/valid_css_at_rules_amp.reserialized';
 import {installCryptoService} from '../../../../src/service/crypto-impl';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
@@ -27,8 +27,8 @@ import {adConfig} from '../../../../ads/_config';
 import {getA4ARegistry} from '../../../../ads/_a4a-config';
 import {signingServerURLs} from '../../../../ads/_a4a-config';
 import {
-    resetScheduledElementForTesting,
-    upgradeOrRegisterElement,
+  resetScheduledElementForTesting,
+  upgradeOrRegisterElement,
 } from '../../../../src/service/custom-element-registry';
 import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {loadPromise} from '../../../../src/event-helper';
@@ -192,12 +192,11 @@ describe('integration test: a4a', () => {
           .then(() => {
             const a4a = new MockA4AImpl(a4aElement);
             const initiateAdRequestMock = sandbox.stub(
-                MockA4AImpl.prototype,
-                'initiateAdRequest',
+                MockA4AImpl.prototype, 'initiateAdRequest').callsFake(
                 () => {
                   a4a.adPromise_ = Promise.resolve();
-                  // This simulates calling forceCollapse, without tripping up
-                  // any unrelated asserts.
+                  // This simulates calling forceCollapse, without tripping
+                  // up any unrelated asserts.
                   a4a.isRefreshing = false;
                 });
             const tearDownSlotMock =

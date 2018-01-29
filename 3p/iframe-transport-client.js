@@ -93,7 +93,7 @@ export class IframeTransportClient {
     return this.creativeIdToContext_[creativeId] ||
         (this.creativeIdToContext_[creativeId] =
             new IframeTransportContext(this.win_, this.iframeMessagingClient_,
-            creativeId, this.vendor_));
+              creativeId, this.vendor_));
   }
 
   /**
@@ -129,7 +129,7 @@ export class IframeTransportContext {
 
     user().assert(win['onNewContextInstance'] &&
         typeof win['onNewContextInstance'] == 'function',
-        'Must implement onNewContextInstance in ' + win.location.href);
+    'Must implement onNewContextInstance in ' + win.location.href);
     win['onNewContextInstance'](this);
   }
 
@@ -138,7 +138,7 @@ export class IframeTransportContext {
    * is received.
    * Note that calling this a second time will result in the first listener
    * being removed - the events will not be sent to both callbacks.
-   * @param {!function(string)} listener
+   * @param {function(string)} listener
    */
   onAnalyticsEvent(listener) {
     this.listener_ = listener;
