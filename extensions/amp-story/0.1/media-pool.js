@@ -57,7 +57,7 @@ const DOM_MEDIA_ELEMENT_ID_PREFIX = 'i-amphtml-media-';
 /**
  * @const {string}
  */
-const POOL_MEDIA_ELEMENT_ATTRIBUTE = 'i-amphtml-media-pool';
+const POOL_MEDIA_ELEMENT_PROPERTY_NAME = 'i-amphtml-media-pool';
 
 
 /**
@@ -788,7 +788,7 @@ export class MediaPool {
    */
   static for(root) {
     const element = root.getElement();
-    const existingId = element.getAttribute(POOL_MEDIA_ELEMENT_ATTRIBUTE);
+    const existingId = element[POOL_MEDIA_ELEMENT_PROPERTY_NAME];
     const hasInstanceAllocated = existingId && instances[existingId];
 
     if (hasInstanceAllocated) {
@@ -796,7 +796,7 @@ export class MediaPool {
     }
 
     const newId = String(nextInstanceId++);
-    element.setAttribute(POOL_MEDIA_ELEMENT_ATTRIBUTE, newId);
+    element[POOL_MEDIA_ELEMENT_PROPERTY_NAME] = newId;
     instances[newId] = new MediaPool(
         toWin(root.getElement().ownerDocument.defaultView),
         root.getMaxMediaElementCounts(),
