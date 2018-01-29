@@ -58,10 +58,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
     });
 
     it('should be invalid', () => {
-      try {
-        impl.getAdUrl();
-        expect(false).to.be.true;
-      } catch (err) {}
+      expect(() => impl.getAdUrl()).to.throw(/Expected data-r attribte/);
     });
   });
 
