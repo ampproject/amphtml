@@ -185,11 +185,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
   },
   {
-    id: 'variable-filters',
-    name: 'Format to apply filters to analytics variables',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
-  },
-  {
     id: 'pump-early-frame',
     name: 'Force all extensions to have the same release ' +
         'as the main JS binary',
