@@ -636,10 +636,10 @@ class AmpDatePicker extends AMP.BaseElement {
    */
   emitUpdate_() {
     const renderedEvent = createCustomEvent(
-      this.win_,
-      AmpEvents.DOM_UPDATE,
-      /* detail */ null,
-      {bubbles: true});
+        this.win_,
+        AmpEvents.DOM_UPDATE,
+        /* detail */ null,
+        {bubbles: true});
     this.element.dispatchEvent(renderedEvent);
   }
 
