@@ -142,15 +142,9 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
     // TODO(levitzky) The following minification is for demo purposes only. Once
     // launched this will either be performed server-side, or will be replaced
     // by more sophisticated logic.
-    const minifiedCreative = creative
-        .split(
-            '<script async src="https://cdn.ampproject.org/v0.js"></script>')
-        .join('')
-        .split(
-            '<script async custom-template="amp-mustache" src=' +
-            '"https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>')
-        .join('');
-    this.creativeMetadata_ = /** @type {?CreativeMetaDataDef} */ ({
+    const minifiedCreative = creative.replace(
+        /<script async.+?<\/script>/g, '');
+      this.creativeMetadata_ = /** @type {?CreativeMetaDataDef} */ ({
       minifiedCreative,
       customElementExtensions: [],
       extensions: [],
