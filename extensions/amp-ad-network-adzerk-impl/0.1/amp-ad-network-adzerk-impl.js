@@ -144,7 +144,7 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
     // by more sophisticated logic.
     const minifiedCreative = creative.replace(
         /<script async.+?<\/script>/g, '');
-      this.creativeMetadata_ = /** @type {?CreativeMetaDataDef} */ ({
+    this.creativeMetadata_ = /** @type {?CreativeMetaDataDef} */ ({
       minifiedCreative,
       customElementExtensions: [],
       extensions: [],
