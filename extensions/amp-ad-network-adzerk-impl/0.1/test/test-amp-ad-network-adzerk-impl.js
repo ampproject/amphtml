@@ -51,23 +51,16 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
 
   describe('#getAdUrl', () => {
     it('should be valid', () => {
-      ['https://engine.adzerk.net/amp?id=1234',
-        'https://engine.aDzErK.net/amp'].forEach(src => {
-        element.setAttribute('src', src);
-        expect(impl.isValidElement()).to.be.true;
-        expect(impl.getAdUrl()).to.equal(src);
-      });
+      const r = '{"p":[{"n":1234,"t":[5],"s":677496}]}';
+      element.setAttribute('data-r', r);
+      expect(impl.getAdUrl()).to.equal(`https://engine.adzerk.net/amp?r='${r}'`);
     });
 
-    it('should not be valid', () => {
-      ['http://engine.adzerk.com/amp',
-        'https://engine.adzerk.net?id=a',
-        'https://www.adzerk.net/amp?id=1234',
-        'foohttps://engine.adzerk.net/amp'].forEach(src => {
-        element.setAttribute('src', src);
-        expect(impl.isValidElement()).to.be.false;
-        expect(impl.getAdUrl()).to.equal('');
-      });
+    it('should be invalid', () => {
+      try {
+        impl.getAdUrl();
+        expect(false).to.be.true;
+      } catch (err) {}
     });
   });
 
