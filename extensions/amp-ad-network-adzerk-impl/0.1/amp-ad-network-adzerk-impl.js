@@ -93,17 +93,14 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
 
   /** @override */
   getAdUrl() {
-    const src = this.element.getAttribute('src');
-    if (!/^https:\/\/engine.adzerk.net\/amp/i.test(src)) {
-      return '';
-    }
     if (getMode(this.win).localDev) {
-      return `http://ads.localhost:${this.win.location.port}` +
-        '/adzerk/' + /^https:\/\/engine.adzerk.net\/amp\?id=(\d+)/
-        .exec(src)[1];
+      const localTemplateId = this.element.getAttribute('data-template-id');
+      if (localTemplateId) {
+        return `http://ads.localhost:${this.win.location.port}` +
+          '/adzerk/' + localTemplateId;
+      }
     }
-    // TODO(adzerk): specify expected src path.
-    return /^https:\/\/engine.adzerk.net\/amp/i.test(src) ? src : '';
+    return 'https://engine.adzerk.net/amp';
   }
 
   /** @override */
