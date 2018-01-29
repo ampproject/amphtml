@@ -26,7 +26,7 @@ import {
 import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {Xhr} from '../../../../src/service/xhr-impl';
-import {utf8EncodeSync, utf8Decode} from '../../../../src/utils/bytes';
+import {utf8Encode, utf8Decode} from '../../../../src/utils/bytes';
 
 describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
   let win, doc;
@@ -126,7 +126,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
             text: () => template,
           }));
       return impl.maybeValidateAmpCreative(
-          utf8EncodeSync(JSON.stringify(adResponseBody)).buffer,
+          utf8Encode(JSON.stringify(adResponseBody)).buffer,
           {
             get: name => {
               expect(name).to.equal(AMP_TEMPLATED_CREATIVE_HEADER_NAME);
@@ -134,7 +134,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
             },
           },
           () => {})
-          .then(buffer => utf8Decode(buffer))
+          .then(buffer => Promise.resolve(utf8Decode(buffer)))
           .then(creative => {
             expect(impl.getAmpAdMetadata()).to.jsonEqual({
               minifiedCreative: creative,

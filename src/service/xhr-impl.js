@@ -27,7 +27,7 @@ import {
 } from '../url';
 import {parseJson} from '../json';
 import {isArray, isObject} from '../types';
-import {utf8EncodeSync} from '../utils/bytes';
+import {utf8Encode} from '../utils/bytes';
 import {getMode} from '../mode';
 import {dict, map} from '../utils/object';
 import {fromIterator} from '../utils/array';
@@ -776,7 +776,7 @@ export class FetchResponse {
    */
   arrayBuffer() {
     return /** @type {!Promise<!ArrayBuffer>} */ (
-      this.drainText_().then(utf8EncodeSync));
+      this.drainText_().then(utf8Encode));
   }
 }
 
