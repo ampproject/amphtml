@@ -106,6 +106,7 @@ class ActivityHistory {
     }
     return totalEngagedTime;
   }
+
 }
 
 
@@ -162,6 +163,16 @@ export class Activity {
 
     /** @private @const {function()} */
     this.boundHandleVisibilityChange_ = this.handleVisibilityChange_.bind(this);
+
+    /**
+     * Contains the incrementalEngagedTime timestamps for named triggers.
+     * @private {Object<string, number>}
+     */
+    this.totalEngagedTimeByTrigger_ = {
+      /*
+       * "$triggerName" : ${lastRequestTimestamp}
+      */
+    };
 
     /** @private {Array<!UnlistenDef>} */
     this.unlistenFuncs_ = [];
@@ -305,5 +316,22 @@ export class Activity {
   getTotalEngagedTime() {
     const secondsSinceStart = Math.floor(this.getTimeSinceStart_() / 1000);
     return this.activityHistory_.getTotalEngagedTime(secondsSinceStart);
+  }
+  /**
+   * Get the incremental engaged time since the last push and reset it.
+   * @param {string} name
+   * @return {number}
+   */
+  getIncrementalEngagedTime(name = '') {
+    if (!this.totalEngagedTimeByTrigger_.hasOwnProperty(name)) {
+      this.totalEngagedTimeByTrigger_[name] =
+        this.getTotalEngagedTime();
+      return this.totalEngagedTimeByTrigger_[name];
+    }
+    const currentIncrementalEngagedTime =
+      this.totalEngagedTimeByTrigger_[name];
+    this.totalEngagedTimeByTrigger_[name] = this.getTotalEngagedTime();
+    return this.totalEngagedTimeByTrigger_[name] -
+      currentIncrementalEngagedTime;
   }
 };
