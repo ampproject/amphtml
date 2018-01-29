@@ -237,9 +237,8 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {!AmpStoryHint} */
     this.ampStoryHint_ = new AmpStoryHint(this.win);
 
-    /** @private {!MediaPool} */
-    this.mediaPool_ = new MediaPool(this.win, MAX_MEDIA_ELEMENT_COUNTS,
-        element => this.getElementDistanceFromActivePage_(element));
+    /** @private {!Promise<!MediaPool>} */
+    this.mediaPoolPromise_ = MediaPool.forStory(this.element);
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
@@ -375,21 +374,10 @@ export class AmpStory extends AMP.BaseElement {
     this.element.addEventListener(EventType.TAP_NAVIGATION, e => {
       const {direction} = e.detail;
 
-      if (this.isDesktop_()) {
-        this.next_();
-        return;
-      }
-
-      if (direction === TapNavigationDirection.NEXT) {
-        this.next_();
-      } else if (direction === TapNavigationDirection.PREVIOUS) {
-        this.previous_();
-      }
-
-      // We do this after navigation, because we do not want to block navigation
-      // on an asynchronous call.  Blessing can also fail, so we do not want to
-      // risk that either.  Otherwise, this can cause #12966.
-      this.mediaPool_.blessAll();
+      this.mediaPoolPromise_
+          .then(mediaPool => mediaPool.blessAll())
+          .then(() => this.performTapNavigation_(direction),
+              () => this.performTapNavigation_(direction));
     });
 
     const gestures = Gestures.get(this.element,
@@ -675,7 +663,6 @@ export class AmpStory extends AMP.BaseElement {
         (pageEl, index) => {
           return pageEl.getImpl().then(pageImpl => {
             this.pages_[index] = pageImpl;
-            pageImpl.setMediaPool(this.mediaPool_);
           });
         });
 
@@ -715,6 +702,24 @@ export class AmpStory extends AMP.BaseElement {
     const activePage = dev().assert(this.activePage_,
         'No active page set when navigating to next page.');
     activePage.previous();
+  }
+
+
+  /**
+   * @param {!TapNavigationDirection} direction The direction to navigate.
+   * @private
+   */
+  performTapNavigation_(direction) {
+    if (this.isDesktop_()) {
+      this.next_();
+      return;
+    }
+
+    if (direction === TapNavigationDirection.NEXT) {
+      this.next_();
+    } else if (direction === TapNavigationDirection.PREVIOUS) {
+      this.previous_();
+    }
   }
 
 
@@ -1264,9 +1269,18 @@ export class AmpStory extends AMP.BaseElement {
    * @return {number} The number of pages the specified element is from the
    *     currently active page.
    */
-  getElementDistanceFromActivePage_(element) {
+  getElementDistanceFromActivePage(element) {
     const page = this.getPageContainingElement_(element);
     return page.getDistance();
+  }
+
+
+  /**
+   * @return {!Object<!MediaType, number>} The maximum amount of each media
+   *     type to allow within this story.
+   */
+  getMaxMediaElementCounts() {
+    return MAX_MEDIA_ELEMENT_COUNTS;
   }
 
 
@@ -1286,9 +1300,10 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   unmute_() {
-    this.mediaPool_.blessAll().then(() => {
-      this.activePage_.unmuteAllMedia();
-    });
+    this.mediaPoolPromise_
+        .then(mediaPool => mediaPool.blessAll())
+        .then(() => this.activePage_.unmuteAllMedia(),
+            () => this.activePage_.unmuteAllMedia());
     this.toggleMutedAttribute_(false);
   }
 

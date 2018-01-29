@@ -85,6 +85,12 @@ function ampMediaElementFor(el) {
 }
 
 
+/**
+ * @type {?Promise<!MediaPool>}
+ */
+let mediaPoolPromise = null;
+
+
 export class MediaPool {
   /**
    * @param {!Window} win The window object.
@@ -575,8 +581,9 @@ export class MediaPool {
     const isMuted = mediaEl.muted;
     const currentTime = mediaEl.currentTime;
 
-    mediaEl.muted = false;
     return Promise.resolve(mediaEl.play()).then(() => {
+      mediaEl.muted = false;
+
       if (isPaused) {
         mediaEl.pause();
         mediaEl.currentTime = currentTime;
@@ -585,6 +592,9 @@ export class MediaPool {
       if (isMuted) {
         mediaEl.muted = true;
       }
+    }).catch(reason => {
+      dev().expectedError('AMP-STORY', 'Blessing media element failed:',
+          reason);
     });
   }
 
@@ -745,8 +755,32 @@ export class MediaPool {
         .then(() => {
           this.blessed_ = true;
         }).catch(reason => {
-          dev().expectedError('AMP-STORY', 'Blessing media failed: ', reason);
+          dev().expectedError('AMP-STORY', 'Blessing all media failed: ',
+              reason);
         });
+  }
+
+
+  static forStory(storyEl) {
+    // Implemented as singleton for now, should allow any element that
+    // implements an interface providing getMaxMediaElementCounts() and
+    // getElementDistance().
+    // TODO(newmuis): Allow multiple MediaPools in the same document.
+
+    if (mediaPoolPromise) {
+      return mediaPoolPromise;
+    }
+
+    mediaPoolPromise = storyEl.getImpl().then(storyImpl => {
+      const instance = new MediaPool(storyImpl.win,
+          storyImpl.getMaxMediaElementCounts(),
+          storyImpl.getElementDistanceFromActivePage);
+      return instance;
+    }).catch(reason => {
+      dev().error('AMP-STORY', 'Could not get media pool:', reason);
+    });
+
+    return mediaPoolPromise;
   }
 }
 
