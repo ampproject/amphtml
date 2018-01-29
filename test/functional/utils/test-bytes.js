@@ -120,15 +120,13 @@ describe('utf8', function() {
 
   it('should encode given string into utf-8 byte array', () => {
     for (let i = 0; i < strings.length; i++) {
-      utf8Encode(strings[i]).then(byteArray => expect(byteArray).to.deep
-          .equal(new Uint8Array(bytes[i])));
+      expect(utf8Encode(strings[i])).to.deep.equal(new Uint8Array(bytes[i]));
     }
   });
 
   it('should decode given utf-8 bytes into string', () => {
     for (let i = 0; i < bytes.length; i++) {
-      utf8Decode(new Uint8Array(bytes[i])).then(string => expect(string).to
-          .equal(strings[i]));
+      expect(utf8Decode(new Uint8Array(bytes[i]))).to.equal(strings[i]);
     }
   });
 });

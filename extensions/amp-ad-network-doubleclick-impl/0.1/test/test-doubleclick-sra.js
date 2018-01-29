@@ -266,7 +266,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
             method: 'GET',
             credentials: 'include',
           }).returns(Promise.resolve({
-        arrayBuffer: () => utf8Encode(creative),
+        arrayBuffer: () => Promise.resolve(utf8Encode(creative)),
         bodyUsed: false,
         headers: new FetchResponseHeaders({
           getResponseHeader(name) {
