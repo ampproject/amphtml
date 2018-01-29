@@ -116,13 +116,16 @@ export class RequestHandler {
     const triggerParams = trigger['extraUrlParams'];
     const isImmediate =
         (trigger['immediate'] === true) || (this.maxDelay_ == 0);
+
+    const macros = this.variableService_.getMacros();
+    const bindings = Object.assign({}, dynamicBindings, macros);
     if (!this.baseUrlPromise_) {
       expansionOption.freezeVar('extraUrlParams');
       this.baseUrlTemplatePromise_ =
           this.variableService_.expandTemplate(this.baseUrl, expansionOption);
       this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then(baseUrl => {
         return this.urlReplacementService_.expandUrlAsync(
-            baseUrl, dynamicBindings, this.whiteList_);
+            baseUrl, bindings, this.whiteList_);
       });
     };
 
@@ -133,7 +136,7 @@ export class RequestHandler {
           const expandedExtraUrlParamsStr =
               this.getExtraUrlParamsString_(expandExtraUrlParams);
           return this.urlReplacementService_.expandUrlAsync(
-              expandedExtraUrlParamsStr, dynamicBindings, this.whiteList_);
+              expandedExtraUrlParamsStr, bindings, this.whiteList_);
         });
 
     if (this.batchingPlugin_) {

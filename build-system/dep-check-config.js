@@ -214,6 +214,9 @@ exports.rules = [
           'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-analytics/0.1/amp-analytics.js->' +
           'src/service/cid-impl.js',
+      // TODO(calebcordry) remove this once experiment is launched
+      'extensions/amp-analytics/0.1/variables.js->' +
+          'src/service/url-replacements-impl.js',
     ],
   },
   {
