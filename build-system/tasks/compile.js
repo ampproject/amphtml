@@ -311,20 +311,6 @@ function compile(entryModuleFilenames, outputDir,
           'globalThis');
       compilerOptions.compilerFlags.conformance_configs =
           'build-system/conformance-config.textproto';
-
-      // TODO(aghassemi): Remove when NTI is the default.
-      if (argv.nti) {
-        compilerOptions.compilerFlags.new_type_inf = true;
-        compilerOptions.compilerFlags.jscomp_off.push(
-            'newCheckTypesExtraChecks');
-        compilerOptions.compilerFlags.externs.push(
-            'build-system/amp.nti.extern.js'
-        );
-      } else {
-        compilerOptions.compilerFlags.externs.push(
-            'build-system/amp.oti.extern.js'
-        );
-      }
     }
     if (argv.pseudo_names) {
       compilerOptions.compilerFlags.define.push('PSEUDO_NAMES=true');
