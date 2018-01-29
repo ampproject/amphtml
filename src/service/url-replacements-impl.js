@@ -224,7 +224,7 @@ export class GlobalVariableSource extends VariableSource {
 
     // Will be overridden by amp-analytics, but needs to exist here or will get
     // a null pointer exception at A4AVariableSource.initialize
-    this.set('HTML_ATTR', () => {});
+    this.set('HTML_ATTR', () => '');
 
     this.setBoth('QUERY_PARAM', (param, defaultValue = '') => {
       return this.getQueryParamData_(param, defaultValue);
