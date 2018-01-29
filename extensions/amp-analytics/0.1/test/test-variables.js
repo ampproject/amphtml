@@ -125,11 +125,6 @@ describe('amp-analytics.VariableService', function() {
     });
   });
 
-  it('default filterdoesn\'t work when experiment is off' , () =>
-    variables.expandTemplate('${bar|default:baz}',
-        new ExpansionOptions({'foo': ' Hello world! '}))
-        .then(actual => expect(actual).to.equal('')));
-
   describes.fakeWin('macros', {amp: true}, env => {
     let win;
     let ampdoc;
