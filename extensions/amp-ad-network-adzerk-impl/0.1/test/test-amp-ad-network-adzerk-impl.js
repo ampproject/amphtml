@@ -137,4 +137,97 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
           });
     });
   });
+
+  describe('#getAmpAdMetadata', () => {
+    let template;
+
+    beforeEach(() => {
+      template = '<!doctype html><html ⚡4ads><head>' +
+          '<meta charset="utf-8">' +
+          '<meta name="viewport" content="width=device-width, ' +
+          'minimum-scale=1"><style amp4ads-boilerplate>body{visibility:' +
+          'hidden}</style><style amp-custom>amp-fit-text: {border: 1px;}' +
+          '</style><script async src="https://cdn.ampproject.org/' +
+          'amp4ads-v0.js"></script><script async custom-element=' +
+          '"amp-fit-text" src="https://cdn.ampproject.org/v0/' +
+          'amp-fit-text-0.1.js"></script><link rel="stylesheet" ' +
+          'type="text/css" href="https://fonts.googleapis.com/css?' +
+          'family=Raleway"></head><body>' +
+          '<amp-fit-text width="300" height="200" ' +
+          '[text]="\'hello \' + USER_NAME + \'!\' + USER_NUM ">' +
+          '</amp-fit-text><p [text]="\'Expect encoding \' + HTML_CONTENT">' +
+          '</p><amp-img [src]="IMG_SRC" [srcset]="IMG_SRC"/>' +
+          '<p [text]="\'Missing \' + UNKNOWN + \' item\'"></p>' +
+          '<script amp-ad-metadata type=application/json>' +
+          '{ "ampRuntimeUtf16CharOffsets" : [ 235, 414 ], ' +
+          '"customElementExtensions": [ "amp-bind" ], ' +
+          '"extensions": [ { ' +
+          '"custom-element": "amp-bind",' +
+          '"src": "https://cdn.ampproject.org/v0/amp-fit-text-0.1.js" } ] }' +
+          '</script></body></html>';
+      fetchTextMock.withArgs(
+          'https://www-adzerk-com.cdn.ampproject.org/c/s/www.adzerk.com/456',
+          {
+            mode: 'cors',
+            method: 'GET',
+            ampCors: false,
+            credentials: 'omit',
+          }).returns(Promise.resolve(
+          {
+            headers: {},
+            text: () => template,
+          }));
+    });
+
+    it('should auto add amp-analytics if required', () => {
+      const adResponseBody = {
+        templateUrl: 'https://www.adzerk.com/456',
+        analytics: {'type': 'googleanalytics'},
+      };
+      return impl.maybeValidateAmpCreative(
+          utf8EncodeSync(JSON.stringify(adResponseBody)).buffer,
+          {
+            get: name => {
+              expect(name).to.equal(AMP_TEMPLATED_CREATIVE_HEADER_NAME);
+              return 'amp-mustache';
+            },
+          },
+          () => {})
+          .then(buffer => utf8Decode(buffer))
+          .then(creative => {
+            expect(impl.getAmpAdMetadata()).to.jsonEqual({
+              minifiedCreative: creative,
+              customElementExtensions: ['amp-bind', 'amp-analytics'],
+            });
+            // Won't insert duplicate
+            expect(impl.getAmpAdMetadata()).to.jsonEqual({
+              minifiedCreative: creative,
+              customElementExtensions: ['amp-bind', 'amp-analytics'],
+            });
+          });
+    });
+
+    it('should not add amp-analytics if not', () => {
+      const adResponseBody = {
+        templateUrl: 'https://www.adzerk.com/456',
+        analytics: undefined,
+      };
+      return impl.maybeValidateAmpCreative(
+          utf8EncodeSync(JSON.stringify(adResponseBody)).buffer,
+          {
+            get: name => {
+              expect(name).to.equal(AMP_TEMPLATED_CREATIVE_HEADER_NAME);
+              return 'amp-mustache';
+            },
+          },
+          () => {})
+          .then(buffer => utf8Decode(buffer))
+          .then(creative => {
+            expect(impl.getAmpAdMetadata()).to.jsonEqual({
+              minifiedCreative: creative,
+              customElementExtensions: ['amp-bind'],
+            });
+          });
+    });
+  });
 });

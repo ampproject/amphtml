@@ -20,6 +20,8 @@ import {getMode} from '../../../src/mode';
 import {urls} from '../../../src/config';
 import {parseUrl} from '../../../src/url';
 import {LRUCache} from '../../../src/utils/lru-cache';
+import {isArray} from '../../../src/types';
+import {createElementWithAttributes} from '../../../src/dom';
 
 /** @private {!Object<string, string|boolean>} */
 const TEMPLATE_CORS_CONFIG = {
@@ -75,7 +77,45 @@ export class AmpAdTemplates {
    */
   render(templateValues, element) {
     return Services.templatesFor(this.win_)
-        .findAndRenderTemplate(element, templateValues);
+        .findAndRenderTemplate(element, templateValues)
+        .then(renderedElement => {
+          return renderedElement;
+        });
+  }
+
+  /**
+   * @param {!Element} element
+   * @param {!JsonObject|undefined} analyticsValue
+   */
+  insertAnalytics(element, analyticsValue) {
+    if (!analyticsValue) {
+      return;
+    }
+
+    analyticsValue =
+        isArray(analyticsValue) ? analyticsValue : [analyticsValue];
+    for (let i = 0; i < analyticsValue.length; i++) {
+      console.log('i is ', i);
+      const config = analyticsValue[i];
+      const analyticsEle = document.createElement('amp-analytics');
+      if (config['config']) {
+        analyticsEle.setAttribute('config', config['config']);
+      }
+      if (config['type']) {
+        analyticsEle.setAttribute('type', config['type']);
+      }
+      if (config['json']) {
+        const scriptElem = createElementWithAttributes(
+            document,
+            'script', {
+              'type': 'application/json',
+            });
+        scriptElem.textContent = JSON.stringify(config['json']);
+        analyticsEle.appendChild(scriptElem);
+      }
+      console.log('new', analyticsEle);
+      element.appendChild(analyticsEle);
+    }
   }
 
   /**
