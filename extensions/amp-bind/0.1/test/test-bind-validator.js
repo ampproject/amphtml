@@ -206,6 +206,7 @@ describe('BindValidator', () => {
     });
 
     it('should support <amp-selector>', () => {
+      expect(val.canBind('AMP-SELECTOR', 'disabled')).to.be.true;
       expect(val.canBind('AMP-SELECTOR', 'selected')).to.be.true;
     });
 
