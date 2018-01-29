@@ -1481,7 +1481,7 @@ export class AmpA4A extends AMP.BaseElement {
       'releaseType': this.releaseType_,
     });
     const checkStillCurrent = this.verifyStillCurrent();
-    return utf8Decode(creativeBody).then(creative => {
+    return Promise.resolve(utf8Decode(creativeBody)).then(creative => {
       checkStillCurrent();
       let srcPath;
       let name = '';

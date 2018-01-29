@@ -20,7 +20,7 @@ import * as sinon from 'sinon';
 
 import {dev, user} from '../../../../src/log';
 import {base64EncodeFromBytes} from '../../../../src/utils/base64';
-import {utf8EncodeSync} from '../../../../src/utils/bytes';
+import {utf8Encode} from '../../../../src/utils/bytes';
 import {SignatureVerifier, VerificationStatus} from '../signature-verifier';
 
 const networkFailure = {throws: new TypeError('Failed to fetch')};
@@ -43,8 +43,8 @@ describes.fakeWin('SignatureVerifier', {amp: true}, env => {
         .once();
   };
 
-  const creative1 = utf8EncodeSync('Hello world!');
-  const creative2 = utf8EncodeSync('This is a <em>test</em> creative.');
+  const creative1 = utf8Encode('Hello world!');
+  const creative2 = utf8Encode('This is a <em>test</em> creative.');
 
   // TODO(bradfrizzell, #12476): Make this test work with sinon 4.0.
   it.skip('should make no network requests when crypto is unavailable', () => {

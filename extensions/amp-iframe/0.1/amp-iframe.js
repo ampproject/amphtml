@@ -26,7 +26,7 @@ import {removeElement, closestBySelector} from '../../../src/dom';
 import {removeFragment, parseUrl, isSecureUrl} from '../../../src/url';
 import {Services} from '../../../src/services';
 import {user, dev} from '../../../src/log';
-import {utf8EncodeSync} from '../../../src/utils/bytes.js';
+import {utf8Encode} from '../../../src/utils/bytes.js';
 import {urls} from '../../../src/config';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {setStyle} from '../../../src/style';
@@ -202,7 +202,7 @@ export class AmpIframe extends AMP.BaseElement {
         this.element);
 
     return 'data:text/html;charset=utf-8;base64,' +
-        base64EncodeFromBytes(utf8EncodeSync(srcdoc));
+        base64EncodeFromBytes(utf8Encode(srcdoc));
   }
 
   /** @override */
