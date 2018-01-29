@@ -285,10 +285,6 @@ export class AmpStory extends AMP.BaseElement {
         () => this.variableService_);
 
     this.buildLandscapeOrientationOverlay_();
-
-    // Remove the cursor: pointer; style set by the runtime, to avoid wrong
-    // touch feedback on mobile, like a flashing overlay on page transitions.
-    resetStyles(this.win.document.documentElement, ['cursor']);
   }
 
 
