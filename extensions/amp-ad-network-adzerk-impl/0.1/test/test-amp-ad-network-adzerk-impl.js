@@ -52,8 +52,9 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
     it('should be valid', () => {
       const r = '{"p":[{"n":1234,"t":[5],"s":677496}]}';
       element.setAttribute('data-r', r);
+      const encodedQueryParam = encodeURIComponent(`'${r}'`);
       expect(impl.getAdUrl()).to.equal(
-          `https://engine.adzerk.net/amp?r='${encodeURIComponent(r)}'`);
+          `https://engine.adzerk.net/amp?r=${encodedQueryParam}`);
     });
 
     it('should be invalid', () => {
