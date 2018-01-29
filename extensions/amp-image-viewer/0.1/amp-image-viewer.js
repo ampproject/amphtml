@@ -465,6 +465,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     // Movable.
     this.unlistenOnSwipePan_ = this.gestures_
         .onGesture(SwipeXYRecognizer, e => {
+          event.preventDefault();
           this.onMove_(e.data.deltaX, e.data.deltaY, false);
           if (e.data.last) {
             this.onMoveRelease_(e.data.velocityX, e.data.velocityY);
