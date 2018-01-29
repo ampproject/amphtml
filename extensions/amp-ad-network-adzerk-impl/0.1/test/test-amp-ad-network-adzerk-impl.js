@@ -41,7 +41,6 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
     fetchTextMock = sandbox.stub(Xhr.prototype, 'fetchText');
     element = createElementWithAttributes(doc, 'amp-ad', {
       'type': 'adzerk',
-      'src': 'https://engine.adzerk.net/amp?id=1234',
       'width': '320',
       'height': '50',
     });
