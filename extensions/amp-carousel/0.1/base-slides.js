@@ -185,14 +185,14 @@ export class BaseSlides extends BaseCarousel {
     //Change the button as well
     if (this.hasAutoplay_) {
       // Set the button to be pause
-      this.autoPlayButton_.style.backgroundImage = "url('https://i.imgur.com/LgmfKda.png')"; /* find an svg version of the logo */
+      setStyle(autoPlayButton_, "background-image", "url('https://i.imgur.com/LgmfKda.png')"); /* find an svg version of the logo */
       this.autoplayTimeoutId_ = Services.timerFor(this.win).delay(
-        this.go.bind(
-          this, /* dir */ 1, /* animate */ true, /* autoplay */ true),
-        this.autoplayDelay_);
+          this.go.bind(
+            this, /* dir */ 1, /* animate */ true, /* autoplay */ true),
+          this.autoplayDelay_);
     } else {
       // Set the button to be play
-      this.autoPlayButton_.style.backgroundImage = "url('https://i.imgur.com/Lj57czy.png')"; /* find an svg version of the logo */
+      setStyle(autoPlayButton_, "background-image", "url('https://i.imgur.com/Lj57czy.png')"); /* find an svg version of the logo */
       Services.timerFor(this.win).cancel(this.autoplayTimeoutId_);
     }
   }
