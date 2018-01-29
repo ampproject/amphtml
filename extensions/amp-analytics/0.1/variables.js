@@ -19,7 +19,9 @@ import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
-import {map} from '../../../src/utils/object';
+// TODO(calebcordry) remove this once experiment is launched
+// also remove from dep-check-config whitelist;
+import {REPLACEMENT_EXP_NAME} from '../../../src/service/url-replacements-impl';
 
 /** @const {string} */
 const TAG = 'Analytics.Variables';
@@ -29,25 +31,6 @@ const VARIABLE_ARGS_REGEXP = /^(?:([^\s]*)(\([^)]*\))|[^]+)$/;
 
 /** @typedef {{name: string, argList: string}} */
 let FunctionNameArgsDef;
-
-/**
- * @struct
- * @const
- */
-class Filter {
-  /**
-   * @param {function(...?):(string|!Promise<string>)} filter
-   * @param {boolean=} opt_allowNull
-   */
-  constructor(filter, opt_allowNull) {
-    /** @type {function(...?):(string|!Promise<string>)} */
-    this.filter = filter;
-
-    /** @type{boolean} */
-    this.allowNull = !!opt_allowNull;
-  }
-}
-
 
 /**
  * The structure that contains all details needed to expand a template
@@ -89,15 +72,15 @@ export class ExpansionOptions {
  * @param {string=} opt_l
  * @return {string}
  */
-function substrFilter(str, s, opt_l) {
+function substrMacro(str, s, opt_l) {
   const start = Number(s);
   let length = str.length;
   user().assert(isFiniteNumber(start),
-      'Start index ' + start + 'in substr filter should be a number');
+      'Start index ' + start + 'in substr macro should be a number');
   if (opt_l) {
     length = Number(opt_l);
     user().assert(isFiniteNumber(length),
-        'Length ' + length + ' in substr filter should be a number');
+        'Length ' + length + ' in substr macro should be a number');
   }
 
   return str.substr(start, length);
@@ -108,14 +91,17 @@ function substrFilter(str, s, opt_l) {
  * @param {string} defaultValue
  * @return {string}
  */
-function defaultFilter(value, defaultValue) {
-  return value || user().assertString(defaultValue);
+function defaultMacro(value, defaultValue) {
+  if (!value || !value.length) {
+    return user().assertString(defaultValue);
+  }
+  return value;
 }
 
 
 /**
  * Provides support for processing of advanced variable syntax like nested
- * expansions filters etc.
+ * expansions macros etc.
  */
 export class VariableService {
   /**
@@ -126,76 +112,39 @@ export class VariableService {
     /** @private {!Window} */
     this.win_ = window;
 
-    /** @private {!Object<string, !Filter>} */
-    this.filters_ = map();
+    /** @private {!Object<string, *>} */
+    this.macros_ = {};
 
-    this.register_('default', new Filter(defaultFilter, /* allowNulls */ true));
-    this.register_('substr', new Filter(substrFilter));
-    this.register_('trim', new Filter(value => value.trim()));
-    this.register_('json', new Filter(value => JSON.stringify(value)));
-    this.register_('toLowerCase', new Filter(value => value.toLowerCase()));
-    this.register_('toUpperCase', new Filter(value => value.toUpperCase()));
-    this.register_('not', new Filter(value => String(!value)));
-    this.register_('base64', new Filter(value => btoa(value)));
-    this.register_('hash', new Filter(this.hashFilter_.bind(this)));
-    this.register_('if', new Filter(
-        (value, thenValue, elseValue) => value ? thenValue : elseValue, true));
+    this.register_('DEFAULT', defaultMacro);
+    this.register_('SUBSTR', substrMacro);
+    this.register_('TRIM', value => value.trim());
+    this.register_('JSON', value => JSON.stringify(value));
+    this.register_('TOLOWERCASE', value => value.toLowerCase());
+    this.register_('TOUPPERCASE', value => value.toUpperCase());
+    this.register_('NOT', value => String(!value));
+    this.register_('BASE64', value => btoa(value));
+    this.register_('HASH', this.hashMacro_.bind(this));
+    this.register_('IF',
+        (value, thenValue, elseValue) => value ? thenValue : elseValue);
+  }
+
+  /**
+   * @return {!Object} contains all registered macros
+   */
+  getMacros() {
+    const isV2ExpansionOn = this.win_ && isExperimentOn(this.win_,
+        REPLACEMENT_EXP_NAME);
+    return isV2ExpansionOn ? this.macros_ : {};
   }
 
   /**
    * @param {string} name
-   * @param {!Filter} filter
+   * @param {*} macro
    */
-  register_(name, filter) {
-    dev().assert(!this.filters_[name], 'Filter "' + name
+  register_(name, macro) {
+    dev().assert(!this.macros_[name], 'Macro "' + name
         + '" already registered.');
-    this.filters_[name] = filter;
-  }
-
-  /**
-   * @param {string} filterStr
-   * @return {?{filter: !Filter, args: !Array<string>}}
-   */
-  parseFilter_(filterStr) {
-    if (!filterStr) {
-      return null;
-    }
-
-    // The parsing for filters breaks when `:` is used as something other than
-    // the argument separator. A full-fledged parser would be needed to fix
-    // this.
-    const tokens = filterStr.split(':');
-    const fnName = tokens.shift();
-    user().assert(fnName, 'Filter ' + name + ' is invalid.');
-    const filter = user().assert(this.filters_[fnName],
-        'Unknown filter: ' + fnName);
-    return {filter, args: tokens};
-  }
-
-  /**
-   * @param {string} value
-   * @param {Array<string>} filters
-   * @return {Promise<string>}
-   */
-  applyFilters_(value, filters) {
-    if (!this.isFilterExperimentOn_()) {
-      return Promise.resolve(value);
-    }
-
-    let result = Promise.resolve(value);
-    for (let i = 0; i < filters.length; i++) {
-      const {filter, args} = this.parseFilter_(filters[i].trim());
-      if (filter) {
-        result = result.then(value => {
-          if (value != null || filter.allowNull) {
-            args.unshift(value);
-            return filter.filter.apply(null, args);
-          }
-          return null;
-        });
-      }
-    }
-    return result;
+    this.macros_[name] = macro;
   }
 
   /**
@@ -212,17 +161,11 @@ export class VariableService {
 
     const replacementPromises = [];
     let replacement = template.replace(/\${([^}]*)}/g, (match, key) => {
-
-      // Note: The parsing for variables breaks when `|` is used as
-      // something other than the filter separator. A full-fledged parser would
-      // be needed to fix this.
-      const tokens = key.split('|');
-      const initialValue = tokens.shift().trim();
-      if (!initialValue) {
+      if (!key) {
         return Promise.resolve('');
       }
 
-      const {name, argList} = this.getNameArgs_(initialValue);
+      const {name, argList} = this.getNameArgs_(key);
       if (options.freezeVars[name]) {
         // Do nothing with frozen params
         return match;
@@ -241,16 +184,13 @@ export class VariableService {
         p = Promise.resolve(raw);
       }
 
-      p = p.then(expandedValue =>
-          // First apply filters
-        this.applyFilters_(expandedValue, tokens))
-          .then(finalRawValue => {
-          // Then encode the value
-            const val = options.noEncode
-              ? finalRawValue
-              : this.encodeVars(name, finalRawValue);
-            return val ? val + argList : val;
-          })
+      p = p.then(finalRawValue => {
+        // Then encode the value
+        const val = options.noEncode
+          ? finalRawValue
+          : this.encodeVars(name, finalRawValue);
+        return val ? val + argList : val;
+      })
           .then(encodedValue => {
           // Replace it in the string
             replacement = replacement.replace(match, encodedValue);
@@ -305,12 +245,8 @@ export class VariableService {
    * @param {string} value
    * @return {!Promise<string>}
    */
-  hashFilter_(value) {
+  hashMacro_(value) {
     return Services.cryptoFor(this.win_).sha384Base64(value);
-  }
-
-  isFilterExperimentOn_() {
-    return isExperimentOn(this.win_, 'variable-filters');
   }
 }
 
