@@ -110,11 +110,8 @@ export class RequestHandler {
    * @param {!Object<string, *>} dynamicBindings A mapping of variables to
    *     stringable values. For example, values could be strings, functions that
    *     return strings, promises, etc.
-   * @param {!Document=} opt_contextDoc Used if any of the expansion variables
-   *     will be inspecting the document context
    */
-  send(configParams, trigger, expansionOption, dynamicBindings,
-    opt_contextDoc) {
+  send(configParams, trigger, expansionOption, dynamicBindings) {
     this.lastTrigger_ = trigger;
     const triggerParams = trigger['extraUrlParams'];
     const isImmediate =
@@ -137,8 +134,7 @@ export class RequestHandler {
           const expandedExtraUrlParamsStr =
               this.getExtraUrlParamsString_(expandExtraUrlParams);
           return this.urlReplacementService_.expandUrlAsync(
-              expandedExtraUrlParamsStr, dynamicBindings, this.whiteList_,
-              opt_contextDoc);
+              expandedExtraUrlParamsStr, dynamicBindings, this.whiteList_);
         });
 
     if (this.batchingPlugin_) {
