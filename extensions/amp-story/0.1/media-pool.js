@@ -54,6 +54,12 @@ const DOM_MEDIA_ELEMENT_ID_PREFIX = 'i-amphtml-media-';
 
 
 /**
+ * @const {string}
+ */
+const POOL_MEDIA_ELEMENT_ATTRIBUTE = 'i-amphtml-media-pool';
+
+
+/**
  * @const {!Array<string>}
  */
 const PROTECTED_CSS_CLASS_NAMES = [
@@ -86,9 +92,15 @@ function ampMediaElementFor(el) {
 
 
 /**
- * @type {?Promise<!MediaPool>}
+ * @type {!Object<string, !MediaPool>}
  */
-let mediaPoolPromise = null;
+const instances = {};
+
+
+/**
+ * @type {number}
+ */
+let nextInstanceId = 0;
 
 
 export class MediaPool {
@@ -761,26 +773,24 @@ export class MediaPool {
   }
 
 
-  static forStory(storyEl) {
-    // Implemented as singleton for now, should allow any element that
-    // implements an interface providing getMaxMediaElementCounts() and
-    // getElementDistance().
-    // TODO(newmuis): Allow multiple MediaPools in the same document.
+  /**
+   * @param {!MediaPoolRoot} root
+   * @return {!MediaPool}
+   */
+  static for(root) {
+    const existingId = root.element.getAttribute(POOL_MEDIA_ELEMENT_ATTRIBUTE);
+    const hasInstanceAllocated = existingId && instances[existingId];
 
-    if (mediaPoolPromise) {
-      return mediaPoolPromise;
+    if (hasInstanceAllocated) {
+      return instances[existingId];
     }
 
-    mediaPoolPromise = storyEl.getImpl().then(storyImpl => {
-      const instance = new MediaPool(storyImpl.win,
-          storyImpl.getMaxMediaElementCounts(),
-          storyImpl.getElementDistanceFromActivePage);
-      return instance;
-    }).catch(reason => {
-      dev().error('AMP-STORY', 'Could not get media pool:', reason);
-    });
+    const newId = nextInstanceId++;
+    root.element.setAttribute(POOL_MEDIA_ELEMENT_ATTRIBUTE, newId);
+    instances[newId] = new MediaPool(root.win,
+        root.getMaxMediaElementCounts(), root.getElementDistance);
 
-    return mediaPoolPromise;
+    return instances[newId];
   }
 }
 
@@ -838,4 +848,36 @@ class Sources {
 
     return new Sources(srcAttr, srcEls);
   }
+}
+
+
+/**
+ * Defines a common interface for elements that contain a MediaPool.  Components
+ * implementing this interface must also extend
+ * {@link ./base-element.BaseElement}.
+ *
+ * @interface
+ */
+export class MediaPoolRoot {
+  /**
+   * @param {!Element} element The element whose distance should be retrieved.
+   * @return {number} A numerical distance representing how far the specified
+   *     element is from the user's current position in the document.  The
+   *     absolute magnitude of this number is irrelevant; the relative magnitude
+   *     is used to determine which media elements should be evicted (elements
+   *     furthest from the user's current position in the document are evicted
+   *     from the MediaPool first).
+   */
+  getElementDistance() {
+    return 0;
+  };
+
+
+  /**
+   * @return {!Object<!MediaType, number>} The maximum amount of each media
+   *     type to allow within this element.
+   */
+  getMaxMediaElementCounts() {
+    return {};
+  };
 }

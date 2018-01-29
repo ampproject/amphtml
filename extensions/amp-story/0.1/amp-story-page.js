@@ -44,6 +44,7 @@ import {LoadingSpinner} from './loading-spinner';
 import {listen} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {MediaPool} from './media-pool';
+import {dev} from '../../../src/log';
 
 
 /**
@@ -91,8 +92,10 @@ export class AmpStoryPage extends AMP.BaseElement {
     });
 
     /** @private @const {!Promise<!MediaPool>} */
-    this.mediaPoolPromise_ = MediaPool.forStory(
-        closestBySelector(this.element, 'amp-story'));
+    this.mediaPoolPromise_ = new Promise((resolve, reject) => {
+      this.mediaPoolResolveFn_ = resolve;
+      this.mediaPoolRejectFn_ = reject;
+    });
 
     /** @private @const {boolean} Only prerender the first story page. */
     this.prerenderAllowed_ = matches(this.element,
@@ -127,6 +130,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   buildCallback() {
     upgradeBackgroundAudio(this.element);
     this.markMediaElementsWithPreload_();
+    this.initializeMediaPool_();
     this.maybeCreateAnimationManager_();
     this.advancement_.addPreviousListener(() => this.previous());
     this.advancement_
@@ -135,6 +139,20 @@ export class AmpStoryPage extends AMP.BaseElement {
         navigationDirection => this.navigateOnTap(navigationDirection));
     this.advancement_
         .addProgressListener(progress => this.emitProgress_(progress));
+  }
+
+
+  /** @private */
+  initializeMediaPool_() {
+    const storyEl = dev().assertElement(
+        closestBySelector(this.element, 'amp-story'),
+        'amp-story-page must be a descendant of amp-story.');
+
+    storyEl.getImpl()
+        .then(storyImpl => {
+          this.mediaPoolResolveFn_(MediaPool.for(storyImpl));
+        })
+        .catch(reason => this.mediaPoolRejectFn_(reason));
   }
 
 
