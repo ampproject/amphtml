@@ -791,6 +791,14 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
+  it('should replace INCREMENTAL_ENGAGED_TIME', () => {
+    return expandUrlAsync('?sh=' +
+      'INCREMENTAL_ENGAGED_TIME', /*opt_bindings*/undefined,
+    {withActivity: true}).then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
   it('should replace AMP_VERSION', () => {
     return expandUrlAsync('?sh=AMP_VERSION').then(res => {
       expect(res).to.equal('?sh=%24internalRuntimeVersion%24');
