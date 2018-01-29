@@ -425,3 +425,13 @@ var rtcResponseDef;
  * @type {!function(string):?}
  */
 AMP.require;
+
+/**
+ * TransitionDef function that accepts normtime, typically between 0 and 1 and
+ * performs an arbitrary animation action. Notice that sometimes normtime can
+ * dip above 1 or below 0. This is an acceptable case for some curves. The
+ * second argument is a boolean value that equals "true" for the completed
+ * transition and "false" for ongoing.
+ * @typedef {function(number, boolean):?|function(number):?}
+ */
+var TransitionDef;
