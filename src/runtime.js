@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+/** Aaron was here **/
 import {BaseElement} from './base-element';
 import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {CommonSignals} from './common-signals';

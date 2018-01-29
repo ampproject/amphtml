@@ -657,7 +657,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       return this.carousel_.signals().whenSignal(CommonSignals.LOAD_END);
     }).then(() => this.openLightboxForElement_(element));
   }
-
+  
   /**
    * Given a single lightbox element, opens the internal carousel slide
    * associated with said element, updates the description, and initializes
@@ -712,7 +712,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     const anim = new Animation(this.element);
     let duration = MIN_TRANSITION_DURATION;
     let transLayer = null;
-    const sourceElement = this.getCurrentElement_().sourceElement;
     return this.vsync_.measurePromise(() => {
       // Lightbox background fades in.
       anim.add(0, tr.setStyles(this.element, {
@@ -924,6 +923,112 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     }
   }
 
+  /**
+   * Animation for closing lightbox
+   * @return {!Promise}
+   * @private
+   */
+  exit_() {
+    const anim = new Animation(this.element);
+    let duration = MIN_TRANSITION_DURATION;
+    const imageBox = /**@type {?}*/ (this.getCurrentElement_().imageViewer)
+        .implementation_.getImageBoxWithOffset();
+    const image = /**@type {?}*/ (this.getCurrentElement_().imageViewer)
+        .implementation_.getImage();
+    // Try to transition to the source image.
+    let transLayer = null;
+    return this.vsync_.measurePromise(() => {
+      if (this.sourceElement_ && image
+          && !this.aspectRatioChanged_(this.sourceElement_)) {
+        // TODO (#13013): if current image is not the original image, don't transition
+        transLayer = this.element.ownerDocument.createElement('div');
+        transLayer.classList.add('i-amphtml-lightbox-viewer-trans');
+        this.element.ownerDocument.body.appendChild(transLayer);
+
+        const rect = layoutRectFromDomRect(this.sourceElement_
+            ./*OK*/getBoundingClientRect());
+        const clone = image.cloneNode(true);
+        st.setStyles(clone, {
+          position: 'absolute',
+          top: st.px(imageBox.top),
+          left: st.px(imageBox.left),
+          width: st.px(imageBox.width),
+          height: st.px(imageBox.height),
+          transform: '',
+          transformOrigin: 'top left',
+          willChange: 'transform',
+        });
+        transLayer.appendChild(clone);
+
+        st.setStyles(dev().assertElement(this.carousel_), {
+          opacity: 0,
+        });
+
+        anim.add(0, tr.setStyles(dev().assertElement(this.element), {
+          opacity: tr.numeric(1, 0),
+        }), MOTION_DURATION_RATIO, EXIT_CURVE_);
+
+        // Move and resize the image back to where it is in the article.
+        const dx = rect.left - imageBox.left;
+        const dy = rect.top - imageBox.top;
+        const scaleX = imageBox.width != 0 ? rect.width / imageBox.width : 1;
+        /** @const {!TransitionDef<void>} */
+        const moveAndScale = tr.setStyles(clone, {
+          transform: tr.concat([
+            tr.translate(tr.numeric(0, dx), tr.numeric(0, dy)),
+            tr.scale(tr.numeric(1, scaleX)),
+          ]),
+        });
+
+        anim.add(0, (time, complete) => {
+          moveAndScale(time);
+          if (complete) {
+            this.sourceElement_.classList.remove('i-amphtml-ghost');
+          }
+        }, MOTION_DURATION_RATIO, EXIT_CURVE_);
+
+        // Fade out the transition image.
+        anim.add(MOTION_DURATION_RATIO, tr.setStyles(transLayer, {
+          opacity: tr.numeric(1, 0.01),
+        }), 0.2, EXIT_CURVE_);
+
+        duration = this.getTransitionDuration_(dy);
+      }
+    }).then(() => {
+      return anim.start(duration).thenAlways(() => {
+        return this.vsync_.mutatePromise(() => {
+          if (this.sourceElement_) {
+            this.sourceElement_.classList.remove('i-amphtml-ghost');
+          }
+          st.setStyles(this.element, {
+            opacity: '',
+          });
+          st.setStyles(dev().assertElement(this.carousel_), {
+            opacity: '',
+          });
+          if (transLayer) {
+            this.element.ownerDocument.body.removeChild(transLayer);
+          }
+        });
+      });
+    });
+  }
+
+  /**
+   * Calculates transition duration from vertical distance traveled
+   * @param {number} dy
+   * @return {number}
+   * @private
+   */
+  getTransitionDuration_(dy) {
+    const distanceAdjustedDuration =
+      Math.abs(dy) / MAX_DISTANCE_APPROXIMATION * MAX_TRANSITION_DURATION;
+    return clamp(
+        distanceAdjustedDuration,
+        MIN_TRANSITION_DURATION,
+        MAX_TRANSITION_DURATION
+    );
+  }
   /**
    * Closes the lightbox-viewer
    * @return {!Promise}

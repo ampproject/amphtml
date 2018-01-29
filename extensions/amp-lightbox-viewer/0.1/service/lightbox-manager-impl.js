@@ -44,12 +44,6 @@ const VALIDATION_ERROR_MSG = `lightbox attribute is only supported for the
   tag right now.`;
 
 /** @typedef {{
- *  url: string,
- *  element: !Element
- * }} */
-export let LightboxThumbnailDataDef;
-
-/** @typedef {{
  *  sourceCarousel: !Element,
  *  excludedIndexes: !Array<number>
  * }} */
@@ -137,6 +131,25 @@ export class LightboxManager {
    */
   hasCarousel(lightboxGroupId) {
     return hasOwn(this.lightboxSourceCarousels_, lightboxGroupId);
+  }
+
+  /**
+   * Decides whether an already lightboxable element should automatically get
+   * a tap handler to open in the lightbox.
+   * @param {!Element} element
+   * @return {boolean}
+   */
+  meetsHeuristicsForTap_(element) {
+    dev().assert(element);
+    dev().assert(element.hasAttribute('lightbox'));
+
+    if (!ELIGIBLE_TAP_TAGS[element.tagName.toLowerCase()]) {
+      return false;
+    }
+    if (element.hasAttribute('on')) {
+      return false;
+    }
+    return true;
   }
 
   /**
