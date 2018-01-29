@@ -260,4 +260,31 @@ describes.fakeWin('BaseSlides', {amp: true}, env => {
     carousel.clearAutoplay();
     expect(carousel.autoplayTimeoutId_).to.be.null;
   });
+
+  it('should create autoplayButton when autoplay is \'true\'', () => {
+    const carousel = new TestCarousel(setElement({
+      autoplay: true,
+      delay: 300,
+    }));
+    carousel.buildCallback();
+    carousel.autoplay_();
+
+    expect(carousel.autoplayButton_).to.not.be.null;
+  });
+
+
+  it('hitting autoPlay button successfully triggers autoPlay status', () => {
+    const carousel = new TestCarousel(setElement({
+      autoplay: true,
+      delay: 300,
+    }));
+    carousel.buildCallback();
+    carousel.autoplay_();
+
+    expect(carousel.shouldAutoplay_).to.be.true;
+
+    carousel.interactionAutoPlay();
+    expect(carousel.shouldAutoplay_).to.be.false;
+  });
+
 });
