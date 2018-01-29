@@ -193,6 +193,14 @@ describe('amp-analytics.VariableService', function() {
                 'S7Uc5ZmODduHWdplzrZ7Jsnqx')
           );
     });
+
+    it('replaces', () => {
+      return check('REPLACE(this-is-a-test, `-`, )', 'thisisatest');
+    });
+
+    it('replace with no third arg', () => {
+      return check('REPLACE(thi@s-is-a-te@st, `-|@`)', 'thisisatest');
+    });
   });
 
   describe('getNameArgs:', () => {

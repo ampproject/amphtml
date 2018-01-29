@@ -98,6 +98,17 @@ function defaultMacro(value, defaultValue) {
   return value;
 }
 
+function replaceFilter(string, matchPattern, newSubStr) {
+  if (!matchPattern) {
+    user().warn(TAG, 'Replace must have two or more arguments');
+  }
+  if (!newSubStr) {
+    newSubStr = '';
+  }
+  const regex = new RegExp(matchPattern, 'g');
+  return string.replace(regex, newSubStr);
+}
+
 
 /**
  * Provides support for processing of advanced variable syntax like nested
@@ -126,6 +137,7 @@ export class VariableService {
     this.register_('HASH', this.hashMacro_.bind(this));
     this.register_('IF',
         (value, thenValue, elseValue) => value ? thenValue : elseValue);
+    this.register_('REPLACE', replaceFilter);
   }
 
   /**
