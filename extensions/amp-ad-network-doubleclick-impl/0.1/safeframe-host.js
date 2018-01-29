@@ -115,11 +115,14 @@ export class SafeframeHostApi {
 
     /** @private {number} */
     this.endpointIdentity_ = Math.random();
+
+    this.uid = Math.random();
   }
 
-  getSafeframeName() {
+  getSafeframeNameAttr() {
     const attributes = dict({});
-    attributes['uid'] = 1;
+    // TODO: Some of these options are probably not right.
+    attributes['uid'] = this.uid;
     attributes['hostPeerName'] = this.win_.location.origin;
     attributes['initialGeometry'] = this.formatGeom_(
         this.baseInstance_.element.getIntersectionChangeEntry());
