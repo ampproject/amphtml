@@ -377,9 +377,11 @@ export class AmpStory extends AMP.BaseElement {
     this.element.addEventListener(EventType.TAP_NAVIGATION, e => {
       const {direction} = e.detail;
 
-      this.mediaPool_.blessAll()
-          .then(() => this.performTapNavigation_(direction),
-              () => this.performTapNavigation_(direction));
+      this.performTapNavigation_(direction);
+
+      // We bless after the navigation so as not to slow down the navigation
+      // interaction.
+      this.mediaPool_.blessAll();
     });
 
     const gestures = Gestures.get(this.element,

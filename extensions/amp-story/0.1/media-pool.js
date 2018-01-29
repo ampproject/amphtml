@@ -594,7 +594,15 @@ export class MediaPool {
     const isMuted = mediaEl.muted;
     const currentTime = mediaEl.currentTime;
 
-    return Promise.resolve(mediaEl.play()).then(() => {
+    // If the video is already playing, we do not want to call play again, as it
+    // can interrupt the video playback.  Instead, we do a no-op.
+    const playFn = () => {
+      if (isPaused) {
+        mediaEl.play();
+      }
+    };
+
+    return Promise.resolve(playFn()).then(() => {
       mediaEl.muted = false;
 
       if (isPaused) {
