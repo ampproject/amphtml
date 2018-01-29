@@ -753,16 +753,13 @@ export class AmpAnalytics extends AMP.BaseElement {
   htmlAttrBinding_(cssSelector, ...attributeNames) {
     const HTML_ATTR_MAX_RETURN_SIZE = 10;
     const result = [];
-    if (!cssSelector || !attributeNames || attributeNames.length == 0) {
+    if (!cssSelector || !attributeNames || !attributeNames.length) {
       return JSON.stringify(result);
     }
     try {
       const elements = this.win.document.querySelectorAll(cssSelector);
-      if (!elements) {
-        return JSON.stringify(result);
-      }
-      for (let i = 0; i < elements.length &&
-      result.length < HTML_ATTR_MAX_RETURN_SIZE; ++i) {
+      for (let i = 0; elements && i < elements.length &&
+          result.length < HTML_ATTR_MAX_RETURN_SIZE; ++i) {
         const currentResult = {};
         attributeNames.forEach(attributeName => {
           const attributeValue = elements[i].getAttribute(attributeName);
@@ -770,12 +767,13 @@ export class AmpAnalytics extends AMP.BaseElement {
             currentResult[attributeName] = attributeValue;
           }
         });
-        if (Object.keys(currentResult).length != 0) {
+        if (Object.keys(currentResult).length) {
           result.push(currentResult);
         }
       }
     } catch (e) {
-      // invalid selector, return empty array
+      const TAG = this.getName_();
+      user().warn(TAG, `Invalid selector: ${cssSelector}`);
     }
     return JSON.stringify(result);
   }
