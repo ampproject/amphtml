@@ -151,6 +151,18 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
 
   /** @override */
   getAmpAdMetadata(unusedCreative) {
+    if (this.ampCreativeJson_.analytics) {
+      if (!this.creativeMetadata_) {
+        this.creativeMetadata_ = /**@type {?CreativeMetaDataDef}*/ ({});
+      }
+      if (!this.creativeMetadata_['customElementExtensions']) {
+        this.creativeMetadata_['customElementExtensions'] = [];
+      }
+      if (this.creativeMetadata_['customElementExtensions'].indexOf(
+          'amp-analytics') < 0) {
+        this.creativeMetadata_['customElementExtensions'].push('amp-analytics');
+      }
+    }
     return /**@type {?CreativeMetaDataDef}*/(this.creativeMetadata_);
   }
 
@@ -161,6 +173,10 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
           this.ampCreativeJson_.data,
           this.iframe.contentWindow.document.body)
           .then(renderedElement => {
+            if (this.ampCreativeJson_.analytics) {
+              ampAdTemplates.insertAnalytics(
+                  renderedElement, this.ampCreativeJson_.analytics);
+            }
             this.iframe.contentWindow.document.body./*OK*/innerHTML =
                 renderedElement./*OK*/innerHTML;
           });
