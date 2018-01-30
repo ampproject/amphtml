@@ -198,7 +198,7 @@ export class VideoManager {
    * @private
    */
   timeUpdateActionEvent_(entry) {
-    const name = 'timeupdate';
+    const name = 'timeUpdate';
     const currentTime = entry.video.getCurrentTime();
     if (isFiniteNumber(currentTime)) {
       const perc = currentTime / entry.video.getDuration();
