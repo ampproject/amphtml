@@ -9,7 +9,7 @@
     "height": "92px"
   },
   "analytics": [{
-    "json": {
+    "inline": {
       "requests": {
           "a": "https://www.fake.com"
         },

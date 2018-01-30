@@ -86,8 +86,8 @@ describes.fakeWin('amp-ad-templates', {amp: true}, env => {
         '<p>123</p>';
     doc.body.appendChild(parentDiv);
     const analytics = [{
-      'config': 'remoteUrl',
-      'json': {
+      'remote': 'remoteUrl',
+      'inline': {
         'requests': 'r',
       },
     }, {

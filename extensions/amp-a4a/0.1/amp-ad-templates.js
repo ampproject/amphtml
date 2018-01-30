@@ -94,19 +94,19 @@ export class AmpAdTemplates {
     for (let i = 0; i < analyticsValue.length; i++) {
       const config = analyticsValue[i];
       const analyticsEle = document.createElement('amp-analytics');
-      if (config['config']) {
-        analyticsEle.setAttribute('config', config['config']);
+      if (config['remote']) {
+        analyticsEle.setAttribute('config', config['remote']);
       }
       if (config['type']) {
         analyticsEle.setAttribute('type', config['type']);
       }
-      if (config['json']) {
+      if (config['inline']) {
         const scriptElem = createElementWithAttributes(
             document,
             'script', dict({
               'type': 'application/json',
             }));
-        scriptElem.textContent = JSON.stringify(config['json']);
+        scriptElem.textContent = JSON.stringify(config['inline']);
         analyticsEle.appendChild(scriptElem);
       }
       element.appendChild(analyticsEle);
