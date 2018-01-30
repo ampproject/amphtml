@@ -205,17 +205,17 @@ Each of these providers has a different set of available parameters ([see `data-
   "related-articles": {
     "More to Read": [
       {
-        title: "My friends, this is India [...]",
-        url: "http://a-publisher.com/india"
-        image: "./media/b1.jpg"
+        "title": "My friends, this is India [...]",
+        "url": "http://a-publisher.com/india",
+        "image": "./media/b1.jpg"
       },
       {
-        title: "A wonderful weekend with Tenturi",
-        url: "http://a-publisher.com/tenturi"
-        image: "./media/b2.jpg"
+        "title": "A wonderful weekend with Tenturi",
+        "url": "http://a-publisher.com/tenturi",
+        "image": "./media/b2.jpg"
       },
       ...
-    ],
+    ]
   }
 }
 ```
