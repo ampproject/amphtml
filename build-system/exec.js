@@ -29,7 +29,7 @@ const childProcess = require('child_process');
  * @return {<Object>} Process info.
  */
 function spawnProcess(cmd, options) {
-  return childProcess.spawnSync('/bin/sh', ['-c', cmd], options);
+  return childProcess.spawnSync(cmd, options);
 }
 
 /**
@@ -67,6 +67,7 @@ function getOutput(cmd) {
         'env': process.env,
         'stdio': 'pipe',
         'encoding': 'utf-8',
+        'shell': true,
       });
   return p;
 }
