@@ -1,14 +1,14 @@
 /**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
+ * distributed under the License is distributed on an 'AS-IS' BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -16,7 +16,6 @@
 
 import {loadScript} from './3p';
 import {setStyles} from '../src/style';
-import {parseUrl} from '../src/url';
 
 /**
  * Produces the Twitter API object for the passed in callback. If the current
@@ -28,7 +27,7 @@ import {parseUrl} from '../src/url';
  */
 function getBeOpinion(global, cb) {
   loadScript(global, 'https://widget.beopinion.com/sdk.js', function() {
-    cb(global.beopinion);
+    cb(global.BeOpinionSDK);
   });
 }
 
@@ -51,18 +50,21 @@ function addCanonicalLinkTag(global) {
  * @param {!Object} data
  */
 function createContainer(global, data) {
+  // add canonical link tag
+  addCanonicalLinkTag(global);
+
   // create div
   const container = global.document.createElement('container');
-  container.className = "BeOpinionWidget";
+  container.className = 'BeOpinionWidget';
 
   // get content id
   if (data['content'] !== null) {
     container.setAttribute('data-content', data['content']);
   }
 
-  // get my-content value, forcing it to "1" if it is not an amp-ad
+  // get my-content value, forcing it to '1' if it is not an amp-ad
   if (global.context.tagName === 'AMP-BEOPINION') {
-    container.setAttribute('data-my-content', "1");
+    container.setAttribute('data-my-content', '1');
   } else if (data['my-content'] !== null) {
     container.setAttribute('data-my-content', data['my-content']);
   }
@@ -90,24 +92,12 @@ export function beopinion(global, data) {
   const container = createContainer(global, data);
   global.document.getElementById('c').appendChild(container);
 
-  getBeOpinion(global, function(beopinion) {
-    global.BeOpinionSDK.init({
-      account: data.account
+  getBeOpinion(global, function(sdk) { // , context) {
+    sdk.init({
+      account: data.account,
     });
-    global.BeOpinionSDK.watch();
-    // global.BeOpinionSDK.setAMPContext(global.context); ?
-    // global.context.noContentAvailable(); to be called when no content
+    sdk.watch();
+    // sdk.setAMPContext(context); ?
+    // + context.noContentAvailable(); to be called when no content
   });
-
-  function resize(container) {
-    const height = container./*OK*/offsetHeight;
-    // 0 height is always wrong and we should get another resize request
-    // later.
-    if (height == 0) {
-      return;
-    }
-    context.updateDimensions(
-        container./*OK*/offsetWidth,
-        height + /* margins */ 20);
-  }
 }

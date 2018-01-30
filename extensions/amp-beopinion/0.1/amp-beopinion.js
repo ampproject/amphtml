@@ -82,6 +82,20 @@ class AmpBeOpinion extends AMP.BaseElement {
     this.iframe_ = iframe;
     return this.loadPromise(iframe);
   }
+
+  /** @override */
+  unlayoutOnPause() {
+    return true;
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+    }
+    return true;
+  }
 }
 
 AMP.extension(TAG, '0.1', AMP => {

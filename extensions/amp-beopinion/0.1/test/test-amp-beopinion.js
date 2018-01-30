@@ -20,7 +20,7 @@ import {beopinion} from '../../../../3p/beopinion';
 describes.realWin('amp-beopinion', {
   amp: {
     extensions: ['amp-beopinion'],
-    canonicalUrl: 'https://news.autoplus.fr/Peugeot/1007/-658881.html',
+    canonicalUrl: 'https://foo.bar/baz',
   },
 }, env => {
   const accountId = '589446dd42ee0d6fdd9c3dfd';
@@ -54,33 +54,35 @@ describes.realWin('amp-beopinion', {
     });
   });
 
-  // TypeError: Cannot read property 'tagName' of undefined ?!?
-  // it('adds container element correctly', () => {
-  //   const div = doc.createElement('div');
-  //   div.setAttribute('id', 'c');
-  //   doc.body.appendChild(div);
-  //
-  //   beopinion(win, {
-  //     account: accountId,
-  //     content: contentId,
-  //     width: 111,
-  //     height: 222,
-  //   });
-  //   const content = doc.body.querySelector('.BeOpinionWidget');
-  //   expect(content).not.to.be.undefined;
-  // });
+  it('adds container element correctly', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+    win.context = {
+      canonicalUrl: 'https://foo.bar/baz',
+      tagName: 'AMP-BEOPINION',
+    };
 
-  // AssertionError => iframe not removed
-  // it('removes iframe after unlayoutCallback', () => {
-  //   return getAmpBeOpinion(accountId).then(ampBeOpinion => {
-  //     const iframe = ampBeOpinion.querySelector('iframe');
-  //     expect(iframe).to.not.be.null;
-  //     const obj = ampBeOpinion.implementation_;
-  //     obj.unlayoutCallback();
-  //     expect(ampBeOpinion.querySelector('iframe')).to.be.null;
-  //     expect(obj.iframe_).to.be.null;
-  //     expect(obj.unlayoutOnPause()).to.be.true;
-  //   });
-  // });
+    beopinion(win, {
+      account: accountId,
+      content: contentId,
+      width: 111,
+      height: 222,
+    });
+    const content = doc.body.querySelector('.BeOpinionWidget');
+    expect(content).not.to.be.undefined;
+  });
+
+  it('removes iframe after unlayoutCallback', () => {
+    return getAmpBeOpinion(accountId).then(ampBeOpinion => {
+      const iframe = ampBeOpinion.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      const obj = ampBeOpinion.implementation_;
+      obj.unlayoutCallback();
+      expect(ampBeOpinion.querySelector('iframe')).to.be.null;
+      expect(obj.iframe_).to.be.null;
+      expect(obj.unlayoutOnPause()).to.be.true;
+    });
+  });
 
 });

@@ -66,17 +66,6 @@ The name of the BeOpinion slot on the page.
 For `amp-ad` elements of type `beopinion`, the value can be set to `"0"` (default value).
 Warning: the `amp-beopinion` element overrides this value to `"1"`, to prevent the serving of ads outside of an `amp-ad` element.
 
-<div>
-<amp-iframe height="202"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/ampbeopinion.options.embed.html">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
-</div>
-
 ##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
