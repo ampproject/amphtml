@@ -57,7 +57,7 @@ const DOM_MEDIA_ELEMENT_ID_PREFIX = 'i-amphtml-media-';
 /**
  * @const {string}
  */
-const POOL_MEDIA_ELEMENT_PROPERTY_NAME = 'i-amphtml-media-pool';
+const POOL_MEDIA_ELEMENT_PROPERTY_NAME = '__AMP_MEDIA_POOL_ID__';
 
 
 /**
@@ -602,7 +602,7 @@ export class MediaPool {
       }
     };
 
-    return Promise.resolve(playFn()).then(() => {
+    return Promise.resolve().then(() => playFn()).then(() => {
       mediaEl.muted = false;
 
       if (isPaused) {

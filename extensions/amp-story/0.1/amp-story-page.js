@@ -158,8 +158,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     storyEl.getImpl()
         .then(storyImpl => {
           this.mediaPoolResolveFn_(MediaPool.for(storyImpl));
-        })
-        .catch(reason => this.mediaPoolRejectFn_(reason));
+        }, reason => this.mediaPoolRejectFn_(reason));
   }
 
 

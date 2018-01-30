@@ -1303,9 +1303,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   unmute_() {
+    const unmuteAllMedia = () => this.activePage_.unmuteAllMedia();
     this.mediaPool_.blessAll()
-        .then(() => this.activePage_.unmuteAllMedia(),
-            () => this.activePage_.unmuteAllMedia());
+        .then(unmuteAllMedia, unmuteAllMedia);
     this.toggleMutedAttribute_(false);
   }
 
