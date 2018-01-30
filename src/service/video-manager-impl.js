@@ -85,7 +85,7 @@ const DOCK_CLASS = 'i-amphtml-dockable-video-minimizing';
 const DOCK_MARGIN = 20;
 
 /**
- * @const {number} Amount by which the velocity depamp-gwdcreseases every frame
+ * @const {number} Amount by which the velocity decreseases every frame
  */
 const FRICTION_COEFF = 0.55;
 
@@ -164,6 +164,7 @@ export class VideoManager {
     /** @private @const */
     this.timer_ = Services.timerFor(ampdoc.win);
 
+    /** @private @const */
     this.actions_ = Services.actionServiceForDoc(ampdoc);
 
     /** @private @const */
@@ -200,8 +201,11 @@ export class VideoManager {
   timeUpdateActionEvent_(entry) {
     const name = 'timeUpdate';
     const currentTime = entry.video.getCurrentTime();
-    if (isFiniteNumber(currentTime)) {
-      const perc = currentTime / entry.video.getDuration();
+    const duration = entry.video.getDuration();
+    if (isFiniteNumber(currentTime) &&
+        isFiniteNumber(duration) &&
+        duration > 0) {
+      const perc = currentTime / duration;
       const event = createCustomEvent(this.ampdoc.win, `${TAG}.${name}`,
           {time: currentTime, percent: perc});
       this.actions_.trigger(entry.video.element, name, event, ActionTrust.LOW);
