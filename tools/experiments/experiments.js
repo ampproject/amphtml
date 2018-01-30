@@ -206,12 +206,6 @@ const EXPERIMENTS = [
     name: 'Display jank meter',
   },
   {
-    id: 'amp-fx-parallax',
-    name: 'Amp extension for a parallax effect',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7801',
-    spec: 'https://github.com/ampproject/amphtml/issues/1443',
-  },
-  {
     id: 'slidescroll-disable-css-snap',
     name: 'Slidescroll disable css snap',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/8195',
