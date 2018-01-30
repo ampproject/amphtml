@@ -140,7 +140,7 @@
     "prop-types": "15.6.0",
     "react-addons-shallow-compare": "15.6.2",
     "react-externs": "0.13.6",
-    "react-with-direction": "1.1.0",
+    "react-with-direction": "1.3.0",
     "request": "2.83.0",
     "rimraf": "2.6.2",
     "rocambole": "0.7.0",
