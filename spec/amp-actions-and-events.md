@@ -216,6 +216,20 @@ event.index</pre></td>
   </tr>
 </table>
 
+### amp-video, amp-youtube
+<table>
+  <tr>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>timeUpdate</code>(low-trust)</td>
+    <td>Fired when the playing position of a video has changed. Frequency of the event is controlled by AMP and is currently set at 1 second intervals. This event is low-trust which means it can not trigger most actions; only low-trust actions such as <code>amp-animation</code> actions can be run.</td>
+    <td><code>{time, percent}</code><code>time</code> indicates the current time in seconds, <code>percent</code> is a number between 0 and 1 and indicates current position as percentage of total time.</td>
+  </tr>
+</table>
+
 ### form
 <table>
   <tr>
