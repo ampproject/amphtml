@@ -293,6 +293,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.carousel_ = this.win.document.createElement('amp-carousel');
     this.carousel_.setAttribute('type', 'slides');
     this.carousel_.setAttribute('layout', 'fill');
+    this.carousel_.setAttribute('loop', '');
     this.carousel_.setAttribute('amp-lightbox-group', lightboxGroupId);
     return this.manager_.getElementsForLightboxGroup(lightboxGroupId)
         .then(list => {

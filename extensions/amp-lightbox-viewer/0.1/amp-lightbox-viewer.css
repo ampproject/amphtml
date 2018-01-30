@@ -137,6 +137,7 @@
   position: absolute;
   top: 0;
   object-fit: cover;
+  cursor: pointer;
 }
 
 /* Controls */
