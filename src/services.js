@@ -213,15 +213,6 @@ export class Services {
   }
 
   /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
-   * @return {!./service/parallax-impl.ParallaxService}
-   */
-  static parallaxForDoc(nodeOrDoc) {
-    return /** @type {!./service/parallax-impl.ParallaxService} */ (
-      getServiceForDoc(nodeOrDoc, 'amp-fx-parallax'));
-  }
-
-  /**
    * @param {!Window} window
    * @return {!./service/performance-impl.Performance}
    */
