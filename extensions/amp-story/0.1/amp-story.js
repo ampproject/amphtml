@@ -917,7 +917,7 @@ export class AmpStory extends AMP.BaseElement {
    * Build overlay for Landscape mode mobile
    */
   buildUnsupportedBrowserOverlay_() {
-    if (!this.win.CSS.supports('display', 'grid')) {
+    if (this.win.CSS.supports('display', 'grid')) {
       return;
     }
 
