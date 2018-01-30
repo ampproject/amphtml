@@ -7,5 +7,20 @@
     "title": "Adzerk Demo",
     "width": "272px",
     "height": "92px"
-  }
+  },
+  "analytics": [{
+    "inline": {
+      "requests": {
+          "a": "https://www.fake.com"
+        },
+        "triggers": {
+          "visible": {
+            "on": "visible",
+            "request": "a"
+          }
+        }
+    }
+  }, {
+    "type": "googleanalytics"
+  }]
 }
