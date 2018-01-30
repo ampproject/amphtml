@@ -271,12 +271,14 @@ describes.fakeWin('BaseSlides', {amp: true}, env => {
 
     expect(carousel.shouldAutoplay_).to.be.true;
 
-    let args = {'toggleOn': false};
-    carousel.executeAction({method: 'toggleAutoPlay', args, satisfiesTrust: () => true});
+    const args = {'toggleOn': false};
+    carousel.executeAction(
+        {method: 'toggleAutoPlay', args, satisfiesTrust: () => true});
     expect(carousel.shouldAutoplay_).to.be.false;
 
     args['toggleOn'] = true;
-    carousel.executeAction({method: 'toggleAutoPlay', args, satisfiesTrust: () => true});
+    carousel.executeAction(
+        {method: 'toggleAutoPlay', args, satisfiesTrust: () => true});
     expect(carousel.shouldAutoplay_).to.be.true;
   });
 
