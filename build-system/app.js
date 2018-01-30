@@ -756,7 +756,6 @@ function escapeRegExp(string) {
 }
 
 function elementExtractor(tagName, type) {
-  tagName = escapeRegExp(tagName);
   type = escapeRegExp(type);
   return new RegExp(
       `<${tagName} [^>]*['"]${type}['"][^>]*>([\\s\\S]+?)</${tagName}>`,
