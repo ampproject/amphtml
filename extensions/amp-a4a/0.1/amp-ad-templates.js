@@ -84,9 +84,10 @@ export class AmpAdTemplates {
    * @return {string}
    */
   getTemplateProxyUrl_(url) {
+    const cdnUrlSuffix = urls.cdn.slice(8);
     const loc = parseUrl(url);
-    return 'https://' +
-        loc.hostname.replace(/-/g, '--').replace(/\./g, '-') +
-        '.' + urls.cdn.slice(8) + '/c/s/' + loc.hostname + loc.pathname;
+    return loc.origin.indexOf(cdnUrlSuffix) > 0 ? url :
+      'https://' + loc.hostname.replace(/-/g, '--').replace(/\./g, '-') +
+      '.' + cdnUrlSuffix + '/c/s/' + loc.hostname + loc.pathname;
   }
 }
