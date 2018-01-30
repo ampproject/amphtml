@@ -30,6 +30,27 @@ Please add new release changes here. Use the time in UTC for the header and
 mention any release notes since the last change as well as the version numbers.
 -->
 
+### 7:00 PM, January 29, 2018 UTC
+
+Validator version 311
+
+Rules version 546
+
+Includes:
+ - #7394
+ - #11198
+ - #12196
+ - #12285
+ - #12352
+ - #12425
+ - #12452
+ - #12457
+ - #12461
+ - #12471
+ - #12483
+ - #12664
+
+
 ### 7:00 PM, January 3, 2018 UTC
 
 Validator version 288
