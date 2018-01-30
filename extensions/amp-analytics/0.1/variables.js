@@ -98,15 +98,21 @@ function defaultMacro(value, defaultValue) {
   return value;
 }
 
-function replaceFilter(string, matchPattern, newSubStr) {
+/**
+ * @param {string} string input to be replaced
+ * @param {string} matchPattern string representation of regex pattern
+ * @param {string=} opt_newSubStr pattern to be substituted in
+ * @returns {string}
+ */
+function replaceMacro(string, matchPattern, opt_newSubStr) {
   if (!matchPattern) {
-    user().warn(TAG, 'Replace must have two or more arguments');
+    user().warn(TAG, 'REPLACE macro must have two or more arguments');
   }
-  if (!newSubStr) {
-    newSubStr = '';
+  if (!opt_newSubStr) {
+    opt_newSubStr = '';
   }
   const regex = new RegExp(matchPattern, 'g');
-  return string.replace(regex, newSubStr);
+  return string.replace(regex, opt_newSubStr);
 }
 
 
@@ -137,7 +143,7 @@ export class VariableService {
     this.register_('HASH', this.hashMacro_.bind(this));
     this.register_('IF',
         (value, thenValue, elseValue) => value ? thenValue : elseValue);
-    this.register_('REPLACE', replaceFilter);
+    this.register_('REPLACE', replaceMacro);
   }
 
   /**
