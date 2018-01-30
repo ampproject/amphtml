@@ -409,6 +409,10 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @private */
   setupGestures_() {
+    // TODO (#12881): this and the subsequent use of event.preventDefault
+    // is a temporary solution to #12362. We should revisit this problem after
+    // resolving #12881 or change the use of window.event to the specific event
+    // triggering the gesture.
     this.gestures_ = Gestures.get(
         this.element,
         /* opt_shouldNotPreventDefault */true
@@ -465,6 +469,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     // Movable.
     this.unlistenOnSwipePan_ = this.gestures_
         .onGesture(SwipeXYRecognizer, e => {
+          event.preventDefault();
           this.onMove_(e.data.deltaX, e.data.deltaY, false);
           if (e.data.last) {
             this.onMoveRelease_(e.data.velocityX, e.data.velocityY);
