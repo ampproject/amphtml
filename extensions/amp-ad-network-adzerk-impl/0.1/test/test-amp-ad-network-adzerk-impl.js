@@ -185,7 +185,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
         analytics: {'type': 'googleanalytics'},
       };
       return impl.maybeValidateAmpCreative(
-          utf8EncodeSync(JSON.stringify(adResponseBody)).buffer,
+          utf8Encode(JSON.stringify(adResponseBody)).buffer,
           {
             get: name => {
               expect(name).to.equal(AMP_TEMPLATED_CREATIVE_HEADER_NAME);
@@ -213,7 +213,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
         analytics: undefined,
       };
       return impl.maybeValidateAmpCreative(
-          utf8EncodeSync(JSON.stringify(adResponseBody)).buffer,
+          utf8Encode(JSON.stringify(adResponseBody)).buffer,
           {
             get: name => {
               expect(name).to.equal(AMP_TEMPLATED_CREATIVE_HEADER_NAME);
