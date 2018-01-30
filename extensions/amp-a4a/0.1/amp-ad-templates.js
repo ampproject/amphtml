@@ -78,10 +78,7 @@ export class AmpAdTemplates {
    */
   render(templateValues, element) {
     return Services.templatesFor(this.win_)
-        .findAndRenderTemplate(element, templateValues)
-        .then(renderedElement => {
-          return renderedElement;
-        });
+        .findAndRenderTemplate(element, templateValues);
   }
 
   /**
@@ -93,7 +90,7 @@ export class AmpAdTemplates {
         (isArray(analyticsValue) ? analyticsValue : [analyticsValue]);
     for (let i = 0; i < analyticsValue.length; i++) {
       const config = analyticsValue[i];
-      const analyticsEle = document.createElement('amp-analytics');
+      const analyticsEle = element.ownerDocument.createElement('amp-analytics');
       if (config['remote']) {
         analyticsEle.setAttribute('config', config['remote']);
       }
@@ -102,7 +99,7 @@ export class AmpAdTemplates {
       }
       if (config['inline']) {
         const scriptElem = createElementWithAttributes(
-            document,
+            element.ownerDocument,
             'script', dict({
               'type': 'application/json',
             }));
