@@ -120,6 +120,9 @@ export class AmpImageViewer extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.sourceAmpImage_ = null;
+
+    /** @private {?Promise} */
+    this.loadPromise_ = null;
   }
 
   /** @override */
@@ -137,14 +140,12 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    let elementLayoutPromise = Promise.resolve();
-    if (this.sourceAmpImage_) {
-      this.scheduleLayout(this.sourceAmpImage_);
-      elementLayoutPromise = this.sourceAmpImage_.signals()
-          .whenSignal(CommonSignals.LOAD_END);
+    if (this.loadPromise_) {
+      return this.loadPromise_;
     }
-    return elementLayoutPromise
-        .then(() => {
+    this.scheduleLayout(dev().assertElement(this.sourceAmpImage_));
+    this.loadPromise_ = this.sourceAmpImage_.signals()
+        .whenSignal(CommonSignals.LOAD_END).then(() => {
           return this.vsync_.mutatePromise(() => {
             if (!this.image_) {
               this.image_ = this.element.ownerDocument.createElement('img');
@@ -162,17 +163,27 @@ export class AmpImageViewer extends AMP.BaseElement {
           this.setupGestures_();
           this.registerOnResizeHandler_();
         });
+    return this.loadPromise_;
   }
 
   /** @override */
   pauseCallback() {
-    this.cleanupGestures_();
-    this.cleanupOnResizeHandler_();
+    if (!this.loadPromise_) {
+      return;
+    }
+    this.loadPromise_.then(() => {
+      this.measure();
+      this.cleanupGestures_();
+      this.cleanupOnResizeHandler_();
+    });
   }
 
   /** @override */
   resumeCallback() {
-    this.element.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
+    if (!this.loadPromise_) {
+      return;
+    }
+    this.loadPromise_.then(() => {
       if (!this.gestures_) {
         this.setupGestures_();
       }
@@ -186,6 +197,7 @@ export class AmpImageViewer extends AMP.BaseElement {
   unlayoutCallback() {
     this.cleanupGestures_();
     this.cleanupOnResizeHandler_();
+    this.loadPromise_ = null;
     return true;
   }
 
