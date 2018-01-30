@@ -96,7 +96,7 @@ export function beopinion(global, data) {
     sdk.init({
       account: data.account,
     });
-    sdk.watch();
+    sdk['watch'](); // sdk.watch() fails 'gulp check-types' validation on Travis
     // sdk.setAMPContext(context); ?
     // + context.noContentAvailable(); to be called when no content
   });
