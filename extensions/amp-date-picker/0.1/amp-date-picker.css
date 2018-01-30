@@ -34,9 +34,7 @@ amp-date-picker * {
 
 .CalendarMonth_caption {
   font-weight: lighter;
-  margin-left: -30px;
-  margin-right: -30px;
-  margin-bottom: 38px;
+  margin: 0 -30px 38px;
   padding-bottom: 20px;
   background-color: #000;
   color: #fff;
