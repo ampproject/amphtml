@@ -23,7 +23,7 @@ import {
 import {dev, user} from '../../../../src/log';
 import {getServiceForDoc} from '../../../../src/service';
 import {Services} from '../../../../src/services';
-import {setStyles} from '../../../../src/style';
+import {setStyles, setStyle} from '../../../../src/style';
 
 const FACTOR_ATTR = 'data-parallax-factor';
 
@@ -59,6 +59,7 @@ export class ParallaxProvider {
    * @param {!Element} element
    */
   installOn(element) {
+    setStyle(element, 'will-change', 'transform');
     const parallaxElement = new ParallaxElement(
         element, this.positionObserver_, this.viewport_, this.vsync_);
     parallaxElement.initialize();
@@ -140,7 +141,8 @@ class ParallaxElement {
 
     // Translate the element offset pixels.
     // No need for vsync mutate, position observer only calls back at most
-    // every animation frame.
+    // every animation frame and we are only changing `translate` which does
+    // not cause relayouts.
     setStyles(this.element_,
         {transform: `translateY(${offset.toFixed(0)}px)`}
     );
