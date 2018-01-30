@@ -1417,7 +1417,7 @@ export class AmpStory extends AMP.BaseElement {
    *     for amp-story.
    */
   static isBrowserSupported(win) {
-    return !win.CSS.supports('display', 'grid');
+    return win.CSS.supports('display', 'grid');
   }
 }
 
