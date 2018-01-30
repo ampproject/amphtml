@@ -250,6 +250,12 @@ export class AmpStory extends AMP.BaseElement {
   buildCallback() {
     this.assertAmpStoryExperiment_();
 
+    if (this.isDesktop_()) {
+      this.element.setAttribute('desktop','');
+    }
+
+    this.element.querySelector('amp-story-page').setAttribute('active', '');
+
     if (this.element.hasAttribute(AMP_STORY_STANDALONE_ATTRIBUTE)) {
       const html = this.win.document.documentElement;
       this.mutateElement(() => {
