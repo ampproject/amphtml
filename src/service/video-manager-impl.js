@@ -18,7 +18,12 @@
 import {ActionTrust} from '../action-trust';
 import {VideoSessionManager} from './video-session-manager';
 import {removeElement, scopedQuerySelector, isRTL} from '../dom';
-import {getData, listen, listenOncePromise} from '../event-helper';
+import {
+  getData,
+  listen,
+  listenOncePromise,
+  createCustomEvent,
+} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
 import {registerServiceBuilderForDoc, getServiceForDoc} from '../service';
@@ -160,6 +165,9 @@ export class VideoManager {
     this.timer_ = Services.timerFor(ampdoc.win);
 
     /** @private @const */
+    this.actions_ = Services.actionServiceForDoc(ampdoc);
+
+    /** @private @const */
     this.boundSecondsPlaying_ = () => this.secondsPlaying_();
 
     // TODO(cvializ, #10599): It would be nice to only create the timer
@@ -178,9 +186,30 @@ export class VideoManager {
       const entry = this.entries_[i];
       if (entry.getPlayingState() !== PlayingStates.PAUSED) {
         analyticsEvent(entry, VideoAnalyticsEvents.SECONDS_PLAYED);
+        this.timeUpdateActionEvent_(entry);
       }
     }
     this.timer_.delay(this.boundSecondsPlaying_, SECONDS_PLAYED_MIN_DELAY);
+  }
+
+  /**
+   * Triggers a LOW-TRUST timeupdate event consumable by AMP actions.
+   * Frequency of this event is controlled by SECONDS_PLAYED_MIN_DELAY and is
+   * every 1 second for now.
+   * @private
+   */
+  timeUpdateActionEvent_(entry) {
+    const name = 'timeUpdate';
+    const currentTime = entry.video.getCurrentTime();
+    const duration = entry.video.getDuration();
+    if (isFiniteNumber(currentTime) &&
+        isFiniteNumber(duration) &&
+        duration > 0) {
+      const perc = currentTime / duration;
+      const event = createCustomEvent(this.ampdoc.win, `${TAG}.${name}`,
+          {time: currentTime, percent: perc});
+      this.actions_.trigger(entry.video.element, name, event, ActionTrust.LOW);
+    }
   }
 
   /**
