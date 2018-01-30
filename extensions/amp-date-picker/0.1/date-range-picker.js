@@ -15,7 +15,7 @@
  */
 
 import {requireExternal} from '../../../src/module';
-import {omit} from '../../../src/utils/object';
+import {map,omit} from '../../../src/utils/object';
 import {withDatePickerCommon} from './date-picker-common';
 
 
@@ -25,7 +25,6 @@ import {withDatePickerCommon} from './date-picker-common';
  */
 function createDateRangePickerBase() {
   const React = requireExternal('react');
-  const PropTypes = requireExternal('prop-types');
   const moment = requireExternal('moment');
   const {
     ANCHOR_LEFT,
@@ -33,31 +32,12 @@ function createDateRangePickerBase() {
   } = requireExternal('react-dates/constants');
   const {
     DateRangePicker: DatePicker,
-    DateRangePickerShape,
     DateRangePickerPhrases,
   } = requireExternal('react-dates');
 
   React.options.syncComponentUpdates = false;
 
-  const propTypes = {
-    // example props for the demo
-    autoFocus: PropTypes.bool,
-    autoFocusEndDate: PropTypes.bool,
-    initialStartDate: PropTypes.object,
-    initialEndDate: PropTypes.object,
-    registerAction: PropTypes.func,
-    templates: PropTypes.object,
-  };
-
-  Object.assign(propTypes, omit(DateRangePickerShape, [
-    'startDate',
-    'endDate',
-    'onDatesChange',
-    'focusedInput',
-    'onFocusChange',
-  ]));
-
-  const defaultProps = {
+  const defaultProps = map({
     // example props for the demo
     autoFocus: false,
     autoFocusEndDate: false,
@@ -117,7 +97,7 @@ function createDateRangePickerBase() {
       dateIsSelected: ({date}) => `The date ${date} is selected.`,
     }),
     registerAction: null,
-  };
+  });
 
   class DateRangePickerBase extends React.Component {
     /**
@@ -207,7 +187,6 @@ function createDateRangePickerBase() {
     }
   }
 
-  DateRangePickerBase.propTypes = propTypes;
   DateRangePickerBase.defaultProps = defaultProps;
 
   return withDatePickerCommon(DateRangePickerBase);
