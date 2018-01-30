@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-trust';
 import {Services} from '../../../src/services';
 import {BaseCarousel} from './base-carousel';
 
@@ -55,6 +56,12 @@ export class BaseSlides extends BaseCarousel {
     this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
 
     if (this.shouldAutoplay_) {
+      this.registerAction('toggleAutoPlay', invocation => {
+        const args = invocation.args;
+        if (args) {
+          this.toggleAutoPlay(args['toggleOn']);
+        }
+      }, ActionTrust.HIGH);
       this.setupAutoplay_();
     }
   }
@@ -148,15 +155,14 @@ export class BaseSlides extends BaseCarousel {
   }
 
   /**
-   * Called on user interaction to play/pause the autoplay feature.
+   * Called on user interaction to toggle the autoplay feature.
    */
-  toggleAutoPlay() {
+  toggleAutoPlay(toggleOn) {
     // Set the autoPlay status to the opposite
-    this.hasAutoplay_ = !this.hasAutoplay_;
+    this.hasAutoplay_ = toggleOn;
 
     this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
 
-    //Change the button as well
     if (this.hasAutoplay_) {
       this.autoplayTimeoutId_ = Services.timerFor(this.win).delay(
           this.go.bind(

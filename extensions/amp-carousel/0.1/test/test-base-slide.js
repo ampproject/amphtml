@@ -261,7 +261,7 @@ describes.fakeWin('BaseSlides', {amp: true}, env => {
     expect(carousel.autoplayTimeoutId_).to.be.null;
   });
 
-  it('Toggle autoPlay status', () => {
+  it('toggle autoPlay status', () => {
     const carousel = new TestCarousel(setElement({
       autoplay: true,
       delay: 300,
@@ -271,8 +271,13 @@ describes.fakeWin('BaseSlides', {amp: true}, env => {
 
     expect(carousel.shouldAutoplay_).to.be.true;
 
-    carousel.toggleAutoPlay();
+    let args = {'toggleOn': false};
+    carousel.executeAction({method: 'toggleAutoPlay', args, satisfiesTrust: () => true});
     expect(carousel.shouldAutoplay_).to.be.false;
+
+    args['toggleOn'] = true;
+    carousel.executeAction({method: 'toggleAutoPlay', args, satisfiesTrust: () => true});
+    expect(carousel.shouldAutoplay_).to.be.true;
   });
 
 });
