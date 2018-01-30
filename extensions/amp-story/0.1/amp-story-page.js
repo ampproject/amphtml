@@ -44,7 +44,6 @@ import {LoadingSpinner} from './loading-spinner';
 import {listen} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {MediaPool} from './media-pool';
-import {dev} from '../../../src/log';
 
 
 /**
