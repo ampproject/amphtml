@@ -33,11 +33,6 @@ amp-story {
   width: 100% !important;
 }
 
-/** Removes overlay that blocks viewing during initial load */
-amp-story[standalone].i-amphtml-story-loaded::after {
-  display: none !important;
-}
-
 html.i-amphtml-story-standalone,
 html.i-amphtml-story-standalone body {
   height: 100% !important;
