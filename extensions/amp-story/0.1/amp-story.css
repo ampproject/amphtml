@@ -887,11 +887,15 @@ amp-story[standalone] .i-amphtml-story-no-rotation-overlay,
 .i-amphtml-story-unsupported-browser-overlay {
   position: fixed !important;
   z-index: 200000!important;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 700 !important;
+  line-height: 1.5;
+  padding: 32px;
   background-color: #000 !important;
   top:0 !important;
   left:0 !important;
-  width:100% !important;
-  height: 100% !important;
+  right:0 !important;
+  bottom:0 !important;
   align-items: center !important;
   justify-content: center !important;
   text-align: center !important;

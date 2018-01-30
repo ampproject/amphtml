@@ -302,9 +302,6 @@ export class AmpStory extends AMP.BaseElement {
 
     registerServiceBuilder(this.win, 'story-variable',
         () => this.variableService_);
-
-    this.buildUnsupportedBrowserOverlay_();
-    this.buildLandscapeOrientationOverlay_();
   }
 
 
@@ -532,6 +529,12 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (!AmpStory.isBrowserSupported(this.win)) {
+      this.buildUnsupportedBrowserOverlay_();
+      dev().expectedError(TAG, 'Unsupported browser');
+      return Promise.resolve();
+    }
+
     const firstPageEl = user().assertElement(
         scopedQuerySelector(this.element, 'amp-story-page'),
         'Story must have at least one page.');
@@ -543,6 +546,7 @@ export class AmpStory extends AMP.BaseElement {
     const storyLayoutPromise = this.initializePages_()
         .then(() => this.buildSystemLayer_())
         .then(() => this.buildHintLayer_())
+        .then(() => this.buildLandscapeOrientationOverlay_())
         .then(() => {
           this.pages_.forEach(page => {
             page.setActive(false);
@@ -907,9 +911,11 @@ export class AmpStory extends AMP.BaseElement {
    * Build overlay for Landscape mode mobile
    */
   buildLandscapeOrientationOverlay_() {
-    this.element.insertBefore(
-        renderSimpleTemplate(this.win.document, LANDSCAPE_ORIENTATION_WARNING),
-        this.element.firstChild);
+    this.mutateElement(() => {
+      this.element.insertBefore(
+          renderSimpleTemplate(this.win.document, LANDSCAPE_ORIENTATION_WARNING),
+          this.element.firstChild);
+    });
   }
 
 
@@ -917,13 +923,11 @@ export class AmpStory extends AMP.BaseElement {
    * Build overlay for Landscape mode mobile
    */
   buildUnsupportedBrowserOverlay_() {
-    if (this.win.CSS.supports('display', 'grid')) {
-      return;
-    }
-
-    this.element.insertBefore(
-        renderSimpleTemplate(this.win.document, UNSUPPORTED_BROWSER_WARNING),
-        this.element.firstChild);
+    this.mutateElement(() => {
+      this.element.insertBefore(
+          renderSimpleTemplate(this.win.document, UNSUPPORTED_BROWSER_WARNING),
+          this.element.firstChild);
+    });
   }
 
 
@@ -1404,6 +1408,15 @@ export class AmpStory extends AMP.BaseElement {
       dispatch(this.element, EventType.CLOSE_BOOKEND);
     }
     this.switchTo_(dev().assertElement(this.pages_[0].element).id);
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {boolean} true if the user's browser supports the features needed
+   *     for amp-story.
+   */
+  static isBrowserSupported(win) {
+    return !win.CSS.supports('display', 'grid');
   }
 }
 
