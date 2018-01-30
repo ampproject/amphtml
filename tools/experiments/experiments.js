@@ -255,6 +255,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11475',
   },
   {
+    id: 'amp-story-scaling',
+    name: 'Scale pages dynamically in amp-story by default',
+    spec: 'https://github.com/ampproject/amphtml/issues/12902',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12902',
+  },
+  {
     id: 'disable-amp-story-desktop',
     name: 'Disables responsive desktop experience for the amp-story component',
     spec: 'https://github.com/ampproject/amphtml/issues/11714',
