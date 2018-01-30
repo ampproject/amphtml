@@ -27,8 +27,7 @@ import {parseUrl} from '../src/url';
  * @param {function(!Object)} cb
  */
 function getBeOpinion(global, cb) {
-  // loadScript(global, 'https://widget.beopinion.com/sdk.js', function() {
-  loadScript(global, 'http://localhost:8081/sdk-4.0.0.js', function() {
+  loadScript(global, 'https://widget.beopinion.com/sdk.js', function() {
     cb(global.beopinion);
   });
 }

@@ -256,8 +256,7 @@ export const adConfig = {
   },
 
   beopinion: {
-    // prefetch: 'https://widget.beopinion.com/sdkjs',
-    prefetch: 'http://localhost:8081/sdk-4.0.0.js',
+    prefetch: 'https://widget.beopinion.com/sdk.js',
     preconnect: [
       'https://t.beopinion.com',
       'https://s.beopinion.com',

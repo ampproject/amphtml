@@ -37,55 +37,16 @@ limitations under the License.
 
 The `amp-beopinion` component allows you to embed a BeOpinion content given a BeOpinion account.  
 
-Here's an example of a basic embedded BeOpinion content:
-
-<!--embedded example - displays in ampproject.org -->
-<div>
-<amp-iframe height="164"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/ampbeopinion.basic.embed.html">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
-</div>
 
 ## Appearance
 
-Twitter does not currently provide an API that yields fixed aspect ratio for embedded Tweets. Currently, AMP automatically proportionally scales the Tweet to fit the provided size, but this may yield less than ideal appearance. You might need to manually tweak the provided width and height. Also, you can use the `media` attribute to select the aspect ratio based on the screen width.
+BeOpinion does not currently provide an API that yields fixed aspect ratio for embedded contents. Currently, AMP automatically proportionally scales the content to fit the provided size, but this may yield less than ideal appearance. You might need to manually tweak the provided width and height. Also, you can use the `media` attribute to select the aspect ratio based on the screen width.
 
 ## Placeholders & fallbacks
 
-An element marked with a `placeholder` attribute displays while the content for the Tweet is loading or initializing.  Placeholders are hidden once the AMP component's content displays. An element marked with a `fallback` attribute displays if `amp-beopinion` isn't supported by the browser or if the Tweet doesn't exist or has been deleted.
+An element marked with a `placeholder` attribute displays while the content for the content is loading or initializing.  Placeholders are hidden once the AMP component's content displays. An element marked with a `fallback` attribute displays if `amp-beopinion` isn't supported by the browser or if the content doesn't exist or has been deleted.
 
 Visit the [Placeholders & fallbacks](https://www.ampproject.org/docs/guides/responsive/placeholders) guide to learn more about how placeholders and fallbacks interact for the `amp-beopinion` component.
-
-*Example: Specifying a placeholder*
-<!--embedded example - displays in ampproject.org -->
-<div>
-  <amp-iframe height="278"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/ampbeopinion.placeholder.embed.html">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
-</div>
-
-*Example: Specifying a placeholder and a fallback*
-
-<div>
-  <amp-iframe height="354"
-            layout="fixed-height"
-            sandbox="allow-scripts allow-forms allow-same-origin"
-            resizable
-            src="https://ampproject-b5f4c.firebaseapp.com/examples/ampbeopinion.placeholder-and-fallback.embed.html">
-  <div overflow tabindex="0" role="button" aria-label="Show more">Show full code</div>
-  <div placeholder></div>
-</amp-iframe>
-</div>
 
 ## Attributes
 
