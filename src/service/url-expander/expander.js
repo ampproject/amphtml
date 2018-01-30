@@ -16,6 +16,8 @@
 
 import {rethrowAsync} from '../../log';
 
+export const PARSER_IGNORE_FLAG = '`';
+
 /** Rudamentary parser to handle nested Url replacement. */
 export class Expander {
 
@@ -86,13 +88,14 @@ export class Expander {
     let matchIndex = 0;
     let match = matches[matchIndex];
     let numOfPendingCalls = 0;
+    let ignoringChars = false;
+    let nextArgShouldBeRaw = false;
 
     const evaluateNextLevel = () => {
       let builder = '';
       const results = [];
 
       while (urlIndex < url.length && matchIndex <= matches.length) {
-
         if (match && urlIndex === match.start) {
           let binding;
           // find out where this keyword is coming from
@@ -127,25 +130,40 @@ export class Expander {
           builder = '';
         }
 
-        else if (numOfPendingCalls && url[urlIndex] === ',') {
+        else if (url[urlIndex] === PARSER_IGNORE_FLAG) {
+          if (!ignoringChars) {
+            ignoringChars = true;
+            nextArgShouldBeRaw = true;
+            builder = '';
+          } else {
+            ignoringChars = false;
+          }
+          urlIndex++;
+        }
+
+        else if (numOfPendingCalls && url[urlIndex] === ',' && !ignoringChars) {
           if (builder.length) {
-            results.push(builder.trim());
+            const nextArg = nextArgShouldBeRaw ? builder : builder.trim();
+            results.push(nextArg);
+            nextArgShouldBeRaw = false;
           }
           // support existing two comma format
           // eg CLIENT_ID(__ga,,ga-url)
           if (url[urlIndex + 1] === ',') {
-            results.push('');
+            results.push(''); // TODO(ccordry): may want this to be undefined at some point
             urlIndex++;
           }
           builder = '';
           urlIndex++;
         }
 
-        else if (url[urlIndex] === ')') {
+        else if (url[urlIndex] === ')' && !ignoringChars) {
           urlIndex++;
           numOfPendingCalls--;
           const binding = stack.pop();
-          results.push(builder.trim());
+          const nextArg = nextArgShouldBeRaw ? builder : builder.trim();
+          results.push(nextArg);
+          nextArgShouldBeRaw = false;
           const value = this.evaluateBinding_(binding, results);
           return value;
         }
