@@ -812,17 +812,8 @@ amp-story-page {
   background-color: #757575;
 }
 
-/** Overlay that blocks viewing during initial load */
-.i-amphtml-embedded amp-story[standalone]::after {
-  background-color: #fff !important;
-  bottom: 0 !important;
-  content: ' ' !important;
-  display: block !important;
-  left: 0 !important;
-  position: absolute !important;
-  right: 0 !important;
-  top: 0 !important;
-  z-index: 999999 !important;
+amp-story .i-amphtml-loader {
+  display: none !important;
 }
 
 amp-date-picker {
