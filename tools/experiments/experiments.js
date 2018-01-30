@@ -105,12 +105,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
-    id: 'amp-gwd-animation',
-    name: 'AMP GWD Animation',
-    spec: 'https://github.com/ampproject/amphtml/issues/9949',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11238',
-  },
-  {
     id: 'no-auth-in-prerender',
     name: 'Delay amp-access auth request until doc becomes visible.',
     spec: '',
@@ -191,11 +185,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
   },
   {
-    id: 'variable-filters',
-    name: 'Format to apply filters to analytics variables',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
-  },
-  {
     id: 'pump-early-frame',
     name: 'Force all extensions to have the same release ' +
         'as the main JS binary',
@@ -264,6 +253,12 @@ const EXPERIMENTS = [
     name: 'Visual storytelling in AMP',
     spec: 'https://github.com/ampproject/amphtml/issues/11329',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11475',
+  },
+  {
+    id: 'amp-story-scaling',
+    name: 'Scale pages dynamically in amp-story by default',
+    spec: 'https://github.com/ampproject/amphtml/issues/12902',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12902',
   },
   {
     id: 'disable-amp-story-desktop',

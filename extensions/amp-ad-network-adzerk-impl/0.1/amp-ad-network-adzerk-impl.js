@@ -93,16 +93,13 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
 
   /** @override */
   getAdUrl() {
-    const src = this.element.getAttribute('src');
-    if (!/^https:\/\/adzerk.com\?id=\d+$/i.test(src)) {
-      return '';
-    }
+    const data = this.element.getAttribute('data-r');
+    dev().assert(data, 'Expected data-r attribte on amp-ad tag');
     if (getMode(this.win).localDev) {
       return `http://ads.localhost:${this.win.location.port}` +
-        '/adzerk/' + /^https:\/\/adzerk.com\?id=(\d+)/.exec(src)[1];
+          '/adzerk/' + data;
     }
-    // TODO(adzerk): specify expected src path.
-    return /^https:\/\/adzerk.com\?id=\d+$/i.test(src) ? src : '';
+    return `https://engine.adzerk.net/amp?r=${encodeURIComponent(data)}`;
   }
 
   /** @override */
@@ -112,7 +109,7 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
     }
     // Shorthand for: reject promise if current promise chain is out of date.
     const checkStillCurrent = this.verifyStillCurrent();
-    return utf8Decode(bytes).then(body => {
+    return Promise.resolve(utf8Decode(bytes)).then(body => {
       checkStillCurrent();
       this.ampCreativeJson_ = /** @type {!AmpTemplateCreativeDef} */
         (tryParseJson(body) || {});
@@ -120,9 +117,7 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
       return ampAdTemplates
           .fetch(this.ampCreativeJson_.templateUrl)
           .then(parsedTemplate => {
-            this.creativeMetadata_ = /** @type {!CreativeMetaDataDef} */
-                (super.getAmpAdMetadata(parsedTemplate));
-            return utf8Encode(this.creativeMetadata_.minifiedCreative);
+            return utf8Encode(this.parseMetadataFromCreative(parsedTemplate));
           })
           .catch(error => {
             dev().warn(TAG, 'Error fetching/expanding template',
@@ -131,6 +126,27 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
             return Promise.reject(NO_CONTENT_RESPONSE);
           });
     });
+  }
+
+  /**
+   * Parses out required extensions and returns a minified version of the
+   * creative.
+   * @param {string} creative
+   * @return {string} A minified version of the creative, suitable to be
+   *   rendered as an amp4ads ad.
+   */
+  parseMetadataFromCreative(creative) {
+    // TODO(levitzky) The following minification is for demo purposes only. Once
+    // launched this will either be performed server-side, or will be replaced
+    // by more sophisticated logic.
+    const minifiedCreative = creative.replace(
+        /<script async.+?<\/script>/g, '');
+    this.creativeMetadata_ = /** @type {?CreativeMetaDataDef} */ ({
+      minifiedCreative,
+      customElementExtensions: [],
+      extensions: [],
+    });
+    return minifiedCreative;
   }
 
   /** @override */
