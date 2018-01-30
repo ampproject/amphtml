@@ -140,7 +140,6 @@
     "react-addons-shallow-compare": "15.6.2",
     "react-dates": "15.5.3",
     "react-externs": "0.13.6",
-    "react-with-direction": "1.3.0",
     "request": "2.83.0",
     "rimraf": "2.6.2",
     "rocambole": "0.7.0",
