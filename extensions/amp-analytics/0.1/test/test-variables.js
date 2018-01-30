@@ -203,7 +203,7 @@ describe('amp-analytics.VariableService', function() {
     });
 
     it('replaces backticks optional', () => {
-      return check('REPLACE(this-is-a-test, `-`, **)', 'this**is**a**test');
+      return check('REPLACE(this-is-a-test, -, **)', 'this**is**a**test');
     });
 
     it('replaces not trimming spaces in backticks', () => {
