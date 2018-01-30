@@ -1,5 +1,5 @@
 #
-# Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+# Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,8 +21,6 @@ tags: {  # amp-beopinion
     name: "amp-beopinion"
     allowed_versions: "0.1"
     allowed_versions: "latest"
-    requires_usage: GRANDFATHERED
-    deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
@@ -32,7 +30,19 @@ tags: {  # <amp-beopinion>
   requires_extension: "amp-beopinion"
   attrs: {
     name: "data-account"
+    value_regex_casei: "[0-9a-f]{24}"
     mandatory: true
+  }
+  attrs: {
+    name: "data-content"
+    value_regex_casei: "[0-9a-f]{24}"
+  }
+  attrs: {
+    name: "data-name"
+  }
+  attrs: {
+    name: "data-my-content"
+    value_regex: "0|1"
   }
   attr_lists: "extended-amp-global"
   amp_layout: {
