@@ -193,6 +193,34 @@ describe('amp-analytics.VariableService', function() {
                 'S7Uc5ZmODduHWdplzrZ7Jsnqx')
           );
     });
+
+    it('replaces common use case', () => {
+      return check('REPLACE(this-is-a-test, `-`)', 'thisisatest');
+    });
+
+    it('replaces three args', () => {
+      return check('REPLACE(this-is-a-test, `-`, *)', 'this*is*a*test');
+    });
+
+    it('replaces backticks optional', () => {
+      return check('REPLACE(this-is-a-test, -, **)', 'this**is**a**test');
+    });
+
+    it('replaces not trimming spaces in backticks', () => {
+      return check('REPLACE(this-is-a-test, ` -`)', 'this-is-a-test');
+    });
+
+    it('replaces respecting space as arg', () => {
+      return check('REPLACE(this-is-a-test, `-`, ` `)', 'this%20is%20a%20test');
+    });
+
+    it('replaces respecting backticks', () => {
+      return check('REPLACE(`this-,is-,a-,test`, `-,`)', 'thisisatest');
+    });
+
+    it('replace with no third arg', () => {
+      return check('REPLACE(thi@s-is-a-te@st, `-|@`)', 'thisisatest');
+    });
   });
 
   describe('getNameArgs:', () => {
