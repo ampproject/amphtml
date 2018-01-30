@@ -184,12 +184,12 @@ amp-date-picker * {
  * Adapted from: https://freqdec.github.io/Pure-CSS-Tooltips/
  */
 
-[data-tooltip] {
+[data-date-tooltip] {
   position: relative;
 }
 
-[data-tooltip]::before,
-[data-tooltip]::after {
+[data-date-tooltip]::before,
+[data-date-tooltip]::after {
   pointer-events: none;
   outline: none;
   position: absolute;
@@ -201,12 +201,12 @@ amp-date-picker * {
   transform: translate(-50%, 12px);
 }
 
-[data-tooltip]:hover::before,
-[data-tooltip]:hover::after {
+[data-date-tooltip]:hover::before,
+[data-date-tooltip]:hover::after {
   transition: transform 300ms ease-out, opacity 300ms ease-out;
 }
 
-[data-tooltip]::before {
+[data-date-tooltip]::before {
   content: "";
   width: 0;
   height: 0;
@@ -217,8 +217,8 @@ amp-date-picker * {
   overflow: hidden;
 }
 
-[data-tooltip]::after {
-  content: attr(data-tooltip);
+[data-date-tooltip]::after {
+  content: attr(data-date-tooltip);
   width: 85px;
   margin-bottom: 5px;
   letter-spacing: normal;
@@ -237,10 +237,10 @@ amp-date-picker * {
   border-radius: 3px;
 }
 
-[data-tooltip]:hover::before,
-[data-tooltip]:focus::before,
-[data-tooltip]:hover::after,
-[data-tooltip]:focus::after {
+[data-date-tooltip]:hover::before,
+[data-date-tooltip]:focus::before,
+[data-date-tooltip]:hover::after,
+[data-date-tooltip]:focus::after {
   transform: translate(-50%, 0);
   pointer-events: auto;
   opacity: 1;
