@@ -63,7 +63,7 @@ const MAX_TRANSITION_DURATION = 1000; // ms
 const MIN_TRANSITION_DURATION = 300; // ms
 const MAX_DISTANCE_APPROXIMATION = 250; // px
 const MOTION_DURATION_RATIO = 0.8; // fraction of animation
-const EPSILON = 0.001; // precision for approx equals
+const EPSILON = 0.01; // precision for approx equals
 
 /**
  * TODO(aghassemi): Make lightbox-manager into a doc-level service.
