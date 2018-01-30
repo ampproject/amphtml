@@ -913,7 +913,8 @@ export class AmpStory extends AMP.BaseElement {
   buildLandscapeOrientationOverlay_() {
     this.mutateElement(() => {
       this.element.insertBefore(
-          renderSimpleTemplate(this.win.document, LANDSCAPE_ORIENTATION_WARNING),
+          renderSimpleTemplate(this.win.document,
+              LANDSCAPE_ORIENTATION_WARNING),
           this.element.firstChild);
     });
   }
