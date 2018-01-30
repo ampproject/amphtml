@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// TODO(malteubl) Move somewhere else since this is not an ad.
-
 import {loadScript} from './3p';
 import {setStyles} from '../src/style';
 import {parseUrl} from '../src/url';
@@ -29,17 +27,17 @@ import {parseUrl} from '../src/url';
  * @param {function(!Object)} cb
  */
 function getBeOpinion(global, cb) {
-  loadScript(global, 'https://widget.beopinion.com/sdk.js', function() {
-  // loadScript(global, 'http://localhost:8081/dist/widget/fr/sdk-4.0.0.js', function() {
+  // loadScript(global, 'https://widget.beopinion.com/sdk.js', function() {
+  loadScript(global, 'http://localhost:8081/sdk-4.0.0.js', function() {
     cb(global.beopinion);
   });
 }
 
 /**
  * @param {!Window} global
- * @param {!Object} data
+ * @description Make canonicalUrl available from iframe
  */
-export function beopinion(global, data) {
+function addCanonicalLinkTag(global) {
   const canonicalUrl = global.context.canonicalUrl;
   if (canonicalUrl) {
     const link = global.document.createElement('link');
@@ -47,31 +45,59 @@ export function beopinion(global, data) {
     link.setAttribute('href', canonicalUrl);
     global.document.head.appendChild(link);
   }
+}
 
-  const div = global.document.createElement('div');
-  div.className = "BeOpinionWidget";
-  // if (data['content'] !== null) {
-    div.setAttribute('data-content', null);//data['content']);
-  // }
-  if (data['my-content'] !== null) {
-    div.setAttribute('data-my-content', data['my-content']);
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+function createContainer(global, data) {
+  // create div
+  const container = global.document.createElement('container');
+  container.className = "BeOpinionWidget";
+
+  // get content id
+  if (data['content'] !== null) {
+    container.setAttribute('data-content', data['content']);
   }
+
+  // get my-content value, forcing it to "1" if it is not an amp-ad
+  if (global.context.tagName === 'AMP-BEOPINION') {
+    container.setAttribute('data-my-content', "1");
+  } else if (data['my-content'] !== null) {
+    container.setAttribute('data-my-content', data['my-content']);
+  }
+
+  // get slot name
   if (data['name'] !== null) {
-    div.setAttribute('data-name', data['name']);
+    container.setAttribute('data-name', data['name']);
   }
-  setStyles(div, {
+
+  setStyles(container, {
     width: '500px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
   });
-  global.document.getElementById('c').appendChild(div);
+
+  return container;
+}
+
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function beopinion(global, data) {
+  const container = createContainer(global, data);
+  global.document.getElementById('c').appendChild(container);
+
   getBeOpinion(global, function(beopinion) {
     global.BeOpinionSDK.init({
       account: data.account
     });
     global.BeOpinionSDK.watch();
-    //     global.context.noContentAvailable();
+    // global.BeOpinionSDK.setAMPContext(global.context); ?
+    // global.context.noContentAvailable(); to be called when no content
   });
 
   function resize(container) {

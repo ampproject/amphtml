@@ -84,4 +84,6 @@ class AmpBeOpinion extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement(TAG, AmpBeOpinion);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpBeOpinion);
+});
