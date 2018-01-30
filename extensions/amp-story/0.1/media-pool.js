@@ -22,6 +22,7 @@ import {
 } from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
+import {toWin} from '../../../src/types';
 import {BLANK_AUDIO_SRC, BLANK_VIDEO_SRC} from './default-media';
 
 
@@ -54,6 +55,12 @@ const DOM_MEDIA_ELEMENT_ID_PREFIX = 'i-amphtml-media-';
 
 
 /**
+ * @const {string}
+ */
+const POOL_MEDIA_ELEMENT_PROPERTY_NAME = '__AMP_MEDIA_POOL_ID__';
+
+
+/**
  * @const {!Array<string>}
  */
 const PROTECTED_CSS_CLASS_NAMES = [
@@ -83,6 +90,18 @@ const PROTECTED_ATTRIBUTES = [
 function ampMediaElementFor(el) {
   return closestBySelector(el, 'amp-video, amp-audio');
 }
+
+
+/**
+ * @type {!Object<string, !MediaPool>}
+ */
+const instances = {};
+
+
+/**
+ * @type {number}
+ */
+let nextInstanceId = 0;
 
 
 export class MediaPool {
@@ -575,8 +594,17 @@ export class MediaPool {
     const isMuted = mediaEl.muted;
     const currentTime = mediaEl.currentTime;
 
-    mediaEl.muted = false;
-    return Promise.resolve(mediaEl.play()).then(() => {
+    // If the video is already playing, we do not want to call play again, as it
+    // can interrupt the video playback.  Instead, we do a no-op.
+    const playFn = () => {
+      if (isPaused) {
+        mediaEl.play();
+      }
+    };
+
+    return Promise.resolve().then(() => playFn()).then(() => {
+      mediaEl.muted = false;
+
       if (isPaused) {
         mediaEl.pause();
         mediaEl.currentTime = currentTime;
@@ -585,6 +613,9 @@ export class MediaPool {
       if (isMuted) {
         mediaEl.muted = true;
       }
+    }).catch(reason => {
+      dev().expectedError('AMP-STORY', 'Blessing media element failed:',
+          reason);
     });
   }
 
@@ -745,8 +776,33 @@ export class MediaPool {
         .then(() => {
           this.blessed_ = true;
         }).catch(reason => {
-          dev().expectedError('AMP-STORY', 'Blessing media failed: ', reason);
+          dev().expectedError('AMP-STORY', 'Blessing all media failed: ',
+              reason);
         });
+  }
+
+
+  /**
+   * @param {!MediaPoolRoot} root
+   * @return {!MediaPool}
+   */
+  static for(root) {
+    const element = root.getElement();
+    const existingId = element[POOL_MEDIA_ELEMENT_PROPERTY_NAME];
+    const hasInstanceAllocated = existingId && instances[existingId];
+
+    if (hasInstanceAllocated) {
+      return instances[existingId];
+    }
+
+    const newId = String(nextInstanceId++);
+    element[POOL_MEDIA_ELEMENT_PROPERTY_NAME] = newId;
+    instances[newId] = new MediaPool(
+        toWin(root.getElement().ownerDocument.defaultView),
+        root.getMaxMediaElementCounts(),
+        root.getElementDistance);
+
+    return instances[newId];
   }
 }
 
@@ -804,4 +860,36 @@ class Sources {
 
     return new Sources(srcAttr, srcEls);
   }
+}
+
+
+/**
+ * Defines a common interface for elements that contain a MediaPool.
+ *
+ * @interface
+ */
+export class MediaPoolRoot {
+  /**
+   * @return {!Element} The root element of this media pool.
+   */
+  getElement() {};
+
+  /**
+   * @param {!Element} unusedElement The element whose distance should be
+   *    retrieved.
+   * @return {number} A numerical distance representing how far the specified
+   *     element is from the user's current position in the document.  The
+   *     absolute magnitude of this number is irrelevant; the relative magnitude
+   *     is used to determine which media elements should be evicted (elements
+   *     furthest from the user's current position in the document are evicted
+   *     from the MediaPool first).
+   */
+  getElementDistance(unusedElement) {};
+
+
+  /**
+   * @return {!Object<!MediaType, number>} The maximum amount of each media
+   *     type to allow within this element.
+   */
+  getMaxMediaElementCounts() {};
 }
