@@ -122,7 +122,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.sourceAmpImage_ = null;
 
     /** @private {?Promise} */
-    this.layoutPromise_ = null;
+    this.loadPromise_ = null;
   }
 
   /** @override */
@@ -140,12 +140,11 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (this.layoutPromise_) {
-      return this.layoutPromise_;
+    if (this.loadPromise_) {
+      return this.loadPromise_;
     }
-    dev().assertElement(this.sourceAmpImage_);
-    this.scheduleLayout(this.sourceAmpImage_);
-    this.layoutPromise_ = this.sourceAmpImage_.signals()
+    this.scheduleLayout(dev().assertElement(this.sourceAmpImage_));
+    this.loadPromise_ = this.sourceAmpImage_.signals()
         .whenSignal(CommonSignals.LOAD_END).then(() => {
           return this.vsync_.mutatePromise(() => {
             if (!this.image_) {
@@ -164,15 +163,15 @@ export class AmpImageViewer extends AMP.BaseElement {
           this.setupGestures_();
           this.registerOnResizeHandler_();
         });
-    return this.layoutPromise_;
+    return this.loadPromise_;
   }
 
   /** @override */
   pauseCallback() {
-    if (!this.layoutPromise_) {
+    if (!this.loadPromise_) {
       return;
     }
-    this.layoutPromise_.then(() => {
+    this.loadPromise_.then(() => {
       this.measure();
       this.cleanupGestures_();
       this.cleanupOnResizeHandler_();
@@ -181,10 +180,10 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @override */
   resumeCallback() {
-    if (!this.layoutPromise_) {
+    if (!this.loadPromise_) {
       return;
     }
-    this.layoutPromise_.then(() => {
+    this.loadPromise_.then(() => {
       if (!this.gestures_) {
         this.setupGestures_();
       }
@@ -198,7 +197,7 @@ export class AmpImageViewer extends AMP.BaseElement {
   unlayoutCallback() {
     this.cleanupGestures_();
     this.cleanupOnResizeHandler_();
-    this.layoutPromise_ = null;
+    this.loadPromise_ = null;
     return true;
   }
 
