@@ -11,13 +11,27 @@
   <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
 </head>
 <body>
-
+  <!-- Note that the below data-r attributes are not formatted for production.
+       They will only work in local dev mode. --->
   <amp-ad width=300 height=250
       type="adzerk"
-      src="https://adzerk.com?id=0">
+      data-r="0">
     <div placeholder></div>
     <div fallback></div>
   </amp-ad>
 
+  <amp-ad width=300 height=250
+      type="adzerk"
+      data-r="101">
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
+
+  <amp-ad width=300 height=250
+      type="adzerk"
+      data-r="102">
+    <div placeholder></div>
+    <div fallback></div>
+  </amp-ad>
 </body>
 </html>

@@ -41,7 +41,6 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
     fetchTextMock = sandbox.stub(Xhr.prototype, 'fetchText');
     element = createElementWithAttributes(doc, 'amp-ad', {
       'type': 'adzerk',
-      'src': 'https://adzerk.com?id=1234',
       'width': '320',
       'height': '50',
     });
@@ -51,25 +50,23 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
 
   describe('#getAdUrl', () => {
     it('should be valid', () => {
-      ['https://adzerk.com?id=1234',
-        'https://aDzErK.com?id=1234',
-        'https://adzerk.com?id=9'].forEach(src => {
-        element.setAttribute('src', src);
-        expect(impl.isValidElement()).to.be.true;
-        expect(impl.getAdUrl()).to.equal(src);
-      });
+      const r = '{"p":[{"n":1234,"t":[5],"s":677496}]}';
+      element.setAttribute('data-r', r);
+      expect(impl.getAdUrl()).to.equal(
+          `https://engine.adzerk.net/amp?r=${encodeURIComponent(r)}`);
     });
 
-    it('should not be valid', () => {
-      ['http://adzerk.com?id=1234',
-        'https://adzerk.com?id=a',
-        'https://www.adzerk.com?id=1234',
-        'https://adzerk.com?id=1234&a=b',
-        'foohttps://adzer.com?id=1234'].forEach(src => {
-        element.setAttribute('src', src);
-        expect(impl.isValidElement()).to.be.false;
-        expect(impl.getAdUrl()).to.equal('');
-      });
+    it('should be valid #2', () => {
+      element.setAttribute('data-r',
+          '{"p":[{"t":[5],"s":333999,"a":5603000}]}');
+      expect(impl.getAdUrl()).to.equal(
+          'https://engine.adzerk.net' +
+          '/amp?r=%7B%22p%22%3A%5B%7B%22t%22%3A%5B5%5D%2C%22s%22%3A333999' +
+          '%2C%22a%22%3A5603000%7D%5D%7D');
+    });
+
+    it('should be invalid', () => {
+      expect(() => impl.getAdUrl()).to.throw(/Expected data-r attribte/);
     });
   });
 
