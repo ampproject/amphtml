@@ -36,8 +36,9 @@ const FxType = {
  * Map of fx type to fx provider class.
  * @type {Object<FxType, function(new:FxProviderInterface, !../../../src/service/ampdoc-impl.AmpDoc)>}
  */
-const fxProviders = map();
-fxProviders[FxType.PARALLAX] = ParallaxProvider;
+const fxProviders = map({
+  [FxType.PARALLAX]: ParallaxProvider,
+});
 
 /**
  * Bootstraps elements that have `amp-fx=<fx1 fx2>` attribute and installs
@@ -65,7 +66,10 @@ class AmpFxCollection {
     /** @private @const {!Object<FxType, FxProviderInterface>} */
     this.fxProviderInstances_ = map();
 
-    ampdoc.whenReady().then(() => this.viewer_.whenFirstVisible()).then(() => {
+    Promise.all([
+      ampdoc.whenReady(),
+      this.viewer_.whenFirstVisible(),
+    ]).then(() => {
       // Scan when page becomes visible.
       this.scan_();
       // Rescan as DOM changes happen.
@@ -87,6 +91,7 @@ class AmpFxCollection {
       // Don't break for all components if only a subset are misconfigured.
       try {
         this.register_(fxElement);
+        this.seen_.push(fxElement);
       } catch (e) {
         rethrowAsync(e);
       }
@@ -102,7 +107,6 @@ class AmpFxCollection {
     dev().assert(!this.seen_.includes(fxElement));
     dev().assert(this.viewer_.isVisible());
 
-    /** @type {!Array<!FxType>} */
     const fxTypes = this.getFxTypes_(fxElement);
 
     fxTypes.forEach(fxType => {
