@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
+import {setStyle} from '../../../src/style';
 import {BaseCarousel} from './base-carousel';
 
 export class BaseSlides extends BaseCarousel {
@@ -31,6 +32,9 @@ export class BaseSlides extends BaseCarousel {
 
     /** @private {boolean} */
     this.hasAutoplay_ = false;
+
+    /** @private {?Element} */
+    this.autoPlayButton_ = null;
 
     /** @private {number} */
     this.autoplayDelay_ = 5000;
@@ -183,17 +187,19 @@ export class BaseSlides extends BaseCarousel {
     this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
 
     //Change the button as well
-    if (this.hasAutoplay_) {
-      // Set the button to be pause
-      setStyle(autoPlayButton_, "background-image", "url('https://i.imgur.com/LgmfKda.png')"); /* find an svg version of the logo */
-      this.autoplayTimeoutId_ = Services.timerFor(this.win).delay(
-          this.go.bind(
-            this, /* dir */ 1, /* animate */ true, /* autoplay */ true),
-          this.autoplayDelay_);
-    } else {
-      // Set the button to be play
-      setStyle(autoPlayButton_, "background-image", "url('https://i.imgur.com/Lj57czy.png')"); /* find an svg version of the logo */
-      Services.timerFor(this.win).cancel(this.autoplayTimeoutId_);
+    if (this.autoPlayButton_) {
+      if (this.hasAutoplay_) {
+        // Set the button to be pause
+        setStyle(this.autoPlayButton_, 'background-image', 'url(\'https://i.imgur.com/LgmfKda.png\')'); /* find an svg version of the logo */
+        this.autoplayTimeoutId_ = Services.timerFor(this.win).delay(
+            this.go.bind(
+                this, /* dir */ 1, /* animate */ true, /* autoplay */ true),
+            this.autoplayDelay_);
+      } else {
+        // Set the button to be play
+        setStyle(this.autoPlayButton_, 'background-image', 'url(\'https://i.imgur.com/Lj57czy.png\')'); /* find an svg version of the logo */
+        Services.timerFor(this.win).cancel(this.autoplayTimeoutId_);
+      }
     }
   }
 
