@@ -140,7 +140,32 @@ const LANDSCAPE_ORIENTATION_WARNING = [
           },
           {
             tag: 'div',
-            text: 'The page is best viewed in Portrait mode.',
+            text: 'The page is best viewed in portrait mode',
+          },
+        ],
+      },
+    ],
+  },
+];
+
+
+const UNSUPPORTED_BROWSER_WARNING = [
+  {
+    tag: 'div',
+    attrs: dict({'class': 'i-amphtml-story-unsupported-browser-overlay'}),
+    children: [
+      {
+        tag: 'div',
+        attrs: dict({'class': 'i-amphtml-overlay-container'}),
+        children: [
+          {
+            tag: 'div',
+            attrs: dict({'class': 'i-amphtml-gear-icon'}),
+          },
+          {
+            tag: 'div',
+            text: 'We\'re sorry, it looks like your browser doesn\'t support ' +
+                'this experience',
           },
         ],
       },
@@ -250,12 +275,6 @@ export class AmpStory extends AMP.BaseElement {
   buildCallback() {
     this.assertAmpStoryExperiment_();
 
-    if (this.isDesktop_()) {
-      this.element.setAttribute('desktop','');
-    }
-
-    this.element.querySelector('amp-story-page').setAttribute('active', '');
-
     if (this.element.hasAttribute(AMP_STORY_STANDALONE_ATTRIBUTE)) {
       const html = this.win.document.documentElement;
       this.mutateElement(() => {
@@ -283,8 +302,6 @@ export class AmpStory extends AMP.BaseElement {
 
     registerServiceBuilder(this.win, 'story-variable',
         () => this.variableService_);
-
-    this.buildLandscapeOrientationOverlay_();
   }
 
 
@@ -512,6 +529,12 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (!AmpStory.isBrowserSupported(this.win)) {
+      this.buildUnsupportedBrowserOverlay_();
+      dev().expectedError(TAG, 'Unsupported browser');
+      return Promise.resolve();
+    }
+
     const firstPageEl = user().assertElement(
         scopedQuerySelector(this.element, 'amp-story-page'),
         'Story must have at least one page.');
@@ -523,6 +546,7 @@ export class AmpStory extends AMP.BaseElement {
     const storyLayoutPromise = this.initializePages_()
         .then(() => this.buildSystemLayer_())
         .then(() => this.buildHintLayer_())
+        .then(() => this.buildLandscapeOrientationOverlay_())
         .then(() => {
           this.pages_.forEach(page => {
             page.setActive(false);
@@ -887,10 +911,27 @@ export class AmpStory extends AMP.BaseElement {
    * Build overlay for Landscape mode mobile
    */
   buildLandscapeOrientationOverlay_() {
-    this.element.insertBefore(
-        renderSimpleTemplate(this.win.document, LANDSCAPE_ORIENTATION_WARNING),
-        this.element.firstChild);
+    this.mutateElement(() => {
+      this.element.insertBefore(
+          renderSimpleTemplate(this.win.document,
+              LANDSCAPE_ORIENTATION_WARNING),
+          this.element.firstChild);
+    });
   }
+
+
+  /**
+   * Build overlay for Landscape mode mobile
+   */
+  buildUnsupportedBrowserOverlay_() {
+    this.mutateElement(() => {
+      this.element.insertBefore(
+          renderSimpleTemplate(this.win.document, UNSUPPORTED_BROWSER_WARNING),
+          this.element.firstChild);
+    });
+  }
+
+
   /**
    * Get the URL of the given page's background resource.
    * @param {!Element} pageElement
@@ -1368,6 +1409,15 @@ export class AmpStory extends AMP.BaseElement {
       dispatch(this.element, EventType.CLOSE_BOOKEND);
     }
     this.switchTo_(dev().assertElement(this.pages_[0].element).id);
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {boolean} true if the user's browser supports the features needed
+   *     for amp-story.
+   */
+  static isBrowserSupported(win) {
+    return win.CSS.supports('display', 'grid');
   }
 }
 
