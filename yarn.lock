@@ -144,28 +144,7 @@ JSONStream@^1.0.3:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/JSV/-/JSV-4.0.2.tgz#d077f6825571f82132f9dffaed587b4029feff57"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 abab@^1.0.4:
-=======
-=======
->>>>>>> Undoing yarn stuff.
-<<<<<<< HEAD
-abab@^1.0.3:
-=======
-abab@^1.0.0:
->>>>>>> Cleaned PR + tests.
-<<<<<<< HEAD
->>>>>>> Cleaned PR + tests.
-=======
-=======
-abab@^1.0.3:
->>>>>>> Undoing yarn stuff.
->>>>>>> Undoing yarn stuff.
-=======
-abab@^1.0.3:
->>>>>>> Yarn attempt #2.
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/abab/-/abab-1.0.4.tgz#5faad9c2c07f60dd76770f71cf025b62a63cfd4e"
 
@@ -222,27 +201,7 @@ acorn@^4.0.3:
   version "4.0.13"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-4.0.13.tgz#105495ae5361d697bd195c825192e1ad7f253787"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 acorn@^5.0.0, acorn@^5.0.3, acorn@^5.2.1:
-=======
-=======
->>>>>>> Undoing yarn stuff.
-<<<<<<< HEAD
-acorn@^5.0.0, acorn@^5.0.3, acorn@^5.1.2, acorn@^5.2.1:
->>>>>>> Cleaned PR + tests.
-  version "5.2.1"
-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-5.2.1.tgz#317ac7821826c22c702d66189ab8359675f135d7"
-=======
-acorn@^5.2.1:
-  version "5.3.0"
-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-5.3.0.tgz#7446d39459c54fb49a80e6ee6478149b940ec822"
->>>>>>> Cleaned PR + tests.
-=======
-=======
->>>>>>> Yarn attempt #2.
-acorn@^5.0.0, acorn@^5.0.3, acorn@^5.1.2, acorn@^5.2.1:
   version "5.2.1"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-5.2.1.tgz#317ac7821826c22c702d66189ab8359675f135d7"
 
@@ -295,6 +254,7 @@ ajv-keywords@^2.1.0:
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 ajv@6.1.1:
   version "6.1.1"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.1.1.tgz#978d597fbc2b7d0e5a5c3ddeb149a682f2abfa0e"
@@ -324,6 +284,11 @@ ajv@5.5.2, ajv@^5.1.0, ajv@^5.2.3, ajv@^5.3.0:
   version "5.5.2"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-5.5.2.tgz#73b5eeca3fab653e3d3f9422b341ad42205dc965"
 >>>>>>> Yarn attempt #2.
+=======
+ajv@6.1.1:
+  version "6.1.1"
+  resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.1.1.tgz#978d597fbc2b7d0e5a5c3ddeb149a682f2abfa0e"
+>>>>>>> Merges
   dependencies:
     fast-deep-equal "^1.0.0"
     fast-json-stable-stringify "^2.0.0"
@@ -339,10 +304,13 @@ ajv@^4.9.1:
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
 =======
 >>>>>>> Cleaned PR + tests.
+=======
+>>>>>>> Merges
 ajv@^5.1.0, ajv@^5.2.3, ajv@^5.3.0:
   version "5.5.2"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-5.5.2.tgz#73b5eeca3fab653e3d3f9422b341ad42205dc965"
@@ -353,6 +321,7 @@ ajv@^5.1.0, ajv@^5.2.3, ajv@^5.3.0:
     json-schema-traverse "^0.3.0"
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> Cleaned PR + tests.
 >>>>>>> Cleaned PR + tests.
@@ -360,6 +329,8 @@ ajv@^5.1.0, ajv@^5.2.3, ajv@^5.3.0:
 >>>>>>> Undoing yarn stuff.
 =======
 >>>>>>> Yarn attempt #2.
+=======
+>>>>>>> Merges
 align-text@^0.1.1, align-text@^0.1.3:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/align-text/-/align-text-0.1.4.tgz#0cd90a561093f35d0a99256c22b7069433fad117"
@@ -444,25 +415,10 @@ ansi-styles@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-1.0.0.tgz#cb102df1c56f5123eab8b67cd7b98027a0279178"
 
-<<<<<<< HEAD
 ansi-wrap@0.1.0, ansi-wrap@^0.1.0:
-=======
-ansi-wrap@0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/ansi-wrap/-/ansi-wrap-0.1.0.tgz#a82250ddb0015e9a27ca82e82ea603bbfa45efaf"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-any-promise@^0.1.0:
->>>>>>> Cleaned PR + tests.
->>>>>>> Cleaned PR + tests.
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/ansi-wrap/-/ansi-wrap-0.1.0.tgz#a82250ddb0015e9a27ca82e82ea603bbfa45efaf"
-
-=======
->>>>>>> Undoing yarn stuff.
-=======
->>>>>>> Yarn attempt #2.
 any-shell-escape@^0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/any-shell-escape/-/any-shell-escape-0.1.1.tgz#d55ab972244c71a9a5e1ab0879f30bf110806959"
@@ -2692,28 +2648,7 @@ content-type@~1.0.1, content-type@~1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/content-type/-/content-type-1.0.4.tgz#e138cc75e040c727b1966fe5e5f8c9aee256fe3b"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 convert-source-map@1.X, convert-source-map@^1.1.3, convert-source-map@^1.2.0, convert-source-map@^1.5.0, convert-source-map@^1.5.1:
-=======
-=======
->>>>>>> Undoing yarn stuff.
-<<<<<<< HEAD
-convert-source-map@1.X, convert-source-map@^1.1.3, convert-source-map@^1.2.0, convert-source-map@^1.5.0:
-=======
-convert-source-map@^1.0.0, convert-source-map@^1.1.3, convert-source-map@^1.2.0, convert-source-map@^1.5.0:
->>>>>>> Cleaned PR + tests.
-<<<<<<< HEAD
->>>>>>> Cleaned PR + tests.
-=======
-=======
-convert-source-map@1.X, convert-source-map@^1.1.3, convert-source-map@^1.2.0, convert-source-map@^1.5.0:
->>>>>>> Undoing yarn stuff.
->>>>>>> Undoing yarn stuff.
-=======
-convert-source-map@1.X, convert-source-map@^1.1.3, convert-source-map@^1.2.0, convert-source-map@^1.5.0:
->>>>>>> Yarn attempt #2.
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/convert-source-map/-/convert-source-map-1.5.1.tgz#b8278097b9bc229365de5c62cf5fcaed8b5599e5"
 
@@ -3295,6 +3230,7 @@ diffie-hellman@^5.0.0:
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 doctrine@2.1.0, doctrine@^2.1.0:
 =======
 =======
@@ -3302,10 +3238,13 @@ doctrine@2.1.0, doctrine@^2.1.0:
 =======
 >>>>>>> Yarn attempt #2.
 <<<<<<< HEAD
+=======
+>>>>>>> Merges
 direction@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/direction/-/direction-1.0.1.tgz#0481cc6eb44b4bb0c00da0ddb10a91469bbffe5d"
 
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
 >>>>>>> Cleaned PR + tests.
@@ -3329,6 +3268,8 @@ doctrine@^2.0.0:
 >>>>>>> Yarn attempt #2.
 =======
 >>>>>>> Yarn attempt #2.
+=======
+>>>>>>> Merges
 doctrine@2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/doctrine/-/doctrine-2.1.0.tgz#5cd01fc101621b42c4cd7f5d1a66243716d3f39d"
@@ -4122,28 +4063,7 @@ extsprintf@^1.2.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/extsprintf/-/extsprintf-1.4.0.tgz#e2689f8f356fad62cca65a3a91c5df5f9551692f"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 fancy-log@1.3.2, fancy-log@^1.1.0, fancy-log@^1.2.0, fancy-log@^1.3.2:
-=======
-=======
->>>>>>> Undoing yarn stuff.
-<<<<<<< HEAD
-fancy-log@^1.1.0, fancy-log@^1.2.0, fancy-log@^1.3.2:
-=======
-fancy-log@^1.1.0:
->>>>>>> Cleaned PR + tests.
-<<<<<<< HEAD
->>>>>>> Cleaned PR + tests.
-=======
-=======
-fancy-log@^1.1.0, fancy-log@^1.2.0, fancy-log@^1.3.2:
->>>>>>> Undoing yarn stuff.
->>>>>>> Undoing yarn stuff.
-=======
-fancy-log@^1.1.0, fancy-log@^1.2.0, fancy-log@^1.3.2:
->>>>>>> Yarn attempt #2.
   version "1.3.2"
   resolved "https://registry.yarnpkg.com/fancy-log/-/fancy-log-1.3.2.tgz#f41125e3d84f2e7d89a43d06d958c8f78be16be1"
   dependencies:
@@ -7607,16 +7527,6 @@ object-copy@^0.1.0:
     copy-descriptor "^0.1.0"
     define-property "^0.2.5"
     kind-of "^3.0.3"
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-object-keys@^1.0.10, object-keys@^1.0.8:
-  version "1.0.11"
-  resolved "https://registry.yarnpkg.com/object-keys/-/object-keys-1.0.11.tgz#c54601778ad560f1142ce0e01bcca8b56d13426d"
-=======
->>>>>>> Cleaned PR + tests.
-=======
->>>>>>> Yarn attempt #2.
 
 object-keys@^1.0.10, object-keys@^1.0.8:
   version "1.0.11"
@@ -7643,12 +7553,15 @@ object.assign@^4.0.4:
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 =======
 >>>>>>> Undoing yarn stuff.
 =======
 >>>>>>> Yarn attempt #2.
 <<<<<<< HEAD
+=======
+>>>>>>> Merges
 object.assign@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/object.assign/-/object.assign-4.1.0.tgz#968bf1100d7956bb3ca086f006f846b3bc4008da"
@@ -7658,6 +7571,7 @@ object.assign@^4.1.0:
     has-symbols "^1.0.0"
     object-keys "^1.0.11"
 
+<<<<<<< HEAD
 =======
 >>>>>>> Undoing yarn stuff.
 =======
@@ -7672,6 +7586,8 @@ object.assign@^4.1.0:
 >>>>>>> Undoing yarn stuff.
 =======
 >>>>>>> Yarn attempt #2.
+=======
+>>>>>>> Merges
 object.defaults@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/object.defaults/-/object.defaults-1.1.0.tgz#3a7f868334b407dea06da16d88d5cd29e435fecf"
@@ -11184,3 +11100,4 @@ zip-stream@^1.1.0:
     compress-commons "^1.2.0"
     lodash "^4.8.0"
     readable-stream "^2.0.0"
+
