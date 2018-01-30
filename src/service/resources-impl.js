@@ -1690,7 +1690,7 @@ export class Resources {
 
     const score = currentScore || 0;
     const depthPenalty = 1 + (depth / 10);
-    const nonActivePenalty = layout.isActive() ? 1 : 2;
+    const nonActivePenalty = layout.isActiveUnsafe() ? 1 : 2;
     const distance = layout.getHorizontalDistanceFromParent() +
         layout.getVerticalDistanceFromParent();
     return cache[id] = score + nonActivePenalty * depthPenalty * distance;
