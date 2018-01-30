@@ -120,6 +120,9 @@ export class AmpImageViewer extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.sourceAmpImage_ = null;
+
+    /** @private {?Promise} */
+    this.layoutPromise_ = null;
   }
 
   /** @override */
@@ -137,13 +140,16 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    let elementLayoutPromise = Promise.resolve();
+    if (this.layoutPromise_) {
+      return this.layoutPromise_;
+    }
+    this.layoutPromise_ = Promise.resolve();
     if (this.sourceAmpImage_) {
       this.scheduleLayout(this.sourceAmpImage_);
-      elementLayoutPromise = this.sourceAmpImage_.signals()
+      this.layoutPromise_ = this.sourceAmpImage_.signals()
           .whenSignal(CommonSignals.LOAD_END);
     }
-    return elementLayoutPromise
+    return this.layoutPromise_
         .then(() => {
           return this.vsync_.mutatePromise(() => {
             if (!this.image_) {
@@ -166,13 +172,22 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
-    this.cleanupGestures_();
-    this.cleanupOnResizeHandler_();
+    if (!this.layoutPromise_) {
+      return;
+    }
+    this.layoutPromise_.then(() => {
+      this.measure();
+      this.cleanupGestures_();
+      this.cleanupOnResizeHandler_();
+    });
   }
 
   /** @override */
   resumeCallback() {
-    this.element.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
+    if (!this.layoutPromise_) {
+      return;
+    }
+    this.layoutPromise_.then(() => {
       if (!this.gestures_) {
         this.setupGestures_();
       }
@@ -186,6 +201,7 @@ export class AmpImageViewer extends AMP.BaseElement {
   unlayoutCallback() {
     this.cleanupGestures_();
     this.cleanupOnResizeHandler_();
+    this.layoutPromise_ = null;
     return true;
   }
 
