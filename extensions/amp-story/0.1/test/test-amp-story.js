@@ -70,6 +70,7 @@ describes.realWin('amp-story', {
     element = win.document.createElement('amp-story');
     win.document.body.appendChild(element);
 
+    AmpStory.isBrowserSupported = () => true;
     story = new AmpStory(element);
     // TODO(alanorozco): Test active page event triggers once the stubbable
     // `Services` module is part of the amphtml-story repo.
