@@ -80,8 +80,9 @@ function positionLt(left, top) {
 }
 
 /**
- * Stores an LayoutElement's parent layer ancestry (temporarily).
- * See {@link LayoutElement#ancestry}.
+ * Stores an LayoutElement's parent layer ancestry (temporarily), reusing the
+ * same array instance to avoid heavy GCs.
+ * See {@link LayoutElement#iterateAncestry}.
  * @const {!Array<!LayoutElement>}
  */
 const ANCESTRY_CACHE = [];
@@ -481,9 +482,6 @@ export class LayoutElement {
      * @private {number}
      */
     this.scrollTop_ = 0;
-
-    /**
-     *
 
     /**
      * The child LayoutElements of this layer. Only a layer (which means it
@@ -977,6 +975,7 @@ export class LayoutElement {
     // Gather, and update whether the layers are descendants of the active
     // layer.
     let isActive = activeLayer === this || activeLayer.contains(this);
+    dev().assert(ANCESTRY_CACHE.length === 0, 'ancestry cache must be empty');
 
     let layer = this;
     while (layer) {
