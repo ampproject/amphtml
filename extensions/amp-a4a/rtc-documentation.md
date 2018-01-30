@@ -31,7 +31,7 @@ In both cases, the results of these call-outs will be passed to the Fast Fetch i
 
 * **RTC Endpoint:** A URL that will respond with RTC targeting information.
 
-* **Vendor URL:** A vendor URL is simply an RTC endpoint that belongs to a third-party company that is registered within amp-a4a/0.1/callout-vendors.js. By a vendor registering themselves within callout-vendors.js, a publisher that then wants to send RTC requests to that vendor need only specify the vendor by name in their RTC Config. 
+* **Vendor URL:** A vendor URL is simply an RTC endpoint that belongs to a third-party company that is registered within amp-a4a/0.1/callout-vendors.js. A publisher may send RTC requests to a vendor registered in that file by simply specifying the vendor's name in their RTC Config.
 
 * **Custom URL:** A 'custom URL' as used in RTC documentation means an RTC endpoint URL that is not registered within callout-vendors.js. For instance, if MyFirstPartyPublisher.com wanted to use RTC to make requests to their own targeting server, they would not register themselves within callout-vendors.js as other publishers would not need to use them. Thus, their RTC endpoint is referred to as a 'custom URL'.
 
