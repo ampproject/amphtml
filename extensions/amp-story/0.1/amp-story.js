@@ -140,7 +140,32 @@ const LANDSCAPE_ORIENTATION_WARNING = [
           },
           {
             tag: 'div',
-            text: 'The page is best viewed in Portrait mode.',
+            text: 'The page is best viewed in portrait mode',
+          },
+        ],
+      },
+    ],
+  },
+];
+
+
+const UNSUPPORTED_BROWSER_WARNING = [
+  {
+    tag: 'div',
+    attrs: dict({'class': 'i-amphtml-story-unsupported-browser-overlay'}),
+    children: [
+      {
+        tag: 'div',
+        attrs: dict({'class': 'i-amphtml-overlay-container'}),
+        children: [
+          {
+            tag: 'div',
+            attrs: dict({'class': 'i-amphtml-gear-icon'}),
+          },
+          {
+            tag: 'div',
+            text: 'We\'re sorry, it looks like your browser doesn\'t support ' +
+                'this experience',
           },
         ],
       },
@@ -250,12 +275,6 @@ export class AmpStory extends AMP.BaseElement {
   buildCallback() {
     this.assertAmpStoryExperiment_();
 
-    if (this.isDesktop_()) {
-      this.element.setAttribute('desktop','');
-    }
-
-    this.element.querySelector('amp-story-page').setAttribute('active', '');
-
     if (this.element.hasAttribute(AMP_STORY_STANDALONE_ATTRIBUTE)) {
       const html = this.win.document.documentElement;
       this.mutateElement(() => {
@@ -284,6 +303,7 @@ export class AmpStory extends AMP.BaseElement {
     registerServiceBuilder(this.win, 'story-variable',
         () => this.variableService_);
 
+    this.buildUnsupportedBrowserOverlay_();
     this.buildLandscapeOrientationOverlay_();
   }
 
@@ -891,6 +911,22 @@ export class AmpStory extends AMP.BaseElement {
         renderSimpleTemplate(this.win.document, LANDSCAPE_ORIENTATION_WARNING),
         this.element.firstChild);
   }
+
+
+  /**
+   * Build overlay for Landscape mode mobile
+   */
+  buildUnsupportedBrowserOverlay_() {
+    if (!this.win.CSS.supports('display', 'grid')) {
+      return;
+    }
+
+    this.element.insertBefore(
+        renderSimpleTemplate(this.win.document, UNSUPPORTED_BROWSER_WARNING),
+        this.element.firstChild);
+  }
+
+
   /**
    * Get the URL of the given page's background resource.
    * @param {!Element} pageElement
