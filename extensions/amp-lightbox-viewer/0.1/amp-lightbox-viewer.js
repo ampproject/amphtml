@@ -60,7 +60,7 @@ const SWIPE_TO_CLOSE_THRESHOLD = 10;
 const ENTER_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
 const EXIT_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
 const MAX_TRANSITION_DURATION = 1000; // ms
-const MIN_TRANSITION_DURATION = 300; // ms
+const MIN_TRANSITION_DURATION = 500; // ms
 const MAX_DISTANCE_APPROXIMATION = 250; // px
 const MOTION_DURATION_RATIO = 0.8; // fraction of animation
 const EPSILON = 0.01; // precision for approx equals
@@ -771,6 +771,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
         anim.add(0.9, tr.setStyles(transLayer, {
           opacity: tr.numeric(1, 0.01),
         }), 0.1, EXIT_CURVE_);
+      } else {
+        st.setStyles(dev().assertElement(this.carousel_), {opacity: ''});
       }
     }).then(() => {
       return anim.start(duration).thenAlways(() => {
