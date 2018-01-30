@@ -82,6 +82,9 @@ class AmpYoutube extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
+    /** @private {?Object} Info object about video returned by YouTube API*/
+    this.info_ = null;
+
     /** @private {?string} */
     this.videoIframeSrc_ = null;
 
@@ -371,6 +374,11 @@ class AmpYoutube extends AMP.BaseElement {
         const evt = this.muted_ ? VideoEvents.MUTED : VideoEvents.UNMUTED;
         this.element.dispatchCustomEvent(evt);
       }
+    } else if (data['event'] == 'initialDelivery' && data['info']) {
+      this.info_ = data['info'];
+    } else if (data['event'] == 'infoDelivery' && data['info'] &&
+        data['info']['currentTime'] !== undefined) {
+      this.info_.currentTime = data['info']['currentTime'];
     }
   }
 
@@ -534,12 +542,17 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   getCurrentTime() {
-    // Not supported.
+    if (this.info_) {
+      return this.info_.currentTime;
+    }
     return 0;
   }
 
   /** @override */
   getDuration() {
+    if (this.info_) {
+      return this.info_.duration;
+    }
     // Not supported.
     return 1;
   }
