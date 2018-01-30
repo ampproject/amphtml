@@ -163,6 +163,7 @@ export class Expander {
           const binding = stack.pop();
           const nextArg = nextArgShouldBeRaw ? builder : builder.trim();
           results.push(nextArg);
+          nextArgShouldBeRaw = false;
           const value = this.evaluateBinding_(binding, results);
           return value;
         }
