@@ -100,7 +100,6 @@ declareExtension('amp-font', '0.1', false);
 declareExtension('amp-form', '0.1', true);
 declareExtension('amp-fx-collection', '0.1', false);
 declareExtension('amp-fx-flying-carpet', '0.1', true);
-declareExtension('amp-fx-parallax', '0.1', false);
 declareExtension('amp-gfycat', '0.1', false);
 declareExtension('amp-gist', '0.1', false);
 declareExtension('amp-gwd-animation', '0.1', true);

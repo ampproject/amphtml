@@ -202,8 +202,6 @@ exports.rules = [
           'src/service/video-manager-impl.js',
       'extensions/amp-wistia-player/0.1/amp-wistia-player.js->' +
           'src/service/video-manager-impl.js',
-      'extensions/amp-fx-parallax/0.1/amp-fx-parallax.js->' +
-          'src/service/parallax-impl.js',
       'extensions/amp-analytics/0.1/iframe-transport.js->' +
           'src/service/extension-location.js',
       'extensions/amp-analytics/0.1/iframe-transport.js->' +
