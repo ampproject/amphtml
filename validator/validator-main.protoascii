@@ -3890,6 +3890,12 @@ attr_lists: {
       also_requires_attr: "validation-for"
     }
   }
+  # amp-fx-collection specific attributes, see
+  # https://www.ampproject.org/docs/reference/components/amp-fx-collection
+  attrs: {
+    name: "amp-fx"
+    value_regex_casei: "parallax"
+  }
   # <amp-bind>
   attrs: { name: "[aria-activedescendant]" }
   attrs: { name: "[aria-atomic]" }
