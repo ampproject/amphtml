@@ -20,6 +20,9 @@ import {getMode} from '../../../src/mode';
 import {urls} from '../../../src/config';
 import {parseUrl} from '../../../src/url';
 import {LRUCache} from '../../../src/utils/lru-cache';
+import {isArray} from '../../../src/types';
+import {createElementWithAttributes} from '../../../src/dom';
+import {dict} from '../../../src/utils/object';
 
 /** @private {!Object<string, string|boolean>} */
 const TEMPLATE_CORS_CONFIG = {
@@ -76,6 +79,35 @@ export class AmpAdTemplates {
   render(templateValues, element) {
     return Services.templatesFor(this.win_)
         .findAndRenderTemplate(element, templateValues);
+  }
+
+  /**
+   * @param {!Element} element
+   * @param {!Array|!JsonObject} analyticsValue
+   */
+  insertAnalytics(element, analyticsValue) {
+    analyticsValue = /**@type {!Array}*/
+        (isArray(analyticsValue) ? analyticsValue : [analyticsValue]);
+    for (let i = 0; i < analyticsValue.length; i++) {
+      const config = analyticsValue[i];
+      const analyticsEle = element.ownerDocument.createElement('amp-analytics');
+      if (config['remote']) {
+        analyticsEle.setAttribute('config', config['remote']);
+      }
+      if (config['type']) {
+        analyticsEle.setAttribute('type', config['type']);
+      }
+      if (config['inline']) {
+        const scriptElem = createElementWithAttributes(
+            element.ownerDocument,
+            'script', dict({
+              'type': 'application/json',
+            }));
+        scriptElem.textContent = JSON.stringify(config['inline']);
+        analyticsEle.appendChild(scriptElem);
+      }
+      element.appendChild(analyticsEle);
+    }
   }
 
   /**
