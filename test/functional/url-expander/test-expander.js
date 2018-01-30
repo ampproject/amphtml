@@ -174,6 +174,24 @@ describes.realWin('Expander', {
       return expect(expander.expand('TRIM(FAKE(aaaaa))', mockBindings))
           .to.eventually.equal('');
     });
+
+    it('ignores commas within backticks', () => {
+      const url = 'CONCAT(`he,llo`,UPPERCASE(world)';
+      return expect(expander.expand(url, mockBindings))
+          .to.eventually.equal('he,lloWORLD');
+    });
+
+    it('ignores left parentheses within backticks', () => {
+      const url = 'CONCAT(hello, `wo((rld`)';
+      return expect(expander.expand(url, mockBindings))
+          .to.eventually.equal('hellowo((rld');
+    });
+
+    it('ignores right parentheses within backticks', () => {
+      const url = 'CONCAT(`hello)`,UPPERCASE(world)';
+      return expect(expander.expand(url, mockBindings))
+          .to.eventually.equal('hello)WORLD');
+    });
   });
 });
 
