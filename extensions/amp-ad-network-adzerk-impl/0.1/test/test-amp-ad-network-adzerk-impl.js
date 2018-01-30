@@ -137,4 +137,87 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
           });
     });
   });
+
+  describe('#getAmpAdMetadata', () => {
+    let template;
+
+    beforeEach(() => {
+      template = `<!doctype html><html ⚡><head>
+          <script async src="https://cdn.ampproject.org/v0.js"></script>
+          <script async custom-template="amp-mustache"
+            src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+          </head>
+          <body>
+            <template type="amp-mustache">
+            <p>{{foo}}</p>
+            </template>
+          </body></html>`;
+      fetchTextMock.withArgs(
+          'https://www-adzerk-com.cdn.ampproject.org/c/s/www.adzerk.com/456',
+          {
+            mode: 'cors',
+            method: 'GET',
+            ampCors: false,
+            credentials: 'omit',
+          }).returns(Promise.resolve(
+          {
+            headers: {},
+            text: () => template,
+          }));
+    });
+
+    it('should auto add amp-analytics if required', () => {
+      const adResponseBody = {
+        templateUrl: 'https://www.adzerk.com/456',
+        analytics: {'type': 'googleanalytics'},
+      };
+      return impl.maybeValidateAmpCreative(
+          utf8Encode(JSON.stringify(adResponseBody)).buffer,
+          {
+            get: name => {
+              expect(name).to.equal(AMP_TEMPLATED_CREATIVE_HEADER_NAME);
+              return 'amp-mustache';
+            },
+          },
+          () => {})
+          .then(buffer => utf8Decode(buffer))
+          .then(creative => {
+            expect(impl.getAmpAdMetadata()).to.jsonEqual({
+              minifiedCreative: creative,
+              customElementExtensions: ['amp-analytics'],
+              extensions: [],
+            });
+            // Won't insert duplicate
+            expect(impl.getAmpAdMetadata()).to.jsonEqual({
+              minifiedCreative: creative,
+              customElementExtensions: ['amp-analytics'],
+              extensions: [],
+            });
+          });
+    });
+
+    it('should not add amp-analytics if not', () => {
+      const adResponseBody = {
+        templateUrl: 'https://www.adzerk.com/456',
+        analytics: undefined,
+      };
+      return impl.maybeValidateAmpCreative(
+          utf8Encode(JSON.stringify(adResponseBody)).buffer,
+          {
+            get: name => {
+              expect(name).to.equal(AMP_TEMPLATED_CREATIVE_HEADER_NAME);
+              return 'amp-mustache';
+            },
+          },
+          () => {})
+          .then(buffer => utf8Decode(buffer))
+          .then(creative => {
+            expect(impl.getAmpAdMetadata()).to.jsonEqual({
+              minifiedCreative: creative,
+              customElementExtensions: [],
+              extensions: [],
+            });
+          });
+    });
+  });
 });

@@ -66,6 +66,10 @@ describes.fakeWin('amp-ad-templates', {amp: true}, env => {
 
   it('should render a template with correct values', () => {
     win.AMP.registerTemplate('amp-mustache', AmpMustache);
+  });
+
+  it('should render a template with correct values', () => {
+    win.AMP.registerTemplate('amp-mustache', AmpMustache);
     const parentDiv = doc.createElement('div');
     parentDiv./*OK*/innerHTML =
         '<template type="amp-mustache"><p>{{foo}}</p></template>';
@@ -76,5 +80,26 @@ describes.fakeWin('amp-ad-templates', {amp: true}, env => {
     });
   });
 
+  it('should insert analytics component', () => {
+    const parentDiv = doc.createElement('div');
+    parentDiv./*OK*/innerHTML =
+        '<p>123</p>';
+    doc.body.appendChild(parentDiv);
+    const analytics = [{
+      'remote': 'remoteUrl',
+      'inline': {
+        'requests': 'r',
+      },
+    }, {
+      'type': 'googleanalytics',
+    }];
+    ampAdTemplates.insertAnalytics(parentDiv, analytics);
+    expect(parentDiv.childNodes.length).to.equal(3);
+    expect(parentDiv.innerHTML).to.equal('<p>123</p>' +
+        '<amp-analytics config="remoteUrl">' +
+        '<script type="application/json">{"requests":"r"}</script>' +
+        '</amp-analytics>' +
+        '<amp-analytics type="googleanalytics"></amp-analytics>');
+  });
 });
 
