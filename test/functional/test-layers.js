@@ -45,7 +45,7 @@ describes.realWin('Layers', {amp: false}, env => {
     element.scrollTop = top;
     element.scrollLeft = left;
     const layout = LayoutElement.for(element);
-    layout.requestScrollRemeasure();
+    layout.dirtyScrollMeasurements();
   }
 
   describe('LayoutElement', () => {
@@ -123,14 +123,14 @@ describes.realWin('Layers', {amp: false}, env => {
         });
 
         div.style.top = '10px';
-        rootLayout.remeasure();
+        rootLayout.dirtyMeasurements();
         expect(layout.getScrolledPosition()).to.deep.equal({
           left: 0,
           top: 10,
         });
 
         div.style.left = '10px';
-        rootLayout.remeasure();
+        rootLayout.dirtyMeasurements();
         expect(layout.getScrolledPosition()).to.deep.equal({
           left: 10,
           top: 10,
@@ -144,14 +144,14 @@ describes.realWin('Layers', {amp: false}, env => {
         });
 
         parent.style.top = '10px';
-        rootLayout.remeasure();
+        rootLayout.dirtyMeasurements();
         expect(layout.getScrolledPosition()).to.deep.equal({
           left: 0,
           top: 10,
         });
 
         parent.style.left = '10px';
-        rootLayout.remeasure();
+        rootLayout.dirtyMeasurements();
         expect(layout.getScrolledPosition()).to.deep.equal({
           left: 10,
           top: 10,
@@ -166,7 +166,7 @@ describes.realWin('Layers', {amp: false}, env => {
 
         parent.style.top = '10px';
         div.style.left = '10px';
-        rootLayout.remeasure();
+        rootLayout.dirtyMeasurements();
         expect(layout.getScrolledPosition()).to.deep.equal({
           left: 10,
           top: 10,
@@ -174,7 +174,7 @@ describes.realWin('Layers', {amp: false}, env => {
 
         parent.style.left = '10px';
         div.style.top = '10px';
-        rootLayout.remeasure();
+        rootLayout.dirtyMeasurements();
         expect(layout.getScrolledPosition()).to.deep.equal({
           left: 20,
           top: 20,
@@ -188,7 +188,7 @@ describes.realWin('Layers', {amp: false}, env => {
           left: 0,
           top: 0,
         });
-        rootLayout.remeasure();
+        rootLayout.dirtyMeasurements();
         expect(parentLayout.getScrolledPosition()).to.deep.equal({
           left: 0,
           top: 0,
@@ -200,7 +200,7 @@ describes.realWin('Layers', {amp: false}, env => {
           left: 0,
           top: 0,
         });
-        rootLayout.remeasure();
+        rootLayout.dirtyMeasurements();
         expect(rootLayout.getScrolledPosition()).to.deep.equal({
           left: 0,
           top: 0,
@@ -214,7 +214,7 @@ describes.realWin('Layers', {amp: false}, env => {
           left: -5,
           top: -10,
         });
-        rootLayout.remeasure();
+        rootLayout.dirtyMeasurements();
         expect(layout.getScrolledPosition()).to.deep.equal({
           left: -5,
           top: -10,
@@ -226,7 +226,7 @@ describes.realWin('Layers', {amp: false}, env => {
           left: -10,
           top: -20,
         });
-        rootLayout.remeasure();
+        rootLayout.dirtyMeasurements();
         expect(layout.getScrolledPosition()).to.deep.equal({
           left: -10,
           top: -20,
@@ -274,14 +274,14 @@ describes.realWin('Layers', {amp: false}, env => {
         });
 
         div.style.top = '10px';
-        rootLayout.remeasure();
+        rootLayout.dirtyMeasurements();
         expect(layout.getOffsetPosition()).to.deep.equal({
           left: 0,
           top: 10,
         });
 
         div.style.left = '10px';
-        rootLayout.remeasure();
+        rootLayout.dirtyMeasurements();
         expect(layout.getOffsetPosition()).to.deep.equal({
           left: 10,
           top: 10,
@@ -295,14 +295,14 @@ describes.realWin('Layers', {amp: false}, env => {
         });
 
         parent.style.top = '10px';
-        rootLayout.remeasure();
+        rootLayout.dirtyMeasurements();
         expect(layout.getOffsetPosition()).to.deep.equal({
           left: 0,
           top: 10,
         });
 
         parent.style.left = '10px';
-        rootLayout.remeasure();
+        rootLayout.dirtyMeasurements();
         expect(layout.getOffsetPosition()).to.deep.equal({
           left: 10,
           top: 10,
@@ -317,7 +317,7 @@ describes.realWin('Layers', {amp: false}, env => {
 
         parent.style.top = '10px';
         div.style.left = '10px';
-        rootLayout.remeasure();
+        rootLayout.dirtyMeasurements();
         expect(layout.getOffsetPosition()).to.deep.equal({
           left: 10,
           top: 10,
@@ -325,7 +325,7 @@ describes.realWin('Layers', {amp: false}, env => {
 
         parent.style.left = '10px';
         div.style.top = '10px';
-        rootLayout.remeasure();
+        rootLayout.dirtyMeasurements();
         expect(layout.getOffsetPosition()).to.deep.equal({
           left: 20,
           top: 20,
@@ -339,7 +339,7 @@ describes.realWin('Layers', {amp: false}, env => {
           left: 0,
           top: 0,
         });
-        rootLayout.remeasure();
+        rootLayout.dirtyMeasurements();
         expect(parentLayout.getOffsetPosition()).to.deep.equal({
           left: 0,
           top: 0,
@@ -351,7 +351,7 @@ describes.realWin('Layers', {amp: false}, env => {
           left: 0,
           top: 0,
         });
-        rootLayout.remeasure();
+        rootLayout.dirtyMeasurements();
         expect(rootLayout.getOffsetPosition()).to.deep.equal({
           left: 0,
           top: 0,
@@ -365,7 +365,7 @@ describes.realWin('Layers', {amp: false}, env => {
           left: 0,
           top: 0,
         });
-        rootLayout.remeasure();
+        rootLayout.dirtyMeasurements();
         expect(layout.getOffsetPosition()).to.deep.equal({
           left: 0,
           top: 0,
@@ -377,7 +377,7 @@ describes.realWin('Layers', {amp: false}, env => {
           left: 0,
           top: 0,
         });
-        rootLayout.remeasure();
+        rootLayout.dirtyMeasurements();
         expect(layout.getOffsetPosition()).to.deep.equal({
           left: 0,
           top: 0,
