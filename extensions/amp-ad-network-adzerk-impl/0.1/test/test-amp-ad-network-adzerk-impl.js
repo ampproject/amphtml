@@ -142,29 +142,16 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
     let template;
 
     beforeEach(() => {
-      template = '<!doctype html><html ⚡4ads><head>' +
-          '<meta charset="utf-8">' +
-          '<meta name="viewport" content="width=device-width, ' +
-          'minimum-scale=1"><style amp4ads-boilerplate>body{visibility:' +
-          'hidden}</style><style amp-custom>amp-fit-text: {border: 1px;}' +
-          '</style><script async src="https://cdn.ampproject.org/' +
-          'amp4ads-v0.js"></script><script async custom-element=' +
-          '"amp-fit-text" src="https://cdn.ampproject.org/v0/' +
-          'amp-fit-text-0.1.js"></script><link rel="stylesheet" ' +
-          'type="text/css" href="https://fonts.googleapis.com/css?' +
-          'family=Raleway"></head><body>' +
-          '<amp-fit-text width="300" height="200" ' +
-          '[text]="\'hello \' + USER_NAME + \'!\' + USER_NUM ">' +
-          '</amp-fit-text><p [text]="\'Expect encoding \' + HTML_CONTENT">' +
-          '</p><amp-img [src]="IMG_SRC" [srcset]="IMG_SRC"/>' +
-          '<p [text]="\'Missing \' + UNKNOWN + \' item\'"></p>' +
-          '<script amp-ad-metadata type=application/json>' +
-          '{ "ampRuntimeUtf16CharOffsets" : [ 235, 414 ], ' +
-          '"customElementExtensions": [ "amp-bind" ], ' +
-          '"extensions": [ { ' +
-          '"custom-element": "amp-bind",' +
-          '"src": "https://cdn.ampproject.org/v0/amp-fit-text-0.1.js" } ] }' +
-          '</script></body></html>';
+      template = `<!doctype html><html ⚡><head>
+          <script async src="https://cdn.ampproject.org/v0.js"></script>
+          <script async custom-template="amp-mustache"
+            src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+          </head>
+          <body>
+            <template type="amp-mustache">
+            <p>{{foo}}</p>
+            </template>
+          </body></html>`;
       fetchTextMock.withArgs(
           'https://www-adzerk-com.cdn.ampproject.org/c/s/www.adzerk.com/456',
           {
@@ -197,12 +184,14 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
           .then(creative => {
             expect(impl.getAmpAdMetadata()).to.jsonEqual({
               minifiedCreative: creative,
-              customElementExtensions: ['amp-bind', 'amp-analytics'],
+              customElementExtensions: ['amp-analytics'],
+              extensions: [],
             });
             // Won't insert duplicate
             expect(impl.getAmpAdMetadata()).to.jsonEqual({
               minifiedCreative: creative,
-              customElementExtensions: ['amp-bind', 'amp-analytics'],
+              customElementExtensions: ['amp-analytics'],
+              extensions: [],
             });
           });
     });
@@ -225,7 +214,8 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
           .then(creative => {
             expect(impl.getAmpAdMetadata()).to.jsonEqual({
               minifiedCreative: creative,
-              customElementExtensions: ['amp-bind'],
+              customElementExtensions: [],
+              extensions: [],
             });
           });
     });
