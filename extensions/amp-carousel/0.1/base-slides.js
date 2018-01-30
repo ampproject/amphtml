@@ -15,7 +15,6 @@
  */
 
 import {Services} from '../../../src/services';
-import {setStyle} from '../../../src/style';
 import {BaseCarousel} from './base-carousel';
 
 export class BaseSlides extends BaseCarousel {
@@ -32,9 +31,6 @@ export class BaseSlides extends BaseCarousel {
 
     /** @private {boolean} */
     this.hasAutoplay_ = false;
-
-    /** @private {?Element} */
-    this.autoPlayButton_ = null;
 
     /** @private {number} */
     this.autoplayDelay_ = 5000;
@@ -59,7 +55,6 @@ export class BaseSlides extends BaseCarousel {
     this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
 
     if (this.shouldAutoplay_) {
-      this.setupAutoplayButton_();
       this.setupAutoplay_();
     }
   }
@@ -115,31 +110,6 @@ export class BaseSlides extends BaseCarousel {
   }
 
   /**
-  * Adds the pause button to the carousel
-  * @private
-  */
-  setupAutoplayButton_() {
-    // Set up the autoplay start/stop button
-    this.autoPlayButton_ = this.element.ownerDocument.createElement('div');
-    this.autoPlayButton_.classList.add('amp-carousel-button');
-    this.autoPlayButton_.classList.add('amp-carousel-button-autoplay');
-    this.autoPlayButton_.setAttribute('role', 'button');
-    if (this.element.hasAttribute('data-autoPlay-button-aria-label')) {
-      this.autoPlayButton_.setAttribute('aria-label',
-          this.element.getAttribute('data-autoPlay-button-aria-label'));
-    } else {
-      this.autoPlayButton_.setAttribute('aria-label',
-          'autoPlay item in carousel');
-    }
-    this.autoPlayButton_.setAttribute('tabindex', 0);
-    this.autoPlayButton_.onclick = () => {
-      this.interactionAutoPlay();
-    };
-    this.element.appendChild(this.autoPlayButton_);
-  }
-
-
-  /**
   * Sets up the `autoplay` configuration.
   * @private
   */
@@ -180,26 +150,20 @@ export class BaseSlides extends BaseCarousel {
   /**
    * Called on user interaction to play/pause the autoplay feature.
    */
-  interactionAutoPlay() {
+  toggleAutoPlay() {
     // Set the autoPlay status to the opposite
     this.hasAutoplay_ = !this.hasAutoplay_;
 
     this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
 
     //Change the button as well
-    if (this.autoPlayButton_) {
-      if (this.hasAutoplay_) {
-        // Set the button to be pause
-        setStyle(this.autoPlayButton_, 'background-image', 'url(\'https://i.imgur.com/LgmfKda.png\')'); /* find an svg version of the logo */
-        this.autoplayTimeoutId_ = Services.timerFor(this.win).delay(
-            this.go.bind(
-                this, /* dir */ 1, /* animate */ true, /* autoplay */ true),
-            this.autoplayDelay_);
-      } else {
-        // Set the button to be play
-        setStyle(this.autoPlayButton_, 'background-image', 'url(\'https://i.imgur.com/Lj57czy.png\')'); /* find an svg version of the logo */
-        Services.timerFor(this.win).cancel(this.autoplayTimeoutId_);
-      }
+    if (this.hasAutoplay_) {
+      this.autoplayTimeoutId_ = Services.timerFor(this.win).delay(
+          this.go.bind(
+              this, /* dir */ 1, /* animate */ true, /* autoplay */ true),
+          this.autoplayDelay_);
+    } else {
+      Services.timerFor(this.win).cancel(this.autoplayTimeoutId_);
     }
   }
 
