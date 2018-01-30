@@ -163,6 +163,10 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
         this.creativeMetadata_['customElementExtensions'].push('amp-analytics');
       }
     }
+    if (this.creativeMetadata_['customElementExtensions']
+        .indexOf('amp-mustache') < 0) {
+      this.creativeMetadata_['customElementExtensions'].push('amp-mustache');
+    }
     return /**@type {?CreativeMetaDataDef}*/(this.creativeMetadata_);
   }
 
