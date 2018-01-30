@@ -98,6 +98,23 @@ function defaultMacro(value, defaultValue) {
   return value;
 }
 
+/**
+ * @param {string} string input to be replaced
+ * @param {string} matchPattern string representation of regex pattern
+ * @param {string=} opt_newSubStr pattern to be substituted in
+ * @returns {string}
+ */
+function replaceMacro(string, matchPattern, opt_newSubStr) {
+  if (!matchPattern) {
+    user().warn(TAG, 'REPLACE macro must have two or more arguments');
+  }
+  if (!opt_newSubStr) {
+    opt_newSubStr = '';
+  }
+  const regex = new RegExp(matchPattern, 'g');
+  return string.replace(regex, opt_newSubStr);
+}
+
 
 /**
  * Provides support for processing of advanced variable syntax like nested
@@ -126,6 +143,7 @@ export class VariableService {
     this.register_('HASH', this.hashMacro_.bind(this));
     this.register_('IF',
         (value, thenValue, elseValue) => value ? thenValue : elseValue);
+    this.register_('REPLACE', replaceMacro);
   }
 
   /**
