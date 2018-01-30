@@ -85,7 +85,7 @@ const DOCK_CLASS = 'i-amphtml-dockable-video-minimizing';
 const DOCK_MARGIN = 20;
 
 /**
- * @const {number} Amount by which the velocity decreseases every frame
+ * @const {number} Amount by which the velocity depamp-gwdcreseases every frame
  */
 const FRICTION_COEFF = 0.55;
 
@@ -191,8 +191,14 @@ export class VideoManager {
     this.timer_.delay(this.boundSecondsPlaying_, SECONDS_PLAYED_MIN_DELAY);
   }
 
+  /**
+   * Triggers a LOW-TRUST timeupdate event consumable by AMP actions.
+   * Frequency of this event is controlled by SECONDS_PLAYED_MIN_DELAY and is
+   * every 1 second for now.
+   * @private
+   */
   timeUpdateActionEvent_(entry) {
-    const name = 'time-update';
+    const name = 'timeupdate';
     const currentTime = entry.video.getCurrentTime();
     if (isFiniteNumber(currentTime)) {
       const perc = currentTime / entry.video.getDuration();
@@ -245,18 +251,6 @@ export class VideoManager {
     video.registerAction('unmute', video.unmute.bind(video), ActionTrust.LOW);
     video.registerAction('fullscreen', video.fullscreenEnter.bind(video),
         ActionTrust.LOW);
-    video.registerAction('seekTo', invocation => {
-      // time based seek
-      const time = parseFloat(invocation.args && invocation.args['time']);
-      if (isFiniteNumber(time)) {
-        video.seekTo(time);
-      }
-      // percent based seek
-      const percent = parseFloat(invocation.args && invocation.args['percent']);
-      if (isFiniteNumber(percent)) {
-        video.seekToPercent(percent);
-      }
-    }, ActionTrust.LOW);
   }
 
   /**

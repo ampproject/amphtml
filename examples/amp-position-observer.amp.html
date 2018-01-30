@@ -8,8 +8,6 @@
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
   <script async custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js"></script>
-  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
-
   <style amp-custom>
     main {
       font-family: Helvetica, sans-serif;
@@ -132,14 +130,12 @@
     </div>
 
     <div class="spacer"></div>
-    <h2>Seek video via scroll</h2>
-    <h3>Similar to animations, videos can be seeked via scroll as well</h3>
+    <h2>Custom visibility end with amp-position-observer and amp-video</h2>
+    <h3>If played, the following video will pause when 20% invisible</h3>
     <div>
       <amp-position-observer
-        intersection-ratios="1"
-        on="scroll:myVideo.seekTo(percent=event.percent),myYouTube.seekTo(percent=event.percent);
-        enter:myVideo.play,myYouTube.play;
-        exit:myVideo.pause,myYouTube.pause;"
+        intersection-ratios="0.8"
+        on="exit:myVideo.pause"
         layout="nodisplay">
       </amp-position-observer>
 
@@ -153,16 +149,8 @@
         width="720"
         height="405"
         layout="responsive"
-        preload="metadata"
         controls>
     </amp-video>
-    <amp-youtube
-        id="myYouTube"
-        data-videoid="lBTCB7yLs8Y"
-        width="358"
-        height="204"
-        layout="responsive">
-    </amp-youtube>
     </div>
 
     <div class="spacer"></div>

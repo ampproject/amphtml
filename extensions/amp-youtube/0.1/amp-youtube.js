@@ -82,6 +82,9 @@ class AmpYoutube extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
+    /** @private {?Object} Info object about video returned by YouTube API*/
+    this.info_ = null;
+
     /** @private {?string} */
     this.videoIframeSrc_ = null;
 
@@ -90,11 +93,6 @@ class AmpYoutube extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.playerReadyResolver_ = null;
-
-    /** @private @const {Promise} */
-    this.loadedMetadataPromise_ = new Promise(resolve => {
-      this.loadedMetadataResolver_ = resolve;
-    });
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
@@ -377,11 +375,10 @@ class AmpYoutube extends AMP.BaseElement {
         this.element.dispatchCustomEvent(evt);
       }
     } else if (data['event'] == 'initialDelivery' && data['info']) {
-      this.loadedMetadataResolver_();
-      this.metadata_ = data['info'];
+      this.info_ = data['info'];
     } else if (data['event'] == 'infoDelivery' && data['info'] &&
         data['info']['currentTime'] !== undefined) {
-      this.metadata_.currentTime = data['info']['currentTime'];
+      this.info_.currentTime = data['info']['currentTime'];
     }
   }
 
@@ -503,16 +500,6 @@ class AmpYoutube extends AMP.BaseElement {
     // Not supported.
   }
 
-  seekTo(time) {
-    this.sendCommand_('seekTo', [time, true]);
-  }
-
-  seekToPercent(percent) {
-    this.loadedMetadataPromise_.then(() => {
-      this.seekTo(percent * this.getDuration());
-    });
-  }
-
   /**
    * @override
    */
@@ -555,16 +542,16 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   getCurrentTime() {
-    if (this.metadata_) {
-      return this.metadata_.currentTime;
+    if (this.info_) {
+      return this.info_.currentTime;
     }
     return 0;
   }
 
   /** @override */
   getDuration() {
-    if (this.metadata_) {
-      return this.metadata_.duration;
+    if (this.info_) {
+      return this.info_.duration;
     }
     // Not supported.
     return 1;

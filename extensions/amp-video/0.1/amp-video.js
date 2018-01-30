@@ -96,11 +96,6 @@ class AmpVideo extends AMP.BaseElement {
 
     /** @private @const {boolean} */
     this.storySupportsHls_ = !isExperimentOn(this.win, 'disable-amp-story-hls');
-
-    /** @private @const {Promise} */
-    this.metaDataLoadedPromise_ = new Promise(resolve => {
-      this.loadedMetadataResolver_ = resolve;
-    });
   }
 
   /**
@@ -450,10 +445,6 @@ class AmpVideo extends AMP.BaseElement {
         this.element.dispatchCustomEvent(evt);
       }
     }));
-
-    this.unlisteners_.push(listen(video, 'loadedmetadata', () => {
-      this.loadedMetadataResolver_();
-    }));
   }
 
   /** @private */
@@ -555,16 +546,6 @@ class AmpVideo extends AMP.BaseElement {
    */
   hideControls() {
     this.video_.controls = false;
-  }
-
-  seekTo(time) {
-    this.video_.currentTime = time;
-  }
-
-  seekToPercent(percent) {
-    this.metaDataLoadedPromise_.then(() => {
-      this.seekTo(percent * this.getDuration());
-    });
   }
 
   /**
