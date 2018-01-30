@@ -31,6 +31,7 @@ tags: {  # <amp-list>
   tag_name: "AMP-LIST"
   requires_extension: "amp-list"
   attrs: { name: "credentials" }
+  attrs: { name: "filter" }
   attrs: { name: "items" }
   attrs: { name: "max-items" }
   attrs: { name: "single-item" }
@@ -47,6 +48,7 @@ tags: {  # <amp-list>
   # to reference the id of an existing template element.
   attrs: { name: "template" }
   # <amp-bind>
+  attrs: { name: "[filter]" }
   attrs: { name: "[src]" }
   attrs: { name: "[state]" }
   attr_lists: "extended-amp-global"

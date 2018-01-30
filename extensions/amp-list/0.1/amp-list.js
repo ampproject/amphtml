@@ -16,6 +16,7 @@
 
 import {AmpEvents} from '../../../src/amp-events';
 import {createCustomEvent} from '../../../src/event-helper';
+import {dict} from '../../../src/utils/object';
 import {fetchBatchedJsonFor} from '../../../src/batched-json';
 import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -50,6 +51,9 @@ export class AmpList extends AMP.BaseElement {
      * @private {boolean}
      */
     this.layoutCompleted_ = false;
+
+    /** @private {Array} */
+    this.items_ = null;
   }
 
   /** @override */
@@ -100,6 +104,7 @@ export class AmpList extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     const src = mutations['src'];
     const state = mutations['state'];
+    const filter = mutations['filter'];
 
     if (src !== undefined) {
       const typeOfSrc = typeof src;
@@ -119,7 +124,9 @@ export class AmpList extends AMP.BaseElement {
     } else if (state !== undefined) {
       const items = isArray(state) ? state : [state];
       this.renderItems_(items);
-      user().warn(TAG, '[state] is deprecated, please use [src] instead.');
+      user().error(TAG, '[state] is deprecated, please use [src] instead.');
+    } else if (filter !== undefined && this.items_) {
+      this.renderItems_(this.items_);
     }
   }
 
@@ -180,12 +187,40 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * @param {!Array} items
+   * @return {!Promise<!Array>}
+   * @private
+   */
+  filterItems_(items) {
+    const filter = this.element.getAttribute('filter');
+    if (filter) {
+      return Services.bindForDocOrNull(this.element).then(bind => {
+        if (bind) {
+          const expr = `items.filter(item => ${filter})`;
+          return bind.evaluateExpression(expr, dict({'items': items}));
+        } else {
+          user().error(TAG,
+              'amp-bind must be installed to use "filter" attribute.');
+        }
+      });
+    } else {
+      return Promise.resolve(items);
+    }
+  }
+
+  /**
+   * @param {!Array} items
    * @return {!Promise}
    * @private
    */
   renderItems_(items) {
-    return this.templates_.findAndRenderTemplateArray(this.element, items)
-        .then(elements => this.updateBindings_(elements))
+    this.items_ = items;
+
+    return this.filterItems_(items)
+        .then(filtered => {
+          return this.templates_.findAndRenderTemplateArray(
+              this.element, filtered);
+        })
+        .then(elements => this.computeBindings_(elements))
         .then(elements => this.rendered_(elements));
   }
 
@@ -194,7 +229,7 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise<!Array<!Element>>}
    * @private
    */
-  updateBindings_(elements) {
+  computeBindings_(elements) {
     const forwardElements = () => elements;
     return Services.bindForDocOrNull(this.element).then(bind => {
       if (bind) {
@@ -240,7 +275,6 @@ export class AmpList extends AMP.BaseElement {
     return fetchBatchedJsonFor(this.getAmpDoc(), this.element, itemsExpr);
   }
 }
-
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpList);

@@ -238,6 +238,7 @@ function createElementRules_() {
       },
     },
     'AMP-LIST': {
+      'filter': null,
       'src': {
         'allowedProtocols': {
           'https': true,

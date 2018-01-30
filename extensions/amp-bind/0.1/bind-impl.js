@@ -224,7 +224,7 @@ export class Bind {
    * @return {!Promise}
    */
   setStateWithExpression(expression, scope) {
-    this.setStatePromise_ = this.evaluateExpression_(expression, scope)
+    this.setStatePromise_ = this.evaluateExpression(expression, scope)
         .then(result => this.setState(result));
     return this.setStatePromise_;
   }
@@ -238,7 +238,7 @@ export class Bind {
    * @return {!Promise}
    */
   pushStateWithExpression(expression, scope) {
-    return this.evaluateExpression_(expression, scope).then(result => {
+    return this.evaluateExpression(expression, scope).then(result => {
       // Store the current values of each referenced variable in `expression`
       // so that we can restore them on history-pop.
       const oldState = map();
@@ -667,7 +667,7 @@ export class Bind {
    * @param {!JsonObject} scope
    * @return {!Promise<!JsonObject>}
    */
-  evaluateExpression_(expression, scope) {
+  evaluateExpression(expression, scope) {
     return this.initializePromise_.then(() => {
       // Allow expression to reference current state in addition to event state.
       Object.assign(scope, this.state_);

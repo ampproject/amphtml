@@ -349,7 +349,7 @@ sort([2, 1, 3])</pre>
 references the current state as well as zero or more arguments. Then, this `amp-bind-macro` can be called by its name from anywhere in your doc.
 
 ```html
-<amp-bind-macro name="circleArea" arguments="radius" expression="3.14 * radius * radius" />
+<amp-bind-macro id="circleArea" arguments="radius" expression="3.14 * radius * radius" />
 
 <div>
   The circle has an area of <span [text]="circleArea(myCircle.radius)">0</span>.
