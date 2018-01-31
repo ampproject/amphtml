@@ -98,7 +98,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
             </template>
           </body></html>`;
       fetchTextMock.withArgs(
-          'https://www-adzerk-com.cdn.ampproject.org/c/s/www.adzerk.com/456',
+          'https://www-adzerk-com.cdn.ampproject.org/ad/s/www.adzerk.com/456',
           {
             mode: 'cors',
             method: 'GET',
@@ -153,7 +153,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
             </template>
           </body></html>`;
       fetchTextMock.withArgs(
-          'https://www-adzerk-com.cdn.ampproject.org/c/s/www.adzerk.com/456',
+          'https://www-adzerk-com.cdn.ampproject.org/ad/s/www.adzerk.com/456',
           {
             mode: 'cors',
             method: 'GET',
