@@ -44,9 +44,9 @@ import {CommonSignals} from '../../../src/common-signals';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-image-viewer';
-
 const ARIA_ATTRIBUTES = ['aria-label', 'aria-describedby',
   'aria-labelledby'];
+const DEFAULT_MAX_SCALE = 2;
 
 export class AmpImageViewer extends AMP.BaseElement {
 
@@ -94,7 +94,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     /** @private {number} */
     this.minScale_ = 1;
     /** @private {number} */
-    this.maxScale_ = 2;
+    this.maxScale_ = DEFAULT_MAX_SCALE;
     /** @private {number} */
     this.startX_ = 0;
     /** @private {number} */
@@ -374,6 +374,14 @@ export class AmpImageViewer extends AMP.BaseElement {
         width: st.px(this.imageBox_.width),
         height: st.px(this.imageBox_.height),
       });
+
+      // Adjust max scale to at least fit the screen.
+      const elementBoxRatio = this.elementBox_.width / this.elementBox_.height;
+      const maxScale = Math.max(
+          elementBoxRatio / sourceAspectRatio,
+          sourceAspectRatio / elementBoxRatio
+      );
+      this.maxScale_ = Math.max(DEFAULT_MAX_SCALE, maxScale);
 
       // Reset zoom and pan.
       this.startScale_ = this.scale_ = 1;
