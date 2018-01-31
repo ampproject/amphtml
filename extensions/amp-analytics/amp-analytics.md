@@ -260,7 +260,7 @@ The `triggers` configuration object describes when an analytics request should b
   - `on` (required) The event to listen for. Valid values are `render-start`, `ini-load`, `click`, `scroll`, `timer`, `visible`, `hidden`, `user-error`, [`access-*`](../amp-access/amp-access-analytics.md), and [`video-*`](./amp-video-analytics.md)
   - `request` (required) Name of the request to send (as specified in the `requests` section).
   - `vars` An object containing key-value pairs used to override `vars` defined in the top level config, or to specify vars unique to this trigger.
-  - `immediate` can be specified to work with request that support batching behavior. Setting `immediate` to `true` can help to flush batched request queue with some certain trigger. In this case, it's possible to reduce the request pings number without losing important trigger events.
+  - `important` can be specified to work with request that support batching behavior. Setting `important` to `true` can help to flush batched request queue with some certain trigger. In this case, it's possible to reduce the request pings number without losing important trigger events.
   - `selector` and `selectionMethod` can be specified for some triggers, such as `click` and `visible`. See [Element selector](#element-selector) for details.
   - `scrollSpec` (required when `on` is set to `scroll`) This configuration is used in conjunction with the `scroll` trigger. Please see below for details.
   - `timerSpec` (required when `on` is set to `timer`) This configuration is used in conjunction with the `timer` trigger. Please see below for details.
