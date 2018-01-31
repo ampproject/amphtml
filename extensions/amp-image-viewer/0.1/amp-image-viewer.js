@@ -153,8 +153,7 @@ export class AmpImageViewer extends AMP.BaseElement {
 
               this.init_();
               this.element.appendChild(this.image_);
-              this.element.removeChild(this.sourceAmpImage_);
-              this.sourceAmpImage_ = null;
+              st.toggle(dev().assertElement(this.sourceAmpImage_), false);
             }
           });
         }).then(() => {
@@ -180,6 +179,7 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @override */
   resumeCallback() {
+    this.scheduleLayout(dev().assertElement(this.sourceAmpImage_));
     if (!this.loadPromise_) {
       return;
     }
