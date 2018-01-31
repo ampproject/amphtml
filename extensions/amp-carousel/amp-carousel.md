@@ -78,10 +78,6 @@ In the following example, we have a carousel of three images with preview button
 </amp-iframe>
 </div>
 
-### Adding toggle controls for autoplay
-
-Setting a method for the `on` attribute on an element to `tap:carousel-id.toggleAutoPlay(toggleOn=val)` will, on user tap or click, toggle the autoplay status for the carousel with the "carousel-id" ID.
-
 ## Attributes
 
 ##### type 

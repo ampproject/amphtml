@@ -56,14 +56,17 @@ export class BaseSlides extends BaseCarousel {
     this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
 
     if (this.shouldAutoplay_) {
-      this.registerAction('toggleAutoPlay', invocation => {
-        const args = invocation.args;
-        if (args) {
-          this.toggleAutoPlay(args['toggleOn']);
-        }
-      }, ActionTrust.HIGH);
       this.setupAutoplay_();
     }
+
+    this.registerAction('toggleAutoplay', invocation => {
+      const args = invocation.args;
+      if (args && args['toggleOn'] !== undefined) {
+        this.toggleAutoplay_(args['toggleOn']);
+      } else {
+        this.toggleAutoplay_(!this.hasAutoplay_);
+      }
+    }, ActionTrust.LOW);
   }
 
   buildSlides() {
@@ -155,21 +158,28 @@ export class BaseSlides extends BaseCarousel {
   }
 
   /**
-   * Called on user interaction to toggle the autoplay feature.
+   * Called by toggleAutoplay action to toggle the autoplay feature.
+   * @param {boolean} toggleOn
+   * @private
    */
-  toggleAutoPlay(toggleOn) {
-    // Set the autoPlay status to the opposite
-    this.hasAutoplay_ = toggleOn;
+  toggleAutoplay_(toggleOn) {
+    if (toggleOn == this.shouldAutoplay_) {
+      return;
+    }
 
+    const prevAutoplayStatus = this.shouldAutoplay_;
+
+    this.hasAutoplay_ = toggleOn;
     this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
 
-    if (this.hasAutoplay_) {
-      this.autoplayTimeoutId_ = Services.timerFor(this.win).delay(
-          this.go.bind(
-              this, /* dir */ 1, /* animate */ true, /* autoplay */ true),
-          this.autoplayDelay_);
+    if (!prevAutoplayStatus && this.shouldAutoplay_) {
+      this.setupAutoplay_();
+    }
+
+    if (this.shouldAutoplay_) {
+      this.autoplay_();
     } else {
-      Services.timerFor(this.win).cancel(this.autoplayTimeoutId_);
+      this.clearAutoplay();
     }
   }
 
