@@ -390,12 +390,57 @@ function runAllCommandsLocally() {
 }
 
 /**
+ * Makes sure package.json and yarn.lock are in sync.
+ */
+function runYarnIntegrityCheck() {
+  const yarnIntegrityCheck = getStderr('yarn check --integrity').trim();
+  if (yarnIntegrityCheck.includes('error')) {
+    console.error(fileLogPrefix, colors.red('ERROR:'),
+        'Found the following', colors.cyan('yarn'), 'errors:\n' +
+        colors.cyan(yarnIntegrityCheck));
+    console.error(fileLogPrefix, colors.red('ERROR:'),
+        'Updates to', colors.cyan('package.json'),
+        'must be accompanied by a corresponding update to',
+        colors.cyan('yarn.lock'));
+    console.error(fileLogPrefix, colors.yellow('NOTE:'),
+        'To update', colors.cyan('yarn.lock'), 'after changing',
+        colors.cyan('package.json') + ',', 'run',
+        '"' + colors.cyan('yarn install') + '"',
+        'and include the updated', colors.cyan('yarn.lock'),
+        'in your PR.');
+    process.exit(1);
+  }
+}
+
+/**
+ * Makes sure that yarn.lock was properly updated.
+ */
+function runYarnLockfileCheck() {
+  const yarnLockfileCheck = getStdout('git -c color.ui=always diff').trim();
+  if (yarnLockfileCheck.includes('yarn.lock')) {
+    console.error(fileLogPrefix, colors.red('ERROR:'),
+        'This PR did not properly update', colors.cyan('yarn.lock') + '.');
+    console.error(fileLogPrefix, colors.yellow('NOTE:'),
+        'To fix this, sync your branch to', colors.cyan('upstream/master') +
+        ', run', colors.cyan('gulp update-packages') +
+        ', and push a new commit containing the changes.');
+    console.error(fileLogPrefix, 'Expected changes:');
+    console.log(yarnLockfileCheck);
+    process.exit(1);
+  }
+}
+
+/**
  * The main method for the script execution which much like a C main function
  * receives the command line arguments and returns an exit status.
  * @returns {number}
  */
 function main() {
   const startTime = startTimer('pr-check.js');
+
+  // Make sure package.json and yarn.lock are in sync and up-to-date.
+  runYarnIntegrityCheck();
+  runYarnLockfileCheck();
 
   // Run the local version of all tests.
   if (!process.env.TRAVIS) {
@@ -450,27 +495,6 @@ function main() {
         colors.cyan(nonFlagConfigFiles.join(', ')));
     stopTimer('pr-check.js', startTime);
     process.exit(1);
-  }
-
-  // Make sure package.json and yarn.lock are in sync.
-  if (files.indexOf('package.json') != -1 || files.indexOf('yarn.lock') != -1) {
-    const yarnIntegrityCheck = getStderr('yarn check --integrity').trim();
-    if (yarnIntegrityCheck.includes('error')) {
-      console.error(fileLogPrefix, colors.red('ERROR:'),
-          'Found the following', colors.cyan('yarn'), 'errors:\n' +
-          colors.cyan(yarnIntegrityCheck));
-      console.error(fileLogPrefix, colors.red('ERROR:'),
-          'Updates to', colors.cyan('package.json'),
-          'must be accompanied by a corresponding update to',
-          colors.cyan('yarn.lock'));
-      console.error(fileLogPrefix, colors.yellow('NOTE:'),
-          'To update', colors.cyan('yarn.lock'), 'after changing',
-          colors.cyan('package.json') + ',', 'run',
-          '"' + colors.cyan('yarn install') + '"',
-          'and include the updated', colors.cyan('yarn.lock'),
-          'in your PR.');
-      process.exit(1);
-    }
   }
 
   console.log(
