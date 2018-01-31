@@ -108,19 +108,13 @@ function buildArticleTemplate(articleData) {
 
   if (articleData.image) {
     template.children.unshift(/** @type {!./simple-template.ElementDef} */ ({
-      tag: 'div',
-      attrs: dict({'class': 'i-amphtml-story-bookend-article-image'}),
-      children: [
-        // TODO(alanorozco): Figure out how to use amp-img here
-        {
-          tag: 'img',
-          attrs: dict({
-            'src': articleData.image,
-            'width': 100,
-            'height': 100,
-          }),
-        },
-      ],
+      tag: 'amp-img',
+      attrs: dict({
+        'class': 'i-amphtml-story-bookend-article-image',
+        'src': articleData.image,
+        'width': 100,
+        'height': 100,
+      }),
     }));
   }
 
