@@ -15,7 +15,11 @@
  */
 
 import {Services} from '../../../src/services';
-import {UrlReplacementPolicy, batchFetchJsonFor} from '../../../src/batched-json';
+import {
+  UrlReplacementPolicy,
+  batchFetchJsonFor,
+} from '../../../src/batched-json';
+import {getSourceOrigin} from '../../../src/url';
 import {map} from '../../../src/utils/object';
 import {isJsonScriptTag} from '../../../src/dom';
 import {toggle} from '../../../src/style';
@@ -131,11 +135,15 @@ export class AmpState extends AMP.BaseElement {
    * @visibleForTesting
    */
   fetch_(ampdoc, element, isInit) {
-    // Require opt-in for URL variable replacements on fetches triggered
+    const src = element.getAttribute('src');
+
+    // Require opt-in for URL variable replacements on CORS fetches triggered
     // by [src] mutation. @see spec/amp-var-substitutions.md
-    const policy = isInit
-      ? UrlReplacementPolicy.ALL
-      : UrlReplacementPolicy.OPT_IN;
+    let policy = UrlReplacementPolicy.OPT_IN;
+    if (isInit ||
+      (getSourceOrigin(src) == getSourceOrigin(ampdoc.win.location))) {
+      policy = UrlReplacementPolicy.ALL;
+    }
     return batchFetchJsonFor(
         ampdoc, element, /* opt_expr */ undefined, policy);
   }
