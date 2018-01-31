@@ -8,3 +8,4 @@
 ./third_party/react-dates/index.js | \
 node ./build-system/scope-require.js | \
 ./node_modules/.bin/derequire > ./third_party/react-dates/bundle.js
+cp ./node_modules/react-dates/lib/css/_datepicker.css ./third_party/react-dates/
