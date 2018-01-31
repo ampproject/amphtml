@@ -48,6 +48,7 @@ import {toWin} from '../types';
 const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
 const LEGACY_ELEMENTS = ['amp-ad', 'amp-embed', 'amp-video'];
+const CUSTOM_TEMPLATES = ['amp-mustache'];
 const LOADER_PROP = '__AMP_EXT_LDR';
 
 /**
@@ -91,6 +92,9 @@ let ExtensionDef;
  */
 let ExtensionHolderDef;
 
+export function isTemplateExtension(extensionId) {
+  return CUSTOM_TEMPLATES.indexOf(extensionId) >= 0;
+}
 
 /**
  * Install extensions service.
@@ -641,7 +645,9 @@ export class Extensions {
   createExtensionScript_(extensionId, opt_extensionVersion) {
     const scriptElement = this.win.document.createElement('script');
     scriptElement.async = true;
-    scriptElement.setAttribute('custom-element', extensionId);
+    scriptElement.setAttribute(
+        isTemplateExtension(extensionId) ? 'custom-template' : 'custom-element',
+        extensionId);
     scriptElement.setAttribute('data-script', extensionId);
     scriptElement.setAttribute('i-amphtml-inserted', '');
     let loc = this.win.location;
