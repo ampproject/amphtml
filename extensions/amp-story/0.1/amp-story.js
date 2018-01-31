@@ -1105,7 +1105,7 @@ export class AmpStory extends AMP.BaseElement {
       if (bookendConfig !== null) {
         this.bookend_.setConfig(dev().assert(bookendConfig));
       }
-      this.scheduleResume(this.bookend_.getRoot());
+      this.scheduleLayout(this.bookend_.getRoot());
     });
   }
 
