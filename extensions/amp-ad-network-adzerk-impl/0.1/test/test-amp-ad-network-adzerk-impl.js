@@ -131,7 +131,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
                     '</script>') == -1).to.be.true;
             expect(impl.getAmpAdMetadata()).to.jsonEqual({
               minifiedCreative: creative,
-              customElementExtensions: [],
+              customElementExtensions: ['amp-mustache'],
               extensions: [],
             });
           });
@@ -184,13 +184,13 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
           .then(creative => {
             expect(impl.getAmpAdMetadata()).to.jsonEqual({
               minifiedCreative: creative,
-              customElementExtensions: ['amp-analytics'],
+              customElementExtensions: ['amp-analytics', 'amp-mustache'],
               extensions: [],
             });
             // Won't insert duplicate
             expect(impl.getAmpAdMetadata()).to.jsonEqual({
               minifiedCreative: creative,
-              customElementExtensions: ['amp-analytics'],
+              customElementExtensions: ['amp-analytics', 'amp-mustache'],
               extensions: [],
             });
           });
@@ -214,7 +214,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
           .then(creative => {
             expect(impl.getAmpAdMetadata()).to.jsonEqual({
               minifiedCreative: creative,
-              customElementExtensions: [],
+              customElementExtensions: ['amp-mustache'],
               extensions: [],
             });
           });
