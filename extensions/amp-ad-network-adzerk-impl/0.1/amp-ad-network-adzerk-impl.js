@@ -151,22 +151,18 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
 
   /** @override */
   getAmpAdMetadata(unusedCreative) {
+    if (!this.creativeMetadata_) {
+      this.creativeMetadata_ = /**@type {?CreativeMetaDataDef}*/ ({});
+    }
+    if (!this.creativeMetadata_['customElementExtensions']) {
+      this.creativeMetadata_['customElementExtensions'] = [];
+    }
     if (this.ampCreativeJson_.analytics) {
-      if (!this.creativeMetadata_) {
-        this.creativeMetadata_ = /**@type {?CreativeMetaDataDef}*/ ({});
-      }
-      if (!this.creativeMetadata_['customElementExtensions']) {
-        this.creativeMetadata_['customElementExtensions'] = [];
-      }
-      if (this.creativeMetadata_['customElementExtensions'].indexOf(
-          'amp-analytics') < 0) {
-        this.creativeMetadata_['customElementExtensions'].push('amp-analytics');
-      }
+      pushIfNotExist(
+          this.creativeMetadata_['customElementExtensions'], 'amp-analytics');
     }
-    if (this.creativeMetadata_['customElementExtensions']
-        .indexOf('amp-mustache') < 0) {
-      this.creativeMetadata_['customElementExtensions'].push('amp-mustache');
-    }
+    pushIfNotExist(
+        this.creativeMetadata_['customElementExtensions'], 'amp-mustache');
     return /**@type {?CreativeMetaDataDef}*/(this.creativeMetadata_);
   }
 
@@ -188,6 +184,11 @@ export class AmpAdNetworkAdzerkImpl extends AmpA4A {
   }
 }
 
+function pushIfNotExist(array, item) {
+  if (array.indexOf(item) < 0) {
+    array.push(item);
+  }
+}
 
 AMP.extension('amp-ad-network-adzerk-impl', '0.1', AMP => {
   AMP.registerElement('amp-ad-network-adzerk-impl', AmpAdNetworkAdzerkImpl);
