@@ -452,37 +452,36 @@ function main() {
     process.exit(1);
   }
 
-  // Make sure package.json and yarn.lock are in sync, and that yarn.lock was
-  // properly updated.
-  if (files.indexOf('package.json') != -1 || files.indexOf('yarn.lock') != -1) {
-    const yarnIntegrityCheck = getStderr('yarn check --integrity').trim();
-    if (yarnIntegrityCheck.includes('error')) {
-      console.error(fileLogPrefix, colors.red('ERROR:'),
-          'Found the following', colors.cyan('yarn'), 'errors:\n' +
-          colors.cyan(yarnIntegrityCheck));
-      console.error(fileLogPrefix, colors.red('ERROR:'),
-          'Updates to', colors.cyan('package.json'),
-          'must be accompanied by a corresponding update to',
-          colors.cyan('yarn.lock'));
-      console.error(fileLogPrefix, colors.yellow('NOTE:'),
-          'To update', colors.cyan('yarn.lock'), 'after changing',
-          colors.cyan('package.json') + ',', 'run',
-          '"' + colors.cyan('yarn install') + '"',
-          'and include the updated', colors.cyan('yarn.lock'),
-          'in your PR.');
-      process.exit(1);
-    }
-    const yarnLockfileCheck = getStdout('git diff').trim();
-    if (yarnLockfileCheck.includes('yarn.lock')) {
-      console.error(fileLogPrefix, colors.red('ERROR:'),
-          'This PR did not properly update', colors.cyan('yarn.lock') +
-          '. To fix this, sync your branch to', colors.cyan('upstream/master'),
-          'run', colors.cyan('gulp update-packages') +
-          ', and push a new commit.');
-      console.error(fileLogPrefix, colors.yellow('Diffs found:'));
-      console.log(yarnLockfileCheck);
-      process.exit(1);
-    }
+  // Make sure package.json and yarn.lock are in sync.
+  const yarnIntegrityCheck = getStderr('yarn check --integrity').trim();
+  if (yarnIntegrityCheck.includes('error')) {
+    console.error(fileLogPrefix, colors.red('ERROR:'),
+        'Found the following', colors.cyan('yarn'), 'errors:\n' +
+        colors.cyan(yarnIntegrityCheck));
+    console.error(fileLogPrefix, colors.red('ERROR:'),
+        'Updates to', colors.cyan('package.json'),
+        'must be accompanied by a corresponding update to',
+        colors.cyan('yarn.lock'));
+    console.error(fileLogPrefix, colors.yellow('NOTE:'),
+        'To update', colors.cyan('yarn.lock'), 'after changing',
+        colors.cyan('package.json') + ',', 'run',
+        '"' + colors.cyan('yarn install') + '"',
+        'and include the updated', colors.cyan('yarn.lock'),
+        'in your PR.');
+    process.exit(1);
+  }
+
+  // Make sure that yarn.lock was properly updated.
+  const yarnLockfileCheck = getStdout('git diff').trim();
+  if (yarnLockfileCheck.includes('yarn.lock')) {
+    console.error(fileLogPrefix, colors.red('ERROR:'),
+        'This PR did not properly update', colors.cyan('yarn.lock') +
+        '. To fix this, sync your branch to', colors.cyan('upstream/master'),
+        'run', colors.cyan('gulp update-packages') +
+        ', and push a new commit.');
+    console.error(fileLogPrefix, colors.yellow('Diffs found:'));
+    console.log(yarnLockfileCheck);
+    process.exit(1);
   }
 
   console.log(
