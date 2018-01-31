@@ -21,7 +21,6 @@ import {writeScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function adpicker(global, data) {
-  // TODO: check mandatory fields
   validateData(data, ['ph']);
   const url = 'https://cdn.adpicker.net' +
       '/ads/main.js?et=amp' +
