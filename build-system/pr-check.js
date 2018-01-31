@@ -472,14 +472,14 @@ function main() {
   }
 
   // Make sure that yarn.lock was properly updated.
-  const yarnLockfileCheck = getStdout('git diff').trim();
+  const yarnLockfileCheck = getStdout('git -c color.ui=always diff').trim();
   if (yarnLockfileCheck.includes('yarn.lock')) {
     console.error(fileLogPrefix, colors.red('ERROR:'),
         'This PR did not properly update', colors.cyan('yarn.lock') +
         '. To fix this, sync your branch to', colors.cyan('upstream/master'),
-        'run', colors.cyan('gulp update-packages') +
-        ', and push a new commit.');
-    console.error(fileLogPrefix, colors.yellow('Diffs found:'));
+        ', run', colors.cyan('gulp update-packages') +
+        ', and push a new commit containing the changes.');
+    console.error(fileLogPrefix, 'Expected changes:');
     console.log(yarnLockfileCheck);
     process.exit(1);
   }
