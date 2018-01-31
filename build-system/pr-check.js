@@ -475,8 +475,9 @@ function main() {
   const yarnLockfileCheck = getStdout('git -c color.ui=always diff').trim();
   if (yarnLockfileCheck.includes('yarn.lock')) {
     console.error(fileLogPrefix, colors.red('ERROR:'),
-        'This PR did not properly update', colors.cyan('yarn.lock') +
-        '. To fix this, sync your branch to', colors.cyan('upstream/master'),
+        'This PR did not properly update', colors.cyan('yarn.lock') + '.');
+    console.error(fileLogPrefix, colors.yellow('NOTE:'),
+        'To fix this, sync your branch to', colors.cyan('upstream/master') +
         ', run', colors.cyan('gulp update-packages') +
         ', and push a new commit containing the changes.');
     console.error(fileLogPrefix, 'Expected changes:');
