@@ -60,30 +60,22 @@ export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
  */
 function safeframeListener() {
   const data = tryParseJson(getData(event));
+  /** Only process messages that are valid Safeframe messages */
   if (event.origin != SAFEFRAME_ORIGIN || !data) {
     return;
   }
-
   /**
    * If the sentinel is provided at the top level, this is a message simply
    * to setup the postMessage channel, so set it up.
    */
   if (data[MESSAGE_FIELDS.SENTINEL]) {
-    const safeframeHost = safeframeHosts[data[MESSAGE_FIELDS.SENTINEL]];
-    if (!safeframeHost) {
-      dev().warn(TAG, 'Safeframe Host for sentinel ' +
-                 `${data[MESSAGE_FIELDS.SENTINEL]} not found.`);
-      return;
-    }
-    if (!safeframeHost.channel) {
-        safeframeHost.connectMessagingChannel(data[MESSAGE_FIELDS.CHANNEL]);
-    }
-    return;
+    receiveSetupMessage(data);
+  } else {
+    receiveStandardMessage(data);
   }
+}
 
-  /**
-   * If sentinel not provided at top level, parse the payload and process the message.
-   */
+function receiveStandardMessage(data) {
   const payload = tryParseJson(data[MESSAGE_FIELDS.PAYLOAD]);
   if (!payload || !payload['sentinel']) {
     return;
@@ -95,7 +87,18 @@ function safeframeListener() {
     return;
   }
   safeframeHost.processMessage(payload, data['s']);
+}
 
+function receiveSetupMessage(data) {
+  const safeframeHost = safeframeHosts[data[MESSAGE_FIELDS.SENTINEL]];
+  if (!safeframeHost) {
+    dev().warn(TAG, 'Safeframe Host for sentinel ' +
+               `${data[MESSAGE_FIELDS.SENTINEL]} not found.`);
+    return;
+  }
+  if (!safeframeHost.channel) {
+    safeframeHost.connectMessagingChannel(data[MESSAGE_FIELDS.CHANNEL]);
+  }
 }
 
 /**
