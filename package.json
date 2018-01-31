@@ -42,7 +42,7 @@
   "devDependencies": {
     "acorn-globals": "4.1.0",
     "ajv": "6.1.1",
-    "ajv-keywords": "2.1.1",
+    "ajv-keywords": "3.1.0",
     "ansi-colors": "1.0.1",
     "ast-replace": "1.1.3",
     "atob": "2.0.3",
