@@ -120,6 +120,6 @@ export class AmpAdTemplates {
     const loc = parseUrl(url);
     return loc.origin.indexOf(cdnUrlSuffix) > 0 ? url :
       'https://' + loc.hostname.replace(/-/g, '--').replace(/\./g, '-') +
-      '.' + cdnUrlSuffix + '/c/s/' + loc.hostname + loc.pathname;
+      '.' + cdnUrlSuffix + '/ad/s/' + loc.hostname + loc.pathname;
   }
 }

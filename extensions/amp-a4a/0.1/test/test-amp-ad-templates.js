@@ -21,7 +21,7 @@ import {Xhr} from '../../../../src/service/xhr-impl';
 
 describes.fakeWin('amp-ad-templates', {amp: true}, env => {
 
-  const cdnUrl = 'https://adserver-com.cdn.ampproject.org/c/s/' +
+  const cdnUrl = 'https://adserver-com.cdn.ampproject.org/ad/s/' +
       'adserver.com/amp_template_1';
   const canonicalUrl = 'https://adserver.com/amp_template_1';
 
