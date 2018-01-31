@@ -57,6 +57,9 @@ export class RequestHandler {
     this.batchInterval_ = request['batchInterval']; //unit is sec
 
     /** @private {?number} */
+    this.reportWindow_ = Number(request['reportWindow']) || null; // unit is sec
+
+    /** @private {?number} */
     this.batchIntervalPointer_ = null;
 
     /** @private @const {boolean} */
@@ -107,12 +110,19 @@ export class RequestHandler {
     /** @private {?number} */
     this.batchIntervalTimeoutId_ = null;
 
+    /** @private {?number} */
+    this.reportWindowTimeoutId_ = null;
+
+    /** @private {boolean} */
+    this.reportRequest_ = true;
+
     /** @private {?JsonObject} */
     this.lastTrigger_ = null;
 
     /** @private {number} */
     this.queueSize_ = 0;
 
+    this.initReportWindow_();
     this.initBatchInterval_();
   }
 
@@ -127,14 +137,23 @@ export class RequestHandler {
    *     return strings, promises, etc.
    */
   send(configParams, trigger, expansionOption, dynamicBindings) {
+    const isImportant = trigger['important'];
+
+    const isImmediate =
+        (trigger['important'] === true) || (!this.isBatched_);
+
+    if (!this.reportRequest_ && !isImportant) {
+      // Ignore non important trigger out reportWindow
+      return;
+    }
+
     this.queueSize_++;
     this.lastTrigger_ = trigger;
     const triggerParams = trigger['extraUrlParams'];
-    const isImmediate =
-        (trigger['immediate'] === true) || (!this.isBatched_);
 
     const macros = this.variableService_.getMacros();
     const bindings = Object.assign({}, dynamicBindings, macros);
+
     if (!this.baseUrlPromise_) {
       expansionOption.freezeVar('extraUrlParams');
       this.baseUrlTemplatePromise_ =
@@ -182,6 +201,11 @@ export class RequestHandler {
     if (this.batchIntervalTimeoutId_) {
       this.win.clearTimeout(this.batchIntervalTimeoutId_);
       this.batchIntervalTimeoutId_ = null;
+    }
+
+    if (this.reportWindowTimeoutId_) {
+      this.win.clearTimeout(this.reportWindowTimeoutId_);
+      this.reportWindowTimeoutId_ = null;
     }
   }
 
@@ -358,6 +382,7 @@ export class RequestHandler {
     }
 
     if (this.maxDelay_) {
+      // TODO: Remove maxDelay_ completely
       // Ignore maxDelay in presence of batchInterval
       // TODO: we can remove the restriction upon requests
       user().error(TAG,
@@ -365,50 +390,50 @@ export class RequestHandler {
       this.maxDelay_ = 0;
     }
 
-    if (isArray(this.batchInterval_)) {
-      // Support batchInterval in array with absolute time to send request
-      const batchInterval = [];
-      for (let i = 0; i < this.batchInterval_.length; i++) {
-        const current = this.batchInterval_[i];
-        const prev = (i > 0) ? this.batchInterval_[i - 1] : 0;
-        user().assert(isFiniteNumber(current) && Number(current) >= 0,
-            `Invalid batchInterval value: ${this.batchInterval_}, ` +
-            'interval must be number greater than 0.');
-        const interval = (current - prev) * 1000;
-        user().assert(i == 0 || interval > BATCH_INTERVAL_MIN,
-            `Invalid batchInterval value: ${this.batchInterval_}, ` +
-            `interval must be greater than ${BATCH_INTERVAL_MIN / 1000}s.`);
-        batchInterval[i] = interval;
-      }
-      this.batchInterval_ = batchInterval;
-      this.batchIntervalPointer_ = 0;
-    } else if (isFiniteNumber(Number(this.batchInterval_))) {
-      // Support batchInterval in number, send batched requests every interval
-      this.batchInterval_ = Number(this.batchInterval_) * 1000;
-      user().assert(this.batchInterval_ > BATCH_INTERVAL_MIN,
+    this.batchInterval_ = isArray(this.batchInterval_) ?
+      this.batchInterval_ : [this.batchInterval_];
+
+    for (let i = 0; i < this.batchInterval_.length; i++) {
+      let interval = this.batchInterval_[i];
+      user().assert(isFiniteNumber(interval),
+          `Invalid batchInterval value: ${this.batchInterval_}` +
+          'interval must be a number');
+      interval = Number(interval) * 1000;
+      user().assert(interval >= BATCH_INTERVAL_MIN,
           `Invalid batchInterval value: ${this.batchInterval_}, ` +
-          `interval must be greater than ${BATCH_INTERVAL_MIN / 1000}s.`);
-    } else {
-      user().assert(false,
-          `Invalid batchInterval value: ${this.batchInterval_}`);
+          `interval value must be greater than ${BATCH_INTERVAL_MIN}ms.`);
+      this.batchInterval_[i] = interval;
     }
 
+    this.batchIntervalPointer_ = 0;
+
     this.refreshBatchInterval_();
+  }
+
+  initReportWindow_() {
+    if (this.reportWindow_) {
+      this.reportWindowTimeoutId_ = this.win.setTimeout(() => {
+        // Flush batch queue;
+        this.trigger_(true);
+        this.reportRequest_ = false;
+        // Clear batchInterval timeout
+        if (this.batchIntervalTimeoutId_) {
+          this.win.clearTimeout(this.batchIntervalTimeoutId_);
+          this.batchIntervalTimeoutId_ = null;
+        }
+      }, this.reportWindow_ * 1000);
+    }
   }
 
   /**
    * Schedule sending request regarding to batchInterval
    */
   refreshBatchInterval_() {
-    let interval;
-    if (this.batchIntervalPointer_ != null) {
-      if (this.batchIntervalPointer_ >= this.batchInterval_.length) {
-        return;
-      }
-      interval = this.batchInterval_[this.batchIntervalPointer_++];
-    } else {
-      interval = this.batchInterval_;
-    }
+    dev().assert(this.batchIntervalPointer_ != null,
+        'Should not start batchInterval without pointer');
+    const interval = this.batchIntervalPointer_ < this.batchInterval_.length ?
+      this.batchInterval_[this.batchIntervalPointer_++] :
+      this.batchInterval_[this.batchInterval_.length - 1];
 
     this.batchIntervalTimeoutId_ = this.win.setTimeout(() => {
       this.trigger_(true);
