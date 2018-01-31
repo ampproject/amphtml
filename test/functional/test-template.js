@@ -87,13 +87,6 @@ describes.fakeWin('Template', {}, env => {
     }).to.throw(/Duplicate template type/);
   });
 
-  it('should fail render if template is not declared', () => {
-    const templateElement = createTemplateElement();
-    expect(() => {
-      templates.renderTemplate(templateElement, {value: 0});
-    }).to.throw(/Template must be declared/);
-  });
-
   it('should block render until template registered', () => {
     templates.declaredTemplates_ = undefined;
     const templateElement = createTemplateElement();
