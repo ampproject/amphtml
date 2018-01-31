@@ -121,6 +121,8 @@ export class AmpStoryBackground {
 
     const hidden = this.hidden_;
 
+    setStyle(hidden, 'background-image', 'none');
+
     // Image will be swapped on load.
     whenFresh(imgLoad, () => {
       setStyle(hidden, 'background-image', url ? `url(${url})` : null);
