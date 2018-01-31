@@ -760,11 +760,37 @@ export class FetchResponse {
     dev().assert(!this.bodyUsed, 'Body already used');
     this.bodyUsed = true;
 
-    user().assert(this.xhr_.responseXML,
-      'responseXML should exist. Make sure to return ' +
-      'Content-Type: text/html header. URL: ' + url + ' - ');
-    return /** @type {!Promise<!Document>} */ (
-      Promise.resolve(dev().assert(this.xhr_.responseXML)));
+    return new Promise((resolve, reject) => {
+
+      if (!!this.xhr_.responseXML) {
+        resolve(this.xhr_.responseXML);
+        return;
+      }
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', url, true);
+      xhr.responseType = 'document';
+      xhr.onreadystatechange = () => {
+        if (xhr.readyState < 2) {
+          return;
+        }
+        if (xhr.status < 100 || xhr.status > 599) {
+          xhr.onreadystatechange = null;
+          return;
+        }
+
+        if (xhr.readyState === 4) {
+          if (!xhr.responseXML) {
+            reject({'message': 'responseXML should exist second attempt. Make sure to return ' +
+              'Content-Type: text/html header. URL: ' + url + ' - ',
+              'stack': `${window.AMP_CONFIG.cdnUrl}/statics/amp/dist/xhr-impl:566:45`});
+            return;
+          }
+
+          resolve(xhr.responseXML);
+        }
+      };
+      xhr.send();
+    });
   }
 
 
