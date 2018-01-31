@@ -801,7 +801,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   setupSafeframe() {
     if (!this.safeframeApi) {
       this.safeframeApi = new SafeframeHostApi(this);
-      this.safeframeApi.registerSafeframeHost();
     }
   }
 
@@ -1211,7 +1210,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getAdditionalContextMetadata(isSafeframe) {
-    return (this.isFluid_ || isSafeframe) ? this.safeframeApi.getSafeframeNameAttr() : {};
+    return (this.isFluid_ || isSafeframe) ?
+        this.safeframeApi.getSafeframeNameAttr() : {};
   }
 
   /**

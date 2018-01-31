@@ -21,6 +21,7 @@ import {getData} from './event-helper';
 import {filterSplice} from './utils/array';
 import {parseUrl} from './url';
 import {tryParseJson} from './json';
+import {SimplePostMessageApiDef} from './simple-postmessage-api-def';
 
 /**
  * Sentinel used to force unlistening after a iframe is detached.
@@ -408,6 +409,7 @@ export function parseIfNeeded(data) {
  * Manages a postMessage API for an iframe with a subscription message and
  * a way to broadcast messages to all subscribed windows, which
  * in turn must all be descendants of the contentWindow of the iframe.
+ * @implements {SimplePostMessageApiDef}
  */
 export class SubscriptionApi {
   /**
@@ -442,6 +444,7 @@ export class SubscriptionApi {
    * Sends a message to all subscribed windows.
    * @param {string} type Type of the message.
    * @param {!JsonObject} data Message payload.
+   * @override
    */
   send(type, data) {
     // Remove clients that have been removed from the DOM.
@@ -454,6 +457,7 @@ export class SubscriptionApi {
         this.is3p_);
   }
 
+  /** @override */
   destroy() {
     this.unlisten_();
     this.clientWindows_.length = 0;

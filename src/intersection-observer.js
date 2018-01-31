@@ -19,6 +19,7 @@ import {dict} from './utils/object';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
 import {SubscriptionApi} from './iframe-helper';
 import {Services} from './services';
+import {SimplePostMessageApiDef} from './simple-postmessage-api-def';
 
 /**
  * The structure that defines the rectangle used in intersection observers.
@@ -118,8 +119,10 @@ export class IntersectionObserver {
    * @param {!Element} iframe Iframe element which requested the
    *     intersection data.
    * @param {?boolean} opt_is3p Set to `true` when the iframe is 3'rd party.
+   * @param {SimplePostMessageApiDef=} opt_MessageApi Alternate messaging API
+   *   to use. If not specified, defaults to using SubscriptionAPI.
    */
-  constructor(baseElement, iframe, opt_is3p, opt_SafeframeApi) {
+  constructor(baseElement, iframe, opt_is3p, opt_MessageApi) {
     /** @private @const {!AMP.BaseElement} */
     this.baseElement_ = baseElement;
     /** @private @const {!./service/timer-impl.Timer} */
@@ -143,13 +146,13 @@ export class IntersectionObserver {
      * intersection updates for this element.
      * Triggered by context.observeIntersection(…) inside the ad/iframe
      * or by directly posting a send-intersections message.
-     * @private {!SubscriptionApi}
+     * @private {!SimplePostMessageApiDef}
      */
-    this.postMessageApi_ = opt_SafeframeApi || new SubscriptionApi(
+    this.postMessageApi_ = opt_MessageApi || new SubscriptionApi(
         iframe, 'send-intersections', opt_is3p || false,
         // Each time someone subscribes we make sure that they
         // get an update.
-        () => this.startSendingIntersectionChanges_());
+        () => this.startSendingIntersectionChanges());
 
     /** @private {?Function} */
     this.unlistenViewportChanges_ = null;
@@ -177,9 +180,8 @@ export class IntersectionObserver {
    * one change record to the iframe.
    * Note that this method may be called more than once if a single ad
    * has multiple parties interested in viewability data.
-   * @private
    */
-  startSendingIntersectionChanges_() {
+  startSendingIntersectionChanges() {
     this.shouldSendIntersectionChanges_ = true;
     this.baseElement_.getVsync().measure(() => {
       if (this.baseElement_.isInViewport()) {

@@ -1,8 +1,25 @@
+/**
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import {tryParseJson} from '../../../src/json';
 import {getData} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {IntersectionObserver} from '../../../src/intersection-observer';
+import {SimplePostMessageApiDef} from '../../../src/simple-postmessage-api-def';
 
 /**
  * Used to manage messages for different Safeframe ad slots.
@@ -58,8 +75,9 @@ function safeframeListener() {
                  `${data[MESSAGE_FIELDS.SENTINEL]} not found.`);
       return;
     }
-    !!safeframeHost.channel ||
+    if (!safeframeHost.channel) {
         safeframeHost.connectMessagingChannel(data[MESSAGE_FIELDS.CHANNEL]);
+    }
     return;
   }
 
@@ -82,6 +100,7 @@ function safeframeListener() {
 
 /**
  * This class is sets up the host for GPT Safeframe.
+ * @implements {SimplePostMessageApiDef}
  */
 export class SafeframeHostApi {
 
@@ -116,7 +135,10 @@ export class SafeframeHostApi {
     /** @private {number} */
     this.endpointIdentity_ = Math.random();
 
+    /** @type {number} */
     this.uid = Math.random();
+
+    this.registerSafeframeHost();
   }
 
   getSafeframeNameAttr() {
@@ -186,20 +208,16 @@ export class SafeframeHostApi {
   setupGeom_() {
     this.IntersectionObserver_ = new IntersectionObserver(
         this.baseInstance_, this.baseInstance_.iframe, false, this);
-    this.IntersectionObserver_.startSendingIntersectionChanges_();
+    this.IntersectionObserver_.startSendingIntersectionChanges();
   }
 
   /**
-   * DO NOT CHANGE NAME OF METHOD.
-   * This is named as 'send' as a hack to allow us to use
-   * IntersectionObserver without needing to do any major refactoring of it.
-   * Every time that the IntersectionObserver instance sends an update, instead
-   * of utilizing the SubscriptionApi, we have overridden its typical behavior
-   * to instead call this method.
-   * This method actually handles sending the geometry update message to the
-   * safeframe container, which allows $sf.ext.geom() to work. This method
-   * is triggered whenever the page is scrolled or visibility otherwise
-   * changes.
+   * Every time that the IntersectionObserver needs to send an update, this
+   * method is triggered. Includes page scroll or other visibility change
+   * events.
+   * Handles sending the geometry update message to the
+   * safeframe container, which allows $sf.ext.geom() to work.
+   * @override
    */
   send(unusedTrash, changes) {
     this.sendMessage_(JSON.stringify({
