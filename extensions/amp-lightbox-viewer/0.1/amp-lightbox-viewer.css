@@ -54,8 +54,7 @@
   right: 0 !important;
   top: 0 !important;
   height: 50px !important;
-  background-color: rgba(0,0,0,0.7);
-  background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0));
+  background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0));
   transition: opacity 1s;
   z-index: 2;
 }
@@ -66,7 +65,7 @@
   right: 0 !important;
   top: 0 !important;
   height: 50px !important;
-  background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0));
+  background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0));
 }
 
 .i-amphtml-lbv-desc-box {
@@ -83,14 +82,13 @@
 
 .i-amphtml-lbv-desc-box.standard {
   max-height: 6rem;
-  background-color: rgba(0,0,0,0.7);
-  background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.7));
+  background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.5));
 }
 
 .i-amphtml-lbv-desc-box.overflow {
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
-  background-color: rgba(0,0,0,0.7);
+  background-color: rgba(0,0,0,0.5);
   top: 0px !important;
   padding-top: 50px !important;
 }
@@ -119,6 +117,10 @@
 @media (min-width: 1024px) {
   .i-amphtml-lbv[gallery-view] .i-amphtml-lbv-gallery {
     grid-template-columns: repeat(4, calc(1024px/4 - 5px * 5 / 4));
+  }
+
+  div.i-amphtml-lbv-top-bar {
+    height: 100px !important;
   }
 
   div.amp-lbv-button-close,
