@@ -180,6 +180,11 @@ event.value</pre>
     <td><pre>// Slide number.
 event.index</pre></td>
   </tr>
+  <tr>
+    <td><code>toggleAutoplay</code></td>
+    <td>Will, on user tap or click, toggle the autoplay status for the carousel. You can either specify the status you want by specifying it: <code>carousel-id.toggleAutoplay(toggleOn=false)</code> or flip the status by not specifying a value.</td>
+    <td><pre>optional toggle status</pre></td>
+  </tr>
 </table>
 
 ### amp-sidebar
