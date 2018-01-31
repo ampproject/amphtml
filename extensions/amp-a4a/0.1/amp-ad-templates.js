@@ -54,16 +54,14 @@ export class AmpAdTemplates {
    * @return {!Promise<string>}
    */
   fetch(templateUrl) {
-    const proxyUrl = getMode(this.win_).localDev
-      ? templateUrl
+    const proxyUrl = getMode(this.win_).localDev && !isNaN(templateUrl)
+      ? `http://ads.localhost:${this.win_.location.port}` +
+          `/a4a_template/adzerk/${templateUrl}`
       : this.getTemplateProxyUrl_(templateUrl);
     let templatePromise = this.cache_.get(proxyUrl);
     if (!templatePromise) {
       templatePromise = Services.xhrFor(this.win_)
-          .fetchText(getMode(this.win_).localDev
-            ? `http://ads.localhost:${this.win_.location.port}` +
-                `/a4a_template/adzerk/${proxyUrl}`
-            : proxyUrl, TEMPLATE_CORS_CONFIG)
+          .fetchText(proxyUrl, TEMPLATE_CORS_CONFIG)
           .then(response => response.text());
       this.cache_.put(proxyUrl, templatePromise);
     }
