@@ -129,6 +129,10 @@ export const adConfig = {
 
   adocean: {},
 
+  adpicker: {
+    renderStartImplemented: true,
+  },
+
   adreactor: {},
 
   adsense: {
