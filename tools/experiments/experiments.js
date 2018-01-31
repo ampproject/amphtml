@@ -57,11 +57,6 @@ const EXPERIMENTS = [
         'README.md#amp-dev-channel',
   },
   {
-    id: 'ad-type-custom',
-    name: 'Activates support for custom (self-serve) advertisements',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/ads/custom.md',
-  },
-  {
     id: 'alp',
     name: 'Activates support for measuring incoming clicks.',
     spec: 'https://github.com/ampproject/amphtml/issues/2934',
