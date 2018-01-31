@@ -20,6 +20,7 @@ import {StandardActions} from '../../src/service/standard-actions-impl';
 import {Services} from '../../src/services';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
 import {setParentWindow} from '../../src/service';
+import {createElementWithAttributes} from '../../src/dom';
 
 
 describes.sandboxed('StandardActions', {}, () => {
@@ -351,6 +352,64 @@ describes.sandboxed('StandardActions', {}, () => {
       };
       standardActions.handleAmpTarget(invocation);
       expect(printStub).to.be.calledOnce;
+    });
+
+    it('should not implement print when not whitelisted', () => {
+      window.document.head.appendChild(
+          createElementWithAttributes(window.document, 'meta', {
+            name: 'amp-action-whitelist',
+            content: 'pushState,setState',
+          }));
+
+      standardActions = new StandardActions(ampdoc);
+
+      const windowApi = {
+        print: () => {},
+      };
+      const printStub = sandbox.stub(windowApi, 'print');
+      const invocation = {
+        method: 'print',
+        satisfiesTrust: () => true,
+        target: {
+          ownerDocument: {
+            defaultView: windowApi,
+          },
+        },
+      };
+      expect(() => standardActions.handleAmpTarget(invocation)).to.throw();
+      expect(printStub).to.not.be.called;
+    });
+
+    it('should implement pushState when whitelisted', () => {
+      window.document.head.appendChild(
+          createElementWithAttributes(window.document, 'meta', {
+            name: 'amp-action-whitelist',
+            content: 'setState, pushState',
+          }));
+
+      standardActions = new StandardActions(ampdoc);
+
+      const pushStateWithExpression = sandbox.stub();
+      // Bind.pushStateWithExpression() doesn't resolve with a value,
+      // but add one here to check that the promise is chained.
+      pushStateWithExpression.returns(Promise.resolve('push-state-complete'));
+
+      window.services.bind = {
+        obj: {pushStateWithExpression},
+      };
+
+      const args = {
+        [OBJECT_STRING_ARGS_KEY]: '{foo: 123}',
+      };
+      const target = ampdoc;
+      const satisfiesTrust = () => true;
+      const pushState = {method: 'pushState', args, target, satisfiesTrust};
+
+      return standardActions.handleAmpTarget(pushState, 0, []).then(result => {
+        expect(result).to.equal('push-state-complete');
+        expect(pushStateWithExpression).to.be.calledOnce;
+        expect(pushStateWithExpression).to.be.calledWith('{foo: 123}');
+      });
     });
   });
 
