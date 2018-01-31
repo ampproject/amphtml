@@ -1475,7 +1475,6 @@ export class AmpA4A extends AMP.BaseElement {
       'releaseType': this.releaseType_,
     });
     const checkStillCurrent = this.verifyStillCurrent();
-    this.setupSafeframe();
     return utf8Decode(creativeBody).then(creative => {
       checkStillCurrent();
       let srcPath;
@@ -1513,8 +1512,6 @@ export class AmpA4A extends AMP.BaseElement {
       return this.iframeRenderHelper_(dict({'src': srcPath, 'name': name}));
     });
   }
-
-  setupSafeframe() {}
 
   /**
    *

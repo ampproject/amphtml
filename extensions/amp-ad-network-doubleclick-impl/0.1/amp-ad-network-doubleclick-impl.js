@@ -797,7 +797,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.qqid_ = null;
   }
 
-  /** @override */
   setupSafeframe() {
     if (!this.safeframeApi) {
       this.safeframeApi = new SafeframeHostApi(this);
@@ -806,12 +805,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   layoutCallback() {
-    const registerFluidAndExec = () => {
-      if (this.isFluid_) {
-        this.setupSafeframe();
-      }
-      return super.layoutCallback();
-    };
     if (this.postAdResponseExperimentFeatures['render-idle-throttle'] &&
         this.isIdleRender_) {
       return this.isVerifiedAmpCreativePromise().then(verified => {
@@ -825,7 +818,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         return throttleFn();
       });
     }
-    return registerFluidAndExec();
+    return super.layoutCallback()
   }
 
   /** @override  */
@@ -1210,8 +1203,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getAdditionalContextMetadata(isSafeframe) {
-    return (this.isFluid_ || isSafeframe) ?
-        this.safeframeApi.getSafeframeNameAttr() : {};
+    if (this.isFluid_ || isSafeframe) {
+      this.setupSafeframe();
+      return this.safeframeApi.getSafeframeNameAttr();
+    }
   }
 
   /**

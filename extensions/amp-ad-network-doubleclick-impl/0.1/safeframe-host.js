@@ -46,6 +46,8 @@ const SERVICE = {
   EXPAND_REQUEST: 'expand_request',
   EXPAND_RESPONSE: 'expand_response',
   REGISTER_DONE: 'register_done',
+  COLLAPSE_REQUEST: 'collapse_request',
+  COLLAPSE_RESPONSE: 'collapse_response',
 };
 
 const TAG = 'AMP-DOUBLECLICK-SAFEFRAME';
@@ -305,8 +307,15 @@ export class SafeframeHostApi {
         break;
       case SERVICE.EXPAND_REQUEST:
         this.handleExpandRequest_(payload);
+        break;
       case SERVICE.REGISTER_DONE:
         this.handleRegisterDone_(payload);
+        break;
+      case SERVICE.COLLAPSE_REQUEST:
+        this.handleCollapseRequest_(payload);
+        break;
+      default:
+        break;
     }
     return;
   }
@@ -331,7 +340,7 @@ export class SafeframeHostApi {
     //this.baseInstance_.handleResize_(width, height);
     // TODO : make the response accurate, right now just defaults to success
     const responsePayload = JSON.stringify({
-      uid: 1,
+      uid: this.uid,
       success: true,
       newGeometry: JSON.stringify(this.currentGeometry_),
       'expand_t': this.currentGeometry_.allowedExpansion_t,
@@ -361,5 +370,22 @@ export class SafeframeHostApi {
           // TODO(levitzky) Add more error handling here
           this.baseInstance_.forceCollapse();
         });
+  }
+
+  handleCollapseRequest_(payload) {
+    this.baseInstance_.attemptChangeSize(
+        this.baseInstance_.initialSize_.height,
+        this.baseInstance_.initialSize_.width).catch(() => {});
+    const responsePayload = JSON.stringify({
+      uid: this.uid,
+      success: true,
+      newGeometry: JSON.stringify(this.currentGeometry_),
+      'expand_t': this.currentGeometry_.allowedExpansion_t,
+      'expand_b': this.currentGeometry_.allowedExpansion_b,
+      'expand_r': this.currentGeometry_.allowedExpansion_r,
+      'expand_l': this.currentGeometry_.allowedExpansion_l,
+      push: true,
+    });
+    this.sendMessage_(responsePayload, SERVICE.COLLAPSE_RESPONSE);
   }
 }
