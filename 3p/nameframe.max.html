@@ -14,9 +14,13 @@
 
     var render = function() {
       try {
-        document.open();
+        if (!writeInBody || !instantLoad) {
+          document.open();
+        }
         document.write(name_data['creative']);
-        document.close();
+        if (!writeInBody || !instantLoad) {
+          document.close();
+        }
         delete name_data['creative'];
         window.name = JSON.stringify(name_data);
       } catch (e) {
