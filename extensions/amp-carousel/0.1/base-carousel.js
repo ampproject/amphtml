@@ -37,7 +37,9 @@ export class BaseCarousel extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.showControls_ = this.element.hasAttribute('controls');
+    const input = Services.inputFor(this.win);
+    this.showControls_ = input.isMouseDetected() ||
+        this.element.hasAttribute('controls');
 
     if (this.showControls_) {
       this.element.classList.add('i-amphtml-carousel-has-controls');
@@ -183,7 +185,13 @@ export class BaseCarousel extends AMP.BaseElement {
       const className = 'i-amphtml-carousel-button-start-hint';
       this.element.classList.add(className);
       Services.timerFor(this.win).delay(() => {
-        this.deferMutate(() => this.element.classList.remove(className));
+        this.deferMutate(() => {
+          this.element.classList.remove(className);
+          this.prevButton_.classList.toggle(
+              'i-amphtml-screen-reader', !this.showControls_);
+          this.nextButton_.classList.toggle(
+              'i-amphtml-screen-reader', !this.showControls_);
+        });
       }, 4000);
     });
   }

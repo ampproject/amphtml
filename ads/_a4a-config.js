@@ -51,7 +51,7 @@ import {map} from '../src/utils/object';
  * Otherwise, it will attempt to render the ad via the existing "3p iframe"
  * pathway (delay load into a cross-domain iframe).
  *
- * @type {!Object<!string, !function(!Window, !Element): boolean>}
+ * @type {!Object<string, function(!Window, !Element): boolean>}
  */
 let a4aRegistry;
 
@@ -62,6 +62,7 @@ export function getA4ARegistry() {
   if (!a4aRegistry) {
     a4aRegistry = map({
       'adsense': adsenseIsA4AEnabled,
+      'adzerk': () => true,
       'doubleclick': doubleclickIsA4AEnabled,
       'triplelift': tripleliftIsA4AEnabled,
       'cloudflare': cloudflareIsA4AEnabled,

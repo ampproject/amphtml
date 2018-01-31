@@ -27,7 +27,11 @@ import {
   DEFAULT_SAFEFRAME_VERSION,
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
-import {is3pThrottled} from '../../amp-ad/0.1/concurrent-load';
+import {
+  is3pThrottled,
+  waitFor3pThrottle,
+  incrementLoadingAds,
+} from '../../amp-ad/0.1/concurrent-load';
 import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
 import {
   experimentFeatureEnabled,
@@ -83,7 +87,7 @@ import {setStyles} from '../../../src/style';
 import {utf8Encode} from '../../../src/utils/bytes';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {isCancellation} from '../../../src/error';
-import {isSecureUrl, parseUrl} from '../../../src/url';
+import {isSecureUrl, parseUrl, parseQueryString} from '../../../src/url';
 import {VisibilityState} from '../../../src/visibility-state';
 import {
   isExperimentOn,
@@ -116,13 +120,6 @@ const RTC_ATI_ENUM = {
   RTC_FAILURE: 3,
 };
 
-/** @private @const {!Object<string,string>} */
-const PAGE_LEVEL_PARAMS_ = {
-  'gdfp_req': '1',
-  'sfv': DEFAULT_SAFEFRAME_VERSION,
-  'u_sd': window.devicePixelRatio,
-};
-
 /** @visibleForTesting @const {string} */
 export const CORRELATOR_CLEAR_EXP_NAME = 'dbclk-correlator-clear';
 
@@ -152,6 +149,9 @@ let sraRequests = null;
       slotIndex: string,
     }} */
 let TroubleshootData;
+
+/** @private {?JsonObject} */
+let windowLocationQueryParameters;
 
 /**
  * Array of functions used to combine block level request parameters for SRA
@@ -389,9 +389,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       return false;
     }
     this.isIdleRender_ = true;
+    // NOTE(keithwrightbos): handle race condition where previous
+    // idleRenderOutsideViewport marked slot as idle render despite never
+    // being schedule due to being beyond viewport max offset.  If slot
+    // comes within standard outside viewport range, then ensure throttling
+    // will not be applied.
+    this.getResource().whenWithinRenderOutsideViewport().then(
+        () => this.isIdleRender_ = false);
     return vpRange;
   }
-
   /** @override */
   isLayoutSupported(layout) {
     this.isFluid_ = layout == Layout.FLUID;
@@ -535,6 +541,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return {resolver, rejector, promise};
   }
 
+  /** @return {!Object<string,string|boolean|number>} */
+  getPageParameters_() {
+    return {
+      'gdfp_req': '1',
+      'sfv': DEFAULT_SAFEFRAME_VERSION,
+      'u_sd': this.win.devicePixelRatio,
+      'gct': this.getLocationQueryParameterValue('google_preview') || null,
+    };
+  }
+
   /**
    * Constructs block-level url parameters with side effect of setting
    * size_, jsonTargeting_, and adKey_ fields.
@@ -639,7 +655,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return googleAdUrl(
               this, DOUBLECLICK_BASE_URL, startTime, Object.assign(
                   this.getBlockParameters_(), rtcParams,
-                  this.buildIdentityParams_(), PAGE_LEVEL_PARAMS_));
+                  this.buildIdentityParams_(), this.getPageParameters_()));
         });
     this.troubleshootData_.adUrl = urlPromise;
     return urlPromise;
@@ -715,11 +731,44 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return {'artc': artc.join() || null, 'ati': ati.join(), 'ard': ard.join()};
   }
 
+  /** @override */
+  getCustomRealTimeConfigMacros_() {
+    /**
+     * This whitelist allow attributes on the amp-ad element to be used as
+     * macros for constructing the RTC URL. Add attributes here, in lowercase,
+     * to make them available.
+     */
+    const whitelist = {
+      'height': true,
+      'width': true,
+      'data-slot': true,
+      'data-multi-size': true,
+      'data-multi-size-validation': true,
+      'data-override-width': true,
+      'data-override-height': true,
+    };
+    return {
+      PAGEVIEWID: () => Services.documentInfoForDoc(this.element).pageViewId,
+      HREF: () => this.win.location.href,
+      TGT: () =>
+        JSON.stringify(
+            (tryParseJson(
+                this.element.getAttribute('json')) || {})['targeting']),
+      ATTR: name => {
+        if (!whitelist[name.toLowerCase()]) {
+          dev().warn('TAG', `Invalid attribute ${name}`);
+        } else {
+          return this.element.getAttribute(name);
+        }
+      },
+    };
+  }
+
   /**
    * Appends the callout value to the keys of response to prevent a collision
    * case caused by multiple vendors returning the same keys.
    * @param {!Object<string, string>} response
-   * @param {!string} callout
+   * @param {string} callout
    * @return {!Object<string, string>}
    * @private
    */
@@ -754,10 +803,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // Load amp-analytics extensions
       this.extensions_./*OK*/installExtensionForDoc(
           this.getAmpDoc(), 'amp-analytics');
-    }
-    const refreshInterval = Number(responseHeaders.get('amp-force-refresh'));
-    if (refreshInterval) {
-      this.element.setAttribute(DATA_ATTR_NAME, refreshInterval);
     }
 
     if (this.isFluid_) {
@@ -828,27 +873,29 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  layoutCallback() {
-    const registerFluidAndExec = () => {
-      if (this.isFluid_) {
-        this.registerListenerForFluid_();
-      }
-      return super.layoutCallback();
-    };
+  renderNonAmpCreative() {
+    // If render idle with throttling, impose one second render delay for
+    // non-AMP creatives.  This is not done in the scheduler to ensure as many
+    // slots as possible are marked for layout given scheduler imposes 5 seconds
+    // past previous execution.
     if (this.postAdResponseExperimentFeatures['render-idle-throttle'] &&
-        this.isIdleRender_) {
-      return this.isVerifiedAmpCreativePromise().then(verified => {
-        // Control concurrent loading of non-AMP creatives executed via
-        // idleRenderOutsideViewport as doing so within
-        // idleRenderOutsideViewport would impose at least 5 second delay due to
-        // scheduler constraints.
-        const throttleFn = () => !verified && is3pThrottled(this.win) ?
-          Services.timerFor(this.win).delay(throttleFn, 1000) :
-          registerFluidAndExec();
-        return throttleFn();
-      });
+          this.isIdleRender_) {
+      if (is3pThrottled(this.win)) {
+        return waitFor3pThrottle().then(() => super.renderNonAmpCreative());
+      } else {
+        incrementLoadingAds(this.win);
+        return super.renderNonAmpCreative(true);
+      }
     }
-    return registerFluidAndExec();
+    return super.renderNonAmpCreative();
+  }
+
+  /** @override */
+  layoutCallback() {
+    if (this.isFluid_) {
+      this.registerListenerForFluid_();
+    }
+    return super.layoutCallback();
   }
 
   /** @override  */
@@ -1158,7 +1205,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   /** @type {?../../../src/service/xhr-impl.FetchResponse} */
                   ({
                     headers,
-                    arrayBuffer: () => utf8Encode(creative),
+                    arrayBuffer: () => Promise.resolve(utf8Encode(creative)),
                   });
                     // Pop head off of the array of resolvers as the response
                     // should match the order of blocks declared in the ad url.
@@ -1228,6 +1275,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getNonAmpCreativeRenderingMethod(headerValue) {
     return this.isFluid_ ? XORIGIN_MODE.SAFEFRAME :
       super.getNonAmpCreativeRenderingMethod(headerValue);
+  }
+
+
+  /**
+   * Note that location is parsed once on first access and cached.
+   * @param {string} parameterName
+   * @return {string|undefined} parameter value from window.location.search
+   * @visibleForTesting
+   */
+  getLocationQueryParameterValue(parameterName) {
+    windowLocationQueryParameters = windowLocationQueryParameters ||
+        parseQueryString((this.win.location && this.win.location.search) || '');
+    return windowLocationQueryParameters[parameterName];
   }
 
   /** @override */
@@ -1356,9 +1416,14 @@ AMP.extension(TAG, '0.1', AMP => {
 });
 
 
-/** @visibileForTesting */
+/** @visibleForTesting */
 export function resetSraStateForTesting() {
   sraRequests = null;
+}
+
+/** @visibleForTesting */
+export function resetLocationQueryParametersForTesting() {
+  windowLocationQueryParameters = null;
 }
 
 /**
@@ -1380,15 +1445,16 @@ export function getNetworkId(element) {
  * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instances
  * @return {!Promise<string>} SRA request URL
  */
-function constructSRARequest_(win, doc, instances) {
+export function constructSRARequest_(win, doc, instances) {
   // TODO(bradfrizzell): Need to add support for RTC.
+  dev().assert(instances && instances.length);
   const startTime = Date.now();
   return googlePageParameters(win, doc, startTime)
-      .then(pageLevelParameters => {
+      .then(googPageLevelParameters => {
         const blockParameters = constructSRABlockParameters(instances);
         return truncAndTimeUrl(DOUBLECLICK_BASE_URL,
-            Object.assign(
-                blockParameters, pageLevelParameters, PAGE_LEVEL_PARAMS_),
+            Object.assign(blockParameters, googPageLevelParameters,
+                instances[0].getPageParameters_()),
             startTime);
       });
 }
@@ -1434,7 +1500,7 @@ function serializeItem_(key, value) {
 
 /**
  * @param {!Array<!AmpAdNetworkDoubleclickImpl>} instances
- * @param {!function(AmpAdNetworkDoubleclickImpl):?T} extractFn
+ * @param {function(AmpAdNetworkDoubleclickImpl):?T} extractFn
  * @return {?T} value of first instance with non-null/undefined value or null
  *    if none can be found
  * @template T

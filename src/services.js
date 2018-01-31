@@ -205,11 +205,11 @@ export class Services {
 
   /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
-   * @return {!./service/parallax-impl.ParallaxService}
+   * @return {!./service/layers-impl.LayoutLayers}
    */
-  static parallaxForDoc(nodeOrDoc) {
-    return /** @type {!./service/parallax-impl.ParallaxService} */ (
-      getServiceForDoc(nodeOrDoc, 'amp-fx-parallax'));
+  static layersForDoc(nodeOrDoc) {
+    return /** @type {!./service/layers-impl.LayoutLayers} */ (
+      getServiceForDoc(nodeOrDoc, 'layers'));
   }
 
   /**

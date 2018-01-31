@@ -71,7 +71,7 @@ export const QQID_HEADER = 'X-QQID';
  * implementations of AMP tags, e.g., by AMPHTML implementors.  It should not be
  * added by a publisher page.
  *
- * @const {!string}
+ * @const {string}
  * @visibleForTesting
  */
 export const EXPERIMENT_ATTRIBUTE = 'data-experiment-id';
@@ -185,7 +185,7 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
 /**
  * @param {!Window} win
  * @param {string} type matching typing attribute.
- * @param {!function(!Element):string} groupFn
+ * @param {function(!Element):string} groupFn
  * @return {!Promise<!Object<string,!Array<!Promise<!../../../src/base-element.BaseElement>>>>}
  */
 export function groupAmpAdsByType(win, type, groupFn) {
@@ -209,9 +209,11 @@ export function groupAmpAdsByType(win, type, groupFn) {
  * @return {!Promise<!Object<string,null|number|string>>}
  */
 export function googlePageParameters(win, nodeOrDoc, startTime) {
-  const referrerPromise = Services.viewerForDoc(nodeOrDoc).getReferrerUrl();
-  return getOrCreateAdCid(nodeOrDoc, 'AMP_ECID_GOOGLE', '_ga')
-      .then(clientId => referrerPromise.then(referrer => {
+  return Promise.all([
+    getOrCreateAdCid(nodeOrDoc, 'AMP_ECID_GOOGLE', '_ga'),
+    Services.viewerForDoc(nodeOrDoc).getReferrerUrl()])
+      .then(promiseResults => {
+        const clientId = promiseResults[0];
         const documentInfo = Services.documentInfoForDoc(nodeOrDoc);
         // Read by GPT for GA/GPT integration.
         win.gaGlobal = win.gaGlobal ||
@@ -250,9 +252,9 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
           'top': win != win.top ? topWindowUrlOrDomain(win) : null,
           'loc': win.location.href == documentInfo.canonicalUrl ?
             null : win.location.href,
-          'ref': referrer,
+          'ref': promiseResults[1] || null,
         };
-      }));
+      });
 }
 
 /**

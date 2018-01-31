@@ -18,7 +18,12 @@
 import {ActionTrust} from '../action-trust';
 import {VideoSessionManager} from './video-session-manager';
 import {removeElement, scopedQuerySelector, isRTL} from '../dom';
-import {getData, listen, listenOncePromise} from '../event-helper';
+import {
+  getData,
+  listen,
+  listenOncePromise,
+  createCustomEvent,
+} from '../event-helper';
 import {dev} from '../log';
 import {getMode} from '../mode';
 import {registerServiceBuilderForDoc, getServiceForDoc} from '../service';
@@ -160,6 +165,9 @@ export class VideoManager {
     this.timer_ = Services.timerFor(ampdoc.win);
 
     /** @private @const */
+    this.actions_ = Services.actionServiceForDoc(ampdoc);
+
+    /** @private @const */
     this.boundSecondsPlaying_ = () => this.secondsPlaying_();
 
     // TODO(cvializ, #10599): It would be nice to only create the timer
@@ -178,16 +186,38 @@ export class VideoManager {
       const entry = this.entries_[i];
       if (entry.getPlayingState() !== PlayingStates.PAUSED) {
         analyticsEvent(entry, VideoAnalyticsEvents.SECONDS_PLAYED);
+        this.timeUpdateActionEvent_(entry);
       }
     }
     this.timer_.delay(this.boundSecondsPlaying_, SECONDS_PLAYED_MIN_DELAY);
   }
 
   /**
+   * Triggers a LOW-TRUST timeupdate event consumable by AMP actions.
+   * Frequency of this event is controlled by SECONDS_PLAYED_MIN_DELAY and is
+   * every 1 second for now.
+   * @private
+   */
+  timeUpdateActionEvent_(entry) {
+    const name = 'timeUpdate';
+    const currentTime = entry.video.getCurrentTime();
+    const duration = entry.video.getDuration();
+    if (isFiniteNumber(currentTime) &&
+        isFiniteNumber(duration) &&
+        duration > 0) {
+      const perc = currentTime / duration;
+      const event = createCustomEvent(this.ampdoc.win, `${TAG}.${name}`,
+          {time: currentTime, percent: perc});
+      this.actions_.trigger(entry.video.element, name, event, ActionTrust.LOW);
+    }
+  }
+
+  /**
    * Registers a video component that implements the VideoInterface.
    * @param {!../video-interface.VideoInterface} video
+   * @param {boolean=} manageAutoplay
    */
-  register(video) {
+  register(video, manageAutoplay = true) {
     dev().assert(video);
 
     this.registerCommonActions_(video);
@@ -197,7 +227,7 @@ export class VideoManager {
     }
 
     this.entries_ = this.entries_ || [];
-    const entry = new VideoEntry(this, video);
+    const entry = new VideoEntry(this, video, manageAutoplay);
     this.maybeInstallVisibilityObserver_(entry);
     this.maybeInstallPositionObserver_(entry);
     this.maybeInstallOrientationObserver_(entry);
@@ -453,8 +483,9 @@ class VideoEntry {
   /**
    * @param {!VideoManager} manager
    * @param {!../video-interface.VideoInterface} video
+   * @param {boolean} allowAutoplay
    */
-  constructor(manager, video) {
+  constructor(manager, video, allowAutoplay) {
 
     /** @private @const {!VideoManager} */
     this.manager_ = manager;
@@ -467,6 +498,9 @@ class VideoEntry {
 
     /** @package @const {!../video-interface.VideoInterface} */
     this.video = video;
+
+    /** @private @const {boolean} */
+    this.allowAutoplay_ = allowAutoplay;
 
     /** @private {?Element} */
     this.autoplayAnimation_ = null;
@@ -599,6 +633,7 @@ class VideoEntry {
     listen(element, VideoEvents.PLAYING, () => this.videoPlayed_());
     listen(element, VideoEvents.MUTED, () => this.muted_ = true);
     listen(element, VideoEvents.UNMUTED, () => this.muted_ = false);
+    listen(element, VideoEvents.ENDED, () => this.videoEnded_());
 
     // Currently we only register after video player is build.
     this.videoBuilt_();
@@ -653,11 +688,7 @@ class VideoEntry {
    * @private
    */
   videoPaused_() {
-    if (this.video.getCurrentTime() === this.video.getDuration()) {
-      analyticsEvent(this, VideoAnalyticsEvents.ENDED);
-    } else {
-      analyticsEvent(this, VideoAnalyticsEvents.PAUSE);
-    }
+    analyticsEvent(this, VideoAnalyticsEvents.PAUSE);
     this.isPlaying_ = false;
 
     // Prevent double-trigger of session if video is autoplay and the video
@@ -668,6 +699,14 @@ class VideoEntry {
       // reset the flag
       this.pauseCalledByAutoplay_ = false;
     }
+  }
+
+  /**
+   * Callback for when the video has ended
+   * @private
+   */
+  videoEnded_() {
+    analyticsEvent(this, VideoAnalyticsEvents.ENDED);
   }
 
   /**
@@ -914,6 +953,9 @@ class VideoEntry {
    * @private
    */
   autoplayLoadedVideoVisibilityChanged_() {
+    if (!this.allowAutoplay_) {
+      return;
+    }
     if (this.isVisible_) {
       this.visibilitySessionManager_.beginSession();
       this.video.play(/*autoplay*/ true);

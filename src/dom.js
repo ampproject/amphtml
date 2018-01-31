@@ -136,7 +136,7 @@ export function removeChildren(parent) {
  * are deeply cloned. Notice, that this method should be used with care and
  * preferably on smaller subtrees.
  * @param {!Element} from
- * @param {!Element} to
+ * @param {!Element|!DocumentFragment} to
  */
 export function copyChildren(from, to) {
   const frag = to.ownerDocument.createDocumentFragment();
@@ -297,7 +297,7 @@ export function closestBySelector(element, selector) {
 /**
  * Checks if the given element matches the selector
  * @param  {!Element} el The element to verify
- * @param  {!string} selector The selector to check against
+ * @param  {string} selector The selector to check against
  * @return {boolean} True if the element matched the selector. False otherwise.
  */
 export function matches(el, selector) {
@@ -609,13 +609,32 @@ export function ancestorElementsByTag(child, tagName) {
 }
 
 /**
+ * Returns a clone of the content of a template element.
+ *
+ * Polyfill to replace .content access for browsers that do not support
+ * HTMLTemplateElements natively.
+ *
+ * @param {!HTMLTemplateElement|!Element} template
+ * @return {!DocumentFragment}
+ */
+export function templateContentClone(template) {
+  if ('content' in template) {
+    return template.content.cloneNode(true);
+  } else {
+    const content = template.ownerDocument.createDocumentFragment();
+    copyChildren(template, content);
+    return content;
+  }
+}
+
+/**
  * Iterate over an array-like. Some collections like NodeList are
  * lazily evaluated in some browsers, and accessing `length` forces full
  * evaluation. We can improve performance by iterating until an element is
  * `undefined` to avoid checking the `length` property.
  * Test cases: https://jsperf.com/iterating-over-collections-of-elements
  * @param {!IArrayLike<T>} iterable
- * @param {!function(T, number)} cb
+ * @param {function(T, number)} cb
  * @template T
  */
 export function iterateCursor(iterable, cb) {

@@ -18,9 +18,6 @@ import {getMode} from './mode';
 import {getModeObject} from './mode-object';
 import {isEnumValue} from './types';
 
-/** @const Time when this JS loaded.  */
-const start = Date.now();
-
 /**
  * Triple zero width space.
  *
@@ -159,7 +156,9 @@ export class Log {
       } else if (level == 'WARN') {
         fn = this.win.console.warn || fn;
       }
-      messages.unshift(Date.now() - start, '[' + tag + ']');
+      if (getMode().localDev) {
+        messages.unshift('[' + tag + ']');
+      }
       fn.apply(this.win.console, messages);
     }
   }
@@ -381,6 +380,21 @@ export class Log {
   }
 
   /**
+   * Throws an error if the first argument isn't a boolean.
+   *
+   * For more details see `assert`.
+   *
+   * @param {*} shouldBeBoolean
+   * @param {string=} opt_message The assertion message
+   * @return {boolean} The boolean value.
+   */
+  assertBoolean(shouldBeBoolean, opt_message) {
+    this.assert(!!shouldBeBoolean === shouldBeBoolean,
+        (opt_message || 'Boolean expected') + ': %s', shouldBeBoolean);
+    return /** @type {boolean} */ (shouldBeBoolean);
+  }
+
+  /**
    * Asserts and returns the enum value. If the enum doesn't contain such a value,
    * the error is thrown.
    *
@@ -590,7 +604,7 @@ function getUserLogger(suffix) {
     if (mode.development || logNum >= 1) {
       return LogLevel.FINE;
     }
-    return LogLevel.OFF;
+    return LogLevel.WARN;
   }, suffix);
 }
 

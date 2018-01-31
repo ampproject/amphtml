@@ -48,6 +48,10 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'domainLookupTime': 'DOMAIN_LOOKUP_TIME',
       'domInteractiveTime': 'DOM_INTERACTIVE_TIME',
       'externalReferrer': 'EXTERNAL_REFERRER',
+      'firstContentfulPaint': 'FIRST_CONTENTFUL_PAINT',
+      'firstViewportReady': 'FIRST_VIEWPORT_READY',
+      'makeBodyVisible': 'MAKE_BODY_VISIBLE',
+      'incrementalEngagedTime': 'INCREMENTAL_ENGAGED_TIME',
       'navRedirectCount': 'NAV_REDIRECT_COUNT',
       'navTiming': 'NAV_TIMING',
       'navType': 'NAV_TYPE',
@@ -255,6 +259,55 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
           'maxTimerLength': 1200,
         },
         'request': 'pageping',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
+  'byside': {
+    'vars': {
+	  'agentDomain': 'webcare',
+      'webcareId': '',
+      'channel': '',
+      'fid': '',
+	  'lang': 'pt',
+    },
+    'requests': {
+      'host': '//${agentDomain}.byside.com/',
+      'base': '${host}BWA${webcare_id}/amp/',
+      'pageview': '${base}pixel.php',
+	  'event': '${base}signal.php?event_id=${eventId}' +
+	    '&event_label=${eventLabel}&fields=${fields}',
+    },
+    'extraUrlParams': {
+      'webcare_id': '${webcareId}',
+      'bwch': '${channel}',
+      'lang': '${lang}',
+      'fid': '${fid}',
+      'bwit': 'A',
+      'tuid': '${clientId(byside_webcare_tuid)}',
+      'suid': '',
+      'puid': '${pageViewId}p${timestamp}',
+      'referrer': '${documentReferrer}',
+      'page': '${sourceUrl}',
+      'amppage': '${ampdocUrl}',
+      'bwpt': '${title}',
+      'bres': '${viewportWidth}x${viewportHeight}',
+      'res': '${screenWidth}x${screenHeight}',
+      'v': 'v20171116a',
+      'ampv': '${ampVersion}',
+      'viewer': '${viewer}',
+      'ua': '${userAgent}',
+      'r': '${random}',
+    },
+    'triggers': {
+      'pageview': {
+        'on': 'visible',
+        'request': 'pageview',
       },
     },
     'transport': {
@@ -1187,10 +1240,11 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
   'nielsen': {
     'vars': {
       'sessionId': 'CLIENT_ID(imrworldwide)',
+      'prefix': '',
     },
     'requests': {
-      'session': 'https://uaid-linkage.imrworldwide.com/cgi-bin/gn?prd=session&c13=asid,P${apid}&sessionId=${sessionId}&pingtype=4&enc=false&c61=createtm,${timestamp}&rnd=${random}',
-      'cloudapi': 'https://cloudapi.imrworldwide.com/nmapi/v2/${apid}/${sessionId}/a?b=%7B%22devInfo%22%3A%7B%22devId%22%3A%22${sessionId}%22%2C%22apn%22%3A%22${apn}%22%2C%22apv%22%3A%22${apv}%22%2C%22apid%22%3A%22${apid}%22%7D%2C%22metadata%22%3A%7B%22static%22%3A%7B%22type%22%3A%22static%22%2C%22section%22%3A%22${section}%22%2C%22assetid%22%3A%22${pageViewId}%22%2C%22segA%22%3A%22${segA}%22%2C%22segB%22%3A%22${segB}%22%2C%22segC%22%3A%22${segC}%22%2C%22adModel%22%3A%220%22%2C%22dataSrc%22%3A%22cms%22%7D%2C%22content%22%3A%7B%7D%2C%22ad%22%3A%7B%7D%7D%2C%22event%22%3A%22playhead%22%2C%22position%22%3A%22${timestamp}%22%2C%22data%22%3A%7B%22hidden%22%3A%22${backgroundState}%22%2C%22blur%22%3A%22${backgroundState}%22%2C%22position%22%3A%22${timestamp}%22%7D%2C%22type%22%3A%22static%22%2C%22utc%22%3A%22${timestamp}%22%2C%22index%22%3A%22${requestCount}%22%7D',
+      'session': 'https://${prefix}uaid-linkage.imrworldwide.com/cgi-bin/gn?prd=session&c13=asid,P${apid}&sessionId=${sessionId}_${pageViewId}&pingtype=4&enc=false&c61=createtm,${timestamp}&rnd=${random}',
+      'cloudapi': 'https://${prefix}cloudapi.imrworldwide.com/nmapi/v2/${apid}/${sessionId}_${pageViewId}/a?b=%7B%22devInfo%22%3A%7B%22devId%22%3A%22${sessionId}%22%2C%22apn%22%3A%22${apn}%22%2C%22apv%22%3A%22${apv}%22%2C%22apid%22%3A%22${apid}%22%7D%2C%22metadata%22%3A%7B%22static%22%3A%7B%22type%22%3A%22static%22%2C%22section%22%3A%22${section}%22%2C%22assetid%22%3A%22${pageViewId}%22%2C%22segA%22%3A%22${segA}%22%2C%22segB%22%3A%22${segB}%22%2C%22segC%22%3A%22${segC}%22%2C%22adModel%22%3A%220%22%2C%22dataSrc%22%3A%22cms%22%7D%2C%22content%22%3A%7B%7D%2C%22ad%22%3A%7B%7D%7D%2C%22event%22%3A%22playhead%22%2C%22position%22%3A%22${timestamp}%22%2C%22data%22%3A%7B%22hidden%22%3A%22${backgroundState}%22%2C%22blur%22%3A%22${backgroundState}%22%2C%22position%22%3A%22${timestamp}%22%7D%2C%22type%22%3A%22static%22%2C%22utc%22%3A%22${timestamp}%22%2C%22index%22%3A%22${requestCount}%22%7D',
     },
     'triggers': {
       'visible': {
@@ -1285,11 +1339,20 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'date=${timestamp}&' +
         'ampid=${clientId(_parsely_visitor)}',
       'pageview': '${basePrefix}&action=pageview',
+      'heartbeat': '${basePrefix}&action=heartbeat' +
+      '&tt=${totalEngagedTime}&inc=${incrementalEngagedTime(parsely-js)}',
     },
     'triggers': {
       'defaultPageview': {
         'on': 'visible',
         'request': 'pageview',
+      },
+      'heartbeat': {
+        'on': 'timer',
+        'timerSpec': {
+          'interval': 5,
+        },
+        'request': 'heartbeat',
       },
     },
     'transport': {

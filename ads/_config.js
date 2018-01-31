@@ -191,6 +191,14 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  adventive: {
+    preconnect: [
+      'https://ads.adventive.com',
+      'https://amp.adventivedev.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   adverline: {
     prefetch: 'https://ads.adverline.com/richmedias/amp.js',
     preconnect: [
@@ -204,6 +212,8 @@ export const adConfig = {
   advertserve: {
     renderStartImplemented: true,
   },
+
+  adzerk: {},
 
   affiliateb: {
     prefetch: 'https://track.affiliate-b.com/amp/a.js',
@@ -328,6 +338,15 @@ export const adConfig = {
     clientIdCookieName: '_ga',
     renderStartImplemented: true,
     masterFrameAccessibleType: 'google_network',
+  },
+
+  eadv: {
+    renderStartImplemented: true,
+    clientIdScope: 'AMP_ECID_EADV',
+    prefetch: [
+      'https://www.eadv.it/track/esr.min.js',
+      'https://www.eadv.it/track/ead.min.js',
+    ],
   },
 
   eas: {
@@ -613,6 +632,8 @@ export const adConfig = {
 
   postquare: {},
 
+  pubexchange: {},
+
   pubmatic: {
     prefetch: 'https://ads.pubmatic.com/AdServer/js/amp.js',
   },
@@ -829,6 +850,11 @@ export const adConfig = {
 
   yieldone: {
     prefetch: 'https://img.ak.impact-ad.jp/ic/pone/commonjs/yone-amp.js',
+  },
+
+  yieldpro: {
+    preconnect: 'https://creatives.yieldpro.eu',
+    renderStartImplemented: true,
   },
 
   zedo: {

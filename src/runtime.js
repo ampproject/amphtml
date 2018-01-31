@@ -53,6 +53,7 @@ import {installDocumentStateService} from './service/document-state';
 import {installGlobalClickListenerForDoc} from './service/document-click';
 import {installGlobalSubmitListenerForDoc} from './document-submit';
 import {installHistoryServiceForDoc} from './service/history-impl';
+import {installInputService} from './input';
 import {installPlatformService} from './service/platform-impl';
 import {installResourcesServiceForDoc} from './service/resources-impl';
 import {
@@ -103,6 +104,7 @@ export function installRuntimeServices(global) {
   installTimerService(global);
   installVsyncService(global);
   installXhrService(global);
+  installInputService(global);
 }
 
 

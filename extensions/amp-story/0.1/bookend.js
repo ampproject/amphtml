@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Animation} from '../../../src/animation';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {ShareWidget} from './share';
+import {ScrollableShareWidget} from './share';
 import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
@@ -26,7 +25,7 @@ import {isArray} from '../../../src/types';
 import {parseUrl} from '../../../src/url';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
 import {throttle} from '../../../src/utils/rate-limit';
-import * as tr from '../../../src/transition';
+import {isProtocolValid} from '../../../src/url';
 
 
 /**
@@ -49,13 +48,14 @@ const FULLBLEED_THRESHOLD = 88;
 const FULLBLEED_CLASSNAME = 'i-amphtml-story-bookend-fullbleed';
 
 
+/** @private @const {string} */
+const HIDDEN_CLASSNAME = 'i-amphtml-hidden';
+
+
 /** @private @const {!./simple-template.ElementDef} */
 const ROOT_TEMPLATE = {
   tag: 'section',
-  attrs: dict({
-    'class': 'i-amphtml-story-bookend',
-    'hidden': true,
-  }),
+  attrs: dict({'class': `i-amphtml-story-bookend ${HIDDEN_CLASSNAME}`}),
   children: [
     // Overflow container that gets pushed to the bottom when content height is
     // smaller than viewport.
@@ -213,11 +213,8 @@ export class Bookend {
     /** @private {?Element} */
     this.closeBtn_ = null;
 
-    /** @private {!ShareWidget} */
-    this.shareWidget_ = ShareWidget.create(win);
-
-    /** @private {boolean} */
-    this.isActive_ = false;
+    /** @private {!ScrollableShareWidget} */
+    this.shareWidget_ = ScrollableShareWidget.create(win);
   }
 
   /**
@@ -267,7 +264,8 @@ export class Bookend {
 
   /** @return {boolean} */
   isActive() {
-    return this.isActive_;
+    return this.isBuilt() &&
+        !this.getRoot().classList.contains(HIDDEN_CLASSNAME);
   }
 
   /**
@@ -324,49 +322,24 @@ export class Bookend {
     }, {});
   }
 
-  /**
-   * Hides bookend with a transition.
-   * Uses animation utils instead of CSS transition for convenience and
-   * coordination (i.e. listening to transition end).
-   */
+  /** Hides bookend with a transition. */
   hide() {
-    const transition = tr.setStyles(this.getRoot(), {
-      transform: tr.translateY(tr.numeric(0, this.getViewportHeight_())),
-    });
-
-    this.isActive_ = false;
-
-    Animation.animate(this.getRoot(), transition, 300, 'ease-in')
-        .thenAlways(() => {
-          this.getRoot().setAttribute('hidden', true);
-        });
+    this.toggle_(false);
   }
 
-  /**
-   * Shows bookend with a transition.
-   * Uses animation utils instead of CSS transition for convenience and
-   * coordination (i.e. listening to transition end).
-   */
+  /** Shows bookend with a transition. */
   show() {
-    const transition = tr.setStyles(this.getRoot(), {
-      transform: tr.translateY(tr.numeric(this.getViewportHeight_(), 0)),
-    });
-
-    this.isActive_ = true;
-
-    this.getRoot().classList.remove(FULLBLEED_CLASSNAME);
-    this.getRoot().removeAttribute('hidden');
-    this.getRoot()./*OK*/scrollTop = 0;
-
-    Animation.animate(this.getRoot(), transition, 300, 'ease-out');
+    this.toggle_(true);
   }
 
   /**
-   * @return {number}
+   * @param {boolean} show
    * @private
    */
-  getViewportHeight_() {
-    return Services.viewportForDoc(this.getRoot()).getSize().height;
+  toggle_(show) {
+    Services.vsyncFor(this.win_).mutate(() => {
+      this.getRoot().classList.toggle(HIDDEN_CLASSNAME, !show);
+    });
   }
 
   /**
@@ -442,8 +415,8 @@ export class Bookend {
     const jsonLd = getJsonLd(ampdoc.getRootNode());
 
     const metadata = {
-      title: jsonLd && jsonLd['heading'] ?
-        jsonLd['heading'] :
+      title: jsonLd && jsonLd['headline'] ?
+        jsonLd['headline'] :
         user().assertElement(
             this.win_.document.head.querySelector('title'),
             'Please set <title> or structured data (JSON-LD).').textContent,
@@ -453,6 +426,8 @@ export class Bookend {
     };
 
     if (jsonLd && isArray(jsonLd['image']) && jsonLd['image'].length) {
+      user().assert(isProtocolValid(jsonLd['image']),
+          `Unsupported protocol for story image URL ${jsonLd['image']}`);
       metadata.imageUrl = jsonLd['image'][0];
     }
 

@@ -34,6 +34,7 @@ amp-story[standalone][desktop] {
  right: 0!important;
  bottom: 0!important;
  left: 0!important;
+ overflow: hidden !important;
 }
 
 .i-amphtml-story-background-overlay,
@@ -62,20 +63,22 @@ amp-story[standalone][desktop] {
 
 .i-amphtml-story-background {
   position: absolute !important;
-  top: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  left: 0 !important;
+  top: -150px !important;
+  right: -150px !important;
+  bottom: -150px !important;
+  left: -150px !important;
   opacity: 0 !important;
   filter: blur(50px) !important;
-  margin: -60px !important;
   background-size: cover !important;
   background-color: transparent !important;
   background-position: center center !important;
+  will-change: opacity, z-index !important;
+  z-index: 0 !important;
 }
 
 .i-amphtml-story-background.active {
-  opacity: 1!important;
+  opacity: 1 !important;
+  z-index: 1 !important;
 }
 
 [desktop] amp-story-page {
@@ -85,40 +88,61 @@ amp-story[standalone][desktop] {
   border-radius: 16px!important;
 }
 
-amp-story-page.i-amphtml-story-page-shown {
-  transition: none!important;
-}
-
-[desktop] amp-story-page.i-amphtml-story-page-shown {
-  transition: opacity 300ms linear, transform 300ms cubic-bezier(0.4, 0.0, 0.2, 1)!important;
+[desktop] amp-story-page[distance="0"],
+[desktop] amp-story-page[distance="1"] {
+  /* TODO(alanorozco): Enable transition for distance = 2.
+   * For some reason, enabling it breaks layout scheduling. */
+  transition: opacity 300ms linear, transform 300ms cubic-bezier(0.4, 0.0, 0.2, 1) !important;
 }
 
 [desktop] .i-amphtml-story-button-container {
-  position: absolute;
-  /* Todo(prateekbh): find a simpler way maybe */
-  width: calc(50vw - 23vh - 64px);
-  top: 0;
-  height: 100vh;
-  z-index: 1;
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 100002 !important;
+  pointer-events: none !important;
+  display: block !important;
 }
 
-[desktop] .next-container {
-  right: 0;
+[desktop] .i-amphtml-story-button-container::before {
+  content: '';
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  /* Roughly equivalent to (viewport width - active page width) / 2  */
+  width: calc(50vw - 23vh - 32px) !important;
+}
+
+.i-amphtml-story-button-move,
+.i-amphtml-story-fwd-next > .i-amphtml-story-page-sentinel,
+.i-amphtml-story-back-prev > .i-amphtml-story-page-sentinel {
+  pointer-events: all !important;
+}
+
+.i-amphtml-story-button-hidden > .i-amphtml-story-button-move {
+  cursor: default !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+}
+
+[desktop] > .next-container::before {
+  right: 0 !important;
   background: linear-gradient(to right, rgba(33,33,33,0) 0%, rgba(33,33,33,0.32) 100%)!important;
 }
 
-[desktop] .prev-container {
-  left: 0;
+[desktop] > .prev-container::before {
+  left: 0 !important;
   background: linear-gradient(to right, rgba(33,33,33,0.32) 0%, rgba(33,33,33,0) 100%)!important;
 }
 
-[desktop] .i-amphtml-story-button-prev:hover ~ [pre-active],
-[desktop] .i-amphtml-story-button-next:hover ~ [active] + amp-story-page {
-  opacity: .25!important;
+[desktop] > .next-container > .i-amphtml-story-button-move {
+  right: 0 !important;
 }
 
-
-[desktop] amp-story-page[pre-active] {
+[desktop] amp-story-page[pre-active],
+.prev-container > .i-amphtml-story-page-sentinel {
   /* -150% + 15% */
   transform: scale(0.9) translateX(calc(-150% - 64px)) translateY(0%) !important;
 }
@@ -128,9 +152,10 @@ amp-story-page.i-amphtml-story-page-shown {
   opacity: 1!important;;
 }
 
-[desktop] amp-story-page[active] + amp-story-page {
+[desktop] amp-story-page[active] + amp-story-page,
+.next-container > .i-amphtml-story-page-sentinel {
   /* 50% - 15% */
-  transform: scale(0.9) translateX(calc(50% + 64px)) translateY(0%) !important;
+  transform: scale(0.9) translate(calc(50% + 64px), 0%) !important;
 }
 
 [desktop] amp-story-page[active] + amp-story-page ~ amp-story-page {
@@ -162,19 +187,34 @@ amp-story-page.i-amphtml-story-page-shown {
   transform: scale(0.9) translateX(-350%) translateY(0%) !important;
 }
 
-[desktop] amp-story-page {
+[desktop] > amp-story-page,
+.i-amphtml-story-page-sentinel {
   left: 50%!important;
-  right: auto!important;
-  margin: auto!important;
-  height: 75vh!important;
-  width: calc(3/5 * 75vh) !important;
-  box-shadow: 0 0 15px rgba(0, 0, 0, .4)!important;
+  right: auto !important;
+  margin: auto !important;
+  max-height: 75vh !important;
+  max-width: calc(3/5 * 75vh) !important;
   min-width: 320px !important;
   min-height: 533px !important;
 }
 
+[desktop] > amp-story-page {
+  box-shadow: 0 0 15px rgba(0, 0, 0, .4)!important;
+}
+
+.i-amphtml-story-page-sentinel {
+  position: absolute !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  margin-left: -32px !important;
+  z-index: 100002 !important;
+  cursor: pointer;
+}
+
 /* Navigation buttons */
-[desktop] .i-amphtml-story-button-move {
+.i-amphtml-story-button-move {
   position: absolute!important;
   top: 0!important;
   bottom: 0!important;
@@ -192,67 +232,68 @@ amp-story-page.i-amphtml-story-page-shown {
   opacity: .5!important;
   transition: 150ms opacity linear, 300ms transform linear!important;
   cursor: pointer!important;
-  z-index: 1!important;
+  z-index: 100002!important;
   outline: none!important;
 }
 
-.i-amphtml-story-button-move {
-  display: none!important;
+.i-amphtml-story-prev-hover > amp-story-page[pre-active] {
+  opacity: 0.3 !important;
 }
 
-.i-amphtml-story-button-move:before {
-  position: absolute!important;
-  height: 65px!important;
-  width: 65px!important;
-  content: ''!important;
-  transition: 300ms transform linear!important;
+.i-amphtml-story-next-hover > amp-story-page[active] + amp-story-page {
+  opacity: 0.3 !important;
 }
 
-.i-amphtml-story-button-container.prev-container:hover ~ amp-story-page[pre-active] {
-  opacity: 0.3!important;
-}
-
-.i-amphtml-story-button-container.next-container:hover ~ amp-story-page[active] + amp-story-page {
-  opacity: 0.3!important;
-}
-
-.i-amphtml-story-button-container:hover .i-amphtml-story-button-move:not(.i-amphtml-story-button-move-hidden) {
-  opacity: 1!important;
-}
-
-.i-amphtml-story-button-container:hover  .i-amphtml-story-button-next {
-  transform: translateX(8px)!important;
-}
-
-.i-amphtml-story-button-container:hover  .i-amphtml-story-button-prev {
-  transform: translateX(-8px)!important;
-}
-
-.i-amphtml-story-button-next {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="16" height="25" xmlns="http://www.w3.org/2000/svg"><path d="M.3 3l9.5 9.5L.3 22l3 3 12.4-12.5L3.2 0"/></svg>')!important;
-  background-position: 55% 50%!important;
-  right: 0!important;
-}
-
-.i-amphtml-story-button-prev {
+.prev-container > .i-amphtml-story-button-move {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg width="16" height="25" xmlns="http://www.w3.org/2000/svg"><path d="M15.7 22l-9.5-9.5L15.7 3l-3-3L.4 12.6 12.8 25"/></svg>')!important;
   background-position: 45% 50%!important;
   left: 0!important;
 }
 
-.i-amphtml-story-button-next:hover {
+.i-amphtml-story-fwd-next > .i-amphtml-story-button-move {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg width="16" height="25" xmlns="http://www.w3.org/2000/svg"><path d="M.3 3l9.5 9.5L.3 22l3 3 12.4-12.5L3.2 0"/></svg>')!important;
+  background-position: 55% 50%!important;
+}
+
+.i-amphtml-story-fwd-replay > .i-amphtml-story-button-move {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="32px" height="32px" viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+  background-position: center center;
+  background-size: 32px 32px !important;
+}
+
+.i-amphtml-story-fwd-more > .i-amphtml-story-button-move {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#000000"><path d="M0 0h24v24H0z" fill="none"/><path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>') !important;
+  background-position: center center;
+  background-size: 32px 32px !important;
+}
+
+/* On forward button mouseover */
+.i-amphtml-story-next-hover > .next-container > .i-amphtml-story-button-move,
+.i-amphtml-story-prev-hover > .prev-container > .i-amphtml-story-button-move {
+  transform: scale(1.1) !important;
+  opacity: 1!important;
+}
+
+/* Do not display when hidden. */
+.i-amphtml-story-prev-hover > .i-amphtml-story-button-hidden >
+    .i-amphtml-story-button-move {
+  opacity: 0 !important;
+}
+
+/* On forward (next) button mouseover */
+.i-amphtml-story-next-hover > .i-amphtml-story-fwd-next >
+    .i-amphtml-story-button-move {
   transform: translateX(8px)!important;
   opacity: 1!important;
 }
 
-.i-amphtml-story-button-prev:hover {
+/* On back button mouseover */
+.i-amphtml-story-prev-hover > .i-amphtml-story-back-prev >
+    .i-amphtml-story-button-move,
+.i-amphtml-story-prev-hover > .i-amphtml-story-back-close-bookend  >
+    .i-amphtml-story-button-move {
   transform: translateX(-8px)!important;
   opacity: 1!important;
-}
-
-.i-amphtml-story-button-move.i-amphtml-story-button-move-hidden {
-  opacity: 0!important;
-  cursor: default!important;
 }
 
 /* Top bar */
@@ -265,12 +306,8 @@ amp-story-page.i-amphtml-story-page-shown {
   background: linear-gradient(to bottom, rgba(33,33,33,0.32) 0%, rgba(33,33,33,0) 100%)!important;
 }
 
-.i-amphtml-story-share {
-  display: none;
-}
-
-[desktop] .i-amphtml-story-share {
-  display: flex!important;
+.i-amphtml-story-share-pill {
+  display: none !important;
   position: absolute!important;
   top: 0!important;
   right: 40px!important;
@@ -280,8 +317,12 @@ amp-story-page.i-amphtml-story-page-shown {
   align-items: center!important;
 }
 
+[desktop] .i-amphtml-story-share-pill {
+  display: flex !important;
+}
+
 /* Share text for share box */
-.i-amphtml-story-share:after {
+.i-amphtml-story-share-pill:after {
   font-family: 'Roboto', sans-serif!important;
   content: 'SHARE'!important;
   position: absolute!important;
@@ -296,7 +337,7 @@ amp-story-page.i-amphtml-story-page-shown {
 }
 
 /* background for the share box */
-.i-amphtml-story-share:before {
+.i-amphtml-story-share-pill:before {
   position: absolute!important;
   content: ''!important;
   width: 58px!important;
@@ -308,110 +349,102 @@ amp-story-page.i-amphtml-story-page-shown {
   right: 0!important;
 }
 
-.i-amphtml-story-share:hover:before {
-  width: calc(100% + 16px)!important;
-}
-
-.i-amphtml-story-share .i-amphtml-story-share-list > li  {
+.i-amphtml-story-share-pill .i-amphtml-story-share-item  {
   opacity: 0!important;
   transition: opacity 300ms linear!important;
 }
 
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li {
+.i-amphtml-story-share-pill:hover .i-amphtml-story-share-item {
   opacity: 1!important;
 }
 
-.i-amphtml-story-share .i-amphtml-story-share-list > li + li {
-  margin-left: 8px!important;
+.i-amphtml-story-share-pill .i-amphtml-story-share-item {
+  margin: 0 !important;
+  width: 48px !important;
+  height: 48px !important;
+  padding: 0 !important;
 }
 
 /* Incremental fade in */
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(9) {
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(9) {
   transition-delay: calc(30ms * 1)!important;
 }
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(8) {
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(8) {
   transition-delay: calc(30ms * 2)!important;
 }
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(7) {
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(7) {
   transition-delay: calc(30ms * 3)!important;
 }
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(6) {
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(6) {
   transition-delay: calc(30ms * 4)!important;
 }
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(5) {
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(5) {
   transition-delay: calc(30ms * 5)!important;
 }
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(4) {
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(4) {
   transition-delay: calc(30ms * 6)!important;
 }
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(3) {
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(3) {
   transition-delay: calc(30ms * 7)!important;
 }
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(2) {
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(2) {
   transition-delay: calc(30ms * 8)!important;
 }
-.i-amphtml-story-share:hover .i-amphtml-story-share-list > li:nth-child(1) {
+.i-amphtml-story-share-pill:hover
+    .i-amphtml-story-share-item:nth-child(1) {
   transition-delay: calc(30ms * 9)!important;
 }
 
-.i-amphtml-story-share .i-amphtml-story-share-list {
+.i-amphtml-story-share-pill .i-amphtml-story-share-list {
   padding: 0!important;
-  margin: 0 80px 0 0!important;
+  margin: 0 72px 0 0 !important;
 }
 
-.i-amphtml-story-share .i-amphtml-story-share-list > li:first-child,
-.i-amphtml-story-share .i-amphtml-story-share-list > li:last-child,
-.i-amphtml-story-share .i-amphtml-story-share-list > li {
-  padding: 0!important;
-  width: 40px!important;
-  height: 40px!important;
+.i-amphtml-story-share-pill:hover:before {
+  width: calc(100% - 32px) !important;
 }
 
-[desktop] .i-amphtml-story-share .i-amphtml-story-share-list > li {
-  width: 56px!important;
-  height: 56px!important;
-}
-
-.i-amphtml-story-share .i-amphtml-story-share-list > li svg {
-  width: 28px!important;
-  height: 28px!important;
-}
-
-.i-amphtml-story-share:hover:before {
-  width: calc(100% + 16px)!important;
-}
-
-.i-amphtml-story-share .i-amphtml-story-share-icon {
-  display: flex!important;
+.i-amphtml-story-share-pill .i-amphtml-story-share-icon {
+  display: flex !important;
   justify-content: center;
   align-items: center;
-  width: 40px!important;
-  height: 40px!important;
-  background-size: 30px 30px;
-  background-color: transparent;
+  width: 48px !important;
+  height: 48px !important;
   padding: 0;
 }
 
 [desktop] .i-amphtml-story-share-icon {
   font-size: 0px!important;
-  background-position-y: 5px!important;
+  background-size: 24px 24px !important;
+  background-position: center center !important;
+  padding: 0 !important;
+}
+
+[desktop] .i-amphtml-story-share-icon.amp-social-share-facebook {
+  /* SVG icon has inner padding, so the glyph renders visually smaller than
+   * other icons, so we work around it by setting a higher background size. */
+  background-size: 28px 28px !important;
+  background-position: center center !important;
 }
 
 [desktop] .i-amphtml-story-share-icon::before {
-  background-color: transparent!important;
+  display: none !important;
 }
 
 [desktop] .i-amphtml-story-share-icon:active::before {
-  background-color: transparent!important;
+  display: none !important;
 }
 
 [desktop] .i-amphtml-story-share-list {
-  margin-right: 100px!important;
-  margin-top: 15px!important;
-}
-
-.i-amphtml-story-share .i-amphtml-story-share-name {
-  display: none!important;
+  margin-right: 72px !important;
 }
 
 /* system layer changes */
@@ -420,14 +453,16 @@ amp-story-page.i-amphtml-story-page-shown {
   top: auto!important;
   bottom: 0!important;
   height: 96px!important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 [desktop] .i-amphtml-story-progress-bar {
- height: 3px!important;
- width: calc(100vw/3)!important;
- margin: auto!important;
- top: 0!important;
- bottom: 0!important;
+  position: relative !important;
+  height: 3px !important;
+  width: calc(100vw/3) !important;
+  margin: 0px !important;
 }
 
 [desktop] .i-amphtml-story-page-progress-bar {
@@ -444,26 +479,21 @@ amp-story-page.i-amphtml-story-page-shown {
 }
 
 [desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-left {
-  display: block!important;
-  float: left!important;
-  margin: 16px 40px!important;
+  display: flex !important;
+  height: 40px !important;
+  flex: 1 !important;
+  min-width: 200px;
+  align-items: center;
+  justify-content: flex-end;
+  margin-right: 32px;
 }
 [desktop] .i-amphtml-story-system-layer .i-amphtml-story-ui-right {
-  margin: 16px 40px!important;
+  display: block !important;
+  flex: 1 !important;
 }
 
 [desktop] .i-amphtml-story-top {
   z-index: 100002 !important; /* 1 higher than bookend */
-
-  /* This is only needed since we need to render the share button inside the
-  top bar in a higher context than the bookend. This won't be necessary once
-  the bookend close button is rendered on a different area than the top bar. */
-  pointer-events: none !important;
-}
-
-[desktop] .i-amphtml-story-top > .i-amphtml-story-share {
-  /* Ditto. */
-  pointer-events: all !important;
 }
 
 [desktop] .i-amphtml-story-bookend .i-amphtml-story-share-widget {
@@ -479,6 +509,11 @@ amp-story-page.i-amphtml-story-page-shown {
 }
 
 [desktop] .i-amphtml-story-bookend-inner::before {
+  display: none !important;
+}
+
+[desktop] .i-amphtml-story-bookend-replay {
+  /* This is replaced with the forward button on desktop. */
   display: none !important;
 }
 

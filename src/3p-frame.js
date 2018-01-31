@@ -111,6 +111,9 @@ export function getIframe(
   if (attributes['height']) {
     iframe.height = attributes['height'];
   }
+  if (attributes['title']) {
+    iframe.title = attributes['title'];
+  }
   iframe.setAttribute('scrolling', 'no');
   setStyle(iframe, 'border', 'none');
   /** @this {!Element} */
@@ -229,8 +232,11 @@ export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
 }
 
 function getAdsLocalhost(win) {
-  return 'http://ads.localhost:'
-      + (win.location.port || win.parent.location.port);
+  let adsUrl = urls.thirdParty; // local dev with a non-localhost server
+  if (adsUrl.indexOf('ampproject.net') > -1) {
+    adsUrl = 'http://ads.localhost'; // local dev with a localhost server
+  }
+  return adsUrl + ':' + (win.location.port || win.parent.location.port);
 }
 
 /**
@@ -293,8 +299,8 @@ function getCustomBootstrapBaseUrl(
   const parsed = parseUrl(url);
   user().assert((parsed.hostname == 'localhost' && !opt_strictForUnitTest) ||
       parsed.origin != parseUrl(parentWindow.location.href).origin,
-  '3p iframe url must not be on the same origin as the current doc' +
-      'ument %s (%s) in element %s. See https://github.com/ampproject/amphtml' +
+  '3p iframe url must not be on the same origin as the current document ' +
+      '%s (%s) in element %s. See https://github.com/ampproject/amphtml' +
       '/blob/master/spec/amp-iframe-origin-policy.md for details.', url,
   parsed.origin, meta);
   return url + '?$internalRuntimeVersion$';

@@ -21,6 +21,7 @@ import {
   maybeExecuteRealTimeConfig_,
   validateRtcConfig_,
   RTC_ERROR_ENUM,
+  truncUrl_,
 } from '../real-time-config-manager';
 import {Xhr} from '../../../../src/service/xhr-impl';
 // Need the following side-effect import because in actual production code,
@@ -73,6 +74,19 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
   function setRtcConfig(rtcConfig) {
     element.setAttribute('rtc-config', JSON.stringify(rtcConfig));
   }
+
+  describe('#truncUrl_', () => {
+    it('truncates URL', () => {
+      let url = 'https://www.example.biz/?';
+      for (let i = 0; i < 1000; i++) {
+        url += '&23456=8901234567';
+      }
+      expect(url.length > 16384).to.be.true;
+      url = truncUrl_(url);
+      expect(url.length <= 16384).to.be.true;
+      expect(url.indexOf('&__trunc__=1') > 0).to.be.true;
+    });
+  });
 
   describe('#maybeExecuteRealTimeConfig_', () => {
     function executeTest(args) {
@@ -219,6 +233,29 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         vendors, customMacros, inflatedUrls, rtcCalloutResponses,
         calloutCount, expectedCalloutUrls: inflatedUrls, expectedRtcArray});
     });
+    it('should send callouts to vendor URLs with object/array macros', () => {
+      const vendors = {
+        'fAkeVeNdOR': {
+          SLOT_ID: {'key': 'value'},
+          PAGE_ID: [1,2,3],
+          FOO_ID: 'String',
+        },
+      };
+      const inflatedUrls = [
+        'https://localhost:8000/examples/rtcE1.json?slot_id=%7B%22key%22%3A%22' +
+            'value%22%7D&page_id=%5B1%2C2%2C3%5D&foo_id=String',
+      ];
+      const rtcCalloutResponses = [
+        {'response1': {'fooArray': ['foo']}},
+      ];
+      const calloutCount = 1;
+      const expectedRtcArray = [];
+      expectedRtcArray.push(rtcEntry(rtcCalloutResponses[0],
+          Object.keys(vendors)[0].toLowerCase()));
+      return executeTest({
+        vendors, inflatedUrls, rtcCalloutResponses,
+        calloutCount, expectedCalloutUrls: inflatedUrls, expectedRtcArray});
+    });
     it('should send RTC callouts to inflated publisher and vendor URLs', () => {
       const urls = generateUrls(2,2);
       const vendors = {
@@ -320,8 +357,6 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
     });
 
     it('should not send an RTC callout to an insecure url', () => {
-      env.win.AMP_MODE.test = false;
-      env.win.AMP_MODE.localdev = false;
       const urls = [
         'https://www.1.com/',
         'https://www.2.com',

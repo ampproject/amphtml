@@ -875,12 +875,6 @@ class ChildTagMatcher {
      */
     this.parentSpec_ = parentSpec;
 
-    /**
-     * @type {number}
-     * @private
-     */
-    this.numChildTagsSeen_ = 0;
-
     if (!amp.validator.LIGHT) {
       /**
        * @type {!LineCol}
@@ -905,6 +899,9 @@ class ChildTagMatcher {
    */
   matchChildTagName(encounteredTag, context, result) {
     const childTags = this.parentSpec_.childTags;
+    // Enforce child_tag_name_oneof: If at least one tag name is specified,
+    // then the child tags of the parent tag must have one of the provided
+    // tag names.
     if (childTags.childTagNameOneof.length > 0) {
       const names = childTags.childTagNameOneof;
       if (names.indexOf(encounteredTag.upperName()) === -1) {
@@ -925,8 +922,11 @@ class ChildTagMatcher {
         }
       }
     }
+    // Enforce first_child_tag_name_oneof: If at least one tag name is
+    // specified, then the first child of the parent tag must have one
+    // of the provided tag names.
     if (childTags.firstChildTagNameOneof.length > 0 &&
-        this.numChildTagsSeen_ === 0) {
+        context.getTagStack().parentChildCount() === 0) {
       const names = childTags.firstChildTagNameOneof;
       if (names.indexOf(encounteredTag.upperName()) === -1) {
         if (!amp.validator.LIGHT) {
@@ -950,13 +950,6 @@ class ChildTagMatcher {
   }
 
   /**
-   * Record that we have encountered a new child tag.
-   */
-  recordChildTag() {
-    this.numChildTagsSeen_++;
-  }
-
-  /**
    * @param {!Context} context
    * @param {!amp.validator.ValidationResult} result
    */
@@ -964,7 +957,7 @@ class ChildTagMatcher {
     const expectedNumChildTags =
         this.parentSpec_.childTags.mandatoryNumChildTags;
     if (expectedNumChildTags !== -1 &&
-        expectedNumChildTags !== this.numChildTagsSeen_) {
+        expectedNumChildTags !== context.getTagStack().parentChildCount()) {
       if (amp.validator.LIGHT) {
         result.status = amp.validator.ValidationResult.Status.FAIL;
         return;
@@ -975,7 +968,7 @@ class ChildTagMatcher {
             /* params */
             [
               getTagSpecName(this.parentSpec_), expectedNumChildTags.toString(),
-              this.numChildTagsSeen_.toString()
+              context.getTagStack().parentChildCount().toString()
             ],
             getTagSpecUrl(this.parentSpec_), result);
         return;
@@ -985,7 +978,7 @@ class ChildTagMatcher {
     const expectedMinNumChildTags =
         this.parentSpec_.childTags.mandatoryMinNumChildTags;
     if (expectedMinNumChildTags !== -1 &&
-        this.numChildTagsSeen_ < expectedMinNumChildTags) {
+        context.getTagStack().parentChildCount() < expectedMinNumChildTags) {
       if (amp.validator.LIGHT) {
         result.status = amp.validator.ValidationResult.Status.FAIL;
         return;
@@ -997,7 +990,7 @@ class ChildTagMatcher {
             [
               getTagSpecName(this.parentSpec_),
               expectedMinNumChildTags.toString(),
-              this.numChildTagsSeen_.toString()
+              context.getTagStack().parentChildCount().toString()
             ],
             getTagSpecUrl(this.parentSpec_), result);
         return;
@@ -1226,7 +1219,11 @@ class ReferencePointMatcher {
 let DescendantConstraints;
 
 /**
+ * tagSpec and referencePoint are the ParsedTagSpecs that best matched the
+ * stack entry. May be null. May not fully match.
  * @typedef {{ tagName: string,
+ *             tagSpec: ?ParsedTagSpec,
+ *             referencePoint: ?ParsedTagSpec,
  *             hasDescendantConstraintLists: boolean,
  *             numChildren: number,
  *             onlyChildTagName: string,
@@ -1279,6 +1276,8 @@ class TagStack {
   createNewTagStackEntry(tagName) {
     return {
       tagName: tagName,
+      tagSpec: null,
+      referencePoint: null,
       hasDescendantConstraintLists: false,
       numChildren: 0,
       onlyChildTagName: '',
@@ -1294,15 +1293,16 @@ class TagStack {
   }
 
   /**
-   * Enter a tag, opening a scope for child tags. Reason |context| and
-   * |result| are provided is that entering a tag can close the previous
-   * tag, which can trigger validation (e.g., the previous tag may be
-   * required to have two child tags).
+   * Enter a tag, opening a scope for child tags.
    * @param {string} tagName
+   * @param {!ValidateTagResult} referencePointResult
+   * @param {!ValidateTagResult} tagResult
    */
-  enterTag(tagName) {
-    this.increaseChildCounterForParent();
-    this.stack_.push(this.createNewTagStackEntry(tagName));
+  enterTag(tagName, referencePointResult, tagResult) {
+    let stackEntry = this.createNewTagStackEntry(tagName);
+    stackEntry.referencePoint = referencePointResult.bestMatchTagSpec;
+    stackEntry.tagSpec = tagResult.bestMatchTagSpec;
+    this.stack_.push(stackEntry);
   }
 
   /**
@@ -1316,13 +1316,14 @@ class TagStack {
     goog.asserts.assert(this.stack_.length > 0, 'Exiting an empty tag stack.');
 
     this.unSetDescendantConstraintList();
-    const topStackEntry = this.stack_.pop();
+    const topStackEntry = this.back_();
     if (topStackEntry.childTagMatcher !== null) {
       topStackEntry.childTagMatcher.exitTag(context, result);
     }
     if (topStackEntry.referencePointMatcher !== null) {
       topStackEntry.referencePointMatcher.exitParentTag(context, result);
     }
+    this.stack_.pop();
 
   }
 
@@ -1332,8 +1333,9 @@ class TagStack {
    * @param {!ValidateTagResult} result
    * @param {!ParsedValidatorRules} parsedRules
    * @param {!LineCol} lineCol
+   * @private
    */
-  updateStackEntryFromTagResult(result, parsedRules, lineCol) {
+  updateStackEntryFromTagResult_(result, parsedRules, lineCol) {
     if (result.bestMatchTagSpec === null) return;
     const parsedTagSpec = result.bestMatchTagSpec;
 
@@ -1361,9 +1363,9 @@ class TagStack {
    */
   updateFromTagResults(
       encounteredTag, referencePointResult, tagResult, parsedRules, lineCol) {
-    // Always Record that the parent tag contains an additional child
-    if (this.parentStackEntry_().childTagMatcher !== null)
-      this.parentStackEntry_().childTagMatcher.recordChildTag();
+    // Keep track of the number of direct children this tag has, even as we
+    // pop in and out of them on the stack.
+    this.parentStackEntry_().numChildren++;
 
     // Record in the parent element that a reference point has been satisfied,
     // even if the reference point didn't match completely.
@@ -1392,11 +1394,11 @@ class TagStack {
     }
 
     // Add the tag to the stack, and then update the stack entry.
-    this.enterTag(encounteredTag.upperName());
+    this.enterTag(encounteredTag.upperName(), referencePointResult, tagResult);
 
-    this.updateStackEntryFromTagResult(
+    this.updateStackEntryFromTagResult_(
         referencePointResult, parsedRules, lineCol);
-    this.updateStackEntryFromTagResult(tagResult, parsedRules, lineCol);
+    this.updateStackEntryFromTagResult_(tagResult, parsedRules, lineCol);
   }
 
   /**
@@ -1499,13 +1501,6 @@ class TagStack {
   }
 
   /**
-   * Increases the Parent tag's child count.
-   */
-  increaseChildCounterForParent() {
-    this.parentStackEntry_().numChildren++;
-  }
-
-  /**
    * Tells the parent of the current stack entry that it can only have 1 child
    * and that child must be me (the current stack entry).
    * @param {string} tagName The current stack entry's tag name.
@@ -1584,7 +1579,8 @@ class TagStack {
   }
 
   /**
-   * Returns true if the current tag has ancestor with the given tag name.
+   * Returns true if the current tag has ancestor with the given tag name or
+   * specName.
    * @param {string} ancestor
    * @return {boolean}
    */
@@ -1592,6 +1588,10 @@ class TagStack {
     // Skip the first element, which is "$ROOT".
     for (let i = 1; i < this.stack_.length; ++i) {
       if (this.stack_[i].tagName === ancestor) {
+        return true;
+      }
+      if ((this.stack_[i].tagSpec !== null) &&
+          (this.stack_[i].tagSpec.getSpec().specName === ancestor)) {
         return true;
       }
     }
@@ -3610,7 +3610,7 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
   const layout =
       CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr);
 
-  // height="auto" is only allowed if the layout is FLEX_ITEM.
+  // Only FLEX_ITEM allows for height to be set to auto.
   if (height.isAuto && layout !== amp.validator.AmpLayout.Layout.FLEX_ITEM) {
     if (amp.validator.LIGHT) {
       result.status = amp.validator.ValidationResult.Status.FAIL;
@@ -3639,11 +3639,12 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
     }
     return;
   }
-  // Check other constraints imposed by the particular layouts.
+  // FIXED, FIXED_HEIGHT, FLUID, INTRINSIC, RESPONSIVE must have height set.
   if ((layout === amp.validator.AmpLayout.Layout.FIXED ||
        layout === amp.validator.AmpLayout.Layout.FIXED_HEIGHT ||
-       layout === amp.validator.AmpLayout.Layout.RESPONSIVE ||
-       layout === amp.validator.AmpLayout.Layout.FLUID) &&
+       layout === amp.validator.AmpLayout.Layout.FLUID ||
+       layout === amp.validator.AmpLayout.Layout.INTRINSIC ||
+       layout === amp.validator.AmpLayout.Layout.RESPONSIVE) &&
       !height.isSet) {
     if (amp.validator.LIGHT) {
       result.status = amp.validator.ValidationResult.Status.FAIL;
@@ -3656,6 +3657,7 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
     }
     return;
   }
+  // For FIXED_HEIGHT if width is set it must be auto.
   if (layout === amp.validator.AmpLayout.Layout.FIXED_HEIGHT && width.isSet &&
       !width.isAuto) {
     if (amp.validator.LIGHT) {
@@ -3670,9 +3672,11 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
     }
     return;
   }
+  // FIXED, FLUID, INTRINSIC, RESPONSIVE must have width set and not be auto.
   if (layout === amp.validator.AmpLayout.Layout.FIXED ||
-      layout === amp.validator.AmpLayout.Layout.RESPONSIVE ||
-      layout === amp.validator.AmpLayout.Layout.FLUID) {
+      layout === amp.validator.AmpLayout.Layout.FLUID ||
+      layout === amp.validator.AmpLayout.Layout.INTRINSIC ||
+      layout === amp.validator.AmpLayout.Layout.RESPONSIVE) {
     if (!width.isSet) {
       if (amp.validator.LIGHT) {
         result.status = amp.validator.ValidationResult.Status.FAIL;
@@ -3697,7 +3701,9 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
       return;
     }
   }
-  if (layout === amp.validator.AmpLayout.Layout.RESPONSIVE &&
+  // INTRINSIC, RESPONSIVE must have same units for height and width.
+  if ((layout === amp.validator.AmpLayout.Layout.INTRINSIC ||
+       layout === amp.validator.AmpLayout.Layout.RESPONSIVE) &&
       width.unit !== height.unit) {
     if (amp.validator.LIGHT) {
       result.status = amp.validator.ValidationResult.Status.FAIL;
@@ -3711,6 +3717,7 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
     }
     return;
   }
+  // RESPONSIVE only allows heights attribute.
   if (heightsAttr !== undefined &&
       layout !== amp.validator.AmpLayout.Layout.RESPONSIVE) {
     if (amp.validator.LIGHT) {
@@ -4377,6 +4384,7 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
   // to return a GENERAL_DISALLOWED_TAG error.
   // calling HasDispatchKeys here is only an optimization to skip the loop
   // over encountered attributes in the case where we have no dispatches.
+  let bestMatchTagSpec = null;
   if (tagSpecDispatch.hasDispatchKeys()) {
     for (let attr of encounteredTag.attrs()) {
       const maybeTagSpecId = tagSpecDispatch.matchingDispatchKey(
@@ -4426,7 +4434,6 @@ function validateTag(encounteredTag, bestMatchReferencePoint, context) {
   // tried them all.
   let resultForBestAttempt = new amp.validator.ValidationResult();
   resultForBestAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
-  let bestMatchTagSpec = null;
   for (const tagSpecId of tagSpecDispatch.allTagSpecs()) {
     const parsedTagSpec = context.getRules().getByTagSpecId(tagSpecId);
     const resultForAttempt = validateTagAgainstSpec(
@@ -4517,7 +4524,7 @@ class ParsedValidatorRules {
        */
       this.isTagSpecCorrectHtmlFormat_ = function(tagSpec) {
         const castedHtmlFormat =
-            /** @type {amp.validator.TagSpec.HtmlFormat<string>} */ (
+            /** @type {amp.validator.HtmlFormat.Code<string>} */ (
                 /** @type {*} */ (htmlFormat));
         return tagSpec.htmlFormat.length === 0 ||
             tagSpec.htmlFormat.indexOf(castedHtmlFormat) !== -1;
@@ -4751,17 +4758,18 @@ class ParsedValidatorRules {
 
     // In the light mode, we only have status values.
     if (!amp.validator.LIGHT) {
-      // Prefer the attempt with the fewest errors.
-      if (resultA.errors.length < resultB.errors.length) return true;
-      if (resultB.errors.length < resultA.errors.length) return false;
-
-      // If the same number of errors, prefer the most specific error.
+      // Prefer the most specific error found in either set.
       if (this.maxSpecificity(resultA.errors) >
           this.maxSpecificity(resultB.errors))
         return true;
       if (this.maxSpecificity(resultB.errors) >
           this.maxSpecificity(resultA.errors))
         return false;
+
+      // Prefer the attempt with the fewest errors if the most specific errors
+      // are the same.
+      if (resultA.errors.length < resultB.errors.length) return true;
+      if (resultB.errors.length < resultA.errors.length) return false;
     }
 
     // Equal, so not better than.
@@ -5883,7 +5891,7 @@ amp.validator.categorizeError = function(error) {
   }
   if (error.code ===
           amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR &&
-      (error.params[1] === 'template')) {
+      ((error.params[0] === 'template') || (error.params[1] === 'template'))) {
     return amp.validator.ErrorCategory.Code.AMP_HTML_TEMPLATE_PROBLEM;
   }
   if (error.code ===

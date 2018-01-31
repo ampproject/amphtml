@@ -105,12 +105,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
-    id: 'amp-gwd-animation',
-    name: 'AMP GWD Animation',
-    spec: 'https://github.com/ampproject/amphtml/issues/9949',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11238',
-  },
-  {
     id: 'no-auth-in-prerender',
     name: 'Delay amp-access auth request until doc becomes visible.',
     spec: '',
@@ -191,11 +185,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
   },
   {
-    id: 'variable-filters',
-    name: 'Format to apply filters to analytics variables',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
-  },
-  {
     id: 'pump-early-frame',
     name: 'Force all extensions to have the same release ' +
         'as the main JS binary',
@@ -215,12 +204,6 @@ const EXPERIMENTS = [
   {
     id: 'jank-meter',
     name: 'Display jank meter',
-  },
-  {
-    id: 'amp-fx-parallax',
-    name: 'Amp extension for a parallax effect',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7801',
-    spec: 'https://github.com/ampproject/amphtml/issues/1443',
   },
   {
     id: 'slidescroll-disable-css-snap',
@@ -245,17 +228,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/9277',
   },
   {
-    id: 'amp-ima-video',
-    name: 'IMA-integrated Video Player',
-  },
-  {
-    id: 'amp-sidebar 1.0',
-    name: 'Amp sidebar 1.0 extension',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9803',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-      'amp-sidebar/1.0/amp-sidebar-1.0.md',
-  },
-  {
     id: 'user-error-reporting',
     name: 'Report error to publishers',
     spec: 'https://github.com/ampproject/amphtml/issues/6415',
@@ -277,22 +249,34 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11475',
   },
   {
+    id: 'amp-story-scaling',
+    name: 'Scale pages dynamically in amp-story by default',
+    spec: 'https://github.com/ampproject/amphtml/issues/12902',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12902',
+  },
+  {
     id: 'disable-amp-story-desktop',
     name: 'Disables responsive desktop experience for the amp-story component',
     spec: 'https://github.com/ampproject/amphtml/issues/11714',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11715',
   },
   {
-    id: 'amp-story-auto-fullscreen',
-    name: 'Enables full-screen mode on first page transition',
-    spec: 'https://github.com/ampproject/amphtml/issues/11974',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11975',
-  },
-  {
     id: 'amp-date-picker',
     name: 'Enables the amp-date-picker extension',
     spec: 'https://github.com/ampproject/amphtml/issues/6469',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12267',
+  },
+  {
+    id: 'url-replacement-v2',
+    name: 'new parsing engine for url variables',
+    spec: 'https://github.com/ampproject/amphtml/issues/12119',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
+  },
+  {
+    id: 'disable-amp-story-hls',
+    name: 'Disables usage of HTTP Live Streaming (HLS) within amp-story',
+    spec: 'https://github.com/ampproject/amphtml/issues/12965',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12978',
   },
 ];
 

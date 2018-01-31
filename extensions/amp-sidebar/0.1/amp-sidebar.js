@@ -22,16 +22,13 @@ import {Services} from '../../../src/services';
 import {Toolbar} from './toolbar';
 import {closestByTag, tryFocus, isRTL} from '../../../src/dom';
 import {dev} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
 import {setStyles, toggle} from '../../../src/style';
 import {createCustomEvent} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {removeFragment, parseUrl} from '../../../src/url';
 import {toArray} from '../../../src/types';
-
 /** @const */
 const TAG = 'amp-sidebar toolbar';
-
 /** @const */
 const ANIMATION_TIMEOUT = 350;
 
@@ -73,9 +70,6 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {Array} */
     this.toolbars_ = [];
 
-    /** @private {boolean} */
-    this.isToolbarExperimentEnabled_ = isExperimentOn(this.win, TAG);
-
     const platform = Services.platformFor(this.win);
 
     /** @private @const {boolean} */
@@ -99,6 +93,9 @@ export class AmpSidebar extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.openerElement_ = null;
+
+    /** @private {number} */
+    this.initialScrollTop_ = 0;
   }
 
   /** @override */
@@ -116,28 +113,25 @@ export class AmpSidebar extends AMP.BaseElement {
 
     this.action_ = Services.actionServiceForDoc(this.element);
 
-    this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
-
     if (this.side_ != 'left' && this.side_ != 'right') {
       this.side_ = isRTL(this.document_) ? 'right' : 'left';
       this.element.setAttribute('side', this.side_);
     }
 
-    if (this.isToolbarExperimentEnabled_) {
-      const ampdoc = this.getAmpDoc();
-      // Get the toolbar attribute from the child navs.
-      const toolbarElements =
-        toArray(this.element.querySelectorAll('nav[toolbar]'));
+    const ampdoc = this.getAmpDoc();
+    // Get the toolbar attribute from the child navs.
+    const toolbarElements =
+      toArray(this.element.querySelectorAll('nav[toolbar]'));
 
-      toolbarElements.forEach(toolbarElement => {
-        try {
-          this.toolbars_.push(new Toolbar(toolbarElement, this.vsync_,
-              ampdoc));
-        } catch (e) {
-          this.user().error(TAG, 'Failed to instantiate toolbar', e);
-        }
-      });
-    }
+    toolbarElements.forEach(toolbarElement => {
+      try {
+        this.toolbars_.push(new Toolbar(toolbarElement, this.vsync_,
+            ampdoc));
+      } catch (e) {
+        this.user().error(TAG, 'Failed to instantiate toolbar', e);
+      }
+    });
+
 
     if (this.isIos_) {
       this.fixIosElasticScrollLeak_();
@@ -213,14 +207,12 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    if (this.isToolbarExperimentEnabled_) {
-      this.getAmpDoc().whenReady().then(() => {
-        // Check our toolbars for changes
-        this.toolbars_.forEach(toolbar => {
-          toolbar.onLayoutChange(() => this.onToolbarOpen_());
-        });
+    this.getAmpDoc().whenReady().then(() => {
+      // Check our toolbars for changes
+      this.toolbars_.forEach(toolbar => {
+        toolbar.onLayoutChange(() => this.onToolbarOpen_());
       });
-    }
+    });
   }
 
   /**
@@ -265,6 +257,8 @@ export class AmpSidebar extends AMP.BaseElement {
     this.viewport_.enterOverlayMode();
     this.vsync_.mutate(() => {
       toggle(this.element, /* display */true);
+      this.viewport_.addToFixedLayer(this.element, /* forceTransfer */ true);
+
       if (this.isIos_ && this.isSafari_) {
         this.compensateIosBottombar_();
       }
@@ -282,6 +276,7 @@ export class AmpSidebar extends AMP.BaseElement {
     });
     if (opt_invocation) {
       this.openerElement_ = opt_invocation.source;
+      this.initialScrollTop_ = this.viewport_.getScrollTop();
     }
   }
 
@@ -294,6 +289,10 @@ export class AmpSidebar extends AMP.BaseElement {
       return;
     }
     this.viewport_.leaveOverlayMode();
+    const scrollDidNotChange =
+      (this.initialScrollTop_ == this.viewport_.getScrollTop());
+    const sidebarIsActive =
+        this.element.contains(this.document_.activeElement);
     this.vsync_.mutate(() => {
       this.closeMask_();
       this.element.removeAttribute('open');
@@ -303,6 +302,9 @@ export class AmpSidebar extends AMP.BaseElement {
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
       this.historyId_ = -1;
+    }
+    if (this.openerElement_ && sidebarIsActive && scrollDidNotChange) {
+      tryFocus(this.openerElement_);
     }
   }
 
@@ -395,15 +397,6 @@ export class AmpSidebar extends AMP.BaseElement {
       this.vsync_.mutate(() => {
         toggle(this.element, /* display */false);
         this.schedulePause(this.getRealChildren());
-        // TODO(cathyxz, 12479): Re-enable with updated heuristic on whether
-        // returning focus to opener is the right choice or not. Current
-        // issue is that if an item in sidebar has a .focus, .scrollTo
-        // or just local # navigation before closing the sidebar, moving the
-        // focus would override their effects.
-        // Return focus to source element if applicable
-        // if (this.openerElement_) {
-        //   tryFocus(this.openerElement_);
-        // }
         this.triggerEvent_(SidebarEvents.CLOSE);
       });
     }

@@ -161,7 +161,7 @@ export class GoogleAdLifecycleReporter extends BaseLifecycleReporter {
     /** @private {time} @const */
     this.initTime_ = initTime;
 
-    /** @const {!function():number} */
+    /** @const {function():number} */
     this.getDeltaTime = (win.performance && win.performance.now) ?
       win.performance.now.bind(win.performance) :
       () => Date.now() - this.initTime_;

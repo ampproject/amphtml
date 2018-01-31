@@ -16,12 +16,13 @@
 'use strict';
 
 
-const $$ = require('gulp-load-plugins')();
 const autoprefixer = require('autoprefixer');
 const cssnano = require('cssnano');
 const fs = require('fs-extra');
 const postcss = require('postcss');
 const postcssImport = require('postcss-import');
+const colors = require('ansi-colors');
+const log = require('fancy-log');
 
 // NOTE: see https://github.com/ai/browserslist#queries for `browsers` list
 const cssprefixer = autoprefixer({
@@ -86,7 +87,7 @@ const transformCss = exports.transformCss = function(filename, opt_cssnano) {
 exports.jsifyCssAsync = function(filename) {
   return transformCss(filename).then(function(result) {
     result.warnings().forEach(function(warn) {
-      $$.util.log($$.util.colors.red(warn.toString()));
+      log(colors.red(warn.toString()));
     });
     const css = result.css;
     return css + '\n/*# sourceURL=/' + filename + '*/';
