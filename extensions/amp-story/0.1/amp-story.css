@@ -432,6 +432,10 @@ amp-story-grid-layer * {
   overflow: hidden;
 }
 
+.i-amphtml-story-bookend-article-image.amp-notsupported {
+  display: none !important;
+}
+
 .i-amphtml-story-bookend-replay-image {
   background-position: center center !important;
   background-size: cover !important;
