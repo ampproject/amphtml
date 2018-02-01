@@ -323,6 +323,8 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   buildDescriptionBox_() {
     this.descriptionBox_ = this.win.document.createElement('div');
     this.descriptionBox_.classList.add('i-amphtml-lbv-desc-box');
+    this.descriptionBox_.classList.add('i-amphtml-lbv-controls');
+
     this.descriptionBox_.classList.add('standard');
 
     this.descriptionTextArea_ = this.win.document.createElement('div');
@@ -445,6 +447,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     dev().assert(this.container_);
     this.topBar_ = this.win.document.createElement('div');
     this.topBar_.classList.add('i-amphtml-lbv-top-bar');
+    this.topBar_.classList.add('i-amphtml-lbv-controls');
 
     this.topGradient_ = this.win.document.createElement('div');
     this.topGradient_.classList.add('i-amphtml-lbv-top-bar-top-gradient');
@@ -505,16 +508,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
-   * Toggle description box if it has text content
-   * @param {boolean} display
-   * @private
-   */
-  toggleDescriptionBox_(display) {
-    this.updateDescriptionBox_();
-    toggle(dev().assertElement(this.descriptionBox_), display);
-  }
-
-  /**
    * Toggle lightbox controls including topbar and description.
    * @param {!Event} e
    * @private
@@ -525,14 +518,15 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     }
 
     if (this.controlsMode_ == LightboxControlsModes.CONTROLS_HIDDEN) {
-      toggle(dev().assertElement(this.topBar_), true);
+      this.topBar_.classList.remove('fade-out');
       if (!this.container_.hasAttribute('gallery-view')) {
-        this.toggleDescriptionBox_(true);
+        this.descriptionBox_.classList.remove('fade-out');
+        this.updateDescriptionBox_();
       }
       this.controlsMode_ = LightboxControlsModes.CONTROLS_DISPLAYED;
     } else {
-      this.toggleDescriptionBox_(false);
-      toggle(dev().assertElement(this.topBar_), false);
+      this.topBar_.classList.add('fade-out');
+      this.descriptionBox_.classList.add('fade-out');
       this.controlsMode_ = LightboxControlsModes.CONTROLS_HIDDEN;
     }
   }
