@@ -366,6 +366,7 @@ export class SafeframeHostApi {
           push: true,
         });
       } else {
+        this.baseInstance_.getResource().resetPendingChangeSize();
         responsePayload = JSON.stringify({
           uid: this.uid,
           success,
