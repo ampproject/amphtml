@@ -275,7 +275,7 @@ export class AmpSidebar extends AMP.BaseElement {
       this.historyId_ = historyId;
     });
     if (opt_invocation) {
-      this.openerElement_ = opt_invocation.source;
+      this.openerElement_ = opt_invocation.caller;
       this.initialScrollTop_ = this.viewport_.getScrollTop();
     }
   }

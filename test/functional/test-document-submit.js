@@ -168,7 +168,7 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
     onDocumentFormSubmit_(evt);
     expect(actionService.execute).to.have.been.calledOnce;
     expect(actionService.execute).to.have.been.calledWith(
-        tgt, 'submit', null, tgt, evt);
+        tgt, 'submit', null, tgt, tgt, evt);
     expect(preventDefaultSpy).to.have.been.calledOnce;
     expect(stopImmediatePropagationSpy).to.have.been.calledOnce;
   });

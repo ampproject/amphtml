@@ -121,11 +121,12 @@ export class ActionInvocation {
    * @param {!Node} target
    * @param {string} method
    * @param {?JsonObject} args
-   * @param {?Element} source
+   * @param {?Element} source Element where the action was triggered.
+   * @param {?Element} caller Element where the action is being handled.
    * @param {?ActionEventDef} event
    * @param {ActionTrust} trust
    */
-  constructor(target, method, args, source, event, trust) {
+  constructor(target, method, args, source, caller, event, trust) {
     /** @const {!Node} */
     this.target = target;
     /** @const {string} */
@@ -134,6 +135,8 @@ export class ActionInvocation {
     this.args = args;
     /** @const {?Element} */
     this.source = source;
+    /** @const {?Element} */
+    this.caller = caller;
     /** @const {?ActionEventDef} */
     this.event = event;
     /** @const {ActionTrust} */
@@ -319,12 +322,13 @@ export class ActionService {
    * @param {string} method
    * @param {?JsonObject} args
    * @param {?Element} source
+   * @param {?Element} caller
    * @param {?ActionEventDef} event
    * @param {ActionTrust} trust
    */
-  execute(target, method, args, source, event, trust) {
-    const invocation =
-        new ActionInvocation(target, method, args, source, event, trust);
+  execute(target, method, args, source, caller, event, trust) {
+    const invocation = new ActionInvocation(
+        target, method, args, source, caller, event, trust);
     this.invoke_(invocation, /* actionInfo */ null);
   }
 
@@ -398,7 +402,7 @@ export class ActionService {
         const globalTarget = this.globalTargets_[actionInfo.target];
         if (globalTarget) {
           const invocation = new ActionInvocation(this.root_, actionInfo.method,
-              args, action.node, event, trust);
+              args, source, action.node, event, trust);
           return globalTarget(invocation, i, action.actionInfos);
         }
 
@@ -406,7 +410,7 @@ export class ActionService {
         const target = this.root_.getElementById(actionInfo.target);
         if (target) {
           const invocation = new ActionInvocation(target, actionInfo.method,
-              args, action.node, event, trust);
+              args, source, action.node, event, trust);
           return this.invoke_(invocation, actionInfo);
         } else {
           this.actionInfoError_('target not found', actionInfo, target);
