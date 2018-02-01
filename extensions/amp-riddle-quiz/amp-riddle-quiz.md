@@ -19,19 +19,19 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>
-      Displays any Riddle item content (e.g., quiz, list, poll, etc.)<br />
-    </td>
+    <td>Displays any <a href="https://www.riddle.com/">Riddle</a> item content (e.g., quiz, list, poll, etc.)</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-riddle-quiz-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-riddle-quiz" src="https://cdn.ampproject.org/v0/amp-riddle-quiz-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>responsive</td>
   </tr>
 </table>
+
+This component embeds <a href="https://www.riddle.com/">Riddle</a> content (e.g., quiz, list, poll, etc.).
 
 ## Example
 
@@ -45,10 +45,15 @@ limitations under the License.
 ```
 
 ## Attributes
-### Required
-**src**
 
-The Riddle Id
+
+##### data-riddle-id (required)
+
+Specifies the unique ID for the Riddle item.
+
+##### common attributes
+
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP component.
 
 ## Validation
 See [amp-riddle-quiz rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-riddle-quiz/validator-amp-riddle-quiz.protoascii) in the AMP validator specification.
