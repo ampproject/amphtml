@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {rethrowAsync} from '../../log';
+import {rethrowAsync, user} from '../../log';
 
 export const PARSER_IGNORE_FLAG = '`';
 
@@ -134,6 +134,9 @@ export class Expander {
           if (!ignoringChars) {
             ignoringChars = true;
             nextArgShouldBeRaw = true;
+            user().assert(builder.trim() === '',
+                `The substring "${builder}" was lost during url-replacement. ` +
+                'Please ensure the url syntax is correct');
             builder = '';
           } else {
             ignoringChars = false;
