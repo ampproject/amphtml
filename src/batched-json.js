@@ -66,7 +66,7 @@ export function batchFetchJsonFor(
           user().error(TAG, 'URL variable substitutions in CORS fetches ' +
               'triggered by amp-bind will soon require opt-in. Please add ' +
               `data-amp-replace="${unwhitelisted.join(' ')}" to the ` +
-              '<${TAG}> element. See "bit.ly/amp-var-subs" for details.';
+              `<${TAG}> element. See "bit.ly/amp-var-subs" for details.`);
         }
       });
     }
