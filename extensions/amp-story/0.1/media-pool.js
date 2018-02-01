@@ -813,7 +813,7 @@ export class MediaPool {
     instances[newId] = new MediaPool(
         toWin(root.getElement().ownerDocument.defaultView),
         root.getMaxMediaElementCounts(),
-        root.getElementDistance);
+        element => root.getElementDistance(element));
 
     return instances[newId];
   }
