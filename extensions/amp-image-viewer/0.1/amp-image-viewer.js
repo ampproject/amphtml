@@ -171,7 +171,8 @@ export class AmpImageViewer extends AMP.BaseElement {
       return;
     }
     this.loadPromise_.then(() => {
-      this.measure();
+      return this.measure();
+    }).then(() => {
       this.cleanupGestures_();
       this.cleanupOnResizeHandler_();
     });
@@ -186,12 +187,10 @@ export class AmpImageViewer extends AMP.BaseElement {
       return;
     }
     this.loadPromise_.then(() => {
-      if (!this.gestures_) {
-        this.setupGestures_();
-      }
-      if (!this.cleanupOnResizeHandler_) {
-        this.registerOnResizeHandler_();
-      }
+      return this.measure();
+    }).then(() => {
+      this.setupGestures_();
+      this.registerOnResizeHandler_();
     });
   }
 
@@ -253,6 +252,8 @@ export class AmpImageViewer extends AMP.BaseElement {
    */
   // TODO (cathyxz): test on mobile and verify this works.
   registerOnResizeHandler_() {
+    this.cleanupOnResizeHandler_();
+
     const platform = Services.platformFor(this.win);
 
     // Special case for iOS browsers due to Webkit bug #170595
@@ -283,10 +284,12 @@ export class AmpImageViewer extends AMP.BaseElement {
   cleanupOnResizeHandler_() {
     if (this.unlistenResize_) {
       this.unlistenResize_();
+      this.unlistenResize_ = null;
     }
 
     if (this.unlistenOrientationChange_) {
       this.unlistenOrientationChange_();
+      this.unlistenOrientationChange_ = null;
     }
   }
 
@@ -435,6 +438,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     // is a temporary solution to #12362. We should revisit this problem after
     // resolving #12881 or change the use of window.event to the specific event
     // triggering the gesture.
+    this.cleanupGestures_();
     this.gestures_ = Gestures.get(
         this.element,
         /* opt_shouldNotPreventDefault */true
