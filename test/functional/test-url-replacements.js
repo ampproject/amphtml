@@ -1053,6 +1053,18 @@ describes.sandboxed('UrlReplacements', {}, () => {
         });
   });
 
+  it('should collect unwhitelisted vars', () => {
+    const win = getFakeWindow();
+    const element = document.createElement('amp-foo');
+    element.setAttribute('src', '?SOURCE_HOST&QUERY_PARAM(p1)&COUNTER');
+    element.setAttribute('data-amp-replace', 'QUERY_PARAM(p1)');
+    return Services.urlReplacementsForDoc(win.ampdoc)
+        .collectUnwhitelistedVars(element)
+        .then(res => {
+          expect(res).to.deep.equal(['SOURCE_HOST', 'COUNTER']);
+        });
+  });
+
   it('should reject javascript protocol', () => {
     const win = getFakeWindow();
     const urlReplacements = Services.urlReplacementsForDoc(win.ampdoc);
