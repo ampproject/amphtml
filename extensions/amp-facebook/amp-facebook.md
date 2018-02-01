@@ -94,6 +94,12 @@ The value is either `true` or `false`.  The default is `false`.
 
 Having this attribute set to true would align the post/video container to center.
 
+##### data-locale (optional)
+
+By default, the local is set to <code>en_US</code>; however, you can specify a locale as well. 
+
+For details on strings accepted here please visit the [Facebook API Localization page](https://developers.facebook.com/docs/internationalization)
+
 ##### common attributes
 
 This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
