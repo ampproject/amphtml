@@ -195,9 +195,9 @@ describes.realWin('Expander', {
 
     it('throws on bad input with back ticks', () => {
       const url = 'CONCAT(bad`hello`, world)';
-      return expect(expander.expand(url, mockBindings))
-          // .to.throw('The substring "bad" was lost during url-replacement. Please ensure the url syntax is correct');
-          .to.throw(Error);
+      expect(() => {
+        expander.expand(url, mockBindings);
+      }).to.throw(/bad/);
     });
   });
 });
