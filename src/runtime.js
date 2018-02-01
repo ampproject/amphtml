@@ -72,10 +72,12 @@ import {installViewerServiceForDoc, setViewerVisibilityState} from
   './service/viewer-impl';
 import {installViewportServiceForDoc} from './service/viewport/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
+import {install as installMutationMonitor} from './black-magic';
 import {installXhrService} from './service/xhr-impl';
 import {
   isExperimentOn,
   toggleExperiment,
+  isCanary,
 } from './experiments';
 import {parseUrl} from './url';
 import {reportErrorForWin} from './error';
@@ -103,6 +105,12 @@ export function installRuntimeServices(global) {
   installTemplatesService(global);
   installTimerService(global);
   installVsyncService(global);
+  if (getMode(global).localDev || getMode(global).development ||
+      getMode(global).test || isCanary(global)) {
+    // Only install in development environments because of the **massive**
+    // performance hits.
+    installMutationMonitor(global);
+  }
   installXhrService(global);
   installInputService(global);
 }
