@@ -239,6 +239,8 @@ export function install(window) {
 
         return liveObject;
       };
+
+      Object.defineProperty(proto, prop, descriptor);
     });
   });
 
