@@ -63,97 +63,97 @@ var unminifiedRuntimeTarget = 'dist/amp.js';
 var unminified3pTarget = 'dist.3p/current/integration.js';
 
 // Each extension and version must be listed individually here.
-declareExtension('amp-3q-player', '0.1', false);
-declareExtension('amp-access', '0.1', true);
-declareExtension('amp-access-laterpay', '0.1', true);
-declareExtension('amp-accordion', '0.1', false);
-declareExtension('amp-ad', '0.1', true);
-declareExtension('amp-ad-network-adsense-impl', 0.1, false);
-declareExtension('amp-ad-network-adzerk-impl', 0.1, false);
-declareExtension('amp-ad-network-doubleclick-impl', 0.1, false);
-declareExtension('amp-ad-network-fake-impl', 0.1, false);
-declareExtension('amp-ad-network-triplelift-impl', 0.1, false);
-declareExtension('amp-ad-network-cloudflare-impl', 0.1, false);
-declareExtension('amp-ad-network-gmossp-impl', 0.1, false);
-declareExtension('amp-ad-exit', 0.1, false);
-declareExtension('amp-analytics', '0.1', false);
-declareExtension('amp-anim', '0.1', false);
-declareExtension('amp-animation', '0.1', false);
-declareExtension('amp-apester-media', '0.1', true);
-declareExtension('amp-app-banner', '0.1', true);
-declareExtension('amp-audio', '0.1', false);
-declareExtension('amp-auto-ads', '0.1', false);
-declareExtension('amp-bind', '0.1', false);
-declareExtension('amp-brid-player', '0.1', false);
-declareExtension('amp-brightcove', '0.1', false);
-declareExtension('amp-kaltura-player', '0.1', false);
-declareExtension('amp-call-tracking', '0.1', false);
-declareExtension('amp-carousel', '0.1', true);
-declareExtension('amp-compare-slider', '0.1', false);
-declareExtension('amp-crypto-polyfill', '0.1', false);
-declareExtension('amp-dailymotion', '0.1', false);
-declareExtension('amp-dynamic-css-classes', '0.1', false);
-declareExtension('amp-experiment', '0.1', false);
-declareExtension('amp-facebook', '0.1', false);
-declareExtension('amp-facebook-comments', '0.1', false);
-declareExtension('amp-facebook-like', '0.1', false);
-declareExtension('amp-fit-text', '0.1', true);
-declareExtension('amp-font', '0.1', false);
-declareExtension('amp-form', '0.1', true);
-declareExtension('amp-fx-collection', '0.1', false);
-declareExtension('amp-fx-flying-carpet', '0.1', true);
-declareExtension('amp-gfycat', '0.1', false);
-declareExtension('amp-gist', '0.1', false);
-declareExtension('amp-gwd-animation', '0.1', true);
-declareExtension('amp-hulu', '0.1', false);
-declareExtension('amp-iframe', '0.1', false);
-declareExtension('amp-ima-video', '0.1', false);
-declareExtension('amp-image-lightbox', '0.1', true);
-declareExtension('amp-imgur', '0.1', false);
-declareExtension('amp-instagram', '0.1', true);
-declareExtension('amp-install-serviceworker', '0.1', false);
-declareExtension('amp-izlesene', '0.1', false);
-declareExtension('amp-jwplayer', '0.1', false);
-declareExtension('amp-lightbox', '0.1', true);
-declareExtension('amp-lightbox-viewer', '0.1', true);
-declareExtension('amp-list', '0.1', false);
-declareExtension('amp-live-list', '0.1', true);
-declareExtension('amp-mathml', '0.1', true);
-declareExtension('amp-mustache', '0.1', false);
-declareExtension('amp-nexxtv-player', '0.1', false);
-declareExtension('amp-o2-player', '0.1', false);
-declareExtension('amp-ooyala-player', '0.1', false);
-declareExtension('amp-pinterest', '0.1', true);
-declareExtension('amp-playbuzz', '0.1', true);
-declareExtension('amp-reach-player', '0.1', false);
-declareExtension('amp-reddit', '0.1', false);
-declareExtension('amp-riddle-quiz', '0.1', false);
-declareExtension('amp-share-tracking', '0.1', false);
-declareExtension('amp-sidebar', '0.1', true);
-declareExtension('amp-soundcloud', '0.1', false);
-declareExtension('amp-springboard-player', '0.1', false);
-declareExtension('amp-sticky-ad', '1.0', true);
-declareExtension('amp-story', '0.1', true);
-declareExtension('amp-selector', '0.1', true);
-declareExtension('amp-web-push', '0.1', true);
-declareExtension('amp-wistia-player', '0.1', false);
-declareExtension('amp-position-observer', '0.1', false);
-declareExtension('amp-date-picker', '0.1', true);
-declareExtension('amp-image-viewer', '0.1', true);
+declareExtension('amp-3q-player', '0.1', {hasCss: false});
+declareExtension('amp-access', '0.1', {hasCss: true});
+declareExtension('amp-access-laterpay', '0.1', {hasCss: true});
+declareExtension('amp-accordion', '0.1', {hasCss: false});
+declareExtension('amp-ad', '0.1', {hasCss: true});
+declareExtension('amp-ad-network-adsense-impl', 0.1, {hasCss: false});
+declareExtension('amp-ad-network-adzerk-impl', 0.1, {hasCss: false});
+declareExtension('amp-ad-network-doubleclick-impl', 0.1, {hasCss: false});
+declareExtension('amp-ad-network-fake-impl', 0.1, {hasCss: false});
+declareExtension('amp-ad-network-triplelift-impl', 0.1, {hasCss: false});
+declareExtension('amp-ad-network-cloudflare-impl', 0.1, {hasCss: false});
+declareExtension('amp-ad-network-gmossp-impl', 0.1, {hasCss: false});
+declareExtension('amp-ad-exit', 0.1, {hasCss: false});
+declareExtension('amp-analytics', '0.1', {hasCss: false});
+declareExtension('amp-anim', '0.1', {hasCss: false});
+declareExtension('amp-animation', '0.1', {hasCss: false});
+declareExtension('amp-apester-media', '0.1', {hasCss: true});
+declareExtension('amp-app-banner', '0.1', {hasCss: true});
+declareExtension('amp-audio', '0.1', {hasCss: false});
+declareExtension('amp-auto-ads', '0.1', {hasCss: false});
+declareExtension('amp-bind', '0.1', {hasCss: false});
+declareExtension('amp-brid-player', '0.1', {hasCss: false});
+declareExtension('amp-brightcove', '0.1', {hasCss: false});
+declareExtension('amp-kaltura-player', '0.1', {hasCss: false});
+declareExtension('amp-call-tracking', '0.1', {hasCss: false});
+declareExtension('amp-carousel', '0.1', {hasCss: true});
+declareExtension('amp-compare-slider', '0.1', {hasCss: false});
+declareExtension('amp-crypto-polyfill', '0.1', {hasCss: false});
+declareExtension('amp-dailymotion', '0.1', {hasCss: false});
+declareExtension('amp-dynamic-css-classes', '0.1', {hasCss: false});
+declareExtension('amp-experiment', '0.1', {hasCss: false});
+declareExtension('amp-facebook', '0.1', {hasCss: false});
+declareExtension('amp-facebook-comments', '0.1', {hasCss: false});
+declareExtension('amp-facebook-like', '0.1', {hasCss: false});
+declareExtension('amp-fit-text', '0.1', {hasCss: true});
+declareExtension('amp-font', '0.1', {hasCss: false});
+declareExtension('amp-form', '0.1', {hasCss: true});
+declareExtension('amp-fx-collection', '0.1', {hasCss: false});
+declareExtension('amp-fx-flying-carpet', '0.1', {hasCss: true});
+declareExtension('amp-gfycat', '0.1', {hasCss: false});
+declareExtension('amp-gist', '0.1', {hasCss: false});
+declareExtension('amp-gwd-animation', '0.1', {hasCss: true});
+declareExtension('amp-hulu', '0.1', {hasCss: false});
+declareExtension('amp-iframe', '0.1', {hasCss: false});
+declareExtension('amp-ima-video', '0.1', {hasCss: false});
+declareExtension('amp-image-lightbox', '0.1', {hasCss: true});
+declareExtension('amp-imgur', '0.1', {hasCss: false});
+declareExtension('amp-instagram', '0.1', {hasCss: true});
+declareExtension('amp-install-serviceworker', '0.1', {hasCss: false});
+declareExtension('amp-izlesene', '0.1', {hasCss: false});
+declareExtension('amp-jwplayer', '0.1', {hasCss: false});
+declareExtension('amp-lightbox', '0.1', {hasCss: true});
+declareExtension('amp-lightbox-viewer', '0.1', {hasCss: true});
+declareExtension('amp-list', '0.1', {hasCss: false});
+declareExtension('amp-live-list', '0.1', {hasCss: true});
+declareExtension('amp-mathml', '0.1', {hasCss: true});
+declareExtension('amp-mustache', '0.1', {hasCss: false});
+declareExtension('amp-nexxtv-player', '0.1', {hasCss: false});
+declareExtension('amp-o2-player', '0.1', {hasCss: false});
+declareExtension('amp-ooyala-player', '0.1', {hasCss: false});
+declareExtension('amp-pinterest', '0.1', {hasCss: true});
+declareExtension('amp-playbuzz', '0.1', {hasCss: true});
+declareExtension('amp-reach-player', '0.1', {hasCss: false});
+declareExtension('amp-reddit', '0.1', {hasCss: false});
+declareExtension('amp-riddle-quiz', '0.1', {hasCss: false});
+declareExtension('amp-share-tracking', '0.1', {hasCss: false});
+declareExtension('amp-sidebar', '0.1', {hasCss: true});
+declareExtension('amp-soundcloud', '0.1', {hasCss: false});
+declareExtension('amp-springboard-player', '0.1', {hasCss: false});
+declareExtension('amp-sticky-ad', '1.0', {hasCss: true});
+declareExtension('amp-story', '0.1', {hasCss: true});
+declareExtension('amp-selector', '0.1', {hasCss: true});
+declareExtension('amp-web-push', '0.1', {hasCss: true});
+declareExtension('amp-wistia-player', '0.1', {hasCss: false});
+declareExtension('amp-position-observer', '0.1', {hasCss: false});
+declareExtension('amp-date-picker', '0.1', {hasCss: true});
+declareExtension('amp-image-viewer', '0.1', {hasCss: true});
 
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
  * Please see {@link AmpCarousel} with `type=slides` attribute instead.
  */
-declareExtension('amp-slides', '0.1', false);
-declareExtension('amp-social-share', '0.1', true);
-declareExtension('amp-timeago', '0.1', false);
-declareExtension('amp-twitter', '0.1', false);
-declareExtension('amp-user-notification', '0.1', true);
-declareExtension('amp-vimeo', '0.1', false);
-declareExtension('amp-vine', '0.1', false);
-declareExtension('amp-viz-vega', '0.1', true);
-declareExtension('amp-google-vrview-image', '0.1', false);
+declareExtension('amp-slides', '0.1', {hasCss: false});
+declareExtension('amp-social-share', '0.1', {hasCss: true});
+declareExtension('amp-timeago', '0.1', {hasCss: false});
+declareExtension('amp-twitter', '0.1', {hasCss: false});
+declareExtension('amp-user-notification', '0.1', {hasCss: true});
+declareExtension('amp-vimeo', '0.1', {hasCss: false});
+declareExtension('amp-vine', '0.1', {hasCss: false});
+declareExtension('amp-viz-vega', '0.1', {hasCss: true});
+declareExtension('amp-google-vrview-image', '0.1', {hasCss: false});
 declareExtension('amp-viewer-integration', '0.1', {
   // The viewer integration code needs to run asap, so that viewers
   // can influence document state asap. Otherwise the document may take
@@ -161,30 +161,35 @@ declareExtension('amp-viewer-integration', '0.1', {
   // faster.
   loadPriority: 'high',
 });
-declareExtension('amp-video', '0.1', false);
-declareExtension('amp-vk', '0.1', false);
-declareExtension('amp-youtube', '0.1', false);
+declareExtension('amp-video', '0.1', {hasCss: false});
+declareExtension('amp-vk', '0.1', {hasCss: false});
+declareExtension('amp-youtube', '0.1', {hasCss: false});
 declareExtensionVersionAlias(
     'amp-sticky-ad', '0.1', /* lastestVersion */ '1.0', /* hasCss */ true);
+
+
+/**
+ * @typedef {{
+ *   name: ?string,
+ *   version: ?string,
+ *   hasCss: ?boolean,
+ *   loadPriority: ?string
+ * }}
+ */
+const ExtensionOption = {};
+
 /**
  * @param {string} name
  * @param {string} version E.g. 0.1
- * @param {boolean|!Object} hasCssOrOptions Whether the extension comes with CSS
- *   or an extension options object.
+ * @param {!ExtensionOption} options extension options object.
  */
-function declareExtension(name, version, hasCssOrOptions) {
-  var hasCss = false;
-  var options = {};
-  if (typeof hasCssOrOptions == 'boolean') {
-    hasCss = hasCssOrOptions;
-  } else {
-    options = hasCssOrOptions
-  }
-  extensions[name + '-' + version] = Object.assign({
-    name: name,
-    version: version,
-    hasCss: hasCss,
-  }, options);
+function declareExtension(name, version, options) {
+  const defaultOptions = {hasCss: false};
+  const extensionKey = `${name}-${version}`;
+  extensions[extensionKey] = Object.assign({
+    name,
+    version,
+  }, defaultOptions, options);
 }
 
 /**
