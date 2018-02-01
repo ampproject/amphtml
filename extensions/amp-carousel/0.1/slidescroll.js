@@ -293,6 +293,7 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   unlayoutCallback() {
+    this.scheduleUnlayout(this.slides_[dev().assertNumber(this.slideIndex_)]);
     this.slideIndex_ = null;
     return super.unlayoutCallback();
   }
