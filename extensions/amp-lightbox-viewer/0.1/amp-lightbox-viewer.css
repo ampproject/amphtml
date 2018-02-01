@@ -55,8 +55,18 @@
   top: 0 !important;
   height: 50px !important;
   background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0));
-  transition: opacity 1s;
   z-index: 2;
+}
+
+.i-amphtml-lbv-controls {
+  opacity: 0;
+  animation: fadeIn ease-in 0.4s 1 forwards;
+}
+
+.i-amphtml-lbv-controls.fade-out
+ {
+  opacity: 1;
+  animation: fadeOut linear 0.4s 1 forwards;
 }
 
 .i-amphtml-lbv-top-bar.fullscreen .i-amphtml-lbv-top-bar-top-gradient {
@@ -75,9 +85,9 @@
   bottom: 0 !important;
   overflow-x: hidden !important;
   color: #ffffff;
-  opacity: 1;
-  transition: opacity 1s;
   z-index: 2;
+  opacity: 0;
+  animation: fadeIn ease-in 0.4s 1 forwards;
 }
 
 .i-amphtml-lbv-desc-box.standard {
@@ -211,4 +221,20 @@
   left: 0;
   bottom: 0;
   right: 0;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to {
+    opacity: 1;
+    visibility: visible;
+   }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to {
+    opacity: 0;
+    visibility: hidden;
+   }
 }
