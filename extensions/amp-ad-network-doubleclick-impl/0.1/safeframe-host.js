@@ -20,6 +20,7 @@ import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {SimplePostMessageApiDef} from '../../../src/simple-postmessage-api-def';
+import {Services} from '../../../src/services';
 
 /**
  * Used to manage messages for different Safeframe ad slots.
@@ -147,6 +148,8 @@ export class SafeframeHostApi {
     /** @type {number} */
     this.uid = Math.random();
 
+    this.viewport = Services.viewportForDoc(this.baseInstance_.getAmpDoc());
+
     this.registerSafeframeHost();
   }
 
@@ -269,10 +272,10 @@ export class SafeframeHostApi {
       'windowCoords_r': changes.rootBounds.right,
       'windowCoords_b': changes.rootBounds.bottom,
       'windowCoords_l': changes.rootBounds.left,
-      'frameCoords_t': changes.boundingClientRect.top,
-      'frameCoords_r': changes.boundingClientRect.right,
-      'frameCoords_b': changes.boundingClientRect.bottom,
-      'frameCoords_l': changes.boundingClientRect.left,
+      'frameCoords_t': changes.boundingClientRect.top + this.viewport.getScrollTop(),
+      'frameCoords_r': changes.boundingClientRect.right + this.viewport.getScrollLeft(),
+      'frameCoords_b': changes.boundingClientRect.bottom  + this.viewport.getScrollTop(),
+      'frameCoords_l': changes.boundingClientRect.left + this.viewport.getScrollLeft(),
       'styleZIndex': this.baseInstance_.element.style.zIndex,
       'allowedExpansion_t': changes.rootBounds.top,
       'allowedExpansion_r': changes.rootBounds.right,
@@ -349,44 +352,23 @@ export class SafeframeHostApi {
             && !!this.baseInstance_.element.style.width.match(width);
       // Update the sizing of the safeframe to match the size of its
       // containing amp-ad element.
-      let responsePayload;
       if (success) {
         this.iframe_.style.height =
             this.baseInstance_.element.style.height;
         this.iframe_.style.width =
             this.baseInstance_.element.style.width;
-        responsePayload = JSON.stringify({
-          uid: this.uid,
-          success,
-          newGeometry: this.getCurrentGeometry(),
-          'expand_t': this.currentGeometry_.allowedExpansion_t,
-          'expand_b': this.currentGeometry_.allowedExpansion_b,
-          'expand_r': this.currentGeometry_.allowedExpansion_r,
-          'expand_l': this.currentGeometry_.allowedExpansion_l,
-          push: true,
-        });
-      } else {
-        this.baseInstance_.getResource().resetPendingChangeSize();
-        responsePayload = JSON.stringify({
-          uid: this.uid,
-          success,
-          newGeometry: this.getCurrentGeometry(),
-          'expand_t': this.currentGeometry_.allowedExpansion_t,
-          'expand_b': this.currentGeometry_.allowedExpansion_b,
-          'expand_r': this.currentGeometry_.allowedExpansion_r,
-          'expand_l': this.currentGeometry_.allowedExpansion_l,
-          push: true,
-        });
       }
-      this.sendMessage_(responsePayload, message);
-    }).catch(() => {
-      // Failed resize
-      const responsePayload = JSON.stringify({
-        uid: this.uid,
-        success: false,
-      });
-      this.sendMessage_(responsePayload, message);
-    });
+      this.sendMessage_(JSON.stringify({
+          uid: this.uid,
+          success,
+          newGeometry: this.getCurrentGeometry(),
+          'expand_t': this.currentGeometry_.allowedExpansion_t,
+          'expand_b': this.currentGeometry_.allowedExpansion_b,
+          'expand_r': this.currentGeometry_.allowedExpansion_r,
+          'expand_l': this.currentGeometry_.allowedExpansion_l,
+          push: true,
+        }), message);
+    }).catch(() => {});
   }
 
   /**
