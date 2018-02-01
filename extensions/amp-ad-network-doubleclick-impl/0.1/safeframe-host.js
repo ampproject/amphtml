@@ -267,6 +267,10 @@ export class SafeframeHostApi {
         return percInView;
       }
     };
+
+    const getExpansionValue = (frameCoord, winCoord) => {
+      return (frameCoord > 0) && Math.abs(winCoord - frameCoord) || 0;
+    };
     this.currentGeometry_ = {
       'windowCoords_t': changes.rootBounds.top,
       'windowCoords_r': changes.rootBounds.right,
@@ -277,10 +281,14 @@ export class SafeframeHostApi {
       'frameCoords_b': changes.boundingClientRect.bottom  + this.viewport.getScrollTop(),
       'frameCoords_l': changes.boundingClientRect.left + this.viewport.getScrollLeft(),
       'styleZIndex': this.baseInstance_.element.style.zIndex,
-      'allowedExpansion_t': changes.rootBounds.top,
-      'allowedExpansion_r': changes.rootBounds.right,
-      'allowedExpansion_b': changes.rootBounds.bottom,
-      'allowedExpansion_l': changes.rootBounds.left,
+      'allowedExpansion_t': getExpansionValue(changes.boundingClientRect.top,
+                                              changes.rootBounds.top),
+      'allowedExpansion_r': getExpansionValue(changes.boundingClientRect.right,
+                                              changes.rootBounds.right),
+      'allowedExpansion_b': getExpansionValue(changes.boundingClientRect.bottom,
+                                              changes.rootBounds.bottom),
+      'allowedExpansion_l': getExpansionValue(changes.boundingClientRect.left,
+                                              changes.rootBounds.left),
       'xInView': percInView(changes.rootBounds.top,
           changes.rootBounds.bottom,
           changes.boundingClientRect.top,
@@ -396,8 +404,10 @@ export class SafeframeHostApi {
    * @private
    */
   handleExpandRequest_(payload) {
-    this.handleSizeChange(payload.expand_b - payload.expand_t,
-                          payload.expand_r - payload.expand_l,
+    this.handleSizeChange(payload.expand_b + payload.expand_t +
+                          this.initialHeight_,
+                          payload.expand_r + payload.expand_l +
+                          this.initialWidth_,
                           SERVICE.EXPAND_RESPONSE);
   }
 
