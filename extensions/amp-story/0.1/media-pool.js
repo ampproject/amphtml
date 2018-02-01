@@ -600,11 +600,16 @@ export class MediaPool {
     // can interrupt the video playback.  Instead, we do a no-op.
     const playFn = () => {
       if (isPaused) {
-        mediaEl.play();
+        return mediaEl.play();
       }
+
+      return null;
     };
 
-    return Promise.resolve().then(() => playFn()).then(() => {
+    // The playFn() invocation is wrapped in a Promise.resolve(...) due to the
+    // fact that some browsers return a promise from media elements' play()
+    // function, while others return a boolean.
+    return Promise.resolve(playFn()).then(() => {
       mediaEl.muted = false;
 
       if (isPaused) {
