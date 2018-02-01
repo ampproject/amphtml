@@ -370,6 +370,12 @@ export class SafeframeHostApi {
         responsePayload = JSON.stringify({
           uid: this.uid,
           success,
+          newGeometry: this.getCurrentGeometry(),
+          'expand_t': this.currentGeometry_.allowedExpansion_t,
+          'expand_b': this.currentGeometry_.allowedExpansion_b,
+          'expand_r': this.currentGeometry_.allowedExpansion_r,
+          'expand_l': this.currentGeometry_.allowedExpansion_l,
+          push: true,
         });
       }
       this.sendMessage_(responsePayload, message);
