@@ -50,9 +50,6 @@ export class RequestHandler {
     /** @const {string} */
     this.baseUrl = dev().assert(request['baseUrl']);
 
-    /** @private {number} */
-    this.maxDelay_ = Number(request['maxDelay']) || 0; //unit is sec
-
     /** @private {Array<number>|number|undefined} */
     this.batchInterval_ = request['batchInterval']; //unit is sec
 
@@ -62,13 +59,10 @@ export class RequestHandler {
     /** @private {?number} */
     this.batchIntervalPointer_ = null;
 
-    /** @private @const {boolean} */
-    this.isBatched_ = !!this.maxDelay_ || !!this.batchInterval_;
-
     /** @private @const {string} */
     this.batchPluginId_ = request['batchPlugin'];
 
-    user().assert((this.batchPluginId_ ? this.isBatched_ : true),
+    user().assert((this.batchPluginId_ ? this.batchInterval_ : true),
         'Invalid request: batchPlugin cannot be set on non-batched request');
 
     /** @const {?function(string, !Array<!batchSegmentDef>)} */
@@ -105,9 +99,6 @@ export class RequestHandler {
     this.whiteList_ = isSandbox ? SANDBOX_AVAILABLE_VARS : undefined;
 
     /** @private {?number} */
-    this.maxDelayTimeoutId_ = null;
-
-    /** @private {?number} */
     this.batchIntervalTimeoutId_ = null;
 
     /** @private {?number} */
@@ -140,8 +131,7 @@ export class RequestHandler {
     const isImportant = trigger['important'];
 
     const isImmediate =
-        (trigger['important'] === true) || (!this.isBatched_);
-
+        (trigger['important'] === true) || (!this.batchInterval_);
     if (!this.reportRequest_ && !isImportant) {
       // Ignore non important trigger out reportWindow
       return;
@@ -225,13 +215,6 @@ export class RequestHandler {
       this.fire_();
       return;
     }
-
-    // Schedule trigger after maxDelay.
-    if (this.maxDelay_ && !this.maxDelayTimeoutId_ && !this.batchInterval_) {
-      this.maxDelayTimeoutId_ = this.win.setTimeout(() => {
-        this.fire_();
-      }, this.maxDelay_ * 1000);
-    }
   }
 
   /**
@@ -309,15 +292,11 @@ export class RequestHandler {
    * @private
    */
   reset_() {
-    if (this.maxDelayTimeoutId_) {
-      this.win.clearTimeout(this.maxDelayTimeoutId_);
-    }
     this.queueSize_ = 0;
     this.baseUrlPromise_ = null;
     this.baseUrlTemplatePromise_ = null;
     this.extraUrlParamsPromise_ = [];
     this.batchSegmentPromises_ = [];
-    this.maxDelayTimeoutId_ = null;
     this.lastTrigger_ = null;
   }
 
@@ -379,15 +358,6 @@ export class RequestHandler {
   initBatchInterval_() {
     if (!this.batchInterval_) {
       return;
-    }
-
-    if (this.maxDelay_) {
-      // TODO: Remove maxDelay_ completely
-      // Ignore maxDelay in presence of batchInterval
-      // TODO: we can remove the restriction upon requests
-      user().error(TAG,
-          'maxDelay value will not be respected with batchInterval defined');
-      this.maxDelay_ = 0;
     }
 
     this.batchInterval_ = isArray(this.batchInterval_) ?
