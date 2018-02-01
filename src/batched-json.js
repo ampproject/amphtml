@@ -63,9 +63,10 @@ export function batchFetchJsonFor(
       urlReplacements.collectUnwhitelistedVars(element).then(unwhitelisted => {
         if (unwhitelisted.length > 0) {
           const TAG = element.tagName;
-          user().error(TAG, 'URL variable substitutions will soon require ' +
-              `opt-in. Add data-amp-replace="${unwhitelisted.join(' ')}" to ` +
-              `the <${TAG}> element. This will stop working soon!`);
+          user().error(TAG, 'URL variable substitutions in CORS fetches ' +
+              'triggered by amp-bind will soon require opt-in. Please add ' +
+              `data-amp-replace="${unwhitelisted.join(' ')}" to the ` +
+              '<${TAG}> element. See "bit.ly/amp-var-subs" for details.';
         }
       });
     }
