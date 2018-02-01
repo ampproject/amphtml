@@ -21,4 +21,3 @@ test/coverage
 package-lock.json
 *.swp
 *.swo
-/.vs
