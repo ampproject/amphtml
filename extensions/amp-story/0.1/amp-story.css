@@ -39,6 +39,9 @@ html.i-amphtml-story-standalone body {
   margin: 0 !important;
   padding: 0 !important;
   width: 100% !important;
+  /** Remove the cursor: pointer; style set by the runtime, to avoid wrong
+      touch feedback on mobile, like a flashing overlay on page transitions. */
+  cursor: auto !important;
 }
 
 html.i-amphtml-story-standalone body {
