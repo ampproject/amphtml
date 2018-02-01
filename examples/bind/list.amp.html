@@ -11,27 +11,67 @@
   <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
   <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
   <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <style amp-custom>
+    div.feature {
+      border: solid 1px gray;
+      margin: 10px;
+      padding: 5px;
+    }
+    div.feature button {
+      border: solid 1px black;
+    }
+    amp-list {
+      border: solid 1px red;
+      margin: 10px;
+    }
+  </style>
 </head>
 <body>
+  <p>Switching [src] and computing bindings in rendered template</p>
+  <div class="feature">
+    <button on="tap:AMP.setState({src:'/list/fruit-data/get'})">Show fruit</button>
+    <button on="tap:AMP.setState({src:'/list/vegetable-data/get'})">Show vegetables</button>
+    <button on="tap:AMP.setState({
+      src: [{
+        name: 'pizza',
+        quantity: 1976,
+        unitPrice: 3.50
+      }, {
+        name: 'ice cream',
+        quantity: 108,
+        unitPrice: 6.50
+      }]
+    })">Show local foods</button>
+    <button on="tap:AMP.setState({foo: foo+1})">Increment foo</button>
+  </div>
 
-  <button on="tap:AMP.setState({src:'/list/fruit-data/get'})">Show Fruit</button>
-  <button on="tap:AMP.setState({src:'/list/vegetable-data/get'})">Show Vegetables</button>
+  <p>Filters</p>
+  <div class="feature">
+    <amp-bind-macro id="conditions" expression="[inStock, maxPrice].filter(c => !!c).join(operand || ' && ')"></amp-bind-macro>
 
-  <button on="tap:AMP.setState({
-    src: [{
-      name: 'pizza',
-      quantity: 1976,
-      unitPrice: 3.50
-    }, {
-      name: 'ice cream',
-      quantity: 108,
-      unitPrice: 6.50
-    }]
-  })">Show Other Foods</button>
+    <label [text]="'Expr: ' + conditions()">Expr:</label>
+    <br>
 
-  <button on="tap:AMP.setState({foo: foo+1})">increment foo</button>
+    <label>In stock</label>
+    <input type=checkbox on="change:AMP.setState({inStock: event.checked ? 'item.quantity > 0' : ''})"></input>
+    <br>
 
-  <amp-list layout="responsive" src="/list/fruit-data/get" [src]="src" width="600" height="600">
+    <label>Max price</label>
+    <input type=text on="change:AMP.setState({maxPrice: 'item.unitPrice <= ' + event.value})"></input>
+    <br>
+
+    <label>Operand</label>
+    <select on="change:AMP.setState({operand: (event.value == 'AND') ? ' && ' : ' || '})">
+      <option value="AND">AND</option>
+      <option value="OR">OR</option>
+    </select>
+    <br>
+
+    <button on="tap:AMP.setState({filter: conditions())})">Apply filters</button>
+  </div>
+
+  <p>amp-list</p>
+  <amp-list layout="responsive" src="/list/fruit-data/get" [src]="src || '/list/fruit-data/get'" [filter]="filter" width="600" height="600">
     <template type="amp-mustache">
       <strong>Product</strong>: {{name}}
       <strong>Quantity:</strong>: {{quantity}}

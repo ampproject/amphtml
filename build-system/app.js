@@ -839,9 +839,9 @@ app.use('/list/fruit-data/get', (req, res) => {
   assertCors(req, res, ['GET']);
   res.json({
     items: [
-      {name: 'apple', quantity: 47, unitPrice: '0.33'},
-      {name: 'pear', quantity: 538, unitPrice: '0.54'},
-      {name: 'tomato', quantity: 0, unitPrice: '0.23'},
+      {name: 'apple', quantity: 47, unitPrice: 0.33},
+      {name: 'pear', quantity: 538, unitPrice: 0.54},
+      {name: 'tomato', quantity: 0, unitPrice: 0.23},
     ],
   });
 });
@@ -850,9 +850,9 @@ app.use('/list/vegetable-data/get', (req, res) => {
   assertCors(req, res, ['GET']);
   res.json({
     items: [
-      {name: 'cabbage', quantity: 5, unitPrice: '1.05'},
-      {name: 'carrot', quantity: 10, unitPrice: '0.01'},
-      {name: 'brocoli', quantity: 7, unitPrice: '0.02'},
+      {name: 'cabbage', quantity: 5, unitPrice: 1.05},
+      {name: 'carrot', quantity: 10, unitPrice: 0.01},
+      {name: 'brocoli', quantity: 7, unitPrice: 0.02},
     ],
   });
 });
