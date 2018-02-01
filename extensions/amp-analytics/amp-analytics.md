@@ -173,12 +173,12 @@ In this example, we specify the `config` attribute to load the configuration dat
 ###  Configuration data objects
 
 ####  Requests
-The `requests` configuration object specifies the URLs used to transmit data to an analytics platform as well as batching or reporting behavior of the request. The `request-name` specifies what request should be sent in response to a particular event (e.g., `pageview`, `event`, etc.) . The `request-value` contains a https URL, the value may include placeholder tokens that can reference other requests or variables. The `request-value` can also be an object that contains optional request configs.
+The `requests` configuration object specifies the URLs used to transmit data to an analytics platform as well as batching or reporting behavior of the request. The `request-name` specifies what request should be sent in response to a particular event (e.g., `pageview`, `event`, etc.) . The `request-value` contains an https URL, the value may include placeholder tokens that can reference other requests or variables. The `request-value` can also be an object that contains optional request configs.
 
 ##### Request configs
-When defining a request with an object. The properties are:
- - `baseUrl`: A required property to define the url of the request.
- - `reportWindow`: An optional property to specify the time (in seconds) to stop reporting requests. The trigger with `important: true` will override the maximum report window constraint.
+The properties for defining a request with an object are:
+ - `baseUrl`: Defines the url of the request (required).
+ - `reportWindow`: An optional property to specify the time (in seconds) to stop reporting requests. The trigger with `important: true` overrides the maximum report window constraint.
 
 In this example, all requests are valid.
 
@@ -202,7 +202,7 @@ Some analytics providers have an already-provided configuration, which you use v
 To reduce the number of request pings, you can specify batching behaviors in the request configuration. Any [`extraUrlParams`](#extra-url-params) from `triggers` that use the same request are appended to the `baseUrl` of the request.
 
 The batching properties are:
-  - `batchInterval`: This property specifies the time interval (in seconds) to flush request pings in  the batching queue. `batchInterval` can be a number or an array of numbers (The minimum time interval is 200ms). The request will respect every value in the array, and then repeat the last interval value (or the single value) when reach the end of the array.
+  - `batchInterval`: This property specifies the time interval (in seconds) to flush request pings in the batching queue. `batchInterval` can be a number or an array of numbers (the minimum time interval is 200ms). The request will respect every value in the array, and then repeat the last interval value (or the single value) when it reaches the end of the array.
   - `batchPlugin`: This property specifies the alternative plugin function to use to construct the final request url. Please reach out to the vendor to ask for the correct batch plugin to use.
 
 For example, the following config sends out a single request ping every 2 seconds, with one sample request ping looking like `https://example.com/analytics?rc=1&rc=2`.
@@ -227,7 +227,7 @@ For example, the following config sends out a single request ping every 2 second
 }
 ```
 
-The following config sends out the first request ping after 1 second and then send out a request every 3 seconds. The first request ping looks like `https://example.com/analytics?rc=1`, the second request ping looks like `https://example.com/analytics?rc=2&rc=3&rc=4`.
+The following config sends out the first request ping after 1 second and then sends out a request every 3 seconds. The first request ping looks like `https://example.com/analytics?rc=1`, the second request ping looks like `https://example.com/analytics?rc=2&rc=3&rc=4`.
 ```javascript
 "requests": {
   "timer": {
