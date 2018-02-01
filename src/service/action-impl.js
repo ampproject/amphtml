@@ -121,8 +121,8 @@ export class ActionInvocation {
    * @param {!Node} target
    * @param {string} method
    * @param {?JsonObject} args
-   * @param {?Element} source
-   * @param {?Element} caller
+   * @param {?Element} source Element where the action was triggered.
+   * @param {?Element} caller Element where the action is being handled.
    * @param {?ActionEventDef} event
    * @param {ActionTrust} trust
    */
