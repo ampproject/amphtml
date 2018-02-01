@@ -192,6 +192,13 @@ describes.realWin('Expander', {
       return expect(expander.expand(url, mockBindings))
           .to.eventually.equal('hello)WORLD');
     });
+
+    it('throws on bad input with back ticks', () => {
+      const url = 'CONCAT(bad`hello`, world)';
+      expect(() => {
+        expander.expand(url, mockBindings);
+      }).to.throw(/bad/);
+    });
   });
 });
 
