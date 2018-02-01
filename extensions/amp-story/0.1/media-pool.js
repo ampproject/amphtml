@@ -605,16 +605,17 @@ export class MediaPool {
      */
     const playFn = () => {
       if (isPaused) {
-        return mediaEl.play();
+        // The playFn() invocation is wrapped in a Promise.resolve(...) due to
+        // the fact that some browsers return a promise from media elements'
+        // play() function, while others return a boolean.
+        return Promise.resolve(mediaEl.play());
       }
 
-      return null;
+      // This media element was already playing.
+      return Promise.resolve();
     };
 
-    // The playFn() invocation is wrapped in a Promise.resolve(...) due to the
-    // fact that some browsers return a promise from media elements' play()
-    // function, while others return a boolean.
-    return Promise.resolve(playFn()).then(() => {
+    return playFn().then(() => {
       mediaEl.muted = false;
 
       if (isPaused) {
