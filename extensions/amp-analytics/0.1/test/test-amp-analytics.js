@@ -532,7 +532,7 @@ describes.realWin('amp-analytics', {
       const analytics = getAnalyticsTag({
         'requests': {'foo': {
           'baseUrl': 'https://example.com/${bar}',
-          'maxDelay': 0,
+          'batchInterval': 0,
         }, 'bar': 'bar-i'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
       }, {'type': 'xyz'});
@@ -542,7 +542,7 @@ describes.realWin('amp-analytics', {
             'foo': 'foo',
             'bar': {
               'baseUrl': 'bar-v',
-              'maxDelay': 2,
+              'batchInterval': 2,
             }},
         },
       };
@@ -550,11 +550,11 @@ describes.realWin('amp-analytics', {
         expect(analytics.config_['requests']).to.jsonEqual({
           'foo': {
             'baseUrl': 'https://example.com/bar-i',
-            'maxDelay': 0,
+            'batchInterval': 0,
           },
           'bar': {
             'baseUrl': 'bar-i',
-            'maxDelay': 2,
+            'batchInterval': 2,
           },
         });
         expect(sendRequestSpy.calledOnce).to.be.true;
@@ -567,10 +567,10 @@ describes.realWin('amp-analytics', {
         'requests': {
           'foo': {
             'baseUrl': 'https://example.com/${bar}',
-            'maxDelay': 0,
+            'batchInterval': 0,
           },
           'bar': {
-            'maxDelay': 3,
+            'batchInterval': 3,
           },
         },
         'triggers': [{'on': 'visible', 'request': 'foo'}],
@@ -580,7 +580,7 @@ describes.realWin('amp-analytics', {
           'requests': {
             'foo': {
               'baseUrl': 'foo',
-              'maxDelay': 5,
+              'batchInterval': 5,
             },
             'bar': {
               'baseUrl': 'bar-v',
@@ -591,11 +591,11 @@ describes.realWin('amp-analytics', {
         expect(analytics.config_['requests']).to.jsonEqual({
           'foo': {
             'baseUrl': 'https://example.com/bar-v',
-            'maxDelay': 0,
+            'batchInterval': 0,
           },
           'bar': {
             'baseUrl': 'bar-v',
-            'maxDelay': 3,
+            'batchInterval': 3,
           },
         });
         expect(sendRequestSpy.calledOnce).to.be.true;

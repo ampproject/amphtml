@@ -185,7 +185,7 @@ In this example, all requests are valid.
   },
   "event": {
     "baseUrl": "${base}&type=event&eventId=${eventId}",
-    "maxDelay": 5
+    "batchInterval": 5
   }
 }
 ```
@@ -196,15 +196,15 @@ Some analytics providers have an already-provided configuration, which you use v
 To reduce the number of request pings, you can specify batching behaviors in the request configuration. Any [`extraUrlParams`](#extra-url-params) from `triggers` that use the same request are appended to the `baseUrl` of the request.
 
 The batching properties are:
-  - `maxDelay`: This property specifies the time to wait (in seconds) before sending out a request ping. `maxDelay` acts as a counter that starts upon the triggering of the first batched request.
+  - `batchInterval`: This property specifies the max time interval to wait (in seconds) before sending out a request ping. `batchInterval` can be a number or an array of numbers. Request will respect every item value in the array, and repeat the last interval value (or the single value) when reach the end of the array.
 
-For example, the following config sends out a single request ping after 3 seconds, with the final request ping looking like `https://example.com/analytics?rc=1&rc=2&rc=3` .
+For example, the following config sends out a single request ping every 3 seconds, with the first request ping looking like `https://example.com/analytics?rc=1&rc=2&rc=3` .
 
 ```javascript
 "requests": {
   "timer": {
     "baseUrl": "https://example.com/analytics?",
-    "maxDelay": 3,
+    "batchInterval": 3,
   }
 }
 "triggers": {
