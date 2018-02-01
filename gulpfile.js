@@ -240,8 +240,21 @@ function endBuildStep(stepName, targetName, startTime) {
  * @return {!Promise}
  */
 function buildExtensions(options) {
-  var results = [];
-  for (var key in extensions) {
+  const results = [];
+  let extensionToBuild = null;
+  if (argv.extension) {
+    let arg = argv.extension;
+    arg = arg.split(',');
+    extensionToBuild = Array.isArray(arg) ? arg : [arg];
+  }
+  for (const key in extensions) {
+    const extensionName = key.substring(0, key.length - 4);
+    if (argv.extension && extensionToBuild) {
+      if (extensionToBuild.indexOf(extensionName) < 0) {
+        // Skip this extension;
+        continue;
+      }
+    }
     var e = extensions[key];
     var o = Object.assign({}, options);
     o = Object.assign(o, e);
