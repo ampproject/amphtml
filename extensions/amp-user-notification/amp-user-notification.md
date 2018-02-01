@@ -191,6 +191,7 @@ This notification should ALWAYS show - if shouldShow endpoint response was true.
 <a href="#learn-more">Learn more.</a>
 <button on="tap:amp-user-notification7.dismiss">Dismiss</button>
 </amp-user-notification>
+```
 
 ## JSON Fields
 
