@@ -271,6 +271,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Meg](../../ads/meg.md)
 - [MicroAd](../../ads/microad.md)
 - [Mixpo](../../ads/mixpo.md)
+- [myTarget](../../ads/mytarget.md)
 - [myWidget](../../ads/mywidget.md)
 - [Nativo](../../ads/nativo.md)
 - [Navegg](../../ads/navegg.md)
