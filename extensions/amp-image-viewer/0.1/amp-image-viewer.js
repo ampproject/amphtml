@@ -179,7 +179,9 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @override */
   resumeCallback() {
-    this.scheduleLayout(dev().assertElement(this.sourceAmpImage_));
+    if (this.sourceAmpImage_) {
+      this.scheduleLayout(this.sourceAmpImage_);
+    }
     if (!this.loadPromise_) {
       return;
     }
