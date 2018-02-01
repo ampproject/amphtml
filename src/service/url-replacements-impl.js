@@ -1025,6 +1025,25 @@ export class UrlReplacements {
     return this.expand_(url, opt_bindings, vars).then(() => vars);
   }
 
+  /**
+   * Collects substitutions in the `src` attribute of the given element
+   * that are _not_ whitelisted via `data-amp-replace` opt-in attribute.
+   * @param {!Element} element
+   * @return {!Promise<!Array<string>>}
+   */
+  collectUnwhitelistedVars(element) {
+    const url = element.getAttribute('src');
+    return this.collectVars(url).then(vars => {
+      const whitelist = this.getWhitelistForElement_(element);
+      const varNames = Object.keys(vars);
+      if (whitelist) {
+        return varNames.filter(v => !whitelist[v]);
+      } else {
+        // All vars are unwhitelisted if the element has no whitelist.
+        return varNames;
+      }
+    });
+  }
 
   /**
    * Ensures that the protocol of the original url matches the protocol of the

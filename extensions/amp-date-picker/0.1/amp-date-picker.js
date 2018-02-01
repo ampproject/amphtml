@@ -21,13 +21,13 @@ import {DEFAULT_LOCALE, DEFAULT_FORMAT, FORMAT_STRINGS} from './constants';
 import {DatesList} from './dates-list';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
+import {batchFetchJsonFor} from '../../../src/batched-json';
 import {childElementByAttr, isRTL, removeElement} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {createDateRangePicker} from './date-range-picker';
 import {createDeferred} from './react-utils';
 import {createSingleDatePicker} from './single-date-picker';
 import {dashToCamelCase} from '../../../src/string';
-import {fetchBatchedJsonFor} from '../../../src/batched-json';
 import {isExperimentOn} from '../../../src/experiments';
 import {map} from '../../../src/utils/object';
 import {requireExternal} from '../../../src/module';
@@ -249,7 +249,7 @@ class AmpDatePicker extends AMP.BaseElement {
    */
   fetchSrcTemplates_() {
     if (this.element.getAttribute('src')) {
-      return fetchBatchedJsonFor(this.ampdoc_, this.element);
+      return batchFetchJsonFor(this.ampdoc_, this.element);
     } else {
       return null;
     }
