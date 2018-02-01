@@ -1024,7 +1024,13 @@ export class UrlReplacements {
     const url = element.getAttribute('src');
     return this.collectVars(url).then(vars => {
       const whitelist = this.getWhitelistForElement_(element);
-      return Object.keys(vars).filter(v => !whitelist[v]);
+      const varNames = Object.keys(vars);
+      if (whitelist) {
+        return varNames.filter(v => !whitelist[v]);
+      } else {
+        // All vars are unwhitelisted if the element has no whitelist.
+        return varNames;
+      }
     });
   }
 
