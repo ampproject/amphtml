@@ -313,10 +313,6 @@ export class LightboxManager {
         return figCaption./*OK*/innerText;
       }
     }
-    const alt = element.getAttribute('alt');
-    if (alt) {
-      return alt;
-    }
     const ariaDescribedBy = element.getAttribute('aria-describedby');
     if (ariaDescribedBy) {
       const descriptionElement = element.ownerDocument
@@ -324,6 +320,10 @@ export class LightboxManager {
       if (descriptionElement) {
         return descriptionElement./*OK*/innerText;
       }
+    }
+    const alt = element.getAttribute('alt');
+    if (alt) {
+      return alt;
     }
     const ariaLabel = element.getAttribute('aria-label');
     if (ariaLabel) {
