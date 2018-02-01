@@ -65,7 +65,7 @@
 
 .i-amphtml-lbv-controls.fade-out
  {
-  opacity: 0;
+  opacity: 1;
   animation: fadeOut linear 0.4s 1 forwards;
 }
 
@@ -87,8 +87,6 @@
   color: #ffffff;
   z-index: 2;
   opacity: 0;
-  -webkit-animation: fadeIn ease-in 0.4s 1 forwards;
-  -moz-animation: fadeIn ease-in 0.4s 1 forwards;
   animation: fadeIn ease-in 0.4s 1 forwards;
 }
 
@@ -227,13 +225,16 @@
 
 @keyframes fadeIn {
   from { opacity: 0; }
-  to { opacity: 1; }
+  to {
+    opacity: 1;
+    visibility: visible;
+   }
 }
 
 @keyframes fadeOut {
   from { opacity: 1; }
   to {
     opacity: 0;
-    display: none;
+    visibility: hidden;
    }
 }
