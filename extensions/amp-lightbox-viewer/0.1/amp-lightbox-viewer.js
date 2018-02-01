@@ -606,7 +606,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    */
   activate(invocation) {
-    let target = invocation.source;
+    let target = invocation.caller;
     if (invocation.args && invocation.args['id']) {
       const targetId = invocation.args['id'];
       target = this.getAmpDoc().getElementById(targetId);
