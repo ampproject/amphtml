@@ -657,7 +657,7 @@ function dist() {
   if (argv.fortesting) {
     printConfigHelp('gulp dist --fortesting')
   }
-  return compileCss().then(() => {
+  return compileCss().then(patchWebAnimations).then(() => {
     return Promise.all([
       compile(false, true, true),
       // NOTE:
