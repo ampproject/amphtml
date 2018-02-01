@@ -596,20 +596,26 @@ export class MediaPool {
     const isMuted = mediaEl.muted;
     const currentTime = mediaEl.currentTime;
 
-    // If the video is already playing, we do not want to call play again, as it
-    // can interrupt the video playback.  Instead, we do a no-op.
+    /**
+     * @return {!Promise} A promise that is resolved when playback has been
+     *    initiated or rejected if playback fails to initiate.  If the media
+     *    element is already playing, the promise is immediately resolved
+     *    without playing the media element again, to avoid interrupting
+     *    playback.
+     */
     const playFn = () => {
       if (isPaused) {
-        return mediaEl.play();
+        // The playFn() invocation is wrapped in a Promise.resolve(...) due to
+        // the fact that some browsers return a promise from media elements'
+        // play() function, while others return a boolean.
+        return Promise.resolve(mediaEl.play());
       }
 
-      return null;
+      // This media element was already playing.
+      return Promise.resolve();
     };
 
-    // The playFn() invocation is wrapped in a Promise.resolve(...) due to the
-    // fact that some browsers return a promise from media elements' play()
-    // function, while others return a boolean.
-    return Promise.resolve(playFn()).then(() => {
+    return playFn().then(() => {
       mediaEl.muted = false;
 
       if (isPaused) {
