@@ -51,11 +51,11 @@ export const BatchingPluginFunctions = {
 // function ping(baseUrl, batchSegments) {}
 
 /**
- * @param {string} unusedBaseUrl
- * @param {Array<!batchSegmentDef>} unusedBatchSegments
+ * @param {string} unusedBaseUrlForTesting
+ * @param {Array<!batchSegmentDef>} unusedBatchSegmentsForTesting
  * @return {string}
  */
-function ping(unusedBaseUrl, unusedBatchSegments) {
+function ping(unusedBaseUrlForTesting, unusedBatchSegmentsForTesting) {
   if (getMode().localDev || getMode().test) {
     return 'testFinalUrl';
   }
