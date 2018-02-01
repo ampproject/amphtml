@@ -613,8 +613,8 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @private
    */
   onMove_(deltaX, deltaY, animate) {
-    const newPosX = this.boundX_(this.startX_ + deltaX, true);
-    const newPosY = this.boundY_(this.startY_ + deltaY, true);
+    const newPosX = this.boundX_(this.startX_ + deltaX, false);
+    const newPosY = this.boundY_(this.startY_ + deltaY, false);
     this.set_(this.scale_, newPosX, newPosY, animate);
   }
 
@@ -630,8 +630,8 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.motion_ = continueMotion(dev().assertElement(this.image_),
         this.posX_, this.posY_, veloX, veloY,
         (x, y) => {
-          const newPosX = this.boundX_(x, true);
-          const newPosY = this.boundY_(y, true);
+          const newPosX = this.boundX_(x, false);
+          const newPosY = this.boundY_(y, false);
           if (Math.abs(newPosX - this.posX_) < 1 &&
                 Math.abs(newPosY - this.posY_) < 1) {
             // Hit the wall: stop motion.
