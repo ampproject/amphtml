@@ -38,6 +38,7 @@ const MESSAGE_FIELDS = {
   ENDPOINT_IDENTITY: 'i',
   PAYLOAD: 'p',
   SERVICE: 's',
+  MESSAGE: 'message',
 };
 
 const SERVICE = {
@@ -122,6 +123,9 @@ export class SafeframeHostApi {
     /** @private {string} */
     this.sentinel_ = this.baseInstance_.sentinel;
 
+    /** @private {?HTMLIframeElement} */
+    this.iframe_ = null;
+
     /** @private {?IntersectionObserver} */
     this.IntersectionObserver_ = null;
 
@@ -151,8 +155,7 @@ export class SafeframeHostApi {
     // TODO: Some of these options are probably not right.
     attributes['uid'] = this.uid;
     attributes['hostPeerName'] = this.win_.location.origin;
-    attributes['initialGeometry'] = this.formatGeom_(
-        this.baseInstance_.element.getIntersectionChangeEntry());
+    attributes['initialGeometry'] = this.getCurrentGeometry();
     attributes['permissions'] = JSON.stringify(
         dict({
           'expandByOverlay': false,
@@ -174,6 +177,11 @@ export class SafeframeHostApi {
     return attributes;
   }
 
+  getCurrentGeometry() {
+    return this.formatGeom_(
+        this.baseInstance_.element.getIntersectionChangeEntry());
+  }
+
   /**
    * Registers this instance as the host API for the current sentinel.
    * If the global safeframe listener has not yet been created, it creates
@@ -192,8 +200,12 @@ export class SafeframeHostApi {
    * Also initializes the sending of geometry update messages to the frame.
    */
   connectMessagingChannel(channel) {
+    // Set the iframe here, because when class is first created the iframe
+    // element does not yet exist on this.baseInstance_. The first time
+    // we receive a message we know that it now exists.
+    this.iframe_ = this.baseInstance_.iframe;
     this.channel = channel;
-    dev().assert(this.baseInstance_.iframe.contentWindow,
+    dev().assert(this.iframe_.contentWindow,
         'Frame contentWindow unavailable.');
     this.setupGeom_();
     this.sendMessage_(dict({
@@ -212,7 +224,7 @@ export class SafeframeHostApi {
    */
   setupGeom_() {
     this.IntersectionObserver_ = new IntersectionObserver(
-        this.baseInstance_, this.baseInstance_.iframe, false, this);
+        this.baseInstance_, this.iframe_, false, this);
     this.IntersectionObserver_.startSendingIntersectionChanges();
   }
 
@@ -285,13 +297,15 @@ export class SafeframeHostApi {
    * @private
    */
   sendMessage_(payload, serviceName) {
+    dev().assert(this.iframe_.contentWindow,
+                 'Frame contentWindow unavailable.');
     const message = {};
     message[MESSAGE_FIELDS.CHANNEL] = this.channel;
     message[MESSAGE_FIELDS.PAYLOAD] = payload;
     message[MESSAGE_FIELDS.SERVICE] = serviceName;
     message[MESSAGE_FIELDS.SENTINEL] = this.sentinel_;
     message[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = this.endpointIdentity_;
-    this.baseInstance_.iframe.contentWindow./*OK*/postMessage(
+    this.iframe_.contentWindow./*OK*/postMessage(
         JSON.stringify(message), SAFEFRAME_ORIGIN);
   }
 
@@ -329,27 +343,43 @@ export class SafeframeHostApi {
     this.initialWidth_ = payload.initialWidth;
   }
 
-  /**
-   * @param {!Object} payload
-   * @private
-   */
-  handleExpandRequest_(payload) {
-    const width = payload.expand_r - payload.expand_l;
-    const height = payload.expand_b - payload.expand_t;
-    this.baseInstance_.attemptChangeSize(height, width).catch(() => {});
-    //this.baseInstance_.handleResize_(width, height);
-    // TODO : make the response accurate, right now just defaults to success
-    const responsePayload = JSON.stringify({
-      uid: this.uid,
-      success: true,
-      newGeometry: JSON.stringify(this.currentGeometry_),
-      'expand_t': this.currentGeometry_.allowedExpansion_t,
-      'expand_b': this.currentGeometry_.allowedExpansion_b,
-      'expand_r': this.currentGeometry_.allowedExpansion_r,
-      'expand_l': this.currentGeometry_.allowedExpansion_l,
-      push: true,
+  handleSizeChange(height, width, message) {
+    this.baseInstance_.attemptChangeSize(height, width).then(() => {
+      const success = !!this.baseInstance_.element.style.height.match(height)
+            && !!this.baseInstance_.element.style.width.match(width);
+      // Update the sizing of the safeframe to match the size of its
+      // containing amp-ad element.
+      let responsePayload;
+      if (success) {
+        this.iframe_.style.height =
+            this.baseInstance_.element.style.height;
+        this.iframe_.style.width =
+            this.baseInstance_.element.style.width;
+        responsePayload = JSON.stringify({
+          uid: this.uid,
+          success,
+          newGeometry: this.getCurrentGeometry(),
+          'expand_t': this.currentGeometry_.allowedExpansion_t,
+          'expand_b': this.currentGeometry_.allowedExpansion_b,
+          'expand_r': this.currentGeometry_.allowedExpansion_r,
+          'expand_l': this.currentGeometry_.allowedExpansion_l,
+          push: true,
+        });
+      } else {
+        responsePayload = JSON.stringify({
+          uid: this.uid,
+          success,
+        });
+      }
+      this.sendMessage_(responsePayload, message);
+    }).catch(() => {
+      // Failed resize
+      const responsePayload = JSON.stringify({
+        uid: this.uid,
+        success: false,
+      });
+      this.sendMessage_(responsePayload, message);
     });
-    this.sendMessage_(responsePayload, SERVICE.EXPAND_RESPONSE);
   }
 
   /**
@@ -365,27 +395,41 @@ export class SafeframeHostApi {
       return;
     }
     this.baseInstance_.attemptChangeHeight(newHeight)
-        .then(() => this.baseInstance_.onFluidResize_())
+        .then(() => this.onFluidResize_())
         .catch(() => {
           // TODO(levitzky) Add more error handling here
           this.baseInstance_.forceCollapse();
         });
   }
 
+  /**
+   * @param {!Object} payload
+   * @private
+   */
+  handleExpandRequest_(payload) {
+    this.handleSizeChange(payload.expand_b - payload.expand_t,
+                          payload.expand_r - payload.expand_l,
+                          SERVICE.EXPAND_RESPONSE);
+  }
+
   handleCollapseRequest_(payload) {
-    this.baseInstance_.attemptChangeSize(
-        this.baseInstance_.initialSize_.height,
-        this.baseInstance_.initialSize_.width).catch(() => {});
-    const responsePayload = JSON.stringify({
-      uid: this.uid,
-      success: true,
-      newGeometry: JSON.stringify(this.currentGeometry_),
-      'expand_t': this.currentGeometry_.allowedExpansion_t,
-      'expand_b': this.currentGeometry_.allowedExpansion_b,
-      'expand_r': this.currentGeometry_.allowedExpansion_r,
-      'expand_l': this.currentGeometry_.allowedExpansion_l,
-      push: true,
-    });
-    this.sendMessage_(responsePayload, SERVICE.COLLAPSE_RESPONSE);
+    this.handleSizeChange(this.baseInstance_.initialSize_.height,
+                          this.baseInstance_.initialSize_.width,
+                          SERVICE.COLLAPSE_RESPONSE);
+  }
+
+    /**
+   * Fires a delayed impression and notifies the Fluid creative that its
+   * container has been resized.
+   * @private
+   */
+  onFluidResize_() {
+    if (this.baseInstance_.fluidImpressionUrl_) {
+      this.baseInstance_.fireDelayedImpressions(this.baseInstance_.fluidImpressionUrl_);
+      this.baseInstance_.fluidImpressionUrl_ = null;
+    }
+    this.iframe_.contentWindow./*OK*/postMessage(
+        JSON.stringify(dict({'message': 'resize-complete', 'c': 'sfchannel1'})),
+        SAFEFRAME_ORIGIN);
   }
 }

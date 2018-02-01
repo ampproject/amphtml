@@ -847,23 +847,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return superResult;
   }
 
-  /**
-   * Fires a delayed impression and notifies the Fluid creative that its
-   * container has been resized.
-   * @private
-   */
-  onFluidResize_() {
-    if (this.fluidImpressionUrl_) {
-      this.fireDelayedImpressions(this.fluidImpressionUrl_);
-      this.fluidImpressionUrl_ = null;
-    }
-    dev().assert(this.iframe.contentWindow,
-        'Frame contentWindow unavailable.');
-    this.iframe.contentWindow./*OK*/postMessage(
-        JSON.stringify(dict({'message': 'resize-complete', 'c': 'sfchannel1'})),
-        SAFEFRAME_ORIGIN);
-  }
-
   /** @override */
   refresh(refreshEndCallback) {
     this.refreshCount_++;
