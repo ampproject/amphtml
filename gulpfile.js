@@ -38,6 +38,8 @@ var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
 var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
 var colors = require('ansi-colors');
 var log = require('fancy-log');
+var BBPromise = require('bluebird');
+var writeFileAsync = BBPromise.promisify(require('fs-extra').writeFile);
 
 var argv = minimist(process.argv.slice(2), {boolean: ['strictBabelTransform']});
 
@@ -611,7 +613,7 @@ function enableLocalTesting(targetFile) {
 function performBuild(watch) {
   process.env.NODE_ENV = 'development';
   printConfigHelp(watch ? 'gulp watch' : 'gulp build');
-  return compileCss(watch).then(() => {
+  return compileCss(watch).then(patchWebAnimations).then(() => {
     return Promise.all([
       polyfillsForTests(),
       buildAlp({watch: watch}),
@@ -1292,9 +1294,12 @@ function mkdirSync(path) {
  * Patches Web Animations API by wrapping its body into `install` function.
  * This gives us an option to call polyfill directly on the main window
  * or a friendly iframe.
+ *
+ * @return {!Promise}
  */
 function patchWebAnimations() {
   // Copies web-animations-js into a new file that has an export.
+  const startTime = Date.now();
   const patchedName = 'node_modules/web-animations-js/' +
       'web-animations.install.js';
   var file = fs.readFileSync(
@@ -1305,9 +1310,10 @@ function patchWebAnimations() {
       'var document = window.document;\n' +
       file + '\n' +
       '}\n';
-  fs.writeFileSync(patchedName, file);
+  return writeFileAsync(patchedName, file).then (() => {
+    endBuildStep('Wrote', patchedName, startTime);
+  });
 }
-patchWebAnimations();
 
 function toPromise(readable) {
   return new Promise(function(resolve, reject) {
