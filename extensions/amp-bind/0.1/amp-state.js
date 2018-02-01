@@ -15,8 +15,12 @@
  */
 
 import {Services} from '../../../src/services';
+import {
+  UrlReplacementPolicy,
+  batchFetchJsonFor,
+} from '../../../src/batched-json';
+import {getSourceOrigin} from '../../../src/url';
 import {map} from '../../../src/utils/object';
-import {fetchBatchedJsonFor} from '../../../src/batched-json';
 import {isJsonScriptTag} from '../../../src/dom';
 import {toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
@@ -68,7 +72,7 @@ export class AmpState extends AMP.BaseElement {
     }
     const src = mutations['src'];
     if (src !== undefined) {
-      this.fetchSrcAndUpdateState_(/* isInit */ false);
+      this.fetchAndUpdate_(/* isInit */ false);
     }
   }
 
@@ -93,7 +97,7 @@ export class AmpState extends AMP.BaseElement {
       this.parseChildAndUpdateState_();
     }
     if (this.element.hasAttribute('src')) {
-      this.fetchSrcAndUpdateState_(/* isInit */ true);
+      this.fetchAndUpdate_(/* isInit */ true);
     }
   }
 
@@ -126,11 +130,22 @@ export class AmpState extends AMP.BaseElement {
    * Wrapper to stub during testing.
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!Element} element
+   * @param {boolean} isInit
    * @return {!Promise}
    * @visibleForTesting
    */
-  fetchBatchedJsonFor_(ampdoc, element) {
-    return fetchBatchedJsonFor(ampdoc, element);
+  fetch_(ampdoc, element, isInit) {
+    const src = element.getAttribute('src');
+
+    // Require opt-in for URL variable replacements on CORS fetches triggered
+    // by [src] mutation. @see spec/amp-var-substitutions.md
+    let policy = UrlReplacementPolicy.OPT_IN;
+    if (isInit ||
+      (getSourceOrigin(src) == getSourceOrigin(ampdoc.win.location))) {
+      policy = UrlReplacementPolicy.ALL;
+    }
+    return batchFetchJsonFor(
+        ampdoc, element, /* opt_expr */ undefined, policy);
   }
 
   /**
@@ -138,9 +153,9 @@ export class AmpState extends AMP.BaseElement {
    * @returm {!Promise}
    * @private
    */
-  fetchSrcAndUpdateState_(isInit) {
+  fetchAndUpdate_(isInit) {
     const ampdoc = this.getAmpDoc();
-    return this.fetchBatchedJsonFor_(ampdoc, this.element).then(json => {
+    return this.fetch_(ampdoc, this.element, isInit).then(json => {
       this.updateState_(json, isInit);
     });
   }
