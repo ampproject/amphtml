@@ -132,6 +132,7 @@ export function onDocumentFormSubmit_(e) {
 
     const actions = Services.actionServiceForDoc(form);
     actions.execute(
-        form, 'submit', /*args*/ null, form, form, e, ActionTrust.HIGH);
+        form, 'submit', /*args*/ null, /*source*/ form, /*caller*/ form, e,
+        ActionTrust.HIGH);
   }
 }
