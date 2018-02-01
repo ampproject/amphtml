@@ -239,7 +239,7 @@ export class SafeframeHostApi {
   send(unusedTrash, changes) {
     this.sendMessage_(JSON.stringify({
       newGeometry: this.formatGeom_(changes['changes'][0]),
-      uid: 1,
+      uid: this.uid,
     }), SERVICE.GEOMETRY_UPDATE
     );
   }
