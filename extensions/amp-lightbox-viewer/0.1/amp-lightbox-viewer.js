@@ -286,23 +286,25 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @private
    */
   buildCarousel_(lightboxGroupId) {
-    Services.extensionsFor(this.win).installExtensionForDoc(
-        this.getAmpDoc(), 'amp-carousel');
-    Services.extensionsFor(this.win).installExtensionForDoc(
-        this.getAmpDoc(), 'amp-image-viewer');
-    this.carousel_ = this.win.document.createElement('amp-carousel');
-    this.carousel_.setAttribute('type', 'slides');
-    this.carousel_.setAttribute('layout', 'fill');
-    this.carousel_.setAttribute('loop', '');
-    this.carousel_.setAttribute('amp-lightbox-group', lightboxGroupId);
-    return this.manager_.getElementsForLightboxGroup(lightboxGroupId)
-        .then(list => {
-          return this.vsync_.mutatePromise(() => {
-            this.buildCarouselSlides_(list);
-          });
-        }).then(() => {
-          this.container_.appendChild(this.carousel_);
-        });
+    return Promise.all([
+      Services.extensionsFor(this.win).installExtensionForDoc(
+          this.getAmpDoc(), 'amp-carousel'),
+      Services.extensionsFor(this.win).installExtensionForDoc(
+          this.getAmpDoc(), 'amp-image-viewer'),
+    ]).then(() => {
+      this.carousel_ = this.win.document.createElement('amp-carousel');
+      this.carousel_.setAttribute('type', 'slides');
+      this.carousel_.setAttribute('layout', 'fill');
+      this.carousel_.setAttribute('loop', '');
+      this.carousel_.setAttribute('amp-lightbox-group', lightboxGroupId);
+      return this.manager_.getElementsForLightboxGroup(lightboxGroupId);
+    }).then(list => {
+      return this.vsync_.mutatePromise(() => {
+        this.buildCarouselSlides_(list);
+      });
+    }).then(() => {
+      this.container_.appendChild(this.carousel_);
+    });
   }
 
   /**
