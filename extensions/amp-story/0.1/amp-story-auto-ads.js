@@ -36,7 +36,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     const ampStory = this.element.parentElement;
     user().assert(ampStory.tagName === 'AMP-STORY',
         `<${TAG}> should be child of <amp-story>`);
-    ampStory.appendChild(this.makeMockPage());
+    this.ampStory = ampStory;
   }
 
   /** @override */
@@ -44,11 +44,16 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     return true;
   }
 
+  /** @override */
+  layoutCallback() {
+    this.ampStory.appendChild(this.makeMockPage());
+  }
+
   // temporary to be replaced with real page later
   makeMockPage() {
     const ampStoryAdPage = document.createElement('amp-story-page');
-    ampStoryAdPage.id = 'ad-page-1';
-    ampStoryAdPage.innerHTML = `
+    ampStoryAdPage.id = 'i-amhtl-ad-page-1';
+    ampStoryAdPage./*OK*/innerHTML = `
       <amp-story-grid-layer template="vertical">
         <h1>First Ad Page</h1>
         <p>This is the first ad shown in this story.</p>
@@ -58,8 +63,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement('amp-story-auto-ads', AmpStoryAutoAds);
-});
+AMP.registerElement('amp-story-auto-ads', AmpStoryAutoAds);
 
 
