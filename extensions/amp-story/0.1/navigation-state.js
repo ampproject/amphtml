@@ -41,7 +41,7 @@ export class NavigationState {
    * @param {!Element} storyElement
    * @param {function():Promise<boolean>} hasBookend
    */
-  constructor(storyElement, hasBookend) {
+  constructor(storyElement, hasBookend) {]de
     /** @private @const {!function():Promise<boolean>} */
     this.hasBookend_ = hasBookend;
 

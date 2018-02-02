@@ -32,6 +32,5 @@ describes.realWin('amp-story-auto-ads', {
   });
 
   it('should build', () => {
-    element.build();
   });
 });

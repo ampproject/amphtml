@@ -21,7 +21,7 @@ import {user} from '../../../src/log';
 // const EXPERIMENT = 'amp-story-auto-ad';
 
 /** @const */
-const TAG = 'amp-story-auto-ad';
+const TAG = 'amp-story-auto-ads';
 
 export class AmpStoryAutoAds extends AMP.BaseElement {
 
@@ -52,7 +52,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   // temporary to be replaced with real page later
   makeMockPage() {
     const ampStoryAdPage = document.createElement('amp-story-page');
-    ampStoryAdPage.id = 'i-amhtl-ad-page-1';
+    ampStoryAdPage.id = 'i-amphtl-ad-page-1';
     ampStoryAdPage./*OK*/innerHTML = `
       <amp-story-grid-layer template="vertical">
         <h1>First Ad Page</h1>
