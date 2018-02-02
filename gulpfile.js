@@ -306,10 +306,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
       include3pDirectories: true,
       includePolyfills: false,
     }),
-    // For compilation with babel we start with the amp-babel entry point,
-    // but then rename to the amp.js which we've been using all along.
-    compileJs('./src/', 'amp-babel.js', './dist', {
-      toName: 'amp.js',
+    compileJs('./src/', 'amp.js', './dist', {
       minifiedName: 'v0.js',
       includePolyfills: true,
       checkTypes: opt_checkTypes,
@@ -343,9 +340,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
   if (!opt_checkTypes) {
     if (!watch || argv.with_shadow) {
       promises.push(
-        // Entry point for shadow runtime.
-        compileJs('./src/', 'amp-shadow-babel.js', './dist', {
-          toName: 'amp-shadow.js',
+        compileJs('./src/', 'amp-shadow.js', './dist', {
           minifiedName: 'shadow-v0.js',
           includePolyfills: true,
           checkTypes: opt_checkTypes,
@@ -714,7 +709,7 @@ function checkTypes() {
     preventRemoveAndMakeDir: true,
   });*/
   var compileSrcs = [
-    './src/amp-babel.js',
+    './src/amp.js',
     './src/amp-shadow.js',
     './src/inabox/amp-inabox.js',
     './ads/alp/install-alp.js',
