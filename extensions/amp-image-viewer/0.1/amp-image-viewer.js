@@ -18,7 +18,6 @@ import {CSS} from '../../../build/amp-image-viewer-0.1.css';
 import {Animation} from '../../../src/animation';
 import {bezierCurve} from '../../../src/curve';
 import {elementByTag} from '../../../src/dom';
-import {listen} from '../../../src/event-helper';
 import {Gestures} from '../../../src/gesture';
 import {dev, user} from '../../../src/log';
 import {
@@ -37,7 +36,6 @@ import {
 import {continueMotion} from '../../../src/motion';
 import {Services} from '../../../src/services';
 import {srcsetFromElement} from '../../../src/srcset';
-import {debounce} from '../../../src/utils/rate-limit';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 import {CommonSignals} from '../../../src/common-signals';
@@ -75,12 +73,6 @@ export class AmpImageViewer extends AMP.BaseElement {
 
     /** @private {!../../../src/layout-rect.LayoutRectDef} */
     this.imageBox_ = layoutRectLtwh(0, 0, 0, 0);
-
-    /** @private {!UnlistenDef|null} */
-    this.unlistenResize_ = null;
-
-    /** @private {!UnlistenDef|null} */
-    this.unlistenOrientationChange_ = null;
 
     /** @private {!UnlistenDef|null} */
     this.unlistenOnSwipePan_ = null;
@@ -139,6 +131,13 @@ export class AmpImageViewer extends AMP.BaseElement {
   }
 
   /** @override */
+  onLayoutMeasure() {
+    if (this.loadPromise_) {
+      this.loadPromise_.then(() => this.measure());
+    }
+  }
+
+  /** @override */
   layoutCallback() {
     if (this.loadPromise_) {
       return this.loadPromise_;
@@ -160,7 +159,6 @@ export class AmpImageViewer extends AMP.BaseElement {
           return this.measure();
         }).then(() => {
           this.setupGestures_();
-          this.registerOnResizeHandler_();
         });
     return this.loadPromise_;
   }
@@ -173,7 +171,6 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.loadPromise_.then(() => {
       this.measure();
       this.cleanupGestures_();
-      this.cleanupOnResizeHandler_();
     });
   }
 
@@ -189,16 +186,12 @@ export class AmpImageViewer extends AMP.BaseElement {
       if (!this.gestures_) {
         this.setupGestures_();
       }
-      if (!this.cleanupOnResizeHandler_) {
-        this.registerOnResizeHandler_();
-      }
     });
   }
 
   /** @override */
   unlayoutCallback() {
     this.cleanupGestures_();
-    this.cleanupOnResizeHandler_();
     this.loadPromise_ = null;
     return true;
   }
@@ -244,50 +237,6 @@ export class AmpImageViewer extends AMP.BaseElement {
         this.posX_,
         this.posY_
     );
-  }
-
-  /**
-   * Registers a onResize handler to resize the ImageViewer whenever
-   * the screen size or mobile orientation changes.
-   * @private
-   */
-  // TODO (cathyxz): test on mobile and verify this works.
-  registerOnResizeHandler_() {
-    const platform = Services.platformFor(this.win);
-
-    // Special case for iOS browsers due to Webkit bug #170595
-    // https://bugs.webkit.org/show_bug.cgi?id=170595
-    // Delay the onResize by 500 ms to ensure correct height and width
-    const debouncedOnResize = debounce(this.win, () => this.measure(), 500);
-
-    // Register an onResize handler to resize the image viewer
-    this.unlistenResize_ = this.getViewport().onResize(() => {
-      if (platform.isIos() && platform.isSafari()) {
-        debouncedOnResize();
-      } else {
-        this.measure();
-      }
-    });
-
-    // iOS non-safari browsers do not reliably fire onResize on orientation
-    // change, so listen to orientationchange to trigger resize
-    if (platform.isIos() && !platform.isSafari()) {
-      this.unlistenOrientationChange_ = listen(this.win,
-          'orientationchange', debouncedOnResize);
-    }
-  }
-
-  /**
-   * @private
-   */
-  cleanupOnResizeHandler_() {
-    if (this.unlistenResize_) {
-      this.unlistenResize_();
-    }
-
-    if (this.unlistenOrientationChange_) {
-      this.unlistenOrientationChange_();
-    }
   }
 
   /**
