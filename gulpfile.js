@@ -625,26 +625,28 @@ function enableLocalTesting(targetFile) {
 function performBuild(watch) {
   process.env.NODE_ENV = 'development';
   printConfigHelp(watch ? 'gulp watch' : 'gulp build');
-  if (argv.extensions) {
-    if (typeof(argv.extensions) !== 'string') {
-      log(red('ERROR:'), 'Missing list of extensions. Expected format:',
-      cyan('--extensions=amp-foo,amp-bar'));
-      process.exit(1);
+  if (!process.env.TRAVIS) {
+    if (argv.extensions) {
+      if (typeof(argv.extensions) !== 'string') {
+        log(red('ERROR:'), 'Missing list of extensions. Expected format:',
+        cyan('--extensions=amp-foo,amp-bar'));
+        process.exit(1);
+      }
+      log(green('Building extension(s):'),
+          cyan(argv.extensions.split(',').join(', ')));
+      log(green('⤷ Use'), cyan('--noextensions'),
+          green('to skip building extensions.'));
+    } else if (argv.noextensions) {
+      log(green('Not building any AMP extensions.'));
+      log(green('⤷ Use'), cyan('--extensions=amp-foo,amp-bar'),
+          green('to choose which ones to build.'));
+    } else {
+      log(green('Building all AMP extensions.'));
+      log(green('⤷ Use'), cyan('--noextensions'),
+          green('to skip building extensions, or'),
+          cyan('--extensions=amp-foo,amp-bar'),
+          green('to choose which ones to build.'));
     }
-    log(green('Building extension(s):'),
-        cyan(argv.extensions.split(',').join(', ')));
-    log(green('⤷ Use'), cyan('--noextensions'),
-        green('to skip building extensions.'));
-  } else if (argv.noextensions) {
-    log(green('Not building any AMP extensions.'));
-    log(green('⤷ Use'), cyan('--extensions=amp-foo,amp-bar'),
-        green('to choose which ones to build.'));
-  } else {
-    log(green('Building all AMP extensions.'));
-    log(green('⤷ Use'), cyan('--noextensions'),
-        green('to skip building extensions, or'),
-        cyan('--extensions=amp-foo,amp-bar'),
-        green('to choose which ones to build.'));
   }
   return compileCss(watch).then(() => {
     return Promise.all([
