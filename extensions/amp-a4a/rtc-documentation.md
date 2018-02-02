@@ -13,7 +13,7 @@ Remote HTML support was added for Delayed Fetch to support first-party cookie ta
 
 ## Overview
 
-RTC works by sending HTTP requests to URLs that a publisher specifies for each ad slot. The servers that receive these RTC requests respond with a JSON object of targeting information that the associated AMP Fast Fetch implementation can use for various purposes, for instance the DoubleClick Fast Fetch implementation takes the data and adds it to the ad request to DFP as targeting parameters.
+RTC works by sending HTTP requests to URLs that a publisher specifies for each ad slot. The servers that receive these RTC requests respond with a JSON object that the associated AMP Fast Fetch implementation can use for various purposes, for instance the DoubleClick Fast Fetch implementation takes the data and adds it to the ad request to DFP as targeting parameters.
 
 The design of RTC is per-slot, with a** maximum of 5 parallel callouts allowed per slot**. RTC is usable by any Fast Fetch network implementation. Call-outs for all slots will be sent as soon as possible. There are two different types of callouts that will be supported:
 
@@ -29,7 +29,9 @@ In both cases, the results of these call-outs will be passed to the Fast Fetch i
 ## Glossary of Important Terms
 * **RTC Callout / RTC Request:** The HTTP request sent from the AMP page by the Fast Fetch implementation, to a server endpoint, asking for an RTC Response.
 
-* **RTC Endpoint:** A URL that will respond with RTC targeting information.
+* **RTC Response:** The JSON object returned in response to the RTC Callout.
+
+* **RTC Endpoint:** A URL that will respond with RTC Response.
 
 * **Vendor URL:** A vendor URL is simply an RTC endpoint that belongs to a third-party company that is registered within amp-a4a/0.1/callout-vendors.js. A publisher may send RTC requests to a vendor registered in that file by simply specifying the vendor's name in their RTC Config.
 
@@ -181,7 +183,7 @@ The RTC Response to a GET request must meet the following requirements:
     *   AMP-Access-Control-Allow-Source-Origin
     *   Access-control-allow-origin 
     *   Access-control-expose-header: AMP-Access-Control-Allow-Source-Origin
-*   Body of response is a JSON object of targeting information such as:
+*   Body of response is a JSON object such as:
     *   **<code>{"targeting": {"sport":["rugby","cricket"]}}</code></strong>
     *   The response body must be JSON, but the actual structure of that data need not match the structure here. Refer to Fast Fetch Network specific documentation for the required spec. (for example, if using DoubleClick, refer to DoubleClick docs - See list at top for all network specific documentation).
 
