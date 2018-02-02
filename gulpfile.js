@@ -626,6 +626,11 @@ function performBuild(watch) {
   process.env.NODE_ENV = 'development';
   printConfigHelp(watch ? 'gulp watch' : 'gulp build');
   if (argv.extensions) {
+    if (typeof(argv.extensions) !== 'string') {
+      log(red('ERROR:'), 'Missing list of extensions. Expected format:',
+      cyan('--extensions=amp-foo,amp-bar'));
+      process.exit(1);
+    }
     log(green('Building extension(s):'),
         cyan(argv.extensions.split(',').join(', ')));
     log(green('⤷ Use'), cyan('--noextensions'),
