@@ -933,7 +933,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         endBuildStep('Compiled', srcFilename, startTime);
       }).then(() => {
         if (process.env.NODE_ENV === 'development') {
-          if (srcFilename === 'amp-babel.js') {
+          if (srcFilename === 'amp.js') {
             return enableLocalTesting(unminifiedRuntimeTarget);
           } else if (srcFilename === 'integration.js') {
             return enableLocalTesting(unminified3pTarget);
