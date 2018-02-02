@@ -319,6 +319,9 @@ const forbiddenTerms = {
       'src/service/extensions-impl.js',
       'src/service/fixed-layer.js',
       'src/service/vsync-impl.js',
+      'src/service/viewport/viewport-binding-ios-embed-wrapper.js',
+      'src/service/viewport/viewport-binding-natural.js',
+      'src/service/viewport/viewport-impl.js',
     ],
   },
   '\\.sendMessage\\(': {

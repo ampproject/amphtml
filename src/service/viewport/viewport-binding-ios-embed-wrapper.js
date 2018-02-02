@@ -23,6 +23,10 @@ import {layoutRectLtwh} from '../../layout-rect';
 import {px, setStyle} from '../../style';
 import {waitForBody} from '../../dom';
 import {whenDocumentReady} from '../../document-ready';
+import {
+  dangerousSyncMutate,
+  dangerousSyncMutateStop,
+} from '../../dangerously-mutate';
 
 const TAG_ = 'Viewport';
 
@@ -158,7 +162,9 @@ export class ViewportBindingIosEmbedWrapper_ {
 
   /** @override */
   updatePaddingTop(paddingTop) {
+    const prev = dangerousSyncMutate(this.win);
     setStyle(this.wrapper_, 'paddingTop', px(paddingTop));
+    dangerousSyncMutateStop(this.win, prev);
   }
 
   /** @override */

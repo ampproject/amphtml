@@ -21,6 +21,10 @@ import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
 import {layoutRectLtwh} from '../../layout-rect';
 import {px, setStyle} from '../../style';
+import {
+  dangerousSyncMutate,
+  dangerousSyncMutateStop,
+} from '../../dangerously-mutate';
 
 
 const TAG_ = 'Viewport';
@@ -116,7 +120,9 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   updatePaddingTop(paddingTop) {
+    const prev = dangerousSyncMutate(this.win);
     setStyle(this.win.document.documentElement, 'paddingTop', px(paddingTop));
+    dangerousSyncMutateStop(this.win, prev);
   }
 
   /** @override */

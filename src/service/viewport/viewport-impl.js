@@ -42,6 +42,10 @@ import {
 } from '../../layout-rect';
 import {numeric} from '../../transition';
 import {setStyle} from '../../style';
+import {
+  dangerousSyncMutate,
+  dangerousSyncMutateStop,
+} from '../../dangerously-mutate';
 
 
 const TAG_ = 'Viewport';
@@ -89,11 +93,12 @@ export class Viewport {
     /** @const {!../ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
+    const win = this.ampdoc.win;
     /**
      * Some viewport operations require the global document.
      * @private @const {!Document}
      */
-    this.globalDoc_ = this.ampdoc.win.document;
+    this.globalDoc_ = win.document;
 
     /** @const {!ViewportBindingDef} */
     this.binding_ = binding;
@@ -131,10 +136,10 @@ export class Viewport {
     this.lastPaddingTop_ = 0;
 
     /** @private {!../timer-impl.Timer} */
-    this.timer_ = Services.timerFor(this.ampdoc.win);
+    this.timer_ = Services.timerFor(win);
 
     /** @private {!../vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(this.ampdoc.win);
+    this.vsync_ = Services.vsyncFor(win);
 
     /** @private {boolean} */
     this.scrollTracking_ = false;
@@ -158,7 +163,7 @@ export class Viewport {
     this.originalViewportMetaString_ = undefined;
 
     /** @private @const {boolean} */
-    this.useLayers_ = isExperimentOn(this.ampdoc.win, 'layers');
+    this.useLayers_ = isExperimentOn(win, 'layers');
     if (this.useLayers_) {
       this.layersSetupDone_ = true;
       installLayersServiceForDoc(this.ampdoc,
@@ -194,6 +199,7 @@ export class Viewport {
     this.updateVisibility_();
 
     // Top-level mode classes.
+    const prev = dangerousSyncMutate(win);
     if (this.ampdoc.isSingleDoc()) {
       this.globalDoc_.documentElement.classList.add('i-amphtml-singledoc');
     }
@@ -202,15 +208,16 @@ export class Viewport {
     } else {
       this.globalDoc_.documentElement.classList.add('i-amphtml-standalone');
     }
-    if (isIframed(this.ampdoc.win)) {
+    if (isIframed(win)) {
       this.globalDoc_.documentElement.classList.add('i-amphtml-iframed');
     }
     if (viewer.getParam('webview') === '1') {
       this.globalDoc_.documentElement.classList.add('i-amphtml-webview');
     }
+    dangerousSyncMutateStop(win, prev);
 
     // To avoid browser restore scroll position when traverse history
-    if (isIframed(this.ampdoc.win) &&
+    if (isIframed(win) &&
         ('scrollRestoration' in this.ampdoc.win.history)) {
       this.ampdoc.win.history.scrollRestoration = 'manual';
     }
