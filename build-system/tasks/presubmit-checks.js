@@ -308,6 +308,19 @@ const forbiddenTerms = {
       'dist.3p/current/integration.js',
     ],
   },
+  'dangerousSyncMutate': {
+    message: 'dangerous sync mutate functions are forbidden. DO NOT USE IT.',
+    whitelist: [
+      'src/custom-element.js',
+      'src/dangerously-mutate.js',
+      'src/font-stylesheet-timeout.js',
+      'src/preconnect.js',
+      'src/style-installer.js',
+      'src/service/extensions-impl.js',
+      'src/service/fixed-layer.js',
+      'src/service/vsync-impl.js',
+    ],
+  },
   '\\.sendMessage\\(': {
     message: 'Usages must be reviewed.',
     whitelist: [

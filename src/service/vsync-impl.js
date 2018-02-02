@@ -21,6 +21,10 @@ import {cancellation} from '../error';
 import {dev, rethrowAsync} from '../log';
 import {getService, registerServiceBuilder} from '../service';
 import {installTimerService} from './timer-impl';
+import {
+  dangerousSyncMutate,
+  dangerousSyncMutateStop,
+} from '../dangerously-mutate';
 
 /** @const {time} */
 const FRAME_TIME = 16;
@@ -40,15 +44,6 @@ let VsyncTaskSpecDef;
 
 
 /**
- * The property on `window` where we will store whether we are currently
- * performing the mutate-phase.
- *
- * @const {string}
- */
-export const IN_MUTATE_PHASE_PROP = 'VSYNC_IN_MUTATE_PHASE';
-
-
-/**
  * Abstraction over requestAnimationFrame (rAF) that batches DOM read (measure)
  * and write (mutate) tasks in a single frame, to eliminate layout thrashing.
  *
@@ -65,7 +60,7 @@ export class Vsync {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
-    this.win[IN_MUTATE_PHASE_PROP] = false;
+    dangerousSyncMutateStop(win, false);
 
     /** @private @const {!./ampdoc-impl.AmpDocService} */
     this.ampdocService_ = Services.ampdocServiceFor(this.win);
@@ -418,13 +413,13 @@ export class Vsync {
       }
     }
 
-    this.win[IN_MUTATE_PHASE_PROP] = true;
+    const prev = dangerousSyncMutate(this.win);
     for (let i = 0; i < tasks.length; i++) {
       if (tasks[i].mutate) {
         callTaskNoInline(tasks[i].mutate, states[i]);
       }
     }
-    this.win[IN_MUTATE_PHASE_PROP] = false;
+    dangerousSyncMutateStop(this.win, prev);
 
     // Swap last arrays into double buffer.
     this.nextTasks_ = tasks;

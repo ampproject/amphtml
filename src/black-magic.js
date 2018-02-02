@@ -15,8 +15,9 @@
  */
 
 import {dev} from './log';
-import {IN_MUTATE_PHASE_PROP} from './service/vsync-impl';
+import {IN_MUTATE_PHASE_PROP} from './dangerously-mutate';
 import {startsWith, endsWith} from './string';
+import {hasOwn} from './utils/object';
 
 /**
  * Gathers the node's ancestry tree, so that the location may be logged.
@@ -26,8 +27,8 @@ import {startsWith, endsWith} from './string';
  */
 function ancestry(node) {
   const tree = [node.tagName];
-  for (let current = node.parentElement; current; current = current.parentElement) {
-    const tag = current.tagName;
+  for (let c = node.parentElement; c; c = c.parentElement) {
+    const tag = c.tagName;
     tree.push(tag);
     if (startsWith(tag, 'AMP-')) {
       break;
@@ -91,6 +92,9 @@ export function install(window) {
         checkInMutationPhase(this);
         return setter.call(this, value);
       };
+      Object.defineProperty(descriptor.set, 'name', {
+        value: `${Element.name}#${prop}#set`,
+      });
 
       Object.defineProperty(proto, prop, descriptor);
     });
@@ -132,6 +136,9 @@ export function install(window) {
         checkInMutationPhase(this);
         return method.apply(this, arguments);
       };
+      Object.defineProperty(descriptor.value, 'name', {
+        value: `${klass.name}#${prop}`,
+      });
 
       Object.defineProperty(proto, prop, descriptor);
     });
@@ -207,19 +214,28 @@ export function install(window) {
         const liveObject = getter.call(this);
 
         methods.forEach(prop => {
-          const method = liveObject[prop];
-          if (!method) {
+          // Only install once
+          if (hasOwn(liveObject, prop) || !(prop in liveObject)) {
             return;
           }
 
+          const method = liveObject[prop];
           // Shadow the prototype method with an own method.
           liveObject[prop] = function() {
             checkInMutationPhase(element);
             return method.apply(liveObject, arguments);
           };
+          Object.defineProperty(liveObject[prop], 'name', {
+            value: `${liveObject.constructor.name}#${prop}`,
+          });
         });
 
         setters.forEach(prop => {
+          // Only install once
+          if (hasOwn(liveObject, prop) || !(prop in liveObject)) {
+            return;
+          }
+
           const liveProto = Object.getPrototypeOf(liveObject);
           const descriptor = Object.getOwnPropertyDescriptor(liveProto, prop);
 
@@ -233,12 +249,18 @@ export function install(window) {
             checkInMutationPhase(element);
             return setter.call(liveObject, value);
           };
+          Object.defineProperty(descriptor.set, 'name', {
+            value: `${liveObject.constructor.name}#${prop}#set`,
+          });
 
           Object.defineProperty(liveObject, prop, descriptor);
         });
 
         return liveObject;
       };
+      Object.defineProperty(descriptor.get, 'name', {
+        value: `${klass.name}#${prop}#get`,
+      });
 
       Object.defineProperty(proto, prop, descriptor);
     });
@@ -269,7 +291,7 @@ export function install(window) {
 
           // Datasets allow arbitrary property writes/deletes, so we need to trap
           // both.
-          return new Proxy(liveObject, {
+          const handler = {
             set(target, property, value) {
               checkInMutationPhase(element);
               target[property] = value;
@@ -280,8 +302,18 @@ export function install(window) {
               checkInMutationPhase(element);
               return delete target[prop];
             },
+          };
+          Object.defineProperty(handler.set, 'name', {
+            value: `${liveObject.constructor.name}#${prop}#set`,
           });
+          Object.defineProperty(handler.deleteProperty, 'name', {
+            value: `${liveObject.constructor.name}#${prop}#delete`,
+          });
+          return new Proxy(liveObject, handler);
         };
+        Object.defineProperty(descriptor.get, 'name', {
+          value: `HTMLElement#${prop}#get`,
+        });
 
         Object.defineProperty(proto, prop, descriptor);
       }

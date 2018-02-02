@@ -44,6 +44,10 @@ import {map} from '../utils/object';
 import {toWin} from '../types';
 import installCustomElements from
   'document-register-element/build/document-register-element.node';
+import {
+  dangerousSyncMutate,
+  dangerousSyncMutateStop,
+} from '../dangerously-mutate';
 
 const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
@@ -611,7 +615,9 @@ export class Extensions {
     if (this.isExtensionScriptRequired_(extensionId, holder)) {
       const scriptElement =
           this.createExtensionScript_(extensionId, opt_extensionVersion);
+      const prev = dangerousSyncMutate(this.win);
       this.win.document.head.appendChild(scriptElement);
+      dangerousSyncMutateStop(this.win, prev);
       holder.scriptPresent = true;
     }
   }
