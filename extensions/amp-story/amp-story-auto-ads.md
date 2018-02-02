@@ -51,4 +51,4 @@ FILL THIS IN. What does this extension do?
 FILL THIS IN. Does this extension allow for properties to configure?
 
 ## Validation
-See [amp-story-auto-ads rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story-auto-ads/validator-amp-story-auto-ads.protoascii) in the AMP validator specification.
+
