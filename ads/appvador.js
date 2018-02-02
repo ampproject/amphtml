@@ -29,12 +29,13 @@ export function appvador(global, data) {
   container.appendChild(apvDiv);
 
   const scriptUrl = data.customScriptSrc ? data.customScriptSrc :
-      'https://cdn.apvdr.com/js/' +
-      (data.jsType ? encodeURIComponent(data.jsType) : 'VastAdUnit') + '.min.js';
+    'https://cdn.apvdr.com/js/' +
+    (data.jsType ? encodeURIComponent(data.jsType) : 'VastAdUnit') +
+    '.min.js';
   const apvScript = 'new APV.' +
-      (data.jsType ? data.jsType : 'VASTAdUnit') +
-      '({s:"' + data.id + '",isAmpAd:true' +
-      (data.options ? (',' + data.options) : '') + '}).load();';
+    (data.jsType ? data.jsType : 'VASTAdUnit') +
+    '({s:"' + data.id + '",isAmpAd:true' +
+    (data.options ? (',' + data.options) : '') + '}).load();';
 
   const cb = function() {
     const apvLoadScript = global.document.createElement('script');
