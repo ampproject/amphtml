@@ -40,6 +40,7 @@ var colors = require('ansi-colors');
 var log = require('fancy-log');
 var BBPromise = require('bluebird');
 var writeFileAsync = BBPromise.promisify(require('fs-extra').writeFile);
+var execAsync = require('./build-system/exec').execAsync;
 
 var argv = minimist(process.argv.slice(2), {boolean: ['strictBabelTransform']});
 
@@ -636,7 +637,8 @@ function performBuild(watch) {
  * @return {!Promise}
  */
 function watch() {
-  return performBuild(true);
+  const handlerProcess = createCtrlcHandler('watch');
+  return performBuild(true).then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
@@ -644,7 +646,8 @@ function watch() {
  * @return {!Promise}
  */
 function build() {
-  return performBuild();
+  const handlerProcess = createCtrlcHandler('build');
+  return performBuild().then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
@@ -652,6 +655,7 @@ function build() {
  * @return {!Promise}
  */
 function dist() {
+  const handlerProcess = createCtrlcHandler('dist');
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   if (argv.fortesting) {
@@ -683,7 +687,7 @@ function dist() {
     if (argv.fortesting) {
       return enableLocalTesting(minified3pTarget);
     }
-  });
+  }).then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
@@ -1324,6 +1328,44 @@ function toPromise(readable) {
   return new Promise(function(resolve, reject) {
     readable.on('error', reject).on('end', resolve);
   });
+}
+
+/**
+ * Creates an async child process that handles Ctrl + C and immediately cancels
+ * the ongoing `gulp watch | build | dist` task.
+ *
+ * @param {string} command.
+ */
+function createCtrlcHandler(command) {
+  if (!process.env.TRAVIS) {
+    log(green('Running'), cyan(command) + green('. Press'), cyan('Ctrl + C'),
+        green('to cancel...'));
+  }
+  const killCmd =
+      (process.platform == 'win32') ? 'taskkill /pid' : 'kill -KILL';
+  const killMessage = green('\nDetected ') + cyan('Ctrl + C') +
+      green ('. Canceling ') + cyan(command) + green('.');
+  const listenerCmd = `
+    #!/bin/sh
+    ctrlcHandler() {
+      echo -e "${killMessage}"
+      ${killCmd} ${process.pid}
+      exit 1
+    }
+    trap 'ctrlcHandler' INT
+    read _ # Waits until the process is terminated
+  `;
+  return execAsync(
+      listenerCmd, {'stdio': [null, process.stdout, process.stderr]}).pid;
+}
+
+/**
+ * Exits the Ctrl C handler process.
+ *
+ * @param {string} handlerProcess
+ */
+function exitCtrlcHandler(handlerProcess) {
+  process.kill(handlerProcess, 'SIGKILL');
 }
 
 /**
