@@ -365,6 +365,7 @@ const forbiddenTerms = {
       'src/cookies.js',
       'src/service/cid-impl.js',
       'testing/fake-dom.js',
+      'extensions/amp-access-scroll/0.1/scroll-impl.js',
       'extensions/amp-analytics/0.1/vendors.js',
       'extensions/amp-youtube/0.1/amp-youtube.js',
     ],
@@ -448,6 +449,7 @@ const forbiddenTerms = {
     whitelist: [
       'build-system/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
+      'extensions/amp-access-scroll/0.1/scroll-impl.js',
       'src/service/url-replacements-impl.js',
     ],
   },
