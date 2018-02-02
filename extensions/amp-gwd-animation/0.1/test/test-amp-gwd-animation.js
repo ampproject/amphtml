@@ -175,6 +175,42 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
         });
       });
 
+      it('should change the current page on pagedeck slideChange', () => {
+        return ampdoc.whenBodyAvailable().then(() => {
+          const pagedeck = ampdoc.getRootNode().getElementById(GWD_PAGEDECK_ID);
+          const page1 = ampdoc.getRootNode().getElementById('page1');
+          const page2 = ampdoc.getRootNode().getElementById('page2');
+
+          // Trigger a setCurrentPage action as though it originated from a
+          // pagedeck slideChange event and verify that page 2 is activated.
+          const setCurrentPageInvocation = {
+            method: 'setCurrentPage',
+            args: {index: 1},
+            source: pagedeck,
+            caller: pagedeck,
+            satisfiesTrust: () => true,
+          };
+          impl.executeAction(setCurrentPageInvocation);
+
+          expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.false;
+          expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
+
+          // Simulate setCurrentPage from a slideChange event which originated
+          // from some other carousel. There should be no page change.
+          const ignoredSetCurrentPageInvocation = {
+            method: 'setCurrentPage',
+            args: {index: 0},
+            source: {},  // Some other element.
+            caller: pagedeck,
+            satisfiesTrust: () => true,
+          };
+          impl.executeAction(ignoredSetCurrentPageInvocation);
+
+          expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.false;
+          expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
+        });
+      });
+
       it('should activate and deactivate pages', () => {
         return ampdoc.whenBodyAvailable().then(() => {
           const runtime = getServiceForDoc(ampdoc, GWD_SERVICE_NAME);

@@ -109,13 +109,24 @@ export class GwdAnimation extends AMP.BaseElement {
    */
   createAction_(actionName) {
     return invocation => {
+      // The 'setCurrentPage' action is special-cased, because the event which
+      // triggers it ('slideChange') may be emitted by an amp-carousel other
+      // than the GWD page deck. Ignore the event in this case.
+      if (actionName == 'setCurrentPage') {
+        const gwdPageDeck = this.getAmpDoc().getRootNode().querySelector(
+            `amp-carousel#${GWD_PAGEDECK_ID}`);
+        if (invocation.source != gwdPageDeck) {
+          return;
+        }
+      }
+
       const service = user().assert(
           getServiceForDoc(this.getAmpDoc(), GWD_SERVICE_NAME),
           'Cannot execute action because the GWD service is not registered.');
 
       const argPaths = ACTION_IMPL_ARGS[actionName];
       const actionArgs =
-        argPaths.map(argPath => getValueForExpr(invocation, argPath));
+          argPaths.map(argPath => getValueForExpr(invocation, argPath));
       service[actionName].apply(service, actionArgs);
     };
   }
