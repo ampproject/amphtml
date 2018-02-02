@@ -202,11 +202,15 @@ function declareExtension(name, version, options) {
  * @param {boolean} hasCss
  */
 function declareExtensionVersionAlias(name, version, lastestVersion, hasCss) {
-  extensionAliasFilePath[name + '-' + version + '.js'] =
-      name + '-' + lastestVersion + '.js';
+  extensionAliasFilePath[name + '-' + version + '.js'] = {
+    'name': name,
+    'file': name + '-' + lastestVersion + '.js',
+  };
   if (hasCss) {
-    extensionAliasFilePath[name + '-' + version + '.css'] =
-      name + '-' + lastestVersion + '.css';
+    extensionAliasFilePath[name + '-' + version + '.css'] = {
+      'name': name,
+      'file': name + '-' + lastestVersion + '.css',
+    };
   }
 }
 
@@ -245,7 +249,7 @@ function buildExtensions(options) {
   }
 
   var extensionsToBuild = [];
-  if (!!argv.extensions && argv.extensions !== true) {
+  if (!!argv.extensions) {
     extensionsToBuild = argv.extensions.split(',');
   }
 
@@ -723,8 +727,21 @@ function dist() {
  * Copy built extension to alias extension
  */
 function copyAliasExtensions() {
+  if (!! argv.noextensions) {
+    return;
+  }
+  var extensionsToBuild = [];
+  if (!!argv.extensions) {
+    extensionsToBuild = argv.extensions.split(',');
+  }
+
   for (var key in extensionAliasFilePath) {
-    fs.copySync('dist/v0/' + extensionAliasFilePath[key], 'dist/v0/' + key);
+    if (extensionsToBuild.length > 0 &&
+        extensionsToBuild.indexOf(extensionAliasFilePath[key]['name']) == -1) {
+      continue;
+    }
+    fs.copySync('dist/v0/' + extensionAliasFilePath[key]['file'],
+        'dist/v0/' + key);
   }
 }
 
