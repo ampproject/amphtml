@@ -594,10 +594,10 @@ function printConfigHelp(command) {
   if (!process.env.TRAVIS) {
     log(green('Building the runtime for local testing with the'),
         cyan((argv.config === 'canary') ? 'canary' : 'prod'),
-        green('AMP config'));
-    log(green('To specify which config to apply, use'),
+        green('AMP config.'));
+    log(green('⤷ To specify which config to apply, use'),
         cyan('--config={canary|prod}'), green('with your'),
-        cyan(command), green('command'));
+        cyan(command), green('command.'));
   }
 }
 
@@ -625,8 +625,28 @@ function enableLocalTesting(targetFile) {
 function performBuild(watch) {
   process.env.NODE_ENV = 'development';
   printConfigHelp(watch ? 'gulp watch' : 'gulp build');
-  if (!!argv.extensions) {
-    log(green('Building extension(s):'), cyan(argv.extensions));
+  if (!process.env.TRAVIS) {
+    if (argv.extensions) {
+      if (typeof(argv.extensions) !== 'string') {
+        log(red('ERROR:'), 'Missing list of extensions. Expected format:',
+        cyan('--extensions=amp-foo,amp-bar'));
+        process.exit(1);
+      }
+      log(green('Building extension(s):'),
+          cyan(argv.extensions.split(',').join(', ')));
+      log(green('⤷ Use'), cyan('--noextensions'),
+          green('to skip building extensions.'));
+    } else if (argv.noextensions) {
+      log(green('Not building any AMP extensions.'));
+      log(green('⤷ Use'), cyan('--extensions=amp-foo,amp-bar'),
+          green('to choose which ones to build.'));
+    } else {
+      log(green('Building all AMP extensions.'));
+      log(green('⤷ Use'), cyan('--noextensions'),
+          green('to skip building extensions, or'),
+          cyan('--extensions=amp-foo,amp-bar'),
+          green('to choose which ones to build.'));
+    }
   }
   return compileCss(watch).then(() => {
     return Promise.all([
