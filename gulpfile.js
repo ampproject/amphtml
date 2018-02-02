@@ -1347,7 +1347,7 @@ gulp.task('build', 'Builds the AMP library',
       options: {
         config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
         extensions: '  Builds only the listed extensions.',
-        noextensions: ' Builds with no extensions.',
+        noextensions: '  Builds with no extensions.',
       }
     });
 gulp.task('check-all', 'Run through all presubmit checks',
