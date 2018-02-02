@@ -171,7 +171,6 @@ export class MediaPool {
         const audioEl = this.win_.document.createElement('audio');
         audioEl.setAttribute('src', BLANK_AUDIO_SRC);
         audioEl.setAttribute('muted', '');
-        audioEl.muted = true;
         audioEl.classList.add('i-amphtml-pool-media');
         audioEl.classList.add('i-amphtml-pool-audio');
         return audioEl;
@@ -180,7 +179,6 @@ export class MediaPool {
         const videoEl = this.win_.document.createElement('video');
         videoEl.setAttribute('src', BLANK_VIDEO_SRC);
         videoEl.setAttribute('muted', '');
-        videoEl.muted = true;
         videoEl.setAttribute('playsinline', '');
         videoEl.classList.add('i-amphtml-pool-media');
         videoEl.classList.add('i-amphtml-pool-video');
@@ -615,7 +613,6 @@ export class MediaPool {
       return Promise.resolve();
     };
 
-    console.log('blessing video');
     return playFn().then(() => {
       mediaEl.muted = false;
 
@@ -627,7 +624,6 @@ export class MediaPool {
       if (isMuted) {
         mediaEl.muted = true;
       }
-      console.log('blessed video');
     }).catch(reason => {
       dev().expectedError('AMP-STORY', 'Blessing media element failed:',
           reason, mediaEl);
@@ -845,7 +841,6 @@ class Sources {
   applyToElement(element) {
     Sources.removeFrom(element);
 
-    console.log('updating sources');
     if (!this.srcAttr_) {
       element.removeAttribute('src');
     } else {
@@ -854,12 +849,9 @@ class Sources {
 
     Array.prototype.forEach.call(this.srcEls_,
         srcEl => element.appendChild(srcEl));
-    console.log('updated sources');
 
     // Reset media element after changing sources.
-    console.log('loading media');
     element.load();
-    console.log('loaded media');
   }
 
 
