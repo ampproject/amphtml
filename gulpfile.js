@@ -633,23 +633,38 @@ function performBuild(watch) {
     if (argv.extensions) {
       if (typeof(argv.extensions) !== 'string') {
         log(red('ERROR:'), 'Missing list of extensions. Expected format:',
-        cyan('--extensions=amp-foo,amp-bar'));
+            cyan('--extensions=amp-foo,amp-bar'),
+            green('to choose which ones to build, or'),
+            cyan('--extensions=minimal_set'),
+            green('to build ones needed to load article.amp.html.'));
         process.exit(1);
       }
-      log(green('Building extension(s):'),
-          cyan(argv.extensions.split(',').join(', ')));
+      if (argv.extensions == 'minimal_set') {
+        argv.extensions =
+            'amp-ad,amp-ad-network-adsense-impl,amp-audio,amp-video,' +
+            'amp-image-lightbox,amp-lightbox,amp-sidebar,' +
+            'amp-analytics,amp-app-banner';
+        log(green('Building extensions to load article.amp.html.'));
+      } else {
+        log(green('Building extension(s):'),
+            cyan(argv.extensions.split(',').join(', ')));
+      }
       log(green('⤷ Use'), cyan('--noextensions'),
           green('to skip building extensions.'));
     } else if (argv.noextensions) {
       log(green('Not building any AMP extensions.'));
       log(green('⤷ Use'), cyan('--extensions=amp-foo,amp-bar'),
-          green('to choose which ones to build.'));
+          green('to choose which ones to build, or'),
+          cyan('--extensions=minimal_set'),
+          green('to build ones needed to load article.amp.html.'));
     } else {
       log(green('Building all AMP extensions.'));
       log(green('⤷ Use'), cyan('--noextensions'),
           green('to skip building extensions, or'),
           cyan('--extensions=amp-foo,amp-bar'),
-          green('to choose which ones to build.'));
+          green('to choose which ones to build, or'),
+          cyan('--extensions=minimal_set'),
+          green('to build ones needed to load article.amp.html.'));
     }
   }
   return compileCss(watch).then(() => {
@@ -907,12 +922,6 @@ function concatFilesToString(files) {
 function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
   if (options.minify) {
-    if (argv.minimal_set
-        && !(/integration|babel|amp-ad|lightbox|sidebar|analytics|app-banner/
-            .test(srcFilename))) {
-      log('Skipping', cyan(srcFilename), 'because of --minimal_set');
-      return Promise.resolve();
-    }
     const startTime = Date.now();
     return closureCompile(
         srcDir + srcFilename, destDir, options.minifiedName, options)
@@ -1408,7 +1417,6 @@ gulp.task('dist', 'Build production binaries',
             'Great for profiling and debugging production code.',
         fortesting: '  Compiles production binaries for local testing',
         config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-        minimal_set: '  Only compile files needed to load article.amp.html',
       }
     });
 gulp.task('watch', 'Watches for changes in files, re-builds when detected',
