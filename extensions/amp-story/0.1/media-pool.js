@@ -615,6 +615,7 @@ export class MediaPool {
       return Promise.resolve();
     };
 
+    console.log('blessing video');
     return playFn().then(() => {
       mediaEl.muted = false;
 
@@ -626,9 +627,10 @@ export class MediaPool {
       if (isMuted) {
         mediaEl.muted = true;
       }
+      console.log('blessed video');
     }).catch(reason => {
       dev().expectedError('AMP-STORY', 'Blessing media element failed:',
-          reason);
+          reason, mediaEl);
     });
   }
 
@@ -837,12 +839,13 @@ class Sources {
 
   /**
    * Applies the src attribute and source tags to a specified element.
-   * @param {!Element} element The element to adopt the sources represented by
-   *     this object.
+   * @param {!HTMLMediaElement} element The element to adopt the sources
+   *     represented by this object.
    */
   applyToElement(element) {
     Sources.removeFrom(element);
 
+    console.log('updating sources');
     if (!this.srcAttr_) {
       element.removeAttribute('src');
     } else {
@@ -851,9 +854,12 @@ class Sources {
 
     Array.prototype.forEach.call(this.srcEls_,
         srcEl => element.appendChild(srcEl));
+    console.log('updated sources');
 
     // Reset media element after changing sources.
+    console.log('loading media');
     element.load();
+    console.log('loaded media');
   }
 
 
