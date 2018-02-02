@@ -42,6 +42,12 @@ In both cases, the results of these call-outs will be passed to the Fast Fetch i
 
 ## Design
 
+### Network-Specific Addendums
+
+Each Ad Network that works with Real Time Config may have their own additional documentation supplements, see links here:
+
+* [DoubleClick - RTC Documentation Supplement](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-network-doubleclick-impl/doubleclick-rtc.md)
+
 
 ### Per-Slot RTC Specification
 
@@ -177,7 +183,7 @@ The RTC Response to a GET request must meet the following requirements:
     *   Access-control-expose-header: AMP-Access-Control-Allow-Source-Origin
 *   Body of response is a JSON object of targeting information such as:
     *   **<code>{"targeting": {"sport":["rugby","cricket"]}}</code></strong>
-    *   The response body must be JSON, but the actual structure of that data need not match the structure here. Refer to Fast Fetch Network specific documentation for the required spec. (for example, if using DoubleClick, refer to DoubleClick docs).
+    *   The response body must be JSON, but the actual structure of that data need not match the structure here. Refer to Fast Fetch Network specific documentation for the required spec. (for example, if using DoubleClick, refer to DoubleClick docs - See list at top for all network specific documentation).
 
 
 ### URL Macro Substitution
