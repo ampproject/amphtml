@@ -104,7 +104,7 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
             `<amp-carousel id="pagedeck"
                 on="slideChange:node1.hide;event1:node1.show">
               <div id="page1" class="${GWD_PAGE_WRAPPER_CLASS}">
-                <div id="child">
+                <div>
                   <div id="not-an-event"></div>
                   <div id="grandchild"></div>
                   <div id="event1" data-event-name="event-1"></div>
@@ -181,6 +181,10 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
           const page1 = ampdoc.getRootNode().getElementById('page1');
           const page2 = ampdoc.getRootNode().getElementById('page2');
 
+          // Set page 1 as current. This is normally done automatically on
+          // initialize_, but this step does not occur in the test environment.
+          page1.classList.add(PlaybackCssClass.PLAY);
+
           // Trigger a setCurrentPage action as though it originated from a
           // pagedeck slideChange event and verify that page 2 is activated.
           const setCurrentPageInvocation = {
@@ -210,10 +214,11 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
           expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
 
           // Remove the pagedeck element and verify that triggering
-          // setCurrentPage does not throw errors.
+          // setCurrentPage does not throw errors. Set a null source on the
+          // dummy invocation to test the comparison to a null pagedeck
+          // reference.
           pagedeck.remove();
           otherSetCurrentPageInvocation.source = null;
-          otherSetCurrentPageInvocation.caller = null;
           impl.executeAction(otherSetCurrentPageInvocation);
         });
       });

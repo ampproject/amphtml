@@ -181,6 +181,14 @@ export class AmpGwdRuntimeService {
    *     pagedeck amp-carousel).
    */
   setCurrentPage(index) {
+    const gwdPages = this.ampdoc_.getRootNode().querySelectorAll(
+        `.${GWD_PAGE_WRAPPER_CLASS}`);
+
+    if (gwdPages.length == 0) {
+      // The document has no pages.
+      return;
+    }
+
     // Deactivate the outgoing current page, if there is one.
     // TODO(sklobovskaya): Decide if it's worth just storing the index.
     const currentPageEl = this.ampdoc_.getRootNode().querySelector(
@@ -190,18 +198,11 @@ export class AmpGwdRuntimeService {
       this.deactivatePage_(currentPageEl);
     }
 
-    const gwdPages = this.ampdoc_.getRootNode().querySelectorAll(
-        `.${GWD_PAGE_WRAPPER_CLASS}`);
-
     const newPageEl = gwdPages[index];
 
     if (newPageEl) {
       this.activatePage_(newPageEl);
-    } else if (gwdPages.length > 0) {
-      // Don't throw the error if there were no pages at all and just let this
-      // fail quietly. This is primarily because the initial setCurrentPage(0)
-      // call is invoked programmatically without checking if there are any
-      // pages.
+    } else {
       user().error(LOG_ID, 'Could not find page with index ' + index + '.');
     }
   }
