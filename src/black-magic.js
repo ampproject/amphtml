@@ -19,6 +19,13 @@ import {IN_MUTATE_PHASE_PROP} from './dangerously-mutate';
 import {startsWith, endsWith} from './string';
 import {hasOwn} from './utils/object';
 
+
+/**
+ * A global property that checks if black magic has already been performed.
+ * @const {string}
+ */
+const INSTALLED_PROP = 'BLACK_MAGIC_INSTALLED';
+
 /**
  * Gathers the node's ancestry tree, so that the location may be logged.
  *
@@ -63,6 +70,11 @@ function checkInMutationPhase(nodeOrAttr) {
  * @param {!Window} window
  */
 export function install(window) {
+  if (window[INSTALLED_PROP]) {
+    return;
+  }
+  window[INSTALLED_PROP] = true;
+
   // First, we'll do runtime inspection to find special setter properties
   // for Nodes, and monkey patch them.
   // Setters are functions that run when `obj.prop = value` executed.
