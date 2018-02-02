@@ -27,9 +27,9 @@ export let AmpDocumentRecommendationsConfig;
 
 /**
  * @typedef {{
- *   ampUrl: !string,
- *   image: !string,
- *   title: !string,
+ *   ampUrl: string,
+ *   image: string,
+ *   title: string,
  * }}
  */
 export let AmpDocumentRecommendationsReco;
@@ -37,7 +37,7 @@ export let AmpDocumentRecommendationsReco;
 
 /**
  * Checks whether the object conforms to the AmpDocumentRecommendationsConfig spec.
- * 
+ *
  * @param {*} config The config to validate.
  * @return {!./config.AmpDocumentRecommendationsConfig}
  */

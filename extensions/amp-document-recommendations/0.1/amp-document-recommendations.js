@@ -15,9 +15,6 @@
  */
 
 /** @const */
-const EXPERIMENT = 'amp-document-recommendations';
-
-/** @const */
 const MAX_ARTICLES = 2;
 
 /** @const */
@@ -30,6 +27,7 @@ import {CSS} from '../../../build/amp-document-recommendations-0.1.css';
 import {isJsonScriptTag} from '../../../src/dom';
 import {Services} from '../../../src/services';
 import {MultidocManager} from '../../../src/runtime';
+import {setStyle} from '../../../src/style';
 
 export class AmpDocumentRecommendations extends AMP.BaseElement {
 
@@ -37,7 +35,7 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    this.element.classList.add('-amp-document-recommendations');
+    this.element.classList.add('i-amp-document-recommendations');
 
     // TODO(emarchiori): Consider using a service instead of singleton.
     if (this.win.CONTENT_DISCOVERY) {
@@ -56,7 +54,7 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
   }
 
   /** @override */
-  isLayoutSupported(layout) {
+  isLayoutSupported(unused) {
     return true;
   }
 
@@ -67,8 +65,9 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     this.element.appendChild(topDivision);
   }
 
-  appendNextArticle_(url) {
-    if (this.nextArticle_ < MAX_ARTICLES && this.nextArticle_ < this.config_.recommendations.length) {
+  appendNextArticle_() {
+    if (this.nextArticle_ < MAX_ARTICLES &&
+        this.nextArticle_ < this.config_.recommendations.length) {
       this.appendDivision_();
       this.appendArticleLinks_(this.nextArticle_ + 1);
 
@@ -76,14 +75,14 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
       this.nextArticle_++;
 
       Services.xhrFor(this.win)
-        .fetchDocument(next.ampUrl, {})
-        .then(
-          (doc) => {this.attachShadowDoc(doc);},
-          (error) => {});    
+          .fetchDocument(next.ampUrl, {})
+          .then(
+              doc => {this.attachShadowDoc_(doc);},
+              () => {});
     }
   }
 
-  /** 
+  /**
    * @param {number} from
    */
   appendArticleLinks_(from) {
@@ -97,18 +96,20 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
       article++;
 
       const articleHolder = doc.createElement('div');
-      articleHolder.classList.add('-reco-holder-article');
+      articleHolder.classList.add('i-reco-holder-article');
       articleHolder.onclick = () => {
         viewer.navigateTo(next.ampUrl, 'content-discovery');
-      }
+      };
 
       const imageElement = doc.createElement('div');
-      imageElement.classList.add('-next-article-image', 'amp-document-recommendations-image');
-      imageElement.style.backgroundImage = `url(${next.image})`;
+      imageElement.classList.add('i-next-article-image',
+          'amp-document-recommendations-image');
+      setStyle(imageElement, 'background-image', `url(${next.image})`);
       articleHolder.appendChild(imageElement);
 
       const titleElement = doc.createElement('div');
-      titleElement.classList.add('-next-article-title', 'amp-document-recommendations-text');
+      titleElement.classList.add('i-next-article-title',
+          'amp-document-recommendations-text');
 
       titleElement.textContent = next.title;
       articleHolder.appendChild(titleElement);
@@ -119,13 +120,12 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     }
   }
 
-  attachShadowDoc(doc, url) {
+  attachShadowDoc_(doc) {
     this.getVsync().mutate(() => {
       const shadowRoot = this.win.document.createElement('div');
-      //shadowRoot.classList.add('amp-next-article-container');
 
       try {
-        const amp = this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {});
+        this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {});
 
         // TODO(emarchiori): Update document title.
 
@@ -135,7 +135,7 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
           this.appendNextArticle_();
         }
 
-      } catch(e) {
+      } catch (e) {
         this.handleLoadingError();
       }
     });
@@ -148,10 +148,10 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     }
 
     this.multidocManager_ = new MultidocManager(
-      this.win,
-      Services.ampdocServiceFor(this.win),
-      Services.extensionsFor(this.win),
-      Services.timerFor(this.win));
+        this.win,
+        Services.ampdocServiceFor(this.win),
+        Services.extensionsFor(this.win),
+        Services.timerFor(this.win));
 
     const children = this.element.children;
     user().assert(children.length == 1,
@@ -162,9 +162,11 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
         'The amp-document-recommendations config should ' +
         'be inside a <script> tag with type="application/json"');
 
-    const configJson = tryParseJson(scriptElement.textContent, error => {
-      throw user().createError('failed to parse content discovery script', error);
-    });
+    const configJson = tryParseJson(
+        scriptElement.textContent, error => {
+          throw user().createError(
+              'failed to parse content discovery script', error);
+        });
 
     this.config_ = assertConfig(configJson);
 
@@ -174,4 +176,5 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-document-recommendations', AmpDocumentRecommendations, CSS);
+AMP.registerElement(
+    'amp-document-recommendations', AmpDocumentRecommendations, CSS);
