@@ -21,6 +21,7 @@ import {
 import {
   ANIMATIONS_DISABLED_CLASS,
   CURRENT_LABEL_ANIMATION_ATTR,
+  GOTO_COUNTER_PROP,
   GWD_PAGE_WRAPPER_CLASS,
   GWD_SERVICE_NAME,
   PlaybackCssClass,
@@ -103,8 +104,9 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
             `<amp-carousel id="pagedeck"
                 on="slideChange:node1.hide;event1:node1.show">
               <div id="page1" class="${GWD_PAGE_WRAPPER_CLASS}">
-                <div>
+                <div id="child">
                   <div id="not-an-event"></div>
+                  <div id="grandchild"></div>
                   <div id="event1" data-event-name="event-1"></div>
                   <div id="event2" data-event-name="event-2"></div>
                 </div>
@@ -173,20 +175,51 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
         });
       });
 
-      it('should set a page as current', () => {
+      it('should activate and deactivate pages', () => {
         return ampdoc.whenBodyAvailable().then(() => {
-          // Set page 1 as current.
+          const runtime = getServiceForDoc(ampdoc, GWD_SERVICE_NAME);
           const page1 = ampdoc.getRootNode().getElementById('page1');
-          page1.classList.add(PlaybackCssClass.PLAY);
+          const grandchild = page1.querySelector('#grandchild');
+          const page2 = ampdoc.getRootNode().getElementById('page2');
+
+          // Activate page 1.
+          // TODO(sklobovskaya): This is normally done by initialize_, but is
+          // not done in the test environment due to initialize_ executing
+          // before beforeEach which sets up the test DOM. Would be nice to fix.
+          runtime.setCurrentPage(0);
+
+          // Animations should be enabled on page1 only.
+          expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
+          expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.false;
+
+          // Set an active label animation, goto counters, and a pause on
+          // several descendant elements and the page element itself to test
+          // that this state is reset when the page is deactivated.
+          page1.classList.add(PlaybackCssClass.PAUSE);
+          grandchild.classList.add(PlaybackCssClass.PAUSE);
+          page1[GOTO_COUNTER_PROP] = {};
+          grandchild[GOTO_COUNTER_PROP] = {};
+          page1.setAttribute(CURRENT_LABEL_ANIMATION_ATTR, 'someLabel1');
+          grandchild.setAttribute(CURRENT_LABEL_ANIMATION_ATTR, 'someLabel2');
 
           // Change to page 2.
-          const runtime = getServiceForDoc(ampdoc, GWD_SERVICE_NAME);
           runtime.setCurrentPage(1);
 
+          // Animations should be enabled on page2 only.
           expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.false;
-
-          const page2 = ampdoc.getRootNode().getElementById('page2');
           expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
+
+          // Pause, goto counters, and current label animation data should have
+          // been cleared from all elements under page1, including the page
+          // itself.
+          expect(page1.classList.contains(PlaybackCssClass.PAUSE)).to.be.false;
+          expect(grandchild.classList.contains(PlaybackCssClass.PAUSE))
+              .to.be.false;
+          expect(page1).to.not.have.property(GOTO_COUNTER_PROP);
+          expect(grandchild).to.not.have.property(GOTO_COUNTER_PROP);
+          expect(page1.hasAttribute(CURRENT_LABEL_ANIMATION_ATTR)).to.be.false;
+          expect(grandchild.hasAttribute(CURRENT_LABEL_ANIMATION_ATTR))
+              .to.be.false;
         });
       });
 
