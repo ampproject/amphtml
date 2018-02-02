@@ -455,7 +455,8 @@ function compileCss(watch) {
       bundleOnlyIfListedInFiles: false,
       compileOnlyCss: true
     });
-  });
+  })
+  .then(patchWebAnimations);
 }
 
 /**
@@ -619,7 +620,7 @@ function enableLocalTesting(targetFile) {
 function performBuild(watch) {
   process.env.NODE_ENV = 'development';
   printConfigHelp(watch ? 'gulp watch' : 'gulp build');
-  return compileCss(watch).then(patchWebAnimations).then(() => {
+  return compileCss(watch).then(() => {
     return Promise.all([
       polyfillsForTests(),
       buildAlp({watch: watch}),
@@ -661,7 +662,7 @@ function dist() {
   if (argv.fortesting) {
     printConfigHelp('gulp dist --fortesting')
   }
-  return compileCss().then(patchWebAnimations).then(() => {
+  return compileCss().then(() => {
     return Promise.all([
       compile(false, true, true),
       // NOTE:
