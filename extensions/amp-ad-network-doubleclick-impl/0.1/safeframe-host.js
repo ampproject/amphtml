@@ -267,28 +267,30 @@ export class SafeframeHostApi {
         return percInView;
       }
     };
-
-    const getExpansionValue = (frameCoord, winCoord) => {
-      return (frameCoord > 0) && Math.abs(winCoord - frameCoord) || 0;
-    };
+    const frameHeight = changes.boundingClientRect.bottom -
+          changes.boundingClientRect.top;
+    const frameWidth = changes.boundingClientRect.right -
+          changes.boundingClientRect.left;
+    const viewportHeight = changes.rootBounds.bottom -
+          changes.rootBounds.top;
+    const viewportWidth = changes.rootBounds.right -
+          changes.rootBounds.left;
+    const expandWidth = (viewportWidth - frameWidth) / 2;
+    const expandHeight = (viewportHeight - frameHeight) / 2;
     this.currentGeometry_ = {
       'windowCoords_t': changes.rootBounds.top,
       'windowCoords_r': changes.rootBounds.right,
       'windowCoords_b': changes.rootBounds.bottom,
       'windowCoords_l': changes.rootBounds.left,
-      'frameCoords_t': changes.boundingClientRect.top + this.viewport.getScrollTop(),
-      'frameCoords_r': changes.boundingClientRect.right + this.viewport.getScrollLeft(),
-      'frameCoords_b': changes.boundingClientRect.bottom  + this.viewport.getScrollTop(),
-      'frameCoords_l': changes.boundingClientRect.left + this.viewport.getScrollLeft(),
+      'frameCoords_t': changes.boundingClientRect.top,// + this.viewport.getScrollTop(),
+      'frameCoords_r': changes.boundingClientRect.right,// + this.viewport.getScrollLeft(),
+      'frameCoords_b': changes.boundingClientRect.bottom,//  + this.viewport.getScrollTop(),
+      'frameCoords_l': changes.boundingClientRect.left,// + this.viewport.getScrollLeft(),
       'styleZIndex': this.baseInstance_.element.style.zIndex,
-      'allowedExpansion_t': getExpansionValue(changes.boundingClientRect.top,
-                                              changes.rootBounds.top),
-      'allowedExpansion_r': getExpansionValue(changes.boundingClientRect.right,
-                                              changes.rootBounds.right),
-      'allowedExpansion_b': getExpansionValue(changes.boundingClientRect.bottom,
-                                              changes.rootBounds.bottom),
-      'allowedExpansion_l': getExpansionValue(changes.boundingClientRect.left,
-                                              changes.rootBounds.left),
+      'allowedExpansion_t': expandHeight,
+      'allowedExpansion_r': expandWidth,
+      'allowedExpansion_b': expandHeight,
+      'allowedExpansion_l': expandWidth,
       'xInView': percInView(changes.rootBounds.top,
           changes.rootBounds.bottom,
           changes.boundingClientRect.top,
@@ -404,10 +406,12 @@ export class SafeframeHostApi {
    * @private
    */
   handleExpandRequest_(payload) {
-    this.handleSizeChange(payload.expand_b + payload.expand_t +
-                          this.initialHeight_,
-                          payload.expand_r + payload.expand_l +
-                          this.initialWidth_,
+    // TODO: Something is not working right when the frame is allllmost out of viewport
+    // and when it is fully out of viewport
+    this.handleSizeChange(Math.floor(payload.expand_b + payload.expand_t +
+                                     this.initialHeight_),
+                          Math.floor(payload.expand_r + payload.expand_l +
+                                     this.initialWidth_),
                           SERVICE.EXPAND_RESPONSE);
   }
 
