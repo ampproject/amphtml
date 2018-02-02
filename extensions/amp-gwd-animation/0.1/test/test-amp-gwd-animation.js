@@ -177,13 +177,16 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
 
       it('should change the current page on pagedeck slideChange', () => {
         return ampdoc.whenBodyAvailable().then(() => {
+          const runtime = getServiceForDoc(ampdoc, GWD_SERVICE_NAME);
           const pagedeck = ampdoc.getRootNode().getElementById(GWD_PAGEDECK_ID);
           const page1 = ampdoc.getRootNode().getElementById('page1');
           const page2 = ampdoc.getRootNode().getElementById('page2');
 
-          // Set page 1 as current. This is normally done automatically on
-          // initialize_, but this step does not occur in the test environment.
-          page1.classList.add(PlaybackCssClass.PLAY);
+          // Activate page 1.
+          // TODO(sklobovskaya): This is normally done by initialize_, but is
+          // not done in the test environment due to initialize_ executing
+          // before beforeEach which sets up the test DOM. Would be nice to fix.
+          runtime.setCurrentPage(0);
 
           // Trigger a setCurrentPage action as though it originated from a
           // pagedeck slideChange event and verify that page 2 is activated.
@@ -231,9 +234,6 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
           const page2 = ampdoc.getRootNode().getElementById('page2');
 
           // Activate page 1.
-          // TODO(sklobovskaya): This is normally done by initialize_, but is
-          // not done in the test environment due to initialize_ executing
-          // before beforeEach which sets up the test DOM. Would be nice to fix.
           runtime.setCurrentPage(0);
 
           // Animations should be enabled on page1 only.
