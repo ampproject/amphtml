@@ -38,10 +38,8 @@ var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
 var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
 var colors = require('ansi-colors');
 var log = require('fancy-log');
-var BBPromise = require('bluebird');
-var writeFileAsync = BBPromise.promisify(require('fs-extra').writeFile);
-var execAsync = require('./build-system/exec').execAsync;
-
+var createCtrlcHandler = require('./build-system/ctrlcHandler').createCtrlcHandler;
+var exitCtrlcHandler = require('./build-system/ctrlcHandler').exitCtrlcHandler;
 var argv = minimist(process.argv.slice(2), {boolean: ['strictBabelTransform']});
 
 require('./build-system/tasks');
@@ -614,7 +612,7 @@ function enableLocalTesting(targetFile) {
 function performBuild(watch) {
   process.env.NODE_ENV = 'development';
   printConfigHelp(watch ? 'gulp watch' : 'gulp build');
-  return compileCss(watch).then(patchWebAnimations).then(() => {
+  return compileCss(watch).then(() => {
     return Promise.all([
       polyfillsForTests(),
       buildAlp({watch: watch}),
@@ -656,7 +654,7 @@ function dist() {
   if (argv.fortesting) {
     printConfigHelp('gulp dist --fortesting')
   }
-  return compileCss().then(patchWebAnimations).then(() => {
+  return compileCss().then(() => {
     return Promise.all([
       compile(false, true, true),
       // NOTE:
@@ -1303,7 +1301,6 @@ function mkdirSync(path) {
  */
 function patchWebAnimations() {
   // Copies web-animations-js into a new file that has an export.
-  const startTime = Date.now();
   const patchedName = 'node_modules/web-animations-js/' +
       'web-animations.install.js';
   var file = fs.readFileSync(
@@ -1314,9 +1311,10 @@ function patchWebAnimations() {
       'var document = window.document;\n' +
       file + '\n' +
       '}\n';
-  return writeFileAsync(patchedName, file).then (() => {
-    endBuildStep('Wrote', patchedName, startTime);
-  });
+  fs.writeFileSync(patchedName, file);
+  if (!process.env.TRAVIS) {
+    log('Wrote', cyan(patchedName));
+  }
 }
 
 function toPromise(readable) {
@@ -1326,69 +1324,36 @@ function toPromise(readable) {
 }
 
 /**
- * Creates an async child process that handles Ctrl + C and immediately cancels
- * the ongoing `gulp watch | build | dist` task.
- *
- * @param {string} command.
- */
-function createCtrlcHandler(command) {
-  if (!process.env.TRAVIS) {
-    log(green('Running'), cyan(command) + green('. Press'), cyan('Ctrl + C'),
-        green('to cancel...'));
-  }
-  const killCmd =
-      (process.platform == 'win32') ? 'taskkill /pid' : 'kill -KILL';
-  const killMessage = green('\nDetected ') + cyan('Ctrl + C') +
-      green ('. Canceling ') + cyan(command) + green('.');
-  const listenerCmd = `
-    #!/bin/sh
-    ctrlcHandler() {
-      echo -e "${killMessage}"
-      ${killCmd} ${process.pid}
-      exit 1
-    }
-    trap 'ctrlcHandler' INT
-    read _ # Waits until the process is terminated
-  `;
-  return execAsync(
-      listenerCmd, {'stdio': [null, process.stdout, process.stderr]}).pid;
-}
-
-/**
- * Exits the Ctrl C handler process.
- *
- * @param {string} handlerProcess
- */
-function exitCtrlcHandler(handlerProcess) {
-  process.kill(handlerProcess, 'SIGKILL');
-}
-
-/**
  * Gulp tasks
  */
-gulp.task('build', 'Builds the AMP library', ['update-packages'], build, {
-  options: {
-    config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-  }
-});
+gulp.task('build', 'Builds the AMP library',
+    ['update-packages', 'patch-web-animations'], build, {
+      options: {
+        config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+      }
+    });
 gulp.task('check-all', 'Run through all presubmit checks',
     ['lint', 'dep-check', 'check-types', 'presubmit']);
 gulp.task('check-types', 'Check JS types', checkTypes);
+gulp.task('patch-web-animations',
+    'Patches the Web Animations API with an install function',
+    ['update-packages'], patchWebAnimations);
 gulp.task('css', 'Recompile css to build directory', ['update-packages'], css);
 gulp.task('default', 'Runs "watch" and then "serve"',
     ['update-packages', 'watch'], serve);
-gulp.task('dist', 'Build production binaries', ['update-packages'], dist, {
-  options: {
-    pseudo_names: '  Compiles with readable names. ' +
-        'Great for profiling and debugging production code.',
-    fortesting: '  Compiles production binaries for local testing',
-    config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-    minimal_set: '  Only compile files needed to load article.amp.html',
-  }
-});
+gulp.task('dist', 'Build production binaries',
+    ['update-packages', 'patch-web-animations'], dist, {
+      options: {
+        pseudo_names: '  Compiles with readable names. ' +
+            'Great for profiling and debugging production code.',
+        fortesting: '  Compiles production binaries for local testing',
+        config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+        minimal_set: '  Only compile files needed to load article.amp.html',
+      }
+    });
 gulp.task('extensions', 'Build AMP Extensions', buildExtensions);
 gulp.task('watch', 'Watches for changes in files, re-builds when detected',
-    ['update-packages'], watch, {
+    ['update-packages', 'patch-web-animations'], watch, {
       options: {
         with_inabox: '  Also watch and build the amp-inabox.js binary.',
         with_shadow: '  Also watch and build the amp-shadow.js binary.',
