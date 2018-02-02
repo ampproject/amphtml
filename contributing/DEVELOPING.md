@@ -42,11 +42,14 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp lint --watch`                                                     | Watches for changes in files, Validates against Google Closure Linter.|
 | `gulp lint --fix`                                                       | Fixes simple lint warnings/errors automatically.                      |
 | `gulp build`<sup>[[1]](#footnote-1)</sup>                               | Builds the AMP library.                                               |
+| `gulp build --extensions=<extension-name,extension-name>`               | Builds the AMP library with only listed extension components.
+| `gulp build --noextensions`                                             | Builds the AMP library with no extensions.
 | `gulp check-links --files foo.md,bar.md`                                | Reports dead links in `.md` files.                                                 |
 | `gulp clean`                                                            | Removes build output.                                                 |
 | `gulp css`<sup>[[1]](#footnote-1)</sup>                                 | Recompiles css to build directory and builds the embedded css into js files for the AMP library. |
-| `gulp extensions`                                                       | Build AMP Extensions.                                                 |
 | `gulp watch`<sup>[[1]](#footnote-1)</sup>                               | Watches for changes in files, re-build.                               |
+| `gulp watch --extensions=<extension-name,extension-name>`               | Watch for changes in files, re-build with only listed extensions.
+| `gulp watch --noextensions`                                             | Watch for changes in files, re-build with no extensions.
 | `gulp pr-check`<sup>[[1]](#footnote-1)</sup>                            | Runs all the Travis CI checks locally.         |
 | `gulp pr-check --nobuild`<sup>[[1]](#footnote-1)</sup>                  | Runs all the Travis CI checks locally, but skips the `gulp build` step.         |
 | `gulp pr-check --files=<test-files-path-glob>`<sup>[[1]](#footnote-1)</sup>   | Runs all the Travis CI checks locally, and restricts tests to the files provided.  |

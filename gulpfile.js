@@ -241,16 +241,20 @@ function endBuildStep(stepName, targetName, startTime) {
  */
 function buildExtensions(options) {
   const results = [];
-  let extensionToBuild = null;
-  if (argv.extension) {
-    let arg = argv.extension;
-    arg = arg.split(',');
-    extensionToBuild = Array.isArray(arg) ? arg : [arg];
+  let extensionsToBuild = [];
+  // --noextensions flag skip building extensions
+  if (!!argv.noextensions) {
+    return Promise.all(results);
   }
-  for (const key in extensions) {
-    const extensionName = key.substring(0, key.length - 4);
-    if (argv.extension && extensionToBuild) {
-      if (extensionToBuild.indexOf(extensionName) < 0) {
+
+  // --extensions flag: only build listed extensions
+  if (!!argv.extensions && argv.extensions !== true) {
+    extensionsToBuild = argv.extensions.split(',');
+  }
+
+  for (var key in extensions) {
+    if (extensionsToBuild.length > 0 && extensionsToBuild) {
+      if (extensionsToBuild.indexOf(extensions[key].name) < 0) {
         // Skip this extension;
         continue;
       }
@@ -625,6 +629,9 @@ function enableLocalTesting(targetFile) {
 function performBuild(watch) {
   process.env.NODE_ENV = 'development';
   printConfigHelp(watch ? 'gulp watch' : 'gulp build');
+  if (!!argv.extensions) {
+    log(green('Building extension(s):'), cyan(argv.extensions));
+  }
   return compileCss(watch).then(() => {
     return Promise.all([
       polyfillsForTests(),
@@ -1364,7 +1371,6 @@ gulp.task('dist', 'Build production binaries',
         minimal_set: '  Only compile files needed to load article.amp.html',
       }
     });
-gulp.task('extensions', 'Build AMP Extensions', buildExtensions);
 gulp.task('watch', 'Watches for changes in files, re-builds when detected',
     ['update-packages', 'patch-web-animations'], watch, {
       options: {
