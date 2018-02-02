@@ -240,24 +240,20 @@ function endBuildStep(stepName, targetName, startTime) {
  * @return {!Promise}
  */
 function buildExtensions(options) {
-  const results = [];
-  let extensionsToBuild = [];
-  // --noextensions flag skip building extensions
   if (!!argv.noextensions) {
-    return Promise.all(results);
+    return Promise.resolve();
   }
 
-  // --extensions flag: only build listed extensions
+  var extensionsToBuild = [];
   if (!!argv.extensions && argv.extensions !== true) {
     extensionsToBuild = argv.extensions.split(',');
   }
 
+  var results = [];
   for (var key in extensions) {
-    if (extensionsToBuild.length > 0 && extensionsToBuild) {
-      if (extensionsToBuild.indexOf(extensions[key].name) < 0) {
-        // Skip this extension;
-        continue;
-      }
+    if (extensionsToBuild.length > 0 &&
+        extensionsToBuild.indexOf(extensions[key].name) == -1) {
+      continue;
     }
     var e = extensions[key];
     var o = Object.assign({}, options);
@@ -1350,6 +1346,8 @@ gulp.task('build', 'Builds the AMP library',
     ['update-packages', 'patch-web-animations'], build, {
       options: {
         config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+        extensions: '  Builds only the listed extensions.',
+        noextensions: ' Builds with no extensions.',
       }
     });
 gulp.task('check-all', 'Run through all presubmit checks',
@@ -1360,7 +1358,12 @@ gulp.task('patch-web-animations',
     ['update-packages'], patchWebAnimations);
 gulp.task('css', 'Recompile css to build directory', ['update-packages'], css);
 gulp.task('default', 'Runs "watch" and then "serve"',
-    ['update-packages', 'watch'], serve);
+    ['update-packages', 'watch'], serve, {
+      options: {
+        extensions: '  Watches and builds only the listed extensions.',
+        noextensions: '  Watches and builds with no extensions.',
+      }
+    });
 gulp.task('dist', 'Build production binaries',
     ['update-packages', 'patch-web-animations'], dist, {
       options: {
@@ -1376,6 +1379,8 @@ gulp.task('watch', 'Watches for changes in files, re-builds when detected',
       options: {
         with_inabox: '  Also watch and build the amp-inabox.js binary.',
         with_shadow: '  Also watch and build the amp-shadow.js binary.',
+        extensions: '  Watches and builds only the listed extensions.',
+        noextensions: '  Watches and builds with no extensions.',
       }
 });
 gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
