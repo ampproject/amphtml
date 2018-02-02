@@ -209,12 +209,12 @@ def close_web_server(pid)
 end
 
 
-# Loads all the visual tests from a well-known json config file.
+# Loads all the visual tests from a well-known pseudo-json config file.
 def load_visual_tests_config_json
   json_file = File.open(
       File.join(
           File.dirname(__FILE__),
-          '../../test/visual-diff/visual-tests.json'),
+          '../../test/visual-diff/visual-tests.js'),
       'r')
   json_file.read
 end
