@@ -201,8 +201,7 @@ export class AmpStory extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-    
-    debugger;
+
     /** @private {!NavigationState} */
     this.navigationState_ =
         new NavigationState(element, () => this.hasBookend_());
