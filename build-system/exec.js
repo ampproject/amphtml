@@ -45,6 +45,16 @@ exports.exec = function(cmd) {
 };
 
 /**
+ * Executes the provided command in an asynchronous process.
+ *
+ * @param {string} cmd
+ * @param {<Object>} options
+ */
+exports.execAsync = function(cmd, options) {
+  return childProcess.spawn(shellCmd, [shellFlag, cmd], options);
+};
+
+/**
  * Executes the provided command, and terminates the program in case of failure.
  *
  * @param {string} cmd Command line to execute.
