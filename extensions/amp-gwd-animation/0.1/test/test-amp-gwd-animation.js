@@ -197,17 +197,24 @@ describes.sandboxed('AMP GWD Animation', {}, () => {
 
           // Simulate setCurrentPage from a slideChange event which originated
           // from some other carousel. There should be no page change.
-          const ignoredSetCurrentPageInvocation = {
+          const otherSetCurrentPageInvocation = {
             method: 'setCurrentPage',
             args: {index: 0},
-            source: {},  // Some other element.
+            source: null,
             caller: pagedeck,
             satisfiesTrust: () => true,
           };
-          impl.executeAction(ignoredSetCurrentPageInvocation);
+          impl.executeAction(otherSetCurrentPageInvocation);
 
           expect(page1.classList.contains(PlaybackCssClass.PLAY)).to.be.false;
           expect(page2.classList.contains(PlaybackCssClass.PLAY)).to.be.true;
+
+          // Remove the pagedeck element and verify that triggering
+          // setCurrentPage does not throw errors.
+          pagedeck.remove();
+          otherSetCurrentPageInvocation.source = null;
+          otherSetCurrentPageInvocation.caller = null;
+          impl.executeAction(otherSetCurrentPageInvocation);
         });
       });
 

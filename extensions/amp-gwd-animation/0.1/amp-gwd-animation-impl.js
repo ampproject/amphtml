@@ -261,7 +261,7 @@ export class AmpGwdRuntimeService {
     }
 
     // Clear all gotoAndPlayNTimes counters.
-    delete element['gwdGotoCounters'];
+    delete element[GOTO_COUNTER_PROP];
   }
 
   /**

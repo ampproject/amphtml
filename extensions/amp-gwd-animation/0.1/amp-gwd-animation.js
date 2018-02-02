@@ -77,12 +77,10 @@ export class GwdAnimation extends AMP.BaseElement {
     this.getAmpDoc().getRootNode().addEventListener(
         GWD_TIMELINE_EVENT, this.boundOnGwdTimelineEvent_, true);
 
-    // If the document has a GWD page deck, automatically generate listeners
-    // for `slideChange` events, on which the active animations context must be
+    // If the document has a GWD pagedeck, automatically generate listeners for
+    // `slideChange` events, on which the active animations context must be
     // switched from the old page to the new.
-    const gwdPageDeck = this.getAmpDoc().getRootNode().querySelector(
-        `amp-carousel#${GWD_PAGEDECK_ID}`);
-
+    const gwdPageDeck = this.getGwdPageDeck_();
     if (gwdPageDeck) {
       user().assert(this.element.id, `The ${TAG} element must have an id.`);
 
@@ -99,6 +97,16 @@ export class GwdAnimation extends AMP.BaseElement {
   }
 
   /**
+   * Returns the GWD pagedeck element if one exists in the document.
+   * @return {?Element}
+   * @private
+   */
+  getGwdPageDeck_() {
+    return this.getAmpDoc().getRootNode().querySelector(
+        `amp-carousel#${GWD_PAGEDECK_ID}`);
+  }
+
+  /**
    * Returns a registrable AMP action function which invokes the corresponding
    * GWD runtime method with arguments extracted from the invocation object
    * (@see getActionImplArgs).
@@ -109,13 +117,12 @@ export class GwdAnimation extends AMP.BaseElement {
    */
   createAction_(actionName) {
     return invocation => {
-      // The 'setCurrentPage' action is special-cased, because the event which
-      // triggers it ('slideChange') may be emitted by an amp-carousel other
-      // than the GWD page deck. Ignore the event in this case.
+      // The setCurrentPage action is special-cased, because the event which
+      // triggers it (slideChange) may be emitted by an amp-carousel other
+      // than the GWD pagedeck. Ignore the event in this case.
       if (actionName == 'setCurrentPage') {
-        const gwdPageDeck = this.getAmpDoc().getRootNode().querySelector(
-            `amp-carousel#${GWD_PAGEDECK_ID}`);
-        if (invocation.source != gwdPageDeck) {
+        const gwdPageDeck = this.getGwdPageDeck_();
+        if (!(gwdPageDeck && invocation.source == gwdPageDeck)) {
           return;
         }
       }
