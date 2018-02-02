@@ -35,6 +35,8 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | Command                                                                 | Description                                                           |
 | ----------------------------------------------------------------------- | --------------------------------------------------------------------- |
 | **`gulp`**<sup>[[1]](#footnote-1)</sup>                                 | Runs "watch" and "serve". Use this for standard local dev.            |
+| `gulp --extensions=<amp-foo,amp-bar>`                                   | Runs "watch" and "serve", after building only the listed extensions.
+| `gulp --noextensions`                                                   | Runs "watch" and "serve" without building any extensions.
 | `gulp dist`<sup>[[1]](#footnote-1)</sup>                                | Builds production binaries.                                           |
 | `gulp dist --fortesting`<sup>[[1]](#footnote-1)</sup>                   | Builds production binaries for local testing. (Allows use cases like ads, tweets, etc. to work with minified sources. Overrides `TESTING_HOST` if specified. Uses the production `AMP_CONFIG` by default.) |
 | `gulp dist --fortesting --config=<config>`<sup>[[1]](#footnote-1)</sup> | Builds production binaries for local testing, with the specified `AMP_CONFIG`. `config` can be `prod` or `canary`. (Defaults to `prod`.) |
@@ -42,11 +44,14 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp lint --watch`                                                     | Watches for changes in files, Validates against Google Closure Linter.|
 | `gulp lint --fix`                                                       | Fixes simple lint warnings/errors automatically.                      |
 | `gulp build`<sup>[[1]](#footnote-1)</sup>                               | Builds the AMP library.                                               |
+| `gulp build --extensions=<amp-foo,amp-bar>`                             | Builds the AMP library, with only the listed extensions.
+| `gulp build --noextensions`                                             | Builds the AMP library with no extensions.
 | `gulp check-links --files foo.md,bar.md`                                | Reports dead links in `.md` files.                                                 |
 | `gulp clean`                                                            | Removes build output.                                                 |
 | `gulp css`<sup>[[1]](#footnote-1)</sup>                                 | Recompiles css to build directory and builds the embedded css into js files for the AMP library. |
-| `gulp extensions`                                                       | Build AMP Extensions.                                                 |
-| `gulp watch`<sup>[[1]](#footnote-1)</sup>                               | Watches for changes in files, re-build.                               |
+| `gulp watch`<sup>[[1]](#footnote-1)</sup>                               | Watches for changes in files, re-builds.                               |
+| `gulp watch --extensions=<amp-foo,amp-bar>`                             | Watches for changes in files, re-builds only the listed extensions.
+| `gulp watch --noextensions`                                             | Watches for changes in files, re-builds with no extensions.
 | `gulp pr-check`<sup>[[1]](#footnote-1)</sup>                            | Runs all the Travis CI checks locally.         |
 | `gulp pr-check --nobuild`<sup>[[1]](#footnote-1)</sup>                  | Runs all the Travis CI checks locally, but skips the `gulp build` step.         |
 | `gulp pr-check --files=<test-files-path-glob>`<sup>[[1]](#footnote-1)</sup>   | Runs all the Travis CI checks locally, and restricts tests to the files provided.  |
