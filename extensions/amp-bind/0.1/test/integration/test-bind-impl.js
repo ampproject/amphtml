@@ -287,10 +287,10 @@ describe.configure().ifNewChrome().run('Bind', function() {
       createElement(env, container, '[class]="\'foo\'" class=" foo "');
       createElement(env, container, '[class]="\'\'"');
       createElement(env, container, '[class]="\'bar\'" class="qux"'); // Error
-      const errorSpy = env.sandbox.spy(user(), 'createError');
+      const warnSpy = env.sandbox.spy(user(), 'warn');
       return onBindReady(env, bind).then(() => {
-        expect(errorSpy).to.be.calledOnce;
-        expect(errorSpy).calledWithMatch(/bar/);
+        expect(warnSpy).to.be.calledOnce;
+        expect(warnSpy).calledWithMatch(/bar/);
       });
     });
 
@@ -298,9 +298,9 @@ describe.configure().ifNewChrome().run('Bind', function() {
       window.AMP_MODE = {development: true, test: true};
       // Only the initial value for [a] binding does not match.
       createElement(env, container, '[text]="\'a\'" [class]="\'b\'" class="b"');
-      const errorSpy = env.sandbox.spy(user(), 'createError');
+      const warnSpy = env.sandbox.spy(user(), 'warn');
       return onBindReady(env, bind).then(() => {
-        expect(errorSpy).to.be.calledOnce;
+        expect(warnSpy).to.be.calledOnce;
       });
     });
 
@@ -309,9 +309,9 @@ describe.configure().ifNewChrome().run('Bind', function() {
       createElement(env, container, '[disabled]="true" disabled', 'button');
       createElement(env, container, '[disabled]="false"', 'button');
       createElement(env, container, '[disabled]="true"', 'button'); // Mismatch.
-      const errorSpy = env.sandbox.spy(user(), 'createError');
+      const warnSpy = env.sandbox.spy(user(), 'warn');
       return onBindReady(env, bind).then(() => {
-        expect(errorSpy).to.be.calledOnce;
+        expect(warnSpy).to.be.calledOnce;
       });
     });
 
