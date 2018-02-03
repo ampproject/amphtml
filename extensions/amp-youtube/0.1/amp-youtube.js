@@ -435,8 +435,10 @@ class AmpYoutube extends AMP.BaseElement {
           encodeURIComponent(videoid) + '/hqdefault.jpg';
       return this.loadPromise(imgPlaceholder);
     }).then(() => {
-      setStyles(imgPlaceholder, {
-        'visibility': '',
+      this.getVsync().mutate(() => {
+        setStyles(imgPlaceholder, {
+          'visibility': '',
+        });
       });
     });
   }
