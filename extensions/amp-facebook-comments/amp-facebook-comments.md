@@ -54,7 +54,7 @@ The URL of the comments page. For example, `http://www.directlyrics.com/adele-25
 
 ##### data-locale (optional)
 
-By default, the local is set to <code>en_US</code>; however, you can specify a locale as well.
+By default, the local is set to user's system language; however, you can specify a locale as well.
 
 For details on strings accepted here please visit the [Facebook API Localization page](https://developers.facebook.com/docs/internationalization)
 
