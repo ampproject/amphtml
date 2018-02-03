@@ -23,15 +23,21 @@ import {isArray} from '../../../../src/types';
  * Please add your custom test data here in alphabetic order.
  * Test data should be an object like
  * {
- *   'in': Array<batchSegmentDef>
+ *   'in': Array<{
+ *      'baseUrl': string,
+ *      'batchSegments': Array<batchSegmentDef>
+ *    }>
  *   'out': Array<string>
  * }
  */
 const pingTestData = {
   'in': [{
-    'trigger': 'click',
-    'timestamp': 0,
-    'extraUrlParams': 123,
+    'baseUrl': 'base.com?',
+    'batchSegments': [{
+      'trigger': 'click',
+      'timestamp': 0,
+      'extraUrlParams': 123,
+    }],
   }],
   'out': ['testFinalUrl'],
 };
@@ -125,7 +131,7 @@ describe('Batching Plugins', () => {
         expect(input).to.be.ok;
         expect(output).to.be.ok;
         expect(isArray(input)).to.be.true;
-        expect(isArray(input)).to.be.true;
+        expect(isArray(output)).to.be.true;
         expect(input.length).to.be.greaterThan(0);
         expect(output.length).to.be.greaterThan(0);
         expect(input.length).to.equal(output.length);
@@ -133,9 +139,13 @@ describe('Batching Plugins', () => {
 
       it('run custom test', () => {
         for (let i = 0; i < input.length; i++) {
-          const batchSegment = input[i];
+          const baseUrl = input[i].baseUrl;
+          expect(baseUrl).to.be.ok;
+          const batchSegments = input[i].batchSegments;
+          expect(batchSegments).to.be.ok;
+          expect(isArray(batchSegments)).to.be.true;
           const url = output[i];
-          expect(plugin(batchSegment)).to.equal(url);
+          expect(plugin(baseUrl, batchSegments)).to.equal(url);
         }
       });
     });
