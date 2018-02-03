@@ -288,6 +288,11 @@ export class AmpStory extends AMP.BaseElement {
       }, html);
     }
 
+    if (this.isDesktop_()) {
+      this.element.setAttribute('desktop','');
+    }
+    this.element.querySelector('amp-story-page').setAttribute('active', '');
+
     this.initializeListeners_();
     this.initializeListenersForDev_();
 
