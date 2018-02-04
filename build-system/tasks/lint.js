@@ -31,7 +31,6 @@ const isWatching = (argv.watch || argv.w) || false;
 const options = {
   fix: false,
   rulePaths: ['build-system/eslint-rules/'],
-  plugins: ['eslint-plugin-google-camelcase'],
 };
 
 /**
