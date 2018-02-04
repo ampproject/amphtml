@@ -265,6 +265,12 @@ data.inViewport;
 data.numposts;
 data.orderBy;
 data.colorscheme;
+data.tabs;
+data.hideCover;
+data.hideCta;
+data.smallHeader;
+data.adaptContainerWidth;
+data.showFacePile;
 
 // 3p code
 var twttr;

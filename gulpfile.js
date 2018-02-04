@@ -95,6 +95,7 @@ declareExtension('amp-experiment', '0.1', false);
 declareExtension('amp-facebook', '0.1', false);
 declareExtension('amp-facebook-comments', '0.1', false);
 declareExtension('amp-facebook-like', '0.1', false);
+declareExtension('amp-facebook-page', '0.1', false);
 declareExtension('amp-fit-text', '0.1', true);
 declareExtension('amp-font', '0.1', false);
 declareExtension('amp-form', '0.1', true);
