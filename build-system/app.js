@@ -19,12 +19,12 @@
  * @fileoverview Creates an http server to handle static
  * files and list directories for use with the gulp live server
  */
-const BBPromise = require('bluebird');
 const app = require('express')();
 const bacon = require('baconipsum');
+const BBPromise = require('bluebird');
 const bodyParser = require('body-parser');
-const fs = BBPromise.promisifyAll(require('fs'));
 const formidable = require('formidable');
+const fs = BBPromise.promisifyAll(require('fs'));
 const jsdom = require('jsdom');
 const path = require('path');
 const request = require('request');

@@ -15,12 +15,12 @@
  */
 'use strict';
 
+const colors = require('ansi-colors');
 const gulp = require('gulp-help')(require('gulp'));
+const log = require('fancy-log');
 const path = require('path');
 const srcGlobs = require('../config').presubmitGlobs;
 const through2 = require('through2');
-const colors = require('ansi-colors');
-const log = require('fancy-log');
 
 const dedicatedCopyrightNoteSources = /(\.js|\.css|\.go)$/;
 
