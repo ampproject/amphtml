@@ -29,8 +29,51 @@ import {
   masterSelection,
 } from './ampcontext-integration';
 import {MessageType} from '../src/3p-frame-messaging';
-import {_24smi} from '../ads/24smi';
+import {
+  computeInMasterFrame,
+  nextTick,
+  register,
+  run,
+  setExperimentToggles,
+} from './3p';
+import {dict} from '../src/utils/object.js';
+import {endsWith} from '../src/string';
+import {
+  getAmpConfig,
+  getAttributeData,
+  getContextState,
+  getEmbedType,
+  getLocation,
+} from './frame-metadata';
+import {getMode} from '../src/mode';
+import {getSourceUrl, isProxyOrigin, parseUrl} from '../src/url';
+import {
+  initLogConstructor,
+  isUserErrorMessage,
+  setReportError,
+  user,
+} from '../src/log';
+import {installEmbedStateListener, manageWin} from './environment';
+import {isExperimentOn} from './3p';
+import {listenParent, nonSensitiveDataPostMessage} from './messaging';
+import {parseJson} from '../src/json';
+import {startsWith} from '../src/string.js';
+import {urls} from '../src/config';
+
+// Disable auto-sorting of imports from here on.
+/* eslint-disable sort-imports-es6-autofix/sort-imports-es6 */
+
+// 3P - please keep in alphabetic order
+import {facebook} from './facebook';
+import {github} from './github';
+import {mathml} from './mathml';
+import {reddit} from './reddit';
+import {twitter} from './twitter';
+
 import {_ping_} from '../ads/_ping_';
+
+// 3P Ad Networks - please keep in alphabetic order
+import {_24smi} from '../ads/24smi';
 import {a8} from '../ads/a8';
 import {a9} from '../ads/a9';
 import {accesstrade} from '../ads/accesstrade';
@@ -42,17 +85,12 @@ import {adfox} from '../ads/adfox';
 import {adgeneration} from '../ads/adgeneration';
 import {adhese} from '../ads/adhese';
 import {adition} from '../ads/adition';
-
-// 3P - please keep in alphabetic order
 import {adman} from '../ads/adman';
 import {admanmedia} from '../ads/admanmedia';
 import {adocean} from '../ads/adocean';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/google/adsense';
-
 import {adsnative} from '../ads/adsnative';
-
-// 3P Ad Networks - please keep in alphabetic order
 import {adspeed} from '../ads/adspeed';
 import {adspirit} from '../ads/adspirit';
 import {adstir} from '../ads/adstir';
@@ -75,48 +113,28 @@ import {capirs} from '../ads/capirs';
 import {caprofitx} from '../ads/caprofitx';
 import {chargeads} from '../ads/chargeads';
 import {colombia} from '../ads/colombia';
-import {
-  computeInMasterFrame,
-  nextTick,
-  register,
-  run,
-  setExperimentToggles,
-} from './3p';
 import {connatix} from '../ads/connatix';
 import {contentad} from '../ads/contentad';
 import {criteo} from '../ads/criteo';
 import {csa} from '../ads/google/csa';
 import {dable} from '../ads/dable';
-import {dict} from '../src/utils/object.js';
 import {directadvert} from '../ads/directadvert';
 import {distroscale} from '../ads/distroscale';
 import {dotandads} from '../ads/dotandads';
 import {doubleclick} from '../ads/google/doubleclick';
 import {eadv} from '../ads/eadv';
 import {eas} from '../ads/eas';
-import {endsWith} from '../src/string';
 import {engageya} from '../ads/engageya';
 import {eplanning} from '../ads/eplanning';
 import {ezoic} from '../ads/ezoic';
 import {f1e} from '../ads/f1e';
 import {f1h} from '../ads/f1h';
-import {facebook} from './facebook';
 import {felmat} from '../ads/felmat';
 import {flite} from '../ads/flite';
 import {fluct} from '../ads/fluct';
 import {fusion} from '../ads/fusion';
 import {genieessp} from '../ads/genieessp';
-import {
-  getAmpConfig,
-  getAttributeData,
-  getContextState,
-  getEmbedType,
-  getLocation,
-} from './frame-metadata';
-import {getMode} from '../src/mode';
-import {getSourceUrl, isProxyOrigin, parseUrl} from '../src/url';
 import {giraff} from '../ads/giraff';
-import {github} from './github';
 import {gmossp} from '../ads/gmossp';
 import {gumgum} from '../ads/gumgum';
 import {holder} from '../ads/holder';
@@ -125,27 +143,17 @@ import {imaVideo} from '../ads/google/imaVideo';
 import {imedia} from '../ads/imedia';
 import {imobile} from '../ads/imobile';
 import {improvedigital} from '../ads/improvedigital';
-import {
-  initLogConstructor,
-  isUserErrorMessage,
-  setReportError,
-  user,
-} from '../src/log';
 import {inmobi} from '../ads/inmobi';
 import {innity} from '../ads/innity';
-import {installEmbedStateListener, manageWin} from './environment';
-import {isExperimentOn} from './3p';
 import {ix} from '../ads/ix';
 import {kargo} from '../ads/kargo';
 import {kiosked} from '../ads/kiosked';
 import {kixer} from '../ads/kixer';
 import {ligatus} from '../ads/ligatus';
-import {listenParent, nonSensitiveDataPostMessage} from './messaging';
 import {lockerdome} from '../ads/lockerdome';
 import {loka} from '../ads/loka';
 import {mads} from '../ads/mads';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
-import {mathml} from './mathml';
 import {mediaimpact} from '../ads/mediaimpact';
 import {medianet} from '../ads/medianet';
 import {mediavine} from '../ads/mediavine';
@@ -161,7 +169,6 @@ import {nokta} from '../ads/nokta';
 import {openadstream} from '../ads/openadstream';
 import {openx} from '../ads/openx';
 import {outbrain} from '../ads/outbrain';
-import {parseJson} from '../src/json';
 import {plista} from '../ads/plista';
 import {polymorphicads} from '../ads/polymorphicads';
 import {popin} from '../ads/popin';
@@ -171,7 +178,6 @@ import {pubmatic} from '../ads/pubmatic';
 import {pubmine} from '../ads/pubmine';
 import {pulsepoint} from '../ads/pulsepoint';
 import {purch} from '../ads/purch';
-import {reddit} from './reddit';
 import {relap} from '../ads/relap';
 import {revcontent} from '../ads/revcontent';
 import {revjet} from '../ads/revjet';
@@ -186,14 +192,11 @@ import {sogouad} from '../ads/sogouad';
 import {sortable} from '../ads/sortable';
 import {sovrn} from '../ads/sovrn';
 import {spotx} from '../ads/spotx';
-import {startsWith} from '../src/string.js';
 import {sunmedia} from '../ads/sunmedia';
 import {swoop} from '../ads/swoop';
 import {taboola} from '../ads/taboola';
 import {teads} from '../ads/teads';
 import {triplelift} from '../ads/triplelift';
-import {twitter} from './twitter';
-import {urls} from '../src/config';
 import {valuecommerce} from '../ads/valuecommerce';
 import {viralize} from '../ads/viralize';
 import {vmfive} from '../ads/vmfive';
