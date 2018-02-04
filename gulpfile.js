@@ -725,7 +725,6 @@ function dist() {
   }
   parseExtensionFlags();
   return compileCss().then(() => {
-    log('---------------> creating promises');
     return Promise.all([
       compile(false, true, true),
       // NOTE:
@@ -999,50 +998,36 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   const destFilename = options.toName || srcFilename;
   function rebundle() {
     const startTime = Date.now();
-    return toPromise(bundler.bundle()
-      .on('error', function(err) {
-        // Drop the node_modules call stack, which begins with '    at'.
-        const message = err.stack.replace(/    at[^]*/, '').trim();
-        console.error(red(message));
-        process.exit(1);
-      })
-      .pipe(lazybuild())
-      .pipe($$.rename(destFilename))
-      .pipe(lazywrite())
-      .on('end', function() {
-        appendToCompiledFile(srcFilename, destDir + '/' + destFilename);
-      })).then(() => {
-        endBuildStep('Compiled', srcFilename, startTime);
-      }).then(() => {
-        if (process.env.NODE_ENV === 'development') {
-          if (srcFilename === 'amp.js') {
-            return enableLocalTesting(unminifiedRuntimeTarget);
-          } else if (srcFilename === 'integration.js') {
-            return enableLocalTesting(unminified3pTarget);
-          } else {
-            log(red(err.message));
-          }
+    return toPromise(
+        bundler.bundle()
+            .on('error', function(err) {
+              // Drop the node_modules call stack, which begins with '    at'.
+              const message = err.stack.replace(/    at[^]*/, '').trim();
+              console.error(red(message));
+              process.exit(1);
+            })
+            .pipe(lazybuild())
+            .pipe($$.rename(destFilename))
+            .pipe(lazywrite())
+            .on('end', function() {
+              appendToCompiledFile(srcFilename, destDir + '/' + destFilename);
+            }))
+        .then(() => {
+          endBuildStep('Compiled', srcFilename, startTime);
         })
-        .pipe(lazybuild())
-        .pipe($$.rename(destFilename))
-        .pipe(lazywrite())
-        .on('end', function() {
-          appendToCompiledFile(srcFilename, destDir + '/' + destFilename);
-        })).then(() => {
-      endBuildStep('Compiled', srcFilename, startTime);
-    }).then(() => {
-      if (process.env.NODE_ENV === 'development') {
-        if (srcFilename === 'amp.js') {
-          return enableLocalTesting(unminifiedRuntimeTarget);
-        } else if (srcFilename === 'integration.js') {
-          return enableLocalTesting(unminified3pTarget);
-        } else {
-          return Promise.resolve();
-        }
-      } else {
-        return Promise.resolve();
-      }
-    });
+        .then(() => {
+          if (process.env.NODE_ENV === 'development') {
+            if (srcFilename === 'amp.js') {
+              return enableLocalTesting(unminifiedRuntimeTarget);
+            } else if (srcFilename === 'integration.js') {
+              return enableLocalTesting(unminified3pTarget);
+            } else {
+              return Promise.resolve();
+            }
+          } else {
+            return Promise.resolve();
+          }
+        });
   }
 
   if (options.watch) {
