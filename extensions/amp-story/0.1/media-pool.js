@@ -96,8 +96,10 @@ function blessMediaElement(mediaEl) {
       mediaEl.muted = true;
     }
 
+    console.log('dispatch bless success');
     dispatch(mediaEl, 'bless', false);
   }).catch(reason => {
+    console.log('dispatch bless fail');
     dispatch(mediaEl, 'bless', false);
     dev().expectedError('AMP-STORY', 'Blessing media element failed:',
         reason, mediaEl);
@@ -226,6 +228,13 @@ function executeNextMediaElementTask(mediaEl) {
   const task = ELEMENT_TASKS[taskName] || NOOP_ELEMENT_TASK;
 
   task(mediaEl)
+      .then(() => {
+        console.log('dispatch ' + taskName + ' in execute success');
+        dispatch(mediaEl, taskName, true);
+      }, () => {
+        console.log('dispatch ' + taskName + ' in execute failure');
+        dispatch(mediaEl, taskName, true);
+      })
       .catch(reason => dev().error('AMP-STORY', reason))
       .then(() => {
         queue.shift();
@@ -246,7 +255,8 @@ function enqueueMediaElementTask(mediaEl, taskName) {
 
   const queue = mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME];
   queue.push(taskName);
-  console.log('[task] Queue contains ' + JSON.stringify(queue), mediaEl);
+  // console.log('element ' + mediaEl.getAttribute('pool-element') +
+  //     ' task queue contains ' + JSON.stringify(queue));
 
   if (queue.length === 1) {
     executeNextMediaElementTask(mediaEl);
@@ -264,6 +274,9 @@ const instances = {};
  * @type {number}
  */
 let nextInstanceId = 0;
+
+
+let elId = 0;
 
 
 export class MediaPool {
@@ -371,6 +384,7 @@ export class MediaPool {
       this.unallocated[type] = [];
       for (let i = 0; i < count; i++) {
         const mediaEl = this.mediaFactory_[type].call(this);
+        mediaEl.setAttribute('pool-element', elId++);
         // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE is
         // returned.  If so, we should adjust the pool size/distribution between
         // media types.
@@ -903,8 +917,10 @@ export class MediaPool {
 
     const blessPromises = [];
     this.forEachMediaElement_(mediaEl => {
+      const blessPromise = listenOncePromise(mediaEl, ElementTaskName.BLESS)
+          .then(() => console.log('bless complete for', mediaEl));
       this.bless_(mediaEl);
-      blessPromises.push(listenOncePromise(mediaEl, 'bless'));
+      blessPromises.push(blessPromise);
     });
 
     return Promise.all(blessPromises)
