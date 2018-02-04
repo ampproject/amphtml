@@ -2,9 +2,15 @@
   "env": {
     "node": true
   },
+  "plugins": [
+    "sort-requires"
+  ],
   "globals": {
     "require": false,
     "process": false,
     "exports": false
+  },
+  "rules": {
+    "sort-requires/sort-requires": 2
   }
 }
