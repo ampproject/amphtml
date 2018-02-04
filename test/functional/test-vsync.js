@@ -482,8 +482,7 @@ describe('vsync', () => {
       vsync.raf_ = handler => rafHandler = handler;
       viewer.isVisible = () => false;
 
-      /*eslint no-unused-vars: 0*/
-      let result = '';
+      let result = ''; // eslint-disable-line no-unused-vars
       const res = vsync.runAnim(contextNode, {
         mutate: () => {
           result += 'mu1';
@@ -500,8 +499,7 @@ describe('vsync', () => {
       vsync.raf_ = handler => rafHandler = handler;
       viewer.isVisible = () => false;
 
-      /*eslint no-unused-vars: 0*/
-      let result = '';
+      let result = ''; // eslint-disable-line no-unused-vars
       const task = vsync.createAnimTask(contextNode, {
         mutate: () => {
           result += 'mu1';
@@ -760,8 +758,7 @@ describe('vsync', () => {
       vsync.raf_ = handler => rafHandler = handler;
       docState.isHidden = () => true;
 
-      /*eslint no-unused-vars: 0*/
-      let result = '';
+      let result = ''; // eslint-disable-line no-unused-vars
       const res = vsync.runAnim(contextNode, {
         mutate: () => {
           result += 'mu1';
@@ -778,8 +775,7 @@ describe('vsync', () => {
       vsync.raf_ = handler => rafHandler = handler;
       docState.isHidden = () => true;
 
-      /*eslint no-unused-vars: 0*/
-      let result = '';
+      let result = ''; // eslint-disable-line no-unused-vars
       const task = vsync.createAnimTask(contextNode, {
         mutate: () => {
           result += 'mu1';

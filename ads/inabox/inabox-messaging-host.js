@@ -307,10 +307,9 @@ export class InaboxMessagingHost {
  */
 function canInspectWindow_(win) {
   try {
-    const /* eslint no-unused-vars: 0 */ unused =
-      !!win.location.href && win['test'];
+    const unused = !!win.location.href && win['test']; // eslint-disable-line no-unused-vars
     return true;
-  } catch (unusedErr) {
+  } catch (unusedErr) { // eslint-disable-line no-unused-vars
     return false;
   }
 }

@@ -48,25 +48,23 @@ import {
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
 import {
-  DATA_ATTR_NAME,
-  RefreshManager,
-  getRefreshManager,
-} from '../../amp-a4a/0.1/refresh-manager';
-import {
   DOUBLECLICK_EXPERIMENT_FEATURE,
   DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
   UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
   experimentFeatureEnabled,
 } from './doubleclick-a4a-config';
 import {
-  ExperimentInfo,
+  ExperimentInfo, // eslint-disable-line no-unused-vars
   getExperimentBranch, // eslint-disable-line no-unused-vars
-  isExperimentOn,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {RTC_ERROR_ENUM} from '../../amp-a4a/0.1/real-time-config-manager';
 import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
+import {
+  RefreshManager, // eslint-disable-line no-unused-vars
+  getRefreshManager,
+} from '../../amp-a4a/0.1/refresh-manager';
 import {Services} from '../../../src/services';
 import {VisibilityState} from '../../../src/visibility-state';
 import {
@@ -96,8 +94,7 @@ import {isCancellation} from '../../../src/error';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {isObject} from '../../../src/types';
-import {isSecureUrl, parseQueryString, parseUrl} from '../../../src/url';
+import {isSecureUrl, parseQueryString} from '../../../src/url';
 import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
@@ -148,7 +145,7 @@ let sraRequests = null;
       slotId: string,
       slotIndex: string,
     }} */
-let TroubleshootData;
+let TroubleshootData; // eslint-disable-line no-unused-vars
 
 /** @private {?JsonObject} */
 let windowLocationQueryParameters;
@@ -644,7 +641,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const startTime = Date.now();
     const identityPromise = Services.timerFor(this.win)
         .timeoutPromise(1000, this.identityTokenPromise_)
-        .catch(err => {
+        .catch(() => {
           // On error/timeout, proceed.
           return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({});
         });

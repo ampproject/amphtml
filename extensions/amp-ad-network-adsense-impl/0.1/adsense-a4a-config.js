@@ -21,17 +21,12 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import {
-  ExperimentInfo, // eslint-disable-line no-unused-vars
-  forceExperimentBranch,
-  getExperimentBranch,
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
-import {
   MANUAL_EXPERIMENT_ID,
   addExperimentIdToElement,
   extractUrlExperimentId,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {dev} from '../../../src/log';
+import {forceExperimentBranch} from '../../../src/experiments';
 import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
 
 /** @const {string} @visibleForTesting */

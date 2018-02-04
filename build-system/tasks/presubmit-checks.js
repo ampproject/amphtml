@@ -613,6 +613,12 @@ const forbiddenTerms = {
   '(dev|user)\\(\\)\\.assert(Element|String|Number)?\\(\\s*([A-Z][A-Z0-9-]*,)': { // eslint-disable-line max-len
     message: 'TAG is not an argument to assert(). Will cause false positives.',
   },
+  'eslint no-unused-vars': {
+    message: 'Use a line-level "no-unused-vars" rule instead.',
+    whitelist: [
+      'viewer-api/swipe-api.js',
+    ],
+  },
 };
 
 const ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded' +
