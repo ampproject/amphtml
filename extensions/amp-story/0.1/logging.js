@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dev, LogLevel} from '../../../src/log';
+import {LogLevel, dev} from '../../../src/log';
 import {scopedQuerySelectorAll} from '../../../src/dom';
 
 

@@ -17,25 +17,25 @@
 import {AmpEvents} from '../../../src/amp-events';
 import {BindEvents} from './bind-events';
 import {BindExpressionResultDef} from './bind-expression';
-import {BindingDef} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
+import {BindingDef} from './bind-evaluator';
+import {ChunkPriority, chunk} from '../../../src/chunk';
 import {Services} from '../../../src/services';
-import {chunk, ChunkPriority} from '../../../src/chunk';
+import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
-import {dict, deepMerge} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
 import {filterSplice} from '../../../src/utils/array';
+import {getMode} from '../../../src/mode';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isFiniteNumber} from '../../../src/types';
+import {
+  iterateCursor, scopedQuerySelectorAll, waitForBodyPromise,
+} from '../../../src/dom';
 import {map} from '../../../src/utils/object';
 import {parseJson, recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
-import {
-  iterateCursor, scopedQuerySelectorAll, waitForBodyPromise,
-} from '../../../src/dom';
 
 const TAG = 'amp-bind';
 

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {urls} from '../../../src/config';
+import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {hasOwn} from '../../../src/utils/object';
 import {isLongTaskApiSupported} from '../../../src/service/jank-meter';
 import {setStyles} from '../../../src/style';
-import {hasOwn} from '../../../src/utils/object';
-import {IframeTransportMessageQueue} from './iframe-transport-message-queue';
+import {urls} from '../../../src/config';
 
 /** @private @const {string} */
 const TAG_ = 'amp-analytics.IframeTransport';

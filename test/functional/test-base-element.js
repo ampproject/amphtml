@@ -16,10 +16,10 @@
 
 import {BaseElement} from '../../src/base-element';
 import {Resource} from '../../src/service/resource';
+import {Services} from '../../src/services';
 import {createAmpElementProtoForTesting} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {listenOncePromise} from '../../src/event-helper';
-import {Services} from '../../src/services';
 
 
 describes.realWin('BaseElement', {amp: true}, env => {

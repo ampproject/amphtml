@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {registerServiceBuilderForDoc} from '../service';
-import {getSourceOrigin} from '../url';
+import {Services} from '../services';
 import {dev} from '../log';
 import {dict} from '../utils/object';
+import {getSourceOrigin} from '../url';
 import {parseJson, recreateNonProtoObject} from '../json';
-import {Services} from '../services';
+import {registerServiceBuilderForDoc} from '../service';
 
 /** @const */
 const TAG = 'Storage';

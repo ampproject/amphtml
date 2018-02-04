@@ -20,10 +20,10 @@
  */
 
 
-import {getService, registerServiceBuilder} from './service';
-import {parseUrl} from './url';
 import {Services} from './services';
 import {dev} from './log';
+import {getService, registerServiceBuilder} from './service';
+import {parseUrl} from './url';
 import {startsWith} from './string';
 import {toWin} from './types';
 

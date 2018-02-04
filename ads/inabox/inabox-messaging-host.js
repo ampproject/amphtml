@@ -15,15 +15,15 @@
  */
 
 import {FrameOverlayManager} from './frame-overlay-manager';
-import {PositionObserver} from './position-observer';
 import {
-  serializeMessage,
-  deserializeMessage,
   MessageType,
+  deserializeMessage,
+  serializeMessage,
 } from '../../src/3p-frame-messaging';
+import {PositionObserver} from './position-observer';
 import {dev} from '../../src/log';
-import {getData} from '../../src/event-helper';
 import {dict} from '../../src/utils/object';
+import {getData} from '../../src/event-helper';
 import {layoutRectFromDomRect} from '../../src/layout-rect';
 /** @const */
 const TAG = 'InaboxMessagingHost';

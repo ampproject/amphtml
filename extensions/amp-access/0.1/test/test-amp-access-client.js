@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {AccessClientAdapter} from '../amp-access-client';
 import * as lolex from 'lolex';
-import * as sinon from 'sinon';
 import * as mode from '../../../../src/mode';
+import * as sinon from 'sinon';
+import {AccessClientAdapter} from '../amp-access-client';
 
 
 describes.realWin('AccessClientAdapter', {

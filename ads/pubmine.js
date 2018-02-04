@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {writeScript, validateData} from '../3p/3p';
 import {getSourceOrigin, getSourceUrl} from '../src/url';
+import {validateData, writeScript} from '../3p/3p';
 
 const pubmineOptional = ['adsafe', 'section', 'wordads'],
     pubmineRequired = ['siteid'],

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {liveListManagerForDoc, LiveListManager} from '../live-list-manager';
+import {LiveListManager, liveListManagerForDoc} from '../live-list-manager';
 import {Services} from '../../../../src/services';
 
 const XHR_BUFFER_SIZE = 2;

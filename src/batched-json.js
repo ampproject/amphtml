@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl} from './url';
 import {Services} from './services';
+import {assertHttpsUrl} from './url';
 import {getValueForExpr} from './json';
 import {user} from './log';
 

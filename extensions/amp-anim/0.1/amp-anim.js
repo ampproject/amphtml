@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import * as st from '../../../src/style';
+import {dev} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {srcsetFromElement} from '../../../src/srcset';
-import {dev} from '../../../src/log';
-import * as st from '../../../src/style';
 
 const TAG = 'amp-anim';
 

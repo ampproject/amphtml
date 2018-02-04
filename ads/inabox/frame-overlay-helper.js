@@ -18,12 +18,12 @@ import {
   layoutRectFromDomRect,
   layoutRectLtwh,
 } from '../../src/layout-rect';
-import {restrictedVsync, timer} from './util';
 import {
   centerFrameUnderVsyncMutate,
-  expandFrameUnderVsyncMutate,
   collapseFrameUnderVsyncMutate,
+  expandFrameUnderVsyncMutate,
 } from '../../src/full-overlay-frame-helper';
+import {restrictedVsync, timer} from './util';
 
 
 const CENTER_TRANSITION_TIME_MS = 500;

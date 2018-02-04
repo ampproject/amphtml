@@ -21,18 +21,18 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import {
-  MANUAL_EXPERIMENT_ID,
-  extractUrlExperimentId,
-  addExperimentIdToElement,
-} from '../../../ads/google/a4a/traffic-experiments';
-import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
-import {
-  /* eslint no-unused-vars: 0 */ ExperimentInfo,
-  getExperimentBranch,
+  ExperimentInfo, // eslint-disable-line no-unused-vars
   forceExperimentBranch,
+  getExperimentBranch,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
+import {
+  MANUAL_EXPERIMENT_ID,
+  addExperimentIdToElement,
+  extractUrlExperimentId,
+} from '../../../ads/google/a4a/traffic-experiments';
 import {dev} from '../../../src/log';
+import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
 
 /** @const {string} @visibleForTesting */
 export const ADSENSE_A4A_EXPERIMENT_NAME = 'expAdsenseA4A';
