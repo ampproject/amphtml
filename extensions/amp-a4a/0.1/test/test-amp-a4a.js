@@ -15,7 +15,13 @@
  */
 
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+// Need the following side-effect import because in actual production code,
+// Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
+// always available for them. However, when we test an impl in isolation,
+// AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+// The following namespaces are imported so that we can stub and spy on certain
+// methods in tests.
 import * as analytics from '../../../../src/analytics';
 import * as analyticsExtension from '../../../../src/extension-analytics';
 import * as sinon from 'sinon';
@@ -42,16 +48,10 @@ import {dev, user} from '../../../../src/log';
 import {incrementLoadingAds} from '../../../amp-ad/0.1/concurrent-load';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
-// The following namespaces are imported so that we can stub and spy on certain
-// methods in tests.
 import {
   resetScheduledElementForTesting,
 } from '../../../../src/service/custom-element-registry';
 import {data as testFragments} from './testdata/test_fragments';
-// Need the following side-effect import because in actual production code,
-// Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
-// always available for them. However, when we test an impl in isolation,
-// AmpAd is not loaded already, so we need to load it separately.
 import {
   data as validCSSAmp,
 } from './testdata/valid_css_at_rules_amp.reserialized';

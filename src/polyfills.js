@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// Importing the document-register-element module has the side effect
-// of installing the custom elements polyfill if necessary.
 import {getMode} from './mode';
 import {install as installArrayIncludes} from './polyfills/array-includes';
 import {
@@ -25,6 +23,8 @@ import {install as installDocContains} from './polyfills/document-contains';
 import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installPromise} from './polyfills/promise';
+// Importing the document-register-element module has the side effect
+// of installing the custom elements polyfill if necessary.
 import installCustomElements from
   'document-register-element/build/document-register-element.node';
 
