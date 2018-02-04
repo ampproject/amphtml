@@ -219,7 +219,6 @@ function ampMediaElementFor(el) {
  */
 function executeNextMediaElementTask(mediaEl) {
   const queue = mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME];
-  console.log('[task]', 'Queue contains', JSON.stringify(queue), mediaEl);
   if (queue.length === 0) {
     return;
   }
@@ -250,6 +249,7 @@ function enqueueMediaElementTask(mediaEl, taskName) {
   const queue = mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME];
   queue.push(taskName);
   console.log('[task]', 'Enqueued', taskName, 'for', mediaEl);
+  console.log('[task]', 'Queue contains', JSON.stringify(queue), mediaEl);
 
   if (queue.length === 1) {
     executeNextMediaElementTask(mediaEl);
