@@ -1,6 +1,9 @@
 {
   "parser": "babel-eslint",
-  "plugins": ["eslint-plugin-google-camelcase"],
+  "plugins": [
+    "eslint-plugin-google-camelcase",
+    "sort-imports-es6-autofix"
+  ],
   "env": {
     "es6": true,
     "browser": true
@@ -92,7 +95,12 @@
     "quotes": [2, "single", "avoid-escape"],
     "radix": 2,
     "semi": 2,
-    "keyword-spacing": ["error", { "before": true, "after": true }],
+    "keyword-spacing": [2, { "before": true, "after": true }],
+    "sort-imports-es6-autofix/sort-imports-es6": [2, {
+      "ignoreCase": false,
+      "ignoreMemberSort": false,
+      "memberSyntaxSortOrder": ["none", "all", "multiple", "single"]
+    }],
     "space-before-blocks": 2,
     "space-before-function-paren": [2, "never"],
     "space-in-parens": 2,
