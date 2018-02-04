@@ -84,7 +84,7 @@ function blessMediaElement(mediaEl) {
     return Promise.resolve();
   };
 
-  const blessPromise = playFn().then(() => {
+  return playFn().then(() => {
     mediaEl.muted = false;
 
     if (isPaused) {
@@ -95,14 +95,13 @@ function blessMediaElement(mediaEl) {
     if (isMuted) {
       mediaEl.muted = true;
     }
-  });
 
-  blessPromise.catch(reason => {
+    dispatch(mediaEl, 'bless', false);
+  }).catch(reason => {
+    dispatch(mediaEl, 'bless', false);
     dev().expectedError('AMP-STORY', 'Blessing media element failed:',
         reason, mediaEl);
-  }).then(() => dispatch(mediaEl, 'bless', false));
-
-  return blessPromise;
+  });
 }
 
 
