@@ -40,6 +40,7 @@ import {getBinaryType, isExperimentOn} from '../../../src/experiments';
 import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getMode} from '../../../src/mode';
+// TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {handleClick} from '../../../ads/alp/handler';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
@@ -51,7 +52,6 @@ import {
   installUrlReplacementsForEmbed,
 } from '../../../src/service/url-replacements-impl';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
-// TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {isArray, isEnumValue, isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {setStyle} from '../../../src/style';
