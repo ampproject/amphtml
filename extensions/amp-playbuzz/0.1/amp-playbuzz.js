@@ -44,6 +44,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
 import * as events from '../../../src/event-helper';
 import {postMessage} from '../../../src/iframe-helper';
+import {documentInfoForDoc} from '../../../src/document-info';
 import {
   parseUrl,
   removeFragment,
@@ -240,16 +241,18 @@ class AmpPlaybuzz extends AMP.BaseElement {
    *
    */
   generateEmbedSourceUrl_() {
+    const canonicalUrl = documentInfoForDoc(this.element).canonicalUrl;
+    const parsedPageUrl = parseUrl(canonicalUrl);
     const itemSrc = parseUrl(this.item_);
-    const winUrl = this.win.location;
+
     const params = {
       itemUrl: removeFragment(itemSrc.href).replace(itemSrc.protocol, ''), //remove scheme (cors) & fragment
       relativeUrl: itemSrc.pathname,
       displayItemInfo: this.displayItemInfo_,
       displayShareBar: this.displayShareBar_,
       displayComments: this.displayComments_,
-      parentUrl: removeFragment(winUrl.href),
-      parentHost: winUrl.hostname,
+      parentUrl: removeFragment(parsedPageUrl.href),
+      parentHost: parsedPageUrl.host,
     };
 
     const embedUrl = utils.composeEmbedUrl(params);
