@@ -100,7 +100,7 @@ function blessMediaElement(mediaEl) {
   blessPromise.catch(reason => {
     dev().expectedError('AMP-STORY', 'Blessing media element failed:',
         reason, mediaEl);
-  });
+  }).then(() => dispatch(mediaEl, 'bless', false));
 
   return blessPromise;
 }
@@ -229,7 +229,6 @@ function executeNextMediaElementTask(mediaEl) {
 
   task(mediaEl)
       .catch(reason => dev().error('AMP-STORY', reason))
-      .then(() => dispatch(mediaEl, taskName, false))
       .then(() => {
         queue.shift();
         executeNextMediaElementTask(mediaEl);
@@ -906,7 +905,7 @@ export class MediaPool {
     const blessPromises = [];
     this.forEachMediaElement_(mediaEl => {
       this.bless_(mediaEl);
-      blessPromises.push(listenOncePromise(mediaEl, ElementTaskName.BLESS));
+      blessPromises.push(listenOncePromise(mediaEl, 'bless'));
     });
 
     return Promise.all(blessPromises)
