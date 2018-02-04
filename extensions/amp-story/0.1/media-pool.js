@@ -24,6 +24,9 @@ import {
 import {dev} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
 import {toWin} from '../../../src/types';
+import {BLANK_AUDIO_SRC, BLANK_VIDEO_SRC} from './default-media';
+import {listenOncePromise} from '../../../src/event-helper';
+import {dispatch} from './events';
 
 
 
@@ -43,6 +46,67 @@ export let ElementDistanceFnDef;
 
 
 /**
+ * Represents a task to be executed on a media element.
+ * @typedef {function(!HTMLMediaElement): !Promise}
+ */
+let ElementTaskDef;
+
+
+/**
+ * "Blesses" the specified media element for future playback without a user
+ * gesture.  In order for this to bless the media element, this function must
+ * be invoked in response to a user gesture.
+ * @param {!HTMLMediaElement} mediaEl The media element to bless.
+ * @return {!Promise} A promise that is resolved when blessing the media
+ *     element is complete.
+ */
+function blessMediaElement(mediaEl) {
+  const isPaused = mediaEl.paused;
+  const isMuted = mediaEl.muted;
+  const currentTime = mediaEl.currentTime;
+
+  /**
+   * @return {!Promise} A promise that is resolved when playback has been
+   *    initiated or rejected if playback fails to initiate.  If the media
+   *    element is already playing, the promise is immediately resolved
+   *    without playing the media element again, to avoid interrupting
+   *    playback.
+   */
+  const playFn = () => {
+    if (isPaused) {
+      // The playFn() invocation is wrapped in a Promise.resolve(...) due to
+      // the fact that some browsers return a promise from media elements'
+      // play() function, while others return a boolean.
+      return Promise.resolve(mediaEl.play());
+    }
+
+    // This media element was already playing.
+    return Promise.resolve();
+  };
+
+  const blessPromise = playFn().then(() => {
+    mediaEl.muted = false;
+
+    if (isPaused) {
+      mediaEl.pause();
+      mediaEl.currentTime = currentTime;
+    }
+
+    if (isMuted) {
+      mediaEl.muted = true;
+    }
+  });
+
+  blessPromise.catch(reason => {
+    dev().expectedError('AMP-STORY', 'Blessing media element failed:',
+        reason, mediaEl);
+  });
+
+  return blessPromise;
+}
+
+
+/**
  * @const {string}
  */
 const REPLACED_MEDIA_ATTRIBUTE = 'replaced-media';
@@ -58,6 +122,63 @@ const DOM_MEDIA_ELEMENT_ID_PREFIX = 'i-amphtml-media-';
  * @const {string}
  */
 const POOL_MEDIA_ELEMENT_PROPERTY_NAME = '__AMP_MEDIA_POOL_ID__';
+
+
+/**
+ * @const {string}
+ */
+const ELEMENT_TASK_QUEUE_PROPERTY_NAME = '__AMP_MEDIA_ELEMENT_TASKS__';
+
+
+/** @const @enum {string} */
+export const ElementTaskName = {
+  BLESS: 'bless',
+  LOAD: 'load',
+  MUTE: 'mute',
+  PAUSE: 'pause',
+  PLAY: 'play',
+  REWIND: 'rewind',
+  UNMUTE: 'unmute',
+};
+
+
+/**
+ * @const {!Object<string, !ElementTaskDef>}
+ */
+const ELEMENT_TASKS = {
+  [ElementTaskName.BLESS]: el => blessMediaElement(el),
+  [ElementTaskName.LOAD]: el => Promise.resolve(el.load()),
+  [ElementTaskName.MUTE]: el => Promise.resolve(() => {
+    el.muted = true;
+    el.setAttribute('muted', '');
+  }),
+  [ElementTaskName.PAUSE]: el => Promise.resolve(el.pause()),
+  [ElementTaskName.PLAY]: el => {
+    if (!el.paused) {
+      // We do not want to invoke play() if the media element is already
+      // playing, as this can interrupt playback in some browsers.
+      return Promise.resolve();
+    }
+
+    // The play() invocation is wrapped in a Promise.resolve(...) due to the
+    // fact that some browsers return a promise from media elements' play()
+    // function, while others return a boolean.
+    return Promise.resolve(el.play());
+  },
+  [ElementTaskName.REWIND]: el => Promise.resolve(() => {
+    el.currentTime = 0;
+  }),
+  [ElementTaskName.UNMUTE]: el => Promise.resolve(() => {
+    el.muted = false;
+    el.removeAttribute('muted');
+  }),
+};
+
+
+/**
+ * @const {!ElementTaskDef}
+ */
+const NOOP_ELEMENT_TASK = () => Promise.resolve();
 
 
 /**
@@ -89,6 +210,49 @@ const PROTECTED_ATTRIBUTES = [
  */
 function ampMediaElementFor(el) {
   return closestBySelector(el, 'amp-video, amp-audio');
+}
+
+
+/**
+ * @param {!HTMLMediaElement} mediaEl The element whose task queue should be
+ *     executed.
+ */
+function executeNextMediaElementTask(mediaEl) {
+  const queue = mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME];
+
+  if (queue.length === 0) {
+    return;
+  }
+
+  const taskName = queue[0];
+  const task = ELEMENT_TASKS[taskName] || NOOP_ELEMENT_TASK;
+
+  task(mediaEl)
+      .catch(reason => dev().error('AMP-STORY', reason))
+      .then(() => dispatch(mediaEl, taskName, false))
+      .then(() => {
+        queue.shift();
+        executeNextMediaElementTask(mediaEl);
+      });
+}
+
+
+/**
+ * @param {!HTMLMediaElement} mediaEl The element for which the specified task
+ *     should be executed.
+ * @param {!ElementTaskName} taskName The name of the task to execute.
+ */
+function enqueueMediaElementTask(mediaEl, taskName) {
+  if (!mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME]) {
+    mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME] = [];
+  }
+
+  const queue = mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME];
+  queue.push(taskName);
+
+  if (queue.length === 1) {
+    executeNextMediaElementTask(mediaEl);
+  }
 }
 
 
@@ -587,49 +751,10 @@ export class MediaPool {
    * "Blesses" the specified media element for future playback without a user
    * gesture.  In order for this to bless the media element, this function must
    * be invoked in response to a user gesture.
-   * @param {!HTMLMediaElement} mediaEl The media element to bless.
-   * @return {!Promise} A promise that is resolved when blessing the media
-   *     element is complete.
+   * @param {!HTMLMediaElement} poolMediaEl The media element to bless.
    */
-  bless_(mediaEl) {
-    const isPaused = mediaEl.paused;
-    const isMuted = mediaEl.muted;
-    const currentTime = mediaEl.currentTime;
-
-    /**
-     * @return {!Promise} A promise that is resolved when playback has been
-     *    initiated or rejected if playback fails to initiate.  If the media
-     *    element is already playing, the promise is immediately resolved
-     *    without playing the media element again, to avoid interrupting
-     *    playback.
-     */
-    const playFn = () => {
-      if (isPaused) {
-        // The playFn() invocation is wrapped in a Promise.resolve(...) due to
-        // the fact that some browsers return a promise from media elements'
-        // play() function, while others return a boolean.
-        return Promise.resolve(mediaEl.play());
-      }
-
-      // This media element was already playing.
-      return Promise.resolve();
-    };
-
-    return playFn().then(() => {
-      mediaEl.muted = false;
-
-      if (isPaused) {
-        mediaEl.pause();
-        mediaEl.currentTime = currentTime;
-      }
-
-      if (isMuted) {
-        mediaEl.muted = true;
-      }
-    }).catch(reason => {
-      dev().expectedError('AMP-STORY', 'Blessing media element failed:',
-          reason, mediaEl);
-    });
+  bless_(poolMediaEl) {
+    enqueueMediaElementTask(poolMediaEl, ElementTaskName.BLESS);
   }
 
 
@@ -688,7 +813,7 @@ export class MediaPool {
       return;
     }
 
-    poolMediaEl.play();
+    enqueueMediaElementTask(poolMediaEl, ElementTaskName.PLAY);
   }
 
 
@@ -707,10 +832,10 @@ export class MediaPool {
       return;
     }
 
-    poolMediaEl.pause();
+    enqueueMediaElementTask(poolMediaEl, ElementTaskName.PAUSE);
 
     if (opt_rewindToBeginning) {
-      poolMediaEl.currentTime = 0;
+      enqueueMediaElementTask(poolMediaEl, ElementTaskName.REWIND);
     }
   }
 
@@ -728,7 +853,7 @@ export class MediaPool {
       return;
     }
 
-    poolMediaEl.currentTime = 0;
+    enqueueMediaElementTask(poolMediaEl, ElementTaskName.REWIND);
   }
 
 
@@ -745,8 +870,7 @@ export class MediaPool {
       return;
     }
 
-    poolMediaEl.muted = true;
-    poolMediaEl.setAttribute('muted', '');
+    enqueueMediaElementTask(poolMediaEl, ElementTaskName.MUTE);
   }
 
 
@@ -763,8 +887,7 @@ export class MediaPool {
       return;
     }
 
-    poolMediaEl.muted = false;
-    poolMediaEl.removeAttribute('muted');
+    enqueueMediaElementTask(poolMediaEl, ElementTaskName.UNMUTE);
   }
 
 
@@ -782,7 +905,8 @@ export class MediaPool {
 
     const blessPromises = [];
     this.forEachMediaElement_(mediaEl => {
-      blessPromises.push(this.bless_(mediaEl));
+      this.bless_(mediaEl);
+      blessPromises.push(listenOncePromise(mediaEl, ElementTaskName.BLESS));
     });
 
     return Promise.all(blessPromises)
@@ -853,7 +977,7 @@ class Sources {
         srcEl => element.appendChild(srcEl));
 
     // Reset media element after changing sources.
-    element.load();
+    enqueueMediaElementTask(element, ElementTaskName.LOAD);
   }
 
 
