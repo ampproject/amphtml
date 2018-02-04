@@ -223,7 +223,6 @@ function executeNextMediaElementTask(mediaEl) {
   }
 
   const taskName = queue[0];
-  console.log('[task]', 'Executing', taskName, 'for', mediaEl);
   const task = ELEMENT_TASKS[taskName] || NOOP_ELEMENT_TASK;
 
   task(mediaEl)
@@ -247,8 +246,7 @@ function enqueueMediaElementTask(mediaEl, taskName) {
 
   const queue = mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME];
   queue.push(taskName);
-  console.log('[task]', 'Enqueued', taskName, 'for', mediaEl);
-  console.log('[task]', 'Queue contains', JSON.stringify(queue), mediaEl);
+  console.log('[task] Queue contains ' + JSON.stringify(queue), mediaEl);
 
   if (queue.length === 1) {
     executeNextMediaElementTask(mediaEl);
