@@ -1674,7 +1674,7 @@ describes.fakeWin('AccessService multiple sources', {
         .once();
     sourceBeer.analyticsEvent_ = sandbox.spy();
     return sourceBeer.buildLoginUrls_()
-        .then(() => service.loginWithType_('beer.'))
+        .then(() => service.loginWithType_('beer'))
         .then(() => {
           expect(sourceBeer.loginPromise_).to.not.exist;
           expect(authorizationStub).to.be.calledOnce;
@@ -1706,7 +1706,7 @@ describes.fakeWin('AccessService multiple sources', {
         .once();
     sourceDonuts.analyticsEvent_ = sandbox.spy();
     return sourceDonuts.buildLoginUrls_()
-        .then(() => service.loginWithType_('donuts.login2'))
+        .then(() => service.loginWithType_('donuts-login2'))
         .then(() => {
           expect(sourceDonuts.loginPromise_).to.not.exist;
           expect(authorizationStub).to.be.calledOnce;

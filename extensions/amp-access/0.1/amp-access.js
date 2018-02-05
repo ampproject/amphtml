@@ -660,7 +660,8 @@ export class AccessService {
     const match = this.sources_.filter(s => s.getNamespace() == namespace);
     if (match.length) {
       // Matching namespace found
-      return match[0].loginWithType(type.substring(namespace.length));
+      const remaining = (splitPoint > -1) ? type.substring(splitPoint + 1) : '';
+      return match[0].loginWithType(remaining);
     }
 
     // If there is only one source, process as standalone
