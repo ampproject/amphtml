@@ -27,7 +27,6 @@ import {toWin} from '../../../src/types';
 import {BLANK_AUDIO_SRC, BLANK_VIDEO_SRC} from './default-media';
 import {listenOncePromise} from '../../../src/event-helper';
 import {dispatch} from './events';
-import {Services} from '../../../src/services';
 
 
 
@@ -284,9 +283,6 @@ export class MediaPool {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private @const */
-    this.vsync_ = Services.vsyncFor(win);
-
     /**
      * The function used to retrieve the distance between an element and the
      * current position in the document.
@@ -525,9 +521,7 @@ export class MediaPool {
       return null;
     }
 
-    this.vsync_.mutate(() => {
-      this.swapPoolMediaElementOutOfDom_(poolMediaEl);
-    });
+    this.swapPoolMediaElementOutOfDom_(poolMediaEl);
     return poolMediaEl;
   }
 
@@ -749,10 +743,7 @@ export class MediaPool {
       return null;
     }
 
-    this.vsync_.mutate(() => {
-      this.swapPoolMediaElementIntoDom_(domMediaEl, poolMediaEl, sources);
-    });
-
+    this.swapPoolMediaElementIntoDom_(domMediaEl, poolMediaEl, sources);
     this.allocateMediaElement_(mediaType, poolMediaEl);
     return poolMediaEl;
   }
