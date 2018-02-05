@@ -36,13 +36,13 @@ import * as utils from './utils';
 import {CSS} from '../../../build/amp-byside-content-0.1.css';
 import {Services} from '../../../src/services';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
+import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
 import {toWin} from '../../../src/types';
-import {user} from '../../../src/log';
 
 /** @const {string} */
 const TAG_ = 'amp-byside-content';
@@ -245,7 +245,7 @@ export class AmpBysideContent extends AMP.BaseElement {
         // since url replacements implementation throws an uncaught error
         win.AMP_TEST ? resolve(url) :
           Services.urlReplacementsForDoc(this.element)
-              .expandAsync(url).then(newUrl => resolve(newUrl));
+              .expandUrlAsync(url).then(newUrl => resolve(newUrl));
       } catch (error) {
         resolve(url);
       }
@@ -318,7 +318,7 @@ export class AmpBysideContent extends AMP.BaseElement {
     if (newHeight !== undefined) {
 	  this.attemptChangeHeight(newHeight).catch(() => {/* do nothing */ });
     } else {
-      user().error(TAG_,
+      dev().warn(TAG_,
           'Ignoring embed-size request because no height value is provided',
           this.element);
     }
