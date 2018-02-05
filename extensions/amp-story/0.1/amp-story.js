@@ -140,7 +140,32 @@ const LANDSCAPE_ORIENTATION_WARNING = [
           },
           {
             tag: 'div',
-            text: 'The page is best viewed in Portrait mode.',
+            text: 'The page is best viewed in portrait mode',
+          },
+        ],
+      },
+    ],
+  },
+];
+
+
+const UNSUPPORTED_BROWSER_WARNING = [
+  {
+    tag: 'div',
+    attrs: dict({'class': 'i-amphtml-story-unsupported-browser-overlay'}),
+    children: [
+      {
+        tag: 'div',
+        attrs: dict({'class': 'i-amphtml-overlay-container'}),
+        children: [
+          {
+            tag: 'div',
+            attrs: dict({'class': 'i-amphtml-gear-icon'}),
+          },
+          {
+            tag: 'div',
+            text: 'We\'re sorry, it looks like your browser doesn\'t support ' +
+                'this experience',
           },
         ],
       },
@@ -169,6 +194,9 @@ const HIDE_ON_BOOKEND_SELECTOR =
     'amp-story-page, .i-amphtml-story-system-layer';
 
 
+/**
+ * @implements {./media-pool.MediaPoolRoot}
+ */
 export class AmpStory extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -231,15 +259,14 @@ export class AmpStory extends AMP.BaseElement {
     this.originWhitelist_ = [
       '3451824873', '834917366', '4273375831', '750731789', '3322156041',
       '878041739', '2199838184', '708478954', '142793127', '2414533450',
-      '212690086',
+      '212690086', '799038630', '2128662947',
     ];
 
     /** @private {!AmpStoryHint} */
     this.ampStoryHint_ = new AmpStoryHint(this.win);
 
     /** @private {!MediaPool} */
-    this.mediaPool_ = new MediaPool(this.win, MAX_MEDIA_ELEMENT_COUNTS,
-        element => this.getElementDistanceFromActivePage_(element));
+    this.mediaPool_ = MediaPool.for(this);
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
@@ -261,6 +288,11 @@ export class AmpStory extends AMP.BaseElement {
       }, html);
     }
 
+    if (this.isDesktop_()) {
+      this.element.setAttribute('desktop','');
+    }
+    this.element.querySelector('amp-story-page').setAttribute('active', '');
+
     this.initializeListeners_();
     this.initializeListenersForDev_();
 
@@ -277,8 +309,6 @@ export class AmpStory extends AMP.BaseElement {
 
     registerServiceBuilder(this.win, 'story-variable',
         () => this.variableService_);
-
-    this.buildLandscapeOrientationOverlay_();
   }
 
 
@@ -369,20 +399,10 @@ export class AmpStory extends AMP.BaseElement {
     this.element.addEventListener(EventType.TAP_NAVIGATION, e => {
       const {direction} = e.detail;
 
-      if (this.isDesktop_()) {
-        this.next_();
-        return;
-      }
+      this.performTapNavigation_(direction);
 
-      if (direction === TapNavigationDirection.NEXT) {
-        this.next_();
-      } else if (direction === TapNavigationDirection.PREVIOUS) {
-        this.previous_();
-      }
-
-      // We do this after navigation, because we do not want to block navigation
-      // on an asynchronous call.  Blessing can also fail, so we do not want to
-      // risk that either.  Otherwise, this can cause #12966.
+      // We bless after the navigation so as not to slow down the navigation
+      // interaction.
       this.mediaPool_.blessAll();
     });
 
@@ -506,6 +526,12 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (!AmpStory.isBrowserSupported(this.win)) {
+      this.buildUnsupportedBrowserOverlay_();
+      dev().expectedError(TAG, 'Unsupported browser');
+      return Promise.resolve();
+    }
+
     const firstPageEl = user().assertElement(
         scopedQuerySelector(this.element, 'amp-story-page'),
         'Story must have at least one page.');
@@ -517,6 +543,7 @@ export class AmpStory extends AMP.BaseElement {
     const storyLayoutPromise = this.initializePages_()
         .then(() => this.buildSystemLayer_())
         .then(() => this.buildHintLayer_())
+        .then(() => this.buildLandscapeOrientationOverlay_())
         .then(() => {
           this.pages_.forEach(page => {
             page.setActive(false);
@@ -669,7 +696,6 @@ export class AmpStory extends AMP.BaseElement {
         (pageEl, index) => {
           return pageEl.getImpl().then(pageImpl => {
             this.pages_[index] = pageImpl;
-            pageImpl.setMediaPool(this.mediaPool_);
           });
         });
 
@@ -709,6 +735,24 @@ export class AmpStory extends AMP.BaseElement {
     const activePage = dev().assert(this.activePage_,
         'No active page set when navigating to next page.');
     activePage.previous();
+  }
+
+
+  /**
+   * @param {!TapNavigationDirection} direction The direction to navigate.
+   * @private
+   */
+  performTapNavigation_(direction) {
+    if (this.isDesktop_()) {
+      this.next_();
+      return;
+    }
+
+    if (direction === TapNavigationDirection.NEXT) {
+      this.next_();
+    } else if (direction === TapNavigationDirection.PREVIOUS) {
+      this.previous_();
+    }
   }
 
 
@@ -881,10 +925,27 @@ export class AmpStory extends AMP.BaseElement {
    * Build overlay for Landscape mode mobile
    */
   buildLandscapeOrientationOverlay_() {
-    this.element.insertBefore(
-        renderSimpleTemplate(this.win.document, LANDSCAPE_ORIENTATION_WARNING),
-        this.element.firstChild);
+    this.mutateElement(() => {
+      this.element.insertBefore(
+          renderSimpleTemplate(this.win.document,
+              LANDSCAPE_ORIENTATION_WARNING),
+          this.element.firstChild);
+    });
   }
+
+
+  /**
+   * Build overlay for Landscape mode mobile
+   */
+  buildUnsupportedBrowserOverlay_() {
+    this.mutateElement(() => {
+      this.element.insertBefore(
+          renderSimpleTemplate(this.win.document, UNSUPPORTED_BROWSER_WARNING),
+          this.element.firstChild);
+    });
+  }
+
+
   /**
    * Get the URL of the given page's background resource.
    * @param {!Element} pageElement
@@ -1105,7 +1166,7 @@ export class AmpStory extends AMP.BaseElement {
       if (bookendConfig !== null) {
         this.bookend_.setConfig(dev().assert(bookendConfig));
       }
-      this.scheduleResume(this.bookend_.getRoot());
+      this.scheduleLayout(this.bookend_.getRoot());
     });
   }
 
@@ -1253,14 +1314,22 @@ export class AmpStory extends AMP.BaseElement {
   }
 
 
-  /**
-   * @param {!Element} element The element whose distance should be retrieved.
-   * @return {number} The number of pages the specified element is from the
-   *     currently active page.
-   */
-  getElementDistanceFromActivePage_(element) {
+  /** @override */
+  getElementDistance(element) {
     const page = this.getPageContainingElement_(element);
     return page.getDistance();
+  }
+
+
+  /** @override */
+  getMaxMediaElementCounts() {
+    return MAX_MEDIA_ELEMENT_COUNTS;
+  }
+
+
+  /** @override */
+  getElement() {
+    return this.element;
   }
 
 
@@ -1280,9 +1349,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   unmute_() {
-    this.mediaPool_.blessAll().then(() => {
-      this.activePage_.unmuteAllMedia();
-    });
+    const unmuteAllMedia = () => this.activePage_.unmuteAllMedia();
+    this.mediaPool_.blessAll()
+        .then(unmuteAllMedia, unmuteAllMedia);
     this.toggleMutedAttribute_(false);
   }
 
@@ -1362,6 +1431,15 @@ export class AmpStory extends AMP.BaseElement {
       dispatch(this.element, EventType.CLOSE_BOOKEND);
     }
     this.switchTo_(dev().assertElement(this.pages_[0].element).id);
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {boolean} true if the user's browser supports the features needed
+   *     for amp-story.
+   */
+  static isBrowserSupported(win) {
+    return win.CSS.supports('display', 'grid');
   }
 }
 

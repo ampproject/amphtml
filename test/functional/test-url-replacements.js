@@ -367,7 +367,7 @@ describes.sandboxed('UrlReplacements', {}, () => {
     return expandUrlAsync(
         '?a=CLIENT_ID(abc,,url-abc)&b=CLIENT_ID(xyz,,url-xyz)',
         /*opt_bindings*/undefined, {withCid: true}).then(res => {
-      expect(res).to.match(/^\?a=cid-for-abc\&b=amp-([a-zA-Z2-9_-]+){10,}/);
+      expect(res).to.match(/^\?a=cid-for-abc\&b=amp-([a-zA-Z0-9_-]+){10,}/);
     });
   });
 
@@ -791,6 +791,14 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
+  it('should replace INCREMENTAL_ENGAGED_TIME', () => {
+    return expandUrlAsync('?sh=' +
+      'INCREMENTAL_ENGAGED_TIME', /*opt_bindings*/undefined,
+    {withActivity: true}).then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
   it('should replace AMP_VERSION', () => {
     return expandUrlAsync('?sh=AMP_VERSION').then(res => {
       expect(res).to.equal('?sh=%24internalRuntimeVersion%24');
@@ -1042,6 +1050,18 @@ describes.sandboxed('UrlReplacements', {}, () => {
             'FUNC': 22,
             'PROMISE': 23,
           });
+        });
+  });
+
+  it('should collect unwhitelisted vars', () => {
+    const win = getFakeWindow();
+    const element = document.createElement('amp-foo');
+    element.setAttribute('src', '?SOURCE_HOST&QUERY_PARAM(p1)&COUNTER');
+    element.setAttribute('data-amp-replace', 'QUERY_PARAM(p1)');
+    return Services.urlReplacementsForDoc(win.ampdoc)
+        .collectUnwhitelistedVars(element)
+        .then(res => {
+          expect(res).to.deep.equal(['SOURCE_HOST', 'COUNTER']);
         });
   });
 

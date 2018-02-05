@@ -31,12 +31,19 @@ import {Layout} from '../../../src/layout';
 import {upgradeBackgroundAudio} from './audio';
 import {EventType, dispatch, dispatchCustom} from './events';
 import {AdvancementConfig} from './page-advancement';
-import {matches, scopedQuerySelectorAll} from '../../../src/dom';
+import {
+  matches,
+  scopedQuerySelectorAll,
+  closestBySelector,
+} from '../../../src/dom';
+import {dev} from '../../../src/log';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
+import {PageScalingService} from './page-scaling';
 import {LoadingSpinner} from './loading-spinner';
 import {listen} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
+import {MediaPool} from './media-pool';
 
 
 /**
@@ -83,14 +90,19 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.markPageAsLoaded_();
     });
 
-    /** @private @const {!Promise<!./media-pool.MediaPool>} */
+    let mediaPoolResolveFn, mediaPoolRejectFn;
+
+    /** @private @const {!Promise<!MediaPool>} */
     this.mediaPoolPromise_ = new Promise((resolve, reject) => {
-      this.setMediaPool = mediaPool => {
-        this.mediaLayoutPromise_
-            .then(() => resolve(mediaPool))
-            .catch(reject);
-      };
+      mediaPoolResolveFn = resolve;
+      mediaPoolRejectFn = reject;
     });
+
+    /** @private @const {!function(!MediaPool)} */
+    this.mediaPoolResolveFn_ = mediaPoolResolveFn;
+
+    /** @private @const {!function(*)} */
+    this.mediaPoolRejectFn_ = mediaPoolRejectFn;
 
     /** @private @const {boolean} Only prerender the first story page. */
     this.prerenderAllowed_ = matches(this.element,
@@ -125,6 +137,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   buildCallback() {
     upgradeBackgroundAudio(this.element);
     this.markMediaElementsWithPreload_();
+    this.initializeMediaPool_();
     this.maybeCreateAnimationManager_();
     this.advancement_.addPreviousListener(() => this.previous());
     this.advancement_
@@ -133,6 +146,19 @@ export class AmpStoryPage extends AMP.BaseElement {
         navigationDirection => this.navigateOnTap(navigationDirection));
     this.advancement_
         .addProgressListener(progress => this.emitProgress_(progress));
+  }
+
+
+  /** @private */
+  initializeMediaPool_() {
+    const storyEl = dev().assertElement(
+        closestBySelector(this.element, 'amp-story'),
+        'amp-story-page must be a descendant of amp-story.');
+
+    storyEl.getImpl()
+        .then(storyImpl => {
+          this.mediaPoolResolveFn_(MediaPool.for(storyImpl));
+        }, reason => this.mediaPoolRejectFn_(reason));
   }
 
 
@@ -190,6 +216,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     return Promise.all([
       this.beforeVisible(),
+      this.mediaLayoutPromise_,
       this.mediaPoolPromise_,
     ]);
   }
@@ -198,7 +225,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @return {!Promise} */
   beforeVisible() {
     this.rewindAllMediaToBeginning_();
-    return this.maybeApplyFirstAnimationFrame();
+    return this.scale_().then(() => this.maybeApplyFirstAnimationFrame());
   }
 
 
@@ -404,6 +431,14 @@ export class AmpStoryPage extends AMP.BaseElement {
     return this.animationManager_.applyFirstFrame();
   }
 
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  scale_() {
+    const storyEl = dev().assertElement(this.element.parentNode);
+    return PageScalingService.for(storyEl).scale(this.element);
+  }
 
   /**
    * @param {boolean} isActive
@@ -434,21 +469,13 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   setDistance(distance) {
     this.element.setAttribute('distance', distance);
-
     this.registerAllMedia_();
     if (distance > 0 && distance <= 2) {
       this.preloadAllMedia_();
+      this.scale_();
     }
   }
 
-
-  /**
-   * @param {!./media-pool.MediaPool} unusedMediaPool The media pool instance to
-   *     use for this AmpStoryPage.
-   */
-  setMediaPool(unusedMediaPool) {
-    // Overridden by this.mediaPoolPromise_.
-  }
 
   /**
    * @return {boolean} Whether this page is currently active.

@@ -69,7 +69,7 @@ const METADATA_STRINGS = [
 // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
 // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
 /** @type {string} */
-export const DEFAULT_SAFEFRAME_VERSION = '1-0-14';
+export const DEFAULT_SAFEFRAME_VERSION = '1-0-15';
 
 /** @const {string} */
 export const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
@@ -1282,9 +1282,8 @@ export class AmpA4A extends AMP.BaseElement {
           'fallback to 3p disabled');
       return Promise.resolve(false);
     }
-    this.promiseErrorHandler_(
-        new Error('fallback to 3p'),
-        /* ignoreStack */ true);
+    // TODO(keithwrightbos): remove when no longer needed.
+    dev().warn(TAG, 'fallback to 3p');
     // Haven't rendered yet, so try rendering via one of our
     // cross-domain iframe solutions.
     const method = this.experimentalNonAmpCreativeRenderMethod_;
@@ -1481,7 +1480,7 @@ export class AmpA4A extends AMP.BaseElement {
       'releaseType': this.releaseType_,
     });
     const checkStillCurrent = this.verifyStillCurrent();
-    return utf8Decode(creativeBody).then(creative => {
+    return Promise.resolve(utf8Decode(creativeBody)).then(creative => {
       checkStillCurrent();
       let srcPath;
       let name = '';

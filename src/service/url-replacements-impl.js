@@ -49,6 +49,9 @@ const VARIANT_DELIMITER = '.';
 const ORIGINAL_HREF_PROPERTY = 'amp-original-href';
 const ORIGINAL_VALUE_PROPERTY = 'amp-original-value';
 
+/** @const {string} */
+export const REPLACEMENT_EXP_NAME = 'url-replacement-v2';
+
 /**
  * Returns a encoded URI Component, or an empty string if the value is nullish.
  * @param {*} val
@@ -459,6 +462,14 @@ export class GlobalVariableSource extends VariableSource {
     this.setAsync('TOTAL_ENGAGED_TIME', () => {
       return Services.activityForDoc(this.ampdoc).then(activity => {
         return activity.getTotalEngagedTime();
+      });
+    });
+
+    // Returns the incremental engaged time since the last push under the
+    // same name.
+    this.setAsync('INCREMENTAL_ENGAGED_TIME', name => {
+      return Services.activityForDoc(this.ampdoc).then(activity => {
+        return activity.getIncrementalEngagedTime(name);
       });
     });
 
@@ -915,7 +926,7 @@ export class UrlReplacements {
    */
   expand_(url, opt_bindings, opt_collectVars, opt_sync, opt_whiteList) {
     const isV2ExperimentOn = isExperimentOn(this.ampdoc.win,
-        'url-replacement-v2');
+        REPLACEMENT_EXP_NAME);
     if (isV2ExperimentOn && !opt_collectVars && !opt_sync) {
       // not supporting syncronous version (yet) or collect_vars with this new structure
       return this.expander_./*OK*/expand(url, opt_bindings, opt_whiteList);
@@ -1014,6 +1025,25 @@ export class UrlReplacements {
     return this.expand_(url, opt_bindings, vars).then(() => vars);
   }
 
+  /**
+   * Collects substitutions in the `src` attribute of the given element
+   * that are _not_ whitelisted via `data-amp-replace` opt-in attribute.
+   * @param {!Element} element
+   * @return {!Promise<!Array<string>>}
+   */
+  collectUnwhitelistedVars(element) {
+    const url = element.getAttribute('src');
+    return this.collectVars(url).then(vars => {
+      const whitelist = this.getWhitelistForElement_(element);
+      const varNames = Object.keys(vars);
+      if (whitelist) {
+        return varNames.filter(v => !whitelist[v]);
+      } else {
+        // All vars are unwhitelisted if the element has no whitelist.
+        return varNames;
+      }
+    });
+  }
 
   /**
    * Ensures that the protocol of the original url matches the protocol of the

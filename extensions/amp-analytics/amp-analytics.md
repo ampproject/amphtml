@@ -185,7 +185,7 @@ In this example, all requests are valid.
   },
   "event": {
     "baseUrl": "${base}&type=event&eventId=${eventId}",
-    "maxDelay": 5
+    "batchInterval": 5
   }
 }
 ```
@@ -196,15 +196,15 @@ Some analytics providers have an already-provided configuration, which you use v
 To reduce the number of request pings, you can specify batching behaviors in the request configuration. Any [`extraUrlParams`](#extra-url-params) from `triggers` that use the same request are appended to the `baseUrl` of the request.
 
 The batching properties are:
-  - `maxDelay`: This property specifies the time to wait (in seconds) before sending out a request ping. `maxDelay` acts as a counter that starts upon the triggering of the first batched request.
+  - `batchInterval`: This property specifies the max time interval to wait (in seconds) before sending out a request ping. `batchInterval` can be a number or an array of numbers. Request will respect every item value in the array, and repeat the last interval value (or the single value) when reach the end of the array.
 
-For example, the following config sends out a single request ping after 3 seconds, with the final request ping looking like `https://example.com/analytics?rc=1&rc=2&rc=3` .
+For example, the following config sends out a single request ping every 3 seconds, with the first request ping looking like `https://example.com/analytics?rc=1&rc=2&rc=3` .
 
 ```javascript
 "requests": {
   "timer": {
     "baseUrl": "https://example.com/analytics?",
-    "maxDelay": 3,
+    "batchInterval": 3,
   }
 }
 "triggers": {
@@ -260,7 +260,7 @@ The `triggers` configuration object describes when an analytics request should b
   - `on` (required) The event to listen for. Valid values are `render-start`, `ini-load`, `click`, `scroll`, `timer`, `visible`, `hidden`, `user-error`, [`access-*`](../amp-access/amp-access-analytics.md), and [`video-*`](./amp-video-analytics.md)
   - `request` (required) Name of the request to send (as specified in the `requests` section).
   - `vars` An object containing key-value pairs used to override `vars` defined in the top level config, or to specify vars unique to this trigger.
-  - `immediate` can be specified to work with request that support batching behavior. Setting `immediate` to `true` can help to flush batched request queue with some certain trigger. In this case, it's possible to reduce the request pings number without losing important trigger events.
+  - `important` can be specified to work with request that support batching behavior. Setting `important` to `true` can help to flush batched request queue with some certain trigger. In this case, it's possible to reduce the request pings number without losing important trigger events.
   - `selector` and `selectionMethod` can be specified for some triggers, such as `click` and `visible`. See [Element selector](#element-selector) for details.
   - `scrollSpec` (required when `on` is set to `scroll`) This configuration is used in conjunction with the `scroll` trigger. Please see below for details.
   - `timerSpec` (required when `on` is set to `timer`) This configuration is used in conjunction with the `timer` trigger. Please see below for details.
