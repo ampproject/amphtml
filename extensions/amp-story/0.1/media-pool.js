@@ -925,6 +925,7 @@ export class MediaPool {
 
     return Promise.all(blessPromises)
         .then(() => {
+          console.log('all blessed');
           this.blessed_ = true;
         }).catch(reason => {
           dev().expectedError('AMP-STORY', 'Blessing all media failed: ',
