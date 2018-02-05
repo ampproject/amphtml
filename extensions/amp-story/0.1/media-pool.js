@@ -766,13 +766,21 @@ export class MediaPool {
    * gesture.  In order for this to bless the media element, this function must
    * be invoked in response to a user gesture.
    * @param {!HTMLMediaElement} poolMediaEl The media element to bless.
+   * @return {!Promise} A promise that is resolved when blessing the media
+   *     element is complete.
    */
   bless_(poolMediaEl) {
     if (poolMediaEl[ELEMENT_BLESSED_PROPERTY_NAME]) {
-      return;
+      return Promise.resolve();
     }
 
+    const blessPromise = listenOncePromise(poolMediaEl, ElementTaskName.BLESS, {
+      capture: true,
+    }).then(() => console.log('bless complete for', poolMediaEl));
+
     enqueueMediaElementTask(poolMediaEl, ElementTaskName.BLESS);
+
+    return blessPromise;
   }
 
 
@@ -923,11 +931,7 @@ export class MediaPool {
 
     const blessPromises = [];
     this.forEachMediaElement_(mediaEl => {
-      const blessPromise = listenOncePromise(mediaEl, ElementTaskName.BLESS, {
-        capture: true,
-      }).then(() => console.log('bless complete for', mediaEl));
-      this.bless_(mediaEl);
-      blessPromises.push(blessPromise);
+      blessPromises.push(this.bless_(mediaEl));
     });
 
     return Promise.all(blessPromises)
