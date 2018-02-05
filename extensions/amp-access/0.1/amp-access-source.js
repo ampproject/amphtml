@@ -171,7 +171,7 @@ export class AccessSource {
   createAdapter_(configJson) {
     const context = /** @type {!AccessTypeAdapterContextDef} */ ({
       buildUrl: this.buildUrl.bind(this),
-      collectUrlVars: this.collectUrlVars_.bind(this),
+      collectUrlVars: this.collectUrlVars.bind(this),
     });
     const isJwt = (this.isJwtEnabled_ && configJson['jwt'] === true);
     switch (this.type_) {
@@ -308,9 +308,8 @@ export class AccessSource {
    * @param {string} url
    * @param {boolean} useAuthData Allows `AUTH(field)` URL var substitutions.
    * @return {!Promise<!Object<string, *>>}
-   * @private
    */
-  collectUrlVars_(url, useAuthData) {
+  collectUrlVars(url, useAuthData) {
     return this.prepareUrlVars_(useAuthData).then(vars => {
       return this.urlReplacements_.collectVars(url, vars);
     });

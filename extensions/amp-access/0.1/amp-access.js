@@ -235,7 +235,7 @@ export class AccessService {
         'Access vendor "%s" can only be used for "type=vendor", but none found',
         name);
     // Should not happen, just to appease type checking.
-    return this.sources_[0];
+    throw new Error();
   }
 
   /**
@@ -635,7 +635,7 @@ export class AccessService {
 
   /**
    * Expose the underlying AccessSource for use by laterpay.
-   *
+   * @param {number} index
    * @return {!AccessSource}
    */
   getSource(index) {
@@ -652,20 +652,20 @@ export class AccessService {
    * @return {!Promise}
    */
   loginWithType_(type) {
-    const splitPoint = type.indexOf('.');
+    const splitPoint = type.indexOf('-');
+    const singleSource = this.sources_.length == 1;
 
-    // No namespace
-    if (splitPoint < 0) {
-      user().assert(this.sources_.length == 1,
-          'Login types must be namespaced with multiple sources.');
-      return this.sources_[0].loginWithType(type);
+    // Try to find a matching namespace
+    const namespace = (splitPoint > -1) ? type.substring(0, splitPoint) : type;
+    const match = this.sources_.filter(s => s.getNamespace() == namespace);
+    if (match.length) {
+      // Matching namespace found
+      return match[0].loginWithType(type.substring(namespace.length));
     }
 
-    // Namespaced
-    const namespace = type.substring(0, splitPoint);
-    const match = this.sources_.filter(s => s.getNamespace() == namespace);
-    user().assert(match.length, 'Login type not found: %s', namespace);
-    return match[0].loginWithType(type.substring(splitPoint + 1));
+    // If there is only one source, process as standalone
+    user().assert(singleSource, 'Login must match namespace: %s', namespace);
+    return this.sources_[0].loginWithType(type);
   }
 
   /**
