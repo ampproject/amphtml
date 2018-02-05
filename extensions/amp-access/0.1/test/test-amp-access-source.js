@@ -18,8 +18,8 @@ import {AccessClientAdapter} from '../amp-access-client';
 import {AccessOtherAdapter} from '../amp-access-other';
 import {AccessServerAdapter} from '../amp-access-server';
 import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
-import {AccessVendorAdapter} from '../amp-access-vendor';
 import {AccessSource} from '../amp-access-source';
+import {AccessVendorAdapter} from '../amp-access-vendor';
 import {cidServiceForDocForTesting} from
   '../../../../src/service/cid-impl';
 import {installPerformanceService} from

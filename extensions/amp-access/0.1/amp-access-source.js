@@ -19,17 +19,17 @@ import {AccessOtherAdapter} from './amp-access-other';
 import {AccessServerAdapter} from './amp-access-server';
 import {AccessServerJwtAdapter} from './amp-access-server-jwt';
 import {AccessVendorAdapter} from './amp-access-vendor';
-import {SignInProtocol} from './signin';
 import {Services} from '../../../src/services';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {SignInProtocol} from './signin';
 import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
-import {isExperimentOn} from '../../../src/experiments';
-import {getValueForExpr} from '../../../src/json';
-import {isObject} from '../../../src/types';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getLoginUrl, openLoginDialog} from './login-dialog';
+import {getValueForExpr} from '../../../src/json';
+import {isExperimentOn} from '../../../src/experiments';
+import {isObject} from '../../../src/types';
 import {parseQueryString} from '../../../src/url';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 
 /** @const */
