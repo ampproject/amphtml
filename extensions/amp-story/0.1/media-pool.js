@@ -74,6 +74,7 @@ function blessMediaElement(mediaEl) {
   const currentTime = mediaEl.currentTime;
 
   return Promise.resolve(mediaEl.play()).then(() => {
+    console.log('inner bless', mediaEl);
     mediaEl.muted = false;
 
     if (isPaused) {
@@ -87,10 +88,11 @@ function blessMediaElement(mediaEl) {
 
     mediaEl[ELEMENT_BLESSED_PROPERTY_NAME] = true;
   }).catch(reason => {
+    console.log('bless failed', mediaEl);
     dev().expectedError('AMP-STORY', 'Blessing media element failed:',
         reason, mediaEl);
   }).then(() => {
-    console.log('dispatch bless');
+    console.log('dispatch bless', mediaEl);
     dispatch(mediaEl, 'bless', false);
   });
 }
