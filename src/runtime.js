@@ -344,7 +344,7 @@ function adoptShared(global, callback) {
  * @return {!Promise}
  */
 export function adopt(global) {
-  return adoptShared(global, (global, extensions) => {
+  return adoptShared(global, global => {
     const ampdocService = Services.ampdocServiceFor(global);
     const ampdoc = ampdocService.getAmpDoc();
     global.AMP.ampdoc = ampdoc;
@@ -367,7 +367,6 @@ export function adopt(global) {
     return waitForBodyPromise(global.document).then(() => {
       // Ensure that all declared extensions are marked and stubbed.
       stubElementsForDoc(ampdoc);
-      installAutoLoadExtensions(extensions, ampdoc);
     });
   });
 }
@@ -410,21 +409,6 @@ export function adoptShadowMode(global) {
     return waitForBodyPromise(global.document);
   });
 }
-
-
-/**
- * Certain extensions can be auto-loaded by runtime based on experiments or
- * other configurations.
- * @param {!./service/extensions-impl.Extensions} extensions
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- */
-function installAutoLoadExtensions(extensions, ampdoc) {
-  if (!getMode().test &&
-      isExperimentOn(ampdoc.win, 'amp-lightbox-viewer-auto')) {
-    extensions.installExtensionForDoc(ampdoc, 'amp-lightbox-viewer');
-  }
-}
-
 
 /**
  * A manager for documents in the multi-doc environment.
@@ -486,8 +470,6 @@ class MultidocManager {
         /* opt_isRuntimeCss */ true);
     // Instal doc services.
     installAmpdocServices(ampdoc, initParams || Object.create(null));
-    // Install auto-load extensions.
-    installAutoLoadExtensions(this.extensions_, ampdoc);
 
     const viewer = Services.viewerForDoc(ampdoc);
 

@@ -6,7 +6,7 @@
   <link rel="canonical" href="amps.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <script async custom-element="amp-lightbox-viewer" src="https://cdn.ampproject.org/v0/amp-lightbox-viewer-0.1.js"></script>
+  <script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js"></script>
   <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
   <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
   <script async custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"></script>
@@ -33,15 +33,10 @@
     // Enable amp-lightbox-viewer experiment automatically if it is not enabled.
     // Disable amp-lightbox-viewer-auto experiment if it is enabled.
     setTimeout(function() {
-      if (!AMP.isExperimentOn('amp-lightbox-viewer') || AMP.isExperimentOn('amp-lightbox-viewer-auto')) {
-        if (!AMP.isExperimentOn('amp-lightbox-viewer')) {
-          AMP.toggleExperiment('amp-lightbox-viewer');
+        if (!AMP.isExperimentOn('amp-lightbox-gallery')) {
+          AMP.toggleExperiment('amp-lightbox-gallery');
+          location.reload();
         }
-        if (AMP.isExperimentOn('amp-lightbox-viewer-auto')) {
-          AMP.toggleExperiment('amp-lightbox-viewer-auto');
-        }
-        location.reload();
-      }
     }, 1000);
   </script>
 
