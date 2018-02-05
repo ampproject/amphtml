@@ -54,7 +54,7 @@ The absolute URL of the page that will be liked. For example, `https://www.faceb
 
 ##### data-locale (optional)
 
-By default, the local is set to user's system language; however, you can specify a locale as well.
+By default, the locale is set to user's system language; however, you can specify a locale as well.
 
 For details on strings accepted here please visit the [Facebook API Localization page](https://developers.facebook.com/docs/internationalization)
 
