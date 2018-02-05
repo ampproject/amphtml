@@ -813,12 +813,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         // idleRenderOutsideViewport would impose at least 5 second delay due to
         // scheduler constraints.
         const throttleFn = () => !verified && is3pThrottled(this.win) ?
-          Services.timerFor(this.win).delay(throttleFn, 1000) :
-          registerFluidAndExec();
+              Services.timerFor(this.win).delay(throttleFn, 1000) : null;
         return throttleFn();
       });
     }
-    return super.layoutCallback()
+    return super.layoutCallback();
   }
 
   /** @override  */

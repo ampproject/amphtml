@@ -311,7 +311,7 @@ export class SafeframeHostApi {
    */
   sendMessage_(payload, serviceName) {
     dev().assert(this.iframe_.contentWindow,
-                 'Frame contentWindow unavailable.');
+        'Frame contentWindow unavailable.');
     const message = {};
     message[MESSAGE_FIELDS.CHANNEL] = this.channel;
     message[MESSAGE_FIELDS.PAYLOAD] = payload;
@@ -369,15 +369,15 @@ export class SafeframeHostApi {
             this.baseInstance_.element.style.width;
       }
       this.sendMessage_(JSON.stringify({
-          uid: this.uid,
-          success,
-          newGeometry: this.getCurrentGeometry(),
-          'expand_t': this.currentGeometry_.allowedExpansion_t,
-          'expand_b': this.currentGeometry_.allowedExpansion_b,
-          'expand_r': this.currentGeometry_.allowedExpansion_r,
-          'expand_l': this.currentGeometry_.allowedExpansion_l,
-          push: true,
-        }), message);
+        uid: this.uid,
+        success,
+        newGeometry: this.getCurrentGeometry(),
+        'expand_t': this.currentGeometry_.allowedExpansion_t,
+        'expand_b': this.currentGeometry_.allowedExpansion_b,
+        'expand_r': this.currentGeometry_.allowedExpansion_r,
+        'expand_l': this.currentGeometry_.allowedExpansion_l,
+        push: true,
+      }), message);
     }).catch(() => {});
   }
 
@@ -408,27 +408,28 @@ export class SafeframeHostApi {
   handleExpandRequest_(payload) {
     // TODO: Something is not working right when the frame is allllmost out of viewport
     // and when it is fully out of viewport
-    this.handleSizeChange(Math.floor(payload.expand_b + payload.expand_t +
-                                     this.initialHeight_),
-                          Math.floor(payload.expand_r + payload.expand_l +
-                                     this.initialWidth_),
-                          SERVICE.EXPAND_RESPONSE);
+    this.handleSizeChange(Math.floor(payload.expand_b + payload.expand_t),// +
+        //this.initialHeight_),
+        Math.floor(payload.expand_r + payload.expand_l),// +
+        //  this.initialWidth_),
+        SERVICE.EXPAND_RESPONSE);
   }
 
-  handleCollapseRequest_(payload) {
+  handleCollapseRequest_(unused_payload) {
     this.handleSizeChange(this.baseInstance_.initialSize_.height,
-                          this.baseInstance_.initialSize_.width,
-                          SERVICE.COLLAPSE_RESPONSE);
+        this.baseInstance_.initialSize_.width,
+        SERVICE.COLLAPSE_RESPONSE);
   }
 
-    /**
+  /**
    * Fires a delayed impression and notifies the Fluid creative that its
    * container has been resized.
    * @private
    */
   onFluidResize_() {
     if (this.baseInstance_.fluidImpressionUrl_) {
-      this.baseInstance_.fireDelayedImpressions(this.baseInstance_.fluidImpressionUrl_);
+      this.baseInstance_.fireDelayedImpressions(
+          this.baseInstance_.fluidImpressionUrl_);
       this.baseInstance_.fluidImpressionUrl_ = null;
     }
     this.iframe_.contentWindow./*OK*/postMessage(
