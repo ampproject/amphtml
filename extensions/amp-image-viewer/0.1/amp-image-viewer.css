@@ -18,3 +18,16 @@
   position: absolute;
   z-index: 1;
 }
+
+.i-amphtml-image-viewer {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* This is necessary due to crbug/248522 where touch events fail after
+    transform */
+  overflow: hidden;
+  transform: translate3d(0, 0, 0);
+}
