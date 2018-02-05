@@ -255,8 +255,7 @@ function enqueueMediaElementTask(mediaEl, taskName) {
 
   const queue = mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME];
   queue.push(taskName);
-  console.log('element ' + mediaEl.getAttribute('pool-element') +
-      ' task queue contains ' + JSON.stringify(queue));
+  console.log('element ' + mediaEl + ' task queue contains ' + JSON.stringify(queue));
 
   if (queue.length === 1) {
     executeNextMediaElementTask(mediaEl);
