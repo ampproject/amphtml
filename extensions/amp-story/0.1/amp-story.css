@@ -439,6 +439,10 @@ amp-story-grid-layer * {
   display: none !important;
 }
 
+.i-amphtml-story-bookend-article-image > img {
+  object-fit: cover;
+}
+
 .i-amphtml-story-bookend-replay-image {
   background-position: center center !important;
   background-size: cover !important;
