@@ -173,7 +173,12 @@ In this example, we specify the `config` attribute to load the configuration dat
 ###  Configuration data objects
 
 ####  Requests
-The `requests` configuration object specifies the URLs used to transmit data to an analytics platform as well as batching behavior of the request. The `request-name` specifies what request should be sent in response to a particular event (e.g., `pageview`, `event`, etc.) . The `request-value` contains a https URL, the value may include placeholder tokens that can reference other requests or variables. The `request-value` can also be an object that contain optional batching configs.
+The `requests` configuration object specifies the URLs used to transmit data to an analytics platform as well as batching or reporting behavior of the request. The `request-name` specifies what request should be sent in response to a particular event (e.g., `pageview`, `event`, etc.) . The `request-value` contains an https URL, the value may include placeholder tokens that can reference other requests or variables. The `request-value` can also be an object that contains optional request configs.
+
+##### Request configs
+The properties for defining a request with an object are:
+ - `baseUrl`: Defines the url of the request (required).
+ - `reportWindow`: An optional property to specify the time (in seconds) to stop reporting requests. The trigger with `important: true` overrides the maximum report window constraint.
 
 In this example, all requests are valid.
 
@@ -185,7 +190,8 @@ In this example, all requests are valid.
   },
   "event": {
     "baseUrl": "${base}&type=event&eventId=${eventId}",
-    "batchInterval": 5
+    "batchInterval": 5,
+    "reportWindow" : 30
   }
 }
 ```
@@ -196,15 +202,37 @@ Some analytics providers have an already-provided configuration, which you use v
 To reduce the number of request pings, you can specify batching behaviors in the request configuration. Any [`extraUrlParams`](#extra-url-params) from `triggers` that use the same request are appended to the `baseUrl` of the request.
 
 The batching properties are:
-  - `batchInterval`: This property specifies the max time interval to wait (in seconds) before sending out a request ping. `batchInterval` can be a number or an array of numbers. Request will respect every item value in the array, and repeat the last interval value (or the single value) when reach the end of the array.
+  - `batchInterval`: This property specifies the time interval (in seconds) to flush request pings in the batching queue. `batchInterval` can be a number or an array of numbers (the minimum time interval is 200ms). The request will respect every value in the array, and then repeat the last interval value (or the single value) when it reaches the end of the array.
+  - `batchPlugin`: This property specifies the alternative plugin function to use to construct the final request url. Please reach out to the vendor to ask for the correct batch plugin to use.
 
-For example, the following config sends out a single request ping every 3 seconds, with the first request ping looking like `https://example.com/analytics?rc=1&rc=2&rc=3` .
-
+For example, the following config sends out a single request ping every 2 seconds, with one sample request ping looking like `https://example.com/analytics?rc=1&rc=2`.
 ```javascript
 "requests": {
   "timer": {
     "baseUrl": "https://example.com/analytics?",
-    "batchInterval": 3,
+    "batchInterval": 2,
+  }
+}
+"triggers": {
+  "timer": {
+    "on": "timer",
+    "request" : "timer",
+    "timerSpec": {
+      "interval": 1
+    },
+    "extraUrlParams": {
+      "rc": "${requestCount}"
+    }
+  }
+}
+```
+
+The following config sends out the first request ping after 1 second and then sends out a request every 3 seconds. The first request ping looks like `https://example.com/analytics?rc=1`, the second request ping looks like `https://example.com/analytics?rc=2&rc=3&rc=4`.
+```javascript
+"requests": {
+  "timer": {
+    "baseUrl": "https://example.com/analytics?",
+    "batchInterval": [1, 3],
   }
 }
 "triggers": {
@@ -260,7 +288,7 @@ The `triggers` configuration object describes when an analytics request should b
   - `on` (required) The event to listen for. Valid values are `render-start`, `ini-load`, `click`, `scroll`, `timer`, `visible`, `hidden`, `user-error`, [`access-*`](../amp-access/amp-access-analytics.md), and [`video-*`](./amp-video-analytics.md)
   - `request` (required) Name of the request to send (as specified in the `requests` section).
   - `vars` An object containing key-value pairs used to override `vars` defined in the top level config, or to specify vars unique to this trigger.
-  - `important` can be specified to work with request that support batching behavior. Setting `important` to `true` can help to flush batched request queue with some certain trigger. In this case, it's possible to reduce the request pings number without losing important trigger events.
+  - `important` can be specified to work with requests that support the batching behavior or the report window. Setting `important` to `true` can help to flush batched request queue with some certain triggers. In this case, it's possible to reduce the request pings number without losing important trigger events. Setting `important` to `true` can also override the request's `reportWindow` value to send out important request pings regardless.
   - `selector` and `selectionMethod` can be specified for some triggers, such as `click` and `visible`. See [Element selector](#element-selector) for details.
   - `scrollSpec` (required when `on` is set to `scroll`) This configuration is used in conjunction with the `scroll` trigger. Please see below for details.
   - `timerSpec` (required when `on` is set to `timer`) This configuration is used in conjunction with the `timer` trigger. Please see below for details.
