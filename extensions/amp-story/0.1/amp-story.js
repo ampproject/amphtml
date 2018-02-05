@@ -319,18 +319,6 @@ export class AmpStory extends AMP.BaseElement {
   }
 
 
-  getNavigationState() {
-    return this.navigationState_;
-  }
-
-  getActivePage() {
-    return this.activePage_;
-  }
-
-  getPages() {
-    return this.pages_;
-  }
-
   /**
    * Builds the system layer DOM.  This is dependent on the pages_ array having
    * been initialized, so it cannot happen at build time.
@@ -1466,6 +1454,21 @@ export class AmpStory extends AMP.BaseElement {
       dispatch(this.element, EventType.CLOSE_BOOKEND);
     }
     this.switchTo_(dev().assertElement(this.pages_[0].element).id);
+  }
+
+  /** @return {!NavigationState} */
+  getNavigationState() {
+    return this.navigationState_;
+  }
+
+  /** @return {?./amp-story-page.AmpStoryPage} */
+  getActivePage() {
+    return this.activePage_;
+  }
+
+  /** @return  {!Array<!./amp-story-page.AmpStoryPage>} */
+  getPages() {
+    return this.pages_;
   }
 
   /**
