@@ -606,29 +606,10 @@ function printConfigHelp(command) {
 }
 
 /**
- * Enables runtime to be used for local testing by writing AMP_CONFIG to file.
- * Called at the end of "gulp build" and "gulp dist --fortesting".
- * @param {string} targetFile File to which the config is to be written.
+ * Prints a helpful message that lets the developer know how to build
+ * a list of extensions or without any extensions.
  */
-function enableLocalTesting(targetFile) {
-  let config = (argv.config === 'canary') ? 'canary' : 'prod';
-  let baseConfigFile = 'build-system/global-configs/' + config + '-config.json';
-
-  return removeConfig(targetFile).then(() => {
-    return applyConfig(
-        config, targetFile, baseConfigFile,
-        /* opt_localDev */ true, /* opt_localBranch */ true);
-  });
-}
-
-/**
- * Performs the build steps for gulp build and gulp watch
- * @param {boolean} watch
- * @return {!Promise}
- */
-function performBuild(watch) {
-  process.env.NODE_ENV = 'development';
-  printConfigHelp(watch ? 'gulp watch' : 'gulp build');
+function printExtensionsHelp() {
   if (!process.env.TRAVIS) {
     if (argv.extensions) {
       if (typeof(argv.extensions) !== 'string') {
@@ -668,6 +649,33 @@ function performBuild(watch) {
           cyan('article.amp.html') + green('.'));
     }
   }
+}
+
+/**
+ * Enables runtime to be used for local testing by writing AMP_CONFIG to file.
+ * Called at the end of "gulp build" and "gulp dist --fortesting".
+ * @param {string} targetFile File to which the config is to be written.
+ */
+function enableLocalTesting(targetFile) {
+  let config = (argv.config === 'canary') ? 'canary' : 'prod';
+  let baseConfigFile = 'build-system/global-configs/' + config + '-config.json';
+
+  return removeConfig(targetFile).then(() => {
+    return applyConfig(
+        config, targetFile, baseConfigFile,
+        /* opt_localDev */ true, /* opt_localBranch */ true);
+  });
+}
+
+/**
+ * Performs the build steps for gulp build and gulp watch
+ * @param {boolean} watch
+ * @return {!Promise}
+ */
+function performBuild(watch) {
+  process.env.NODE_ENV = 'development';
+  printConfigHelp(watch ? 'gulp watch' : 'gulp build');
+  printExtensionsHelp();
   return compileCss(watch).then(() => {
     return Promise.all([
       polyfillsForTests(),
@@ -710,6 +718,7 @@ function dist() {
   if (argv.fortesting) {
     printConfigHelp('gulp dist --fortesting')
   }
+  printExtensionsHelp();
   return compileCss().then(() => {
     return Promise.all([
       compile(false, true, true),
