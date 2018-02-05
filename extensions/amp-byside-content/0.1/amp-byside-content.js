@@ -25,9 +25,9 @@
  * 	 data-lang="<<<lang>>>"
  *   data-label="<<<content_label>>>"
  *   title="Content title"
- *   width="320"
- *   height="392"
- *   layout="fixed">
+ *   width="640"
+ *   height="480"
+ *   layout="responsive">
  * </amp-instagram>
  * </code>
  */
@@ -38,6 +38,7 @@ import {user} from '../../../src/log';
 import {setStyles} from '../../../src/style';
 import {removeElement} from '../../../src/dom';
 import {Services} from '../../../src/services';
+import {toWin} from '../../../src/types';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
 import {listenFor} from '../../../src/iframe-helper';
 import {dict} from '../../../src/utils/object';
@@ -187,11 +188,11 @@ export class AmpBysideContent extends AMP.BaseElement {
 	  this.unlisteners_.push(unlisten);
 
 	  this.element.appendChild(iframe);
-	  this.iframePromise_ = this.loadPromise(iframe).then(() => {
-        this.getVsync().mutate(() => {
-          setStyles(iframe, {
-            'opacity': 1,
-          });
+      return (this.iframePromise_ = this.loadPromise(iframe));
+    }).then(() => {
+      this.getVsync().mutate(() => {
+        setStyles(iframe, {
+          'opacity': 1,
         });
       });
     }).then(() => this);
@@ -232,9 +233,23 @@ export class AmpBysideContent extends AMP.BaseElement {
       'r': 'RANDOM',
       '_resize': '1',
     });
+    const url = addParamsToUrl(src, params);
 
-    return Services.urlReplacementsForDoc(this.element)
-        .expandAsync(addParamsToUrl(src, params));
+    return new Promise(resolve => {
+      try {
+        // If a node is passed, try to resolve via this node.
+        const win = toWin(/** @type {!Document} */ (
+		  this.element.ownerDocument || this.element).defaultView);
+
+        // for unit integration tests resolve original url
+        // since url replacements implementation throws an uncaught error
+        win.AMP_TEST ? resolve(url) :
+          Services.urlReplacementsForDoc(this.element)
+			.expandAsync(url).then(newUrl => resolve(newUrl));
+      } catch (error) {
+        resolve(url);
+      }
+    });
   }
 
   /**
@@ -257,9 +272,9 @@ export class AmpBysideContent extends AMP.BaseElement {
   getOverflowElement_() {
     const createElement = utils.getElementCreator(this.element.ownerDocument);
 
-    const overflow = createElement('div', 'bs-overflow',
-        createElement('div', 'bs-overflow-content',
-            createElement('i', 'bs-arrow-down')
+    const overflow = createElement('div', 'i-amphtml-byside-content-overflow',
+        createElement('div', 'i-amphtml-byside-content-overflow-content',
+            createElement('i', 'i-amphtml-byside-content-arrow-down')
         ));
     overflow.setAttribute('overflow', '');
 
@@ -271,8 +286,8 @@ export class AmpBysideContent extends AMP.BaseElement {
     const createElement = utils.getElementCreator(this.element.ownerDocument);
 
     const loadingPlaceholder =
-      createElement('div', 'bs-loading-container',
-          createElement('div', 'bs-loading-animation')
+      createElement('div', 'i-amphtml-byside-content-loading-container',
+          createElement('div', 'i-amphtml-byside-content-loading-animation')
       );
 
     return loadingPlaceholder;
@@ -285,13 +300,13 @@ export class AmpBysideContent extends AMP.BaseElement {
    * @private
    */
   updateSize_(data) {
-    // Calculate new width and height of the container to include the padding.
-    // If padding is negative, just use the requested width and height directly.
+    // Calculate new height of the container to include the padding.
+    // If padding is negative, just use the requested height directly.
     if (!data) {
       return;
     }
 
-    let newHeight, newWidth;
+    let newHeight;
     const height = parseInt(data['height'], 10);
     if (!isNaN(height)) {
       newHeight = Math.max(
@@ -299,30 +314,12 @@ export class AmpBysideContent extends AMP.BaseElement {
               - this.iframe_./*OK*/offsetHeight),
           height);
     }
-    const width = parseInt(data['width'], 10);
-    if (!isNaN(width)) {
-      newWidth = Math.max(
-          width + (this.element./*OK*/offsetWidth
-              - this.iframe_./*OK*/offsetWidth),
-          width);
-    }
 
-    if (newHeight !== undefined || newWidth !== undefined) {
-      // Force change size as requested
-      this.element.getResources().attemptChangeSize(
-          this.element, newHeight, newWidth, () => {
-            if (newHeight !== undefined) {
-              this.element.setAttribute('height', newHeight);
-            }
-            if (newWidth !== undefined) {
-              this.element.setAttribute('width', newWidth);
-            }
-          }
-      ).catch(() => {/* do nothing */ });
+    if (newHeight !== undefined) {
+	  this.attemptChangeHeight(newHeight).catch(() => {/* do nothing */ });
     } else {
-      this.user().error(TAG_,
-          'Ignoring embed-size request because '
-          + 'no width or height value is provided',
+      user().error(TAG_,
+          'Ignoring embed-size request because no height value is provided',
           this.element);
     }
   }

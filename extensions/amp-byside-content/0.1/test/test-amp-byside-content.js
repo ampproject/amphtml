@@ -20,6 +20,7 @@ describes.realWin('amp-byside-content', {
   amp: {
     extensions: ['amp-byside-content'],
   },
+  ampAdCss: true,
 }, env => {
   let win, doc;
 
@@ -114,7 +115,9 @@ describes.realWin('amp-byside-content', {
       'data-webcare-id': 'D6604AE5D0',
       'data-label': 'placeholder-label',
     }).then(elem => {
-	  const loader = elem.querySelector('.bs-loading-animation');
+	  const loader = elem.querySelector(
+          '.i-amphtml-byside-content-loading-animation'
+      );
 	  expect(loader).to.not.be.null;
     });
   });
