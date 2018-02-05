@@ -399,8 +399,10 @@ describes.realWin('amp-analytics', {
     const analytics = getAnalyticsTag({
       'triggers': [{'on': 'visible', 'request': 'foo'}],
     });
+    const spy = sandbox.spy(analytics, 'expandAndSendRequest_');
 
     return waitForNoSendRequest(analytics).then(() => {
+      expect(spy).to.have.not.been.called;
       expect(sendRequestSpy).to.have.not.been.called;
     });
   });
