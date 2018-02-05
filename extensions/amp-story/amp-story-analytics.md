@@ -34,15 +34,15 @@ The `story-page-visible` event is issued when a story page becomes visible.
   }
 }
 ```
-### Story variables
+## Story variables
 
 AMP story contributes the following URL substitutions:
 
-#### STORY_PAGE_ID
+### STORY_PAGE_ID
 
 The unique ID for an AMP story page, as provided by the `id` attribute of the current `amp-story-page`.
 
-#### STORY_PAGE_INDEX
+### STORY_PAGE_INDEX
 
 A zero-based index value for an AMP story page determined by its ordering within `amp-story`.
 
