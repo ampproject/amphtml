@@ -917,8 +917,9 @@ export class MediaPool {
 
     const blessPromises = [];
     this.forEachMediaElement_(mediaEl => {
-      const blessPromise = listenOncePromise(mediaEl, ElementTaskName.BLESS)
-          .then(() => console.log('bless complete for', mediaEl));
+      const blessPromise = listenOncePromise(mediaEl, ElementTaskName.BLESS, {
+        capture: true,
+      }).then(() => console.log('bless complete for', mediaEl));
       this.bless_(mediaEl);
       blessPromises.push(blessPromise);
     });
