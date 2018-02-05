@@ -992,11 +992,10 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     const startTime = Date.now();
     return toPromise(bundler.bundle()
       .on('error', function(err) {
-        if (err instanceof SyntaxError) {
-          console.error(red('Syntax error: ' + err.message));
-        } else {
-          console.error(red(err.message));
-        }
+        // Drop the node_modules call stack, which begins with '    at'.
+        const message = err.stack.replace(/    at[^]*/, '').trim();
+        console.error(red(message));
+        process.exit(1);
       })
       .pipe(lazybuild())
       .pipe($$.rename(destFilename))
