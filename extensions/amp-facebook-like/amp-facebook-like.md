@@ -52,6 +52,12 @@ You can use the `amp-facebook-like` component to embed the [Facebook like button
 
 The absolute URL of the page that will be liked. For example, `https://www.facebook.com/testesmegadivertidos/`.
 
+##### data-locale (optional)
+
+By default, the locale is set to user's system language; however, you can specify a locale as well.
+
+For details on strings accepted here please visit the [Facebook API Localization page](https://developers.facebook.com/docs/internationalization)
+
 ##### data-action (optional)
 
 The verb to display on the button. Can be either `like` or `recommend`. The default is `like`.
