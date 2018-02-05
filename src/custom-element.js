@@ -30,6 +30,10 @@ import {ResourceState} from './service/resource';
 import {Services} from './services';
 import {Signals} from './utils/signals';
 import {createLoaderElement} from '../src/loader';
+import {
+  dangerousSyncMutate,
+  dangerousSyncMutateStop,
+} from './dangerously-mutate';
 import {dev, rethrowAsync, user} from './log';
 import {
   getIntersectionChangeEntry,
@@ -40,10 +44,6 @@ import {parseSizeList} from './size-list';
 import {reportError} from './error';
 import {setStyle} from './style';
 import {toWin} from './types';
-import {
-  dangerousSyncMutate,
-  dangerousSyncMutateStop,
-} from './dangerously-mutate';
 
 const TAG = 'CustomElement';
 

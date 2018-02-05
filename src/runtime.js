@@ -54,6 +54,7 @@ import {installGlobalNavigationHandlerForDoc} from './service/navigation';
 import {installGlobalSubmitListenerForDoc} from './document-submit';
 import {installHistoryServiceForDoc} from './service/history-impl';
 import {installInputService} from './input';
+import {install as installMutationMonitor} from './black-magic';
 import {installPlatformService} from './service/platform-impl';
 import {installResourcesServiceForDoc} from './service/resources-impl';
 import {
@@ -72,12 +73,11 @@ import {installViewerServiceForDoc, setViewerVisibilityState} from
   './service/viewer-impl';
 import {installViewportServiceForDoc} from './service/viewport/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
-import {install as installMutationMonitor} from './black-magic';
 import {installXhrService} from './service/xhr-impl';
 import {
+  isCanary,
   isExperimentOn,
   toggleExperiment,
-  isCanary,
 } from './experiments';
 import {parseUrl} from './url';
 import {reportErrorForWin} from './error';

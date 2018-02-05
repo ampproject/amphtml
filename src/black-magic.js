@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {dev} from './log';
 import {IN_MUTATE_PHASE_PROP} from './dangerously-mutate';
-import {startsWith, endsWith} from './string';
+import {dev} from './log';
+import {endsWith, startsWith} from './string';
 import {hasOwn} from './utils/object';
 
 

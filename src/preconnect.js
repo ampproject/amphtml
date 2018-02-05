@@ -21,15 +21,15 @@
 
 
 import {Services} from './services';
+import {
+  dangerousSyncMutate,
+  dangerousSyncMutateStop,
+} from './dangerously-mutate';
 import {dev} from './log';
 import {getService, registerServiceBuilder} from './service';
 import {parseUrl} from './url';
 import {startsWith} from './string';
 import {toWin} from './types';
-import {
-  dangerousSyncMutate,
-  dangerousSyncMutateStop,
-} from './dangerously-mutate';
 
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
 const PRECONNECT_TIMEOUT_MS = 10 * 1000;

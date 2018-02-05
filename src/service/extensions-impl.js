@@ -29,6 +29,10 @@ import {
   upgradeOrRegisterElement,
 } from './custom-element-registry';
 import {cssText} from '../../build/css';
+import {
+  dangerousSyncMutate,
+  dangerousSyncMutateStop,
+} from '../dangerously-mutate';
 import {declareExtension} from './ampdoc-impl';
 import {dev, rethrowAsync} from '../log';
 import {getMode} from '../mode';
@@ -44,10 +48,6 @@ import {map} from '../utils/object';
 import {toWin} from '../types';
 import installCustomElements from
   'document-register-element/build/document-register-element.node';
-import {
-  dangerousSyncMutate,
-  dangerousSyncMutateStop,
-} from '../dangerously-mutate';
 
 const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';

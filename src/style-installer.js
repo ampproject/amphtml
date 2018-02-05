@@ -15,16 +15,16 @@
  */
 
 import {Services} from './services';
-import {dev, rethrowAsync} from './log';
-import {insertAfterOrAtStart, waitForBody} from './dom';
-import {map} from './utils/object';
-import {setStyles} from './style';
-import {waitForServices} from './render-delaying-services';
 import {
   dangerousSyncMutate,
   dangerousSyncMutateStop,
 } from './dangerously-mutate';
+import {dev, rethrowAsync} from './log';
+import {insertAfterOrAtStart, waitForBody} from './dom';
+import {map} from './utils/object';
+import {setStyles} from './style';
 import {toWin} from './types';
+import {waitForServices} from './render-delaying-services';
 
 
 const TRANSFORMER_PROP = '__AMP_CSS_TR';

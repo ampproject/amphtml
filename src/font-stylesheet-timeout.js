@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {escapeCssSelectorIdent} from './dom';
-import {isExperimentOn} from './experiments';
-import {onDocumentReady} from './document-ready';
-import {urls} from './config';
 import {
   dangerousSyncMutate,
   dangerousSyncMutateStop,
 } from './dangerously-mutate';
+import {escapeCssSelectorIdent} from './dom';
+import {isExperimentOn} from './experiments';
+import {onDocumentReady} from './document-ready';
+import {urls} from './config';
 
 /**
  * While browsers put a timeout on font downloads (3s by default,

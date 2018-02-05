@@ -24,6 +24,10 @@ import {
 } from './viewport-binding-ios-embed-wrapper';
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {VisibilityState} from '../../visibility-state';
+import {
+  dangerousSyncMutate,
+  dangerousSyncMutateStop,
+} from '../../dangerously-mutate';
 import {dev} from '../../log';
 import {dict} from '../../utils/object';
 import {getFriendlyIframeEmbedOptional} from '../../friendly-iframe-embed';
@@ -42,10 +46,6 @@ import {
 } from '../../layout-rect';
 import {numeric} from '../../transition';
 import {setStyle} from '../../style';
-import {
-  dangerousSyncMutate,
-  dangerousSyncMutateStop,
-} from '../../dangerously-mutate';
 
 
 const TAG_ = 'Viewport';

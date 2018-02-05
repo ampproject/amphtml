@@ -17,16 +17,16 @@
 import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
+import {
+  dangerousSyncMutate,
+  dangerousSyncMutateStop,
+} from '../../dangerously-mutate';
 import {dev} from '../../log';
 import {isExperimentOn} from '../../experiments';
 import {layoutRectLtwh} from '../../layout-rect';
 import {px, setStyle} from '../../style';
 import {waitForBody} from '../../dom';
 import {whenDocumentReady} from '../../document-ready';
-import {
-  dangerousSyncMutate,
-  dangerousSyncMutateStop,
-} from '../../dangerously-mutate';
 
 const TAG_ = 'Viewport';
 

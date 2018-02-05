@@ -18,13 +18,13 @@ import {JankMeter} from './jank-meter';
 import {Pass} from '../pass';
 import {Services} from '../services';
 import {cancellation} from '../error';
-import {dev, rethrowAsync} from '../log';
-import {getService, registerServiceBuilder} from '../service';
-import {installTimerService} from './timer-impl';
 import {
   dangerousSyncMutate,
   dangerousSyncMutateStop,
 } from '../dangerously-mutate';
+import {dev, rethrowAsync} from '../log';
+import {getService, registerServiceBuilder} from '../service';
+import {installTimerService} from './timer-impl';
 
 /** @const {time} */
 const FRAME_TIME = 16;

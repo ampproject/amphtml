@@ -17,14 +17,14 @@
 import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
-import {dev} from '../../log';
-import {isExperimentOn} from '../../experiments';
-import {layoutRectLtwh} from '../../layout-rect';
-import {px, setStyle} from '../../style';
 import {
   dangerousSyncMutate,
   dangerousSyncMutateStop,
 } from '../../dangerously-mutate';
+import {dev} from '../../log';
+import {isExperimentOn} from '../../experiments';
+import {layoutRectLtwh} from '../../layout-rect';
+import {px, setStyle} from '../../style';
 
 
 const TAG_ = 'Viewport';
