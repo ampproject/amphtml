@@ -68,30 +68,12 @@ const ELEMENT_BLESSED_PROPERTY_NAME = '__AMP_MEDIA_IS_BLESSED__';
  *     element is complete.
  */
 function blessMediaElement(mediaEl) {
+  console.log('blessing element', mediaEl);
   const isPaused = mediaEl.paused;
   const isMuted = mediaEl.muted;
   const currentTime = mediaEl.currentTime;
 
-  /**
-   * @return {!Promise} A promise that is resolved when playback has been
-   *    initiated or rejected if playback fails to initiate.  If the media
-   *    element is already playing, the promise is immediately resolved
-   *    without playing the media element again, to avoid interrupting
-   *    playback.
-   */
-  const playFn = () => {
-    if (isPaused) {
-      // The playFn() invocation is wrapped in a Promise.resolve(...) due to
-      // the fact that some browsers return a promise from media elements'
-      // play() function, while others return a boolean.
-      return Promise.resolve(mediaEl.play());
-    }
-
-    // This media element was already playing.
-    return Promise.resolve();
-  };
-
-  return playFn().then(() => {
+  return Promise.resolve(mediaEl.play()).then(() => {
     mediaEl.muted = false;
 
     if (isPaused) {
