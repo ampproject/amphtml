@@ -34,6 +34,23 @@ The `story-page-visible` event is issued when a story page becomes visible.
   }
 }
 ```
+
+Because of the user experience of AMP story enables a user to traverse several "pages" without loading new HTML pages each time, one interesting consideration involving the `story-page-visible` event is how to record pageview events. One approach would be to count each `story-page-visible` event as a typical pageview (i.e. as if a user were visiting a new HTML page); another approach is to capture `story-page-visible` events specially as their own type of event.
+
+Using `amp-analytics` you can re-assign the `story-page-visible` event to behave like a pageview event, which is a common vendor-specified event type:
+
+```javascript
+"triggers": {
+  "storyPageVisible": {
+    "on": "story-page-visible",
+    "request": "pageview"
+  }
+}
+```
+
+Consult your vendor's documentation for more specific details on how to set this up.
+
+
 ## Story variables
 
 AMP story contributes the following URL substitutions:
