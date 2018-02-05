@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-access-scroll-0.1.css';
 import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client';
+import {CSS} from '../../../build/amp-access-scroll-0.1.css';
 import {installStylesForDoc} from '../../../src/style-installer';
 
 const TAG = 'amp-access-scroll-elt';
