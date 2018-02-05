@@ -73,9 +73,9 @@ function blessMediaElement(mediaEl) {
   const isMuted = mediaEl.muted;
   const currentTime = mediaEl.currentTime;
 
-  console.log('media to be played for blessing', mediaEl);
+  console.log('media to be played for blessing', mediaEl.outerHTML);
   const playResult = mediaEl.play();
-  console.log('media has been played for blessing', mediaEl, playResult);
+  console.log('media has been played for blessing', mediaEl.outerHTML, playResult);
 
   return Promise.resolve(playResult).then(() => {
     console.log('inner bless', mediaEl);
