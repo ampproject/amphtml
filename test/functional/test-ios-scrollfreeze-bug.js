@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {checkAndFix} from '../../src/service/viewport/ios-scrollfreeze-bug';
-import * as sinon from 'sinon';
 
 
 describe('ios-scrollfreeze-bug', () => {

@@ -16,6 +16,11 @@
 
 import {AmpDocShadow} from '../../src/service/ampdoc-impl';
 import {
+  ShadowDomVersion,
+  setShadowCssSupportedForTesting,
+  setShadowDomSupportedVersionForTesting,
+} from '../../src/web-components';
+import {
   ShadowDomWriterBulk,
   ShadowDomWriterStreamer,
   createShadowDomWriter,
@@ -26,13 +31,8 @@ import {
   scopeShadowCss,
   setShadowDomStreamingSupportedForTesting,
 } from '../../src/shadow-embed';
-import {toArray} from '../../src/types';
 import {installStylesForDoc} from '../../src/style-installer';
-import {
-  setShadowDomSupportedVersionForTesting,
-  setShadowCssSupportedForTesting,
-  ShadowDomVersion,
-} from '../../src/web-components';
+import {toArray} from '../../src/types';
 
 describes.sandboxed('shadow-embed', {}, () => {
   afterEach(() => {

@@ -15,13 +15,13 @@
  */
 'use strict';
 const BBPromise = require('bluebird');
-const yaml = require('yamljs');
 const fs = BBPromise.promisifyAll(require('fs-extra'));
 const gulp = require('gulp-help')(require('gulp'));
 const intercept = require('gulp-intercept');
-const path = require('path');
-const minimist = require('minimist');
 const log = require('fancy-log');
+const minimist = require('minimist');
+const path = require('path');
+const yaml = require('yamljs');
 
 const argv = minimist(process.argv.slice(2));
 

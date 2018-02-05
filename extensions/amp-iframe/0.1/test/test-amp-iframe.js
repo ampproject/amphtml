@@ -21,11 +21,11 @@ import {
 } from '../amp-iframe';
 import {CommonSignals} from '../../../../src/common-signals';
 import {Services} from '../../../../src/services';
-import {poll} from '../../../../testing/iframe';
 import {
   createElementWithAttributes,
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
+import {poll} from '../../../../testing/iframe';
 
 
 describes.realWin('amp-iframe', {

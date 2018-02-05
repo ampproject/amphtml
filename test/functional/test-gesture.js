@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {GestureRecognizer, Gestures} from '../../src/gesture';
 import * as sinon from 'sinon';
+import {GestureRecognizer, Gestures} from '../../src/gesture';
 
 
 describe('Gestures', () => {

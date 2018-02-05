@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {
+  DEFAULT_THRESHOLD,
   IntersectionObserverApi,
   IntersectionObserverPolyfill,
-  getThresholdSlot,
-  DEFAULT_THRESHOLD,
   getIntersectionChangeEntry,
+  getThresholdSlot,
 } from '../../src/intersection-observer-polyfill';
 import {layoutRectLtwh} from '../../src/layout-rect';
-import * as sinon from 'sinon';
 
 describe('IntersectionObserverApi', () => {
   let sandbox;

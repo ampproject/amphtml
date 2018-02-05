@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import {dict} from '../../../src/utils/object';
 import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 
 
 /** @const */

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 
 class AmpReddit extends AMP.BaseElement {
 

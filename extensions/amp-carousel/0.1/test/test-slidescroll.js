@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as sinon from 'sinon';
 import '../amp-carousel';
+import * as sinon from 'sinon';
 
 
 describes.realWin('SlideScroll', {

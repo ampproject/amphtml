@@ -14,30 +14,30 @@
   * limitations under the License.
   */
 
+import {EMPTY_METADATA} from '../../../src/mediasession-helper';
+import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
+import {VisibilityState} from '../../../src/visibility-state';
+import {assertHttpsUrl, isProxyOrigin} from '../../../src/url';
 import {
-  elementByTag,
-  childElementsByTag,
   childElementByTag,
+  childElementsByTag,
   closestByTag,
+  elementByTag,
   fullscreenEnter,
   fullscreenExit,
-  isFullscreenElement,
   insertAfterOrAtStart,
+  isFullscreenElement,
 } from '../../../src/dom';
-import {toArray} from '../../../src/types';
-import {listen} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {getMode} from '../../../src/mode';
 import {dev} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import {VideoEvents} from '../../../src/video-interface';
-import {Services} from '../../../src/services';
-import {assertHttpsUrl, isProxyOrigin} from '../../../src/url';
-import {EMPTY_METADATA} from '../../../src/mediasession-helper';
-import {VisibilityState} from '../../../src/visibility-state';
 import {isExperimentOn} from '../../../src/experiments';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {listen} from '../../../src/event-helper';
+import {toArray} from '../../../src/types';
 
 
 const TAG = 'amp-video';

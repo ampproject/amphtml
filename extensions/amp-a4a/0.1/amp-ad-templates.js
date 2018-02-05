@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {urls} from '../../../src/config';
-import {parseUrl} from '../../../src/url';
 import {LRUCache} from '../../../src/utils/lru-cache';
-import {isArray} from '../../../src/types';
+import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
+import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getMode} from '../../../src/mode';
+import {isArray} from '../../../src/types';
+import {parseUrl} from '../../../src/url';
+import {urls} from '../../../src/config';
 
 /** @private {!Object<string, string|boolean>} */
 const TEMPLATE_CORS_CONFIG = {

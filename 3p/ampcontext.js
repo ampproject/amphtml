@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dict} from '../src/utils/object';
-import {dev} from '../src/log';
+import {AmpEvents} from '../src/amp-events';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
-import {nextTick} from './3p';
-import {tryParseJson} from '../src/json';
+import {dev} from '../src/log';
+import {dict} from '../src/utils/object';
 import {isObject} from '../src/types';
-import {AmpEvents} from '../src/amp-events';
+import {nextTick} from './3p';
 import {parseUrl} from '../src/url';
+import {tryParseJson} from '../src/json';
 
 export class AbstractAmpContext {
 

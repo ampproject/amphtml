@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../testing/iframe';
+import * as sinon from 'sinon';
 import {Services} from '../../src/services';
+import {createIframePromise} from '../../testing/iframe';
+import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc} from
   '../../src/service/document-info-impl';
-import {installDocService} from '../../src/service/ampdoc-impl';
-import * as sinon from 'sinon';
 
 describe('document-info', () => {
   let sandbox;

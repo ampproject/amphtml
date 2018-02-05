@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {AmpDocSingle, installDocService} from '../../src/service/ampdoc-impl';
 import {Services} from '../../src/services';
 import {
-  installViewportServiceForDoc,
   Viewport,
+  installViewportServiceForDoc,
   parseViewportMeta,
   stringifyViewportMeta,
   updateViewportMetaString,
@@ -27,12 +28,12 @@ import {
   ViewportBindingDef,
 } from '../../src/service/viewport/viewport-binding-def';
 import {
-  ViewportBindingNatural_,
-} from '../../src/service/viewport/viewport-binding-natural';
-import {
   ViewportBindingIosEmbedWrapper_,
 } from '../../src/service/viewport/viewport-binding-ios-embed-wrapper';
 
+import {
+  ViewportBindingNatural_,
+} from '../../src/service/viewport/viewport-binding-natural';
 import {dev} from '../../src/log';
 import {getMode} from '../../src/mode';
 import {installDocumentStateService} from '../../src/service/document-state';
@@ -40,10 +41,9 @@ import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installVsyncService} from '../../src/service/vsync-impl';
+import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 import {setParentWindow} from '../../src/service';
-import {layoutRectLtwh} from '../../src/layout-rect';
-import * as sinon from 'sinon';
 
 
 const NOOP = () => {};

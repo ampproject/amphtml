@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import '../../../third_party/react-dates/bundle';
 import {ActionTrust} from '../../../src/action-trust';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-date-picker-0.1.css';
-import {DEFAULT_LOCALE, DEFAULT_FORMAT, FORMAT_STRINGS} from './constants';
+import {DEFAULT_FORMAT, DEFAULT_LOCALE, FORMAT_STRINGS} from './constants';
 import {DatesList} from './dates-list';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
@@ -34,7 +35,6 @@ import {requireExternal} from '../../../src/module';
 import {sanitizeFormattingHtml} from '../../../src/sanitizer';
 import {toArray} from '../../../src/types';
 import {user} from '../../../src/log';
-import '../../../third_party/react-dates/bundle';
 
 
 /**

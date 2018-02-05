@@ -15,8 +15,8 @@
  */
 
 import '../amp-twitter';
-import {twitter} from '../../../../3p/twitter';
 import {cleanupTweetId_} from '../../../../3p/twitter';
+import {twitter} from '../../../../3p/twitter';
 
 describes.realWin('amp-twitter', {
   amp: {

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {createElementWithAttributes} from '../../../../src/dom';
-import {Xhr} from '../../../../src/service/xhr-impl';
 import {
   GoogleAdLifecycleReporter,
 } from '../../../../ads/google/a4a/performance';
+import {Xhr} from '../../../../src/service/xhr-impl';
+import {createElementWithAttributes} from '../../../../src/dom';
 
 // Still under construction.
 describes.sandboxed('A4A integration', {}, () => {

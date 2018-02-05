@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {RTC_ERROR_ENUM} from '../../../amp-a4a/0.1/real-time-config-manager';
-import {RTC_VENDORS} from '../../../amp-a4a/0.1/callout-vendors';
-import {
-  AmpAdNetworkDoubleclickImpl,
-} from '../amp-ad-network-doubleclick-impl';
-import {createElementWithAttributes} from '../../../../src/dom';
+
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+import {
+  AmpAdNetworkDoubleclickImpl,
+} from '../amp-ad-network-doubleclick-impl';
+import {RTC_ERROR_ENUM} from '../../../amp-a4a/0.1/real-time-config-manager';
+import {RTC_VENDORS} from '../../../amp-a4a/0.1/callout-vendors';
 import {Services} from '../../../../src/services';
+import {createElementWithAttributes} from '../../../../src/dom';
 
 describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
   let impl;

@@ -20,10 +20,10 @@ const detectGlobals = require('acorn-globals');
 const escodegen = require('escodegen');
 const rocambole = require('rocambole');
 
+const colors = require('ansi-colors');
+const es = require('event-stream');
 const fs = require('fs');
 const program = require('commander');
-const es = require('event-stream');
-const colors = require('ansi-colors');
 
 /**
  * Changes global `require` calls to be referenced from a given global namespace.

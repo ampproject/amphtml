@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {user} from '../../../src/log';
 import {ANALYTICS_CONFIG} from '../../amp-analytics/0.1/vendors';
 import {FilterType} from './filters/filter';
+import {user} from '../../../src/log';
 
 /**
  * @typedef {{

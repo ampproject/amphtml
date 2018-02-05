@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {validateData} from '../3p/3p';
 import {startsWith} from '../src/string';
+import {validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global

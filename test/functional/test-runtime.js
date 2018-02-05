@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
+import * as dom from '../../src/dom';
+import * as ext from '../../src/service/extensions-impl';
+import * as sinon from 'sinon';
+import * as styles from '../../src/style-installer';
 import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {ElementStub} from '../../src/element-stub';
+import {Services} from '../../src/services';
 import {
   adopt,
   adoptShadowMode,
@@ -31,14 +36,9 @@ import {
 import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import {vsyncForTesting} from '../../src/service/vsync-impl';
-import {Services} from '../../src/services';
 import {runChunksForTesting} from '../../src/chunk';
 import {toggleExperiment} from '../../src/experiments';
-import * as ext from '../../src/service/extensions-impl';
-import * as styles from '../../src/style-installer';
-import * as dom from '../../src/dom';
-import * as sinon from 'sinon';
+import {vsyncForTesting} from '../../src/service/vsync-impl';
 
 
 describes.fakeWin('runtime', {

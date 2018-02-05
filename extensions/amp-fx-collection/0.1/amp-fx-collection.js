@@ -15,12 +15,12 @@
  */
 
 import {AmpEvents} from '../../../src/amp-events';
-import {listen} from '../../../src/event-helper';
-import {iterateCursor} from '../../../src/dom';
-import {dev, user, rethrowAsync} from '../../../src/log';
-import {map} from '../../../src/utils/object';
-import {Services} from '../../../src/services';
 import {ParallaxProvider} from './providers/parallax';
+import {Services} from '../../../src/services';
+import {dev, rethrowAsync, user} from '../../../src/log';
+import {iterateCursor} from '../../../src/dom';
+import {listen} from '../../../src/event-helper';
+import {map} from '../../../src/utils/object';
 
 const TAG = 'amp-fx-collection';
 

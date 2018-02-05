@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {
-  doubleclickIsA4AEnabled,
-  DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
   DOUBLECLICK_EXPERIMENT_FEATURE,
+  DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
+  DoubleclickA4aEligibility,
   UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
   URL_EXPERIMENT_MAPPING,
-  DoubleclickA4aEligibility,
+  doubleclickIsA4AEnabled,
 } from '../doubleclick-a4a-config';
-import {
-  isInExperiment,
-  MANUAL_EXPERIMENT_ID,
-} from '../../../../ads/google/a4a/traffic-experiments';
 import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
-import {parseUrl} from '../../../../src/url';
+import {
+  MANUAL_EXPERIMENT_ID,
+  isInExperiment,
+} from '../../../../ads/google/a4a/traffic-experiments';
 import {createIframePromise} from '../../../../testing/iframe';
-import * as sinon from 'sinon';
+import {parseUrl} from '../../../../src/url';
 
 describe('doubleclick-a4a-config', () => {
   let sandbox;

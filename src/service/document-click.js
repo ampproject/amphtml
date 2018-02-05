@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
+import {Services} from '../services';
 import {
   closestByTag,
-  openWindowDialog,
   escapeCssSelectorIdent,
   isIframed,
+  openWindowDialog,
 } from '../dom';
-import {
-  registerServiceBuilderForDoc,
-  installServiceInEmbedScope,
-} from '../service';
 import {dev} from '../log';
+import {
+  getExtraParamsUrl,
+  shouldAppendExtraParams,
+} from '../impression';
 import {getMode} from '../mode';
-import {Services} from '../services';
+import {
+  installServiceInEmbedScope,
+  registerServiceBuilderForDoc,
+} from '../service';
 import {
   parseUrl,
   parseUrlWithA,
 } from '../url';
 import {toWin} from '../types';
-import {
-  shouldAppendExtraParams,
-  getExtraParamsUrl,
-} from '../impression';
 
 
 const TAG = 'clickhandler';

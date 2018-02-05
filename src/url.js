@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {startsWith, endsWith} from './string';
-import {user} from './log';
+import {endsWith, startsWith} from './string';
 import {getMode} from './mode';
-import {urls} from './config';
 import {isArray} from './types';
 import {parseQueryString_} from './url-parse-query-string';
 import {tryDecodeUriComponent_} from './url-try-decode-uri-component';
+import {urls} from './config';
+import {user} from './log';
 
 /**
  * Cached a-tag to avoid memory allocation during URL parsing.

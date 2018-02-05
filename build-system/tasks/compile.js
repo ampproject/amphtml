@@ -15,17 +15,17 @@
  */
 'use strict';
 
-const fs = require('fs-extra');
 const argv = require('minimist')(process.argv.slice(2));
 const closureCompiler = require('gulp-closure-compiler');
+const colors = require('ansi-colors');
+const fs = require('fs-extra');
 const gulp = require('gulp');
+const internalRuntimeToken = require('../internal-version').TOKEN;
+const internalRuntimeVersion = require('../internal-version').VERSION;
 const rename = require('gulp-rename');
 const replace = require('gulp-replace');
-const internalRuntimeVersion = require('../internal-version').VERSION;
-const internalRuntimeToken = require('../internal-version').TOKEN;
-const shortenLicense = require('../shorten-license');
 const rimraf = require('rimraf');
-const colors = require('ansi-colors');
+const shortenLicense = require('../shorten-license');
 
 const isProdBuild = !!argv.type;
 const queue = [];

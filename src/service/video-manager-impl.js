@@ -15,47 +15,47 @@
  * limitations under the License.
  */
 
+import * as st from '../style';
+import * as tr from '../transition';
 import {ActionTrust} from '../action-trust';
-import {VideoSessionManager} from './video-session-manager';
-import {removeElement, scopedQuerySelector, isRTL} from '../dom';
+import {Animation} from '../animation';
 import {
-  getData,
-  listen,
-  listenOncePromise,
-  createCustomEvent,
-} from '../event-helper';
-import {dev} from '../log';
-import {getMode} from '../mode';
-import {registerServiceBuilderForDoc, getServiceForDoc} from '../service';
-import {setStyles} from '../style';
-import {isFiniteNumber} from '../types';
-import {mapRange} from '../utils/math';
-import {startsWith} from '../string.js';
+  EMPTY_METADATA,
+  parseFavicon,
+  parseOgImage,
+  parseSchemaImage,
+  setMediaSession,
+} from '../mediasession-helper';
 import {
   PlayingStates,
   VideoAnalyticsEvents,
   VideoAttributes,
   VideoEvents,
 } from '../video-interface';
-import {Services} from '../services';
-import {
-  installPositionObserverServiceForDoc,
-} from './position-observer/position-observer-impl';
 import {
   PositionObserverFidelity,
 } from './position-observer/position-observer-worker';
-import {map} from '../utils/object';
-import {layoutRectLtwh, RelativePositions} from '../layout-rect';
+import {RelativePositions, layoutRectLtwh} from '../layout-rect';
+import {Services} from '../services';
+import {VideoSessionManager} from './video-session-manager';
 import {
-  EMPTY_METADATA,
-  parseSchemaImage,
-  parseOgImage,
-  parseFavicon,
-  setMediaSession,
-} from '../mediasession-helper';
-import {Animation} from '../animation';
-import * as st from '../style';
-import * as tr from '../transition';
+  createCustomEvent,
+  getData,
+  listen,
+  listenOncePromise,
+} from '../event-helper';
+import {dev} from '../log';
+import {getMode} from '../mode';
+import {getServiceForDoc, registerServiceBuilderForDoc} from '../service';
+import {
+  installPositionObserverServiceForDoc,
+} from './position-observer/position-observer-impl';
+import {isFiniteNumber} from '../types';
+import {isRTL, removeElement, scopedQuerySelector} from '../dom';
+import {map} from '../utils/object';
+import {mapRange} from '../utils/math';
+import {setStyles} from '../style';
+import {startsWith} from '../string.js';
 
 const TAG = 'video-manager';
 

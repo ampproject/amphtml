@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {
   History,
@@ -22,10 +23,9 @@ import {
   installHistoryServiceForDoc,
 } from '../../src/service/history-impl';
 import {Services} from '../../src/services';
-import {listenOncePromise} from '../../src/event-helper';
 import {installTimerService} from '../../src/service/timer-impl';
+import {listenOncePromise} from '../../src/event-helper';
 import {parseUrl} from '../../src/url';
-import * as sinon from 'sinon';
 
 
 describes.fakeWin('History', {

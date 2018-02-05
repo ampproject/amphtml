@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {handleClick, warmupDynamic, warmupStatic} from '../../ads/alp/handler';
 import {parseUrl} from '../../src/url';
-import * as sinon from 'sinon';
 
 describe('alp-handler', () => {
 

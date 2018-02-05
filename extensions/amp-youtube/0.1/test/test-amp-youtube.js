@@ -15,10 +15,10 @@
  */
 
 import '../amp-youtube';
-import {listenOncePromise} from '../../../../src/event-helper';
+import * as sinon from 'sinon';
 import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
-import * as sinon from 'sinon';
+import {listenOncePromise} from '../../../../src/event-helper';
 
 const EXAMPLE_VIDEOID = 'mGENRKrdoGY';
 const EXAMPLE_LIVE_CHANNELID = 'UCB8Kb4pxYzsDsHxzBfnid4Q';

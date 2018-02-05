@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {validateData, loadScript} from '../../3p/3p';
-import {tryParseJson} from '../../src/json.js';
 import {getStyle, setStyle, setStyles} from '../../src/style';
+import {loadScript, validateData} from '../../3p/3p';
+import {tryParseJson} from '../../src/json.js';
 
 // Keep track of current height of AMP iframe
 let currentAmpHeight = null;

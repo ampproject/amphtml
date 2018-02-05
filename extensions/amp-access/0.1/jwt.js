@@ -17,8 +17,8 @@
 import {
   base64UrlDecodeToBytes,
 } from '../../../src/utils/base64';
-import {stringToBytes, utf8Decode} from '../../../src/utils/bytes';
 import {pemToBytes} from '../../../src/utils/pem';
+import {stringToBytes, utf8Decode} from '../../../src/utils/bytes';
 import {tryParseJson} from '../../../src/json';
 
 

@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-import {Builder} from './web-animations';
 import {ActionTrust} from '../../../src/action-trust';
+import {Builder} from './web-animations';
 import {Pass} from '../../../src/pass';
+import {Services} from '../../../src/services';
 import {WebAnimationPlayState} from './web-animation-types';
+import {WebAnimationService} from './web-animation-service';
 import {childElementByTag} from '../../../src/dom';
+import {clamp} from '../../../src/utils/math';
 import {getFriendlyIframeEmbedOptional}
   from '../../../src/friendly-iframe-embed';
 import {getParentWindowFrameElement} from '../../../src/service';
 import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
+import {isFiniteNumber} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 import {user} from '../../../src/log';
-import {Services} from '../../../src/services';
-import {isFiniteNumber} from '../../../src/types';
-import {clamp} from '../../../src/utils/math';
-import {WebAnimationService} from './web-animation-service';
 
 const TAG = 'amp-animation';
 

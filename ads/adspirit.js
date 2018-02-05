@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {validateData} from '../3p/3p';
 import {setStyles} from '../src/style';
+import {validateData} from '../3p/3p';
 
 /**
   * @param {!Window} global

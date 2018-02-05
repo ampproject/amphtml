@@ -20,12 +20,12 @@
  * files and list directories for use with the gulp live server
  */
 const app = require(require.resolve('./app.js'));
-const isRunning = require('is-running');
+const colors = require('ansi-colors');
 const gulp = require('gulp-help')(require('gulp'));
+const isRunning = require('is-running');
+const log = require('fancy-log');
 const morgan = require('morgan');
 const webserver = require('gulp-webserver');
-const colors = require('ansi-colors');
-const log = require('fancy-log');
 
 const host = process.env.SERVE_HOST;
 const port = process.env.SERVE_PORT;

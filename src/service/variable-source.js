@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 import {dev} from '../log';
-import {loadPromise} from '../event-helper';
 import {isFiniteNumber} from '../types';
+import {loadPromise} from '../event-helper';
 
 /** @typedef {string|number|boolean|undefined|null} */
 let ResolverReturnDef;

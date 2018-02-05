@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 import {CSS} from '../../../build/amp-apester-media-0.1.css';
-import {dict} from '../../../src/utils/object';
-import {user, dev} from '../../../src/log';
-import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
-import {removeElement} from '../../../src/dom';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {
   extractTags,
   getPlatform,
-  setFullscreenOn,
-  setFullscreenOff,
   registerEvent,
+  setFullscreenOff,
+  setFullscreenOn,
 } from './utils';
+import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
+import {removeElement} from '../../../src/dom';
 
 /** @const */
 const TAG = 'amp-apester-media';

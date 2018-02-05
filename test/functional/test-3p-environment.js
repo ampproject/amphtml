@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
+import {Services} from '../../src/services';
+import {createIframePromise} from '../../testing/iframe';
+import {loadPromise} from '../../src/event-helper';
 import {
   manageWin,
   setInViewportForTesting,
 } from '../../3p/environment';
-import {createIframePromise} from '../../testing/iframe';
-import {Services} from '../../src/services';
-import {loadPromise} from '../../src/event-helper';
-import * as lolex from 'lolex';
 
 describe('3p environment', () => {
 

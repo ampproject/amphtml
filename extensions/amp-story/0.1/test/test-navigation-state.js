@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {NavigationState, StateChangeType} from '../navigation-state';
 import {EventType, dispatch} from '../events';
+import {NavigationState, StateChangeType} from '../navigation-state';
 
 
 describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {

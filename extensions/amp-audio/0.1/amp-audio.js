@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
+import {
+  EMPTY_METADATA,
+  parseFavicon,
+  parseOgImage,
+  parseSchemaImage,
+  setMediaSession,
+} from '../../../src/mediasession-helper';
 import {Layout} from '../../../src/layout';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev} from '../../../src/log';
 import {listen} from '../../../src/event-helper';
-import {
-  EMPTY_METADATA,
-  parseSchemaImage,
-  parseOgImage,
-  parseFavicon,
-  setMediaSession,
-} from '../../../src/mediasession-helper';
 
 const TAG = 'amp-audio';
 

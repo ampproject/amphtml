@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {tryParseJson} from '../../../src/json';
-import {user, dev} from '../../../src/log';
+import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
+import {dev, user} from '../../../src/log';
 import {
-  removeElement,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
+  removeElement,
 } from '../../../src/dom';
+import {getData, listen} from '../../../src/event-helper';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/types';
-import {getData, listen} from '../../../src/event-helper';
-import {VideoEvents} from '../../../src/video-interface';
-import {Services} from '../../../src/services';
+import {tryParseJson} from '../../../src/json';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}

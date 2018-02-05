@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {urls} from '../config';
 import {getMode} from '../mode';
+import {urls} from '../config';
 
 /**
  * Calculate the base url for any scripts.

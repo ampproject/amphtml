@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {FilterType, Filter} from './filter';
+import {Filter, FilterType} from './filter';
 import {user} from '../../../../src/log';
 
 export class ClickDelayFilter extends Filter {

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {parseUrl, serializeQueryString} from '../../../../src/url';
 import {Messaging} from '../messaging/messaging';
+import {parseUrl, serializeQueryString} from '../../../../src/url';
 
 const APP = '__AMPHTML__';
 const MessageType = {

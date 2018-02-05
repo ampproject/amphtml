@@ -18,9 +18,9 @@ import {
   AdSenseAmpAutoAdsHoldoutBranches,
   getAdSenseAmpAutoAdsExpBranch,
 } from '../../../ads/google/adsense-amp-auto-ads';
+import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/url-builder';
 import {dict} from '../../../src/utils/object';
-import {Services} from '../../../src/services';
 import {parseUrl} from '../../../src/url';
 
 

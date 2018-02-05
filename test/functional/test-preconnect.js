@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
+import * as sinon from 'sinon';
 import {createIframePromise} from '../../testing/iframe';
 import {preconnectForElement, setPreconnectFeaturesForTesting} from
   '../../src/preconnect';
-import * as sinon from 'sinon';
-import * as lolex from 'lolex';
 
 describe('preconnect', () => {
 

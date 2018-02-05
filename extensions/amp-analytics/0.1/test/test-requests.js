@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {installVariableService, ExpansionOptions} from '../variables';
-import {expandConfigRequest, RequestHandler} from '../requests';
-import {macroTask} from '../../../../testing/yield';
-import {dict} from '../../../../src/utils/object';
 import * as lolex from 'lolex';
-import {toggleExperiment} from '../../../../src/experiments';
+import {ExpansionOptions, installVariableService} from '../variables';
 import {REPLACEMENT_EXP_NAME} from '../../../../src/service/url-replacements-impl';
+import {RequestHandler, expandConfigRequest} from '../requests';
+import {dict} from '../../../../src/utils/object';
+import {macroTask} from '../../../../testing/yield';
+import {toggleExperiment} from '../../../../src/experiments';
 
 
 describes.realWin('Requests', {amp: 1}, env => {

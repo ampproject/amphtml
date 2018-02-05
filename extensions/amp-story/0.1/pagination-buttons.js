@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dict} from './../../../src/utils/object';
-import {dev} from '../../../src/log';
-import {renderAsElement} from './simple-template';
 import {EventType, dispatch} from './events';
 import {StateChangeType} from './navigation-state';
+import {dev} from '../../../src/log';
+import {dict} from './../../../src/utils/object';
+import {renderAsElement} from './simple-template';
 
 
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */

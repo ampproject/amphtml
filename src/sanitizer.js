@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
 import {
+  checkCorsUrl,
   getSourceUrl,
   isProxyOrigin,
   parseUrl,
   resolveRelativeUrl,
-  checkCorsUrl,
 } from './url';
-import {parseSrcset} from './srcset';
-import {user} from './log';
-import {urls} from './config';
+import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
 import {map} from './utils/object';
+import {parseSrcset} from './srcset';
 import {startsWith} from './string';
+import {urls} from './config';
+import {user} from './log';
 
 
 /** @private @const {string} */

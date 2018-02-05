@@ -16,8 +16,8 @@
 
 import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
 import {dev} from '../../../src/log';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {isExperimentOn} from '../../../src/experiments';
+import {isLayoutSizeDefined} from '../../../src/layout';
 
 /** @const */
 const TAG = 'amp-google-vrview-image';

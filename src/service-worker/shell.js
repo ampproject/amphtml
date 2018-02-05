@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {getMode} from '../mode';
 import {calculateExtensionScriptUrl} from '../service/extension-location';
+import {getMode} from '../mode';
 import {installWorkerErrorReporting} from '../worker-error-reporting';
 
 installWorkerErrorReporting('sw');

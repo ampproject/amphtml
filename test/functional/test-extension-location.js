@@ -15,8 +15,8 @@
  */
 
 import {
-  calculateExtensionScriptUrl,
   calculateEntryPointScriptUrl,
+  calculateExtensionScriptUrl,
 } from '../../src/service/extension-location';
 import {
   initLogConstructor,

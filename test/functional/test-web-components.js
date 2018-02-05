@@ -17,8 +17,8 @@
 
 import {
   ShadowDomVersion,
-  isShadowDomSupported,
   getShadowDomSupportedVersion,
+  isShadowDomSupported,
   setShadowDomSupportedVersionForTesting,
 } from '../../src/web-components';
 

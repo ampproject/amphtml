@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {user} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {timeago} from '../../../third_party/timeagojs/timeago';
+import {user} from '../../../src/log';
 
 export class AmpTimeAgo extends AMP.BaseElement {
 

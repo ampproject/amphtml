@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {
-  registerServiceBuilder,
-  registerServiceBuilderForDoc,
-  getService,
-} from '../service';
-import {getMode} from '../mode';
+import {Services} from '../services';
 import {dev} from '../log';
 import {dict, map} from '../utils/object';
-import {Services} from '../services';
+import {getMode} from '../mode';
+import {
+  getService,
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+} from '../service';
 
 /** @private @const {string} */
 const TAG_ = 'History';

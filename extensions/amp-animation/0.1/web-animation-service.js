@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 import {Builder} from './web-animations';
-import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
 import {Services} from '../../../src/services';
+import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
 
 
 export class WebAnimationService {

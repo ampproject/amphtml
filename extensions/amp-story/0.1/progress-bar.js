@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {scale, setImportantStyles} from '../../../src/style';
 import {scopedQuerySelector} from '../../../src/dom';
-import {Services} from '../../../src/services';
 
 
 /** @const {string} */

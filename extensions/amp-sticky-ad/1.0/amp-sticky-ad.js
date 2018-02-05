@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {CommonSignals} from '../../../src/common-signals';
 import {CSS} from '../../../build/amp-sticky-ad-1.0.css';
+import {CommonSignals} from '../../../src/common-signals';
 import {Layout} from '../../../src/layout';
+import {computedStyle, toggle} from '../../../src/style';
 import {dev,user} from '../../../src/log';
-import {removeElement} from '../../../src/dom';
-import {toggle, computedStyle} from '../../../src/style';
 import {
-  setStyle,
   removeAlphaFromColor,
+  setStyle,
 } from '../../../src/style';
+import {removeElement} from '../../../src/dom';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 class AmpStickyAd extends AMP.BaseElement {

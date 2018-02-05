@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {writeScript} from './3p';
 import {user} from '../src/log';
+import {writeScript} from './3p';
 
 /**
  * Get the correct script for the gist.

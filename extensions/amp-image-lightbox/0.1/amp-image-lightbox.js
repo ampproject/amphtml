@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import * as dom from '../../../src/dom';
+import * as st from '../../../src/style';
+import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-image-lightbox-0.1.css';
 import {
@@ -25,9 +28,10 @@ import {
 import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
-import {Services} from '../../../src/services';
+import {dev, user} from '../../../src/log';
 import {isLoaded} from '../../../src/event-helper';
 import {
   layoutRectFromDomRect,
@@ -35,11 +39,7 @@ import {
   moveLayoutRect,
 } from '../../../src/layout-rect';
 import {srcsetFromElement} from '../../../src/srcset';
-import {user, dev} from '../../../src/log';
 import {startsWith} from '../../../src/string';
-import * as dom from '../../../src/dom';
-import * as st from '../../../src/style';
-import * as tr from '../../../src/transition';
 
 const TAG = 'amp-image-lightbox';
 

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {renderAsElement} from './simple-template';
-import {dict} from '../../../src/utils/object';
 import {Services} from '../../../src/services';
+import {dict} from '../../../src/utils/object';
+import {renderAsElement} from './simple-template';
 
 
 /** @private @const {!./simple-template.ElementDef} */

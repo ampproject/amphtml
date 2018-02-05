@@ -17,8 +17,8 @@
 import {deserializeMessage, isAmpMessage} from './3p-frame-messaging';
 import {dev} from './log';
 import {dict} from './utils/object';
-import {getData} from './event-helper';
 import {filterSplice} from './utils/array';
+import {getData} from './event-helper';
 import {parseUrl} from './url';
 import {tryParseJson} from './json';
 

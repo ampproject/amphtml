@@ -14,31 +14,31 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-image-viewer-0.1.css';
+import * as st from '../../../src/style';
+import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
-import {bezierCurve} from '../../../src/curve';
-import {elementByTag} from '../../../src/dom';
-import {Gestures} from '../../../src/gesture';
-import {dev, user} from '../../../src/log';
+import {CSS} from '../../../build/amp-image-viewer-0.1.css';
+import {CommonSignals} from '../../../src/common-signals';
 import {
   DoubletapRecognizer,
+  PinchRecognizer,
   SwipeXYRecognizer,
   TapzoomRecognizer,
-  PinchRecognizer,
 } from '../../../src/gesture-recognizers';
+import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
+import {bezierCurve} from '../../../src/curve';
+import {continueMotion} from '../../../src/motion';
+import {dev, user} from '../../../src/log';
+import {elementByTag} from '../../../src/dom';
 import {
   expandLayoutRect,
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
 } from '../../../src/layout-rect';
-import {continueMotion} from '../../../src/motion';
-import {Services} from '../../../src/services';
 import {srcsetFromElement} from '../../../src/srcset';
-import * as st from '../../../src/style';
-import * as tr from '../../../src/transition';
-import {CommonSignals} from '../../../src/common-signals';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-image-viewer';

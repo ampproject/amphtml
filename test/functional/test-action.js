@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../src/action-trust';
+import * as sinon from 'sinon';
 import {
   ActionInvocation,
   ActionService,
@@ -23,11 +23,11 @@ import {
   dereferenceExprsInArgs,
   parseActionMap,
 } from '../../src/service/action-impl';
+import {ActionTrust} from '../../src/action-trust';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {KeyCodes} from '../../src/utils/key-codes';
 import {createCustomEvent} from '../../src/event-helper';
 import {setParentWindow} from '../../src/service';
-import * as sinon from 'sinon';
 
 
 /**

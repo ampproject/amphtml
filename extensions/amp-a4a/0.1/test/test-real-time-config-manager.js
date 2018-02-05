@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {createElementWithAttributes} from '../../../../src/dom';
-import {isFiniteNumber} from '../../../../src/types';
-import {AmpA4A} from '../amp-a4a';
-import {
-  maybeExecuteRealTimeConfig_,
-  validateRtcConfig_,
-  RTC_ERROR_ENUM,
-  truncUrl_,
-} from '../real-time-config-manager';
-import {Xhr} from '../../../../src/service/xhr-impl';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+import {AmpA4A} from '../amp-a4a';
+import {
+  RTC_ERROR_ENUM,
+  maybeExecuteRealTimeConfig_,
+  truncUrl_,
+  validateRtcConfig_,
+} from '../real-time-config-manager';
+import {Xhr} from '../../../../src/service/xhr-impl';
+import {createElementWithAttributes} from '../../../../src/dom';
+import {isFiniteNumber} from '../../../../src/types';
 
 describes.realWin('real-time-config-manager', {amp: true}, env => {
   let element;
