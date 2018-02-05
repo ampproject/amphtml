@@ -61,6 +61,7 @@ Example:
 #### Attributes
 
 **data-parallax-factor**
+
 a decimal value that controls how much faster or slower the element would scroll
 relative to the scrolling speed:
 
