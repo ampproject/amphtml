@@ -1024,11 +1024,11 @@ export class Bind {
     }
 
     if (!match) {
-      user().warn(`${TAG}: ` +
-        `Default value for <${tagName} [${property}]="${expressionString}"> ` +
-        `does not match first result (${expectedValue}). We recommend ` +
-        'writing expressions with matching default values, but this can be ' +
-        'safely ignored if intentional.');
+      user().warn(TAG,
+          `Default value for <${tagName} [${property}]="${expressionString}"> `
+          + `does not match first result (${expectedValue}). We recommend `
+          + 'writing expressions with matching default values, but this can be '
+          + 'safely ignored if intentional.');
     }
   }
 
