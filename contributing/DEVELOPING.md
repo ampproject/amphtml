@@ -36,8 +36,12 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | ----------------------------------------------------------------------- | --------------------------------------------------------------------- |
 | **`gulp`**<sup>[[1]](#footnote-1)</sup>                                 | Runs "watch" and "serve". Use this for standard local dev.            |
 | `gulp --extensions=<amp-foo,amp-bar>`                                   | Runs "watch" and "serve", after building only the listed extensions.
+| `gulp --extensions=minimal_set`                                         | Runs "watch" and "serve", after building the extensions needed to load `article.amp.html`.
 | `gulp --noextensions`                                                   | Runs "watch" and "serve" without building any extensions.
 | `gulp dist`<sup>[[1]](#footnote-1)</sup>                                | Builds production binaries.                                           |
+| `gulp dist --extensions=<amp-foo,amp-bar>`                              | Builds production binaries, with only the listed extensions.
+| `gulp dist --extensions=minimal_set`                                    | Builds production binaries, with only the extensions needed to load `article.amp.html`.
+| `gulp dist --noextensions`                                              | Builds production binaries without building any extensions.
 | `gulp dist --fortesting`<sup>[[1]](#footnote-1)</sup>                   | Builds production binaries for local testing. (Allows use cases like ads, tweets, etc. to work with minified sources. Overrides `TESTING_HOST` if specified. Uses the production `AMP_CONFIG` by default.) |
 | `gulp dist --fortesting --config=<config>`<sup>[[1]](#footnote-1)</sup> | Builds production binaries for local testing, with the specified `AMP_CONFIG`. `config` can be `prod` or `canary`. (Defaults to `prod`.) |
 | `gulp lint`                                                             | Validates against Google Closure Linter.                              |
@@ -45,12 +49,14 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp lint --fix`                                                       | Fixes simple lint warnings/errors automatically.                      |
 | `gulp build`<sup>[[1]](#footnote-1)</sup>                               | Builds the AMP library.                                               |
 | `gulp build --extensions=<amp-foo,amp-bar>`                             | Builds the AMP library, with only the listed extensions.
+| `gulp build --extensions=minimal_set`                                   | Builds the AMP library, with only the extensions needed to load `article.amp.html`.
 | `gulp build --noextensions`                                             | Builds the AMP library with no extensions.
 | `gulp check-links --files foo.md,bar.md`                                | Reports dead links in `.md` files.                                                 |
 | `gulp clean`                                                            | Removes build output.                                                 |
 | `gulp css`<sup>[[1]](#footnote-1)</sup>                                 | Recompiles css to build directory and builds the embedded css into js files for the AMP library. |
 | `gulp watch`<sup>[[1]](#footnote-1)</sup>                               | Watches for changes in files, re-builds.                               |
 | `gulp watch --extensions=<amp-foo,amp-bar>`                             | Watches for changes in files, re-builds only the listed extensions.
+| `gulp watch --extensions=minimal_set`                                   | Watches for changes in files, re-builds only the extensions needed to load `article.amp.html`.
 | `gulp watch --noextensions`                                             | Watches for changes in files, re-builds with no extensions.
 | `gulp pr-check`<sup>[[1]](#footnote-1)</sup>                            | Runs all the Travis CI checks locally.         |
 | `gulp pr-check --nobuild`<sup>[[1]](#footnote-1)</sup>                  | Runs all the Travis CI checks locally, but skips the `gulp build` step.         |
