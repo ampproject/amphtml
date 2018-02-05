@@ -671,6 +671,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       const TAG = this.getName_();
       this.user().error(TAG, 'Ignoring event. Request string ' +
           'not found: ', trigger['request']);
+      return;
     }
 
     this.checkTriggerEnabled_(trigger, event).then(enabled => {
