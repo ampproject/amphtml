@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import {user} from '../../../src/log';
+import {StateChangeType} from './navigation-state';
+import {dev, user} from '../../../src/log';
 
+/** @const */
+const INTERACTIONS_BEFORE_AD_SHOWN = 3;
 
 /** @const */
 // const EXPERIMENT = 'amp-story-auto-ad';
@@ -31,15 +34,40 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
     /** @private {?AmpStory} */
     this.ampStory_ = null;
+
+    /** @private {?NavigationState} */
+    this.navigationState_ = null;
+
+    /** @private {!number} */
+    this.interactions_ = 0;
+
+    /** @private {!array} */
+    this.adElements = [];
+
+    /** @private {!array} */
+    this.adIdPointer_ = 0;
   }
 
   /** @override */
   buildCallback() {
-    const ampStory = this.element.parentElement;
-    user().assert(ampStory.tagName === 'AMP-STORY',
+    this.ampStoryElement_ = this.element.parentElement;
+    user().assert(this.ampStoryElement_.tagName === 'AMP-STORY',
         `<${TAG}> should be child of <amp-story>`);
-    this.ampStory_ = ampStory;
-  }
+
+    this.ampStoryElement_.getImpl().then(impl => {
+      this.ampStory_ = impl;
+      this.navigationState_ = this.ampStory_.getNavigationState();
+      this.navigationState_.observe(this.handleStateChange_.bind(this));
+    });
+
+    // move this chunk to layoutCallback
+    const mockPage = this.makeMockPage();
+    this.adElements.push(mockPage);
+    this.ampStoryElement_.appendChild(mockPage);
+    // mockPage.getImpl().then(impl => impl.setDistance(0));
+    // layoutCallback
+
+  };
 
   /** @override */
   isLayoutSupported() {
@@ -48,7 +76,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.ampStory.appendChild(this.makeMockPage());
   }
 
   // temporary to be replaced with real page later
@@ -63,8 +90,50 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       `;
     return ampStoryAdPage;
   }
+
+  handleStateChange_(stateChangeEvent) {
+    switch (stateChangeEvent.type) {
+      case StateChangeType.ACTIVE_PAGE:
+        const {pageIndex, pageId} = stateChangeEvent.value;
+        this.handleActivePageChange_(
+            dev().assertNumber(pageIndex),
+            dev().assertString(pageId));
+        break;
+    }
+  }
+
+  handleActivePageChange_(unusedPageIndex, unusedPageId) {
+    this.interactions_++;
+    console.log(this.interactions_);
+    if (this.interactions_ >= INTERACTIONS_BEFORE_AD_SHOWN) {
+      this.placeNextAd_();
+      this.interactions_ = 0;
+    }
+  }
+
+  placeNextAd_() {
+    const nextAdElement = this.adElements[this.adIdPointer_];
+    const nextAdId = nextAdElement.id;
+    if (!nextAdId) {
+      return;
+    }
+
+    const activePage = this.ampStory_.getActivePage();
+    // make these public
+    const nextPageId = activePage.getNextPageId_();
+    const nexPageEl = this.ampStory_getPageById_(nextPageId);
+    const activePageEl = activePage.element;
+    const activePageElId = activePageEl.id;
+
+    activePageEl.setAttribute('advance-to', nextAdId);
+    nextAdElement.setAttribute('return-to', activePageElId);
+    nextAdElement.setAttribute('advance-to', nextPageId);
+    nexPageEl.setAttribute('return-to', nextAdId);
+
+    this.adIdPointer_++;
+  }
 }
 
-AMP.registerElement('amp-story-auto-ads', AmpStoryAutoAds);
+AMP.registerElement(TAG, AmpStoryAutoAds);
 
 

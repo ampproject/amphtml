@@ -24,6 +24,7 @@
  * </amp-story>
  * </code>
  */
+import './amp-story-auto-ads';
 import './amp-story-grid-layer';
 import './amp-story-page';
 import {ActionTrust} from '../../../src/action-trust';
@@ -311,6 +312,14 @@ export class AmpStory extends AMP.BaseElement {
         () => this.variableService_);
   }
 
+
+  getNavigationState() {
+    return this.navigationState_;
+  }
+
+  getActivePage() {
+    return this.activePage_;
+  }
 
   /**
    * Builds the system layer DOM.  This is dependent on the pages_ array having

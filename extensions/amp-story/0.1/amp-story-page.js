@@ -525,6 +525,10 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   getPreviousPageId_() {
+    if (this.element.hasAttribute('return-to')) {
+      return this.element.getAttribute('return-to');
+    }
+
     const previousElement = this.element.previousElementSibling;
     if (previousElement && previousElement.tagName.toLowerCase() === TAG) {
       return previousElement.id;
