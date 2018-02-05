@@ -19,29 +19,29 @@
 checkMinVersion();
 
 const $$ = require('gulp-load-plugins')();
+const applyConfig = require('./build-system/tasks/prepend-global/index.js').applyConfig;
 const babel = require('babelify');
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
-const closureCompile = require('./build-system/tasks/compile').closureCompile;
 const cleanupBuildDir = require('./build-system/tasks/compile').cleanupBuildDir;
-const jsifyCssAsync = require('./build-system/tasks/jsify-css').jsifyCssAsync;
-const applyConfig = require('./build-system/tasks/prepend-global/index.js').applyConfig;
-const removeConfig = require('./build-system/tasks/prepend-global/index.js').removeConfig;
-const serve = require('./build-system/tasks/serve.js').serve;
+const closureCompile = require('./build-system/tasks/compile').closureCompile;
+const colors = require('ansi-colors');
+const createCtrlcHandler = require('./build-system/ctrlcHandler').createCtrlcHandler;
+const exitCtrlcHandler = require('./build-system/ctrlcHandler').exitCtrlcHandler;
 const fs = require('fs-extra');
 const gulp = $$.help(require('gulp'));
+const internalRuntimeToken = require('./build-system/internal-version').TOKEN;
+const internalRuntimeVersion = require('./build-system/internal-version').VERSION;
+const jsifyCssAsync = require('./build-system/tasks/jsify-css').jsifyCssAsync;
 const lazypipe = require('lazypipe');
+const log = require('fancy-log');
 const minimatch = require('minimatch');
 const minimist = require('minimist');
+const removeConfig = require('./build-system/tasks/prepend-global/index.js').removeConfig;
+const serve = require('./build-system/tasks/serve.js').serve;
 const source = require('vinyl-source-stream');
 const touch = require('touch');
 const watchify = require('watchify');
-const internalRuntimeVersion = require('./build-system/internal-version').VERSION;
-const internalRuntimeToken = require('./build-system/internal-version').TOKEN;
-const colors = require('ansi-colors');
-const log = require('fancy-log');
-const createCtrlcHandler = require('./build-system/ctrlcHandler').createCtrlcHandler;
-const exitCtrlcHandler = require('./build-system/ctrlcHandler').exitCtrlcHandler;
 const argv = minimist(
     process.argv.slice(2), {boolean: ['strictBabelTransform']});
 
@@ -625,7 +625,7 @@ function parseExtensionFlags() {
         green('to build just the extensions needed to load ') +
         cyan('article.amp.html') + green('.');
     if (argv.extensions) {
-      if (typeof(argv.extensions) !== 'string') {
+      if (typeof (argv.extensions) !== 'string') {
         log(red('ERROR:'), 'Missing list of extensions.');
         log(noExtensionsMessage);
         log(extensionsMessage);
@@ -761,12 +761,12 @@ function copyAliasExtensions() {
   if (argv.noextensions) {
     return;
   }
-  var extensionsToBuild = [];
+  let extensionsToBuild = [];
   if (!!argv.extensions) {
     extensionsToBuild = argv.extensions.split(',');
   }
 
-  for (var key in extensionAliasFilePath) {
+  for (const key in extensionAliasFilePath) {
     if (extensionsToBuild.length > 0 &&
         extensionsToBuild.indexOf(extensionAliasFilePath[key]['name']) == -1) {
       continue;
@@ -1423,7 +1423,7 @@ gulp.task('dist', 'Build production binaries',
             'Great for profiling and debugging production code.',
         fortesting: '  Compiles production binaries for local testing',
         config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-      }
+      },
     });
 gulp.task('watch', 'Watches for changes in files, re-builds when detected',
     ['update-packages', 'patch-web-animations'], watch, {
