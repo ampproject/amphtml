@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {AccessClientAdapter} from '../amp-access-client';
 import {AccessOtherAdapter} from '../amp-access-other';
 import {AccessServerAdapter} from '../amp-access-server';
 import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
-import {AccessVendorAdapter} from '../amp-access-vendor';
 import {AccessService} from '../amp-access';
+import {AccessVendorAdapter} from '../amp-access-vendor';
 import {AmpEvents} from '../../../../src/amp-events';
 import {Observable} from '../../../../src/observable';
 import {cidServiceForDocForTesting} from
@@ -27,7 +28,6 @@ import {cidServiceForDocForTesting} from
 import {installPerformanceService} from
   '../../../../src/service/performance-impl';
 import {toggleExperiment} from '../../../../src/experiments';
-import * as sinon from 'sinon';
 
 
 describes.fakeWin('AccessService', {

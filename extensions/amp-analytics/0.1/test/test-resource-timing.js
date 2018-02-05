@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {serializeResourceTiming} from '../resource-timing';
 import {installVariableService} from '../variables';
+import {serializeResourceTiming} from '../resource-timing';
 
 /**
  * Returns a new, pre-filled resourceTimingSpec.

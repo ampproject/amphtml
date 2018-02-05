@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 
 class AmpVimeo extends AMP.BaseElement {
 

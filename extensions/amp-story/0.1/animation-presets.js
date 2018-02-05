@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {px} from '../../../src/style';
 import {StoryAnimationPresetDef} from './animation-types';
+import {px} from '../../../src/style';
 
 
 /** @const {!Object<string, !StoryAnimationPresetDef>} */

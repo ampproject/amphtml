@@ -23,19 +23,19 @@
  */
 
 import {
+  EXPERIMENT_ATTRIBUTE,
   isGoogleAdsA4AValidEnvironment,
   mergeExperimentIds,
-  EXPERIMENT_ATTRIBUTE,
 } from './utils';
 import {
-  /* eslint no-unused-vars: 0 */ ExperimentInfo,
-  isExperimentOn,
+  ExperimentInfo, // eslint-disable-line no-unused-vars
   forceExperimentBranch,
   getExperimentBranch,
+  isExperimentOn,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
-import {dev} from '../../../src/log';
 import {Services} from '../../../src/services';
+import {dev} from '../../../src/log';
 import {parseQueryString} from '../../../src/url';
 
 /** @typedef {{

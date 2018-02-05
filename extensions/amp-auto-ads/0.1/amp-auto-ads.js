@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {AdTracker, getExistingAds} from './ad-tracker';
 import {AdStrategy} from './ad-strategy';
+import {AdTracker, getExistingAds} from './ad-tracker';
 import {AnchorAdStrategy} from './anchor-ad-strategy';
-import {user} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {getAdNetworkConfig} from './ad-network-config';
-import {isExperimentOn} from '../../../src/experiments';
 import {getAttributesFromConfigObj} from './attributes';
 import {getPlacementsFromConfigObj} from './placement';
+import {isExperimentOn} from '../../../src/experiments';
+import {user} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-auto-ads';

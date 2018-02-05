@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
+import * as st from '../../../src/style';
+import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
-import {bezierCurve} from '../../../src/curve';
 import {CSS} from '../../../build/amp-lightbox-viewer-0.1.css';
+import {CommonSignals} from '../../../src/common-signals';
 import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {clamp} from '../../../src/utils/math';
-import {Services} from '../../../src/services';
-import {isExperimentOn} from '../../../src/experiments';
-import {isLoaded} from '../../../src/event-helper';
 import {Layout} from '../../../src/layout';
-import {user, dev} from '../../../src/log';
-import {toggle, setStyle} from '../../../src/style';
-import {getData, listen} from '../../../src/event-helper';
 import {
   LightboxManager,
   LightboxedCarouselMetadataDef,
 } from './service/lightbox-manager-impl';
-import {layoutRectFromDomRect} from '../../../src/layout-rect';
-import {closest, elementByTag, scopedQuerySelector} from '../../../src/dom';
-import * as st from '../../../src/style';
-import * as tr from '../../../src/transition';
+import {Services} from '../../../src/services';
 import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
-import {CommonSignals} from '../../../src/common-signals';
+import {bezierCurve} from '../../../src/curve';
+import {clamp} from '../../../src/utils/math';
+import {closest, elementByTag, scopedQuerySelector} from '../../../src/dom';
+import {dev, user} from '../../../src/log';
+import {getData, listen} from '../../../src/event-helper';
+import {isExperimentOn} from '../../../src/experiments';
+import {isLoaded} from '../../../src/event-helper';
+import {layoutRectFromDomRect} from '../../../src/layout-rect';
+import {setStyle, toggle} from '../../../src/style';
 
 
 /** @const */

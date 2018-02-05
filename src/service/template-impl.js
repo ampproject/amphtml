@@ -15,8 +15,8 @@
  */
 
 import {childElementByTag, scopedQuerySelector} from '../dom';
-import {getService, registerServiceBuilder} from '../service';
 import {dev, user} from '../log';
+import {getService, registerServiceBuilder} from '../service';
 
 
 /**
