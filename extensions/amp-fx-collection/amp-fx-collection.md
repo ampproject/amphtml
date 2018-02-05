@@ -21,7 +21,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Provides a collection of preset visual effects such as parallax</td>
+    <td>Provides a collection of preset visual effects, such as parallax.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -39,14 +39,14 @@ limitations under the License.
 
 ## Overview
 
-`amp-fx-collection` extension provides a collection of preset visual effects
+The `amp-fx-collection` extension provides a collection of preset visual effects,
 such as parallax that can be easily enabled on any element via attributes.
 
-Currently only `parallax` is supported. More effects such as `fade-in`, `slide-in`
-and more are planned to be supported soon.
+Currently, only the `parallax` effect is supported. More effects such as `fade-in`, `slide-in`
+are planned to be supported soon.
 
 ### parallax
-Parallax effect allows an element to move as if it is nearer or farther relative
+The `parallax` effect allows an element to move as if it is nearer or farther relative
 to the foreground of the page content. As the user scrolls the page, the element
 scrolls faster or slower depending on the value assigned to the
 `data-parallax-factor` attribute.
@@ -60,9 +60,9 @@ Example:
 
 #### Attributes
 
-**data-parallax-factor**
+##### data-parallax-factor
 
-a decimal value that controls how much faster or slower the element would scroll
+Specifies a decimal value that controls how much faster or slower the element scrolls
 relative to the scrolling speed:
 
 - A value greater than 1 scrolls the element upward (element scrolls faster) when the user scrolls down the page.
