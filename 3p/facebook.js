@@ -29,8 +29,8 @@ import {user} from '../src/log';
  * @param {!Window} global
  * @param {function(!Object)} cb
  */
-function getFacebookSdk(global, cb) {
-  loadScript(global, 'https://connect.facebook.net/' + dashToUnderline(window.navigator.language) + '/sdk.js', () => {
+function getFacebookSdk(global, cb, locale) {
+  loadScript(global, 'https://connect.facebook.net/' + locale + '/sdk.js', () => {
     cb(global.FB);
   });
 }
@@ -126,5 +126,5 @@ export function facebook(global, data) {
     });
 
     FB.init({xfbml: true, version: 'v2.5'});
-  });
+  }, data.locale ? data.locale : dashToUnderline(window.navigator.language));
 }
