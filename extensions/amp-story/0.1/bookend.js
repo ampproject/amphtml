@@ -56,8 +56,8 @@ const HIDDEN_CLASSNAME = 'i-amphtml-hidden';
 const ROOT_TEMPLATE = {
   tag: 'section',
   attrs: dict({
-      'class': `i-amphtml-story-bookend i-amphtml-story-system-reset ` +
-               `${HIDDEN_CLASSNAME}`}),
+    'class': 'i-amphtml-story-bookend i-amphtml-story-system-reset ' +
+        HIDDEN_CLASSNAME}),
   children: [
     // Overflow container that gets pushed to the bottom when content height is
     // smaller than viewport.
