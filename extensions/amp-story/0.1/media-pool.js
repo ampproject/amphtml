@@ -103,14 +103,13 @@ function blessMediaElement(mediaEl) {
       mediaEl.muted = true;
     }
 
-    console.log('dispatch bless success');
-    dispatch(mediaEl, 'bless', false);
     mediaEl[ELEMENT_BLESSED_PROPERTY_NAME] = true;
   }).catch(reason => {
-    console.log('dispatch bless fail');
-    dispatch(mediaEl, 'bless', false);
     dev().expectedError('AMP-STORY', 'Blessing media element failed:',
         reason, mediaEl);
+  }).then(() => {
+    console.log('dispatch bless');
+    dispatch(mediaEl, 'bless', false);
   });
 }
 
@@ -236,13 +235,6 @@ function executeNextMediaElementTask(mediaEl) {
   const task = ELEMENT_TASKS[taskName] || NOOP_ELEMENT_TASK;
 
   task(mediaEl)
-      .then(() => {
-        console.log('dispatch ' + taskName + ' in execute success');
-        dispatch(mediaEl, taskName, true);
-      }, () => {
-        console.log('dispatch ' + taskName + ' in execute failure');
-        dispatch(mediaEl, taskName, true);
-      })
       .catch(reason => dev().error('AMP-STORY', reason))
       .then(() => {
         queue.shift();
@@ -263,6 +255,7 @@ function enqueueMediaElementTask(mediaEl, taskName) {
 
   const queue = mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME];
   queue.push(taskName);
+  console.log('enqueue ' + taskName, mediaEl);
   console.log('element task queue contains ' + JSON.stringify(queue), mediaEl);
 
   if (queue.length === 1) {
