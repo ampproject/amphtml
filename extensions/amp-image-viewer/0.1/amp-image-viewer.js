@@ -120,7 +120,7 @@ export class AmpImageViewer extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.vsync_ = this.getVsync();
-    this.element.classList.add('i-amphtml-image-lightbox-viewer');
+    this.element.classList.add('i-amphtml-image-viewer');
     const children = this.getRealChildren();
     user().assert(
         children.length == 1 && children[0].tagName == 'AMP-IMG',
