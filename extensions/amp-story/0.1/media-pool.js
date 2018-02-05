@@ -334,7 +334,6 @@ export class MediaPool {
     this.mediaFactory_ = {
       [MediaType.AUDIO]: () => {
         const audioEl = this.win_.document.createElement('audio');
-        audioEl.setAttribute('src', BLANK_AUDIO_SRC);
         audioEl.setAttribute('muted', '');
         audioEl.muted = true;
         audioEl.classList.add('i-amphtml-pool-media');
@@ -343,7 +342,6 @@ export class MediaPool {
       },
       [MediaType.VIDEO]: () => {
         const videoEl = this.win_.document.createElement('video');
-        videoEl.setAttribute('src', BLANK_VIDEO_SRC);
         videoEl.setAttribute('muted', '');
         videoEl.muted = true;
         videoEl.setAttribute('playsinline', '');
@@ -375,12 +373,30 @@ export class MediaPool {
       for (let i = 0; i < count; i++) {
         const mediaEl = this.mediaFactory_[type].call(this);
         mediaEl.setAttribute('pool-element', elId++);
+        mediaEl.src = this.getDefaultSource_(type, mediaEl);
         // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE is
         // returned.  If so, we should adjust the pool size/distribution between
         // media types.
         this.unallocated[type].push(mediaEl);
       }
     });
+  }
+
+
+  /**
+   * @param {!MediaType} mediaType The media type whose source should be
+   *     retrieved.
+   * @return {string} The default source for the specified type of media.
+   */
+  getDefaultSource_(mediaType) {
+    switch (mediaType) {
+      case MediaType.AUDIO:
+        return BLANK_AUDIO_SRC;
+      case MediaType.VIDEO:
+        return BLANK_VIDEO_SRC;
+      default:
+        dev().error('AMP-STORY', `No default media for type ${mediaType}.`);
+    }
   }
 
 
@@ -608,6 +624,18 @@ export class MediaPool {
 
 
   /**
+   * @param {!HTMLMediaElement} poolMediaEl The element whose source should be
+   *     reset.
+   */
+  resetPoolMediaElementSource_(poolMediaEl) {
+    console.log('resetting source for element', poolMediaEl);
+    const mediaType = this.getMediaType_(poolMediaEl);
+    Sources.removeFrom(poolMediaEl);
+    poolMediaEl.src = this.getDefaultSource_(mediaType);
+  }
+
+
+  /**
    * Removes a pool media element from the DOM and replaces it with the video
    * that it originally replaced.
    * @param {!HTMLMediaElement} poolMediaEl The pool media element to remove
@@ -623,7 +651,7 @@ export class MediaPool {
     this.copyAttributes_(poolMediaEl, oldDomMediaEl);
     poolMediaEl.parentElement.replaceChild(oldDomMediaEl, poolMediaEl);
     poolMediaEl.removeAttribute(REPLACED_MEDIA_ATTRIBUTE);
-    Sources.removeFrom(poolMediaEl);
+    this.resetPoolMediaElementSource_(poolMediaEl);
   }
 
 
