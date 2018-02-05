@@ -606,7 +606,8 @@ function printConfigHelp(command) {
 }
 
 /**
- * Prints a helpful message that lets the developer know how to build
+ * Parse the --extensions or the --noextensions flag and
+ * prints a helpful message that lets the developer know how to build
  * a list of extensions or without any extensions.
  */
 function parseExtensionFlags() {
