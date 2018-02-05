@@ -116,7 +116,6 @@ module.exports = {
     // TODO: temporary, remove when validator is up to date
     '!validator/**/*.*',
     '!eslint-rules/**/*.*',
-    '!gulpfile.js',
     '!karma.conf.js',
     '!**/local-amp-chrome-extension/background.js',
     '!extensions/amp-access/0.1/access-expr-impl.js',
@@ -146,7 +145,6 @@ module.exports = {
     '!build-system/tasks/presubmit-checks.js',
     '!build/polyfills.js',
     '!build/polyfills/*.js',
-    '!gulpfile.js',
     '!third_party/**/*.*',
     '!validator/chromeextension/*.*',
     // Files in this testdata dir are machine-generated and are not part
