@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {mapRange, clamp} from '../../../src/utils/math';
+import {clamp, mapRange} from '../../../src/utils/math';
 
 describes.sandboxed('utils/math', {}, () => {
 

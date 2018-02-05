@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
+import {Observable} from '../../src/observable';
 import {
   createCustomEvent,
   isLoaded,
@@ -26,8 +28,6 @@ import {
   detectEvtListenerOptsSupport,
   resetEvtListenerOptsSupportForTesting,
 } from '../../src/event-helper-listen';
-import {Observable} from '../../src/observable';
-import * as sinon from 'sinon';
 
 describe('EventHelper', () => {
 

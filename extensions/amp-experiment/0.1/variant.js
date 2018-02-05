@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {isObject} from '../../../src/types';
-import {dev, user} from '../../../src/log';
 import {Services} from '../../../src/services';
+import {dev, user} from '../../../src/log';
+import {isObject} from '../../../src/types';
 
 const ATTR_PREFIX = 'amp-x-';
 const nameValidator = /^[\w-]+$/;

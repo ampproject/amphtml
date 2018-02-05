@@ -15,10 +15,10 @@
  */
 
 import {
-  base64UrlDecodeToBytes,
   base64DecodeToBytes,
-  base64UrlEncodeFromBytes,
   base64EncodeFromBytes,
+  base64UrlDecodeToBytes,
+  base64UrlEncodeFromBytes,
 } from '../../../src/utils/base64';
 import {
   stringToBytes,

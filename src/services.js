@@ -15,12 +15,12 @@
  */
 
 import {
+  getAmpdoc,
+  getExistingServiceForDocInEmbedScope,
+  getExistingServiceOrNull,
   getService,
   getServiceForDoc,
   getServicePromiseForDoc,
-  getExistingServiceOrNull,
-  getExistingServiceForDocInEmbedScope,
-  getAmpdoc,
 } from './service';
 import {
   getElementServiceForDoc,

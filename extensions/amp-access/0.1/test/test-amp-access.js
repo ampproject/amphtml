@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {AccessClientAdapter} from '../amp-access-client';
 import {AccessService} from '../amp-access';
 import {AmpEvents} from '../../../../src/amp-events';
@@ -23,7 +24,6 @@ import {cidServiceForDocForTesting} from
 import {installPerformanceService} from
   '../../../../src/service/performance-impl';
 import {toggleExperiment} from '../../../../src/experiments';
-import * as sinon from 'sinon';
 
 
 describes.fakeWin('AccessService', {

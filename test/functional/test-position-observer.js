@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
 import {
   PositionObserver,
 } from '../../src/service/position-observer/position-observer-impl';
 import {
   PositionObserverFidelity,
 } from '../../src/service/position-observer/position-observer-worker';
-import {layoutRectLtwh} from '../../src/layout-rect';
 import {Services} from '../../src/services';
-import {setStyles} from '../../src/style';
+import {layoutRectLtwh} from '../../src/layout-rect';
 import {macroTask} from '../../testing/yield';
-import * as lolex from 'lolex';
+import {setStyles} from '../../src/style';
 
 describes.realWin('PositionObserver', {amp: 1}, env => {
   let win;

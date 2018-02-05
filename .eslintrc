@@ -1,6 +1,10 @@
 {
   "parser": "babel-eslint",
-  "plugins": ["eslint-plugin-google-camelcase"],
+  "plugins": [
+    "eslint-plugin-google-camelcase",
+    "sort-imports-es6-autofix",
+    "sort-requires"
+  ],
   "env": {
     "es6": true,
     "browser": true
@@ -45,7 +49,7 @@
     "max-len": [2, 80, 4, {
       "ignoreComments": true,
       "ignoreUrls": true,
-      "ignorePattern": "^import.*';$"
+      "ignorePattern": "^import.*';|}\\ from.*;|.*require\\(.*;$"
     }],
     "no-alert": 2,
     "no-array-destructuring": 2,
@@ -92,7 +96,13 @@
     "quotes": [2, "single", "avoid-escape"],
     "radix": 2,
     "semi": 2,
-    "keyword-spacing": ["error", { "before": true, "after": true }],
+    "keyword-spacing": [2, { "before": true, "after": true }],
+    "sort-imports-es6-autofix/sort-imports-es6": [2, {
+      "ignoreCase": false,
+      "ignoreMemberSort": false,
+      "memberSyntaxSortOrder": ["none", "all", "multiple", "single"]
+    }],
+    "sort-requires/sort-requires": 2,
     "space-before-blocks": 2,
     "space-before-function-paren": [2, "never"],
     "space-in-parens": 2,

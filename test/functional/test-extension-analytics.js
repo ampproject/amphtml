@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
+import {BaseElement} from '../../src/base-element';
+import {
+  CustomEventReporterBuilder,
+  insertAnalyticsElement,
+  useAnalyticsInSandbox,
+} from '../../src/extension-analytics';
+import {Services} from '../../src/services';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../../src/service';
-import {
-  insertAnalyticsElement,
-  useAnalyticsInSandbox,
-  CustomEventReporterBuilder,
-} from '../../src/extension-analytics';
-import {registerElement} from '../../src/service/custom-element-registry';
-import {Services} from '../../src/services';
-import {BaseElement} from '../../src/base-element';
 import {macroTask} from '../../testing/yield';
-import * as sinon from 'sinon';
+import {registerElement} from '../../src/service/custom-element-registry';
 
 
 describes.realWin('extension-analytics', {

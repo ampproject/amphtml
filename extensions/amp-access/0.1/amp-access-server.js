@@ -15,12 +15,12 @@
  */
 
 import {AccessClientAdapter} from './amp-access-client';
-import {isExperimentOn} from '../../../src/experiments';
-import {isProxyOrigin, removeFragment} from '../../../src/url';
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {isExperimentOn} from '../../../src/experiments';
+import {isProxyOrigin, removeFragment} from '../../../src/url';
 import {parseJson} from '../../../src/json';
-import {Services} from '../../../src/services';
 
 /** @const {string} */
 const TAG = 'amp-access-server';

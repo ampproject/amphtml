@@ -21,6 +21,8 @@ import {Services} from '../../../src/services';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {getSourceOrigin} from '../../../src/url';
 import {cancellation} from '../../../src/error';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {evaluateAccessExpr} from './access-expr';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {installStylesForDoc} from '../../../src/style-installer';
@@ -29,6 +31,7 @@ import {listenOnce} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {startsWith} from '../../../src/string';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 
 /** @const */

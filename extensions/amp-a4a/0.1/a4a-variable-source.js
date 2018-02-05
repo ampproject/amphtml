@@ -18,8 +18,8 @@ import {Services} from '../../../src/services';
 import {
   VariableSource,
   getNavigationData,
-  getTimingDataSync,
   getTimingDataAsync,
+  getTimingDataSync,
 } from '../../../src/service/variable-source';
 import {user} from '../../../src/log';
 

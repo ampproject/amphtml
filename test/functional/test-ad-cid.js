@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {adConfig} from '../../ads/_config';
+import * as lolex from 'lolex';
 import {Services} from '../../src/services';
+import {adConfig} from '../../ads/_config';
 import {
   cidServiceForDocForTesting,
 } from '../../src/service/cid-impl';
 import {getAdCid} from '../../src/ad-cid';
-import * as lolex from 'lolex';
 
 describes.realWin('ad-cid', {amp: true}, env => {
   const cidScope = 'cid-in-ads-test';

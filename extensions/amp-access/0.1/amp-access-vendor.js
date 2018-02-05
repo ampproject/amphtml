@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../../../src/log';
 import './access-vendor';
+import {dev, user} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-access-vendor';
