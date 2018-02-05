@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../amp-events';
+import {Layout} from '../layout';
+import {computedStyle, toggle} from '../style';
+import {dev} from '../log';
+import {isExperimentOn} from '../experiments';
 import {
   layoutRectLtwh,
   layoutRectsOverlap,
   moveLayoutRect,
 } from '../layout-rect';
-import {dev} from '../log';
 import {startsWith} from '../string';
-import {toggle, computedStyle} from '../style';
-import {AmpEvents} from '../amp-events';
 import {toWin} from '../types';
-import {Layout} from '../layout';
-import {isExperimentOn} from '../experiments';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';

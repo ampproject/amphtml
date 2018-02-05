@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import {Services} from './services';
 import {
   closestByTag,
 } from './dom';
 import {dev} from './log';
-import {Services} from './services';
 
 /** @private @const {string} */
 const ORIG_HREF_ATTRIBUTE = 'data-a4a-orig-href';

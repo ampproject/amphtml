@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl} from '../../../src/url';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
+import {assertHttpsUrl} from '../../../src/url';
 import {user} from '../../../src/log';
 
 

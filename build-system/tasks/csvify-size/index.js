@@ -19,9 +19,9 @@
 const BBPromise = require('bluebird');
 const childProcess = require('child_process');
 const exec = BBPromise.promisify(childProcess.exec);
+const colors = require('ansi-colors');
 const fs = BBPromise.promisifyAll(require('fs'));
 const gulp = require('gulp-help')(require('gulp'));
-const colors = require('ansi-colors');
 const log = require('fancy-log');
 
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, computeInMasterFrame, validateData} from '../3p/3p';
+import {computeInMasterFrame, loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global

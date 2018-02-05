@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
-import {getMode} from '../../../../src/mode';
-import {removeFragment, serializeQueryString} from '../../../../src/url';
-import {isUserErrorMessage} from '../../../../src/log';
 import * as lolex from 'lolex';
 import * as sinon from 'sinon';
+import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
+import {getMode} from '../../../../src/mode';
+import {isUserErrorMessage} from '../../../../src/log';
+import {removeFragment, serializeQueryString} from '../../../../src/url';
 
 
 describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {

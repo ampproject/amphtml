@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+import {
+  KeyframesDef,
+  KeyframesOrFilterFnDef,
+  StoryAnimationDef,
+  StoryAnimationDimsDef,
+  StoryAnimationPresetDef,
+} from './animation-types';
 import {PRESETS} from './animation-presets';
 import {Services} from '../../../src/services';
 import {
@@ -23,13 +30,6 @@ import {dev, user} from '../../../src/log';
 import {map, omit} from '../../../src/utils/object';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
-import {
-  StoryAnimationDef,
-  StoryAnimationDimsDef,
-  KeyframesOrFilterFnDef,
-  KeyframesDef,
-  StoryAnimationPresetDef,
-} from './animation-types';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 
 /** const {string} */

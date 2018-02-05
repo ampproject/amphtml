@@ -16,8 +16,8 @@
 
 import {Observable} from '../observable';
 import {getVendorJsPropertyName} from '../style';
-import {waitForChild} from '../dom';
 import {registerServiceBuilder} from '../service';
+import {waitForChild} from '../dom';
 
 /**
  */

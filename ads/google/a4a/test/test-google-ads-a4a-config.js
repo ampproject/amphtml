@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {Services} from '../../../../src/services';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {
   googleAdsIsA4AEnabled,
   isInExperiment,
   isInManualExperiment,
 } from '../traffic-experiments';
-import {toggleExperiment} from '../../../../src/experiments';
-import {installPlatformService} from '../../../../src/service/platform-impl';
-import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
-import {resetServiceForTesting} from '../../../../src/service';
+import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {
   installDocumentStateService,
 } from '../../../../src/service/document-state';
-import * as sinon from 'sinon';
+import {installPlatformService} from '../../../../src/service/platform-impl';
+import {installViewerServiceForDoc} from '../../../../src/service/viewer-impl';
+import {resetServiceForTesting} from '../../../../src/service';
+import {toggleExperiment} from '../../../../src/experiments';
 
 const EXP_ID = 'EXP_ID';
 

@@ -15,13 +15,13 @@
  */
 'use strict';
 
-const test = require('ava');
-const m = require('./');
 const BBPromise = require('bluebird');
-const fs = BBPromise.promisifyAll(require('fs-extra'));
-const exec = require('child_process').execSync;
 const colors = require('ansi-colors');
+const exec = require('child_process').execSync;
+const fs = BBPromise.promisifyAll(require('fs-extra'));
 const log = require('fancy-log');
+const m = require('./');
+const test = require('ava');
 
 test('sync - build out correct CODEOWNERS', t => {
   const owners = {
