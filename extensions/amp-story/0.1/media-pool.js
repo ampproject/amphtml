@@ -237,7 +237,9 @@ function executeNextMediaElementTask(mediaEl) {
   task(mediaEl)
       .catch(reason => dev().error('AMP-STORY', reason))
       .then(() => {
-        queue.shift();
+        const oldTaskName = queue.shift();
+        console.log('dequeue ' + oldTaskName, mediaEl);
+        console.log('element task queue contains ' + JSON.stringify(queue), mediaEl);
         executeNextMediaElementTask(mediaEl);
       });
 }
