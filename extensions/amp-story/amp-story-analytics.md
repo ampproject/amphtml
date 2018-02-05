@@ -22,7 +22,7 @@ limitations under the License.
 
 See [amp-analytics.md](../amp-analytics/amp-analytics.md) for details on *amp-analytics* configuration.
 
-### Visibile trigger (`"on": "story-page-visible"`)
+### Visible trigger (`"on": "story-page-visible"`)
 
 The `story-page-visible` event is issued when a story page becomes visible.
 
