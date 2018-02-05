@@ -24,21 +24,38 @@ import {getMode} from '../../../src/mode';
 export let batchSegmentDef;
 
 /**
- * TODO: Add documentation!
+ * Please register your batch plugin function below.
+ * Please keep the object in alphabetic order.
+ * Note: extraUrlParams passed in are not encoded. Please make sure to proper
+ * encode segments and make sure the final output url is valid.
+ */
+export const BatchingPluginFunctions = {
+  '_ping_': ping,
+};
+
+
+/**
+ * Please add your batch plugin function below in alphabetic order.
+ * All batch plugin function should accept input of a string, an array of batchSegment
+ * Then return a string.
  * Note: extraUrlParams passed in are not encoded. Please make sure to proper
  * encode segments and make sure the final output url is valid.
  */
 
-export const BatchingPluginFunctions = {
-  // TODO: Remove _ping_ from production code
-  '_ping_': ping,
-};
+// Below is a function prototype for easy copy
+// /**
+//  * @param {string} baseUrl
+//  * @param {Array<!batchSegmentDef>} batchSegments
+//  * @return {string}
+//  */
+// function ping(baseUrl, batchSegments) {}
 
 /**
- * @param {string} unusedBaseUrl
- * @param {Array<!batchSegmentDef>} unusedSegments
+ * @param {string} unusedBaseUrlForTesting
+ * @param {Array<!batchSegmentDef>} unusedBatchSegmentsForTesting
+ * @return {string}
  */
-function ping(unusedBaseUrl, unusedSegments) {
+function ping(unusedBaseUrlForTesting, unusedBatchSegmentsForTesting) {
   if (getMode().localDev || getMode().test) {
     return 'testFinalUrl';
   }
