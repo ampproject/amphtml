@@ -123,6 +123,20 @@ amp-story[standalone]:fullscreen {
   background-color: rgba(0, 0, 0, 0.2) !important;
 }
 
+.i-amphtml-story-system-reset,
+.i-amphtml-story-system-reset * {
+  border: none !important;
+  color: initial !important;
+  font-family: 'Roboto', sans-serif !important;
+  font-size: initial !important;
+  font-weight: initial !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
+  width: auto !important;
+}
+
 .i-amphtml-story-system-layer .i-amphtml-story-button {
   float: left !important;
 }
@@ -558,6 +572,7 @@ amp-story-grid-layer * {
   display: block !important;
   text-transform: capitalize !important;
   font-family: 'Roboto', sans-serif !important;
+  color: #fff !important;
   font-weight: 400 !important;
   line-height: 10px !important;
   font-size: 10px !important;
