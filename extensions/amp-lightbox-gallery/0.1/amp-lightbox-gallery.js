@@ -17,7 +17,7 @@
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
-import {CSS} from '../../../build/amp-lightbox-viewer-0.1.css';
+import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
@@ -40,8 +40,8 @@ import {setStyle, toggle} from '../../../src/style';
 
 
 /** @const */
-const TAG = 'amp-lightbox-viewer';
-const DEFAULT_VIEWER_ID = 'amp-lightbox-viewer';
+const TAG = 'amp-lightbox-gallery';
+const DEFAULT_GALLERY_ID = 'amp-lightbox-gallery';
 
 /**
  * Set of namespaces that indicate the lightbox controls mode.
@@ -86,7 +86,7 @@ let LightboxElementMetadataDef_;
 /**
  * @private visible for testing.
  */
-export class AmpLightboxViewer extends AMP.BaseElement {
+export class AmpLightboxGallery extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -579,7 +579,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
-   * Closes the lightbox viewer on a tiny upwards swipe.
+   * Closes the lightbox gallery on a tiny upwards swipe.
    * @param {number} deltaY
    * @private
    */
@@ -590,14 +590,14 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
-   * Opens the lightbox-viewer with either the invocation source or
+   * Opens the lightbox-gallery with either the invocation source or
    * the element referenced by the `id` argument.
    * Examples:
    *  // Opens the element tapped.
-   *  on="tap:myLightboxViewer'
+   *  on="tap:myLightboxGallery'
    *
    *  // Opens the element referenced by elementId
-   *  on="tap:myLightboxViewer.open(id='<elementId>')
+   *  on="tap:myLightboxGallery.open(id='<elementId>')
    * @override
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    */
@@ -607,13 +607,13 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       const targetId = invocation.args['id'];
       target = this.getAmpDoc().getElementById(targetId);
       user().assert(target,
-          'amp-lightbox-viewer.open: element with id: %s not found', targetId);
+          'amp-lightbox-gallery.open: element with id: %s not found', targetId);
     }
     this.open_(dev().assertElement(target));
   }
 
   /**
-   * Opens the lightbox-viewer and displays the given element inside.
+   * Opens the lightbox-gallery and displays the given element inside.
    * @param {!Element} element Element to lightbox.
    * @return {!Promise}
    * @private
@@ -924,7 +924,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
-   * Closes the lightbox-viewer
+   * Closes the lightbox-gallery
    * @return {!Promise}
    * @private
    */
@@ -1096,30 +1096,30 @@ export function installLightboxManager(win) {
 }
 
 /**
- * Tries to find an existing amp-lightbox-viewer, if there is none, it adds a
+ * Tries to find an existing amp-lightbox-gallery, if there is none, it adds a
  * default one.
  * @param {!Window} win
  * @return {!Promise}
  */
-function installLightboxViewer(win) {
+function installLightboxGallery(win) {
   const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
   // TODO (#12859): make this work for more than singleDoc mode
   return ampdoc.whenBodyAvailable().then(body => {
-    const existingViewer = elementByTag(ampdoc.getRootNode(), TAG);
-    if (!existingViewer) {
+    const existingGallery = elementByTag(ampdoc.getRootNode(), TAG);
+    if (!existingGallery) {
       const matches = ampdoc.getRootNode().querySelectorAll('[lightbox]');
       if (matches.length > 0) {
-        const viewer = ampdoc.getRootNode().createElement(TAG);
-        viewer.setAttribute('layout', 'nodisplay');
-        viewer.setAttribute('id', DEFAULT_VIEWER_ID);
-        body.appendChild(viewer);
+        const gallery = ampdoc.getRootNode().createElement(TAG);
+        gallery.setAttribute('layout', 'nodisplay');
+        gallery.setAttribute('id', DEFAULT_GALLERY_ID);
+        body.appendChild(gallery);
       }
     }
   });
 }
 
 AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(TAG, AmpLightboxViewer, CSS);
+  AMP.registerElement(TAG, AmpLightboxGallery, CSS);
   installLightboxManager(AMP.win);
-  installLightboxViewer(AMP.win);
+  installLightboxGallery(AMP.win);
 });
