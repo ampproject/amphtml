@@ -609,7 +609,7 @@ function printConfigHelp(command) {
  * Prints a helpful message that lets the developer know how to build
  * a list of extensions or without any extensions.
  */
-function printExtensionsHelp() {
+function parseExtensionFlags() {
   if (!process.env.TRAVIS) {
     if (argv.extensions) {
       if (typeof(argv.extensions) !== 'string') {
@@ -675,7 +675,7 @@ function enableLocalTesting(targetFile) {
 function performBuild(watch) {
   process.env.NODE_ENV = 'development';
   printConfigHelp(watch ? 'gulp watch' : 'gulp build');
-  printExtensionsHelp();
+  parseExtensionFlags();
   return compileCss(watch).then(() => {
     return Promise.all([
       polyfillsForTests(),
@@ -718,7 +718,7 @@ function dist() {
   if (argv.fortesting) {
     printConfigHelp('gulp dist --fortesting')
   }
-  printExtensionsHelp();
+  parseExtensionFlags();
   return compileCss().then(() => {
     return Promise.all([
       compile(false, true, true),
