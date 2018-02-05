@@ -68,10 +68,6 @@ const ELEMENT_BLESSED_PROPERTY_NAME = '__AMP_MEDIA_IS_BLESSED__';
  *     element is complete.
  */
 function blessMediaElement(mediaEl) {
-  if (mediaEl[ELEMENT_BLESSED_PROPERTY_NAME]) {
-    return Promise.resolve();
-  }
-
   const isPaused = mediaEl.paused;
   const isMuted = mediaEl.muted;
   const currentTime = mediaEl.currentTime;
@@ -777,6 +773,10 @@ export class MediaPool {
    * @param {!HTMLMediaElement} poolMediaEl The media element to bless.
    */
   bless_(poolMediaEl) {
+    if (poolMediaEl[ELEMENT_BLESSED_PROPERTY_NAME]) {
+      return;
+    }
+
     enqueueMediaElementTask(poolMediaEl, ElementTaskName.BLESS);
   }
 
