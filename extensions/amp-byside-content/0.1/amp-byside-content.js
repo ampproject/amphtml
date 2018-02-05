@@ -32,17 +32,17 @@
  * </code>
  */
 
-import {CSS} from '../../../build/amp-byside-content-0.1.css';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
-import {setStyles} from '../../../src/style';
-import {removeElement} from '../../../src/dom';
-import {Services} from '../../../src/services';
-import {toWin} from '../../../src/types';
-import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
-import {listenFor} from '../../../src/iframe-helper';
-import {dict} from '../../../src/utils/object';
 import * as utils from './utils';
+import {CSS} from '../../../build/amp-byside-content-0.1.css';
+import {Services} from '../../../src/services';
+import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
+import {dict} from '../../../src/utils/object';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {listenFor} from '../../../src/iframe-helper';
+import {removeElement} from '../../../src/dom';
+import {setStyles} from '../../../src/style';
+import {toWin} from '../../../src/types';
+import {user} from '../../../src/log';
 
 /** @const {string} */
 const TAG_ = 'amp-byside-content';
@@ -135,7 +135,7 @@ export class AmpBysideContent extends AMP.BaseElement {
         this.element);
 
     this.label_ = user().assert(
-	this.element.getAttribute('data-label'),
+        this.element.getAttribute('data-label'),
         'The data-label attribute is required for <' + TAG_ + '> %s',
         this.element);
 
@@ -245,7 +245,7 @@ export class AmpBysideContent extends AMP.BaseElement {
         // since url replacements implementation throws an uncaught error
         win.AMP_TEST ? resolve(url) :
           Services.urlReplacementsForDoc(this.element)
-			.expandAsync(url).then(newUrl => resolve(newUrl));
+              .expandAsync(url).then(newUrl => resolve(newUrl));
       } catch (error) {
         resolve(url);
       }
