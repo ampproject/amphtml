@@ -90,15 +90,17 @@ const forbiddenTerms = {
         '  If this is cross domain, overwrite the method directly.',
   },
   'console\\.\\w+\\(': {
-    message: 'If you run against this, use console/*OK*/.log to ' +
+    message: 'If you run against this, use console/*OK*/.[log|error] to ' +
       'whitelist a legit case.',
     whitelist: [
       'build-system/pr-check.js',
       'build-system/app.js',
+      'build-system/check-package-manager.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
       'validator/engine/validator.js',
+      'gulpfile.js',
     ],
     checkInTestFolder: true,
   },
@@ -575,6 +577,7 @@ const forbiddenTerms = {
       'src/worker-error-reporting.js',
       'tools/experiments/experiments.js',
       'build-system/amp4test.js',
+      'gulpfile.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
@@ -843,6 +846,7 @@ const forbiddenTermsSrcInclusive = {
       'validator/webui/serve-standalone.go',
       'build-system/tasks/check-links.js',
       'build-system/tasks/extension-generator/index.js',
+      'gulpfile.js',
     ],
   },
   '\\<\\<\\<\\<\\<\\<': {
