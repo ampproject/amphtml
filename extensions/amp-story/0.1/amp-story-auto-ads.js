@@ -18,7 +18,9 @@ import {StateChangeType} from './navigation-state';
 import {dev, user} from '../../../src/log';
 
 /** @const */
-const INTERACTIONS_BEFORE_AD_SHOWN = 3;
+// temp before config in passed in
+const MIN_INTERVAL = 3;
+// const MAX_NUMBER = 3;
 
 /** @const */
 // const EXPERIMENT = 'amp-story-auto-ad';
@@ -42,10 +44,13 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.interactions_ = 0;
 
     /** @private {!array} */
-    this.adElements = [];
+    this.adElements_ = [];
 
     /** @private {!array} */
     this.adIdPointer_ = 0;
+    
+    /** @private {?array} */
+    this.pages = null;
   }
 
   /** @override */
@@ -60,12 +65,15 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.navigationState_.observe(this.handleStateChange_.bind(this));
     });
 
-    // move this chunk to layoutCallback
-    const mockPage = this.makeMockPage();
-    this.adElements.push(mockPage);
-    this.ampStoryElement_.appendChild(mockPage);
+    // TODO(ccordry): move this chunk to layoutCallback
+    for (let i = 0; i < 2; i++) {
+      const mockPage = this.makeMockPage();
+      this.adElements_.push(mockPage);
+      this.ampStoryElement_.appendChild(mockPage);
+    }
+    // TODO(ccordry): need to fake distance from page to force load
     // mockPage.getImpl().then(impl => impl.setDistance(0));
-    // layoutCallback
+    // end layoutCallback
 
   };
 
@@ -81,14 +89,23 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   // temporary to be replaced with real page later
   makeMockPage() {
     const ampStoryAdPage = document.createElement('amp-story-page');
-    ampStoryAdPage.id = 'i-amphtml-ad-page-1';
+    const id = this.adElements_.length + 1;
+    ampStoryAdPage.id = `i-amphtml-ad-page-${id}`;
+    ampStoryAdPage.setAttribute('advertisement', '');
     ampStoryAdPage./*OK*/innerHTML = `
       <amp-story-grid-layer template="vertical">
-        <h1>First Ad Page</h1>
-        <p>This is the first ad shown in this story.</p>
+        <h1>Ad Page #${id}</h1>
+        <p>This is ad $${id} shown in this story.</p>
       </amp-story-grid-layer>
       `;
     return ampStoryAdPage;
+  }
+
+  getPages_() {
+    if (!this.pages_) {
+      this.pages_ = this.ampStory_.getPages();
+    }
+    return this.pages_;
   }
 
   handleStateChange_(stateChangeEvent) {
@@ -105,30 +122,39 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   handleActivePageChange_(unusedPageIndex, unusedPageId) {
     this.interactions_++;
     console.log(this.interactions_);
-    if (this.interactions_ >= INTERACTIONS_BEFORE_AD_SHOWN) {
+    // temp before config in passed in
+    if (this.interactions_ > MIN_INTERVAL) {
       this.placeNextAd_();
       this.interactions_ = 0;
     }
   }
 
   placeNextAd_() {
-    const nextAdElement = this.adElements[this.adIdPointer_];
-    const nextAdId = nextAdElement.id;
+    // TODO(ccordry) make sure ad is loaded
+    const nextAdElement = this.adElements_[this.adIdPointer_];
+    const nextAdId = nextAdElement && nextAdElement.id;
+
     if (!nextAdId) {
       return;
     }
 
-    const activePage = this.ampStory_.getActivePage();
-    // make these public
-    const nextPageId = activePage.getNextPageId_();
-    const nexPageEl = this.ampStory_getPageById_(nextPageId);
-    const activePageEl = activePage.element;
-    const activePageElId = activePageEl.id;
+    const pages = this.getPages_();
 
-    activePageEl.setAttribute('advance-to', nextAdId);
-    nextAdElement.setAttribute('return-to', activePageElId);
-    nextAdElement.setAttribute('advance-to', nextPageId);
-    nexPageEl.setAttribute('return-to', nextAdId);
+    // make methods public if necessary once finalized
+    const activePage = this.ampStory_.getActivePage();
+    const activePageId = activePage.element.id;
+    const activePageIndex = this.ampStory_.getPageIndexById_(activePageId);
+
+    const pageBeforeAd = pages[activePageIndex + 1];
+    const pageBeforeAdEl = pageBeforeAd && pageBeforeAd.element;
+
+    const pageAfterAd = pages[activePageIndex + 2];
+    const pageAfterAdEl = pageAfterAd && pageAfterAd.element;
+
+    pageBeforeAdEl.setAttribute('advance-to', nextAdId);
+    pageAfterAdEl.setAttribute('return-to', nextAdId);
+    nextAdElement.setAttribute('advance-to', pageAfterAdEl.id);
+    nextAdElement.setAttribute('return-to', pageBeforeAdEl.id);
 
     this.adIdPointer_++;
   }

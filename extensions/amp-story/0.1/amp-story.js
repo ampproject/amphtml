@@ -92,6 +92,9 @@ const DESKTOP_HEIGHT_THRESHOLD = 550;
 /** @private @const {number} */
 const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
 
+/** @private @const {string} */
+const ADVERTISEMENT_ATTR_NAME = 'advertisement';
+
 /**
  * The duration of time (in milliseconds) to wait for a page to be loaded,
  * before the story becomes visible.
@@ -226,6 +229,9 @@ export class AmpStory extends AMP.BaseElement {
     /** @private @const {!Array<!./amp-story-page.AmpStoryPage>} */
     this.pages_ = [];
 
+    /** @private @const {!Array<!./amp-story-page.AmpStoryPage>} */
+    this.adPages_ = [];
+
     /** @const @private {!AmpStoryVariableService} */
     this.variableService_ = new AmpStoryVariableService();
 
@@ -321,6 +327,10 @@ export class AmpStory extends AMP.BaseElement {
     return this.activePage_;
   }
 
+  getPages() {
+    return this.pages_;
+  }
+
   /**
    * Builds the system layer DOM.  This is dependent on the pages_ array having
    * been initialized, so it cannot happen at build time.
@@ -394,7 +404,11 @@ export class AmpStory extends AMP.BaseElement {
         return;
       }
 
-      this.systemLayer_.updateProgress(pageId, progress);
+      const pageIndex = this.getPageIndexById_(pageId);
+
+      if (!this.activePage_.element.hasAttribute(ADVERTISEMENT_ATTR_NAME)) {
+        this.systemLayer_.updateProgress(pageIndex, progress);
+      }
     });
 
     this.element.addEventListener(EventType.REPLAY, () => {
@@ -702,6 +716,10 @@ export class AmpStory extends AMP.BaseElement {
         (pageEl, index) => {
           return pageEl.getImpl().then(pageImpl => {
             this.pages_[index] = pageImpl;
+
+            if (pageEl.hasAttribute(ADVERTISEMENT_ATTR_NAME)) {
+              this.adPages_.push(pageImpl);
+            }
           });
         });
 
@@ -721,7 +739,8 @@ export class AmpStory extends AMP.BaseElement {
 
     const lastPage = this.pages_[this.getPageCount() - 1];
 
-    if (activePage !== lastPage) {
+    if (activePage.element.hasAttribute('advance-to') ||
+        activePage !== lastPage) {
       activePage.next(opt_isAutomaticAdvance);
     } else {
       this.hasBookend_().then(hasBookend => {
@@ -775,7 +794,9 @@ export class AmpStory extends AMP.BaseElement {
     this.updateBackground_(targetPage.element, /* initial */ !this.activePage_);
 
     // TODO(alanorozco): decouple this using NavigationState
-    this.systemLayer_.setActivePageId(targetPageId);
+    if (!targetPage.element.hasAttribute(ADVERTISEMENT_ATTR_NAME)) {
+      this.systemLayer_.setActivePageIndex(pageIndex);
+    }
 
     // TODO(alanorozco): check if autoplay
     this.navigationState_.updateActivePage(
@@ -1288,7 +1309,7 @@ export class AmpStory extends AMP.BaseElement {
    * @return {number}
    */
   getPageCount() {
-    return this.pages_.length;
+    return this.pages_.length - this.adPages_.length;
   }
 
   /**
