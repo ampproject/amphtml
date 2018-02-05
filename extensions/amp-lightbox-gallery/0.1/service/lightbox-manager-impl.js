@@ -34,7 +34,7 @@ const ELIGIBLE_TAP_TAGS = {
   'amp-img': true,
 };
 
-const VIEWER_TAG = 'amp-lightbox-viewer';
+const GALLERY_TAG = 'amp-lightbox-gallery';
 const CAROUSEL_TAG = 'amp-carousel';
 const FIGURE_TAG = 'figure';
 const SLIDE_SELECTOR = '.amp-carousel-slide';
@@ -72,7 +72,7 @@ export class LightboxManager {
   constructor(ampdoc) {
 
     // Extra safety check, we don't install this service if experiment is off
-    dev().assert(isExperimentOn(ampdoc.win, 'amp-lightbox-viewer'));
+    dev().assert(isExperimentOn(ampdoc.win, 'amp-lightbox-gallery'));
 
     /** @const @private {!../../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
@@ -272,8 +272,8 @@ export class LightboxManager {
     this.lightboxGroups_[lightboxGroupId]
         .push(dev().assertElement(element));
     if (this.meetsHeuristicsForTap_(element)) {
-      const viewer = elementByTag(this.ampdoc_.getRootNode(), VIEWER_TAG);
-      element.setAttribute('on', `tap:${viewer.id}.activate`);
+      const gallery = elementByTag(this.ampdoc_.getRootNode(), GALLERY_TAG);
+      element.setAttribute('on', `tap:${gallery.id}.activate`);
     }
   }
 

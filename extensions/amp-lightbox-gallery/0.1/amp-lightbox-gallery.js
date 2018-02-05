@@ -17,7 +17,7 @@
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
-import {CSS} from '../../../build/amp-lightbox-viewer-0.1.css';
+import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
@@ -40,8 +40,8 @@ import {setStyle, toggle} from '../../../src/style';
 
 
 /** @const */
-const TAG = 'amp-lightbox-viewer';
-const DEFAULT_VIEWER_ID = 'amp-lightbox-viewer';
+const TAG = 'amp-lightbox-gallery';
+const DEFAULT_GALLERY_ID = 'amp-lightbox-gallery';
 
 /**
  * Set of namespaces that indicate the lightbox controls mode.
@@ -86,7 +86,7 @@ let LightboxElementMetadataDef_;
 /**
  * @private visible for testing.
  */
-export class AmpLightboxViewer extends AMP.BaseElement {
+export class AmpLightboxGallery extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -167,7 +167,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     const viewer = Services.viewerForDoc(this.getAmpDoc());
     viewer.whenFirstVisible().then(() => {
       this.container_ = this.win.document.createElement('div');
-      this.container_.classList.add('i-amphtml-lbv');
+      this.container_.classList.add('i-amphtml-lbg');
       this.element.appendChild(this.container_);
       this.manager_.maybeInit();
       this.buildMask_();
@@ -205,7 +205,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   buildMask_() {
     dev().assert(this.container_);
     const mask = this.win.document.createElement('div');
-    mask.classList.add('i-amphtml-lbv-mask');
+    mask.classList.add('i-amphtml-lbg-mask');
     this.container_.appendChild(mask);
   }
 
@@ -322,13 +322,13 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    */
   buildDescriptionBox_() {
     this.descriptionBox_ = this.win.document.createElement('div');
-    this.descriptionBox_.classList.add('i-amphtml-lbv-desc-box');
-    this.descriptionBox_.classList.add('i-amphtml-lbv-controls');
+    this.descriptionBox_.classList.add('i-amphtml-lbg-desc-box');
+    this.descriptionBox_.classList.add('i-amphtml-lbg-controls');
 
     this.descriptionBox_.classList.add('standard');
 
     this.descriptionTextArea_ = this.win.document.createElement('div');
-    this.descriptionTextArea_.classList.add('i-amphtml-lbv-desc-text');
+    this.descriptionTextArea_.classList.add('i-amphtml-lbg-desc-text');
     this.descriptionTextArea_.classList.add('non-expanded');
     this.descriptionBox_.appendChild(this.descriptionTextArea_);
 
@@ -446,11 +446,11 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   buildTopBar_() {
     dev().assert(this.container_);
     this.topBar_ = this.win.document.createElement('div');
-    this.topBar_.classList.add('i-amphtml-lbv-top-bar');
-    this.topBar_.classList.add('i-amphtml-lbv-controls');
+    this.topBar_.classList.add('i-amphtml-lbg-top-bar');
+    this.topBar_.classList.add('i-amphtml-lbg-controls');
 
     this.topGradient_ = this.win.document.createElement('div');
-    this.topGradient_.classList.add('i-amphtml-lbv-top-bar-top-gradient');
+    this.topGradient_.classList.add('i-amphtml-lbg-top-bar-top-gradient');
     this.topBar_.appendChild(this.topGradient_);
 
     const close = this.close_.bind(this);
@@ -458,9 +458,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     const closeGallery = this.closeGallery_.bind(this);
 
     // TODO(aghassemi): i18n and customization. See https://git.io/v6JWu
-    this.buildButton_('Close', 'amp-lbv-button-close', close);
-    this.buildButton_('Gallery', 'amp-lbv-button-gallery', openGallery);
-    this.buildButton_('Content', 'amp-lbv-button-slide', closeGallery);
+    this.buildButton_('Close', 'amp-lbg-button-close', close);
+    this.buildButton_('Gallery', 'amp-lbg-button-gallery', openGallery);
+    this.buildButton_('Content', 'amp-lbg-button-slide', closeGallery);
 
     this.container_.appendChild(this.topBar_);
   }
@@ -579,7 +579,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
-   * Closes the lightbox viewer on a tiny upwards swipe.
+   * Closes the lightbox gallery on a tiny upwards swipe.
    * @param {number} deltaY
    * @private
    */
@@ -590,14 +590,14 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
-   * Opens the lightbox-viewer with either the invocation source or
+   * Opens the lightbox-gallery with either the invocation source or
    * the element referenced by the `id` argument.
    * Examples:
    *  // Opens the element tapped.
-   *  on="tap:myLightboxViewer'
+   *  on="tap:myLightboxGallery'
    *
    *  // Opens the element referenced by elementId
-   *  on="tap:myLightboxViewer.open(id='<elementId>')
+   *  on="tap:myLightboxGallery.open(id='<elementId>')
    * @override
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    */
@@ -607,13 +607,13 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       const targetId = invocation.args['id'];
       target = this.getAmpDoc().getElementById(targetId);
       user().assert(target,
-          'amp-lightbox-viewer.open: element with id: %s not found', targetId);
+          'amp-lightbox-gallery.open: element with id: %s not found', targetId);
     }
     this.open_(dev().assertElement(target));
   }
 
   /**
-   * Opens the lightbox-viewer and displays the given element inside.
+   * Opens the lightbox-gallery and displays the given element inside.
    * @param {!Element} element Element to lightbox.
    * @return {!Promise}
    * @private
@@ -722,7 +722,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
         // TODO (#13039): implement crop and object fit contain transitions
         transLayer = this.element.ownerDocument.createElement('div');
-        transLayer.classList.add('i-amphtml-lightbox-viewer-trans');
+        transLayer.classList.add('i-amphtml-lightbox-gallery-trans');
         this.element.ownerDocument.body.appendChild(transLayer);
         const rect = layoutRectFromDomRect(sourceElement
             ./*OK*/getBoundingClientRect());
@@ -924,7 +924,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
-   * Closes the lightbox-viewer
+   * Closes the lightbox-gallery
    * @return {!Promise}
    * @private
    */
@@ -944,7 +944,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
       this.container_.removeAttribute('gallery-view');
 
       if (this.gallery_) {
-        this.gallery_.classList.add('i-amphtml-lbv-gallery-hidden');
+        this.gallery_.classList.add('i-amphtml-lbg-gallery-hidden');
         this.gallery_ = null;
       }
     });
@@ -1014,15 +1014,15 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   findOrBuildGallery_() {
     this.gallery_ = scopedQuerySelector(
         this.element,
-        '.i-amphtml-lbv-gallery[amp-lightbox-group='
+        '.i-amphtml-lbg-gallery[amp-lightbox-group='
         + this.currentLightboxGroupId_ + ']'
     );
     if (this.gallery_) {
-      this.gallery_.classList.remove('i-amphtml-lbv-gallery-hidden');
+      this.gallery_.classList.remove('i-amphtml-lbg-gallery-hidden');
     } else {
       // Build gallery
       this.gallery_ = this.win.document.createElement('div');
-      this.gallery_.classList.add('i-amphtml-lbv-gallery');
+      this.gallery_.classList.add('i-amphtml-lbg-gallery');
       this.gallery_.setAttribute('amp-lightbox-group',
           this.currentLightboxGroupId_);
 
@@ -1062,9 +1062,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    */
   createThumbnailElement_(thumbnailObj) {
     const element = this.win.document.createElement('div');
-    element.classList.add('i-amphtml-lbv-gallery-thumbnail');
+    element.classList.add('i-amphtml-lbg-gallery-thumbnail');
     const imgElement = this.win.document.createElement('img');
-    imgElement.classList.add('i-amphtml-lbv-gallery-thumbnail-img');
+    imgElement.classList.add('i-amphtml-lbg-gallery-thumbnail-img');
     imgElement.setAttribute('src', thumbnailObj.url);
     element.appendChild(imgElement);
     const closeGalleryAndShowTargetSlide = event => {
@@ -1096,30 +1096,30 @@ export function installLightboxManager(win) {
 }
 
 /**
- * Tries to find an existing amp-lightbox-viewer, if there is none, it adds a
+ * Tries to find an existing amp-lightbox-gallery, if there is none, it adds a
  * default one.
  * @param {!Window} win
  * @return {!Promise}
  */
-function installLightboxViewer(win) {
+function installLightboxGallery(win) {
   const ampdoc = Services.ampdocServiceFor(win).getAmpDoc();
   // TODO (#12859): make this work for more than singleDoc mode
   return ampdoc.whenBodyAvailable().then(body => {
-    const existingViewer = elementByTag(ampdoc.getRootNode(), TAG);
-    if (!existingViewer) {
+    const existingGallery = elementByTag(ampdoc.getRootNode(), TAG);
+    if (!existingGallery) {
       const matches = ampdoc.getRootNode().querySelectorAll('[lightbox]');
       if (matches.length > 0) {
-        const viewer = ampdoc.getRootNode().createElement(TAG);
-        viewer.setAttribute('layout', 'nodisplay');
-        viewer.setAttribute('id', DEFAULT_VIEWER_ID);
-        body.appendChild(viewer);
+        const gallery = ampdoc.getRootNode().createElement(TAG);
+        gallery.setAttribute('layout', 'nodisplay');
+        gallery.setAttribute('id', DEFAULT_GALLERY_ID);
+        body.appendChild(gallery);
       }
     }
   });
 }
 
 AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(TAG, AmpLightboxViewer, CSS);
+  AMP.registerElement(TAG, AmpLightboxGallery, CSS);
   installLightboxManager(AMP.win);
-  installLightboxViewer(AMP.win);
+  installLightboxGallery(AMP.win);
 });
