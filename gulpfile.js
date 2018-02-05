@@ -634,21 +634,20 @@ function performBuild(watch) {
       if (typeof(argv.extensions) !== 'string') {
         log(red('ERROR:'), 'Missing list of extensions. Expected format:',
             cyan('--extensions=amp-foo,amp-bar'),
-            green('to choose which ones to build, or'),
+            'to choose which ones to build, or',
             cyan('--extensions=minimal_set'),
-            green('to build ones needed to load article.amp.html.'));
+            'to build the ones needed to load',
+            cyan('article.amp.html') + '.');
         process.exit(1);
       }
-      if (argv.extensions == 'minimal_set') {
+      if (argv.extensions === 'minimal_set') {
         argv.extensions =
             'amp-ad,amp-ad-network-adsense-impl,amp-audio,amp-video,' +
             'amp-image-lightbox,amp-lightbox,amp-sidebar,' +
             'amp-analytics,amp-app-banner';
-        log(green('Building extensions to load article.amp.html.'));
-      } else {
-        log(green('Building extension(s):'),
-            cyan(argv.extensions.split(',').join(', ')));
       }
+      log(green('Building extension(s):'),
+          cyan(argv.extensions.split(',').join(', ')));
       log(green('⤷ Use'), cyan('--noextensions'),
           green('to skip building extensions.'));
     } else if (argv.noextensions) {
@@ -656,7 +655,8 @@ function performBuild(watch) {
       log(green('⤷ Use'), cyan('--extensions=amp-foo,amp-bar'),
           green('to choose which ones to build, or'),
           cyan('--extensions=minimal_set'),
-          green('to build ones needed to load article.amp.html.'));
+          green('to build the ones needed to load'),
+          cyan('article.amp.html') + green('.'));
     } else {
       log(green('Building all AMP extensions.'));
       log(green('⤷ Use'), cyan('--noextensions'),
@@ -664,7 +664,8 @@ function performBuild(watch) {
           cyan('--extensions=amp-foo,amp-bar'),
           green('to choose which ones to build, or'),
           cyan('--extensions=minimal_set'),
-          green('to build ones needed to load article.amp.html.'));
+          green('to build the ones needed to load'),
+          cyan('article.amp.html') + green('.'));
     }
   }
   return compileCss(watch).then(() => {
@@ -742,7 +743,7 @@ function dist() {
  * Copy built extension to alias extension
  */
 function copyAliasExtensions() {
-  if (!! argv.noextensions) {
+  if (argv.noextensions) {
     return;
   }
   var extensionsToBuild = [];
