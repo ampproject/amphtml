@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {utf8Encode} from '../../../../src/utils/bytes';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
+import {createElementWithAttributes} from '../../../../src/dom';
+import {utf8Encode} from '../../../../src/utils/bytes';
 
 /**
  * We're allowing external resources because otherwise using realWin causes

@@ -14,11 +14,11 @@
  * the License.
  */
 
-import {parseQueryString} from '../../../src/url.js';
+import {TAG} from './vars';
 import {WindowMessenger} from './window-messenger';
 import {getMode} from '../../../src/mode';
+import {parseQueryString} from '../../../src/url.js';
 import {user} from '../../../src/log';
-import {TAG} from './vars';
 
 /**
  * @typedef {{

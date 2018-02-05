@@ -15,15 +15,15 @@
  */
 
 
-import {rethrowAsync} from './../../../src/log';
 import {dict} from './../../../src/utils/object';
-import {parseJson} from './../../../src/json';
 import {getData} from './../../../src/event-helper';
+import {parseJson} from './../../../src/json';
 import {
   parseUrl,
   removeFragment,
   serializeQueryString,
 } from '../../../src/url';
+import {rethrowAsync} from './../../../src/log';
 
 /**
  * Returns a function, that, as long as it continues to be invoked, will not

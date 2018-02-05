@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {calcVelocity, continueMotion} from '../../src/motion';
 import * as sinon from 'sinon';
+import {calcVelocity, continueMotion} from '../../src/motion';
 
 
 describe('Motion calcVelocity', () => {

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {user} from '../../../src/log';
+import {ExpansionOptions, variableServiceFor} from './variables';
+import {findIndex} from '../../../src/utils/array';
 import {isObject} from '../../../src/types';
 import {parseUrl} from '../../../src/url';
-import {findIndex} from '../../../src/utils/array';
-import {ExpansionOptions, variableServiceFor} from './variables';
+import {user} from '../../../src/log';
 
 /**
  * A user-supplied JSON object that defines a resource to be reported. It is

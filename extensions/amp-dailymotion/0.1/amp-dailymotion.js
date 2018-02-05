@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
+import {
+  addParamToUrl,
+  addParamsToUrl,
+  parseQueryString,
+} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {VideoEvents} from '../../../src/video-interface';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  getDataParamsFromAttributes,
+  isFullscreenElement,
+} from '../../../src/dom';
+import {getData, listen} from '../../../src/event-helper';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import {getData, listen} from '../../../src/event-helper';
-import {Services} from '../../../src/services';
-import {
-  parseQueryString,
-  addParamsToUrl,
-  addParamToUrl,
-} from '../../../src/url';
-import {
-  getDataParamsFromAttributes,
-  fullscreenEnter,
-  fullscreenExit,
-  isFullscreenElement,
-} from '../../../src/dom';
+import {isLayoutSizeDefined} from '../../../src/layout';
 
 /**
  * Player events reverse-engineered from the Dailymotion API

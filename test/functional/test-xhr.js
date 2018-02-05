@@ -15,16 +15,16 @@
  */
 
 import * as sinon from 'sinon';
-import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
 import {
-  xhrServiceForTesting,
-  fetchPolyfill,
   FetchResponse,
   assertSuccess,
+  fetchPolyfill,
+  xhrServiceForTesting,
 } from '../../src/service/xhr-impl';
 import {FormDataWrapper} from '../../src/form-data-wrapper';
-import {getCookie} from '../../src/cookies';
 import {Services} from '../../src/services';
+import {getCookie} from '../../src/cookies';
+import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
 
 // TODO(jridgewell, #11827): Make this test work on Safari.
 describe.configure().skipSafari().run('XHR', function() {

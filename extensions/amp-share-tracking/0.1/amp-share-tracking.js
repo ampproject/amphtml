@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {isExperimentOn} from '../../../src/experiments';
-import {Services} from '../../../src/services';
-import {registerServiceBuilder} from '../../../src/service';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {base64UrlEncodeFromBytes} from '../../../src/utils/base64';
-import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
+import {isExperimentOn} from '../../../src/experiments';
+import {registerServiceBuilder} from '../../../src/service';
 
 /** @private @const {string} */
 const TAG = 'amp-share-tracking';

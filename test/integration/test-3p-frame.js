@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
+import {DomFingerprint} from '../../src/utils/dom-fingerprint';
+import {Services} from '../../src/services';
 import {
   addDataAndJsonAttributes_,
-  getIframe,
   getBootstrapBaseUrl,
   getDefaultBootstrapBaseUrl,
+  getIframe,
   getSubDomain,
   preloadBootstrap,
-  resetCountForTesting,
   resetBootstrapBaseUrlForTesting,
+  resetCountForTesting,
 } from '../../src/3p-frame';
 import {
-  serializeMessage,
   deserializeMessage,
+  serializeMessage,
 } from '../../src/3p-frame-messaging';
 import {dev} from '../../src/log';
-import {Services} from '../../src/services';
 import {loadPromise} from '../../src/event-helper';
-import {toggleExperiment} from '../../src/experiments';
 import {preconnectForElement} from '../../src/preconnect';
+import {toggleExperiment} from '../../src/experiments';
 import {validateData} from '../../3p/3p';
-import {DomFingerprint} from '../../src/utils/dom-fingerprint';
-import * as sinon from 'sinon';
 
 describe.configure().ifNewChrome().run('3p-frame', () => {
 

@@ -13,23 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as sinon from 'sinon';
+import {
+  ANIMATIONS_DISABLED_CLASS,
+  AmpGwdRuntimeService,
+  CURRENT_LABEL_ANIMATION_ATTR,
+  GWD_PAGE_WRAPPER_CLASS,
+  GWD_SERVICE_NAME,
+  PlaybackCssClass,
+} from '../amp-gwd-animation-impl';
+import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {
   GWD_PAGEDECK_ID,
   TAG,
   addAction,
 } from '../amp-gwd-animation';
-import {
-  ANIMATIONS_DISABLED_CLASS,
-  CURRENT_LABEL_ANIMATION_ATTR,
-  GWD_PAGE_WRAPPER_CLASS,
-  GWD_SERVICE_NAME,
-  PlaybackCssClass,
-  AmpGwdRuntimeService,
-} from '../amp-gwd-animation-impl';
-import {getServiceForDoc} from '../../../../src/service';
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {Services} from '../../../../src/services';
-import * as sinon from 'sinon';
+import {getServiceForDoc} from '../../../../src/service';
 
 describes.sandboxed('AMP GWD Animation', {}, () => {
   /**

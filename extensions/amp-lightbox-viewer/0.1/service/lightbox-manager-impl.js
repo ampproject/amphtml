@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {isExperimentOn} from '../../../../src/experiments';
-import {dev, user} from '../../../../src/log';
+import {CommonSignals} from '../../../../src/common-signals';
 import {
   childElement,
   closestByTag,
   elementByTag,
   iterateCursor,
 } from '../../../../src/dom';
-import {toArray} from '../../../../src/types';
-import {CommonSignals} from '../../../../src/common-signals';
+import {dev, user} from '../../../../src/log';
 import {hasOwn, map} from '../../../../src/utils/object';
+import {isExperimentOn} from '../../../../src/experiments';
+import {toArray} from '../../../../src/types';
 
 const LIGHTBOX_ELIGIBLE_TAGS = {
   'amp-img': true,

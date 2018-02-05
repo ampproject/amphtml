@@ -16,13 +16,9 @@
 
 import {FakeWindow} from '../../testing/fake-dom';
 import {
-  markElementScheduledForTesting,
-  resetScheduledElementForTesting,
-} from '../../src/service/custom-element-registry';
-import {
   getElementService,
-  getElementServiceIfAvailable,
   getElementServiceForDoc,
+  getElementServiceIfAvailable,
   getElementServiceIfAvailableForDoc,
   getElementServiceIfAvailableForDocInEmbedScope,
 } from '../../src/element-service';
@@ -33,6 +29,10 @@ import {
   resetServiceForTesting,
   setParentWindow,
 } from '../../src/service';
+import {
+  markElementScheduledForTesting,
+  resetScheduledElementForTesting,
+} from '../../src/service/custom-element-registry';
 
 describe('getElementServiceIfAvailable()', () => {
   let doc;

@@ -15,10 +15,10 @@
  */
 
 import * as dom from '../../src/dom';
-import {loadPromise} from '../../src/event-helper';
-import {toArray} from '../../src/types';
 import {BaseElement} from '../../src/base-element';
 import {createAmpElementProtoForTesting} from '../../src/custom-element';
+import {loadPromise} from '../../src/event-helper';
+import {toArray} from '../../src/types';
 
 
 describes.sandboxed('DOM', {}, env => {

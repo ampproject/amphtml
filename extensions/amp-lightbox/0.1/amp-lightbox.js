@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-lightbox-0.1.css';
+import * as st from '../../../src/style';
 import {AmpEvents} from '../../../src/amp-events';
+import {CSS} from '../../../build/amp-lightbox-0.1.css';
 import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {computedStyle, setImportantStyles} from '../../../src/style';
+import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {Services} from '../../../src/services';
 import {toArray} from '../../../src/types';
-import {debounce} from '../../../src/utils/rate-limit';
-import * as st from '../../../src/style';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';

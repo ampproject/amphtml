@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 'use strict';
-const BBPromise = require('bluebird');
 const argv = require('minimist')(process.argv.slice(2));
 const assert = require('assert');
+const BBPromise = require('bluebird');
+const colors = require('ansi-colors');
 const extend = require('util')._extend;
 const gulp = require('gulp-help')(require('gulp'));
-const request = BBPromise.promisify(require('request'));
-const colors = require('ansi-colors');
 const log = require('fancy-log');
+const request = BBPromise.promisify(require('request'));
 
 const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
 

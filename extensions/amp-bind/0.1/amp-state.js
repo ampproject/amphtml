@@ -19,12 +19,12 @@ import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
+import {dev, user} from '../../../src/log';
 import {getSourceOrigin} from '../../../src/url';
-import {map} from '../../../src/utils/object';
 import {isJsonScriptTag} from '../../../src/dom';
+import {map} from '../../../src/utils/object';
 import {toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
-import {dev, user} from '../../../src/log';
 
 export class AmpState extends AMP.BaseElement {
   /** @override */

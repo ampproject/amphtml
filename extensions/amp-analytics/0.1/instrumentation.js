@@ -26,6 +26,7 @@ import {
   getTrackerTypesForParentType,
 } from './events';
 import {Observable} from '../../../src/observable';
+import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {
   getFriendlyIframeEmbedOptional,
@@ -36,7 +37,6 @@ import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
-import {Services} from '../../../src/services';
 
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';

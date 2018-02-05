@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
+import {Util} from './util';
 import {assertHttpsUrl} from '../../../src/url';
 import {openWindowDialog} from '../../../src/dom';
-import {user} from '../../../src/log';
-import {Services} from '../../../src/services';
 import {toWin} from '../../../src/types';
 
-import {Util} from './util';
+import {user} from '../../../src/log';
 
 // Popup options
 const POP = 'status=no,resizable=yes,scrollbars=yes,' +

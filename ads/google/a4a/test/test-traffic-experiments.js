@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {
-  addExperimentIdToElement,
-  isInExperiment,
-  validateExperimentIds,
-  googleAdsIsA4AEnabled,
-} from '../traffic-experiments';
+import {EXPERIMENT_ATTRIBUTE} from '../utils';
 import {
   RANDOM_NUMBER_GENERATORS,
   toggleExperiment,
 } from '../../../../src/experiments';
-import {EXPERIMENT_ATTRIBUTE} from '../utils';
+import {
+  addExperimentIdToElement,
+  googleAdsIsA4AEnabled,
+  isInExperiment,
+  validateExperimentIds,
+} from '../traffic-experiments';
 
 describe('all-traffic-experiments-tests', () => {
 

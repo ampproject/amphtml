@@ -16,8 +16,8 @@
 
 import {
   createFixtureIframe,
-  poll,
   expectBodyToBecomeVisible,
+  poll,
 } from '../../testing/iframe.js';
 
 /** @const {number} */

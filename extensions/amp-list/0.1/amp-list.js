@@ -15,17 +15,17 @@
  */
 
 import {AmpEvents} from '../../../src/amp-events';
+import {Services} from '../../../src/services';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
+import {dev, user} from '../../../src/log';
+import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {getSourceOrigin} from '../../../src/url';
 import {removeChildren} from '../../../src/dom';
-import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-list';

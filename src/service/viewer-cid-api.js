@@ -16,8 +16,8 @@
 
 import {Services} from '../services';
 import {dict} from '../utils/object';
-import {user} from '../log';
 import {parseUrl} from '../url';
+import {user} from '../log';
 
 const GOOGLE_CLIENT_ID_API_META_NAME = 'amp-google-client-id-api';
 const CID_API_SCOPE_WHITELIST = {

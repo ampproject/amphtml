@@ -19,15 +19,15 @@ import {KeyCodes} from '../utils/key-codes';
 import {Services} from '../services';
 import {debounce, throttle} from '../utils/rate-limit';
 import {dev, user} from '../log';
-import {isArray, isFiniteNumber, toWin} from '../types';
-import {isEnabled} from '../dom';
 import {getMode} from '../mode';
 import {getValueForExpr} from '../json';
-import {map} from '../utils/object';
 import {
-  registerServiceBuilderForDoc,
   installServiceInEmbedScope,
+  registerServiceBuilderForDoc,
 } from '../service';
+import {isArray, isFiniteNumber, toWin} from '../types';
+import {isEnabled} from '../dom';
+import {map} from '../utils/object';
 
 /**
  * ActionInfoDef args key that maps to the an unparsed object literal string.

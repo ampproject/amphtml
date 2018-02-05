@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import {Services} from '../services';
 import {calculateEntryPointScriptUrl} from '../service/extension-location';
-import {isExperimentOn} from '../experiments';
 import {dev} from '../log';
 import {getMode} from '../mode';
-import {Services} from '../services';
+import {isExperimentOn} from '../experiments';
 import {parseUrl} from '../url';
 import {urls} from '../config';
 

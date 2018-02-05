@@ -15,21 +15,21 @@
  */
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
-const gulp = require('gulp-help')(require('gulp'));
-const glob = require('glob');
-const Karma = require('karma').Server;
-const config = require('../config');
-const applyConfig = require('./prepend-global/index.js').applyConfig;
-const removeConfig = require('./prepend-global/index.js').removeConfig;
-const fs = require('fs');
-const path = require('path');
-const webserver = require('gulp-webserver');
 const app = require('../test-server').app;
-const karmaDefault = require('./karma.conf');
-const shuffleSeed = require('shuffle-seed');
+const applyConfig = require('./prepend-global/index.js').applyConfig;
+const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
+const config = require('../config');
+const fs = require('fs');
+const glob = require('glob');
+const gulp = require('gulp-help')(require('gulp'));
+const Karma = require('karma').Server;
+const karmaDefault = require('./karma.conf');
 const log = require('fancy-log');
+const path = require('path');
+const removeConfig = require('./prepend-global/index.js').removeConfig;
+const shuffleSeed = require('shuffle-seed');
+const webserver = require('gulp-webserver');
 
 
 const green = colors.green;

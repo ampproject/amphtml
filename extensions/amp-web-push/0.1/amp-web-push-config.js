@@ -14,10 +14,10 @@
  * the License.
  */
 
-import {TAG, CONFIG_TAG, SERVICE_TAG} from './vars';
+import {CONFIG_TAG, SERVICE_TAG, TAG} from './vars';
 import {Layout} from '../../../src/layout';
-import {getServiceForDoc} from '../../../src/service';
 import {dev, user} from '../../../src/log';
+import {getServiceForDoc} from '../../../src/service';
 import {parseUrl} from '../../../src/url';
 
 /** @enum {string} */

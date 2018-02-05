@@ -15,10 +15,10 @@
  */
 
 import {
-  writeScript,
   validateData,
-  validateSrcPrefix,
   validateSrcContains,
+  validateSrcPrefix,
+  writeScript,
 } from '../3p/3p';
 
 

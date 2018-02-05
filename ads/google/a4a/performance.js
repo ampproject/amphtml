@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {getCorrelator} from './utils';
+import {CommonSignals} from '../../../src/common-signals';
 import {LIFECYCLE_STAGES} from '../../../extensions/amp-a4a/0.1/amp-a4a';
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {serializeQueryString} from '../../../src/url';
+import {getCorrelator} from './utils';
 import {getTimingDataSync} from '../../../src/service/variable-source';
-import {Services} from '../../../src/services';
-import {CommonSignals} from '../../../src/common-signals';
+import {serializeQueryString} from '../../../src/url';
 
 /**
  * This module provides a fairly crude form of performance monitoring (or

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
+import {Services} from '../../src/services';
 import {
   createFixtureIframe,
   poll,
 } from '../../testing/iframe';
-import {Services} from '../../src/services';
 import {installPlatformService} from '../../src/service/platform-impl';
-import {
-  toggleExperiment,
-  resetExperimentTogglesForTesting,
-} from '../../src/experiments';
 import {layoutRectLtwh} from '../../src/layout-rect';
+import {
+  resetExperimentTogglesForTesting,
+  toggleExperiment,
+} from '../../src/experiments';
 
 // TODO(@alanorozco): Inline this once 3p-use-ampcontext experiment is removed
 function createIframeWithApis(fixture) {

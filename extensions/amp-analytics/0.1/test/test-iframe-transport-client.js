@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {MessageType} from '../../../../src/3p-frame-messaging';
+import * as sinon from 'sinon';
 import {
   IframeTransportClient, IframeTransportContext,
 } from '../../../../3p/iframe-transport-client';
+import {MessageType} from '../../../../src/3p-frame-messaging';
 import {adopt} from '../../../../src/runtime';
-import * as sinon from 'sinon';
 
 adopt(window);
 

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Animation} from '../../src/animation';
 import * as sinon from 'sinon';
+import {Animation} from '../../src/animation';
 
 describe('Animation', () => {
 

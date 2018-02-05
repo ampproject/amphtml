@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
 import {AmpEvents} from '../../src/amp-events';
 import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
@@ -22,7 +23,6 @@ import {ResourceState} from '../../src/service/resource';
 import {Services} from '../../src/services';
 import {createAmpElementProtoForTesting} from '../../src/custom-element';
 import {poll} from '../../testing/iframe';
-import * as lolex from 'lolex';
 
 
 describes.realWin('CustomElement', {amp: true}, env => {

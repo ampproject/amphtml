@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Animation} from '../../../src/animation';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
+import {Animation} from '../../../src/animation';
+import {isLayoutSizeDefined} from '../../../src/layout';
 
 
 /**

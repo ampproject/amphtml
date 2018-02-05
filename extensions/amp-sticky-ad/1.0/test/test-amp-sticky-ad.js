@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import '../amp-sticky-ad';
 import '../../../amp-ad/0.1/amp-ad';
+import '../amp-sticky-ad';
 import {macroTask} from '../../../../testing/yield';
 import {poll} from '../../../../testing/iframe';
 

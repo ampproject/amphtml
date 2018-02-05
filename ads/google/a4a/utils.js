@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
+import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
 import {Services} from '../../../src/services';
 import {buildUrl} from './url-builder';
-import {makeCorrelator} from '../correlator';
-import {getBinaryType} from '../../../src/experiments';
-import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {dev} from '../../../src/log';
-import {getMode} from '../../../src/mode';
 import {dict} from '../../../src/utils/object';
-import {parseUrl} from '../../../src/url';
-import {parseJson} from '../../../src/json';
-import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
+import {getBinaryType} from '../../../src/experiments';
+import {getMode} from '../../../src/mode';
+import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {
   isExperimentOn,
   toggleExperiment,
 } from '../../../src/experiments';
+import {makeCorrelator} from '../correlator';
+import {parseJson} from '../../../src/json';
+import {parseUrl} from '../../../src/url';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';

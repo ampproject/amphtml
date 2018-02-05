@@ -18,6 +18,10 @@ import {
   adsenseIsA4AEnabled,
 } from '../extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
 import {
+  cloudflareIsA4AEnabled,
+} from
+  '../extensions/amp-ad-network-cloudflare-impl/0.1/cloudflare-a4a-config';
+import {
   doubleclickIsA4AEnabled,
 } from
   '../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';
@@ -25,20 +29,16 @@ import {
   fakeIsA4AEnabled,
 } from
   '../extensions/amp-ad-network-fake-impl/0.1/fake-a4a-config';
-import {
-  tripleliftIsA4AEnabled,
-} from
-  '../extensions/amp-ad-network-triplelift-impl/0.1/triplelift-a4a-config';
-import {
-  cloudflareIsA4AEnabled,
-} from
-  '../extensions/amp-ad-network-cloudflare-impl/0.1/cloudflare-a4a-config';
+import {getMode} from '../src/mode';
 import {
   gmosspIsA4AEnabled,
 } from
   '../extensions/amp-ad-network-gmossp-impl/0.1/gmossp-a4a-config';
-import {getMode} from '../src/mode';
 import {map} from '../src/utils/object';
+import {
+  tripleliftIsA4AEnabled,
+} from
+  '../extensions/amp-ad-network-triplelift-impl/0.1/triplelift-a4a-config';
 
 /**
  * Registry for A4A (AMP Ads for AMPHTML pages) "is supported" predicates.

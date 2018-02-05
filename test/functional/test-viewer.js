@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Viewer} from '../../src/service/viewer-impl';
+import * as sinon from 'sinon';
 import {Services} from '../../src/services';
+import {Viewer} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {parseUrl, removeFragment} from '../../src/url';
-import * as sinon from 'sinon';
 
 
 describe('Viewer', () => {

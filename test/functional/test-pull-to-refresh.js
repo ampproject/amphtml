@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {PullToRefreshBlocker} from '../../src/pull-to-refresh';
 import * as sinon from 'sinon';
+import {PullToRefreshBlocker} from '../../src/pull-to-refresh';
 
 
 describe('PullToRefreshBlocker', () => {

@@ -14,23 +14,27 @@
  * limitations under the License.
  */
 
-import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
+// Need the following side-effect import because in actual production code,
+// Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
+// always available for them. However, when we test an impl in isolation,
+// AmpAd is not loaded already, so we need to load it separately.
+import '../../../amp-ad/0.1/amp-ad';
+import {
+  AMP_SIGNATURE_HEADER,
+  VerificationStatus,
+} from '../../../amp-a4a/0.1/signature-verifier';
 import {
   AmpA4A,
   CREATIVE_SIZE_HEADER,
   signatureVerifierFor,
 } from '../../../amp-a4a/0.1/amp-a4a';
-import {
-  AMP_SIGNATURE_HEADER,
-  VerificationStatus,
-} from '../../../amp-a4a/0.1/signature-verifier';
-import {Services} from '../../../../src/services';
+import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkDoubleclickImpl,
-  getNetworkId,
   CORRELATOR_CLEAR_EXP_BRANCHES,
   CORRELATOR_CLEAR_EXP_NAME,
   SAFEFRAME_ORIGIN,
+  getNetworkId,
   resetLocationQueryParametersForTesting,
 } from '../amp-ad-network-doubleclick-impl';
 import {
@@ -40,23 +44,19 @@ import {
   UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
 } from '../doubleclick-a4a-config';
 import {
-  isInExperiment,
-  addExperimentIdToElement,
-} from '../../../../ads/google/a4a/traffic-experiments';
-import {
   QQID_HEADER,
 } from '../../../../ads/google/a4a/utils';
+import {Services} from '../../../../src/services';
+import {VisibilityState} from '../../../../src/visibility-state';
+import {
+  addExperimentIdToElement,
+  isInExperiment,
+} from '../../../../ads/google/a4a/traffic-experiments';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {
-  toggleExperiment,
   forceExperimentBranch,
+  toggleExperiment,
 } from '../../../../src/experiments';
-import {VisibilityState} from '../../../../src/visibility-state';
-// Need the following side-effect import because in actual production code,
-// Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
-// always available for them. However, when we test an impl in isolation,
-// AmpAd is not loaded already, so we need to load it separately.
-import '../../../amp-ad/0.1/amp-ad';
 
 /**
  * We're allowing external resources because otherwise using realWin causes

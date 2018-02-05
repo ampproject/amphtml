@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, writeScript, validateData} from '../3p/3p';
+import {loadScript, validateData, writeScript} from '../3p/3p';
 import {setStyles} from '../src/style';
 
 const APPNEXUS_AST_URL = 'https://acdn.adnxs.com/ast/ast.js';

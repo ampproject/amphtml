@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
+import * as sinon from 'sinon';
 import {AmpdocAnalyticsRoot} from '../analytics-root';
 import {
   AnalyticsEvent,
@@ -25,8 +27,6 @@ import {
   VisibilityTracker,
 } from '../events';
 import {Signals} from '../../../../src/utils/signals';
-import * as lolex from 'lolex';
-import * as sinon from 'sinon';
 
 
 describes.realWin('Events', {amp: 1}, env => {

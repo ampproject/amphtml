@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
+import {AmpAdUIHandler} from '../amp-ad-ui';
 import {AmpAdXOriginIframeHandler} from '../amp-ad-xorigin-iframe-handler';
 import {BaseElement} from '../../../../src/base-element';
+import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/utils/signals';
 import {
   createIframeWithMessageStub,
   expectPostMessage,
 } from '../../../../testing/iframe';
-import {AmpAdUIHandler} from '../amp-ad-ui';
-import {Services} from '../../../../src/services';
-import * as sinon from 'sinon';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {toggleExperiment} from '../../../../src/experiments';
 

@@ -14,50 +14,50 @@
  * limitations under the License.
  */
 
+import {A4AVariableSource} from './a4a-variable-source';
+import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
-import {
-  is3pThrottled,
-  getAmpAdRenderOutsideViewport,
-  incrementLoadingAds,
-} from '../../amp-ad/0.1/concurrent-load';
-import {createElementWithAttributes} from '../../../src/dom';
-import {cancellation, isCancellation} from '../../../src/error';
-import {
-  installFriendlyIframeEmbed,
-  setFriendlyIframeEmbedVisible,
-} from '../../../src/friendly-iframe-embed';
-import {isLayoutSizeDefined, Layout} from '../../../src/layout';
-import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {dev, user, duplicateErrorIfNecessary} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {isArray, isObject, isEnumValue} from '../../../src/types';
-import {utf8Decode} from '../../../src/utils/bytes';
-import {getBinaryType, isExperimentOn} from '../../../src/experiments';
-import {setStyle} from '../../../src/style';
 import {
   assertHttpsUrl,
   isSecureUrl,
   tryDecodeUriComponent,
 } from '../../../src/url';
-import {parseJson} from '../../../src/json';
-import {handleClick} from '../../../ads/alp/handler';
+import {cancellation, isCancellation} from '../../../src/error';
+import {createElementWithAttributes} from '../../../src/dom';
+import {dev, duplicateErrorIfNecessary, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {
-  getDefaultBootstrapBaseUrl,
   generateSentinel,
+  getDefaultBootstrapBaseUrl,
 } from '../../../src/3p-frame';
+import {
+  getAmpAdRenderOutsideViewport,
+  incrementLoadingAds,
+  is3pThrottled,
+} from '../../amp-ad/0.1/concurrent-load';
+import {getBinaryType, isExperimentOn} from '../../../src/experiments';
+import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
+import {getContextMetadata} from '../../../src/iframe-attributes';
+import {getMode} from '../../../src/mode';
+// TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
+import {getTimingDataAsync} from '../../../src/service/variable-source';
+import {handleClick} from '../../../ads/alp/handler';
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
+import {
+  installFriendlyIframeEmbed,
+  setFriendlyIframeEmbedVisible,
+} from '../../../src/friendly-iframe-embed';
 import {
   installUrlReplacementsForEmbed,
 } from '../../../src/service/url-replacements-impl';
-import {A4AVariableSource} from './a4a-variable-source';
-// TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
-import {getTimingDataAsync} from '../../../src/service/variable-source';
-import {getContextMetadata} from '../../../src/iframe-attributes';
-import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
+import {isAdPositionAllowed} from '../../../src/ad-helper';
+import {isArray, isEnumValue, isObject} from '../../../src/types';
+import {parseJson} from '../../../src/json';
+import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {insertAnalyticsElement} from '../../../src/extension-analytics';
+import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [

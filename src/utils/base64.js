@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {stringToBytes, bytesToString} from './bytes';
+import {bytesToString, stringToBytes} from './bytes';
 
 /**
  * Character mapping from base64url to base64.

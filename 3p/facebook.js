@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {loadScript} from './3p';
-import {user} from '../src/log';
 import {dashToUnderline} from '../src/string';
+import {loadScript} from './3p';
 import {setStyle} from '../src/style';
+import {user} from '../src/log';
 
 /**
  * Produces the Facebook SDK object for the passed in callback.

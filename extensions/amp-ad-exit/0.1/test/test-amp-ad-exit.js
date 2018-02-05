@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {AmpAdExit} from '../amp-ad-exit';
 import * as sinon from 'sinon';
 import {ANALYTICS_CONFIG} from '../../../amp-analytics/0.1/vendors';
+import {AmpAdExit} from '../amp-ad-exit';
 import {toggleExperiment} from '../../../../src/experiments';
 
 const TEST_3P_VENDOR = '3p-vendor';

@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {layoutRectLtwh} from '../../../src/layout-rect';
 import {Services} from '../../../src/services';
 import {
+  ViewportBindingInabox,
   prepareBodyForOverlay,
   resetBodyForOverlay,
-  ViewportBindingInabox,
 } from '../../../src/inabox/inabox-viewport';
 import {
   installIframeMessagingClient,
 } from '../../../src/inabox/inabox-iframe-messaging-client';
+import {layoutRectLtwh} from '../../../src/layout-rect';
 
 
 const NOOP = () => {};

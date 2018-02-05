@@ -15,8 +15,8 @@
  */
 
 
-import {writeScript, validateData} from '../3p/3p';
 import {parseJson} from '../src/json';
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @const {Object<string, string>}

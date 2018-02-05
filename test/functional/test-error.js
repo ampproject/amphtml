@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import * as analytics from '../../src/analytics';
+import * as sinon from 'sinon';
+import {Services} from '../../src/services';
 import {
   cancellation,
   detectJsEngineFromStack,
@@ -25,18 +28,15 @@ import {
   reportError,
   reportErrorToAnalytics,
 } from '../../src/error';
-import {user} from '../../src/log';
-import {
-  resetExperimentTogglesForTesting,
-  toggleExperiment,
-} from '../../src/experiments';
-import * as sinon from 'sinon';
-import * as analytics from '../../src/analytics';
 import {
   getMode,
   getRtvVersionForTesting,
 } from '../../src/mode';
-import {Services} from '../../src/services';
+import {
+  resetExperimentTogglesForTesting,
+  toggleExperiment,
+} from '../../src/experiments';
+import {user} from '../../src/log';
 
 describes.fakeWin('installErrorReporting', {}, env => {
   let sandbox;

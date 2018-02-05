@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {StateChangeType} from '../navigation-state';
 import {AmpStoryVariableService} from '../variable-service';
+import {StateChangeType} from '../navigation-state';
 
 
 describes.fakeWin('amp-story variable service', {}, () => {

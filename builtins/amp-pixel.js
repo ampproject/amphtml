@@ -15,12 +15,12 @@
  */
 
 import {BaseElement} from '../src/base-element';
-import {scopedQuerySelector} from '../src/dom';
+import {Services} from '../src/services';
+import {createElementWithAttributes} from '../src/dom';
 import {dev, user} from '../src/log';
 import {dict} from '../src/utils/object';
 import {registerElement} from '../src/service/custom-element-registry';
-import {Services} from '../src/services';
-import {createElementWithAttributes} from '../src/dom';
+import {scopedQuerySelector} from '../src/dom';
 import {toWin} from '../src/types';
 
 const TAG = 'amp-pixel';

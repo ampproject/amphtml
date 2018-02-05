@@ -16,8 +16,8 @@
 'use strict';
 
 
-const test = require('ava');
 const m = require('./');
+const test = require('ava');
 
 /*eslint "max-len": 0*/
 test('sync - parse size.txt', t => {

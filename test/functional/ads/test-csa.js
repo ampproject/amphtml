@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../testing/iframe';
+import * as _3p from '../../../3p/3p';
+import * as sinon from 'sinon';
 import {
+  AD_TYPE,
+  callbackWithBackfill,
+  callbackWithNoBackfill,
   csa,
+  resizeDeniedHandler,
   resizeIframe,
   resizeSuccessHandler,
-  resizeDeniedHandler,
-  callbackWithNoBackfill,
-  callbackWithBackfill,
-  AD_TYPE,
 } from '../../../ads/google/csa';
-import * as sinon from 'sinon';
-import * as _3p from '../../../3p/3p';
+import {createIframePromise} from '../../../testing/iframe';
 
 
 function getAds(type) {

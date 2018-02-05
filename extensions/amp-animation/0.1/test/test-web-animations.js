@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {
   Builder,
   WebAnimationRunner,
@@ -24,7 +25,6 @@ import {
 import {isArray, isObject} from '../../../../src/types';
 import {poll} from '../../../../testing/iframe';
 import {user} from '../../../../src/log';
-import * as sinon from 'sinon';
 
 
 describes.realWin('MeasureScanner', {amp: 1}, env => {

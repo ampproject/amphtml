@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import {Util} from './util';
 import {assertHttpsUrl} from '../../../src/url';
-import {user} from '../../../src/log';
 import {openWindowDialog} from '../../../src/dom';
 
-import {Util} from './util';
+import {user} from '../../../src/log';
 
 // Popup options
 const POP_FOLLOW = `status=no,resizable=yes,scrollbars=yes,

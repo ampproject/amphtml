@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
 import {Observable} from '../../../src/observable';
+import {dev} from '../../../src/log';
 
 /**
  * This class implements visibility calculations based on the

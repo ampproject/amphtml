@@ -18,10 +18,10 @@
 
 const fs = require('fs');
 const gulp = require('gulp-help')(require('gulp'));
+const PluginError = require('plugin-error');
 const postcss = require('postcss');
 const table = require('text-table');
 const through = require('through2');
-const PluginError = require('plugin-error');
 
 const tableHeaders = [
   ['selector', 'z-index', 'file'],

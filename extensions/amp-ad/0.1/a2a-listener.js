@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-import {closestByTag} from '../../../src/dom';
-import {isExperimentOn} from '../../../src/experiments';
-import {getData} from '../../../src/event-helper';
-import {user} from '../../../src/log';
 import {Services} from '../../../src/services';
+import {closestByTag} from '../../../src/dom';
+import {getData} from '../../../src/event-helper';
+import {isExperimentOn} from '../../../src/experiments';
 import {isProxyOrigin} from '../../../src/url';
 import {parseJson} from '../../../src/json';
+import {user} from '../../../src/log';
 
 /**
  * Sets up a special document wide listener that relays requests

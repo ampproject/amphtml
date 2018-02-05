@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../testing/iframe';
-import {BaseElement} from '../../src/base-element';
-import {installImg, AmpImg} from '../../builtins/amp-img';
-import {Services} from '../../src/services';
 import * as sinon from 'sinon';
+import {AmpImg, installImg} from '../../builtins/amp-img';
+import {BaseElement} from '../../src/base-element';
+import {Services} from '../../src/services';
+import {createIframePromise} from '../../testing/iframe';
 
 describe('amp-img', () => {
   let sandbox;

@@ -16,13 +16,13 @@
 
 import {AmpInstallServiceWorker} from '../amp-install-serviceworker';
 import {Services} from '../../../../src/services';
+import {installTimerService} from '../../../../src/service/timer-impl';
+import {loadPromise} from '../../../../src/event-helper';
 import {
   registerServiceBuilder,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../../../../src/service';
-import {loadPromise} from '../../../../src/event-helper';
-import {installTimerService} from '../../../../src/service/timer-impl';
 
 
 describes.realWin('amp-install-serviceworker', {

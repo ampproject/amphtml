@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {FrameOverlayManager} from '../../../ads/inabox/frame-overlay-manager';
 import {
   stubCollapseFrameForTesting,
   stubExpandFrameForTesting,
 } from '../../../ads/inabox/frame-overlay-helper';
-import * as sinon from 'sinon';
 
 
 const NOOP = () => {};

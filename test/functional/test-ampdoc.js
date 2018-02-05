@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
+import * as docready from '../../src/document-ready';
+import * as dom from '../../src/dom';
+import * as sinon from 'sinon';
 import {
   AmpDocService,
-  AmpDocSingle,
   AmpDocShadow,
   AmpDocShell,
+  AmpDocSingle,
   declareExtension,
   installShadowDoc,
   installShadowDocForShell,
   shadowDocHasBody,
   shadowDocReady,
 } from '../../src/service/ampdoc-impl';
-import * as dom from '../../src/dom';
-import * as docready from '../../src/document-ready';
-import {createShadowRoot} from '../../src/shadow-embed';
 import {
   ShadowDomVersion,
-  isShadowDomSupported,
   getShadowDomSupportedVersion,
+  isShadowDomSupported,
   setShadowDomSupportedVersionForTesting,
 } from '../../src/web-components';
-import * as sinon from 'sinon';
+import {createShadowRoot} from '../../src/shadow-embed';
 
 
 describe('AmpDocService', () => {

@@ -18,10 +18,10 @@ import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
-import {removeFragment} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
-import {tryFocus} from '../../../src/dom';
 import {parseJson} from '../../../src/json';
+import {removeFragment} from '../../../src/url';
+import {tryFocus} from '../../../src/dom';
 
 const TAG = 'amp-accordion';
 

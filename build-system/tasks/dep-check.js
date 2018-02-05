@@ -16,20 +16,20 @@
 'use strict';
 
 
-const BBPromise = require('bluebird');
 const babel = require('babelify');
+const BBPromise = require('bluebird');
 const browserify = require('browserify');
+const colors = require('ansi-colors');
+const createCtrlcHandler = require('../ctrlcHandler').createCtrlcHandler;
 const depCheckConfig = require('../dep-check-config');
+const exitCtrlcHandler = require('../ctrlcHandler').exitCtrlcHandler;
 const fs = BBPromise.promisifyAll(require('fs-extra'));
 const gulp = require('gulp-help')(require('gulp'));
+const log = require('fancy-log');
 const minimatch = require('minimatch');
 const path = require('path');
 const source = require('vinyl-source-stream');
 const through = require('through2');
-const colors = require('ansi-colors');
-const log = require('fancy-log');
-const createCtrlcHandler = require('../ctrlcHandler').createCtrlcHandler;
-const exitCtrlcHandler = require('../ctrlcHandler').exitCtrlcHandler;
 
 
 const root = process.cwd();

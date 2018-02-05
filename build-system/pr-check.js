@@ -26,11 +26,11 @@
  */
 const argv = require('minimist')(process.argv.slice(2));
 const atob = require('atob');
-const execOrDie = require('./exec').execOrDie;
-const getStdout = require('./exec').getStdout;
-const getStderr = require('./exec').getStderr;
-const path = require('path');
 const colors = require('ansi-colors');
+const execOrDie = require('./exec').execOrDie;
+const getStderr = require('./exec').getStderr;
+const getStdout = require('./exec').getStdout;
+const path = require('path');
 
 const fileLogPrefix = colors.bold(colors.yellow('pr-check.js:'));
 

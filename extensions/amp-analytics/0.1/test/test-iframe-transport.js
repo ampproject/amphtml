@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {urls} from '../../../../src/config';
-import {getIframeTransportScriptUrl, IframeTransport}
+import {IframeTransport, getIframeTransportScriptUrl}
   from '../iframe-transport';
-import {user} from '../../../../src/log';
 import {addParamsToUrl} from '../../../../src/url';
 import {expectPostMessage} from '../../../../testing/iframe.js';
+import {urls} from '../../../../src/config';
+import {user} from '../../../../src/log';
 
 describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
 

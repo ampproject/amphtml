@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {parseUrl} from '../../../src/url';
 import {Services} from '../../../src/services';
+import {parseUrl} from '../../../src/url';
 
 
 /**

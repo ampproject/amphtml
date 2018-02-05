@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {InaboxMessagingHost} from '../../../ads/inabox/inabox-messaging-host';
 import {deserializeMessage} from '../../../src/3p-frame-messaging';
 import {layoutRectLtwh} from '../../../src/layout-rect';
-import * as sinon from 'sinon';
 
 describes.realWin('inabox-host:messaging', {}, env => {
 

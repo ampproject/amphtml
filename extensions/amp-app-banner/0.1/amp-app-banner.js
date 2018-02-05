@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/layout';
-import {dict} from '../../../src/utils/object';
-import {user, dev, rethrowAsync} from '../../../src/log';
-import {Services} from '../../../src/services';
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
+import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
-import {removeElement, openWindowDialog} from '../../../src/dom';
+import {dev, rethrowAsync, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {isProtocolValid, isProxyOrigin} from '../../../src/url';
+import {openWindowDialog, removeElement} from '../../../src/dom';
 import {parseUrl} from '../../../src/url';
-import {isProxyOrigin, isProtocolValid} from '../../../src/url';
 
 const TAG = 'amp-app-banner';
 const OPEN_LINK_TIMEOUT = 1500;

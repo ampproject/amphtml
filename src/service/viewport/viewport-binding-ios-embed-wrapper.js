@@ -15,14 +15,14 @@
  */
 
 import {Observable} from '../../observable';
-import {layoutRectLtwh} from '../../layout-rect';
-import {dev} from '../../log';
-import {whenDocumentReady} from '../../document-ready';
 import {Services} from '../../services';
+import {ViewportBindingDef} from './viewport-binding-def';
+import {dev} from '../../log';
+import {isExperimentOn} from '../../experiments';
+import {layoutRectLtwh} from '../../layout-rect';
 import {px, setStyle} from '../../style';
 import {waitForBody} from '../../dom';
-import {ViewportBindingDef} from './viewport-binding-def';
-import {isExperimentOn} from '../../experiments';
+import {whenDocumentReady} from '../../document-ready';
 
 const TAG_ = 'Viewport';
 

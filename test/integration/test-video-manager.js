@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {listenOncePromise} from '../../src/event-helper';
-import {Services} from '../../src/services';
-import {isLayoutSizeDefined} from '../../src/layout';
+import * as sinon from 'sinon';
 import {PlayingStates, VideoEvents} from '../../src/video-interface';
+import {Services} from '../../src/services';
 import {
+  clearSupportsAutoplayCacheForTesting,
   installVideoManagerForDoc,
   supportsAutoplay,
-  clearSupportsAutoplayCacheForTesting,
 } from '../../src/service/video-manager-impl';
+import {isLayoutSizeDefined} from '../../src/layout';
+import {listenOncePromise} from '../../src/event-helper';
 import {
   runVideoPlayerIntegrationTests,
 } from './test-video-players-helper';
-import * as sinon from 'sinon';
 import {toArray} from '../../src/types';
 
 // TODO(dvoytenko): These tests time out when run with the prod AMP config.

@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {Observable} from '../../src/observable';
+import {Services} from '../../src/services';
 import {
   installActivityServiceForTesting,
 } from '../../extensions/amp-analytics/0.1/activity-impl';
-import {Services} from '../../src/services';
 import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
-import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installTimerService} from '../../src/service/timer-impl';
+import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {
   installViewportServiceForDoc,
 } from '../../src/service/viewport/viewport-impl';
+import {installVsyncService} from '../../src/service/vsync-impl';
 import {
   markElementScheduledForTesting,
 } from '../../src/service/custom-element-registry';
-import {installVsyncService} from '../../src/service/vsync-impl';
-import {Observable} from '../../src/observable';
-import * as sinon from 'sinon';
 
 describe('Activity getTotalEngagedTime', () => {
 

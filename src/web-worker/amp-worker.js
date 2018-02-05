@@ -15,11 +15,11 @@
  */
 
 import {FromWorkerMessageDef, ToWorkerMessageDef} from './web-worker-defines';
+import {Services} from '../services';
 import {calculateEntryPointScriptUrl} from '../service/extension-location';
 import {dev} from '../log';
-import {getService, registerServiceBuilder} from '../service';
 import {getMode} from '../mode';
-import {Services} from '../services';
+import {getService, registerServiceBuilder} from '../service';
 
 const TAG = 'web-worker';
 

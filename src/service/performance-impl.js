@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {layoutRectLtwh} from '../layout-rect';
-import {registerServiceBuilder, getService} from '../service';
 import {Services} from '../services';
-import {whenDocumentComplete} from '../document-ready';
-import {getMode} from '../mode';
-import {isCanary} from '../experiments';
-import {throttle} from '../utils/rate-limit';
 import {dict, map} from '../utils/object';
+import {getMode} from '../mode';
+import {getService, registerServiceBuilder} from '../service';
+import {isCanary} from '../experiments';
+import {layoutRectLtwh} from '../layout-rect';
+import {throttle} from '../utils/rate-limit';
+import {whenDocumentComplete} from '../document-ready';
 
 /**
  * Maximum number of tick events we allow to accumulate in the performance

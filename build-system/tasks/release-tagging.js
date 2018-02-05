@@ -15,14 +15,14 @@
  */
 'use strict';
 
-const BBPromise = require('bluebird');
 const argv = require('minimist')(process.argv.slice(2));
+const BBPromise = require('bluebird');
+const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const git = require('gulp-git');
 const gulp = require('gulp-help')(require('gulp'));
-const request = BBPromise.promisify(require('request'));
-const colors = require('ansi-colors');
 const log = require('fancy-log');
+const request = BBPromise.promisify(require('request'));
 
 const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
 const gitExec = BBPromise.promisify(git.exec);

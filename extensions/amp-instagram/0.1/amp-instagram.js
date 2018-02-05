@@ -47,14 +47,14 @@
  */
 
 import {CSS} from '../../../build/amp-instagram-0.1.css';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {setStyles} from '../../../src/style';
-import {removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
-import {tryParseJson} from '../../../src/json';
-import {isObject} from '../../../src/types';
 import {getData, listen} from '../../../src/event-helper';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {isObject} from '../../../src/types';
+import {removeElement} from '../../../src/dom';
+import {setStyles} from '../../../src/style';
 import {startsWith} from '../../../src/string';
+import {tryParseJson} from '../../../src/json';
+import {user} from '../../../src/log';
 
 /*
  * These padding values are specifc to intagram embeds with

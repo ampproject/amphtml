@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import * as bytes from '../../../../src/utils/bytes';
 import {AmpShareTracking} from '../amp-share-tracking';
 import {History} from '../../../../src/service/history-impl';
-import {Xhr} from '../../../../src/service/xhr-impl';
 import {Services} from '../../../../src/services';
+import {Xhr} from '../../../../src/service/xhr-impl';
 import {toggleExperiment} from '../../../../src/experiments';
-import * as bytes from '../../../../src/utils/bytes';
 
 describes.fakeWin('amp-share-tracking', {
   amp: {
