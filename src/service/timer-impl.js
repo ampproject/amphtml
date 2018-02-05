@@ -17,9 +17,9 @@
 // Requires polyfills in immediate side effect.
 import '../polyfills';
 
-import {user} from '../log';
 import {registerServiceBuilder} from '../service';
 import {reportError} from '../error';
+import {user} from '../log';
 
 /**
  * Helper with all things Timer.

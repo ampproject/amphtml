@@ -14,33 +14,33 @@
  * limitations under the License.
  */
 
+import * as log from '../../../../src/log';
 import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
 import {
   ClickEventTracker,
   VisibilityTracker,
 } from '../events';
-import {installCryptoService} from '../../../../src/service/crypto-impl';
-import {instrumentationServiceForDocForTesting} from '../instrumentation';
-import {variableServiceFor} from '../variables';
-import {
-  installUserNotificationManagerForTesting,
-} from '../../../amp-user-notification/0.1/amp-user-notification';
+import {Services} from '../../../../src/services';
+import {cidServiceForDocForTesting} from
+  '../../../../src/service/cid-impl';
 import {
   getService,
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service';
+import {installCryptoService} from '../../../../src/service/crypto-impl';
+import {
+  installUserNotificationManagerForTesting,
+} from '../../../amp-user-notification/0.1/amp-user-notification';
+import {instrumentationServiceForDocForTesting} from '../instrumentation';
+import {macroTask} from '../../../../testing/yield';
 import {map} from '../../../../src/utils/object';
-import {cidServiceForDocForTesting} from
-  '../../../../src/service/cid-impl';
-import {Services} from '../../../../src/services';
 import {
   newPerformanceResourceTiming,
   newResourceTimingSpec,
 } from './test-resource-timing';
-import {macroTask} from '../../../../testing/yield';
-import * as log from '../../../../src/log';
+import {variableServiceFor} from '../variables';
 
 /* global require: false */
 const VENDOR_REQUESTS = require('./vendor-requests.json');

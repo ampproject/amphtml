@@ -16,8 +16,8 @@
 
 import '../amp-facebook';
 import {facebook} from '../../../../3p/facebook';
-import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
 import {resetServiceForTesting} from '../../../../src/service';
+import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
 
 
 describes.realWin('amp-facebook', {

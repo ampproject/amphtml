@@ -14,38 +14,38 @@
  * limitations under the License.
  */
 
-import {isJsonScriptTag} from '../../../src/dom';
-import {assertHttpsUrl, appendEncodedParamStringToUrl} from '../../../src/url';
-import {dev, rethrowAsync, user} from '../../../src/log';
-import {expandTemplate} from '../../../src/string';
-import {isArray, isObject} from '../../../src/types';
-import {dict, hasOwn, map} from '../../../src/utils/object';
-import {sendRequest, sendRequestUsingIframe} from './transport';
-import {getIframeTransportScriptUrl, IframeTransport} from './iframe-transport';
-import {getAmpAdResourceId} from '../../../src/ad-helper';
-import {getTopWindow} from '../../../src/service';
-import {Services} from '../../../src/services';
-import {toggle} from '../../../src/style';
-import {isEnumValue} from '../../../src/types';
-import {parseJson} from '../../../src/json';
-import {getMode} from '../../../src/mode';
+import {ANALYTICS_CONFIG} from './vendors';
 import {Activity} from './activity-impl';
 import {AnalyticsEventType} from './events';
-import {
-  InstrumentationService,
-  instrumentationServicePromiseForDoc,
-} from './instrumentation';
 import {
   ExpansionOptions,
   installVariableService,
   variableServiceFor,
 } from './variables';
-import {ANALYTICS_CONFIG} from './vendors';
+import {IframeTransport, getIframeTransportScriptUrl} from './iframe-transport';
 import {
-  expandConfigRequest,
+  InstrumentationService,
+  instrumentationServicePromiseForDoc,
+} from './instrumentation';
+import {
   RequestHandler,
+  expandConfigRequest,
 } from './requests';
+import {Services} from '../../../src/services';
+import {appendEncodedParamStringToUrl, assertHttpsUrl} from '../../../src/url';
+import {dev, rethrowAsync, user} from '../../../src/log';
+import {dict, hasOwn, map} from '../../../src/utils/object';
+import {expandTemplate} from '../../../src/string';
+import {getAmpAdResourceId} from '../../../src/ad-helper';
+import {getMode} from '../../../src/mode';
+import {getTopWindow} from '../../../src/service';
+import {isArray, isObject} from '../../../src/types';
+import {isEnumValue} from '../../../src/types';
+import {isJsonScriptTag} from '../../../src/dom';
+import {parseJson} from '../../../src/json';
+import {sendRequest, sendRequestUsingIframe} from './transport';
 import {serializeResourceTiming} from './resource-timing';
+import {toggle} from '../../../src/style';
 
 const TAG = 'amp-analytics';
 

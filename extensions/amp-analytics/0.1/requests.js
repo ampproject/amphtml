@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import {user, dev} from '../../../src/log';
-import {isObject} from '../../../src/types';
-import {hasOwn, map} from '../../../src/utils/object';
-import {filterSplice} from '../../../src/utils/array';
-import {isArray, isFiniteNumber} from '../../../src/types';
-import {appendEncodedParamStringToUrl} from '../../../src/url';
+import {BatchingPluginFunctions, batchSegmentDef} from './batching-plugins';
 import {
-  variableServiceFor,
   ExpansionOptions,
+  variableServiceFor,
 } from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
-import {batchSegmentDef, BatchingPluginFunctions} from './batching-plugins';
-import {parseQueryString} from '../../../src/url';
+import {appendEncodedParamStringToUrl} from '../../../src/url';
+import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {filterSplice} from '../../../src/utils/array';
+import {hasOwn, map} from '../../../src/utils/object';
+import {isArray, isFiniteNumber} from '../../../src/types';
+import {isObject} from '../../../src/types';
+import {parseQueryString} from '../../../src/url';
 
 const TAG = 'AMP-ANALYTICS';
 

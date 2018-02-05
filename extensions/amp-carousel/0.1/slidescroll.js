@@ -21,13 +21,13 @@ import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
-import {isConnectedNode} from '../../../src/dom';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {getStyle, setStyle} from '../../../src/style';
-import {numeric} from '../../../src/transition';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {isConnectedNode} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {numeric} from '../../../src/transition';
 import {startsWith} from '../../../src/string';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const {string} */
 const SHOWN_CSS_CLASS = 'i-amphtml-slide-item-show';

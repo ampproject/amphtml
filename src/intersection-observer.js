@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import {Services} from './services';
+import {SubscriptionApi} from './iframe-helper';
 import {dev} from './log';
 import {dict} from './utils/object';
-import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
-import {SubscriptionApi} from './iframe-helper';
-import {Services} from './services';
+import {layoutRectLtwh, moveLayoutRect, rectIntersection} from './layout-rect';
 
 /**
  * The structure that defines the rectangle used in intersection observers.

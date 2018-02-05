@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {requireExternal} from '../../../src/module';
 import {map, omit} from '../../../src/utils/object';
+import {requireExternal} from '../../../src/module';
 
 
 /**

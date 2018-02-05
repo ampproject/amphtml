@@ -15,9 +15,9 @@
  */
 'use strict';
 
-const jison = require('jison');
-const gulp = require('gulp');
 const fs = require('fs-extra');
+const gulp = require('gulp');
+const jison = require('jison');
 
 gulp.task('compile-bind-expr', function() {
   const path = 'extensions/amp-bind/0.1/';

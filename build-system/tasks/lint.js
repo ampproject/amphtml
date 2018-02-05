@@ -17,21 +17,20 @@
 
 
 const argv = require('minimist')(process.argv.slice(2));
+const colors = require('ansi-colors');
 const config = require('../config');
 const eslint = require('gulp-eslint');
 const gulp = require('gulp-help')(require('gulp'));
 const gulpIf = require('gulp-if');
 const lazypipe = require('lazypipe');
-const watch = require('gulp-watch');
-const colors = require('ansi-colors');
 const log = require('fancy-log');
+const watch = require('gulp-watch');
 
 const isWatching = (argv.watch || argv.w) || false;
 
 const options = {
   fix: false,
   rulePaths: ['build-system/eslint-rules/'],
-  plugins: ['eslint-plugin-google-camelcase'],
 };
 
 /**

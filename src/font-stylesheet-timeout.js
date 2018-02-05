@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import {isExperimentOn} from './experiments';
 import {onDocumentReady} from './document-ready';
 import {urls} from './config';
-import {isExperimentOn} from './experiments';
 
 /**
  * While browsers put a timeout on font downloads (3s by default,

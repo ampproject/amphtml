@@ -15,15 +15,15 @@
  */
 
 import '../../src/polyfills';
+import '../../src/service/timer-impl';
 import {dev, initLogConstructor, setReportError} from '../../src/log';
-import {reportError} from '../../src/error';
 import {getCookie, setCookie} from '../../src/cookies';
 import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {listenOnce} from '../../src/event-helper';
 import {onDocumentReady} from '../../src/document-ready';
 //TODO(@cramforce): For type. Replace with forward declaration.
-import '../../src/service/timer-impl';
+import {reportError} from '../../src/error';
 
 initLogConstructor();
 setReportError(reportError);

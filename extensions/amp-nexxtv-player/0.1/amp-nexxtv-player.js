@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
 import {assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
-import {tryParseJson} from '../../../src/json';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {user, dev} from '../../../src/log';
 import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
-import {
-  removeElement,
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
+  removeElement,
 } from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/types';
-import {VideoEvents} from '../../../src/video-interface';
-import {Services} from '../../../src/services';
+import {tryParseJson} from '../../../src/json';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}

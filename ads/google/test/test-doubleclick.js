@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {writeAdScript} from '../doubleclick';
 import {createServedIframe} from '../../../testing/iframe';
+import {writeAdScript} from '../doubleclick';
 
 function verifyScript(win, name) {
   const scripts = ['gpt.js', 'glade.js'];

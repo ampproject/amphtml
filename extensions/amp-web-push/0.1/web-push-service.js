@@ -14,17 +14,17 @@
  * the License.
  */
 
-import {getMode} from '../../../src/mode';
-import {dev, user} from '../../../src/log';
 import {CSS} from '../../../build/amp-web-push-0.1.css';
 import {IFrameHost} from './iframehost';
+import {NotificationPermission, StorageKeys, TAG, WIDGET_TAG} from './vars';
+import {Services} from '../../../src/services';
+import {WebPushWidgetVisibilities} from './amp-web-push-widget';
 import {WindowMessenger} from './window-messenger';
+import {dev, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {openWindowDialog} from '../../../src/dom';
-import {parseUrl, parseQueryString} from '../../../src/url';
-import {TAG, WIDGET_TAG, NotificationPermission, StorageKeys} from './vars';
-import {WebPushWidgetVisibilities} from './amp-web-push-widget';
-import {Services} from '../../../src/services';
+import {parseQueryString, parseUrl} from '../../../src/url';
 
 /** @typedef {{
  *    isControllingFrame: boolean,
