@@ -53,6 +53,13 @@ let ElementTaskDef;
 
 
 /**
+ * @const {string}
+ */
+const ELEMENT_BLESSED_PROPERTY_NAME = '__AMP_MEDIA_IS_BLESSED__';
+
+
+
+/**
  * "Blesses" the specified media element for future playback without a user
  * gesture.  In order for this to bless the media element, this function must
  * be invoked in response to a user gesture.
@@ -61,6 +68,10 @@ let ElementTaskDef;
  *     element is complete.
  */
 function blessMediaElement(mediaEl) {
+  if (mediaEl[ELEMENT_BLESSED_PROPERTY_NAME]) {
+    return Promise.resolve();
+  }
+
   const isPaused = mediaEl.paused;
   const isMuted = mediaEl.muted;
   const currentTime = mediaEl.currentTime;
@@ -98,6 +109,7 @@ function blessMediaElement(mediaEl) {
 
     console.log('dispatch bless success');
     dispatch(mediaEl, 'bless', false);
+    mediaEl[ELEMENT_BLESSED_PROPERTY_NAME] = true;
   }).catch(reason => {
     console.log('dispatch bless fail');
     dispatch(mediaEl, 'bless', false);
