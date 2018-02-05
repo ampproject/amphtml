@@ -203,11 +203,15 @@ function declareExtension(name, version, options) {
  * @param {boolean} hasCss
  */
 function declareExtensionVersionAlias(name, version, lastestVersion, hasCss) {
-  extensionAliasFilePath[name + '-' + version + '.js'] =
-      name + '-' + lastestVersion + '.js';
+  extensionAliasFilePath[name + '-' + version + '.js'] = {
+    'name': name,
+    'file': name + '-' + lastestVersion + '.js',
+  };
   if (hasCss) {
-    extensionAliasFilePath[name + '-' + version + '.css'] =
-      name + '-' + lastestVersion + '.css';
+    extensionAliasFilePath[name + '-' + version + '.css'] = {
+      'name': name,
+      'file': name + '-' + lastestVersion + '.css',
+    };
   }
 }
 
@@ -246,7 +250,7 @@ function buildExtensions(options) {
   }
 
   var extensionsToBuild = [];
-  if (!!argv.extensions && argv.extensions !== true) {
+  if (!!argv.extensions) {
     extensionsToBuild = argv.extensions.split(',');
   }
 
@@ -603,6 +607,53 @@ function printConfigHelp(command) {
 }
 
 /**
+ * Parse the --extensions or the --noextensions flag and
+ * prints a helpful message that lets the developer know how to build
+ * a list of extensions or without any extensions.
+ */
+function parseExtensionFlags() {
+  if (!process.env.TRAVIS) {
+    if (argv.extensions) {
+      if (typeof(argv.extensions) !== 'string') {
+        log(red('ERROR:'), 'Missing list of extensions. Expected format:',
+            cyan('--extensions=amp-foo,amp-bar'),
+            'to choose which ones to build, or',
+            cyan('--extensions=minimal_set'),
+            'to build the ones needed to load',
+            cyan('article.amp.html') + '.');
+        process.exit(1);
+      }
+      if (argv.extensions === 'minimal_set') {
+        argv.extensions =
+            'amp-ad,amp-ad-network-adsense-impl,amp-audio,amp-video,' +
+            'amp-image-lightbox,amp-lightbox,amp-sidebar,' +
+            'amp-analytics,amp-app-banner';
+      }
+      log(green('Building extension(s):'),
+          cyan(argv.extensions.split(',').join(', ')));
+      log(green('⤷ Use'), cyan('--noextensions'),
+          green('to skip building extensions.'));
+    } else if (argv.noextensions) {
+      log(green('Not building any AMP extensions.'));
+      log(green('⤷ Use'), cyan('--extensions=amp-foo,amp-bar'),
+          green('to choose which ones to build, or'),
+          cyan('--extensions=minimal_set'),
+          green('to build the ones needed to load'),
+          cyan('article.amp.html') + green('.'));
+    } else {
+      log(green('Building all AMP extensions.'));
+      log(green('⤷ Use'), cyan('--noextensions'),
+          green('to skip building extensions, or'),
+          cyan('--extensions=amp-foo,amp-bar'),
+          green('to choose which ones to build, or'),
+          cyan('--extensions=minimal_set'),
+          green('to build the ones needed to load'),
+          cyan('article.amp.html') + green('.'));
+    }
+  }
+}
+
+/**
  * Enables runtime to be used for local testing by writing AMP_CONFIG to file.
  * Called at the end of "gulp build" and "gulp dist --fortesting".
  * @param {string} targetFile File to which the config is to be written.
@@ -626,29 +677,7 @@ function enableLocalTesting(targetFile) {
 function performBuild(watch) {
   process.env.NODE_ENV = 'development';
   printConfigHelp(watch ? 'gulp watch' : 'gulp build');
-  if (!process.env.TRAVIS) {
-    if (argv.extensions) {
-      if (typeof(argv.extensions) !== 'string') {
-        log(red('ERROR:'), 'Missing list of extensions. Expected format:',
-        cyan('--extensions=amp-foo,amp-bar'));
-        process.exit(1);
-      }
-      log(green('Building extension(s):'),
-          cyan(argv.extensions.split(',').join(', ')));
-      log(green('⤷ Use'), cyan('--noextensions'),
-          green('to skip building extensions.'));
-    } else if (argv.noextensions) {
-      log(green('Not building any AMP extensions.'));
-      log(green('⤷ Use'), cyan('--extensions=amp-foo,amp-bar'),
-          green('to choose which ones to build.'));
-    } else {
-      log(green('Building all AMP extensions.'));
-      log(green('⤷ Use'), cyan('--noextensions'),
-          green('to skip building extensions, or'),
-          cyan('--extensions=amp-foo,amp-bar'),
-          green('to choose which ones to build.'));
-    }
-  }
+  parseExtensionFlags();
   return compileCss(watch).then(() => {
     return Promise.all([
       polyfillsForTests(),
@@ -691,6 +720,7 @@ function dist() {
   if (argv.fortesting) {
     printConfigHelp('gulp dist --fortesting')
   }
+  parseExtensionFlags();
   return compileCss().then(() => {
     return Promise.all([
       compile(false, true, true),
@@ -724,8 +754,21 @@ function dist() {
  * Copy built extension to alias extension
  */
 function copyAliasExtensions() {
+  if (argv.noextensions) {
+    return;
+  }
+  var extensionsToBuild = [];
+  if (!!argv.extensions) {
+    extensionsToBuild = argv.extensions.split(',');
+  }
+
   for (var key in extensionAliasFilePath) {
-    fs.copySync('dist/v0/' + extensionAliasFilePath[key], 'dist/v0/' + key);
+    if (extensionsToBuild.length > 0 &&
+        extensionsToBuild.indexOf(extensionAliasFilePath[key]['name']) == -1) {
+      continue;
+    }
+    fs.copySync('dist/v0/' + extensionAliasFilePath[key]['file'],
+        'dist/v0/' + key);
   }
 }
 
@@ -891,12 +934,6 @@ function concatFilesToString(files) {
 function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
   if (options.minify) {
-    if (argv.minimal_set
-        && !(/integration|babel|amp-ad|lightbox|sidebar|analytics|app-banner/
-            .test(srcFilename))) {
-      log('Skipping', cyan(srcFilename), 'because of --minimal_set');
-      return Promise.resolve();
-    }
     const startTime = Date.now();
     return closureCompile(
         srcDir + srcFilename, destDir, options.minifiedName, options)
@@ -1392,7 +1429,6 @@ gulp.task('dist', 'Build production binaries',
             'Great for profiling and debugging production code.',
         fortesting: '  Compiles production binaries for local testing',
         config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-        minimal_set: '  Only compile files needed to load article.amp.html',
       }
     });
 gulp.task('watch', 'Watches for changes in files, re-builds when detected',
