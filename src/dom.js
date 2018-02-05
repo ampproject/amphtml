@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import {cssEscape} from '../third_party/css-escape/css-escape';
 import {dev} from './log';
 import {dict} from './utils/object';
-import {cssEscape} from '../third_party/css-escape/css-escape';
 import {startsWith} from './string';
 import {toWin} from './types';
 

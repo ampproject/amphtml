@@ -15,15 +15,15 @@
  */
 
 import {Poller} from './poller';
+import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {getMode} from '../../../src/mode';
-import {toArray} from '../../../src/types';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
+import {toArray} from '../../../src/types';
 import {user} from '../../../src/log';
-import {Services} from '../../../src/services';
 
 const SERVICE_ID = 'liveListManager';
 

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {AmpAdUIHandler} from './amp-ad-ui';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {ancestorElementsByTag} from '../../../src/dom';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
-import {AmpAdUIHandler} from './amp-ad-ui';
+import {user} from '../../../src/log';
 
 /** @const {string} Tag name for custom ad implementation. */
 export const TAG_AD_CUSTOM = 'amp-ad-custom';

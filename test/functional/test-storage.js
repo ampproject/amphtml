@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {
+  LocalStorageBinding,
   Storage,
   Store,
-  LocalStorageBinding,
   ViewerStorageBinding,
 } from '../../src/service/storage-impl';
 import {dev} from '../../src/log';
-import * as sinon from 'sinon';
 
 
 describe('Storage', () => {

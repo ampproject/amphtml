@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {
   adoptServiceForEmbed,
   adoptServiceForEmbedIfEmbeddable,
@@ -38,7 +39,6 @@ import {
   setParentWindow,
 } from '../../src/service';
 import {loadPromise} from '../../src/event-helper';
-import * as sinon from 'sinon';
 
 
 describe('service', () => {

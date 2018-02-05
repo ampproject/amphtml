@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {writeScript, loadScript, validateData} from '../3p/3p';
-import {getSourceUrl} from '../src/url';
 import {doubleclick} from '../ads/google/doubleclick';
+import {getSourceUrl} from '../src/url';
+import {loadScript, validateData, writeScript} from '../3p/3p';
 
 /* global rubicontag: false */
 

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {
-  GoogleAdLifecycleReporter,
-  BaseLifecycleReporter,
-} from '../performance';
-import {createIframePromise} from '../../../../testing/iframe';
-import {Services} from '../../../../src/services';
 import * as sinon from 'sinon';
+import {
+  BaseLifecycleReporter,
+  GoogleAdLifecycleReporter,
+} from '../performance';
+import {Services} from '../../../../src/services';
+import {createIframePromise} from '../../../../testing/iframe';
 
 /**
  * Verify that `address` matches all of the patterns in `matchlist`.

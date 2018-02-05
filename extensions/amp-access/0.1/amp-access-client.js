@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
-import {Services} from '../../../src/services';
 import {getMode} from '../../../src/mode';
 
 /** @const {string} */

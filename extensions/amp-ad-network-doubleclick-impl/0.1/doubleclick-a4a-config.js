@@ -20,22 +20,22 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 import {
+  ExperimentInfo, // eslint-disable-line no-unused-vars
+  forceExperimentBranch,
+  getExperimentBranch,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
+import {
   MANUAL_EXPERIMENT_ID,
-  extractUrlExperimentId,
   addExperimentIdToElement,
+  extractUrlExperimentId,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {dev, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {
   isCdnProxy,
 } from '../../../ads/google/a4a/utils';
-import {
-  /* eslint no-unused-vars: 0 */ ExperimentInfo,
-  getExperimentBranch,
-  forceExperimentBranch,
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
 import {tryParseJson} from '../../../src/json';
-import {getMode} from '../../../src/mode';
-import {dev, user} from '../../../src/log';
 
 /** @const {string} */
 export const DOUBLECLICK_A4A_EXPERIMENT_NAME = 'expDoubleclickA4A';

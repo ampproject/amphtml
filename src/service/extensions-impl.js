@@ -15,7 +15,6 @@
  */
 
 import {Services} from '../services';
-import {declareExtension} from './ampdoc-impl';
 import {
   adoptServiceForEmbed,
   adoptServiceForEmbedIfEmbeddable,
@@ -23,27 +22,28 @@ import {
   registerServiceBuilderForDoc,
   setParentWindow,
 } from '../service';
+import {calculateExtensionScriptUrl} from './extension-location';
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,
   upgradeOrRegisterElement,
 } from './custom-element-registry';
 import {cssText} from '../../build/css';
+import {declareExtension} from './ampdoc-impl';
 import {dev, rethrowAsync} from '../log';
 import {getMode} from '../mode';
-import installCustomElements from
-  'document-register-element/build/document-register-element.node';
-import {install as installDocContains} from '../polyfills/document-contains';
 import {
   install as installDOMTokenListToggle,
 } from '../polyfills/domtokenlist-toggle';
+import {install as installDocContains} from '../polyfills/document-contains';
 import {installImg} from '../../builtins/amp-img';
-import {installPixel} from '../../builtins/amp-pixel';
 import {installLayout} from '../../builtins/amp-layout';
+import {installPixel} from '../../builtins/amp-pixel';
 import {installStylesForDoc, installStylesLegacy} from '../style-installer';
-import {calculateExtensionScriptUrl} from './extension-location';
 import {map} from '../utils/object';
 import {toWin} from '../types';
+import installCustomElements from
+  'document-register-element/build/document-register-element.node';
 
 const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';

@@ -19,15 +19,15 @@ import {
   WindowPortEmulator,
   parseMessage,
 } from './messaging/messaging';
+import {Services} from '../../../src/services';
 import {TouchHandler} from './touch-handler';
-import {getAmpdoc} from '../../../src/service';
-import {isIframed} from '../../../src/dom';
-import {listen, listenOnce} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getAmpdoc} from '../../../src/service';
 import {getData} from '../../../src/event-helper';
 import {getSourceUrl} from '../../../src/url';
-import {Services} from '../../../src/services';
+import {isIframed} from '../../../src/dom';
+import {listen, listenOnce} from '../../../src/event-helper';
 
 const TAG = 'amp-viewer-integration';
 const APP = '__AMPHTML__';

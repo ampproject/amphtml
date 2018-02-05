@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {getCurve} from './curve';
-import {dev} from './log';
 import {Services} from './services';
+import {dev} from './log';
+import {getCurve} from './curve';
 
 const TAG_ = 'Animation';
 

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill';
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
-import {IntersectionObserverPolyfill} from '../../../src/intersection-observer-polyfill'; // eslint-disable-line max-len
 
 /**
  * - visibilePercentageMin: The percentage of pixels that need to be on screen

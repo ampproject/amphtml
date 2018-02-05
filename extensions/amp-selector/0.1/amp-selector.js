@@ -18,7 +18,7 @@ import {ActionTrust} from '../../../src/action-trust';
 import {CSS} from '../../../build/amp-selector-0.1.css';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
-import {closestBySelector, tryFocus, isRTL} from '../../../src/dom';
+import {closestBySelector, isRTL, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 

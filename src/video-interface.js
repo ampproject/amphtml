@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from './action-trust'; /* eslint no-unused-vars: 0 */
+import {ActionTrust} from './action-trust'; // eslint-disable-line no-unused-vars
 
 /**
  * VideoInterface defines a common video API which any AMP component that plays

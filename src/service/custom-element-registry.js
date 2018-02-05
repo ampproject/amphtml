@@ -17,8 +17,8 @@
 import {ElementStub, stubbedElements} from '../element-stub';
 import {createCustomElementClass} from '../custom-element';
 import {declareExtension} from './ampdoc-impl';
-import {user} from '../log';
 import {reportError} from '../error';
+import {user} from '../log';
 
 
 /**

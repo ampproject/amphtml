@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript, validateData, validateSrcPrefix} from '../3p/3p';
+import {validateData, validateSrcPrefix, writeScript} from '../3p/3p';
 
 const validHosts = [
   'https://go.eu.bbelements.com',

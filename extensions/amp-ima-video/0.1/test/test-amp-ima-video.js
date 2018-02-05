@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as imaVideoObj from '../../../../ads/google/imaVideo';
 import '../amp-ima-video';
+import * as imaVideoObj from '../../../../ads/google/imaVideo';
 
 
 describes.realWin('amp-ima-video', {

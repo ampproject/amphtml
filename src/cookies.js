@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import {endsWith} from './string';
 import {
   isProxyOrigin,
   parseUrl,
   tryDecodeUriComponent,
 } from './url';
-import {endsWith} from './string';
 import {urls} from './config';
 
 

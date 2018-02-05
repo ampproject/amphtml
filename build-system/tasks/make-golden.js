@@ -16,6 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const colors = require('ansi-colors');
 const dirname = require('path').dirname;
 const exec = require('child_process').exec;
 const fs = require('fs-extra');
@@ -23,7 +24,6 @@ const gulp = require('gulp');
 // imageDiff is currently a bad dependency as it has a fixed node 0.8 engine
 // requirement.
 const imageDiff = require('gulp-image-diff');
-const colors = require('ansi-colors');
 const log = require('fancy-log');
 
 /**

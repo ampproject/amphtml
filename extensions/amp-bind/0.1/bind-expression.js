@@ -15,8 +15,8 @@
  */
 
 import {AstNodeType} from './bind-expr-defines';
-import {getMode} from '../../../src/mode';
 import {dict, hasOwn, map} from '../../../src/utils/object';
+import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {parser} from './bind-expr-impl';
 import {user} from '../../../src/log';

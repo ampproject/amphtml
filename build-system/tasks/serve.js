@@ -16,10 +16,10 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const gulp = require('gulp-help')(require('gulp'));
-const nodemon = require('nodemon');
 const colors = require('ansi-colors');
+const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
+const nodemon = require('nodemon');
 
 const host = argv.host || 'localhost';
 const port = argv.port || process.env.PORT || 8000;

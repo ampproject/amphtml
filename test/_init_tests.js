@@ -15,29 +15,29 @@
  */
 
 // This must load before all other tests.
-import 'babel-polyfill';
 import '../src/polyfills';
+import 'babel-polyfill';
+import * as describes from '../testing/describes';
 import {Services} from '../src/services';
-import {removeElement} from '../src/dom';
-import {setReportError} from '../src/log';
+import {activateChunkingForTesting} from '../src/chunk';
 import {
   adopt,
   installAmpdocServices,
   installRuntimeServices,
 } from '../src/runtime';
-import {activateChunkingForTesting} from '../src/chunk';
 import {installDocService} from '../src/service/ampdoc-impl';
-import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
+import {installYieldIt} from '../testing/yield';
+import {removeElement} from '../src/dom';
 import {
-  resetAccumulatedErrorMessagesForTesting,
   reportError,
+  resetAccumulatedErrorMessagesForTesting,
 } from '../src/error';
-import {resetExperimentTogglesForTesting} from '../src/experiments';
 import {
   resetEvtListenerOptsSupportForTesting,
 } from '../src/event-helper-listen';
-import * as describes from '../testing/describes';
-import {installYieldIt} from '../testing/yield';
+import {resetExperimentTogglesForTesting} from '../src/experiments';
+import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
+import {setReportError} from '../src/log';
 import stringify from 'json-stable-stringify';
 
 // All exposed describes.

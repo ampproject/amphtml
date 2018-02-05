@@ -15,9 +15,9 @@
  */
 
 import {BaseElement} from '../src/base-element';
-import {scopedQuerySelector} from '../src/dom';
 import {isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/service/custom-element-registry';
+import {scopedQuerySelector} from '../src/dom';
 import {srcsetFromElement, srcsetFromSrc} from '../src/srcset';
 
 /**

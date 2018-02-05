@@ -24,11 +24,11 @@
  * check for an existing web push subscription.
  */
 
-import {WebPushService} from './web-push-service';
-import {WebPushConfig} from './amp-web-push-config';
-import {CONFIG_TAG, WIDGET_TAG, SERVICE_TAG, TAG} from './vars';
-import {WebPushWidget} from './amp-web-push-widget';
+import {CONFIG_TAG, SERVICE_TAG, TAG, WIDGET_TAG} from './vars';
 import {CSS} from '../../../build/amp-web-push-0.1.css';
+import {WebPushConfig} from './amp-web-push-config';
+import {WebPushService} from './web-push-service';
+import {WebPushWidget} from './amp-web-push-widget';
 
 
 AMP.extension(TAG, '0.1', AMP => {

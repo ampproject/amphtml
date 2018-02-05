@@ -17,8 +17,8 @@
 import {Observable} from './observable';
 import {Pass} from './pass';
 import {dev} from './log';
-import {toWin} from './types';
 import {findIndex} from './utils/array';
+import {toWin} from './types';
 
 
 const PROP_ = '__AMP_Gestures';

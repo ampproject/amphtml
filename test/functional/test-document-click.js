@@ -15,9 +15,9 @@
  */
 
 import '../../src/service/document-click';
+import * as Impression from '../../src/impression';
 import {addParamToUrl} from '../../src/url';
 import {macroTask} from '../../testing/yield';
-import * as Impression from '../../src/impression';
 
 
 describes.sandboxed('ClickHandler', {}, () => {

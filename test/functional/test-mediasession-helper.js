@@ -15,10 +15,10 @@
  */
 
 import {
-  setMediaSession,
-  parseSchemaImage,
-  parseOgImage,
   parseFavicon,
+  parseOgImage,
+  parseSchemaImage,
+  setMediaSession,
 } from '../../src/mediasession-helper';
 
 const schemaTemplate = `

@@ -15,10 +15,10 @@
  */
 
 import {addParamsToUrl} from '../../../src/url';
-import {getDataParamsFromAttributes} from '../../../src/dom';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getDataParamsFromAttributes} from '../../../src/dom';
+import {isLayoutSizeDefined} from '../../../src/layout';
 
 
 class AmpIzlesene extends AMP.BaseElement {

@@ -15,15 +15,15 @@
  */
 
 import {
-  setReportValiditySupportedForTesting,
-  getFormValidator,
-  FormValidator,
-  DefaultValidator,
-  PolyfillDefaultValidator,
   AsYouGoValidator,
-  ShowAllOnSubmitValidator,
+  DefaultValidator,
+  FormValidator,
   InteractAndSubmitValidator,
+  PolyfillDefaultValidator,
+  ShowAllOnSubmitValidator,
   ShowFirstOnSubmitValidator,
+  getFormValidator,
+  setReportValiditySupportedForTesting,
 } from '../form-validators';
 import {ValidationBubble} from '../validation-bubble';
 

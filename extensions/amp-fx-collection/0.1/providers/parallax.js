@@ -15,15 +15,15 @@
  */
 
 import {
-  installPositionObserverServiceForDoc,
-} from '../../../../src/service/position-observer/position-observer-impl';
-import {
   PositionObserverFidelity,
 } from '../../../../src/service/position-observer/position-observer-worker';
+import {Services} from '../../../../src/services';
 import {dev, user} from '../../../../src/log';
 import {getServiceForDoc} from '../../../../src/service';
-import {Services} from '../../../../src/services';
-import {setStyles, setStyle} from '../../../../src/style';
+import {
+  installPositionObserverServiceForDoc,
+} from '../../../../src/service/position-observer/position-observer-impl';
+import {setStyle, setStyles} from '../../../../src/style';
 
 const FACTOR_ATTR = 'data-parallax-factor';
 

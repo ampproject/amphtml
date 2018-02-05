@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {handleMessageEvent} from '../a2a-listener';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
-import * as sinon from 'sinon';
 
 describe('amp-ad a2a listener', function() {
   let sandbox;

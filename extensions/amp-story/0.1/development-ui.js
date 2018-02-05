@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dev, LogLevel} from '../../../src/log';
+import {LogLevel, dev} from '../../../src/log';
 import {Services} from '../../../src/services';
 import {isArray} from '../../../src/types';
 import {removeChildren} from '../../../src/dom';

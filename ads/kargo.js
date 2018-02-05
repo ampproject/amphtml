@@ -15,9 +15,9 @@
  */
 
 import {
+  computeInMasterFrame,
   loadScript,
   validateData,
-  computeInMasterFrame,
 } from '../3p/3p';
 
 /**

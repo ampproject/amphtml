@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import '../../../amp-ad/0.1/amp-ad';
+import * as vendors from '../vendors';
 import {AmpAdNetworkCloudflareImpl} from '../amp-ad-network-cloudflare-impl';
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {cloudflareIsA4AEnabled} from '../cloudflare-a4a-config';
 import {createElementWithAttributes} from '../../../../src/dom';
-import '../../../amp-ad/0.1/amp-ad';
-import * as vendors from '../vendors';
 
 
 describes.realWin('cloudflare-a4a-config', {

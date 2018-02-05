@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {TaskQueue} from '../../src/service/task-queue';
 import * as sinon from 'sinon';
+import {TaskQueue} from '../../src/service/task-queue';
 
 
 describe('TaskQueue', () => {

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {WindowMessenger} from '../window-messenger';
 import {AmpWebPushPermissionDialog} from '../amp-web-push-permission-dialog';
-import {WebPushService} from '../web-push-service';
 import {WebPushConfigAttributes} from '../amp-web-push-config';
+import {WebPushService} from '../web-push-service';
+import {WindowMessenger} from '../window-messenger';
 import {parseUrl} from '../../../../src/url';
 
 const FAKE_IFRAME_URL =

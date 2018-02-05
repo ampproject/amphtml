@@ -16,8 +16,8 @@
 
 
 import {AdStrategy} from '../ad-strategy';
-import {PlacementState, getPlacementsFromConfigObj} from '../placement';
 import {AdTracker} from '../ad-tracker';
+import {PlacementState, getPlacementsFromConfigObj} from '../placement';
 
 
 describes.realWin('amp-strategy', {

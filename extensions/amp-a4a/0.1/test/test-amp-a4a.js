@@ -14,47 +14,47 @@
  * limitations under the License.
  */
 
-import {FetchMock, networkFailure} from './fetch-mock';
-import {MockA4AImpl, TEST_URL} from './utils';
-import {createIframePromise} from '../../../../testing/iframe';
-import {
-  AmpA4A,
-  RENDERING_TYPE_HEADER,
-  DEFAULT_SAFEFRAME_VERSION,
-  SAFEFRAME_VERSION_HEADER,
-  protectFunctionWrapper,
-  assignAdUrlToError,
-} from '../amp-a4a';
-import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
-import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
-import {Signals} from '../../../../src/utils/signals';
-import {Extensions} from '../../../../src/service/extensions-impl';
-import {Viewer} from '../../../../src/service/viewer-impl';
-import {cancellation} from '../../../../src/error';
-import {
-  data as validCSSAmp,
-} from './testdata/valid_css_at_rules_amp.reserialized';
-import {data as testFragments} from './testdata/test_fragments';
-import {
-  resetScheduledElementForTesting,
-} from '../../../../src/service/custom-element-registry';
-import {Services} from '../../../../src/services';
-import {incrementLoadingAds} from '../../../amp-ad/0.1/concurrent-load';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {dev, user} from '../../../../src/log';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
-import * as sinon from 'sinon';
-// The following namespaces are imported so that we can stub and spy on certain
-// methods in tests.
-import * as analytics from '../../../../src/analytics';
-import * as analyticsExtension from '../../../../src/extension-analytics';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+// The following namespaces are imported so that we can stub and spy on certain
+// methods in tests.
+import * as analytics from '../../../../src/analytics';
+import * as analyticsExtension from '../../../../src/extension-analytics';
+import * as sinon from 'sinon';
+import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
+import {
+  AmpA4A,
+  DEFAULT_SAFEFRAME_VERSION,
+  RENDERING_TYPE_HEADER,
+  SAFEFRAME_VERSION_HEADER,
+  assignAdUrlToError,
+  protectFunctionWrapper,
+} from '../amp-a4a';
+import {Extensions} from '../../../../src/service/extensions-impl';
+import {FetchMock, networkFailure} from './fetch-mock';
+import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
+import {MockA4AImpl, TEST_URL} from './utils';
+import {Services} from '../../../../src/services';
+import {Signals} from '../../../../src/utils/signals';
+import {Viewer} from '../../../../src/service/viewer-impl';
+import {cancellation} from '../../../../src/error';
+import {createElementWithAttributes} from '../../../../src/dom';
+import {createIframePromise} from '../../../../testing/iframe';
+import {dev, user} from '../../../../src/log';
+import {incrementLoadingAds} from '../../../amp-ad/0.1/concurrent-load';
+import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {
+  resetScheduledElementForTesting,
+} from '../../../../src/service/custom-element-registry';
+import {data as testFragments} from './testdata/test_fragments';
+import {
+  data as validCSSAmp,
+} from './testdata/valid_css_at_rules_amp.reserialized';
 
 describe('amp-a4a', () => {
   let sandbox;

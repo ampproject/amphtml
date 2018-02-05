@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {writeScript} from './3p';
-import {user} from '../src/log';
 import {setStyle} from '../src/style';
+import {user} from '../src/log';
+import {writeScript} from './3p';
 
 /**
  * Get the correct script for the mathml formula.

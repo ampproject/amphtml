@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {installTimerService} from '../../src/service/timer-impl.js';
-import {Input} from '../../src/input';
 import * as sinon from 'sinon';
+import {Input} from '../../src/input';
+import {installTimerService} from '../../src/service/timer-impl.js';
 
 
 describe('Input', () => {

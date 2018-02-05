@@ -14,33 +14,33 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
+import * as sinon from 'sinon';
+import * as url from '../../src/url';
+import {Crypto, installCryptoService} from '../../src/service/crypto-impl';
 import {Services} from '../../src/services';
 import {
   cidServiceForDocForTesting,
   getProxySourceOrigin,
-  optOutOfCid,
   isOptedOutOfCid,
+  optOutOfCid,
 } from '../../src/service/cid-impl';
-import {installCryptoService, Crypto} from '../../src/service/crypto-impl';
-import {installDocService} from '../../src/service/ampdoc-impl';
-import {installDocumentStateService} from '../../src/service/document-state';
-import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
-import {parseUrl} from '../../src/url';
-import {installPlatformService} from '../../src/service/platform-impl';
-import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
-import {installTimerService} from '../../src/service/timer-impl';
+import {getCookie, setCookie} from '../../src/cookies';
 import {
   installCryptoPolyfill,
 } from '../../extensions/amp-crypto-polyfill/0.1/amp-crypto-polyfill';
+import {installDocService} from '../../src/service/ampdoc-impl';
+import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
+import {installDocumentStateService} from '../../src/service/document-state';
 import {
   installExtensionsService,
 } from '../../src/service/extensions-impl';
-import {stubServiceForDoc} from '../../testing/test-helper';
+import {installPlatformService} from '../../src/service/platform-impl';
+import {installTimerService} from '../../src/service/timer-impl';
+import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {macroTask} from '../../testing/yield';
-import * as url from '../../src/url';
-import {setCookie, getCookie} from '../../src/cookies';
-import * as sinon from 'sinon';
-import * as lolex from 'lolex';
+import {parseUrl} from '../../src/url';
+import {stubServiceForDoc} from '../../testing/test-helper';
 
 const DAY = 24 * 3600 * 1000;
 

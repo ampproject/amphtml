@@ -18,10 +18,10 @@
 
 import * as sinon from 'sinon';
 
-import {dev, user} from '../../../../src/log';
-import {base64EncodeFromBytes} from '../../../../src/utils/base64';
-import {utf8Encode} from '../../../../src/utils/bytes';
 import {SignatureVerifier, VerificationStatus} from '../signature-verifier';
+import {base64EncodeFromBytes} from '../../../../src/utils/base64';
+import {dev, user} from '../../../../src/log';
+import {utf8Encode} from '../../../../src/utils/bytes';
 
 const networkFailure = {throws: new TypeError('Failed to fetch')};
 const noop = () => {};

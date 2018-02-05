@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../src/amp-events';
 import {
   createFixtureIframe,
-  pollForLayout,
   poll,
+  pollForLayout,
 } from '../../testing/iframe';
-import {AmpEvents} from '../../src/amp-events';
 
 describe.configure().enableIe().retryOnSaucelabs().run('Rendering of' +
     ' one ad', () => {

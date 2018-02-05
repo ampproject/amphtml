@@ -14,35 +14,35 @@
  * limitations under the License.
  */
 
+import * as trackPromise from '../../src/impression';
 import {Observable} from '../../src/observable';
 import {Services} from '../../src/services';
-import {createIframePromise} from '../../testing/iframe';
-import {user} from '../../src/log';
-import {
-  markElementScheduledForTesting,
-  resetScheduledElementForTesting,
-} from '../../src/service/custom-element-registry';
 import {cidServiceForDocForTesting} from
   '../../src/service/cid-impl';
+import {createIframePromise} from '../../testing/iframe';
+import {
+  extractClientIdFromGaCookie,
+  installUrlReplacementsServiceForDoc,
+} from '../../src/service/url-replacements-impl';
+import {
+  installActivityServiceForTesting,
+} from '../../extensions/amp-analytics/0.1/activity-impl';
 import {installCryptoService} from '../../src/service/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc} from
   '../../src/service/document-info-impl';
 import {
-  installActivityServiceForTesting,
-} from '../../extensions/amp-analytics/0.1/activity-impl';
+  markElementScheduledForTesting,
+  resetScheduledElementForTesting,
+} from '../../src/service/custom-element-registry';
 import {
-  installUrlReplacementsServiceForDoc,
-  extractClientIdFromGaCookie,
-} from '../../src/service/url-replacements-impl';
+  mockWindowInterface,
+  stubServiceForDoc,
+} from '../../testing/test-helper';
+import {parseUrl} from '../../src/url';
 import {registerServiceBuilder} from '../../src/service';
 import {setCookie} from '../../src/cookies';
-import {parseUrl} from '../../src/url';
-import * as trackPromise from '../../src/impression';
-import {
-  stubServiceForDoc,
-  mockWindowInterface,
-} from '../../testing/test-helper';
+import {user} from '../../src/log';
 
 
 describes.sandboxed('UrlReplacements', {}, () => {

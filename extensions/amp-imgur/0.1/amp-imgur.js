@@ -27,13 +27,13 @@
   * </code>
   */
 
-import {user} from '../../../src/log';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeElement} from '../../../src/dom';
-import {tryParseJson} from '../../../src/json';
-import {isObject} from '../../../src/types';
 import {getData, listen} from '../../../src/event-helper';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {isObject} from '../../../src/types';
+import {removeElement} from '../../../src/dom';
 import {startsWith} from '../../../src/string';
+import {tryParseJson} from '../../../src/json';
+import {user} from '../../../src/log';
 
 export class AmpImgur extends AMP.BaseElement {
 

@@ -15,11 +15,11 @@
  */
 'use strict';
 
+const colors = require('ansi-colors');
 const gulp = require('gulp-help')(require('gulp'));
 const jsonGlobs = require('../config').jsonGlobs;
-const through2 = require('through2');
-const colors = require('ansi-colors');
 const log = require('fancy-log');
+const through2 = require('through2');
 
 /**
  * Fail if JSON files are valid.

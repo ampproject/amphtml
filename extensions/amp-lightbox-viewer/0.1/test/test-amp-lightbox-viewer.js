@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {toggleExperiment} from '../../../../src/experiments';
-import {installLightboxManager} from '../amp-lightbox-viewer';
 import '../../../amp-carousel/0.1/amp-carousel';
+import {installLightboxManager} from '../amp-lightbox-viewer';
+import {toggleExperiment} from '../../../../src/experiments';
 
 
 describes.realWin('amp-lightbox-viewer', {

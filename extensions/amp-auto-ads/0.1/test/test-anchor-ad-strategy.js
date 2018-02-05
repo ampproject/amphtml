@@ -15,9 +15,9 @@
  */
 
 import '../../../amp-ad/0.1/amp-ad';
-import {waitForChild} from '../../../../src/dom';
-import {Services} from '../../../../src/services';
 import {AnchorAdStrategy} from '../anchor-ad-strategy';
+import {Services} from '../../../../src/services';
+import {waitForChild} from '../../../../src/dom';
 
 
 describes.realWin('anchor-ad-strategy', {

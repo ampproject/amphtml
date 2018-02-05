@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import * as variant from '../variant';
 import {AmpExperiment} from '../amp-experiment';
 import {Services} from '../../../../src/services';
-import * as variant from '../variant';
 
 
 describes.realWin('amp-experiment', {

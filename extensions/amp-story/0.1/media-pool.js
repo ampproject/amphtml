@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {BLANK_AUDIO_SRC, BLANK_VIDEO_SRC} from './default-media';
 import {
   closestBySelector,
   isConnectedNode,
@@ -23,7 +24,6 @@ import {
 import {dev} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
 import {toWin} from '../../../src/types';
-import {BLANK_AUDIO_SRC, BLANK_VIDEO_SRC} from './default-media';
 
 
 

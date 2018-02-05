@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {
   computeInMasterFrame,
-  validateSrcPrefix,
-  validateSrcContains,
+  loadScript,
   nextTick,
   validateData,
-  loadScript,
+  validateSrcContains,
+  validateSrcPrefix,
 } from '../../3p/3p';
-import * as sinon from 'sinon';
 
 describe('3p', () => {
 

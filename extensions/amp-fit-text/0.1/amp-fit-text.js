@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import * as st from '../../../src/style';
 import {CSS} from '../../../build/amp-fit-text-0.1.css';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
-import * as st from '../../../src/style';
 
 const TAG = 'amp-fit-text';
 const LINE_HEIGHT_EM_ = 1.15;

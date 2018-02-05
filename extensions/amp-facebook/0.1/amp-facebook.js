@@ -15,11 +15,11 @@
  */
 
 
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {listenFor} from '../../../src/iframe-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeElement} from '../../../src/dom';
 import {dashToUnderline} from '../../../src/string';
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {listenFor} from '../../../src/iframe-helper';
+import {removeElement} from '../../../src/dom';
 
 class AmpFacebook extends AMP.BaseElement {
 

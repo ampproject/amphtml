@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 import {RTC_VENDORS} from './callout-vendors.js';
-import {tryParseJson} from '../../../src/json';
-import {dev, user} from '../../../src/log';
 import {Services} from '../../../src/services';
+import {dev, user} from '../../../src/log';
 import {isArray, isObject} from '../../../src/types';
 import {isSecureUrl} from '../../../src/url';
+import {tryParseJson} from '../../../src/json';
 
 /** @type {string} */
 const TAG = 'real-time-config';

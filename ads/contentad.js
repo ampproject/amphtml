@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {writeScript, validateData} from '../3p/3p';
 import {parseUrl} from '../src/url';
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global

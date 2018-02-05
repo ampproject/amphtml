@@ -16,10 +16,10 @@
 
 import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
+import {AmpEvents} from '../../../../src/amp-events';
 import {AmpLiveList, getNumberMaxOrDefault} from '../amp-live-list';
 import {LiveListManager} from '../live-list-manager';
 import {adopt} from '../../../../src/runtime';
-import {AmpEvents} from '../../../../src/amp-events';
 
 adopt(window);
 

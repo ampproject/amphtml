@@ -16,15 +16,15 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const path = require('path');
 const BBPromise = require('bluebird');
 const chalk = require('chalk');
+const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const getStdout = require('../exec').getStdout;
 const gulp = require('gulp-help')(require('gulp'));
-const markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
-const colors = require('ansi-colors');
 const log = require('fancy-log');
+const markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
+const path = require('path');
 
 
 /**

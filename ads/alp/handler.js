@@ -21,9 +21,9 @@ import {
 import {closest, openWindowDialog} from '../../src/dom';
 import {dev} from '../../src/log';
 import {dict} from '../../src/utils/object';
-import {urls} from '../../src/config';
-import {isProxyOrigin, isLocalhostOrigin, parseUrl} from '../../src/url';
+import {isLocalhostOrigin, isProxyOrigin, parseUrl} from '../../src/url';
 import {startsWith} from '../../src/string';
+import {urls} from '../../src/config';
 
 /**
  * Install a click listener that transforms navigation to the AMP cache

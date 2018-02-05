@@ -18,9 +18,9 @@ import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {numeric} from '../../../src/transition';
 import {dev} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
+import {numeric} from '../../../src/transition';
 
 /** @const {string} */
 const TAG = 'amp-scrollable-carousel';

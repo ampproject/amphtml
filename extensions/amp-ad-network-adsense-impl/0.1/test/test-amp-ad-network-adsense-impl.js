@@ -14,33 +14,33 @@
  * limitations under the License.
  */
 
-import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
-import {
-  AmpAdNetworkAdsenseImpl,
-  resetSharedState,
-} from '../amp-ad-network-adsense-impl';
-import {Services} from '../../../../src/services';
-import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
-import {
-  AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
-} from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {
-  createElementWithAttributes,
-  addAttributesToElement,
-} from '../../../../src/dom';
-import {
-  toggleExperiment,
-  forceExperimentBranch,
-} from '../../../../src/experiments';
-import {
-  ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
-  AdSenseAmpAutoAdsHoldoutBranches,
-} from '../../../../ads/google/adsense-amp-auto-ads';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+import {
+  ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
+  AdSenseAmpAutoAdsHoldoutBranches,
+} from '../../../../ads/google/adsense-amp-auto-ads';
+import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
+import {
+  AmpAdNetworkAdsenseImpl,
+  resetSharedState,
+} from '../amp-ad-network-adsense-impl';
+import {AmpAdUIHandler} from '../../../amp-ad/0.1/amp-ad-ui'; // eslint-disable-line no-unused-vars
+import {
+  AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
+} from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import {Services} from '../../../../src/services';
+import {
+  addAttributesToElement,
+  createElementWithAttributes,
+} from '../../../../src/dom';
+import {
+  forceExperimentBranch,
+  toggleExperiment,
+} from '../../../../src/experiments';
 
 function createAdsenseImplElement(attributes, doc, opt_tag) {
   const tag = opt_tag || 'amp-ad';

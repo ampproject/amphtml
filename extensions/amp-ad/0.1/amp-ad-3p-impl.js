@@ -14,32 +14,32 @@
  * limitations under the License.
  */
 
-import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
-import {
-  is3pThrottled,
-  getAmpAdRenderOutsideViewport,
-  incrementLoadingAds,
-} from './concurrent-load';
-import {getAdCid} from '../../../src/ad-cid';
-import {preloadBootstrap} from '../../../src/3p-frame';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {isAdPositionAllowed, getAdContainer}
-  from '../../../src/ad-helper';
-import {adConfig} from '../../../ads/_config';
-import {
-  googleLifecycleReporterFactory,
-} from '../../../ads/google/a4a/google-data-reporter';
-import {user, dev} from '../../../src/log';
-import {getIframe} from '../../../src/3p-frame';
-import {setupA2AListener} from './a2a-listener';
-import {moveLayoutRect} from '../../../src/layout-rect';
-import {clamp} from '../../../src/utils/math';
 import {AmpAdUIHandler} from './amp-ad-ui';
-import {toWin} from '../../../src/types';
+import {AmpAdXOriginIframeHandler} from './amp-ad-xorigin-iframe-handler';
+import {adConfig} from '../../../ads/_config';
+import {clamp} from '../../../src/utils/math';
 import {
   computedStyle,
   setStyle,
 } from '../../../src/style';
+import {dev, user} from '../../../src/log';
+import {getAdCid} from '../../../src/ad-cid';
+import {getAdContainer, isAdPositionAllowed}
+  from '../../../src/ad-helper';
+import {
+  getAmpAdRenderOutsideViewport,
+  incrementLoadingAds,
+  is3pThrottled,
+} from './concurrent-load';
+import {getIframe} from '../../../src/3p-frame';
+import {
+  googleLifecycleReporterFactory,
+} from '../../../ads/google/a4a/google-data-reporter';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {moveLayoutRect} from '../../../src/layout-rect';
+import {preloadBootstrap} from '../../../src/3p-frame';
+import {setupA2AListener} from './a2a-listener';
+import {toWin} from '../../../src/types';
 
 /** @const {string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';

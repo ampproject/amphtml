@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {
-  InstrumentationService,
-} from '../instrumentation.js';
+import * as sinon from 'sinon';
+import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {
   AnalyticsEventType,
   ClickEventTracker,
@@ -26,15 +25,16 @@ import {
   TimerEventTracker,
   VisibilityTracker,
 } from '../events';
-import * as sinon from 'sinon';
 
-import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
-import {installTimerService} from '../../../../src/service/timer-impl';
+import {
+  InstrumentationService,
+} from '../instrumentation.js';
+import {Services} from '../../../../src/services';
 import {installPlatformService} from '../../../../src/service/platform-impl';
 import {
   installResourcesServiceForDoc,
 } from '../../../../src/service/resources-impl';
-import {Services} from '../../../../src/services';
+import {installTimerService} from '../../../../src/service/timer-impl';
 
 describes.realWin('InstrumentationService', {amp: 1}, env => {
   let win;

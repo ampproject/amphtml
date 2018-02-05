@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {openWindowDialog} from '../../../src/dom';
-import {dev, user} from '../../../src/log';
 import {Services} from '../../../src/services';
-import {toWin} from '../../../src/types';
-
 import {Util} from './util';
+import {dev, user} from '../../../src/log';
+import {openWindowDialog} from '../../../src/dom';
+
+import {toWin} from '../../../src/types';
 
 // Popup options
 const POP = 'status=no,resizable=yes,scrollbars=yes,' +

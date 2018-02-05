@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
+import {Services} from '../../src/services';
 import {
+  getExtraParamsUrl,
   getTrackImpressionPromise,
   maybeTrackImpression,
   resetTrackImpressionPromiseForTesting,
   shouldAppendExtraParams,
-  getExtraParamsUrl,
 } from '../../src/impression';
-import {toggleExperiment} from '../../src/experiments';
-import {Services} from '../../src/services';
 import {macroTask} from '../../testing/yield';
+import {toggleExperiment} from '../../src/experiments';
 import {user} from '../../src/log';
-import * as sinon from 'sinon';
 
 describe('impression', () => {
 

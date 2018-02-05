@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {
-  getPublisherSpecifiedRefreshInterval,
-  RefreshManager,
   DATA_ATTR_NAME,
   DATA_MANAGER_ID_NAME,
   METATAG_NAME,
+  RefreshManager,
+  getPublisherSpecifiedRefreshInterval,
 } from '../refresh-manager';
 import {timerFor} from '../../../../src/services';
-import * as sinon from 'sinon';
 
 function getTestElement() {
   const div = window.document.createElement('div');

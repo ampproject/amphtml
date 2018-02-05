@@ -22,25 +22,25 @@
  * For details, see https://goo.gl/Mwaacs
  */
 
+import {GoogleCidApi, TokenStatus} from './cid-api';
+import {Services} from '../services';
+import {ViewerCidApi} from './viewer-cid-api';
+import {base64UrlEncodeFromBytes} from '../utils/base64';
+import {dev, rethrowAsync, user} from '../log';
+import {dict} from '../utils/object';
 import {getCookie, setCookie} from '../cookies';
+import {getCryptoRandomBytesArray} from '../utils/bytes';
 import {
-  registerServiceBuilderForDoc,
   getServiceForDoc,
+  registerServiceBuilderForDoc,
 } from '../service';
 import {
   getSourceOrigin,
   isProxyOrigin,
   parseUrl,
 } from '../url';
-import {dict} from '../utils/object';
 import {isIframed} from '../dom';
-import {getCryptoRandomBytesArray} from '../utils/bytes';
-import {Services} from '../services';
-import {base64UrlEncodeFromBytes} from '../utils/base64';
 import {parseJson, tryParseJson} from '../json';
-import {dev, user, rethrowAsync} from '../log';
-import {ViewerCidApi} from './viewer-cid-api';
-import {GoogleCidApi, TokenStatus} from './cid-api';
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
 

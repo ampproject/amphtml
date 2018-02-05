@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {getMode} from '../../../src/mode';
-import {getData, listen} from '../../../src/event-helper';
+import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {getData, listen} from '../../../src/event-helper';
+import {getMode} from '../../../src/mode';
 import {openWindowDialog} from '../../../src/dom';
 import {parseUrl} from '../../../src/url';
-import {Services} from '../../../src/services';
 import {urls} from '../../../src/config';
-import {dict} from '../../../src/utils/object';
 
 /** @const */
 const TAG = 'amp-access-login';

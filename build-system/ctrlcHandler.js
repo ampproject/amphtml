@@ -15,8 +15,8 @@
  */
 
 const colors = require('ansi-colors');
-const log = require('fancy-log');
 const execAsync = require('./exec').execAsync;
+const log = require('fancy-log');
 
 const green = colors.green;
 const cyan = colors.cyan;

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../3p/3p';
 import {addParamsToUrl} from '../src/url';
+import {loadScript, validateData} from '../3p/3p';
 import {parseJson} from '../src/json';
 
 /**

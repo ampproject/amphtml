@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import {JankMeter} from './jank-meter';
 import {Pass} from '../pass';
 import {Services} from '../services';
 import {cancellation} from '../error';
 import {dev, rethrowAsync} from '../log';
-import {registerServiceBuilder, getService} from '../service';
+import {getService, registerServiceBuilder} from '../service';
 import {installTimerService} from './timer-impl';
-import {JankMeter} from './jank-meter';
 
 /** @const {time} */
 const FRAME_TIME = 16;

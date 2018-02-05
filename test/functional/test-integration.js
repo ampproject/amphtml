@@ -20,10 +20,10 @@
 import {
   draw3p,
   ensureFramed,
-  validateParentOrigin,
+  parseFragment,
   validateAllowedEmbeddingOrigins,
   validateAllowedTypes,
-  parseFragment,
+  validateParentOrigin,
 } from '../../3p/integration';
 import {getRegistrations, register} from '../../3p/3p';
 

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {FixedLayer} from '../../src/service/fixed-layer';
-import {installPlatformService} from '../../src/service/platform-impl';
 import {endsWith} from '../../src/string';
-import * as sinon from 'sinon';
+import {installPlatformService} from '../../src/service/platform-impl';
 
 
 describe('FixedLayer', () => {

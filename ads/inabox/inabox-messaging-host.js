@@ -15,15 +15,15 @@
  */
 
 import {FrameOverlayManager} from './frame-overlay-manager';
-import {PositionObserver} from './position-observer';
 import {
-  serializeMessage,
-  deserializeMessage,
   MessageType,
+  deserializeMessage,
+  serializeMessage,
 } from '../../src/3p-frame-messaging';
+import {PositionObserver} from './position-observer';
 import {dev} from '../../src/log';
-import {getData} from '../../src/event-helper';
 import {dict} from '../../src/utils/object';
+import {getData} from '../../src/event-helper';
 import {layoutRectFromDomRect} from '../../src/layout-rect';
 /** @const */
 const TAG = 'InaboxMessagingHost';
@@ -307,10 +307,9 @@ export class InaboxMessagingHost {
  */
 function canInspectWindow_(win) {
   try {
-    const /* eslint no-unused-vars: 0 */ unused =
-      !!win.location.href && win['test'];
+    const unused = !!win.location.href && win['test']; // eslint-disable-line no-unused-vars
     return true;
-  } catch (unusedErr) {
+  } catch (unusedErr) { // eslint-disable-line no-unused-vars
     return false;
   }
 }

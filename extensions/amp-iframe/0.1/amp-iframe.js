@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {
   IntersectionObserverApi,
 } from '../../../src/intersection-observer-polyfill';
+import {Services} from '../../../src/services';
+import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
+import {closestBySelector, removeElement} from '../../../src/dom';
+import {dev, user} from '../../../src/log';
+import {endsWith} from '../../../src/string';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {endsWith} from '../../../src/string';
+import {isSecureUrl, parseUrl, removeFragment} from '../../../src/url';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement, closestBySelector} from '../../../src/dom';
-import {removeFragment, parseUrl, isSecureUrl} from '../../../src/url';
-import {Services} from '../../../src/services';
-import {user, dev} from '../../../src/log';
-import {utf8Encode} from '../../../src/utils/bytes.js';
-import {urls} from '../../../src/config';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {setStyle} from '../../../src/style';
+import {urls} from '../../../src/config';
+import {utf8Encode} from '../../../src/utils/bytes.js';
 
 /** @const {string} */
 const TAG_ = 'amp-iframe';

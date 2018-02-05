@@ -15,9 +15,9 @@
  */
 
 import {TAG} from './vars';
+import {dev} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
 import {parseUrl} from '../../../src/url';
-import {dev} from '../../../src/log';
 
 /** @typedef {{
  *    CONNECT_HANDSHAKE: string,

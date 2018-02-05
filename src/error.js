@@ -15,27 +15,27 @@
  */
 
 
-import {getMode} from './mode';
+import {AmpEvents} from './amp-events';
+import {Services} from './services';
+import {
+  USER_ERROR_SENTINEL,
+  dev,
+  duplicateErrorIfNecessary,
+  isUserErrorEmbed,
+  isUserErrorMessage,
+} from './log';
+import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
 import {exponentialBackoff} from './exponential-backoff';
+import {getMode} from './mode';
+import {isExperimentOn} from './experiments';
 import {
   isLoadErrorMessage,
 } from './event-helper';
-import {
-  USER_ERROR_SENTINEL,
-  isUserErrorMessage,
-  isUserErrorEmbed,
-  duplicateErrorIfNecessary,
-  dev,
-} from './log';
 import {isProxyOrigin} from './url';
-import {isCanary, experimentTogglesOrNull, getBinaryType} from './experiments';
 import {makeBodyVisible} from './style-installer';
 import {startsWith} from './string';
-import {urls} from './config';
-import {AmpEvents} from './amp-events';
 import {triggerAnalyticsEvent} from './analytics';
-import {isExperimentOn} from './experiments';
-import {Services} from './services';
+import {urls} from './config';
 
 /**
  * @const {string}

@@ -15,9 +15,9 @@
  */
 
 import {getMode} from './mode';
-import {urls} from './config';
-import {startsWith} from './string';
 import {loadPromise} from './event-helper';
+import {startsWith} from './string';
+import {urls} from './config';
 
 /**
  * Triggers validation for the current document if there is a script in the

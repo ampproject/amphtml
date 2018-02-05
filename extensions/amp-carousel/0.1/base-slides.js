@@ -15,8 +15,8 @@
  */
 
 import {ActionTrust} from '../../../src/action-trust';
-import {Services} from '../../../src/services';
 import {BaseCarousel} from './base-carousel';
+import {Services} from '../../../src/services';
 
 export class BaseSlides extends BaseCarousel {
 

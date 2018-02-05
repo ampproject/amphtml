@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {SystemLayer} from '../system-layer';
 import {ProgressBar} from '../progress-bar';
 import {Services} from '../../../../src/services';
+import {SystemLayer} from '../system-layer';
 
 
 const NOOP = () => {};

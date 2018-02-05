@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getAttributesFromConfigObj} from './attributes';
 import {Services} from '../../../src/services';
 import {
   closestByTag,
   createElementWithAttributes,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {getAttributesFromConfigObj} from './attributes';
 
 /** @const */
 const TAG = 'amp-auto-ads';
