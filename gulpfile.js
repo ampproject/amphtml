@@ -602,9 +602,8 @@ function printConfigHelp(command) {
     log(green('Building the runtime for local testing with the'),
         cyan((argv.config === 'canary') ? 'canary' : 'prod'),
         green('AMP config.'));
-    log(green('⤷ To specify which config to apply, use'),
-        cyan('--config={canary|prod}'), green('with your'),
-        cyan(command), green('command.'));
+    log(green('⤷ Use'), cyan('--config={canary|prod}'), green('with your'),
+        cyan(command), green('command to specify which config to apply.'));
   }
 }
 
@@ -615,14 +614,22 @@ function printConfigHelp(command) {
  */
 function parseExtensionFlags() {
   if (!process.env.TRAVIS) {
+    const noExtensionsMessage = green('⤷ Use ') +
+        cyan('--noextensions ') +
+        green('to skip building extensions.');
+    const extensionsMessage = green('⤷ Use ') +
+        cyan('--extensions=amp-foo,amp-bar ') +
+        green('to choose which extensions to build.');
+    const minimalSetMessage = green('⤷ Use ') +
+        cyan('--extensions=minimal_set ') +
+        green('to build just the extensions needed to load ') +
+        cyan('article.amp.html') + green('.');
     if (argv.extensions) {
       if (typeof(argv.extensions) !== 'string') {
-        log(red('ERROR:'), 'Missing list of extensions. Expected format:',
-            cyan('--extensions=amp-foo,amp-bar'),
-            'to choose which ones to build, or',
-            cyan('--extensions=minimal_set'),
-            'to build the ones needed to load',
-            cyan('article.amp.html') + '.');
+        log(red('ERROR:'), 'Missing list of extensions.');
+        log(noExtensionsMessage);
+        log(extensionsMessage);
+        log(minimalSetMessage);
         process.exit(1);
       }
       if (argv.extensions === 'minimal_set') {
@@ -633,25 +640,14 @@ function parseExtensionFlags() {
       }
       log(green('Building extension(s):'),
           cyan(argv.extensions.split(',').join(', ')));
-      log(green('⤷ Use'), cyan('--noextensions'),
-          green('to skip building extensions.'));
     } else if (argv.noextensions) {
       log(green('Not building any AMP extensions.'));
-      log(green('⤷ Use'), cyan('--extensions=amp-foo,amp-bar'),
-          green('to choose which ones to build, or'),
-          cyan('--extensions=minimal_set'),
-          green('to build the ones needed to load'),
-          cyan('article.amp.html') + green('.'));
     } else {
       log(green('Building all AMP extensions.'));
-      log(green('⤷ Use'), cyan('--noextensions'),
-          green('to skip building extensions, or'),
-          cyan('--extensions=amp-foo,amp-bar'),
-          green('to choose which ones to build, or'),
-          cyan('--extensions=minimal_set'),
-          green('to build the ones needed to load'),
-          cyan('article.amp.html') + green('.'));
     }
+    log(noExtensionsMessage);
+    log(extensionsMessage);
+    log(minimalSetMessage);
   }
 }
 
