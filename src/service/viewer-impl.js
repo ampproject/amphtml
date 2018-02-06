@@ -22,7 +22,6 @@ import {dict, map} from '../utils/object';
 import {findIndex} from '../utils/array';
 import {
   getSourceOrigin,
-  isProxyOrigin,
   parseQueryString,
   parseUrl,
   removeFragment,
