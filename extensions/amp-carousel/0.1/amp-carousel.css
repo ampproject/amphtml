@@ -104,7 +104,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
   position: absolute !important;
   top: 0;
   width: 100% !important;
-  scroll-snap-type: mandatory !important;
+  scroll-snap-type: x mandatory !important;
   /**
    * Hide the scrollbar by tucking it under some padding
    * which gets cut off as it overflows the parent.
@@ -131,7 +131,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
   height: 100% !important;
   justify-content: center !important;
   position: relative !important;
-  scroll-snap-coordinate: 0 0 !important;
+  scroll-snap-align: center !important;
   width: 100% !important;
 }
 
@@ -152,7 +152,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
   flex: 0 0 1px !important;
   height: 100% !important;
   position: relative !important;
-  scroll-snap-coordinate: 0 0 !important;
+  scroll-snap-align: center !important;
   width: 1px !important;
 }
 
@@ -171,7 +171,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
 }
 
 .i-amphtml-slidescroll-no-snap .i-amphtml-slide-item {
-  scroll-snap-coordinate: none !important;
+  scroll-snap-align: none !important;
 }
 
 .i-amphtml-slidescroll-no-snap.i-amphtml-slides-container.i-amphtml-no-scroll {
