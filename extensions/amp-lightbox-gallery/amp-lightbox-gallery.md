@@ -20,11 +20,11 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Allows for a "lightbox” experience where upon user interaction, a ui component expands to fill the viewport until it is closed again by the user. Currently only images are supported. </td>
+    <td>Provides a "lightbox” experience. Upon user interaction, a UI component expands to fill the viewport until it is closed by the user.</td>
   </tr>
    <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a>; no validations yet.</div><div>Work in progress under the 'amp-lightbox-gallery' experiment flag.</div></td>
+    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a>; no validations yet.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -36,8 +36,13 @@ limitations under the License.
   </tr>
 </table>
 
-## Behavior
-All you need to do is to include the extension script and put the 'lightbox' attribute on an `<amp-img>` or `<amp-carousel>`. A typical usage looks like this:
+## Overview
+
+The `amp-lightbox-gallery` component provides a "lightbox” experience for AMP components (e.g., `amp-img`, `amp-carousel`). When the user interacts with the AMP element, a UI component expands to fill the viewport until it is closed by the user. Currently, only images are supported. 
+
+## Usage
+
+To use `amp-lightbox-gallery`, ensure the required script is included in your `<head>` section, then add the `lightbox` attribute on an `<amp-img>` or `<amp-carousel>` element. A typical usage looks like this:
 
 ### Lightbox with `<amp-img>`
 
@@ -51,6 +56,7 @@ The `<amp-lightbox-gallery>` extension automatically inserts an invisible `<amp-
 It iterates through each `<amp-img>` that has the `lightbox` attribute and installs a tap handler on it (`on=tap:amp-lightbox-gallery.activate`) if a tap handler does not already exist. Tapping on any `<amp-img>` will open the image in a lightbox gallery. The lightbox gallery does image-handling (e.g. zoom and pan), enables swiping to navigate between images, and offers a thumbnail gallery view for browsing all picture thumbnails in a grid.
 
 ### Lightbox with `<amp-carousel>`
+
 ```html
 <amp-carousel lightbox width=1600 height=900 layout=responsive type=slides>
   <amp-img src="image1" width=200 height=100></amp-img>
@@ -59,13 +65,15 @@ It iterates through each `<amp-img>` that has the `lightbox` attribute and insta
 </amp-carousel>
 ```
 
-You can add the `lightbox` attribute on an `<amp-carousel>` to lightbox all of its children. `<amp-lightbox-gallery>` currently supports only carousels containing `<amp-img>` as children. As you navigate through the carousel items in the lightbox, the original carousel slides will be sync-ed so that when the lightbox is closed, you will end up on the same slide as you were on originally. Currently on the the `type='slides'` carousel is supported.
+You can add the `lightbox` attribute on an `<amp-carousel>` to lightbox all of its children. Currently, the `<amp-lightbox-gallery>` component only supports carousels containing `<amp-img>` as children. As you navigate through the carousel items in the lightbox, the original carousel slides are synchronized so that when the lightbox is closed, the user ends up on the same slide as the were originally on. Currently, only the `type='slides'` carousel is supported.
 
 ### Captions
-Lightbox optionally allows the user to specify a caption for each element. These fields are automatically read and displayed by `<amp-lightbox-gallery>` in the following order of priority:
-- figcaption (if the lightboxed element is the child of a figure)
-- aria-describedby
-- alt
-- aria-label
-- aria-labelledby
+
+Optionally, you can specify a caption for each element in the lightbox. These fields are automatically read and displayed by the `<amp-lightbox-gallery>` in the following order of priority:
+
+- `figcaption` (if the lightboxed element is the child of a figure)
+- `aria-describedby`
+- `alt`
+- `aria-label`
+- `aria-labelledby`
 
