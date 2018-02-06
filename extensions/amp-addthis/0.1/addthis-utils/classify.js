@@ -76,7 +76,7 @@ const classifyString = (keywordString = '', nonStrictMatch = false) => {
 
 /**
  * Classify a meta RATING keyword.
- * @param {String} value meta rating tag value
+ * @param {string} rating
  * @private
  */
 const classifyRating = (rating = '') => {
@@ -122,6 +122,11 @@ const extractKeywordsFromContent = content => {
   return keywords;
 };
 
+/**
+ * Guesses the search value from an url using a list of known search keys
+ * @param {string} url
+ * @returns {string|undefined}
+ */
 const getSearchString = url => {
   const terms = url.split('?').pop().toLowerCase().split('&');
   let matches;
@@ -139,6 +144,7 @@ const getSearchString = url => {
 
 /**
  * Return true if the url appears to be a search URL; false otherwise.
+ * @param {string} url
  */
 const isSearchUrl = (url = '') => {
   const lowerUrl = url.toLowerCase();
@@ -177,6 +183,8 @@ const isSearchUrl = (url = '') => {
 
 /**
  * Classifies the present page based on title, hostname, meta keywords and meta description.
+ * @param {*} pageInfo
+ * @param {Array} metaElements
  * @returns {number} classification bitmask (currently only setting a porn bit)
  */
 export const classifyPage = (pageInfo, metaElements) => {
@@ -198,6 +206,14 @@ export const classifyPage = (pageInfo, metaElements) => {
   return bitmask;
 };
 
+
+/**
+ * Returns bitmask based on detected classification
+ * @param {string} referrerString
+ * @param {*} parsedReferrer
+ * @param {*} parsedHref
+ * @returns {number}
+ */
 export const classifyReferrer = (
   referrerString,
   parsedReferrer,
@@ -224,6 +240,12 @@ export const classifyReferrer = (
   return bitmask;
 };
 
+/**
+ * Return true if the url appears to be a product page; false otherwise.
+ * @param {Document} doc
+ * @param {Array} metaElements
+ * @returns {boolean}
+ */
 export const isProductPage = (doc, metaElements) => {
   if (doc.getElementById('product') ||
       (doc.getElementsByClassName('product') || []).length > 0 ||
@@ -249,9 +271,10 @@ export const isProductPage = (doc, metaElements) => {
 };
 
 /**
-* Gather the keywords gathered while classifying the page.
-* @returns {string} csv containing keywords
-*/
+ * Gather the keywords gathered while classifying the page.
+ * @param {Array} metaElements
+ * @returns {string} csv containing keywords
+ */
 export const getKeywordsString = metaElements => {
   const keywords = metaElements
       .filter(meta => getDetailsForMeta(meta).name === 'keywords')
