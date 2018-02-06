@@ -632,7 +632,7 @@ app.use('/a4a(|-3p)/', (req, res) => {
   adUrl = addQueryParam(adUrl, 'inabox', 1);
   fs.readFileAsync(pc.cwd() + templatePath, 'utf8').then(template => {
     const result = template
-        .replace(/FORCE3P/g, force3p)
+        .replace(/CHECKSIG/g, force3p || '')
         .replace(/DISABLE3PFALLBACK/g, !force3p)
         .replace(/OFFSET/g, req.query.offset || '0px')
         .replace(/AD_URL/g, adUrl)
