@@ -622,6 +622,7 @@ const forbiddenTerms = {
     message: 'Use a line-level "no-unused-vars" rule instead.',
     whitelist: [
       'viewer-api/swipe-api.js',
+      'dist.3p/current/integration.js',
     ],
   },
 };

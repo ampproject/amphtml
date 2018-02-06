@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import './polyfills';
+
+// src/polyfills.js must be the first import.
+import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+
 import {AmpContext} from './ampcontext.js';
 import {initLogConstructor, setReportError} from '../src/log';
 
