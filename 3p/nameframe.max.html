@@ -14,13 +14,9 @@
 
     var render = function() {
       try {
-        if (!writeInBody || !instantLoad) {
-          document.open();
-        }
+        document.open();
         document.write(name_data['creative']);
-        if (!writeInBody || !instantLoad) {
-          document.close();
-        }
+        document.close();
         delete name_data['creative'];
         window.name = JSON.stringify(name_data);
       } catch (e) {
