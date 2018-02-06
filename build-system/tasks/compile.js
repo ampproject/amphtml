@@ -15,17 +15,17 @@
  */
 'use strict';
 
-const fs = require('fs-extra');
 const argv = require('minimist')(process.argv.slice(2));
 const closureCompiler = require('gulp-closure-compiler');
+const colors = require('ansi-colors');
+const fs = require('fs-extra');
 const gulp = require('gulp');
+const internalRuntimeToken = require('../internal-version').TOKEN;
+const internalRuntimeVersion = require('../internal-version').VERSION;
 const rename = require('gulp-rename');
 const replace = require('gulp-replace');
-const util = require('gulp-util');
-const internalRuntimeVersion = require('../internal-version').VERSION;
-const internalRuntimeToken = require('../internal-version').TOKEN;
-const shortenLicense = require('../shorten-license');
 const rimraf = require('rimraf');
+const shortenLicense = require('../shorten-license');
 
 const isProdBuild = !!argv.type;
 const queue = [];
@@ -52,7 +52,7 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
             next();
             resolve();
           }, function(e) {
-            console./* OK*/error(util.colors.red('Compilation error',
+            console./* OK*/error(colors.red('Compilation error',
                 e.message));
             process.exit(1);
           });
@@ -311,20 +311,6 @@ function compile(entryModuleFilenames, outputDir,
           'globalThis');
       compilerOptions.compilerFlags.conformance_configs =
           'build-system/conformance-config.textproto';
-
-      // TODO(aghassemi): Remove when NTI is the default.
-      if (argv.nti) {
-        compilerOptions.compilerFlags.new_type_inf = true;
-        compilerOptions.compilerFlags.jscomp_off.push(
-            'newCheckTypesExtraChecks');
-        compilerOptions.compilerFlags.externs.push(
-            'build-system/amp.nti.extern.js'
-        );
-      } else {
-        compilerOptions.compilerFlags.externs.push(
-            'build-system/amp.oti.extern.js'
-        );
-      }
     }
     if (argv.pseudo_names) {
       compilerOptions.compilerFlags.define.push('PSEUDO_NAMES=true');
@@ -340,9 +326,9 @@ function compile(entryModuleFilenames, outputDir,
     let stream = gulp.src(srcs)
         .pipe(closureCompiler(compilerOptions))
         .on('error', function(err) {
-          console./* OK*/error(util.colors.red('Error compiling',
+          console./* OK*/error(colors.red('Error compiling',
               entryModuleFilenames));
-          console./* OK*/error(util.colors.red(err.message));
+          console./* OK*/error(colors.red(err.message));
           process.exit(1);
         });
 

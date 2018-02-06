@@ -1,0 +1,9 @@
+{
+  "templates": [{
+    "id": "deal",
+    "dates": [
+      "2018-02-16", "2018-02-17", "2018-02-24", "2018-03-01",
+      "FREQ=WEEKLY;DTSTART=20180101T150000Z;COUNT=30;WKST=MO;BYDAY=TU,SA;INTERVAL=2"
+    ]
+  }]
+}

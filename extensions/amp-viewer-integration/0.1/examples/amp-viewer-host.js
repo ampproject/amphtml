@@ -16,8 +16,8 @@
 
 import {
   APP,
-  Messaging,
   MessageType,
+  Messaging,
   WindowPortEmulator,
 } from '../messaging/messaging';
 import {listen} from '../../../../src/event-helper';

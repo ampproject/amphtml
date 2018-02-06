@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {Services} from '../../src/services';
 import {onDocumentFormSubmit_} from '../../src/document-submit';
-import * as sinon from 'sinon';
 
 describe('test-document-submit onDocumentFormSubmit_', () => {
   let sandbox;
@@ -168,7 +168,7 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
     onDocumentFormSubmit_(evt);
     expect(actionService.execute).to.have.been.calledOnce;
     expect(actionService.execute).to.have.been.calledWith(
-        tgt, 'submit', null, tgt, evt);
+        tgt, 'submit', null, tgt, tgt, evt);
     expect(preventDefaultSpy).to.have.been.calledOnce;
     expect(stopImmediatePropagationSpy).to.have.been.calledOnce;
   });

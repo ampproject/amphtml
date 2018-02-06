@@ -21,22 +21,22 @@ import {AccessServerJwtAdapter} from './amp-access-server-jwt';
 import {AccessVendorAdapter} from './amp-access-vendor';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-access-0.1.css';
-import {SignInProtocol} from './signin';
 import {Services} from '../../../src/services';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {SignInProtocol} from './signin';
 import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
 import {cancellation} from '../../../src/error';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {evaluateAccessExpr} from './access-expr';
+import {getLoginUrl, openLoginDialog} from './login-dialog';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
 import {listenOnce} from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getLoginUrl, openLoginDialog} from './login-dialog';
 import {parseQueryString} from '../../../src/url';
 import {startsWith} from '../../../src/string';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 
 /** @const */
@@ -416,7 +416,7 @@ export class AccessService {
    */
   buildUrl(url, useAuthData) {
     return this.prepareUrlVars_(useAuthData).then(vars => {
-      return this.urlReplacements_.expandAsync(url, vars);
+      return this.urlReplacements_.expandUrlAsync(url, vars);
     });
   }
 

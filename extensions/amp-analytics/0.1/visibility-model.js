@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
 import {Observable} from '../../../src/observable';
-
-/** @private @const {string} */
-const TAG_ = 'amp-analytics.VisibilityModel';
+import {dev} from '../../../src/log';
 
 /**
  * This class implements visibility calculations based on the
@@ -74,10 +71,6 @@ export class VisibilityModel {
     });
 
     this.eventPromise_.then(() => {
-      if (!this.onTriggerObservable_) {
-        dev().error(TAG_, 'onTriggerObservable_ is unexpectedly null.');
-        return;
-      }
       this.onTriggerObservable_.fire();
     });
 
@@ -160,10 +153,6 @@ export class VisibilityModel {
       this.eventResolver_ = resolve;
     });
     this.eventPromise_.then(() => {
-      if (!this.onTriggerObservable_) {
-        dev().error(TAG_, 'onTriggerObservable_ is unexpectedly null.');
-        return;
-      }
       this.onTriggerObservable_.fire();
     });
     this.scheduleRepeatId_ = null;
@@ -206,15 +195,10 @@ export class VisibilityModel {
     });
     this.unsubscribe_.length = 0;
     this.eventResolver_ = null;
-    // TODO(jonkeller): Investigate why dispose() can be called twice,
-    // necessitating this "if", and the same "if" elsewhere in this file.
-    if (!this.onTriggerObservable_) {
-      dev().error(TAG_,
-          'dispose() called when onTriggerObservable_ already null.');
-      return;
+    if (this.onTriggerObservable_) {
+      this.onTriggerObservable_.removeAll();
+      this.onTriggerObservable_ = null;
     }
-    this.onTriggerObservable_.removeAll();
-    this.onTriggerObservable_ = null;
   }
 
   /**
@@ -234,8 +218,6 @@ export class VisibilityModel {
   onTriggerEvent(handler) {
     if (this.onTriggerObservable_) {
       this.onTriggerObservable_.add(handler);
-    } else {
-      dev().error(TAG_, 'onTriggerObservable_ is unexpectedly null.');
     }
     if (this.eventPromise_ && !this.eventResolver_) {
       // If eventPromise has already resolved, need to call handler manually.

@@ -16,14 +16,14 @@
 
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {Services} from '../../../src/services';
-import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
-import {dev, user, rethrowAsync} from '../../../src/log';
+import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
+import {dev, rethrowAsync, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {setStyle} from '../../../src/style';
-import {dict} from '../../../src/utils/object';
 
 const TAG = 'amp-user-notification';
 const SERVICE_ID = 'userNotificationManager';
@@ -175,7 +175,7 @@ export class AmpUserNotification extends AMP.BaseElement {
    */
   buildGetHref_(ampUserId) {
     const showIfHref = dev().assertString(this.showIfHref_);
-    return this.urlReplacements_.expandAsync(showIfHref).then(href => {
+    return this.urlReplacements_.expandUrlAsync(showIfHref).then(href => {
       const data = /** @type {!JsonObject} */({
         'elementId': this.elementId_,
         'ampUserId': ampUserId,

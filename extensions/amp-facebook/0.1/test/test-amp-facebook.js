@@ -16,8 +16,8 @@
 
 import '../amp-facebook';
 import {facebook} from '../../../../3p/facebook';
-import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
 import {resetServiceForTesting} from '../../../../src/service';
+import {setDefaultBootstrapBaseUrlForTesting} from '../../../../src/3p-frame';
 
 
 describes.realWin('amp-facebook', {
@@ -37,13 +37,18 @@ describes.realWin('amp-facebook', {
     doc = win.document;
   });
 
-  function getAmpFacebook(href, opt_embedAs) {
+  function getAmpFacebook(href, opt_embedAs, opt_locale) {
     const ampFB = doc.createElement('amp-facebook');
     ampFB.setAttribute('data-href', href);
     ampFB.setAttribute('width', '111');
     ampFB.setAttribute('height', '222');
     if (opt_embedAs) {
       ampFB.setAttribute('data-embed-as', opt_embedAs);
+    }
+    if (opt_locale) {
+      ampFB.setAttribute('data-locale', opt_locale);
+    } else {
+      ampFB.setAttribute('data-locale', 'en_US');
     }
     doc.body.appendChild(ampFB);
     return ampFB.build().then(() => {
@@ -66,6 +71,20 @@ describes.realWin('amp-facebook', {
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.className).to.match(/i-amphtml-fill-content/);
+    });
+  });
+
+  it('renders amp-facebook with detected locale', () => {
+    return getAmpFacebook(fbVideoHref, 'post').then(ampFB => {
+      expect(ampFB).not.to.be.undefined;
+      expect(ampFB.getAttribute('data-locale')).to.equal('en_US');
+    });
+  });
+
+  it('renders amp-facebook with specified locale', () => {
+    return getAmpFacebook(fbVideoHref, 'post', 'fr_FR').then(ampFB => {
+      expect(ampFB).not.to.be.undefined;
+      expect(ampFB.getAttribute('data-locale')).to.equal('fr_FR');
     });
   });
 

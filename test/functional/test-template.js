@@ -19,8 +19,8 @@ import {
   installTemplatesService,
   registerExtendedTemplate,
 } from '../../src/service/template-impl';
-import {resetServiceForTesting} from '../../src/service';
 import {Services} from '../../src/services';
+import {resetServiceForTesting} from '../../src/service';
 
 describes.fakeWin('Template', {}, env => {
   let templates;
@@ -85,13 +85,6 @@ describes.fakeWin('Template', {}, env => {
       registerExtendedTemplate(win, templateElement.getAttribute('type'),
           TemplateImpl);
     }).to.throw(/Duplicate template type/);
-  });
-
-  it('should fail render if template is not declared', () => {
-    const templateElement = createTemplateElement();
-    expect(() => {
-      templates.renderTemplate(templateElement, {value: 0});
-    }).to.throw(/Template must be declared/);
   });
 
   it('should block render until template registered', () => {

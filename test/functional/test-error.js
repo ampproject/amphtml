@@ -14,27 +14,29 @@
  * limitations under the License.
  */
 
+import * as analytics from '../../src/analytics';
+import * as sinon from 'sinon';
+import {Services} from '../../src/services';
 import {
   cancellation,
+  detectJsEngineFromStack,
   detectNonAmpJs,
   getErrorReportData,
   installErrorReporting,
   isCancellation,
+  maybeReportErrorToViewer,
   reportError,
-  detectJsEngineFromStack,
   reportErrorToAnalytics,
 } from '../../src/error';
-import {user} from '../../src/log';
-import {
-  resetExperimentTogglesForTesting,
-  toggleExperiment,
-} from '../../src/experiments';
-import * as sinon from 'sinon';
-import * as analytics from '../../src/analytics';
 import {
   getMode,
   getRtvVersionForTesting,
 } from '../../src/mode';
+import {
+  resetExperimentTogglesForTesting,
+  toggleExperiment,
+} from '../../src/experiments';
+import {user} from '../../src/log';
 
 describes.fakeWin('installErrorReporting', {}, env => {
   let sandbox;
@@ -90,6 +92,78 @@ describes.fakeWin('installErrorReporting', {}, env => {
   });
 });
 
+describe('maybeReportErrorToViewer', () => {
+  let win;
+  let viewer;
+  let sandbox;
+  let ampdocServiceForStub;
+  let sendMessageStub;
+
+  const data = getErrorReportData(undefined, undefined, undefined, undefined,
+      new Error('XYZ', false));
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+
+    const optedInDoc = window.document.implementation.createHTMLDocument('');
+    optedInDoc.documentElement.setAttribute('report-errors-to-viewer', '');
+
+    ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
+    ampdocServiceForStub.returns({
+      isSingleDoc: () => true,
+      getAmpDoc: () => ({getRootNode: () => optedInDoc}),
+    });
+
+    viewer = {
+      hasCapability: () => true,
+      isTrustedViewer: () => Promise.resolve(true),
+      sendMessage: () => true,
+    };
+    sendMessageStub = sandbox.stub(viewer, 'sendMessage');
+
+    sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('should not report if AMP doc is not single', () => {
+    ampdocServiceForStub.returns({isSingleDoc: () => false});
+    return maybeReportErrorToViewer(win, data)
+        .then(() => expect(sendMessageStub).to.not.have.been.called);
+  });
+
+  it('should not report if AMP doc is not opted in', () => {
+    const nonOptedInDoc =
+          window.document.implementation.createHTMLDocument('');
+    ampdocServiceForStub.returns({
+      isSingleDoc: () => true,
+      getAmpDoc: () => ({getRootNode: () => nonOptedInDoc}),
+    });
+    return maybeReportErrorToViewer(win, data)
+        .then(() => expect(sendMessageStub).to.not.have.been.called);
+  });
+
+  it('should not report if viewer is not capable', () => {
+    sandbox.stub(viewer, 'hasCapability').withArgs('errorReporting')
+        .returns(false);
+    return maybeReportErrorToViewer(win, data)
+        .then(() => expect(sendMessageStub).to.not.have.been.called);
+  });
+
+  it('should not report if viewer is not trusted', () => {
+    sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
+    return maybeReportErrorToViewer(win, data)
+        .then(() => expect(sendMessageStub).to.not.have.been.called);
+  });
+
+  it('should send viewer message named `error`', () => {
+    return maybeReportErrorToViewer(win, data)
+        .then(() => expect(sendMessageStub).to.have.been
+            .calledWith('error', data));
+  });
+});
 
 describe('reportErrorToServer', () => {
   let sandbox;

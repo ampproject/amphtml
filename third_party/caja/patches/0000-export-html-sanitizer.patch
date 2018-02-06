@@ -1,0 +1,8 @@
+--- a/third_party/caja/html-sanitizer.js
++++ b/third_party/caja/html-sanitizer.js
+@@ -2473,3 +2473,5 @@
+ // for domado and run in an environment without 'window'
+ if (typeof window !== 'undefined') {
+ }
++
++export var htmlSanitizer = html;

@@ -19,12 +19,12 @@
  * @fileoverview Creates an http server to handle static
  * files and list directories for use with the gulp live server
  */
-const BBPromise = require('bluebird');
 const app = require('express')();
 const bacon = require('baconipsum');
+const BBPromise = require('bluebird');
 const bodyParser = require('body-parser');
-const fs = BBPromise.promisifyAll(require('fs'));
 const formidable = require('formidable');
+const fs = BBPromise.promisifyAll(require('fs'));
 const jsdom = require('jsdom');
 const path = require('path');
 const request = require('request');
@@ -569,6 +569,26 @@ app.get('/iframe/*', (req, res) => {
           </html>`);
 });
 
+app.get('/a4a_template/*', (req, res) => {
+  assertCors(req, res, ['GET'], undefined, true);
+  const match = /^\/a4a_template\/([a-z-]+)\/(\d+)$/.exec(req.path);
+  if (!match) {
+    res.status(404);
+    res.end('Invalid path: ' + req.path);
+    return;
+  }
+  const filePath = `${pc.cwd()}/extensions/amp-ad-network-${match[1]}-impl/` +
+      `0.1/data/${match[2]}.template`;
+  fs.readFileAsync(filePath).then(file => {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('AMP-template-amp-creative', 'amp-mustache');
+    res.end(file);
+  }).error(() => {
+    res.status(404);
+    res.end('Not found: ' + filePath);
+  });
+});
+
 // Returns a document that echoes any post messages received from parent.
 // An optional `message` query param can be appended for an initial post
 // message sent on document load.
@@ -736,7 +756,6 @@ function escapeRegExp(string) {
 }
 
 function elementExtractor(tagName, type) {
-  tagName = escapeRegExp(tagName);
   type = escapeRegExp(type);
   return new RegExp(
       `<${tagName} [^>]*['"]${type}['"][^>]*>([\\s\\S]+?)</${tagName}>`,
@@ -873,6 +892,27 @@ app.get([fakeAdNetworkDataDir + '/*', cloudflareDataDir + '/*'], (req, res) => {
     res.setHeader('Content-Type', 'text/html');
     res.setHeader('X-AmpAdSignature', metadata.signature);
     res.end(metadata.creative);
+  }).error(() => {
+    res.status(404);
+    res.end('Not found: ' + filePath);
+  });
+});
+
+// Simulated adzerk ad server and AMP cache CDN.
+app.get('/adzerk/*', (req, res) => {
+  assertCors(req, res, ['GET'], ['AMP-template-amp-creative']);
+  const match = /\/(\d+)/.exec(req.path);
+  if (!match || !match[1]) {
+    res.status(404);
+    res.end('Invalid path: ' + req.path);
+    return;
+  }
+  const filePath =
+      pc.cwd() + '/extensions/amp-ad-network-adzerk-impl/0.1/data/' + match[1];
+  fs.readFileAsync(filePath).then(file => {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('AMP-template-amp-creative', 'amp-mustache');
+    res.end(file);
   }).error(() => {
     res.status(404);
     res.end('Not found: ' + filePath);
@@ -1128,11 +1168,14 @@ function enableCors(req, res, origin, opt_exposeHeaders) {
   res.setHeader('Access-Control-Expose-Headers',
       ['AMP-Access-Control-Allow-Source-Origin']
           .concat(opt_exposeHeaders || []).join(', '));
-  res.setHeader('AMP-Access-Control-Allow-Source-Origin',
-      req.query.__amp_source_origin);
+  if (req.query.__amp_source_origin) {
+    res.setHeader('AMP-Access-Control-Allow-Source-Origin',
+        req.query.__amp_source_origin);
+  }
 }
 
-function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
+function assertCors(req, res, opt_validMethods, opt_exposeHeaders,
+  opt_ignoreMissingSourceOrigin) {
   // Allow disable CORS check (iframe fixtures have origin 'about:srcdoc').
   if (req.query.cors == '0') {
     return;
@@ -1159,7 +1202,8 @@ function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
       throw invalidOrigin;
     }
 
-    if (!SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
+    if (!opt_ignoreMissingSourceOrigin &&
+        !SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
       res.statusCode = 500;
       res.end(JSON.stringify({message: invalidSourceOrigin}));
       throw invalidSourceOrigin;

@@ -15,10 +15,10 @@
  */
 
 import {
-  AmpAppBanner,
   AbstractAppBanner,
-  AmpIosAppBanner,
   AmpAndroidAppBanner,
+  AmpAppBanner,
+  AmpIosAppBanner,
 } from '../amp-app-banner';
 import {Services} from '../../../../src/services';
 

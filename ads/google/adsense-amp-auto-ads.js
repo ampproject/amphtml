@@ -16,9 +16,9 @@
 
 
 import {
-  /* eslint no-unused-vars: 0 */ ExperimentInfo,
-  randomlySelectUnsetExperiments,
+  ExperimentInfo, // eslint-disable-line no-unused-vars
   getExperimentBranch,
+  randomlySelectUnsetExperiments,
 } from '../../src/experiments';
 
 

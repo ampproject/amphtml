@@ -15,13 +15,16 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {
   ExpansionOptions,
   installVariableService,
   variableServiceFor,
 } from '../variables';
+import {REPLACEMENT_EXP_NAME} from '../../../../src/service/url-replacements-impl';
+import {Services} from '../../../../src/services';
 import {adopt} from '../../../../src/runtime';
-import * as sinon from 'sinon';
+import {toggleExperiment} from '../../../../src/experiments';
 
 adopt(window);
 
@@ -122,61 +125,101 @@ describe('amp-analytics.VariableService', function() {
     });
   });
 
-  it('default filterdoesn\'t work when experiment is off' , () =>
-    variables.expandTemplate('${bar|default:baz}',
-        new ExpansionOptions({'foo': ' Hello world! '}))
-        .then(actual => expect(actual).to.equal('')));
-
-  describe('filter:', () => {
-    const vars = new ExpansionOptions({'foo': ' Hello world! '});
+  describes.fakeWin('macros', {amp: true}, env => {
+    let win;
+    let ampdoc;
+    let urlReplacementService;
 
     beforeEach(() => {
-      sandbox.stub(variables, 'isFilterExperimentOn_').callsFake(() => true);
+      ampdoc = env.ampdoc;
+      win = env.win;
+      toggleExperiment(env.win, REPLACEMENT_EXP_NAME, true);
+      installVariableService(win);
+      variables = variableServiceFor(win);
+      urlReplacementService = Services.urlReplacementsForDoc(ampdoc);
+    });
+
+    afterEach(() => {
+      toggleExperiment(env.win, REPLACEMENT_EXP_NAME);
     });
 
     function check(input, output) {
-      return variables.expandTemplate(input, vars).then(actual =>
-        expect(actual).to.equal(output));
+      const macros = variables.getMacros();
+      const expanded = urlReplacementService.expandUrlAsync(input, macros);
+      return expect(expanded).to.eventually.equal(output);
     }
 
-    it('default works', () => check('${bar|default:baz}', 'baz'));
+    it('default works', () => check('DEFAULT(one,two)', 'one'));
 
-    it('hash works', () => check('${foo|hash}',
-        '8R9LfzzIKtjQOwqNEUN5Tw3-oUTgU2UvtufGxDh4wRiiacsW5yga9nqHSYBoBkkp'));
+    it('default works without first arg', () => check('DEFAULT(,two)', 'two'));
 
-    it('substr works', () => check('${foo|substr:2:4}', 'ello'));
+    it('default works without first arg length',
+        () => check('DEFAULT(TRIM(), two)', 'two'));
 
-    it('trim works', () => check('${foo|trim}', 'Hello%20world!'));
+    it('hash works', () => check('HASH(test)',
+        'doQSMg97CqWBL85CjcRwazyuUOAqZMqhangiSb_o78S37xzLEmJV0ZYEff7fF6Cp'));
+
+    it('substr works', () => check('SUBSTR(Hello world!, 1, 4)', 'ello'));
+
+    it('trim works', () => check('TRIM(hello      )', 'hello'));
 
     it('json works', () =>
-      // " Hello world! "
-      check('${foo|json}', '%22%20Hello%20world!%20%22'));
+      check('JSON(Hello world!)', '%22Hello%20world!%22'));
 
     it('toLowerCase works', () =>
-      check('${foo|toLowerCase}', '%20hello%20world!%20'));
+      check('TOLOWERCASE(HeLLO WOrld!)', 'hello%20world!'));
 
     it('toUpperCase works', () => {
-      return check('${foo|toUpperCase}', '%20HELLO%20WORLD!%20');
+      return check('TOUPPERCASE(HeLLO WOrld!)', 'HELLO%20WORLD!');
     });
 
-    it('not works (truth-y value)', () => check('${foo|not}', 'false'));
+    it('not works (truth-y value)', () => check('NOT(hello)', 'false'));
 
-    it('not works (false-y value)', () => check('${bar|not}', 'true'));
+    it('not works (false-y value)', () => check('NOT()', 'true'));
 
     it('base64 works', () => {
-      return check('${foo|base64}', 'IEhlbGxvIHdvcmxkISA%3D');
+      return check('BASE64(Hello World!)', 'SGVsbG8gV29ybGQh');
     });
 
-    it('if works', () => check('${foo|if:yey:boo}', 'yey'));
+    it('if works', () => check('IF(hey, truthy, falsey)', 'truthy'));
 
     it('chaining works', () => {
-      return check('${foo|substr:6}', '%20world!%20').then(() =>
-        check('${foo|substr:6|trim}', 'world!')).then(() =>
-        check('${foo|substr:6|trim|toUpperCase}', 'WORLD!')).then(() =>
-        check('${foo|substr:6|trim|toUpperCase|base64}', 'V09STEQh')).then(() =>
-        check('${foo|substr:6|trim|toUpperCase|base64|hash}',
-            'OPTTt2IGW8-R31MrIF_cRUwLTZ9jLDOXEuhNz_QS7Uc5ZmODduHWdplzrZ7Jsnqx')
-      );
+      return check('SUBSTR(Hello world!, 6)', 'world!').then(() =>
+        check('TOUPPERCASE(SUBSTR(Hello world!, 6))', 'WORLD!')).then(() =>
+        check('BASE64(TOUPPERCASE(SUBSTR(Hello world!, 6)))', 'V09STEQh'))
+          .then(() =>
+            check('HASH(BASE64(TOUPPERCASE(SUBSTR(Hello world!, 6))))',
+                'OPTTt2IGW8-R31MrIF_cRUwLTZ9jLDOXEuhNz_Q' +
+                'S7Uc5ZmODduHWdplzrZ7Jsnqx')
+          );
+    });
+
+    it('replaces common use case', () => {
+      return check('REPLACE(this-is-a-test, `-`)', 'thisisatest');
+    });
+
+    it('replaces three args', () => {
+      return check('REPLACE(this-is-a-test, `-`, *)', 'this*is*a*test');
+    });
+
+    it('replaces backticks optional', () => {
+      return check('REPLACE(this-is-a-test, -, **)', 'this**is**a**test');
+    });
+
+    it('replaces not trimming spaces in backticks', () => {
+      return check('REPLACE(this-is-a-test, ` -`)', 'this-is-a-test');
+    });
+
+    it('replaces respecting space as arg', () => {
+      return check('REPLACE(this-is-a-test, `-`, ` `)', 'this%20is%20a%20test');
+    });
+
+    it('replaces respecting backticks', () => {
+      return check('REPLACE(`this-,is-,a-,test`, `-,`)', 'thisisatest');
+    });
+
+    it('replace with no third arg', () => {
+      return check('REPLACE(thi@s-is-a-te@st, `-|@`)', 'thisisatest');
     });
   });
 

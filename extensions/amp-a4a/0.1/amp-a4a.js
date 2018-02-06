@@ -14,50 +14,50 @@
  * limitations under the License.
  */
 
+import {A4AVariableSource} from './a4a-variable-source';
+import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
-import {
-  is3pThrottled,
-  getAmpAdRenderOutsideViewport,
-  incrementLoadingAds,
-} from '../../amp-ad/0.1/concurrent-load';
-import {createElementWithAttributes} from '../../../src/dom';
-import {cancellation, isCancellation} from '../../../src/error';
-import {
-  installFriendlyIframeEmbed,
-  setFriendlyIframeEmbedVisible,
-} from '../../../src/friendly-iframe-embed';
-import {isLayoutSizeDefined, Layout} from '../../../src/layout';
-import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {dev, user, duplicateErrorIfNecessary} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {isArray, isObject, isEnumValue} from '../../../src/types';
-import {utf8Decode} from '../../../src/utils/bytes';
-import {getBinaryType, isExperimentOn} from '../../../src/experiments';
-import {setStyle} from '../../../src/style';
 import {
   assertHttpsUrl,
   isSecureUrl,
   tryDecodeUriComponent,
 } from '../../../src/url';
-import {parseJson} from '../../../src/json';
-import {handleClick} from '../../../ads/alp/handler';
+import {cancellation, isCancellation} from '../../../src/error';
+import {createElementWithAttributes} from '../../../src/dom';
+import {dev, duplicateErrorIfNecessary, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {
-  getDefaultBootstrapBaseUrl,
   generateSentinel,
+  getDefaultBootstrapBaseUrl,
 } from '../../../src/3p-frame';
+import {
+  getAmpAdRenderOutsideViewport,
+  incrementLoadingAds,
+  is3pThrottled,
+} from '../../amp-ad/0.1/concurrent-load';
+import {getBinaryType, isExperimentOn} from '../../../src/experiments';
+import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
+import {getContextMetadata} from '../../../src/iframe-attributes';
+import {getMode} from '../../../src/mode';
+// TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
+import {getTimingDataAsync} from '../../../src/service/variable-source';
+import {handleClick} from '../../../ads/alp/handler';
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
+import {
+  installFriendlyIframeEmbed,
+  setFriendlyIframeEmbedVisible,
+} from '../../../src/friendly-iframe-embed';
 import {
   installUrlReplacementsForEmbed,
 } from '../../../src/service/url-replacements-impl';
-import {A4AVariableSource} from './a4a-variable-source';
-// TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
-import {getTimingDataAsync} from '../../../src/service/variable-source';
-import {getContextMetadata} from '../../../src/iframe-attributes';
-import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
+import {isAdPositionAllowed} from '../../../src/ad-helper';
+import {isArray, isEnumValue, isObject} from '../../../src/types';
+import {parseJson} from '../../../src/json';
+import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {insertAnalyticsElement} from '../../../src/extension-analytics';
+import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
@@ -69,7 +69,7 @@ const METADATA_STRINGS = [
 // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
 // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
 /** @type {string} */
-export const DEFAULT_SAFEFRAME_VERSION = '1-0-14';
+export const DEFAULT_SAFEFRAME_VERSION = '1-0-15';
 
 /** @const {string} */
 export const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
@@ -87,7 +87,7 @@ export const EXPERIMENT_FEATURE_HEADER_NAME = 'amp-ff-exps';
 const TAG = 'amp-a4a';
 
 /** @type {string} */
-const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
+export const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
 
 /** @enum {string} */
 export const XORIGIN_MODE = {
@@ -115,7 +115,7 @@ export let SizeInfoDef;
       customStylesheets: !Array<{href: string}>,
       images: (Array<string>|undefined),
     }} */
-let CreativeMetaDataDef;
+export let CreativeMetaDataDef;
 
 /** @private */
 export const LIFECYCLE_STAGES = {
@@ -394,14 +394,6 @@ export class AmpA4A extends AMP.BaseElement {
   /** @override */
   isRelayoutNeeded() {
     return this.isRelayoutNeededFlag;
-  }
-
-  /**
-   * @return {!Promise<boolean>} promise blocked on ad promise whose result is
-   *    whether creative returned is validated as AMP.
-   */
-  isVerifiedAmpCreativePromise() {
-    return this.adPromise_.then(() => this.isVerifiedAmpCreative_);
   }
 
   /** @override */
@@ -735,8 +727,6 @@ export class AmpA4A extends AMP.BaseElement {
             };
           });
         })
-        // This block returns the ad creative if it exists and validates as AMP;
-        // null otherwise.
         /** @return {!Promise<?ArrayBuffer>} */
         .then(responseParts => {
           checkStillCurrent();
@@ -758,40 +748,7 @@ export class AmpA4A extends AMP.BaseElement {
               bytes) {
             this.creativeBody_ = bytes;
           }
-          this.handleLifecycleStage_('adResponseValidateStart');
-          return this.keysetPromise_
-              .then(() => signatureVerifierFor(this.win)
-                  .verify(bytes, headers, (eventName, extraVariables) => {
-                    this.handleLifecycleStage_(
-                        eventName, extraVariables);
-                  }))
-              .then(status => {
-                if (getMode().localDev &&
-                    this.element.getAttribute('type') == 'fake') {
-                  // do not verify signature for fake type ad
-                  status = VerificationStatus.OK;
-                }
-                this.handleLifecycleStage_('adResponseValidateEnd', {
-                  'signatureValidationResult': status,
-                  'releaseType': this.releaseType_,
-                });
-                switch (status) {
-                  case VerificationStatus.OK:
-                    return bytes;
-                  case VerificationStatus.UNVERIFIED:
-                    return null;
-                  case VerificationStatus.CRYPTO_UNAVAILABLE:
-                    return this.shouldPreferentialRenderWithoutCrypto() ?
-                      bytes : null;
-                  // TODO(@taymonbeal, #9274): differentiate between these
-                  case VerificationStatus.ERROR_KEY_NOT_FOUND:
-                  case VerificationStatus.ERROR_SIGNATURE_MISMATCH:
-                    user().error(
-                        TAG, this.element.getAttribute('type'),
-                        'Signature verification failed');
-                    return null;
-                }
-              });
+          return this.maybeValidateAmpCreative(bytes, headers);
         })
         .then(creative => {
           checkStillCurrent();
@@ -806,13 +763,13 @@ export class AmpA4A extends AMP.BaseElement {
         /** @return {?CreativeMetaDataDef} */
         .then(creativeDecoded => {
           checkStillCurrent();
-          // Note: It's critical that #getAmpAdMetadata_ be called
+          // Note: It's critical that #getAmpAdMetadata be called
           // on precisely the same creative that was validated
           // via #validateAdResponse_.  See GitHub issue
           // https://github.com/ampproject/amphtml/issues/4187
           let creativeMetaDataDef;
           if (!creativeDecoded ||
-            !(creativeMetaDataDef = this.getAmpAdMetadata_(creativeDecoded))) {
+            !(creativeMetaDataDef = this.getAmpAdMetadata(creativeDecoded))) {
             return null;
           }
           // Update priority.
@@ -843,6 +800,52 @@ export class AmpA4A extends AMP.BaseElement {
           // url or creative exist.
           this.promiseErrorHandler_(error);
           return null;
+        });
+  }
+
+  /**
+   * This block returns the ad creative if it exists and validates as AMP;
+   * null otherwise.
+   * @param {!ArrayBuffer} bytes
+   * @param {!Headers} headers
+   * @return {!Promise<?ArrayBuffer>}
+   */
+  maybeValidateAmpCreative(bytes, headers) {
+    this.handleLifecycleStage_('adResponseValidateStart');
+    const checkStillCurrent = this.verifyStillCurrent();
+    return this.keysetPromise_
+        .then(() => signatureVerifierFor(this.win)
+            .verify(bytes, headers, (eventName, extraVariables) => {
+              this.handleLifecycleStage_(
+                  eventName, extraVariables);
+            }))
+        .then(status => {
+          checkStillCurrent();
+          if (getMode().localDev &&
+              this.element.getAttribute('type') == 'fake') {
+            // do not verify signature for fake type ad
+            status = VerificationStatus.OK;
+          }
+          this.handleLifecycleStage_('adResponseValidateEnd', {
+            'signatureValidationResult': status,
+            'releaseType': this.releaseType_,
+          });
+          switch (status) {
+            case VerificationStatus.OK:
+              return bytes;
+            case VerificationStatus.UNVERIFIED:
+              return null;
+            case VerificationStatus.CRYPTO_UNAVAILABLE:
+              return this.shouldPreferentialRenderWithoutCrypto() ?
+                bytes : null;
+            // TODO(@taymonbeal, #9274): differentiate between these
+            case VerificationStatus.ERROR_KEY_NOT_FOUND:
+            case VerificationStatus.ERROR_SIGNATURE_MISMATCH:
+              user().error(
+                  TAG, this.element.getAttribute('type'),
+                  'Signature verification failed');
+              return null;
+          }
         });
   }
 
@@ -994,7 +997,7 @@ export class AmpA4A extends AMP.BaseElement {
       }
       if (!creativeMetaData) {
         // Non-AMP creative case, will verify ad url existence.
-        return this.renderNonAmpCreative_();
+        return this.renderNonAmpCreative();
       }
       // Must be an AMP creative.
       return this.renderAmpCreative_(creativeMetaData)
@@ -1005,7 +1008,7 @@ export class AmpA4A extends AMP.BaseElement {
             user().error(TAG, this.element.getAttribute('type'),
                 'Error injecting creative in friendly frame', err);
             this.promiseErrorHandler_(err);
-            return this.renderNonAmpCreative_();
+            return this.renderNonAmpCreative();
           });
     }).catch(error => {
       this.promiseErrorHandler_(error);
@@ -1269,18 +1272,18 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Render non-AMP creative within cross domain iframe.
+   * @param {boolean=} throttleApplied Whether incrementLoadingAds has already
+   *    been called
    * @return {Promise<boolean>} Whether the creative was successfully rendered.
-   * @private
    */
-  renderNonAmpCreative_() {
+  renderNonAmpCreative(throttleApplied) {
     if (this.element.getAttribute('disable3pfallback') == 'true') {
       user().warn(TAG, this.element.getAttribute('type'),
           'fallback to 3p disabled');
       return Promise.resolve(false);
     }
-    this.promiseErrorHandler_(
-        new Error('fallback to 3p'),
-        /* ignoreStack */ true);
+    // TODO(keithwrightbos): remove when no longer needed.
+    dev().warn(TAG, 'fallback to 3p');
     // Haven't rendered yet, so try rendering via one of our
     // cross-domain iframe solutions.
     const method = this.experimentalNonAmpCreativeRenderMethod_;
@@ -1301,7 +1304,9 @@ export class AmpA4A extends AMP.BaseElement {
       user().warn(TAG, this.element.getAttribute('type'),
           'No creative or URL available -- A4A can\'t render any ad');
     }
-    incrementLoadingAds(this.win, renderPromise);
+    if (!throttleApplied) {
+      incrementLoadingAds(this.win, renderPromise);
+    }
     return renderPromise.then(
         result => {
           this.handleLifecycleStage_('crossDomainIframeLoaded');
@@ -1475,7 +1480,7 @@ export class AmpA4A extends AMP.BaseElement {
       'releaseType': this.releaseType_,
     });
     const checkStillCurrent = this.verifyStillCurrent();
-    return utf8Decode(creativeBody).then(creative => {
+    return Promise.resolve(utf8Decode(creativeBody)).then(creative => {
       checkStillCurrent();
       let srcPath;
       let name = '';
@@ -1521,10 +1526,9 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {?CreativeMetaDataDef} Object result of parsing JSON data blob inside
    *     the metadata markers on the ad text, or null if no metadata markers are
    *     found.
-   * @private
    * TODO(keithwrightbos@): report error cases
    */
-  getAmpAdMetadata_(creative) {
+  getAmpAdMetadata(creative) {
     let metadataStart = -1;
     let metadataString;
     for (let i = 0; i < METADATA_STRINGS.length; i++) {

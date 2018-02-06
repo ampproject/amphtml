@@ -17,25 +17,25 @@
 import {AmpEvents} from '../../../src/amp-events';
 import {BindEvents} from './bind-events';
 import {BindExpressionResultDef} from './bind-expression';
-import {BindingDef} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
+import {BindingDef} from './bind-evaluator';
+import {ChunkPriority, chunk} from '../../../src/chunk';
 import {Services} from '../../../src/services';
-import {chunk, ChunkPriority} from '../../../src/chunk';
+import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
-import {dict, deepMerge} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
 import {filterSplice} from '../../../src/utils/array';
+import {getMode} from '../../../src/mode';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isFiniteNumber} from '../../../src/types';
+import {
+  iterateCursor, scopedQuerySelectorAll, waitForBodyPromise,
+} from '../../../src/dom';
 import {map} from '../../../src/utils/object';
 import {parseJson, recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
-import {
-  iterateCursor, scopedQuerySelectorAll, waitForBodyPromise,
-} from '../../../src/dom';
 
 const TAG = 'amp-bind';
 
@@ -124,6 +124,9 @@ export class Bind {
     /** @private {!../../../src/service/history-impl.History} */
     this.history_ = Services.historyForDoc(ampdoc);
 
+    /** @private {!Array<string>} */
+    this.overridableKeys_ = [];
+
     /**
      * Upper limit on number of bindings for performance.
      * @private {number}
@@ -147,6 +150,7 @@ export class Bind {
 
     /** @const @private {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
+    this.viewer_.onMessageRespond('premutate', this.premutate_.bind(this));
 
     const bodyPromise = (opt_win)
       ? waitForBodyPromise(opt_win.document)
@@ -331,6 +335,39 @@ export class Bind {
   /** @return {!../../../src/service/history-impl.History} */
   historyForTesting() {
     return this.history_;
+  }
+
+  /**
+   * Calls setState(s), where s is data.state with the non-overridable keys removed.
+   * @param {*} data
+   * @return {!Promise}
+   * @private
+   */
+  premutate_(data) {
+    const ignoredKeys = [];
+    return this.initializePromise_.then(() => {
+      Object.keys(data.state).forEach(key => {
+        if (!this.overridableKeys_.includes(key)) {
+          delete data.state[key];
+          ignoredKeys.push(key);
+        }
+      });
+      if (ignoredKeys.length > 0) {
+        user().warn(TAG, 'Some state keys could not be premutated ' +
+              'because they are missing the overridable attribute: ' +
+              ignoredKeys.join(', '));
+      }
+      return this.setState(data.state);
+    });
+  }
+
+  /**
+   * Marks the given key as overridable so that it can be overriden by
+   * a premutate message from the viewer.
+   * @param {string} key
+   */
+  makeStateKeyOverridable(key) {
+    this.overridableKeys_.push(key);
   }
 
   /**

@@ -3,7 +3,7 @@
    "base": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx",
    "basicCapture": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx&ident=_client_id_&identsrc=amp&es=Amp&url=_canonical_url_&rurl=_document_referrer_&cttl=_title_",
    "pageview": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx&ident=_client_id_&identsrc=amp&es=Amp&url=_canonical_url_&rurl=_document_referrer_&cttl=_title_&en=Content View",
-   "click": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx&ident=_client_id_&identsrc=amp&es=Amp&url=_canonical_url_&rurl=_document_referrer_&cttl=_title_&en=Click-Through",
+   "click": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx&ident=_client_id_&identsrc=amp&es=Amp&url=_canonical_url_&rurl=_document_referrer_&cttl=_title_&en=Click-Through"
   },
   "afsanalytics": {
    "host": "//www.afsanalytics.com",
@@ -32,6 +32,12 @@
     "base": "//ignore.c.richmetrics.com/imglog?e=ignore&pi=ignore|_page_view_id_|_canonical_path_|_client_id_&ui=_client_id_&v=amp&ts=_timestamp_&sn=3&",
     "pageview": "//ignore.c.richmetrics.com/imglog?e=ignore&pi=ignore|_page_view_id_|_canonical_path_|_client_id_&ui=_client_id_&v=amp&ts=_timestamp_&sn=3&type=page&ca=$category&sc=$subCategory&ln=_browser_language_&lr=_document_referrer_&eu=_source_url_&tz=_timezone_&pd=_scroll_width_x_scroll_height_&sd=_screen_width_x_screen_height_&wd=_available_screen_width_x_available_screen_height_&ws=_scroll_left_x_scroll_top_",
     "pageping": "//ignore.c.richmetrics.com/imglog?e=ignore&pi=ignore|_page_view_id_|_canonical_path_|_client_id_&ui=_client_id_&v=amp&ts=_timestamp_&sn=3&type=pageping"
+  },
+  "byside": {
+    "host": "//webcare.byside.com/?webcare_id=$webcare_id&bwch=$bwch&lang=pt&fid=$fid&bwit=A&tuid=_client_id_&suid=$suid&puid=_page_view_id_p_timestamp_&referrer=_document_referrer_&page=_source_url_&amppage=_ampdoc_url_&bwpt=_title_&bres=_viewport_width_x_viewport_height_&res=_screen_width_x_screen_height_&v=v20171116a&ampv=_amp_version_&viewer=_viewer_&ua=_user_agent_&r=_random_",
+    "base": "//webcare.byside.com/BWA$webcare_id/amp/?webcare_id=$webcare_id&bwch=$bwch&lang=pt&fid=$fid&bwit=A&tuid=_client_id_&suid=$suid&puid=_page_view_id_p_timestamp_&referrer=_document_referrer_&page=_source_url_&amppage=_ampdoc_url_&bwpt=_title_&bres=_viewport_width_x_viewport_height_&res=_screen_width_x_screen_height_&v=v20171116a&ampv=_amp_version_&viewer=_viewer_&ua=_user_agent_&r=_random_",
+    "pageview": "//webcare.byside.com/BWA$webcare_id/amp/pixel.php?webcare_id=$webcare_id&bwch=$bwch&lang=pt&fid=$fid&bwit=A&tuid=_client_id_&suid=$suid&puid=_page_view_id_p_timestamp_&referrer=_document_referrer_&page=_source_url_&amppage=_ampdoc_url_&bwpt=_title_&bres=_viewport_width_x_viewport_height_&res=_screen_width_x_screen_height_&v=v20171116a&ampv=_amp_version_&viewer=_viewer_&ua=_user_agent_&r=_random_",
+    "event": "//webcare.byside.com/BWA$webcare_id/amp/signal.php?event_id=$eventId&event_label=$eventLabel&fields=$fields&webcare_id=$webcare_id&bwch=$bwch&lang=pt&fid=$fid&bwit=A&tuid=_client_id_&suid=$suid&puid=_page_view_id_p_timestamp_&referrer=_document_referrer_&page=_source_url_&amppage=_ampdoc_url_&bwpt=_title_&bres=_viewport_width_x_viewport_height_&res=_screen_width_x_screen_height_&v=v20171116a&ampv=_amp_version_&viewer=_viewer_&ua=_user_agent_&r=_random_"
   },
   "chartbeat": {
     "host": "https://ping.chartbeat.net",
@@ -63,7 +69,7 @@
   },
   "dynatrace": {
    "endpoint": "https://$tenant.live.dynatrace.com:443/ampbf/$tenantpath",
-   "pageview": "https://$tenant.live.dynatrace.com:443/ampbf/$tenantpath?type=js&flavor=amp&v=1&a=1%7C1%7C_load_%7C_load_%7C-%7C_nav_timing_%7C_nav_timing_%7C0%2C2%7C2%7C_onload_%7C_load_%7C-%7C_nav_timing_%7C_nav_timing_%7C0&fId=_page_view_id_&vID=_client_id_&referer=_source_url_&title=_title_&sw=_screen_width_&sh=_screen_height_&w=_viewport_width_&h=_viewport_height_&nt=a_nav_type_b_nav_timing_c_nav_timing_d_nav_timing_e_nav_timing_f_nav_timing_g_nav_timing_h_nav_timing_i_nav_timing_j_nav_timing_k_nav_timing_l_nav_timing_m_nav_timing_n_nav_timing_o_nav_timing_p_nav_timing_q_nav_timing_r_nav_timing_s_nav_timing_t_nav_timing_&app=ampapp&time=_timestamp_",
+   "pageview": "https://$tenant.live.dynatrace.com:443/ampbf/$tenantpath?type=js&flavor=amp&v=1&a=1%7C1%7C_load_%7C_load_%7C-%7C_nav_timing_%7C_nav_timing_%7C0%2C2%7C2%7C_onload_%7C_load_%7C-%7C_nav_timing_%7C_nav_timing_%7C0&fId=_page_view_id_&vID=_client_id_&referer=_source_url_&title=_title_&sw=_screen_width_&sh=_screen_height_&w=_viewport_width_&h=_viewport_height_&nt=a_nav_type_b_nav_timing_c_nav_timing_d_nav_timing_e_nav_timing_f_nav_timing_g_nav_timing_h_nav_timing_i_nav_timing_j_nav_timing_k_nav_timing_l_nav_timing_m_nav_timing_n_nav_timing_o_nav_timing_p_nav_timing_q_nav_timing_r_nav_timing_s_nav_timing_t_nav_timing_&app=ampapp&time=_timestamp_"
   },
   "euleriananalytics": {
     "base": "https://$analyticsHost",
@@ -182,7 +188,7 @@
   },
   "nielsen": {
     "session": "https://$prefixuaid-linkage.imrworldwide.com/cgi-bin/gn?prd=session&c13=asid,P$apid&sessionId=_client_id___page_view_id_&pingtype=4&enc=false&c61=createtm,_timestamp_&rnd=_random_",
-    "cloudapi": "https://$prefixcloudapi.imrworldwide.com/nmapi/v2/$apid/_client_id___page_view_id_/a?b=%7B%22devInfo%22%3A%7B%22devId%22%3A%22_client_id_%22%2C%22apn%22%3A%22$apn%22%2C%22apv%22%3A%22$apv%22%2C%22apid%22%3A%22$apid%22%7D%2C%22metadata%22%3A%7B%22static%22%3A%7B%22type%22%3A%22static%22%2C%22section%22%3A%22$section%22%2C%22assetid%22%3A%22_page_view_id_%22%2C%22segA%22%3A%22$segA%22%2C%22segB%22%3A%22$segB%22%2C%22segC%22%3A%22$segC%22%2C%22adModel%22%3A%220%22%2C%22dataSrc%22%3A%22cms%22%7D%2C%22content%22%3A%7B%7D%2C%22ad%22%3A%7B%7D%7D%2C%22event%22%3A%22playhead%22%2C%22position%22%3A%22_timestamp_%22%2C%22data%22%3A%7B%22hidden%22%3A%22_background_state_%22%2C%22blur%22%3A%22_background_state_%22%2C%22position%22%3A%22_timestamp_%22%7D%2C%22type%22%3A%22static%22%2C%22utc%22%3A%22_timestamp_%22%2C%22index%22%3A%223%22%7D",
+    "cloudapi": "https://$prefixcloudapi.imrworldwide.com/nmapi/v2/$apid/_client_id___page_view_id_/a?b=%7B%22devInfo%22%3A%7B%22devId%22%3A%22_client_id_%22%2C%22apn%22%3A%22$apn%22%2C%22apv%22%3A%22$apv%22%2C%22apid%22%3A%22$apid%22%7D%2C%22metadata%22%3A%7B%22static%22%3A%7B%22type%22%3A%22static%22%2C%22section%22%3A%22$section%22%2C%22assetid%22%3A%22_page_view_id_%22%2C%22segA%22%3A%22$segA%22%2C%22segB%22%3A%22$segB%22%2C%22segC%22%3A%22$segC%22%2C%22adModel%22%3A%220%22%2C%22dataSrc%22%3A%22cms%22%7D%2C%22content%22%3A%7B%7D%2C%22ad%22%3A%7B%7D%7D%2C%22event%22%3A%22playhead%22%2C%22position%22%3A%22_timestamp_%22%2C%22data%22%3A%7B%22hidden%22%3A%22_background_state_%22%2C%22blur%22%3A%22_background_state_%22%2C%22position%22%3A%22_timestamp_%22%7D%2C%22type%22%3A%22static%22%2C%22utc%22%3A%22_timestamp_%22%2C%22index%22%3A%223%22%7D"
   },
   "nielsen-marketing-cloud": {
     "host": "loadeu.exelator.com",
@@ -192,7 +198,8 @@
   "parsely": {
     "host": "https://srv.pixel.parsely.com",
     "basePrefix": "https://srv.pixel.parsely.com/plogger/?rand=_timestamp_&idsite=$apikey&url=_ampdoc_url_&urlref=_document_referrer_&screen=_screen_width_x_screen_height_%7C_available_screen_width_x_available_screen_height_%7C_screen_color_depth_&title=_title_&date=_timestamp_&ampid=_client_id_",
-    "pageview": "https://srv.pixel.parsely.com/plogger/?rand=_timestamp_&idsite=$apikey&url=_ampdoc_url_&urlref=_document_referrer_&screen=_screen_width_x_screen_height_%7C_available_screen_width_x_available_screen_height_%7C_screen_color_depth_&title=_title_&date=_timestamp_&ampid=_client_id_&action=pageview"
+    "pageview": "https://srv.pixel.parsely.com/plogger/?rand=_timestamp_&idsite=$apikey&url=_ampdoc_url_&urlref=_document_referrer_&screen=_screen_width_x_screen_height_%7C_available_screen_width_x_available_screen_height_%7C_screen_color_depth_&title=_title_&date=_timestamp_&ampid=_client_id_&action=pageview",
+    "heartbeat": "https://srv.pixel.parsely.com/plogger/?rand=_timestamp_&idsite=$apikey&url=_ampdoc_url_&urlref=_document_referrer_&screen=_screen_width_x_screen_height_%7C_available_screen_width_x_available_screen_height_%7C_screen_color_depth_&title=_title_&date=_timestamp_&ampid=_client_id_&action=heartbeat&tt=_total_engaged_time_&inc=_incremental_engaged_time_"
   },
   "piano": {
     "host": "https://api-v3.tinypass.com",
@@ -288,6 +295,6 @@
   "ibeatanalytics": {
     "host": "https://ibeat.indiatimes.com",
     "base": "https://ibeat.indiatimes.com/iBeat/pageTrendlogAmp.html",
-    "pageview": "https://ibeat.indiatimes.com/iBeat/pageTrendlogAmp.html?&h=$h&d=$h&url=$url&k=$key&ts=$time&ch=$channel&sid=$uid&at=$agentType&ref=_document_referrer_&aid=$aid&loc=1&ct=1&cat=$cat&scat=$scat&ac=1&tg=$tags&ctids=$catIds&pts=$pagePublishTime&auth=$author&pos=$position&iBeatField=$ibeatFields&cid=_client_id_",
-  },
+    "pageview": "https://ibeat.indiatimes.com/iBeat/pageTrendlogAmp.html?&h=$h&d=$h&url=$url&k=$key&ts=$time&ch=$channel&sid=$uid&at=$agentType&ref=_document_referrer_&aid=$aid&loc=1&ct=1&cat=$cat&scat=$scat&ac=1&tg=$tags&ctids=$catIds&pts=$pagePublishTime&auth=$author&pos=$position&iBeatField=$ibeatFields&cid=_client_id_"
+  }
 }

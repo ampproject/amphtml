@@ -1,0 +1,525 @@
+<!doctype html>
+<html ⚡>
+
+<head>
+  <meta charset="utf-8">
+  <title>Lorem Ipsum | PublisherName</title>
+  <link rel="canonical" href="https://medium.com/p/cb7f223fad86">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+
+  <style amp-custom>
+    body {
+      margin: 0;
+      font-family: 'Georgia', Serif;
+      background: white;
+    }
+
+    .grid {
+      margin: auto;
+      padding: 15px 0px;
+      width: 80vw;
+      max-width: 80vh;
+    }
+
+    .row {
+      display: flex;
+    }
+
+    .box {
+      background: tomato;
+      margin: 5px;
+      color: white;
+      font-weight: bold;
+      flex: 1 0 auto;
+      position: relative;
+    }
+
+    .box:after {
+      content: "";
+      float: left;
+      display: block;
+      padding-top: 100%;
+    }
+
+    .box .inner {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      top: 0;
+      overflow: hidden
+    }
+
+    .grid amp-img img {
+      object-fit: cover;
+      object-position: center center;
+    }
+
+    main {
+      max-width: 960px;
+      margin: auto;
+    }
+
+    .brand-logo {
+      font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    }
+
+    .ad-container {
+      display: flex;
+      justify-content: center;
+    }
+
+    .content-container p {
+      line-height: 24px;
+    }
+
+    /* In the shadow-doc mode, the parent shell already has header and nav. */
+
+    .amp-shadow header {
+      display: none;
+    }
+
+    .lightbox-only-description {
+      display: none;
+    }
+
+    figure {
+      margin: 0;
+    }
+
+    figcaption {
+      font-family: 'Roboto', Arial, Helvetica, sans-serif;
+      border-bottom: 1px solid #e2e2e2;
+      color: #6d6d6d;
+      margin-left: 20px;
+      margin-right: 20px;
+      font-size: .9em;
+      padding: 15px;
+    }
+
+    figcaption::before {
+      content: '';
+      width: 24px;
+      height: 24px;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 5px;
+    }
+
+    figcaption.image::before {
+      background-image: url('data:image/svg+xml,<svg fill="#a9a9a9" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="3.2"/><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+    }
+
+    figcaption.video::before {
+      background-image: url('data:image/svg+xml,<svg fill="#a9a9a9" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h24v24H0z" fill="none"/><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>');
+    }
+
+    .author {
+      display: flex;
+      align-items: center;
+
+      background: #f4f4f4;
+      padding: 0 15px;
+
+      font-size: .8em;
+
+      border: solid #dcdcdc;
+      border-width: 1px 0;
+    }
+
+    .header-time,
+    .header-author {
+      color: #a8a3ae;
+      font-family: 'Roboto', Arial, Helvetica, sans-serif;
+      font-size: 12px;
+    }
+
+    .header-author {
+      border-right: 1px solid #d5d5d5;
+      padding-right: 10px;
+      margin-right: 10px;
+      display: inline-block;
+    }
+
+    .header-author b {
+      color: #2294dd;
+      font-weight: normal;
+    }
+
+    .author p {
+      margin: 5px;
+    }
+
+    .byline {
+      font-family: 'Roboto', Arial, Helvetica, sans-serif;
+      display: inline-block;
+    }
+
+    .byline p {
+      line-height: normal;
+    }
+
+    .byline .brand {
+      color: #6f757a;
+    }
+
+    .mailto {
+      text-decoration: none;
+    }
+
+    #author-avatar {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 5px;
+    }
+
+    h1 {
+      margin: 5px 0;
+      font-weight: normal;
+    }
+
+    footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 226px;
+      background: #f4f4f4;
+    }
+
+    hr {
+      margin: 0;
+    }
+
+    .article-body p,
+    h3 {
+      padding-right: 15px;
+      padding-left: 15px;
+    }
+
+    header {
+      padding: 15px;
+    }
+
+    button.menu {
+      background: transparent;
+      border: none;
+      padding: 10px;
+      padding-right: 20px;
+    }
+
+    header#top-bar {
+      background: white;
+      border-bottom: 1px solid #e2e2e2;
+    }
+
+    header#article-desc {
+      background: rgb(250, 250, 250);
+      padding: 20px;
+    }
+
+    header#article-desc h1 {
+      margin-top: 0px;
+      padding-top: 0px;
+    }
+
+    amp-img#cover>img {
+      object-fit: cover;
+      object-position: bottom;
+    }
+
+    .see-gallery {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      z-index: 1;
+      pointer-events: none;
+      color: white;
+      font-family: sans-serif;
+      font-size: 0.8em;
+    }
+
+    amp-img[lightbox] {
+      cursor: pointer;
+    }
+
+  </style>
+  <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
+  <script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js"></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+
+  <style amp-boilerplate>
+    body {
+      -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+      animation: -amp-start 8s steps(1, end) 0s 1 normal both
+    }
+
+    @-webkit-keyframes -amp-start {
+      from {
+        visibility: hidden
+      }
+      to {
+        visibility: visible
+      }
+    }
+
+    @-moz-keyframes -amp-start {
+      from {
+        visibility: hidden
+      }
+      to {
+        visibility: visible
+      }
+    }
+
+    @-ms-keyframes -amp-start {
+      from {
+        visibility: hidden
+      }
+      to {
+        visibility: visible
+      }
+    }
+
+    @-o-keyframes -amp-start {
+      from {
+        visibility: hidden
+      }
+      to {
+        visibility: visible
+      }
+    }
+
+    @keyframes -amp-start {
+      from {
+        visibility: hidden
+      }
+      to {
+        visibility: visible
+      }
+    }
+  </style>
+  <noscript>
+    <style amp-boilerplate>
+      body {
+        -webkit-animation: none;
+        -moz-animation: none;
+        -ms-animation: none;
+        animation: none
+      }
+    </style>
+  </noscript>
+
+  <script>
+    // Enable amp-lightbox-gallery experiment automatically if it is not enabled.
+    setTimeout(function () {
+      if (!AMP.isExperimentOn('amp-lightbox-gallery')) {
+        AMP.toggleExperiment('amp-lightbox-gallery');
+        location.reload();
+      }
+    }, 1000);
+  </script>
+
+</head>
+
+<body>
+  <header id="top-bar">
+    <button class="menu" title="Toggle Sidebar">
+      ☰
+    </button>
+    <span class="brand-logo">
+      PublisherLogo
+    </span>
+  </header>
+
+  <main role="main">
+    <article>
+      <header id="article-desc">
+        <h1>Experimental Lightbox 2.0</h1>
+        <div class="header-author">
+          by
+          <span itemscope itemtype="http://schema.org/Person">
+            <b>Lorem Ipsum</b>
+          </span>
+          </span>
+        </div>
+        <time class="header-time" datetime="2015-09-14 13:00">September 14, 2015</time>
+      </header>
+      <figure>
+        <amp-img id="hero-img" lightbox="toronto" src="https://picsum.photos/1600/900?image=1075" layout="responsive" width="1600"
+          height="900" alt="Picture of CN tower.">
+          <span class="see-gallery">See all 4 skyscraper photos</span>
+        </amp-img>
+        <figcaption class='image'>
+          Toronto's CN tower was built in 1976 and was the tallest free-standing structure until 2007.
+        </figcaption>
+      </figure>
+      <!-- toronto image gallery -->
+      <div hidden>
+        <figure>
+          <amp-img lightbox="toronto" src="https://picsum.photos/1600/900?image=972" layout="responsive" width="1600" height="900"
+            alt="Picture of four tall buildings">
+          </amp-img>
+          <figcaption>
+            Toronto's financial district it a metropolis of glass and steel.
+          </figcaption>
+        </figure>
+
+        <amp-img lightbox="toronto" src="https://picsum.photos/900/1600?image=948" layout="responsive" width="900" height="1600"
+          alt="Picture of a tall building" aria-describedby="img2desc">
+          <span id=img2desc>The brutalist architecture of this building is obvious from its small windows and raw concrete look.</span>
+        </amp-img>
+
+        <amp-img lightbox="toronto" src="https://picsum.photos/1600/1600?image=430" layout="responsive" width="1600" height="1600"
+        alt="Picture of new york city skyline" aria-describedby="img3desc">
+        <div id=img3desc><p>Compared to New York Cities skyline, Toronto falls short on density. Lorem ipsum dolor sit amet, consectetur
+          adipiscing elit. Curabitur ullamcorper turpis vel commodo scelerisque. Phasellus luctus nunc ut elit cursus,
+          et imperdiet diam vehicula.</p><p>Lorem ipsum dolor sit ametconsectetur adipiscing elit. Curabitur ullamcorper
+          turpis vel commodo scelerisque. Phasellus luctus nunc ut elit cursus, et imperdiet diam vehicula. Lorem ipsum
+          dolor sit amet, consectetur adipiscing elit. Curabitur ullamcorper turpis vel commodo scelerisque. Phasellus
+          luctus nunc ut elit cursus, et imperdiet diam vehicula.</p> </div>
+      </amp-img>
+      </div>
+
+      <div class="content-container">
+        <div class="article-body">
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur ullamcorper turpis vel commodo scelerisque. Phasellus
+            luctus nunc ut elit cursus, et imperdiet diam vehicula. Duis et nisi sed urna blandit bibendum et sit amet erat.
+            Suspendisse potenti. Curabitur consequat volutpat arcu nec elementum. Etiam a turpis ac libero varius condimentum.
+            Maecenas sollicitudin felis aliquam tortor vulputate, ac posuere velit semper.
+          </p>
+          <h3>Other Modern Architectures</h3>
+          <amp-carousel lightbox width=1600 height=900 layout=responsive type=slides>
+            <amp-img src="https://picsum.photos/1600/900?image=898" layout="responsive" width="1600" height="900" aria-describedby="desc1">
+              <div id="desc1" class="lightbox-only-description">
+                <p>Short - Sed pharetra semper fringilla. Nulla fringilla, neque eget</p>
+              </div>
+            </amp-img>
+            <amp-img src="https://picsum.photos/1600/900?image=864" layout="responsive" width="1600" height="900" aria-describedby="desc2">
+              <div id="desc2" class="lightbox-only-description">
+                <p> Medium - Sed pharetra semper fringilla. Nulla fringilla, neque eget varius suscipit, mi turpis congue odio,
+                  quis dignissim nisi nulla at erat. Duis non nibh vel erat vehicula hendrerit eget vel velit. Donec congue
+                  augue magna, nec eleifend dui porttitor
+                </p>
+              </div>
+            </amp-img>
+
+            <amp-img src="https://picsum.photos/1600/900?image=870" layout="responsive" width="1600" height="900" aria-describedby="desc3">
+              <div id="desc3" class="lightbox-only-description">
+                <p> Long - Sed pharetra semper fringilla. Nulla fringilla, neque eget varius suscipit, mi turpis congue odio,
+                  quis dignissim nisi nulla at erat. Duis non nibh vel erat vehicula hendrerit eget vel velit. Donec congue
+                  augue magna, nec eleifend dui porttitor Sed pharetra semper fringilla. Nulla fringilla, neque eget varius
+                  suscipit, mi turpis congue odio, quis dignissim nisi nulla at erat. Duis non nibh vel erat vehicula hendrerit
+                  eget vel velit. Donec congue augue magna, nec eleifend dui porttitor Sed pharetra semper fringilla. Nulla
+                  fringilla, neque eget varius suscipit, mi turpis congue odio, quis dignissim nisi nulla at erat. Duis non
+                  nibh vel erat vehicula hendrerit eget vel velit. Donec congue augue magna, nec eleifend dui porttitor
+                </p>
+              </div>
+            </amp-img>
+
+            <amp-img src="https://picsum.photos/1600/400?image=857" layout="responsive" width="1600" height="400"
+              alt="Wide image">
+            </amp-img>
+
+            <amp-img src="https://picsum.photos/400/1600?image=682" layout="responsive" width="400" height="1600" alt="Tall image">
+            </amp-img>
+
+            <amp-img id="cover" src="https://picsum.photos/900/1600?image=629" layout="responsive" width="900" height="1600" alt="Tall image with fit:cover">
+            </amp-img>
+          </amp-carousel>
+
+          <p>
+            Sed pharetra semper fringilla. Nulla fringilla, neque eget varius suscipit, mi turpis congue odio, quis dignissim nisi nulla
+            at erat. Duis non nibh vel erat vehicula hendrerit eget vel velit. Donec congue augue magna, nec eleifend dui
+            porttitor
+          </p>
+
+          <p>
+            Sed pharetra semper fringilla. Nulla fringilla, neque eget varius suscipit, mi turpis congue odio, quis dignissim nisi nulla
+            at erat. Duis non nibh vel erat vehicula hendrerit eget vel velit. Donec congue augue magna, nec eleifend dui
+            porttitor
+          </p>
+
+          <div class="grid">
+            <div class="row">
+              <div class="box">
+                <div class="inner">
+                  <amp-img lightbox="gallery" src="https://picsum.photos/1600/900?image=857" layout="fill" alt="Sed pharetra semper fringilla. Nulla">
+                  </amp-img>
+                </div>
+              </div>
+              <div class="box">
+                <div class="inner">
+                  <amp-img lightbox="gallery" src="https://picsum.photos/1600/1600?image=1081" layout="fill" alt="Sed pharetra semper fringilla. Nulla">
+                  </amp-img>
+                </div>
+              </div>
+              <div class="box">
+                <div class="inner">
+                  <amp-img lightbox="gallery" src="https://picsum.photos/900/1600?image=1076" layout="fill" alt="Sed pharetra semper fringilla. Nulla">
+                  </amp-img>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="box">
+                <div class="inner">
+                  <amp-img lightbox="gallery" src="https://picsum.photos/1600/900?image=1067" layout="fill" alt="Sed pharetra semper fringilla. Nulla">
+                  </amp-img>
+                </div>
+              </div>
+              <div class="box">
+                <div class="inner">
+                  <amp-img lightbox="gallery" src="https://picsum.photos/1600/1600?image=1048" layout="fill" alt="Sed pharetra semper fringilla. Nulla">
+                  </amp-img>
+                </div>
+              </div>
+              <div class="box">
+                <div class="inner">
+                  <amp-img lightbox="gallery" src="https://picsum.photos/900/1600?image=868" layout="fill" alt="Sed pharetra semper fringilla. Nulla">
+                  </amp-img>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="box">
+                <div class="inner">
+                  <amp-img lightbox="gallery" src="https://picsum.photos/1600/900?image=864" layout="fill" alt="Sed pharetra semper fringilla. Nulla">
+                  </amp-img>
+                </div>
+              </div>
+              <div class="box">
+                <div class="inner">
+                  <amp-img lightbox="gallery" src="https://picsum.photos/1600/1600?image=740" layout="fill" alt="Sed pharetra semper fringilla. Nulla">
+                  </amp-img>
+                </div>
+              </div>
+              <div class="box">
+                <div class="inner">
+                  <amp-img lightbox="gallery" src="https://picsum.photos/900/1600?image=736" layout="fill" alt="Sed pharetra semper fringilla. Nulla">
+                  </amp-img>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p>
+            Sed pharetra semper fringilla. Nulla fringilla, neque eget varius suscipit, mi turpis congue odio, quis dignissim nisi nulla
+            at erat. Duis non nibh vel erat vehicula hendrerit eget vel velit. Donec congue augue magna, nec eleifend dui
+            porttitor
+          </p>
+        </div>
+    </article>
+  </main>
+
+  <footer>
+    <div class="brand-logo">Footer - Bye!</div>
+  </footer>
+</body>
+
+</html>

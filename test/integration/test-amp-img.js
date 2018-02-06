@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../src/amp-events';
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
 } from '../../testing/iframe.js';
-import {AmpEvents} from '../../src/amp-events';
 
 describe.configure().retryOnSaucelabs().run('Rendering of amp-img', () => {
   const timeout = window.ampTestRuntimeConfig.mochaTimeout;

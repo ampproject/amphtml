@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
+import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
 import {
-  adsenseIsA4AEnabled,
   URL_EXPERIMENT_MAPPING,
+  adsenseIsA4AEnabled,
 } from '../adsense-a4a-config';
+import {createIframePromise} from '../../../../testing/iframe';
 import {
   isInExperiment,
 } from '../../../../ads/google/a4a/traffic-experiments';
-import {EXPERIMENT_ATTRIBUTE} from '../../../../ads/google/a4a/utils';
-import {urls} from '../../../../src/config';
 import {isProxyOrigin, parseUrl} from '../../../../src/url';
-import {createIframePromise} from '../../../../testing/iframe';
-import * as sinon from 'sinon';
+import {urls} from '../../../../src/config';
 
 describe('adsense-a4a-config', () => {
   let sandbox;
