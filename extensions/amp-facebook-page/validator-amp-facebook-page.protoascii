@@ -1,5 +1,5 @@
 #
-# Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+# Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ tags: {  # amp-facebook-page
 }
 tags: {  # <amp-facebook-page>
   html_format: AMP
-  tag_name: "AMP-FACEBOOK-page"
+  tag_name: "AMP-FACEBOOK-PAGE"
   requires_extension: "amp-facebook-page"
   # data-* is generally allowed, but it's not generally mandatory.
   attrs: {

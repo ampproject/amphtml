@@ -1,5 +1,5 @@
 <!---
-Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-facebook-like"></a> `amp-facebook-like`
+# <a name="amp-facebook-page"></a> `amp-facebook-page`
 
 <table>
   <tr>
@@ -44,7 +44,7 @@ You can use the `amp-facebook-page` component to embed the [Facebook page plugin
     layout="fixed"
     data-hide-cover="true"
     data-href="https://www.facebook.com/testesmegadivertidos/">
-</amp-facebook-like>
+</amp-facebook-page>
 ```
 ## Attributes
 
@@ -68,7 +68,7 @@ You can specify the tabs to render i.e. `timeline`, `events`, `messages`. Use a 
 
 Attribute hides cover photo in the header. `false` (cover photo displayed) by default.
 
-##### data-face-pile (optional)
+##### data-show-face-pile (optional)
 
 Shows profile photos of friends who like the page. `true` by default.
 

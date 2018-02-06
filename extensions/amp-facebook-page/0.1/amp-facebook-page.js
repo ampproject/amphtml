@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,10 @@ class AmpFacebookPage extends AMP.BaseElement {
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
 
-    /** @private {string} */
-    this.dataLocale_ = element.getAttribute('data-locale');
-    if (!this.dataLocale_) {
-      this.dataLocale_ = dashToUnderline(window.navigator.language);
-    }
+    /** @private @const {string} */
+    this.dataLocale_ = element.hasAttribute('data-locale') ?
+      element.getAttribute('data-locale') :
+      dashToUnderline(window.navigator.language);
   }
 
   /** @override */

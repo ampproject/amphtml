@@ -93,7 +93,6 @@ function getCommentsContainer(global, data) {
   container.setAttribute('data-numposts', data.numposts || 10);
   container.setAttribute('data-colorscheme', data.colorscheme || 'light');
   container.setAttribute('data-width', '100%');
-  container.setAttribute('data-height', '100%');
   return container;
 }
 
