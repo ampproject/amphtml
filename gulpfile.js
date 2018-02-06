@@ -723,7 +723,7 @@ function dist() {
     printConfigHelp('gulp dist --fortesting');
   }
   parseExtensionFlags();
-  return compileCss(/* watch */ false, /* opt_compileAll */ true).then(() => {
+  return compileCss(/* watch */ undefined, /* opt_compileAll */ true).then(() => {
     return Promise.all([
       compile(false, true, true),
       // NOTE:
