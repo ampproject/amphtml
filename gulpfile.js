@@ -247,12 +247,12 @@ function endBuildStep(stepName, targetName, startTime) {
  * @return {!Promise}
  */
 function buildExtensions(options) {
-  if (!!argv.noextensions) {
+  if (!!argv.noextensions && !options.compileAll) {
     return Promise.resolve();
   }
 
   let extensionsToBuild = [];
-  if (!!argv.extensions) {
+  if (!!argv.extensions && !options.compileAll) {
     extensionsToBuild = argv.extensions.split(',');
   }
 
@@ -431,9 +431,10 @@ function css() {
 /**
  * Compile all the css and drop in the build folder
  * @param {boolean} watch
+ * @param {boolean=} opt_compileAll
  * @return {!Promise}
  */
-function compileCss(watch) {
+function compileCss(watch, opt_compileAll) {
   // Print a message that could help speed up local development.
   if (!process.env.TRAVIS && argv['_'].indexOf('test') != -1) {
     log(green('To skip building during future test runs, use'),
@@ -467,6 +468,7 @@ function compileCss(watch) {
         return buildExtensions({
           bundleOnlyIfListedInFiles: false,
           compileOnlyCss: true,
+          compileAll: opt_compileAll,
         });
       });
 }
@@ -632,6 +634,7 @@ function parseExtensionFlags() {
         log(minimalSetMessage);
         process.exit(1);
       }
+      argv.extensions = argv.extensions.trim();
       if (argv.extensions === 'minimal_set') {
         argv.extensions =
             'amp-ad,amp-ad-network-adsense-impl,amp-audio,amp-video,' +
@@ -720,7 +723,7 @@ function dist() {
     printConfigHelp('gulp dist --fortesting');
   }
   parseExtensionFlags();
-  return compileCss().then(() => {
+  return compileCss(/* watch */ false, /* opt_compileAll */ true).then(() => {
     return Promise.all([
       compile(false, true, true),
       // NOTE:
