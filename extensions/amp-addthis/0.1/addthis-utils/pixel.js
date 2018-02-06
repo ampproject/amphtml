@@ -19,8 +19,11 @@ import {parseUrl} from '../../../../src/url';
 import {setStyles} from '../../../../src/style';
 import {addParamsToUrl} from '../../../../src/url';
 import {Services} from '../../../../src/services';
+import {isObject} from '../../../../src/types';
+import {getData} from '../../../../src/event-helper';
 
-import {COOKIELESS_API_SERVER} from '../constants';
+import {COOKIELESS_API_SERVER, Pixel} from '../constants';
+import {parseJson} from '../../../../src/json';
 
 const RE_IFRAME = /#iframe$/;
 const pixelatorFrameTitle = 'Pxltr Frame';
@@ -28,7 +31,7 @@ const pixelatorFrameTitle = 'Pxltr Frame';
 /**
  * Returns a sorted array of objects like [{delay: 1000, pixels: [...]}]
  * @param  {Array<Pixel>} pixelList
- * @return {Array<PixelGroup>}
+ * @return {Array}
  */
 const groupPixelsByTime = pixelList => {
   // Clean delay value; if it's empty/doesn't exist, default to [0]
@@ -40,21 +43,21 @@ const groupPixelsByTime = pixelList => {
   });
 
   const delayMap = cleanedPixels
-    .map(pixel => {
-      const delays = pixel.delay;
-      return delays.map(delay => ({
-        delay,
-        pixels: [pixel],
-      }));
-    })
-    .reduce((a, b) => a.concat(b), []) // flatten
-    .reduce((currentDelayMap, {delay, pixels}) => {
-      if (!currentDelayMap[delay]) {
-        currentDelayMap[delay] = [];
-      }
-      currentDelayMap[delay] = currentDelayMap[delay].concat(pixels);
-      return currentDelayMap;
-    }, {});
+      .map(pixel => {
+        const delays = pixel.delay;
+        return delays.map(delay => ({
+          delay,
+          pixels: [pixel],
+        }));
+      })
+      .reduce((a, b) => a.concat(b), []) // flatten
+      .reduce((currentDelayMap, {delay, pixels}) => {
+        if (!currentDelayMap[delay]) {
+          currentDelayMap[delay] = [];
+        }
+        currentDelayMap[delay] = currentDelayMap[delay].concat(pixels);
+        return currentDelayMap;
+      }, {});
 
   return Object.keys(delayMap).map(delay => ({
     delay: Number(delay),
@@ -106,7 +109,7 @@ const dropPixelatorPixel = (url, ampDoc) => {
   const requiresIframe = RE_IFRAME.test(url);
 
   // if it's not an absolute URL, don't pixelate
-  if (!url.includes('//')) {
+  if (url.indexOf('//') === -1) {
     return;
   }
 
@@ -120,8 +123,11 @@ const dropPixelatorPixel = (url, ampDoc) => {
 
 /**
  * Requests groups of pixels at specified delays
- * @param  {Array<Pixel>}    pixels
- * @param  {String}     options.sid - session (view) id
+ * @param  {Array<Pixel>} pixels
+ * @param  {{
+ * sid: string,
+ * ampDoc: *
+ * }} options
  */
 const dropPixelGroups = (pixels, {sid, ampDoc}) => {
   const pixelGroups = groupPixelsByTime(pixels);
@@ -131,11 +137,11 @@ const dropPixelGroups = (pixels, {sid, ampDoc}) => {
         dropPixelatorPixel(pixel.url, ampDoc);
         return pixel.id;
       });
-      const data = {
-        delay,
+      const data = dict({
+        delay: `${delay}`,
         ids: pids.join('-'),
         sid,
-      };
+      });
       const url = addParamsToUrl(`${COOKIELESS_API_SERVER}/live/prender`, data);
 
       if (ampDoc.win.navigator.sendBeacon) {
@@ -147,8 +153,37 @@ const dropPixelGroups = (pixels, {sid, ampDoc}) => {
   });
 };
 
-const callPixelEndpoint = ({ampDoc, endpoint, data}) => {
-  const url = addParamsToUrl(endpoint, data);
+/**
+ * Requests groups of pixels at specified delays
+ * @param  {(?JsonObject|string|undefined|null)} object
+ * @return {!JsonObject}
+ */
+function getJsonObject_(object) {
+  const params = dict();
+
+  if (object === undefined || object === null) {
+    return params;
+  }
+  const stringifiedObject = typeof object === 'string' ?
+      object : JSON.stringify(object);
+
+  try {
+    const parsedObject = parseJson(stringifiedObject);
+    if (isObject(parsedObject)) {
+      for (const key in parsedObject) {
+        params[key] = parsedObject[key];
+      }
+    }
+  } catch (error) {
+    console.log(error);
+  }
+  return params;
+}
+
+const callPixelEndpoint = event => {
+  const {ampDoc, endpoint} = event;
+  const eventData = getJsonObject_(getData(event));
+  const url = addParamsToUrl(endpoint, eventData);
 
   Services.xhrFor(ampDoc.win).fetchJson(url, {
     mode: 'cors',
@@ -161,7 +196,7 @@ const callPixelEndpoint = ({ampDoc, endpoint, data}) => {
     const {pixels = []} = json;
     if (pixels.length > 0) {
       dropPixelGroups(pixels, {
-        sid: data.sid,
+        sid: eventData['sid'],
         ampDoc,
       });
     }

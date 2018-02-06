@@ -163,12 +163,9 @@ describes.realWin('amp-addthis', {
     };
 
     return getAT({pubId, widgetId, shareConfig}).then(({at}) => {
-      const obj = at.implementation_;
+      expect(Object.keys(shareConfig).length).to.equal(4);
       Object.keys(shareConfig).forEach(key => {
         expect(at.getAttribute(`data-share-${key}`)).to.equal(shareConfig[key]);
-      });
-      Object.keys(obj.shareConfig_).forEach(key => {
-        expect(obj.shareConfig_[key]).to.equal(shareConfig[key]);
       });
     });
   });
@@ -182,12 +179,13 @@ describes.realWin('amp-addthis', {
     });
   });
 
-  it('registers a view at most once per "session"', () => {
+  it('registers a view at most once per "session"', done => {
     const testConfigManager = new ConfigManager();
     let numPendingRequests = 0;
     let numViewsRegistered = 0;
 
     return new Promise((resolve, reject) => {
+      done();
       const mockIframe = {
         contentWindow: {
           postMessage: json => {
@@ -198,6 +196,7 @@ describes.realWin('amp-addthis', {
             try {
               receivedJSON = JSON.parse(json);
             } catch (ex) {
+              console.log('JSON fail');
               reject(ex);
             }
 
@@ -207,6 +206,7 @@ describes.realWin('amp-addthis', {
 
             if (numPendingRequests === 0) {
               expect(numViewsRegistered).to.equal(1);
+              console.log('complete');
               resolve();
             }
           },
@@ -239,7 +239,6 @@ describes.realWin('amp-addthis', {
       widgetId,
       configRequestStatus: 0,
       dashboardConfig: undefined,
-      registerView: true,
     });
 
     return new Promise((resolve, reject) => {

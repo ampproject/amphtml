@@ -76,7 +76,7 @@ const classifyString = (keywordString = '', nonStrictMatch = false) => {
 
 /**
  * Classify a meta RATING keyword.
- * @param {String} value meta rating tag value
+ * @param {string} rating
  * @private
  */
 const classifyRating = (rating = '') => {
@@ -122,6 +122,11 @@ const extractKeywordsFromContent = content => {
   return keywords;
 };
 
+/**
+ * Guesses the search value from an url using a list of known search keys
+ * @param {string} url
+ * @returns {string|undefined}
+ */
 const getSearchString = url => {
   const terms = url.split('?').pop().toLowerCase().split('&');
   let matches;
@@ -139,6 +144,7 @@ const getSearchString = url => {
 
 /**
  * Return true if the url appears to be a search URL; false otherwise.
+ * @param {string} url
  */
 const isSearchUrl = (url = '') => {
   const lowerUrl = url.toLowerCase();
@@ -154,29 +160,31 @@ const isSearchUrl = (url = '') => {
 
   return lowerUrl.indexOf('addthis') === -1 && (
       lowerUrl.match(RE_SEARCH_GOOGLE)
-          || lowerUrl.match(RE_SEARCH_AOL) /* search.aol.* /aol/search?q=*/
-          || lowerUrl.indexOf('/pagead/aclk?') > -1 /*googleadservices*/
-          || lowerUrl.indexOf(com + 'url') > -1 /*bing*/
-          || lowerUrl.indexOf(com + 'l.php') > -1 /*facebook graph search*/
-          || lowerUrl.indexOf('/search?') > -1 /* many */
-          || lowerUrl.indexOf('/search/?') > -1 /* a few */
-          || lowerUrl.indexOf('search?') > -1 /*yandex.ru, and presumably others*/
-          || lowerUrl.indexOf('yandex.ru/clck/jsredir?') > -1 /*yandex, no one else */
-          || lowerUrl.indexOf(com + 'search') > -1 /* yahoo (including yahoo int'l), many others */
-          || lowerUrl.indexOf(org + 'search') > -1 /*many .org searches*/
-          || lowerUrl.indexOf('/search.html?') > -1 /* a few */
-          || lowerUrl.indexOf('search/results.') > -1 /*cars.com, gmc.com*/
-          || lowerUrl.indexOf(com + 's?bs') > -1 /*baidu*/
-          || lowerUrl.indexOf(com + 's?wd') > -1 /*baidu*/
-          || lowerUrl.indexOf(com + 'mb?search') > -1 /*manta*/
-          || lowerUrl.indexOf(com + 'mvc/search') > -1 /*eonline*/
-          || lowerUrl.indexOf(com + 'web') > -1 /*ask.com (same in .ca), altavista*/
-          || lowerUrl.indexOf('hotbot' + com) > -1 /*hotbot*/
+      || lowerUrl.match(RE_SEARCH_AOL) /* search.aol.* /aol/search?q=*/
+      || lowerUrl.indexOf('/pagead/aclk?') > -1 /*googleadservices*/
+      || lowerUrl.indexOf(com + 'url') > -1 /*bing*/
+      || lowerUrl.indexOf(com + 'l.php') > -1 /*facebook graph search*/
+      || lowerUrl.indexOf('/search?') > -1 /* many */
+      || lowerUrl.indexOf('/search/?') > -1 /* a few */
+      || lowerUrl.indexOf('search?') > -1 /*yandex.ru, and presumably others*/
+      || lowerUrl.indexOf('yandex.ru/clck/jsredir?') > -1 /*yandex, no one else */
+      || lowerUrl.indexOf(com + 'search') > -1 /* yahoo (including yahoo int'l), many others */
+      || lowerUrl.indexOf(org + 'search') > -1 /*many .org searches*/
+      || lowerUrl.indexOf('/search.html?') > -1 /* a few */
+      || lowerUrl.indexOf('search/results.') > -1 /*cars.com, gmc.com*/
+      || lowerUrl.indexOf(com + 's?bs') > -1 /*baidu*/
+      || lowerUrl.indexOf(com + 's?wd') > -1 /*baidu*/
+      || lowerUrl.indexOf(com + 'mb?search') > -1 /*manta*/
+      || lowerUrl.indexOf(com + 'mvc/search') > -1 /*eonline*/
+      || lowerUrl.indexOf(com + 'web') > -1 /*ask.com (same in .ca), altavista*/
+      || lowerUrl.indexOf('hotbot' + com) > -1 /*hotbot*/
   );
 };
 
 /**
  * Classifies the present page based on title, hostname, meta keywords and meta description.
+ * @param {*} pageInfo
+ * @param {Array} metaElements
  * @returns {number} classification bitmask (currently only setting a porn bit)
  */
 export const classifyPage = (pageInfo, metaElements) => {
@@ -198,10 +206,18 @@ export const classifyPage = (pageInfo, metaElements) => {
   return bitmask;
 };
 
+
+/**
+ * Returns bitmask based on detected classification
+ * @param {string} referrerString
+ * @param {*} parsedReferrer
+ * @param {*} parsedHref
+ * @returns {number}
+ */
 export const classifyReferrer = (
-  referrerString,
-  parsedReferrer,
-  parsedHref
+    referrerString,
+    parsedReferrer,
+    parsedHref
 ) => {
   // The default is a direct view.
   let bitmask = REFERRER_BITS.DIRECT;
@@ -224,6 +240,12 @@ export const classifyReferrer = (
   return bitmask;
 };
 
+/**
+ * Return true if the url appears to be a product page; false otherwise.
+ * @param {Document} doc
+ * @param {Array} metaElements
+ * @returns {boolean}
+ */
 export const isProductPage = (doc, metaElements) => {
   if (doc.getElementById('product') ||
       (doc.getElementsByClassName('product') || []).length > 0 ||
@@ -249,9 +271,10 @@ export const isProductPage = (doc, metaElements) => {
 };
 
 /**
-* Gather the keywords gathered while classifying the page.
-* @returns {string} csv containing keywords
-*/
+ * Gather the keywords gathered while classifying the page.
+ * @param {Array} metaElements
+ * @returns {string} csv containing keywords
+ */
 export const getKeywordsString = metaElements => {
   const keywords = metaElements
       .filter(meta => getDetailsForMeta(meta).name === 'keywords')

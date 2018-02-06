@@ -51,6 +51,12 @@ export class ConfigManager {
      * @private
      */
     this.configProviderIframes_ = [];
+
+    /**
+     * @type {Object<string,string>}
+     * @private
+     */
+    this.activeToolsMonitor_ = null;
   }
 
   /**
@@ -113,17 +119,25 @@ export class ConfigManager {
   /**
    * Register relevant data with the configuration manager and prepare request/response cycle
    * between frames.
-   * @param {{pubId:!string, widgetId:!string, iframe:!Element, iframeLoadPromise:!Promise, win:!EventTarget, shareConfig:(JsonObject|undefined)}} param
+   * @param {{
+   * pubId:!string,
+   * activeToolsMonitor: Object<string,string>,
+   * atConfig: Object<string,string>,
+   * widgetId:!string, iframe:!Element,
+   * iframeLoadPromise:!Promise,
+   * win:(EventTarget|undefined),
+   * shareConfig:(JsonObject|undefined)
+   * }} param
    */
   register({
-    pubId,
-    widgetId,
-    iframe,
-    iframeLoadPromise,
-    shareConfig,
-    atConfig,
-    activeToolsMonitor,
-  }) {
+             pubId,
+             widgetId,
+             iframe,
+             iframeLoadPromise,
+             shareConfig,
+             atConfig,
+             activeToolsMonitor,
+           }) {
     if (!this.activeToolsMonitor_) {
       this.activeToolsMonitor_ = activeToolsMonitor;
     }

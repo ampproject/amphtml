@@ -16,7 +16,7 @@
 import {parseUrl} from '../../../../src/url';
 import {toArray} from '../../../../src/types';
 
-import {API_SERVER} from '../constants';
+import {API_SERVER, AT_CONFIG} from '../constants';
 import {
   classifyPage,
   classifyReferrer,
@@ -35,14 +35,25 @@ import {callPixelEndpoint} from './pixel';
 const VIEW_EVENT_CHANNEL = 100;
 const nonTrackedDomainMatcher = /\.gov|\.mil/;
 
+
+/**
+ *
+ * @param {{
+ * loc:*, title:string,
+ * pubId:string,
+ * atConfig: AT_CONFIG,
+ * referrer:string,
+ * ampDoc:*
+ * }} param
+ */
 const getLojsonData = ({
-    loc,
-    title,
-    pubId,
-    atConfig,
-    referrer,
-    ampDoc,
-}) => {
+                         loc,
+                         title,
+                         pubId,
+                         atConfig,
+                         referrer,
+                         ampDoc,
+                       }) => {
   const {href, hostname, host, search, pathname, hash, protocol, port} = loc;
   const pageInfo = {
     du: href.split('#').shift(),
@@ -71,13 +82,13 @@ const getLojsonData = ({
   return {
     amp: 1,
     bl: 0 |
-        (atConfig.use_cookies !== false ? 1 : 0) |
-        (atConfig.track_textcopy === true ? 2 : 0) |
-        (atConfig.track_addressbar === true ? 4 : 0),
+    (atConfig.use_cookies !== false ? 1 : 0) |
+    (atConfig.track_textcopy === true ? 2 : 0) |
+    (atConfig.track_addressbar === true ? 4 : 0),
     cb: classifyPage(pageInfo, metaElements),
     colc: Date.now(),
     ct: atConfig.track_clickback !== false &&
-        atConfig.track_linkback !== false ? 1 : 0,
+    atConfig.track_linkback !== false ? 1 : 0,
     dc: 1,
     dp: host,
     dr: host === parsedReferrer.host ? undefined : parsedReferrer.host,
@@ -90,7 +101,7 @@ const getLojsonData = ({
     mk: getKeywordsString(metaElements),
     of: isDNTEnabled ? 4 :
         nonTrackedDomainMatcher.test(hostname) ? 1 :
-        0,
+            0,
     pd: isProductPage(win.document, metaElements) ? 1 : 0,
     pub: pubId,
     rb: classifyReferrer(referrer, parsedReferrer, parseUrl(pageInfo.du)),
