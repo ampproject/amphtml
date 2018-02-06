@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Gestures} from '../../src/gesture';
+import * as sinon from 'sinon';
 import {DoubletapRecognizer, PinchRecognizer, SwipeXYRecognizer, TapRecognizer,
   TapzoomRecognizer} from '../../src/gesture-recognizers';
-import * as sinon from 'sinon';
+import {Gestures} from '../../src/gesture';
 
 
 describe('TapRecognizer', () => {

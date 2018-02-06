@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,23 @@
  * limitations under the License.
  */
 
-// Entry point into AMP for compilation with babel. Just loads amp.js and
-// Babel's helpers.
+// import {AmpStoryAutoAds} from '../amp-story-auto-ads';
 
-import './amp-shadow';
+describes.realWin('amp-story-auto-ads', {
+  amp: {
+    extensions: ['amp-story-auto-ads'],
+  },
+}, env => {
+
+  let win;
+  let element;
+
+  beforeEach(() => {
+    win = env.win;
+    element = win.document.createElement('amp-story-auto-ads');
+    win.document.body.appendChild(element);
+  });
+
+  it('should build', () => {
+  });
+});

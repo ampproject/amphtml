@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {registerServiceBuilder, getService} from '../service';
-import {dev} from '../log';
 import {Services} from '../services';
-import {stringToBytes, utf8EncodeSync} from '../utils/bytes';
 import {base64UrlEncodeFromBytes} from '../utils/base64';
+import {dev} from '../log';
+import {getService, registerServiceBuilder} from '../service';
+import {stringToBytes, utf8Encode} from '../utils/bytes';
 
 /** @const {string} */
 const TAG = 'Crypto';
@@ -165,7 +165,7 @@ export class Crypto {
     dev().assert(this.isPkcsAvailable());
     // Safari 10 and earlier want this as an ArrayBufferView.
     const keyData = this.isLegacyWebkit_
-      ? utf8EncodeSync(JSON.stringify(/** @type {!JsonObject} */ (jwk)))
+      ? utf8Encode(JSON.stringify(/** @type {!JsonObject} */ (jwk)))
       : /** @type {!webCrypto.JsonWebKey} */ (jwk);
     return /** @type {!Promise<!webCrypto.CryptoKey>} */ (
       this.subtle.importKey('jwk', keyData, this.pkcsAlgo, true, ['verify'])

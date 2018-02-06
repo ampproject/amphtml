@@ -202,8 +202,6 @@ exports.rules = [
           'src/service/video-manager-impl.js',
       'extensions/amp-wistia-player/0.1/amp-wistia-player.js->' +
           'src/service/video-manager-impl.js',
-      'extensions/amp-fx-parallax/0.1/amp-fx-parallax.js->' +
-          'src/service/parallax-impl.js',
       'extensions/amp-analytics/0.1/iframe-transport.js->' +
           'src/service/extension-location.js',
       'extensions/amp-analytics/0.1/iframe-transport.js->' +
@@ -212,8 +210,15 @@ exports.rules = [
           'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
           'src/service/position-observer/position-observer-worker.js',
+      'extensions/amp-fx-collection/0.1/providers/parallax.js->' +
+          'src/service/position-observer/position-observer-impl.js',
+      'extensions/amp-fx-collection/0.1/providers/parallax.js->' +
+          'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-analytics/0.1/amp-analytics.js->' +
           'src/service/cid-impl.js',
+      // TODO(calebcordry) remove this once experiment is launched
+      'extensions/amp-analytics/0.1/variables.js->' +
+          'src/service/url-replacements-impl.js',
     ],
   },
   {

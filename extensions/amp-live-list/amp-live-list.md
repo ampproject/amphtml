@@ -280,7 +280,7 @@ added, and will be removed once the next set of new items are inserted on a subs
 highlighting effect like the css below.
 
 ```css
-.live-list-item-new {
+.amp-live-list-item-new {
   animation: amp-live-list-item-highlight 2s;
 }
 

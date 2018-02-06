@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as tr from '../../src/transition';
 import * as sinon from 'sinon';
+import * as tr from '../../src/transition';
 
 describe('Transition', () => {
 

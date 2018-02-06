@@ -14,35 +14,35 @@
  * limitations under the License.
  */
 
+import * as trackPromise from '../../src/impression';
 import {Observable} from '../../src/observable';
 import {Services} from '../../src/services';
-import {createIframePromise} from '../../testing/iframe';
-import {user} from '../../src/log';
-import {
-  markElementScheduledForTesting,
-  resetScheduledElementForTesting,
-} from '../../src/service/custom-element-registry';
 import {cidServiceForDocForTesting} from
   '../../src/service/cid-impl';
+import {createIframePromise} from '../../testing/iframe';
+import {
+  extractClientIdFromGaCookie,
+  installUrlReplacementsServiceForDoc,
+} from '../../src/service/url-replacements-impl';
+import {
+  installActivityServiceForTesting,
+} from '../../extensions/amp-analytics/0.1/activity-impl';
 import {installCryptoService} from '../../src/service/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentInfoServiceForDoc} from
   '../../src/service/document-info-impl';
 import {
-  installActivityServiceForTesting,
-} from '../../extensions/amp-analytics/0.1/activity-impl';
+  markElementScheduledForTesting,
+  resetScheduledElementForTesting,
+} from '../../src/service/custom-element-registry';
 import {
-  installUrlReplacementsServiceForDoc,
-  extractClientIdFromGaCookie,
-} from '../../src/service/url-replacements-impl';
+  mockWindowInterface,
+  stubServiceForDoc,
+} from '../../testing/test-helper';
+import {parseUrl} from '../../src/url';
 import {registerServiceBuilder} from '../../src/service';
 import {setCookie} from '../../src/cookies';
-import {parseUrl} from '../../src/url';
-import * as trackPromise from '../../src/impression';
-import {
-  stubServiceForDoc,
-  mockWindowInterface,
-} from '../../testing/test-helper';
+import {user} from '../../src/log';
 
 
 describes.sandboxed('UrlReplacements', {}, () => {
@@ -791,6 +791,14 @@ describes.sandboxed('UrlReplacements', {}, () => {
     });
   });
 
+  it('should replace INCREMENTAL_ENGAGED_TIME', () => {
+    return expandUrlAsync('?sh=' +
+      'INCREMENTAL_ENGAGED_TIME', /*opt_bindings*/undefined,
+    {withActivity: true}).then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
   it('should replace AMP_VERSION', () => {
     return expandUrlAsync('?sh=AMP_VERSION').then(res => {
       expect(res).to.equal('?sh=%24internalRuntimeVersion%24');
@@ -1042,6 +1050,18 @@ describes.sandboxed('UrlReplacements', {}, () => {
             'FUNC': 22,
             'PROMISE': 23,
           });
+        });
+  });
+
+  it('should collect unwhitelisted vars', () => {
+    const win = getFakeWindow();
+    const element = document.createElement('amp-foo');
+    element.setAttribute('src', '?SOURCE_HOST&QUERY_PARAM(p1)&COUNTER');
+    element.setAttribute('data-amp-replace', 'QUERY_PARAM(p1)');
+    return Services.urlReplacementsForDoc(win.ampdoc)
+        .collectUnwhitelistedVars(element)
+        .then(res => {
+          expect(res).to.deep.equal(['SOURCE_HOST', 'COUNTER']);
         });
   });
 

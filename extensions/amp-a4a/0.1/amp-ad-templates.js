@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {urls} from '../../../src/config';
-import {parseUrl} from '../../../src/url';
 import {LRUCache} from '../../../src/utils/lru-cache';
+import {Services} from '../../../src/services';
+import {createElementWithAttributes} from '../../../src/dom';
+import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {getMode} from '../../../src/mode';
+import {isArray} from '../../../src/types';
+import {parseUrl} from '../../../src/url';
+import {urls} from '../../../src/config';
 
 /** @private {!Object<string, string|boolean>} */
 const TEMPLATE_CORS_CONFIG = {
@@ -51,16 +54,14 @@ export class AmpAdTemplates {
    * @return {!Promise<string>}
    */
   fetch(templateUrl) {
-    const proxyUrl = getMode(this.win_).localDev
-      ? templateUrl
+    const proxyUrl = getMode(this.win_).localDev && !isNaN(templateUrl)
+      ? `http://ads.localhost:${this.win_.location.port}` +
+          `/a4a_template/adzerk/${templateUrl}`
       : this.getTemplateProxyUrl_(templateUrl);
     let templatePromise = this.cache_.get(proxyUrl);
     if (!templatePromise) {
       templatePromise = Services.xhrFor(this.win_)
-          .fetchText(getMode(this.win_).localDev
-            ? `http://ads.localhost:${this.win_.location.port}` +
-                `/a4a_template/adzerk/${proxyUrl}`
-            : proxyUrl, TEMPLATE_CORS_CONFIG)
+          .fetchText(proxyUrl, TEMPLATE_CORS_CONFIG)
           .then(response => response.text());
       this.cache_.put(proxyUrl, templatePromise);
     }
@@ -79,14 +80,44 @@ export class AmpAdTemplates {
   }
 
   /**
+   * @param {!Element} element
+   * @param {!Array|!JsonObject} analyticsValue
+   */
+  insertAnalytics(element, analyticsValue) {
+    analyticsValue = /**@type {!Array}*/
+        (isArray(analyticsValue) ? analyticsValue : [analyticsValue]);
+    for (let i = 0; i < analyticsValue.length; i++) {
+      const config = analyticsValue[i];
+      const analyticsEle = element.ownerDocument.createElement('amp-analytics');
+      if (config['remote']) {
+        analyticsEle.setAttribute('config', config['remote']);
+      }
+      if (config['type']) {
+        analyticsEle.setAttribute('type', config['type']);
+      }
+      if (config['inline']) {
+        const scriptElem = createElementWithAttributes(
+            element.ownerDocument,
+            'script', dict({
+              'type': 'application/json',
+            }));
+        scriptElem.textContent = JSON.stringify(config['inline']);
+        analyticsEle.appendChild(scriptElem);
+      }
+      element.appendChild(analyticsEle);
+    }
+  }
+
+  /**
    * Converts the canonical template URL to the CDN proxy URL.
    * @param {string} url
    * @return {string}
    */
   getTemplateProxyUrl_(url) {
+    const cdnUrlSuffix = urls.cdn.slice(8);
     const loc = parseUrl(url);
-    return 'https://' +
-        loc.hostname.replace(/-/g, '--').replace(/\./g, '-') +
-        '.' + urls.cdn.slice(8) + '/c/s/' + loc.hostname + loc.pathname;
+    return loc.origin.indexOf(cdnUrlSuffix) > 0 ? url :
+      'https://' + loc.hostname.replace(/-/g, '--').replace(/\./g, '-') +
+      '.' + cdnUrlSuffix + '/ad/s/' + loc.hostname + loc.pathname;
   }
 }

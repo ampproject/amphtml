@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import {AmpPixel} from '../../builtins/amp-pixel';
+import {Services} from '../../src/services';
+import {createElementWithAttributes} from '../../src/dom';
 import {
   depositRequestUrl,
   withdrawRequest,
 } from '../../testing/test-helper';
-import {createElementWithAttributes} from '../../src/dom';
-import {Services} from '../../src/services';
-import {AmpPixel} from '../../builtins/amp-pixel';
 
 describe.configure().run('amp-pixel', function() {
   this.timeout(15000);

@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-// Extern specifically for Old Type Inference (OTI) type checking mode.
+import {ScrollAccessVendor} from './scroll-impl';
+import {Services} from '../../../src/services';
 
-/**
- * TransitionDef function that accepts normtime, typically between 0 and 1 and
- * performs an arbitrary animation action. Notice that sometimes normtime can
- * dip above 1 or below 0. This is an acceptable case for some curves. The
- * second argument is a boolean value that equals "true" for the completed
- * transition and "false" for ongoing.
- * @typedef {function(number, boolean):?|function(number):?}
- */
-var TransitionDef;
+AMP.extension('amp-access-scroll', '0.1', function(AMP) {
+  AMP.registerServiceForDoc(
+      'scroll',
+      function(ampdoc) {
+        return Services.accessServiceForDoc(ampdoc).then(accessService => {
+  	  const vendor = new ScrollAccessVendor(ampdoc, accessService);
+          accessService.registerVendor('scroll', vendor);
+          return vendor;
+        });
+      });
+});

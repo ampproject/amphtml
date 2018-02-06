@@ -14,39 +14,37 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-image-viewer-0.1.css';
+import * as st from '../../../src/style';
+import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
-import {bezierCurve} from '../../../src/curve';
-import {elementByTag} from '../../../src/dom';
-import {listen} from '../../../src/event-helper';
-import {Gestures} from '../../../src/gesture';
-import {dev, user} from '../../../src/log';
+import {CSS} from '../../../build/amp-image-viewer-0.1.css';
+import {CommonSignals} from '../../../src/common-signals';
 import {
   DoubletapRecognizer,
+  PinchRecognizer,
   SwipeXYRecognizer,
   TapzoomRecognizer,
-  PinchRecognizer,
 } from '../../../src/gesture-recognizers';
+import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
+import {bezierCurve} from '../../../src/curve';
+import {continueMotion} from '../../../src/motion';
+import {dev, user} from '../../../src/log';
+import {elementByTag} from '../../../src/dom';
 import {
   expandLayoutRect,
   layoutRectFromDomRect,
   layoutRectLtwh,
   moveLayoutRect,
 } from '../../../src/layout-rect';
-import {continueMotion} from '../../../src/motion';
-import {Services} from '../../../src/services';
 import {srcsetFromElement} from '../../../src/srcset';
-import {debounce} from '../../../src/utils/rate-limit';
-import * as st from '../../../src/style';
-import * as tr from '../../../src/transition';
-import {CommonSignals} from '../../../src/common-signals';
 
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 const TAG = 'amp-image-viewer';
-
 const ARIA_ATTRIBUTES = ['aria-label', 'aria-describedby',
   'aria-labelledby'];
+const DEFAULT_MAX_SCALE = 2;
 
 export class AmpImageViewer extends AMP.BaseElement {
 
@@ -77,12 +75,6 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.imageBox_ = layoutRectLtwh(0, 0, 0, 0);
 
     /** @private {!UnlistenDef|null} */
-    this.unlistenResize_ = null;
-
-    /** @private {!UnlistenDef|null} */
-    this.unlistenOrientationChange_ = null;
-
-    /** @private {!UnlistenDef|null} */
     this.unlistenOnSwipePan_ = null;
 
     /** @private {number} */
@@ -94,7 +86,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     /** @private {number} */
     this.minScale_ = 1;
     /** @private {number} */
-    this.maxScale_ = 2;
+    this.maxScale_ = DEFAULT_MAX_SCALE;
     /** @private {number} */
     this.startX_ = 0;
     /** @private {number} */
@@ -120,12 +112,15 @@ export class AmpImageViewer extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.sourceAmpImage_ = null;
+
+    /** @private {?Promise} */
+    this.loadPromise_ = null;
   }
 
   /** @override */
   buildCallback() {
     this.vsync_ = this.getVsync();
-    this.element.classList.add('i-amphtml-image-lightbox-viewer');
+    this.element.classList.add('i-amphtml-image-viewer');
     const children = this.getRealChildren();
     user().assert(
         children.length == 1 && children[0].tagName == 'AMP-IMG',
@@ -136,15 +131,20 @@ export class AmpImageViewer extends AMP.BaseElement {
   }
 
   /** @override */
-  layoutCallback() {
-    let elementLayoutPromise = Promise.resolve();
-    if (this.sourceAmpImage_) {
-      this.scheduleLayout(this.sourceAmpImage_);
-      elementLayoutPromise = this.sourceAmpImage_.signals()
-          .whenSignal(CommonSignals.LOAD_END);
+  onLayoutMeasure() {
+    if (this.loadPromise_) {
+      this.loadPromise_.then(() => this.measure());
     }
-    return elementLayoutPromise
-        .then(() => {
+  }
+
+  /** @override */
+  layoutCallback() {
+    if (this.loadPromise_) {
+      return this.loadPromise_;
+    }
+    this.scheduleLayout(dev().assertElement(this.sourceAmpImage_));
+    this.loadPromise_ = this.sourceAmpImage_.signals()
+        .whenSignal(CommonSignals.LOAD_END).then(() => {
           return this.vsync_.mutatePromise(() => {
             if (!this.image_) {
               this.image_ = this.element.ownerDocument.createElement('img');
@@ -152,32 +152,39 @@ export class AmpImageViewer extends AMP.BaseElement {
 
               this.init_();
               this.element.appendChild(this.image_);
-              this.element.removeChild(this.sourceAmpImage_);
-              this.sourceAmpImage_ = null;
+              st.toggle(dev().assertElement(this.sourceAmpImage_), false);
             }
           });
         }).then(() => {
           return this.measure();
         }).then(() => {
           this.setupGestures_();
-          this.registerOnResizeHandler_();
         });
+    return this.loadPromise_;
   }
 
   /** @override */
   pauseCallback() {
-    this.cleanupGestures_();
-    this.cleanupOnResizeHandler_();
+    if (!this.loadPromise_) {
+      return;
+    }
+    this.loadPromise_.then(() => {
+      this.measure();
+      this.cleanupGestures_();
+    });
   }
 
   /** @override */
   resumeCallback() {
-    this.element.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
+    if (this.sourceAmpImage_) {
+      this.scheduleLayout(this.sourceAmpImage_);
+    }
+    if (!this.loadPromise_) {
+      return;
+    }
+    this.loadPromise_.then(() => {
       if (!this.gestures_) {
         this.setupGestures_();
-      }
-      if (!this.cleanupOnResizeHandler_) {
-        this.registerOnResizeHandler_();
       }
     });
   }
@@ -185,7 +192,7 @@ export class AmpImageViewer extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.cleanupGestures_();
-    this.cleanupOnResizeHandler_();
+    this.loadPromise_ = null;
     return true;
   }
 
@@ -230,50 +237,6 @@ export class AmpImageViewer extends AMP.BaseElement {
         this.posX_,
         this.posY_
     );
-  }
-
-  /**
-   * Registers a onResize handler to resize the ImageViewer whenever
-   * the screen size or mobile orientation changes.
-   * @private
-   */
-  // TODO (cathyxz): test on mobile and verify this works.
-  registerOnResizeHandler_() {
-    const platform = Services.platformFor(this.win);
-
-    // Special case for iOS browsers due to Webkit bug #170595
-    // https://bugs.webkit.org/show_bug.cgi?id=170595
-    // Delay the onResize by 500 ms to ensure correct height and width
-    const debouncedOnResize = debounce(this.win, () => this.measure(), 500);
-
-    // Register an onResize handler to resize the image viewer
-    this.unlistenResize_ = this.getViewport().onResize(() => {
-      if (platform.isIos() && platform.isSafari()) {
-        debouncedOnResize();
-      } else {
-        this.measure();
-      }
-    });
-
-    // iOS non-safari browsers do not reliably fire onResize on orientation
-    // change, so listen to orientationchange to trigger resize
-    if (platform.isIos() && !platform.isSafari()) {
-      this.unlistenOrientationChange_ = listen(this.win,
-          'orientationchange', debouncedOnResize);
-    }
-  }
-
-  /**
-   * @private
-   */
-  cleanupOnResizeHandler_() {
-    if (this.unlistenResize_) {
-      this.unlistenResize_();
-    }
-
-    if (this.unlistenOrientationChange_) {
-      this.unlistenOrientationChange_();
-    }
   }
 
   /**
@@ -363,6 +326,14 @@ export class AmpImageViewer extends AMP.BaseElement {
         height: st.px(this.imageBox_.height),
       });
 
+      // Adjust max scale to at least fit the screen.
+      const elementBoxRatio = this.elementBox_.width / this.elementBox_.height;
+      const maxScale = Math.max(
+          elementBoxRatio / sourceAspectRatio,
+          sourceAspectRatio / elementBoxRatio
+      );
+      this.maxScale_ = Math.max(DEFAULT_MAX_SCALE, maxScale);
+
       // Reset zoom and pan.
       this.startScale_ = this.scale_ = 1;
       this.startX_ = this.posX_ = 0;
@@ -409,6 +380,10 @@ export class AmpImageViewer extends AMP.BaseElement {
 
   /** @private */
   setupGestures_() {
+    // TODO (#12881): this and the subsequent use of event.preventDefault
+    // is a temporary solution to #12362. We should revisit this problem after
+    // resolving #12881 or change the use of window.event to the specific event
+    // triggering the gesture.
     this.gestures_ = Gestures.get(
         this.element,
         /* opt_shouldNotPreventDefault */true
@@ -465,6 +440,7 @@ export class AmpImageViewer extends AMP.BaseElement {
     // Movable.
     this.unlistenOnSwipePan_ = this.gestures_
         .onGesture(SwipeXYRecognizer, e => {
+          event.preventDefault();
           this.onMove_(e.data.deltaX, e.data.deltaY, false);
           if (e.data.last) {
             this.onMoveRelease_(e.data.velocityX, e.data.velocityY);
@@ -586,8 +562,8 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @private
    */
   onMove_(deltaX, deltaY, animate) {
-    const newPosX = this.boundX_(this.startX_ + deltaX, true);
-    const newPosY = this.boundY_(this.startY_ + deltaY, true);
+    const newPosX = this.boundX_(this.startX_ + deltaX, false);
+    const newPosY = this.boundY_(this.startY_ + deltaY, false);
     this.set_(this.scale_, newPosX, newPosY, animate);
   }
 
@@ -603,8 +579,8 @@ export class AmpImageViewer extends AMP.BaseElement {
     this.motion_ = continueMotion(dev().assertElement(this.image_),
         this.posX_, this.posY_, veloX, veloY,
         (x, y) => {
-          const newPosX = this.boundX_(x, true);
-          const newPosY = this.boundY_(y, true);
+          const newPosX = this.boundX_(x, false);
+          const newPosY = this.boundY_(y, false);
           if (Math.abs(newPosX - this.posX_) < 1 &&
                 Math.abs(newPosY - this.posY_) < 1) {
             // Hit the wall: stop motion.

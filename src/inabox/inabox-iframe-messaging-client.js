@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {registerServiceBuilder, getService} from '../service';
 import {IframeMessagingClient} from '../../3p/iframe-messaging-client';
+import {getService, registerServiceBuilder} from '../service';
 import {tryParseJson} from '../json';
 
 /**

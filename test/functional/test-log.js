@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {
   Log,
   LogLevel,
   USER_ERROR_SENTINEL,
   dev,
+  duplicateErrorIfNecessary,
+  isUserErrorEmbed,
   isUserErrorMessage,
   rethrowAsync,
   setReportError,
   user,
-  duplicateErrorIfNecessary,
-  isUserErrorEmbed,
 } from '../../src/log';
-import * as sinon from 'sinon';
 
 describe('Logging', () => {
 

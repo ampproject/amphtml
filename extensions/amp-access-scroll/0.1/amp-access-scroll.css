@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,22 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {installParallaxForDoc} from '../../../src/service/parallax-impl';
-import {onDocumentReady} from '../../../src/document-ready';
-
-const ampdoc = Services.ampdocServiceFor(AMP.win).getAmpDoc();
-onDocumentReady(ampdoc.win.document, () => {
-  installParallaxForDoc(ampdoc.getRootNode());
-});
+.amp-access-scroll-bar {
+    height: 44px;
+    position: fixed;
+    left: 0;
+    width: 100%;
+    background: transparent;
+    z-index: 2147483647;
+    bottom: 0;
+}
+.amp-access-scroll-bar.scroll-bar-top {
+    top: 0;
+    bottom: auto;
+}
+.amp-access-scroll-placeholder {
+  padding-top: 8px;
+  padding-left: 16px;
+  background-color: #fff;
+  z-index: 11;
+}

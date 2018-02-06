@@ -20,6 +20,11 @@ import {Xhr} from '../../../../src/service/xhr-impl';
 
 
 describes.fakeWin('amp-ad-templates', {amp: true}, env => {
+
+  const cdnUrl = 'https://adserver-com.cdn.ampproject.org/ad/s/' +
+      'adserver.com/amp_template_1';
+  const canonicalUrl = 'https://adserver.com/amp_template_1';
+
   let win, doc;
   let fetchTextMock;
   let ampAdTemplates;
@@ -35,8 +40,7 @@ describes.fakeWin('amp-ad-templates', {amp: true}, env => {
   it('should return a promise resolving to a string template', () => {
     const template = 'content not important here';
     fetchTextMock.withArgs(
-        'https://adserver-com.cdn.ampproject.org/c/s/' +
-        'adserver.com/amp_template_1',
+        cdnUrl,
         {
           mode: 'cors',
           method: 'GET',
@@ -48,8 +52,20 @@ describes.fakeWin('amp-ad-templates', {amp: true}, env => {
               headers: {},
               text: () => template,
             }));
-    return ampAdTemplates.fetch('https://adserver.com/amp_template_1')
+    return ampAdTemplates.fetch(canonicalUrl)
         .then(fetchedTemplate => expect(fetchedTemplate).to.equal(template));
+  });
+
+  it('should use CDN url if one is supplied', () => {
+    expect(ampAdTemplates.getTemplateProxyUrl_(cdnUrl)).to.equal(cdnUrl);
+  });
+
+  it('should convert canonical to CDN', () => {
+    expect(ampAdTemplates.getTemplateProxyUrl_(canonicalUrl)).to.equal(cdnUrl);
+  });
+
+  it('should render a template with correct values', () => {
+    win.AMP.registerTemplate('amp-mustache', AmpMustache);
   });
 
   it('should render a template with correct values', () => {
@@ -64,5 +80,26 @@ describes.fakeWin('amp-ad-templates', {amp: true}, env => {
     });
   });
 
+  it('should insert analytics component', () => {
+    const parentDiv = doc.createElement('div');
+    parentDiv./*OK*/innerHTML =
+        '<p>123</p>';
+    doc.body.appendChild(parentDiv);
+    const analytics = [{
+      'remote': 'remoteUrl',
+      'inline': {
+        'requests': 'r',
+      },
+    }, {
+      'type': 'googleanalytics',
+    }];
+    ampAdTemplates.insertAnalytics(parentDiv, analytics);
+    expect(parentDiv.childNodes.length).to.equal(3);
+    expect(parentDiv.innerHTML).to.equal('<p>123</p>' +
+        '<amp-analytics config="remoteUrl">' +
+        '<script type="application/json">{"requests":"r"}</script>' +
+        '</amp-analytics>' +
+        '<amp-analytics type="googleanalytics"></amp-analytics>');
+  });
 });
 

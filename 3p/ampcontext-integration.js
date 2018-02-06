@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 import {AbstractAmpContext} from './ampcontext';
+import {adConfig} from '../ads/_config';
 import {computeInMasterFrame} from './3p';
 import {dev, user} from '../src/log';
 import {dict} from '../src/utils/object';
-import {adConfig} from '../ads/_config';
 
 
 /**

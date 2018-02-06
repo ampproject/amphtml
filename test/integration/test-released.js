@@ -16,8 +16,8 @@
 
 import {
   createFixtureIframe,
-  pollForLayout,
   expectBodyToBecomeVisible,
+  pollForLayout,
 } from '../../testing/iframe.js';
 
 describe.configure().retryOnSaucelabs().run('released components: ',

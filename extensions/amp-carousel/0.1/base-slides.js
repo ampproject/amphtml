@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
+import {ActionTrust} from '../../../src/action-trust';
 import {BaseCarousel} from './base-carousel';
+import {Services} from '../../../src/services';
 
 export class BaseSlides extends BaseCarousel {
 
@@ -57,6 +58,15 @@ export class BaseSlides extends BaseCarousel {
     if (this.shouldAutoplay_) {
       this.setupAutoplay_();
     }
+
+    this.registerAction('toggleAutoplay', invocation => {
+      const args = invocation.args;
+      if (args && args['toggleOn'] !== undefined) {
+        this.toggleAutoplay_(args['toggleOn']);
+      } else {
+        this.toggleAutoplay_(!this.hasAutoplay_);
+      }
+    }, ActionTrust.LOW);
   }
 
   buildSlides() {
@@ -145,6 +155,32 @@ export class BaseSlides extends BaseCarousel {
         this.go.bind(
             this, /* dir */ 1, /* animate */ true, /* autoplay */ true),
         this.autoplayDelay_);
+  }
+
+  /**
+   * Called by toggleAutoplay action to toggle the autoplay feature.
+   * @param {boolean} toggleOn
+   * @private
+   */
+  toggleAutoplay_(toggleOn) {
+    if (toggleOn == this.shouldAutoplay_) {
+      return;
+    }
+
+    const prevAutoplayStatus = this.shouldAutoplay_;
+
+    this.hasAutoplay_ = toggleOn;
+    this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
+
+    if (!prevAutoplayStatus && this.shouldAutoplay_) {
+      this.setupAutoplay_();
+    }
+
+    if (this.shouldAutoplay_) {
+      this.autoplay_();
+    } else {
+      this.clearAutoplay();
+    }
   }
 
   /**

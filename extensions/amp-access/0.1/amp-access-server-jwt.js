@@ -16,7 +16,9 @@
 
 import {AccessClientAdapter} from './amp-access-client';
 import {JwtHelper} from './jwt';
+import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
+import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/types';
@@ -26,8 +28,6 @@ import {
   removeFragment,
   serializeQueryString,
 } from '../../../src/url';
-import {dev, user} from '../../../src/log';
-import {Services} from '../../../src/services';
 
 /** @const {string} */
 const TAG = 'amp-access-server-jwt';

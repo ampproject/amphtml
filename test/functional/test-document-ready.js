@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
+import {Services} from '../../src/services';
 import {isDocumentReady,
   onDocumentReady,
-  whenDocumentReady,
   whenDocumentComplete,
+  whenDocumentReady,
 } from '../../src/document-ready';
-import {Services} from '../../src/services';
-import * as sinon from 'sinon';
 
 
 describe('documentReady', () => {

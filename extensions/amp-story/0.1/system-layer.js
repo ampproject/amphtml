@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui';
 import {EventType, dispatch} from './events';
-import {renderAsElement} from './simple-template';
-import {dict} from '../../../src/utils/object';
-import {dev} from '../../../src/log';
-import {Services} from '../../../src/services';
 import {ProgressBar} from './progress-bar';
+import {Services} from '../../../src/services';
+import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {matches} from '../../../src/dom';
-import {DevelopmentModeLog, DevelopmentModeLogButtonSet} from './development-ui'; // eslint-disable-line max-len
+import {renderAsElement} from './simple-template';
 
 
 const MUTE_CLASS = 'i-amphtml-story-mute-audio-control';

@@ -15,8 +15,8 @@
  */
 
 import {
-  domFingerprintPlain,
   DomFingerprint,
+  domFingerprintPlain,
 } from '../../../src/utils/dom-fingerprint';
 
 

@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
 import {
+  checkCorsUrl,
   getSourceUrl,
   isProxyOrigin,
   parseUrl,
   resolveRelativeUrl,
-  checkCorsUrl,
 } from './url';
-import {parseSrcset} from './srcset';
-import {user} from './log';
-import {urls} from './config';
+import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
 import {map} from './utils/object';
+import {parseSrcset} from './srcset';
 import {startsWith} from './string';
+import {urls} from './config';
+import {user} from './log';
 
 
 /** @private @const {string} */
@@ -278,6 +278,8 @@ export function sanitizeHtml(html) {
         const attrName = attribs[i];
         const attrValue = attribs[i + 1];
         if (!isValidAttr(tagName, attrName, attrValue)) {
+          user().error(TAG, `Removing "${attrName}" attribute with invalid `
+              + `value in <${tagName} ${attrName}="${attrValue}">.`);
           continue;
         }
         emit(' ');
@@ -357,7 +359,6 @@ export function sanitizeFormattingHtml(html) {
  * @return {boolean}
  */
 export function isValidAttr(tagName, attrName, attrValue) {
-
   // "on*" attributes are not allowed.
   if (startsWith(attrName, 'on') && attrName != 'on') {
     return false;
