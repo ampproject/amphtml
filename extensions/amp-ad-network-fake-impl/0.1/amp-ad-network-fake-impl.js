@@ -15,7 +15,7 @@
  */
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {dev, user} from '../../../src/log';
+import {user} from '../../../src/log';
 import {startsWith} from '../../../src/string';
 
 const TAG = 'AMP-AD-NETWORK-FAKE-IMPL';
