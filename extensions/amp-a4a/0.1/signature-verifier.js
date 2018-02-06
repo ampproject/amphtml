@@ -173,13 +173,10 @@ export class SignatureVerifier {
     const signatureFormat =
         /^([A-Za-z0-9._-]+):([A-Za-z0-9._-]+):([A-Za-z0-9+/]{341}[AQgw]==)$/;
     if (!headers.has(AMP_SIGNATURE_HEADER)) {
-      console.log('no signature header');
       return Promise.resolve(VerificationStatus.UNVERIFIED);
     }
     const headerValue = headers.get(AMP_SIGNATURE_HEADER);
-    console.log('header value is ', headerValue);
     const match = signatureFormat.exec(headerValue);
-    console.log('match is ', match);
     if (!match) {
       // TODO(@taymonbeal, #9274): replace this with real error reporting
       user().error(

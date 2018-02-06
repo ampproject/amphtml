@@ -812,9 +812,9 @@ export class AmpA4A extends AMP.BaseElement {
         .then(status => {
           checkStillCurrent();
           if (this.element.getAttribute('type') == 'fake' &&
-              !this.element.getAttribute('checkSig')) {
+              !this.element.getAttribute('checksig')) {
             // do not verify signature for fake type ad, unless the ad
-            // specfically requires via 'checkSig' attribute
+            // specfically requires via 'checksig' attribute
             status = VerificationStatus.OK;
           }
           this.handleLifecycleStage_('adResponseValidateEnd', {
@@ -1281,7 +1281,8 @@ export class AmpA4A extends AMP.BaseElement {
     let renderPromise = Promise.resolve(false);
     if ((method == XORIGIN_MODE.SAFEFRAME ||
          method == XORIGIN_MODE.NAMEFRAME) &&
-        this.creativeBody_) {
+        this.creativeBody_ &&
+        this.element.getAttribute('type') != 'fake') {
       renderPromise = this.renderViaNameAttrOfXOriginIframe_(
           this.creativeBody_);
       this.creativeBody_ = null; // Free resources.

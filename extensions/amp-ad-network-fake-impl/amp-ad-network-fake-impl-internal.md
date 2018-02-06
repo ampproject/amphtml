@@ -34,21 +34,22 @@ limitations under the License.
 
 ## Behavior
 
-The 'fake' ad network produces only a single ad request to localhost and
+The 'fake' ad network produces only a single ad request and
 attempts to render it via the A4A fast rendering path.  It is intended only
-for testing and demos.  It is disabled outside of local development or
-testing modes.
+for testing and demos. To send an ad request with 'fake' ad network, it is
+required that the ad element to have an id value starts with `i-amphtml-demo`
+which makes the AMP page invalid.
 
 Like all A4A ad networks, you do not place an `<amp-ad-network-fake-impl>`
 tag directly on the page.  Instead, you place an `<amp-ad type="fake">` tag.
 
-The fake impl loads a creative from a JSON-formatted file containing two
-fields: `"creative"` and `"signature"`.  The `signature` field **must** be a
-valid signature for the text of the `creative` field, according to at least
-one of the built-in A4A keys.  (_Note:_ A4A will discontinue built-in keys
-when the ability to fetch keys live from the validation service is available.)
-Alternatively, the `<amp-ad type="fake">` tag may include the attribute
-`fakesig="true"` to disable signature checking.
+The fake impl loads an A4A creative or an AMP creative and convert it to an A4A
+creative. Use `convert` attribute to instruct the fake impl to perform creative
+conversion.
+
+The fake impl will skip signature verification by default. To enforce this check,
+set `checksig` attribute. This can be useful to test the ad's behavior when signature
+verification fails.
 
 ## Attributes
 
@@ -61,13 +62,6 @@ special tags for fake or special behaviors of existing tags:
 
 **src** The file source.
 
-**data-use-a4a**  If non-empty, fake will attempt to render via the A4A
-pathway (i.e., fast rendering for AMP creatives).  Otherwise, it will attempt
-to render via the delayed iframe path.
+**convert** To instruct the fake impl to convert creative response to A4A creative.
 
-_Note 1_: `data-use-a4a` is special-purpose to the fake impl, for testing
-purposes only.  It does not exist for `amp-ad` or A4A in general.
-
-_Note 2_: Currently, there is no equivalent "fake" network implementation for
-the delayed iframe (a.k.a., "3p") ad rendering pathway.  So attempts to use
-fake impl _without_ the `data-use-a4a` parameter will fail.
+**checksig** To enforce the signature check.
