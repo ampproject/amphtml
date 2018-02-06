@@ -823,7 +823,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
         sourceElement.classList.add('i-amphtml-ghost');
         transLayer = this.element.ownerDocument.createElement('div');
-        transLayer.classList.add('i-amphtml-lightbox-viewer-trans');
+        transLayer.classList.add('i-amphtml-lightbox-gallery-trans');
         this.element.ownerDocument.body.appendChild(transLayer);
 
         const rect = layoutRectFromDomRect(sourceElement
