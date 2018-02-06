@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {isObject} from '../../../src/types';
-import {tryParseJson} from '../../../src/json';
+import {CONFIGURATION_EVENT, ORIGIN, SHARE_EVENT} from './constants';
 import {getData} from '../../../src/event-helper';
+import {isObject} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 
-import {CONFIGURATION_EVENT, SHARE_EVENT, ORIGIN} from './constants';
+import {tryParseJson} from '../../../src/json';
 
 export class PostMessageDispatcher {
   constructor() {

@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {parseUrl} from '../../../../src/url';
-import {toArray} from '../../../../src/types';
+import {API_SERVER} from '../constants';
+import {callPixelEndpoint} from './pixel';
 
-import {API_SERVER, AT_CONFIG} from '../constants';
 import {
   classifyPage,
   classifyReferrer,
@@ -25,35 +24,53 @@ import {
 } from './classify';
 import {
   clearOurFragment,
-  getServiceFromUrlFragment,
   getFragmentId,
+  getServiceFromUrlFragment,
 } from './fragment';
 import {getMetaElements} from './meta';
 import {getSessionId} from './session';
-import {callPixelEndpoint} from './pixel';
+import {parseUrl} from '../../../../src/url';
+import {toArray} from '../../../../src/types';
 
 const VIEW_EVENT_CHANNEL = 100;
 const nonTrackedDomainMatcher = /\.gov|\.mil/;
-
-
 /**
  *
  * @param {{
  * loc:*, title:string,
  * pubId:string,
- * atConfig: AT_CONFIG,
+ * atConfig: {
+ * services_exclude:string,
+ * services_compact:string,
+ * services_expanded:string,
+ * services_custom: Array,
+ * ui_click: boolean,
+ * ui_disable: boolean,
+ * ui_delay: number,
+ * ui_hover_direction: number,
+ * ui_language: string,
+ * ui_offset_top: number,
+ * ui_offset_left: number,
+ * ui_508_compliant: boolean,
+ * ui_tabindex: number,
+ * use_cookies: boolean,
+ * track_addressbar: boolean,
+ * track_clickback: boolean,
+ * track_linkback: boolean,
+ * track_textcopy: boolean
+ * },
  * referrer:string,
  * ampDoc:*
  * }} param
  */
 const getLojsonData = ({
-                         loc,
-                         title,
-                         pubId,
-                         atConfig,
-                         referrer,
-                         ampDoc,
-                       }) => {
+  loc,
+  title,
+  pubId,
+  atConfig,
+  referrer,
+  ampDoc,
+}) => {
   const {href, hostname, host, search, pathname, hash, protocol, port} = loc;
   const pageInfo = {
     du: href.split('#').shift(),
@@ -100,8 +117,8 @@ const getLojsonData = ({
     lnlc: locale,
     mk: getKeywordsString(metaElements),
     of: isDNTEnabled ? 4 :
-        nonTrackedDomainMatcher.test(hostname) ? 1 :
-            0,
+      nonTrackedDomainMatcher.test(hostname) ? 1 :
+        0,
     pd: isProductPage(win.document, metaElements) ? 1 : 0,
     pub: pubId,
     rb: classifyReferrer(referrer, parsedReferrer, parseUrl(pageInfo.du)),

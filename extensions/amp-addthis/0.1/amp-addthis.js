@@ -29,38 +29,38 @@
  * </code>
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {setStyle} from '../../../src/style';
-import {createElementWithAttributes, removeElement} from '../../../src/dom';
-import {user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {Services} from '../../../src/services';
-import {parseUrl} from '../../../src/url';
-import {listen} from '../../../src/event-helper';
-
-import {ConfigManager} from './config-manager';
-import {PostMessageDispatcher} from './post-message-dispatcher';
 import {
-  AT_CONFIG_KEYS,
-  SHARE_CONFIG_KEYS,
-  ORIGIN,
-  API_SERVER,
-  COOKIELESS_API_SERVER,
-  SHARECOUNTER_SERVER,
-  ICON_SIZE,
   ALT_TEXT,
+  API_SERVER,
+  AT_CONFIG_KEYS,
   CONFIGURATION_EVENT,
+  COOKIELESS_API_SERVER,
+  ICON_SIZE,
+  ORIGIN,
+  SHARECOUNTER_SERVER,
+  SHARE_CONFIG_KEYS,
   SHARE_EVENT,
 } from './constants';
-import {callLojson} from './addthis-utils/lojson';
-import {callEng} from './addthis-utils/eng';
-import {callPjson} from './addthis-utils/pjson';
-import {ScrollMonitor} from './addthis-utils/monitors/scroll-monitor';
-import {DwellMonitor} from './addthis-utils/monitors/dwell-monitor';
-import {ClickMonitor} from './addthis-utils/monitors/click-monitor';
 import {
   ActiveToolsMonitor,
 } from './addthis-utils/monitors/active-tools-monitor';
+import {ClickMonitor} from './addthis-utils/monitors/click-monitor';
+import {ConfigManager} from './config-manager';
+import {DwellMonitor} from './addthis-utils/monitors/dwell-monitor';
+import {PostMessageDispatcher} from './post-message-dispatcher';
+import {ScrollMonitor} from './addthis-utils/monitors/scroll-monitor';
+import {Services} from '../../../src/services';
+
+import {callEng} from './addthis-utils/eng';
+import {callLojson} from './addthis-utils/lojson';
+import {callPjson} from './addthis-utils/pjson';
+import {createElementWithAttributes, removeElement} from '../../../src/dom';
+import {dict} from '../../../src/utils/object';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {listen} from '../../../src/event-helper';
+import {parseUrl} from '../../../src/url';
+import {setStyle} from '../../../src/style';
+import {user} from '../../../src/log';
 
 // The following items will be shared by all AmpAddThis elements on a page, to prevent unnecessary
 // HTTP requests, get accurate analytics, etc., and hence are defined outside of the class.

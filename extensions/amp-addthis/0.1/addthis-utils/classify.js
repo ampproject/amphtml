@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {rot13Array} from './rot13';
-import {getDetailsForMeta} from './meta';
 import {RE_NONALPHA, RE_WHITESPACE} from '../constants';
+import {getDetailsForMeta} from './meta';
+import {rot13Array} from './rot13';
 
 const MAX_KEYWORD_LENGTH = 200;
 const PORN_BIT = 0x1;
@@ -159,7 +159,7 @@ const isSearchUrl = (url = '') => {
   }
 
   return lowerUrl.indexOf('addthis') === -1 && (
-      lowerUrl.match(RE_SEARCH_GOOGLE)
+    lowerUrl.match(RE_SEARCH_GOOGLE)
       || lowerUrl.match(RE_SEARCH_AOL) /* search.aol.* /aol/search?q=*/
       || lowerUrl.indexOf('/pagead/aclk?') > -1 /*googleadservices*/
       || lowerUrl.indexOf(com + 'url') > -1 /*bing*/
@@ -215,9 +215,9 @@ export const classifyPage = (pageInfo, metaElements) => {
  * @returns {number}
  */
 export const classifyReferrer = (
-    referrerString,
-    parsedReferrer,
-    parsedHref
+  referrerString,
+  parsedReferrer,
+  parsedHref
 ) => {
   // The default is a direct view.
   let bitmask = REFERRER_BITS.DIRECT;

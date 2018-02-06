@@ -13,24 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {COOKIELESS_API_SERVER} from '../constants';
+import {Services} from '../../../../src/services';
+import {addParamsToUrl} from '../../../../src/url';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {dict} from '../../../../src/utils/object';
+import {getData} from '../../../../src/event-helper';
+import {isObject} from '../../../../src/types';
+import {parseJson} from '../../../../src/json';
+
 import {parseUrl} from '../../../../src/url';
 import {setStyles} from '../../../../src/style';
-import {addParamsToUrl} from '../../../../src/url';
-import {Services} from '../../../../src/services';
-import {isObject} from '../../../../src/types';
-import {getData} from '../../../../src/event-helper';
-
-import {COOKIELESS_API_SERVER, Pixel} from '../constants';
-import {parseJson} from '../../../../src/json';
 
 const RE_IFRAME = /#iframe$/;
 const pixelatorFrameTitle = 'Pxltr Frame';
 
 /**
  * Returns a sorted array of objects like [{delay: 1000, pixels: [...]}]
- * @param  {Array<Pixel>} pixelList
+ * @param  {Array<{
+ *   delay: number,
+ *   id: string,
+ *   url: string
+ * }>} pixelList
  * @return {Array}
  */
 const groupPixelsByTime = pixelList => {
@@ -138,9 +142,9 @@ const dropPixelGroups = (pixels, {sid, ampDoc}) => {
         return pixel.id;
       });
       const data = dict({
-        delay: `${delay}`,
-        ids: pids.join('-'),
-        sid,
+        'delay': `${delay}`,
+        'ids': pids.join('-'),
+        'sid': sid,
       });
       const url = addParamsToUrl(`${COOKIELESS_API_SERVER}/live/prender`, data);
 
@@ -165,7 +169,7 @@ function getJsonObject_(object) {
     return params;
   }
   const stringifiedObject = typeof object === 'string' ?
-      object : JSON.stringify(object);
+    object : JSON.stringify(object);
 
   try {
     const parsedObject = parseJson(stringifiedObject);

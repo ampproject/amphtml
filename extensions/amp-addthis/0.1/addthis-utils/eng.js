@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from '../../../../src/services';
-import {addParamsToUrl} from '../../../../src/url';
-
 import {API_SERVER} from '../constants';
+import {Services} from '../../../../src/services';
+
+import {addParamsToUrl} from '../../../../src/url';
 import {getSessionId} from './session';
 import {pixelDrop} from './pixel';
 

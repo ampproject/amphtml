@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
+import {
+  ALT_TEXT,
+  CONFIGURATION_EVENT,
+  ICON_SIZE,
+  ORIGIN,
+} from '../constants';
+import {ConfigManager} from '../config-manager';
+
 import {createElementWithAttributes} from '../../../../src/dom';
 import {dict} from '../../../../src/utils/object';
-
-import {ConfigManager} from '../config-manager';
 import {getConfigManager} from '../amp-addthis';
-import {
-  CONFIGURATION_EVENT,
-  ORIGIN,
-  ALT_TEXT,
-  ICON_SIZE,
-} from '../constants';
 
 describes.realWin('amp-addthis', {
   amp: {

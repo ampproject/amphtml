@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dict} from '../../../src/utils/object';
-
 import {CONFIGURATION_EVENT, ORIGIN} from './constants';
+
+import {dict} from '../../../src/utils/object';
 
 /**
  * Configuration request status enum.
@@ -120,24 +120,24 @@ export class ConfigManager {
    * Register relevant data with the configuration manager and prepare request/response cycle
    * between frames.
    * @param {{
-   * pubId:!string,
+   * pubId:string,
    * activeToolsMonitor: Object<string,string>,
    * atConfig: Object<string,string>,
-   * widgetId:!string, iframe:!Element,
+   * widgetId:string, iframe:!Element,
    * iframeLoadPromise:!Promise,
    * win:(EventTarget|undefined),
    * shareConfig:(JsonObject|undefined)
    * }} param
    */
   register({
-             pubId,
-             widgetId,
-             iframe,
-             iframeLoadPromise,
-             shareConfig,
-             atConfig,
-             activeToolsMonitor,
-           }) {
+    pubId,
+    widgetId,
+    iframe,
+    iframeLoadPromise,
+    shareConfig,
+    atConfig,
+    activeToolsMonitor,
+  }) {
     if (!this.activeToolsMonitor_) {
       this.activeToolsMonitor_ = activeToolsMonitor;
     }

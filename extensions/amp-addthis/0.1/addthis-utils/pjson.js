@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {parseUrl} from '../../../../src/url';
-import {toArray} from '../../../../src/types';
+import {API_SERVER} from '../constants';
+import {callPixelEndpoint} from './pixel';
 
-import {API_SERVER, AT_PAGE_INFO, AT_PJSON_DATA} from '../constants';
 import {
   classifyPage,
   classifyReferrer,
@@ -24,18 +23,40 @@ import {
 } from './classify';
 import {getMetaElements} from './meta';
 import {getSessionId} from './session';
-import {callPixelEndpoint} from './pixel';
+import {parseUrl} from '../../../../src/url';
+import {toArray} from '../../../../src/types';
 
 // "gen" value for shares
 const SHARE = 300;
 
 /**
- * @param {AT_PJSON_DATA} pjson
- * @returns {{amp: number, cb: number, dc: number, dest: *, gen: number, mk: string, pub: *, rb: number, sid, url}}
- */
+  * @param {{
+  * loc:Location,
+  * referrer:string,
+  * title:string,
+  * ampDoc: *,
+  * pubId:string,
+  * data: {
+  *   url: string,
+  *   service: string
+  * }
+  * }} pjson
+  * @returns {{amp: number, cb: number, dc: number, dest: *, gen: number, mk: string, pub: *, rb: number, sid, url}}
+  */
 const getPjsonData = ({loc, referrer, title, ampDoc, pubId, data}) => {
   const {href, hostname, search, pathname, hash, protocol, port} = loc;
-  /** @param {AT_PAGE_INFO} pageInfo */
+  /** @typedef {{
+  * du: string,
+  * hostname: string,
+  * href: string,
+  * referrer: string,
+  * search: string,
+  * pathname: string,
+  * title: string,
+  * hash: string,
+  * protocol: string,
+  * port: string
+  * }} */
   const pageInfo = {
     du: href.split('#').shift(),
     hostname,
