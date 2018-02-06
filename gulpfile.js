@@ -993,7 +993,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(gulp.dest.bind(gulp), destDir);
 
   const destFilename = options.toName || srcFilename;
-  function rebundle() {
+  function rebundle(failOnError) {
     const startTime = Date.now();
     return toPromise(
         bundler.bundle()
@@ -1001,7 +1001,11 @@ function compileJs(srcDir, srcFilename, destDir, options) {
               // Drop the node_modules call stack, which begins with '    at'.
               const message = err.stack.replace(/    at[^]*/, '').trim();
               console.error(red(message));
-              process.exit(1);
+              if (failOnError) {
+                process.exit(1);
+              } else {
+                endBuildStep('Error while compiling', srcFilename, startTime);
+              }
             })
             .pipe(lazybuild())
             .pipe($$.rename(destFilename))
@@ -1029,7 +1033,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 
   if (options.watch) {
     bundler.on('update', function() {
-      rebundle();
+      rebundle(/* failOnError */ false);
       // Touch file in unit test set. This triggers rebundling of tests because
       // karma only considers changes to tests files themselves re-bundle
       // worthy.
@@ -1046,7 +1050,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   } else {
     // This is the default options.watch === true case, and also covers the
     // `gulp build` / `gulp dist` cases where options.watch is undefined.
-    return rebundle();
+    return rebundle(/* failOnError */ true);
   }
 }
 
