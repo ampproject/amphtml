@@ -475,10 +475,16 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   buildButton_(label, className, action) {
     dev().assert(this.topBar_);
     const button = this.win.document.createElement('div');
-
     button.setAttribute('role', 'button');
     button.setAttribute('aria-label', label);
+
+    const icon = this.win.document.createElement('span');
+    icon.classList.add('amp-lbg-icon');
+    button.appendChild(icon);
     button.classList.add(className);
+    button.classList.add('amp-lbg-button');
+
+
     button.addEventListener('click', event => {
       action();
       event.stopPropagation();
@@ -721,6 +727,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         && this.shouldAnimate_(sourceElement)) {
 
         // TODO (#13039): implement crop and object fit contain transitions
+        sourceElement.classList.add('i-amphtml-ghost');
         transLayer = this.element.ownerDocument.createElement('div');
         transLayer.classList.add('i-amphtml-lightbox-gallery-trans');
         this.element.ownerDocument.body.appendChild(transLayer);
@@ -816,7 +823,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         transLayer = this.element.ownerDocument.createElement('div');
         transLayer.classList.add('i-amphtml-lightbox-viewer-trans');
         this.element.ownerDocument.body.appendChild(transLayer);
-        sourceElement.classList.add('i-amphtml-ghost');
 
         const rect = layoutRectFromDomRect(sourceElement
             ./*OK*/getBoundingClientRect());
