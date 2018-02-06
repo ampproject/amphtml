@@ -205,6 +205,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 |----------------|--------------------|------------------------|
 | [Horizontal Scroll Boundary](#horizontal-scroll-boundary) | N/A | `${horizontalScrollBoundary}` |
 | [Total Engaged Time](#total-engaged-time) | `TOTAL_ENGAGED_TIME` | `${totalEngagedTime}` |
+| [Incremental Engaged Time](#incremental-engaged-time) | `INCREMENTAL_ENGAGED_TIME` | `${incrementalEngagedTime(foo)}` |
 | [Vertical Scroll Boundary](#vertical-scroll-boundary) | N/A | `${verticalScrollBoundary}` |
 
 ### Visibility
@@ -1083,6 +1084,14 @@ Provides the total time (in seconds) the user has been engaged with the page sin
 
 * **platform variable**: `TOTAL_ENGAGED_TIME`
 * **amp-analytics variable**: `${totalEngagedTime}`
+  * Example value: `36`
+
+#### Incremental Engaged Time
+
+Provides the time (in seconds) the user has been engaged with the page since the the last time the named timer (foo in the example below) was polled. If the timer name is not specified it will default to ''. Incremental engaged time will be 0 until the page first becomes visible. This variable requires the [amp-analytics](../extensions/amp-analytics/amp-analytics.md) extension to be present on the page.
+
+* **platform variable**: `INCREMENTAL_ENGAGED_TIME`
+* **amp-analytics variable**: `${incrementalEngagedTime(foo)}`
   * Example value: `36`
 
 #### Total Time
