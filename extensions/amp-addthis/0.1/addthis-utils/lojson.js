@@ -16,7 +16,7 @@
 import {parseUrl} from '../../../../src/url';
 import {toArray} from '../../../../src/types';
 
-import {API_SERVER} from '../constants';
+import {API_SERVER, AT_CONFIG} from '../constants';
 import {
   classifyPage,
   classifyReferrer,
@@ -35,6 +35,17 @@ import {callPixelEndpoint} from './pixel';
 const VIEW_EVENT_CHANNEL = 100;
 const nonTrackedDomainMatcher = /\.gov|\.mil/;
 
+
+/**
+ *
+ * @param {{
+ * loc:*, title:string,
+ * pubId:string,
+ * atConfig: AT_CONFIG,
+ * referrer:string,
+ * ampDoc:*
+ * }} param
+ */
 const getLojsonData = ({
     loc,
     title,
