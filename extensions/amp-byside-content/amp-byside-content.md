@@ -27,7 +27,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-byside-content-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-byside-content" src="https://cdn.ampproject.org/v0/amp-byside-content-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -43,22 +43,21 @@ limitations under the License.
 
 An `amp-byside-content` component displays dynamic content that can be retrieved from the [BySide](https://www.byside.com) customization mechanisms, for a valid BySide client.
 
-The `data-webcare-id` and `data-label` attributes are required for the content embed to work.
-
 Example:
 ```html
 <amp-byside-content
-	data-webcare-id="D6604AE5D0"
-	data-label="amp"
-	data-lang="en"
-	width="400"
-	height="400"
-	layout="responsive"
-	resizable>
+    data-webcare-id="D6604AE5D0"
+    data-label="amp-responsive"
+    data-lang="en"
+    width="1024"
+    height="500"
+    layout="responsive">
 </amp-byside-content>
 ```
 
 ## Attributes
+
+The `data-webcare-id` and `data-label` attributes are required for the content embed to work.
 
 **data-webcare-id**
 
@@ -82,3 +81,11 @@ The **required** placeholder content label as seen in your backoffice account.
 
 ## Validation
 See [amp-byside-content rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-byside-content/validator-amp-byside-content.protoascii) in the AMP validator specification.
+
+## Privacy and cookies policy
+
+[BySide](https://www.byside.com) is committed to respect and protect your privacy and developing technology that gives you the most powerful and safe online experience. BySide privacy statement and cookies policy can be found on the following url's:
+
+[http://www.byside.com/privacy.html](http://www.byside.com/privacy.html)
+
+[http://www.byside.com/cookies.html](http://www.byside.com/cookies.html)
