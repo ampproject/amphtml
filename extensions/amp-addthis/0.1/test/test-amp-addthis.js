@@ -196,7 +196,6 @@ describes.realWin('amp-addthis', {
             try {
               receivedJSON = JSON.parse(json);
             } catch (ex) {
-              console.log('JSON fail');
               reject(ex);
             }
 
@@ -206,7 +205,6 @@ describes.realWin('amp-addthis', {
 
             if (numPendingRequests === 0) {
               expect(numViewsRegistered).to.equal(1);
-              console.log('complete');
               resolve();
             }
           },

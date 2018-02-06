@@ -39,7 +39,7 @@ const getDateFromCuid = cuid => {
  */
 const isCuidInFuture = cuid => {
   const date = getDateFromCuid(cuid);
-  return ((date.getTime() - 86400000) > (new Date()).getTime());
+  return ((date.getTime() - 86400000) > Date.now());
 };
 
 /**

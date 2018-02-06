@@ -179,7 +179,6 @@ function getJsonObject_(object) {
       }
     }
   } catch (error) {
-    console.log(error);
   }
   return params;
 }
