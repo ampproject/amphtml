@@ -38,7 +38,7 @@ limitations under the License.
 
 ## Overview
 
-The `amp-lightbox-gallery` component provides a "lightbox” experience for AMP components (e.g., `amp-img`, `amp-carousel`). When the user interacts with the AMP element, a UI component expands to fill the viewport until it is closed by the user. Currently, only images are supported. 
+The `amp-lightbox-gallery` component provides a "lightbox” experience for AMP components (e.g., `amp-img`, `amp-carousel`). When the user interacts with the AMP element, a UI component expands to fill the viewport until it is closed by the user. Currently, only images are supported.
 
 ## Usage
 
@@ -47,21 +47,19 @@ To use `amp-lightbox-gallery`, ensure the required script is included in your `<
 ### Lightbox with `<amp-img>`
 
 ```html
-<amp-img src="image1" width=200 height=100 lightbox></amp-img>
-<amp-img src="image2" width=200 height=100 lightbox></amp-img>
+<amp-img src="image1" width="200" height="100" lightbox></amp-img>
+<amp-img src="image2" width="200" height="100" lightbox></amp-img>
 ```
 
-The `<amp-lightbox-gallery>` extension automatically inserts an invisible `<amp-lightbox-gallery>` component (with the id 'amp-lightbox-gallery') into the dom.
-
-It iterates through each `<amp-img>` that has the `lightbox` attribute and installs a tap handler on it (`on=tap:amp-lightbox-gallery.activate`) if a tap handler does not already exist. Tapping on any `<amp-img>` will open the image in a lightbox gallery. The lightbox gallery does image-handling (e.g. zoom and pan), enables swiping to navigate between images, and offers a thumbnail gallery view for browsing all picture thumbnails in a grid.
+ Tapping on any `<amp-img>` will open the image in a lightbox gallery. The lightbox gallery does image-handling (e.g. zoom and pan), enables swiping to navigate between images, and offers a thumbnail gallery view for browsing all picture thumbnails in a grid.
 
 ### Lightbox with `<amp-carousel>`
 
 ```html
-<amp-carousel lightbox width=1600 height=900 layout=responsive type=slides>
-  <amp-img src="image1" width=200 height=100></amp-img>
-  <amp-img src="image2" width=200 height=100></amp-img>
-  <amp-img src="image3" width=200 height=100></amp-img>
+<amp-carousel lightbox width="1600" height="900" layout=responsive type=slides>
+  <amp-img src="image1" width="200" height="100"></amp-img>
+  <amp-img src="image1" width="200" height="100"></amp-img>
+  <amp-img src="image1" width="200" height="100"></amp-img>
 </amp-carousel>
 ```
 
@@ -77,3 +75,30 @@ Optionally, you can specify a caption for each element in the lightbox. These fi
 - `aria-label`
 - `aria-labelledby`
 
+For example:
+
+E.g. 1: in this example, `<amp-lightbox-gallery>` will display the figcaption as its description, showing "Toront's CN tower was ....".
+
+```html
+<figure>
+  <amp-img id="hero-img" lightbox="toronto" src="https://picsum.photos/1600/900?image=1075" layout="responsive" width="1600"
+    height="900" alt="Picture of CN tower.">
+  </amp-img>
+  <figcaption class='image'>
+    Toronto's CN tower was built in 1976 and was the tallest free-standing structure until 2007.
+  </figcaption>
+</figure>
+```
+
+E.g. 2: in this example, `<amp-lightbox-gallery>` will display the alt as its description, showing "Picture of CN tower.".
+```html
+<amp-img
+  id="hero-img"
+  lightbox="toronto"
+  src="https://picsum.photos/1600/900?image=1075"
+  layout="responsive"
+  width="1600"
+  height="900"
+  alt="Picture of CN tower.">
+</amp-img>
+```
