@@ -133,6 +133,10 @@
     height: 100px !important;
   }
 
+  div.i-amphtml-lbg-gallery {
+    padding-top: 80px !important;
+  }
+
   div.amp-lbg-button {
     width: 40px;
     height: 40px;
