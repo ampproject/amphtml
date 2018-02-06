@@ -36,13 +36,12 @@ import {
   incrementLoadingAds,
   is3pThrottled,
 } from '../../amp-ad/0.1/concurrent-load';
-import {getBinaryType, isExperimentOn} from '../../../src/experiments';
+import {getBinaryType} from '../../../src/experiments';
 import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getMode} from '../../../src/mode';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
-import {handleClick} from '../../../ads/alp/handler';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
   installFriendlyIframeEmbed,
@@ -1371,8 +1370,6 @@ export class AmpA4A extends AMP.BaseElement {
       const frameDoc = friendlyIframeEmbed.iframe.contentDocument ||
               friendlyIframeEmbed.win.document;
       setStyle(frameDoc.body, 'visibility', 'visible');
-      // Bubble phase click handlers on the ad.
-      this.registerAlpHandler_(friendlyIframeEmbed.win);
       // Capture timing info for friendly iframe load completion.
       getTimingDataAsync(
           friendlyIframeEmbed.win,
@@ -1607,22 +1604,6 @@ export class AmpA4A extends AMP.BaseElement {
           creative.slice(metadataStart + metadataString.length, metadataEnd));
       return null;
     }
-  }
-
-  /**
-   * Registers a click handler for "A2A" (AMP-to-AMP navigation where the AMP
-   * viewer navigates to an AMP destination on our behalf.
-   * @param {!Window} iframeWin
-   */
-  registerAlpHandler_(iframeWin) {
-    if (!isExperimentOn(this.win, 'alp-for-a4a')) {
-      return;
-    }
-    iframeWin.document.documentElement.addEventListener('click', event => {
-      handleClick(event, url => {
-        Services.viewerForDoc(this.getAmpDoc()).navigateTo(url, 'a4a');
-      });
-    });
   }
 
   /**
