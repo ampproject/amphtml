@@ -29,10 +29,10 @@ PASS
 |    <script async custom-element="amp-facebook-page" src="https://cdn.ampproject.org/v0/amp-facebook-page-0.1.js"></script>
 |  </head>
 |  <body>
-|      <amp-facebook-page width=552 height=310
-|          layout="fixed"
-|          data-tabs="timeline"
-|          data-href="https://www.facebook.com/barackobama/">
-|      </amp-facebook-page>
+|    <amp-facebook-page width=552 height=310
+|        layout="responsive"
+|        data-tabs="timeline"
+|        data-href="https://www.facebook.com/barackobama/">
+|    </amp-facebook-page>
 |  </body>
 |  </html>
