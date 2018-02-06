@@ -39,13 +39,13 @@ import {
 } from '../../../ads/google/a4a/utils';
 import {Services} from '../../../src/services';
 import {clamp} from '../../../src/utils/math';
-import {dict} from '../../../src/utils/object';
 import {
   computedStyle,
   setStyle,
   setStyles,
 } from '../../../src/style';
 import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {
   getAdSenseAmpAutoAdsExpBranch,
