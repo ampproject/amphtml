@@ -28,13 +28,12 @@
       name_data = JSON.parse(window.name);
       writeInBody = name_data['writeInBody'];
       instantLoad = name_data['instantLoad'];
-      if (name_data && name_data['creative']) {
-        if (!writeInBody) {
-          instantLoad ? render() : (window.onload = render);
-        }
-      } else {
+      if (!name_data || !name_data['creative']) {
         throw new Error('Missing or incorrectly formatted JSON ' +
             'input to nameframe');
+      }
+      if (!writeInBody) {
+        instantLoad ? render() : (window.onload = render);
       }
     } catch (e) {
       errorHandler(e);
