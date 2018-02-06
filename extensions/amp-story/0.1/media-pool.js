@@ -47,7 +47,7 @@ export let ElementDistanceFnDef;
 
 /**
  * Represents a task to be executed on a media element.
- * @typedef {function(!HTMLMediaElement): !Promise}
+ * @typedef {function(!HTMLMediaElement, *): !Promise}
  */
 let ElementTaskDef;
 
@@ -135,6 +135,7 @@ export const ElementTaskName = {
   PLAY: 'play',
   REWIND: 'rewind',
   UNMUTE: 'unmute',
+  UPDATE_SRC: 'updatesrc',
 };
 
 
@@ -168,6 +169,10 @@ const ELEMENT_TASKS = {
     el.muted = false;
     el.removeAttribute('muted');
   }),
+  [ElementTaskName.UPDATE_SRC]: (el, sources) => {
+    // TODO(newmuis): vsync.runPromise
+    return Promise.resolve(sources.applyToElement(el));
+  },
 };
 
 
@@ -219,10 +224,9 @@ function executeNextMediaElementTask(mediaEl) {
     return;
   }
 
-  const taskName = queue[0];
-  const task = ELEMENT_TASKS[taskName] || NOOP_ELEMENT_TASK;
+  const task = queue[0];
 
-  task(mediaEl)
+  task.call()
       .catch(reason => dev().error('AMP-STORY', reason))
       .then(() => {
         const oldTaskName = queue.shift();
@@ -237,14 +241,19 @@ function executeNextMediaElementTask(mediaEl) {
  * @param {!HTMLMediaElement} mediaEl The element for which the specified task
  *     should be executed.
  * @param {!ElementTaskName} taskName The name of the task to execute.
+ * @param {*=} opt_state An object holding state to be read by the task.
  */
-function enqueueMediaElementTask(mediaEl, taskName) {
+function enqueueMediaElementTask(mediaEl, taskName, opt_state) {
   if (!mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME]) {
     mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME] = [];
   }
 
   const queue = mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME];
-  queue.push(taskName);
+  const state = opt_state || {};
+  const task = ELEMENT_TASKS[taskName] || NOOP_ELEMENT_TASK;
+  const boundTask = task.bind(this, mediaEl, state);
+
+  queue.push(boundTask);
   console.log('enqueue ' + taskName, mediaEl);
   console.log('element task queue contains ' + JSON.stringify(queue), mediaEl);
 
@@ -596,7 +605,8 @@ export class MediaPool {
 
     this.copyCssClasses_(domMediaEl, poolMediaEl);
     this.copyAttributes_(domMediaEl, poolMediaEl);
-    sources.applyToElement(poolMediaEl);
+    enqueueMediaElementTask(poolMediaEl, ElementTaskName.UPDATE_SRC, sources);
+    enqueueMediaElementTask(poolMediaEl, ElementTaskName.LOAD);
     poolMediaEl.setAttribute(REPLACED_MEDIA_ATTRIBUTE, domMediaEl.id);
     domMediaEl.parentElement.replaceChild(poolMediaEl, domMediaEl);
 
@@ -1017,9 +1027,6 @@ class Sources {
 
     Array.prototype.forEach.call(this.srcEls_,
         srcEl => element.appendChild(srcEl));
-
-    // Reset media element after changing sources.
-    enqueueMediaElementTask(element, ElementTaskName.LOAD);
   }
 
 
