@@ -38,7 +38,6 @@ import {
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {preloadBootstrap} from '../../../src/3p-frame';
-import {setupA2AListener} from './a2a-listener';
 import {toWin} from '../../../src/types';
 
 /** @const {string} Tag name for 3P AD implementation. */
@@ -168,8 +167,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         this.config, `Type "${this.type_}" is not supported in amp-ad`);
 
     this.uiHandler = new AmpAdUIHandler(this);
-
-    setupA2AListener(this.win);
 
     this.isFullWidthRequested_ = this.shouldRequestFullWidth_();
 
