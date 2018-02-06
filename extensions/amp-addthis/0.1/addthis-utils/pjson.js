@@ -16,7 +16,7 @@
 import {parseUrl} from '../../../../src/url';
 import {toArray} from '../../../../src/types';
 
-import {API_SERVER} from '../constants';
+import {API_SERVER, AT_PAGE_INFO, AT_PJSON_DATA} from '../constants';
 import {
   classifyPage,
   classifyReferrer,
@@ -29,8 +29,13 @@ import {callPixelEndpoint} from './pixel';
 // "gen" value for shares
 const SHARE = 300;
 
+/**
+ * @param {AT_PJSON_DATA} pjson
+ * @returns {{amp: number, cb: number, dc: number, dest: *, gen: number, mk: string, pub: *, rb: number, sid, url}}
+ */
 const getPjsonData = ({loc, referrer, title, ampDoc, pubId, data}) => {
   const {href, hostname, search, pathname, hash, protocol, port} = loc;
+  /** @param {AT_PAGE_INFO} pageInfo */
   const pageInfo = {
     du: href.split('#').shift(),
     hostname,
