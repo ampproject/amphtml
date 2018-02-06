@@ -29,11 +29,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>None</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-fx-collection/">annotated amp-fx-collection</a> example.</td>
+    <td>nodisplay</td>
   </tr>
 </table>
 
@@ -70,3 +66,6 @@ relative to the scrolling speed:
 - A value of 1 behaves normally.
 - A value of 0 effectively makes the element scroll fixed with the page.
 
+## Validation
+
+See [amp-fx-collection rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-fx-collection/validator-amp-fx-collection.protoascii) in the AMP validator specification.
