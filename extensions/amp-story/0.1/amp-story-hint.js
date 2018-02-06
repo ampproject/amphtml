@@ -22,7 +22,9 @@ import {renderAsElement} from './simple-template';
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
   tag: 'aside',
-  attrs: dict({'class': 'i-amphtml-story-hint-container i-amphtml-hidden'}),
+  attrs: dict({
+    'class': 'i-amphtml-story-hint-container ' +
+        'i-amphtml-story-system-reset i-amphtml-hidden'}),
   children: [
     {
       tag: 'div',

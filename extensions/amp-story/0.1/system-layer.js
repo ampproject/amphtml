@@ -31,7 +31,8 @@ const UNMUTE_CLASS = 'i-amphtml-story-unmute-audio-control';
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
   tag: 'aside',
-  attrs: dict({'class': 'i-amphtml-story-system-layer'}),
+  attrs: dict(
+      {'class': 'i-amphtml-story-system-layer i-amphtml-story-system-reset'}),
   children: [
     {
       tag: 'div',
