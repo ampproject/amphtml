@@ -56,7 +56,7 @@ To use `amp-lightbox-gallery`, ensure the required script is included in your `<
 ### Lightbox with `<amp-carousel>`
 
 ```html
-<amp-carousel lightbox width="1600" height="900" layout=responsive type=slides>
+<amp-carousel lightbox width="1600" height="900" layout="responsive" type="slides">
   <amp-img src="image1" width="200" height="100"></amp-img>
   <amp-img src="image1" width="200" height="100"></amp-img>
   <amp-img src="image1" width="200" height="100"></amp-img>
@@ -75,22 +75,24 @@ Optionally, you can specify a caption for each element in the lightbox. These fi
 - `aria-label`
 - `aria-labelledby`
 
-For example:
+#### Example 1: Using figcaption for description
 
-E.g. 1: in this example, `<amp-lightbox-gallery>` will display the figcaption as its description, showing "Toront's CN tower was ....".
+In this example, `<amp-lightbox-gallery>` displays the `figcaption` value as its description, showing "Toront's CN tower was ....".
 
 ```html
 <figure>
   <amp-img id="hero-img" lightbox="toronto" src="https://picsum.photos/1600/900?image=1075" layout="responsive" width="1600"
     height="900" alt="Picture of CN tower.">
   </amp-img>
-  <figcaption class='image'>
+  <figcaption class="image">
     Toronto's CN tower was built in 1976 and was the tallest free-standing structure until 2007.
   </figcaption>
 </figure>
 ```
 
-E.g. 2: in this example, `<amp-lightbox-gallery>` will display the alt as its description, showing "Picture of CN tower.".
+#### Example 2: Using alt for description
+
+In this example, `<amp-lightbox-gallery>` displays the `alt` value as its description, showing "Picture of CN tower".
 ```html
 <amp-img
   id="hero-img"
@@ -99,6 +101,6 @@ E.g. 2: in this example, `<amp-lightbox-gallery>` will display the alt as its de
   layout="responsive"
   width="1600"
   height="900"
-  alt="Picture of CN tower.">
+  alt="Picture of CN tower">
 </amp-img>
 ```
