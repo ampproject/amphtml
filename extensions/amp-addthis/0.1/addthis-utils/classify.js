@@ -259,7 +259,7 @@ export const isProductPage = (doc, metaElements) => {
   const ogTags = metaElements.reduce((tags, metaElement) => {
     const {name, content} = getDetailsForMeta(metaElement);
 
-    if (name.startsWith('og:')) {
+    if (name.indexOf('og:') === 0) {
       const ogProperty = name.split(':').pop();
       tags[ogProperty] = content;
     }

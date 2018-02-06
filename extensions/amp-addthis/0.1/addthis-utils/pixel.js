@@ -69,7 +69,7 @@ const groupPixelsByTime = pixelList => {
   }));
 };
 
-const pixelDrop = (url, ampDoc) => {
+export const pixelDrop = (url, ampDoc) => {
   const doc = ampDoc.win.document;
   const ampPixel = createElementWithAttributes(
       doc,
@@ -127,7 +127,11 @@ const dropPixelatorPixel = (url, ampDoc) => {
 
 /**
  * Requests groups of pixels at specified delays
- * @param  {Array<Pixel>} pixels
+ * @param  {Array<{
+ * delay: number,
+ * id: string,
+ * url: string
+ * }>} pixels
  * @param  {{
  * sid: string,
  * ampDoc: *
@@ -183,7 +187,7 @@ function getJsonObject_(object) {
   return params;
 }
 
-const callPixelEndpoint = event => {
+export const callPixelEndpoint = event => {
   const {ampDoc, endpoint} = event;
   const eventData = getJsonObject_(getData(event));
   const url = addParamsToUrl(endpoint, eventData);
@@ -204,9 +208,4 @@ const callPixelEndpoint = event => {
       });
     }
   });
-};
-
-export {
-  pixelDrop,
-  callPixelEndpoint,
 };
