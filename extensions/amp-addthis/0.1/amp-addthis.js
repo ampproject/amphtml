@@ -55,12 +55,12 @@ import {
 import {callLojson} from './addthis-utils/lojson';
 import {callEng} from './addthis-utils/eng';
 import {callPjson} from './addthis-utils/pjson';
+import {ScrollMonitor} from './addthis-utils/monitors/scroll-monitor';
+import {DwellMonitor} from './addthis-utils/monitors/dwell-monitor';
+import {ClickMonitor} from './addthis-utils/monitors/click-monitor';
 import {
-  ScrollMonitor,
-  DwellMonitor,
-  ClickMonitor,
   ActiveToolsMonitor,
-} from './addthis-utils/monitors';
+} from './addthis-utils/monitors/active-tools-monitor';
 
 // The following items will be shared by all AmpAddThis elements on a page, to prevent unnecessary
 // HTTP requests, get accurate analytics, etc., and hence are defined outside of the class.
@@ -103,7 +103,7 @@ class AmpAddThis extends AMP.BaseElement {
     /** @private {string} */
     this.referrer_ = '';
 
-    /** @private {(?Object<string, string>|null)} */
+    /** @private {(?JsonObject<string, string>|null)} */
     this.shareConfig_ = null;
 
     /** @private {(?Object<string, string>|null)} */
@@ -111,22 +111,6 @@ class AmpAddThis extends AMP.BaseElement {
   }
 
   /**
-   * @param {boolean=} opt_onLayout
-   * @override
-   */
-  preconnectCallback(opt_onLayout) {
-    this.preconnect.url(ORIGIN, opt_onLayout);
-    this.preconnect.url(API_SERVER, opt_onLayout);
-    this.preconnect.url(COOKIELESS_API_SERVER, opt_onLayout);
-    this.preconnect.url(SHARECOUNTER_SERVER, opt_onLayout);
-    // Images, etc.:
-    this.preconnect.url('https://cache.addthiscdn.com', opt_onLayout);
-    this.preconnect.url('https://su.addthis.com', opt_onLayout);
-  }
-
-  /**
-   * Note: Does no actual building (building is deferred until layout). Simply checks for/sets
-   * required attributes.
    * @override
    */
   buildCallback() {
@@ -151,7 +135,7 @@ class AmpAddThis extends AMP.BaseElement {
         ampDoc.getUrl();
     this.canonicalTitle_ = this.element.getAttribute('data-canonical-title') ||
         ampDoc.win.document.title;
-    this.shareConfig_ = this.getShareConfig_();
+    this.shareConfig_ = this.getShareConfigAsJsonObject_();
     this.atConfig_ = this.getATConfig_(ampDoc);
 
     if (shouldRegisterView) {
@@ -186,6 +170,24 @@ class AmpAddThis extends AMP.BaseElement {
     }
   }
 
+
+  /**
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
+  preconnectCallback(opt_onLayout) {
+    this.preconnect.url(ORIGIN, opt_onLayout);
+    this.preconnect.url(API_SERVER, opt_onLayout);
+    this.preconnect.url(COOKIELESS_API_SERVER, opt_onLayout);
+    this.preconnect.url(SHARECOUNTER_SERVER, opt_onLayout);
+    // Images, etc.:
+    this.preconnect.url('https://cache.addthiscdn.com', opt_onLayout);
+    this.preconnect.url('https://su.addthis.com', opt_onLayout);
+  }
+
+  /**
+   * @returns {Element}
+   */
   createPlaceholderCallback() {
     const placeholder = createElementWithAttributes(
         this.win.document,
@@ -211,14 +213,6 @@ class AmpAddThis extends AMP.BaseElement {
 
     placeholder.appendChild(image);
     return placeholder;
-  }
-
-  /**
-   * @return {boolean}
-   * @override
-   */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
   }
 
   /** @override */
@@ -252,6 +246,15 @@ class AmpAddThis extends AMP.BaseElement {
   }
 
   /**
+   *
+   * @return {boolean}
+   * @override
+   */
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout);
+  }
+
+  /**
    * @override
    * @return {boolean}
    */
@@ -269,23 +272,24 @@ class AmpAddThis extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {Object<string, string>}
+   * @return {JsonObject<string, string>}
    */
-  getShareConfig_() {
-    return SHARE_CONFIG_KEYS.reduce((config, key) => {
+  getShareConfigAsJsonObject_() {
+    const params = dict();
+    SHARE_CONFIG_KEYS.map(key => {
       const value = this.element.getAttribute(`data-${key}`);
       if (value) {
-        config[key] = value;
+        params[key] = value;
       } else {
         // Fallbacks for values that should always be defined.
         if (key === 'url') {
-          config[key] = this.getAmpDoc().getUrl();
+          params[key] = this.getAmpDoc().getUrl();
         } else if (key === 'title') {
-          config[key] = this.getAmpDoc().win.document.title;
+          params[key] = this.getAmpDoc().win.document.title;
         }
       }
-      return config;
-    }, {});
+    });
+    return params;
   }
 
   /**
@@ -325,7 +329,7 @@ class AmpAddThis extends AMP.BaseElement {
       pubId,
     }));
 
-    const postMessageDispatcher = new PostMessageDispatcher(ampDoc.win);
+    const postMessageDispatcher = new PostMessageDispatcher();
     const pmHandler = postMessageDispatcher.handleAddThisMessage.bind(
         postMessageDispatcher
     );
@@ -352,6 +356,10 @@ class AmpAddThis extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-addthis', '0.1', AMP => {
+if (typeof AMP.extension === 'function') {
+  AMP.extension('amp-addthis', '0.1', AMP => {
+    AMP.registerElement('amp-addthis', AmpAddThis);
+  });
+} else {
   AMP.registerElement('amp-addthis', AmpAddThis);
-});
+}
