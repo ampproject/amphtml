@@ -143,6 +143,10 @@ function filterWhitelistedLinks(markdown) {
   // Links inside a <code> block (illustrative, and not always valid)
   filteredMarkdown = filteredMarkdown.replace(/<code>(.*?)<\/code>/g, '');
 
+  // The heroku nightly build page is not always acccessible by the checker.
+  filteredMarkdown = filteredMarkdown.replace(
+      /\(http:\/\/amphtml-nightly.herokuapp.com\/\)/g, '');
+
   // After all whitelisting is done, clean up any remaining empty blocks bounded
   // by backticks. Otherwise, `` will be treated as the start of a code block
   // and confuse the link extractor.
