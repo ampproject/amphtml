@@ -1371,8 +1371,6 @@ export class AmpA4A extends AMP.BaseElement {
       const frameDoc = friendlyIframeEmbed.iframe.contentDocument ||
               friendlyIframeEmbed.win.document;
       setStyle(frameDoc.body, 'visibility', 'visible');
-      // Bubble phase click handlers on the ad.
-      this.registerAlpHandler_(friendlyIframeEmbed.win);
       // Capture timing info for friendly iframe load completion.
       getTimingDataAsync(
           friendlyIframeEmbed.win,
@@ -1607,22 +1605,6 @@ export class AmpA4A extends AMP.BaseElement {
           creative.slice(metadataStart + metadataString.length, metadataEnd));
       return null;
     }
-  }
-
-  /**
-   * Registers a click handler for "A2A" (AMP-to-AMP navigation where the AMP
-   * viewer navigates to an AMP destination on our behalf.
-   * @param {!Window} iframeWin
-   */
-  registerAlpHandler_(iframeWin) {
-    if (!isExperimentOn(this.win, 'alp-for-a4a')) {
-      return;
-    }
-    iframeWin.document.documentElement.addEventListener('click', event => {
-      handleClick(event, url => {
-        Services.viewerForDoc(this.getAmpDoc()).navigateTo(url, 'a4a');
-      });
-    });
   }
 
   /**
