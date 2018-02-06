@@ -358,7 +358,7 @@ describes.sandboxed('StandardActions', {}, () => {
       window.document.head.appendChild(
           createElementWithAttributes(window.document, 'meta', {
             name: 'amp-action-whitelist',
-            content: 'pushState,setState',
+            content: 'AMP.pushState,AMP.setState',
           }));
 
       standardActions = new StandardActions(ampdoc);
@@ -384,7 +384,7 @@ describes.sandboxed('StandardActions', {}, () => {
       window.document.head.appendChild(
           createElementWithAttributes(window.document, 'meta', {
             name: 'amp-action-whitelist',
-            content: 'setState, pushState',
+            content: 'AMP.setState, AMP.pushState',
           }));
 
       standardActions = new StandardActions(ampdoc);
