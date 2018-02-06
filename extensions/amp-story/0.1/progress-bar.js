@@ -159,7 +159,8 @@ export class ProgressBar {
       if (withTransition) {
         // Using an eased transition only if filling the bar to 0 or 1.
         transition =
-            progress === ~~progress ? TRANSITION_EASE : TRANSITION_LINEAR;
+            (progress === 1 || progress === 0) ?
+              TRANSITION_EASE : TRANSITION_LINEAR;
       }
       setImportantStyles(dev().assertElement(progressEl), {
         'transform': scale(`${progress},1`),
