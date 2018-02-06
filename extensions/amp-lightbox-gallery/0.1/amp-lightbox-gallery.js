@@ -783,7 +783,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         return this.vsync_.mutatePromise(() => {
           st.setStyles(this.element, {opacity: ''});
           st.setStyles(dev().assertElement(this.carousel_), {opacity: ''});
-
+          sourceElement.classList.remove('i-amphtml-ghost');
           if (transLayer) {
             this.element.ownerDocument.body.removeChild(transLayer);
           }
@@ -820,8 +820,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         && this.shouldAnimate_(sourceElement)
         && (sourceElement == this.sourceElement_
         || this.manager_.hasCarousel(this.currentLightboxGroupId_))) {
+
+        sourceElement.classList.add('i-amphtml-ghost');
         transLayer = this.element.ownerDocument.createElement('div');
-        transLayer.classList.add('i-amphtml-lightbox-viewer-trans');
+        transLayer.classList.add('i-amphtml-lightbox-gallery-trans');
         this.element.ownerDocument.body.appendChild(transLayer);
 
         const rect = layoutRectFromDomRect(sourceElement
