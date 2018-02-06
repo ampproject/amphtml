@@ -37,9 +37,9 @@ limitations under the License.
 </table>
 
 ## Behavior
-All you need to do is to include the 'lightbox' attribute on an `<amp-img>` or `<amp-carousel>`. A typical usage looks like this:
+All you need to do is to include the extension script and put the 'lightbox' attribute on an `<amp-img>` or `<amp-carousel>`. A typical usage looks like this:
 
-### Lightbox with AMP-IMG
+### Lightbox with `<amp-img>`
 
 ```html
 <amp-img src="image1" width=200 height=100 lightbox></amp-img>
@@ -48,9 +48,9 @@ All you need to do is to include the 'lightbox' attribute on an `<amp-img>` or `
 
 The `<amp-lightbox-gallery>` extension automatically inserts an invisible `<amp-lightbox-gallery>` component (with the id 'amp-lightbox-gallery') into the dom.
 
-It iterates through each item that has the `lightbox` attribute and processes it. If the component is a basic item (e.g. `AMP-IMG`), it will install a tap handler on each basic lightboxed item (`on=tap:amp-lightbox-gallery.activate`) if a tap handler does not already exist. Currently, `<amp-img>` is the only type of basic item supported.
+It iterates through each `<amp-img>` that has the `lightbox` attribute and installs a tap handler on it (`on=tap:amp-lightbox-gallery.activate`) if a tap handler does not already exist. Tapping on any `<amp-img>` will open the image in a lightbox gallery. The lightbox gallery does image-handling (e.g. zoom and pan), enables swiping to navigate between images, and offers a thumbnail gallery view for browsing all picture thumbnails in a grid.
 
-### Lightbox with AMP-CAROUSEL
+### Lightbox with `<amp-carousel>`
 ```html
 <amp-carousel lightbox width=1600 height=900 layout=responsive type=slides>
   <amp-img src="image1" width=200 height=100></amp-img>
@@ -59,11 +59,11 @@ It iterates through each item that has the `lightbox` attribute and processes it
 </amp-carousel>
 ```
 
-`<amp-carousel>` is considered a lightbox container item. To process an `<amp-carousel>` with the `lightbox` attribute,  `<amp-lightbox-gallery>` extension will iterate all of the `<amp-carousel>`'s children, add the `lightbox` attribute and a tap-handler to each child.
+You can add the `lightbox` attribute on an `<amp-carousel>` to lightbox all of its children. `<amp-lightbox-gallery>` currently supports only carousels containing `<amp-img>` as children. As you navigate through the carousel items in the lightbox, the original carousel slides will be sync-ed so that when the lightbox is closed, you will end up on the same slide as you were on originally. Currently on the the `type='slides'` carousel is supported.
 
 ### Captions
 Lightbox optionally allows the user to specify a caption for each element. These fields are automatically read and displayed by `<amp-lightbox-gallery>` in the following order of priority:
-- figcaption (if the lightboxed element is a figure)
+- figcaption (if the lightboxed element is the child of a figure)
 - aria-describedby
 - alt
 - aria-label
