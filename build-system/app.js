@@ -857,6 +857,28 @@ app.use('/list/vegetable-data/get', (req, res) => {
   });
 });
 
+app.use('/subscription/subsplatform1', (req, res) => {
+  assertCors(req, res, ['GET']);
+  res.json({access: false});
+});
+
+app.use('/subscription/subsplatform2', (req, res) => {
+  assertCors(req, res, ['GET']);
+  res.json({
+    service: 'foo-bar',
+    entitlements: [
+      {
+        source: 'lorem',
+        products: ['product1', 'product2'],
+      },
+      {
+        source: 'ipsum',
+        products: ['product3', 'product4'],
+      },
+    ],
+  });
+});
+
 // Simulated Cloudflare signed Ad server
 
 const cloudflareDataDir = '/extensions/amp-ad-network-cloudflare-impl/0.1/data';
@@ -1052,6 +1074,7 @@ app.get('/dist/diversions', (req, res) => {
   res.setHeader('Cache-Control', 'no-cache;max-age=150');
   res.end(JSON.stringify(['98' + n]));
 });
+
 /*
  * End Cache SW LOCALDEV section
  */

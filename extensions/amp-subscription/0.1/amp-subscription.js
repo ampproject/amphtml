@@ -15,8 +15,7 @@
  */
 
 import {installStylesForDoc} from '../../../src/style-installer';
-import {dev, user} from '../../../src/log';
-import {tryParseJson} from '../../../src/json';
+import {SubscriptionPlatform} from './amp-subscription-platform';
 
 /** @const */
 const TAG = 'amp-subscription';
@@ -26,61 +25,66 @@ export class SubscriptionSubscription {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    /** @const */
-    this.ampdoc = ampdoc;
+    /** @const @private */
+    this.ampdoc_ = ampdoc;
 
     // Install styles.
     installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
 
-    const accessElement = ampdoc.getElementById('amp-subscriptions');
+    /** @private @const {!Array<./SubscriptionPlatform>} */
+    this.subscriptionPlatforms_ = [];
+  }
 
-    /** @const @private {boolean} */
-    this.enabled_ = !!accessElement;
-    if (!this.enabled_) {
-      return;
-    }
+  /**
+   * @return {Object}
+   * @private
+   */
+  getConfig_() {
+    // TODO(@prateekbh): get this config from the document config
+    return [
+      {
+        paywallUrl: '/subscription/subsplatform1',
+      },
+      {
+        paywallUrl: '/subscription/subsplatform2',
+      },
+    ];
+  }
 
-    /** @const @private {!Element} */
-    this.accessElement_ = dev().assertElement(accessElement);
-
-    const configJson = tryParseJson(this.accessElement_.textContent, e => {
-      throw user().createError('Failed to parse "amp-access" JSON: ' + e);
+  /**
+   * @private
+   */
+  buildSubscriptionPlatforms_() {
+    this.getConfig_().forEach(subscriptionPlatformConfig => {
+      this.subscriptionPlatforms_.push(new SubscriptionPlatform(this.ampdoc_,
+          subscriptionPlatformConfig.paywallUrl));
     });
   }
 
   /**
-   * @return {!Element}
    * @private
    */
-  getRootElement_() {
-    const root = this.ampdoc.getRootNode();
-    return dev().assertElement(root.documentElement || root.body || root);
+  processEntitlement_() {
+    // TODO(@prateekbh): process and unblock marup here.
   }
 
   /**
-   * @return {boolean}
-   */
-  isEnabled() {
-    return this.enabled_;
-  }
-
-  /**
-   * @return {!AccessService}
    * @private
    */
   start_() {
-    if (!this.enabled_) {
-      user().info(TAG,
-          'Subscriptions is disabled - no "id=amp-subscriptions" element');
-      return this;
-    }
-    this.startInternal_();
-    return this;
-  }
-
-  startInternal_() {
-
+    this.buildSubscriptionPlatforms_();
+    this.subscriptionPlatforms_.forEach(subscriptionPlatform => {
+      subscriptionPlatform.getEntitlements()
+          .then(entitlement => this.processEntitlement_(entitlement))
+          .catch(() => {});
+    });
   }
 
 }
 
+// Register the extension services.
+AMP.extension(TAG, '0.1', function(AMP) {
+  AMP.registerServiceForDoc('access', function(ampdoc) {
+    return new SubscriptionSubscription(ampdoc).start_();
+  });
+});
