@@ -634,7 +634,7 @@ function parseExtensionFlags() {
         log(minimalSetMessage);
         process.exit(1);
       }
-      argv.extensions = argv.extensions.trim();
+      argv.extensions = argv.extensions.replace(/\s/g, '');
       if (argv.extensions === 'minimal_set') {
         argv.extensions =
             'amp-ad,amp-ad-network-adsense-impl,amp-audio,amp-video,' +
