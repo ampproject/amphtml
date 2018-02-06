@@ -332,6 +332,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.descriptionTextArea_.classList.add('non-expanded');
     this.descriptionBox_.appendChild(this.descriptionTextArea_);
 
+    const descriptionMask = this.win.document.createElement('div');
+    descriptionMask.classList.add('i-amphtml-lbg-desc-mask');
+    this.descriptionBox_.appendChild(descriptionMask);
+
     this.descriptionBox_.addEventListener('click', event => {
       this.toggleDescriptionOverflow_();
       event.stopPropagation();
