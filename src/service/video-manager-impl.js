@@ -1091,7 +1091,7 @@ class VideoEntry {
       const internalElement = this.internalElement_;
       function cloneStyle(prop) {
         return st.getStyle(dev().assertElement(internalElement), prop);
-      };
+      }
 
       st.setStyles(dev().assertElement(this.draggingMask_), {
         'top': cloneStyle('top'),
@@ -1990,4 +1990,4 @@ export function clearSupportsAutoplayCacheForTesting() {
  */
 export function installVideoManagerForDoc(nodeOrDoc) {
   registerServiceBuilderForDoc(nodeOrDoc, 'video-manager', VideoManager);
-};
+}

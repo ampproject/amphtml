@@ -30,7 +30,7 @@ function verifyScript(win, name) {
           .to.equal(script == name);
     }
   });
-};
+}
 
 describes.sandboxed('writeAdScript', {}, env => {
 

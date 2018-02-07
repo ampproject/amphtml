@@ -328,7 +328,7 @@ describes.fakeWin('AccessService', {
     };
     element.textContent = JSON.stringify(config);
     const accessService = new AccessService(ampdoc);
-    class Vendor1 {};
+    class Vendor1 {}
     const vendor1 = new Vendor1();
     accessService.registerVendor('vendor1', vendor1);
     return accessService.adapter_.vendorPromise_.then(vendor => {
@@ -344,7 +344,7 @@ describes.fakeWin('AccessService', {
     };
     element.textContent = JSON.stringify(config);
     const accessService = new AccessService(ampdoc);
-    class Vendor1 {};
+    class Vendor1 {}
     const vendor1 = new Vendor1();
     expect(() => {
       accessService.registerVendor('vendor1', vendor1);

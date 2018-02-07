@@ -64,4 +64,4 @@ function parseAttributes(attributeObject) {
     attributes[key] = String(attributeObject[key]);
   }
   return attributes;
-};
+}

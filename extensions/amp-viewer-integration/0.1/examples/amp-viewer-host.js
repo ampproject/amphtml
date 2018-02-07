@@ -134,7 +134,7 @@ export class AmpViewerHost {
       state: this.visibilityState_,
       prerenderSize: this.prerenderSize,
     }, true);
-  };
+  }
 
   /**
    * @param {*} eventData
@@ -143,7 +143,7 @@ export class AmpViewerHost {
    */
   isChannelOpen_(eventData) {
     return eventData.app == APP && eventData.name == CHANNEL_OPEN_MSG;
-  };
+  }
 
   /**
    * @param {string} type
@@ -157,7 +157,7 @@ export class AmpViewerHost {
       return;
     }
     return this.messaging_.sendRequest(type, data, awaitResponse);
-  };
+  }
 
   log() {
     const var_args = Array.prototype.slice.call(arguments, 0);

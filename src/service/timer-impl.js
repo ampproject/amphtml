@@ -172,4 +172,4 @@ export class Timer {
  */
 export function installTimerService(window) {
   registerServiceBuilder(window, 'timer', Timer);
-};
+}

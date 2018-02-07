@@ -183,7 +183,7 @@ describes.fakeWin('runtime', {
       expect(progress).to.equal('12345');
       expect(queueExtensions).to.have.length(0);
     });
-  };
+  }
 
   it('should execute scheduled extensions & execute new extensions',
       extensionRegistrationTest);

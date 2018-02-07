@@ -36,7 +36,7 @@ function log(queryParams) {
   }
   query = query + '&via=' + encodeURIComponent(window.location.href);
   call.src = query;
-};
+}
 
 /**
  * Strip data from string
@@ -53,7 +53,7 @@ function filter(str) {
   ret = decoded.replace(/</g, '&lt;');
   ret = ret.replace(/>/g, '&gt;');
   return ret;
-};
+}
 
 /**
  * Create a DOM element with attributes
@@ -73,7 +73,7 @@ function make(doc, data) {
     break;
   }
   return el;
-};
+}
 
 /**
  * Set a DOM element attribute
@@ -87,6 +87,6 @@ function set(el, attr, value) {
   } else {
     el.setAttribute(attr, value);
   }
-};
+}
 
 export const Util = {filter, guid, log, make, set};

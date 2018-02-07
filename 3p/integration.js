@@ -462,7 +462,7 @@ export function draw3p(win, data, configCallback) {
   } else {
     run(type, win, data);
   }
-};
+}
 
 /**
  * @return {boolean} Whether this is the master iframe.

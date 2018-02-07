@@ -324,7 +324,7 @@ export class Messaging {
     const dataStr = ' data: ' + this.errorToString_(opt_data);
     stateStr += dataStr;
     this.win['viewerState'] = stateStr;
-  };
+  }
 
   /**
    * @param {*} err !Error most of time, string sometimes, * rarely.

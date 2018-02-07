@@ -141,7 +141,7 @@ export function withDatePickerCommon(WrappedComponent) {
         isOutsideRange: this.isOutsideRange,
       }));
     }
-  };
+  }
 
   Component.defaultProps = defaultProps;
 

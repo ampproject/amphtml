@@ -42,7 +42,7 @@ describes.realWin('amp-pinterest', {
     return pin.implementation_.layoutCallback().then(() => {
       return pin;
     });
-  };
+  }
 
   function getEmbedPin(pinID, pinAlt, mockResponse) {
     const div = document.createElement('div');
@@ -61,7 +61,7 @@ describes.realWin('amp-pinterest', {
     return pin.implementation_.layoutCallback().then(() => {
       return pin;
     });
-  };
+  }
 
 
   it('renders', () => {

@@ -1093,4 +1093,4 @@ export function installLayersServiceForDoc(ampdoc, scrollingElement) {
   registerServiceBuilderForDoc(ampdoc, 'layers', function(ampdoc) {
     return new LayoutLayers(ampdoc, scrollingElement);
   }, /* opt_instantiate */ true);
-};
+}

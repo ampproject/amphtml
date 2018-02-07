@@ -334,4 +334,4 @@ export class Activity {
     return this.totalEngagedTimeByTrigger_[name] -
       currentIncrementalEngagedTime;
   }
-};
+}

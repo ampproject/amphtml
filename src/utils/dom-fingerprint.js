@@ -61,7 +61,7 @@ export function domFingerprintPlain(element) {
     element = element.parentElement;
   }
   return ids.join();
-};
+}
 
 
 export class DomFingerprint {
@@ -107,4 +107,4 @@ function indexWithinParent(element) {
   }
   // If we got to the end, then the count is accurate; otherwise skip count.
   return count < 25 && i < 100 ? `.${count}` : '';
-};
+}

@@ -1601,7 +1601,7 @@ function createBaseCustomElementClass(win) {
         }
       }
     }
-  };
+  }
   win.BaseCustomElementClass = BaseCustomElement;
   return win.BaseCustomElementClass;
 }

@@ -549,7 +549,7 @@ describes.realWin('placement', {
         initialMinSpacing: 0,
         subsequentMinSpacing: [],
         maxAdCount: 10,
-      });;
+      });
       return placements[0].placeAd(attributes, adTracker)
           .then(placementState => {
             expect(resource.attemptChangeSize).to.have.been.calledWith(

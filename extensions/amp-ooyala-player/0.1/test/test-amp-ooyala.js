@@ -58,7 +58,7 @@ describes.realWin('amp-ooyala-player', {
     return player.build()
         .then(() => player.layoutCallback())
         .then(() => player);
-  };
+  }
 
   it('renders a V3 player', () => {
     return getOoyalaElement('Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ',

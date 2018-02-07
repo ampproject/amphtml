@@ -318,4 +318,4 @@ function styleLoaded(doc, style) {
     }
   }
   return false;
-};
+}
