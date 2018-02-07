@@ -232,6 +232,33 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       expect(fireDelayedImpressionsSpy.withArgs(
           'https://c.com?e=f,https://d.com?g=h', true)).to.be.calledOnce;
     });
+
+    it('should specify nameframe loading behavior; single arg', () => {
+      impl.extractSize({
+        get(name) {
+          return name == 'amp-nameframe-exp' ? 'instantLoad' : undefined;
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      });
+      expect(impl.nameframeExperimentConfig_.instantLoad).to.be.true;
+      expect(impl.nameframeExperimentConfig_.writeInBody).to.be.false;
+    });
+
+    it('should specify nameframe loading behavior; two args', () => {
+      impl.extractSize({
+        get(name) {
+          return name == 'amp-nameframe-exp' ?
+            'instantLoad;writeInBody' : undefined;
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      });
+      expect(impl.nameframeExperimentConfig_.instantLoad).to.be.true;
+      expect(impl.nameframeExperimentConfig_.writeInBody).to.be.true;
+    });
   });
 
   describe('#onCreativeRender', () => {
