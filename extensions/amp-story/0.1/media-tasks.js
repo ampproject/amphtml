@@ -138,18 +138,6 @@ function copyAttributes(fromEl, toEl) {
 }
 
 
-// TODO(newmuis): DO NOT SUBMIT!!!! DEBUGGING ONLY!!!!
-let lastTime = 0;
-function doLog() {
-  const currentTime = new Date().getTime();
-  const timeDelta = lastTime === 0 ? 0 : (currentTime - lastTime);
-  const timeStr = `@${currentTime} (+${timeDelta}ms)`;
-  const logArgs = [timeStr].concat(Array.from(arguments));
-  //console.log.apply(this, logArgs);
-  lastTime = currentTime;
-}
-
-
 
 /**
  * Base class for tasks executed in order on HTMLMediaElements.
@@ -275,10 +263,8 @@ export class UnmuteTask extends MediaTask {
 
   /** @override */
   executeInternal(mediaEl) {
-    doLog('unmuting video');
     mediaEl.muted = false;
     mediaEl.removeAttribute('muted');
-    doLog('video unmuted');
     return Promise.resolve();
   }
 }
@@ -350,17 +336,13 @@ export class BlessTask extends MediaTask {
 
   /** @override */
   executeInternal(mediaEl) {
-    doLog('blessing element', mediaEl);
     const isPaused = mediaEl.paused;
     const isMuted = mediaEl.muted;
     const currentTime = mediaEl.currentTime;
 
-    doLog('media to be played for blessing', mediaEl);
     const playResult = mediaEl.play();
-    doLog('media has been played for blessing', mediaEl, playResult);
 
     return Promise.resolve(playResult).then(() => {
-      doLog('inner bless', mediaEl);
       mediaEl.muted = false;
 
       if (isPaused) {
@@ -374,7 +356,6 @@ export class BlessTask extends MediaTask {
 
       mediaEl[ELEMENT_BLESSED_PROPERTY_NAME] = true;
     }).catch(reason => {
-      doLog('bless failed', mediaEl);
       dev().expectedError('AMP-STORY', 'Blessing media element failed:',
           reason, mediaEl);
     });
@@ -432,20 +413,16 @@ export class SwapIntoDomTask extends MediaTask {
 
   /** @override */
   executeInternal(mediaEl) {
-    doLog('swapping into dom', mediaEl);
-
     return this.vsync_.mutatePromise(() => {
       if (!isConnectedNode(this.replacedMediaEl_)) {
         this.failTask('Cannot swap media for element that is not in DOM.');
         return;
       }
 
-      doLog('swapping into dom mutate', mediaEl);
       copyCssClasses(this.replacedMediaEl_, mediaEl);
       copyAttributes(this.replacedMediaEl_, mediaEl);
       this.replacedMediaEl_.parentElement
           .replaceChild(mediaEl, this.replacedMediaEl_);
-      doLog('swapping into dom mutate done', mediaEl);
     });
   }
 }
@@ -473,14 +450,10 @@ export class SwapOutOfDomTask extends MediaTask {
 
   /** @override */
   executeInternal(mediaEl) {
-    doLog('swapping out of dom', mediaEl);
-
     return this.vsync_.mutatePromise(() => {
-      doLog('swapping out of dom mutate', mediaEl);
       copyCssClasses(mediaEl, this.placeholderMediaEl_);
       copyAttributes(mediaEl, this.placeholderMediaEl_);
       mediaEl.parentElement.replaceChild(this.placeholderMediaEl_, mediaEl);
-      doLog('swapping out of dom mutate done', mediaEl);
     });
   }
 }

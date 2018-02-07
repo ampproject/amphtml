@@ -85,20 +85,6 @@ const ELEMENT_TASK_QUEUE_PROPERTY_NAME = '__AMP_MEDIA_ELEMENT_TASKS__';
 export const REPLACED_MEDIA_PROPERTY_NAME = 'replaced-media';
 
 
-// TODO(newmuis): DO NOT SUBMIT!!!! DEBUGGING ONLY!!!!
-let lastTime = 0;
-function doLogA() {
-  const currentTime = new Date().getTime();
-  const timeDelta = lastTime === 0 ? 0 : (currentTime - lastTime);
-  const timeStr = `@${currentTime} (+${timeDelta}ms)`;
-  const logArgs = [timeStr].concat(Array.from(arguments));
-  console.log.apply(this, logArgs);
-  lastTime = currentTime;
-}
-
-function doLog(){}
-
-
 /**
  * @type {!Object<string, !MediaPool>}
  */
@@ -451,17 +437,13 @@ export class MediaPool {
     return this.enqueueMediaElementTask_(poolMediaEl,
         new SwapIntoDomTask(domMediaEl, this.vsync_))
         .then(() => {
-          doLog('swapping into dom tasks', poolMediaEl);
           this.maybeResetAmpMedia_(ampMediaForPoolEl);
           this.maybeResetAmpMedia_(ampMediaForDomEl);
           this.enqueueMediaElementTask_(poolMediaEl,
               new UpdateSourcesTask(sources, this.vsync_));
           this.enqueueMediaElementTask_(poolMediaEl, new LoadTask());
-          doLog('swapping into dom done', poolMediaEl);
         }, () => {
-          doLog('force deallocating', poolMediaEl);
           this.forceDeallocateMediaElement_(poolMediaEl);
-          doLog('force deallocated', poolMediaEl);
         });
   }
 
@@ -509,7 +491,6 @@ export class MediaPool {
    * @private
    */
   swapPoolMediaElementOutOfDom_(poolMediaEl) {
-    doLog('swapping out of dom', poolMediaEl);
     const oldDomMediaElId = poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME];
     const oldDomMediaEl = /** @type {!HTMLMediaElement} */ (dev().assertElement(
         this.domMediaEls_[oldDomMediaElId],
@@ -518,10 +499,8 @@ export class MediaPool {
     return this.enqueueMediaElementTask_(poolMediaEl,
         new SwapOutOfDomTask(oldDomMediaEl, this.vsync_))
         .then(() => {
-          doLog('swapping out of reset media element', poolMediaEl);
           poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = null;
           this.resetPoolMediaElementSource_(poolMediaEl);
-          doLog('swapping out of dom done', poolMediaEl);
         });
   }
 
@@ -607,8 +586,7 @@ export class MediaPool {
       return Promise.resolve();
     }
 
-    return this.enqueueMediaElementTask_(poolMediaEl, new BlessTask())
-        .then(() => doLog('bless complete for', poolMediaEl));
+    return this.enqueueMediaElementTask_(poolMediaEl, new BlessTask());
   }
 
 
@@ -800,7 +778,6 @@ export class MediaPool {
    */
   executeNextMediaElementTask_(mediaEl) {
     const queue = mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME];
-    doLogA('element task queue contains ', queue, mediaEl);
 
     if (queue.length === 0) {
       return;
