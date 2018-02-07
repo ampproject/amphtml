@@ -38,6 +38,7 @@ const log = require('fancy-log');
 const minimatch = require('minimatch');
 const minimist = require('minimist');
 const removeConfig = require('./build-system/tasks/prepend-global/index.js').removeConfig;
+const run = require('gulp-run');
 const serve = require('./build-system/tasks/serve.js').serve;
 const source = require('vinyl-source-stream');
 const touch = require('touch');
@@ -346,6 +347,11 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
           's.visibility="visible";' +
           's.animation="none";' +
           's.WebkitAnimation="none;"},1000);throw e};',
+    }).then(() => {
+      run('cd validator && python build.py --light').exec(() => {
+       log(green('append validator light to v0.js'));
+       appendLightValidatorToCompiled('validator/dist/validator_light_minified.js', 'dist/v0.js');
+      });
     }),
     compileJs('./extensions/amp-viewer-integration/0.1/examples/',
         'amp-viewer-host.js', './dist/v0/examples', {
@@ -964,6 +970,11 @@ function appendToCompiledFile(srcFilename, destFilePath) {
   }
 }
 
+function appendLightValidatorToCompiled(srcFilename, destFilePath) {
+  const newSource = concatFilesToString([srcFilename].concat([destFilePath]));
+  fs.writeFileSync(destFilePath, newSource, 'utf8');
+}
+
 /**
  * Synchronously concatenates the given files into a string.
  *
@@ -1460,3 +1471,13 @@ gulp.task('watch', 'Watches for changes in files, re-builds when detected',
     });
 gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
 gulp.task('build-login-done', 'Builds login-done.html/js', buildLoginDone);
+gulp.task('runtime-validator', 'Builds the runtime validation', () => {
+         return run('cd validator && python build.py --light').exec(() => {
+           appendToCompiledFile('dist/validator_light_minified.js', './dist/v0.js')
+         })
+      });
+ gulp.task('test-validator-light-appending', 'Builds the runtime validation', () => {
+         return run('echo "appending validator_light_minified to v0"').exec(() => {
+            appendLightValidatorToCompiled('validator/dist/validator_light_minified.js', 'dist/v0.js');
+          })
+       });
