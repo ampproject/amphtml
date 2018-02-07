@@ -19,7 +19,16 @@ const initTestsPath = [
   'test/_init_tests.js',
 ];
 
-const commonTestPaths = initTestsPath.concat([
+const exmaplesPath = [
+  {
+    pattern: 'examples/**/*',
+    included: false,
+    nocache: false,
+    watched: true,
+  },
+];
+
+const commonTestPaths = initTestsPath.concat(exmaplesPath, [
   'test/fixtures/*.html',
   {
     pattern: 'test/fixtures/served/*.html',
@@ -35,12 +44,6 @@ const commonTestPaths = initTestsPath.concat([
   },
   {
     pattern: 'dist.tools/**/*.js',
-    included: false,
-    nocache: false,
-    watched: true,
-  },
-  {
-    pattern: 'examples/**/*',
     included: false,
     nocache: false,
     watched: true,
@@ -79,13 +82,13 @@ const chaiAsPromised = [
   'test/chai-as-promised/chai-as-promised.js',
 ];
 
-const unitTestPaths = commonTestPaths.concat([
+const unitTestPaths = initTestsPath.concat(exmaplesPath, [
   'test/functional/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/*.js',
 ]);
 
-const unitTestOnSaucePaths = commonTestPaths.concat([
+const unitTestOnSaucePaths = initTestsPath.concat(exmaplesPath, [
   'test/functional/**/*.js',
   'ads/**/test/test-*.js',
 ]);
