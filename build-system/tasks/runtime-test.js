@@ -20,6 +20,7 @@ const applyConfig = require('./prepend-global/index.js').applyConfig;
 const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const config = require('../config');
+const exec = require('../exec').exec;
 const fs = require('fs');
 const gulp = require('gulp-help')(require('gulp'));
 const Karma = require('karma').Server;
@@ -123,6 +124,11 @@ function getAdTypes() {
   return adTypes;
 }
 
+// Mitigates https://github.com/karma-runner/karma-sauce-launcher/issues/117
+// by refreshing the wd cache so that Karma can launch without an error.
+function refreshKarmaWdCache() {
+  exec('node ./node_modules/wd/scripts/build-browser-scripts.js');
+}
 
 /**
  * Prints help messages for args if tests are being run for local development.
@@ -320,6 +326,7 @@ function runTests() {
 
   let resolver;
   const deferred = new Promise(resolverIn => {resolver = resolverIn;});
+  refreshKarmaWdCache();
   new Karma(c, function(exitCode) {
     server.emit('kill');
     if (exitCode) {
