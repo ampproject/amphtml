@@ -297,6 +297,5 @@ function flatten(arr) {
 gulp.task(
     'dep-check',
     'Runs a dependency check on each module',
-    // Defined in gulpfile.js, and must be run before dep-check.
-    ['update-packages', 'patch-web-animations', 'css'],
+    ['update-packages', 'css'],
     depCheck);
