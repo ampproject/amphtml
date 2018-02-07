@@ -804,19 +804,21 @@ export class AmpA4A extends AMP.BaseElement {
     this.handleLifecycleStage_('adResponseValidateStart');
     const checkStillCurrent = this.verifyStillCurrent();
     return this.keysetPromise_
-        .then(() => signatureVerifierFor(this.win)
-            .verify(bytes, headers, (eventName, extraVariables) => {
-              this.handleLifecycleStage_(
-                  eventName, extraVariables);
-            }))
-        .then(status => {
-          checkStillCurrent();
+        .then(() => {
           if (this.element.getAttribute('type') == 'fake' &&
               !this.element.getAttribute('checksig')) {
             // do not verify signature for fake type ad, unless the ad
             // specfically requires via 'checksig' attribute
-            status = VerificationStatus.OK;
+            return Promise.resolve(VerificationStatus.OK);
           }
+          return signatureVerifierFor(this.win)
+              .verify(bytes, headers, (eventName, extraVariables) => {
+                this.handleLifecycleStage_(
+                    eventName, extraVariables);
+              });
+        })
+        .then(status => {
+          checkStillCurrent();
           this.handleLifecycleStage_('adResponseValidateEnd', {
             'signatureValidationResult': status,
             'releaseType': this.releaseType_,
