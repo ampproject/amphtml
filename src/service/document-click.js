@@ -55,7 +55,7 @@ export function installGlobalClickListenerForDoc(ampdoc) {
       /* opt_instantiate */ true);
 }
 
-// TODO(willchou): Rename this to Navigation.
+// TODO(willchou): Rename to navigation.js#Navigation.
 /**
  * Intercept any click on the current document and prevent any
  * linking to an identifier from pushing into the history stack.
@@ -138,32 +138,33 @@ export class ClickHandler {
   /**
    * Navigates a window to a URL.
    *
-   * If opt_requestedBy matches a feature name in a meta[amp-to-amp-navigation]
-   * tag, then treats the URL as an AMP URL (A2A).
+   * If opt_requestedBy matches a feature name in a <meta> tag with attribute
+   * name="amp-to-amp-navigation", then treats the URL as an AMP URL (A2A).
    *
    * @param {!Window} win
    * @param {string} url
    * @param {string=} opt_requestedBy
    */
   navigateTo(win, url, opt_requestedBy) {
-    if (!this.a2aFeatures_) {
-      const meta = this.rootNode_.querySelector(
-          'meta[name="amp-to-amp-navigation"]');
-      this.a2aFeatures_ = meta.getAttribute('content')
-          .split(';')
-          .map(feature => feature.trim());
-    }
-
-    if (isProtocolValid(url)) {
+    if (!isProtocolValid(url)) {
       user().error(TAG, 'Cannot navigate to invalid protocol: ' + url);
       return;
     }
 
     // If this redirect was requested by a feature that opted into A2A,
     // try to ask the viewer to navigate this AMP URL.
-    if (opt_requestedBy && this.a2aFeatures_.indexOf(opt_requestedBy) >= 0) {
-      if (this.viewer_.navigateToAmpUrl(url, opt_requestedBy)) {
-        return;
+    if (opt_requestedBy) {
+      if (!this.a2aFeatures_) {
+        const meta = this.rootNode_.querySelector(
+            'meta[name="amp-to-amp-navigation"]');
+        this.a2aFeatures_ = (meta && meta.hasAttribute('content'))
+            ? meta.getAttribute('content').split(',').map(s => s.trim())
+            : [];
+      }
+      if (this.a2aFeatures_.indexOf(opt_requestedBy) >= 0) {
+        if (this.viewer_.navigateToAmpUrl(url, opt_requestedBy)) {
+          return;
+        }
       }
     }
 
@@ -271,9 +272,9 @@ export class ClickHandler {
    * @private
    */
   handleA2AClick_(e, target, location) {
-    const relations = target.getAttribute('rel')
-        .split(' ')
-        .map(r => r.trim());
+    const relations = (target.hasAttribute('rel'))
+        ? target.getAttribute('rel').split(' ').map(s => s.trim())
+        : [];
     if (relations.indexOf('amphtml') < 0) {
       return false;
     }
