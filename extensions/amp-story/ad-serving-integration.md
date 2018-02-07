@@ -2,18 +2,18 @@
 
 ## THIS IS A WORK-IN-PROGRESS
 
-This article is for parties who want to serve ads into AMP stories. If you're a
-publisher who wants to monetize your stories, go for [monetize with story](./monetize-with-story.md) instead,
+This article is for parties who want to serve ads into AMP stories. Publisher 
+who wants to monetize your stories, please refer to [monetize with story](./monetize-with-story.md)
 unless you want to serve ads by yourselves.
 
 ## Custom ad
 
-Story publisher can do self-served ads using the [Custom ad](../../ads/custom.md) 
+Story publishers can do self-served ads using the [Custom ad](../../ads/custom.md) 
 extension. The ads are rendered with inlined templates in the story document
 and data fetched remotely.
 
 ### Template
-An ad template will be written in [amp-mustache](../amp-mustache/amp-mustache.md).
+An ad template must be written in [amp-mustache](../amp-mustache/amp-mustache.md).
 
 ```html
 <template type="amp-mustache" id="template-1">
@@ -67,7 +67,7 @@ A server endpoint needs to provide ad responses in the following JSON format:
 - `templateId`: the ID of the inlined template that is going to be used.
 - `data`: the data model to populate the selected template. The fields should match the variable names in the selected template.
 - `var`: extra variables needed by the story. They will be added to the `amp-ad` element as data attributes, and picked by runtime for different use cases:
-    - CTA button rendering (see details in the "CTA ad" section)
+    - CTA button rendering (see details in the ["CTA ad" section](#CTA-ad))
     - Provide dynamic content of the ad for tracking purpose (see details in the "tracking" section)
 
 #### Response headers
@@ -134,8 +134,8 @@ Each story page that is dynamically inserted for ad will be assigned with a syst
 generated page ID, prefixed with `i-amphtml-AD-`. `story-page-visible` trigger 
 can be used to track ad views.
 
-Further more, ad response can leverage the `var` object to put data attributes 
-to the `amp-ad` tag, and used by amp-analytics as [data-var](../amp-analytics/analytics-vars.md),
+Further more, ad response can leverage the `var` object to set data attributes 
+to the `amp-ad` tag, to be used by amp-analytics as [data vars](../amp-analytics/analytics-vars.md),
 
 ## Ad network integration
 Coming soon ...
