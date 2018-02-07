@@ -24,6 +24,7 @@
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
 import {dev} from './log';
+import {hasOwn} from './utils/object';
 import {toWin} from './types';
 
 
@@ -568,7 +569,7 @@ function disposeServicesInternal(holder) {
   // service to be canceled automatically.
   const services = getServices(holder);
   for (const id in services) {
-    if (!Object.prototype.hasOwnProperty.call(services, id)) {
+    if (!hasOwn(services, id)) {
       continue;
     }
     const serviceHolder = services[id];

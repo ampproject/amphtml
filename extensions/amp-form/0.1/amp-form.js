@@ -49,6 +49,7 @@ import {
   isCheckValiditySupported,
 } from './form-validators';
 import {getMode} from '../../../src/mode';
+import {hasOwn} from '../../../src/utils/object';
 import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {
@@ -308,7 +309,7 @@ export class AmpForm {
 
 
     for (const k in formObject) {
-      if (Object.prototype.hasOwnProperty.call(formObject, k)) {
+      if (hasOwn(formObject, k)) {
         formDataForAnalytics['formFields[' + k + ']'] = formObject[k].join(',');
       }
     }

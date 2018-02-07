@@ -15,10 +15,9 @@
  */
 
 import {doubleclick} from '../ads/google/doubleclick';
+import {hasOwn} from '../src/utils/object';
 import {loadScript, validateData, writeScript} from '../3p/3p';
 import {startsWith} from '../src/string';
-
-const hasOwnProperty = Object.prototype.hasOwnProperty;
 
 /**
  * Sort of like Object.assign.
@@ -28,7 +27,7 @@ const hasOwnProperty = Object.prototype.hasOwnProperty;
  */
 function assign(target, source) {
   for (const prop in source) {
-    if (hasOwnProperty.call(source, prop)) {
+    if (hasOwn(source, prop)) {
       target[prop] = source[prop];
     }
   }

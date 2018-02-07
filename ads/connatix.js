@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {tryParseJson} from '../src/json.js';
+import {hasOwn} from '../src/utils/object';
+import {tryParseJson} from '../src/json';
 import {validateData} from '../3p/3p';
 
 /**
@@ -31,7 +32,7 @@ export function connatix(global, data) {
   const cnxData = Object.assign(Object(tryParseJson(data['connatix'])));
   global.cnxAmpAd = true;
   for (const key in cnxData) {
-    if (cnxData.hasOwnProperty(key)) {
+    if (hasOwn(cnxData, key)) {
       script.setAttribute(key, cnxData[key]);
     }
   }

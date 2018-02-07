@@ -21,6 +21,7 @@ import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getCorrelator} from './utils';
 import {getTimingDataSync} from '../../../src/service/variable-source';
+import {hasOwn} from '../../../src/utils/object';
 import {serializeQueryString} from '../../../src/url';
 
 /**
@@ -93,7 +94,7 @@ export class BaseLifecycleReporter {
    */
   setPingParameters(parametersToValues) {
     for (const variable in parametersToValues) {
-      if (parametersToValues.hasOwnProperty(variable)) {
+      if (hasOwn(parametersToValues, variable)) {
         this.setPingParameter(variable, parametersToValues[variable]);
       }
     }

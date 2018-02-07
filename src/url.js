@@ -428,7 +428,7 @@ export function resolveRelativeUrl(relativeUrlString, baseUrl) {
     baseUrl = parseUrl(baseUrl);
   }
   if (typeof URL == 'function') {
-    return new URL(relativeUrlString, baseUrl.href).toString();
+    return String(new URL(relativeUrlString, baseUrl.href));
   }
   return resolveRelativeUrlFallback_(relativeUrlString, baseUrl);
 }

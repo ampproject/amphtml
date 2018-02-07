@@ -177,7 +177,7 @@ export class AmpSlideScroll extends BaseSlides {
 
     this.slides_.forEach((slide, index) => {
       this.dataSlideIdArr_.push(
-          slide.getAttribute('data-slide-id') || index.toString());
+          slide.getAttribute('data-slide-id') || String(index));
       this.setAsOwner(slide);
       slide.classList.add('amp-carousel-slide');
 

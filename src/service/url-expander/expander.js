@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {hasOwn} from '../../utils/object';
 import {rethrowAsync, user} from '../../log';
 
 export const PARSER_IGNORE_FLAG = '`';
@@ -99,7 +100,7 @@ export class Expander {
         if (match && urlIndex === match.start) {
           let binding;
           // find out where this keyword is coming from
-          if (opt_bindings && opt_bindings.hasOwnProperty(match.name)) {
+          if (opt_bindings && hasOwn(opt_bindings, match.name)) {
             // the optional bindings
             binding = opt_bindings[match.name];
           } else {

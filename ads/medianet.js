@@ -17,6 +17,7 @@
 import {computeInMasterFrame, validateData, writeScript} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
 import {getSourceUrl, parseUrl} from '../src/url';
+import {hasOwn} from '../src/utils/object';
 
 const mandatoryParams = ['tagtype', 'cid'],
     optionalParams = [
@@ -69,7 +70,7 @@ function loadCMTag(global, data, publisherUrl, referrerUrl) {
       return;
     }
     const name = 'medianet_' + type;
-    if (data.hasOwnProperty(type)) {
+    if (hasOwn(data, type)) {
       global[name] = data[type];
     }
   }

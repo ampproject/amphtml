@@ -241,7 +241,7 @@ export class AmpWebPushHelperFrame {
               replyToFrame,
               true,
               null,
-              error ? error.message || error.toString() : null
+              error ? error.message || String(error) : null
           );
         });
   }

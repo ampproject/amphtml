@@ -86,6 +86,18 @@ requirement: {
   value: 'Object.getOwnPropertyDescriptors'
 }
 
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Use hasOwn in src/utils/object.js'
+  value: 'Object.prototype.hasOwnProperty'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Use explicit String(value) conversion'
+  value: 'Object.prototype.toString'
+}
+
 # Array
 
 requirement: {

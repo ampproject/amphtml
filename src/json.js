@@ -19,6 +19,7 @@
  * {@link http://json.org/}.
  */
 
+import {hasOwn} from './utils/object';
 import {isObject} from './types';
 
 
@@ -197,6 +198,5 @@ function hasOwnProperty(obj, key) {
   if (obj == null || typeof obj != 'object') {
     return false;
   }
-  return Object.prototype.hasOwnProperty.call(
-      /** @type {!Object} */ (obj), key);
+  return hasOwn(/** @type {!Object} */ (obj), key);
 }

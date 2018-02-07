@@ -35,6 +35,7 @@ import {
 } from '../url';
 import {dev, rethrowAsync, user} from '../log';
 import {getTrackImpressionPromise} from '../impression.js';
+import {hasOwn} from '../utils/object';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
@@ -800,7 +801,7 @@ export class UrlReplacements {
     const requestedReplacements = {};
     whitelist.trim().split(/\s+/).forEach(replacement => {
       if (!opt_supportedReplacement ||
-          opt_supportedReplacement.hasOwnProperty(replacement)) {
+          hasOwn(opt_supportedReplacement, replacement)) {
         requestedReplacements[replacement] = true;
       } else {
         user().warn('URL', 'Ignoring unsupported replacement', replacement);
