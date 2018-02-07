@@ -573,6 +573,13 @@ message ErrorCategory {
   }
 }
 
+// We record validation errors in a structured form, so that they can be
+// worked with in code - e.g., to provide translated messages.
+// In the Javascript implementation (validator.js), you may find
+// the amp.validator.renderErrorMessage function which will make a
+// human-readable string from the structured form. It should be easy to port
+// this to other languages as needed; for instance Google has implementations
+// in C++, Java, and for templates used in some frontends.
 message ValidationError {
   enum Severity {
     UNKNOWN_SEVERITY = 0;
