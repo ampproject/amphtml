@@ -602,15 +602,6 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.adPromise_ || !this.shouldInitializePromiseChain_()) {
       return;
     }
-    // If in localDev `type=fake` Ad specifies `force3p`, it will be forced
-    // to go via 3p.
-    if (getMode().localDev &&
-        this.element.getAttribute('type') == 'fake' &&
-        this.element.getAttribute('force3p') == 'true') {
-      this.adUrl_ = this.getAdUrl();
-      this.adPromise_ = Promise.resolve();
-      return;
-    }
 
     // Increment unique promise ID so that if its value changes within the
     // promise chain due to cancel from unlayout, the promise will be rejected.
@@ -813,18 +804,21 @@ export class AmpA4A extends AMP.BaseElement {
     this.handleLifecycleStage_('adResponseValidateStart');
     const checkStillCurrent = this.verifyStillCurrent();
     return this.keysetPromise_
-        .then(() => signatureVerifierFor(this.win)
-            .verify(bytes, headers, (eventName, extraVariables) => {
-              this.handleLifecycleStage_(
-                  eventName, extraVariables);
-            }))
+        .then(() => {
+          if (this.element.getAttribute('type') == 'fake' &&
+              !this.element.getAttribute('checksig')) {
+            // do not verify signature for fake type ad, unless the ad
+            // specfically requires via 'checksig' attribute
+            return Promise.resolve(VerificationStatus.OK);
+          }
+          return signatureVerifierFor(this.win)
+              .verify(bytes, headers, (eventName, extraVariables) => {
+                this.handleLifecycleStage_(
+                    eventName, extraVariables);
+              });
+        })
         .then(status => {
           checkStillCurrent();
-          if (getMode().localDev &&
-              this.element.getAttribute('type') == 'fake') {
-            // do not verify signature for fake type ad
-            status = VerificationStatus.OK;
-          }
           this.handleLifecycleStage_('adResponseValidateEnd', {
             'signatureValidationResult': status,
             'releaseType': this.releaseType_,
