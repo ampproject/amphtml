@@ -15,12 +15,12 @@
  */
 
 import {installStylesForDoc} from '../../../src/style-installer';
-import {SubscriptionPlatform} from './amp-subscription-platform';
+import {SubscriptionPlatform} from './subscription-platform';
 
 /** @const */
-const TAG = 'amp-subscription';
+const TAG = 'amp-subscriptions';
 
-export class SubscriptionSubscription {
+export class SubscriptionService {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
@@ -31,33 +31,31 @@ export class SubscriptionSubscription {
     // Install styles.
     installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
 
-    /** @private @const {!Array<./SubscriptionPlatform>} */
+    /** @private @const {!Array<SubscriptionPlatform>} */
     this.subscriptionPlatforms_ = [];
   }
 
   /**
-   * @return {Object}
    * @private
+   * @return {Promise<Object>}
    */
-  getConfig_() {
-    // TODO(@prateekbh): get this config from the document config
-    return [
+  initialize_() {
+    // TODO(@prateekbh): read this config from the document.
+    const config = [
       {
-        paywallUrl: '/subscription/subsplatform1',
+        paywallUrl: '/subscription/1/entitlements',
       },
       {
-        paywallUrl: '/subscription/subsplatform2',
+        paywallUrl: '/subscription/2/entitlements',
       },
     ];
-  }
 
-  /**
-   * @private
-   */
-  buildSubscriptionPlatforms_() {
-    this.getConfig_().forEach(subscriptionPlatformConfig => {
-      this.subscriptionPlatforms_.push(new SubscriptionPlatform(this.ampdoc_,
-          subscriptionPlatformConfig.paywallUrl));
+    return new Promise(resolve => {
+      config.forEach(subscriptionPlatformConfig => {
+        this.subscriptionPlatforms_.push(new SubscriptionPlatform(this.ampdoc_,
+            subscriptionPlatformConfig.paywallUrl));
+      });
+      resolve();
     });
   }
 
@@ -72,11 +70,11 @@ export class SubscriptionSubscription {
    * @private
    */
   start_() {
-    this.buildSubscriptionPlatforms_();
-    this.subscriptionPlatforms_.forEach(subscriptionPlatform => {
-      subscriptionPlatform.getEntitlements()
-          .then(entitlement => this.processEntitlement_(entitlement))
-          .catch(() => {});
+    this.initialize_().then(() => {
+      this.subscriptionPlatforms_.forEach(subscriptionPlatform => {
+        subscriptionPlatform.getEntitlements()
+            .then(entitlement => this.processEntitlement_(entitlement));
+      });
     });
   }
 
@@ -85,6 +83,6 @@ export class SubscriptionSubscription {
 // Register the extension services.
 AMP.extension(TAG, '0.1', function(AMP) {
   AMP.registerServiceForDoc('access', function(ampdoc) {
-    return new SubscriptionSubscription(ampdoc).start_();
+    return new SubscriptionService(ampdoc).start_();
   });
 });

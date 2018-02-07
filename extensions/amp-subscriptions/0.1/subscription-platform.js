@@ -14,39 +14,19 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-
 /**
- * This implements the methods to interact with various subscription platforms.
+ * This interface is intended to be implemented by Subscription platforms to
+ * provide method of getting entitlements.
+ * @interface
  */
 export class SubscriptionPlatform {
 
   /**
-   * @param {string} entitlementURL
-   */
-  constructor(ampdoc, entitlementURL) {
-    /** @const */
-    this.ampdoc_ = ampdoc;
-
-    /** @const @private {string} */
-    this.entitlementURL_ = entitlementURL;
-  }
-
-  /**
-   * @return {string}
-   */
-  getEntitlementsUrl() {
-    return this.entitlementURL_;
-  }
-
-  /**
-   * TODO(@prateekbh): Define object below once we have a defination of entitlement
-   * @return {!Promise<Object>}
+   * Requests authorization from the vendor. Returns a promise that yields
+   * a JSON authorization response.
+   * @return {!Promise<!JsonObject>}
    */
   getEntitlements() {
-    return Services.xhrFor(this.ampdoc_.win)
-        .fetchJson(this.entitlementURL_)
-        .then(res => res.json());
   }
 
 }

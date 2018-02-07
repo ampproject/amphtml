@@ -857,15 +857,9 @@ app.use('/list/vegetable-data/get', (req, res) => {
   });
 });
 
-app.use('/subscription/subsplatform1', (req, res) => {
-  assertCors(req, res, ['GET']);
-  res.json({access: false});
-});
-
-app.use('/subscription/subsplatform2', (req, res) => {
+app.use('/subscription/:id/entitlements', (req, res) => {
   assertCors(req, res, ['GET']);
   res.json({
-    service: 'foo-bar',
     entitlements: [
       {
         source: 'lorem',
