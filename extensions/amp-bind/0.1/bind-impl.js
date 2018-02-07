@@ -962,11 +962,12 @@ export class Bind {
    * @private
    */
   verifyBinding_(boundProperty, element, expectedValue) {
-    const property = boundProperty.property;
+    const {property, expressionString} = boundProperty;
+    const tagName = element.tagName;
 
     // Don't show a warning for bind-only attributes,
     // like 'slide' on amp-carousel.
-    const bindOnlyAttrs = BIND_ONLY_ATTRIBUTES[element.tagName];
+    const bindOnlyAttrs = BIND_ONLY_ATTRIBUTES[tagName];
     if (bindOnlyAttrs && bindOnlyAttrs.includes(property)) {
       return;
     }
@@ -1023,11 +1024,11 @@ export class Bind {
     }
 
     if (!match) {
-      const err = user().createError(`${TAG}: ` +
-        `Default value for [${property}] does not match first expression ` +
-        `result (${expectedValue}). This can result in unexpected behavior ` +
-        'after the next state change.');
-      reportError(err, element);
+      user().warn(TAG,
+          `Default value for <${tagName} [${property}]="${expressionString}"> `
+          + `does not match first result (${expectedValue}). We recommend `
+          + 'writing expressions with matching default values, but this can be '
+          + 'safely ignored if intentional.');
     }
   }
 
