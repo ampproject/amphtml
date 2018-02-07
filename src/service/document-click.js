@@ -158,8 +158,8 @@ export class ClickHandler {
         const meta = this.rootNode_.querySelector(
             'meta[name="amp-to-amp-navigation"]');
         this.a2aFeatures_ = (meta && meta.hasAttribute('content'))
-            ? meta.getAttribute('content').split(',').map(s => s.trim())
-            : [];
+          ? meta.getAttribute('content').split(',').map(s => s.trim())
+          : [];
       }
       if (this.a2aFeatures_.indexOf(opt_requestedBy) >= 0) {
         if (this.viewer_.navigateToAmpUrl(url, opt_requestedBy)) {
@@ -273,8 +273,8 @@ export class ClickHandler {
    */
   handleA2AClick_(e, target, location) {
     const relations = (target.hasAttribute('rel'))
-        ? target.getAttribute('rel').split(' ').map(s => s.trim())
-        : [];
+      ? target.getAttribute('rel').split(' ').map(s => s.trim())
+      : [];
     if (relations.indexOf('amphtml') < 0) {
       return false;
     }

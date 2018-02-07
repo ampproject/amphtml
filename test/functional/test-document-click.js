@@ -457,8 +457,7 @@ describes.sandboxed('ClickHandler', {}, () => {
 
       it('should delegate navigation if viewer supports A2A', () => {
         const stub =
-            sandbox.stub(handler.viewer_, 'navigateToAmpUrl')
-            .returns(true);
+            sandbox.stub(handler.viewer_, 'navigateToAmpUrl').returns(true);
 
         handler.handle_(event);
 
@@ -474,8 +473,7 @@ describes.sandboxed('ClickHandler', {}, () => {
 
       it('should behave normally if viewer does not support A2A', () => {
         const stub =
-            sandbox.stub(handler.viewer_, 'navigateToAmpUrl')
-            .returns(false);
+            sandbox.stub(handler.viewer_, 'navigateToAmpUrl').returns(false);
 
         handler.handle_(event);
 
@@ -499,7 +497,7 @@ describes.sandboxed('ClickHandler', {}, () => {
       });
 
       it('should reject invalid protocols', () => {
-        const newUrl =  /*eslint no-script-url: 0*/ 'javascript:alert(1)';
+        const newUrl = /*eslint no-script-url: 0*/ 'javascript:alert(1)';
 
         expect(win.location.href).to.equal('https://www.pub.com/');
         handler.navigateTo(win, newUrl);
@@ -514,8 +512,7 @@ describes.sandboxed('ClickHandler', {}, () => {
         ampdoc.getRootNode().head.appendChild(meta);
 
         const stub =
-            sandbox.stub(handler.viewer_, 'navigateToAmpUrl')
-            .returns(true);
+            sandbox.stub(handler.viewer_, 'navigateToAmpUrl').returns(true);
         expect(win.location.href).to.equal('https://www.pub.com/');
 
         // Delegate to viewer if opt_requestedBy matches the <meta> tag content
