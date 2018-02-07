@@ -15,10 +15,10 @@
  */
 'use strict';
 
+const colors = require('ansi-colors');
 const exec = require('../exec').exec;
 const getStderr = require('../exec').getStderr;
 const gulp = require('gulp-help')(require('gulp'));
-const colors = require('ansi-colors');
 const log = require('fancy-log');
 
 

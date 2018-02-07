@@ -102,7 +102,7 @@ function getCounter(receiver, counterName) {
     return receiver[GOTO_COUNTER_PROP][counterName];
   }
   return 0;
-};
+}
 
 /**
  * @param {!Element} receiver
@@ -496,4 +496,4 @@ export class AmpGwdRuntimeService {
  */
 function reflow(element) {
   element./*OK*/offsetWidth = element./*OK*/offsetWidth;
-};
+}

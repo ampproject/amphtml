@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Timer} from '../../src/service/timer-impl';
 import * as sinon from 'sinon';
+import {Timer} from '../../src/service/timer-impl';
 
 describes.fakeWin('Timer', {}, env => {
 

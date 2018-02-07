@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
+import {Services} from '../../src/services';
 import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
@@ -22,8 +24,6 @@ import {
 import {
   triggerAnalyticsEvent,
 } from '../../src/analytics';
-import {Services} from '../../src/services';
-import * as sinon from 'sinon';
 
 
 describes.realWin('analytics', {

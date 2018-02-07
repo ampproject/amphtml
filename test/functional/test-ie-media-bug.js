@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {checkAndFix} from '../../src/service/ie-media-bug';
 import {dev} from '../../src/log';
-import * as sinon from 'sinon';
 
 
 describe('ie-media-bug', () => {

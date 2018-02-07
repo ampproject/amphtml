@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
+import {createElementWithAttributes} from '../../../../src/dom';
 import {
   getAmpAdRenderOutsideViewport,
-  is3pThrottled,
   incrementLoadingAds,
+  is3pThrottled,
   waitFor3pThrottle,
 } from '../concurrent-load';
-import {createElementWithAttributes} from '../../../../src/dom';
 import {installTimerService} from '../../../../src/service/timer-impl';
 import {macroTask} from '../../../../testing/yield';
-import * as lolex from 'lolex';
 
 describes.realWin('concurrent-load', {}, env => {
 

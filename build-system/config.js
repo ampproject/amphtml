@@ -15,8 +15,11 @@
  */
 'use strict';
 
-const commonTestPaths = [
+const initTestsPath = [
   'test/_init_tests.js',
+];
+
+const commonTestPaths = initTestsPath.concat([
   'test/fixtures/*.html',
   {
     pattern: 'test/fixtures/served/*.html',
@@ -54,25 +57,23 @@ const commonTestPaths = [
     nocache: false,
     watched: false,
   },
-];
+]);
 
 const simpleTestPath = [
   'test/simple-test.js',
 ];
 
-const basicTestPaths = [
+const testPaths = commonTestPaths.concat([
   'test/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
-];
+]);
 
-const testPaths = commonTestPaths.concat(basicTestPaths);
-
-const a4aTestPaths = [
+const a4aTestPaths = initTestsPath.concat([
   'extensions/amp-a4a/**/test/**/*.js',
   'extensions/amp-ad-network-*/**/test/**/*.js',
   'ads/google/a4a/test/*.js',
-];
+]);
 
 const chaiAsPromised = [
   'test/chai-as-promised/chai-as-promised.js',
@@ -99,7 +100,6 @@ const integrationTestPaths = commonTestPaths.concat([
 module.exports = {
   commonTestPaths,
   simpleTestPath,
-  basicTestPaths,
   testPaths,
   a4aTestPaths,
   chaiAsPromised,
@@ -116,7 +116,6 @@ module.exports = {
     // TODO: temporary, remove when validator is up to date
     '!validator/**/*.*',
     '!eslint-rules/**/*.*',
-    '!gulpfile.js',
     '!karma.conf.js',
     '!**/local-amp-chrome-extension/background.js',
     '!extensions/amp-access/0.1/access-expr-impl.js',
@@ -146,7 +145,6 @@ module.exports = {
     '!build-system/tasks/presubmit-checks.js',
     '!build/polyfills.js',
     '!build/polyfills/*.js',
-    '!gulpfile.js',
     '!third_party/**/*.*',
     '!validator/chromeextension/*.*',
     // Files in this testdata dir are machine-generated and are not part

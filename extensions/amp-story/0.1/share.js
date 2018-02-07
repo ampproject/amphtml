@@ -23,9 +23,9 @@ import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
+import {px, setImportantStyles} from '../../../src/style';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
-import {px, setImportantStyles} from '../../../src/style';
 import {throttle} from '../../../src/utils/rate-limit';
 
 

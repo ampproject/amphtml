@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {installDocService} from '../../src/service/ampdoc-impl';
-import {Services} from '../../src/services';
 import {
   LayoutElement,
   installLayersServiceForDoc,
 } from '../../src/service/layers-impl';
+import {Services} from '../../src/services';
+import {installDocService} from '../../src/service/ampdoc-impl';
 
 describes.realWin('Layers', {amp: false}, env => {
   let win;
