@@ -1347,13 +1347,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'on': 'visible',
         'request': 'pageview',
       },
-      'heartbeat': {
-        'on': 'timer',
-        'timerSpec': {
-          'interval': 5,
-        },
-        'request': 'heartbeat',
-      },
     },
     'transport': {
       'beacon': false,
