@@ -15,6 +15,7 @@
  */
 
 import {user} from '../../../src/log';
+import {closestBySelector} from '../../../src/dom';
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)
@@ -72,4 +73,14 @@ export function unscaledClientRect(el) {
     width: width / scaleFactorX,
     height: height / scaleFactorY,
   });
+}
+
+
+/**
+ * Finds an amp-video/amp-audio ancestor.
+ * @param {!Element} el
+ * @return {?AmpElement}
+ */
+export function ampMediaElementFor(el) {
+  return closestBySelector(el, 'amp-video, amp-audio');
 }
