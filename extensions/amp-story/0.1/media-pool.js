@@ -25,8 +25,7 @@ import {dev} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
 import {toWin} from '../../../src/types';
 import {BLANK_AUDIO_SRC, BLANK_VIDEO_SRC} from './default-media';
-import {listenOncePromise} from '../../../src/event-helper';
-import {dispatch} from './events';
+import {Services} from '../../../src/services';
 
 
 
@@ -55,56 +54,6 @@ let ElementTaskDef;
 /**
  * @const {string}
  */
-const ELEMENT_BLESSED_PROPERTY_NAME = '__AMP_MEDIA_IS_BLESSED__';
-
-
-
-/**
- * "Blesses" the specified media element for future playback without a user
- * gesture.  In order for this to bless the media element, this function must
- * be invoked in response to a user gesture.
- * @param {!HTMLMediaElement} mediaEl The media element to bless.
- * @return {!Promise} A promise that is resolved when blessing the media
- *     element is complete.
- */
-function blessMediaElement(mediaEl) {
-  console.log('blessing element', mediaEl);
-  const isPaused = mediaEl.paused;
-  const isMuted = mediaEl.muted;
-  const currentTime = mediaEl.currentTime;
-
-  console.log('media to be played for blessing', mediaEl.outerHTML);
-  const playResult = mediaEl.play();
-  console.log('media has been played for blessing', mediaEl.outerHTML, playResult);
-
-  return Promise.resolve(playResult).then(() => {
-    console.log('inner bless', mediaEl);
-    mediaEl.muted = false;
-
-    if (isPaused) {
-      mediaEl.pause();
-      mediaEl.currentTime = currentTime;
-    }
-
-    if (isMuted) {
-      mediaEl.muted = true;
-    }
-
-    mediaEl[ELEMENT_BLESSED_PROPERTY_NAME] = true;
-  }).catch(reason => {
-    console.log('bless failed', mediaEl);
-    dev().expectedError('AMP-STORY', 'Blessing media element failed:',
-        reason, mediaEl);
-  }).then(() => {
-    console.log('dispatch bless', mediaEl);
-    dispatch(mediaEl, 'bless', false);
-  });
-}
-
-
-/**
- * @const {string}
- */
 const REPLACED_MEDIA_ATTRIBUTE = 'replaced-media';
 
 
@@ -126,60 +75,10 @@ const POOL_MEDIA_ELEMENT_PROPERTY_NAME = '__AMP_MEDIA_POOL_ID__';
 const ELEMENT_TASK_QUEUE_PROPERTY_NAME = '__AMP_MEDIA_ELEMENT_TASKS__';
 
 
-/** @const @enum {string} */
-export const ElementTaskName = {
-  BLESS: 'bless',
-  LOAD: 'load',
-  MUTE: 'mute',
-  PAUSE: 'pause',
-  PLAY: 'play',
-  REWIND: 'rewind',
-  UNMUTE: 'unmute',
-  UPDATE_SRC: 'updatesrc',
-};
-
-
 /**
- * @const {!Object<string, !ElementTaskDef>}
+ * @const {string}
  */
-const ELEMENT_TASKS = {
-  [ElementTaskName.BLESS]: el => blessMediaElement(el),
-  [ElementTaskName.LOAD]: el => Promise.resolve(el.load()),
-  [ElementTaskName.MUTE]: el => Promise.resolve(() => {
-    el.muted = true;
-    el.setAttribute('muted', '');
-  }),
-  [ElementTaskName.PAUSE]: el => Promise.resolve(el.pause()),
-  [ElementTaskName.PLAY]: el => {
-    if (!el.paused) {
-      // We do not want to invoke play() if the media element is already
-      // playing, as this can interrupt playback in some browsers.
-      return Promise.resolve();
-    }
-
-    // The play() invocation is wrapped in a Promise.resolve(...) due to the
-    // fact that some browsers return a promise from media elements' play()
-    // function, while others return a boolean.
-    return Promise.resolve(el.play());
-  },
-  [ElementTaskName.REWIND]: el => Promise.resolve(() => {
-    el.currentTime = 0;
-  }),
-  [ElementTaskName.UNMUTE]: el => Promise.resolve(() => {
-    el.muted = false;
-    el.removeAttribute('muted');
-  }),
-  [ElementTaskName.UPDATE_SRC]: (el, sources) => {
-    // TODO(newmuis): vsync.runPromise
-    return Promise.resolve(sources.applyToElement(el));
-  },
-};
-
-
-/**
- * @const {!ElementTaskDef}
- */
-const NOOP_ELEMENT_TASK = () => Promise.resolve();
+const ELEMENT_BLESSED_PROPERTY_NAME = '__AMP_MEDIA_IS_BLESSED__';
 
 
 /**
@@ -215,55 +114,6 @@ function ampMediaElementFor(el) {
 
 
 /**
- * @param {!HTMLMediaElement} mediaEl The element whose task queue should be
- *     executed.
- */
-function executeNextMediaElementTask(mediaEl) {
-  const queue = mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME];
-  if (queue.length === 0) {
-    return;
-  }
-
-  const task = queue[0];
-
-  task.call()
-      .catch(reason => dev().error('AMP-STORY', reason))
-      .then(() => {
-        const oldTaskName = queue.shift();
-        console.log('dequeue ' + oldTaskName, mediaEl);
-        console.log('element task queue contains ' + JSON.stringify(queue), mediaEl);
-        executeNextMediaElementTask(mediaEl);
-      });
-}
-
-
-/**
- * @param {!HTMLMediaElement} mediaEl The element for which the specified task
- *     should be executed.
- * @param {!ElementTaskName} taskName The name of the task to execute.
- * @param {*=} opt_state An object holding state to be read by the task.
- */
-function enqueueMediaElementTask(mediaEl, taskName, opt_state) {
-  if (!mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME]) {
-    mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME] = [];
-  }
-
-  const queue = mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME];
-  const state = opt_state || {};
-  const task = ELEMENT_TASKS[taskName] || NOOP_ELEMENT_TASK;
-  const boundTask = task.bind(this, mediaEl, state);
-
-  queue.push(boundTask);
-  console.log('enqueue ' + taskName, mediaEl);
-  console.log('element task queue contains ' + JSON.stringify(queue), mediaEl);
-
-  if (queue.length === 1) {
-    executeNextMediaElementTask(mediaEl);
-  }
-}
-
-
-/**
  * @type {!Object<string, !MediaPool>}
  */
 const instances = {};
@@ -291,6 +141,9 @@ export class MediaPool {
   constructor(win, maxCounts, distanceFn) {
     /** @private @const {!Window} */
     this.win_ = win;
+
+    /** @private @const {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(win);
 
     /**
      * The function used to retrieve the distance between an element and the
@@ -382,7 +235,7 @@ export class MediaPool {
       for (let i = 0; i < count; i++) {
         const mediaEl = this.mediaFactory_[type].call(this);
         mediaEl.setAttribute('pool-element', elId++);
-        mediaEl.src = this.getDefaultSource_(type, mediaEl);
+        mediaEl.src = this.getDefaultSource_(type);
         // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE is
         // returned.  If so, we should adjust the pool size/distribution between
         // media types.
@@ -405,6 +258,7 @@ export class MediaPool {
         return BLANK_VIDEO_SRC;
       default:
         dev().error('AMP-STORY', `No default media for type ${mediaType}.`);
+        return '';
     }
   }
 
@@ -605,8 +459,8 @@ export class MediaPool {
 
     this.copyCssClasses_(domMediaEl, poolMediaEl);
     this.copyAttributes_(domMediaEl, poolMediaEl);
-    enqueueMediaElementTask(poolMediaEl, ElementTaskName.UPDATE_SRC, sources);
-    enqueueMediaElementTask(poolMediaEl, ElementTaskName.LOAD);
+    this.enqueueMediaElementTask_(poolMediaEl, new UpdateSourcesTask(sources));
+    this.enqueueMediaElementTask_(poolMediaEl, new LoadTask());
     poolMediaEl.setAttribute(REPLACED_MEDIA_ATTRIBUTE, domMediaEl.id);
     domMediaEl.parentElement.replaceChild(poolMediaEl, domMediaEl);
 
@@ -800,13 +654,8 @@ export class MediaPool {
       return Promise.resolve();
     }
 
-    const blessPromise = listenOncePromise(poolMediaEl, ElementTaskName.BLESS, {
-      capture: true,
-    }).then(() => console.log('bless complete for', poolMediaEl));
-
-    enqueueMediaElementTask(poolMediaEl, ElementTaskName.BLESS);
-
-    return blessPromise;
+    return this.enqueueMediaElementTask_(poolMediaEl, new BlessTask())
+        .then(() => console.log('bless complete for', poolMediaEl));
   }
 
 
@@ -865,7 +714,7 @@ export class MediaPool {
       return;
     }
 
-    enqueueMediaElementTask(poolMediaEl, ElementTaskName.PLAY);
+    this.enqueueMediaElementTask_(poolMediaEl, new PlayTask());
   }
 
 
@@ -884,10 +733,10 @@ export class MediaPool {
       return;
     }
 
-    enqueueMediaElementTask(poolMediaEl, ElementTaskName.PAUSE);
+    this.enqueueMediaElementTask_(poolMediaEl, new PauseTask());
 
     if (opt_rewindToBeginning) {
-      enqueueMediaElementTask(poolMediaEl, ElementTaskName.REWIND);
+      this.enqueueMediaElementTask_(poolMediaEl, new RewindTask());
     }
   }
 
@@ -905,7 +754,7 @@ export class MediaPool {
       return;
     }
 
-    enqueueMediaElementTask(poolMediaEl, ElementTaskName.REWIND);
+    this.enqueueMediaElementTask_(poolMediaEl, new RewindTask());
   }
 
 
@@ -922,7 +771,7 @@ export class MediaPool {
       return;
     }
 
-    enqueueMediaElementTask(poolMediaEl, ElementTaskName.MUTE);
+    this.enqueueMediaElementTask_(poolMediaEl, new MuteTask());
   }
 
 
@@ -939,7 +788,7 @@ export class MediaPool {
       return;
     }
 
-    enqueueMediaElementTask(poolMediaEl, ElementTaskName.UNMUTE);
+    this.enqueueMediaElementTask_(poolMediaEl, new UnmuteTask());
   }
 
 
@@ -962,12 +811,70 @@ export class MediaPool {
 
     return Promise.all(blessPromises)
         .then(() => {
-          console.log('all blessed');
           this.blessed_ = true;
         }).catch(reason => {
           dev().expectedError('AMP-STORY', 'Blessing all media failed: ',
               reason);
         });
+  }
+
+
+  /**
+   * @param {!HTMLMediaElement} mediaEl The element whose task queue should be
+   *     executed.
+   * @private
+   */
+  executeNextMediaElementTask_(mediaEl) {
+    const queue = mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME];
+    if (queue.length === 0) {
+      return;
+    }
+
+    const task = queue[0];
+
+    const executionFn = () => task.execute(mediaEl)
+        .catch(reason => dev().error('AMP-STORY', reason))
+        .then(() => {
+          const oldTask = queue.shift();
+          console.log('dequeue ' + oldTask.getName(), mediaEl);
+          console.log('element task queue contains ' + JSON.stringify(queue),
+              mediaEl);
+          this.executeNextMediaElementTask_(mediaEl);
+        });
+
+    if (task.requiresSynchronousExecution()) {
+      executionFn.call();
+    } else {
+      this.timer_.delay(executionFn, 0);
+    }
+  }
+
+
+  /**
+   * @param {!HTMLMediaElement} mediaEl The element for which the specified task
+   *     should be executed.
+   * @param {!MediaTask} task The task to be executed.
+   * @return {!Promise} A promise that is resolved when the specified task is
+   *     completed.
+   * @private
+   */
+  enqueueMediaElementTask_(mediaEl, task) {
+    if (!mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME]) {
+      mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME] = [];
+    }
+
+    const queue = mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME];
+
+    queue.push(task);
+    console.log('enqueue ' + task.getName(), mediaEl);
+    console.log('element task queue contains ' + JSON.stringify(queue),
+        mediaEl);
+
+    if (queue.length === 1) {
+      this.executeNextMediaElementTask_(mediaEl);
+    }
+
+    return task.whenComplete();
   }
 
 
@@ -1078,4 +985,249 @@ export class MediaPoolRoot {
    *     type to allow within this element.
    */
   getMaxMediaElementCounts() {}
+}
+
+
+/**
+ * TODO(newmuis): Document this.
+ */
+class MediaTask {
+  constructor(name) {
+    /** @private @const {string} */
+    this.name_ = name;
+
+    /** @private {?function()} */
+    this.resolve_ = null;
+
+    /** @private {?function()} */
+    this.reject_ = null;
+
+    /** @private @const {!Promise} */
+    this.completionPromise_ = new Promise((resolve, reject) => {
+      this.resolve_ = resolve;
+      this.reject_ = reject;
+    });
+  }
+
+  /**
+   * @return {string} The name of this task.
+   */
+  getName() {
+    return this.name_;
+  }
+
+  /**
+   * @return {!Promise<*>} A promise that is resolved when the task has
+   *     completed execution.
+   */
+  whenComplete() {
+    return this.completionPromise_;
+  }
+
+  /**
+   * @param {!HTMLMediaElement} mediaEl The media element on which this task
+   *     should be executed.
+   */
+  execute(mediaEl) {
+    return this.executeInternal(mediaEl)
+        .then(this.resolve_, this.reject_);
+  }
+
+  /**
+   * @param {!HTMLMediaElement} unusedMediaEl The media element on which this
+   *     task should be executed.
+   * @protected
+   */
+  executeInternal(unusedMediaEl) {
+    return Promise.resolve();
+  }
+
+  /**
+   * @return {boolean} true, if this task must be executed synchronously, e.g.
+   *    if it requires a user gesture.
+   */
+  requiresSynchronousExecution() {
+    return false;
+  }
+}
+
+
+/**
+ * Plays the specified media element.
+ */
+class PlayTask extends MediaTask {
+  constructor() {
+    super('play');
+  }
+
+  /** @override */
+  executeInternal(mediaEl) {
+    if (!mediaEl.paused) {
+      // We do not want to invoke play() if the media element is already
+      // playing, as this can interrupt playback in some browsers.
+      return Promise.resolve();
+    }
+
+    // The play() invocation is wrapped in a Promise.resolve(...) due to the
+    // fact that some browsers return a promise from media elements' play()
+    // function, while others return a boolean.
+    return Promise.resolve(mediaEl.play());
+  }
+}
+
+
+/**
+ * Pauses the specified media element.
+ */
+class PauseTask extends MediaTask {
+  constructor() {
+    super('pause');
+  }
+
+  /** @override */
+  executeInternal(mediaEl) {
+    mediaEl.pause();
+    return Promise.resolve();
+  }
+}
+
+
+/**
+ * Unmutes the specified media element.
+ */
+class UnmuteTask extends MediaTask {
+  constructor() {
+    super('unmute');
+  }
+
+  /** @override */
+  executeInternal(mediaEl) {
+    console.log('unmuting video');
+    mediaEl.muted = false;
+    mediaEl.removeAttribute('muted');
+    console.log('video unmuted');
+    return Promise.resolve();
+  }
+}
+
+
+/**
+ * Mutes the specified media element.
+ */
+class MuteTask extends MediaTask {
+  constructor() {
+    super('mute');
+  }
+
+  /** @override */
+  executeInternal(mediaEl) {
+    mediaEl.muted = true;
+    mediaEl.setAttribute('muted', '');
+    return Promise.resolve();
+  }
+}
+
+
+/**
+ * Seeks the specified media element to the beginning.
+ */
+class RewindTask extends MediaTask {
+  constructor() {
+    super('rewind');
+  }
+
+  /** @override */
+  executeInternal(mediaEl) {
+    mediaEl.currentTime = 0;
+    return Promise.resolve();
+  }
+}
+
+
+/**
+ * Loads the specified media element.
+ */
+class LoadTask extends MediaTask {
+  constructor() {
+    super('load');
+  }
+
+  /** @override */
+  executeInternal(mediaEl) {
+    mediaEl.load();
+    return Promise.resolve();
+  }
+}
+
+
+/**
+ * "Blesses" the specified media element for future playback without a user
+ * gesture.  In order for this to bless the media element, this function must
+ * be invoked in response to a user gesture.
+ */
+class BlessTask extends MediaTask {
+  constructor() {
+    super('bless');
+  }
+
+  /** @override */
+  requiresSynchronousExecution() {
+    return true;
+  }
+
+  /** @override */
+  executeInternal(mediaEl) {
+    console.log('blessing element', mediaEl);
+    const isPaused = mediaEl.paused;
+    const isMuted = mediaEl.muted;
+    const currentTime = mediaEl.currentTime;
+
+    console.log('media to be played for blessing', mediaEl);
+    const playResult = mediaEl.play();
+    console.log('media has been played for blessing', mediaEl, playResult);
+
+    return Promise.resolve(playResult).then(() => {
+      console.log('inner bless', mediaEl);
+      mediaEl.muted = false;
+
+      if (isPaused) {
+        mediaEl.pause();
+        mediaEl.currentTime = currentTime;
+      }
+
+      if (isMuted) {
+        mediaEl.muted = true;
+      }
+
+      mediaEl[ELEMENT_BLESSED_PROPERTY_NAME] = true;
+    }).catch(reason => {
+      console.log('bless failed', mediaEl);
+      dev().expectedError('AMP-STORY', 'Blessing media element failed:',
+          reason, mediaEl);
+    });
+  }
+}
+
+
+/**
+ * Updates the sources of the specified media element.
+ */
+class UpdateSourcesTask extends MediaTask {
+  /**
+   * @param {!Sources} newSources The sources to which the media element should
+   *     be updated.
+   */
+  constructor(newSources) {
+    super('updatesrc');
+
+    /** @private @const {!Sources} */
+    this.newSources_ = newSources;
+  }
+
+  /** @override */
+  executeInternal(mediaEl) {
+    // TODO(newmuis): vsync.runPromise
+    this.newSources_.applyToElement(mediaEl);
+    return Promise.resolve();
+  }
 }
