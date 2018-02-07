@@ -219,7 +219,7 @@ export function protectFunctionWrapper(
       return undefined;
     }
   };
-};
+}
 
 export class AmpA4A extends AMP.BaseElement {
   // TODO: Add more error handling throughout code.
@@ -1772,7 +1772,7 @@ export function assignAdUrlToError(error, adUrl) {
   }
   (error.args || (error.args = {}))['au'] =
     adUrl.substring(adQueryIdx + 1, adQueryIdx + 251);
-};
+}
 
 /**
  * Returns the signature verifier for the given window. Lazily creates it if it

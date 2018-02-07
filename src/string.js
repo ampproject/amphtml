@@ -126,4 +126,4 @@ export function stringHash32(str) {
   }
   // Convert from 32-bit signed to unsigned.
   return String(hash >>> 0);
-};
+}

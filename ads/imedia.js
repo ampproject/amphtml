@@ -73,4 +73,4 @@ export function imedia(global, data) {
       return used; // remove (filter) element filled with add
     });
   });
-};
+}

@@ -91,7 +91,7 @@ function main() {
   } else {
     console.log(green('Detected yarn version'), cyan(yarnVersion) +
         green('. Installing packages...'));
-  };
+  }
   return 0;
 }
 

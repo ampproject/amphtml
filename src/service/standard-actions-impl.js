@@ -348,4 +348,4 @@ export function installStandardActionsForDoc(ampdoc) {
       'standard-actions',
       StandardActions,
       /* opt_instantiate */ true);
-};
+}

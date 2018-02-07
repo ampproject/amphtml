@@ -547,7 +547,7 @@ export class AmpIframe extends AMP.BaseElement {
     }
     return !this.isInContainer_;
   }
-};
+}
 
 /**
  * We always set a sandbox. Default is that none of the things that need
