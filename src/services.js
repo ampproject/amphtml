@@ -283,6 +283,15 @@ export class Services {
   }
 
   /**
+   * @param {!Window} window
+   * @return {!./service/media-pool-impl.MediaPoolService}
+   */
+  static mediaPoolFor(win) {
+    return /** @type {!./service/media-pool-impl.MediaPoolService} */ (
+      getService(win, 'mediapool'));
+  }
+
+  /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
    * @return {!Promise<!./service/storage-impl.Storage>}
    */

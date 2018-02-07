@@ -1069,3 +1069,15 @@ amp-story[standalone].i-amphtml-story-landscape .i-amphtml-story-no-rotation-ove
   50% { transform: rotate(5deg) }
   to { transform: rotate(-130deg) }
 }
+
+.i-amphtml-media-placeholder {
+  position: absolute !important;
+  background-position: center center !important;
+  background-size: cover !important;
+  z-index: 100000 !important;
+}
+
+.i-amphtml-media-placeholder.i-amphtml-hidden {
+  display: none;
+}
+

@@ -39,6 +39,7 @@ import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {relatedArticlesFromJson} from './related-articles';
 import {ShareWidget} from './share';
+import {toArray} from '../../../src/types';
 import {
   closest,
   matches,
@@ -68,7 +69,6 @@ import {Gestures} from '../../../src/gesture';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {dict} from '../../../src/utils/object';
 import {renderSimpleTemplate} from './simple-template';
-import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
 import {TapNavigationDirection} from './page-advancement';
 
@@ -105,12 +105,6 @@ const PAGE_LOAD_TIMEOUT_MS = 5000;
  * @const {string}
  */
 const STORY_LOADED_CLASS_NAME = 'i-amphtml-story-loaded';
-
-/** @const {!Object<string, number>} */
-const MAX_MEDIA_ELEMENT_COUNTS = {
-  [MediaType.AUDIO]: 4,
-  [MediaType.VIDEO]: 8,
-};
 
 
 /**
@@ -194,9 +188,6 @@ const HIDE_ON_BOOKEND_SELECTOR =
     'amp-story-page, .i-amphtml-story-system-layer';
 
 
-/**
- * @implements {./media-pool.MediaPoolRoot}
- */
 export class AmpStory extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -266,7 +257,7 @@ export class AmpStory extends AMP.BaseElement {
     this.ampStoryHint_ = new AmpStoryHint(this.win);
 
     /** @private {!MediaPool} */
-    this.mediaPool_ = MediaPool.for(this);
+    this.mediaPool_ = Services.mediaPoolFor(this.win).for(this.element);
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
@@ -292,6 +283,13 @@ export class AmpStory extends AMP.BaseElement {
       this.element.setAttribute('desktop','');
     }
     this.element.querySelector('amp-story-page').setAttribute('active', '');
+
+    const pages =
+        toArray(scopedQuerySelectorAll(this.element, 'amp-story-page'));
+
+    pages.forEach((page, distance) => {
+      page.setAttribute('distance', distance);
+    });
 
     this.initializeListeners_();
     this.initializeListenersForDev_();
@@ -790,6 +788,8 @@ export class AmpStory extends AMP.BaseElement {
     this.systemLayer_.setDeveloperLogContextString(
         this.activePage_.element.id);
 
+    this.preloadPagesByDistance_();
+
     return targetPage.beforeVisible().then(() => {
       this.triggerActiveEventForPage_();
 
@@ -808,7 +808,6 @@ export class AmpStory extends AMP.BaseElement {
             PRE_ACTIVE_PAGE_ATTRIBUTE_NAME);
       }
 
-      this.preloadPagesByDistance_();
       this.reapplyMuting_();
       this.forceRepaintForSafari_();
       this.maybePreloadBookend_();
@@ -1311,19 +1310,6 @@ export class AmpStory extends AMP.BaseElement {
 
     return dev().assert(this.pages_[pageIndex],
         'Element not contained on any amp-story-page');
-  }
-
-
-  /** @override */
-  getElementDistance(element) {
-    const page = this.getPageContainingElement_(element);
-    return page.getDistance();
-  }
-
-
-  /** @override */
-  getMaxMediaElementCounts() {
-    return MAX_MEDIA_ELEMENT_COUNTS;
   }
 
 
