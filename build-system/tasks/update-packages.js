@@ -17,13 +17,40 @@
 
 const colors = require('ansi-colors');
 const exec = require('../exec').exec;
+const fs = require('fs-extra');
 const getStderr = require('../exec').getStderr;
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 
+/**
+ * Patches Web Animations API by wrapping its body into `install` function.
+ * This gives us an option to call polyfill directly on the main window
+ * or a friendly iframe.
+ */
+function patchWebAnimations() {
+  // Copies web-animations-js into a new file that has an export.
+  const patchedName = 'node_modules/web-animations-js/' +
+      'web-animations.install.js';
+  if (fs.existsSync(patchedName)) {
+    return;
+  }
+  let file = fs.readFileSync(
+      'node_modules/web-animations-js/' +
+      'web-animations.min.js').toString();
+  // Wrap the contents inside the install function.
+  file = 'exports.installWebAnimations = function(window) {\n' +
+      'var document = window.document;\n' +
+      file + '\n' +
+      '}\n';
+  fs.writeFileSync(patchedName, file);
+  if (!process.env.TRAVIS) {
+    log(colors.green('Patched'), colors.cyan(patchedName));
+  }
+}
 
 /**
  * Does a yarn check on node_modules, and if it is outdated, runs yarn.
+ * Follows it up with a call to patch web-animations-js if necessary.
  */
 function updatePackages() {
   const integrityCmd = 'yarn check --integrity';
@@ -42,10 +69,11 @@ function updatePackages() {
           colors.cyan('node_modules'), colors.green('are up to date.'));
     }
   }
+  patchWebAnimations();
 }
 
 gulp.task(
     'update-packages',
-    'Runs yarn if node_modules is not up to date.',
+    'Runs yarn if node_modules is out of date, and patches web-animations-js',
     updatePackages
 );
