@@ -42,6 +42,11 @@ export const RTC_VENDORS = {
     macros: ['CID'],
     disableKeyAppend: true,
   },
+  prebid_appnexus : {
+    url: 'https://prebid.adnxs.com/pbs/v1/openrtb2/amp?tag_id=PLACEMENT_ID',
+    macros : ['PLACEMENT_ID'],
+    disableKeyAppend: true,
+  }
 };
 
 // DO NOT MODIFY: Setup for tests
