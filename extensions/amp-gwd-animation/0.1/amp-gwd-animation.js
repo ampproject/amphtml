@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {ActionTrust} from '../../../src/action-trust';
 import {
+  AmpGwdRuntimeService,
   GWD_SERVICE_NAME,
   GWD_TIMELINE_EVENT,
-  AmpGwdRuntimeService,
 } from './amp-gwd-animation-impl';
 import {CSS} from '../../../build/amp-gwd-animation-0.1.css';
-import {ActionTrust} from '../../../src/action-trust';
+import {Services} from '../../../src/services';
+import {getServiceForDoc} from '../../../src/service';
 import {getValueForExpr} from '../../../src/json';
 import {user} from '../../../src/log';
-import {getServiceForDoc} from '../../../src/service';
-import {Services} from '../../../src/services';
 
 /** @const {string} The custom element tag name for this extension. */
 export const TAG = 'amp-gwd-animation';
@@ -198,7 +198,7 @@ export function addAction(ampdoc, element, event, actionStr) {
 
   // Reset the element's actions with the new actions string.
   Services.actionServiceForDoc(ampdoc).setActions(element, newActionsStr);
-};
+}
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerServiceForDoc(GWD_SERVICE_NAME, AmpGwdRuntimeService);

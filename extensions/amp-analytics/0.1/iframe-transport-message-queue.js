@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
 import {MessageType} from '../../../src/3p-frame-messaging';
 import {SubscriptionApi} from '../../../src/iframe-helper';
+import {dev} from '../../../src/log';
 
 /** @private @const {string} */
 const TAG_ = 'amp-analytics.IframeTransportMessageQueue';

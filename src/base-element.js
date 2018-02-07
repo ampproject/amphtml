@@ -16,13 +16,13 @@
 
 import {ActionTrust} from './action-trust';
 import {Layout} from './layout';
+import {Services} from './services';
+import {dev, user} from './log';
 import {getData, listen} from './event-helper';
+import {isArray, toWin} from './types';
+import {isExperimentOn} from './experiments';
 import {loadPromise} from './event-helper';
 import {preconnectForElement} from './preconnect';
-import {isArray, toWin} from './types';
-import {Services} from './services';
-import {user, dev} from './log';
-import {isExperimentOn} from './experiments';
 
 /**
  * Base class for all custom element implementations. Instead of inheriting

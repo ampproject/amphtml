@@ -122,7 +122,7 @@ export function parseSizeList(s, opt_allowPercentAsLength) {
           assertLength(sizeStr)});
   });
   return new SizeList(sizes);
-};
+}
 
 
 /**

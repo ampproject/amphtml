@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {KeyCodes} from '../../../../src/utils/key-codes';
-import {Services} from '../../../../src/services';
 import '../amp-image-lightbox';
+import * as dom from '../../../../src/dom';
+import * as lolex from 'lolex';
 import {
   ImageViewer,
 } from '../amp-image-lightbox';
+import {KeyCodes} from '../../../../src/utils/key-codes';
+import {Services} from '../../../../src/services';
 import {parseSrcset} from '../../../../src/srcset';
-import * as lolex from 'lolex';
-import * as dom from '../../../../src/dom';
 
 describes.realWin('amp-image-lightbox component', {
   amp: {

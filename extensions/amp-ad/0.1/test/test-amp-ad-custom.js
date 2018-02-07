@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {AmpAdCustom} from '../amp-ad-custom';
 import {createElementWithAttributes} from '../../../../src/dom';
-import * as sinon from 'sinon';
 
 describe('Amp custom ad', () => {
   let sandbox;

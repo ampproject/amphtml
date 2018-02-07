@@ -23,27 +23,27 @@
  * </amp-story>
  * </code>
  */
+import {AdvancementConfig} from './page-advancement';
 import {
   AnimationManager,
   hasAnimations,
 } from './animation';
-import {Layout} from '../../../src/layout';
-import {upgradeBackgroundAudio} from './audio';
 import {EventType, dispatch, dispatchCustom} from './events';
-import {AdvancementConfig} from './page-advancement';
+import {Layout} from '../../../src/layout';
+import {LoadingSpinner} from './loading-spinner';
+import {MediaPool} from './media-pool';
+import {PageScalingService} from './page-scaling';
 import {
+  closestBySelector,
   matches,
   scopedQuerySelectorAll,
-  closestBySelector,
 } from '../../../src/dom';
+import {debounce} from '../../../src/utils/rate-limit';
 import {dev} from '../../../src/log';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
-import {PageScalingService} from './page-scaling';
-import {LoadingSpinner} from './loading-spinner';
 import {listen} from '../../../src/event-helper';
-import {debounce} from '../../../src/utils/rate-limit';
-import {MediaPool} from './media-pool';
+import {upgradeBackgroundAudio} from './audio';
 
 
 /**

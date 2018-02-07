@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {isExperimentOn} from '../experiments';
 import {Services} from '../services';
 import {dev, user} from '../log';
+import {isExperimentOn} from '../experiments';
 
 /** @const {number} */
 const NTH_FRAME = 200;
