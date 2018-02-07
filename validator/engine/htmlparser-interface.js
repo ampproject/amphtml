@@ -160,7 +160,7 @@ amp.htmlparser.ParsedHtmlTag = class {
 
 
 /**
- * An interface to the {@code amp.htmlparser.HtmlParser} visitor, that gets
+ * An interface to the `amp.htmlparser.HtmlParser` visitor, that gets
  * called while the HTML is being parsed.
  */
 amp.htmlparser.HtmlSaxHandler = class {
@@ -224,7 +224,7 @@ amp.htmlparser.HtmlSaxHandler = class {
 
 /**
  * An interface for determining the line/column information for SAX events that
- * are being received by a {@code amp.htmlparser.HtmlSaxHandler}. Please see
+ * are being received by a `amp.htmlparser.HtmlSaxHandler`. Please see
  * the {@code amp.htmlparser.HtmlSaxHandler#setDocLocator} method.
  */
 amp.htmlparser.DocLocator = class {
@@ -259,7 +259,7 @@ amp.htmlparser.HtmlSaxHandlerWithLocation =
   constructor() { super(); }
 
   /**
-   * Called prior to parsing a document, that is, before {@code startTag}.
+   * Called prior to parsing a document, that is, before `startTag`.
    * @param {amp.htmlparser.DocLocator} locator A locator instance which
    *   provides access to the line/column information while SAX events
    *   are being received by the handler.
