@@ -20,7 +20,9 @@ const applyConfig = require('./prepend-global/index.js').applyConfig;
 const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const config = require('../config');
+const createCtrlcHandler = require('../ctrlcHandler').createCtrlcHandler;
 const exec = require('../exec').exec;
+const exitCtrlcHandler = require('../ctrlcHandler').exitCtrlcHandler;
 const fs = require('fs');
 const gulp = require('gulp-help')(require('gulp'));
 const Karma = require('karma').Server;
@@ -147,10 +149,9 @@ function printArgvMessages() {
     verbose: 'Enabling verbose mode. Expect lots of output!',
     testnames: 'Listing the names of all tests being run.',
     files: 'Running tests in the file(s): ' + cyan(argv.files),
-    integration: 'Running only the integration tests. Requires ' +
-        cyan('gulp build') + ' to have been run first.',
-    unit: 'Running only the unit tests. Requires ' +
-        cyan('gulp css') + ' to have been run first.',
+    integration: 'Running only the integration tests. Prerequisite: ' +
+        cyan('gulp build'),
+    unit: 'Running only the unit tests. Prerequisite: ' + cyan('gulp css'),
     a4a: 'Running only A4A tests.',
     compiled: 'Running tests against minified code.',
     grep: 'Only running tests that match the pattern "' +
@@ -160,15 +161,18 @@ function printArgvMessages() {
     log(green('Run'), cyan('gulp help'),
         green('to see a list of all test flags. (Use'), cyan('--nohelp'),
         green('to silence these messages.)'));
-    if (!argv.unit && !argv.integration && !argv.files) {
-      log(green('Running all tests. Use'),
-          cyan('--unit'), green('or'), cyan('--integration'),
+    if (!argv.unit && !argv.integration && !argv.files && !argv.a4a) {
+      log(green('Running all tests.'));
+      log(green('⤷ Use'), cyan('--unit'), green('or'), cyan('--integration'),
           green('to run just the unit tests or integration tests.'));
+    }
+    if (!argv.testnames && !argv.files) {
+      log(green('Use'), cyan('--testnames'),
+          green('to see the names of all tests being run.'));
     }
     if (!argv.compiled) {
       log(green('Running tests against unminified code.'));
     }
-    log(green('Setting the runtime\'s AMP config to'), cyan(ampConfig));
     Object.keys(argv).forEach(arg => {
       const message = argvMessages[arg];
       if (message) {
@@ -179,12 +183,26 @@ function printArgvMessages() {
 }
 
 /**
- * Applies the prod or canary AMP config to file.
- * Called at the end of "gulp build" and "gulp dist --fortesting".
+ * Applies the prod or canary AMP config to the AMP runtime.
  * @param {string} targetFile File to which the config is to be written.
  * @return {Promise}
  */
-function applyAmpConfig(targetFile) {
+function applyAmpConfig() {
+  if (argv.a4a) {
+    return Promise.resolve();
+  }
+  log(green('Setting the runtime\'s AMP config to'), cyan(ampConfig));
+  return writeConfig('dist/amp.js').then(() => {
+    return writeConfig('dist/v0.js');
+  });
+}
+
+/**
+ * Writes the prod or canary AMP config to file.
+ * @param {string} targetFile File to which the config is to be written.
+ * @return {Promise}
+ */
+function writeConfig(targetFile) {
   const configFile =
       'build-system/global-configs/' + ampConfig + '-config.json';
   if (fs.existsSync(targetFile)) {
@@ -206,6 +224,13 @@ function runTests() {
     console./* OK*/info('Deactivated for ampsauce repo');
   }
 
+  if (argv.saucelabs && !argv.integration) {
+    log(red('ERROR:'), 'Only integration tests may be run on the full set of ' +
+        'Sauce Labs browsers');
+    log('Use', cyan('--saucelabs'), 'with', cyan('--integration'));
+    process.exit();
+  }
+
   const c = getConfig();
 
   if (argv.watch || argv.w) {
@@ -218,14 +243,6 @@ function runTests() {
 
   if (argv.testnames) {
     c.reporters = ['mocha'];
-  }
-
-  if (argv.saucelabs && !argv.integration) {
-    log(red('Only integration tests may be run on the full set of ' +
-        'Sauce Labs browsers'));
-    log(
-        red('Use'), cyan('--saucelabs'), red('with'), cyan('--integration'));
-    process.exit();
   }
 
   // Exclude chai-as-promised from runs on the full set of sauce labs browsers.
@@ -324,15 +341,20 @@ function runTests() {
   log(yellow(
       'Started test responses server on localhost:31862'));
 
+  // Listen for Ctrl + C to cancel testing
+  const handlerProcess = createCtrlcHandler('test');
+
+  // Avoid Karma startup errors
+  refreshKarmaWdCache();
+
   let resolver;
   const deferred = new Promise(resolverIn => {resolver = resolverIn;});
-  refreshKarmaWdCache();
   new Karma(c, function(exitCode) {
     server.emit('kill');
     if (exitCode) {
       log(
           red('ERROR:'),
-          yellow('Karma test failed with exit code', exitCode));
+          yellow('Karma test failed with exit code ' + exitCode));
       process.exit(exitCode);
     } else {
       resolver();
@@ -360,7 +382,7 @@ function runTests() {
       console./* OK*/log(message);
     }
   }).start();
-  return deferred;
+  return deferred.then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
@@ -371,9 +393,7 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     printArgvMessages();
   }
 
-  return applyAmpConfig('dist/amp.js').then(() => {
-    return applyAmpConfig('dist/v0.js');
-  }).then(() => {
+  return applyAmpConfig().then(() => {
     return runTests();
   });
 }, {
