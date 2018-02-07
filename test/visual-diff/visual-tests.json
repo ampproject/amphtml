@@ -78,15 +78,6 @@
     },
 
     {
-      "url": "examples/visual-tests/amp-list/amp-list.amp.html",
-      "name": "AMP List and Mustache",
-      "loading_complete_css": [
-        ".list1",
-        ".list2"
-      ]
-    },
-
-    {
       "url": "examples/visual-tests/article-access.amp/article-access.amp.html",
       "name": "AMP Article Access",
       "loading_complete_css": [
@@ -148,6 +139,17 @@
         ".article-body",
         ".ad-one",
         ".ad-two"
+      ]
+    },
+    /**
+      * Fails due to https://github.com/ampproject/amphtml/issues/13351
+      */
+    {
+      "url": "examples/visual-tests/amp-list/amp-list.amp.html",
+      "name": "AMP List and Mustache",
+      "loading_complete_css": [
+        ".list1",
+        ".list2"
       ]
     }
   ]
