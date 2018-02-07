@@ -1375,31 +1375,6 @@ function mkdirSync(path) {
   }
 }
 
-/**
- * Patches Web Animations API by wrapping its body into `install` function.
- * This gives us an option to call polyfill directly on the main window
- * or a friendly iframe.
- *
- * @return {!Promise}
- */
-function patchWebAnimations() {
-  // Copies web-animations-js into a new file that has an export.
-  const patchedName = 'node_modules/web-animations-js/' +
-      'web-animations.install.js';
-  let file = fs.readFileSync(
-      'node_modules/web-animations-js/' +
-      'web-animations.min.js').toString();
-  // Wrap the contents inside the install function.
-  file = 'exports.installWebAnimations = function(window) {\n' +
-      'var document = window.document;\n' +
-      file + '\n' +
-      '}\n';
-  fs.writeFileSync(patchedName, file);
-  if (!process.env.TRAVIS) {
-    log('Wrote', cyan(patchedName));
-  }
-}
-
 function toPromise(readable) {
   return new Promise(function(resolve, reject) {
     readable.on('error', reject).on('end', resolve);
@@ -1411,22 +1386,17 @@ function toPromise(readable) {
 /**
  * Gulp tasks
  */
-gulp.task('build', 'Builds the AMP library',
-    ['update-packages', 'patch-web-animations'], build, {
-      options: {
-        config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-        extensions: '  Builds only the listed extensions.',
-        noextensions: '  Builds with no extensions.',
-      },
-    });
+gulp.task('build', 'Builds the AMP library', ['update-packages'], build, {
+  options: {
+    config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+    extensions: '  Builds only the listed extensions.',
+    noextensions: '  Builds with no extensions.',
+  },
+});
 gulp.task('check-all', 'Run through all presubmit checks',
     ['lint', 'dep-check', 'check-types', 'presubmit']);
 gulp.task('check-types', 'Check JS types', checkTypes);
-gulp.task('patch-web-animations',
-    'Patches the Web Animations API with an install function',
-    ['update-packages'], patchWebAnimations);
-gulp.task('css', 'Recompile css to build directory',
-    ['update-packages', 'patch-web-animations'], css);
+gulp.task('css', 'Recompile css to build directory', ['update-packages'], css);
 gulp.task('default', 'Runs "watch" and then "serve"',
     ['update-packages', 'watch'], serve, {
       options: {
@@ -1434,17 +1404,16 @@ gulp.task('default', 'Runs "watch" and then "serve"',
         noextensions: '  Watches and builds with no extensions.',
       },
     });
-gulp.task('dist', 'Build production binaries',
-    ['update-packages', 'patch-web-animations'], dist, {
-      options: {
-        pseudo_names: '  Compiles with readable names. ' +
+gulp.task('dist', 'Build production binaries', ['update-packages'], dist, {
+  options: {
+    pseudo_names: '  Compiles with readable names. ' +
             'Great for profiling and debugging production code.',
-        fortesting: '  Compiles production binaries for local testing',
-        config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-      },
-    });
+    fortesting: '  Compiles production binaries for local testing',
+    config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+  },
+});
 gulp.task('watch', 'Watches for changes in files, re-builds when detected',
-    ['update-packages', 'patch-web-animations'], watch, {
+    ['update-packages'], watch, {
       options: {
         with_inabox: '  Also watch and build the amp-inabox.js binary.',
         with_shadow: '  Also watch and build the amp-shadow.js binary.',
