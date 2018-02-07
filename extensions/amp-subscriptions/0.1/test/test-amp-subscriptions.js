@@ -15,3 +15,23 @@
  */
 
 import {SubscriptionService} from '../amp-subscriptions';
+
+const NOOP = () => {};
+describe('amp-subscriptions', {}, env => {
+  let ampdoc;
+  let ampSubscriptions;
+
+  beforeEach(() => {
+    ampdoc = env.ampdoc;
+    ampSubscriptions = new SubscriptionService(ampdoc);
+  });
+
+  it('should call `initialize_` on start', () => {
+    const initializeStub =
+        sandbox.stub(ampSubscriptions, 'initialize_').callsFake(NOOP);
+    ampSubscriptions.start_();
+
+    expect(initializeStub).to.be.called.once;
+  });
+});
+

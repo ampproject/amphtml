@@ -18,8 +18,9 @@ import {Services} from '../../../src/services';
 
 /**
  * This implements the methods to interact with various subscription platforms.
+ * @implements {./subscription-platform}
  */
-export class SubscriptionPlatform {
+export class AmpSubscriptionPlatform {
 
   /**
    * @param {string} entitlementURL
@@ -30,21 +31,17 @@ export class SubscriptionPlatform {
 
     /** @const @private {string} */
     this.serviceUrl_ = serviceUrl;
-  }
 
-  /**
-   * @return {string}
-   */
-  getEntitlementsUrl() {
-    return this.serviceUrl_;
+    /** @const @private {string} */
+    this.xhr_ = Services.xhrFor(this.ampdoc_.win)
   }
 
   /**
    * TODO(@prateekbh): Define object below once we have a defination of entitlement
-   * @return {!Promise<Object>}
+   * @return {!Promise<JsonObject>}
    */
   getEntitlements() {
-    return Services.xhrFor(this.ampdoc_.win)
+    return this.xhr_
         .fetchJson(this.serviceUrl_)
         .then(res => res.json());
   }

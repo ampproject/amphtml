@@ -14,19 +14,27 @@
  * limitations under the License.
  */
 
-/**
- * This interface is intended to be implemented by Subscription platforms to
- * provide method of getting entitlements.
- * @interface
- */
-export class SubscriptionPlatform {
+import {AmpSubscriptionPlatform} from '../amp-subscription-platform';
 
-  /**
-   * Requests entitlement for a subscription platform.
-   * @return {!Promise<!JsonObject>}
-   */
-  getEntitlements() {
-  }
+const NOOP = () => {};
+const dummyUrl = 'http://lipsum.com';
 
-}
+describe('amp-subscriptions', {}, env => {
+  let ampdoc;
+  let ampSubscriptionPlatform;
+
+  beforeEach(() => {
+    ampdoc = env.ampdoc;
+
+    ampSubscriptionPlatform = new AmpSubscriptionPlatform(ampdoc, dummyUrl);
+  });
+
+
+  it('should fetch the entitlements on getEntitlements', () => {
+    const initializeStub =
+        sandbox.stub(ampSubscriptionPlatform.xhr_, 'fetchJson').callsFake(NOOP);
+    ampSubscriptionPlatform.getEntitlements();
+    expect(initializeStub).to.be.called.once;
+  });
+});
 
