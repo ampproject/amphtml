@@ -23,8 +23,8 @@
 
 
 import {dev, user} from '../src/log';
+import {hasOwn, map} from '../src/utils/object';
 import {isArray} from '../src/types';
-import {map} from '../src/utils/object';
 import {rethrowAsync} from '../src/log';
 
 
@@ -271,7 +271,7 @@ function validateExactlyOne(data, alternativeFields) {
  * @param {!Array<string>} allowedFields
  */
 function validateAllowedFields(data, allowedFields) {
-  const defaultAvailableFields = map({
+  const defaultAvailableFields = {
     'width': true,
     'height': true,
     'type': true,
@@ -284,10 +284,10 @@ function validateAllowedFields(data, allowedFields) {
     'ampSlotIndex': true,
     'adHolderText': true,
     'loadingStrategy': true,
-  });
+  };
 
   for (const field in data) {
-    if (!defaultAvailableFields[field]) {
+    if (!hasOwn(data, field) || hasOwn(defaultAvailableFields, field)) {
       continue;
     }
     if (allowedFields.indexOf(field) < 0) {
