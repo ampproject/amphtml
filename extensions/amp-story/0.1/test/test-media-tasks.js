@@ -15,7 +15,6 @@
  */
 import * as sinon from 'sinon';
 import {
-  BlessTask,
   LoadTask,
   MuteTask,
   PauseTask,
@@ -29,15 +28,12 @@ import {
 import {Sources} from '../sources';
 import {toArray} from '../../../../src/types';
 
-describes.realWin('media-tasks', {}, env => {
-  let win;
+describes.realWin('media-tasks', {}, () => {
   let sandbox;
   let el;
   let vsyncApi;
-  let mutatePromiseStub;
 
   beforeEach(() => {
-    win = env.win;
     sandbox = sinon.sandbox.create();
     el = document.createElement('video');
 
@@ -45,7 +41,7 @@ describes.realWin('media-tasks', {}, env => {
     vsyncApi = {
       mutatePromise: () => {},
     };
-    mutatePromiseStub = sandbox.stub(vsyncApi, 'mutatePromise')
+    sandbox.stub(vsyncApi, 'mutatePromise')
         .callsFake(callback => {
           callback();
           return Promise.resolve();

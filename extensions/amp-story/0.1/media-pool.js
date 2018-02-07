@@ -14,17 +14,10 @@
  * limitations under the License.
  */
 
-import {isConnectedNode} from '../../../src/dom';
-import {dev} from '../../../src/log';
-import {findIndex} from '../../../src/utils/array';
-import {toWin} from '../../../src/types';
 import {BLANK_AUDIO_SRC, BLANK_VIDEO_SRC} from './default-media';
-import {Services} from '../../../src/services';
-import {Sources} from './sources';
-import {ampMediaElementFor} from './utils';
 import {
-  ELEMENT_BLESSED_PROPERTY_NAME,
   BlessTask,
+  ELEMENT_BLESSED_PROPERTY_NAME,
   LoadTask,
   MuteTask,
   PauseTask,
@@ -35,6 +28,13 @@ import {
   UnmuteTask,
   UpdateSourcesTask,
 } from './media-tasks';
+import {Services} from '../../../src/services';
+import {Sources} from './sources';
+import {ampMediaElementFor} from './utils';
+import {dev} from '../../../src/log';
+import {findIndex} from '../../../src/utils/array';
+import {isConnectedNode} from '../../../src/dom';
+import {toWin} from '../../../src/types';
 
 
 /** @const @enum {string} */

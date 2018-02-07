@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {isConnectedNode} from '../../../src/dom';
-import {dev} from '../../../src/log';
 import {Sources} from './sources';
+import {dev} from '../../../src/log';
+import {isConnectedNode} from '../../../src/dom';
 
 
 

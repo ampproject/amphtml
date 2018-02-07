@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import {ampMediaElementFor} from './utils';
 import {
   removeElement,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
-import {ampMediaElementFor} from './utils';
 
 
 
