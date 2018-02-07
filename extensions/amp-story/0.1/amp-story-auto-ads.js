@@ -64,8 +64,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.navigationState_ = this.ampStory_.getNavigationState();
       this.navigationState_.observe(this.handleStateChange_.bind(this));
     });
-
-    this.initializeStyles_();
   }
 
 
@@ -108,21 +106,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       </amp-story-grid-layer>
       `;
     return ampStoryAdPage;
-  }
-
-
-  /**
-   * Must set some styles so that tag is in viewport
-   * @private
-   */
-  initializeStyles_() {
-    const styles = 'position: fixed !important;' +
-      'top: !important;' +
-      'width: 1px !important;' +
-      'height: 1px !important;' +
-      'overflow: hidden !important;' +
-      'visibility: hidden;';
-    this.element.setAttribute('style', styles);
   }
 
 

@@ -23,7 +23,6 @@
  * </amp-story>
  * </code>
  */
-import {ADVANCE_TO_ATTR, RETURN_TO_ATTR} from './amp-story';
 import {AdvancementConfig} from './page-advancement';
 import {
   AnimationManager,
@@ -500,9 +499,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     const adjacentPageIds = [];
 
     const autoAdvanceNext =
-        this.getNextPageId_(true /* opt_isAutomaticAdvance */);
+        this.getNextPageId(true /* opt_isAutomaticAdvance */);
     const manualAdvanceNext =
-        this.getNextPageId_(false /* opt_isAutomaticAdvance */);
+        this.getNextPageId(false /* opt_isAutomaticAdvance */);
     const previous = this.getPreviousPageId_();
 
     if (autoAdvanceNext) {
@@ -528,8 +527,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   getPreviousPageId_() {
-    if (this.element.hasAttribute(RETURN_TO_ATTR)) {
-      return this.element.getAttribute(RETURN_TO_ATTR);
+    if (this.element.hasAttribute('i-amphtml-return-to')) {
+      return this.element.getAttribute('i-amphtml-return-to');
     }
 
     const previousElement = this.element.previousElementSibling;
@@ -547,16 +546,15 @@ export class AmpStoryPage extends AMP.BaseElement {
    *     by an automatic advancement after a timeout.
    * @return {?string} Returns the ID of the next page in the story, or null if
    *     there isn't one.
-   * @private
    */
-  getNextPageId_(opt_isAutomaticAdvance) {
+  getNextPageId(opt_isAutomaticAdvance) {
     if (opt_isAutomaticAdvance &&
         this.element.hasAttribute('auto-advance-to')) {
       return this.element.getAttribute('auto-advance-to');
     }
 
-    if (this.element.hasAttribute(ADVANCE_TO_ATTR)) {
-      return this.element.getAttribute(ADVANCE_TO_ATTR);
+    if (this.element.hasAttribute('i-amphtml-advance-to')) {
+      return this.element.getAttribute('i-amphtml-advance-to');
     }
 
     const nextElement = this.element.nextElementSibling;
@@ -589,7 +587,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    *     by an automatic advancement after a timeout.
    */
   next(opt_isAutomaticAdvance) {
-    const pageId = this.getNextPageId_(opt_isAutomaticAdvance);
+    const pageId = this.getNextPageId(opt_isAutomaticAdvance);
 
     if (pageId === null) {
       dispatch(this.element, EventType.SHOW_BOOKEND, /* opt_bubbles */ true);

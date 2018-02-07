@@ -1479,13 +1479,13 @@ export class AmpStory extends AMP.BaseElement {
     const currentPageEl = currentPage.element;
 
     const nextPageId = currentPage
-        .getNextPageId_(false /*opt_isAutomaticAdvance */);
-    const nextPage = this.getPageById_(nextPageId);
+        .getNextPageId(false /*opt_isAutomaticAdvance */);
 
     currentPageEl.setAttribute(ADVANCE_TO_ATTR, pageToBeInsertedId);
     pageToBeInsertedEl.setAttribute(RETURN_TO_ATTR, currentPageId);
 
-    if (nextPage) {
+    if (nextPageId) {
+      const nextPage = this.getPageById_(nextPageId);
       const nextPageEl = nextPage.element;
       pageToBeInsertedEl.setAttribute(ADVANCE_TO_ATTR, nextPageEl.id);
       nextPageEl.setAttribute(RETURN_TO_ATTR, pageToBeInsertedId);
