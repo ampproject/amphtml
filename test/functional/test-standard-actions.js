@@ -355,14 +355,13 @@ describes.sandboxed('StandardActions', {}, () => {
     });
 
     it('should not implement print when not whitelisted', () => {
-      window.document.head.appendChild(
-          createElementWithAttributes(window.document, 'meta', {
-            name: 'amp-action-whitelist',
-            content: 'AMP.pushState,AMP.setState',
-          }));
-
+      const fakeMeta = {
+          getAttribute: (key) => 'AMP.pushState,AMP.setState',
+      }
+      const querySelectorStub = sandbox.stub(window.document.head,
+          'querySelector').callsFake(selector => fakeMeta);
       standardActions = new StandardActions(ampdoc);
-
+      
       const windowApi = {
         print: () => {},
       };
@@ -381,11 +380,11 @@ describes.sandboxed('StandardActions', {}, () => {
     });
 
     it('should implement pushState when whitelisted', () => {
-      window.document.head.appendChild(
-          createElementWithAttributes(window.document, 'meta', {
-            name: 'amp-action-whitelist',
-            content: 'AMP.setState, AMP.pushState',
-          }));
+      const fakeMeta = {
+          getAttribute: (key) => 'AMP.setState,AMP.pushState',
+      }
+      const querySelectorStub = sandbox.stub(window.document.head,
+          'querySelector').callsFake(selector => fakeMeta);
 
       standardActions = new StandardActions(ampdoc);
 
