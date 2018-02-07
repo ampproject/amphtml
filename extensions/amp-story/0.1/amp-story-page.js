@@ -23,6 +23,7 @@
  * </amp-story>
  * </code>
  */
+import {ADVANCE_TO_ATTR, RETURN_TO_ATTR} from './amp-story';
 import {AdvancementConfig} from './page-advancement';
 import {
   AnimationManager,
@@ -45,7 +46,6 @@ import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {upgradeBackgroundAudio} from './audio';
 
-
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
  * @const {string}
@@ -62,6 +62,9 @@ const PAGE_MEDIA_SELECTOR = 'amp-audio, amp-video, amp-img, amp-anim';
 
 /** @private @const {string} */
 const TAG = 'amp-story-page';
+
+/** @private @const {string} */
+const ADVERTISEMENT_ATTR_NAME = 'ad';
 
 
 /**
@@ -525,8 +528,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   getPreviousPageId_() {
-    if (this.element.hasAttribute('return-to')) {
-      return this.element.getAttribute('return-to');
+    if (this.element.hasAttribute(RETURN_TO_ATTR)) {
+      return this.element.getAttribute(RETURN_TO_ATTR);
     }
 
     const previousElement = this.element.previousElementSibling;
@@ -552,8 +555,8 @@ export class AmpStoryPage extends AMP.BaseElement {
       return this.element.getAttribute('auto-advance-to');
     }
 
-    if (this.element.hasAttribute('advance-to')) {
-      return this.element.getAttribute('advance-to');
+    if (this.element.hasAttribute(ADVANCE_TO_ATTR)) {
+      return this.element.getAttribute(ADVANCE_TO_ATTR);
     }
 
     const nextElement = this.element.nextElementSibling;
@@ -693,6 +696,10 @@ export class AmpStoryPage extends AMP.BaseElement {
 
       this.loadingSpinner_.toggle(isActive);
     });
+  }
+
+  isAdvertisement() {
+    return this.element.hasAttribute(ADVERTISEMENT_ATTR_NAME);
   }
 }
 

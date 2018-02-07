@@ -92,8 +92,12 @@ const DESKTOP_HEIGHT_THRESHOLD = 550;
 /** @private @const {number} */
 const MIN_SWIPE_FOR_HINT_OVERLAY_PX = 50;
 
-/** @private @const {string} */
-const ADVERTISEMENT_ATTR_NAME = 'advertisement';
+/** @const {string} */
+export const ADVANCE_TO_ATTR = 'i-amphtml-advance-to';
+
+/** @const {string} */
+export const RETURN_TO_ATTR = 'i-amphtml-return-to';
+
 
 /**
  * The duration of time (in milliseconds) to wait for a page to be loaded,
@@ -394,7 +398,7 @@ export class AmpStory extends AMP.BaseElement {
 
       const pageIndex = this.getPageIndexById_(pageId);
 
-      if (!this.activePage_.element.hasAttribute(ADVERTISEMENT_ATTR_NAME)) {
+      if (!this.activePage_.isAdvertisement()) {
         this.systemLayer_.updateProgress(pageIndex, progress);
       }
     });
@@ -705,7 +709,7 @@ export class AmpStory extends AMP.BaseElement {
           return pageEl.getImpl().then(pageImpl => {
             this.pages_[index] = pageImpl;
 
-            if (pageEl.hasAttribute(ADVERTISEMENT_ATTR_NAME)) {
+            if (pageImpl.isAdvertisement()) {
               this.adPages_.push(pageImpl);
             }
           });
@@ -726,8 +730,7 @@ export class AmpStory extends AMP.BaseElement {
         'No active page set when navigating to next page.');
 
     const lastPage = this.pages_[this.getPageCount() - 1];
-
-    if (activePage.element.hasAttribute('advance-to') ||
+    if (activePage.element.hasAttribute(ADVANCE_TO_ATTR) ||
         activePage !== lastPage) {
       activePage.next(opt_isAutomaticAdvance);
     } else {
@@ -782,7 +785,7 @@ export class AmpStory extends AMP.BaseElement {
     this.updateBackground_(targetPage.element, /* initial */ !this.activePage_);
 
     // TODO(alanorozco): decouple this using NavigationState
-    if (!targetPage.element.hasAttribute(ADVERTISEMENT_ATTR_NAME)) {
+    if (!targetPage.isAdvertisement()) {
       this.systemLayer_.setActivePageIndex(pageIndex);
     }
 
@@ -1461,14 +1464,32 @@ export class AmpStory extends AMP.BaseElement {
     return this.navigationState_;
   }
 
-  /** @return {?./amp-story-page.AmpStoryPage} */
-  getActivePage() {
-    return this.activePage_;
-  }
+  /**
+   * Insert a new page in navigation flow by changing the attr pointers
+   * on amp-story-page elements
+   * @param {string} currentPageId
+   * @param {string} pageToBeInsertedId
+   */
+  insertPage(currentPageId, pageToBeInsertedId) {
+    // TODO(ccordry): make sure this method moves to PageManager when implemented
+    const pageToBeInserted = this.getPageById_(pageToBeInsertedId);
+    const pageToBeInsertedEl = pageToBeInserted.element;
 
-  /** @return  {!Array<!./amp-story-page.AmpStoryPage>} */
-  getPages() {
-    return this.pages_;
+    const currentPage = this.getPageById_(currentPageId);
+    const currentPageEl = currentPage.element;
+
+    const nextPageId = currentPage
+        .getNextPageId_(false /*opt_isAutomaticAdvance */);
+    const nextPage = this.getPageById_(nextPageId);
+
+    currentPageEl.setAttribute(ADVANCE_TO_ATTR, pageToBeInsertedId);
+    pageToBeInsertedEl.setAttribute(RETURN_TO_ATTR, currentPageId);
+
+    if (nextPage) {
+      const nextPageEl = nextPage.element;
+      pageToBeInsertedEl.setAttribute(ADVANCE_TO_ATTR, nextPageEl.id);
+      nextPageEl.setAttribute(RETURN_TO_ATTR, pageToBeInsertedId);
+    }
   }
 
   /**
