@@ -44,7 +44,7 @@ describes.realWin('amp-ad-network-fake-impl', {
   });
 
   it('send ad request with invalid id', () => {
-    fakeImplElem.setAttribute('id', 'i-amphtml-demo');
+    fakeImplElem.setAttribute('id', 'i-amphtml-demo-test');
     const fakeImpl = new AmpAdNetworkFakeImpl(fakeImplElem);
     expect(fakeImpl.isValidElement()).to.be.true;
   });

@@ -39,11 +39,11 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
   /** @override */
   isValidElement() {
     // To send out ad request, ad type='fake' requires the id set to an invalid
-    // value start with `i-amphtml-demo`. So that fake ad can only be used in
+    // value start with `i-amphtml-demo-`. So that fake ad can only be used in
     // invalid AMP pages.
     const id = this.element.getAttribute('id');
-    if (!id || !startsWith(id, 'i-amphtml-demo')) {
-      user().warn(TAG, 'Only works with id starts with i-amphtml-demo');
+    if (!id || !startsWith(id, 'i-amphtml-demo-')) {
+      user().warn(TAG, 'Only works with id starts with i-amphtml-demo-');
       return false;
     }
     return true;
