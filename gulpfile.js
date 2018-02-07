@@ -248,12 +248,12 @@ function endBuildStep(stepName, targetName, startTime) {
  * @return {!Promise}
  */
 function buildExtensions(options) {
-  if (!!argv.noextensions) {
+  if (!!argv.noextensions && !options.compileAll) {
     return Promise.resolve();
   }
 
   let extensionsToBuild = [];
-  if (!!argv.extensions) {
+  if (!!argv.extensions && !options.compileAll) {
     extensionsToBuild = argv.extensions.split(',');
   }
 
@@ -432,9 +432,10 @@ function css() {
 /**
  * Compile all the css and drop in the build folder
  * @param {boolean} watch
+ * @param {boolean=} opt_compileAll
  * @return {!Promise}
  */
-function compileCss(watch) {
+function compileCss(watch, opt_compileAll) {
   // Print a message that could help speed up local development.
   if (!process.env.TRAVIS && argv['_'].indexOf('test') != -1) {
     log(green('To skip building during future test runs, use'),
@@ -468,6 +469,7 @@ function compileCss(watch) {
         return buildExtensions({
           bundleOnlyIfListedInFiles: false,
           compileOnlyCss: true,
+          compileAll: opt_compileAll,
         });
       });
 }
@@ -633,6 +635,7 @@ function parseExtensionFlags() {
         log(minimalSetMessage);
         process.exit(1);
       }
+      argv.extensions = argv.extensions.replace(/\s/g, '');
       if (argv.extensions === 'minimal_set') {
         argv.extensions =
             'amp-ad,amp-ad-network-adsense-impl,amp-audio,amp-video,' +
@@ -721,38 +724,39 @@ function dist() {
     printConfigHelp('gulp dist --fortesting');
   }
   parseExtensionFlags();
-  return compileCss().then(() => {
-    return Promise.all([
-      compile(false, true, true),
-      // NOTE:
-      // When adding a line here, consider whether you need to include polyfills
-      // and whether you need to init logging (initLogConstructor).
-      buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true}),
-      buildExaminer({
-        minify: true, watch: false, preventRemoveAndMakeDir: true}),
-      buildSw({minify: true, watch: false, preventRemoveAndMakeDir: true}),
-      buildWebWorker({
-        minify: true, watch: false, preventRemoveAndMakeDir: true}),
-      buildExtensions({minify: true, preventRemoveAndMakeDir: true}),
-      buildExperiments({
-        minify: true, watch: false, preventRemoveAndMakeDir: true}),
-      buildLoginDone({
-        minify: true, watch: false, preventRemoveAndMakeDir: true}),
-      buildWebPushPublisherFiles({
-        minify: true, watch: false, preventRemoveAndMakeDir: true}),
-      copyCss(),
-    ]);
-  }).then(() => {
-    copyAliasExtensions();
-  }).then(() => {
-    if (argv.fortesting) {
-      return enableLocalTesting(minifiedRuntimeTarget);
-    }
-  }).then(() => {
-    if (argv.fortesting) {
-      return enableLocalTesting(minified3pTarget);
-    }
-  }).then(() => exitCtrlcHandler(handlerProcess));
+  return compileCss(/* watch */ undefined, /* opt_compileAll */ true)
+      .then(() => {
+        return Promise.all([
+          compile(false, true, true),
+          // NOTE: When adding a line here,
+          // consider whether you need to include polyfills
+          // and whether you need to init logging (initLogConstructor).
+          buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true}),
+          buildExaminer({
+            minify: true, watch: false, preventRemoveAndMakeDir: true}),
+          buildSw({minify: true, watch: false, preventRemoveAndMakeDir: true}),
+          buildWebWorker({
+            minify: true, watch: false, preventRemoveAndMakeDir: true}),
+          buildExtensions({minify: true, preventRemoveAndMakeDir: true}),
+          buildExperiments({
+            minify: true, watch: false, preventRemoveAndMakeDir: true}),
+          buildLoginDone({
+            minify: true, watch: false, preventRemoveAndMakeDir: true}),
+          buildWebPushPublisherFiles({
+            minify: true, watch: false, preventRemoveAndMakeDir: true}),
+          copyCss(),
+        ]);
+      }).then(() => {
+        copyAliasExtensions();
+      }).then(() => {
+        if (argv.fortesting) {
+          return enableLocalTesting(minifiedRuntimeTarget);
+        }
+      }).then(() => {
+        if (argv.fortesting) {
+          return enableLocalTesting(minified3pTarget);
+        }
+      }).then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
