@@ -20,7 +20,7 @@ import {Services} from '../../../src/services';
  * This implements the methods to interact with various subscription platforms.
  * @implements {./subscription-platform}
  */
-export class AmpSubscriptionPlatform {
+export class LocalSubscriptionPlatform {
 
   /**
    * @param {string} entitlementURL
@@ -33,7 +33,7 @@ export class AmpSubscriptionPlatform {
     this.serviceUrl_ = serviceUrl;
 
     /** @const @private {string} */
-    this.xhr_ = Services.xhrFor(this.ampdoc_.win)
+    this.xhr_ = Services.xhrFor(this.ampdoc_.win);
   }
 
   /**

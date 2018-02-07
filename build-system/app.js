@@ -862,12 +862,8 @@ app.use('/subscription/:id/entitlements', (req, res) => {
   res.json({
     entitlements: [
       {
-        source: 'lorem',
+        source: req.params.id,
         products: ['product1', 'product2'],
-      },
-      {
-        source: 'ipsum',
-        products: ['product3', 'product4'],
       },
     ],
   });

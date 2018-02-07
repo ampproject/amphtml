@@ -15,7 +15,7 @@
  */
 
 import {installStylesForDoc} from '../../../src/style-installer';
-import {SubscriptionPlatform} from './subscription-platform';
+import {LocalSubscriptionPlatform} from './local-subscription-platform';
 
 /** @const */
 const TAG = 'amp-subscriptions';
@@ -31,7 +31,7 @@ export class SubscriptionService {
     // Install styles.
     installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
 
-    /** @private @const {!Array<SubscriptionPlatform>} */
+    /** @private @const {!Array<./subscription-platform>} */
     this.subscriptionPlatforms_ = [];
   }
 
@@ -52,8 +52,12 @@ export class SubscriptionService {
 
     return new Promise(resolve => {
       config.forEach(subscriptionPlatformConfig => {
-        this.subscriptionPlatforms_.push(new SubscriptionPlatform(this.ampdoc_,
-            subscriptionPlatformConfig.paywallUrl));
+        this.subscriptionPlatforms_.push(
+            new LocalSubscriptionPlatform(
+                this.ampdoc_,
+                subscriptionPlatformConfig.paywallUrl
+            )
+        );
       });
       resolve();
     });

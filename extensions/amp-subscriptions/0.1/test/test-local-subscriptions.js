@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {SubscriptionService} from '../amp-subscriptions';
+import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 
 const NOOP = () => {};
 describe('amp-subscriptions', {}, env => {
@@ -23,7 +23,7 @@ describe('amp-subscriptions', {}, env => {
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
-    ampSubscriptions = new SubscriptionService(ampdoc);
+    ampSubscriptions = new LocalSubscriptionPlatform(ampdoc);
   });
 
   it('should call `initialize_` on start', () => {
