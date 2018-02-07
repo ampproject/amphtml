@@ -68,7 +68,7 @@
     "doctrine": "2.1.0",
     "envify": "4.1.0",
     "escodegen": "1.9.0",
-    "eslint": "4.14.0",
+    "eslint": "4.17.0",
     "eslint-plugin-google-camelcase": "0.0.2",
     "eslint-plugin-sort-imports-es6-autofix": "0.2.2",
     "eslint-plugin-sort-requires": "2.1.0",
