@@ -188,7 +188,7 @@ function printArgvMessages() {
  * @return {Promise}
  */
 function applyAmpConfig() {
-  if (argv.a4a) {
+  if (argv.unit || argv.a4a) {
     return Promise.resolve();
   }
   log(green('Setting the runtime\'s AMP config to'), cyan(ampConfig));
