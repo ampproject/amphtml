@@ -387,27 +387,17 @@ describes.sandboxed('StandardActions', {}, () => {
 
       standardActions = new StandardActions(ampdoc);
 
-      const pushStateWithExpression = sandbox.stub();
-      // Bind.pushStateWithExpression() doesn't resolve with a value,
-      // but add one here to check that the promise is chained.
-      pushStateWithExpression.returns(Promise.resolve('push-state-complete'));
-
-      window.services.bind = {
-        obj: {pushStateWithExpression},
+      const handleAmpBindActionStub =
+        sandbox.stub(standardActions, 'handleAmpBindAction_');
+      const invocation = {
+        method: 'pushState',
+        satisfiesTrust: () => true,
+        target: ampdoc,
       };
 
-      const args = {
-        [OBJECT_STRING_ARGS_KEY]: '{foo: 123}',
-      };
-      const target = ampdoc;
-      const satisfiesTrust = () => true;
-      const pushState = {method: 'pushState', args, target, satisfiesTrust};
-
-      return standardActions.handleAmpTarget(pushState, 0, []).then(result => {
-        expect(result).to.equal('push-state-complete');
-        expect(pushStateWithExpression).to.be.calledOnce;
-        expect(pushStateWithExpression).to.be.calledWith('{foo: 123}');
-      });
+      expect(() =>
+        standardActions.handleAmpTarget(invocation, 0, [])).to.not.throw();
+      expect(handleAmpBindActionStub).to.be.calledOnce;
     });
   });
 
