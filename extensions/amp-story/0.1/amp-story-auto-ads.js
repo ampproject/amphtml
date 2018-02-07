@@ -83,46 +83,32 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @private
    */
   schedulePage_() {
-    this.fetchData_()
-        .then(data => {
-          const page = this.makeMockPage(data);
-          this.adElements_.push(page);
+    const page = this.makeMockPage();
+    this.adElements_.push(page);
 
-          this.ampStory_.element.appendChild(page);
+    this.ampStory_.element.appendChild(page);
 
-          // TODO(ccordry): need to fake distance from page to force load
+    // TODO(ccordry): need to fake distance from page to force load
 
-          page.getImpl().then(impl => {
-            this.ampStory_.addPage(impl);
-          });
-        });
+    page.getImpl().then(impl => {
+      this.ampStory_.addPage(impl);
+    });
   }
-
-  /**
-   * fetch remote data
-   * @private
-   */
-  fetchData_() {
-    const id = this.adsPlaced_ + 1;
-    const data = `
-      <amp-story-grid-layer template="vertical">
-      <h1>Ad Page #${id}</h1>
-      <p>This is ad #${id} shown in this story.</p>
-      </amp-story-grid-layer>
-    `;
-    return Promise.resolve(data);
-  }
-
 
   /**
    * temporary to be replaced with real fetching
    */
-  makeMockPage(data) {
-    const id = this.adsPlaced_ + 1;
+  makeMockPage() {
     const ampStoryAdPage = document.createElement('amp-story-page');
+    const id = this.adsPlaced_ + 1;
     ampStoryAdPage.id = `i-amphtml-ad-page-${id}`;
     ampStoryAdPage.setAttribute('ad', '');
-    ampStoryAdPage./*OK*/innerHTML = data;
+    ampStoryAdPage./*OK*/innerHTML = `
+      <amp-story-grid-layer template="vertical">
+        <h1>Ad Page #${id}</h1>
+        <p>This is ad #${id} shown in this story.</p>
+      </amp-story-grid-layer>
+      `;
     return ampStoryAdPage;
   }
 
