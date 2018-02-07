@@ -1425,7 +1425,8 @@ gulp.task('check-types', 'Check JS types', checkTypes);
 gulp.task('patch-web-animations',
     'Patches the Web Animations API with an install function',
     ['update-packages'], patchWebAnimations);
-gulp.task('css', 'Recompile css to build directory', ['update-packages'], css);
+gulp.task('css', 'Recompile css to build directory',
+    ['update-packages', 'patch-web-animations'], css);
 gulp.task('default', 'Runs "watch" and then "serve"',
     ['update-packages', 'watch'], serve, {
       options: {
