@@ -23,12 +23,24 @@ An ad template will be written in [amp-mustache](../amp-mustache/amp-mustache.md
 ```
 
 Important things
-- An element ID is required, so that the template can be reference by the ad response.
+
 - Templates need to be inlined in the AMP Story, as a direct children of `<amp-story>` element.
+- An element ID is required, so that the template can be referenced by the ad response.
+- The selected template ID will be set as an attribute of `amp-ad`: `<amp-ad template="template-1">`
 - The content inside a template should strictly follow the [rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/validator-amp-story.protoascii) of `amp-story-grid-layer`
 - Be aware of the [restrictions](../amp-mustache/amp-mustache.md#Restrictions) of `amp-mustache`.
 
-To provide a consistent user experience, CTA (call-to-action) button should NOT
+- Ads of different templates can be styled separately using CSS attribute selector:
+```css
+amp-ad[template=template-1] {
+  background-color: blue;
+}
+amp-ad[template=template-2] {
+  background-color: red;
+}
+```
+
+- To provide a consistent user experience, CTA (call-to-action) button should NOT
 be included in the template. Story defines a list of CTA buttons to select from.
 For details, read the "CTA ad" section below. 
 
