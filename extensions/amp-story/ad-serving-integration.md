@@ -28,7 +28,7 @@ Important things
 - An element ID is required, so that the template can be referenced by the ad response.
 - The selected template ID will be set as an attribute of `amp-ad`: `<amp-ad template="template-1">`
 - The content inside a template should strictly follow the [rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/validator-amp-story.protoascii) of `amp-story-grid-layer`
-- Be aware of the [restrictions](../amp-mustache/amp-mustache.md#Restrictions) of `amp-mustache`.
+- Be aware of the [restrictions](../amp-mustache/amp-mustache.md#restrictions) of `amp-mustache`.
 
 - Ads of different templates can be styled separately using CSS attribute selector:
 ```css
@@ -42,7 +42,7 @@ amp-ad[template=template-2] {
 
 - To provide a consistent user experience, CTA (call-to-action) button should NOT
 be included in the template. Story defines a list of CTA buttons to select from.
-For details, read the "CTA ad" section below. 
+For details, read the ["CTA ad" section](#cta-ad) below. 
 
 ### Ad response
 
@@ -67,12 +67,12 @@ A server endpoint needs to provide ad responses in the following JSON format:
 - `templateId`: the ID of the inlined template that is going to be used.
 - `data`: the data model to populate the selected template. The fields should match the variable names in the selected template.
 - `var`: extra variables needed by the story. They will be added to the `amp-ad` element as data attributes, and picked by runtime for different use cases:
-    - CTA button rendering (see details in the ["CTA ad" section](#CTA-ad))
+    - CTA button rendering (see details in the ["CTA ad" section](#cta-ad))
     - Provide dynamic content of the ad for tracking purpose (see details in the "tracking" section)
 
 #### Response headers
 The ad request will be an AMPCORS request, hence a couple of custom response headers are needed.
-Take a look at the [AMPCORS spec](../spec/amp-cors-request.md).
+Take a look at the [AMPCORS spec](../../spec/amp-cors-requests.md).
 
 ### Tagging
 
@@ -135,7 +135,7 @@ generated page ID, prefixed with `i-amphtml-AD-`. `story-page-visible` trigger
 can be used to track ad views.
 
 Further more, ad response can leverage the `var` object to set data attributes 
-to the `amp-ad` tag, to be used by amp-analytics as [data vars](../amp-analytics/analytics-vars.md),
+to the `amp-ad` tag, to be used by amp-analytics as [data vars](../amp-analytics/analytics-vars.md#variables-as-data-attribute),
 
 ## Ad network integration
 Coming soon ...
