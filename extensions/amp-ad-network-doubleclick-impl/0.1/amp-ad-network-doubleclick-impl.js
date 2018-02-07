@@ -45,6 +45,7 @@ import {
   isCdnProxy,
   isReportingEnabled,
   maybeAppendErrorParameter,
+  setNameframeExperimentConfigs,
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
 import {
@@ -376,7 +377,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {boolean} */
     this.isIdleRender_ = false;
 
-    /** @private {{instantLoad: boolean, writeInBody: boolean}} */
+    /** @private {!../../../ads/google/a4a/utils.NameframeExperimentConfig} */
     this.nameframeExperimentConfig_ = {
       instantLoad: false,
       writeInBody: false,
@@ -808,14 +809,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.getAmpDoc(), 'amp-analytics');
     }
 
-    const nameframeExperimentConfig = responseHeaders.get('amp-nameframe-exp');
-    if (nameframeExperimentConfig) {
-      nameframeExperimentConfig.split(';').forEach(config => {
-        if (config == 'instantLoad' || config == 'writeInBody') {
-          this.nameframeExperimentConfig_[config] = true;
-        }
-      });
-    }
+    setNameframeExperimentConfigs(responseHeaders,
+        this.nameframeExperimentConfig_);
 
     if (this.isFluid_) {
       this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');

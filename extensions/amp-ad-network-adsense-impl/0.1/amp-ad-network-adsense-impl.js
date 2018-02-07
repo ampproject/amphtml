@@ -36,6 +36,7 @@ import {
   googleAdUrl,
   isReportingEnabled,
   maybeAppendErrorParameter,
+  setNameframeExperimentConfigs,
 } from '../../../ads/google/a4a/utils';
 import {Services} from '../../../src/services';
 import {clamp} from '../../../src/utils/math';
@@ -152,7 +153,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
      */
     this.isAmpCreative_ = null;
 
-    /** @private {{instantLoad: boolean, writeInBody: boolean}} */
+    /** @private {!../../../ads/google/a4a/utils.NameframeExperimentConfig} */
     this.nameframeExperimentConfig_ = {
       instantLoad: false,
       writeInBody: false,
@@ -334,16 +335,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       this.extensions_./*OK*/installExtensionForDoc(
           this.getAmpDoc(), 'amp-analytics');
     }
-
-    const nameframeExperimentConfig = responseHeaders.get('amp-nameframe-exp');
-    if (nameframeExperimentConfig) {
-      nameframeExperimentConfig.split(';').forEach(config => {
-        if (config == 'instantLoad' || config == 'writeInBody') {
-          this.nameframeExperimentConfig_[config] = true;
-        }
-      });
-    }
-
+    setNameframeExperimentConfigs(responseHeaders,
+        this.nameframeExperimentConfig_);
     return this.size_;
   }
 
