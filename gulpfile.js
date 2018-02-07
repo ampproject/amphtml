@@ -427,6 +427,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
  * @return {!Promise}
  */
 function css() {
+  printNobuildHelp();
   return compileCss();
 }
 
@@ -437,13 +438,6 @@ function css() {
  * @return {!Promise}
  */
 function compileCss(watch, opt_compileAll) {
-  // Print a message that could help speed up local development.
-  if (!process.env.TRAVIS && argv['_'].indexOf('test') != -1) {
-    log(green('To skip building during future test runs, use'),
-        cyan('--nobuild'), green('with your'), cyan('gulp test'),
-        green('command.'));
-  }
-
   if (watch) {
     $$.watch('css/**/*.css', function() {
       compileCss();
@@ -597,6 +591,18 @@ function buildExtensionJs(path, name, version, options) {
   });
 }
 
+
+/**
+ * Prints a message that could help speed up local development.
+ */
+function printNobuildHelp() {
+  if (!process.env.TRAVIS && argv['_'].indexOf('test') != -1) {
+    log(green('To skip building during future test runs, use'),
+        cyan('--nobuild'), green('with your'), cyan('gulp test'),
+        green('command.'));
+  }
+}
+
 /**
  * Prints a helpful message that lets the developer know how to switch configs.
  * @param {string} command Command being run.
@@ -680,6 +686,7 @@ function enableLocalTesting(targetFile) {
  */
 function performBuild(watch) {
   process.env.NODE_ENV = 'development';
+  printNobuildHelp();
   printConfigHelp(watch ? 'gulp watch' : 'gulp build');
   parseExtensionFlags();
   return compileCss(watch).then(() => {
