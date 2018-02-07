@@ -590,7 +590,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 98
+  // NEXT AVAILABLE TAG: 101
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -682,6 +682,9 @@ message ValidationError {
     CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS = 91;
     CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME = 92;
     CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME = 93;
+    CSS_SYNTAX_MALFORMED_MEDIA_QUERY = 98;
+    CSS_SYNTAX_DISALLOWED_MEDIA_TYPE = 99;
+    CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE = 100;
 
     // The following codes are currently used only by A4A CSS validation.
     CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE = 71;

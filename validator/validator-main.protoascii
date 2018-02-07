@@ -26,7 +26,7 @@ min_validator_revision_required: 314
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 561
+spec_file_revision: 562
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -4079,8 +4079,20 @@ error_specificity {
   specificity: 113
 }
 error_specificity {
+  code: CSS_SYNTAX_MALFORMED_MEDIA_QUERY
+  specificity: 115
+}
+error_specificity {
+  code: CSS_SYNTAX_DISALLOWED_MEDIA_TYPE
+  specificity: 116
+}
+error_specificity {
+  code: CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE;
+  specificity: 117
+}
+error_specificity {
   code: INVALID_UTF8
-  specificity: 114
+  specificity: 118
 }
 # Error formats
 error_formats {
@@ -4502,3 +4514,16 @@ error_formats {
   format: "CSS syntax error in tag '%1' - the property '%2' is disallowed "
           "unless the enclosing rule is prefixed with the '%3' qualification."
 }
+error_formats {
+  code: CSS_SYNTAX_MALFORMED_MEDIA_QUERY
+  format: "CSS syntax error in tag '%1' - malformed media query."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_MEDIA_TYPE
+  format: "CSS syntax error in tag '%1' - disallowed media type '%2'."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE;
+  format: "CSS syntax error in tag '%1' - disallowed media feature '%2'."
+}
+
