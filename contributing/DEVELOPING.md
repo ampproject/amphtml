@@ -198,8 +198,6 @@ To run the tests on Sauce Labs:
    ```
 * It may take a few minutes for the tests to start.  You can see the status of your tests on the Sauce Labs [Automated Tests](https://saucelabs.com/beta/dashboard/tests) dashboard.  (You can also see the status of your proxy on the [Tunnels](https://saucelabs.com/beta/tunnels) dashboard.
 
-* If you see "Cannot find module '../build/safe-execute'", this is caused by a caching issue - try uninstalling and reinstalling the 'wd' module as described in [karma-sauce-launcher issue #117](https://github.com/karma-runner/karma-sauce-launcher/issues/117).
-
 ## Visual Diff Tests
 
 **NOTE:** *We are working on giving all `ampproject/amphtml` committers automatic access to visual diff test results. Until this is in place, you can fill out [this](https://docs.google.com/forms/d/e/1FAIpQLScZma6qVJtYUTqSm4KtiF3Zc-n5ukNe2GXNFqnaHxospsz0sQ/viewform) form, and your request should be approved soon.*
