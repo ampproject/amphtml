@@ -67,7 +67,7 @@ message UrlSpec {
 // Attributes that are not covered by at least one of these specs are
 // disallowed. Within a given context (e.g., for a given TagSpec),
 // names are unique.
-// NEXT AVAILABLE TAG: 19
+// NEXT AVAILABLE TAG: 20
 message AttrSpec {
   // Use lower-case attribute names only.
   optional string name = 1;
@@ -127,6 +127,11 @@ message AttrSpec {
   // If set to true, the TagSpec containing this AttrSpec implicitly has this
   // attribute and the attribute is considered valid.
   optional bool implicit = 17 [default = false];
+
+  // If set, this attr is considered part of an amp extended component, and
+  // requires that the named extended component script tag is present on the
+  // page.
+  repeated string requires_extension = 19;
 }
 
 // Some tags share several attributes, so they're identified by unique key
@@ -568,6 +573,13 @@ message ErrorCategory {
   }
 }
 
+// We record validation errors in a structured form, so that they can be
+// worked with in code - e.g., to provide translated messages.
+// In the Javascript implementation (validator.js), you may find
+// the amp.validator.renderErrorMessage function which will make a
+// human-readable string from the structured form. It should be easy to port
+// this to other languages as needed; for instance Google has implementations
+// in C++, Java, and for templates used in some frontends.
 message ValidationError {
   enum Severity {
     UNKNOWN_SEVERITY = 0;
@@ -578,7 +590,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 97
+  // NEXT AVAILABLE TAG: 101
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -642,6 +654,7 @@ message ValidationError {
     CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR = 70;
     BASE_TAG_MUST_PRECEED_ALL_URLS = 78;
     MISSING_REQUIRED_EXTENSION = 83;
+    ATTR_MISSING_REQUIRED_EXTENSION = 97;
     DOCUMENT_TOO_COMPLEX = 86;
     INVALID_UTF8 = 96;
 
@@ -669,6 +682,9 @@ message ValidationError {
     CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS = 91;
     CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME = 92;
     CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME = 93;
+    CSS_SYNTAX_MALFORMED_MEDIA_QUERY = 98;
+    CSS_SYNTAX_DISALLOWED_MEDIA_TYPE = 99;
+    CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE = 100;
 
     // The following codes are currently used only by A4A CSS validation.
     CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE = 71;

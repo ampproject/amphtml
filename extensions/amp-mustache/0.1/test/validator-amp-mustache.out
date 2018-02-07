@@ -31,7 +31,7 @@ FAIL
 |  
 |  <template type="amp-mustache">
 >> ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:31:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [AMP_TAG_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:31:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <{{not-actually-parsed-as-an-html-tag-so-allowed}}>
 |    <p title="{{allowed}}">{{allowed}}</p>
 |    <p {{notallowed}}></p>
@@ -224,13 +224,13 @@ amp-mustache/0.1/test/validator-amp-mustache.html:75:2 The attribute 'title' in 
 |  
 |  <template type="amp-mustache">
 >> ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:98:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [AMP_TAG_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:98:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <div>
 |      <template type="amp-mustache">
 >>     ^~~~~~~~~
 amp-mustache/0.1/test/validator-amp-mustache.html:100:4 The tag 'template' may not appear as a descendant of tag 'template'. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [AMP_HTML_TEMPLATE_PROBLEM]
 >>     ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:100:4 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [AMP_TAG_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:100:4 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |        Nested Template tags are not allowed.
 |      </template>
 |    </div>
@@ -246,13 +246,13 @@ amp-mustache/0.1/test/validator-amp-mustache.html:100:4 The tag 'template' requi
 >> ^~~~~~~~~
 amp-mustache/0.1/test/validator-amp-mustache.html:112:0 The attribute 'autoplay' in tag 'amp-audio' is set to the invalid value '{{invalid}}'. (see https://www.ampproject.org/docs/reference/components/amp-audio) [AMP_TAG_PROBLEM]
 >> ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:112:0 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [AMP_TAG_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:112:0 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  <template type="amp-mustache">
 >> ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:113:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [AMP_TAG_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:113:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  <amp-audio src="https://example.com/audio" layout="fixed" autoplay="{{valid}}">
 >> ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:114:0 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [AMP_TAG_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:114:0 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  </template>
 |  
 |  <!-- Since layout calculations follow a different code path, test that layouts
@@ -260,7 +260,7 @@ amp-mustache/0.1/test/validator-amp-mustache.html:114:0 The tag 'amp-audio' requ
 |  <!-- See https://github.com/ampproject/amphtml/issues/2670 -->
 |  <template type="amp-mustache">
 >> ^~~~~~~~~
-amp-mustache/0.1/test/validator-amp-mustache.html:120:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [AMP_TAG_PROBLEM]
+amp-mustache/0.1/test/validator-amp-mustache.html:120:0 The tag 'template' requires including the 'amp-mustache' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-mustache) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |  <amp-img src="{{image.url}}" width={{image.width}} height={{image.height}}></amp-img>
 |  </template>
 |  
