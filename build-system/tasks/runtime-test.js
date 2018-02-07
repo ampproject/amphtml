@@ -184,7 +184,6 @@ function printArgvMessages() {
 
 /**
  * Applies the prod or canary AMP config to the AMP runtime.
- * @param {string} targetFile File to which the config is to be written.
  * @return {Promise}
  */
 function applyAmpConfig() {
