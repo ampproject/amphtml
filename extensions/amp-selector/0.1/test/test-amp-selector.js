@@ -324,7 +324,7 @@ describes.realWin('amp-selector', {
 
       impl = ampSelector.implementation_;
       yield ampSelector.build();
-      expect(impl.inputs_.length).to.equal(0);;
+      expect(impl.inputs_.length).to.equal(0);
 
       ampSelector = getSelector({
         attributes: {

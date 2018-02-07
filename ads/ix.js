@@ -106,5 +106,5 @@ function reportStats(siteID, slotID, dfpSlot, start, code) {
     xhttp.open('POST', url, true);
     xhttp.setRequestHeader('Content-Type', 'application/json');
     xhttp.send(stats);
-  } catch (e) {};
+  } catch (e) {}
 }

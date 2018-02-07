@@ -102,4 +102,4 @@ export function batchedXhrServiceForTesting(window) {
  */
 export function installBatchedXhrService(window) {
   registerServiceBuilder(window, 'batched-xhr', BatchedXhr);
-};
+}

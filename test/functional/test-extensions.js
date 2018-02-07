@@ -150,7 +150,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(holder.error.message).to.equal('intentional');
       expect(holder.loaded).to.be.undefined;
       expect(holder.resolve).to.exist;
-      expect(holder.reject).to.exist;;
+      expect(holder.reject).to.exist;
       expect(holder.promise).to.exist;
       expect(promise).to.equal(holder.promise);
 

@@ -172,7 +172,7 @@ export class FxProviderInterface {
    * @param {!Element} unusedElement
    */
   installOn(unusedElement) {}
-};
+}
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerServiceForDoc(TAG, AmpFxCollection);

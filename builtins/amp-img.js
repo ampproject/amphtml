@@ -222,7 +222,7 @@ export class AmpImg extends BaseElement {
       this.togglePlaceholder(false);
     });
   }
-};
+}
 
 /**
  * @param {!Window} win Destination window for the new element.

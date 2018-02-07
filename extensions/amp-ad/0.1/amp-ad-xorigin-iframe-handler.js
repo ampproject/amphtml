@@ -121,7 +121,7 @@ export class AmpAdXOriginIframeHandler {
             this.sendPosition_();
             this.registerPosition_();
           });
-    };
+    }
 
     // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
     // iframe.

@@ -195,7 +195,7 @@ export class Platform {
     }
     return Number(currentIosVersion.split('.')[0]);
   }
-};
+}
 
 
 /**
@@ -203,4 +203,4 @@ export class Platform {
  */
 export function installPlatformService(window) {
   return registerServiceBuilder(window, 'platform', Platform);
-};
+}

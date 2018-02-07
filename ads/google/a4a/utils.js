@@ -426,7 +426,7 @@ export function additionalDimensions(win, viewportSize) {
     outerHeight,
     innerWidth,
     innerHeight].join();
-};
+}
 
 /**
  * Returns amp-analytics config for a new CSI trigger.
@@ -727,7 +727,7 @@ export function getIdentityToken(win, nodeOrDoc) {
   win['goog_identity_prom'] = win['goog_identity_prom'] ||
       executeIdentityTokenFetch(win, nodeOrDoc);
   return /** @type {!Promise<!IdentityToken>} */(win['goog_identity_prom']);
-};
+}
 
 /**
  * @param {!Window} win
@@ -794,7 +794,7 @@ export function getIdentityTokenRequestUrl(win, nodeOrDoc, domain = undefined) {
   const canonical =
     parseUrl(Services.documentInfoForDoc(nodeOrDoc).canonicalUrl).hostname;
   return `https://adservice${domain}/adsid/integrator.json?domain=${canonical}`;
-};
+}
 
 /**
  * Returns whether we are running on the AMP CDN.

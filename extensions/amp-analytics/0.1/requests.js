@@ -152,7 +152,7 @@ export class RequestHandler {
         return this.urlReplacementService_.expandUrlAsync(
             baseUrl, bindings, this.whiteList_);
       });
-    };
+    }
 
     const extraUrlParamsPromise = this.expandExtraUrlParams_(
         configParams, triggerParams, expansionOption)

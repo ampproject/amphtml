@@ -122,4 +122,4 @@ export function cleanupTweetId_(tweetid) {
   }
 
   return tweetid;
-};
+}

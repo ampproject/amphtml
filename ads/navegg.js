@@ -35,7 +35,7 @@ export function navegg(global, data) {
     nvg.getProfile(nvgTargeting => {
       for (seg in nvgTargeting) {
         data.targeting[seg] = nvgTargeting[seg];
-      };
+      }
       doubleclick(global, data);
     });
   });

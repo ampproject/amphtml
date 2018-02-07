@@ -155,7 +155,7 @@ export function getContextState() {
     startTime: rawContext['startTime'],
     tagName: rawContext['tagName'],
   };
-};
+}
 
 
 /**
