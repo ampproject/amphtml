@@ -45,6 +45,7 @@ import {
   isCdnProxy,
   isReportingEnabled,
   maybeAppendErrorParameter,
+  setNameframeExperimentConfigs,
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
 import {
@@ -375,6 +376,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {boolean} */
     this.isIdleRender_ = false;
+
+    /** @private {!../../../ads/google/a4a/utils.NameframeExperimentConfig} */
+    this.nameframeExperimentConfig_ = {
+      instantLoad: false,
+      writeInBody: false,
+    };
   }
 
   /** @override */
@@ -801,6 +808,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.extensions_./*OK*/installExtensionForDoc(
           this.getAmpDoc(), 'amp-analytics');
     }
+
+    setNameframeExperimentConfigs(responseHeaders,
+        this.nameframeExperimentConfig_);
 
     if (this.isFluid_) {
       this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
@@ -1331,6 +1341,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       attributes['reportCreativeGeometry'] = true;
       attributes['isDifferentSourceWindow'] = false;
       attributes['sentinel'] = this.sentinel;
+    } else {
+      Object.assign(attributes, this.nameframeExperimentConfig_);
     }
     return attributes;
   }
