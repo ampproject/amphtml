@@ -17,10 +17,12 @@
 import {StateChangeType} from './navigation-state';
 import {dev, user} from '../../../src/log';
 
-/** @const */
 // temp before config in passed in
+/** @const */
 const MIN_INTERVAL = 3;
-// const MAX_NUMBER = 3;
+
+/** @const */
+const MAX_NUMBER = 2;
 
 /** @const */
 // const EXPERIMENT = 'amp-story-auto-ad';
@@ -46,11 +48,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     /** @private {!Array} */
     this.adElements_ = [];
 
-    /** @private {!Array} */
-    this.adPages_ = [];
-
     /** @private {number} */
-    this.adIdPointer_ = 0;
+    this.adsPlaced_ = 0;
   }
 
   /** @override */
@@ -75,19 +74,25 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    // TODO(ccordry): need to fake distance from page to force load
-    for (let i = 0; i < 2; i++) {
-      const mockPage = this.makeMockPage();
-      this.adElements_.push(mockPage);
-      this.ampStory_.element.appendChild(mockPage);
-    }
-
-    Promise.all(this.adElements_.map(el => el.getImpl()))
-        .then(impls => {
-          this.adPages_ = impls;
-        });
-
+    this.schedulePage_();
     return Promise.resolve();
+  }
+
+  /**
+   * build page and start preloading
+   * @private
+   */
+  schedulePage_() {
+    const mockPage = this.makeMockPage();
+    this.adElements_.push(mockPage);
+
+    this.ampStory_.element.appendChild(mockPage);
+
+    // TODO(ccordry): need to fake distance from page to force load
+
+    mockPage.getImpl().then(impl => {
+      this.ampStory_.addPage(impl);
+    });
   }
 
 
@@ -96,7 +101,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    */
   makeMockPage() {
     const ampStoryAdPage = document.createElement('amp-story-page');
-    const id = this.adElements_.length + 1;
+    const id = this.adsPlaced_ + 1;
     ampStoryAdPage.id = `i-amphtml-ad-page-${id}`;
     ampStoryAdPage.setAttribute('ad', '');
     ampStoryAdPage./*OK*/innerHTML = `
@@ -133,10 +138,18 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   handleActivePageChange_(pageIndex, pageId) {
     this.interactions_++;
     // temp before config in passed in
-    if (this.interactions_ > MIN_INTERVAL) {
-      this.placeNextAd_(pageId);
+    if (this.interactions_ > MIN_INTERVAL && !this.allAdsPlaced_()) {
+      this.placeAdAfterPage_(pageId);
       this.interactions_ = 0;
     }
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  allAdsPlaced_() {
+    return this.adsPlaced_ >= MAX_NUMBER;
   }
 
 
@@ -145,16 +158,20 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
    * @param {string} currentPageId
    * @private
    */
-  placeNextAd_(currentPageId) {
+  placeAdAfterPage_(currentPageId) {
     // TODO(ccordry) make sure ad is loaded
-    const nextAdElement = this.adElements_[this.adIdPointer_];
+    const nextAdElement = this.adElements_[this.adElements_.length - 1];
 
     if (!nextAdElement) {
       return;
     }
 
     this.ampStory_.insertPage(currentPageId, nextAdElement.id);
-    this.adIdPointer_++;
+    this.adsPlaced_++;
+
+    if (!this.allAdsPlaced_()) {
+      this.schedulePage_();
+    }
   }
 }
 

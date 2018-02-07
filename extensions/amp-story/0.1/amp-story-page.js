@@ -696,7 +696,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     });
   }
 
-  isAdvertisement() {
+  isAd() {
     return this.element.hasAttribute(ADVERTISEMENT_ATTR_NAME);
   }
 }

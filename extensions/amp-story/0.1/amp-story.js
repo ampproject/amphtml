@@ -398,7 +398,7 @@ export class AmpStory extends AMP.BaseElement {
 
       const pageIndex = this.getPageIndexById_(pageId);
 
-      if (!this.activePage_.isAdvertisement()) {
+      if (!this.activePage_.isAd()) {
         this.systemLayer_.updateProgress(pageIndex, progress);
       }
     });
@@ -708,10 +708,6 @@ export class AmpStory extends AMP.BaseElement {
         (pageEl, index) => {
           return pageEl.getImpl().then(pageImpl => {
             this.pages_[index] = pageImpl;
-
-            if (pageImpl.isAdvertisement()) {
-              this.adPages_.push(pageImpl);
-            }
           });
         });
 
@@ -785,7 +781,7 @@ export class AmpStory extends AMP.BaseElement {
     this.updateBackground_(targetPage.element, /* initial */ !this.activePage_);
 
     // TODO(alanorozco): decouple this using NavigationState
-    if (!targetPage.isAdvertisement()) {
+    if (!targetPage.isAd()) {
       this.systemLayer_.setActivePageIndex(pageIndex);
     }
 
@@ -1462,6 +1458,19 @@ export class AmpStory extends AMP.BaseElement {
   /** @return {!NavigationState} */
   getNavigationState() {
     return this.navigationState_;
+  }
+
+
+  /**
+   * Add page to back of pages_ array
+   * @param {!./amp-story-page.AmpStoryPage} page
+   */
+  addPage(page) {
+    this.pages_.push(page);
+
+    if (page.isAd()) {
+      this.adPages_.push(page);
+    }
   }
 
   /**
