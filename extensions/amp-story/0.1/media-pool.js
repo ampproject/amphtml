@@ -789,6 +789,7 @@ export class MediaPool {
       task.execute(mediaEl)
           .catch(reason => dev().error('AMP-STORY', reason))
           .then(() => {
+            // Run regardless of success or failure of task execution.
             queue.shift();
             this.executeNextMediaElementTask_(mediaEl);
           });
@@ -816,9 +817,11 @@ export class MediaPool {
     }
 
     const queue = mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME];
+    const isQueueRunning = queue.length === 0;
+
     queue.push(task);
 
-    if (queue.length === 1) {
+    if (!isQueueRunning) {
       this.executeNextMediaElementTask_(mediaEl);
     }
 
