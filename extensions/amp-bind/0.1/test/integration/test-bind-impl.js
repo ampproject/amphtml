@@ -290,7 +290,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
       const warnSpy = env.sandbox.spy(user(), 'warn');
       return onBindReady(env, bind).then(() => {
         expect(warnSpy).to.be.calledOnce;
-        expect(warnSpy).calledWithMatch(/bar/);
+        expect(warnSpy).calledWithMatch('amp-bind', /\[class\]/);
       });
     });
 
@@ -301,6 +301,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
       const warnSpy = env.sandbox.spy(user(), 'warn');
       return onBindReady(env, bind).then(() => {
         expect(warnSpy).to.be.calledOnce;
+        expect(warnSpy).calledWithMatch('amp-bind', /\[text\]/);
       });
     });
 
@@ -312,6 +313,7 @@ describe.configure().ifNewChrome().run('Bind', function() {
       const warnSpy = env.sandbox.spy(user(), 'warn');
       return onBindReady(env, bind).then(() => {
         expect(warnSpy).to.be.calledOnce;
+        expect(warnSpy).calledWithMatch('amp-bind', /\[disabled\]/);
       });
     });
 
