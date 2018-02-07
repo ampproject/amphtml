@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import {renderAsElement} from './simple-template';
-import {dict} from '../../../src/utils/object';
 import {Services} from '../../../src/services';
+import {dict} from '../../../src/utils/object';
+import {renderAsElement} from './simple-template';
 
 
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
   tag: 'aside',
-  attrs: dict({'class': 'i-amphtml-story-hint-container i-amphtml-hidden'}),
+  attrs: dict({
+    'class': 'i-amphtml-story-hint-container ' +
+        'i-amphtml-story-system-reset i-amphtml-hidden'}),
   children: [
     {
       tag: 'div',

@@ -14,13 +14,21 @@
   * limitations under the License.
   */
 
+import {EMPTY_METADATA} from '../../../src/mediasession-helper';
+import {MediaPoolAmpVideo} from './media-pool-amp-video';
+import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
+import {VideoProperties} from './video-lifecycle';
+import {VisibilityState} from '../../../src/visibility-state';
+import {assertHttpsUrl, isProxyOrigin} from '../../../src/url';
+import {dev} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {
   fullscreenEnter,
   fullscreenExit,
   isFullscreenElement,
 } from '../../../src/dom';
 import {
-  EVENTS_TO_FORWARD,
   getOriginSourcesAndTracks,
   getVideoSourceForPreconnect,
   hasAnyCachedSources,
@@ -32,17 +40,9 @@ import {
 } from './utils';
 import {listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {getMode} from '../../../src/mode';
-import {dev} from '../../../src/log';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import {VideoEvents} from '../../../src/video-interface';
-import {Services} from '../../../src/services';
-import {assertHttpsUrl} from '../../../src/url';
-import {EMPTY_METADATA} from '../../../src/mediasession-helper';
-import {MediaPoolAmpVideo} from './media-pool-amp-video';
-import {VideoProperties} from './video-lifecycle';
 
 
 const TAG = 'amp-video';

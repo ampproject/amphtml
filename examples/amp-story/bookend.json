@@ -7,7 +7,7 @@
       {
         "title": "This is an example article",
         "url": "http://example.com/article.html",
-        "image": "http://placehold.it/128x128"
+        "image": "http://placehold.it/256x128"
       }
     ]
   }

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {camelCaseToTitleCase, setStyle} from '../../src/style';
 import {
   ImaPlayerData,
 } from './ima-player-data';
+import {camelCaseToTitleCase, setStyle} from '../../src/style';
 import {isObject} from '../../src/types';
 import {loadScript} from '../../3p/3p';
 import {tryParseJson} from '../../src/json';
@@ -812,7 +812,7 @@ function getPagePosition(el) {
     el != null;
     lx += el./*OK*/offsetLeft, ly += el./*OK*/offsetTop,
     el = el./*OK*/offsetParent)
-  {};
+  {}
   return {x: lx,y: ly};
 }
 

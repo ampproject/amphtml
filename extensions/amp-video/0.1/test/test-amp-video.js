@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import {listenOncePromise} from '../../../../src/event-helper';
+import '../amp-video';
 import {Services} from '../../../../src/services';
-import {mockServiceForDoc} from '../../../../testing/test-helper';
 import {VideoEvents} from '../../../../src/video-interface';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {isCachedByCdn} from '../utils';
 import {BLANK_VIDEO_SRC} from '../../../../src/default-media';
 import '../amp-video';
+import {listenOncePromise} from '../../../../src/event-helper';
+import {mockServiceForDoc} from '../../../../testing/test-helper';
 
 
 function describesAmpVideoTest(name, useMediaPool) {

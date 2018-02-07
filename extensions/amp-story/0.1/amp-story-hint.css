@@ -34,7 +34,7 @@
   display: none !important;
 }
 
-.i-amphtml-story-navigation-help-overlay {
+.i-amphtml-story-hint-container .i-amphtml-story-navigation-help-overlay {
   position: absolute !important;
   left: 0 !important;
   top: 0 !important;
@@ -43,8 +43,8 @@
   background: rgba(0,0,0,0.7) !important;
   flex-direction: row !important;
   color: #fff !important;
-  font-size: 20px;
-  padding: 16px 0;
+  font-size: 20px !important;
+  padding: 16px 0 !important;
 }
 
 .i-amphtml-story-navigation-help-section {
@@ -77,13 +77,13 @@
   padding: 0px !important;
 }
 
-.next-page {
+.i-amphtml-story-hint-container .next-page {
   flex: 3 !important;
-  border-left: 1px dashed transparent;
-  border-image-source: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" version="1.1"><line x1="0" y1="0" x2="0" y2="30" fill-rule="evenodd" stroke-width="1" fill="none" stroke-linecap="square" stroke-dasharray="6,6" stroke="white"></line></svg>');
-  border-image-slice: 33% 33%;
-  border-image-repeat: repeat;
-  border-image-width: 14px;
+  border-left: 1px dashed transparent !important;
+  border-image-source: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" version="1.1"><line x1="0" y1="0" x2="0" y2="30" fill-rule="evenodd" stroke-width="1" fill="none" stroke-linecap="square" stroke-dasharray="6,6" stroke="white"></line></svg>')  !important;
+  border-image-slice: 33% 33%  !important;
+  border-image-repeat: repeat  !important;
+  border-image-width: 14px !important;
 }
 
 .show-navigation-overlay .i-amphtml-story-navigation-help-overlay,
@@ -103,7 +103,7 @@
   display: inline-block !important;
 }
 
-.i-amphtml-story-hint-tap-button {
+.i-amphtml-story-hint-container .i-amphtml-story-hint-tap-button {
   position: relative !important;
   width: 44px !important;
   height: 44px !important;
@@ -128,7 +128,7 @@
   background-color: #fff !important;
 }
 
-.i-amphtml-story-hint-tap-button-icon {
+.i-amphtml-story-hint-container .i-amphtml-story-hint-tap-button-icon {
   position: absolute !important;
   z-index: 1 !important;
   height: 44px !important;
@@ -157,7 +157,7 @@
   position: absolute;
 }
 
-.i-amphtml-story-hint-tap-button-text {
+.i-amphtml-story-hint-container .i-amphtml-story-hint-tap-button-text {
   color: #fff !important;
   font-size: 16px !important;
   font-family: 'Roboto-Medium', sans-serif !important;

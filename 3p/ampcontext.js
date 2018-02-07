@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dict} from '../src/utils/object';
-import {dev} from '../src/log';
+import {AmpEvents} from '../src/amp-events';
 import {IframeMessagingClient} from './iframe-messaging-client';
 import {MessageType} from '../src/3p-frame-messaging';
-import {nextTick} from './3p';
-import {tryParseJson} from '../src/json';
+import {dev} from '../src/log';
+import {dict} from '../src/utils/object';
 import {isObject} from '../src/types';
-import {AmpEvents} from '../src/amp-events';
+import {nextTick} from './3p';
 import {parseUrl} from '../src/url';
+import {tryParseJson} from '../src/json';
 
 export class AbstractAmpContext {
 
@@ -178,7 +178,7 @@ export class AbstractAmpContext {
     });
 
     return unlisten;
-  };
+  }
 
   /**
    *  Requests HTML snippet from the parent window.
@@ -216,7 +216,7 @@ export class AbstractAmpContext {
       'width': width,
       'height': height,
     }));
-  };
+  }
 
   /**
    *  Allows a creative to set the callback function for when the resize
@@ -228,7 +228,7 @@ export class AbstractAmpContext {
   onResizeSuccess(callback) {
     this.client_.registerCallback(MessageType.EMBED_SIZE_CHANGED, obj => {
       callback(obj['requestedHeight'], obj['requestedWidth']); });
-  };
+  }
 
   /**
    *  Allows a creative to set the callback function for when the resize
@@ -241,7 +241,7 @@ export class AbstractAmpContext {
     this.client_.registerCallback(MessageType.EMBED_SIZE_DENIED, obj => {
       callback(obj['requestedHeight'], obj['requestedWidth']);
     });
-  };
+  }
 
   /**
    *  Takes the current name on the window, and attaches it to

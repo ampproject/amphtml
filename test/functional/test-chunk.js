@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
+import {Services} from '../../src/services';
 import {
   activateChunkingForTesting,
   chunkInstanceForTesting,
@@ -22,8 +24,6 @@ import {
   startupChunk,
 } from '../../src/chunk';
 import {installDocService} from '../../src/service/ampdoc-impl';
-import {Services} from '../../src/services';
-import * as sinon from 'sinon';
 
 
 describe('chunk', () => {

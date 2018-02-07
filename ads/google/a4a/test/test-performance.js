@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {
-  GoogleAdLifecycleReporter,
-  BaseLifecycleReporter,
-} from '../performance';
-import {createIframePromise} from '../../../../testing/iframe';
-import {Services} from '../../../../src/services';
 import * as sinon from 'sinon';
+import {
+  BaseLifecycleReporter,
+  GoogleAdLifecycleReporter,
+} from '../performance';
+import {Services} from '../../../../src/services';
+import {createIframePromise} from '../../../../testing/iframe';
 
 /**
  * Verify that `address` matches all of the patterns in `matchlist`.
@@ -217,7 +217,7 @@ describe('GoogleAdLifecycleReporter', () => {
               /&st=30/.test(src));
           slotCounts[slotId] = slotCounts[slotId] || 0;
           ++slotCounts[slotId];
-        };
+        }
         // SlotId 0 corresponds to unusedReporter, so ignore it.
         for (let s = 1; s <= nSlots; ++s) {
           expect(slotCounts[s], 'slotCounts[' + s + ']').to.equal(nStages);

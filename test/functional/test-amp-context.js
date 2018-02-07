@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as sinon from 'sinon';
 import {
   AmpContext,
 } from '../../3p/ampcontext';
 import {MessageType, serializeMessage} from '../../src/3p-frame-messaging';
-import * as sinon from 'sinon';
 import {Platform} from '../../src/service/platform-impl';
 
 const NOOP = () => {};

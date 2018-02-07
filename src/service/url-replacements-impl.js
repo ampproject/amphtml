@@ -14,33 +14,33 @@
  * limitations under the License.
  */
 
+import {
+  AsyncResolverDef,
+  ResolverReturnDef,
+  SyncResolverDef,
+  VariableSource,
+  getNavigationData,
+  getTimingDataAsync,
+  getTimingDataSync,
+} from './variable-source';
+import {Expander} from './url-expander/expander';
 import {Services} from '../services';
-import {dev, user, rethrowAsync} from '../log';
+import {WindowInterface} from '../window-interface';
+import {
+  addParamsToUrl,
+  getSourceUrl,
+  parseQueryString,
+  parseUrl,
+  removeFragment,
+} from '../url';
+import {dev, rethrowAsync, user} from '../log';
+import {getTrackImpressionPromise} from '../impression.js';
 import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
-import {
-  parseUrl,
-  removeFragment,
-  parseQueryString,
-  addParamsToUrl,
-  getSourceUrl,
-} from '../url';
-import {getTrackImpressionPromise} from '../impression.js';
-import {
-  VariableSource,
-  AsyncResolverDef,
-  ResolverReturnDef,
-  SyncResolverDef,
-  getNavigationData,
-  getTimingDataSync,
-  getTimingDataAsync,
-} from './variable-source';
-import {isProtocolValid} from '../url';
-import {WindowInterface} from '../window-interface';
-import {Expander} from './url-expander/expander';
 import {isExperimentOn} from '../experiments';
+import {isProtocolValid} from '../url';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -62,7 +62,7 @@ function encodeValue(val) {
     return '';
   }
   return encodeURIComponent(/** @type {string} */(val));
-};
+}
 
 /**
  * Class to provide variables that pertain to top level AMP window.

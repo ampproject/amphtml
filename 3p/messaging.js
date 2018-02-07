@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {parseJson} from '../src/json';
 import {getData} from '../src/event-helper';
+import {parseJson} from '../src/json';
 
 /**
  * Send messages to parent frame. These should not contain user data.

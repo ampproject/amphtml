@@ -16,8 +16,8 @@
 'use strict';
 
 
-const test = require('ava');
 const m = require('./');
+const test = require('ava');
 
 const result = {
   'test.css': {

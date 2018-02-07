@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {parseJson} from '../../../../src/json';
 import {getData} from '../../../../src/event-helper';
+import {parseJson} from '../../../../src/json';
 
 const TAG = 'amp-viewer-messaging';
 export const APP = '__AMPHTML__';
@@ -324,7 +324,7 @@ export class Messaging {
     const dataStr = ' data: ' + this.errorToString_(opt_data);
     stateStr += dataStr;
     this.win['viewerState'] = stateStr;
-  };
+  }
 
   /**
    * @param {*} err !Error most of time, string sometimes, * rarely.

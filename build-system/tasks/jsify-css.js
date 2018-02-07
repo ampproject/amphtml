@@ -17,12 +17,12 @@
 
 
 const autoprefixer = require('autoprefixer');
+const colors = require('ansi-colors');
 const cssnano = require('cssnano');
 const fs = require('fs-extra');
+const log = require('fancy-log');
 const postcss = require('postcss');
 const postcssImport = require('postcss-import');
-const colors = require('ansi-colors');
-const log = require('fancy-log');
 
 // NOTE: see https://github.com/ai/browserslist#queries for `browsers` list
 const cssprefixer = autoprefixer({

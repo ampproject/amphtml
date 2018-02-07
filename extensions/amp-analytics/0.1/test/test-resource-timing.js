@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {serializeResourceTiming} from '../resource-timing';
 import {installVariableService} from '../variables';
+import {serializeResourceTiming} from '../resource-timing';
 
 /**
  * Returns a new, pre-filled resourceTimingSpec.
@@ -39,7 +39,7 @@ export function newResourceTimingSpec() {
       'delim': '~',
     },
   };
-};
+}
 
 /**
  * Returns a sample PerformanceResourceTiming entry. Timing intervals are fixed
@@ -77,7 +77,7 @@ export function newPerformanceResourceTiming(
     encodedBodySize: bodySize * 0.7,
     transferSize: cached ? 0 : bodySize * 0.7 + 200, // +200 for header size
   };
-};
+}
 
 describes.fakeWin('resourceTiming', {amp: true}, env => {
   let win;

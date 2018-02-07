@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {EventType, dispatch} from './events';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {ScrollableShareWidget} from './share';
-import {EventType, dispatch} from './events';
 import {Services} from '../../../src/services';
 import {closest} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {getJsonLd} from './jsonld';
 import {isArray} from '../../../src/types';
+import {isProtocolValid} from '../../../src/url';
 import {parseUrl} from '../../../src/url';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
 import {throttle} from '../../../src/utils/rate-limit';
-import {isProtocolValid} from '../../../src/url';
 
 
 /**
@@ -55,7 +55,9 @@ const HIDDEN_CLASSNAME = 'i-amphtml-hidden';
 /** @private @const {!./simple-template.ElementDef} */
 const ROOT_TEMPLATE = {
   tag: 'section',
-  attrs: dict({'class': `i-amphtml-story-bookend ${HIDDEN_CLASSNAME}`}),
+  attrs: dict({
+    'class': 'i-amphtml-story-bookend i-amphtml-story-system-reset ' +
+        HIDDEN_CLASSNAME}),
   children: [
     // Overflow container that gets pushed to the bottom when content height is
     // smaller than viewport.

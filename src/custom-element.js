@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as dom from './dom';
 import {AmpEvents} from './amp-events';
 import {CommonSignals} from './common-signals';
 import {ElementStub} from './element-stub';
@@ -34,12 +35,11 @@ import {
   getIntersectionChangeEntry,
 } from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
+import {isExperimentOn} from './experiments';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
 import {setStyle} from './style';
-import * as dom from './dom';
 import {toWin} from './types';
-import {isExperimentOn} from './experiments';
 
 const TAG = 'CustomElement';
 
@@ -1601,7 +1601,7 @@ function createBaseCustomElementClass(win) {
         }
       }
     }
-  };
+  }
   win.BaseCustomElementClass = BaseCustomElement;
   return win.BaseCustomElementClass;
 }

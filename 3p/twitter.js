@@ -17,8 +17,8 @@
 // TODO(malteubl) Move somewhere else since this is not an ad.
 
 import {loadScript} from './3p';
-import {setStyles} from '../src/style';
 import {parseUrl} from '../src/url';
+import {setStyles} from '../src/style';
 
 /**
  * Produces the Twitter API object for the passed in callback. If the current
@@ -122,4 +122,4 @@ export function cleanupTweetId_(tweetid) {
   }
 
   return tweetid;
-};
+}
