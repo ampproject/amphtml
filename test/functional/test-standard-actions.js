@@ -20,7 +20,6 @@ import {StandardActions} from '../../src/service/standard-actions-impl';
 import {Services} from '../../src/services';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
 import {setParentWindow} from '../../src/service';
-import {createElementWithAttributes} from '../../src/dom';
 
 
 describes.sandboxed('StandardActions', {}, () => {
@@ -356,12 +355,12 @@ describes.sandboxed('StandardActions', {}, () => {
 
     it('should not implement print when not whitelisted', () => {
       const fakeMeta = {
-          getAttribute: (key) => 'AMP.pushState,AMP.setState',
-      }
-      const querySelectorStub = sandbox.stub(window.document.head,
-          'querySelector').callsFake(selector => fakeMeta);
+        getAttribute: () => 'AMP.pushState,AMP.setState',
+      };
+      sandbox.stub(window.document.head,
+          'querySelector').callsFake(() => fakeMeta);
       standardActions = new StandardActions(ampdoc);
-      
+
       const windowApi = {
         print: () => {},
       };
@@ -381,10 +380,10 @@ describes.sandboxed('StandardActions', {}, () => {
 
     it('should implement pushState when whitelisted', () => {
       const fakeMeta = {
-          getAttribute: (key) => 'AMP.setState,AMP.pushState',
-      }
-      const querySelectorStub = sandbox.stub(window.document.head,
-          'querySelector').callsFake(selector => fakeMeta);
+        getAttribute: () => 'AMP.setState,AMP.pushState',
+      };
+      sandbox.stub(window.document.head,
+          'querySelector').callsFake(() => fakeMeta);
 
       standardActions = new StandardActions(ampdoc);
 
