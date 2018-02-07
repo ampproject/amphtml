@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import {getSourceOrigin, getSourceUrl} from '../src/url';
 import {validateData, writeScript} from '../3p/3p';
 
-const pubmineOptional = ['adsafe', 'section', 'wordads'],
+const pubmineOptional = ['section', 'pt', 'ht'],
     pubmineRequired = ['siteid'],
     pubmineURL = 'https://s.pubmine.com/head.js';
 
@@ -28,28 +27,39 @@ const pubmineOptional = ['adsafe', 'section', 'wordads'],
 export function pubmine(global, data) {
   validateData(data, pubmineRequired, pubmineOptional);
 
-  global._ipw_custom = { // eslint-disable-line google-camelcase/google-camelcase
-    adSafe: 'adsafe' in data ? data.adsafe : '0',
-    amznPay: [],
-    domain: getSourceOrigin(global.context.location.href),
-    pageURL: getSourceUrl(global.context.location.href),
-    wordAds: 'wordads' in data ? data.wordads : '0',
+  global.__ATA_PP = {
     renderStartCallback: () => global.context.renderStart(),
+    pt: 'pt' in data ? data.pt : 1,
+    ht: 'ht' in data ? data.ht : 1,
+    tn: 'amp',
+    amp: true,
   };
+
+  global.__ATA = global.__ATA || {};
+  global.__ATA.cmd = global.__ATA.cmd || [];
+  global.__ATA.criteo = global.__ATA.criteo || {};
+  global.__ATA.criteo.cmd = global.__ATA.criteo.cmd || [];
   writeScript(global, pubmineURL);
 
   const o = {
         sectionId: data['siteid'] + ('section' in data ? data.section : '1'),
-        height: data.height,
+        height: data.height == 250 ? 250 : data.height - 15,
         width: data.width,
       },
       wr = global.document.write;
 
   wr.call(global.document,
-      `<script type="text/javascript">
-      (function(g){g.__ATA.initAd(
-        {sectionId:${o.sectionId}, width:${o.width}, height:${o.height}});
-      })(window);
-    </script>`
+      `<div id="atatags-${o.sectionId}">
+        <script type="text/javascript">
+          __ATA.cmd.push(function() {
+            __ATA.initSlot('atatags-${o.sectionId}', {
+              collapseEmpty: 'before',
+              sectionId: ${o.sectionId},
+              width: ${o.width},
+              height: ${o.height}
+            });
+          });
+        </script>
+      </div>`
   );
 }
