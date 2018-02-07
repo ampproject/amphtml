@@ -65,7 +65,7 @@ feature_tests/style_amp_keyframes_error.html:46:6 CSS syntax error in tag 'style
 |         * [opacity, transform, visibility, offset-distance] */
 |        100% {thisshouldfail: translateX(100%);}
 >>             ^~~~~~~~~
-feature_tests/style_amp_keyframes_error.html:51:12 CSS syntax error in tag 'style[amp-keyframes]' - invalid property 'thisshouldfail'. The only allowed properties are '['offset-distance', 'opacity', 'transform', 'visibility']'. [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/style_amp_keyframes_error.html:51:12 CSS syntax error in tag 'style[amp-keyframes]' - invalid property 'thisshouldfail'. The only allowed properties are '['animation-timing-function', 'offset-distance', 'opacity', 'transform', 'visibility']'. [AUTHOR_STYLESHEET_PROBLEM]
 |      }
 |      @keyframes anim2 {
 |        @keyframes anim1 {
