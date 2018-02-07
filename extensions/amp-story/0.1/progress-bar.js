@@ -13,14 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {POLL_INTERVAL_MS} from './page-advancement';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {scale, setImportantStyles} from '../../../src/style';
 import {scopedQuerySelector} from '../../../src/dom';
 
 
-/** @const {string} */
-const TRANSITION = 'transform 0.2s ease';
+/**
+ * Transition used to show the progress of a media. Has to be linear so the
+ * animation is smooth and constant.
+ * @const {string}
+ */
+const TRANSITION_LINEAR = `transform ${POLL_INTERVAL_MS}ms linear`;
+
+/**
+ * Transition used to fully fill or unfill a progress bar item.
+ * @const {string}
+ */
+const TRANSITION_EASE = 'transform 200ms ease';
 
 
 /**
@@ -144,9 +155,16 @@ export class ProgressBar {
         `.i-amphtml-story-page-progress-bar:nth-child(${nthChildIndex}) ` +
         '.i-amphtml-story-page-progress-value');
     this.vsync_.mutate(() => {
+      let transition = 'none';
+      if (withTransition) {
+        // Using an eased transition only if filling the bar to 0 or 1.
+        transition =
+            (progress === 1 || progress === 0) ?
+              TRANSITION_EASE : TRANSITION_LINEAR;
+      }
       setImportantStyles(dev().assertElement(progressEl), {
         'transform': scale(`${progress},1`),
-        'transition': withTransition ? TRANSITION : 'none',
+        'transition': transition,
       });
     });
   }
