@@ -190,6 +190,8 @@ class MediaTask {
   /**
    * @param {!HTMLMediaElement} mediaEl The media element on which this task
    *     should be executed.
+   * @return {!Promise} A promise that is resolved when the task has completed
+   *     execution.
    */
   execute(mediaEl) {
     return this.executeInternal(mediaEl)

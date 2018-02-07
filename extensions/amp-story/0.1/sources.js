@@ -24,7 +24,7 @@ import {ampMediaElementFor} from './utils';
 
 export class Sources {
   /**
-   * @param {string} srcAttr The 'src' attribute of the media element.
+   * @param {?string} srcAttr The 'src' attribute of the media element.
    * @param {!IArrayLike<!Element>} srcEls Any child <source> tags of the media
    *     element.
    */
