@@ -19,16 +19,7 @@ const initTestsPath = [
   'test/_init_tests.js',
 ];
 
-const exmaplesPath = [
-  {
-    pattern: 'examples/**/*',
-    included: false,
-    nocache: false,
-    watched: true,
-  },
-];
-
-const commonTestPaths = initTestsPath.concat(exmaplesPath, [
+const fixturesExamplesPaths = [
   'test/fixtures/*.html',
   {
     pattern: 'test/fixtures/served/*.html',
@@ -37,13 +28,16 @@ const commonTestPaths = initTestsPath.concat(exmaplesPath, [
     watched: true,
   },
   {
-    pattern: 'dist/**/*.js',
+    pattern: 'examples/**/*',
     included: false,
     nocache: false,
     watched: true,
   },
+];
+
+const builtRuntimePaths = [
   {
-    pattern: 'dist.tools/**/*.js',
+    pattern: 'dist/**/*.js',
     included: false,
     nocache: false,
     watched: true,
@@ -55,12 +49,24 @@ const commonTestPaths = initTestsPath.concat(exmaplesPath, [
     watched: true,
   },
   {
+    pattern: 'dist.tools/**/*.js',
+    included: false,
+    nocache: false,
+    watched: true,
+  },
+];
+
+const commonTestPaths =
+    initTestsPath.concat(fixturesExamplesPaths, builtRuntimePaths);
+
+const coveragePaths = [
+  {
     pattern: 'test/coverage/**/*',
     included: false,
     nocache: false,
     watched: false,
   },
-]);
+];
 
 const simpleTestPath = [
   'test/simple-test.js',
@@ -82,13 +88,13 @@ const chaiAsPromised = [
   'test/chai-as-promised/chai-as-promised.js',
 ];
 
-const unitTestPaths = initTestsPath.concat(exmaplesPath, [
+const unitTestPaths = initTestsPath.concat(fixturesExamplesPaths, [
   'test/functional/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/*.js',
 ]);
 
-const unitTestOnSaucePaths = initTestsPath.concat(exmaplesPath, [
+const unitTestOnSaucePaths = initTestsPath.concat(fixturesExamplesPaths, [
   'test/functional/**/*.js',
   'ads/**/test/test-*.js',
 ]);
@@ -109,6 +115,7 @@ module.exports = {
   unitTestPaths,
   unitTestOnSaucePaths,
   integrationTestPaths,
+  coveragePaths,
   lintGlobs: [
     '**/*.js',
     '!**/*.extern.js',

@@ -295,6 +295,7 @@ function runTests() {
 
   if (argv.coverage) {
     log(cyan('Including code coverage tests'));
+    c.files = c.files.concat(config.coveragePaths);
     c.browserify.transform.push(
         ['browserify-istanbul', {instrumenterConfig: {embedSource: true}}]);
     c.reporters = c.reporters.concat(['progress', 'coverage']);
