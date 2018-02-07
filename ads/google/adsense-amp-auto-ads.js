@@ -60,4 +60,4 @@ export function getAdSenseAmpAutoAdsExpBranch(win) {
   randomlySelectUnsetExperiments(win, experiments);
   return getExperimentBranch(win, ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME)
       || null;
-};
+}

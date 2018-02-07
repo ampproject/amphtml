@@ -609,4 +609,4 @@ export function installDocService(win, isSingleDoc) {
       function() {
         return new AmpDocService(win, isSingleDoc);
       });
-};
+}

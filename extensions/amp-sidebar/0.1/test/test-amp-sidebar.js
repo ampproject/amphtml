@@ -69,7 +69,7 @@ describes.realWin('amp-sidebar 0.1 version', {
     if (options.closeText) {
       ampSidebar.setAttribute('data-close-button-aria-label',
           options.closeText);
-    };
+    }
     ampSidebar.setAttribute('id', 'sidebar1');
     ampSidebar.setAttribute('layout', 'nodisplay');
     doc.body.appendChild(ampSidebar);

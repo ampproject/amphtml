@@ -131,7 +131,7 @@ function entryToExpansionOptions(entry, name, format) {
     'initiatorType': entry.initiatorType,
   };
   return new ExpansionOptions(vars, 1 /* opt_iterations */);
-};
+}
 
 /**
  * Returns the variables for the given resource timing entry if it matches one

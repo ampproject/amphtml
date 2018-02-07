@@ -95,7 +95,7 @@ function getCounter(receiver, counterName) {
     return receiver.gwdGotoCounters[counterName];
   }
   return 0;
-};
+}
 
 /**
  * @param {!Element} receiver
@@ -113,7 +113,7 @@ function setCounter(receiver, counterName, counterValue) {
     receiver.gwdGotoCounters[counterName] = 0;
   }
   receiver.gwdGotoCounters[counterName] = counterValue;
-};
+}
 
 /**
  * AMP GWD animation runtime service.
@@ -423,4 +423,4 @@ export class AmpGwdRuntimeService {
  */
 function reflow(element) {
   element./*OK*/offsetWidth = element./*OK*/offsetWidth;
-};
+}
