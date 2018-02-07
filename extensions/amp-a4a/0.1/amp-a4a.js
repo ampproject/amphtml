@@ -1281,8 +1281,7 @@ export class AmpA4A extends AMP.BaseElement {
     let renderPromise = Promise.resolve(false);
     if ((method == XORIGIN_MODE.SAFEFRAME ||
          method == XORIGIN_MODE.NAMEFRAME) &&
-        this.creativeBody_ &&
-        this.element.getAttribute('type') != 'fake') {
+        this.creativeBody_) {
       renderPromise = this.renderViaNameAttrOfXOriginIframe_(
           this.creativeBody_);
       this.creativeBody_ = null; // Free resources.

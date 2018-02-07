@@ -704,11 +704,12 @@ app.get(['/examples/*.html', '/test/manual/*.html'], (req, res, next) => {
       file = addViewerIntegrationScript(req.query['amp_js_v'], file);
     }
 
-    file = replaceUrls(mode, file, '', inabox);
 
     if (inabox && req.headers.origin && req.query.__amp_source_origin) {
       // Allow CORS requests for A4A.
       enableCors(req, res, req.headers.origin);
+    } else {
+      file = replaceUrls(mode, file, '', inabox);
     }
 
     // Extract amp-ad for the given 'type' specified in URL query.
