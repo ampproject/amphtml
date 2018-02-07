@@ -26,7 +26,7 @@ import {scopedQuerySelector} from '../../../src/dom';
 const NEXT_SCREEN_AREA_RATIO = 0.75;
 
 /** @const {number} */
-const POLL_INTERVAL_MS = 250;
+export const POLL_INTERVAL_MS = 300;
 
 /** @const @enum */
 export const TapNavigationDirection = {
