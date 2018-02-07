@@ -126,7 +126,7 @@ export class AmpList extends AMP.BaseElement {
     } else if (state !== undefined) {
       const items = isArray(state) ? state : [state];
       this.renderItems_(items);
-      user().warn(TAG, '[state] is deprecated, please use [src] instead.');
+      user().error(TAG, '[state] is deprecated, please use [src] instead.');
     }
   }
 
