@@ -232,7 +232,7 @@ describes.realWin('media-tasks', {}, env => {
       expect(el.parentElement).to.equal(parent);
       expect(placeholderEl.parentElement).to.equal(null);
 
-      const task = new SwapIntoDomTask(placeholderEl, vsyncApi);
+      const task = new SwapOutOfDomTask(placeholderEl, vsyncApi);
       return task.execute(el).then(() => {
         expect(el.parentElement).to.equal(null);
         expect(placeholderEl.parentElement).to.equal(parent);
