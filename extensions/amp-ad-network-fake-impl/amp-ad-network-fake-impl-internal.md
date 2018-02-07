@@ -44,7 +44,7 @@ Like all A4A ad networks, you do not place an `<amp-ad-network-fake-impl>`
 tag directly on the page.  Instead, you place an `<amp-ad type="fake">` tag.
 
 The fake impl loads an A4A creative or an AMP creative and convert it to an A4A
-creative. Use `convert` attribute to instruct the fake impl to perform creative
+creative. Use `a4a-conversion` attribute to instruct the fake impl to perform creative
 conversion.
 
 The fake impl will skip signature verification by default. To enforce this check,
@@ -62,6 +62,6 @@ special tags for fake or special behaviors of existing tags:
 
 **src** The file source.
 
-**convert** To instruct the fake impl to convert creative response to A4A creative.
+**a4a-conversion** To instruct the fake impl to convert creative response to A4A creative.
 
 **checksig** To enforce the signature check.

@@ -66,7 +66,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
       // In the convert creative mode the content is the plain AMP HTML.
       // This mode is primarily used for A4A Envelop for testing.
       // See DEVELOPING.md for more info.
-      if (this.element.getAttribute('convert') == 'true') {
+      if (this.element.getAttribute('a4a-conversion') == 'true') {
         return response.text().then(
             responseText => new Response(
                 this.transformCreative_(responseText),
