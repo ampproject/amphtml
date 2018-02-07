@@ -54,7 +54,7 @@ function checkInMutationPhase(nodeOrAttr) {
   const node = nodeOrAttr.ownerElement || nodeOrAttr;
   const window = node.ownerDocument.defaultView;
   if (node.isConnected !== false && !window[IN_MUTATE_PHASE_PROP]) {
-    dev().expectedError('MUTATE', 'mutation occurred outside mutation phase',
+    dev().error('MUTATE', 'mutation occurred outside mutation phase',
         ancestry(node));
   }
 }

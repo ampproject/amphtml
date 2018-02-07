@@ -40,6 +40,7 @@ import {dev, initLogConstructor, setReportError, user} from './log';
 import {
   disposeServicesForDoc,
 } from './service';
+import {getCookie} from './cookies';
 import {getMode} from './mode';
 import {
   hasRenderDelayingServices,
@@ -75,7 +76,6 @@ import {installViewportServiceForDoc} from './service/viewport/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';
 import {
-  isCanary,
   isExperimentOn,
   toggleExperiment,
 } from './experiments';
@@ -106,7 +106,9 @@ export function installRuntimeServices(global) {
   installTimerService(global);
   installVsyncService(global);
   if (getMode(global).localDev || getMode(global).development ||
-      getMode(global).test || isCanary(global)) {
+      getMode(global).test ||
+      // Test explicitly for opt-in, not canary which could be 1% prod traffic.
+      getCookie(global, 'AMP_CANARY') === '1') {
     // Only install in development environments because of the **massive**
     // performance hits.
     installMutationMonitor(global);
