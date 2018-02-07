@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {
   assertHttpsUrl,
-  parseUrl,
   checkCorsUrl,
+  parseUrl,
 } from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {loadPromise} from '../../../src/event-helper';
-import {Services} from '../../../src/services';
 import {removeElement} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 

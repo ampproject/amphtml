@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-import {getData, listen, listenOncePromise} from '../../src/event-helper';
-import {Services} from '../../src/services';
-import {removeElement} from '../../src/dom';
-import {toggleExperiment} from '../../src/experiments';
+import * as st from '../../src/style';
 import {
-  VideoInterface,
-  VideoEvents,
-  VideoAnalyticsEvents,
   PlayingStates,
+  VideoAnalyticsEvents,
+  VideoEvents,
+  VideoInterface,
 } from '../../src/video-interface';
-import {supportsAutoplay} from '../../src/service/video-manager-impl';
+import {Services} from '../../src/services';
 import {
   createFixtureIframe,
   expectBodyToBecomeVisible,
   poll,
 } from '../../testing/iframe';
-import * as st from '../../src/style';
+import {getData, listen, listenOncePromise} from '../../src/event-helper';
+import {removeElement} from '../../src/dom';
+import {supportsAutoplay} from '../../src/service/video-manager-impl';
+import {toggleExperiment} from '../../src/experiments';
 
 export function runVideoPlayerIntegrationTests(
   createVideoElementFunc, opt_experiment) {

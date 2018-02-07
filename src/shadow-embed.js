@@ -16,21 +16,21 @@
 
 import {Services} from './services';
 import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS';
-import {dev} from './log';
 import {
+  ShadowDomVersion,
+  getShadowDomSupportedVersion,
+  isShadowCssSupported,
+  isShadowDomSupported,
+} from './web-components';
+import {
+  childElementsByTag,
   closestNode,
   escapeCssSelectorIdent,
   iterateCursor,
   removeElement,
-  childElementsByTag,
 } from './dom';
+import {dev} from './log';
 import {installCssTransformer} from './style-installer';
-import {
-  isShadowCssSupported,
-  isShadowDomSupported,
-  getShadowDomSupportedVersion,
-  ShadowDomVersion,
-} from './web-components';
 import {setStyle} from './style';
 import {toArray, toWin} from './types';
 

@@ -16,12 +16,12 @@
 'use strict';
 
 const BBPromise = require('bluebird');
+const colors = require('ansi-colors');
 const gulp = require('gulp-help')(require('gulp'));
+const log = require('fancy-log');
+const request = BBPromise.promisify(require('request'));
 const srcGlobs = require('../config').presubmitGlobs;
 const through2 = require('through2');
-const request = BBPromise.promisify(require('request'));
-const colors = require('ansi-colors');
-const log = require('fancy-log');
 
 const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
 

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {createIframePromise} from '../../../testing/iframe';
 import {listenParent} from '../../../3p/messaging';
 import {postMessage} from '../../../src/iframe-helper';
-import {Services} from '../../../src/services';
 
 describe('3p messaging', () => {
 

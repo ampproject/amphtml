@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {
   lineDelimitedStreamer,
   metaJsonCreativeGrouper,
 } from '../line-delimited-response-handler';
-import * as sinon from 'sinon';
 
 describe('#line-delimited-response-handler', () => {
 

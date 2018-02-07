@@ -19,9 +19,9 @@
  * its embed AMP content (such as an ad created in AMP).
  */
 
+import {InaboxMessagingHost} from './inabox-messaging-host';
 import {dev, initLogConstructor, setReportError} from '../../src/log';
 import {reportError} from '../../src/error';
-import {InaboxMessagingHost} from './inabox-messaging-host';
 
 /** @const {string} */
 const TAG = 'inabox-host';
