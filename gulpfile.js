@@ -723,38 +723,39 @@ function dist() {
     printConfigHelp('gulp dist --fortesting');
   }
   parseExtensionFlags();
-  return compileCss(/* watch */ undefined, /* opt_compileAll */ true).then(() => {
-    return Promise.all([
-      compile(false, true, true),
-      // NOTE:
-      // When adding a line here, consider whether you need to include polyfills
-      // and whether you need to init logging (initLogConstructor).
-      buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true}),
-      buildExaminer({
-        minify: true, watch: false, preventRemoveAndMakeDir: true}),
-      buildSw({minify: true, watch: false, preventRemoveAndMakeDir: true}),
-      buildWebWorker({
-        minify: true, watch: false, preventRemoveAndMakeDir: true}),
-      buildExtensions({minify: true, preventRemoveAndMakeDir: true}),
-      buildExperiments({
-        minify: true, watch: false, preventRemoveAndMakeDir: true}),
-      buildLoginDone({
-        minify: true, watch: false, preventRemoveAndMakeDir: true}),
-      buildWebPushPublisherFiles({
-        minify: true, watch: false, preventRemoveAndMakeDir: true}),
-      copyCss(),
-    ]);
-  }).then(() => {
-    copyAliasExtensions();
-  }).then(() => {
-    if (argv.fortesting) {
-      return enableLocalTesting(minifiedRuntimeTarget);
-    }
-  }).then(() => {
-    if (argv.fortesting) {
-      return enableLocalTesting(minified3pTarget);
-    }
-  }).then(() => exitCtrlcHandler(handlerProcess));
+  return compileCss(/* watch */ undefined, /* opt_compileAll */ true)
+      .then(() => {
+        return Promise.all([
+          compile(false, true, true),
+          // NOTE: When adding a line here,
+          // consider whether you need to include polyfills
+          // and whether you need to init logging (initLogConstructor).
+          buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true}),
+          buildExaminer({
+            minify: true, watch: false, preventRemoveAndMakeDir: true}),
+          buildSw({minify: true, watch: false, preventRemoveAndMakeDir: true}),
+          buildWebWorker({
+            minify: true, watch: false, preventRemoveAndMakeDir: true}),
+          buildExtensions({minify: true, preventRemoveAndMakeDir: true}),
+          buildExperiments({
+            minify: true, watch: false, preventRemoveAndMakeDir: true}),
+          buildLoginDone({
+            minify: true, watch: false, preventRemoveAndMakeDir: true}),
+          buildWebPushPublisherFiles({
+            minify: true, watch: false, preventRemoveAndMakeDir: true}),
+          copyCss(),
+        ]);
+      }).then(() => {
+        copyAliasExtensions();
+      }).then(() => {
+        if (argv.fortesting) {
+          return enableLocalTesting(minifiedRuntimeTarget);
+        }
+      }).then(() => {
+        if (argv.fortesting) {
+          return enableLocalTesting(minified3pTarget);
+        }
+      }).then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
