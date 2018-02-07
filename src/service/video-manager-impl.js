@@ -215,9 +215,8 @@ export class VideoManager {
   /**
    * Registers a video component that implements the VideoInterface.
    * @param {!../video-interface.VideoInterface} video
-   * @param {boolean=} manageAutoplay
    */
-  register(video, manageAutoplay = true) {
+  register(video) {
     dev().assert(video);
 
     this.registerCommonActions_(video);
@@ -227,7 +226,7 @@ export class VideoManager {
     }
 
     this.entries_ = this.entries_ || [];
-    const entry = new VideoEntry(this, video, manageAutoplay);
+    const entry = new VideoEntry(this, video);
     this.maybeInstallVisibilityObserver_(entry);
     this.maybeInstallPositionObserver_(entry);
     this.maybeInstallOrientationObserver_(entry);
@@ -483,9 +482,8 @@ class VideoEntry {
   /**
    * @param {!VideoManager} manager
    * @param {!../video-interface.VideoInterface} video
-   * @param {boolean} allowAutoplay
    */
-  constructor(manager, video, allowAutoplay) {
+  constructor(manager, video) {
 
     /** @private @const {!VideoManager} */
     this.manager_ = manager;
@@ -498,9 +496,6 @@ class VideoEntry {
 
     /** @package @const {!../video-interface.VideoInterface} */
     this.video = video;
-
-    /** @private @const {boolean} */
-    this.allowAutoplay_ = allowAutoplay;
 
     /** @private {?Element} */
     this.autoplayAnimation_ = null;
@@ -953,9 +948,6 @@ class VideoEntry {
    * @private
    */
   autoplayLoadedVideoVisibilityChanged_() {
-    if (!this.allowAutoplay_) {
-      return;
-    }
     if (this.isVisible_) {
       this.visibilitySessionManager_.beginSession();
       this.video.play(/*autoplay*/ true);

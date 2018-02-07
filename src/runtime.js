@@ -72,6 +72,7 @@ import {installViewerServiceForDoc, setViewerVisibilityState} from
   './service/viewer-impl';
 import {installViewportServiceForDoc} from './service/viewport/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
+import {installMediaPoolService} from './service/media-pool-impl';
 import {installXhrService} from './service/xhr-impl';
 import {
   isExperimentOn,
@@ -105,6 +106,7 @@ export function installRuntimeServices(global) {
   installVsyncService(global);
   installXhrService(global);
   installInputService(global);
+  installMediaPoolService(global);
 }
 
 

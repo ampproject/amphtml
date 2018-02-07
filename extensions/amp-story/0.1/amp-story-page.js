@@ -90,20 +90,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.markPageAsLoaded_();
     });
 
-    let mediaPoolResolveFn, mediaPoolRejectFn;
-
-    /** @private @const {!Promise<!MediaPool>} */
-    this.mediaPoolPromise_ = new Promise((resolve, reject) => {
-      mediaPoolResolveFn = resolve;
-      mediaPoolRejectFn = reject;
-    });
-
-    /** @private @const {!function(!MediaPool)} */
-    this.mediaPoolResolveFn_ = mediaPoolResolveFn;
-
-    /** @private @const {!function(*)} */
-    this.mediaPoolRejectFn_ = mediaPoolRejectFn;
-
     /** @private @const {boolean} Only prerender the first story page. */
     this.prerenderAllowed_ = matches(this.element,
         'amp-story-page:first-of-type');
@@ -136,8 +122,6 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     upgradeBackgroundAudio(this.element);
-    this.markMediaElementsWithPreload_();
-    this.initializeMediaPool_();
     this.maybeCreateAnimationManager_();
     this.advancement_.addPreviousListener(() => this.previous());
     this.advancement_
@@ -146,32 +130,6 @@ export class AmpStoryPage extends AMP.BaseElement {
         navigationDirection => this.navigateOnTap(navigationDirection));
     this.advancement_
         .addProgressListener(progress => this.emitProgress_(progress));
-  }
-
-
-  /** @private */
-  initializeMediaPool_() {
-    const storyEl = dev().assertElement(
-        closestBySelector(this.element, 'amp-story'),
-        'amp-story-page must be a descendant of amp-story.');
-
-    storyEl.getImpl()
-        .then(storyImpl => {
-          this.mediaPoolResolveFn_(MediaPool.for(storyImpl));
-        }, reason => this.mediaPoolRejectFn_(reason));
-  }
-
-
-  /**
-   * Marks any AMP elements that represent media elements with preload="auto".
-   * @private
-   */
-  markMediaElementsWithPreload_() {
-    const mediaSet = scopedQuerySelectorAll(
-        this.element, 'amp-audio, amp-video');
-    Array.prototype.forEach.call(mediaSet, mediaItem => {
-      mediaItem.setAttribute('preload', 'auto');
-    });
   }
 
 
@@ -196,14 +154,10 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   resumeCallback() {
-    this.registerAllMedia_();
-
     if (this.isActive()) {
       this.advancement_.start();
       this.maybeStartAnimations();
-      this.preloadAllMedia_()
-          .then(() => this.startListeningToVideoEvents_())
-          .then(() => this.playAllMedia_());
+      this.playAllMedia_();
     }
 
     this.reportDevModeErrors_();
@@ -213,18 +167,12 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.muteAllMedia();
-
-    return Promise.all([
-      this.beforeVisible(),
-      this.mediaLayoutPromise_,
-      this.mediaPoolPromise_,
-    ]);
+    return this.beforeVisible();
   }
 
 
   /** @return {!Promise} */
   beforeVisible() {
-    this.rewindAllMediaToBeginning_();
     return this.scale_().then(() => this.maybeApplyFirstAnimationFrame());
   }
 
@@ -290,39 +238,28 @@ export class AmpStoryPage extends AMP.BaseElement {
 
 
   /**
-   * Gets all media elements on this page.
-   * @return {!NodeList<!Element>}
-   * @private
-   */
-  getAllMedia_() {
-    return scopedQuerySelectorAll(this.element, 'audio, video');
-  }
-
-
-  /**
    * Gets all video elements on this page.
-   * @return {!NodeList<!Element>}
+   * @return {!Array<!Element>}
    * @private
    */
   getAllVideos_() {
-    return scopedQuerySelectorAll(this.element, 'video');
+    return toArray(scopedQuerySelectorAll(this.element, 'amp-video'));
   }
 
 
   /**
    * Applies the specified callback to each media element on the page, after the
    * media element is loaded.
-   * @param {!function(!./media-pool.MediaPool, !Element)} callbackFn The
+   * @param {!function(!./media-pool.MediaInterface)} callbackFn The
    *     callback to be applied to each media element.
    * @return {!Promise} Promise that resolves after the callbacks are called.
    */
   forEachMediaElement_(callbackFn) {
-    const mediaSet = this.getAllMedia_();
-    return this.mediaPoolPromise_.then(mediaPool => {
-      Array.prototype.forEach.call(mediaSet, mediaEl => {
-        callbackFn(mediaPool, mediaEl);
-      });
-    });
+    const media = toArray(
+        scopedQuerySelectorAll(this.element, 'amp-video, amp-audio'));
+
+    return Promise.all(media.map(media =>
+      media.getImpl().then(impl => callbackFn(impl))));
   }
 
 
@@ -334,10 +271,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   pauseAllMedia_(opt_rewindToBeginning) {
-    return this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.pause(/** @type {!HTMLMediaElement} */ (mediaEl),
-          opt_rewindToBeginning);
-    });
+    return this.forEachMediaElement_(el => el.pause());
   }
 
 
@@ -347,21 +281,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   playAllMedia_() {
-    return this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.play(/** @type {!HTMLMediaElement} */ (mediaEl));
-    });
-  }
-
-
-  /**
-   * Preloads all media on this page.
-   * @return {!Promise} Promise that resolves after the callbacks are called.
-   * @private
-   */
-  preloadAllMedia_() {
-    return this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.preload(/** @type {!HTMLMediaElement} */ (mediaEl));
-    });
+    return this.forEachMediaElement_(el => el.play());
   }
 
 
@@ -370,8 +290,10 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   rewindAllMediaToBeginning_() {
-    return this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.rewindToBeginning(/** @type {!HTMLMediaElement} */ (mediaEl));
+    return this.forEachMediaElement_(el => {
+      if (el.rewindToBeginning) {
+        el.rewindToBeginning();
+      }
     });
   }
 
@@ -381,9 +303,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @return {!Promise} Promise that resolves after the callbacks are called.
    */
   muteAllMedia() {
-    return this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.mute(/** @type {!HTMLMediaElement} */ (mediaEl));
-    });
+    return this.forEachMediaElement_(el => el.mute());
   }
 
 
@@ -392,23 +312,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @return {!Promise} Promise that resolves after the callbacks are called.
    */
   unmuteAllMedia() {
-    return this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.unmute(/** @type {!HTMLMediaElement} */ (mediaEl));
-    });
+    return this.forEachMediaElement_(el => el.unmute());
   }
-
-
-  /**
-   * Registers all media on this page
-   * @return {!Promise} Promise that resolves after the callbacks are called.
-   * @private
-   */
-  registerAllMedia_() {
-    return this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.register(/** @type {!HTMLMediaElement} */ (mediaEl));
-    });
-  }
-
 
   /**
    * Starts playing animations, if the animation manager is available.
@@ -445,6 +350,9 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   setActive(isActive) {
     if (isActive) {
+      // TODO(alanorozco): Don't force distance. This is  required for a media-
+      // pool workaround on replay.
+      this.element.setAttribute('distance', '0');
       this.element.setAttribute('active', '');
       this.beforeVisible();
       this.resumeCallback();
@@ -469,11 +377,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   setDistance(distance) {
     this.element.setAttribute('distance', distance);
-    this.registerAllMedia_();
-    if (distance > 0 && distance <= 2) {
-      this.preloadAllMedia_();
-      this.scale_();
-    }
+    this.scale_();
   }
 
 
@@ -656,7 +560,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     this.debounceToggleLoadingSpinner_(true);
-    Array.prototype.forEach.call(videos, videoEl => {
+    videos.forEach(videoEl => {
       this.unlisteners_.push(listen(
           videoEl, 'playing', () => this.debounceToggleLoadingSpinner_(false)));
       this.unlisteners_.push(listen(
