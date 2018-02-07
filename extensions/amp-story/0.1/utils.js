@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {user} from '../../../src/log';
 import {closestBySelector} from '../../../src/dom';
+import {user} from '../../../src/log';
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)
