@@ -38,8 +38,14 @@ const getDateFromCuid = cuid => {
  * @param cuid
  */
 const isCuidInFuture = cuid => {
-  const date = getDateFromCuid(cuid);
-  return ((date.getTime() - 86400000) > Date.now());
+  const computedDate = getDateFromCuid(cuid);
+  const date = computedDate.setDate(computedDate.getDate() - 1);
+  const now = new Date();
+  return (
+    (date.getFullYear() <= now.getFullYear()) &&
+    (date.getMonth() <= now.getMonth()) &&
+    (date.getDay() <= now.getDay())
+  );
 };
 
 /**
