@@ -197,24 +197,22 @@ Each of these providers has a different set of available parameters ([see `data-
     "email": true,
     "twitter": true,
     "tumblr": true,
-    "facebook": {
-      // Facebook requires an `app_id` param
-      "app_id": "MY_FACEBOOK_APP_ID"
-    }
+    // Facebook requires an `app_id` param
+    "facebook": { "app_id": "MY_FACEBOOK_APP_ID" }
   },
   "related-articles": {
     "More to Read": [
       {
-        title: "My friends, this is India [...]",
-        url: "http://a-publisher.com/india"
-        image: "./media/b1.jpg"
+        "title": "My friends, this is India [...]",
+        "url": "http://a-publisher.com/india",
+        "image": "./media/b1.jpg"
       },
       {
-        title: "A wonderful weekend with Tenturi",
-        url: "http://a-publisher.com/tenturi"
-        image: "./media/b2.jpg"
+        "title": "A wonderful weekend with Tenturi",
+        "url": "http://a-publisher.com/tenturi",
+        "image": "./media/b2.jpg"
       },
-      ...
+      // ...
     ],
   }
 }
