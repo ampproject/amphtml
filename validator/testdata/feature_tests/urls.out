@@ -103,17 +103,17 @@ feature_tests/urls.html:70:2 Missing URL for attribute 'src' in tag 'amp-ad'. (s
 >>   ^~~~~~~~~
 feature_tests/urls.html:71:2 Missing URL for attribute 'src' in tag 'amp-anim'. (see https://www.ampproject.org/docs/reference/components/amp-anim) [AMP_TAG_PROBLEM]
 >>   ^~~~~~~~~
-feature_tests/urls.html:71:2 The tag 'amp-anim' requires including the 'amp-anim' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-anim) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:71:2 The tag 'amp-anim' requires including the 'amp-anim' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-anim) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <amp-audio src="" layout="fixed" width="42"></amp-audio>
 >>   ^~~~~~~~~
 feature_tests/urls.html:72:2 Missing URL for attribute 'src' in tag 'amp-audio'. (see https://www.ampproject.org/docs/reference/components/amp-audio) [AMP_TAG_PROBLEM]
 >>   ^~~~~~~~~
-feature_tests/urls.html:72:2 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:72:2 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <amp-iframe src="" width="42" height="42"></amp-iframe>
 >>   ^~~~~~~~~
 feature_tests/urls.html:73:2 Missing URL for attribute 'src' in tag 'amp-iframe'. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [AMP_TAG_PROBLEM]
 >>   ^~~~~~~~~
-feature_tests/urls.html:73:2 The tag 'amp-iframe' requires including the 'amp-iframe' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:73:2 The tag 'amp-iframe' requires including the 'amp-iframe' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <amp-img src="" layout="responsive" width="42" height="42"></amp-img>
 >>   ^~~~~~~~~
 feature_tests/urls.html:74:2 Missing URL for attribute 'src' in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_TAG_PROBLEM]
@@ -134,7 +134,7 @@ feature_tests/urls.html:81:2 Invalid URL protocol 'http:' for attribute 'src' in
 >>   ^~~~~~~~~
 feature_tests/urls.html:82:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-iframe'. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [AMP_TAG_PROBLEM]
 >>   ^~~~~~~~~
-feature_tests/urls.html:82:2 The tag 'amp-iframe' requires including the 'amp-iframe' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:82:2 The tag 'amp-iframe' requires including the 'amp-iframe' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <amp-pixel src="http://amp-pixel" layout="fixed" width="42"></amp-pixel>
 >>   ^~~~~~~~~
 feature_tests/urls.html:83:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-pixel'. (see https://www.ampproject.org/docs/reference/components/amp-pixel) [AMP_TAG_PROBLEM]
@@ -193,17 +193,17 @@ feature_tests/urls.html:108:2 The attribute 'src' in tag 'amp-ad' is set to the 
 >>   ^~~~~~~~~
 feature_tests/urls.html:109:2 The attribute 'src' in tag 'amp-anim' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-anim) [AMP_TAG_PROBLEM]
 >>   ^~~~~~~~~
-feature_tests/urls.html:109:2 The tag 'amp-anim' requires including the 'amp-anim' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-anim) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:109:2 The tag 'amp-anim' requires including the 'amp-anim' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-anim) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <amp-audio src="__amp_source_origin" layout="fixed" width="42"></amp-audio>
 >>   ^~~~~~~~~
 feature_tests/urls.html:110:2 The attribute 'src' in tag 'amp-audio' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-audio) [AMP_TAG_PROBLEM]
 >>   ^~~~~~~~~
-feature_tests/urls.html:110:2 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:110:2 The tag 'amp-audio' requires including the 'amp-audio' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-audio) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <amp-iframe src="__amp_source_origin" width="42" height="42"></amp-iframe>
 >>   ^~~~~~~~~
 feature_tests/urls.html:111:2 The attribute 'src' in tag 'amp-iframe' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [AMP_TAG_PROBLEM]
 >>   ^~~~~~~~~
-feature_tests/urls.html:111:2 The tag 'amp-iframe' requires including the 'amp-iframe' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:111:2 The tag 'amp-iframe' requires including the 'amp-iframe' extension JavaScript. (see https://www.ampproject.org/docs/reference/components/amp-iframe) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 |    <amp-img src="__amp_source_origin" layout="responsive" width="42" height="42"></amp-img>
 >>   ^~~~~~~~~
 feature_tests/urls.html:112:2 The attribute 'src' in tag 'amp-img' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/components/amp-img) [AMP_TAG_PROBLEM]

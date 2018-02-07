@@ -733,25 +733,39 @@ def PrintObject(descriptor, msg, registry, light, out):
     field_and_assigned_values.append((field_desc, AssignedValueFor(
         descriptor, field_desc, field_val, registry, light, out)))
 
-  # First we emit the constructor call, with the appropriate arguments.
+  # Constructor with the appropriate arguments.
   constructor_arg_values = [
       value for (field, value) in field_and_assigned_values
       if field.full_name in CONSTRUCTOR_ARG_FIELDS
   ]
 
   this_message_reference = registry.MessageReferenceForKey(this_message_key)
-  out.Line('var %s = new %s(%s);' %
-           (this_message_reference, msg.DESCRIPTOR.full_name,
-            ','.join(constructor_arg_values)))
 
-  # Then we emit the remaining field values as assignments.
+  # Construct object field values.
+  fields = []
+  fields_string = ''
   for (field, value) in field_and_assigned_values:
     if light and field.name in SKIP_FIELDS_FOR_LIGHT:
       continue
     if field.full_name in CONSTRUCTOR_ARG_FIELDS:
       continue
-    out.Line('%s.%s = %s;' % (this_message_reference,
-                              UnderscoreToCamelCase(field.name), value))
+    fields.append('%s : %s' %  (UnderscoreToCamelCase(field.name), value))
+
+  # Construct the object with object literal field assignment. Rather than
+  # assignment via dot notation, this is more concise and helps reduce the size
+  # of the binary. We also use Object.assign as to not blow away fields that are
+  # set constructor instantiation.
+  if fields:
+    fields_string = '{' + ','.join(fields) + '}'
+    out.Line('var %s = /** @type {!%s} */ (Object.assign(new %s(%s), %s));' %
+             (this_message_reference, msg.DESCRIPTOR.full_name,
+              msg.DESCRIPTOR.full_name, ','.join(constructor_arg_values),
+              fields_string))
+  else:
+    out.Line('var %s = new %s(%s);' %
+             (this_message_reference, msg.DESCRIPTOR.full_name,
+              ','.join(constructor_arg_values)))
+
   if (msg.DESCRIPTOR.full_name == 'amp.validator.CdataSpec' and
       msg.blacklisted_cdata_regex):
     combined_blacklisted_cdata_regex = '(%s)' % '|'.join([
