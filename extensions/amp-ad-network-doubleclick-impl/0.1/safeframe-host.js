@@ -180,6 +180,7 @@ export class SafeframeHostApi {
     return attributes;
   }
 
+  // TODO: Need to fix so it is the geom of the safeframe, not the amp-ad
   getCurrentGeometry() {
     return this.formatGeom_(
         this.baseInstance_.element.getIntersectionChangeEntry());
@@ -217,6 +218,7 @@ export class SafeframeHostApi {
     }));
   }
 
+  // TODO: Need to fix so it is the geom of the safeframe, not the amp-ad
   /**
    * Creates IntersectionObserver instance for this SafeframeAPI instance.
    * We utilize the existing IntersectionObserver class, by passing in this
@@ -247,6 +249,33 @@ export class SafeframeHostApi {
     );
   }
 
+  safeframeFillsAmpAd() {
+    if (!this.iframe_) {
+      return false;
+    }
+    const iframeRect = this.iframe_.getBoundingClientRect();
+    const ampAdRect = this.baseInstance_.element.getBoundingClientRect();
+    return iframeRect.width == ampAdRect.width &&
+        iframeRect.height == ampAdRect.height &&
+        iframeRect.x == ampAdRect.x &&
+        iframeRect.y == ampAdRect.y;
+  }
+
+  getFrameCorrections() {
+    if (!this.iframe_) {
+      return {dT: 0, dB: 0, dL: 0, dR: 0};
+    }
+    const iframeRect = this.iframe_.getBoundingClientRect();
+    const ampAdRect = this.baseInstance_.element.getBoundingClientRect();
+    return {
+      dT: (iframeRect.y - ampAdRect.y),
+      dL: (iframeRect.x - ampAdRect.x),
+      dB: ((iframeRect.height + iframeRect.y) - (ampAdRect.height + ampAdRect.y)),
+      dR: ((iframeRect.width + iframeRect.x) - (ampAdRect.width  + ampAdRect.x)),
+
+    };
+  }
+
   /**
    * Converts an IntersectionObserver-formatted change message to the
    * geometry update format expected by GPT Safeframe.
@@ -267,6 +296,7 @@ export class SafeframeHostApi {
         return percInView;
       }
     };
+    const corrections = this.getFrameCorrections();
     const frameHeight = changes.boundingClientRect.bottom -
           changes.boundingClientRect.top;
     const frameWidth = changes.boundingClientRect.right -
@@ -282,20 +312,20 @@ export class SafeframeHostApi {
       'windowCoords_r': changes.rootBounds.right,
       'windowCoords_b': changes.rootBounds.bottom,
       'windowCoords_l': changes.rootBounds.left,
-      'frameCoords_t': changes.boundingClientRect.top,// + this.viewport.getScrollTop(),
-      'frameCoords_r': changes.boundingClientRect.right,// + this.viewport.getScrollLeft(),
-      'frameCoords_b': changes.boundingClientRect.bottom,//  + this.viewport.getScrollTop(),
-      'frameCoords_l': changes.boundingClientRect.left,// + this.viewport.getScrollLeft(),
+      'frameCoords_t': changes.boundingClientRect.top + corrections['dT'],
+      'frameCoords_r': changes.boundingClientRect.right + corrections['dR'],
+      'frameCoords_b': changes.boundingClientRect.bottom + corrections['dB'],
+      'frameCoords_l': changes.boundingClientRect.left + corrections['dL'],
       'styleZIndex': this.baseInstance_.element.style.zIndex,
       'allowedExpansion_t': expandHeight,
       'allowedExpansion_r': expandWidth,
       'allowedExpansion_b': expandHeight,
       'allowedExpansion_l': expandWidth,
-      'xInView': percInView(changes.rootBounds.top,
+      'yInView': percInView(changes.rootBounds.top,
           changes.rootBounds.bottom,
           changes.boundingClientRect.top,
           changes.boundingClientRect.bottom),
-      'yInView': percInView(changes.rootBounds.left,
+      'xInView': percInView(changes.rootBounds.left,
           changes.rootBounds.right,
           changes.boundingClientRect.left,
           changes.boundingClientRect.right),
@@ -357,17 +387,13 @@ export class SafeframeHostApi {
   }
 
   handleSizeChange(height, width, message) {
-    this.baseInstance_.attemptChangeSize(height, width).then(() => {
-      const success = !!this.baseInstance_.element.style.height.match(height)
-            && !!this.baseInstance_.element.style.width.match(width);
-      // Update the sizing of the safeframe to match the size of its
-      // containing amp-ad element.
-      if (success) {
-        this.iframe_.style.height =
-            this.baseInstance_.element.style.height;
-        this.iframe_.style.width =
-            this.baseInstance_.element.style.width;
-      }
+    height = height /2 ;
+    width = width/2;
+    const resizeIframe = () => {
+      this.iframe_.style.height = height + "px";
+      this.iframe_.style.width = width + "px";
+    };
+    const sendResizeResponse = success => {
       this.sendMessage_(JSON.stringify({
         uid: this.uid,
         success,
@@ -378,7 +404,23 @@ export class SafeframeHostApi {
         'expand_l': this.currentGeometry_.allowedExpansion_l,
         push: true,
       }), message);
-    }).catch(() => {});
+    };
+    if (width <= this.baseInstance_.element.getBoundingClientRect().width &&
+        height <= this.baseInstance_.element.getBoundingClientRect().height) {
+      resizeIframe();
+      sendResizeResponse(true);
+    } else {
+      this.baseInstance_.attemptChangeSize(height, width).then(() => {
+        const success = !!this.baseInstance_.element.style.height.match(height)
+              && !!this.baseInstance_.element.style.width.match(width);
+        // Update the sizing of the safeframe to match the size of its
+        // containing amp-ad element.
+        if (success) {
+          resizeIframe();
+        }
+        sendResizeResponse(success);
+      }).catch(() => {});
+    }
   }
 
   /**
