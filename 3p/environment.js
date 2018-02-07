@@ -261,4 +261,4 @@ export function installEmbedStateListener() {
   listenParent(window, 'embed-state', function(data) {
     inViewport = data.inViewport;
   });
-};
+}

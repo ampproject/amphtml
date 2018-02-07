@@ -138,7 +138,7 @@ export function calculateFontSize_(measurer, expectedHeight, expectedWidth,
     }
   }
   return minFontSize;
-};
+}
 
 
 /**
