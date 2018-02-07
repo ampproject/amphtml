@@ -175,7 +175,7 @@ export class StandardActions {
     const node = invocation.target;
     const win = (node.ownerDocument || node).defaultView;
     const url = invocation.args['url'];
-    const requestedBy = `${invocation.target}.${invocation.method}`;
+    const requestedBy = `AMP.${invocation.method}`;
     Services.clickHandlerForDoc(this.ampdoc).navigateTo(win, url, requestedBy);
     return null;
   }
