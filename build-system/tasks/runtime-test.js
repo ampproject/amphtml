@@ -156,10 +156,12 @@ function printArgvMessages() {
     compiled: 'Running tests against minified code.',
     grep: 'Only running tests that match the pattern "' +
         cyan(argv.grep) + '".',
+    coverage: 'Runing tests in code coverage mode.',
   };
   if (!process.env.TRAVIS) {
     log(green('Run'), cyan('gulp help'),
-        green('to see a list of all test flags. (Use'), cyan('--nohelp'),
+        green('to see a list of all test flags.'));
+    log(green('⤷ Use'), cyan('--nohelp'),
         green('to silence these messages.)'));
     if (!argv.unit && !argv.integration && !argv.files && !argv.a4a) {
       log(green('Running all tests.'));
@@ -167,7 +169,7 @@ function printArgvMessages() {
           green('to run just the unit tests or integration tests.'));
     }
     if (!argv.testnames && !argv.files) {
-      log(green('Use'), cyan('--testnames'),
+      log(green('⤷ Use'), cyan('--testnames'),
           green('to see the names of all tests being run.'));
     }
     if (!argv.compiled) {
@@ -294,11 +296,10 @@ function runTests() {
   }
 
   if (argv.coverage) {
-    log(cyan('Including code coverage tests'));
     c.files = c.files.concat(config.coveragePaths);
     c.browserify.transform.push(
         ['browserify-istanbul', {instrumenterConfig: {embedSource: true}}]);
-    c.reporters = c.reporters.concat(['progress', 'coverage']);
+    c.reporters = c.reporters.concat(['coverage']);
     if (c.preprocessors['src/**/*.js']) {
       c.preprocessors['src/**/*.js'].push('coverage');
     }
@@ -417,5 +418,6 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     'nohelp': '  Silence help messages that are printed prior to test run',
     'a4a': '  Runs all A4A tests',
     'config': '  Sets the runtime\'s AMP config to one of "prod" or "canary"',
+    'coverage': '  Run tests in code coverage mode',
   },
 });
