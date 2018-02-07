@@ -39,11 +39,11 @@ limitations under the License.
 
 ## Behavior
 `amp-story-auto-ads` extension dynamically inserts ads (implemented as `amp-ad`)
-into the story at the time when the content is consumed.
+into the story while content is being consumed by the user.
 
 Each `amp-ad` is inserted as a full screen story page. To prevent showing 
 blank/unloaded ads, the ad is pre-rendered completely in the background before 
-being visible to users. Based on user interactions, the extension decides when 
+making it visible to the user. Based on user interactions, the extension decides when 
 and where to insert ads.
 
 Ad in story can be skipped the same way as normal story pages by tapping on the
@@ -61,7 +61,7 @@ looks like the following:
        {
           "ad-attributes": {
             "type": "custom",
-            "data-src": "https://adserver.com/getad?slot=abcd1234"
+            "data-url": "https://adserver.com/getad?slot=abcd1234"
           }
        }
      </script>
@@ -74,11 +74,12 @@ looks like the following:
 `ad-attributes` is a map of key-value pairs, which are the attributes of the 
  `amp-ad` element to be inserted.
  
-The above example will insert the following `amp-ad` element.
+The above example will insert the following `amp-ad` element, which represents
+a [custom ad](../../ads/custom.md):
 
 ```html
 <amp-ad type="custom"
-  data-src="https://adserver.com/getad?slot=abcd1234"
+  data-url="https://adserver.com/getad?slot=abcd1234"
 </amp-ad>
 ```
 
