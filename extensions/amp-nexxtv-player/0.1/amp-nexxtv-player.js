@@ -196,7 +196,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
         }), '*');
       }
     });
-  };
+  }
 
   // emitter
   handleNexxMessages_(event) {

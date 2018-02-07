@@ -885,7 +885,7 @@ export class MediaPoolRoot {
   /**
    * @return {!Element} The root element of this media pool.
    */
-  getElement() {};
+  getElement() {}
 
   /**
    * @param {!Element} unusedElement The element whose distance should be
@@ -897,12 +897,12 @@ export class MediaPoolRoot {
    *     furthest from the user's current position in the document are evicted
    *     from the MediaPool first).
    */
-  getElementDistance(unusedElement) {};
+  getElementDistance(unusedElement) {}
 
 
   /**
    * @return {!Object<!MediaType, number>} The maximum amount of each media
    *     type to allow within this element.
    */
-  getMaxMediaElementCounts() {};
+  getMaxMediaElementCounts() {}
 }

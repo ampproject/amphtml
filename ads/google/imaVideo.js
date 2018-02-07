@@ -812,7 +812,7 @@ function getPagePosition(el) {
     el != null;
     lx += el./*OK*/offsetLeft, ly += el./*OK*/offsetTop,
     el = el./*OK*/offsetParent)
-  {};
+  {}
   return {x: lx,y: ly};
 }
 

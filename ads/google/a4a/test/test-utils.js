@@ -34,7 +34,7 @@ import {
 } from '../utils';
 import {
   MockA4AImpl,
-} from '../../../../extensions/amp-a4a/0.1/test/utils';;
+} from '../../../../extensions/amp-a4a/0.1/test/utils';
 import {Services} from '../../../../src/services';
 import {buildUrl} from '../url-builder';
 import {createElementWithAttributes} from '../../../../src/dom';

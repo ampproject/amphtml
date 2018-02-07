@@ -2246,4 +2246,4 @@ export let SizeDef;
  */
 export function installResourcesServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(ampdoc, 'resources', Resources);
-};
+}

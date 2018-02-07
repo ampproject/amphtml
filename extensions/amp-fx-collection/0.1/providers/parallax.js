@@ -186,4 +186,4 @@ class ParallaxElement {
       return aboveTheFold ? offsetTop : viewportHeight;
     });
   }
-};
+}

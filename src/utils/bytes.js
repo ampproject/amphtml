@@ -56,7 +56,7 @@ export function stringToBytes(str) {
     bytes[i] = charCode;
   }
   return bytes;
-};
+}
 
 /**
  * Converts a 8-bit bytes array into a string
@@ -71,7 +71,7 @@ export function bytesToString(bytes) {
     array[i] = String.fromCharCode(bytes[i]);
   }
   return array.join('');
-};
+}
 
 /**
  * Converts a 4-item byte array to an unsigned integer.

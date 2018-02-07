@@ -178,7 +178,7 @@ export class AbstractAmpContext {
     });
 
     return unlisten;
-  };
+  }
 
   /**
    *  Requests HTML snippet from the parent window.
@@ -216,7 +216,7 @@ export class AbstractAmpContext {
       'width': width,
       'height': height,
     }));
-  };
+  }
 
   /**
    *  Allows a creative to set the callback function for when the resize
@@ -228,7 +228,7 @@ export class AbstractAmpContext {
   onResizeSuccess(callback) {
     this.client_.registerCallback(MessageType.EMBED_SIZE_CHANGED, obj => {
       callback(obj['requestedHeight'], obj['requestedWidth']); });
-  };
+  }
 
   /**
    *  Allows a creative to set the callback function for when the resize
@@ -241,7 +241,7 @@ export class AbstractAmpContext {
     this.client_.registerCallback(MessageType.EMBED_SIZE_DENIED, obj => {
       callback(obj['requestedHeight'], obj['requestedWidth']);
     });
-  };
+  }
 
   /**
    *  Takes the current name on the window, and attaches it to

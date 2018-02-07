@@ -31,11 +31,11 @@ export function debounce(func, wait, immediate) {
 	  clearTimeout(timeout);
 	  timeout = setTimeout(function() {
       timeout = null;
-      if (!immediate) { func.apply(context, args); };
+      if (!immediate) { func.apply(context, args); }
 	  }, wait);
 	  if (immediate && !timeout) { func.apply(context, args); }
   };
-};
+}
 
 /**
  *
@@ -56,4 +56,4 @@ export function getElementCreator(document) {
 function appendChildren(element, children) {
   children = (!children) ? [] : Array.isArray(children) ? children : [children];
   children.forEach(child => element.appendChild(child));
-};
+}

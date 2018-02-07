@@ -41,4 +41,4 @@ export function sogouad(global, data) {
   }
   slot.appendChild(ad);
   loadScript(global, 'https://theta.sogoucdn.com/wap/js/aw.js');
-};
+}

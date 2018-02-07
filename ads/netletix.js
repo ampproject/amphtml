@@ -73,7 +73,7 @@ export function netletix(global, data) {
           if (event.data.width && event.data.height &&
               (event.data.width != nxw || event.data.height != nxh)) {
             global.context.requestResize(event.data.width, event.data.height);
-          };
+          }
           break;
         case 'nx-empty':
           global.context.noContentAvailable();

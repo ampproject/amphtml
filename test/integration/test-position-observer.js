@@ -176,7 +176,7 @@ config.run('amp-position-observer', function() {
 function getOpacity(win) {
   const animTarget = win.document.querySelector('#animTarget');
   return parseFloat(win.getComputedStyle(animTarget).opacity);
-};
+}
 
 function waitForOpacity(win, comparison, factor) {
   return poll('wait for opacity to ' + comparison + ': ' + factor, () => {
@@ -188,7 +188,7 @@ function waitForOpacity(win, comparison, factor) {
       return getOpacity(win) > factor;
     }
   });
-};
+}
 
 function ensureOpacityIsNoChangingAnymore(win) {
   return new Promise((resolve, reject) => {
@@ -207,4 +207,4 @@ function ensureOpacityIsNoChangingAnymore(win) {
 
 function getViewportHeight(win) {
   return win.document.querySelector('.spacer').offsetHeight;
-};
+}

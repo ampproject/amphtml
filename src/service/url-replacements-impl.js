@@ -62,7 +62,7 @@ function encodeValue(val) {
     return '';
   }
   return encodeURIComponent(/** @type {string} */(val));
-};
+}
 
 /**
  * Class to provide variables that pertain to top level AMP window.

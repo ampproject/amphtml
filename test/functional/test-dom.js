@@ -961,7 +961,7 @@ describes.realWin('DOM', {
   },
 }, env => {
   let doc;
-  class TestElement extends BaseElement {};
+  class TestElement extends BaseElement {}
   describe('whenUpgradeToCustomElement function', () => {
     beforeEach(() => {
       doc = env.win.document;

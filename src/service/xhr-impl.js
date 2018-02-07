@@ -826,4 +826,4 @@ export function xhrServiceForTesting(window) {
  */
 export function installXhrService(window) {
   registerServiceBuilder(window, 'xhr', Xhr);
-};
+}

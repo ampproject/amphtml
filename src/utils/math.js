@@ -51,7 +51,7 @@ export function mapRange(val, min1, max1, min2, max2) {
   }
 
   return (val - min1) * (max2 - min2) / (max1 - min1) + min2;
-};
+}
 
 /**
  * Restricts a number to be in the given min/max range.
@@ -68,4 +68,4 @@ export function mapRange(val, min1, max1, min2, max2) {
  */
 export function clamp(val, min, max) {
   return Math.min(Math.max(val, min), max);
-};
+}

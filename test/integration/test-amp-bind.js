@@ -427,7 +427,7 @@ describe.configure().ifNewChrome().run('amp-bind', function() {
       const button = fixture.doc.getElementById('disallowedVidUrlButton');
       const vid = fixture.doc.getElementById('video');
       expect(vid.getAttribute('src')).to
-          .equal('https://www.google.com/unbound.webm');;
+          .equal('https://www.google.com/unbound.webm');
       button.click();
       return waitForSetState().then(() => {
         expect(vid.getAttribute('src')).to

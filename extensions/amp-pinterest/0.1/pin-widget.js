@@ -259,4 +259,4 @@ export class PinWidget {
         .then(this.renderPin.bind(this));
   }
 
-};
+}

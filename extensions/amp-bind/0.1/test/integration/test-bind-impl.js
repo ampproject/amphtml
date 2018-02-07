@@ -100,7 +100,7 @@ function waitForEvent(env, name) {
     function callback() {
       resolve();
       env.win.removeEventListener(name, callback);
-    };
+    }
     env.win.addEventListener(name, callback);
   });
 }

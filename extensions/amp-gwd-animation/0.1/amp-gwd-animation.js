@@ -180,7 +180,7 @@ export function addAction(ampdoc, element, event, actionStr) {
 
   // Reset the element's actions with the new actions string.
   Services.actionServiceForDoc(ampdoc).setActions(element, newActionsStr);
-};
+}
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerServiceForDoc(GWD_SERVICE_NAME, AmpGwdRuntimeService);
