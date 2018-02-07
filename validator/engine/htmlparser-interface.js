@@ -1,5 +1,5 @@
 /**
- * @license
+ * @license DEDUPE_ON_MINIFY
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,12 +13,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the license.
- *
- * Credits:
- *   Copyright 2006-2008, The Google Caja project, licensed under the
- *   Apache License (http://code.google.com/p/google-caja/).
- *   Copyright 2009, The Closure Library Authors, licensed under the
- *   Apache License.
  */
 
 goog.provide('amp.htmlparser.DocLocator');
