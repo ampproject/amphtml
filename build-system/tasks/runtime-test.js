@@ -240,7 +240,7 @@ function runTests() {
       c.files = c.files.concat(config.unitTestPaths);
     }
   } else if (argv.a4a) {
-    c.files = c.files.concat(config.commonTestPaths, config.a4aTestPaths);
+    c.files = c.files.concat(config.a4aTestPaths);
   } else {
     c.files = c.files.concat(config.testPaths);
   }

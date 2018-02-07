@@ -15,8 +15,11 @@
  */
 'use strict';
 
-const commonTestPaths = [
+const initTestsPath = [
   'test/_init_tests.js',
+];
+
+const commonTestPaths = initTestsPath.concat([
   'test/fixtures/*.html',
   {
     pattern: 'test/fixtures/served/*.html',
@@ -54,25 +57,23 @@ const commonTestPaths = [
     nocache: false,
     watched: false,
   },
-];
+]);
 
 const simpleTestPath = [
   'test/simple-test.js',
 ];
 
-const basicTestPaths = [
+const testPaths = commonTestPaths.concat([
   'test/**/*.js',
   'ads/**/test/test-*.js',
   'extensions/**/test/**/*.js',
-];
+]);
 
-const testPaths = commonTestPaths.concat(basicTestPaths);
-
-const a4aTestPaths = [
+const a4aTestPaths = initTestsPath.concat([
   'extensions/amp-a4a/**/test/**/*.js',
   'extensions/amp-ad-network-*/**/test/**/*.js',
   'ads/google/a4a/test/*.js',
-];
+]);
 
 const chaiAsPromised = [
   'test/chai-as-promised/chai-as-promised.js',
@@ -99,7 +100,6 @@ const integrationTestPaths = commonTestPaths.concat([
 module.exports = {
   commonTestPaths,
   simpleTestPath,
-  basicTestPaths,
   testPaths,
   a4aTestPaths,
   chaiAsPromised,
