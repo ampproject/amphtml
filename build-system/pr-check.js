@@ -526,12 +526,7 @@ function main() {
         buildTargets.has('RUNTIME')) {
       command.testBuildSystem();
     }
-    if (buildTargets.has('BUILD_SYSTEM') ||
-        buildTargets.has('RUNTIME') ||
-        buildTargets.has('VISUAL_DIFF') ||
-        buildTargets.has('INTEGRATION_TEST')) {
-      command.runLintCheck();
-    }
+    command.runLintCheck();
     if (buildTargets.has('DOCS')) {
       command.testDocumentLinks();
     }
