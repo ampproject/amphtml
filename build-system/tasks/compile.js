@@ -81,12 +81,12 @@ function cleanupBuildDir() {
 exports.cleanupBuildDir = cleanupBuildDir;
 
 // Formats a closure compiler error message into a more readable form by
-// dropping the lengthy invocation line...
+// dropping the lengthy java invocation line...
 //     Command failed: java -jar ... --js_output_file="<file>"
 // ...and then syntax highlighting the error text.
 function formatClosureCompilerError(message) {
-  message =
-      message.replace(/Command failed:[^]*--js_output_file=\".*?\"\n/, '');
+  const javaInvocationLine = /Command failed:[^]*--js_output_file=\".*?\"\n/;
+  message = message.replace(javaInvocationLine, '');
   message = highlight(message, {ignoreIllegals: true}); // never throws
   message = message.replace(/WARNING/g, colors.yellow('WARNING'));
   message = message.replace(/ERROR/g, colors.red('ERROR'));
