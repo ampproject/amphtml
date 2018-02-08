@@ -82,7 +82,7 @@ export class LightboxManager {
      * Cache for the `maybeInit()` call.
      * @private {?Promise}
      **/
-    this.initPromise_ = null;
+    this.scanPromise_ = null;
 
     /**
      * Ordered lists of lightboxable elements according to group
@@ -117,14 +117,15 @@ export class LightboxManager {
    * @return {!Promise}
    */
   maybeInit() {
-    if (this.initPromise_) {
-      return this.initPromise_;
+    if (this.scanPromise_) {
+      return this.scanPromise_;
     }
-    this.initPromise_ = this.scanLightboxables_();
+    this.scanPromise_ = this.scanLightboxables_();
     // Rescan whenever DOM changes happen.
-    this.ampdoc_.getRootNode().addEventListener(AmpEvents.DOM_UPDATE,
-        this.scanLightboxables_.bind(this));
-    return this.initPromise_;
+    this.ampdoc_.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, () => {
+      this.scanPromise_ = this.scanLightboxables_();
+    });
+    return this.scanPromise_;
   }
 
   /**
