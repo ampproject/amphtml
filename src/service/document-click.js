@@ -155,13 +155,9 @@ export class ClickHandler {
     // try to ask the viewer to navigate this AMP URL.
     if (opt_requestedBy) {
       if (!this.a2aFeatures_) {
-        const meta = this.rootNode_.querySelector(
-            'meta[name="amp-to-amp-navigation"]');
-        this.a2aFeatures_ = (meta && meta.hasAttribute('content'))
-          ? meta.getAttribute('content').split(',').map(s => s.trim())
-          : [];
+        this.a2aFeatures_ = this.queryA2AFeatures_();
       }
-      if (this.a2aFeatures_.indexOf(opt_requestedBy) >= 0) {
+      if (this.a2aFeatures_.includes(opt_requestedBy)) {
         if (this.viewer_.navigateToAmpUrl(url, opt_requestedBy)) {
           return;
         }
@@ -170,6 +166,19 @@ export class ClickHandler {
 
     // Otherwise, perform normal behavior of navigating the top frame.
     win.top.location.href = url;
+  }
+
+  /**
+   * @return {!Array<string>}
+   * @private
+   */
+  queryA2AFeatures_() {
+    const meta = this.rootNode_.querySelector(
+        'meta[name="amp-to-amp-navigation"]');
+    if (meta && meta.hasAttribute('content')) {
+      return meta.getAttribute('content').split(',').map(s => s.trim());
+    }
+    return [];
   }
 
   /**
@@ -272,10 +281,11 @@ export class ClickHandler {
    * @private
    */
   handleA2AClick_(e, target, location) {
-    const relations = (target.hasAttribute('rel'))
-      ? target.getAttribute('rel').split(' ').map(s => s.trim())
-      : [];
-    if (relations.indexOf('amphtml') < 0) {
+    if (!target.hasAttribute('rel')) {
+      return false;
+    }
+    const relations = target.getAttribute('rel').split(' ').map(s => s.trim());
+    if (!relations.includes('amphtml')) {
       return false;
     }
     // The viewer may not support the capability for navigating AMP links.
