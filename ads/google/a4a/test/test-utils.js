@@ -415,6 +415,28 @@ describe('Google A4A utils', () => {
         });
       });
     });
+
+    it('should include GA cid/hid', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        doc.win = fixture.win;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        impl.win.gaGlobal = {cid: 'foo', hid: 'bar'};
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', 0, [], []).then(url => {
+            expect(url).to.match(/[&?]ga_cid=foo[&$]/);
+            expect(url).to.match(/[&?]ga_hid=bar[&$]/);
+          });
+        });
+      });
+    });
   });
 
   describe('#mergeExperimentIds', () => {
