@@ -249,18 +249,6 @@ export class SafeframeHostApi {
     );
   }
 
-  safeframeFillsAmpAd() {
-    if (!this.iframe_) {
-      return false;
-    }
-    const iframeRect = this.iframe_.getBoundingClientRect();
-    const ampAdRect = this.baseInstance_.element.getBoundingClientRect();
-    return iframeRect.width == ampAdRect.width &&
-        iframeRect.height == ampAdRect.height &&
-        iframeRect.x == ampAdRect.x &&
-        iframeRect.y == ampAdRect.y;
-  }
-
   getFrameCorrections() {
     if (!this.iframe_) {
       return {dT: 0, dB: 0, dL: 0, dR: 0};
@@ -272,7 +260,6 @@ export class SafeframeHostApi {
       dL: (iframeRect.x - ampAdRect.x),
       dB: ((iframeRect.height + iframeRect.y) - (ampAdRect.height + ampAdRect.y)),
       dR: ((iframeRect.width + iframeRect.x) - (ampAdRect.width  + ampAdRect.x)),
-
     };
   }
 
@@ -297,6 +284,10 @@ export class SafeframeHostApi {
       }
     };
     const corrections = this.getFrameCorrections();
+    changes.boundingClientRect.right += corrections['dR'],
+    changes.boundingClientRect.top += corrections['dT'];
+    changes.boundingClientRect.bottom += corrections['dB'];
+    changes.boundingClientRect.left += corrections['dL'];
     const frameHeight = changes.boundingClientRect.bottom -
           changes.boundingClientRect.top;
     const frameWidth = changes.boundingClientRect.right -
@@ -312,23 +303,23 @@ export class SafeframeHostApi {
       'windowCoords_r': changes.rootBounds.right,
       'windowCoords_b': changes.rootBounds.bottom,
       'windowCoords_l': changes.rootBounds.left,
-      'frameCoords_t': changes.boundingClientRect.top + corrections['dT'],
-      'frameCoords_r': changes.boundingClientRect.right + corrections['dR'],
-      'frameCoords_b': changes.boundingClientRect.bottom + corrections['dB'],
-      'frameCoords_l': changes.boundingClientRect.left + corrections['dL'],
+      'frameCoords_t': changes.boundingClientRect.top,
+      'frameCoords_r': changes.boundingClientRect.right,
+      'frameCoords_b': changes.boundingClientRect.bottom,
+      'frameCoords_l': changes.boundingClientRect.left,
       'styleZIndex': this.baseInstance_.element.style.zIndex,
       'allowedExpansion_t': expandHeight,
       'allowedExpansion_r': expandWidth,
       'allowedExpansion_b': expandHeight,
       'allowedExpansion_l': expandWidth,
       'yInView': percInView(changes.rootBounds.top,
-          changes.rootBounds.bottom,
-          changes.boundingClientRect.top,
-          changes.boundingClientRect.bottom),
+                            changes.rootBounds.bottom,
+                            changes.boundingClientRect.top,
+                            changes.boundingClientRect.bottom),
       'xInView': percInView(changes.rootBounds.left,
-          changes.rootBounds.right,
-          changes.boundingClientRect.left,
-          changes.boundingClientRect.right),
+                            changes.rootBounds.right,
+                            changes.boundingClientRect.left,
+                            changes.boundingClientRect.right),
     };
     return JSON.stringify(this.currentGeometry_);
   }
@@ -387,8 +378,6 @@ export class SafeframeHostApi {
   }
 
   handleSizeChange(height, width, message) {
-    height = height /2 ;
-    width = width/2;
     const resizeIframe = () => {
       this.iframe_.style.height = height + "px";
       this.iframe_.style.width = width + "px";
@@ -450,10 +439,12 @@ export class SafeframeHostApi {
   handleExpandRequest_(payload) {
     // TODO: Something is not working right when the frame is allllmost out of viewport
     // and when it is fully out of viewport
-    this.handleSizeChange(Math.floor(payload.expand_b + payload.expand_t),// +
-        //this.initialHeight_),
-        Math.floor(payload.expand_r + payload.expand_l),// +
-        //  this.initialWidth_),
+    this.handleSizeChange(Math.floor(payload.expand_b +
+                                     payload.expand_t +
+                                     Number(this.iframe_.height)),
+                          Math.floor(payload.expand_r +
+                                     payload.expand_l +
+                                     Number(this.iframe_.width)),
         SERVICE.EXPAND_RESPONSE);
   }
 
