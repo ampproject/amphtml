@@ -118,6 +118,7 @@ class AmpStickyAd extends AMP.BaseElement {
   /** @override */
   collapsedCallback() {
     this.collapsed_ = true;
+    this.visible_ = false;
     toggle(this.element, false);
     this.vsync_.mutate(() => {
       this.viewport_.updatePaddingBottom(0);
