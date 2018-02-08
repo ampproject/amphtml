@@ -41,11 +41,8 @@ describes.realWin('media-tasks', {}, () => {
     vsyncApi = {
       mutatePromise: () => {},
     };
-    sandbox.stub(vsyncApi, 'mutatePromise')
-        .callsFake(callback => {
-          callback();
-          return Promise.resolve();
-        });
+    sandbox.stub(vsyncApi, 'mutatePromise').resolves(callback => {callback();});
+
   });
 
   describe('PauseTask', () => {

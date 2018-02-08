@@ -237,7 +237,7 @@ export class MediaPool {
         return new Sources(BLANK_VIDEO_SRC);
       default:
         dev().error('AMP-STORY', `No default media for type ${mediaType}.`);
-        return '';
+        return new Sources();
     }
   }
 
@@ -642,8 +642,8 @@ export class MediaPool {
    * Preloads the content of the specified media element in the DOM.
    * @param {!HTMLMediaElement} domMediaEl The media element, found in the DOM,
    *     whose content should be loaded.
-   * @return {!Promise<!HTMLMediaElement>} A promise that is resolved when the
-   *     specified media element has been successfully loaded.
+   * @return {!Promise} A promise that is resolved when the specified media
+   *     element has successfully started preloading.
    */
   preload(domMediaEl) {
     // Empty then() invocation hides the value yielded by the loadInternal_
@@ -657,14 +657,14 @@ export class MediaPool {
    * Plays the specified media element in the DOM by replacing it with a media
    * element from the pool and playing that.
    * @param {!HTMLMediaElement} domMediaEl The media element to be played.
-   * @return {!Promise<!HTMLMediaElement>} A promise that is resolved when the
-   *     specified media element has been successfully played.
+   * @return {!Promise} A promise that is resolved when the specified media
+   *     element has been successfully played.
    */
   play(domMediaEl) {
     return this.loadInternal_(domMediaEl)
         .then(poolMediaEl => {
           if (!poolMediaEl) {
-            return;
+            return Promise.resolve();
           }
 
           return this.enqueueMediaElementTask_(poolMediaEl, new PlayTask());
@@ -677,8 +677,8 @@ export class MediaPool {
    * @param {!HTMLMediaElement} domMediaEl The media element to be paused.
    * @param {boolean=} opt_rewindToBeginning Whether to rewind the currentTime
    *     of media items to the beginning.
-   * @return {!Promise<!HTMLMediaElement>} A promise that is resolved when the
-   *     specified media element has been successfully paused.
+   * @return {!Promise} A promise that is resolved when the specified media
+   *     element has been successfully paused.
    */
   pause(domMediaEl, opt_rewindToBeginning) {
     const mediaType = this.getMediaType_(domMediaEl);
@@ -686,13 +686,15 @@ export class MediaPool {
         this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
 
     if (!poolMediaEl) {
-      return;
+      return Promise.resolve();
     }
 
     return this.enqueueMediaElementTask_(poolMediaEl, new PauseTask())
         .then(() => {
           if (opt_rewindToBeginning) {
-            this.enqueueMediaElementTask_(poolMediaEl, new RewindTask());
+            this.enqueueMediaElementTask_(
+                /** @type {!HTMLMediaElement} */ (poolMediaEl),
+                new RewindTask());
           }
         });
   }
@@ -701,7 +703,7 @@ export class MediaPool {
   /**
    * Rewinds a specified media element in the DOM to 0.
    * @param {!HTMLMediaElement} domMediaEl The media element to be rewound.
-   * @return {!Promise<!HTMLMediaElement>} A promise that is resolved when the
+   * @return {!Promise} A promise that is resolved when the
    *     specified media element has been successfully rewound.
    */
   rewindToBeginning(domMediaEl) {
@@ -710,7 +712,7 @@ export class MediaPool {
         this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
 
     if (!poolMediaEl) {
-      return;
+      return Promise.resolve();
     }
 
     return this.enqueueMediaElementTask_(poolMediaEl, new RewindTask());
@@ -720,8 +722,8 @@ export class MediaPool {
   /**
    * Mutes the specified media element in the DOM.
    * @param {!HTMLMediaElement} domMediaEl The media element to be muted.
-   * @return {!Promise<!HTMLMediaElement>} A promise that is resolved when the
-   *     specified media element has been successfully muted.
+   * @return {!Promise} A promise that is resolved when the specified media
+   *     element has been successfully muted.
    */
   mute(domMediaEl) {
     const mediaType = this.getMediaType_(domMediaEl);
@@ -729,7 +731,7 @@ export class MediaPool {
         this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
 
     if (!poolMediaEl) {
-      return;
+      return Promise.resolve();
     }
 
     return this.enqueueMediaElementTask_(poolMediaEl, new MuteTask());
@@ -739,8 +741,8 @@ export class MediaPool {
   /**
    * Unmutes the specified media element in the DOM.
    * @param {!HTMLMediaElement} domMediaEl The media element to be unmuted.
-   * @return {!Promise<!HTMLMediaElement>} A promise that is resolved when the
-   *     specified media element has been successfully paused.
+   * @return {!Promise} A promise that is resolved when the specified media
+   *     element has been successfully paused.
    */
   unmute(domMediaEl) {
     const mediaType = this.getMediaType_(domMediaEl);
@@ -748,7 +750,7 @@ export class MediaPool {
         this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
 
     if (!poolMediaEl) {
-      return;
+      return Promise.resolve();
     }
 
     return this.enqueueMediaElementTask_(poolMediaEl, new UnmuteTask());
@@ -816,7 +818,7 @@ export class MediaPool {
   /**
    * @param {!HTMLMediaElement} mediaEl The element for which the specified task
    *     should be executed.
-   * @param {!MediaTask} task The task to be executed.
+   * @param {!./media-tasks.MediaTask} task The task to be executed.
    * @return {!Promise} A promise that is resolved when the specified task is
    *     completed.
    * @private

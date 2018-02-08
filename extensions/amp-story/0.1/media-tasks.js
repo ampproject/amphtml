@@ -142,7 +142,7 @@ function copyAttributes(fromEl, toEl) {
 /**
  * Base class for tasks executed in order on HTMLMediaElements.
  */
-class MediaTask {
+export class MediaTask {
   constructor(name) {
     /** @private @const {string} */
     this.name_ = name;
