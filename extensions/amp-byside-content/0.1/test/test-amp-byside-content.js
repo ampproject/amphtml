@@ -15,6 +15,7 @@
  */
 
 import '../amp-byside-content';
+import {mockServiceForDoc} from '../../../../testing/test-helper';
 
 describes.realWin('amp-byside-content', {
   amp: {
@@ -22,11 +23,14 @@ describes.realWin('amp-byside-content', {
   },
   ampAdCss: true,
 }, env => {
-  let win, doc;
+  let win, doc, urlMock;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
+    urlMock = mockServiceForDoc(sandbox, env.ampdoc, 'url-replace', [
+      'expandUrlAsync',
+    ]);
   });
 
   function getElement(attributes, opt_responsive, opt_beforeLayoutCallback) {
@@ -44,6 +48,9 @@ describes.realWin('amp-byside-content', {
 
     doc.body.appendChild(elem);
     return elem.build().then(() => {
+      urlMock.expandUrlAsync
+          .returns(Promise.resolve(elem.implementation_.baseUrl_))
+          .withArgs(sinon.match.any);
       if (opt_beforeLayoutCallback) {
         opt_beforeLayoutCallback(elem);
       }
@@ -67,7 +74,7 @@ describes.realWin('amp-byside-content', {
       'data-webcare-id': 'D6604AE5D0',
       'data-label': 'amp-simple',
     }).then(elem => {
-	  testIframe(elem);
+      testIframe(elem);
     });
   });
 
@@ -93,7 +100,7 @@ describes.realWin('amp-byside-content', {
       'data-label': 'placeholder-label',
     }).then(elem => {
       expect(elem.implementation_.origin_).to.equal(
-		  'https://webcare.byside.com'
+          'https://webcare.byside.com'
       );
     });
   });
@@ -117,10 +124,10 @@ describes.realWin('amp-byside-content', {
       'data-webcare-id': 'D6604AE5D0',
       'data-label': 'placeholder-label',
     }).then(elem => {
-	  const loader = elem.querySelector(
+      const loader = elem.querySelector(
           '.i-amphtml-byside-content-loading-animation'
       );
-	  expect(loader).to.not.be.null;
+      expect(loader).to.not.be.null;
     });
   });
 
@@ -141,10 +148,10 @@ describes.realWin('amp-byside-content', {
         return {
           mutate: fn => fn(),
         };
-	  };
+      };
 
-	  // test iframe
-	  testIframe(elem);
+      // test iframe
+      testIframe(elem);
 
       // test placeholder too
       elem.implementation_.iframePromise_.then(() => {
