@@ -171,7 +171,7 @@ export class SafeframeHostApi {
     // TODO: Some of these options are probably not right.
     attributes['uid'] = this.uid;
     attributes['hostPeerName'] = this.win_.location.origin;
-    attributes['initialGeometry'] = this.getCurrentGeometry();
+    attributes['initialGeometry'] = this.getCurrentGeometry(true);
     attributes['permissions'] = JSON.stringify(
         dict({
           'expandByOverlay': false,
@@ -194,9 +194,9 @@ export class SafeframeHostApi {
   }
 
   // TODO: Need to fix so it is the geom of the safeframe, not the amp-ad
-  getCurrentGeometry() {
+  getCurrentGeometry(isFirstRender) {
     return this.formatGeom_(
-        this.baseInstance_.element.getIntersectionChangeEntry());
+        this.baseInstance_.element.getIntersectionChangeEntry(), isFirstRender);
   }
 
   /**
@@ -282,6 +282,21 @@ export class SafeframeHostApi {
     };
   }
 
+  getInitialCorrection(ampAdRect) {
+    const sfWidth = this.baseInstance_.creativeSize_.width;
+    const sfHeight = this.baseInstance_.creativeSize_.height;
+    const ampAdWidth = ampAdRect.right - ampAdRect.left;
+    const ampAdHeight = ampAdRect.bottom - ampAdRect.top;
+    const widthCorrection = (ampAdWidth - sfWidth)/2;
+    const heightCorrection = (ampAdHeight - sfHeight)/2;
+    return {
+      dT: heightCorrection,
+      dB: heightCorrection,
+      dL: widthCorrection,
+      dR: widthCorrection,
+    };
+  }
+
   /**
    * Converts an IntersectionObserver-formatted change message to the
    * geometry update format expected by GPT Safeframe.
@@ -290,7 +305,7 @@ export class SafeframeHostApi {
    * @return {string} Safeframe formatted changes.
    * @private
    */
-  formatGeom_(changes) {
+  formatGeom_(changes, isFirstRender) {
     const percInView = (a1, b1, a2, b2) => {
       const lengthInView = (b2 >= b1) ? b1 - a2 : b2;
       const percInView = lengthInView / (b2 - a2);
@@ -302,13 +317,13 @@ export class SafeframeHostApi {
         return percInView;
       }
     };
-    if (this.iframe_) {
-      const corrections = this.getFrameCorrections();
+    const corrections = isFirstRender ?
+            this.getInitialCorrection(changes.boundingClientRect) :
+            this.getFrameCorrections();
       changes.boundingClientRect.right += corrections['dR'];
       changes.boundingClientRect.top += corrections['dT'];
       changes.boundingClientRect.bottom += corrections['dB'];
       changes.boundingClientRect.left += corrections['dL'];
-    }
     const frameHeight = changes.boundingClientRect.bottom -
           changes.boundingClientRect.top;
     const frameWidth = changes.boundingClientRect.right -
@@ -436,6 +451,14 @@ export class SafeframeHostApi {
         // containing amp-ad element.
         if (success) {
           resizeIframe();
+        } else {
+          // attemptChangeSize automatically registers a pendingChangeSize if
+          // the initial attempt failed. We do not want to do that, so clear it.
+          this.baseInstance_.element.getResources().resources_.forEach(resource => {
+            if (resource.element == this.baseInstance_.element) {
+              resource.pendingChangeSize_ = undefined;
+            }
+          });
         }
         sendResizeResponse(success);
       }).catch(() => {});
