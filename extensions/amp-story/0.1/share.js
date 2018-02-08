@@ -201,7 +201,7 @@ export class ShareWidget {
 
   /** @private */
   maybeAddLinkShareButton_() {
-    if (!isCopyingToClipboardSupported(this.win_.document)) {
+    if (!isCopyingToClipboardSupported(this.win_)) {
       return;
     }
 
