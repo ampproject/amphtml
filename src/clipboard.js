@@ -43,8 +43,9 @@ export function copyTextToClipboard(doc, text) {
   textarea.value = text;
 
   doc.body.appendChild(textarea);
-
-  textarea.select();
+  const range = doc.createRange();
+  range.selectNode(textarea);
+  window.getSelection().addRange(range);
 
   try {
     copySuccessful = doc.execCommand('copy');
@@ -53,6 +54,7 @@ export function copyTextToClipboard(doc, text) {
   }
 
   removeElement(textarea);
+  window.getSelection().removeAllRanges();
 
   return copySuccessful;
 }
