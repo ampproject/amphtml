@@ -32,7 +32,8 @@ describe('amp-subscriptions', {}, env => {
 
   it('should fetch the entitlements on getEntitlements', () => {
     const initializeStub =
-        sandbox.stub(localSubscriptionPlatform.xhr_, 'fetchJson').callsFake(NOOP);
+        sandbox.stub(localSubscriptionPlatform.xhr_, 'fetchJson')
+            .callsFake(NOOP);
     localSubscriptionPlatform.getEntitlements();
     expect(initializeStub).to.be.called.once;
   });
