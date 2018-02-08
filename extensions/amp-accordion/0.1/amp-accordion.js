@@ -230,7 +230,6 @@ class AmpAccordion extends AMP.BaseElement {
         header.setAttribute('aria-expanded', 'true');
         // if expand-one is set, only allow one <section> to be expanded at a time
         if (this.element.hasAttribute('expand-one')) {
-          this.sections_ = this.getRealChildren();
           this.sections_.forEach(sectionIter => {
             if (sectionIter != section) {
               sectionIter.removeAttribute('expanded');
