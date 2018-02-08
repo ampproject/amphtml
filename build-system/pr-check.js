@@ -435,7 +435,7 @@ function runYarnLockfileCheck() {
  */
 function isGreenkeeperPrBuild() {
   return (process.env.TRAVIS_EVENT_TYPE == 'pull_request') &&
-      (process.env.TRAVIS_PULL_REQUEST_BRANCH.indexOf('greenkeeper/') != -1);
+      (process.env.TRAVIS_PULL_REQUEST_BRANCH.indexOf('greenkeeper/') == 0);
 }
 
 /**
@@ -443,7 +443,7 @@ function isGreenkeeperPrBuild() {
  */
 function isGreenkeeperPushBuild() {
   return (process.env.TRAVIS_EVENT_TYPE == 'push') &&
-      (process.env.TRAVIS_BRANCH.indexOf('greenkeeper/') != -1);
+      (process.env.TRAVIS_BRANCH.indexOf('greenkeeper/') == 0);
 }
 
 /**
