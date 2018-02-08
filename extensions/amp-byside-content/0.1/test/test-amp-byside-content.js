@@ -18,6 +18,7 @@ import '../amp-byside-content';
 
 describes.realWin('amp-byside-content', {
   amp: {
+    runtimeOn: true,
     extensions: ['amp-byside-content'],
   },
   ampAdCss: true,

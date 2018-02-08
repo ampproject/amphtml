@@ -36,13 +36,13 @@ import * as utils from './utils';
 import {CSS} from '../../../build/amp-byside-content-0.1.css';
 import {Services} from '../../../src/services';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
+import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
-import {toWin} from '../../../src/types';
 
 /** @const {string} */
 const TAG_ = 'amp-byside-content';
@@ -109,7 +109,7 @@ export class AmpBysideContent extends AMP.BaseElement {
 
     /** @const {function()} */
     this.boundUpdateSize_ =
-		utils.debounce(this.updateSize_.bind(this), 100);
+		    debounce(this.win, this.updateSize_.bind(this), 100);
   }
 
   /** @override */
@@ -195,7 +195,7 @@ export class AmpBysideContent extends AMP.BaseElement {
           'opacity': 1,
         });
       });
-    }).then(() => this);
+    });
   }
 
   /** @private */
@@ -204,7 +204,7 @@ export class AmpBysideContent extends AMP.BaseElement {
       MAIN_WEBCARE_ZONE_SUBDOMAIN_ :
 	  this.webcareZone_;
 
-    return 'https://' + subDomain + '.' + BYSIDE_DOMAIN_;
+    return 'https://' + encodeURIComponent(subDomain) + '.' + BYSIDE_DOMAIN_;
   }
 
   /** @private */
@@ -235,21 +235,7 @@ export class AmpBysideContent extends AMP.BaseElement {
     });
     const url = addParamsToUrl(src, params);
 
-    return new Promise(resolve => {
-      try {
-        // If a node is passed, try to resolve via this node.
-        const win = toWin(/** @type {!Document} */ (
-		  this.element.ownerDocument || this.element).defaultView);
-
-        // for unit integration tests resolve original url
-        // since url replacements implementation throws an uncaught error
-        win.AMP_TEST ? resolve(url) :
-          Services.urlReplacementsForDoc(this.element)
-              .expandUrlAsync(url).then(newUrl => resolve(newUrl));
-      } catch (error) {
-        resolve(url);
-      }
-    });
+    return Services.urlReplacementsForDoc(this.element).expandUrlAsync(url);
   }
 
   /**
@@ -306,22 +292,24 @@ export class AmpBysideContent extends AMP.BaseElement {
       return;
     }
 
-    let newHeight;
-    const height = parseInt(data['height'], 10);
-    if (!isNaN(height)) {
-      newHeight = Math.max(
-          height + (this.element./*OK*/offsetHeight
-              - this.iframe_./*OK*/offsetHeight),
-          height);
-    }
+    this.getVsync().measure(() => {
+      let newHeight;
+      const height = parseInt(data['height'], 10);
+      if (!isNaN(height)) {
+        newHeight = Math.max(
+            height + (this.element./*OK*/offsetHeight
+                - this.iframe_./*OK*/offsetHeight),
+            height);
+      }
 
-    if (newHeight !== undefined) {
-	  this.attemptChangeHeight(newHeight).catch(() => {/* do nothing */ });
-    } else {
-      dev().warn(TAG_,
-          'Ignoring embed-size request because no height value is provided',
-          this.element);
-    }
+      if (newHeight !== undefined) {
+        this.attemptChangeHeight(newHeight).catch(() => {/* do nothing */ });
+      } else {
+        dev().warn(TAG_,
+            'Ignoring embed-size request because no height value is provided',
+            this.element);
+      }
+    });
   }
 
   /** @override */
