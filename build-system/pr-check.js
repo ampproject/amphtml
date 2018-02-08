@@ -435,7 +435,7 @@ function runYarnLockfileCheck() {
  */
 function isGreenkeeperPrBuild() {
   return (process.env.TRAVIS_EVENT_TYPE == 'pull_request') &&
-      (process.env.TRAVIS_PULL_REQUEST_BRANCH.indexOf('greenkeeper/') == 0);
+      (process.env.TRAVIS_PULL_REQUEST_BRANCH.startsWith('greenkeeper/'));
 }
 
 /**
@@ -443,7 +443,7 @@ function isGreenkeeperPrBuild() {
  */
 function isGreenkeeperPushBuild() {
   return (process.env.TRAVIS_EVENT_TYPE == 'push') &&
-      (process.env.TRAVIS_BRANCH.indexOf('greenkeeper/') == 0);
+      (process.env.TRAVIS_BRANCH.startsWith('greenkeeper/'));
 }
 
 /**
@@ -452,8 +452,8 @@ function isGreenkeeperPushBuild() {
  */
 function isGreenkeeperLockfilePushBuild() {
   return isGreenkeeperPushBuild() &&
-      (process.env.TRAVIS_COMMIT_MESSAGE.indexOf(
-          'chore(package): update lockfile') == 0);
+      (process.env.TRAVIS_COMMIT_MESSAGE.startsWith(
+          'chore(package): update lockfile'));
 }
 
 /**
@@ -526,12 +526,7 @@ function main() {
         buildTargets.has('RUNTIME')) {
       command.testBuildSystem();
     }
-    if (buildTargets.has('BUILD_SYSTEM') ||
-        buildTargets.has('RUNTIME') ||
-        buildTargets.has('VISUAL_DIFF') ||
-        buildTargets.has('INTEGRATION_TEST')) {
-      command.runLintCheck();
-    }
+    command.runLintCheck();
     if (buildTargets.has('DOCS')) {
       command.testDocumentLinks();
     }
@@ -555,13 +550,15 @@ function main() {
       command.cleanBuild();
       command.buildRuntime();
       command.runVisualDiffTests();
-      // Run presubmit and integration tests only if the PR contains runtime
-      // changes or modifies an integration test.
-      if (buildTargets.has('INTEGRATION_TEST') ||
-          buildTargets.has('RUNTIME')) {
-        command.runPresubmitTests();
-        command.runIntegrationTests(/* compiled */ false);
-      }
+    }
+    command.runPresubmitTests();
+    if (buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('RUNTIME')) {
+      command.runIntegrationTests(/* compiled */ false);
+    }
+    if (buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('RUNTIME') ||
+        buildTargets.has('VISUAL_DIFF')) {
       command.verifyVisualDiffTests();
     } else {
       // Generates a blank Percy build to satisfy the required Github check.
