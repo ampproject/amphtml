@@ -4,8 +4,6 @@ import {RTC_VENDORS} from '../callout-vendors';
 // This test acts as a presubmit to enforce that.
 describe('RTC_VENDORS', () => {
   it('should have all lowercase keys', () => {
-    Object.keys(RTC_VENDORS).forEach(key => {
-      expect(key).to.equal(key.toLowerCase());
-    });
+    Object.keys(RTC_VENDORS).forEach(key => expect(key).to.equal(key.toLowerCase()));
   });
 });
