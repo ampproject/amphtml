@@ -340,9 +340,7 @@ export class BlessTask extends MediaTask {
     const isMuted = mediaEl.muted;
     const currentTime = mediaEl.currentTime;
 
-    const playResult = mediaEl.play();
-
-    return Promise.resolve(playResult).then(() => {
+    return Promise.resolve(mediaEl.play()).then(() => {
       mediaEl.muted = false;
 
       if (isPaused) {

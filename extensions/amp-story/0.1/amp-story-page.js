@@ -196,11 +196,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   resumeCallback() {
-    console.log('resume', this.element.id);
     this.registerAllMedia_();
 
     if (this.isActive()) {
-      console.log('resume isActive', this.element.id);
       this.advancement_.start();
       this.maybeStartAnimations();
       this.preloadAllMedia_()
@@ -351,7 +349,6 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   playAllMedia_() {
-    console.log('playing all media on', this.element.id);
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
       return mediaPool.play(/** @type {!HTMLMediaElement} */ (mediaEl));
     });
@@ -364,7 +361,6 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   preloadAllMedia_() {
-    console.log('preloading all media on', this.element.id);
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
       return mediaPool.preload(/** @type {!HTMLMediaElement} */ (mediaEl));
     });

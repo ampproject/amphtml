@@ -225,14 +225,14 @@ export class MediaPool {
   /**
    * @param {!MediaType} mediaType The media type whose source should be
    *     retrieved.
-   * @return {string} The default source for the specified type of media.
+   * @return {!Sources} The default source for the specified type of media.
    */
   getDefaultSource_(mediaType) {
     switch (mediaType) {
       case MediaType.AUDIO:
-        return BLANK_AUDIO_SRC;
+        return new Sources(BLANK_AUDIO_SRC);
       case MediaType.VIDEO:
-        return BLANK_VIDEO_SRC;
+        return new Sources(BLANK_VIDEO_SRC);
       default:
         dev().error('AMP-STORY', `No default media for type ${mediaType}.`);
         return '';
@@ -778,7 +778,6 @@ export class MediaPool {
    */
   executeNextMediaElementTask_(mediaEl) {
     const queue = mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME];
-    console.log('queue contains', queue, mediaEl);
     if (queue.length === 0) {
       return;
     }
@@ -796,9 +795,9 @@ export class MediaPool {
     };
 
     if (task.requiresSynchronousExecution()) {
-      executionFn.call();
+      executionFn.call(this);
     } else {
-      this.timer_.delay(executionFn, 0);
+      this.timer_.delay(executionFn.bind(this), 0);
     }
   }
 
@@ -817,7 +816,7 @@ export class MediaPool {
     }
 
     const queue = mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME];
-    const isQueueRunning = queue.length === 0;
+    const isQueueRunning = queue.length !== 0;
 
     queue.push(task);
 

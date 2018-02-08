@@ -24,16 +24,16 @@ import {
 
 export class Sources {
   /**
-   * @param {?string} srcAttr The 'src' attribute of the media element.
-   * @param {!IArrayLike<!Element>} srcEls Any child <source> tags of the media
-   *     element.
+   * @param {?string=} opt_srcAttr The 'src' attribute of the media element.
+   * @param {?IArrayLike<!Element>=} opt_srcEls Any child <source> tags of the
+   *     media element.
    */
-  constructor(srcAttr, srcEls) {
+  constructor(opt_srcAttr, opt_srcEls) {
     /** @private @const {?string} */
-    this.srcAttr_ = srcAttr && srcAttr.length ? srcAttr : null;
+    this.srcAttr_ = opt_srcAttr && opt_srcAttr.length ? opt_srcAttr : null;
 
     /** @private @const {!IArrayLike<!Element>} */
-    this.srcEls_ = srcEls;
+    this.srcEls_ = opt_srcEls || [];
   }
 
 
