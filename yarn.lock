@@ -5932,9 +5932,9 @@ karma-babel-preprocessor@7.0.0:
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/karma-babel-preprocessor/-/karma-babel-preprocessor-7.0.0.tgz#18756d818f97a5e88f91902674cd9130177a8dce"
 
-karma-browserify@5.1.3:
-  version "5.1.3"
-  resolved "https://registry.yarnpkg.com/karma-browserify/-/karma-browserify-5.1.3.tgz#9bbfef806514bb8866f0f0d60d454ccf2bc0735d"
+karma-browserify@5.2.0:
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/karma-browserify/-/karma-browserify-5.2.0.tgz#d3039aeea24362162fea048bcec04abf375f1d79"
   dependencies:
     convert-source-map "^1.1.3"
     hat "^0.0.3"
