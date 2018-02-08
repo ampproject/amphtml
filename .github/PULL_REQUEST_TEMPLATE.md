@@ -19,16 +19,16 @@ Fixes/Closes/Related-to #1 (enter issue number, except in rare cases where none 
 
 It is also helpful to add an emoji before the commit message to identify the kind of work done on a single commit. See the following suggestions below:
 
-- :bug: - `:bug:` Bug fix
-- :sparkles: - `:sparkles:` New feature
-- :white_check_mark: - `:white_check_mark:` Tests
-- :fire: - `:fire:` P0
-- :rocket: - `:rocket:` Performance improvements
-- :crayon: - `:crayon:` CSS / Styling
-- :wheelchair: - `:wheelchair:` Accessibility
-- :globe_with_meridians: - `:globe_with_meridians:` i18n (Internationalization)
-- :book: - `:book:` Documentation
-- :recycle: - `:recycle:` Refactoring (like moving around code w/o any changes)
-- :building_construction: - `:building_construction:` Infrastructure / Tooling / Builds / CI
-- :rewind: - `:rewind:` Revert
-- :put_litter_in_its_place: - `:put_litter_in_its_place:` Deleting code
+- 🐛 - `:bug:` Bug fix
+- ✨ - `:sparkles:` New feature
+- ✅ - `:white_check_mark:` Tests
+- 🔥 - `:fire:` P0
+- 🚀 - `:rocket:` Performance improvements
+- 🖍️ - `:crayon:` CSS / Styling
+- ♿ - `:wheelchair:` Accessibility
+- 🌐 - `:globe_with_meridians:` i18n (Internationalization)
+- 📖 - `:book:` Documentation
+- ♻️ - `:recycle:` Refactoring (like moving around code w/o any changes)
+- 🏗️ - `:building_construction:` Infrastructure / Tooling / Builds / CI
+- ⏪ - `:rewind:` Revert
+- 🚮 - `:put_litter_in_its_place:` Deleting code
