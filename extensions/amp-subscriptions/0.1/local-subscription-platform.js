@@ -15,15 +15,17 @@
  */
 
 import {Services} from '../../../src/services';
+import {SubscriptionPlatform} from './subscription-platform';
 
 /**
  * This implements the methods to interact with various subscription platforms.
  *
- * @implements {./subscription-platform.SubscriptionPlatform}
+ * @implements {SubscriptionPlatform}
  */
 export class LocalSubscriptionPlatform {
 
   /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {string} serviceUrl
    */
   constructor(ampdoc, serviceUrl) {
@@ -39,7 +41,7 @@ export class LocalSubscriptionPlatform {
 
   /**
    * TODO(@prateekbh): Define object below once we have a defination of entitlement
-   * @return {!Promise<JsonObject>}
+   * @return {!Promise<!JsonObject>}
    */
   getEntitlements() {
     return this.xhr_
