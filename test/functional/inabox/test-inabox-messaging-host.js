@@ -127,6 +127,18 @@ describes.realWin('inabox-host:messaging', {}, env => {
       });
       expect(targetOrigin).to.equal('www.example.com');
     });
+
+    it('should not throw error if postMessage undefined', () => {
+      iframe1.contentWindow.postMessage = undefined;
+      host.processMessage({
+        source: iframe1.contentWindow,
+        origin: 'www.example.com',
+        data: 'amp-' + JSON.stringify({
+          sentinel: '0-123',
+          type: 'send-positions',
+        }),
+      });
+    });
   });
 
   describe('send-positions position observer callback', () => {
@@ -256,6 +268,30 @@ describes.realWin('inabox-host:messaging', {}, env => {
       expect(message.type).to.equal('cancel-full-overlay-frame-response');
       expect(message.success).to.be.true;
       expect(message.boxRect).to.deep.equal(boxRect);
+    });
+
+    it('should not error if postMessage undefined', () => {
+      iframe1.contentWindow.postMessage = undefined;
+      host.processMessage({
+        source: iframe1.contentWindow,
+        origin: 'www.example.com',
+        data: 'amp-' + JSON.stringify({
+          sentinel: '0-123',
+          type: 'full-overlay-frame',
+        }),
+      });
+    });
+
+    it('should not error if postMessage undefined, cancel msg', () => {
+      iframe1.contentWindow.postMessage = undefined;
+      host.processMessage({
+        source: iframe1.contentWindow,
+        origin: 'www.example.com',
+        data: 'amp-' + JSON.stringify({
+          sentinel: '0-123',
+          type: 'cancel-full-overlay-frame',
+        }),
+      });
     });
 
   });
