@@ -384,10 +384,9 @@ export class UpdateSourcesTask extends MediaTask {
 
   /** @override */
   executeInternal(mediaEl) {
-    return this.vsync_.mutatePromise(() => {
-      Sources.removeFrom(mediaEl);
-      this.newSources_.applyToElement(mediaEl);
-    });
+    Sources.removeFrom(mediaEl);
+    this.newSources_.applyToElement(mediaEl);
+    return Promise.resolve();
   }
 }
 
@@ -413,17 +412,16 @@ export class SwapIntoDomTask extends MediaTask {
 
   /** @override */
   executeInternal(mediaEl) {
-    return this.vsync_.mutatePromise(() => {
-      if (!isConnectedNode(this.replacedMediaEl_)) {
-        this.failTask('Cannot swap media for element that is not in DOM.');
-        return;
-      }
+    if (!isConnectedNode(this.replacedMediaEl_)) {
+      this.failTask('Cannot swap media for element that is not in DOM.');
+      return Promise.resolve();
+    }
 
-      copyCssClasses(this.replacedMediaEl_, mediaEl);
-      copyAttributes(this.replacedMediaEl_, mediaEl);
-      this.replacedMediaEl_.parentElement
-          .replaceChild(mediaEl, this.replacedMediaEl_);
-    });
+    copyCssClasses(this.replacedMediaEl_, mediaEl);
+    copyAttributes(this.replacedMediaEl_, mediaEl);
+    this.replacedMediaEl_.parentElement
+        .replaceChild(mediaEl, this.replacedMediaEl_);
+    return Promise.resolve();
   }
 }
 
@@ -450,10 +448,9 @@ export class SwapOutOfDomTask extends MediaTask {
 
   /** @override */
   executeInternal(mediaEl) {
-    return this.vsync_.mutatePromise(() => {
-      copyCssClasses(mediaEl, this.placeholderMediaEl_);
-      copyAttributes(mediaEl, this.placeholderMediaEl_);
-      mediaEl.parentElement.replaceChild(this.placeholderMediaEl_, mediaEl);
-    });
+    copyCssClasses(mediaEl, this.placeholderMediaEl_);
+    copyAttributes(mediaEl, this.placeholderMediaEl_);
+    mediaEl.parentElement.replaceChild(this.placeholderMediaEl_, mediaEl);
+    return Promise.resolve();
   }
 }
