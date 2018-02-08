@@ -42,7 +42,6 @@ import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {setStyles} from '../../../src/style';
-import {toWin} from '../../../src/types';
 
 /** @const {string} */
 const TAG_ = 'amp-byside-content';
@@ -141,14 +140,14 @@ export class AmpBysideContent extends AMP.BaseElement {
         this.element);
 
     this.webcareZone_ = (this.element.getAttribute('data-webcare-zone') ||
-		DEFAULT_WEBCARE_ZONE_);
+        DEFAULT_WEBCARE_ZONE_);
     this.channel_ = (this.element.getAttribute('data-channel') || '');
     this.lang_ = (this.element.getAttribute('data-lang') || DEFAULT_LANG_);
     this.fid_ = (this.element.getAttribute('data-fid') || '');
 
     this.origin_ = this.composeOrigin_();
     this.baseUrl_ = this.origin_ + '/BWA' +
-		encodeURIComponent(this.webcareId_) + '/amp/';
+        encodeURIComponent(this.webcareId_) + '/amp/';
   }
 
   /** @override */
@@ -185,10 +184,10 @@ export class AmpBysideContent extends AMP.BaseElement {
       this.iframeSrc_ = assertHttpsUrl(src, this.element, this.getName_());
       iframe.src = this.iframeSrc_;
 
-	  const unlisten = listenFor(iframe, 'embed-size', this.boundUpdateSize_);
-	  this.unlisteners_.push(unlisten);
+      const unlisten = listenFor(iframe, 'embed-size', this.boundUpdateSize_);
+      this.unlisteners_.push(unlisten);
 
-	  this.element.appendChild(iframe);
+      this.element.appendChild(iframe);
       return (this.iframePromise_ = this.loadPromise(iframe));
     }).then(() => {
       this.getVsync().mutate(() => {
@@ -203,7 +202,7 @@ export class AmpBysideContent extends AMP.BaseElement {
   composeOrigin_() {
     const subDomain = this.webcareZone_ === MAIN_WEBCARE_ZONE_ ?
       MAIN_WEBCARE_ZONE_SUBDOMAIN_ :
-	  this.webcareZone_;
+      this.webcareZone_;
 
     return 'https://' + encodeURIComponent(subDomain) + '.' + BYSIDE_DOMAIN_;
   }
@@ -236,17 +235,7 @@ export class AmpBysideContent extends AMP.BaseElement {
     });
     const url = addParamsToUrl(src, params);
 
-    return new Promise(resolve => {
-      const win = toWin(/** @type {!Document} */ (
-        this.element.ownerDocument).defaultView);
-
-      // for unit integration tests resolve original url
-      // since url replacements implementation throws an uncaught error
-      resolve(win.AMP_TEST ? url :
-        Services.urlReplacementsForDoc(this.element)
-            .expandUrlAsync(url)
-      );
-    });
+    return Services.urlReplacementsForDoc(this.element).expandUrlAsync(url);
   }
 
   /**
@@ -310,23 +299,23 @@ export class AmpBysideContent extends AMP.BaseElement {
       return;
     }
 
-    // Calculate new height of the container to include the padding.
-    // If padding is negative, just use the requested height directly.
-    let newHeight;
-    const height = parseInt(data['height'], 10);
-    if (!isNaN(height)) {
-      this.getVsync().mutate(() => {
+    this.getVsync().mutate(() => {
+      // Calculate new height of the container to include the padding.
+      // If padding is negative, just use the requested height directly.
+      let newHeight;
+      const height = parseInt(data['height'], 10);
+      if (!isNaN(height)) {
         newHeight = Math.max(
             height + (this.element./*OK*/offsetHeight
               - this.iframe_./*OK*/offsetHeight),
             height);
-	  this.attemptChangeHeight(newHeight).catch(() => {/* do nothing */ });
-      });
-    } else {
-      dev().warn(TAG_,
-          'Ignoring embed-size request because no height value is provided',
-          this.element);
-    }
+        this.attemptChangeHeight(newHeight).catch(() => {/* do nothing */ });
+      } else {
+        dev().warn(TAG_,
+            'Ignoring embed-size request because no height value is provided',
+            this.element);
+      }
+    });
   }
 
   /** @override */
