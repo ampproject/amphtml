@@ -93,6 +93,7 @@ function buildArticleTemplate(articleData) {
     attrs: dict({
       'class': 'i-amphtml-story-bookend-article',
       'href': articleData.url,
+      'target': '_top',
     }),
     children: [
       {
