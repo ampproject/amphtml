@@ -819,6 +819,7 @@ function copyAliasExtensions() {
  * @return {!Promise}
  */
 function checkTypes() {
+  const handlerProcess = createCtrlcHandler('check-types');
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   // Disabled to improve type check performance, since this provides
@@ -880,7 +881,7 @@ function checkTypes() {
             checkTypes: true,
           }),
     ]);
-  });
+  }).then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
