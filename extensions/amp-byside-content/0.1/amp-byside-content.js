@@ -32,15 +32,15 @@
  * </code>
  */
 
-import * as utils from './utils';
 import {CSS} from '../../../build/amp-byside-content-0.1.css';
 import {Services} from '../../../src/services';
 import {addParamsToUrl, assertHttpsUrl} from '../../../src/url';
+import {createElementWithAttributes, removeElement} from '../../../src/dom';
+import {debounce} from '../../../src/utils/rate-limit';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
 import {toWin} from '../../../src/types';
 
@@ -108,8 +108,9 @@ export class AmpBysideContent extends AMP.BaseElement {
     this.baseUrl_ = '';
 
     /** @const {function()} */
-    this.boundUpdateSize_ =
-		utils.debounce(this.updateSize_.bind(this), 100);
+    this.boundUpdateSize_ = debounce(
+        this.win, this.updateSize_.bind(this), 100
+    );
   }
 
   /** @override */
@@ -122,8 +123,8 @@ export class AmpBysideContent extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(onLayout) {
-    if (this.iframeSrc_) {
-      this.preconnect.url(this.iframeSrc_, onLayout);
+    if (this.iframeSrc_ || this.origin_) {
+      this.preconnect.url(this.iframeSrc_ || this.origin_, onLayout);
     }
   }
 
@@ -195,7 +196,7 @@ export class AmpBysideContent extends AMP.BaseElement {
           'opacity': 1,
         });
       });
-    }).then(() => this);
+    });
   }
 
   /** @private */
@@ -204,7 +205,7 @@ export class AmpBysideContent extends AMP.BaseElement {
       MAIN_WEBCARE_ZONE_SUBDOMAIN_ :
 	  this.webcareZone_;
 
-    return 'https://' + subDomain + '.' + BYSIDE_DOMAIN_;
+    return 'https://' + encodeURIComponent(subDomain) + '.' + BYSIDE_DOMAIN_;
   }
 
   /** @private */
@@ -236,19 +237,15 @@ export class AmpBysideContent extends AMP.BaseElement {
     const url = addParamsToUrl(src, params);
 
     return new Promise(resolve => {
-      try {
-        // If a node is passed, try to resolve via this node.
-        const win = toWin(/** @type {!Document} */ (
-		  this.element.ownerDocument || this.element).defaultView);
+      const win = toWin(/** @type {!Document} */ (
+        this.element.ownerDocument).defaultView);
 
-        // for unit integration tests resolve original url
-        // since url replacements implementation throws an uncaught error
-        win.AMP_TEST ? resolve(url) :
-          Services.urlReplacementsForDoc(this.element)
-              .expandUrlAsync(url).then(newUrl => resolve(newUrl));
-      } catch (error) {
-        resolve(url);
-      }
+      // for unit integration tests resolve original url
+      // since url replacements implementation throws an uncaught error
+      resolve(win.AMP_TEST ? url :
+        Services.urlReplacementsForDoc(this.element)
+            .expandUrlAsync(url)
+      );
     });
   }
 
@@ -270,53 +267,61 @@ export class AmpBysideContent extends AMP.BaseElement {
    * @private
    */
   getOverflowElement_() {
-    const createElement = utils.getElementCreator(this.element.ownerDocument);
-
-    const overflow = createElement('div', 'i-amphtml-byside-content-overflow',
-        createElement('div', 'i-amphtml-byside-content-overflow-content',
-            createElement('i', 'i-amphtml-byside-content-arrow-down')
-        ));
-    overflow.setAttribute('overflow', '');
+    const doc = /** @type {!Document} */ (this.element.ownerDocument);
+    const overflow = createElementWithAttributes(doc, 'div', dict({
+      'class': 'i-amphtml-byside-content-overflow',
+      'overflow': '',
+    }));
+    const overflowContent = createElementWithAttributes(doc, 'div', dict({
+      'class': 'i-amphtml-byside-content-overflow-content',
+    }));
+    const arrow = createElementWithAttributes(doc, 'div', dict({
+      'class': 'i-amphtml-byside-content-arrow-down',
+    }));
+    overflowContent.appendChild(arrow);
+    overflow.appendChild(overflowContent);
 
     return overflow;
   }
 
   /** @return {!Element} @private */
   createBySideLoader_() {
-    const createElement = utils.getElementCreator(this.element.ownerDocument);
+    const doc = /** @type {!Document} */ (this.element.ownerDocument);
+    const loadingContainer = createElementWithAttributes(doc, 'div', dict({
+      'class': 'i-amphtml-byside-content-loading-container',
+    }));
+    const loadingAnimation = createElementWithAttributes(doc, 'div', dict({
+      'class': 'i-amphtml-byside-content-loading-animation',
+    }));
+    loadingContainer.appendChild(loadingAnimation);
 
-    const loadingPlaceholder =
-      createElement('div', 'i-amphtml-byside-content-loading-container',
-          createElement('div', 'i-amphtml-byside-content-loading-animation')
-      );
-
-    return loadingPlaceholder;
+    return loadingContainer;
   }
 
   /**
    * Updates the element's dimensions to accommodate the iframe's
    *    requested dimensions.
-   * @param {Object} data
    * @private
    */
-  updateSize_(data) {
-    // Calculate new height of the container to include the padding.
-    // If padding is negative, just use the requested height directly.
+  updateSize_() {
+    const args = Array.prototype.slice.call(arguments);
+    const data = args.length ? args[0] : null;
     if (!data) {
       return;
     }
 
+    // Calculate new height of the container to include the padding.
+    // If padding is negative, just use the requested height directly.
     let newHeight;
     const height = parseInt(data['height'], 10);
     if (!isNaN(height)) {
-      newHeight = Math.max(
-          height + (this.element./*OK*/offsetHeight
+      this.getVsync().mutate(() => {
+        newHeight = Math.max(
+            height + (this.element./*OK*/offsetHeight
               - this.iframe_./*OK*/offsetHeight),
-          height);
-    }
-
-    if (newHeight !== undefined) {
+            height);
 	  this.attemptChangeHeight(newHeight).catch(() => {/* do nothing */ });
+      });
     } else {
       dev().warn(TAG_,
           'Ignoring embed-size request because no height value is provided',
