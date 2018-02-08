@@ -178,7 +178,10 @@ declareExtensionVersionAlias(
  *   name: ?string,
  *   version: ?string,
  *   hasCss: ?boolean,
- *   loadPriority: ?string
+ *   loadPriority: ?string,
+ *   cssBinaries: ?Array<string>,
+ *   extraGlobs?Array<string>,
+ *   bundleOnlyIfListedInFiles: ?boolean
  * }}
  */
 const ExtensionOption = {}; // eslint-disable-line no-unused-vars
@@ -536,23 +539,45 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
     mkdirSync('build');
     mkdirSync('build/css');
     const startTime = Date.now();
-    return jsifyCssAsync(path + '/' + name + '.css').then(function(css) {
-      const jsCss = 'export const CSS = ' + JSON.stringify(css) + ';\n';
-      const jsName = 'build/' + name + '-' + version + '.css.js';
-      const cssName = 'build/css/' + name + '-' + version + '.css';
-      fs.writeFileSync(jsName, jsCss, 'utf-8');
-      fs.writeFileSync(cssName, css, 'utf-8');
+    return buildExtensionCss(path, name, version, options).then(() => {
+      endBuildStep('Recompiled CSS in', name, startTime);
+    }).then(function() {
       if (options.compileOnlyCss) {
         return Promise.resolve();
       }
       return buildExtensionJs(path, name, version, options);
-    })
-        .then(() => {
-          endBuildStep('Recompiled CSS in', name, startTime);
-        });
+    });
   } else {
     return buildExtensionJs(path, name, version, options);
   }
+}
+
+/**
+ * @param {string} path
+ * @param {string} css
+ * @param {string} version
+ * @param {!Object} options
+ */
+function buildExtensionCss(path, name, version, options) {
+  function writeCssBinaries(name, css) {
+    const jsCss = 'export const CSS = ' + JSON.stringify(css) + ';\n';
+    const jsName = `build/${name}.js`;
+    const cssName = `build/css/${name}`;
+    fs.writeFileSync(jsName, jsCss, 'utf-8');
+    fs.writeFileSync(cssName, css, 'utf-8');
+  }
+  const promises = [];
+  const mainCssBinary = jsifyCssAsync(path + '/' + name + '.css')
+      .then(writeCssBinaries.bind(null, `${name}-${version}.css`));
+
+  if (Array.isArray(options.cssBinaries)) {
+    promises.push.apply(promises, options.cssBinaries.map(function(name) {
+      return jsifyCssAsync(`${path}/${name}.css`)
+          .then(css => writeCssBinaries(`${name}-${version}.css`, css));
+    }));
+  }
+  promises.push(mainCssBinary);
+  return Promise.all(promises);
 }
 
 /**
@@ -756,6 +781,11 @@ function dist() {
           copyCss(),
         ]);
       }).then(() => {
+        if (process.env.TRAVIS) {
+          // New line after all the compilation progress dots on Travis.
+          console.log('\n');
+        }
+      }).then(() => {
         copyAliasExtensions();
       }).then(() => {
         if (argv.fortesting) {
@@ -795,6 +825,7 @@ function copyAliasExtensions() {
  * @return {!Promise}
  */
 function checkTypes() {
+  const handlerProcess = createCtrlcHandler('check-types');
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   // Disabled to improve type check performance, since this provides
@@ -856,7 +887,12 @@ function checkTypes() {
             checkTypes: true,
           }),
     ]);
-  });
+  }).then(() => {
+    if (process.env.TRAVIS) {
+      // New line after all the compilation progress dots on Travis.
+      console.log('\n');
+    }
+  }).then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
@@ -1396,7 +1432,7 @@ gulp.task('build', 'Builds the AMP library', ['update-packages'], build, {
 });
 gulp.task('check-all', 'Run through all presubmit checks',
     ['lint', 'dep-check', 'check-types', 'presubmit']);
-gulp.task('check-types', 'Check JS types', checkTypes);
+gulp.task('check-types', 'Check JS types', ['update-packages'], checkTypes);
 gulp.task('css', 'Recompile css to build directory', ['update-packages'], css);
 gulp.task('default', 'Runs "watch" and then "serve"',
     ['update-packages', 'watch'], serve, {
