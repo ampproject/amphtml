@@ -3,7 +3,7 @@
 ## THIS IS A WORK-IN-PROGRESS
 
 This article is for parties who want to serve ads into AMP stories. Publisher 
-who wants to monetize your stories, please refer to [monetize with story](./monetize-with-story.md)
+who wants to monetize your stories, please refer to monetize with story (TODO: link to be added)
 unless you want to serve ads by yourselves.
 
 ## Custom ad
