@@ -211,10 +211,12 @@ export class MediaPool {
         this.vsync_.mutate(() => {
           const mediaEl = this.mediaFactory_[type].call(this);
           mediaEl.setAttribute('pool-element', elId++);
-          mediaEl.src = this.getDefaultSource_(type);
-          // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE is
-          // returned.  If so, we should adjust the pool size/distribution between
-          // media types.
+          const sources = this.getDefaultSource_(type);
+          this.enqueueMediaElementTask_(mediaEl,
+              new UpdateSourcesTask(sources, this.vsync_));
+          // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE
+          // is returned.  If so, we should adjust the pool size/distribution
+          // between media types.
           this.unallocated[type].push(mediaEl);
         });
       }
