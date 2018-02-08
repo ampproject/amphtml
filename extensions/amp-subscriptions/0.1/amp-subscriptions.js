@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-access-0.1.css';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
+import {SubscriptionPlatform} from './subscription-platform';
 import {installStylesForDoc} from '../../../src/style-installer';
 
 /** @const */
@@ -31,7 +33,7 @@ export class SubscriptionService {
     // Install styles.
     installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
 
-    /** @private @const {!Array<./subscription-platform>} */
+    /** @private @const {!Array<SubscriptionPlatform>} */
     this.subscriptionPlatforms_ = [];
   }
 
@@ -77,7 +79,7 @@ export class SubscriptionService {
     this.initialize_().then(() => {
       this.subscriptionPlatforms_.forEach(subscriptionPlatform => {
         subscriptionPlatform.getEntitlements()
-            .then(entitlement => this.processEntitlement_(entitlement));
+            .then(entitlement => this.processEntitlement_());
       });
     });
   }

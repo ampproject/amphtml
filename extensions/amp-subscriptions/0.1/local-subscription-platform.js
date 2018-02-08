@@ -16,14 +16,18 @@
 
 import {Entitlement} from './entitlements';
 import {Services} from '../../../src/services';
+import {SubscriptionPlatform} from './subscription-platform';
+
 /**
  * This implements the methods to interact with various subscription platforms.
- * @implements {./subscription-platform}
+ *
+ * @implements {SubscriptionPlatform}
  */
 export class LocalSubscriptionPlatform {
 
   /**
-   * @param {string} entitlementURL
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {string} serviceUrl
    */
   constructor(ampdoc, serviceUrl) {
     /** @const */
@@ -32,7 +36,7 @@ export class LocalSubscriptionPlatform {
     /** @const @private {string} */
     this.serviceUrl_ = serviceUrl;
 
-    /** @const @private {string} */
+    /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(this.ampdoc_.win);
   }
 
