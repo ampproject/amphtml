@@ -435,7 +435,7 @@ function runYarnLockfileCheck() {
  */
 function isGreenkeeperPrBuild() {
   return (process.env.TRAVIS_EVENT_TYPE == 'pull_request') &&
-      (process.env.TRAVIS_PULL_REQUEST_BRANCH.indexOf('greenkeeper/') == 0);
+      (process.env.TRAVIS_PULL_REQUEST_BRANCH.startsWith('greenkeeper/'));
 }
 
 /**
@@ -443,7 +443,7 @@ function isGreenkeeperPrBuild() {
  */
 function isGreenkeeperPushBuild() {
   return (process.env.TRAVIS_EVENT_TYPE == 'push') &&
-      (process.env.TRAVIS_BRANCH.indexOf('greenkeeper/') == 0);
+      (process.env.TRAVIS_BRANCH.startsWith('greenkeeper/'));
 }
 
 /**
@@ -452,8 +452,8 @@ function isGreenkeeperPushBuild() {
  */
 function isGreenkeeperLockfilePushBuild() {
   return isGreenkeeperPushBuild() &&
-      (process.env.TRAVIS_COMMIT_MESSAGE.indexOf(
-          'chore(package): update lockfile') == 0);
+      (process.env.TRAVIS_COMMIT_MESSAGE.startsWith(
+          'chore(package): update lockfile'));
 }
 
 /**
