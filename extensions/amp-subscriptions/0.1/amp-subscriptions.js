@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {installStylesForDoc} from '../../../src/style-installer';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
+import {installStylesForDoc} from '../../../src/style-installer';
 
 /** @const */
 const TAG = 'amp-subscriptions';
