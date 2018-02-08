@@ -3265,7 +3265,6 @@ tags {
     name: "template"
     mandatory: true
   }
-  attrs: { name: "template" }
 }
 tags {
   tag_name: "DIV"
@@ -3290,7 +3289,6 @@ tags {
     name: "template"
     mandatory: true
   }
-  attrs: { name: "template" }
 }
 attr_lists: {
   name: "input-name-attr"
