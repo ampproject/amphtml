@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Services} from './services';
 import {removeElement} from './dom';
 import {setStyles} from './style';
 
@@ -58,9 +59,14 @@ export function copyTextToClipboard(doc, text) {
 
 
 /**
- * @param {!Document} doc
+ * @param {!Window} win
  * @return {boolean}
  */
-export function isCopyingToClipboardSupported(doc) {
-  return doc.queryCommandSupported('copy');
+export function isCopyingToClipboardSupported(win) {
+  // Current implementation does not work on iOS even though the test for
+  // support below returns true. See #13136.
+  if (Services.platformFor(win).isIos()) {
+    return false;
+  }
+  return win.document.queryCommandSupported('copy');
 }
