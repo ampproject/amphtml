@@ -21,7 +21,7 @@ import {
   isIframed,
   openWindowDialog,
 } from '../dom';
-import {dev} from '../log';
+import {dev, user} from '../log';
 import {
   getExtraParamsUrl,
   shouldAppendExtraParams,
@@ -32,6 +32,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../service';
 import {
+  isProtocolValid,
   parseUrl,
   parseUrlWithA,
 } from '../url';
@@ -54,7 +55,7 @@ export function installGlobalClickListenerForDoc(ampdoc) {
       /* opt_instantiate */ true);
 }
 
-
+// TODO(willchou): Rename to navigation.js#Navigation.
 /**
  * Intercept any click on the current document and prevent any
  * linking to an identifier from pushing into the history stack.
@@ -83,7 +84,6 @@ export class ClickHandler {
     this.history_ = Services.historyForDoc(this.ampdoc);
 
     const platform = Services.platformFor(this.ampdoc.win);
-
     /** @private @const {boolean} */
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
 
@@ -107,11 +107,17 @@ export class ClickHandler {
     this.boundHandle_ = this.handle_.bind(this);
     this.rootNode_.addEventListener('click', this.boundHandle_);
 
+    /** @private {boolean} */
     this.appendExtraParams_ = false;
-
     shouldAppendExtraParams(this.ampdoc).then(res => {
       this.appendExtraParams_ = res;
     });
+
+    /**
+     * Lazy-generated list of A2A-enabled navigation features.
+     * @private {?Array<string>}
+     */
+    this.a2aFeatures_ = null;
   }
 
   /** @override */
@@ -127,6 +133,52 @@ export class ClickHandler {
     if (this.boundHandle_) {
       this.rootNode_.removeEventListener('click', this.boundHandle_);
     }
+  }
+
+  /**
+   * Navigates a window to a URL.
+   *
+   * If opt_requestedBy matches a feature name in a <meta> tag with attribute
+   * name="amp-to-amp-navigation", then treats the URL as an AMP URL (A2A).
+   *
+   * @param {!Window} win
+   * @param {string} url
+   * @param {string=} opt_requestedBy
+   */
+  navigateTo(win, url, opt_requestedBy) {
+    if (!isProtocolValid(url)) {
+      user().error(TAG, 'Cannot navigate to invalid protocol: ' + url);
+      return;
+    }
+
+    // If this redirect was requested by a feature that opted into A2A,
+    // try to ask the viewer to navigate this AMP URL.
+    if (opt_requestedBy) {
+      if (!this.a2aFeatures_) {
+        this.a2aFeatures_ = this.queryA2AFeatures_();
+      }
+      if (this.a2aFeatures_.includes(opt_requestedBy)) {
+        if (this.viewer_.navigateToAmpUrl(url, opt_requestedBy)) {
+          return;
+        }
+      }
+    }
+
+    // Otherwise, perform normal behavior of navigating the top frame.
+    win.top.location.href = url;
+  }
+
+  /**
+   * @return {!Array<string>}
+   * @private
+   */
+  queryA2AFeatures_() {
+    const meta = this.rootNode_.querySelector(
+        'meta[name="amp-to-amp-navigation"]');
+    if (meta && meta.hasAttribute('content')) {
+      return meta.getAttribute('content').split(',').map(s => s.trim());
+    }
+    return [];
   }
 
   /**
@@ -156,51 +208,94 @@ export class ClickHandler {
       defaultExpandParamsUrl = getExtraParamsUrl(this.ampdoc.win, target);
     }
 
-    Services.urlReplacementsForDoc(target).maybeExpandLink(
-        target, defaultExpandParamsUrl);
-    const tgtLoc = this.parseUrl_(target.href);
+    const urlReplacements = Services.urlReplacementsForDoc(target);
+    urlReplacements.maybeExpandLink(target, defaultExpandParamsUrl);
 
-    // Handle custom protocols only if the document is iframed.
-    if (this.isIframed_) {
-      this.handleCustomProtocolClick_(e, target, tgtLoc);
+    const location = this.parseUrl_(target.href);
+
+    // Handle AMP-to-AMP navigation if rel=amphtml.
+    if (this.handleA2AClick_(e, target, location)) {
+      return;
     }
 
-    // Handle navigation clicks.
-    if (!e.defaultPrevented) {
-      this.handleNavClick_(e, target, tgtLoc);
+    // Handle navigating to custom protocol if applicable.
+    if (this.handleCustomProtocolClick_(e, target, location)) {
+      return;
     }
+
+    // Finally, handle normal click-navigation behavior.
+    this.handleNavClick_(e, target, location);
   }
 
   /**
    * Handles clicking on a custom protocol link.
+   * Returns true if the navigation was handled. Otherwise, returns false.
    * @param {!Event} e
    * @param {!Element} target
-   * @param {!Location} tgtLoc
+   * @param {!Location} location
+   * @return {boolean}
    * @private
    */
-  handleCustomProtocolClick_(e, target, tgtLoc) {
+  handleCustomProtocolClick_(e, target, location) {
+    // Handle custom protocols only if the document is iframed.
+    if (!this.isIframed_) {
+      return false;
+    }
+
     /** @const {!Window} */
     const win = toWin(target.ownerDocument.defaultView);
+    const url = target.href;
+    const protocol = location.protocol;
+
     // On Safari iOS, custom protocol links will fail to open apps when the
     // document is iframed - in order to go around this, we set the top.location
     // to the custom protocol href.
-    const isFTP = tgtLoc.protocol == 'ftp:';
+    const isFTP = protocol == 'ftp:';
 
     // In case of FTP Links in embedded documents always open then in _blank.
     if (isFTP) {
-      openWindowDialog(win, target.href, '_blank');
+      openWindowDialog(win, url, '_blank');
       e.preventDefault();
-      return;
+      return true;
     }
 
-    const isNormalProtocol = /^(https?|mailto):$/.test(tgtLoc.protocol);
+    const isNormalProtocol = /^(https?|mailto):$/.test(protocol);
     if (this.isIosSafari_ && !isNormalProtocol) {
-      openWindowDialog(win, target.href, '_top');
+      openWindowDialog(win, url, '_top');
       // Without preventing default the page would should an alert error twice
       // in the case where there's no app to handle the custom protocol.
       e.preventDefault();
+      return true;
     }
+
+    return false;
   }
+
+  /**
+   * Handles clicking on an AMP link.
+   * Returns true if the navigation was handled. Otherwise, returns false.
+   * @param {!Event} e
+   * @param {!Element} target
+   * @param {!Location} location
+   * @return {boolean}
+   * @private
+   */
+  handleA2AClick_(e, target, location) {
+    if (!target.hasAttribute('rel')) {
+      return false;
+    }
+    const relations = target.getAttribute('rel').split(' ').map(s => s.trim());
+    if (!relations.includes('amphtml')) {
+      return false;
+    }
+    // The viewer may not support the capability for navigating AMP links.
+    if (this.viewer_.navigateToAmpUrl(location.href, '<a rel=amphtml>')) {
+      e.preventDefault();
+      return true;
+    }
+    return false;
+  }
+
 
   /**
    * Handles clicking on a link with hash navigation.
