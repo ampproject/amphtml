@@ -235,6 +235,8 @@ export function googlePageParameters(win, nodeOrDoc, startTime) {
           'amp_v': '$internalRuntimeVersion$',
           'd_imp': '1',
           'c': getCorrelator(win, clientId, nodeOrDoc),
+          'ga_cid': win.gaGlobal.cid || null,
+          'ga_hid': win.gaGlobal.hid || null,
           'dt': startTime,
           'biw': viewportRect.width,
           'bih': viewportRect.height,
