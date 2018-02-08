@@ -871,47 +871,6 @@ app.use('/subscription/:id/entitlements', (req, res) => {
   });
 });
 
-// Simulated Cloudflare signed Ad server
-
-const cloudflareDataDir = '/extensions/amp-ad-network-cloudflare-impl/0.1/data';
-const fakeAdNetworkDataDir = '/extensions/amp-ad-network-fake-impl/0.1/data';
-
-/**
- * Handle CORS headers
- */
-app.use([cloudflareDataDir], function fakeCors(req, res, next) {
-  assertCors(req, res, ['GET', 'OPTIONS'], ['X-AmpAdSignature']);
-
-  if (req.method == 'OPTIONS') {
-    res.status(204).end();
-  } else {
-    next();
-  }
-});
-
-/**
- * Handle fake a4a data
- */
-app.get([fakeAdNetworkDataDir + '/*', cloudflareDataDir + '/*'], (req, res) => {
-  let filePath = req.path;
-  const unwrap = !req.path.endsWith('.html');
-  filePath = pc.cwd() + filePath;
-  fs.readFileAsync(filePath).then(file => {
-    res.setHeader('X-AmpAdRender', 'nameframe');
-    if (!unwrap) {
-      res.end(file);
-      return;
-    }
-    const metadata = JSON.parse(file);
-    res.setHeader('Content-Type', 'text/html');
-    res.setHeader('X-AmpAdSignature', metadata.signature);
-    res.end(metadata.creative);
-  }).error(() => {
-    res.status(404);
-    res.end('Not found: ' + filePath);
-  });
-});
-
 // Simulated adzerk ad server and AMP cache CDN.
 app.get('/adzerk/*', (req, res) => {
   assertCors(req, res, ['GET'], ['AMP-template-amp-creative']);
