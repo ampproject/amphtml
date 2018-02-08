@@ -45,6 +45,9 @@ class AmpStickyAd extends AMP.BaseElement {
 
     /** @private {?UnlistenDef} */
     this.scrollUnlisten_ = null;
+
+    /** @private {boolean} */
+    this.collapsed_ = false;
   }
 
   /** @override */
@@ -114,6 +117,8 @@ class AmpStickyAd extends AMP.BaseElement {
 
   /** @override */
   collapsedCallback() {
+    this.collapsed_ = true;
+    this.visible_ = false;
     toggle(this.element, false);
     this.vsync_.mutate(() => {
       this.viewport_.updatePaddingBottom(0);
@@ -151,6 +156,10 @@ class AmpStickyAd extends AMP.BaseElement {
   display_() {
     this.removeOnScrollListener_();
     this.deferMutate(() => {
+      if (this.collapsed_) {
+        // It's possible that if an AMP ad collapse before its layoutCallback.
+        return;
+      }
       this.visible_ = true;
       this.addCloseButton_();
       this.viewport_.addToFixedLayer(
