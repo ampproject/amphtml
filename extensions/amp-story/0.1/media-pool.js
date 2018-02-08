@@ -778,7 +778,7 @@ export class MediaPool {
    */
   executeNextMediaElementTask_(mediaEl) {
     const queue = mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME];
-
+    console.log('queue contains', queue);
     if (queue.length === 0) {
       return;
     }
