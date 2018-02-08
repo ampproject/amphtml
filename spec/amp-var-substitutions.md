@@ -155,6 +155,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Document Charset](#document-charset) | `DOCUMENT_CHARSET` | `${documentCharset}` |
 | [Document Referrer](#document-referrer) | `DOCUMENT_REFERRER` | `${documentReferrer}` |
 | [External Referrer](#external-referrer) | `EXTERNAL_REFERRER` | `${externalReferrer}` |
+| [HTML Attribute](#html-attribute) | `HTML_ATTR` | `${htmlAttr}` |
 | [Source URL](#source-url)           | `SOURCE_URL`      | `${sourceUrl}` |
 | [Source Host](#source-host)         | `SOURCE_HOST`     | `${sourceHost}` |
 | [Source Hostname](#source-hostname) | `SOURCE_HOSTNAME` | `${sourceHostname}` |
@@ -620,6 +621,23 @@ Provides the horizontal scroll boundary that triggered a scroll event. This vari
 
 * **platform variable**: N/A
 * **amp-analytics variable**: `${horizontalScrollBoundary}`
+
+#### HTML Attribute
+
+Queries the parent document of the amp-analytics tag for elements matching a CSS query. Then returns the requested 
+attribute values of those elements. A maximum of 10 elements will be returned.
+
+* **platform variable**: `${htmlAttr}`
+* **amp-analytics variable**: `${htmlAttr}`
+
+Example:
+  ```json
+  "sample_request": "http://nowhere/imgData=${htmlAttr(img,src,width)}",
+  ```
+Example value (actual value of imgData parameter will be URL Encoded):
+```html
+  http://nowhere/imgData=[{"src":"a.jpg","width":"300"},{"src":"b.jpg","width":"500"}]
+```
 
 #### Intersection Ratio
 
