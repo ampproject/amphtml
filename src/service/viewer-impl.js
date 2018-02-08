@@ -22,7 +22,6 @@ import {dict, map} from '../utils/object';
 import {findIndex} from '../utils/array';
 import {
   getSourceOrigin,
-  isProxyOrigin,
   parseQueryString,
   parseUrl,
   removeFragment,
@@ -465,23 +464,23 @@ export class Viewer {
 
   /**
    * Requests A2A navigation to the given destination. If the viewer does
-   * not support this operation, will navigate the top level window
-   * to the destination.
+   * not support this operation, does nothing.
    * The URL is assumed to be in AMP Cache format already.
    * @param {string} url An AMP article URL.
    * @param {string} requestedBy Informational string about the entity that
    *     requested the navigation.
+   * @return {boolean} Returns true if navigation message was sent to viewer.
+   *     Otherwise, returns false.
    */
-  navigateTo(url, requestedBy) {
-    dev().assert(isProxyOrigin(url), 'Invalid A2A URL %s %s', url, requestedBy);
+  navigateToAmpUrl(url, requestedBy) {
     if (this.hasCapability('a2a')) {
       this.sendMessage('a2a', dict({
         'url': url,
         'requestedBy': requestedBy,
       }));
-    } else {
-      this.win.top.location.href = url;
+      return true;
     }
+    return false;
   }
 
   /**

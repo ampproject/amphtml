@@ -16,6 +16,7 @@
 
 import '../../src/service/document-click';
 import * as Impression from '../../src/impression';
+import {Services} from '../../src/services';
 import {addParamToUrl} from '../../src/url';
 import {macroTask} from '../../testing/yield';
 
@@ -56,7 +57,7 @@ describes.sandboxed('ClickHandler', {}, () => {
       win = env.win;
       doc = win.document;
 
-      handler = win.services.clickhandler.obj;
+      handler = Services.clickHandlerForDoc(doc);
       handler.isIframed_ = true;
       decorationSpy = sandbox.spy(Impression, 'getExtraParamsUrl');
       handleNavSpy = sandbox.spy(handler, 'handleNavClick_');
@@ -66,9 +67,9 @@ describes.sandboxed('ClickHandler', {}, () => {
       winOpenStub = sandbox.stub(win, 'open').callsFake(() => {
         return {};
       });
-      const viewport = win.services.viewport.obj;
+      const viewport = Services.viewportForDoc(doc);
       scrollIntoViewStub = sandbox.stub(viewport, 'scrollIntoView');
-      const history = win.services.history.obj;
+      const history = Services.historyForDoc(doc);
       replaceStateForTargetPromise = Promise.resolve();
       replaceStateForTargetStub = sandbox.stub(
           history, 'replaceStateForTarget').callsFake(
@@ -100,7 +101,8 @@ describes.sandboxed('ClickHandler', {}, () => {
       it('should NOT handle custom protocol when not iframed', () => {
         handler.isIframed_ = false;
         handler.handle_(event);
-        expect(handleCustomProtocolSpy).to.not.be.called;
+        expect(handleCustomProtocolSpy).to.be.calledOnce;
+        expect(handleCustomProtocolSpy).to.have.returned(false);
       });
 
       it('should discover a link from a nested target', () => {
@@ -351,7 +353,6 @@ describes.sandboxed('ClickHandler', {}, () => {
     });
 
     describe('when linking to identifier', () => {
-
       beforeEach(() => {
         anchor.href = 'https://www.google.com/some-path?hello=world#test';
       });
@@ -447,6 +448,96 @@ describes.sandboxed('ClickHandler', {}, () => {
         expect(scrollIntoViewStub).to.be.calledWith(elementWithId);
       });
     });
+
+    describe('when linking to rel=amphtml', () => {
+      beforeEach(() => {
+        anchor.href = 'https://amp.pub.com/amp_page';
+        anchor.setAttribute('rel', 'unused amphtml unused');
+      });
+
+      it('should delegate navigation if viewer supports A2A', () => {
+        const stub =
+            sandbox.stub(handler.viewer_, 'navigateToAmpUrl').returns(true);
+
+        handler.handle_(event);
+
+        expect(stub).to.be.calledOnce;
+        expect(stub).calledWithExactly(
+            'https://amp.pub.com/amp_page', '<a rel=amphtml>');
+
+        // If viewer handles it, we should prevent default and not handle nav
+        // ourselves.
+        expect(event.defaultPrevented).to.be.true;
+        expect(handleNavSpy).to.not.be.called;
+      });
+
+      it('should behave normally if viewer does not support A2A', () => {
+        const stub =
+            sandbox.stub(handler.viewer_, 'navigateToAmpUrl').returns(false);
+
+        handler.handle_(event);
+
+        expect(stub).to.be.calledOnce;
+        expect(stub).calledWithExactly(
+            'https://amp.pub.com/amp_page', '<a rel=amphtml>');
+
+        // If viewer doesn't handles it, we should not prevent default and
+        // handle nav ourselves.
+        expect(event.defaultPrevented).to.be.false;
+        expect(handleNavSpy).to.be.calledOnce;
+      });
+    });
+
+    describe('navigateTo', () => {
+      let ampdoc;
+
+      beforeEach(() => {
+        ampdoc = Services.ampdoc(doc);
+        win.location.href = 'https://www.pub.com/';
+      });
+
+      it('should reject invalid protocols', () => {
+        const newUrl = /*eslint no-script-url: 0*/ 'javascript:alert(1)';
+
+        expect(win.location.href).to.equal('https://www.pub.com/');
+        handler.navigateTo(win, newUrl);
+        // No navigation so window location should be unchanged.
+        expect(win.location.href).to.equal('https://www.pub.com/');
+      });
+
+      it('should delegate navigation to viewer if necessary', () => {
+        const meta = doc.createElement('meta');
+        meta.setAttribute('name', 'amp-to-amp-navigation');
+        meta.setAttribute('content', 'feature-foo, action-bar');
+        ampdoc.getRootNode().head.appendChild(meta);
+
+        const stub =
+            sandbox.stub(handler.viewer_, 'navigateToAmpUrl').returns(true);
+        expect(win.location.href).to.equal('https://www.pub.com/');
+
+        // Delegate to viewer if opt_requestedBy matches the <meta> tag content
+        // and the viewer supports A2A.
+        handler.navigateTo(win, 'https://amp.pub.com/amp_page', 'feature-foo');
+        expect(stub).to.be.calledOnce;
+        expect(stub).to.be.calledWithExactly(
+            'https://amp.pub.com/amp_page', 'feature-foo');
+        expect(win.location.href).to.equal('https://www.pub.com/');
+
+        // If opt_requestedBy doesn't match, navigate top normally.
+        handler.navigateTo(win, 'https://amp.pub.com/amp_page', 'no-match');
+        expect(stub).to.be.calledOnce;
+        expect(win.location.href).to.equal('https://amp.pub.com/amp_page');
+
+        // If opt_requestedBy matches but viewer doesn't support A2A, navigate
+        // top normally.
+        stub.returns(false);
+        handler.navigateTo(win, 'https://amp.pub.com/different', 'action-bar');
+        expect(stub).to.be.calledTwice;
+        expect(stub).to.be.calledWithExactly(
+            'https://amp.pub.com/different', 'action-bar');
+        expect(win.location.href).to.equal('https://amp.pub.com/different');
+      });
+    });
   });
 
   describes.realWin('fie embed', {
@@ -540,7 +631,6 @@ describes.sandboxed('ClickHandler', {}, () => {
       });
 
       describe('when linking to identifier', () => {
-
         beforeEach(() => {
           anchor.href = 'http://ads.localhost:8000/example#test';
         });
