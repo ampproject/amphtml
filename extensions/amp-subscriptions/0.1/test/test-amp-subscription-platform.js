@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-import {AmpSubscriptionPlatform} from '../amp-subscription-platform';
+import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 
 const NOOP = () => {};
 const dummyUrl = 'http://lipsum.com';
 
 describe('amp-subscriptions', {}, env => {
   let ampdoc;
-  let ampSubscriptionPlatform;
+  let localSubscriptionPlatform;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
 
-    ampSubscriptionPlatform = new AmpSubscriptionPlatform(ampdoc, dummyUrl);
+    localSubscriptionPlatform = new LocalSubscriptionPlatform(ampdoc, dummyUrl);
   });
 
 
   it('should fetch the entitlements on getEntitlements', () => {
     const initializeStub =
-        sandbox.stub(ampSubscriptionPlatform.xhr_, 'fetchJson').callsFake(NOOP);
-    ampSubscriptionPlatform.getEntitlements();
+        sandbox.stub(localSubscriptionPlatform.xhr_, 'fetchJson').callsFake(NOOP);
+    localSubscriptionPlatform.getEntitlements();
     expect(initializeStub).to.be.called.once;
   });
 });
