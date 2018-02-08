@@ -555,13 +555,15 @@ function main() {
       command.cleanBuild();
       command.buildRuntime();
       command.runVisualDiffTests();
-      // Run presubmit and integration tests only if the PR contains runtime
-      // changes or modifies an integration test.
-      if (buildTargets.has('INTEGRATION_TEST') ||
-          buildTargets.has('RUNTIME')) {
-        command.runPresubmitTests();
-        command.runIntegrationTests(/* compiled */ false);
-      }
+    }
+    command.runPresubmitTests();
+    if (buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('RUNTIME')) {
+      command.runIntegrationTests(/* compiled */ false);
+    }
+    if (buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('RUNTIME') ||
+        buildTargets.has('VISUAL_DIFF')) {
       command.verifyVisualDiffTests();
     } else {
       // Generates a blank Percy build to satisfy the required Github check.
