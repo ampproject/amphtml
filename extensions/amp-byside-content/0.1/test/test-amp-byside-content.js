@@ -15,19 +15,22 @@
  */
 
 import '../amp-byside-content';
+import {mockServiceForDoc} from '../../../../testing/test-helper';
 
 describes.realWin('amp-byside-content', {
   amp: {
-    runtimeOn: true,
     extensions: ['amp-byside-content'],
   },
   ampAdCss: true,
 }, env => {
-  let win, doc;
+  let win, doc, urlMock;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
+    urlMock = mockServiceForDoc(sandbox, env.ampdoc, 'url-replace', [
+      'expandUrlAsync',
+    ]);
   });
 
   function getElement(attributes, opt_responsive, opt_beforeLayoutCallback) {
@@ -45,6 +48,9 @@ describes.realWin('amp-byside-content', {
 
     doc.body.appendChild(elem);
     return elem.build().then(() => {
+      urlMock.expandUrlAsync
+          .returns(Promise.resolve(elem.implementation_.baseUrl_))
+          .withArgs(sinon.match.any);
       if (opt_beforeLayoutCallback) {
         opt_beforeLayoutCallback(elem);
       }
@@ -68,7 +74,7 @@ describes.realWin('amp-byside-content', {
       'data-webcare-id': 'D6604AE5D0',
       'data-label': 'amp-simple',
     }).then(elem => {
-	  testIframe(elem);
+	    testIframe(elem);
     });
   });
 
