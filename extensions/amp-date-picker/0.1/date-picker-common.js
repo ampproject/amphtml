@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {requireExternal} from '../../../src/module';
 import {map, omit} from '../../../src/utils/object';
+import {requireExternal} from '../../../src/module';
 
 
 /**
@@ -141,7 +141,7 @@ export function withDatePickerCommon(WrappedComponent) {
         isOutsideRange: this.isOutsideRange,
       }));
     }
-  };
+  }
 
   Component.defaultProps = defaultProps;
 

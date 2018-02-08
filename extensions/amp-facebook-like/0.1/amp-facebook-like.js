@@ -15,11 +15,11 @@
  */
 
 
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {listenFor} from '../../../src/iframe-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeElement} from '../../../src/dom';
 import {dashToUnderline} from '../../../src/string';
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {listenFor} from '../../../src/iframe-helper';
+import {removeElement} from '../../../src/dom';
 
 class AmpFacebookLike extends AMP.BaseElement {
 
@@ -29,6 +29,12 @@ class AmpFacebookLike extends AMP.BaseElement {
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
+
+    /** @private {string} */
+    this.dataLocale_ = element.getAttribute('data-locale');
+    if (!this.dataLocale_) {
+      this.dataLocale_ = dashToUnderline(window.navigator.language);
+    }
   }
 
   /** @override */
@@ -47,7 +53,7 @@ class AmpFacebookLike extends AMP.BaseElement {
     this.preconnect.url('https://facebook.com', opt_onLayout);
     // Hosts the facebook SDK.
     this.preconnect.preload(
-        'https://connect.facebook.net/' + dashToUnderline(window.navigator.language) + '/sdk.js', 'script');
+        'https://connect.facebook.net/' + this.dataLocale_ + '/sdk.js', 'script');
     preloadBootstrap(this.win, this.preconnect);
   }
 

@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-import {isFormDataWrapper} from '../form-data-wrapper';
 import {Services} from '../services';
 import {dev, user} from '../log';
-import {registerServiceBuilder, getService} from '../service';
+import {dict, map} from '../utils/object';
+import {fromIterator} from '../utils/array';
 import {
-  getSourceOrigin,
   getCorsUrl,
+  getSourceOrigin,
   getWinOrigin,
   parseUrl,
   serializeQueryString,
 } from '../url';
-import {parseJson} from '../json';
-import {isArray, isObject} from '../types';
-import {utf8Encode} from '../utils/bytes';
 import {getMode} from '../mode';
-import {dict, map} from '../utils/object';
-import {fromIterator} from '../utils/array';
+import {getService, registerServiceBuilder} from '../service';
+import {isArray, isObject} from '../types';
+import {isFormDataWrapper} from '../form-data-wrapper';
+import {parseJson} from '../json';
+import {utf8Encode} from '../utils/bytes';
 
 /**
  * The "init" argument of the Fetch API. Currently, only "credentials: include"
@@ -826,4 +826,4 @@ export function xhrServiceForTesting(window) {
  */
 export function installXhrService(window) {
   registerServiceBuilder(window, 'xhr', Xhr);
-};
+}

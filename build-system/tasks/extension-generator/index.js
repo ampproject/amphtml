@@ -16,9 +16,9 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = require('gulp-help')(require('gulp'));
-const colors = require('ansi-colors');
 const log = require('fancy-log');
 
 const year = new Date().getFullYear();

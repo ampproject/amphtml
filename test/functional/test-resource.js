@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {Resources} from '../../src/service/resources-impl';
-import {Resource, ResourceState} from '../../src/service/resource';
-import {layoutRectLtwh} from '../../src/layout-rect';
-import {Services} from '../../src/services';
 import * as sinon from 'sinon';
+import {AmpDocSingle} from '../../src/service/ampdoc-impl';
+import {Resource, ResourceState} from '../../src/service/resource';
+import {Resources} from '../../src/service/resources-impl';
+import {Services} from '../../src/services';
+import {layoutRectLtwh} from '../../src/layout-rect';
 
 
 describes.realWin('Resource', {amp: true}, env => {

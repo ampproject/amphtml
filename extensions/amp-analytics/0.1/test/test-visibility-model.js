@@ -42,7 +42,7 @@ describes.sandboxed('VisibilityModel', {}, () => {
       return {
         repeat: model.repeat_,
       };
-    };
+    }
 
     it('should parse visiblePercentageMin', () => {
       expect(config({}).visiblePercentageMin).to.equal(0);

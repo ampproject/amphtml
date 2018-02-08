@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {isExperimentOn} from '../../../src/experiments';
+import {REPLACEMENT_EXP_NAME} from '../../../src/service/url-replacements-impl';
 import {Services} from '../../../src/services';
 import {dev, user} from '../../../src/log';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
 // TODO(calebcordry) remove this once experiment is launched
 // also remove from dep-check-config whitelist;
-import {REPLACEMENT_EXP_NAME} from '../../../src/service/url-replacements-impl';
+import {isExperimentOn} from '../../../src/experiments';
 
 /** @const {string} */
 const TAG = 'Analytics.Variables';

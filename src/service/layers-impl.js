@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import {Services} from '../services';
+import {computedStyle} from '../style';
 import {dev} from '../log';
 import {filterSplice} from '../utils/array';
-import {Services} from '../services';
-import {registerServiceBuilderForDoc} from '../service';
-import {computedStyle} from '../style';
-import {listen} from '../event-helper';
 import {getMode} from '../mode';
+import {listen} from '../event-helper';
+import {registerServiceBuilderForDoc} from '../service';
 
 const LAYOUT_PROP = '__AMP_LAYOUT';
 
@@ -1093,4 +1093,4 @@ export function installLayersServiceForDoc(ampdoc, scrollingElement) {
   registerServiceBuilderForDoc(ampdoc, 'layers', function(ampdoc) {
     return new LayoutLayers(ampdoc, scrollingElement);
   }, /* opt_instantiate */ true);
-};
+}

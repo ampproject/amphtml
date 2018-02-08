@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
+import '../../../amp-mustache/0.1/amp-mustache';
+import '../../../amp-selector/0.1/amp-selector';
+import * as sinon from 'sinon';
+import {AmpEvents} from '../../../../src/amp-events';
 import {
   AmpForm,
   AmpFormService,
   checkUserValidityAfterInteraction_,
 } from '../amp-form';
 import {
-  setReportValiditySupportedForTesting,
-  setCheckValiditySupportedForTesting,
-} from '../form-validators';
-import {
   CONFIG_KEY,
 } from '../form-verifiers';
-import * as sinon from 'sinon';
-import '../../../amp-mustache/0.1/amp-mustache';
+import {FormDataWrapper} from '../../../../src/form-data-wrapper';
+import {Services} from '../../../../src/services';
 import {
   cidServiceForDocForTesting,
 } from '../../../../src/service/cid-impl';
-import {Services} from '../../../../src/services';
-import '../../../amp-selector/0.1/amp-selector';
+import {fromIterator} from '../../../../src/utils/array';
+import {
+  setCheckValiditySupportedForTesting,
+  setReportValiditySupportedForTesting,
+} from '../form-validators';
 import {user} from '../../../../src/log';
 import {whenCalled} from '../../../../testing/test-helper.js';
-import {AmpEvents} from '../../../../src/amp-events';
-import {FormDataWrapper} from '../../../../src/form-data-wrapper';
-import {fromIterator} from '../../../../src/utils/array';
 
 describes.repeated('', {
   'single ampdoc': {ampdoc: 'single'},

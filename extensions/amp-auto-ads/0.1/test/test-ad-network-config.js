@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {getAdNetworkConfig} from '../ad-network-config';
-import {
-  toggleExperiment,
-  forceExperimentBranch,
-} from '../../../../src/experiments';
-import {Services} from '../../../../src/services';
 import {
   ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME,
   AdSenseAmpAutoAdsHoldoutBranches,
 } from '../../../../ads/google/adsense-amp-auto-ads';
+import {Services} from '../../../../src/services';
+import {
+  forceExperimentBranch,
+  toggleExperiment,
+} from '../../../../src/experiments';
+import {getAdNetworkConfig} from '../ad-network-config';
 
 describes.realWin('ad-network-config', {
   amp: {

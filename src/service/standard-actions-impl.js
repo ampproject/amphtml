@@ -15,16 +15,16 @@
  */
 
 import {ActionTrust} from '../action-trust';
-import {OBJECT_STRING_ARGS_KEY} from '../service/action-impl';
 import {Layout, getLayoutClass} from '../layout';
+import {OBJECT_STRING_ARGS_KEY} from '../service/action-impl';
 import {Services} from '../services';
 import {computedStyle, getStyle, toggle} from '../style';
 import {dev, user} from '../log';
 import {dict} from '../utils/object';
 import {isProtocolValid} from '../url';
 import {registerServiceBuilderForDoc} from '../service';
-import {tryFocus} from '../dom';
 import {toWin} from '../types';
+import {tryFocus} from '../dom';
 
 /**
  * @param {!Element} element
@@ -348,4 +348,4 @@ export function installStandardActionsForDoc(ampdoc) {
       'standard-actions',
       StandardActions,
       /* opt_instantiate */ true);
-};
+}

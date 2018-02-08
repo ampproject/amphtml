@@ -16,8 +16,8 @@
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {OBJECT_STRING_ARGS_KEY} from '../../src/service/action-impl';
-import {StandardActions} from '../../src/service/standard-actions-impl';
 import {Services} from '../../src/services';
+import {StandardActions} from '../../src/service/standard-actions-impl';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
 import {setParentWindow} from '../../src/service';
 
