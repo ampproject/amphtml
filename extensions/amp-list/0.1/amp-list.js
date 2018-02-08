@@ -15,17 +15,17 @@
  */
 
 import {AmpEvents} from '../../../src/amp-events';
+import {Services} from '../../../src/services';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
 } from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
+import {dev, user} from '../../../src/log';
+import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {getSourceOrigin} from '../../../src/url';
 import {removeChildren} from '../../../src/dom';
-import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -126,7 +126,7 @@ export class AmpList extends AMP.BaseElement {
     } else if (state !== undefined) {
       const items = isArray(state) ? state : [state];
       this.renderItems_(items);
-      user().warn(TAG, '[state] is deprecated, please use [src] instead.');
+      user().error(TAG, '[state] is deprecated, please use [src] instead.');
     }
   }
 

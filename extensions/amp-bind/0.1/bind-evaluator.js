@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {BindMacro} from './bind-macro';
 import {BindExpression} from './bind-expression';
+import {BindMacro} from './bind-macro';
 import {BindValidator} from './bind-validator';
 import {filterSplice} from '../../../src/utils/array';
 

@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
+import {addParamsToUrl} from '../../../src/url';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {
-  getDataParamsFromAttributes,
-  removeElement,
   fullscreenEnter,
   fullscreenExit,
+  getDataParamsFromAttributes,
   isFullscreenElement,
+  removeElement,
 } from '../../../src/dom';
-import {tryParseJson} from '../../../src/json';
 import {getData, listen} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {user, dev} from '../../../src/log';
 import {
   installVideoManagerForDoc,
 } from '../../../src/service/video-manager-impl';
-import {setStyles} from '../../../src/style';
-import {addParamsToUrl} from '../../../src/url';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/types';
-import {dict} from '../../../src/utils/object';
-import {VideoEvents} from '../../../src/video-interface';
-import {Services} from '../../../src/services';
+import {setStyles} from '../../../src/style';
 import {startsWith} from '../../../src/string';
+import {tryParseJson} from '../../../src/json';
 
 /**
  * @enum {number}
@@ -435,8 +435,10 @@ class AmpYoutube extends AMP.BaseElement {
           encodeURIComponent(videoid) + '/hqdefault.jpg';
       return this.loadPromise(imgPlaceholder);
     }).then(() => {
-      setStyles(imgPlaceholder, {
-        'visibility': '',
+      this.getVsync().mutate(() => {
+        setStyles(imgPlaceholder, {
+          'visibility': '',
+        });
       });
     });
   }

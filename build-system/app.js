@@ -19,12 +19,12 @@
  * @fileoverview Creates an http server to handle static
  * files and list directories for use with the gulp live server
  */
-const BBPromise = require('bluebird');
 const app = require('express')();
 const bacon = require('baconipsum');
+const BBPromise = require('bluebird');
 const bodyParser = require('body-parser');
-const fs = BBPromise.promisifyAll(require('fs'));
 const formidable = require('formidable');
+const fs = BBPromise.promisifyAll(require('fs'));
 const jsdom = require('jsdom');
 const path = require('path');
 const request = require('request');
@@ -632,7 +632,7 @@ app.use('/a4a(|-3p)/', (req, res) => {
   adUrl = addQueryParam(adUrl, 'inabox', 1);
   fs.readFileAsync(pc.cwd() + templatePath, 'utf8').then(template => {
     const result = template
-        .replace(/FORCE3P/g, force3p)
+        .replace(/CHECKSIG/g, force3p || '')
         .replace(/DISABLE3PFALLBACK/g, !force3p)
         .replace(/OFFSET/g, req.query.offset || '0px')
         .replace(/AD_URL/g, adUrl)
@@ -704,11 +704,12 @@ app.get(['/examples/*.html', '/test/manual/*.html'], (req, res, next) => {
       file = addViewerIntegrationScript(req.query['amp_js_v'], file);
     }
 
-    file = replaceUrls(mode, file, '', inabox);
 
     if (inabox && req.headers.origin && req.query.__amp_source_origin) {
       // Allow CORS requests for A4A.
       enableCors(req, res, req.headers.origin);
+    } else {
+      file = replaceUrls(mode, file, '', inabox);
     }
 
     // Extract amp-ad for the given 'type' specified in URL query.
@@ -857,6 +858,7 @@ app.use('/list/vegetable-data/get', (req, res) => {
   });
 });
 
+// Simulated subscription entitlement
 app.use('/subscription/:id/entitlements', (req, res) => {
   assertCors(req, res, ['GET']);
   res.json({

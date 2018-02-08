@@ -21,25 +21,25 @@ import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
-import {isConnectedNode} from '../../../src/dom';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {getStyle, setStyle} from '../../../src/style';
-import {numeric} from '../../../src/transition';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {isConnectedNode} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {numeric} from '../../../src/transition';
 import {startsWith} from '../../../src/string';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @const {string} */
 const SHOWN_CSS_CLASS = 'i-amphtml-slide-item-show';
 
 /** @const {number} */
-const NATIVE_SNAP_TIMEOUT = 35;
+const NATIVE_SNAP_TIMEOUT = 135;
 
 /** @const {number} */
 const IOS_CUSTOM_SNAP_TIMEOUT = 45;
 
 /** @const {number} */
-const NATIVE_TOUCH_TIMEOUT = 120;
+const NATIVE_TOUCH_TIMEOUT = 100;
 
 /** @const {number} */
 const IOS_TOUCH_TIMEOUT = 45;
@@ -350,6 +350,7 @@ export class AmpSlideScroll extends BaseSlides {
     }
 
     const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
+
     if (!this.isIos_) {
       this.handleCustomElasticScroll_(currentScrollLeft);
     }
@@ -359,7 +360,6 @@ export class AmpSlideScroll extends BaseSlides {
         this.isIos_ ? IOS_CUSTOM_SNAP_TIMEOUT : CUSTOM_SNAP_TIMEOUT);
       // Timer that detects scroll end and/or end of snap scroll.
       this.scrollTimeout_ = Services.timerFor(this.win).delay(() => {
-
         if (this.snappingInProgress_) {
           return;
         }
