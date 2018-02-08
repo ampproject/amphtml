@@ -327,6 +327,13 @@ export class MediaPool {
    */
   allocateMediaElement_(mediaType, poolMediaEl) {
     this.allocated[mediaType].push(poolMediaEl);
+
+    const unallocatedEls = this.unallocated[mediaType];
+    const indexToRemove = unallocatedEls.indexOf(poolMediaEl);
+
+    if (indexToRemove >= 0) {
+      unallocatedEls.splice(indexToRemove, 1);
+    }
   }
 
 
@@ -498,12 +505,14 @@ export class MediaPool {
         this.domMediaEls_[oldDomMediaElId],
         'No media element to put back into DOM after eviction.'));
 
-    return this.enqueueMediaElementTask_(poolMediaEl,
+    const swapOutOfDom = this.enqueueMediaElementTask_(poolMediaEl,
         new SwapOutOfDomTask(oldDomMediaEl, this.vsync_))
         .then(() => {
           poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = null;
-          this.resetPoolMediaElementSource_(poolMediaEl);
         });
+
+    this.resetPoolMediaElementSource_(poolMediaEl);
+    return swapOutOfDom;
   }
 
 
