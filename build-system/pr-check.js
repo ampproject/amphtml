@@ -431,12 +431,48 @@ function runYarnLockfileCheck() {
 }
 
 /**
+ * Returns true if this is a PR build for a greenkeeper branch.
+ */
+function isGreenkeeperPrBuild() {
+  return (process.env.TRAVIS_EVENT_TYPE == 'pull_request') &&
+      (process.env.TRAVIS_PULL_REQUEST_BRANCH.indexOf('greenkeeper/') != -1);
+}
+
+/**
+ * Returns true if this is a push build for a greenkeeper branch.
+ */
+function isGreenkeeperPushBuild() {
+  return (process.env.TRAVIS_EVENT_TYPE == 'push') &&
+      (process.env.TRAVIS_BRANCH.indexOf('greenkeeper/') != -1);
+}
+
+/**
+ * Returns true if this is a push build for a lockfile update on a greenkeeper
+ * branch.
+ */
+function isGreenkeeperLockfilePushBuild() {
+  return isGreenkeeperPushBuild() &&
+      (process.env.TRAVIS_COMMIT_MESSAGE.indexOf('update lockfile') != -1);
+}
+
+/**
  * The main method for the script execution which much like a C main function
  * receives the command line arguments and returns an exit status.
  * @returns {number}
  */
 function main() {
   const startTime = startTimer('pr-check.js');
+
+  // Eliminate unnecessary testing on greenkeeper branches by running tests only
+  // on the push build that contains the lockfile update.
+  if (isGreenkeeperPrBuild() ||
+      (isGreenkeeperPushBuild() && !isGreenkeeperLockfilePushBuild())) {
+    console.log(fileLogPrefix,
+        'Skipping unnecessary testing on greenkeeper branches. ' +
+        'Tests will only be run for the push build with the lockfile update.');
+    stopTimer('pr-check.js', startTime);
+    return 0;
+  }
 
   // Make sure package.json and yarn.lock are in sync and up-to-date.
   runYarnIntegrityCheck();
@@ -454,24 +490,6 @@ function main() {
       fileLogPrefix, 'Running build shard',
       colors.cyan(process.env.BUILD_SHARD),
       '\n');
-
-  // Eliminate unnecessary testing on greenkeeper branches by running tests only
-  // on the push build that contains the lockfile update.
-  const isGreenkeeperPushBuild =
-      ((process.env.TRAVIS_EVENT_TYPE == 'push') &&
-       (process.env.TRAVIS_BRANCH.indexOf('greenkeeper/') != -1));
-  const isGreenkeeperPrBuild =
-      ((process.env.TRAVIS_EVENT_TYPE == 'pull_request') &&
-       (process.env.TRAVIS_PULL_REQUEST_BRANCH.indexOf('greenkeeper/') != -1));
-  if (isGreenkeeperPrBuild ||
-      (isGreenkeeperPushBuild &&
-       process.env.TRAVIS_COMMIT_MESSAGE.indexOf('update lockfile') == -1)) {
-    console.log(fileLogPrefix,
-        'Skipping unnecessary testing on greenkeeper branches. ' +
-        'Tests will only be run for the push build with the lockfile update.');
-    stopTimer('pr-check.js', startTime);
-    return 0;
-  }
 
   // If $TRAVIS_PULL_REQUEST_SHA is empty then it is a push build and not a PR.
   if (!process.env.TRAVIS_PULL_REQUEST_SHA) {
