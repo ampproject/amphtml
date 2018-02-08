@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import {Entitlement} from './entitlements';
 import {Services} from '../../../src/services';
-
 /**
  * This implements the methods to interact with various subscription platforms.
  * @implements {./subscription-platform}
@@ -38,12 +38,16 @@ export class LocalSubscriptionPlatform {
 
   /**
    * TODO(@prateekbh): Define object below once we have a defination of entitlement
-   * @return {!Promise<JsonObject>}
+   * @return {!Promise<Entitlement>}
    */
   getEntitlements() {
     return this.xhr_
         .fetchJson(this.serviceUrl_)
-        .then(res => res.json());
+        .then(res => res.json())
+        .then(json => {
+          const entitlements = json.entitlements;
+          return new Entitlement(entitlements.souce, entitlements.products);
+        });
   }
 
 }
