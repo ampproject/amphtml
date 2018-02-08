@@ -69,10 +69,13 @@ To see more demos of the `amp-accordion`, visit [AMP By Example](https://ampbyex
 {% endcall %}
 
 ### Actions
+
 #### `toggle`
 This action toggles between the `expanded` and `collapsed` states of the `amp-accordion`. When called with no arguements, it will toggle all sections of the accordion. A single section may be specified with the `section` arguement and the corresponding `id` as the value.
+
 #### `expand`
 This action expands an `amp-accordion`. If it is already `expanded`, it will stay so. When called with no arguements, it will expand all sections of the accordion. A single section may be spefified with the `section` arguement and the corresponding `id` as the value.
+
 #### `collapse`
 This action collapses an `amp-accordion`. If it is already collapsed, it will stay so. When called with no arguements, it will collapse all sections of the accordion. A single section may be spefified with the `section` arguement and the corresponding `id` as the value.
 
@@ -85,6 +88,10 @@ Set this attribute on the `<amp-accordion>` to opt out of preserving the collaps
 #####  expanded
 
 Set this attribute on a `<section>` to display the section as expanded on page load.
+
+#####  expand-one
+
+Set this attribute on the `<amp-accordion>` to only allow one `<section>` to be expanded at a time. If the user focuses on one `<section>` any other previously expanded `<section>` will be collapsed.
 
 ## Styling
 
