@@ -107,6 +107,11 @@ amp-story[standalone]:fullscreen {
   pointer-events: none !important;
 }
 
+.i-amphtml-story-ui-left,
+.i-amphtml-story-ui-right {
+  pointer-events: auto !important;
+}
+
 .i-amphtml-story-bookend-active > .i-amphtml-story-system-layer {
   opacity: 0.3 !important;
 }
@@ -114,7 +119,6 @@ amp-story[standalone]:fullscreen {
 .i-amphtml-story-ui-right {
   float: right !important;
   margin: 0 8px !important;
-  pointer-events: auto !important;
 }
 
 .i-amphtml-story-button {

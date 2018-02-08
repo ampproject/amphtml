@@ -15,12 +15,11 @@
  */
 
 import {Services} from '../../../src/services';
-import {SubscriptionPlatform} from './subscription-platform';
 
 /**
  * This implements the methods to interact with various subscription platforms.
  *
- * @implements {SubscriptionPlatform}
+ * @implements {./subscription-platform.SubscriptionPlatform}
  */
 export class LocalSubscriptionPlatform {
 
