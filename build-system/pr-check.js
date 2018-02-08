@@ -452,7 +452,8 @@ function isGreenkeeperPushBuild() {
  */
 function isGreenkeeperLockfilePushBuild() {
   return isGreenkeeperPushBuild() &&
-      (process.env.TRAVIS_COMMIT_MESSAGE.indexOf('update lockfile') != -1);
+      (process.env.TRAVIS_COMMIT_MESSAGE.indexOf(
+          'chore(package): update lockfile') == 0);
 }
 
 /**
