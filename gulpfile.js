@@ -780,6 +780,11 @@ function dist() {
           copyCss(),
         ]);
       }).then(() => {
+        if (process.env.TRAVIS) {
+          // New line after all the compilation progress dots on Travis.
+          console.log('\n');
+        }
+      }).then(() => {
         copyAliasExtensions();
       }).then(() => {
         if (argv.fortesting) {
@@ -881,6 +886,11 @@ function checkTypes() {
             checkTypes: true,
           }),
     ]);
+  }).then(() => {
+    if (process.env.TRAVIS) {
+      // New line after all the compilation progress dots on Travis.
+      console.log('\n');
+    }
   }).then(() => exitCtrlcHandler(handlerProcess));
 }
 

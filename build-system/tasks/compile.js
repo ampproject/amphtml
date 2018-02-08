@@ -45,6 +45,10 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
       inProgress++;
       compile(entryModuleFilename, outputDir, outputFilename, options)
           .then(function() {
+            if (process.env.TRAVIS) {
+              // Print a progress dot after each task to avoid Travis timeouts.
+              process.stdout.write('.');
+            }
             inProgress--;
             next();
             resolve();
