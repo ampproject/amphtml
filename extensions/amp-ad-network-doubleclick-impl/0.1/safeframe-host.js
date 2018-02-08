@@ -20,7 +20,7 @@ import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {SimplePostMessageApiDef} from '../../../src/simple-postmessage-api-def';
-import {Services} from '../../../src/services';
+import {AmpAdNetworkDoubleclickImpl} from './amp-ad-network-doubleclick-impl';
 
 /**
  * Used to manage messages for different Safeframe ad slots.
@@ -79,6 +79,11 @@ function safeframeListener() {
   }
 }
 
+/**
+ * Handles all non-setup messages.
+ * @param {Object} data Message data from the postMessage received from
+ *   the safeframe.
+ */
 function receiveStandardMessage(data) {
   const payload = tryParseJson(data[MESSAGE_FIELDS.PAYLOAD]);
   if (!payload || !payload['sentinel']) {
@@ -93,6 +98,12 @@ function receiveStandardMessage(data) {
   safeframeHost.processMessage(payload, data['s']);
 }
 
+
+/**
+ * Handles the setup message from the safeframe.
+ * @param {Object} data Message data from the postMessage received from
+ *   the safeframe.
+ */
 function receiveSetupMessage(data) {
   const safeframeHost = safeframeHosts[data[MESSAGE_FIELDS.SENTINEL]];
   if (!safeframeHost) {
@@ -106,7 +117,7 @@ function receiveSetupMessage(data) {
 }
 
 /**
- * This class is sets up the host for GPT Safeframe.
+ * Sets up the host for GPT Safeframe.
  * @implements {SimplePostMessageApiDef}
  */
 export class SafeframeHostApi {
@@ -148,11 +159,13 @@ export class SafeframeHostApi {
     /** @type {number} */
     this.uid = Math.random();
 
-    this.viewport = Services.viewportForDoc(this.baseInstance_.getAmpDoc());
-
     this.registerSafeframeHost();
   }
 
+  /**
+   * Returns the Safeframe specific name attributes that are needed for the
+   * Safeframe creative to properly setup.
+   */
   getSafeframeNameAttr() {
     const attributes = dict({});
     // TODO: Some of these options are probably not right.
@@ -162,7 +175,7 @@ export class SafeframeHostApi {
     attributes['permissions'] = JSON.stringify(
         dict({
           'expandByOverlay': false,
-          'expandByPush': false,
+          'expandByPush': true,
           'readCookie': false,
           'writeCookie': false,
         }));
@@ -218,7 +231,6 @@ export class SafeframeHostApi {
     }));
   }
 
-  // TODO: Need to fix so it is the geom of the safeframe, not the amp-ad
   /**
    * Creates IntersectionObserver instance for this SafeframeAPI instance.
    * We utilize the existing IntersectionObserver class, by passing in this
@@ -249,17 +261,24 @@ export class SafeframeHostApi {
     );
   }
 
+  /**
+   * The IntersectionObserver class is monitoring the amp-ad element,
+   * not the Safeframe. The Safeframe is not necessarily the exact
+   * same size as the amp-ad element, so calculate the deltas between
+   * the top, bottom, left, and right sides of the amp-ad and the
+   * safeframe.
+   * @return {Object} Offsets for iframe to get correct intersections.
+   */
   getFrameCorrections() {
-    if (!this.iframe_) {
-      return {dT: 0, dB: 0, dL: 0, dR: 0};
-    }
     const iframeRect = this.iframe_.getBoundingClientRect();
     const ampAdRect = this.baseInstance_.element.getBoundingClientRect();
     return {
       dT: (iframeRect.y - ampAdRect.y),
       dL: (iframeRect.x - ampAdRect.x),
-      dB: ((iframeRect.height + iframeRect.y) - (ampAdRect.height + ampAdRect.y)),
-      dR: ((iframeRect.width + iframeRect.x) - (ampAdRect.width  + ampAdRect.x)),
+      dB: ((iframeRect.height + iframeRect.y) -
+           (ampAdRect.height + ampAdRect.y)),
+      dR: ((iframeRect.width + iframeRect.x) -
+           (ampAdRect.width + ampAdRect.x)),
     };
   }
 
@@ -283,11 +302,13 @@ export class SafeframeHostApi {
         return percInView;
       }
     };
-    const corrections = this.getFrameCorrections();
-    changes.boundingClientRect.right += corrections['dR'],
-    changes.boundingClientRect.top += corrections['dT'];
-    changes.boundingClientRect.bottom += corrections['dB'];
-    changes.boundingClientRect.left += corrections['dL'];
+    if (this.iframe_) {
+      const corrections = this.getFrameCorrections();
+      changes.boundingClientRect.right += corrections['dR'];
+      changes.boundingClientRect.top += corrections['dT'];
+      changes.boundingClientRect.bottom += corrections['dB'];
+      changes.boundingClientRect.left += corrections['dL'];
+    }
     const frameHeight = changes.boundingClientRect.bottom -
           changes.boundingClientRect.top;
     const frameWidth = changes.boundingClientRect.right -
@@ -313,13 +334,13 @@ export class SafeframeHostApi {
       'allowedExpansion_b': expandHeight,
       'allowedExpansion_l': expandWidth,
       'yInView': percInView(changes.rootBounds.top,
-                            changes.rootBounds.bottom,
-                            changes.boundingClientRect.top,
-                            changes.boundingClientRect.bottom),
+          changes.rootBounds.bottom,
+          changes.boundingClientRect.top,
+          changes.boundingClientRect.bottom),
       'xInView': percInView(changes.rootBounds.left,
-                            changes.rootBounds.right,
-                            changes.boundingClientRect.left,
-                            changes.boundingClientRect.right),
+          changes.rootBounds.right,
+          changes.boundingClientRect.left,
+          changes.boundingClientRect.right),
     };
     return JSON.stringify(this.currentGeometry_);
   }
@@ -377,10 +398,17 @@ export class SafeframeHostApi {
     this.initialWidth_ = payload.initialWidth;
   }
 
+  /**
+   * Resizes the safeframe, and potentially the containing amp-ad element.
+   * Then sends a response message to the Safeframe creative.
+   * @param {number} height In pixels.
+   * @param {number} width In pixels.
+   * @param {string} message
+   */
   handleSizeChange(height, width, message) {
     const resizeIframe = () => {
-      this.iframe_.style.height = height + "px";
-      this.iframe_.style.width = width + "px";
+      this.iframe_.style.height = height + 'px';
+      this.iframe_.style.width = width + 'px';
     };
     const sendResizeResponse = success => {
       this.sendMessage_(JSON.stringify({
@@ -394,6 +422,8 @@ export class SafeframeHostApi {
         push: true,
       }), message);
     };
+    // If the new size is fully contained within the bounds of the amp-ad,
+    // we can resize immediately as there will be no reflow.
     if (width <= this.baseInstance_.element.getBoundingClientRect().width &&
         height <= this.baseInstance_.element.getBoundingClientRect().height) {
       resizeIframe();
@@ -437,18 +467,20 @@ export class SafeframeHostApi {
    * @private
    */
   handleExpandRequest_(payload) {
-    // TODO: Something is not working right when the frame is allllmost out of viewport
-    // and when it is fully out of viewport
     this.handleSizeChange(Math.floor(payload.expand_b +
                                      payload.expand_t +
                                      Number(this.iframe_.height)),
-                          Math.floor(payload.expand_r +
+    Math.floor(payload.expand_r +
                                      payload.expand_l +
                                      Number(this.iframe_.width)),
-        SERVICE.EXPAND_RESPONSE);
+    SERVICE.EXPAND_RESPONSE);
   }
 
-  handleCollapseRequest_(unused_payload) {
+  /**
+   * @param {!Object} unusedPayload
+   * @private
+   */
+  handleCollapseRequest_(unusedPayload) {
     this.handleSizeChange(this.baseInstance_.initialSize_.height,
         this.baseInstance_.initialSize_.width,
         SERVICE.COLLAPSE_RESPONSE);
