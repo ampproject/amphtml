@@ -1420,7 +1420,7 @@ gulp.task('build', 'Builds the AMP library', ['update-packages'], build, {
 });
 gulp.task('check-all', 'Run through all presubmit checks',
     ['lint', 'dep-check', 'check-types', 'presubmit']);
-gulp.task('check-types', 'Check JS types', checkTypes);
+gulp.task('check-types', 'Check JS types', ['update-packages'], checkTypes);
 gulp.task('css', 'Recompile css to build directory', ['update-packages'], css);
 gulp.task('default', 'Runs "watch" and then "serve"',
     ['update-packages', 'watch'], serve, {

@@ -20,6 +20,7 @@ const closureCompiler = require('gulp-closure-compiler');
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const gulp = require('gulp');
+const highlight = require('cli-highlight').highlight;
 const internalRuntimeToken = require('../internal-version').TOKEN;
 const internalRuntimeVersion = require('../internal-version').VERSION;
 const rename = require('gulp-rename');
@@ -33,7 +34,7 @@ let inProgress = 0;
 const MAX_PARALLEL_CLOSURE_INVOCATIONS = 4;
 
 // Compiles AMP with the closure compiler. This is intended only for
-// production use. During development we intent to continue using
+// production use. During development we intend to continue using
 // babel, as it has much faster incremental compilation.
 exports.closureCompile = function(entryModuleFilename, outputDir,
   outputFilename, options) {
@@ -44,26 +45,16 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
       inProgress++;
       compile(entryModuleFilename, outputDir, outputFilename, options)
           .then(function() {
-            if (process.env.TRAVIS) {
-              // When printing simplified log in travis, use dot for each task.
-              process.stdout.write('.');
-            }
             inProgress--;
             next();
             resolve();
           }, function(e) {
-            console./* OK*/error(colors.red('Compilation error',
-                e.message));
+            console./* OK*/error(colors.red('Compilation error:', e.message));
             process.exit(1);
           });
     }
     function next() {
       if (!queue.length) {
-        // When printing simplified log in travis, print EOF after
-        // all closure compiling task are done.
-        if (process.env.TRAVIS) {
-          process.stdout.write('\n');
-        }
         return;
       }
       if (inProgress < MAX_PARALLEL_CLOSURE_INVOCATIONS) {
@@ -84,6 +75,16 @@ function cleanupBuildDir() {
   fs.mkdirsSync('build/fake-module/src/polyfills/');
 }
 exports.cleanupBuildDir = cleanupBuildDir;
+
+// Formats a closure compiler error message into a more readable form by
+// dropping the lengthy invocation line...
+//     Command failed: java -jar ... --js_output_file="<file>"
+// ...and then syntax highlighting the error text.
+function formatClosureCompilerError(message) {
+  const filteredMessage =
+      message.replace(/Command failed:[^]*--js_output_file=\".*?\"\n/, '');
+  return highlight(filteredMessage, {ignoreIllegals: true}); // never throws
+}
 
 function compile(entryModuleFilenames, outputDir,
   outputFilename, options) {
@@ -326,9 +327,8 @@ function compile(entryModuleFilenames, outputDir,
     let stream = gulp.src(srcs)
         .pipe(closureCompiler(compilerOptions))
         .on('error', function(err) {
-          console./* OK*/error(colors.red('Error compiling',
-              entryModuleFilenames));
-          console./* OK*/error(colors.red(err.message));
+          console./* OK*/error(colors.red('Compiler error:\n') +
+              formatClosureCompilerError(err.message));
           process.exit(1);
         });
 
