@@ -780,6 +780,11 @@ function dist() {
           copyCss(),
         ]);
       }).then(() => {
+        if (process.env.TRAVIS) {
+          // New line after all the compilation progress dots on Travis.
+          console.log('\n');
+        }
+      }).then(() => {
         copyAliasExtensions();
       }).then(() => {
         if (argv.fortesting) {
@@ -819,6 +824,7 @@ function copyAliasExtensions() {
  * @return {!Promise}
  */
 function checkTypes() {
+  const handlerProcess = createCtrlcHandler('check-types');
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   // Disabled to improve type check performance, since this provides
@@ -880,7 +886,12 @@ function checkTypes() {
             checkTypes: true,
           }),
     ]);
-  });
+  }).then(() => {
+    if (process.env.TRAVIS) {
+      // New line after all the compilation progress dots on Travis.
+      console.log('\n');
+    }
+  }).then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
@@ -1420,7 +1431,7 @@ gulp.task('build', 'Builds the AMP library', ['update-packages'], build, {
 });
 gulp.task('check-all', 'Run through all presubmit checks',
     ['lint', 'dep-check', 'check-types', 'presubmit']);
-gulp.task('check-types', 'Check JS types', checkTypes);
+gulp.task('check-types', 'Check JS types', ['update-packages'], checkTypes);
 gulp.task('css', 'Recompile css to build directory', ['update-packages'], css);
 gulp.task('default', 'Runs "watch" and then "serve"',
     ['update-packages', 'watch'], serve, {
