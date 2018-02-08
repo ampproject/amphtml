@@ -81,9 +81,12 @@ exports.cleanupBuildDir = cleanupBuildDir;
 //     Command failed: java -jar ... --js_output_file="<file>"
 // ...and then syntax highlighting the error text.
 function formatClosureCompilerError(message) {
-  const filteredMessage =
+  message =
       message.replace(/Command failed:[^]*--js_output_file=\".*?\"\n/, '');
-  return highlight(filteredMessage, {ignoreIllegals: true}); // never throws
+  message = highlight(message, {ignoreIllegals: true}); // never throws
+  message = message.replace(/WARNING/g, colors.yellow('WARNING'));
+  message = message.replace(/ERROR/g, colors.red('ERROR'));
+  return message;
 }
 
 function compile(entryModuleFilenames, outputDir,
