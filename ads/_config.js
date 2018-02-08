@@ -128,6 +128,10 @@ export const adConfig = {
   },
 
   adocean: {},
+  
+  adplugg: {
+    prefetch: 'https://www.adplugg.com/serve/js/ad.js',
+  },
 
   adreactor: {},
 
