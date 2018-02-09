@@ -219,6 +219,7 @@ def load_visual_tests_config_json
   json_file.read
 end
 
+
 # Configures Chrome and headless Chrome
 def configure_browser
   if ARGV.include? '--headless'
@@ -239,6 +240,7 @@ def configure_browser
   end
 end
 
+
 # Initializes the Capybara driver
 #
 # Args:
@@ -256,6 +258,7 @@ def initialize_capybara(assets_dir, assets_base_url)
     page = Capybara::Session.new(:chrome)
   end
 end
+
 
 # Runs the visual tests.
 #
