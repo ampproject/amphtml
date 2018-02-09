@@ -858,6 +858,19 @@ app.use('/list/vegetable-data/get', (req, res) => {
   });
 });
 
+// Simulated subscription entitlement
+app.use('/subscription/:id/entitlements', (req, res) => {
+  assertCors(req, res, ['GET']);
+  res.json({
+    entitlements: [
+      {
+        source: req.params.id,
+        products: ['product1', 'product2'],
+      },
+    ],
+  });
+});
+
 // Simulated adzerk ad server and AMP cache CDN.
 app.get('/adzerk/*', (req, res) => {
   assertCors(req, res, ['GET'], ['AMP-template-amp-creative']);
@@ -1012,6 +1025,7 @@ app.get('/dist/diversions', (req, res) => {
   res.setHeader('Cache-Control', 'no-cache;max-age=150');
   res.end(JSON.stringify(['98' + n]));
 });
+
 /*
  * End Cache SW LOCALDEV section
  */
