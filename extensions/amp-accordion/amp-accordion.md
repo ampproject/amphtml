@@ -81,15 +81,15 @@ This action collapses an `amp-accordion`. If it is already collapsed, it will st
 
 #### Attributes
 
-##### disable-session-states
+##### `disable-session-states`
 
 Set this attribute on the `<amp-accordion>` to opt out of preserving the collapsed/expanded state of the accordion.
 
-#####  expanded
+#####  `expanded`
 
 Set this attribute on a `<section>` to display the section as expanded on page load.
 
-#####  expand-single-section
+#####  `expand-single-section`
 
 Set this attribute on the `<amp-accordion>` to only allow one `<section>` to be expanded at a time. If the user focuses on one `<section>` any other previously expanded `<section>` will be collapsed.
 
