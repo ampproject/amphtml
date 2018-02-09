@@ -35,6 +35,8 @@ SRC_DIR=$(dirname "$AMPHTML_DIR")
 ABE_DIR="$SRC_DIR/amp-by-example"
 ABE_TESTS_PATH="examples/visual-tests/amp-by-example"
 ABE_TESTS_DIR="$AMPHTML_DIR/$ABE_TESTS_PATH"
+ABE_TESTS_JSON_FILE="$AMPHTML_DIR/test/visual-diff/visual-tests.js"
+ABE_COMPONENTS_DIR="$ABE_TESTS_DIR/components"
 ABE_CLONE_PATH="git@github.com:ampproject/amp-by-example.git"
 
 echo $(YELLOW "-----------------------------------------------------------------------------------------------------------------")
@@ -45,6 +47,7 @@ echo $(GREEN "  2. If already present, updates the local") $(CYAN "amp-by-exampl
 echo $(GREEN "  3. Runs") $(CYAN "gulp build") $(GREEN "to regenerate pages")
 echo $(GREEN "  4. Copies the") $(CYAN "dist") $(GREEN "folder to") $(CYAN "$ABE_TESTS_DIR")
 echo $(GREEN "  5. Prepends all local directory links with") $(CYAN "$ABE_TESTS_PATH")
+echo $(GREEN "  6. Generates test json for all components in") $(CYAN "$ABE_COMPONENTS_DIR")
 echo $(YELLOW "-----------------------------------------------------------------------------------------------------------------")
 echo -e "\n"
 
@@ -129,16 +132,30 @@ RUN "ls -d */"
 
 echo -e "\n"
 echo $(GREEN "Prepending all local directory links with") $(CYAN "$ABE_TESTS_DIR")
-for HTMLFILE in `find . -name "*.html"`
+for HTML_FILE in `find . -name "*.html"`
 do
-  echo "Processing $HTMLFILE..."
+  echo "Processing $HTML_FILE..."
   for DIRPATH in `ls -d */`
   do
     DIRNAME=`basename $DIRPATH`
-    sed -i "s~/$DIRNAME/~/$ABE_TESTS_PATH/$DIRNAME/~g" $HTMLFILE
-    sed -i "s~ampbyexample\.com/$ABE_TESTS_PATH/$DIRNAME/~ampbyexample\.com/$DIRNAME/~g" $HTMLFILE
+    sed -i "s~/$DIRNAME/~/$ABE_TESTS_PATH/$DIRNAME/~g" $HTML_FILE
+    sed -i "s~ampbyexample\.com/$ABE_TESTS_PATH/$DIRNAME/~ampbyexample\.com/$DIRNAME/~g" $HTML_FILE
   done
 done
+
+echo -e "\n"
+echo $(GREEN "Generating test json for all components in") $(CYAN "$ABE_COMPONENTS_DIR")
+echo $(GREEN "Copy this code into the") $(CYAN "webpages") $(GREEN "section of") $(CYAN "$ABE_TESTS_JSON_FILE")
+RUN "cd $ABE_COMPONENTS_DIR"
+for COMPONENT_DIR in `ls -d */`
+do
+  COMPONENT=`basename $COMPONENT_DIR`
+  echo "    {"
+  echo "      \"url\": \"examples/visual-tests/$COMPONENT/index.html\","
+  echo "      \"name\": \"$COMPONENT - Amp By Example\""
+  echo "    },"
+done
+
 echo -e "\n"
 echo $(YELLOW "-----------------------------------------------------------------------------------------------------------------")
 echo $(GREEN "Successfully completed the following:")
@@ -146,4 +163,5 @@ echo $(GREEN "  1. Created / updated the local") $(CYAN "amp-by-example") $(GREE
 echo $(GREEN "  2. Regenerated all pages in") $(CYAN "$ABE_TESTS_DIR")
 echo $(GREEN "  3. Replaced the contents of") $(CYAN "$ABE_TESTS_DIR") $(GREEN "with newly built pages")
 echo $(GREEN "  4. Prepended all local directory links with") $(CYAN "$ABE_TESTS_PATH")
+echo $(GREEN "  5. Generated test json for all components in") $(CYAN "$ABE_COMPONENTS_DIR")
 echo $(YELLOW "-----------------------------------------------------------------------------------------------------------------")
