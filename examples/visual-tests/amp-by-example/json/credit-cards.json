@@ -1,0 +1,14 @@
+{
+  "cards": [
+    {
+      "id":"1",
+      "title":"Max Mustermann, *1234",
+      "default": true
+    },
+    {
+      "id":"2",
+      "title":"Max Mustermann, *2345"
+    }
+  ],
+  "manual": true
+}

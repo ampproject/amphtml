@@ -1,0 +1,37 @@
+:root {
+  --header-height: 56px;
+}
+body {
+  background: #f9f7f7;
+  opacity: .8;
+}
+#abe-preview-header {
+  background: #fff;
+  color: #000;
+  height: var(--header-height);
+  width: 100vw;
+  z-index: 100;
+}
+#abe-preview-header > a {
+  line-height: 16px;
+}
+#abe-preview-header-title {
+  width: 100%;
+}
+#abe-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: calc(100vh - var(--header-height));
+}
+#abe-preview > div {
+  background: #fff;
+  max-width: 960px;
+}
+@media (max-width: 960px) {
+  #abe-preview > div {
+    max-width: 100%;
+    margin: 0;
+  }
+}

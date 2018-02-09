@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "name": "AMP by Example",
+  "description": "Accelerated Mobile Pages in Action",
+  "icons": {
+    "60": "/favicons/firefox_app_60x60.png",
+    "128": "/favicons/firefox_app_128x128.png",
+    "512": "/favicons/firefox_app_512x512.png"
+  },
+  "developer": {
+    "name": "Sebastian Benz",
+    "url": "http://sebastianbenz.de/"
+  }
+}

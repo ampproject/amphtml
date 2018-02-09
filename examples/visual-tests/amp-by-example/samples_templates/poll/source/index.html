@@ -1,0 +1,133 @@
+<!--
+  ## Introduction
+
+  This is a sample template for a poll in AMP. After selecting one of the answers, you will see the percentage of chosen answers.
+
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+<meta charset="utf-8">
+  <title>Poll</title>
+<script async src="https://cdn.ampproject.org/v0.js"></script>
+<!-- ## Setup -->
+<!--
+Import the additional AMP components. This sample uses a amp-form and mustache templates.
+-->
+<script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+<script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+<link rel="canonical" href="https://ampbyexample.com/samples_templates/poll/">
+<meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+
+<style amp-custom>
+#poll1.amp-form-submit-success fieldset {
+  display: none;
+}
+.percentage-container-fixed {
+  height: 100%;
+  position: absolute;
+  font-size: 0;
+  right: 80px;
+  left: 160px;
+}
+.one-pc-fixed {
+  width: 1%;
+  display: inline-block;
+  background: #b60845;
+  height: 100%;
+}
+form.amp-form-submit-success [submit-success] {
+  flex: 0 0 100%;
+}
+.fixed-size-cell {
+  width: 90px;
+  display: inline-block;
+  max-width: 90px;
+}
+.votes-cell {
+  float: right;
+  width: 60px;
+}
+</style>
+</head>
+<body>
+
+<h2 class="p1">Flightless bird poll</h2>
+<!-- ## Poll -->
+<!--
+We use `amp-form` to implement a poll. To avoid multiple votes by the same user, we need to identify which users have
+already voted. We use a cookie called `POLL_USER_ID` to identify the user. Given that in Safari the default behavior is
+to block third-party cookies from sites that have not been previously visited, this approach may not work if the page
+is visited via the AMP Cache. In this case we fallback to checking for duplicate entries via the `CLIENT_ID`.
+
+The `CLIENT_ID` is a unique identifier for the user when accessing a specific origin, for example the original page or
+the cached version of it. This means that the same user will generate two different values when accessing different origins.
+That's why we use a custom cookie to track cross origin access to the poll page.
+
+The `CLIENT_ID` variable can be passed via an amp-form by declaring a hidden input value with
+`default-value="CLIENT_ID(POLL_USER_ID)`. In our implementation, [the backend](https://github.com/ampproject/amp-by-example/blob/master/backend/poll.go) sets `POLL_USER_ID` to the value of `CLIENT_ID`,
+but the value of this cookie is not relevant and you could re-use your own session id.
+
+Read more about [variable substitution](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-form#variable-substitutions).
+Currently, HTML tables are not supported in form responses, so we'll use CSS to layout the result data.
+
+In order to submit the form as soon as the user picks an option, we will add an
+[`on` attribute](https://www.ampproject.org/docs/reference/spec#on) to each `<input>`, that will submit the poll on change.
+-->
+<form method="post" action-xhr="/examples/visual-tests/amp-by-example/samples_templates/poll/submit" target="_blank"
+      id="poll1"
+      custom-validation-reporting="as-you-go">
+    <input name="clientId" type="hidden" value="CLIENT_ID(POLL_USER_ID)" data-amp-replace="CLIENT_ID">
+    <fieldset class="m1 p1 ampstart-card">
+        <h3 class="pb1">What is your favorite flightless bird?</h3>
+        <p>Choose your favourite flightless bird and you will discover what other users have chosen.
+        If you have already voted, your answer will be overwritten.</p>
+
+          [[range $key, $value := .Questions]]
+              <div class="ampstart-input ampstart-input-radio block relative m0 p0 mt1 ">
+                <input type="radio" value="[[$key]]" name="answer" id="[[$key]]" class="relative" on="change:poll1.submit">
+                <label for="[[$key]]" class="">[[$value]]</label>
+              </div>
+          [[end]]
+    </fieldset>
+    <div submit-success class="ml1">
+        <template type="amp-mustache">
+          <p class="pt1">{{Message}}</p>
+          <p class="pt1">Here are the results:</p>
+          <div class="ampstart-card mt1 mr1 p1">
+            <span class="fixed-sixe-cell">Answer</span>
+            <span class="fixed-size-cell">&nbsp;</span>
+            <span>&nbsp;</span>
+            <span class="fixed-size-cell votes-cell">Votes</span>
+            {{#PollEntryResults}}
+            <div class="mt1 relative">
+                <span class="fixed-size-cell">
+                  {{Answer}}
+                </span>
+                <span class="fixed-size-cell">
+                  {{Percentage.length}}%
+                </span>
+
+                <span class="percentage-container-fixed">
+                    {{#Percentage}}<span class="one-pc-fixed"></span>{{/Percentage}}
+                </span>
+
+                <span class="fixed-size-cell votes-cell">
+                  {{Votes}}
+                </span>
+              </div>
+            {{/PollEntryResults}}
+
+          </div>
+        </template>
+    </div>
+    <div submit-error>
+      <template type="amp-mustache">
+        Error! Looks like something went wrong with your vote, please try to submit it again. {{error}}
+      </template>
+    </div>
+</form>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!--
+  ## Introduction
+
+  The [amp-install-serviceworker](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-install-serviceworker)
+  component enables service worker installation via same origin or via the Google AMP Cache.
+
+  [Service workers](https://github.com/slightlyoff/ServiceWorker/blob/master/explainer.md) can run in the background even when the browser is closed, cache required contents in advance of rendering time, send notifications to users, and more.
+  This sample installs a service worker which caches this page in the background. You can test this by loading this page while offline once the service worker has been installed.
+
+  Service Workers are currently available in [Chrome, Firefox and Opera](https://jakearchibald.github.io/isserviceworkerready/).
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-install-serviceworker</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!--
+    Import the amp-install-serviceworker component.
+  -->
+  <script async custom-element="amp-install-serviceworker" src="https://cdn.ampproject.org/v0/amp-install-serviceworker-0.1.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-install-serviceworker/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+
+  <!-- ## Installing the Service Worker -->
+  <!--
+Calls to amp-install-serviceworker can include the `src` and `data-iframe-src` attributes. `src` is the location of the service worker to be installed, and is used when the document is accessed via the same origin as the service worker file. When the document is accessed via the Google AMP Cache, the HTML document noted in the `data-iframe-src` attribute is used to install the service worker. We recommend using both attributes.
+
+  The reason why `amp-install-serviceworker` requires a separate `data-iframe-src` option is because browsers can't install service worker from other domains for security reasons. For details of the security considerations of service worker, [see official specs](https://www.w3.org/TR/service-workers/#security-considerations).
+  -->
+  <amp-install-serviceworker
+      src="/sw.js"
+      data-iframe-src="https://ampbyexample.com/sw.html"
+      layout="nodisplay">
+  </amp-install-serviceworker>
+  <!--
+    <div class="ampstart-card abe-info p1">The [service worker](/sw.js) in this sample uses [sw-toolbox](https://googlechrome.github.io/examples/visual-tests/amp-by-example/sw-toolbox/), a helper library for implementing service workers. </div>
+
+  In this sample, when users access this AMP page for the second time, the service worker is installed and caches all image files and video files under the root path of this domain.
+
+  Confirm that the service worker is installed and works as expected by following the following steps:
+  1. Access [amp-install-serviceworker](/examples/visual-tests/amp-by-example/components/amp-install-serviceworker) twice.
+  2. Open Chrome Dev Tools and navigate to the "Resources" tab (or "Application" tab on newer versions of Chrome). In the "Service Workers" section you can see that `/sw.js` is installed.
+  3. Then open the "Cached Storage" section. It shows all cached images and videos.
+  4. Disable your network connection and reload this page. It still works! In the "Network" tab in Dev Tools, you'll see which resources are cached by the service worker.
+  -->
+
+</body>
+</html>

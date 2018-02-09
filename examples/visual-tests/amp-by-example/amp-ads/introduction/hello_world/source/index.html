@@ -1,0 +1,48 @@
+<!--
+  ## Introduction
+
+  An introduction into how to create [AMPHTML ads](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md). AMPHTML ads are ads implemented using AMPHTML. The AMPHTML ads runtime is based on the AMP runtime and provides the same performance benefits. However, there are a few things that make them different from normal AMPHTML files.
+
+  <p class="mb2">
+  <div class="p1 ampstart-card abe-info"><strong>Good to know:</strong> the <a href="https://validator.ampproject.org/#htmlFormat=AMP4ADS">AMPHTML Validator</a> features a special validation mode for AMPHTML ads.
+  </div>
+  </p>
+-->
+
+<!-- ## Markup -->
+<!-- -->
+<!-- Doctype declaration is required. -->
+<!doctype html>
+<!-- This tells everyone that this is an AMPHTML ads file. -->
+<html ⚡4ads>
+<!-- ### Head -->
+<!-- -->
+<head>
+  <!-- The charset definition must be the first child of the `<head>` tag. -->
+  <meta charset="utf-8">
+  <title> Hello World</title>
+  <!-- AMPHTML ads require a custom version of the AMP runtime.-->
+  <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <!--
+    The AMPHTML ads boilerplate which is shorter than the regular AMP boilerplate. -->
+  <style amp4ads-boilerplate>body{visibility:hidden}</style>
+  <!--
+    CSS must be embedded inline as well.
+  -->
+  <style amp-custom>
+    h1 {
+      color: red;
+    }
+  </style>
+</head>
+<!-- ## Body -->
+<!-- -->
+<body>
+  <!--
+    Inside the body, AMPHTML ads are only allowed to use a restricted set of HTML and AMPHTML elements as described in the [spec](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md).
+  -->
+  <h1>Hello World</h1>
+<!-- Check out the other [AMPHTML ads samples](/#amp_ads) to learn how to create more sophisticated AMPHTML ads. -->
+</body>
+</html>

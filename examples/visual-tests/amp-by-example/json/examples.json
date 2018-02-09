@@ -1,0 +1,20 @@
+{
+ "items": [
+   {
+     "title": "amp-carousel",
+     "url": "/components/amp-carousel/"
+   },
+   {
+     "title": "amp-img",
+     "url": "/components/amp-img/"
+   },
+   {
+     "title": "amp-ad",
+     "url": "/components/amp-ad/"
+   },
+   {
+     "title": "amp-accordion",
+     "url": "/components/amp-accordion/"
+   }
+ ]
+}

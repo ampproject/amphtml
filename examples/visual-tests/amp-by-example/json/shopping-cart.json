@@ -1,0 +1,22 @@
+{
+  "items": [{
+    "img": "/img/product1_640x426.jpg",
+    "name": "Apple",
+    "price": "1.99",
+    "total": "3.98",
+    "count": 2
+  }, {
+    "img": "/img/product2_640x426.jpg",
+    "name": "Orange",
+    "attribution": "visualhunt",
+    "price": "0.99",
+    "count": 1
+  }, {
+    "img": "/img/product3_640x426.jpg",
+    "name": "Pear",
+    "price": "6.00",
+    "count": 4
+  }
+  ],
+  "total": "10.97"
+}
