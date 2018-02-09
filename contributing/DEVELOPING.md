@@ -83,7 +83,7 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp ava`<sup>[[1]](#footnote-1)</sup>                                 | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava). |
 | `gulp todos:find-closed`                                                | Find `TODO`s in code for issues that have been closed. |
 | `gulp visual-diff`                                                      | Runs all visual diff tests on local Chrome. Requires `gulp build` to have been run. Also requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables. |
-| `gulp visual-diff --headless`                                           | Runs all visual diff tests on local Chrome in headless mode. |
+| `gulp visual-diff --headless`                                           | Same as above, but launches local Chrome in headless mode. |
 | `gulp visual-diff --percy_debug --webserver_debug`                      | Same as above, with additional logging. Debug flags can be used independently.  |
 
 <a id="footnote-1">[1]</a> On Windows, this command must be run as administrator.
