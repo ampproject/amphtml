@@ -16,6 +16,7 @@
 
 import {BaseElement} from '../src/base-element';
 import {Services} from '../src/services';
+import {assertHttpsUrl} from '../src/url';
 import {createElementWithAttributes} from '../src/dom';
 import {dev, user} from '../src/log';
 import {dict} from '../src/utils/object';
@@ -88,7 +89,7 @@ export class AmpPixel extends BaseElement {
         return;
       }
       return Services.urlReplacementsForDoc(this.element)
-          .expandUrlAsync(this.assertSource_(src))
+          .expandUrlAsync(assertHttpsUrl(src, this.element))
           .then(src => {
             const pixel = this.referrerPolicy_
               ? createNoReferrerPixel(this.element, src)
@@ -97,19 +98,6 @@ export class AmpPixel extends BaseElement {
             return pixel;
           });
     });
-  }
-
-  /**
-   * @param {?string} src
-   * @return {string}
-   * @private
-   */
-  assertSource_(src) {
-    user().assert(
-        /^(https\:\/\/|\/\/)/i.test(src),
-        'The <amp-pixel> src attribute must start with ' +
-        '"https://" or "//". Invalid value: ' + src);
-    return /** @type {string} */ (src);
   }
 }
 
