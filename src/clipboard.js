@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from './services';
 import {removeElement} from './dom';
 import {setStyles} from './style';
 
@@ -41,11 +40,15 @@ export function copyTextToClipboard(doc, text) {
   });
 
   textarea.value = text;
+  textarea.readOnly = false;
+  textarea.contentEditable = true;
 
   doc.body.appendChild(textarea);
   const range = doc.createRange();
-  range.selectNode(textarea);
+  range.selectNode(textarea); 
+  window.getSelection().removeAllRanges();
   window.getSelection().addRange(range);
+  textarea.setSelectionRange(0, text.length);
 
   try {
     copySuccessful = doc.execCommand('copy');
@@ -54,22 +57,15 @@ export function copyTextToClipboard(doc, text) {
   }
 
   removeElement(textarea);
-  window.getSelection().removeAllRanges();
 
   return copySuccessful;
 }
 
 
 /**
- * @param {!Window} win
+ * @param {!Document} doc
  * @return {boolean}
  */
-export function isCopyingToClipboardSupported(win) {
-  // Current implementation does not work on iOS even though the test for
-  // support below returns true. See #13136.
-  console.log("TEST--!!!");
-  if (Services.platformFor(win).isIos()) {
-    return false;
-  }
-  return win.document.queryCommandSupported('copy');
+export function isCopyingToClipboardSupported(doc) {
+  return doc.queryCommandSupported('copy');
 }
