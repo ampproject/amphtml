@@ -23,10 +23,8 @@ import {user} from '../../../src/log';
  */
 const LOADING_ADS_WIN_ID_ = '3pla';
 
-/** @private {?Promise} resolves when no 3p throttle */
-let throttlePromise_ = null;
-/** @private {?Function} resolver for throttle promise */
-let throttlePromiseResolver_ = null;
+/** @private {!Array<function()>} resolve when no 3p throttle */
+let throttlePromiseResolvers_ = [];
 
 /**
  * @param {!Window} win
@@ -37,8 +35,14 @@ export function is3pThrottled(win) {
 }
 
 /** @return {!Promise} resolves when no 3p throttle */
-export function waitFor3pThrottle() {
-  return throttlePromise_ || Promise.resolve();
+export function waitFor3pThrottle(win) {
+  if (is3pThrottled(win)) {
+    return new Promise(resolver => {
+      throttlePromiseResolvers_.push(resolver);
+    });
+  } else {
+    return Promise.resolve();
+  }
 }
 
 /**
@@ -75,16 +79,15 @@ export function incrementLoadingAds(win, opt_loadingPromise) {
     win[LOADING_ADS_WIN_ID_] = 0;
   }
   win[LOADING_ADS_WIN_ID_]++;
-  throttlePromise_ = throttlePromise_ ||
-      new Promise(resolver => throttlePromiseResolver_ = resolver);
   Services.timerFor(win)
       .timeoutPromise(1000, opt_loadingPromise)
       .catch(() => {})
       .then(() => {
         if (!--win[LOADING_ADS_WIN_ID_]) {
-          throttlePromiseResolver_();
-          throttlePromise_ = null;
-          throttlePromiseResolver_ = null;
+          throttlePromiseResolver = throttlePromiseResolvers_.shift();
+          if (throttlePromiseResolver !== undefined) {
+            throttlePromiseResolver();
+          }
         }
       });
 }

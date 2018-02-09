@@ -124,5 +124,19 @@ describes.realWin('concurrent-load', {}, env => {
       return waitFor3pThrottle(env.win).then(
           () => expect(Date.now() - start).to.be.at.most(50));
     });
+
+    it('should block 3x if incremented 3x times', function() {
+      // This test needs to wait 1s three times.
+      this.timeout(4000);
+      incrementLoadingAds(env.win);
+      const start = Date.now();
+      waitFor3pThrottle(env.win).then(
+          () => incrementLoadingAds(env.win));
+      waitFor3pThrottle(env.win).then(
+          () => incrementLoadingAds(env.win));
+      return waitFor3pThrottle(env.win).then(
+          () => expect(Date.now() - start).to.be.at.least(3000));
+    });
+
   });
 });
