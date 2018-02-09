@@ -1410,7 +1410,7 @@ describe('amp-a4a', () => {
             });
         a4a.buildCallback();
         a4a.onLayoutMeasure();
-        expect(a4a.adPromise_);
+        expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.adPromise_.then(() => {
           expect(getAdUrlSpy).to.be.calledOnce;
         });
@@ -1427,7 +1427,7 @@ describe('amp-a4a', () => {
             });
         a4a.buildCallback();
         a4a.onLayoutMeasure();
-        expect(a4a.adPromise_);
+        expect(a4a.adPromise_).to.be.instanceof(Promise);
         // Delay to all getAdUrl to potentially execute.
         return Services.timerFor(a4a.win).promise(1).then(() => {
           expect(getAdUrlSpy).to.not.be.called;

@@ -104,7 +104,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         expect(rtcResponseArray.length).to.equal(expectedRtcArray.length);
         expect(fetchJsonStub.callCount).to.equal(calloutCount);
         (expectedCalloutUrls || []).forEach(url => {
-          expect(fetchJsonStub.calledWith(url));
+          expect(fetchJsonStub.calledWith(url)).to.be.true;
         });
         rtcResponseArray.forEach((rtcResponse, i) => {
           expect(rtcResponse.response).to.deep.equal(

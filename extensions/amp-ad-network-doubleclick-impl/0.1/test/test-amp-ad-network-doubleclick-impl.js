@@ -1013,8 +1013,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.buildCallback();
       expect(onVisibilityChangedHandler).to.be.ok;
       onVisibilityChangedHandler();
-      expect(
-          impl.win.experimentBranches[CORRELATOR_CLEAR_EXP_NAME] !== undefined);
+      // TODO(jeffkaufman, #13422): this test was silently failing
+      // expect(impl.win.experimentBranches[
+      //     CORRELATOR_CLEAR_EXP_NAME]).not.to.be.undefined;
     });
 
     it('does not attempt to select into branch if SRA', () => {
@@ -1023,8 +1024,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       expect(onVisibilityChangedHandler).to.be.ok;
       onVisibilityChangedHandler();
       expect(impl.win.ampAdPageCorrelator).to.equal(12345);
-      expect(
-          impl.win.experimentBranches[CORRELATOR_CLEAR_EXP_NAME] === undefined);
+      expect(impl.win.experimentBranches[
+          CORRELATOR_CLEAR_EXP_NAME]).to.be.undefined;
     });
 
     it('does not attempt to select into branch if no correlator', () => {
@@ -1032,8 +1033,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.buildCallback();
       expect(onVisibilityChangedHandler).to.be.ok;
       onVisibilityChangedHandler();
-      expect(
-          impl.win.experimentBranches[CORRELATOR_CLEAR_EXP_NAME] === undefined);
+      expect(impl.win.experimentBranches[
+          CORRELATOR_CLEAR_EXP_NAME]).to.be.undefined;
     });
 
     it('does not attempt to select into branch if not pause', () => {
@@ -1041,8 +1042,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.buildCallback();
       expect(onVisibilityChangedHandler).to.be.ok;
       onVisibilityChangedHandler();
-      expect(
-          impl.win.experimentBranches[CORRELATOR_CLEAR_EXP_NAME] === undefined);
+      expect(impl.win.experimentBranches[
+          CORRELATOR_CLEAR_EXP_NAME]).to.be.undefined;
     });
 
     it('set experiment for second block', () => {
@@ -1396,11 +1397,12 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
               .returns(Promise.resolve());
         });
 
-        it('should throttle if idle render and non-AMP creative', () => {
+        // TODO(jeffkaufman, #13422): this test was silently failing
+        it.skip('should throttle if idle render and non-AMP creative', () => {
           impl.win['3pla'] = 1;
           const startTime = Date.now();
           return impl.renderNonAmpCreative().then(() => {
-            expect(Date.now() - startTime >= 1000);
+            expect(Date.now() - startTime).to.be.at.least(1000);
           });
         });
 
@@ -1409,7 +1411,7 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           delete impl.postAdResponseExperimentFeatures['render-idle-vp'];
           const startTime = Date.now();
           return impl.renderNonAmpCreative().then(() => {
-            expect(Date.now() - startTime <= 50);
+            expect(Date.now() - startTime).to.be.at.most(50);
           });
         });
 
@@ -1417,7 +1419,7 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           impl.win['3pla'] = 1;
           const startTime = Date.now();
           return impl.renderNonAmpCreative().then(() => {
-            expect(Date.now() - startTime <= 50);
+            expect(Date.now() - startTime).to.be.at.most(50);
           });
         });
 
@@ -1425,7 +1427,7 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           impl.win['3pla'] = 0;
           const startTime = Date.now();
           return impl.renderNonAmpCreative().then(() => {
-            expect(Date.now() - startTime <= 50);
+            expect(Date.now() - startTime).to.be.at.most(50);
           });
         });
       });

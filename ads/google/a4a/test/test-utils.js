@@ -470,7 +470,7 @@ describe('Google A4A utils', () => {
     it('should not append parameter if truncated', () => {
       const truncUrl = buildUrl(
           'https://foo.com/bar', {hello: 'world'}, 15, TRUNCATION_PARAM);
-      expect(truncUrl.indexOf(TRUNCATION_PARAM.name) != -1);
+      expect(truncUrl.indexOf(TRUNCATION_PARAM.name)).to.not.equal(-1);
       expect(maybeAppendErrorParameter(truncUrl, 'n')).to.not.be.ok;
     });
   });
