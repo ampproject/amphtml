@@ -474,7 +474,7 @@ On the Pull Request page you can see that a few checks are running:
 
 * Your code is going through static analysis by [LGTM](https://lgtm.com/projects/g/ampproject/amphtml/).
 
-* Visual diff tests that are run on Travis are being analyzed by [Percy](percy.io/ampproject/amphtml). (To access the results, fill out this [form](https://docs.google.com/forms/d/e/1FAIpQLScZma6qVJtYUTqSm4KtiF3Zc-n5ukNe2GXNFqnaHxospsz0sQ/viewform), and your request should be approved soon.)
+* Visual diff tests that are run on Travis are being analyzed by [Percy](http://percy.io/ampproject/amphtml). (To access the results, fill out this [form](https://docs.google.com/forms/d/e/1FAIpQLScZma6qVJtYUTqSm4KtiF3Zc-n5ukNe2GXNFqnaHxospsz0sQ/viewform), and your request should be approved soon.)
 
 If you don't hear back from your reviewer within 2 business days, feel free to ping the pull request by adding a comment.
 
