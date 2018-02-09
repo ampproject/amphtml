@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {loadScript} from './3p';
-import {user} from '../src/log';
 import {dashToUnderline} from '../src/string';
+import {loadScript} from './3p';
 import {setStyle} from '../src/style';
+import {user} from '../src/log';
 
 /**
  * Produces the Facebook SDK object for the passed in callback.
@@ -29,8 +29,8 @@ import {setStyle} from '../src/style';
  * @param {!Window} global
  * @param {function(!Object)} cb
  */
-function getFacebookSdk(global, cb) {
-  loadScript(global, 'https://connect.facebook.net/' + dashToUnderline(window.navigator.language) + '/sdk.js', () => {
+function getFacebookSdk(global, cb, locale) {
+  loadScript(global, 'https://connect.facebook.net/' + locale + '/sdk.js', () => {
     cb(global.FB);
   });
 }
@@ -55,6 +55,27 @@ function getPostContainer(global, data) {
       ' "post" or "video" was: %s', embedAs);
   container.className = 'fb-' + embedAs;
   container.setAttribute('data-href', data.href);
+  return container;
+}
+
+/**
+ * Create DOM element for the Facebook embedded page plugin.
+ * Reference: https://developers.facebook.com/docs/plugins/page-plugin
+ * @param {!Window} global
+ * @param {!Object} data The element data
+ * @return {!Element} div
+ */
+function getPageContainer(global, data) {
+  const container = global.document.createElement('div');
+  container.className = 'fb-page';
+  container.setAttribute('data-href', data.href);
+  container.setAttribute('data-tabs', data.tabs);
+  container.setAttribute('data-hide-cover', data.hideCover);
+  container.setAttribute('data-show-facepile', data.showFacePile);
+  container.setAttribute('data-hide-cta', data.hideCta);
+  container.setAttribute('data-small-header', data.smallHeader);
+  container.setAttribute(
+      'data-adapt-container-width', data.adaptContainerWidth);
   return container;
 }
 
@@ -104,7 +125,10 @@ function getLikeContainer(global, data) {
 export function facebook(global, data) {
   const extension = global.context.tagName;
   let container;
-  if (extension === 'AMP-FACEBOOK-LIKE') {
+
+  if (extension === 'AMP-FACEBOOK-PAGE') {
+    container = getPageContainer(global, data);
+  } else if (extension === 'AMP-FACEBOOK-LIKE') {
     container = getLikeContainer(global, data);
   } else if (extension === 'AMP-FACEBOOK-COMMENTS') {
     container = getCommentsContainer(global, data);
@@ -126,5 +150,5 @@ export function facebook(global, data) {
     });
 
     FB.init({xfbml: true, version: 'v2.5'});
-  });
+  }, data.locale ? data.locale : dashToUnderline(window.navigator.language));
 }

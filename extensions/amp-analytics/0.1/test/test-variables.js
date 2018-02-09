@@ -15,16 +15,16 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {
   ExpansionOptions,
   installVariableService,
   variableServiceFor,
 } from '../variables';
-import {adopt} from '../../../../src/runtime';
-import * as sinon from 'sinon';
-import {Services} from '../../../../src/services';
-import {toggleExperiment} from '../../../../src/experiments';
 import {REPLACEMENT_EXP_NAME} from '../../../../src/service/url-replacements-impl';
+import {Services} from '../../../../src/services';
+import {adopt} from '../../../../src/runtime';
+import {toggleExperiment} from '../../../../src/experiments';
 
 adopt(window);
 

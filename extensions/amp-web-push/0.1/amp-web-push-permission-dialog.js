@@ -14,10 +14,10 @@
  * the License.
  */
 
-import {tryDecodeUriComponent, parseQueryString, parseUrl} from '../../../src/url.js';
+import {NotificationPermission, StorageKeys} from './vars';
 import {WindowMessenger} from './window-messenger';
 import {getMode} from '../../../src/mode';
-import {StorageKeys, NotificationPermission} from './vars';
+import {parseQueryString, parseUrl, tryDecodeUriComponent} from '../../../src/url.js';
 
 /** @typedef {{
  *    debug: boolean,

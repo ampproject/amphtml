@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
+import * as dom from './dom';
 import {
+  getAmpdoc,
   getExistingServiceForDocInEmbedScope,
   getServicePromise,
-  getServicePromiseOrNull,
-  getAmpdoc,
   getServicePromiseForDoc,
+  getServicePromiseOrNull,
   getServicePromiseOrNullForDoc,
   getTopWindow,
 } from './service';
-import {user} from './log';
-import * as dom from './dom';
 import {toWin} from './types';
+import {user} from './log';
 
 /**
  * Returns a promise for a service for the given id and window. Also expects

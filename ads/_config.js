@@ -236,6 +236,7 @@ export const adConfig = {
   appnexus: {
     prefetch: 'https://acdn.adnxs.com/ast/ast.js',
     preconnect: 'https://ib.adnxs.com',
+    renderStartImplemented: true,
   },
 
   atomx: {

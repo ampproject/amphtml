@@ -24,7 +24,7 @@
 /**
  * @fileoverview A Html DOM walker that simulates a SAX parser.
  *
- * See the {@code goog.string.html.HtmlParser}, this is simulating that
+ * See the `goog.string.html.HtmlParser`, this is simulating that
  * interface.
  *
  * TODO(powdercloud): We're not currently using this, but may use it. Ronsider
@@ -119,15 +119,15 @@ amp.domwalker.HandlerCalls = {
 };
 
 /**
- * A dom walker: {@code walktree} takes a DOM Node and calls methods on
- * {@code amp.htmlparser.HtmlSaxHandler} while it is visiting it.
+ * A dom walker: `walktree` takes a DOM Node and calls methods on
+ * `amp.htmlparser.HtmlSaxHandler` while it is visiting it.
  */
 amp.domwalker.DomWalker = class {
   constructor() {}
 
   /**
-   * Given a SAX-like {@code amp.htmlparser.HtmlSaxHandler}, enumerates the
-   * children of {@code rootDoc} and lets the {@code handler} know the
+   * Given a SAX-like `amp.htmlparser.HtmlSaxHandler`, enumerates the
+   * children of `rootDoc` and lets the `handler` know the
    * structure while visiting the nodes.
    *
    * @param {!amp.htmlparser.HtmlSaxHandler} handler

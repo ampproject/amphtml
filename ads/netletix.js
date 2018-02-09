@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {writeScript, loadScript, validateData} from '../3p/3p';
-import {startsWith} from '../src/string.js';
+import {addParamsToUrl, assertHttpsUrl} from '../src/url.js';
 import {dev} from '../src/log.js';
 import {dict} from '../src/utils/object';
-import {assertHttpsUrl, addParamsToUrl} from '../src/url.js';
+import {loadScript, validateData, writeScript} from '../3p/3p';
+import {startsWith} from '../src/string.js';
 
 const NX_URL_HOST = 'https://call.adadapter.netzathleten-media.de';
 const NX_URL_PATHPREFIX = '/pb/';
@@ -73,7 +73,7 @@ export function netletix(global, data) {
           if (event.data.width && event.data.height &&
               (event.data.width != nxw || event.data.height != nxh)) {
             global.context.requestResize(event.data.width, event.data.height);
-          };
+          }
           break;
         case 'nx-empty':
           global.context.noContentAvailable();

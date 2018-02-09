@@ -22,14 +22,15 @@
  * https://3p.ampproject.net/$version/f.js
  */
 
-import './polyfills';
+// src/polyfills.js must be the first import.
+import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+
+import {AmpEvents} from '../src/amp-events';
 import {
   IntegrationAmpContext,
   masterSelection,
 } from './ampcontext-integration';
-import {installEmbedStateListener, manageWin} from './environment';
-import {isExperimentOn} from './3p';
-import {nonSensitiveDataPostMessage, listenParent} from './messaging';
+import {MessageType} from '../src/3p-frame-messaging';
 import {
   computeInMasterFrame,
   nextTick,
@@ -37,6 +38,8 @@ import {
   run,
   setExperimentToggles,
 } from './3p';
+import {dict} from '../src/utils/object.js';
+import {endsWith} from '../src/string';
 import {
   getAmpConfig,
   getAttributeData,
@@ -44,21 +47,23 @@ import {
   getEmbedType,
   getLocation,
 } from './frame-metadata';
-import {urls} from '../src/config';
-import {endsWith} from '../src/string';
-import {parseJson} from '../src/json';
-import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
+import {getMode} from '../src/mode';
+import {getSourceUrl, isProxyOrigin, parseUrl} from '../src/url';
 import {
   initLogConstructor,
+  isUserErrorMessage,
   setReportError,
   user,
-  isUserErrorMessage,
 } from '../src/log';
-import {dict} from '../src/utils/object.js';
-import {getMode} from '../src/mode';
+import {installEmbedStateListener, manageWin} from './environment';
+import {isExperimentOn} from './3p';
+import {listenParent, nonSensitiveDataPostMessage} from './messaging';
+import {parseJson} from '../src/json';
 import {startsWith} from '../src/string.js';
-import {AmpEvents} from '../src/amp-events';
-import {MessageType} from '../src/3p-frame-messaging';
+import {urls} from '../src/config';
+
+// Disable auto-sorting of imports from here on.
+/* eslint-disable sort-imports-es6-autofix/sort-imports-es6 */
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
@@ -459,7 +464,7 @@ export function draw3p(win, data, configCallback) {
   } else {
     run(type, win, data);
   }
-};
+}
 
 /**
  * @return {boolean} Whether this is the master iframe.

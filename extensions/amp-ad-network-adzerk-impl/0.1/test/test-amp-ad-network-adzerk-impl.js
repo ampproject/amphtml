@@ -20,13 +20,13 @@
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
 import {
-  AmpAdNetworkAdzerkImpl,
   AMP_TEMPLATED_CREATIVE_HEADER_NAME,
+  AmpAdNetworkAdzerkImpl,
 } from '../amp-ad-network-adzerk-impl';
 import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
-import {createElementWithAttributes} from '../../../../src/dom';
 import {Xhr} from '../../../../src/service/xhr-impl';
-import {utf8Encode, utf8Decode} from '../../../../src/utils/bytes';
+import {createElementWithAttributes} from '../../../../src/dom';
+import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
 
 describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
   let win, doc;
@@ -98,7 +98,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
             </template>
           </body></html>`;
       fetchTextMock.withArgs(
-          'https://www-adzerk-com.cdn.ampproject.org/c/s/www.adzerk.com/456',
+          'https://www-adzerk-com.cdn.ampproject.org/ad/s/www.adzerk.com/456',
           {
             mode: 'cors',
             method: 'GET',
@@ -131,7 +131,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
                     '</script>') == -1).to.be.true;
             expect(impl.getAmpAdMetadata()).to.jsonEqual({
               minifiedCreative: creative,
-              customElementExtensions: [],
+              customElementExtensions: ['amp-mustache'],
               extensions: [],
             });
           });
@@ -153,7 +153,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
             </template>
           </body></html>`;
       fetchTextMock.withArgs(
-          'https://www-adzerk-com.cdn.ampproject.org/c/s/www.adzerk.com/456',
+          'https://www-adzerk-com.cdn.ampproject.org/ad/s/www.adzerk.com/456',
           {
             mode: 'cors',
             method: 'GET',
@@ -184,13 +184,13 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
           .then(creative => {
             expect(impl.getAmpAdMetadata()).to.jsonEqual({
               minifiedCreative: creative,
-              customElementExtensions: ['amp-analytics'],
+              customElementExtensions: ['amp-analytics', 'amp-mustache'],
               extensions: [],
             });
             // Won't insert duplicate
             expect(impl.getAmpAdMetadata()).to.jsonEqual({
               minifiedCreative: creative,
-              customElementExtensions: ['amp-analytics'],
+              customElementExtensions: ['amp-analytics', 'amp-mustache'],
               extensions: [],
             });
           });
@@ -214,7 +214,7 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
           .then(creative => {
             expect(impl.getAmpAdMetadata()).to.jsonEqual({
               minifiedCreative: creative,
-              customElementExtensions: [],
+              customElementExtensions: ['amp-mustache'],
               extensions: [],
             });
           });

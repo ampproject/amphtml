@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
+import '../../../amp-mustache/0.1/amp-mustache';
+import '../../../amp-selector/0.1/amp-selector';
+import * as sinon from 'sinon';
+import {AmpEvents} from '../../../../src/amp-events';
 import {
   AmpForm,
   AmpFormService,
   checkUserValidityAfterInteraction_,
 } from '../amp-form';
 import {
-  setReportValiditySupportedForTesting,
-  setCheckValiditySupportedForTesting,
-} from '../form-validators';
-import {
   CONFIG_KEY,
 } from '../form-verifiers';
-import * as sinon from 'sinon';
-import '../../../amp-mustache/0.1/amp-mustache';
+import {FormDataWrapper} from '../../../../src/form-data-wrapper';
+import {Services} from '../../../../src/services';
 import {
   cidServiceForDocForTesting,
 } from '../../../../src/service/cid-impl';
-import {Services} from '../../../../src/services';
-import '../../../amp-selector/0.1/amp-selector';
+import {fromIterator} from '../../../../src/utils/array';
+import {
+  setCheckValiditySupportedForTesting,
+  setReportValiditySupportedForTesting,
+} from '../form-validators';
 import {user} from '../../../../src/log';
 import {whenCalled} from '../../../../testing/test-helper.js';
-import {AmpEvents} from '../../../../src/amp-events';
-import {FormDataWrapper} from '../../../../src/form-data-wrapper';
-import {fromIterator} from '../../../../src/utils/array';
 
 describes.repeated('', {
   'single ampdoc': {ampdoc: 'single'},
@@ -1512,6 +1512,7 @@ describes.repeated('', {
       fetchRejectPromise.catch(() => {
         // Just avoiding a global uncaught promise exception.
       });
+      let navigateTo;
 
       beforeEach(() => {
         form = getForm(env.win.document);
@@ -1519,6 +1520,9 @@ describes.repeated('', {
         sandbox.stub(form, 'checkValidity').returns(true);
         ampForm = new AmpForm(form);
         ampForm.target_ = '_top';
+
+        navigateTo = sandbox.spy();
+        sandbox.stub(Services, 'clickHandlerForDoc').returns({navigateTo});
       });
 
       describe('AMP-Redirect-To', () => {
@@ -1527,8 +1531,12 @@ describes.repeated('', {
           redirectToValue = 'https://google.com/';
           ampForm.handleSubmitAction_(/* invocation */ {});
 
+          expect(navigateTo).to.not.be.called;
           return ampForm.xhrSubmitPromiseForTesting().then(() => {
-            expect(env.win.top.location.href).to.be.equal(redirectToValue);
+            expect(navigateTo).to.be.calledOnce;
+            const args = navigateTo.firstCall.args;
+            expect(args[1]).to.equal('https://google.com/');
+            expect(args[2]).to.equal('AMP-Redirect-To');
           });
         });
 
@@ -1540,8 +1548,7 @@ describes.repeated('', {
           return ampForm.xhrSubmitPromiseForTesting().then(() => {
             assert.fail('Submit should have failed.');
           }, () => {
-            expect(env.win.top.location.href).to.be.equal(
-                'https://example-top.com/');
+            expect(navigateTo).to.not.be.called;
           });
         });
 
@@ -1553,8 +1560,7 @@ describes.repeated('', {
           return ampForm.xhrSubmitPromiseForTesting().then(() => {
             assert.fail('Submit should have failed.');
           }, () => {
-            expect(env.win.top.location.href).to.be.equal(
-                'https://example-top.com/');
+            expect(navigateTo).to.not.be.called;
           });
         });
 
@@ -1567,8 +1573,7 @@ describes.repeated('', {
           return ampForm.xhrSubmitPromiseForTesting().then(() => {
             assert.fail('Submit should have failed.');
           }, () => {
-            expect(env.win.top.location.href).to.be.equal(
-                'https://example-top.com/');
+            expect(navigateTo).to.not.be.called;
           });
         });
 
@@ -1578,11 +1583,16 @@ describes.repeated('', {
           const logSpy = sandbox.spy(user(), 'error');
           ampForm.handleSubmitAction_(/* invocation */ {});
 
+          expect(navigateTo).to.not.be.called;
           return ampForm.xhrSubmitPromiseForTesting().then(() => {
             expect(logSpy).to.be.calledOnce;
             const error = logSpy.getCall(0).args[1];
             expect(error).to.match(/Form submission failed/);
-            expect(env.win.top.location.href).to.be.equal(redirectToValue);
+
+            expect(navigateTo).to.be.calledOnce;
+            const args = navigateTo.firstCall.args;
+            expect(args[1]).to.equal('https://example2.com/hello');
+            expect(args[2]).to.equal('AMP-Redirect-To');
           });
         });
       });

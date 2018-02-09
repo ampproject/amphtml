@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {urls} from '../../../src/config';
-import {parseUrl} from '../../../src/url';
 import {LRUCache} from '../../../src/utils/lru-cache';
-import {isArray} from '../../../src/types';
+import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
+import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getMode} from '../../../src/mode';
+import {isArray} from '../../../src/types';
+import {parseUrl} from '../../../src/url';
+import {urls} from '../../../src/config';
 
 /** @private {!Object<string, string|boolean>} */
 const TEMPLATE_CORS_CONFIG = {
@@ -54,16 +54,14 @@ export class AmpAdTemplates {
    * @return {!Promise<string>}
    */
   fetch(templateUrl) {
-    const proxyUrl = getMode(this.win_).localDev
-      ? templateUrl
+    const proxyUrl = getMode(this.win_).localDev && !isNaN(templateUrl)
+      ? `http://ads.localhost:${this.win_.location.port}` +
+          `/a4a_template/adzerk/${templateUrl}`
       : this.getTemplateProxyUrl_(templateUrl);
     let templatePromise = this.cache_.get(proxyUrl);
     if (!templatePromise) {
       templatePromise = Services.xhrFor(this.win_)
-          .fetchText(getMode(this.win_).localDev
-            ? `http://ads.localhost:${this.win_.location.port}` +
-                `/a4a_template/adzerk/${proxyUrl}`
-            : proxyUrl, TEMPLATE_CORS_CONFIG)
+          .fetchText(proxyUrl, TEMPLATE_CORS_CONFIG)
           .then(response => response.text());
       this.cache_.put(proxyUrl, templatePromise);
     }
@@ -120,6 +118,6 @@ export class AmpAdTemplates {
     const loc = parseUrl(url);
     return loc.origin.indexOf(cdnUrlSuffix) > 0 ? url :
       'https://' + loc.hostname.replace(/-/g, '--').replace(/\./g, '-') +
-      '.' + cdnUrlSuffix + '/c/s/' + loc.hostname + loc.pathname;
+      '.' + cdnUrlSuffix + '/ad/s/' + loc.hostname + loc.pathname;
   }
 }

@@ -47,58 +47,45 @@ Integer in felis at lacus mattis facilisis. Curabitur tincidunt, felis porttitor
     "requests": {
       "old": "https://fake.com/analytics?timer",
       "batch": {
-        "baseUrl": "https://fake.com/batch-analytics?",
-        "maxDelay": 5
+        "baseUrl": "https://fake.com/batch?",
+        "batchInterval": 5
       },
       "batchplugin": {
-        "baseUrl": "https://fake.com/batch-analytics?",
-        "maxDelay": 5,
+        "baseUrl": "https://fake.com/batchplugin?",
+        "batchInterval": 5,
         "batchPlugin": "_ping_"
+      },
+      "batchInterval1": {
+        "baseUrl": "https://fake.com/batchinterval1?",
+        "batchInterval": [1, 2, 5, 10],
+        "reportWindow": 30
+      },
+      "batchInterval2": {
+        "baseUrl": "https://fake.com/batchinterval2?",
+        "batchInterval": 2,
+        "reportWindow": 10
       }
     },
     "triggers": {
-      "timer": {
-        "on": "timer",
-        "request": "old",
-        "immediate": true,
-        "timerSpec": {
-          "interval": 2,
-          "maxTimerLength": 10
-        }
-      },
       "batch-time": {
         "on": "timer",
-        "request": "batch",
+        "request": ["batch", "batchInterval1", "batchInterval2"],
         "timerSpec": {
           "interval": 2,
           "maxTimerLength": 10
         },
-        "batchSegment": "&timer",
         "extraUrlParams": {
-          "extra": null,
-          "extra2": "&&${requestCount}"
-        }
-      },
-      "batch-plugin-timer": {
-        "on": "timer",
-        "request": "batchplugin",
-        "timerSpec": {
-          "interval": 2,
-          "maxTimerLength": 10
-        },
-        "batchSegment": "&timer",
-        "extraUrlParams": {
+          "event": "timer",
           "extra2": "${requestCount}"
         }
       },
       "click": {
         "on": "click",
         "selector": "#ele1",
-        "request": "batch",
-        "immediate": true,
-        "batchSegment": "&timer",
+        "request": ["batch", "batchInterval1", "batchInterval2"],
+        "important": true,
         "extraUrlParams": {
-          "extra": "immediate"
+          "extra": "important"
         }
       }
     },

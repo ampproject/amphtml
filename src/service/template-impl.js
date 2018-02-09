@@ -15,8 +15,8 @@
  */
 
 import {childElementByTag, scopedQuerySelector} from '../dom';
-import {getService, registerServiceBuilder} from '../service';
 import {dev, user} from '../log';
+import {getService, registerServiceBuilder} from '../service';
 
 
 /**
@@ -289,7 +289,6 @@ export class Templates {
       return this.templateClassMap_[type];
     }
 
-    this.checkTemplateDeclared_(element, type);
     let aResolve;
     const promise = new Promise((resolve, unusedReject) => {
       aResolve = resolve;
@@ -297,29 +296,6 @@ export class Templates {
     this.templateClassMap_[type] = promise;
     this.templateClassResolvers_[type] = aResolve;
     return promise;
-  }
-
-
-  /**
-   * Checks that the template type has actually been declared by a
-   * `<script custom-template=$type>` tag in the head.
-   * @param {!Element} element
-   * @param {string} type
-   * @private
-   */
-  checkTemplateDeclared_(element, type) {
-    if (!this.declaredTemplates_) {
-      this.declaredTemplates_ = this.win_.Object.create(null);
-      const scriptTags = this.win_.document.querySelectorAll(
-          'script[custom-template]');
-      for (let i = 0; i < scriptTags.length; i++) {
-        this.declaredTemplates_[scriptTags[i].getAttribute(
-            'custom-template')] = true;
-      }
-    }
-    user().assert(this.declaredTemplates_[type],
-        'Template must be declared for %s as <script custom-template=%s>',
-        element, type);
   }
 
   /**
