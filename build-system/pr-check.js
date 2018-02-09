@@ -165,7 +165,7 @@ function isOwnersFile(filePath) {
  * @return {boolean}
  */
 function isDocFile(filePath) {
-  return path.extname(filePath) == '.md';
+  return path.extname(filePath) == '.md' && !filePath.startsWith('examples/');
 }
 
 /**
@@ -176,7 +176,7 @@ function isDocFile(filePath) {
 function isVisualDiffFile(filePath) {
   const filename = path.basename(filePath);
   return (filename == 'visual-diff.rb' ||
-          filename == 'visual-tests.json' ||
+          filename == 'visual-tests.js' ||
           filePath.startsWith('examples/visual-tests/'));
 }
 
