@@ -666,7 +666,7 @@ describe('ValidatorRulesMakeSense', () => {
     if ((tagSpec.tagName === 'SCRIPT') &&
         ((tagSpec.htmlFormat.length === 0) ||
          (tagSpec.htmlFormat.indexOf(
-              amp.validator.HtmlFormat.Code.AMP4ADS) !== -1)) &&
+            amp.validator.HtmlFormat.Code.AMP4ADS) !== -1)) &&
         tagSpec.extensionSpec) {
       // AMP4ADS Creative Format document is the source of this whitelist.
       // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
