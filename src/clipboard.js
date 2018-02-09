@@ -41,7 +41,7 @@ export function copyTextToClipboard(win, text) {
   });
 
   textarea.value = text;
-  textarea.readOnly = false;
+  textarea.readOnly = true;
   textarea.contentEditable = true;
 
   doc.body.appendChild(textarea);
