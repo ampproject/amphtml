@@ -18,12 +18,13 @@ import {setStyles} from './style';
 
 
 /**
- * @param {!Document} doc
+ * @param {!Window} win
  * @param {string} text
  * @return {boolean}
  */
-export function copyTextToClipboard(doc, text) {
+export function copyTextToClipboard(win, text) {
   let copySuccessful = false;
+  const doc = win.document;
 
   const textarea = doc.createElement('textarea');
 
@@ -45,9 +46,9 @@ export function copyTextToClipboard(doc, text) {
 
   doc.body.appendChild(textarea);
   const range = doc.createRange();
-  range.selectNode(textarea); 
-  window.getSelection().removeAllRanges();
-  window.getSelection().addRange(range);
+  range.selectNode(textarea);
+  win.getSelection().removeAllRanges();
+  win.getSelection().addRange(range);
   textarea.setSelectionRange(0, text.length);
 
   try {

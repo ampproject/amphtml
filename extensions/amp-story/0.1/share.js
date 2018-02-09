@@ -224,7 +224,7 @@ export class ShareWidget {
         /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
           dev().assert(this.ampdoc_))).canonicalUrl;
 
-    if (!copyTextToClipboard(this.win_.document, url)) {
+    if (!copyTextToClipboard(this.win_, url)) {
       Toast.show(this.win_, 'Could not copy link to clipboard :(');
       return;
     }
