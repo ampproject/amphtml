@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Entitlement} from './entitlements';
+import {Entitlement} from './entitlement';
 import {Services} from '../../../src/services';
 
 /**

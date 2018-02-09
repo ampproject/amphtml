@@ -15,6 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-access-0.1.css';
+import {EntitlementStore} from './entitlement-store';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {SubscriptionPlatform} from './subscription-platform';
 import {installStylesForDoc} from '../../../src/style-installer';
@@ -35,6 +36,9 @@ export class SubscriptionService {
 
     /** @private @const {!Array<!SubscriptionPlatform>} */
     this.subscriptionPlatforms_ = [];
+
+    /** @private @const {?EntitlementStore} */
+    this.entitlementStore_ = null;
   }
 
   /**
@@ -77,6 +81,9 @@ export class SubscriptionService {
    */
   start_() {
     this.initialize_().then(() => {
+      // TODO(@prateekbh): Read the service ids in EntitlementStore constructor from page config.
+      this.entitlementStore_ = new EntitlementStore(['foo', 'bar']);
+
       this.subscriptionPlatforms_.forEach(subscriptionPlatform => {
         subscriptionPlatform.getEntitlements()
             .then(() => this.processEntitlement_());
