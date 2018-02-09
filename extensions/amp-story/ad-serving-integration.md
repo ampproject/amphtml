@@ -24,7 +24,7 @@ An ad template must be written in [amp-mustache](../amp-mustache/amp-mustache.md
 
 Important things
 
-- Templates need to be inlined in the AMP Story, as a direct children of `<amp-story>` element.
+- Templates need to be inlined in the AMP Story, as direct children of a `<amp-story-auto-ads>` element.
 - An element ID is required, so that the template can be referenced by the ad response.
 - The selected template ID will be set as an attribute of `amp-ad`: `<amp-ad template="template-1">`
 - The content inside a template should strictly follow the [rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story/validator-amp-story.protoascii) of `amp-story-grid-layer`
@@ -84,17 +84,6 @@ Here is a full example using `amp-story-auto-ads` together with some templates i
 
 ```html
 <amp-story>
-  <template type="amp-mustache" id="template-1">
-    <amp-img src="{{imgSrc}}"></amp-img>
-    <amp-pixel src="{{impressionUrl}}"></amp-pixel>
-  </template>
-
-  <template type="amp-mustache" id="template-2">
-    <div class="creative-line-1">{{creativeLine1}}</div>
-    <div class="creative-line-2">{{creativeLine2}}</div>
-    <amp-pixel src="{{impressionUrl}}"></amp-pixel>
-  </template>
-  
   <amp-story-auto-ads>
      <script type=”application/json”>
        {
@@ -104,6 +93,17 @@ Here is a full example using `amp-story-auto-ads` together with some templates i
           }
        }
      </script>
+
+     <template type="amp-mustache" id="template-1">
+       <amp-img src="{{imgSrc}}"></amp-img>
+       <amp-pixel src="{{impressionUrl}}"></amp-pixel>
+     </template>
+
+     <template type="amp-mustache" id="template-2">
+       <div class="creative-line-1">{{creativeLine1}}</div>
+       <div class="creative-line-2">{{creativeLine2}}</div>
+       <amp-pixel src="{{impressionUrl}}"></amp-pixel>
+     </template>
   </amp-story-auto-ads>
   ...
 ```
@@ -117,6 +117,8 @@ At runtime, an `amp-ad` element will be inserted dynamically:
 ```
 
 And an ad request will be made to this URL `https://adserver.com/getad?slot=abcd1234`.
+
+Each story can only have one `amp-story-auto-ads` element.
 
 ### CTA ad
 To provide a consistent user experience, story will be responsible to render 
