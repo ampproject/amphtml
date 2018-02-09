@@ -41,7 +41,7 @@ tags: {  # <amp-accordion> > <section>
   spec_name: "amp-accordion > section"
   mandatory_parent: "AMP-ACCORDION"
   attrs: { name: "expanded" value: "" }
-  attrs: { name: "expand-one" value: "" }
+  attrs: { name: "expand-single-section" value: "" }
   child_tags: {
     mandatory_num_child_tags: 2
     first_child_tag_name_oneof: "H1"

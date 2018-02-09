@@ -106,11 +106,11 @@ describes.realWin('amp-accordion', {
       });
 
   it('should collapse other sections when expand action is triggered on a ' +
-    'collapsed section if expand-once attribute is set',
+    'collapsed section if expand-single-section attribute is set',
   () => {
     return getAmpAccordion().then(ampAccordion => {
-      ampAccordion.setAttribute('expand-one', '');
-      expect(ampAccordion.hasAttribute('expand-one')).to.be.true;
+      ampAccordion.setAttribute('expand-single-section', '');
+      expect(ampAccordion.hasAttribute('expand-single-section')).to.be.true;
       const impl = ampAccordion.implementation_;
       const headerElements = doc.querySelectorAll(
           'section > *:first-child');

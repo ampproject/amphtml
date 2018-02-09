@@ -89,7 +89,7 @@ Set this attribute on the `<amp-accordion>` to opt out of preserving the collaps
 
 Set this attribute on a `<section>` to display the section as expanded on page load.
 
-#####  expand-one
+#####  expand-single-section
 
 Set this attribute on the `<amp-accordion>` to only allow one `<section>` to be expanded at a time. If the user focuses on one `<section>` any other previously expanded `<section>` will be collapsed.
 
