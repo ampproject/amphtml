@@ -13,7 +13,6 @@ before_install:
   - export DISPLAY=:99.0
   - unset _JAVA_OPTIONS  # JVM heap sizes break closure compiler. #11203.
   - sh -e /etc/init.d/xvfb start
-  - google-chrome-stable --headless --disable-gpu --remote-debugging-port=9222 http://localhost &
   # Required due to https://github.com/greenkeeperio/greenkeeper-lockfile/issues/98#issuecomment-352087908
   - export PATH="`yarn global bin`:$PATH"
   - yarn global add greenkeeper-lockfile@1
