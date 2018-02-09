@@ -34,7 +34,6 @@ describes.realWin('amp-install-serviceworker', {
 }, env => {
 
   let doc;
-  let clock;
   let sandbox;
   let container;
   let ampdoc;
@@ -43,7 +42,6 @@ describes.realWin('amp-install-serviceworker', {
   beforeEach(() => {
     doc = env.win.document;
     sandbox = env.sandbox;
-    clock = sandbox.useFakeTimers();
     ampdoc = Services.ampdocServiceFor(env.win).getAmpDoc();
     container = doc.createElement('div');
     env.win.document.body.appendChild(container);
@@ -223,10 +221,6 @@ describes.realWin('amp-install-serviceworker', {
         deferredMutate = fn;
       };
       return whenVisible.then(() => {
-        clock.tick(9999);
-        expect(deferredMutate).to.be.undefined;
-        expect(iframe).to.be.undefined;
-        clock.tick(1);
         expect(deferredMutate).to.exist;
         expect(iframe).to.be.undefined;
         deferredMutate();

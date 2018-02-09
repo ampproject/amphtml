@@ -92,27 +92,20 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
     }
   }
 
+  /** @override  */
+  getPriority() {
+    return 2;
+  }
+
   /** @private */
   scheduleIframeLoad_() {
     Services.viewerForDoc(this.getAmpDoc()).whenFirstVisible().then(() => {
-      // If the user is longer than 10 seconds on this page, load
-      // the external iframe to install the ServiceWorker. The wait is
-      // introduced to avoid installing SWs for content that the user
-      // only engaged with superficially.
-      Services.timerFor(this.win).delay(() => {
-        this.deferMutate(this.insertIframe_.bind(this));
-      }, 10000);
+      this.deferMutate(this.insertIframe_.bind(this));
     });
   }
 
   /** @private */
   insertIframe_() {
-    // If we are no longer visible, we will not do a SW registration on this
-    // page view.
-    if (!Services.viewerForDoc(this.getAmpDoc()).isVisible()) {
-      return;
-    }
-    // The iframe will stil be loaded.
     setStyle(this.element, 'display', 'none');
     const iframe = this.win.document.createElement('iframe');
     iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts');
