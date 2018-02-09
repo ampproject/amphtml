@@ -309,7 +309,7 @@ const command = {
           colors.cyan('PERCY_TOKEN') + '. Skipping visual diff tests.');
       return;
     }
-    let cmd = 'gulp visual-diff';
+    let cmd = 'gulp visual-diff --headless';
     if (opt_mode === 'skip') {
       cmd += ' --skip';
     } else if (opt_mode === 'master') {

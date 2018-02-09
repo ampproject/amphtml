@@ -20,9 +20,7 @@ before_install:
   - yarn global add greenkeeper-lockfile@1
 before_script:
   - pip install --user protobuf
-  - gem install percy-capybara phantomjs poltergeist
-  # Poltergeist requires an absolute path to find phantomjs. See #10305.
-  - export PATH="`pwd`/node_modules/.bin:$PATH"
+  - gem install percy-capybara poltergeist selenium-webdriver chromedriver-helper
   - greenkeeper-lockfile-update
 script: node build-system/pr-check.js
 after_script: greenkeeper-lockfile-upload
