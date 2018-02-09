@@ -193,7 +193,7 @@ describes.realWin('amp-story', {
         });
   });
 
-  // TODO(#187): Re-enable this test.
+  // TODO(#11639): Re-enable this test.
   it.skip('should hide bookend when CLOSE_BOOKEND is triggered', () => {
     const hideBookendStub = sandbox.stub(
         element.implementation_, 'hideBookend_', NOOP);
@@ -207,7 +207,7 @@ describes.realWin('amp-story', {
     expect(hideBookendStub).to.have.been.calledOnce;
   });
 
-  // TODO(#187): Re-enable this test.
+  // TODO(#11639): Re-enable this test.
   it.skip('should return a valid page index', () => {
     const count = 5;
 
@@ -218,7 +218,7 @@ describes.realWin('amp-story', {
     });
   });
 
-  // TODO(#187): Re-enable this test.
+  // TODO(#11639): Re-enable this test.
   it.skip('should update progress bar when switching pages', () => {
     const impl = element.implementation_;
     const count = 10;
@@ -240,7 +240,7 @@ describes.realWin('amp-story', {
     expect(updateProgressBarStub).to.have.been.calledWith(index, count - 1);
   });
 
-  // TODO(#187): Re-enable this test.
+  // TODO(#11639): Re-enable this test.
   it.skip('should pause/resume pages when switching pages', () => {
     const impl = element.implementation_;
     const pages = createPages(element, 5);
@@ -258,7 +258,7 @@ describes.realWin('amp-story', {
     });
   });
 
-  // TODO(#187): Re-enable this test.
+  // TODO(#11639): Re-enable this test.
   it.skip('should go to next page on right arrow keydown', () => {
     const pages = createPages(element, 5);
 
