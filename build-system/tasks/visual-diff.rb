@@ -38,7 +38,7 @@ CONFIGS = %w(canary prod)
 AMP_RUNTIME_FILE = 'dist/amp.js'
 BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status'
 BUILD_PROCESSING_POLLING_INTERVAL_SECS = 5
-BUILD_PROCESSING_TIMEOUT_SECS = 60 * 5
+BUILD_PROCESSING_TIMEOUT_SECS = 60 * 10
 PERCY_BUILD_URL = 'https://percy.io/ampproject/amphtml/builds'
 OUT = ENV['TRAVIS'] ? '/dev/null' : :out
 
@@ -303,6 +303,10 @@ def generate_snapshots(page, webpages)
     page.visit('/')
     webpages.each do |webpage|
       url = webpage['url']
+      if url.include? 'examples/visual-tests/amp-by-example/' and
+          !ARGV.include? '--master'
+        next
+      end
       name = "#{webpage['name']} (#{config})"
       forbidden_css = webpage['forbidden_css']
       loading_incomplete_css = webpage['loading_incomplete_css']
