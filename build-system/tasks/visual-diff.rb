@@ -392,10 +392,14 @@ end
 def set_debugging_level
   if ARGV.include? '--debug'
     ENV['PERCY_DEBUG'] = '1'
+    Selenium::WebDriver.logger.level = :debug
     ENV['WEBSERVER_QUIET'] = ''
   end
   if ARGV.include? '--percy_debug'
     ENV['PERCY_DEBUG'] = '1'
+  end
+  if ARGV.include? '--chrome_debug'
+    Selenium::WebDriver.logger.level = :debug
   end
   if ARGV.include? '--webserver_debug'
     ENV['WEBSERVER_QUIET'] = ''

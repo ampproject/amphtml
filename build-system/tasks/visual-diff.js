@@ -62,6 +62,7 @@ gulp.task(
         'skip': '  Creates a dummy Percy build with only a blank snapshot',
         'headless': '  Runs Chrome in headless mode',
         'percy_debug': '  Prints debug info from Percy libraries',
+        'chrome_debug': '  Prints debug info from Chrome',
         'webserver_debug': '  Prints debug info from the local gulp webserver',
         'debug': '  Prints all the above debug info',
       },

@@ -84,7 +84,7 @@ The Quick Start Guide's  [One-time setup](getting-started-quick.md#one-time-setu
 | `gulp todos:find-closed`                                                | Find `TODO`s in code for issues that have been closed. |
 | `gulp visual-diff`                                                      | Runs all visual diff tests on local Chrome. Requires `gulp build` to have been run. Also requires `PERCY_PROJECT` and `PERCY_TOKEN` to be set as environment variables. |
 | `gulp visual-diff --headless`                                           | Same as above, but launches local Chrome in headless mode. |
-| `gulp visual-diff --percy_debug --webserver_debug`                      | Same as above, with additional logging. Debug flags can be used independently.  |
+| `gulp visual-diff --percy_debug --chrome_debug --webserver_debug`       | Same as above, with additional logging. Debug flags can be used independently.  |
 
 <a id="footnote-1">[1]</a> On Windows, this command must be run as administrator.
 
@@ -240,9 +240,9 @@ To run Chrome in headless mode, use:
 
 To see debugging info during Percy runs, you can run:
 ```
- gulp visual-diff --percy_debug --webserver_debug
+ gulp visual-diff --percy_debug --chrome_debug --webserver_debug
 ```
-The debug flags `--percy_debug` and `--webserver_debug` can be used independently. To enable both debug flags, you can also run:
+The debug flags `--percy_debug`, `--chrome_debug`, and `--webserver_debug` can be used independently. To enable all three debug flags, you can also run:
 ```
  gulp visual-diff --debug
 ```
