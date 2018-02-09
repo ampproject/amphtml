@@ -1115,13 +1115,10 @@ function installLightboxGallery(win) {
   return ampdoc.whenBodyAvailable().then(body => {
     const existingGallery = elementByTag(ampdoc.getRootNode(), TAG);
     if (!existingGallery) {
-      const matches = ampdoc.getRootNode().querySelectorAll('[lightbox]');
-      if (matches.length > 0) {
-        const gallery = ampdoc.getRootNode().createElement(TAG);
-        gallery.setAttribute('layout', 'nodisplay');
-        gallery.setAttribute('id', DEFAULT_GALLERY_ID);
-        body.appendChild(gallery);
-      }
+      const gallery = ampdoc.getRootNode().createElement(TAG);
+      gallery.setAttribute('layout', 'nodisplay');
+      gallery.setAttribute('id', DEFAULT_GALLERY_ID);
+      body.appendChild(gallery);
     }
   });
 }
