@@ -300,6 +300,7 @@ is demonstrated desire for it.
   <tr><td>amp-form</td></tr>
   <tr><td>amp-img</td></tr>
   <tr><td>amp-layout</td></tr>
+  <tr><td>amp-mustache</td></tr>
   <tr><td>amp-pixel</td></tr>
   <tr><td>amp-position-observer</td></tr>
   <tr><td>amp-social-share</td></tr>
