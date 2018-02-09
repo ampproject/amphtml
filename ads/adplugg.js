@@ -23,7 +23,7 @@ import {loadScript, validateData} from '../3p/3p';
 export function adplugg(global,data) {
   //load ad.js
   loadScript(global, 'https://www.adplugg.com/serve/js/ad.js');
-  
+
   //validate the amp-ad attributes
   validateData(
       data,
@@ -38,12 +38,12 @@ export function adplugg(global,data) {
   const adTag = global.document.createElement('div');
   adTag.setAttribute('class', 'adplugg-tag');
   adTag.setAttribute('data-adplugg-access-code', data['accessCode']);
-  if(data['zone']) {
+  if (data['zone']) {
     adTag.setAttribute('data-adplugg-zone', data['zone']);
   }
   ampwrapper.appendChild(adTag);
 
   //fill the ad tag
-  global.AdPlugg = global.AdPlugg||[];
+  global.AdPlugg = global.AdPlugg || [];
   global.AdPlugg.push({});
 }
