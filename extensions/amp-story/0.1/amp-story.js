@@ -775,7 +775,7 @@ export class AmpStory extends AMP.BaseElement {
     this.updateBackground_(targetPage.element, /* initial */ !this.activePage_);
 
     // TODO(alanorozco): decouple this using NavigationState
-    this.systemLayer_.setActivePageIndex(targetPageId);
+    this.systemLayer_.setActivePageId(targetPageId);
 
     // TODO(alanorozco): check if autoplay
     this.navigationState_.updateActivePage(

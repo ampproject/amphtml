@@ -17,7 +17,7 @@ import {POLL_INTERVAL_MS} from './page-advancement';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {escapeCssSelectorNth, scopedQuerySelector} from '../../../src/dom';
-import {map} from '../../../src/utils/object';
+import {hasOwn, map} from '../../../src/utils/object';
 import {scale, setImportantStyles} from '../../../src/style';
 
 
@@ -56,7 +56,7 @@ export class ProgressBar {
     this.segmentCount_ = 0;
 
     /** @private {number} */
-    this.activePageIndex_ = 0;
+    this.activeSegmentIndex_ = 0;
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
@@ -73,7 +73,7 @@ export class ProgressBar {
   }
 
   /**
-   * @param {!Array<string>} segmentIds The id of each page in the story.
+   * @param {!Array<string>} segmentIds The id of each segment in the story.
    * @return {!Element}
    */
   build(segmentIds) {
@@ -93,12 +93,12 @@ export class ProgressBar {
     this.root_.classList.add('i-amphtml-story-progress-bar');
 
     for (let i = 0; i < this.segmentCount_; i++) {
-      const pageProgressBar = this.win_.document.createElement('li');
-      pageProgressBar.classList.add('i-amphtml-story-page-progress-bar');
-      const pageProgressValue = this.win_.document.createElement('div');
-      pageProgressValue.classList.add('i-amphtml-story-page-progress-value');
-      pageProgressBar.appendChild(pageProgressValue);
-      this.root_.appendChild(pageProgressBar);
+      const segmentProgressBar = this.win_.document.createElement('li');
+      segmentProgressBar.classList.add('i-amphtml-story-page-progress-bar');
+      const segmentProgressValue = this.win_.document.createElement('div');
+      segmentProgressValue.classList.add('i-amphtml-story-page-progress-value');
+      segmentProgressBar.appendChild(segmentProgressValue);
+      this.root_.appendChild(segmentProgressBar);
     }
 
     return this.getRoot();
@@ -114,63 +114,62 @@ export class ProgressBar {
 
 
   /**
-   * @param {number} pageIndex The index to assert whether it is in bounds.
-   * @private
-   */
-  assertValidPageIndex_(pageIndex) {
-    dev().assert(pageIndex >= 0 && pageIndex < this.segmentCount_,
-        `Page index ${pageIndex} is not between 0 and ${this.segmentCount_}.`);
-  }
-
-
-  /**
-   * @param {string} pageId The index of the new active page.
+   * @param {string} segmentId The index of the new active segment.
    * @public
    */
-  setActivePageIndex(pageId) {
-    const progressBarIndex = this.segmentIdMap_[pageId];
+  setActiveSegmentId(segmentId) {
+    this.assertVaildSegmentId_(segmentId);
+    const segmentIndex = this.segmentIdMap_[segmentId];
 
     for (let i = 0; i < this.segmentCount_; i++) {
-      if (i < progressBarIndex) {
+      if (i < segmentIndex) {
         this.updateProgressByIndex_(i, 1.0,
-            /* withTransition */ i == progressBarIndex - 1);
+            /* withTransition */ i == segmentIndex - 1);
       } else {
-        // The active page manages its own progress by firing PAGE_PROGRESS
+        // The active segment manages its own progress by firing PAGE_PROGRESS
         // events to amp-story.
         this.updateProgressByIndex_(i, 0.0, /* withTransition */ (
-          progressBarIndex != 0 && this.activePageIndex_ != 1));
+          segmentIndex != 0 && this.activeSegmentIndex_ != 1));
       }
     }
   }
 
+  /**
+   * @param {string} segmentId The index to assert validity
+   * @private
+   */
+  assertVaildSegmentId_(segmentId) {
+    dev().assert(hasOwn(this.segmentIdMap_, segmentId),
+        'Invalid segment-id passed to progress-bar');
+  }
 
   /**
    * The
-   * @param {string} pageId the id of the page whos progress to change
+   * @param {string} segmentId the id of the segment whos progress to change
    * @param {number} progress A number from 0.0 to 1.0, representing the
-   *     progress of the current page.
+   *     progress of the current segment.
    */
-  updateProgress(pageId, progress) {
-    const progressBarIndex = this.segmentIdMap_[pageId];
-    this.updateProgressByIndex_(progressBarIndex, progress);
+  updateProgress(segmentId, progress) {
+    this.assertVaildSegmentId_(segmentId);
+    const segmentIndex = this.segmentIdMap_[segmentId];
+    this.updateProgressByIndex_(segmentIndex, progress);
   }
 
 
   /**
-   * @param {number} progressBarIndex The index of the progress bar segment whose progress should be
+   * @param {number} segmentIndex The index of the progress bar segment whose progress should be
    *     changed.
    * @param {number} progress A number from 0.0 to 1.0, representing the
-   *     progress of the current page.
+   *     progress of the current segment.
    * @param {boolean=} withTransition
    * @public
    */
-  updateProgressByIndex_(progressBarIndex, progress, withTransition = true) {
-    this.assertValidPageIndex_(progressBarIndex);
-    this.activePageIndex_ = progressBarIndex;
+  updateProgressByIndex_(segmentIndex, progress, withTransition = true) {
+    this.activeSegmentIndex_ = segmentIndex;
 
     // Offset the index by 1, since nth-child indices start at 1 while
     // JavaScript indices start at 0.
-    const nthChildIndex = progressBarIndex + 1;
+    const nthChildIndex = segmentIndex + 1;
     const progressEl = scopedQuerySelector(this.getRoot(),
         `.i-amphtml-story-page-progress-bar:nth-child(${
           escapeCssSelectorNth(nthChildIndex)

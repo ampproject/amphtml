@@ -214,9 +214,9 @@ export class SystemLayer {
    * @param {string} pageId The page id of the new active page.
    * @public
    */
-  setActivePageIndex(pageId) {
+  setActivePageId(pageId) {
     // TODO(newmuis) avoid passing progress logic through system-layer
-    this.progressBar_.setActivePageIndex(pageId);
+    this.progressBar_.setActiveSegmentId(pageId);
   }
 
   /**
