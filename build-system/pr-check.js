@@ -350,7 +350,7 @@ function runAllCommands() {
     command.runJsonCheck();
     command.runDepAndTypeChecks();
     command.runUnitTests();
-    command.verifyVisualDiffTests();
+    // command.verifyVisualDiffTests(); is flaky due to Amp By Example tests
     // command.testDocumentLinks() is skipped during push builds.
     command.buildValidatorWebUI();
     command.buildValidator();
@@ -382,7 +382,7 @@ function runAllCommandsLocally() {
   command.runVisualDiffTests();
   command.runUnitTests();
   command.runIntegrationTests(/* compiled */ false);
-  command.verifyVisualDiffTests();
+  // command.verifyVisualDiffTests(); is flaky due to Amp By Example tests
 
   // Validator tests.
   command.buildValidatorWebUI();
