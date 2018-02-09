@@ -119,10 +119,10 @@ export class SystemLayer {
   }
 
   /**
-   * @param {!Array} pages the pages in the story
+   * @param {!Array<string>} pageIds the ids of each page in the story
    * @return {!Element}
    */
-  build(pages) {
+  build(pageIds) {
     if (this.isBuilt_) {
       return this.getRoot();
     }
@@ -132,7 +132,7 @@ export class SystemLayer {
     this.root_ = renderAsElement(this.win_.document, TEMPLATE);
 
     this.root_.insertBefore(
-        this.progressBar_.build(pages), this.root_.lastChild);
+        this.progressBar_.build(pageIds), this.root_.lastChild);
 
     this.leftButtonTray_ =
         this.root_.querySelector('.i-amphtml-story-ui-left');
@@ -215,6 +215,7 @@ export class SystemLayer {
    * @public
    */
   setActivePageIndex(pageId) {
+    // TODO(newmuis) avoid passing progress logic through system-layer
     this.progressBar_.setActivePageIndex(pageId);
   }
 
@@ -226,6 +227,7 @@ export class SystemLayer {
    * @public
    */
   updateProgress(pageId, progress) {
+    // TODO(newmuis) avoid passing progress logic through system-layer
     this.progressBar_.updateProgress(pageId, progress);
   }
 

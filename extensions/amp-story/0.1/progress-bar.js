@@ -53,7 +53,7 @@ export class ProgressBar {
     this.root_ = null;
 
     /** @private {number} */
-    this.pageCount_ = 0;
+    this.segmentCount_ = 0;
 
     /** @private {number} */
     this.activePageIndex_ = 0;
@@ -62,7 +62,7 @@ export class ProgressBar {
     this.vsync_ = Services.vsyncFor(this.win_);
 
     /** @private {!Object<string, number>} */
-    this.pageIdMap_ = map();
+    this.segmentIdMap_ = map();
   }
 
   /**
@@ -73,27 +73,26 @@ export class ProgressBar {
   }
 
   /**
-   * @param {!Array} pages The number of pages in the story.
+   * @param {!Array<string>} segmentIds The id of each page in the story.
    * @return {!Element}
    */
-  build(pages) {
+  build(segmentIds) {
     if (this.isBuilt_) {
       return this.getRoot();
     }
 
-    const pageCount = pages.length;
-    dev().assertNumber(pageCount);
-    dev().assert(pageCount > 0);
+    const segmentCount = segmentIds.length;
+    dev().assert(segmentCount > 0);
 
     this.isBuilt_ = true;
-    this.pageCount_ = pageCount;
+    this.segmentCount_ = segmentCount;
 
-    this.makePageIdMap_(pages);
+    this.makeSegmentIdMap_(segmentIds);
 
     this.root_ = this.win_.document.createElement('ol');
     this.root_.classList.add('i-amphtml-story-progress-bar');
 
-    for (let i = 0; i < this.pageCount_; i++) {
+    for (let i = 0; i < this.segmentCount_; i++) {
       const pageProgressBar = this.win_.document.createElement('li');
       pageProgressBar.classList.add('i-amphtml-story-page-progress-bar');
       const pageProgressValue = this.win_.document.createElement('div');
@@ -106,11 +105,11 @@ export class ProgressBar {
   }
 
   /**
-   * create mapping of pageIds to position in progress bar
-   * @param {Array} pages
+   * create mapping of segmentIds to position in progress bar
+   * @param {!Array<string>} segmentIds
    */
-  makePageIdMap_(pages) {
-    pages.forEach((page, i) => this.pageIdMap_[page.element.id] = i);
+  makeSegmentIdMap_(segmentIds) {
+    segmentIds.forEach((id, i) => this.segmentIdMap_[id] = i);
   }
 
 
@@ -127,8 +126,8 @@ export class ProgressBar {
    * @private
    */
   assertValidPageIndex_(pageIndex) {
-    dev().assert(pageIndex >= 0 && pageIndex < this.pageCount_,
-        `Page index ${pageIndex} is not between 0 and ${this.pageCount_}.`);
+    dev().assert(pageIndex >= 0 && pageIndex < this.segmentCount_,
+        `Page index ${pageIndex} is not between 0 and ${this.segmentCount_}.`);
   }
 
 
@@ -137,9 +136,9 @@ export class ProgressBar {
    * @public
    */
   setActivePageIndex(pageId) {
-    const progressBarIndex = this.pageIdMap_[pageId];
-    this.assertValidPageIndex_(progressBarIndex);
-    for (let i = 0; i < this.pageCount_; i++) {
+    const progressBarIndex = this.segmentIdMap_[pageId];
+
+    for (let i = 0; i < this.segmentCount_; i++) {
       if (i < progressBarIndex) {
         this.updateProgressByIndex_(i, 1.0,
             /* withTransition */ i == progressBarIndex - 1);
@@ -160,7 +159,7 @@ export class ProgressBar {
    *     progress of the current page.
    */
   updateProgress(pageId, progress) {
-    const progressBarIndex = this.pageIdMap_[pageId];
+    const progressBarIndex = this.segmentIdMap_[pageId];
     this.updateProgressByIndex_(progressBarIndex, progress);
   }
 

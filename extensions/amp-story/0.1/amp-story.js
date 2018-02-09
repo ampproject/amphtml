@@ -322,7 +322,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   buildSystemLayer_() {
-    this.element.appendChild(this.systemLayer_.build(this.pages_));
+    const pageIds = this.pages_.map(page => page.element.id);
+    this.element.appendChild(this.systemLayer_.build(pageIds));
     this.updateAudioIcon_();
   }
 
