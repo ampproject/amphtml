@@ -88,7 +88,7 @@ function getMode_(win) {
   return {
     localDev: isLocalDev,
     // Triggers validation
-    development: !!(hashQuery['development'] == '1' || win.AMP_DEV_MODE),
+    development: !!(hashQuery['development'] == '1' || hashQuery['development'] == '2' || win.AMP_DEV_MODE),
     examiner: hashQuery['development'] == '2',
     // Allows filtering validation errors by error category. For the
     // available categories, see ErrorCategory in validator/validator.proto.

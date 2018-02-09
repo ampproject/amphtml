@@ -21,6 +21,7 @@ goog.provide('amp.validator.annotateWithErrorCategories');
 goog.provide('amp.validator.isSeverityWarning');
 goog.provide('amp.validator.renderErrorMessage');
 goog.provide('amp.validator.renderValidationResult');
+goog.provide('amp.validator.validateDomMutation');
 goog.provide('amp.validator.validateSaxEvents');
 goog.provide('amp.validator.validateString');
 goog.require('amp.htmlparser.HtmlParser');
@@ -5310,6 +5311,19 @@ amp.validator.isSeverityWarning = function(error) {
 };
 
 /**
+ * Validates a DOM mutation 
+ * @param {Object} domMutation the dom mutation request.
+ * @return {Object} {!ampl.validator.ValidationResult} Validation result.
+ **/
+amp.validator.validateDomMutation = (domMutation) => {
+  // TODO(alabiaga): This is still in progress.
+  let result = new amp.validator.ValidationResult();
+  result.status = amp.validator.ValidationResult.Status.FAIL;
+  return result;
+};
+
+
+/**
  * Validates a document input as a string.
  * @param {string} inputDocContents
  * @param {string=} opt_htmlFormat the allowed format. Defaults to 'AMP'.
@@ -5318,9 +5332,6 @@ amp.validator.isSeverityWarning = function(error) {
  * @export
  */
 amp.validator.validateString = function(inputDocContents, opt_htmlFormat) {
-  if (amp.validator.LIGHT) {
-    throw 'not implemented';
-  }
   goog.asserts.assertString(inputDocContents, 'Input document is not a string');
 
   const htmlFormat = opt_htmlFormat || 'AMP';

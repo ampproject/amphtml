@@ -163,7 +163,7 @@ def GenValidatorPb2Py(out_dir):
   logging.info('... done')
 
 
-def GenValidatorProtoascii(out_dir):
+def GenValidatorProtoascii(out_dir, is_light=False):
   """Assembles the validator protoascii file from the main and extensions.
 
   Args:
@@ -186,7 +186,6 @@ def GenValidatorProtoascii(out_dir):
   f.write(''.join(protoascii_segments))
   f.close()
   logging.info('... done')
-
 
 def GenValidatorGeneratedJs(out_dir, is_light=False):
   """Calls validator_gen_js to generate validator-generated.js
@@ -547,14 +546,14 @@ def GenerateTestRunner(out_dir):
              var JasmineRunner = require('jasmine');
              var jasmine = new JasmineRunner();
              process.env.TESTDATA_ROOTS = 'testdata:%s'
-             //require('./validator_test_minified');
+             require('./validator_test_minified');
              require('./validator-light_test_minified');
-             //require('./htmlparser_test_minified');
-             //require('./parse-css_test_minified');
-             //require('./parse-url_test_minified');
-             //require('./amp4ads-parse-css_test_minified');
-             //require('./keyframes-parse-css_test_minified');
-             //require('./parse-srcset_test_minified');
+             require('./htmlparser_test_minified');
+             require('./parse-css_test_minified');
+             require('./parse-url_test_minified');
+             require('./amp4ads-parse-css_test_minified');
+             require('./keyframes-parse-css_test_minified');
+             require('./parse-srcset_test_minified');
              jasmine.onComplete(function (passed) {
                  process.exit(passed ? 0 : 1);
              });
@@ -589,7 +588,7 @@ def Main():
   CheckPrereqs()
   InstallNodeDependencies()
   SetupOutDir(out_dir='dist')
-  GenValidatorProtoascii(out_dir='dist')
+  GenValidatorProtoascii(out_dir='dist', is_light=build_light)
   GenValidatorPb2Py(out_dir='dist')
   GenValidatorGeneratedJs(out_dir='dist')
   GenValidatorGeneratedLightAmpJs(out_dir='dist')
@@ -606,7 +605,10 @@ def Main():
   CompileKeyframesParseCssTestMinified(out_dir='dist')
   CompileParseSrcsetTestMinified(out_dir='dist')
   GenerateTestRunner(out_dir='dist')
-  #RunTests(out_dir='dist', nodejs_cmd=nodejs_cmd)
+  # TODO(alabiaga): fix this, as we temporarily skip when --light is passed,
+  # as they fail when invoked from gulp.
+  if not build_light:
+    RunTests(out_dir='dist', nodejs_cmd=nodejs_cmd)
 
 
 if __name__ == '__main__':
