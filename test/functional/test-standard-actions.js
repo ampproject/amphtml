@@ -20,7 +20,7 @@ import {StandardActions} from '../../src/service/standard-actions-impl';
 import {Services} from '../../src/services';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
 import {setParentWindow} from '../../src/service';
-
+import {createElementWithAttributes} from '../../src/dom';
 
 describes.sandboxed('StandardActions', {}, () => {
   let standardActions;
@@ -352,14 +352,23 @@ describes.sandboxed('StandardActions', {}, () => {
       standardActions.handleAmpTarget(invocation);
       expect(printStub).to.be.calledOnce;
     });
+  });
+
+  describes.realWin('#whitelist', {
+    amp: {
+      ampdoc: 'single',
+    },
+  }, env => {
+    beforeEach(() => {
+      env.win.document.head.appendChild(
+          createElementWithAttributes(env.win.document, 'meta', {
+            name: 'amp-action-whitelist',
+            content: 'AMP.pushState,AMP.setState',
+          }));
+    });
 
     it('should not implement print when not whitelisted', () => {
-      const fakeMeta = {
-        getAttribute: () => 'AMP.pushState,AMP.setState',
-      };
-      sandbox.stub(window.document.head,
-          'querySelector').callsFake(() => fakeMeta);
-      standardActions = new StandardActions(ampdoc);
+      standardActions = new StandardActions(env.ampdoc);
 
       const windowApi = {
         print: () => {},
@@ -379,26 +388,21 @@ describes.sandboxed('StandardActions', {}, () => {
     });
 
     it('should implement pushState when whitelisted', () => {
-      const fakeMeta = {
-        getAttribute: () => 'AMP.setState,AMP.pushState',
-      };
-      sandbox.stub(window.document.head,
-          'querySelector').callsFake(() => fakeMeta);
-
-      standardActions = new StandardActions(ampdoc);
+      standardActions = new StandardActions(env.ampdoc);
 
       const handleAmpBindActionStub =
         sandbox.stub(standardActions, 'handleAmpBindAction_');
       const invocation = {
         method: 'pushState',
         satisfiesTrust: () => true,
-        target: ampdoc,
+        target: env.ampdoc,
       };
 
       expect(() =>
         standardActions.handleAmpTarget(invocation, 0, [])).to.not.throw();
       expect(handleAmpBindActionStub).to.be.calledOnce;
     });
+
   });
 
   describes.fakeWin('adoptEmbedWindow', {}, env => {
