@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {closestBySelector} from '../../../src/dom';
 import {user} from '../../../src/log';
 
 /**
@@ -72,4 +73,14 @@ export function unscaledClientRect(el) {
     width: width / scaleFactorX,
     height: height / scaleFactorY,
   });
+}
+
+
+/**
+ * Finds an amp-video/amp-audio ancestor.
+ * @param {!Element} el
+ * @return {?AmpElement}
+ */
+export function ampMediaElementFor(el) {
+  return closestBySelector(el, 'amp-video, amp-audio');
 }
