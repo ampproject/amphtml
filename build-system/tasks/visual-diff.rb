@@ -223,12 +223,13 @@ end
 # Configures the Chrome browser (optionally in headless mode)
 def configure_browser
   if ARGV.include? '--headless'
-    capabilities = Selenium::WebDriver::Remote::Capabilities.chrome(
-      chromeOptions: { args: %w(headless disable-gpu) }
-    )
+    chrome_args = %w(no-sandbox disable-extensions headless disable-gpu)
   else
-    capabilities = Selenium::WebDriver::Remote::Capabilities.chrome()
+    chrome_args = %w(no-sandbox disable-extensions)
   end
+  capabilities = Selenium::WebDriver::Remote::Capabilities.chrome(
+    chromeOptions: { args: chrome_args }
+  )
   Capybara.register_driver :chrome do |app|
     Capybara::Selenium::Driver.new app,
       browser: :chrome,
