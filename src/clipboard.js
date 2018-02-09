@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Services} from './services';
 import {removeElement} from './dom';
 import {setStyles} from './style';
 
 
 /**
- * @param {!Document} doc
+ * @param {!Window} win
  * @param {string} text
  * @return {boolean}
  */
-export function copyTextToClipboard(doc, text) {
+export function copyTextToClipboard(win, text) {
   let copySuccessful = false;
+  const doc = win.document;
 
   const textarea = doc.createElement('textarea');
 
@@ -41,10 +41,15 @@ export function copyTextToClipboard(doc, text) {
   });
 
   textarea.value = text;
+  textarea.readOnly = true;
+  textarea.contentEditable = true;
 
   doc.body.appendChild(textarea);
-
-  textarea.select();
+  const range = doc.createRange();
+  range.selectNode(textarea);
+  win.getSelection().removeAllRanges();
+  win.getSelection().addRange(range);
+  textarea.setSelectionRange(0, text.length);
 
   try {
     copySuccessful = doc.execCommand('copy');
@@ -59,14 +64,9 @@ export function copyTextToClipboard(doc, text) {
 
 
 /**
- * @param {!Window} win
+ * @param {!Document} doc
  * @return {boolean}
  */
-export function isCopyingToClipboardSupported(win) {
-  // Current implementation does not work on iOS even though the test for
-  // support below returns true. See #13136.
-  if (Services.platformFor(win).isIos()) {
-    return false;
-  }
-  return win.document.queryCommandSupported('copy');
+export function isCopyingToClipboardSupported(doc) {
+  return doc.queryCommandSupported('copy');
 }
