@@ -103,227 +103,227 @@
       "name": "Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-access/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-access/index.html",
       "name": "amp-access - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-access-laterpay/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-access-laterpay/index.html",
       "name": "amp-access-laterpay - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-accordion/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-accordion/index.html",
       "name": "amp-accordion - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-ad/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-ad/index.html",
       "name": "amp-ad - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-analytics/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-analytics/index.html",
       "name": "amp-analytics - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-anim/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-anim/index.html",
       "name": "amp-anim - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-app-banner/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-app-banner/index.html",
       "name": "amp-app-banner - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-audio/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-audio/index.html",
       "name": "amp-audio - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-bind/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-bind/index.html",
       "name": "amp-bind - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-brid-player/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-brid-player/index.html",
       "name": "amp-brid-player - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-brightcove/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-brightcove/index.html",
       "name": "amp-brightcove - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-call-tracking/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-call-tracking/index.html",
       "name": "amp-call-tracking - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-carousel/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-carousel/index.html",
       "name": "amp-carousel - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-dailymotion/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-dailymotion/index.html",
       "name": "amp-dailymotion - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-date-picker/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-date-picker/index.html",
       "name": "amp-date-picker - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-dynamic-css-classes/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-dynamic-css-classes/index.html",
       "name": "amp-dynamic-css-classes - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-experiment/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-experiment/index.html",
       "name": "amp-experiment - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-facebook/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-facebook/index.html",
       "name": "amp-facebook - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-fit-text/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-fit-text/index.html",
       "name": "amp-fit-text - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-font/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-font/index.html",
       "name": "amp-font - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-form/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-form/index.html",
       "name": "amp-form - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-fx-flying-carpet/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-fx-flying-carpet/index.html",
       "name": "amp-fx-flying-carpet - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-fx-parallax/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-fx-parallax/index.html",
       "name": "amp-fx-parallax - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-gfycat/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-gfycat/index.html",
       "name": "amp-gfycat - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-gist/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-gist/index.html",
       "name": "amp-gist - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-google-vrview-image/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-google-vrview-image/index.html",
       "name": "amp-google-vrview-image - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-hulu/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-hulu/index.html",
       "name": "amp-hulu - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-iframe/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-iframe/index.html",
       "name": "amp-iframe - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-image-lightbox/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-image-lightbox/index.html",
       "name": "amp-image-lightbox - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-ima-video/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-ima-video/index.html",
       "name": "amp-ima-video - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-img/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-img/index.html",
       "name": "amp-img - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-instagram/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-instagram/index.html",
       "name": "amp-instagram - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-install-serviceworker/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-install-serviceworker/index.html",
       "name": "amp-install-serviceworker - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-jwplayer/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-jwplayer/index.html",
       "name": "amp-jwplayer - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-kaltura-player/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-kaltura-player/index.html",
       "name": "amp-kaltura-player - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-lightbox/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-lightbox/index.html",
       "name": "amp-lightbox - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-list/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-list/index.html",
       "name": "amp-list - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-live-list/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-live-list/index.html",
       "name": "amp-live-list - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-mustache/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-mustache/index.html",
       "name": "amp-mustache - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-o2-player/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-o2-player/index.html",
       "name": "amp-o2-player - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-pinterest/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-pinterest/index.html",
       "name": "amp-pinterest - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-pixel/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-pixel/index.html",
       "name": "amp-pixel - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-reach-player/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-reach-player/index.html",
       "name": "amp-reach-player - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-selector/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-selector/index.html",
       "name": "amp-selector - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-sidebar/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-sidebar/index.html",
       "name": "amp-sidebar - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-social-share/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-social-share/index.html",
       "name": "amp-social-share - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-soundcloud/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-soundcloud/index.html",
       "name": "amp-soundcloud - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-springboard-player/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-springboard-player/index.html",
       "name": "amp-springboard-player - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-sticky-ad/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-sticky-ad/index.html",
       "name": "amp-sticky-ad - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-timeago/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-timeago/index.html",
       "name": "amp-timeago - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-twitter/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-twitter/index.html",
       "name": "amp-twitter - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-user-notification/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-user-notification/index.html",
       "name": "amp-user-notification - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-video/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-video/index.html",
       "name": "amp-video - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-vimeo/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-vimeo/index.html",
       "name": "amp-vimeo - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-vine/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-vine/index.html",
       "name": "amp-vine - Amp By Example"
     },
     {
-      "url": "examples/visual-tests/amp-youtube/index.html",
+      "url": "examples/visual-tests/amp-by-example/components/amp-youtube/index.html",
       "name": "amp-youtube - Amp By Example"
     }
   ],

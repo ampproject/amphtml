@@ -151,7 +151,7 @@ for COMPONENT_DIR in `ls -d */`
 do
   COMPONENT=`basename $COMPONENT_DIR`
   echo "    {"
-  echo "      \"url\": \"examples/visual-tests/$COMPONENT/index.html\","
+  echo "      \"url\": \"examples/visual-tests/amp-by-example/components/$COMPONENT/index.html\","
   echo "      \"name\": \"$COMPONENT - Amp By Example\""
   echo "    },"
 done
