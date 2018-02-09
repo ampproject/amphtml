@@ -88,7 +88,7 @@ export class ProgressBar {
     this.isBuilt_ = true;
     this.pageCount_ = pageCount;
 
-    this.makeIdMap_(pages);
+    this.makePageIdMap_(pages);
 
     this.root_ = this.win_.document.createElement('ol');
     this.root_.classList.add('i-amphtml-story-progress-bar');
@@ -109,7 +109,7 @@ export class ProgressBar {
    * create mapping of pageIds to position in progress bar
    * @param {Array} pages
    */
-  makeIdMap_(pages) {
+  makePageIdMap_(pages) {
     pages.forEach((page, i) => this.pageIdMap_[page.element.id] = i);
   }
 
