@@ -1,0 +1,50 @@
+<!--
+  ## Introduction
+
+  [amp-call-tracking](https://www.ampproject.org/docs/reference/components/ads/amp-call-tracking) replaces static phone numbers with dynamically generated phone numbers used for call tracking analytics.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-call-tracking</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!--
+    Import the `amp-call-tracking` component.
+  -->
+  <script async custom-element="amp-call-tracking" src="https://cdn.ampproject.org/v0/amp-call-tracking-0.1.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-call-tracking/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+
+  <!-- ## Basic Usage -->
+  <!--
+    An XHR endpoint that returns a JSON response will define the phone number and how the number will be formatted.
+
+    Your XHR endpoint needs to follow and implement [CORS Requests in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md).
+
+    The following is the JSON response used in the endpoint in this example:
+
+    ```
+    {
+      "phoneNumber": "15559876543",
+      "formattedPhoneNumber": "1 (555) 987-6543"
+    }
+    ```
+
+    Note that `formattedPhoneNumber` is optional. See the [component documentation for more information](https://www.ampproject.org/docs/reference/components/ads/amp-call-tracking).
+
+    We also need to set a default phone number that will be shown before the endpoint responds. This is done via an `<a>` element inside the `amp-call-tracking` tag.
+  -->
+  <p>
+    <strong>Call us!</strong><br>
+    <amp-call-tracking config="https://ampbyexample.com/json/call-tracking-number.json">
+      <a href="tel:10001111111">1 (000) 111-1111</a>
+    </amp-call-tracking>
+  </p>
+</body>
+</html>

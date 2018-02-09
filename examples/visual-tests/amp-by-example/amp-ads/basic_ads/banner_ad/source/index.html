@@ -1,0 +1,46 @@
+<!--
+  ## Introduction
+
+  This sample demonstrates how to implement a simple banner [AMPHTML ad](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md). In general an AMPHTML ad should be a valid AMP document.
+
+  The code represents the body that should be returned as a response initiated through an [amp-ad](/components/amp-ad/) component or otherwise whenever we want to return an AMPHTML ad in any other context.
+
+  This example consists of an image and a rendering tracking pixel that are implemented respectively using `amp-img` and `amp-pixel` components.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡4ads>
+<head>
+
+  <meta charset="utf-8">
+  <title>Banner Ad</title>
+  <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+  <!-- ## Setup -->
+  <!--
+  As part of any other AMP document, we import the canonical boiler plate to make it a valid AMP document.
+  -->
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp4ads-boilerplate>body{visibility:hidden}</style>
+</head>
+<body>
+
+  <!-- ## Basic Usage -->
+  <!--
+  The anatonomy of banner ad is an image with a hyperlink to the advertiser's page. We display the image for the creative using [amp-img](/components/amp-img/).
+  -->
+  <a target="_blank"
+     href="https://ampbyexample.com/amp_ads/banner_ad/">
+    <amp-img src="https://ampbyexample.com/img/amp-300x250.jpg"
+              width="300"
+              height="250"
+              alt="a4a image"></amp-img>
+  </a>
+
+  <!--
+   We include a tracking pixel to record that the ad was rendered using [amp-pixel](https://www.ampproject.org/docs/reference/components/amp-pixel).
+
+   Alternatively one could make use of [amp-analytics](https://www.ampproject.org/docs/reference/extended/amp-analytics.html) to enable much more comprenhensive measure activity.
+   -->
+   <amp-pixel src="https://foo.com/pixel?RANDOM"></amp-pixel>
+</body>
+</html>

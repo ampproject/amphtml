@@ -1,0 +1,94 @@
+<!-- ## Introduction
+  The [amp-access](https://www.ampproject.org/docs/reference/components/amp-access) component adds support for paywalls and subscriptions to AMP, allowing the publisher to control which content is accessible by the reader and with what restrictions.
+
+  For sample `amp-access` server endpoints, see the [amp-publisher-sample](https://github.com/ampproject/amp-publisher-sample) project.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-access</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+
+  <!-- ## Setup -->
+  <!-- Import the `amp-access` component in the header. -->
+  <script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js"></script>
+  <!-- `amp-access` requires `amp-analytics` to be imported as well. -->
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+
+  <!-- Optionally, use the [`amp-mustache`](https://www.ampproject.org/docs/reference/components/amp-mustache) component to show text with values replaced from
+  the authorization response -->
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+
+  <!-- Add the configuration for the `authorization`, `pingback` and the `login` endpoints. We provide two login endpoints, one for sign-in and one for sign-out. It is
+  also possible to create a fallback response that will be used if the authorization fails with the `authorizationFallbackResponse` attribute -->
+  <script id="amp-access" type="application/json">
+    {
+        "authorization": "https://ampbyexample.com/components/amp-access/authorization?rid=READER_ID&url=CANONICAL_URL&ref=DOCUMENT_REFERRER&_=RANDOM",
+        "pingback": "https://ampbyexample.com/components/amp-access/authorization?rid=READER_ID&url=CANONICAL_URL&ref=DOCUMENT_REFERRER&_=RANDOM",
+        "login": {
+          "sign-in": "https://ampbyexample.com/components/amp-access/login?rid=READER_ID&url=CANONICAL_URL",
+          "sign-out": "https://ampbyexample.com/components/amp-access/logout"
+        },
+        "authorizationFallbackResponse": {
+            "error": true,
+            "access": false,
+            "subscriber": false
+        }
+    }
+  </script>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-access/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+  <!-- This section is visible to all users. No special markup is needed in this case.-->
+  <section>
+    <h3>The Article</h3>
+    <p>
+      This is a preview of the article.
+    </p>
+  </section>
+
+   <!-- Use the `amp-access` attribute to control the visibility of each component. The expression
+   must evaluate to a boolean value. If it evaluates to `TRUE`, the section will be shown.  -->
+  <section amp-access="access">
+    <p>This section is visible to users if the authorization response contains: <code>"access": true</code>. This is usually the main content of the article.</p>
+  </section>
+
+  <!-- This section is only shown if the value of the `access` attribute on the response for
+  the authorization requests evaluates to `FALSE`-->
+  <section amp-access="NOT access">
+    <p>This section is only visible to users if the authorization response does not contain <code>access</code> or contains <code>"access": false</code>.</p>
+  </section>
+
+  <!-- It is possible to combine two values on the evaluation expression.
+    Check the docs to find out more about the [Expression Grammar](https://www.ampproject.org/docs/reference/components/amp-access#appendix-a-amp-access-expression-grammar)
+   -->
+  <div amp-access="access AND NOT subscriber">
+    <p>This section is only visible to users with <code>"access": true</code> and <code>"subscriber": false</code></p>
+  </div>
+
+  <!-- Combine `amp-access` and `amp-mustache` to show information returned from the authorization request. In this case we show the user name returned in the authentification response. -->
+  <section amp-access="subscriber">
+    <template amp-access-template type="amp-mustache">
+      Hello {{name}}!
+    </template>
+  </section>
+
+  <!-- Use `on="tap:amp-access.login-sign-in"` to open the login dialog when the element is
+  clicked.
+
+  `amp-access-hide` will default the component to be hidden and enabled later
+  if the `amp-access` expression is evaluated to `TRUE` -->
+  <section class="p1" amp-access="NOT subscriber" amp-access-hide role="button" tabindex="0">
+    <a class="ampstart-btn caps" on="tap:amp-access.login-sign-in">Login</a>
+  </section>
+  <!-- The logout link will only be shown for logged in subscribers. We use a trick here: the logout is a login action that directly redirects back to the original URL. This has the advantage that the page updates without being reloaded.  -->
+  <section class="p1" amp-access="subscriber" amp-access-hide role="button" tabindex="0">
+    <a class="ampstart-btn caps" on="tap:amp-access.login-sign-out">Logout</a>
+  </section>
+  <!-- Checkout the [official amp-access sample](https://rocky-sierra-1919.herokuapp.com/) for demos of first-click-free and view counting. -->
+</body>
+</html>

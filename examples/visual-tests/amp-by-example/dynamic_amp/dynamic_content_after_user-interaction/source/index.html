@@ -1,0 +1,43 @@
+<!-- ## Dynamic content after User-Interaction -->
+<!--
+This is a sample showing how to show dynamic content after an user interaction: the product availability will be shown based on product selection.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+
+  <!-- ## Setup -->
+  <!--
+    Additionally used AMP components must be imported in the header. We use `amp-bind` to dynamically
+    update the page content.
+  -->
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+
+  <link rel="canonical" href="https://ampbyexample.com/dynamic_amp/dynamic_content_after_user-interaction/">
+  <title>Dynamic Content</title>
+
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+
+</head>
+<body>
+  <!-- ## How to get dynamic content -->
+  <!-- By using `amp-bind` and `amp-state` with a JSON end-point, a user can get up-to-date data after an interaction. As `amp-bind` statements are not evaluated on page load, the updated state is only available after an user interaction, which works well for use cases such as specific product availability. -->
+    <div>
+    <amp-state id="products" src="https://ampbyexample.com/json/products.json"></amp-state>
+
+    <amp-img on="tap:AMP.setState({ productId: 0})" src="/img/red_apple_1_60x40.jpg" width="60" height="40" role="button" tabindex="0">
+    </amp-img>
+    <amp-img on="tap:AMP.setState({ productId: 1})" src="/img/green_apple_1_60x40.jpg" width="60" height="40" role="button" tabindex="0">
+    </amp-img>
+    <amp-img on="tap:AMP.setState({ productId: 2})" src="/img/product1_alt1_60x40.jpg" width="60" height="40" role="button" tabindex="0">
+    </amp-img>
+    <div [text]="products[productId] + ' available'">Please select a product</div>
+  </div>
+
+</body>
+</html>

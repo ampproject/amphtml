@@ -1,0 +1,50 @@
+<!--
+  ## Introduction
+
+  The [`amp-timeago`](https://www.ampproject.org/docs/reference/components/amp-timeago) provides fuzzy timestamps by formatting dates as "X time ago"
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-timeago</title>
+  <link rel="canonical" href="https://ampbyexample.com/../components/amp-timeago/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!-- Import the `amp-timeago` component -->
+  <script async custom-element="amp-timeago" src="https://cdn.ampproject.org/v0/amp-timeago-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+
+  <!-- ## Basic Usage -->
+  <!--
+  A simple example showing how long it has been since 14 March, 2017
+  -->
+  <amp-timeago class="m1" width="160" height="20" datetime="2017-03-14T00:37:33.809Z">Tuesday 14 March 2017 00.37</amp-timeago>
+
+  <!-- ## Different locale -->
+  <!--
+    The `locale` attribute allows you to get an output in a
+    different language. By default the `locale` is set to `en`
+  -->
+  <amp-timeago class="m1" width="160" height="20" datetime="2017-03-14T00:37:33.809Z" locale="ml">Tuesday 14 March 2017 00.37</amp-timeago>
+
+  <!-- ## Dates in the future -->
+  <!--
+    The component supports dates in the future as well
+  -->
+  <amp-timeago class="m1" width="160" height="20" datetime="2050-03-14T00:37:33.809Z">Monday 14 March 2050 00.37</amp-timeago>
+
+  <!-- ## Cutoff time-->
+  <!--
+    Cutoff times are useful when it doesn't make sense to
+    display "X time ago" after a threshold. Specify `cutoff` in seconds
+  -->
+  <amp-timeago class="m1" width="160" height="20" datetime="2017-03-14T00:37:33.809Z" cutoff="600">Tuesday 14 March 2017 00.37</amp-timeago>
+
+
+</body>
+</html>

@@ -1,0 +1,444 @@
+<!-- -->
+<!doctype html>
+<html amp4ads lang="en">
+  <head>
+    <meta charset="utf-8">
+  <title>Slides With Lightbox Ad</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <script async custom-element="amp-bind" src="https://amp-ads.firebaseapp.com/dist/v0/amp-bind-0.1.max.js"></script>
+    <script async custom-element="amp-lightbox" src="https://amp-ads.firebaseapp.com/dist/v0/amp-lightbox-0.1.max.js"></script>
+    <script async custom-element="amp-carousel" src="https://amp-ads.firebaseapp.com/dist/v0/amp-carousel-0.1.max.js"></script>
+    <script async src="https://amp-ads.firebaseapp.com/dist/amp.js"></script>
+    <style amp4ads-boilerplate>body{visibility:hidden}</style>
+    <!-- ## Summary-->
+    <!--
+    Sample AMPHTML ad using [amp-lightbox](https://www.ampproject.org/docs/reference/components/amp-lightbox), [amp-carousel](https://www.ampproject.org/docs/reference/components/amp-carousel) and [amp-bind](https://www.ampproject.org/docs/reference/components/amp-bind) to create an interactive ad.
+    -->
+    <!-- ## Styling -->
+    <!--
+    This is an advanced example that requires some styling to make it look and function properly.
+    -->
+    <style amp-custom>
+      /* Main element that contains the creative. */
+      .root-container {
+        font-family: 'Roboto', sans-serif;
+        font-size: 12px;
+        background: #151717 url(https://ampbyexample.com/img/car-mesh.jpg) center center;
+        background-size: cover;
+        color: #fff;
+        width: 100%;
+        height: 100vh;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .root-container h1 {
+        font-weight: normal;
+        margin: 10px 0 0;
+        text-align: center;
+        text-transform: uppercase;
+        font-size: 12px;
+      }
+      .carousel-container {
+        position: relative;
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+      }
+      .carousel-img {
+        display: block;
+      }
+      /*
+       * Dimensions of the carousel item are the same as the size of each image
+       * plus the border width. Using `calc()` for the sake of the example.
+       */
+      .carousel-item {
+        width: calc(216px + 2 * 4px);
+        height: calc(117px + 2 * 4px);
+        box-sizing: border-box;
+        background: #000;
+        transition: 0.4s transform ease-out;
+        transform: scale(0.8);
+        float: left;
+      }
+      .carousel-item.selected {
+        transform: scale(1);
+      }
+      .carousel-item .carousel-img {
+        opacity: 0.4;
+        transition: 0.4s opacity ease-out;
+        border: 4px solid #c9cccc;
+      }
+      .carousel-item.selected .carousel-img {
+        opacity: 1;
+      }
+      /* Styling for footer */
+      .footer {
+        background: #000;
+        box-sizing: border-box;
+        padding: 8px;
+        display: flex;
+      }
+      .stretch {
+        flex: 1;
+      }
+      .logo-img {
+        display: block;
+      }
+      .button {
+        text-transform: uppercase;
+        padding: 8px;
+        color: #fff;
+        display: inline-block;
+        background-color: #2979ff;
+      }
+      .button-secondary {
+        background: transparent;
+        border-right: 1px solid white;
+        margin-right: 8px;
+      }
+      /* Styling for lightbox */
+      amp-lightbox {
+        font-family: 'Roboto', sans-serif;
+        font-size: 12px;
+        background: rgba(0, 0, 0, 0.8);
+      }
+      .lightbox {
+        height: 100%;
+        max-height: 920px;
+        margin: 0 auto;
+        max-width: 600px;
+        background: #fff;
+        overflow: hidden;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+      }
+      .lightbox-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        padding: 6px;
+      }
+      .lightbox-row h3 {
+        font-size: 12px;
+        margin: 0;
+        font-weight: normal;
+        text-transform: uppercase;
+        color: #000;
+      }
+      .lightbox-row p {
+        margin: 0;
+      }
+      .lightbox-main {
+        overflow: hidden;
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+      }
+      .lightbox-row-img {
+        width: 160px;
+        flex: 0;
+        padding: 6px;
+      }
+      .lightbox-row-desc {
+        flex: 1;
+        min-width: 160px;
+        line-height: 18px;
+        max-width: 300px;
+        padding: 6px;
+        font-size: 12px;
+        color: #999;
+      }
+      .lightbox-close-container {
+        text-align: center;
+        padding: 18px 0;
+      }
+      .lightbox-header {
+        background: #000;
+        text-align: center;
+        padding: 10px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .lightbox-map {
+        background: #f0f0f0;
+        width: 600px;
+        height: 800px;
+        position: relative;
+      }
+      /*
+       * Styling for locator buttons in the lightbox map.
+       * These are centered relative to the map.
+       */
+      .locator-button {
+        padding: 0;
+        width: 44px;
+        height: 44px;
+        border-radius: 44px;
+        line-height: 44px;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+        left: 50%;
+        top: 50%;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        position: absolute;
+      }
+      .locator-button svg {
+        margin: 0 auto;
+        display: block;
+      }
+      /*
+       * Position each locator button absolutely.
+       * Margin values are relative to the center of the map image.
+       */
+      .locator-button-1 {
+        margin-left: -100px;
+        margin-top: 0;
+      }
+      .locator-button-2 {
+        margin-left: 0;
+        margin-top: -140px;
+      }
+      .locator-button-3 {
+        margin-left: 100px;
+        margin-top: 90px
+      }
+      .locator-panel-container {
+        left: 0;
+        bottom: 0;
+        top: 0;
+        right: 0;
+        background: rgba(100, 100, 100, 0.3);
+        position: absolute;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+      .locator-panel {
+        width: 100%;
+        max-width: 320px;
+        background: #fff;
+        border-radius: 2px;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+        position: relative;
+      }
+      .locator-back {
+        width: 44px;
+        height: 44px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 1;
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-size: 24px 24px;
+        background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#fff" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z"/></svg>');
+      }
+      .locator-row {
+        font-size: 12px;
+        color: #888;
+        padding: 12px 0;
+        border-bottom: 1px solid #ddd;
+        display: flex;
+        align-items: center;
+      }
+      .locator-row:last-child {
+        border-bottom: none;
+      }
+      .locator-row svg {
+        fill: #2979ff;
+        margin: 0 10px;
+      }
+      .locator-header {
+        background: #000;
+        padding: 12px 10px;
+        color: #fff;
+        display: flex;
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+      .locator-header h3 {
+        flex: 1;
+        font-size: inherit;
+        font-weight: bold;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ## Banner markup -->
+    <!--
+    `amp-ad-banner` is a dummy AMP element that is used by the AMP runtime to determine the position of the ad when a lightbox is opened.
+
+    Please note that `amp-ad-banner` is still in experimental stages and is
+    likely to change in the future. See [this Github issue for tracking.](https://github.com/ampproject/amphtml/issues/8334)
+    -->
+    <amp-ad-banner class="root-container">
+      <h1>The all-new Howdy WX-S Series</h1>
+      <div class="carousel-container">
+        <!-- ## Carousel -->
+        <!--
+        We use the `amp-carousel` component to display multiple slides.
+
+        All elements with the `carousel-item` class-name have essentially the same markup.
+
+        AMP has a system in place for [events and actions](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md). It uses a domain-specific language to describe how actions are triggered. In this example, we use the actions system in combination with `amp-bind` to keep a state variable of the current selected slide.
+
+        This is only used for transitions that are activated when the selected item slides into view. If the transition is not desired, `amp-bind` is no longer a requisite for this example.
+        -->
+        <amp-carousel
+            height="132"
+            layout="fixed-height"
+            type="slides"
+            class="carousel"
+            on="slideChange:AMP.setState({selection: event.index})"
+            controls>
+          <div class="carousel-item selected"
+              [class]="'carousel-item ' + (selection == 0 ? 'selected' : '')">
+            <amp-img src="https://ampbyexample.com/img/car-sideview2.jpg"
+                width="216"
+                height="117"
+                layout="fixed"
+                class="carousel-img"></amp-img>
+          </div>
+          <div class="carousel-item"
+              [class]="'carousel-item ' + (selection == 1 ? 'selected' : '')">
+            <amp-img src="https://ampbyexample.com/img/car-gauges.jpg"
+                width="216"
+                height="117"
+                layout="fixed"
+                class="carousel-img"></amp-img>
+          </div>
+          <div class="carousel-item"
+              [class]="'carousel-item ' + (selection == 2 ? 'selected' : '')">
+            <amp-img src="https://ampbyexample.com/img/car-sideview1.jpg"
+                width="216"
+                height="117"
+                layout="fixed"
+                class="carousel-img"></amp-img>
+          </div>
+        </amp-carousel>
+      </div>
+      <!-- ## Ad footer -->
+      <!--
+      By using the action system, we can activate a lightbox when the "Locate Store" button is tapped.
+      -->
+      <div class="footer">
+        <div class="stretch">
+          <amp-img src="https://ampbyexample.com/img/car-logo.png"
+              width="72"
+              height="32"
+              layout="fixed"
+              class="logo-img"></amp-img>
+        </div>
+        <div role="button"
+            class="button button-secondary"
+            on="tap:locator-lightbox.activate">
+          Locate Store
+        </div>
+        <a href="https://ampbyexample.com" target="_blank" class="button">
+          Explore
+        </a>
+      </div>
+    </amp-ad-banner>
+    <!-- ## Lightbox markup -->
+    <!--
+    The amp-lightbox component defines the child elements that will be displayed in a full-viewport overlay.
+    We set an id (`locator-lightbox`) so it can be opened and closed by actions on other elements.
+    Its content is normal AMP HTML.
+    -->
+    <amp-lightbox id="locator-lightbox" layout="nodisplay">
+      <div class="lightbox">
+        <div class="lightbox-header">
+          <amp-img src="https://ampbyexample.com/img/car-logo.png"
+              width="72"
+              height="32"
+              layout="fixed"
+              alt="Howdy"
+              class="logo-img"></amp-img>
+        </div>
+        <div class="lightbox-main">
+          <!-- Inside the lightbox we set a fixed-size image to serve as a map. We overlay absolute-positioned buttons that display a location detail panel when tapped. In this example all buttons open the same panel, but in practice they can each open a different one. -->
+          <div class="lightbox-map">
+            <amp-img src="https://ampbyexample.com/img/car-map.png"
+                width="600"
+                height="800"
+                layout="fixed"
+                class="a-map-img"></amp-img>
+            <div class="button locator-button locator-button-1"
+                on="tap:locator-store.show">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#fff">
+                <path d="M0 0h24v24H0z" fill="none"/>
+                <path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z"/>
+              </svg>
+            </div>
+            <div class="button locator-button locator-button-2"
+                on="tap:locator-store.show">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#fff">
+                <path d="M0 0h24v24H0z" fill="none"/>
+                <path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z"/>
+              </svg>
+            </div>
+            <div class="button locator-button locator-button-3"
+                on="tap:locator-store.show">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#fff">
+                <path d="M0 0h24v24H0z" fill="none"/>
+                <path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z"/>
+              </svg>
+            </div>
+          </div>
+          <!-- We hide the locator panel by default using the `hidden` attribute. The AMP action system will remove it when `show` is triggered. -->
+          <div class="locator-panel-container"
+              id="locator-store"
+              hidden>
+            <div class="locator-panel">
+              <div class="locator-back"
+                  role="button"
+                  on="tap:locator-store.hide">
+              </div>
+              <amp-img src="https://ampbyexample.com/img/car-store.jpg"
+                  width="608"
+                  height="342"
+                  layout="responsive">
+              </amp-img>
+              <div class="locator-header">
+                <h3>Dealer #302</h3>
+                <div>Visit Site</div>
+              </div>
+              <div class="locator-row">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    <path d="M0 0h24v24H0z" fill="none"/>
+                </svg>
+                1600 Amphitheatre Pkwy
+              </div>
+              <div class="locator-row">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24">
+                    <path d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                </svg>
+                (555) 987-6543
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="lightbox-close-container">
+          <div class="button lightbox-close-button" role="button" on="tap:locator-lightbox.close">
+            Close
+          </div>
+        </div>
+      </div>
+    </amp-lightbox>
+  </body>
+</html>

@@ -1,0 +1,456 @@
+<!-- ## Introduction -->
+<!--
+This is a sample recipe AMP article demonstrating how to express machine-readable recipe data using JSON+LD. It uses AMP components that work well for recipe articles: amp-carousel (image gallery, reviews carousel), amp-social-share, and amp-list (related articles). There are also star ratings, read-only for now (see [this GitHub issue](https://github.com/ampproject/amphtml/issues/2691)).
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+
+  <!-- ## Setup -->
+  <!--
+    Additionally used AMP components must be imported in the header.
+  -->
+  <script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js"></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <!-- For the list of related recipes. -->
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+
+
+  <link rel="canonical" href="https://ampbyexample.com/samples_templates/recipe/">
+  <title>Garlic-Studded Roast Lamb recipe</title>
+
+  <!-- ## Metadata -->
+  <!--
+  Google Search can display recipe data using [Recipes Rich Cards](https://developers.google.com/search/docs/data-types/recipes) if [schema.org metadata](https://schema.org/Recipe) is present.
+  -->
+  <script type="application/ld+json">
+    {
+      "@context": "http://schema.org/",
+      "@type": "Recipe",
+      "mainEntityOfPage": "https://ampbyexample.com/samples_templates/recipe/",
+      "name": "Garlic-Studded Roast Lamb",
+      "@id": "12345",
+      "image": {
+        "@type": "ImageObject",
+        "url": "https://ampbyexample.com/img/lamb-garlic-done.jpg",
+        "height": 1280,
+        "width": 479
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Dan Dascalescu"
+      },
+      "datePublished": "2016-06-12",
+      "dateModified": "2016-06-12",
+      "description": "This is a traditional Romanian lamb recipe, with the subtle taste of garlic deeply permeating the meat.",
+      "prepTime": "PT30M",
+      "cookTime": "PT1H45M",
+      "totalTime": "PT2H15M",
+      "recipeYield": "1 tray (4 servings)",
+      "nutrition": {
+        "@type": "NutritionInformation",
+        "servingSize": "1 piece",
+        "calories": "500 kcal",
+        "carbohydrateContent": "5g",
+        "fatContent": "30g",
+        "proteinContent": "60g"
+      },
+      "recipeIngredient": [
+        "lamb",
+        "4 cloves of garlic",
+        "1 sprig of rosemary",
+        "4 chopped tomatoes",
+        "1 tbsp olive oil",
+        "1 carrot",
+        "1 cup wine",
+        "peppercorn to taste"
+      ],
+      "recipeInstructions": "1. Heat oven to 350F / 180C.\n2. Prepare the meat by washing and removing the silverskin.\n3. Peel and cut each garlic clove into several slices.\n4. Make incisions in the meat and insert the garlic slices.\n5. Place lamb in baking dish, drizzle with olive oil, and add wine.\n6. Add chopped tomatoes and carrot.\n7. Cut lemon into quarters, remove seeds, squeeze juice over meat and leave wedges among the meat pieces.\n8. Finely mince rosemary and sprinkle over lamb, along with paprika, salt and peppercorns to taste.\n9. Roast for approximately 1 hr 45 mins, turning the lamb halfway through.",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Google",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_116x41dp.png",
+          "width": 116,
+          "height": 41
+        }
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.5",
+        "bestRating": "5",
+        "ratingCount": "3",
+        "reviewCount": "3"
+      },
+      "review": [{
+        "@type": "Review",
+        "name": "Yum!",
+        "reviewBody": "Words cannot express how delicious this tastes!",
+        "reviewRating": {
+          "@type": "Rating",
+          "ratingValue": "5"
+        },
+        "author": "Positive Patrick"
+      }, {
+        "@type": "Review",
+        "name": "Not bad, but prep is laborious",
+        "reviewBody": "Tastes really good, but cutting the silverskin takes a while. Try asking your butcher if they can do it, since they have specialized tools and skills!",
+        "reviewRating": {
+          "@type": "Rating",
+          "ratingValue": "4"
+        },
+        "author": "Negative Nancy"
+      }, {
+        "@type": "Review",
+        "name": "Unexpected side effects",
+        "reviewBody": "After taking it out of the oven, I left this dish to cool off next to my pet lizard, unfortunately now he's 350ft tall now and is currently destroying Tokyo, Japan.",
+        "reviewRating": {
+          "@type": "Rating",
+          "ratingValue": "4"
+        },
+        "author": "Lawrence Gonzalez"
+      }]
+    }
+  </script>
+
+
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+
+
+  <!-- The `amp-carousel amp-img > img { object-fit: contain; }` rule preserves the image aspect ratios in the carousel. See [this GitHub issue](https://github.com/ampproject/amphtml/issues/1531#issuecomment-225461224) for potentially better methods recommended after this example was released.
+   -->
+  <style amp-custom>
+    amp-carousel amp-img > img {
+      object-fit: contain;
+    }
+    amp-carousel figcaption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 8px;
+      background: rgba(0, 0, 0, 0.6);  /* translucent black */
+      color: #ddd;
+      font-size: smaller;
+      max-height: 30%;
+    }
+
+    amp-carousel .review {
+      width: 25em;
+      vertical-align: top;
+      overflow: auto;
+      margin: 0;
+      padding: 16px;
+      height: 80%;  /* TODO easy way to ensure the bottom shadow is visible */
+      white-space: normal;  /* the enclosing div generated by amp-carousel sets it to nowrap */
+    }
+
+    amp-carousel .review:nth-child(even) {background: #FFFFFF}
+    amp-carousel .review:nth-child(odd) {background: #94C2F9}
+
+    amp-carousel .review h1 {
+      font-size: larger;
+      padding: 0;
+    }
+    amp-carousel .review p {
+      padding: 0;
+    }
+
+    amp-carousel .review address:before {
+      content: '-- ';
+    }
+
+    ul, ol {
+      padding: 0 16px;
+    }
+
+    /* Unicode-based stars and half-star credit: amoniker, https://coderwall.com/p/iml9ka/star-ratings-in-css-utf8 */
+    .star-icon {
+      color: #ddd;
+      font-size: 34px;
+      position: relative;
+    }
+
+    .star-icon.full:before {
+      color: #FDE16D;
+      content: '\2605'; /* Full star in UTF8 */
+      position: absolute;
+      left: 0;
+      text-shadow: 0 0 2px rgba(0,0,0,0.7);
+    }
+
+    .star-icon.half:before {
+      color: #FDE16D;
+      content: '\2605'; /* Full star in UTF8 */
+      position: absolute;
+      left: 0;
+      width: 50%;
+      overflow: hidden;
+      text-shadow: 0 0 2px rgba(0,0,0,0.7);
+    }
+
+    .logo {
+      background-position: left 16px center;
+      background-repeat: no-repeat;
+      background-image: -webkit-image-set(
+          url(/img/ic_menu_white_1x_web_24dp.png) 1x,
+          url(/img/ic_menu_white_2x_web_24dp.png) 2x
+      );
+      background-color: #333;
+      text-align: left;
+      padding: 16px;
+      padding-left: 72px;
+      box-shadow: 0 2px 2px 0 rgba(0,0,0,.14),0 3px 1px -2px rgba(0,0,0,.2),0 1px 5px 0 rgba(0,0,0,.12);
+    }
+    .logo > a {
+      font-size: 16px;
+      font-weight: 500;
+      color: white;
+      text-transform: uppercase;
+    }
+    .heading {
+      padding-bottom: 8px;
+    }
+    .heading > #summary {
+      font-weight: 500;
+    }
+    .heading > small {
+      color: #656565;
+    }
+    .related {
+      background-color: #f5f5f5;
+      margin: 16px 16px;
+      display: block;
+      color: #111;
+      height: 75px;
+      padding: 0;
+    }
+    .related > span {
+      font-size: 16px;
+      line-height: 75px;
+      font-weight: 400;
+      vertical-align: top;
+      margin: 8px;
+    }
+    .related:hover {
+      background-color: #ccc;
+    }
+  </style>
+
+</head>
+<body>
+
+  <!-- -->
+  <div class="logo">
+    <a href="/"> AMP by Example</a>
+  </div>
+
+  <!-- ## Basic Usage -->
+  <!--
+  We'll start the recipe article with its title, followed my a mouthwatering gallery of shots taken during preparation.
+  -->
+  <div class="heading">
+    <h1>Garlic-Studded Roast Lamb</h1>
+    <p id="summary">This is a sample recipe AMP article demonstrating how to express machine-readable recipe data using JSON+LD. It uses AMP components that work well for recipe articles: amp-carousel (image gallery, reviews carousel), amp-social-sharing, and amp-list (related articles). There are also star ratings, read-only for now (see <a href="https://github.com/ampproject/amphtml/issues/2691">this GitHub issue</a>).</p>
+    <p><small>By Dan Dascalescu<br>
+      Published: June 12, 2016</small></p>
+  </div>
+
+  <!-- ## Social Sharing  -->
+
+  <!--
+  The Social Share extension provides a common interface for share buttons.  Learn more about [`amp-social-share`](/components/amp-social-share/).
+  -->
+  <p class="heading">
+    <amp-social-share type="twitter" data-param-text="Amazing recipe that my friend made" width="45" height="33"></amp-social-share>
+    <amp-social-share type="facebook" width="45" height="33" data-attribution="254325784911610"></amp-social-share>
+    <amp-social-share type="gplus" width="45" height="33"></amp-social-share>
+    <amp-social-share type="email" width="45" height="33"></amp-social-share>
+    <amp-social-share type="pinterest" width="45" height="33"></amp-social-share>
+  </p>
+
+
+  <figure>
+    <amp-img src="/img/lamb-garlic-done.jpg" width="1280" height="479" layout="responsive" attribution="Dan Dascalescu"></amp-img>
+    <figcaption>Garlic-studded roast lamb. Serve with a side of baked potatoes.</figcaption>
+  </figure>
+
+  <p>This is a traditional Romanian lamb recipe, with the subtle taste of garlic deeply permeating the meat. It is customarily prepared for Easter, but can be enjoyed year-round. For best results, stud the meat a day in advance.</p>
+  <!-- ## Image Galleries  -->
+  <!--
+  Use `amp-carousel` for image galleries. Here we display responsively images with different aspect ratios. Learn more about [creating image galleries in AMP](/advanced/image_galleries_with_amp-carousel/).
+  -->
+  <amp-carousel width="1280" height="970" layout="responsive" type="slides">
+    <figure>
+      <amp-img src="/img/meat-silverskin-cutting.jpg" width="401" height="542" layout="fill" attribution="Scott Phillips"></amp-img>
+      <figcaption>Prepare the meat by washing and removing the silverskin.</figcaption>
+    </figure>
+    <figure>
+      <amp-img src="/img/garlic.jpg" width="1280" height="960" layout="fill" attribution="Wikipedia"></amp-img>
+      <figcaption>Prepare the garlic.</figcaption>
+    </figure>
+    <figure>
+      <amp-img src="/img/lamb-with-garlic-slivers.jpg" width="1021" height="763" layout="fill" attribution="Kara / EatDrinkAdventure"></amp-img>
+      <figcaption>Insert slivers of garlic into the meat; the deeper the better.</figcaption>
+    </figure>
+    <figure>
+      <amp-img src="/img/tomatoes-cut.jpg" width="720" height="720" attribution="CC0 - https://pixabay.com/en/chopped-tomatoes-tomato-food-red-1375892/" layout="fill"></amp-img>
+      <figcaption>Cut the tomatoes.</figcaption>
+    </figure>
+    <figure>
+      <amp-img src="/img/lamb-garlic-ready-for-oven.jpg" width="1280" height="1703" attribution="Dan Dascalescu"  layout="fill"></amp-img>
+      <figcaption>The garlic lamb roast is ready for baking.</figcaption>
+    </figure>
+  </amp-carousel>
+
+
+  <!-- An [AMP star rating component](https://github.com/ampproject/amphtml/issues/2691) is being developed. -->
+  <p><span class="star-rating">
+    <span class="star-icon full">☆</span>
+    <span class="star-icon full">☆</span>
+    <span class="star-icon full">☆</span>
+    <span class="star-icon full">☆</span>
+    <span class="star-icon half">☆</span>
+  </span> (3 reviews)</p>
+
+  <p>Prep time: 30 min</p>
+  <p>Cook time: 1 hour 45 minutes</p>
+  <p>Total time: 2 hours 15 minutes</p>
+  <p>Yield: 4 servings<br>
+    Calories per serving: 500 kcal <br>
+    Fat per serving: 30g<br>
+    Carbs: 5g<br>
+    Protein: 60g<br>
+  </p>
+
+  <h1>Ingredients</h1>
+  <ul>
+    <li>Lamb meat: 4lbs / 1.8kg</li>
+    <li>Garlic: 4 cloves, halved</li>
+    <li>Rosemary: 1 sprig, minced</li>
+    <li>Olive oil: 2 tbsp</li>
+    <li>Carrot: 1 </li>
+    <li>Tomatoes: 3, chopped</li>
+    <li>Lemon: 1</li>
+    <li>Dry white wine: 1 cup</li>
+    <li>Paprika: 1 tbsp</li>
+    <li>Peppercorns and salt to taste</li>
+  </ul>
+
+  <h2>Directions</h2>
+  <ol>
+    <li>Heat oven to 350F / 180C.</li>
+    <li>Prepare the meat by washing and removing the silverskin.</li>
+    <li>Peel and cut each garlic clove into several slices.</li>
+    <li>Make incisions in the meat and insert the garlic slices. (For the most delicious results, perform this step the day before cooking and leave overnight in the refrigerator. Don't start the oven though. :)</li>
+    <li>Place lamb in baking dish, drizzle with olive oil, and add wine.</li>
+    <li>Add chopped tomatoes and carrot.</li>
+    <li>Cut lemon into quarters, remove seeds, squeeze juice over meat and leave wedges among the meat pieces.</li>
+    <li>Finely mince rosemary and sprinkle over lamb, along with paprika, salt and peppercorns to taste.</li>
+    <li>Roast for approximately 1 hr 45 mins, turning the lamb halfway through.</li>
+  </ol>
+
+  <!--
+  `amp-carousel` supports any content, in addition to images. Here, we'll display reviews.
+  -->
+  <h2>Reviews</h2>
+
+  <!-- The [`address` tag is the most appropriate](http://stackoverflow.com/questions/7290504/which-html5-tag-should-i-use-to-mark-up-an-author-s-name/7290744#7290744) for expressing authorship information.
+
+  The reviews will display a vertical scrollbar for long text that doesn't fit vertically. An alternative would be to use [multi-line text ellipsis](http://dev.mobify.com/blog/multiline-ellipsis-in-pure-css/). -->
+  <amp-carousel width="1280" height="400" layout="responsive" type="carousel">
+    <article class="review">
+      <div class="star-rating">
+        <span class="star-icon full">☆</span>
+        <span class="star-icon full">☆</span>
+        <span class="star-icon full">☆</span>
+        <span class="star-icon full">☆</span>
+        <span class="star-icon full">☆</span>
+      </div>
+      <h1 class="name">Yum!</h1>
+      <p class="reviewBody">Words cannot express how delicious this tastes!</p>
+      <address class="author">Positive Patrick</address>
+    </article>
+    <article class="review">
+      <div class="star-rating">
+        <span class="star-icon full">☆</span>
+        <span class="star-icon full">☆</span>
+        <span class="star-icon full">☆</span>
+        <span class="star-icon full">☆</span>
+        <span class="star-icon">☆</span>
+      </div>
+      <h1 class="name">Not bad but prep is laborious</h1>
+      <p class="reviewBody">Tastes really good, but cutting the silverskin takes a while. Try asking your butcher if they can do it, since they have specialized tools and skills!</p>
+      <address class="author">Negative Nancy</address>
+    </article>
+    <article class="review">
+      <div class="star-rating">
+        <span class="star-icon full">☆</span>
+        <span class="star-icon full">☆</span>
+        <span class="star-icon full">☆</span>
+        <span class="star-icon full">☆</span>
+        <span class="star-icon">☆</span>
+      </div>
+      <h1 class="name">Unexpected side effects</h1>
+      <p class="reviewBody">After taking it out of the oven, I left this dish to cool off next to my pet lizard, unfortunately now he's 350ft tall now and is currently destroying Tokyo, Japan.</p>
+      <address class="author">Lawrence Gonzalez</address>
+    </article>
+  </amp-carousel>
+
+  <!-- ## Bottom copy of the social sharing buttons -->
+
+  <p class="heading">
+    <amp-social-share type="twitter" data-param-text="Amazing recipe that my friend made" width="45" height="33"></amp-social-share>
+    <amp-social-share type="facebook" width="45" height="33" data-attribution="254325784911610"></amp-social-share>
+    <amp-social-share type="gplus" width="45" height="33"></amp-social-share>
+    <amp-social-share type="email" width="45" height="33"></amp-social-share>
+    <amp-social-share type="pinterest" width="45" height="33"></amp-social-share>
+  </p>
+
+  <!-- ## Embedding related content -->
+
+  <h2>Related Recipes</h2>
+  <!--
+  It's a good idea to recommend related content to your readers. With `amp-list` it is possible to dynamically include personalized content into your AMPs. It's best to link to the AMP version of related content in order to keep the user in the fast AMP world. [Learn more about `amp-list`](/components/amp-list/)
+  -->
+  <amp-list width="300" height="75" layout="responsive" src="/json/related_articles.json">
+    <template type="amp-mustache">
+      <a class="card related" href="{{url}}"><amp-img width="101" height="75" src="{{thumbnail}}"></amp-img><span>{{title}}</span></a>
+    </template>
+  </amp-list>
+
+  <!--
+  ## User Analytics
+  -->
+  <!--
+  Analytics must be configured in the body. Here we use Google Analytics to track pageviews.
+  -->
+  <amp-analytics type="googleanalytics">
+    <script type="application/json">
+      {
+        "vars": {
+          "account": "UA-73836974-1"
+        },
+        "triggers": {
+          "default pageview": {
+            "on": "visible",
+            "request": "pageview",
+            "vars": {
+              "title": "{{title}}"
+            }
+          }
+        }
+      }
+    </script>
+  </amp-analytics>
+
+</body>
+</html>

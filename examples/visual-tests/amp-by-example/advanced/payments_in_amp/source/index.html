@@ -1,0 +1,75 @@
+<!--
+## Introduction
+
+Via [amp-iframe](/components/amp-iframe) and the `allowpaymentrequest` attribute, AMP pages can support requesting payment information directly from the browser. The PaymentRequest API is an [open W3C spec](https://www.w3.org/TR/payment-request/) with support from most major browsers. This example won't go into detail on the API, but you can get more information in [this deep dive article](https://developers.google.com/web/fundamentals/discovery-and-monetization/payment-request/deep-dive-into-payment-request).
+
+  This example shows how to embed an iframe that contains only a "buy now" button. All of the actual payment logic is contained within the iframe src itself.
+
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>Payments in AMP</title>
+  <link rel="canonical" href="https://ampbyexample.com/advanced/payments_iframe/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!--
+  The only extra component needed for this example is amp-iframe. -->
+  <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+
+  <style amp-custom>
+  .label {
+    line-height: 42px;
+  }
+  /* hide the default loader */
+  .amp-active > div {
+    display: none;
+  }
+  </style>
+
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+
+  <amp-img src="/img/green_apple_2_1024x685.jpg"
+           width="1024" height="682"
+           layout="responsive">
+  </amp-img>
+
+  <div id="payment-demo" class="flex flex-center">
+    <div class="label m1">Green Apples: $1.99</div>
+    <!-- ## Configuring the Iframe -->
+    <!--
+    In the basic case, the AMP page hands off all PaymentRequest logic to the iframe to complete purchase of a single item.
+
+    Crtically, the iframe does two things:
+
+      1. Sets the `allowpaymentrequest` attribute, which gives the iframe source permission to call PaymentRequest.show().
+      2. Passes a relevant product identifier via query string, allowing the iframe to retrive appropriate product information for this product.
+
+    -->
+    <amp-iframe title="Buy Now button to retrieve product information"
+                width="130" height="42"
+                sandbox="allow-scripts allow-same-origin allow-top-navigation"
+                allowpaymentrequest
+                frameborder="0"
+                src="https://amp-by-example-api.appspot.com/iframe/payments.html?productId=1"
+                class="m1">
+                <button placeholder class="ampstart-btn caps" disabled>Buy Now</button>
+    </amp-iframe>
+  </div>
+    <!--
+    <div class="ampstart-card info">**Best Practice:** we add a placeholder element to the amp-iframe to ensure that it can be loaded in the top viewport. The placeholder shows a disabled button until the iframe is loaded. We also disable the [default loading animation](/advanced/custom_loading_indicators/) using css.
+      </div>
+
+    However, since AMP does not allow javascript, the iframe source must also handle the case where PaymentRequest is not available. While currently out of scope for this example, potential options are to:
+
+    1. Swap the "Buy Now" button for an "Add to cart" button.
+    2. Redirect to a standard checkout form.
+    3. Hide the "Buy Now" button altogether, and have a separate AMP-based Add to Cart button (see the [Product Page demo](/samples_templates/product_page/))
+    -->
+</body>
+</html>

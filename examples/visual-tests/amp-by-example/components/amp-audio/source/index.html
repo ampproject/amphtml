@@ -1,0 +1,73 @@
+<!--
+  ## Introduction
+
+  AMP replaces the HTML5 audio tag with its own version: `amp-audio`. The amp-audio component can only be used for direct HTML5 audio file embeds.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-audio</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!--
+    Import the `amp-audio` component.
+  -->
+  <script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-audio/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+
+  <!-- ## Basic Usage -->
+  <!--
+    The amp-audio component loads the audio resource specified by its `src` attribute at a time determined by the runtime. `amp-audio` doesn't support a responsive layout by default, but you can achieve the same by combining a `fixed` height with `width="auto"`.
+  -->
+  <amp-audio width="auto" height="50" src="https://ia801402.us.archive.org/16/items/EDIS-SRP-0197-06/EDIS-SRP-0197-06.mp3">
+    <div fallback>
+      <p>Your browser doesn’t support HTML5 audio</p>
+    </div>
+  </amp-audio>
+
+
+  <!-- ## Customize Media Notifications -->
+  <!--
+    <center>
+      <amp-img class="my1" src="https://i.imgur.com/uzaVJsM.jpg" width="200" height="320"></amp-mg>
+    </center>
+    <br />
+
+    With the implementation of the MediaSessionAPI on AMP, you can now show rich notifications that describe the playing media
+    through the `artist`, `album`, `artwork` and `title` attributes.
+    Learn more by following [this tutorial](/advanced/Rich_Media_Notifications/).
+  -->
+  <amp-audio
+    src="https://storage.googleapis.com/media-session/sintel/snow-fight.mp3"
+    artwork="https://storage.googleapis.com/media-session/sintel/artwork-512.png"
+    title="Snow Fight"
+    album="Jan Morgenstern"
+    artist="Sintel"
+    height="50"
+    width="auto"
+    controls>
+  </amp-audio>
+
+  <!-- ## Disabling controls -->
+  <!--
+  Audio controls are added by default and are the same as [controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList) attribute of HTML5 video element.
+  For example, you can use them to disable the download button.
+  -->
+
+  <amp-audio
+    width="auto"
+    height="50"
+    src="https://ia801402.us.archive.org/16/items/EDIS-SRP-0197-06/EDIS-SRP-0197-06.mp3"
+    controlsList="nodownload">
+    <div fallback>
+      <p>Your browser doesn’t support HTML5 audio</p>
+    </div>
+  </amp-audio>
+</body>
+</html>

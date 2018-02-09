@@ -1,0 +1,79 @@
+<!--
+  #### Introduction
+  The [amp-fx-parallax](https://www.ampproject.org/docs/reference/components/amp-fx-parallax) extension allows an element to move as if it is nearer or farther relative to the foreground of the page content.
+  As the user scrolls the page, the element scrolls faster or slower depending on the value assigned to the attribute.
+
+  Parallax effect can be enabled by adding `amp-fx-parallax=<factor>` **attribute** to any HTML or AMP.
+
+  The `factor` is a decimal that controls how much faster or slower the element would scroll relative to the scrolling speed:
+  * A value greater than `1` scrolls the element upward (element scrolls faster) when the user scrolls down the page.
+  * A value less than `1` scrolls the element downward (element scrolls slower) when the user scrolls downward.
+  * A value of `1` behaves normally.
+  * A value of `0` effectively makes the element scroll fixed with the page.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-fx-parallax</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- #### Setup -->
+  <!--
+    Import the `amp-fx-parallax` extension in the header.
+  -->
+  <script async custom-element="amp-fx-parallax" src="https://cdn.ampproject.org/v0/amp-fx-parallax-0.1.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-fx-parallax/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+
+  <style amp-custom>
+    .spacer {
+      height: 2000px;
+    }
+
+    .header h1 {
+      color: white;
+      top: 0%;
+      position: absolute;
+      z-index: 1;
+      height: 2000px;
+    }
+
+    .header {
+      position: relative;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <!-- #### Slide-out-of-sight effect with factor > 1 -->
+  <!-- In the following example, we are allowing the page title to scroll faster than the page by adding `amp-fx-parallax` attribute and giving it a value greater than `1`. This creates a slide-out-of-sight visual effect. Title is repeated for demonstration purposes only. -->
+  <div class="header">
+    <amp-img  layout="responsive" width="1920" height="1280" src="https://unsplash.it/1920/1280?image=1003"></amp-img>
+    <h1 amp-fx-parallax="1.4">
+      Title 1 <br>
+      Title 2 <br>
+      Title 3 <br>
+      Title 4 <br>
+      Title 5 <br>
+      Title 6 <br>
+      Title 7 <br>
+      Title 8 <br>
+      Title 9 <br>
+      Title 10 <br>
+      Title 11 <br>
+      Title 12 <br>
+      Title 13 <br>
+      Title 14 <br>
+      Title 15 <br>
+      Title 16 <br>
+      Title 17 <br>
+      Title 18 <br>
+      Title 19 <br>
+      Title 20 <br>
+    </h1>
+  </div>
+  <div class="spacer"></div>
+</body>
+</html>

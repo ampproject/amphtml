@@ -1,0 +1,147 @@
+<!--
+ Copyright Google Inc.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<link rel="import" href="../node_modules/@npm-polymer/polymer/polymer-element.html">
+<link rel="import" href="../node_modules/@npm-polymer/iron-ajax/iron-ajax.html">
+
+<dom-module id="sample-category-data">
+  <template>
+    <iron-ajax auto url="https://ampbyexample.com/sitemap.json" handle-as="json" on-response="handleResponse"></iron-ajax>
+  </template>
+
+  <script>
+  (function() {
+
+    class SampleCategoryData extends Polymer.Element {
+
+      static get is() { return 'sample-category-data'; }
+
+      static get properties() { return {
+
+        categoryName: String,
+
+        itemName: String,
+
+        categories: {
+          type: Array,
+          notify: true
+        },
+
+        category: {
+          type: Object,
+          notify: true,
+          computed: '_computeCategory(categories, categoryName)',
+        },
+
+        item: {
+          type: Object,
+          computed: '_computeItem(category.items, itemName)',
+          notify: true
+        },
+
+        failure: {
+          type: Boolean,
+          notify: true,
+          readOnly: true
+        },
+
+        resource: {
+          type: Object
+        }
+
+      }}
+
+      handleResponse(data) {
+        this.resource = data.detail.response[0]["categories"]
+        var catNames =  this.resource.map(function(cat) {
+          var category = {
+            name:  cat["name"],
+            id: cat["id"]
+          };
+          return category;
+        });
+        this.categories = catNames;
+      }
+
+      _getCategory(categoryName, categories) {
+        if (!categories || categoryName === "index.html") {
+          return null;
+        }
+        return categories.find(function(c) {
+          return c.id === categoryName
+        })
+      }
+
+      _computeCategory(categories, categoryName) {
+        // Fetch the items of the category. Note that the fetch is asynchronous,
+        // which means `category.items` may not be set initially (but that path
+        // will be notified when the fetch completes).
+        let category = this._getCategory(categoryName, this.categories);
+        this._fetchItems(category, 1);
+        return category;
+      }
+
+      _computeItem(items, itemName) {
+        if (!items || !itemName) {
+          return;
+        }
+        return items.find (function(item) {
+          return item.url.endsWith(itemName.concat('/'))
+        })
+      }
+
+      _parseCategoriesFromJson(e) {
+        return JSON.parse(e.target.responseText)[0]["categories"]
+      }
+
+      _fetchItems(category) {
+        this._setFailure(false);
+        // Only fetch the items of a category if it has not been previously set.
+        if (!category || category.items) {
+          return;
+        }
+
+        var categories = this.resource
+        categories = categories.filter(function(cat) {
+                return cat.name == category.name
+        });
+
+        var items =  categories[0]["examples"].map(function(itemJson) {
+          return {
+            name:  itemJson["name"],
+            title: itemJson["title"],
+            description: itemJson["description"],
+            url: itemJson["url"]
+          };
+        });
+        category.items = items
+      }
+
+      refresh() {
+        if (this.categoryName) {
+          // Try at most 3 times to get the items.
+          this._fetchItems(this._getCategory(this.categoryName, this.categories), 3);
+        }
+      }
+
+    }
+
+    customElements.define(SampleCategoryData.is, SampleCategoryData);
+
+  })();
+  </script>
+
+</dom-module>

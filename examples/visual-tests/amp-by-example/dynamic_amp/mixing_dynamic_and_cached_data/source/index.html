@@ -1,0 +1,57 @@
+<!-- ## Introduction -->
+<!--
+This is a sample showing how to integrate product data details such as description, price, availability etc with different data freshness requirements. AMPs can be served from the AMP Cache. Due to the AMP Cache's stale-while-invalide caching strategy, one user will see stale data until the latest version has been fetched. This might be a problem if product data needs always to be up-to-date, for example, product availability. This sample demonstrates one approach how to avoid stale data on cached AMPs.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+
+  <!-- ## Setup -->
+  <!--
+    Additionally used AMP components must be imported in the header. We use `amp-list` for retrieving latest data from the server.
+  -->
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <!-- We use `amp-mustache` as a templating for `amp-list` -->
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+
+  <link rel="canonical" href="https://ampbyexample.com/dynamic_amp/mixing_dynamic_and_cached_data/">
+  <title>Dynamic and cached product data details</title>
+
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+
+</head>
+<body>
+  <!-- ## How to implement dynamic and cached product data details -->
+  <!--
+  To ensure that users always see the latest content, you can use the `amp-list` component which will fetch and render content directly from your server.
+   -->
+   <amp-list height="24"
+     layout="fixed-height"
+     src="/json/product.json"
+     class="m1">
+     <template type="amp-mustache">
+        Price: ${{price}}
+     </template>
+   </amp-list>
+  <!-- For product details such a descriptionb or title, where are unlikely to change frequently, you don't need to use `amp-list`-->
+  <p> An awesome product </p>
+  <!-- if you need to make multiple calls to get all the data, that is not a problem in AMP since if multiple `amp-list` with the same `src` are found in the page, only one network call is actually made by the AMP runtime.
+  By checking the network tab of the Chrome dev console, you can check that this second `amp-list` does not cause a second network call.
+  Since we are using a [service-worker](https://www.ampproject.org/docs/reference/components/amp-install-serviceworker) you may see
+  two similar calls one after the other to the same endpoint, so to better verify this behaviour, go to Application -> Service workers and click on Unregister.-->
+   <amp-list height="24"
+     layout="fixed-height"
+     src="/json/product.json"
+     class="m1">
+     <template type="amp-mustache">
+        Availability: {{availability}}
+     </template>
+   </amp-list>
+
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!--
+  ## Introduction
+
+  The amp-pinterest component allows embedding a Pin It button or pin widget.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-pinterest</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!--
+    Import the `amp-pinterest` component in the header.
+  -->
+  <script async custom-element="amp-pinterest" src="https://cdn.ampproject.org/v0/amp-pinterest-0.1.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-pinterest/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+
+  <!-- ## Pin It Button -->
+  <!--
+    Set `data-do` to `buttonPin` to enable pinning content on your site. These attributes are required:
+
+    * `data-url`: the URL to be shared.
+    * `data-media` the absolute image URL to be pinned.
+    * `data-description`:  the default description that appears in the pin create form.
+  -->
+  <figure>
+    <amp-img src="/img/amp.jpg" width="300" height="169" alt="an image"></amp-img>
+    <amp-pinterest height="18" width="56"
+      data-do="buttonPin"
+      data-url="https://ampbyexample.com/"
+      data-media="https://ampbyexample.com/img/amp.png"
+      data-description="amp-pinterest in action">
+    </amp-pinterest>
+  </figure>
+
+  <!-- ## Embed pin widget -->
+  <!--
+    To embed the pin widget, set `data-do` to `embedPing`. The `data-url` attribute must contain the fully-qualified URL of the Pinterest resource.
+  -->
+    <amp-pinterest width="236" height="326"
+      data-do="embedPin"
+      data-url="https://www.pinterest.com/pin/228065168607834583/">
+    </amp-pinterest>
+
+</body>
+</html>

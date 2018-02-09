@@ -1,0 +1,136 @@
+<!--
+  ## Introduction
+
+  The Social Share extension provides a common interface for share buttons, styled to complement each other.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-social-share</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!--
+    Import the `amp-social-share` component in the header.
+  -->
+  <script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js"></script>
+  <!--
+    Ensure you've configured your canonical URL.
+  -->
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-social-share/">
+  <!--
+    Origin trial tokens for `ampbyexample.com` and `*.cdn.ampproject.org`. (Needed for `type=system`; [see below](#native-share-dialog-chrome-on-android-).)
+  -->
+  <meta http-equiv="origin-trial" data-feature="Web Share" data-expires="2017-04-04" content="Ajcrk411RcpUCQ3ovgC8le4e7Te/1kARZsW5Hd/OCnW6vIHTs5Kcq1PaABs7SzcrtfvT0TIlFh9Vdb5xWi9LiQsAAABSeyJvcmlnaW4iOiJodHRwczovL2FtcGJ5ZXhhbXBsZS5jb206NDQzIiwiZmVhdHVyZSI6IldlYlNoYXJlIiwiZXhwaXJ5IjoxNDkxMzM3MDEwfQ==">
+  <meta http-equiv="origin-trial" data-feature="Web Share" data-expires="04/11/17" content="ArP55PINkEOG8GxebgOUGlUeleT5iZV2J1a5OVsIX4kq+89ZHBVKzoXikg0AiPOVQbJijM3fE+myhu62DEeCRwcAAABneyJvcmlnaW4iOiJodHRwczovL2Nkbi5hbXBwcm9qZWN0Lm9yZzo0NDMiLCJmZWF0dXJlIjoiV2ViU2hhcmUiLCJleHBpcnkiOjE0OTE5Mzc4NDEsImlzU3ViZG9tYWluIjp0cnVlfQ==">
+
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    amp-social-share.custom-style {
+      background-color: #008080;
+      background-image: url('https://raw.githubusercontent.com/google/material-design-icons/master/social/1x_web/ic_share_white_48dp.png');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ## Basic Usage -->
+  <!--
+    Embed the [`amp-social-share`](https://www.ampproject.org/docs/reference/components/amp-social-share) widget choosing a share type from the [supported types](https://www.ampproject.org/docs/reference/components/amp-social-share#types).
+
+    `amp-social-share` with `type="facebook"` requires to specify the [facebook app id](https://developers.facebook.com/apps) via `data-attribution`.
+  -->
+  <div>
+    <amp-social-share type="email"></amp-social-share>
+    <amp-social-share type="facebook" data-param-app_id="254325784911610"></amp-social-share>
+    <amp-social-share type="gplus"></amp-social-share>
+    <amp-social-share type="linkedin"></amp-social-share>
+    <amp-social-share type="pinterest" data-param-media="https://ampbyexample.com/img/amp.jpg"></amp-social-share>
+    <amp-social-share type="tumblr"></amp-social-share>
+    <amp-social-share type="twitter"></amp-social-share>
+    <amp-social-share type="whatsapp"></amp-social-share>
+  </div>
+
+  <!-- ## Configuration -->
+  <!--
+    Embed the `amp-social-share` widget [choosing a type](https://www.ampproject.org/docs/reference/components/amp-social-share#types), then configure the actions.
+
+    * `width`, default 60px.
+    * `height`, default 44px.
+    * `data-param-text` is the text to include in the share.
+    * `data-param-url` is the URL to share, current URL by default.
+    * `data-param-attribution` is where the share is attributed to.
+
+
+    All `data-param-*` prefixed attributes will be turned into URL parameters and passed to the share endpoint.
+  -->
+  <amp-social-share type="linkedin"
+    width="40"
+    height="40"
+    data-param-text="Check out these AMP Examples!"
+    data-param-url="https://ampbyexample.com/"
+    data-param-attribution="AMPhtml">
+  </amp-social-share>
+
+  <!-- ## Custom Style -->
+  <!--
+    Whenever you want to provide your own style, use CSS properties within the `<style amp-custom>` element ([Modify the presentation](https://www.ampproject.org/docs/get_started/create/presentation_layout)). This will make sure the image stays responsive and centered, and the default styling is overwritten.
+
+    * `background-color`, if you want the element to be a different color.
+    * `background-image`, provide another image if you want to change the icon.
+    * `background-repeat` (when using `background-image`), set to `no-repeat`.
+    * `background-position` (when using `background-image`), set to `center`.
+    * `background-size` (when using `background-image`), set to `contain`.
+  -->
+  <amp-social-share type="linkedin"
+    class="custom-style">
+  </amp-social-share>
+
+  <!-- ## Sharing Media via Pinterest -->
+  <!-- Use `data-param-media` to share media via Pinterest. -->
+
+  <amp-social-share type="pinterest" data-param-media="https://ampbyexample.com/img/amp.jpg"></amp-social-share>
+
+  <!-- #### Native Share Dialog (Chrome on Android) -->
+  <!--
+  If a couple of conditions are satisfied, the `system` type will display a native share
+  UI. (That is, exactly the same UI that's available to native applications, reflecting
+  the user's sharing preferences, the applications they have installed, and so on.)
+
+  The conditions are:
+
+    * The user must be viewing the AMP using Chrome on Android. (The only supported browser as of February 2017.)
+    * An appropriate token (origin-specific) must be embedded on the site to activate the feature. ([Apply for a token](https://goo.gl/GR5YLI); [more information about the process](https://developers.google.com/web/updates/2016/10/navigator-share).)
+
+  For this example, we've embedded the tokens via `<meta>` elements [in the document `<head>`](#setup).
+
+  Here's what it looks like if conditions are right:
+
+  <amp-img class="ampstart-card" alt="Animation showing native sharing sheet appearing" src="/img/system-share.gif" width="270" height="480"></amp-img>
+  -->
+
+  <amp-social-share type="system"></amp-social-share>
+
+  <!--
+  This type supports one option: if `data-mode="replace"` is specified, then all
+  other share icons will be suppressed. (That is, the only share icon the user
+  will see is the system share icon.)
+
+  Since it's not possible to demo this feature within the context of this
+  example, here's some screenshots to illustrate the difference.
+
+  Without `data-mode="replace"`:
+  <amp-img class="ampstart-card" alt="Screenshot showing multiple share icons" src="/img/system-share1.png" height="576" width="324"></amp-img>
+  -->
+  <!--
+  With `data-mode="replace"`:
+  <amp-img class="ampstart-card" alt="Screenshot show the native share icon only" src="/img/system-share2.png" height="576" width="324"></amp-img>
+  -->
+
+</body>
+</html>

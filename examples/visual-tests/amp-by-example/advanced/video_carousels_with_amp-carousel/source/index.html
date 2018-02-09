@@ -1,0 +1,99 @@
+<!--
+  ## Introduction
+  The `amp-carousel` component works not only great for image galleries, but also for video galleries. The challenge when implementing a video gallery is to make sure that all videos fit into the carousel. This sample shows how to implement a massive video carousel using all available AMP video integrations.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>Video Carousels with amp-carousel</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!--
+    Import all AMP video components.
+  -->
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <script async custom-element="amp-instagram" src="https://cdn.ampproject.org/v0/amp-instagram-0.1.js"></script>
+  <script async custom-element="amp-vine" src="https://cdn.ampproject.org/v0/amp-vine-0.1.js"></script>
+  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+  <script async custom-element="amp-vimeo" src="https://cdn.ampproject.org/v0/amp-vimeo-0.1.js"></script>
+  <script async custom-element="amp-dailymotion" src="https://cdn.ampproject.org/v0/amp-dailymotion-0.1.js"></script>
+  <script async custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"></script>
+  <script async custom-element="amp-facebook" src="https://cdn.ampproject.org/v0/amp-facebook-0.1.js"></script>
+  <script async custom-element="amp-brightcove" src="https://cdn.ampproject.org/v0/amp-brightcove-0.1.js"></script>
+  <script async custom-element="amp-brid-player" src="https://cdn.ampproject.org/v0/amp-brid-player-0.1.js"></script>
+  <script async custom-element="amp-reach-player" src="https://cdn.ampproject.org/v0/amp-reach-player-0.1.js"></script>
+  <script async custom-element="amp-springboard-player" src="https://cdn.ampproject.org/v0/amp-springboard-player-0.1.js"></script>
+  <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <link rel="canonical" href="https://ampbyexample.com/advanced/video_carousels_with_amp-carousel/">
+  <style amp-custom>
+  amp-carousel {
+    background: black;
+  }
+  .amp-video-container {
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    height: 100%;
+  }
+  .amp-video {
+    width: 100%;
+    height: 55%;
+  }
+  </style>
+</head>
+<body>
+  <!-- ## The Video Carousel -->
+  <!-- Display a list of videos as slides. For more info about `amp-carousel` take a look [here](/components/amp-carousel/).
+  Each AMP video component specifies the aspect ratio using the width and height attributes while the responsive layout takes care of filling the carousel. Some video components are not centered by default in the carousel, we use a CSS flex layout to fix this. -->
+  <amp-carousel width="450"
+  height="450"
+  layout="responsive" type="slides">
+    <amp-video width="480" height="270" src="/video/tokyo.mp4" poster="/img/tokyo.jpg"
+      layout="responsive" controls>
+      <div fallback>
+        <p>Your browser doesn't support HTML5 video.</p>
+      </div>
+    </amp-video>
+    <amp-brid-player data-partner="264" data-player="4144" data-video="13663"
+      layout="responsive" width="480" height="270"></amp-brid-player>
+    <amp-brightcove data-account="906043040001" data-video-id="1401169490001" data-player-id="180a5658-8be8-4f33-8eba-d562ab41b40c"
+      layout="responsive" width="400" height="300">
+    </amp-brightcove>
+    <amp-dailymotion data-videoid="x1r0aw6" layout="responsive" data-ui-highlight="FF4081" width="480" height="270"></amp-dailymotion>
+    <div>
+      <div class="amp-video-container">
+        <amp-facebook class="amp-video" width="552" height="574" layout="responsive" data-embed-as="video"
+          data-href="https://www.facebook.com/zuck/videos/10102509264909801/">
+        </amp-facebook>
+      </div>
+    </div>
+    <amp-instagram data-shortcode="BCtYW7mhRV8" width="1" height="1" layout="responsive"></amp-instagram>
+    <div>
+      <div class="amp-video-container">
+        <amp-reach-player class="amp-video" data-embed-id="default" layout="responsive" width="560" height="315"></amp-reach-player>
+      </div>
+    </div>
+    <amp-springboard-player data-site-id="261" data-mode="video" data-content-id="1578473"
+      data-player-id="test401" data-domain="test.com" data-items="10"
+      layout="responsive" width="480" height="270">
+    </amp-springboard-player>
+    <amp-twitter width="375" height="472" layout="responsive" data-tweetid="707569406105092096"></amp-twitter>
+    <amp-vimeo data-videoid="27246366" width="500" height="281"></amp-vimeo>
+    <amp-vine width="400" height="300" layout="responsive" data-vineid="MdKjXez002d"></amp-vine>
+    <amp-youtube height="270" layout="fixed-height" data-videoid="SOx1XfOjJPI"></amp-youtube>
+    <amp-iframe title="Video of Sintel, an independently produced short film"
+                width="400" 
+                height="300" 
+                layout="responsive" 
+                sandbox="allow-scripts allow-same-origin allow-popups"
+                allowfullscreen frameborder="0"
+                src="https://player.ooyala.com/iframe.html?ec=Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ&pbid=6440813504804d76ba35c8c787a4b33c&platform=html5">
+    </amp-iframe>
+  </amp-carousel>
+</body>
+</html>

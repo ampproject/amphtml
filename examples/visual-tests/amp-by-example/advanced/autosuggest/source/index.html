@@ -1,0 +1,318 @@
+<!--
+## Introduction
+
+This sample showcases how to implement an interactive autosuggest form field.
+The example below suggests cities in an address form, but the list of
+suggestions may contain any content, such as anticipated search queries, or
+product listings with images.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <title>Autosuggest form field example</title>
+  <meta charset="utf-8">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!--
+  ## Setup
+  -->
+  <!-- First we include `amp-form`, which is required when using `<form>` elements in AMP documents. -->
+  <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+  <!-- Next we include `amp-selector` to easily display results in an accessible list. -->
+  <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
+  <!-- Then we include `amp-list` to request and display the autosuggest results. -->
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <!-- Then we include `amp-mustache` to render the mustache templates inside the `<amp-list>`. -->
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <!-- Finally we include `amp-bind` to track and update the page's state after user interactions.-->
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/advanced/autosuggest/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+<!--
+## Styles
+
+Only a few CSS rules are necessary to implement the autosuggest overlay.
+The remaining rules set the style and layout of the form fields.
+-->
+  <style amp-custom>
+  /* --------------------------------
+     Necessary styles for the example
+     -------------------------------- */
+  /*
+   * Prevent the autosuggest box from
+   * flowing outside its parent
+   */
+  .autosuggest-container {
+    position: relative;
+  }
+
+  /*
+   * Position the autosuggest box as an
+   * overlay over the form fields.
+   */
+  .autosuggest-box {
+    position: absolute;
+    width: 100%;
+    /* make the overlay opaque */
+    background-color: #fafafa;
+  }
+
+  /*
+   * Prevents a solid outline from appearing
+   * around an item when the autosuggest box
+   * is opened with an item already selected
+   */
+  .select-option.no-outline[selected] {
+    outline: initial;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  /* ---------------------------------
+     Additional non-autosuggest styles
+     --------------------------------- */
+  .wrapper {
+    padding: 0 15px;
+  }
+
+  .form-grid {
+    width: 100%;
+    display: grid;
+    grid-template-areas:
+      "firstName lastName"
+      "addressLine1 addressLine1"
+      "addressLine2 addressLine2"
+      "cityState cityState"
+      "suggest suggest"
+      "zipCode none"
+      "submit submit";
+  }
+  .first-name { grid-area: firstName; }
+  .last-name { grid-area: lastName; }
+  .address-line-1 { grid-area: addressLine1; }
+  .address-line-2 { grid-area: addressLine2; }
+  .city-state { grid-area: cityState; }
+  .suggest { grid-area: suggest; }
+  .zip-code { grid-area: zipCode; }
+  .submit { grid-area: submit; }
+
+  .form-item {
+    display: flex;
+    flex-flow: column nowrap;
+    margin-top: 4px;
+  }
+
+  .form-item label,
+  .form-item label input {
+    flex: 1 0 0;
+  }
+
+  .search-submit, .select-option {
+    font-size: 1.1em;
+  }
+
+  .search-submit {
+    margin: 10px 0;
+    padding: .5em 1em;
+    color: #444;
+    border: 1px solid #999;
+    background-color: #fafafa;
+    text-decoration: none;
+    border-radius: 2px;
+  }
+
+  input {
+    padding: 5px;
+    border: 2px solid lightgray;
+    line-height: 1.5em;
+  }
+
+  .autosuggest-box {
+    box-shadow: 0px 2px 6px rgba(0,0,0,.3);
+  }
+
+  .select-option {
+    box-sizing: border-box;
+    height: 30px;
+    line-height: 30px;
+    padding-left: 10px;
+  }
+
+  .select-option:hover {
+    text-decoration: underline;
+  }
+
+  .last-name input {
+    border-left: 0;
+  }
+
+  .select-option.empty {
+    text-align: center;
+  }
+  </style>
+</head>
+<body>
+  <!-- ## Autosuggest form field -->
+  <!-- -->
+  <h2 class="p1">Autosuggest</h2>
+
+  <!--
+  Autosuggest combines multiple AMP extensions: `amp-form`, `amp-list`,
+  `amp-selector`, and `amp-bind`. `amp-form` handles submitting the form and
+  renders the success and error states. `amp-list` displays the autosuggest
+  results in an `amp-selector` for accessibility. Finally, `amp-bind` glues
+  all the components together to enable interactivity.
+
+  Try entering a city name. In this sample form, only US state capitals
+  are returned in the typeahead. In a real-world product, more cities would be
+  suggested.
+  -->
+  <div
+    class="wrapper"
+    on="tap:AMP.setState({showDropdown:false})"
+    role="button"
+    tabindex="0"
+    aria-label="Tap to close the autosuggest box"
+  >
+    <form
+      method="post"
+      action-xhr="https://ampbyexample.com/advanced/autosuggest/address"
+      target="_blank"
+      id="search-form"
+      on="
+        submit: autosuggest-list.hide;
+        submit-success: autosuggest-list.hide;
+        submit-error: autosuggest-list.hide"
+    >
+      <div class="form-grid">
+        <div class="form-item first-name">
+          <label>First name</label>
+          <input />
+        </div>
+        <div class="form-item last-name">
+          <label>Last name</label>
+          <input />
+        </div>
+        <div class="form-item address-line-1">
+          <label>Address line 1</label>
+          <input />
+        </div>
+        <div class="form-item address-line-2">
+          <label>Address line 2</label>
+          <input />
+        </div>
+        <div class="form-item city-state">
+          <label>City</label>
+          <input
+            name="city"
+            type="text"
+            class="search-box"
+            on="
+              input-debounced:
+                AMP.setState({
+                  query: event.value,
+                  showDropdown: event.value,
+                }),
+                autosuggest-list.show;
+              tap:
+                AMP.setState({
+                  query: query == null ? '' : query,
+                  showDropdown: 'true'
+                }),
+                autosuggest-list.show"
+            [value]="query || ''"
+            value=""
+            required
+            autocomplete="off"
+          />
+        </div>
+        <div class="suggest">
+          <div
+            class="autosuggest-container hidden"
+            [class]="(showDropdown && query) ?
+              'autosuggest-container' :
+              'autosuggest-container hidden'"
+          >
+            <amp-list
+              class="autosuggest-box"
+              layout="fixed-height"
+              height="120"
+              src="/advanced/autosuggest/search_list"
+              [src]="query ?
+                autosuggest.endpoint + query :
+                autosuggest.emptyAndInitialTemplateJson"
+              id="autosuggest-list"
+            >
+              <template type="amp-mustache">
+                <amp-selector
+                  id="autosuggest-selector"
+                  keyboard-select-mode="focus"
+                  layout="container"
+                  on="
+                    select:
+                      AMP.setState({
+                        query: event.targetOption,
+                        showDropdown: false
+                      }),
+                      autosuggest-list.hide"
+                >
+                  {{#results}}
+                    <div
+                      class="select-option no-outline"
+                      role="option"
+                      tabindex="0"
+                      on="tap:autosuggest-list.hide"
+                      option="{{.}}"
+                    >{{.}}</div>
+                  {{/results}}
+                  {{^results}}
+                    <div class="select-option {{#query}}empty{{/query}}">
+                      {{#query}}Sorry! We don't ship to your city 😰{{/query}}
+                    </div>
+                  {{/results}}
+                </amp-selector>
+              </template>
+            </amp-list>
+          </div>
+        </div>
+        <div class="form-item zip-code">
+          <label>Zip code</label>
+          <input />
+        </div>
+        <div class="form-item submit">
+          <button class="search-submit" type="submit">Submit</button>
+        </div>
+      </div>
+      <div submit-success>
+        <template type="amp-mustache">
+          {{result}}
+        </template>
+      </div>
+      <div submit-error>
+        <template type="amp-mustache">
+          {{#result}}{{result}}{{/result}}
+          {{^result}}Sorry! Something went wrong.{{/result}}
+        </template>
+      </div>
+    </form>
+  </div>
+
+  <!--
+  The initial state and helper variables are configured by amp-state.
+  -->
+  <amp-state id="autosuggest">
+    <script type="application/json">
+    {
+      "endpoint": "/advanced/autosuggest/search_list?q=",
+      "emptyAndInitialTemplateJson": [{
+        "query": "",
+        "results": []
+      }]
+    }
+    </script>
+  </amp-state>
+</body>
+</html>

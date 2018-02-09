@@ -1,0 +1,273 @@
+<!-- ## Introduction -->
+
+  <!-- This is a sample template for a news article in AMP. It demonstrates the usage of AMP components which works well in news articles. Examples include social sharing, image galleries, personalized content, ads, and more.  -->
+  <!-- -->
+  <!doctype html>
+  <html ⚡>
+    <head>
+      <meta charset="utf-8">
+  <title>News Article</title>
+      <script async src="https://cdn.ampproject.org/v0.js"></script>
+      <!-- ## Setup -->
+      <!--
+        All additionally used AMP components must be imported in the header.
+      -->
+      <script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js"></script>
+      <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+      <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+      <script async custom-element="amp-user-notification" src="https://cdn.ampproject.org/v0/amp-user-notification-0.1.js"></script>
+      <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+      <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+      <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+      <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+
+      <link rel="canonical" href="https://ampbyexample.com/samples_templates/news_article/">
+
+      <!-- ## Metadata -->
+      <!-- The Top Stories carousel requires schema.org markup for one of the following types: Article, NewsArticle, BlogPosting, or VideoObject. [Learn more](https://developers.google.com/structured-data/carousels/top-stories#markup_specification).  -->
+      <script type="application/ld+json">
+{
+      "@context": "http://schema.org",
+      "@type": "NewsArticle",
+      "mainEntityOfPage": "https://ampbyexample.com/samples_templates/news_article/",
+      "headline": "Lorem Ipsum",
+      "datePublished": "2016-04-21T11:55:02Z",
+      "dateModified": "2016-04-21T11:55:02Z",
+      "description": "A sample news article build with AMP.",
+      "author": {
+        "@type": "Person",
+        "name": "Sebastian Benz"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Google",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "http://cdn.ampproject.org/logo.jpg",
+          "width": 600,
+          "height": 60
+        }
+      },
+      "image": {
+        "@type": "ImageObject",
+        "url": "https://ampbyexample.com/img/landscape_lake_1280x857.jpg",
+        "height": 1280,
+        "width": 857
+      }
+    }
+      </script>
+      <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+      <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+        <style amp-custom>
+  main>p, main>div, main>h2, main>figure>figcaption {
+    padding: 1rem;
+  }
+  figure {
+    margin: 1rem 0;
+    padding: 0;
+  }
+  figure>figcaption{
+    padding: .5rem 1rem;
+  }
+  .amp-ad-container {
+   display: flex;
+  }
+  amp-ad {
+    margin: 0 auto;
+  }
+  .carousel .slide > amp-img > img {
+    object-fit: contain;
+  }
+  .heading {
+    padding-bottom: 8px;
+  }
+  .heading h1 {
+    font-size: 3rem;
+    line-height: 3.5rem;
+    margin-bottom: 1rem;
+  }
+  .heading > #summary {
+    font-weight: 500;
+  }
+  .heading > small {
+    color: #656565;
+  }
+  .related {
+    background-color: #f5f5f5;
+    margin: 1rem;
+    display: flex;
+    color: #111;
+    padding: 0;
+    box-shadow: 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 1px -1px rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);
+    text-decoration: none;
+  }
+  .related > span {
+    font-weight: 400;
+    margin: 8px;
+  }
+  .related:hover {
+    background-color: #ccc;
+  }
+  amp-user-notification {
+    padding: 8px;
+    background: #bbb;
+    text-align: center;
+    color: white;
+  }
+        </style>
+
+    </head>
+    <body>
+
+      <!-- -->
+      <main>
+      <div class="heading">
+        <h1>A sample AMP Article</h1>
+        <p id="summary">This is a sample article demonstrating how to write a news article in AMP. It demonstrates the usage of AMP components which works well in news articles. Examples include social sharing, image galleries, personalized content, ads, and more.</p>
+        <p><small>by Sebastian Benz</small></p>
+      </div>
+
+      <!-- ## Social Sharing  -->
+
+      <!-- The Social Share extension provides a common interface for share buttons.  Learn more about `amp-social-share` [here](/components/amp-social-share/).  -->
+      <p class="heading">
+      <amp-social-share type="twitter" width="45" height="33"></amp-social-share>
+      <amp-social-share type="facebook" width="45" height="33" data-attribution="254325784911610"></amp-social-share>
+      <amp-social-share type="gplus" width="45" height="33"></amp-social-share>
+      <amp-social-share type="email" width="45" height="33"></amp-social-share>
+      <amp-social-share type="pinterest" width="45" height="33"></amp-social-share>
+      </p>
+
+      <p>Lorem ipsum dolor sit amet, voluptua oporteat cum cu, eu vix interesset scribentur. Et iudico efficiendi duo, vim an odio iusto reformidans. At maluisset scripserit duo, cum in sumo delenit. Quot erant maiestatis usu ut. Ne mea maiorum vivendum argumentum, tale utinam postea mei in, eam in odio dicta patrioque.
+      </p>
+      <p>
+      Cum ad graeci legimus, ut duo omnesque petentium, mei saepe explicari principes eu. Ex mei ocurreret expetendis, ex errem blandit has. Phaedrum mediocrem appellantur his ut. Erat viris mediocrem id ius, ad dicta appareat assentior sit. Nec et nullam singulis moderatius, est reque vidisse copiosae eu.
+      </p>
+      <p>
+      Mutat dolores ea duo. Usu cu dico everti tincidunt, pri vero nullam vidisse no. Eam novum aeque populo cu. Verear contentiones ne quo, no sed consulatu definitionem.
+      </p>
+
+      <figure>
+        <amp-img src="/img/landscape_village_1280x853.jpg" width="1280" height="768" layout="responsive"></amp-img>
+        <figcaption>Here is a responsive image.</figcaption>
+      </figure>
+
+      <p>Lorem ipsum dolor sit amet, voluptua oporteat cum cu, eu vix interesset scribentur. Et iudico efficiendi duo, vim an odio iusto reformidans. At maluisset scripserit duo, cum in sumo delenit. Quot erant maiestatis usu ut. Ne mea maiorum vivendum argumentum, tale utinam postea mei in, eam in odio dicta patrioque.</p>
+
+      <!-- ## AD Support -->
+      <!-- There are no limitations regarding the number or placement of ads in an AMP. Learn more about `amp-ad` [here](/components/amp-ad/).  -->
+      <div class="amp-ad-container">
+        <amp-ad width="300" height="250"
+                            type="a9"
+                            data-aax_size="300x250"
+                            data-aax_pubname="test123"
+                            data-aax_src="302">
+        </amp-ad>
+      </div>
+
+      <p>
+      Cum ad graeci legimus, ut duo omnesque petentium, mei saepe explicari principes eu. Ex mei ocurreret expetendis, ex errem blandit has. Phaedrum mediocrem appellantur his ut. Erat viris mediocrem id ius, ad dicta appareat assentior sit. Nec et nullam singulis moderatius, est reque vidisse copiosae eu.</p>
+      <p>
+      Mutat dolores ea duo. Usu cu dico everti tincidunt, pri vero nullam vidisse no. Eam novum aeque populo cu. Verear contentiones ne quo, no sed consulatu definitionem.
+      </p>
+      <p>
+      Cum ad graeci legimus, ut duo omnesque petentium, mei saepe explicari principes eu. Ex mei ocurreret expetendis, ex errem blandit has. Phaedrum mediocrem appellantur his ut. Erat viris mediocrem id ius, ad dicta appareat assentior sit. Nec et nullam singulis moderatius, est reque vidisse copiosae eu.</p>
+      <p>
+      Mutat dolores ea duo. Usu cu dico everti tincidunt, pri vero nullam vidisse no. Eam novum aeque populo cu. Verear contentiones ne quo, no sed consulatu definitionem.
+      </p>
+
+      <!-- ## Image Galleries  -->
+      <!-- Use `amp-carousel` for image galleries. Learn more about creating image galleries in AMP [here](/advanced/image_galleries_with_amp-carousel/).  -->
+      <amp-carousel width="1280" height="1000" layout="responsive" type="slides">
+        <figure>
+          <amp-img src="/img/landscape_lake_1280x857.jpg" width="1280" height="857" layout="responsive"></amp-img>
+          <figcaption>Each image has a different caption.</figcaption>
+        </figure>
+        <figure>
+          <amp-img src="/img/landscape_village_1280x853.jpg" width="1280" height="853" layout="responsive"></amp-img>
+          <figcaption>This caption is different.</figcaption>
+        </figure>
+        <figure>
+          <amp-img src="/img/landscape_desert_1280x853.jpg" width="1280" height="853" layout="responsive"></amp-img>
+          <figcaption>The third image has its caption.</figcaption>
+        </figure>
+      </amp-carousel>
+
+      <p>Lorem ipsum dolor sit amet, voluptua oporteat cum cu, eu vix interesset scribentur. Et iudico efficiendi duo, vim an odio iusto reformidans. At maluisset scripserit duo, cum in sumo delenit. Quot erant maiestatis usu ut. Ne mea maiorum vivendum argumentum, tale utinam postea mei in, eam in odio dicta patrioque.
+      </p>
+      <p>
+      Cum ad graeci legimus, ut duo omnesque petentium, mei saepe explicari principes eu. Ex mei ocurreret expetendis, ex errem blandit has. Phaedrum mediocrem appellantur his ut. Erat viris mediocrem id ius, ad dicta appareat assentior sit. Nec et nullam singulis moderatius, est reque vidisse copiosae eu.
+      </p>
+      <p>
+      Mutat dolores ea duo. Usu cu dico everti tincidunt, pri vero nullam vidisse no. Eam novum aeque populo cu. Verear contentiones ne quo, no sed consulatu definitionem.
+      </p>
+
+      <!-- ## Interactive Content -->
+      <!-- To achieve its performance, AMP HTML doesn't allow custom Javascript. This doesn't mean that you can't created visually rich and interactive websites with AMP. Embed interactive content via `amp-iframe`. Learn more about `amp-iframe` [here](/components/amp-iframe/).  -->
+      <figure>
+        <amp-iframe src="https://www.google.us/trends/embed/US_cu_82I1CVMBAACV6M_en/horserace_chart_3c6cdb21-e1eb-4412-9c28-707c3638ea35?hl=en&template=fe"
+                    title="Interactive chart displaying 2016 Oscar Best Picture search interest by date"
+                    height="360"
+                    layout="fixed-height"
+                    frameborder="0"
+                    sandbox="allow-scripts allow-same-origin">
+          <amp-img src="/img/oscars_placeholder_1.png"
+                   layout="fixed-height"
+                   height="360"
+                   width="auto"
+                   placeholder>
+          </amp-img>
+        </amp-iframe>
+        <figcaption>An interactive chart - in AMP!</figcaption>
+      </figure>
+      <p>Lorem ipsum dolor sit amet, voluptua oporteat cum cu, eu vix interesset scribentur. Et iudico efficiendi duo, vim an odio iusto reformidans. At maluisset scripserit duo, cum in sumo delenit. Quot erant maiestatis usu ut. Ne mea maiorum vivendum argumentum, tale utinam postea mei in, eam in odio dicta patrioque.
+      </p>
+      <p>
+      Cum ad graeci legimus, ut duo omnesque petentium, mei saepe explicari principes eu. Ex mei ocurreret expetendis, ex errem blandit has. Phaedrum mediocrem appellantur his ut. Erat viris mediocrem id ius, ad dicta appareat assentior sit. Nec et nullam singulis moderatius, est reque vidisse copiosae eu.
+      </p>
+      <p>
+      Mutat dolores ea duo. Usu cu dico everti tincidunt, pri vero nullam vidisse no. Eam novum aeque populo cu. Verear contentiones ne quo, no sed consulatu definitionem.
+      </p>
+
+      <!-- ## Embedding related content -->
+      <!-- -->
+      <h2>Related Articles</h2>
+      <p>These articles might be interesting for you as well:</p>
+      <!-- It's a good idea to recommend related content to your readers. With `amp-list` it is possible to dynamically include personalized content into your AMPs. It's a good idea to link to the AMP version of related content in order to keep the user in the fast AMP world. Learn more about `amp-list` [here](/components/amp-list/) -->
+      <amp-list width="300" height="75" layout="responsive" src="/json/related_articles.json">
+        <template type="amp-mustache">
+          <a class="card related" href="{{url}}"><amp-img width="101" height="75" src="{{thumbnail}}"></amp-img><span>{{title}}</span></a>
+        </template>
+      </amp-list>
+      </main>
+
+      <!-- ## Cookie Consent -->
+      <!-- Use `amp-user-notification` to implement a cookie consent form (if needed). By default, the AMP runtime doesn't use cookies. Some analytics vendors might use require cookies though. Learn more about `amp-user-notification` [here](/components/amp-user-notification/) -->
+      <amp-user-notification layout="nodisplay" id="amp-user-notification1">
+        This page might use cookies if your analytics vendor requires them.
+        <button on="tap:amp-user-notification1.dismiss">Accept</button>
+      </amp-user-notification>
+
+      <!-- ## User Analytics -->
+      <!-- Analytics must be configured in the body. Here we use Google Analytics to track pageviews.  -->
+      <amp-analytics type="googleanalytics">
+        <script type="application/json">
+{
+          "vars": {
+            "account": "UA-73836974-1"
+          },
+          "triggers": {
+            "default pageview": {
+              "on": "visible",
+              "request": "pageview",
+              "vars": {
+                "title": "{{title}}"
+              }
+            }
+          }
+        }
+        </script>
+      </amp-analytics>
+
+    </body>
+  </html>

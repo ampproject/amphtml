@@ -1,0 +1,117 @@
+<!--
+ Copyright Google Inc.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<link rel="import" href="../node_modules/@npm-polymer/polymer/polymer-element.html">
+
+<dom-module id="sample-home">
+
+  <template>
+
+    <style>
+
+      .item {
+        display: block;
+        text-decoration: none;
+        text-align: center;
+        margin-bottom: 40px;
+        flex: 1 1 250px;
+        padding: 24px;
+        border-top: 3px solid #bcc2c8;
+        margin-left: 32px;
+        margin-bottom: 32px;
+        padding: 24px;
+        box-sizing: border-box;
+        box-shadow: 0 1px 4px 0 hsla(0, 0%, 0%, 0.1);
+      }
+
+      .item:nth-of-type(3),
+      .item:nth-of-type(4) {
+        display: inline-block;
+        width: 50%;
+      }
+
+      h2 {
+        font-size: 1.3em;
+        font-weight: 500;
+        margin: 32px 0;
+      }
+
+      .item:nth-of-type(3) > h2,
+      .item:nth-of-type(4) > h2 {
+        font-size: 1.1em;
+      }
+
+      @media (max-width: 767px) {
+
+        h2 {
+          margin: 24px 0;
+        }
+
+        .item:nth-of-type(3) > shop-button > a,
+        .item:nth-of-type(4) > shop-button > a {
+          padding: 8px 24px;
+        }
+      }
+      .container {
+        display: flex;
+        flex-wrap: wrap;
+        padding-top: 24px;
+      }
+
+    </style>
+    <div class="container">
+      <dom-repeat items="[[categories]]">
+        <template strip-whitespace>
+              <a class="item" aria-label$="[[item.id]] item.name" href$="/polymer/list/[[item.id]]">[[item.name]]</a>
+        </template>
+      </dom-repeat>
+  </div>
+
+  </template>
+
+  <script>
+
+    class SampleHome extends Polymer.Element {
+
+      static get is() { return 'sample-home'; }
+
+      static get properties() { return {
+
+        categories: {
+          type: Array
+        },
+
+        visible: {
+          type: Boolean,
+          observer: '_visibleChanged'
+        }
+
+      }}
+
+      _visibleChanged(visible) {
+        if (visible) {
+          this.dispatchEvent(new CustomEvent('change-section', {
+            bubbles: true, composed: true, detail: {title: 'Home'}}));
+        }
+      }
+
+    }
+
+    customElements.define(SampleHome.is, SampleHome);
+
+  </script>
+
+</dom-module>

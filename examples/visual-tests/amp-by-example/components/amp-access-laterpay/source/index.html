@@ -1,0 +1,78 @@
+<!--
+  #### Introduction
+
+  [amp-access-laterpay](https://www.ampproject.org/docs/reference/components/amp-access-laterpay) allows publishers to easily integrate with the payment infrastructure platform [LaterPay](https://www.laterpay.net). It is based on, and requires [AMP Access](https://www.ampproject.org/docs/reference/components/amp-access).
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-access-laterpay</title>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-access-laterpay/" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+
+  <!-- #### Setup -->
+  <!-- Import the `amp-access` component in the header. -->
+  <script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js"></script>
+  <!-- `amp-access` requires `amp-analytics` to be imported as well. -->
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <!-- And of course the `amp-access-laterpay` component. -->
+  <script async custom-element="amp-access-laterpay" src="https://cdn.ampproject.org/v0/amp-access-laterpay-0.1.js"></script>
+
+  <!-- Add the configuration which specifies the vendor, and vendor specific configuration for `amp-access` -->
+  <script id="amp-access" type="application/json">
+  {
+    "vendor": "laterpay",
+    "laterpay": {
+      "articleTitleSelector": ".preview > h3",
+      "sandbox": true
+    }
+  }
+  </script>
+
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+
+  <!-- This section is visible to all users. No special markup is needed in this case.-->
+  <section class="preview">
+    <h3>The Article</h3>
+    <p>
+      This is a preview of the article.
+    </p>
+  </section>
+
+  <!-- This section is only shown if the value of the `access` and `error` attributes 
+  on the response for the authorization requests both evaluate to `FALSE`
+  The LaterPay dialog with the different purchase options will be rendered here-->
+  <section amp-access="NOT error AND NOT access" amp-access-hide>
+    <!-- The id and class shown here are both predefined and should be kept as such
+    You can then use these as references to style the dialog to your needs. -->
+    <div id="amp-access-laterpay-dialog" class="amp-access-laterpay"></div>
+  </section>
+
+  <!-- This section is shown if an `error` attribute exists when getting the
+  the authorization request -->
+  <section amp-access="error" amp-access-hide>
+    Oops... Something broke.
+  </section>
+
+   <!-- Use the `amp-access` attribute to control the visibility of each component. The expression
+   must evaluate to a boolean value. If it evaluates to `TRUE`, the section will be shown.  -->
+  <div amp-access="access" amp-access-hide>
+    <p>
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+      Curabitur ullamcorper turpis vel commodo scelerisque. Phasellus
+      luctus nunc ut elit cursus, et imperdiet diam vehicula.
+      Duis et nisi sed urna blandit bibendum et sit amet erat.
+      Suspendisse potenti. Curabitur consequat volutpat arcu nec
+      elementum. Etiam a turpis ac libero varius condimentum.
+      Maecenas sollicitudin felis aliquam tortor vulputate,
+      ac posuere velit semper.
+    </p>
+  </div>
+
+</body>
+</html>

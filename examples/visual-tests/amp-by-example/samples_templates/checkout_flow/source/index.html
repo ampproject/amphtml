@@ -1,0 +1,426 @@
+<!--
+  ## Introduction
+
+  This sample demonstrates how you can implement a simple checkout page in AMP. The sample assumes that all payment processing is done server-side. The covered use cases are:
+
+  * How to dynamically render shopping card data.
+  * How to support user login with stored addresses and credit cards. 
+  * How to let users auto-fill their contact, address and credit card details.
+  * How to handle promo/discount codes. 
+  -->
+  <!-- -->
+  <!doctype html>
+  <html ⚡>
+    <head>
+      <meta charset="utf-8">
+      <link rel="canonical" href="https://ampbyexample.com/../samples_templates/checkout_flow/">
+      <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+      <script async src="https://cdn.ampproject.org/v0.js"></script>
+
+      <!-- ## Setup -->
+      <!-- We use quite a few components: 
+        
+        `amp-form` for collecting and submitting user input. -->
+      <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+      <!-- `amp-access` for user login. -->
+      <script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js"></script>
+      <!-- `amp-analytics` is required by the `amp-access` extension. -->
+      <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+      <!-- `amp-list` for rendering personalized content, such as the shopping cart. -->
+      <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+      <!-- `amp-mustache` for rendering templates in combination with `amp-list`. -->
+      <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+      <!-- `amp-bind` for dynamically updating the page based on user input. -->
+      <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+      <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+
+      <!-- ## Sign-in Support -->
+
+        <!-- We use `amp-access` to integrate login and to show and hide a login button depending on whether the user is logged in. [amp-access](/components/amp-access) requires the definition of 3 endpoints as documented [here](https://www.ampproject.org/docs/reference/components/amp-access).
+          This sample allows an user to login and logout using either email/password or [Google sign in](https://developers.google.com/identity/sign-in/web/). Logout is implemented by configuring a second endpoint in the login property `sign-out`, find more [here](https://www.ampproject.org/docs/reference/components/amp-access#login-page).  -->
+          <script id="amp-access" type="application/json">
+{
+        "authorization": "https://ampbyexample.com/samples_templates/comment_section/authorization?rid=READER_ID&url=CANONICAL_URL&ref=DOCUMENT_REFERRER&_=RANDOM",
+        "noPingback": "true",
+        "login": {
+          "sign-in": "https://ampbyexample.com/samples_templates/comment_section/login?rid=READER_ID",
+          "sign-out": "https://ampbyexample.com/samples_templates/comment_section/logout?rid=READER_ID"
+        },
+        "authorizationFallbackResponse": {
+            "error": true,
+            "loggedIn": false
+        }
+    }
+          </script>
+          <style amp-custom>
+            #abe-preview {
+              background: #eee;
+            }
+
+            section .sub-section,
+            .checkout-section {
+              display: flex;
+              flex-wrap: wrap;
+              margin: 1rem;
+              background: #ccc;
+            }
+            .checkout-section {
+              background: #fff;
+              box-shadow: 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 1px -1px rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);
+              padding: 0 0.5rem;
+            }
+            .sub-section > *,
+            .checkout-section > * {
+              display: block;
+              width: calc(50% - 1rem);
+              padding: 0.25rem;
+              margin: 0.5rem;
+              align-self: center;
+            }
+            .checkout-section > amp-list,
+            .sub-section,
+            .checkout-section > form,
+            .checkout-section > div,
+            .checkout-section > h3 {
+              width: 100%;
+            }
+            .checkout-section > button {
+              width: auto;
+            }
+            section > h3 {
+              font-size: 18px;
+              font-weight: 500;
+              text-transform: uppercase;
+              padding: 0;
+              margin: 1rem 0;
+            }
+            .shopping-cart .item:first-child {
+              margin-bottom: 0.5rem;
+            }
+            .shopping-cart .item:last-child {
+              margin-top: 0.5rem;
+            }
+            .shopping-cart .item {
+              display: flex;
+              justify-content: space-between;
+            }
+            .shopping-cart .name {
+              width: 60%;
+            }
+            .shopping-cart .price,
+            .shopping-cart .quantity {
+              display: block;
+              text-align: right;
+              min-width: 72px;
+              margin-left: 8px;
+            }
+            .shopping-cart .summary .price,
+            .shopping-cart .summary .quantity {
+              margin: 8px 0 0 8px;
+            }
+            .checkout [role=listitem] {
+              margin: 0;
+              margin-left: 0.5rem;
+              padding: 0;
+            }
+            .checkout li {
+              height: 32px;
+            }
+            .checkout [type=radio] {
+              margin: 1rem;
+              padding: 0;
+            }
+            #pay-now-button {
+              width: 100%;
+              max-width: 400px;
+              padding: .7em .8em;
+            }
+            .hide {
+              display: none;
+            }
+          </style>
+    </head>
+    <body>
+      <div class="pt1 m1" [class]="checkoutSuccess ? 'hide' : 'pt1 m1'"><h1>Checkout</h1></div>
+
+      <!--  `amp-access` enables us to show either a Login or Logout button depending on whether the user is already logged-in, e.g. elements marked with `amp-access="NOT loggedIn"` will only show for non-logged-in users. The button's on tap actions, e.g. `on="tap:amp-access.login-sign-in"`, specifies which action should be taken when clicking on the button: `login` defines the property inside the `amp-access` json configuration, while `sign-in` defines the endpoint. -->
+      <div class="my2" [class]="checkoutSuccess ? 'hide' : 'my2'" >
+        <button amp-access="NOT loggedIn" on="tap:amp-access.login-sign-in" class="ampstart-btn ampstart-btn-secondary ml1 caps">Login</button> 
+        <button amp-access="loggedIn" tabindex="0" on="tap:amp-access.login-sign-out" class="ampstart-btn ml1 caps" amp-access-hide>Logout</button>
+        <span class="inline-block ml1">...or continue as guest</span>
+      </div>
+
+      <!-- ## Review Order (Shopping Cart) -->
+      <!-- The review order section displays the current shopping cart content and the total price. We pull in the shopping cart content from a JSON endpoint and render it inside an `amp-list`. The user is identified based on the AMP CLIENT_ID which is passed as
+        a request parameter. Another possibility would be to use cookies, which are included in the amp-list's source request, if the attribute `credentials="include"` is set. Additionally, we bind the amp-list's `src` attribute to an implicit state object `[src]="shoppingCart.src"`, which we use to refresh the content using `amp-bind`.
+        -->
+        <section [class]="checkoutSuccess ? 'hide' : 'checkout-section'" class="checkout-section">
+          <h3 class="">Review Order</h3>
+          <amp-list width="auto"
+                    height="180"
+                    items="."
+                    single-item
+                    layout="fixed-height"
+                    credentials="include"
+                    src="/checkout/shopping-cart?clientId=CLIENT_ID(cart)"
+                    [src]="shoppingCart.src">
+            <template type="amp-mustache">
+              <div class="shopping-cart">
+                <div class="item header">
+                  <div class="name"></div>
+                  <div class="price"><strong>Price</strong></div>
+                  <div class="quantity"><strong>Quantity</strong></div>
+                </div>
+                {{#items}}
+                <div class="item">
+                  <div class="name">{{name}}</div>
+                  <div class="price">${{price}}</div>
+                  <div class="quantity">{{quantity}}x</div>
+                </div>
+                {{/items}}
+                {{#discount}}
+                <div class="item summary">
+                  <div class="name"></div>
+                  <div class="price"><strong>Discount:</strong></div>
+                  <div class="quantity"><strong>{{.}}</strong></div>
+                </div>
+                {{/discount}}
+                <div class="item summary">
+                  <div class="name"></div>
+                  <div class="price"><strong>Sum:</strong></div>
+                  <div class="quantity"><strong>${{total}}</strong></div>
+                </div>
+              </div>
+            </template>
+          </amp-list>
+        </section>
+
+        <!-- ## Promo/Discount Code -->
+        <!-- This section makes it possible to enter promo or discount codes. It's a simple `amp-form` that posts the 
+          code to an XHR endpoint. If the form has been successfully submitted, we refresh the shopping carts 
+          contents by updating the `shoppingCart` object with an updated src URL. We append a random value to invalidate any caches and force
+          the refresh. -->
+          <section [class]="checkoutSuccess ? 'hide' : 'checkout-section'" class="checkout-section">
+            <h3> Add a promotional code </h3>
+            <form  method="post"
+                   action-xhr="/checkout/apply-code"
+                   on="submit-success:AMP.setState({shoppingCart: {src: '/checkout/shopping-cart?clientId=CLIENT_ID(cart)&' + random()}})" 
+                   target="_top">
+              <input name="clientId"
+                     type="hidden"
+                     value="CLIENT_ID(cart)"
+                     data-amp-replace="CLIENT_ID">
+              <input name="code" placeholder="Code" aria-label="code" value="abc123">
+              <button value="Apply" class="ampstart-btn caps ml1">Apply</button>
+            </form>
+          </section>
+
+
+          <!-- ## The Checkout Form --> 
+        <!-- This is the actual checkout form. Form submission takes place via XHR. Once the form has been successfully submitted, we set the 
+        `checkoutSuccess` variable to `true`. This enables us to hide the forms once the checkout is done. Another option would have be to [redirect](https://www.ampproject.org/docs/reference/components/amp-form#redirecting-after-a-submission) to a new page on successful checkout. -->
+          <form  id="checkout-form"
+                 method="post"
+                 action-xhr="/checkout/apply-code"
+                 on="submit-success:AMP.setState({checkoutSuccess: true})"
+                 target="_top">
+
+            <!-- ## Contact Details -->
+            <!-- Not logged in users (`amp-access="NOT loggedIn"`) will see this section to enter their contact details.  -->
+            <section [class]="checkoutSuccess ? 'hide' : 'checkout-section'" class="checkout-section" amp-access="NOT loggedIn">
+              <h3 class="">Contact</h3>
+              <label for="frmNameA">Name</label>
+              <input name="name" id="frmNameA" placeholder="Full name" autocomplete="name">
+              <label for="frmEmailA">Email</label>
+              <input type="email" name="email" id="frmEmailA" placeholder="name@example.com" autocomplete="email">
+            </section>
+
+            <!-- ## Shipping & Billing Address --> 
+            <!-- Logged in users (`amp-access="loggedIn"`) can select an existing address which are pulled in using another amp-list. This section is initially hidden via the `amp-access-hide` attribute. 
+
+            We provide a third option for users to enter a new address. The radio button's [change action](https://www.ampproject.org/docs/reference/amp-actions-and-events) triggers the visibilityof the address form `on="change:manualShippingAddress.toggleVisibility"`.  
+            -->
+            <section [class]="checkoutSuccess ? 'hide' : 'checkout-section'" class="checkout-section" amp-access="loggedIn" amp-access-hide>
+              <h3 class="">Select Shipping Address</h3>
+              <amp-list width="auto"
+                        height="96"
+                        layout="fixed-height"
+                        items="."
+                        single-item
+                        credentials="include"
+                        src="/json/addresses.json">
+                <template type="amp-mustache">
+                  <ul class="list-reset">
+                    {{#addresses}}
+                    <li>
+                      {{^default}}
+                      <input type="radio" id="address{{id}}" name="address" value="{{id}}" on="change:manualShippingAddress.hide">
+                      <label for="address{{id}}">{{name}}, {{street}}, {{city}} </label>
+                      {{/default}}
+                      {{#default}}
+                      <input type="radio" checked id="defaultAddress{{id}}" name="address" value="{{id}}" on="change:manualShippingAddress.hide">
+                      <label for="defaultAddress{{id}}">{{name}}, {{street}}, {{city}} {{#default}}<strong class="xs-hide">[DEFAULT]</strong>{{/default}}</label>
+                      {{/default}}
+                      {{/addresses}}
+                    </li>
+                    {{#manual}}
+                    <li>
+                      <input type="radio" id="ship-separate" name="address" value="{{id}}"  on="change:manualShippingAddress.toggleVisibility">
+                      <label for="ship-separate">Enter new Shipping Address</label>
+                    </li>
+                    {{/manual}}
+                  </ul>
+                </template>
+              </amp-list>
+
+              <section class="sub-section" id="manualShippingAddress" hidden>
+                <label for="manualShipAddressS">Address</label>
+                <input name="ship-address" id="manualShipAddressS" placeholder="123 Any Street" autocomplete="shipping street-address">
+
+                <label for="manualShipCityS">City</label>
+                <input name="ship-city" id="manualShipCityS" placeholder="New York" autocomplete="shipping locality">
+
+                <label for="manualShipStateS">State</label>
+                <input name="ship-state" id="manualShipStateS" placeholder="NY" autocomplete="shipping region">
+
+                <label for="manualShipZipS">Zip</label>
+                <input name="ship-zip" id="manualShipZipS" placeholder="10011" autocomplete="shipping postal-code">
+
+                <label for="manualShipCountryS">Country</label>
+                <input name="ship-country" id="manualShipCountryS" placeholder="USA" autocomplete="shipping country">
+                <label for="saveNewAddress1">Save Address</label>
+                <input id="saveNewAddress1" type="checkbox" checked on="change:shippingAddress.toggleVisibility">
+              </section>
+
+              <label for="shippingAddressCheck">Use Shipping as Billing Address</label>
+              <input id="shippingAddressCheck" type="checkbox" checked on="change:shippingAddress.toggleVisibility">
+            </section>
+
+            <!-- Not logged in users see a simple form for entering the shipping address. We use the `autocomplete` attributes
+              to enable [auto fill for addresses](https://developers.google.com/web/updates/2015/06/checkout-faster-with-autofill) which greatly simplifies form fill-out for users.  -->
+            <section [class]="checkoutSuccess ? 'hide' : 'checkout-section'" class="checkout-section" amp-access="NOT loggedIn">
+              <h3 class="">Enter Shipping Address</h3>
+              <label for="shipAddressS">Address</label>
+              <input name="ship-address" id="shipAddressS" placeholder="123 Any Street" autocomplete="shipping street-address">
+
+              <label for="shipCityS">City</label>
+              <input name="ship-city" id="shipCityS" placeholder="New York" autocomplete="shipping locality">
+
+              <label for="shipStateS">State</label>
+              <input name="ship-state" id="shipStateS" placeholder="NY" autocomplete="shipping region">
+
+              <label for="shipZipS">Zip</label>
+              <input name="ship-zip" id="shipZipS" placeholder="10011" autocomplete="shipping postal-code">
+
+              <label for="shipCountryS">Country</label>
+              <input name="ship-country" id="shipCountryS" placeholder="USA" autocomplete="shipping country">
+
+              <label for="shippingAddressCheck">Use Shipping as Billing Address</label>
+              <input type="checkbox" checked on="change:shippingAddress.toggleVisibility">
+            </section>
+
+            <!-- The shipping address form is optional. We hide it initially using the `hidden` attribute so that it can be toggled
+              via the `toggleVisibility` action (`on="change:shippingAddress.toggleVisibility"`).
+            -->
+            <section [class]="checkoutSuccess ? 'hide' : 'checkout-section'" class="checkout-section" hidden id="billingAddress">
+              <h3 class="">Enter Billing Address</h3>
+              <label for="billingAddressS">Address</label>
+              <input name="billing-address" id="billingAddressS" placeholder="123 Any Street" autocomplete="billing street-address">
+
+              <label for="billingCityS">City</label>
+              <input name="billing-city" id="billingCityS" placeholder="New York" autocomplete="billing locality">
+
+              <label for="billingStateS">State</label>
+              <input name="billing-state" id="billingStateS" placeholder="NY" autocomplete="billing region">
+
+              <label for="billingZipS">Zip</label>
+              <input name="billing-zip" id="billingZipS" placeholder="10011" autocomplete="billing postal-code">
+
+              <label for="billingCountryS">Country</label>
+              <input name="billing-country" id="billingCountryS" placeholder="USA" autocomplete="billing country">
+            </section>
+
+            <!-- ## Payment Details -->
+            <!-- Logged in users (`amp-access="loggedIn"`) can select an existing credit card which is pulled in using `amp-list` similar to how the shipping addresses are rendered dynamically above. It's also possible to manually enter credit card details. -->
+            <section [class]="checkoutSuccess ? 'hide' : 'checkout-section'" class="checkout-section" amp-access="loggedIn" amp-access-hide>
+              <h3 class="">Select Payment Details</h3>
+              <amp-list width="auto"
+                        height="96"
+                        layout="fixed-height"
+                        items="."
+                        single-item
+                        credentials="include"
+                        src="/json/credit-cards.json">
+                <template type="amp-mustache">
+                  <ul class="list-reset">
+                    {{#cards}}
+                    <li>
+                      {{^default}}
+                      <input type="radio" id="cc{{id}}" name="cc" value="{{id}}" on="change:manualCC.hide">
+                      {{/default}}
+                      {{#default}}
+                      <input type="radio" checked id="defaultCC{{id}}" name="cc" value="{{id}}" on="change:manualCC.hide">
+                      {{/default}}
+                      <label for="defaultCC{{id}}">{{title}} {{#default}}<strong class="xs-hide">[DEFAULT]</strong>{{/default}}</label>
+                      {{/cards}}
+                    </li>
+                    {{#manual}}
+                    <li>
+                      <input type="radio" id="new-cc" name="cc" value="{{id}}"  on="change:manualCC.toggleVisibility">
+                      <label for="new-cc">Enter new Credit Card</label>
+                    </li>
+                    {{/manual}}
+                  </ul>
+                </template>
+              </amp-list>
+
+              <section class="sub-section" id="manualCC" hidden>
+                <label for="manualCCNameCC">Name on card</label>
+                <input name="ccname" id="manualCCNameCC" placeholder="Full Name" autocomplete="cc-name">
+
+                <label for="manualCCCCNum">Card Number</label>
+                <input name="cardnumber" id="manualCCCCNum" autocomplete="cc-number">
+
+                <label for="manualCCCVC">CVC</label>
+                <input name="cvc" id="manualCCCVC" autocomplete="cc-csc">
+
+                <label for="manualCCExp">Expiry</label>
+                <input name="cc-exp" id="manualCCExp" placeholder="MM-YYYY" autocomplete="cc-exp">
+                <label for="saveNewAddress2">Save Credit Card</label>
+                <input id="saveNewAddress2" type="checkbox" checked on="change:shippingAddress.toggleVisibility">
+              </section>
+            </section>
+
+            <!-- Not logged in users can enter their credit card details manually. Note that we're using the credit card auto-fill markup. -->
+            <section [class]="checkoutSuccess ? 'hide' : 'checkout-section'" class="checkout-section" amp-access="NOT loggedIn" amp-access-hide>
+              <h3 class="">Enter Credit Card Details</h3>
+              <label for="nameCC">Name on card</label>
+              <input name="ccname" id="nameCC" placeholder="Full Name" autocomplete="cc-name">
+
+              <label for="ccNum">Card Number</label>
+              <input name="cardnumber" id="ccNum" autocomplete="cc-number">
+
+              <label for="ccCVC">CVC</label>
+              <input name="cvc" id="ccCVC" autocomplete="cc-csc">
+
+              <label for="ccExp">Expiry</label>
+              <input name="cc-exp" id="ccExp" placeholder="MM-YYYY" autocomplete="cc-exp">
+            </section>
+
+            <!-- ## Form Submission  -->
+            <!-- The pay now button simply submits the form containting the different checkout form sections. -->
+            <div [class]="checkoutSuccess ? 'hide' : 'm2'" class="m2">
+              <input id="pay-now-button" type="submit" value="Pay Now" class="ampstart-btn ampstart-btn-secondary allcaps caps mb1">
+              <span>Not for real ...</span>
+            </div>
+          </form>
+          <!-- This is the message that we will show after a successful checkout and the `checkoutSuccess` variable is set to `true`. -->
+          <section class="hide" [class]="checkoutSuccess ? 'checkout-section' : 'hide'">
+            <h3>Checkout success!</h3>
+          </section>
+
+          <!-- <div class="card important">
+              **Note:** this sample does not include any form validation. However, this can be easily added using AMP's support for [custom form validation](https://ampbyexample.com/components/amp-form/#form-custom-validation).</div> -->
+
+    </body>
+  </html>

@@ -1,0 +1,413 @@
+<!-- -->
+ <!doctype html>
+<html amp4ads lang="en">
+  <head>
+    <meta charset="utf-8">
+  <title>Carousel Lightbox Ad</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <script async custom-element="amp-carousel" src="https://amp-ads.firebaseapp.com/dist/v0/amp-carousel-0.1.max.js"></script>
+    <script async custom-element="amp-lightbox" src="https://amp-ads.firebaseapp.com/dist/v0/amp-lightbox-0.1.max.js"></script>
+    <script async src="https://amp-ads.firebaseapp.com/dist/amp-inabox.js"></script>
+    <style amp4ads-boilerplate>body{visibility:hidden}</style>
+    <!-- ## Summary-->
+    <!--
+    Sample AMPHTML ad using [amp-lightbox](https://www.ampproject.org/docs/reference/components/amp-lightbox),
+    and [amp-carousel](https://www.ampproject.org/docs/reference/components/amp-carousel) to create an interactive ad.
+    -->
+    <!-- ## Styling -->
+    <!--
+    This is an advanced example that requires some styling to make it look and function properly.
+    -->
+    <style amp-custom>
+      .root-container {
+        font-family: 'Roboto', sans-serif;
+        font-size: 12px;
+        line-height: 18px;
+        overflow: hidden;
+        background: #6a594b;
+        color: #ffffff;
+        width: 100%;
+        height: 100vh;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+      }
+      .main-container {
+        flex: 1;
+        display: flex;
+        justify-content: flex-end;
+        flex-direction: column;
+      }
+      .footer {
+        background: #000000;
+        color: #ffffff;
+        padding: 8px;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+      }
+      .footer-logo {
+        border-right: 1px solid #ffffff;
+        padding: 0 8px 0 0;
+        margin: 0 8px 0 0;
+      }
+      .logo-img {
+        display: block;
+      }
+      .stretch {
+        flex: 1;
+      }
+      .button {
+        cursor: pointer;
+        text-decoration: none;
+        text-transform: uppercase;
+        padding: 6px 10px;
+        color: #ffffff;
+        display: inline-block;
+        background-color: #2979ff;
+      }
+      .carousel-item {
+        width: 184px;
+        height: 105px;
+        padding: 12px 2px;
+        color: #000000;
+        position: relative;
+      }
+      .carousel-item:first-child {
+        padding-left: 12px;
+      }
+      .carousel-item:last-child {
+        padding-right: 12px;
+      }
+      .carousel {
+        width: 100%;
+        position: absolute;
+      }
+      .carousel-item-inner {
+        width: 180px;
+        height: 105px;
+        padding: 2px;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 4px;
+        position: relative;
+      }
+      .carousel-img {
+        display: block;
+        border: 2px solid #ffffff;
+        border-radius: 2px;
+      }
+      .carousel-button-container {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 10px;
+        text-align: center;
+      }
+      /* Styling for lightbox */
+      amp-lightbox {
+        font-family: 'Roboto', sans-serif;
+        font-size: 12px;
+        background: rgba(0, 0, 0, 0.8);
+      }
+      .lightbox-content {
+        height: 100%;
+        margin: 0 auto;
+        max-width: 600px;
+        background: #ffffff;
+        overflow: hidden;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+      }
+      .lightbox-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        padding: 6px;
+      }
+      .lightbox-row h3 {
+        font-size: inherit;
+        margin: 0;
+        font-weight: normal;
+        text-transform: uppercase;
+        color: #000;
+      }
+      .lightbox-main {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+      }
+      .lightbox-row-img {
+        width: 160px;
+        padding: 6px;
+      }
+      .lightbox-row-desc {
+        flex: 1;
+        min-width: 160px;
+        line-height: 18px;
+        max-width: 300px;
+        padding: 6px;
+        color: #999;
+      }
+      .lightbox-close-container {
+        text-align: center;
+        border-top: 1px solid #eee;
+        padding: 18px 0;
+      }
+      .lightbox-header {
+        background: #000;
+        text-align: center;
+        padding: 10px 0;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .lightbox-header h1  {
+        display: inline;
+        color: #ffffff;
+        text-transform: uppercase;
+        font-weight: normal;
+        font-size: inherit;
+        border-left: 1px solid #ffffff;
+        margin: 0 0 0 12px;
+        padding-left: 12px;
+      }
+      .lightbox-hero {
+        position: relative;
+        overflow: hidden;
+      }
+      .learn-more a {
+        padding: 8px 0;
+        text-transform: uppercase;
+        display: inline-block;
+        color: #2979ff;
+        text-decoration: none;
+        font-weight: bold;
+      }
+      /* Responsive styles so that the lightbox does not over-stretch */
+      @media (max-height: 500px) {
+        .lightbox {
+          max-width: 400px;
+        }
+        .lightbox-hero {
+          max-height: 160px;
+        }
+        .lightbox-hero-img {
+          margin-top: -30px;
+        }
+      }
+      @media (max-height: 360px) {
+        .lightbox-hero-img {
+          display: none;
+        }
+        .lightbox-header {
+          position: static;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ## Banner markup -->
+    <!--
+    `amp-ad-banner` is a dummy AMP element that is used by the AMP runtime to determine the position of the ad when a lightbox is opened.
+
+    Please note that `amp-ad-banner` is still in experimental stages and is likely to change in the future. See [this Github issue for tracking.](https://github.com/ampproject/amphtml/issues/8334)
+    -->
+    <amp-ad-banner class="root-container">
+      <div class="main-container">
+        <amp-img src="https://ampbyexample.com/img/car-side-bg.jpg"
+            width="608"
+            height="342"
+            layout="responsive"
+            class="bg-img"></amp-img>
+        <!-- ## Carousel -->
+        <!--
+        We use the `amp-carousel` to display multiple pieces of content along a horizontal axis.
+
+        All elements with the `carousel-item` class-name have essentially the same markup: one container that activates the lightbox, an image, and a button.
+
+        AMP has a system in place for [events and actions](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md). It uses a domain-specific language to describe how actions are triggered. In this example, we set the `on` attribute so the lightbox will activate when a carousel item is tapped. Each button will also toggle the visibility of specific items in the lightbox (see `show` and `hide`).
+        -->
+        <amp-carousel
+            height="132"
+            layout="fixed-height"
+            type="carousel"
+            class="carousel">
+          <div class="carousel-item"
+              on="tap:main-lightbox.activate,
+                row-engine.show, row-gauges.hide, row-seats.hide"
+              role="button">
+            <div class="carousel-item-inner">
+              <amp-img src="https://ampbyexample.com/img/car-engine.jpg"
+                  width="177"
+                  height="100"
+                  layout="fixed"
+                  class="carousel-img"></amp-img>
+              <div class="carousel-button-container">
+                <div class="button carousel-button">
+                  6C Tuned Engine
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="carousel-item"
+              on="tap:main-lightbox.activate,
+                row-engine.hide, row-gauges.show, row-seats.hide"
+              role="button">
+            <div class="carousel-item-inner">
+              <amp-img src="https://ampbyexample.com/img/car-gauges.jpg"
+                  width="177"
+                  height="100"
+                  layout="fixed"
+                  class="carousel-img"></amp-img>
+              <div class="carousel-button-container">
+                <div class="button carousel-button">
+                  Sport Gauge Cluster
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="carousel-item"
+              on="tap:main-lightbox.activate,
+                row-engine.hide, row-gauges.hide, row-seats.show"
+              role="button">
+            <div class="carousel-item-inner">
+              <amp-img src="https://ampbyexample.com/img/car-seats.jpg"
+                  width="177"
+                  height="100"
+                  layout="fixed"
+                  class="carousel-img"></amp-img>
+              <div class="carousel-button-container">
+                <div class="button carousel-button">
+                  Luxury Seats
+                </div>
+              </div>
+            </div>
+          </div>
+        </amp-carousel>
+      </div>
+
+      <div class="footer">
+        <div class="footer-logo">
+          <amp-img src="https://ampbyexample.com/img/car-logo.png"
+              width="72"
+              height="32"
+              layout="fixed"
+              alt="Howdy"
+              class="logo-img"></amp-img>
+        </div>
+        <div class="stretch">The All-New WX-S R5</div>
+        <a href="https://ampbyexample.com/" target="_blank" class="button">
+          Learn more
+        </a>
+      </div>
+    </amp-ad-banner>
+    <!-- ## Lightbox markup -->
+    <!--
+    The amp-lightbox component defines the child elements that will be displayed in a full-viewport overlay.
+
+    We set an id (`main-lightbox`) so it can be opened and closed by actions on other elements.
+
+    Its content is normal AMP HTML.
+    -->
+    <amp-lightbox id="main-lightbox" layout="nodisplay">
+      <div class="lightbox-content">
+        <div class="lightbox-hero">
+          <amp-img src="https://ampbyexample.com/img/car-side-bg.jpg"
+              width="608"
+              height="342"
+              layout="responsive"
+              alt="The all-new Howdy WX-S R5"
+              class="lightbox-hero-img"></amp-img>
+          <div class="lightbox-header">
+            <amp-img src="https://ampbyexample.com/img/car-logo.png"
+                width="72"
+                height="32"
+                layout="fixed"
+                alt="Howdy"
+                class="logo-img"></amp-img>
+            <h1>The all-new WX-S R5</h1>
+          </div>
+        </div>
+        <div class="lightbox-main">
+          <div class="lightbox-row" id="row-engine">
+            <div class="lightbox-row-img">
+              <amp-img src="https://ampbyexample.com/img/car-engine.jpg"
+                width="160"
+                height="90"
+                layout="fixed"></amp-img>
+            </div>
+            <div class="lightbox-row-desc">
+              <h3>6-Cylinder Tuned Engine</h3>
+              <div>
+                3.5L, 290 horsepower. Lightweight aluminum-aloy
+                block and cylinder head.
+              </div>
+              <div class="learn-more">
+                <a href="https://ampbyexample.com/" target="_blank">
+                  Learn more
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="lightbox-row" id="row-gauges">
+            <div class="lightbox-row-img">
+              <amp-img src="https://ampbyexample.com/img/car-gauges.jpg"
+                width="160"
+                height="90"
+                layout="fixed"></amp-img>
+            </div>
+            <div class="lightbox-row-desc">
+              <h3>Sport Gauge Cluster</h3>
+              <div>
+                Sports-car inspired illuminated gauge cluster.
+              </div>
+              <div class="learn-more">
+                <a href="https://ampbyexample.com/" target="_blank">
+                  Learn more
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="lightbox-row" id="row-seats">
+            <div class="lightbox-row-img">
+              <amp-img src="https://ampbyexample.com/img/car-seats.jpg"
+                width="160"
+                height="90"
+                layout="fixed"></amp-img>
+            </div>
+            <div class="lightbox-row-desc">
+              <h3>Luxury Seats</h3>
+              <div>
+                Available in Comfort Suede and leather. High-contrast stitching colors available.
+              </div>
+              <div class="learn-more">
+                <a href="https://ampbyexample.com/" target="_blank">
+                  Learn more
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- ## Close button -->
+        <!--
+        We define an element that will trigger the close action on the lightbox when tapped.
+        -->
+        <div class="lightbox-close-container">
+          <div class="button" role="button" on="tap:main-lightbox.close">
+            Back
+          </div>
+        </div>
+      </div>
+    </amp-lightbox>
+  </body>
+</html>

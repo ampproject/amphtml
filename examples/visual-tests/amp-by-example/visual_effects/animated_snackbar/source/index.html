@@ -1,0 +1,104 @@
+<!--
+  ## Introduction
+
+  [Snackbars](https://material.io/guidelines/components/snackbars-toasts.html) provide brief feedback about an operation through a message at the bottom of the screen.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="https://ampbyexample.com/visual_effects/animated_snackbar/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!-- We use `amp-bind` to trigger the Snackbar...  -->
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <!-- ... and `amp-animation` to show and hide the Snackbar.  -->
+  <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+<style amp-custom>
+    .trigger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .trigger > * {
+      padding: 0.5rem;
+      margin: 0.5rem;
+    }
+    .snackbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      height: 48px;
+      margin: 0 auto;
+      padding: 14px 24px;
+      max-width: 568px;
+      background: #323232;
+      color: white;
+      border-radius: 2px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      transform: translateY(100%);
+      z-index: 1000;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- ## The Animation -->
+  <!--
+    We want to show a snackbar that disappears after a few seconds. This could be easily accomplished by adding a CSS class using `amp-bind` to show the snackbar and then using CSS animations to hide the snackbar after a few seconds. However, with this approach it's not possible to trigger the snackbar multiple times (the newly added CSS class won't dissappear). 
+    
+    We can solve this problem by using the [`amp-animation`](https://www.ampproject.org/docs/reference/components/amp-animation)  extension, which makes it possible to execute animations repeatedly. We define an animation that will slide-in the snackbar and then hide it after a few seconds using the `offset` attribute to time the different keyframes.
+  -->
+  <amp-animation id="snackbarSlideIn" layout="nodisplay">
+    <script type="application/json">
+      [{
+        "duration": "3s",
+        "fill": "both",
+        "easing": "ease-out",
+        "iterations": "1",
+        "selector": ".snackbar",
+        "keyframes": [{
+            "transform": "translateY(100%)"
+          },
+          {
+            "transform": "translateY(0)", "offset": 0.1
+          },
+          {
+            "transform": "translateY(0)", "offset": 0.9
+          },
+          
+          {
+            "transform": "translateY(100%)"
+          }
+        ]
+      }
+      ]
+    </script>
+  </amp-animation>
+
+  <!-- ## The Snacbar -->
+  <!-- Our snackbar is a `div` containing the message. It's going to disappear after a few seconds so we don't provide any additional buttons to manually hide the snackbar. The text message is bound to an `amp-state` variable to make it's content configurable. This is not needed if the snackbar should always show the same message. -->
+  <div class="snackbar" [text]="message">
+    Hello World
+  </div>
+
+  <!-- ## The Trigger -->
+  <!-- The snackbar animation is triggered via the `restart` action: `on="tap:snackbarSlideIn.restart"`. We use the `restart` action to make it possible to override an already active animation. The input field simply updates the `amp-state` variable containing the snackbar's message. -->
+  <div class="trigger">
+    <input on="input-debounced:AMP.setState({message: event.value})" value="Hello World">
+    <button on="tap:snackbarSlideIn.restart">
+      Show Snackbar
+    </button>
+  </div>
+
+</body>
+</html>

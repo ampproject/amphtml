@@ -1,0 +1,188 @@
+<!--
+  ## Introduction
+
+  The [`amp-list`](https://www.ampproject.org/docs/reference/components/amp-list) component fetches dynamic content from a CORS JSON endpoint and renders it using a supplied template. This is good for embedding a dynamic list of related articles.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-list</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!-- Import the `amp-list` component ... -->
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <!-- ... and the `amp-mustache` component in the header -->
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-list/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+
+  .list-overflow {
+    width: 160px;
+    margin-left: auto;
+  }
+
+  #amp-list-placeholder div[role=list] {
+    margin: 1rem;
+  }
+
+  .products {
+      display: block;
+      height: 100px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+      background: #fff;
+      border-radius: 2px;
+      margin-bottom: 15px;
+      position: relative;
+    }
+
+  .products amp-img {
+      float: left;
+      margin-right: 16px;
+  }
+
+  #amp-list-placeholder ul.results {
+      list-style: none;
+      overflow: auto;
+      margin-left: 1rem;
+      padding: 0;
+    }
+
+  #amp-list-placeholder ul.results li {
+         height: 100px;
+         background: #fff;
+         border-radius: 2px;
+         margin-bottom: 15px;
+         position: relative;
+         box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+  }
+
+  #amp-list-placeholder div[placeholder] ul.results li {
+      background:
+        linear-gradient(90deg, rgba(211, 211, 211, 0) 0, rgba(211, 211, 211, 0.8) 50%, rgba(211, 211, 211, 0) 100%),
+        linear-gradient(#cccccc 100%, transparent 0),
+        linear-gradient(#cccccc 100%, transparent 0),
+        linear-gradient(#cccccc 100%, transparent 0),
+        linear-gradient(#cccccc 100%, transparent 0);
+      background-size:
+        200px 100px,
+        150px 100px,
+        100px 10px,
+        100px 10px,
+        100px 10px;
+      background-position:
+        -150% 0,
+        0 0,
+        166px 4px,
+        166px 29px,
+        166px 53px;
+      background-repeat: no-repeat;
+      -webkit-animation: loading 1.5s infinite;
+      animation: loading 1.5s infinite;
+    }
+
+    @-webkit-keyframes loading {
+      to {
+        background-position: 350% 0, 0 0,
+        166px 4px,
+        166px 29px,
+        166px 53px;
+      }
+    }
+
+     @keyframes loading {
+       to {
+         background-position: 350% 0, 0 0,
+         166px 4px,
+         166px 29px,
+         166px 53px;
+       }
+     }
+
+  </style>
+</head>
+<body>
+
+  <!-- ## Using a nested template -->
+  <!--
+  The `amp-list` content is provided by a JSON CORS endpoint, which is defined by the `src`
+  attribute. The URL's protocol must be HTTPS. The response must be a JSON object containing
+  an array property `items`, for example:
+  ```json
+  {
+    "items": [
+      {
+        "title": "amp-carousel",
+        "url": "https://ampbyexample.com/components/amp-carousel"
+      },
+      ...
+    ]
+  }
+  ```
+  The list content is rendered via an [amp-mustache template](https://www.ampproject.org/docs/reference/components/amp-mustache). The template can be specified either by id, or by using a nested element.
+  -->
+  <amp-list width="auto" height="100" layout="fixed-height" src="https://ampbyexample.com/json/examples.json" class="m1">
+    <template type="amp-mustache" id="amp-template-id">
+      <div><a href="{{url}}">{{title}}</a></div>
+    </template>
+  </amp-list>
+
+  <!-- ## Handling empty List Content -->
+  <!-- If the list contains an empty array, you can use  [mustache inverted sections](https://github.com/janl/mustache.js) to print a message. -->
+<amp-list width="auto" height="100" layout="fixed-height" src="/json/examples-empty.json" class="m1">
+  <template type="amp-mustache">
+    {{^products}} No items founds.{{/products}}
+  </template>
+</amp-list>
+
+  <!-- ## Using an existing template -->
+  <!--
+    The template can also be specified using an ID of an existing
+    `template` element. This example references the template from the
+    previous sample.
+  -->
+  <amp-list width="auto" height="100" layout="fixed-height" src="https://ampbyexample.com/json/examples.json"
+      template="amp-template-id" class="m1">
+  </amp-list>
+
+  <!-- ## Using a placeholder animation -->
+  <!--
+    You can use a custom placeholder like an animation to improve the user experience while the list is loading.
+    We are using an endpoint which intentionally delays the response by 10 seconds.
+  -->
+  <amp-list id="amp-list-placeholder" noloading width="auto"
+            height="600"
+            layout="fixed-height" src="https://ampbyexample.com/samples_templates/slow-json-with-items/?delay=10000">
+    <div placeholder>
+      <ul class="results">
+         <li></li><li></li><li></li><li></li><li></li>
+      </ul>
+    </div>
+    <template type="amp-mustache">
+        <div class="products">
+            <amp-img width="150"
+                   height="100"
+                   alt="{{name}}"
+                   src="{{img}}"></amp-img>
+            <p class="name">{{name}}</p>
+            <p class="star">{{{stars}}}</p>
+            <p class="price">${{price}}</p>
+        </div>
+    </template>
+
+  </amp-list>
+
+  <!-- ## Handling List Overflow -->
+  <!--
+ If the `amp-list` content requires more space than available, the AMP runtime will display the overflow element (if specified).
+  -->
+  <amp-list width="auto" height="48" layout="fixed-height" src="https://ampbyexample.com/json/examples.json" template="amp-template-id" class="m1">
+    <div overflow role="button" aria-label="Show more" class="list-overflow ampstart-btn caps">
+      Show more
+    </div>
+  </amp-list>
+</body>
+</html>

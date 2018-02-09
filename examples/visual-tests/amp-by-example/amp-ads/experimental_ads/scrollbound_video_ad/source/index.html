@@ -1,0 +1,255 @@
+<!-- -->
+<!doctype html>
+<html ⚡4ads>
+
+<head>
+  <meta charset="utf-8">
+  <title>Scrollbound Video Ad</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://amp-ads.firebaseapp.com/dist/amp-inabox.js"></script>
+  <script async custom-element="amp-animation" src="https://amp-ads.firebaseapp.com/dist/v0/amp-animation-0.1.max.js"></script>
+  <script async custom-element="amp-video" src="https://amp-ads.firebaseapp.com/dist/v0/amp-video-0.1.max.js"></script>
+
+  <style amp4ads-boilerplate>
+    body {
+      visibility: hidden
+    }
+  </style>
+
+  <!-- ## Summary-->
+  <!--
+    Sample AMPHTML ad using [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation),
+    [amp-video](https://www.ampproject.org/docs/reference/components/amp-video) and [amp-img](https://www.ampproject.org/docs/reference/components/amp-img)
+    to create an ad that animates based on scrolling.
+
+
+    ![Demo of this example](https://cloud.githubusercontent.com/assets/2099009/26071260/4cfddfa2-395c-11e7-86d0-bb22fe0581eb.gif)
+  -->
+
+  <!-- ## Styling -->
+  <!--
+  This is an advanced example that requires some styling to make it
+  look and function properly.
+
+  The styling designed here is responsive and will work with various ad sizes.
+  -->
+  <style amp-custom>
+
+    /*
+     * Top level container: It fills the parent viewport
+     * that hosts the ad.
+     */
+    .ad-container {
+      font-family: "Roboto", sans-serif;
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      color: #FFFFFF;
+    }
+
+    /* Video Layer */
+    .video-container {
+      /**
+       * Specifies that right corner should be used
+       * as the anchor point when video is scaled down
+       * using scrollbound amp-animation.
+       */
+      transform-origin: calc(100% - 25px) 25px;
+      z-index: 2;
+    }
+
+    /* Video player: Click-to-player overlay */
+    .video-container .poster-image {
+      position: absolute;
+      z-index: 1;
+    }
+
+    .video-container .poster-image img {
+      object-fit: cover;
+    }
+
+    .video-container .play-icon {
+      position: absolute;
+      z-index: 3;
+      width: 100px;
+      height: 100px;
+      background-image: url(https://ampbyexample.com/img/play-icon.png);
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+      /* Align to the middle */
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+      opacity: 0.9;
+    }
+
+    .video-container amp-video video {
+      object-fit: cover;
+    }
+
+    /* Content Layer */
+    .content-container {
+      z-index: 1;
+    }
+
+    /* Content Layer: Background image */
+    .background amp-img {
+      margin: -70px;
+    }
+
+    .background amp-img img {
+      object-fit: cover;
+    }
+
+    /* Content Layer: Title and logo */
+    .title {
+      position: absolute;
+      top: 5px;
+      padding-left: 15px;
+      font-weight: bold;
+    }
+
+    /* Content Layer: Footer and learn more button */
+    .footer {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      padding: 5px 15px;
+      background-color: rgba(0, 0, 0, 0.8);
+      box-sizing: border-box;
+      font-size: 10px;
+      display: flex;
+      flex-direction: row;
+    }
+
+    .footer>* {
+      flex: 1;
+      align-self: center;
+    }
+
+    .footer .learn-more {
+      background-color: #2979ff;
+      padding: 5px 15px;
+      white-space: nowrap;
+      flex: 0;
+      font-size: 10px;
+      letter-spacing: 0.5px;
+      color: #fafafa;
+      text-decoration: none;
+    }
+
+    /* Generic CSS class to fill a parent */
+    .fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ## Scrollbound Animations -->
+  <!--
+    There are two types of scrollbound animations that occur in this sample:
+    **scaling** of the video container and **parallax** movement of the background image.
+
+    The animations are implemented using [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation)
+    which is an experimental AMP component that uses [Web Animations API](https://www.w3.org/TR/web-animations/)
+    to support both __time__ and __scroll__ based animations.
+  -->
+  <amp-animation layout="nodisplay" trigger="visibility">
+    <script type="application/json">
+      {
+      "ticker": "scroll",
+      "fill": "both",
+      "animations": [
+        {
+          "target": "videoContainer",
+          "keyframes": [
+            { "transform": "scale(1)" },
+            { "transform": "scale(1)", "offset": 0.1 },
+            { "transform": "scale(0.5)", "offset": 0.5 },
+            { "transform": "scale(0.5)", "offset": 1 }
+          ]
+        },
+        {
+          "target": "backgroundImg",
+          "keyframes": [
+            { "transform": "translateY(0)" },
+            { "transform": "translateY(60px)", "offset": 1 }
+          ]
+        }
+      ]
+    }
+    </script>
+  </amp-animation>
+  <!--
+    **scroll vs. time ticker**: Setting `"ticker": "scroll"` tells
+    `amp-animation` to advance the animation timeline based on scrolling rather than time.
+
+    **Scale down video to the corner when scrolling**:
+    The video covers the whole ad initially and when the page scrolls,
+    it slowly starts to scale down and move to the corner reaching its target
+    size when the ad is in the middle of the view port.
+
+    To achieve that, we define 4 keyframes. Between 0 and 10% of viewport,
+    video is fullsize, between 10% and 50%, it starts scaling down until it
+    settles at half its size when in the middle of the viewport and stays the
+    same size all the way to the last keyframe.
+
+    **Parallax background image**:
+    The background image of this ad has a subtle parallax effect.
+    To achieve that, we use scrollbound animation and specify a `60px` offset
+    at the last keyframe.
+  -->
+
+  <!-- ## Ad Container -->
+  <!--
+  Top level container: It fills the parent viewport that hosts the ad.
+  -->
+  <div class="ad-container">
+    <!-- ## Video Layer -->
+    <!--
+    Inside the ad-container we create a click-to-play overlay and a video element.
+
+    The `amp-animation` scales down the `videoContainer` when the user scrolls.
+    -->
+    <div id="videoContainer" class="video-container fill">
+      <div id="clickToPlayOverlay" class="fill">
+        <div class="play-icon" role="button" tabindex="0" on="tap:clickToPlayOverlay.hide, video.play"></div>
+
+        <amp-img class="poster-image" layout="fill" src="https://ampbyexample.com/img/car-video-poster.png"></amp-img>
+      </div>
+
+      <amp-video id="video" controls layout="fill" src="https://ampbyexample.com/video/car-video-360p.mp4"></amp-video>
+    </div>
+    <!-- ## Content Layer -->
+    <!--
+    Create the content layer that hosts the background image and information about the ad.
+
+    The `amp-animation` simulates a parallax effect for `backgroundImg` when the user scrolls.
+    -->
+    <div class="content-container fill">
+      <div class="background">
+        <amp-img id="backgroundImg" layout="fill" src="https://ampbyexample.com/img/car-bg.jpg"></amp-img>
+      </div>
+      <div class="title">
+        <div>
+          <amp-img layout="fixed" width="72" height="32" src="https://ampbyexample.com/img/car-logo.png"></amp-img>
+        </div>
+        <div>THE ALL NEW</div>
+        <div>WS-X LUX</div>
+      </div>
+      <div class="footer">
+        <span>36 months lease, $189/month, $2999 due at signing</span>
+        <a href="https://ampproject.org" target="blank_" class="learn-more">LEARN MORE</a>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>

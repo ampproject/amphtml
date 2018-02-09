@@ -1,0 +1,44 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <title>A sample shopping cart</title>
+  <link rel="canonical" href="https://ampbyexample.com/shopping_cart/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    .shopping-cart {
+      background: #f2f2f2;
+    }
+    .details {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .shopping-cart > *:nth-child(2n+1) {
+      font-weight: 600;
+    }
+    .details > * {
+      box-sizing: border-box;
+      flex-grow: 1;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <!-- ## Shopping Cart -->
+  <!-- A sample shopping cart.
+  <div class="shopping-cart">
+      [[ range $item, $quantity := . ]]
+        <div class="p1">[[$item.Name]] [[$item.Price]]</div>
+        <div class="details pb1">
+          <div class="px1">Color: [[$item.Color]]</div>
+          <div class="px1">Size: [[$item.Size]]</div>
+          <div class="px1">Qty: [[$quantity]]</div>
+        </div>
+      [[ end ]]
+    </div>
+    <p>Back to <a href="/samples_templates/product_page/preview/">product</a> sample.</p>
+  -->
+</body>
+</html>

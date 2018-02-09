@@ -1,0 +1,534 @@
+<!--
+  ## Introduction
+
+  This sample demonstrates different approaches for how to implement a multi-step flow in AMP. These could 
+  be used for checkout flows, sign-ups or surveys.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="https://ampbyexample.com/../dynamic_amp/multi_page_flow">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!-- We use `amp-bind` to coordinate the page transitions... -->
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <!-- ... and `amp-selector` for implementing a simple survey. -->
+  <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+ 
+<style amp-custom>
+/* Simple Stepper */
+.stepper.simple .step-dots {
+  user-select: none;
+}
+.stepper.simple .step-dot {
+  display: inline-block;
+  background: #ddd;
+  overflow: hidden;
+  text-indent: -999px;
+  border-radius: 100%;
+  width: 10px;
+  height: 10px;
+  box-shadow: inset 0 1px 1px 0 #999;
+}
+.stepper.simple .step-dot.active {
+  background: linear-gradient(#00CFFF, #1584bc);
+  box-shadow: inset 0 0 1px 1px #087DC0;
+}
+.stepper.simple section {
+  background-color: #ccc;
+}
+.stepper.simple .content {
+  height: 350px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.stepper.simple .top-bar,
+.stepper.simple .bottom-bar {
+  height: 48px;
+  line-height: 48px;
+  background-color: #f2f2f2;
+  color: #4a4a4a;
+}
+.stepper.simple .top-bar {
+  padding: 0 24px;
+  font-size: 16px;
+}
+.stepper.simple .bottom-bar {
+  height: 48px;
+  line-height: 48px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.stepper.simple .bottom-bar .button-next,
+.stepper.simple .bottom-bar .button-prev {
+  position: absolute;
+  height: 100%;
+  border: none;  
+  color: #4a4a4a;
+  background-color: unset;
+  text-transform: uppercase;
+  font-size: 14px;
+  font-weight: 500;
+  width: 72px;
+  user-select: none;
+}
+.stepper.simple .bottom-bar .button-prev {
+  top: 0;
+  left: 0;
+}
+.stepper.simple .bottom-bar .button-next {
+  top: 0;
+  right: 0;
+}
+.stepper.simple .bottom-bar .button-next:after {
+  padding: 8px;
+  content: ">";
+  font-weight: 500;
+}
+.stepper.simple .bottom-bar .button-prev:before {
+  padding: 8px;
+  content: "<";
+  font-weight: 500;
+}
+/* Vertical Stepper */
+.stepper.vertical {
+  display: flex;
+  flex-direction: column;
+}
+.stepper.vertical .step-title {
+  padding: 8px;
+  font-size: 16px;
+  display: block;
+  border: none;
+  line-height: 24px;
+  text-align: left;
+  background-color: #fff;
+}
+.stepper.vertical .step-title:not([disabled]):active {
+  background-color: #ccc;
+}
+.stepper.vertical .step-title:not([disabled]) {
+  cursor: pointer;
+}
+.stepper.vertical .step-title.step-active {
+  background-color: #f2f2f2;
+  font-weight: 700;
+}
+.stepper.vertical .step-title i {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  margin: 8px;
+  background-color: #b60845;
+  border-radius: 100%;
+  color: white;
+  font-size: 14px;
+  font-style: normal;
+  transition: background 0.25s ease-in-out;
+}
+.stepper.vertical .step-title[disabled] .step-incomplete {
+  background-color: #ccc;
+}
+.stepper.vertical .step-title .step-incomplete:before {
+  content: attr(data-step-nr);
+  display: block;
+  text-align: center;
+  font-weight: 700;
+}
+.stepper.vertical .step-title .step-complete:before {
+  content: "✓";
+  display: block;
+  text-align: center;
+  font-weight: 700;
+}
+.stepper.vertical .content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1rem;
+  margin-left: 36px;
+}
+.stepper.vertical .content > *:nth-child(n+2) {
+  margin-top: 1rem;
+}
+.stepper.vertical .content button {
+  color: #fff;
+  background: #b60845;
+  border: 1px solid #fff;
+  text-transform: uppercase;
+  letter-spacing: .2em;
+  padding: .5em .8em;
+}
+.stepper.vertical .content button[disabled] {
+  opacity: .5;
+  outline: 0;
+  cursor: default;
+}
+/* Sliding Stepper */
+.stepper.sliding {
+  position: relative;
+  overflow-x: hidden;
+  height: 300px;
+  max-width: 420px;
+  margin: 1rem auto;
+}
+.stepper.sliding .page {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  transition: transform 0.25s cubic-bezier(0, 0, 0.3, 1);
+}
+.stepper.sliding .page.active {
+  transform: translateX(0%);
+  pointer-events: auto;
+}
+.stepper.sliding .page:not(.active) {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.stepper.sliding .page.next {
+  transform: translateX(100%);
+}
+.stepper.sliding .page.previous {
+  transform: translateX(-100%);
+}
+.stepper.sliding .back {
+  position: relative;
+  height: 32px;
+  width: 100%;
+  max-width: 300px;
+  cursor: pointer;
+  line-height: 32px;
+  border: none;
+  background: none;
+  text-align: left;
+  padding: 0;
+  -webkit-appearance: none;
+}
+.stepper.sliding .back:after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  right: 3px;
+  border: solid black;
+  border-width: 0 3px 3px 0;
+  display: inline-block;
+  padding: 3px;
+  transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+}
+/* Survey styling */
+amp-selector.poll [option][selected] {
+  outline: none;
+}
+amp-selector.poll [option] {
+  display: flex;
+  align-items: center;
+}
+amp-selector.poll [option]:before {
+  transition: background 0.25s ease-in-out;
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin: 8px;
+  border-radius: 100%;
+  border: solid 1px #b60845;
+  font-size: 14px;
+  line-height: 16px;
+}
+amp-selector.poll [option][selected]:before {
+  text-align: center;
+  content: "✓";
+  color: white;
+  background: #b60845;
+}
+amp-selector.poll [option][selected]:focus {
+  outline: -webkit-focus-ring-color auto 5px;
+}
+</style>
+</head>
+<body>
+  <h2 class="m0 p1 pt2">A simple mobile Stepper</h2>
+  <div class="p1">Use the browser back button to go to the previous view.</div>
+<!-- ## A simple Dialog -->
+<!-- We use an implicit state variable `currentPage` to keep track of the current view. Views are identified by numbers starting with `0` in their order of appearance. The view state is bound to each view using AMP's [`hidden` attribute](https://www.ampproject.org/docs/reference/amp-actions-and-events#*-(all-elements)):
+
+```html
+<section [hidden]="currentPage > 0"> ... </section>
+```
+
+...and for initially hidden views we add the `hidden` attribute as a default:
+
+```html
+<section hidden [hidden]="currentPage != 1"> ... </section>
+```
+
+We update the `currentPage` variable to progress forward in the dialog. In this sample we're using [`AMP.pushState(...)`](https://www.ampproject.org/docs/reference/components/amp-bind#modifying-history-with-amp.pushstate()) instead of `AMP.setState(...)`. `AMP.pushState(...)` pushes a new entry onto the browser history stack, which allows the user to navigate back in the to use the browser's back button to move backwards in the dialog:
+
+```html
+<button on="tap:AMP.pushState({ currentPage: currentPage + 1 })">
+  next
+</button>
+```
+-->
+  <div class="stepper simple">
+    <section [hidden]="currentPage > 0"> 
+      <div class="top-bar">
+        Step 1
+      </div>
+      <div class="content">Here is some content ...</div>
+      <div class="bottom-bar">
+        <div class="step-dots">
+          <i class="step-dot active"></i>
+          <i class="step-dot"></i>
+          <i class="step-dot"></i>
+        </div>
+        <button on="tap:AMP.pushState({ currentPage: currentPage + 1 })"
+                class="button-next"
+                >next</button>
+      </div>
+    </section>
+    <section hidden [hidden]="currentPage != 1"> 
+      <div class="top-bar">
+        Step 2
+      </div>
+      <div class="content">Here is some more content ...</div>
+      <div class="bottom-bar">
+        <button class="button-prev" on="tap:AMP.pushState({ currentPage: currentPage - 1 })">back</button>
+        <div class="step-dots">
+          <i class="step-dot active"></i>
+          <i class="step-dot active"></i>
+          <i class="step-dot"></i>
+        </div>
+        <button on="tap:AMP.pushState({ currentPage: currentPage + 1 })"
+                class="button-next"
+                >next</button>
+      </div>
+    </section>
+    <section hidden [hidden]="currentPage != 2"> 
+      <div class="top-bar">
+        Step 3
+      </div>
+      <div class="content">Done!</div>
+      <div class="bottom-bar">
+        <button class="button-prev" on="tap:AMP.pushState({ currentPage: currentPage - 1 })">back</button>
+        <div class="step-dots">
+          <i class="step-dot active"></i>
+          <i class="step-dot active"></i>
+          <i class="step-dot active"></i>
+        </div>
+      </div>
+    </section>
+  </div>
+  <h2 class="m0 p1 pt2">A vertical Stepper</h2>
+  <div class="p1">Use the browser back button to go to the previous view.</div>
+<!-- ## A vertical Stepper -->
+<!-- Vertical steppers work well if steps depend on each other. The stepper is implemented similar to the first sample using a 
+  variable `currentStep` to keep track of the currently active step. We additionally define a step title button which is always visible 
+  and shows the status of the current step. The title needs to reflect three different states (active, complete, disabled). To avoid too complex amp-bind expressions the three states are split into three different bindings:    
+
+  * The title class gets updated if the current step is active.
+  * The title gets a `disabled` attribute if the **previous** step has not yet been completed
+  * The nested icon's class gets set to `step-complete` or `step-incomplete` based on whether the step has finished. 
+
+Clicking on the title will go to the corresponding step (if already possible):
+
+  ```html
+  <button class="step-title" 
+      [class]="currentStep != 1 ? 'step-title' : 'step-title step-active'" 
+       disabled [disabled]="!animalSelected"
+       on="tap:AMP.pushState({ currentStep: 1 })">
+    <i class="step-incomplete" 
+       [class]="colorSelected ? 'step-complete' : 'step-incomplete'" data-step-nr="2"></i>
+       Color
+  </button>
+  ```
+
+By default, the continue buttons is disabled. Only when the step is completed (in this case when a selection has been made), the button will be enabled:
+
+```html
+  <button disabled [disabled]="!animalSelected"
+          on="tap:AMP.pushState({ currentStep: currentStep + 1 })">
+    continue
+  </button>
+```
+  
+  Here is the full example:
+-->
+  <div class="stepper vertical">
+    <button class="step-title step-active" 
+        [class]="currentStep > 0 ? 'step-title' : 'step-title step-active'" 
+         on="tap:AMP.pushState({ currentStep: 0 })">
+      <i class="step-incomplete" 
+         [class]="animalSelected ? 'step-complete' : 'step-incomplete'" data-step-nr="1"></i>
+         Animal
+    </button>
+    <section [hidden]="currentStep > 0"> 
+      <div class="content">
+        <p>What's your favorite animal?</p>
+        <amp-selector on="select:AMP.setState({animalSelected: true})" class="poll" name="animal-poll">
+          <div option="cat">Cat</div>
+          <div option="dog">Dog</div>
+          <div option="horse">Horse</div>
+        </amp-selector>
+        <button disabled [disabled]="!animalSelected"
+                on="tap:AMP.pushState({ currentStep: currentStep + 1 })">
+          continue
+        </button>
+      </div>
+    </section>
+    <button class="step-title" 
+        [class]="currentStep != 1 ? 'step-title' : 'step-title step-active'" 
+         disabled [disabled]="!animalSelected"
+         on="tap:AMP.pushState({ currentStep: 1 })">
+      <i class="step-incomplete" 
+         [class]="colorSelected ? 'step-complete' : 'step-incomplete'" data-step-nr="2"></i>
+         Color
+    </button>
+    <section hidden [hidden]="currentStep != 1"> 
+      <div class="content">
+        <p>What's your favorite color?</p>
+        <amp-selector on="select:AMP.setState({colorSelected: true})" class="poll" name="color-poll">
+          <div option="blue">Blue</div>
+          <div option="green">Green</div>
+          <div option="yellow">Yellow</div>
+        </amp-selector>
+        <button disabled [disabled]="!colorSelected"
+                on="tap:AMP.pushState({ currentStep: currentStep + 1 })">
+          continue
+        </button>
+      </div>
+    </section>
+    <button class="step-title" 
+        [class]="currentStep != 2 ? 'step-title' : 'step-title step-active'" 
+         disabled [disabled]="!colorSelected"
+         on="tap:AMP.pushState({ currentStep: 2 })">
+      <i class="step-incomplete" 
+         [class]="fruitSelected ? 'step-complete' : 'step-incomplete'" data-step-nr="3"></i>
+         Fruit
+    </button>
+    <section hidden [hidden]="currentStep != 2"> 
+      <div class="content">
+        <p>What's your favorite fruit?</p>
+        <amp-selector on="select:AMP.setState({fruitSelected: true})" class="poll" name="fruit-poll">
+          <div option="apple">Apple</div>
+          <div option="banana">Banana</div>
+          <div option="cheery">Cheery</div>
+        </amp-selector>
+        <button disabled [disabled]="!fruitSelected"
+                on="tap:AMP.pushState({ currentStep: currentStep + 1 })">
+          continue
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <h2 class="m0 p1">Stepper with Sliding Animation</h2>
+  <div class="p1">Use the browser back button to go to the previous view.</div>
+  <!-- ## Stepper with Sliding Animation -->
+  <!-- This sample demonstrates a simple sliding animations visualising the dialog progress. We're using 
+  templates from [ampstart.com](https://ampstart.com) for styling the input fields. The basic approach is 
+  the same as in the previous two samples: a variable keeps track of the current page. The only difference is 
+  that here we can't use the `hidden` attribute as we want to transition between the different pages. The `hidden`
+  attribute uses `display: none` which cannot be animated in CSS. Instead we use three different CSS classes `active`, 
+  `next` and `previous` to slide between the different pages:
+  
+```css
+  .page.active {
+    transform: translateX(0%);
+    pointer-events: auto;
+  }
+  .page:not(.active) {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .page.next {
+    transform: translateX(100%);
+  }
+  .page.previous {
+    transform: translateX(-100%);
+  }
+```
+
+  For each page we assign the matching class based on whether the page index is smaller, same or larger:
+
+  ```html
+    <section class="page next" 
+             [class]="slidingStepperPage < 1 ? 'page next' : 
+                      (slidingStepperPage > 1 ? 'page previous' : 'page active')"> ...</section>
+   ```
+
+   To avoid accidentally revealing hidden steps via keyboard focus, we need to make sure to explicitly disable all input elements
+   in hidden steps, e.g.:
+
+   ```html
+     <input type="text" value="" name="password" 
+            disabled [disabled]="slidingStepperPage != 1" ...>
+   ```
+
+   We sync the entered email address between the two steps using an amp-state variable `email`:
+
+   ```html
+      <input type="text" value="" name="email" 
+               on="input-debounced: AMP.setState({ email: event.value })" ...>
+        ...
+      <button class="back" [text]="email" ...></button>
+   ```
+
+   Here is the full example:
+  -->
+  <div class="stepper sliding">
+    <section class="page active" 
+             [class]="slidingStepperPage > 0 ? 'page previous' : 'page active'"> 
+      <h3>Sign in</h3>
+      <div class="ampstart-input inline-block relative m0 p0 mb3 mt3">
+        <input type="text" value="" name="email" autocomplete="email" id="id1" class="block border-none p0 m0" placeholder="Enter your Email"
+                    on="input-debounced: AMP.setState({ email: event.value })">
+        <label for="ip1" class="absolute top-0 right-0 bottom-0 left-0" aria-hidden="true">
+          Enter your Email
+        </label>
+      </div>
+      <button on="tap:AMP.pushState({ slidingStepperPage: slidingStepperPage + 1 })"
+              class="align-self-end ampstart-btn ampstart-btn-secondary caps"
+              disabled [disabled]="!email">next</button>
+    </section>
+    <section class="page next" 
+             [class]="slidingStepperPage < 1 ? 'page next' : 
+             (slidingStepperPage > 1 ? 'page previous' : 'page active')"> 
+      <h3>Welcome</h3>
+      <button class="back" [text]="email" on="tap:AMP.pushState({ slidingStepperPage: slidingStepperPage - 1 })"
+            disabled [disabled]="slidingStepperPage != 1"></button>
+      <div class="ampstart-input inline-block relative m0 p0 mb3 mt1">
+        <input type="text" value="" name="password" id="id2" class="block border-none p0 m0" placeholder="Enter your Password"
+               disabled [disabled]="slidingStepperPage != 1"
+               on="input-debounced: AMP.setState({ password: event.value })">
+        <label for="ip2" class="absolute top-0 right-0 bottom-0 left-0" aria-hidden="true">
+          Enter your Password
+        </label>
+      </div>
+      <button on="tap:AMP.pushState({ slidingStepperPage: slidingStepperPage + 1 })"
+              class="align-self-end ampstart-btn ampstart-btn-secondary caps"
+              disabled [disabled]="slidingStepperPage != 1 || !password">next</button>
+    </section>
+    <section class="page next" 
+             [class]="slidingStepperPage < 2 ? 'page next' : 
+             (slidingStepperPage > 2 ? 'page previous' : 'page active')"> 
+        <h3>Success</h3>
+        <p>You did it!</p>
+    </section>
+  </div>
+</body>
+</html>

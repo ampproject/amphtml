@@ -1,0 +1,73 @@
+<!--
+ Copyright Google Inc.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<link rel="import" href="../node_modules/@npm-polymer/polymer/polymer-element.html">
+<link rel="import" href="../node_modules/@npm-polymer/iron-flex-layout/iron-flex-layout.html">
+
+<dom-module id="sample-list-item">
+
+  <template>
+
+    <style>
+
+      :host {
+        @apply --layout-vertical;
+        @apply --layout-center-justified;
+        text-align: center;
+        margin: 0 48px;
+      }
+
+      .title {
+        color: var(--app-primary-color);
+        font-weight: bold;
+      }
+
+      .description {
+        color: var(--app-secondary-color);
+      }
+
+      @media (max-width: 767px) {
+        :host {
+          margin: 0 12px;
+        }
+      }
+
+    </style>
+
+    <div class="title">[[item.title]]</div>
+    <span class="description">[[item.description]]</span>
+
+  </template>
+
+  <script>
+
+    class SampleListItem extends Polymer.Element {
+
+      static get is() { return 'sample-list-item'; }
+
+      static get properties() { return {
+
+        item: Object
+
+      }}
+
+    }
+
+    customElements.define(SampleListItem.is, SampleListItem);
+
+  </script>
+
+</dom-module>

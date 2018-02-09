@@ -1,0 +1,107 @@
+<!---
+  {
+    "comment": "Don't install serviceworker as canonical domain is different that serviceworker domain",
+    "skipServiceWorker": true
+  }
+--->
+<!--
+  ## Introduction
+
+  [amp-app-banner](https://www.ampproject.org/docs/reference/components/amp-app-banner) provides a minimal UI for a cross-platform, fixed-position banner showing a call-to-action to install an app. In particular, `amp-app-banner` works inside an AMP viewer such as the Top Stories carousel in Google Search. Outside of the AMP viewer, the native app banners will be displayed instead of `amp-app-banner` in Safari on iOS and in Chrome on Android.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-app-banner</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!--
+  Import the `amp-app-banner` component.
+  -->
+  <script async custom-element="amp-app-banner" src="https://cdn.ampproject.org/v0/amp-app-banner-0.1.js"></script>
+  <!--
+    Declare the iOS app in the [meta data](https://developer.apple.com/library/content/documentation/AppleApplications/Reference/SafariWebContent/PromotingAppswithAppBanners/PromotingAppswithAppBanners.html). This enables Safari's build-in app install banner as well.
+  -->
+  <meta name="apple-itunes-app" content="app-id=828256236, app-argument=medium://p/9ea61abf530f">
+  <!--
+    Android apps need to be declared in the [web app manifest](/amp-app-banner-manifest.json). This will also enable the [native app install banner](https://developers.google.com/web/updates/2015/03/increasing-engagement-with-app-install-banners-in-chrome-for-android#native) in Chrome on Android.
+  -->
+  <link rel="manifest" href="/amp-app-banner-manifest.json">
+  <!--
+    Deep links into your apps are calculated based on your AMP's canonical link. Here we link to an article on Medium as we don't have a native AMP by Example app.
+  -->
+  <link rel="canonical" href="https://medium.com/google-developers/how-to-avoid-common-mistakes-when-publishing-accelerated-mobile-pages-9ea61abf530f">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+
+<style amp-custom>
+
+#banner {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+#banner > #banner-logo {
+  padding: 8px;
+}
+
+#banner > #banner-text {
+  flex: 1;
+  font-size: 14px;
+  padding: 0 8px;
+}
+
+</style>
+</head>
+<body>
+
+  <!-- ## Basic Usage -->
+  <!--
+The `amp-app-banner` can be fully customized by the developer as long as the height doesn't exceed 100px.  One required UI element is a button with the attribute `[open-button]`, which triggers the app install, or opens the deep-link if the app is already installed.
+  -->
+  <amp-app-banner layout="nodisplay" id="banner">
+    <div id="banner-logo">
+      <amp-img src="https://cdn-images-1.medium.com/max/50/1*JLegdtjFMNgqHgnxdd04fg.png" width="50" height="43" layout="fixed"></amp-img>
+    </div>
+    <div id="banner-text">Learn more about AMP in the Medium App.</div>
+    <div id="banner-action">
+      <button class="ampstart-btn mr1 caps" open-button>View in app</button>
+    </div>
+  </amp-app-banner>
+
+  <!-- ## Demo -->
+
+  <!--
+  The custom app banner shows up in AMP Viewers. The banner action opens the document's canonical URL as deep-link inside the app:
+
+  <amp-video width="1920" height="1080"
+    src="/video/amp-app-banner-android-app-installed.mp4"
+             layout="responsive"
+             controls>
+  </amp-video>
+
+  ...and if the app is not installed, the banner action shows the app in the Play Store / App Store:
+
+  <amp-video width="1920" height="1080"
+    src="/video/amp-app-banner-android-app-not-installed.mp4"
+             layout="responsive"
+             controls>
+  </amp-video>
+  -->
+
+  <!-- ## Testing -->
+  <!--
+    The amp-app-banner will only show in browsers that don't provide their own app install banner. This means Chrome on Android or Safari on iOS will not show the amp-app-banner, but the native install banner. For testing amp-app-banner you can open this page:
+
+  * **On a mobile device:** in browser without native install banner, e.g. [Firefox](https://play.google.com/store/apps/details?id=org.mozilla.firefox&hl=en_GB) on Android or [Chrome](https://itunes.apple.com/gb/app/chrome-web-browser-by-google/id535886823?mt=8) on iOS.
+  * **On Desktop:** in [mobile device emulation mode](https://developers.google.com/web/tools/chrome-devtools/device-mode/) append `#webview=1` to the [page URL](https://ampbyexample.com/components/amp-app-banner/#webview=1). The other option is to use a custom user agent in mobile emulation mode, for example:
+
+  <pre>Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) CriOS/51.000.21 Mobile/13B143 Safari/601.1</pre>
+  -->
+
+</body>
+</html>

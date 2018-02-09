@@ -1,0 +1,65 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-dynamic-css-classes</title>
+  <!-- #### Introduction 
+     AMP's dynamic CSS classes provided by the <a href="https://www.ampproject.org/docs/reference/components/presentation/amp-dynamic-css-classes">amp-dynamic-css-class tag</a> enable boolean logic for a handful of conditions 
+  -->
+  <!-- #### Setup -->
+  <!--
+    Include the amp-dynamic-css-classes extended component.
+  -->
+  <script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-dynamic-css-classes/" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- 
+    For the purpose of this sample, we're creating some helper CSS classes that use the CSS rules defined by amp-dynamic-css-classes.  These allow us to more succinctly refer to the conditions in our code below.
+  -->
+  <style amp-custom>
+    body:not(.amp-referrer-pinterest-com) .if-pinterest, 
+    body:not(.amp-referrer-ampbyexample-com) .if-ampbyexample, 
+    body:not(.amp-referrer-google-com) .if-google,
+    body:not(.amp-referrer-twitter-com) .if-twitter,
+    body:not(.amp-referrer-linkedin-com) .if-linkedin,
+    body:not(.amp-referrer-localhost) .if-localhost {
+      display: none;
+    }
+    body:not(.amp-viewer) .if-viewer,
+    body.amp-viewer .if-not-viewer {
+      display: none;
+    }
+    p {
+      padding: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- You do not need to include a call to the amp-dynamic-css-classes component to initialize the classes on the body element -->
+
+  <!-- #### Referrer -->
+  <!--
+    Using these referrer classes can allow you to conditionally include elements.
+  -->
+  <div>
+    <p class="if-pinterest">You were referred here or embedded by Pinterest!</p>
+    <p class="if-twitter">You were referred here or embedded by Twitter!</p>
+    <p class="if-google">You were referred here or embedded by Google!</p>
+    <p class="if-ampbyexample">You came here directly!  Cool :)</p>
+    <p class="if-localhost">You came here directly!  Cool :)</p>
+  </div>
+
+  <!-- #### Viewer -->
+  <!-- 
+    The 'viewer' classes enable you to style the page based on whether it's embedded inside an AMP viewer. Try it out on the [Google AMP Viewer](https://google.com/amp/ampbyexample.com/components/amp-dynamic-css-classes/): 
+  -->
+  <div>
+    <p class="if-not-viewer">Hey! You're not visiting within the context of an AMP Viewer!</p>
+    <p class="if-viewer">Ahoy! Since you're coming from a viewer.</p>
+  </div>
+
+</body>
+</html>

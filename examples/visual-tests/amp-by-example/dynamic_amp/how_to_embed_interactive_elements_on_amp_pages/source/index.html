@@ -1,0 +1,94 @@
+<!--
+  ## Introduction
+
+  This samples demonstrates how to embed interactive charts into AMP files.
+
+  To achieve its performance, AMP HTML doesn't allow custom Javascript.
+  This doesn't mean that you can't created visually rich and interactive websites with AMP.
+  For example, you can use [amp-bind](https://www.ampproject.org/docs/reference/components/amp-bind) to create dynamic and interactive features directly in AMP. However, sometimes dynamic content requires custom JS, e.g. when using a charting library. In this cases it's best to embed dynamic content using amp-iframe.
+
+  Google Trends recently published [live search trends](https://www.google.com/trends/oscars-2016-in-google-search/index.html) about the Oscars. These gives a fascinating inside into what the billions of searches that take place each day on Google tell us about the nominated actors and movies. Part of the articles are a number of interactive and live updating graphics.
+
+  This sample demonstrates how we can embed these into AMP files.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>How to create interactive AMP pages?</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!--
+    The only additional AMP component we will be using is `amp-iframe`.
+  -->
+  <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/dynamic_amp/how_to_embed_interactive_elements_on_AMP_pages/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+
+  <!-- ## Iframe to the Rescue -->
+  <!--
+    The key is to split your webpage into content that is defined with AMP...
+  -->
+  <section class="m1">
+    <h2 class="py2 py1">Who's going to win the Oscars?</h2>
+    <p>
+    We have also created this interactive guide — this shows
+    the day by day and minute by minute search interest in best
+    picture, actor and actress nominees since the nominations were
+    announced in January and will be updated to feature data from
+    the awards ceremony itself.
+    </p>
+  </section>
+  <!--
+    ...and interactive content embedded via iframes.
+
+    One thing to be aware of: the AMP runtime will only show iframes located at the top of a website if they provide a placeholder image. The charts in the sample are updated in real-time which means we cannot provide a placeholder image. Instead, we use an image of the chart background which stretches well to different widths.
+  -->
+  <amp-iframe title="Interactive chart displaying 2016 Oscar Best Picture search interest by date"
+              src="https://www.google.us/trends/embed/US_cu_82I1CVMBAACV6M_en/horserace_chart_3c6cdb21-e1eb-4412-9c28-707c3638ea35?hl=en&template=fe"
+              height="400"
+              layout="fixed-height"
+              frameborder="0"
+              sandbox="allow-scripts allow-same-origin">
+    <amp-img src="/img/oscars_placeholder_1.png"
+             layout="fixed-height"
+             height="360"
+             width="auto"
+             placeholder>
+    </amp-img>
+  </amp-iframe>
+
+  <section class="p1">
+    <h2 class="pb2">Where in America cares most about the Oscars?</h2>
+    <p>
+    It won’t surprise you to know that Hollywood consistently has
+    the highest search interest in, well, Hollywood. But other
+    metropolitan areas are in there too, from New York to Chicago
+    to San Francisco (where Oscars parties are yearly tradition).
+    </p>
+  </section>
+  <!--
+    Here is another interactive element embedded via an iframe.
+
+    A positive side-effect of encapsulating interactive content into
+    iframes is that it makes it easy to embed these on other
+    platforms as well, for example, in a mobile app via a webview.
+  -->
+  <amp-iframe title="Interactive US map displaying 2016 Oscar search interest by state"
+              src="https://www.google.com/trends/embed/US_cu_x1aYQFIBAAANlM_en/fe_geo_chart_f5a4cc96-b49b-4d88-9a3f-74cc902c2f35?forceMobileMode=true"
+              height="565"
+              layout="fixed-height"
+              frameborder="0"
+              sandbox="allow-scripts allow-same-origin">
+    <amp-img src="/img/oscars_placeholder_2.png"
+             layout="fixed-height"
+             height="565"
+             placeholder>
+    </amp-img>
+  </amp-iframe>
+</body>
+</html>

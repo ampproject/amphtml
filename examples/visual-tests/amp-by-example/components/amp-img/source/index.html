@@ -1,0 +1,77 @@
+<!-- 
+  ## Introduction
+
+  AMP HTML files don't support the normal HTML `img` tag. With `amp-img` AMP
+  provides a powerful replacement.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-img</title>
+  <!-- ## Setup -->
+  <!--
+    `amp-img` is a built-in element and is automatically imported via the AMP runtime.
+  -->
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-img/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+<style amp-custom>
+  amp-img > div[fallback] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f2f2f2;
+    border: solid 1px #ccc;
+  }
+</style>
+</head>
+<body>
+
+  <!-- ## Basic Usage -->
+  <!--
+    A simple [responsive](https://www.ampproject.org/docs/guides/responsive/control_layout.html)
+    image - *width* and *height* are used to determine the aspect ratio. Use `alt` to specify text that can act as an alternative for the image.
+  -->
+  <amp-img src="/img/amp.jpg" width="1080" height="610" layout="responsive" alt="AMP"></amp-img>
+
+  <!--
+  <p class="mb2">
+  <div class="p1 ampstart-card abe-info"><strong>Good to know:</strong> HTML 5.1 provides <a href="https://www.w3.org/TR/html51/semantics-embedded-content.html#alt-text">guidance for creating text to act as an alternative for images</a>.
+  </div>
+  </p>
+  -->
+
+  <!-- ## srcset -->
+  <!--
+    Use `srcset` to specify different images for varying viewport widths and pixel densities (change the width of your browser windows to test it).
+  -->
+  <amp-img src="/img/amp.jpg" srcset="/img/amp.jpg 1080w, /img/amp-900.jpg 900w, /img/amp-800.jpg 800w,
+  /img/amp-700.jpg 700w, /img/amp-600.jpg 600w, /img/amp-500.jpg 500w, /img/amp-400.jpg 400w,
+  /img/amp-300.jpg 300w, /img/amp-200.jpg 200w, /img/amp-100.jpg 100w" width="1080" height="610" layout="responsive" alt="AMP"></amp-img>
+
+  <!-- ## Offline Fallback -->
+  <!--
+    `amp-img` supports AMP's [common attributes](https://www.ampproject.org/docs/reference/common_attributes#fallback), this means you can show a `fallback` in case the image couldn't be loaded. This is great for adding offline support to your AMPs.
+  -->
+  <amp-img src="/img/does-not-exist.jpg" width="300" height="100" layout="responsive" class="m1">
+    <div fallback>offline</div>
+  </amp-img>
+  
+  <!-- ## No Script -->
+  <!--
+    If you want to ensure that users with javascript disabled can see your images, you can add an additional `img` element inside a `noscript` tag. This also makes it possible for webcrawlers without javascript runtime to discover your images.
+  -->
+  <amp-img src="/img/amp.jpg" alt="AMP" width="475" height="268" layout="responsive" class="m1">
+    <noscript>
+      <img src="/img/amp.jpg" width="475" height="268" alt="AMP"> 
+    </noscript>
+  </amp-img>
+
+  <!-- ## Hiding the Loading Indicator -->
+  <!-- Use the [`noloading`](https://www.ampproject.org/docs/reference/common_attributes#noloading) attribute to hide the loading indicators on page load. This is recommended for logos and small images/icons. -->
+  <amp-img src="/img/amp_by_example_logo.svg" width="208" height="40" alt="AMP by Example" noloading></amp-img>
+</body>
+</html>

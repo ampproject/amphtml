@@ -1,0 +1,36 @@
+<!--
+  ## Introduction
+
+  Use the [amp-hulu](https://www.ampproject.org/docs/reference/components/amp-hulu) component to embed Hulu videos into AMP files.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-hulu</title>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-hulu/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!--
+  Import the `amp-hulu` component in the header.
+  -->
+  <script async custom-element="amp-hulu" src="https://cdn.ampproject.org/v0/amp-hulu-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+
+  <!-- ## Basic Usage -->
+  <!--
+  **Note:** This sample only works on mobile browsers due to restrictions from Hulu and the component can only be used by Hulu partners.
+  -->
+  <!--
+  Embed Hulu videos via the `eid` in a video's URL. We recommend using the responsive layout for videos.
+  -->
+  <amp-hulu width="412" height="213" layout="responsive"
+            data-eid="4Dk5F2PYTtrgciuvloH3UA">
+  </amp-hulu>
+
+</body>
+</html>

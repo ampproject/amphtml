@@ -1,0 +1,114 @@
+<!--
+  ## Introduction
+
+  [amp-fx-flying-carpet](https://www.ampproject.org/docs/reference/components/amp-fx-flying-carpet) displays its children inside a container of fixed height. As the user scrolls the page, the flying carpet reveals more of it contents, sliding across its children as if peering through a window in the page.
+
+  For best experience of this example, use a mobile device or choose a mobile device layout using the Chrome console.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-fx-flying-carpet</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!-- Import the `amp-fx-flying-carpet` component in the header. -->
+  <script async custom-element="amp-fx-flying-carpet" src="https://cdn.ampproject.org/v0/amp-fx-flying-carpet-0.1.js"></script>
+  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-fx-flying-carpet/">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    @media (max-width: 1026px) {
+      amp-fx-flying-carpet {
+        text-align: center;
+      }
+    }
+    @media (min-width: 1027px) {
+      .align-right {
+        float: right;
+        margin: 16px;
+      }
+    }
+    .amp-flying-carpet-text-border {
+      background-color: black;
+      color: white;
+      text-align: center;
+    }
+    amp-fx-flying-carpet {
+      background: orange;
+    }
+  </style>
+</head>
+<body>
+
+  <!--
+     ## Basic Usage
+  -->
+  <!--
+
+    `amp-fx-flying-carpet` elements must be positioned after the first viewport
+     so make sure to place enough content before the element to cover the targeted viewport sizes.
+
+     The text that follows is to ensure that the `amp-fx-flying-carpet` is placed after the first viewport.
+  -->
+  <p>
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis venenatis, metus a tristique aliquet, enim nibh efficitur sem, ut iaculis urna justo eu diam. Nullam cursus sapien et sodales posuere. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Suspendisse potenti. Donec vitae ornare risus. Maecenas eleifend ante vel dui laoreet, et porttitor libero rutrum. Nam arcu mi, ullamcorper at risus et, pulvinar ultrices erat. In pellentesque sem vel purus auctor, ut venenatis tellus tristique. Phasellus molestie diam orci, nec gravida turpis bibendum ut. Sed sagittis aliquet lorem sed dictum.
+  </p>
+  <!--
+    `amp-fx-flying-carpet` can be used to display ads.
+
+    Use `height` parameter to specify the height of the flying carpets "window".
+  -->
+
+   <div>
+    <div class="amp-flying-carpet-text-border">Advertising</div>
+    <amp-fx-flying-carpet height="300px">
+      <amp-ad
+        width="300"
+        height="600"
+        class="align-right"
+        layout="fixed"
+        type="doubleclick"
+        data-slot="/35096353/amptesting/formats/flying_carpet">
+      </amp-ad>
+    </amp-fx-flying-carpet>
+    <div class="amp-flying-carpet-text-border">Advertising</div>
+  </div>
+
+  <!-- -->
+    <p>
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis venenatis, metus a tristique aliquet, enim nibh efficitur sem, ut iaculis urna justo eu diam. Nullam cursus sapien et sodales posuere. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Suspendisse potenti. Donec vitae ornare risus. Maecenas eleifend ante vel dui laoreet, et porttitor libero rutrum. Nam arcu mi, ullamcorper at risus et, pulvinar ultrices erat. In pellentesque sem vel purus auctor, ut venenatis tellus tristique. Phasellus molestie diam orci, nec gravida turpis bibendum ut. Sed sagittis aliquet lorem sed dictum.
+    </p>
+
+  <!--
+    `amp-fx-flying-carpet` can be also used to display images.
+  -->
+  <amp-fx-flying-carpet height="200px">
+     <amp-img src="/img/landscape_lake_1280x857.jpg"
+      width="1280"
+      height="853"
+      alt="an image"></amp-img>
+  </amp-fx-flying-carpet>
+
+  <!--
+    ## Positioning
+  -->
+  <!--
+    `amp-fx-flying-carpet` elements must be positioned before the last viewport
+     so make sure to place enough content after the element to cover the targeted viewport sizes.
+
+     The text that follows is to ensure that the `amp-fx-flying-carpet` is placed before the last viewport.
+  -->
+  <p>
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis venenatis, metus a tristique aliquet, enim nibh efficitur sem, ut iaculis urna justo eu diam. Nullam cursus sapien et sodales posuere. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Suspendisse potenti. Donec vitae ornare risus. Maecenas eleifend ante vel dui laoreet, et porttitor libero rutrum. Nam arcu mi, ullamcorper at risus et, pulvinar ultrices erat. In pellentesque sem vel purus auctor, ut venenatis tellus tristique. Phasellus molestie diam orci, nec gravida turpis bibendum ut. Sed sagittis aliquet lorem sed dictum.
+  </p>
+  <p>
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis venenatis, metus a tristique aliquet, enim nibh efficitur sem, ut iaculis urna justo eu diam. Nullam cursus sapien et sodales posuere. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Suspendisse potenti. Donec vitae ornare risus. Maecenas eleifend ante vel dui laoreet, et porttitor libero rutrum. Nam arcu mi, ullamcorper at risus et, pulvinar ultrices erat. In pellentesque sem vel purus auctor, ut venenatis tellus tristique. Phasellus molestie diam orci, nec gravida turpis bibendum ut. Sed sagittis aliquet lorem sed dictum.
+  </p>
+  <p>
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis venenatis, metus a tristique aliquet, enim nibh efficitur sem, ut iaculis urna justo eu diam. Nullam cursus sapien et sodales posuere. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Suspendisse potenti. Donec vitae ornare risus. Maecenas eleifend ante vel dui laoreet, et porttitor libero rutrum. Nam arcu mi, ullamcorper at risus et, pulvinar ultrices erat. In pellentesque sem vel purus auctor, ut venenatis tellus tristique. Phasellus molestie diam orci, nec gravida turpis bibendum ut. Sed sagittis aliquet lorem sed dictum.
+  </p>
+</body>
+</html>
