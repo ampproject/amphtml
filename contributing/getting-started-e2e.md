@@ -466,11 +466,15 @@ The reviewer should be one of the [core committers](https://github.com/ampprojec
 
 When you're done click "Create pull request."  This will bring you to your Pull Request page where you can track progress, add comments, etc.
 
-On the Pull Request page you can see that a couple of checks are running:
+On the Pull Request page you can see that a few checks are running:
 
-* the tests are being run on [Travis](https://travis-ci.org/ampproject/amphtml/pull_requests)
+* The tests are being run on [Travis](https://travis-ci.org/ampproject/amphtml/pull_requests)
 
-* the system is verifying that you have signed a CLA (Contributor License Agreement).  If this is your first time submitting a Pull Request for the amphtml project you'll need to sign an agreement.  (Make sure the email address you use to sign the CLA is the same one that you configured Git with.)  See details in the [Contributing code](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#contributing-code) documentation.
+* The system is verifying that you have signed a CLA (Contributor License Agreement).  If this is your first time submitting a Pull Request for the amphtml project you'll need to sign an agreement.  (Make sure the email address you use to sign the CLA is the same one that you configured Git with.)  See details in the [Contributing code](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#contributing-code) documentation.
+
+* Your code is going through static analysis by [LGTM](https://lgtm.com/projects/g/ampproject/amphtml/).
+
+* Visual diff tests that are run on Travis are being analyzed by [Percy](percy.io/ampproject/amphtml). (To access the results, fill out this [form](https://docs.google.com/forms/d/e/1FAIpQLScZma6qVJtYUTqSm4KtiF3Zc-n5ukNe2GXNFqnaHxospsz0sQ/viewform), and your request should be approved soon.)
 
 If you don't hear back from your reviewer within 2 business days, feel free to ping the pull request by adding a comment.
 
