@@ -67,6 +67,7 @@ export function copyTextToClipboard(doc, text) {
 export function isCopyingToClipboardSupported(win) {
   // Current implementation does not work on iOS even though the test for
   // support below returns true. See #13136.
+  console.log("TEST--!!!");
   if (Services.platformFor(win).isIos()) {
     return false;
   }
