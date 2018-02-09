@@ -177,8 +177,6 @@ amp4ads_feature_tests/extensions.html:113:2 Only AMP runtime 'script' tags are a
 |       src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
 |  
 |    <script async custom-template="amp-mustache"
->>   ^~~~~~~~~
-amp4ads_feature_tests/extensions.html:118:2 Only AMP runtime 'script' tags are allowed, and only in the document head. (see https://www.ampproject.org/docs/reference/spec#html-tags) [CUSTOM_JAVASCRIPT_DISALLOWED]
 |       src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
 |  </head>
 |  <body></body></html>
