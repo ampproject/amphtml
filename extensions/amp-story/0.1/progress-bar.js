@@ -87,7 +87,7 @@ export class ProgressBar {
     this.isBuilt_ = true;
     this.segmentCount_ = segmentCount;
 
-    this.makeSegmentIdMap_(segmentIds);
+    segmentIds.forEach((id, i) => this.segmentIdMap_[id] = i);
 
     this.root_ = this.win_.document.createElement('ol');
     this.root_.classList.add('i-amphtml-story-progress-bar');
@@ -102,14 +102,6 @@ export class ProgressBar {
     }
 
     return this.getRoot();
-  }
-
-  /**
-   * create mapping of segmentIds to position in progress bar
-   * @param {!Array<string>} segmentIds
-   */
-  makeSegmentIdMap_(segmentIds) {
-    segmentIds.forEach((id, i) => this.segmentIdMap_[id] = i);
   }
 
 
