@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ const RE_ADDTHIS_FRAGMENT = /^\.[a-z0-9\-_]{11}(\.[a-z0-9_]+)?$/i;
 /**
  * Fetches the fragment if it is in the style of a modern AddThis fragment.
  * @param url
+ * @returns (string|undefined)
  */
 const getModernFragment = url => {
   let frag = url.split('#').pop();
@@ -35,6 +36,11 @@ const getModernFragment = url => {
   }
 };
 
+/**
+ * Returns true if AddThis share fragment exists on URL
+ * @param url
+ * @returns {boolean}
+ */
 const isAddthisFragment = url => {
   if (getModernFragment(url)) {
     return true;
@@ -51,18 +57,20 @@ const isAddthisFragment = url => {
 
 /**
  * Removes the fragment from the url if we classify it as an AddThis fragment.
+ * @param {string} url
+ * @returns {string}
  */
 export const clearOurFragment = url => {
   if (isAddthisFragment(url)) {
     return url.split('#').shift();
-  } else {
-    return url;
   }
+  return url;
 };
 
 /**
  * Fetch the unique identifier portion of a modern fragment.
- * @param url
+ * @param {string} url
+ * @returns {string|undefined}
  */
 export const getFragmentId = url => {
   const fragment = getModernFragment(url);
@@ -75,7 +83,8 @@ export const getFragmentId = url => {
 
 /**
  * Fetch the service name portion of a modern fragment.
- * @param url
+ * @param {string} url
+ * @returns {string|undefined}
  */
 export const getServiceFromUrlFragment = url => {
   const fragment = getModernFragment(url);

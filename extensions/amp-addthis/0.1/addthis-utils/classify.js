@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ const strictPornHash = rot13Array(['phz']);
  * @param {string} keywordString string of keywords (seperated by non alpha characters)
  * @param {boolean} nonStrictMatch true iff we can't use the list of strict keywords
  * @private
+ * @returns {number}
  */
 const classifyString = (keywordString = '', nonStrictMatch = false) => {
   let classification = 0;
@@ -79,6 +80,7 @@ const classifyString = (keywordString = '', nonStrictMatch = false) => {
  * Classify a meta RATING keyword.
  * @param {string} rating
  * @private
+ * @returns {number}
  */
 const classifyRating = (rating = '') => {
   let classification = 0;
@@ -99,6 +101,7 @@ const classifyRating = (rating = '') => {
  * Add keywords to the page based on the content.
  * @param {string} content
  * @private
+ * @returns {Array<string>}
  */
 const extractKeywordsFromContent = content => {
   const keywords = [];
@@ -146,6 +149,7 @@ const getSearchString = url => {
 /**
  * Return true if the url appears to be a search URL; false otherwise.
  * @param {string} url
+ * @returns {boolean}
  */
 const isSearchUrl = (url = '') => {
   const lowerUrl = url.toLowerCase();
@@ -248,6 +252,7 @@ export const classifyReferrer = (
  * @returns {boolean}
  */
 export const isProductPage = (doc, metaElements) => {
+  // if a single id or class enumerated below exists, return true
   if (doc.getElementById('product') ||
       (doc.getElementsByClassName('product') || []).length > 0 ||
       doc.getElementById('productDescription') ||
@@ -257,6 +262,7 @@ export const isProductPage = (doc, metaElements) => {
     return true;
   }
 
+  // see if 'og:type' meta tag === 'product'
   const ogTags = metaElements.reduce((tags, metaElement) => {
     const {name, content} = getDetailsForMeta(metaElement);
 
