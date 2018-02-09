@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 import {MediaPool, MediaType} from '../media-pool';
+import {Services} from '../../../../src/services';
 import {findIndex} from '../../../../src/utils/array';
+
+const NOOP = () => {};
 
 describes.realWin('media-pool', {}, env => {
   let win;
@@ -27,6 +30,11 @@ describes.realWin('media-pool', {}, env => {
 
   beforeEach(() => {
     win = env.win;
+    sandbox.stub(Services, 'vsyncFor')
+        .callsFake(() => ({mutate: task => task()}));
+    sandbox.stub(Services, 'timerFor')
+        .callsFake(() => ({delay: NOOP}));
+
     mediaPool = new MediaPool(win, COUNTS, element => {
       return distanceFnStub(element);
     });
@@ -74,12 +82,6 @@ describes.realWin('media-pool', {}, env => {
 
   it('should not be null', () => {
     expect(mediaPool).to.not.be.null;
-  });
-
-  it('should pre-populate default sources', () => {
-    getElements([mediaPool.allocated, mediaPool.unallocated]).forEach(el => {
-      expect(!!el.getAttribute('src')).to.be.true;
-    });
   });
 
   it('should start with no allocated elements', () => {
