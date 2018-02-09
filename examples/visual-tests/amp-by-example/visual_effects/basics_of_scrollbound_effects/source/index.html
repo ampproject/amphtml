@@ -1,0 +1,369 @@
+<!--
+  ## Introduction
+
+  [amp-position-observer](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-position-observer)
+  combined with [amp-animation](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-animation) is
+  a powerful building block that can handle various uses-cases such as **scrollbound animations**,
+  **parallax effects** and **transitions** as elements enter and exit the viewport.
+
+  In this tutorial, we will go through some of these use-cases in detail.
+-->
+
+<!--
+  ## Components
+  [amp-position-observer](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-position-observer) is a
+  functional component that monitors the position of an element within the viewport as a user scrolls,
+  and dispatches `enter`, `exit` and `scroll:<Position In Viewport As a Percentage>` events.
+
+  These events in return can be used to `play`, `pause` or `seek` animation timelines
+  defined by [amp-animation](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-animation)
+  to create scrollbound and visibility-based effects.
+
+  [amp-animation](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-animation) is a UI component
+  that relies on [Web Animations API](https://www.w3.org/TR/web-animations/) to define and
+  run keyframe animations in AMP documents.
+-->
+
+<!-- -->
+<!doctype html>
+<html ⚡>
+
+<head>
+  <meta charset="utf-8">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!--  Import amp-position-observer extension -->
+  <script async custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js"></script>
+
+  <!--  Import amp-animation extension -->
+  <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
+
+  <script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+
+
+  <link rel="canonical" href="https://ampbyexample.com/visual_effects/basics_of_scrollbound_effects/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+
+  <!--
+    ## Styles
+
+    The CSS used for these samples are included here for reference.
+
+    These rules are simply needed to make the samples work but are not fundamental
+    to the concepts covered here.
+  -->
+  <style amp-custom>
+
+    /*
+     * Fidget Spinner styles
+     */
+    .fidget-spinner-scene {
+      margin: 10px 20%;
+    }
+
+    /*
+     * Card transition styles
+     */
+    .card {
+      margin: 10%;
+      position: relative;
+    }
+    .card-title {
+      padding: 5%;
+      padding-right: 40%;
+      font-size: 50%;
+      font-weight: bold;
+      color: #FAFAFA;
+      transform: translateX(-100%);
+    }
+
+    /*
+     * Parallax window stles
+     */
+    .parallax-image-window {
+      overflow: hidden;
+    }
+    .parallax-image-window amp-img {
+      margin-bottom: -30%;
+    }
+
+    /*
+     * Carousel transition styles
+     */
+    .carousel-component {
+      margin-right: -60%;
+      margin-left: 60%;
+    }
+    .carousel-parent {
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!--
+  ## Scrollbound Animations
+
+  Let's create a fidget spinner that rotates as user scrolls the page.
+
+  This sample showcases the core concept behind combining
+  `amp-position-observer` and `amp-animation`: The ability to progress
+  through a keyframe animation timeline as an element progresses through the viewport via scrolling.
+  -->
+
+  <!--
+  Our fidget spinner scene is a `div` with an `image`. We add an
+  `amp-position-observer` element as child of the scene to monitor its progress
+  through the viewport. Let's take a look at the details:
+
+  - **`on:scroll`**: This event is triggered by position observer as the position of the
+  scene is changed when user scrolls. The event provides a percentage value
+  (decimal between 0 and 1) representing how far the scene is between the start and
+  end of its progress through the viewport.
+  - **`spinAnimation.seekTo(percent=event.percent)`**: We will define an `amp-animation`
+  that will do the spinning in the next step, here we are coupling `amp-position-observer` and
+  `amp-animation` by triggering a `seekTo` action on the animation as `scroll` events occurs.
+  This is how we specify that we like to progress through the animation
+  timeline as the scene progresses through the viewport via scrolling.
+  - **`intersection-ratios`**: Defines how much of the scene should be
+  visible in the viewport before `amp-position-observer` triggers any of its events.
+  Here, we like the spinning to happen only when fidget spinner is fully visible so
+  we set it to `1`.
+  -->
+  <div class="fidget-spinner-scene">
+
+    <amp-position-observer on="scroll:spinAnimation.seekTo(percent=event.percent)" intersection-ratios="1" layout="nodisplay">
+    </amp-position-observer>
+
+    <amp-img id="fidgetSpinnerImage" width="1024" height="1114" layout="responsive" src="/examples/visual-tests/amp-by-example/img/fidget.png" alt="Picture of a fidget spinner"></amp-img>
+  </div>
+
+  <!--
+   Now we need to define the animation itself:
+
+   Fairly straightforward in this case, we want `fidgetSpinnerImage` to rotate
+   360 degrees, so we just define a `"transform": "rotate(360deg)"` as the last (and only)
+   keyframe. Let's take a look at the details:
+
+   * **`id="spinAnimation"`**: We need to give the animation an Id so we can reference it from postion observer.
+   * **`"duration": "1"`**: The value of `duration` is irrelevant in this case since we progress through
+   the timeline via scrolling so we just set it to `1`
+   * **`"direction": "reverse"`**: This is needed due an iOS bug with Web Animations.
+   * **`"animations"`**: Here we can define one or more keyframe-based animations. In our case, we only need one.
+   * **`"selector"`**: `"#fidgetSpinnerImage"` is the selector that targets the fidget spinner for the animation.
+   * **`"keyframes":`** We define a `"transform": "rotate(360deg)"` as the last (and only)
+   keyframe. Note that `amp-animation` automatically fills the first keyframe if not provided.
+  -->
+  <!--
+   `amp-animation` has plenty of other features, please see
+   [the API reference](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-animation) to learn more about `amp-animations`.
+  -->
+  <amp-animation id="spinAnimation" layout="nodisplay">
+    <script type="application/json">
+      {
+        "duration": "1",
+        "fill": "both",
+        "direction": "reverse",
+        "animations": [
+          {
+            "selector": "#fidgetSpinnerImage",
+            "keyframes": [
+              { "transform": "rotate(360deg)" }
+            ]
+          }
+        ]
+      }
+    </script>
+  </amp-animation>
+
+  <!--
+  ## Fade & Slide Transitions
+
+  Now that we have learned the basic core concepts behind `amp-position-observer`
+  and `amp-animation`, let's dive into more creative ways they can be combined to
+  create interesting transitions.
+
+  In this sample, we will combine timebound and scrollbound transitions together
+  to create an effect where the opacity of the card is tied to how much of it
+  is visible in the viewport (scrollbound) and the title of the card animates in/out
+  (timebound) as the card enters and exits the viewport.
+  -->
+
+  <!--
+  Our card scene is simply composed of an image and an overlayed title.
+  Here we define two position observers with different `intersection-ratios` values:
+
+  * The first one will control the opacity of the image as user scrolls.
+  * The second one will run a timebound slide animation for the title when the
+  scene becomes mostly visible (80%) and runs it again "in reverse" when scene
+  exits the viewport a bit (20%).
+  -->
+  <div class="card ampstart-card">
+
+    <amp-position-observer on="scroll:fadeTransition.seekTo(percent=event.percent)" intersection-ratios="0" layout="nodisplay">
+    </amp-position-observer>
+
+    <amp-position-observer on="enter:slideTransition.start; exit:slideTransition.start,slideTransition.reverse" intersection-ratios="0.8"
+      layout="nodisplay">
+    </amp-position-observer>
+
+    <amp-fit-text layout="fill">
+      <div class="card-title">
+        Organic, fresh tomatos and pasta!
+      </div>
+    </amp-fit-text>
+
+    <amp-img id="cardImage" width="1280" height="898" layout="responsive" src="/examples/visual-tests/amp-by-example/img/food.jpg" alt="Picture of food table."></amp-img>
+  </div>
+
+  <!--
+  Let's define the keyframes for the scrollbound fade in/out transition.
+
+  We target the `#cardImage` and define keyframes in a way that image gains
+  full opacity within the first 40% of the timeline and starts fading out in the
+  last 40% of the timeline.
+
+  Note that since the position observer controlling this animation has
+  `intersection-ratios` set to `0`, we go through the full timeline when user
+  scrolls `ViewportHeight + 2 * SceneHeight` amount of pixels.
+  -->
+  <amp-animation id="fadeTransition" layout="nodisplay">
+    <script type="application/json">
+      {
+        "duration": "1",
+        "fill": "both",
+        "direction": "reverse",
+        "animations": [
+          {
+            "selector": "#cardImage",
+            "keyframes": [
+              { "opacity": "0.3", "offset": 0 },
+              { "opacity": "1", "offset": 0.4 },
+              { "opacity": "1", "offset": 0.6 },
+              { "opacity": "0.3", "offset": 1 }
+            ]
+          }
+        ]
+      }
+    </script>
+  </amp-animation>
+
+  <!--
+  For the slide in/out effect of the title, we just define a 500ms animation
+  that will move the title along the X-axis.
+
+  This animation will simply be triggered (either in normal or reverse directions)
+  via the second position observer when the scene is mostly visible/invisible.
+  -->
+  <amp-animation id="slideTransition" layout="nodisplay">
+    <script type="application/json">
+      {
+          "duration": "500ms",
+          "fill": "both",
+          "easing": "ease-out",
+          "iterations": "1",
+          "animations": [
+            {
+              "selector": ".card-title",
+              "keyframes": [
+                { "transform": "translateX(-100%)" },
+                { "transform": "translateX(0)" }
+              ]
+            }
+          ]
+        }
+    </script>
+  </amp-animation>
+
+  <!--
+  ## Parallax Image Window
+
+  Parallax is another effect that is possible with combining `amp-animation` and
+  `amp-position-observer`.
+
+  Parallax normally involves translating an element on the Y-axis as user scrolls.
+
+  Here we define a scene that has a smaller height than the image inside of it,
+  as user scrolls, we move the image creating a parallax window into the image.
+  -->
+  <div class="parallax-image-window">
+
+    <amp-position-observer on="scroll:parallaxTransition.seekTo(percent=event.percent)" intersection-ratios="0" layout="nodisplay">
+    </amp-position-observer>
+
+    <amp-img id="parallaxImage" width="1280" height="873" layout="responsive" src="/examples/visual-tests/amp-by-example/img/elephant.jpg" alt="Picture of an elephant"></amp-img>
+  </div>
+
+  <!--
+  The animation itself simply moves the image up via `"transform": "translateY(-30%)"`
+  -->
+  <amp-animation id="parallaxTransition" layout="nodisplay">
+    <script type="application/json">
+      {
+        "duration": "1",
+        "fill": "both",
+        "direction": "reverse",
+        "animations": [
+          {
+            "selector": "#parallaxImage",
+            "keyframes": [
+              { "transform": "translateY(-30%)" }
+            ]
+          }
+        ]
+      }
+    </script>
+  </amp-animation>
+
+  <!--
+  ## Carousel Transition
+
+  We can also use these effects with other AMP components such as `amp-carousel`.
+
+  In this sample, we have a carousel where the first item is pushed to the right and
+  when carousel becomes visible, it snaps back into place providing a visual "hint"
+  that the carousel is horizontally scrollable.
+  -->
+  <div class="carousel-parent">
+    <amp-carousel class="carousel-component" height="300" layout="fixed-height" type="carousel">
+
+      <amp-position-observer on="enter:carouselTrasnsition.start" intersection-ratios="0.8" layout="nodisplay">
+      </amp-position-observer>
+
+      <amp-img src="https://unsplash.it/800/600?image=1003" width="400" height="300" alt="a sample image"></amp-img>
+      <amp-img src="https://unsplash.it/800/600?image=1043" width="400" height="300" alt="another sample image"></amp-img>
+      <amp-img src="https://unsplash.it/800/600?image=1032" width="400" height="300" alt="and another sample image"></amp-img>
+    </amp-carousel>
+  </div>
+
+  <!--
+  Here we define our timebound animation with a delay of 200ms which will slide
+  the carousel to the left within 500ms.
+
+  This animation will only be triggered once by the position observer as defined above.
+  -->
+  <amp-animation id="carouselTrasnsition" layout="nodisplay">
+    <script type="application/json">
+      {
+        "duration": "500ms",
+        "fill": "both",
+        "easing": "ease-in",
+        "delay": "200ms",
+        "animations": [
+          {
+            "selector": ".carousel-component",
+            "keyframes": [
+              { "transform": "translateX(-60%)" }
+            ]
+          }
+        ]
+      }
+    </script>
+  </amp-animation>
+
+</body>
+
+</html>

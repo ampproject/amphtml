@@ -39,7 +39,7 @@ function getMarkdownFiles() {
   const filesInPr =
         getStdout('git diff --name-only master...HEAD').trim().split('\n');
   return filesInPr.filter(function(file) {
-    return path.extname(file) == '.md';
+    return path.extname(file) == '.md' && !file.startsWith('examples/');
   });
 }
 
