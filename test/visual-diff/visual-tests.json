@@ -102,36 +102,19 @@
     {
       "url": "examples/visual-tests/amp-layout/amp-layout.amp.html",
       "name": "AMP Layout"
-    }
-  ],
-
-  /**
-   * List of failing webpages. Move pages here if they fail, since visual tests
-   * block PRs from being merged. Move them back once failures are fixed.
-   */
-  "failing_webpages": [
+    },
     {
-      /**
-       * Fails due to https://github.com/ampproject/amphtml/issues/10377
-       */
       "url": "examples/visual-tests/font.amp.404/font.amp.html",
       "name": "Fonts 404",
       "forbidden_css": [
         ".comic-amp-font-loaded",
         ".comic-amp-bold-font-loaded"
       ],
-      "loading_incomplete_css": [
-        ".comic-amp-font-loading",
-        ".comic-amp-bold-font-loading"
-      ],
       "loading_complete_css": [
         ".comic-amp-font-missing",
         ".comic-amp-bold-font-missing"
       ]
     },
-    /**
-      * Fails due to https://github.com/ampproject/amphtml/issues/11496
-      */
     {
       "url": "examples/visual-tests/article.amp/article.amp.html",
       "name": "AMP Article",
@@ -141,9 +124,6 @@
         ".ad-two"
       ]
     },
-    /**
-      * Fails due to https://github.com/ampproject/amphtml/issues/13351
-      */
     {
       "url": "examples/visual-tests/amp-list/amp-list.amp.html",
       "name": "AMP List and Mustache",
@@ -152,5 +132,12 @@
         ".list2"
       ]
     }
+  ],
+
+  /**
+   * List of failing webpages. Move pages here if they fail, since visual tests
+   * block PRs from being merged. Move them back once failures are fixed.
+   */
+  "failing_webpages": [
   ]
 }
