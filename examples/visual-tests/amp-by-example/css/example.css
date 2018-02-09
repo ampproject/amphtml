@@ -1,0 +1,109 @@
+amp-instagram {
+  box-sizing: content-box;
+}
+.www-component-desc pre,
+pre, code {
+  font-family: Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+}
+.www-component-desc pre,
+pre {
+  font-size: 14px;
+  overflow: scroll;
+  -moz-tab-size: 2;
+  -o-tab-size: 2;
+  tab-size: 2;
+  word-break: normal;
+  line-height: 1.4;
+}
+pre > code {
+  padding: 0;
+}
+code {
+  background: #f9f7f7;
+  padding: 2px 4px;
+}
+.www-component-desc:last-child {
+  padding-bottom: 4rem;
+}
+.www-component-desc > p > amp-img {
+  display: block;
+  margin: 0 auto;
+}
+.www-component-desc ol,
+.www-component-desc ul {
+  list-style:inside;
+}
+.www-component-desc > pre {
+  padding: 1rem;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+}
+.www-component-desc > div,
+.www-component-desc > amp-img,
+.www-component-desc > amp-iframe,
+.www-component-desc > pre {
+  margin-left: 5rem;
+  margin-right: 5rem;
+  margin-bottom: 2rem;
+  padding: 0;
+}
+.www-component-desc > pre {
+  padding: 1rem;
+}
+.www-component-desc > .ampstart-card {
+  padding: 1rem;
+}
+@media (max-width: 40rem) {
+  .www-component-desc > div,
+  .www-component-desc > amp-img,
+  .www-component-desc > amp-iframe,
+  .www-component-desc > pre {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+.www-header h1 {
+  color: #fff;
+}
+.www-component-desc > pre > code,
+.abe-code pre {
+  white-space: pre-wrap;
+  overflow-x: auto;
+  margin: 0;
+  max-height: 600px;
+  padding: 0;
+}
+.abe-code pre {
+  padding: 1rem;
+}
+.abe-code-container {
+  padding: 0;
+  margin: 0;
+}
+.www-component-desc {
+  margin-bottom: 0rem;
+}
+.www-component-desc:first-child h2 {
+  margin-top: 0rem;
+}
+.www-component-desc h2 {
+  margin-top: 5rem;
+  margin-bottom: 2rem;
+}
+.abe-code-preview {
+  background: #f9f7f7;
+}
+.abe-preview {
+  background: #fff;
+}
+.abe-preview>h1,
+.abe-preview>h2,
+.abe-preview>h3,
+.abe-preview>h4,
+.abe-preview>figure,
+.abe-preview>section,
+.abe-preview>p {
+  padding: 1rem;
+}

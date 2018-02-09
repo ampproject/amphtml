@@ -1,0 +1,244 @@
+<!-- -->
+<!doctype html>
+<html ⚡4ads>
+
+<head>
+  <meta charset="utf-8">
+  <title>Scrollbound Slides 360 Ad</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://amp-ads.firebaseapp.com/dist/amp-inabox.js"></script>
+  <script async custom-element="amp-animation" src="https://amp-ads.firebaseapp.com/dist/v0/amp-animation-0.1.max.js"></script>
+  <script async custom-element="amp-lightbox" src="https://amp-ads.firebaseapp.com/dist/v0/amp-lightbox-0.1.max.js"></script>
+<script async custom-element="amp-google-vrview-image" src="https://amp-ads.firebaseapp.com/dist/v0/amp-google-vrview-image-0.1.max.js"></script>
+  <style amp4ads-boilerplate>
+    body {
+      visibility: hidden
+    }
+  </style>
+
+  <!-- ## Summary-->
+  <!--
+    Sample AMPHTML ad using [amp-animation](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-animation),
+    [amp-lightbox](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-lightbox),
+    [amp-google-vrview-image](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-google-vrview-image),
+    and [amp-img](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-img)
+    to create an ad that changes slides based on scrolling and displays a 360 image in a lightbox.
+
+    <img src="https://cloud.githubusercontent.com/assets/2099009/26142066/be812a52-3a93-11e7-8bf7-937a49109128.gif" width="303" alt="Demo of this example"></img>
+  -->
+
+  <!-- ## Styling -->
+  <!--
+  This is an advanced example that requires some styling to make it
+  look and function properly. The styling designed here is responsive and will work with various ad sizes.
+  -->
+  <style amp-custom>
+
+    /*
+     * Top level container: It fills the parent viewport
+     * that hosts the ad.
+     */
+    .ad-container {
+      font-family: "Roboto", sans-serif;
+      width: 100vw;
+      height: 100vh;
+      color: #FFFFFF;
+    }
+
+    /* Content Layer */
+    .content-container {
+      z-index: 1;
+    }
+
+    /* Content Layer: Title and logo */
+    .title {
+      position: absolute;
+      top: 40%;
+      left: 0;
+      padding: 15px;
+      transform: translate(0, -40%);
+      background: rgba(0,0,0,0.8);
+      font-weight: bold;
+    }
+
+    .vr360-button {
+      position: absolute;
+      top: 40%;
+      transform: translate(0, -40%);
+      height: auto;
+      right: 0px;
+      display: flex;
+      flex-direction: row;
+    }
+
+    .vr360-button>* {
+      flex: 1;
+    }
+
+    .next {
+      padding: 2px;
+      margin-left: 2px;
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-image: url('https://ampbyexample.com/img/arrow.svg');
+      transform: rotate(180deg);
+      background-size: contain;
+    }
+
+    /* Content Layer: Footer and learn more button */
+    .footer {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      padding: 5px 10px;
+      background-color: rgba(0, 0, 0, 0.8);
+      box-sizing: border-box;
+      font-size: 10px;
+      display: flex;
+      flex-direction: row;
+    }
+
+    .footer>* {
+      flex: 1;
+      align-self: center;
+    }
+
+    .footer>.center {
+      flex: 2;
+    }
+
+    .logo {
+      margin-right: 10px;
+    }
+
+    .button {
+      flex: 0;
+      font-size: 10px;
+      background-color: #2979ff;
+      padding: 5px 15px;
+      white-space: nowrap;
+      letter-spacing: 0.5px;
+      color: #fafafa;
+      text-decoration: none;
+      cursor: pointer
+    }
+
+    /* Generic CSS class to fill a parent */
+    .fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+
+    /* Lightbox styles */
+    .lightbox-back-button {
+      position: absolute;
+      z-index: 1;
+      cursor: pointer;
+      width: 60px;
+      height: 60px;
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-image: url('https://ampbyexample.com/img/arrow.svg');
+    }
+
+    #lightbox-vr {
+      background: #f9f7f7;
+    }
+
+    .ad-container img {
+      object-fit: cover;
+    }
+
+  </style>
+</head>
+
+<body>
+  <!-- ## Scrollbound Slide Change Animation -->
+  <!--
+    The animation is implemented using [amp-animation](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-animation)
+    which is an experimental AMP component that uses [Web Animations API](https://www.w3.org/TR/web-animations/)
+    to support both __time__ and __scroll__ based animations.
+  -->
+  <amp-animation layout="nodisplay" trigger="visibility">
+    <script type="application/json">
+      {
+      "ticker": "scroll",
+      "fill": "both",
+      "animations": [
+        {
+          "target": "slides",
+          "keyframes": [
+            { "transform": "translateY(0)" },
+            { "transform": "translateY(0)", "offset": 0.5 },
+            { "transform": "translateY(-100vh)", "offset": 0.5 },
+            { "transform": "translateY(-100vh)", "offset": 1 }
+          ]
+        }
+      ]
+    }
+    </script>
+  </amp-animation>
+  <!--
+    **scroll vs. time ticker**: Setting `"ticker": "scroll"` tells
+    `amp-animation` to advance the animation timeline based on scrolling rather than time.
+
+    **Sliding images**:
+    We have two images of 100vh height for this ad, we switch between them by moving
+    the parent container -100vh at the middle keyframe of the scrollbound animation as defined above.
+  -->
+
+  <!-- ## Lightbox with 360 image -->
+  <!--
+  The amp-lightbox component defines the child elements that will be displayed in a full-viewport overlay.
+  We set a different id for each lightbox so they can be opened and closed by actions on other elements.
+
+  Inside the lightbox we create an `amp-google-vrview-image` component which can display VR and 360
+  images and videos.
+  -->
+  <amp-lightbox id="lightbox-vr" layout="nodisplay">
+    <div class="lightbox-back-button" role="button" tabindex="0"
+         on="tap:lightbox-vr.close">
+    </div>
+    <amp-google-vrview-image yaw="90" src="https://ampbyexample.com/img/car-vr-360.jpg"
+      layout="fill">
+    </amp-google-vrview-image>
+  </amp-lightbox>
+
+  <!-- ## Ad Container -->
+  <!--
+  Top level container: It fills the parent viewport that hosts the ad.
+
+  `amp-ad-banner` is a dummy AMP element that is used by the AMP runtime to determine the position of the ad when a lightbox is opened.
+  -->
+  <amp-ad-banner class="ad-container" layout="container">
+    <!-- ## Content Layer -->
+    <!--
+    Create the content layer that hosts the slide images and information about the ad.
+    -->
+    <div class="content-container fill">
+      <div id="slides">
+        <amp-img height="100vh" layout="fixed-height" src="https://ampbyexample.com/img/car-side-bg.jpg"></amp-img>
+        <amp-img height="100vh" layout="fixed-height" src="https://ampbyexample.com/img/car-tunnel.jpg"></amp-img>
+      </div>
+      <div class="title">
+        <div>THE ALL NEW</div>
+        <div>HOWDY WS-X LUX</div>
+      </div>
+      <div class="vr360-button" on="tap:lightbox-vr.activate" role="button" tabindex="0">
+        <div class="button">EXPLORE 360</div>
+        <div class="button next"></div>
+      </div>
+      <div class="footer">
+        <div><amp-img class="logo" layout="fixed" width="72" height="32" src="https://ampbyexample.com/img/car-logo.png"></amp-img></div>
+        <div class="center"><span>36 months lease, $189/month, $2999 due at signing</span></div>
+        <div><a href="https://ampproject.org" target="blank_" class="button">LEARN MORE</a></div>
+      </div>
+    </div>
+  </amp-ad-banner>
+
+</body>
+
+</html>

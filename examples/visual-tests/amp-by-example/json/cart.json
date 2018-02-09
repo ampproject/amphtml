@@ -1,0 +1,26 @@
+{
+"items": [
+{
+  "fullname": "Jordan M Adler",
+  "phonenumber": "212-555-1212",
+  "cart_items": [
+    {
+      "name": "Pluot",
+      "quantity": 5,
+      "price": "$1.00"
+    },
+    {
+      "name": "Apple",
+      "quantity": 1,
+      "price": "$3.25"
+    }
+  ],
+  "address": {
+    "addr1": "111 8th Ave",
+    "city": "New York",
+    "state": "NY",
+    "zipcode": 10011
+  }
+}
+]
+}

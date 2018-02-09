@@ -1,0 +1,285 @@
+<!-- -->
+<!doctype html>
+<html amp4ads lang="en">
+  <head>
+    <meta charset="utf-8">
+  <title>Stack With Bind Ad</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <script async custom-element="amp-bind" src="https://amp-ads.firebaseapp.com/dist/v0/amp-bind-0.1.max.js"></script>
+    <script async custom-element="amp-selector" src="https://amp-ads.firebaseapp.com/dist/v0/amp-selector-0.1.max.js"></script>
+    <script async src="https://amp-ads.firebaseapp.com/dist/amp.js"></script>
+    <style amp4ads-boilerplate>body{visibility:hidden}</style>
+    <!-- ## Summary-->
+    <!--
+    Sample AMPHTML ad using [amp-bind](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-bind),
+    and [amp-selector](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-selector) to create an interactive "stack" ad.
+    -->
+    <!-- ## Styling -->
+    <!--
+    This is an advanced example that requires some styling to make it look and function properly.
+
+    We use [custom CSS properties](https://developer.mozilla.org/en-US/docs/Web/CSS/--*) and `calc()` in this example for the sake of readability. This is not a requirement, since the results of all of the `calc()` expressions in this example can be replaced by hand or by using a CSS pre-processor.
+    -->
+    <style amp-custom>
+      /* Define constants for stack item dimensions */
+      :root {
+        --item-width: 230px;
+        --item-height: 130px;
+      }
+      /* Root container for the entire visual area */
+      .root-container {
+        font-family: 'Roboto', sans-serif;
+        font-size: 14px;
+        background: #000;
+        color: #fff;
+        width: 100%;
+        height: 100vh;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+      }
+      /* Main area container */
+      .main-container {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+      /* Footer styling */
+      .footer {
+        background: #000;
+        font-size: 12px;
+        padding: 8px;
+        line-height: 34px;
+        display: flex;
+        position: relative;
+        z-index: 1;
+      }
+      .footer-logo {
+        flex: 1;
+      }
+      .logo-img {
+        display: block;
+      }
+      .button {
+        text-decoration: none;
+        text-transform: uppercase;
+        padding: 0 12px;
+        color: #fff;
+        display: inline-block;
+        background-color: #2979ff;
+      }
+      /*
+       * We use empty div elements to fake the appearance of depth in the stack.
+       * Each one of them is offset by 8px, which is why the width changes.
+       */
+      .stack-bg-item {
+        height: calc(var(--item-height) - 4px);
+        margin: calc(8px - var(--item-height)) auto 0;
+        border-radius: 3px;
+      }
+      .stack-bg-item:nth-child(1) {
+        background: rgba(255, 255, 255, 0.15);
+        margin-top: 0;
+        width: calc(var(--item-width) - 4 * 8px);
+      }
+      .stack-bg-item:nth-child(2) {
+        background: rgba(255, 255, 255, 0.25);
+        width: calc(var(--item-width) - 3 * 8px);
+      }
+      .stack-bg-item:nth-child(3) {
+        background: rgba(255, 255, 255, 0.35);
+        width: calc(var(--item-width) - 2 * 8px);
+      }
+      .stack-bg-item:nth-child(4) {
+        background: rgba(255, 255, 255, 0.45);
+        width: calc(var(--item-width) - 1 * 8px);
+      }
+      .stack-container {
+        display: block;
+        position: absolute;
+      }
+      .stack {
+        height: var(--item-height);
+        width: var(--item-width);
+        margin: calc(5px - var(--item-height)) 0 5px;
+      }
+      /* Styling for actual stack items */
+      .stack-item {
+        height: var(--item-height);
+        width: var(--item-width);
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 3px;
+        padding: 2px;
+        position: absolute;
+        box-sizing: border-box;
+        transition: 0.3s transform, 0.3s opacity;
+
+        /*
+         * Translate the stack item horizontally when not topmost or second
+         * topmost, and set its opacity to 0 so it's out of view.
+         */
+        transform: translate(100px, 0);
+        opacity: 0;
+      }
+      .stack-item:nth-child(even) {
+        /*
+         * We use negative translate for each even stack item to alternate the
+         * animation effect.
+         */
+        transform: translate(-100px, 0);
+      }
+      /*
+       * Style the second topmost stack item so it's displayed.
+       * We scale it so it's smaller than the topmost element by 8px total, to
+       * contribute to the illusion of depth.
+       */
+      .stack-item.second-topmost {
+        transform: scale(calc(1 - (4px / var(--item-width)))) translate(0, 0);
+        opacity: 0;
+      }
+      /*
+       * Style the topmost stack item so it's in full-width and slightly offset
+       * from the second topmost.
+       */
+      .stack-item.topmost {
+        opacity: 1;
+        transform: scale(1) translate(0, 4px);
+        z-index: 1;
+      }
+      /* Styling for selector dots */
+      .dots {
+        text-align: center;
+      }
+      .dots-item {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-radius: 6px;
+        background: #fff;
+        margin: 0 2px;
+      }
+      .dots-item[selected] {
+        background: #2979ff;
+      }
+      .bg-img-container {
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ## amp-bind state configuration -->
+    <!-- We use the initial state to configure the amount of items in stack. -->
+    <amp-state id="config">
+      <script type="application/json">
+        {
+          "length": 5
+        }
+      </script>
+    </amp-state>
+    <!-- ## Main container -->
+    <!-- Define a main container with an `amp-img` as background -->
+    <div class="root-container">
+      <div class="main-container">
+        <div class="bg-img-container">
+          <amp-img src="https://ampbyexample.com/img/car-front.jpg"
+            width="608"
+            height="568"
+            layout="responsive"
+            class="bg-img"></amp-img>
+        </div>
+        <!-- ## Stack -->
+        <!--
+        AMP has a system in place for [events and actions](https://github.com/ampproject/amphtml/blob/master/spec/amp-actions-and-events.md). It uses a domain-specific language to describe how actions are triggered. In this example, we set the `on` attribute so the amp-bind state changes on tap. The `selection` variable is originally undefined, which means that when it is accessed by the first time, it will fallback to zero. The remainder operation (`%`) is used so that the stack will cycle back to zero once the final element is at the top.
+
+        Each stack item has a conditional class value (`[class]`) that is calculated by amp-bind. This is to determine whether each item is the topmost or the second-topmost element in the stack so it can be styled appropriately.
+
+        See [this document](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-bind) for specifics on the amp-bind expression syntax.
+        -->
+        <div class="stack-container"
+            role="button"
+            on="tap:AMP.setState({selection: (selection + 1) % config.length})">
+          <div class="stack-bg-item"></div>
+          <div class="stack-bg-item"></div>
+          <div class="stack-bg-item"></div>
+          <div class="stack-bg-item"></div>
+          <div class="stack">
+            <div class="stack-item topmost"
+                [class]="'stack-item' +
+                    (selection == 0 ? ' topmost' :
+                        (selection == config.length - 1 ? ' second-topmost' : ''))">
+              <amp-img src="https://ampbyexample.com/img/car-sideview.jpg"
+                  width="226"
+                  height="126"
+                  layout="fixed"></amp-img>
+            </div>
+            <div class="stack-item second-topmost"
+                [class]="'stack-item' +
+                    (selection == 1 ? ' topmost' :
+                        (selection == 0 ? ' second-topmost' : ''))">
+              <amp-img src="https://ampbyexample.com/img/car-steeringwheel.jpg"
+                  width="226"
+                  height="126"
+                  layout="fixed"></amp-img>
+            </div>
+            <div class="stack-item"
+                [class]="'stack-item' +
+                  (selection == 2 ? ' topmost' :
+                      (selection == 1 ? ' second-topmost' : ''))">
+              <amp-img src="https://ampbyexample.com/img/car-seats.jpg"
+                  width="226"
+                  height="126"
+                  layout="fixed"></amp-img>
+            </div>
+            <div class="stack-item"
+                [class]="'stack-item' +
+                  (selection == 3 ? ' topmost' :
+                      (selection == 2 ? ' second-topmost' : ''))">
+              <amp-img src="https://ampbyexample.com/img/car-gauges.jpg"
+                  width="226"
+                  height="126"
+                  layout="fixed"></amp-img>
+            </div>
+            <div class="stack-item"
+                [class]="'stack-item' +
+                  (selection == 4 ? ' topmost' :
+                      (selection == 3 ? ' second-topmost' : ''))">
+              <amp-img src="https://ampbyexample.com/img/car-engine.jpg"
+                  width="226"
+                  height="126"
+                  layout="fixed"></amp-img>
+            </div>
+          </div>
+          <!-- We can use amp-selector to show indicator dots for our stack. The `[selected]` attribute is used to refer to an amp-bind state variable so that the indicators change accordingly. -->
+          <amp-selector
+              layout="container"
+              class="dots"
+              disabled
+              [selected]="selection">
+            <div option="0" class="dots-item" selected></div>
+            <div option="1" class="dots-item"></div>
+            <div option="2" class="dots-item"></div>
+            <div option="3" class="dots-item"></div>
+            <div option="4" class="dots-item"></div>
+          </amp-selector>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="footer-logo">
+          <amp-img src="https://ampbyexample.com/img/car-logo.png"
+              width="72"
+              height="32"
+              layout="fixed"
+              alt="Howdy"
+              class="logo-img"></amp-img>
+        </div>
+        <a href="https://ampbyexample.com/" target="_blank" class="button">
+          Learn More
+        </a>
+      </div>
+    </div>
+  </body>
+</html>

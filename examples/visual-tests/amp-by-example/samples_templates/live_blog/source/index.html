@@ -1,0 +1,209 @@
+<!--
+  ## Introduction
+
+This is a sample template for implementing live blogs in AMP.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+  <head>
+    <meta charset="utf-8">
+  <title>Live Blog</title>
+      <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <!-- ## Setup -->
+    <!--
+      All additionally used AMP components must be imported in the header. Import `amp-live-list` for implementing a live blog and `amp-social-share` for adding share buttons.
+    -->
+    <script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js"></script>
+    <script async custom-element="amp-live-list" src="https://cdn.ampproject.org/v0/amp-live-list-0.1.js"></script>
+    <link rel="canonical" href="https://ampbyexample.com/samples_templates/live_blog/">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+      <!-- ## Metadata -->
+      <!-- Live blog updates can be represented in Google Search results as carousel items of the blog page. [Learn more](https://developers.google.com/search/pilot/open/live-blogs#properties). -->
+      <script type="application/ld+json">
+        {
+          "@context": "http://schema.org",
+          "@type": "LiveBlogPosting",
+          "url": "https://ampbyexample.com/samples_templates/live_blog/",
+          "articleBody": "This is the initial text in the blog post",
+          "datePublished": "2016-09-08T23:04:28.24337",
+          "about": {
+            "@type": "Event",
+            "description": "This is my great live blog sample",
+            "startDate": "2016-07-23T13:00:00-07:00",
+            "endDate": "2016-07-23T15:00:00-07:00",
+            "name": "An AMP Live Blog",
+            "url": "https://ampbyexample.com/samples_templates/live_blog/",
+            "location": {
+              "@type": "EventVenue",
+              "name": "The Venue Name",
+              "address" : {
+                "@type": "PostalAddress",
+                "streetAddress": "701 Mission St",
+                "addressLocality": "San Francisco",
+                "addressRegion": "CA",
+                "postalCode": "94103",
+                "addressCountry": "US"
+              }
+            }
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "Google",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://ampbyexample.com/img/favicon.png",
+              "width": "512",
+              "height": "512"
+            }
+          },
+          "author": {
+            "@type": "Person",
+            "sameAs": "https://github.com/kul3r4",
+            "name": "Chiara Chiappini"
+          },
+          "image": {
+            "@type": "ImageObject",
+            "url": "https://ampbyexample.com/img/abe_preview.png",
+            "height": "1532",
+            "width": "2046"
+          },
+          "coverageStartTime": "2016-07-23T11:30:00-07:00",
+          "coverageEndTime": "2016-07-23T16:00:00-07:00",
+          "headline": "An AMP Live Blog",
+          "description": "A Live Blog implementation with AMP",
+          "liveBlogUpdate": [[.BlogMetadata]]
+        }
+      </script>
+      <style amp-custom>
+        .carousel .slide > amp-img > img {
+          object-fit: contain;
+        }
+        amp-social-share {
+          margin-right: 8px;
+        }
+        .heading {
+          padding: 1rem;
+        }
+        .heading > #summary {
+          font-weight: 500;
+        }
+        .heading > small {
+          color: #656565;
+        }
+        .date {
+          color: #a8a3ae;
+          font-size: 12px;
+        }
+        .blog {
+          padding: 0;
+          min-width: 70%;
+          background: #fff;
+        }
+        .blog p {
+          margin: 0 16px;
+        }
+        .blog .text {
+          color: black;
+          padding-top: 0;
+        }
+        .blog .title {
+          color: white;
+          position: relative;
+          top: -48px;
+          margin: 0 16px;
+          height: 0;
+          padding-bottom: 16px;
+        }
+        .blog .social-share {
+          line-height:36px;
+          display: flex;
+          padding-bottom: 16px;
+          padding-top: 16px;
+        }
+        #live-list-update-button {
+          position: fixed;
+          top: 10px;
+          right: 16px;
+        }
+        @media (max-width: 600px) {
+          #live-list-update-button {
+            top: 60px;
+          }
+        }
+    .pagination {
+      display: inline-block;
+      padding: 0;
+    }
+    amp-live-list [pagination] nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pagination li {
+      display: inline;
+      padding: 10px;
+      list-style-type: none;
+    }
+      </style>
+
+  </head>
+  <body>
+    <section class="heading">
+      <h1>An AMP Live Blog</h1>
+      <p><small class="date">Fri July 22 2016</small></p>
+      <p><small>by Chiara Chiappini</small></p>
+      <p id="summary">This is a sample article demonstrating how to write a live blog in AMP. It demonstrates the usage of amp-live-list component which allows to create live blogs.</p>
+    </section>
+    <!-- ## Blog Posts -->
+    <!-- Use amp-live-list to implement a live blog. The amp-live-list component regularly polls the host document for updated content and updates the end user's browser as new items become available. This means that every time a new post needs to be added, the host document should be updated by the CMS to include the update both the body and the metadata section. Find an amp-live-list example [here](/examples/visual-tests/amp-by-example/components/amp-live-list).
+
+    Long blogs could use pagination to improve performance by limiting the number of blog items to be displayed on a page. To implement pagination, amp-live-list allows to add the `<div pagination></div>` element, to then insert any markup needed for pagination, for example the page number, a link to the next and previous page. -->
+    <amp-live-list [[.Disabled]]
+    layout="container"
+    data-poll-interval="15000"
+    data-max-items-per-page="5"
+    id="amp-live-list-insert-blog">
+
+    <button id ="live-list-update-button" update on="tap:amp-live-list-insert-blog.update" class="ampstart-btn caps">You have updates</button>
+    <div items>
+      [[range .BlogItems]]
+          <div id="[[.ID]]" data-sort-time="[[.Timestamp]]">
+            <div class="ampstart-card m1 blog">
+              <amp-img src="[[.Image]]"
+                  layout="responsive" width="1280" height="853">
+              </amp-img>
+              <h4 class="title">[[.Heading]]</h4>
+              <p class="date">[[.Date]]</p>
+              <p class="text">[[.Text]]</p>
+              <p class="social-share">
+                <amp-social-share type="twitter" width="45" height="33" data-param-url="AMPDOC_URL#[[.ID]]"></amp-social-share>
+                <amp-social-share type="facebook" width="45" height="33" data-attribution="254325784911610" data-param-url="AMPDOC_URL#[[.ID]]"></amp-social-share>
+                <amp-social-share type="gplus" width="45" height="33" data-param-url="AMPDOC_URL#[[.ID]]"></amp-social-share>
+                <amp-social-share type="email" width="45" height="33" data-param-url="AMPDOC_URL#[[.ID]]"></amp-social-share>
+                <amp-social-share type="pinterest" width="45" height="33" data-param-url="AMPDOC_URL#[[.ID]]"></amp-social-share>
+              </p>
+            </div>
+          </div>
+        [[end]]
+    </div>
+
+    <div pagination>
+      <nav aria-label="amp live list pagination">
+      <ul class="pagination">
+        [[if .PrevPageURL]]
+          <li><a href="[[.PrevPageURL]]">Prev</a></li>
+        [[end]]
+        <li>[[.PageNumber]]</li>
+        [[if .NextPageURL]]
+          <li><a href="[[.NextPageURL]]">Next</a></li>
+        [[end]]
+      </ul>
+      </nav>
+    </div>
+
+  </amp-live-list>
+
+  </body>
+</html>

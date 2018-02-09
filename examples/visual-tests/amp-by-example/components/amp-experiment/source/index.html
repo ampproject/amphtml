@@ -1,0 +1,110 @@
+<!--
+  ## Introduction
+
+The  [amp-experiment](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-experiment) component allows to perform user experience experiments on an AMP document and collect resulting data. This is, for example, good for A/B testing new features in your AMPs, but you can test as many variants as you want.
+
+In this sample, we're using Google Analytics to track the experiment. Google Analytics requires different variants to be specified via an index variable. However, `amp-experiment` has no opinion about how these are specified.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-experiment</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+   <!-- ## Setup -->
+  <!--
+    Import the `amp-experiment` component.
+  -->
+  <script async custom-element="amp-experiment" src="https://cdn.ampproject.org/v0/amp-experiment-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-experiment/">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <!--
+    Style different variants of the experiment by using `body[amp-x-name-of-experiment="nameOfVariant"`].
+  -->
+  <style amp-custom>
+    body[amp-x-button-color-experiment="0"] .button-color-experiment {
+      background-color: yellow;
+      color: black;
+    }
+    body[amp-x-button-color-experiment="1"] .button-color-experiment {
+      background-color: red;
+    }
+    body[amp-x-button-color-experiment="2"] .button-color-experiment {
+      background-color: blue;
+    }
+    button {
+      background-color: grey;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ## Basic Usage -->
+  <!--
+    Configure experiments inside the `amp-experiment` inside a JSON object. Use `variants` within each experiment to declare how many users in percent will be part of an experiment variant. The total sum of the variants must be a number <= 100. If the sum is < 100, then the default behaviour is used. A user belongs to one of the variants based on a random number generated between 0 and 100.
+
+   For more details about variants read the official [documentation](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-experiment). Multiple experiments can be run on the same AMP document in parallel with their own sets of variants. One AMP document can have at most one `amp-experiment` element.
+  -->
+  <amp-experiment>
+    <script type="application/json">
+      {
+        "button-color-experiment": {
+          "variants": {
+            "0": 30,
+            "1": 30,
+            "2": 30
+          }
+        }
+      }
+    </script>
+  </amp-experiment>
+<!--
+  An experimental button. The background of the button is going to be yellow for the 30% of users, red for 30% of users, blue for 30% of users and, for the remaining 10% of users, the button background is going to be the default color which is grey in this sample.
+-->
+<button class= "ampstart-btn button-color-experiment caps m1">Click here</button>
+
+<!-- ## Reporting -->
+
+<!--
+  Measure results of the experiment using [amp-pixel](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-pixel)...
+-->
+<amp-pixel src="https://example.com/track/?xname=button-color-experiment&xvar=VARIANT(button-color-experiment)"></amp-pixel>
+<!--
+... or [amp-analytics](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-analytics). Allocated variants are available as a URL substitution variable: `VARIANT(name-of-the-experiment)`. You can check the analytics requests in the network tab of the developer tools.
+-->
+<amp-analytics type="googleanalytics">
+  <script type="application/json">
+    {
+      "vars": {
+        "account": "UA-73836974-1"
+      },
+      "requests": {
+        "experiment": "${pageview}&xid=${experiment}&xvar=${variant}"
+      },
+      "triggers": {
+        "default pageview": {
+          "on": "visible",
+          "request": "experiment",
+          "vars": {
+            "experiment": "W4kYemYmQBSTIYNpoezCmg",
+            "variant": "VARIANT(button-color-experiment)"
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+
+<!-- ## Development Tip -->
+<!--
+  You can force an experiment to be in a specific variant by adding `amp-x-experiment-name` to the AMP page URL.
+  * <a href="https://ampbyexample.com/components/amp-experiment#amp-x-button-color-experiment=0">#amp-x-button-color-experiment=0</a>
+  * <a href="https://ampbyexample.com/components/amp-experiment#amp-x-button-color-experiment=1">#amp-x-button-color-experiment=1</a>
+  * <a href="https://ampbyexample.com/components/amp-experiment#amp-x-button-color-experiment=2">#amp-x-button-color-experiment=2</a>
+-->
+
+</body>
+</html>

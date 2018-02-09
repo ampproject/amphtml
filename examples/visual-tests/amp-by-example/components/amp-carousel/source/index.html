@@ -1,0 +1,80 @@
+<!--
+  ## Introduction
+
+  The amp-carousel component allows displaying multiple similar pieces of content along a horizontal
+  axis.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-carousel</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!-- Import the carousel component in the header. -->
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-carousel/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    .blue-box, .red-box, .green-box {
+      width: 100%;
+      height: 280px;
+    }
+    .blue-box {
+      background: blue;
+    }
+    .green-box {
+      background: green;
+    }
+    .red-box {
+      background: red;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ## Basic Usage -->
+
+  <!-- Use `type="carousel"` to display a list of images as a continuous strip. -->
+  <amp-carousel height="300" layout="fixed-height" type="carousel">
+    <amp-img src="/examples/visual-tests/amp-by-example/img/image1.jpg" width="400" height="300" alt="a sample image"></amp-img>
+    <amp-img src="/examples/visual-tests/amp-by-example/img/image2.jpg" width="400" height="300" alt="another sample image"></amp-img>
+    <amp-img src="/examples/visual-tests/amp-by-example/img/image3.jpg" width="400" height="300" alt="and another sample image"></amp-img>
+  </amp-carousel>
+
+  <!-- Use `type="slides"` to display a list of images as slides. -->
+  <amp-carousel width="400" height="300" layout="responsive" type="slides">
+    <amp-img src="/examples/visual-tests/amp-by-example/img/image1.jpg" width="400" height="300" layout="responsive" alt="a sample image"></amp-img>
+    <amp-img src="/examples/visual-tests/amp-by-example/img/image2.jpg" width="400" height="300" layout="responsive" alt="another sample image"></amp-img>
+    <amp-img src="/examples/visual-tests/amp-by-example/img/image3.jpg" width="400" height="300" layout="responsive" alt="and another sample image"></amp-img>
+  </amp-carousel>
+
+  <!-- The `autoplay` attribute (type=slides only) advances the slide to the next slide without user interaction, by default it will advance a slide in 5000 millisecond intervals (5 seconds) and can be overridden by the `delay` attribute.  -->
+  <amp-carousel width="400" height="300" layout="responsive" type="slides" autoplay delay="2000">
+    <amp-img src="/examples/visual-tests/amp-by-example/img/image1.jpg" width="400" height="300" layout="responsive" alt="a sample image"></amp-img>
+    <amp-img src="/examples/visual-tests/amp-by-example/img/image2.jpg" width="400" height="300" layout="responsive" alt="another sample image"></amp-img>
+    <amp-img src="/examples/visual-tests/amp-by-example/img/image3.jpg" width="400" height="300" layout="responsive" alt="and another sample image"></amp-img>
+  </amp-carousel>
+
+  <!-- ## Supported Contents  -->
+  <!-- Each of these nodes may also have arbitrary HTML children.  -->
+  <amp-carousel height="300" layout="fixed-height" type="slides">
+    <div>
+      <div class="blue-box"></div>
+      This is a blue box.
+    </div>
+    <div>
+      <div class="red-box"></div>
+      This is a red box.
+    </div>
+    <div>
+      <div class="green-box"></div>
+      This is a green box.
+    </div>
+  </amp-carousel>
+  <!-- A good use case for `amp-carousel` are image galleries, [here](/examples/visual-tests/amp-by-example/advanced/image_galleries_with_amp-carousel/) are some examples. -->
+
+</body>
+</html>

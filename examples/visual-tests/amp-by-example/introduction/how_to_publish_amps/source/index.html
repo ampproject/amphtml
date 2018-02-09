@@ -1,0 +1,114 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title> How to publish AMPs</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/introduction/how_to_publish_amps/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+<!--
+## Introduction
+
+There are a few things you need to watch out for when publishing [Accelerated Mobile Pages](https://www.ampproject.org) (AMP).
+
+## Publish valid AMPs 
+
+One of the great things about AMP is that the runtime includes a built-in validator. The validator checks if your AMP file contains valid AMP HTML. If your page contains invalid AMP, it will not load correctly and third-party platforms might choose not to show your AMP page. This makes it a good idea to validate a representative subset of your AMP pages to make sure that all different variants are valid.
+
+Run the validator by adding `#development=1` to an AMP URL, for example:
+
+[/examples/visual-tests/amp-by-example/introduction/how_to_publish_amps/#development=1](/examples/visual-tests/amp-by-example/introduction/how_to_publish_amps/#development=1)
+
+You can view the validation result in the [Javascript console](https://developer.chrome.com/devtools/docs/console) of your browser:
+
+<amp-img src="/examples/visual-tests/amp-by-example/img/console_showing_validation_errors.png" width="800" height="121" layout="responsive"></amp-img>
+
+There are also other ways to validate an AMP page such as [validator.ampproject.org](https://validator.ampproject.org/) or the [official Node AMP Validator](https://www.npmjs.com/package/amphtml-validator), which makes it easy to integrate AMP validation into your build pipeline.
+
+## User correct metadata
+
+Adding metadata to your AMP files enables third-party sites to better display your AMP pages. For example, the [Google Top Stories Carousel with AMP](https://developers.google.com/structured-data/carousels/top-stories) currently supports the _Article_ and _Video_ metadata categories and uses these for rendering article previews:
+
+<amp-img src="/examples/visual-tests/amp-by-example/img/carousel_preview_card.png" width="241" height="299"></amp-img>
+
+The [Structured Data Testing Tool](https://developers.google.com/structured-data/testing-tool/) is a great way to test whether the metadata in your AMP files is correct: make sure the “All data” filter shows “AMP Articles” and everything is green. Here is an [example](https://developers.google.com/structured-data/testing-tool?url=https://ampbyexample.com/).
+
+## Be Discoverable
+
+Third-party integrations, such as the [Google Top Stories Carousel with AMP](https://developers.google.com/structured-data/carousels/top-stories), discover your AMPs via the canonical version of your page. To make this possible, link from your AMP HTML files to their canonical version (this is usually the desktop version):
+
+```
+<link rel="canonical" href=”http://example.ampproject.org/article.html" />
+```
+
+…and (important!) link to your AMP files from your canonical version (and any alternate):
+
+```
+<link rel="amphtml" href="http://example.ampproject.org/article.amp.html" />
+```
+
+Otherwise third-party integrations may not be able to discover your AMPs.
+
+## Give Crawlers access 
+
+If you want your AMPs to show up in third-party platforms, make sure to allow their crawlers to access them. This means in particular:
+
+*   Don’t exclude crawlers via your [robots.txt](https://support.google.com/webmasters/answer/6062608?hl=en) file:
+
+```
+User-agent: *
+Disallow: /amp/                            <= don't!
+```
+
+*   Don’t add a robots _noindex_ meta tag to your AMP HTML files:
+
+```
+<meta name="robots" content="noindex" />   <= don't!
+```
+
+*   Don’t include _noindex_ as X-Robots-Tag HTTP header for your AMP files:
+
+```
+$ curl -I [http://www.example.com/amp.html](http://www.example.com/amp.html)
+
+HTTP/1.1 200 OK
+Date: Tue, 25 May 2010 21:42:43 GMT
+...
+X-Robots-Tag: noindex                      <= don't!
+...
+```
+
+## Test with the Google AMP Cache
+
+The Google AMP Cache stores valid AMP pages and provides consistently fast access to them. The [Google Top Stories Carousel with AMP](https://developers.google.com/structured-data/carousels/top-stories), for example, uses the Google AMP Cache to display articles. The cache stores images and fonts in addition to documents. This makes it important to test that your AMPs work correctly when loaded via the Google AMP Cache.
+
+<amp-img src="/examples/visual-tests/amp-by-example/img/amp_cache_validation_error.png" width="385" height="386"></amp-img>
+
+Loading your AMP pages via the Google AMP Cache is easy. The Google AMP Cache URL is composed based on whether the source URL is available via HTTP or HTTPS:
+
+*   HTTP: [https://cdn.ampproject.org/**c**/AMP_URL_WITHOUT_SCHEME](https://cdn.ampproject.org/c/URL_WITHOUT_SCHEME)
+*   HTTP**S:** [https://cdn.ampproject.org/**c/s**/AMP_URL_WITHOUT_SCHEME](https://cdn.ampproject.org/c/s/URL_WITHOUT_SCHEME)
+
+where AMP_URL_WITHOUT_SCHEME is the location of your AMP file minus `http(s)://`. For example, the AMP Cache URL for [https://ampbyexample.com](https://ampbyexample.com) is:
+
+[https://cdn.ampproject.org/c/s/ampbyexample.com](https://cdn.ampproject.org/c/s/ampbyexample.com)
+
+When loading your AMP pages via the Google AMP Cache, check via your [browser’s developer tools](https://developers.google.com/web/tools/chrome-devtools/) if all external resources can be loaded successfully, including all of the following:
+
+*   images
+*   videos
+*   amp-analytics endpoints
+*   amp-pixel endpoints
+*   custom fonts
+*   iframes
+
+<div class="card important">
+  **Important:** A common cause for missing assets are [protocol relative URLs](https://en.wikipedia.org/wiki/Wikipedia:Protocol-relative_URL). These are currently not supported by the Google AMP Cache. Instead link to all assets via HTTPS (if available). You can learn more about how the Google AMP Cache works <a href="/examples/visual-tests/amp-by-example/advanced/using_the_google_amp_cache/">here</a>.
+</div>
+
+-->
+</body>
+</html>

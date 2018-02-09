@@ -1,0 +1,38 @@
+<!-- 
+  ## Introduction
+
+  Embed Kaltura videos in your AMP HTML files.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-kaltura-player</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!--
+    Import the `amp-kaltura-player` component in the header.
+  -->
+  <script async custom-element="amp-kaltura-player" src="https://cdn.ampproject.org/v0/amp-kaltura-player-0.1.js"></script>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-kaltura-player/">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+
+  <!-- ## Basic Usage -->
+  <!--
+    Embed videos hosted on Kaltura via the `data-uiconf`, `data-partner`, and `data-entryid` attributes.  We recommend using the responsive layout for videos.
+    The `data-param-*` attributes will be added as key/value pairs to the query string in the video player's embed iframe, and can be used to pass ad parameters to Kaltura's video player, for example.
+  -->
+    <amp-kaltura-player
+      data-uiconf="33502051"
+      data-partner="1281471"
+      data-entryid="1_3ts1ms9c"
+      data-param-streamerType="auto"
+      layout="responsive"
+      width="720" height="480"></amp-kaltura-player>
+
+</body>
+</html>
