@@ -86,6 +86,34 @@ a [custom ad](../../ads/custom.md):
 Unlike normal `amp-ad`, no `<fallback>` or `<placeholder>` needs to be specified
 here, as ads in story can only be displayed once fully rendered.
 
+## Inlined templates
+If [custom ad](../../ads/custom.md) is used, templates can be inlined in the
+`<amp-story-auto-ads>` element:
+
+```html
+  <amp-story-auto-ads>
+     <script type=”application/json”>
+       {
+          "ad-attributes": {
+            type: “custom”
+            data-src: “https://adserver.com/getad?slot=abcd1234”
+          }
+       }
+     </script>
+
+     <template type="amp-mustache" id="template-1">
+       <amp-img src="{{imgSrc}}"></amp-img>
+       <amp-pixel src="{{impressionUrl}}"></amp-pixel>
+     </template>
+
+     <template type="amp-mustache" id="template-2">
+       <div class="creative-line-1">{{creativeLine1}}</div>
+       <div class="creative-line-2">{{creativeLine2}}</div>
+       <amp-pixel src="{{impressionUrl}}"></amp-pixel>
+     </template>
+  </amp-story-auto-ads>
+```
+
 ## Validation
 
 It has to be a direct child of `amp-story` element.
