@@ -33,7 +33,7 @@ export class SubscriptionService {
     // Install styles.
     installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
 
-    /** @private @const {!Array<SubscriptionPlatform>} */
+    /** @private @const {!Array<!SubscriptionPlatform>} */
     this.subscriptionPlatforms_ = [];
   }
 
@@ -79,10 +79,13 @@ export class SubscriptionService {
     this.initialize_().then(() => {
       this.subscriptionPlatforms_.forEach(subscriptionPlatform => {
         subscriptionPlatform.getEntitlements()
-            .then(entitlement => this.processEntitlement_());
+            .then(() => this.processEntitlement_());
       });
     });
   }
+
+  /** @private */
+  getPlatformClassForTesting_() {return SubscriptionPlatform;}
 
 }
 
