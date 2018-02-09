@@ -322,7 +322,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   buildSystemLayer_() {
-    this.element.appendChild(this.systemLayer_.build(this.getPageCount()));
+    this.element.appendChild(this.systemLayer_.build(this.pages_));
     this.updateAudioIcon_();
   }
 
@@ -388,8 +388,7 @@ export class AmpStory extends AMP.BaseElement {
         return;
       }
 
-      const pageIndex = this.getPageIndexById_(pageId);
-      this.systemLayer_.updateProgress(pageIndex, progress);
+      this.systemLayer_.updateProgress(pageId, progress);
     });
 
     this.element.addEventListener(EventType.REPLAY, () => {
@@ -775,7 +774,7 @@ export class AmpStory extends AMP.BaseElement {
     this.updateBackground_(targetPage.element, /* initial */ !this.activePage_);
 
     // TODO(alanorozco): decouple this using NavigationState
-    this.systemLayer_.setActivePageIndex(pageIndex);
+    this.systemLayer_.setActivePageIndex(targetPageId);
 
     // TODO(alanorozco): check if autoplay
     this.navigationState_.updateActivePage(
@@ -1337,7 +1336,6 @@ export class AmpStory extends AMP.BaseElement {
   getElement() {
     return this.element;
   }
-
 
   /**
    * Mutes the audio for the story.

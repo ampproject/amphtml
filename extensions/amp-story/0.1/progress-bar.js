@@ -17,6 +17,7 @@ import {POLL_INTERVAL_MS} from './page-advancement';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {escapeCssSelectorNth, scopedQuerySelector} from '../../../src/dom';
+import {map} from '../../../src/utils/object';
 import {scale, setImportantStyles} from '../../../src/style';
 
 
@@ -59,6 +60,9 @@ export class ProgressBar {
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win_);
+
+    /** @private {!Object<string, number>} */
+    this.pageIdMap_ = map();
   }
 
   /**
@@ -69,19 +73,22 @@ export class ProgressBar {
   }
 
   /**
-   * @param {number} pageCount The number of pages in the story.
+   * @param {!Array} pages The number of pages in the story.
    * @return {!Element}
    */
-  build(pageCount) {
+  build(pages) {
     if (this.isBuilt_) {
       return this.getRoot();
     }
 
+    const pageCount = pages.length;
     dev().assertNumber(pageCount);
     dev().assert(pageCount > 0);
 
     this.isBuilt_ = true;
     this.pageCount_ = pageCount;
+
+    this.makeIdMap_(pages);
 
     this.root_ = this.win_.document.createElement('ol');
     this.root_.classList.add('i-amphtml-story-progress-bar');
@@ -96,6 +103,14 @@ export class ProgressBar {
     }
 
     return this.getRoot();
+  }
+
+  /**
+   * create mapping of pageIds to position in progress bar
+   * @param {Array} pages
+   */
+  makeIdMap_(pages) {
+    pages.forEach((page, i) => this.pageIdMap_[page.element.id] = i);
   }
 
 
@@ -118,39 +133,53 @@ export class ProgressBar {
 
 
   /**
-   * @param {number} pageIndex The index of the new active page.
+   * @param {string} pageId The index of the new active page.
    * @public
    */
-  setActivePageIndex(pageIndex) {
-    this.assertValidPageIndex_(pageIndex);
+  setActivePageIndex(pageId) {
+    const progressBarIndex = this.pageIdMap_[pageId];
+    this.assertValidPageIndex_(progressBarIndex);
     for (let i = 0; i < this.pageCount_; i++) {
-      if (i < pageIndex) {
-        this.updateProgress(i, 1.0, /* withTransition */ i == pageIndex - 1);
+      if (i < progressBarIndex) {
+        this.updateProgressByIndex_(i, 1.0,
+            /* withTransition */ i == progressBarIndex - 1);
       } else {
         // The active page manages its own progress by firing PAGE_PROGRESS
         // events to amp-story.
-        this.updateProgress(i, 0.0, /* withTransition */ (
-          pageIndex != 0 && this.activePageIndex_ != 1));
+        this.updateProgressByIndex_(i, 0.0, /* withTransition */ (
+          progressBarIndex != 0 && this.activePageIndex_ != 1));
       }
     }
   }
 
+
   /**
-   * @param {number} pageIndex The index of the page whose progress should be
+   * The
+   * @param {string} pageId the id of the page whos progress to change
+   * @param {number} progress A number from 0.0 to 1.0, representing the
+   *     progress of the current page.
+   */
+  updateProgress(pageId, progress) {
+    const progressBarIndex = this.pageIdMap_[pageId];
+    this.updateProgressByIndex_(progressBarIndex, progress);
+  }
+
+
+  /**
+   * @param {number} progressBarIndex The index of the progress bar segment whose progress should be
    *     changed.
    * @param {number} progress A number from 0.0 to 1.0, representing the
    *     progress of the current page.
    * @param {boolean=} withTransition
    * @public
    */
-  updateProgress(pageIndex, progress, withTransition = true) {
-    this.assertValidPageIndex_(pageIndex);
-
-    this.activePageIndex_ = pageIndex;
+  updateProgressByIndex_(progressBarIndex, progress, withTransition = true) {
+    this.assertValidPageIndex_(progressBarIndex);
+    this.activePageIndex_ = progressBarIndex;
 
     // Offset the index by 1, since nth-child indices start at 1 while
     // JavaScript indices start at 0.
-    const nthChildIndex = pageIndex + 1;
+    const nthChildIndex = progressBarIndex + 1;
     const progressEl = scopedQuerySelector(this.getRoot(),
         `.i-amphtml-story-page-progress-bar:nth-child(${
           escapeCssSelectorNth(nthChildIndex)
