@@ -419,8 +419,9 @@ export class SafeframeHostApi {
    * @param {number} height In pixels.
    * @param {number} width In pixels.
    * @param {string} message
+   * @param {boolean} optIsCollapse Whether this is a collapse attempt.
    */
-  handleSizeChange(height, width, message) {
+  handleSizeChange(height, width, message, optIsCollapse) {
     const resizeIframe = () => {
       this.iframe_.style.height = height + 'px';
       this.iframe_.style.width = width + 'px';
@@ -439,17 +440,20 @@ export class SafeframeHostApi {
     };
     // If the new size is fully contained within the bounds of the amp-ad,
     // we can resize immediately as there will be no reflow.
-    if (width <= this.baseInstance_.element.getBoundingClientRect().width &&
-        height <= this.baseInstance_.element.getBoundingClientRect().height) {
+    if (!optIsCollapse &&
+        width <= this.baseInstance_.creativeSize_.width &&
+        height <= this.baseInstance_.creativeSize_.height) {
       resizeIframe();
       sendResizeResponse(true);
     } else {
       this.baseInstance_.attemptChangeSize(height, width).then(() => {
         const success = !!this.baseInstance_.element.style.height.match(height)
               && !!this.baseInstance_.element.style.width.match(width);
-        // Update the sizing of the safeframe to match the size of its
-        // containing amp-ad element.
-        if (success) {
+        // If the amp-ad element was successfully resized, always update
+        // the size of the safeframe as well. If the amp-ad element could not
+        // be resized, but this is a collapse request, then only collapse
+        // the safeframe.
+        if (success || optIsCollapse) {
           resizeIframe();
         } else {
           // attemptChangeSize automatically registers a pendingChangeSize if
@@ -490,13 +494,19 @@ export class SafeframeHostApi {
    * @private
    */
   handleExpandRequest_(payload) {
-    this.handleSizeChange(Math.floor(payload.expand_b +
-                                     payload.expand_t +
-                                     Number(this.iframe_.height)),
-    Math.floor(payload.expand_r +
-                                     payload.expand_l +
-                                     Number(this.iframe_.width)),
-    SERVICE.EXPAND_RESPONSE);
+    let expandHeight = Math.floor(payload.expand_b +
+                                 payload.expand_t);
+    let expandWidth = Math.floor(payload.expand_r +
+                                  payload.expand_l);
+    if (expandWidth != this.baseInstance_.element.style.width.split('px')[0]) {
+      expandWidth += Number(this.iframe_.width);
+    }
+    if (expandHeight != this.baseInstance_.element.style.height.split('px')[0]) {
+      expandHeight += Number(this.iframe_.height);
+    }
+    this.handleSizeChange(expandHeight,
+                          expandWidth,
+                          SERVICE.EXPAND_RESPONSE);
   }
 
   /**
@@ -505,8 +515,9 @@ export class SafeframeHostApi {
    */
   handleCollapseRequest_(unusedPayload) {
     this.handleSizeChange(this.baseInstance_.initialSize_.height,
-        this.baseInstance_.initialSize_.width,
-        SERVICE.COLLAPSE_RESPONSE);
+                          this.baseInstance_.initialSize_.width,
+                          SERVICE.COLLAPSE_RESPONSE,
+                          /** isCollapse */ true);
   }
 
   /**
