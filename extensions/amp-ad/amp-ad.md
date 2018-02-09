@@ -135,6 +135,7 @@ When using `amp-iframe` approach:
 
 
 ## Running ads from a custom domain
+*This approach to load/ enhance ads has been deprecated and will be unsupported starting Apr,2018 . Please use [RTC](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-documentation.md) as an alternative.*
 
 AMP supports loading the bootstrap iframe that is used to load ads from a custom domain such as your own domain.
 
