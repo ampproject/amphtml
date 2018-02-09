@@ -38,7 +38,7 @@ CONFIGS = %w(canary prod)
 AMP_RUNTIME_FILE = 'dist/amp.js'
 BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status'
 BUILD_PROCESSING_POLLING_INTERVAL_SECS = 5
-BUILD_PROCESSING_TIMEOUT_SECS = 60
+BUILD_PROCESSING_TIMEOUT_SECS = 60 * 5
 PERCY_BUILD_URL = 'https://percy.io/ampproject/amphtml/builds'
 OUT = ENV['TRAVIS'] ? '/dev/null' : :out
 
@@ -209,12 +209,12 @@ def close_web_server(pid)
 end
 
 
-# Loads all the visual tests from a well-known json config file.
+# Loads all the visual tests from a well-known pseudo-json config file.
 def load_visual_tests_config_json
   json_file = File.open(
       File.join(
           File.dirname(__FILE__),
-          '../../test/visual-diff/visual-tests.json'),
+          '../../test/visual-diff/visual-tests.js'),
       'r')
   json_file.read
 end
