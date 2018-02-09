@@ -38,7 +38,7 @@ CONFIGS = %w(canary prod)
 AMP_RUNTIME_FILE = 'dist/amp.js'
 BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status'
 BUILD_PROCESSING_POLLING_INTERVAL_SECS = 5
-BUILD_PROCESSING_TIMEOUT_SECS = 60
+BUILD_PROCESSING_TIMEOUT_SECS = 60 * 5
 PERCY_BUILD_URL = 'https://percy.io/ampproject/amphtml/builds'
 OUT = ENV['TRAVIS'] ? '/dev/null' : :out
 
