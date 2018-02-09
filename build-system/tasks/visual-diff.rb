@@ -220,24 +220,21 @@ def load_visual_tests_config_json
 end
 
 
-# Configures Chrome and headless Chrome
+# Configures the Chrome browser (optionally in headless mode)
 def configure_browser
   if ARGV.include? '--headless'
-    Capybara.register_driver :headless_chrome do |app|
-      capabilities = Selenium::WebDriver::Remote::Capabilities.chrome(
-        chromeOptions: { args: %w(headless disable-gpu) }
-      )
-      Capybara::Selenium::Driver.new app,
-        browser: :chrome,
-        desired_capabilities: capabilities
-    end
-    Capybara.javascript_driver = :headless_chrome
+    capabilities = Selenium::WebDriver::Remote::Capabilities.chrome(
+      chromeOptions: { args: %w(headless disable-gpu) }
+    )
   else
-    Capybara.register_driver :chrome do |app|
-      Capybara::Selenium::Driver.new(app, browser: :chrome)
-    end
-    Capybara.javascript_driver = :chrome
+    capabilities = Selenium::WebDriver::Remote::Capabilities.chrome()
   end
+  Capybara.register_driver :chrome do |app|
+    Capybara::Selenium::Driver.new app,
+      browser: :chrome,
+      desired_capabilities: capabilities
+  end
+  Capybara.javascript_driver = :chrome
 end
 
 
@@ -252,11 +249,7 @@ def initialize_capybara(assets_dir, assets_base_url)
   Capybara.app_host = "http://#{HOST}:#{PORT}"
   Percy::Capybara.use_loader(
       :filesystem, assets_dir: assets_dir, base_url: assets_base_url)
-  if ARGV.include? '--headless'
-    page = Capybara::Session.new(:headless_chrome)
-  else
-    page = Capybara::Session.new(:chrome)
-  end
+  page = Capybara::Session.new(:chrome)
 end
 
 
