@@ -17,7 +17,7 @@
 /**
  * Particulars of the webpages used in the AMP visual diff tests.
  *
- * Note: While the extension of this file is .json, the contents are pseudo-json
+ * Note: While the extension of this file is .js, the contents are pseudo-json
  * due to the presence of detailed comments. Ruby's json parser natively
  * supports comments in json files, and is capable of parsing this file.
  */
@@ -97,6 +97,35 @@
     {
       "url": "examples/visual-tests/amp-layout/amp-layout.amp.html",
       "name": "AMP Layout"
+    },
+    {
+      "url": "examples/visual-tests/font.amp.404/font.amp.html",
+      "name": "Fonts 404",
+      "forbidden_css": [
+        ".comic-amp-font-loaded",
+        ".comic-amp-bold-font-loaded"
+      ],
+      "loading_complete_css": [
+        ".comic-amp-font-missing",
+        ".comic-amp-bold-font-missing"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/article.amp/article.amp.html",
+      "name": "AMP Article",
+      "loading_complete_css": [
+        ".article-body",
+        ".ad-one",
+        ".ad-two"
+      ]
+    },
+    {
+      "url": "examples/visual-tests/amp-list/amp-list.amp.html",
+      "name": "AMP List and Mustache",
+      "loading_complete_css": [
+        ".list1",
+        ".list2"
+      ]
     },
     {
       "url": "examples/visual-tests/amp-by-example/index.html",
@@ -325,42 +354,6 @@
     {
       "url": "examples/visual-tests/amp-by-example/components/amp-youtube/index.html",
       "name": "amp-youtube - Amp By Example"
-    }
-  ],
-
-  /**
-   * List of failing webpages. Move pages here if they fail, since visual tests
-   * block PRs from being merged. Move them back once failures are fixed.
-   */
-  "failing_webpages": [
-    {
-      "url": "examples/visual-tests/font.amp.404/font.amp.html",
-      "name": "Fonts 404",
-      "forbidden_css": [
-        ".comic-amp-font-loaded",
-        ".comic-amp-bold-font-loaded"
-      ],
-      "loading_complete_css": [
-        ".comic-amp-font-missing",
-        ".comic-amp-bold-font-missing"
-      ]
-    },
-    {
-      "url": "examples/visual-tests/article.amp/article.amp.html",
-      "name": "AMP Article",
-      "loading_complete_css": [
-        ".article-body",
-        ".ad-one",
-        ".ad-two"
-      ]
-    },
-    {
-      "url": "examples/visual-tests/amp-list/amp-list.amp.html",
-      "name": "AMP List and Mustache",
-      "loading_complete_css": [
-        ".list1",
-        ".list2"
-      ]
     }
   ],
 
