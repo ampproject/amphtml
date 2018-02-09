@@ -1,0 +1,149 @@
+<!--
+  ## Introduction
+
+  There many different ways to integrate videos in AMP HTML files.
+  Here is a list of all currently supported video formats and platforms.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>Integrating Videos in AMP an Overview</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!--
+    Import the libraries.
+  -->
+  <script async custom-element="amp-instagram" src="https://cdn.ampproject.org/v0/amp-instagram-0.1.js"></script>
+  <script async custom-element="amp-vine" src="https://cdn.ampproject.org/v0/amp-vine-0.1.js"></script>
+  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+  <script async custom-element="amp-vimeo" src="https://cdn.ampproject.org/v0/amp-vimeo-0.1.js"></script>
+  <script async custom-element="amp-dailymotion" src="https://cdn.ampproject.org/v0/amp-dailymotion-0.1.js"></script>
+  <script async custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"></script>
+  <script async custom-element="amp-facebook" src="https://cdn.ampproject.org/v0/amp-facebook-0.1.js"></script>
+  <script async custom-element="amp-brightcove" src="https://cdn.ampproject.org/v0/amp-brightcove-0.1.js"></script>
+  <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link rel="canonical" href="https://ampbyexample.com/advanced/integrating_videos_in_amp_an_overview/">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+
+  <!-- ## Embed your own Video with amp-video -->
+  <!--
+    Use `amp-video` for hosted videos.
+    Find more examples [here](/examples/visual-tests/amp-by-example/components/amp-video/).
+  -->
+  <amp-video width="480"
+             height="270"
+             src="video/tokyo.mp4"
+             poster="/examples/visual-tests/amp-by-example/img/tokyo.jpg"
+             layout="responsive"
+             controls>
+    <div fallback>
+      <p>Your browser doesn't support HTML5 video.</p>
+    </div>
+    <source type="video/mp4" src="video/tokyo.mp4">
+    <source type="video/webm" src="video/tokyo.webm">
+  </amp-video>
+  <!-- ## Supported Video Platforms -->
+  <!-- ### amp-brightcove -->
+  <!--
+    Use `amp-brightcove` for Brightcove videos.
+    Find more examples [here](/examples/visual-tests/amp-by-example/components/amp-brightcove/).
+  -->
+  <amp-brightcove data-account="906043040001"
+                  data-video-id="1401169490001"
+                  data-player-id="180a5658-8be8-4f33-8eba-d562ab41b40c"
+                  layout="responsive" width="480" height="270">
+  </amp-brightcove>
+  <!-- ### amp-dailymotion -->
+  <!--
+    Use `amp-dailymotion` for dailymotion videos.
+    Find more examples [here](/examples/visual-tests/amp-by-example/components/amp-dailymotion/).
+  -->
+  <amp-dailymotion data-videoid="x1r0aw6"
+                   layout="responsive"
+                   data-ui-highlight="FF4081"
+                   width="480"
+                   height="270">
+  </amp-dailymotion>
+  <!-- ### amp-facebook -->
+  <!--
+    Use `amp-facebook` for Facebook videos.
+    Find more examples [here](/examples/visual-tests/amp-by-example/components/amp-facebook/).
+  -->
+  <amp-facebook width="552"
+                height="310"
+                layout="responsive"
+                data-embed-as="video"
+                data-href="https://www.facebook.com/zuck/videos/10102509264909801/">
+  </amp-facebook>
+  <!-- ### amp-instagram -->
+  <!--
+    Use `amp-instagram` for videos on Instagram.
+    Find more examples [here](/examples/visual-tests/amp-by-example/components/amp-instagram/).
+  -->
+  <amp-instagram data-shortcode="1totVhIFXl"
+                 width="1"
+                 height="1"
+                 layout="responsive">
+  </amp-instagram>
+  <!-- ### amp-twitter -->
+  <!--
+    Use `amp-twitter` for Twitter videos.
+    Find more examples [here](/examples/visual-tests/amp-by-example/components/amp-twitter/).
+  -->
+  <amp-twitter width="375"
+               height="472"
+               layout="responsive"
+               data-tweetid="707569406105092096">
+  </amp-twitter>
+  <!-- ### amp-vimeo -->
+  <!--
+    Use `amp-vimeo` for Vimeo videos.
+    Find more examples [here](/examples/visual-tests/amp-by-example/components/amp-vimeo/).
+  -->
+  <amp-vimeo data-videoid="27246366"
+             layout="responsive"
+             width="16" height="9">
+  </amp-vimeo>
+  <!-- ### amp-vine -->
+  <!--
+    Use `amp-vine` for Vine embeds.
+    Find more examples [here](/examples/visual-tests/amp-by-example/components/amp-vine/).
+  -->
+  <amp-vine width="400"
+            height="400"
+            layout="responsive"
+            data-vineid="MdKjXez002d">
+  </amp-vine>
+  <!-- ### amp-youtube -->
+  <!--
+    Use `amp-youtube` for YouTube videos.
+    Find more examples [here](/examples/visual-tests/amp-by-example/components/amp-youtube/).
+  -->
+  <amp-youtube width="480"
+               height="270"
+               layout="responsive"
+               data-videoid="lBTCB7yLs8Y">
+  </amp-youtube>
+  <!-- ## What if your Video Provider is not Supported?-->
+  <!--
+    Use `amp-iframe` for videos not supported in AMP.
+    Find more examples [here](/examples/visual-tests/amp-by-example/components/amp-iframe/).
+  -->
+  <amp-iframe title="Video of Sintel, an independently produced short film"
+              width="500"
+              height="281"
+              layout="responsive"
+              sandbox="allow-scripts allow-same-origin allow-popups"
+              allowfullscreen
+              frameborder="0"
+              src="https://player.ooyala.com/iframe.html?ec=Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ&pbid=6440813504804d76ba35c8c787a4b33c&platform=html5">
+  </amp-iframe>
+
+</body>
+</html>

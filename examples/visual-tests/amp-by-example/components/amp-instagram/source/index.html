@@ -1,0 +1,58 @@
+<!--
+  ## Introduction
+
+  Embed instagram videos and photos into your AMP HTML files.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-instagram</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-instagram/">
+  <!-- ## Setup -->
+  <!-- Import the amp-instagram component in the header -->
+  <script async custom-element="amp-instagram" src="https://cdn.ampproject.org/v0/amp-instagram-0.1.js"></script>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+   <!-- ## Basic Usage -->
+   <!--
+     Instagram photos are embedded via the instagram data-shortcode, which is found in every
+     instagram photo URL. Many instagrams are square. When you set `layout="responsive"` any
+     value where `width` and `height` are the same will work.
+   -->
+  <amp-instagram
+      data-shortcode="1totVhIFXl"
+      width="1"
+      height="1"
+      layout="responsive">
+  </amp-instagram>
+
+  <!--
+    If the image is not square, `width` and `height` should be the actual width and height of
+    the instagram image.
+  -->
+  <amp-instagram
+      data-shortcode="_hIitKIFcg"
+      width="600"
+      height="450"
+      layout="responsive">
+  </amp-instagram>
+
+  <!-- ## Captions -->
+  <!--
+    You can include captions with the `data-captioned` attribute
+  -->
+  <amp-instagram
+      data-shortcode="BMQ8i4lBTlb"
+      data-captioned
+      width="1"
+      height="1"
+      layout="responsive">
+  </amp-instagram>
+
+</body>
+</html>

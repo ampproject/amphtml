@@ -1,0 +1,223 @@
+<!--
+  #### Introduction
+
+  There are a number of tools in AMP and CSS to make responsive documents.
+
+  In each of these examples, we'll use a 200x200 grey square (inline-block) as a parent to each element to demonstrate the layout values.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>Layout System</title>
+  <link rel="canonical" href="https://ampbyexample.com/advanced/layout_system/" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <meta name="amp-experiment-token" content="HfmyLgNLmblRg3Alqy164Vywr">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"></script>
+  <script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
+  <script async custom-element="amp-install-serviceworker" src="https://cdn.ampproject.org/v0/amp-install-serviceworker-0.1.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <style amp-custom>
+    div.fixed-panel {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      width: 20%;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+    }
+
+    div.square {
+      display: inline-block;
+      width: 200px;
+      height:200px;
+      background-color: grey;
+      margin: 5px;
+    }
+
+    div.vtphone {
+      /* a 16x9 device in portrait mode */
+      width: 180px;
+      height: 320px;
+    }
+
+    div.hzphone {
+      /* a 16x9 device in landscape mode */
+      width: 320px;
+      height: 180px;
+    }
+
+    div.desktop {
+      /* a 4:3 device in landscape mode */
+      width: 426px;
+      height: 320px;
+    }
+    div.double {
+      transform:scale(2);
+      transform-origin: top left;
+    }
+    div.double * {
+      transform: scale(1);
+    }
+    div.half {
+      transform:scale(0.5);
+      transform-origin: top left;
+    }
+    div.half * {
+      transform: scale(1);
+    }
+  </style>
+</head>
+<body>
+  <!--
+    We're going to build a demo panel of buttons that can adjust the size and aspect ratio of the individual samples so as to better display layout size changes. It should be visible in the bottom right corner.
+
+
+  -->
+  <div class="fixed-panel">
+    <div>
+      <span>Adjust Aspect Ratio:</span>
+      <button on="tap:AMP.setState({deviceClass: 'vtphone'})">Set to Vertical Phone</button>
+      <button on="tap:AMP.setState({deviceClass: 'desktop'})">Set to Desktop</button>
+      <button on="tap:AMP.setState({deviceClass: 'hzphone'})">Set to Horizontal Phone</button>
+      <button on="tap:AMP.setState({deviceClass: ''})">Set to Square</button>
+    </div>
+    <div>
+      <span>Adjust Size:</span>
+      <button on="tap:AMP.setState({sizeClass: 'half'})">Half size</button>
+      <button on="tap:AMP.setState({sizeClass: ''})">Regular size</button>
+      <button on="tap:AMP.setState({sizeClass: 'double'})">Double size</button>
+    </div>
+  </div>
+
+  <!-- #### responsive
+    AMP HTML has a number of different layout types.  The most common of these is the responsive layout attribute value.
+
+    When an element is given a height, width, and the layout="responsive" attribute value, it will use the height and width to calculate an aspect ratio, and responsively scale the element's box to match the width of the parent element.
+  -->
+  <div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-fit-text width="300" height="200" layout="responsive">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
+  </div>
+  <!--
+    In the responsive layout, the height and width are only used for determining the aspect ratio.  Thus 3x2 and 300x200 are functionally equivalent.
+  -->
+  <div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')" ><amp-fit-text width="3" height="2" layout="responsive">Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
+  </div>
+  <!--
+    The layout attribute applies to all amp-* tags, though not all amp tags support all layout types.
+  -->
+  <div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img width="300" height="200" layout="responsive" src="/examples/visual-tests/amp-by-example/img/amp.jpg"></amp-img></div>
+  </div>
+  <!-- #### nodisplay
+   Some elements, such as amp-font and amp-install-serviceworker, only support the nodisplay type.  These elements do not require space to be allocated on the page for their rendering.
+  -->
+  <div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-install-serviceworker src="/sw.js" data-iframe-src="https://ampbyexample.com/sw.html" layout="nodisplay"></amp-install-serviceworker></div>
+  </div>
+  <!-- #### fixed
+    The layout="fixed" attribute value indicates that the element should fit to the size its given (300x200).
+  -->
+  <div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-fit-text width="300" height="200" layout="fixed">Lorem ipsum dolori sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
+  </div>
+  <!-- -->
+  <div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img width="300" height="200" layout="fixed" src="/examples/visual-tests/amp-by-example/img/amp.jpg"></amp-img></div>
+  </div>
+  <!--
+    Elements with the layout="fixed" attribute value will render at the size provided, even if that exceeds the size of the parent element.
+  -->
+  <div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-fit-text width="500" height="10" layout="fixed">Lorem ipsum dolori sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
+  </div>
+  <!-- -->
+  <div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img width="500" height="200" layout="fixed" src="/examples/visual-tests/amp-by-example/img/amp.jpg"></amp-img></div>
+  </div>
+  <!-- #### fixed-height
+    The layout="fixed-height" attribute value indicates that the element should fill to the width that it's given, but remain at a fixed height.
+    As the width is disregarded in fixed-height, it can only be set to "auto" (or not set at all).
+  -->
+  <div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-fit-text height="200" layout="fixed-height">Lorem ipsum dolori sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text></div>
+  </div>
+  <!-- -->
+  <div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img height="200" layout="fixed-height" src="/examples/visual-tests/amp-by-example/img/amp.jpg"></amp-img></div>
+  </div>
+  <!-- -->
+  <div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img height="200" width="auto" layout="fixed-height" src="/examples/visual-tests/amp-by-example/img/amp.jpg"></amp-img></div>
+  </div>
+  <!--
+    Elements with a fixed-height layout attribute value will respond to the size of the parent element (and thus screen size), but will not respect aspect ratio.
+  -->
+  <div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img height="100" layout="fixed-height" src="/examples/visual-tests/amp-by-example/img/amp.jpg"></amp-img></div>
+  </div>
+  <!--
+  -->
+  <div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img height="500" layout="fixed-height" src="/examples/visual-tests/amp-by-example/img/amp.jpg"></amp-img></div>
+  </div>
+  <!-- #### flex-item
+    The layout="flex-item" attribute value is similar to the layout="fill" attribute value, except that it is used in a flexbox model.
+    For these examples, I've created a parent flex box container inside of the fixed-size square.  The children in that container will expand in a row (horizontally) and will wrap if the size exceeds the width given.
+  -->
+  <div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><div class="flexsquare"><amp-fit-text layout="flex-item">Lorem ipsum dolori sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text>
+    <amp-img layout="flex-item" src="/examples/visual-tests/amp-by-example/img/amp.jpg"></amp-img>
+    </div></div>
+  </div>
+  <!-- #### container
+    The layout="container" attribute value indicates that the element has no intrisic space needs of its own, and that it's size should be determined by the needs of its children.  This is functionally equivalent to the default behavior of the "div" tag in HTML5.
+    Use cases include amp-accordion, amp-live-list, and other tags whose content is determined by its children.
+  -->
+  <div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')">
+      <amp-accordion layout="container">
+        <section expanded>
+          <h1>Lipsum</h1>
+          <amp-fit-text width="300" height="200" layout="fixed">Lorem ipsum dolori sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text>
+        </section>
+      </amp-accordion>
+  </div>
+  </div>
+  <!-- ### Sizes (Width)
+    The sizes attribute is a list of media conditions and source size values (width).  This is similar to the "sizes" attribute in 'img' tags in HTML5, except it applies to all amp-* tags that allow use the responsive layout.  It only works with the responsive layout.
+  -->
+  <div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img width="300" height="200" layout="responsive" src="/examples/visual-tests/amp-by-example/img/amp.jpg" sizes="(min-width:500px) 200px, 100px"></amp-img></div>
+  </div>
+  <!-- ### Sizes (Height)
+    The heights attribute is a list of media conditions and source size values (height).  This is similar to the "sizes" attribute in 'img' tags in HTML5, except it applies to all amp-* tags that allow use of the responsive layout.  It only works with the responsive layout.
+  -->
+  <div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img width="300" height="200" layout="responsive" src="/examples/visual-tests/amp-by-example/img/amp.jpg" heights="(min-width:500px) 200px, 100px"></amp-img></div>
+  </div>
+  <!--
+    Additionally, the value refers to a height, not a width, and unlike the "sizes" attribute, it can also use a percentage.
+  -->
+  <div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img width="300" height="200" layout="responsive" src="/examples/visual-tests/amp-by-example/img/amp.jpg" heights="(min-width:500px) 200px, 30%"></amp-img></div>
+  </div>
+  <!--- ### Media attribute
+    The media attribute is a media query that is evaluated and used as a conditional to determine if a given element should be loaded.  This can be a useful way to conditioanlly show certain elements based on the screen size (e.g. add an additional column for outbound links on desktop devices)
+  -->
+  <div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-fit-text width="300" height="200" layout="responsive" media="(min-width: 200px)">This text has at least 200px of width to fill!</amp-fit-text></div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-fit-text width="300" height="200" layout="responsive" media="(min-width: 300px)">This text has at least 300px of width to fill!</amp-fit-text></div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-fit-text width="300" height="200" layout="responsive" media="(min-width: 400px)">This text has at least 400px of width to fill!</amp-fit-text></div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-fit-text width="300" height="200" layout="responsive" media="(min-width: 500px)">This text has at least 500px of width to fill!</amp-fit-text></div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-fit-text width="300" height="200" layout="responsive" media="(min-width: 600px)">This text has at least 600px of width to fill!</amp-fit-text></div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-fit-text width="300" height="200" layout="responsive" media="(min-width: 700px)">This text has at least 700px of width to fill!</amp-fit-text></div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-fit-text width="300" height="200" layout="responsive" media="(min-width: 800px)">This text has at least 800px of width to fill!</amp-fit-text></div>
+  </div>
+</body>
+</html>

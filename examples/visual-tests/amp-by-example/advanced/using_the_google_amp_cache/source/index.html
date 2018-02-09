@@ -1,0 +1,101 @@
+<!--
+  ## Introduction
+
+  The [Google AMP Cache](https://developers.google.com/amp/cache/overview) stores valid AMPs and provides a consistently fast access to AMPs. It is available for anyone to use.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>Using the Google AMP Cache</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/advanced/using_the_google_amp_cache/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-custom>
+        .doc pre {
+          margin: 16px;
+          padding: 16px;
+        }
+        .doc pre code {
+          font-size: 14px;
+        }
+        .doc pre, .doc pre>code, code {
+          background-color: #ECEFF1;
+        }
+      </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+  <!--
+## AMP Cache URL Format
+
+When possible, the Google AMP Cache will create a subdomain for each AMP document's domain by first converting it from [IDN (punycode)](https://en.wikipedia.org/wiki/Punycode) to UTF-8. The caches replaces every `-` (dash) with `--` (2 dashes) and replace every `.` (dot) with `-` (dash). For example, `pub.com` will map to `pub-com.cdn.ampproject.org`.
+
+Here is AMP Cache URL for `https://ampbyexample.com/components/amp-img`:
+
+<amp-iframe title="Google AMP Cache tool"
+            height="149"
+            layout="fixed-height"
+            sandbox="allow-scripts allow-same-origin allow-popups"
+            src="https://amp-by-example-api.appspot.com/iframe/amp-url-converter.html?url=https://ampbyexample.com/components/amp-img">
+            <div placeholder></div>
+</amp-iframe>
+
+The converted AMP Cache URL consists of the following parts:
+
+* `ampbyexample-com`: the publisher domain converted into a subdomain using the algorithm described above.
+* `cdn.ampproject.org`: the AMP Cache domain.
+* `c`: to indicate that it's an AMP document (there is also `i` for image and `r` for resources such as fonts).
+* `s`: indicating that the AMP Cache fetches the content from the origin using TLS (secure HTTPS).
+* `ampbyexample.com/components/amp-img`: the original URL excluding the scheme.
+
+It is OK for URLs to include parameters in the query string, simply include these in the AMP Cache URL as well.
+
+Example: [https://ampbyexample-com.cdn.ampproject.org/c/s/ampbyexample.com/g?value=Hello%20World](https://ampbyexample-com.cdn.ampproject.org/c/s/ampbyexample.com/g?value=Hello%20World).
+
+## Redirect & Error Handling
+
+Here are some examples for how the AMP Cache handles redirects and errors:
+
+**Redirects**
+
+The AMP Cache follows redirects when resolving AMP URLs. For example, if an URL redirects to another AMP URL:
+
+```
+$ curl -I https://ampbyexample.com/amp-img.html
+
+HTTP/1.1 301 Moved Permanently
+Content-Type: text/html; charset=utf-8
+Location: https://ampbyexample.com/components/amp-img/
+...
+```
+
+Then the AMP Cache will return the content of the resolved redirect for the original URL.
+
+Example: [https://ampbyexample-com.cdn.ampproject.org/ampbyexample.com/amp-img.html](https://cdn.ampproject.org/c/s/ampbyexample.com/amp-img.html).
+    <p class="card important">**Important**: if you move the location of the AMP Files on your server, make sure to set up a redirect from the old location to the new one. </p>
+
+**Not Found**
+
+When a page is not found in the AMP Cache, it will show an error page and return a 404 status.
+
+Example: [https://ampbyexample-com.cdn.ampproject.org/ampbyexample.com/not-found](https://cdn.ampproject.org/c/s/ampbyexample.com/not-found)
+
+**Invalid AMP**
+
+When a page is invalid AMP, the AMP Cache will return a 404 status.
+
+Example: [https://ampbyexample-com.cdn.ampproject.org/ampbyexample.com/invalid_amp.html](https://cdn.ampproject.org/c/s/ampbyexample.com/invalid_amp.html)
+
+**Server Errors**
+
+If an URL returns a 5XX server errors, the AMP Cache will return a 404 status.
+
+Example: [https://ampbyexample-com.cdn.ampproject.org/ampbyexample.com/error](https://cdn.ampproject.org/c/s/ampbyexample.com/error)
+
+<br>
+-->
+</body>
+</html>

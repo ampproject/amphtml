@@ -1,0 +1,43 @@
+<!--
+  ## Introduction
+
+  <a href="https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-pixel">amp-pixel</a> is a lightweight mechanism for measuring pageviews.  It provides
+  functionality similar to <a href="https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-analytics">amp-analytics</a>, but only includes a single event
+  (views), and offers fewer transport mechanisms and variables.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-pixel</title>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-pixel/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!--
+    `amp-pixel` is a built-in component and does not require loading an extension.
+  -->
+<!-- -->
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+
+  <!-- ## Basic Usage -->
+  <!--
+    The `amp-pixel` issues a simple GET request to the given URL and ignores the result.  This is a fast way to track pageviews.
+  -->
+  <amp-pixel src="https://ampbyexample.com/tracker/foo" layout="nodisplay"></amp-pixel>
+
+  <!--
+    The variables noted in <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md">amp-var-substitutions</a> will be interpolated in the URL as a way to capture some meaningful data.
+  -->
+  <amp-pixel src="https://ampbyexample.com/tracker/foo?redirectTime=REDIRECT_TIME&sourceHost=SOURCE_HOSTNAME&viewer=VIEWER" layout="nodisplay"></amp-pixel>
+
+  <!-- ## Referrer Policy -->
+  <!--
+    The optional `referrerpolicy` attribute allows you to strip the 'Referrer' header in the outbound HTTP request.  Other values of `referrerpolicy` that are valid for other tags (e.g. `amp-img`) are not available for `amp-pixel`.
+  -->
+  <amp-pixel src="https://ampbyexample.com/tracker/foo" layout="nodisplay" referrerpolicy="no-referrer"></amp-pixel>
+</body>
+</html>

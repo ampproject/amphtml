@@ -1,0 +1,116 @@
+<!--
+  ## Introduction
+
+  Embed videos into your AMP HTML files. Video source files should be served via HTTPS.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-video</title>
+  <!-- ## Setup -->
+  <!--
+    Import the `amp-video` component.
+  -->
+  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-video/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+
+  <!-- ## Basic Usage -->
+  <!--
+    A simple video with controller.
+    `amp-video` supports the following formats: mp4, webm, ogg together with all the formats
+    supported by the HTML5 video tag including HLS.
+  -->
+  <amp-video width="480" height="270" src="/examples/visual-tests/amp-by-example/video/tokyo.mp4"
+             poster="/examples/visual-tests/amp-by-example/img/tokyo.jpg"
+             layout="responsive"
+             controls>
+    <div fallback>
+      <p>Your browser doesn't support HTML5 video.</p>
+    </div>
+    <source type="video/mp4" src="/examples/visual-tests/amp-by-example/video/tokyo.mp4">
+    <source type="video/webm" src="/examples/visual-tests/amp-by-example/video/tokyo.webm">
+  </amp-video>
+
+  <!-- ## Autoplay -->
+  <!--
+    Setting `autoplay` will automatically play/pause the video as it is
+    scrolled into/out of view on supported browsers.
+
+    The video is automatically muted before autoplay starts, when the user
+    taps the video, the video is unmuted.
+
+    If the user has interacted with the video
+    (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in
+    or out of view, the state of the video remains as how the user left it.
+  -->
+  <amp-video width="480" height="270" src="/examples/visual-tests/amp-by-example/video/tokyo.mp4"
+             poster="/examples/visual-tests/amp-by-example/img/tokyo.jpg"
+             layout="responsive"
+             controls
+             autoplay>
+    <div fallback>
+      <p>Your browser doesn't support HTML5 video.</p>
+    </div>
+    <source type="video/webm" src="/examples/visual-tests/amp-by-example/video/tokyo.webm">
+  </amp-video>
+
+  <!-- ## HLS -->
+  <!--
+    AMP supports adaptive bitrate video via
+    [HLS](https://en.wikipedia.org/wiki/HTTP_Live_Streaming) provided it is
+    supported by the browser. (Note that whilst HLS is supported by most mobile
+    browsers—including Chrome and Safari—few desktop browsers support it.)
+
+    The videos below have the bitrate burnt into the video files themselves to
+    make it easier to discover when the browser switches between streams. If
+    your browser does not support HLS, you will see "No HLS". If you need to
+    create files in the appropriate format, we recommend investigating [shaka
+    packager](https://github.com/google/shaka-packager).
+  -->
+  <amp-video width="480" height="270"
+             poster="/examples/visual-tests/amp-by-example/img/tokyo.jpg"
+             layout="responsive"
+             controls
+             autoplay>
+    <div fallback>
+      <p>Your browser doesn't support HTML5 video.</p>
+    </div>
+    <source type="application/vnd.apple.mpegurl" src="/examples/visual-tests/amp-by-example/video/tokyo.m3u8">
+    <source type="video/mp4" src="/examples/visual-tests/amp-by-example/video/tokyo-no-hls.mp4">
+  </amp-video>
+
+  <!-- ## Customize Media Notifications -->
+  <!--
+    <center>
+      <amp-img src="https://i.imgur.com/QBSHYgs.jpg" width="200" height="356" class="my1"></amp-img>
+      <amp-img src="https://i.imgur.com/GrZpu0p.png" width="150" height="150"  class="my1"></amp-img>
+    </center>
+    <br />
+
+    With the implementation of the MediaSessionAPI on AMP, you can now show rich notifications that describe the playing media
+    through the `artist`, `album`, `artwork` and `title` attributes.
+    Learn more by following [this tutorial](/examples/visual-tests/amp-by-example/advanced/Rich_Media_Notifications/).
+  -->
+  <amp-video
+    autoplay
+    src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+    poster="https://peach.blender.org/wp-content/uploads/bbb-splash.png"
+    artwork="img/bigbuckbunny.jpg"
+    title="Big Buck Bunny"
+    album="Blender"
+    artist="Blender Foundation"
+    width="720"
+    height="405"
+    layout="responsive"
+    controls>
+  </amp-video>
+
+</body>
+</html>

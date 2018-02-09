@@ -1,0 +1,62 @@
+<!--
+  ## Introduction
+
+  The amp-lightbox component allows for a “lightbox” or similar experience - where upon user
+  interaction a component expands to fill the viewport, until it is closed again by the user.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-lightbox</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!-- Import the amp-lightbox component in the header -->
+  <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-lightbox/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    .lightbox {
+      background: rgba(0,0,0,0.8);
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .lightbox h1 {
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <!-- ## Basic Usage -->
+  <!--
+    The `amp-lightbox` component defines the child elements that will be displayed in a full-viewport overlay.
+    To close the lightbox via click or tap use the `on` attribute on one or more elements
+    inside the lightbox. In this example the user can click anywhere in the lightbox to close it.
+  -->
+  <amp-lightbox id="my-lightbox" layout="nodisplay">
+    <div class="lightbox" on="tap:my-lightbox.close" role="button" tabindex="0">
+      <h1>Hello World!</h1>
+    </div>
+  </amp-lightbox>
+  <!--
+    The lighbox is shown when the user taps or clicks on an element with `on` attribute that targets
+    the id of an `amp-lightbox` element.
+  -->
+  <button class="ampstart-btn caps m2" on="tap:my-lightbox" role="button" tabindex="0">
+    Open lightbox
+  </button>
+  <!--
+    For showing images in a lightbox, AMP also features the
+    [amp-image-lightbox](/examples/visual-tests/amp-by-example/components/amp-image-lightbox/) component, which doesn't need the image to
+    specified twice.
+  -->
+
+
+</body>
+</html>
