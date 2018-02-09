@@ -28,13 +28,13 @@ Import the additional AMP components. This sample uses fitted text, an image car
 <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 <!-- ## Access -->
 <!--
-Specify the endpoints required for `amp-access` to detect a signed-user. This will be used to display a special offer. Learn more about these attributes [here](/components/amp-access).
+Specify the endpoints required for `amp-access` to detect a signed-user. This will be used to display a special offer. Learn more about these attributes [here](/examples/visual-tests/amp-by-example/components/amp-access).
 -->
 <script id="amp-access" type="application/json">
     {
-        "authorization": "/samples_templates/hotel/authorization?rid=READER_ID&url=CANONICAL_URL&ref=DOCUMENT_REFERRER&_=RANDOM",
-        "pingback": "/samples_templates/hotel/pingback?rid=READER_ID&ref=DOCUMENT_REFERRER&url=CANONICAL_URL",
-        "login": "/samples_templates/hotel/login?rid=READER_ID&url=CANONICAL_URL",
+        "authorization": "/examples/visual-tests/amp-by-example/samples_templates/hotel/authorization?rid=READER_ID&url=CANONICAL_URL&ref=DOCUMENT_REFERRER&_=RANDOM",
+        "pingback": "/examples/visual-tests/amp-by-example/samples_templates/hotel/pingback?rid=READER_ID&ref=DOCUMENT_REFERRER&url=CANONICAL_URL",
+        "login": "/examples/visual-tests/amp-by-example/samples_templates/hotel/login?rid=READER_ID&url=CANONICAL_URL",
         "authorizationFallbackResponse": {
             "error": true,
             "access": false
@@ -133,26 +133,26 @@ Specify the endpoints required for `amp-access` to detect a signed-user. This wi
 <body>
 <!-- ## Hero Images -->
 <!--
-  The heading resizes to the available space using `amp-fit-text`. The `amp-carousel` element is used to add hero images for the property. To learn more about configuring these elements look at the [advanced carousel demo here](/advanced/image_galleries_with_amp-carousel/).
+  The heading resizes to the available space using `amp-fit-text`. The `amp-carousel` element is used to add hero images for the property. To learn more about configuring these elements look at the [advanced carousel demo here](/examples/visual-tests/amp-by-example/advanced/image_galleries_with_amp-carousel/).
 -->
 <div>
     <h5><amp-fit-text layout="responsive" min-font-size="20px" max-font-size="80px" height="80" width="600">Buckingham Palace Guest Rooms</amp-fit-text></h5>
     <div class="star-rating"><span>★★★★☆</span> 4.3 stars from 250 reviews</div>
     <amp-carousel id="hero-images-carousel" width="640" height="383" layout="responsive" type="slides">
         <div>
-            <amp-img src="/img/hotel01_2benny_640x383.jpg" layout="fill" alt="Buckingham Palace exterior" attribution="2benny on Flickr - CC BY 2.0"></amp-img>
+            <amp-img src="/examples/visual-tests/amp-by-example/img/hotel01_2benny_640x383.jpg" layout="fill" alt="Buckingham Palace exterior" attribution="2benny on Flickr - CC BY 2.0"></amp-img>
             <div class="caption">Photo by <a href="https://flic.kr/p/rAGfoE">2benny</a> / <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a></div>
         </div>
         <div>
-            <amp-img src="/img/hotel02_joepitha_640x383.jpg" layout="fill" alt="Buckingham Palace gate" attribution="Joe Pitha on Flickr - CC BY-SA 2.0"></amp-img>
+            <amp-img src="/examples/visual-tests/amp-by-example/img/hotel02_joepitha_640x383.jpg" layout="fill" alt="Buckingham Palace gate" attribution="Joe Pitha on Flickr - CC BY-SA 2.0"></amp-img>
             <div class="caption">Photo by <a href="https://flic.kr/p/ew3kma">Joe Pitha</a> / <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA 2.0</a></div>
         </div>
         <div>
-            <amp-img src="/img/hotel03_muffinn_640x383.jpg" layout="fill" alt="The Victoria Memorial" attribution="muffinn on Flickr - CC BY 2.0"></amp-img>
+            <amp-img src="/examples/visual-tests/amp-by-example/img/hotel03_muffinn_640x383.jpg" layout="fill" alt="The Victoria Memorial" attribution="muffinn on Flickr - CC BY 2.0"></amp-img>
             <div class="caption">Photo by <a href="https://flic.kr/p/cuDKc3">muffinn</a> / <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a></div>
         </div>
         <div>
-            <amp-img src="/img/hotel04_robinhawkes_640x383.jpg" layout="fill" alt="Aerial view of Buckingham Palace" attribution="Robin Hawkes on Flickr - CC BY-SA 2.0"></amp-img>
+            <amp-img src="/examples/visual-tests/amp-by-example/img/hotel04_robinhawkes_640x383.jpg" layout="fill" alt="Aerial view of Buckingham Palace" attribution="Robin Hawkes on Flickr - CC BY-SA 2.0"></amp-img>
             <div class="caption">Photo by <a href="https://flic.kr/p/bw8B7r">Robin Hawkes</a> / <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA 2.0</a></div>
         </div>
     </amp-carousel>
@@ -179,14 +179,14 @@ Specify the endpoints required for `amp-access` to detect a signed-user. This wi
 </div>
 <!-- ## Dates of stay -->
 <!--
-  An amp-form is used to allow the user to change the dates of their stay. The `type="date"` is used to allow the browser to display a native date picker. Learn more about handling the result of a form submission in the [form example](/components/amp-form).
+  An amp-form is used to allow the user to change the dates of their stay. The `type="date"` is used to allow the browser to display a native date picker. Learn more about handling the result of a form submission in the [form example](/examples/visual-tests/amp-by-example/components/amp-form).
 -->
 <div>
   <h6>Your stay</h6>
   <p>7 nights, from 12 Dec 2020 to 06 Jan 2021</p>
   <form method="GET" class="px3 mb4"
-    action="/samples_templates/hotel/check-available"
-    action-xhr="/samples_templates/hotel/check-available"
+    action="/examples/visual-tests/amp-by-example/samples_templates/hotel/check-available"
+    action-xhr="/examples/visual-tests/amp-by-example/samples_templates/hotel/check-available"
     target="_top">
     <fieldset id="stay-input" class="border-none p0 m0">
     <div class="ampstart-input relative m0 p0 mb3">
@@ -225,7 +225,7 @@ Specify the endpoints required for `amp-access` to detect a signed-user. This wi
 -->
 <div>
     <h6>Rooms</h6>
-  <form method="POST" action-xhr="/samples_templates/hotel/book" target="_top">
+  <form method="POST" action-xhr="/examples/visual-tests/amp-by-example/samples_templates/hotel/book" target="_top">
     <table>
       <thead>
         <tr>
@@ -260,7 +260,7 @@ Specify the endpoints required for `amp-access` to detect a signed-user. This wi
 </div>
 <!-- ## Embedding a map -->
 <!--
-  A standard `amp-iframe` is used to embed a Google Map. Learn more about other iframe embeds [here](/components/amp-iframe).
+  A standard `amp-iframe` is used to embed a Google Map. Learn more about other iframe embeds [here](/examples/visual-tests/amp-by-example/components/amp-iframe).
 -->
 <div>
     <h6>Location</h6>
@@ -271,7 +271,7 @@ Specify the endpoints required for `amp-access` to detect a signed-user. This wi
 </div>
 <!-- ## Dynamic list -->
 <!--
-  An `amp-list` is used to pull in the interesting attractions nearby. Learn more about the element [here](/components/amp-list).
+  An `amp-list` is used to pull in the interesting attractions nearby. Learn more about the element [here](/examples/visual-tests/amp-by-example/components/amp-list).
 -->
 <div>
   <h6>Nearby attractions</h6>
@@ -279,7 +279,7 @@ Specify the endpoints required for `amp-access` to detect a signed-user. This wi
             width="auto"
             height="100"
             layout="fixed-height"
-            src="/json/nearby_attractions.json">
+            src="/examples/visual-tests/amp-by-example/json/nearby_attractions.json">
     <template type="amp-mustache">
       <div class="{{type}}">
         <a href="{{url}}">{{attraction}}</a>

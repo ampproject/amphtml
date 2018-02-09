@@ -3,7 +3,7 @@
 
   While the AMP Caches don't offer support for geolocation, you can enable
   geo-based features with geolocation logic on your backend and
-  [amp-list](https://www.ampproject.org/docs/reference/components/amp-list).
+  [amp-list](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-list).
   This adds an additional XHR request but you can mitigate the negative UX
   effects with a skeleton layout in the placeholder attribute.
 -->
@@ -12,7 +12,7 @@
 <html ⚡>
 <head>
   <meta charset="utf-8">
-  <link rel="canonical" href="https://ampbyexample.com/../advanced/geolocation_with_amp-list/">
+  <link rel="canonical" href="https://ampbyexample.com/../examples/visual-tests/amp-by-example/advanced/geolocation_with_amp-list/">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <!-- ## Setup -->
@@ -52,13 +52,13 @@
       margin: 0;
     }
     .geolist-preview ul.results amp-img {
-      background-image: url(/img/geolocation_map_skeleton.png);
+      background-image: url(/examples/visual-tests/amp-by-example/img/geolocation_map_skeleton.png);
       background-size: 150px 100px;
       float: left;
       margin-right: 5px;
     }
     .geolist-preview div[placeholder] ul.results li {
-      background: url(/img/geolocation_map_skeleton.png), /* Image */
+      background: url(/examples/visual-tests/amp-by-example/img/geolocation_map_skeleton.png), /* Image */
         linear-gradient(#cccccc 100%, transparent 0), /* Image Placeholder */
         linear-gradient(#bbbbbb 100%, transparent 0), /* City */
         linear-gradient(#cccccc 100%, transparent 0), /* State */

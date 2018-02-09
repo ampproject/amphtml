@@ -201,8 +201,8 @@ This is a sample recipe AMP article demonstrating how to express machine-readabl
       background-position: left 16px center;
       background-repeat: no-repeat;
       background-image: -webkit-image-set(
-          url(/img/ic_menu_white_1x_web_24dp.png) 1x,
-          url(/img/ic_menu_white_2x_web_24dp.png) 2x
+          url(/examples/visual-tests/amp-by-example/img/ic_menu_white_1x_web_24dp.png) 1x,
+          url(/examples/visual-tests/amp-by-example/img/ic_menu_white_2x_web_24dp.png) 2x
       );
       background-color: #333;
       text-align: left;
@@ -267,7 +267,7 @@ This is a sample recipe AMP article demonstrating how to express machine-readabl
   <!-- ## Social Sharing  -->
 
   <!--
-  The Social Share extension provides a common interface for share buttons.  Learn more about [`amp-social-share`](/components/amp-social-share/).
+  The Social Share extension provides a common interface for share buttons.  Learn more about [`amp-social-share`](/examples/visual-tests/amp-by-example/components/amp-social-share/).
   -->
   <p class="heading">
     <amp-social-share type="twitter" data-param-text="Amazing recipe that my friend made" width="45" height="33"></amp-social-share>
@@ -279,34 +279,34 @@ This is a sample recipe AMP article demonstrating how to express machine-readabl
 
 
   <figure>
-    <amp-img src="/img/lamb-garlic-done.jpg" width="1280" height="479" layout="responsive" attribution="Dan Dascalescu"></amp-img>
+    <amp-img src="/examples/visual-tests/amp-by-example/img/lamb-garlic-done.jpg" width="1280" height="479" layout="responsive" attribution="Dan Dascalescu"></amp-img>
     <figcaption>Garlic-studded roast lamb. Serve with a side of baked potatoes.</figcaption>
   </figure>
 
   <p>This is a traditional Romanian lamb recipe, with the subtle taste of garlic deeply permeating the meat. It is customarily prepared for Easter, but can be enjoyed year-round. For best results, stud the meat a day in advance.</p>
   <!-- ## Image Galleries  -->
   <!--
-  Use `amp-carousel` for image galleries. Here we display responsively images with different aspect ratios. Learn more about [creating image galleries in AMP](/advanced/image_galleries_with_amp-carousel/).
+  Use `amp-carousel` for image galleries. Here we display responsively images with different aspect ratios. Learn more about [creating image galleries in AMP](/examples/visual-tests/amp-by-example/advanced/image_galleries_with_amp-carousel/).
   -->
   <amp-carousel width="1280" height="970" layout="responsive" type="slides">
     <figure>
-      <amp-img src="/img/meat-silverskin-cutting.jpg" width="401" height="542" layout="fill" attribution="Scott Phillips"></amp-img>
+      <amp-img src="/examples/visual-tests/amp-by-example/img/meat-silverskin-cutting.jpg" width="401" height="542" layout="fill" attribution="Scott Phillips"></amp-img>
       <figcaption>Prepare the meat by washing and removing the silverskin.</figcaption>
     </figure>
     <figure>
-      <amp-img src="/img/garlic.jpg" width="1280" height="960" layout="fill" attribution="Wikipedia"></amp-img>
+      <amp-img src="/examples/visual-tests/amp-by-example/img/garlic.jpg" width="1280" height="960" layout="fill" attribution="Wikipedia"></amp-img>
       <figcaption>Prepare the garlic.</figcaption>
     </figure>
     <figure>
-      <amp-img src="/img/lamb-with-garlic-slivers.jpg" width="1021" height="763" layout="fill" attribution="Kara / EatDrinkAdventure"></amp-img>
+      <amp-img src="/examples/visual-tests/amp-by-example/img/lamb-with-garlic-slivers.jpg" width="1021" height="763" layout="fill" attribution="Kara / EatDrinkAdventure"></amp-img>
       <figcaption>Insert slivers of garlic into the meat; the deeper the better.</figcaption>
     </figure>
     <figure>
-      <amp-img src="/img/tomatoes-cut.jpg" width="720" height="720" attribution="CC0 - https://pixabay.com/en/chopped-tomatoes-tomato-food-red-1375892/" layout="fill"></amp-img>
+      <amp-img src="/examples/visual-tests/amp-by-example/img/tomatoes-cut.jpg" width="720" height="720" attribution="CC0 - https://pixabay.com/en/chopped-tomatoes-tomato-food-red-1375892/" layout="fill"></amp-img>
       <figcaption>Cut the tomatoes.</figcaption>
     </figure>
     <figure>
-      <amp-img src="/img/lamb-garlic-ready-for-oven.jpg" width="1280" height="1703" attribution="Dan Dascalescu"  layout="fill"></amp-img>
+      <amp-img src="/examples/visual-tests/amp-by-example/img/lamb-garlic-ready-for-oven.jpg" width="1280" height="1703" attribution="Dan Dascalescu"  layout="fill"></amp-img>
       <figcaption>The garlic lamb roast is ready for baking.</figcaption>
     </figure>
   </amp-carousel>
@@ -419,9 +419,9 @@ This is a sample recipe AMP article demonstrating how to express machine-readabl
 
   <h2>Related Recipes</h2>
   <!--
-  It's a good idea to recommend related content to your readers. With `amp-list` it is possible to dynamically include personalized content into your AMPs. It's best to link to the AMP version of related content in order to keep the user in the fast AMP world. [Learn more about `amp-list`](/components/amp-list/)
+  It's a good idea to recommend related content to your readers. With `amp-list` it is possible to dynamically include personalized content into your AMPs. It's best to link to the AMP version of related content in order to keep the user in the fast AMP world. [Learn more about `amp-list`](/examples/visual-tests/amp-by-example/components/amp-list/)
   -->
-  <amp-list width="300" height="75" layout="responsive" src="/json/related_articles.json">
+  <amp-list width="300" height="75" layout="responsive" src="/examples/visual-tests/amp-by-example/json/related_articles.json">
     <template type="amp-mustache">
       <a class="card related" href="{{url}}"><amp-img width="101" height="75" src="{{thumbnail}}"></amp-img><span>{{title}}</span></a>
     </template>

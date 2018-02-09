@@ -70,13 +70,13 @@ The `CLIENT_ID` variable can be passed via an amp-form by declaring a hidden inp
 `default-value="CLIENT_ID(POLL_USER_ID)`. In our implementation, [the backend](https://github.com/ampproject/amp-by-example/blob/master/backend/poll.go) sets `POLL_USER_ID` to the value of `CLIENT_ID`,
 but the value of this cookie is not relevant and you could re-use your own session id.
 
-Read more about [variable substitution](https://www.ampproject.org/docs/reference/components/amp-form#variable-substitutions).
+Read more about [variable substitution](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-form#variable-substitutions).
 Currently, HTML tables are not supported in form responses, so we'll use CSS to layout the result data.
 
 In order to submit the form as soon as the user picks an option, we will add an
 [`on` attribute](https://www.ampproject.org/docs/reference/spec#on) to each `<input>`, that will submit the poll on change.
 -->
-<form method="post" action-xhr="/samples_templates/poll/submit" target="_blank"
+<form method="post" action-xhr="/examples/visual-tests/amp-by-example/samples_templates/poll/submit" target="_blank"
       id="poll1"
       custom-validation-reporting="as-you-go">
     <input name="clientId" type="hidden" value="CLIENT_ID(POLL_USER_ID)" data-amp-replace="CLIENT_ID">

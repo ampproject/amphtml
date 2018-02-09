@@ -32,7 +32,7 @@ This is a sample showing how to integrate product data details such as descripti
    -->
    <amp-list height="24"
      layout="fixed-height"
-     src="/json/product.json"
+     src="/examples/visual-tests/amp-by-example/json/product.json"
      class="m1">
      <template type="amp-mustache">
         Price: ${{price}}
@@ -42,11 +42,11 @@ This is a sample showing how to integrate product data details such as descripti
   <p> An awesome product </p>
   <!-- if you need to make multiple calls to get all the data, that is not a problem in AMP since if multiple `amp-list` with the same `src` are found in the page, only one network call is actually made by the AMP runtime.
   By checking the network tab of the Chrome dev console, you can check that this second `amp-list` does not cause a second network call.
-  Since we are using a [service-worker](https://www.ampproject.org/docs/reference/components/amp-install-serviceworker) you may see
+  Since we are using a [service-worker](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-install-serviceworker) you may see
   two similar calls one after the other to the same endpoint, so to better verify this behaviour, go to Application -> Service workers and click on Unregister.-->
    <amp-list height="24"
      layout="fixed-height"
-     src="/json/product.json"
+     src="/examples/visual-tests/amp-by-example/json/product.json"
      class="m1">
      <template type="amp-mustache">
         Availability: {{availability}}

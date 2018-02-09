@@ -27,15 +27,15 @@
     `amp-video` supports the following formats: mp4, webm, ogg together with all the formats
     supported by the HTML5 video tag including HLS.
   -->
-  <amp-video width="480" height="270" src="/video/tokyo.mp4"
-             poster="/img/tokyo.jpg"
+  <amp-video width="480" height="270" src="/examples/visual-tests/amp-by-example/video/tokyo.mp4"
+             poster="/examples/visual-tests/amp-by-example/img/tokyo.jpg"
              layout="responsive"
              controls>
     <div fallback>
       <p>Your browser doesn't support HTML5 video.</p>
     </div>
-    <source type="video/mp4" src="/video/tokyo.mp4">
-    <source type="video/webm" src="/video/tokyo.webm">
+    <source type="video/mp4" src="/examples/visual-tests/amp-by-example/video/tokyo.mp4">
+    <source type="video/webm" src="/examples/visual-tests/amp-by-example/video/tokyo.webm">
   </amp-video>
 
   <!-- ## Autoplay -->
@@ -50,15 +50,15 @@
     (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in
     or out of view, the state of the video remains as how the user left it.
   -->
-  <amp-video width="480" height="270" src="/video/tokyo.mp4"
-             poster="/img/tokyo.jpg"
+  <amp-video width="480" height="270" src="/examples/visual-tests/amp-by-example/video/tokyo.mp4"
+             poster="/examples/visual-tests/amp-by-example/img/tokyo.jpg"
              layout="responsive"
              controls
              autoplay>
     <div fallback>
       <p>Your browser doesn't support HTML5 video.</p>
     </div>
-    <source type="video/webm" src="/video/tokyo.webm">
+    <source type="video/webm" src="/examples/visual-tests/amp-by-example/video/tokyo.webm">
   </amp-video>
 
   <!-- ## HLS -->
@@ -75,15 +75,15 @@
     packager](https://github.com/google/shaka-packager).
   -->
   <amp-video width="480" height="270"
-             poster="/img/tokyo.jpg"
+             poster="/examples/visual-tests/amp-by-example/img/tokyo.jpg"
              layout="responsive"
              controls
              autoplay>
     <div fallback>
       <p>Your browser doesn't support HTML5 video.</p>
     </div>
-    <source type="application/vnd.apple.mpegurl" src="/video/tokyo.m3u8">
-    <source type="video/mp4" src="/video/tokyo-no-hls.mp4">
+    <source type="application/vnd.apple.mpegurl" src="/examples/visual-tests/amp-by-example/video/tokyo.m3u8">
+    <source type="video/mp4" src="/examples/visual-tests/amp-by-example/video/tokyo-no-hls.mp4">
   </amp-video>
 
   <!-- ## Customize Media Notifications -->
@@ -96,7 +96,7 @@
 
     With the implementation of the MediaSessionAPI on AMP, you can now show rich notifications that describe the playing media
     through the `artist`, `album`, `artwork` and `title` attributes.
-    Learn more by following [this tutorial](/advanced/Rich_Media_Notifications/).
+    Learn more by following [this tutorial](/examples/visual-tests/amp-by-example/advanced/Rich_Media_Notifications/).
   -->
   <amp-video
     autoplay

@@ -32,7 +32,7 @@ This is a sample showing how to implement the "show more" design pattern. "Show 
   <!-- You can implement a show more button by using `amp-list` and `amp-bind`, where
   `amp-list` `src` data are bind to the value of an `amp-state` element. Here we are using two `amp-state`: `productsState`
   which uses the same json `src` as the `amp-list` so that will initially contain the same list of items ... -->
-  <amp-state id="productsState" src="/json/related_products.json">
+  <amp-state id="productsState" src="/examples/visual-tests/amp-by-example/json/related_products.json">
   </amp-state>
 
   <!-- ... while the `amp-state` with id `product` is just used to implement the show-more logic where we are allowing the user to click 3 times. -->
@@ -49,7 +49,7 @@ This is a sample showing how to implement the "show more" design pattern. "Show 
   <!-- We bind the `src` attribute of the `amp-list` to the `amp-state` object containing the products
       from that component as a `src`. We also dynamically change the height of the amp-list based on 
       the number of items (each item has a height of `24px`). -->
-  <amp-list src="/json/related_products.json" 
+  <amp-list src="/examples/visual-tests/amp-by-example/json/related_products.json" 
             [src]="productsState.items" 
             width="320"
             height="144"
@@ -64,8 +64,8 @@ This is a sample showing how to implement the "show more" design pattern. "Show 
   <!-- The show more button is implemented via a form which triggers a page update on the `submit-success` event.
       We are then merging the form results into the items already loaded by the `amp-state` using the `concat` function. -->
       <form method="GET"
-            action="/json/more_related_products_page"
-            action-xhr="/json/more_related_products_page"
+            action="/examples/visual-tests/amp-by-example/json/more_related_products_page"
+            action-xhr="/examples/visual-tests/amp-by-example/json/more_related_products_page"
             target="_top"
             on="submit-success: AMP.setState({
               productsState: { 

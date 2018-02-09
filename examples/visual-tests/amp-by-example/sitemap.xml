@@ -10,10 +10,6 @@
 <url> <loc>https://ampbyexample.com/introduction/internationalization/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
 <url> <loc>https://ampbyexample.com/introduction/hello_world/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
 <url> <loc>https://ampbyexample.com/introduction/how_to_publish_amps/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
-<url> <loc>https://ampbyexample.com/dynamic_amp/dynamic_content_after_user-interaction/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
-<url> <loc>https://ampbyexample.com/dynamic_amp/how_to_embed_interactive_elements_on_amp_pages/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
-<url> <loc>https://ampbyexample.com/dynamic_amp/mixing_dynamic_and_cached_data/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
-<url> <loc>https://ampbyexample.com/dynamic_amp/multi_page_flow/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
 <url> <loc>https://ampbyexample.com/advanced/autosuggest/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
 <url> <loc>https://ampbyexample.com/advanced/click-to-play_overlay_for_amp-video/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
 <url> <loc>https://ampbyexample.com/advanced/combobox/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
@@ -36,9 +32,10 @@
 <url> <loc>https://ampbyexample.com/advanced/using_the_google_amp_cache/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
 <url> <loc>https://ampbyexample.com/advanced/video_carousels_with_amp-carousel/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
 <url> <loc>https://ampbyexample.com/advanced/amp-user-notification_with_server_endpoint/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
-<url> <loc>https://ampbyexample.com/visual_effects/animated_snackbar/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
-<url> <loc>https://ampbyexample.com/visual_effects/basics_of_scrollbound_effects/</loc> <lastmod>2018-02-09T02:30:17Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
-<url> <loc>https://ampbyexample.com/visual_effects/scroll_to_top/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
+<url> <loc>https://ampbyexample.com/dynamic_amp/dynamic_content_after_user-interaction/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
+<url> <loc>https://ampbyexample.com/dynamic_amp/how_to_embed_interactive_elements_on_amp_pages/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
+<url> <loc>https://ampbyexample.com/dynamic_amp/mixing_dynamic_and_cached_data/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
+<url> <loc>https://ampbyexample.com/dynamic_amp/multi_page_flow/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
 <url> <loc>https://ampbyexample.com/components/amp-access-laterpay/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
 <url> <loc>https://ampbyexample.com/components/amp-access/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
 <url> <loc>https://ampbyexample.com/components/amp-accordion/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
@@ -95,6 +92,9 @@
 <url> <loc>https://ampbyexample.com/components/amp-vimeo/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
 <url> <loc>https://ampbyexample.com/components/amp-vine/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
 <url> <loc>https://ampbyexample.com/components/amp-youtube/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
+<url> <loc>https://ampbyexample.com/visual_effects/animated_snackbar/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
+<url> <loc>https://ampbyexample.com/visual_effects/basics_of_scrollbound_effects/</loc> <lastmod>2018-02-09T02:30:17Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
+<url> <loc>https://ampbyexample.com/visual_effects/scroll_to_top/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
 <url> <loc>https://ampbyexample.com/samples_templates/checkout_flow/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
 <url> <loc>https://ampbyexample.com/samples_templates/comment_section/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>
 <url> <loc>https://ampbyexample.com/samples_templates/housing/</loc> <lastmod>2018-02-09T02:26:41Z</lastmod> <changefreq>daily</changefreq> <priority>0.8</priority> </url>

@@ -9,7 +9,7 @@
 <html ⚡>
 <head>
   <meta charset="utf-8">
-  <link rel="canonical" href="https://ampbyexample.com/../dynamic_amp/multi_page_flow">
+  <link rel="canonical" href="https://ampbyexample.com/../examples/visual-tests/amp-by-example/dynamic_amp/multi_page_flow">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <!-- ## Setup -->
@@ -276,7 +276,7 @@ amp-selector.poll [option][selected]:focus {
 <section hidden [hidden]="currentPage != 1"> ... </section>
 ```
 
-We update the `currentPage` variable to progress forward in the dialog. In this sample we're using [`AMP.pushState(...)`](https://www.ampproject.org/docs/reference/components/amp-bind#modifying-history-with-amp.pushstate()) instead of `AMP.setState(...)`. `AMP.pushState(...)` pushes a new entry onto the browser history stack, which allows the user to navigate back in the to use the browser's back button to move backwards in the dialog:
+We update the `currentPage` variable to progress forward in the dialog. In this sample we're using [`AMP.pushState(...)`](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-bind#modifying-history-with-amp.pushstate()) instead of `AMP.setState(...)`. `AMP.pushState(...)` pushes a new entry onto the browser history stack, which allows the user to navigate back in the to use the browser's back button to move backwards in the dialog:
 
 ```html
 <button on="tap:AMP.pushState({ currentPage: currentPage + 1 })">

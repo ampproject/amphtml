@@ -1,7 +1,7 @@
 <!--
   ## Introduction
 
-  The [amp-form](https://www.ampproject.org/docs/reference/components/amp-form) extension allows
+  The [amp-form](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-form) extension allows
   the usage of forms and input fields in an AMP document. `amp-form` allows HTTP and XHR (XMLHttpRequest) form
   submissions. An HTTP form submission loads a new page, while an XHR form submission doesn't require a page reload.
 -->
@@ -51,7 +51,7 @@
 
     You can find the code for the server endpoint used in this demo at [/backend/amp-form.go](https://github.com/ampproject/amp-by-example/blob/master/backend/amp-form.go).
   -->
-  <form method="GET" class="p2" action="/components/amp-form/submit-form" target="_top">
+  <form method="GET" class="p2" action="/examples/visual-tests/amp-by-example/components/amp-form/submit-form" target="_top">
     <div class="ampstart-input inline-block relative mb3">
       <input type="search" placeholder="Search..." name="googlesearch">
     </div>
@@ -61,7 +61,7 @@
   <!-- ## Form Submission with Page Update -->
   <!--
     Use the `action-xhr` attribute to submit the form via XMLHttpRequest (XHR). You can use
-    [amp-mustache](https://www.ampproject.org/docs/reference/components/amp-mustache)
+    [amp-mustache](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-mustache)
     templates to show custom success or error messages, using data sent by the server endpoint as JSON. For
     example, if the server sends `{"foo": "bar"}`, you can use use `{{foo}}` in the template to render `bar`.
 
@@ -71,7 +71,7 @@
   -->
   <form method="post"
         class="p2"
-        action-xhr="/components/amp-form/submit-form-input-text-xhr"
+        action-xhr="/examples/visual-tests/amp-by-example/components/amp-form/submit-form-input-text-xhr"
         target="_top">
     <div class="ampstart-input inline-block relative m0 p0 mb3">
       <input type="text"
@@ -101,13 +101,13 @@
   <!-- ## Form Custom Validation -->
   <!--
     The `amp-form` extension allows you to build your own custom validation UI by using the `custom-validation-reporting`,
-  read [here](https://www.ampproject.org/docs/reference/components/amp-form#custom-validations) about the different strategies.
+  read [here](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-form#custom-validations) about the different strategies.
 
   Use `show-all-on-submit` strategy to ensure all the validation messages are shown when the user submits the form.
   -->
   <form method="post"
         class="p2"
-        action-xhr="/components/amp-form/submit-form-input-text-xhr"
+        action-xhr="/examples/visual-tests/amp-by-example/components/amp-form/submit-form-input-text-xhr"
         target="_top"
         custom-validation-reporting="show-all-on-submit">
     <div class="ampstart-input inline-block relative m0 p0 mb3">
@@ -140,7 +140,7 @@
   <!-- Use `show-first-on-submit` strategy to show the first validation message when the user submit the form. -->
   <form method="post"
         class="p2"
-        action-xhr="/components/amp-form/submit-form-input-text-xhr"
+        action-xhr="/examples/visual-tests/amp-by-example/components/amp-form/submit-form-input-text-xhr"
         target="_top"
         custom-validation-reporting="show-first-on-submit">
     <div class="ampstart-input inline-block relative m0 p0 mb3">
@@ -173,7 +173,7 @@
   <!-- Use `as-you-go` strategy to show validation messages as the user is interacting with the form. -->
   <form method="post"
         class="p2"
-        action-xhr="/components/amp-form/submit-form-input-text-xhr"
+        action-xhr="/examples/visual-tests/amp-by-example/components/amp-form/submit-form-input-text-xhr"
         target="_top"
         custom-validation-reporting="as-you-go">
     <div class="ampstart-input inline-block relative m0 p0 mb3">
@@ -211,7 +211,7 @@
   If an error is found, such as a username being taken, it will show as a
   validation error in the form.
 
-  Read <a href="https://www.ampproject.org/docs/reference/components/amp-form#verification-(experimental)">here</a>
+  Read <a href="https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-form#verification-(experimental)">here</a>
   for complete documentation.
 
   Use the `verify-xhr` attribute to enable the form verification feature.
@@ -229,8 +229,8 @@
   -->
   <form method="post"
         class="p2"
-        action-xhr="/components/amp-form/verify-form-input-text-xhr"
-        verify-xhr="/components/amp-form/verify-form-input-text-xhr"
+        action-xhr="/examples/visual-tests/amp-by-example/components/amp-form/verify-form-input-text-xhr"
+        verify-xhr="/examples/visual-tests/amp-by-example/components/amp-form/verify-form-input-text-xhr"
         target="_top"
         custom-validation-reporting="as-you-go">
     <div class="ampstart-input inline-block relative m0 p0 mb3">
@@ -268,7 +268,7 @@
   }
   ```
 -->
-<form class="p3 hide-inputs" method="post" action-xhr="/components/amp-form/submit-form-input-text-xhr" target="_top">
+<form class="p3 hide-inputs" method="post" action-xhr="/examples/visual-tests/amp-by-example/components/amp-form/submit-form-input-text-xhr" target="_top">
 <div class="ampstart-input inline-block relative mb3">
   <input type="text" name="name" placeholder="Name..." required>
 </div>
@@ -289,7 +289,7 @@
     `amp-form` supports all HTML5 form types with the exception of file, password and image.
     Use `type="date"` for input fields that should contain a date.
   -->
-  <form method="post" class="p2" action-xhr="/components/amp-form/submit-form-xhr" target="_top">
+  <form method="post" class="p2" action-xhr="/examples/visual-tests/amp-by-example/components/amp-form/submit-form-xhr" target="_top">
     <div class="ampstart-input inline-block relative mb3">
       <input name="select-date" type="date" value="2020-12-30">
     </div>
@@ -308,7 +308,7 @@
   <!--
     Use `type="month"` for input fields that should contain a month.
   -->
-  <form method="post" class="p2" action-xhr="/components/amp-form/submit-form-xhr" target="_top">
+  <form method="post" class="p2" action-xhr="/examples/visual-tests/amp-by-example/components/amp-form/submit-form-xhr" target="_top">
     <div class="ampstart-input inline-block relative mb3">
       <input name="select-month" type="month" value="2020-12">
     </div>
@@ -327,7 +327,7 @@
   <!--
     Use `type="week"` for input fields that should contain a week.
   -->
-  <form method="post" class="p2" action-xhr="/components/amp-form/submit-form-xhr" target="_top">
+  <form method="post" class="p2" action-xhr="/examples/visual-tests/amp-by-example/components/amp-form/submit-form-xhr" target="_top">
     <div class="ampstart-input inline-block relative mb3">
       <input type="week" name="week_year">
     </div>
@@ -346,7 +346,7 @@
   <!--
     Use `type="datetime-local"` for input fields that should contain a date and time.
   -->
-  <form method="post" class="p2" action-xhr="/components/amp-form/submit-form-xhr" target="_top">
+  <form method="post" class="p2" action-xhr="/examples/visual-tests/amp-by-example/components/amp-form/submit-form-xhr" target="_top">
     <div class="ampstart-input inline-block relative mb3">
       <input name="select-datetime" type="datetime-local" value="2020-12-30T12:34:56">
     </div>
@@ -365,7 +365,7 @@
   <!--
     Use `type="time"` for input fields that should contain a time.
   -->
-  <form method="post" class="p2" action-xhr="/components/amp-form/submit-form-xhr" target="_top">
+  <form method="post" class="p2" action-xhr="/examples/visual-tests/amp-by-example/components/amp-form/submit-form-xhr" target="_top">
     <div class="ampstart-input inline-block relative mb3">
       <input type="time" name="time_now">
     </div>
@@ -384,7 +384,7 @@
   <!--
     Use `type="checkbox"` to let the user select ZERO or MORE options of a limited number of choices.
   -->
-  <form method="post" class="p2" action-xhr="/components/amp-form/submit-form-xhr" target="_top">
+  <form method="post" class="p2" action-xhr="/examples/visual-tests/amp-by-example/components/amp-form/submit-form-xhr" target="_top">
     <div class="ampstart-input ampstart-input-chk inline-block relative mb3 mr1">
       <input type="checkbox" id="animal1" name="animal1" class="relative" value="Cats" >
       <label for="animal1">I like cats</label>
@@ -408,7 +408,7 @@
    <!--
     Use `type="email"` for input fields that should contain an e-mail address.
   -->
-  <form method="post" class="p2" action-xhr="/components/amp-form/submit-form-xhr" target="_top">
+  <form method="post" class="p2" action-xhr="/examples/visual-tests/amp-by-example/components/amp-form/submit-form-xhr" target="_top">
     <div class="ampstart-input inline-block relative mb3">
       <input type="email" name="email" placeholder="Email..." >
     </div>
@@ -427,7 +427,7 @@
   <!--
     Use `type="hidden"` to define a field not visible to a user.
   -->
-  <form method="post" class="p2" action-xhr="/components/amp-form/submit-form-xhr" target="_top">
+  <form method="post" class="p2" action-xhr="/examples/visual-tests/amp-by-example/components/amp-form/submit-form-xhr" target="_top">
     <input type="hidden" name="city" value="London">
     <input type="submit" value="OK" class="ampstart-btn caps">
     <div submit-success>
@@ -444,7 +444,7 @@
    <!--
     Use `type="number"` for input fields that should contain a numeric value.
   -->
-  <form method="post" class="p2" action-xhr="/components/amp-form/submit-form-xhr" target="_top">
+  <form method="post" class="p2" action-xhr="/examples/visual-tests/amp-by-example/components/amp-form/submit-form-xhr" target="_top">
     <div class="ampstart-input inline-block relative mb3">
       <input type="number" name="quantity" min="1" max="5">
     </div>
@@ -463,7 +463,7 @@
    <!--
     Use `type="radio"` to let a user select ONLY ONE of a limited number of choices.
   -->
-  <form method="post" class="p2" action-xhr="/components/amp-form/submit-form-xhr" target="_top">
+  <form method="post" class="p2" action-xhr="/examples/visual-tests/amp-by-example/components/amp-form/submit-form-xhr" target="_top">
     <div class="ampstart-input ampstart-input-radio inline-block relative mb3">
       <input type="radio" id="cat" class="relative" name="favourite animal" value="cat" checked>
       <label for="cat">Cat</label>
@@ -491,7 +491,7 @@
    <!--
     Use `type="range"` for input fields that should contain a value within a range.
   -->
-  <form method="post" class="p2" action-xhr="/components/amp-form/submit-form-xhr" target="_top">
+  <form method="post" class="p2" action-xhr="/examples/visual-tests/amp-by-example/components/amp-form/submit-form-xhr" target="_top">
     <div class=" ampstart-input inline-block relative mb3">
       <input type="range" name="points" min="0" max="10">
     </div>
@@ -510,7 +510,7 @@
    <!--
     Use `type="tel"` for input fields that should contain a telephone number.
   -->
-  <form method="post" class="p2" action-xhr="/components/amp-form/submit-form-xhr" target="_top">
+  <form method="post" class="p2" action-xhr="/examples/visual-tests/amp-by-example/components/amp-form/submit-form-xhr" target="_top">
     <div class="ampstart-input inline-block relative mb3">
       <input type="tel" name="my_tel" placeholder="Telephone...">
     </div>
@@ -529,7 +529,7 @@
    <!--
     Use `type="url"` for input fields that should contain a URL address.
   -->
-  <form method="post" class="p2" action-xhr="/components/amp-form/submit-form-xhr" target="_top">
+  <form method="post" class="p2" action-xhr="/examples/visual-tests/amp-by-example/components/amp-form/submit-form-xhr" target="_top">
     <div class="ampstart-input inline-block relative mb3">
       <input type="url" placeholder="URL..." name="website">
     </div>
@@ -549,7 +549,7 @@
   <!--
     Use `type="reset"` to clear input fields.
   -->
-  <form method="post" class="p2" action-xhr="/components/amp-form/submit-form-xhr" target="_top">
+  <form method="post" class="p2" action-xhr="/examples/visual-tests/amp-by-example/components/amp-form/submit-form-xhr" target="_top">
     <div class="ampstart-input inline-block relative mb3">
       <input type="text" placeholder="Some text...">
     </div>
@@ -573,7 +573,7 @@
     Use `select` element for dropdowns.
   -->
     <form method="post"
-      action-xhr="/components/amp-form/submit-form-xhr" target="_top" class="p2">
+      action-xhr="/examples/visual-tests/amp-by-example/components/amp-form/submit-form-xhr" target="_top" class="p2">
       <div class="ampstart-input inline-block relative mb3">
         <select name="cars" id="cars" >
           <option value="volvo">Volvo</option>

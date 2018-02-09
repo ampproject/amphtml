@@ -130,10 +130,10 @@ This sample showcases how to build a housing page in AMP HTML. Explore how to us
         <p id="housing-description" class="m1">London SW1A 1AA</p>
 
         <!-- ## Image Gallery -->
-        <!-- The `amp-carousel` works very well for housing image galleries. Learn more about `amp-carousel` [here](/advanced/image_galleries_with_amp-carousel/). -->
+        <!-- The `amp-carousel` works very well for housing image galleries. Learn more about `amp-carousel` [here](/examples/visual-tests/amp-by-example/advanced/image_galleries_with_amp-carousel/). -->
         <amp-carousel width="512" height="384" layout="responsive" type="slides">
-            <amp-img src="/img/buckingham_palace_building_1280x960.jpg" width="1280" height="960" layout="responsive" alt="Buckingham Palace" attribution="https://pixabay.com"></amp-img>
-            <amp-img src="/img/buckingham_palace_entrance_1280x853.jpg" width="1280" height="853" layout="responsive" alt="Buckingham Palace entrance" attribution="https://pixabay.com"></amp-img>
+            <amp-img src="/examples/visual-tests/amp-by-example/img/buckingham_palace_building_1280x960.jpg" width="1280" height="960" layout="responsive" alt="Buckingham Palace" attribution="https://pixabay.com"></amp-img>
+            <amp-img src="/examples/visual-tests/amp-by-example/img/buckingham_palace_entrance_1280x853.jpg" width="1280" height="853" layout="responsive" alt="Buckingham Palace entrance" attribution="https://pixabay.com"></amp-img>
         </amp-carousel>
         <!-- These buttons are used for requesting details on the property. -->
         <div class="contact-section p1">
@@ -146,7 +146,7 @@ This sample showcases how to build a housing page in AMP HTML. Explore how to us
 
 
     <!-- ## Social -->
-    <!-- The Social Share extension provides a common interface for share buttons. Learn more about `amp-social-share` [here](/components/amp-social-share/). -->
+    <!-- The Social Share extension provides a common interface for share buttons. Learn more about `amp-social-share` [here](/examples/visual-tests/amp-by-example/components/amp-social-share/). -->
     <p class="social-share p1">
         <amp-social-share type="twitter"
         width="60"
@@ -167,7 +167,7 @@ This sample showcases how to build a housing page in AMP HTML. Explore how to us
     </p>
 
     <!-- ## Collapsibles/Accordion -->
-    <!-- Use `amp-accordion` to hide and show additional data about your product. Learn more about `amp-accordion` [here](/components/amp-accordion/). Embedding Google Maps is possible via the [Google Maps Embed API](https://developers.google.com/maps/documentation/embed/guide), see [here](https://ampbyexample.com/components/amp-iframe/#example16) for a sample.-->
+    <!-- Use `amp-accordion` to hide and show additional data about your product. Learn more about `amp-accordion` [here](/examples/visual-tests/amp-by-example/components/amp-accordion/). Embedding Google Maps is possible via the [Google Maps Embed API](https://developers.google.com/maps/documentation/embed/guide), see [here](https://ampbyexample.com/components/amp-iframe/#example16) for a sample.-->
     <div>
       <amp-accordion>
         <section>
@@ -191,11 +191,11 @@ This sample showcases how to build a housing page in AMP HTML. Explore how to us
         </section>
         <section>
           <h4>Floorplan</h4>
-          <amp-img src="/img/floorplan_518x340.jpg" width="518" height="340"></amp-img>
+          <amp-img src="/examples/visual-tests/amp-by-example/img/floorplan_518x340.jpg" width="518" height="340"></amp-img>
         </section>
         <section>
           <h4>Mortgage Calculator</h4>
-          <form class="px1 pt1" method="GET" action="/samples_templates/housing/calculate-mortgage" action-xhr="/samples_templates/housing/calculate-mortgage-xhr"  target="_top">
+          <form class="px1 pt1" method="GET" action="/examples/visual-tests/amp-by-example/samples_templates/housing/calculate-mortgage" action-xhr="/examples/visual-tests/amp-by-example/samples_templates/housing/calculate-mortgage-xhr"  target="_top">
             <div class="flex mb1">
               <span class="form-field-left">
                 Price
@@ -249,11 +249,11 @@ This sample showcases how to build a housing page in AMP HTML. Explore how to us
     <h4 class="m1">Properties sold nearby</h4>
 
     <!-- ## Properties sold nearby -->
-    <!-- Use `amp-list` to show a list of properties sold nearby. Learn more about `amp-list` [here](/components/amp-list/) -->
+    <!-- Use `amp-list` to show a list of properties sold nearby. Learn more about `amp-list` [here](/examples/visual-tests/amp-by-example/components/amp-list/) -->
     <amp-list width="auto"
               height="150"
               layout="fixed-height"
-              src="/json/other_properties.json">
+              src="/examples/visual-tests/amp-by-example/json/other_properties.json">
       <template type="amp-mustache">
         <a href="#" class="ampstart-card related m1">
           <amp-img width="122"

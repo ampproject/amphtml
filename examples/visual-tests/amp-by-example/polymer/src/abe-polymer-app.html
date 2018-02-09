@@ -1,4 +1,4 @@
-<link rel="import" href="../node_modules/@npm-polymer/polymer/polymer-element.html">
+<link rel="import" href="../node_modules/@npm-polymer/examples/visual-tests/amp-by-example/polymer/polymer-element.html">
 <link rel="import" href="../node_modules/@npm-polymer/app-route/app-location.html">
 <link rel="import" href="../node_modules/@npm-polymer/app-route/app-route.html">
 <link rel="import" href="../node_modules/@npm-polymer/iron-flex-layout/iron-flex-layout.html">
@@ -59,7 +59,7 @@
   </style>
     <sample-category-data categories="{{categories}}"></sample-category-data>
     <app-location route="{{route}}"></app-location>
-    <app-route route="{{route}}" pattern="/polymer/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
+    <app-route route="{{route}}" pattern="/examples/visual-tests/amp-by-example/polymer/:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
 
   <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404">
     <sample-home name="home" categories="[[categories]]"></sample-home>
@@ -143,7 +143,7 @@
           Polymer.RenderStatus.afterNextRender(this, () => {
               // Register service worker if supported.
               if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('service-worker.js', {scope: '/polymer/'});
+                navigator.serviceWorker.register('service-worker.js', {scope: '/examples/visual-tests/amp-by-example/polymer/'});
               }
               this._notifyNetworkStatus();
               this.loadComplete = true;

@@ -112,7 +112,7 @@
     The layout attribute applies to all amp-* tags, though not all amp tags support all layout types.
   -->
   <div>
-    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img width="300" height="200" layout="responsive" src="/img/amp.jpg"></amp-img></div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img width="300" height="200" layout="responsive" src="/examples/visual-tests/amp-by-example/img/amp.jpg"></amp-img></div>
   </div>
   <!-- #### nodisplay
    Some elements, such as amp-font and amp-install-serviceworker, only support the nodisplay type.  These elements do not require space to be allocated on the page for their rendering.
@@ -128,7 +128,7 @@
   </div>
   <!-- -->
   <div>
-    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img width="300" height="200" layout="fixed" src="/img/amp.jpg"></amp-img></div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img width="300" height="200" layout="fixed" src="/examples/visual-tests/amp-by-example/img/amp.jpg"></amp-img></div>
   </div>
   <!--
     Elements with the layout="fixed" attribute value will render at the size provided, even if that exceeds the size of the parent element.
@@ -138,7 +138,7 @@
   </div>
   <!-- -->
   <div>
-    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img width="500" height="200" layout="fixed" src="/img/amp.jpg"></amp-img></div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img width="500" height="200" layout="fixed" src="/examples/visual-tests/amp-by-example/img/amp.jpg"></amp-img></div>
   </div>
   <!-- #### fixed-height
     The layout="fixed-height" attribute value indicates that the element should fill to the width that it's given, but remain at a fixed height.  
@@ -149,22 +149,22 @@
   </div>
   <!-- -->
   <div>
-    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img height="200" layout="fixed-height" src="/img/amp.jpg"></amp-img></div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img height="200" layout="fixed-height" src="/examples/visual-tests/amp-by-example/img/amp.jpg"></amp-img></div>
   </div>
   <!-- -->
   <div>
-    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img height="200" width="auto" layout="fixed-height" src="/img/amp.jpg"></amp-img></div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img height="200" width="auto" layout="fixed-height" src="/examples/visual-tests/amp-by-example/img/amp.jpg"></amp-img></div>
   </div>
   <!--
     Elements with a fixed-height layout attribute value will respond to the size of the parent element (and thus screen size), but will not respect aspect ratio.
   -->
   <div>
-    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img height="100" layout="fixed-height" src="/img/amp.jpg"></amp-img></div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img height="100" layout="fixed-height" src="/examples/visual-tests/amp-by-example/img/amp.jpg"></amp-img></div>
   </div>
   <!--
   -->
   <div>
-    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img height="500" layout="fixed-height" src="/img/amp.jpg"></amp-img></div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img height="500" layout="fixed-height" src="/examples/visual-tests/amp-by-example/img/amp.jpg"></amp-img></div>
   </div>
   <!-- #### flex-item
     The layout="flex-item" attribute value is similar to the layout="fill" attribute value, except that it is used in a flexbox model.  
@@ -172,7 +172,7 @@
   -->
   <div>
     <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><div class="flexsquare"><amp-fit-text layout="flex-item">Lorem ipsum dolori sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.</amp-fit-text>
-    <amp-img layout="flex-item" src="/img/amp.jpg"></amp-img>
+    <amp-img layout="flex-item" src="/examples/visual-tests/amp-by-example/img/amp.jpg"></amp-img>
     </div></div>
   </div>
   <!-- #### container
@@ -193,19 +193,19 @@
     The sizes attribute is a list of media conditions and source size values (width).  This is similar to the "sizes" attribute in 'img' tags in HTML5, except it applies to all amp-* tags that allow use the responsive layout.  It only works with the responsive layout.
   -->
   <div>
-    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img width="300" height="200" layout="responsive" src="/img/amp.jpg" sizes="(min-width:500px) 200px, 100px"></amp-img></div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img width="300" height="200" layout="responsive" src="/examples/visual-tests/amp-by-example/img/amp.jpg" sizes="(min-width:500px) 200px, 100px"></amp-img></div>
   </div>
   <!-- ### Sizes (Height) 
     The heights attribute is a list of media conditions and source size values (height).  This is similar to the "sizes" attribute in 'img' tags in HTML5, except it applies to all amp-* tags that allow use of the responsive layout.  It only works with the responsive layout.
   -->
   <div>
-    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img width="300" height="200" layout="responsive" src="/img/amp.jpg" heights="(min-width:500px) 200px, 100px"></amp-img></div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img width="300" height="200" layout="responsive" src="/examples/visual-tests/amp-by-example/img/amp.jpg" heights="(min-width:500px) 200px, 100px"></amp-img></div>
   </div>
   <!--
     Additionally, the value refers to a height, not a width, and unlike the "sizes" attribute, it can also use a percentage.
   -->
   <div>
-    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img width="300" height="200" layout="responsive" src="/img/amp.jpg" heights="(min-width:500px) 200px, 30%"></amp-img></div>
+    <div class="square" [class]="['square', deviceClass, sizeClass].join(' ')"><amp-img width="300" height="200" layout="responsive" src="/examples/visual-tests/amp-by-example/img/amp.jpg" heights="(min-width:500px) 200px, 30%"></amp-img></div>
   </div>
   <!--- ### Media attribute
     The media attribute is a media query that is evaluated and used as a conditional to determine if a given element should be loaded.  This can be a useful way to conditioanlly show certain elements based on the screen size (e.g. add an additional column for outbound links on desktop devices)

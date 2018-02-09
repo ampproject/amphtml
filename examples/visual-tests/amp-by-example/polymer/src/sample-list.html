@@ -14,7 +14,7 @@
  limitations under the License.
 -->
 
-<link rel="import" href="../node_modules/@npm-polymer/polymer/polymer-element.html">
+<link rel="import" href="../node_modules/@npm-polymer/examples/visual-tests/amp-by-example/polymer/polymer-element.html">
 <link rel="import" href="../node_modules/@npm-polymer/app-route/app-route.html">
 <link rel="import" href="../node_modules/@npm-polymer/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="sample-category-data.html">
@@ -138,7 +138,7 @@
       _getItemHref(item) {
         // By returning null when `itemId` is undefined, the href attribute won't be set and
         // the link will be disabled.
-        return item.name ? ['/polymer/detail', item.url].join('') : null;
+        return item.name ? ['/examples/visual-tests/amp-by-example/polymer/detail', item.url].join('') : null;
       }
 
       _categoryChanged(category, visible) {

@@ -1,7 +1,7 @@
 <!--
   ## Introduction
 
-  The [amp-live-list](https://www.ampproject.org/docs/reference/components/amp-live-list) component adds support for publishing live updates to AMP pages as new content becomes available in the source document. This works great for implementing live blogs. Find an example of a live blog [here](/samples_templates/live_blog).
+  The [amp-live-list](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-live-list) component adds support for publishing live updates to AMP pages as new content becomes available in the source document. This works great for implementing live blogs. Find an example of a live blog [here](/examples/visual-tests/amp-by-example/samples_templates/live_blog).
 
   In other words, the AMP runtime will poll the server for updates to the origin document, fetching itself. The server can return the entire AMP page [or parts of it](https://github.com/ampproject/amphtml/blob/master/extensions/amp-live-list/amp-live-list-server-side-filtering.md), and the runtime updates the page in-place seamlessly.
 
@@ -23,7 +23,7 @@
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 
     <!--
-  Use `amp-live-list-item` to style the children of the `amp-live-list`. Refer to the [documentation](https://www.ampproject.org/docs/reference/components/amp-live-list) for details.
+  Use `amp-live-list-item` to style the children of the `amp-live-list`. Refer to the [documentation](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-live-list) for details.
   -->
   <style amp-custom>
     .amp-live-list-item {
@@ -65,7 +65,7 @@
   <!--
     Use the `data-poll-interval` attribute to specify how frequently the `amp-live-list` component will poll new data. The minimum interval is 15 seconds.
     Use `data-max-items-per-page` to specify the maximum number displayed on the page.
-    For an extensive explanation of all the attributes, refer to [amp-live-list](https://www.ampproject.org/docs/reference/components/amp-live-list).
+    For an extensive explanation of all the attributes, refer to [amp-live-list](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-live-list).
 
     Use `on="tap:my-live-list.update"` to load the latest changes from the server.
     A button will appear when the AMP runtime discovers new document changes. Note that the button has to be defined as a direct child of `amp-live-list` .
@@ -119,13 +119,13 @@
           <div class="card match">
             <div class="side">
               <div class="flag">
-                <amp-img src="/img/italy-flag.png"
+                <amp-img src="/examples/visual-tests/amp-by-example/img/italy-flag.png"
                     layout="fixed" height="50" width="100">
                 </amp-img>
               </div>
               <div class="content">[[.FootballScore.ScoreTeam1]] - [[.FootballScore.ScoreTeam2]]</div>
               <div class="flag">
-                <amp-img src="/img/england-flag.png"
+                <amp-img src="/examples/visual-tests/amp-by-example/img/england-flag.png"
                   layout="fixed" height="50" width="100">
                 </amp-img>
               </div>

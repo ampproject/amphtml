@@ -64,16 +64,16 @@
       <script type="application/json">
       { "currentAnimal" : "dog",
         "dog": {
-          "imageUrl": "/img/Border_Collie.jpg",
-          "videoUrl": "/video/dog-video.mp4",
+          "imageUrl": "/examples/visual-tests/amp-by-example/img/Border_Collie.jpg",
+          "videoUrl": "/examples/visual-tests/amp-by-example/video/dog-video.mp4",
           "style": "greenBackground",
-          "iframeUrl": "https://player.vimeo.com/video/183849543"
+          "iframeUrl": "https://player.vimeo.com/examples/visual-tests/amp-by-example/video/183849543"
         },
         "cat": {
-          "imageUrl": "/img/cat-looking-up-300x200.jpg",
-          "videoUrl": "/video/cat-video.mp4",
+          "imageUrl": "/examples/visual-tests/amp-by-example/img/cat-looking-up-300x200.jpg",
+          "videoUrl": "/examples/visual-tests/amp-by-example/video/cat-video.mp4",
           "style": "redBackground",
-          "iframeUrl": "https://player.vimeo.com/video/185199565"
+          "iframeUrl": "https://player.vimeo.com/examples/visual-tests/amp-by-example/video/185199565"
         }
       }
       </script>
@@ -124,21 +124,21 @@
     <!-- ## Binding Attribute Values -->
     <!--
       Various AMP components support binding attribute values with `amp-bind`:
-      - [amp-img](/components/amp-bind#amp-img)
-      - [amp-video](/components/amp-bind#amp-video)
-      - [amp-iframe](/components/amp-bind#amp-iframe)
+      - [amp-img](/examples/visual-tests/amp-by-example/components/amp-bind#amp-img)
+      - [amp-video](/examples/visual-tests/amp-by-example/components/amp-bind#amp-video)
+      - [amp-iframe](/examples/visual-tests/amp-by-example/components/amp-bind#amp-iframe)
     -->
     <!--
       `amp-img` URLs can be changed.
     -->
-    <amp-img id="amp-img" src="/img/Border_Collie.jpg" layout="responsive" width="300" height="200"
+    <amp-img id="amp-img" src="/examples/visual-tests/amp-by-example/img/Border_Collie.jpg" layout="responsive" width="300" height="200"
                                                                           [src]="allAnimals[allAnimals.currentAnimal].imageUrl">
     </amp-img>
 
     <!--
       The `src` URL for videos embedded with `amp-video` can be changed. At the moment, among all the AMP video components, `amp-video` and `amp-youtube` support `amp-bind`.
     -->
-    <amp-video id="amp-video" src="/video/dog-video.mp4" layout="responsive" [src]="allAnimals[allAnimals.currentAnimal].videoUrl" width="300" height="170" autoplay controls></amp-video>
+    <amp-video id="amp-video" src="/examples/visual-tests/amp-by-example/video/dog-video.mp4" layout="responsive" [src]="allAnimals[allAnimals.currentAnimal].videoUrl" width="300" height="170" autoplay controls></amp-video>
 
     <!--
       The `src` for iframes embedded with `amp-iframe` can be changed.
@@ -151,7 +151,7 @@
                 sandbox="allow-scripts allow-same-origin allow-popups"
                 allowfullscreen
                 frameborder="0"
-                src="https://player.vimeo.com/video/183849543"
+                src="https://player.vimeo.com/examples/visual-tests/amp-by-example/video/183849543"
                 [src]="allAnimals[allAnimals.currentAnimal].iframeUrl">
     </amp-iframe>
 
@@ -176,16 +176,16 @@
 
       {"currentAnimal": "bird",
         "dog": {
-          "imageUrl": "/img/Border_Collie.jpg",
-          "videoUrl": "/video/dog-video.mp4",
+          "imageUrl": "/examples/visual-tests/amp-by-example/img/Border_Collie.jpg",
+          "videoUrl": "/examples/visual-tests/amp-by-example/video/dog-video.mp4",
           "style": "greenBackground",
-          "iframeUrl": "https://player.vimeo.com/video/183849543"
+          "iframeUrl": "https://player.vimeo.com/examples/visual-tests/amp-by-example/video/183849543"
         },
         "bird": {
-          "imageUrl": "/img/bird.jpg",
-          "videoUrl": "/video/bird-video.mp4",
+          "imageUrl": "/examples/visual-tests/amp-by-example/img/bird.jpg",
+          "videoUrl": "/examples/visual-tests/amp-by-example/video/bird-video.mp4",
           "style": "yellowBackground",
-          "iframeUrl": "https://player.vimeo.com/video/151358139"
+          "iframeUrl": "https://player.vimeo.com/examples/visual-tests/amp-by-example/video/151358139"
         }
       }
       ```
@@ -194,10 +194,10 @@
       <script type="application/json">
       { "currentAnimal" : "dog",
         "dog": {
-          "imageUrl": "/img/Border_Collie.jpg",
-          "videoUrl": "/video/dog-video.mp4",
+          "imageUrl": "/examples/visual-tests/amp-by-example/img/Border_Collie.jpg",
+          "videoUrl": "/examples/visual-tests/amp-by-example/video/dog-video.mp4",
           "style": "greenBackground",
-          "iframeUrl": "https://player.vimeo.com/video/183849543"
+          "iframeUrl": "https://player.vimeo.com/examples/visual-tests/amp-by-example/video/183849543"
         }
       }
       </script>
@@ -209,7 +209,7 @@
       new data is fetched and merged into the `amp-state`.
     -->
 
-    <button class="ampstart-btn caps m1" on="tap:AMP.setState({remoteAnimalUrl: '/json/amp-bind-data-new-state.json?RANDOM'})">
+    <button class="ampstart-btn caps m1" on="tap:AMP.setState({remoteAnimalUrl: '/examples/visual-tests/amp-by-example/json/amp-bind-data-new-state.json?RANDOM'})">
       Set to Bird
     </button>
 
@@ -218,9 +218,9 @@
     <p [text]="'This is a ' + remoteAnimals.currentAnimal + '.'">This is a dog.</p>
 
     <!--
-      ... bind to `amp-img` `src ` ... and all the components described [here](https://www.ampproject.org/docs/reference/components/amp-bind)
+      ... bind to `amp-img` `src ` ... and all the components described [here](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-bind)
     -->
-    <amp-img src="/img/Border_Collie.jpg" layout="responsive" width="300" height="200"
+    <amp-img src="/examples/visual-tests/amp-by-example/img/Border_Collie.jpg" layout="responsive" width="300" height="200"
             [src]="remoteAnimals[remoteAnimals.currentAnimal].imageUrl">
     </amp-img>
   </section>

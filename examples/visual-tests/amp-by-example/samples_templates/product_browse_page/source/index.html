@@ -80,8 +80,8 @@ article#preview {
            background-position: center;
            background-repeat: no-repeat;
            background-image: -webkit-image-set(
-             url('/img/ic_search_white_1x_web_24dp.png') 1x,
-             url('/img/ic_search_white_2x_web_24dp.png') 2x
+             url('/examples/visual-tests/amp-by-example/img/ic_search_white_1x_web_24dp.png') 1x,
+             url('/examples/visual-tests/amp-by-example/img/ic_search_white_2x_web_24dp.png') 2x
            );
            border: 0 none;
            height: 32px;
@@ -294,25 +294,25 @@ article#preview {
     <body>
       <!-- ## Navigation -->
       <!--
-        Use the [amp-sidebar](/components/amp-sidebar/) component to give customers the chance to quickly jump to any of your product categories.
+        Use the [amp-sidebar](/examples/visual-tests/amp-by-example/components/amp-sidebar/) component to give customers the chance to quickly jump to any of your product categories.
       -->
       <amp-sidebar id="drawermenu" layout="nodisplay">
         <a href="/" class="caps text-decoration-none block p1">Products</a>
         <hr/>
-        <a class="caps text-decoration-none block p1" href="/samples_templates/product_browse_page/preview/">Fruit</a>
-        <a class="caps text-decoration-none block p1" href="/samples_templates/product_browse_page/preview/">Vegetable</a>
-        <a class="caps text-decoration-none block p1" href="/samples_templates/product_browse_page/preview/">More</a>
+        <a class="caps text-decoration-none block p1" href="/examples/visual-tests/amp-by-example/samples_templates/product_browse_page/preview/">Fruit</a>
+        <a class="caps text-decoration-none block p1" href="/examples/visual-tests/amp-by-example/samples_templates/product_browse_page/preview/">Vegetable</a>
+        <a class="caps text-decoration-none block p1" href="/examples/visual-tests/amp-by-example/samples_templates/product_browse_page/preview/">More</a>
       </amp-sidebar>
       <!-- ## Header with Search -->
       <!-- AMP supports forms, which means you can directly integrate a product search into your AMPs. Try searching for "Apple".
         AMP doesn't support custom Javascript, but you can use CSS3 animations to enrich your page. The expanding text field when the search box is focused is implemented with CSS only. -->
       <div class="header">
         <a id="sample-menu" on="tap:drawermenu.toggle">
-          <amp-img srcset="/img/ic_menu_white_1x_web_24dp.png 1x, /img/ic_menu_white_2x_web_24dp.png 2x" width="24" height="24" alt="navigation"></amp-img>
+          <amp-img srcset="/examples/visual-tests/amp-by-example/img/ic_menu_white_1x_web_24dp.png 1x, /examples/visual-tests/amp-by-example/img/ic_menu_white_2x_web_24dp.png 2x" width="24" height="24" alt="navigation"></amp-img>
         </a>
         <input name="search" type="text" placeholder="Search" on="change:AMP.setState({
         products: {
-        listSrc: '/samples_templates/products?searchProduct='+ event.value +'&sort='+ products.sortChoiceValue +'&searchColor='+ products.searchColor +'&_=RANDOM',
+        listSrc: '/examples/visual-tests/amp-by-example/samples_templates/products?searchProduct='+ event.value +'&sort='+ products.sortChoiceValue +'&searchColor='+ products.searchColor +'&_=RANDOM',
         searchProduct: event.value
         }
         })">
@@ -322,10 +322,10 @@ article#preview {
       </div>
       <!-- ## A Hero Slider -->
       <!-- The `amp-carousel` component can be used to quickly create full-bleed, auto-advancing slideshows showcasing your latest promotions. We
-        use the [amp-fit-text](/components/amp-fit-text/) component for the slide headers to automatically size the text to fit into the carousel. -->
+        use the [amp-fit-text](/examples/visual-tests/amp-by-example/components/amp-fit-text/) component for the slide headers to automatically size the text to fit into the carousel. -->
       <amp-carousel id="hero-images" width="1024" height="480" layout="responsive" type="slides" autoplay>
         <a href="#">
-          <amp-img src="/img/product_hero1_1024x683.jpg" layout="fill" alt="product hero 1" attribution="visualhunt"></amp-img>
+          <amp-img src="/examples/visual-tests/amp-by-example/img/product_hero1_1024x683.jpg" layout="fill" alt="product hero 1" attribution="visualhunt"></amp-img>
 
           <amp-fit-text class="caption" width="300" height="200" layout="responsive"
                                                                  max-font-size="36">
@@ -333,14 +333,14 @@ article#preview {
           </amp-fit-text>
         </a>
         <a href="#">
-          <amp-img src="/img/product_hero2_1024x683.jpg" layout="fill" alt="product hero 2" attribution="visualhunt"></amp-img>
+          <amp-img src="/examples/visual-tests/amp-by-example/img/product_hero2_1024x683.jpg" layout="fill" alt="product hero 2" attribution="visualhunt"></amp-img>
           <amp-fit-text class="caption" width="300" height="200" layout="responsive"
                                                                  max-font-size="36">
             So much orange!
           </amp-fit-text>
         </a>
         <a href="#">
-          <amp-img src="/img/product_hero3_1024x683.jpg" layout="fill" alt="product hero 3" attribution="visualhunt"></amp-img>
+          <amp-img src="/examples/visual-tests/amp-by-example/img/product_hero3_1024x683.jpg" layout="fill" alt="product hero 3" attribution="visualhunt"></amp-img>
           <amp-fit-text class="caption" width="300" height="200" layout="responsive"
                                                                  max-font-size="36">
             So healthy!
@@ -353,7 +353,7 @@ article#preview {
               "sortChoiceValue": "price-descendent",
               "searchProduct": "",
               "searchColor": "all",
-              "listSrc": "/samples_templates/products?sortChoiceValue=price-descendent&searchColor=all&_=RANDOM"
+              "listSrc": "/examples/visual-tests/amp-by-example/samples_templates/products?sortChoiceValue=price-descendent&searchColor=all&_=RANDOM"
             }
         </script>
       </amp-state>
@@ -365,7 +365,7 @@ article#preview {
             <input type="radio" name="colorFilter" class="relative" value="Yellow" on="change:AMP.setState({
             products: {
             searchColor: event.checked == true ? 'yellow' : '',
-            listSrc: '/samples_templates/products?searchProduct='+ products.searchProduct +'&sort='+ products.sortChoiceValue +'&searchColor='+ (event.checked == true ? 'yellow' : '') +'&_=RANDOM'
+            listSrc: '/examples/visual-tests/amp-by-example/samples_templates/products?searchProduct='+ products.searchProduct +'&sort='+ products.sortChoiceValue +'&searchColor='+ (event.checked == true ? 'yellow' : '') +'&_=RANDOM'
             }
             }), filter-lightbox.close">
             <label for="yellow"> yellow </label>
@@ -374,7 +374,7 @@ article#preview {
             <input type="radio" name="colorFilter" class="relative" value="Orange" on="change:AMP.setState({
             products: {
             searchColor: event.checked == true ? 'orange' : '',
-            listSrc: '/samples_templates/products?searchProduct='+ products.searchProduct +'&sort='+ products.sortChoiceValue +'&searchColor='+ (event.checked == true ? 'orange' : '') +'&_=RANDOM'
+            listSrc: '/examples/visual-tests/amp-by-example/samples_templates/products?searchProduct='+ products.searchProduct +'&sort='+ products.sortChoiceValue +'&searchColor='+ (event.checked == true ? 'orange' : '') +'&_=RANDOM'
             }
             }), filter-lightbox.close">
             <label for="orange"> orange </label>
@@ -383,7 +383,7 @@ article#preview {
             <input type="radio" name="colorFilter" class="relative" value="Green" on="change:AMP.setState({
             products: {
             searchColor: event.checked == true ? 'green' : '',
-            listSrc: '/samples_templates/products?searchProduct='+ products.searchProduct +'&sort='+ products.sortChoiceValue +'&searchColor='+ (event.checked == true ? 'green' : '') +'&_=RANDOM'
+            listSrc: '/examples/visual-tests/amp-by-example/samples_templates/products?searchProduct='+ products.searchProduct +'&sort='+ products.sortChoiceValue +'&searchColor='+ (event.checked == true ? 'green' : '') +'&_=RANDOM'
             }
             }), filter-lightbox.close">
             <label for="green"> green </label>
@@ -392,7 +392,7 @@ article#preview {
             <input type="radio" name="colorFilter" class="relative" value="all" on="change:AMP.setState({
             products: {
             searchColor: event.checked == true ? 'all' : '',
-            listSrc: '/samples_templates/products?searchProduct='+ products.searchProduct +'&sort='+ products.sortChoiceValue +'&searchColor='+ (event.checked == true ? 'all' : '') +'&_=RANDOM'
+            listSrc: '/examples/visual-tests/amp-by-example/samples_templates/products?searchProduct='+ products.searchProduct +'&sort='+ products.sortChoiceValue +'&searchColor='+ (event.checked == true ? 'all' : '') +'&_=RANDOM'
             }
             }), filter-lightbox.close">
             <label for="all"> all </label>
@@ -416,7 +416,7 @@ article#preview {
             <input type="radio" id="yellow" name="colorFilter" class="relative" value="Yellow" on="change:AMP.setState({
             products: {
             searchColor: event.checked == true ? 'yellow' : '',
-            listSrc: '/samples_templates/products?searchProduct='+ products.searchProduct +'&sort='+ products.sortChoiceValue +'&searchColor='+ (event.checked == true ? 'yellow' : '') +'&_=RANDOM'
+            listSrc: '/examples/visual-tests/amp-by-example/samples_templates/products?searchProduct='+ products.searchProduct +'&sort='+ products.sortChoiceValue +'&searchColor='+ (event.checked == true ? 'yellow' : '') +'&_=RANDOM'
             }
             })">
             <label for="yellow"> yellow </label>
@@ -425,7 +425,7 @@ article#preview {
             <input type="radio" id="orange" name="colorFilter" class="relative" value="Orange" on="change:AMP.setState({
             products: {
             searchColor: event.checked == true ? 'orange' : '',
-            listSrc: '/samples_templates/products?searchProduct='+ products.searchProduct +'&sort='+ products.sortChoiceValue +'&searchColor='+ (event.checked == true ? 'orange' : '') +'&_=RANDOM'
+            listSrc: '/examples/visual-tests/amp-by-example/samples_templates/products?searchProduct='+ products.searchProduct +'&sort='+ products.sortChoiceValue +'&searchColor='+ (event.checked == true ? 'orange' : '') +'&_=RANDOM'
             }
             })">
             <label for="orange"> orange </label>
@@ -434,7 +434,7 @@ article#preview {
             <input type="radio" id="green" name="colorFilter" class="relative" value="Green" on="change:AMP.setState({
             products: {
             searchColor: event.checked == true ? 'green' : '',
-            listSrc: '/samples_templates/products?searchProduct='+ products.searchProduct +'&sort='+ products.sortChoiceValue +'&searchColor='+ (event.checked == true ? 'green' : '') +'&_=RANDOM'
+            listSrc: '/examples/visual-tests/amp-by-example/samples_templates/products?searchProduct='+ products.searchProduct +'&sort='+ products.sortChoiceValue +'&searchColor='+ (event.checked == true ? 'green' : '') +'&_=RANDOM'
             }
             })">
             <label for="green"> green </label>
@@ -443,7 +443,7 @@ article#preview {
             <input type="radio" id="all" name="colorFilter" class="relative" value="all" on="change:AMP.setState({
             products: {
             searchColor: event.checked == true ? 'all' : '',
-            listSrc: '/samples_templates/products?searchProduct='+ products.searchProduct +'&sort='+ products.sortChoiceValue +'&searchColor='+ (event.checked == true ? 'all' : '') +'&_=RANDOM'
+            listSrc: '/examples/visual-tests/amp-by-example/samples_templates/products?searchProduct='+ products.searchProduct +'&sort='+ products.sortChoiceValue +'&searchColor='+ (event.checked == true ? 'all' : '') +'&_=RANDOM'
             }
             })">
             <label for="all"> all </label>
@@ -455,7 +455,7 @@ article#preview {
               <select id="sort" on="change:AMP.setState({
               products: {
               sortChoiceValue: event.value,
-              listSrc: '/samples_templates/products?searchProduct='+products.searchProduct+'&sort='+event.value+'&searchColor='+products.searchColor+'&_=RANDOM'
+              listSrc: '/examples/visual-tests/amp-by-example/samples_templates/products?searchProduct='+products.searchProduct+'&sort='+event.value+'&searchColor='+products.searchColor+'&_=RANDOM'
               }
               })">
                 <option value="price-descendent">Price high to low
@@ -472,11 +472,11 @@ article#preview {
           <amp-list width="auto"
                     height="600"
                     layout="fixed-height"
-                    src="/samples_templates/products?sortChoiceValue=price-descendent&searchColor=all&_=RANDOM'"
+                    src="/examples/visual-tests/amp-by-example/samples_templates/products?sortChoiceValue=price-descendent&searchColor=all&_=RANDOM'"
                     [src]="products.listSrc"
                     class="grid">
             <template type="amp-mustache">
-              <a class="m1 text-decoration-none products" href="/samples_templates/product/[[$.Mode]]">
+              <a class="m1 text-decoration-none products" href="/examples/visual-tests/amp-by-example/samples_templates/product/[[$.Mode]]">
                 <amp-img width="150"
                          height="100"
                          alt="{{name}}"
@@ -495,49 +495,49 @@ article#preview {
       <!-- The `amp-carousel` supports also a more traditional carousel mode.   -->
       <amp-carousel class="m1" width="auto" height="160" layout="fixed-height" type="carousel">
         <a class="m1 text-decoration-none" href="#" role="listitem">
-          <amp-img width="640" height="426" layout="responsive" alt="Apple" src="/img/product1_640x426.jpg"></amp-img>
+          <amp-img width="640" height="426" layout="responsive" alt="Apple" src="/examples/visual-tests/amp-by-example/img/product1_640x426.jpg"></amp-img>
           <p class="name">Apple</p>
           <p class="star">★★★★★</p>
           <p class="price">$1.99</p>
         </a>
         <a class="m1 text-decoration-none" href="#" role="listitem">
-          <amp-img width="640" height="426" layout="responsive" alt="Orange" src="/img/product2_640x426.jpg"></amp-img>
+          <amp-img width="640" height="426" layout="responsive" alt="Orange" src="/examples/visual-tests/amp-by-example/img/product2_640x426.jpg"></amp-img>
           <p class="name">Orange</p>
           <p class="star">★★★★☆</p>
           <p class="price">$0.99</p>
         </a>
         <a class="m1 text-decoration-none" href="#" role="listitem">
-          <amp-img width="640" height="426" layout="responsive" alt="Pear" src="/img/product3_640x426.jpg"></amp-img>
+          <amp-img width="640" height="426" layout="responsive" alt="Pear" src="/examples/visual-tests/amp-by-example/img/product3_640x426.jpg"></amp-img>
           <p class="name">Pear</p>
           <p class="star">★★★☆☆</p>
           <p class="price">$1.50</p>
         </a>
         <a class="m1 text-decoration-none" href="#" role="listitem">
-          <amp-img width="640" height="426" layout="responsive" alt="Banana" src="/img/product4_640x426.jpg"></amp-img>
+          <amp-img width="640" height="426" layout="responsive" alt="Banana" src="/examples/visual-tests/amp-by-example/img/product4_640x426.jpg"></amp-img>
           <p class="name">Banana</p>
           <p class="star">★★★★★</p>
           <p class="price">$1.50</p>
         </a>
         <a class="m1 text-decoration-none" href="#" role="listitem">
-          <amp-img width="640" height="426" layout="responsive" alt="Apple" src="/img/product1_640x426.jpg"></amp-img>
+          <amp-img width="640" height="426" layout="responsive" alt="Apple" src="/examples/visual-tests/amp-by-example/img/product1_640x426.jpg"></amp-img>
           <p class="name">Apple 2</p>
           <p class="star">★★★★★</p>
           <p class="price">$1.99</p>
         </a>
         <a class="m1 text-decoration-none" href="#" role="listitem">
-          <amp-img width="640" height="426" layout="responsive" alt="Orange" src="/img/product2_640x426.jpg"></amp-img>
+          <amp-img width="640" height="426" layout="responsive" alt="Orange" src="/examples/visual-tests/amp-by-example/img/product2_640x426.jpg"></amp-img>
           <p class="name">Orange 2</p>
           <p class="star">★★★★☆</p>
           <p class="price">$0.99</p>
         </a>
         <a class="m1 text-decoration-none" href="#" role="listitem">
-          <amp-img width="640" height="426" layout="responsive" alt="Pear" src="/img/product3_640x426.jpg"></amp-img>
+          <amp-img width="640" height="426" layout="responsive" alt="Pear" src="/examples/visual-tests/amp-by-example/img/product3_640x426.jpg"></amp-img>
           <p class="name">Pear 2</p>
           <p class="star">★★★☆☆</p>
           <p class="price">$1.50</p>
         </a>
         <a class="m1 text-decoration-none" href="#" role="listitem">
-          <amp-img width="640" height="426" layout="responsive" alt="Banana" src="/img/product4_640x426.jpg"></amp-img>
+          <amp-img width="640" height="426" layout="responsive" alt="Banana" src="/examples/visual-tests/amp-by-example/img/product4_640x426.jpg"></amp-img>
           <p class="name">Banana 2</p>
           <p class="star">★★★★★</p>
           <p class="price">$1.50</p>
@@ -547,15 +547,15 @@ article#preview {
       <h3 class="pl1 pt2 pb2">Bestsellers</h3>
       <!--
         With AMP, you can easily pull in different latest offers or highlights without changing the page. To do so, just use `amp-list` to fire a CORS request to a JSON endpoint which supplies the list of related products. These are populated into an amp-mustache template on the client.
-        Learn more about `amp-list` [here](/components/amp-list/)
+        Learn more about `amp-list` [here](/examples/visual-tests/amp-by-example/components/amp-list/)
       -->
       <amp-list class="items"
                 width="auto"
                 height="160"
                 layout="fixed-height"
-                src="/json/related_products.json">
+                src="/examples/visual-tests/amp-by-example/json/related_products.json">
         <template type="amp-mustache">
-          <a class="m1 text-decoration-none" href="/samples_templates/product/preview/">
+          <a class="m1 text-decoration-none" href="/examples/visual-tests/amp-by-example/samples_templates/product/preview/">
             <amp-img width="640"
                      height="426"
                      layout="responsive"

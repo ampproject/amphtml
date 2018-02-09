@@ -1,7 +1,7 @@
 <!--
   ## Introduction
 
-The  [amp-experiment](https://www.ampproject.org/docs/reference/components/amp-experiment) component allows to perform user experience experiments on an AMP document and collect resulting data. This is, for example, good for A/B testing new features in your AMPs, but you can test as many variants as you want.
+The  [amp-experiment](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-experiment) component allows to perform user experience experiments on an AMP document and collect resulting data. This is, for example, good for A/B testing new features in your AMPs, but you can test as many variants as you want.
 
 In this sample, we're using Google Analytics to track the experiment. Google Analytics requires different variants to be specified via an index variable. However, `amp-experiment` has no opinion about how these are specified.
 -->
@@ -46,7 +46,7 @@ In this sample, we're using Google Analytics to track the experiment. Google Ana
   <!--
     Configure experiments inside the `amp-experiment` inside a JSON object. Use `variants` within each experiment to declare how many users in percent will be part of an experiment variant. The total sum of the variants must be a number <= 100. If the sum is < 100, then the default behaviour is used. A user belongs to one of the variants based on a random number generated between 0 and 100.
 
-   For more details about variants read the official [documentation](https://www.ampproject.org/docs/reference/components/amp-experiment). Multiple experiments can be run on the same AMP document in parallel with their own sets of variants. One AMP document can have at most one `amp-experiment` element.
+   For more details about variants read the official [documentation](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-experiment). Multiple experiments can be run on the same AMP document in parallel with their own sets of variants. One AMP document can have at most one `amp-experiment` element.
   -->
   <amp-experiment>
     <script type="application/json">
@@ -69,11 +69,11 @@ In this sample, we're using Google Analytics to track the experiment. Google Ana
 <!-- ## Reporting -->
 
 <!--
-  Measure results of the experiment using [amp-pixel](https://www.ampproject.org/docs/reference/components/amp-pixel)...
+  Measure results of the experiment using [amp-pixel](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-pixel)...
 -->
 <amp-pixel src="https://example.com/track/?xname=button-color-experiment&xvar=VARIANT(button-color-experiment)"></amp-pixel>
 <!--
-... or [amp-analytics](https://www.ampproject.org/docs/reference/components/amp-analytics). Allocated variants are available as a URL substitution variable: `VARIANT(name-of-the-experiment)`. You can check the analytics requests in the network tab of the developer tools.
+... or [amp-analytics](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-analytics). Allocated variants are available as a URL substitution variable: `VARIANT(name-of-the-experiment)`. You can check the analytics requests in the network tab of the developer tools.
 -->
 <amp-analytics type="googleanalytics">
   <script type="application/json">

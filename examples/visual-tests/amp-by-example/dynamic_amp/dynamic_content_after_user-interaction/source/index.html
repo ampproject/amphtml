@@ -30,11 +30,11 @@ This is a sample showing how to show dynamic content after an user interaction: 
     <div>
     <amp-state id="products" src="https://ampbyexample.com/json/products.json"></amp-state>
 
-    <amp-img on="tap:AMP.setState({ productId: 0})" src="/img/red_apple_1_60x40.jpg" width="60" height="40" role="button" tabindex="0">
+    <amp-img on="tap:AMP.setState({ productId: 0})" src="/examples/visual-tests/amp-by-example/img/red_apple_1_60x40.jpg" width="60" height="40" role="button" tabindex="0">
     </amp-img>
-    <amp-img on="tap:AMP.setState({ productId: 1})" src="/img/green_apple_1_60x40.jpg" width="60" height="40" role="button" tabindex="0">
+    <amp-img on="tap:AMP.setState({ productId: 1})" src="/examples/visual-tests/amp-by-example/img/green_apple_1_60x40.jpg" width="60" height="40" role="button" tabindex="0">
     </amp-img>
-    <amp-img on="tap:AMP.setState({ productId: 2})" src="/img/product1_alt1_60x40.jpg" width="60" height="40" role="button" tabindex="0">
+    <amp-img on="tap:AMP.setState({ productId: 2})" src="/examples/visual-tests/amp-by-example/img/product1_alt1_60x40.jpg" width="60" height="40" role="button" tabindex="0">
     </amp-img>
     <div [text]="products[productId] + ' available'">Please select a product</div>
   </div>

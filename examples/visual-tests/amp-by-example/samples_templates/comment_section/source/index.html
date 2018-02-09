@@ -1,7 +1,7 @@
 <!--
 ## Introduction
 
-This sample showcases how to build a comment section in AMP HTML using the [amp-form](https://www.ampproject.org/docs/reference/components/amp-form) component after a successful login flow. Login, type a comment and press the COMMENT button; your comment will not be persisted, so reload the page if you want to start commenting again.
+This sample showcases how to build a comment section in AMP HTML using the [amp-form](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-form) component after a successful login flow. Login, type a comment and press the COMMENT button; your comment will not be persisted, so reload the page if you want to start commenting again.
 -->
 <!doctype html>
 <html ⚡>
@@ -61,8 +61,8 @@ This sample showcases how to build a comment section in AMP HTML using the [amp-
     </style>
 
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
-    <!-- [amp-access](/components/amp-access) requires the definition of 3 endpoints as documented [here](https://www.ampproject.org/docs/reference/components/amp-access).
-          This sample allows an user to login and logout using either email/password or [Google sign in](https://developers.google.com/identity/sign-in/web/). Logout is implemented by configuring a second endpoint in the login property `sign-out`, find more [here](https://www.ampproject.org/docs/reference/components/amp-access#login-page).  -->
+    <!-- [amp-access](/examples/visual-tests/amp-by-example/components/amp-access) requires the definition of 3 endpoints as documented [here](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-access).
+          This sample allows an user to login and logout using either email/password or [Google sign in](https://developers.google.com/identity/sign-in/web/). Logout is implemented by configuring a second endpoint in the login property `sign-out`, find more [here](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-access#login-page).  -->
     <script id="amp-access" type="application/json">
     {
         "authorization": "https://ampbyexample.com/samples_templates/comment_section/authorization?rid=READER_ID&url=CANONICAL_URL&ref=DOCUMENT_REFERRER&_=RANDOM",
@@ -84,10 +84,10 @@ This sample showcases how to build a comment section in AMP HTML using the [amp-
     <h2 class="p1">Comments</h2>
 
     <!-- Use `amp-list` to render existing comments to make sure that the latest comments appear if the page is loaded via AMP Cache.  -->
-      <amp-list class="mt1" width="auto" height="230" layout="fixed-height" src="/json/comments.json">
+      <amp-list class="mt1" width="auto" height="230" layout="fixed-height" src="/examples/visual-tests/amp-by-example/json/comments.json">
         <template type="amp-mustache">
           <div class="flex px1 pt1">
-            <amp-img width="44" height="44" class="mr1 flex-none" alt="user" src="/img/ic_account_box_black_48dp_1x.png"></amp-img>
+            <amp-img width="44" height="44" class="mr1 flex-none" alt="user" src="/examples/visual-tests/amp-by-example/img/ic_account_box_black_48dp_1x.png"></amp-img>
             <div class="ampstart-card p1 comment">
               <p><span class="user">{{user}}</span> <span class="date">{{datetime}}</span></p>
               <p>{{text}}</p>
@@ -104,8 +104,8 @@ This sample showcases how to build a comment section in AMP HTML using the [amp-
           <button on="tap:amp-access.login-sign-in" class="ampstart-btn mx1 mt1 caps">Login</button>
     </span>
       <!-- Use amp-form to submit the comment. In this sample, only a single comment can be added as comments are not persisted in the backend.  -->
-      <form class="px1 pt1 flex" amp-access="loggedIn" amp-access-hide method="post" action-xhr="/samples_templates/comment_section/submit-comment-xhr" target="_top">
-        <amp-img width="44" height="44" class="flex-none mr1 mt1" alt="user" src="/img/ic_account_box_black_48dp_1x.png"></amp-img>
+      <form class="px1 pt1 flex" amp-access="loggedIn" amp-access-hide method="post" action-xhr="/examples/visual-tests/amp-by-example/samples_templates/comment_section/submit-comment-xhr" target="_top">
+        <amp-img width="44" height="44" class="flex-none mr1 mt1" alt="user" src="/examples/visual-tests/amp-by-example/img/ic_account_box_black_48dp_1x.png"></amp-img>
         <div class="ampstart-input inline-block relative m0 p0 mb3">
           <input type="text" value="" name="text" id="ip1" class="block border-none p0 m0" placeholder="Your comment ...">
           <label for="ip1" class="absolute top-0 right-0 bottom-0 left-0">

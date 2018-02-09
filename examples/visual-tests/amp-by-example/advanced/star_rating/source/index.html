@@ -118,10 +118,10 @@
   We'll use a set of radio buttons to take user input for the star ratings, because they are keyboard-accessible.
   For desktop, it's nice to change the style of the previous stars when the user hovers their mouse over them. The [only](https://github.com/dandv/comparisons/blob/master/star-rating-widgets.md) pure-CSS way to affect the style of previous elements onmouseover is to list them in reverse DOM order, which is why the `<input>` elements below run from 5 to 1.
 
-  We want the form to submit as soon as the user makes a selection, without a Submit button. To do that, we'll set the [`on` attribute](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#on) of the `input`s to submit the form on [`change`](https://www.ampproject.org/docs/reference/components/amp-form#input-events).
+  We want the form to submit as soon as the user makes a selection, without a Submit button. To do that, we'll set the [`on` attribute](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#on) of the `input`s to submit the form on [`change`](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-form#input-events).
 
   The initial rating is determined by which radio button has the `checked` attribute set. This is optional. -->
-  <form id="rating" class="p2" method="post" action-xhr="/samples_templates/rating/set" target="_blank">
+  <form id="rating" class="p2" method="post" action-xhr="/examples/visual-tests/amp-by-example/samples_templates/rating/set" target="_blank">
     <fieldset class="rating">
       <input name="rating" type="radio" id="rating5" value="5" on="change:rating.submit"/>
       <label for="rating5" title="5 stars">☆</label>

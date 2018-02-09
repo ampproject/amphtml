@@ -1,7 +1,7 @@
 <!--
   ## Introduction
 
-  The [`amp-list`](https://www.ampproject.org/docs/reference/components/amp-list) component fetches dynamic content from a CORS JSON endpoint and renders it using a supplied template. This is good for embedding a dynamic list of related articles.
+  The [`amp-list`](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-list) component fetches dynamic content from a CORS JSON endpoint and renders it using a supplied template. This is good for embedding a dynamic list of related articles.
 -->
 <!-- -->
 <!doctype html>
@@ -122,7 +122,7 @@
     ]
   }
   ```
-  The list content is rendered via an [amp-mustache template](https://www.ampproject.org/docs/reference/components/amp-mustache). The template can be specified either by id, or by using a nested element.
+  The list content is rendered via an [amp-mustache template](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-mustache). The template can be specified either by id, or by using a nested element.
   -->
   <amp-list width="auto" height="100" layout="fixed-height" src="https://ampbyexample.com/json/examples.json" class="m1">
     <template type="amp-mustache" id="amp-template-id">
@@ -132,7 +132,7 @@
 
   <!-- ## Handling empty List Content -->
   <!-- If the list contains an empty array, you can use  [mustache inverted sections](https://github.com/janl/mustache.js) to print a message. -->
-<amp-list width="auto" height="100" layout="fixed-height" src="/json/examples-empty.json" class="m1">
+<amp-list width="auto" height="100" layout="fixed-height" src="/examples/visual-tests/amp-by-example/json/examples-empty.json" class="m1">
   <template type="amp-mustache">
     {{^products}} No items founds.{{/products}}
   </template>

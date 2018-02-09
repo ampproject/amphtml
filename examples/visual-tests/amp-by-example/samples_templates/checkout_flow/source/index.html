@@ -13,7 +13,7 @@
   <html ⚡>
     <head>
       <meta charset="utf-8">
-      <link rel="canonical" href="https://ampbyexample.com/../samples_templates/checkout_flow/">
+      <link rel="canonical" href="https://ampbyexample.com/../examples/visual-tests/amp-by-example/samples_templates/checkout_flow/">
       <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
       <script async src="https://cdn.ampproject.org/v0.js"></script>
 
@@ -36,8 +36,8 @@
 
       <!-- ## Sign-in Support -->
 
-        <!-- We use `amp-access` to integrate login and to show and hide a login button depending on whether the user is logged in. [amp-access](/components/amp-access) requires the definition of 3 endpoints as documented [here](https://www.ampproject.org/docs/reference/components/amp-access).
-          This sample allows an user to login and logout using either email/password or [Google sign in](https://developers.google.com/identity/sign-in/web/). Logout is implemented by configuring a second endpoint in the login property `sign-out`, find more [here](https://www.ampproject.org/docs/reference/components/amp-access#login-page).  -->
+        <!-- We use `amp-access` to integrate login and to show and hide a login button depending on whether the user is logged in. [amp-access](/examples/visual-tests/amp-by-example/components/amp-access) requires the definition of 3 endpoints as documented [here](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-access).
+          This sample allows an user to login and logout using either email/password or [Google sign in](https://developers.google.com/identity/sign-in/web/). Logout is implemented by configuring a second endpoint in the login property `sign-out`, find more [here](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-access#login-page).  -->
           <script id="amp-access" type="application/json">
 {
         "authorization": "https://ampbyexample.com/samples_templates/comment_section/authorization?rid=READER_ID&url=CANONICAL_URL&ref=DOCUMENT_REFERRER&_=RANDOM",
@@ -218,7 +218,7 @@
 
           <!-- ## The Checkout Form --> 
         <!-- This is the actual checkout form. Form submission takes place via XHR. Once the form has been successfully submitted, we set the 
-        `checkoutSuccess` variable to `true`. This enables us to hide the forms once the checkout is done. Another option would have be to [redirect](https://www.ampproject.org/docs/reference/components/amp-form#redirecting-after-a-submission) to a new page on successful checkout. -->
+        `checkoutSuccess` variable to `true`. This enables us to hide the forms once the checkout is done. Another option would have be to [redirect](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-form#redirecting-after-a-submission) to a new page on successful checkout. -->
           <form  id="checkout-form"
                  method="post"
                  action-xhr="/checkout/apply-code"
@@ -248,7 +248,7 @@
                         items="."
                         single-item
                         credentials="include"
-                        src="/json/addresses.json">
+                        src="/examples/visual-tests/amp-by-example/json/addresses.json">
                 <template type="amp-mustache">
                   <ul class="list-reset">
                     {{#addresses}}
@@ -350,7 +350,7 @@
                         items="."
                         single-item
                         credentials="include"
-                        src="/json/credit-cards.json">
+                        src="/examples/visual-tests/amp-by-example/json/credit-cards.json">
                 <template type="amp-mustache">
                   <ul class="list-reset">
                     {{#cards}}

@@ -20,11 +20,11 @@ One of the great things about AMP is that the runtime includes a built-in valida
 
 Run the validator by adding `#development=1` to an AMP URL, for example:
 
-[/introduction/how_to_publish_amps/#development=1](/introduction/how_to_publish_amps/#development=1)
+[/examples/visual-tests/amp-by-example/introduction/how_to_publish_amps/#development=1](/examples/visual-tests/amp-by-example/introduction/how_to_publish_amps/#development=1)
 
 You can view the validation result in the [Javascript console](https://developer.chrome.com/devtools/docs/console) of your browser:
 
-<amp-img src="/img/console_showing_validation_errors.png" width="800" height="121" layout="responsive"></amp-img>
+<amp-img src="/examples/visual-tests/amp-by-example/img/console_showing_validation_errors.png" width="800" height="121" layout="responsive"></amp-img>
 
 There are also other ways to validate an AMP page such as [validator.ampproject.org](https://validator.ampproject.org/) or the [official Node AMP Validator](https://www.npmjs.com/package/amphtml-validator), which makes it easy to integrate AMP validation into your build pipeline.
 
@@ -32,7 +32,7 @@ There are also other ways to validate an AMP page such as [validator.ampproject.
 
 Adding metadata to your AMP files enables third-party sites to better display your AMP pages. For example, the [Google Top Stories Carousel with AMP](https://developers.google.com/structured-data/carousels/top-stories) currently supports the _Article_ and _Video_ metadata categories and uses these for rendering article previews:
 
-<amp-img src="/img/carousel_preview_card.png" width="241" height="299"></amp-img>
+<amp-img src="/examples/visual-tests/amp-by-example/img/carousel_preview_card.png" width="241" height="299"></amp-img>
 
 The [Structured Data Testing Tool](https://developers.google.com/structured-data/testing-tool/) is a great way to test whether the metadata in your AMP files is correct: make sure the “All data” filter shows “AMP Articles” and everything is green. Here is an [example](https://developers.google.com/structured-data/testing-tool?url=https://ampbyexample.com/).
 
@@ -85,7 +85,7 @@ X-Robots-Tag: noindex                      <= don't!
 
 The Google AMP Cache stores valid AMP pages and provides consistently fast access to them. The [Google Top Stories Carousel with AMP](https://developers.google.com/structured-data/carousels/top-stories), for example, uses the Google AMP Cache to display articles. The cache stores images and fonts in addition to documents. This makes it important to test that your AMPs work correctly when loaded via the Google AMP Cache.
 
-<amp-img src="/img/amp_cache_validation_error.png" width="385" height="386"></amp-img>
+<amp-img src="/examples/visual-tests/amp-by-example/img/amp_cache_validation_error.png" width="385" height="386"></amp-img>
 
 Loading your AMP pages via the Google AMP Cache is easy. The Google AMP Cache URL is composed based on whether the source URL is available via HTTP or HTTPS:
 
@@ -106,7 +106,7 @@ When loading your AMP pages via the Google AMP Cache, check via your [browser’
 *   iframes
 
 <div class="card important">
-  **Important:** A common cause for missing assets are [protocol relative URLs](https://en.wikipedia.org/wiki/Wikipedia:Protocol-relative_URL). These are currently not supported by the Google AMP Cache. Instead link to all assets via HTTPS (if available). You can learn more about how the Google AMP Cache works <a href="/advanced/using_the_google_amp_cache/">here</a>.
+  **Important:** A common cause for missing assets are [protocol relative URLs](https://en.wikipedia.org/wiki/Wikipedia:Protocol-relative_URL). These are currently not supported by the Google AMP Cache. Instead link to all assets via HTTPS (if available). You can learn more about how the Google AMP Cache works <a href="/examples/visual-tests/amp-by-example/advanced/using_the_google_amp_cache/">here</a>.
 </div>
 
 -->

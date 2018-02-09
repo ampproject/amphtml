@@ -1,8 +1,8 @@
 <!--
   ## Introduction
 
-  [amp-position-observer](https://www.ampproject.org/docs/reference/components/amp-position-observer)
-  combined with [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation) is
+  [amp-position-observer](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-position-observer)
+  combined with [amp-animation](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-animation) is
   a powerful building block that can handle various uses-cases such as **scrollbound animations**,
   **parallax effects** and **transitions** as elements enter and exit the viewport.
 
@@ -11,15 +11,15 @@
 
 <!--
   ## Components
-  [amp-position-observer](https://www.ampproject.org/docs/reference/components/amp-position-observer) is a
+  [amp-position-observer](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-position-observer) is a
   functional component that monitors the position of an element within the viewport as a user scrolls,
   and dispatches `enter`, `exit` and `scroll:<Position In Viewport As a Percentage>` events.
 
   These events in return can be used to `play`, `pause` or `seek` animation timelines
-  defined by [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation)
+  defined by [amp-animation](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-animation)
   to create scrollbound and visibility-based effects.
 
-  [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation) is a UI component
+  [amp-animation](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-animation) is a UI component
   that relies on [Web Animations API](https://www.w3.org/TR/web-animations/) to define and
   run keyframe animations in AMP documents.
 -->
@@ -138,7 +138,7 @@
     <amp-position-observer on="scroll:spinAnimation.seekTo(percent=event.percent)" intersection-ratios="1" layout="nodisplay">
     </amp-position-observer>
 
-    <amp-img id="fidgetSpinnerImage" width="1024" height="1114" layout="responsive" src="/img/fidget.png" alt="Picture of a fidget spinner"></amp-img>
+    <amp-img id="fidgetSpinnerImage" width="1024" height="1114" layout="responsive" src="/examples/visual-tests/amp-by-example/img/fidget.png" alt="Picture of a fidget spinner"></amp-img>
   </div>
 
   <!--
@@ -159,7 +159,7 @@
   -->
   <!--
    `amp-animation` has plenty of other features, please see
-   [the API reference](https://www.ampproject.org/docs/reference/components/amp-animation) to learn more about `amp-animations`.
+   [the API reference](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-animation) to learn more about `amp-animations`.
   -->
   <amp-animation id="spinAnimation" layout="nodisplay">
     <script type="application/json">
@@ -216,7 +216,7 @@
       </div>
     </amp-fit-text>
 
-    <amp-img id="cardImage" width="1280" height="898" layout="responsive" src="/img/food.jpg" alt="Picture of food table."></amp-img>
+    <amp-img id="cardImage" width="1280" height="898" layout="responsive" src="/examples/visual-tests/amp-by-example/img/food.jpg" alt="Picture of food table."></amp-img>
   </div>
 
   <!--
@@ -294,7 +294,7 @@
     <amp-position-observer on="scroll:parallaxTransition.seekTo(percent=event.percent)" intersection-ratios="0" layout="nodisplay">
     </amp-position-observer>
 
-    <amp-img id="parallaxImage" width="1280" height="873" layout="responsive" src="/img/elephant.jpg" alt="Picture of an elephant"></amp-img>
+    <amp-img id="parallaxImage" width="1280" height="873" layout="responsive" src="/examples/visual-tests/amp-by-example/img/elephant.jpg" alt="Picture of an elephant"></amp-img>
   </div>
 
   <!--

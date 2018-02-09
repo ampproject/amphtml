@@ -1,5 +1,5 @@
 <!-- ## Introduction
-  The [amp-access](https://www.ampproject.org/docs/reference/components/amp-access) component adds support for paywalls and subscriptions to AMP, allowing the publisher to control which content is accessible by the reader and with what restrictions.
+  The [amp-access](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-access) component adds support for paywalls and subscriptions to AMP, allowing the publisher to control which content is accessible by the reader and with what restrictions.
 
   For sample `amp-access` server endpoints, see the [amp-publisher-sample](https://github.com/ampproject/amp-publisher-sample) project.
 -->
@@ -17,7 +17,7 @@
   <!-- `amp-access` requires `amp-analytics` to be imported as well. -->
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
 
-  <!-- Optionally, use the [`amp-mustache`](https://www.ampproject.org/docs/reference/components/amp-mustache) component to show text with values replaced from
+  <!-- Optionally, use the [`amp-mustache`](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-mustache) component to show text with values replaced from
   the authorization response -->
   <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
 
@@ -64,7 +64,7 @@
   </section>
 
   <!-- It is possible to combine two values on the evaluation expression.
-    Check the docs to find out more about the [Expression Grammar](https://www.ampproject.org/docs/reference/components/amp-access#appendix-a-amp-access-expression-grammar)
+    Check the docs to find out more about the [Expression Grammar](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-access#appendix-a-amp-access-expression-grammar)
    -->
   <div amp-access="access AND NOT subscriber">
     <p>This section is only visible to users with <code>"access": true</code> and <code>"subscriber": false</code></p>
