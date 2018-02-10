@@ -67,7 +67,7 @@ export class EntitlementStore {
     this.firstResolvedPromise_ = new Promise(resolve => {
       this.onChange((serviceId, entitlements) => {
         if (entitlements.enablesThis()) {
-          resolve();
+          resolve(serviceId);
         }
       });
     });

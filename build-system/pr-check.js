@@ -165,7 +165,7 @@ function isOwnersFile(filePath) {
  * @return {boolean}
  */
 function isDocFile(filePath) {
-  return path.extname(filePath) == '.md';
+  return path.extname(filePath) == '.md' && !filePath.startsWith('examples/');
 }
 
 /**
@@ -176,7 +176,7 @@ function isDocFile(filePath) {
 function isVisualDiffFile(filePath) {
   const filename = path.basename(filePath);
   return (filename == 'visual-diff.rb' ||
-          filename == 'visual-tests.json' ||
+          filename == 'visual-tests.js' ||
           filePath.startsWith('examples/visual-tests/'));
 }
 
@@ -309,7 +309,7 @@ const command = {
           colors.cyan('PERCY_TOKEN') + '. Skipping visual diff tests.');
       return;
     }
-    let cmd = 'gulp visual-diff';
+    let cmd = 'gulp visual-diff --headless';
     if (opt_mode === 'skip') {
       cmd += ' --skip';
     } else if (opt_mode === 'master') {
@@ -350,7 +350,7 @@ function runAllCommands() {
     command.runJsonCheck();
     command.runDepAndTypeChecks();
     command.runUnitTests();
-    command.verifyVisualDiffTests();
+    // command.verifyVisualDiffTests(); is flaky due to Amp By Example tests
     // command.testDocumentLinks() is skipped during push builds.
     command.buildValidatorWebUI();
     command.buildValidator();
@@ -382,7 +382,7 @@ function runAllCommandsLocally() {
   command.runVisualDiffTests();
   command.runUnitTests();
   command.runIntegrationTests(/* compiled */ false);
-  command.verifyVisualDiffTests();
+  // command.verifyVisualDiffTests(); is flaky due to Amp By Example tests
 
   // Validator tests.
   command.buildValidatorWebUI();

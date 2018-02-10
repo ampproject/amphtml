@@ -60,7 +60,8 @@ export class LocalSubscriptionPlatform {
           return new Entitlements(
               this.serviceConfig_['serviceId'],
               JSON.stringify(json),
-              entitlements, entitlements.products
+              entitlements,
+              entitlements.products
           );
         });
   }

@@ -112,4 +112,3 @@ AMP.extension(TAG, '0.1', function(AMP) {
     return new SubscriptionService(ampdoc).start_();
   });
 });
-
