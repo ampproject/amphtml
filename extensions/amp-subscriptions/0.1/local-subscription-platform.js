@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {Entitlement} from './entitlement';
+import {Entitlement, Entitlements} from './entitlements';
+
 import {Services} from '../../../src/services';
 
 /**
@@ -26,32 +27,42 @@ export class LocalSubscriptionPlatform {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {string} serviceUrl
+   * @param {!JsonObject} serviceConfig
    */
-  constructor(ampdoc, serviceUrl) {
+  constructor(ampdoc, serviceConfig) {
     /** @const */
     this.ampdoc_ = ampdoc;
 
-    /** @const @private {string} */
-    this.serviceUrl_ = serviceUrl;
+    /** @const @private {!JsonObject} */
+    this.serviceConfig_ = serviceConfig;
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(this.ampdoc_.win);
   }
 
   /**
-   * TODO(@prateekbh): Define object below once we have a defination of entitlement
-   * @return {!Promise<Entitlement>}
+   * Returns the Entitlements object for the subscription platform.
+   *
+   * @return {!Promise<!Entitlements>}
    */
   getEntitlements() {
     return this.xhr_
-        .fetchJson(this.serviceUrl_)
+        .fetchJson(this.serviceConfig_['paywallUrl'])
         .then(res => res.json())
         .then(json => {
-          const entitlements = json.entitlements;
-          return new Entitlement(entitlements.souce, entitlements.products);
+          const entitlements = json.entitlements.map(entitlement => {
+            return new Entitlement(
+                this.serviceConfig_['serviceId'],
+                entitlement.products,
+                ''
+            );
+          });
+          return new Entitlements(
+              this.serviceConfig_['serviceId'],
+              JSON.stringify(json),
+              entitlements, entitlements.products
+          );
         });
   }
-
 }
 

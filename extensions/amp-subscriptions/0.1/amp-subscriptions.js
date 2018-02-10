@@ -61,12 +61,22 @@ export class SubscriptionService {
         this.subscriptionPlatforms_.push(
             new LocalSubscriptionPlatform(
                 this.ampdoc_,
-                subscriptionPlatformConfig.paywallUrl
+                subscriptionPlatformConfig
             )
         );
       });
       resolve();
     });
+  }
+
+  /**
+   * This method registers an auto initialized subcription platform with this service.
+   *
+   * @param {string} serviceId
+   * @param {!./entitlements.Entitlements} entitlements
+   */
+  registerService(serviceId, entitlements) {
+    this.entitlementStore_.resolveEntitlement(serviceId, entitlements);
   }
 
   /**
@@ -102,3 +112,4 @@ AMP.extension(TAG, '0.1', function(AMP) {
     return new SubscriptionService(ampdoc).start_();
   });
 });
+

@@ -17,20 +17,22 @@
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 
 const NOOP = () => {};
+const dummyUrl = 'http://lipsum.com';
+
 describe('amp-subscriptions', {}, env => {
   let ampdoc;
-  let ampSubscriptions;
+  let localSubscriptionPlatform;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
-    ampSubscriptions = new LocalSubscriptionPlatform(ampdoc);
+    localSubscriptionPlatform = new LocalSubscriptionPlatform(ampdoc, dummyUrl);
   });
 
-  it('should call `initialize_` on start', () => {
+  it('should fetch the entitlements on getEntitlements', () => {
     const initializeStub =
-        sandbox.stub(ampSubscriptions, 'initialize_').callsFake(NOOP);
-    ampSubscriptions.start_();
-
+        sandbox.stub(localSubscriptionPlatform.xhr_, 'fetchJson')
+            .callsFake(NOOP);
+    localSubscriptionPlatform.getEntitlements();
     expect(initializeStub).to.be.called.once;
   });
 });

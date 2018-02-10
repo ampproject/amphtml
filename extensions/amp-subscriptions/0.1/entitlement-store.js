@@ -17,17 +17,17 @@
 export class EntitlementStore {
   /**
    *
-   * @param {!Array<string>} serviceIds
+   * @param {!Array<string>} expectedServiceIds
    */
-  constructor(serviceIds) {
+  constructor(expectedServiceIds) {
 
     /** @private @const {!Array<string>} */
-    this.serviceIds_ = serviceIds;
+    this.serviceIds_ = expectedServiceIds;
 
-    /** @private @typedef {{serviceId: string, entitlements: <./entitlement.Entitlement>}} */
+    /** @private @typedef {{serviceId: string, entitlements: ./entitlements.Entitlements}} */
     this.entitlements_ = {};
 
-    /** @private @const {!Array<Function(string, ./entitlement.Entitlement)>} */
+    /** @private @const {!Array<function(string, ./entitlements.Entitlements)>} */
     this.onChangeCallbacks_ = [];
 
     /** @private {?Promise<string>} */
@@ -36,7 +36,7 @@ export class EntitlementStore {
 
   /**
    * This registers a callback which is called whenever a service id is resolved with an entitlement.
-   * @param {Function(string, ./entitlement.Entitlement)} callback
+   * @param {function(string, ./entitlements.Entitlements)} callback
    */
   onChange(callback) {
     this.onChangeCallbacks_.push(callback);
@@ -45,30 +45,34 @@ export class EntitlementStore {
   /**
    * This resolves the entitlement to a serviceId
    * @param {string} serviceId
-   * @param {./entitlement.Entitlement} entitlement
+   * @param {./entitlements.Entitlements} entitlements
    */
-  resolveEntitlement(serviceId, entitlement) {
-    this.entitlements_[serviceId] = entitlement;
+  resolveEntitlement(serviceId, entitlements) {
+    this.entitlements_[serviceId] = entitlements;
 
     // Call all onChange callbacks.
     this.onChangeCallbacks_.forEach(callback => {
-      callback(serviceId, entitlement);
+      callback(serviceId, entitlements);
     });
   }
 
   /**
-   * @param {string} product
    * @returns {!Promise<string>}
    */
-  getFirstResolvedSubscription(product) {
+  getFirstResolvedSubscription() {
+    if (this.firstResolvedPromise_ !== null) {
+      return this.firstResolvedPromise_;
+    }
+
     this.firstResolvedPromise_ = new Promise(resolve => {
-      this.onChange((serviceId, entitlement) => {
-        if (entitlement.enables(product)) {
+      this.onChange((serviceId, entitlements) => {
+        if (entitlements.enablesThis()) {
           resolve();
         }
       });
     });
     return this.firstResolvedPromise_;
+
   }
 }
 
