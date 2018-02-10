@@ -54,6 +54,7 @@ tags: {  # <amp-ad>
   attrs: { name: "alt" }
   attrs: { name: "json" }
   attrs: { name: "rtc-config" }
+  attrs: { name: "template" }
   attrs: {
     name: "src"
     value_url: {
@@ -176,6 +177,7 @@ tags: {  # <amp-embed>
   attrs: { name: "alt" }
   attrs: { name: "json" }
   attrs: { name: "rtc-config" }
+  attrs: { name: "template" }
   attrs: {
     name: "src"
     value_url: {
