@@ -38,6 +38,7 @@ const log = require('fancy-log');
 const minimatch = require('minimatch');
 const minimist = require('minimist');
 const removeConfig = require('./build-system/tasks/prepend-global/index.js').removeConfig;
+const run = require('gulp-run');
 const serve = require('./build-system/tasks/serve.js').serve;
 const source = require('vinyl-source-stream');
 const touch = require('touch');
@@ -964,6 +965,7 @@ function appendToCompiledFile(srcFilename, destFilePath) {
   }
 }
 
+
 /**
  * Synchronously concatenates the given files into a string.
  *
@@ -1460,3 +1462,6 @@ gulp.task('watch', 'Watches for changes in files, re-builds when detected',
     });
 gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
 gulp.task('build-login-done', 'Builds login-done.html/js', buildLoginDone);
+gulp.task('build-validator-light', 'Builds the light version of validator',
+    run('cd validator && python build.py --light').exec()
+);

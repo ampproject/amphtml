@@ -32,11 +32,20 @@ export function maybeValidate(win) {
   }
 
   if (getMode().development) {
-    loadScript(win.document, `${urls.cdn}/v0/validator.js`).then(() => {
-      /* global amp: false */
-      amp.validator.validateUrlAndLog(
-          filename, win.document, getMode().filter);
-    });
+    // Load the light validator.
+    if (win.location.hash === '#development=2') {
+      loadScript(win.document,'https://alabiaga.users.x20web.corp.google.com/www/amp_validator/validator_light_minified.js').then(() => {
+        /* global amp: false */
+        amp.validator.validateUrlAndLog(
+            filename, win.document, getMode().filter);
+      });
+    } else {
+      loadScript(win.document, `${urls.cdn}/v0/validator.js`).then(() => {
+        /* global amp: false */
+        amp.validator.validateUrlAndLog(
+            filename, win.document, getMode().filter);
+      });
+    }
   } else if (getMode().examiner) {
     loadScript(win.document, `${urls.cdn}/examiner.js`);
   }
