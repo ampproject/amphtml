@@ -78,6 +78,7 @@ import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
+import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {
   googleLifecycleReporterFactory,
   setGoogleLifecycleVarsFromHeaders,
@@ -758,6 +759,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         JSON.stringify(
             (tryParseJson(
                 this.element.getAttribute('json')) || {})['targeting']),
+      ADCID: () => getOrCreateAdCid(this.getAmpDoc(), 'AMP_ECID_GOOGLE', '_ga'),
       ATTR: name => {
         if (!whitelist[name.toLowerCase()]) {
           dev().warn('TAG', `Invalid attribute ${name}`);
