@@ -108,7 +108,7 @@ export class AmpBysideContent extends AMP.BaseElement {
 
     /** @const {function()} */
     this.boundUpdateSize_ = debounce(
-        this.win, this.updateSize_.bind(this), 100
+        this.win, data => this.updateSize_(data), 100
     );
   }
 
@@ -122,8 +122,8 @@ export class AmpBysideContent extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(onLayout) {
-    if (this.iframeSrc_ || this.origin_) {
-      this.preconnect.url(this.iframeSrc_ || this.origin_, onLayout);
+    if (this.origin_) {
+      this.preconnect.url(this.origin_, onLayout);
     }
   }
 
@@ -292,14 +292,8 @@ export class AmpBysideContent extends AMP.BaseElement {
    *    requested dimensions.
    * @private
    */
-  updateSize_() {
-    const args = Array.prototype.slice.call(arguments);
-    const data = args.length ? args[0] : null;
-    if (!data) {
-      return;
-    }
-
-    this.getVsync().mutate(() => {
+  updateSize_(data) {
+    this.getVsync().measure(() => {
       // Calculate new height of the container to include the padding.
       // If padding is negative, just use the requested height directly.
       let newHeight;
@@ -307,7 +301,7 @@ export class AmpBysideContent extends AMP.BaseElement {
       if (!isNaN(height)) {
         newHeight = Math.max(
             height + (this.element./*OK*/offsetHeight
-              - this.iframe_./*OK*/offsetHeight),
+            - this.iframe_./*OK*/offsetHeight),
             height);
         this.attemptChangeHeight(newHeight).catch(() => {/* do nothing */ });
       } else {
