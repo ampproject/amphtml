@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {BLANK_AUDIO_SRC, BLANK_VIDEO_SRC} from './default-media';
 import {
   closestBySelector,
   isConnectedNode,
@@ -23,7 +24,6 @@ import {
 import {dev} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
 import {toWin} from '../../../src/types';
-import {BLANK_AUDIO_SRC, BLANK_VIDEO_SRC} from './default-media';
 
 
 
@@ -596,15 +596,26 @@ export class MediaPool {
     const isMuted = mediaEl.muted;
     const currentTime = mediaEl.currentTime;
 
-    // If the video is already playing, we do not want to call play again, as it
-    // can interrupt the video playback.  Instead, we do a no-op.
+    /**
+     * @return {!Promise} A promise that is resolved when playback has been
+     *    initiated or rejected if playback fails to initiate.  If the media
+     *    element is already playing, the promise is immediately resolved
+     *    without playing the media element again, to avoid interrupting
+     *    playback.
+     */
     const playFn = () => {
       if (isPaused) {
-        mediaEl.play();
+        // The playFn() invocation is wrapped in a Promise.resolve(...) due to
+        // the fact that some browsers return a promise from media elements'
+        // play() function, while others return a boolean.
+        return Promise.resolve(mediaEl.play());
       }
+
+      // This media element was already playing.
+      return Promise.resolve();
     };
 
-    return Promise.resolve().then(() => playFn()).then(() => {
+    return playFn().then(() => {
       mediaEl.muted = false;
 
       if (isPaused) {
@@ -617,7 +628,7 @@ export class MediaPool {
       }
     }).catch(reason => {
       dev().expectedError('AMP-STORY', 'Blessing media element failed:',
-          reason);
+          reason, mediaEl);
     });
   }
 
@@ -802,7 +813,7 @@ export class MediaPool {
     instances[newId] = new MediaPool(
         toWin(root.getElement().ownerDocument.defaultView),
         root.getMaxMediaElementCounts(),
-        root.getElementDistance);
+        element => root.getElementDistance(element));
 
     return instances[newId];
   }
@@ -826,8 +837,8 @@ class Sources {
 
   /**
    * Applies the src attribute and source tags to a specified element.
-   * @param {!Element} element The element to adopt the sources represented by
-   *     this object.
+   * @param {!HTMLMediaElement} element The element to adopt the sources
+   *     represented by this object.
    */
   applyToElement(element) {
     Sources.removeFrom(element);
@@ -874,7 +885,7 @@ export class MediaPoolRoot {
   /**
    * @return {!Element} The root element of this media pool.
    */
-  getElement() {};
+  getElement() {}
 
   /**
    * @param {!Element} unusedElement The element whose distance should be
@@ -886,12 +897,12 @@ export class MediaPoolRoot {
    *     furthest from the user's current position in the document are evicted
    *     from the MediaPool first).
    */
-  getElementDistance(unusedElement) {};
+  getElementDistance(unusedElement) {}
 
 
   /**
    * @return {!Object<!MediaType, number>} The maximum amount of each media
    *     type to allow within this element.
    */
-  getMaxMediaElementCounts() {};
+  getMaxMediaElementCounts() {}
 }

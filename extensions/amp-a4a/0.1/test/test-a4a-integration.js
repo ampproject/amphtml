@@ -14,30 +14,29 @@
  * limitations under the License.
  */
 
-import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
-import {FetchMock, networkFailure} from './fetch-mock';
-import {MockA4AImpl, TEST_URL} from './utils';
-import {createIframePromise} from '../../../../testing/iframe';
-import {
-  data as validCSSAmp,
-} from './testdata/valid_css_at_rules_amp.reserialized';
-import {installCryptoService} from '../../../../src/service/crypto-impl';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
-import {adConfig} from '../../../../ads/_config';
-import {getA4ARegistry} from '../../../../ads/_a4a-config';
-import {signingServerURLs} from '../../../../ads/_a4a-config';
-import {
-  resetScheduledElementForTesting,
-  upgradeOrRegisterElement,
-} from '../../../../src/service/custom-element-registry';
-import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {loadPromise} from '../../../../src/event-helper';
-import * as sinon from 'sinon';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+import '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import * as sinon from 'sinon';
+import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
+import {FetchMock, networkFailure} from './fetch-mock';
+import {MockA4AImpl, TEST_URL} from './utils';
+import {createIframePromise} from '../../../../testing/iframe';
+import {getA4ARegistry} from '../../../../ads/_a4a-config';
+import {installCryptoService} from '../../../../src/service/crypto-impl';
+import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {loadPromise} from '../../../../src/event-helper';
+import {
+  resetScheduledElementForTesting,
+  upgradeOrRegisterElement,
+} from '../../../../src/service/custom-element-registry';
+import {signingServerURLs} from '../../../../ads/_a4a-config';
+import {
+  data as validCSSAmp,
+} from './testdata/valid_css_at_rules_amp.reserialized';
 
 // Integration tests for A4A.  These stub out accesses to the outside world
 // (e.g., XHR requests and interfaces to ad network-specific code), but
@@ -92,7 +91,6 @@ describe('integration test: a4a', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     a4aRegistry = getA4ARegistry();
-    adConfig['mock'] = {};
     a4aRegistry['mock'] = () => {return true;};
     return createIframePromise().then(f => {
       fixture = f;
@@ -126,7 +124,6 @@ describe('integration test: a4a', () => {
     fetchMock./*OK*/restore();
     sandbox.restore();
     resetScheduledElementForTesting(window, 'amp-a4a');
-    delete adConfig['mock'];
     delete a4aRegistry['mock'];
   });
 

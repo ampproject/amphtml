@@ -15,12 +15,12 @@
  */
 'use strict';
 
+const colors = require('ansi-colors');
 const gulp = require('gulp-help')(require('gulp'));
+const log = require('fancy-log');
 const path = require('path');
 const srcGlobs = require('../config').presubmitGlobs;
 const through2 = require('through2');
-const colors = require('ansi-colors');
-const log = require('fancy-log');
 
 const dedicatedCopyrightNoteSources = /(\.js|\.css|\.go)$/;
 
@@ -90,15 +90,17 @@ const forbiddenTerms = {
         '  If this is cross domain, overwrite the method directly.',
   },
   'console\\.\\w+\\(': {
-    message: 'If you run against this, use console/*OK*/.log to ' +
+    message: 'If you run against this, use console/*OK*/.[log|error] to ' +
       'whitelist a legit case.',
     whitelist: [
       'build-system/pr-check.js',
       'build-system/app.js',
+      'build-system/check-package-manager.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
       'validator/engine/validator.js',
+      'gulpfile.js',
     ],
     checkInTestFolder: true,
   },
@@ -514,7 +516,7 @@ const forbiddenTerms = {
     message: 'requireLayout is restricted b/c it affects non-contained elements', // eslint-disable-line max-len
     whitelist: [
       'extensions/amp-animation/0.1/web-animations.js',
-      'extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.js',
+      'extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
       'src/service/resources-impl.js',
     ],
   },
@@ -575,6 +577,7 @@ const forbiddenTerms = {
       'src/worker-error-reporting.js',
       'tools/experiments/experiments.js',
       'build-system/amp4test.js',
+      'gulpfile.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
@@ -614,6 +617,13 @@ const forbiddenTerms = {
   },
   '(dev|user)\\(\\)\\.assert(Element|String|Number)?\\(\\s*([A-Z][A-Z0-9-]*,)': { // eslint-disable-line max-len
     message: 'TAG is not an argument to assert(). Will cause false positives.',
+  },
+  'eslint no-unused-vars': {
+    message: 'Use a line-level "no-unused-vars" rule instead.',
+    whitelist: [
+      'viewer-api/swipe-api.js',
+      'dist.3p/current/integration.js',
+    ],
   },
 };
 
@@ -747,7 +757,7 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js', // eslint-disable-line max-len
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js', // eslint-disable-line max-len
-      'extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.js',
+      'extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
     ],
   },
   'loadElementClass': {
@@ -837,6 +847,7 @@ const forbiddenTermsSrcInclusive = {
       'validator/webui/serve-standalone.go',
       'build-system/tasks/check-links.js',
       'build-system/tasks/extension-generator/index.js',
+      'gulpfile.js',
     ],
   },
   '\\<\\<\\<\\<\\<\\<': {

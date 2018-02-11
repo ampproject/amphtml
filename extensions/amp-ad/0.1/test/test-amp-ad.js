@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {getA4ARegistry} from '../../../../ads/_a4a-config';
-import {adConfig} from '../../../../ads/_config';
 import {AmpAd} from '../amp-ad';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {Services} from '../../../../src/services';
+import {adConfig} from '../../../../ads/_config';
+import {getA4ARegistry} from '../../../../ads/_a4a-config';
 import {stubService} from '../../../../testing/test-helper';
 
 

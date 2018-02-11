@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {validateData} from '../../3p/3p';
-import {user} from '../../src/log';
-import {setStyles} from '../../src/style';
-import {camelCaseToDash} from '../../src/string';
 import {ADSENSE_RSPV_WHITELISTED_HEIGHT} from './utils';
+import {camelCaseToDash} from '../../src/string';
+import {setStyles} from '../../src/style';
+import {user} from '../../src/log';
+import {validateData} from '../../3p/3p';
 
 /**
  * Make an adsense iframe.

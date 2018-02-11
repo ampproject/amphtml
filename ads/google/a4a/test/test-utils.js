@@ -14,36 +14,36 @@
  * limitations under the License.
  */
 
+import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
+import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import * as sinon from 'sinon';
 import {
-  additionalDimensions,
+  EXPERIMENT_ATTRIBUTE,
+  TRUNCATION_PARAM,
+  ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
+  additionalDimensions,
   extractAmpAnalyticsConfig,
   getCsiAmpAnalyticsVariables,
-  EXPERIMENT_ATTRIBUTE,
-  googleAdUrl,
-  mergeExperimentIds,
-  maybeAppendErrorParameter,
-  TRUNCATION_PARAM,
   getEnclosingContainerTypes,
-  ValidAdContainerTypes,
-  getIdentityTokenRequestUrl,
   getIdentityToken,
+  getIdentityTokenRequestUrl,
+  googleAdUrl,
+  maybeAppendErrorParameter,
+  mergeExperimentIds,
 } from '../utils';
-import {buildUrl} from '../url-builder';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {Services} from '../../../../src/services';
-import {installXhrService} from '../../../../src/service/xhr-impl';;
-import {
-  installExtensionsService,
-} from '../../../../src/service/extensions-impl';
 import {
   MockA4AImpl,
 } from '../../../../extensions/amp-a4a/0.1/test/utils';
-import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
-import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {Services} from '../../../../src/services';
+import {buildUrl} from '../url-builder';
+import {createElementWithAttributes} from '../../../../src/dom';
 import {createIframePromise} from '../../../../testing/iframe';
-import * as sinon from 'sinon';
+import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {
+  installExtensionsService,
+} from '../../../../src/service/extensions-impl';
+import {installXhrService} from '../../../../src/service/xhr-impl';
 
 function setupForAdTesting(fixture) {
   installDocService(fixture.win, /* isSingleDoc */ true);

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Vsync} from '../../src/service/vsync-impl';
+import * as sinon from 'sinon';
 import {AmpDocShadow, installDocService} from '../../src/service/ampdoc-impl';
 import {Services} from '../../src/services';
+import {Vsync} from '../../src/service/vsync-impl';
 import {installTimerService} from '../../src/service/timer-impl';
-import * as sinon from 'sinon';
 
 
 describe('vsync', () => {
@@ -482,8 +482,7 @@ describe('vsync', () => {
       vsync.raf_ = handler => rafHandler = handler;
       viewer.isVisible = () => false;
 
-      /*eslint no-unused-vars: 0*/
-      let result = '';
+      let result = ''; // eslint-disable-line no-unused-vars
       const res = vsync.runAnim(contextNode, {
         mutate: () => {
           result += 'mu1';
@@ -500,8 +499,7 @@ describe('vsync', () => {
       vsync.raf_ = handler => rafHandler = handler;
       viewer.isVisible = () => false;
 
-      /*eslint no-unused-vars: 0*/
-      let result = '';
+      let result = ''; // eslint-disable-line no-unused-vars
       const task = vsync.createAnimTask(contextNode, {
         mutate: () => {
           result += 'mu1';
@@ -760,8 +758,7 @@ describe('vsync', () => {
       vsync.raf_ = handler => rafHandler = handler;
       docState.isHidden = () => true;
 
-      /*eslint no-unused-vars: 0*/
-      let result = '';
+      let result = ''; // eslint-disable-line no-unused-vars
       const res = vsync.runAnim(contextNode, {
         mutate: () => {
           result += 'mu1';
@@ -778,8 +775,7 @@ describe('vsync', () => {
       vsync.raf_ = handler => rafHandler = handler;
       docState.isHidden = () => true;
 
-      /*eslint no-unused-vars: 0*/
-      let result = '';
+      let result = ''; // eslint-disable-line no-unused-vars
       const task = vsync.createAnimTask(contextNode, {
         mutate: () => {
           result += 'mu1';

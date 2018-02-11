@@ -15,28 +15,28 @@
  */
 
 import {ActionTrust} from '../../../src/action-trust';
-import {getServiceForDoc} from '../../../src/service';
-import {Services} from '../../../src/services';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, user} from '../../../src/log';
-import {
-  RelativePositions,
-  layoutRectsRelativePos,
-  layoutRectLtwh,
-} from '../../../src/layout-rect';
 import {
   Layout,
+  assertLength,
   getLengthNumeral,
   getLengthUnits,
-  assertLength,
   parseLength,
 } from '../../../src/layout';
 import {
-  installPositionObserverServiceForDoc,
-} from '../../../src/service/position-observer/position-observer-impl';
-import {
   PositionObserverFidelity,
 } from '../../../src/service/position-observer/position-observer-worker';
+import {
+  RelativePositions,
+  layoutRectLtwh,
+  layoutRectsRelativePos,
+} from '../../../src/layout-rect';
+import {Services} from '../../../src/services';
+import {createCustomEvent} from '../../../src/event-helper';
+import {dev, user} from '../../../src/log';
+import {getServiceForDoc} from '../../../src/service';
+import {
+  installPositionObserverServiceForDoc,
+} from '../../../src/service/position-observer/position-observer-impl';
 
 const TAG = 'amp-position-observer';
 

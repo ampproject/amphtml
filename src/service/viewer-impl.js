@@ -15,21 +15,21 @@
  */
 
 import {Observable} from '../observable';
-import {findIndex} from '../utils/array';
-import {dict, map} from '../utils/object';
 import {Services} from '../services';
-import {registerServiceBuilderForDoc} from '../service';
+import {VisibilityState} from '../visibility-state';
 import {dev, duplicateErrorIfNecessary} from '../log';
-import {isIframed} from '../dom';
+import {dict, map} from '../utils/object';
+import {findIndex} from '../utils/array';
 import {
   getSourceOrigin,
+  isProxyOrigin,
   parseQueryString,
   parseUrl,
   removeFragment,
-  isProxyOrigin,
 } from '../url';
+import {isIframed} from '../dom';
+import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
-import {VisibilityState} from '../visibility-state';
 
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';

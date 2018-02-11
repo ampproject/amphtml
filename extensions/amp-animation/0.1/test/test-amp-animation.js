@@ -15,8 +15,8 @@
  */
 
 import {AmpAnimation} from '../amp-animation';
-import {WebAnimationRunner} from '../web-animations';
 import {WebAnimationPlayState} from '../web-animation-types';
+import {WebAnimationRunner} from '../web-animations';
 
 
 describes.sandboxed('AmpAnimation', {}, () => {

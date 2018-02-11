@@ -24,6 +24,20 @@ amp-story, amp-story-page, amp-story-grid-layer {
   overflow: hidden !important;
 }
 
+.i-amphtml-story-system-reset,
+.i-amphtml-story-system-reset * {
+  border: none !important;
+  color: initial !important;
+  font-family: 'Roboto', sans-serif !important;
+  font-size: initial !important;
+  font-weight: initial !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
+  width: auto !important;
+}
+
 /** Story level */
 amp-story {
   height: 100% !important;
@@ -93,6 +107,11 @@ amp-story[standalone]:fullscreen {
   pointer-events: none !important;
 }
 
+.i-amphtml-story-ui-left,
+.i-amphtml-story-ui-right {
+  pointer-events: auto !important;
+}
+
 .i-amphtml-story-bookend-active > .i-amphtml-story-system-layer {
   opacity: 0.3 !important;
 }
@@ -100,7 +119,6 @@ amp-story[standalone]:fullscreen {
 .i-amphtml-story-ui-right {
   float: right !important;
   margin: 0 8px !important;
-  pointer-events: auto !important;
 }
 
 .i-amphtml-story-button {
@@ -439,6 +457,10 @@ amp-story-grid-layer * {
   display: none !important;
 }
 
+.i-amphtml-story-bookend-article-image > img {
+  object-fit: cover;
+}
+
 .i-amphtml-story-bookend-replay-image {
   background-position: center center !important;
   background-size: cover !important;
@@ -558,6 +580,7 @@ amp-story-grid-layer * {
   display: block !important;
   text-transform: capitalize !important;
   font-family: 'Roboto', sans-serif !important;
+  color: #fff !important;
   font-weight: 400 !important;
   line-height: 10px !important;
   font-size: 10px !important;
@@ -918,13 +941,13 @@ amp-story[standalone].i-amphtml-story-landscape .i-amphtml-story-no-rotation-ove
   display: flex !important;
 }
 
-.i-amphtml-story-no-rotation-overlay,
-.i-amphtml-story-unsupported-browser-overlay {
+amp-story .i-amphtml-story-no-rotation-overlay,
+amp-story .i-amphtml-story-unsupported-browser-overlay {
   color: #fff!important;
 }
 
-.i-amphtml-rotate-icon,
-.i-amphtml-gear-icon {
+amp-story .i-amphtml-rotate-icon,
+amp-story .i-amphtml-gear-icon {
   background-repeat: no-repeat!important;
   background-position: center center!important;
   border-radius: 50%!important;
@@ -935,12 +958,17 @@ amp-story[standalone].i-amphtml-story-landscape .i-amphtml-story-no-rotation-ove
   margin: 16px auto!important;
 }
 
-.i-amphtml-rotate-icon {
+amp-story .i-amphtml-rotate-icon {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#000000"><path d="M0 0h24v24H0z" fill="none"/><path d="M16.48 2.52c3.27 1.55 5.61 4.72 5.97 8.48h1.5C23.44 4.84 18.29 0 12 0l-.66.03 3.81 3.81 1.33-1.32zm-6.25-.77c-.59-.59-1.54-.59-2.12 0L1.75 8.11c-.59.59-.59 1.54 0 2.12l12.02 12.02c.59.59 1.54.59 2.12 0l6.36-6.36c.59-.59.59-1.54 0-2.12L10.23 1.75zm4.6 19.44L2.81 9.17l6.36-6.36 12.02 12.02-6.36 6.36zm-7.31.29C4.25 19.94 1.91 16.76 1.55 13H.05C.56 19.16 5.71 24 12 24l.66-.03-3.81-3.81-1.33 1.32z"/></svg>')!important;
 }
 
-.i-amphtml-gear-icon {
+amp-story .i-amphtml-gear-icon {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 20 20" fill="#000000"><path fill="none" d="M0 0h20v20H0V0z"/><path d="M15.95 10.78c.03-.25.05-.51.05-.78s-.02-.53-.06-.78l1.69-1.32c.15-.12.19-.34.1-.51l-1.6-2.77c-.1-.18-.31-.24-.49-.18l-1.99.8c-.42-.32-.86-.58-1.35-.78L12 2.34c-.03-.2-.2-.34-.4-.34H8.4c-.2 0-.36.14-.39.34l-.3 2.12c-.49.2-.94.47-1.35.78l-1.99-.8c-.18-.07-.39 0-.49.18l-1.6 2.77c-.1.18-.06.39.1.51l1.69 1.32c-.04.25-.07.52-.07.78s.02.53.06.78L2.37 12.1c-.15.12-.19.34-.1.51l1.6 2.77c.1.18.31.24.49.18l1.99-.8c.42.32.86.58 1.35.78l.3 2.12c.04.2.2.34.4.34h3.2c.2 0 .37-.14.39-.34l.3-2.12c.49-.2.94-.47 1.35-.78l1.99.8c.18.07.39 0 .49-.18l1.6-2.77c.1-.18.06-.39-.1-.51l-1.67-1.32zM10 13c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3z"/></svg>')!important;
+}
+
+amp-story .i-amphtml-story-overlay-text {
+  color: #fff !important;
+  font-weight: 700 !important;
 }
 
 .i-amphtml-story-button-container {

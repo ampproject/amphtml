@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {toggleExperiment} from '../../../../src/experiments';
-import {installLightboxManager} from '../amp-lightbox-viewer';
 import '../../../amp-carousel/0.1/amp-carousel';
+import {installLightboxManager} from '../amp-lightbox-gallery';
+import {toggleExperiment} from '../../../../src/experiments';
 
 
-describes.realWin('amp-lightbox-viewer', {
+describes.realWin('amp-lightbox-gallery', {
   amp: {
     amp: true,
-    extensions: ['amp-lightbox-viewer', 'amp-carousel'],
+    extensions: ['amp-lightbox-gallery', 'amp-carousel'],
   },
 }, env => {
   let win, doc;
@@ -37,14 +37,9 @@ describes.realWin('amp-lightbox-viewer', {
   });
 
   function getAmpLightboxViewer(autoLightbox) {
-    toggleExperiment(win, 'amp-lightbox-viewer', true);
-    if (autoLightbox) {
-      toggleExperiment(win, 'amp-lightbox-viewer-auto', true);
-    } else {
-      toggleExperiment(win, 'amp-lightbox-viewer-auto', false);
-    }
+    toggleExperiment(win, 'amp-lightbox-gallery', true);
     setUpDocument(doc, autoLightbox);
-    const viewer = doc.createElement('amp-lightbox-viewer');
+    const viewer = doc.createElement('amp-lightbox-gallery');
     viewer.setAttribute('layout', 'nodisplay');
     installLightboxManager(win);
     doc.body.appendChild(viewer);

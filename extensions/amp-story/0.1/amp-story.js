@@ -26,19 +26,25 @@
  */
 import './amp-story-grid-layer';
 import './amp-story-page';
+import {ActionTrust} from '../../../src/action-trust';
 import {AmpStoryAnalytics} from './analytics';
-import {AmpStoryVariableService} from './variable-service';
 import {AmpStoryBackground} from './background';
+import {AmpStoryHint} from './amp-story-hint';
+import {AmpStoryVariableService} from './variable-service';
 import {Bookend} from './bookend';
 import {CSS} from '../../../build/amp-story-0.1.css';
 import {EventType, dispatch} from './events';
+import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
-import {NavigationState} from './navigation-state';
-import {SystemLayer} from './system-layer';
 import {Layout} from '../../../src/layout';
+import {MediaPool, MediaType} from './media-pool';
+import {NavigationState} from './navigation-state';
+import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
-import {relatedArticlesFromJson} from './related-articles';
 import {ShareWidget} from './share';
+import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
+import {SystemLayer} from './system-layer';
+import {TapNavigationDirection} from './page-advancement';
 import {
   closest,
   matches,
@@ -46,31 +52,25 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
-import {dev, user} from '../../../src/log';
-import {once} from '../../../src/utils/function';
-import {debounce} from '../../../src/utils/rate-limit';
-import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
-import {registerServiceBuilder} from '../../../src/service';
-import {upgradeBackgroundAudio} from './audio';
 import {
   computedStyle,
-  setStyle,
-  setImportantStyles,
   resetStyles,
+  setImportantStyles,
+  setStyle,
 } from '../../../src/style';
+import {debounce} from '../../../src/utils/rate-limit';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {findIndex} from '../../../src/utils/array';
-import {ActionTrust} from '../../../src/action-trust';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrl} from '../../../src/url';
-import {stringHash32} from '../../../src/string';
-import {AmpStoryHint} from './amp-story-hint';
-import {Gestures} from '../../../src/gesture';
-import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
-import {dict} from '../../../src/utils/object';
+import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
+import {once} from '../../../src/utils/function';
+import {registerServiceBuilder} from '../../../src/service';
+import {relatedArticlesFromJson} from './related-articles';
 import {renderSimpleTemplate} from './simple-template';
-import {MediaPool, MediaType} from './media-pool';
-import {PaginationButtons} from './pagination-buttons';
-import {TapNavigationDirection} from './page-advancement';
+import {stringHash32} from '../../../src/string';
+import {upgradeBackgroundAudio} from './audio';
 
 
 /** @private @const {string} */
@@ -128,7 +128,9 @@ const LANDSCAPE_OVERLAY_CLASS = 'i-amphtml-story-landscape';
 const LANDSCAPE_ORIENTATION_WARNING = [
   {
     tag: 'div',
-    attrs: dict({'class': 'i-amphtml-story-no-rotation-overlay'}),
+    attrs: dict({
+      'class': 'i-amphtml-story-no-rotation-overlay ' +
+          'i-amphtml-story-system-reset'}),
     children: [
       {
         tag: 'div',
@@ -140,6 +142,7 @@ const LANDSCAPE_ORIENTATION_WARNING = [
           },
           {
             tag: 'div',
+            attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
             text: 'The page is best viewed in portrait mode',
           },
         ],
@@ -164,6 +167,7 @@ const UNSUPPORTED_BROWSER_WARNING = [
           },
           {
             tag: 'div',
+            attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
             text: 'We\'re sorry, it looks like your browser doesn\'t support ' +
                 'this experience',
           },
@@ -455,6 +459,8 @@ export class AmpStory extends AMP.BaseElement {
       'overflow': 'hidden',
     });
 
+    this.getViewport().resetTouchZoom();
+    this.getViewport().disableTouchZoom();
     this.maybeLockScreenOrientation_();
   }
 
