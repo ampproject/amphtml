@@ -282,6 +282,11 @@ export class SafeframeHostApi {
     };
   }
 
+  /**
+   * The intersection change entries that we get are for the amp-ad
+   * element, not the safeframe. This method gets the correct for
+   * the difference between the safeframe and the amp-ad element.
+   */
   getInitialCorrection(ampAdRect) {
     const sfWidth = this.baseInstance_.creativeSize_.width;
     const sfHeight = this.baseInstance_.creativeSize_.height;
@@ -401,7 +406,6 @@ export class SafeframeHostApi {
       default:
         break;
     }
-    return;
   }
 
   /**
@@ -414,6 +418,15 @@ export class SafeframeHostApi {
   }
 
   /**
+   * @param {!number} height
+   * @param {!number} width
+   */
+  resizeIframe(height, width) {
+    this.iframe_.style.height = height + 'px';
+    this.iframe_.style.width = width + 'px';
+  }
+
+  /**
    * Resizes the safeframe, and potentially the containing amp-ad element.
    * Then sends a response message to the Safeframe creative.
    * @param {number} height In pixels.
@@ -422,10 +435,6 @@ export class SafeframeHostApi {
    * @param {boolean} optIsCollapse Whether this is a collapse attempt.
    */
   handleSizeChange(height, width, message, optIsCollapse) {
-    const resizeIframe = () => {
-      this.iframe_.style.height = height + 'px';
-      this.iframe_.style.width = width + 'px';
-    };
     const sendResizeResponse = success => {
       this.sendMessage_(JSON.stringify({
         uid: this.uid,
@@ -443,9 +452,14 @@ export class SafeframeHostApi {
     if (!optIsCollapse &&
         width <= this.baseInstance_.creativeSize_.width &&
         height <= this.baseInstance_.creativeSize_.height) {
-      resizeIframe();
+      this.resizeIframe(height, width);
       sendResizeResponse(true);
     } else {
+      this.resizeAmpAdAndSafeframe(height, width, sendResizeResponse, optIsCollapse);
+    }
+  }
+
+  resizeAmpAdAndSafeframe(height, width, sendResizeResponse, optIsCollapse) {
       this.baseInstance_.attemptChangeSize(height, width).then(() => {
         const success = !!this.baseInstance_.element.style.height.match(height)
               && !!this.baseInstance_.element.style.width.match(width);
@@ -454,7 +468,7 @@ export class SafeframeHostApi {
         // be resized, but this is a collapse request, then only collapse
         // the safeframe.
         if (success || optIsCollapse) {
-          resizeIframe();
+          this.resizeIframe(height, width);
           this.baseInstance_.element.getResources().resources_.forEach(resource => {
             if (resource.element == this.baseInstance_.element) {
               // Need to force a measure event, as measure won't happen immediately
@@ -475,7 +489,6 @@ export class SafeframeHostApi {
         }
         sendResizeResponse(success);
       }).catch(() => {});
-    }
   }
 
   /**
@@ -506,11 +519,15 @@ export class SafeframeHostApi {
     let expandHeight = Math.floor(payload.expand_b +
                                  payload.expand_t);
     let expandWidth = Math.floor(payload.expand_r +
-                                  payload.expand_l);
-    if (expandWidth != this.baseInstance_.element.style.width.split('px')[0]) {
+                                 payload.expand_l);
+    // We assume that a fair amount of usage of this API will try to pass the final
+    // size of the iframe that is desired, instead of the correct usage which is
+    // specify how much to expand by. We try to protect against this, by detecting
+    // if the requested expansion size matches the size of the amp-ad element, and
+    // if so we assume that the desired effect was to resize to fill the element.
+    if (expandWidth != this.baseInstance_.element.style.width.split('px')[0] ||
+       expandHeight != this.baseInstance_.element.style.height.split('px')[0]) {
       expandWidth += Number(this.iframe_.width);
-    }
-    if (expandHeight != this.baseInstance_.element.style.height.split('px')[0]) {
       expandHeight += Number(this.iframe_.height);
     }
     this.handleSizeChange(expandHeight,
