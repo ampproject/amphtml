@@ -171,7 +171,7 @@ export class SafeframeHostApi {
     // TODO: Some of these options are probably not right.
     attributes['uid'] = this.uid;
     attributes['hostPeerName'] = this.win_.location.origin;
-    attributes['initialGeometry'] = this.getCurrentGeometry(true);
+    attributes['initialGeometry'] = this.getCurrentGeometry();
     attributes['permissions'] = JSON.stringify(
         dict({
           'expandByOverlay': false,
@@ -193,10 +193,12 @@ export class SafeframeHostApi {
     return attributes;
   }
 
-  // TODO: Need to fix so it is the geom of the safeframe, not the amp-ad
-  getCurrentGeometry(isFirstRender) {
+  /**
+   * @return {!string}
+   */
+  getCurrentGeometry() {
     return this.formatGeom_(
-        this.baseInstance_.element.getIntersectionChangeEntry(), isFirstRender);
+        this.baseInstance_.element.getIntersectionChangeEntry());
   }
 
   /**
@@ -310,7 +312,7 @@ export class SafeframeHostApi {
    * @return {string} Safeframe formatted changes.
    * @private
    */
-  formatGeom_(changes, isFirstRender) {
+  formatGeom_(changes) {
     const percInView = (a1, b1, a2, b2) => {
       const lengthInView = (b2 >= b1) ? b1 - a2 : b2;
       const percInView = lengthInView / (b2 - a2);
@@ -322,7 +324,7 @@ export class SafeframeHostApi {
         return percInView;
       }
     };
-    const corrections = isFirstRender ?
+    const corrections = !this.iframe_ ?
             this.getInitialCorrection(changes.boundingClientRect) :
             this.getFrameCorrections();
       changes.boundingClientRect.right += corrections['dR'];
@@ -453,7 +455,7 @@ export class SafeframeHostApi {
         width <= this.baseInstance_.creativeSize_.width &&
         height <= this.baseInstance_.creativeSize_.height) {
       this.resizeIframe(height, width);
-      sendResizeResponse(true);
+      sendResizeResponse(/** SUCCESS */ true);
     } else {
       this.resizeAmpAdAndSafeframe(height, width, sendResizeResponse, optIsCollapse);
     }
