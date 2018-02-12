@@ -81,10 +81,10 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       for (let i = 0; i < 1000; i++) {
         url += '&23456=8901234567';
       }
-      expect(url.length > 16384).to.be.true;
+      expect(url.length).to.be.above(16384);
       url = truncUrl_(url);
-      expect(url.length <= 16384).to.be.true;
-      expect(url.indexOf('&__trunc__=1') > 0).to.be.true;
+      expect(url.length).to.be.at.most(16384);
+      expect(url).to.contain('&__trunc__=1');
     });
   });
 

@@ -585,7 +585,7 @@ describe('Google A4A utils', () => {
         expect(result.pucrd).to.equal('');
         expect(result.freshLifetimeSecs).to.equal(3600);
         expect(result.validLifetimeSecs).to.equal(86400);
-        expect(result.fetchTimeMs >= 0).to.be.true;
+        expect(result.fetchTimeMs).to.be.at.least(0);
       });
     });
 
@@ -603,7 +603,7 @@ describe('Google A4A utils', () => {
         expect(result.pucrd).to.equal('some_pucrd');
         expect(result.freshLifetimeSecs).to.equal(1234);
         expect(result.validLifetimeSecs).to.equal(5678);
-        expect(result.fetchTimeMs >= 0).to.be.true;
+        expect(result.fetchTimeMs).to.be.at.least(0);
       });
     });
 
@@ -616,7 +616,7 @@ describe('Google A4A utils', () => {
         expect(result.pucrd).to.equal('');
         expect(result.freshLifetimeSecs).to.equal(3600);
         expect(result.validLifetimeSecs).to.equal(86400);
-        expect(result.fetchTimeMs >= 0).to.be.true;
+        expect(result.fetchTimeMs).to.be.at.least(0);
       });
     });
 
@@ -628,7 +628,7 @@ describe('Google A4A utils', () => {
         expect(result.token).to.not.be.ok;
         expect(result.jar).to.not.be.ok;
         expect(result.pucrd).to.not.be.ok;
-        expect(result.fetchTimeMs >= 0).to.be.true;
+        expect(result.fetchTimeMs).to.be.at.least(0);
       });
     });
 

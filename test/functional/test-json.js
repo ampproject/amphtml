@@ -109,7 +109,7 @@ describe('json', () => {
       const original = {};
       const copy = recreateNonProtoObject(original);
       expect(copy).to.deep.equal(original);
-      expect(copy === original).to.be.false;
+      assert(copy !== original);
       expect(copy.__proto__).to.be.undefined;
     });
 
@@ -117,7 +117,7 @@ describe('json', () => {
       const original = {str: 'A', num: 1, bool: true, val: null};
       const copy = recreateNonProtoObject(original);
       expect(copy).to.deep.equal(original);
-      expect(copy === original).to.be.false;
+      assert(copy !== original);
       expect(copy.__proto__).to.be.undefined;
       expect(copy.val).to.be.null;
     });
@@ -126,10 +126,10 @@ describe('json', () => {
       const original = {child: {str: 'A', num: 1, bool: true, val: null}};
       const copy = recreateNonProtoObject(original);
       expect(copy).to.deep.equal(original);
-      expect(copy === original).to.be.false;
+      assert(copy !== original);
       expect(copy.__proto__).to.be.undefined;
       expect(copy.child).to.deep.equal(original.child);
-      expect(copy.child === original.child).to.be.false;
+      assert(copy.child !== original.child);
       expect(copy.child.__proto__).to.be.undefined;
     });
   });

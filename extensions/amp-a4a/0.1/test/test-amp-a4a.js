@@ -190,7 +190,7 @@ describe('amp-a4a', () => {
     expect(match).to.be.ok;
     const contentLength = Number(match[2]);
     const rest = match[3];
-    expect(rest.length > contentLength).to.be.true;
+    expect(rest.length).to.be.above(contentLength);
     const data = JSON.parse(rest.substr(contentLength));
     expect(data).to.be.ok;
     verifyContext(data._context);
