@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {Entitlement} from '../entitlement';
+import {Entitlement, Entitlements} from '../entitlements';
+
 import {EntitlementStore} from '../entitlement-store';
 
 describe('entitlements', () => {
@@ -25,16 +26,39 @@ describe('entitlements', () => {
     entitlementStore = new EntitlementStore(serviceIds);
   });
 
-  describe('it should instantiate with the service ids', () => {
+  it('should instantiate with the service ids', () => {
     expect(entitlementStore.serviceIds_).to.be.equal(serviceIds);
   });
 
-  describe('it should call all onChange callbacks on every resolve', () => {
+  it('should call all onChange callbacks on every resolve', () => {
     const cb = sandbox.spy();
     entitlementStore.onChange(cb);
     entitlementStore.resolveEntitlement('service2',
         new Entitlement('service2', ['product1'], ''));
     expect(cb).to.be.calledOnce;
+  });
+
+  it('should resolve `firstResolvedPromise_` on positive entitlement', done => {
+    const entitlementForService1 =
+      new Entitlement(serviceIds[0], ['product1'], '');
+    const entitlementForService2 =
+      new Entitlement(serviceIds[1], ['product3'], '');
+    const currentProduct = 'product1';
+    const entitlementsForService1 = new Entitlements(
+        serviceIds[0], '', [entitlementForService1], currentProduct);
+    const entitlementsForService2 = new Entitlements(
+        serviceIds[1], '', [entitlementForService2], currentProduct);
+    entitlementStore.getFirstResolvedSubscription()
+        .then(entitlements => {
+          if (entitlements.json().service
+              === entitlementsForService1.json().service) {
+            done();
+          } else {
+            throw new Error('Incorrect entitlement resolved');
+          }
+        });
+    entitlementStore.resolveEntitlement(serviceIds[1], entitlementsForService2);
+    entitlementStore.resolveEntitlement(serviceIds[0], entitlementsForService1);
   });
 });
 

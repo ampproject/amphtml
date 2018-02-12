@@ -13,6 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Observable} from '../../../src/observable';
+
+/** @typedef {{serviceId: string, entitlements: ./entitlements.Entitlements}} */
+export let EntitlementChangeEventDef;
 
 export class EntitlementStore {
   /**
@@ -24,40 +28,41 @@ export class EntitlementStore {
     /** @private @const {!Array<string>} */
     this.serviceIds_ = expectedServiceIds;
 
-    /** @private @typedef {{serviceId: string, entitlements: ./entitlements.Entitlements}} */
+    /** @private @const Object<serviceId: string, entitlements: ./entitlements.Entitlements> */
     this.entitlements_ = {};
 
-    /** @private @const {!Array<function(string, ./entitlements.Entitlements)>} */
-    this.onChangeCallbacks_ = [];
+    /** @private @const {Observable<!EntitlementChangeEventDef>} */
+    this.onChangeCallbacks_ = new Observable();
+
+    /** @private {?Promise<./entitlements.Entitlements>} */
+    this.firstResolvedPromise_ = null;
 
     /** @private {?Promise<string>} */
-    this.firstResolvedPromise_ = null;
+    this.allResolvedPromise_ = null;
   }
 
   /**
    * This registers a callback which is called whenever a service id is resolved with an entitlement.
-   * @param {function(string, ./entitlements.Entitlements)} callback
+   * @param {function(!EntitlementChangeEventDef):void} callback
    */
   onChange(callback) {
-    this.onChangeCallbacks_.push(callback);
+    this.onChangeCallbacks_.add(callback);
   }
 
   /**
    * This resolves the entitlement to a serviceId
    * @param {string} serviceId
-   * @param {./entitlements.Entitlements} entitlements
+   * @param {!./entitlements.Entitlements} entitlements
    */
   resolveEntitlement(serviceId, entitlements) {
     this.entitlements_[serviceId] = entitlements;
 
     // Call all onChange callbacks.
-    this.onChangeCallbacks_.forEach(callback => {
-      callback(serviceId, entitlements);
-    });
+    this.onChangeCallbacks_.fire({serviceId, entitlements});
   }
 
   /**
-   * @returns {!Promise<string>}
+   * @returns {!Promise<./entitlements.Entitlements>}
    */
   getFirstResolvedSubscription() {
     if (this.firstResolvedPromise_ !== null) {
@@ -65,14 +70,21 @@ export class EntitlementStore {
     }
 
     this.firstResolvedPromise_ = new Promise(resolve => {
-      this.onChange((serviceId, entitlements) => {
+      this.onChange(({entitlements}) => {
         if (entitlements.enablesThis()) {
-          resolve(serviceId);
+          resolve(entitlements);
         }
       });
     });
     return this.firstResolvedPromise_;
-
   }
-}
 
+  /**
+   * Returns entitlements when all services are done fetching them.
+   * @returns {!Promise<./entitlements.Entitlements>}
+   */
+  getAllPlatformsEntitlement() {
+    // TODO(@prateekbh): implement this.
+  }
+
+}
