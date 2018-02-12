@@ -241,7 +241,7 @@ export class SafeframeHostApi {
    */
   setupGeom_() {
     this.IntersectionObserver_ = new IntersectionObserver(
-        this.baseInstance_, this.iframe_, false, this);
+        this.baseInstance_, this.iframe_, false, this, 1000);
     this.IntersectionObserver_.startSendingIntersectionChanges();
   }
 
@@ -455,6 +455,15 @@ export class SafeframeHostApi {
         // the safeframe.
         if (success || optIsCollapse) {
           resizeIframe();
+          this.baseInstance_.element.getResources().resources_.forEach(resource => {
+            if (resource.element == this.baseInstance_.element) {
+              // Need to force a measure event, as measure won't happen immediately
+              // if the element was above the viewport when resize occured, and
+              // without a measure, we'll send the wrong size for the creative
+              // on the geometry update message.
+              resource.measure();
+            }
+          });
         } else {
           // attemptChangeSize automatically registers a pendingChangeSize if
           // the initial attempt failed. We do not want to do that, so clear it.

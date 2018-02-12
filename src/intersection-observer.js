@@ -121,8 +121,10 @@ export class IntersectionObserver {
    * @param {?boolean} opt_is3p Set to `true` when the iframe is 3'rd party.
    * @param {SimplePostMessageApiDef=} opt_MessageApi Alternate messaging API
    *   to use. If not specified, defaults to using SubscriptionAPI.
+   * @param {number=} opt_updatePeriod Optional period of how frequently to
+   *   send update messages.
    */
-  constructor(baseElement, iframe, opt_is3p, opt_MessageApi) {
+  constructor(baseElement, iframe, opt_is3p, opt_MessageApi, opt_updatePeriod) {
     /** @private @const {!AMP.BaseElement} */
     this.baseElement_ = baseElement;
     /** @private @const {!./service/timer-impl.Timer} */
@@ -156,6 +158,9 @@ export class IntersectionObserver {
 
     /** @private {?Function} */
     this.unlistenViewportChanges_ = null;
+
+    /** @private {!number} */
+    this.updatePeriod_ = opt_updatePeriod || 100;
   }
 
   fire() {
@@ -241,7 +246,7 @@ export class IntersectionObserver {
       // Send one immediately, …
       this.flush_();
       // but only send a maximum of 10 postMessages per second.
-      this.flushTimeout_ = this.timer_.delay(this.boundFlush_, 100);
+      this.flushTimeout_ = this.timer_.delay(this.boundFlush_, this.updatePeriod_);
     }
   }
 
