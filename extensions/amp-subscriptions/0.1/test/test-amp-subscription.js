@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {Entitlement, Entitlements} from '../entitlements';
-
+import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {SubscriptionService} from '../amp-subscriptions';
 
 const NOOP = () => {};
@@ -39,17 +38,11 @@ describe('amp-subscriptions', {}, env => {
     expect(initializeStub).to.be.called.once;
   });
 
-  it('should resolve entitlements when registering service', () => {
+  it('should add subscription platform while registering it', () => {
     const serviceID = 'dummy service';
-    const resolveStub = sandbox.stub(subscriptionService.entitlementStore_,
-        'resolveEntitlement');
-    const entitlements = new Entitlements(
-        serviceID,
-        '',
-        [new Entitlement(serviceID, ['product'], '')],
-        'product'
-    );
-    subscriptionService.registerService(serviceID, entitlements);
-    expect(resolveStub).to.be.calledOnce;
+    const subsPlatform = new LocalSubscriptionPlatform(ampdoc, {});
+    subscriptionService.registerService(serviceID, subsPlatform);
+    expect(subscriptionService.subscriptionPlatforms_.includes(subsPlatform))
+        .to.be.true;
   });
 });

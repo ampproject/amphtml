@@ -36,4 +36,3 @@ describe('amp-subscriptions', {}, env => {
     expect(initializeStub).to.be.called.once;
   });
 });
-

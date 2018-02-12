@@ -17,6 +17,7 @@
 import {Entitlement, Entitlements} from './entitlements';
 
 import {Services} from '../../../src/services';
+import {user} from '../../../src/log';
 
 /**
  * This implements the methods to interact with various subscription platforms.
@@ -46,22 +47,24 @@ export class LocalSubscriptionPlatform {
    * @return {!Promise<!Entitlements>}
    */
   getEntitlements() {
+    user().assert(this.serviceConfig_['paywallUrl'],
+        'service config does not have paywall Url');
     return this.xhr_
         .fetchJson(this.serviceConfig_['paywallUrl'])
         .then(res => res.json())
-        .then(json => {
-          const entitlements = json.entitlements.map(entitlement => {
+        .then(entitlementJson => {
+          const entitlements = entitlementJson.entitlements.map(entitlement => {
             return new Entitlement(
-                this.serviceConfig_['serviceId'],
-                entitlement.products,
+                entitlement['source'] || this.serviceConfig_['serviceId'],
+                entitlement['products'],
                 ''
             );
           });
           return new Entitlements(
               this.serviceConfig_['serviceId'],
-              JSON.stringify(json),
+              JSON.stringify(entitlementJson),
               entitlements,
-              entitlements.products
+              'product1' // TODO(@prateekbh): read this from pageConfig
           );
         });
   }

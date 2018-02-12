@@ -73,10 +73,13 @@ export class SubscriptionService {
    * This method registers an auto initialized subcription platform with this service.
    *
    * @param {string} serviceId
-   * @param {!./entitlements.Entitlements} entitlements
+   * @param {!SubscriptionPlatform} subscriptionPlatform
    */
-  registerService(serviceId, entitlements) {
-    this.entitlementStore_.resolveEntitlement(serviceId, entitlements);
+  registerService(serviceId, subscriptionPlatform) {
+    this.subscriptionPlatforms_.push(subscriptionPlatform);
+
+    subscriptionPlatform.getEntitlements()
+        .then(() => this.processEntitlement_());
   }
 
   /**
