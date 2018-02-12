@@ -14,7 +14,30 @@
  * limitations under the License.
  */
 
-import {findInArray} from '../../../src/utils/array';
+// TODO(@prateekbh): Remove this function from here after linking this file from subscription repo.
+/**
+ * Implements `Array.find()` method that's not yet available in all browsers.
+ *
+ * @param {?Array<T>} array
+ * @param {function(T, number, !Array<T>):boolean} predicate
+ * @return {?T}
+ * @template T
+ */
+export function findInArray(array, predicate) {
+  if (!array) {
+    return null;
+  }
+  const len = array.length || 0;
+  if (len > 0) {
+    for (let i = 0; i < len; i++) {
+      const other = array[i];
+      if (predicate(other, i, array)) {
+        return other;
+      }
+    }
+  }
+  return null;
+}
 
 /**
  * The holder of the entitlements for a service.
