@@ -760,7 +760,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             (tryParseJson(
                 this.element.getAttribute('json')) || {})['targeting']),
       ADCID: opt_timeout => getOrCreateAdCid(
-          this.getAmpDoc(), 'AMP_ECID_GOOGLE', '_ga', opt_timeout),
+          this.getAmpDoc(), 'AMP_ECID_GOOGLE', '_ga', parseInt(opt_timeout, 10)),
       ATTR: name => {
         if (!whitelist[name.toLowerCase()]) {
           dev().warn('TAG', `Invalid attribute ${name}`);

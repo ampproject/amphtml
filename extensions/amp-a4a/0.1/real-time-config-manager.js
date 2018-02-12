@@ -157,8 +157,11 @@ function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
     if (url.length > MAX_URL_LENGTH) {
       url = truncUrl_(url);
     }
-    return sendRtcCallout_(
-        url, rtcStartTime, win, timeoutMillis - timePenalty, opt_vendor || url);
+    timeoutMillis -= timePenalty;
+    if (timeoutMillis > 0) {
+      return sendRtcCallout_(
+          url, rtcStartTime, win, timeoutMillis, opt_vendor || url);
+    }
   };
 
   if (macros && Object.keys(macros).length) {
