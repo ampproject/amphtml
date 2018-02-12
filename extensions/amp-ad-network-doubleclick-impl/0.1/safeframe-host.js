@@ -269,29 +269,23 @@ export class SafeframeHostApi {
   /**
    * The IntersectionObserver class is monitoring the amp-ad element,
    * not the Safeframe. The Safeframe is not necessarily the exact
-   * same size as the amp-ad element, so calculate the deltas between
-   * the top, bottom, left, and right sides of the amp-ad and the
-   * safeframe.
-   * @return {Object} Offsets for iframe to get correct intersections.
+   * same size as the amp-ad element, so calculate the width and height
+   * correction between the amp-ad element and the safeframe iframe, and then
+   * modify the change entry to be correct.
+   * @param {!Object} changes
+   * @return {Object} Corrected intersection change entry.
    */
-  getFrameCorrections() {
-    const iframeRect = this.iframe_ ?
-          this.iframe_.getBoundingClientRect() :
+  correctChanges(changes) {
+    const iframeRect = this.iframe_ ? this.iframe_.getBoundingClientRect() :
           this.baseInstance_.creativeSize_;
     const ampAdRect = this.baseInstance_.element.getBoundingClientRect();
-    const sfWidth = iframeRect.width;
-    const sfHeight = iframeRect.height;
-    const ampAdWidth = ampAdRect.width;
-    const ampAdHeight = ampAdRect.height;
-    const widthCorrection = (ampAdWidth - sfWidth)/2;
-    const heightCorrection = (ampAdHeight - sfHeight)/2;
-    return {
-      dT: heightCorrection,
-      dL: widthCorrection,
-      dB: 0 - heightCorrection,
-      dR: 0 - widthCorrection,
-    };
-
+    const widthCorrection = (ampAdRect.width - iframeRect.width)/2;
+    const heightCorrection = (ampAdRect.height - iframeRect.height)/2;
+    changes.boundingClientRect.right -= widthCorrection;
+    changes.boundingClientRect.top += heightCorrection;
+    changes.boundingClientRect.bottom -= heightCorrection;
+    changes.boundingClientRect.left += widthCorrection;
+    return changes;
   }
 
   /**
@@ -314,21 +308,8 @@ export class SafeframeHostApi {
         return percInView;
       }
     };
-    const corrections = this.getFrameCorrections();
-    changes.boundingClientRect.right += corrections['dR'];
-    changes.boundingClientRect.top += corrections['dT'];
-    changes.boundingClientRect.bottom += corrections['dB'];
-    changes.boundingClientRect.left += corrections['dL'];
-    const frameHeight = changes.boundingClientRect.bottom -
-          changes.boundingClientRect.top;
-    const frameWidth = changes.boundingClientRect.right -
-          changes.boundingClientRect.left;
-    const viewportHeight = changes.rootBounds.bottom -
-          changes.rootBounds.top;
-    const viewportWidth = changes.rootBounds.right -
-          changes.rootBounds.left;
-    const expandWidth = (viewportWidth - frameWidth) / 2;
-    const expandHeight = (viewportHeight - frameHeight) / 2;
+    changes = this.correctChanges(changes);
+    const expandBounds = this.getExpandBounds(changes);
     this.currentGeometry_ = {
       'windowCoords_t': changes.rootBounds.top,
       'windowCoords_r': changes.rootBounds.right,
@@ -339,10 +320,10 @@ export class SafeframeHostApi {
       'frameCoords_b': changes.boundingClientRect.bottom,
       'frameCoords_l': changes.boundingClientRect.left,
       'styleZIndex': this.baseInstance_.element.style.zIndex,
-      'allowedExpansion_t': expandHeight,
-      'allowedExpansion_r': expandWidth,
-      'allowedExpansion_b': expandHeight,
-      'allowedExpansion_l': expandWidth,
+      'allowedExpansion_t': expandBounds.height,
+      'allowedExpansion_r': expandBounds.width,
+      'allowedExpansion_b': expandBounds.height,
+      'allowedExpansion_l': expandBounds.width,
       'yInView': percInView(changes.rootBounds.top,
           changes.rootBounds.bottom,
           changes.boundingClientRect.top,
@@ -353,6 +334,21 @@ export class SafeframeHostApi {
           changes.boundingClientRect.right),
     };
     return JSON.stringify(this.currentGeometry_);
+  }
+
+  getExpandBounds(changes) {
+    const frameHeight = changes.boundingClientRect.bottom -
+          changes.boundingClientRect.top;
+    const frameWidth = changes.boundingClientRect.right -
+          changes.boundingClientRect.left;
+    const viewportHeight = changes.rootBounds.bottom -
+          changes.rootBounds.top;
+    const viewportWidth = changes.rootBounds.right -
+          changes.rootBounds.left;
+    return {
+      width: (viewportWidth - frameWidth) / 2,
+      height: (viewportHeight - frameHeight) / 2,
+    };
   }
 
   /**
