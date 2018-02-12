@@ -781,6 +781,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  videonow: {
+    renderStartImplemented: true,
+  },
+
   viralize: {
     renderStartImplemented: true,
   },
