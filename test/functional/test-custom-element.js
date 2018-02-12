@@ -187,7 +187,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
     it('StubElement - createdCallback', () => {
       const element = new StubElementClass();
-      const build = sandbox.stub(element, 'build');
+      sandbox.stub(element, 'build');
 
       expect(element.isBuilt()).to.equal(false);
       expect(element.hasAttributes()).to.equal(false);
@@ -204,7 +204,9 @@ describes.realWin('CustomElement', {amp: true}, env => {
       expect(element.everAttached).to.equal(true);
       expect(testElementCreatedCallback).to.have.not.been.called;
       expect(element.isUpgraded()).to.equal(false);
-      // TODO(jeffkaufman, #13422): this test was silently failing
+      // TODO(jeffkaufman, #13422): this test was silently failing.  `build` was
+      // the return value from `sandbox.stub(element, 'build')`.
+      //
       // expect(build.calledOnce).to.equal(true);
     });
 
