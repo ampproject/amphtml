@@ -16,6 +16,7 @@
 
 import {NotificationPermission, StorageKeys} from './vars';
 import {WindowMessenger} from './window-messenger';
+import {escapeCssSelectorIdent} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
 import {parseQueryString, parseUrl, tryDecodeUriComponent} from '../../../src/url.js';
 
@@ -176,7 +177,9 @@ export class AmpWebPushPermissionDialog {
 
     // Show the section that matches the current permission
     const section = this.window_.document.querySelector(
-        `[permission=${this.window_.Notification.permission}]`
+        `[permission=${escapeCssSelectorIdent(
+            this.window_.Notification.permission
+        )}]`
     );
 
     if (section) {
