@@ -95,7 +95,7 @@ function receiveStandardMessage(data) {
         TAG, `Safeframe Host for sentinel ${payload['sentinel']} not found.`);
     return;
   }
-  safeframeHost.processMessage(payload, data['s']);
+  safeframeHost.processMessage(payload, data[MESSAGE_FIELDS.SERVICE]);
 }
 
 
@@ -244,6 +244,9 @@ export class SafeframeHostApi {
   setupGeom_() {
     this.IntersectionObserver_ = new IntersectionObserver(
         this.baseInstance_, this.iframe_, false, this, 1000);
+    // This will send a geometry update message, and then start sending
+    // them whenever geometry changes as detected by intersection
+    // observer. Make sure we always send this initial update message.
     this.IntersectionObserver_.startSendingIntersectionChanges();
   }
 
@@ -272,36 +275,23 @@ export class SafeframeHostApi {
    * @return {Object} Offsets for iframe to get correct intersections.
    */
   getFrameCorrections() {
-    const iframeRect = this.iframe_.getBoundingClientRect();
+    const iframeRect = this.iframe_ ?
+          this.iframe_.getBoundingClientRect() :
+          this.baseInstance_.creativeSize_;
     const ampAdRect = this.baseInstance_.element.getBoundingClientRect();
-    return {
-      dT: (iframeRect.y - ampAdRect.y),
-      dL: (iframeRect.x - ampAdRect.x),
-      dB: ((iframeRect.height + iframeRect.y) -
-           (ampAdRect.height + ampAdRect.y)),
-      dR: ((iframeRect.width + iframeRect.x) -
-           (ampAdRect.width + ampAdRect.x)),
-    };
-  }
-
-  /**
-   * The intersection change entries that we get are for the amp-ad
-   * element, not the safeframe. This method gets the correct for
-   * the difference between the safeframe and the amp-ad element.
-   */
-  getInitialCorrection(ampAdRect) {
-    const sfWidth = this.baseInstance_.creativeSize_.width;
-    const sfHeight = this.baseInstance_.creativeSize_.height;
-    const ampAdWidth = ampAdRect.right - ampAdRect.left;
-    const ampAdHeight = ampAdRect.bottom - ampAdRect.top;
+    const sfWidth = iframeRect.width;
+    const sfHeight = iframeRect.height;
+    const ampAdWidth = ampAdRect.width;
+    const ampAdHeight = ampAdRect.height;
     const widthCorrection = (ampAdWidth - sfWidth)/2;
     const heightCorrection = (ampAdHeight - sfHeight)/2;
     return {
       dT: heightCorrection,
-      dB: heightCorrection,
       dL: widthCorrection,
-      dR: widthCorrection,
+      dB: 0 - heightCorrection,
+      dR: 0 - widthCorrection,
     };
+
   }
 
   /**
@@ -324,13 +314,11 @@ export class SafeframeHostApi {
         return percInView;
       }
     };
-    const corrections = !this.iframe_ ?
-            this.getInitialCorrection(changes.boundingClientRect) :
-            this.getFrameCorrections();
-      changes.boundingClientRect.right += corrections['dR'];
-      changes.boundingClientRect.top += corrections['dT'];
-      changes.boundingClientRect.bottom += corrections['dB'];
-      changes.boundingClientRect.left += corrections['dL'];
+    const corrections = this.getFrameCorrections();
+    changes.boundingClientRect.right += corrections['dR'];
+    changes.boundingClientRect.top += corrections['dT'];
+    changes.boundingClientRect.bottom += corrections['dB'];
+    changes.boundingClientRect.left += corrections['dL'];
     const frameHeight = changes.boundingClientRect.bottom -
           changes.boundingClientRect.top;
     const frameWidth = changes.boundingClientRect.right -
