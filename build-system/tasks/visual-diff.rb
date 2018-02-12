@@ -29,8 +29,8 @@ require 'selenium/webdriver'
 
 ENV['PERCY_DEBUG'] = '0'
 ENV['WEBSERVER_QUIET'] = '--quiet'
-# CSS widths: iPhone: 375, Pixel: 411, Macbook Pro 15": 1440.
-DEFAULT_WIDTHS = [375, 411, 1440]
+# CSS widths: iPhone: 375, Pixel: 411, Desktop: 1400.
+DEFAULT_WIDTHS = [375, 411, 1400]
 HOST = 'localhost'
 PORT = '8000'
 WEBSERVER_TIMEOUT_SECS = 15
