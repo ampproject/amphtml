@@ -37,7 +37,7 @@ export class SubscriptionService {
     /** @private @const {!Array<!SubscriptionPlatform>} */
     this.subscriptionPlatforms_ = [];
 
-    /** @private @const {?EntitlementStore} */
+    /** @private {?EntitlementStore} */
     this.entitlementStore_ = null;
   }
 
