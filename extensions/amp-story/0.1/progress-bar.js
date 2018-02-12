@@ -152,8 +152,9 @@ export class ProgressBar {
     // JavaScript indices start at 0.
     const nthChildIndex = pageIndex + 1;
     const progressEl = scopedQuerySelector(this.getRoot(),
-        `.i-amphtml-story-page-progress-bar:nth-child(${nthChildIndex}) ` +
-        '.i-amphtml-story-page-progress-value');
+        `.i-amphtml-story-page-progress-bar:nth-child(${
+          nthChildIndex
+        }) .i-amphtml-story-page-progress-value`);
     this.vsync_.mutate(() => {
       let transition = 'none';
       if (withTransition) {

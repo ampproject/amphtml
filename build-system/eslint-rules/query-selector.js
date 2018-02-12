@@ -70,7 +70,16 @@ module.exports = function(context) {
       return;
     }
 
-    const selector = getSelector(node.arguments[0]);
+    if (callee.trailingComments) {
+      const ok = callee.trailingComments.some(comment => {
+        return comment.value === 'OK'
+      });
+      if (ok) {
+        return;
+      }
+    }
+
+    const selector = getSelector(node.arguments[1]);
 
     if (selectorNeedsScope(selector)) {
       return;
