@@ -23,8 +23,8 @@
 
 
 import {dev, user} from '../src/log';
+import {hasOwn, map} from '../src/utils/object';
 import {isArray} from '../src/types';
-import {map} from '../src/utils/object';
 import {rethrowAsync} from '../src/log';
 
 
@@ -188,7 +188,7 @@ export function computeInMasterFrame(global, taskId, work, cb) {
   const master = global.context.master;
   let tasks = master.__ampMasterTasks;
   if (!tasks) {
-    tasks = master.__ampMasterTasks = {};
+    tasks = master.__ampMasterTasks = map();
   }
   let cbs = tasks[taskId];
   if (!tasks[taskId]) {
@@ -272,22 +272,22 @@ function validateExactlyOne(data, alternativeFields) {
  */
 function validateAllowedFields(data, allowedFields) {
   const defaultAvailableFields = {
-    width: true,
-    height: true,
-    type: true,
-    referrer: true,
-    canonicalUrl: true,
-    pageViewId: true,
-    location: true,
-    mode: true,
-    consentNotificationId: true,
-    ampSlotIndex: true,
-    adHolderText: true,
-    loadingStrategy: true,
+    'width': true,
+    'height': true,
+    'type': true,
+    'referrer': true,
+    'canonicalUrl': true,
+    'pageViewId': true,
+    'location': true,
+    'mode': true,
+    'consentNotificationId': true,
+    'ampSlotIndex': true,
+    'adHolderText': true,
+    'loadingStrategy': true,
   };
 
   for (const field in data) {
-    if (!data.hasOwnProperty(field) || field in defaultAvailableFields) {
+    if (!hasOwn(data, field) || hasOwn(defaultAvailableFields, field)) {
       continue;
     }
     if (allowedFields.indexOf(field) < 0) {
@@ -300,7 +300,7 @@ function validateAllowedFields(data, allowedFields) {
 }
 
 /** @private {!Object<string, boolean>} */
-let experimentToggles = {};
+let experimentToggles = map();
 
 /**
  * Returns true if an experiment is enabled.
@@ -316,5 +316,5 @@ export function isExperimentOn(experimentId) {
  * @param {!Object<string, boolean>} toggles
  */
 export function setExperimentToggles(toggles) {
-  experimentToggles = toggles;
+  experimentToggles = map(toggles);
 }

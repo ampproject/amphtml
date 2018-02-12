@@ -16,6 +16,7 @@
 
 import {doubleclick} from '../ads/google/doubleclick';
 import {getSourceUrl} from '../src/url';
+import {hasOwn} from '../src/utils/object';
 import {loadScript, validateData, writeScript} from '../3p/3p';
 
 /* global rubicontag: false */
@@ -56,7 +57,7 @@ function fastLane(global, data) {
   function setFPD(type, data) {
     if (typeof data === 'object' && (type === 'V' || type === 'I')) {
       for (const key in data) {
-        if (data.hasOwnProperty(key)) {
+        if (hasOwn(data, key)) {
           if (type === 'V') {
             rubicontag.setFPV(key, data[key]);
           }

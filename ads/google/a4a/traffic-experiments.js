@@ -36,6 +36,7 @@ import {
 } from '../../../src/experiments';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
+import {hasOwn} from '../../../src/utils/object';
 import {parseQueryString} from '../../../src/url';
 
 /** @typedef {{
@@ -142,13 +143,13 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
 /**
  * @param {!Window} win
  * @param {!Element} element Ad tag Element.
- * @return {?string} experiment extracted from page url.
+ * @return {string} experiment extracted from page url.
  */
 export function extractUrlExperimentId(win, element) {
   const expParam = Services.viewerForDoc(element).getParam('exp') ||
     parseQueryString(win.location.search)['exp'];
   if (!expParam) {
-    return null;
+    return '';
   }
   // Allow for per type experiment control with Doubleclick key set for 'da'
   // and AdSense using 'aa'.  Fallback to 'a4a' if type specific is missing.
@@ -162,7 +163,7 @@ export function extractUrlExperimentId(win, element) {
   expKeys.forEach(key => arg = arg ||
     ((match = new RegExp(`(?:^|,)${key}:(-?\\d+)`).exec(expParam)) &&
       match[1]));
-  return arg || null;
+  return arg || '';
 }
 
 /**
@@ -214,7 +215,7 @@ function maybeSetExperimentFromUrl(win, element, experimentName,
     '6': sfgTreatmentId,
   };
   const arg = extractUrlExperimentId(win, element);
-  if (argMapping.hasOwnProperty(arg)) {
+  if (hasOwn(argMapping, arg)) {
     forceExperimentBranch(win, experimentName, argMapping[arg]);
     return true;
   } else {

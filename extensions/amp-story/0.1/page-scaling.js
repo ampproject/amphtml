@@ -448,7 +448,7 @@ class CssPropsZoomScalingService extends PageScalingService {
       this.rootEl_.style.setProperty('--i-amphtml-story-width', px(width));
       this.rootEl_.style.setProperty('--i-amphtml-story-height', px(height));
       this.rootEl_.style.setProperty('--i-amphtml-story-factor',
-          factor.toString());
+          String(factor));
     });
   }
 

@@ -15,6 +15,7 @@
  */
 
 import {dev} from '../../../src/log';
+import {hasOwn} from '../../../src/utils/object';
 import {parseUrl} from '../../../src/url';
 import {startsWith} from '../../../src/string';
 import {toWin} from '../../../src/types';
@@ -109,7 +110,7 @@ function createFormProxyConstr(win) {
           // Exclude on-events.
           startsWith(name, 'on') ||
           // Exclude properties that already been created.
-          win.Object.prototype.hasOwnProperty.call(FormProxyProto, name) ||
+          hasOwn(FormProxyProto, name) ||
           // Exclude some properties. Currently only used for testing.
           blacklistedProperties && blacklistedProperties.indexOf(name) != -1) {
         continue;

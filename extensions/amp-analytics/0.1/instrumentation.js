@@ -37,6 +37,7 @@ import {
   getServicePromiseForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service';
+import {hasOwn} from '../../../src/utils/object';
 
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
@@ -252,7 +253,7 @@ export class InstrumentationService {
       // Goes through each of the boundaries and fires an event if it has not
       // been fired so far and it should be.
       for (const b in bounds) {
-        if (!bounds.hasOwnProperty(b) || b > scrollPos || bounds[b]) {
+        if (!hasOwn(bounds, b) || b > scrollPos || bounds[b]) {
           continue;
         }
         bounds[b] = true;

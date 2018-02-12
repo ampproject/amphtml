@@ -24,6 +24,7 @@
 import {OriginExperiments} from './origin-experiments';
 import {Services} from './services';
 import {getCookie, setCookie} from './cookies';
+import {hasOwn} from './utils/object';
 import {parseQueryString} from './url';
 import {user} from './log';
 
@@ -391,8 +392,8 @@ export function randomlySelectUnsetExperiments(win, experiments) {
   for (const experimentName in experiments) {
     // Skip experimentName if it is not a key of experiments object or if it
     // has already been populated by some other property.
-    if (!experiments.hasOwnProperty(experimentName) ||
-        win.experimentBranches.hasOwnProperty(experimentName)) {
+    if (!hasOwn(experiments, experimentName) ||
+        hasOwn(win.experimentBranches, experimentName)) {
       continue;
     }
 

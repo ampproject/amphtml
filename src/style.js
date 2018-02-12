@@ -100,7 +100,7 @@ export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
 export function setImportantStyles(element, styles) {
   for (const k in styles) {
     element.style.setProperty(
-        getVendorJsPropertyName(styles, k), styles[k].toString(), 'important');
+        getVendorJsPropertyName(styles, k), String(styles[k]), 'important');
   }
 }
 

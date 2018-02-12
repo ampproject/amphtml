@@ -81,7 +81,7 @@ export function isShadowCssSupported() {
  * @return {boolean}
  */
 function isNative(func) {
-  return !!func && func.toString().indexOf('[native code]') != -1;
+  return !!func && String(func).indexOf('[native code]') != -1;
 }
 
 /**

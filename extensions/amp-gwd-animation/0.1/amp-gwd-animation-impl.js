@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {createCustomEvent} from '../../../src/event-helper';
+import {hasOwn} from '../../../src/utils/object';
 import {user} from '../../../src/log';
 
 /**
@@ -91,7 +92,7 @@ const LOG_ID = 'GWD';
  */
 function getCounter(receiver, counterName) {
   if (receiver.gwdGotoCounters &&
-      receiver.gwdGotoCounters.hasOwnProperty(counterName)) {
+      hasOwn(receiver.gwdGotoCounters, counterName)) {
     return receiver.gwdGotoCounters[counterName];
   }
   return 0;
@@ -109,7 +110,7 @@ function setCounter(receiver, counterName, counterValue) {
   if (!receiver.gwdGotoCounters) {
     receiver.gwdGotoCounters = {};
   }
-  if (!receiver.gwdGotoCounters.hasOwnProperty(counterName)) {
+  if (!hasOwn(receiver.gwdGotoCounters, counterName)) {
     receiver.gwdGotoCounters[counterName] = 0;
   }
   receiver.gwdGotoCounters[counterName] = counterValue;

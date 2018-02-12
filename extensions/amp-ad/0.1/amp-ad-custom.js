@@ -18,6 +18,7 @@ import {AmpAdUIHandler} from './amp-ad-ui';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {ancestorElementsByTag} from '../../../src/dom';
+import {hasOwn} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
 import {user} from '../../../src/log';
@@ -91,7 +92,7 @@ export class AmpAdCustom extends AMP.BaseElement {
       // We will get here when the data has been fetched from the server
       let templateData = data;
       if (this.slot_ !== null) {
-        templateData = data.hasOwnProperty(this.slot_) ? data[this.slot_] :
+        templateData = hasOwn(data, this.slot_) ? data[this.slot_] :
           null;
       }
       // Set UI state

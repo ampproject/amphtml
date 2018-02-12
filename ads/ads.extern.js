@@ -359,7 +359,6 @@ data.slot.replace;
 
 // medianet.js
 data.crid;
-data.hasOwnProperty;
 data.requrl;
 data.refurl;
 data.versionId;

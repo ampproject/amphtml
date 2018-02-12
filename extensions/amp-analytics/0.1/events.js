@@ -24,6 +24,7 @@ import {
 import {dev, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
+import {hasOwn} from '../../../src/utils/object';
 import {isEnumValue} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 
@@ -128,7 +129,7 @@ export function getTrackerKeyName(eventType) {
   if (!isReservedTriggerType(eventType)) {
     return 'custom';
   }
-  return TRACKER_TYPE.hasOwnProperty(eventType) ?
+  return hasOwn(TRACKER_TYPE, eventType) ?
     TRACKER_TYPE[eventType].name : eventType;
 }
 
@@ -139,8 +140,7 @@ export function getTrackerKeyName(eventType) {
 export function getTrackerTypesForParentType(parentType) {
   const filtered = {};
   Object.keys(TRACKER_TYPE).forEach(key => {
-    if (TRACKER_TYPE.hasOwnProperty(key) &&
-        TRACKER_TYPE[key].allowedFor.indexOf(parentType) != -1) {
+    if (TRACKER_TYPE[key].allowedFor.indexOf(parentType) != -1) {
       filtered[key] = TRACKER_TYPE[key].klass;
     }
   }, this);

@@ -393,8 +393,7 @@ export class BindExpression {
           return null;
         }
         // Ignore Closure's type constraint for `hasOwnProperty`.
-        if (Object.prototype.hasOwnProperty.call(
-            /** @type {Object} */ (target), member)) {
+        if (hasOwn(/** @type {Object} */ (target), member)) {
           return target[member];
         } else {
           this.memberAccessWarning_(target, member);
@@ -406,7 +405,7 @@ export class BindExpression {
 
       case AstNodeType.VARIABLE:
         const variable = value;
-        if (Object.prototype.hasOwnProperty.call(scope, variable)) {
+        if (hasOwn(scope, variable)) {
           return scope[variable];
         } else {
           user().warn(TAG, `${variable} is not defined; returning null.`);

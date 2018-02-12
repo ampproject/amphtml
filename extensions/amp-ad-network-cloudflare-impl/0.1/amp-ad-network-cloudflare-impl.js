@@ -92,8 +92,8 @@ export class AmpAdNetworkCloudflareImpl extends AmpA4A {
 
     // compute replacement values
     const values = {
-      slotWidth: (rect.width || 0).toString(),
-      slotHeight: (rect.height || 0).toString(),
+      slotWidth: String(rect.width || 0),
+      slotHeight: String(rect.height || 0),
     };
 
     // encode for safety

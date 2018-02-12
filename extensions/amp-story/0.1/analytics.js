@@ -59,7 +59,7 @@ export class AmpStoryAnalytics {
   onActivePageChange_(pageIndex, pageId) {
     if (!this.seenPagesIndices_[pageIndex]) {
       this.triggerEvent_(Events.PAGE_VISIBLE, {
-        'storyPageIndex': pageIndex.toString(),
+        'storyPageIndex': String(pageIndex),
         'storyPageId': pageId,
       });
 

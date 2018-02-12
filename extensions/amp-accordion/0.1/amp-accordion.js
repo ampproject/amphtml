@@ -144,7 +144,7 @@ class AmpAccordion extends AMP.BaseElement {
       header.setAttribute('role', 'button');
       header.setAttribute('aria-controls', contentId);
       header.setAttribute('aria-expanded',
-          section.hasAttribute('expanded').toString());
+          String(section.hasAttribute('expanded')));
       if (!header.hasAttribute('tabindex')) {
         header.setAttribute('tabindex', 0);
       }

@@ -53,10 +53,11 @@ export function dict(opt_initial) {
 }
 
 /**
- * Checks if the given key is a property in the map.
+ * Checks if the given key is a property in the map. This works with
+ * prototype-less objects as well as regular objects.
  *
  * @param {T}  obj a map like property.
- * @param {string}  key
+ * @param {*}  key
  * @return {boolean}
  * @template T
  */
