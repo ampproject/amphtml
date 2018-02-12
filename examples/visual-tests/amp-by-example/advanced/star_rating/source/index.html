@@ -1,0 +1,154 @@
+<!--
+  #### Introduction
+
+  This star rating widget is implemented using only CSS, given AMP's restriction on custom JavaScript. It still has the key features of star rating components:
+
+   * touch, mouse and keyboard accessibility
+   * stars change color when the user mouses over them
+   * once a selection is made, it "sticks"
+   * clean scalable vector icons
+   * screen reader friendly
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="https://ampbyexample.com/advanced/star_rating/">
+  <title>Star Rating</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <!-- #### Setup -->
+  <!--
+    Import the `amp-form` and `amp-mustache` components.
+  -->
+  <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+
+  <!--
+    #### CSS for the star rating
+  -->
+  <!--
+    This star rating implementation overlays "☆" Unicode characters precisely over radio buttons. Inline comments below describe the rules in detail.
+  -->
+  <style amp-custom>
+    .rating {
+      --star-size: 3;  /* use CSS variables to calculate dependent dimensions later */
+      padding: 0;  /* to prevent flicker when mousing over padding */
+      border: none;  /* to prevent flicker when mousing over border */
+      unicode-bidi: bidi-override; direction: rtl;  /* for CSS-only style change on hover */
+      text-align: left;  /* revert the RTL direction */
+      user-select: none;  /* disable mouse/touch selection */
+      font-size: 3em;  /* fallback - IE doesn't support CSS variables */
+      font-size: calc(var(--star-size) * 1em);  /* because `var(--star-size)em` would be too good to be true */
+      cursor: pointer;
+      /* disable touch feedback on cursor: pointer - http://stackoverflow.com/q/25704650/1269037 */
+      -webkit-tap-highlight-color: rgba(0,0,0,0);
+      -webkit-tap-highlight-color: transparent;
+      margin-bottom: 1em;
+    }
+    /* the stars */
+    .rating > label {
+      display: inline-block;
+      position: relative;
+      width: 1.1em;  /* magic number to overlap the radio buttons on top of the stars */
+      width: calc(var(--star-size) / 3 * 1.1em);
+    }
+    .rating > *:hover,
+    .rating > *:hover ~ label,
+    .rating:not(:hover) > input:checked ~ label {
+      color: transparent;  /* reveal the contour/white star from the HTML markup */
+      cursor: inherit;  /* avoid a cursor transition from arrow/pointer to text selection */
+    }
+    .rating > *:hover:before,
+    .rating > *:hover ~ label:before,
+    .rating:not(:hover) > input:checked ~ label:before {
+      content: "★";
+      position: absolute;
+      left: 0;
+      color: gold;
+    }
+    .rating > input {
+      position: relative;
+      transform: scale(3);  /* make the radio buttons big; they don't inherit font-size */
+      transform: scale(var(--star-size));
+      /* the magic numbers below correlate with the font-size */
+      top: -0.5em;  /* margin-top doesn't work */
+      top: calc(var(--star-size) / 6 * -1em);
+      margin-left: -2.5em;  /* overlap the radio buttons exactly under the stars */
+      margin-left: calc(var(--star-size) / 6 * -5em);
+      z-index: 2;  /* bring the button above the stars so it captures touches/clicks */
+      opacity: 0;  /* comment to see where the radio buttons are */
+      font-size: initial; /* reset to default */
+    }
+    form.amp-form-submit-error [submit-error] {
+      color: red;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- #### Usage -->
+  <!--
+    While this star rating widget is accessible via the keyboard, that doesn't happen without quirks:
+
+    * Click/tap the widget, then press up/down/left/right arrows. Unfortunately, in Firefox and Safari, keyboard arrows work backwards. This issue appears to be <a href="https://github.com/LunarLogic/starability/issues/15">impossible to fix</a> on non-Chrome-based browsers without using JavaScript, so stay tuned for the amp-rating component.
+    * Mouse over the stars to see the style change.
+  -->
+  <!-- -->
+  <div class="p1">
+    <p>Things to try on a computer with a keyboard and/or pointing device:</p>
+    <ul>
+      <li>
+        Click/tap the widget, then press up/down/left/right arrows.
+        Unfortunately, in Firefox and Safari, keyboard arrows work backwards.
+        This issue appears to be <a href="https://github.com/LunarLogic/starability/issues/15">impossible to fix</a>
+        on non-Chrome-based browsers without using JavaScript, so stay tuned for the amp-rating component.
+      </li>
+      <li>
+        Mouse over the stars to see the style change.
+      </li>
+    </ul>
+  </div>
+
+  <!--
+  We'll use a set of radio buttons to take user input for the star ratings, because they are keyboard-accessible.
+  For desktop, it's nice to change the style of the previous stars when the user hovers their mouse over them. The [only](https://github.com/dandv/comparisons/blob/master/star-rating-widgets.md) pure-CSS way to affect the style of previous elements onmouseover is to list them in reverse DOM order, which is why the `<input>` elements below run from 5 to 1.
+
+  We want the form to submit as soon as the user makes a selection, without a Submit button. To do that, we'll set the [`on` attribute](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#on) of the `input`s to submit the form on [`change`](https://www.ampproject.org/docs/reference/examples/visual-tests/amp-by-example/components/amp-form#input-events).
+
+  The initial rating is determined by which radio button has the `checked` attribute set. This is optional. -->
+  <form id="rating" class="p2" method="post" action-xhr="/examples/visual-tests/amp-by-example/samples_templates/rating/set" target="_blank">
+    <fieldset class="rating">
+      <input name="rating" type="radio" id="rating5" value="5" on="change:rating.submit"/>
+      <label for="rating5" title="5 stars">☆</label>
+
+      <input name="rating" type="radio" id="rating4" value="4" on="change:rating.submit" />
+      <label for="rating4" title="4 stars">☆</label>
+
+      <input name="rating" type="radio" id="rating3" value="3" on="change:rating.submit" />
+      <label for="rating3" title="3 stars">☆</label>
+
+      <input name="rating" type="radio" id="rating2" value="2" on="change:rating.submit" checked="checked" />
+      <label for="rating2" title="2 stars">☆</label>
+
+      <input name="rating" type="radio" id="rating1" value="1" on="change:rating.submit" />
+      <label for="rating1" title="1 stars">☆</label>
+    </fieldset>
+    <div submit-success>
+      <template type="amp-mustache">
+        <p>Thanks for rating {{rating}} star(s)!</p>
+      </template>
+    </div>
+    <div submit-error>
+      <template type="amp-mustache">
+        Looks like something went wrong. Please try to rate again. {{error}}
+      </template>
+    </div>
+  </form>
+
+</body>
+</html>

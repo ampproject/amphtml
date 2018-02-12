@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <meta name="google-signin-client_id" content="215342317408-9rs8ek51mgngt4423t2tbknbbc47cr8t.apps.googleusercontent.com">
+    <script src="https://apis.google.com/js/platform.js"></script>
+    <title>Logout</title>
+  </head>
+  <body>
+    <form method="post" action="submit-logout" id="logout-form">
+      <input name="returnurl" type="hidden" value="{{.ReturnURL}}">
+    </form>
+      <script>
+      gapi.load('auth2', () => {
+          gapi.auth2.init()
+            .then(auth2 => {
+              return auth2.signOut()
+            })
+            .then(() => {
+              var form = document.getElementById("logout-form")
+              form.submit()
+            });
+          });
+    </script>
+  </body>
+</html>
