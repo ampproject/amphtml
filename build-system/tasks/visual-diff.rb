@@ -21,15 +21,13 @@
 # a localhost server. See https://percy.io/docs/clients/ruby/percy-anywhere.
 
 
-require 'capybara/poltergeist'
 require 'json'
 require 'net/http'
 require 'percy/capybara/anywhere'
-require 'phantomjs'
+require 'selenium/webdriver'
 
 
 ENV['PERCY_DEBUG'] = '0'
-ENV['PHANTOMJS_DEBUG'] = 'false'
 ENV['WEBSERVER_QUIET'] = '--quiet'
 # CSS widths: iPhone: 375, Pixel: 411, Macbook Pro 15": 1440.
 DEFAULT_WIDTHS = [375, 411, 1440]
@@ -40,7 +38,7 @@ CONFIGS = %w(canary prod)
 AMP_RUNTIME_FILE = 'dist/amp.js'
 BUILD_STATUS_URL = 'https://amphtml-percy-status-checker.appspot.com/status'
 BUILD_PROCESSING_POLLING_INTERVAL_SECS = 5
-BUILD_PROCESSING_TIMEOUT_SECS = 60
+BUILD_PROCESSING_TIMEOUT_SECS = 60 * 10
 PERCY_BUILD_URL = 'https://percy.io/ampproject/amphtml/builds'
 OUT = ENV['TRAVIS'] ? '/dev/null' : :out
 
@@ -211,14 +209,48 @@ def close_web_server(pid)
 end
 
 
-# Loads all the visual tests from a well-known json config file.
+# Loads all the visual tests from a well-known pseudo-json config file.
 def load_visual_tests_config_json
   json_file = File.open(
       File.join(
           File.dirname(__FILE__),
-          '../../test/visual-diff/visual-tests.json'),
+          '../../test/visual-diff/visual-tests.js'),
       'r')
   json_file.read
+end
+
+
+# Configures the Chrome browser (optionally in headless mode)
+def configure_browser
+  if ARGV.include? '--headless'
+    chrome_args = %w(no-sandbox disable-extensions headless disable-gpu)
+  else
+    chrome_args = %w(no-sandbox disable-extensions)
+  end
+  capabilities = Selenium::WebDriver::Remote::Capabilities.chrome(
+    chromeOptions: { args: chrome_args }
+  )
+  Capybara.register_driver :chrome do |app|
+    Capybara::Selenium::Driver.new app,
+      browser: :chrome,
+      desired_capabilities: capabilities
+  end
+  Capybara.javascript_driver = :chrome
+end
+
+
+# Initializes the Capybara driver
+#
+# Args:
+# - assets_dir: Path relative to amphtml/ that contains all asset files
+# - assets_base_url: Path relative to server root from where assets are served
+def initialize_capybara(assets_dir, assets_base_url)
+  Capybara.default_max_wait_time = 5
+  Capybara.run_server = false
+  Capybara.app_host = "http://#{HOST}:#{PORT}"
+  Percy::Capybara.use_loader(
+      :filesystem, assets_dir: assets_dir, base_url: assets_base_url)
+  page = Capybara::Session.new(:chrome)
 end
 
 
@@ -228,25 +260,15 @@ end
 # - visualTestsConfig: JSON object containing the config for the visual tests.
 def run_visual_tests(visual_tests_config)
   Percy.config.default_widths = DEFAULT_WIDTHS
-  Capybara.default_max_wait_time = 5
-  Capybara.run_server = false
-  Capybara.app_host = "http://#{HOST}:#{PORT}"
   assets_base_url = visual_tests_config['assets_base_url']
   assets_dir = File.expand_path(
       "../../../#{visual_tests_config['assets_dir']}",
       __FILE__)
-  Percy::Capybara.use_loader(
-      :filesystem, assets_dir: assets_dir, base_url: assets_base_url)
-  page = Capybara::Session.new(:poltergeist)
+  page = initialize_capybara(assets_dir, assets_base_url)
   build = Percy::Capybara.initialize_build
   build_id = build['data']['id']
   File.write('PERCY_BUILD_ID', build_id)
   log('info', 'Started Percy build ' + cyan("#{build_id}") + '...')
-  page.driver.options[:phantomjs] = Phantomjs.path
-  page.driver.options[:js_errors] = true
-  page.driver.options[:phantomjs_options] =
-      ["--debug=#{ENV['PHANTOMJS_DEBUG']}"]
-  page.driver.options[:phantomjs_logger] = ENV['TRAVIS'] ? '/dev/null' : STDOUT
   generate_snapshots(page, visual_tests_config['webpages'])
   result = Percy::Capybara.finalize_build
   if result['success']
@@ -278,13 +300,19 @@ def generate_snapshots(page, webpages)
     system(config_cmd, :out => OUT)
     log('verbose',
         'Generating snapshots using the ' + cyan("#{config}") + ' AMP config')
+    page.visit('/')
     webpages.each do |webpage|
       url = webpage['url']
+      if url.include? 'examples/visual-tests/amp-by-example/' and
+          !ARGV.include? '--master'
+        next
+      end
       name = "#{webpage['name']} (#{config})"
       forbidden_css = webpage['forbidden_css']
       loading_incomplete_css = webpage['loading_incomplete_css']
       loading_complete_css = webpage['loading_complete_css']
       enable_experiments(page, webpage['experiments'])
+      log('verbose', 'Navigating to page ' + yellow(url) + '...')
       page.visit(url)
       verify_css_elements(
           page,
@@ -349,10 +377,8 @@ end
 # - experiments: List of experiments to enable.
 def enable_experiments(page, experiments)
   if experiments
-    page.driver.set_cookie(
-        'AMP_EXP',
-        experiments.join('%2C'),
-        { :path => '/', :domain => 'localhost' })
+    page.driver.browser.manage.add_cookie(
+        :name => 'AMP_EXP', :value => experiments.join('%2C'))
     log('verbose', 'Setting AMP experiments ' + cyan(experiments.join(', ')))
   end
 end
@@ -363,8 +389,7 @@ end
 # Args:
 # - page: Page object used by Percy for snapshotting.
 def clear_experiments(page)
-  page.driver.clear_cookies
-  log('verbose', 'Cleared all AMP experiment cookies')
+  page.driver.browser.manage.delete_all_cookies
 end
 
 
@@ -372,14 +397,14 @@ end
 def set_debugging_level
   if ARGV.include? '--debug'
     ENV['PERCY_DEBUG'] = '1'
-    ENV['PHANTOMJS_DEBUG'] = 'true'
+    Selenium::WebDriver.logger.level = :debug
     ENV['WEBSERVER_QUIET'] = ''
   end
   if ARGV.include? '--percy_debug'
     ENV['PERCY_DEBUG'] = '1'
   end
-  if ARGV.include? '--phantomjs_debug'
-    ENV['PHANTOMJS_DEBUG'] = 'true'
+  if ARGV.include? '--chrome_debug'
+    Selenium::WebDriver.logger.level = :debug
   end
   if ARGV.include? '--webserver_debug'
     ENV['WEBSERVER_QUIET'] = ''
@@ -393,14 +418,13 @@ def create_empty_build
   log('info',
       'Skipping visual diff tests and generating a blank Percy build...')
   Percy.config.default_widths = [375]
-  server = 'http://localhost'  # Not actually used.
   blank_assets_dir = File.expand_path(
       '../../../examples/visual-tests/blank-page',
       __FILE__)
-  Percy::Capybara::Anywhere.run(server, blank_assets_dir, '') do |page|
-    page.driver.options[:phantomjs] = Phantomjs.path
-    Percy::Capybara.snapshot(page, name: 'Blank page')
-  end
+  page = initialize_capybara(blank_assets_dir, '')
+  build = Percy::Capybara.initialize_build
+  Percy::Capybara.snapshot(page, name: 'Blank page')
+  Percy::Capybara.finalize_build
 end
 
 
@@ -412,6 +436,7 @@ def main
     verify_build_status(status, build_id)
     exit
   end
+  configure_browser
   if ARGV.include? '--skip'
     create_empty_build
     exit
