@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
+import {AmpDoc} from './service/ampdoc-impl';
 import {CommonSignals} from './common-signals';
 import {Observable} from './observable';
 import {Services} from './services';
 import {Signals} from './utils/signals';
 import {dev, rethrowAsync} from './log';
-import {disposeServicesForEmbed, getTopWindow} from './service';
+import {
+  getAmpdoc,
+  disposeServicesForEmbed,
+  getTopWindow,
+  setParentWindow,
+} from './service';
 import {escapeHtml} from './dom';
 import {isDocumentReady} from './document-ready';
 import {layoutRectLtwh} from './layout-rect';
@@ -203,11 +209,19 @@ export function installFriendlyIframeEmbed(iframe, container, spec,
   return readyPromise.then(() => {
     const embed = new FriendlyIframeEmbed(iframe, spec, loadedPromise);
     iframe[EMBED_PROP] = embed;
+    // QQQ: do this via experiment only.
+    const parentAmpdoc = getAmpdoc(iframe);
+    const ampdoc = new AmpDocFie(parentAmpdoc, iframe, spec.url);
 
     const childWin = /** @type {!Window} */ (iframe.contentWindow);
     // Add extensions.
-    extensions.installExtensionsInChildWindow(
-        childWin, spec.extensionIds || [], opt_preinstallCallback);
+    if (ampdoc) {
+      extensions.installExtensionsInEmbed(
+          ampdoc, spec.extensionIds || [], opt_preinstallCallback);
+    } else {
+      extensions.installExtensionsInChildWindow(
+          childWin, spec.extensionIds || [], opt_preinstallCallback);
+    }
     // Ready to be shown.
     embed.startRender_();
     return embed;
@@ -615,4 +629,83 @@ export function whenContentIniLoad(context, hostWin, rect) {
         });
         return Promise.all(promises);
       });
+}
+
+
+/**
+ * QQQ: docs. decide on place.
+ */
+export class AmpDocFie extends AmpDoc {
+  /**
+   * @param {?AmpDoc} parent
+   * @param {!HTMLIFrameElement} iframe
+   * @param {string} url
+   * @param {!ShadowRoot} shadowRoot
+   */
+  constructor(parent, iframe, url) {
+    super(iframe.contentWindow, parent);
+    iframe['__AMPDOC'] = this;  //QQQ:const in ampdoc-impl.js
+    iframe.contentWindow['__AMPDOC'] = this;
+    iframe.contentDocument['__AMPDOC'] = this;
+
+    /** @private @const {string} */
+    this.url_ = url;
+
+    /** @private @const {!HTMLIFrameElement} */
+    this.iframe_ = iframe;
+
+    /** @private {!Element} */
+    this.body_ = iframe.contentDocument.body;
+
+    /** @private @const {!Promise<!Element>} */
+    this.bodyPromise_ = Promise.resolve(this.body_);
+
+    /** @private {!Promise} */
+    this.readyPromise_ = Promise.resolve();
+  }
+
+  /** @override */
+  isSingleDoc() {
+    return false;
+  }
+
+  /** @override */
+  getRootNode() {
+    return this.win.document;
+  }
+
+  /** @override */
+  getUrl() {
+    return this.url_;
+  }
+
+  /** @override */
+  getHeadNode() {
+    return dev().assertElement(this.win.document.head);
+  }
+
+  /** @override */
+  isBodyAvailable() {
+    return true;
+  }
+
+  /** @override */
+  getBody() {
+    return dev().assertElement(this.body_, 'body not available');
+  }
+
+  /** @override */
+  whenBodyAvailable() {
+    return this.bodyPromise_;
+  }
+
+  /** @override */
+  isReady() {
+    return true;
+  }
+
+  /** @override */
+  whenReady() {
+    return this.readyPromise_;
+  }
 }

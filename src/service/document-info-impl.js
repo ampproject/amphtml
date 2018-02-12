@@ -61,6 +61,12 @@ export class DocInfo {
     this.info_ = null;
   }
 
+  /** @override */
+  adoptEmbedDoc(embeddedDoc) {
+    //QQQ:implements
+    return new DocInfo(embeddedDoc);
+  }
+
   /** @return {!DocumentInfoDef} */
   get() {
     if (this.info_) {

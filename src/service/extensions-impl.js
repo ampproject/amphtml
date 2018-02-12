@@ -16,8 +16,10 @@
 
 import {Services} from '../services';
 import {
+  adoptEmbedDocServices,
   adoptServiceForEmbed,
   adoptServiceForEmbedIfEmbeddable,
+  getServiceForDoc,
   registerServiceBuilder,
   registerServiceBuilderForDoc,
   setParentWindow,
@@ -530,6 +532,52 @@ export class Extensions {
       promises.push(promise);
     });
     return Promise.all(promises);
+  }
+
+  /**
+   * Install extensions in the child window (friendly iframe). The pre-install
+   * callback, if specified, is executed after polyfills have been configured
+   * but before the first extension is installed.
+   * @param {!Window} childWin
+   * @param {!Array<string>} extensionIds
+   * @param {function(!Window)=} opt_preinstallCallback
+   * @return {!Promise}
+   * @restricted
+   */
+  installExtensionsInEmbed(childAmpDoc, extensionIds,
+      opt_preinstallCallback) {
+    // QQQQ: reconcile with installExtensionsInChildWindow
+    const childWin = childAmpDoc.win;
+    const topWin = this.win;
+    const parentWin = childAmpDoc.parent.win;
+    setParentWindow(childWin, parentWin);
+
+    // Install necessary polyfills.
+    installPolyfillsInChildWindow(childWin);
+
+    // Install runtime styles.
+    installStylesForDoc(childAmpDoc, cssText, /* callback */ null,
+        /* opt_isRuntimeCss */ true);
+
+    // Run pre-install callback.
+    if (opt_preinstallCallback) {
+      opt_preinstallCallback(childWin);
+    }
+
+    // Adopt standard embeddable services.
+    adoptEmbedDocServices(childAmpDoc);
+    /*QQQQ
+      installCidService(ampdoc);
+      installStorageServiceForDoc(ampdoc);
+      installGlobalSubmitListenerForDoc(ampdoc);
+    */
+
+    // Install built-ins and legacy elements.
+    copyBuiltinElementsToChildWindow(topWin, childWin);
+    stubLegacyElements(childWin);
+
+    // Install all extensions.
+    return this.installExtensionsInDoc_(childAmpDoc, extensionIds);
   }
 
   /**

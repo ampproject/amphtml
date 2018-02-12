@@ -215,6 +215,14 @@ export class ActionService {
         new ActionService(this.ampdoc, embedWin.document));
   }
 
+
+  /** @override */
+  adoptEmbedDoc(embedAmpDoc) {
+    //QQQ:implements
+    return new ActionService(embedAmpDoc);
+  }
+
+
   /**
    * @param {string} name
    * TODO(dvoytenko): switch to a system where the event recognizers are

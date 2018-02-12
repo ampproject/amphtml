@@ -157,7 +157,9 @@ export class AmpDocService {
     }
 
     // Single document: return it immediately.
-    if (this.singleDoc_) {
+    if (this.singleDoc_ &&
+        (!opt_node ||
+            (opt_node.ownerDocument || opt_node).defaultView == this.win)) {
       return this.singleDoc_;
     }
 
@@ -171,7 +173,8 @@ export class AmpDocService {
     }
 
     dev().assert(opt_node);
-    // Otherwise discover and possibly create the ampdoc.
+
+    // Multi-doc: discover the ampdoc via DOM hierarchy.
     let n = opt_node;
     while (n) {
       // A custom element may already have the reference to the ampdoc.
@@ -179,28 +182,34 @@ export class AmpDocService {
         return n.ampdoc_;
       }
 
-      // Traverse the boundary of a friendly iframe.
-      const frameElement = getParentWindowFrameElement(n, this.win);
-      if (frameElement) {
-        n = frameElement;
+      // Shadow root.
+      const shadowRoot = getShadowRootNode(n);
+      if (shadowRoot) {
+        const ampdoc = shadowRoot[AMPDOC_PROP];
+        if (ampdoc) {
+          return ampdoc;
+        }
+        // Traverse the boundary of a shadow root.
+        n = shadowRoot.host;
         continue;
       }
 
-      // Shadow doc.
-      const shadowRoot = getShadowRootNode(n);
-      if (!shadowRoot) {
-        // If not inside a shadow root, it may belong to AmpDocShell
-        if (this.shellShadowDoc_) {
-          return this.shellShadowDoc_;
+      // FIE root.
+      const docRoot = (n.ownerDocument || n);
+      if (docRoot) {
+        const ampdoc = docRoot[AMPDOC_PROP];
+        if (ampdoc) {
+          return ampdoc;
         }
-        break;
+        // Traverse the boundary of a friendly iframe.
+        n = getParentWindowFrameElement(docRoot, this.win);
+        continue;
       }
+    }
 
-      const ampdoc = shadowRoot[AMPDOC_PROP];
-      if (ampdoc) {
-        return ampdoc;
-      }
-      n = shadowRoot.host;
+    // If not inside a shadow root or a FIE, it may belong to AmpDocShell
+    if (this.shellShadowDoc_) {
+      return this.shellShadowDoc_;
     }
 
     throw dev().createError('No ampdoc found for', opt_node);
@@ -216,9 +225,7 @@ export class AmpDocService {
   installShadowDoc_(url, shadowRoot) {
     dev().assert(!shadowRoot[AMPDOC_PROP],
         'The shadow root already contains ampdoc');
-    const ampdoc = new AmpDocShadow(this.win, url, shadowRoot);
-    shadowRoot[AMPDOC_PROP] = ampdoc;
-    return ampdoc;
+    return new AmpDocShadow(this.win, url, shadowRoot);
   }
 
   /**
@@ -252,10 +259,14 @@ export class AmpDocService {
 export class AmpDoc {
   /**
    * @param {!Window} win
+   * @param {?AmpDoc} parent
    */
-  constructor(win) {
+  constructor(win, parent) {
     /** @public @const {!Window} */
     this.win = win;
+
+    /** @public @const {?AmpDoc} */
+    this.parent = parent;
 
     /** @private @const */
     this.signals_ = new Signals();
@@ -415,7 +426,8 @@ export class AmpDocSingle extends AmpDoc {
    * @param {!Window} win
    */
   constructor(win) {
-    super(win);
+    super(win, /* parent */ null);
+    win.document[AMPDOC_PROP] = this;
 
     /** @private @const {!Promise<!Element>} */
     this.bodyPromise_ = this.win.document.body ?
@@ -485,7 +497,9 @@ export class AmpDocShadow extends AmpDoc {
    * @param {!ShadowRoot} shadowRoot
    */
   constructor(win, url, shadowRoot) {
-    super(win);
+    super(win, /* parent */ null);
+    shadowRoot[AMPDOC_PROP] = this;
+
     /** @private @const {string} */
     this.url_ = url;
     /** @private @const {!ShadowRoot} */

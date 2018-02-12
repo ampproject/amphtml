@@ -68,6 +68,12 @@ export class History {
     this.binding_.setOnStackIndexUpdated(this.onStackIndexUpdated_.bind(this));
   }
 
+  /** @override */
+  adoptEmbedDoc() {
+    //QQQ:implements
+    return this;
+  }
+
   /** @private */
   cleanup_() {
     this.binding_.cleanup_();

@@ -1103,8 +1103,17 @@ export function installUrlReplacementsServiceForDoc(ampdoc) {
  * @param {*} varSource
  */
 export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
-  installServiceInEmbedScope(embedWin, 'url-replace',
-      new UrlReplacements(ampdoc, varSource));
+  //QQQQ
+  const childAmpDoc = embedWin['__AMPDOC'];
+  console.log('QQQ: installUrlReplacementsForEmbed: ', childAmpDoc);
+  if (childAmpDoc) {
+    registerServiceBuilderForDoc(childAmpDoc, 'url-replace',
+        () => new UrlReplacements(ampdoc, varSource),
+        /* instantiate */ true);
+  } else {
+    installServiceInEmbedScope(embedWin, 'url-replace',
+        new UrlReplacements(ampdoc, varSource));
+  }
 }
 
 /**

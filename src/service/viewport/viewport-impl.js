@@ -217,6 +217,13 @@ export class Viewport {
   }
 
   /** @override */
+  adoptEmbedDoc() {
+    // QQQ:implements
+    // TODO: at this time the same viewport is used. but will it always?
+    return this;
+  }
+
+  /** @override */
   dispose() {
     this.binding_.disconnect();
   }
