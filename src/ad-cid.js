@@ -43,7 +43,7 @@ export function getAdCid(adElement) {
  */
 export function getOrCreateAdCid(
   ampDoc, clientIdScope, opt_clientIdCookieName, opt_timeout) {
-  const timeout = !!opt_timeout && isFiniteNumber(opt_timeout) ?
+  const timeout = opt_timeout != undefined && isFiniteNumber(opt_timeout) ?
     opt_timeout : 1000;
   const cidPromise = Services.cidForDoc(ampDoc).then(cidService => {
     if (!cidService) {

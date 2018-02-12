@@ -52,21 +52,15 @@ export const RTC_ERROR_ENUM = {
 /**
  * @param {string} error
  * @param {string} callout
- * @private
- */
-function logAndAddErrorResponse_(error, callout) {
-  dev().warn(TAG, `Dropping RTC Callout to ${callout} due to ${error}`);
-  return buildErrorResponse_(error, callout);
-}
-
-/**
- * @param {string} error
- * @param {string} callout
  * @param {number=} opt_rtcTime
+ * @param {boolean=} opt_log
  * @return {!Promise<!rtcResponseDef>}
  * @private
  */
-function buildErrorResponse_(error, callout, opt_rtcTime) {
+function buildErrorResponse_(error, callout, opt_rtcTime, opt_log) {
+  if (opt_log) {
+    dev().warn(TAG, `Dropping RTC Callout to ${callout} due to ${error}`);
+  }
   return Promise.resolve(/**@type {rtcResponseDef} */(
     {error, callout, rtcTime: opt_rtcTime || 0}));
 }
@@ -102,7 +96,8 @@ export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
     const url = vendorObject ? vendorObject.url : '';
     if (!url) {
       return promiseArray.push(
-          logAndAddErrorResponse_(RTC_ERROR_ENUM.UNKNOWN_VENDOR, vendor));
+          buildErrorResponse_(
+              RTC_ERROR_ENUM.UNKNOWN_VENDOR, vendor, undefined, true));
     }
     const validVendorMacros = {};
     Object.keys(rtcConfig['vendors'][vendor]).forEach(macro => {
@@ -135,8 +130,7 @@ export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
  * @private
  */
 function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
-  rtcStartTime, macros, timeoutMillis,
-  opt_vendor) {
+  rtcStartTime, macros, timeoutMillis, opt_vendor) {
   const win = a4aElement.win;
   const ampDoc = a4aElement.getAmpDoc();
   /**
@@ -147,17 +141,17 @@ function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
    */
   const send = (url, timePenalty) => {
     if (Object.keys(seenUrls).length == MAX_RTC_CALLOUTS) {
-      return logAndAddErrorResponse_(
+      return buildErrorResponse_(
           RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED,
-          opt_vendor || url);
+          opt_vendor || url, undefined, true);
     }
     if (!isSecureUrl(url)) {
-      return logAndAddErrorResponse_(RTC_ERROR_ENUM.INSECURE_URL,
-          opt_vendor || url);
+      return buildErrorResponse_(RTC_ERROR_ENUM.INSECURE_URL,
+          opt_vendor || url, undefined, true);
     }
     if (seenUrls[url]) {
-      return logAndAddErrorResponse_(RTC_ERROR_ENUM.DUPLICATE_URL,
-          opt_vendor || url);
+      return buildErrorResponse_(RTC_ERROR_ENUM.DUPLICATE_URL,
+          opt_vendor || url, undefined, true);
     }
     seenUrls[url] = true;
     if (url.length > MAX_URL_LENGTH) {
