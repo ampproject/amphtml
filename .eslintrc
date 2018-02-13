@@ -36,6 +36,7 @@
     "arrow-parens": [2, "as-needed"],
     "arrow-spacing": 2,
     "chai-expect/missing-assertion": 2,
+    "chai-expect/no-inner-compare": 2,
     "chai-expect/terminating-properties": 2,
     "comma-dangle": [2, "always-multiline"],
     "computed-property-spacing": [2, "never"],
