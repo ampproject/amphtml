@@ -312,6 +312,42 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       Object.keys(macros).forEach(macro => {
         expect(customMacros.ATTR(macro)).to.equal(macros[macro]);
       });
+      return customMacros.ADCID().then(adcid => {
+        expect(adcid).to.not.be.null;
+      });
+    });
+
+    it('should return the same ADCID on multiple calls', () => {
+      element = createElementWithAttributes(env.win.document, 'amp-ad', {
+        type: 'doubleclick',
+      });
+      env.win.document.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(
+          element, env.win.document, env.win);
+      impl.populateAdUrlState();
+      const customMacros = impl.getCustomRealTimeConfigMacros_();
+      let adcid;
+      return customMacros.ADCID().then(adcid1 => {
+        adcid = adcid1;
+        expect(adcid).to.not.be.null;
+        return customMacros.ADCID().then(adcid2 => {
+          expect(adcid2).to.equal(adcid);
+        });
+      });
+    });
+
+    it('should respect timeout for adcid', () => {
+      element = createElementWithAttributes(env.win.document, 'amp-ad', {
+        type: 'doubleclick',
+      });
+      env.win.document.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(
+          element, env.win.document, env.win);
+      impl.populateAdUrlState();
+      const customMacros = impl.getCustomRealTimeConfigMacros_();
+      return customMacros.ADCID(0).then(adcid => {
+        expect(adcid).to.be.undefined;
+      });
     });
 
     it('should handle TGT macro when targeting not set', () => {
