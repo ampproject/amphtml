@@ -3486,6 +3486,10 @@ escope@^3.6.0:
     esrecurse "^4.1.0"
     estraverse "^4.1.1"
 
+eslint-plugin-chai-expect@1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-chai-expect/-/eslint-plugin-chai-expect-1.1.1.tgz#cd640b8b38cf6c3abcc378673b7b173b99ddc70a"
+
 eslint-plugin-google-camelcase@0.0.2:
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/eslint-plugin-google-camelcase/-/eslint-plugin-google-camelcase-0.0.2.tgz#0c27555e4782073442d034a3db1f214ee0b37401"
