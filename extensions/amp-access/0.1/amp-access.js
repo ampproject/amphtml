@@ -360,7 +360,8 @@ export class AccessService {
   /**
    * Returns the promise that will yield the value of the specified field from
    * the authorization response. This method will wait for the most recent
-   * authorization request to complete.
+   * authorization request to complete. It will return null values for failed
+   * requests with no fallback, but could be modified to block indefinitely.
    *
    * This is a restricted API.
    *
