@@ -47,6 +47,8 @@ export const RTC_ERROR_ENUM = {
   UNKNOWN_VENDOR: 'unknown_vendor',
   // Occurs when request took longer than timeout
   TIMEOUT: 'timeout',
+  // Occurs when URL expansion time exceeded allowed timeout, request never sent.
+  MACRO_EXPAND_TIMEOUT: 'macro_expand_timeout',
 };
 
 /**
@@ -129,7 +131,7 @@ export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
  * @param {string=} opt_vendor
  * @private
  */
-function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
+export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
   rtcStartTime, macros, timeoutMillis, opt_vendor) {
   const win = a4aElement.win;
   const ampDoc = a4aElement.getAmpDoc();
@@ -139,7 +141,7 @@ function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
    * async call. Thus, however long the URL replacement took is treated as a
    * time penalty.
    */
-  const send = (url, timePenalty) => {
+  const send = url => {
     if (Object.keys(seenUrls).length == MAX_RTC_CALLOUTS) {
       return buildErrorResponse_(
           RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED,
@@ -157,11 +159,8 @@ function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
     if (url.length > MAX_URL_LENGTH) {
       url = truncUrl_(url);
     }
-    timeoutMillis -= timePenalty;
-    if (timeoutMillis > 0) {
-      return sendRtcCallout_(
-          url, rtcStartTime, win, timeoutMillis, opt_vendor || url);
-    }
+    return sendRtcCallout_(
+        url, rtcStartTime, win, timeoutMillis, opt_vendor || url);
   };
 
   if (macros && Object.keys(macros).length) {
@@ -169,12 +168,15 @@ function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
     const whitelist = {};
     Object.keys(macros).forEach(key => whitelist[key] = true);
     const urlReplacementStartTime = Date.now();
-    promiseArray.push(urlReplacements.expandUrlAsync(
-        url, macros, whitelist).then(url => {
-      return send(url, Date.now() - urlReplacementStartTime);
+    promiseArray.push(Services.timerFor(win).timeoutPromise(timeoutMillis,
+        urlReplacements.expandUrlAsync(url, macros, whitelist)).then(url => {
+      return send(url);
+    }).catch(err => {
+      return buildErrorResponse_(RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT,
+          opt_vendor || url, undefined, true);
     }));
   } else {
-    promiseArray.push(send(url, 0));
+    promiseArray.push(send(url));
   }
 }
 

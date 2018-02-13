@@ -41,9 +41,9 @@ export function getAdCid(adElement) {
  * @return {!Promise<string|undefined>} A promise for a CID or undefined.
  */
 export function getOrCreateAdCid(
-    ampDoc, clientIdScope, opt_clientIdCookieName, opt_timeout) {
+  ampDoc, clientIdScope, opt_clientIdCookieName, opt_timeout) {
   const timeout = isNaN(opt_timeout) || opt_timeout == null ?
-        1000 : opt_timeout;
+    1000 : opt_timeout;
   const cidPromise = Services.cidForDoc(ampDoc).then(cidService => {
     if (!cidService) {
       return;
