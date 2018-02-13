@@ -13,15 +13,12 @@ before_install:
   - export DISPLAY=:99.0
   - unset _JAVA_OPTIONS  # JVM heap sizes break closure compiler. #11203.
   - sh -e /etc/init.d/xvfb start
-  # Required due to https://github.com/greenkeeperio/greenkeeper-lockfile/issues/98#issuecomment-352087908
-  - export PATH="`yarn global bin`:$PATH"
-  - yarn global add greenkeeper-lockfile@1
 before_script:
   - pip install --user protobuf
   - gem install percy-capybara poltergeist selenium-webdriver chromedriver-helper
-  - greenkeeper-lockfile-update
+  - ./node_modules/.bin/greenkeeper-lockfile-update
 script: node build-system/pr-check.js
-after_script: greenkeeper-lockfile-upload
+after_script: ./node_modules/.bin/greenkeeper-lockfile-upload
 branches:
   only:
     - master
