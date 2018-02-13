@@ -354,7 +354,7 @@ describes.sandboxed('StandardActions', {}, () => {
     });
   });
 
-  describes.realWin('#whitelist', {
+  describes.realWin('whitelist of actions on the special AMP target', {
     amp: {
       ampdoc: 'single',
     },

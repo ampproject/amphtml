@@ -78,11 +78,14 @@ export class StandardActions {
    * Searches for a meta tag containing whitelist of actions on
    * the special AMP target, e.g.,
    * <meta name="amp-action-whitelist" content="AMP.setState,AMP.pushState">
-   * @return {?Array<string>} the whitelist of actions on the
-   * special AMP target.
+   * @return {?Array<string>} the whitelist of actions on the special AMP target.
    * @private
    */
-  createWhitelist_() {
+  getAmpActionWhitelist_() {
+    if (this.ampActionWhitelist_) {
+      return this.ampActionWhitelist_;
+    }
+
     const head = this.ampdoc.getRootNode().head;
     if (!head) {
       return null;
@@ -95,8 +98,9 @@ export class StandardActions {
       return null;
     }
 
-    return meta.getAttribute('content').split(',')
+    this.ampActionWhitelist_ = meta.getAttribute('content').split(',')
         .map(action => action.trim());
+    return this.ampActionWhitelist_;
   }
 
 
@@ -133,14 +137,10 @@ export class StandardActions {
    * @throws {Error} If action is not recognized or is not whitelisted.
    */
   handleAmpTarget(invocation, opt_actionIndex, opt_actionInfos) {
-    if (!this.ampActionWhitelist_) {
-      // Cache the whitelist of allowed AMP actions (if provided).
-      this.ampActionWhitelist_ = this.createWhitelist_();
-    }
     const method = invocation.method;
-    if (this.ampActionWhitelist_ &&
-      !this.ampActionWhitelist_.includes(`AMP.${method}`)) {
-      throw user().createError(`AMP.${method}$ is not whitelisted.`);
+    if (this.getAmpActionWhitelist_() &&
+      !this.getAmpActionWhitelist_().includes(`AMP.${method}`)) {
+      throw user().createError(`AMP.${method} is not whitelisted.`);
     }
     switch (method) {
       case 'pushState':
