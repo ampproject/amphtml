@@ -1,0 +1,8 @@
+path_classifiers:
+  externs:
+    - "**/*.extern.js"
+extraction:
+  javascript:
+    index:
+      filters:
+        exclude: "examples"
