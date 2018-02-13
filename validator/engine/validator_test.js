@@ -656,20 +656,14 @@ describe('ValidatorRulesMakeSense', () => {
     it('unique spec_name or if none then unique tag_name', () => {
       if (tagSpec.specName !== null) {
         expect(specNameIsUnique.hasOwnProperty(tagSpec.specName)).toBe(false);
-        if (specNameIsUnique.hasOwnProperty(tagSpec.specName))
-          console.log(tagSpec.specName);
         specNameIsUnique[tagSpec.specName] = 0;
       } else if (tagSpec.extensionSpec !== null) {
         const specName = tagSpec.extensionSpec.name + ' extension .js script';
         expect(specNameIsUnique.hasOwnProperty(specName)).toBe(false);
-        if (specNameIsUnique.hasOwnProperty(specName))
-          console.log(specName);
         specNameIsUnique[specName] = 0;
       } else {
         expect(tagWithoutSpecNameIsUnique.hasOwnProperty(tagSpec.tagName))
             .toBe(false);
-        if (specNameIsUnique.hasOwnProperty(tagSpec.tagName))
-          console.log(tagSpec.specName);
         tagWithoutSpecNameIsUnique[tagSpec.tagName] = 0;
       }
     });
