@@ -17,7 +17,6 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const BBPromise = require('bluebird');
-const chalk = require('chalk');
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const getStdout = require('../exec').getStdout;
@@ -71,9 +70,9 @@ function checkLinks() {
             if (result.status === 'dead') {
               deadLinksFound = true;
               deadLinksFoundInFile = true;
-              log('[%s] %s', chalk.red('✖'), result.link);
+              log('[%s] %s', colors.red('✖'), result.link);
             } else if (!process.env.TRAVIS) {
-              log('[%s] %s', chalk.green('✔'), result.link);
+              log('[%s] %s', colors.green('✔'), result.link);
             }
           });
           if (deadLinksFoundInFile) {
@@ -178,6 +177,7 @@ function runLinkChecker(markdownFile) {
 gulp.task(
     'check-links',
     'Detects dead links in markdown files',
+    ['update-packages'],
     checkLinks,
     {
       options: {
