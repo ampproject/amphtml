@@ -177,6 +177,7 @@ function runLinkChecker(markdownFile) {
 gulp.task(
     'check-links',
     'Detects dead links in markdown files',
+    ['update-packages'],
     checkLinks,
     {
       options: {
