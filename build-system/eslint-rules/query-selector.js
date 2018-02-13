@@ -16,7 +16,7 @@
 'use strict';
 
 module.exports = function(context) {
-  function querySelectorCall(node) {
+  function callQuerySelector(node) {
     const {callee} = node;
 
     // If it's not a querySelector(All) call, I don't care about it.
@@ -35,7 +35,7 @@ module.exports = function(context) {
       }
     }
 
-    const selector = getSelector(node.arguments[0]);
+    const selector = getSelector(node, 0);
 
     // What are we calling querySelector on?
     let obj = callee.object;
@@ -64,7 +64,7 @@ module.exports = function(context) {
         'scopedQuerySelector in src/dom.js');
   }
 
-  function scopedQuerySelectorCall(node) {
+  function callScopedQuerySelector(node) {
     const {callee} = node;
     if (!callee.name.startsWith('scopedQuerySelector')) {
       return;
@@ -79,7 +79,7 @@ module.exports = function(context) {
       }
     }
 
-    const selector = getSelector(node.arguments[1]);
+    const selector = getSelector(node, 1);
 
     if (selectorNeedsScope(selector)) {
       return;
@@ -89,17 +89,22 @@ module.exports = function(context) {
         "unnecessary, since you don't use child selector semantics.");
   }
 
-  function getSelector(node) {
+  function getSelector(node, argIndex) {
+    const arg = node.arguments[argIndex];
     let selector;
-    if (node.type === 'Literal') {
-      selector = node.value;
-    } else if (node.type === 'TemplateLiteral') {
+
+    if (!arg) {
+      context.report(node, 'no argument to query selector');
+      selector = 'dynamic value';
+    } else if (arg.type === 'Literal') {
+      selector = arg.value;
+    } else if (arg.type === 'TemplateLiteral') {
 
       // Ensure all template variables are properly escaped.
       let accumulator = '';
-      const quasis = node.quasis.map(v => v.value.raw);
-      for (let i = 0; i < node.expressions.length; i++) {
-        const expression = node.expressions[i];
+      const quasis = arg.quasis.map(v => v.value.raw);
+      for (let i = 0; i < arg.expressions.length; i++) {
+        const expression = arg.expressions[i];
         accumulator += quasis[i];
 
         if (expression.type === 'CallExpression') {
@@ -132,8 +137,8 @@ module.exports = function(context) {
 
       selector = quasis.join('');
     } else {
-      if (node.type === 'BinaryExpression') {
-        context.report(node, 'Use a template literal string');
+      if (arg.type === 'BinaryExpression') {
+        context.report(arg, 'Use a template literal string');
       }
       selector = 'dynamic value';
     }
@@ -165,9 +170,9 @@ module.exports = function(context) {
 
       const {callee} = node;
       if (callee.type === 'MemberExpression') {
-        querySelectorCall(node);
+        callQuerySelector(node);
       } else if (callee.type === 'Identifier') {
-        scopedQuerySelectorCall(node);
+        callScopedQuerySelector(node);
       }
     },
   };
