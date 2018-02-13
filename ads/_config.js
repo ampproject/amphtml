@@ -442,6 +442,7 @@ export const adConfig = {
   },
   imonomy: {
     prefetch: 'https://srv.imonomy.com/amp/amp.js',
+    renderStartImplemented: true,
   },
   improvedigital: {},
 

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {writeScript, loadScript} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
 import {getSourceUrl} from '../src/url';
+import {loadScript, writeScript} from '../3p/3p';
 
 const DEFAULT_TIMEOUT = 500; // ms
 const EVENT_SUCCESS = 0;
@@ -59,8 +59,10 @@ export function imonomy(global, data) {
       ampError: EVENT_ERROR,
     };
 
-    loadScript(global, '//srv.imonomy.com/amp/amp.js', undefined, () => {
-      callDoubleclick(EVENT_ERROR);
+    loadScript(global, '//srv.imonomy.com/amp/amp.js', () => {
+      global.context.renderStart();
+    }, () => {
+      global.context.noContentAvailable();
     });
   }
 }
@@ -83,7 +85,7 @@ function reportStats(data, code) {
     xhttp.open('GET', getTrackingUrl(data), true);
     xhttp.setRequestHeader('Content-Type', 'text/plain');
     xhttp.send();
-  } catch (e) {};
+  } catch (e) {}
 }
 
 function getTrackingUrl(data) {
@@ -125,5 +127,5 @@ function getTrackingUrl(data) {
       unitCodeUrl = unitCodeUrl + `&tier=${tier}`;
     }
   }
-  	return unitCodeUrl;
+  return unitCodeUrl;
 }
