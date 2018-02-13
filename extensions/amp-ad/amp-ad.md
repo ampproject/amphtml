@@ -304,6 +304,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Swoop](../../ads/swoop.md)
 - [Teads](../../ads/teads.md)
 - [TripleLift](../../ads/triplelift.md)
+- [Trugaze](../../ads/trugaze.md)
 - [ValueCommerce](../../ads/valuecommerce.md)
 - [Viralize](../../ads/viralize.md)
 - [VMFive](../../ads/vmfive.md)

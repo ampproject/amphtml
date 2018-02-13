@@ -760,6 +760,11 @@ export const adConfig = {
 
   triplelift: {},
 
+  trugaze: {
+    clientIdScope: '__tg_amp',
+    renderStartImplemented: true,
+  },
+
   valuecommerce: {
     prefetch: 'https://amp.valuecommerce.com/amp_bridge.js',
     preconnect: [
