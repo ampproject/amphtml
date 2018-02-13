@@ -22,17 +22,17 @@
  * json, and yaml changes.
  */
 
-const BBPromise = require('bluebird');
 const argv = require('minimist')(process.argv.slice(2));
 const assert = require('assert');
+const BBPromise = require('bluebird');
 const childProcess = require('child_process');
+const colors = require('ansi-colors');
 const config = require('../config');
 const extend = require('util')._extend;
 const git = require('gulp-git');
 const gulp = require('gulp-help')(require('gulp'));
-const request = BBPromise.promisify(require('request'));
-const colors = require('ansi-colors');
 const log = require('fancy-log');
+const request = BBPromise.promisify(require('request'));
 
 const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
 const exec = BBPromise.promisify(childProcess.exec);

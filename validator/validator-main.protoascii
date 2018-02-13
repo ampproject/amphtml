@@ -20,12 +20,13 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 295
+min_validator_revision_required: 314
+
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 552
+spec_file_revision: 566
 
 styles_spec_url: "https://www.ampproject.org/docs/guides/author-develop/responsive/style_pages"
 script_spec_url: "https://www.ampproject.org/docs/reference/spec#html-tags"
@@ -1034,6 +1035,7 @@ tags: {
         type: PARSE_AS_ERROR
       }
       validate_keyframes: true
+      allowed_declarations: "animation-timing-function"
       allowed_declarations: "offset-distance"
       allowed_declarations: "opacity"
       allowed_declarations: "transform"
@@ -3890,6 +3892,13 @@ attr_lists: {
       also_requires_attr: "validation-for"
     }
   }
+  # amp-fx-collection specific attributes, see
+  # https://www.ampproject.org/docs/reference/components/amp-fx-collection
+  attrs: {
+    name: "amp-fx"
+    value_casei: "parallax"
+    requires_extension: "amp-fx-collection"
+  }
   # <amp-bind>
   attrs: { name: "[aria-activedescendant]" }
   attrs: { name: "[aria-atomic]" }
@@ -3945,100 +3954,101 @@ error_specificity { code: MANDATORY_TAG_MISSING specificity: 7 }
 error_specificity { code: WRONG_PARENT_TAG specificity: 8 }
 error_specificity { code: TAG_REQUIRED_BY_MISSING specificity: 9 }
 error_specificity { code: MISSING_REQUIRED_EXTENSION specificity: 10 }
-error_specificity { code: WARNING_TAG_REQUIRED_BY_MISSING specificity: 11 }
-error_specificity { code: EXTENSION_UNUSED specificity: 12 }
-error_specificity { code: WARNING_EXTENSION_UNUSED specificity: 13 }
-error_specificity { code: WARNING_EXTENSION_DEPRECATED_VERSION specificity: 14 }
-error_specificity { code: DISALLOWED_TAG specificity: 15 }
-error_specificity { code: DISALLOWED_ATTR specificity: 16 }
-error_specificity { code: INVALID_ATTR_VALUE specificity: 17 }
-error_specificity { code: DUPLICATE_ATTRIBUTE specificity: 18 }
-error_specificity { code: ATTR_VALUE_REQUIRED_BY_LAYOUT specificity: 19 }
-error_specificity { code: MANDATORY_ATTR_MISSING specificity: 20 }
-error_specificity { code: MANDATORY_ONEOF_ATTR_MISSING specificity: 21 }
-error_specificity { code: ATTR_REQUIRED_BUT_MISSING specificity: 22 }
-error_specificity { code: DUPLICATE_UNIQUE_TAG specificity: 23 }
-error_specificity { code: DUPLICATE_UNIQUE_TAG_WARNING specificity: 24 }
-error_specificity { code: STYLESHEET_TOO_LONG specificity: 25 }
-error_specificity { code: CSS_SYNTAX specificity: 26 }
-error_specificity { code: CSS_SYNTAX_INVALID_AT_RULE specificity: 27 }
+error_specificity { code: ATTR_MISSING_REQUIRED_EXTENSION specificity: 11 }
+error_specificity { code: WARNING_TAG_REQUIRED_BY_MISSING specificity: 12 }
+error_specificity { code: EXTENSION_UNUSED specificity: 13 }
+error_specificity { code: WARNING_EXTENSION_UNUSED specificity: 14 }
+error_specificity { code: WARNING_EXTENSION_DEPRECATED_VERSION specificity: 15 }
+error_specificity { code: DISALLOWED_TAG specificity: 16 }
+error_specificity { code: DISALLOWED_ATTR specificity: 17 }
+error_specificity { code: INVALID_ATTR_VALUE specificity: 18 }
+error_specificity { code: DUPLICATE_ATTRIBUTE specificity: 19 }
+error_specificity { code: ATTR_VALUE_REQUIRED_BY_LAYOUT specificity: 20 }
+error_specificity { code: MANDATORY_ATTR_MISSING specificity: 21 }
+error_specificity { code: MANDATORY_ONEOF_ATTR_MISSING specificity: 22 }
+error_specificity { code: ATTR_REQUIRED_BUT_MISSING specificity: 23 }
+error_specificity { code: DUPLICATE_UNIQUE_TAG specificity: 24 }
+error_specificity { code: DUPLICATE_UNIQUE_TAG_WARNING specificity: 25 }
+error_specificity { code: STYLESHEET_TOO_LONG specificity: 26 }
+error_specificity { code: CSS_SYNTAX specificity: 27 }
+error_specificity { code: CSS_SYNTAX_INVALID_AT_RULE specificity: 28 }
 error_specificity {
-  code: MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE specificity: 28
+  code: MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE specificity: 29
 }
-error_specificity { code: INVALID_PROPERTY_VALUE_IN_ATTR_VALUE specificity: 29 }
-error_specificity { code: DISALLOWED_PROPERTY_IN_ATTR_VALUE specificity: 30 }
-error_specificity { code: MUTUALLY_EXCLUSIVE_ATTRS specificity: 31 }
-error_specificity { code: UNESCAPED_TEMPLATE_IN_ATTR_VALUE specificity: 32 }
-error_specificity { code: TEMPLATE_PARTIAL_IN_ATTR_VALUE specificity: 33 }
-error_specificity { code: TEMPLATE_IN_ATTR_NAME specificity: 34 }
+error_specificity { code: INVALID_PROPERTY_VALUE_IN_ATTR_VALUE specificity: 30 }
+error_specificity { code: DISALLOWED_PROPERTY_IN_ATTR_VALUE specificity: 31 }
+error_specificity { code: MUTUALLY_EXCLUSIVE_ATTRS specificity: 32 }
+error_specificity { code: UNESCAPED_TEMPLATE_IN_ATTR_VALUE specificity: 33 }
+error_specificity { code: TEMPLATE_PARTIAL_IN_ATTR_VALUE specificity: 34 }
+error_specificity { code: TEMPLATE_IN_ATTR_NAME specificity: 35 }
 error_specificity {
-  code: INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT specificity: 35
+  code: INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT specificity: 36
 }
-error_specificity { code: IMPLIED_LAYOUT_INVALID specificity: 36 }
-error_specificity { code: SPECIFIED_LAYOUT_INVALID specificity: 37 }
-error_specificity { code: ATTR_DISALLOWED_BY_IMPLIED_LAYOUT specificity: 38 }
-error_specificity { code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT specificity: 39 }
-error_specificity { code: DUPLICATE_DIMENSION specificity: 40 }
-error_specificity { code: DISALLOWED_RELATIVE_URL specificity: 41 }
-error_specificity { code: MISSING_URL specificity: 42 }
-error_specificity { code: DISALLOWED_DOMAIN specificity: 43 }
-error_specificity { code: INVALID_URL_PROTOCOL specificity: 44 }
-error_specificity { code: INVALID_URL specificity: 45 }
-error_specificity { code: DISALLOWED_STYLE_ATTR specificity: 46 }
-error_specificity { code: CSS_SYNTAX_STRAY_TRAILING_BACKSLASH specificity: 47 }
-error_specificity { code: CSS_SYNTAX_UNTERMINATED_COMMENT specificity: 48 }
-error_specificity { code: CSS_SYNTAX_UNTERMINATED_STRING specificity: 49 }
-error_specificity { code: CSS_SYNTAX_BAD_URL specificity: 50 }
+error_specificity { code: IMPLIED_LAYOUT_INVALID specificity: 37 }
+error_specificity { code: SPECIFIED_LAYOUT_INVALID specificity: 38 }
+error_specificity { code: ATTR_DISALLOWED_BY_IMPLIED_LAYOUT specificity: 39 }
+error_specificity { code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT specificity: 40 }
+error_specificity { code: DUPLICATE_DIMENSION specificity: 41 }
+error_specificity { code: DISALLOWED_RELATIVE_URL specificity: 42 }
+error_specificity { code: MISSING_URL specificity: 43 }
+error_specificity { code: DISALLOWED_DOMAIN specificity: 44 }
+error_specificity { code: INVALID_URL_PROTOCOL specificity: 45 }
+error_specificity { code: INVALID_URL specificity: 46 }
+error_specificity { code: DISALLOWED_STYLE_ATTR specificity: 47 }
+error_specificity { code: CSS_SYNTAX_STRAY_TRAILING_BACKSLASH specificity: 48 }
+error_specificity { code: CSS_SYNTAX_UNTERMINATED_COMMENT specificity: 49 }
+error_specificity { code: CSS_SYNTAX_UNTERMINATED_STRING specificity: 50 }
+error_specificity { code: CSS_SYNTAX_BAD_URL specificity: 51 }
 error_specificity {
-  code: CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE specificity: 51
+  code: CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE specificity: 52
 }
-error_specificity { code: CSS_SYNTAX_INVALID_DECLARATION specificity: 52 }
-error_specificity { code: CSS_SYNTAX_INCOMPLETE_DECLARATION specificity: 53 }
-error_specificity { code: CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR specificity: 54 }
-error_specificity { code: CSS_SYNTAX_MISSING_SELECTOR specificity: 55 }
-error_specificity { code: CSS_SYNTAX_NOT_A_SELECTOR_START specificity: 56 }
+error_specificity { code: CSS_SYNTAX_INVALID_DECLARATION specificity: 53 }
+error_specificity { code: CSS_SYNTAX_INCOMPLETE_DECLARATION specificity: 54 }
+error_specificity { code: CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR specificity: 55 }
+error_specificity { code: CSS_SYNTAX_MISSING_SELECTOR specificity: 56 }
+error_specificity { code: CSS_SYNTAX_NOT_A_SELECTOR_START specificity: 57 }
 error_specificity {
-  code: CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR specificity: 57
+  code: CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR specificity: 58
 }
-error_specificity { code: CSS_SYNTAX_MISSING_URL specificity: 58 }
-error_specificity { code: CSS_SYNTAX_DISALLOWED_DOMAIN specificity: 59 }
-error_specificity { code: CSS_SYNTAX_INVALID_URL specificity: 60 }
-error_specificity { code: CSS_SYNTAX_INVALID_URL_PROTOCOL specificity: 61 }
-error_specificity { code: CSS_SYNTAX_DISALLOWED_RELATIVE_URL specificity: 62 }
-error_specificity { code: INCORRECT_NUM_CHILD_TAGS specificity: 63 }
-error_specificity { code: DISALLOWED_CHILD_TAG_NAME specificity: 64 }
-error_specificity { code: DISALLOWED_FIRST_CHILD_TAG_NAME specificity: 65 }
-error_specificity { code: CSS_SYNTAX_INVALID_ATTR_SELECTOR specificity: 66 }
+error_specificity { code: CSS_SYNTAX_MISSING_URL specificity: 59 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_DOMAIN specificity: 60 }
+error_specificity { code: CSS_SYNTAX_INVALID_URL specificity: 61 }
+error_specificity { code: CSS_SYNTAX_INVALID_URL_PROTOCOL specificity: 62 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_RELATIVE_URL specificity: 63 }
+error_specificity { code: INCORRECT_NUM_CHILD_TAGS specificity: 64 }
+error_specificity { code: DISALLOWED_CHILD_TAG_NAME specificity: 65 }
+error_specificity { code: DISALLOWED_FIRST_CHILD_TAG_NAME specificity: 66 }
+error_specificity { code: CSS_SYNTAX_INVALID_ATTR_SELECTOR specificity: 67 }
 error_specificity {
-  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT specificity: 67
+  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT specificity: 68
 }
-error_specificity { code: MANDATORY_REFERENCE_POINT_MISSING specificity: 68 }
-error_specificity { code: DUPLICATE_REFERENCE_POINT specificity: 69 }
-error_specificity { code: TAG_REFERENCE_POINT_CONFLICT specificity: 70 }
+error_specificity { code: MANDATORY_REFERENCE_POINT_MISSING specificity: 69 }
+error_specificity { code: DUPLICATE_REFERENCE_POINT specificity: 70 }
+error_specificity { code: TAG_REFERENCE_POINT_CONFLICT specificity: 71 }
 error_specificity {
   code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR
-  specificity: 71
+  specificity: 72
 }
-error_specificity { code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE specificity: 72 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE specificity: 73 }
 error_specificity {
   code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT
-  specificity: 73
-}
-error_specificity {
-  code: CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE
   specificity: 74
 }
 error_specificity {
-  code: CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH
+  code: CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE
   specificity: 75
 }
 error_specificity {
-  code: CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION
+  code: CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH
   specificity: 76
 }
 error_specificity {
-  code: BASE_TAG_MUST_PRECEED_ALL_URLS
+  code: CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION
   specificity: 77
+}
+error_specificity {
+  code: BASE_TAG_MUST_PRECEED_ALL_URLS
+  specificity: 78
 }
 error_specificity { code: DISALLOWED_SCRIPT_TAG specificity: 100 }
 error_specificity { code: GENERAL_DISALLOWED_TAG specificity: 101 }
@@ -4070,8 +4080,20 @@ error_specificity {
   specificity: 113
 }
 error_specificity {
+  code: CSS_SYNTAX_MALFORMED_MEDIA_QUERY
+  specificity: 115
+}
+error_specificity {
+  code: CSS_SYNTAX_DISALLOWED_MEDIA_TYPE
+  specificity: 116
+}
+error_specificity {
+  code: CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE
+  specificity: 117
+}
+error_specificity {
   code: INVALID_UTF8
-  specificity: 114
+  specificity: 118
 }
 # Error formats
 error_formats {
@@ -4353,6 +4375,10 @@ error_formats {
   format: "The tag '%1' requires including the '%2' extension JavaScript."
 }
 error_formats {
+  code: ATTR_MISSING_REQUIRED_EXTENSION
+  format: "The attribute '%1' requires including the '%2' extension JavaScript."
+}
+error_formats {
   code: DOCUMENT_TOO_COMPLEX
   format: "The document is too complex."
 }
@@ -4489,3 +4515,16 @@ error_formats {
   format: "CSS syntax error in tag '%1' - the property '%2' is disallowed "
           "unless the enclosing rule is prefixed with the '%3' qualification."
 }
+error_formats {
+  code: CSS_SYNTAX_MALFORMED_MEDIA_QUERY
+  format: "CSS syntax error in tag '%1' - malformed media query."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_MEDIA_TYPE
+  format: "CSS syntax error in tag '%1' - disallowed media type '%2'."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE
+  format: "CSS syntax error in tag '%1' - disallowed media feature '%2'."
+}
+

@@ -20,88 +20,90 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
+import '../../amp-a4a/0.1/real-time-config-manager';
 import {
   AmpA4A,
+  DEFAULT_SAFEFRAME_VERSION,
   RENDERING_TYPE_HEADER,
   XORIGIN_MODE,
-  DEFAULT_SAFEFRAME_VERSION,
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
-import {is3pThrottled} from '../../amp-ad/0.1/concurrent-load';
-import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
 import {
-  experimentFeatureEnabled,
-  DOUBLECLICK_EXPERIMENT_FEATURE,
-  DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
-  UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
-} from './doubleclick-a4a-config';
-import {
-  isInManualExperiment,
-} from '../../../ads/google/a4a/traffic-experiments';
-import {
-  googleAdUrl,
-  truncAndTimeUrl,
-  googleBlockParameters,
-  googlePageParameters,
-  isCdnProxy,
-  isReportingEnabled,
   AmpAnalyticsConfigDef,
+  QQID_HEADER,
+  ValidAdContainerTypes,
+  addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
   getCsiAmpAnalyticsConfig,
   getCsiAmpAnalyticsVariables,
-  groupAmpAdsByType,
-  addCsiSignalsToAmpAnalyticsConfig,
-  QQID_HEADER,
   getEnclosingContainerTypes,
-  ValidAdContainerTypes,
-  maybeAppendErrorParameter,
   getIdentityToken,
+  googleAdUrl,
+  googleBlockParameters,
+  googlePageParameters,
+  groupAmpAdsByType,
+  isCdnProxy,
+  isReportingEnabled,
+  maybeAppendErrorParameter,
+  setNameframeExperimentConfigs,
+  truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
+import {
+  DOUBLECLICK_EXPERIMENT_FEATURE,
+  DOUBLECLICK_UNCONDITIONED_EXPERIMENTS,
+  UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
+  experimentFeatureEnabled,
+} from './doubleclick-a4a-config';
+import {
+  ExperimentInfo, // eslint-disable-line no-unused-vars
+  getExperimentBranch, // eslint-disable-line no-unused-vars
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
+import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {RTC_ERROR_ENUM} from '../../amp-a4a/0.1/real-time-config-manager';
+import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
+import {
+  RefreshManager, // eslint-disable-line no-unused-vars
+  getRefreshManager,
+} from '../../amp-a4a/0.1/refresh-manager';
+import {Services} from '../../../src/services';
+import {VisibilityState} from '../../../src/visibility-state';
+import {
+  addExperimentIdToElement,
+} from '../../../ads/google/a4a/traffic-experiments';
+import {createElementWithAttributes, removeElement} from '../../../src/dom';
+import {deepMerge, dict} from '../../../src/utils/object';
+import {dev, user} from '../../../src/log';
+import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+import {getData} from '../../../src/event-helper';
+import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {
   googleLifecycleReporterFactory,
   setGoogleLifecycleVarsFromHeaders,
 } from '../../../ads/google/a4a/google-data-reporter';
 import {
-  lineDelimitedStreamer,
-  metaJsonCreativeGrouper,
-} from '../../../ads/google/a4a/line-delimited-response-handler';
+  incrementLoadingAds,
+  is3pThrottled,
+  waitFor3pThrottle,
+} from '../../amp-ad/0.1/concurrent-load';
+import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
   installAnchorClickInterceptor,
 } from '../../../src/anchor-click-interceptor';
-import {stringHash32} from '../../../src/string';
-import {removeElement, createElementWithAttributes} from '../../../src/dom';
-import {getData} from '../../../src/event-helper';
-import {tryParseJson} from '../../../src/json';
-import {dev, user} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {isObject} from '../../../src/types';
-import {Services} from '../../../src/services';
-import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
-import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {setStyles} from '../../../src/style';
-import {utf8Encode} from '../../../src/utils/bytes';
-import {deepMerge, dict} from '../../../src/utils/object';
 import {isCancellation} from '../../../src/error';
-import {isSecureUrl, parseUrl, parseQueryString} from '../../../src/url';
-import {VisibilityState} from '../../../src/visibility-state';
 import {
-  isExperimentOn,
-  /* eslint no-unused-vars: 0 */ ExperimentInfo,
-  getExperimentBranch,
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
-import {isLayoutSizeDefined, Layout} from '../../../src/layout';
-import {
-  getRefreshManager,
-  RefreshManager,
-  DATA_ATTR_NAME,
-} from '../../amp-a4a/0.1/refresh-manager';
-import {
-  addExperimentIdToElement,
+  isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {RTC_ERROR_ENUM} from '../../amp-a4a/0.1/real-time-config-manager';
-import '../../amp-a4a/0.1/real-time-config-manager';
+import {isSecureUrl, parseQueryString} from '../../../src/url';
+import {
+  lineDelimitedStreamer,
+  metaJsonCreativeGrouper,
+} from '../../../ads/google/a4a/line-delimited-response-handler';
+import {setStyles} from '../../../src/style';
+import {stringHash32} from '../../../src/string';
+import {tryParseJson} from '../../../src/json';
+import {utf8Encode} from '../../../src/utils/bytes';
 
 /** @type {string} */
 const TAG = 'amp-ad-network-doubleclick-impl';
@@ -144,7 +146,7 @@ let sraRequests = null;
       slotId: string,
       slotIndex: string,
     }} */
-let TroubleshootData;
+let TroubleshootData; // eslint-disable-line no-unused-vars
 
 /** @private {?JsonObject} */
 let windowLocationQueryParameters;
@@ -374,6 +376,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {boolean} */
     this.isIdleRender_ = false;
+
+    /** @private {!../../../ads/google/a4a/utils.NameframeExperimentConfig} */
+    this.nameframeExperimentConfig_ = {
+      instantLoad: false,
+      writeInBody: false,
+    };
   }
 
   /** @override */
@@ -385,9 +393,15 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       return false;
     }
     this.isIdleRender_ = true;
+    // NOTE(keithwrightbos): handle race condition where previous
+    // idleRenderOutsideViewport marked slot as idle render despite never
+    // being schedule due to being beyond viewport max offset.  If slot
+    // comes within standard outside viewport range, then ensure throttling
+    // will not be applied.
+    this.getResource().whenWithinRenderOutsideViewport().then(
+        () => this.isIdleRender_ = false);
     return vpRange;
   }
-
   /** @override */
   isLayoutSupported(layout) {
     this.isFluid_ = layout == Layout.FLUID;
@@ -634,7 +648,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const startTime = Date.now();
     const identityPromise = Services.timerFor(this.win)
         .timeoutPromise(1000, this.identityTokenPromise_)
-        .catch(err => {
+        .catch(() => {
           // On error/timeout, proceed.
           return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/({});
         });
@@ -795,6 +809,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.getAmpDoc(), 'amp-analytics');
     }
 
+    setNameframeExperimentConfigs(responseHeaders,
+        this.nameframeExperimentConfig_);
+
     if (this.isFluid_) {
       this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
     } else {
@@ -863,27 +880,29 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  layoutCallback() {
-    const registerFluidAndExec = () => {
-      if (this.isFluid_) {
-        this.registerListenerForFluid_();
-      }
-      return super.layoutCallback();
-    };
+  renderNonAmpCreative() {
+    // If render idle with throttling, impose one second render delay for
+    // non-AMP creatives.  This is not done in the scheduler to ensure as many
+    // slots as possible are marked for layout given scheduler imposes 5 seconds
+    // past previous execution.
     if (this.postAdResponseExperimentFeatures['render-idle-throttle'] &&
-        this.isIdleRender_) {
-      return this.isVerifiedAmpCreativePromise().then(verified => {
-        // Control concurrent loading of non-AMP creatives executed via
-        // idleRenderOutsideViewport as doing so within
-        // idleRenderOutsideViewport would impose at least 5 second delay due to
-        // scheduler constraints.
-        const throttleFn = () => !verified && is3pThrottled(this.win) ?
-          Services.timerFor(this.win).delay(throttleFn, 1000) :
-          registerFluidAndExec();
-        return throttleFn();
-      });
+          this.isIdleRender_) {
+      if (is3pThrottled(this.win)) {
+        return waitFor3pThrottle().then(() => super.renderNonAmpCreative());
+      } else {
+        incrementLoadingAds(this.win);
+        return super.renderNonAmpCreative(true);
+      }
     }
-    return registerFluidAndExec();
+    return super.renderNonAmpCreative();
+  }
+
+  /** @override */
+  layoutCallback() {
+    if (this.isFluid_) {
+      this.registerListenerForFluid_();
+    }
+    return super.layoutCallback();
   }
 
   /** @override  */
@@ -1193,7 +1212,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                   /** @type {?../../../src/service/xhr-impl.FetchResponse} */
                   ({
                     headers,
-                    arrayBuffer: () => utf8Encode(creative),
+                    arrayBuffer: () => Promise.resolve(utf8Encode(creative)),
                   });
                     // Pop head off of the array of resolvers as the response
                     // should match the order of blocks declared in the ad url.
@@ -1322,6 +1341,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       attributes['reportCreativeGeometry'] = true;
       attributes['isDifferentSourceWindow'] = false;
       attributes['sentinel'] = this.sentinel;
+    } else {
+      Object.assign(attributes, this.nameframeExperimentConfig_);
     }
     return attributes;
   }

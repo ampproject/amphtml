@@ -36,7 +36,7 @@ limitations under the License.
 </table>
 
 {% call callout('Important', type='caution') %}
-This component is experimental and under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new).
+This component is experimental and under active development. For any issues, please [file a GitHub issue](https://github.com/ampproject/amphtml/issues/new). To sign up for the origin trial to publish pages with this component, please visit [bit.ly/amp-story-signup](http://bit.ly/amp-story-signup).
 {% endcall %}
 
 [TOC]
@@ -244,16 +244,15 @@ The `<amp-story-page>` component represents the content to display on a single p
 ```html
 <amp-story-page id="cover">
   <amp-story-grid-layer template="fill">
-    <amp-video src="background.mp4"></amp-video>
+    <amp-video layout="fill" src="background.mp4" poster="background.png" muted autoplay></amp-video>
   </amp-story-grid-layer>
   <amp-story-grid-layer template="vertical">
     <h1>These are the Top 5 World's Most...</h1>
     <p>Jon Bersch</p>
     <p>May 18</p>
   </amp-story-grid-layer>
-  <amp-story-grid-layer template="vertical"
-      align-content="end" justify-content="end">
-    <amp-img src="a-logo.svg"></amp-img>
+  <amp-story-grid-layer template="thirds">
+    <amp-img grid-area="bottom-third" src="a-logo.svg" width="64" height="64"></amp-img>
   </amp-story-grid-layer>
 </amp-story-page>
 ```

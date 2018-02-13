@@ -265,6 +265,12 @@ data.inViewport;
 data.numposts;
 data.orderBy;
 data.colorscheme;
+data.tabs;
+data.hideCover;
+data.hideCta;
+data.smallHeader;
+data.adaptContainerWidth;
+data.showFacePile;
 
 // 3p code
 var twttr;
@@ -287,6 +293,7 @@ amp.validator.validateUrlAndLog = function(string, doc, filter) {}
 // Temporary Access types (delete when amp-access is compiled
 // for type checking).
 Activity.prototype.getTotalEngagedTime = function() {};
+Activity.prototype.getIncrementalEngagedTime = function(name) {};
 AccessService.prototype.getAccessReaderId = function() {};
 AccessService.prototype.getAuthdataField = function(field) {};
 // Same for amp-analytics
@@ -425,3 +432,13 @@ var rtcResponseDef;
  * @type {!function(string):?}
  */
 AMP.require;
+
+/**
+ * TransitionDef function that accepts normtime, typically between 0 and 1 and
+ * performs an arbitrary animation action. Notice that sometimes normtime can
+ * dip above 1 or below 0. This is an acceptable case for some curves. The
+ * second argument is a boolean value that equals "true" for the completed
+ * transition and "false" for ongoing.
+ * @typedef {function(number, boolean):?|function(number):?}
+ */
+var TransitionDef;

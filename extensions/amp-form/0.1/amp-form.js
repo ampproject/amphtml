@@ -15,48 +15,48 @@
  */
 
 import {ActionTrust} from '../../../src/action-trust';
-import {FormEvents} from './form-events';
-import {installFormProxy} from './form-proxy';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {createCustomEvent} from '../../../src/event-helper';
-import {
-  iterateCursor,
-  tryFocus,
-} from '../../../src/dom';
-import {
-  formOrNullForElement,
-  setFormForElement,
-  getFormAsObject,
-} from '../../../src/form';
-import {FormDataWrapper} from '../../../src/form-data-wrapper';
-import {
-  assertAbsoluteHttpOrHttpsUrl,
-  assertHttpsUrl,
-  addParamsToUrl,
-  SOURCE_ORIGIN_PARAM,
-  isProxyOrigin,
-} from '../../../src/url';
-import {dev, user} from '../../../src/log';
-import {getMode} from '../../../src/mode';
-import {Services} from '../../../src/services';
-import {toArray, toWin} from '../../../src/types';
-import {
-  removeElement,
-  childElementByAttr,
-  ancestorElementsByTag,
-} from '../../../src/dom';
-import {installStylesForDoc} from '../../../src/style-installer';
+import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-form-0.1.css';
-import {
-  getFormValidator,
-  isCheckValiditySupported,
-} from './form-validators';
 import {
   FORM_VERIFY_PARAM,
   getFormVerifier,
 } from './form-verifiers';
+import {FormDataWrapper} from '../../../src/form-data-wrapper';
+import {FormEvents} from './form-events';
+import {
+  SOURCE_ORIGIN_PARAM,
+  addParamsToUrl,
+  assertAbsoluteHttpOrHttpsUrl,
+  assertHttpsUrl,
+  isProxyOrigin,
+} from '../../../src/url';
+import {Services} from '../../../src/services';
+import {
+  ancestorElementsByTag,
+  childElementByAttr,
+  removeElement,
+} from '../../../src/dom';
+import {createCustomEvent} from '../../../src/event-helper';
 import {deepMerge} from '../../../src/utils/object';
-import {AmpEvents} from '../../../src/amp-events';
+import {dev, user} from '../../../src/log';
+import {
+  formOrNullForElement,
+  getFormAsObject,
+  setFormForElement,
+} from '../../../src/form';
+import {
+  getFormValidator,
+  isCheckValiditySupported,
+} from './form-validators';
+import {getMode} from '../../../src/mode';
+import {installFormProxy} from './form-proxy';
+import {installStylesForDoc} from '../../../src/style-installer';
+import {
+  iterateCursor,
+  tryFocus,
+} from '../../../src/dom';
+import {toArray, toWin} from '../../../src/types';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 /** @type {string} */
 const TAG = 'amp-form';
@@ -609,7 +609,8 @@ export class AmpForm {
         user().assert(false, 'The `AMP-Redirect-To` header value must be an ' +
             'absolute URL starting with https://. Found %s', redirectTo);
       }
-      this.win_.top.location.href = redirectTo;
+      const clickHandler = Services.clickHandlerForDoc(this.form_);
+      clickHandler.navigateTo(this.win_, redirectTo, REDIRECT_TO_HEADER);
     }
   }
 

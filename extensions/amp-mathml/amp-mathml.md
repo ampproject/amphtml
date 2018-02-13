@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-mathml" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -31,7 +31,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-mathml/">Annotated code example for amp-mathml</a></td>
+    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/amp-mathml.amp.html">amp-mathml.amp.html</a></td>
   </tr>
 </table>
 
@@ -58,7 +58,7 @@ This extension creates an iframe and renders a MathML formula.
 <amp-mathml layout="container" data-formula="\[ \cos(θ+φ)=\cos(θ)\cos(φ)−\sin(θ)\sin(φ) \]">
 </amp-mathml>
 ```
-#### Example: Inline formula.
+#### Example: Inline formula
 
 This is an example of a formula placed  inline in the middle of a block of text. `<amp-mathml layout="container" inline data-formula="\[ \cos(θ+φ) \]"></amp-mathml>` This shows how the formula will fit inside a block of text and can be styled with CSS.
 
@@ -66,7 +66,11 @@ This is an example of a formula placed  inline in the middle of a block of text.
 
 ##### data-formula (required)
 
-The formula to render.
+Specifies the formula to render.
+
+##### inline (optional)
+
+If specified, the component renders inline (`inline-block` in CSS).
 
 ## Validation
 See [amp-mathml rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mathml/validator-amp-mathml.protoascii) in the AMP validator specification.

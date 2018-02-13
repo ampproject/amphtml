@@ -380,6 +380,21 @@ export class Log {
   }
 
   /**
+   * Throws an error if the first argument isn't a boolean.
+   *
+   * For more details see `assert`.
+   *
+   * @param {*} shouldBeBoolean
+   * @param {string=} opt_message The assertion message
+   * @return {boolean} The boolean value.
+   */
+  assertBoolean(shouldBeBoolean, opt_message) {
+    this.assert(!!shouldBeBoolean === shouldBeBoolean,
+        (opt_message || 'Boolean expected') + ': %s', shouldBeBoolean);
+    return /** @type {boolean} */ (shouldBeBoolean);
+  }
+
+  /**
    * Asserts and returns the enum value. If the enum doesn't contain such a value,
    * the error is thrown.
    *

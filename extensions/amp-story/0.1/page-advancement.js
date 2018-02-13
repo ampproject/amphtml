@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {dev, user} from '../../../src/log';
-import {scopedQuerySelector} from '../../../src/dom';
-import {listenOnce} from '../../../src/event-helper';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {closest} from '../../../src/dom';
+import {dev, user} from '../../../src/log';
 import {hasTapAction, timeStrToMillis} from './utils';
+import {listenOnce} from '../../../src/event-helper';
+import {scopedQuerySelector} from '../../../src/dom';
 
 
 /** @private @const {number} */
 const NEXT_SCREEN_AREA_RATIO = 0.75;
 
 /** @const {number} */
-const POLL_INTERVAL_MS = 250;
+export const POLL_INTERVAL_MS = 300;
 
 /** @const @enum */
 export const TapNavigationDirection = {

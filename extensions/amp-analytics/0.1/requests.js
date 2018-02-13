@@ -14,23 +14,25 @@
  * limitations under the License.
  */
 
-import {user, dev} from '../../../src/log';
-import {isObject} from '../../../src/types';
-import {hasOwn, map} from '../../../src/utils/object';
-import {filterSplice} from '../../../src/utils/array';
-import {appendEncodedParamStringToUrl} from '../../../src/url';
+import {BatchingPluginFunctions, batchSegmentDef} from './batching-plugins';
 import {
-  variableServiceFor,
   ExpansionOptions,
+  variableServiceFor,
 } from './variables';
 import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
 import {Services} from '../../../src/services';
-import {batchSegmentDef, BatchingPluginFunctions} from './batching-plugins';
-import {parseQueryString} from '../../../src/url';
+import {appendEncodedParamStringToUrl} from '../../../src/url';
+import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {filterSplice} from '../../../src/utils/array';
+import {hasOwn, map} from '../../../src/utils/object';
+import {isArray, isFiniteNumber} from '../../../src/types';
+import {isObject} from '../../../src/types';
+import {parseQueryString} from '../../../src/url';
 
 const TAG = 'AMP-ANALYTICS';
 
+const BATCH_INTERVAL_MIN = 200;
 
 export class RequestHandler {
   /**
@@ -48,17 +50,19 @@ export class RequestHandler {
     /** @const {string} */
     this.baseUrl = dev().assert(request['baseUrl']);
 
-    /** @private @const {number} */
-    // TODO: to support intervalDelay that start timeout during construction.
-    this.maxDelay_ = Number(request['maxDelay']) || 0; //unit is sec
+    /** @private {Array<number>|number|undefined} */
+    this.batchInterval_ = request['batchInterval']; //unit is sec
 
-    /** @private @const {boolean} */
-    this.isBatched_ = !!this.maxDelay_;
+    /** @private {?number} */
+    this.reportWindow_ = Number(request['reportWindow']) || null; // unit is sec
+
+    /** @private {?number} */
+    this.batchIntervalPointer_ = null;
 
     /** @private @const {string} */
     this.batchPluginId_ = request['batchPlugin'];
 
-    user().assert((this.batchPluginId_ ? this.isBatched_ : true),
+    user().assert((this.batchPluginId_ ? this.batchInterval_ : true),
         'Invalid request: batchPlugin cannot be set on non-batched request');
 
     /** @const {?function(string, !Array<!batchSegmentDef>)} */
@@ -95,13 +99,22 @@ export class RequestHandler {
     this.whiteList_ = isSandbox ? SANDBOX_AVAILABLE_VARS : undefined;
 
     /** @private {?number} */
-    this.timeoutId_ = null;
+    this.batchIntervalTimeoutId_ = null;
+
+    /** @private {?number} */
+    this.reportWindowTimeoutId_ = null;
+
+    /** @private {boolean} */
+    this.reportRequest_ = true;
 
     /** @private {?JsonObject} */
     this.lastTrigger_ = null;
 
-    /** @private {?Promise<string>} */
-    this.sendPromise_ = null;
+    /** @private {number} */
+    this.queueSize_ = 0;
+
+    this.initReportWindow_();
+    this.initBatchInterval_();
   }
 
   /**
@@ -110,21 +123,36 @@ export class RequestHandler {
    * @param {?JsonObject} configParams
    * @param {!JsonObject} trigger
    * @param {!./variables.ExpansionOptions} expansionOption
-   * @return {!Promise<string>}
+   * @param {!Object<string, *>} dynamicBindings A mapping of variables to
+   *     stringable values. For example, values could be strings, functions that
+   *     return strings, promises, etc.
    */
-  send(configParams, trigger, expansionOption) {
+  send(configParams, trigger, expansionOption, dynamicBindings) {
+    const isImportant = trigger['important'];
+
+    const isImmediate =
+        (trigger['important'] === true) || (!this.batchInterval_);
+    if (!this.reportRequest_ && !isImportant) {
+      // Ignore non important trigger out reportWindow
+      return;
+    }
+
+    this.queueSize_++;
     this.lastTrigger_ = trigger;
     const triggerParams = trigger['extraUrlParams'];
+
+    const macros = this.variableService_.getMacros();
+    const bindings = Object.assign({}, dynamicBindings, macros);
 
     if (!this.baseUrlPromise_) {
       expansionOption.freezeVar('extraUrlParams');
       this.baseUrlTemplatePromise_ =
           this.variableService_.expandTemplate(this.baseUrl, expansionOption);
       this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then(baseUrl => {
-        return this.urlReplacementService_.expandAsync(
-            baseUrl, undefined, this.whiteList_);
+        return this.urlReplacementService_.expandUrlAsync(
+            baseUrl, bindings, this.whiteList_);
       });
-    };
+    }
 
     const extraUrlParamsPromise = this.expandExtraUrlParams_(
         configParams, triggerParams, expansionOption)
@@ -132,8 +160,8 @@ export class RequestHandler {
           // Construct the extraUrlParamsString: Remove null param and encode component
           const expandedExtraUrlParamsStr =
               this.getExtraUrlParamsString_(expandExtraUrlParams);
-          return this.urlReplacementService_.expandAsync(
-              expandedExtraUrlParamsStr, undefined, this.whiteList_);
+          return this.urlReplacementService_.expandUrlAsync(
+              expandedExtraUrlParamsStr, bindings, this.whiteList_);
         });
 
     if (this.batchingPlugin_) {
@@ -150,45 +178,47 @@ export class RequestHandler {
     }
 
     this.extraUrlParamsPromise_.push(extraUrlParamsPromise);
-
-    return this.trigger_();
+    this.trigger_(isImmediate);
   }
 
   /**
-   * Dispose function that clear reqeust handler state.
+   * Dispose function that clear request handler state.
    */
   dispose() {
-    if (this.timeoutId_) {
-      this.win.clearTimeout(this.timeoutId_);
-    }
     this.reset_();
+
+    // Clear batchInterval timeout
+    if (this.batchIntervalTimeoutId_) {
+      this.win.clearTimeout(this.batchIntervalTimeoutId_);
+      this.batchIntervalTimeoutId_ = null;
+    }
+
+    if (this.reportWindowTimeoutId_) {
+      this.win.clearTimeout(this.reportWindowTimeoutId_);
+      this.reportWindowTimeoutId_ = null;
+    }
   }
 
   /**
    * Function that schedule the actual request send.
+   * @param {boolean} isImmediate
    * @private
    */
-  trigger_() {
-    if (!this.isBatched_) {
-      return this.fire_();
-    }
-    // If is batched
-    if (!this.timeoutId_) {
-      // schedule fire_ after certain time
-      return this.sendPromise_ = new Promise(resolve => {
-        this.timeoutId_ = this.win.setTimeout(() => {
-          this.fire_().then(request => {
-            resolve(request);
-          });
-        }, this.maxDelay_ * 1000);
-      });
+  trigger_(isImmediate) {
+    if (this.queueSize_ == 0) {
+      // Do nothing if no request in queue
+      return;
     }
 
-    return this.sendPromise_;
+    if (isImmediate) {
+      // If not batched, or batchInterval scheduler schedule trigger immediately
+      this.fire_();
+      return;
+    }
   }
 
   /**
-   * Send out request once ready
+   * Send out request. Should only be called by `trigger_` function
    * @private
    */
   fire_() {
@@ -199,9 +229,9 @@ export class RequestHandler {
     const lastTrigger = /** @type {!JsonObject} */ (this.lastTrigger_);
     this.reset_();
 
-    return baseUrlTemplatePromise.then(preUrl => {
+    baseUrlTemplatePromise.then(preUrl => {
       this.preconnect_.url(preUrl, true);
-      return baseUrlPromise.then(baseUrl => {
+      baseUrlPromise.then(baseUrl => {
         let requestUrlPromise;
         if (this.batchingPlugin_) {
           requestUrlPromise =
@@ -210,9 +240,8 @@ export class RequestHandler {
           requestUrlPromise =
               this.constructExtraUrlParamStrs_(baseUrl, extraUrlParamsPromise);
         }
-        return requestUrlPromise.then(requestUrl => {
+        requestUrlPromise.then(requestUrl => {
           this.handler_(requestUrl, lastTrigger);
-          return requestUrl;
         });
       });
     });
@@ -263,13 +292,12 @@ export class RequestHandler {
    * @private
    */
   reset_() {
+    this.queueSize_ = 0;
     this.baseUrlPromise_ = null;
     this.baseUrlTemplatePromise_ = null;
     this.extraUrlParamsPromise_ = [];
     this.batchSegmentPromises_ = [];
-    this.timeoutId_ = null;
     this.lastTrigger_ = null;
-    this.sendPromise_ = null;
   }
 
   /**
@@ -322,6 +350,65 @@ export class RequestHandler {
       }
     }
     return s.join('&');
+  }
+
+  /**
+   * Handle batchInterval
+   */
+  initBatchInterval_() {
+    if (!this.batchInterval_) {
+      return;
+    }
+
+    this.batchInterval_ = isArray(this.batchInterval_) ?
+      this.batchInterval_ : [this.batchInterval_];
+
+    for (let i = 0; i < this.batchInterval_.length; i++) {
+      let interval = this.batchInterval_[i];
+      user().assert(isFiniteNumber(interval),
+          `Invalid batchInterval value: ${this.batchInterval_}` +
+          'interval must be a number');
+      interval = Number(interval) * 1000;
+      user().assert(interval >= BATCH_INTERVAL_MIN,
+          `Invalid batchInterval value: ${this.batchInterval_}, ` +
+          `interval value must be greater than ${BATCH_INTERVAL_MIN}ms.`);
+      this.batchInterval_[i] = interval;
+    }
+
+    this.batchIntervalPointer_ = 0;
+
+    this.refreshBatchInterval_();
+  }
+
+  initReportWindow_() {
+    if (this.reportWindow_) {
+      this.reportWindowTimeoutId_ = this.win.setTimeout(() => {
+        // Flush batch queue;
+        this.trigger_(true);
+        this.reportRequest_ = false;
+        // Clear batchInterval timeout
+        if (this.batchIntervalTimeoutId_) {
+          this.win.clearTimeout(this.batchIntervalTimeoutId_);
+          this.batchIntervalTimeoutId_ = null;
+        }
+      }, this.reportWindow_ * 1000);
+    }
+  }
+
+  /**
+   * Schedule sending request regarding to batchInterval
+   */
+  refreshBatchInterval_() {
+    dev().assert(this.batchIntervalPointer_ != null,
+        'Should not start batchInterval without pointer');
+    const interval = this.batchIntervalPointer_ < this.batchInterval_.length ?
+      this.batchInterval_[this.batchIntervalPointer_++] :
+      this.batchInterval_[this.batchInterval_.length - 1];
+
+    this.batchIntervalTimeoutId_ = this.win.setTimeout(() => {
+      this.trigger_(true);
+      this.refreshBatchInterval_();
+    }, interval);
   }
 }
 

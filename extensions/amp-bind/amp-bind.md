@@ -345,19 +345,17 @@ sort([2, 1, 3])</pre>
 
 #### Defining macros with `amp-bind-macro`
 
-`amp-bind` expression fragments can be reused by defining an `amp-bind-macro`. The `amp-bind-macro` element allows you to define an expression that
-references the current state as well as zero or more arguments. Then, this `amp-bind-macro` can be called by its name from anywhere in your doc.
+`amp-bind` expression fragments can be reused by defining an `amp-bind-macro`. The `amp-bind-macro` element allows you to define an expression that takes zero or more arguments and references the current state. A macro can be invoked like a function by referencing its `id` attribute value from anywhere in your doc.
 
 ```html
-<amp-bind-macro name="circleArea" arguments="radius" expression="3.14 * radius * radius" />
+<amp-bind-macro id="circleArea" arguments="radius" expression="3.14 * radius * radius" />
 
 <div>
   The circle has an area of <span [text]="circleArea(myCircle.radius)">0</span>.
 </div>
 ```
 
-`amp-bind-macro`s can also call other `amp-bind-macro`s but only if the callee is defined before the caller in the document. `amp-bind-macro`s cannot call
-themselves recursively.
+A macro can also call other macros <i>defined before itself</i>. A macro cannot call itself recursively.
 
 ### Bindings
 

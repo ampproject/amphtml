@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-import {AmpAdCustom} from '../amp-ad-custom';
-import {toggleExperiment} from '../../../../src/experiments';
-import {createElementWithAttributes} from '../../../../src/dom';
 import * as sinon from 'sinon';
+import {AmpAdCustom} from '../amp-ad-custom';
+import {createElementWithAttributes} from '../../../../src/dom';
 
 describe('Amp custom ad', () => {
   let sandbox;
 
   beforeEach(() => {
-    toggleExperiment(window, 'ad-type-custom', true);
     sandbox = sinon.sandbox.create();
   });
 
   afterEach(() => {
-    toggleExperiment(window, 'ad-type-custom', false);
     sandbox.restore();
   });
 

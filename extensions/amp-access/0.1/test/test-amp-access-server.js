@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
 import {AccessServerAdapter} from '../amp-access-server';
 import {removeFragment} from '../../../../src/url';
-import * as lolex from 'lolex';
 
 
 describes.realWin('AccessServerAdapter', {amp: true}, env => {

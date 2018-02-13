@@ -15,15 +15,15 @@
  */
 
 import {
-  base64UrlDecodeToBytes,
   base64DecodeToBytes,
-  base64UrlEncodeFromBytes,
   base64EncodeFromBytes,
+  base64UrlDecodeToBytes,
+  base64UrlEncodeFromBytes,
 } from '../../../src/utils/base64';
 import {
   stringToBytes,
-  utf8DecodeSync,
-  utf8EncodeSync,
+  utf8Decode,
+  utf8Encode,
 } from '../../../src/utils/bytes';
 
 describe('base64 <> utf-8 encode/decode', () => {
@@ -59,11 +59,11 @@ describe('base64 <> utf-8 encode/decode', () => {
       describe('base64Encode/base64Decode', () => {
         testCases.forEach(testCase => {
           it(testCase, () => {
-            const utf8Bytes = utf8EncodeSync(testCase);
+            const utf8Bytes = utf8Encode(testCase);
             const encoded = base64EncodeFromBytes(utf8Bytes);
             expect(encoded).not.to.equal(testCase);
             const decodedUtf8Bytes = base64DecodeToBytes(encoded);
-            const decoded = utf8DecodeSync(decodedUtf8Bytes);
+            const decoded = utf8Decode(decodedUtf8Bytes);
             expect(decoded).to.equal(testCase);
           });
         });
@@ -72,12 +72,12 @@ describe('base64 <> utf-8 encode/decode', () => {
       describe('base64UrlEncode/base64UrlDecode', () => {
         testCases.forEach(testCase => {
           it(testCase, () => {
-            const utf8Bytes = utf8EncodeSync(testCase);
+            const utf8Bytes = utf8Encode(testCase);
             const encoded = base64UrlEncodeFromBytes(utf8Bytes);
             expect(encoded).not.to.equal(testCase);
             expect(encoded).not.to.match(/[+/=]/g);
             const decodedUtf8Bytes = base64UrlDecodeToBytes(encoded);
-            const decoded = utf8DecodeSync(decodedUtf8Bytes);
+            const decoded = utf8Decode(decodedUtf8Bytes);
             expect(decoded).to.equal(testCase);
           });
         });

@@ -23,9 +23,9 @@ import {dev, user} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
+import {px, setImportantStyles} from '../../../src/style';
 import {renderAsElement, renderSimpleTemplate} from './simple-template';
 import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
-import {px, setImportantStyles} from '../../../src/style';
 import {throttle} from '../../../src/utils/rate-limit';
 
 
@@ -224,7 +224,7 @@ export class ShareWidget {
         /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */ (
           dev().assert(this.ampdoc_))).canonicalUrl;
 
-    if (!copyTextToClipboard(this.win_.document, url)) {
+    if (!copyTextToClipboard(this.win_, url)) {
       Toast.show(this.win_, 'Could not copy link to clipboard :(');
       return;
     }

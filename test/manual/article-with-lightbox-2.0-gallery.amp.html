@@ -241,9 +241,14 @@
       font-family: sans-serif;
       font-size: 0.8em;
     }
+
+    amp-img[lightbox] {
+      cursor: pointer;
+    }
+
   </style>
   <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
-  <script async custom-element="amp-lightbox-viewer" src="https://cdn.ampproject.org/v0/amp-lightbox-viewer-0.1.js"></script>
+  <script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js"></script>
   <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
 
   <style amp-boilerplate>
@@ -311,10 +316,10 @@
   </noscript>
 
   <script>
-    // Enable amp-lightbox-viewer experiment automatically if it is not enabled.
+    // Enable amp-lightbox-gallery experiment automatically if it is not enabled.
     setTimeout(function () {
-      if (!AMP.isExperimentOn('amp-lightbox-viewer')) {
-        AMP.toggleExperiment('amp-lightbox-viewer');
+      if (!AMP.isExperimentOn('amp-lightbox-gallery')) {
+        AMP.toggleExperiment('amp-lightbox-gallery');
         location.reload();
       }
     }, 1000);
@@ -337,8 +342,6 @@
       <header id="article-desc">
         <h1>Experimental Lightbox 2.0</h1>
         <div class="header-author">
-          <amp-img src="img/sample.jpg" id="author-avatar" placeholder height="16" width="16">
-          </amp-img>
           by
           <span itemscope itemtype="http://schema.org/Person">
             <b>Lorem Ipsum</b>
@@ -370,18 +373,17 @@
         <amp-img lightbox="toronto" src="https://picsum.photos/900/1600?image=948" layout="responsive" width="900" height="1600"
           alt="Picture of a tall building" aria-describedby="img2desc">
           <span id=img2desc>The brutalist architecture of this building is obvious from its small windows and raw concrete look.</span>
-
-          <amp-img lightbox="toronto" src="https://picsum.photos/1600/1600?image=430" layout="responsive" width="1600" height="1600"
-            alt="Picture of new york city skyline" aria-describedby="img3desc">
-            <p id=img3desc>Compared to New York Cities skyline, Toronto falls short on density. Lorem ipsum dolor sit amet, consectetur
-              adipiscing elit. Curabitur ullamcorper turpis vel commodo scelerisque. Phasellus luctus nunc ut elit cursus,
-              et imperdiet diam vehicula. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur ullamcorper
-              turpis vel commodo scelerisque. Phasellus luctus nunc ut elit cursus, et imperdiet diam vehicula. Lorem ipsum
-              dolor sit amet, consectetur adipiscing elit. Curabitur ullamcorper turpis vel commodo scelerisque. Phasellus
-              luctus nunc ut elit cursus, et imperdiet diam vehicula.</p>
-          </amp-img>
-
         </amp-img>
+
+        <amp-img lightbox="toronto" src="https://picsum.photos/1600/1600?image=430" layout="responsive" width="1600" height="1600"
+        alt="Picture of new york city skyline" aria-describedby="img3desc">
+        <div id=img3desc><p>Compared to New York Cities skyline, Toronto falls short on density. Lorem ipsum dolor sit amet, consectetur
+          adipiscing elit. Curabitur ullamcorper turpis vel commodo scelerisque. Phasellus luctus nunc ut elit cursus,
+          et imperdiet diam vehicula.</p><p>Lorem ipsum dolor sit ametconsectetur adipiscing elit. Curabitur ullamcorper
+          turpis vel commodo scelerisque. Phasellus luctus nunc ut elit cursus, et imperdiet diam vehicula. Lorem ipsum
+          dolor sit amet, consectetur adipiscing elit. Curabitur ullamcorper turpis vel commodo scelerisque. Phasellus
+          luctus nunc ut elit cursus, et imperdiet diam vehicula.</p> </div>
+      </amp-img>
       </div>
 
       <div class="content-container">
@@ -421,7 +423,7 @@
               </div>
             </amp-img>
 
-            <amp-img lightbox="gallery" src="https://picsum.photos/1600/400?image=857" layout="responsive" width="1600" height="400"
+            <amp-img src="https://picsum.photos/1600/400?image=857" layout="responsive" width="1600" height="400"
               alt="Wide image">
             </amp-img>
 

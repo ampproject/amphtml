@@ -17,11 +17,3 @@
 amp-mathml[inline] {
   display: inline-block;
 }
-
-amp-mathml {
-  height: 1px;
-}
-
-amp-mathml[inline] {
-  width: 1px;
-}

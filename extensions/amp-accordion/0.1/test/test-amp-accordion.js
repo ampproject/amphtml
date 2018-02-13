@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import '../amp-accordion';
 import {KeyCodes} from '../../../../src/utils/key-codes';
 import {tryFocus} from '../../../../src/dom';
-import '../amp-accordion';
 
 
 describes.realWin('amp-accordion', {

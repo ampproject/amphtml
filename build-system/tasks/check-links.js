@@ -16,15 +16,15 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const path = require('path');
 const BBPromise = require('bluebird');
 const chalk = require('chalk');
+const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const getStdout = require('../exec').getStdout;
 const gulp = require('gulp-help')(require('gulp'));
-const markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
-const colors = require('ansi-colors');
 const log = require('fancy-log');
+const markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
+const path = require('path');
 
 
 /**
@@ -39,7 +39,7 @@ function getMarkdownFiles() {
   const filesInPr =
         getStdout('git diff --name-only master...HEAD').trim().split('\n');
   return filesInPr.filter(function(file) {
-    return path.extname(file) == '.md';
+    return path.extname(file) == '.md' && !file.startsWith('examples/');
   });
 }
 
@@ -142,6 +142,10 @@ function filterWhitelistedLinks(markdown) {
 
   // Links inside a <code> block (illustrative, and not always valid)
   filteredMarkdown = filteredMarkdown.replace(/<code>(.*?)<\/code>/g, '');
+
+  // The heroku nightly build page is not always acccessible by the checker.
+  filteredMarkdown = filteredMarkdown.replace(
+      /\(http:\/\/amphtml-nightly.herokuapp.com\/\)/g, '');
 
   // After all whitelisting is done, clean up any remaining empty blocks bounded
   // by backticks. Otherwise, `` will be treated as the start of a code block

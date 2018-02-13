@@ -209,8 +209,21 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  adzerk: {},
+
   affiliateb: {
     prefetch: 'https://track.affiliate-b.com/amp/a.js',
+    renderStartImplemented: true,
+  },
+
+  appvador: {
+    prefetch: [
+      'https://cdn.apvdr.com/js/VastAdUnit.min.js',
+      'https://cdn.apvdr.com/js/VideoAd.min.js',
+      'https://cdn.apvdr.com/js/VideoAd3PAS.min.js',
+      'https://cdn.apvdr.com/js/VideoAdAutoPlay.min.js',
+      'https://cdn.apvdr.com/js/VideoAdNative.min.js',
+    ],
     renderStartImplemented: true,
   },
 
@@ -230,6 +243,7 @@ export const adConfig = {
   appnexus: {
     prefetch: 'https://acdn.adnxs.com/ast/ast.js',
     preconnect: 'https://ib.adnxs.com',
+    renderStartImplemented: true,
   },
 
   atomx: {
@@ -332,6 +346,15 @@ export const adConfig = {
     clientIdCookieName: '_ga',
     renderStartImplemented: true,
     masterFrameAccessibleType: 'google_network',
+  },
+
+  eadv: {
+    renderStartImplemented: true,
+    clientIdScope: 'AMP_ECID_EADV',
+    prefetch: [
+      'https://www.eadv.it/track/esr.min.js',
+      'https://www.eadv.it/track/ead.min.js',
+    ],
   },
 
   eas: {
@@ -619,6 +642,8 @@ export const adConfig = {
 
   postquare: {},
 
+  pubexchange: {},
+
   pubmatic: {
     prefetch: 'https://ads.pubmatic.com/AdServer/js/amp.js',
   },
@@ -755,6 +780,10 @@ export const adConfig = {
       'https://ad.jp.ap.valuecommerce.com',
       'https://ad.omks.valuecommerce.com',
     ],
+    renderStartImplemented: true,
+  },
+
+  videonow: {
     renderStartImplemented: true,
   },
 
