@@ -329,6 +329,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {boolean} */
     this.isIdleRender_ = false;
+
+    /** @private {./safeframe-host.SafeframeHostApi} */
+    this.safeframeApi_ = null;
   }
 
   /** @override */
@@ -798,8 +801,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   setupSafeframe() {
-    if (!this.safeframeApi) {
-      this.safeframeApi = new SafeframeHostApi(this);
+    if (!this.safeframeApi_) {
+      this.safeframeApi_ = new SafeframeHostApi(this);
     }
   }
 
@@ -842,7 +845,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       return false;
     }
     const superResult = super.unlayoutCallback();
-    this.maybeRemoveListenerForFluid();
     return superResult;
   }
 
@@ -1187,7 +1189,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getAdditionalContextMetadata(isSafeframe) {
     if (this.isFluid_ || isSafeframe) {
       this.setupSafeframe();
-      return this.safeframeApi.getSafeframeNameAttr();
+      return this.safeframeApi_.getSafeframeNameAttr();
     }
   }
 

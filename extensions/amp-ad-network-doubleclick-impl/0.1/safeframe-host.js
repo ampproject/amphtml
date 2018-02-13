@@ -26,8 +26,7 @@ import {SimplePostMessageApiDef} from '../../../src/simple-postmessage-api-def';
  *
  * Maps a sentinel value to an instance of the SafeframeHostApi to which that
  * sentinel value belongs.
- * @type{!Object<string,
- *   !./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>}
+ * @type{!Object<string,SafeframeHostApi>}
  */
 const safeframeHosts = {};
 
@@ -243,7 +242,7 @@ export class SafeframeHostApi {
    */
   setupGeom_() {
     this.IntersectionObserver_ = new IntersectionObserver(
-        this.baseInstance_, this.iframe_, false, this, 1000);
+        this.baseInstance_, this.baseInstance_.element, false, this, 1000);
     // This will send a geometry update message, and then start sending
     // them whenever geometry changes as detected by intersection
     // observer. Make sure we always send this initial update message.
@@ -258,10 +257,10 @@ export class SafeframeHostApi {
    * safeframe container, which allows $sf.ext.geom() to work.
    */
   send(unusedTrash, changes) {
-    this.sendMessage_(JSON.stringify({
+    this.sendMessage_({
       newGeometry: this.formatGeom_(changes['changes'][0]),
       uid: this.uid,
-    }), SERVICE.GEOMETRY_UPDATE);
+    }, SERVICE.GEOMETRY_UPDATE);
   }
 
   /**
@@ -356,8 +355,8 @@ export class SafeframeHostApi {
 
   /**
    * Handles serializing and sending messages to the safeframe.
-   * @param {Object} payload
-   * @param {string} serviceName
+   * @param {!Object} payload
+   * @param {!string} serviceName
    * @private
    */
   sendMessage_(payload, serviceName) {
@@ -365,7 +364,7 @@ export class SafeframeHostApi {
         'Frame contentWindow unavailable.');
     const message = {};
     message[MESSAGE_FIELDS.CHANNEL] = this.channel;
-    message[MESSAGE_FIELDS.PAYLOAD] = payload;
+    message[MESSAGE_FIELDS.PAYLOAD] = JSON.stringify(payload);
     message[MESSAGE_FIELDS.SERVICE] = serviceName;
     message[MESSAGE_FIELDS.SENTINEL] = this.sentinel_;
     message[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = this.endpointIdentity_;
@@ -425,7 +424,7 @@ export class SafeframeHostApi {
    */
   handleSizeChange(height, width, message, optIsCollapse) {
     const sendResizeResponse = success => {
-      this.sendMessage_(JSON.stringify({
+      this.sendMessage_({
         uid: this.uid,
         success,
         newGeometry: this.getCurrentGeometry(),
@@ -434,7 +433,7 @@ export class SafeframeHostApi {
         'expand_r': this.currentGeometry_.allowedExpansion_r,
         'expand_l': this.currentGeometry_.allowedExpansion_l,
         push: true,
-      }), message);
+      }, message);
     };
     // If the new size is fully contained within the bounds of the amp-ad,
     // we can resize immediately as there will be no reflow.
