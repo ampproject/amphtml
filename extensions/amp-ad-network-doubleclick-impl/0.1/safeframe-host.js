@@ -20,14 +20,14 @@ import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {SimplePostMessageApiDef} from '../../../src/simple-postmessage-api-def';
-import {AmpAdNetworkDoubleclickImpl} from './amp-ad-network-doubleclick-impl';
 
 /**
  * Used to manage messages for different Safeframe ad slots.
  *
  * Maps a sentinel value to an instance of the SafeframeHostApi to which that
  * sentinel value belongs.
- * @type{!Object<string, !AmpAdNetworkDoubleclickImpl>}
+ * @type{!Object<string,
+ *   !./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl>}
  */
 const safeframeHosts = {};
 
@@ -123,10 +123,10 @@ function receiveSetupMessage(data) {
 export class SafeframeHostApi {
 
   /**
-   * @param {AmpAdNetworkDoubleclickImpl} baseInstance
+   * @param {!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl} baseInstance
    */
   constructor(baseInstance) {
-    /** @private {AmpAdNetworkDoubleclickImpl} */
+    /** @private {!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl} */
     this.baseInstance_ = baseInstance;
 
     /** @private {Window} */
@@ -135,7 +135,7 @@ export class SafeframeHostApi {
     /** @private {string} */
     this.sentinel_ = this.baseInstance_.sentinel;
 
-    /** @private {?HTMLIframeElement} */
+    /** @private {?Element} */
     this.iframe_ = null;
 
     /** @private {?IntersectionObserver} */
@@ -262,8 +262,7 @@ export class SafeframeHostApi {
     this.sendMessage_(JSON.stringify({
       newGeometry: this.formatGeom_(changes['changes'][0]),
       uid: this.uid,
-    }), SERVICE.GEOMETRY_UPDATE
-    );
+    }), SERVICE.GEOMETRY_UPDATE);
   }
 
   /**
@@ -336,6 +335,11 @@ export class SafeframeHostApi {
     return JSON.stringify(this.currentGeometry_);
   }
 
+  /**
+   * Calculates and returns the allowed expansion values for height and width.
+   * @param {!Object} changes Intersection change entry.
+   * @returns {!Object<string, number>}
+   */
   getExpandBounds(changes) {
     const frameHeight = changes.boundingClientRect.bottom -
           changes.boundingClientRect.top;
