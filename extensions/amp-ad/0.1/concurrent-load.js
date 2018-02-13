@@ -24,7 +24,7 @@ import {user} from '../../../src/log';
 const LOADING_ADS_WIN_ID_ = '3pla';
 
 /** @private {!Array<function()>} resolve when no 3p throttle */
-let throttlePromiseResolvers_ = [];
+const throttlePromiseResolvers_ = [];
 
 /**
  * @param {!Window} win
@@ -84,7 +84,7 @@ export function incrementLoadingAds(win, opt_loadingPromise) {
       .catch(() => {})
       .then(() => {
         if (!--win[LOADING_ADS_WIN_ID_]) {
-          throttlePromiseResolver = throttlePromiseResolvers_.shift();
+          const throttlePromiseResolver = throttlePromiseResolvers_.shift();
           if (throttlePromiseResolver !== undefined) {
             throttlePromiseResolver();
           }
