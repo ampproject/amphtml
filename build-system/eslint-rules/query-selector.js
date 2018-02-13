@@ -96,22 +96,41 @@ module.exports = function(context) {
     } else if (node.type === 'TemplateLiteral') {
 
       // Ensure all template variables are properly escaped.
+      let accumulator = '';
+      const quasis = node.quasis.map(v => v.value.raw);
       for (let i = 0; i < node.expressions.length; i++) {
         const expression = node.expressions[i];
+        accumulator += quasis[i];
 
         if (expression.type === 'CallExpression') {
           const {callee} = expression;
-          if (callee.type === 'Identifier' ||
-            callee.name === 'escapeCssSelectorIdent') {
-            continue;
+          if (callee.type === 'Identifier') {
+            const inNthChild = /:nth-(last-)?(child|of-type|col)\([^)]*$/.test(
+                accumulator);
+
+            if (callee.name === 'escapeCssSelectorIdent') {
+              if (inNthChild) {
+                context.report(expression, 'escapeCssSelectorIdent may not ' +
+                    'be used inside an :nth-X psuedo-class. Please use ' +
+                    'escapeCssSelectorNth instead.');
+              }
+              continue;
+            } else if (callee.name === 'escapeCssSelectorNth') {
+              if (!inNthChild) {
+                context.report(expression, 'escapeCssSelectorNth may only be ' +
+                    'used inside an :nth-X psuedo-class. Please use ' +
+                    'escapeCssSelectorIdent instead.');
+              }
+              continue;
+            }
           }
         }
 
         context.report(expression, 'Each selector value must be escaped by '+
-          'escapeCssSelectorIdent in src/dom.js');
+            'escapeCssSelectorIdent in src/dom.js');
       }
 
-      selector = node.quasis.map(v => v.value.raw).join('');
+      selector = quasis.join('');
     } else {
       if (node.type === 'BinaryExpression') {
         context.report(node, 'Use a template literal string');

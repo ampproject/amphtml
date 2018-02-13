@@ -724,6 +724,21 @@ export function escapeCssSelectorIdent(win, ident) {
   return cssEscape(ident);
 }
 
+/**
+ * Escapes an ident in a way that can be used by :nth-child() psuedo-class.
+ *
+ * See https://github.com/w3c/csswg-drafts/issues/2306.
+ *
+ * @param {!Window} win
+ * @param {string|number} ident
+ * @return {string}
+ */
+export function escapeCssSelectorNth(win, ident) {
+  const escaped = String(ident);
+  // Ensure it doesn't close the nth-child psuedo class.
+  dev().assert(escaped.indexOf(')') === -1);
+  return escaped;
+}
 
 /**
  * Escapes `<`, `>` and other HTML charcaters with their escaped forms.
