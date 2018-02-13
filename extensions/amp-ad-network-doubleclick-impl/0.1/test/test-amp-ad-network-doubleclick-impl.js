@@ -1379,6 +1379,11 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           expect(impl.idleRenderOutsideViewport()).to.be.false;
           expect(impl.isIdleRender_).to.be.false;
         });
+
+        it('should return 12 if launch experiment enabled', () => {
+          forceExperimentBranch(impl.win, 'dfp_ff_render_idle_launch', 1);
+          expect(impl.idleRenderOutsideViewport()).to.equal(12);
+        });
       });
 
       describe('idle renderNonAmpCreative', () => {
