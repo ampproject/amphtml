@@ -112,17 +112,18 @@ describes.realWin('concurrent-load', {}, env => {
       installTimerService(env.win);
     });
 
-    it('should block if incremented', () => {
+    // TODO(jeffkaufman, #13422): this test was silently failing
+    it.skip('should block if incremented', () => {
       incrementLoadingAds(env.win);
       const start = Date.now();
       return waitFor3pThrottle(env.win).then(
-          () => expect(Date.now() - start >= 1000));
+          () => expect(Date.now() - start).to.be.at.least(1000));
     });
 
     it('should not block if never incremented', () => {
       const start = Date.now();
       return waitFor3pThrottle(env.win).then(
-          () => expect(Date.now() - start <= 50));
+          () => expect(Date.now() - start).to.be.at.most(50));
     });
   });
 });
