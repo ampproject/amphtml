@@ -113,8 +113,8 @@ describes.realWin('concurrent-load', {}, env => {
     });
 
     it('should block if incremented', () => {
-      incrementLoadingAds(env.win);
       const start = Date.now();
+      incrementLoadingAds(env.win);
       return waitFor3pThrottle(env.win).then(
           () => expect(Date.now() - start).to.be.at.least(1000));
     });
