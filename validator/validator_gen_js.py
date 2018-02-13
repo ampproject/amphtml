@@ -242,7 +242,7 @@ class MessageRegistry(object):
     self.message_id_by_attr_list_name_[attr_list.name] = message_id
 
   def MessageIdForAttrListName(self, attr_list_name):
-    """Looks up a message id for a tag spec by TagSpecName.
+    """Looks up a message id for a tag spec by AttrListName.
 
     Args:
       attr_list_name: a string - the AttrList::name field.

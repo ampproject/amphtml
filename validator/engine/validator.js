@@ -597,7 +597,8 @@ class ParsedTagSpec {
    */
   expandExtensionSpec() {
     const extensionSpec = this.spec_.extensionSpec;
-    this.spec_.specName = extensionSpec.name + ' extension .js script';
+    if (this.spec_.specName === null)
+      this.spec_.specName = extensionSpec.name + ' extension .js script';
     this.spec_.mandatoryParent = 'HEAD';
     if (this.spec_.extensionSpec.deprecatedAllowDuplicates)
       this.spec_.uniqueWarning = true;
@@ -5545,7 +5546,7 @@ amp.validator.renderValidationResult = function(validationResult, filename) {
  * @return {boolean}
  */
 function isAuthorStylesheet(param) {
-  return param === 'style amp-custom' || param === 'style amp-custom (AMP4ADS)';
+  return goog.string./*OK*/ startsWith(param, 'style amp-custom');
 }
 
 /**
