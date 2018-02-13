@@ -19,11 +19,11 @@ module.exports = function(context) {
   return {
     ExportNamedDeclaration: function(node) {
       if (node.declaration) {
-        var declaration = node.declaration;
+        const declaration = node.declaration;
         if (declaration.type === 'VariableDeclaration') {
           declaration.declarations
               .map(function(declarator) {
-                return declarator.init
+                return declarator.init;
               }).filter(function(init) {
                 return init && /(?:Call|New)Expression/.test(init.type);
               }).forEach(function(init) {
