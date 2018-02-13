@@ -171,9 +171,9 @@ export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
     promiseArray.push(Services.timerFor(win).timeoutPromise(
         timeoutMillis,
         urlReplacements.expandUrlAsync(url, macros, whitelist)).then(url => {
-          timeoutMillis -= (urlReplacementStartTime - Date.now());
-          return send(url);
-    }).catch(err => {
+      timeoutMillis -= (urlReplacementStartTime - Date.now());
+      return send(url);
+    }).catch(unused => {
       return buildErrorResponse_(RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT,
           opt_vendor || url, undefined, true);
     }));
