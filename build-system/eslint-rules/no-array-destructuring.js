@@ -19,6 +19,6 @@ module.exports = function(context) {
   return {
     ArrayPattern: function(node) {
       context.report(node, 'No Array destructuring allowed.');
-    }
+    },
   };
 };
