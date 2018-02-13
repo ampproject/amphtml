@@ -19,7 +19,7 @@ import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 const NOOP = () => {};
 const dummyUrl = 'http://lipsum.com';
 
-describe('amp-subscriptions', {}, env => {
+describe('local-subscriptions', {}, env => {
   let ampdoc;
   let localSubscriptionPlatform;
 

@@ -15,27 +15,33 @@
  */
 
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
+import {SubscriptionService} from '../amp-subscriptions';
 
 const NOOP = () => {};
-const dummyUrl = 'http://lipsum.com';
 
 describe('amp-subscriptions', {}, env => {
   let ampdoc;
-  let localSubscriptionPlatform;
+  let subscriptionService;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
-
-    localSubscriptionPlatform = new LocalSubscriptionPlatform(ampdoc, dummyUrl);
+    subscriptionService = new SubscriptionService(ampdoc);
   });
 
 
-  it('should fetch the entitlements on getEntitlements', () => {
+  it('should call `initialize_` on start', () => {
     const initializeStub =
-        sandbox.stub(localSubscriptionPlatform.xhr_, 'fetchJson')
-            .callsFake(NOOP);
-    localSubscriptionPlatform.getEntitlements();
+        sandbox.stub(subscriptionService, 'initialize_').callsFake(NOOP);
+    subscriptionService.start_();
+
     expect(initializeStub).to.be.called.once;
   });
-});
 
+  it('should add subscription platform while registering it', () => {
+    const serviceID = 'dummy service';
+    const subsPlatform = new LocalSubscriptionPlatform(ampdoc, {});
+    subscriptionService.registerService(serviceID, subsPlatform);
+    expect(subscriptionService.subscriptionPlatforms_.includes(subsPlatform))
+        .to.be.true;
+  });
+});

@@ -18,7 +18,7 @@ import {Entitlement, Entitlements} from '../entitlements';
 
 import {EntitlementStore} from '../entitlement-store';
 
-describe('entitlements', () => {
+describe('entitlement-store', {}, () => {
   let entitlementStore;
   const serviceIds = ['service1', 'service2'];
 
@@ -30,8 +30,8 @@ describe('entitlements', () => {
     expect(entitlementStore.serviceIds_).to.be.equal(serviceIds);
   });
 
-  it('should call all onChange callbacks on every resolve', () => {
-    const cb = sandbox.spy();
+  it('should call onChange callbacks on every resolve', () => {
+    const cb = sandbox.stub(entitlementStore.onChangeCallbacks_, 'fire');
     entitlementStore.onChange(cb);
     entitlementStore.resolveEntitlement('service2',
         new Entitlement('service2', ['product1'], ''));
