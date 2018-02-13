@@ -901,7 +901,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (this.postAdResponseExperimentFeatures['render-idle-throttle'] &&
           this.isIdleRender_) {
       if (is3pThrottled(this.win)) {
-        return waitFor3pThrottle().then(() => super.renderNonAmpCreative());
+        return waitFor3pThrottle(this.win).then(
+            () => super.renderNonAmpCreative());
       } else {
         incrementLoadingAds(this.win);
         return super.renderNonAmpCreative(true);
