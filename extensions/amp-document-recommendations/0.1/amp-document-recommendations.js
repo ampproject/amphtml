@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-/** @const */
-const MAX_ARTICLES = 2;
-
-/** @const */
-const SEPARATPOR_RECOS = 3;
-
 import {assertConfig} from './config';
 import {user} from '../../../src/log';
 import {tryParseJson} from '../../../src/json';
@@ -29,19 +23,26 @@ import {Services} from '../../../src/services';
 import {MultidocManager} from '../../../src/runtime';
 import {setStyle} from '../../../src/style';
 
+/** @const */
+const MAX_ARTICLES = 2;
+
+/** @const */
+const SEPARATPOR_RECOS = 3;
+
+/** @private {AmpDocumentRecommendations} */
+let activeInstance_ = null;
+
 export class AmpDocumentRecommendations extends AMP.BaseElement {
 
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
-    this.element.classList.add('i-amp-document-recommendations');
-
     // TODO(emarchiori): Consider using a service instead of singleton.
-    if (this.win.CONTENT_DISCOVERY) {
+    if (activeInstance_) {
       return;
     }
-    this.win.CONTENT_DISCOVERY = this;
+    activeInstance_ = this;
 
     /** @private {?AmpDocumentRecommendationsConfig} */
     this.config_;
@@ -51,6 +52,9 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
 
     /** @private {number} */
     this.nextArticle_ = 0;
+
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = Services.viewerForDoc(this.getAmpDoc());
   }
 
   /** @override */
@@ -58,6 +62,9 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     return true;
   }
 
+  /**
+   * Append a divider between two recommendations or articles.
+   */
   appendDivision_() {
     const doc = this.win.document;
     const topDivision = doc.createElement('div');
@@ -65,6 +72,9 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     this.element.appendChild(topDivision);
   }
 
+  /**
+   * Append a new article if still possible.
+   */
   appendNextArticle_() {
     if (this.nextArticle_ < MAX_ARTICLES &&
         this.nextArticle_ < this.config_.recommendations.length) {
@@ -75,7 +85,7 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
       this.nextArticle_++;
 
       Services.xhrFor(this.win)
-          .fetchDocument(next.ampUrl, {})
+          .fetchDocument(next.ampUrl)
           .then(
               doc => {this.attachShadowDoc_(doc);},
               () => {});
@@ -83,32 +93,33 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
   }
 
   /**
+   * Append recommendation links to articles, starting from a given
+   * one.
    * @param {number} from
    */
   appendArticleLinks_(from) {
     const doc = this.win.document;
     let article = from;
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
 
     while (article < this.config_.recommendations.length &&
         article - from < SEPARATPOR_RECOS) {
       const next = this.config_.recommendations[article];
       article++;
 
-      const articleHolder = doc.createElement('div');
-      articleHolder.classList.add('i-reco-holder-article');
-      articleHolder.onclick = () => {
-        viewer.navigateTo(next.ampUrl, 'content-discovery');
-      };
+      const articleHolder = doc.createElement('button');
+      articleHolder.classList.add('i-amphtml-reco-holder-article');
+      articleHolder.addEventListener('click', () => {
+        this.viewer_.navigateTo(next.ampUrl, 'content-discovery');
+      });
 
       const imageElement = doc.createElement('div');
-      imageElement.classList.add('i-next-article-image',
+      imageElement.classList.add('i-amphtml-next-article-image',
           'amp-document-recommendations-image');
       setStyle(imageElement, 'background-image', `url(${next.image})`);
       articleHolder.appendChild(imageElement);
 
       const titleElement = doc.createElement('div');
-      titleElement.classList.add('i-next-article-title',
+      titleElement.classList.add('i-amphtml-next-article-title',
           'amp-document-recommendations-text');
 
       titleElement.textContent = next.title;
@@ -120,6 +131,10 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     }
   }
 
+  /**
+   * Attach a ShadowDoc using the given document.
+   * @param {!Document} doc
+   */
   attachShadowDoc_(doc) {
     this.getVsync().mutate(() => {
       const shadowRoot = this.win.document.createElement('div');
@@ -143,9 +158,11 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    if (this.win.CONTENT_DISCOVERY !== this) {
+    if (activeInstance_ !== this) {
       return Promise.resolve();
     }
+
+    this.element.classList.add('i-amphtml-document-recommendations');
 
     this.multidocManager_ = new MultidocManager(
         this.win,

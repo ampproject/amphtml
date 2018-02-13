@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-i-amp-document-recommendations {}
-
-.i-amp-document-recommendations {
-  background: white;
+.i-amphtml-document-recommendations {
+  background: #FFFFFF;
 }
 
 .amp-document-recommendations-division {
@@ -33,13 +31,14 @@ i-amp-document-recommendations {}
   font-size: 17px;
 }
 
-.i-reco-holder-article {
+.i-amphtml-reco-holder-article {
   padding-top:10px;
   padding-bottom:10px;
-  height:72px;
+  height:92px;
+  width:100%;
 }
 
-.i-next-article-image {
+.i-amphtml-next-article-image {
   width: 72px;
   height: 72px;
   float: left;
@@ -48,7 +47,7 @@ i-amp-document-recommendations {}
   background-position: center;
 }
 
-.i-next-article-title {
+.i-amphtml-next-article-title {
   position: relative;
   left: 10px;
   top: 5px;
@@ -56,4 +55,5 @@ i-amp-document-recommendations {}
   text-overflow: ellipsis;
   overflow: hidden;
   margin-right: 30px;
+  text-align: left;
 }
