@@ -127,7 +127,7 @@
     "markdown-link-check": "3.1.6",
     "minimatch": "3.0.4",
     "minimist": "1.2.0",
-    "mocha": "4.1.0",
+    "mocha": "5.0.1",
     "moment": "2.20.1",
     "morgan": "1.9.0",
     "nodemon": "1.14.12",
