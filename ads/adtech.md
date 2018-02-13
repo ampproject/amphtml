@@ -30,10 +30,10 @@ limitations under the License.
 For semantics of configuration, please see ad network documentation.
 
 ### Required Parameters:
-* `data-atwMN` - magic number (placement alias) for the ad spot
 * `data-atwDiv` - div name of the ad spot; can be class or id
 
 ### Optional parameters:
+* `data-atwMN` - magic number (placement alias) for the ad spot
 * `data-atwPlId` - placement ID (instead of Magic Number)
 * `data-atwOthAT` - generic var to set key/value pairs to send with the ad call; accepts mulitple values in a semi-colon delimited list
 * `data-atwCo` - override default country code
