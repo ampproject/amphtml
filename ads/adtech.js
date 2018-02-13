@@ -32,7 +32,7 @@ export function adtech(global, data) {
     validateData(data, ['atwdiv'], [
       'atwco', 'atwheight', 'atwhtnmat',
       'atwmoat', 'atwnetid', 'atwothat', 'atwplid',
-      'atwpolar', 'atwsizes', 'atwwidth',
+      'atwpolar', 'atwsizes', 'atwwidth', 'atwmn'
     ]);
     global.atwco = data.atwco;
     global.atwdiv = data.atwdiv;
