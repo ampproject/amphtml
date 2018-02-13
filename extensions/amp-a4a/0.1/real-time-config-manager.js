@@ -168,9 +168,11 @@ export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
     const whitelist = {};
     Object.keys(macros).forEach(key => whitelist[key] = true);
     const urlReplacementStartTime = Date.now();
-    promiseArray.push(Services.timerFor(win).timeoutPromise(timeoutMillis,
+    promiseArray.push(Services.timerFor(win).timeoutPromise(
+        timeoutMillis,
         urlReplacements.expandUrlAsync(url, macros, whitelist)).then(url => {
-      return send(url);
+          timeoutMillis -= (urlReplacementStartTime - Date.now());
+          return send(url);
     }).catch(err => {
       return buildErrorResponse_(RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT,
           opt_vendor || url, undefined, true);
