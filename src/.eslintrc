@@ -1,6 +1,5 @@
 {
   "rules": {
-    "no-global": 2,
-    "query-selector": 2
+    "no-global": 2
   }
 }

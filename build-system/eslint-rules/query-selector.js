@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ module.exports = function(context) {
 
     if (property.leadingComments) {
       const ok = property.leadingComments.some(comment => {
-        return comment.value === 'OK'
+        return comment.value === 'OK';
       });
       if (ok) {
         return;
@@ -72,7 +72,7 @@ module.exports = function(context) {
 
     if (callee.trailingComments) {
       const ok = callee.trailingComments.some(comment => {
-        return comment.value === 'OK'
+        return comment.value === 'OK';
       });
       if (ok) {
         return;
@@ -85,12 +85,12 @@ module.exports = function(context) {
       return;
     }
 
-    context.report(node, "using scopedQuerySelector here is actually " +
+    context.report(node, 'using scopedQuerySelector here is actually ' +
         "unnecessary, since you don't use child selector semantics.");
   }
 
   function getSelector(node) {
-    let selector
+    let selector;
     if (node.type === 'Literal') {
       selector = node.value;
     } else if (node.type === 'TemplateLiteral') {
@@ -126,7 +126,7 @@ module.exports = function(context) {
           }
         }
 
-        context.report(expression, 'Each selector value must be escaped by '+
+        context.report(expression, 'Each selector value must be escaped by ' +
             'escapeCssSelectorIdent in src/dom.js');
       }
 
@@ -169,6 +169,6 @@ module.exports = function(context) {
       } else if (callee.type === 'Identifier') {
         scopedQuerySelectorCall(node);
       }
-    }
+    },
   };
 };
