@@ -24,11 +24,13 @@ describe('test-ads-config', () => {
     });
   });
 
-  it('should sort adConfig in alphabetic order', () => {
+  // TODO(jeffkaufman, #13422): this test was silently failing
+  it.skip('should sort adConfig in alphabetic order', () => {
     delete adConfig.fakead3p;
     const keys = Object.keys(adConfig);
     for (let i = 0; i < keys.length - 1; i++) {
-      expect(keys[i] < keys[i + 1]);
+      assert(keys[i] <= keys[i + 1], 'Keys not sorted: ' + keys[i] +
+             ' should sort before ' + keys[i + 1]);
     }
   });
 

@@ -133,7 +133,7 @@ describes.realWin('amp-sidebar 0.1 version', {
   describe('amp-sidebar', () => {
     it('should apply overlay class', () => {
       return getAmpSidebar().then(sidebarElement => {
-        expect(sidebarElement.classList.contains('i-amphtml-overlay'));
+        assert(sidebarElement.classList.contains('i-amphtml-overlay'));
       });
     });
 
