@@ -265,6 +265,7 @@ data.inViewport;
 data.numposts;
 data.orderBy;
 data.colorscheme;
+data.showText;
 
 // 3p code
 var twttr;
