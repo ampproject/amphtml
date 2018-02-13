@@ -144,7 +144,7 @@ describe('iframe-helper', function() {
       IframeHelper.listenForOncePromise(testIframe,
           ['no-msg', 'send-intersections'])
           .then(obj => {
-            expect(obj.message = 'send-intersections');
+            expect(obj.message).to.equal('send-intersections');
             calls++;
             resolve();
           });

@@ -120,15 +120,13 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
           () => {})
           .then(buffer => Promise.resolve(utf8Decode(buffer)))
           .then(creative => {
-            expect(creative
-                .indexOf(
-                    '<script async src="https://cdn.ampproject.org/v0.js">' +
-                    '</script>') == -1).to.be.true;
-            expect(creative
-                .indexOf(
-                    '<script async custom-template="amp-mustache" src=' +
-                    '"https://cdn.ampproject.org/v0/amp-mustache-0.1.js">' +
-                    '</script>') == -1).to.be.true;
+            expect(creative).to.not.contain(
+                '<script async src="https://cdn.ampproject.org/v0.js">' +
+                '</script>');
+            expect(creative).to.not.contain(
+                '<script async custom-template="amp-mustache" src=' +
+                '"https://cdn.ampproject.org/v0/amp-mustache-0.1.js">' +
+                '</script>');
             expect(impl.getAmpAdMetadata()).to.jsonEqual({
               minifiedCreative: creative,
               customElementExtensions: ['amp-mustache'],
