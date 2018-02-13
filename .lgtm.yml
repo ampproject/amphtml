@@ -4,5 +4,4 @@ path_classifiers:
 extraction:
   javascript:
     index:
-      filters:
-        exclude: "examples"
+      exclude: examples
