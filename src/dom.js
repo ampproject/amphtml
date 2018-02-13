@@ -712,15 +712,10 @@ export function isRTL(doc) {
  *
  * See https://drafts.csswg.org/cssom/#serialize-an-identifier.
  *
- * @param {!Window} win
  * @param {string} ident
  * @return {string}
  */
-export function escapeCssSelectorIdent(win, ident) {
-  if (win.CSS && win.CSS.escape) {
-    return win.CSS.escape(ident);
-  }
-  // Polyfill.
+export function escapeCssSelectorIdent(ident) {
   return cssEscape(ident);
 }
 
@@ -729,11 +724,10 @@ export function escapeCssSelectorIdent(win, ident) {
  *
  * See https://github.com/w3c/csswg-drafts/issues/2306.
  *
- * @param {!Window} win
  * @param {string|number} ident
  * @return {string}
  */
-export function escapeCssSelectorNth(win, ident) {
+export function escapeCssSelectorNth(ident) {
   const escaped = String(ident);
   // Ensure it doesn't close the nth-child psuedo class.
   dev().assert(escaped.indexOf(')') === -1);

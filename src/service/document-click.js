@@ -305,8 +305,6 @@ export class ClickHandler {
    * @private
    */
   handleNavClick_(e, target, tgtLoc) {
-    /** @const {!Window} */
-    const win = e.target.ownerDocument.defaultView;
     /** @const {!Location} */
     const curLoc = this.parseUrl_('');
     const tgtHref = `${tgtLoc.origin}${tgtLoc.pathname}${tgtLoc.search}`;
@@ -342,7 +340,7 @@ export class ClickHandler {
     const hash = tgtLoc.hash.slice(1);
     let elem = null;
     if (hash) {
-      const escapedHash = escapeCssSelectorIdent(win, hash);
+      const escapedHash = escapeCssSelectorIdent(hash);
       elem = (this.rootNode_.getElementById(hash) ||
           // Fallback to anchor[name] if element with id is not found.
           // Linking to an anchor element with name is obsolete in html5.
