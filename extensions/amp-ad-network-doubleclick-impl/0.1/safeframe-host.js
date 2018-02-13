@@ -141,16 +141,16 @@ export class SafeframeHostApi {
     /** @private {?IntersectionObserver} */
     this.IntersectionObserver_ = null;
 
-    /** @type {string} */
+    /** @type {?string} */
     this.channel = null;
 
-    /** @private {number} */
+    /** @private {?number} */
     this.initialHeight_ = null;
 
-    /** @private {number} */
+    /** @private {?number} */
     this.initialWidth_ = null;
 
-    /** @private {Object} */
+    /** @private {?Object} */
     this.currentGeometry_ = null;
 
     /** @private {number} */
@@ -256,7 +256,6 @@ export class SafeframeHostApi {
    * events.
    * Handles sending the geometry update message to the
    * safeframe container, which allows $sf.ext.geom() to work.
-   * @override
    */
   send(unusedTrash, changes) {
     this.sendMessage_(JSON.stringify({
@@ -403,8 +402,8 @@ export class SafeframeHostApi {
    * @private
    */
   handleRegisterDone_(payload) {
-    this.initialHeight_ = payload.initialHeight;
-    this.initialWidth_ = payload.initialWidth;
+    this.initialHeight_ = payload['initialHeight'];
+    this.initialWidth_ = payload['initialWidth'];
   }
 
   /**
@@ -422,7 +421,7 @@ export class SafeframeHostApi {
    * @param {number} height In pixels.
    * @param {number} width In pixels.
    * @param {string} message
-   * @param {boolean} optIsCollapse Whether this is a collapse attempt.
+   * @param {boolean=} optIsCollapse Whether this is a collapse attempt.
    */
   handleSizeChange(height, width, message, optIsCollapse) {
     const sendResizeResponse = success => {
