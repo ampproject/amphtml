@@ -28,6 +28,6 @@ module.exports = function(context) {
           }
         });
       }
-    }
+    },
   };
 };
