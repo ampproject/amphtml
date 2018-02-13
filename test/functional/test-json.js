@@ -129,7 +129,7 @@ describe('json', () => {
       expect(copy).to.not.equal(original);
       expect(copy.__proto__).to.be.undefined;
       expect(copy.child).to.deep.equal(original.child);
-      assert(copy.child).to.not.equal(original.child);
+      expect(copy.child).to.not.equal(original.child);
       expect(copy.child.__proto__).to.be.undefined;
     });
   });
