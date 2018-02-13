@@ -54,11 +54,6 @@ import {
   UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
   experimentFeatureEnabled,
 } from './doubleclick-a4a-config';
-import {
-  ExperimentInfo, // eslint-disable-line no-unused-vars
-  getExperimentBranch, // eslint-disable-line no-unused-vars
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {RTC_ERROR_ENUM} from '../../amp-a4a/0.1/real-time-config-manager';
 import {RTC_VENDORS} from '../../amp-a4a/0.1/callout-vendors';
@@ -76,8 +71,14 @@ import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {getData} from '../../../src/event-helper';
+import {
+  getExperimentBranch,
+  isExperimentOn,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
+import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {
   googleLifecycleReporterFactory,
   setGoogleLifecycleVarsFromHeaders,
@@ -386,11 +387,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   idleRenderOutsideViewport() {
-    const vpRange =
-        parseInt(this.postAdResponseExperimentFeatures['render-idle-vp'], 10);
     // Disable if publisher has indicated a non-default loading strategy.
-    if (isNaN(vpRange) || this.element.getAttribute('data-loading-strategy')) {
+    if (this.element.getAttribute('data-loading-strategy')) {
       return false;
+    }
+    let vpRange =
+        parseInt(this.postAdResponseExperimentFeatures['render-idle-vp'], 10);
+    if (isNaN(vpRange)) {
+      if (isExperimentOn(this.win, 'dfp_ff_render_idle_launch')) {
+        vpRange = 12;
+      } else {
+        return false;
+      }
     }
     this.isIdleRender_ = true;
     // NOTE(keithwrightbos): handle race condition where previous
@@ -452,7 +460,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     const sfPreloadExpName = 'a4a-safeframe-preloading-off';
     const experimentInfoMap =
-        /** @type {!Object<string, !ExperimentInfo>} */ ({});
+        /** @type {!Object<string,
+        !../../../src/experiments.ExperimentInfo>} */ ({});
     experimentInfoMap[sfPreloadExpName] = {
       isTrafficEligible: () => true,
       branches: ['21061135', '21061136'],
@@ -476,7 +485,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // TODO(keithwrightbos,glevitzy) - determine behavior for correlator
       // interaction with refresh.
       const experimentInfoMap =
-          /** @type {!Object<string, !ExperimentInfo>} */ ({});
+          /** @type {!Object<string,
+          !../../../src/experiments.ExperimentInfo>} */ ({});
       experimentInfoMap[CORRELATOR_CLEAR_EXP_NAME] = {
         isTrafficEligible: () => true,
         branches: ['22302764','22302765'],
@@ -758,6 +768,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         JSON.stringify(
             (tryParseJson(
                 this.element.getAttribute('json')) || {})['targeting']),
+      ADCID: opt_timeout => getOrCreateAdCid(
+          this.getAmpDoc(), 'AMP_ECID_GOOGLE', '_ga',
+          parseInt(opt_timeout, 10)),
       ATTR: name => {
         if (!whitelist[name.toLowerCase()]) {
           dev().warn('TAG', `Invalid attribute ${name}`);
