@@ -428,7 +428,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       ampStickyAd.appendChild(element);
       doc.body.appendChild(ampStickyAd);
       return impl.getAdUrl().then(adUrl => {
-        expect(adUrl.indexOf('act=sa') >= 0).to.be.true;
+        expect(adUrl).to.contain('act=sa');
       });
     });
 

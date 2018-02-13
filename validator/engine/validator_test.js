@@ -521,7 +521,7 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
           'disallowed_domain is whatever.ampproject.org',
          () => {
            for (const disallowedDomain of attrSpec.valueUrl.disallowedDomain) {
-             expect(disallowedDomain !== 'whatever.ampproject.org');
+             expect(disallowedDomain).to.not.equal('whatever.ampproject.org');
            }
          });
     }
