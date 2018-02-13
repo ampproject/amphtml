@@ -30,11 +30,10 @@ class AmpFacebook extends AMP.BaseElement {
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
 
-    /** @private {string} */
-    this.dataLocale_ = element.getAttribute('data-locale');
-    if (!this.dataLocale_) {
-      this.dataLocale_ = dashToUnderline(window.navigator.language);
-    }
+    /** @private @const {string} */
+    this.dataLocale_ = element.hasAttribute('data-locale') ?
+      element.getAttribute('data-locale') :
+      dashToUnderline(window.navigator.language);
   }
 
   /** @override */

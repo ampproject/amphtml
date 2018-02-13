@@ -1,0 +1,1441 @@
+[
+  {
+    "path": "/",
+    "title": "Learn AMP by Example",
+    "name": "AMPHTML",
+    "desc": "A hands-on introduction to Accelerated Mobile Pages (AMP) focusing on code and live samples. Learn how to create AMP pages and see examples for all AMP components.",
+    "index": 0,
+    "categories": [
+      {
+        "description": "<p>Get started with AMP and learn how to build your first AMP page.</p>\n",
+        "name": "Introduction",
+        "url": "/#introduction",
+        "id": "introduction",
+        "targetDir": "introduction/index.html",
+        "examples": [
+          {
+            "title": " Hello World",
+            "name": "_Hello_World",
+            "description": "An AMP HTML tutorial - learn the different building blocks of an AMP HTML file.",
+            "url": "/introduction/hello_world/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/introduction/hello_world/preview/embed/",
+            "urlEmbed": "/introduction/hello_world/embed/",
+            "metadata": {}
+          },
+          {
+            "title": " How to publish AMPs",
+            "name": "_How_to_publish_AMPs",
+            "description": "There are a few things you need to watch out for when publishing Accelerated Mobile Pages (AMP).",
+            "url": "/introduction/how_to_publish_amps/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/introduction/how_to_publish_amps/preview/embed/",
+            "urlEmbed": "/introduction/how_to_publish_amps/embed/",
+            "metadata": {
+              "hideCode": true,
+              "disablePlayground": true,
+              "hidePreview": true
+            }
+          },
+          {
+            "title": "AMP for E-Commerce Getting Started",
+            "name": "AMP_for_E-Commerce_Getting_Started",
+            "description": "Here is a quick getting started guide for creating e-commerce webpages with AMP.",
+            "url": "/introduction/amp_for_e-commerce_getting_started/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/introduction/amp_for_e-commerce_getting_started/preview/embed/",
+            "urlEmbed": "/introduction/amp_for_e-commerce_getting_started/embed/",
+            "metadata": {
+              "disablePlayground": true
+            }
+          },
+          {
+            "title": "Internationalization",
+            "name": "Internationalization",
+            "description": "How to support hreflang and internationalization with AMP.",
+            "url": "/introduction/internationalization/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/introduction/internationalization/preview/embed/",
+            "urlEmbed": "/introduction/internationalization/embed/",
+            "metadata": {
+              "hideCode": true,
+              "disablePlayground": true,
+              "hidePreview": true
+            }
+          }
+        ],
+        "selected": false
+      },
+      {
+        "description": "<p>AMP components in action. Learn how to build AMPs using the built-in components.</p>\n",
+        "name": "Components",
+        "url": "/#components",
+        "id": "components",
+        "targetDir": "components/index.html",
+        "examples": [
+          {
+            "title": "amp-access-laterpay",
+            "name": "amp-access-laterpay",
+            "description": "amp-access-laterpay allows publishers to easily integrate with the payment infrastructure platform LaterPay.",
+            "url": "/components/amp-access-laterpay/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-access-laterpay/preview/embed/",
+            "urlEmbed": "/components/amp-access-laterpay/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-access",
+            "name": "amp-access",
+            "description": "The amp-access component adds support for paywalls and subscriptions to AMP, allowing the publisher to control which content is accessible by the reader and with what restrictions.",
+            "url": "/components/amp-access/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-access/preview/embed/",
+            "urlEmbed": "/components/amp-access/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-accordion",
+            "name": "amp-accordion",
+            "description": "An accordion provides a way for viewers to have a glance at the outline of the content and jump to a section or their choice at their will.",
+            "url": "/components/amp-accordion/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-accordion/preview/embed/",
+            "urlEmbed": "/components/amp-accordion/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-ad",
+            "name": "amp-ad",
+            "description": "How to display Ads in your AMP HTML files.",
+            "url": "/components/amp-ad/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-ad/preview/embed/",
+            "urlEmbed": "/components/amp-ad/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-analytics",
+            "name": "amp-analytics",
+            "description": "The amp-analytics element can be used to measure activity on an AMP document.",
+            "url": "/components/amp-analytics/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-analytics/preview/embed/",
+            "urlEmbed": "/components/amp-analytics/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-anim",
+            "name": "amp-anim",
+            "description": "Embed animations (gif, webp) into your AMP HTML files.",
+            "url": "/components/amp-anim/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-anim/preview/embed/",
+            "urlEmbed": "/components/amp-anim/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-app-banner",
+            "name": "amp-app-banner",
+            "description": "amp-app-banner provides a minimal UI for a cross-platform, fixed-position banner showing a call-to-action to install an app.",
+            "url": "/components/amp-app-banner/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-app-banner/preview/embed/",
+            "urlEmbed": "/components/amp-app-banner/embed/",
+            "metadata": {
+              "comment": "Don't install serviceworker as canonical domain is different that serviceworker domain",
+              "skipServiceWorker": true
+            }
+          },
+          {
+            "title": "amp-audio",
+            "name": "amp-audio",
+            "description": "AMP replaces the HTML5 audio tag with its own version: amp-audio.",
+            "url": "/components/amp-audio/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-audio/preview/embed/",
+            "urlEmbed": "/components/amp-audio/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-bind",
+            "name": "amp-bind",
+            "description": "amp-bind   allows you to add custom interactivity to your pages beyond   using AMP's pre-built components.",
+            "url": "/components/amp-bind/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-bind/preview/embed/",
+            "urlEmbed": "/components/amp-bind/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-brid-player",
+            "name": "amp-brid-player",
+            "description": "Embed Brid Player videos in your AMP HTML files.",
+            "url": "/components/amp-brid-player/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-brid-player/preview/embed/",
+            "urlEmbed": "/components/amp-brid-player/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-brightcove",
+            "name": "amp-brightcove",
+            "description": "The amp-brightcove component allows embedding a Brightcove   Video Cloud or   Perform player.",
+            "url": "/components/amp-brightcove/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-brightcove/preview/embed/",
+            "urlEmbed": "/components/amp-brightcove/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-call-tracking",
+            "name": "amp-call-tracking",
+            "description": "amp-call-tracking replaces static phone numbers with dynamically generated phone numbers used for call tracking analytics.",
+            "url": "/components/amp-call-tracking/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-call-tracking/preview/embed/",
+            "urlEmbed": "/components/amp-call-tracking/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-carousel",
+            "name": "amp-carousel",
+            "description": "The amp-carousel component allows displaying multiple similar pieces of content along a horizontal   axis.",
+            "url": "/components/amp-carousel/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-carousel/preview/embed/",
+            "urlEmbed": "/components/amp-carousel/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-dailymotion",
+            "name": "amp-dailymotion",
+            "description": "Embed daily motion videos into your AMP HTML files.",
+            "url": "/components/amp-dailymotion/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-dailymotion/preview/embed/",
+            "urlEmbed": "/components/amp-dailymotion/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-date-picker",
+            "name": "amp-date-picker",
+            "description": "amp-date-picker is an AMP component which allows to select a single date or a range of dates.",
+            "url": "/components/amp-date-picker/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-date-picker/preview/embed/",
+            "urlEmbed": "/components/amp-date-picker/embed/",
+            "metadata": {
+              "experiments": [
+                "amp-date-picker"
+              ]
+            },
+            "experiments": [
+              "amp-date-picker"
+            ],
+            "experiment": true
+          },
+          {
+            "title": "amp-dynamic-css-classes",
+            "name": "amp-dynamic-css-classes",
+            "description": "AMP's dynamic CSS classes provided by the amp-dynamic-css-class tag enable boolean logic for a handful of conditions",
+            "url": "/components/amp-dynamic-css-classes/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-dynamic-css-classes/preview/embed/",
+            "urlEmbed": "/components/amp-dynamic-css-classes/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-experiment",
+            "name": "amp-experiment",
+            "description": "The  amp-experiment component allows to perform user experience experiments on an AMP document and collect resulting data.",
+            "url": "/components/amp-experiment/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-experiment/preview/embed/",
+            "urlEmbed": "/components/amp-experiment/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-facebook",
+            "name": "amp-facebook",
+            "description": "The amp-facebook component allows embedding both posts and videos into AMP files.",
+            "url": "/components/amp-facebook/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-facebook/preview/embed/",
+            "urlEmbed": "/components/amp-facebook/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-fit-text",
+            "name": "amp-fit-text",
+            "description": "amp-fit-text enables you to manage the size and fit of text within a given area.",
+            "url": "/components/amp-fit-text/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-fit-text/preview/embed/",
+            "urlEmbed": "/components/amp-fit-text/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-font",
+            "name": "amp-font",
+            "description": "Learn how to use the amp-font component to trigger and monitor the loading of custom fonts on AMP pages.",
+            "url": "/components/amp-font/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-font/preview/embed/",
+            "urlEmbed": "/components/amp-font/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-form",
+            "name": "amp-form",
+            "description": "The amp-form extension allows   the usage of forms and input fields in an AMP document.",
+            "url": "/components/amp-form/",
+            "urlPreview": "/components/amp-form/preview/",
+            "urlPreviewEmbed": "/components/amp-form/preview/embed/",
+            "urlEmbed": "/components/amp-form/embed/",
+            "metadata": {
+              "preview": "default",
+              "experiments": [
+                "amp-form-verifiers"
+              ]
+            },
+            "experiments": [
+              "amp-form-verifiers"
+            ],
+            "experiment": true
+          },
+          {
+            "title": "amp-fx-flying-carpet",
+            "name": "amp-fx-flying-carpet",
+            "description": "amp-fx-flying-carpet displays its children inside a container of fixed height.",
+            "url": "/components/amp-fx-flying-carpet/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-fx-flying-carpet/preview/embed/",
+            "urlEmbed": "/components/amp-fx-flying-carpet/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-fx-parallax",
+            "name": "amp-fx-parallax",
+            "description": "The amp-fx-parallax extension allows an element to move as if it is nearer or farther relative to the foreground of the page content.",
+            "url": "/components/amp-fx-parallax/",
+            "urlPreview": "/components/amp-fx-parallax/preview/",
+            "urlPreviewEmbed": "/components/amp-fx-parallax/preview/embed/",
+            "urlEmbed": "/components/amp-fx-parallax/embed/",
+            "metadata": {
+              "experiments": [
+                "amp-fx-parallax"
+              ],
+              "preview": "default"
+            },
+            "experiments": [
+              "amp-fx-parallax"
+            ],
+            "experiment": true
+          },
+          {
+            "title": "amp-gfycat",
+            "name": "amp-gfycat",
+            "description": "Use the amp-gfycat component to embed animated GIFs from gfycat in your AMP HTML files.",
+            "url": "/components/amp-gfycat/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-gfycat/preview/embed/",
+            "urlEmbed": "/components/amp-gfycat/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-gist",
+            "name": "amp-gist",
+            "description": "The amp-gist component allows embedding of an entire gist or a single file.",
+            "url": "/components/amp-gist/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-gist/preview/embed/",
+            "urlEmbed": "/components/amp-gist/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-google-vrview-image",
+            "name": "amp-google-vrview-image",
+            "description": "The amp-google-vrview-image extension allows embedding 360 degree VR media into AMP pages.",
+            "url": "/components/amp-google-vrview-image/",
+            "urlPreview": "/components/amp-google-vrview-image/preview/",
+            "urlPreviewEmbed": "/components/amp-google-vrview-image/preview/embed/",
+            "urlEmbed": "/components/amp-google-vrview-image/embed/",
+            "metadata": {
+              "experiments": [
+                "amp-google-vrview-image"
+              ],
+              "preview": "default"
+            },
+            "experiments": [
+              "amp-google-vrview-image"
+            ],
+            "experiment": true
+          },
+          {
+            "title": "amp-hulu",
+            "name": "amp-hulu",
+            "description": "Use the amp-hulu component to embed Hulu videos into AMP files.",
+            "url": "/components/amp-hulu/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-hulu/preview/embed/",
+            "urlEmbed": "/components/amp-hulu/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-iframe",
+            "name": "amp-iframe",
+            "description": "Use amp-iframe for embedding content into AMP files via iframe.",
+            "url": "/components/amp-iframe/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-iframe/preview/embed/",
+            "urlEmbed": "/components/amp-iframe/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-ima-video",
+            "name": "amp-ima-video",
+            "description": "amp-ima-video   embeds a video player for instream video ads that are integrated with the   IMA SDK.",
+            "url": "/components/amp-ima-video/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-ima-video/preview/embed/",
+            "urlEmbed": "/components/amp-ima-video/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-image-lightbox",
+            "name": "amp-image-lightbox",
+            "description": "The amp-image-lightbox component allows the user to expand an image to fill the viewport.",
+            "url": "/components/amp-image-lightbox/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-image-lightbox/preview/embed/",
+            "urlEmbed": "/components/amp-image-lightbox/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-img",
+            "name": "amp-img",
+            "description": "AMP HTML files don't support the normal HTML img tag.",
+            "url": "/components/amp-img/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-img/preview/embed/",
+            "urlEmbed": "/components/amp-img/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-instagram",
+            "name": "amp-instagram",
+            "description": "Embed instagram videos and photos into your AMP HTML files.",
+            "url": "/components/amp-instagram/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-instagram/preview/embed/",
+            "urlEmbed": "/components/amp-instagram/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-install-serviceworker",
+            "name": "amp-install-serviceworker",
+            "description": "The amp-install-serviceworker   component enables service worker installation via same origin or via the Google AMP Cache.",
+            "url": "/components/amp-install-serviceworker/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-install-serviceworker/preview/embed/",
+            "urlEmbed": "/components/amp-install-serviceworker/embed/",
+            "metadata": {
+              "hidePreview": true
+            }
+          },
+          {
+            "title": "amp-jwplayer",
+            "name": "amp-jwplayer",
+            "description": "Embed jwplayer videos in your AMP HTML files.",
+            "url": "/components/amp-jwplayer/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-jwplayer/preview/embed/",
+            "urlEmbed": "/components/amp-jwplayer/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-kaltura-player",
+            "name": "amp-kaltura-player",
+            "description": "Embed Kaltura videos in your AMP HTML files.",
+            "url": "/components/amp-kaltura-player/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-kaltura-player/preview/embed/",
+            "urlEmbed": "/components/amp-kaltura-player/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-lightbox",
+            "name": "amp-lightbox",
+            "description": "The amp-lightbox component allows for a “lightbox” or similar experience - where upon user   interaction a component expands to fill the viewport, until it is closed again by the user.",
+            "url": "/components/amp-lightbox/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-lightbox/preview/embed/",
+            "urlEmbed": "/components/amp-lightbox/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-list",
+            "name": "amp-list",
+            "description": "The amp-list component fetches dynamic content from a CORS JSON endpoint and renders it using a supplied template.",
+            "url": "/components/amp-list/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-list/preview/embed/",
+            "urlEmbed": "/components/amp-list/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-live-list",
+            "name": "amp-live-list",
+            "description": "The amp-live-list component adds support for publishing live updates to AMP pages as new content becomes available in the source document.",
+            "url": "/components/amp-live-list/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-live-list/preview/embed/",
+            "urlEmbed": "/components/amp-live-list/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-mustache",
+            "name": "amp-mustache",
+            "description": "amp-mustache templates are a simple, structured templating system based on mustache.",
+            "url": "/components/amp-mustache/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-mustache/preview/embed/",
+            "urlEmbed": "/components/amp-mustache/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-o2-player",
+            "name": "amp-o2-player",
+            "description": "Embed o2 player in your AMP HTML files.",
+            "url": "/components/amp-o2-player/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-o2-player/preview/embed/",
+            "urlEmbed": "/components/amp-o2-player/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-pinterest",
+            "name": "amp-pinterest",
+            "description": "The amp-pinterest component allows embedding a Pin It button or pin widget.",
+            "url": "/components/amp-pinterest/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-pinterest/preview/embed/",
+            "urlEmbed": "/components/amp-pinterest/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-pixel",
+            "name": "amp-pixel",
+            "description": "amp-pixel is a lightweight mechanism for measuring pageviews.",
+            "url": "/components/amp-pixel/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-pixel/preview/embed/",
+            "urlEmbed": "/components/amp-pixel/embed/",
+            "metadata": {
+              "skipValidation": "true"
+            }
+          },
+          {
+            "title": "amp-reach-player",
+            "name": "amp-reach-player",
+            "description": "Embed videos hosted on Beachfront Reach in your AMP HTML files.",
+            "url": "/components/amp-reach-player/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-reach-player/preview/embed/",
+            "urlEmbed": "/components/amp-reach-player/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-selector",
+            "name": "amp-selector",
+            "description": "amp-selector lets the user choose from a list of options.",
+            "url": "/components/amp-selector/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-selector/preview/embed/",
+            "urlEmbed": "/components/amp-selector/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-sidebar",
+            "name": "amp-sidebar",
+            "description": "A sidebar provides a way to display meta content intended for temporary access (navigation links, buttons, menus, etc.).",
+            "url": "/components/amp-sidebar/",
+            "urlPreview": "/components/amp-sidebar/preview/",
+            "urlPreviewEmbed": "/components/amp-sidebar/preview/embed/",
+            "urlEmbed": "/components/amp-sidebar/embed/",
+            "metadata": {
+              "skipValidation": "true",
+              "preview": "default"
+            }
+          },
+          {
+            "title": "amp-social-share",
+            "name": "amp-social-share",
+            "description": "The Social Share extension provides a common interface for share buttons, styled to complement each other.",
+            "url": "/components/amp-social-share/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-social-share/preview/embed/",
+            "urlEmbed": "/components/amp-social-share/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-soundcloud",
+            "name": "amp-soundcloud",
+            "description": "Play soundcloud tracks from within AMP HTML files.",
+            "url": "/components/amp-soundcloud/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-soundcloud/preview/embed/",
+            "urlEmbed": "/components/amp-soundcloud/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-springboard-player",
+            "name": "amp-springboard-player",
+            "description": "Embed videos hosted on the Springboard Video Platform in your AMP HTML files.",
+            "url": "/components/amp-springboard-player/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-springboard-player/preview/embed/",
+            "urlEmbed": "/components/amp-springboard-player/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-sticky-ad",
+            "name": "amp-sticky-ad",
+            "description": "amp-sticky-ad adds support for ad units that always take a fixed place in the viewport in your AMP HTML files.",
+            "url": "/components/amp-sticky-ad/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-sticky-ad/preview/embed/",
+            "urlEmbed": "/components/amp-sticky-ad/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-timeago",
+            "name": "amp-timeago",
+            "description": "The amp-timeago provides fuzzy timestamps by formatting dates as \"X time ago\"",
+            "url": "/components/amp-timeago/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-timeago/preview/embed/",
+            "urlEmbed": "/components/amp-timeago/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-twitter",
+            "name": "amp-twitter",
+            "description": "Embed tweets into your AMP HTML files.",
+            "url": "/components/amp-twitter/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-twitter/preview/embed/",
+            "urlEmbed": "/components/amp-twitter/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-user-notification",
+            "name": "amp-user-notification",
+            "description": "Use amp-user-notification to display a dismissable notification to the user.",
+            "url": "/components/amp-user-notification/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-user-notification/preview/embed/",
+            "urlEmbed": "/components/amp-user-notification/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-video",
+            "name": "amp-video",
+            "description": "Embed videos into your AMP HTML files.",
+            "url": "/components/amp-video/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-video/preview/embed/",
+            "urlEmbed": "/components/amp-video/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-vimeo",
+            "name": "amp-vimeo",
+            "description": "Embed Vimeo videos in your AMP HTML files.",
+            "url": "/components/amp-vimeo/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-vimeo/preview/embed/",
+            "urlEmbed": "/components/amp-vimeo/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-vine",
+            "name": "amp-vine",
+            "description": "Embed Vine videos in your AMP HTML files.",
+            "url": "/components/amp-vine/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-vine/preview/embed/",
+            "urlEmbed": "/components/amp-vine/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "amp-youtube",
+            "name": "amp-youtube",
+            "description": "Embed YouTube videos into your AMP HTML files.",
+            "url": "/components/amp-youtube/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/components/amp-youtube/preview/embed/",
+            "urlEmbed": "/components/amp-youtube/embed/",
+            "metadata": {}
+          }
+        ],
+        "selected": false
+      },
+      {
+        "description": "<p>Advanced AMP integrations. Learn how to get the most out of AMP.</p>\n",
+        "name": "Advanced",
+        "url": "/#advanced",
+        "id": "advanced",
+        "targetDir": "advanced/index.html",
+        "examples": [
+          {
+            "title": "amp-user-notification with Server Endpoint",
+            "name": "amp-user-notification_with_Server_Endpoint",
+            "description": "Use amp-user-notification to display a dismissable notification to the user.",
+            "url": "/advanced/amp-user-notification_with_server_endpoint/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/advanced/amp-user-notification_with_server_endpoint/preview/embed/",
+            "urlEmbed": "/advanced/amp-user-notification_with_server_endpoint/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "Autosuggest",
+            "name": "Autosuggest",
+            "description": "This sample showcases how to implement an interactive autosuggest form field.",
+            "url": "/advanced/autosuggest/",
+            "urlPreview": "/advanced/autosuggest/preview/",
+            "urlPreviewEmbed": "/advanced/autosuggest/preview/embed/",
+            "urlEmbed": "/advanced/autosuggest/embed/",
+            "metadata": {
+              "preview": "default",
+              "draft": false
+            }
+          },
+          {
+            "title": "Click-to-play overlay for amp-video",
+            "name": "Click-to-play_overlay_for_amp-video",
+            "description": "Click-to-play is a common UX feature for video players on the web.",
+            "url": "/advanced/click-to-play_overlay_for_amp-video/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/advanced/click-to-play_overlay_for_amp-video/preview/embed/",
+            "urlEmbed": "/advanced/click-to-play_overlay_for_amp-video/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "ComboBox",
+            "name": "ComboBox",
+            "description": "This sample demonstrastes a classic dropdown combo, with a text field which filters the dropdown elements    according to the user's input.",
+            "url": "/advanced/combobox/",
+            "urlPreview": "/advanced/combobox/preview/",
+            "urlPreviewEmbed": "/advanced/combobox/preview/embed/",
+            "urlEmbed": "/advanced/combobox/embed/",
+            "metadata": {
+              "preview": "default"
+            }
+          },
+          {
+            "title": "Custom Loading Indicators",
+            "name": "Custom_Loading_Indicators",
+            "description": "While the AMP runtime fetches content from endpoints, it will display a loading indicator.",
+            "url": "/advanced/custom_loading_indicators/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/advanced/custom_loading_indicators/preview/embed/",
+            "urlEmbed": "/advanced/custom_loading_indicators/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "Favorite Button",
+            "name": "Favorite_Button",
+            "description": "This sample demonstrates how to implement a favorite/like/bookmark button in AMP.",
+            "url": "/advanced/favorite_button/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/advanced/favorite_button/preview/embed/",
+            "urlEmbed": "/advanced/favorite_button/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "Geolocation with amp-list",
+            "name": "Geolocation_with_amp-list",
+            "description": "While the AMP Caches don't offer support for geolocation, you can enable   geo-based features with geolocation logic on your backend and   amp-list.",
+            "url": "/advanced/geolocation_with_amp-list/",
+            "urlPreview": "/advanced/geolocation_with_amp-list/preview/",
+            "urlPreviewEmbed": "/advanced/geolocation_with_amp-list/preview/embed/",
+            "urlEmbed": "/advanced/geolocation_with_amp-list/embed/",
+            "metadata": {
+              "preview": "default"
+            }
+          },
+          {
+            "title": "How to support Images with unknown Dimensions?",
+            "name": "How_to_support_Images_with_unknown_Dimensions%3F",
+            "description": "This sample demonstrates how it is possible to embed images with unknown dimensions into an AMP page while maintaining the correct aspect ratio.",
+            "url": "/advanced/how_to_support_images_with_unknown_dimensions/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/advanced/how_to_support_images_with_unknown_dimensions/preview/embed/",
+            "urlEmbed": "/advanced/how_to_support_images_with_unknown_dimensions/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "Image Galleries with amp-carousel",
+            "name": "Image_Galleries_with_amp-carousel",
+            "description": "The amp-carousel component works great for image galleries.",
+            "url": "/advanced/image_galleries_with_amp-carousel/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/advanced/image_galleries_with_amp-carousel/preview/embed/",
+            "urlEmbed": "/advanced/image_galleries_with_amp-carousel/embed/",
+            "metadata": {
+              "highlight": true
+            },
+            "highlight": true
+          },
+          {
+            "title": "Integrating Videos in AMP an Overview",
+            "name": "Integrating_Videos_in_AMP_an_Overview",
+            "description": "There many different ways to integrate videos in AMP HTML files.",
+            "url": "/advanced/integrating_videos_in_amp_an_overview/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/advanced/integrating_videos_in_amp_an_overview/preview/embed/",
+            "urlEmbed": "/advanced/integrating_videos_in_amp_an_overview/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "Layout System",
+            "name": "Layout_System",
+            "description": "There are a number of tools in AMP and CSS to make responsive documents.",
+            "url": "/advanced/layout_system/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/advanced/layout_system/preview/embed/",
+            "urlEmbed": "/advanced/layout_system/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "Linked Dropdowns",
+            "name": "Linked_Dropdowns",
+            "description": "These linked dropdowns are implemented using AMP components.",
+            "url": "/advanced/linked_dropdowns/",
+            "urlPreview": "/advanced/linked_dropdowns/preview/",
+            "urlPreviewEmbed": "/advanced/linked_dropdowns/preview/embed/",
+            "urlEmbed": "/advanced/linked_dropdowns/embed/",
+            "metadata": {
+              "preview": "default"
+            }
+          },
+          {
+            "title": "Long List of amp-instagram Embeds",
+            "name": "Long_List_of_amp-instagram_Embeds",
+            "description": "A page with a long list of amp-instagram embeds to show how fast and responsive AMP pages are, this example contains 15 amp-instagram embeds.",
+            "url": "/advanced/long_list_of_amp-instagram_embeds/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/advanced/long_list_of_amp-instagram_embeds/preview/embed/",
+            "urlEmbed": "/advanced/long_list_of_amp-instagram_embeds/embed/",
+            "metadata": {
+              "comment": "Hack: using `&nbsp;` to ensure that code and preview sections are visible on mobile. "
+            }
+          },
+          {
+            "title": "Paged List",
+            "name": "Paged_List",
+            "description": "Often, users requests data that could fill multiple pages of content, so   web applications must provide a way for users to navigate across pages of   data.",
+            "url": "/advanced/paged_list/",
+            "urlPreview": "/advanced/paged_list/preview/",
+            "urlPreviewEmbed": "/advanced/paged_list/preview/embed/",
+            "urlEmbed": "/advanced/paged_list/embed/",
+            "metadata": {
+              "preview": "default"
+            }
+          },
+          {
+            "title": "Payments in AMP",
+            "name": "Payments_in_AMP",
+            "description": "Via amp-iframe and the allowpaymentrequest attribute, AMP pages can support requesting payment information directly from the browser.",
+            "url": "/advanced/payments_in_amp/",
+            "urlPreview": "/advanced/payments_in_amp/preview/",
+            "urlPreviewEmbed": "/advanced/payments_in_amp/preview/embed/",
+            "urlEmbed": "/advanced/payments_in_amp/embed/",
+            "metadata": {
+              "preview": "default"
+            }
+          },
+          {
+            "title": "Rich Media Notifications",
+            "name": "Rich_Media_Notifications",
+            "description": "Media notifications are one of the most common ways users control media   playback on mobile devices.",
+            "url": "/advanced/rich_media_notifications/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/advanced/rich_media_notifications/preview/embed/",
+            "urlEmbed": "/advanced/rich_media_notifications/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "Show More Button",
+            "name": "Show_More_Button",
+            "description": "This is a sample showing how to implement the \"show more\" design pattern.",
+            "url": "/advanced/show_more_button/",
+            "urlPreview": "/advanced/show_more_button/preview/",
+            "urlPreviewEmbed": "/advanced/show_more_button/preview/embed/",
+            "urlEmbed": "/advanced/show_more_button/embed/",
+            "metadata": {
+              "preview": "default",
+              "default": "preview"
+            }
+          },
+          {
+            "title": "Star Rating",
+            "name": "Star_Rating",
+            "description": "This star rating widget is implemented using only CSS, given AMP's restriction on custom JavaScript.",
+            "url": "/advanced/star_rating/",
+            "urlPreview": "/advanced/star_rating/preview/",
+            "urlPreviewEmbed": "/advanced/star_rating/preview/embed/",
+            "urlEmbed": "/advanced/star_rating/embed/",
+            "metadata": {
+              "preview": "default"
+            }
+          },
+          {
+            "title": "Tab Panels with amp-selector",
+            "name": "Tab_Panels_with_amp-selector",
+            "description": "This is a implementation of tab panels that uses amp-selector.",
+            "url": "/advanced/tab_panels_with_amp-selector/",
+            "urlPreview": "/advanced/tab_panels_with_amp-selector/preview/",
+            "urlPreviewEmbed": "/advanced/tab_panels_with_amp-selector/preview/embed/",
+            "urlEmbed": "/advanced/tab_panels_with_amp-selector/embed/",
+            "metadata": {
+              "preview": "default"
+            }
+          },
+          {
+            "title": "Using the AMP URL API",
+            "name": "Using_the_AMP_URL_API",
+            "description": "The AMP URL API retrieves the matching AMP URLs for a given list of URLs.",
+            "url": "/advanced/using_the_amp_url_api/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/advanced/using_the_amp_url_api/preview/embed/",
+            "urlEmbed": "/advanced/using_the_amp_url_api/embed/",
+            "metadata": {
+              "hideCode": true,
+              "hidePreview": true,
+              "disablePlayground": true,
+              "skipValidation": true
+            }
+          },
+          {
+            "title": "Using the Google AMP Cache",
+            "name": "Using_the_Google_AMP_Cache",
+            "description": "The Google AMP Cache stores valid AMPs and provides a consistently fast access to AMPs.",
+            "url": "/advanced/using_the_google_amp_cache/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/advanced/using_the_google_amp_cache/preview/embed/",
+            "urlEmbed": "/advanced/using_the_google_amp_cache/embed/",
+            "metadata": {
+              "hideCode": true,
+              "disablePlayground": true,
+              "hidePreview": true
+            }
+          },
+          {
+            "title": "Video Carousels with amp-carousel",
+            "name": "Video_Carousels_with_amp-carousel",
+            "description": "The amp-carousel component works not only great for image galleries, but also for video galleries.",
+            "url": "/advanced/video_carousels_with_amp-carousel/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/advanced/video_carousels_with_amp-carousel/preview/embed/",
+            "urlEmbed": "/advanced/video_carousels_with_amp-carousel/embed/",
+            "metadata": {}
+          }
+        ],
+        "selected": false
+      },
+      {
+        "name": "Dynamic AMP",
+        "url": "/#dynamic_amp",
+        "id": "dynamic_amp",
+        "targetDir": "dynamic_amp/index.html",
+        "examples": [
+          {
+            "title": "Dynamic Content After User-Interaction",
+            "name": "Dynamic_Content_After_User-Interaction",
+            "description": "This is a sample showing how to show dynamic content after an user interaction: the product availability will be shown based on product selection.",
+            "url": "/dynamic_amp/dynamic_content_after_user-interaction/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/dynamic_amp/dynamic_content_after_user-interaction/preview/embed/",
+            "urlEmbed": "/dynamic_amp/dynamic_content_after_user-interaction/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "How to embed interactive elements on AMP pages?",
+            "name": "How_to_embed_interactive_elements_on_AMP_pages%3F",
+            "description": "This samples demonstrates how to embed interactive charts into AMP files.",
+            "url": "/dynamic_amp/how_to_embed_interactive_elements_on_amp_pages/",
+            "urlPreview": "/dynamic_amp/how_to_embed_interactive_elements_on_amp_pages/preview/",
+            "urlPreviewEmbed": "/dynamic_amp/how_to_embed_interactive_elements_on_amp_pages/preview/embed/",
+            "urlEmbed": "/dynamic_amp/how_to_embed_interactive_elements_on_amp_pages/embed/",
+            "metadata": {
+              "highligh": true,
+              "preview": "default"
+            }
+          },
+          {
+            "title": "Mixing Dynamic and Cached Data",
+            "name": "Mixing_Dynamic_and_Cached_Data",
+            "description": "This is a sample showing how to integrate product data details such as description, price, availability etc with different data freshness requirements.",
+            "url": "/dynamic_amp/mixing_dynamic_and_cached_data/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/dynamic_amp/mixing_dynamic_and_cached_data/preview/embed/",
+            "urlEmbed": "/dynamic_amp/mixing_dynamic_and_cached_data/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "Multi Page Flow",
+            "name": "Multi_Page_Flow",
+            "description": "This sample demonstrates different approaches for how to implement a multi-step flow in AMP.",
+            "url": "/dynamic_amp/multi_page_flow/",
+            "urlPreview": "/dynamic_amp/multi_page_flow/preview/",
+            "urlPreviewEmbed": "/dynamic_amp/multi_page_flow/preview/embed/",
+            "urlEmbed": "/dynamic_amp/multi_page_flow/embed/",
+            "metadata": {
+              "preview": "default",
+              "default": "preview"
+            }
+          }
+        ],
+        "selected": false
+      },
+      {
+        "name": "Visual Effects",
+        "url": "/#visual_effects",
+        "id": "visual_effects",
+        "targetDir": "visual_effects/index.html",
+        "examples": [
+          {
+            "title": "Animated Snackbar",
+            "name": "Animated_Snackbar",
+            "description": "Snackbars provide brief feedback about an operation through a message at the bottom of the screen.",
+            "url": "/visual_effects/animated_snackbar/",
+            "urlPreview": "/visual_effects/animated_snackbar/preview/",
+            "urlPreviewEmbed": "/visual_effects/animated_snackbar/preview/embed/",
+            "urlEmbed": "/visual_effects/animated_snackbar/embed/",
+            "metadata": {
+              "preview": "default"
+            }
+          },
+          {
+            "title": "Basics of scrollbound effects",
+            "name": "Basics_of_scrollbound_effects",
+            "description": "amp-position-observer   combined with amp-animation is   a powerful building block that can handle various uses-cases such as scrollbound animations,   parallax effects and transitions as elements enter and exit the viewport.",
+            "url": "/visual_effects/basics_of_scrollbound_effects/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/visual_effects/basics_of_scrollbound_effects/preview/embed/",
+            "urlEmbed": "/visual_effects/basics_of_scrollbound_effects/embed/",
+            "metadata": {}
+          },
+          {
+            "title": "Scroll to top",
+            "name": "Scroll_to_top",
+            "description": "amp-position-observer   combined with amp-animation can be used to   implement a scroll to top button.",
+            "url": "/visual_effects/scroll_to_top/",
+            "urlPreview": null,
+            "urlPreviewEmbed": "/visual_effects/scroll_to_top/preview/embed/",
+            "urlEmbed": "/visual_effects/scroll_to_top/embed/",
+            "metadata": {}
+          }
+        ],
+        "selected": false
+      },
+      {
+        "description": "<p>Templates and metadata samples for different kinds of AMPs.</p>\n",
+        "name": "Samples & Templates",
+        "url": "/#samples_templates",
+        "id": "samples_templates",
+        "targetDir": "samples_templates/index.html",
+        "examples": [
+          {
+            "title": "Checkout Flow",
+            "name": "Checkout_Flow",
+            "description": "This sample demonstrates how you can implement a simple checkout page in AMP.",
+            "url": "/samples_templates/checkout_flow/",
+            "urlPreview": "/samples_templates/checkout_flow/preview/",
+            "urlPreviewEmbed": "/samples_templates/checkout_flow/preview/embed/",
+            "urlEmbed": "/samples_templates/checkout_flow/embed/",
+            "metadata": {
+              "preview": "default",
+              "default": "preview"
+            }
+          },
+          {
+            "title": "Comment Section",
+            "name": "Comment_Section",
+            "description": "This sample showcases how to build a comment section in AMP HTML using the amp-form component after a successful login flow.",
+            "url": "/samples_templates/comment_section/",
+            "urlPreview": "/samples_templates/comment_section/preview/",
+            "urlPreviewEmbed": "/samples_templates/comment_section/preview/embed/",
+            "urlEmbed": "/samples_templates/comment_section/embed/",
+            "metadata": {
+              "preview": "default",
+              "default": "preview"
+            }
+          },
+          {
+            "title": "Housing",
+            "name": "Housing",
+            "description": "This sample showcases how to build a housing page in AMP HTML.",
+            "url": "/samples_templates/housing/",
+            "urlPreview": "/samples_templates/housing/preview/",
+            "urlPreviewEmbed": "/samples_templates/housing/preview/embed/",
+            "urlEmbed": "/samples_templates/housing/embed/",
+            "metadata": {
+              "default": "preview",
+              "preview": "default"
+            }
+          },
+          {
+            "title": "Live Blog",
+            "name": "Live_Blog",
+            "description": "This is a sample template for implementing live blogs in AMP.",
+            "url": "/samples_templates/live_blog/",
+            "urlPreview": "/samples_templates/live_blog/preview/",
+            "urlPreviewEmbed": "/samples_templates/live_blog/preview/embed/",
+            "urlEmbed": "/samples_templates/live_blog/embed/",
+            "metadata": {
+              "preview": "default",
+              "default": "preview",
+              "skipValidation": true
+            }
+          },
+          {
+            "title": "News Article",
+            "name": "News_Article",
+            "description": "This is a sample template for a news article in AMP.",
+            "url": "/samples_templates/news_article/",
+            "urlPreview": "/samples_templates/news_article/preview/",
+            "urlPreviewEmbed": "/samples_templates/news_article/preview/embed/",
+            "urlEmbed": "/samples_templates/news_article/embed/",
+            "metadata": {
+              "default": "preview",
+              "preview": "default"
+            }
+          },
+          {
+            "title": "Poll",
+            "name": "Poll",
+            "description": "This is a sample template for a poll in AMP.",
+            "url": "/samples_templates/poll/",
+            "urlPreview": "/samples_templates/poll/preview/",
+            "urlPreviewEmbed": "/samples_templates/poll/preview/embed/",
+            "urlEmbed": "/samples_templates/poll/embed/",
+            "metadata": {
+              "preview": "default"
+            }
+          },
+          {
+            "title": "Product Browse Page",
+            "name": "Product_Browse_Page",
+            "description": "This is a sample template for a news article in AMP.",
+            "url": "/samples_templates/product_browse_page/",
+            "urlPreview": "/samples_templates/product_browse_page/preview/",
+            "urlPreviewEmbed": "/samples_templates/product_browse_page/preview/embed/",
+            "urlEmbed": "/samples_templates/product_browse_page/embed/",
+            "metadata": {
+              "preview": "default",
+              "default": "preview",
+              "skipValidation": true
+            }
+          },
+          {
+            "title": "Product Page",
+            "name": "Product_Page",
+            "description": "This sample showcases how to build a product page in AMP HTML.",
+            "url": "/samples_templates/product_page/",
+            "urlPreview": "/samples_templates/product_page/preview/",
+            "urlPreviewEmbed": "/samples_templates/product_page/preview/embed/",
+            "urlEmbed": "/samples_templates/product_page/embed/",
+            "metadata": {
+              "preview": "default",
+              "default": "preview",
+              "hideCode": true
+            }
+          },
+          {
+            "title": "Recipe",
+            "name": "Recipe",
+            "description": "This is a sample recipe AMP article demonstrating how to express machine-readable recipe data using JSON+LD.",
+            "url": "/samples_templates/recipe/",
+            "urlPreview": "/samples_templates/recipe/preview/",
+            "urlPreviewEmbed": "/samples_templates/recipe/preview/embed/",
+            "urlEmbed": "/samples_templates/recipe/embed/",
+            "metadata": {
+              "default": "preview",
+              "preview": "default"
+            }
+          }
+        ],
+        "selected": false
+      }
+    ],
+    "selected": false
+  },
+  {
+    "path": "/amp-ads",
+    "name": "AMPHTML ads",
+    "title": "AMPHTML ads by Example",
+    "desc": "Learn how to create AMPHTML ads. AMPHTML ads are ads built using AMP-HTML and use many of the same AMP components that make AMP pages performant and safe.",
+    "index": 1,
+    "categories": [
+      {
+        "description": "<p>Getting started with AMPHTML ads and how they work.</p>\n",
+        "name": "Introduction",
+        "url": "/amp-ads#amp-ads/introduction",
+        "id": "amp-ads/introduction",
+        "targetDir": "amp-ads/introduction/index.html",
+        "examples": [
+          {
+            "title": " Hello World",
+            "name": "_Hello_World",
+            "description": "An introduction into how to create AMPHTML ads.",
+            "url": "/amp-ads/introduction/hello_world/",
+            "urlPreview": "/amp-ads/introduction/hello_world/preview/",
+            "urlPreviewEmbed": "/amp-ads/introduction/hello_world/preview/embed/",
+            "urlEmbed": "/amp-ads/introduction/hello_world/embed/",
+            "metadata": {
+              "preview": "a4a",
+              "skipValidation": "true"
+            }
+          },
+          {
+            "title": "AMPHTML ads vs non-AMP ads",
+            "name": "AMPHTML_ads_vs_non-AMP_ads",
+            "description": "This sample compares the performance of an AMPHTML ad vs a regular ad.",
+            "url": "/amp-ads/introduction/amphtml_ads_vs_non-amp_ads/",
+            "urlPreview": "https://ampbyexample-com.cdn.ampproject.org/c/s/ampbyexample.com/amp-ads/introduction/amphtml_ads_vs_non-amp_ads/preview/?exp=a4a:-1",
+            "urlPreviewEmbed": "/amp-ads/introduction/amphtml_ads_vs_non-amp_ads/preview/embed/",
+            "urlEmbed": "/amp-ads/introduction/amphtml_ads_vs_non-amp_ads/embed/",
+            "metadata": {
+              "preview": "cache",
+              "adSlot": "/30497360/amp_by_example/AMP_Banner_300x250",
+              "skipValidation": "true"
+            }
+          }
+        ],
+        "selected": false
+      },
+      {
+        "name": "Basic Ads",
+        "url": "/amp-ads#amp-ads/basic_ads",
+        "id": "amp-ads/basic_ads",
+        "targetDir": "amp-ads/basic_ads/index.html",
+        "examples": [
+          {
+            "title": "Banner Ad",
+            "name": "Banner_Ad",
+            "description": "This sample demonstrates how to implement a simple banner AMPHTML ad.",
+            "url": "/amp-ads/basic_ads/banner_ad/",
+            "urlPreview": "https://ampbyexample-com.cdn.ampproject.org/c/s/ampbyexample.com/amp-ads/basic_ads/banner_ad/preview/?exp=a4a:-1",
+            "urlPreviewEmbed": "/amp-ads/basic_ads/banner_ad/preview/embed/",
+            "urlEmbed": "/amp-ads/basic_ads/banner_ad/embed/",
+            "metadata": {
+              "preview": "a4a",
+              "adSlot": "/30497360/amp_by_example/AMP_Banner_300x250",
+              "skipValidation": "true"
+            }
+          },
+          {
+            "title": "Carousel Ad",
+            "name": "Carousel_Ad",
+            "description": "Sample AMPHTML ad using amp-carousel to display a slide-show style ad.",
+            "url": "/amp-ads/basic_ads/carousel_ad/",
+            "urlPreview": "https://ampbyexample-com.cdn.ampproject.org/c/s/ampbyexample.com/amp-ads/basic_ads/carousel_ad/preview/?exp=a4a:-1",
+            "urlPreviewEmbed": "/amp-ads/basic_ads/carousel_ad/preview/embed/",
+            "urlEmbed": "/amp-ads/basic_ads/carousel_ad/embed/",
+            "metadata": {
+              "preview": "a4a",
+              "adSlot": "/30497360/amp_by_example/AMP_Carousel_300x250",
+              "skipValidation": "true"
+            }
+          }
+        ],
+        "selected": false
+      },
+      {
+        "name": "Advanced Ads",
+        "url": "/amp-ads#amp-ads/advanced_ads",
+        "id": "amp-ads/advanced_ads",
+        "targetDir": "amp-ads/advanced_ads/index.html",
+        "examples": [
+          {
+            "title": "Video Ad",
+            "name": "Video_Ad",
+            "description": "Sample AMPHTML ad using amp-video to display a video ad with layers and playback control.",
+            "url": "/amp-ads/advanced_ads/video_ad/",
+            "urlPreview": "https://ampbyexample-com.cdn.ampproject.org/c/s/ampbyexample.com/amp-ads/advanced_ads/video_ad/preview/?exp=a4a:-1",
+            "urlPreviewEmbed": "/amp-ads/advanced_ads/video_ad/preview/embed/",
+            "urlEmbed": "/amp-ads/advanced_ads/video_ad/embed/",
+            "metadata": {
+              "preview": "a4a",
+              "adSlot": "/30497360/amp_by_example/AMP_Video_Ad_300x168",
+              "skipValidation": "true",
+              "width": 300,
+              "height": 168
+            }
+          }
+        ],
+        "selected": false
+      },
+      {
+        "description": "<p>AMPHTML ad samples using experimental features demonstrating what is soon going to be possible with the AMPHTML ad format.</p>\n",
+        "name": "Experimental Ads",
+        "url": "/amp-ads#amp-ads/experimental_ads",
+        "id": "amp-ads/experimental_ads",
+        "targetDir": "amp-ads/experimental_ads/index.html",
+        "examples": [
+          {
+            "title": "Carousel Lightbox Ad",
+            "name": "Carousel_Lightbox_Ad",
+            "description": "Sample AMPHTML ad using amp-lightbox, and amp-carousel to create an interactive ad.",
+            "url": "/amp-ads/experimental_ads/carousel_lightbox_ad/",
+            "urlPreview": "/amp-ads/experimental_ads/carousel_lightbox_ad/preview/",
+            "urlPreviewEmbed": "/amp-ads/experimental_ads/carousel_lightbox_ad/preview/embed/",
+            "urlEmbed": "/amp-ads/experimental_ads/carousel_lightbox_ad/embed/",
+            "metadata": {
+              "preview": "a4a",
+              "skipValidation": true,
+              "hidePreview": true,
+              "experiments": [
+                "amp-lightbox-a4a-proto"
+              ],
+              "width": 350,
+              "height": 240,
+              "layout": "responsive"
+            },
+            "experiments": [
+              "amp-lightbox-a4a-proto"
+            ],
+            "experiment": true
+          },
+          {
+            "title": "Scrollbound Lightbox Ad",
+            "name": "Scrollbound_Lightbox_Ad",
+            "description": "Sample AMPHTML ad using amp-lightbox, and amp-animation to create an interactive ad.",
+            "url": "/amp-ads/experimental_ads/scrollbound_lightbox_ad/",
+            "urlPreview": "/amp-ads/experimental_ads/scrollbound_lightbox_ad/preview/",
+            "urlPreviewEmbed": "/amp-ads/experimental_ads/scrollbound_lightbox_ad/preview/embed/",
+            "urlEmbed": "/amp-ads/experimental_ads/scrollbound_lightbox_ad/embed/",
+            "metadata": {
+              "preview": "a4a",
+              "skipValidation": true,
+              "hidePreview": true,
+              "experiments": [
+                "amp-animation",
+                "amp-lightbox-a4a-proto"
+              ],
+              "width": 350,
+              "height": 240,
+              "layout": "responsive",
+              "scrollToReveal": true
+            },
+            "experiments": [
+              "amp-animation",
+              "amp-lightbox-a4a-proto"
+            ],
+            "experiment": true
+          },
+          {
+            "title": "Scrollbound Slides 360 Ad",
+            "name": "Scrollbound_Slides_360_Ad",
+            "description": "Sample AMPHTML ad using amp-animation,   amp-lightbox,   amp-google-vrview-image,   and amp-img   to create an ad that changes slides based on scrolling and displays a 360 image in a lightbox.",
+            "url": "/amp-ads/experimental_ads/scrollbound_slides_360_ad/",
+            "urlPreview": "/amp-ads/experimental_ads/scrollbound_slides_360_ad/preview/",
+            "urlPreviewEmbed": "/amp-ads/experimental_ads/scrollbound_slides_360_ad/preview/embed/",
+            "urlEmbed": "/amp-ads/experimental_ads/scrollbound_slides_360_ad/embed/",
+            "metadata": {
+              "preview": "a4a",
+              "skipValidation": true,
+              "hidePreview": true,
+              "experiments": [
+                "amp-animation",
+                "amp-google-vrview-image",
+                "amp-lightbox-a4a-proto"
+              ],
+              "width": 350,
+              "height": 250,
+              "layout": "responsive",
+              "scrollToReveal": true
+            },
+            "experiments": [
+              "amp-animation",
+              "amp-google-vrview-image",
+              "amp-lightbox-a4a-proto"
+            ],
+            "experiment": true
+          },
+          {
+            "title": "Scrollbound Video Ad",
+            "name": "Scrollbound_Video_Ad",
+            "description": "Sample AMPHTML ad using amp-animation,   amp-video and amp-img   to create an ad that animates based on scrolling.",
+            "url": "/amp-ads/experimental_ads/scrollbound_video_ad/",
+            "urlPreview": "/amp-ads/experimental_ads/scrollbound_video_ad/preview/",
+            "urlPreviewEmbed": "/amp-ads/experimental_ads/scrollbound_video_ad/preview/embed/",
+            "urlEmbed": "/amp-ads/experimental_ads/scrollbound_video_ad/embed/",
+            "metadata": {
+              "preview": "a4a",
+              "skipValidation": true,
+              "hidePreview": true,
+              "experiments": [
+                "amp-animation"
+              ],
+              "width": 350,
+              "height": 250,
+              "layout": "responsive",
+              "scrollToReveal": true
+            },
+            "experiments": [
+              "amp-animation"
+            ],
+            "experiment": true
+          },
+          {
+            "title": "Slides With Lightbox Ad",
+            "name": "Slides_With_Lightbox_Ad",
+            "description": "Sample AMPHTML ad using amp-lightbox, amp-carousel and amp-bind to create an interactive ad.",
+            "url": "/amp-ads/experimental_ads/slides_with_lightbox_ad/",
+            "urlPreview": "/amp-ads/experimental_ads/slides_with_lightbox_ad/preview/",
+            "urlPreviewEmbed": "/amp-ads/experimental_ads/slides_with_lightbox_ad/preview/embed/",
+            "urlEmbed": "/amp-ads/experimental_ads/slides_with_lightbox_ad/embed/",
+            "metadata": {
+              "preview": "a4a",
+              "skipValidation": true,
+              "hidePreview": true,
+              "experiments": [
+                "amp-lightbox-a4a-proto"
+              ],
+              "width": 350,
+              "height": 240,
+              "layout": "responsive"
+            },
+            "experiments": [
+              "amp-lightbox-a4a-proto"
+            ],
+            "experiment": true
+          },
+          {
+            "title": "Stack With Bind Ad",
+            "name": "Stack_With_Bind_Ad",
+            "description": "Sample AMPHTML ad using amp-bind, and amp-selector to create an interactive \"stack\" ad.",
+            "url": "/amp-ads/experimental_ads/stack_with_bind_ad/",
+            "urlPreview": "/amp-ads/experimental_ads/stack_with_bind_ad/preview/",
+            "urlPreviewEmbed": "/amp-ads/experimental_ads/stack_with_bind_ad/preview/embed/",
+            "urlEmbed": "/amp-ads/experimental_ads/stack_with_bind_ad/embed/",
+            "metadata": {
+              "preview": "a4a",
+              "skipValidation": true,
+              "hidePreview": true,
+              "width": 350,
+              "height": 240,
+              "layout": "responsive"
+            }
+          }
+        ],
+        "selected": false
+      }
+    ],
+    "selected": true
+  }
+]
