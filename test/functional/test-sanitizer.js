@@ -80,6 +80,11 @@ describe('sanitizeHtml', () => {
         'a<a href="http://acme.com/" target="_top">b</a>');
   });
 
+  it('should output "rel" attribute', () => {
+    expect(sanitizeHtml('a<a href="http://acme.com/" rel="amphtml">b</a>')).to.be.equal(
+        'a<a href="http://acme.com/" rel="amphtml" target="_top">b</a>');
+  });
+
   it('should default target to _top with href', () => {
     expect(sanitizeHtml(
         '<a href="">a</a>'
