@@ -15,18 +15,15 @@
  */
 'use strict';
 
-module.exports = {
-  rules: {
-    'closure-type-primitives': require('./closure-type-primitives'),
-    'dict-string-keys': require('./dict-string-keys'),
-    'enforce-private-props': require('./enforce-private-props'),
-    'no-array-destructuring': require('./no-array-destructuring'),
-    'no-es2015-number-props': require('./no-es2015-number-props'),
-    'no-export-side-effect': require('./no-export-side-effect'),
-    'no-for-of-statement': require('./no-for-of-statement'),
-    'no-global': require('./no-global'),
-    'no-spread': require('./no-spread'),
-    'query-selector': require('./query-selector'),
-    'todo-format': require('./todo-format'),
-  },
-};
+const fs = require('fs');
+const path = require('path');
+
+const rules = {};
+const ruleFiles = fs.readdirSync(__dirname).filter(ruleFile =>
+  !['index.js', 'node_modules', 'package.json'].includes(ruleFile));
+ruleFiles.forEach(function(ruleFile) {
+  const rule = ruleFile.replace(path.extname(ruleFile), '');
+  rules[rule] = require(path.join(__dirname, rule));
+});
+
+module.exports = {rules};
