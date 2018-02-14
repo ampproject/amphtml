@@ -71,6 +71,7 @@ import {relatedArticlesFromJson} from './related-articles';
 import {renderSimpleTemplate} from './simple-template';
 import {stringHash32} from '../../../src/string';
 import {upgradeBackgroundAudio} from './audio';
+import {ORIGIN_WHITELIST} from './whitelist';
 
 
 /** @private @const {string} */
@@ -260,11 +261,7 @@ export class AmpStory extends AMP.BaseElement {
     this.boundOnResize_ = null;
 
     /** @private @const {!Array<string>} */
-    this.originWhitelist_ = [
-      '3451824873', '834917366', '4273375831', '750731789', '3322156041',
-      '878041739', '2199838184', '708478954', '142793127', '2414533450',
-      '212690086', '799038630', '2128662947',
-    ];
+    this.originWhitelist_ = ORIGIN_WHITELIST;
 
     /** @private {!AmpStoryHint} */
     this.ampStoryHint_ = new AmpStoryHint(this.win);
