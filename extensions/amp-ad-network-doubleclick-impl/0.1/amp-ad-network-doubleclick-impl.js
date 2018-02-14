@@ -1186,8 +1186,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdditionalContextMetadata(isSafeframe) {
-    if (this.isFluid_ || isSafeframe) {
+  getAdditionalContextMetadata(optIsSafeframe) {
+    if (this.isFluid_ || optIsSafeframe) {
       this.setupSafeframe();
       return this.safeframeApi_.getSafeframeNameAttr();
     }

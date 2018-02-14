@@ -1765,9 +1765,11 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Returns base object that will be written to cross-domain iframe name
    * attribute.
+   * @param {boolean=} optIsSafeframe Whether creative is rendering into
+   *   a safeframe.
    * @return {!JsonObject}
    */
-  getAdditionalContextMetadata() {
+  getAdditionalContextMetadata(optIsSafeframe) {
     return /** @type {!JsonObject} */ ({});
   }
 }

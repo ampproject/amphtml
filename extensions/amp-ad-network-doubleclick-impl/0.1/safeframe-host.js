@@ -229,7 +229,7 @@ export class SafeframeHostApi {
     this.sendMessage_(dict({
       'message': 'connect',
       'c': this.channel,
-    }));
+    }), '');
   }
 
   /**
