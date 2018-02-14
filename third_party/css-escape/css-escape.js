@@ -2,84 +2,49 @@
 
 
 /**
+ * This regex consists of 4 matching capture groups and one (non-matching) fallback:
+ *
+ * - (\0), catch the null terminator character so it may be replaced by UTF
+ *   Replacement Char
+ * - ^(-)$, catch a solitary dash char, so that it may be backslash escaped.
+ *   This is a separate capture group so that the legal-chars (group 4) doesn't
+ *   capture it first, since that group doesn't need to escape its dash.
+ * - ([\x01-\x1f\x7f]|^-?[0-9]), catch a UTF control char, or any leading
+ *   number (with an optional leading dash). The control or the number (but not
+ *   the leading dash) must be hex-escaped,.
+ * - ([\x80-\uffff0-9a-zA-Z_-]+), catch legal-chars, with the exception of a
+ *   solitary dash, which will already have matched in group 1.
+ * - [^], finally, a catch-all that allows us to backslash escape the char.
+ *
+ * Together, this matches everything necessary for CSS.escape.
+ */
+var regex = /(\0)|^(-)$|([\x01-\x1f\x7f]|^-?[0-9])|([\x80-\uffff0-9a-zA-Z_-]+)|[^]/g;
+
+function escaper(match, nil, dash, hexEscape, chars) {
+  // Chars is the legal-chars (group 4) capture
+  if (chars) {
+    return chars;
+  }
+  // Nil is the null terminator (group 1) capture
+  if (nil) {
+    return '\uFFFD';
+  }
+  // Both UTF control chars, and leading numbers (with optional leading dash)
+  // (group 3) must be backslash escaped with a trailing space.  Funnily, the
+  // leading dash must not be escaped, but the number. :shrug:
+  if (hexEscape) {
+    return match.slice(0, -1) + '\\' + match.slice(-1).charCodeAt(0).toString(16) + ' '
+  }
+  // Finally, the solitary dash and the catch-all chars require backslash
+  // escaping.
+  return '\\' + match;
+}
+
+/**
  * https://drafts.csswg.org/cssom/#serialize-an-identifier
  * @param {string} value
  * @return {string}
  */
 export function cssEscape(value) {
-		if (arguments.length == 0) {
-			throw new TypeError('`CSS.escape` requires an argument.');
-		}
-		var string = String(value);
-		var length = string.length;
-		var index = -1;
-		var codeUnit;
-		var result = '';
-		var firstCodeUnit = string.charCodeAt(0);
-		while (++index < length) {
-			codeUnit = string.charCodeAt(index);
-			// Note: there’s no need to special-case astral symbols, surrogate
-			// pairs, or lone surrogates.
-
-			// If the character is NULL (U+0000), then the REPLACEMENT CHARACTER
-			// (U+FFFD).
-			if (codeUnit == 0x0000) {
-				result += '\uFFFD';
-				continue;
-			}
-
-			if (
-				// If the character is in the range [\1-\1F] (U+0001 to U+001F) or is
-				// U+007F, […]
-				(codeUnit >= 0x0001 && codeUnit <= 0x001F) || codeUnit == 0x007F ||
-				// If the character is the first character and is in the range [0-9]
-				// (U+0030 to U+0039), […]
-				(index == 0 && codeUnit >= 0x0030 && codeUnit <= 0x0039) ||
-				// If the character is the second character and is in the range [0-9]
-				// (U+0030 to U+0039) and the first character is a `-` (U+002D), […]
-				(
-					index == 1 &&
-					codeUnit >= 0x0030 && codeUnit <= 0x0039 &&
-					firstCodeUnit == 0x002D
-				)
-			) {
-				// https://drafts.csswg.org/cssom/#escape-a-character-as-code-point
-				result += '\\' + codeUnit.toString(16) + ' ';
-				continue;
-			}
-
-			if (
-				// If the character is the first character and is a `-` (U+002D), and
-				// there is no second character, […]
-				index == 0 &&
-				length == 1 &&
-				codeUnit == 0x002D
-			) {
-				result += '\\' + string.charAt(index);
-				continue;
-			}
-
-			// If the character is not handled by one of the above rules and is
-			// greater than or equal to U+0080, is `-` (U+002D) or `_` (U+005F), or
-			// is in one of the ranges [0-9] (U+0030 to U+0039), [A-Z] (U+0041 to
-			// U+005A), or [a-z] (U+0061 to U+007A), […]
-			if (
-				codeUnit >= 0x0080 ||
-				codeUnit == 0x002D ||
-				codeUnit == 0x005F ||
-				codeUnit >= 0x0030 && codeUnit <= 0x0039 ||
-				codeUnit >= 0x0041 && codeUnit <= 0x005A ||
-				codeUnit >= 0x0061 && codeUnit <= 0x007A
-			) {
-				// the character itself
-				result += string.charAt(index);
-				continue;
-			}
-
-			// Otherwise, the escaped character.
-			// https://drafts.csswg.org/cssom/#escape-a-character
-			result += '\\' + string.charAt(index);
-
-		}
-		return result;
+  return String(value).replace(regex, escaper);
 }

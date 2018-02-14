@@ -17,6 +17,7 @@
 import {CONFIG_TAG, SERVICE_TAG, TAG} from './vars';
 import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
+import {escapeCssSelectorIdent} from '../../../src/dom';
 import {getServiceForDoc} from '../../../src/service';
 import {parseUrl} from '../../../src/url';
 
@@ -186,7 +187,7 @@ export class WebPushConfig extends AMP.BaseElement {
   ensureUniqueElement_() {
     const webPushConfigElements = this.getAmpDoc()
         .getRootNode()
-        .querySelectorAll('#' + CONFIG_TAG);
+        .querySelectorAll(`#${escapeCssSelectorIdent(CONFIG_TAG)}`);
     if (webPushConfigElements.length > 1) {
       throw user().createError(
           `Only one <${CONFIG_TAG}> element may exist on a page.`

@@ -167,8 +167,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   markMediaElementsWithPreload_() {
-    const mediaSet = scopedQuerySelectorAll(
-        this.element, 'amp-audio, amp-video');
+    const mediaSet = this.element.querySelectorAll('amp-audio, amp-video');
     Array.prototype.forEach.call(mediaSet, mediaItem => {
       mediaItem.setAttribute('preload', 'auto');
     });
@@ -295,7 +294,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   getAllMedia_() {
-    return scopedQuerySelectorAll(this.element, 'audio, video');
+    return this.element.querySelectorAll('audio, video');
   }
 
 
@@ -305,7 +304,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   getAllVideos_() {
-    return scopedQuerySelectorAll(this.element, 'video');
+    return this.element.querySelectorAll('video');
   }
 
 

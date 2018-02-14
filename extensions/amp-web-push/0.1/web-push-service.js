@@ -21,9 +21,9 @@ import {Services} from '../../../src/services';
 import {WebPushWidgetVisibilities} from './amp-web-push-widget';
 import {WindowMessenger} from './window-messenger';
 import {dev, user} from '../../../src/log';
+import {escapeCssSelectorIdent, openWindowDialog} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {openWindowDialog} from '../../../src/dom';
 import {parseQueryString, parseUrl} from '../../../src/url';
 
 /** @typedef {{
@@ -437,7 +437,9 @@ export class WebPushService {
   setWidgetVisibilities(widgetCategoryName, isVisible) {
     const widgetDomElements = this.ampdoc
         .getRootNode()
-        .querySelectorAll(`${WIDGET_TAG}[visibility=${widgetCategoryName}]`);
+        .querySelectorAll(`${escapeCssSelectorIdent(WIDGET_TAG)}[visibility=${
+          escapeCssSelectorIdent(widgetCategoryName)
+        }]`);
     const invisibilityCssClassName = 'amp-invisible';
 
     for (let i = 0; i < widgetDomElements.length; i++) {
@@ -461,7 +463,9 @@ export class WebPushService {
   doesWidgetCategoryMarkupExist_(widgetCategoryName) {
     const widgetDomElements = this.ampdoc
         .getRootNode()
-        .querySelectorAll(`${WIDGET_TAG}[visibility=${widgetCategoryName}]`);
+        .querySelectorAll(`${escapeCssSelectorIdent(WIDGET_TAG)}[visibility=${
+          escapeCssSelectorIdent(widgetCategoryName)
+        }]`);
 
     return widgetDomElements.length > 0;
   }

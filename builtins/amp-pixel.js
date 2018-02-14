@@ -20,7 +20,6 @@ import {createElementWithAttributes} from '../src/dom';
 import {dev, user} from '../src/log';
 import {dict} from '../src/utils/object';
 import {registerElement} from '../src/service/custom-element-registry';
-import {scopedQuerySelector} from '../src/dom';
 import {toWin} from '../src/types';
 
 const TAG = 'amp-pixel';
@@ -61,7 +60,7 @@ export class AmpPixel extends BaseElement {
           + ' Only "no-referrer" is supported');
     }
     if (this.element.hasAttribute('i-amphtml-ssr') &&
-        scopedQuerySelector(this.element, 'img')) {
+        this.element.querySelector('img')) {
       dev().info(TAG, 'inabox img already present');
       return;
     }

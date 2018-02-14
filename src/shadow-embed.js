@@ -112,7 +112,6 @@ export function createShadowRoot(hostElement) {
  */
 function createShadowRootPolyfill(hostElement) {
   const doc = hostElement.ownerDocument;
-  const win = toWin(doc.defaultView);
 
   // Host CSS polyfill.
   hostElement.classList.add('i-amphtml-shadow-host-polyfill');
@@ -136,7 +135,7 @@ function createShadowRootPolyfill(hostElement) {
 
   // `getElementById` is resolved via `querySelector('#id')`.
   shadowRoot.getElementById = function(id) {
-    const escapedId = escapeCssSelectorIdent(win, id);
+    const escapedId = escapeCssSelectorIdent(id);
     return /** @type {HTMLElement|null} */ (
       shadowRoot./*OK*/querySelector(`#${escapedId}`));
   };
