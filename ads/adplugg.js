@@ -50,7 +50,7 @@ export function adplugg(global,data) {
 
   // Register event listeners (via async wrapper).
   AdPlugg.push(function() {
-
+    const AdPlugg = global.AdPlugg;
     // Register the renderStart event listener.
     AdPlugg.on(
         adTag,
