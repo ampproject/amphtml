@@ -433,7 +433,7 @@ function isScopeSelectorSupported(parent) {
  * @return {?Element}
  */
 export function childElementByAttr(parent, attr) {
-  return scopedQuerySelector(parent, `> [${attr}]`);
+  return scopedQuerySelector/*OK*/(parent, `> [${attr}]`);
 }
 
 
@@ -457,7 +457,7 @@ export function lastChildElementByAttr(parent, attr) {
  * @return {!NodeList<!Element>}
  */
 export function childElementsByAttr(parent, attr) {
-  return scopedQuerySelectorAll(parent, `> [${attr}]`);
+  return scopedQuerySelectorAll/*OK*/(parent, `> [${attr}]`);
 }
 
 
@@ -468,7 +468,7 @@ export function childElementsByAttr(parent, attr) {
  * @return {?Element}
  */
 export function childElementByTag(parent, tagName) {
-  return scopedQuerySelector(parent, `> ${tagName}`);
+  return scopedQuerySelector/*OK*/(parent, `> ${tagName}`);
 }
 
 
@@ -479,7 +479,7 @@ export function childElementByTag(parent, tagName) {
  * @return {!NodeList<!Element>}
  */
 export function childElementsByTag(parent, tagName) {
-  return scopedQuerySelectorAll(parent, `> ${tagName}`);
+  return scopedQuerySelectorAll/*OK*/(parent, `> ${tagName}`);
 }
 
 
@@ -712,18 +712,27 @@ export function isRTL(doc) {
  *
  * See https://drafts.csswg.org/cssom/#serialize-an-identifier.
  *
- * @param {!Window} win
  * @param {string} ident
  * @return {string}
  */
-export function escapeCssSelectorIdent(win, ident) {
-  if (win.CSS && win.CSS.escape) {
-    return win.CSS.escape(ident);
-  }
-  // Polyfill.
+export function escapeCssSelectorIdent(ident) {
   return cssEscape(ident);
 }
 
+/**
+ * Escapes an ident in a way that can be used by :nth-child() psuedo-class.
+ *
+ * See https://github.com/w3c/csswg-drafts/issues/2306.
+ *
+ * @param {string|number} ident
+ * @return {string}
+ */
+export function escapeCssSelectorNth(ident) {
+  const escaped = String(ident);
+  // Ensure it doesn't close the nth-child psuedo class.
+  dev().assert(escaped.indexOf(')') === -1);
+  return escaped;
+}
 
 /**
  * Escapes `<`, `>` and other HTML charcaters with their escaped forms.

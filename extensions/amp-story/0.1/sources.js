@@ -15,10 +15,7 @@
  */
 
 import {ampMediaElementFor} from './utils';
-import {
-  removeElement,
-  scopedQuerySelectorAll,
-} from '../../../src/dom';
+import {removeElement} from '../../../src/dom';
 
 
 
@@ -67,7 +64,7 @@ export class Sources {
     const elementToUse = ampMediaElementFor(element) || element;
     const srcAttr = elementToUse.getAttribute('src');
     elementToUse.removeAttribute('src');
-    const srcEls = scopedQuerySelectorAll(elementToUse, 'source');
+    const srcEls = elementToUse.querySelectorAll('source');
     Array.prototype.forEach.call(srcEls, srcEl => removeElement(srcEl));
 
     return new Sources(srcAttr, srcEls);
