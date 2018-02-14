@@ -97,7 +97,6 @@ import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {SafeframeHostApi} from './safeframe-host';
-import {RTC_ERROR_ENUM} from '../../amp-a4a/0.1/real-time-config-manager';
 import '../../amp-a4a/0.1/real-time-config-manager';
 import {isSecureUrl, parseQueryString} from '../../../src/url';
 import {
@@ -338,7 +337,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {./safeframe-host.SafeframeHostApi} */
     this.safeframeApi_ = null;
-    
+
     /** @private {!../../../ads/google/a4a/utils.NameframeExperimentConfig} */
     this.nameframeExperimentConfig_ = {
       instantLoad: false,

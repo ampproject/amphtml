@@ -15,12 +15,10 @@
  */
 
 import {Services} from './services';
-import {SubscriptionApi} from './iframe-helper';
 import {dev} from './log';
 import {dict} from './utils/object';
 import {layoutRectLtwh, moveLayoutRect, rectIntersection} from './layout-rect';
 import {SubscriptionApi} from './iframe-helper';
-import {Services} from './services';
 import {SimplePostMessageApiDef} from './simple-postmessage-api-def';
 
 
