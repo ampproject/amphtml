@@ -1,5 +1,5 @@
 {
   "rules": {
-    "query-selector": 0
+    "amphtml-internal/query-selector": 0
   }
 }
