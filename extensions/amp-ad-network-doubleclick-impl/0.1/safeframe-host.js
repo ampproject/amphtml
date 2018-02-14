@@ -406,6 +406,40 @@ export class SafeframeHostApi {
   }
 
   /**
+   * @param {!Object} payload
+   * @private
+   */
+  handleExpandRequest_(payload) {
+    let expandHeight = Math.floor(payload.expand_b +
+                                 payload.expand_t);
+    let expandWidth = Math.floor(payload.expand_r +
+                                 payload.expand_l);
+    // We assume that a fair amount of usage of this API will try to pass the final
+    // size of the iframe that is desired, instead of the correct usage which is
+    // specify how much to expand by. We try to protect against this, by detecting
+    // if the requested expansion size matches the size of the amp-ad element, and
+    // if so we assume that the desired effect was to resize to fill the element.
+    if (expandWidth != this.baseInstance_.element.style.width.split('px')[0] ||
+       expandHeight != this.baseInstance_.element.style.height.split('px')[0]) {
+      expandWidth += Number(this.iframe_.width);
+      expandHeight += Number(this.iframe_.height);
+    }
+    this.handleSizeChange(expandHeight,
+        expandWidth,
+        SERVICE.EXPAND_RESPONSE);
+  }
+
+  /**
+   * @private
+   */
+  handleCollapseRequest_() {
+    this.handleSizeChange(this.baseInstance_.initialSize_.height,
+        this.baseInstance_.initialSize_.width,
+        SERVICE.COLLAPSE_RESPONSE,
+        /** isCollapse */ true);
+  }
+
+  /**
    * @param {number} height
    * @param {number} width
    */
@@ -515,52 +549,18 @@ export class SafeframeHostApi {
   }
 
   /**
-   * @param {!Object} payload
-   * @private
-   */
-  handleExpandRequest_(payload) {
-    let expandHeight = Math.floor(payload.expand_b +
-                                 payload.expand_t);
-    let expandWidth = Math.floor(payload.expand_r +
-                                 payload.expand_l);
-    // We assume that a fair amount of usage of this API will try to pass the final
-    // size of the iframe that is desired, instead of the correct usage which is
-    // specify how much to expand by. We try to protect against this, by detecting
-    // if the requested expansion size matches the size of the amp-ad element, and
-    // if so we assume that the desired effect was to resize to fill the element.
-    if (expandWidth != this.baseInstance_.element.style.width.split('px')[0] ||
-       expandHeight != this.baseInstance_.element.style.height.split('px')[0]) {
-      expandWidth += Number(this.iframe_.width);
-      expandHeight += Number(this.iframe_.height);
-    }
-    this.handleSizeChange(expandHeight,
-        expandWidth,
-        SERVICE.EXPAND_RESPONSE);
-  }
-
-  /**
-   * @private
-   */
-  handleCollapseRequest_() {
-    this.handleSizeChange(this.baseInstance_.initialSize_.height,
-        this.baseInstance_.initialSize_.width,
-        SERVICE.COLLAPSE_RESPONSE,
-        /** isCollapse */ true);
-  }
-
-  /**
    * Fires a delayed impression and notifies the Fluid creative that its
    * container has been resized.
    * @private
    */
   onFluidResize_() {
-    if (this.baseInstance_.fluidImpressionUrl_) {
+    if (this.baseInstance_.fluidImpressionUrl) {
       this.baseInstance_.fireDelayedImpressions(
-          this.baseInstance_.fluidImpressionUrl_);
-      this.baseInstance_.fluidImpressionUrl_ = null;
+          this.baseInstance_.fluidImpressionUrl);
+      this.baseInstance_.fluidImpressionUrl = null;
     }
     this.iframe_.contentWindow./*OK*/postMessage(
-        JSON.stringify(dict({'message': 'resize-complete', 'c': 'sfchannel1'})),
+        JSON.stringify(dict({'message': 'resize-complete', 'c': this.channel})),
         SAFEFRAME_ORIGIN);
   }
 }

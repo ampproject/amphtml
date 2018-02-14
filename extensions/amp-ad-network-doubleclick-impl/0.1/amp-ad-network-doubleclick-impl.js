@@ -306,8 +306,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {boolean} */
     this.isFluid_ = false;
 
-    /** @private {?string} */
-    this.fluidImpressionUrl_ = null;
+    /** {?string} */
+    this.fluidImpressionUrl = null;
 
     /** @private {?Promise<!../../../ads/google/a4a/utils.IdentityToken>} */
     this.identityTokenPromise_ = null;
@@ -734,7 +734,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
 
     if (this.isFluid_) {
-      this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
+      this.fluidImpressionUrl = responseHeaders.get('X-AmpImps');
     } else {
       this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
       this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
