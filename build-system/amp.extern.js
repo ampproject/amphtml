@@ -265,6 +265,12 @@ data.inViewport;
 data.numposts;
 data.orderBy;
 data.colorscheme;
+data.tabs;
+data.hideCover;
+data.hideCta;
+data.smallHeader;
+data.adaptContainerWidth;
+data.showFacePile;
 data.showText;
 
 // 3p code

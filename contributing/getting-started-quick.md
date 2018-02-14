@@ -25,7 +25,7 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 
 * [Install and set up Git](https://help.github.com/articles/set-up-git/); in the "Authenticating" step of that page use SSH instead of HTTPS
 
-* Install [NodeJS](https://nodejs.org/) version >= 6 (which includes npm)
+* Install [Node.js](https://nodejs.org/) version >= 6 (which includes npm); [NVM](https://github.com/creationix/nvm) is a convenient way to do this on Mac and Linux
 
 * Install [Yarn](https://yarnpkg.com/) version >= 1.2.0 (instructions [here](https://yarnpkg.com/en/docs/install), this may require elevated privileges using `sudo` on some platforms)
 
@@ -34,18 +34,17 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 * Add this line to your hosts file (`/etc/hosts` on Mac or Linux, `%SystemRoot%\System32\drivers\etc\hosts` on Windows):
 
     ```
-    127.0.0.1               ads.localhost iframe.localhost
+    127.0.0.1 ads.localhost iframe.localhost
     ```
 
 * Fork the [amphtml repository](https://github.com/ampproject/amphtml) by clicking "Fork" in the Web UI.
 
 * Create your local repository: `git clone git@github.com:<your username>/amphtml.git`
-* Add an alias:  Go to the newly created local repository directory and run `git remote add upstream git@github.com:ampproject/amphtml.git`
+* Add an alias:  Go to the newly created local repository directory and run `git remote add upstream git@github.com:ampproject/amphtml.git` and then `git branch -u upstream/master master`
 
 # Branch (do this each time you want a new branch)
 
-* Create the branch: `git branch --track <branch name> origin/master`
-* Go to the branch: `git checkout <branch name>`
+* Create and go to the branch: `git checkout -b <branch name> master`
 
 # Build AMP & run a local server
 
@@ -56,7 +55,10 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 
 # Test AMP
 
-* Run the tests: `gulp test`
+* Run all tests: `gulp test`
+* Run only the unit tests: `gulp test --unit` (doesn't build the runtime)
+* Run only the integration tests: `gulp test --integration` (builds the runtime)
+* Run tests, but skip building after having done so previously: `gulp test --nobuild`
 * Run the tests in a specified set of files: `gulp test --files=<filename>`
 * Add the `--watch` flag to any `gulp test` command to automatically re-run the tests when a file changes
 * To run only a certain set of Mocha tests change  `describe` to `describe.only` for the tests you want to run; combine this with `gulp test --watch` to automatically rerun your test when files are changed   (but make sure to run all the tests before sending your change for review)
@@ -73,7 +75,7 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 # Pull the latest changes
 
 * `git checkout master`
-* `git pull upstream master`
+* `git pull`
 * `git checkout <branch name>`
 * `git rebase master`
 * Note that you may need to resolve conflicting changes at this point
@@ -82,18 +84,21 @@ This Quick Start guide is the TL;DR version of the longer [end-to-end guide](get
 
 * Pull the latest changes as described above
 * `git checkout <branch name>`
-* `git push origin <branch name>`
+* `git push -u origin <branch name>`
 * Go to [https://github.com/ampproject/amphtml](https://github.com/ampproject/amphtml) and in the banner indicating you've recently pushed a branch, click the "Compare & pull request"  (if this banner does not appear, go to your fork at `https://github.com/<your username>/amphtml`, choose your branch from the "Branch" dropdown and click "New pull request")
 * Make sure you've signed the CLA (using the same email address as your git config indicates)
 * If your reviewer requests changes make them locally and then repeat the steps in this section to push the changes to your branch back up to GitHub again
+* For pushes after the first, just use `git push`
 * If you don't get a new review within 2 business days, feel free to ping the pull request by adding a comment
+* If you see visual diffs reported by [Percy](http://percy.io/ampproject/amphtml), and want to access the results, fill out this [form](https://docs.google.com/forms/d/e/1FAIpQLScZma6qVJtYUTqSm4KtiF3Zc-n5ukNe2GXNFqnaHxospsz0sQ/viewform).
+
 * Once approved your changes are merged into the amphtml repository by a core committer (you don't do this merge)
 
 # Delete your branch after your changes are merged (optional)
 
 * Go to the master branch: `git checkout master`
 * Delete your local branch: `git branch -D <branch name>`
-* Delete the GitHub fork branch: `git push origin --delete <branch name>`
+* Delete the GitHub fork branch: `git push -d origin <branch name>`
 
 # See your changes in production
 

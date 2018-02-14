@@ -1,0 +1,50 @@
+<!--
+  ## Introduction
+
+  Use `amp-user-notification` to display a dismissable notification to the user.
+  Use this to implement a dialog to notify users about cookies.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-user-notification</title>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!-- Import `amp-user-notification` in the header. -->
+  <script async custom-element="amp-user-notification" src="https://cdn.ampproject.org/v0/amp-user-notification-0.1.js"></script>
+  <!-- `amp-user-notification` requires `amp-analytics` to be imported as well. -->
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-user-notification/">
+  <!--
+    Specify any additional css, default css class will put the amp-user-notification element
+    in the left bottom corner.
+  -->
+  <style amp-custom>
+    /* Center the notification content */
+    amp-user-notification > div {
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+</head>
+<body>
+
+  <!-- ## Using Local Storage -->
+  <!--
+    When the user agrees to the cookies policy, the status is saved in the local storage.
+  -->
+  <amp-user-notification 
+    id="my-notification"
+    layout="nodisplay">
+    <div>This is an amp-user-notification. It uses local storage to store the dismissed state. <button on="tap:my-notification.dismiss" class="ampstart-btn caps ml1">I accept</button>
+    </div>
+  </amp-user-notification>
+
+</body>
+</html>

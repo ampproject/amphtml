@@ -15,18 +15,17 @@
  */
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
-import {closest} from '../../../src/dom';
+import {closest, escapeCssSelectorIdent} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {hasTapAction, timeStrToMillis} from './utils';
 import {listenOnce} from '../../../src/event-helper';
-import {scopedQuerySelector} from '../../../src/dom';
 
 
 /** @private @const {number} */
 const NEXT_SCREEN_AREA_RATIO = 0.75;
 
 /** @const {number} */
-const POLL_INTERVAL_MS = 250;
+export const POLL_INTERVAL_MS = 300;
 
 /** @const @enum */
 export const TapNavigationDirection = {
@@ -474,10 +473,9 @@ class MediaBasedAdvancement extends AdvancementConfig {
       return this.element_;
     } else if (this.element_.hasAttribute('background-audio') &&
         (tagName === 'amp-story' || tagName === 'amp-story-page')) {
-      return scopedQuerySelector(this.element_,
-          '.i-amphtml-story-background-audio');
+      return this.element_.querySelector('.i-amphtml-story-background-audio');
     } else if (tagName === 'amp-audio') {
-      return scopedQuerySelector(this.element_, 'audio');
+      return this.element_.querySelector('audio');
     }
 
     return null;
@@ -572,7 +570,9 @@ class MediaBasedAdvancement extends AdvancementConfig {
    */
   static fromAutoAdvanceString(autoAdvanceStr, win, rootEl) {
     try {
-      const element = scopedQuerySelector(rootEl, `#${autoAdvanceStr}`);
+      const element = rootEl.querySelector(`#${
+        escapeCssSelectorIdent(autoAdvanceStr)
+      }`);
 
       if (!element) {
         return null;

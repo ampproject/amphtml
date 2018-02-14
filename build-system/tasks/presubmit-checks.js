@@ -360,38 +360,6 @@ const forbiddenTerms = {
       'src/service/viewer-impl.js',
     ],
   },
-  'cookie\\W': {
-    message: requiresReviewPrivacy,
-    whitelist: [
-      'build-system/test-server.js',
-      'src/cookies.js',
-      'src/service/cid-impl.js',
-      'testing/fake-dom.js',
-      'extensions/amp-access-scroll/0.1/scroll-impl.js',
-      'extensions/amp-analytics/0.1/vendors.js',
-      'extensions/amp-youtube/0.1/amp-youtube.js',
-    ],
-  },
-  'getCookie\\W': {
-    message: requiresReviewPrivacy,
-    whitelist: [
-      'src/service/cid-impl.js',
-      'src/service/cid-api.js',
-      'src/cookies.js',
-      'src/experiments.js',
-      'tools/experiments/experiments.js',
-    ],
-  },
-  'setCookie\\W': {
-    message: requiresReviewPrivacy,
-    whitelist: [
-      'src/service/cid-impl.js',
-      'src/service/cid-api.js',
-      'src/cookies.js',
-      'src/experiments.js',
-      'tools/experiments/experiments.js',
-    ],
-  },
   'isTrustedViewer': {
     message: requiresReviewPrivacy,
     whitelist: [
@@ -622,6 +590,7 @@ const forbiddenTerms = {
     message: 'Use a line-level "no-unused-vars" rule instead.',
     whitelist: [
       'viewer-api/swipe-api.js',
+      'dist.3p/current/integration.js',
     ],
   },
 };
@@ -729,15 +698,6 @@ const forbiddenTermsSrcInclusive = {
       'examples/pwa/pwa.js',
       'src/utils/bytes.js',
     ],
-  },
-  // Super complicated regex that says "find any querySelector method call that
-  // is passed as a variable anything that is not a string, or a string that
-  // contains a space.
-  '\\b(?:(?!\\w*[dD]oc\\w*)\\w)+\\.querySelector(?:All)?\\((?=\\s*([^\'"\\s]|[^\\s)]+\\s))[^)]*\\)': { // eslint-disable-line max-len
-    message: 'querySelector is not scoped to the element, but globally and ' +
-    'filtered to just the elements inside the element. This leads to ' +
-    'obscure bugs if you attempt to match a descendant of a descendant (ie ' +
-    '"div div"). Instead, use the scopedQuerySelector helper in dom.js',
   },
   'preloadExtension': {
     message: bannedTermsHelpString,

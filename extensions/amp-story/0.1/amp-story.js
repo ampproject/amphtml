@@ -47,9 +47,9 @@ import {SystemLayer} from './system-layer';
 import {TapNavigationDirection} from './page-advancement';
 import {
   closest,
+  escapeCssSelectorIdent,
   matches,
   removeElement,
-  scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {
@@ -128,7 +128,9 @@ const LANDSCAPE_OVERLAY_CLASS = 'i-amphtml-story-landscape';
 const LANDSCAPE_ORIENTATION_WARNING = [
   {
     tag: 'div',
-    attrs: dict({'class': 'i-amphtml-story-no-rotation-overlay'}),
+    attrs: dict({
+      'class': 'i-amphtml-story-no-rotation-overlay ' +
+          'i-amphtml-story-system-reset'}),
     children: [
       {
         tag: 'div',
@@ -140,6 +142,7 @@ const LANDSCAPE_ORIENTATION_WARNING = [
           },
           {
             tag: 'div',
+            attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
             text: 'The page is best viewed in portrait mode',
           },
         ],
@@ -164,6 +167,7 @@ const UNSUPPORTED_BROWSER_WARNING = [
           },
           {
             tag: 'div',
+            attrs: dict({'class': 'i-amphtml-story-overlay-text'}),
             text: 'We\'re sorry, it looks like your browser doesn\'t support ' +
                 'this experience',
           },
@@ -455,6 +459,8 @@ export class AmpStory extends AMP.BaseElement {
       'overflow': 'hidden',
     });
 
+    this.getViewport().resetTouchZoom();
+    this.getViewport().disableTouchZoom();
     this.maybeLockScreenOrientation_();
   }
 
@@ -533,7 +539,7 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     const firstPageEl = user().assertElement(
-        scopedQuerySelector(this.element, 'amp-story-page'),
+        this.element.querySelector('amp-story-page'),
         'Story must have at least one page.');
 
     if (!this.paginationButtons_) {
@@ -692,7 +698,7 @@ export class AmpStory extends AMP.BaseElement {
   /** @private */
   initializePages_() {
     const pageImplPromises = Array.prototype.map.call(
-        scopedQuerySelectorAll(this.element, 'amp-story-page'),
+        this.element.querySelectorAll('amp-story-page'),
         (pageEl, index) => {
           return pageEl.getImpl().then(pageImpl => {
             this.pages_[index] = pageImpl;
@@ -781,8 +787,8 @@ export class AmpStory extends AMP.BaseElement {
 
     // TODO(cvializ): Move this to the page class?
     const activePriorSibling = targetPage.element.previousElementSibling;
-    const previousActivePriorSibling = scopedQuerySelector(
-        this.element, `[${PRE_ACTIVE_PAGE_ATTRIBUTE_NAME}]`);
+    const previousActivePriorSibling = this.element.querySelector(
+        `[${escapeCssSelectorIdent(PRE_ACTIVE_PAGE_ATTRIBUTE_NAME)}]`);
 
     this.activePage_ = targetPage;
 
@@ -952,7 +958,7 @@ export class AmpStory extends AMP.BaseElement {
    * @return {?string} The URL of the background resource
    */
   getBackgroundUrl_(pageElement) {
-    let fillElement = scopedQuerySelector(pageElement,
+    let fillElement = pageElement.querySelector(
         '[template="fill"]:not(.i-amphtml-hidden-by-media-query)');
 
     if (!fillElement) {
@@ -961,10 +967,10 @@ export class AmpStory extends AMP.BaseElement {
 
     fillElement = dev().assertElement(fillElement);
 
-    const fillPosterElement = scopedQuerySelector(fillElement,
+    const fillPosterElement = fillElement.querySelector(
         '[poster]:not(.i-amphtml-hidden-by-media-query)');
 
-    const srcElement = scopedQuerySelector(fillElement,
+    const srcElement = fillElement.querySelector(
         '[src]:not(.i-amphtml-hidden-by-media-query)');
 
     const fillPoster = fillPosterElement ?
@@ -1049,8 +1055,8 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    const elements =
-        scopedQuerySelectorAll(this.element, HIDE_ON_BOOKEND_SELECTOR);
+    const elements = scopedQuerySelectorAll(this.element,
+        HIDE_ON_BOOKEND_SELECTOR);
 
     Array.prototype.forEach.call(elements, el => {
       if (display) {
@@ -1398,7 +1404,7 @@ export class AmpStory extends AMP.BaseElement {
   updateAudioIcon_() {
     // TODO(#11857): Defer to any playing media element for whether any audio is
     // being played.
-    const containsMediaElement = !!scopedQuerySelector(this.element,
+    const containsMediaElement = !!this.element.querySelector(
         'amp-audio, amp-video, [background-audio]');
     const hasStoryAudio = this.element.hasAttribute('background-audio');
 

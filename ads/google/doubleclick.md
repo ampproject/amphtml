@@ -130,10 +130,6 @@ Example:
 - Anchor Ads / Adhesion Units
 - Creatives served over HTTP.
 
-### DFP Implementation Examples
-[This](http://dfp-amp-testing-1185.appspot.com/) website has a list of implementation examples with source code that showcase DFP features.
-
-
 
 
 

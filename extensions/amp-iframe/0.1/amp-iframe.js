@@ -105,7 +105,11 @@ export class AmpIframe extends AMP.BaseElement {
      **/
     this.iframeSrc = null;
 
-    /** @private {?Element} */
+    /**
+     * The element which will contain the iframe. This may be the amp-iframe
+     * itself if the iframe is non-scrolling, or a wrapper element if it is.
+     * @private {?Element}
+     */
     this.container_ = null;
 
     /** @private {boolean|undefined} */
@@ -215,13 +219,6 @@ export class AmpIframe extends AMP.BaseElement {
             this.element.getAttribute('srcdoc'), this.sandbox_);
     this.iframeSrc = this.assertSource(
         iframeSrc, window.location.href, this.sandbox_);
-
-    /**
-     * The element which will contain the iframe. This may be the amp-iframe
-     * itself if the iframe is non-scrolling, or a wrapper element if it is.
-     * @type {!Element}
-     */
-    this.container_ = makeIOsScrollable(this.element);
   }
 
   /**
@@ -246,6 +243,8 @@ export class AmpIframe extends AMP.BaseElement {
     if (!this.element.hasAttribute('frameborder')) {
       this.element.setAttribute('frameborder', '0');
     }
+
+    this.container_ = makeIOsScrollable(this.element);
   }
 
   /**
@@ -548,7 +547,7 @@ export class AmpIframe extends AMP.BaseElement {
     }
     return !this.isInContainer_;
   }
-};
+}
 
 /**
  * We always set a sandbox. Default is that none of the things that need

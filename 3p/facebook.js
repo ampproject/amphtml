@@ -65,6 +65,27 @@ function getPostContainer(global, data) {
 }
 
 /**
+ * Create DOM element for the Facebook embedded page plugin.
+ * Reference: https://developers.facebook.com/docs/plugins/page-plugin
+ * @param {!Window} global
+ * @param {!Object} data The element data
+ * @return {!Element} div
+ */
+function getPageContainer(global, data) {
+  const container = global.document.createElement('div');
+  container.className = 'fb-page';
+  container.setAttribute('data-href', data.href);
+  container.setAttribute('data-tabs', data.tabs);
+  container.setAttribute('data-hide-cover', data.hideCover);
+  container.setAttribute('data-show-facepile', data.showFacePile);
+  container.setAttribute('data-hide-cta', data.hideCta);
+  container.setAttribute('data-small-header', data.smallHeader);
+  container.setAttribute(
+      'data-adapt-container-width', data.adaptContainerWidth);
+  return container;
+}
+
+/**
  * Create DOM element for the Facebook comments plugin:
  * Reference: https://developers.facebook.com/docs/plugins/comments
  * @param {!Window} global
@@ -110,7 +131,10 @@ function getLikeContainer(global, data) {
 export function facebook(global, data) {
   const extension = global.context.tagName;
   let container;
-  if (extension === 'AMP-FACEBOOK-LIKE') {
+
+  if (extension === 'AMP-FACEBOOK-PAGE') {
+    container = getPageContainer(global, data);
+  } else if (extension === 'AMP-FACEBOOK-LIKE') {
     container = getLikeContainer(global, data);
   } else if (extension === 'AMP-FACEBOOK-COMMENTS') {
     container = getCommentsContainer(global, data);
