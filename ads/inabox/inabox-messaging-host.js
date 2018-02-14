@@ -29,7 +29,6 @@ import {layoutRectFromDomRect} from '../../src/layout-rect';
 const TAG = 'InaboxMessagingHost';
 
 
-
 /** Simple helper for named callbacks. */
 class NamedObservable {
 
@@ -96,26 +95,28 @@ export class InaboxMessagingHost {
    * @return {boolean} true if message get successfully processed
    */
   processMessage(message) {
-    const request = deserializeMessage(getData(message));
-    if (!request || !request['sentinel']) {
-      dev().fine(TAG, 'Ignored non-AMP message:', message);
-      return false;
-    }
+    try {
+      const request = deserializeMessage(getData(message));
+      if (!request || !request['sentinel']) {
+        dev().fine(TAG, 'Ignored non-AMP message:', message);
+        return false;
+      }
 
-    const iframe =
-        this.getFrameElement_(message.source, request['sentinel']);
-    if (!iframe) {
-      dev().info(TAG, 'Ignored message from untrusted iframe:', message);
-      return false;
-    }
+      const iframe =
+            this.getFrameElement_(message.source, request['sentinel']);
+      if (!iframe) {
+        dev().info(TAG, 'Ignored message from untrusted iframe:', message);
+        return false;
+      }
 
-    if (!this.msgObservable_.fire(request['type'], this,
-        [iframe, request, message.source, message.origin])) {
-      dev().warn(TAG, 'Unprocessed AMP message:', message);
-      return false;
-    }
+      if (!this.msgObservable_.fire(request['type'], this,
+          [iframe, request, message.source, message.origin])) {
+        dev().warn(TAG, 'Unprocessed AMP message:', message);
+        return false;
+      }
 
-    return true;
+      return true;
+    } catch (unused) {}
   }
 
   /**
@@ -128,7 +129,7 @@ export class InaboxMessagingHost {
   handleSendPositions_(iframe, request, source, origin) {
     const viewportRect = this.positionObserver_.getViewportRect();
     const targetRect =
-        layoutRectFromDomRect(iframe./*OK*/getBoundingClientRect());
+          layoutRectFromDomRect(iframe./*OK*/getBoundingClientRect());
     this.sendPosition_(request, source, origin, dict({
       'viewportRect': viewportRect,
       'targetRect': targetRect,
