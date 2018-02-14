@@ -34,7 +34,7 @@ import {
 } from '../utils';
 import {
   MockA4AImpl,
-} from '../../../../extensions/amp-a4a/0.1/test/utils';;
+} from '../../../../extensions/amp-a4a/0.1/test/utils';
 import {Services} from '../../../../src/services';
 import {buildUrl} from '../url-builder';
 import {createElementWithAttributes} from '../../../../src/dom';
@@ -415,6 +415,28 @@ describe('Google A4A utils', () => {
         });
       });
     });
+
+    it('should include GA cid/hid', () => {
+      return createIframePromise().then(fixture => {
+        setupForAdTesting(fixture);
+        const doc = fixture.doc;
+        doc.win = fixture.win;
+        const elem = createElementWithAttributes(doc, 'amp-a4a', {
+          'type': 'adsense',
+          'width': '320',
+          'height': '50',
+        });
+        const impl = new MockA4AImpl(elem);
+        noopMethods(impl, doc, sandbox);
+        impl.win.gaGlobal = {cid: 'foo', hid: 'bar'};
+        return fixture.addElement(elem).then(() => {
+          return googleAdUrl(impl, '', 0, [], []).then(url => {
+            expect(url).to.match(/[&?]ga_cid=foo[&$]/);
+            expect(url).to.match(/[&?]ga_hid=bar[&$]/);
+          });
+        });
+      });
+    });
   });
 
   describe('#mergeExperimentIds', () => {
@@ -448,7 +470,7 @@ describe('Google A4A utils', () => {
     it('should not append parameter if truncated', () => {
       const truncUrl = buildUrl(
           'https://foo.com/bar', {hello: 'world'}, 15, TRUNCATION_PARAM);
-      expect(truncUrl.indexOf(TRUNCATION_PARAM.name) != -1);
+      expect(truncUrl.indexOf(TRUNCATION_PARAM.name)).to.not.equal(-1);
       expect(maybeAppendErrorParameter(truncUrl, 'n')).to.not.be.ok;
     });
   });
@@ -563,7 +585,7 @@ describe('Google A4A utils', () => {
         expect(result.pucrd).to.equal('');
         expect(result.freshLifetimeSecs).to.equal(3600);
         expect(result.validLifetimeSecs).to.equal(86400);
-        expect(result.fetchTimeMs >= 0).to.be.true;
+        expect(result.fetchTimeMs).to.be.at.least(0);
       });
     });
 
@@ -581,7 +603,7 @@ describe('Google A4A utils', () => {
         expect(result.pucrd).to.equal('some_pucrd');
         expect(result.freshLifetimeSecs).to.equal(1234);
         expect(result.validLifetimeSecs).to.equal(5678);
-        expect(result.fetchTimeMs >= 0).to.be.true;
+        expect(result.fetchTimeMs).to.be.at.least(0);
       });
     });
 
@@ -594,7 +616,7 @@ describe('Google A4A utils', () => {
         expect(result.pucrd).to.equal('');
         expect(result.freshLifetimeSecs).to.equal(3600);
         expect(result.validLifetimeSecs).to.equal(86400);
-        expect(result.fetchTimeMs >= 0).to.be.true;
+        expect(result.fetchTimeMs).to.be.at.least(0);
       });
     });
 
@@ -606,7 +628,7 @@ describe('Google A4A utils', () => {
         expect(result.token).to.not.be.ok;
         expect(result.jar).to.not.be.ok;
         expect(result.pucrd).to.not.be.ok;
-        expect(result.fetchTimeMs >= 0).to.be.true;
+        expect(result.fetchTimeMs).to.be.at.least(0);
       });
     });
 

@@ -16,15 +16,25 @@
 
 import {BLANK_AUDIO_SRC, BLANK_VIDEO_SRC} from './default-media';
 import {
-  closestBySelector,
-  isConnectedNode,
-  removeElement,
-  scopedQuerySelectorAll,
-} from '../../../src/dom';
+  BlessTask,
+  ELEMENT_BLESSED_PROPERTY_NAME,
+  LoadTask,
+  MuteTask,
+  PauseTask,
+  PlayTask,
+  RewindTask,
+  SwapIntoDomTask,
+  SwapOutOfDomTask,
+  UnmuteTask,
+  UpdateSourcesTask,
+} from './media-tasks';
+import {Services} from '../../../src/services';
+import {Sources} from './sources';
+import {ampMediaElementFor} from './utils';
 import {dev} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
+import {isConnectedNode} from '../../../src/dom';
 import {toWin} from '../../../src/types';
-
 
 
 /** @const @enum {string} */
@@ -43,9 +53,10 @@ export let ElementDistanceFnDef;
 
 
 /**
- * @const {string}
+ * Represents a task to be executed on a media element.
+ * @typedef {function(!HTMLMediaElement, *): !Promise}
  */
-const REPLACED_MEDIA_ATTRIBUTE = 'replaced-media';
+let ElementTaskDef;
 
 
 /**
@@ -61,35 +72,17 @@ const POOL_MEDIA_ELEMENT_PROPERTY_NAME = '__AMP_MEDIA_POOL_ID__';
 
 
 /**
- * @const {!Array<string>}
+ * @const {string}
  */
-const PROTECTED_CSS_CLASS_NAMES = [
-  'i-amphtml-pool-media',
-  'i-amphtml-pool-audio',
-  'i-amphtml-pool-video',
-];
+const ELEMENT_TASK_QUEUE_PROPERTY_NAME = '__AMP_MEDIA_ELEMENT_TASKS__';
 
 
 /**
- * @const {!Array<string>}
+ * The name for a string attribute that represents the ID of a media element
+ * that the element containing this attribute replaced.
+ * @const {string}
  */
-const PROTECTED_ATTRIBUTES = [
-  'id',
-  'src',
-  'class',
-  'autoplay',
-  REPLACED_MEDIA_ATTRIBUTE,
-];
-
-
-/**
- * Finds an amp-video/amp-audio ancestor.
- * @param {!Element} el
- * @return {?AmpElement}
- */
-function ampMediaElementFor(el) {
-  return closestBySelector(el, 'amp-video, amp-audio');
-}
+export const REPLACED_MEDIA_PROPERTY_NAME = 'replaced-media';
 
 
 /**
@@ -102,6 +95,9 @@ const instances = {};
  * @type {number}
  */
 let nextInstanceId = 0;
+
+
+let elId = 0;
 
 
 export class MediaPool {
@@ -117,6 +113,12 @@ export class MediaPool {
   constructor(win, maxCounts, distanceFn) {
     /** @private @const {!Window} */
     this.win_ = win;
+
+    /** @private @const {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(win);
+
+    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(win);
 
     /**
      * The function used to retrieve the distance between an element and the
@@ -169,7 +171,6 @@ export class MediaPool {
     this.mediaFactory_ = {
       [MediaType.AUDIO]: () => {
         const audioEl = this.win_.document.createElement('audio');
-        audioEl.setAttribute('src', BLANK_AUDIO_SRC);
         audioEl.setAttribute('muted', '');
         audioEl.muted = true;
         audioEl.classList.add('i-amphtml-pool-media');
@@ -178,7 +179,6 @@ export class MediaPool {
       },
       [MediaType.VIDEO]: () => {
         const videoEl = this.win_.document.createElement('video');
-        videoEl.setAttribute('src', BLANK_VIDEO_SRC);
         videoEl.setAttribute('muted', '');
         videoEl.muted = true;
         videoEl.setAttribute('playsinline', '');
@@ -208,13 +208,37 @@ export class MediaPool {
       this.allocated[type] = [];
       this.unallocated[type] = [];
       for (let i = 0; i < count; i++) {
-        const mediaEl = this.mediaFactory_[type].call(this);
-        // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE is
-        // returned.  If so, we should adjust the pool size/distribution between
-        // media types.
-        this.unallocated[type].push(mediaEl);
+        this.vsync_.mutate(() => {
+          const mediaEl = this.mediaFactory_[type].call(this);
+          mediaEl.setAttribute('pool-element', elId++);
+          const sources = this.getDefaultSource_(type);
+          this.enqueueMediaElementTask_(mediaEl,
+              new UpdateSourcesTask(sources, this.vsync_));
+          // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE
+          // is returned.  If so, we should adjust the pool size/distribution
+          // between media types.
+          this.unallocated[type].push(mediaEl);
+        });
       }
     });
+  }
+
+
+  /**
+   * @param {!MediaType} mediaType The media type whose source should be
+   *     retrieved.
+   * @return {!Sources} The default source for the specified type of media.
+   */
+  getDefaultSource_(mediaType) {
+    switch (mediaType) {
+      case MediaType.AUDIO:
+        return new Sources(BLANK_AUDIO_SRC);
+      case MediaType.VIDEO:
+        return new Sources(BLANK_VIDEO_SRC);
+      default:
+        dev().error('AMP-STORY', `No default media for type ${mediaType}.`);
+        return new Sources();
+    }
   }
 
 
@@ -288,8 +312,7 @@ export class MediaPool {
 
     const allocatedEls = this.allocated[mediaType];
     const index = findIndex(allocatedEls, poolMediaEl => {
-      return poolMediaEl.getAttribute(REPLACED_MEDIA_ATTRIBUTE) ===
-          domMediaEl.id;
+      return poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] === domMediaEl.id;
     });
 
     return allocatedEls[index];
@@ -304,6 +327,13 @@ export class MediaPool {
    */
   allocateMediaElement_(mediaType, poolMediaEl) {
     this.allocated[mediaType].push(poolMediaEl);
+
+    const unallocatedEls = this.unallocated[mediaType];
+    const indexToRemove = unallocatedEls.indexOf(poolMediaEl);
+
+    if (indexToRemove >= 0) {
+      unallocatedEls.splice(indexToRemove, 1);
+    }
   }
 
 
@@ -335,7 +365,31 @@ export class MediaPool {
     }
 
     // De-allocate a media element.
-    return allocatedEls.pop();
+    const poolMediaEl = allocatedEls.pop();
+    this.unallocated[mediaType].push(poolMediaEl);
+    return poolMediaEl;
+  }
+
+
+  /**
+   * Forcibly deallocates a specific media element, regardless of its distance
+   * from the current position in the document.
+   * @param {!HTMLMediaElement} poolMediaEl The element to be deallocated.
+   * @return {!Promise} A promise that is resolved when the specified media
+   *     element has been successfully deallocated.
+   */
+  forceDeallocateMediaElement_(poolMediaEl) {
+    const mediaType = this.getMediaType_(poolMediaEl);
+    const allocatedEls = this.allocated[mediaType];
+    const removeFromDom = isConnectedNode(poolMediaEl) ?
+      this.swapPoolMediaElementOutOfDom_(poolMediaEl) : Promise.resolve();
+
+    return removeFromDom.then(() => {
+      const index = allocatedEls.indexOf(poolMediaEl);
+      dev().assert(index >= 0, 'Cannot deallocate unallocated media element.');
+      allocatedEls.splice(index, 1);
+      this.unallocated[mediaType].push(poolMediaEl);
+    });
   }
 
 
@@ -373,32 +427,6 @@ export class MediaPool {
 
 
   /**
-   * Determines whether a CSS class name is allowed to be removed or copied from
-   * media elements.
-   * @param {string} cssClassName The CSS class name name to check.
-   * @return {boolean} true, if the specified CSS class name is allowed to be
-   *     removed or copied from media elements; false otherwise.
-   * @private
-   */
-  isProtectedCssClassName_(cssClassName) {
-    return PROTECTED_CSS_CLASS_NAMES.indexOf(cssClassName) >= 0;
-  }
-
-
-  /**
-   * Determines whether an attribute is allowed to be removed or copied from
-   * media elements.
-   * @param {string} attributeName The attribute name to check.
-   * @return {boolean} true, if the specified attribute is allowed to be removed
-   *     or copied from media elements; false otherwise.
-   * @private
-   */
-  isProtectedAttributeName_(attributeName) {
-    return PROTECTED_ATTRIBUTES.indexOf(attributeName) >= 0;
-  }
-
-
-  /**
    * Replaces a media element that was originally in the DOM with a media
    * element from the pool.
    * @param {!HTMLMediaElement} domMediaEl The media element originating from
@@ -406,20 +434,26 @@ export class MediaPool {
    * @param {!HTMLMediaElement} poolMediaEl The media element originating from
    *     the pool.
    * @param {!Sources} sources The sources for the media element.
+   * @return {!Promise} A promise that is resolved when the media element has
+   *     been successfully swapped into the DOM.
    * @private
    */
   swapPoolMediaElementIntoDom_(domMediaEl, poolMediaEl, sources) {
     const ampMediaForPoolEl = ampMediaElementFor(poolMediaEl);
     const ampMediaForDomEl = ampMediaElementFor(domMediaEl);
+    poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = domMediaEl.id;
 
-    this.copyCssClasses_(domMediaEl, poolMediaEl);
-    this.copyAttributes_(domMediaEl, poolMediaEl);
-    sources.applyToElement(poolMediaEl);
-    poolMediaEl.setAttribute(REPLACED_MEDIA_ATTRIBUTE, domMediaEl.id);
-    domMediaEl.parentElement.replaceChild(poolMediaEl, domMediaEl);
-
-    this.maybeResetAmpMedia_(ampMediaForPoolEl);
-    this.maybeResetAmpMedia_(ampMediaForDomEl);
+    return this.enqueueMediaElementTask_(poolMediaEl,
+        new SwapIntoDomTask(domMediaEl, this.vsync_))
+        .then(() => {
+          this.maybeResetAmpMedia_(ampMediaForPoolEl);
+          this.maybeResetAmpMedia_(ampMediaForDomEl);
+          this.enqueueMediaElementTask_(poolMediaEl,
+              new UpdateSourcesTask(sources, this.vsync_));
+          this.enqueueMediaElementTask_(poolMediaEl, new LoadTask());
+        }, () => {
+          this.forceDeallocateMediaElement_(poolMediaEl);
+        });
   }
 
 
@@ -442,81 +476,45 @@ export class MediaPool {
 
 
   /**
+   * @param {!HTMLMediaElement} poolMediaEl The element whose source should be
+   *     reset.
+   * @return {!Promise} A promise that is resolved when the pool media element
+   *     has been reset.
+   */
+  resetPoolMediaElementSource_(poolMediaEl) {
+    const mediaType = this.getMediaType_(poolMediaEl);
+    const defaultSources = this.getDefaultSource_(mediaType);
+
+    return this.enqueueMediaElementTask_(poolMediaEl,
+        new UpdateSourcesTask(defaultSources, this.vsync_));
+  }
+
+
+  /**
    * Removes a pool media element from the DOM and replaces it with the video
    * that it originally replaced.
    * @param {!HTMLMediaElement} poolMediaEl The pool media element to remove
    *     from the DOM.
+   * @return {!Promise} A promise that is resolved when the media element has
+   *     been successfully swapped out of the DOM.
    * @private
    */
   swapPoolMediaElementOutOfDom_(poolMediaEl) {
-    const oldDomMediaElId = poolMediaEl.getAttribute(REPLACED_MEDIA_ATTRIBUTE);
+    const oldDomMediaElId = poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME];
     const oldDomMediaEl = /** @type {!HTMLMediaElement} */ (dev().assertElement(
         this.domMediaEls_[oldDomMediaElId],
         'No media element to put back into DOM after eviction.'));
-    this.copyCssClasses_(poolMediaEl, oldDomMediaEl);
-    this.copyAttributes_(poolMediaEl, oldDomMediaEl);
-    poolMediaEl.parentElement.replaceChild(oldDomMediaEl, poolMediaEl);
-    poolMediaEl.removeAttribute(REPLACED_MEDIA_ATTRIBUTE);
-    Sources.removeFrom(poolMediaEl);
+
+    const swapOutOfDom = this.enqueueMediaElementTask_(poolMediaEl,
+        new SwapOutOfDomTask(oldDomMediaEl, this.vsync_))
+        .then(() => {
+          poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] = null;
+        });
+
+    this.resetPoolMediaElementSource_(poolMediaEl);
+    return swapOutOfDom;
   }
 
-
-  /**
-   * Copies all unprotected CSS classes from fromEl to toEl.
-   * @param {!HTMLMediaElement} fromEl The element from which CSS classes should
-   *     be copied.
-   * @param {!HTMLMediaElement} toEl The element to which CSS classes should be
-   *     copied.
-   * @private
-   */
-  copyCssClasses_(fromEl, toEl) {
-    // Remove all of the unprotected CSS classes from the toEl.
-    for (let i = toEl.classList.length - 1; i >= 0; i--) {
-      const cssClass = toEl.classList.item(i);
-      if (!this.isProtectedCssClassName_(cssClass)) {
-        toEl.classList.remove(cssClass);
-      }
-    }
-
-    // Copy all of the unprotected CSS classes from the fromEl to the toEl.
-    for (let i = 0; i < fromEl.classList.length; i++) {
-      const cssClass = fromEl.classList.item(i);
-      if (!this.isProtectedCssClassName_(cssClass)) {
-        toEl.classList.add(cssClass);
-      }
-    }
-  }
-
-
-  /**
-   * Copies all unprotected attributes from fromEl to toEl.
-   * @param {!HTMLMediaElement} fromEl The element from which attributes should
-   *     be copied.
-   * @param {!HTMLMediaElement} toEl The element to which attributes should be
-   *     copied.
-   * @private
-   */
-  copyAttributes_(fromEl, toEl) {
-    const fromAttributes = fromEl.attributes;
-    const toAttributes = toEl.attributes;
-
-    // Remove all of the unprotected attributes from the toEl.
-    for (let i = toAttributes.length - 1; i >= 0; i--) {
-      const attributeName = toAttributes[i].name;
-      if (!this.isProtectedAttributeName_(attributeName)) {
-        toEl.removeAttribute(attributeName);
-      }
-    }
-
-    // Copy all of the unprotected attributes from the fromEl to the toEl.
-    for (let i = 0; i < fromAttributes.length; i++) {
-      const attributeName = fromAttributes[i].name;
-      const attributeValue = fromAttributes[i].value;
-      if (!this.isProtectedAttributeName_(attributeName)) {
-        toEl.setAttribute(attributeName, attributeValue);
-      }
-    }
-  }
 
   forEachMediaType_(callbackFn) {
     Object.keys(MediaType).forEach(callbackFn.bind(this));
@@ -549,19 +547,21 @@ export class MediaPool {
    * a media element that can be used in its stead for playback.
    * @param {!HTMLMediaElement} domMediaEl The media element, found in the DOM,
    *     whose content should be loaded.
-   * @return {?HTMLMediaElement} A media element from the pool that can be used
+   * @return {Promise<!HTMLMediaElement>} A media element from the pool that can be used
    *     to replace the specified element.
    */
   loadInternal_(domMediaEl) {
     if (!isConnectedNode(domMediaEl)) {
       // Don't handle nodes that aren't even in the document.
-      return null;
+      return Promise.resolve();
     }
 
     const mediaType = this.getMediaType_(domMediaEl);
-    if (this.getMatchingMediaElementFromPool_(mediaType, domMediaEl)) {
-      // The element being loaded is already an allocated media element.
-      return domMediaEl;
+    const existingPoolMediaEl =
+        this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
+    if (existingPoolMediaEl) {
+      // The element being loaded already has an allocated media element.
+      return Promise.resolve(existingPoolMediaEl);
     }
 
     const sources = this.sources_[domMediaEl.id];
@@ -574,12 +574,13 @@ export class MediaPool {
     if (!poolMediaEl) {
       // If there is no space in the pool to allocate a new element, and no
       // element can be evicted, do not return any element.
-      return null;
+      return Promise.resolve();
     }
 
-    this.swapPoolMediaElementIntoDom_(domMediaEl, poolMediaEl, sources);
     this.allocateMediaElement_(mediaType, poolMediaEl);
-    return poolMediaEl;
+
+    return this.swapPoolMediaElementIntoDom_(domMediaEl, poolMediaEl, sources)
+        .then(() => poolMediaEl);
   }
 
 
@@ -587,38 +588,16 @@ export class MediaPool {
    * "Blesses" the specified media element for future playback without a user
    * gesture.  In order for this to bless the media element, this function must
    * be invoked in response to a user gesture.
-   * @param {!HTMLMediaElement} mediaEl The media element to bless.
+   * @param {!HTMLMediaElement} poolMediaEl The media element to bless.
    * @return {!Promise} A promise that is resolved when blessing the media
    *     element is complete.
    */
-  bless_(mediaEl) {
-    const isPaused = mediaEl.paused;
-    const isMuted = mediaEl.muted;
-    const currentTime = mediaEl.currentTime;
+  bless_(poolMediaEl) {
+    if (poolMediaEl[ELEMENT_BLESSED_PROPERTY_NAME]) {
+      return Promise.resolve();
+    }
 
-    // If the video is already playing, we do not want to call play again, as it
-    // can interrupt the video playback.  Instead, we do a no-op.
-    const playFn = () => {
-      if (isPaused) {
-        mediaEl.play();
-      }
-    };
-
-    return Promise.resolve().then(() => playFn()).then(() => {
-      mediaEl.muted = false;
-
-      if (isPaused) {
-        mediaEl.pause();
-        mediaEl.currentTime = currentTime;
-      }
-
-      if (isMuted) {
-        mediaEl.muted = true;
-      }
-    }).catch(reason => {
-      dev().expectedError('AMP-STORY', 'Blessing media element failed:',
-          reason);
-    });
+    return this.enqueueMediaElementTask_(poolMediaEl, new BlessTask());
   }
 
 
@@ -629,18 +608,20 @@ export class MediaPool {
    * already registered, this is a no-op.  Registering elements from within the
    * pool is not allowed, and will also be a no-op.
    * @param {!HTMLMediaElement} domMediaEl The media element to be registered.
+   * @return {!Promise} A promise that is resolved when the element has been
+   *     successfully registered, or rejected otherwise.
    */
   register(domMediaEl) {
     const mediaType = this.getMediaType_(domMediaEl);
     if (this.isAllocatedMediaElement_(mediaType, domMediaEl)) {
       // This media element originated from the media pool.
-      return;
+      return Promise.resolve();
     }
 
     const id = domMediaEl.id || this.createDomMediaElementId_();
     if (this.sources_[id] && this.domMediaEls_[id]) {
       // This media element is already registered.
-      return;
+      return Promise.resolve();
     }
 
     // This media element has not yet been registered.
@@ -652,6 +633,8 @@ export class MediaPool {
     domMediaEl.muted = true;
     domMediaEl.setAttribute('muted', '');
     domMediaEl.pause();
+
+    return Promise.resolve();
   }
 
 
@@ -659,9 +642,14 @@ export class MediaPool {
    * Preloads the content of the specified media element in the DOM.
    * @param {!HTMLMediaElement} domMediaEl The media element, found in the DOM,
    *     whose content should be loaded.
+   * @return {!Promise} A promise that is resolved when the specified media
+   *     element has successfully started preloading.
    */
   preload(domMediaEl) {
-    this.loadInternal_(domMediaEl);
+    // Empty then() invocation hides the value yielded by the loadInternal_
+    // promise, so that we do not leak the pool media element outside of the
+    // scope of the media pool.
+    return this.loadInternal_(domMediaEl).then();
   }
 
 
@@ -669,15 +657,18 @@ export class MediaPool {
    * Plays the specified media element in the DOM by replacing it with a media
    * element from the pool and playing that.
    * @param {!HTMLMediaElement} domMediaEl The media element to be played.
+   * @return {!Promise} A promise that is resolved when the specified media
+   *     element has been successfully played.
    */
   play(domMediaEl) {
-    const poolMediaEl = this.loadInternal_(domMediaEl);
+    return this.loadInternal_(domMediaEl)
+        .then(poolMediaEl => {
+          if (!poolMediaEl) {
+            return Promise.resolve();
+          }
 
-    if (!poolMediaEl) {
-      return;
-    }
-
-    poolMediaEl.play();
+          return this.enqueueMediaElementTask_(poolMediaEl, new PlayTask());
+        });
   }
 
 
@@ -686,6 +677,8 @@ export class MediaPool {
    * @param {!HTMLMediaElement} domMediaEl The media element to be paused.
    * @param {boolean=} opt_rewindToBeginning Whether to rewind the currentTime
    *     of media items to the beginning.
+   * @return {!Promise} A promise that is resolved when the specified media
+   *     element has been successfully paused.
    */
   pause(domMediaEl, opt_rewindToBeginning) {
     const mediaType = this.getMediaType_(domMediaEl);
@@ -693,20 +686,25 @@ export class MediaPool {
         this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
 
     if (!poolMediaEl) {
-      return;
+      return Promise.resolve();
     }
 
-    poolMediaEl.pause();
-
-    if (opt_rewindToBeginning) {
-      poolMediaEl.currentTime = 0;
-    }
+    return this.enqueueMediaElementTask_(poolMediaEl, new PauseTask())
+        .then(() => {
+          if (opt_rewindToBeginning) {
+            this.enqueueMediaElementTask_(
+                /** @type {!HTMLMediaElement} */ (poolMediaEl),
+                new RewindTask());
+          }
+        });
   }
 
 
   /**
    * Rewinds a specified media element in the DOM to 0.
-   * @param {!HTMLMediaElement} domMediaEl The media element to be paused.
+   * @param {!HTMLMediaElement} domMediaEl The media element to be rewound.
+   * @return {!Promise} A promise that is resolved when the
+   *     specified media element has been successfully rewound.
    */
   rewindToBeginning(domMediaEl) {
     const mediaType = this.getMediaType_(domMediaEl);
@@ -714,16 +712,18 @@ export class MediaPool {
         this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
 
     if (!poolMediaEl) {
-      return;
+      return Promise.resolve();
     }
 
-    poolMediaEl.currentTime = 0;
+    return this.enqueueMediaElementTask_(poolMediaEl, new RewindTask());
   }
 
 
   /**
    * Mutes the specified media element in the DOM.
    * @param {!HTMLMediaElement} domMediaEl The media element to be muted.
+   * @return {!Promise} A promise that is resolved when the specified media
+   *     element has been successfully muted.
    */
   mute(domMediaEl) {
     const mediaType = this.getMediaType_(domMediaEl);
@@ -731,17 +731,18 @@ export class MediaPool {
         this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
 
     if (!poolMediaEl) {
-      return;
+      return Promise.resolve();
     }
 
-    poolMediaEl.muted = true;
-    poolMediaEl.setAttribute('muted', '');
+    return this.enqueueMediaElementTask_(poolMediaEl, new MuteTask());
   }
 
 
   /**
    * Unmutes the specified media element in the DOM.
    * @param {!HTMLMediaElement} domMediaEl The media element to be unmuted.
+   * @return {!Promise} A promise that is resolved when the specified media
+   *     element has been successfully paused.
    */
   unmute(domMediaEl) {
     const mediaType = this.getMediaType_(domMediaEl);
@@ -749,11 +750,10 @@ export class MediaPool {
         this.getMatchingMediaElementFromPool_(mediaType, domMediaEl);
 
     if (!poolMediaEl) {
-      return;
+      return Promise.resolve();
     }
 
-    poolMediaEl.muted = false;
-    poolMediaEl.removeAttribute('muted');
+    return this.enqueueMediaElementTask_(poolMediaEl, new UnmuteTask());
   }
 
 
@@ -785,6 +785,63 @@ export class MediaPool {
 
 
   /**
+   * @param {!HTMLMediaElement} mediaEl The element whose task queue should be
+   *     executed.
+   * @private
+   */
+  executeNextMediaElementTask_(mediaEl) {
+    const queue = mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME];
+    if (queue.length === 0) {
+      return;
+    }
+
+    const task = queue[0];
+
+    const executionFn = () => {
+      task.execute(mediaEl)
+          .catch(reason => dev().error('AMP-STORY', reason))
+          .then(() => {
+            // Run regardless of success or failure of task execution.
+            queue.shift();
+            this.executeNextMediaElementTask_(mediaEl);
+          });
+    };
+
+    if (task.requiresSynchronousExecution()) {
+      executionFn.call(this);
+    } else {
+      this.timer_.delay(executionFn.bind(this), 0);
+    }
+  }
+
+
+  /**
+   * @param {!HTMLMediaElement} mediaEl The element for which the specified task
+   *     should be executed.
+   * @param {!./media-tasks.MediaTask} task The task to be executed.
+   * @return {!Promise} A promise that is resolved when the specified task is
+   *     completed.
+   * @private
+   */
+  enqueueMediaElementTask_(mediaEl, task) {
+    if (!mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME]) {
+      mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME] = [];
+    }
+
+    const queue = mediaEl[ELEMENT_TASK_QUEUE_PROPERTY_NAME];
+    const isQueueRunning = queue.length !== 0;
+
+    queue.push(task);
+
+    if (!isQueueRunning) {
+      this.executeNextMediaElementTask_(mediaEl);
+    }
+
+    return task.whenComplete();
+  }
+
+
+  /**
    * @param {!MediaPoolRoot} root
    * @return {!MediaPool}
    */
@@ -802,65 +859,9 @@ export class MediaPool {
     instances[newId] = new MediaPool(
         toWin(root.getElement().ownerDocument.defaultView),
         root.getMaxMediaElementCounts(),
-        root.getElementDistance);
+        element => root.getElementDistance(element));
 
     return instances[newId];
-  }
-}
-
-
-class Sources {
-  /**
-   * @param {string} srcAttr The 'src' attribute of the media element.
-   * @param {!IArrayLike<!Element>} srcEls Any child <source> tags of the media
-   *     element.
-   */
-  constructor(srcAttr, srcEls) {
-    /** @private @const {?string} */
-    this.srcAttr_ = srcAttr && srcAttr.length ? srcAttr : null;
-
-    /** @private @const {!IArrayLike<!Element>} */
-    this.srcEls_ = srcEls;
-  }
-
-
-  /**
-   * Applies the src attribute and source tags to a specified element.
-   * @param {!Element} element The element to adopt the sources represented by
-   *     this object.
-   */
-  applyToElement(element) {
-    Sources.removeFrom(element);
-
-    if (!this.srcAttr_) {
-      element.removeAttribute('src');
-    } else {
-      element.setAttribute('src', this.srcAttr_);
-    }
-
-    Array.prototype.forEach.call(this.srcEls_,
-        srcEl => element.appendChild(srcEl));
-
-    // Reset media element after changing sources.
-    element.load();
-  }
-
-
-  /**
-   * Removes and returns the sources from a specified element.
-   * @param {!Element} element The element whose sources should be removed and
-   *     returned.
-   * @return {!Sources} An object representing the sources of the specified
-   *     element.
-   */
-  static removeFrom(element) {
-    const elementToUse = ampMediaElementFor(element) || element;
-    const srcAttr = elementToUse.getAttribute('src');
-    elementToUse.removeAttribute('src');
-    const srcEls = scopedQuerySelectorAll(elementToUse, 'source');
-    Array.prototype.forEach.call(srcEls, srcEl => removeElement(srcEl));
-
-    return new Sources(srcAttr, srcEls);
   }
 }
 
@@ -874,7 +875,7 @@ export class MediaPoolRoot {
   /**
    * @return {!Element} The root element of this media pool.
    */
-  getElement() {};
+  getElement() {}
 
   /**
    * @param {!Element} unusedElement The element whose distance should be
@@ -886,12 +887,12 @@ export class MediaPoolRoot {
    *     furthest from the user's current position in the document are evicted
    *     from the MediaPool first).
    */
-  getElementDistance(unusedElement) {};
+  getElementDistance(unusedElement) {}
 
 
   /**
    * @return {!Object<!MediaType, number>} The maximum amount of each media
    *     type to allow within this element.
    */
-  getMaxMediaElementCounts() {};
+  getMaxMediaElementCounts() {}
 }

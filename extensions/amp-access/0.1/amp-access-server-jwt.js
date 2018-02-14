@@ -20,6 +20,7 @@ import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {escapeCssSelectorIdent} from '../../../src/dom';
 import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
@@ -334,7 +335,7 @@ export class AccessServerJwtAdapter {
         const section = sections[i];
         const sectionId = section.getAttribute('i-amphtml-access-id');
         const target = this.ampdoc.getRootNode().querySelector(
-            '[i-amphtml-access-id="' + sectionId + '"]');
+            `[i-amphtml-access-id="${escapeCssSelectorIdent(sectionId)}"]`);
         if (!target) {
           dev().warn(TAG, 'Section not found: ', sectionId);
           continue;

@@ -59,6 +59,19 @@ function initializeStream(globs, streamOptions) {
 }
 
 /**
+ * Logs a message on the same line to indicate progress
+ * @param {string} message
+ */
+function logOnSameLine(message) {
+  if (!process.env.TRAVIS) {
+    process.stdout.moveCursor(0, -1);
+    process.stdout.cursorTo(0);
+    process.stdout.clearLine();
+  }
+  log(message);
+}
+
+/**
  * Runs the linter on the given stream using the given options.
  * @param {string} path
  * @param {!ReadableStream} stream
@@ -67,12 +80,31 @@ function initializeStream(globs, streamOptions) {
  */
 function runLinter(path, stream, options) {
   let errorsFound = false;
+  if (!process.env.TRAVIS) {
+    log(colors.green('Starting linter...'));
+  }
   return stream.pipe(eslint(options))
       .pipe(eslint.formatEach('stylish', function(msg) {
         errorsFound = true;
-        log(msg);
+        logOnSameLine(colors.red('Linter error:') + msg + '\n');
       }))
       .pipe(gulpIf(isFixed, gulp.dest(path)))
+      .pipe(eslint.result(function(result) {
+        if (!process.env.TRAVIS) {
+          logOnSameLine(colors.green('Linting: ') + result.filePath);
+        }
+      }))
+      .pipe(eslint.results(function(results) {
+        if (results.errorCount == 0) {
+          if (!process.env.TRAVIS) {
+            logOnSameLine(colors.green('Success: ') + 'No linter errors');
+          }
+        } else {
+          logOnSameLine(colors.red('Error: ') + results.errorCount +
+              ' linter error(s) found.');
+          process.exit(1);
+        }
+      }))
       .pipe(eslint.failAfterError())
       .on('error', function() {
         if (errorsFound && !options.fix) {
@@ -101,7 +133,11 @@ function lint() {
 }
 
 
-gulp.task('lint', 'Validates against Google Closure Linter', lint,
+gulp.task(
+    'lint',
+    'Validates against Google Closure Linter',
+    ['update-packages'],
+    lint,
     {
       options: {
         'watch': '  Watches for changes in files, validates against the linter',

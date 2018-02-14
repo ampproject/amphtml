@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {createCustomEvent} from '../../../src/event-helper';
+import {escapeCssSelectorIdent} from '../../../src/dom';
 import {user} from '../../../src/log';
 
 /**
@@ -95,7 +96,7 @@ function getCounter(receiver, counterName) {
     return receiver.gwdGotoCounters[counterName];
   }
   return 0;
-};
+}
 
 /**
  * @param {!Element} receiver
@@ -113,7 +114,7 @@ function setCounter(receiver, counterName, counterValue) {
     receiver.gwdGotoCounters[counterName] = 0;
   }
   receiver.gwdGotoCounters[counterName] = counterValue;
-};
+}
 
 /**
  * AMP GWD animation runtime service.
@@ -176,7 +177,9 @@ export class AmpGwdRuntimeService {
     // Turn off animations on the previously-active page, if there was one.
     // TODO(sklobovskaya): Decide if it's worth just storing the index.
     const currentPageEl = this.ampdoc_.getRootNode().querySelector(
-        `.${GWD_PAGE_WRAPPER_CLASS}.${PlaybackCssClass.PLAY}`);
+        `.${escapeCssSelectorIdent(GWD_PAGE_WRAPPER_CLASS)}.${
+          escapeCssSelectorIdent(PlaybackCssClass.PLAY)
+        }`);
 
     if (currentPageEl) {
       currentPageEl.classList.remove(PlaybackCssClass.PLAY);
@@ -184,7 +187,7 @@ export class AmpGwdRuntimeService {
 
     // Activate animations on the new current page.
     const gwdPages = this.ampdoc_.getRootNode().querySelectorAll(
-        `.${GWD_PAGE_WRAPPER_CLASS}`);
+        `.${escapeCssSelectorIdent(GWD_PAGE_WRAPPER_CLASS)}`);
     const newPageEl = gwdPages[index];
 
     if (newPageEl) {
@@ -423,4 +426,4 @@ export class AmpGwdRuntimeService {
  */
 function reflow(element) {
   element./*OK*/offsetWidth = element./*OK*/offsetWidth;
-};
+}

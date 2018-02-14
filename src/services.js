@@ -151,6 +151,15 @@ export class Services {
   }
 
   /**
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!./service/document-click.ClickHandler}
+   */
+  static clickHandlerForDoc(nodeOrDoc) {
+    return /** @type {!./service/document-click.ClickHandler} */ (
+      getServiceForDoc(nodeOrDoc, 'clickhandler'));
+  }
+
+  /**
    * @param {!Window} window
    * @return {!./service/crypto-impl.Crypto}
    */
@@ -201,7 +210,7 @@ export class Services {
    */
   static inputFor(win) {
     return getService(win, 'input');
-  };
+  }
 
   /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc

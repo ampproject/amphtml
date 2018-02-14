@@ -428,7 +428,7 @@ describes.realWin('amp-ad-network-adsense-impl', {
       ampStickyAd.appendChild(element);
       doc.body.appendChild(ampStickyAd);
       return impl.getAdUrl().then(adUrl => {
-        expect(adUrl.indexOf('act=sa') >= 0).to.be.true;
+        expect(adUrl).to.contain('act=sa');
       });
     });
 
@@ -896,6 +896,35 @@ describes.realWin('amp-ad-network-adsense-impl', {
     it('should return true', () => {
       expect(AmpAdNetworkAdsenseImpl.prototype.delayAdRequestEnabled())
           .to.be.true;
+    });
+  });
+
+  describe('#nameframeExperiment', () => {
+    it('should specify nameframe loading behavior; single arg', () => {
+      impl.extractSize({
+        get(name) {
+          return name == 'amp-nameframe-exp' ? 'instantLoad' : undefined;
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      });
+      expect(impl.nameframeExperimentConfig_.instantLoad).to.be.true;
+      expect(impl.nameframeExperimentConfig_.writeInBody).to.be.false;
+    });
+
+    it('should specify nameframe loading behavior; two args', () => {
+      impl.extractSize({
+        get(name) {
+          return name == 'amp-nameframe-exp' ?
+            'instantLoad;writeInBody' : undefined;
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      });
+      expect(impl.nameframeExperimentConfig_.instantLoad).to.be.true;
+      expect(impl.nameframeExperimentConfig_.writeInBody).to.be.true;
     });
   });
 });

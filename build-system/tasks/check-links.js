@@ -17,7 +17,6 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const BBPromise = require('bluebird');
-const chalk = require('chalk');
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const getStdout = require('../exec').getStdout;
@@ -39,7 +38,7 @@ function getMarkdownFiles() {
   const filesInPr =
         getStdout('git diff --name-only master...HEAD').trim().split('\n');
   return filesInPr.filter(function(file) {
-    return path.extname(file) == '.md';
+    return path.extname(file) == '.md' && !file.startsWith('examples/');
   });
 }
 
@@ -71,9 +70,9 @@ function checkLinks() {
             if (result.status === 'dead') {
               deadLinksFound = true;
               deadLinksFoundInFile = true;
-              log('[%s] %s', chalk.red('✖'), result.link);
+              log('[%s] %s', colors.red('✖'), result.link);
             } else if (!process.env.TRAVIS) {
-              log('[%s] %s', chalk.green('✔'), result.link);
+              log('[%s] %s', colors.green('✔'), result.link);
             }
           });
           if (deadLinksFoundInFile) {
@@ -143,6 +142,10 @@ function filterWhitelistedLinks(markdown) {
   // Links inside a <code> block (illustrative, and not always valid)
   filteredMarkdown = filteredMarkdown.replace(/<code>(.*?)<\/code>/g, '');
 
+  // The heroku nightly build page is not always acccessible by the checker.
+  filteredMarkdown = filteredMarkdown.replace(
+      /\(http:\/\/amphtml-nightly.herokuapp.com\/\)/g, '');
+
   // After all whitelisting is done, clean up any remaining empty blocks bounded
   // by backticks. Otherwise, `` will be treated as the start of a code block
   // and confuse the link extractor.
@@ -174,6 +177,7 @@ function runLinkChecker(markdownFile) {
 gulp.task(
     'check-links',
     'Detects dead links in markdown files',
+    ['update-packages'],
     checkLinks,
     {
       options: {

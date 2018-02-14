@@ -36,13 +36,12 @@ import {
   incrementLoadingAds,
   is3pThrottled,
 } from '../../amp-ad/0.1/concurrent-load';
-import {getBinaryType, isExperimentOn} from '../../../src/experiments';
+import {getBinaryType} from '../../../src/experiments';
 import {getBinaryTypeNumericalCode} from '../../../ads/google/a4a/utils';
 import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getMode} from '../../../src/mode';
 // TODO(tdrl): Temporary.  Remove when we migrate to using amp-analytics.
 import {getTimingDataAsync} from '../../../src/service/variable-source';
-import {handleClick} from '../../../ads/alp/handler';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
   installFriendlyIframeEmbed,
@@ -220,7 +219,7 @@ export function protectFunctionWrapper(
       return undefined;
     }
   };
-};
+}
 
 export class AmpA4A extends AMP.BaseElement {
   // TODO: Add more error handling throughout code.
@@ -603,15 +602,6 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.adPromise_ || !this.shouldInitializePromiseChain_()) {
       return;
     }
-    // If in localDev `type=fake` Ad specifies `force3p`, it will be forced
-    // to go via 3p.
-    if (getMode().localDev &&
-        this.element.getAttribute('type') == 'fake' &&
-        this.element.getAttribute('force3p') == 'true') {
-      this.adUrl_ = this.getAdUrl();
-      this.adPromise_ = Promise.resolve();
-      return;
-    }
 
     // Increment unique promise ID so that if its value changes within the
     // promise chain due to cancel from unlayout, the promise will be rejected.
@@ -814,18 +804,21 @@ export class AmpA4A extends AMP.BaseElement {
     this.handleLifecycleStage_('adResponseValidateStart');
     const checkStillCurrent = this.verifyStillCurrent();
     return this.keysetPromise_
-        .then(() => signatureVerifierFor(this.win)
-            .verify(bytes, headers, (eventName, extraVariables) => {
-              this.handleLifecycleStage_(
-                  eventName, extraVariables);
-            }))
+        .then(() => {
+          if (this.element.getAttribute('type') == 'fake' &&
+              !this.element.getAttribute('checksig')) {
+            // do not verify signature for fake type ad, unless the ad
+            // specfically requires via 'checksig' attribute
+            return Promise.resolve(VerificationStatus.OK);
+          }
+          return signatureVerifierFor(this.win)
+              .verify(bytes, headers, (eventName, extraVariables) => {
+                this.handleLifecycleStage_(
+                    eventName, extraVariables);
+              });
+        })
         .then(status => {
           checkStillCurrent();
-          if (getMode().localDev &&
-              this.element.getAttribute('type') == 'fake') {
-            // do not verify signature for fake type ad
-            status = VerificationStatus.OK;
-          }
           this.handleLifecycleStage_('adResponseValidateEnd', {
             'signatureValidationResult': status,
             'releaseType': this.releaseType_,
@@ -1371,8 +1364,6 @@ export class AmpA4A extends AMP.BaseElement {
       const frameDoc = friendlyIframeEmbed.iframe.contentDocument ||
               friendlyIframeEmbed.win.document;
       setStyle(frameDoc.body, 'visibility', 'visible');
-      // Bubble phase click handlers on the ad.
-      this.registerAlpHandler_(friendlyIframeEmbed.win);
       // Capture timing info for friendly iframe load completion.
       getTimingDataAsync(
           friendlyIframeEmbed.win,
@@ -1610,22 +1601,6 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * Registers a click handler for "A2A" (AMP-to-AMP navigation where the AMP
-   * viewer navigates to an AMP destination on our behalf.
-   * @param {!Window} iframeWin
-   */
-  registerAlpHandler_(iframeWin) {
-    if (!isExperimentOn(this.win, 'alp-for-a4a')) {
-      return;
-    }
-    iframeWin.document.documentElement.addEventListener('click', event => {
-      handleClick(event, url => {
-        Services.viewerForDoc(this.getAmpDoc()).navigateTo(url, 'a4a');
-      });
-    });
-  }
-
-  /**
    * @return {string} full url to safeframe implementation.
    * @private
    */
@@ -1735,7 +1710,7 @@ export class AmpA4A extends AMP.BaseElement {
    * To be overriden by network impl. Should return a mapping of macro keys
    * to values for substitution in publisher-specified URLs for RTC.
    * @return {?Object<string,
-   *   !../../../src/service/variable-source.SyncResolverDef>}
+   *   !../../../src/service/variable-source.AsyncResolverDef>}
    */
   getCustomRealTimeConfigMacros_() {
     return null;
@@ -1791,7 +1766,7 @@ export function assignAdUrlToError(error, adUrl) {
   }
   (error.args || (error.args = {}))['au'] =
     adUrl.substring(adQueryIdx + 1, adQueryIdx + 251);
-};
+}
 
 /**
  * Returns the signature verifier for the given window. Lazily creates it if it

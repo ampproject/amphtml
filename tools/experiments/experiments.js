@@ -129,7 +129,7 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/1199',
   },
   {
-    id: 'amp-lightbox-viewer',
+    id: 'amp-lightbox-gallery',
     name: 'Enables a new lightbox experience via the `lightbox` attribute',
     spec: 'https://github.com/ampproject/amphtml/issues/4152',
   },
@@ -139,21 +139,10 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
   },
   {
-    id: 'amp-lightbox-viewer-auto',
-    name: 'Allows the new lightbox experience to automatically include some ' +
-        'elements without the need to manually add the `lightbox` attribute',
-    spec: 'https://github.com/ampproject/amphtml/issues/4152',
-  },
-  {
     id: 'amp-playbuzz',
     name: 'AMP extension for playbuzz items (launched)',
     spec: 'https://github.com/ampproject/amphtml/issues/6106',
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
-  },
-  {
-    id: 'alp-for-a4a',
-    name: 'Enable redirect to landing page directly for A4A',
-    spec: 'https://github.com/ampproject/amphtml/issues/5212',
   },
   {
     id: 'ios-embed-wrapper',

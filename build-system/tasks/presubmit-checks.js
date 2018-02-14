@@ -90,15 +90,17 @@ const forbiddenTerms = {
         '  If this is cross domain, overwrite the method directly.',
   },
   'console\\.\\w+\\(': {
-    message: 'If you run against this, use console/*OK*/.log to ' +
+    message: 'If you run against this, use console/*OK*/.[log|error] to ' +
       'whitelist a legit case.',
     whitelist: [
       'build-system/pr-check.js',
       'build-system/app.js',
+      'build-system/check-package-manager.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
       'validator/engine/validator.js',
+      'gulpfile.js',
     ],
     checkInTestFolder: true,
   },
@@ -358,38 +360,6 @@ const forbiddenTerms = {
       'src/service/viewer-impl.js',
     ],
   },
-  'cookie\\W': {
-    message: requiresReviewPrivacy,
-    whitelist: [
-      'build-system/test-server.js',
-      'src/cookies.js',
-      'src/service/cid-impl.js',
-      'testing/fake-dom.js',
-      'extensions/amp-access-scroll/0.1/scroll-impl.js',
-      'extensions/amp-analytics/0.1/vendors.js',
-      'extensions/amp-youtube/0.1/amp-youtube.js',
-    ],
-  },
-  'getCookie\\W': {
-    message: requiresReviewPrivacy,
-    whitelist: [
-      'src/service/cid-impl.js',
-      'src/service/cid-api.js',
-      'src/cookies.js',
-      'src/experiments.js',
-      'tools/experiments/experiments.js',
-    ],
-  },
-  'setCookie\\W': {
-    message: requiresReviewPrivacy,
-    whitelist: [
-      'src/service/cid-impl.js',
-      'src/service/cid-api.js',
-      'src/cookies.js',
-      'src/experiments.js',
-      'tools/experiments/experiments.js',
-    ],
-  },
   'isTrustedViewer': {
     message: requiresReviewPrivacy,
     whitelist: [
@@ -514,7 +484,7 @@ const forbiddenTerms = {
     message: 'requireLayout is restricted b/c it affects non-contained elements', // eslint-disable-line max-len
     whitelist: [
       'extensions/amp-animation/0.1/web-animations.js',
-      'extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.js',
+      'extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
       'src/service/resources-impl.js',
     ],
   },
@@ -575,6 +545,7 @@ const forbiddenTerms = {
       'src/worker-error-reporting.js',
       'tools/experiments/experiments.js',
       'build-system/amp4test.js',
+      'gulpfile.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
@@ -619,6 +590,7 @@ const forbiddenTerms = {
     message: 'Use a line-level "no-unused-vars" rule instead.',
     whitelist: [
       'viewer-api/swipe-api.js',
+      'dist.3p/current/integration.js',
     ],
   },
 };
@@ -727,15 +699,6 @@ const forbiddenTermsSrcInclusive = {
       'src/utils/bytes.js',
     ],
   },
-  // Super complicated regex that says "find any querySelector method call that
-  // is passed as a variable anything that is not a string, or a string that
-  // contains a space.
-  '\\b(?:(?!\\w*[dD]oc\\w*)\\w)+\\.querySelector(?:All)?\\((?=\\s*([^\'"\\s]|[^\\s)]+\\s))[^)]*\\)': { // eslint-disable-line max-len
-    message: 'querySelector is not scoped to the element, but globally and ' +
-    'filtered to just the elements inside the element. This leads to ' +
-    'obscure bugs if you attempt to match a descendant of a descendant (ie ' +
-    '"div div"). Instead, use the scopedQuerySelector helper in dom.js',
-  },
   'preloadExtension': {
     message: bannedTermsHelpString,
     whitelist: [
@@ -753,7 +716,7 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js', // eslint-disable-line max-len
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js', // eslint-disable-line max-len
-      'extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.js',
+      'extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
     ],
   },
   'loadElementClass': {
@@ -843,6 +806,7 @@ const forbiddenTermsSrcInclusive = {
       'validator/webui/serve-standalone.go',
       'build-system/tasks/check-links.js',
       'build-system/tasks/extension-generator/index.js',
+      'gulpfile.js',
     ],
   },
   '\\<\\<\\<\\<\\<\\<': {

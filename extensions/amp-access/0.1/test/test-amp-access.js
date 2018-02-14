@@ -170,7 +170,7 @@ describes.fakeWin('AccessService', {
     const source = accessService.getVendorSource('vendor1');
     expect(source).to.equal(accessService.sources_[0]);
 
-    class Vendor1 {};
+    class Vendor1 {}
     const vendor1 = new Vendor1();
     source.getAdapter().registerVendor(vendor1);
     return source.adapter_.vendorPromise_.then(vendor => {
