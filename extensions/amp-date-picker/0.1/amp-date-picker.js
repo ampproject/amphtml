@@ -23,7 +23,7 @@ import {DatesList} from './dates-list';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {batchFetchJsonFor} from '../../../src/batched-json';
-import {childElementByAttr, isRTL, removeElement} from '../../../src/dom';
+import {childElementByAttr, escapeCssSelectorIdent, isRTL, removeElement} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {createDateRangePicker} from './date-range-picker';
 import {createDeferred} from './react-utils';
@@ -277,7 +277,7 @@ class AmpDatePicker extends AMP.BaseElement {
           .map(t => ({
             dates: new DatesList(t.dates),
             template: this.ampdoc_.getRootNode().querySelector(
-                `#${t.id}[date-template]`),
+                `#${escapeCssSelectorIdent(t.id)}[date-template]`),
           }));
       this.srcTemplates_ = srcTemplates;
 

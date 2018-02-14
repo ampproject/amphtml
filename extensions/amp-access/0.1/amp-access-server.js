@@ -18,6 +18,7 @@ import {AccessClientAdapter} from './amp-access-client';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {escapeCssSelectorIdent} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {isProxyOrigin, removeFragment} from '../../../src/url';
 import {parseJson} from '../../../src/json';
@@ -195,7 +196,7 @@ export class AccessServerAdapter {
         const section = sections[i];
         const sectionId = section.getAttribute('i-amphtml-access-id');
         const target = this.ampdoc.getRootNode().querySelector(
-            '[i-amphtml-access-id="' + sectionId + '"]');
+            `[i-amphtml-access-id="${escapeCssSelectorIdent(sectionId)}"]`);
         if (!target) {
           dev().warn(TAG, 'Section not found: ', sectionId);
           continue;

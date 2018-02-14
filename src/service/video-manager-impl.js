@@ -51,7 +51,7 @@ import {
   installPositionObserverServiceForDoc,
 } from './position-observer/position-observer-impl';
 import {isFiniteNumber} from '../types';
-import {isRTL, removeElement, scopedQuerySelector} from '../dom';
+import {isRTL, removeElement} from '../dom';
 import {map} from '../utils/object';
 import {mapRange} from '../utils/math';
 import {setStyles} from '../style';
@@ -716,10 +716,7 @@ class VideoEntry {
     this.loaded_ = true;
 
     // Get the internal element (the actual video/iframe)
-    this.internalElement_ = scopedQuerySelector(
-        this.video.element,
-        'video, iframe'
-    );
+    this.internalElement_ = this.video.element.querySelector('video, iframe');
 
     // Just in case the video's size changed during layout
     this.vsync_.measure(() => {

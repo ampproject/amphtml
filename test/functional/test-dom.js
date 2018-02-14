@@ -817,12 +817,8 @@ describes.sandboxed('DOM', {}, env => {
 
   describe('escapeCssSelectorIdent', () => {
 
-    it('should escape natively', () => {
-      expect(dom.escapeCssSelectorIdent(window, 'a b')).to.equal('a\\ b');
-    });
-
-    it('should polyfill escape', () => {
-      expect(dom.escapeCssSelectorIdent({}, 'a b')).to.equal('a\\ b');
+    it('should escape', () => {
+      expect(dom.escapeCssSelectorIdent('a b')).to.equal('a\\ b');
     });
   });
 
