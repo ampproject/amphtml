@@ -444,7 +444,6 @@ export class SubscriptionApi {
    * Sends a message to all subscribed windows.
    * @param {string} type Type of the message.
    * @param {!JsonObject} data Message payload.
-   * @override
    */
   send(type, data) {
     // Remove clients that have been removed from the DOM.
@@ -457,7 +456,6 @@ export class SubscriptionApi {
         this.is3p_);
   }
 
-  /** @override */
   destroy() {
     this.unlisten_();
     this.clientWindows_.length = 0;

@@ -193,7 +193,7 @@ export class SafeframeHostApi {
   }
 
   /**
-   * @return {!string}
+   * @return {string}
    */
   getCurrentGeometry() {
     return this.formatGeom_(
@@ -270,14 +270,14 @@ export class SafeframeHostApi {
    * correction between the amp-ad element and the safeframe iframe, and then
    * modify the change entry to be correct.
    * @param {!Object} changes
-   * @return {Object} Corrected intersection change entry.
+   * @return {!Object} Corrected intersection change entry.
    */
   correctChanges(changes) {
     const iframeRect = this.iframe_ ? this.iframe_.getBoundingClientRect() :
-          this.baseInstance_.creativeSize_;
+      this.baseInstance_.creativeSize_;
     const ampAdRect = this.baseInstance_.element.getBoundingClientRect();
-    const widthCorrection = (ampAdRect.width - iframeRect.width)/2;
-    const heightCorrection = (ampAdRect.height - iframeRect.height)/2;
+    const widthCorrection = (ampAdRect.width - iframeRect.width) / 2;
+    const heightCorrection = (ampAdRect.height - iframeRect.height) / 2;
     changes.boundingClientRect.right -= widthCorrection;
     changes.boundingClientRect.top += heightCorrection;
     changes.boundingClientRect.bottom -= heightCorrection;
@@ -356,7 +356,7 @@ export class SafeframeHostApi {
   /**
    * Handles serializing and sending messages to the safeframe.
    * @param {!Object} payload
-   * @param {!string} serviceName
+   * @param {string} serviceName
    * @private
    */
   sendMessage_(payload, serviceName) {
@@ -374,7 +374,7 @@ export class SafeframeHostApi {
 
   /**
    * Routes messages to their appropriate handler.
-   * @param {Object} payload
+   * @param {!Object} payload
    * @param {string} service
    */
   processMessage(payload, service) {
@@ -389,7 +389,7 @@ export class SafeframeHostApi {
         this.handleRegisterDone_(payload);
         break;
       case SERVICE.COLLAPSE_REQUEST:
-        this.handleCollapseRequest_(payload);
+        this.handleCollapseRequest_();
         break;
       default:
         break;
@@ -406,8 +406,8 @@ export class SafeframeHostApi {
   }
 
   /**
-   * @param {!number} height
-   * @param {!number} width
+   * @param {number} height
+   * @param {number} width
    */
   resizeIframe(height, width) {
     this.iframe_.style.height = height + 'px';
@@ -423,65 +423,80 @@ export class SafeframeHostApi {
    * @param {boolean=} optIsCollapse Whether this is a collapse attempt.
    */
   handleSizeChange(height, width, message, optIsCollapse) {
-    const sendResizeResponse = success => {
-      this.sendMessage_({
-        uid: this.uid,
-        success,
-        newGeometry: this.getCurrentGeometry(),
-        'expand_t': this.currentGeometry_.allowedExpansion_t,
-        'expand_b': this.currentGeometry_.allowedExpansion_b,
-        'expand_r': this.currentGeometry_.allowedExpansion_r,
-        'expand_l': this.currentGeometry_.allowedExpansion_l,
-        push: true,
-      }, message);
-    };
     // If the new size is fully contained within the bounds of the amp-ad,
     // we can resize immediately as there will be no reflow.
     if (!optIsCollapse &&
         width <= this.baseInstance_.creativeSize_.width &&
         height <= this.baseInstance_.creativeSize_.height) {
       this.resizeIframe(height, width);
-      sendResizeResponse(/** SUCCESS */ true);
+      this.sendResizeResponse(/** SUCCESS */ true, message);
     } else {
-      this.resizeAmpAdAndSafeframe(height, width, sendResizeResponse, optIsCollapse);
+      this.resizeAmpAdAndSafeframe(
+          height, width, message, optIsCollapse);
     }
   }
 
-  resizeAmpAdAndSafeframe(height, width, sendResizeResponse, optIsCollapse) {
-      this.baseInstance_.attemptChangeSize(height, width).then(() => {
-        const success = !!this.baseInstance_.element.style.height.match(height)
+  /**
+   * @param {boolean} success
+   * @param {string} message
+   */
+  sendResizeResponse(success, message) {
+    this.sendMessage_({
+      uid: this.uid,
+      success,
+      newGeometry: this.getCurrentGeometry(),
+      'expand_t': this.currentGeometry_.allowedExpansion_t,
+      'expand_b': this.currentGeometry_.allowedExpansion_b,
+      'expand_r': this.currentGeometry_.allowedExpansion_r,
+      'expand_l': this.currentGeometry_.allowedExpansion_l,
+      push: true,
+    }, message);
+  }
+
+  /**
+   *
+   * @param {number} height
+   * @param {number} width
+   * @param {string} message
+   * @param {boolean=} optIsCollapse
+   */
+  resizeAmpAdAndSafeframe(height, width, message, optIsCollapse) {
+    this.baseInstance_.attemptChangeSize(height, width).then(() => {
+      const success = !!this.baseInstance_.element.style.height.match(height)
               && !!this.baseInstance_.element.style.width.match(width);
-        // If the amp-ad element was successfully resized, always update
-        // the size of the safeframe as well. If the amp-ad element could not
-        // be resized, but this is a collapse request, then only collapse
-        // the safeframe.
-        if (success || optIsCollapse) {
-          this.resizeIframe(height, width);
-          this.baseInstance_.element.getResources().resources_.forEach(resource => {
-            if (resource.element == this.baseInstance_.element) {
-              // Need to force a measure event, as measure won't happen immediately
-              // if the element was above the viewport when resize occured, and
-              // without a measure, we'll send the wrong size for the creative
-              // on the geometry update message.
-              resource.measure();
-            }
-          });
-        } else {
-          // attemptChangeSize automatically registers a pendingChangeSize if
-          // the initial attempt failed. We do not want to do that, so clear it.
-          this.baseInstance_.element.getResources().resources_.forEach(resource => {
-            if (resource.element == this.baseInstance_.element) {
-              resource.pendingChangeSize_ = undefined;
-            }
-          });
-        }
-        sendResizeResponse(success);
-      }).catch(() => {});
+      // If the amp-ad element was successfully resized, always update
+      // the size of the safeframe as well. If the amp-ad element could not
+      // be resized, but this is a collapse request, then only collapse
+      // the safeframe.
+      if (success || optIsCollapse) {
+        this.resizeIframe(height, width);
+        this.baseInstance_.element.getResources().resources_.forEach(
+            resource => {
+              if (resource.element == this.baseInstance_.element) {
+                // Need to force a measure event, as measure won't happen immediately
+                // if the element was above the viewport when resize occured, and
+                // without a measure, we'll send the wrong size for the creative
+                // on the geometry update message.
+                resource.measure();
+              }
+            });
+      } else {
+        // attemptChangeSize automatically registers a pendingChangeSize if
+        // the initial attempt failed. We do not want to do that, so clear it.
+        this.baseInstance_.element.getResources().resources_.forEach(
+            resource => {
+              if (resource.element == this.baseInstance_.element) {
+                resource.pendingChangeSize_ = undefined;
+              }
+            });
+      }
+      this.sendResizeResponse(success, message);
+    }).catch(() => {});
   }
 
   /**
    * Handles Fluid-related messages dispatched from SafeFrame.
-   * @param {!JsonObject} payload
+   * @param {!Object} payload
    * @private
    */
   handleFluidMessage_(payload) {
@@ -519,19 +534,18 @@ export class SafeframeHostApi {
       expandHeight += Number(this.iframe_.height);
     }
     this.handleSizeChange(expandHeight,
-                          expandWidth,
-                          SERVICE.EXPAND_RESPONSE);
+        expandWidth,
+        SERVICE.EXPAND_RESPONSE);
   }
 
   /**
-   * @param {!Object} unusedPayload
    * @private
    */
-  handleCollapseRequest_(unusedPayload) {
+  handleCollapseRequest_() {
     this.handleSizeChange(this.baseInstance_.initialSize_.height,
-                          this.baseInstance_.initialSize_.width,
-                          SERVICE.COLLAPSE_RESPONSE,
-                          /** isCollapse */ true);
+        this.baseInstance_.initialSize_.width,
+        SERVICE.COLLAPSE_RESPONSE,
+        /** isCollapse */ true);
   }
 
   /**
