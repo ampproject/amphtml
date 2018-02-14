@@ -27,6 +27,7 @@ import {setStyles} from '../src/style';
  */
 function getBeOpinion(global, cb) {
   loadScript(global, 'https://widget.beopinion.com/sdk.js', function() {
+  // loadScript(global, 'http://localhost:8081/sdk-4.0.0.js', function() {
     cb(global.BeOpinionSDK);
   });
 }
@@ -75,7 +76,7 @@ function createContainer(global, data) {
   }
 
   setStyles(container, {
-    width: '500px',
+    width: '100%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -90,14 +91,27 @@ function createContainer(global, data) {
  */
 export function beopinion(global, data) {
   const container = createContainer(global, data);
-  global.document.getElementById('c').appendChild(container);
+  const c = global.document.getElementById('c');
+  c.appendChild(container);
 
   getBeOpinion(global, function(sdk) { // , context) {
     sdk.init({
       account: data.account,
+      onContentReceive: function(hasContent) {
+        console.log('onContentReceive', hasContent);
+        if (hasContent) {
+          global.context.renderStart();
+        } else {
+          global.context.noContentAvailable();
+        }
+      },
+      onHeightChange: function(newHeight) {
+        console.log('onHeightChange', newHeight);
+        const boundingClientRect = c.getBoundingClientRect();
+        global.context.onResizeDenied(global.context.requestResize);
+        global.context.requestResize(boundingClientRect.width, newHeight);
+      }
     });
     sdk['watch'](); // sdk.watch() fails 'gulp check-types' validation on Travis
-    // sdk.setAMPContext(context); ?
-    // + context.noContentAvailable(); to be called when no content
   });
 }
