@@ -1,0 +1,6 @@
+{
+  "name": "eslint-plugin-amphtml-internal",
+  "version": "0.1.0",
+  "description": "ESLint rules for the AMP HTML project",
+  "private": true
+}

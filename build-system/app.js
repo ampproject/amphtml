@@ -1098,7 +1098,7 @@ function addViewerIntegrationScript(ampJsVersion, file) {
     return file;
   }
   let viewerScript;
-  if (Number.isInteger(ampJsVersion)) { // eslint-disable-line no-es2015-number-props
+  if (Number.isInteger(ampJsVersion)) { // eslint-disable-line amphtml-internal/no-es2015-number-props
     // Viewer integration script from gws, such as
     // https://cdn.ampproject.org/viewer/google/v7.js
     viewerScript =
