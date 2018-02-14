@@ -116,6 +116,9 @@ const WHITELISTED_ATTRS = [
 
 /** @const {!Object<string, !Array<string>>} */
 const WHITELISTED_ATTRS_BY_TAGS = dict({
+  'a': [
+    'rel',
+  ],
   'div': [
     'template',
   ],
