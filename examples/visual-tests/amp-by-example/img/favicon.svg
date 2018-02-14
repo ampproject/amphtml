@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="512px" height="512px" viewBox="0 0 512 512" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 39.1 (31720) - http://www.bohemiancoding.com/sketch -->
+    <title>AMP-icon-16pt</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="amp-logo-internal-site" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="AMP-icon-16pt" fill="#EB407A">
+            <g id="Updated-Icon">
+                <path d="M5.502,10.5 L5.005,10.5 L5.5,7 L2.995,7.005 L6.507,1.501 L7.005,1.501 L6.499,5.002 L9,5 L5.502,10.5 Z M6,0 C2.686,0 0,2.687 0,6 C0,9.314 2.686,12 6,12 C9.313,12 12,9.314 12,6 C12,2.687 9.313,0 6,0 L6,0 Z" id="Pixel-Adjusted"></path>
+            </g>
+        </g>
+    </g>
+</svg>

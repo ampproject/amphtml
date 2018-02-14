@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {dev, user} from '../log';
-import {endsWith} from '../string';
 import {Services} from '../services';
 import {
+  computedStyle,
+  getVendorJsPropertyName,
   setImportantStyles,
   setStyle,
   setStyles,
-  computedStyle,
-  getVendorJsPropertyName,
 } from '../style';
+import {dev, user} from '../log';
+import {endsWith} from '../string';
 
 const TAG = 'FixedLayer';
 

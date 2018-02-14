@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
+import {
+  KeyframesDef,
+  KeyframesOrFilterFnDef,
+  StoryAnimationDef,
+  StoryAnimationDimsDef,
+  StoryAnimationPresetDef,
+} from './animation-types';
 import {PRESETS} from './animation-presets';
 import {Services} from '../../../src/services';
 import {
   WebAnimationPlayState,
 } from '../../amp-animation/0.1/web-animation-types';
 import {dev, user} from '../../../src/log';
+import {escapeCssSelectorIdent, scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {map, omit} from '../../../src/utils/object';
-import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
-import {
-  StoryAnimationDef,
-  StoryAnimationDimsDef,
-  KeyframesOrFilterFnDef,
-  KeyframesDef,
-  StoryAnimationPresetDef,
-} from './animation-types';
 import {timeStrToMillis, unscaledClientRect} from './utils';
 
 /** const {string} */
@@ -497,7 +497,7 @@ export class AnimationManager {
       const dependencyId = el.getAttribute(ANIMATE_IN_AFTER_ATTRIBUTE_NAME);
 
       user().assertElement(
-          scopedQuerySelector(this.root_, `#${dependencyId}`),
+          this.root_.querySelector(`#${escapeCssSelectorIdent(dependencyId)}`),
           `The attribute '${ANIMATE_IN_AFTER_ATTRIBUTE_NAME}' in tag ` +
               `'${el.tagName}' is set to the invalid value ` +
               `'${dependencyId}'. No children of parenting 'amp-story-page' ` +

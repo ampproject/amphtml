@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-import {installCryptoService} from '../../src/service/crypto-impl';
-import {Services} from '../../src/services';
+import * as sinon from 'sinon';
 import {
+  RANDOM_NUMBER_GENERATORS,
+  experimentToggles,
+  getBinaryType,
+  getExperimentBranch,
+  getExperimentToglesFromCookieForTesting,
   isCanary,
   isExperimentOn,
   isOriginExperimentOn,
-  experimentToggles,
-  toggleExperiment,
-  resetExperimentTogglesForTesting,
-  getExperimentToglesFromCookieForTesting,
-  RANDOM_NUMBER_GENERATORS,
-  getExperimentBranch,
   randomlySelectUnsetExperiments,
-  getBinaryType,
+  resetExperimentTogglesForTesting,
+  toggleExperiment,
 } from '../../src/experiments';
+import {Services} from '../../src/services';
 import {createElementWithAttributes} from '../../src/dom';
-import * as sinon from 'sinon';
+import {installCryptoService} from '../../src/service/crypto-impl';
 
 describe('experimentToggles', () => {
   it('should return experiment status map', () => {

@@ -19,13 +19,13 @@ import {
   IntersectionObserverPolyfill,
   nativeIntersectionObserverSupported,
 } from '../../../src/intersection-observer-polyfill';
+import {Services} from '../../../src/services';
 import {VisibilityModel} from './visibility-model';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {map} from '../../../src/utils/object';
-import {Services} from '../../../src/services';
-import {isFiniteNumber, isArray} from '../../../src/types';
+import {isArray, isFiniteNumber} from '../../../src/types';
 import {layoutRectLtwh} from '../../../src/layout-rect';
+import {map} from '../../../src/utils/object';
 
 const TAG = 'VISIBILITY-MANAGER';
 

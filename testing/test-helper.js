@@ -48,7 +48,7 @@ export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
 }
 
 export function mockServiceForDoc(sandbox, ampdoc, serviceId, methods) {
-  resetServiceForTesting(ampdoc.win, 'viewer');
+  resetServiceForTesting(ampdoc.win, serviceId);
   const impl = {};
   methods.forEach(method => {
     impl[method] = () => {};

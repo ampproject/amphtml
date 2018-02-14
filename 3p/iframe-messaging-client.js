@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 import {Observable} from '../src/observable';
-import {map} from '../src/utils/object';
 import {
+  deserializeMessage,
   listen,
   serializeMessage,
-  deserializeMessage,
 } from '../src/3p-frame-messaging';
+import {dev} from '../src/log';
 import {getData} from '../src/event-helper';
 import {getMode} from '../src/mode';
-import {dev} from '../src/log';
+import {map} from '../src/utils/object';
 
 export class IframeMessagingClient {
 

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {installDocService} from '../../src/service/ampdoc-impl';
 import {Services} from '../../src/services';
 import {
   ViewportBindingIosEmbedWrapper_,
@@ -22,6 +21,7 @@ import {
 import {
   ViewportBindingNatural_,
 } from '../../src/service/viewport/viewport-binding-natural';
+import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installVsyncService} from '../../src/service/vsync-impl';

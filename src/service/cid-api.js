@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {getCookie, setCookie} from '../cookies';
 import {Services} from '../services';
+import {WindowInterface} from '../window-interface';
 import {dev} from '../log';
 import {dict} from '../utils/object';
+import {getCookie, setCookie} from '../cookies';
 import {isProxyOrigin, parseUrl} from '../url';
-import {WindowInterface} from '../window-interface';
 
 const GOOGLE_API_URL = 'https://ampcid.google.com/v1/publisher:getClientId?key=';
 
@@ -177,7 +177,9 @@ export class GoogleCidApi {
    */
   persistToken_(tokenValue, expires) {
     if (tokenValue) {
-      setCookie(this.win_, AMP_TOKEN, tokenValue, this.expiresIn_(expires));
+      setCookie(this.win_, AMP_TOKEN, tokenValue, this.expiresIn_(expires), {
+        highestAvailableDomain: true,
+      });
     }
   }
 

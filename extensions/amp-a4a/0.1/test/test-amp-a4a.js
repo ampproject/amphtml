@@ -14,47 +14,47 @@
  * limitations under the License.
  */
 
-import {FetchMock, networkFailure} from './fetch-mock';
-import {MockA4AImpl, TEST_URL} from './utils';
-import {createIframePromise} from '../../../../testing/iframe';
-import {
-  AmpA4A,
-  RENDERING_TYPE_HEADER,
-  DEFAULT_SAFEFRAME_VERSION,
-  SAFEFRAME_VERSION_HEADER,
-  protectFunctionWrapper,
-  assignAdUrlToError,
-} from '../amp-a4a';
-import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
-import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
-import {Signals} from '../../../../src/utils/signals';
-import {Extensions} from '../../../../src/service/extensions-impl';
-import {Viewer} from '../../../../src/service/viewer-impl';
-import {cancellation} from '../../../../src/error';
-import {
-  data as validCSSAmp,
-} from './testdata/valid_css_at_rules_amp.reserialized';
-import {data as testFragments} from './testdata/test_fragments';
-import {
-  resetScheduledElementForTesting,
-} from '../../../../src/service/custom-element-registry';
-import {Services} from '../../../../src/services';
-import {incrementLoadingAds} from '../../../amp-ad/0.1/concurrent-load';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
-import {dev, user} from '../../../../src/log';
-import {createElementWithAttributes} from '../../../../src/dom';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
-import * as sinon from 'sinon';
-// The following namespaces are imported so that we can stub and spy on certain
-// methods in tests.
-import * as analytics from '../../../../src/analytics';
-import * as analyticsExtension from '../../../../src/extension-analytics';
 // Need the following side-effect import because in actual production code,
 // Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+// The following namespaces are imported so that we can stub and spy on certain
+// methods in tests.
+import * as analytics from '../../../../src/analytics';
+import * as analyticsExtension from '../../../../src/extension-analytics';
+import * as sinon from 'sinon';
+import {AMP_SIGNATURE_HEADER} from '../signature-verifier';
+import {
+  AmpA4A,
+  DEFAULT_SAFEFRAME_VERSION,
+  RENDERING_TYPE_HEADER,
+  SAFEFRAME_VERSION_HEADER,
+  assignAdUrlToError,
+  protectFunctionWrapper,
+} from '../amp-a4a';
+import {Extensions} from '../../../../src/service/extensions-impl';
+import {FetchMock, networkFailure} from './fetch-mock';
+import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
+import {MockA4AImpl, TEST_URL} from './utils';
+import {Services} from '../../../../src/services';
+import {Signals} from '../../../../src/utils/signals';
+import {Viewer} from '../../../../src/service/viewer-impl';
+import {cancellation} from '../../../../src/error';
+import {createElementWithAttributes} from '../../../../src/dom';
+import {createIframePromise} from '../../../../testing/iframe';
+import {dev, user} from '../../../../src/log';
+import {incrementLoadingAds} from '../../../amp-ad/0.1/concurrent-load';
+import {installDocService} from '../../../../src/service/ampdoc-impl';
+import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {
+  resetScheduledElementForTesting,
+} from '../../../../src/service/custom-element-registry';
+import {data as testFragments} from './testdata/test_fragments';
+import {
+  data as validCSSAmp,
+} from './testdata/valid_css_at_rules_amp.reserialized';
 
 describe('amp-a4a', () => {
   let sandbox;
@@ -190,7 +190,7 @@ describe('amp-a4a', () => {
     expect(match).to.be.ok;
     const contentLength = Number(match[2]);
     const rest = match[3];
-    expect(rest.length > contentLength).to.be.true;
+    expect(rest.length).to.be.above(contentLength);
     const data = JSON.parse(rest.substr(contentLength));
     expect(data).to.be.ok;
     verifyContext(data._context);
@@ -495,7 +495,7 @@ describe('amp-a4a', () => {
       const layoutCallbackPromise = a4a.layoutCallback();
       a4a.unlayoutCallback();
       const renderNonAmpCreativeSpy = sandbox.spy(
-          AmpA4A.prototype, 'renderNonAmpCreative_');
+          AmpA4A.prototype, 'renderNonAmpCreative');
       promiseResolver();
       layoutCallbackPromise.then(() => {
         // We should never get in here.
@@ -827,13 +827,13 @@ describe('amp-a4a', () => {
         doc.head.appendChild(s);
         const a4a = new MockA4AImpl(a4aElement);
         const renderNonAmpCreativeSpy =
-          sandbox.spy(a4a, 'renderNonAmpCreative_');
+          sandbox.spy(a4a, 'renderNonAmpCreative');
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.ok;
         return a4a.layoutCallback().then(() => {
           expect(renderNonAmpCreativeSpy.calledOnce,
-              'renderNonAmpCreative_ called exactly once').to.be.true;
+              'renderNonAmpCreative called exactly once').to.be.true;
           a4a.unlayoutCallback();
           getResourceStub.returns({
             'hasBeenMeasured': () => true,
@@ -888,13 +888,13 @@ describe('amp-a4a', () => {
         doc.head.appendChild(s);
         const a4a = new MockA4AImpl(a4aElement);
         const renderNonAmpCreativeSpy =
-          sandbox.spy(a4a, 'renderNonAmpCreative_');
+          sandbox.spy(a4a, 'renderNonAmpCreative');
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.ok;
         return a4a.layoutCallback().then(() => {
           expect(renderNonAmpCreativeSpy.calledOnce,
-              'renderNonAmpCreative_ called exactly once').to.be.true;
+              'renderNonAmpCreative called exactly once').to.be.true;
           a4a.unlayoutCallback();
           const onLayoutMeasureSpy = sandbox.spy(a4a, 'onLayoutMeasure');
           getResourceStub.returns({'hasBeenMeasured': () => false});
@@ -998,8 +998,8 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
-        sandbox.stub(a4a, 'getAmpAdMetadata_').callsFake(creative => {
-          const metaData = AmpA4A.prototype.getAmpAdMetadata_(creative);
+        sandbox.stub(a4a, 'getAmpAdMetadata').callsFake(creative => {
+          const metaData = AmpA4A.prototype.getAmpAdMetadata(creative);
           metaData.images = ['https://prefetch.me.com?a=b', 'http://do.not.prefetch.me.com?c=d',
             'https://prefetch.metoo.com?e=f'];
           return metaData;
@@ -1410,7 +1410,7 @@ describe('amp-a4a', () => {
             });
         a4a.buildCallback();
         a4a.onLayoutMeasure();
-        expect(a4a.adPromise_);
+        expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.adPromise_.then(() => {
           expect(getAdUrlSpy).to.be.calledOnce;
         });
@@ -1427,7 +1427,7 @@ describe('amp-a4a', () => {
             });
         a4a.buildCallback();
         a4a.onLayoutMeasure();
-        expect(a4a.adPromise_);
+        expect(a4a.adPromise_).to.be.instanceof(Promise);
         // Delay to all getAdUrl to potentially execute.
         return Services.timerFor(a4a.win).promise(1).then(() => {
           expect(getAdUrlSpy).to.not.be.called;
@@ -1491,7 +1491,7 @@ describe('amp-a4a', () => {
     });
   });
 
-  describe('#getAmpAdMetadata_', () => {
+  describe('#getAmpAdMetadata', () => {
     let a4a;
     let metaData;
     beforeEach(() => {
@@ -1510,7 +1510,7 @@ describe('amp-a4a', () => {
       });
     });
     it('should parse metadata', () => {
-      const actual = a4a.getAmpAdMetadata_(buildCreativeString(metaData));
+      const actual = a4a.getAmpAdMetadata(buildCreativeString(metaData));
       const expected = Object.assign(metaData, {
         minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
       });
@@ -1522,7 +1522,7 @@ describe('amp-a4a', () => {
       const creative = buildCreativeString(metaData).replace(
           '<script type="application/json" amp-ad-metadata>',
           '<script type=application/json amp-ad-metadata>');
-      const actual = a4a.getAmpAdMetadata_(creative);
+      const actual = a4a.getAmpAdMetadata(creative);
       const expected = Object.assign({
         minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
       }, metaData);
@@ -1532,35 +1532,35 @@ describe('amp-a4a', () => {
       const creative = buildCreativeString(metaData).replace(
           '<script type="application/json" amp-ad-metadata>',
           '<script type=application/json" amp-ad-metadata>');
-      expect(a4a.getAmpAdMetadata_(creative)).to.be.null;
+      expect(a4a.getAmpAdMetadata(creative)).to.be.null;
     });
 
     it('should return null if missing ampRuntimeUtf16CharOffsets', () => {
       const baseTestDoc = testFragments.minimalDocOneStyle;
       const splicePoint = baseTestDoc.indexOf('</body>');
-      expect(a4a.getAmpAdMetadata_(
+      expect(a4a.getAmpAdMetadata(
           baseTestDoc.slice(0, splicePoint) +
         '<script type="application/json" amp-ad-metadata></script>' +
         baseTestDoc.slice(splicePoint))).to.be.null;
     });
     it('should return null if invalid extensions', () => {
       metaData.customElementExtensions = 'amp-vine';
-      expect(a4a.getAmpAdMetadata_(buildCreativeString(metaData))).to.be.null;
+      expect(a4a.getAmpAdMetadata(buildCreativeString(metaData))).to.be.null;
     });
     it('should return null if non-array stylesheets', () => {
       metaData.customStylesheets = 'https://fonts.googleapis.com/css?foobar';
-      expect(a4a.getAmpAdMetadata_(buildCreativeString(metaData))).to.be.null;
+      expect(a4a.getAmpAdMetadata(buildCreativeString(metaData))).to.be.null;
     });
     it('should return null if invalid stylesheet object', () => {
       metaData.customStylesheets = [
         {href: 'https://fonts.googleapis.com/css?foobar'},
         {foo: 'https://fonts.com/css?helloworld'},
       ];
-      expect(a4a.getAmpAdMetadata_(buildCreativeString(metaData))).to.be.null;
+      expect(a4a.getAmpAdMetadata(buildCreativeString(metaData))).to.be.null;
     });
     it('should not include amp images if not an array', () => {
       metaData.images = 'https://foo.com';
-      const actual = a4a.getAmpAdMetadata_(buildCreativeString(metaData));
+      const actual = a4a.getAmpAdMetadata(buildCreativeString(metaData));
       const expected = Object.assign({
         minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
       }, metaData);
@@ -1569,7 +1569,7 @@ describe('amp-a4a', () => {
     });
     it('should tolerate missing images', () => {
       delete metaData.images;
-      const actual = a4a.getAmpAdMetadata_(buildCreativeString(metaData));
+      const actual = a4a.getAmpAdMetadata(buildCreativeString(metaData));
       const expected = Object.assign({
         minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
       }, metaData);
@@ -1580,7 +1580,7 @@ describe('amp-a4a', () => {
       while (metaData.images.length < 10) {
         metaData.images.push('https://another.image.com?abc=def');
       }
-      expect(a4a.getAmpAdMetadata_(buildCreativeString(metaData)).images.length)
+      expect(a4a.getAmpAdMetadata(buildCreativeString(metaData)).images.length)
           .to.equal(5);
     });
     // FAILURE cases here
@@ -1619,7 +1619,7 @@ describe('amp-a4a', () => {
   });
 
   describe('#renderAmpCreative_', () => {
-    const metaData = AmpA4A.prototype.getAmpAdMetadata_(buildCreativeString());
+    const metaData = AmpA4A.prototype.getAmpAdMetadata(buildCreativeString());
     let a4aElement;
     let a4a;
     beforeEach(() => {

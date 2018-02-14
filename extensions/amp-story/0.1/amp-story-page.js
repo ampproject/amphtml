@@ -23,17 +23,27 @@
  * </amp-story>
  * </code>
  */
+import {AdvancementConfig} from './page-advancement';
 import {
   AnimationManager,
   hasAnimations,
 } from './animation';
-import {Layout} from '../../../src/layout';
-import {upgradeBackgroundAudio} from './audio';
 import {EventType, dispatch, dispatchCustom} from './events';
-import {AdvancementConfig} from './page-advancement';
-import {matches, scopedQuerySelectorAll} from '../../../src/dom';
+import {Layout} from '../../../src/layout';
+import {LoadingSpinner} from './loading-spinner';
+import {MediaPool} from './media-pool';
+import {PageScalingService} from './page-scaling';
+import {
+  closestBySelector,
+  matches,
+  scopedQuerySelectorAll,
+} from '../../../src/dom';
+import {debounce} from '../../../src/utils/rate-limit';
+import {dev} from '../../../src/log';
 import {getLogEntries} from './logging';
 import {getMode} from '../../../src/mode';
+import {listen} from '../../../src/event-helper';
+import {upgradeBackgroundAudio} from './audio';
 
 
 /**
@@ -69,6 +79,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!AdvancementConfig} */
     this.advancement_ = AdvancementConfig.forPage(this);
 
+    /** @private {?Element} */
+    this.loadingSpinner_ = null;
+
     /** @private @const {!Promise} */
     this.mediaLayoutPromise_ = this.waitForMediaLayout_();
 
@@ -77,18 +90,30 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.markPageAsLoaded_();
     });
 
-    /** @private @const {!Promise<!./media-pool.MediaPool>} */
+    let mediaPoolResolveFn, mediaPoolRejectFn;
+
+    /** @private @const {!Promise<!MediaPool>} */
     this.mediaPoolPromise_ = new Promise((resolve, reject) => {
-      this.setMediaPool = mediaPool => {
-        this.mediaLayoutPromise_
-            .then(() => resolve(mediaPool))
-            .catch(reject);
-      };
+      mediaPoolResolveFn = resolve;
+      mediaPoolRejectFn = reject;
     });
+
+    /** @private @const {!function(!MediaPool)} */
+    this.mediaPoolResolveFn_ = mediaPoolResolveFn;
+
+    /** @private @const {!function(*)} */
+    this.mediaPoolRejectFn_ = mediaPoolRejectFn;
 
     /** @private @const {boolean} Only prerender the first story page. */
     this.prerenderAllowed_ = matches(this.element,
         'amp-story-page:first-of-type');
+
+    /** @const @private {!function()} */
+    this.debounceToggleLoadingSpinner_ = debounce(
+        this.win, isActive => this.toggleLoadingSpinner_(!!isActive), 100);
+
+    /** @private {!Array<function()>} */
+    this.unlisteners_ = [];
   }
 
 
@@ -112,6 +137,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   buildCallback() {
     upgradeBackgroundAudio(this.element);
     this.markMediaElementsWithPreload_();
+    this.initializeMediaPool_();
     this.maybeCreateAnimationManager_();
     this.advancement_.addPreviousListener(() => this.previous());
     this.advancement_
@@ -123,13 +149,25 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
 
+  /** @private */
+  initializeMediaPool_() {
+    const storyEl = dev().assertElement(
+        closestBySelector(this.element, 'amp-story'),
+        'amp-story-page must be a descendant of amp-story.');
+
+    storyEl.getImpl()
+        .then(storyImpl => {
+          this.mediaPoolResolveFn_(MediaPool.for(storyImpl));
+        }, reason => this.mediaPoolRejectFn_(reason));
+  }
+
+
   /**
    * Marks any AMP elements that represent media elements with preload="auto".
    * @private
    */
   markMediaElementsWithPreload_() {
-    const mediaSet = scopedQuerySelectorAll(
-        this.element, 'amp-audio, amp-video');
+    const mediaSet = this.element.querySelectorAll('amp-audio, amp-video');
     Array.prototype.forEach.call(mediaSet, mediaItem => {
       mediaItem.setAttribute('preload', 'auto');
     });
@@ -146,6 +184,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   pauseCallback() {
     this.advancement_.stop();
 
+    this.stopListeningToVideoEvents_();
     this.pauseAllMedia_(/* opt_rewindToBeginning */ false);
 
     if (this.animationManager_) {
@@ -161,7 +200,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (this.isActive()) {
       this.advancement_.start();
       this.maybeStartAnimations();
-      this.playAllMedia_();
+      this.preloadAllMedia_()
+          .then(() => this.startListeningToVideoEvents_())
+          .then(() => this.playAllMedia_());
     }
 
     this.reportDevModeErrors_();
@@ -174,6 +215,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     return Promise.all([
       this.beforeVisible(),
+      this.mediaLayoutPromise_,
       this.mediaPoolPromise_,
     ]);
   }
@@ -182,7 +224,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @return {!Promise} */
   beforeVisible() {
     this.rewindAllMediaToBeginning_();
-    return this.maybeApplyFirstAnimationFrame();
+    return this.scale_().then(() => this.maybeApplyFirstAnimationFrame());
   }
 
 
@@ -252,7 +294,17 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   getAllMedia_() {
-    return scopedQuerySelectorAll(this.element, 'audio, video');
+    return this.element.querySelectorAll('audio, video');
+  }
+
+
+  /**
+   * Gets all video elements on this page.
+   * @return {!NodeList<!Element>}
+   * @private
+   */
+  getAllVideos_() {
+    return this.element.querySelectorAll('video');
   }
 
 
@@ -261,13 +313,16 @@ export class AmpStoryPage extends AMP.BaseElement {
    * media element is loaded.
    * @param {!function(!./media-pool.MediaPool, !Element)} callbackFn The
    *     callback to be applied to each media element.
+   * @return {!Promise} Promise that resolves after the callbacks are called.
    */
-  forEachMediaElement_(callbackFn) {
+  whenAllMediaElements_(callbackFn) {
     const mediaSet = this.getAllMedia_();
-    this.mediaPoolPromise_.then(mediaPool => {
-      Array.prototype.forEach.call(mediaSet, mediaEl => {
-        callbackFn(mediaPool, mediaEl);
+    return this.mediaPoolPromise_.then(mediaPool => {
+      const promises = Array.prototype.map.call(mediaSet, mediaEl => {
+        return callbackFn(mediaPool, mediaEl);
       });
+
+      return Promise.all(promises);
     });
   }
 
@@ -276,72 +331,83 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Pauses all media on this page.
    * @param {boolean=} opt_rewindToBeginning Whether to rewind the currentTime
    *     of media items to the beginning.
+   * @return {!Promise} Promise that resolves after the callbacks are called.
    * @private
    */
   pauseAllMedia_(opt_rewindToBeginning) {
-    this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.pause(/** @type {!HTMLMediaElement} */ (mediaEl),
+    return this.whenAllMediaElements_((mediaPool, mediaEl) => {
+      return mediaPool.pause(/** @type {!HTMLMediaElement} */ (mediaEl),
           opt_rewindToBeginning);
     });
   }
 
 
   /**
-   * Pauses all media on this page.
+   * Plays all media on this page.
+   * @return {!Promise} Promise that resolves after the callbacks are called.
    * @private
    */
   playAllMedia_() {
-    this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.play(/** @type {!HTMLMediaElement} */ (mediaEl));
+    return this.whenAllMediaElements_((mediaPool, mediaEl) => {
+      return mediaPool.play(/** @type {!HTMLMediaElement} */ (mediaEl));
     });
   }
 
 
   /**
-   * Pauses all media on this page.
+   * Preloads all media on this page.
+   * @return {!Promise} Promise that resolves after the callbacks are called.
    * @private
    */
   preloadAllMedia_() {
-    this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.preload(/** @type {!HTMLMediaElement} */ (mediaEl));
+    return this.whenAllMediaElements_((mediaPool, mediaEl) => {
+      return mediaPool.preload(/** @type {!HTMLMediaElement} */ (mediaEl));
     });
   }
 
-  /** @private */
+
+  /**
+   * @return {!Promise} Promise that resolves after the callbacks are called.
+   * @private
+   */
   rewindAllMediaToBeginning_() {
-    this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.rewindToBeginning(/** @type {!HTMLMediaElement} */ (mediaEl));
+    return this.whenAllMediaElements_((mediaPool, mediaEl) => {
+      return mediaPool.rewindToBeginning(
+          /** @type {!HTMLMediaElement} */ (mediaEl));
     });
   }
 
 
   /**
    * Mutes all media on this page.
+   * @return {!Promise} Promise that resolves after the callbacks are called.
    */
   muteAllMedia() {
-    this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.mute(/** @type {!HTMLMediaElement} */ (mediaEl));
+    return this.whenAllMediaElements_((mediaPool, mediaEl) => {
+      return mediaPool.mute(/** @type {!HTMLMediaElement} */ (mediaEl));
     });
   }
 
 
   /**
    * Unmutes all media on this page.
+   * @return {!Promise} Promise that resolves after the callbacks are called.
    */
   unmuteAllMedia() {
-    this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.unmute(/** @type {!HTMLMediaElement} */ (mediaEl));
+    return this.whenAllMediaElements_((mediaPool, mediaEl) => {
+      return mediaPool.unmute(/** @type {!HTMLMediaElement} */ (mediaEl));
     });
   }
 
 
   /**
    * Registers all media on this page
+   * @return {!Promise} Promise that resolves after the callbacks are called.
    * @private
    */
   registerAllMedia_() {
-    this.forEachMediaElement_((mediaPool, mediaEl) => {
-      mediaPool.register(/** @type {!HTMLMediaElement} */ (mediaEl));
+    return this.whenAllMediaElements_((mediaPool, mediaEl) => {
+      return mediaPool.register(/** @type {!HTMLMediaElement} */ (mediaEl));
     });
   }
 
@@ -367,6 +433,14 @@ export class AmpStoryPage extends AMP.BaseElement {
     return this.animationManager_.applyFirstFrame();
   }
 
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  scale_() {
+    const storyEl = dev().assertElement(this.element.parentNode);
+    return PageScalingService.for(storyEl).scale(this.element);
+  }
 
   /**
    * @param {boolean} isActive
@@ -374,6 +448,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   setActive(isActive) {
     if (isActive) {
       this.element.setAttribute('active', '');
+      this.beforeVisible();
       this.resumeCallback();
     } else {
       this.element.removeAttribute('active');
@@ -396,21 +471,13 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   setDistance(distance) {
     this.element.setAttribute('distance', distance);
-
     this.registerAllMedia_();
     if (distance > 0 && distance <= 2) {
       this.preloadAllMedia_();
+      this.scale_();
     }
   }
 
-
-  /**
-   * @param {!./media-pool.MediaPool} unusedMediaPool The media pool instance to
-   *     use for this AmpStoryPage.
-   */
-  setMediaPool(unusedMediaPool) {
-    // Overridden by this.mediaPoolPromise_.
-  }
 
   /**
    * @return {boolean} Whether this page is currently active.
@@ -573,6 +640,67 @@ export class AmpStoryPage extends AMP.BaseElement {
     getLogEntries(this.element).then(logEntries => {
       dispatchCustom(this.win, this.element,
           EventType.DEV_LOG_ENTRIES_AVAILABLE, logEntries, {bubbles: true});
+    });
+  }
+
+
+  /**
+   * Displays a loading spinner whenever the video is buffering.
+   * Has to be called after the mediaPool preload method, that swaps the video
+   * elements with new amp elements.
+   * @private
+   */
+  startListeningToVideoEvents_() {
+    const videos = this.getAllVideos_();
+
+    if (videos.length === 0) {
+      return;
+    }
+
+    this.debounceToggleLoadingSpinner_(true);
+    Array.prototype.forEach.call(videos, videoEl => {
+      this.unlisteners_.push(listen(
+          videoEl, 'playing', () => this.debounceToggleLoadingSpinner_(false)));
+      this.unlisteners_.push(listen(
+          videoEl, 'waiting', () => this.debounceToggleLoadingSpinner_(true)));
+    });
+  }
+
+
+  /**
+   * @private
+   */
+  stopListeningToVideoEvents_() {
+    this.debounceToggleLoadingSpinner_(false);
+    this.unlisteners_.forEach(unlisten => unlisten());
+    this.unlisteners_ = [];
+  }
+
+
+  /**
+   * @private
+   */
+  buildAndAppendLoadingSpinner_() {
+    this.loadingSpinner_ = new LoadingSpinner(this.win.document);
+    this.element.appendChild(this.loadingSpinner_.build());
+  }
+
+
+  /**
+   * Has to be called through the `debounceToggleLoadingSpinner_` method, to
+   * avoid the spinner flashing on the screen when the video loops, or during
+   * navigation transitions.
+   * Builds the loading spinner and attaches it to the DOM on first call.
+   * @param {boolean} isActive
+   * @private
+   */
+  toggleLoadingSpinner_(isActive) {
+    this.getVsync().mutate(() => {
+      if (!this.loadingSpinner_) {
+        this.buildAndAppendLoadingSpinner_();
+      }
+
+      this.loadingSpinner_.toggle(isActive);
     });
   }
 }

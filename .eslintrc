@@ -1,6 +1,11 @@
 {
   "parser": "babel-eslint",
-  "plugins": ["eslint-plugin-google-camelcase"],
+  "plugins": [
+    "chai-expect",
+    "eslint-plugin-google-camelcase",
+    "sort-imports-es6-autofix",
+    "sort-requires"
+  ],
   "env": {
     "es6": true,
     "browser": true
@@ -30,6 +35,9 @@
     "array-bracket-spacing": [2, "never"],
     "arrow-parens": [2, "as-needed"],
     "arrow-spacing": 2,
+    "chai-expect/missing-assertion": 2,
+    "chai-expect/no-inner-compare": 2,
+    "chai-expect/terminating-properties": 2,
     "comma-dangle": [2, "always-multiline"],
     "computed-property-spacing": [2, "never"],
     "curly": 2,
@@ -45,7 +53,7 @@
     "max-len": [2, 80, 4, {
       "ignoreComments": true,
       "ignoreUrls": true,
-      "ignorePattern": "^import.*';$"
+      "ignorePattern": "^import.*';|}\\ from.*;|.*require\\(.*;$"
     }],
     "no-alert": 2,
     "no-array-destructuring": 2,
@@ -58,6 +66,7 @@
     "no-export-side-effect": 2,
     "no-extend-native": 2,
     "no-extra-bind": 2,
+    "no-extra-semi": 2,
     "no-for-of-statement": 2,
     "no-implicit-coercion": [2, { "boolean": false }],
     "no-implied-eval": 2,
@@ -91,8 +100,15 @@
     "prefer-const": 2,
     "quotes": [2, "single", "avoid-escape"],
     "radix": 2,
+    "query-selector": 2,
     "semi": 2,
-    "keyword-spacing": ["error", { "before": true, "after": true }],
+    "keyword-spacing": [2, { "before": true, "after": true }],
+    "sort-imports-es6-autofix/sort-imports-es6": [2, {
+      "ignoreCase": false,
+      "ignoreMemberSort": false,
+      "memberSyntaxSortOrder": ["none", "all", "multiple", "single"]
+    }],
+    "sort-requires/sort-requires": 2,
     "space-before-blocks": 2,
     "space-before-function-paren": [2, "never"],
     "space-in-parens": 2,

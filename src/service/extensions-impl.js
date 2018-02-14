@@ -15,7 +15,6 @@
  */
 
 import {Services} from '../services';
-import {declareExtension} from './ampdoc-impl';
 import {
   adoptServiceForEmbed,
   adoptServiceForEmbedIfEmbeddable,
@@ -23,31 +22,33 @@ import {
   registerServiceBuilderForDoc,
   setParentWindow,
 } from '../service';
+import {calculateExtensionScriptUrl} from './extension-location';
 import {
   copyElementToChildWindow,
   stubElementIfNotKnown,
   upgradeOrRegisterElement,
 } from './custom-element-registry';
 import {cssText} from '../../build/css';
+import {declareExtension} from './ampdoc-impl';
 import {dev, rethrowAsync} from '../log';
 import {getMode} from '../mode';
-import installCustomElements from
-  'document-register-element/build/document-register-element.node';
-import {install as installDocContains} from '../polyfills/document-contains';
 import {
   install as installDOMTokenListToggle,
 } from '../polyfills/domtokenlist-toggle';
+import {install as installDocContains} from '../polyfills/document-contains';
 import {installImg} from '../../builtins/amp-img';
-import {installPixel} from '../../builtins/amp-pixel';
 import {installLayout} from '../../builtins/amp-layout';
+import {installPixel} from '../../builtins/amp-pixel';
 import {installStylesForDoc, installStylesLegacy} from '../style-installer';
-import {calculateExtensionScriptUrl} from './extension-location';
 import {map} from '../utils/object';
 import {toWin} from '../types';
+import installCustomElements from
+  'document-register-element/build/document-register-element.node';
 
 const TAG = 'extensions';
 const UNKNOWN_EXTENSION = '_UNKNOWN_';
 const LEGACY_ELEMENTS = ['amp-ad', 'amp-embed', 'amp-video'];
+const CUSTOM_TEMPLATES = ['amp-mustache'];
 const LOADER_PROP = '__AMP_EXT_LDR';
 
 /**
@@ -91,6 +92,9 @@ let ExtensionDef;
  */
 let ExtensionHolderDef;
 
+export function isTemplateExtension(extensionId) {
+  return CUSTOM_TEMPLATES.indexOf(extensionId) >= 0;
+}
 
 /**
  * Install extensions service.
@@ -641,7 +645,9 @@ export class Extensions {
   createExtensionScript_(extensionId, opt_extensionVersion) {
     const scriptElement = this.win.document.createElement('script');
     scriptElement.async = true;
-    scriptElement.setAttribute('custom-element', extensionId);
+    scriptElement.setAttribute(
+        isTemplateExtension(extensionId) ? 'custom-template' : 'custom-element',
+        extensionId);
     scriptElement.setAttribute('data-script', extensionId);
     scriptElement.setAttribute('i-amphtml-inserted', '');
     let loc = this.win.location;
