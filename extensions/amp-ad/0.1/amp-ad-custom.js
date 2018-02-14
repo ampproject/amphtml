@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {AmpAdUIHandler} from './amp-ad-ui';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {ancestorElementsByTag} from '../../../src/dom';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
-import {AmpAdUIHandler} from './amp-ad-ui';
+import {user} from '../../../src/log';
 
 /** @const {string} Tag name for custom ad implementation. */
 export const TAG_AD_CUSTOM = 'amp-ad-custom';
@@ -69,10 +69,7 @@ export class AmpAdCustom extends AMP.BaseElement {
   buildCallback() {
     this.url_ = this.element.getAttribute('data-url');
     this.slot_ = this.element.getAttribute('data-slot');
-    // Ensure that there are templates in this ad
-    const templates = this.element.querySelectorAll('template');
-    user().assert(templates.length > 0, 'Missing template in custom ad');
-    // And ensure that the slot value is legal
+    // Ensure that the slot value is legal
     user().assert(this.slot_ === null || this.slot_.match(/^[0-9a-z]+$/),
         'custom ad slot should be alphanumeric: ' + this.slot_);
 

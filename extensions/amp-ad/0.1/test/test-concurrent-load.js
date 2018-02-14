@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
+import * as lolex from 'lolex';
+import {createElementWithAttributes} from '../../../../src/dom';
 import {
   getAmpAdRenderOutsideViewport,
-  is3pThrottled,
   incrementLoadingAds,
+  is3pThrottled,
+  waitFor3pThrottle,
 } from '../concurrent-load';
-import {createElementWithAttributes} from '../../../../src/dom';
 import {installTimerService} from '../../../../src/service/timer-impl';
 import {macroTask} from '../../../../testing/yield';
-import * as lolex from 'lolex';
 
 describes.realWin('concurrent-load', {}, env => {
 
@@ -103,6 +104,26 @@ describes.realWin('concurrent-load', {}, env => {
       resolver();
       yield macroTask();
       expect(is3pThrottled(win)).to.be.false;
+    });
+  });
+
+  describe('waitFor3pThrottle', () => {
+    beforeEach(() => {
+      installTimerService(env.win);
+    });
+
+    // TODO(jeffkaufman, #13422): this test was silently failing
+    it.skip('should block if incremented', () => {
+      incrementLoadingAds(env.win);
+      const start = Date.now();
+      return waitFor3pThrottle(env.win).then(
+          () => expect(Date.now() - start).to.be.at.least(1000));
+    });
+
+    it('should not block if never incremented', () => {
+      const start = Date.now();
+      return waitFor3pThrottle(env.win).then(
+          () => expect(Date.now() - start).to.be.at.most(50));
     });
   });
 });

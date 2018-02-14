@@ -15,12 +15,12 @@
  */
 
 import {
+  getAmpdoc,
+  getExistingServiceForDocInEmbedScope,
+  getExistingServiceOrNull,
   getService,
   getServiceForDoc,
   getServicePromiseForDoc,
-  getExistingServiceOrNull,
-  getExistingServiceForDocInEmbedScope,
-  getAmpdoc,
 } from './service';
 import {
   getElementServiceForDoc,
@@ -151,6 +151,15 @@ export class Services {
   }
 
   /**
+   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+   * @return {!./service/document-click.ClickHandler}
+   */
+  static clickHandlerForDoc(nodeOrDoc) {
+    return /** @type {!./service/document-click.ClickHandler} */ (
+      getServiceForDoc(nodeOrDoc, 'clickhandler'));
+  }
+
+  /**
    * @param {!Window} window
    * @return {!./service/crypto-impl.Crypto}
    */
@@ -201,7 +210,7 @@ export class Services {
    */
   static inputFor(win) {
     return getService(win, 'input');
-  };
+  }
 
   /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
@@ -210,15 +219,6 @@ export class Services {
   static layersForDoc(nodeOrDoc) {
     return /** @type {!./service/layers-impl.LayoutLayers} */ (
       getServiceForDoc(nodeOrDoc, 'layers'));
-  }
-
-  /**
-   * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
-   * @return {!./service/parallax-impl.ParallaxService}
-   */
-  static parallaxForDoc(nodeOrDoc) {
-    return /** @type {!./service/parallax-impl.ParallaxService} */ (
-      getServiceForDoc(nodeOrDoc, 'amp-fx-parallax'));
   }
 
   /**

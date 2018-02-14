@@ -27,14 +27,22 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
   <script async custom-element="amp-fx-flying-carpet" src="https://cdn.ampproject.org/v0/amp-fx-flying-carpet-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
 </head>
 <body>
+  <template type="amp-mustache" id="template-1">
+  </template>
   <!-- Valid -->
   <amp-ad width=300 height=250
           type="a9"
           data-aax_size="300x250"
           data-aax_pubname="test123"
           data-aax_src="302">
+  </amp-ad>
+  <!-- Valid -->
+  <amp-ad width=300 height=250
+      type="custom"
+      template="template-1">
   </amp-ad>
   <!-- Valid -->
   <amp-fx-flying-carpet height="300">

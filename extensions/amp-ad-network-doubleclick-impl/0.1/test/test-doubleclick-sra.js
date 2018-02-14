@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import '../../../amp-ad/0.1/amp-ad';
+import * as sinon from 'sinon';
 import {
   AmpA4A,
   RENDERING_TYPE_HEADER,
@@ -20,25 +22,23 @@ import {
 } from '../../../amp-a4a/0.1/amp-a4a';
 import {
   AmpAdNetworkDoubleclickImpl,
-  getNetworkId,
-  constructSRABlockParameters,
   TFCD,
+  constructSRABlockParameters,
+  getNetworkId,
   resetSraStateForTesting,
 } from '../amp-ad-network-doubleclick-impl';
-import {
-  MANUAL_EXPERIMENT_ID,
-} from '../../../../ads/google/a4a/traffic-experiments';
+import {BaseElement} from '../../../../src/base-element';
 import {
   EXPERIMENT_ATTRIBUTE,
 } from '../../../../ads/google/a4a/utils';
-import {utf8Encode} from '../../../../src/utils/bytes';
-import {BaseElement} from '../../../../src/base-element';
+import {FetchResponseHeaders, Xhr} from '../../../../src/service/xhr-impl';
+import {
+  MANUAL_EXPERIMENT_ID,
+} from '../../../../ads/google/a4a/traffic-experiments';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
-import {Xhr, FetchResponseHeaders} from '../../../../src/service/xhr-impl';
 import {dev} from '../../../../src/log';
-import '../../../amp-ad/0.1/amp-ad';
-import * as sinon from 'sinon';
+import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {utf8Encode} from '../../../../src/utils/bytes';
 
 const config = {amp: true, allowExternalResources: true};
 
@@ -266,7 +266,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', config , env => {
             method: 'GET',
             credentials: 'include',
           }).returns(Promise.resolve({
-        arrayBuffer: () => utf8Encode(creative),
+        arrayBuffer: () => Promise.resolve(utf8Encode(creative)),
         bodyUsed: false,
         headers: new FetchResponseHeaders({
           getResponseHeader(name) {

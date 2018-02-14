@@ -22,14 +22,15 @@
  * https://3p.ampproject.net/$version/f.js
  */
 
-import './polyfills';
+// src/polyfills.js must be the first import.
+import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+
+import {AmpEvents} from '../src/amp-events';
 import {
   IntegrationAmpContext,
   masterSelection,
 } from './ampcontext-integration';
-import {installEmbedStateListener, manageWin} from './environment';
-import {isExperimentOn} from './3p';
-import {nonSensitiveDataPostMessage, listenParent} from './messaging';
+import {MessageType} from '../src/3p-frame-messaging';
 import {
   computeInMasterFrame,
   nextTick,
@@ -37,6 +38,8 @@ import {
   run,
   setExperimentToggles,
 } from './3p';
+import {dict} from '../src/utils/object.js';
+import {endsWith} from '../src/string';
 import {
   getAmpConfig,
   getAttributeData,
@@ -44,25 +47,28 @@ import {
   getEmbedType,
   getLocation,
 } from './frame-metadata';
-import {urls} from '../src/config';
-import {endsWith} from '../src/string';
-import {parseJson} from '../src/json';
-import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
+import {getMode} from '../src/mode';
+import {getSourceUrl, isProxyOrigin, parseUrl} from '../src/url';
 import {
   initLogConstructor,
+  isUserErrorMessage,
   setReportError,
   user,
-  isUserErrorMessage,
 } from '../src/log';
-import {dict} from '../src/utils/object.js';
-import {getMode} from '../src/mode';
+import {installEmbedStateListener, manageWin} from './environment';
+import {isExperimentOn} from './3p';
+import {listenParent, nonSensitiveDataPostMessage} from './messaging';
+import {parseJson} from '../src/json';
 import {startsWith} from '../src/string.js';
-import {AmpEvents} from '../src/amp-events';
-import {MessageType} from '../src/3p-frame-messaging';
+import {urls} from '../src/config';
+
+// Disable auto-sorting of imports from here on.
+/* eslint-disable sort-imports-es6-autofix/sort-imports-es6 */
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
 import {github} from './github';
+import {mathml} from './mathml';
 import {reddit} from './reddit';
 import {twitter} from './twitter';
 
@@ -100,6 +106,7 @@ import {advertserve} from '../ads/advertserve';
 import {affiliateb} from '../ads/affiliateb';
 import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
+import {appvador} from '../ads/appvador';
 import {atomx} from '../ads/atomx';
 import {bidtellect} from '../ads/bidtellect';
 import {brainy} from '../ads/brainy';
@@ -118,6 +125,7 @@ import {directadvert} from '../ads/directadvert';
 import {distroscale} from '../ads/distroscale';
 import {dotandads} from '../ads/dotandads';
 import {doubleclick} from '../ads/google/doubleclick';
+import {eadv} from '../ads/eadv';
 import {eas} from '../ads/eas';
 import {engageya} from '../ads/engageya';
 import {eplanning} from '../ads/eplanning';
@@ -168,6 +176,7 @@ import {plista} from '../ads/plista';
 import {polymorphicads} from '../ads/polymorphicads';
 import {popin} from '../ads/popin';
 import {postquare} from '../ads/postquare';
+import {pubexchange} from '../ads/pubexchange';
 import {pubmatic} from '../ads/pubmatic';
 import {pubmine} from '../ads/pubmine';
 import {pulsepoint} from '../ads/pulsepoint';
@@ -192,6 +201,7 @@ import {taboola} from '../ads/taboola';
 import {teads} from '../ads/teads';
 import {triplelift} from '../ads/triplelift';
 import {valuecommerce} from '../ads/valuecommerce';
+import {videonow} from '../ads/videonow';
 import {viralize} from '../ads/viralize';
 import {vmfive} from '../ads/vmfive';
 import {webediads} from '../ads/webediads';
@@ -226,6 +236,7 @@ const AMP_EMBED_ALLOWED = {
   outbrain: true,
   plista: true,
   postquare: true,
+  pubexchange: true,
   smartclip: true,
   smi2: true,
   taboola: true,
@@ -277,6 +288,7 @@ register('advertserve', advertserve);
 register('affiliateb', affiliateb);
 register('amoad', amoad);
 register('appnexus', appnexus);
+register('appvador', appvador);
 register('atomx', atomx);
 register('bidtellect', bidtellect);
 register('brainy', brainy);
@@ -295,6 +307,7 @@ register('directadvert', directadvert);
 register('distroscale', distroscale);
 register('dotandads', dotandads);
 register('doubleclick', doubleclick);
+register('eadv', eadv);
 register('eas', eas);
 register('engageya', engageya);
 register('eplanning', eplanning);
@@ -330,6 +343,7 @@ register('loka', loka);
 register('mads', mads);
 register('mantis-display', mantisDisplay);
 register('mantis-recommend', mantisRecommend);
+register('mathml', mathml);
 register('mediaimpact', mediaimpact);
 register('medianet', medianet);
 register('mediavine', mediavine);
@@ -349,6 +363,7 @@ register('plista', plista);
 register('polymorphicads', polymorphicads);
 register('popin', popin);
 register('postquare', postquare);
+register('pubexchange', pubexchange);
 register('pubmatic', pubmatic);
 register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);
@@ -375,6 +390,7 @@ register('teads', teads);
 register('triplelift', triplelift);
 register('twitter', twitter);
 register('valuecommerce', valuecommerce);
+register('videonow', videonow);
 register('viralize', viralize);
 register('vmfive', vmfive);
 register('webediads', webediads);
@@ -450,7 +466,7 @@ export function draw3p(win, data, configCallback) {
   } else {
     run(type, win, data);
   }
-};
+}
 
 /**
  * @return {boolean} Whether this is the master iframe.

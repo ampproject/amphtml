@@ -15,13 +15,17 @@
  */
 
 import {AmpEvents} from '../../../src/amp-events';
+import {Services} from '../../../src/services';
+import {
+  UrlReplacementPolicy,
+  batchFetchJsonFor,
+} from '../../../src/batched-json';
 import {createCustomEvent} from '../../../src/event-helper';
-import {fetchBatchedJsonFor} from '../../../src/batched-json';
+import {dev, user} from '../../../src/log';
+import {getSourceOrigin} from '../../../src/url';
 import {isArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren} from '../../../src/dom';
-import {Services} from '../../../src/services';
-import {dev, user} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -44,6 +48,15 @@ export class AmpList extends AMP.BaseElement {
 
     /** @const {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win);
+
+    /**
+     * Has layoutCallback() been called yet?
+     * @private {boolean}
+     */
+    this.layoutCompleted_ = false;
+
+    /** @const @private {string} */
+    this.initialSrc_ = element.getAttribute('src');
   }
 
   /** @override */
@@ -73,6 +86,8 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.layoutCompleted_ = true;
+
     const fetch = this.fetchList_();
     if (this.getFallback()) {
       fetch.then(() => {
@@ -96,9 +111,8 @@ export class AmpList extends AMP.BaseElement {
     if (src !== undefined) {
       const typeOfSrc = typeof src;
       if (typeOfSrc === 'string') {
-        // Don't fetch if we aren't laid out yet since we also fetch in
-        // layoutCallback().
-        if (this.getLayoutWidth() > 0) {
+        // Defer to fetch in layoutCallback() before first layout.
+        if (this.layoutCompleted_) {
           this.fetchList_();
         }
       } else if (typeOfSrc === 'object') {
@@ -112,7 +126,7 @@ export class AmpList extends AMP.BaseElement {
     } else if (state !== undefined) {
       const items = isArray(state) ? state : [state];
       this.renderItems_(items);
-      user().warn(TAG, '[state] is deprecated, please use [src] instead.');
+      user().error(TAG, '[state] is deprecated, please use [src] instead.');
     }
   }
 
@@ -230,7 +244,17 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   fetch_(itemsExpr) {
-    return fetchBatchedJsonFor(this.getAmpDoc(), this.element, itemsExpr);
+    const ampdoc = this.getAmpDoc();
+    const src = this.element.getAttribute('src');
+
+    // Require opt-in for URL variable replacements on CORS fetches triggered
+    // by [src] mutation. @see spec/amp-var-substitutions.md
+    let policy = UrlReplacementPolicy.OPT_IN;
+    if (src == this.initialSrc_ ||
+      (getSourceOrigin(src) == getSourceOrigin(ampdoc.win.location))) {
+      policy = UrlReplacementPolicy.ALL;
+    }
+    return batchFetchJsonFor(ampdoc, this.element, itemsExpr, policy);
   }
 }
 

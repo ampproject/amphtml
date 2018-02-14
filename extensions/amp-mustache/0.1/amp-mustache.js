@@ -18,7 +18,7 @@ import {dict} from '../../../src/utils/object';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {parse as mustacheParse, render as mustacheRender,
   setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
-import {sanitizeHtml, sanitizeFormattingHtml} from '../../../src/sanitizer';
+import {sanitizeFormattingHtml, sanitizeHtml} from '../../../src/sanitizer';
 
 // Configure inline sanitizer for unescaped values.
 setUnescapedSanitizier(sanitizeFormattingHtml);
@@ -58,8 +58,11 @@ export class AmpMustache extends AMP.BaseTemplate {
 
   /** @override */
   render(data) {
-    const html = mustacheRender(this.template_,
-        Object.assign({}, data, this.nestedTemplates_));
+    let mustacheData = data;
+    if (typeof data === 'object') {
+      mustacheData = Object.assign({}, data, this.nestedTemplates_);
+    }
+    const html = mustacheRender(this.template_, mustacheData);
     const sanitized = sanitizeHtml(html);
     const root = this.win.document.createElement('div');
     root./*OK*/innerHTML = sanitized;

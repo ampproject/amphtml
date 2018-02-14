@@ -16,8 +16,8 @@
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {OBJECT_STRING_ARGS_KEY} from '../../src/service/action-impl';
-import {StandardActions} from '../../src/service/standard-actions-impl';
 import {Services} from '../../src/services';
+import {StandardActions} from '../../src/service/standard-actions-impl';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
 import {setParentWindow} from '../../src/service';
 
@@ -206,12 +206,10 @@ describes.sandboxed('StandardActions', {}, () => {
 
   describe('"AMP" global target', () => {
     it('should implement navigateTo', () => {
-      const expandUrlStub = sandbox.stub(standardActions.urlReplacements_,
-          'expandUrlSync').callsFake(url => url);
+      const clickHandler = {navigateTo: sandbox.stub()};
+      sandbox.stub(Services, 'clickHandlerForDoc').returns(clickHandler);
 
-      const win = {
-        location: 'http://foo.com',
-      };
+      const win = {};
       const invocation = {
         method: 'navigateTo',
         args: {
@@ -227,20 +225,14 @@ describes.sandboxed('StandardActions', {}, () => {
       // Should check trust and fail.
       invocation.satisfiesTrust = () => false;
       standardActions.handleAmpTarget(invocation);
-      expect(win.location).to.equal('http://foo.com');
-      expect(expandUrlStub).to.not.be.called;
+      expect(clickHandler.navigateTo).to.be.not.called;
 
       // Should succeed.
       invocation.satisfiesTrust = () => true;
       standardActions.handleAmpTarget(invocation);
-      expect(win.location).to.equal('http://bar.com');
-      expect(expandUrlStub.calledOnce);
-
-      // Invalid protocols should fail.
-      invocation.args.url = /*eslint no-script-url: 0*/ 'javascript:alert(1)';
-      standardActions.handleAmpTarget(invocation);
-      expect(win.location).to.equal('http://bar.com');
-      expect(expandUrlStub.calledOnce);
+      expect(clickHandler.navigateTo).to.be.calledOnce;
+      expect(clickHandler.navigateTo).to.be.calledWithExactly(
+          win, 'http://bar.com', 'AMP.navigateTo');
     });
 
     it('should implement goBack', () => {

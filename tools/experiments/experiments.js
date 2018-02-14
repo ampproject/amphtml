@@ -15,15 +15,15 @@
  */
 
 import '../../src/polyfills';
+import '../../src/service/timer-impl';
 import {dev, initLogConstructor, setReportError} from '../../src/log';
-import {reportError} from '../../src/error';
 import {getCookie, setCookie} from '../../src/cookies';
 import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {listenOnce} from '../../src/event-helper';
 import {onDocumentReady} from '../../src/document-ready';
 //TODO(@cramforce): For type. Replace with forward declaration.
-import '../../src/service/timer-impl';
+import {reportError} from '../../src/error';
 
 initLogConstructor();
 setReportError(reportError);
@@ -55,11 +55,6 @@ const EXPERIMENTS = [
     name: 'AMP Dev Channel (more info)',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
         'README.md#amp-dev-channel',
-  },
-  {
-    id: 'ad-type-custom',
-    name: 'Activates support for custom (self-serve) advertisements',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/ads/custom.md',
   },
   {
     id: 'alp',
@@ -105,12 +100,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
-    id: 'amp-gwd-animation',
-    name: 'AMP GWD Animation',
-    spec: 'https://github.com/ampproject/amphtml/issues/9949',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11238',
-  },
-  {
     id: 'no-auth-in-prerender',
     name: 'Delay amp-access auth request until doc becomes visible.',
     spec: '',
@@ -140,7 +129,7 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/1199',
   },
   {
-    id: 'amp-lightbox-viewer',
+    id: 'amp-lightbox-gallery',
     name: 'Enables a new lightbox experience via the `lightbox` attribute',
     spec: 'https://github.com/ampproject/amphtml/issues/4152',
   },
@@ -150,21 +139,10 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
   },
   {
-    id: 'amp-lightbox-viewer-auto',
-    name: 'Allows the new lightbox experience to automatically include some ' +
-        'elements without the need to manually add the `lightbox` attribute',
-    spec: 'https://github.com/ampproject/amphtml/issues/4152',
-  },
-  {
     id: 'amp-playbuzz',
     name: 'AMP extension for playbuzz items (launched)',
     spec: 'https://github.com/ampproject/amphtml/issues/6106',
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
-  },
-  {
-    id: 'alp-for-a4a',
-    name: 'Enable redirect to landing page directly for A4A',
-    spec: 'https://github.com/ampproject/amphtml/issues/5212',
   },
   {
     id: 'ios-embed-wrapper',
@@ -191,11 +169,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5888',
   },
   {
-    id: 'variable-filters',
-    name: 'Format to apply filters to analytics variables',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
-  },
-  {
     id: 'pump-early-frame',
     name: 'Force all extensions to have the same release ' +
         'as the main JS binary',
@@ -215,12 +188,6 @@ const EXPERIMENTS = [
   {
     id: 'jank-meter',
     name: 'Display jank meter',
-  },
-  {
-    id: 'amp-fx-parallax',
-    name: 'Amp extension for a parallax effect',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/7801',
-    spec: 'https://github.com/ampproject/amphtml/issues/1443',
   },
   {
     id: 'slidescroll-disable-css-snap',
@@ -245,10 +212,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/9277',
   },
   {
-    id: 'amp-ima-video',
-    name: 'IMA-integrated Video Player',
-  },
-  {
     id: 'user-error-reporting',
     name: 'Report error to publishers',
     spec: 'https://github.com/ampproject/amphtml/issues/6415',
@@ -270,6 +233,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/11475',
   },
   {
+    id: 'amp-story-scaling',
+    name: 'Scale pages dynamically in amp-story by default',
+    spec: 'https://github.com/ampproject/amphtml/issues/12902',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12902',
+  },
+  {
     id: 'disable-amp-story-desktop',
     name: 'Disables responsive desktop experience for the amp-story component',
     spec: 'https://github.com/ampproject/amphtml/issues/11714',
@@ -286,6 +255,12 @@ const EXPERIMENTS = [
     name: 'new parsing engine for url variables',
     spec: 'https://github.com/ampproject/amphtml/issues/12119',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/2198',
+  },
+  {
+    id: 'disable-amp-story-hls',
+    name: 'Disables usage of HTTP Live Streaming (HLS) within amp-story',
+    spec: 'https://github.com/ampproject/amphtml/issues/12965',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12978',
   },
 ];
 

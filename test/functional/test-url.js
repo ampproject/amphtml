@@ -19,11 +19,13 @@ import {
   addParamsToUrl,
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
+  getCorsUrl,
   getSourceOrigin,
   getSourceUrl,
-  isProxyOrigin,
+  getWinOrigin,
   isLocalhostOrigin,
   isProtocolValid,
+  isProxyOrigin,
   isSecureUrl,
   parseQueryString,
   parseUrl,
@@ -31,8 +33,6 @@ import {
   resolveRelativeUrl,
   resolveRelativeUrlFallback_,
   serializeQueryString,
-  getCorsUrl,
-  getWinOrigin,
 } from '../../src/url';
 
 describe('getWinOrigin', () => {

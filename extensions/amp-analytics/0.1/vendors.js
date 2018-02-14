@@ -48,6 +48,10 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'domainLookupTime': 'DOMAIN_LOOKUP_TIME',
       'domInteractiveTime': 'DOM_INTERACTIVE_TIME',
       'externalReferrer': 'EXTERNAL_REFERRER',
+      'firstContentfulPaint': 'FIRST_CONTENTFUL_PAINT',
+      'firstViewportReady': 'FIRST_VIEWPORT_READY',
+      'makeBodyVisible': 'MAKE_BODY_VISIBLE',
+      'incrementalEngagedTime': 'INCREMENTAL_ENGAGED_TIME',
       'navRedirectCount': 'NAV_REDIRECT_COUNT',
       'navTiming': 'NAV_TIMING',
       'navType': 'NAV_TYPE',
@@ -255,6 +259,55 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
           'maxTimerLength': 1200,
         },
         'request': 'pageping',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
+  'byside': {
+    'vars': {
+	  'agentDomain': 'webcare',
+      'webcareId': '',
+      'channel': '',
+      'fid': '',
+	  'lang': 'pt',
+    },
+    'requests': {
+      'host': '//${agentDomain}.byside.com/',
+      'base': '${host}BWA${webcare_id}/amp/',
+      'pageview': '${base}pixel.php',
+	  'event': '${base}signal.php?event_id=${eventId}' +
+	    '&event_label=${eventLabel}&fields=${fields}',
+    },
+    'extraUrlParams': {
+      'webcare_id': '${webcareId}',
+      'bwch': '${channel}',
+      'lang': '${lang}',
+      'fid': '${fid}',
+      'bwit': 'A',
+      'tuid': '${clientId(byside_webcare_tuid)}',
+      'suid': '',
+      'puid': '${pageViewId}p${timestamp}',
+      'referrer': '${documentReferrer}',
+      'page': '${sourceUrl}',
+      'amppage': '${ampdocUrl}',
+      'bwpt': '${title}',
+      'bres': '${viewportWidth}x${viewportHeight}',
+      'res': '${screenWidth}x${screenHeight}',
+      'v': 'v20171116a',
+      'ampv': '${ampVersion}',
+      'viewer': '${viewer}',
+      'ua': '${userAgent}',
+      'r': '${random}',
+    },
+    'triggers': {
+      'pageview': {
+        'on': 'visible',
+        'request': 'pageview',
       },
     },
     'transport': {
@@ -1286,6 +1339,8 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
         'date=${timestamp}&' +
         'ampid=${clientId(_parsely_visitor)}',
       'pageview': '${basePrefix}&action=pageview',
+      'heartbeat': '${basePrefix}&action=heartbeat' +
+      '&tt=${totalEngagedTime}&inc=${incrementalEngagedTime(parsely-js)}',
     },
     'triggers': {
       'defaultPageview': {

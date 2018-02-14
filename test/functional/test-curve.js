@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Curves, bezierCurve, getCurve} from '../../src/curve';
 import * as sinon from 'sinon';
+import {Curves, bezierCurve, getCurve} from '../../src/curve';
 
 describe('Curve', () => {
 
