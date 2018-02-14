@@ -29,7 +29,7 @@ export function adtech(global, data) {
     validateSrcContains('/addyn/', adsrc);
     writeScript(global, adsrc);
   } else {
-    validateData(data, ['atwmn', 'atwdiv'], [
+    validateData(data, ['atwdiv'], [
       'atwco', 'atwheight', 'atwhtnmat',
       'atwmoat', 'atwnetid', 'atwothat', 'atwplid',
       'atwpolar', 'atwsizes', 'atwwidth',

@@ -30,19 +30,19 @@ limitations under the License.
 For semantics of configuration, please see ad network documentation.
 
 ### Required Parameters:
-* `data-atwMN` - magic number for the ad spot
 * `data-atwDiv` - div name of the ad spot; can be class or id
 
 ### Optional parameters:
+* `data-atwMN` - magic number (placement alias) for the ad spot
 * `data-atwPlId` - placement ID (instead of Magic Number)
 * `data-atwOthAT` - generic var to set key/value pairs to send with the ad call; accepts mulitple values in a semi-colon delimited list
 * `data-atwCo` - override default country code
-* `data-atwHtNmAT` - override ad host name
+* `data-atwHtNmAT` - override ad host name (`adserver.adtech.de`, `adserver.adtechus.com`, default: `at.atwola.com`)
 * `data-atwNetId` - network ID
 * `data-atwWidth` - ad width (use with atwHeight only if the ad is not 300x250)
 * `data-atwHeight`- ad height (use with atwWidth only if the ad is not 300x250)
 * `data-atwSizes` - this overrides atwWidth/atwHeight; use this to create a comma-separated list of possible ad sizes
-* 'data-atwPolar' - set to "1" to enable Polar.me ad in the ad spot
+* `data-atwPolar` - set to "1" to enable Polar.me ad in the ad spot
 
 ### Direct URL Call:
 * `src` - Value must start with `https:` and contain `/addyn/`.  This should only be used in cases where a direct ad call is being used rather than a magic number (MN).
