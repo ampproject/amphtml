@@ -221,6 +221,17 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  appvador: {
+    prefetch: [
+      'https://cdn.apvdr.com/js/VastAdUnit.min.js',
+      'https://cdn.apvdr.com/js/VideoAd.min.js',
+      'https://cdn.apvdr.com/js/VideoAd3PAS.min.js',
+      'https://cdn.apvdr.com/js/VideoAdAutoPlay.min.js',
+      'https://cdn.apvdr.com/js/VideoAdNative.min.js',
+    ],
+    renderStartImplemented: true,
+  },
+
   amoad: {
     prefetch: [
       'https://j.amoad.com/js/a.js',
@@ -772,6 +783,10 @@ export const adConfig = {
       'https://ad.jp.ap.valuecommerce.com',
       'https://ad.omks.valuecommerce.com',
     ],
+    renderStartImplemented: true,
+  },
+
+  videonow: {
     renderStartImplemented: true,
   },
 

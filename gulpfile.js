@@ -100,6 +100,7 @@ declareExtension('amp-experiment', '0.1', {hasCss: false});
 declareExtension('amp-facebook', '0.1', {hasCss: false});
 declareExtension('amp-facebook-comments', '0.1', {hasCss: false});
 declareExtension('amp-facebook-like', '0.1', {hasCss: false});
+declareExtension('amp-facebook-page', '0.1', {hasCss: false});
 declareExtension('amp-fit-text', '0.1', {hasCss: true});
 declareExtension('amp-font', '0.1', {hasCss: false});
 declareExtension('amp-form', '0.1', {hasCss: true});
@@ -143,6 +144,7 @@ declareExtension('amp-wistia-player', '0.1', {hasCss: false});
 declareExtension('amp-position-observer', '0.1', {hasCss: false});
 declareExtension('amp-date-picker', '0.1', {hasCss: true});
 declareExtension('amp-image-viewer', '0.1', {hasCss: true});
+declareExtension('amp-subscriptions', '0.1', {hasCss: true});
 
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
@@ -176,7 +178,10 @@ declareExtensionVersionAlias(
  *   name: ?string,
  *   version: ?string,
  *   hasCss: ?boolean,
- *   loadPriority: ?string
+ *   loadPriority: ?string,
+ *   cssBinaries: ?Array<string>,
+ *   extraGlobs?Array<string>,
+ *   bundleOnlyIfListedInFiles: ?boolean
  * }}
  */
 const ExtensionOption = {}; // eslint-disable-line no-unused-vars
@@ -426,6 +431,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
  * @return {!Promise}
  */
 function css() {
+  printNobuildHelp();
   return compileCss();
 }
 
@@ -436,13 +442,6 @@ function css() {
  * @return {!Promise}
  */
 function compileCss(watch, opt_compileAll) {
-  // Print a message that could help speed up local development.
-  if (!process.env.TRAVIS && argv['_'].indexOf('test') != -1) {
-    log(green('To skip building during future test runs, use'),
-        cyan('--nobuild'), green('with your'), cyan('gulp test'),
-        green('command.'));
-  }
-
   if (watch) {
     $$.watch('css/**/*.css', function() {
       compileCss();
@@ -540,23 +539,45 @@ function buildExtension(name, version, hasCss, options, opt_extraGlobs) {
     mkdirSync('build');
     mkdirSync('build/css');
     const startTime = Date.now();
-    return jsifyCssAsync(path + '/' + name + '.css').then(function(css) {
-      const jsCss = 'export const CSS = ' + JSON.stringify(css) + ';\n';
-      const jsName = 'build/' + name + '-' + version + '.css.js';
-      const cssName = 'build/css/' + name + '-' + version + '.css';
-      fs.writeFileSync(jsName, jsCss, 'utf-8');
-      fs.writeFileSync(cssName, css, 'utf-8');
+    return buildExtensionCss(path, name, version, options).then(() => {
+      endBuildStep('Recompiled CSS in', name, startTime);
+    }).then(function() {
       if (options.compileOnlyCss) {
         return Promise.resolve();
       }
       return buildExtensionJs(path, name, version, options);
-    })
-        .then(() => {
-          endBuildStep('Recompiled CSS in', name, startTime);
-        });
+    });
   } else {
     return buildExtensionJs(path, name, version, options);
   }
+}
+
+/**
+ * @param {string} path
+ * @param {string} css
+ * @param {string} version
+ * @param {!Object} options
+ */
+function buildExtensionCss(path, name, version, options) {
+  function writeCssBinaries(name, css) {
+    const jsCss = 'export const CSS = ' + JSON.stringify(css) + ';\n';
+    const jsName = `build/${name}.js`;
+    const cssName = `build/css/${name}`;
+    fs.writeFileSync(jsName, jsCss, 'utf-8');
+    fs.writeFileSync(cssName, css, 'utf-8');
+  }
+  const promises = [];
+  const mainCssBinary = jsifyCssAsync(path + '/' + name + '.css')
+      .then(writeCssBinaries.bind(null, `${name}-${version}.css`));
+
+  if (Array.isArray(options.cssBinaries)) {
+    promises.push.apply(promises, options.cssBinaries.map(function(name) {
+      return jsifyCssAsync(`${path}/${name}.css`)
+          .then(css => writeCssBinaries(`${name}-${version}.css`, css));
+    }));
+  }
+  promises.push(mainCssBinary);
+  return Promise.all(promises);
 }
 
 /**
@@ -594,6 +615,18 @@ function buildExtensionJs(path, name, version, options) {
         'v:"' + internalRuntimeVersion + '",' +
         'f:(function(AMP){<%= contents %>\n})});'),
   });
+}
+
+
+/**
+ * Prints a message that could help speed up local development.
+ */
+function printNobuildHelp() {
+  if (!process.env.TRAVIS && argv['_'].indexOf('test') != -1) {
+    log(green('To skip building during future test runs, use'),
+        cyan('--nobuild'), green('with your'), cyan('gulp test'),
+        green('command.'));
+  }
 }
 
 /**
@@ -679,6 +712,7 @@ function enableLocalTesting(targetFile) {
  */
 function performBuild(watch) {
   process.env.NODE_ENV = 'development';
+  printNobuildHelp();
   printConfigHelp(watch ? 'gulp watch' : 'gulp build');
   parseExtensionFlags();
   return compileCss(watch).then(() => {
@@ -747,6 +781,11 @@ function dist() {
           copyCss(),
         ]);
       }).then(() => {
+        if (process.env.TRAVIS) {
+          // New line after all the compilation progress dots on Travis.
+          console.log('\n');
+        }
+      }).then(() => {
         copyAliasExtensions();
       }).then(() => {
         if (argv.fortesting) {
@@ -786,6 +825,7 @@ function copyAliasExtensions() {
  * @return {!Promise}
  */
 function checkTypes() {
+  const handlerProcess = createCtrlcHandler('check-types');
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   // Disabled to improve type check performance, since this provides
@@ -847,7 +887,12 @@ function checkTypes() {
             checkTypes: true,
           }),
     ]);
-  });
+  }).then(() => {
+    if (process.env.TRAVIS) {
+      // New line after all the compilation progress dots on Travis.
+      console.log('\n');
+    }
+  }).then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
@@ -1367,31 +1412,6 @@ function mkdirSync(path) {
   }
 }
 
-/**
- * Patches Web Animations API by wrapping its body into `install` function.
- * This gives us an option to call polyfill directly on the main window
- * or a friendly iframe.
- *
- * @return {!Promise}
- */
-function patchWebAnimations() {
-  // Copies web-animations-js into a new file that has an export.
-  const patchedName = 'node_modules/web-animations-js/' +
-      'web-animations.install.js';
-  let file = fs.readFileSync(
-      'node_modules/web-animations-js/' +
-      'web-animations.min.js').toString();
-  // Wrap the contents inside the install function.
-  file = 'exports.installWebAnimations = function(window) {\n' +
-      'var document = window.document;\n' +
-      file + '\n' +
-      '}\n';
-  fs.writeFileSync(patchedName, file);
-  if (!process.env.TRAVIS) {
-    log('Wrote', cyan(patchedName));
-  }
-}
-
 function toPromise(readable) {
   return new Promise(function(resolve, reject) {
     readable.on('error', reject).on('end', resolve);
@@ -1403,20 +1423,16 @@ function toPromise(readable) {
 /**
  * Gulp tasks
  */
-gulp.task('build', 'Builds the AMP library',
-    ['update-packages', 'patch-web-animations'], build, {
-      options: {
-        config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-        extensions: '  Builds only the listed extensions.',
-        noextensions: '  Builds with no extensions.',
-      },
-    });
+gulp.task('build', 'Builds the AMP library', ['update-packages'], build, {
+  options: {
+    config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+    extensions: '  Builds only the listed extensions.',
+    noextensions: '  Builds with no extensions.',
+  },
+});
 gulp.task('check-all', 'Run through all presubmit checks',
     ['lint', 'dep-check', 'check-types', 'presubmit']);
-gulp.task('check-types', 'Check JS types', checkTypes);
-gulp.task('patch-web-animations',
-    'Patches the Web Animations API with an install function',
-    ['update-packages'], patchWebAnimations);
+gulp.task('check-types', 'Check JS types', ['update-packages'], checkTypes);
 gulp.task('css', 'Recompile css to build directory', ['update-packages'], css);
 gulp.task('default', 'Runs "watch" and then "serve"',
     ['update-packages', 'watch'], serve, {
@@ -1425,17 +1441,16 @@ gulp.task('default', 'Runs "watch" and then "serve"',
         noextensions: '  Watches and builds with no extensions.',
       },
     });
-gulp.task('dist', 'Build production binaries',
-    ['update-packages', 'patch-web-animations'], dist, {
-      options: {
-        pseudo_names: '  Compiles with readable names. ' +
+gulp.task('dist', 'Build production binaries', ['update-packages'], dist, {
+  options: {
+    pseudo_names: '  Compiles with readable names. ' +
             'Great for profiling and debugging production code.',
-        fortesting: '  Compiles production binaries for local testing',
-        config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-      },
-    });
+    fortesting: '  Compiles production binaries for local testing',
+    config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+  },
+});
 gulp.task('watch', 'Watches for changes in files, re-builds when detected',
-    ['update-packages', 'patch-web-animations'], watch, {
+    ['update-packages'], watch, {
       options: {
         with_inabox: '  Also watch and build the amp-inabox.js binary.',
         with_shadow: '  Also watch and build the amp-shadow.js binary.',

@@ -26,11 +26,6 @@ import {
 } from
   '../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';
 import {
-  fakeIsA4AEnabled,
-} from
-  '../extensions/amp-ad-network-fake-impl/0.1/fake-a4a-config';
-import {getMode} from '../src/mode';
-import {
   gmosspIsA4AEnabled,
 } from
   '../extensions/amp-ad-network-gmossp-impl/0.1/gmossp-a4a-config';
@@ -67,20 +62,12 @@ export function getA4ARegistry() {
       'triplelift': tripleliftIsA4AEnabled,
       'cloudflare': cloudflareIsA4AEnabled,
       'gmossp': gmosspIsA4AEnabled,
+      'fake': () => true,
       // TODO: Add new ad network implementation "is enabled" functions here.  Note:
       // if you add a function here that requires a new "import", above, you'll
       // probably also need to add a whitelist exception to
       // build-system/dep-check-config.js in the "filesMatching: 'ads/**/*.js' rule.
     });
-
-    // Note: the 'fake' ad network implementation is only for local testing.
-    // Normally, ad networks should add their *IsA4AEnabled callback directly
-    // to the a4aRegistry, above.  Ad network implementations should NOT use
-    // getMode() in this file.  If they need to check getMode() state, they
-    // should do so inside their *IsA4AEnabled callback.
-    if (getMode().localDev || getMode().test) {
-      a4aRegistry['fake'] = fakeIsA4AEnabled;
-    }
   }
 
   return a4aRegistry;
