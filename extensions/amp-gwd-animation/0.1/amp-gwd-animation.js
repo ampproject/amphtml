@@ -21,6 +21,7 @@ import {
 } from './amp-gwd-animation-impl';
 import {CSS} from '../../../build/amp-gwd-animation-0.1.css';
 import {Services} from '../../../src/services';
+import {escapeCssSelectorIdent} from '../../../src/dom';
 import {getServiceForDoc} from '../../../src/service';
 import {getValueForExpr} from '../../../src/json';
 import {user} from '../../../src/log';
@@ -103,7 +104,7 @@ export class GwdAnimation extends AMP.BaseElement {
    */
   getGwdPageDeck_() {
     return this.getAmpDoc().getRootNode().querySelector(
-        `amp-carousel#${GWD_PAGEDECK_ID}`);
+        `amp-carousel#${escapeCssSelectorIdent(GWD_PAGEDECK_ID)}`)
   }
 
   /**

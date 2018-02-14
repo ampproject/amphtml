@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {createCustomEvent} from '../../../src/event-helper';
+import {escapeCssSelectorIdent} from '../../../src/dom';
 import {user} from '../../../src/log';
 
 /**
@@ -182,7 +183,7 @@ export class AmpGwdRuntimeService {
    */
   setCurrentPage(index) {
     const gwdPages = this.ampdoc_.getRootNode().querySelectorAll(
-        `.${GWD_PAGE_WRAPPER_CLASS}`);
+        `.${escapeCssSelectorIdent(GWD_PAGE_WRAPPER_CLASS)}`);
 
     if (gwdPages.length == 0) {
       // The document has no pages.
@@ -192,12 +193,15 @@ export class AmpGwdRuntimeService {
     // Deactivate the outgoing current page, if there is one.
     // TODO(sklobovskaya): Decide if it's worth just storing the index.
     const currentPageEl = this.ampdoc_.getRootNode().querySelector(
-        `.${GWD_PAGE_WRAPPER_CLASS}.${PlaybackCssClass.PLAY}`);
+        `.${escapeCssSelectorIdent(GWD_PAGE_WRAPPER_CLASS)}.${
+          escapeCssSelectorIdent(PlaybackCssClass.PLAY)
+        }`);
 
     if (currentPageEl) {
       this.deactivatePage_(currentPageEl);
     }
 
+    // Activate animations on the new current page.
     const newPageEl = gwdPages[index];
 
     if (newPageEl) {

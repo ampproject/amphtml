@@ -30,7 +30,7 @@ import {Services} from '../../../src/services';
 import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
 import {clamp} from '../../../src/utils/math';
-import {closest, elementByTag, scopedQuerySelector} from '../../../src/dom';
+import {closest, elementByTag, escapeCssSelectorIdent} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {getData, listen} from '../../../src/event-helper';
 import {isExperimentOn} from '../../../src/experiments';
@@ -265,10 +265,10 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   findOrBuildCarousel_(lightboxGroupId) {
     dev().assert(this.container_);
-    const existingCarousel = scopedQuerySelector(
-        this.element,
-        'amp-carousel[amp-lightbox-group=' + lightboxGroupId + ']'
-    );
+    const existingCarousel = this.element.querySelector(
+        `amp-carousel[amp-lightbox-group=${
+          escapeCssSelectorIdent(lightboxGroupId)
+        }]`);
     if (existingCarousel) {
       this.carousel_ = existingCarousel;
       return this.vsync_.mutatePromise(() => {
@@ -1020,11 +1020,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   findOrBuildGallery_() {
-    this.gallery_ = scopedQuerySelector(
-        this.element,
-        '.i-amphtml-lbg-gallery[amp-lightbox-group='
-        + this.currentLightboxGroupId_ + ']'
-    );
+    const group = this.currentLightboxGroupId_;
+    this.gallery_ = this.element.querySelector(
+        `.i-amphtml-lbg-gallery[amp-lightbox-group=${
+          escapeCssSelectorIdent(group)
+        }]`);
     if (this.gallery_) {
       this.gallery_.classList.remove('i-amphtml-lbg-gallery-hidden');
     } else {
@@ -1115,13 +1115,10 @@ function installLightboxGallery(win) {
   return ampdoc.whenBodyAvailable().then(body => {
     const existingGallery = elementByTag(ampdoc.getRootNode(), TAG);
     if (!existingGallery) {
-      const matches = ampdoc.getRootNode().querySelectorAll('[lightbox]');
-      if (matches.length > 0) {
-        const gallery = ampdoc.getRootNode().createElement(TAG);
-        gallery.setAttribute('layout', 'nodisplay');
-        gallery.setAttribute('id', DEFAULT_GALLERY_ID);
-        body.appendChild(gallery);
-      }
+      const gallery = ampdoc.getRootNode().createElement(TAG);
+      gallery.setAttribute('layout', 'nodisplay');
+      gallery.setAttribute('id', DEFAULT_GALLERY_ID);
+      body.appendChild(gallery);
     }
   });
 }
