@@ -30,7 +30,6 @@ const isWatching = (argv.watch || argv.w) || false;
 
 const options = {
   fix: false,
-  rulePaths: ['build-system/eslint-rules/'],
 };
 
 /**
