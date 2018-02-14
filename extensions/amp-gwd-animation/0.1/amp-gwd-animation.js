@@ -104,7 +104,7 @@ export class GwdAnimation extends AMP.BaseElement {
    */
   getGwdPageDeck_() {
     return this.getAmpDoc().getRootNode().querySelector(
-        `amp-carousel#${escapeCssSelectorIdent(GWD_PAGEDECK_ID)}`)
+        `amp-carousel#${escapeCssSelectorIdent(GWD_PAGEDECK_ID)}`);
   }
 
   /**

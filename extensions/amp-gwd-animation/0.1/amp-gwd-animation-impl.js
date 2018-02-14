@@ -121,7 +121,7 @@ function setCounter(receiver, counterName, counterValue) {
     receiver[GOTO_COUNTER_PROP][counterName] = 0;
   }
   receiver[GOTO_COUNTER_PROP][counterName] = counterValue;
-};
+}
 
 /**
  * AMP GWD animation runtime service.
