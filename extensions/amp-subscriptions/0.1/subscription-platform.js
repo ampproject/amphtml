@@ -24,7 +24,7 @@ export class SubscriptionPlatform {
 
   /**
    * Requests entitlement for a subscription platform.
-   * @return {!Promise<!JsonObject>}
+   * @return {!Promise<!./entitlements.Entitlements>}
    */
   getEntitlements() {
   }

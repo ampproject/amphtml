@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+import {Entitlement, Entitlements} from './entitlements';
+
 import {Services} from '../../../src/services';
+import {user} from '../../../src/log';
 
 /**
  * This implements the methods to interact with various subscription platforms.
@@ -25,28 +28,45 @@ export class LocalSubscriptionPlatform {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {string} serviceUrl
+   * @param {!JsonObject} serviceConfig
    */
-  constructor(ampdoc, serviceUrl) {
+  constructor(ampdoc, serviceConfig) {
     /** @const */
     this.ampdoc_ = ampdoc;
 
-    /** @const @private {string} */
-    this.serviceUrl_ = serviceUrl;
+    /** @const @private {!JsonObject} */
+    this.serviceConfig_ = serviceConfig;
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(this.ampdoc_.win);
   }
 
   /**
-   * TODO(@prateekbh): Define object below once we have a defination of entitlement
-   * @return {!Promise<!JsonObject>}
+   * Returns the Entitlements object for the subscription platform.
+   *
+   * @return {!Promise<!Entitlements>}
    */
   getEntitlements() {
+    user().assert(this.serviceConfig_['paywallUrl'],
+        'service config does not have paywall Url');
     return this.xhr_
-        .fetchJson(this.serviceUrl_)
-        .then(res => res.json());
+        .fetchJson(this.serviceConfig_['paywallUrl'])
+        .then(res => res.json())
+        .then(entitlementJson => {
+          const entitlements = entitlementJson.entitlements.map(entitlement => {
+            return new Entitlement(
+                entitlement['source'] || this.serviceConfig_['serviceId'],
+                entitlement['products'],
+                ''
+            );
+          });
+          return new Entitlements(
+              this.serviceConfig_['serviceId'],
+              JSON.stringify(entitlementJson),
+              entitlements,
+              'product1' // TODO(@prateekbh): read this from pageConfig
+          );
+        });
   }
-
 }
 
