@@ -18,6 +18,7 @@ import {AmpEvents} from '../amp-events';
 import {Layout} from '../layout';
 import {computedStyle, toggle} from '../style';
 import {dev} from '../log';
+import {getMode} from '../mode';
 import {isExperimentOn} from '../experiments';
 import {
   layoutRectLtwh,
@@ -471,10 +472,11 @@ export class Resource {
     }
     this.isFixed_ = isFixed;
 
-    if (isFixed) {
+    if (isFixed && getMode(this.hostWin).runtime != 'inabox') {
       // For fixed position elements, we need the relative position to the
       // viewport. When accessing the layoutBox through #getLayoutBox, we'll
-      // return the new absolute position.
+      // return the new absolute position.  For inabox viewport scroll is
+      // for top, not containing window so ignore.
       this.layoutBox_ = moveLayoutRect(box, -viewport.getScrollLeft(),
           -viewport.getScrollTop());
     }
@@ -568,7 +570,11 @@ export class Resource {
       return layoutRectLtwh(pos.left, pos.top, size.width, size.height);
     }
 
-    if (!this.isFixed_) {
+    // For inabox, viewport is based on containing window relative to top
+    // and therefore scroll left/top do not reflect the element's position
+    // relative to its containing window.  Instead, assume the window
+    // has no scroll position as one typically does not scroll inner windows.
+    if (!this.isFixed_ || getMode(this.hostWin).runtime == 'inabox') {
       return this.layoutBox_;
     }
     const viewport = this.resources_.getViewport();
