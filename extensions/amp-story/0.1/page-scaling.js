@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
-import {
-  childElementsByTag,
-  matches,
-  scopedQuerySelector,
-} from '../../../src/dom';
+import {childElementsByTag, matches} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {px, setImportantStyles} from '../../../src/style';
@@ -196,7 +192,7 @@ export class PageScalingService {
 
     /** @private @const {?Element} */
     // Assumes active page to be determinant of the target size.
-    this.sizer_ = scopedQuerySelector(rootEl, 'amp-story-page[active]');
+    this.sizer_ = rootEl.querySelector('amp-story-page[active]');
 
     /** @private {?TargetDimensionsDef} */
     this.targetDimensions_ = null;

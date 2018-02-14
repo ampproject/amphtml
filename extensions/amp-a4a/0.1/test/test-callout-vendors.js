@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-/**
- * This interface is intended to be implemented by Subscription platforms to
- * provide method of getting entitlements.
- *
- * @interface
- */
-export class SubscriptionPlatform {
+import {RTC_VENDORS} from '../callout-vendors';
 
-  /**
-   * Requests entitlement for a subscription platform.
-   * @return {!Promise<!./entitlements.Entitlements>}
-   */
-  getEntitlements() {
-  }
-
-}
-
+// The keys of RTC_VENDORS are not allowed to have any capital letters.
+// This test acts as a presubmit to enforce that.
+describe('RTC_VENDORS', () => {
+  it('should have all lowercase keys', () =>
+    Object.keys(RTC_VENDORS).forEach(
+        key => expect(key).to.equal(key.toLowerCase())
+    ));
+});

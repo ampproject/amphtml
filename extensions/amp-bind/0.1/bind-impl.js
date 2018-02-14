@@ -29,9 +29,7 @@ import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isFiniteNumber} from '../../../src/types';
-import {
-  iterateCursor, scopedQuerySelectorAll, waitForBodyPromise,
-} from '../../../src/dom';
+import {iterateCursor, waitForBodyPromise} from '../../../src/dom';
 import {map} from '../../../src/utils/object';
 import {parseJson, recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
@@ -380,8 +378,7 @@ export class Bind {
    * @private
    */
   addMacros_() {
-    const elements =
-        scopedQuerySelectorAll(this.ampdoc.getBody(), 'AMP-BIND-MACRO');
+    const elements = this.ampdoc.getBody().querySelectorAll('AMP-BIND-MACRO');
     const macros =
         /** @type {!Array<!./amp-bind-macro.AmpBindMacroDef>} */ ([]);
     iterateCursor(elements, element => {
