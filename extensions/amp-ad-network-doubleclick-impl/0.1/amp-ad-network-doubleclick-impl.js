@@ -21,6 +21,7 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import '../../amp-a4a/0.1/real-time-config-manager';
+import '../../amp-a4a/0.1/real-time-config-manager';
 import {
   AmpA4A,
   DEFAULT_SAFEFRAME_VERSION,
@@ -61,6 +62,7 @@ import {
   RefreshManager, // eslint-disable-line no-unused-vars
   getRefreshManager,
 } from '../../amp-a4a/0.1/refresh-manager';
+import {SafeframeHostApi} from './safeframe-host';
 import {Services} from '../../../src/services';
 import {VisibilityState} from '../../../src/visibility-state';
 import {
@@ -70,7 +72,6 @@ import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
-import {getData} from '../../../src/event-helper';
 import {
   getExperimentBranch,
   isExperimentOn,
@@ -96,8 +97,6 @@ import {isCancellation} from '../../../src/error';
 import {
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
-import {SafeframeHostApi} from './safeframe-host';
-import '../../amp-a4a/0.1/real-time-config-manager';
 import {isSecureUrl, parseQueryString} from '../../../src/url';
 import {
   lineDelimitedStreamer,
@@ -854,14 +853,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       }
     }
     return super.renderNonAmpCreative();
-  }
-
-  /** @override */
-  layoutCallback() {
-    if (this.isFluid_) {
-      this.registerListenerForFluid_();
-    }
-    return super.layoutCallback();
   }
 
   /** @override  */

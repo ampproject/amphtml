@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {tryParseJson} from '../../../src/json';
-import {getData} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {SimplePostMessageApiDef} from '../../../src/simple-postmessage-api-def';
+import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {getData} from '../../../src/event-helper';
+import {tryParseJson} from '../../../src/json';
 
 /**
  * Used to manage messages for different Safeframe ad slots.

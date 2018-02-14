@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {SimplePostMessageApiDef} from './simple-postmessage-api-def';
 import {deserializeMessage, isAmpMessage} from './3p-frame-messaging';
 import {dev} from './log';
 import {dict} from './utils/object';
@@ -21,7 +22,6 @@ import {filterSplice} from './utils/array';
 import {getData} from './event-helper';
 import {parseUrl} from './url';
 import {tryParseJson} from './json';
-import {SimplePostMessageApiDef} from './simple-postmessage-api-def';
 
 /**
  * Sentinel used to force unlistening after a iframe is detached.

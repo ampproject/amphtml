@@ -15,11 +15,11 @@
  */
 
 import {Services} from './services';
+import {SimplePostMessageApiDef} from './simple-postmessage-api-def';
+import {SubscriptionApi} from './iframe-helper';
 import {dev} from './log';
 import {dict} from './utils/object';
 import {layoutRectLtwh, moveLayoutRect, rectIntersection} from './layout-rect';
-import {SubscriptionApi} from './iframe-helper';
-import {SimplePostMessageApiDef} from './simple-postmessage-api-def';
 
 
 /**
@@ -248,7 +248,7 @@ export class IntersectionObserver {
       this.flush_();
       // but only send a maximum of 10 postMessages per second.
       this.flushTimeout_ = this.timer_.delay(this.boundFlush_,
-                                             this.updatePeriod_);
+          this.updatePeriod_);
     }
   }
 
