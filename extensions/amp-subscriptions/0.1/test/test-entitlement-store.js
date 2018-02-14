@@ -18,7 +18,7 @@ import {Entitlement, Entitlements} from '../entitlements';
 
 import {EntitlementStore} from '../entitlement-store';
 
-describe('entitlement-store', {}, () => {
+describes.realWin('entitlement-store', {}, () => {
   let entitlementStore;
   const serviceIds = ['service1', 'service2'];
 

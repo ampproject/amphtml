@@ -17,9 +17,9 @@
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {SubscriptionService} from '../amp-subscriptions';
 
-const NOOP = () => {};
+const paywallUrl = 'https://lipsum.com';
 
-describe('amp-subscriptions', {}, env => {
+describes.realWin('amp-subscriptions', {amp: true}, env => {
   let ampdoc;
   let subscriptionService;
 
@@ -30,16 +30,15 @@ describe('amp-subscriptions', {}, env => {
 
 
   it('should call `initialize_` on start', () => {
-    const initializeStub =
-        sandbox.stub(subscriptionService, 'initialize_').callsFake(NOOP);
+    const initializeStub = sandbox.spy(subscriptionService, 'initialize_');
     subscriptionService.start_();
 
-    expect(initializeStub).to.be.called.once;
+    expect(initializeStub).to.be.calledOnce;
   });
 
   it('should add subscription platform while registering it', () => {
     const serviceID = 'dummy service';
-    const subsPlatform = new LocalSubscriptionPlatform(ampdoc, {});
+    const subsPlatform = new LocalSubscriptionPlatform(ampdoc, {paywallUrl});
     subscriptionService.registerService(serviceID, subsPlatform);
     expect(subscriptionService.subscriptionPlatforms_.includes(subsPlatform))
         .to.be.true;

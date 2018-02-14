@@ -16,23 +16,22 @@
 
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 
-const NOOP = () => {};
-const dummyUrl = 'http://lipsum.com';
+const paywallUrl = 'http://lipsum.com';
 
-describe('local-subscriptions', {}, env => {
+describes.realWin('local-subscriptions', {amp: true}, env => {
   let ampdoc;
   let localSubscriptionPlatform;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
-    localSubscriptionPlatform = new LocalSubscriptionPlatform(ampdoc, dummyUrl);
+    localSubscriptionPlatform = new LocalSubscriptionPlatform(ampdoc,
+        {paywallUrl});
   });
 
   it('should fetch the entitlements on getEntitlements', () => {
     const initializeStub =
-        sandbox.stub(localSubscriptionPlatform.xhr_, 'fetchJson')
-            .callsFake(NOOP);
+        sandbox.spy(localSubscriptionPlatform.xhr_, 'fetchJson');
     localSubscriptionPlatform.getEntitlements();
-    expect(initializeStub).to.be.called.once;
+    expect(initializeStub).to.be.calledWith(paywallUrl);
   });
 });

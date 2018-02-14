@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-access-0.1.css';
+import {CSS} from '../../../build/amp-subscriptions-0.1.css';
 import {EntitlementStore} from './entitlement-store';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {SubscriptionPlatform} from './subscription-platform';
@@ -111,7 +111,7 @@ export class SubscriptionService {
 
 // Register the extension services.
 AMP.extension(TAG, '0.1', function(AMP) {
-  AMP.registerServiceForDoc('access', function(ampdoc) {
+  AMP.registerServiceForDoc(TAG, function(ampdoc) {
     return new SubscriptionService(ampdoc).start_();
   });
 });
