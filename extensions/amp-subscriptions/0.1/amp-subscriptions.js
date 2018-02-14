@@ -90,14 +90,15 @@ export class SubscriptionService {
   /** @private */
   processEntitlement_() {
     // TODO(@prateekbh): process and unblock marup here.
-    this.renderer_.toggleLoading(false);
   }
 
   /** @private */
   start_() {
     this.initialize_().then(() => {
-      this.renderer_.toggleLoading(true);
-      // TODO(@prateekbh): Read the service ids in EntitlementStore constructor from page config.
+      // TODO(@prateekbh): Start and stop loading indicator. See
+      // `Renderer.toggleLoading`.
+      // TODO(@prateekbh): Read the service ids in EntitlementStore constructor
+      // from page config.
       this.entitlementStore_ = new EntitlementStore(['foo', 'bar']);
       this.subscriptionPlatforms_.forEach(subscriptionPlatform => {
         subscriptionPlatform.getEntitlements()
