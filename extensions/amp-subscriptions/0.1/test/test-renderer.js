@@ -32,13 +32,12 @@ describes.realWin('amp-subscriptions renderer before initialized', {
   amp: {},
 }, env => {
   let win, doc;
-  let ampdoc;
+  let unrelated;
   let section, action, dialog;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    ampdoc = env.ampdoc;
     unrelated = createElementWithAttributes(doc, 'div', {});
     section = createElementWithAttributes(doc, 'div', {
       'subscriptions-section': '',
