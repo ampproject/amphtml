@@ -308,11 +308,12 @@ const forbiddenTerms = {
       'dist.3p/current/integration.js',
     ],
   },
-  'dangerousSyncMutate': {
-    message: 'dangerous sync mutate functions are forbidden. DO NOT USE IT.',
+  'dangerousSyncMutateStart': {
+    message: 'dangerousSyncMutateStart() must not be used! Use ' +
+        'BaseElement.mutateElement() instead.',
     whitelist: [
       'src/custom-element.js',
-      'src/dangerously-mutate.js',
+      'src/black-magic.js',
       'src/font-stylesheet-timeout.js',
       'src/preconnect.js',
       'src/style-installer.js',

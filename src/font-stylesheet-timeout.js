@@ -15,9 +15,9 @@
  */
 
 import {
-  dangerousSyncMutate,
+  dangerousSyncMutateStart,
   dangerousSyncMutateStop,
-} from './dangerously-mutate';
+} from './black-magic';
 import {escapeCssSelectorIdent} from './dom';
 import {isExperimentOn} from './experiments';
 import {onDocumentReady} from './document-ready';
@@ -88,7 +88,7 @@ function maybeTimeoutFonts(win) {
       }
     }
 
-    const prev = dangerousSyncMutate(win);
+    dangerousSyncMutateStart(win);
     for (let i = 0; i < timedoutStyleSheets.length; i++) {
       const link = timedoutStyleSheets[i];
       // To avoid blocking the render, we assign a non-matching media
@@ -98,9 +98,9 @@ function maybeTimeoutFonts(win) {
       // And then switch it back to the original after the stylesheet
       // loaded.
       link.onload = () => {
-        const prev = dangerousSyncMutate(win);
+        dangerousSyncMutateStart(win);
         link.media = media;
-        dangerousSyncMutateStop(win, prev);
+        dangerousSyncMutateStop(win);
         timeoutFontFaces(win);
       };
       link.setAttribute('i-amphtml-timeout', timeout);
@@ -108,7 +108,7 @@ function maybeTimeoutFonts(win) {
       // blank out Safari. #12521
       link.parentNode.insertBefore(link, link.nextSibling);
     }
-    dangerousSyncMutateStop(win, prev);
+    dangerousSyncMutateStop(win);
   }, timeout);
 }
 

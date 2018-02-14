@@ -19,9 +19,9 @@ import {Pass} from '../pass';
 import {Services} from '../services';
 import {cancellation} from '../error';
 import {
-  dangerousSyncMutate,
+  dangerousSyncMutateStart,
   dangerousSyncMutateStop,
-} from '../dangerously-mutate';
+} from '../black-magic';
 import {dev, rethrowAsync} from '../log';
 import {getService, registerServiceBuilder} from '../service';
 import {installTimerService} from './timer-impl';
@@ -60,7 +60,6 @@ export class Vsync {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
-    dangerousSyncMutateStop(win, false);
 
     /** @private @const {!./ampdoc-impl.AmpDocService} */
     this.ampdocService_ = Services.ampdocServiceFor(this.win);
@@ -413,13 +412,13 @@ export class Vsync {
       }
     }
 
-    const prev = dangerousSyncMutate(this.win);
+    dangerousSyncMutateStart(this.win);
     for (let i = 0; i < tasks.length; i++) {
       if (tasks[i].mutate) {
         callTaskNoInline(tasks[i].mutate, states[i]);
       }
     }
-    dangerousSyncMutateStop(this.win, prev);
+    dangerousSyncMutateStop(this.win);
 
     // Swap last arrays into double buffer.
     this.nextTasks_ = tasks;

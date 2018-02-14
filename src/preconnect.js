@@ -22,9 +22,9 @@
 
 import {Services} from './services';
 import {
-  dangerousSyncMutate,
+  dangerousSyncMutateStart,
   dangerousSyncMutateStop,
-} from './dangerously-mutate';
+} from './black-magic';
 import {dev} from './log';
 import {getService, registerServiceBuilder} from './service';
 import {parseUrl} from './url';
@@ -174,7 +174,7 @@ class PreconnectService {
     // If we know that preconnect is supported, there is no need to do
     // dedicated dns-prefetch.
     let dns;
-    const prev = dangerousSyncMutate(this.win_);
+    dangerousSyncMutateStart(this.win_);
     if (!this.features_.preconnect) {
       dns = this.document_.createElement('link');
       dns.setAttribute('rel', 'dns-prefetch');
@@ -186,18 +186,18 @@ class PreconnectService {
     preconnect.setAttribute('href', origin);
     preconnect.setAttribute('referrerpolicy', 'origin');
     this.head_.appendChild(preconnect);
-    dangerousSyncMutateStop(this.win_, prev);
+    dangerousSyncMutateStop(this.win_);
 
     // Remove the tags eventually to free up memory.
     this.timer_.delay(() => {
-      const prev = dangerousSyncMutate(this.win_);
+      dangerousSyncMutateStart(this.win_);
       if (dns && dns.parentNode) {
         dns.parentNode.removeChild(dns);
       }
       if (preconnect.parentNode) {
         preconnect.parentNode.removeChild(preconnect);
       }
-      dangerousSyncMutateStop(this.win_, prev);
+      dangerousSyncMutateStop(this.win_);
     }, 10000);
 
     this.preconnectPolyfill_(viewer, origin);
@@ -253,9 +253,9 @@ class PreconnectService {
     } else {
       preload.as = '';
     }
-    const prev = dangerousSyncMutate(this.win_);
+    dangerousSyncMutateStart(this.win_);
     this.head_.appendChild(preload);
-    dangerousSyncMutateStop(this.win_, prev);
+    dangerousSyncMutateStop(this.win_);
     // As opposed to preconnect we do not clean this tag up, because there is
     // no expectation as to it having an immediate effect.
   }

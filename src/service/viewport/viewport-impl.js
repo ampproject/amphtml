@@ -25,9 +25,9 @@ import {
 import {ViewportBindingNatural_} from './viewport-binding-natural';
 import {VisibilityState} from '../../visibility-state';
 import {
-  dangerousSyncMutate,
+  dangerousSyncMutateStart,
   dangerousSyncMutateStop,
-} from '../../dangerously-mutate';
+} from '../../black-magic';
 import {dev} from '../../log';
 import {dict} from '../../utils/object';
 import {getFriendlyIframeEmbedOptional} from '../../friendly-iframe-embed';
@@ -199,7 +199,7 @@ export class Viewport {
     this.updateVisibility_();
 
     // Top-level mode classes.
-    const prev = dangerousSyncMutate(win);
+    dangerousSyncMutateStart(win);
     if (this.ampdoc.isSingleDoc()) {
       this.globalDoc_.documentElement.classList.add('i-amphtml-singledoc');
     }
@@ -214,7 +214,7 @@ export class Viewport {
     if (viewer.getParam('webview') === '1') {
       this.globalDoc_.documentElement.classList.add('i-amphtml-webview');
     }
-    dangerousSyncMutateStop(win, prev);
+    dangerousSyncMutateStop(win);
 
     // To avoid browser restore scroll position when traverse history
     if (isIframed(win) &&

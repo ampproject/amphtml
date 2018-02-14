@@ -16,9 +16,9 @@
 
 import {Services} from './services';
 import {
-  dangerousSyncMutate,
+  dangerousSyncMutateStart,
   dangerousSyncMutateStop,
-} from './dangerously-mutate';
+} from './black-magic';
 import {dev, rethrowAsync} from './log';
 import {insertAfterOrAtStart, waitForBody} from './dom';
 import {map} from './utils/object';
@@ -178,9 +178,9 @@ function insertStyleElement(win, cssRoot, cssText, isRuntimeCss, ext) {
     }
     afterElement = cssRoot.lastChild;
   }
-  const prev = dangerousSyncMutate(win);
+  dangerousSyncMutateStart(win);
   insertAfterOrAtStart(cssRoot, style, afterElement);
-  dangerousSyncMutateStop(win, prev);
+  dangerousSyncMutateStop(win);
   if (key) {
     styleMap[key] = style;
   }
@@ -248,13 +248,13 @@ export function makeBodyVisible(doc, opt_waitForServices) {
   }
   const set = () => {
     win[bodyVisibleSentinel] = true;
-    const prev = dangerousSyncMutate(win);
+    dangerousSyncMutateStart(win);
     setStyles(dev().assertElement(doc.body), {
       opacity: 1,
       visibility: 'visible',
       animation: 'none',
     });
-    dangerousSyncMutateStop(win, prev);
+    dangerousSyncMutateStop(win);
     renderStartedNoInline(doc);
   };
   try {

@@ -23,9 +23,9 @@ import {
   setStyles,
 } from '../style';
 import {
-  dangerousSyncMutate,
+  dangerousSyncMutateStart,
   dangerousSyncMutateStop,
-} from '../dangerously-mutate';
+} from '../black-magic';
 import {dev, user} from '../log';
 import {endsWith} from '../string';
 
@@ -285,7 +285,7 @@ export class FixedLayer {
         // 1. Unset top from previous mutates and set bottom to an extremely
         // large value (to catch cases where sticky-tops are in a long way
         // down inside a scroller).
-        const prev = dangerousSyncMutate(win);
+        dangerousSyncMutateStart(win);
         for (let i = 0; i < elements.length; i++) {
           setImportantStyles(elements[i].element, {
             top: '',
@@ -293,7 +293,7 @@ export class FixedLayer {
             transition: 'none',
           });
         }
-        dangerousSyncMutateStop(win, prev);
+        dangerousSyncMutateStop(win);
         // 2. Capture the `style.top` with this new `style.bottom` value. If
         // this element has a non-auto top, this value will remain constant
         // regardless of bottom.
@@ -301,11 +301,11 @@ export class FixedLayer {
           autoTops.push(computedStyle(win, elements[i].element).top);
         }
         // 3. Cleanup the `style.bottom`.
-        dangerousSyncMutate(win);
+        dangerousSyncMutateStart(win);
         for (let i = 0; i < elements.length; i++) {
           setStyle(elements[i].element, 'bottom', '');
         }
-        dangerousSyncMutateStop(win, prev);
+        dangerousSyncMutateStop(win);
 
         for (let i = 0; i < elements.length; i++) {
           const fe = elements[i];
@@ -501,9 +501,9 @@ export class FixedLayer {
       // A new entry.
       const id = 'F' + (this.counter_++);
       const win = this.ampdoc.win;
-      const prev = dangerousSyncMutate(win);
+      dangerousSyncMutateStart(win);
       element.setAttribute('i-amphtml-fixedid', id);
-      dangerousSyncMutateStop(win, prev);
+      dangerousSyncMutateStop(win);
       if (isFixed) {
         element[DECLARED_FIXED_PROP] = true;
       } else {

@@ -14,17 +14,53 @@
  * limitations under the License.
  */
 
-import {IN_MUTATE_PHASE_PROP} from './dangerously-mutate';
 import {dev} from './log';
 import {endsWith, startsWith} from './string';
 import {hasOwn} from './utils/object';
-
 
 /**
  * A global property that checks if black magic has already been performed.
  * @const {string}
  */
-const INSTALLED_PROP = 'BLACK_MAGIC_INSTALLED';
+const INSTALLED_PROP = '__AMP_BLACK_MAGIC_INSTALLED_';
+
+/**
+ * The property on `window` where we will store whether we are currently
+ * performing the mutate-phase.
+ *
+ * @const {string}
+ */
+const IN_MUTATE_PHASE_PROP = '__AMP_VSYNC_IN_MUTATE_';
+
+/**
+ * A stack used for keeping the previous mutation state whenever a new mutation
+ * phase is entered.
+ *
+ * @const {!Array<boolean>}
+ */
+const MUTATION_STACK = [];
+
+/**
+ * Creates a "mutation" phase regardless of vsync's async batching.
+ * THIS IS DANGEROUS, AND BREAKS AN IMPLICIT AMP INVARIANT.
+ *
+ * @param {!Window} win
+ */
+export function dangerousSyncMutateStart(win) {
+  MUTATION_STACK.push(win[IN_MUTATE_PHASE_PROP])
+  win[IN_MUTATE_PHASE_PROP] = true;
+}
+
+/**
+ * Stops the "mutation" phase regardless of vsync's async batching.
+ * THIS IS DANGEROUS, AND BREAKS AN IMPLICIT AMP INVARIANT.
+ *
+ * @param {!Window} win
+ */
+export function dangerousSyncMutateStop(win) {
+  win[IN_MUTATE_PHASE_PROP] = dev().assertBoolean(MUTATION_STACK.pop());
+}
+
 
 /**
  * Gathers the node's ancestry tree, so that the location may be logged.
@@ -32,7 +68,7 @@ const INSTALLED_PROP = 'BLACK_MAGIC_INSTALLED';
  * @param {!Node} node
  * @return {string}
  */
-function ancestry(node) {
+function ancestryCssSelector(node) {
   const tree = [node.tagName];
   for (let c = node.parentElement; c; c = c.parentElement) {
     const tag = c.tagName;
@@ -50,12 +86,12 @@ function ancestry(node) {
  *
  * @param {!Node|!Attr} nodeOrAttr
  */
-function checkInMutationPhase(nodeOrAttr) {
+function assertMutationPhase(nodeOrAttr) {
   const node = nodeOrAttr.ownerElement || nodeOrAttr;
   const window = node.ownerDocument.defaultView;
   if (node.isConnected !== false && !window[IN_MUTATE_PHASE_PROP]) {
     dev().error('MUTATE', 'mutation occurred outside mutation phase',
-        ancestry(node));
+        ancestryCssSelector(node));
   }
 }
 
@@ -74,6 +110,7 @@ export function install(window) {
     return;
   }
   window[INSTALLED_PROP] = true;
+  window[IN_MUTATE_PHASE_PROP] = false;
 
   // First, we'll do runtime inspection to find special setter properties
   // for Nodes, and monkey patch them.
@@ -101,7 +138,7 @@ export function install(window) {
 
       const setter = descriptor.set;
       descriptor.set = function(value) {
-        checkInMutationPhase(this);
+        assertMutationPhase(this);
         return setter.call(this, value);
       };
       Object.defineProperty(descriptor.set, 'name', {
@@ -145,7 +182,7 @@ export function install(window) {
 
       const method = descriptor.value;
       descriptor.value = function() {
-        checkInMutationPhase(this);
+        assertMutationPhase(this);
         return method.apply(this, arguments);
       };
       Object.defineProperty(descriptor.value, 'name', {
@@ -234,7 +271,7 @@ export function install(window) {
           const method = liveObject[prop];
           // Shadow the prototype method with an own method.
           liveObject[prop] = function() {
-            checkInMutationPhase(element);
+            assertMutationPhase(element);
             return method.apply(liveObject, arguments);
           };
           Object.defineProperty(liveObject[prop], 'name', {
@@ -258,7 +295,7 @@ export function install(window) {
 
           const setter = descriptor.set;
           descriptor.set = function(value) {
-            checkInMutationPhase(element);
+            assertMutationPhase(element);
             return setter.call(liveObject, value);
           };
           Object.defineProperty(descriptor.set, 'name', {
@@ -305,13 +342,13 @@ export function install(window) {
           // both.
           const handler = {
             set(target, property, value) {
-              checkInMutationPhase(element);
+              assertMutationPhase(element);
               target[property] = value;
               return true;
             },
 
             deleteProperty(target, prop) {
-              checkInMutationPhase(element);
+              assertMutationPhase(element);
               return delete target[prop];
             },
           };
