@@ -17,24 +17,25 @@
 import {loadScript, validateData} from '../3p/3p';
 
 /**
+ * Make an AdPlugg iframe.
  * @param {!Window} global
  * @param {!Object} data
  */
 export function adplugg(global,data) {
-  //load ad.js
+  // Load ad.js
   loadScript(global, 'https://www.adplugg.com/serve/js/ad.js');
 
-  //validate the amp-ad attributes
+  // Validate the amp-ad attributes.
   validateData(
       data,
       ['accessCode', 'width', 'height'], //required
       ['zone'] //optional
   );
 
-  //get the amp wrapper element
+  // Get the amp wrapper element.
   const ampwrapper = global.document.getElementById('c');
 
-  // build and append the ad tag
+  // Build and append the ad tag.
   const adTag = global.document.createElement('div');
   adTag.setAttribute('class', 'adplugg-tag');
   adTag.setAttribute('data-adplugg-access-code', data['accessCode']);
@@ -43,7 +44,40 @@ export function adplugg(global,data) {
   }
   ampwrapper.appendChild(adTag);
 
-  //fill the ad tag
-  global.AdPlugg = global.AdPlugg || [];
-  global.AdPlugg.push({});
+  // Get a handle on the AdPlugg SDK.
+  global.AdPlugg = (global.AdPlugg || []);
+  const AdPlugg = global.AdPlugg;
+
+  // Register event listeners (via async wrapper).
+  AdPlugg.push(function() {
+
+    // Register the renderStart event listener.
+    AdPlugg.on(
+        adTag,
+        'adplugg:renderStart',
+        function(event) {
+          // Create the opt_data object.
+          const optData = {};
+          if (event.hasOwnProperty('width')) {
+            optData.width = event.width;
+          }
+          if (event.hasOwnProperty('height')) {
+            optData.height = event.height;
+          }
+          global.context.renderStart(optData);
+        }
+    );
+
+    // Register the noContentAvailable event listener.
+    AdPlugg.on(adTag, 'adplugg:noContentAvailable',
+        function() {
+          global.context.noContentAvailable();
+        }
+    );
+
+  });
+
+  // Fill the tag.
+  AdPlugg.push({'command': 'run'});
+
 }

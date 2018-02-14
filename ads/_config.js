@@ -131,6 +131,7 @@ export const adConfig = {
 
   adplugg: {
     prefetch: 'https://www.adplugg.com/serve/js/ad.js',
+    renderStartImplemented: true,
   },
 
   adreactor: {},
