@@ -356,10 +356,6 @@ class AmpAddThis extends AMP.BaseElement {
   }
 }
 
-if (typeof AMP.extension === 'function') {
-  AMP.extension('amp-addthis', '0.1', AMP => {
-    AMP.registerElement('amp-addthis', AmpAddThis);
-  });
-} else {
+AMP.extension('amp-addthis', '0.1', AMP => {
   AMP.registerElement('amp-addthis', AmpAddThis);
-}
+});
