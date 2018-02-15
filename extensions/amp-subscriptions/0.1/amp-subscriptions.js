@@ -17,11 +17,13 @@
 import {CSS} from '../../../build/amp-subscriptions-0.1.css';
 import {EntitlementStore} from './entitlement-store';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
+import {Renderer} from './renderer';
 import {SubscriptionPlatform} from './subscription-platform';
 import {installStylesForDoc} from '../../../src/style-installer';
 
 /** @const */
 const TAG = 'amp-subscriptions';
+
 
 export class SubscriptionService {
   /**
@@ -33,6 +35,9 @@ export class SubscriptionService {
 
     // Install styles.
     installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
+
+    /** @private @const {!Renderer} */
+    this.renderer_ = new Renderer(ampdoc);
 
     /** @private @const {!Array<!SubscriptionPlatform>} */
     this.subscriptionPlatforms_ = [];
@@ -82,32 +87,33 @@ export class SubscriptionService {
         .then(() => this.processEntitlement_());
   }
 
-  /**
-   * @private
-   */
+  /** @private */
   processEntitlement_() {
     // TODO(@prateekbh): process and unblock marup here.
   }
 
-  /**
-   * @private
-   */
+  /** @private */
   start_() {
     this.initialize_().then(() => {
-      // TODO(@prateekbh): Read the service ids in EntitlementStore constructor from page config.
+      // TODO(@prateekbh): Start and stop loading indicator. See
+      // `Renderer.toggleLoading`.
+      // TODO(@prateekbh): Read the service ids in EntitlementStore constructor
+      // from page config.
       this.entitlementStore_ = new EntitlementStore(['foo', 'bar']);
-
       this.subscriptionPlatforms_.forEach(subscriptionPlatform => {
         subscriptionPlatform.getEntitlements()
             .then(() => this.processEntitlement_());
       });
     });
   }
-
-  /** @private */
-  getPlatformClassForTesting_() {return SubscriptionPlatform;}
-
 }
+
+
+/** @package @VisibleForTesting */
+export function getPlatformClassForTesting() {
+  return SubscriptionPlatform;
+}
+
 
 // Register the extension services.
 AMP.extension(TAG, '0.1', function(AMP) {
