@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
+/**
+ * @interface
+ */
 export class SimplePostMessageApiDef {
   /**
    * Handles sending the postMessages.
+   * @param {string} type Type of the message.
+   * @param {!JsonObject} data Message payload.
    */
-  send() {}
+  send(type, data) {}
 
-  /**
-   * Destroys instance of listener or message receiver.
-   */
   destroy() {}
 }

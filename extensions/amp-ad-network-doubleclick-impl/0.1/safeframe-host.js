@@ -563,4 +563,6 @@ export class SafeframeHostApi {
         JSON.stringify(dict({'message': 'resize-complete', 'c': this.channel})),
         SAFEFRAME_ORIGIN);
   }
+
+  destroy() {}
 }
