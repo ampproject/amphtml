@@ -124,7 +124,7 @@ export class SafeframeHostApi {
   /**
    * @param {!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl} baseInstance
    */
-  constructor(baseInstance) {
+  constructor(baseInstance, isFluid, initialSize) {
     /** @private {!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl} */
     this.baseInstance_ = baseInstance;
 
@@ -158,6 +158,10 @@ export class SafeframeHostApi {
     /** @type {number} */
     this.uid = Math.random();
 
+    this.isFluid_ = isFluid;
+
+    this.initialSize_ = initialSize;
+
     this.registerSafeframeHost();
   }
 
@@ -186,7 +190,7 @@ export class SafeframeHostApi {
             'flash_ver': '26.0.0',
           },
         }));
-    attributes['reportCreativeGeometry'] = this.baseInstance_.isFluid_;
+    attributes['reportCreativeGeometry'] = this.isFluid_;
     attributes['isDifferentSourceWindow'] = false;
     attributes['sentinel'] = this.sentinel_;
     return attributes;
@@ -433,8 +437,8 @@ export class SafeframeHostApi {
    * @private
    */
   handleCollapseRequest_() {
-    this.handleSizeChange(this.baseInstance_.initialSize_.height,
-        this.baseInstance_.initialSize_.width,
+    this.handleSizeChange(this.initialSize_.height,
+        this.initialSize_.width,
         SERVICE.COLLAPSE_RESPONSE,
         /** isCollapse */ true);
   }
