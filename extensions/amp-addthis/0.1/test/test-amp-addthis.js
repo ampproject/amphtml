@@ -25,6 +25,10 @@ import {ConfigManager} from '../config-manager';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {dict} from '../../../../src/utils/object';
 import {getConfigManager} from '../amp-addthis';
+import {getDetailsForMeta, getMetaElements} from './../addthis-utils/meta';
+import {getKeywordsString} from './../addthis-utils/classify';
+import {isDateInFuture} from '../addthis-utils/cuid';
+import {toArray} from '../../../../src/types';
 
 describes.realWin('amp-addthis', {
   amp: {
@@ -77,7 +81,7 @@ describes.realWin('amp-addthis', {
   }
 
   function testIframe(iframe) {
-    expect(iframe).to.not.be.null;
+    expect(iframe).to.not.equal(null);
     expect(iframe.getAttribute('src'))
         .to.equal(`${ORIGIN}/dc/amp-addthis.html`);
     expect(iframe.getAttribute('title')).to.equal(ALT_TEXT);
@@ -94,8 +98,8 @@ describes.realWin('amp-addthis', {
       const placeholder = at.querySelector('[placeholder]');
       const ampImg = placeholder.querySelector('amp-img');
 
-      expect(placeholder).to.not.be.null;
-      expect(ampImg).to.not.be.null;
+      expect(placeholder).to.not.equal(null);
+      expect(ampImg).to.not.equal(null);
       expect(ampImg.getAttribute('src')).to.match(/cache\.addthiscdn\.com/);
       expect(ampImg.getAttribute('width')).to.equal(ICON_SIZE);
       expect(ampImg.getAttribute('height')).to.equal(ICON_SIZE);
@@ -120,8 +124,8 @@ describes.realWin('amp-addthis', {
       const obj = at.implementation_;
       testIframe(at.querySelector('iframe'));
       obj.unlayoutCallback();
-      expect(at.querySelector('iframe')).to.be.null;
-      expect(obj.iframe_).to.be.null;
+      expect(at.querySelector('iframe')).to.equal(null);
+      expect(obj.iframe_).to.equal(null);
     });
   });
 
@@ -129,7 +133,7 @@ describes.realWin('amp-addthis', {
     return getAT({pubId, widgetId}).then(({at, atIframeLoadPromise}) => {
       const obj = at.implementation_;
 
-      expect(registerStub.calledOnce).to.be.true;
+      expect(registerStub.calledOnce).to.equal(true);
       expect(registerStub.calledWithExactly({
         pubId,
         widgetId,
@@ -146,7 +150,7 @@ describes.realWin('amp-addthis', {
       const obj = at.implementation_;
       obj.unlayoutCallback();
 
-      expect(unregisterStub.calledOnce).to.be.true;
+      expect(unregisterStub.calledOnce).to.equal(true);
       expect(unregisterStub.calledWithExactly({
         pubId,
         iframe: obj.iframe_,
@@ -325,4 +329,63 @@ describes.realWin('amp-addthis', {
     });
   });
 
+  it('gets meta elements from document', () => {
+    const meta1 = document.createElement('meta');
+    window.document.head.appendChild(meta1);
+    expect(toArray(getMetaElements(window.document)).length).to.equal(1);
+    const meta2 = document.createElement('meta');
+    window.document.head.appendChild(meta2);
+    expect(toArray(getMetaElements(window.document)).length).to.equal(2);
+  });
+
+  it('gets 0 meta elements from document when there are none', () => {
+    expect(toArray(getMetaElements(window.document)).length).to.equal(0);
+  });
+
+  it('gets details for meta tag with name in lower case', () => {
+    const meta1 = document.createElement('meta');
+    meta1.name = 'KEYWORDS';
+    meta1.content = 'this,that';
+    const details = getDetailsForMeta(meta1);
+    expect(details.name).to.equal(meta1.name.toLowerCase());
+    expect(details.name).not.to.equal(meta1.name);
+    expect(details.content).to.equal(meta1.content);
+  });
+
+  it('gets keywords from meta tags', () => {
+    const meta1 = document.createElement('meta');
+    meta1.name = 'keywords';
+    meta1.content = 'this,that';
+    expect(getKeywordsString([meta1])).to.equal(meta1.content);
+    const meta2 = document.createElement('meta');
+    meta2.name = 'keywords';
+    meta2.content = 'a,b';
+    expect(getKeywordsString([meta1, meta2]))
+        .to.equal(`${meta1.content},${meta2.content}`);
+  });
+
+  it('can tell future dates from past dates', () => {
+    const nextYear = new Date();
+    nextYear.setFullYear(nextYear.getFullYear() + 1);
+    expect(isDateInFuture(nextYear)).to.equal(true);
+
+    const nextMonth = new Date();
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    expect(isDateInFuture(nextMonth)).to.equal(true);
+
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    expect(isDateInFuture(tomorrow)).to.equal(true);
+
+    const today = new Date();
+    expect(isDateInFuture(today)).to.equal(false);
+
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    expect(isDateInFuture(yesterday)).to.equal(false);
+
+    const lastYear = new Date();
+    lastYear.setFullYear(lastYear.getFullYear() - 1);
+    expect(isDateInFuture(lastYear)).to.equal(false);
+  });
 });
