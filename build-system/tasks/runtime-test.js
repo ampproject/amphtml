@@ -60,6 +60,10 @@ function getConfig() {
   if (argv.ie) {
     return Object.assign({}, karmaDefault, {browsers: ['IE']});
   }
+  if (argv.headless) {
+    return Object.assign({}, karmaDefault,
+        {browsers: ['Chrome_no_extensions_headless']});
+  }
   if (argv.saucelabs || argv.saucelabs_lite) {
     if (!process.env.SAUCE_USERNAME) {
       throw new Error('Missing SAUCE_USERNAME Env variable');
@@ -156,7 +160,8 @@ function printArgvMessages() {
     compiled: 'Running tests against minified code.',
     grep: 'Only running tests that match the pattern "' +
         cyan(argv.grep) + '".',
-    coverage: 'Runing tests in code coverage mode.',
+    coverage: 'Running tests in code coverage mode.',
+    headless: 'Running tests in a headless Chrome window.',
   };
   if (!process.env.TRAVIS) {
     log(green('Run'), cyan('gulp help'),
@@ -171,6 +176,10 @@ function printArgvMessages() {
     if (!argv.testnames && !argv.files) {
       log(green('⤷ Use'), cyan('--testnames'),
           green('to see the names of all tests being run.'));
+    }
+    if (!argv.headless) {
+      log(green('⤷ Use'), cyan('--headless'),
+          green('to run tests in a headless Chrome window.'));
     }
     if (!argv.compiled) {
       log(green('Running tests against unminified code.'));
@@ -419,5 +428,6 @@ gulp.task('test', 'Runs tests', preTestTasks, function() {
     'a4a': '  Runs all A4A tests',
     'config': '  Sets the runtime\'s AMP config to one of "prod" or "canary"',
     'coverage': '  Run tests in code coverage mode',
+    'headless': '  Run tests in a headless Chrome window',
   },
 });

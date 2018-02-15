@@ -273,7 +273,7 @@ const command = {
     timedExecOrDie('gulp check-types');
   },
   runUnitTests: function() {
-    let cmd = 'gulp test --unit --nobuild';
+    let cmd = 'gulp test --unit --nobuild --headless';
     if (argv.files) {
       cmd = cmd + ' --files ' + argv.files;
     }
@@ -287,7 +287,7 @@ const command = {
   },
   runIntegrationTests: function(compiled) {
     // Integration tests on chrome, or on all saucelabs browsers if set up
-    let cmd = 'gulp test --nobuild --integration';
+    let cmd = 'gulp test --integration --nobuild';
     if (argv.files) {
       cmd = cmd + ' --files ' + argv.files;
     }
@@ -296,6 +296,8 @@ const command = {
     }
     if (!!process.env.SAUCE_USERNAME && !!process.env.SAUCE_ACCESS_KEY) {
       cmd += ' --saucelabs';
+    } else {
+      cmd += ' --headless';
     }
     timedExecOrDie(cmd);
   },
