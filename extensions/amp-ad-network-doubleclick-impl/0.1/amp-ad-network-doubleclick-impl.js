@@ -833,7 +833,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   setupSafeframe() {
     if (!this.safeframeApi_) {
-      this.safeframeApi_ = new SafeframeHostApi(this, this.isFluid_, this.initialSize_);
+      this.safeframeApi_ = new SafeframeHostApi(this, this.isFluid_,
+                                                this.initialSize_,
+                                                this.creativeSize_);
     }
   }
 

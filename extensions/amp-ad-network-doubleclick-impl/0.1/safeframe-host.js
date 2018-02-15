@@ -123,8 +123,11 @@ export class SafeframeHostApi {
 
   /**
    * @param {!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl} baseInstance
+   * @param {boolean} isFluid
+   * @param {!Object} initialSize
+   * @param {!Object} creativeSize
    */
-  constructor(baseInstance, isFluid, initialSize) {
+  constructor(baseInstance, isFluid, initialSize, creativeSize) {
     /** @private {!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl} */
     this.baseInstance_ = baseInstance;
 
@@ -158,9 +161,14 @@ export class SafeframeHostApi {
     /** @type {number} */
     this.uid = Math.random();
 
+    /** @private {boolean} */
     this.isFluid_ = isFluid;
 
+    /** @private {!Object} */
     this.initialSize_ = initialSize;
+
+    /** @private {!Object} */
+    this.creativeSize_ = creativeSize;
 
     this.registerSafeframeHost();
   }
@@ -278,7 +286,7 @@ export class SafeframeHostApi {
    */
   correctChanges(changes) {
     const iframeRect = this.iframe_ ? this.iframe_.getBoundingClientRect() :
-      this.baseInstance_.creativeSize_;
+      this.creativeSize_;
     const ampAdRect = this.baseInstance_.element.getBoundingClientRect();
     const widthCorrection = (ampAdRect.width - iframeRect.width) / 2;
     const heightCorrection = (ampAdRect.height - iframeRect.height) / 2;
@@ -464,8 +472,8 @@ export class SafeframeHostApi {
     // If the new size is fully contained within the bounds of the amp-ad,
     // we can resize immediately as there will be no reflow.
     if (!optIsCollapse &&
-        width <= this.baseInstance_.creativeSize_.width &&
-        height <= this.baseInstance_.creativeSize_.height) {
+        width <= this.creativeSize_.width &&
+        height <= this.creativeSize_.height) {
       this.resizeIframe(height, width);
       this.sendResizeResponse(/** SUCCESS */ true, message);
     } else {
