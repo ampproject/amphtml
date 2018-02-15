@@ -153,28 +153,15 @@ export class ViewportBindingInabox {
 
     this.iframeClient_.makeRequest(
         MessageType.SEND_POSITIONS, MessageType.POSITION,
-        data => {
-          dev().fine(TAG, 'Position changed: ', data);
-          const oldViewportRect = this.viewportRect_;
-          this.viewportRect_ = data.viewportRect;
-
-          this.updateBoxRect_(data.targetRect);
-
-          if (isResized(this.viewportRect_, oldViewportRect)) {
-            this.resizeObservable_.fire();
-          }
-          if (isMoved(this.viewportRect_, oldViewportRect)) {
-            this.fireScrollThrottle_();
-          }
-        });
+        data => this.updatePosition_(data));
   }
 
   /** @override */
   getLayoutRect(el) {
     const b = el./*OK*/getBoundingClientRect();
     return layoutRectLtwh(
-        Math.round(b.left + this.boxRect_.left),
-        Math.round(b.top + this.boxRect_.top),
+        Math.round(b.left),
+        Math.round(b.top),
         Math.round(b.width),
         Math.round(b.height));
   }
@@ -199,12 +186,12 @@ export class ViewportBindingInabox {
 
   /** @override */
   getScrollTop() {
-    return this.viewportRect_.top;
+    return this.viewportRect_.top - this.boxRect_.top;
   }
 
   /** @override */
   getScrollLeft() {
-    return this.viewportRect_.left;
+    return this.viewportRect_.left - this.boxRect_.left;
   }
 
   /** @override */
@@ -216,37 +203,31 @@ export class ViewportBindingInabox {
    * @param {?../layout-rect.LayoutRectDef|undefined} positionRect
    * @private
    */
-  updateBoxRect_(positionRect) {
-    if (!positionRect) {
-      return;
+  updatePosition_(positionRect) {
+    dev().fine(TAG, 'Position changed: ', data);
+    const oldViewport = this.viewportRect_;
+    const oldBox = this.boxRect_;
+
+    const viewportRect = data.viewportRect;
+    let boxRect = data.targetRect;
+    if (boxRect) {
+      // positionRect is relative to the host's viewport, so we need to move it
+      // into absolute position coordinates.
+      boxRect = moveLayoutRect(positionRect, this.viewportRect_.left,
+          this.viewportRect_.top);
+    } else {
+      boxRect = this.boxRect_;
     }
 
-    const boxRect = moveLayoutRect(positionRect, this.viewportRect_.left,
-        this.viewportRect_.top);
+    this.viewportRect_ = viewportRect;
+    this.boxRect_ = boxRect;
 
-    if (isChanged(boxRect, this.boxRect_)) {
-      dev().fine(TAG, 'Updating viewport box rect: ', boxRect);
-
-      this.boxRect_ = boxRect;
-      // Remeasure all AMP elements once iframe position or size are changed.
-      // Because all layout boxes are calculated relatively to the
-      // iframe position.
-      this.remeasureAllElements_();
-      // TODO: fire DOM mutation event once we handle them
+    if (isResized(boxRect, oldBox) || isResized(viewportRect, oldViewport)) {
+      this.resizeObservable_.fire();
     }
-  }
-
-  /**
-   * @return {!Array<!../service/resource.Resource>}
-   * @visibleForTesting
-   */
-  getChildResources() {
-    return Services.resourcesForDoc(this.win.document).get();
-  }
-
-  /** @private */
-  remeasureAllElements_() {
-    this.getChildResources().forEach(resource => resource.measure());
+    if (isMoved(boxRect, oldBox) || isMoved(viewportRect, oldViewport)) {
+      this.fireScrollThrottle_();
+    }
   }
 
   /** @override */
@@ -381,15 +362,6 @@ export function installInaboxViewportService(ampdoc) {
         return new Viewport(ampdoc, binding, viewer);
       },
       /* opt_instantiate */ true);
-}
-
-/**
- * @param {!../layout-rect.LayoutRectDef} newRect
- * @param {!../layout-rect.LayoutRectDef} oldRect
- * @returns {boolean}
- */
-function isChanged(newRect, oldRect) {
-  return isMoved(newRect, oldRect) || isResized(newRect, oldRect);
 }
 
 /**
