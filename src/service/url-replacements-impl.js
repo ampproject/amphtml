@@ -22,6 +22,7 @@ import {
 } from '../service';
 import {
   parseUrl,
+  getFragment,
   removeFragment,
   parseQueryString,
   addParamsToUrl,
@@ -513,6 +514,21 @@ export class GlobalVariableSource extends VariableSource {
       return this.getStoryValue_(storyVariables => storyVariables.pageId,
           'STORY_PAGE_ID');
     });
+
+    this.set('CONTAINER_TOKEN', () => {
+      let fragment = getFragment(this.ampdoc.win.location.href);
+      if (!fragment) {
+	return '';
+      }
+      let args = parseQueryString(fragment.substring(1, fragment.length));
+      if (!args.ct) {
+	return '';
+      }
+      return args.ct;
+    });
+    this.set('CONTAINER', () => {
+      return document.location.ancestorOrigins[0];
+    });
   }
 
   /**
@@ -973,7 +989,8 @@ export class UrlReplacements {
       if (opt_collectVars) {
         opt_collectVars[match] = val;
       }
-      return encodeValue(val);
+      // Should this be implemented as a whitelist or something?
+      return match == 'CONTAINER' ? val : encodeValue(val);
     });
 
     if (replacementPromise) {
