@@ -756,3 +756,26 @@
 
 </body>
 </html>
+
+<h4>Using a submit-success template referenced by id</h4>
+
+<template type="amp-mustache" id="submit_success_template">
+    <h1>You searched for: {{term}}</h1>
+</template>
+
+<form method="get"
+      action="https://httpbin.org/response-headers?AMP-Access-Control-Allow-Source-Origin=http%3A%2F%2Flocalhost%3A8000&access-control-expose-headers=AMP-Access-Control-Allow-Source-Origin"
+      action-xhr="https://httpbin.org/response-headers?AMP-Access-Control-Allow-Source-Origin=http%3A%2F%2Flocalhost%3A8000&access-control-expose-headers=AMP-Access-Control-Allow-Source-Origin"
+      target="_blank">
+    <fieldset>
+        <input name="clientId" type="hidden" value="CLIENT_ID(poll)" data-amp-replace="CLIENT_ID">
+        <input name="canonicalUrl" type="hidden" value="RANDOM and CANONICAL_URL" data-amp-replace="CANONICAL_URL RANDOM">
+        <label>
+            <span>Search for</span>
+            <input type="search" name="term" required>
+        </label>
+        <input type="submit" value="Search">
+    </fieldset>
+
+    <div submit-success template="submit_success_template"></div>
+</form>
