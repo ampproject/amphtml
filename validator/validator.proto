@@ -372,7 +372,8 @@ message HtmlFormat {
   enum Code {
     AMP = 1;
     AMP4ADS = 2;
-    EXPERIMENTAL = 3;  // Currently unused
+    AMP4EMAIL = 3;
+    EXPERIMENTAL = 4;  // Currently unused
   }
 }
 

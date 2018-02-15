@@ -33,6 +33,7 @@ goog.provide('parse_css.extractAFunction');
 goog.provide('parse_css.extractASimpleBlock');
 goog.provide('parse_css.extractUrls');
 goog.provide('parse_css.parseAStylesheet');
+goog.provide('parse_css.parseMediaQueries');
 goog.provide('parse_css.stripVendorPrefix');
 goog.require('amp.validator.LIGHT');
 goog.require('amp.validator.ValidationError.Code');
@@ -1037,4 +1038,215 @@ parse_css.extractUrls = function(stylesheet, parsedUrls, errors) {
   if (errorsOldLength !== errors.length) {
     parsedUrls.splice(parsedUrlsOldLength);
   }
+};
+
+/**
+ * Helper class for implementing parse_css.parseMediaQueries.
+ * @private
+ */
+class MediaQueryVisitor extends parse_css.RuleVisitor {
+  /**
+   * @param {!Array<!parse_css.IdentToken>} mediaTypes
+   * @param {!Array<!parse_css.IdentToken>} mediaFeatures
+   * @param {!Array<!parse_css.ErrorToken>} errors
+   */
+  constructor(mediaTypes, mediaFeatures, errors) {
+    super();
+
+    /** @type {!Array<!parse_css.IdentToken>} */
+    this.mediaTypes = mediaTypes;
+    /** @type {!Array<!parse_css.IdentToken>} */
+    this.mediaFeatures = mediaFeatures;
+    /** @type {!Array<!parse_css.ErrorToken>} */
+    this.errors = errors;
+  }
+
+  /** @inheritDoc */
+  visitAtRule(atRule) {
+    if (atRule.name.toLowerCase() !== 'media') return;
+
+    let tokenStream = new parse_css.TokenStream(atRule.prelude);
+    tokenStream.consume();  // Advance to first token.
+    if (!this.parseAMediaQueryList_(tokenStream)) {
+      if (amp.validator.LIGHT) {
+        this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
+      } else {
+        this.errors.push(atRule.copyPosTo(new parse_css.ErrorToken(
+            amp.validator.ValidationError.Code.CSS_SYNTAX_MALFORMED_MEDIA_QUERY,
+            ['style'])));
+      }
+    }
+  }
+
+  /**
+   * Maybe consume one whitespace token.
+   * @param {!parse_css.TokenStream} tokenStream
+   * @private
+   */
+  maybeConsumeAWhitespaceToken_(tokenStream) {
+    // While the grammar calls for consuming multiple whitespace tokens,
+    // our tokenizer already collapses whitespace so only one token can ever
+    // be present.
+    if (tokenStream.current().tokenType === parse_css.TokenType.WHITESPACE)
+      tokenStream.consume();
+  }
+
+  /**
+   * Parse a media query list
+   * @param {!parse_css.TokenStream} tokenStream
+   * @return {boolean}
+   * @private
+   */
+  parseAMediaQueryList_(tokenStream) {
+    // https://www.w3.org/TR/css3-mediaqueries/#syntax
+    // : S* [media_query [ ',' S* media_query ]* ]?
+    // ;
+    this.maybeConsumeAWhitespaceToken_(tokenStream);
+    if (tokenStream.current().tokenType !== parse_css.TokenType.EOF_TOKEN) {
+      if (!this.parseAMediaQuery_(tokenStream)) return false;
+      while (tokenStream.current().tokenType === parse_css.TokenType.COMMA) {
+        tokenStream.consume();  // ','
+        this.maybeConsumeAWhitespaceToken_(tokenStream);
+        if (!this.parseAMediaQuery_(tokenStream)) return false;
+      }
+    }
+    return tokenStream.current().tokenType === parse_css.TokenType.EOF_TOKEN;
+  }
+
+  /**
+   * Parse a media query
+   * @param {!parse_css.TokenStream} tokenStream
+   * @return {boolean}
+   * @private
+   */
+  parseAMediaQuery_(tokenStream) {
+    // : [ONLY | NOT]? S* media_type S* [ AND S* expression ]*
+    // | expression [ AND S* expression ]*
+    // ;
+    //
+    // Below we parse media queries with this equivalent grammar:
+    // : (expression | [ONLY | NOT]? S* media_type S* )
+    // [ AND S* expression ]*
+    // ;
+    //
+    // This is more convenient because we know that expressions must start with
+    // '(', so it's simpler to use as a check to distinguis the expression case
+    // from the media type case.
+    if (tokenStream.current().tokenType === parse_css.TokenType.OPEN_PAREN) {
+      if (!this.parseAMediaExpression_(tokenStream)) return false;
+    } else {
+      if (tokenStream.current().tokenType === parse_css.TokenType.IDENT &&
+          (
+              /** @type {parse_css.IdentToken} */
+              (tokenStream.current()).ASCIIMatch('only') ||
+              /** @type {parse_css.IdentToken} */
+              (tokenStream.current()).ASCIIMatch('not'))) {
+        tokenStream.consume();  // 'ONLY' | 'NOT'
+      }
+      this.maybeConsumeAWhitespaceToken_(tokenStream);
+      if (!this.parseAMediaType_(tokenStream)) return false;
+      this.maybeConsumeAWhitespaceToken_(tokenStream);
+    }
+    while (tokenStream.current().tokenType === parse_css.TokenType.IDENT &&
+           /** @type {parse_css.IdentToken} */
+           (tokenStream.current()).ASCIIMatch('and')) {
+      tokenStream.consume();  // 'AND'
+      this.maybeConsumeAWhitespaceToken_(tokenStream);
+      if (!this.parseAMediaExpression_(tokenStream)) return false;
+    }
+    return true;
+  }
+
+  /**
+   * Parse a media type
+   * @param {!parse_css.TokenStream} tokenStream
+   * @return {boolean}
+   * @private
+   */
+  parseAMediaType_(tokenStream) {
+    // : IDENT
+    // ;
+    if (tokenStream.current().tokenType === parse_css.TokenType.IDENT) {
+      this.mediaTypes.push(
+          /** @type {!parse_css.IdentToken} */ (tokenStream.current()));
+      tokenStream.consume();
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Parse a media expression
+   * @param {!parse_css.TokenStream} tokenStream
+   * @return {boolean}
+   * @private
+   */
+  parseAMediaExpression_(tokenStream) {
+    //  : '(' S* media_feature S* [ ':' S* expr ]? ')' S*
+    //  ;
+    if (tokenStream.current().tokenType !== parse_css.TokenType.OPEN_PAREN)
+      return false;
+    tokenStream.consume();  // '('
+    this.maybeConsumeAWhitespaceToken_(tokenStream);
+    if (!this.parseAMediaFeature_(tokenStream)) return false;
+    this.maybeConsumeAWhitespaceToken_(tokenStream);
+    if (tokenStream.current().tokenType === parse_css.TokenType.COLON) {
+      tokenStream.consume();  // '('
+      this.maybeConsumeAWhitespaceToken_(tokenStream);
+      // The CSS3 grammar at this point just tells us to expect some
+      // expr. Which tokens are accepted here are defined by the media
+      // feature found above. We don't implement media features here, so
+      // we just loop over tokens until we find a CLOSE_PAREN or EOF.
+      // While expr in general may have arbitrary sets of open/close parens,
+      // it seems that https://www.w3.org/TR/css3-mediaqueries/#media1
+      // suggests that media features cannot:
+      //
+      // "Media features only accept single values: one keyword, one number,
+      // or a number with a unit identifier. (The only exceptions are the
+      // ‘aspect-ratio’ and ‘device-aspect-ratio’ media features.)
+      while (
+          tokenStream.current().tokenType !== parse_css.TokenType.EOF_TOKEN &&
+          tokenStream.current().tokenType !== parse_css.TokenType.CLOSE_PAREN)
+        tokenStream.consume();
+    }
+    if (tokenStream.current().tokenType !== parse_css.TokenType.CLOSE_PAREN)
+      return false;
+    tokenStream.consume();  // ')'
+    this.maybeConsumeAWhitespaceToken_(tokenStream);
+    return true;
+  }
+
+  /**
+   * Parse a media feature
+   * @param {!parse_css.TokenStream} tokenStream
+   * @return {boolean}
+   * @private
+   */
+  parseAMediaFeature_(tokenStream) {
+    // : IDENT
+    // ;
+    if (tokenStream.current().tokenType === parse_css.TokenType.IDENT) {
+      this.mediaFeatures.push(
+          /** @type {!parse_css.IdentToken} */ (tokenStream.current()));
+      tokenStream.consume();
+      return true;
+    }
+    return false;
+  }
+}
+
+/**
+ * Parses media queries within the provided stylesheet, emitting the set of
+ * discovered media types and media features, as well as errors if parsing
+ * failed.
+ * parsedUrls and errors into errors.
+ * @param {!parse_css.Stylesheet} stylesheet
+ * @param {!Array<!parse_css.IdentToken>} mediaTypes
+ * @param {!Array<!parse_css.IdentToken>} mediaFeatures
+ * @param {!Array<!parse_css.ErrorToken>} errors
+ */
+parse_css.parseMediaQueries = function(
+    stylesheet, mediaTypes, mediaFeatures, errors) {
+  const visitor = new MediaQueryVisitor(mediaTypes, mediaFeatures, errors);
+  stylesheet.accept(visitor);
 };

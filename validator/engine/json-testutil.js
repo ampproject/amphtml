@@ -17,6 +17,7 @@
 goog.provide('json_testutil.defaultCmpFn');
 goog.provide('json_testutil.makeJsonKeyCmpFn');
 goog.provide('json_testutil.renderJSON');
+goog.require('goog.asserts');
 
 /**
  * Helper function for renderJSON below.

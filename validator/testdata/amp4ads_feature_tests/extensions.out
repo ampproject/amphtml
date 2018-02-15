@@ -182,3 +182,5 @@ amp4ads_feature_tests/extensions.html:113:2 Only AMP runtime 'script' tags are a
 |  <body></body></html>
 >>                    ^~~~~~~~~
 amp4ads_feature_tests/extensions.html:121:19 The extension 'amp-animation' was found on this page, but is unused. Please remove this extension. [AMP_TAG_PROBLEM]
+>>                    ^~~~~~~~~
+amp4ads_feature_tests/extensions.html:121:19 The extension 'amp-mustache' was found on this page, but is unused. Please remove this extension. [AMP_TAG_PROBLEM]
