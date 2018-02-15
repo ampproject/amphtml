@@ -64,30 +64,30 @@ describe('amp-mustache template', () => {
     expect(result.firstElementChild).to.be.null;
   });
 
-  it('should escape curly braces in output', () => {
+  it('should allow escaped curly braces in output', () => {
     const templateElement = document.createElement('template');
     templateElement./*OK*/innerHTML =
-        'value = <p>{{foo}}</p>';
+        'value = <p>"&lcub;&lcub;&lcub;foo&rcub;&rcub;&rcub;"</p>';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
     const result = template.render({
-      foo: '{{{curly braces}}}',
+      foo: 'bar',
     });
     expect(result./*OK*/innerHTML).to.equal(
-        'value = <p>{{{curly braces}}}</p>');
+        'value = <p>"{{{foo}}}"</p>');
   });
 
-  it('should escape curly braces in attributes', () => {
+  it('should allow escaped curly braces in attributes', () => {
     const templateElement = document.createElement('template');
     templateElement./*OK*/innerHTML =
-        'value = <a href="" title="{{foo}}">abc</a>';
+        'value = <a href="" title="&lcub;;&lcub;foo&rcub;&rcub;">abc</a>';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
     const result = template.render({
-      foo: '{{{curly braces}}}',
+      foo: 'bar',
     });
     expect(result./*OK*/innerHTML).to.equal(
-        'value = <a href="" title="{{{curly braces}}}" target="_top">abc</a>');
+        'value = <a href="" title="{{foo}}" target="_top">abc</a>');
   });
 
   describe('Sanitizing data- attributes', () => {
