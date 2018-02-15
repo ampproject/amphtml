@@ -60,6 +60,7 @@ goog.provide('parse_css.WhitespaceToken');
 goog.provide('parse_css.tokenize');
 goog.require('amp.validator.LIGHT');
 goog.require('amp.validator.ValidationError');
+goog.require('goog.asserts');
 
 /**
  * Returns an array of Tokens.
