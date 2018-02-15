@@ -528,7 +528,7 @@ describes.repeated('', {
       });
     });
 
-    it('should allow rendering responses through templates', () => {
+    it('should allow rendering responses through inlined templates', () => {
       return getAmpForm(getForm(env.win.document, true)).then(ampForm => {
         const form = ampForm.form_;
         // Add a div[submit-error] with a template child.
@@ -567,6 +567,50 @@ describes.repeated('', {
           // Check that form has a rendered div with class .submit-error-message.
           renderedTemplate = form.querySelector('[i-amphtml-rendered]');
           expect(renderedTemplate).to.not.be.null;
+        });
+      });
+    });
+
+    it('should allow rendering responses through referenced templates', () => {
+      return getAmpForm(getForm(env.win.document)).then(ampForm => {
+        const form = ampForm.form_;
+
+        const successTemplate = document.createElement('template');
+        successTemplate.id = 'successTemplate';
+        successTemplate.setAttribute('type', 'amp-mustache');
+        successTemplate.content.appendChild(
+            document.createTextNode('Hello, {{name}}'));
+        form.appendChild(successTemplate);
+
+        const messageContainer = document.createElement('div');
+        messageContainer.id = 'message';
+        messageContainer.setAttribute('submit-success', '');
+        messageContainer.setAttribute('template', 'successTemplate');
+        form.appendChild(messageContainer);
+
+        sandbox.stub(ampForm.xhr_, 'fetch')
+            .returns(Promise.resolve({
+              json: () => {
+                return Promise.resolve({'name': 'John Smith'});
+              },
+            }));
+        const renderedTemplate = document.createElement('div');
+        renderedTemplate.innerText = 'Hello, John Smith';
+        sandbox.stub(ampForm.templates_, 'findAndRenderTemplate')
+            .returns(Promise.resolve(renderedTemplate));
+        const event = {
+          stopImmediatePropagation: sandbox.spy(),
+          target: form,
+          preventDefault: sandbox.spy(),
+        };
+        ampForm.handleSubmitEvent_(event);
+        return whenCalled(ampForm.templates_.findAndRenderTemplate).then(() => {
+          return ampForm.renderTemplatePromiseForTesting();
+        }).then(() => {
+          expect(ampForm.templates_.findAndRenderTemplate).to.be.called;
+          expect(ampForm.templates_.findAndRenderTemplate.calledWith(
+              messageContainer, {'name': 'John Smith'})).to.be.true;
+          expect(messageContainer.firstChild).to.equal(renderedTemplate);
         });
       });
     });
