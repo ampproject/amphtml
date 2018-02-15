@@ -546,6 +546,10 @@ export const adConfig = {
     renderStartImplemented: true,
   },
 
+  medyanet: {
+    renderStartImplemented: true,
+  },
+
   meg: {
     renderStartImplemented: true,
   },
