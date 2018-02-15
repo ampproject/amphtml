@@ -18,6 +18,7 @@
 # templates. These are specific to any particular tag, so must live at
 # the top level of this rules file.
 template_spec_url: "https://www.ampproject.org/docs/reference/components/dynamic/amp-mustache"
+
 tags: {  # amp-mustache
   html_format: AMP
   tag_name: "SCRIPT"
@@ -32,9 +33,10 @@ tags: {  # amp-mustache
   attr_lists: "common-extension-attrs"
 }
 tags: {  # amp-mustache
+  html_format: AMP4ADS
   html_format: AMP4EMAIL
   tag_name: "SCRIPT"
-  spec_name: "SCRIPT[custom-element=amp-mustache] (AMP4EMAIL)"
+  spec_name: "SCRIPT[custom-element=amp-mustache] (AMP4ADS/AMP4EMAIL)"
   extension_spec: {
     name: "amp-mustache"
     is_custom_template: true
