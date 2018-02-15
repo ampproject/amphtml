@@ -211,7 +211,7 @@ When the `amp-form-submit` event fires, it generates the following variables con
 ## Success/Error Response Rendering
 `amp-form` allows publishers to render the responses using [Extended Templates](../../spec/amp-html-format.md#extended-templates).
 
-Using `submit-success` and `submit-error` special marker attributes, publishers can mark any **direct child element of form** and include a `<template></template>` tag inside it to render the response in it.
+Using `submit-success` and `submit-error` special marker attributes, publishers can mark any **direct child element of form** and include a `<template></template>` tag inside it, or a `template="id_of_other_template"` attribute, to render the response in it.
 
 The response is expected to be a valid JSON Object. For example, if the publisher's `action-xhr` endpoint returns the following responses:
 
@@ -234,7 +234,7 @@ The response is expected to be a valid JSON Object. For example, if the publishe
 
 Both success and error responses should have a `Content-Type: application/json` header. `submit-success` will render for all responses that has a status of `2XX`, all other statuses will render `submit-error`.
 
-Publishers can render these in a template inside their forms as follows.
+Publishers can render these in a inlined template inside their forms as follows.
 
 ```html
 <form ...>
@@ -252,6 +252,26 @@ Publishers can render these in a template inside their forms as follows.
       Oops! {{name}}, {{message}}.
     </template>
   </div>
+</form>
+```
+
+  Publishers can render the responses in a referenced template defined earlier in the document by using the template's id as the value of the `template` attribute, set on the elements with the `submit-success` and `submit-error` attributes.
+
+```html
+<template type="amp-mustache" id="submit_success_template">
+  Success! Thanks {{name}} for subscribing! Please make sure to check your email {{email}}
+  to confirm! After that we'll start sending you weekly articles on {{#interests}}<b>{{name}}</b> {{/interests}}.
+</template>
+<template type="amp-mustache" id="submit_error_template">
+  Oops! {{name}}, {{message}}.
+</template>
+
+<form ...>
+  <fieldset>
+  ...
+  </fieldset>
+  <div submit-success template="submit_success_template"></div>
+  <div submit-error template="submit_error_template"></div>
 </form>
 ```
 
