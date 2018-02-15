@@ -163,9 +163,9 @@ const isSearchUrl = (url = '') => {
     return false;
   }
 
-  return lowerUrl.indexOf('addthis') === -1 && (
-    lowerUrl.match(RE_SEARCH_GOOGLE)
-      || lowerUrl.match(RE_SEARCH_AOL) /* search.aol.* /aol/search?q=*/
+  return (lowerUrl.indexOf('addthis') === -1) && (
+    RE_SEARCH_GOOGLE.test(lowerUrl)
+      || RE_SEARCH_AOL.test(lowerUrl) /* search.aol.* /aol/search?q=*/
       || lowerUrl.indexOf('/pagead/aclk?') > -1 /*googleadservices*/
       || lowerUrl.indexOf(com + 'url') > -1 /*bing*/
       || lowerUrl.indexOf(com + 'l.php') > -1 /*facebook graph search*/
@@ -284,7 +284,7 @@ export const isProductPage = (doc, metaElements) => {
  */
 export const getKeywordsString = metaElements => {
   const keywords = metaElements
-      .filter(meta => getDetailsForMeta(meta).name === 'keywords')
+      .filter(meta => getDetailsForMeta(meta).name.toLowerCase() === 'keywords')
       .map(meta => extractKeywordsFromContent(getDetailsForMeta(meta).content))
       .reduce((kws, subKeywords) => kws.concat(subKeywords), []);
 
