@@ -80,7 +80,7 @@ describe('amp-mustache template', () => {
   it('should allow escaped curly braces in attributes', () => {
     const templateElement = document.createElement('template');
     templateElement./*OK*/innerHTML =
-        'value = <a href="" title="&lcub;;&lcub;foo&rcub;&rcub;">abc</a>';
+        'value = <a href="" title="&lcub;&lcub;foo&rcub;&rcub;">abc</a>';
     const template = new AmpMustache(templateElement);
     template.compileCallback();
     const result = template.render({
