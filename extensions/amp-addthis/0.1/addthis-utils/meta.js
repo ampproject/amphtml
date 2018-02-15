@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * Returns a NodeList of Meta Elements (not an Array)
+ * @param {Document} doc
+ * @returns {NodeList}
+ */
 export const getMetaElements = doc => doc.head.querySelectorAll('meta');
 
 export const getDetailsForMeta = meta => {

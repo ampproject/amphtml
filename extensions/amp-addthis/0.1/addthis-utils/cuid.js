@@ -19,38 +19,49 @@ const CUID_SESSION_TIME = Date.now();
 
 /**
  * Get the date from the CUID (first 8 hex digits are the time from epoch in seconds).
- * @param cuid
+ * @param {string} cuid
+ * @returns {Date}
  */
 const getDateFromCuid = cuid => {
-  let date;
+  let date = new Date();
   try {
     date = (new Date((parseInt(cuid.substr(0, 8), 16) * 1000)));
-  } catch (e) {
-    date = new Date();
-  }
-  finally {
-    return date;
-  }
+  } catch (e) {}
+  return date;
 };
 
 /**
  * Check if the CUID is in the future (allowing for up to one day of jitter).
- * @param cuid
+ * @param {string} cuid
+ * @returns {boolean}
  */
 const isCuidInFuture = cuid => {
-  const computedDate = getDateFromCuid(cuid);
-  const date = computedDate.setDate(computedDate.getDate() - 1);
+  const date = getDateFromCuid(cuid);
+  date.setDate(date.getDate() - 1);
+  return isDateInFuture(date);
+};
+
+export const isDateInFuture = date => {
   const now = new Date();
+  if (date.getFullYear() < now.getFullYear()) {
+    return false;
+  }
+  const yearIsLater = date.getFullYear() > now.getFullYear();
+  const yearIsSame = date.getFullYear() === now.getFullYear();
+  const monthIsLater = date.getMonth() > now.getMonth();
+  const monthIsSame = date.getMonth() === now.getMonth();
+  const dateIsLater = date.getDay() > now.getDay();
   return (
-    (date.getFullYear() <= now.getFullYear()) &&
-    (date.getMonth() <= now.getMonth()) &&
-    (date.getDay() <= now.getDay())
+    yearIsLater ||
+    (yearIsSame && monthIsLater) ||
+    (yearIsSame && monthIsSame && dateIsLater)
   );
 };
 
 /**
  * Check that the CUID is a 16 digit hex number that is not in the future.
  * @param cuid
+ * @returns {boolean}
  */
 export const isValidCUID = cuid => {
   return Boolean(cuid && cuid.match(RE_CUID) && !isCuidInFuture(cuid));
@@ -60,6 +71,7 @@ export const isValidCUID = cuid => {
  * Create a 16 digit CUID.
  * 0-8 = The date the CUID was created in seconds in hex format, max 8 digits.
  * 9-15 = Random hex number
+ * @returns {string}
  */
 export const createCUID = () => {
   const suffix = '00000000' +

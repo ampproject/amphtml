@@ -17,9 +17,15 @@ import {API_SERVER} from '../constants';
 import {Services} from '../../../../src/services';
 
 import {addParamsToUrl} from '../../../../src/url';
+import {dict} from '../../../../src/utils/object';
 import {getSessionId} from './session';
 import {pixelDrop} from './pixel';
 
+/**
+ * Gets data to be passed along in request via params
+ * @param {{monitors: *, loc: Location, ampDoc: !../../../../src/service/ampdoc-impl.AmpDoc, pubId: string}} params
+ * @returns {{al: (string|undefined), amp: number, dc: number, dp: string, dt: string, fp: string, ict: string, ivh: number, pct: number, pfm: number, ph: number, pub: string, sh: number, sid: string}}
+ */
 const getEngData = ({monitors, loc, ampDoc, pubId}) => {
   const {
     dwellMonitor,
@@ -48,8 +54,28 @@ const getEngData = ({monitors, loc, ampDoc, pubId}) => {
   };
 };
 
+/**
+ * Makes an ajax request to eng endpoint with params
+ * @param {{monitors: *, loc: Location, ampDoc: !../../../../src/service/ampdoc-impl.AmpDoc, pubId: string}} props
+ */
 export const callEng = props => {
-  const data = getEngData(props);
+  const object = getEngData(props);
+  const data = dict({
+    'al': object.al,
+    'amp': object.amp,
+    'dc': object.dc,
+    'dp': object.dp,
+    'dt': object.dt,
+    'fp': object.fp,
+    'ict': object.ict,
+    'ivh': object.ivh,
+    'pct': object.pct,
+    'pfm': object.pfm,
+    'ph': object.ph,
+    'pub': object.pub,
+    'sh': object.sh,
+    'sid': object.sid,
+  });
   const url = addParamsToUrl(`${API_SERVER}/live/red_lojson/100eng.json`, data);
   const {ampDoc} = props;
 
