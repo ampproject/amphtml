@@ -121,6 +121,10 @@ module.exports = {
       // Dramatically speeds up iframe creation time.
       flags: ['--disable-extensions'],
     },
+    Chrome_no_extensions_headless: {
+      base: 'ChromeHeadless',
+      flags: ['--disable-extensions'],
+    },
     // SauceLabs configurations.
     // New configurations can be created here:
     // https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
