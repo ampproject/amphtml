@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../../../src/amp-events';
 import {CommonSignals} from '../../../../src/common-signals';
 import {
   childElement,
@@ -81,7 +82,7 @@ export class LightboxManager {
      * Cache for the `maybeInit()` call.
      * @private {?Promise}
      **/
-    this.initPromise_ = null;
+    this.scanPromise_ = null;
 
     /**
      * Ordered lists of lightboxable elements according to group
@@ -98,6 +99,12 @@ export class LightboxManager {
     this.counter_ = 0;
 
     /**
+     * List of lightbox elements that have already been scanned.
+     * @private {!Array<!Element>}
+     */
+    this.seen_ = [];
+
+    /**
      * If the lightbox group is a carousel, this object contains a
      * mapping of the lightbox group id to the carousel element.
      * @private {!Object<string, !LightboxedCarouselMetadataDef>}
@@ -110,11 +117,15 @@ export class LightboxManager {
    * @return {!Promise}
    */
   maybeInit() {
-    if (this.initPromise_) {
-      return this.initPromise_;
+    if (this.scanPromise_) {
+      return this.scanPromise_;
     }
-    this.initPromise_ = this.scanLightboxables_();
-    return this.initPromise_;
+    this.scanPromise_ = this.scanLightboxables_();
+    // Rescan whenever DOM changes happen.
+    this.ampdoc_.getRootNode().addEventListener(AmpEvents.DOM_UPDATE, () => {
+      this.scanPromise_ = this.scanLightboxables_();
+    });
+    return this.scanPromise_;
   }
 
   /**
@@ -220,6 +231,10 @@ export class LightboxManager {
    * @private
    */
   processLightboxElement_(element) {
+    if (this.seen_.includes(element)) {
+      return;
+    }
+    this.seen_.push(element);
     if (element.tagName.toLowerCase() == CAROUSEL_TAG) {
       this.processLightboxCarousel_(element);
     } else {

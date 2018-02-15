@@ -121,7 +121,6 @@ module.exports = {
     '!**/*.extern.js',
     '!{node_modules,build,dist,dist.3p,dist.tools,' +
         'third_party}/**/*.*',
-    '!build-system/eslint-rules/**/*.*',
     '!{testing,examples}/**/*.*',
     // TODO: temporary, remove when validator is up to date
     '!validator/**/*.*',
@@ -132,6 +131,7 @@ module.exports = {
     '!extensions/amp-animation/0.1/css-expr-impl.js',
     '!extensions/amp-bind/0.1/bind-expr-impl.js',
     '!test/coverage/**/*.*',
+    '!test/visual-diff/visual-tests.js',
   ],
   jsonGlobs: [
     '**/*.json',
@@ -161,7 +161,9 @@ module.exports = {
     // of the AMP runtime, so shouldn't be checked.
     '!extensions/amp-a4a/*/test/testdata/*.js',
     '!examples/*.js',
+    '!examples/visual-tests/**/*',
     '!test/coverage/**/*.*',
+    '!test/visual-diff/visual-tests.js',
   ],
   changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/,
 };

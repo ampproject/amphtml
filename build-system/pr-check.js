@@ -165,7 +165,7 @@ function isOwnersFile(filePath) {
  * @return {boolean}
  */
 function isDocFile(filePath) {
-  return path.extname(filePath) == '.md';
+  return path.extname(filePath) == '.md' && !filePath.startsWith('examples/');
 }
 
 /**
@@ -176,7 +176,7 @@ function isDocFile(filePath) {
 function isVisualDiffFile(filePath) {
   const filename = path.basename(filePath);
   return (filename == 'visual-diff.rb' ||
-          filename == 'visual-tests.json' ||
+          filename == 'visual-tests.js' ||
           filePath.startsWith('examples/visual-tests/'));
 }
 
@@ -273,7 +273,7 @@ const command = {
     timedExecOrDie('gulp check-types');
   },
   runUnitTests: function() {
-    let cmd = 'gulp test --unit --nobuild';
+    let cmd = 'gulp test --unit --nobuild --headless';
     if (argv.files) {
       cmd = cmd + ' --files ' + argv.files;
     }
@@ -287,7 +287,7 @@ const command = {
   },
   runIntegrationTests: function(compiled) {
     // Integration tests on chrome, or on all saucelabs browsers if set up
-    let cmd = 'gulp test --nobuild --integration';
+    let cmd = 'gulp test --integration --nobuild';
     if (argv.files) {
       cmd = cmd + ' --files ' + argv.files;
     }
@@ -296,6 +296,8 @@ const command = {
     }
     if (!!process.env.SAUCE_USERNAME && !!process.env.SAUCE_ACCESS_KEY) {
       cmd += ' --saucelabs';
+    } else {
+      cmd += ' --headless';
     }
     timedExecOrDie(cmd);
   },
@@ -309,7 +311,7 @@ const command = {
           colors.cyan('PERCY_TOKEN') + '. Skipping visual diff tests.');
       return;
     }
-    let cmd = 'gulp visual-diff';
+    let cmd = 'gulp visual-diff --headless';
     if (opt_mode === 'skip') {
       cmd += ' --skip';
     } else if (opt_mode === 'master') {
@@ -350,7 +352,7 @@ function runAllCommands() {
     command.runJsonCheck();
     command.runDepAndTypeChecks();
     command.runUnitTests();
-    command.verifyVisualDiffTests();
+    // command.verifyVisualDiffTests(); is flaky due to Amp By Example tests
     // command.testDocumentLinks() is skipped during push builds.
     command.buildValidatorWebUI();
     command.buildValidator();
@@ -382,7 +384,7 @@ function runAllCommandsLocally() {
   command.runVisualDiffTests();
   command.runUnitTests();
   command.runIntegrationTests(/* compiled */ false);
-  command.verifyVisualDiffTests();
+  // command.verifyVisualDiffTests(); is flaky due to Amp By Example tests
 
   // Validator tests.
   command.buildValidatorWebUI();

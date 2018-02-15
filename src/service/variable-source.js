@@ -24,7 +24,7 @@ let ResolverReturnDef;
 export let SyncResolverDef;
 
 /** @typedef {function(...*):!Promise<ResolverReturnDef>} */
-let AsyncResolverDef;
+export let AsyncResolverDef;
 
 /** @typedef {{sync: SyncResolverDef, async: AsyncResolverDef}} */
 let ReplacementDef;
