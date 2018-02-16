@@ -37,19 +37,17 @@ def Die(msg):
   sys.exit(1)
 
 
-def GetNodeJsCmd():
-  """Ensure Node.js is installed and return the proper command to run."""
+def EnsureNodeJsIsInstalled():
+  """Ensure Node.js is installed and that 'node' is the command to run."""
   logging.info('entering ...')
 
-  for cmd in ['node', 'nodejs']:
-    try:
-      output = subprocess.check_output([cmd, '--eval', 'console.log("42")'])
-      if output.strip() == '42':
-        logging.info('... done')
-        return cmd
-    except (subprocess.CalledProcessError, OSError):
-      continue
-  Die('Node.js not found. Try "apt-get install nodejs".')
+  try:
+    output = subprocess.check_output(['node', '--eval', 'console.log("42")'])
+    if output.strip() == 42:
+      return;
+  except (subprocess.CalledProcessError, OSError):
+    pass
+  Die('Node.js not found. Try "apt-get install nodejs" or install NVM.')
 
 
 def CheckPrereqs():
@@ -388,18 +386,17 @@ def CompileValidatorMinified(out_dir):
   logging.info('... done')
 
 
-def RunSmokeTest(out_dir, nodejs_cmd):
+def RunSmokeTest(out_dir):
   """Runs a smoke test (minimum valid AMP and empty html file).
 
   Args:
     out_dir: output directory
-    nodejs_cmd: the command for calling Node.js
   """
   logging.info('entering ...')
   # Run index.js on the minimum valid amp and observe that it passes.
   p = subprocess.Popen(
       [
-          nodejs_cmd, 'nodejs/index.js', '--validator_js',
+          'node', 'nodejs/index.js', '--validator_js',
           '%s/validator_minified.js' % out_dir,
           'testdata/feature_tests/minimum_valid_amp.html'
       ],
@@ -414,7 +411,7 @@ def RunSmokeTest(out_dir, nodejs_cmd):
   # Run index.js on an empty file and observe that it fails.
   p = subprocess.Popen(
       [
-          nodejs_cmd, 'nodejs/index.js', '--validator_js',
+          'node', 'nodejs/index.js', '--validator_js',
           '%s/validator_minified.js' % out_dir,
           'testdata/feature_tests/empty.html'
       ],
@@ -429,15 +426,12 @@ def RunSmokeTest(out_dir, nodejs_cmd):
   logging.info('... done')
 
 
-def RunIndexTest(nodejs_cmd):
+def RunIndexTest()
   """Runs the index_test.js, which tests the NodeJS API.
-
-  Args:
-    nodejs_cmd: the command for calling Node.js
   """
   logging.info('entering ...')
   p = subprocess.Popen(
-      [nodejs_cmd, './index_test.js'],
+      ['node', './index_test.js'],
       stdout=subprocess.PIPE,
       stderr=subprocess.PIPE,
       cwd='nodejs')
@@ -644,7 +638,7 @@ def GenerateTestRunner(out_dir):
   # to the validator rather than a child directory.
   if not os.path.isdir(extensions_dir):
     extensions_dir = '../extensions'
-  f.write("""#!/usr/bin/nodejs
+  f.write("""#!/usr/bin/env node
              global.assert = require('assert');
              global.fs = require('fs');
              global.path = require('path');
@@ -668,16 +662,15 @@ def GenerateTestRunner(out_dir):
   logging.info('... success')
 
 
-def RunTests(out_dir, nodejs_cmd):
+def RunTests(out_dir)
   """Runs all the minified tests.
 
   Args:
     out_dir: directory name of the output directory. Must not have slashes,
       dots, etc.
-    nodejs_cmd: the command for calling Node.js
   """
   logging.info('entering ...')
-  subprocess.check_call([nodejs_cmd, '%s/test_runner' % out_dir])
+  subprocess.check_call(['node', '%s/test_runner' % out_dir])
   logging.info('... success')
 
 
@@ -686,7 +679,7 @@ def Main():
   logging.basicConfig(
       format='[[%(filename)s %(funcName)s]] - %(message)s',
       level=(logging.ERROR if os.environ.get('TRAVIS') else logging.INFO))
-  nodejs_cmd = GetNodeJsCmd()
+  EnsureNodeJsIsInstalled()
   CheckPrereqs()
   InstallNodeDependencies()
   SetupOutDir(out_dir='dist')
@@ -697,8 +690,8 @@ def Main():
   GenValidatorProtoGeneratedLightAmpJs(out_dir='dist')
   GenValidatorGeneratedLightAmpJs(out_dir='dist')
   CompileValidatorMinified(out_dir='dist')
-  RunSmokeTest(out_dir='dist', nodejs_cmd=nodejs_cmd)
-  RunIndexTest(nodejs_cmd=nodejs_cmd)
+  RunSmokeTest(out_dir='dist')
+  RunIndexTest()
   CompileValidatorTestMinified(out_dir='dist')
   CompileValidatorLightTestMinified(out_dir='dist')
   CompileHtmlparserTestMinified(out_dir='dist')
@@ -708,7 +701,7 @@ def Main():
   CompileKeyframesParseCssTestMinified(out_dir='dist')
   CompileParseSrcsetTestMinified(out_dir='dist')
   GenerateTestRunner(out_dir='dist')
-  RunTests(out_dir='dist', nodejs_cmd=nodejs_cmd)
+  RunTests(out_dir='dist')
 
 
 if __name__ == '__main__':
