@@ -17,6 +17,10 @@
 import {CSS} from '../../../build/amp-subscriptions-0.1.css';
 import {EntitlementStore} from './entitlement-store';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
+import {
+  PageConfig,
+  PageConfigResolver,
+} from '../../../third_party/subscriptions-project/config';
 import {Renderer} from './renderer';
 import {SubscriptionPlatform} from './subscription-platform';
 import {installStylesForDoc} from '../../../src/style-installer';
@@ -39,6 +43,9 @@ export class SubscriptionService {
     /** @private @const {!Renderer} */
     this.renderer_ = new Renderer(ampdoc);
 
+    /** @private {?PageConfig} */
+    this.pageConfig_ = null;
+
     /** @private @const {!Array<!SubscriptionPlatform>} */
     this.subscriptionPlatforms_ = [];
 
@@ -48,11 +55,13 @@ export class SubscriptionService {
 
   /**
    * @private
-   * @return {Promise<Object>}
+   * @return {!Promise}
    */
   initialize_() {
+    const pageConfigResolver = new PageConfigResolver(this.ampdoc_.win);
+
     // TODO(@prateekbh): read this config from the document.
-    const config = [
+    const platformConfigs = [
       {
         paywallUrl: '/subscription/1/entitlements',
       },
@@ -61,16 +70,16 @@ export class SubscriptionService {
       },
     ];
 
-    return new Promise(resolve => {
-      config.forEach(subscriptionPlatformConfig => {
+    return pageConfigResolver.resolveConfig().then(pageConfig => {
+      this.pageConfig_ = pageConfig;
+      platformConfigs.forEach(platformConfig => {
         this.subscriptionPlatforms_.push(
             new LocalSubscriptionPlatform(
                 this.ampdoc_,
-                subscriptionPlatformConfig
+                platformConfig
             )
         );
       });
-      resolve();
     });
   }
 
@@ -112,6 +121,14 @@ export class SubscriptionService {
 /** @package @VisibleForTesting */
 export function getPlatformClassForTesting() {
   return SubscriptionPlatform;
+}
+
+/**
+ * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
+ * @package @VisibleForTesting
+ */
+export function getPageConfigClassForTesting() {
+  return PageConfig;
 }
 
 

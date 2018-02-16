@@ -862,12 +862,8 @@ app.use('/list/vegetable-data/get', (req, res) => {
 app.use('/subscription/:id/entitlements', (req, res) => {
   assertCors(req, res, ['GET']);
   res.json({
-    entitlements: [
-      {
-        source: req.params.id,
-        products: ['product1', 'product2'],
-      },
-    ],
+    source: req.params.id,
+    products: ['product1', 'product2'],
   });
 });
 

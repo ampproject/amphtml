@@ -77,6 +77,10 @@ exports.rules = [
           'third_party/timeagojs/timeago-locales.js',
       'extensions/amp-date-picker/**->third_party/react-dates/bundle.js',
       'extensions/amp-date-picker/**->third_party/rrule/rrule.js',
+      'extensions/amp-subscriptions/**/*.js->' +
+          'third_party/subscriptions-project/apis.js',
+      'extensions/amp-subscriptions/**/*.js->' +
+          'third_party/subscriptions-project/config.js',
     ],
   },
   // Rules for 3p
