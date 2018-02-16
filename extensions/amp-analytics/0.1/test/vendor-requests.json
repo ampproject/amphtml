@@ -296,5 +296,10 @@
     "host": "https://ibeat.indiatimes.com",
     "base": "https://ibeat.indiatimes.com/iBeat/pageTrendlogAmp.html",
     "pageview": "https://ibeat.indiatimes.com/iBeat/pageTrendlogAmp.html?&h=$h&d=$h&url=$url&k=$key&ts=$time&ch=$channel&sid=$uid&at=$agentType&ref=_document_referrer_&aid=$aid&loc=1&ct=1&cat=$cat&scat=$scat&ac=1&tg=$tags&ctids=$catIds&pts=$pagePublishTime&auth=$author&pos=$position&iBeatField=$ibeatFields&cid=_client_id_"
+  },
+  "umenganalytics": {
+    "base": "https://b.cnzz.com/utrack?&_siteid=$siteid&_distinct_id=_client_id_&_t=_timestamp_&_s=google&_b=web&_r=_external_referrer_&_h=_screen_height_&_w=_screen_width_&_ivt=$initial_view_time",
+    "pageview": "https://b.cnzz.com/utrack?&_siteid=$siteid&_distinct_id=_client_id_&_t=_timestamp_&_s=google&_b=web&_r=_external_referrer_&_h=_screen_height_&_w=_screen_width_&_ivt=$initial_view_time&_ename=$w_page_view&_eprops=$eventProps",
+    "event": "https://b.cnzz.com/utrack?&_siteid=$siteid&_distinct_id=_client_id_&_t=_timestamp_&_s=google&_b=web&_r=_external_referrer_&_h=_screen_height_&_w=_screen_width_&_ivt=$initial_view_time&_ename=$eventName&_eprops=$eventProps"
   }
 }
