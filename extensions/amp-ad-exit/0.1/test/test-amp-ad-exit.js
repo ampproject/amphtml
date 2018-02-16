@@ -118,12 +118,13 @@ describes.realWin('amp-ad-exit', {
   let win;
   let element;
 
-  function makeClickEvent(time = 0, x = 0, y = 0) {
+  function makeClickEvent(time = 0, x = 0, y = 0, target = win.document.body) {
     sandbox.clock.tick(time);
     return {
       preventDefault: sandbox.spy(),
       clientX: x,
       clientY: y,
+      target,
     };
   }
 
@@ -204,7 +205,7 @@ describes.realWin('amp-ad-exit', {
   });
 
   it('should stop event propagation', () => {
-    const event = makeClickEvent();
+    const event = makeClickEvent(1001);
     element.implementation_.executeAction({
       method: 'exit',
       args: {target: 'simple'},
@@ -553,6 +554,19 @@ describes.realWin('amp-ad-exit', {
     expect(open).to.have.been.calledTwice;
     expect(open).to.have.been.calledWith(
         EXIT_CONFIG.targets.borderProtection.finalUrl, '_blank');
+  });
+
+  it('should not trigger for amp-carousel buttons', () => {
+    const open = sandbox.stub(win, 'open');
+    const fakeCarouselButton = document.createElement('div');
+    fakeCarouselButton.classList.add('amp-carousel-button');
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'simple'},
+      event: makeClickEvent(1001, 200, 300, fakeCarouselButton),
+      satisfiesTrust: () => true,
+    });
+    expect(open).to.not.have.been.called;
   });
 
   it('should replace custom URL variables with 3P Analytics defaults', () => {
