@@ -687,6 +687,12 @@ def Main():
       format='[[%(filename)s %(funcName)s]] - %(message)s',
       level=(logging.ERROR if os.environ.get('TRAVIS') else logging.INFO))
   nodejs_cmd = GetNodeJsCmd()
+  if nodejs_cmd == 'nodejs':
+    logging.error(
+        'We found a nodejs binary on your system, but no node binary. '
+        'You\'ll need to fix this, perhaps by installing NVM or '
+        'by installing nodejs-legacy.')
+    system.exit(2)
   CheckPrereqs()
   InstallNodeDependencies()
   SetupOutDir(out_dir='dist')
