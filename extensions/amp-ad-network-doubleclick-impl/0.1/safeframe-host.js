@@ -67,51 +67,24 @@ function safeframeListener() {
   if (event.origin != SAFEFRAME_ORIGIN || !data) {
     return;
   }
+  let payload;
+  if (!data[MESSAGE_FIELDS.SENTINEL]) {
+    payload = tryParseJson(data[MESSAGE_FIELDS.PAYLOAD]) || {};
+  }
   /**
    * If the sentinel is provided at the top level, this is a message simply
    * to setup the postMessage channel, so set it up.
    */
-  if (data[MESSAGE_FIELDS.SENTINEL]) {
-    receiveSetupMessage(data);
-  } else {
-    receiveStandardMessage(data);
-  }
-}
-
-/**
- * Handles all non-setup messages.
- * @param {!Object} data Message data from the postMessage received from
- *   the safeframe.
- */
-function receiveStandardMessage(data) {
-  const payload = tryParseJson(data[MESSAGE_FIELDS.PAYLOAD]);
-  if (!payload) {
-    return;
-  }
-  const safeframeHost = safeframeHosts[payload['sentinel']];
+  const sentinel = data[MESSAGE_FIELDS.SENTINEL] || payload['sentinel'];
+  const safeframeHost = safeframeHosts[sentinel];
   if (!safeframeHost) {
-    dev().warn(
-        TAG, `Safeframe Host for sentinel ${payload['sentinel']} not found.`);
-    return;
-  }
-  safeframeHost.processMessage(payload, data[MESSAGE_FIELDS.SERVICE]);
-}
-
-
-/**
- * Handles the setup message from the safeframe.
- * @param {Object} data Message data from the postMessage received from
- *   the safeframe.
- */
-function receiveSetupMessage(data) {
-  const safeframeHost = safeframeHosts[data[MESSAGE_FIELDS.SENTINEL]];
-  if (!safeframeHost) {
-    dev().warn(TAG, 'Safeframe Host for sentinel ' +
-               `${data[MESSAGE_FIELDS.SENTINEL]} not found.`);
+    dev().warn(TAG, `Safeframe Host for sentinel: ${sentinel} not found.`);
     return;
   }
   if (!safeframeHost.channel) {
     safeframeHost.connectMessagingChannel(data[MESSAGE_FIELDS.CHANNEL]);
+  } else {
+    safeframeHost.processMessage(payload, data[MESSAGE_FIELDS.SERVICE]);
   }
 }
 
@@ -300,14 +273,20 @@ export class SafeframeHostApi {
     let iframeRect;
     if (this.iframe_) {
       iframeRect = this.iframe_.getBoundingClientRect();
-      this.iframeOffsets['dT'] = iframeRect.top - changes.boundingClientRect.top;
-      this.iframeOffsets['dR'] = iframeRect.right - changes.boundingClientRect.right;
-      this.iframeOffsets['dL'] = iframeRect.left - changes.boundingClientRect.left;
-      this.iframeOffsets['dB'] = iframeRect.bottom - changes.boundingClientRect.bottom;
+      this.iframeOffsets['dT'] = iframeRect.top -
+          changes.boundingClientRect.top;
+      this.iframeOffsets['dR'] = iframeRect.right -
+          changes.boundingClientRect.right;
+      this.iframeOffsets['dL'] = iframeRect.left -
+          changes.boundingClientRect.left;
+      this.iframeOffsets['dB'] = iframeRect.bottom -
+          changes.boundingClientRect.bottom;
     } else {
       iframeRect = this.creativeSize_;
-      this.iframeOffsets['dL'] = (changes.boundingClientRect.width - iframeRect.width) / 2;
-      this.iframeOffsets['dB'] = (changes.boundingClientRect.height - iframeRect.height) / 2;
+      this.iframeOffsets['dL'] = (changes.boundingClientRect.width -
+                                  iframeRect.width) / 2;
+      this.iframeOffsets['dB'] = (changes.boundingClientRect.height -
+                                  iframeRect.height) / 2;
       this.iframeOffsets['dR'] = -this.iframeOffsets['dL'];
       this.iframeOffsets['dT'] = -this.iframeOffsets['dB'];
     }
@@ -369,7 +348,7 @@ export class SafeframeHostApi {
    */
   getPercInView(rootBoundEnd, boundingRectStart, boundingRectEnd) {
     const lengthInView = (boundingRectEnd >= rootBoundEnd) ?
-          rootBoundEnd - boundingRectStart : boundingRectEnd;
+      rootBoundEnd - boundingRectStart : boundingRectEnd;
     const percInView = lengthInView / (boundingRectEnd - boundingRectStart);
     if (percInView < 0) {
       return 0;
@@ -378,7 +357,7 @@ export class SafeframeHostApi {
     } else {
       return percInView;
     }
-  };
+  }
 
   /**
    * Handles serializing and sending messages to the safeframe.
@@ -438,13 +417,14 @@ export class SafeframeHostApi {
    */
   handleExpandRequest_(payload) {
     let expandHeight = payload.expand_b + payload.expand_t;
-    let expandWidth = payload.expand_r +  payload.expand_l;
+    let expandWidth = payload.expand_r + payload.expand_l;
     // We assume that a fair amount of usage of this API will try to pass the final
     // size of the iframe that is desired, instead of the correct usage which is
     // specify how much to expand by. We try to protect against this, by detecting
     // if the requested expansion size matches the size of the amp-ad element, and
     // if so we assume that the desired effect was to resize to fill the element.
-    if (expandWidth != this.initialWidth_ || expandHeight != this.initialHeight_) {
+    if (expandWidth != this.initialWidth_ ||
+        expandHeight != this.initialHeight_) {
       expandWidth += Number(this.iframe_.width);
       expandHeight += Number(this.iframe_.height);
     }
