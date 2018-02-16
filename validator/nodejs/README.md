@@ -85,3 +85,6 @@ As expected, this emits errors because the provided string in the example, `<htm
 
 ### 1.0.21
 * --html_format=AMP4ADS is no longer experimental.
+
+### 1.0.22
+* --html_format=AMP4EMAIL added.
