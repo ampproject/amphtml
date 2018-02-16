@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Entitlement, Entitlements} from './entitlements';
+import {Entitlement, Entitlements} from '../../../third_party/subscriptions-project/apis';
 
 import {Services} from '../../../src/services';
 import {user} from '../../../src/log';
@@ -52,18 +52,11 @@ export class LocalSubscriptionPlatform {
     return this.xhr_
         .fetchJson(this.serviceConfig_['paywallUrl'])
         .then(res => res.json())
-        .then(entitlementJson => {
-          const entitlements = entitlementJson.entitlements.map(entitlement => {
-            return new Entitlement(
-                entitlement['source'] || this.serviceConfig_['serviceId'],
-                entitlement['products'],
-                ''
-            );
-          });
+        .then(resJson => {
           return new Entitlements(
               this.serviceConfig_['serviceId'],
-              JSON.stringify(entitlementJson),
-              entitlements,
+              JSON.stringify(resJson),
+              Entitlement.parseListFromJson(resJson),
               'product1' // TODO(@prateekbh): read this from pageConfig
           );
         });

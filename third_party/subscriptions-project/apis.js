@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,36 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ /** Version: 0.1.17-1518718881304 */
+'use strict';
 
-// TODO(@prateekbh): Remove this function from here after linking this file from subscription repo.
-/**
- * Implements `Array.find()` method that's not yet available in all browsers.
- *
- * @param {?Array<T>} array
- * @param {function(T, number, !Array<T>):boolean} predicate
- * @return {?T}
- * @template T
- */
-export function findInArray(array, predicate) {
-  if (!array) {
-    return null;
-  }
-  const len = array.length || 0;
-  if (len > 0) {
-    for (let i = 0; i < len; i++) {
-      const other = array[i];
-      if (predicate(other, i, array)) {
-        return other;
-      }
-    }
-  }
-  return null;
-}
+
 
 /**
  * The holder of the entitlements for a service.
  */
-export class Entitlements {
+class Entitlements {
 
   /**
    * @param {string} service
@@ -125,12 +104,14 @@ export class Entitlements {
    * @return {?Entitlement}
    */
   getEntitlementFor(product) {
-    if (!product) {
-      return null;
+    if (product && this.entitlements.length > 0) {
+      for (let i = 0; i < this.entitlements.length; i++) {
+        if (this.entitlements[i].enables(product)) {
+          return this.entitlements[i];
+        }
+      }
     }
-    return findInArray(this.entitlements, entitlement => {
-      return entitlement.enables(product);
-    });
+    return null;
   }
 }
 
@@ -138,7 +119,7 @@ export class Entitlements {
 /**
  * The single entitlement object.
  */
-export class Entitlement {
+class Entitlement {
 
   /**
    * @param {string} source
@@ -185,4 +166,39 @@ export class Entitlement {
     }
     return this.products.includes(product);
   }
+
+  /**
+   * @param {?Object} json
+   * @return {!Entitlement}
+   */
+  static parseFromJson(json) {
+    if (!json) {
+      json = {};
+    }
+    const source = json['source'] || '';
+    const products = json['products'] || [];
+    const subscriptionToken = json['subscriptionToken'];
+    return new Entitlement(source, products, subscriptionToken);
+  }
+
+  /**
+   * The JSON is expected in one of the forms:
+   * - Single entitlement: `{products: [], ...}`.
+   * - A list of entitlements: `[{products: [], ...}, {...}]`.
+   * @param {!Object|!Array<!Object>} json
+   * @return {!Array<!Entitlement>}
+   */
+  static parseListFromJson(json) {
+    const jsonList = Array.isArray(json) ?
+        /** @type {!Array<Object>} */ (json) : [json];
+    return jsonList.map(json => Entitlement.parseFromJson(json));
+  }
 }
+
+
+
+
+export {
+  Entitlements,
+  Entitlement,
+};
