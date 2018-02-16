@@ -224,9 +224,19 @@ class AmpAccordion extends AMP.BaseElement {
       } else {
         toExpand = !section.hasAttribute('expanded');
       }
+
       if (toExpand) {
         section.setAttribute('expanded', '');
         header.setAttribute('aria-expanded', 'true');
+        // if expand-single-section is set, only allow one <section> to be expanded at a time
+        if (this.element.hasAttribute('expand-single-section')) {
+          this.sections_.forEach(sectionIter => {
+            if (sectionIter != section) {
+              sectionIter.removeAttribute('expanded');
+              sectionIter.children[0].setAttribute('aria-expanded', 'false');
+            }
+          });
+        }
       } else {
         section.removeAttribute('expanded');
         header.setAttribute('aria-expanded', 'false');
