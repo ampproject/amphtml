@@ -20,7 +20,7 @@ import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {
   PageConfig,
   PageConfigResolver,
-} from 'third_party/subscriptions-project/config';
+} from '../../../third_party/subscriptions-project/config';
 import {Renderer} from './renderer';
 import {SubscriptionPlatform} from './subscription-platform';
 import {installStylesForDoc} from '../../../src/style-installer';

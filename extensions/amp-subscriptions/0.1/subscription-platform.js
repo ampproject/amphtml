@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Entitlements} from 'third_party/subscriptions-project/apis';
+import {Entitlements} from '../../../third_party/subscriptions-project/apis';
 
 
 /**
