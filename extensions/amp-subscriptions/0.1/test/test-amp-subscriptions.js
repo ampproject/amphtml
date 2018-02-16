@@ -33,7 +33,7 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
     subscriptionService = new SubscriptionService(ampdoc);
     pageConfig = new PageConfig('example.org:basic', true);
     sandbox.stub(PageConfigResolver.prototype, 'resolveConfig')
-      .callsFake(() => Promise.resolve(pageConfig));
+        .callsFake(() => Promise.resolve(pageConfig));
   });
 
 
