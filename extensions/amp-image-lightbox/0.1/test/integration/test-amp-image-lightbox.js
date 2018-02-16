@@ -67,7 +67,6 @@ describe.configure().run('amp-image-lightbox', function() {
         expect(imageSelection.length).to.equal(1);
         const image = imageSelection[0];
         expect(image.tagName).to.equal('IMG');
-        return Promise.resolve();
       });
     });
   });
