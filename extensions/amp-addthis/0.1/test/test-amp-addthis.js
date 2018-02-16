@@ -130,8 +130,8 @@ describes.realWin('amp-addthis', {
   });
 
   it('registers the frame with the configManager on layout', () => {
-    return getAT({pubId, widgetId}).then(({at, atIframeLoadPromise}) => {
-      const obj = at.implementation_;
+    return getAT({pubId, widgetId}).then(() => {
+      //const obj = at.implementation_;
 
       expect(registerStub.calledOnce).to.equal(true);
       /*expect(registerStub.calledWithExactly({
