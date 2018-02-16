@@ -34,6 +34,10 @@ limitations under the License.
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>nodisplay</td>
   </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-lightbox-gallery/">amp-lightbox-gallery</a> sample.</td>
+  </tr>
 </table>
 
 ## Overview
@@ -47,11 +51,12 @@ To use `amp-lightbox-gallery`, ensure the required script is included in your `<
 ### Lightbox with `<amp-img>`
 
 ```html
-<amp-img src="image1" width="200" height="100" lightbox></amp-img>
-<amp-img src="image2" width="200" height="100" lightbox></amp-img>
+<amp-img src="cat.jpg" width="100" height="100" lightbox></amp-img>
+<amp-img src="dog.jpg" width="100" height="100" lightbox></amp-img>
+<amp-img src="bird.jpg" width="100" height="100" lightbox></amp-img>
 ```
 
- Tapping on any `<amp-img>` will open the image in a lightbox gallery. The lightbox gallery does image-handling (e.g. zoom and pan), enables swiping to navigate between images, and offers a thumbnail gallery view for browsing all picture thumbnails in a grid.
+Tapping on any `<amp-img>` opens the image in a lightbox gallery. The lightbox gallery does image-handling (e.g., zoom and pan), enables swiping to navigate between images, and offers a thumbnail gallery view for browsing all picture thumbnails in a grid.
 
 ### Lightbox with `<amp-carousel>`
 
