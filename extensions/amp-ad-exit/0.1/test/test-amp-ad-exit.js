@@ -86,6 +86,10 @@ const EXIT_CONFIG = {
         },
       },
     },
+    inactiveElementTest: {
+      'finalUrl': 'http://localhost:8000/simple',
+      'filters': ['unclickableFilter'],
+    },
   },
   filters: {
     'twoSecond': {
@@ -104,6 +108,10 @@ const EXIT_CONFIG = {
       right: 20,
       bottom: 30,
       relativeTo: '#ad',
+    },
+    unclickableFilter: {
+      type: 'inactiveElement',
+      selector: '#unclickable',
     },
   },
 };
@@ -567,6 +575,26 @@ describes.realWin('amp-ad-exit', {
       satisfiesTrust: () => true,
     });
     expect(open).to.not.have.been.called;
+  });
+
+  it('should not trigger for elements matching InactiveElementFilter', () => {
+    const open = sandbox.stub(win, 'open');
+    const unclickable = document.createElement('span');
+    unclickable.id = 'unclickable';
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'inactiveElementTest'},
+      event: makeClickEvent(1001, 200, 300, unclickable),
+      satisfiesTrust: () => true,
+    });
+    expect(open).to.not.have.been.called;
+    element.implementation_.executeAction({
+      method: 'exit',
+      args: {target: 'inactiveElementTest'},
+      event: makeClickEvent(1001, 200, 300, win.document.body),
+      satisfiesTrust: () => true,
+    });
+    expect(open).to.have.been.called;
   });
 
   it('should replace custom URL variables with 3P Analytics defaults', () => {

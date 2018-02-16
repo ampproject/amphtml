@@ -16,8 +16,8 @@
 
 import {ClickDelayFilter} from './click-delay';
 import {ClickLocationFilter} from './click-location';
-import {InactiveElementFilter} from './inactive-element';
 import {FilterType} from './filter';
+import {InactiveElementFilter} from './inactive-element';
 
 export function createFilter(name, spec, adExitElement) {
   switch (spec.type) {
