@@ -331,7 +331,7 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.fromResumeCallback = false;
 
-    /** @protected {string} */
+    /** @type {string} */
     this.safeframeVersion = DEFAULT_SAFEFRAME_VERSION;
 
     /**
@@ -449,6 +449,13 @@ export class AmpA4A extends AMP.BaseElement {
    */
   isValidElement() {
     return true;
+  }
+
+  /**
+   * @return {?({width, height}|../../../src/layout-rect.LayoutRectDef)}
+   */
+  getCreativeSize() {
+    return this.creativeSize_;
   }
 
   /**
@@ -1746,11 +1753,9 @@ export class AmpA4A extends AMP.BaseElement {
    * attribute.
    * @param {boolean=} opt_isSafeframe Whether creative is rendering into
    *   a safeframe.
-   * @return {!JsonObject}
+   * @return {!JsonObject|undefined}
    */
-  getAdditionalContextMetadata(opt_isSafeframe) {
-    return /** @type {!JsonObject} */ ({});
-  }
+  getAdditionalContextMetadata(opt_isSafeframe) {}
 }
 
 /**

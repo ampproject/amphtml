@@ -69,13 +69,13 @@ function safeframeListener() {
   }
   let payload;
   if (!data[MESSAGE_FIELDS.SENTINEL]) {
-    payload = tryParseJson(data[MESSAGE_FIELDS.PAYLOAD]) || {};
+    payload = tryParseJson(data[MESSAGE_FIELDS.PAYLOAD]);
   }
   /**
    * If the sentinel is provided at the top level, this is a message simply
    * to setup the postMessage channel, so set it up.
    */
-  const sentinel = data[MESSAGE_FIELDS.SENTINEL] || payload['sentinel'];
+  const sentinel = data[MESSAGE_FIELDS.SENTINEL] || (payload || {})['sentinel'];
   const safeframeHost = safeframeHosts[sentinel];
   if (!safeframeHost) {
     dev().warn(TAG, `Safeframe Host for sentinel: ${sentinel} not found.`);
@@ -83,7 +83,7 @@ function safeframeListener() {
   }
   if (!safeframeHost.channel) {
     safeframeHost.connectMessagingChannel(data[MESSAGE_FIELDS.CHANNEL]);
-  } else {
+  } else if (payload) {
     safeframeHost.processMessage(payload, data[MESSAGE_FIELDS.SERVICE]);
   }
 }
@@ -97,8 +97,8 @@ export class SafeframeHostApi {
   /**
    * @param {!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl} baseInstance
    * @param {boolean} isFluid
-   * @param {!Object} initialSize
-   * @param {!Object} creativeSize
+   * @param {?({width: number, height: number}|../../../src/layout-rect.LayoutRectDef)} initialSize
+   * @param {?({width, height}|../../../src/layout-rect.LayoutRectDef)} creativeSize
    */
   constructor(baseInstance, isFluid, initialSize, creativeSize) {
     /** @private {!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl} */
@@ -125,7 +125,7 @@ export class SafeframeHostApi {
     /** @private {?number} */
     this.initialWidth_ = null;
 
-    /** @private {?Object} */
+    /** @private {?JsonObject} */
     this.currentGeometry_ = null;
 
     /** @private {number} */
@@ -137,10 +137,10 @@ export class SafeframeHostApi {
     /** @private {boolean} */
     this.isFluid_ = isFluid;
 
-    /** @private {!Object} */
+    /** @private {?({width: number, height: number}|../../../src/layout-rect.LayoutRectDef)} */
     this.initialSize_ = initialSize;
 
-    /** @private {!Object} */
+    /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
     this.creativeSize_ = creativeSize;
 
     this.iframeOffsets = {};
@@ -151,7 +151,7 @@ export class SafeframeHostApi {
   /**
    * Returns the Safeframe specific name attributes that are needed for the
    * Safeframe creative to properly setup.
-   * @return {JSONObject}
+   * @return {!JsonObject}
    */
   getSafeframeNameAttr() {
     const attributes = dict({});
@@ -220,10 +220,10 @@ export class SafeframeHostApi {
     dev().assert(this.iframe_.contentWindow,
         'Frame contentWindow unavailable.');
     this.setupGeom_();
-    this.sendMessage_(dict({
+    this.sendMessage_({
       'message': 'connect',
       'c': this.channel,
-    }), '');
+    }, '');
   }
 
   /**
@@ -266,29 +266,32 @@ export class SafeframeHostApi {
    * same size as the amp-ad element, so calculate the width and height
    * correction between the amp-ad element and the safeframe iframe, and then
    * modify the change entry to be correct.
-   * @param {!Object} changes
-   * @return {!Object} Corrected intersection change entry.
+   * @param {!JsonObject} changes
    */
   updateIframeOffsets(changes) {
     let iframeRect;
     if (this.iframe_) {
       iframeRect = this.iframe_.getBoundingClientRect();
       this.iframeOffsets['dT'] = iframeRect.top -
-          changes.boundingClientRect.top;
+          changes['boundingClientRect']['top'];
       this.iframeOffsets['dR'] = iframeRect.right -
-          changes.boundingClientRect.right;
+          changes['boundingClientRect']['right'];
       this.iframeOffsets['dL'] = iframeRect.left -
-          changes.boundingClientRect.left;
+          changes['boundingClientRect']['left'];
       this.iframeOffsets['dB'] = iframeRect.bottom -
-          changes.boundingClientRect.bottom;
+          changes['boundingClientRect']['bottom'];
+      this.iframeOffsets['width'] = iframeRect.width;
+      this.iframeOffsets['height'] = iframeRect.height;
     } else {
       iframeRect = this.creativeSize_;
-      this.iframeOffsets['dL'] = (changes.boundingClientRect.width -
+      this.iframeOffsets['dL'] = (changes['boundingClientRect']['width'] -
                                   iframeRect.width) / 2;
-      this.iframeOffsets['dB'] = (changes.boundingClientRect.height -
+      this.iframeOffsets['dB'] = (changes['boundingClientRect']['height'] -
                                   iframeRect.height) / 2;
       this.iframeOffsets['dR'] = -this.iframeOffsets['dL'];
       this.iframeOffsets['dT'] = -this.iframeOffsets['dB'];
+      this.iframeOffsets['width'] = iframeRect.width;
+      this.iframeOffsets['height'] = iframeRect.height;
     }
   }
 
@@ -305,7 +308,9 @@ export class SafeframeHostApi {
     changes.boundingClientRect.top += this.iframeOffsets['dT'];
     changes.boundingClientRect.bottom += this.iframeOffsets['dB'];
     changes.boundingClientRect.left += this.iframeOffsets['dL'];
-    this.currentGeometry_ = {
+    //changes.boundingClientRect.width -= (this.iframeOffsets['dR'] - this.iframeOffsets['dL']);
+    ///changes.boundingClientRect.height -= (this.iframeOffsets['dB'] - this.iframeOffsets['dT']);
+    this.currentGeometry_ = /** @type {JsonObject} */({
       'windowCoords_t': changes.rootBounds.top,
       'windowCoords_r': changes.rootBounds.right,
       'windowCoords_b': changes.rootBounds.bottom,
@@ -318,9 +323,9 @@ export class SafeframeHostApi {
       // AMP's built in resize methodology that we use only allows expansion
       // to the right and bottom, so we enforce that here.
       'allowedExpansion_r': changes.rootBounds.width -
-          changes.boundingClientRect.width,
+          this.iframeOffsets['width'],
       'allowedExpansion_b': changes.rootBounds.height -
-          changes.boundingClientRect.height,
+          this.iframeOffsets['height'],
       'allowedExpansion_t': 0,
       'allowedExpansion_l': 0,
       'yInView': this.getPercInView(
@@ -331,7 +336,7 @@ export class SafeframeHostApi {
           changes.rootBounds.right,
           changes.boundingClientRect.left,
           changes.boundingClientRect.right),
-    };
+    });
     return JSON.stringify(this.currentGeometry_);
   }
 
@@ -368,9 +373,10 @@ export class SafeframeHostApi {
   sendMessage_(payload, serviceName) {
     dev().assert(this.iframe_.contentWindow,
         'Frame contentWindow unavailable.');
-    const message = {};
+    const message = dict();
     message[MESSAGE_FIELDS.CHANNEL] = this.channel;
-    message[MESSAGE_FIELDS.PAYLOAD] = JSON.stringify(payload);
+    message[MESSAGE_FIELDS.PAYLOAD] = JSON.stringify(
+        /** @type {!JsonObject} */(payload));
     message[MESSAGE_FIELDS.SERVICE] = serviceName;
     message[MESSAGE_FIELDS.SENTINEL] = this.sentinel_;
     message[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = this.endpointIdentity_;
@@ -380,7 +386,7 @@ export class SafeframeHostApi {
 
   /**
    * Routes messages to their appropriate handler.
-   * @param {!Object} payload
+   * @param {!JsonObject} payload
    * @param {string} service
    */
   processMessage(payload, service) {
@@ -403,7 +409,7 @@ export class SafeframeHostApi {
   }
 
   /**
-   * @param {!Object} payload
+   * @param {!JsonObject} payload
    * @private
    */
   handleRegisterDone_(payload) {
@@ -412,12 +418,12 @@ export class SafeframeHostApi {
   }
 
   /**
-   * @param {!Object} payload
+   * @param {!JsonObject} payload
    * @private
    */
   handleExpandRequest_(payload) {
-    let expandHeight = payload.expand_b + payload.expand_t;
-    let expandWidth = payload.expand_r + payload.expand_l;
+    let expandHeight = payload['expand_b'] + payload['expand_t'];
+    let expandWidth = payload['expand_r'] + payload['expand_l'];
     // We assume that a fair amount of usage of this API will try to pass the final
     // size of the iframe that is desired, instead of the correct usage which is
     // specify how much to expand by. We try to protect against this, by detecting
@@ -483,10 +489,10 @@ export class SafeframeHostApi {
       uid: this.uid,
       success,
       newGeometry: this.getCurrentGeometry(),
-      'expand_t': this.currentGeometry_.allowedExpansion_t,
-      'expand_b': this.currentGeometry_.allowedExpansion_b,
-      'expand_r': this.currentGeometry_.allowedExpansion_r,
-      'expand_l': this.currentGeometry_.allowedExpansion_l,
+      'expand_t': this.currentGeometry_['allowedExpansion_t'],
+      'expand_b': this.currentGeometry_['allowedExpansion_b'],
+      'expand_r': this.currentGeometry_['allowedExpansion_r'],
+      'expand_l': this.currentGeometry_['allowedExpansion_l'],
       push: true,
     }, message);
   }
@@ -534,7 +540,7 @@ export class SafeframeHostApi {
 
   /**
    * Handles Fluid-related messages dispatched from SafeFrame.
-   * @param {!Object} payload
+   * @param {!JsonObject} payload
    * @private
    */
   handleFluidMessage_(payload) {

@@ -20,10 +20,10 @@
 export class SimplePostMessageApiDef {
   /**
    * Handles sending the postMessages.
-   * @param {string} type Type of the message.
-   * @param {!JsonObject} data Message payload.
+   * @param {string} unusedType Type of the message.
+   * @param {!JsonObject} unusedData Message payload.
    */
-  send(type, data) {}
+  send(unusedType, unusedData) {}
 
   destroy() {}
 }
