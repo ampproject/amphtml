@@ -475,8 +475,20 @@
    * that takes a single argument: the name of the partial.
    */
   Writer.prototype.render = function render (template, view, partials) {
+    console.log('Writer.render');
+    console.log(template, view, partials);
+
+       // template: <a href="" title="{{{{foobar}}}}">foo</a>
+       // view: {foobar: "{{{curly braces}}}"}
+       // partials: undefined
+
     var tokens = this.parse(template);
     var context = (view instanceof Context) ? view : new Context(view);
+
+    console.log('tokens');
+    console.log(tokens);
+    console.log('context');
+    console.log(context);
     return this.renderTokens(tokens, context, partials, template);
   };
 

@@ -17,6 +17,7 @@
 import {dict} from '../../../src/utils/object';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {parse as mustacheParse, render as mustacheRender,
+  escape as mustacheEscape,
   setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
 import {sanitizeFormattingHtml, sanitizeHtml} from '../../../src/sanitizer';
 
