@@ -15,17 +15,25 @@
  */
 
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
+import {
+  PageConfig,
+  PageConfigResolver,
+} from '../../../../third_party/subscriptions-project/config';
 import {SubscriptionService} from '../amp-subscriptions';
 
 const paywallUrl = 'https://lipsum.com';
 
 describes.realWin('amp-subscriptions', {amp: true}, env => {
   let ampdoc;
+  let pageConfig;
   let subscriptionService;
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
     subscriptionService = new SubscriptionService(ampdoc);
+    pageConfig = new PageConfig('example.org:basic', true);
+    sandbox.stub(PageConfigResolver.prototype, 'resolveConfig')
+        .callsFake(() => Promise.resolve(pageConfig));
   });
 
 
@@ -34,6 +42,12 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
     subscriptionService.start_();
 
     expect(initializeStub).to.be.calledOnce;
+  });
+
+  it('should discover page configuration', () => {
+    return subscriptionService.initialize_().then(() => {
+      expect(subscriptionService.pageConfig_).to.equal(pageConfig);
+    });
   });
 
   it('should add subscription platform while registering it', () => {

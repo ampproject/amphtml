@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import {Entitlements} from '../../../third_party/subscriptions-project/apis';
+
+
 /**
  * This interface is intended to be implemented by Subscription platforms to
  * provide method of getting entitlements.
@@ -24,10 +27,17 @@ export class SubscriptionPlatform {
 
   /**
    * Requests entitlement for a subscription platform.
-   * @return {!Promise<!./entitlements.Entitlements>}
+   * @return {!Promise<!Entitlements>}
    */
   getEntitlements() {
   }
-
 }
 
+
+/**
+ * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
+ * @package @visibleForTesting
+ */
+export function getEntitlementsClassForTesting() {
+  return Entitlements;
+}
