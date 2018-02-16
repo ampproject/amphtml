@@ -15,7 +15,6 @@
  */
 
 import {BaseElement} from '../src/base-element';
-import {scopedQuerySelector} from '../src/dom';
 import {isLayoutSizeDefined} from '../src/layout';
 import {registerElement} from '../src/service/custom-element-registry';
 import {srcsetFromElement, srcsetFromSrc} from '../src/srcset';
@@ -126,7 +125,7 @@ export class AmpImg extends BaseElement {
     // For inabox SSR, image will have been written directly to DOM so no need
     // to recreate.  Calling appendChild again will have no effect.
     if (this.element.hasAttribute('i-amphtml-ssr')) {
-      this.img_ = scopedQuerySelector(this.element, 'img');
+      this.img_ = this.element.querySelector('img');
     }
     this.img_ = this.img_ || new Image();
     this.img_.setAttribute('decoding', 'async');
@@ -222,7 +221,7 @@ export class AmpImg extends BaseElement {
       this.togglePlaceholder(false);
     });
   }
-};
+}
 
 /**
  * @param {!Window} win Destination window for the new element.

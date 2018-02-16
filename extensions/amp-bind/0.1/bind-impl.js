@@ -17,25 +17,23 @@
 import {AmpEvents} from '../../../src/amp-events';
 import {BindEvents} from './bind-events';
 import {BindExpressionResultDef} from './bind-expression';
-import {BindingDef} from './bind-evaluator';
 import {BindValidator} from './bind-validator';
+import {BindingDef} from './bind-evaluator';
+import {ChunkPriority, chunk} from '../../../src/chunk';
 import {Services} from '../../../src/services';
-import {chunk, ChunkPriority} from '../../../src/chunk';
+import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
-import {dict, deepMerge} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
 import {filterSplice} from '../../../src/utils/array';
+import {getMode} from '../../../src/mode';
 import {installServiceInEmbedScope} from '../../../src/service';
 import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isFiniteNumber} from '../../../src/types';
+import {iterateCursor, waitForBodyPromise} from '../../../src/dom';
 import {map} from '../../../src/utils/object';
 import {parseJson, recursiveEquals} from '../../../src/json';
 import {reportError} from '../../../src/error';
 import {rewriteAttributeValue} from '../../../src/sanitizer';
-import {
-  iterateCursor, scopedQuerySelectorAll, waitForBodyPromise,
-} from '../../../src/dom';
 
 const TAG = 'amp-bind';
 
@@ -380,8 +378,7 @@ export class Bind {
    * @private
    */
   addMacros_() {
-    const elements =
-        scopedQuerySelectorAll(this.ampdoc.getBody(), 'AMP-BIND-MACRO');
+    const elements = this.ampdoc.getBody().querySelectorAll('AMP-BIND-MACRO');
     const macros =
         /** @type {!Array<!./amp-bind-macro.AmpBindMacroDef>} */ ([]);
     iterateCursor(elements, element => {
@@ -962,11 +959,12 @@ export class Bind {
    * @private
    */
   verifyBinding_(boundProperty, element, expectedValue) {
-    const property = boundProperty.property;
+    const {property, expressionString} = boundProperty;
+    const tagName = element.tagName;
 
     // Don't show a warning for bind-only attributes,
     // like 'slide' on amp-carousel.
-    const bindOnlyAttrs = BIND_ONLY_ATTRIBUTES[element.tagName];
+    const bindOnlyAttrs = BIND_ONLY_ATTRIBUTES[tagName];
     if (bindOnlyAttrs && bindOnlyAttrs.includes(property)) {
       return;
     }
@@ -1023,11 +1021,11 @@ export class Bind {
     }
 
     if (!match) {
-      const err = user().createError(`${TAG}: ` +
-        `Default value for [${property}] does not match first expression ` +
-        `result (${expectedValue}). This can result in unexpected behavior ` +
-        'after the next state change.');
-      reportError(err, element);
+      user().warn(TAG,
+          `Default value for <${tagName} [${property}]="${expressionString}"> `
+          + `does not match first result (${expectedValue}). We recommend `
+          + 'writing expressions with matching default values, but this can be '
+          + 'safely ignored if intentional.');
     }
   }
 

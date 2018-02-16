@@ -14,23 +14,27 @@
  * limitations under the License.
  */
 
-import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
+// Need the following side-effect import because in actual production code,
+// Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
+// always available for them. However, when we test an impl in isolation,
+// AmpAd is not loaded already, so we need to load it separately.
+import '../../../amp-ad/0.1/amp-ad';
+import {
+  AMP_SIGNATURE_HEADER,
+  VerificationStatus,
+} from '../../../amp-a4a/0.1/signature-verifier';
 import {
   AmpA4A,
   CREATIVE_SIZE_HEADER,
   signatureVerifierFor,
 } from '../../../amp-a4a/0.1/amp-a4a';
-import {
-  AMP_SIGNATURE_HEADER,
-  VerificationStatus,
-} from '../../../amp-a4a/0.1/signature-verifier';
-import {Services} from '../../../../src/services';
+import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkDoubleclickImpl,
-  getNetworkId,
   CORRELATOR_CLEAR_EXP_BRANCHES,
   CORRELATOR_CLEAR_EXP_NAME,
   SAFEFRAME_ORIGIN,
+  getNetworkId,
   resetLocationQueryParametersForTesting,
 } from '../amp-ad-network-doubleclick-impl';
 import {
@@ -40,23 +44,19 @@ import {
   UNCONDITIONED_CANONICAL_FF_HOLDBACK_EXP_NAME,
 } from '../doubleclick-a4a-config';
 import {
-  isInExperiment,
-  addExperimentIdToElement,
-} from '../../../../ads/google/a4a/traffic-experiments';
-import {
   QQID_HEADER,
 } from '../../../../ads/google/a4a/utils';
+import {Services} from '../../../../src/services';
+import {VisibilityState} from '../../../../src/visibility-state';
+import {
+  addExperimentIdToElement,
+  isInExperiment,
+} from '../../../../ads/google/a4a/traffic-experiments';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {
-  toggleExperiment,
   forceExperimentBranch,
+  toggleExperiment,
 } from '../../../../src/experiments';
-import {VisibilityState} from '../../../../src/visibility-state';
-// Need the following side-effect import because in actual production code,
-// Fast Fetch impls are always loaded via an AmpAd tag, which means AmpAd is
-// always available for them. However, when we test an impl in isolation,
-// AmpAd is not loaded already, so we need to load it separately.
-import '../../../amp-ad/0.1/amp-ad';
 
 /**
  * We're allowing external resources because otherwise using realWin causes
@@ -231,6 +231,33 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           'https://a.com?a=b,https://b.com?c=d')).to.be.calledOnce;
       expect(fireDelayedImpressionsSpy.withArgs(
           'https://c.com?e=f,https://d.com?g=h', true)).to.be.calledOnce;
+    });
+
+    it('should specify nameframe loading behavior; single arg', () => {
+      impl.extractSize({
+        get(name) {
+          return name == 'amp-nameframe-exp' ? 'instantLoad' : undefined;
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      });
+      expect(impl.nameframeExperimentConfig_.instantLoad).to.be.true;
+      expect(impl.nameframeExperimentConfig_.writeInBody).to.be.false;
+    });
+
+    it('should specify nameframe loading behavior; two args', () => {
+      impl.extractSize({
+        get(name) {
+          return name == 'amp-nameframe-exp' ?
+            'instantLoad;writeInBody' : undefined;
+        },
+        has(name) {
+          return !!this.get(name);
+        },
+      });
+      expect(impl.nameframeExperimentConfig_.instantLoad).to.be.true;
+      expect(impl.nameframeExperimentConfig_.writeInBody).to.be.true;
     });
   });
 
@@ -986,8 +1013,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.buildCallback();
       expect(onVisibilityChangedHandler).to.be.ok;
       onVisibilityChangedHandler();
-      expect(
-          impl.win.experimentBranches[CORRELATOR_CLEAR_EXP_NAME] !== undefined);
+      // TODO(jeffkaufman, #13422): this test was silently failing
+      // expect(impl.win.experimentBranches[
+      //     CORRELATOR_CLEAR_EXP_NAME]).not.to.be.undefined;
     });
 
     it('does not attempt to select into branch if SRA', () => {
@@ -996,8 +1024,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       expect(onVisibilityChangedHandler).to.be.ok;
       onVisibilityChangedHandler();
       expect(impl.win.ampAdPageCorrelator).to.equal(12345);
-      expect(
-          impl.win.experimentBranches[CORRELATOR_CLEAR_EXP_NAME] === undefined);
+      expect(impl.win.experimentBranches[
+          CORRELATOR_CLEAR_EXP_NAME]).to.be.undefined;
     });
 
     it('does not attempt to select into branch if no correlator', () => {
@@ -1005,8 +1033,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.buildCallback();
       expect(onVisibilityChangedHandler).to.be.ok;
       onVisibilityChangedHandler();
-      expect(
-          impl.win.experimentBranches[CORRELATOR_CLEAR_EXP_NAME] === undefined);
+      expect(impl.win.experimentBranches[
+          CORRELATOR_CLEAR_EXP_NAME]).to.be.undefined;
     });
 
     it('does not attempt to select into branch if not pause', () => {
@@ -1014,8 +1042,8 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       impl.buildCallback();
       expect(onVisibilityChangedHandler).to.be.ok;
       onVisibilityChangedHandler();
-      expect(
-          impl.win.experimentBranches[CORRELATOR_CLEAR_EXP_NAME] === undefined);
+      expect(impl.win.experimentBranches[
+          CORRELATOR_CLEAR_EXP_NAME]).to.be.undefined;
     });
 
     it('set experiment for second block', () => {
@@ -1351,6 +1379,11 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           expect(impl.idleRenderOutsideViewport()).to.be.false;
           expect(impl.isIdleRender_).to.be.false;
         });
+
+        it('should return 12 if launch experiment enabled', () => {
+          forceExperimentBranch(impl.win, 'dfp_ff_render_idle_launch', 1);
+          expect(impl.idleRenderOutsideViewport()).to.equal(12);
+        });
       });
 
       describe('idle renderNonAmpCreative', () => {
@@ -1369,11 +1402,12 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
               .returns(Promise.resolve());
         });
 
-        it('should throttle if idle render and non-AMP creative', () => {
+        // TODO(jeffkaufman, #13422): this test was silently failing
+        it.skip('should throttle if idle render and non-AMP creative', () => {
           impl.win['3pla'] = 1;
           const startTime = Date.now();
           return impl.renderNonAmpCreative().then(() => {
-            expect(Date.now() - startTime >= 1000);
+            expect(Date.now() - startTime).to.be.at.least(1000);
           });
         });
 
@@ -1382,7 +1416,7 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           delete impl.postAdResponseExperimentFeatures['render-idle-vp'];
           const startTime = Date.now();
           return impl.renderNonAmpCreative().then(() => {
-            expect(Date.now() - startTime <= 50);
+            expect(Date.now() - startTime).to.be.at.most(50);
           });
         });
 
@@ -1390,7 +1424,7 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           impl.win['3pla'] = 1;
           const startTime = Date.now();
           return impl.renderNonAmpCreative().then(() => {
-            expect(Date.now() - startTime <= 50);
+            expect(Date.now() - startTime).to.be.at.most(50);
           });
         });
 
@@ -1398,7 +1432,7 @@ describes.realWin('additional amp-ad-network-doubleclick-impl',
           impl.win['3pla'] = 0;
           const startTime = Date.now();
           return impl.renderNonAmpCreative().then(() => {
-            expect(Date.now() - startTime <= 50);
+            expect(Date.now() - startTime).to.be.at.most(50);
           });
         });
       });

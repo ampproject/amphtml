@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
+import '../../../third_party/react-dates/bundle';
 import {ActionTrust} from '../../../src/action-trust';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-date-picker-0.1.css';
-import {DEFAULT_LOCALE, DEFAULT_FORMAT, FORMAT_STRINGS} from './constants';
+import {DEFAULT_FORMAT, DEFAULT_LOCALE, FORMAT_STRINGS} from './constants';
 import {DatesList} from './dates-list';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {batchFetchJsonFor} from '../../../src/batched-json';
-import {childElementByAttr, isRTL, removeElement} from '../../../src/dom';
+import {childElementByAttr, escapeCssSelectorIdent, isRTL, removeElement} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {createDateRangePicker} from './date-range-picker';
 import {createDeferred} from './react-utils';
@@ -34,7 +35,6 @@ import {requireExternal} from '../../../src/module';
 import {sanitizeFormattingHtml} from '../../../src/sanitizer';
 import {toArray} from '../../../src/types';
 import {user} from '../../../src/log';
-import '../../../third_party/react-dates/bundle';
 
 
 /**
@@ -277,7 +277,7 @@ class AmpDatePicker extends AMP.BaseElement {
           .map(t => ({
             dates: new DatesList(t.dates),
             template: this.ampdoc_.getRootNode().querySelector(
-                `#${t.id}[date-template]`),
+                `#${escapeCssSelectorIdent(t.id)}[date-template]`),
           }));
       this.srcTemplates_ = srcTemplates;
 

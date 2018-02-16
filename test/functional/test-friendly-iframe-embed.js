@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {
   FriendlyIframeEmbed,
   getFriendlyIframeEmbedOptional,
@@ -23,13 +24,12 @@ import {
   setSrcdocSupportedForTesting,
   whenContentIniLoad,
 } from '../../src/friendly-iframe-embed';
+import {Services} from '../../src/services';
 import {Signals} from '../../src/utils/signals';
 import {getStyle} from '../../src/style';
-import {Services} from '../../src/services';
 import {installServiceInEmbedScope} from '../../src/service';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
-import * as sinon from 'sinon';
 
 
 describe('friendly-iframe-embed', () => {

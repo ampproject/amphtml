@@ -22,14 +22,15 @@
  * https://3p.ampproject.net/$version/f.js
  */
 
-import './polyfills';
+// src/polyfills.js must be the first import.
+import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
+
+import {AmpEvents} from '../src/amp-events';
 import {
   IntegrationAmpContext,
   masterSelection,
 } from './ampcontext-integration';
-import {installEmbedStateListener, manageWin} from './environment';
-import {isExperimentOn} from './3p';
-import {nonSensitiveDataPostMessage, listenParent} from './messaging';
+import {MessageType} from '../src/3p-frame-messaging';
 import {
   computeInMasterFrame,
   nextTick,
@@ -37,6 +38,8 @@ import {
   run,
   setExperimentToggles,
 } from './3p';
+import {dict} from '../src/utils/object.js';
+import {endsWith} from '../src/string';
 import {
   getAmpConfig,
   getAttributeData,
@@ -44,21 +47,23 @@ import {
   getEmbedType,
   getLocation,
 } from './frame-metadata';
-import {urls} from '../src/config';
-import {endsWith} from '../src/string';
-import {parseJson} from '../src/json';
-import {parseUrl, getSourceUrl, isProxyOrigin} from '../src/url';
+import {getMode} from '../src/mode';
+import {getSourceUrl, isProxyOrigin, parseUrl} from '../src/url';
 import {
   initLogConstructor,
+  isUserErrorMessage,
   setReportError,
   user,
-  isUserErrorMessage,
 } from '../src/log';
-import {dict} from '../src/utils/object.js';
-import {getMode} from '../src/mode';
+import {installEmbedStateListener, manageWin} from './environment';
+import {isExperimentOn} from './3p';
+import {listenParent, nonSensitiveDataPostMessage} from './messaging';
+import {parseJson} from '../src/json';
 import {startsWith} from '../src/string.js';
-import {AmpEvents} from '../src/amp-events';
-import {MessageType} from '../src/3p-frame-messaging';
+import {urls} from '../src/config';
+
+// Disable auto-sorting of imports from here on.
+/* eslint-disable sort-imports-es6-autofix/sort-imports-es6 */
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
@@ -101,6 +106,7 @@ import {advertserve} from '../ads/advertserve';
 import {affiliateb} from '../ads/affiliateb';
 import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
+import {appvador} from '../ads/appvador';
 import {atomx} from '../ads/atomx';
 import {bidtellect} from '../ads/bidtellect';
 import {brainy} from '../ads/brainy';
@@ -195,6 +201,7 @@ import {taboola} from '../ads/taboola';
 import {teads} from '../ads/teads';
 import {triplelift} from '../ads/triplelift';
 import {valuecommerce} from '../ads/valuecommerce';
+import {videonow} from '../ads/videonow';
 import {viralize} from '../ads/viralize';
 import {vmfive} from '../ads/vmfive';
 import {webediads} from '../ads/webediads';
@@ -281,6 +288,7 @@ register('advertserve', advertserve);
 register('affiliateb', affiliateb);
 register('amoad', amoad);
 register('appnexus', appnexus);
+register('appvador', appvador);
 register('atomx', atomx);
 register('bidtellect', bidtellect);
 register('brainy', brainy);
@@ -382,6 +390,7 @@ register('teads', teads);
 register('triplelift', triplelift);
 register('twitter', twitter);
 register('valuecommerce', valuecommerce);
+register('videonow', videonow);
 register('viralize', viralize);
 register('vmfive', vmfive);
 register('webediads', webediads);
@@ -457,7 +466,7 @@ export function draw3p(win, data, configCallback) {
   } else {
     run(type, win, data);
   }
-};
+}
 
 /**
  * @return {boolean} Whether this is the master iframe.

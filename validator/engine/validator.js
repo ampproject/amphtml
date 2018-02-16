@@ -1,5 +1,5 @@
 /**
- * @license
+ * @license DEDUPE_ON_MINIFY
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -597,7 +597,8 @@ class ParsedTagSpec {
    */
   expandExtensionSpec() {
     const extensionSpec = this.spec_.extensionSpec;
-    this.spec_.specName = extensionSpec.name + ' extension .js script';
+    if (this.spec_.specName === null)
+      this.spec_.specName = extensionSpec.name + ' extension .js script';
     this.spec_.mandatoryParent = 'HEAD';
     if (this.spec_.extensionSpec.deprecatedAllowDuplicates)
       this.spec_.uniqueWarning = true;
@@ -2104,7 +2105,7 @@ class ExtensionsContext {
    * this assumes that all extensions will be loaded in the document earlier
    * than their first usage. This is true for <amp-foo> tags, since the
    * extension must be loaded in the head and <amp-foo> tags are not supported
-   * in the body as per HTML spec.
+   * in the head as per HTML spec.
    * @param {string} extension
    * @return {boolean}
    */
@@ -3423,6 +3424,34 @@ function validateRequiredExtensions(parsedTagSpec, context, validationResult) {
 }
 
 /**
+ * If this attribute requires an extension and we have processed all extensions,
+ * report an error if that extension has not been loaded.
+ * @param {!ParsedAttrSpec} parsedAttrSpec
+ * @param {!Context} context
+ * @param {!amp.validator.ValidationResult} validationResult
+ */
+function validateAttrRequiredExtensions(
+    parsedAttrSpec, context, validationResult) {
+  const attrSpec = parsedAttrSpec.getSpec();
+  const extensionsCtx = context.getExtensions();
+  for (let requiredExtension of attrSpec.requiresExtension) {
+    if (!extensionsCtx.isExtensionLoaded(requiredExtension)) {
+      if (amp.validator.LIGHT) {
+        validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+        return;
+      } else {
+        context.addError(
+            amp.validator.ValidationError.Code.ATTR_MISSING_REQUIRED_EXTENSION,
+            context.getLineCol(),
+            /* params */
+            [attrSpec.name, requiredExtension],
+            /* specUrl */ '', validationResult);
+      }
+    }
+  }
+}
+
+/**
  * Check for duplicates of tags that should be unique, reporting errors for
  * the second instance of each unique tag.
  * @param {!ParsedTagSpec} parsedTagSpec
@@ -3995,6 +4024,9 @@ function validateAttributes(
           [attr.name, getTagSpecName(spec), attrSpec.deprecation],
           attrSpec.deprecationUrl, result);
       // Deprecation is only a warning, so we don't return.
+    }
+    if (attrSpec.requiresExtension.length > 0) {
+      validateAttrRequiredExtensions(parsedAttrSpec, context, result);
     }
     if (!hasTemplateAncestor || !attrValueHasTemplateSyntax(attr.value)) {
       validateNonTemplateAttrValueAgainstSpec(
@@ -5514,7 +5546,7 @@ amp.validator.renderValidationResult = function(validationResult, filename) {
  * @return {boolean}
  */
 function isAuthorStylesheet(param) {
-  return param === 'style amp-custom' || param === 'style amp-custom (AMP4ADS)';
+  return goog.string./*OK*/ startsWith(param, 'style amp-custom');
 }
 
 /**
@@ -5834,10 +5866,14 @@ amp.validator.categorizeError = function(error) {
     return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
   }
   // E.g. The tag 'amp-analytics' requires loading the 'amp-analytics' extension
-  // javascript.
-  if (error.code ==
-      amp.validator.ValidationError.Code.MISSING_REQUIRED_EXTENSION) {
-    return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+  // javascript or the attribute 'amp-fx' requires loading the
+  // 'amp-fx-collection' extension javascript..
+  if (error.code ===
+          amp.validator.ValidationError.Code.MISSING_REQUIRED_EXTENSION ||
+      error.code ===
+          amp.validator.ValidationError.Code.ATTR_MISSING_REQUIRED_EXTENSION) {
+    return amp.validator.ErrorCategory.Code
+        .MANDATORY_AMP_TAG_MISSING_OR_INCORRECT;
   }
   // E.g. The extension 'amp-analytics' was found on this page, but is unused.
   // Please remove this extension."

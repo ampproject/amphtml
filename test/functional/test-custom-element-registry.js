@@ -281,7 +281,7 @@ describes.realWin('CustomElement register', {amp: true}, env => {
 
       copyElementToChildWindow(win, childWin, 'amp-test2');
       expect(childWin.ampExtendedElements['amp-test1']).to.equal(ElementStub);
-      expect(registerElement.callCount > firstCallCount).to.be.true;
+      expect(registerElement.callCount).to.be.above(firstCallCount);
       expect(registerElement.getCall(registerElement.callCount - 1).args[0])
           .to.equal('amp-test2');
     });

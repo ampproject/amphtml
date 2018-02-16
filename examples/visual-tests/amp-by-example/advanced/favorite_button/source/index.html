@@ -1,0 +1,231 @@
+<!--
+  ## Introduction
+
+  This sample demonstrates how to implement a favorite/like/bookmark button in AMP. Our implementation:
+  
+  * shows the correct icon based on whether the user already liked an item or not. This works if the AMP is served 
+  from an AMP Cache or the original origin.
+  * shows a placeholder while the current state is loaded asynchronously.
+  * falls back to the original state and displays an error message if the request fails, for example when the user is offline.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+  <head>
+    <meta charset="utf-8">
+    <link rel="canonical" href="https://ampbyexample.com/../examples/visual-tests/amp-by-example/advanced/favorite_button/">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <!-- ## Setup -->
+    <!-- We use the `amp-list` component to dynamically render the initial state of the favorite button. -->
+    <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+    <!-- The mustache component is required by `amp-list`.  -->
+    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+    <!-- We need `amp-form` to submit the favorite request.  -->
+    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+    <!-- `amp-bind` enables us to dynamically change the button state when we submit the form.  -->
+    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      /* some basic button styling */
+      input[type=submit] {
+        width: 48px;
+        height: 48px;
+        cursor: pointer;
+        border: none;
+        margin: 4px;
+        transition: background 300ms ease-in-out;
+      }
+      amp-list {
+        margin: 1rem;
+      }
+
+      .heart-fill {
+        background: url('data:image/svg+xml;utf8,<svg fill="%23000000" height="48" viewBox="0 0 24 24" width="48" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>');
+      }
+      .heart-border {
+        background: url('data:image/svg+xml;utf8,<svg fill="%23000000" height="48" viewBox="0 0 24 24" width="48" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h24v24H0z" fill="none"/><path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"/></svg>');
+      }
+      /* While the page loads we show a grey heart icon to indicate that the functionality is not yet available. */
+      .heart-loading,
+      .heart-loading[placeholder] {
+        background: url('data:image/svg+xml;utf8,<svg fill="%23cccccc" height="48" viewBox="0 0 24 24" width="48" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h24v24H0z" fill="none"/><path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"/></svg>');
+      }
+      .favorite-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .favorite-count {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px;
+        margin-left: 8px;
+        position: relative;
+        width: 48px;
+        background: #b60845;
+        border-radius: .4em;
+        color: white;
+      }
+      .favorite-count.loading {
+        color: #ccc;
+        background: #f2f2f2;
+      }
+      .favorite-count.loading:after {
+        border-right-color: #f2f2f2;
+      }
+      .favorite-count:after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: 0;
+        height: 0;
+        border: 8px solid transparent;
+        border-right-color: #b60845;
+        border-left: 0;
+        margin-top: -8px;
+        margin-left: -8px;
+      }
+      /* A simple snackbar to show an error */
+      #favorite-failed-message {
+        display: flex;
+        justify-content: space-between;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        width: 100%;
+        max-width: 450px;
+        background: #323232;
+        color: white;
+        padding: 1rem 1.5rem;
+      }
+      #favorite-failed-message div {
+        color: #64dd17;
+        margin: 0 1rem;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- 
+    ## Managing State
+
+    We initialize the button state from a JSON endpoint using `amp-state.` As we use cookies to identify the user, we need to add the `credentials="include"`  attribute. 
+    -->
+    <amp-state id="favorite"                 
+               credentials="include"
+               src="/favorite">
+    </amp-state>
+
+    <!--
+    ## A simple favorite Button 
+
+    The button is embedded inside an `amp-list`, which enables us to dynamically render the button based on whether
+    the user already liked something or not. We don't make use of `amp-list`'s templating mechanism, but instead 
+    we use `amp-bind` to bind the button state to the favorite state initialized above. 
+
+    Inside the `amp-list` we declare a placeholder icon using the `placeholder` attribute that 
+    is shown while the `amp-list` is loading. 
+
+    There are a few things that are happening when the user presses the favorite button:
+
+    * The form sends a toggle request when the user presses the button.
+    * We implement an optimistic UX that will instantly update the button state when the button is pressed.
+    * If the form submission fails (`submit-error:...`), we revert the 
+    favorite state to the original version and show an error message (`favorite-failed-message.show`).
+    * We hide any existing error messages (`favorite-failed-message.hide`). 
+    -->
+    <form method="post"
+          action-xhr="/favorite"
+          target="_top"
+          on="submit:AMP.setState({favorite: !favorite}),favorite-failed-message.hide; 
+          submit-error:AMP.setState({favorite: !favorite}),favorite-failed-message.show">
+      <amp-list width="56"
+                height="56"
+                credentials="include"
+                items="."
+                single-item
+                src="/favorite">
+        <template type="amp-mustache">
+          <input type="submit" 
+                 [class]="favorite ? 'heart-fill' : 'heart-border'"
+                 value="" aria-label="Favorite Toggle"> 
+        </template>
+        <input type="submit" disabled 
+               class="heart-loading"
+               value="" aria-label="favorite placeholder" placeholder> 
+      </amp-list>
+    </form>
+
+    <!-- A simple snackbar that we show when the form submission fails. -->
+    <div id="favorite-failed-message" hidden>Error: Could not favorite.
+      <div on="tap:favorite-failed-message.hide" tabindex="0" role="button">CLOSE</div>
+    </div>
+
+
+    <!--
+    ## A favorite Button with Counter
+
+    This is a more sophisticated version of the previous sample that also includes the number of favorites. Our [JSON endpoint](/favorite-with-count) returns two values: `value` and `count`. 
+    -->
+    <amp-state id="favoriteWithCount"                 
+               credentials="include"
+               src="/favorite-with-count">
+    </amp-state>
+    <!-- 
+    The implementation is similar to the previous sample, but also updates the count when the button is clicked 
+
+        AMP.setState({
+        ...,
+        count: favoriteWithCount.count + (favoriteWithCount.value ? -1 : 1)
+        })
+
+    We use a temporary variable `previousFavoriteWithCount` to store the previous value in order to be able to revert the
+    button state in case the form submission fails.
+    -->
+    <form method="post"
+          action-xhr="/favorite-with-count"
+          target="_top"
+          on="submit:AMP.setState({
+            previousFavoriteWithCount: favoriteWithCount,
+            favoriteWithCount: {
+            value: !favoriteWithCount.value,
+            count: favoriteWithCount.count + (favoriteWithCount.value ? -1 : 1),
+          }
+          }),favorite-failed-message.hide; 
+            submit-error:AMP.setState({
+            favoriteWithCount: previousFavoriteWithCount
+          }),favorite-failed-message.show">
+      <amp-list width="200"
+                height="56"
+                credentials="include"
+                items="."
+                single-item
+                noloading
+                src="/favorite-with-count">
+        <template type="amp-mustache">
+          <div class="favorite-container">
+            <input type="submit" 
+                   [class]="favoriteWithCount.value ? 'heart-fill' : 'heart-border'"
+                   value="" aria-label="Favorite Toggle"> 
+            <div class="favorite-count" [text]="favoriteWithCount.count ? favoriteWithCount.count : ''">{{count}}</div>
+          </div>
+        </template>
+        <div placeholder>
+          <div class="favorite-container">
+            <input type="submit" disabled 
+                   class="heart-loading"
+                   value="" aria-label="favorite placeholder"> 
+            <div class="favorite-count loading">0</div>
+          </div>
+        </div>
+      </amp-list>
+    </form>
+  </body>
+</html>

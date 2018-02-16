@@ -153,6 +153,10 @@ const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
       this.ampHtmlFile.indexOf('/validator-amp4ads-') != -1) {
     this.htmlFormat = 'AMP4ADS';
   }
+  if (this.ampHtmlFile.indexOf('amp4email_feature_tests/') != -1 ||
+      this.ampHtmlFile.indexOf('/validator-amp4email-') != -1) {
+    this.htmlFormat = 'AMP4EMAIL';
+  }
   /**
    * If set to false, output will be generated without inlining the input
    * document.
@@ -650,49 +654,51 @@ describe('ValidatorRulesMakeSense', () => {
     });
     // spec_name can't be empty and must be unique.
     it('unique spec_name or if none then unique tag_name', () => {
-      if (tagSpec.extensionSpec !== null) {
+      if (tagSpec.specName !== null) {
+        expect(specNameIsUnique.hasOwnProperty(tagSpec.specName)).toBe(false);
+        specNameIsUnique[tagSpec.specName] = 0;
+      } else if (tagSpec.extensionSpec !== null) {
         const specName = tagSpec.extensionSpec.name + ' extension .js script';
         expect(specNameIsUnique.hasOwnProperty(specName)).toBe(false);
         specNameIsUnique[specName] = 0;
-      } else if (tagSpec.specName !== null) {
-        expect(specNameIsUnique.hasOwnProperty(tagSpec.specName)).toBe(false);
-        specNameIsUnique[tagSpec.specName] = 0;
       } else {
         expect(tagWithoutSpecNameIsUnique.hasOwnProperty(tagSpec.tagName))
             .toBe(false);
         tagWithoutSpecNameIsUnique[tagSpec.tagName] = 0;
       }
     });
-    if ((tagSpec.tagName.indexOf('AMP-') === 0) &&
+    if ((tagSpec.tagName.indexOf('SCRIPT') === 0) && tagSpec.extensionSpec &&
         ((tagSpec.htmlFormat.length === 0) ||
          (tagSpec.htmlFormat.indexOf(
               amp.validator.HtmlFormat.Code.AMP4ADS) !== -1))) {
       // AMP4ADS Creative Format document is the source of this whitelist.
       // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
       const whitelistedAmp4AdsExtensions = {
-        'AMP-ACCORDION': 0,
-        'AMP-AD-EXIT': 0,
-        'AMP-ANALYTICS': 0,
-        'AMP-ANIM': 0,
-        'AMP-ANIMATION': 0,
-        'AMP-AUDIO': 0,
-        'AMP-CAROUSEL': 0,
-        'AMP-FIT-TEXT': 0,
-        'AMP-FONT': 0,
-        'AMP-FORM': 0,
-        'AMP-GWD-ANIMATION': 0,
-        'AMP-IMG': 0,
-        'AMP-LAYOUT': 0,
-        'AMP-PIXEL': 0,
-        'AMP-POSITION-OBSERVER': 0,
-        'AMP-SOCIAL-SHARE': 0,
-        'AMP-VIDEO': 0,
-        'AMP-YOUTUBE': 0
+        'amp-accordion': 0,
+        'amp-ad-exit': 0,
+        'amp-analytics': 0,
+        'amp-anim': 0,
+        'amp-animation': 0,
+        'amp-audio': 0,
+        'amp-carousel': 0,
+        'amp-fit-text': 0,
+        'amp-font': 0,
+        'amp-form': 0,
+        'amp-gwd-animation': 0,
+        'amp-img': 0,
+        'amp-layout': 0,
+        'amp-mustache': 0,
+        'amp-pixel': 0,
+        'amp-position-observer': 0,
+        'amp-social-share': 0,
+        'amp-video': 0,
+        'amp-youtube': 0
       };
-      it(tagSpec.tagName + ' has html_format either explicitly or implicitly' +
-          ' set for AMP4ADS but ' + tagSpec.tagName + ' is not whitelisted' +
+      const extension = tagSpec.extensionSpec.name;
+      it(extension + ' has html_format either explicitly or implicitly' +
+          ' set for AMP4ADS but ' + extension + ' is not whitelisted' +
           ' for AMP4ADS', () => {
-        expect(whitelistedAmp4AdsExtensions.hasOwnProperty(tagSpec.tagName))
+        expect(whitelistedAmp4AdsExtensions.hasOwnProperty(extension))
             .toBe(true);
       });
     }

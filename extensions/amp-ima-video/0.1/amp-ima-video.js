@@ -14,23 +14,10 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl} from '../../../src/url';
-import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {ImaPlayerData} from '../../../ads/google/ima-player-data';
-import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {
-  isObject,
-  toArray,
-  toWin,
-} from '../../../src/types';
-import {
-  getData,
-  listen,
-} from '../../../src/event-helper';
-import {dict} from '../../../src/utils/object';
+import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
+import {assertHttpsUrl} from '../../../src/url';
 import {
   childElementsByTag,
   fullscreenEnter,
@@ -40,9 +27,22 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {dev} from '../../../src/log';
-import {VideoEvents} from '../../../src/video-interface';
-import {Services} from '../../../src/services';
+import {dict} from '../../../src/utils/object';
+import {
+  getData,
+  listen,
+} from '../../../src/event-helper';
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
+import {
+  installVideoManagerForDoc,
+} from '../../../src/service/video-manager-impl';
 import {isEnumValue} from '../../../src/types';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {
+  isObject,
+  toArray,
+  toWin,
+} from '../../../src/types';
 
 /** @const */
 const TAG = 'amp-ima-video';

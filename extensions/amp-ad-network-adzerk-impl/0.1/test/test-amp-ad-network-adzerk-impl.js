@@ -20,13 +20,13 @@
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
 import {
-  AmpAdNetworkAdzerkImpl,
   AMP_TEMPLATED_CREATIVE_HEADER_NAME,
+  AmpAdNetworkAdzerkImpl,
 } from '../amp-ad-network-adzerk-impl';
 import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
-import {createElementWithAttributes} from '../../../../src/dom';
 import {Xhr} from '../../../../src/service/xhr-impl';
-import {utf8Encode, utf8Decode} from '../../../../src/utils/bytes';
+import {createElementWithAttributes} from '../../../../src/dom';
+import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
 
 describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
   let win, doc;
@@ -120,15 +120,13 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
           () => {})
           .then(buffer => Promise.resolve(utf8Decode(buffer)))
           .then(creative => {
-            expect(creative
-                .indexOf(
-                    '<script async src="https://cdn.ampproject.org/v0.js">' +
-                    '</script>') == -1).to.be.true;
-            expect(creative
-                .indexOf(
-                    '<script async custom-template="amp-mustache" src=' +
-                    '"https://cdn.ampproject.org/v0/amp-mustache-0.1.js">' +
-                    '</script>') == -1).to.be.true;
+            expect(creative).to.not.contain(
+                '<script async src="https://cdn.ampproject.org/v0.js">' +
+                '</script>');
+            expect(creative).to.not.contain(
+                '<script async custom-template="amp-mustache" src=' +
+                '"https://cdn.ampproject.org/v0/amp-mustache-0.1.js">' +
+                '</script>');
             expect(impl.getAmpAdMetadata()).to.jsonEqual({
               minifiedCreative: creative,
               customElementExtensions: ['amp-mustache'],
