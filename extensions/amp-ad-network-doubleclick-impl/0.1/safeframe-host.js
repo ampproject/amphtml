@@ -26,7 +26,7 @@ import {tryParseJson} from '../../../src/json';
  *
  * Maps a sentinel value to an instance of the SafeframeHostApi to which that
  * sentinel value belongs.
- * @type{!Object<string,SafeframeHostApi>}
+ * @type{!Object<string,!SafeframeHostApi>}
  */
 const safeframeHosts = {};
 
@@ -89,7 +89,24 @@ function safeframeListener() {
 }
 
 /**
- * Sets up the host for GPT Safeframe.
+ * Sets up the host API for DoubleClick Safeframe to allow the following
+ * Safeframe container APIs to work:
+ *   - $sf.ext.expand()
+ *   - $sf.ext.collapse()
+ *   - $sf.ext.geom()
+ * Expand and collapse are both implemented utilizing AMP's built in element
+ * resizing.
+ *
+ * For geom, the host needs to send geometry updates into the container
+ *  whenever a position change happens, at a max frequency of 1 message/second.
+ *  To implement this messaging, we are leveraging the existing IntersectionObserver
+ *  class that works with AMP elements. However, the safeframe iframe that we
+ *  need to monitor is not an AMP element, but rather contained within an amp-ad.
+ *  So, we are doing intersection observing on the amp-ad, and calculating
+ *  the correct position for the iframe whenever we get an update.
+ *
+ * We pass an instance of this class into the IntersectionObserver class, which then
+ *  calls the instance of send() below whenever an update occurs.
  * @implements {SimplePostMessageApiDef}
  */
 export class SafeframeHostApi {
@@ -143,7 +160,8 @@ export class SafeframeHostApi {
     /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
     this.creativeSize_ = creativeSize;
 
-    this.iframeOffsets = {};
+    /** @private {!Object} */
+    this.iframeOffsets_ = {};
 
     this.registerSafeframeHost();
   }
@@ -272,26 +290,26 @@ export class SafeframeHostApi {
     let iframeRect;
     if (this.iframe_) {
       iframeRect = this.iframe_.getBoundingClientRect();
-      this.iframeOffsets['dT'] = iframeRect.top -
+      this.iframeOffsets_['dT'] = iframeRect.top -
           changes['boundingClientRect']['top'];
-      this.iframeOffsets['dR'] = iframeRect.right -
+      this.iframeOffsets_['dR'] = iframeRect.right -
           changes['boundingClientRect']['right'];
-      this.iframeOffsets['dL'] = iframeRect.left -
+      this.iframeOffsets_['dL'] = iframeRect.left -
           changes['boundingClientRect']['left'];
-      this.iframeOffsets['dB'] = iframeRect.bottom -
+      this.iframeOffsets_['dB'] = iframeRect.bottom -
           changes['boundingClientRect']['bottom'];
-      this.iframeOffsets['width'] = iframeRect.width;
-      this.iframeOffsets['height'] = iframeRect.height;
+      this.iframeOffsets_['width'] = iframeRect.width;
+      this.iframeOffsets_['height'] = iframeRect.height;
     } else {
       iframeRect = this.creativeSize_;
-      this.iframeOffsets['dL'] = (changes['boundingClientRect']['width'] -
+      this.iframeOffsets_['dL'] = (changes['boundingClientRect']['width'] -
                                   iframeRect.width) / 2;
-      this.iframeOffsets['dB'] = (changes['boundingClientRect']['height'] -
+      this.iframeOffsets_['dB'] = (changes['boundingClientRect']['height'] -
                                   iframeRect.height) / 2;
-      this.iframeOffsets['dR'] = -this.iframeOffsets['dL'];
-      this.iframeOffsets['dT'] = -this.iframeOffsets['dB'];
-      this.iframeOffsets['width'] = iframeRect.width;
-      this.iframeOffsets['height'] = iframeRect.height;
+      this.iframeOffsets_['dR'] = -this.iframeOffsets_['dL'];
+      this.iframeOffsets_['dT'] = -this.iframeOffsets_['dB'];
+      this.iframeOffsets_['width'] = iframeRect.width;
+      this.iframeOffsets_['height'] = iframeRect.height;
     }
   }
 
@@ -304,10 +322,10 @@ export class SafeframeHostApi {
    * @private
    */
   formatGeom_(changes) {
-    changes.boundingClientRect.right += this.iframeOffsets['dR'];
-    changes.boundingClientRect.top += this.iframeOffsets['dT'];
-    changes.boundingClientRect.bottom += this.iframeOffsets['dB'];
-    changes.boundingClientRect.left += this.iframeOffsets['dL'];
+    changes.boundingClientRect.right += this.iframeOffsets_['dR'];
+    changes.boundingClientRect.top += this.iframeOffsets_['dT'];
+    changes.boundingClientRect.bottom += this.iframeOffsets_['dB'];
+    changes.boundingClientRect.left += this.iframeOffsets_['dL'];
     this.currentGeometry_ = /** @type {JsonObject} */({
       'windowCoords_t': changes.rootBounds.top,
       'windowCoords_r': changes.rootBounds.right,
@@ -321,9 +339,9 @@ export class SafeframeHostApi {
       // AMP's built in resize methodology that we use only allows expansion
       // to the right and bottom, so we enforce that here.
       'allowedExpansion_r': changes.rootBounds.width -
-          this.iframeOffsets['width'],
+          this.iframeOffsets_['width'],
       'allowedExpansion_b': changes.rootBounds.height -
-          this.iframeOffsets['height'],
+          this.iframeOffsets_['height'],
       'allowedExpansion_t': 0,
       'allowedExpansion_l': 0,
       'yInView': this.getPercInView(

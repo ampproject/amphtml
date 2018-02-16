@@ -309,7 +309,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {boolean} */
     this.isFluid_ = false;
 
-    /** {?string} */
+    /** @type {?string} */
     this.fluidImpressionUrl = null;
 
     /** @private {?Promise<!../../../ads/google/a4a/utils.IdentityToken>} */
@@ -831,14 +831,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     this.qqid_ = null;
   }
 
-  setupSafeframe() {
-    if (!this.safeframeApi_) {
-      this.safeframeApi_ = new SafeframeHostApi(this, this.isFluid_,
-          this.initialSize_,
-          this.getCreativeSize());
-    }
-  }
-
   /** @override */
   renderNonAmpCreative() {
     // If render idle with throttling, impose one second render delay for
@@ -1222,7 +1214,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   getAdditionalContextMetadata(optIsSafeframe) {
     if (this.isFluid_ || optIsSafeframe) {
-      this.setupSafeframe();
+      this.safeframeApi_ = new SafeframeHostApi(
+          this, this.isFluid_, this.initialSize_, this.getCreativeSize());
       return this.safeframeApi_.getSafeframeNameAttr();
     }
   }
