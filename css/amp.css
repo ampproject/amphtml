@@ -543,6 +543,23 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
   visibility: visible;
 }
 
+amp-list[load-more] > [overflow] > .i-amphtml-loader {
+  visibility: hidden;
+}
+
+amp-list[load-more] > [overflow].amp-load-more-loading > .i-amphtml-loader {
+  visibility: visible;
+}
+
+amp-list[load-more] > [load-more-loading],
+amp-list[load-more] > [load-more-failed] {
+  visibility: hidden;
+}
+
+amp-list[load-more] > [load-more-loading].amp-visible,
+amp-list[load-more] > [load-more-failed].amp-visible {
+  visibility: visible;
+}
 
 /* Polyfill for IE and any other browser that don't understand templates. */
 template {
