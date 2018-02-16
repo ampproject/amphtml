@@ -426,7 +426,7 @@ def RunSmokeTest(out_dir):
   logging.info('... done')
 
 
-def RunIndexTest()
+def RunIndexTest():
   """Runs the index_test.js, which tests the NodeJS API.
   """
   logging.info('entering ...')
