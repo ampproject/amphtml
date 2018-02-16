@@ -88,6 +88,7 @@
       <option>snowplow</option>
       <option>top100</option>
       <option>topmailru</option>
+      <option>umenganalytics</option>
       <option>webtrekk</option>
     </select>
     <input type="submit" value="Go">
@@ -1007,6 +1008,27 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Ibeat Analytics example -->
 
+<!-- Umeng+ Analytics Example -->
+<amp-analytics type="umenganalytics" id="umenganalytics">
+  <script type="application/json">
+    {
+      "vars": {
+        "siteid": "123456789"
+      },
+      "triggers": {
+        "event": {
+          "on": "click",
+          "selector": "#test1",
+          "request": "event",
+          "vars": {
+            "eventName": "login"
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End Umeng Analytics example -->
 </div>
 
 <div class="logo"></div>
