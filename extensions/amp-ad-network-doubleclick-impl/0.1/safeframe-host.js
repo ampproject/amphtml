@@ -80,12 +80,12 @@ function safeframeListener() {
 
 /**
  * Handles all non-setup messages.
- * @param {Object} data Message data from the postMessage received from
+ * @param {!Object} data Message data from the postMessage received from
  *   the safeframe.
  */
 function receiveStandardMessage(data) {
   const payload = tryParseJson(data[MESSAGE_FIELDS.PAYLOAD]);
-  if (!payload || !payload['sentinel']) {
+  if (!payload) {
     return;
   }
   const safeframeHost = safeframeHosts[payload['sentinel']];
@@ -141,7 +141,7 @@ export class SafeframeHostApi {
     this.iframe_ = null;
 
     /** @private {?IntersectionObserver} */
-    this.IntersectionObserver_ = null;
+    this.intersectionObserver_ = null;
 
     /** @type {?string} */
     this.channel = null;
@@ -170,12 +170,15 @@ export class SafeframeHostApi {
     /** @private {!Object} */
     this.creativeSize_ = creativeSize;
 
+    this.iframeOffsets = {};
+
     this.registerSafeframeHost();
   }
 
   /**
    * Returns the Safeframe specific name attributes that are needed for the
    * Safeframe creative to properly setup.
+   * @return {JSONObject}
    */
   getSafeframeNameAttr() {
     const attributes = dict({});
@@ -205,11 +208,15 @@ export class SafeframeHostApi {
   }
 
   /**
+   * Gets the current intersection change entry, and returns the
+   *   SafeFrame formatted change. See formatGeom_() for details on what
+   *   that format looks like.
    * @return {string}
    */
   getCurrentGeometry() {
-    return this.formatGeom_(
-        this.baseInstance_.element.getIntersectionChangeEntry());
+    const changes = this.baseInstance_.element.getIntersectionChangeEntry();
+    this.updateIframeOffsets(changes);
+    return this.formatGeom_(changes);
   }
 
   /**
@@ -228,11 +235,13 @@ export class SafeframeHostApi {
   /**
    * Sends initial connection message to the safeframe to finish initialization.
    * Also initializes the sending of geometry update messages to the frame.
+   * @param {string} channel
    */
   connectMessagingChannel(channel) {
     // Set the iframe here, because when class is first created the iframe
     // element does not yet exist on this.baseInstance_. The first time
     // we receive a message we know that it now exists.
+    dev().assert(this.baseInstance_.iframe);
     this.iframe_ = this.baseInstance_.iframe;
     this.channel = channel;
     dev().assert(this.iframe_.contentWindow,
@@ -253,12 +262,12 @@ export class SafeframeHostApi {
    * @private
    */
   setupGeom_() {
-    this.IntersectionObserver_ = new IntersectionObserver(
+    this.intersectionObserver_ = new IntersectionObserver(
         this.baseInstance_, this.baseInstance_.element, false, this, 1000);
     // This will send a geometry update message, and then start sending
     // them whenever geometry changes as detected by intersection
     // observer. Make sure we always send this initial update message.
-    this.IntersectionObserver_.startSendingIntersectionChanges();
+    this.intersectionObserver_.startSendingIntersectionChanges();
   }
 
   /**
@@ -267,8 +276,11 @@ export class SafeframeHostApi {
    * events.
    * Handles sending the geometry update message to the
    * safeframe container, which allows $sf.ext.geom() to work.
+   * @param {string} unused
+   * @param {!JsonObject} changes Intersection change entry.
+   * @override
    */
-  send(unusedTrash, changes) {
+  send(unused, changes) {
     this.sendMessage_({
       newGeometry: this.formatGeom_(changes['changes'][0]),
       uid: this.uid,
@@ -284,17 +296,21 @@ export class SafeframeHostApi {
    * @param {!Object} changes
    * @return {!Object} Corrected intersection change entry.
    */
-  correctChanges(changes) {
-    const iframeRect = this.iframe_ ? this.iframe_.getBoundingClientRect() :
-      this.creativeSize_;
-    const ampAdRect = this.baseInstance_.element.getBoundingClientRect();
-    const widthCorrection = (ampAdRect.width - iframeRect.width) / 2;
-    const heightCorrection = (ampAdRect.height - iframeRect.height) / 2;
-    changes.boundingClientRect.right -= widthCorrection;
-    changes.boundingClientRect.top += heightCorrection;
-    changes.boundingClientRect.bottom -= heightCorrection;
-    changes.boundingClientRect.left += widthCorrection;
-    return changes;
+  updateIframeOffsets(changes) {
+    let iframeRect;
+    if (this.iframe_) {
+      iframeRect = this.iframe_.getBoundingClientRect();
+      this.iframeOffsets['dT'] = iframeRect.top - changes.boundingClientRect.top;
+      this.iframeOffsets['dR'] = iframeRect.right - changes.boundingClientRect.right;
+      this.iframeOffsets['dL'] = iframeRect.left - changes.boundingClientRect.left;
+      this.iframeOffsets['dB'] = iframeRect.bottom - changes.boundingClientRect.bottom;
+    } else {
+      iframeRect = this.creativeSize_;
+      this.iframeOffsets['dL'] = (changes.boundingClientRect.width - iframeRect.width) / 2;
+      this.iframeOffsets['dB'] = (changes.boundingClientRect.height - iframeRect.height) / 2;
+      this.iframeOffsets['dR'] = -this.iframeOffsets['dL'];
+      this.iframeOffsets['dT'] = -this.iframeOffsets['dB'];
+    }
   }
 
   /**
@@ -306,19 +322,10 @@ export class SafeframeHostApi {
    * @private
    */
   formatGeom_(changes) {
-    const percInView = (a1, b1, a2, b2) => {
-      const lengthInView = (b2 >= b1) ? b1 - a2 : b2;
-      const percInView = lengthInView / (b2 - a2);
-      if (percInView < 0) {
-        return 0;
-      } else if (percInView > 1) {
-        return 1;
-      } else {
-        return percInView;
-      }
-    };
-    changes = this.correctChanges(changes);
-    const expandBounds = this.getExpandBounds(changes);
+    changes.boundingClientRect.right += this.iframeOffsets['dR'];
+    changes.boundingClientRect.top += this.iframeOffsets['dT'];
+    changes.boundingClientRect.bottom += this.iframeOffsets['dB'];
+    changes.boundingClientRect.left += this.iframeOffsets['dL'];
     this.currentGeometry_ = {
       'windowCoords_t': changes.rootBounds.top,
       'windowCoords_r': changes.rootBounds.right,
@@ -329,15 +336,19 @@ export class SafeframeHostApi {
       'frameCoords_b': changes.boundingClientRect.bottom,
       'frameCoords_l': changes.boundingClientRect.left,
       'styleZIndex': this.baseInstance_.element.style.zIndex,
-      'allowedExpansion_t': expandBounds.height,
-      'allowedExpansion_r': expandBounds.width,
-      'allowedExpansion_b': expandBounds.height,
-      'allowedExpansion_l': expandBounds.width,
-      'yInView': percInView(changes.rootBounds.top,
+      // AMP's built in resize methodology that we use only allows expansion
+      // to the right and bottom, so we enforce that here.
+      'allowedExpansion_r': changes.rootBounds.width -
+          changes.boundingClientRect.width,
+      'allowedExpansion_b': changes.rootBounds.height -
+          changes.boundingClientRect.height,
+      'allowedExpansion_t': 0,
+      'allowedExpansion_l': 0,
+      'yInView': this.getPercInView(
           changes.rootBounds.bottom,
           changes.boundingClientRect.top,
           changes.boundingClientRect.bottom),
-      'xInView': percInView(changes.rootBounds.left,
+      'xInView': this.getPercInView(
           changes.rootBounds.right,
           changes.boundingClientRect.left,
           changes.boundingClientRect.right),
@@ -346,24 +357,28 @@ export class SafeframeHostApi {
   }
 
   /**
-   * Calculates and returns the allowed expansion values for height and width.
-   * @param {!Object} changes Intersection change entry.
-   * @returns {!Object<string, number>}
+   * Helper function to calculate both the xInView and yInView of the
+   * geometry update messages. In the case of a 400px wide viewport,
+   * with a 100px wide creative that starts at x position 50, if we
+   * are calculating xInView, rootBoundEnd is 400, boundingRectStart
+   * is 50, and boundingRectEnd is 150.
+   * @param {number} rootBoundEnd
+   * @param {number} boundingRectStart
+   * @param {number} boundingRectEnd
+   * @return {number}
    */
-  getExpandBounds(changes) {
-    const frameHeight = changes.boundingClientRect.bottom -
-          changes.boundingClientRect.top;
-    const frameWidth = changes.boundingClientRect.right -
-          changes.boundingClientRect.left;
-    const viewportHeight = changes.rootBounds.bottom -
-          changes.rootBounds.top;
-    const viewportWidth = changes.rootBounds.right -
-          changes.rootBounds.left;
-    return {
-      width: (viewportWidth - frameWidth) / 2,
-      height: (viewportHeight - frameHeight) / 2,
-    };
-  }
+  getPercInView(rootBoundEnd, boundingRectStart, boundingRectEnd) {
+    const lengthInView = (boundingRectEnd >= rootBoundEnd) ?
+          rootBoundEnd - boundingRectStart : boundingRectEnd;
+    const percInView = lengthInView / (boundingRectEnd - boundingRectStart);
+    if (percInView < 0) {
+      return 0;
+    } else if (percInView > 1) {
+      return 1;
+    } else {
+      return percInView;
+    }
+  };
 
   /**
    * Handles serializing and sending messages to the safeframe.
@@ -422,17 +437,14 @@ export class SafeframeHostApi {
    * @private
    */
   handleExpandRequest_(payload) {
-    let expandHeight = Math.floor(payload.expand_b +
-                                 payload.expand_t);
-    let expandWidth = Math.floor(payload.expand_r +
-                                 payload.expand_l);
+    let expandHeight = payload.expand_b + payload.expand_t;
+    let expandWidth = payload.expand_r +  payload.expand_l;
     // We assume that a fair amount of usage of this API will try to pass the final
     // size of the iframe that is desired, instead of the correct usage which is
     // specify how much to expand by. We try to protect against this, by detecting
     // if the requested expansion size matches the size of the amp-ad element, and
     // if so we assume that the desired effect was to resize to fill the element.
-    if (expandWidth != this.baseInstance_.element.style.width.split('px')[0] ||
-       expandHeight != this.baseInstance_.element.style.height.split('px')[0]) {
+    if (expandWidth != this.initialWidth_ || expandHeight != this.initialHeight_) {
       expandWidth += Number(this.iframe_.width);
       expandHeight += Number(this.iframe_.height);
     }
