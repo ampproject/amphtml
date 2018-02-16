@@ -308,8 +308,6 @@ export class SafeframeHostApi {
     changes.boundingClientRect.top += this.iframeOffsets['dT'];
     changes.boundingClientRect.bottom += this.iframeOffsets['dB'];
     changes.boundingClientRect.left += this.iframeOffsets['dL'];
-    //changes.boundingClientRect.width -= (this.iframeOffsets['dR'] - this.iframeOffsets['dL']);
-    ///changes.boundingClientRect.height -= (this.iframeOffsets['dB'] - this.iframeOffsets['dT']);
     this.currentGeometry_ = /** @type {JsonObject} */({
       'windowCoords_t': changes.rootBounds.top,
       'windowCoords_r': changes.rootBounds.right,
