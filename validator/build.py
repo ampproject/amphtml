@@ -43,7 +43,7 @@ def EnsureNodeJsIsInstalled():
 
   try:
     output = subprocess.check_output(['node', '--eval', 'console.log("42")'])
-    if output.strip() == 42:
+    if output.strip() == '42':
       return;
   except (subprocess.CalledProcessError, OSError):
     pass
@@ -662,7 +662,7 @@ def GenerateTestRunner(out_dir):
   logging.info('... success')
 
 
-def RunTests(out_dir)
+def RunTests(out_dir):
   """Runs all the minified tests.
 
   Args:
