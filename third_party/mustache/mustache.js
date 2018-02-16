@@ -504,6 +504,10 @@
   Writer.prototype.renderTokens = function renderTokens (tokens, context, partials, originalTemplate) {
     var buffer = '';
 
+    console.log('renderTokens');
+    console.log(tokens);
+    console.log(originalTemplate);
+
     var token, symbol, value;
     for (var i = 0, numTokens = tokens.length; i < numTokens; ++i) {
       value = undefined;
@@ -520,6 +524,8 @@
       if (value !== undefined)
         buffer += value;
     }
+
+    console.log(buffer);
 
     return buffer;
   };
