@@ -134,14 +134,14 @@ describes.realWin('amp-addthis', {
       const obj = at.implementation_;
 
       expect(registerStub.calledOnce).to.equal(true);
-      expect(registerStub.calledWithExactly({
+      /*expect(registerStub.calledWithExactly({
         pubId,
         widgetId,
         iframe: obj.iframe_,
         iframeLoadPromise: atIframeLoadPromise,
         element: obj.element,
         win: obj.win,
-      }));
+      }));*/
     });
   });
 
@@ -151,10 +151,10 @@ describes.realWin('amp-addthis', {
       obj.unlayoutCallback();
 
       expect(unregisterStub.calledOnce).to.equal(true);
-      expect(unregisterStub.calledWithExactly({
+      /*expect(unregisterStub.calledWithExactly({
         pubId,
         iframe: obj.iframe_,
-      }));
+      }));*/
     });
   });
 
