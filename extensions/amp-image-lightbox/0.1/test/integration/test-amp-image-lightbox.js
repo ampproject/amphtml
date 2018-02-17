@@ -50,7 +50,7 @@ describe.configure().run('amp-image-lightbox', function() {
 
     it('should activate on tap of source image', () => {
       const lightbox = win.document.getElementById('image-lightbox-1');
-      expect(lightbox.style.display == 'none');
+      expect(lightbox.style.display).to.equal('none');
       const ampImage = win.document.getElementById('img0');
       const imageLoadedPromise = waitForImageToLoad(ampImage);
       return imageLoadedPromise.then(() => {
