@@ -134,7 +134,7 @@
     "nodemon": "1.14.12",
     "path": "0.12.7",
     "plugin-error": "0.1.2",
-    "postcss": "6.0.17",
+    "postcss": "6.0.19",
     "postcss-import": "11.0.0",
     "preact": "8.2.7",
     "preact-compat": "3.17.0",
