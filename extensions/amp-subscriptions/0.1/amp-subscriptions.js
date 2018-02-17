@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-access-0.1.css';
+import {CSS} from '../../../build/amp-subscriptions-0.1.css';
+import {EntitlementStore} from './entitlement-store';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
+import {
+  PageConfig,
+  PageConfigResolver,
+} from '../../../third_party/subscriptions-project/config';
+import {Renderer} from './renderer';
 import {SubscriptionPlatform} from './subscription-platform';
 import {installStylesForDoc} from '../../../src/style-installer';
 
 /** @const */
 const TAG = 'amp-subscriptions';
+
 
 export class SubscriptionService {
   /**
@@ -33,17 +40,28 @@ export class SubscriptionService {
     // Install styles.
     installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
 
+    /** @private @const {!Renderer} */
+    this.renderer_ = new Renderer(ampdoc);
+
+    /** @private {?PageConfig} */
+    this.pageConfig_ = null;
+
     /** @private @const {!Array<!SubscriptionPlatform>} */
     this.subscriptionPlatforms_ = [];
+
+    /** @private {?EntitlementStore} */
+    this.entitlementStore_ = null;
   }
 
   /**
    * @private
-   * @return {Promise<Object>}
+   * @return {!Promise}
    */
   initialize_() {
+    const pageConfigResolver = new PageConfigResolver(this.ampdoc_.win);
+
     // TODO(@prateekbh): read this config from the document.
-    const config = [
+    const platformConfigs = [
       {
         paywallUrl: '/subscription/1/entitlements',
       },
@@ -52,46 +70,71 @@ export class SubscriptionService {
       },
     ];
 
-    return new Promise(resolve => {
-      config.forEach(subscriptionPlatformConfig => {
+    return pageConfigResolver.resolveConfig().then(pageConfig => {
+      this.pageConfig_ = pageConfig;
+      platformConfigs.forEach(platformConfig => {
         this.subscriptionPlatforms_.push(
             new LocalSubscriptionPlatform(
                 this.ampdoc_,
-                subscriptionPlatformConfig.paywallUrl
+                platformConfig
             )
         );
       });
-      resolve();
     });
   }
 
   /**
-   * @private
+   * This method registers an auto initialized subcription platform with this service.
+   *
+   * @param {string} serviceId
+   * @param {!SubscriptionPlatform} subscriptionPlatform
    */
+  registerService(serviceId, subscriptionPlatform) {
+    this.subscriptionPlatforms_.push(subscriptionPlatform);
+
+    subscriptionPlatform.getEntitlements()
+        .then(() => this.processEntitlement_());
+  }
+
+  /** @private */
   processEntitlement_() {
     // TODO(@prateekbh): process and unblock marup here.
   }
 
-  /**
-   * @private
-   */
+  /** @private */
   start_() {
     this.initialize_().then(() => {
+      // TODO(@prateekbh): Start and stop loading indicator. See
+      // `Renderer.toggleLoading`.
+      // TODO(@prateekbh): Read the service ids in EntitlementStore constructor
+      // from page config.
+      this.entitlementStore_ = new EntitlementStore(['foo', 'bar']);
       this.subscriptionPlatforms_.forEach(subscriptionPlatform => {
         subscriptionPlatform.getEntitlements()
             .then(() => this.processEntitlement_());
       });
     });
   }
-
-  /** @private */
-  getPlatformClassForTesting_() {return SubscriptionPlatform;}
-
 }
+
+
+/** @package @VisibleForTesting */
+export function getPlatformClassForTesting() {
+  return SubscriptionPlatform;
+}
+
+/**
+ * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
+ * @package @VisibleForTesting
+ */
+export function getPageConfigClassForTesting() {
+  return PageConfig;
+}
+
 
 // Register the extension services.
 AMP.extension(TAG, '0.1', function(AMP) {
-  AMP.registerServiceForDoc('access', function(ampdoc) {
+  AMP.registerServiceForDoc(TAG, function(ampdoc) {
     return new SubscriptionService(ampdoc).start_();
   });
 });

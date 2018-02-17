@@ -13,31 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-import {Entitlements} from '../../../third_party/subscriptions-project/apis';
+const fs = require('fs');
+const path = require('path');
 
+const rules = {};
+const ruleFiles = fs.readdirSync(__dirname).filter(ruleFile =>
+  !['index.js', 'node_modules', 'package.json'].includes(ruleFile));
+ruleFiles.forEach(function(ruleFile) {
+  const rule = ruleFile.replace(path.extname(ruleFile), '');
+  rules[rule] = require(path.join(__dirname, rule));
+});
 
-/**
- * This interface is intended to be implemented by Subscription platforms to
- * provide method of getting entitlements.
- *
- * @interface
- */
-export class SubscriptionPlatform {
-
-  /**
-   * Requests entitlement for a subscription platform.
-   * @return {!Promise<!Entitlements>}
-   */
-  getEntitlements() {
-  }
-}
-
-
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package @visibleForTesting
- */
-export function getEntitlementsClassForTesting() {
-  return Entitlements;
-}
+module.exports = {rules};
