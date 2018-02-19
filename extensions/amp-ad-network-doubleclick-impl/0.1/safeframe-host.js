@@ -20,6 +20,7 @@ import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {tryParseJson} from '../../../src/json';
+import {getMode} from '../../../src/mode';
 
 /**
  * Used to manage messages for different Safeframe ad slots.
@@ -32,7 +33,7 @@ const safeframeHosts = {};
 
 let safeframeListenerCreated = false;
 
-const MESSAGE_FIELDS = {
+export const MESSAGE_FIELDS = {
   CHANNEL: 'c',
   SENTINEL: 'e',
   ENDPOINT_IDENTITY: 'i',
@@ -54,14 +55,15 @@ const SERVICE = {
 const TAG = 'AMP-DOUBLECLICK-SAFEFRAME';
 
 /** @const {string} */
-export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
+export const SAFEFRAME_ORIGIN = /**getMode(window).test ? 'http://localhost:9876' :*/
+    'https://tpc.googlesyndication.com';
 
 /**
  * Event listener callback for message events. If message is a Safeframe message,
  * handles the message.
  * This listener is registered within SafeframeHostApi.
  */
-function safeframeListener(event) {
+export function safeframeListener(event) {
   const data = tryParseJson(getData(event));
   /** Only process messages that are valid Safeframe messages */
   if (event.origin != SAFEFRAME_ORIGIN || !data) {
@@ -590,5 +592,10 @@ export class SafeframeHostApi {
         SAFEFRAME_ORIGIN);
   }
 
-  destroy() {}
+  /**
+   * Unregister this Host API.
+   */
+  destroy() {
+    safeframeHosts[this.sentinel] = undefined;
+  }
 }
