@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import {Entitlement, Entitlements} from '../entitlements';
-
+import {
+  Entitlement,
+  Entitlements,
+} from '../../../../third_party/subscriptions-project/apis';
 import {EntitlementStore} from '../entitlement-store';
+
 
 describes.realWin('entitlement-store', {}, () => {
   let entitlementStore;
