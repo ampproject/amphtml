@@ -25,11 +25,9 @@ import {setStyles} from '../src/style';
  * @param {!Window} global
  * @param {function(!Object)} cb
  */
-function getBeOpinion(global, cb) {
-  loadScript(global, 'https://widget.beopinion.com/sdk.js', function() {
-  // loadScript(global, 'http://localhost:8081/sdk-4.0.0.js', function() {
-    cb(global.BeOpinionSDK);
-  });
+function getBeOpinion(global) {
+  loadScript(global, 'https://widget.beopinion.com/sdk.js', function() {});
+  // loadScript(global, 'http://localhost:8081/sdk-4.0.0.js', function() {});
 }
 
 /**
@@ -85,6 +83,30 @@ function createContainer(global, data) {
   return container;
 }
 
+function getBeOpinionAsyncInit(global, accountId) {
+  const context = global.context;
+  return function() {
+    global.BeOpinionSDK.init({
+      account: accountId,
+      onContentReceive: function(hasContent) {
+        console.log('onContentReceive', hasContent);
+        if (hasContent) {
+          context.renderStart();
+        } else {
+          context.noContentAvailable();
+        }
+      },
+      onHeightChange: function(newHeight) {
+        console.log('onHeightChange', newHeight);
+        const boundingClientRect = c.getBoundingClientRect();
+        context.onResizeDenied(context.requestResize);
+        context.requestResize(boundingClientRect.width, newHeight);
+      }
+    });
+    global.BeOpinionSDK['watch'](); // global.BeOpinionSDK.watch() fails 'gulp check-types' validation on Travis
+  }
+};
+
 /**
  * @param {!Window} global
  * @param {!Object} data
@@ -94,24 +116,6 @@ export function beopinion(global, data) {
   const c = global.document.getElementById('c');
   c.appendChild(container);
 
-  getBeOpinion(global, function(sdk) { // , context) {
-    sdk.init({
-      account: data.account,
-      onContentReceive: function(hasContent) {
-        console.log('onContentReceive', hasContent);
-        if (hasContent) {
-          global.context.renderStart();
-        } else {
-          global.context.noContentAvailable();
-        }
-      },
-      onHeightChange: function(newHeight) {
-        console.log('onHeightChange', newHeight);
-        const boundingClientRect = c.getBoundingClientRect();
-        global.context.onResizeDenied(global.context.requestResize);
-        global.context.requestResize(boundingClientRect.width, newHeight);
-      }
-    });
-    sdk['watch'](); // sdk.watch() fails 'gulp check-types' validation on Travis
-  });
+  global.beOpinionAsyncInit = getBeOpinionAsyncInit(global, data.account);
+  getBeOpinion(global);
 }
