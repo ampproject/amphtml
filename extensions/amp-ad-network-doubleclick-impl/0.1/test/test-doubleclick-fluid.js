@@ -195,7 +195,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
         </script>`;
     impl.getAdditionalContextMetadata();
     const safeframeApi = impl.safeframeApi_;
-    sandbox.stub(safeframeApi, "setupGeom_");
+    sandbox.stub(safeframeApi, 'setupGeom_');
     const connectMessagingChannelSpy =
         sandbox.spy(safeframeApi, 'connectMessagingChannel');
     const onFluidResizeSpy = sandbox.spy(safeframeApi, 'onFluidResize_');
@@ -208,7 +208,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
         expect(connectMessagingChannelSpy).to.be.calledOnce;
         expect(onFluidResizeSpy).to.be.calledOnce;
       }).then(() => {
-        console.log("foo");
+        console.log('foo');
       });
     });
   });

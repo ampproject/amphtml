@@ -20,7 +20,6 @@ import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {tryParseJson} from '../../../src/json';
-import {getMode} from '../../../src/mode';
 
 /**
  * Used to manage messages for different Safeframe ad slots.
@@ -42,7 +41,7 @@ export const MESSAGE_FIELDS = {
   MESSAGE: 'message',
 };
 
-const SERVICE = {
+export const SERVICE = {
   GEOMETRY_UPDATE: 'geometry_update',
   CREATIVE_GEOMETRY_UPDATE: 'creative_geometry_update',
   EXPAND_REQUEST: 'expand_request',
@@ -552,7 +551,7 @@ export class SafeframeHostApi {
               }
             });
       }
-      this.sendResizeResponse(success, message);
+      this.sendResizeResponse(success || !!optIsCollapse, message);
     }).catch(() => {});
   }
 
