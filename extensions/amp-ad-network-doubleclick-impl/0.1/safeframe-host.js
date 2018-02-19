@@ -61,7 +61,7 @@ export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
  * handles the message.
  * This listener is registered within SafeframeHostApi.
  */
-function safeframeListener() {
+function safeframeListener(event) {
   const data = tryParseJson(getData(event));
   /** Only process messages that are valid Safeframe messages */
   if (event.origin != SAFEFRAME_ORIGIN || !data) {

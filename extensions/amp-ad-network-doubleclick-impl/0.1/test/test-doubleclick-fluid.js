@@ -89,7 +89,6 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
 
   afterEach(() => {
     sandbox.restore();
-    impl.maybeRemoveListenerForFluid();
     impl = null;
   });
 
@@ -194,17 +193,22 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
               p: '{"width":"1px","height":"1px","sentinel":"sentinel"}',
             })), '*');
         </script>`;
-    const connectFluidMessagingChannelSpy =
-        sandbox.spy(impl, 'connectFluidMessagingChannel');
-    const onFluidResizeSpy = sandbox.spy(impl, 'onFluidResize_');
+    impl.getAdditionalContextMetadata();
+    const safeframeApi = impl.safeframeApi_;
+    sandbox.stub(safeframeApi, "setupGeom_");
+    const connectMessagingChannelSpy =
+        sandbox.spy(safeframeApi, 'connectMessagingChannel');
+    const onFluidResizeSpy = sandbox.spy(safeframeApi, 'onFluidResize_');
     impl.attemptChangeHeight = () => Promise.resolve();
     impl.sentinel = 'sentinel';
     impl.initiateAdRequest();
     return impl.adPromise_.then(() => {
       impl.creativeBody_ = utf8Encode(rawCreative);
       return impl.layoutCallback().then(() => {
-        expect(connectFluidMessagingChannelSpy).to.be.calledOnce;
+        expect(connectMessagingChannelSpy).to.be.calledOnce;
         expect(onFluidResizeSpy).to.be.calledOnce;
+      }).then(() => {
+        console.log("foo");
       });
     });
   });

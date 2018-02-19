@@ -423,7 +423,7 @@ describe('IntersectionObserver', () => {
     clock.tick(33);
     ioInstance.postMessageApi_.clientWindows_ =
         [{win: testIframe.contentWindow, origin: '*'}];
-    ioInstance.startSendingIntersectionChanges_();
+    ioInstance.startSendingIntersectionChanges();
     expect(getIntersectionChangeEntrySpy).to.be.calledOnce;
     expect(messages).to.have.length(1);
     expect(ioInstance.pendingChanges_).to.have.length(0);
@@ -441,7 +441,7 @@ describe('IntersectionObserver', () => {
     };
     ioInstance.postMessageApi_.clientWindows_ =
         [{win: testIframe.contentWindow, origin: '*'}];
-    ioInstance.startSendingIntersectionChanges_();
+    ioInstance.startSendingIntersectionChanges();
     expect(getIntersectionChangeEntrySpy).to.be.calledOnce;
     expect(messages).to.have.length(1);
     expect(messages[0].changes).to.have.length(1);
@@ -501,7 +501,7 @@ describe('IntersectionObserver', () => {
     element.isInViewport = () => true;
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
-    ioInstance.startSendingIntersectionChanges_();
+    ioInstance.startSendingIntersectionChanges();
     expect(getIntersectionChangeEntrySpy).to.have.callCount(2);
     expect(onScrollSpy).to.be.calledOnce;
     expect(onChangeSpy).to.be.calledOnce;
@@ -519,7 +519,7 @@ describe('IntersectionObserver', () => {
     };
     ioInstance.postMessageApi_.clientWindows_ =
         [{win: testIframe.contentWindow, origin: '*'}];
-    ioInstance.startSendingIntersectionChanges_();
+    ioInstance.startSendingIntersectionChanges();
     expect(messages).to.have.length(1);
     ioInstance.fire();
     clock.tick(50);

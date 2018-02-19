@@ -179,6 +179,7 @@ export class IntersectionObserver {
       this.unlistenViewportChanges_ = null;
     }
   }
+
   /**
    * Called via postMessage from the child iframe when the ad/iframe starts
    * observing its position in the viewport.
