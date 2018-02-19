@@ -88,7 +88,7 @@
     "gulp-eslint": "4.0.1",
     "gulp-exec": "3.0.1",
     "gulp-file": "0.4.0",
-    "gulp-git": "2.5.0",
+    "gulp-git": "2.5.2",
     "gulp-help": "1.6.1",
     "gulp-if": "2.0.2",
     "gulp-intercept": "0.1.0",
