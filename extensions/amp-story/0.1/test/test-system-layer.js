@@ -35,7 +35,7 @@ describes.fakeWin('amp-story system layer', {}, env => {
     progressBarStub = {
       build: sandbox.stub().returns(progressBarRoot),
       getRoot: sandbox.stub().returns(progressBarRoot),
-      setActivePageIndex: sandbox.spy(),
+      setActiveSegmentId: sandbox.spy(),
       updateProgress: sandbox.spy(),
     };
 
@@ -73,8 +73,8 @@ describes.fakeWin('amp-story system layer', {}, env => {
 
   it('should set the active page index', () => {
     [0, 1, 2, 3, 4].forEach(index => {
-      systemLayer.setActivePageIndex(index);
-      progressBarStub.setActivePageIndex.should.have.been.calledWith(index);
+      systemLayer.setActivePageId(index);
+      progressBarStub.setActiveSegmentId.should.have.been.calledWith(index);
     });
   });
 });

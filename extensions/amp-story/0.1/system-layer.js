@@ -119,10 +119,10 @@ export class SystemLayer {
   }
 
   /**
-   * @param {number} pageCount The number of pages in the story.
+   * @param {!Array<string>} pageIds the ids of each page in the story
    * @return {!Element}
    */
-  build(pageCount) {
+  build(pageIds) {
     if (this.isBuilt_) {
       return this.getRoot();
     }
@@ -132,7 +132,7 @@ export class SystemLayer {
     this.root_ = renderAsElement(this.win_.document, TEMPLATE);
 
     this.root_.insertBefore(
-        this.progressBar_.build(pageCount), this.root_.lastChild);
+        this.progressBar_.build(pageIds), this.root_.lastChild);
 
     this.leftButtonTray_ =
         this.root_.querySelector('.i-amphtml-story-ui-left');
@@ -211,22 +211,24 @@ export class SystemLayer {
   }
 
   /**
-   * @param {number} pageIndex The index of the new active page.
+   * @param {string} pageId The page id of the new active page.
    * @public
    */
-  setActivePageIndex(pageIndex) {
-    this.progressBar_.setActivePageIndex(pageIndex);
+  setActivePageId(pageId) {
+    // TODO(newmuis) avoid passing progress logic through system-layer
+    this.progressBar_.setActiveSegmentId(pageId);
   }
 
   /**
-   * @param {number} pageIndex The index of the page whose progress should be
+   * @param {string} pageId The id of the page whose progress should be
    *     changed.
    * @param {number} progress A number from 0.0 to 1.0, representing the
    *     progress of the current page.
    * @public
    */
-  updateProgress(pageIndex, progress) {
-    this.progressBar_.updateProgress(pageIndex, progress);
+  updateProgress(pageId, progress) {
+    // TODO(newmuis) avoid passing progress logic through system-layer
+    this.progressBar_.updateProgress(pageId, progress);
   }
 
   /**
