@@ -156,7 +156,8 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
-    it('should trigger pause analytics when the video pauses', function() {
+    // TODO(cvializ, #10283): Find out why this is flaky on master.
+    it.skip('should trigger pause analytics when the video pauses', function() {
       let pauseButton;
 
       return getVideoPlayer(
