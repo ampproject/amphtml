@@ -90,7 +90,7 @@ export class EntitlementStore {
         // Listen if any upcoming entitlements unblock the reader
         this.onChange(({entitlements}) => {
           if (entitlements.enablesThis()) {
-            return resolve(entitlements);
+            resolve(entitlements);
           }
         });
       }

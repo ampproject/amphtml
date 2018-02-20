@@ -75,7 +75,7 @@ export class SubscriptionService {
             new LocalSubscriptionPlatform(
                 this.ampdoc_,
                 platformConfig,
-                this.pageConfig_
+                pageConfig
             )
         );
       });
@@ -91,8 +91,7 @@ export class SubscriptionService {
   registerService(serviceId, subscriptionPlatform) {
     this.subscriptionPlatforms_.push(subscriptionPlatform);
 
-    subscriptionPlatform.getEntitlements()
-        .then(entitlements => this.resolveEntitlementsToStore_(entitlements));
+    this.fetchEntitlements_(subscriptionPlatform);
   }
 
   /**
@@ -117,6 +116,15 @@ export class SubscriptionService {
         entitlements);
   }
 
+  /**
+   *
+   * @param {!SubscriptionPlatform} subscriptionPlatform
+   */
+  fetchEntitlements_(subscriptionPlatform) {
+    subscriptionPlatform.getEntitlements().then(entitlements =>
+      this.resolveEntitlementsToStore_(entitlements));
+  }
+
   /** @private */
   start_() {
     this.initialize_().then(() => {
@@ -127,9 +135,7 @@ export class SubscriptionService {
         new EntitlementStore(['amp-local-subscription', 'google-subscription']);
 
       this.subscriptionPlatforms_.forEach(subscriptionPlatform => {
-        subscriptionPlatform.getEntitlements()
-            .then(entitlements =>
-              this.resolveEntitlementsToStore_(entitlements));
+        this.fetchEntitlements_(subscriptionPlatform);
       });
 
       this.entitlementStore_.getFirstResolvedSubscription()

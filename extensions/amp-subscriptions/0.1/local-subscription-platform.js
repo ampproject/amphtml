@@ -29,7 +29,7 @@ export class LocalSubscriptionPlatform {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} serviceConfig
-   * @param {PageConfig} pageConfig
+   * @param {!PageConfig} pageConfig
    */
   constructor(ampdoc, serviceConfig, pageConfig) {
     /** @const */
@@ -60,7 +60,7 @@ export class LocalSubscriptionPlatform {
         .then(res => res.json())
         .then(resJson => {
           return new Entitlements(
-              'amp-local-subscription',
+              this.serviceConfig_['serviceId'] || 'local',
               JSON.stringify(resJson),
               Entitlement.parseListFromJson(resJson),
               currentProductId
