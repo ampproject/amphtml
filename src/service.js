@@ -65,6 +65,7 @@ export class Disposable {
  * This interface provides a `adoptEmbedWindow` method that will be called by
  * runtime for a new embed window.
  * @interface
+ * QQQ: deprecate
  */
 export class EmbeddableService {
 
@@ -74,6 +75,22 @@ export class EmbeddableService {
    * @param {!Window} unusedEmbedWin
    */
   adoptEmbedWindow(unusedEmbedWin) {}
+}
+
+
+/**
+ * This interface provides a `adoptEmbedDoc` method that will be called by
+ * runtime for a new embed ampdoc.
+ * @interface
+ */
+export class EmbeddableServiceForDoc {
+
+  /**
+   * Instructs the service to adopt the embed ampdoc and add any necessary
+   * listeners and resources.
+   * @param {!./service/ampdoc-impl.AmpDoc} unusedEmbedDoc
+   */
+  adoptEmbedDoc(unusedEmbedDoc) {}
 }
 
 
@@ -267,7 +284,35 @@ export function getServicePromiseOrNull(win, id) {
 export function getServiceForDoc(nodeOrDoc, id) {
   const ampdoc = getAmpdoc(nodeOrDoc);
   const holder = getAmpdocServiceHolder(ampdoc);
+  if (ampdoc.parent && !isServiceRegistered(holder, id)) {
+    const parentService = getServiceInternal(
+        getAmpdocServiceHolder(ampdoc.parent), id);
+    if (isEmbeddableForDoc(parentService)) {
+      const embeddedService = parentService.adoptEmbedDoc(ampdoc);
+      registerServiceInternal(holder, ampdoc, id, () => embeddedService);
+      getServiceInternal(holder, id);  // Resolve right away.
+      return embeddedService;
+    }
+  }
   return getServiceInternal(holder, id);
+}
+
+
+/**
+ * QQQ
+ */
+export function adoptEmbedDocServices(ampdoc) {
+  dev().assert(ampdoc.parent);
+  const holder = getAmpdocServiceHolder(ampdoc);
+  const services = getServices(getAmpdocServiceHolder(ampdoc.parent));
+  for (const id in services) {
+    // Only instantiated services are adopted.
+    const parentService = services[id].obj;
+    if (parentService && isEmbeddableForDoc(parentService)) {
+      console.log('QQQ: adopt ', id);
+      getServiceForDoc(ampdoc, id);
+    }
+  }
 }
 
 
@@ -280,6 +325,7 @@ export function getServiceForDoc(nodeOrDoc, id) {
  * @return {!Promise<!Object>}
  */
 export function getServicePromiseForDoc(nodeOrDoc, id) {
+  //QQQQ: this will not work correctly with `getServiceForDoc(parent)`
   return getServicePromiseInternal(
       getAmpdocServiceHolder(nodeOrDoc), id);
 }
@@ -607,6 +653,16 @@ function disposeServiceInternal(id, service) {
  */
 export function isEmbeddable(service) {
   return typeof service.adoptEmbedWindow == 'function';
+}
+
+
+/**
+ * Whether the specified service implements `EmbeddableServiceForDoc` interface.
+ * @param {!Object} service
+ * @return {boolean}
+ */
+export function isEmbeddableForDoc(service) {
+  return typeof service.adoptEmbedDoc == 'function';
 }
 
 

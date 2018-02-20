@@ -126,6 +126,12 @@ export class ClickHandler {
         new ClickHandler(this.ampdoc, embedWin.document));
   }
 
+  /** @override */
+  adoptEmbedDoc(embedAmpDoc) {
+    //QQQ:implements
+    return new ClickHandler(embedAmpDoc);
+  }
+
   /**
    * Removes all event listeners.
    */

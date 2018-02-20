@@ -418,6 +418,13 @@ export class Viewer {
     this.onVisibilityChange_();
   }
 
+  /** @override */
+  adoptEmbedDoc() {
+    // QQQ:implements
+    // The same viewer is used for all embedded docs.
+    return this;
+  }
+
   /**
    * Handler for visibility change.
    * @private

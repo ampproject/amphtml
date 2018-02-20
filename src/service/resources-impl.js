@@ -306,6 +306,14 @@ export class Resources {
     });
   }
 
+  /** @override */
+  adoptEmbedDoc() {
+    // The same resources manager is used to manager all resources in
+    // the top-level doc.
+    //QQQ:implements
+    return this;
+  }
+
   /**
    * Returns a list of resources.
    * @return {!Array<!Resource>}

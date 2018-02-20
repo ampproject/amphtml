@@ -75,6 +75,12 @@ export class StandardActions {
     this.installActions_(Services.actionServiceForDoc(embedWin.document));
   }
 
+  /** @override */
+  adoptEmbedDoc(embedAmpDoc) {
+    // QQQ:implements
+    return new StandardActions(embedAmpDoc);
+  }
+
   /**
    * @param {!./action-impl.ActionService} actionService
    * @private
