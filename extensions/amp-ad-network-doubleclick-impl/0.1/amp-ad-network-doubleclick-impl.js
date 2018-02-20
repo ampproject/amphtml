@@ -391,15 +391,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (this.element.getAttribute('data-loading-strategy')) {
       return false;
     }
-    let vpRange =
-        parseInt(this.postAdResponseExperimentFeatures['render-idle-vp'], 10);
-    if (isNaN(vpRange)) {
-      if (isExperimentOn(this.win, 'dfp_ff_render_idle_launch')) {
-        vpRange = 12;
-      } else {
-        return false;
-      }
+    const expVal = this.postAdResponseExperimentFeatures['render-idle-vp'];
+    let vpRange = parseInt(expVal, 10);
+    if (expVal && isNaN(vpRange)) {
+      // holdback branch sends non-numeric value.
+      return false;
     }
+    vpRange = vpRange || 12;
     this.isIdleRender_ = true;
     // NOTE(keithwrightbos): handle race condition where previous
     // idleRenderOutsideViewport marked slot as idle render despite never
