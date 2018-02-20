@@ -362,6 +362,22 @@ event.response</pre></td>
   </tr>
 </table>
 
+### amp-selector
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>selectUp(incrementPos=INTEGER)</code></td>
+    <td>Changes the selected element to the currentPos-incrementPos. If no increment value is specified, the default is 1.</td>
+  </tr>
+  <tr>
+    <td><code>selectDown(decrementPos=INTEGER)</code></td>
+    <td>Changes the selected element to the currentPos+decrementPos. If no decrement value is specified, the default is -1.</td>
+  </tr>
+</table>
+
 ### amp-sidebar
 <table>
   <tr>

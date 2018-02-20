@@ -113,6 +113,24 @@ export class AmpSelector extends AMP.BaseElement {
       this.element.addEventListener('click', this.clickHandler_.bind(this));
       this.element.addEventListener('keydown', this.keyDownHandler_.bind(this));
     }
+
+    this.registerAction('selectUp', invocation => {
+      const args = invocation.args;
+      if (args && args['incrementPos'] !== undefined) {
+        this.select_(-1 * args['incrementPos']);
+      } else {
+        this.select_(-1);
+      }
+    }, ActionTrust.LOW);
+
+    this.registerAction('selectDown', invocation => {
+      const args = invocation.args;
+      if (args && args['decrementPos'] !== undefined) {
+        this.select_(args['decrementPos']);
+      } else {
+        this.select_(1);
+      }
+    }, ActionTrust.LOW);
   }
 
   /** @override */
@@ -317,6 +335,29 @@ export class AmpSelector extends AMP.BaseElement {
     if (el) {
       this.onOptionPicked_(el);
     }
+  }
+
+  /**
+   * Handles selectUp events.
+   * @param {!integer} incrementPos
+   */
+  select_(incrementPos) {
+
+    if (this.isMultiple_) {
+      this.clearSelection_(this.selectedOptions_[0]);
+    }
+    // Change the selection to the next element in the specified direction.
+    // The selection should loop around if the user attempts to go one
+    // past the beginning or end.
+    let selectedIndex_ = this.options_.indexOf(this.selectedOptions_[0]);
+
+    selectedIndex_ = (selectedIndex_ + incrementPos) % this.options_.length;
+    if (selectedIndex_ < 0) {
+      selectedIndex_ = selectedIndex_ + this.options_.length;
+    }
+
+    const selectedOption = this.options_[selectedIndex_];
+    this.onOptionPicked_(selectedOption);
   }
 
   /**

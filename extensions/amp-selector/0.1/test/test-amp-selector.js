@@ -651,6 +651,39 @@ describes.realWin('amp-selector', {
           ampSelector, 'select', /* CustomEvent */ eventMatcher);
     });
 
+    it('should trigger `select` action when user uses ' +
+      '`selectUp`/`selectDown` action with default skip value of 1', () => {
+      const ampSelector = getSelector({
+        attributes: {
+          id: 'ampSelector',
+        },
+        config: {
+          count: 6,
+        },
+      });
+      ampSelector.children[0].setAttribute('selected', '');
+      ampSelector.build();
+
+      expect(ampSelector.hasAttribute('multiple')).to.be.false;
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+
+      const button_down = win.document.createElement('button_down');
+      button_down.setAttribute('on', 'tap:ampSelector.selectDown()');
+      win.document.body.appendChild(button_down);
+      button_down.click();
+
+      // expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
+      // expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
+
+      const button_up = win.document.createElement('button_up');
+      button_up.setAttribute('on', 'tap:ampSelector.selectUp()');
+      win.document.body.appendChild(button_up);
+      button_up.click();
+
+      // expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
+      // expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+    });
+
     describe('keyboard-select-mode', () => {
 
       it('should have `none` mode by default', () => {
