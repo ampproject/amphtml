@@ -71,20 +71,20 @@ const AMP_AUD = 'ampproject.org';
  *            \/
  *    Apply authorization response
  *
- * @implements {./amp-access.AccessTypeAdapterDef}
+ * @implements {./amp-access-source.AccessTypeAdapterDef}
  */
 export class AccessServerJwtAdapter {
 
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} configJson
-   * @param {!./amp-access.AccessTypeAdapterContextDef} context
+   * @param {!./amp-access-source.AccessTypeAdapterContextDef} context
    */
   constructor(ampdoc, configJson, context) {
     /** @const */
     this.ampdoc = ampdoc;
 
-    /** @const @private {!./amp-access.AccessTypeAdapterContextDef} */
+    /** @const @private {!./amp-access-source.AccessTypeAdapterContextDef} */
     this.context_ = context;
 
     /** @private @const */
