@@ -44,21 +44,22 @@ const MUTATION_STACK = [];
  * Creates a "mutation" phase regardless of vsync's async batching.
  * THIS IS DANGEROUS, AND BREAKS AN IMPLICIT AMP INVARIANT.
  *
- * @param {!Window} win
+ * @param {!Window} unusedWin
  */
-export function dangerousSyncMutateStart(win) {
-  MUTATION_STACK.push(win[IN_MUTATE_PHASE_PROP]);
-  win[IN_MUTATE_PHASE_PROP] = true;
+export function dangerousSyncMutateStart(unusedWin) {
+  // Intentionally empty. This will be overridden by install, which is only
+  // installed in development environments, to avoid slowing down Prod.
 }
 
 /**
  * Stops the "mutation" phase regardless of vsync's async batching.
  * THIS IS DANGEROUS, AND BREAKS AN IMPLICIT AMP INVARIANT.
  *
- * @param {!Window} win
+ * @param {!Window} unusedWin
  */
-export function dangerousSyncMutateStop(win) {
-  win[IN_MUTATE_PHASE_PROP] = dev().assertBoolean(MUTATION_STACK.pop());
+export function dangerousSyncMutateStop(unusedWin) {
+  // Intentionally empty. This will be overridden by install, which is only
+  // installed in development environments, to avoid slowing down Prod.
 }
 
 
@@ -88,8 +89,8 @@ function ancestryCssSelector(node) {
  */
 function assertMutationPhase(nodeOrAttr) {
   const node = nodeOrAttr.ownerElement || nodeOrAttr;
-  const window = node.ownerDocument.defaultView;
-  if (node.isConnected !== false && !window[IN_MUTATE_PHASE_PROP]) {
+  const win = node.ownerDocument.defaultView;
+  if (node.isConnected !== false && !win[IN_MUTATE_PHASE_PROP]) {
     dev().error('MUTATE', 'mutation occurred outside mutation phase',
         ancestryCssSelector(node));
   }
@@ -103,26 +104,34 @@ function assertMutationPhase(nodeOrAttr) {
  * This makes excessive use of property descriptors, read about them at
  * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty#Description
  *
- * @param {!Window} window
+ * @param {!Window} win
  */
-export function install(window) {
-  if (window[INSTALLED_PROP]) {
+export function install(win) {
+  if (win[INSTALLED_PROP]) {
     return;
   }
-  window[INSTALLED_PROP] = true;
-  window[IN_MUTATE_PHASE_PROP] = false;
+  win[INSTALLED_PROP] = true;
+  win[IN_MUTATE_PHASE_PROP] = false;
+
+  dangerousSyncMutateStart = function(win) {
+    MUTATION_STACK.push(win[IN_MUTATE_PHASE_PROP]);
+    win[IN_MUTATE_PHASE_PROP] = true;
+  };
+  dangerousSyncMutateStop = function(win) {
+    win[IN_MUTATE_PHASE_PROP] = dev().assertBoolean(MUTATION_STACK.pop());
+  };
 
   // First, we'll do runtime inspection to find special setter properties
   // for Nodes, and monkey patch them.
   // Setters are functions that run when `obj.prop = value` executed.
-  const setterPatches = Object.getOwnPropertyNames(window).filter(prop => {
-    return endsWith(prop, 'Element') && window[prop];
+  const setterPatches = Object.getOwnPropertyNames(win).filter(prop => {
+    return endsWith(prop, 'Element') && win[prop];
   }).map(prop => {
-    return window[prop];
+    return win[prop];
   });
   // Include Attr, Node, DOMTokenList, in the setter monkey-patches
-  setterPatches.push(window.Attr);
-  setterPatches.push(window.Node);
+  setterPatches.push(win.Attr);
+  setterPatches.push(win.Node);
 
   setterPatches.forEach(Element => {
     const proto = Element.prototype;
@@ -210,11 +219,11 @@ export function install(window) {
       // DOMTokenList
       klasses: [
         {klass: Element, prop: 'classList'},
-        {klass: window.HTMLLinkElement, prop: 'relList'},
-        {klass: window.HTMLAnchorElement, prop: 'relList'},
-        {klass: window.HTMLIFrameElement, prop: 'sandbox'},
-        {klass: window.HTMLAreaElement, prop: 'relList'},
-        {klass: window.HTMLOutputElement, prop: 'htmlFor'},
+        {klass: win.HTMLLinkElement, prop: 'relList'},
+        {klass: win.HTMLAnchorElement, prop: 'relList'},
+        {klass: win.HTMLIFrameElement, prop: 'sandbox'},
+        {klass: win.HTMLAreaElement, prop: 'relList'},
+        {klass: win.HTMLOutputElement, prop: 'htmlFor'},
       ],
       methods: [
         'add',
