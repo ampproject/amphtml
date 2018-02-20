@@ -49,7 +49,7 @@
     "autoprefixer": "7.2.6",
     "ava": "0.25.0",
     "babel-core": "6.26.0",
-    "babel-eslint": "8.1.2",
+    "babel-eslint": "8.2.2",
     "babel-plugin-transform-remove-strict-mode": "0.0.2",
     "babel-preset-env": "1.6.1",
     "babelify": "8.0.0",
