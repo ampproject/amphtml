@@ -47,7 +47,7 @@ const MUTATION_STACK = [];
  * @param {!Window} win
  */
 export function dangerousSyncMutateStart(win) {
-  MUTATION_STACK.push(win[IN_MUTATE_PHASE_PROP])
+  MUTATION_STACK.push(win[IN_MUTATE_PHASE_PROP]);
   win[IN_MUTATE_PHASE_PROP] = true;
 }
 
