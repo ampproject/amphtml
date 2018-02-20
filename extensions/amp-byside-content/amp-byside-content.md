@@ -19,11 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Displays dynamic placeholder content from BySide service.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Available for BySide customers with a valid client id.</td>
+    <td>Displays dynamic content from the <a href="http://www.byside.com/">BySide service</a>.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -33,17 +29,18 @@ limitations under the License.
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>See <a href="https://ampbyexample.com/components/amp-byside-content/">annotated code example for amp-byside-content</a></td>
-  </tr>
 </table>
 
 ## Behavior
 
-An `amp-byside-content` component displays dynamic content that can be retrieved from the [BySide](https://www.byside.com) customization mechanisms, for a valid BySide client.
+The `amp-byside-content` component is available for BySide customers and
+displays dynamic content that can be retrieved from the [BySide](http://www.byside.com/) customization mechanisms.
 
 Example:
+
+
+The `width` and `height` attributes determine the aspect ratio of the embedded BySide content in responsive layouts.
+
 ```html
 <amp-byside-content
     data-webcare-id="D6604AE5D0"
@@ -57,35 +54,36 @@ Example:
 
 ## Attributes
 
-The `data-webcare-id` and `data-label` attributes are required for the content embed to work.
+##### data-webcare-id (required)
 
-**data-webcare-id**
+The BySide customer account ID.
 
-The **required** BySide customer account id.
+##### data-label (required)
 
-**data-channel**
+The content label as seen in your BySide account.
 
-The channel identifier to use for content validation. Defaults to empty string "".
+##### data-lang
 
-**data-lang**
+The language to show the contents in, as specified in the BySide customer account localization. Defaults to Portuguese ("pt").
 
-The language to show contents, as available in BySide customer account localization. Defaults to portuguese "pt".
+#####  data-channel
 
-**data-fid**
+The channel identifier to use for content validation. Defaults to an empty string.
 
-The visitor force id. Use this when a unique visitor identifier is available, usually for authenticated users. Defaults to empty "".
+##### data-fid
 
-**data-label**
+The visitor force id. Use this when a unique visitor identifier is available, usually for authenticated users. Defaults to an empty string.
 
-The **required** placeholder content label as seen in your backoffice account.
+##### common attributes
 
-## Validation
-See [amp-byside-content rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-byside-content/validator-amp-byside-content.protoascii) in the AMP validator specification.
+This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
 
 ## Privacy and cookies policy
 
-[BySide](https://www.byside.com) is committed to respect and protect your privacy and developing technology that gives you the most powerful and safe online experience. BySide privacy statement and cookies policy can be found on the following url's:
+[BySide](http://www.byside.com) is committed to respect and protect your privacy and developing technology that gives you the most powerful and safe online experience. BySide privacy statement and cookies policy can be found on the following url's:
 
-[http://www.byside.com/privacy.html](http://www.byside.com/privacy.html)
+* [http://www.byside.com/privacy.html](http://www.byside.com/privacy.html)
+* [http://www.byside.com/cookies.html](http://www.byside.com/cookies.html)
 
-[http://www.byside.com/cookies.html](http://www.byside.com/cookies.html)
+## Validation
+See [amp-byside-content rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-byside-content/validator-amp-byside-content.protoascii) in the AMP validator specification.
