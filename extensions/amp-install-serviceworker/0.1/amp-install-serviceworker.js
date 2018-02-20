@@ -94,7 +94,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
 
   /** @override  */
   getPriority() {
-    return 2;
+    return 3;
   }
 
   /** @private */
