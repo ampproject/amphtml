@@ -72,6 +72,7 @@ declareExtension('amp-accordion', '0.1', {hasCss: false});
 declareExtension('amp-ad', '0.1', {hasCss: true});
 declareExtension('amp-ad-network-adsense-impl', 0.1, {hasCss: false});
 declareExtension('amp-ad-network-adzerk-impl', 0.1, {hasCss: false});
+declareExtension('amp-ad-network-base', 0.1, {hasCss: false});
 declareExtension('amp-ad-network-doubleclick-impl', 0.1, {hasCss: false});
 declareExtension('amp-ad-network-fake-impl', 0.1, {hasCss: false});
 declareExtension('amp-ad-network-triplelift-impl', 0.1, {hasCss: false});
