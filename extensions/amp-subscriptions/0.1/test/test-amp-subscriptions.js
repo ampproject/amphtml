@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {EntitlementStore} from '../entitlement-store';
+
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {
   PageConfig,
@@ -44,6 +46,22 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
     expect(initializeStub).to.be.calledOnce;
   });
 
+  it('should setup store and page on start', done => {
+
+    const renderLoadingStub =
+        sandbox.spy(subscriptionService.renderer_, 'toggleLoading');
+
+    subscriptionService.start_();
+    subscriptionService.initialize_().then(() => {
+      // Should show loading on the page
+      expect(renderLoadingStub).to.be.calledWith(true);
+      // Should setup entitlement store
+      expect(subscriptionService.entitlementStore_).to.be
+          .instanceOf(EntitlementStore);
+      done();
+    });
+  });
+
   it('should discover page configuration', () => {
     return subscriptionService.initialize_().then(() => {
       expect(subscriptionService.pageConfig_).to.equal(pageConfig);
@@ -52,7 +70,8 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
 
   it('should add subscription platform while registering it', () => {
     const serviceID = 'dummy service';
-    const subsPlatform = new LocalSubscriptionPlatform(ampdoc, {paywallUrl});
+    const subsPlatform = new LocalSubscriptionPlatform(
+        ampdoc, {paywallUrl}, pageConfig);
     subscriptionService.registerService(serviceID, subsPlatform);
     expect(subscriptionService.subscriptionPlatforms_.includes(subsPlatform))
         .to.be.true;
