@@ -92,8 +92,9 @@ export class GwdAnimation extends AMP.BaseElement {
     }
 
     // Register handlers for supported actions.
+    const handler = this.actionHandler_.bind(this);
     for (const name in ACTION_IMPL_ARGS) {
-      this.registerAction(name, this.createAction_(name));
+      this.registerAction(name, handler);
     }
   }
 
@@ -103,40 +104,56 @@ export class GwdAnimation extends AMP.BaseElement {
    * @private
    */
   getGwdPageDeck_() {
-    return this.getAmpDoc().getRootNode().querySelector(
-        `amp-carousel#${escapeCssSelectorIdent(GWD_PAGEDECK_ID)}`);
+    return this.getAmpDoc().getRootNode().getElementById(GWD_PAGEDECK_ID);
   }
 
   /**
-   * Returns a registrable AMP action function which invokes the corresponding
-   * GWD runtime method with arguments extracted from the invocation object
-   * (@see getActionImplArgs).
-   * @param {string} actionName Name of the action to invoke (currently
-   *     identical to the corresponding service method name).
-   * @return {!function(!../../../src/service/action-impl.ActionInvocation)}
+   * General handler for all actions invoked on the extension.
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    * @private
    */
-  createAction_(actionName) {
-    return invocation => {
-      // The setCurrentPage action is special-cased, because the event which
-      // triggers it (slideChange) may be emitted by an amp-carousel other
-      // than the GWD pagedeck. Ignore the event in this case.
-      if (actionName == 'setCurrentPage') {
-        const gwdPageDeck = this.getGwdPageDeck_();
-        if (!(gwdPageDeck && invocation.source == gwdPageDeck)) {
-          return;
-        }
-      }
+  actionHandler_(invocation) {
+    if (this.shouldExecuteInvocation_(invocation)) {
+      this.executeInvocation_(invocation);
+    }
+  }
 
-      const service = user().assert(
-          getServiceForDoc(this.getAmpDoc(), GWD_SERVICE_NAME),
-          'Cannot execute action because the GWD service is not registered.');
+  /**
+   * Returns whether the given action invocation should be executed.
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @private
+   */
+  shouldExecuteInvocation_(invocation) {
+    if (invocation.method == 'setCurrentPage') {
+      // The setCurrentPage invocation may be triggered as a result of a
+      // slideChange event emitted by any amp-carousel. Execute the invocation
+      // only if the event originated from the page deck carousel.
+      const gwdPageDeck = this.getGwdPageDeck_();
+      const isFromPageDeck = gwdPageDeck && invocation.source == gwdPageDeck;
+      return isFromPageDeck;
+    }
 
-      const argPaths = ACTION_IMPL_ARGS[actionName];
-      const actionArgs =
-          argPaths.map(argPath => getValueForExpr(invocation, argPath));
-      service[actionName].apply(service, actionArgs);
-    };
+    return true;
+  }
+
+  /**
+   * Executes an invocation by invoking the corresponding GWD runtime method
+   * with arguments extracted from the invocation object.
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   * @private
+   */
+  executeInvocation_(invocation) {
+    const service = user().assert(
+        getServiceForDoc(this.getAmpDoc(), GWD_SERVICE_NAME),
+        'Cannot execute action because the GWD service is not registered.');
+
+    const argPaths = ACTION_IMPL_ARGS[invocation.method];
+    const invocationObj = /** @type {!JsonObject} */ (
+        Object.assign({}, invocation));
+    const actionArgs =
+        argPaths.map(argPath => getValueForExpr(invocationObj, argPath));
+
+    service[invocation.method].apply(service, actionArgs);
   }
 
   /**

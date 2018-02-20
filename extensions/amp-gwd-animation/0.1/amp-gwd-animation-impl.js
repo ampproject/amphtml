@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 import {createCustomEvent} from '../../../src/event-helper';
-import {escapeCssSelectorIdent} from '../../../src/dom';
+import {escapeCssSelectorIdent, scopedQuerySelectorAll} from '../../../src/dom';
 import {user} from '../../../src/log';
+import {toArray} from '../../../src/types';
 
 /**
  * CSS class used to deactivate animations.
@@ -76,7 +77,7 @@ const GOTO_AND_PAUSE_DELAY = 40;
  * @const {string}
  * Exported for test only.
  */
-export const GOTO_COUNTER_PROP = 'gwdGotoCounters';
+export const GOTO_COUNTER_PROP = '__AMP_GWD_GOTO_COUNTERS__';
 
 /**
  * The GWD runtime service ID (arbitrary string).
@@ -186,7 +187,6 @@ export class AmpGwdRuntimeService {
         `.${escapeCssSelectorIdent(GWD_PAGE_WRAPPER_CLASS)}`);
 
     if (gwdPages.length == 0) {
-      // The document has no pages.
       return;
     }
 
@@ -232,13 +232,9 @@ export class AmpGwdRuntimeService {
     pageEl.classList.remove(PlaybackCssClass.PLAY);
 
     // Reset other animation state on the page and all descendants.
-    const pageAndDescendants =
-        Array.prototype.slice.call(pageEl.querySelectorAll('*'), 0);
-    pageAndDescendants.push(pageEl);
-
-    for (let i = 0; i < pageAndDescendants.length; i++) {
-      this.resetAnimatedElement_(pageAndDescendants[i]);
-    }
+    [pageEl]
+        .concat(toArray(scopedQuerySelectorAll(pageEl, '*')))
+        .forEach(el => this.resetAnimatedElement_(el));
   }
 
   /**
