@@ -22,9 +22,14 @@ AMP.extension('amp-access-scroll', '0.1', function(AMP) {
       'scroll',
       function(ampdoc) {
         return Services.accessServiceForDoc(ampdoc).then(accessService => {
-	  const vendor = new ScrollAccessVendor(ampdoc, accessService);
-          accessService.registerVendor('scroll', vendor);
+          const source = accessService.getVendorSource('scroll');
+          const vendor = new ScrollAccessVendor(ampdoc, accessService, source);
+          const adapter = /** @type {
+            !../../amp-access/0.1/amp-access-vendor.AccessVendorAdapter
+          } */ (source.getAdapter());
+          adapter.registerVendor(vendor);
           return vendor;
         });
-      });
+      }
+  );
 });
