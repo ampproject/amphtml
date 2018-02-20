@@ -309,8 +309,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {boolean} */
     this.isFluid_ = false;
 
-    /** @type {?string} */
-    this.fluidImpressionUrl = null;
+    /** @private {?string} */
+    this.fluidImpressionUrl_ = null;
 
     /** @private {?Promise<!../../../ads/google/a4a/utils.IdentityToken>} */
     this.identityTokenPromise_ = null;
@@ -333,8 +333,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     /** @private {boolean} */
     this.isIdleRender_ = false;
 
-
-    /** @private {./safeframe-host.SafeframeHostApi} */
+    /** @private {?./safeframe-host.SafeframeHostApi} */
     this.safeframeApi_ = null;
 
     /** @private {!../../../ads/google/a4a/utils.NameframeExperimentConfig} */
@@ -765,7 +764,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.nameframeExperimentConfig_);
 
     if (this.isFluid_) {
-      this.fluidImpressionUrl = responseHeaders.get('X-AmpImps');
+      this.fluidImpressionUrl_ = responseHeaders.get('X-AmpImps');
     } else {
       this.fireDelayedImpressions(responseHeaders.get('X-AmpImps'));
       this.fireDelayedImpressions(responseHeaders.get('X-AmpRSImps'), true);
@@ -1215,7 +1214,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getAdditionalContextMetadata(optIsSafeframe) {
     if (this.isFluid_ || optIsSafeframe) {
       this.safeframeApi_ = this.safeframeApi_ || new SafeframeHostApi(
-          this, this.isFluid_, this.initialSize_, this.getCreativeSize());
+          this, this.isFluid_, this.initialSize_, this.getCreativeSize(),
+          this.fluidImpressionUrl_);
       return this.safeframeApi_.getSafeframeNameAttr();
     }
   }

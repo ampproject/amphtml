@@ -65,6 +65,7 @@ export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
  * Event listener callback for message events. If message is a Safeframe message,
  * handles the message.
  * This listener is registered within SafeframeHostApi.
+ * @param {!Event} event
  */
 export function safeframeListener(event) {
   const data = tryParseJson(getData(event));
@@ -72,15 +73,12 @@ export function safeframeListener(event) {
   if (event.origin != SAFEFRAME_ORIGIN || !data) {
     return;
   }
-  let payload;
-  if (!data[MESSAGE_FIELDS.SENTINEL]) {
-    payload = tryParseJson(data[MESSAGE_FIELDS.PAYLOAD]);
-  }
+  const payload = tryParseJson(data[MESSAGE_FIELDS.PAYLOAD]) || {};
   /**
    * If the sentinel is provided at the top level, this is a message simply
    * to setup the postMessage channel, so set it up.
    */
-  const sentinel = data[MESSAGE_FIELDS.SENTINEL] || (payload || {})['sentinel'];
+  const sentinel = data[MESSAGE_FIELDS.SENTINEL] || payload['sentinel'];
   const safeframeHost = safeframeHosts[sentinel];
   if (!safeframeHost) {
     dev().warn(TAG, `Safeframe Host for sentinel: ${sentinel} not found.`);
@@ -89,7 +87,9 @@ export function safeframeListener(event) {
   if (!safeframeHost.channel) {
     safeframeHost.connectMessagingChannel(data[MESSAGE_FIELDS.CHANNEL]);
   } else if (payload) {
-    safeframeHost.processMessage(payload, data[MESSAGE_FIELDS.SERVICE]);
+    // Currently we do not expect a payload on initial connection messages.
+    safeframeHost.processMessage(/** @type {!JsonObject} */(payload),
+        data[MESSAGE_FIELDS.SERVICE]);
   }
 }
 
@@ -121,8 +121,10 @@ export class SafeframeHostApi {
    * @param {boolean} isFluid
    * @param {?({width: number, height: number}|../../../src/layout-rect.LayoutRectDef)} initialSize
    * @param {?({width, height}|../../../src/layout-rect.LayoutRectDef)} creativeSize
+   * @param {?string} fluidImpressionUrl
    */
-  constructor(baseInstance, isFluid, initialSize, creativeSize) {
+  constructor(baseInstance, isFluid, initialSize, creativeSize,
+    fluidImpressionUrl) {
     /** @private {!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl} */
     this.baseInstance_ = baseInstance;
 
@@ -141,20 +143,14 @@ export class SafeframeHostApi {
     /** @type {?string} */
     this.channel = null;
 
-    /** @private {?number} */
-    this.initialHeight_ = null;
-
-    /** @private {?number} */
-    this.initialWidth_ = null;
-
     /** @private {?JsonObject} */
     this.currentGeometry_ = null;
 
     /** @private {number} */
     this.endpointIdentity_ = Math.random();
 
-    /** @type {number} */
-    this.uid = Math.random();
+    /** @private {number} */
+    this.uid_ = Math.random();
 
     /** @private {boolean} */
     this.isFluid_ = isFluid;
@@ -168,6 +164,9 @@ export class SafeframeHostApi {
     /** @private {!Object} */
     this.iframeOffsets_ = {};
 
+    /** @private {?string} */
+    this.fluidImpressionUrl_ = fluidImpressionUrl;
+
     this.registerSafeframeHost();
   }
 
@@ -179,7 +178,7 @@ export class SafeframeHostApi {
   getSafeframeNameAttr() {
     const attributes = dict({});
     // TODO: Some of these options are probably not right.
-    attributes['uid'] = this.uid;
+    attributes['uid'] = this.uid_;
     attributes['hostPeerName'] = this.win_.location.origin;
     attributes['initialGeometry'] = this.getCurrentGeometry();
     attributes['permissions'] = JSON.stringify(
@@ -221,6 +220,7 @@ export class SafeframeHostApi {
    * that as well.
    */
   registerSafeframeHost() {
+    dev().assert(this.sentinel_);
     safeframeHosts[this.sentinel_] = safeframeHosts[this.sentinel_] || this;
     if (!safeframeListenerCreated_) {
       safeframeListenerCreated_ = true;
@@ -279,7 +279,7 @@ export class SafeframeHostApi {
   send(unused, changes) {
     this.sendMessage_({
       newGeometry: this.formatGeom_(changes['changes'][0]),
-      uid: this.uid,
+      uid: this.uid_,
     }, SERVICE.GEOMETRY_UPDATE);
   }
 
@@ -307,6 +307,9 @@ export class SafeframeHostApi {
       this.iframeOffsets_['width'] = iframeRect.width;
       this.iframeOffsets_['height'] = iframeRect.height;
     } else {
+      // We don't yet have access to the iframe when we are doing the
+      // very first geometry update that gets set onto the name of the
+      // iframe for initial render.
       iframeRect = this.creativeSize_;
       this.iframeOffsets_['dL'] = (changes['boundingClientRect']['width'] -
                                   iframeRect.width) / 2;
@@ -377,13 +380,7 @@ export class SafeframeHostApi {
     const lengthInView = (boundingRectEnd >= rootBoundEnd) ?
       rootBoundEnd - boundingRectStart : boundingRectEnd;
     const percInView = lengthInView / (boundingRectEnd - boundingRectStart);
-    if (percInView < 0) {
-      return 0;
-    } else if (percInView > 1) {
-      return 1;
-    } else {
-      return percInView;
-    }
+    return Math.max(0, Math.min(1, percInView));
   }
 
   /**
@@ -420,7 +417,6 @@ export class SafeframeHostApi {
         this.handleExpandRequest_(payload);
         break;
       case SERVICE.REGISTER_DONE:
-        this.handleRegisterDone_(payload);
         break;
       case SERVICE.COLLAPSE_REQUEST:
         this.handleCollapseRequest_();
@@ -434,28 +430,11 @@ export class SafeframeHostApi {
    * @param {!JsonObject} payload
    * @private
    */
-  handleRegisterDone_(payload) {
-    this.initialHeight_ = payload['initialHeight'];
-    this.initialWidth_ = payload['initialWidth'];
-  }
-
-  /**
-   * @param {!JsonObject} payload
-   * @private
-   */
   handleExpandRequest_(payload) {
-    let expandHeight = payload['expand_b'] + payload['expand_t'];
-    let expandWidth = payload['expand_r'] + payload['expand_l'];
-    // We assume that a fair amount of usage of this API will try to pass the final
-    // size of the iframe that is desired, instead of the correct usage which is
-    // specify how much to expand by. We try to protect against this, by detecting
-    // if the requested expansion size matches the size of the amp-ad element, and
-    // if so we assume that the desired effect was to resize to fill the element.
-    if (expandWidth != this.initialWidth_ ||
-        expandHeight != this.initialHeight_) {
-      expandWidth += Number(this.iframe_.width);
-      expandHeight += Number(this.iframe_.height);
-    }
+    const expandHeight = Number(this.iframe_.height) +
+          payload['expand_b'] + payload['expand_t'];
+    const expandWidth = Number(this.iframe_.width) +
+          payload['expand_r'] + payload['expand_l'];
     this.handleSizeChange(expandHeight,
         expandWidth,
         SERVICE.EXPAND_RESPONSE);
@@ -487,32 +466,39 @@ export class SafeframeHostApi {
   /**
    * Resizes the safeframe, and potentially the containing amp-ad element.
    * Then sends a response message to the Safeframe creative.
+   *
+   * For expansion:
+   *  If the new size is fully contained within the bounds of the amp-ad,
+   *  we can resize immediately as there will be no reflow. However, if
+   *  the new size is larger than the amp-ad, then first we need to try
+   *  to resize the amp-ad, and only resize the safeframe if that succeeds.
+   * For collapse:
+   *  We always first want to attempt to collapse the amp-ad. Then,
+   *  regardless of whether that succeeds, we collapse the safeframe too.
    * @param {number} height In pixels.
    * @param {number} width In pixels.
-   * @param {string} message
+   * @param {string} messageType
    * @param {boolean=} optIsCollapse Whether this is a collapse attempt.
    */
-  handleSizeChange(height, width, message, optIsCollapse) {
-    // If the new size is fully contained within the bounds of the amp-ad,
-    // we can resize immediately as there will be no reflow.
+  handleSizeChange(height, width, messageType, optIsCollapse) {
     if (!optIsCollapse &&
         width <= this.creativeSize_.width &&
         height <= this.creativeSize_.height) {
       this.resizeIframe(height, width);
-      this.sendResizeResponse(/** SUCCESS */ true, message);
+      this.sendResizeResponse(/** SUCCESS */ true, messageType);
     } else {
       this.resizeAmpAdAndSafeframe(
-          height, width, message, optIsCollapse);
+          height, width, messageType, optIsCollapse);
     }
   }
 
   /**
    * @param {boolean} success
-   * @param {string} message
+   * @param {string} messageType
    */
-  sendResizeResponse(success, message) {
+  sendResizeResponse(success, messageType) {
     this.sendMessage_({
-      uid: this.uid,
+      uid: this.uid_,
       success,
       newGeometry: this.getCurrentGeometry(),
       'expand_t': this.currentGeometry_['allowedExpansion_t'],
@@ -520,17 +506,17 @@ export class SafeframeHostApi {
       'expand_r': this.currentGeometry_['allowedExpansion_r'],
       'expand_l': this.currentGeometry_['allowedExpansion_l'],
       push: true,
-    }, message);
+    }, messageType);
   }
 
   /**
    *
    * @param {number} height
    * @param {number} width
-   * @param {string} message
+   * @param {string} messageType
    * @param {boolean=} optIsCollapse
    */
-  resizeAmpAdAndSafeframe(height, width, message, optIsCollapse) {
+  resizeAmpAdAndSafeframe(height, width, messageType, optIsCollapse) {
     this.baseInstance_.attemptChangeSize(height, width).then(() => {
       const success = !!this.baseInstance_.element.style.height.match(height)
               && !!this.baseInstance_.element.style.width.match(width);
@@ -560,7 +546,7 @@ export class SafeframeHostApi {
               }
             });
       }
-      this.sendResizeResponse(success || !!optIsCollapse, message);
+      this.sendResizeResponse(success || !!optIsCollapse, messageType);
     }).catch(() => {});
   }
 
@@ -590,10 +576,10 @@ export class SafeframeHostApi {
    * @private
    */
   onFluidResize_() {
-    if (this.baseInstance_.fluidImpressionUrl) {
+    if (this.fluidImpressionUrl_) {
       this.baseInstance_.fireDelayedImpressions(
-          this.baseInstance_.fluidImpressionUrl);
-      this.baseInstance_.fluidImpressionUrl = null;
+          this.fluidImpressionUrl_);
+      this.fluidImpressionUrl_ = null;
     }
     this.iframe_.contentWindow./*OK*/postMessage(
         JSON.stringify(dict({'message': 'resize-complete', 'c': this.channel})),
