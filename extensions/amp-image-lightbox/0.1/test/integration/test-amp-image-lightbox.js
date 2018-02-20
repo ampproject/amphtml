@@ -48,7 +48,8 @@ describe.configure().run('amp-image-lightbox', function() {
       win = env.win;
     });
 
-    it('should activate on tap of source image', () => {
+    // TODO(cathyxz, #13458): Find out why this is flaky on master.
+    it.skip('should activate on tap of source image', () => {
       const lightbox = win.document.getElementById('image-lightbox-1');
       expect(lightbox.style.display).to.equal('none');
       const ampImage = win.document.getElementById('img0');
