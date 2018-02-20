@@ -474,7 +474,7 @@ export class Viewer {
    */
   navigateToAmpUrl(url, requestedBy) {
     if (this.hasCapability('a2a')) {
-      this.sendMessage('a2a', dict({
+      this.sendMessage('a2aNavigate', dict({
         'url': url,
         'requestedBy': requestedBy,
       }));
