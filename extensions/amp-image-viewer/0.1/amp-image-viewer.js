@@ -297,44 +297,45 @@ export class AmpImageViewer extends AMP.BaseElement {
    * @return {!Promise}
    */
   measure() {
-    return this.vsync_.measurePromise(() => {
-      this.elementBox_ = layoutRectFromDomRect(this.element
-          ./*OK*/getBoundingClientRect());
+    return this.vsync_.runPromise({
+      measure: () => {
+        this.elementBox_ = layoutRectFromDomRect(this.element
+            ./*OK*/getBoundingClientRect());
 
-      const sourceAspectRatio = this.sourceWidth_ / this.sourceHeight_;
-      let height = Math.min(this.elementBox_.width / sourceAspectRatio,
-          this.elementBox_.height);
-      let width = Math.min(this.elementBox_.height * sourceAspectRatio,
-          this.elementBox_.width);
+        const sourceAspectRatio = this.sourceWidth_ / this.sourceHeight_;
+        let height = Math.min(this.elementBox_.width / sourceAspectRatio,
+            this.elementBox_.height);
+        let width = Math.min(this.elementBox_.height * sourceAspectRatio,
+            this.elementBox_.width);
 
-      if (Math.abs(width - this.sourceWidth_) <= 16
+        if (Math.abs(width - this.sourceWidth_) <= 16
           && Math.abs(height - this.sourceHeight_ <= 16)) {
-        width = this.sourceWidth_;
-        height = this.sourceHeight_;
-      }
+          width = this.sourceWidth_;
+          height = this.sourceHeight_;
+        }
 
-      this.imageBox_ = layoutRectLtwh(
-          Math.round((this.elementBox_.width - width) / 2),
-          Math.round((this.elementBox_.height - height) / 2),
-          Math.round(width),
-          Math.round(height));
+        this.imageBox_ = layoutRectLtwh(
+            Math.round((this.elementBox_.width - width) / 2),
+            Math.round((this.elementBox_.height - height) / 2),
+            Math.round(width),
+            Math.round(height));
 
-      // Adjust max scale to at least fit the screen.
-      const elementBoxRatio = this.elementBox_.width / this.elementBox_.height;
-      const maxScale = Math.max(
-          elementBoxRatio / sourceAspectRatio,
-          sourceAspectRatio / elementBoxRatio
-      );
-      this.maxScale_ = Math.max(DEFAULT_MAX_SCALE, maxScale);
+        // Adjust max scale to at least fit the screen.
+        const elementBoxRatio = this.elementBox_.width
+          / this.elementBox_.height;
+        const maxScale = Math.max(
+            elementBoxRatio / sourceAspectRatio,
+            sourceAspectRatio / elementBoxRatio
+        );
+        this.maxScale_ = Math.max(DEFAULT_MAX_SCALE, maxScale);
 
-      // Reset zoom and pan.
-      this.startScale_ = this.scale_ = 1;
-      this.startX_ = this.posX_ = 0;
-      this.startY_ = this.posY_ = 0;
-      this.updatePanZoomBounds_(this.scale_);
-
-    }).then(() => {
-      return this.vsync_.mutatePromise(() => {
+        // Reset zoom and pan.
+        this.startScale_ = this.scale_ = 1;
+        this.startX_ = this.posX_ = 0;
+        this.startY_ = this.posY_ = 0;
+        this.updatePanZoomBounds_(this.scale_);
+      },
+      mutate: () => {
         // Set the actual dimensions of the image
         st.setStyles(dev().assertElement(this.image_), {
           top: st.px(this.imageBox_.top),
@@ -345,7 +346,7 @@ export class AmpImageViewer extends AMP.BaseElement {
 
         // Update translation and scaling
         this.updatePanZoom_();
-      });
+      },
     }).then(() => this.updateSrc_());
   }
 
