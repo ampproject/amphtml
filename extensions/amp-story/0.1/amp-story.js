@@ -1320,7 +1320,17 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @override */
   getMaxMediaElementCounts() {
-    return MAX_MEDIA_ELEMENT_COUNTS;
+    const audioMediaElements =
+        scopedQuerySelectorAll(this.element, 'amp-audio, [background-audio]');
+    const videoMediaElements =
+        scopedQuerySelectorAll(this.element, 'amp-video');
+
+    return {
+      [MediaType.AUDIO]: Math.min(
+          audioMediaElements.length, MAX_MEDIA_ELEMENT_COUNTS[MediaType.AUDIO]),
+      [MediaType.VIDEO]: Math.min(
+          videoMediaElements.length, MAX_MEDIA_ELEMENT_COUNTS[MediaType.VIDEO]),
+    };
   }
 
 
