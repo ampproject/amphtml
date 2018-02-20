@@ -17,14 +17,17 @@
 import {LaterpayVendor} from './laterpay-impl';
 import {Services} from '../../../src/services';
 
-
 AMP.extension('amp-access-laterpay', '0.1', function(AMP) {
   AMP.registerServiceForDoc(
       'laterpay',
       function(ampdoc) {
         return Services.accessServiceForDoc(ampdoc).then(accessService => {
-          const vendor = new LaterpayVendor(accessService);
-          accessService.registerVendor('laterpay', vendor);
+          const source = accessService.getVendorSource('laterpay');
+          const vendor = new LaterpayVendor(accessService, source);
+          const adapter = /** @type {
+            !../../amp-access/0.1/amp-access-vendor.AccessVendorAdapter
+          } */ (source.getAdapter());
+          adapter.registerVendor(vendor);
           return vendor;
         });
       });
