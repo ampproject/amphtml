@@ -27,7 +27,6 @@ import {setStyles} from '../src/style';
  */
 function getBeOpinion(global) {
   loadScript(global, 'https://widget.beopinion.com/sdk.js', function() {});
-  // loadScript(global, 'http://localhost:8081/sdk-4.0.0.js', function() {});
 }
 
 /**
