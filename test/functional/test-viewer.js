@@ -1429,7 +1429,7 @@ describe('Viewer', () => {
       const viewer = new Viewer(ampdoc);
       const send = sandbox.stub(viewer, 'sendMessage');
       const result = viewer.navigateToAmpUrl(ampUrl, 'abc123');
-      expect(send.lastCall.args[0]).to.equal('a2a');
+      expect(send.lastCall.args[0]).to.equal('a2aNavigate');
       expect(send.lastCall.args[1]).to.jsonEqual({
         url: ampUrl,
         requestedBy: 'abc123',
