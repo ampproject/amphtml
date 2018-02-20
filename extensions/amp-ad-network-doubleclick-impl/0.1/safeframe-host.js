@@ -28,10 +28,12 @@ import {tryParseJson} from '../../../src/json';
  * sentinel value belongs.
  * @type{!Object<string,!SafeframeHostApi>}
  */
-const safeframeHosts = {};
+export const safeframeHosts = {};
 
-let safeframeListenerCreated = false;
+/** @private {boolean} */
+let safeframeListenerCreated_ = false;
 
+/** @enum {string} */
 export const MESSAGE_FIELDS = {
   CHANNEL: 'c',
   SENTINEL: 'e',
@@ -41,6 +43,7 @@ export const MESSAGE_FIELDS = {
   MESSAGE: 'message',
 };
 
+/** @enum {string} */
 export const SERVICE = {
   GEOMETRY_UPDATE: 'geometry_update',
   CREATIVE_GEOMETRY_UPDATE: 'creative_geometry_update',
@@ -51,6 +54,7 @@ export const SERVICE = {
   COLLAPSE_RESPONSE: 'collapse_response',
 };
 
+/** @private {string} */
 const TAG = 'AMP-DOUBLECLICK-SAFEFRAME';
 
 /** @const {string} */
@@ -218,8 +222,8 @@ export class SafeframeHostApi {
    */
   registerSafeframeHost() {
     safeframeHosts[this.sentinel_] = safeframeHosts[this.sentinel_] || this;
-    if (!safeframeListenerCreated) {
-      safeframeListenerCreated = true;
+    if (!safeframeListenerCreated_) {
+      safeframeListenerCreated_ = true;
       this.win_.addEventListener('message', safeframeListener, false);
     }
   }
@@ -595,6 +599,11 @@ export class SafeframeHostApi {
    * Unregister this Host API.
    */
   destroy() {
-    safeframeHosts[this.sentinel] = undefined;
+    delete safeframeHosts[this.sentinel_];
   }
+}
+
+export function removeSafeframeListener() {
+  window.removeEventListener('message', safeframeListener, false);
+  safeframeListenerCreated_ = false;
 }

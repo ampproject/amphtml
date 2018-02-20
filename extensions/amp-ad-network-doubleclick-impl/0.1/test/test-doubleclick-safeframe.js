@@ -25,6 +25,7 @@ import {
   SAFEFRAME_ORIGIN,
   SERVICE,
   SafeframeHostApi,
+  removeSafeframeListener,
   safeframeListener,
 } from '../safeframe-host';
 import {Services} from '../../../../src/services';
@@ -78,6 +79,21 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     doubleclickImpl.layoutCallback();
   });
 
+  afterEach(() => {
+    removeSafeframeListener();
+  });
+
+  /**
+   * Sends the intitial connection message that sets up the
+   * safeframe channel.
+   */
+  function sendSetupMessage() {
+    const messageData = {};
+    messageData[MESSAGE_FIELDS.SENTINEL] = doubleclickImpl.sentinel;
+    messageData[MESSAGE_FIELDS.CHANNEL] = safeframeChannel;
+    receiveMessage(messageData);
+  }
+
   // Simulates receiving a post message from the safeframe.
   function receiveMessage(messageData) {
     const messageEvent = {
@@ -96,11 +112,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
           safeframeHost, 'connectMessagingChannel');
       const postMessageMock = sandbox.stub(safeframeMock.contentWindow,
           'postMessage');
-      const messageData = {};
-      messageData[MESSAGE_FIELDS.SENTINEL] = doubleclickImpl.sentinel;
-      messageData[MESSAGE_FIELDS.CHANNEL] = safeframeChannel;
-
-      receiveMessage(messageData);
+      sendSetupMessage();
 
       // Verify that the channel was set up
       expect(connectMessagingChannelSpy).to.be.calledOnce;
@@ -111,7 +123,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       let connectMessage = JSON.parse(firstPostMessageArgs[0]);
       let payload = JSON.parse(connectMessage[MESSAGE_FIELDS.PAYLOAD]);
       expect(payload).to.deep.equal({'c': safeframeChannel,
-                                     'message': 'connect'});
+        'message': 'connect'});
       expect(connectMessage[MESSAGE_FIELDS.CHANNEL]).to.equal(safeframeChannel);
       expect(connectMessage[MESSAGE_FIELDS.SENTINEL]).to.equal(
           doubleclickImpl.sentinel);
@@ -141,7 +153,9 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     });
   });
 
-  it('should register Safeframe listener on creation', () => {});
+  it('should register Safeframe listener on creation', () => {
+    removeSafeframeListener();
+  });
 
   describe('getSafeframeNameAttr', () => {
     it('should return name attributes', () => {
@@ -199,7 +213,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
           'left': 0,'top': 0,'width': 300,'height': 250,'bottom': 250,
           'right': 300,'x': 0,'y': 0},
         'intersectionRect': {'left': 0,'top': 0,'width': 300,'height': 250,
-                             'bottom': 250,'right': 300,'x': 0,'y': 0},
+          'bottom': 250,'right': 300,'x': 0,'y': 0},
         'intersectionRatio': 1};
       sandbox.stub(ampAd, 'getIntersectionChangeEntry').returns(changes);
     });
@@ -280,16 +294,56 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     });
   });
 
-  describe('registerSafeframeHost', () => {
-    it('should create listener if needed', () => {});
-  });
-
   describe('geometry updates', () => {
-    it('should be sent when geometry changes occur', () => {});
+    it('should be sent when geometry changes occur', () => {
+      const safeframeMock = createElementWithAttributes(doc, 'iframe', {});
+      ampAd.appendChild(safeframeMock);
+      doubleclickImpl.iframe = safeframeMock;
+      const sendSpy = sandbox.spy(safeframeHost, 'send');
+      sandbox.stub(safeframeMock.contentWindow, 'postMessage');
+      sendSetupMessage();
+      safeframeHost.intersectionObserver_.onViewportCallback(true);
+
+      return Services.timerFor(env.win).promise(1000).then(() => {
+        expect(sendSpy).to.be.calledTwice;
+      });
+
+    });
   });
 
   describe('formatGeom', () => {
-    it('should convert an intersection change entry to SF format', () => {});
+    it('should convert an intersection change entry to SF format', () => {
+      safeframeHost.iframeOffsets_ = {
+        'dR': 0,
+        'dT': 0,
+        'dB': 0,
+        'dL': 0,
+      };
+      const intersectionChangeEntry = {
+        'time': 833.0999999307096,
+        'rootBounds': {'left': 0,'top': 0,'width': 500,'height': 1000,
+          'bottom': 1000, 'right': 500,'x': 0,'y': 0},
+        'boundingClientRect': {'left': 100,'top': 200,'width': 300,
+          'height': 600,'bottom': 800,'right': 400,
+          'x': 100,'y': 200},
+        'intersectionRect': {'left': 100,'top': 200,'width': 300,'height': 600,
+          'bottom': 800,'right': 400,'x': 100,'y': 200},
+        'intersectionRatio': 1};
+      const expectedParsedSfGU = {
+        'windowCoords_t': 0, 'windowCoords_r': 500, 'windowCoords_b': 1000,
+        'windowCoords_l': 0, 'frameCoords_t': 200, 'frameCoords_r': 400,
+        'frameCoords_b': 800, 'frameCoords_l': 100, 'styleZIndex': '',
+        'allowedExpansion_r': null, 'allowedExpansion_b': null,
+        'allowedExpansion_t': 0, 'allowedExpansion_l': 0, 'yInView': 1,
+        'xInView': 1,
+      };
+
+      const safeframeGeometryUpdate = safeframeHost.formatGeom_(
+          intersectionChangeEntry);
+      const parsedSfGU = JSON.parse(safeframeGeometryUpdate);
+      expect(parsedSfGU).to.deep.equal(expectedParsedSfGU);
+
+    });
   });
 
   describe('Resizing', () => {
@@ -325,17 +379,6 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       attemptChangeSizeStub = sandbox.stub(
           doubleclickImpl, 'attemptChangeSize');
     });
-
-    /**
-     * Sends the intitial connection message that sets up the
-     * safeframe channel.
-     */
-    function sendSetupMessage() {
-      const messageData = {};
-      messageData[MESSAGE_FIELDS.SENTINEL] = doubleclickImpl.sentinel;
-      messageData[MESSAGE_FIELDS.CHANNEL] = safeframeChannel;
-      receiveMessage(messageData);
-    }
 
     /**
      * Send a message requesting an expand.
@@ -382,25 +425,25 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
      */
     it('expand_request should succeed if expanding past amp-ad bounds and' +
        ' does not create reflow', () => {
-         // Sneaky hack to do a synchronous mock of attemptChangeSize
-         // Resize the ampAd to simulate a success.
-         const then = f => {
-           ampAd.style.height = '600px';
-           ampAd.style.width = '600px';
-           f();
-           return {'catch': f => f()};
-         };
-         attemptChangeSizeStub.returns({then});
-         sendExpandMessage(550,550);
+      // Sneaky hack to do a synchronous mock of attemptChangeSize
+      // Resize the ampAd to simulate a success.
+      const then = f => {
+        ampAd.style.height = '600px';
+        ampAd.style.width = '600px';
+        f();
+        return {'catch': f => f()};
+      };
+      attemptChangeSizeStub.returns({then});
+      sendExpandMessage(550,550);
 
-         expect(resizeIframeSpy).to.be.calledOnce;
-         expect(resizeIframeSpy).to.be.calledWith(600, 600);
-         expect(safeframeMock.style.height).to.equal('600px');
-         expect(safeframeMock.style.width).to.equal('600px');
-         expect(sendResizeResponseSpy).to.be.calledWith(
-             true, SERVICE.EXPAND_RESPONSE);
-         expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
-       });
+      expect(resizeIframeSpy).to.be.calledOnce;
+      expect(resizeIframeSpy).to.be.calledWith(600, 600);
+      expect(safeframeMock.style.height).to.equal('600px');
+      expect(safeframeMock.style.width).to.equal('600px');
+      expect(sendResizeResponseSpy).to.be.calledWith(
+          true, SERVICE.EXPAND_RESPONSE);
+      expect(resizeAmpAdAndSafeframeSpy).to.be.calledOnce;
+    });
 
     /**
      * Request asks to expand past the bounds of the amp-ad element. First we
