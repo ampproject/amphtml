@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-subscriptions-0.1.css';
-import {EntitlementStore} from './entitlement-store';
-import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {
   PageConfig,
   PageConfigResolver,
 } from '../../../third_party/subscriptions-project/config';
+
+import {CSS} from '../../../build/amp-subscriptions-0.1.css';
+import {EntitlementStore} from './entitlement-store';
+import {Entitlements} from '../../../third_party/subscriptions-project/apis';
+import {LocalSubscriptionPlatform} from './local-subscription-platform';
 import {Renderer} from './renderer';
 import {SubscriptionPlatform} from './subscription-platform';
 import {installStylesForDoc} from '../../../src/style-installer';
@@ -93,26 +95,46 @@ export class SubscriptionService {
     this.subscriptionPlatforms_.push(subscriptionPlatform);
 
     subscriptionPlatform.getEntitlements()
-        .then(() => this.processEntitlement_());
+        .then(entitlements => this.resolveEntitlementsToStore_(entitlements));
   }
 
-  /** @private */
-  processEntitlement_() {
-    // TODO(@prateekbh): process and unblock marup here.
+  /**
+   * @param {?Entitlements} entitlements
+   * @private
+   */
+  processEntitlements_(entitlements) {
+    if (entitlements === null) {
+      // TODO(@prateekbh): Show UI that no eligible entitlement found
+      return;
+    }
+
+    this.renderer_.toggleLoading(false);
+  }
+
+  /**
+   * @param {!Entitlements} entitlements
+   * @private
+   */
+  resolveEntitlementsToStore_(entitlements) {
+    this.entitlementStore_.resolveEntitlement(
+        this.pageConfig_.getProductId(), entitlements);
   }
 
   /** @private */
   start_() {
     this.initialize_().then(() => {
-      // TODO(@prateekbh): Start and stop loading indicator. See
-      // `Renderer.toggleLoading`.
-      // TODO(@prateekbh): Read the service ids in EntitlementStore constructor
-      // from page config.
-      this.entitlementStore_ = new EntitlementStore(['foo', 'bar']);
+      this.renderer_.toggleLoading(true);
+      this.entitlementStore_ =
+          new EntitlementStore(this.pageConfig_.getProductId());
+
       this.subscriptionPlatforms_.forEach(subscriptionPlatform => {
         subscriptionPlatform.getEntitlements()
-            .then(() => this.processEntitlement_());
+            .then(entitlements =>
+              this.resolveEntitlementsToStore_(entitlements));
       });
+
+      this.entitlementStore_.getFirstResolvedSubscription()
+          .then(entitlements => {this.processEntitlements_(entitlements);});
     });
   }
 }
@@ -129,6 +151,14 @@ export function getPlatformClassForTesting() {
  */
 export function getPageConfigClassForTesting() {
   return PageConfig;
+}
+
+/**
+ * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
+ * @package @VisibleForTesting
+ */
+export function getEntitlementsClassForTesting() {
+  return Entitlements;
 }
 
 
