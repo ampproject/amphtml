@@ -339,17 +339,14 @@ export class AmpSelector extends AMP.BaseElement {
 
   /**
    * Handles selectUp events.
-   * @param {!integer} incrementPos
+   * @param {number} incrementPos
    */
   select_(incrementPos) {
-
-    if (this.isMultiple_) {
-      this.clearSelection_(this.selectedOptions_[0]);
-    }
     // Change the selection to the next element in the specified direction.
     // The selection should loop around if the user attempts to go one
     // past the beginning or end.
     let selectedIndex_ = this.options_.indexOf(this.selectedOptions_[0]);
+    const oldSelectedIndex_ = selectedIndex_;
 
     selectedIndex_ = (selectedIndex_ + incrementPos) % this.options_.length;
     if (selectedIndex_ < 0) {
@@ -357,7 +354,8 @@ export class AmpSelector extends AMP.BaseElement {
     }
 
     const selectedOption = this.options_[selectedIndex_];
-    this.onOptionPicked_(selectedOption);
+    this.setSelection_(selectedOption);
+    this.clearSelection_(this.options_[oldSelectedIndex_]);
   }
 
   /**

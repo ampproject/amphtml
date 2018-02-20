@@ -663,25 +663,50 @@ describes.realWin('amp-selector', {
       });
       ampSelector.children[0].setAttribute('selected', '');
       ampSelector.build();
+      const impl = ampSelector.implementation_;
 
       expect(ampSelector.hasAttribute('multiple')).to.be.false;
       expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
 
-      const button_down = win.document.createElement('button_down');
-      button_down.setAttribute('on', 'tap:ampSelector.selectDown()');
-      win.document.body.appendChild(button_down);
-      button_down.click();
+      impl.executeAction({method: 'selectDown', satisfiesTrust: () => true});
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
+      expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
 
-      // expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
-      // expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
+      impl.executeAction({method: 'selectUp', satisfiesTrust: () => true});
 
-      const button_up = win.document.createElement('button_up');
-      button_up.setAttribute('on', 'tap:ampSelector.selectUp()');
-      win.document.body.appendChild(button_up);
-      button_up.click();
+      expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
 
-      // expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
-      // expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+    });
+
+    it('should trigger `select` action when user uses ' +
+      '`selectUp`/`selectDown` action with user specified skip value', () => {
+      const ampSelector = getSelector({
+        attributes: {
+          id: 'ampSelector',
+        },
+        config: {
+          count: 6,
+        },
+      });
+      ampSelector.children[0].setAttribute('selected', '');
+      ampSelector.build();
+      const impl = ampSelector.implementation_;
+
+      expect(ampSelector.hasAttribute('multiple')).to.be.false;
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+
+      let args = {'incrementPos': 2};
+      impl.executeAction(
+          {method: 'selectDown', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
+      expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
+
+      args = {'decrementPos': 2};
+      impl.executeAction(
+          {method: 'selectUp', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
     });
 
     describe('keyboard-select-mode', () => {
