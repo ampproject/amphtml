@@ -15,7 +15,7 @@
  */
 
 import {Entitlement, Entitlements} from '../../../third_party/subscriptions-project/apis';
-
+import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {user} from '../../../src/log';
 
@@ -29,13 +29,17 @@ export class LocalSubscriptionPlatform {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {!JsonObject} serviceConfig
+   * @param {PageConfig} pageConfig
    */
-  constructor(ampdoc, serviceConfig) {
+  constructor(ampdoc, serviceConfig, pageConfig) {
     /** @const */
     this.ampdoc_ = ampdoc;
 
     /** @const @private {!JsonObject} */
     this.serviceConfig_ = serviceConfig;
+
+    /** @const @private {!PageConfig} */
+    this.pageConfig_ = pageConfig;
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(this.ampdoc_.win);
@@ -48,18 +52,27 @@ export class LocalSubscriptionPlatform {
    */
   getEntitlements() {
     user().assert(this.serviceConfig_['paywallUrl'],
-        'service config does not have paywall Url');
+        'Service config does not have paywall Url');
+    const currentProductId = user().assertString(
+        this.pageConfig_.getProductId(), 'Current Product ID is null');
     return this.xhr_
         .fetchJson(this.serviceConfig_['paywallUrl'])
         .then(res => res.json())
         .then(resJson => {
           return new Entitlements(
-              this.serviceConfig_['serviceId'],
+              'amp-local-subscription',
               JSON.stringify(resJson),
               Entitlement.parseListFromJson(resJson),
-              'product1' // TODO(@prateekbh): read this from pageConfig
+              currentProductId
           );
         });
   }
 }
 
+/**
+ * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
+ * @package @VisibleForTesting
+ */
+export function getPageConfigClassForTesting() {
+  return PageConfig;
+}

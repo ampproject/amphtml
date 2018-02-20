@@ -22,7 +22,6 @@ import {PageConfig, PageConfigResolver} from '../../../third_party/subscriptions
 import {Renderer} from './renderer';
 import {SubscriptionPlatform} from './subscription-platform';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {user} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-subscriptions';
@@ -75,7 +74,8 @@ export class SubscriptionService {
         this.subscriptionPlatforms_.push(
             new LocalSubscriptionPlatform(
                 this.ampdoc_,
-                platformConfig
+                platformConfig,
+                this.pageConfig_
             )
         );
       });
@@ -113,10 +113,8 @@ export class SubscriptionService {
    * @private
    */
   resolveEntitlementsToStore_(entitlements) {
-    user().assert(this.pageConfig_.getProductId() !== null,
-        'Product id cannot be null');
-    this.entitlementStore_.resolveEntitlement(
-        this.pageConfig_.getProductId(), entitlements);
+    this.entitlementStore_.resolveEntitlement(entitlements.service,
+        entitlements);
   }
 
   /** @private */
@@ -126,7 +124,7 @@ export class SubscriptionService {
       // TODO(@prateekbh): Read the service ids in EntitlementStore constructor
       // from page config.
       this.entitlementStore_ =
-          new EntitlementStore(['foo', 'bar']);
+        new EntitlementStore(['amp-local-subscription', 'google-subscription']);
 
       this.subscriptionPlatforms_.forEach(subscriptionPlatform => {
         subscriptionPlatform.getEntitlements()
