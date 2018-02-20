@@ -59,8 +59,7 @@ export const SERVICE = {
 const TAG = 'AMP-DOUBLECLICK-SAFEFRAME';
 
 /** @const {string} */
-export const SAFEFRAME_ORIGIN = /**getMode(window).test ? 'http://localhost:9876' :*/
-    'https://tpc.googlesyndication.com';
+export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
 
 /**
  * Event listener callback for message events. If message is a Safeframe message,

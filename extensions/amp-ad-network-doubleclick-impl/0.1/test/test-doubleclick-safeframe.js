@@ -153,10 +153,6 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     });
   });
 
-  it('should register Safeframe listener on creation', () => {
-    removeSafeframeListener();
-  });
-
   describe('getSafeframeNameAttr', () => {
     it('should return name attributes', () => {
       const attrs = safeframeHost.getSafeframeNameAttr();
