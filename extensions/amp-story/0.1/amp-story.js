@@ -39,6 +39,7 @@ import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {MediaPool, MediaType} from './media-pool';
 import {NavigationState} from './navigation-state';
+import {ORIGIN_WHITELIST} from './origin-whitelist';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareWidget} from './share';
@@ -71,8 +72,6 @@ import {relatedArticlesFromJson} from './related-articles';
 import {renderSimpleTemplate} from './simple-template';
 import {stringHash32} from '../../../src/string';
 import {upgradeBackgroundAudio} from './audio';
-import {ORIGIN_WHITELIST} from './whitelist';
-
 
 /** @private @const {string} */
 const PRE_ACTIVE_PAGE_ATTRIBUTE_NAME = 'pre-active';
