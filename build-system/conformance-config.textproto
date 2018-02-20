@@ -245,6 +245,7 @@ requirement: {
   value: 'module$src$cookies.setCookie'
   whitelist: 'src/cookies.js'
   whitelist: 'src/experiments.js'
+  whitelist: 'src/runtime.js'
   whitelist: 'src/service/cid-api.js'
   whitelist: 'src/service/cid-impl.js'
 }
