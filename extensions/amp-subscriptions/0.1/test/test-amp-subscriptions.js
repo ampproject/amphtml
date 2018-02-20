@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import {EntitlementStore} from '../entitlement-store';
+
+import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {
   PageConfig,
   PageConfigResolver,
 } from '../../../../third_party/subscriptions-project/config';
-
-import {EntitlementStore} from '../entitlement-store';
-import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {SubscriptionService} from '../amp-subscriptions';
 
 const paywallUrl = 'https://lipsum.com';

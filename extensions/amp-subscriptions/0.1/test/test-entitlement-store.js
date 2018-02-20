@@ -82,7 +82,7 @@ describes.realWin('entitlement-store', {}, () => {
         });
   });
 
-  it('should resolve `firstResolvedPromise_` with null'+
+  it('should resolve `firstResolvedPromise_` with null' +
       ' for negative entitlement', done => {
     const negativeEntitlement1 =
         new Entitlement(serviceIds[0], ['product1'], '');

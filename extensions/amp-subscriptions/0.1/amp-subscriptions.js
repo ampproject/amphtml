@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-import {
-  PageConfig,
-  PageConfigResolver,
-} from '../../../third_party/subscriptions-project/config';
-
 import {CSS} from '../../../build/amp-subscriptions-0.1.css';
 import {EntitlementStore} from './entitlement-store';
 import {Entitlements} from '../../../third_party/subscriptions-project/apis';
 import {LocalSubscriptionPlatform} from './local-subscription-platform';
+import {PageConfig, PageConfigResolver} from '../../../third_party/subscriptions-project/config';
 import {Renderer} from './renderer';
 import {SubscriptionPlatform} from './subscription-platform';
 import {installStylesForDoc} from '../../../src/style-installer';
+import {user} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-subscriptions';
@@ -116,6 +113,8 @@ export class SubscriptionService {
    * @private
    */
   resolveEntitlementsToStore_(entitlements) {
+    user().assert(this.pageConfig_.getProductId() !== null,
+        'Product id cannot be null');
     this.entitlementStore_.resolveEntitlement(
         this.pageConfig_.getProductId(), entitlements);
   }
@@ -124,8 +123,10 @@ export class SubscriptionService {
   start_() {
     this.initialize_().then(() => {
       this.renderer_.toggleLoading(true);
+      // TODO(@prateekbh): Read the service ids in EntitlementStore constructor
+      // from page config.
       this.entitlementStore_ =
-          new EntitlementStore(this.pageConfig_.getProductId());
+          new EntitlementStore(['foo', 'bar']);
 
       this.subscriptionPlatforms_.forEach(subscriptionPlatform => {
         subscriptionPlatform.getEntitlements()
