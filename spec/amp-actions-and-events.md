@@ -376,6 +376,10 @@ event.response</pre></td>
     <td><code>selectDown(decrementPos=INTEGER)</code></td>
     <td>Changes the selected element to the currentPos+decrementPos. If no decrement value is specified, the default is -1.</td>
   </tr>
+  <tr>
+    <td><code>toggle(index=INTEGER, value=BOOLEAN)</code></td>
+    <td>Sets the selected element's `selected` attribute if value is 'true', otherwise removes the attribute</td>
+  </tr>
 </table>
 
 ### amp-sidebar

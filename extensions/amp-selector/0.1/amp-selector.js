@@ -131,6 +131,18 @@ export class AmpSelector extends AMP.BaseElement {
         this.select_(1);
       }
     }, ActionTrust.LOW);
+
+    this.registerAction('toggle', invocation => {
+      const args = invocation.args;
+      if (args && args['index'] !== undefined) {
+        if (args['value'] !== undefined) {
+          this.toggle_(args['index'], args['value']);
+        } else {
+          this.toggle_(args['index'],
+              !this.options_[args['index']].hasAttribute('selected'));
+        }
+      }
+    }, ActionTrust.LOW);
   }
 
   /** @override */
@@ -336,6 +348,40 @@ export class AmpSelector extends AMP.BaseElement {
       this.onOptionPicked_(el);
     }
   }
+
+  /**
+   * Handles toggle action.
+   * @param {number} index
+   * @param {boolean} value
+   */
+  toggle_(index, value) {
+    // Change the selection to the next element in the specified direction.
+    // The selection should loop around if the user attempts to go one
+    // past the beginning or end.
+    const selectedIndex_ = this.options_.indexOf(this.selectedOptions_[0]);
+
+    if (value == true) {
+      // If we are toggling the `selected` attribute to true:
+      // If selectedIndex_ == index then there is no change in the status.
+
+      // If selectedIndex_ != index then the current selected element needs
+      // have the `selected` attribute removed and the element at position
+      // index needs to be selected.
+      if (selectedIndex_ != index) {
+        this.setSelection_(this.options_[index]);
+        this.clearSelection_(this.options_[selectedIndex_]);
+      }
+    } else {
+      // If we are toggling the `selected` attribute to false:
+      // If selectedIndex_ == index then the current selected element needs
+      // to have the `selected` attribute removed.
+      // If selectedIndex_ != index, then the current `selected` element
+      // can retain it's status but the element at the given index needs
+      // to have the `selected` attribute removed.
+      this.clearSelection_(this.options_[index]);
+    }
+  }
+
 
   /**
    * Handles selectUp events.

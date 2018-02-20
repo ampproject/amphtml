@@ -709,6 +709,85 @@ describes.realWin('amp-selector', {
       expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
     });
 
+    it('should trigger `toggle` action when no \'value\'' +
+      ' argument is specified', () => {
+      const ampSelector = getSelector({
+        attributes: {
+          id: 'ampSelector',
+        },
+        config: {
+          count: 6,
+        },
+      });
+      ampSelector.children[2].setAttribute('selected', '');
+      ampSelector.build();
+      const impl = ampSelector.implementation_;
+
+      expect(ampSelector.hasAttribute('multiple')).to.be.false;
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.true;
+
+      // test that if no 'value' argument is provided the 'selected' attribute
+      // is reversed.
+      const args = {'index': 4};
+      impl.executeAction(
+          {method: 'toggle', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
+      expect(ampSelector.children[4].hasAttribute('selected')).to.be.true;
+
+      impl.executeAction(
+          {method: 'toggle', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[4].hasAttribute('selected')).to.be.false;
+    });
+
+    it('should trigger `toggle` action when \'value\'' +
+      ' argument is specified', () => {
+      const ampSelector = getSelector({
+        attributes: {
+          id: 'ampSelector',
+        },
+        config: {
+          count: 6,
+        },
+      });
+      ampSelector.children[2].setAttribute('selected', '');
+      ampSelector.build();
+      const impl = ampSelector.implementation_;
+
+      expect(ampSelector.hasAttribute('multiple')).to.be.false;
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.true;
+
+      // if 'index' is set to the currently selected element and
+      // 'value' is true
+      let args = {'index': 2, 'value': true};
+      impl.executeAction(
+          {method: 'toggle', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.true;
+
+      // if 'index' is different from the selected element and
+      // 'value' is true
+      args = {'index': 4, 'value': true};
+      impl.executeAction(
+          {method: 'toggle', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
+      expect(ampSelector.children[4].hasAttribute('selected')).to.be.true;
+
+      // if 'index' is set to the currently selected element and
+      // 'value' is false
+      args = {'index': 4, 'value': false};
+      impl.executeAction(
+          {method: 'toggle', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[4].hasAttribute('selected')).to.be.false;
+
+      // if 'index' is different from the selected element and
+      // 'value' is false
+      ampSelector.children[2].setAttribute('selected', '');
+      args = {'index': 4, 'value': false};
+      impl.executeAction(
+          {method: 'toggle', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[4].hasAttribute('selected')).to.be.false;
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.true;
+    });
+
     describe('keyboard-select-mode', () => {
 
       it('should have `none` mode by default', () => {
