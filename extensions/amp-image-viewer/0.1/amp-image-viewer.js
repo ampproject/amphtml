@@ -319,13 +319,6 @@ export class AmpImageViewer extends AMP.BaseElement {
           Math.round(width),
           Math.round(height));
 
-      st.setStyles(dev().assertElement(this.image_), {
-        top: st.px(this.imageBox_.top),
-        left: st.px(this.imageBox_.left),
-        width: st.px(this.imageBox_.width),
-        height: st.px(this.imageBox_.height),
-      });
-
       // Adjust max scale to at least fit the screen.
       const elementBoxRatio = this.elementBox_.width / this.elementBox_.height;
       const maxScale = Math.max(
@@ -339,8 +332,20 @@ export class AmpImageViewer extends AMP.BaseElement {
       this.startX_ = this.posX_ = 0;
       this.startY_ = this.posY_ = 0;
       this.updatePanZoomBounds_(this.scale_);
-      this.updatePanZoom_();
 
+    }).then(() => {
+      return this.vsync_.mutatePromise(() => {
+        // Set the actual dimensions of the image
+        st.setStyles(dev().assertElement(this.image_), {
+          top: st.px(this.imageBox_.top),
+          left: st.px(this.imageBox_.left),
+          width: st.px(this.imageBox_.width),
+          height: st.px(this.imageBox_.height),
+        });
+
+        // Update translation and scaling
+        this.updatePanZoom_();
+      });
     }).then(() => this.updateSrc_());
   }
 
