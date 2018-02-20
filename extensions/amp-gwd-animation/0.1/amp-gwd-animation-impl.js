@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 import {createCustomEvent} from '../../../src/event-helper';
-import {escapeCssSelectorIdent, scopedQuerySelectorAll} from '../../../src/dom';
-import {user} from '../../../src/log';
+import {escapeCssSelectorIdent} from '../../../src/dom';
 import {toArray} from '../../../src/types';
+import {user} from '../../../src/log';
 
 /**
  * CSS class used to deactivate animations.
@@ -233,7 +233,7 @@ export class AmpGwdRuntimeService {
 
     // Reset other animation state on the page and all descendants.
     [pageEl]
-        .concat(toArray(scopedQuerySelectorAll(pageEl, '*')))
+        .concat(toArray(pageEl.querySelectorAll('*')))
         .forEach(el => this.resetAnimatedElement_(el));
   }
 

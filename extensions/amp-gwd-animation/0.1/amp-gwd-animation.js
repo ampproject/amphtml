@@ -21,7 +21,6 @@ import {
 } from './amp-gwd-animation-impl';
 import {CSS} from '../../../build/amp-gwd-animation-0.1.css';
 import {Services} from '../../../src/services';
-import {escapeCssSelectorIdent} from '../../../src/dom';
 import {getServiceForDoc} from '../../../src/service';
 import {getValueForExpr} from '../../../src/json';
 import {user} from '../../../src/log';
@@ -149,7 +148,7 @@ export class GwdAnimation extends AMP.BaseElement {
 
     const argPaths = ACTION_IMPL_ARGS[invocation.method];
     const invocationObj = /** @type {!JsonObject} */ (
-        Object.assign({}, invocation));
+      Object.assign({}, invocation));
     const actionArgs =
         argPaths.map(argPath => getValueForExpr(invocationObj, argPath));
 
