@@ -204,10 +204,11 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     impl.initiateAdRequest();
     impl.safeframeApi_ = new SafeframeHostApi(
         impl, true, impl.initialSize_, impl.creativeSize_);
-    sandbox.stub(impl.safeframeApi_, 'setupGeom_');
+    sandbox./*OK*/stub(impl.safeframeApi_, 'setupGeom_');
     const connectMessagingChannelSpy =
-        sandbox.spy(impl.safeframeApi_, 'connectMessagingChannel');
-    const onFluidResizeSpy = sandbox.spy(impl.safeframeApi_, 'onFluidResize_');
+        sandbox./*OK*/spy(impl.safeframeApi_, 'connectMessagingChannel');
+    const onFluidResizeSpy = sandbox./*OK*/spy(impl.safeframeApi_,
+        'onFluidResize_');
     return impl.adPromise_.then(() => {
       impl.creativeBody_ = utf8Encode(rawCreative);
       return impl.layoutCallback().then(() => {

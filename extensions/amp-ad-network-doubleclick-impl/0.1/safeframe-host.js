@@ -19,6 +19,7 @@ import {SimplePostMessageApiDef} from '../../../src/simple-postmessage-api-def';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
+import {setStyles} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 
 /**
@@ -294,7 +295,8 @@ export class SafeframeHostApi {
   updateIframeOffsets(changes) {
     let iframeRect;
     if (this.iframe_) {
-      iframeRect = this.iframe_.getBoundingClientRect();
+      // Worst case, this happens every 1000ms.
+      iframeRect = this.iframe_./*REVIEW*/getBoundingClientRect();
       this.iframeOffsets_['dT'] = iframeRect.top -
           changes['boundingClientRect']['top'];
       this.iframeOffsets_['dR'] = iframeRect.right -
@@ -475,8 +477,12 @@ export class SafeframeHostApi {
    * @param {number} width
    */
   resizeIframe(height, width) {
-    this.iframe_.style.height = height + 'px';
-    this.iframe_.style.width = width + 'px';
+    if (this.iframe_) {
+      setStyles(this.iframe_, {
+        'height': height + 'px',
+        'width': width + 'px',
+      });
+    }
   }
 
   /**

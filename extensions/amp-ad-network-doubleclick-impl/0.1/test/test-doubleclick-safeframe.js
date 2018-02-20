@@ -110,8 +110,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       doubleclickImpl.iframe = safeframeMock;
       const connectMessagingChannelSpy = sandbox.spy(
           safeframeHost, 'connectMessagingChannel');
-      const postMessageMock = sandbox.stub(safeframeMock.contentWindow,
-          'postMessage');
+      const postMessageStub = sandbox./*OK*/stub(
+          safeframeMock.contentWindow, 'postMessage');
       sendSetupMessage();
 
       // Verify that the channel was set up
@@ -119,7 +119,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       expect(safeframeHost.channel).to.equal(safeframeChannel);
 
       // Verify that first response message was sent properly
-      const firstPostMessageArgs = postMessageMock.firstCall.args;
+      const firstPostMessageArgs = postMessageStub.firstCall.args;
       let connectMessage = JSON.parse(firstPostMessageArgs[0]);
       let payload = JSON.parse(connectMessage[MESSAGE_FIELDS.PAYLOAD]);
       expect(payload).to.deep.equal({'c': safeframeChannel,
@@ -132,7 +132,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
 
       // Verify that the initial geometry update was sent
       return Services.timerFor(env.win).promise(500).then(() => {
-        const secondPostMessageArgs = postMessageMock.secondCall.args;
+        const secondPostMessageArgs = postMessageStub.secondCall.args;
         connectMessage = JSON.parse(secondPostMessageArgs[0]);
         expect(connectMessage[MESSAGE_FIELDS.CHANNEL]).to.equal(
             safeframeChannel);
@@ -299,8 +299,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       const safeframeMock = createElementWithAttributes(doc, 'iframe', {});
       ampAd.appendChild(safeframeMock);
       doubleclickImpl.iframe = safeframeMock;
-      const sendSpy = sandbox.spy(safeframeHost, 'send');
-      sandbox.stub(safeframeMock.contentWindow, 'postMessage');
+      const sendSpy = sandbox./*OK*/spy(safeframeHost, 'send');
+      safeframeMock.contentWindow.postMessage = () => {};
       sendSetupMessage();
       safeframeHost.intersectionObserver_.onViewportCallback(true);
 
@@ -374,7 +374,6 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
           safeframeHost, 'resizeAmpAdAndSafeframe');
       safeframeHost.initialHeight_ = ampAdHeight;
       safeframeHost.initialWidth_ = ampAdWidth;
-      sandbox.stub(safeframeMock.contentWindow, 'postMessage');
       sendSetupMessage();
       attemptChangeSizeStub = sandbox.stub(
           doubleclickImpl, 'attemptChangeSize');
