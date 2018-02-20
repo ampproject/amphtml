@@ -108,27 +108,11 @@ function appnexusAst(global, data) {
     global.apntag = context.master.apntag;
   }
 
-  // check for responses received before listeners are registered,
-  //  for example when an above-the-fold ad is scrolled into view
-  const tagsRequested = apntag.requests && apntag.requests.tags;
-  const tagKeys = tagsRequested && Object.keys(tagsRequested);
-  const responses = tagKeys && tagKeys.length
-    && tagKeys.map(key => {
-      const tag = tagsRequested[key];
-      return !tag.showTagCalled && tag.adResponse;
-    }).filter(response => response);
-    if (responses && responses.length) {
-          responses.map(response => {
-        if (response.nobid) {
-          context.noContentAvailable();
-        } else {
-          const adObj = response && apntag.getAdForAMP(response);
-          if (adObj) {
-            handleAdAvailable(adObj);
-          }
-        }
-    });
-  }
+  // check for ad responses received for a slot but before listeners are registered,
+  // for example when an above-the-fold ad is scrolled into view
+  apntag.anq.push(() => {
+    apntag.checkAvailableAdObj(data.target).processEvents(handleAdAvailable);
+  });
 
   apntag.anq.push(() => {
     apntag.onEvent('adAvailable', data.target, handleAdAvailable);
