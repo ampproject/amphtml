@@ -240,8 +240,6 @@ export class SafeframeHostApi {
     dev().assert(this.baseInstance_.iframe);
     this.iframe_ = this.baseInstance_.iframe;
     this.channel = channel;
-    dev().assert(this.iframe_.contentWindow,
-        'Frame contentWindow unavailable.');
     this.setupGeom_();
     this.sendMessage_({
       'message': 'connect',
@@ -258,6 +256,8 @@ export class SafeframeHostApi {
    * @private
    */
   setupGeom_() {
+    dev().assert(this.iframe_.contentWindow,
+        'Frame contentWindow unavailable.');
     this.intersectionObserver_ = new IntersectionObserver(
         this.baseInstance_, this.baseInstance_.element, false, this, 1000);
     // This will send a geometry update message, and then start sending
