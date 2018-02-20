@@ -19,7 +19,8 @@ import {matches} from '../../../../src/dom';
 import {user} from '../../../../src/log';
 
 /**
- * A Filter that ignores events originating from elements that match the spec.
+ * A Filter that ignores events originating from elements that match a specified
+ * element selector.
  */
 export class InactiveElementFilter extends Filter {
   /**
@@ -51,7 +52,7 @@ function isValidInactiveElementSpec(spec) {
 }
 
 /**
- * @param {string} A CSS selector matching elements to ignore.
+ * @param {string} selector A CSS selector matching elements to ignore.
  */
 export function makeInactiveElementSpec(selector) {
   return {type: FilterType.INACTIVE_ELEMENT, selector};
