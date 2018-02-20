@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {IntersectionObserver} from '../../../src/intersection-observer';
-import {SimplePostMessageApiDef} from '../../../src/simple-postmessage-api-def';
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
@@ -112,7 +111,6 @@ export function safeframeListener(event) {
  *
  * We pass an instance of this class into the IntersectionObserver class, which then
  *  calls the instance of send() below whenever an update occurs.
- * @implements {SimplePostMessageApiDef}
  */
 export class SafeframeHostApi {
 
@@ -128,7 +126,7 @@ export class SafeframeHostApi {
     /** @private {!./amp-ad-network-doubleclick-impl.AmpAdNetworkDoubleclickImpl} */
     this.baseInstance_ = baseInstance;
 
-    /** @private {Window} */
+    /** @private {!Window} */
     this.win_ = this.baseInstance_.win;
 
     /** @private {string} */
@@ -167,6 +165,15 @@ export class SafeframeHostApi {
     /** @private {?string} */
     this.fluidImpressionUrl_ = fluidImpressionUrl;
 
+    /** @private {boolean} */
+    this.sendPositionUpdate_ = false;
+
+    /** @private {?Promise} */
+    this.delay_ = null;
+
+    /** @private {../../../src/service/viewport/viewport-impl.Viewport} */
+    this.viewport_ = this.baseInstance_.getViewport();
+
     this.registerSafeframeHost();
   }
 
@@ -180,7 +187,7 @@ export class SafeframeHostApi {
     // TODO: Some of these options are probably not right.
     attributes['uid'] = this.uid_;
     attributes['hostPeerName'] = this.win_.location.origin;
-    attributes['initialGeometry'] = this.getCurrentGeometry();
+    attributes['initialGeometry'] = this.getInitialGeometry();
     attributes['permissions'] = JSON.stringify(
         dict({
           'expandByOverlay': false,
@@ -203,15 +210,25 @@ export class SafeframeHostApi {
   }
 
   /**
-   * Gets the current intersection change entry, and returns the
-   *   SafeFrame formatted change. See formatGeom_() for details on what
-   *   that format looks like.
+   * Returns the initialGeometry to assign to the name of the safeframe
+   * for rendering. This needs to be done differently than all the other
+   * geometry updates, because we don't actually have access to the
+   * rendered safeframe yet.
    * @return {string}
    */
-  getCurrentGeometry() {
-    const changes = this.baseInstance_.element.getIntersectionChangeEntry();
-    this.updateIframeOffsets(changes);
-    return this.formatGeom_(changes);
+  getInitialGeometry() {
+    const ampAdBox = this.baseInstance_.element.getBoundingClientRect();
+    const heightOffset = (ampAdBox.height - this.creativeSize_.height) / 2;
+    const widthOffset = (ampAdBox.width - this.creativeSize_.width) / 2;
+    const iframeBox = {
+      top: ampAdBox.top + heightOffset,
+      bottom: ampAdBox.bottom - heightOffset,
+      left: ampAdBox.left + widthOffset,
+      right: ampAdBox.right - widthOffset,
+      height: this.creativeSize_.height,
+      width: this.creativeSize_.width,
+    };
+    return this.formatGeom_(iframeBox);
   }
 
   /**
@@ -258,111 +275,84 @@ export class SafeframeHostApi {
   setupGeom_() {
     dev().assert(this.iframe_.contentWindow,
         'Frame contentWindow unavailable.');
-    this.intersectionObserver_ = new IntersectionObserver(
-        this.baseInstance_, this.baseInstance_.element, false, this, 1000);
-    // This will send a geometry update message, and then start sending
-    // them whenever geometry changes as detected by intersection
-    // observer. Make sure we always send this initial update message.
-    this.intersectionObserver_.startSendingIntersectionChanges();
+    this.viewport_.onScroll(this.maybeUpdateGeometry_.bind(this));
+    this.viewport_.onChanged(this.maybeUpdateGeometry_.bind(this));
   }
 
   /**
-   * Every time that the IntersectionObserver needs to send an update, this
-   * method is triggered. Includes page scroll or other visibility change
-   * events.
-   * Handles sending the geometry update message to the
-   * safeframe container, which allows $sf.ext.geom() to work.
-   * @param {string} unused
-   * @param {!JsonObject} changes Intersection change entry.
-   * @override
+   * Attempts to call updateGeometry_ to send a geometry update into the
+   * safeframe. If it has been less than 1 second since the last update
+   * and there is still an active delay, instead it registers that
+   * a geometry update is required.
+   * @private
    */
-  send(unused, changes) {
-    this.sendMessage_({
-      newGeometry: this.formatGeom_(changes['changes'][0]),
-      uid: this.uid_,
-    }, SERVICE.GEOMETRY_UPDATE);
-  }
-
-  /**
-   * The IntersectionObserver class is monitoring the amp-ad element,
-   * not the Safeframe. The Safeframe is not necessarily the exact
-   * same size as the amp-ad element, so calculate the width and height
-   * correction between the amp-ad element and the safeframe iframe, and then
-   * modify the change entry to be correct.
-   * @param {!JsonObject} changes
-   */
-  updateIframeOffsets(changes) {
-    let iframeRect;
-    if (this.iframe_) {
-      // Worst case, this happens every 1000ms.
-      iframeRect = this.iframe_./*REVIEW*/getBoundingClientRect();
-      this.iframeOffsets_['dT'] = iframeRect.top -
-          changes['boundingClientRect']['top'];
-      this.iframeOffsets_['dR'] = iframeRect.right -
-          changes['boundingClientRect']['right'];
-      this.iframeOffsets_['dL'] = iframeRect.left -
-          changes['boundingClientRect']['left'];
-      this.iframeOffsets_['dB'] = iframeRect.bottom -
-          changes['boundingClientRect']['bottom'];
-      this.iframeOffsets_['width'] = iframeRect.width;
-      this.iframeOffsets_['height'] = iframeRect.height;
-    } else {
-      // We don't yet have access to the iframe when we are doing the
-      // very first geometry update that gets set onto the name of the
-      // iframe for initial render.
-      iframeRect = this.creativeSize_;
-      this.iframeOffsets_['dL'] = (changes['boundingClientRect']['width'] -
-                                  iframeRect.width) / 2;
-      this.iframeOffsets_['dB'] = (changes['boundingClientRect']['height'] -
-                                  iframeRect.height) / 2;
-      this.iframeOffsets_['dR'] = -this.iframeOffsets_['dL'];
-      this.iframeOffsets_['dT'] = -this.iframeOffsets_['dB'];
-      this.iframeOffsets_['width'] = iframeRect.width;
-      this.iframeOffsets_['height'] = iframeRect.height;
+  maybeUpdateGeometry_() {
+    this.sendPositionUpdate_ = true;
+    if (!this.delay_) {
+      this.updateGeometry_();
     }
   }
 
   /**
-   * Converts an IntersectionObserver-formatted change message to the
-   * geometry update format expected by GPT Safeframe.
-   * @param {!Object} changes IntersectionObserver formatted
-   *   changes.
+   * Sends a geometry update message into the safeframe, and sets a timer
+   * to prevent another update being sent for 1 second. When the timer is
+   * up, if this.sendPositionUpdate_ is set, then it sends another update.
+   * @private
+   */
+  updateGeometry_() {
+    if (!this.iframe_) {
+      return;
+    }
+    this.delay_ = Services.timerFor(this.win_).promise(1000).then(() => {
+      this.delay_ = null;
+      if (this.sendPositionUpdate_) {
+        this.updateGeometry_();
+      }
+    });
+    this.sendPositionUpdate_ = false;
+    this.viewport_.getClientRectAsync(this.iframe_).then(iframeBox => {
+      const formattedGeom = this.formatGeom_(iframeBox);
+      this.sendMessage_({
+        newGeometry: formattedGeom,
+        uid: this.uid_,
+      }, SERVICE.GEOMETRY_UPDATE);
+    });
+  }
+
+  /**
+   * Builds geometry update format expected by GPT Safeframe.
+   * Also sets this.currentGeometry as side effect.
+   * @param {!Object} iframeBox The elementRect for the safeframe.
    * @return {string} Safeframe formatted changes.
    * @private
    */
-  formatGeom_(changes) {
-    changes.boundingClientRect.right += this.iframeOffsets_['dR'];
-    changes.boundingClientRect.top += this.iframeOffsets_['dT'];
-    changes.boundingClientRect.bottom += this.iframeOffsets_['dB'];
-    changes.boundingClientRect.left += this.iframeOffsets_['dL'];
-    this.currentGeometry_ = /** @type {JsonObject} */({
-      'windowCoords_t': changes.rootBounds.top,
-      'windowCoords_r': changes.rootBounds.right,
-      'windowCoords_b': changes.rootBounds.bottom,
-      'windowCoords_l': changes.rootBounds.left,
-      'frameCoords_t': changes.boundingClientRect.top,
-      'frameCoords_r': changes.boundingClientRect.right,
-      'frameCoords_b': changes.boundingClientRect.bottom,
-      'frameCoords_l': changes.boundingClientRect.left,
+  formatGeom_(iframeBox) {
+    const viewportSize = this.viewport_.getSize();
+    const currentGeometry = /** @type {JsonObject} */({
+      'windowCoords_t': 0,
+      'windowCoords_r': viewportSize.width,
+      'windowCoords_b': viewportSize.height,
+      'windowCoords_l': 0,
+      'frameCoords_t': iframeBox.top,
+      'frameCoords_r': iframeBox.right,
+      'frameCoords_b': iframeBox.bottom,
+      'frameCoords_l': iframeBox.left,
       'styleZIndex': this.baseInstance_.element.style.zIndex,
       // AMP's built in resize methodology that we use only allows expansion
       // to the right and bottom, so we enforce that here.
-      'allowedExpansion_r': changes.rootBounds.width -
-          this.iframeOffsets_['width'],
-      'allowedExpansion_b': changes.rootBounds.height -
-          this.iframeOffsets_['height'],
+      'allowedExpansion_r': viewportSize.width -
+          iframeBox.width,
+      'allowedExpansion_b': viewportSize.height -
+          iframeBox.height,
       'allowedExpansion_t': 0,
       'allowedExpansion_l': 0,
-      'yInView': this.getPercInView(
-          changes.rootBounds.bottom,
-          changes.boundingClientRect.top,
-          changes.boundingClientRect.bottom),
-      'xInView': this.getPercInView(
-          changes.rootBounds.right,
-          changes.boundingClientRect.left,
-          changes.boundingClientRect.right),
+      'yInView': this.getPercInView(viewportSize.height,
+          iframeBox.top, iframeBox.bottom),
+      'xInView': this.getPercInView(viewportSize.width,
+          iframeBox.left, iframeBox.right),
     });
-    return JSON.stringify(this.currentGeometry_);
+    this.currentGeometry_ = currentGeometry;
+    return JSON.stringify(currentGeometry);
   }
 
   /**
@@ -497,16 +487,22 @@ export class SafeframeHostApi {
    * @param {string} messageType
    */
   sendResizeResponse(success, messageType) {
-    this.sendMessage_({
-      uid: this.uid_,
-      success,
-      newGeometry: this.getCurrentGeometry(),
-      'expand_t': this.currentGeometry_['allowedExpansion_t'],
-      'expand_b': this.currentGeometry_['allowedExpansion_b'],
-      'expand_r': this.currentGeometry_['allowedExpansion_r'],
-      'expand_l': this.currentGeometry_['allowedExpansion_l'],
-      push: true,
-    }, messageType);
+    if (!this.iframe_) {
+      return;
+    }
+    this.viewport_.getClientRectAsync(this.iframe_).then(iframeBox => {
+      const formattedGeom = this.formatGeom_(iframeBox);
+      this.sendMessage_({
+        uid: this.uid_,
+        success,
+        newGeometry: formattedGeom,
+        'expand_t': this.currentGeometry_['allowedExpansion_t'],
+        'expand_b': this.currentGeometry_['allowedExpansion_b'],
+        'expand_r': this.currentGeometry_['allowedExpansion_r'],
+        'expand_l': this.currentGeometry_['allowedExpansion_l'],
+        push: true,
+      }, messageType);
+    });
   }
 
   /**
@@ -594,6 +590,9 @@ export class SafeframeHostApi {
   }
 }
 
+/**
+ * Removes the safeframe event listener.
+ */
 export function removeSafeframeListener() {
   window.removeEventListener('message', safeframeListener, false);
   safeframeListenerCreated_ = false;

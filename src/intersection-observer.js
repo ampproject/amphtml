@@ -15,12 +15,10 @@
  */
 
 import {Services} from './services';
-import {SimplePostMessageApiDef} from './simple-postmessage-api-def';
 import {SubscriptionApi} from './iframe-helper';
 import {dev} from './log';
 import {dict} from './utils/object';
 import {layoutRectLtwh, moveLayoutRect, rectIntersection} from './layout-rect';
-
 
 /**
  * The structure that defines the rectangle used in intersection observers.
@@ -120,12 +118,8 @@ export class IntersectionObserver {
    * @param {!Element} iframe Iframe element which requested the
    *     intersection data.
    * @param {?boolean} opt_is3p Set to `true` when the iframe is 3'rd party.
-   * @param {SimplePostMessageApiDef=} opt_MessageApi Alternate messaging API
-   *   to use. If not specified, defaults to using SubscriptionAPI.
-   * @param {number=} opt_updatePeriod Optional period of how frequently to
-   *   send update messages.
    */
-  constructor(baseElement, iframe, opt_is3p, opt_MessageApi, opt_updatePeriod) {
+  constructor(baseElement, iframe, opt_is3p) {
     /** @private @const {!AMP.BaseElement} */
     this.baseElement_ = baseElement;
     /** @private @const {!./service/timer-impl.Timer} */
@@ -149,19 +143,16 @@ export class IntersectionObserver {
      * intersection updates for this element.
      * Triggered by context.observeIntersection(…) inside the ad/iframe
      * or by directly posting a send-intersections message.
-     * @private {!SimplePostMessageApiDef}
+     * @private {!SubscriptionApi}
      */
-    this.postMessageApi_ = opt_MessageApi || new SubscriptionApi(
+    this.postMessageApi_ = new SubscriptionApi(
         iframe, 'send-intersections', opt_is3p || false,
         // Each time someone subscribes we make sure that they
         // get an update.
-        () => this.startSendingIntersectionChanges());
+        () => this.startSendingIntersectionChanges_());
 
     /** @private {?Function} */
     this.unlistenViewportChanges_ = null;
-
-    /** @private {number} */
-    this.updatePeriod_ = opt_updatePeriod || 100;
   }
 
   fire() {
@@ -179,7 +170,6 @@ export class IntersectionObserver {
       this.unlistenViewportChanges_ = null;
     }
   }
-
   /**
    * Called via postMessage from the child iframe when the ad/iframe starts
    * observing its position in the viewport.
@@ -188,7 +178,7 @@ export class IntersectionObserver {
    * Note that this method may be called more than once if a single ad
    * has multiple parties interested in viewability data.
    */
-  startSendingIntersectionChanges() {
+  startSendingIntersectionChanges_() {
     this.shouldSendIntersectionChanges_ = true;
     this.baseElement_.getVsync().measure(() => {
       if (this.baseElement_.isInViewport()) {
@@ -248,8 +238,7 @@ export class IntersectionObserver {
       // Send one immediately, …
       this.flush_();
       // but only send a maximum of 10 postMessages per second.
-      this.flushTimeout_ = this.timer_.delay(this.boundFlush_,
-          this.updatePeriod_);
+      this.flushTimeout_ = this.timer_.delay(this.boundFlush_, 100);
     }
   }
 

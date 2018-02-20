@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {SimplePostMessageApiDef} from './simple-postmessage-api-def';
 import {deserializeMessage, isAmpMessage} from './3p-frame-messaging';
 import {dev} from './log';
 import {dict} from './utils/object';
@@ -409,7 +408,6 @@ export function parseIfNeeded(data) {
  * Manages a postMessage API for an iframe with a subscription message and
  * a way to broadcast messages to all subscribed windows, which
  * in turn must all be descendants of the contentWindow of the iframe.
- * @implements {SimplePostMessageApiDef}
  */
 export class SubscriptionApi {
   /**
