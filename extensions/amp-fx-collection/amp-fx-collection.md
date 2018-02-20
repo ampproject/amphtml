@@ -31,6 +31,10 @@ limitations under the License.
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>nodisplay</td>
   </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-fx-collection/">amp-fx-collection</a> example.</td>
+  </tr>
 </table>
 
 ## Overview
@@ -41,20 +45,19 @@ such as parallax that can be easily enabled on any element via attributes.
 Currently, only the `parallax` effect is supported. More effects such as `fade-in`, `slide-in`
 are planned to be supported soon.
 
+To specify a visual effect for an element, add the `amp-fx` attribute with the value of the visual effect.
+
+
+## Visual effects
+
+Below are the supported visual effects for the amp-fx-collection:
+
 ### parallax
+
 The `parallax` effect allows an element to move as if it is nearer or farther relative
 to the foreground of the page content. As the user scrolls the page, the element
 scrolls faster or slower depending on the value assigned to the
 `data-parallax-factor` attribute.
-
-Example:
-```html
-<h1 amp-fx="parallax" data-parallax-factor="1.5">
-  A title that moves faster than other content
-</h1>
-```
-
-#### Attributes
 
 ##### data-parallax-factor
 
@@ -65,6 +68,17 @@ relative to the scrolling speed:
 - A value less than 1 scrolls the element downward (element scrolls slower) when the user scrolls downward.
 - A value of 1 behaves normally.
 - A value of 0 effectively makes the element scroll fixed with the page.
+
+#### Example: Title parallax
+
+In this example, as the user scrolls the page, the h1 element scrolls faster relative to the page's content.
+
+```html
+<h1 amp-fx="parallax" data-parallax-factor="1.5">
+  A title that moves faster than other content.
+</h1>
+```
+
 
 ## Validation
 
