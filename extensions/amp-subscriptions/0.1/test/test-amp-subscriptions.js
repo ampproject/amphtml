@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {
   PageConfig,
   PageConfigResolver,
 } from '../../../../third_party/subscriptions-project/config';
+
+import {EntitlementStore} from '../entitlement-store';
+import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {SubscriptionService} from '../amp-subscriptions';
 
 const paywallUrl = 'https://lipsum.com';
@@ -42,6 +44,21 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
     subscriptionService.start_();
 
     expect(initializeStub).to.be.calledOnce;
+  });
+
+  it('should setup store and page on start', async() => {
+
+    const renderLoadingStub =
+        sandbox.spy(subscriptionService.renderer_, 'toggleLoading');
+
+    subscriptionService.start_();
+    await subscriptionService.initialize_();
+
+    // Should show loading on the page
+    expect(renderLoadingStub).to.be.calledWith(true);
+    // Should setup entitlement store
+    expect(subscriptionService.entitlementStore_).to.be
+        .instanceOf(EntitlementStore);
   });
 
   it('should discover page configuration', () => {
