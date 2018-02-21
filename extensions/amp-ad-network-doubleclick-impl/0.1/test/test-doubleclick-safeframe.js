@@ -305,23 +305,23 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       sendSetupMessage();
       const maybeUpdateGeometry1 = onScrollStub.firstCall.args[0];
       const maybeUpdateGeometry2 = onChangedStub.firstCall.args[0];
-      const sendMessageStub = sandbox./*OK*/stub(safeframeHost,
+      const sendMessageStub = sandbox./*OK*/spy(safeframeHost,
           'sendMessage_');
       maybeUpdateGeometry1();
       maybeUpdateGeometry2();
 
       return Services.timerFor(env.win).promise(500).then(() => {
-        expect(sendMessageStub).to.be.calledOnce;
-        const payload = sendMessageStub.firstCall.args[0];
-        const messageType = sendMessageStub.firstCall.args[1];
+        expect(sendMessageStub).to.be.calledTwice;
+        const payload = sendMessageStub.secondCall.args[0];
+        const messageType = sendMessageStub.secondCall.args[1];
         expect(JSON.parse(payload['newGeometry'])).to.deep.equal(
             safeframeHost.currentGeometry_);
         expect(payload['uid']).to.equal(safeframeHost.uid_);
         expect(messageType).to.equal(SERVICE.GEOMETRY_UPDATE);
         return Services.timerFor(env.win).promise(1000).then(() => {
-          expect(sendMessageStub).to.be.calledTwice;
-          const payload = sendMessageStub.secondCall.args[0];
-          const messageType = sendMessageStub.secondCall.args[1];
+          expect(sendMessageStub).to.be.calledThrice;
+          const payload = sendMessageStub.thirdCall.args[0];
+          const messageType = sendMessageStub.thirdCall.args[1];
           expect(JSON.parse(payload['newGeometry'])).to.deep.equal(
               safeframeHost.currentGeometry_);
           expect(payload['uid']).to.equal(safeframeHost.uid_);

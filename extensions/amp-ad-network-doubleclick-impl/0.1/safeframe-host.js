@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
+import {throttle} from '../../../src/utils/rate-limit';
 import {tryParseJson} from '../../../src/json';
 
 /**
@@ -226,12 +226,15 @@ export class SafeframeHostApi {
    * Returns the initialGeometry to assign to the name of the safeframe
    * for rendering. This needs to be done differently than all the other
    * geometry updates, because we don't actually have access to the
-   * rendered safeframe yet.
+   * rendered safeframe yet. Note that we are using getPageLayoutBox,
+   * which is not guaranteed to be perfectly accurate as it is from
+   * the last measure of the element. This is fine for our use case
+   * here, as even if the position is slightly off, we'll send the right
+   * size.
    * @return {string}
    */
   getInitialGeometry() {
-    const ampAdBox = this.baseInstance_.element.
-          /*REVIEW*/getBoundingClientRect();
+    const ampAdBox = this.baseInstance_.element.getPageLayoutBox();
     const heightOffset = (ampAdBox.height - this.creativeSize_.height) / 2;
     const widthOffset = (ampAdBox.width - this.creativeSize_.width) / 2;
     const iframeBox = {
@@ -289,41 +292,21 @@ export class SafeframeHostApi {
   setupGeom_() {
     dev().assert(this.iframe_.contentWindow,
         'Frame contentWindow unavailable.');
-    this.viewport_.onScroll(this.maybeUpdateGeometry_.bind(this));
-    this.viewport_.onChanged(this.maybeUpdateGeometry_.bind(this));
+    const throttledUpdate = throttle(
+        this.win_, this.updateGeometry_.bind(this), 1000);
+    this.viewport_.onScroll(throttledUpdate);
+    this.viewport_.onChanged(throttledUpdate);
     this.updateGeometry_();
   }
 
   /**
-   * Attempts to call updateGeometry_ to send a geometry update into the
-   * safeframe. If it has been less than 1 second since the last update
-   * and there is still an active delay, instead it registers that
-   * a geometry update is required.
-   * @private
-   */
-  maybeUpdateGeometry_() {
-    this.sendPositionUpdate_ = true;
-    if (!this.delay_) {
-      this.updateGeometry_();
-    }
-  }
-
-  /**
-   * Sends a geometry update message into the safeframe, and sets a timer
-   * to prevent another update being sent for 1 second. When the timer is
-   * up, if this.sendPositionUpdate_ is set, then it sends another update.
+   * Sends a geometry update message into the safeframe.
    * @private
    */
   updateGeometry_() {
     if (!this.iframe_) {
       return;
     }
-    this.delay_ = Services.timerFor(this.win_).promise(1000).then(() => {
-      this.delay_ = null;
-      if (this.sendPositionUpdate_) {
-        this.updateGeometry_();
-      }
-    });
     this.sendPositionUpdate_ = false;
     this.viewport_.getClientRectAsync(this.iframe_).then(iframeBox => {
       const formattedGeom = this.formatGeom_(iframeBox);
