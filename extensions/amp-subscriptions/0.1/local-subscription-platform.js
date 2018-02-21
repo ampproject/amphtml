@@ -51,12 +51,13 @@ export class LocalSubscriptionPlatform {
    * @return {!Promise<!Entitlements>}
    */
   getEntitlements() {
-    user().assert(this.serviceConfig_['paywallUrl'],
+    const authUrl = user().assert(this.serviceConfig_['authorizationUrl'],
         'Service config does not have paywall Url');
     const currentProductId = user().assertString(
         this.pageConfig_.getProductId(), 'Current Product ID is null');
+
     return this.xhr_
-        .fetchJson(this.serviceConfig_['paywallUrl'])
+        .fetchJson(authUrl)
         .then(res => res.json())
         .then(resJson => {
           return new Entitlements(
