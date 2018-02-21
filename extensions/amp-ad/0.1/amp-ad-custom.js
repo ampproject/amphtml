@@ -87,28 +87,91 @@ export class AmpAdCustom extends AMP.BaseElement {
           Services.xhrFor(this.win).fetchJson(fullUrl).then(res => res.json());
     }
     return ampCustomadXhrPromises[fullUrl].then(data => {
-      const element = this.element;
       // We will get here when the data has been fetched from the server
       let templateData = data;
       if (this.slot_ !== null) {
         templateData = data.hasOwnProperty(this.slot_) ? data[this.slot_] :
           null;
       }
-      // Set UI state
-      if (templateData !== null && typeof templateData == 'object') {
-        this.renderStarted();
+
+      if (!templateData || typeof templateData != 'object') {
+        this.uiHandler.applyNoContentUI();
+        return;
+      }
+
+      templateData = this.handleTemplateData_(templateData);
+
+      this.renderStarted();
+
+      try {
         Services.templatesFor(this.win)
-            .findAndRenderTemplate(element, templateData)
+            .findAndRenderTemplate(this.element, templateData)
             .then(renderedElement => {
               // Get here when the template has been rendered
-              // Clear out the template and replace it by the rendered version
-              removeChildren(element);
-              element.appendChild(renderedElement);
+              // Clear out the child template and replace it by the rendered version
+              // Note that we can't clear templates that's not ad's child because
+              // they maybe used by other ad component.
+              removeChildren(this.element);
+              this.element.appendChild(renderedElement);
             });
-      } else {
+      } catch (e) {
+        // Throw user error only when the element template attribute being set.
         this.uiHandler.applyNoContentUI();
+        const templateId = this.element.getAttribute('template');
+        if (templateId) {
+          this.user().error(TAG_AD_CUSTOM,
+              `Invalid templateId: ${templateId}`, e);
+        }
       }
     });
+  }
+
+  /**
+   * Handles the template data response.
+   * There are two types of templateData format
+   * Format option 1
+   * {
+   *   'templateId': {},
+   *   'vars': {},
+   *   'data': {
+   *     'a': '1',
+   *     'b': '2'
+   *   }
+   * }
+   * or format option 2
+   * {
+   *  'a': '1',
+   *  'b': '2'
+   * }
+   * if `templateId` or `vars` are not specified.
+   *
+   * @param {!JsonObject} templateData
+   * @return {!JsonObject}
+   */
+  handleTemplateData_(templateData) {
+
+    let data = templateData;
+
+    if (templateData['data'] && typeof templateData['data'] == 'object') {
+      // For format option 1.
+      data = templateData['data'];
+
+      if (templateData['templateId']) {
+        // Support for templateId
+        this.element.setAttribute('template', templateData['templateId']);
+      }
+
+      if (templateData['vars'] && typeof templateData['vars'] == 'object') {
+        // Support for vars
+        const vars = templateData['vars'];
+        const keys = Object.keys(vars);
+        for (let i = 0; i < keys.length; i++) {
+          const attrName = 'data-vars-' + keys[i];
+          this.element.setAttribute(attrName, vars[keys[i]]);
+        }
+      }
+    }
+    return data;
   }
 
   /** @override  */

@@ -123,5 +123,45 @@ describe('Amp custom ad', () => {
       });
     });
   });
+
+  describe('TemplateData', () => {
+    it('templateData w/o data object', () => {
+      const elem = getCustomAd('fake.json');
+      const ad = new AmpAdCustom(elem);
+      ad.handleTemplateData_({
+        'a': '1',
+        'b': '2',
+      });
+      expect(elem.getAttribute('template')).to.be.null;
+    });
+
+    it('templateData with non object data', () => {
+      const elem = getCustomAd('fake.json');
+      const ad = new AmpAdCustom(elem);
+      ad.handleTemplateData_({
+        'a': '1',
+        'b': '2',
+        'data': '3',
+      });
+      expect(elem.getAttribute('template')).to.be.null;
+    });
+
+    it('templateData with data object', () => {
+      const elem = getCustomAd('fake.json');
+      const ad = new AmpAdCustom(elem);
+      ad.handleTemplateData_({
+        'data': {
+          'a': '1',
+          'b': '2',
+        },
+        'templateId': '123',
+        'vars': {
+          'abc': '456',
+        },
+      });
+      expect(elem.getAttribute('template')).to.equal('123');
+      expect(elem.getAttribute('data-vars-abc')).to.equal('456');
+    });
+  });
 });
 
