@@ -206,8 +206,8 @@ describes.sandboxed('StandardActions', {}, () => {
 
   describe('"AMP" global target', () => {
     it('should implement navigateTo', () => {
-      const clickHandler = {navigateTo: sandbox.stub()};
-      sandbox.stub(Services, 'clickHandlerForDoc').returns(clickHandler);
+      const navigator = {navigateTo: sandbox.stub()};
+      sandbox.stub(Services, 'navigationForDoc').returns(navigator);
 
       const win = {};
       const invocation = {
@@ -225,13 +225,13 @@ describes.sandboxed('StandardActions', {}, () => {
       // Should check trust and fail.
       invocation.satisfiesTrust = () => false;
       standardActions.handleAmpTarget(invocation);
-      expect(clickHandler.navigateTo).to.be.not.called;
+      expect(navigator.navigateTo).to.be.not.called;
 
       // Should succeed.
       invocation.satisfiesTrust = () => true;
       standardActions.handleAmpTarget(invocation);
-      expect(clickHandler.navigateTo).to.be.calledOnce;
-      expect(clickHandler.navigateTo).to.be.calledWithExactly(
+      expect(navigator.navigateTo).to.be.calledOnce;
+      expect(navigator.navigateTo).to.be.calledWithExactly(
           win, 'http://bar.com', 'AMP.navigateTo');
     });
 

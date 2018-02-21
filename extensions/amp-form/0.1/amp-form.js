@@ -609,8 +609,8 @@ export class AmpForm {
         user().assert(false, 'The `AMP-Redirect-To` header value must be an ' +
             'absolute URL starting with https://. Found %s', redirectTo);
       }
-      const clickHandler = Services.clickHandlerForDoc(this.form_);
-      clickHandler.navigateTo(this.win_, redirectTo, REDIRECT_TO_HEADER);
+      const navigator = Services.navigationForDoc(this.form_);
+      navigator.navigateTo(this.win_, redirectTo, REDIRECT_TO_HEADER);
     }
   }
 

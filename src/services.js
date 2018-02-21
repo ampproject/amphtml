@@ -152,11 +152,11 @@ export class Services {
 
   /**
    * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
-   * @return {!./service/document-click.ClickHandler}
+   * @return {!./service/navigation.Navigation}
    */
-  static clickHandlerForDoc(nodeOrDoc) {
-    return /** @type {!./service/document-click.ClickHandler} */ (
-      getServiceForDoc(nodeOrDoc, 'clickhandler'));
+  static navigationForDoc(nodeOrDoc) {
+    return /** @type {!./service/navigation.Navigation} */ (
+      getServiceForDoc(nodeOrDoc, 'navigation'));
   }
 
   /**
