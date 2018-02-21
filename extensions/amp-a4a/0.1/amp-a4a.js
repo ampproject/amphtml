@@ -452,6 +452,7 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * Returns the creativeSize, which is the size extracted from the ad response.
    * @return {?({width, height}|../../../src/layout-rect.LayoutRectDef)}
    */
   getCreativeSize() {

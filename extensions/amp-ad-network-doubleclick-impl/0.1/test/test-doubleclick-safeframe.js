@@ -235,7 +235,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       safeframeHost.iframe_ = safeframeMock;
 
       const sendMessageStub = sandbox./*OK*/stub(safeframeHost,
-                                                 'sendMessage_');
+          'sendMessage_');
       safeframeHost.updateGeometry_();
 
       return Services.timerFor(env.win).promise(1000).then(() => {
@@ -271,7 +271,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       safeframeHost.iframe_ = safeframeMock;
 
       const sendMessageStub = sandbox./*OK*/stub(safeframeHost,
-                                                 'sendMessage_');
+          'sendMessage_');
       safeframeHost.updateGeometry_();
 
       return Services.timerFor(env.win).promise(1000).then(() => {
@@ -306,7 +306,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       const maybeUpdateGeometry1 = onScrollStub.firstCall.args[0];
       const maybeUpdateGeometry2 = onChangedStub.firstCall.args[0];
       const sendMessageStub = sandbox./*OK*/stub(safeframeHost,
-                                                 'sendMessage_');
+          'sendMessage_');
       maybeUpdateGeometry1();
       maybeUpdateGeometry2();
 
