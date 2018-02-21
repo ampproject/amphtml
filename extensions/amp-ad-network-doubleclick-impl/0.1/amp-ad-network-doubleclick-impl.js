@@ -1214,7 +1214,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getAdditionalContextMetadata(optIsSafeframe) {
     if (this.isFluid_ ||
         (optIsSafeframe &&
-         !isExperimentOn(this.win, 'disable-safeframe-host-api'))) {
+         !isExperimentOn(this.win, 'disable-safeframe-host-api'))) { //eslint-disable-line no-undef
       this.safeframeApi_ = this.safeframeApi_ || new SafeframeHostApi(
           this, this.isFluid_, this.initialSize_, this.getCreativeSize(),
           this.fluidImpressionUrl_);
