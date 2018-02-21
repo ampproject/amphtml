@@ -618,6 +618,13 @@ form [submit-error] {
 }
 
 /**
+ * Form validation error messages should be hidden at first.
+ */
+span[visible-when-invalid] {
+  display: none;  
+}
+
+/**
  * Hide the update reference point of amp-live-list by default. This is
  * reset by the `amp-live-list > .amp-active[update]` selector.
  */
