@@ -230,7 +230,7 @@ export class SafeframeHostApi {
    * @return {string}
    */
   getInitialGeometry() {
-    const ampAdBox = this.baseInstance_.element.getBoundingClientRect();
+    const ampAdBox = this.baseInstance_.element./*REVIEW*/getBoundingClientRect();
     const heightOffset = (ampAdBox.height - this.creativeSize_.height) / 2;
     const widthOffset = (ampAdBox.width - this.creativeSize_.width) / 2;
     const iframeBox = {

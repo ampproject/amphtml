@@ -211,7 +211,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
 
   describe('getCurrentGeometry', () => {
     beforeEach(() => {
-      sandbox.stub(safeframeHost.viewport_, 'getSize').returns({
+      sandbox./*OK*/stub(safeframeHost.viewport_, 'getSize').returns({
         height: 1000,
         width: 500,
       });
@@ -234,7 +234,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       doubleclickImpl.iframe_ = safeframeMock;
       safeframeHost.iframe_ = safeframeMock;
 
-      const sendMessageStub = sandbox.stub(safeframeHost, 'sendMessage_');
+      const sendMessageStub = sandbox./*OK*/stub(safeframeHost,
+                                                 'sendMessage_');
       safeframeHost.updateGeometry_();
 
       return Services.timerFor(env.win).promise(1000).then(() => {
@@ -269,7 +270,8 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       doubleclickImpl.iframe_ = safeframeMock;
       safeframeHost.iframe_ = safeframeMock;
 
-      const sendMessageStub = sandbox.stub(safeframeHost, 'sendMessage_');
+      const sendMessageStub = sandbox./*OK*/stub(safeframeHost,
+                                                 'sendMessage_');
       safeframeHost.updateGeometry_();
 
       return Services.timerFor(env.win).promise(1000).then(() => {
@@ -294,14 +296,17 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       ampAd.appendChild(safeframeMock);
       doubleclickImpl.iframe = safeframeMock;
 
-      const onScrollStub = sandbox.stub(safeframeHost.viewport_, 'onScroll');
-      const onChangedStub = sandbox.stub(safeframeHost.viewport_, 'onChanged');
+      const onScrollStub = sandbox./*OK*/stub(
+          safeframeHost.viewport_, 'onScroll');
+      const onChangedStub = sandbox./*OK*/stub(
+          safeframeHost.viewport_, 'onChanged');
 
       safeframeMock.contentWindow.postMessage = () => {};
       sendSetupMessage();
       const maybeUpdateGeometry1 = onScrollStub.firstCall.args[0];
       const maybeUpdateGeometry2 = onChangedStub.firstCall.args[0];
-      const sendMessageStub = sandbox.stub(safeframeHost, 'sendMessage_');
+      const sendMessageStub = sandbox./*OK*/stub(safeframeHost,
+                                                 'sendMessage_');
       maybeUpdateGeometry1();
       maybeUpdateGeometry2();
 
@@ -337,7 +342,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         width: 300,
         height: 600,
       };
-      sandbox.stub(safeframeHost.viewport_, 'getSize').returns({
+      sandbox./*OK*/stub(safeframeHost.viewport_, 'getSize').returns({
         width: 500,
         height: 1000,
       });
@@ -390,7 +395,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       sendRegisterDoneMessage();
       attemptChangeSizeStub = sandbox.stub(
           doubleclickImpl, 'attemptChangeSize');
-      sandbox.stub(safeframeHost.viewport_, 'getSize').returns({
+      sandbox./*OK*/stub(safeframeHost.viewport_, 'getSize').returns({
         height: 1000,
         width: 1000,
       });
