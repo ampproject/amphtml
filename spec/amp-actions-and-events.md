@@ -187,6 +187,25 @@ event.index</pre></td>
   </tr>
 </table>
 
+### amp-lightbox
+<table>
+  <tr>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>lightboxOpen</code></td>
+    <td>Fired when lightbox is fully visible.</td>
+    <td>None</td>
+  </tr>
+  <tr>
+    <td><code>lightboxClose</code></td>
+    <td>Fired when lightbox is fully closed.</td>
+    <td>None</td>
+  </tr>
+</table>
+
 ### amp-sidebar
 <table>
   <tr>
