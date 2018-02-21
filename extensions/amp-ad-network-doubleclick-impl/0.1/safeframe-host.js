@@ -455,12 +455,6 @@ export class SafeframeHostApi {
           expandHeight > this.creativeSize_.height))) {
       return;
     }
-    // We only allow expand by push if the requested expansion size
-    // is greater than the bounds of the amp-ad element.
-    if (!payload['push'] && (expandWidth > this.creativeSize_.width ||
-                             expandHeight > this.creativeSize_.height)) {
-      return;
-    }
     // Can't expand to greater than the viewport size
     if (expandHeight > this.viewport_.getSize().height ||
         expandWidth > this.viewport_.getSize().width) {
