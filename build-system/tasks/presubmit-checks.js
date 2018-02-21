@@ -304,7 +304,7 @@ const forbiddenTerms = {
     message: 'Use parseUrl instead.',
     whitelist: [
       'src/url.js',
-      'src/service/document-click.js',
+      'src/service/navigation.js',
       'dist.3p/current/integration.js',
     ],
   },

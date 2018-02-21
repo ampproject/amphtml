@@ -38,31 +38,31 @@ import {
 } from '../url';
 import {toWin} from '../types';
 
-
-const TAG = 'clickhandler';
-
+const TAG = 'navigation';
 
 /**
- * Install click handler service for ampdoc. Immediately instantiates the
- * the click handler service.
+ * Install navigation service for ampdoc, which handles navigations from anchor
+ * tag clicks and other runtime features like AMP.navigateTo().
+ *
+ * Immediately instantiates the service.
+ *
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
-export function installGlobalClickListenerForDoc(ampdoc) {
+export function installGlobalNavigationHandlerForDoc(ampdoc) {
   registerServiceBuilderForDoc(
       ampdoc,
       TAG,
-      ClickHandler,
+      Navigation,
       /* opt_instantiate */ true);
 }
 
-// TODO(willchou): Rename to navigation.js#Navigation.
 /**
  * Intercept any click on the current document and prevent any
  * linking to an identifier from pushing into the history stack.
  * @implements {../service.EmbeddableService}
  * @visibleForTesting
  */
-export class ClickHandler {
+export class Navigation {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {(!Document|!ShadowRoot)=} opt_rootNode
@@ -123,7 +123,7 @@ export class ClickHandler {
   /** @override */
   adoptEmbedWindow(embedWin) {
     installServiceInEmbedScope(embedWin, TAG,
-        new ClickHandler(this.ampdoc, embedWin.document));
+        new Navigation(this.ampdoc, embedWin.document));
   }
 
   /**
