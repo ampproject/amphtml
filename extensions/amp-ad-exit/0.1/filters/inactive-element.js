@@ -16,7 +16,7 @@
 
 import {Filter, FilterType} from './filter';
 import {matches} from '../../../../src/dom';
-import {user} from '../../../../src/log';
+import {dev, user} from '../../../../src/log';
 
 /**
  * A Filter that ignores events originating from elements that match a specified
@@ -38,7 +38,7 @@ export class InactiveElementFilter extends Filter {
 
   /** @override */
   filter(event) {
-    const element = /** @type {!Element} */ (event.target);
+    const element = dev().assertElement(event.target);
     return !matches(element, this.selector_);
   }
 }
