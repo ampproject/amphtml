@@ -21,7 +21,7 @@ import {Services} from '../../../src/services';
 import {closestBySelector, isRTL, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
-
+import {mod} from '../../../src/utils/math';
 const TAG = 'amp-selector';
 
 /**
@@ -377,13 +377,7 @@ export class AmpSelector extends AMP.BaseElement {
     // past the beginning or end.
     const previousIndex = this.options_.indexOf(this.selectedOptions_[0]);
     const index = previousIndex + delta;
-    const normalizedIndex = index > 0 ?
-      index % this.options_.length :
-      ((index % this.options_.length) +
-      this.options_.length) % this.options_.length;
-
-    user().assert(normalizedIndex >= 0,
-        'This should have been positive');
+    const normalizedIndex = mod(index, this.options_.length);
 
     this.setSelection_(this.options_[normalizedIndex]);
     this.clearSelection_(this.options_[previousIndex]);
