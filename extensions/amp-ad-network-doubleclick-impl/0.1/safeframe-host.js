@@ -26,7 +26,7 @@ import {tryParseJson} from '../../../src/json';
  *
  * Maps a sentinel value to an instance of the SafeframeHostApi to which that
  * sentinel value belongs.
- * @type{!Object<string,!SafeframeHostApi>}
+ * @type {!Object<string, !SafeframeHostApi>}
  */
 export const safeframeHosts = {};
 
@@ -159,9 +159,6 @@ export class SafeframeHostApi {
     /** @private {?({width, height}|../../../src/layout-rect.LayoutRectDef)} */
     this.creativeSize_ = creativeSize;
 
-    /** @private {!Object} */
-    this.iframeOffsets_ = {};
-
     /** @private {?string} */
     this.fluidImpressionUrl_ = fluidImpressionUrl;
 
@@ -173,6 +170,23 @@ export class SafeframeHostApi {
 
     /** @private {../../../src/service/viewport/viewport-impl.Viewport} */
     this.viewport_ = this.baseInstance_.getViewport();
+
+    /** @private {boolean} */
+    this.isCollapsed_ = true;
+
+    /** @private {boolean} */
+    this.isRegistered_ = false;
+
+    const sfConfig = Object(tryParseJson(
+        this.baseInstance_.element.getAttribute(
+            'data-safeframe-config')) || {});
+    /** @private {boolean} */
+    this.expandByOverlay_ = (sfConfig.hasOwnProperty('expandByOverlay') &&
+                             !!sfConfig['expandByOverlay']) || true;
+
+    /** @private {boolean} */
+    this.expandByPush_ = (sfConfig.hasOwnProperty('expandByPush') &&
+                          !!sfConfig['expandByPush']) || true;
 
     this.registerSafeframeHost();
   }
@@ -399,6 +413,8 @@ export class SafeframeHostApi {
    * @param {string} service
    */
   processMessage(payload, service) {
+    // We are not logging unexpected messages, and some expected
+    // messages are being dropped, like init_done, as we don't need them.
     switch (service) {
       case SERVICE.CREATIVE_GEOMETRY_UPDATE:
         this.handleFluidMessage_(payload);
@@ -407,6 +423,7 @@ export class SafeframeHostApi {
         this.handleExpandRequest_(payload);
         break;
       case SERVICE.REGISTER_DONE:
+        this.isRegistered_ = true;
         break;
       case SERVICE.COLLAPSE_REQUEST:
         this.handleCollapseRequest_();
@@ -421,10 +438,33 @@ export class SafeframeHostApi {
    * @private
    */
   handleExpandRequest_(payload) {
+    if (!this.isCollapsed_ || !this.isRegistered_) {
+      return;
+    }
     const expandHeight = Number(this.iframe_.height) +
           payload['expand_b'] + payload['expand_t'];
     const expandWidth = Number(this.iframe_.width) +
           payload['expand_r'] + payload['expand_l'];
+    // Verify that if expanding by push, that expandByPush is allowed.
+    // If expanding by overlay, verify that expandByOverlay is allowed,
+    // and that we are only expanding within the bounds of the amp-ad.
+    if ((payload['push'] && !this.expandByPush_) ||
+        (!payload['push'] && !this.expandByOverlay_ &&
+         (expandWidth > this.creativeSize_.width ||
+          expandHeight > this.creativeSize_.height))) {
+      return;
+    }
+    // We only allow expand by push if the requested expansion size
+    // is greater than the bounds of the amp-ad element.
+    if (!payload['push'] && (expandWidth > this.creativeSize_.width ||
+                             expandHeight > this.creativeSize_.height)) {
+      return;
+    }
+    // Can't expand to greater than the viewport size
+    if (expandHeight > this.viewport_.getSize().height ||
+        expandWidth > this.viewport_.getSize().width) {
+      return;
+    }
     this.handleSizeChange(expandHeight,
         expandWidth,
         SERVICE.EXPAND_RESPONSE);
@@ -434,6 +474,9 @@ export class SafeframeHostApi {
    * @private
    */
   handleCollapseRequest_() {
+    if (this.isCollapsed_ || !this.isRegistered_) {
+      return;
+    }
     this.handleSizeChange(this.initialSize_.height,
         this.initialSize_.width,
         SERVICE.COLLAPSE_RESPONSE,
@@ -475,6 +518,7 @@ export class SafeframeHostApi {
         width <= this.creativeSize_.width &&
         height <= this.creativeSize_.height) {
       this.resizeIframe(height, width);
+      this.isCollapsed_ = !!optIsCollapse;
       this.sendResizeResponse(/** SUCCESS */ true, messageType);
     } else {
       this.resizeAmpAdAndSafeframe(
@@ -522,6 +566,7 @@ export class SafeframeHostApi {
       // the safeframe.
       if (success || optIsCollapse) {
         this.resizeIframe(height, width);
+        this.isCollapsed_ = !!optIsCollapse;
         this.baseInstance_.element.getResources().resources_.forEach(
             resource => {
               if (resource.element == this.baseInstance_.element) {
