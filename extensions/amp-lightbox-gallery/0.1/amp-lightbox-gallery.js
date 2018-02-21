@@ -19,13 +19,14 @@ import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
 import {CSS} from '../../../build/amp-lightbox-gallery-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
-import {Gestures} from '../../../src/gesture';
-import {KeyCodes} from '../../../src/utils/key-codes';
-import {Layout} from '../../../src/layout';
 import {
+  ELIGIBLE_TAP_TAGS,
   LightboxManager,
   LightboxedCarouselMetadataDef,
 } from './service/lightbox-manager-impl';
+import {Gestures} from '../../../src/gesture';
+import {KeyCodes} from '../../../src/utils/key-codes';
+import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {SwipeYRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
@@ -241,7 +242,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         sourceElement: element,
       };
       let slide = clonedNode;
-      if (clonedNode.tagName === 'AMP-IMG') {
+      const tagName = clonedNode.tagName.toLowerCase();
+      if (ELIGIBLE_TAP_TAGS[tagName]) {
         const container = this.element.ownerDocument.createElement('div');
         container.classList.add('i-amphtml-image-lightbox-container');
         const imageViewer = this.win.document.createElement('amp-image-viewer');
@@ -484,7 +486,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     button.classList.add(className);
     button.classList.add('amp-lbg-button');
 
-
     button.addEventListener('click', event => {
       action();
       event.stopPropagation();
@@ -674,8 +675,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     // type checking to work.
     /**@type {?}*/ (this.carousel_).implementation_.showSlideWhenReady(
         this.currentElemId_);
-    const tagName = this.getCurrentElement_().tagName;
-    if (tagName === 'AMP-IMG') {
+    const tagName = this.getCurrentElement_().tagName.toLowerCase();
+    if (ELIGIBLE_TAP_TAGS[tagName]) {
       this.getCurrentElement_().imageViewer.signals()
           .whenSignal(CommonSignals.LOAD_END)
           .then(() => this.enter_());
@@ -691,7 +692,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @private
    */
   shouldAnimate_(element) {
-    if (element.tagName !== 'AMP-IMG') {
+    if (!ELIGIBLE_TAP_TAGS[element.tagName.toLowerCase()]) {
       return false;
     }
     const img = elementByTag(dev().assertElement(element), 'img');
@@ -812,7 +813,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       }), MOTION_DURATION_RATIO, ENTER_CURVE_);
 
       if (sourceElement !== null
-        && sourceElement.tagName == 'AMP-IMG'
         && this.shouldAnimate_(sourceElement)
         && (sourceElement == this.sourceElement_
         || this.manager_.hasCarousel(this.currentLightboxGroupId_))) {

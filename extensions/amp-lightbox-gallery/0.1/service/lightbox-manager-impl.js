@@ -36,8 +36,9 @@ const LIGHTBOX_ELIGIBLE_TAGS = {
   'amp-facebook': true,
 };
 
-const ELIGIBLE_TAP_TAGS = {
+export const ELIGIBLE_TAP_TAGS = {
   'amp-img': true,
+  'amp-anim': true,
 };
 
 const GALLERY_TAG = 'amp-lightbox-gallery';
