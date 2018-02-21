@@ -20,7 +20,6 @@ import {SizeInfoDef} from './a4a-utils';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getTimingDataAsync} from '../../../src/service/variable-source';
 import {
   installFriendlyIframeEmbed,
   setFriendlyIframeEmbedVisible,
@@ -38,7 +37,16 @@ const TAG = 'a4a-render';
       adUrl: string,
       sentinel: ?string,
     }} */
-export let RenderingDataDef;
+export let RenderingDataInputDef;
+
+/** @typedef {{
+      iframe: !Element,
+      friendlyIframeEmbed: !Promise<!FriendlyIframeEmbed>
+    }} */
+export let RenderingDataOutputDef;
+
+/** @typedef {string} */
+export let ValidationResultType;
 
 /** @typedef {{
       templateUrl: string,
@@ -46,6 +54,13 @@ export let RenderingDataDef;
     }} */
 export let AmpTemplateCreativeDef;
 
+/** @enum {ValidationResultType} */
+export const ValidationResult = {
+  AMP: 'amp',
+  NON_AMP: 'non-amp',
+};
+
+/** @type {string} */
 export const AMP_TEMPLATED_CREATIVE_HEADER_NAME = 'AMP-template-amp-creative';
 
 /** @type {string} */
@@ -53,19 +68,17 @@ export const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
 
 /**
  * Render a validated AMP creative directly in the parent page.
- * @param {!RenderingDataDef} renderingData
+ * @param {!RenderingDataInputDef} renderingData
  * @param {!../../amp-ad-network-base/0.1/amp-ad-network-base.AmpAdNetworkBase}
  *   baseImpl
- * @param {function(!RenderingDataDef)=} onRenderCallback
- * @param {function(?string, ?Object)=} lifecycleStageHandler
- * @return {!Promise<Element>} Whether the creative was successfully rendered.
+ * @param {function():boolean=} checkStillCurrent
+ * @return {!RenderingDataOutputDef}
  * @private
  */
 export function friendlyFrameRenderer(
   renderingData,
   baseImpl,
-  onRenderCallback = () => {},
-  lifecycleStageHandler = () => {}) {
+  checkStillCurrent = () => true) {
 
   const creativeMetaData = renderingData.creativeMetadata;
   const size = renderingData.size;
@@ -73,8 +86,6 @@ export function friendlyFrameRenderer(
 
   dev().assert(creativeMetaData.minifiedCreative, 'missing minified creative');
   dev().assert(baseImpl.element.ownerDocument, 'missing owner document?!');
-
-  lifecycleStageHandler('renderFriendlyStart');
 
   // Create and setup friendly iframe.
   const iframe = /** @type {!HTMLIFrameElement} */(
@@ -91,6 +102,7 @@ export function friendlyFrameRenderer(
           'scrolling': 'no',
         })));
   baseImpl.applyFillContent(iframe);
+
   const fontsArray = [];
   if (creativeMetaData.customStylesheets) {
     creativeMetaData.customStylesheets.forEach(s => {
@@ -100,7 +112,7 @@ export function friendlyFrameRenderer(
       }
     });
   }
-  const checkStillCurrent = this.verifyStillCurrent();
+
   return installFriendlyIframeEmbed(
       iframe, baseImpl.element, {
         host: baseImpl.element,
@@ -121,33 +133,17 @@ export function friendlyFrameRenderer(
         const frameDoc = friendlyIframeEmbed.iframe.contentDocument ||
             friendlyIframeEmbed.win.document;
         setStyle(frameDoc.body, 'visibility', 'visible');
-        // Capture timing info for friendly iframe load completion.
-        getTimingDataAsync(
-            friendlyIframeEmbed.win,
-            'navigationStart', 'loadEventEnd').then(delta => {
-          checkStillCurrent();
-          lifecycleStageHandler('friendlyIframeLoaded', {
-            'navStartToLoadEndDelta.AD_SLOT_ID': Math.round(delta),
-          });
-        }).catch(err => {
-          dev().error(TAG, baseImpl.element.getAttribute('type'),
-              'getTimingDataAsync for renderFriendlyEnd failed: ', err);
-        });
-        if (onRenderCallback) {
-          try {
-            onRenderCallback(renderingData);
-          } catch (err) {
-            dev().error(TAG, 'Error executing onRenderCallback', err);
-          }
-        }
         // It's enough to wait for "ini-load" signal because in a FIE case
         // we know that the embed no longer consumes significant resources
         // after the initial load.
-        return friendlyIframeEmbed.whenIniLoaded();
-      }).then(() => {
-        checkStillCurrent();
-        // Capture ini-load ping.
-        lifecycleStageHandler('friendlyIframeIniLoad');
+        return friendlyIframeEmbed.whenIniLoaded()
+            .then(() => {
+              checkStillCurrent();
+              return /** @type RenderDataOutputDef */ ({
+                iframe,
+                friendlyIframeEmbed,
+              });
+            });
       });
 }
 
@@ -160,6 +156,7 @@ export function friendlyFrameRenderer(
  * @param {!Headers} headers
  * @param {!../../amp-ad-network-base/0.1/amp-ad-network-base.AmpAdNetworkBase}
  *   baseImpl
+ * @param {function():boolean=} checkStillCurrent
  * @param {function(string):string=} parseOnFetch
  * @return {!Promise<?ArrayBuffer>}
  */
@@ -167,12 +164,12 @@ export function templateValidator(
   bytes,
   headers,
   baseImpl,
+  checkStillCurrent = () => true,
   parseOnFetch = () => {}) {
 
   if (headers.get(AMP_TEMPLATED_CREATIVE_HEADER_NAME) !== 'amp-mustache') {
     return /**@type {!Promise<(ArrayBuffer|null)>}*/ (Promise.resolve(null));
   }
-  const checkStillCurrent = () => {}; //this.verifyStillCurrent();
   return Promise.resolve(utf8Decode(bytes)).then(body => {
     checkStillCurrent();
     const ampCreativeJson = /** @type {!AmpTemplateCreativeDef} */
@@ -192,4 +189,5 @@ export function templateValidator(
         });
   });
 }
+
 
