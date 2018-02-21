@@ -21,7 +21,6 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import '../../amp-a4a/0.1/real-time-config-manager';
-import '../../amp-a4a/0.1/real-time-config-manager';
 import {
   AmpA4A,
   DEFAULT_SAFEFRAME_VERSION,
@@ -868,6 +867,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!this.useSra && this.isAmpCreative_) {
       // Allow non-AMP creatives to remain unless SRA.
       return false;
+    }
+    if (this.safeframeApi_) {
+      this.safeframeApi_.destroy();
     }
     const superResult = super.unlayoutCallback();
     return superResult;
