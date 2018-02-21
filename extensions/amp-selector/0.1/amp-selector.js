@@ -129,12 +129,10 @@ export class AmpSelector extends AMP.BaseElement {
     this.registerAction('toggle', invocation => {
       const args = invocation.args;
       if (args && args['index'] !== undefined) {
-        if (args['value'] !== undefined) {
-          this.toggle_(args['index'], args['value']);
-        } else {
-          this.toggle_(args['index'],
+        this.toggle_(args['index'],
+            args['value'] !== undefined ?
+              args['value'] :
               !this.options_[args['index']].hasAttribute('selected'));
-        }
       }
     }, ActionTrust.LOW);
   }
@@ -352,27 +350,19 @@ export class AmpSelector extends AMP.BaseElement {
     // Change the selection to the next element in the specified direction.
     // The selection should loop around if the user attempts to go one
     // past the beginning or end.
-    const selectedIndex_ = this.options_.indexOf(this.selectedOptions_[0]);
+    const indexCurrentStatus = this.options_[index].hasAttribute('selected');
+    const indexFinalStatus =
+      !!(value !== undefined ? value : !indexCurrentStatus);
+    const selectedIndex = this.options_.indexOf(this.selectedOptions_[0]);
 
-    if (value == true) {
-      // If we are toggling the `selected` attribute to true:
-      // If selectedIndex_ == index then there is no change in the status.
-
-      // If selectedIndex_ != index then the current selected element needs
-      // have the `selected` attribute removed and the element at position
-      // index needs to be selected.
-      if (selectedIndex_ != index) {
+    // There is a change of the `selected` attribute for the element
+    if (indexFinalStatus !== indexCurrentStatus) {
+      if (selectedIndex !== index) {
         this.setSelection_(this.options_[index]);
-        this.clearSelection_(this.options_[selectedIndex_]);
+        this.clearSelection_(this.options_[selectedIndex]);
+      } else {
+        this.clearSelection_(this.options_[index]);
       }
-    } else {
-      // If we are toggling the `selected` attribute to false:
-      // If selectedIndex_ == index then the current selected element needs
-      // to have the `selected` attribute removed.
-      // If selectedIndex_ != index, then the current `selected` element
-      // can retain it's status but the element at the given index needs
-      // to have the `selected` attribute removed.
-      this.clearSelection_(this.options_[index]);
     }
   }
 
