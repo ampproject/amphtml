@@ -1566,7 +1566,7 @@ describes.repeated('', {
         ampForm.target_ = '_top';
 
         navigateTo = sandbox.spy();
-        sandbox.stub(Services, 'clickHandlerForDoc').returns({navigateTo});
+        sandbox.stub(Services, 'navigationForDoc').returns({navigateTo});
       });
 
       describe('AMP-Redirect-To', () => {
