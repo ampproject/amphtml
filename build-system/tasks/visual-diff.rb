@@ -365,7 +365,7 @@ def snapshot_webpages(page, webpages, config)
         forbidden_css,
         loading_incomplete_css,
         loading_complete_css)
-    Percy::Capybara.snapshot(page, name: name, enable_javascript: true)
+    Percy::Capybara.snapshot(page, name: name)
     clear_experiments(page)
   end
 end
