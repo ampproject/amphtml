@@ -365,8 +365,7 @@ def snapshot_webpages(page, webpages, config)
         forbidden_css,
         loading_incomplete_css,
         loading_complete_css)
-    # TODO(rsimha): Enable JS after percy/percy-capybara/issues/51 is fixed.
-    Percy::Capybara.snapshot(page, name: name, enable_javascript: false)
+    Percy::Capybara.snapshot(page, name: name, enable_javascript: true)
     clear_experiments(page)
   end
 end
