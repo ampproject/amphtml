@@ -1692,11 +1692,6 @@ export const ANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'pageview': '${base}/${table}?${baseParams}',
       'event': '${base}/${table}?${baseParams}',
     },
-    'transport': {
-      'beacon': true,
-      'xhrpost': true,
-      'image': true,
-    },
   },
 
   'webtrekk': {
