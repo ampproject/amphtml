@@ -185,11 +185,8 @@ export class SafeframeHostApi {
     this.expandByPush_ = (sfConfig.hasOwnProperty('expandByPush') &&
                           !!sfConfig['expandByPush']) || true;
 
-    /** @private {?UnlistenDef} */
-    this.scrollUnlistener_ = null;
-
-    /** @private {?UnlistenDef} */
-    this.changedUnlistner_ = null;
+    /** @private {?Function} */
+    this.unlisten_ = null;
 
     this.registerSafeframeHost();
   }
@@ -297,8 +294,12 @@ export class SafeframeHostApi {
         'Frame contentWindow unavailable.');
     const throttledUpdate = throttle(
         this.win_, this.updateGeometry_.bind(this), 1000);
-    this.scrollUnlistener_ = this.viewport_.onScroll(throttledUpdate);
-    this.changedUnlistner_ = this.viewport_.onChanged(throttledUpdate);
+    const scrollUnlistener = this.viewport_.onScroll(throttledUpdate);
+    const changedUnlistener = this.viewport_.onChanged(throttledUpdate);
+    this.unlisten_ = () => {
+      scrollUnlistener();
+      changedUnlistener();
+    };
     this.updateGeometry_();
   }
 
@@ -613,8 +614,9 @@ export class SafeframeHostApi {
    */
   destroy() {
     delete safeframeHosts[this.sentinel_];
-    this.scrollUnlistener_();
-    this.changedUnlistner_();
+    if (this.unlisten_) {
+      this.unlisten_();
+    }
     if (Object.keys(safeframeHosts).length == 0) {
       removeSafeframeListener();
     }
