@@ -43,13 +43,6 @@ const TAG = 'amp-lightbox-gallery';
 const DEFAULT_GALLERY_ID = 'amp-lightbox-gallery';
 
 /**
- * Regular expression that identifies AMP CSS classes.
- * Includes 'i-amphtml-', '-amp-', and 'amp-' prefixes.
- * @type {!RegExp}
- */
-const AMP_CSS_RE = /^(i?-)?amp(html)?-/;
-
-/**
  * Set of namespaces that indicate the lightbox controls mode.
  * Lightbox controls include top bar, description box
  *
@@ -227,15 +220,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const clonedNode = element.cloneNode(deepClone);
     clonedNode.removeAttribute('on');
     clonedNode.removeAttribute('id');
-
-    const ampClasses = [];
-    for (let i = 0; i < clonedNode.classList.length; i++) {
-      const cssClass = clonedNode.classList[i];
-      if (AMP_CSS_RE.test(cssClass)) {
-        ampClasses.push(cssClass);
-      }
-    }
-    clonedNode.classList.remove.apply(clonedNode.classList, ampClasses);
+    clonedNode.setAttribute('class', '');
     return clonedNode;
   }
   /**
