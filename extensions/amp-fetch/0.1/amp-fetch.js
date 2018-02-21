@@ -18,11 +18,11 @@ export default class AmpFetch extends AMP.BaseElement {
   }
 
   viewportCallback(visible) {
-    /*if (this.url && visible) {
+    if (this.url && visible) {
       requests[this.url] = requests[this.url] ||
         this.xhr_.fetchDocument(this.url, {ampCors: false})
           .catch(error => this.handleDocRequestError_(error));
-    }*/
+    }
   }
 
   handleDocRequestError_(error) {
