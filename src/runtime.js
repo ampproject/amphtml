@@ -105,8 +105,7 @@ export function installRuntimeServices(global) {
   installTemplatesService(global);
   installTimerService(global);
   installVsyncService(global);
-  if (getMode(global).localDev || getMode(global).development ||
-      getMode(global).test ||
+  if (getMode(global).development ||
       // Test explicitly for opt-in, not canary which could be 1% prod traffic.
       getCookie(global, 'AMP_CANARY') === '1') {
     // Only install in development environments because of the **massive**
