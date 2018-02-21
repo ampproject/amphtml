@@ -396,10 +396,8 @@ export class AmpStory extends AMP.BaseElement {
         return;
       }
 
-      const pageIndex = this.getPageIndexById_(pageId);
-
       if (!this.activePage_.isAd()) {
-        this.systemLayer_.updateProgress(pageIndex, progress);
+        this.systemLayer_.updateProgress(pageId, progress);
       }
     });
 
@@ -782,7 +780,7 @@ export class AmpStory extends AMP.BaseElement {
 
     // TODO(alanorozco): decouple this using NavigationState
     if (!targetPage.isAd()) {
-      this.systemLayer_.setActivePageIndex(pageIndex);
+      this.systemLayer_.setActivePageId(targetPageId);
     }
 
     // TODO(alanorozco): check if autoplay
