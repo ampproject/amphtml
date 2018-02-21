@@ -198,7 +198,6 @@ export class SafeframeHostApi {
    */
   getSafeframeNameAttr() {
     const attributes = dict({});
-    // TODO: Some of these options are probably not right.
     attributes['uid'] = this.uid_;
     attributes['hostPeerName'] = this.win_.location.origin;
     attributes['initialGeometry'] = this.getInitialGeometry();
