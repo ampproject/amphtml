@@ -1212,7 +1212,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getAdditionalContextMetadata(optIsSafeframe) {
-    if (this.isFluid_ || optIsSafeframe) {
+    if (this.isFluid_ ||
+        (optIsSafeframe &&
+         !isExperimentOn('disable-safeframe-host-api'))) {
       this.safeframeApi_ = this.safeframeApi_ || new SafeframeHostApi(
           this, this.isFluid_, this.initialSize_, this.getCreativeSize(),
           this.fluidImpressionUrl_);
