@@ -88,6 +88,9 @@ export class AmpAdExit extends AMP.BaseElement {
   exit({args, event}) {
     const target = this.targets_[args['target']];
     user().assert(target, `Exit target not found: '${args['target']}'`);
+    user().assert(event, 'Unexpected null event');
+    event = /** @type {!../../../src/service/action-impl.ActionEventDef} */(
+      event);
 
     if (!this.filter_(this.defaultFilters_, event) ||
         !this.filter_(target.filters, event)) {

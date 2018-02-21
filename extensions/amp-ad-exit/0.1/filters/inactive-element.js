@@ -38,7 +38,8 @@ export class InactiveElementFilter extends Filter {
 
   /** @override */
   filter(event) {
-    return !matches(event.target, this.selector_);
+    const element = /** @type {!Element} */ (event.target);
+    return !matches(element, this.selector_);
   }
 }
 
