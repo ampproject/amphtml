@@ -1428,6 +1428,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   getA4aAnalyticsConfig() {
     return getCsiAmpAnalyticsConfig();
   }
+
+  /** @override */
+  forceNonAmpRendering() {
+    // For purely Fluid creatives, we want to always render via the non-AMP
+    // execution path, since we must rely on rendering within a cross-domain
+    // SafeFrame to properly render the Fluid creative.
+    return this.isFluid_ && !this.returnedSize_;
+  }
 }
 
 AMP.extension(TAG, '0.1', AMP => {

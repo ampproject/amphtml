@@ -93,6 +93,22 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     impl = null;
   });
 
+  it('should force non-AMP rendering', () => {
+    impl.buildCallback();
+    expect(impl.forceNonAmpRendering()).to.be.true;
+  });
+
+  it('should not force non-AMP rendering', () => {
+    impl.isFluid_ = false;
+    expect(impl.forceNonAmpRendering()).to.be.false;
+  });
+
+  it('should not force non-AMP rendering due to multi-size', () => {
+    impl.buildCallback();
+    impl.returnedSize_ = {width: 320, height: 50};
+    expect(impl.forceNonAmpRendering()).to.be.false;
+  });
+
   it('should start with height 0', () => {
     impl.buildCallback();
     expect(element.getAttribute('style')).to.match(/height: 0px/);

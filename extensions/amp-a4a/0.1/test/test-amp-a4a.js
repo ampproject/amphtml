@@ -779,6 +779,20 @@ describe('amp-a4a', () => {
         });
       });
     });
+
+    it('should force non-AMP rendering', () => {
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      sandbox.stub(a4a, 'forceNonAmpRendering', () => true);
+      return a4a.layoutCallback().then(() => {
+        expect(a4a.element.tagName.toLowerCase()).to.equal('amp-a4a');
+        expect(a4a.element.querySelectorAll('iframe')).to.have.lengthOf(1);
+        expect(a4a.element.querySelector('iframe[name]')).to.be.ok;
+        expect(a4a.element.querySelector('iframe[src]')).to.be.ok;
+        const friendlyChild = a4a.element.querySelector('iframe[srcdoc]');
+        expect(friendlyChild).to.not.be.ok;
+      });
+    });
   });
 
   it('should set height/width on iframe matching header value', () => {
