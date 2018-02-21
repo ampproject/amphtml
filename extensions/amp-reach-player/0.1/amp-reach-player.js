@@ -46,6 +46,7 @@ class AmpReachPlayer extends AMP.BaseElement {
 
     iframe.setAttribute('frameborder', 'no');
     iframe.setAttribute('scrolling', 'no');
+    iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = 'https://player-cdn.beachfrontmedia.com/playerapi/v1/frame/player/?embed_id=' + encodeURIComponent(embedId);
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
