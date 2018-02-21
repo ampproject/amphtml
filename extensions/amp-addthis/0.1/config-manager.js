@@ -120,14 +120,14 @@ export class ConfigManager {
    * Register relevant data with the configuration manager and prepare request/response cycle
    * between frames.
    * @param {{
-   * pubId:string,
+   * pubId: string,
    * activeToolsMonitor: Object<string,string>,
    * atConfig: Object<string,string>,
-   * widgetId:string, iframe:!Element,
-   * iframeLoadPromise:!Promise,
-   * win:(EventTarget|undefined),
-   * shareConfig:(JsonObject|undefined)
-   * }} param
+   * widgetId: string,
+   * iframe: !Element,
+   * iframeLoadPromise: !Promise,
+   * shareConfig: (JsonObject|undefined)
+   * }} _
    */
   register({
     pubId,
