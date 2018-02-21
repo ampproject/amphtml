@@ -652,7 +652,7 @@ describes.realWin('amp-selector', {
     });
 
     it('should trigger `select` action when user uses ' +
-      '`selectUp`/`selectDown` action with default skip value of 1', () => {
+      '`selectUp`/`selectDown` action with default delta value of 1', () => {
       const ampSelector = getSelector({
         attributes: {
           id: 'ampSelector',
@@ -680,7 +680,7 @@ describes.realWin('amp-selector', {
     });
 
     it('should trigger `select` action when user uses ' +
-      '`selectUp`/`selectDown` action with user specified skip value', () => {
+      '`selectUp`/`selectDown` action with user specified delta value', () => {
       const ampSelector = getSelector({
         attributes: {
           id: 'ampSelector',
@@ -696,16 +696,16 @@ describes.realWin('amp-selector', {
       expect(ampSelector.hasAttribute('multiple')).to.be.false;
       expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
 
-      let args = {'incrementPos': 2};
+      let args = {'delta': 2};
       impl.executeAction(
           {method: 'selectDown', args, satisfiesTrust: () => true});
       expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
-      expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.true;
 
-      args = {'decrementPos': 2};
+      args = {'delta': 2};
       impl.executeAction(
           {method: 'selectUp', args, satisfiesTrust: () => true});
-      expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
       expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
     });
 

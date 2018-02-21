@@ -116,20 +116,14 @@ export class AmpSelector extends AMP.BaseElement {
 
     this.registerAction('selectUp', invocation => {
       const args = invocation.args;
-      if (args && args['incrementPos'] !== undefined) {
-        this.select_(-1 * args['incrementPos']);
-      } else {
-        this.select_(-1);
-      }
+      const delta = (args && args['delta'] !== undefined) ? -args['delta'] : -1;
+      this.select_(delta);
     }, ActionTrust.LOW);
 
     this.registerAction('selectDown', invocation => {
       const args = invocation.args;
-      if (args && args['decrementPos'] !== undefined) {
-        this.select_(args['decrementPos']);
-      } else {
-        this.select_(1);
-      }
+      const delta = (args && args['delta'] !== undefined) ? args['delta'] : 1;
+      this.select_(delta);
     }, ActionTrust.LOW);
   }
 
@@ -339,23 +333,18 @@ export class AmpSelector extends AMP.BaseElement {
 
   /**
    * Handles selectUp events.
-   * @param {number} incrementPos
+   * @param {number} delta
    */
-  select_(incrementPos) {
+  select_(delta) {
     // Change the selection to the next element in the specified direction.
     // The selection should loop around if the user attempts to go one
     // past the beginning or end.
-    let selectedIndex_ = this.options_.indexOf(this.selectedOptions_[0]);
-    const oldSelectedIndex_ = selectedIndex_;
+    const previousIndex = this.options_.indexOf(this.selectedOptions_[0]);
+    const index = previousIndex + delta;
+    const normalizedIndex = index % this.options_.length;
 
-    selectedIndex_ = (selectedIndex_ + incrementPos) % this.options_.length;
-    if (selectedIndex_ < 0) {
-      selectedIndex_ = selectedIndex_ + this.options_.length;
-    }
-
-    const selectedOption = this.options_[selectedIndex_];
-    this.setSelection_(selectedOption);
-    this.clearSelection_(this.options_[oldSelectedIndex_]);
+    this.setSelection_(this.options_[normalizedIndex]);
+    this.clearSelection_(this.options_[previousIndex]);
   }
 
   /**
