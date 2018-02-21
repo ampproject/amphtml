@@ -398,12 +398,7 @@ export class AmpStory extends AMP.BaseElement {
 
     this.element.addEventListener(EventType.TAP_NAVIGATION, e => {
       const {direction} = e.detail;
-
       this.performTapNavigation_(direction);
-
-      // We bless after the navigation so as not to slow down the navigation
-      // interaction.
-      this.mediaPool_.blessAll();
     });
 
     const gestures = Gestures.get(this.element,
@@ -1325,7 +1320,16 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @override */
   getMaxMediaElementCounts() {
-    return MAX_MEDIA_ELEMENT_COUNTS;
+    const audioMediaElements =
+        this.element.querySelectorAll('amp-audio, [background-audio]');
+    const videoMediaElements = this.element.querySelectorAll('amp-video');
+
+    return {
+      [MediaType.AUDIO]: Math.min(
+          audioMediaElements.length, MAX_MEDIA_ELEMENT_COUNTS[MediaType.AUDIO]),
+      [MediaType.VIDEO]: Math.min(
+          videoMediaElements.length, MAX_MEDIA_ELEMENT_COUNTS[MediaType.VIDEO]),
+    };
   }
 
 

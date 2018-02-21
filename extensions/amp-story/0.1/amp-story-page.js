@@ -185,7 +185,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.advancement_.stop();
 
     this.stopListeningToVideoEvents_();
-    this.pauseAllMedia_(/* opt_rewindToBeginning */ false);
+    this.pauseAllMedia_(true /* rewindToBeginning */);
 
     if (this.animationManager_) {
       this.animationManager_.cancelAll();
@@ -223,7 +223,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @return {!Promise} */
   beforeVisible() {
-    this.rewindAllMediaToBeginning_();
     return this.scale_().then(() => this.maybeApplyFirstAnimationFrame());
   }
 
@@ -329,15 +328,15 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Pauses all media on this page.
-   * @param {boolean=} opt_rewindToBeginning Whether to rewind the currentTime
+   * @param {boolean=} rewindToBeginning Whether to rewind the currentTime
    *     of media items to the beginning.
    * @return {!Promise} Promise that resolves after the callbacks are called.
    * @private
    */
-  pauseAllMedia_(opt_rewindToBeginning) {
+  pauseAllMedia_(rewindToBeginning = false) {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      return mediaPool.pause(/** @type {!HTMLMediaElement} */ (mediaEl),
-          opt_rewindToBeginning);
+      return mediaPool.pause(
+          /** @type {!HTMLMediaElement} */ (mediaEl), rewindToBeginning);
     });
   }
 
@@ -362,18 +361,6 @@ export class AmpStoryPage extends AMP.BaseElement {
   preloadAllMedia_() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
       return mediaPool.preload(/** @type {!HTMLMediaElement} */ (mediaEl));
-    });
-  }
-
-
-  /**
-   * @return {!Promise} Promise that resolves after the callbacks are called.
-   * @private
-   */
-  rewindAllMediaToBeginning_() {
-    return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-      return mediaPool.rewindToBeginning(
-          /** @type {!HTMLMediaElement} */ (mediaEl));
     });
   }
 
