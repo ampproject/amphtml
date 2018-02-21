@@ -183,11 +183,10 @@
       "url": "examples/visual-tests/amp-by-example/components/amp-carousel/index.html",
       "name": "amp-carousel - Amp By Example"
     },
-    // Dynamic content. TODO(rsimha-amp, #13394): Make this deterministic.
-    // {
-    //   "url": "examples/visual-tests/amp-by-example/components/amp-dailymotion/index.html",
-    //   "name": "amp-dailymotion - Amp By Example"
-    // },
+    {
+      "url": "examples/visual-tests/amp-by-example/components/amp-dailymotion/index.html",
+      "name": "amp-dailymotion - Amp By Example"
+    },
     {
       "url": "examples/visual-tests/amp-by-example/components/amp-date-picker/index.html",
       "name": "amp-date-picker - Amp By Example"
@@ -196,11 +195,10 @@
       "url": "examples/visual-tests/amp-by-example/components/amp-dynamic-css-classes/index.html",
       "name": "amp-dynamic-css-classes - Amp By Example"
     },
-    // Dynamic content. TODO(rsimha-amp, #13394): Make this deterministic.
-    // {
-    //   "url": "examples/visual-tests/amp-by-example/components/amp-experiment/index.html",
-    //   "name": "amp-experiment - Amp By Example"
-    // },
+    {
+      "url": "examples/visual-tests/amp-by-example/components/amp-experiment/index.html",
+      "name": "amp-experiment - Amp By Example"
+    },
     {
       "url": "examples/visual-tests/amp-by-example/components/amp-facebook/index.html",
       "name": "amp-facebook - Amp By Example"
@@ -225,11 +223,10 @@
       "url": "examples/visual-tests/amp-by-example/components/amp-fx-parallax/index.html",
       "name": "amp-fx-parallax - Amp By Example"
     },
-    // Dynamic content. TODO(rsimha-amp, #13394): Make this deterministic.
-    // {
-    //   "url": "examples/visual-tests/amp-by-example/components/amp-gfycat/index.html",
-    //   "name": "amp-gfycat - Amp By Example"
-    // },
+    {
+      "url": "examples/visual-tests/amp-by-example/components/amp-gfycat/index.html",
+      "name": "amp-gfycat - Amp By Example"
+    },
     {
       "url": "examples/visual-tests/amp-by-example/components/amp-gist/index.html",
       "name": "amp-gist - Amp By Example"
@@ -350,11 +347,10 @@
       "url": "examples/visual-tests/amp-by-example/components/amp-vimeo/index.html",
       "name": "amp-vimeo - Amp By Example"
     },
-    // Dynamic content. TODO(rsimha-amp, #13394): Make this deterministic.
-    // {
-    //   "url": "examples/visual-tests/amp-by-example/components/amp-vine/index.html",
-    //   "name": "amp-vine - Amp By Example"
-    // },
+    {
+      "url": "examples/visual-tests/amp-by-example/components/amp-vine/index.html",
+      "name": "amp-vine - Amp By Example"
+    },
     {
       "url": "examples/visual-tests/amp-by-example/components/amp-youtube/index.html",
       "name": "amp-youtube - Amp By Example"
