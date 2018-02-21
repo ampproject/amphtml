@@ -177,6 +177,7 @@ export class IntersectionObserver {
    * one change record to the iframe.
    * Note that this method may be called more than once if a single ad
    * has multiple parties interested in viewability data.
+   * @private
    */
   startSendingIntersectionChanges_() {
     this.shouldSendIntersectionChanges_ = true;
