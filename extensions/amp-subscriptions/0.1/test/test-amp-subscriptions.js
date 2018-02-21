@@ -31,13 +31,13 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
   let pageConfig;
   let subscriptionService;
   const serviceConfig = {
-    'services': [
+    services: [
       {
-        'serviceId': 'amp.local.subscription',
-        'authorizationUrl': '/subscription/2/entitlements',
+        serviceId: 'amp.local.subscription',
+        authorizationUrl: '/subscription/2/entitlements',
       },
       {
-        'serviceId': 'google.subscription',
+        serviceId: 'google.subscription',
       },
     ],
   };
@@ -45,11 +45,10 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
-    win = env.win;
     element = win.document.createElement('script');
     element.id = 'amp-subscriptions';
     element.setAttribute('type', 'json');
-    element.setInnerHtml = JSON.stringify(serviceConfig);
+    element.innerHTML = JSON.stringify(serviceConfig);
 
     win.document.body.appendChild(element);
     subscriptionService = new SubscriptionService(ampdoc);
@@ -97,5 +96,31 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
     subscriptionService.registerService(service.serviceID, subsPlatform);
     expect(subscriptionService.subscriptionPlatforms_.includes(subsPlatform))
         .to.be.true;
+  });
+
+  describe('getServiceConfig_', () => {
+    it('should return json inside script#amp-subscriptions tag ', done => {
+      subscriptionService.getServiceConfig_.restore();
+      subscriptionService.getServiceConfig_().then(config => {
+        expect(JSON.stringify(config)).to.be.equal(
+            JSON.stringify(serviceConfig));
+        done();
+      });
+    });
+  });
+
+  describe('initializeSubscriptionPlatforms_', () => {
+    it('should put `LocalSubscriptionPlatform` for every service config'
+        + ' with authorization Url', () => {
+      const service = serviceConfig.services[0];
+      const pushStub = sandbox.stub(
+          subscriptionService.subscriptionPlatforms_, 'push');
+      subscriptionService.initializeSubscriptionPlatforms_(service, pageConfig);
+      expect(pushStub).to.be.calledWith(new LocalSubscriptionPlatform(
+          subscriptionService.ampdoc_,
+          service,
+          pageConfig
+      ));
+    });
   });
 });
