@@ -130,18 +130,8 @@ describes.realWin('amp-addthis', {
   });
 
   it('registers the frame with the configManager on layout', () => {
-    return getAT({pubId, widgetId}).then(() => {
-      //const obj = at.implementation_;
-
+    return getAT({pubId, widgetId, shareConfig: {}}).then(() => {
       expect(registerStub.calledOnce).to.equal(true);
-      /*expect(registerStub.calledWithExactly({
-        pubId,
-        widgetId,
-        iframe: obj.iframe_,
-        iframeLoadPromise: atIframeLoadPromise,
-        element: obj.element,
-        win: obj.win,
-      }));*/
     });
   });
 
@@ -151,10 +141,6 @@ describes.realWin('amp-addthis', {
       obj.unlayoutCallback();
 
       expect(unregisterStub.calledOnce).to.equal(true);
-      /*expect(unregisterStub.calledWithExactly({
-        pubId,
-        iframe: obj.iframe_,
-      }));*/
     });
   });
 
@@ -221,7 +207,6 @@ describes.realWin('amp-addthis', {
         testConfigManager.register({
           pubId,
           widgetId,
-          win: window,
           iframe: mockIframe,
           iframeLoadPromise: Promise.resolve(),
         });
@@ -267,7 +252,6 @@ describes.realWin('amp-addthis', {
         pubId: '1234',
         widgetId,
         shareConfig,
-        win: window,
         iframe: mockIframe,
         iframeLoadPromise: Promise.resolve(),
       });
@@ -321,7 +305,6 @@ describes.realWin('amp-addthis', {
         testConfigManager.register({
           pubId: i === 0 ? firstPubId : (i < 3 ? secondPubId : thirdPubId),
           widgetId,
-          win: window,
           iframe: mockIframe,
           iframeLoadPromise: Promise.resolve(),
         });
