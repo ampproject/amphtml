@@ -38,10 +38,16 @@ import {isLoaded} from '../../../src/event-helper';
 import {layoutRectFromDomRect} from '../../../src/layout-rect';
 import {setStyle, toggle} from '../../../src/style';
 
-
 /** @const */
 const TAG = 'amp-lightbox-gallery';
 const DEFAULT_GALLERY_ID = 'amp-lightbox-gallery';
+
+/**
+ * Regular expression that identifies AMP CSS classes.
+ * Includes 'i-amphtml-', '-amp-', and 'amp-' prefixes.
+ * @type {!RegExp}
+ */
+const AMP_CSS_RE = /^(i?-)?amp(html)?-/;
 
 /**
  * Set of namespaces that indicate the lightbox controls mode.
@@ -221,8 +227,14 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const clonedNode = element.cloneNode(deepClone);
     clonedNode.removeAttribute('on');
     clonedNode.removeAttribute('id');
-    const ampClasses = Array.from(clonedNode.classList)
-        .filter(c => c.startsWith('i-amphtml-') || c.startsWith('amp-'));
+
+    const ampClasses = [];
+    for (let i = 0; i < clonedNode.classList.length; i++) {
+      const cssClass = clonedNode.classList[i];
+      if (AMP_CSS_RE.test(cssClass)) {
+        ampClasses.push(cssClass);
+      }
+    }
     clonedNode.classList.remove.apply(clonedNode.classList, ampClasses);
     return clonedNode;
   }
