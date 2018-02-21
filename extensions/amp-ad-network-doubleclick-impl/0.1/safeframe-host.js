@@ -204,8 +204,8 @@ export class SafeframeHostApi {
     attributes['initialGeometry'] = this.getInitialGeometry();
     attributes['permissions'] = JSON.stringify(
         dict({
-          'expandByOverlay': false,
-          'expandByPush': true,
+          'expandByOverlay': this.expandByOverlay_,
+          'expandByPush': this.expandByPush_,
           'readCookie': false,
           'writeCookie': false,
         }));
@@ -291,6 +291,7 @@ export class SafeframeHostApi {
         'Frame contentWindow unavailable.');
     this.viewport_.onScroll(this.maybeUpdateGeometry_.bind(this));
     this.viewport_.onChanged(this.maybeUpdateGeometry_.bind(this));
+    this.updateGeometry_();
   }
 
   /**
@@ -384,7 +385,7 @@ export class SafeframeHostApi {
     const lengthInView = (boundingRectEnd >= rootBoundEnd) ?
       rootBoundEnd - boundingRectStart : boundingRectEnd;
     const percInView = lengthInView / (boundingRectEnd - boundingRectStart);
-    return Math.max(0, Math.min(1, percInView));
+    return Math.max(0, Math.min(1, percInView)) || 0;
   }
 
   /**

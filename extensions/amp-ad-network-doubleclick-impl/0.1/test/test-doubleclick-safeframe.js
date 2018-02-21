@@ -94,6 +94,19 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     receiveMessage(messageData);
   }
 
+  function sendRegisterDoneMessage() {
+    const message = {};
+    message[MESSAGE_FIELDS.CHANNEL] = safeframeHost.channel;
+    message[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = 1;
+    message[MESSAGE_FIELDS.SERVICE] = SERVICE.REGISTER_DONE;
+    message[MESSAGE_FIELDS.PAYLOAD] = JSON.stringify({
+      initialHeight: '100',
+      initialWidth: '100',
+      sentinel: safeframeHost.sentinel_,
+    });
+    receiveMessage(message);
+  }
+
   // Simulates receiving a post message from the safeframe.
   function receiveMessage(messageData) {
     const messageEvent = {
@@ -179,7 +192,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
 
       // check the permissions
       expect(JSON.parse(attrs['permissions'])).to.deep.equal({
-        'expandByOverlay': false,
+        'expandByOverlay': true,
         'expandByPush': true,
         'readCookie': false,
         'writeCookie': false,
@@ -198,20 +211,10 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
 
   describe('getCurrentGeometry', () => {
     beforeEach(() => {
-      // Need to stub the intersection change entry to assure for testing
-      // we always get back a consistent entry.
-      const changes = {
-        'time': 16328.300000168383,
-        'rootBounds': {
-          'left': 0, 'top': 0, 'width': 500, 'height': 1000, 'bottom': 1000,
-          'right': 500, 'x': 0, 'y': 0},
-        'boundingClientRect': {
-          'left': 0,'top': 0,'width': 300,'height': 250,'bottom': 250,
-          'right': 300,'x': 0,'y': 0},
-        'intersectionRect': {'left': 0,'top': 0,'width': 300,'height': 250,
-          'bottom': 250,'right': 300,'x': 0,'y': 0},
-        'intersectionRatio': 1};
-      sandbox.stub(ampAd, 'getIntersectionChangeEntry').returns(changes);
+      sandbox.stub(safeframeHost.viewport_, 'getSize').returns({
+        height: 1000,
+        width: 500,
+      });
     });
 
     it('should get current geometry when safeframe fills amp-ad', () => {
@@ -231,26 +234,22 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       doubleclickImpl.iframe_ = safeframeMock;
       safeframeHost.iframe_ = safeframeMock;
 
-      const geom = safeframeHost.getCurrentGeometry();
+      const sendMessageStub = sandbox.stub(safeframeHost, 'sendMessage_');
+      safeframeHost.updateGeometry_();
 
-      // As part of getCurrentGeometry, the offset between the safeframe,
-      // and its containing amp-ad element are calculated. In the case
-      // that the safeframe fills the amp-ad, these offsets should be 0.
-      expect(safeframeHost.iframeOffsets_).to.deep.equal({
-        'dT': 0,
-        'dL': 0,
-        'dB': 0,
-        'dR': 0,
-        'height': 250,
-        'width': 300,
+      return Services.timerFor(env.win).promise(1000).then(() => {
+        const payload = sendMessageStub.firstCall.args[0];
+        const messageType = sendMessageStub.firstCall.args[1];
+        expect(payload['newGeometry']).to.equal(
+            '{"windowCoords_t":0,"windowCoords_r":500,"windowCoords_b":1000,' +
+              '"windowCoords_l":0,"frameCoords_t":0,"frameCoords_r":300,' +
+              '"frameCoords_b":250,"frameCoords_l":0,"styleZIndex":"",' +
+              '"allowedExpansion_r":200,"allowedExpansion_b":750,' +
+              '"allowedExpansion_t":0,"allowedExpansion_l":0,"yInView":1,' +
+              '"xInView":1}');
+        expect(payload['uid']).to.equal(safeframeHost.uid_);
+        expect(messageType).to.equal(SERVICE.GEOMETRY_UPDATE);
       });
-      expect(geom).to.equal(
-          '{"windowCoords_t":0,"windowCoords_r":500,"windowCoords_b":1000,' +
-            '"windowCoords_l":0,"frameCoords_t":0,"frameCoords_r":300,' +
-            '"frameCoords_b":250,"frameCoords_l":0,"styleZIndex":"",' +
-            '"allowedExpansion_r":200,"allowedExpansion_b":750,' +
-            '"allowedExpansion_t":0,"allowedExpansion_l":0,"yInView":1,' +
-            '"xInView":1}');
     });
 
     it('should get geometry when safeframe does not fill amp-ad', () => {
@@ -270,23 +269,22 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       doubleclickImpl.iframe_ = safeframeMock;
       safeframeHost.iframe_ = safeframeMock;
 
-      const geom = safeframeHost.getCurrentGeometry();
+      const sendMessageStub = sandbox.stub(safeframeHost, 'sendMessage_');
+      safeframeHost.updateGeometry_();
 
-      expect(safeframeHost.iframeOffsets_).to.deep.equal({
-        'dT': 0,
-        'dL': 0,
-        'dB': -200,
-        'dR': -250,
-        'height': 50,
-        'width': 50,
+      return Services.timerFor(env.win).promise(1000).then(() => {
+        const payload = sendMessageStub.firstCall.args[0];
+        const messageType = sendMessageStub.firstCall.args[1];
+        expect(payload['newGeometry']).to.equal(
+            '{"windowCoords_t":0,"windowCoords_r":500,"windowCoords_b":1000,' +
+              '"windowCoords_l":0,"frameCoords_t":0,"frameCoords_r":50,' +
+              '"frameCoords_b":50,"frameCoords_l":0,"styleZIndex":"",' +
+              '"allowedExpansion_r":450,"allowedExpansion_b":950,' +
+              '"allowedExpansion_t":0,"allowedExpansion_l":0,"yInView":1,' +
+              '"xInView":1}');
+        expect(payload['uid']).to.equal(safeframeHost.uid_);
+        expect(messageType).to.equal(SERVICE.GEOMETRY_UPDATE);
       });
-      expect(geom).to.equal(
-          '{"windowCoords_t":0,"windowCoords_r":500,"windowCoords_b":1000,' +
-            '"windowCoords_l":0,"frameCoords_t":0,"frameCoords_r":50,' +
-            '"frameCoords_b":50,"frameCoords_l":0,"styleZIndex":"",' +
-            '"allowedExpansion_r":450,"allowedExpansion_b":950,' +
-            '"allowedExpansion_t":0,"allowedExpansion_l":0,"yInView":1,' +
-            '"xInView":1}');
     });
   });
 
@@ -295,49 +293,67 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       const safeframeMock = createElementWithAttributes(doc, 'iframe', {});
       ampAd.appendChild(safeframeMock);
       doubleclickImpl.iframe = safeframeMock;
-      const sendSpy = sandbox./*OK*/spy(safeframeHost, 'send');
+
+      const onScrollStub = sandbox.stub(safeframeHost.viewport_, 'onScroll');
+      const onChangedStub = sandbox.stub(safeframeHost.viewport_, 'onChanged');
+
       safeframeMock.contentWindow.postMessage = () => {};
       sendSetupMessage();
-      safeframeHost.intersectionObserver_.onViewportCallback(true);
+      const maybeUpdateGeometry1 = onScrollStub.firstCall.args[0];
+      const maybeUpdateGeometry2 = onChangedStub.firstCall.args[0];
+      const sendMessageStub = sandbox.stub(safeframeHost, 'sendMessage_');
+      maybeUpdateGeometry1();
+      maybeUpdateGeometry2();
 
-      return Services.timerFor(env.win).promise(1000).then(() => {
-        expect(sendSpy).to.be.calledTwice;
+      return Services.timerFor(env.win).promise(500).then(() => {
+        expect(sendMessageStub).to.be.calledOnce;
+        const payload = sendMessageStub.firstCall.args[0];
+        const messageType = sendMessageStub.firstCall.args[1];
+        expect(JSON.parse(payload['newGeometry'])).to.deep.equal(
+            safeframeHost.currentGeometry_);
+        expect(payload['uid']).to.equal(safeframeHost.uid_);
+        expect(messageType).to.equal(SERVICE.GEOMETRY_UPDATE);
+        return Services.timerFor(env.win).promise(1000).then(() => {
+          expect(sendMessageStub).to.be.calledTwice;
+          const payload = sendMessageStub.secondCall.args[0];
+          const messageType = sendMessageStub.secondCall.args[1];
+          expect(JSON.parse(payload['newGeometry'])).to.deep.equal(
+              safeframeHost.currentGeometry_);
+          expect(payload['uid']).to.equal(safeframeHost.uid_);
+          expect(messageType).to.equal(SERVICE.GEOMETRY_UPDATE);
+        });
       });
 
     });
   });
 
   describe('formatGeom', () => {
-    it('should convert an intersection change entry to SF format', () => {
-      safeframeHost.iframeOffsets_ = {
-        'dR': 0,
-        'dT': 0,
-        'dB': 0,
-        'dL': 0,
+    it('should build proper geometry update', () => {
+      const iframeBox = {
+        top: 200,
+        left: 100,
+        bottom: 800,
+        right: 400,
+        width: 300,
+        height: 600,
       };
-      const intersectionChangeEntry = {
-        'time': 833.0999999307096,
-        'rootBounds': {'left': 0,'top': 0,'width': 500,'height': 1000,
-          'bottom': 1000, 'right': 500,'x': 0,'y': 0},
-        'boundingClientRect': {'left': 100,'top': 200,'width': 300,
-          'height': 600,'bottom': 800,'right': 400,
-          'x': 100,'y': 200},
-        'intersectionRect': {'left': 100,'top': 200,'width': 300,'height': 600,
-          'bottom': 800,'right': 400,'x': 100,'y': 200},
-        'intersectionRatio': 1};
+      sandbox.stub(safeframeHost.viewport_, 'getSize').returns({
+        width: 500,
+        height: 1000,
+      });
       const expectedParsedSfGU = {
         'windowCoords_t': 0, 'windowCoords_r': 500, 'windowCoords_b': 1000,
         'windowCoords_l': 0, 'frameCoords_t': 200, 'frameCoords_r': 400,
         'frameCoords_b': 800, 'frameCoords_l': 100, 'styleZIndex': '',
-        'allowedExpansion_r': null, 'allowedExpansion_b': null,
+        'allowedExpansion_r': 200, 'allowedExpansion_b': 400,
         'allowedExpansion_t': 0, 'allowedExpansion_l': 0, 'yInView': 1,
         'xInView': 1,
       };
-
       const safeframeGeometryUpdate = safeframeHost.formatGeom_(
-          intersectionChangeEntry);
+          iframeBox);
       const parsedSfGU = JSON.parse(safeframeGeometryUpdate);
       expect(parsedSfGU).to.deep.equal(expectedParsedSfGU);
+      expect(safeframeHost.currentGeometry_).to.deep.equal(expectedParsedSfGU);
 
     });
   });
@@ -371,8 +387,14 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       safeframeHost.initialHeight_ = ampAdHeight;
       safeframeHost.initialWidth_ = ampAdWidth;
       sendSetupMessage();
+      sendRegisterDoneMessage();
       attemptChangeSizeStub = sandbox.stub(
           doubleclickImpl, 'attemptChangeSize');
+      sandbox.stub(safeframeHost.viewport_, 'getSize').returns({
+        height: 1000,
+        width: 1000,
+      });
+      safeframeHost.isCollapsed_ = true;
     });
 
     /**
@@ -389,7 +411,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         'expand_r': width,
         'expand_b': height,
         'expand_l': 0,
-        'push': false,
+        'push': true,
         'sentinel': safeframeHost.sentinel_,
       });
       receiveMessage(expandMessage);
@@ -480,6 +502,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     }
 
     it('should collapse safeframe on amp-ad resize failure', () => {
+      safeframeHost.isCollapsed_ = false;
       ampAd.style.height = '600px';
       ampAd.style.width = '600px';
       safeframeMock.style.height = 600;
@@ -503,6 +526,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     });
 
     it('should collapse safeframe on amp-ad resize success', () => {
+      safeframeHost.isCollapsed_ = false;
       ampAd.style.height = '600px';
       ampAd.style.width = '600px';
       safeframeMock.style.height = 600;
