@@ -370,11 +370,11 @@ event.response</pre></td>
   </tr>
   <tr>
     <td><code>selectUp(delta=INTEGER)</code></td>
-    <td>Changes the selected element to the currentPos - `delta`. The default `delta` is set to 1.</td>
+    <td>Moves the selection up by the value of `delta`. The default `delta` is set to 1.</td>
   </tr>
   <tr>
-    <td><code>selectDown(decrementPos=INTEGER)</code></td>
-    <td>Changes the selected element to the currentPos + `delta`. The default `delta` is set to -1.</td>
+    <td><code>selectDown(delta=INTEGER)</code></td>
+    <td>Moves the selection down by the value of `delta`. The default `delta` is set to -1.</td>
   </tr>
 </table>
 

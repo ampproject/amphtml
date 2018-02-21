@@ -341,7 +341,13 @@ export class AmpSelector extends AMP.BaseElement {
     // past the beginning or end.
     const previousIndex = this.options_.indexOf(this.selectedOptions_[0]);
     const index = previousIndex + delta;
-    const normalizedIndex = index % this.options_.length;
+    const normalizedIndex = index > 0 ?
+      index % this.options_.length :
+      ((index % this.options_.length) +
+      this.options_.length) % this.options_.length;
+
+    user().assert(normalizedIndex >= 0,
+        'This should have been positive');
 
     this.setSelection_(this.options_[normalizedIndex]);
     this.clearSelection_(this.options_[previousIndex]);
