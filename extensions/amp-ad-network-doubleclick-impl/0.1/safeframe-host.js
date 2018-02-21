@@ -162,9 +162,6 @@ export class SafeframeHostApi {
     /** @private {?string} */
     this.fluidImpressionUrl_ = fluidImpressionUrl;
 
-    /** @private {boolean} */
-    this.sendPositionUpdate_ = false;
-
     /** @private {?Promise} */
     this.delay_ = null;
 
@@ -234,7 +231,7 @@ export class SafeframeHostApi {
    * @return {string}
    */
   getInitialGeometry() {
-    const ampAdBox = this.baseInstance_.element.getPageLayoutBox();
+    const ampAdBox = this.baseInstance_.getPageLayoutBox();
     const heightOffset = (ampAdBox.height - this.creativeSize_.height) / 2;
     const widthOffset = (ampAdBox.width - this.creativeSize_.width) / 2;
     const iframeBox = {
@@ -307,7 +304,6 @@ export class SafeframeHostApi {
     if (!this.iframe_) {
       return;
     }
-    this.sendPositionUpdate_ = false;
     this.viewport_.getClientRectAsync(this.iframe_).then(iframeBox => {
       const formattedGeom = this.formatGeom_(iframeBox);
       this.sendMessage_({
