@@ -15,8 +15,8 @@
  */
 
 import {Filter, FilterType} from './filter';
-import {matches} from '../../../../src/dom';
 import {dev, user} from '../../../../src/log';
+import {matches} from '../../../../src/dom';
 
 /**
  * A Filter that ignores events originating from elements that match a specified
