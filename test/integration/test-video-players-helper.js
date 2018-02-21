@@ -79,7 +79,7 @@ export function runVideoPlayerIntegrationTests(
   describe.configure().ifNewChrome().run('Actions', function() {
     this.timeout(TIMEOUT);
 
-    it.skip('should support mute, play, pause, unmute actions', function() {
+    it('should support mute, play, pause, unmute actions', function() {
       return getVideoPlayer({outsideView: false, autoplay: false}).then(r => {
         // Create a action buttons
         const playButton = createButton(r, 'play');
@@ -134,7 +134,7 @@ export function runVideoPlayerIntegrationTests(
     this.timeout(TIMEOUT);
     let video;
 
-    it.skip('should trigger play analytics when the video plays', function() {
+    it('should trigger play analytics when the video plays', function() {
       let playButton;
 
       return getVideoPlayer(
@@ -156,8 +156,7 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
-    // TODO(cvializ, #10283): Find out why this is flaky on master.
-    it.skip('should trigger pause analytics when the video pauses', function() {
+    it('should trigger pause analytics when the video pauses', function() {
       let pauseButton;
 
       return getVideoPlayer(
@@ -196,8 +195,7 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
-    // TODO(aghassemi): Investigate failure. #10974.
-    it.skip('should trigger session analytics when ' +
+    it('should trigger session analytics when ' +
         'a visible session ends', function() {
       let viewport;
       return getVideoPlayer(
@@ -275,8 +273,7 @@ export function runVideoPlayerIntegrationTests(
       });
     });
 
-    // TODO(aghassemi): Investigate failure. #10974.
-    it.skip('should trigger video-seconds-played when visible' +
+    it('should trigger video-seconds-played when visible' +
         'and playing', () => {
       let video;
       let timer;
