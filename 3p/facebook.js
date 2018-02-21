@@ -53,10 +53,15 @@ function getPostContainer(global, data) {
   user().assert(['post', 'video'].indexOf(embedAs) !== -1,
       'Attribute data-embed-as  for <amp-facebook> value is wrong, should be' +
       ' "post" or "video" was: %s', embedAs);
-  // Force the `data-embed-as` attribute to 'video' and make sure to show the post's text.
-  if (data.href.indexOf('/videos/') > 0) {
+  // If the user hasn't set the `data-embed-as` attribute and the provided href
+  // is a video, Force the `data-embed-as` attribute to 'video' and make sure
+  // to show the post's text.
+  if (data.href.match(/\/videos\/\d+\/?$/) &&
+    !container.hasAttribute('data-embed-as')) {
     embedAs = 'video';
     container.setAttribute('data-embed-as', 'video');
+    // Since 'data-embed-as="video"' disables post text, setting the 'data-show-text'
+    // to 'true' enables the ability to see the text (changed from the default 'false')
     container.setAttribute('data-show-text', 'true');
   }
   container.className = 'fb-' + embedAs;
