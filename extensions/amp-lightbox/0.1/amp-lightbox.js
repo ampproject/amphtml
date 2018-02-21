@@ -15,11 +15,13 @@
  */
 
 import * as st from '../../../src/style';
+import {ActionTrust} from '../../../src/action-trust';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-lightbox-0.1.css';
 import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
+import {createCustomEvent} from '../../../src/event-helper';
 import {Services} from '../../../src/services';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {computedStyle, setImportantStyles} from '../../../src/style';
@@ -30,6 +32,12 @@ import {toArray} from '../../../src/types';
 
 /** @const {string} */
 const TAG = 'amp-lightbox';
+
+/**  @enum {string} */
+const LightboxEvents = {
+  OPEN: 'lightboxOpen',
+  CLOSE: 'lightboxClose',
+};
 
 
 class AmpLightbox extends AMP.BaseElement {
@@ -43,6 +51,9 @@ class AmpLightbox extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.container_ = null;
+
+    /** @private {?../../../src/service/action-impl.ActionService} */
+    this.action_ = null;
 
     /** @private {?Array<!Element>} */
     this.componentDescendants_ = null;
@@ -79,6 +90,7 @@ class AmpLightbox extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.element.classList.add('i-amphtml-overlay');
+    this.action_ = Services.actionServiceForDoc(this.element);
     this.maybeSetTransparentBody_();
   }
 
@@ -205,6 +217,7 @@ class AmpLightbox extends AMP.BaseElement {
       this.element.addEventListener('animationend', this.boundReschedule_);
       this.scheduleLayout(container);
       this.scheduleResume(container);
+      this.triggerEvent_(LightboxEvents.OPEN);
     });
 
     this.getHistory_().push(this.close.bind(this)).then(historyId => {
@@ -251,6 +264,7 @@ class AmpLightbox extends AMP.BaseElement {
     this.boundCloseOnEscape_ = null;
     this.schedulePause(dev().assertElement(this.container_));
     this.active_ = false;
+    this.triggerEvent_(LightboxEvents.CLOSE);
   }
 
   /**
@@ -385,6 +399,14 @@ class AmpLightbox extends AMP.BaseElement {
       setTransparentBody(this.getAmpDoc().win, /** @type {!HTMLBodyElement} */ (
         dev().assert(this.win.document.body)));
     }
+  }
+
+  /**
+   * @private
+   */
+  triggerEvent_(name) {
+    const event = createCustomEvent(this.win, `${TAG}.${name}`, {});
+    this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
   }
 }
 
