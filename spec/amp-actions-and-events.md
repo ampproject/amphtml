@@ -196,12 +196,12 @@ event.index</pre></td>
   </tr>
   <tr>
     <td><code>lightboxOpen</code></td>
-    <td>Fired when lightbox is fully visible after transition has ended.</td>
+    <td>Fired when lightbox is fully visible.</td>
     <td>None</td>
   </tr>
   <tr>
     <td><code>lightboxClose</code></td>
-    <td>Fired when lightbox is fully closed after transition has ended.</td>
+    <td>Fired when lightbox is fully closed.</td>
     <td>None</td>
   </tr>
 </table>
