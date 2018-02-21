@@ -20,6 +20,7 @@
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
 import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
+import {SafeframeHostApi, removeSafeframeListener} from '../safeframe-host';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {utf8Encode} from '../../../../src/utils/bytes';
 
@@ -89,7 +90,10 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
 
   afterEach(() => {
     sandbox.restore();
-    impl.maybeRemoveListenerForFluid();
+    removeSafeframeListener();
+    if (impl.safeframeApi_) {
+      impl.safeframeApi_.destroy();
+    }
     impl = null;
   });
 
@@ -187,6 +191,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
         parent./*OK*/postMessage(
             JSON.stringify(/** @type {!JsonObject} */ ({
               e: 'sentinel',
+              c: '1234',
             })), '*');
         parent./*OK*/postMessage(
             JSON.stringify(/** @type {!JsonObject} */ ({
@@ -194,16 +199,20 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
               p: '{"width":"1px","height":"1px","sentinel":"sentinel"}',
             })), '*');
         </script>`;
-    const connectFluidMessagingChannelSpy =
-        sandbox.spy(impl, 'connectFluidMessagingChannel');
-    const onFluidResizeSpy = sandbox.spy(impl, 'onFluidResize_');
     impl.attemptChangeHeight = () => Promise.resolve();
     impl.sentinel = 'sentinel';
     impl.initiateAdRequest();
+    impl.safeframeApi_ = new SafeframeHostApi(
+        impl, true, impl.initialSize_, impl.creativeSize_);
+    sandbox./*OK*/stub(impl.safeframeApi_, 'setupGeom_');
+    const connectMessagingChannelSpy =
+        sandbox./*OK*/spy(impl.safeframeApi_, 'connectMessagingChannel');
+    const onFluidResizeSpy = sandbox./*OK*/spy(impl.safeframeApi_,
+        'onFluidResize_');
     return impl.adPromise_.then(() => {
       impl.creativeBody_ = utf8Encode(rawCreative);
       return impl.layoutCallback().then(() => {
-        expect(connectFluidMessagingChannelSpy).to.be.calledOnce;
+        expect(connectMessagingChannelSpy).to.be.calledOnce;
         expect(onFluidResizeSpy).to.be.calledOnce;
       });
     });

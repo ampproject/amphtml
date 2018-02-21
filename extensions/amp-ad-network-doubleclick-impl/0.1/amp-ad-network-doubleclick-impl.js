@@ -61,6 +61,7 @@ import {
   RefreshManager, // eslint-disable-line no-unused-vars
   getRefreshManager,
 } from '../../amp-a4a/0.1/refresh-manager';
+import {SafeframeHostApi} from './safeframe-host';
 import {Services} from '../../../src/services';
 import {VisibilityState} from '../../../src/visibility-state';
 import {
@@ -70,7 +71,6 @@ import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
-import {getData} from '../../../src/event-helper';
 import {
   getExperimentBranch,
   randomlySelectUnsetExperiments,
@@ -233,52 +233,6 @@ const BLOCK_SRA_COMBINERS_ = [
       instance => instance.buildIdentityParams_()),
 ];
 
-/**
- * Used to manage messages for different fluid ad slots.
- *
- * Maps a sentinel value to an object consisting of the impl to which that
- * sentinel value belongs and the corresponding message handler for that impl.
- * @type{!Object<string, !{instance: !AmpAdNetworkDoubleclickImpl, connectionEstablished: boolean}>}
- */
-const fluidListeners = {};
-
-/**
- * @param {!Event} event
- * @private
- */
-function fluidMessageListener_(event) {
-  const data = tryParseJson(getData(event));
-  if (event.origin != SAFEFRAME_ORIGIN || !data) {
-    return;
-  }
-  if (data['e']) {
-    // This is a request to establish a postmessaging connection.
-    const listener = fluidListeners[data['e']];
-    if (!listener) {
-      dev().warn(TAG, `Listener for sentinel ${data['e']} not found.`);
-      return;
-    }
-    if (!listener.connectionEstablished) {
-      listener.instance.connectFluidMessagingChannel();
-      listener.connectionEstablished = true;
-    }
-    return;
-  }
-  const payload = tryParseJson(data['p']);
-  if (!payload || !payload['sentinel']) {
-    return;
-  }
-  const listener = fluidListeners[payload['sentinel']];
-  if (!listener) {
-    dev().warn(TAG, `Listener for sentinel ${payload['sentinel']} not found.`);
-    return;
-  }
-  if (data['s'] != 'creative_geometry_update') {
-    return;
-  }
-  listener.instance.receiveMessageForFluid_(payload);
-}
-
 /** @final */
 export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
@@ -376,6 +330,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @private {boolean} */
     this.isIdleRender_ = false;
+
+    /** @private {?./safeframe-host.SafeframeHostApi} */
+    this.safeframeApi_ = null;
 
     /** @private {!../../../ads/google/a4a/utils.NameframeExperimentConfig} */
     this.nameframeExperimentConfig_ = {
@@ -504,26 +461,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         }
       }
     });
-  }
-
-  /**
-   * Handles Fluid-related messages dispatched from SafeFrame.
-   * @param {!JsonObject} payload
-   * @private
-   */
-  receiveMessageForFluid_(payload) {
-    let newHeight;
-    if (!payload || !(newHeight = parseInt(payload['height'], 10))) {
-      // TODO(levitzky) Add actual error handling here.
-      this.forceCollapse();
-      return;
-    }
-    this.attemptChangeHeight(newHeight)
-        .then(() => this.onFluidResize_())
-        .catch(() => {
-          // TODO(levitzky) Add more error handling here
-          this.forceCollapse();
-        });
   }
 
   /** @override */
@@ -907,14 +844,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     return super.renderNonAmpCreative();
   }
 
-  /** @override */
-  layoutCallback() {
-    if (this.isFluid_) {
-      this.registerListenerForFluid_();
-    }
-    return super.layoutCallback();
-  }
-
   /** @override  */
   unlayoutCallback() {
     switch (this.postAdResponseExperimentFeatures['unlayout_exp']) {
@@ -936,38 +865,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       // Allow non-AMP creatives to remain unless SRA.
       return false;
     }
-    const superResult = super.unlayoutCallback();
-    this.maybeRemoveListenerForFluid();
-    return superResult;
-  }
-
-  /**
-   * Postmessages an initial message to the fluid creative.
-   * @visibleForTesting
-   */
-  connectFluidMessagingChannel() {
-    dev().assert(this.iframe.contentWindow,
-        'Frame contentWindow unavailable.');
-    this.iframe.contentWindow./*OK*/postMessage(
-        JSON.stringify(dict({'message': 'connect', 'c': 'sfchannel1'})),
-        SAFEFRAME_ORIGIN);
-  }
-
-  /**
-   * Fires a delayed impression and notifies the Fluid creative that its
-   * container has been resized.
-   * @private
-   */
-  onFluidResize_() {
-    if (this.fluidImpressionUrl_) {
-      this.fireDelayedImpressions(this.fluidImpressionUrl_);
-      this.fluidImpressionUrl_ = null;
+    if (this.safeframeApi_) {
+      this.safeframeApi_.destroy();
     }
-    dev().assert(this.iframe.contentWindow,
-        'Frame contentWindow unavailable.');
-    this.iframe.contentWindow./*OK*/postMessage(
-        JSON.stringify(dict({'message': 'resize-complete', 'c': 'sfchannel1'})),
-        SAFEFRAME_ORIGIN);
+    const superResult = super.unlayoutCallback();
+    return superResult;
   }
 
   /** @override */
@@ -1308,74 +1210,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdditionalContextMetadata() {
-    const attributes = dict({});
-    if (this.isFluid_) {
-      attributes['uid'] = 1;
-      attributes['hostPeerName'] = this.win.location.origin;
-      // The initial geometry isn't used for anything important, but it is
-      // expected, so we pass this string with all zero values.
-      attributes['initialGeometry'] = JSON.stringify(
-          dict({
-            'windowCoords_t': 0,
-            'windowCoords_r': 0,
-            'windowCoords_b': 0,
-            'windowCoords_l': 0,
-            'frameCoords_t': 0,
-            'frameCoords_r': 0,
-            'frameCoords_b': 0,
-            'frameCoords_l': 0,
-            'styleZIndex': 'auto',
-            'allowedExpansion_t': 0,
-            'allowedExpansion_r': 0,
-            'allowedExpansion_b': 0,
-            'allowedExpansion_l': 0,
-            'xInView': 0,
-            'yInView': 0,
-          }));
-      attributes['permissions'] = JSON.stringify(
-          dict({
-            'expandByOverlay': false,
-            'expandByPush': false,
-            'readCookie': false,
-            'writeCookie': false,
-          }));
-      attributes['metadata'] = JSON.stringify(
-          dict({
-            'shared': {
-              'sf_ver': this.safeframeVersion,
-              'ck_on': 1,
-              'flash_ver': '26.0.0',
-            },
-          }));
-      attributes['reportCreativeGeometry'] = true;
-      attributes['isDifferentSourceWindow'] = false;
-      attributes['sentinel'] = this.sentinel;
-    } else {
-      Object.assign(attributes, this.nameframeExperimentConfig_);
-    }
-    return attributes;
-  }
-
-  /** @private  */
-  registerListenerForFluid_() {
-    fluidListeners[this.sentinel] = fluidListeners[this.sentinel] || {
-      instance: this,
-      connectionEstablished: false,
-    };
-    if (Object.keys(fluidListeners).length == 1) {
-      this.win.addEventListener('message', fluidMessageListener_, false);
-    }
-  }
-
-  /** @visibleForTesting */
-  maybeRemoveListenerForFluid() {
-    if (!this.isFluid_) {
-      return;
-    }
-    delete fluidListeners[this.sentinel];
-    if (!Object.keys(fluidListeners).length) {
-      this.win.removeEventListener('message', fluidMessageListener_);
+  getAdditionalContextMetadata(optIsSafeframe) {
+    if (this.isFluid_ ||
+        (optIsSafeframe &&
+         !isExperimentOn(this.win, 'disable-safeframe-host-api'))) { //eslint-disable-line no-undef
+      this.safeframeApi_ = this.safeframeApi_ || new SafeframeHostApi(
+          this, this.isFluid_, this.initialSize_, this.getCreativeSize(),
+          this.fluidImpressionUrl_);
+      return this.safeframeApi_.getSafeframeNameAttr();
     }
   }
 
