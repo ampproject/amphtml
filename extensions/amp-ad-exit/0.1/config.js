@@ -70,6 +70,14 @@ export let ClickDelayConfig;
  */
 export let ClickLocationConfig;
 
+/**
+ * @typedef {{
+ *   type: !FilterType,
+ *   selector: string
+ * }}
+ */
+export let InactiveElementConfig;
+
 /** @typedef {!ClickDelayConfig|!ClickLocationConfig} */
 export let FilterConfig;
 
