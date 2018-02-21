@@ -4652,15 +4652,15 @@ gulp-file@0.4.0:
     through2 "^0.4.1"
     vinyl "^2.1.0"
 
-gulp-git@2.5.0:
-  version "2.5.0"
-  resolved "https://registry.yarnpkg.com/gulp-git/-/gulp-git-2.5.0.tgz#3a04369321ecb51c0acf08c944f6e853b14ec5ef"
+gulp-git@2.5.2:
+  version "2.5.2"
+  resolved "https://registry.yarnpkg.com/gulp-git/-/gulp-git-2.5.2.tgz#a76f9a9d41783bc90ab0e4fa80e336c991537ac9"
   dependencies:
     any-shell-escape "^0.1.1"
     fancy-log "^1.3.2"
     lodash.template "^4.4.0"
     plugin-error "^0.1.2"
-    require-dir "^0.3.2"
+    require-dir "^1.0.0"
     strip-bom-stream "^3.0.0"
     through2 "^2.0.3"
     vinyl "^2.0.1"
@@ -8943,9 +8943,9 @@ requestretry@^1.2.2:
     request "^2.74.0"
     when "^3.7.7"
 
-require-dir@^0.3.2:
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/require-dir/-/require-dir-0.3.2.tgz#c1d5c75e9fbffde9f2e6b33e383db4f594b5a6a9"
+require-dir@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/require-dir/-/require-dir-1.0.0.tgz#c2639de72960ea1ee280279f2da35e03c6536b2d"
 
 require-directory@^2.1.1:
   version "2.1.1"
