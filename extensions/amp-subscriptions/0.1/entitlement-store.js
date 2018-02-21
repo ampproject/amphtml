@@ -37,7 +37,7 @@ export class EntitlementStore {
     /** @private @const {Observable<!EntitlementChangeEventDef>} */
     this.onChangeCallbacks_ = new Observable();
 
-    /** @private {?Promise<!Entitlements>} */
+    /** @private {?Promise<boolean>} */
     this.firstResolvedPromise_ = null;
 
     /** @private {?Promise<!Object<string, !Entitlements>>} */
@@ -65,7 +65,8 @@ export class EntitlementStore {
   }
 
   /**
-   * @returns {!Promise<!Entitlements>}
+   * TODO (@prateekbh): rename this to getGrantStatus
+   * @returns {!Promise<boolean>}
    */
   getFirstResolvedSubscription() {
     if (this.firstResolvedPromise_ !== null) {
@@ -79,18 +80,18 @@ export class EntitlementStore {
       for (const key in this.entitlements_) {
         const entitlements = (this.entitlements_[key]);
         if (entitlements.enablesThis()) {
-          return resolve(entitlements);
+          return resolve(true);
         }
       }
 
       if (entitlementsResolved === this.serviceIds_.length) {
         // Resolve with null if non of the entitlements unblocks the reader
-        return resolve(null);
+        return resolve(false);
       } else {
         // Listen if any upcoming entitlements unblock the reader
         this.onChange(({entitlements}) => {
           if (entitlements.enablesThis()) {
-            resolve(entitlements);
+            resolve(true);
           }
         });
       }

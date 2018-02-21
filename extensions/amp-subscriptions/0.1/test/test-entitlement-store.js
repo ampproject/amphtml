@@ -50,54 +50,51 @@ describes.realWin('entitlement-store', {}, () => {
     expect(cb).to.be.calledOnce;
   });
 
-  it('should resolve `firstResolvedPromise_` on recieving a' +
-      ' positive entitlement', done => {
-    entitlementStore.getFirstResolvedSubscription()
-        .then(entitlements => {
-          if (entitlements.json().service
-              === entitlementsForService1.json().service) {
-            done();
-          } else {
-            throw new Error('Incorrect entitlement resolved');
-          }
-        });
-    entitlementStore.resolveEntitlement(serviceIds[1],
-        entitlementsForService2);
-    entitlementStore.resolveEntitlement(serviceIds[0],
-        entitlementsForService1);
-  });
+  describe('firstResolvedPromise_', () => {
+    it('should resolve true on recieving a positive entitlement', done => {
+      entitlementStore.getFirstResolvedSubscription()
+          .then(entitlements => {
+            if (entitlements === true) {
+              done();
+            } else {
+              throw new Error('Incorrect entitlement resolved');
+            }
+          });
+      entitlementStore.resolveEntitlement(serviceIds[1],
+          entitlementsForService2);
+      entitlementStore.resolveEntitlement(serviceIds[0],
+          entitlementsForService1);
+    });
 
-  it('should resolve `firstResolvedPromise_` for existing' +
-      ' positive entitlement', done => {
-    entitlementStore.entitlements_[serviceIds[0]] = entitlementsForService1;
-    entitlementStore.entitlements_[serviceIds[1]] = entitlementsForService2;
-    entitlementStore.getFirstResolvedSubscription()
-        .then(entitlements => {
-          if (entitlements.json().service
-              === entitlementsForService1.json().service) {
-            done();
-          } else {
-            throw new Error('Incorrect entitlement resolved');
-          }
-        });
-  });
+    it('should resolve true for existing positive entitlement', done => {
+      entitlementStore.entitlements_[serviceIds[0]] = entitlementsForService1;
+      entitlementStore.entitlements_[serviceIds[1]] = entitlementsForService2;
+      entitlementStore.getFirstResolvedSubscription()
+          .then(entitlements => {
+            if (entitlements === true) {
+              done();
+            } else {
+              throw new Error('Incorrect entitlement resolved');
+            }
+          });
+    });
 
-  it('should resolve `firstResolvedPromise_` with null' +
-      ' for negative entitlement', done => {
-    const negativeEntitlement1 =
-        new Entitlement(serviceIds[0], ['product1'], '');
-    const negativeEntitlements = new Entitlements(
-        serviceIds[0], '', [negativeEntitlement1], currentProduct);
-    entitlementStore.entitlements_[serviceIds[0]] = negativeEntitlements;
-    entitlementStore.entitlements_[serviceIds[1]] = entitlementsForService2;
-    entitlementStore.getFirstResolvedSubscription()
-        .then(entitlements => {
-          if (entitlements === null) {
-            done();
-          } else {
-            throw new Error('Incorrect entitlement resolved');
-          }
-        });
+    it('should resolve false with null for negative entitlement', done => {
+      const negativeEntitlement1 =
+          new Entitlement(serviceIds[0], ['product1'], '');
+      const negativeEntitlements = new Entitlements(
+          serviceIds[0], '', [negativeEntitlement1], currentProduct);
+      entitlementStore.entitlements_[serviceIds[0]] = negativeEntitlements;
+      entitlementStore.entitlements_[serviceIds[1]] = entitlementsForService2;
+      entitlementStore.getFirstResolvedSubscription()
+          .then(entitlements => {
+            if (entitlements === false) {
+              done();
+            } else {
+              throw new Error('Incorrect entitlement resolved');
+            }
+          });
+    });
   });
 });
 

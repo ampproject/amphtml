@@ -130,11 +130,11 @@ export class SubscriptionService {
   }
 
   /**
-   * @param {?Entitlements} entitlements
+   * @param {boolean} grantState
    * @private
    */
-  processEntitlements_(entitlements) {
-    if (entitlements === null) {
+  processEntitlements_(grantState) {
+    if (grantState === false) {
       // TODO(@prateekbh): Show UI that no eligible entitlement found
       return;
     }
@@ -174,7 +174,7 @@ export class SubscriptionService {
       });
 
       this.entitlementStore_.getFirstResolvedSubscription()
-          .then(entitlements => {this.processEntitlements_(entitlements);});
+          .then(grantState => {this.processEntitlements_(grantState);});
     });
   }
 }
