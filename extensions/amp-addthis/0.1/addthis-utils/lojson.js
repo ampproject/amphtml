@@ -35,7 +35,6 @@ import {toArray} from '../../../../src/types';
 const VIEW_EVENT_CHANNEL = 100;
 const nonTrackedDomainMatcher = /\.gov|\.mil/;
 /**
- *
  * @param {{
  * loc:*, title:string,
  * pubId:string,
@@ -59,9 +58,9 @@ const nonTrackedDomainMatcher = /\.gov|\.mil/;
  * track_linkback: boolean,
  * track_textcopy: boolean
  * },
- * referrer:string,
- * ampDoc:*
- * }} param
+ * referrer: string,
+ * ampDoc: !../../../../src/service/ampdoc-impl.AmpDoc
+ * }} _
  */
 const getLojsonData = ({
   loc,
