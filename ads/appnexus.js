@@ -111,19 +111,21 @@ function appnexusAst(global, data) {
   // check for ad responses received for a slot but before listeners are registered,
   // for example when an above-the-fold ad is scrolled into view
   apntag.anq.push(() => {
-    apntag.checkAvailableAdObj(data.target).processEvents(handleAdAvailable);
+    apntag.checkAdAvailable(data.target)
+        .getAd({ resolve: isAdAvailable, reject: noAdAvailable });
   });
 
   apntag.anq.push(() => {
-    apntag.onEvent('adAvailable', data.target, handleAdAvailable);
-
-    apntag.onEvent('adNoBid', data.target, () => {
-      context.noContentAvailable();
-    });
+    apntag.onEvent('adAvailable', data.target, isAdAvailable);
+    apntag.onEvent('adNoBid', data.target, noAdAvailable);
   });
 }
 
-function handleAdAvailable(adObj) {
+function isAdAvailable(adObj) {
   global.context.renderStart({width: adObj.width, height: adObj.height});
   apntag.showTag(adObj.targetId, global.window);
+}
+
+function noAdAvailable() {
+  context.noContentAvailable();
 }
