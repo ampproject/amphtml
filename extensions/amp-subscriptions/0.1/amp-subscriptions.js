@@ -33,7 +33,7 @@ export class SubscriptionService {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    const configElement = document.getElementById(TAG);
+    const configElement = ampdoc.getElementById(TAG);
 
     /** @const @private */
     this.ampdoc_ = ampdoc;

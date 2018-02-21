@@ -52,7 +52,7 @@ export class LocalSubscriptionPlatform {
    */
   getEntitlements() {
     const authUrl = user().assert(this.serviceConfig_['authorizationUrl'],
-        'Service config does not have paywall Url');
+        'Service config does not have authorization Url');
     const currentProductId = user().assertString(
         this.pageConfig_.getProductId(), 'Current Product ID is null');
 

@@ -23,19 +23,41 @@ import {
 } from '../../../../third_party/subscriptions-project/config';
 import {SubscriptionService} from '../amp-subscriptions';
 
-const paywallUrl = 'https://lipsum.com';
 
 describes.realWin('amp-subscriptions', {amp: true}, env => {
+  let win;
   let ampdoc;
+  let element;
   let pageConfig;
   let subscriptionService;
+  const serviceConfig = {
+    'services': [
+      {
+        'serviceId': 'amp.local.subscription',
+        'authorizationUrl': '/subscription/2/entitlements',
+      },
+      {
+        'serviceId': 'google.subscription',
+      },
+    ],
+  };
 
   beforeEach(() => {
+    win = env.win;
     ampdoc = env.ampdoc;
+    win = env.win;
+    element = win.document.createElement('script');
+    element.id = 'amp-subscriptions';
+    element.setAttribute('type', 'json');
+    element.setInnerHtml = JSON.stringify(serviceConfig);
+
+    win.document.body.appendChild(element);
     subscriptionService = new SubscriptionService(ampdoc);
     pageConfig = new PageConfig('example.org:basic', true);
     sandbox.stub(PageConfigResolver.prototype, 'resolveConfig')
         .callsFake(() => Promise.resolve(pageConfig));
+    sandbox.stub(subscriptionService, 'getServiceConfig_')
+        .callsFake(() => Promise.resolve(serviceConfig));
   });
 
 
@@ -69,10 +91,10 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
   });
 
   it('should add subscription platform while registering it', () => {
-    const serviceID = 'dummy service';
+    const service = serviceConfig.services[0];
     const subsPlatform = new LocalSubscriptionPlatform(
-        ampdoc, {paywallUrl}, pageConfig);
-    subscriptionService.registerService(serviceID, subsPlatform);
+        ampdoc, service, pageConfig);
+    subscriptionService.registerService(service.serviceID, subsPlatform);
     expect(subscriptionService.subscriptionPlatforms_.includes(subsPlatform))
         .to.be.true;
   });
