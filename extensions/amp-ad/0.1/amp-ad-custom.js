@@ -15,6 +15,7 @@
  */
 
 import {AmpAdUIHandler} from './amp-ad-ui';
+import {CommonSignals} from '../../../src/common-signals';
 import {Services} from '../../../src/services';
 import {addParamToUrl} from '../../../src/url';
 import {ancestorElementsByTag} from '../../../src/dom';
@@ -113,6 +114,7 @@ export class AmpAdCustom extends AMP.BaseElement {
               // they maybe used by other ad component.
               removeChildren(this.element);
               this.element.appendChild(renderedElement);
+              this.signals().signal(CommonSignals.INI_LOAD);
             });
       } catch (e) {
         // Throw user error only when the element template attribute being set.
