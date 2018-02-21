@@ -71,12 +71,12 @@ import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+import {getData} from '../../../src/event-helper';
 import {
   getExperimentBranch,
   isExperimentOn,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
-import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
