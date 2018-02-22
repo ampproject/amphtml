@@ -394,7 +394,14 @@ export class Bind {
     if (macros.length == 0) {
       return Promise.resolve(0);
     } else {
-      return this.ww_('bind.addMacros', [macros]).then(() => macros.length);
+      return this.ww_('bind.addMacros', [macros]).then(errors => {
+        // Report macros that failed to parse (e.g. expression size exceeded).
+        errors.forEach((e, i) => {
+          this.reportWorkerError_(
+              e, `${TAG}: Parsing amp-bind-macro failed.`, elements[i]);
+        });
+        return macros.length;
+      });
     }
   }
 
@@ -451,12 +458,9 @@ export class Bind {
           Object.keys(parseErrors).forEach(expressionString => {
             const elements = this.expressionToElements_[expressionString];
             if (elements.length > 0) {
-              const parseError = parseErrors[expressionString];
-              const userError = user().createError(
-                  `${TAG}: Expression compile error in "${expressionString}". `
-                  + parseError.message);
-              userError.stack = parseError.stack;
-              reportError(userError, elements[0]);
+              this.reportWorkerError_(parseErrors[expressionString],
+                  `${TAG}: Expression compile error in "${expressionString}".`,
+                  elements[0]);
             }
           });
           dev().fine(TAG, 'Finished parsing expressions with ' +
@@ -672,12 +676,8 @@ export class Bind {
     }).then(returnValue => {
       const {result, error} = returnValue;
       if (error) {
-        const userError = user().createError(`${TAG}: Expression eval failed `
-            + `with error: ${error.message}`);
-        userError.stack = error.stack;
-        reportError(userError);
-
-        throw userError; // Reject promise.
+        // Throw to reject promise.
+        throw this.reportWorkerError_(error, `${TAG}: Expression eval failed.`);
       } else {
         return result;
       }
@@ -1057,6 +1057,20 @@ export class Bind {
    */
   ww_(method, opt_args) {
     return invokeWebWorker(this.win_, method, opt_args, this.localWin_);
+  }
+
+  /**
+   * @param {{message: string, stack:string}} e
+   * @param {string} message
+   * @param {Element=} opt_element
+   * @return {!Error}
+   * @private
+   */
+  reportWorkerError_(e, message, opt_element) {
+    const userError = user().createError(message + ' ' + e.message);
+    userError.stack = e.stack;
+    reportError(userError, opt_element);
+    return userError;
   }
 
   /**
