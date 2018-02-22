@@ -1,0 +1,121 @@
+<!--
+  Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS-IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the license.
+-->
+<!--
+  Test Description:
+  This test illustrates which AMP extensions are allowed in A4A and which
+  are not. It is likely that this test will not keep up with added extensions
+  over time, and so it should not be used as a definitive list. For that,
+  see the AMP and A4A documentation.
+
+  Note that the test will generate a bunch of warnings/errors suggesting that
+  the extensions are unnecessary since corresponding tags are not present.
+-->
+<!doctype html>
+<html ⚡4ads>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp4ads-boilerplate>body{visibility:hidden}</style>
+  <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+
+  <!-- So many AMP extensions! -->
+  <script async custom-element="amp-access"
+     src="https://cdn.ampproject.org/v0/amp-access-0.1.js"></script>
+  <script async custom-element="amp-accordion"
+     src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
+  <script async custom-element="amp-ad"
+     src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <script async custom-element="amp-analytics"
+     src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-anim"
+     src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
+  <script async custom-element="amp-animation"
+     src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
+  <script async custom-element="amp-audio"
+     src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
+  <script async custom-element="amp-brid-player"
+     src="https://cdn.ampproject.org/v0/amp-brid-player-0.1.js"></script>
+  <script async custom-element="amp-brightcove"
+     src="https://cdn.ampproject.org/v0/amp-brightcove-0.1.js"></script>
+  <script async custom-element="amp-carousel"
+     src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <script async custom-element="amp-dailymotion"
+     src="https://cdn.ampproject.org/v0/amp-dailymotion-0.1.js"></script>
+  <script async custom-element="amp-dynamic-css-classes"
+     src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>
+  <script async custom-element="amp-experiment"
+     src="https://cdn.ampproject.org/v0/amp-experiment-0.1.js"></script>
+  <script async custom-element="amp-facebook"
+     src="https://cdn.ampproject.org/v0/amp-facebook-0.1.js"></script>
+  <script async custom-element="amp-fit-text"
+     src="https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"></script>
+  <script async custom-element="amp-font"
+     src="https://cdn.ampproject.org/v0/amp-font-0.1.js"></script>
+  <script async custom-element="amp-form"
+     src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+  <script async custom-element="amp-fx-flying-carpet"
+     src="https://cdn.ampproject.org/v0/amp-fx-flying-carpet-0.1.js"></script>
+  <script async custom-element="amp-iframe"
+     src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+  <script async custom-element="amp-image-lightbox"
+     src="https://cdn.ampproject.org/v0/amp-image-lightbox-0.1.js"></script>
+  <script async custom-element="amp-instagram"
+     src="https://cdn.ampproject.org/v0/amp-instagram-0.1.js"></script>
+  <script async custom-element="amp-install-serviceworker"
+     src="https://cdn.ampproject.org/v0/amp-install-serviceworker-0.1.js"></script>
+  <script async custom-element="amp-jwplayer"
+     src="https://cdn.ampproject.org/v0/amp-jwplayer-0.1.js"></script>
+  <script async custom-element="amp-kaltura-player"
+     src="https://cdn.ampproject.org/v0/amp-kaltura-player-0.1.js"></script>
+  <script async custom-element="amp-lightbox"
+     src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
+  <script async custom-element="amp-list"
+     src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <script async custom-element="amp-live-list"
+     src="https://cdn.ampproject.org/v0/amp-live-list-0.1.js"></script>
+  <script async custom-element="amp-o2-player"
+     src="https://cdn.ampproject.org/v0/amp-o2-player-0.1.js"></script>
+  <script async custom-element="amp-pinterest"
+     src="https://cdn.ampproject.org/v0/amp-pinterest-0.1.js"></script>
+  <script async custom-element="amp-reach-player"
+     src="https://cdn.ampproject.org/v0/amp-reach-player-0.1.js"></script>
+  <script async custom-element="amp-sidebar"
+     src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
+  <script async custom-element="amp-slides"
+     src="https://cdn.ampproject.org/v0/amp-slides-0.1.js"></script>
+  <script async custom-element="amp-social-share"
+     src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js"></script>
+  <script async custom-element="amp-soundcloud"
+     src="https://cdn.ampproject.org/v0/amp-soundcloud-0.1.js"></script>
+  <script async custom-element="amp-springboard-player"
+     src="https://cdn.ampproject.org/v0/amp-springboard-player-0.1.js"></script>
+  <script async custom-element="amp-sticky-ad"
+     src="https://cdn.ampproject.org/v0/amp-sticky-ad-0.1.js"></script>
+  <script async custom-element="amp-twitter"
+     src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"></script>
+  <script async custom-element="amp-user-notification"
+     src="https://cdn.ampproject.org/v0/amp-user-notification-0.1.js"></script>
+  <script async custom-element="amp-vimeo"
+     src="https://cdn.ampproject.org/v0/amp-vimeo-0.1.js"></script>
+  <script async custom-element="amp-vine"
+     src="https://cdn.ampproject.org/v0/amp-vine-0.1.js"></script>
+  <script async custom-element="amp-youtube"
+     src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+
+  <script async custom-template="amp-mustache"
+     src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+</head>
+<body></body></html>

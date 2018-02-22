@@ -1,0 +1,13 @@
+URL: https://github.com/google/closure-compiler
+License: Apache License
+License File: https://github.com/google/closure-compiler/blob/master/COPYING
+
+Description:
+Temporary check in of a compiled closure compiler while we wait for
+a patch to land.
+
+Local Modifications:
+- Add compiler-and-tests.jar (built from all-classes-jar ant build) to use
+for testing.
+- Add Messages.properties and ParserConfig.properties for testing.
+- Copied intersection_observer.js extern missing from default externs.

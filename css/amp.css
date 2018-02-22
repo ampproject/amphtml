@@ -1,0 +1,879 @@
+/**
+ * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Horizontal scrolling interferes with embedded scenarios and predominantly
+ * the result of the non-responsive design.
+ *
+ * Notice that it's critical that `overflow-x: hidden` is only set on `html`
+ * and not `body`. Otherwise, adding `overflow-x: hidden` forces `overflow-y`
+ * to be computed to `auto` on both the `body` and `html` elements so they both
+ * potentially get a scrolling box. See #3108 for more details.
+ */
+html {
+  overflow-x: hidden !important;
+}
+html, body {
+  height: auto !important;
+}
+
+html.i-amphtml-fie {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+/**
+ * Margin:0 is currently needed for iOS viewer embeds.
+ * See:
+ * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
+ */
+body {
+  margin: 0 !important;
+}
+
+/** These properties can be overriden by user stylesheets. */
+body {
+  /* Text adjust is set to 100% to avoid iOS Safari bugs where the font-size is
+     sometimes not restored during orientation. See #449. */
+  text-size-adjust: 100%;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/**
+ * The enables passive touch handlers, e.g. for document swipe, since they
+ * no will longer need to try to cancel vertical scrolls during swipes.
+ * This is only done in the embedded mode because (a) the document swipe
+ * is only possible in this case, and (b) we'd like to preserve pinch-zoom.
+ */
+html.i-amphtml-singledoc.i-amphtml-embedded {
+  touch-action: pan-y;
+}
+
+/**
+ * Override a user-supplied `body{overflow: visible; position:relative}`. This
+ * style is set in runtime vs css to avoid conflicts with ios-embedded mode
+ * and fixed transfer layer.
+ */
+html.i-amphtml-singledoc > body,
+html.i-amphtml-fie > body {
+  overflow: visible !important;
+  position: relative !important;
+}
+
+/**
+ * Set `body {overflow-x: hidden}` for iOS WebView. This is b/c iOS WebView
+ * does NOT respect `html {overflow-x: hidden}`.
+ * Note! For all other natural cases body's style is `body {overflow: visible}`
+ * to avoid visibility issues with iframes.
+ */
+html.i-amphtml-webview > body {
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+
+
+/**
+ * iOS-Embed mode (iOS <= 8). The `body` itself is scrollable.
+ */
+html.i-amphtml-ios-embed-legacy > body {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  position: absolute !important;
+}
+
+/**
+ * iOS-Embed Wrapper mode. The `body` is wrapped into `#i-amphtml-wrapper`
+ * element.
+ */
+html.i-amphtml-ios-embed {
+  overflow-y: auto !important;
+  position: static;
+}
+
+/** Wrapper for iOS Embed Wrapper mode. */
+#i-amphtml-wrapper {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  margin: 0 !important;
+  display: block !important;
+}
+
+/**
+ * Overflow scrolling is set separately on iOS, after DOMReady due to various
+ * rendering bugs. See #8798 for details.
+ */
+html.i-amphtml-ios-embed.i-amphtml-ios-overscroll,
+html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
+  -webkit-overflow-scrolling: touch !important;
+}
+
+#i-amphtml-wrapper > body {
+  /* Make sure position:absolute elements are positioned relative to the body,
+     not i-amphtml-wrapper */
+  position: relative !important;
+  /* `body` must have a 1px transparent border for two purposes:
+      (1) to cancel out margin collapse in body's children so that position
+          absolute element is positioned correctly
+      (2) to offset scroll adjustment to 1 to avoid scroll freeze problem. */
+  border-top: 1px solid transparent !important;
+}
+
+
+.i-amphtml-element {
+  display: inline-block;
+}
+
+.i-amphtml-layout-nodisplay,
+[layout=nodisplay]:not(.i-amphtml-layout-nodisplay)
+{
+  /* Display is set/reset in JS */
+}
+
+.i-amphtml-layout-fixed,
+[layout=fixed][width][height]:not(.i-amphtml-layout-fixed)
+{
+  display: inline-block;
+  position: relative;
+}
+
+.i-amphtml-layout-responsive,
+[layout=responsive][width][height]:not(.i-amphtml-layout-responsive),
+[width][height][sizes]:not(.i-amphtml-layout-responsive)
+{
+  display: block;
+  position: relative;
+}
+
+.i-amphtml-layout-fixed-height,
+[layout=fixed-height][height]
+{
+  display: block;
+  position: relative;
+}
+
+.i-amphtml-layout-container,
+[layout=container]
+{
+  display: block;
+  position: relative;
+}
+
+.i-amphtml-layout-fill,
+[layout=fill]:not(.i-amphtml-layout-fill)
+{
+  display: block;
+  overflow: hidden !important;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+.i-amphtml-layout-flex-item,
+[layout=flex-item]:not(.i-amphtml-layout-flex-item)
+{
+  display: block;
+  position: relative;
+  flex: 1 1 auto;
+}
+
+.i-amphtml-layout-size-defined {
+  overflow: hidden !important;
+}
+
+.i-amphtml-layout-awaiting-size {
+  position: absolute !important;
+  top: auto !important;
+  bottom: auto !important;
+}
+
+i-amphtml-sizer {
+  display: block !important;
+}
+
+.i-amphtml-fill-content {
+  display: block;
+  /* These lines are a work around to this issue in iOS:     */
+  /* https://bugs.webkit.org/show_bug.cgi?id=155198          */
+  /* And: https://github.com/ampproject/amphtml/issues/11133 */
+  height: 0;
+  max-height: 100%;
+  max-width: 100%;
+  min-height: 100%;
+  min-width: 100%;
+  width: 0;
+  margin: auto;
+}
+
+.i-amphtml-layout-size-defined .i-amphtml-fill-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+.i-amphtml-replaced-content {
+  padding: 0 !important;
+  border: none !important;
+  /* TODO(dvoytenko): explore adding here object-fit. */
+}
+
+/**
+ * Makes elements visually invisible but still accessible to screen-readers.
+ *
+ * This Css has been carefully tested to ensure screen-readers can read and
+ * activate (in case of links and buttons) the elements with this class. Please
+ * use caution when changing anything, even seemingly safe ones. For example
+ * changing width from 1 to 0 would prevent TalkBack from activating (clicking)
+ * buttons despite TalkBack reading them just fine. This is because
+ * element needs to have a defined size and be on viewport otherwise TalkBack
+ * does not allow activation of buttons.
+ */
+.i-amphtml-screen-reader {
+  position: fixed !important;
+  /* keep it on viewport */
+  top: 0px !important;
+  left: 0px !important;
+  /* give it non-zero size, VoiceOver on Safari requires at least 2 pixels
+     before allowing buttons to be activated. */
+  width: 4px !important;
+  height: 4px !important;
+  /* visually hide it with overflow and opacity */
+  opacity: 0 !important;
+  overflow: hidden !important;
+  /* remove any margin or padding */
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  /* ensure no other style sets display to none */
+  display: block !important;
+  visibility: visible !important;
+}
+
+.i-amphtml-screen-reader ~ .i-amphtml-screen-reader {
+  left: 8px !important;
+}
+.i-amphtml-screen-reader ~ .i-amphtml-screen-reader ~ .i-amphtml-screen-reader {
+  left: 12px !important;
+}
+.i-amphtml-screen-reader ~ .i-amphtml-screen-reader ~ .i-amphtml-screen-reader ~ .i-amphtml-screen-reader {
+  left: 16px !important;
+}
+
+/* For author styling. */
+.amp-unresolved {
+}
+
+.i-amphtml-unresolved {
+  position: relative;
+  overflow: hidden !important;
+}
+
+.i-amphtml-scroll-disabled {
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+}
+
+#i-amphtml-wrapper.i-amphtml-scroll-disabled {
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+}
+
+/* "notbuild" classes are set as soon as an element is created and removed
+   as soon as the element is built. */
+
+.amp-notbuilt {
+  /* For author styling. */
+}
+
+.i-amphtml-notbuilt,
+[layout]:not(.i-amphtml-element)
+{
+  position: relative;
+  overflow: hidden !important;
+  color: transparent !important;
+}
+
+.i-amphtml-notbuilt:not(.i-amphtml-layout-container) > * ,
+[layout]:not([layout=container]):not(.i-amphtml-element) > *
+{
+  display: none;
+}
+
+.i-amphtml-ghost {
+  visibility: hidden !important;
+}
+
+.i-amphtml-layout {
+  /* Just state. */
+}
+
+.i-amphtml-error {
+  /* Just state. */
+}
+
+/* layout=nodisplay are automatically hidden until displayed directly. */
+[layout=nodisplay]:not(.i-amphtml-display) {
+  display: none !important;
+}
+
+.i-amphtml-element > [placeholder],
+[layout]:not(.i-amphtml-element) > [placeholder] {
+  display: block;
+}
+
+.i-amphtml-element > [placeholder].hidden,
+.i-amphtml-element > [placeholder].amp-hidden {
+  visibility: hidden;
+}
+
+.i-amphtml-element:not(.amp-notsupported) > [fallback] {
+  display: none;
+}
+
+.i-amphtml-layout-size-defined > [placeholder],
+.i-amphtml-layout-size-defined > [fallback] {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 1;
+}
+
+.i-amphtml-notbuilt > [placeholder] {
+  display: block !important;
+}
+
+.i-amphtml-hidden-by-media-query {
+  display: none !important;
+}
+
+.i-amphtml-element-error {
+  background: red !important;
+  color: white !important;
+  position: relative !important;
+}
+
+.i-amphtml-element-error::before {
+  content: attr(error-message);
+}
+
+/**
+ * Wraps an element to make the contents scrollable. This is
+ * used to wrap iframes which in iOS always behave as if they had the
+ * seamless attribute.
+ * TODO(dvoytenko, #8464): cleanup old `i-amp-scroll-container`.
+ */
+i-amphtml-scroll-container, i-amp-scroll-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: block;
+}
+
+/**
+ * Overflow:auto will be set with delay due to iOS bug where iframe is not
+ * rendered.
+ * TODO(dvoytenko, #8464): cleanup old `i-amp-scroll-container`.
+ */
+i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.i-amphtml-loading-container {
+  display: block !important;
+  z-index: 1;
+}
+
+.i-amphtml-notbuilt > .i-amphtml-loading-container {
+  display: block !important;
+}
+
+/**
+ * `i-amphtml-loading-container`, `i-amphtml-loader` and `i-amphtml-loader-dot` all support
+ * a "loading indicator" usecase. `i-amphtml-loading-container` is mostly responsible
+ * for alighning the loading indicator, while `i-amphtml-loader` and
+ * `i-amphtml-loader-dot` are an implementation for a default loading indicator. The
+ * default implementation includes the three-dot layout and animation.
+ */
+.i-amphtml-loading-container.amp-hidden {
+  visibility: hidden;
+}
+
+.i-amphtml-loader-line {
+  position: absolute;
+  top:0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  overflow: hidden !important;
+  background-color:rgba(151, 151, 151, 0.2);
+  display: block;
+}
+
+.i-amphtml-loader-moving-line {
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100% !important;
+  background-color: rgba(151, 151, 151, 0.65);
+  z-index: 2;
+}
+
+@keyframes i-amphtml-loader-line-moving {
+  0% {transform: translateX(-100%);}
+  100% {transform: translateX(100%);}
+}
+
+.i-amphtml-loader-line.amp-active .i-amphtml-loader-moving-line {
+  animation: i-amphtml-loader-line-moving 4s ease infinite;
+}
+
+.i-amphtml-loader {
+  position: absolute;
+  display: block;
+  height: 10px;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  transform-origin: 50% 50%;
+  white-space: nowrap;
+}
+
+.i-amphtml-loader.amp-active .i-amphtml-loader-dot {
+  animation: i-amphtml-loader-dots 2s infinite;
+}
+
+.i-amphtml-loader-dot {
+  position: relative;
+  display: inline-block;
+
+  height: 10px;
+  width: 10px;
+  margin: 2px;
+  border-radius: 100%;
+  background-color: rgba(0, 0, 0, .3);
+
+  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, .2);
+  will-change: transform;
+}
+
+.i-amphtml-loader .i-amphtml-loader-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.i-amphtml-loader .i-amphtml-loader-dot:nth-child(2) {
+  animation-delay: .1s;
+}
+
+.i-amphtml-loader .i-amphtml-loader-dot:nth-child(3) {
+  animation-delay: .2s;
+}
+
+@keyframes i-amphtml-loader-dots {
+  0%, 100% {
+    transform: scale(.7);
+    background-color: rgba(0, 0, 0, .3);
+  }
+
+  50% {
+    transform: scale(.8);
+    background-color: rgba(0, 0, 0, .5);
+  }
+}
+
+
+/**
+ * "overflow" element is an element shown when more content is available but
+ * not currently visible. Typically tapping on this element shows the full
+ * content.
+ */
+.i-amphtml-element > [overflow] {
+  cursor: pointer;
+  /* position:relative is critical to ensure that [overflow] is displayed
+     above an iframe; z-index is not enough. */
+  position: relative;
+  z-index: 2;
+  visibility: hidden;
+}
+
+.i-amphtml-element > [overflow].amp-visible {
+  visibility: visible;
+}
+
+
+/* Polyfill for IE and any other browser that don't understand templates. */
+template {
+  display: none !important;
+}
+
+/**
+ * Authors can set this class on their html tags to provide `border-box` box-sizing
+ * to every element in their document. Individual elements can override as necessary.
+ */
+.amp-border-box,
+.amp-border-box *,
+.amp-border-box *:before,
+.amp-border-box *:after {
+  box-sizing: border-box;
+}
+
+/* amp-pixel is always non-displayed. */
+amp-pixel {
+  display: none !important;
+}
+
+/**
+ * Instagram wraps the standard image into a fixed size container.
+ * With these offsets, users can simply specify the the size of the
+ * instagram images and things have the right size.
+ * In particular the effect of adding padding to this container is
+ * that with responsive layouts the responsiveness is based on the
+ * asset while the padding stays constant.
+ * This information is here instead of living with the CSS of the
+ * component, so that the runtime can reserve the correct space
+ * before the instagram implementation loads.
+ */
+amp-instagram {
+  padding: 64px 0px 0px 0px !important;
+  background-color: white;
+}
+
+
+/**
+ * Analytics tags should never be visible. keep them hidden.
+ */
+amp-analytics {
+  /* Fixed to make position independent of page other elements. */
+  position: fixed !important;
+  top: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  visibility: hidden;
+}
+
+/**
+ * Iframe allows setting frameborder, so we need to set box-sizing to border-box
+ * or otherwise the iframe will oevrflow its parent when there is a border.
+ */
+amp-iframe iframe {
+  box-sizing: border-box !important;
+}
+
+/**
+ * Minimal AMP Access CSS. This part has to be here so that the correct UI
+ * can be provided before AMP Access JS has been loaded.
+ */
+[amp-access][amp-access-hide] {
+  display: none;
+}
+
+/**
+ * Minimal Subscriptions CSS. This part initially disables all of the UI
+ * until the complete rules are loaded as part of amp-subscriptions extension.
+ * Notice that, the `[subscription-dialog]` elements are always hidden.
+ */
+html:not(.i-amphtml-subs-ready) [subscriptions-section],
+html:not(.i-amphtml-subs-ready) [subscriptions-action],
+[subscriptions-dialog] {
+  display: none !important;
+}
+
+
+/**
+ * Forms error/success messaging containers should be hidden at first.
+ */
+form [submitting],
+form [submit-success],
+form [submit-error] {
+  display: none;
+}
+
+/**
+ * Form validation error messages should be hidden at first.
+ */
+[visible-when-invalid] {
+  display: none;
+}
+
+/**
+ * Hide the update reference point of amp-live-list by default. This is
+ * reset by the `amp-live-list > .amp-active[update]` selector.
+ */
+amp-live-list > [update] {
+  display: none;
+}
+
+/**
+ * Display none elements
+ */
+amp-experiment, amp-share-tracking {
+  display: none;
+}
+
+.i-amphtml-jank-meter {
+  position: fixed;
+  background-color: rgba(232,72,95,.5);
+  bottom: 0;
+  right: 0;
+  color: #fff;
+  font-size: 16px;
+  z-index: 1000;
+  padding: 5px;
+}
+
+/**
+ * Animated equalizer icon for muted autoplaying videos.
+ */
+i-amphtml-video-mask, i-amp-video-mask {
+  z-index: 1;
+}
+.amp-video-eq {
+  align-items: flex-end;
+  bottom: 7px;
+  display: flex;
+  height: 12px;
+  opacity: 0.8;
+  overflow: hidden;
+  position: absolute;
+  right: 7px;
+  width: 20px;
+  z-index: 1;
+}
+.amp-video-eq .amp-video-eq-col {
+  flex: 1;
+  height: 100%;
+  margin-right: 1px;
+  position: relative;
+}
+.amp-video-eq .amp-video-eq-col div {
+  animation-name: amp-video-eq-animation;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  background-color: #FAFAFA;
+  height: 100%;
+  position: absolute;
+  width: 100%;
+  will-change: transform;
+}
+.amp-video-eq .amp-video-eq-col div {
+  animation-play-state: paused;
+}
+.amp-video-eq[unpausable] .amp-video-eq-col div {
+  animation-name: none;
+}
+.amp-video-eq[unpausable].amp-video-eq-play .amp-video-eq-col div {
+  animation-name: amp-video-eq-animation;
+}
+.amp-video-eq.amp-video-eq-play .amp-video-eq-col div {
+  animation-play-state: running;
+}
+.amp-video-eq-1-1 {
+  animation-duration: 0.3s;
+  transform: translateY(60%);
+}
+.amp-video-eq-1-2 {
+  animation-duration: 0.45s;
+  transform: translateY(60%);
+}
+.amp-video-eq-2-1 {
+  animation-duration: 0.5s;
+  transform: translateY(30%);
+}
+.amp-video-eq-2-2 {
+  animation-duration: 0.4s;
+  transform: translateY(30%);
+}
+.amp-video-eq-3-1 {
+  animation-duration: 0.3s;
+  transform: translateY(70%);
+}
+.amp-video-eq-3-2 {
+  animation-duration: 0.35s;
+  transform: translateY(70%);
+}
+.amp-video-eq-4-1 {
+  animation-duration: 0.4s;
+  transform: translateY(50%);
+}
+.amp-video-eq-4-2 {
+  animation-duration: 0.25s;
+  transform: translateY(50%);
+}
+@keyframes amp-video-eq-animation {
+  0% {transform: translateY(100%);}
+  100% {transform: translateY(0);}
+}
+
+
+/**
+ * Video Docking
+ */
+
+.i-amphtml-dockable-video {
+  padding: 0px;
+  margin:0px;
+  transition: background-color 1s;
+}
+
+.i-amphtml-dockable-video > video.i-amphtml-dockable-video-minimizing,
+.i-amphtml-dockable-video > iframe.i-amphtml-dockable-video-minimizing {
+  position: fixed;
+  height: auto;
+  overflow: hidden;
+  z-index: 16;
+  will-change: transform;
+  transform: scale(0.6) translateX(20px) translateY(20px);
+  border-radius: 6px;
+  box-shadow: 0px 3px 9px 3px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 1s, border-radius 1s;
+  /* Override fill-content */
+  min-width: initial !important;
+  min-height: initial !important;
+  margin: initial !important;
+}
+
+/**
+ * amp-accordion to avoid FOUC.
+ */
+
+/* Non-overridable properties */
+amp-accordion {
+  display: block !important;
+}
+
+/* Make sections non-floatable */
+amp-accordion > section {
+  float: none !important;
+}
+
+/*  Display the first 2 elements (heading and content) */
+amp-accordion > section > * {
+  float: none !important;
+  display: block !important;
+  overflow: hidden !important; /* clearfix */
+  position: relative !important;
+}
+
+amp-accordion,
+amp-accordion > section,
+.i-amphtml-accordion-header,
+.i-amphtml-accordion-content {
+  margin: 0;
+}
+
+/* heading element*/
+.i-amphtml-accordion-header {
+  cursor: pointer;
+  background-color: #efefef;
+  padding-right: 20px;
+  border: solid 1px #dfdfdf;
+}
+
+/* Collapse content by default. */
+amp-accordion > section > :last-child {
+  display: none !important;
+}
+
+/* Expand content when needed. */
+amp-accordion > section[expanded] > :last-child {
+  display: block !important;
+}
+
+/**
+ * amp-story
+ */
+amp-story[standalone], amp-story-page {
+  display: block !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  width: 100% !important;
+}
+
+amp-story[standalone] {
+  background-color: #fff !important;
+  position: relative !important;
+}
+
+amp-story-page {
+  background-color: #757575;
+}
+
+amp-story .i-amphtml-loader {
+  display: none !important;
+}
+
+amp-date-picker {
+  display: block;
+}
+
+amp-date-picker:not([i-amphtml-date-picker-attached])  {
+  display: flex;
+  width: 200px;
+  height: 50px;
+  border: 1px solid #dbdbdb;
+}
+
+amp-date-picker[type="range"]:not([i-amphtml-date-picker-attached]) {
+  width: 400px;
+}
+
+amp-date-picker[i-amphtml-date-picker-attached] [amp-date-placeholder],
+amp-date-picker[type="range"][i-amphtml-date-picker-attached] [amp-date-placeholder-start],
+amp-date-picker[type="range"][i-amphtml-date-picker-attached] [amp-date-placeholder-end] {
+  display: none;
+}
+
+amp-date-picker [amp-date-placeholder],
+amp-date-picker[type="range"] [amp-date-placeholder-start],
+amp-date-picker[type="range"] [amp-date-placeholder-end] {
+  border: 0;
+  font-weight: 200;
+  font-size: 18px;
+  line-height: 24px;
+  color: #333;
+  font-family: sans-serif;
+  padding: 4px 8px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+amp-date [amp-date-placeholder]::placeholder,
+amp-date-picker[type="range"] [amp-date-placeholder-start]::placeholder,
+amp-date-picker[type="range"] [amp-date-placeholder-end]::placeholder {
+  color: #757575;
+}

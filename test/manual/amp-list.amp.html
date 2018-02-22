@@ -1,0 +1,96 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <style amp-custom>
+    body {
+      font-family: 'Questrial', Arial;
+    }
+    article {
+      display: block;
+      margin: 8px;
+    }
+
+    amp-list {
+      border: 1px solid green;
+    }
+
+    [overflow] {
+      background: gray;
+      color: #fff;
+      cursor: pointer;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 2;
+      padding: 16px;
+    }
+
+    .story-entry {
+      padding: 40px;
+      border-bottom: 1px solid green;
+    }
+
+    .split {
+      height: 360px;
+    }
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+</head>
+<body>
+<article>
+  <h1>amp-list</h1>
+
+  <amp-list width="396" height="80" layout=responsive
+      src="/test/manual/amp-list-data.json?RANDOM">
+    <template type="amp-mustache">
+      <div class="story-entry">
+        <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
+        {{title}}
+      </div>
+    </template>
+    <div overflow>
+      SEE MORE
+    </div>
+  </amp-list>
+
+  <div class="split"></div>
+
+  <amp-list width="396" height="80" layout=responsive
+      src="/test/manual/amp-list-data.json?RANDOM">
+    <template type="amp-mustache">
+      <div class="story-entry">
+        <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
+        <a href="/link.html">{{title}}</a>
+      </div>
+    </template>
+    <div overflow>
+      SEE MORE
+    </div>
+  </amp-list>
+
+  <amp-list width="396" height="80" layout=responsive
+      src="/invalid-url">
+    <template type="amp-mustache">
+      <div class="story-entry">
+        <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
+      </div>
+    </template>
+    <div placeholder>
+      <p>Placeholder text</p>
+    </div>
+    <div fallback>
+      <p>Fallback text</p>
+    </div>
+  </amp-list>
+</article>
+</body>
+</html>

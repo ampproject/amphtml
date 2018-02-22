@@ -1,0 +1,305 @@
+{
+  "acquialift": {
+   "base": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx",
+   "basicCapture": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx&ident=_client_id_&identsrc=amp&es=Amp&url=_canonical_url_&rurl=_document_referrer_&cttl=_title_",
+   "pageview": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx&ident=_client_id_&identsrc=amp&es=Amp&url=_canonical_url_&rurl=_document_referrer_&cttl=_title_&en=Content View",
+   "click": "https://us-east-1-decisionapi.lift.acquia.com/capture?account_id=xxxxxxxx&site_id=xxxxxxxx&ident=_client_id_&identsrc=amp&es=Amp&url=_canonical_url_&rurl=_document_referrer_&cttl=_title_&en=Click-Through"
+  },
+  "afsanalytics": {
+   "host": "//www.afsanalytics.com",
+   "base": "//www.afsanalytics.com/cgi_bin/",
+   "pageview": "//www.afsanalytics.com/cgi_bin/connect.cgi?usr=xxxxxxxxPauto&js=1&amp=1&title=_title_&url=_canonical_url_&refer=_document_referrer_&resolution=_screen_width_x_screen_height_&color=_screen_color_depth_&Tips=_random_",
+   "click":   "//www.afsanalytics.com/cgi_bin/click.cgi?usr=xxxxxxxx&event=click&exit=clicked%20from%20AMP%20page"
+  },
+  "alexametrics": {
+    "base": "https://certify-amp.alexametrics.com/atrk.gif?account=$atrk_acct&domain=$domain",
+    "pageview": "https://certify-amp.alexametrics.com/atrk.gif?account=$atrk_acct&domain=$domain&jsv=amp-_amp_version_&frame_height=_viewport_height_&frame_width=_viewport_width_&title=_title_&time=_timestamp_&time_zone_offset=_timezone_&screen_params=_screen_width_x_screen_height_x_screen_color_depth_&ref_url=_document_referrer_&host_url=_source_url_&random_number=_random_&user_cookie=_client_id_&user_cookie_flag=0&user_lang=_browser_language_&amp_doc_url=_ampdoc_url_"
+  },
+  "atinternet": {
+    "base": "https://$log$domain/hit.xiti?s=$site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_",
+    "suffix": "&medium=amp&&ref=_document_referrer_",
+    "pageview": "https://$log$domain/hit.xiti?s=$site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_&p=_title_&s2=$level2&medium=amp&&ref=_document_referrer_",
+    "click": "https://$log$domain/hit.xiti?s=$site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_&pclick=_title_&s2click=$level2&p=$label&s2=$level2Click&type=click&click=$type&medium=amp&&ref=_document_referrer_"
+  },
+  "baiduanalytics": {
+    "host": "https://hm.baidu.com",
+    "base": "https://hm.baidu.com/hm.gif?si=$token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_",
+    "pageview": "https://hm.baidu.com/hm.gif?si=$token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_&et=0",
+    "event": "https://hm.baidu.com/hm.gif?si=$token&nv=0&st=4&v=pixel-1.0&rnd=_timestamp_&ep=$category*$action*$label*$value&et=4&api=8_0"
+  },
+  "burt": {
+    "host": "//ignore.c.richmetrics.com/",
+    "base": "//ignore.c.richmetrics.com/imglog?e=ignore&pi=ignore|_page_view_id_|_canonical_path_|_client_id_&ui=_client_id_&v=amp&ts=_timestamp_&sn=3&",
+    "pageview": "//ignore.c.richmetrics.com/imglog?e=ignore&pi=ignore|_page_view_id_|_canonical_path_|_client_id_&ui=_client_id_&v=amp&ts=_timestamp_&sn=3&type=page&ca=$category&sc=$subCategory&ln=_browser_language_&lr=_document_referrer_&eu=_source_url_&tz=_timezone_&pd=_scroll_width_x_scroll_height_&sd=_screen_width_x_screen_height_&wd=_available_screen_width_x_available_screen_height_&ws=_scroll_left_x_scroll_top_",
+    "pageping": "//ignore.c.richmetrics.com/imglog?e=ignore&pi=ignore|_page_view_id_|_canonical_path_|_client_id_&ui=_client_id_&v=amp&ts=_timestamp_&sn=3&type=pageping"
+  },
+  "byside": {
+    "host": "//webcare.byside.com/?webcare_id=$webcare_id&bwch=$bwch&lang=pt&fid=$fid&bwit=A&tuid=_client_id_&suid=$suid&puid=_page_view_id_p_timestamp_&referrer=_document_referrer_&page=_source_url_&amppage=_ampdoc_url_&bwpt=_title_&bres=_viewport_width_x_viewport_height_&res=_screen_width_x_screen_height_&v=v20171116a&ampv=_amp_version_&viewer=_viewer_&ua=_user_agent_&r=_random_",
+    "base": "//webcare.byside.com/BWA$webcare_id/amp/?webcare_id=$webcare_id&bwch=$bwch&lang=pt&fid=$fid&bwit=A&tuid=_client_id_&suid=$suid&puid=_page_view_id_p_timestamp_&referrer=_document_referrer_&page=_source_url_&amppage=_ampdoc_url_&bwpt=_title_&bres=_viewport_width_x_viewport_height_&res=_screen_width_x_screen_height_&v=v20171116a&ampv=_amp_version_&viewer=_viewer_&ua=_user_agent_&r=_random_",
+    "pageview": "//webcare.byside.com/BWA$webcare_id/amp/pixel.php?webcare_id=$webcare_id&bwch=$bwch&lang=pt&fid=$fid&bwit=A&tuid=_client_id_&suid=$suid&puid=_page_view_id_p_timestamp_&referrer=_document_referrer_&page=_source_url_&amppage=_ampdoc_url_&bwpt=_title_&bres=_viewport_width_x_viewport_height_&res=_screen_width_x_screen_height_&v=v20171116a&ampv=_amp_version_&viewer=_viewer_&ua=_user_agent_&r=_random_",
+    "event": "//webcare.byside.com/BWA$webcare_id/amp/signal.php?event_id=$eventId&event_label=$eventLabel&fields=$fields&webcare_id=$webcare_id&bwch=$bwch&lang=pt&fid=$fid&bwit=A&tuid=_client_id_&suid=$suid&puid=_page_view_id_p_timestamp_&referrer=_document_referrer_&page=_source_url_&amppage=_ampdoc_url_&bwpt=_title_&bres=_viewport_width_x_viewport_height_&res=_screen_width_x_screen_height_&v=v20171116a&ampv=_amp_version_&viewer=_viewer_&ua=_user_agent_&r=_random_"
+  },
+  "chartbeat": {
+    "host": "https://ping.chartbeat.net",
+    "basePrefix": "/ping?h=$domain&p=_canonical_path_&u=_client_id_&d=_canonical_host_&g=$uid&g0=$sections&g1=$authors&g2=$zone&g3=$sponsorName&g4=$contentType&c=120&x=_scroll_top_&y=_scroll_height_&j=$decayTime&R=1&W=0&I=0&E=_total_engaged_time_&r=_document_referrer_&t=_page_view_id__client_id_&b=_page_load_time_&i=_title_&T=_timestamp_&tz=_timezone_&C=2",
+    "baseSuffix": "&_",
+    "interval": "https://ping.chartbeat.net/ping?h=$domain&p=_canonical_path_&u=_client_id_&d=_canonical_host_&g=$uid&g0=$sections&g1=$authors&g2=$zone&g3=$sponsorName&g4=$contentType&c=120&x=_scroll_top_&y=_scroll_height_&j=$decayTime&R=1&W=0&I=0&E=_total_engaged_time_&r=_document_referrer_&t=_page_view_id__client_id_&b=_page_load_time_&i=_title_&T=_timestamp_&tz=_timezone_&C=2&_",
+    "anchorClick": "https://ping.chartbeat.net/ping?h=$domain&p=_canonical_path_&u=_client_id_&d=_canonical_host_&g=$uid&g0=$sections&g1=$authors&g2=$zone&g3=$sponsorName&g4=$contentType&c=120&x=_scroll_top_&y=_scroll_height_&j=$decayTime&R=1&W=0&I=0&E=_total_engaged_time_&r=_document_referrer_&t=_page_view_id__client_id_&b=_page_load_time_&i=_title_&T=_timestamp_&tz=_timezone_&C=2&_"
+  },
+  "colanalytics": {
+    "host": "https://ase.clmbtech.com",
+    "base": "https://ase.clmbtech.com/message",
+    "pageview": "https://ase.clmbtech.com/message?cid=$id&val_101=$id&val_101=_canonical_path_&ch=_canonical_host_&uuid=$uid&au=$authors&zo=$zone&sn=$sponsorName&ct=$contentType&st=_scroll_top_&sh=_scroll_height_&dct=$decayTime&tet=_total_engaged_time_&dr=_document_referrer_&plt=_page_load_time_&val_108=_title_&val_120=3"
+  },
+  "clicky": {
+    "base": "https://in.getclicky.com/in.php?site_id=$site_id",
+    "baseSuffix": "&mime=$contentType&x=_random_",
+    "pageview": "https://in.getclicky.com/in.php?site_id=$site_id&res=_screen_width_x_screen_height_&lang=_browser_language_&secure=1&type=pageview&href=_canonical_path_&title=_title_&mime=$contentType&x=_random_",
+    "interval": "https://in.getclicky.com/in.php?site_id=$site_id&type=ping&mime=$contentType&x=_random_"
+  },
+  "comscore": {
+    "host": "https://sb.scorecardresearch.com",
+    "base": "https://sb.scorecardresearch.com/b?",
+    "pageview": "https://sb.scorecardresearch.com/b?c1=2&c2=1000001&cs_pv=_page_view_id_&c12=_client_id_&rn=_random_&c8=_title_&c7=_canonical_url_&c9=_document_referrer_&cs_c7amp=_ampdoc_url_"
+  },
+  "cxense": {
+    "host": "https://scomcluster.cxense.com",
+    "base": "https://scomcluster.cxense.com/Repo/rep.gif" ,
+    "pageview": "https://scomcluster.cxense.com/Repo/rep.gif?ver=1&typ=pgv&sid=$siteId&ckp=_client_id_&loc=_source_url_&rnd=_random_&ref=_document_referrer_&ltm=_timestamp_&wsz=_screen_width_x_screen_height_&bln=_browser_language_&chs=_document_charset_&col=_screen_color_depth_&tzo=_timezone_&cp_cx_channel=amp"
+  },
+  "dynatrace": {
+   "endpoint": "https://$tenant.live.dynatrace.com:443/ampbf/$tenantpath",
+   "pageview": "https://$tenant.live.dynatrace.com:443/ampbf/$tenantpath?type=js&flavor=amp&v=1&a=1%7C1%7C_load_%7C_load_%7C-%7C_nav_timing_%7C_nav_timing_%7C0%2C2%7C2%7C_onload_%7C_load_%7C-%7C_nav_timing_%7C_nav_timing_%7C0&fId=_page_view_id_&vID=_client_id_&referer=_source_url_&title=_title_&sw=_screen_width_&sh=_screen_height_&w=_viewport_width_&h=_viewport_height_&nt=a_nav_type_b_nav_timing_c_nav_timing_d_nav_timing_e_nav_timing_f_nav_timing_g_nav_timing_h_nav_timing_i_nav_timing_j_nav_timing_k_nav_timing_l_nav_timing_m_nav_timing_n_nav_timing_o_nav_timing_p_nav_timing_q_nav_timing_r_nav_timing_s_nav_timing_t_nav_timing_&app=ampapp&time=_timestamp_"
+  },
+  "euleriananalytics": {
+    "base": "https://$analyticsHost",
+    "basePrefix": "-/_random_?euid-amp=_client_id_&url=_source_url_&",
+    "pageview": "https://$analyticsHost/col2/-/_random_?euid-amp=_client_id_&url=_source_url_&rf=_document_referrer_&sd=_screen_width_x_screen_height_&sd=_screen_color_depth_&elg=_browser_language_",
+    "action": "https://$analyticsHost/action/-/_random_?euid-amp=_client_id_&url=_source_url_&eact=$actionCode&actr=$actionRef",
+    "user": "https://$analyticsHost/uparam/-/_random_?euid-amp=_client_id_&url=_source_url_&euk$userParamKey=$userParamVal"
+  },
+  "facebookpixel": {
+    "host": "https://www.facebook.com",
+    "base": "https://www.facebook.com/tr?noscript=1",
+    "pageview": "https://www.facebook.com/tr?noscript=1&ev=PageView&id=PIXEL-ID",
+    "event": "https://www.facebook.com/tr?noscript=1&ev=$eventName&id=PIXEL-ID&cd[content_name]=$content_name",
+    "eventViewContent": "https://www.facebook.com/tr?noscript=1&ev=ViewContent&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[content_type]=$content_type&cd[content_ids]=$content_ids",
+    "eventSearch": "https://www.facebook.com/tr?noscript=1&ev=Search&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_category]=$content_category&cd[content_ids]=$content_ids&cd[search_string]=$search_string",
+    "eventAddToCart": "https://www.facebook.com/tr?noscript=1&ev=AddToCart&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[content_type]=$content_type&cd[content_ids]=$content_ids",
+    "eventAddToWishlist": "https://www.facebook.com/tr?noscript=1&ev=AddToWishlist&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[content_category]=$content_category&cd[content_ids]=$content_ids",
+    "eventInitiateCheckout": "https://www.facebook.com/tr?noscript=1&ev=InitiateCheckout&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[content_category]=$content_category&cd[num_items]=$num_items&cd[content_ids]=$content_ids",
+    "eventAddPaymentInfo": "https://www.facebook.com/tr?noscript=1&ev=AddPaymentInfo&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_category]=$content_category&cd[content_ids]=$content_ids",
+    "eventPurchase": "https://www.facebook.com/tr?noscript=1&ev=Purchase&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[content_type]=$content_type&cd[content_ids]=$content_ids&cd[num_items]=$num_items",
+    "eventLead": "https://www.facebook.com/tr?noscript=1&ev=Lead&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[content_category]=$content_category",
+    "eventCompleteRegistration": "https://www.facebook.com/tr?noscript=1&ev=CompleteRegistration&id=PIXEL-ID&cd[value]=$value&cd[currency]=$currency&cd[content_name]=$content_name&cd[status]=$status"
+  },
+  "gemius": {
+    "base": "https://$prefix.hit.gemius.pl/__timestamp_/redot.gif?l=91&id=$identifier&screen=_screen_width_x_screen_height_&window=_viewport_width_x_viewport_height_&fr=1&href=_source_url_&ref=_document_referrer_&extra=gemamp%3D1%7Campid%3D_client_id_%7C$extraparams",
+    "pageview": "https://$prefix.hit.gemius.pl/__timestamp_/redot.gif?l=91&id=$identifier&screen=_screen_width_x_screen_height_&window=_viewport_width_x_viewport_height_&fr=1&href=_source_url_&ref=_document_referrer_&extra=gemamp%3D1%7Campid%3D_client_id_%7C$extraparams&et=view&hsrc=1",
+    "event": "https://$prefix.hit.gemius.pl/__timestamp_/redot.gif?l=91&id=$identifier&screen=_screen_width_x_screen_height_&window=_viewport_width_x_viewport_height_&fr=1&href=_source_url_&ref=_document_referrer_&extra=gemamp%3D1%7Campid%3D_client_id_%7C$extraparams&et=action&hsrc=3"
+  },
+  "googleanalytics": {
+    "host": "https://www.google-analytics.com",
+    "basePrefix": "v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_external_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_",
+    "baseSuffix": "&a=_page_view_id_&z=_random_",
+    "pageview": "https://www.google-analytics.com/r/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_external_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=pageview&jid=_random_&_r=1&a=_page_view_id_&z=_random_",
+    "event": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_external_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=event&jid=&ec=$eventCategory&ea=$eventAction&el=$eventLabel&ev=0&a=_page_view_id_&z=_random_",
+    "social": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_external_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=social&jid=&sa=$socialAction&sn=$socialNetwork&st=$socialTarget&a=_page_view_id_&z=_random_",
+    "timing": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_external_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=$timingRequestType&jid=&plt=_page_load_time_&dns=_domain_lookup_time_&tcp=_tcp_connect_time_&rrt=_redirect_time_&srt=_server_response_time_&pdt=_page_download_time_&clt=_content_load_time_&dit=_dom_interactive_time_&a=_page_view_id_&z=_random_",
+    "error": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_external_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=exception&exd=-&a=_page_view_id_&z=_random_",
+    "QUERY_PARAM": {
+      "gclid": ""
+    }
+  },
+  "googleanalytics-alpha": {
+    "host": "https://www.google-analytics.com",
+    "basePrefix": "v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_external_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_",
+    "baseSuffix": "&a=_page_view_id_&z=_random_",
+    "pageview": "https://www.google-analytics.com/r/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_external_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=pageview&jid=_random_&_r=1&a=_page_view_id_&z=_random_",
+    "event": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_external_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=event&jid=&ec=$eventCategory&ea=$eventAction&el=$eventLabel&ev=0&a=_page_view_id_&z=_random_",
+    "social": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_external_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=social&jid=&sa=$socialAction&sn=$socialNetwork&st=$socialTarget&a=_page_view_id_&z=_random_",
+    "timing": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_external_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=$timingRequestType&jid=&plt=_page_load_time_&dns=_domain_lookup_time_&tcp=_tcp_connect_time_&rrt=_redirect_time_&srt=_server_response_time_&pdt=_page_download_time_&clt=_content_load_time_&dit=_dom_interactive_time_&a=_page_view_id_&z=_random_",
+    "error": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=AMP&aip&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&cid=_client_id_&tid=$account&dl=_source_url_&dr=_external_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=exception&exd=-&a=_page_view_id_&z=_random_",
+    "QUERY_PARAM": {
+      "gclid": ""
+    }
+  },
+  "googleadwords": {
+    "conversion_prefix": "<ignore for test>",
+    "remarketing_prefix": "<ignore for test>",
+    "common_params": "<ignore for test>",
+    "conversion_params": "<ignore for test>",
+    "conversion": "https://www.googleadservices.com/pagead/conversion/$googleConversionId/?cv=amp2&label=$googleConversionLabel&random=_random_&url=_source_url_&ref=_document_referrer_&fst=_page_view_id_&num=_counter_&fmt=3&async=1&u_h=_screen_height_&u_w=_screen_width_&u_ah=_available_screen_height_&u_aw=_available_screen_width_&u_cd=_screen_color_depth_&u_tz=_timezone_&tiba=_title_&guid=ON&script=0&value=$googleConversionValue&currency_code=$googleConversionCurrency&bg=$googleConversionColor&hl=$googleConversionLanguage",
+    "remarketing": "https://googleads.g.doubleclick.net/pagead/viewthroughconversion/$googleConversionId/?cv=amp2&label=$googleConversionLabel&random=_random_&url=_source_url_&ref=_document_referrer_&fst=_page_view_id_&num=_counter_&fmt=3&async=1&u_h=_screen_height_&u_w=_screen_width_&u_ah=_available_screen_height_&u_aw=_available_screen_width_&u_cd=_screen_color_depth_&u_tz=_timezone_&tiba=_title_&guid=ON&script=0"
+  },
+  "lotame": {
+    "pageview": "https://bcp.crwdcntrl.net/amp?c=$account&pv=y"
+  },
+  "krux": {
+    "beaconHost": "https://beacon.krxd.net",
+    "timing": "t_navigation_type=0&t_dns=_domain_lookup_time_&t_tcp=_tcp_connect_time_&t_http_request=_server_response_time_&t_http_response=_page_download_time_&t_content_ready=_content_load_time_&t_window_load=_page_load_time_&t_redirect=_redirect_time_",
+    "common": "source=amp&confid=$confid&_kpid=$pubid&_kcp_s=$site&_kcp_sc=$section&_kcp_ssc=$subsection&_kcp_d=_canonical_host_&_kpref_=_document_referrer_&_kua_kx_amp_client_id=_client_id_&_kua_kx_lang=_browser_language_&_kua_kx_tech_browser_language=_browser_language_&_kua_kx_tz=_timezone_",
+    "pageview": "https://beacon.krxd.net/pixel.gif?source=amp&confid=$confid&_kpid=$pubid&_kcp_s=$site&_kcp_sc=$section&_kcp_ssc=$subsection&_kcp_d=_canonical_host_&_kpref_=_document_referrer_&_kua_kx_amp_client_id=_client_id_&_kua_kx_lang=_browser_language_&_kua_kx_tech_browser_language=_browser_language_&_kua_kx_tz=_timezone_&t_navigation_type=0&t_dns=_domain_lookup_time_&t_tcp=_tcp_connect_time_&t_http_request=_server_response_time_&t_http_response=_page_download_time_&t_content_ready=_content_load_time_&t_window_load=_page_load_time_&t_redirect=_redirect_time_",
+    "event": "https://beacon.krxd.net/event.gif?source=amp&confid=$confid&_kpid=$pubid&_kcp_s=$site&_kcp_sc=$section&_kcp_ssc=$subsection&_kcp_d=_canonical_host_&_kpref_=_document_referrer_&_kua_kx_amp_client_id=_client_id_&_kua_kx_lang=_browser_language_&_kua_kx_tech_browser_language=_browser_language_&_kua_kx_tz=_timezone_&t_navigation_type=0&t_dns=_domain_lookup_time_&t_tcp=_tcp_connect_time_&t_http_request=_server_response_time_&t_http_response=_page_download_time_&t_content_ready=_content_load_time_&t_window_load=_page_load_time_&t_redirect=_redirect_time_&pageview=false"
+  },
+  "mediametrie": {
+    "host": "https://prof.estat.com/m/web",
+    "pageview": "https://prof.estat.com/m/web/$serial?c=$level1&dom=_ampdoc_url_&enc=_document_charset_&l3=$level3&l4=$level4&n=_random_&p=$level2&r=_document_referrer_&sch=_screen_height_&scw=_screen_width_&tn=amp&v=1&vh=_available_screen_height_&vw=_available_screen_width_"
+  },
+  "mediarithmics": {
+    "host": "https://events.mediarithmics.com",
+    "pageview": "https://events.mediarithmics.com/v1/visits/pixel?$site_token=$site_token&$url=_source_url_&$ev=%24page_view&$referrer=_document_referrer_"
+  },
+  "mediator": {
+    "host": "//collector.mediator.media/amp/?",
+    "prefix": "//collector.mediator.media/amp/?cid=$mediator_id&url=_canonical_url_&ref=_document_referrer_&p=4&",
+    "suffix": "vh=_viewport_height_&sh=_scroll_height_&st=_scroll_top_",
+    "pageview": "//collector.mediator.media/amp/?cid=$mediator_id&url=_canonical_url_&ref=_document_referrer_&p=4&e=v",
+    "timer": "//collector.mediator.media/amp/?cid=$mediator_id&url=_canonical_url_&ref=_document_referrer_&p=4&e=t&vh=_viewport_height_&sh=_scroll_height_&st=_scroll_top_",
+    "s0": "//collector.mediator.media/amp/?cid=$mediator_id&url=_canonical_url_&ref=_document_referrer_&p=4&e=s0",
+    "s1": "//collector.mediator.media/amp/?cid=$mediator_id&url=_canonical_url_&ref=_document_referrer_&p=4&e=s1",
+    "s2": "//collector.mediator.media/amp/?cid=$mediator_id&url=_canonical_url_&ref=_document_referrer_&p=4&e=s2",
+    "s3": "//collector.mediator.media/amp/?cid=$mediator_id&url=_canonical_url_&ref=_document_referrer_&p=4&e=s3"
+  },
+  "metrika": {
+    "pageview": "https://mc.yandex.ru/watch/$counterId?browser-info=amp%3A1%3Az%3A_timezone_%3Ai%3A_timestamp_%3Arn%3A_random_%3Ala%3A_browser_language_%3Aen%3A_document_charset_%3Arqn%3A2%3As%3A_screen_width_x_screen_height_x_screen_color_depth_%3Aw%3A_available_screen_width_x_available_screen_height_%3Ads%3A_domain_lookup_time_%2C_tcp_connect_time_%2C_server_response_time_%2C_page_download_time_%2C_redirect_time_%2C_nav_timing_%2C_nav_redirect_count_%2C_nav_timing_%2C_nav_timing_%2C_nav_timing_%2C_page_load_time_%2C_nav_timing_%2C_content_load_time_%3Auid%3A_client_id_%3Apvid%3A_page_view_id_%3At%3A_title_&site-info=$yaParams&page-url=_source_url_&page-ref=_document_referrer_",
+    "notBounce": "https://mc.yandex.ru/watch/$counterId?browser-info=ar%3A1%3Anb%3A1%3Aamp%3A1%3Az%3A_timezone_%3Ai%3A_timestamp_%3Arn%3A_random_%3Ala%3A_browser_language_%3Aen%3A_document_charset_%3Arqn%3A2%3As%3A_screen_width_x_screen_height_x_screen_color_depth_%3Aw%3A_available_screen_width_x_available_screen_height_%3Ads%3A_domain_lookup_time_%2C_tcp_connect_time_%2C_server_response_time_%2C_page_download_time_%2C_redirect_time_%2C_nav_timing_%2C_nav_redirect_count_%2C_nav_timing_%2C_nav_timing_%2C_nav_timing_%2C_page_load_time_%2C_nav_timing_%2C_content_load_time_%3Auid%3A_client_id_%3Apvid%3A_page_view_id_%3At%3A_title_&page-url=_source_url_&page-ref=_document_referrer_",
+    "externalLink": "https://mc.yandex.ru/watch/$counterId?browser-info=ln%3A1%3Aamp%3A1%3Az%3A_timezone_%3Ai%3A_timestamp_%3Arn%3A_random_%3Ala%3A_browser_language_%3Aen%3A_document_charset_%3Arqn%3A2%3As%3A_screen_width_x_screen_height_x_screen_color_depth_%3Aw%3A_available_screen_width_x_available_screen_height_%3Ads%3A_domain_lookup_time_%2C_tcp_connect_time_%2C_server_response_time_%2C_page_download_time_%2C_redirect_time_%2C_nav_timing_%2C_nav_redirect_count_%2C_nav_timing_%2C_nav_timing_%2C_nav_timing_%2C_page_load_time_%2C_nav_timing_%2C_content_load_time_%3Auid%3A_client_id_%3Apvid%3A_page_view_id_%3At%3A_title_&page-url=_source_url_&page-ref=_document_referrer_",
+    "reachGoal": "https://mc.yandex.ru/watch/$counterId?browser-info=ar%3A1%3Aamp%3A1%3Az%3A_timezone_%3Ai%3A_timestamp_%3Arn%3A_random_%3Ala%3A_browser_language_%3Aen%3A_document_charset_%3Arqn%3A2%3As%3A_screen_width_x_screen_height_x_screen_color_depth_%3Aw%3A_available_screen_width_x_available_screen_height_%3Ads%3A_domain_lookup_time_%2C_tcp_connect_time_%2C_server_response_time_%2C_page_download_time_%2C_redirect_time_%2C_nav_timing_%2C_nav_redirect_count_%2C_nav_timing_%2C_nav_timing_%2C_nav_timing_%2C_page_load_time_%2C_nav_timing_%2C_content_load_time_%3Auid%3A_client_id_%3Apvid%3A_page_view_id_%3At%3A_title_&site-info=$yaParams&page-url=goal%3A%2F%2F_source_host_%2F$goalId&page-ref=_source_url_",
+    "_domain": "https://mc.yandex.ru",
+    "_watch": "https://mc.yandex.ru/watch/$counterId",
+    "_suffix": "page-url=_source_url_&page-ref=_document_referrer_",
+    "_goalSuffix": "page-url=goal%3A%2F%2F_source_host_%2F$goalId&page-ref=_source_url_",
+    "_techInfo": "amp%3A1%3Az%3A_timezone_%3Ai%3A_timestamp_%3Arn%3A_random_%3Ala%3A_browser_language_%3Aen%3A_document_charset_%3Arqn%3A2%3As%3A_screen_width_x_screen_height_x_screen_color_depth_%3Aw%3A_available_screen_width_x_available_screen_height_%3Ads%3A_domain_lookup_time_%2C_tcp_connect_time_%2C_server_response_time_%2C_page_download_time_%2C_redirect_time_%2C_nav_timing_%2C_nav_redirect_count_%2C_nav_timing_%2C_nav_timing_%2C_nav_timing_%2C_page_load_time_%2C_nav_timing_%2C_content_load_time_%3Auid%3A_client_id_%3Apvid%3A_page_view_id_",
+    "_timings": "_domain_lookup_time_%2C_tcp_connect_time_%2C_server_response_time_%2C_page_download_time_%2C_redirect_time_%2C_nav_timing_%2C_nav_redirect_count_%2C_nav_timing_%2C_nav_timing_%2C_nav_timing_%2C_page_load_time_%2C_nav_timing_%2C_content_load_time_",
+    "_brInfo": "amp%3A1%3Az%3A_timezone_%3Ai%3A_timestamp_%3Arn%3A_random_%3Ala%3A_browser_language_%3Aen%3A_document_charset_%3Arqn%3A2%3As%3A_screen_width_x_screen_height_x_screen_color_depth_%3Aw%3A_available_screen_width_x_available_screen_height_%3Ads%3A_domain_lookup_time_%2C_tcp_connect_time_%2C_server_response_time_%2C_page_download_time_%2C_redirect_time_%2C_nav_timing_%2C_nav_redirect_count_%2C_nav_timing_%2C_nav_timing_%2C_nav_timing_%2C_page_load_time_%2C_nav_timing_%2C_content_load_time_%3Auid%3A_client_id_%3Apvid%3A_page_view_id_%3At%3A_title_",
+    "_title": "t%3A_title_",
+    "_siteInfo": "site-info=$yaParams"
+  },
+  "mparticle": {
+    "host": "https://pixels.mparticle.com",
+    "endpointPath": "/v1/$apiKey/Pixel",
+    "baseParams": "et=Unknown&amp_id=_client_id_&attrs_k=$eventAttributes_Keys&attrs_v=$eventAttributes_Values&ua_k=$userAttributes_Keys&ua_v=$userAttributes_Values&ui_t=$userIdentities_Types&ui_v=$userIdentities_Values&flags_k=$customFlags_Keys&flags_v=$customFlags_Values&ct=_timestamp_&dbg=false&lc=$location&av=$appVersion",
+    "pageview": "https://pixels.mparticle.com/v1/$apiKey/Pixel?dt=ScreenView&n=_canonical_path_&hn=_ampdoc_url_&ttl=_title_&et=Unknown&amp_id=_client_id_&attrs_k=$eventAttributes_Keys&attrs_v=$eventAttributes_Values&ua_k=$userAttributes_Keys&ua_v=$userAttributes_Values&ui_t=$userIdentities_Types&ui_v=$userIdentities_Values&flags_k=$customFlags_Keys&flags_v=$customFlags_Values&ct=_timestamp_&dbg=false&lc=$location&av=$appVersion",
+    "event": "https://pixels.mparticle.com/v1/$apiKey/Pixel?dt=AppEvent&n=$eventName&et=Unknown&amp_id=_client_id_&attrs_k=$eventAttributes_Keys&attrs_v=$eventAttributes_Values&ua_k=$userAttributes_Keys&ua_v=$userAttributes_Values&ui_t=$userIdentities_Types&ui_v=$userIdentities_Values&flags_k=$customFlags_Keys&flags_v=$customFlags_Values&ct=_timestamp_&dbg=false&lc=$location&av=$appVersion"
+  },
+  "newrelic": {
+    "pageview": "https://bam.nr-data.net/amp?appId=$appId&licenseKey=$licenseKey&ampUrl=_ampdoc_url_&canonicalUrl=_canonical_url_&timeToDomContentLoadedEventEnd=_nav_timing_&timeToDomInteractive=_nav_timing_&timeToDomComplete=_nav_timing_&timeToDomLoading=_nav_timing_&timeToResponseStart=_nav_timing_&timeToResponseEnd=_nav_timing_&timeToLoadEventStart=_nav_timing_&timeToLoadEventEnd=_nav_timing_&timeToConnectStart=_nav_timing_&timeToConnectEnd=_nav_timing_&timeToFetchStart=_nav_timing_&timeToRequestStart=_nav_timing_&timeToUnloadEventStart=_nav_timing_&timeToUnloadEventEnd=_nav_timing_&timeToDomainLookupStart=_nav_timing_&timeToDomainLookupEnd=_nav_timing_&timeToRedirectStart=_nav_timing_&timeToRedirectEnd=_nav_timing_&timeToSecureConnection=_nav_timing_&timestamp=_timestamp_&ampVersion=_amp_version_&pageLoadTime=_page_load_time_"
+  },
+  "nielsen": {
+    "session": "https://$prefixuaid-linkage.imrworldwide.com/cgi-bin/gn?prd=session&c13=asid,P$apid&sessionId=_client_id___page_view_id_&pingtype=4&enc=false&c61=createtm,_timestamp_&rnd=_random_",
+    "cloudapi": "https://$prefixcloudapi.imrworldwide.com/nmapi/v2/$apid/_client_id___page_view_id_/a?b=%7B%22devInfo%22%3A%7B%22devId%22%3A%22_client_id_%22%2C%22apn%22%3A%22$apn%22%2C%22apv%22%3A%22$apv%22%2C%22apid%22%3A%22$apid%22%7D%2C%22metadata%22%3A%7B%22static%22%3A%7B%22type%22%3A%22static%22%2C%22section%22%3A%22$section%22%2C%22assetid%22%3A%22_page_view_id_%22%2C%22segA%22%3A%22$segA%22%2C%22segB%22%3A%22$segB%22%2C%22segC%22%3A%22$segC%22%2C%22adModel%22%3A%220%22%2C%22dataSrc%22%3A%22cms%22%7D%2C%22content%22%3A%7B%7D%2C%22ad%22%3A%7B%7D%7D%2C%22event%22%3A%22playhead%22%2C%22position%22%3A%22_timestamp_%22%2C%22data%22%3A%7B%22hidden%22%3A%22_background_state_%22%2C%22blur%22%3A%22_background_state_%22%2C%22position%22%3A%22_timestamp_%22%7D%2C%22type%22%3A%22static%22%2C%22utc%22%3A%22_timestamp_%22%2C%22index%22%3A%223%22%7D"
+  },
+  "nielsen-marketing-cloud": {
+    "host": "loadeu.exelator.com",
+    "pathPrefix": "load/",
+    "trackurl": "https://loadeu.exelator.com/load/?p=$pubId&g=$siteId&j=0"
+  },
+  "parsely": {
+    "host": "https://srv.pixel.parsely.com",
+    "basePrefix": "https://srv.pixel.parsely.com/plogger/?rand=_timestamp_&idsite=$apikey&url=_ampdoc_url_&urlref=_document_referrer_&screen=_screen_width_x_screen_height_%7C_available_screen_width_x_available_screen_height_%7C_screen_color_depth_&title=_title_&date=_timestamp_&ampid=_client_id_",
+    "pageview": "https://srv.pixel.parsely.com/plogger/?rand=_timestamp_&idsite=$apikey&url=_ampdoc_url_&urlref=_document_referrer_&screen=_screen_width_x_screen_height_%7C_available_screen_width_x_available_screen_height_%7C_screen_color_depth_&title=_title_&date=_timestamp_&ampid=_client_id_&action=pageview",
+    "heartbeat": "https://srv.pixel.parsely.com/plogger/?rand=_timestamp_&idsite=$apikey&url=_ampdoc_url_&urlref=_document_referrer_&screen=_screen_width_x_screen_height_%7C_available_screen_width_x_available_screen_height_%7C_screen_color_depth_&title=_title_&date=_timestamp_&ampid=_client_id_&action=heartbeat&tt=_total_engaged_time_&inc=_incremental_engaged_time_"
+  },
+  "piano": {
+    "host": "https://api-v3.tinypass.com",
+    "basePrefix": "/api/v3",
+    "baseSuffix": "&pageview_id=_page_view_id_&rand=_random_&amp_client_id=_client_id_&aid=$aid",
+    "pageview": "https://api-v3.tinypass.com/api/v3/page/track?url=_canonical_url_&referer=_document_referrer_&content_created=$contentCreated&content_author=$contentAuthor&content_section=$contentSection&timezone_offset=_timezone_&tags=$tags&amp_url=_ampdoc_url_&screen=_screen_width_x_screen_height_&pageview_id=_page_view_id_&rand=_random_&amp_client_id=_client_id_&aid=$aid"
+  },
+  "quantcast": {
+    "host": "https://pixel.quantserve.com/pixel",
+    "pageview": "https://pixel.quantserve.com/pixel;r=_random_;a=$pcode;labels=$labels;fpan=;fpa=_client_id_;ns=0;ce=1;cm=;je=0;sr=_screen_width_x_screen_height_x_screen_color_depth_;enc=n;et=_timestamp_;ref=_document_referrer_;url=_canonical_url_"
+  },
+  "adobeanalytics": {
+    "requestPath": "/b/ss/$reportSuites/0/amp-1.0/s_random_",
+    "basePrefix": "vid=z_client_id_&ndh=0&ce=_document_charset_&pageName=_title_&g=_ampdoc_url_&r=_document_referrer_&bh=_available_screen_height_&bw=_available_screen_width_&c=_screen_color_depth_&j=amp&s=_screen_width_x_screen_height_",
+    "pageview": "https://$host/b/ss/$reportSuites/0/amp-1.0/s_random_?vid=z_client_id_&ndh=0&ce=_document_charset_&pageName=_title_&g=_ampdoc_url_&r=_document_referrer_&bh=_available_screen_height_&bw=_available_screen_width_&c=_screen_color_depth_&j=amp&s=_screen_width_x_screen_height_",
+    "click": "https://$host/b/ss/$reportSuites/0/amp-1.0/s_random_?vid=z_client_id_&ndh=0&ce=_document_charset_&pageName=_title_&g=_ampdoc_url_&r=_document_referrer_&bh=_available_screen_height_&bw=_available_screen_width_&c=_screen_color_depth_&j=amp&s=_screen_width_x_screen_height_&pe=lnk_o&pev1=$linkUrl&pev2=$linkName"
+  },
+  "infonline": {
+    "pageview": "$url?st=$st&sv=ke&ap=1&co=$co&cp=$cp&host=_canonical_host_&path=_canonical_path_"
+  },
+  "oewa": {
+    "pageview": "$url?s=$s&amp=1&cp=$cp&host=_canonical_host_&path=_canonical_path_"
+  },
+  "oewadirect": {
+    "pageview": "https://$s.oewabox.at/j0=,,,r=_canonical_url_;+,amp=1+cp=$cp+ssl=1+hn=_canonical_host_;;;?lt=_page_view_id_&x=_screen_width_x_screen_height_x24&c=_client_id_"
+  },
+  "simplereach": {
+    "host": "https://edge.simplereach.com",
+    "baseParams": "amp=true&pid=$pid&title=_title_&url=_canonical_url_&date=$published_at&authors=$authors&channels=$categories&tags=$tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_&article_id=$article_id&ignore_metadata=$ignore_metadata",
+    "visible": "https://edge.simplereach.com/n?amp=true&pid=$pid&title=_title_&url=_canonical_url_&date=$published_at&authors=$authors&channels=$categories&tags=$tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_&article_id=$article_id&ignore_metadata=$ignore_metadata",
+    "timer": "https://edge.simplereach.com/t?amp=true&pid=$pid&title=_title_&url=_canonical_url_&date=$published_at&authors=$authors&channels=$categories&tags=$tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_&article_id=$article_id&ignore_metadata=$ignore_metadata&t=5000&e=5000"
+  },
+  "segment": {
+    "host": "https://api.segment.io/v1/pixel",
+    "base": "?writeKey=$writeKey&context.library.name=amp&anonymousId=_client_id_&context.locale=_browser_language_&context.page.path=_canonical_path_&context.page.url=_canonical_url_&context.page.referrer=_document_referrer_&context.page.title=_title_&context.screen.width=_screen_width_&context.screen.height=_screen_height_",
+    "page": "https://api.segment.io/v1/pixel/page?writeKey=$writeKey&context.library.name=amp&anonymousId=_client_id_&context.locale=_browser_language_&context.page.path=_canonical_path_&context.page.url=_canonical_url_&context.page.referrer=_document_referrer_&context.page.title=_title_&context.screen.width=_screen_width_&context.screen.height=_screen_height_&name=$name",
+    "track": "https://api.segment.io/v1/pixel/track?writeKey=$writeKey&context.library.name=amp&anonymousId=_client_id_&context.locale=_browser_language_&context.page.path=_canonical_path_&context.page.url=_canonical_url_&context.page.referrer=_document_referrer_&context.page.title=_title_&context.screen.width=_screen_width_&context.screen.height=_screen_height_&event=$event"
+  },
+  "shinystat": {
+    "base": "https://amp.shinystat.com/cgi-bin/shinyamp.cgi",
+    "commpar": "AMP=1&RM=_random_&USER=$account&PAG=$page&HR=_canonical_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id_&PAGID=_page_view_id_&TITL=_title_&RQC=2",
+    "pagepar": "&VIE=_viewer_&PLT=_page_load_time_",
+    "eventpar": "&SSXL=1",
+    "linkpar": "&LINK=$outboundLink",
+    "pageview": "https://amp.shinystat.com/cgi-bin/shinyamp.cgi?AMP=1&RM=_random_&USER=$account&PAG=$page&HR=_canonical_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id_&PAGID=_page_view_id_&TITL=_title_&RQC=2&VIE=_viewer_&PLT=_page_load_time_",
+    "event": "https://amp.shinystat.com/cgi-bin/shinyamp.cgi?AMP=1&RM=_random_&USER=$account&PAG=$page&HR=_canonical_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id_&PAGID=_page_view_id_&TITL=_title_&RQC=2&SSXL=1",
+    "link": "https://amp.shinystat.com/cgi-bin/shinyamp.cgi?AMP=1&RM=_random_&USER=$account&PAG=$page&HR=_canonical_url_&REFER=_document_referrer_&RES=_screen_width_X_screen_height_&COLOR=_screen_color_depth_&CID=_client_id_&PAGID=_page_view_id_&TITL=_title_&RQC=2&LINK=$outboundLink"
+  },
+  "snowplow": {
+    "aaVersion": "amp-0.2",
+    "basePrefix": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.2&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&lang=_browser_language_&refr=_document_referrer_&stm=_timezone_&vp=_viewport_width_x_viewport_height_",
+    "pageView": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.2&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&lang=_browser_language_&refr=_document_referrer_&stm=_timezone_&vp=_viewport_width_x_viewport_height_&e=pv",
+    "structEvent": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.2&cd=_screen_color_depth_&cs=_document_charset_&duid=_client_id_&lang=_browser_language_&refr=_document_referrer_&stm=_timezone_&vp=_viewport_width_x_viewport_height_&e=se&se_ca=$structEventCategory&se_ac=$structEventAction&se_la=$structEventLabel&se_pr=$structEventProperty&se_va=$structEventValue"
+  },
+  "top100": {
+    "host": "https://kraken.rambler.ru",
+    "base": "https://kraken.rambler.ru/cnt/?pid=$pid&rid=_page_view_id_&v=1.0.0&rn=_random_&ruid=_client_id_&ct=amp",
+    "pageview": "https://kraken.rambler.ru/cnt/?pid=$pid&rid=_page_view_id_&v=1.0.0&rn=_random_&ruid=_client_id_&ct=amp&et=pv&pt=_title_&rf=_document_referrer_&en=_document_charset_&la=_browser_language_&tz=_timezone_&sr=_screen_width_x_screen_height_&cd=_screen_color_depth_-bit&bs=_scroll_width_x_scroll_height_",
+    "_screenData": "&sr=_screen_width_x_screen_height_&cd=_screen_color_depth_-bit&bs=_scroll_width_x_scroll_height_",
+    "_pageData": "&pt=_title_&rf=_document_referrer_&en=_document_charset_&la=_browser_language_&tz=_timezone_"
+  },
+  "topmailru": {
+    "pageView": "https://top-fwz1.mail.ru/counter?js=13;id=$id;u=_source_url_;r=_document_referrer_;s=_screen_width_*_screen_height_;vp=_viewport_width_*_viewport_height_;st=$start;gender=$gender;age=$age;pid=$pid;userid=$userid;device=$device;params=$params;_=_random_;title=_title_",
+    "reachGoal": "https://top-fwz1.mail.ru/tracker?js=13;id=$id;u=_source_url_;r=_document_referrer_;s=_screen_width_*_screen_height_;vp=_viewport_width_*_viewport_height_;st=$start;gender=$gender;age=$age;pid=$pid;userid=$userid;device=$device;params=$params;_=_random_;title=_title_;e=RG%3A$value%2F$goal",
+    "sendEvent": "https://top-fwz1.mail.ru/tracker?js=13;id=$id;u=_source_url_;r=_document_referrer_;s=_screen_width_*_screen_height_;vp=_viewport_width_*_viewport_height_;st=$start;gender=$gender;age=$age;pid=$pid;userid=$userid;device=$device;params=$params;_=_random_;e=CE%3A$value%2F$category%3B$action%3B$label",
+    "_domain": "https://top-fwz1.mail.ru",
+    "_basicMessage": "js=13;id=$id;u=_source_url_;r=_document_referrer_;s=_screen_width_*_screen_height_;vp=_viewport_width_*_viewport_height_;st=$start;gender=$gender;age=$age;pid=$pid;userid=$userid;device=$device;params=$params;_=_random_"
+  },
+  "webtrekk": {
+    "trackURL": "https://$trackDomain/$trackId/wt",
+    "parameterPrefix": "?p=432,$contentId,1,_screen_width_x_screen_height_,_screen_color_depth_,1,_timestamp_,_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id_&la=_browser_language_",
+    "parameterSuffix": "&pu=_source_url_",
+    "pageParameter": "&cp1=$pageParameter1&cp2=$pageParameter2&cp3=$pageParameter3&cp4=$pageParameter4&cp5=$pageParameter5&cp6=$pageParameter6&cp7=$pageParameter7&cp8=$pageParameter8&cp9=$pageParameter9&cp10=$pageParameter10",
+    "pageCategories": "&cg1=$pageCategory1&cg2=$pageCategory2&cg3=$pageCategory3&cg4=$pageCategory4&cg5=$pageCategory5&cg6=$pageCategory6&cg7=$pageCategory7&cg8=$pageCategory8&cg9=$pageCategory9&cg10=$pageCategory10",
+    "pageview": "https://$trackDomain/$trackId/wt?p=432,$contentId,1,_screen_width_x_screen_height_,_screen_color_depth_,1,_timestamp_,_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id_&la=_browser_language_&cp1=$pageParameter1&cp2=$pageParameter2&cp3=$pageParameter3&cp4=$pageParameter4&cp5=$pageParameter5&cp6=$pageParameter6&cp7=$pageParameter7&cp8=$pageParameter8&cp9=$pageParameter9&cp10=$pageParameter10&cg1=$pageCategory1&cg2=$pageCategory2&cg3=$pageCategory3&cg4=$pageCategory4&cg5=$pageCategory5&cg6=$pageCategory6&cg7=$pageCategory7&cg8=$pageCategory8&cg9=$pageCategory9&cg10=$pageCategory10&pu=_source_url_",
+    "actionParameter": "&ck1=$actionParameter1&ck2=$actionParameter2&ck3=$actionParameter3&ck4=$actionParameter4&ck5=$actionParameter5",
+    "event": "https://$trackDomain/$trackId/wt?p=432,$contentId,1,_screen_width_x_screen_height_,_screen_color_depth_,1,_timestamp_,_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id_&la=_browser_language_&ct=$actionName&ck1=$actionParameter1&ck2=$actionParameter2&ck3=$actionParameter3&ck4=$actionParameter4&ck5=$actionParameter5&pu=_source_url_"
+  },
+  "mpulse": {
+    "onvisible": "https://$beacon_url?h.d=$h.d&h.key=$h.key&h.t=$h.t&h.cr=$h.cr&rt.start=navigation&rt.si=_client_id_&rt.ss=_timestamp_&rt.end=_timestamp_&t_resp=_nav_timing_&t_page=_nav_timing_&t_done=_nav_timing_&nt_nav_type=_nav_type_&nt_red_cnt=_nav_redirect_count_&nt_nav_st=_nav_timing_&nt_red_st=_nav_timing_&nt_red_end=_nav_timing_&nt_fet_st=_nav_timing_&nt_dns_st=_nav_timing_&nt_dns_end=_nav_timing_&nt_con_st=_nav_timing_&nt_ssl_st=_nav_timing_&nt_con_end=_nav_timing_&nt_req_st=_nav_timing_&nt_res_st=_nav_timing_&nt_unload_st=_nav_timing_&nt_unload_end=_nav_timing_&nt_domloading=_nav_timing_&nt_res_end=_nav_timing_&nt_domint=_nav_timing_&nt_domcontloaded_st=_nav_timing_&nt_domcontloaded_end=_nav_timing_&nt_domcomp=_nav_timing_&nt_load_st=_nav_timing_&nt_load_end=_nav_timing_&v=1&http.initiator=amp&u=_source_url_&amp.u=_ampdoc_url_&r2=_document_referrer_&scr.xy=_screen_width_x_screen_height_",
+  },
+  "linkpulse": {
+    "base": "https://pp.lp4.io",
+    "pageview": "https://pp.lp4.io/p?i=$id&r=_document_referrer_&p=_canonical_url_&s=$section&t=$type&c=amp&mt=_title_&_t=amp&_r=_random_",
+    "pageload": "https://pp.lp4.io/pl?i=$id&ct=_dom_interactive_time_&rt=_page_download_time_&pt=_page_load_time_&p=_canonical_url_&c=amp&t=$type&s=$section&_t=amp&_r=_random_",
+    "ping": "https://pp.lp4.io/u?i=$id&u=_client_id_&p=_canonical_url_&uActive=true&isPing=yes&c=amp&t=$type&s=$section&_t=amp&_r=_random_",
+  },
+  "rakam": {
+    "base": "?api.api_key=$writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_",
+    "pageview": "https://$apiEndpoint/event/pixel?api.api_key=$writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_&collection=$pageViewName",
+    "custom": "https://$apiEndpoint/event/pixel?api.api_key=$writeKey&prop._platform=amp&prop._device_id=_client_id_&prop.locale=_browser_language_&prop.path=_canonical_path_&prop.url=_canonical_url_&prop.color_depth=_screen_color_depth_&prop._referrer=_document_referrer_&prop.title=_title_&prop.timezone=_timezone_&prop._time=_timestamp_&prop.resolution=_screen_width_ × _screen_height_&collection=$collection"
+  },
+  "ibeatanalytics": {
+    "host": "https://ibeat.indiatimes.com",
+    "base": "https://ibeat.indiatimes.com/iBeat/pageTrendlogAmp.html",
+    "pageview": "https://ibeat.indiatimes.com/iBeat/pageTrendlogAmp.html?&h=$h&d=$h&url=$url&k=$key&ts=$time&ch=$channel&sid=$uid&at=$agentType&ref=_document_referrer_&aid=$aid&loc=1&ct=1&cat=$cat&scat=$scat&ac=1&tg=$tags&ctids=$catIds&pts=$pagePublishTime&auth=$author&pos=$position&iBeatField=$ibeatFields&cid=_client_id_"
+  },
+  "umenganalytics": {
+    "base": "https://b.cnzz.com/utrack?&_siteid=$siteid&_distinct_id=_client_id_&_t=_timestamp_&_s=google&_b=web&_r=_external_referrer_&_h=_screen_height_&_w=_screen_width_&_ivt=$initial_view_time",
+    "pageview": "https://b.cnzz.com/utrack?&_siteid=$siteid&_distinct_id=_client_id_&_t=_timestamp_&_s=google&_b=web&_r=_external_referrer_&_h=_screen_height_&_w=_screen_width_&_ivt=$initial_view_time&_ename=$w_page_view&_eprops=$eventProps",
+    "event": "https://b.cnzz.com/utrack?&_siteid=$siteid&_distinct_id=_client_id_&_t=_timestamp_&_s=google&_b=web&_r=_external_referrer_&_h=_screen_height_&_w=_screen_width_&_ivt=$initial_view_time&_ename=$eventName&_eprops=$eventProps"
+  }
+}

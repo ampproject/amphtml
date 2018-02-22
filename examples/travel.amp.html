@@ -1,0 +1,253 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>Travel date picker example</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-custom>
+  .DateRangePicker_picker {
+    margin-top: -70px;
+  }
+
+  .DateRangePicker,
+  .DateRangePickerInput {
+    font-size: 100%;
+  }
+
+  .CalendarDay_container.CalendarDay_container {
+    border-color: transparent;
+  }
+
+  .CalendarDay_container {
+    color: #000;
+    font-family: sans-serif;
+  }
+
+  tr:first-child td:not(.CalendarDay__selected_span) + .CalendarDay__selected_span,
+  tr:first-child td:not(.CalendarDay__selected_span) + .CalendarDay__selected_end {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+  td:not(.CalendarDay__selected_span):not(.CalendarDay__selected) + .CalendarDay__selected_span,
+  .CalendarDay__selected:not(.CalendarDay__selected_span):not(.CalendarDay__selected_end),
+  .CalendarDay__selected_span:first-child {
+    border-radius: 3px 0 0 3px;
+  }
+
+  .CalendarDay__selected_end {
+    border-radius: 0 3px 3px 0;
+  }
+
+  .CalendarDay__selected:not(.CalendarDay__selected_span) + .CalendarDay__selected:not(.CalendarDay__selected_span),
+  .CalendarDay__selected_span + .CalendarDay__selected:not(.CalendarDay__selected_span),
+  .CalendarDay__selected_span:last-child {
+    border-radius: 0 3px 3px 0;
+  }
+  .CalendarDay__selected_span {
+    border-radius: 0;
+  }
+
+  .CalendarDay__blocked,
+  .CalendarDay__blocked_out_of_range {
+    color: #999;
+  }
+
+  .CalendarDay__selected_span:hover,
+  .CalendarDay__selected_span,
+  .CalendarDay__selected {
+    color: #fff;
+    background-color: #000!important;
+  }
+
+  .CalendarDay__highlighted_calendar:hover {
+    background-color: #e4e7e7;
+  }
+
+  .CalendarDay__highlighted_calendar,
+  .CalendarDay__selected_span,
+  .CalendarDay__hovered_span {
+    background-color: #fff;
+  }
+
+  .CalendarDay__highlighted_calendar .CalendarDay_button:before,
+  .highlight-square {
+    content: '';
+    background-color: #20bf7c;
+    width: 5px;
+    height: 5px;
+    position: absolute;
+    bottom: 5px;
+    margin: auto;
+    left: 0;
+    right: 0;
+  }
+
+  .DayPicker_transitionContainer__verticalScrollable {
+    padding-top: 35px;
+  }
+
+  .CalendarMonth_table:last-child {
+    border-collapse: separate;
+    border-spacing: 0 10px;
+  }
+
+  .CalendarMonthGrid {
+    padding-bottom: 100px;
+  }
+
+  .CalendarMonth_caption {
+    text-align: left;
+    font-family: sans-serif;
+    font-weight: bold;
+    font-size: 2em;
+    margin: 20px 0 5px;
+    color: #000;
+    background: transparent;
+  }
+
+  .DayPicker_weekHeader {
+    top: 0;
+    padding: 40px 0 5px;
+  }
+
+  .DayPicker_weekHeader_li {
+    text-transform: uppercase;
+    font-family: sans-serif;
+    font-weight: bold;
+    font-size: 0;
+  }
+
+  .DayPicker_weekHeader_li:first-letter {
+    color: #000;
+    font-size: small;
+  }
+
+  .variations {
+    font-family: sans-serif;
+    display: flex;
+    margin: 15px 0;
+  }
+
+  .variations label {
+    display: flex;
+    width: 50%;
+    margin: 0 10px;
+  }
+
+  .variations select {
+    flex: 1 0 0;
+    margin-left: 5px;
+  }
+
+  .select-dates {
+    border: 0;
+    padding: 10px;
+    color: #fff;
+    text-align: center;
+    letter-spacing: 2px;
+    line-height: 1.875em;
+    background-image: linear-gradient(to bottom right,#ff7a0d 0%,#ff5956 100%);
+    font-size: 16px;
+    width: 100%;
+  }
+
+  .select-dates-container {
+    margin: 10px;
+  }
+
+  .wow {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    margin: auto;
+    z-index: 10;
+
+    background: #f6f7f8;
+    box-shadow: 0 -2px 1px 0 rgba(0,0,0,0.1);
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .tooltip {
+    visibility: hidden;
+    transform: translateY(0);
+    position: fixed;
+    z-index: 2;
+    width: 100%;
+    top: 100%;
+    height: 50px;
+    color: #fff;
+    background-color: #20bf7c;
+    text-align: center;
+    line-height: 50px;
+    font-size: 1.25em;
+    font-family: sans-serif;
+  }
+
+  .tooltip-show {
+    visibility: visible;
+    animation: slide-in-out 4s linear;
+  }
+
+  @keyframes slide-in-out {
+    0% {
+      transform: translateY(0);
+    }
+
+    10% {
+      transform: translateY(-100%);
+    }
+
+    90% {
+      transform: translateY(-100%);
+    }
+
+    100% {
+      transform: translateY(0);
+    }
+  }
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script async custom-element="amp-date-picker" src="https://cdn.ampproject.org/v0/amp-date-picker-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+
+<amp-date-picker
+  type="range"
+  number-of-months="12"
+  orientation="verticalScrollable"
+  with-full-screen-portal
+  show-clear-dates
+  keep-open-on-date-select
+  src="travel.json"
+  day-size="50"
+  week-day-format="dd"
+  on="
+    select:
+      AMP.setState({
+        tooltip: event.dates.filter(d => d.id == 'deal').length > 0
+      })"
+  month-format="MMM"
+>
+  <input amp-date-placeholder-start placeholder="Departing" id="departing"/>
+  <input amp-date-placeholder-end placeholder="Returning" id="returning"/>
+  <template date-template id="deal" type="amp-mustache">
+    {{D}}
+    <span class="highlight-square"></span>
+  </template>
+</amp-date-picker>
+<div class="tooltip" [class]="'tooltip' + (tooltip ? ' tooltip-show' : '')">
+  Great price
+</div>
+
+</body>
+</html>

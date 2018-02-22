@@ -1,0 +1,38 @@
+{
+  "manifest_version": 2,
+  "name": "__MSG_extensionName__",
+  "version": "1.1.5",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAg4Hh0CWPCdY5pfyjgk3ORL0jyKNCrnI6jP/wG7ljiCm/T9ndy7soTWYC+uICXJqcKnen2v5G1GZPexsffRY4BesQyZJy3zu0ctrwe2NHcxlZLcN8iEGDK65DHPO2LZyS2xF13Z2vxsYWqZIDNEdpmaDyEg1s5oRPWqVe4M2OxYwxiFdKNpVx5/MTEG3yZEIL4lmVAYzgS1V/oWyCogEqWBOOPYzl5DXtLb9muo84gvbRXhvM4yZ6nwA5OZiWgeQvHZG2i99X2iqZALwgc9YL4DqeGKmmL+fpL9w89qowdKmlx9fLtjQO9cf39rfPGt7cDfWTewuYox8dROfp6tuf6wIDAQAB",
+  "default_locale": "en",
+  "description": "__MSG_extensionDescription__",
+  "icons": {
+    "16": "icon-16.png",
+    "48": "icon-48.png",
+    "128": "icon-128.png"
+  },
+  "browser_action": {
+    "default_icon": {
+      "19": "no-amp-128.png",
+      "38": "no-amp-38.png"
+    }
+  },
+  "background": {
+    "page": "background.html"
+  },
+  "content_scripts": [
+    {
+      "js": [ "content_script.js" ],
+      "matches": [ "<all_urls>" ],
+      "run_at": "document_start"
+    }
+  ],
+  "content_security_policy": "script-src 'self' https://cdn.ampproject.org; object-src 'self'",
+  "homepage_url": "https://www.ampproject.org",
+  "permissions": [
+    "tabs",
+    "webRequest",
+    "webRequestBlocking",
+    "*://*/",
+    "<all_urls>"
+  ]
+}

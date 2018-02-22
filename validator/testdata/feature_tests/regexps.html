@@ -1,0 +1,143 @@
+<!--
+  Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS-IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the license.
+-->
+<!--
+  Test Description:
+    This tests looks at specific errors related to positive and negative
+    regexps used inside the validator.
+-->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="./regular-html-version.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style>invalid body</style>
+  <noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+
+  <!--
+  src value_regex: "https://cdn\\.ampproject\\.org/v0/amp-vine-(latest|0\\.1).js"
+  The first example is valid. The latter three examples are invalid.
+  -->
+  <script async custom-element="amp-vine" src="https://cdn.ampproject.org/v0/amp-vine-latest.js"> </script>
+  <script async custom-element="amp-vine" src="https://cdn.ampproject.org/v0/amp-vine-0.1.js?foobar"></script>
+  <script async custom-element="amp-vine" src="http://xss.com/https://cdn.ampproject.org/v0/amp-vine-0.1.js?foobar"></script>
+  <script async custom-element="amp-hulu" src="https://cdn.ampproject.org/v0/amp-hulu-latest.js"> Only whitespace is allowed here. </script>
+
+  <!--
+  href value_regex: "https://cdn\\.materialdesignicons\\.com/([0-9]+\\.?)+/css/materialdesignicons\\.min\\.css"
+  The first example is valid, the second example is invalid.
+  -->
+  <link rel="stylesheet" type="text/css"
+        href="https://cdn.materialdesignicons.com/2.0.46/css/materialdesignicons.min.css">
+  <link rel="stylesheet" type="text/css"
+        href="https://cdn.materialdesignicons.com/2.0.46/css/.../materialdesignicons.min.css">
+
+  <!--
+  href value_regex: "https://fonts\\.googleapis\\.com/css\\?.*|https://fast\\.fonts\\.net/.*"
+  The first two examples are valid, the third example is invalid.
+  -->
+  <link rel="stylesheet" type="text/css"
+        href="https://fonts.googleapis.com/css?foobar">
+  <link rel="stylesheet" type="text/css"
+        href="https://cloud.typography.com/6256354/724768/css/fonts.css">
+  <link rel="stylesheet" type="text/css"
+        href="http://xss.com/https://fonts.googleapis.com/css?foobar">
+
+  <!--
+    Regexp to allow typekit fonts.
+    href value_regex: "https://use\\.typekit\\.net/\\w+\\.css"
+    The first example is valid, the second example is invalid.
+  -->
+  <link rel="stylesheet" type="text/css"
+        href="https://use.typekit.net/oeg4hgb.css">
+  <link rel="stylesheet" type="text/css"
+        href="https://use.typekit.net/css/oeg4hgb.css">
+
+  <!--
+    Regexp to allow font-awesome css, but not path traversal.
+    The first example is valid, the second is not.
+  -->
+  <link rel="stylesheet" type="text/css"
+        href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css"
+        href="https://maxcdn.bootstrapcdn.com/font-awesome/../bootstrap/3.3.7/css/bootstrap.min.class">
+
+  <!--
+  rel value_regex: lengthy, see protoascii
+  The first three examples are valid. The latter three examples are invalid.
+  -->
+  <link rel="accessibility">
+  <link rel="accessibility alternate">
+  <link rel="accessibility alternate archives">
+  <link rel="import">
+  <link rel="accessibility subresource">
+  <link rel="manifest accessibility">
+
+  <!--
+  name blacklisted_value_regex: "(^|\\s)(viewport|content-disposition|revisit-after)($|\\s)"
+  The first two examples are valid. The latter two examples are invalid.
+  -->
+  <meta name="valid" content="">
+  <meta name="validcontent-disposition" content="">
+  <meta name="content-disposition" content="">
+  <meta name="invalid content-disposition" content="">
+
+  <!--
+  css selector blacklisted_value_regex: "(^|\\W)i-amphtml-"
+  The first example is valid. The latter four are invalid.
+  -->
+  <style amp-custom>
+    .comic-amp-font-loaded .comic-amp {
+      font-family: 'Comic AMP', serif, sans-serif;
+    }
+    .i-amphtml-hidden {}
+    #i-amphtml-wrapper {}
+    i-amphtml-sizer {}
+    [i-amphtml-section] {}
+  </style>
+
+</head>
+<body>
+
+  <!--
+  class blacklisted_value_regex: "(^|\\W)i-amphtml-"
+  The first example is valid. The latter two are invalid.
+  -->
+  <div class="example-amp-font"></div>
+  <div class="example-amp-font i-amphtml-hidden"></div>
+  <div class="i-amphtml-hidden example-amp-font"></div>
+
+  <!--
+  id blacklisted_value_regex: lengthy, see protoascii
+  The first example is valid. The latter two are invalid.
+  -->
+  <div id="exampe-amp-font"></div>
+  <div id="i-amphtml-abc"></div>
+  <div id="AMP"></div>
+
+  <!--
+  name blacklisted_value_regex: lengthy, see protoascii
+  The first two examples are valid. The latter three are invalid.
+  -->
+  <input name="" />
+  <input name="email" />
+  <input name="innerHTML" />
+  <input name="__amp_source_origin" />
+  <input name="webkitRequestFullscreen" />
+
+</body>
+</html>

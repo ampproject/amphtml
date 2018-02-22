@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script>
+    var name_data;
+    var writeInBody = false;
+    var instantLoad = false;
+
+    var errorHandler = function(err) {
+      window.parent.postMessage({type: 'no-content', error: err.message}, '*');
+      window.name = '';
+    }
+
+    var render = function() {
+      try {
+        document.open();
+        document.write(name_data['creative']);
+        document.close();
+        delete name_data['creative'];
+        window.name = JSON.stringify(name_data);
+      } catch (e) {
+        errorHandler(e);
+      }
+    };
+
+    try {
+      name_data = JSON.parse(window.name);
+      writeInBody = name_data['writeInBody'];
+      instantLoad = name_data['instantLoad'];
+      if (!name_data || !name_data['creative']) {
+        throw new Error('Missing or incorrectly formatted JSON ' +
+            'input to nameframe');
+      }
+      if (!writeInBody) {
+        instantLoad ? render() : (window.onload = render);
+      }
+    } catch (e) {
+      errorHandler(e);
+    }
+  </script>
+</head>
+<body>
+  <script>
+    if (writeInBody) {
+      instantLoad ? render() : (window.onload = render);
+    }
+  </script>
+</body>
+</html>

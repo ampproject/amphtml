@@ -1,0 +1,156 @@
+PASS
+|  <!--
+|    Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+|  
+|    Licensed under the Apache License, Version 2.0 (the "License");
+|    you may not use this file except in compliance with the License.
+|    You may obtain a copy of the License at
+|  
+|        http://www.apache.org/licenses/LICENSE-2.0
+|  
+|    Unless required by applicable law or agreed to in writing, software
+|    distributed under the License is distributed on an "AS-IS" BASIS,
+|    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+|    See the License for the specific language governing permissions and
+|    limitations under the license.
+|  -->
+|  <!--
+|    Test Description: Another test of amp-bind with an autosuggest box.
+|  -->
+|  <!doctype html>
+|  <html ⚡>
+|  <head>
+|    <meta charset="utf-8">
+|    <title>AMP autosuggest Demo</title>
+|    <link rel="canonical" href="amps.html">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+|    <link href="https://fonts.googleapis.com/css?family=Questrial" rel="stylesheet" type="text/css">
+|    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+|    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+|    <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+|    <script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js"></script>
+|    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+|    <style amp-custom>
+|    body {
+|      padding: 10px;
+|    }
+|    .search-container {
+|      display: flex;
+|      flex-flow: row nowrap;
+|    }
+|    .search-box, .search-submit, .select-option {
+|      font-size: 1.25em;
+|    }
+|    .autosuggest-box {
+|      box-shadow: 0px 2px 6px rgba(0,0,0,.3);
+|    }
+|    .search-box {
+|      flex: 4 0 0;
+|      padding: 5px;
+|      border-radius: 4px 0 0 4px;
+|      border: 2px solid lightgray;
+|      border-right: 0;
+|    }
+|    .search-submit {
+|      flex: 1 0 0;
+|      padding: 5px;
+|      border-radius: 0 4px 4px 0;
+|      border: 2px solid #4b68ff;
+|      background: #4b68ff;
+|      color: #fff;
+|    }
+|    .select-option {
+|      display: block;
+|      box-sizing: border-box;
+|      height: 30px;
+|      line-height: 30px;
+|      padding-left: 10px;
+|      background: #ddd;
+|    }
+|    amp-selector .select-option.no-outline.no-outline[option] {
+|      outline: none;
+|    }
+|    .select-option:focus {
+|      box-shadow: inset rgb(94, 158, 215) 0px 0px 45px;
+|    }
+|    .select-option:focus {
+|      background: #fff;
+|    }
+|    .select-option:nth-child(2n) {
+|      background: #eee;
+|    }
+|    </style>
+|  </head>
+|  <body>
+|    <h1>Programming language search</h1>
+|    <form
+|      method="post"
+|      action-xhr="/form/autosuggest/search"
+|      target="_blank"
+|      id="search-form"
+|      on="submit:autosuggest-list.hide;submit-success:results.show"
+|    >
+|      <div class="search-container">
+|        <input
+|          id="query"
+|          name="query"
+|          type="text"
+|          class="search-box"
+|          on="input-debounced:AMP.setState({
+|              query: event.value,
+|              autosuggest: event.value
+|            }),
+|            autosuggest-list.show,
+|            results.hide"
+|          [value]="query || ''"
+|        />
+|        <button class="search-submit" type="submit">Search</button>
+|      </div>
+|      <amp-list
+|        class="autosuggest-box"
+|        layout="fixed-height"
+|        height="120"
+|        src="/form/autosuggest/query"
+|        [src]="'/form/autosuggest/query?q=' + (autosuggest || '')"
+|        id="autosuggest-list"
+|        hidden
+|      >
+|        <template type="amp-mustache">
+|          <amp-selector
+|            keyboard-select-mode="focus"
+|            layout="container"
+|            on="select:AMP.setState({
+|                query: event.targetOption
+|              }),
+|              autosuggest-list.hide,
+|              results.hide"
+|          >
+|            {{#results}}
+|              <div
+|                class="select-option no-outline"
+|                role="option"
+|                tabindex="0"
+|                on="tap:autosuggest-list.hide"
+|                option="{{.}}"
+|              >{{.}}</div>
+|            {{/results}}
+|            {{^results.3}}<div class="select-option"></div>{{/results.3}}
+|            {{^results.2}}<div class="select-option"></div>{{/results.2}}
+|            {{^results.1}}<div class="select-option"></div>{{/results.1}}
+|            {{^results.0}}<div class="select-option"></div>{{/results.0}}
+|          </amp-selector>
+|        </template>
+|      </amp-list>
+|      <div submit-success id="results">
+|        <template type="amp-mustache">
+|          <p>Here are the results for the search "{{query}}":</p>
+|          <ul>
+|              {{#results}}<li>{{title}}</li>{{/results}}
+|          </ul>
+|        </template>
+|      </div>
+|    </form>
+|  </body>
+|  </html>

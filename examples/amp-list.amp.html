@@ -1,0 +1,95 @@
+<!--
+  ## Introduction
+
+  The [`amp-list`](https://www.ampproject.org/docs/reference/components/amp-list) component fetches dynamic content from a CORS JSON endpoint and renders it using a supplied template. This is good for embedding a dynamic list of related articles.
+-->
+<!-- -->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <!-- ## Setup -->
+  <!-- Import the `amp-list` component ... -->
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <!-- ... and the `amp-mustache` component in the header -->
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-list/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+  amp-list {
+    margin-left: 16px;
+  }
+  .list-overflow {
+    width: 160px;
+    margin-left: auto;
+  }
+  </style>
+</head>
+<body>
+
+  <!-- ## Using a nested template -->
+  <!--
+  The `amp-list` content is provided by a JSON CORS endpoint, which is defined by the `src`
+  attribute. The URL's protocol must be HTTPS. The response must be a JSON object containing
+  an array property `items`, for example:
+  ```json
+  {
+    "items": [
+      {
+        "title": "amp-carousel",
+        "url": "https://ampbyexample.com/components/amp-carousel"
+      },
+      ...
+    ]
+  }
+  ```
+  The list content is rendered via an [amp-mustache template](https://www.ampproject.org/docs/reference/components/amp-mustache). The template can be specified either by id, or by using a nested element.
+  -->
+  <amp-list width="auto" height="100" layout="fixed-height" src="list.example.json" class="m1">
+    <template type="amp-mustache" id="amp-template-id">
+      <div><a href="{{url}}">{{title}}</a></div>
+    </template>
+  </amp-list>
+
+  <!-- ## Using an existing template -->
+  <!--
+    The template can also be specified using an ID of an existing
+    `template` element. This example references the template from the
+    previous sample.
+  -->
+  <amp-list width="auto" height="100" layout="fixed-height"  src="list.example.json"
+      template="amp-template-id" class="m1">
+  </amp-list>
+
+  <!-- ## Limiting List Length -->
+  <!--
+ Use the `max-items` attribute to limit the number of list elements displayed
+  -->
+  <amp-list width="auto" height="100" layout="fixed-height"  src="list.example.json" max-items="3"
+      template="amp-template-id" class="m1">
+  </amp-list>
+
+   <!-- ## Single Entry list -->
+  <!--
+ If the `amp-list` content requires more space than available, the AMP runtime will display the overflow element (if specified).
+  -->
+  <amp-list width="auto" height="100" layout="fixed-height"  src="list-single.example.json" single-item items="."
+  template="amp-template-id" class="m1">
+</amp-list>
+
+  <!-- ## Handling List Overflow -->
+  <!--
+ If the `amp-list` content requires more space than available, the AMP runtime will display the overflow element (if specified).
+  -->
+  <amp-list width="auto" height="48" layout="fixed-height"  src="list.example.json" template="amp-template-id" class="m1">
+    <div overflow role="button" aria-label="Show more" class="list-overflow ampstart-btn caps">
+      Show more
+    </div>
+  </amp-list>
+
+
+
+</body>
+</html>

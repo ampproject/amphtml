@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="jar" basedir="." name="runner">
+  <!--
+    Use -Dtest.class to change what tests are run on the command-line.
+    i.e., -Dtest.class=CommandLineRunnerTest will run just that test class.
+  -->
+  <property name="test.class" value="*Test"/>
+
+  <!-- Use -Dtest.method in conjunction with the one-test rule. -->
+  <property name="test.method" value=""/>
+
+  <!--
+    Use -Dtest.fork to specify whether or not to fork the process.
+    Some machines run better with forking turned off.
+  -->
+  <property name="test.fork" value="true"/>
+
+  <!--this file was created by Eclipse Runnable JAR file Export Wizard-->
+  <!--ANT 1.7 is required-->
+  <!--define folder properties-->
+  <property name="dir.buildfile" value="."/>
+  <property name="src.dir" value="${basedir}/src"/>
+  <property name="test.dir" value="${basedir}/test"/>
+  <property name="build.dir" value="${basedir}/build"/>
+  <property name="lib.dir" value="${basedir}/lib"/>
+  <property name="dist.dir" value="${basedir}/dist"/>
+  <property name="runner-jarfile" value="${build.dir}/${ant.project.name}.jar"/>
+  <property name="compiler.dir" value="${basedir}/../../third_party/closure-compiler"/>
+
+  <property name="classes.dir" value="${build.dir}/classes"/>
+  <property name="testClasses.dir" value="${build.dir}/test"/>
+
+  <target name="jar" depends="compile">
+    <jar destfile="${runner-jarfile}">
+      <zipfileset src="${lib.dir}/jar-in-jar-loader.zip"/>
+      <fileset dir="${classes.dir}"/>
+      <fileset dir="${compiler.dir}">
+        <include name="compiler.jar"/>
+      </fileset>
+      <manifest>
+        <attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader"/>
+        <attribute name="Rsrc-Main-Class" value="org.ampproject.AmpCommandLineRunner"/>
+        <attribute name="Class-Path" value="."/>
+        <attribute name="Rsrc-Class-Path" value="./ compiler.jar"/>
+      </manifest>
+    </jar>
+    <mkdir dir="${dist.dir}"/>
+    <copy file="${build.dir}/runner.jar" todir="${dist.dir}"/>
+  </target>
+
+  <target name="compile">
+    <mkdir dir="${classes.dir}"/>
+    <javac srcdir="${src.dir}"
+        destdir="${classes.dir}"
+        excludes=".git,.DS_Store"
+        includeantruntime="false"
+        encoding="utf-8">
+      <classpath refid="srcclasspath.path"/>
+      <compilerarg value="-Xlint:unchecked"/>
+    </javac>
+    <!-- This copy is needed for tests -->
+    <copy file="${compiler.dir}/Messages.properties"
+        todir="${classes.dir}/com/google/javascript/rhino/"/>
+    <!-- This copy is needed for tests -->
+    <copy file="${compiler.dir}/ParserConfig.properties"
+        todir="${classes.dir}/com/google/javascript/jscomp/parsing"/>
+  </target>
+
+  <target name="clean" description="delete generated files">
+    <delete dir="${build.dir}"/>
+  </target>
+
+  <target name="test" depends="compile-tests">
+    <mkdir dir="build/testoutput"/>
+    <junit printsummary="on" fork="${test.fork}"
+        forkmode="once" showoutput="true"
+        dir="${basedir}"
+        failureproperty="junit.failure">
+      <classpath refid="allclasspath.path" />
+      <classpath>
+        <pathelement location="${build.dir}/test"/>
+      </classpath>
+      <batchtest todir="build/testoutput">
+        <formatter type="brief" usefile="false"/>
+        <formatter type="xml"/>
+        <fileset dir="${build.dir}/test">
+          <include name="**/${test.class}.class"/>
+        </fileset>
+      </batchtest>
+    </junit>
+    <junitreport>
+       <fileset dir="build/testoutput" includes="*.xml"/>
+       <report todir="build/testoutput"/>
+    </junitreport>
+    <fail if="junit.failure" message="Unit tests failed. See build/testoutput/index.html"/>
+  </target>
+
+  <target name="compile-tests" depends="compile">
+    <mkdir dir="${testClasses.dir}"/>
+    <javac srcdir="${src.dir}"
+        destdir="${testClasses.dir}"
+        excludes=".git,**/debugger/**,.DS_Store"
+        debug="on"
+        deprecation="on"
+        includeantruntime="false"
+        encoding="utf-8">
+      <classpath refid="allclasspath.path"/>
+      <compilerarg value="-Xlint:unchecked"/>
+    </javac>
+    <javac srcdir="${test.dir}"
+        destdir="${testClasses.dir}"
+        excludes=".git,.DS_Store"
+        debug="on"
+        deprecation="on"
+        includeantruntime="false"
+        encoding="utf-8">
+      <classpath refid="allclasspath.path"/>
+    </javac>
+  </target>
+
+  <target name="one-test" depends="compile-tests">
+    <mkdir dir="build/testoutput"/>
+    <junit printsummary="on" fork="${test.fork}"
+        forkmode="once" showoutput="true"
+        dir="${basedir}"
+        failureproperty="junit.failure">
+      <classpath refid="allclasspath.path"/>
+      <classpath>
+        <pathelement location="${build.dir}/test"/>
+      </classpath>
+      <test todir="build/testoutput" name="${test.class}" methods="${test.method}">
+        <formatter type="brief" usefile="false"/>
+        <formatter type="xml"/>
+      </test>
+    </junit>
+    <junitreport>
+       <fileset dir="build/testoutput" includes="*.xml"/>
+       <report todir="build/testoutput"/>
+    </junitreport>
+    <fail if="junit.failure"
+          message="Unit tests failed. See build/testoutput/index.html"/>
+  </target>
+
+  <path id="srcclasspath.path">
+    <pathelement location="${classes.dir}"/>
+    <fileset dir="${compiler.dir}">
+      <include name="compiler.jar"/>
+    </fileset>
+  </path>
+
+  <path id="allclasspath.path">
+    <pathelement location="${classes.dir}"/>
+    <fileset dir="${compiler.dir}">
+      <include name="compiler-and-tests.jar"/>
+    </fileset>
+  </path>
+</project>

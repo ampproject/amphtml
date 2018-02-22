@@ -1,0 +1,8 @@
+<script>
+  navigator.serviceWorker.register('./test-sw.js').then(function(registration) {
+    console.info('Iframe: ServiceWorker registration successful with scope: ',
+        registration.scope);
+  }).catch(function(e) {
+    console.error('Iframe: ServiceWorker registration failed: ', e.message);
+  });
+</script>

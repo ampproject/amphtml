@@ -1,0 +1,82 @@
+/**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import "../../../third_party/optimized-svg-icons/amp-social-share-svgs.css";
+
+amp-social-share {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  text-decoration: none;
+  cursor: pointer;
+  position: relative;
+}
+
+/**
+ * Note: Attribute selectors were used initially here but we switched to using
+ * class-based selector to style each type because of a bug on iOS Safari 8.
+ * See https://github.com/ampproject/amphtml/issues/4277 for more details.
+ */
+
+/* Twitter Styling */
+.amp-social-share-twitter {
+  background-color: #1da1f2;
+}
+
+/* Facebook Styling */
+.amp-social-share-facebook {
+  background-color: #3b5998;
+}
+
+/* Pinterest Styling */
+.amp-social-share-pinterest {
+  background-color: #bd081c;
+}
+
+/* LinkedIn Styling */
+.amp-social-share-linkedin {
+  background-color: #0077b5;
+}
+
+/* Google+ Styling */
+.amp-social-share-gplus {
+  background-color: #dc4e41;
+}
+
+/* Tumblr Styling */
+.amp-social-share-tumblr {
+  background-color: #3c5a77;
+}
+
+/* Email Styling */
+.amp-social-share-email {
+  background-color: #000000;
+}
+
+/* Whatsapp Styling */
+.amp-social-share-whatsapp {
+  background-color: #25d366;
+}
+
+/* SMS Styling */
+.amp-social-share-sms {
+  background-color: #CA2B63;
+}
+
+/* "system" styling */
+.amp-social-share-system {
+  background-color: #000000;
+}

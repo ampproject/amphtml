@@ -1,0 +1,202 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>AMP Experiments</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <meta name="robots" content="noindex">
+  <script async src="/dist.tools/experiments/experiments.js"></script>
+  <style>
+    body {
+      max-width: 600px;
+      margin: auto;
+      font-family: Roboto, verdana, arial, sans-serif;
+    }
+
+    .header-title {
+      color: #1b1464;
+      font-family: Roboto, verdana, arial, sans-serif;
+      letter-spacing: 2px;
+      padding-left: 0;
+      padding-top: 18px;
+      text-transform: uppercase;
+      width: 10%;
+      display: inline-block;
+      padding: 10px 15px;
+      text-decoration: none;
+    }
+
+    .hero {
+      padding: 16px;
+      background-color: #147bc1;
+      color: #fff;
+    }
+
+    .content {
+      margin: 16px;
+      display: block;
+    }
+
+    .desc {
+      padding: 16px;
+      display: block;
+      color: orange;
+    }
+
+    a {
+      color: #3ab3eb;
+    }
+
+    .content a {
+      text-decoration: none;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    td {
+      padding: 4px;
+    }
+
+    .button-cell {
+      text-align: center;
+    }
+
+    button {
+      min-width: 60px;
+    }
+
+    tr[data-on='0'] button {
+      background: #aaa;
+      color: #777;
+    }
+
+    tr[data-on='1'] button {
+      background: green;
+      color: #fff;
+    }
+
+    .on, .off, .default {
+      display: none;
+    }
+
+    tr[data-on='0'] .off {
+      display: block;
+    }
+
+    tr[data-on='1'] .on {
+      display: block;
+    }
+
+    tr[data-on='default'] .default {
+      display: block;
+    }
+
+    .popup-graypane {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .popup-graypane:not(.show) {
+      display: none;
+    }
+
+    .popup {
+      background: #fff;
+      border: 1px solid #aaa;
+      border-radius: 3px;
+      max-width: 90%;
+      max-height: 90%;
+      min-width: 280px;
+      min-height: 120px;
+    }
+
+    .popup-body {
+      padding: 16px;
+    }
+
+    .popup-button-bar {
+      padding: 16px;
+      text-align: right;
+    }
+
+    .popup-button-bar button {
+      margin: 0 4px;
+      border: 1px solid #eee;
+      border-radius: 2px;
+      background: #fff;
+      color: #222;
+    }
+
+    #popup-button-ok {
+      background: #03a9f4;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="tab header-title">
+      Accelerated
+      Mobile
+      Pages
+      Project
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>AMP Experiments</h1>
+  </section>
+
+  <section class="desc">
+    <p>
+      The switches below will toggle experiments for all documents served through the
+      <a href="https://developers.google.com/amp/cache/">Google AMP Cache</a>;
+      that is, the cached copies of valid AMP content published to the web at
+      the cdn.ampproject.org domain. See the AMP project
+      <a href="https://www.ampproject.org/docs/reference/experimental.html">documentation</a>
+      to find out more about experiments, and how to activate them outside of
+      the Google AMP Cache (including in local development).
+    </p>
+
+    <p>
+      Please exercise caution. These experiments are not fully tested and might
+      contain bugs or have unexpected side effects. Please only activate them
+      if you work on the <a href="https://github.com/ampproject/amphtml/">AMP Project</a>
+      or plan to create AMP documents that use unreleased features for testing purposes.
+    </p>
+  </section>
+
+  <section class="content">
+    <table id="experiments-table" border=1></table>
+  </section>
+
+  <section class="desc">
+    <a target="_blank" href="https://www.google.com/intl/en/policies/privacy/?fg=1">Privacy Policy</a>
+    <a target="_blank" href="https://www.google.com/intl/en/policies/terms/?fg=1">Terms of Service</a>
+  </section>
+
+  <div class="popup-graypane" id="popup-container">
+    <div class="popup">
+      <div class="popup-body">
+        <div id="popup-message" class="popup-message"></div>
+      </div>
+      <div class="popup-button-bar">
+        <button id="popup-button-cancel">Cancel</button>
+        <button id="popup-button-ok">OK</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

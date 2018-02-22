@@ -1,0 +1,201 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
+  <style amp-custom>
+  /* AMP.CSS */
+  html, body {
+    overflow-x: hidden !important;
+    height: auto !important;
+  }
+
+  #lightbox-1 { width: 100%; height: 100%; background-color: black; }
+  #lightbox-1 .close { position: absolute; top: 0; left: 0; right: 0; margin: 5px; color: #ccc; text-align: center; z-index: 1; }
+
+  /**
+   * Margin:0 is currently needed for iOS viewer embeds.
+   * See:
+   * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
+   */
+  body {
+    margin: 0 !important;
+  }
+  /* END AMP.CSS */
+
+  .hidden {
+    display: none;
+  }
+
+  .visible {
+    display: block;
+  }
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <h1>amp #0</h1>
+  <button onclick="AMP.toggleExperiment('slidescroll-disable-css-snap');window.location.href=window.location.href;">Toggle CSS SNAP</button>
+
+  <h1>No Loops for you</h1>
+  <amp-carousel id="carousel-1" width=400 height=300 type=slides controls>
+    <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" layout=fill></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no" width=80 height=60></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=400 height=300></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" layout=fill></amp-img>
+    <amp-youtube
+        data-videoid="mGENRKrdoGY"
+        width="400" height="300">
+    </amp-youtube>
+    <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no" width=400 height=300></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=400 height=300></amp-img>
+  </amp-carousel>
+
+  <h1>Loopy!</h1>
+  <amp-carousel id="carousel-2" width=400 height=300 type=slides controls loop>
+    <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" layout=fill></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no" width=80 height=60></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=400 height=300></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" layout=fill></amp-img>
+    <amp-youtube
+        data-videoid="mGENRKrdoGY"
+        width="400" height="300">
+    </amp-youtube>
+    <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no" width=400 height=300></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=400 height=300></amp-img>
+  </amp-carousel>
+
+  <h1>Autoplay</h1>
+  <amp-carousel id="carousel-3" width=400 height=300 type=slides controls autoplay>
+    <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" width=400 height=300></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no" width=100 height=70></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=400 height=300></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" layout=fill></amp-img>
+    <amp-youtube
+        data-videoid="mGENRKrdoGY"
+        width="400" height="300">
+    </amp-youtube>
+    <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no" width=400 height=300></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=400 height=300></amp-img>
+  </amp-carousel>
+
+  <h1>Responsive Layout</h1>
+  <amp-carousel id="carousel-4" width=400 height=300 type=slides controls layout="responsive">
+    <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" width=40 height=30 layout=responsive></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no" width=400 height=300></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=400 height=300></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" layout=fill></amp-img>
+    <amp-youtube
+        data-videoid="mGENRKrdoGY"
+        width="400" height="300">
+    </amp-youtube>
+    <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no" width=400 height=300></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=400 height=300></amp-img>
+  </amp-carousel>
+
+  <h1>White Images</h1>
+  <amp-carousel id="carousel-5" width=400 height=300 type=slides controls>
+   <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" width=80 height=60></amp-img>
+   <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no" width=80 height=60></amp-img>
+   <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=80 height=60></amp-img>
+   <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" width=80 height=60></amp-img>
+   <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no" width=80 height=60></amp-img>
+   <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=80 height=60></amp-img>
+  </amp-carousel>
+
+  <h1>Just 3</h1>
+  <amp-carousel id="carousel-5" width=400 height=300 type=slides controls>
+    <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" layout=fill></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no" width=80 height=60></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=400 height=300></amp-img>
+  </amp-carousel>
+
+  <h1>Just 3 with loops</h1>
+  <amp-carousel id="carousel-5" width=400 height=300 type=slides loop>
+    <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" layout=fill></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no" width=80 height=60></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=400 height=300></amp-img>
+  </amp-carousel>
+
+  <h1>Just 2</h1>
+  <amp-carousel id="carousel-6" width=400 height=300 type=slides controls loop>
+    <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" width=80 height=60></amp-img>
+    <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no" width=80 height=60></amp-img>
+  </amp-carousel>
+
+  <h1>Carousel in Lightbox</h1>
+  <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w100-h75-no" width=100 height=75 on="tap:lightbox-1,carousel-7.goToSlide(index=0)"></amp-img>
+  <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w100-h75-no" width=100 height=75 on="tap:lightbox-1,carousel-7.goToSlide(index=1)"></amp-img>
+  <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w100-h75-no" width=100 height=75 on="tap:lightbox-1,carousel-7.goToSlide(index=2)"></amp-img>
+  <amp-lightbox id="lightbox-1" layout=nodisplay>
+    <div class="close" on="tap:lightbox-1.close">Close</div>
+    <amp-carousel id="carousel-7" width=400 height=300 layout=fill type=slides controls>
+      <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no" width=400 height=300></amp-img>
+      <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no" width=400 height=300></amp-img>
+      <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w400-h300-no" width=400 height=300></amp-img>
+    </amp-carousel>
+  </amp-lightbox>
+
+
+  <h1>Alter window size to less than 500px and more than 500px to change image visibility with media attribute.</h1>
+  <amp-carousel
+      id="article-carousel"
+      layout="responsive"
+      width="1600"
+      height="900"
+      type="slides">
+      <div>
+          <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w100-h75-no"
+                   layout="responsive"
+                   media="(min-width: 500px)"
+                   width="1600"
+                   height="900"
+                   alt="a sample image"></amp-img>
+          <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w100-h75-no"
+                   layout="responsive"
+                   media="(max-width: 499px)"
+                   width="1600"
+                   height="900"
+                   alt="a sample image"></amp-img>
+      </div>
+      <div>
+          <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w100-h75-no"
+                   layout="responsive"
+                   media="(min-width: 500px)"
+                   width="1600"
+                   height="900"
+                   alt="a sample image"></amp-img>
+          <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w100-h75-no"
+                   layout="responsive"
+                   media="(max-width: 499px)"
+                   width="1600"
+                   height="900"
+                   alt="a sample image"></amp-img>
+      </div>
+      <div>
+          <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w100-h75-no"
+                   layout="responsive"
+                   media="(min-width: 500px)"
+                   width="1600"
+                   height="900"
+                   alt="a sample image"></amp-img>
+          <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w100-h75-no"
+                   layout="responsive"
+                   media="(max-width: 499px)"
+                   width="1600"
+                   height="900"
+                   alt="a sample image"></amp-img>
+      </div>
+  </amp-carousel>
+
+</body>
+</html>
+

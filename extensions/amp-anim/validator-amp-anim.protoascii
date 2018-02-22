@@ -1,0 +1,81 @@
+#
+# Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS-IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the license.
+#
+
+tags: {  # amp-anim
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "SCRIPT"
+  extension_spec: {
+    name: "amp-anim"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+    requires_usage: GRANDFATHERED
+    deprecated_allow_duplicates: true
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # amp-anim
+  html_format: AMP4EMAIL
+  tag_name: "SCRIPT"
+  spec_name: "amp-anim extension .js script (AMP4EMAIL)"
+  extension_spec: {
+    name: "amp-anim"
+    allowed_versions: "0.1"
+    allowed_versions: "latest"
+  }
+  attr_lists: "common-extension-attrs"
+}
+tags: {  # <amp-anim>
+  html_format: AMP
+  html_format: AMP4ADS
+  tag_name: "AMP-ANIM"
+  requires_extension: "amp-anim"
+  attrs: { name: "alt" }
+  attrs: { name: "attribution" }
+  attrs: { name: "controls" }
+  attr_lists: "extended-amp-global"
+  attr_lists: "mandatory-src-or-srcset"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-anim"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+tags: {  # <amp-anim>
+  html_format: AMP4EMAIL
+  tag_name: "AMP-ANIM"
+  spec_name: "AMP-ANIM (AMP4EMAIL)"
+  requires_extension: "amp-anim"
+  attrs: { name: "alt" }
+  attrs: { name: "attribution" }
+  attrs: { name: "controls" }
+  attr_lists: "extended-amp-global"
+  attr_lists: "mandatory-src-amp4email"
+  spec_url: "https://www.ampproject.org/docs/reference/components/amp-anim"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}

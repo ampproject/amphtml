@@ -1,0 +1,90 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Social Sharing with amp-social-share</title>
+    <link rel="canonical" href="http://example.ampproject.org/article-metadata.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <script type="application/ld+json">
+      {
+        "@context": "http://schema.org",
+        "@type": "NewsArticle",
+        "headline": "Open-source framework for publishing content",
+        "datePublished": "2015-10-07T12:02:41Z",
+        "image": [
+          "logo.jpg"
+        ]
+      }
+    </script>
+    <script custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js" async></script>
+    <style amp-custom>
+      .social-box {
+        max-width: 300px;
+      }
+      amp-social-share[type="baidu"] {
+        background-color: black;
+        color: #fff;
+        font-size: 32px;
+        text-align: center;
+      }
+    </style>
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+  </head>
+  <body>
+    <h1>Social Share</h1>
+
+    <div class="social-box">
+      <amp-social-share type="email"
+                        data-param-subject="Hello World"
+                        data-param-body="What's up?"
+                        data-param-recipient="sample@xyz.com"
+                        aria-label="Share by email">
+      </amp-social-share>
+      <amp-social-share type="whatsapp"
+                        aria-label="Share to Whatsapp">
+      </amp-social-share>
+      <amp-social-share type="pinterest"
+                        data-param-media="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h300-no"
+                        aria-label="Share to Pinterest">
+      </amp-social-share>
+      <amp-social-share type="system"
+                        data-mode="replace"
+                        data-param-text="Shared via the Web Share API"
+                        tabindex="-1">
+      </amp-social-share>
+      <amp-social-share type="facebook"
+                        data-param-text="Hello world"
+                        data-param-href="https://example.com/?ref=URL"
+                        data-param-app_id="145634995501895"
+                        aria-label="Share to Facebook">
+      </amp-social-share>
+      <amp-social-share type="twitter"
+                        aria-label="Share to Twitter">
+      </amp-social-share>
+      <amp-social-share type="linkedin"
+                        width="108"
+                        height="44"
+                        layout="fixed"
+                        aria-label="Share to LinkedIn">
+      </amp-social-share>
+      <amp-social-share layout="responsive"
+                        width="40"
+                        height="40"
+                        type="baidu"
+                        data-share-endpoint="http://cang.baidu.com/do/add"
+                        data-param-iu="CANONICAL_URL"
+                        data-param-it="TITLE"
+                        aria-label="Share to Baidu">
+        B
+      </amp-social-share>
+      <amp-social-share layout="responsive"
+                        width="40"
+                        height="40"
+                        type="sms"
+                        aria-label="Share via SMS">
+      </amp-social-share>
+
+    </div>
+  </body>
+</html>

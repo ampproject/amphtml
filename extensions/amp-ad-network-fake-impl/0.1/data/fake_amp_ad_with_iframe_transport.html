@@ -1,0 +1,86 @@
+<!doctype html>
+<html amp4ads>
+  <head>
+    <title>Ad with 3p Analytics and amp-ad-exit</title>
+    <meta charset=utf-8>
+    <script async src='https://cdn.ampproject.org/v0.js'></script>
+    <script async custom-element='amp-analytics' src='https://cdn.ampproject.org/v0/amp-analytics-0.1.js'></script>
+    <script async custom-element='amp-ad-exit' src='https://cdn.ampproject.org/v0/amp-ad-exit-0.1.js'></script>
+    <style amp4ads-boilerplate>body{visibility:hidden}</style>
+    <meta name=viewport content=width=device-width,minimum-scale=1>
+  </head>
+  <body>
+    Before using this example ad, please add the following to
+    extensions/amp-analytics/0.1/vendors.js:
+    <pre>
+      'example-3p-vendor': {
+        'transport': {
+          'iframe': 'http://localhost:8000/examples/analytics-iframe-transport-remote-frame.html',
+        },
+      },
+    </pre>
+    <amp-analytics type='example-3p-vendor'>
+      <script type='application/json'>
+        {
+          "requests": {
+            "sample_visibility_request": "visible=true&url=${canonicalUrl}&title=${title}&acct=${account}",
+            "sample_click_request": "eid=click&acct=${account}"
+          },
+          "vars": {
+            "account": "sample_account_A123456"
+          },
+          "triggers": {
+            "sample_visibility_trigger": {
+              "on": "visible",
+              "request": "sample_visibility_request"
+            },
+            "sample_img_click_trigger": {
+              "on": "click",
+              "selector": "img",
+              "request": "sample_click_request"
+            }
+          }
+        }
+      </script>
+    </amp-analytics>
+    <amp-ad-exit id='exit-api'>
+      <script type='application/json'>
+        {
+          "targets": {
+            "target1": {
+              "finalUrl": "/?product1&x=CLICK_X&y=CLICK_Y&e=_elem&foo=_bar&shouldNotBeReplaced=AMP_VERSION",
+              "vars": {
+                "_elem": {
+                  "defaultValue": "headline"
+                },
+                "_bar": {
+                  "defaultValue": "bar-default",
+                  "iframeTransportSignal": "IFRAME_TRANSPORT_SIGNAL(example-3p-vendor,collected-data)"
+                }
+              }
+            }
+          },
+          "filters": {
+            "longDelay": {
+              "type": "clickDelay",
+              "delay": 10000
+            }
+          },
+          "transport": {
+            "beacon": true,
+            "image": true
+          }
+        }
+      </script>
+    </amp-ad-exit>
+    <div id='ad'>
+      <div class='product' on='tap:exit-api.exit(target="target1", _elem="Product 1")'>
+        <amp-img id='img' src='https://upload.wikimedia.org/wikipedia/commons/6/6e/Golde33443.jpg' width=256 height=300></amp-img>
+        <p class='frob'>
+          By Golden Trvs Gol twister (Own work) [CC BY-SA 4.0 (http://creativecommons.org/licenses/by-sa/4.0)], via Wikimedia Commons
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
+

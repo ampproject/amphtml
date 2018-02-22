@@ -1,0 +1,150 @@
+<!--
+  Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS-IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the license.
+-->
+<!--
+  Test Description:
+  This test validates the complex rules around mandatory dimensions for
+  responsive amp custom elements. See
+  https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md.
+-->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="./regular-html-version.html">
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+
+  <!-- Valid Examples -->
+    <!-- Layout of responsive/fixed with width/height -->
+    <amp-img src="img" layout="responsive" width="42" height="42"></amp-img>
+    <amp-img src="img" layout="fixed" width="42" height="42"></amp-img>
+
+    <!-- Layout of nodisplay/fill with/without width/height -->
+    <amp-img src="img" layout="nodisplay" width="42" height="42"></amp-img>
+    <amp-img src="img" layout="fill" width="42" height="42"></amp-img>
+    <amp-img src="img" layout="nodisplay"></amp-img>
+    <amp-img src="img" layout="fill"></amp-img>
+
+    <!-- Layout of nodisplay/fill with partial width/height.
+         These should not validate, but currently do. -->
+    <amp-img src="img" layout="nodisplay" width="42"></amp-img>
+    <amp-img src="img" layout="fill" height="42"></amp-img>
+
+    <!-- Missing layout implies layout="fixed" when width and height are set. -->
+    <amp-img src="img" width="42" height="42"></amp-img>
+
+    <!-- fixed-height layout allows width=auto. -->
+    <amp-img layout="fixed-height" src="img" width="auto" height="42"></amp-img>
+    <amp-img layout="fixed-height" src="img" height="42"></amp-img>
+
+    <!-- Missing layout implies layout="fixed-height" when height is set. -->
+    <amp-img src="img" width="auto" height="42"></amp-img>
+    <amp-img src="img" height="42"></amp-img>
+
+    <!-- It's OK to have inconsistent units for layout="fixed" -->
+    <amp-img src="img" layout="fixed" width="42px" height="42rem">
+
+
+    <!-- throw in some fully optional attrs -->
+    <amp-img src="img" width=42 height=42 placeholder=""></amp-img>
+    <amp-img src="img" layout="nodisplay" alt="" attribution=""></amp-img>
+    <amp-img src="img" layout="fixed" width="42" height="42" on="" media="">
+    </amp-img>
+
+    <!-- amp-audio/pixel/lightbox have relaxed width/heigh constraints -->
+    <amp-audio src="https://example.com/audio" layout="fixed" width="42"></amp-audio>
+    <amp-audio src="https://example.com/audio" layout="fixed"></amp-audio>
+    <amp-pixel src="https://example.com/pixel" layout="fixed" width="42"></amp-pixel>
+    <amp-pixel src="https://example.com/pixel" layout="fixed"></amp-pixel>
+    <amp-lightbox layout="nodisplay" width="42"></amp-lightbox>
+    <amp-lightbox layout="nodisplay"></amp-lightbox>
+
+    <!-- src or srcset or both are all valid -->
+    <amp-img width="42" height="42" src="img"></amp-img>
+    <amp-img width="42" height="42" srcset="img 1x, img2 2x"></amp-img>
+    <amp-img width="42" height="42" src="img" srcset="img 1x, img2 2x"></amp-img>
+    <amp-anim width="42" height="42" src="anim"></amp-anim>
+    <amp-anim width="42" height="42" srcset="img 1x, img2 2x"></amp-anim>
+    <amp-anim width="42" height="42" src="anim" srcset="img 1x, img2 2x"></amp-anim>
+
+    <!-- src optional -->
+    <amp-audio src="https://example.com/audio"></amp-audio>
+    <amp-audio></amp-audio>
+    <amp-video width="42" height="42" src="https://example.com/video"></amp-video>
+    <amp-video width="42" height="42"></amp-video>
+    <amp-ad width="42" height="42" type="" src="https://example.com/ad"></amp-ad>
+    <amp-ad width="42" height="42" type=""></amp-ad>
+
+    <!-- src or srcdoc required -->
+    <amp-iframe width="42" height="42" src="https://example.com/iframe"></amp-iframe>
+    <amp-iframe width="42" height="42" srcdoc="<p>Hello, world!</p>"></amp-iframe>
+    <amp-pixel src="https://example.com/pixel"></amp-pixel>
+
+    <!-- disallow a src or srcset -->
+    <amp-fit-text height="42"></amp-fit-text>
+    <amp-carousel height="42"></amp-carousel>
+    <amp-youtube data-videoid="dQw4w9WgXcQ" height="42"></amp-youtube>
+    <amp-twitter data-tweetid="" height="42"></amp-twitter>
+    <amp-instagram data-shortcode="" height="42"></amp-instagram>
+    <amp-lightbox layout="nodisplay"></amp-lightbox>
+  <!-- /Valid Examples -->
+
+  <!-- Invalid Examples -->
+    <!-- Container layout isn't supported by amp-img. -->
+    <amp-img src="img" layout="container">
+    <amp-img src="img" layout="container" width="42" height="42">
+    <amp-img src="img">
+
+    <!-- Layout of responsive/fixed without width/height -->
+    <amp-img src="img" layout="responsive">
+    <amp-img src="img" layout="fixed">
+    <amp-img src="img" layout="responsive" width="42">
+    <amp-img src="img" layout="fixed" height="42">
+    <amp-img src="img" layout="fixed" height="auto">
+    <amp-img src="img" layout="fixed" width="auto" height="42">
+
+    <!-- Inconsistent units -->
+    <amp-img src="img" layout="responsive" width="42px" height="42rem">
+
+    <!-- src or srcset or both are all valid -->
+    <amp-img width="42" height="42"></amp-img>
+    <amp-anim width="42" height="42"></amp-anim>
+
+    <!-- src optional -->
+    <amp-audio srcset="img 1x, img2 2x"></amp-audio>
+    <amp-ad height="42" type="" srcset="img 1x, img2 2x"></amp-ad>
+
+    <!-- src or srcdoc required -->
+    <amp-iframe height="42"></amp-iframe>
+    <amp-pixel></amp-pixel>
+
+    <!-- disallow a src or srcset -->
+    <amp-fit-text height="42" src="fit-text"></amp-fit-text>
+    <amp-carousel height="42" src="carousel"></amp-carousel>
+    <amp-youtube height="42" data-videoid="dQw4w9WgXcQ" srcset="img 1x, img2 2x"></amp-youtube>
+    <amp-twitter height="42" data-tweetid="" srcset="img 1x, img2 2x"></amp-twitter>
+    <amp-instagram height="42" data-shortcode="" srcset="img 1x, img2 2x"></amp-instagram>
+    <amp-lightbox layout="nodisplay" src="lightbox"></amp-lightbox>
+
+    <!-- Not-whitelisted attributes -->
+    <amp-img height="42" src="img" foo="bar"></amp-img>
+  <!-- /Invalid Examples -->
+
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "share-providers": {
+    "facebook": true
+  },
+  "related-articles": {
+    "test": [
+      {
+        "title": "This is an example article",
+        "url": "http://example.com/article.html",
+        "image": "http://placehold.it/256x128"
+      }
+    ]
+  }
+}
