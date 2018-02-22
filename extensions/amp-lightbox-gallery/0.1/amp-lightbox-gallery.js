@@ -491,7 +491,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     button.classList.add(className);
     button.classList.add('amp-lbg-button');
 
-
     button.addEventListener('click', event => {
       action();
       event.stopPropagation();
