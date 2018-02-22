@@ -19,7 +19,7 @@ import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {parser} from './bind-expr-impl';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 
 const TAG = 'amp-bind';
 
@@ -101,54 +101,54 @@ function generateFunctionWhitelist() {
 
   // Prototype functions.
   const whitelist = dict({
-    '[object Array]': [
-      Array.prototype.concat,
-      Array.prototype.filter,
+    '[object Array]': {
       // TODO(choumx): Need polyfill for Array#find and Array#findIndex.
-      Array.prototype.indexOf,
-      Array.prototype.join,
-      Array.prototype.lastIndexOf,
-      Array.prototype.map,
-      Array.prototype.reduce,
-      Array.prototype.slice,
-      Array.prototype.some,
-      Array.prototype.includes,
-    ],
-    '[object Number]': [
-      Number.prototype.toExponential,
-      Number.prototype.toFixed,
-      Number.prototype.toPrecision,
-      Number.prototype.toString,
-    ],
-    '[object String]': [
-      String.prototype.charAt,
-      String.prototype.charCodeAt,
-      String.prototype.concat,
-      String.prototype.indexOf,
-      String.prototype.lastIndexOf,
-      String.prototype.slice,
-      String.prototype.split,
-      String.prototype.substr,
-      String.prototype.substring,
-      String.prototype.toLowerCase,
-      String.prototype.toUpperCase,
-    ],
+      'concat': Array.prototype.concat,
+      'filter': Array.prototype.filter,
+      'indexOf': Array.prototype.indexOf,
+      'join': Array.prototype.join,
+      'lastIndexOf': Array.prototype.lastIndexOf,
+      'map': Array.prototype.map,
+      'reduce': Array.prototype.reduce,
+      'slice': Array.prototype.slice,
+      'some': Array.prototype.some,
+      'includes': Array.prototype.includes,
+    },
+    '[object Number]': {
+      'toExponential': Number.prototype.toExponential,
+      'toFixed': Number.prototype.toFixed,
+      'toPrecision': Number.prototype.toPrecision,
+      'toString': Number.prototype.toString,
+    },
+    '[object String]': {
+      'charAt': String.prototype.charAt,
+      'charCodeAt': String.prototype.charCodeAt,
+      'concat': String.prototype.concat,
+      'indexOf': String.prototype.indexOf,
+      'lastIndexOf': String.prototype.lastIndexOf,
+      'slice': String.prototype.slice,
+      'split': String.prototype.split,
+      'substr': String.prototype.substr,
+      'substring': String.prototype.substring,
+      'toLowerCase': String.prototype.toLowerCase,
+      'toUpperCase': String.prototype.toUpperCase,
+    },
   });
 
   // Un-namespaced static functions.
-  whitelist[BUILT_IN_FUNCTIONS] = [
-    encodeURI,
-    encodeURIComponent,
-    Math.abs,
-    Math.ceil,
-    Math.floor,
-    Math.max,
-    Math.min,
-    Math.random,
-    Math.round,
-    Math.sign,
-    Object.keys, // Object.values is polyfilled below.
-  ];
+  whitelist[BUILT_IN_FUNCTIONS] = {
+    'encodeURI': encodeURI,
+    'encodeURIComponent': encodeURIComponent,
+    'abs': Math.abs,
+    'ceil': Math.ceil,
+    'floor': Math.floor,
+    'max': Math.max,
+    'min': Math.min,
+    'random': Math.random,
+    'round': Math.round,
+    'sign': Math.sign,
+    'keys': Object.keys, // Object.values is polyfilled below.
+  };
 
   // Creates a map of function name to the function itself.
   // This makes function lookups faster (compared to Array.indexOf).
@@ -156,12 +156,17 @@ function generateFunctionWhitelist() {
   Object.keys(whitelist).forEach(type => {
     out[type] = map();
 
-    whitelist[type].forEach((fn, i) => {
-      if (fn) {
-        out[type][fn.name] = fn;
+    const functionsForType = whitelist[type];
+    Object.keys(functionsForType).forEach(name => {
+      const func = functionsForType[name];
+      if (func) {
+        dev().assert(!func.name || name === func.name, `Listed function name ` +
+            `"${name}" doesn't match name property "${func.name}".`)
+
+        out[type][name] = func;
       } else {
         // This can happen if a browser doesn't support a built-in function.
-        throw new Error(`Unsupported function for ${type} at index ${i}.`);
+        throw new Error(`Unsupported function: ${type}.${name}`);
       }
     });
   });
