@@ -271,6 +271,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Media.net](../../ads/medianet.md)
 - [MediaImpact](../../ads/mediaimpact.md)
 - [Mediavine](../../ads/mediavine.md)
+- [Medyanet](../../ads/medyanet.md)
 - [Meg](../../ads/meg.md)
 - [MicroAd](../../ads/microad.md)
 - [Mixpo](../../ads/mixpo.md)
