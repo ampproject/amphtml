@@ -51,28 +51,6 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     /** @private {?string} */
     this.expandedAdUrl_ = null;
 
-    /** @private {?function()} */
-    this.adResponsePromiseResolver_ = null;
-
-    /**
-     * @const {!Promise<?Promise<?{bytes: !ArrayBuffer, headers: !Headers}>>}
-     * @private
-     */
-    this.adResponsePromise_ = new Promise((resolve, unused) => {
-      this.adResponsePromiseResolver_ = resolve;
-    });
-
-    /** @private {?function()} */
-    this.validatedResponsePromiseResolver_ = null;
-
-    /**
-     * @const {!Promise<string>}
-     * @private
-     */
-    this.validatedResponsePromise_ = new Promise((resolve, unused) => {
-      this.validatedResponsePromiseResolver_ = resolve;
-    });
-
     /** @private {?ArrayBuffer} */
     this.unvalidatedBytes_ = null;
 
@@ -82,8 +60,6 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
       height: this.element.getAttribute('height'),
     };
 
-    this.init_();
-
     // TODO Remove
     // For test purposes only
     this.bindAdRequestUrl('foo');
@@ -91,12 +67,9 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     this.bindRenderer(ValidationResult.AMP, creative => dev().info(TAG, creative));
   }
 
-  /////////////////////////////////////////////////////////////////////////////
-  //          Public methods: Please keep in alphabetic order                //
-  /////////////////////////////////////////////////////////////////////////////
-
   /**
    * @param {string} adUrl
+   * @protected
    */
   bindAdRequestUrl(adUrl) {
     if (this.adUrl_) {
@@ -108,6 +81,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   /**
    * @param {ValidationResultType} resultType
    * @param {function()} renderer
+   * @protected
    */
   bindRenderer(resultType, renderer) {
     if (this.boundRenderers_[resultType]) {
@@ -118,6 +92,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
   /**
    * @param {function()} validator
+   * @protected
    */
   bindValidator(validator) {
     if (this.boundValidator_) {
@@ -132,11 +107,6 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   forceCollapse() {
     super.attemptChangeSize(0, 0);
   }
-
-  /////////////////////////////////////////////////////////////////////////////
-  //         Private methods: Please keep in alphabetic order                //
-  /////////////////////////////////////////////////////////////////////////////
-
 
   /**
    * @return {string} The finalized ad request URL.
@@ -163,62 +133,38 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /**
-   * Defines sequence of events to follow:
-   * - ad response receipt
-   * - validation
+   * Processes the ad response as soon as the XHR request returns. This can be
+   * overridden and used as a hook to perform any desired logic before passing
+   * the response to the validator.
+   * @param {?Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} response
+   * @protected
    */
-  init_() {
-    this.initAdResponseHandling_();
-    this.initValidationResponseHandling_();
+  handleAdResponse(response) {
+    const unvalidatedBytes = response.bytes;
+    const headers = response.headers;
+    dev().assert(this.boundValidator_, 'Validator never bound!');
+    this.unvalidatedBytes_ = unvalidatedBytes;
+    this.boundValidator_(unvalidatedBytes, headers, this)
+        .then(validatedBytes =>
+            this.handleValidationResponse(utf8Decode(validatedBytes)));
   }
 
   /**
-   * Defines sequence of events to follow upon resolution of
-   * adResponsePromise_. The promise will resolve once a response is received
-   * following the XhrRequest.
-   *
-   * After resolution, the validator will be invoked, and unvalidatedBytes will
-   * be set.
+   * @param {string} validatedResponse The utf-8 decoded ad response.
    */
-  initAdResponseHandling_() {
-    this.adResponsePromise_.then(response => {
-      const unvalidatedBytes = response.bytes;
-      const headers = response.headers;
-      dev().assert(this.boundValidator_, 'Validator never bound!');
-      this.unvalidatedBytes_ = unvalidatedBytes;
-      this.boundValidator_(unvalidatedBytes, headers, this)
-          .then(validatedBytes => {
-            this.validatedResponsePromiseResolver_(utf8Decode(validatedBytes));
-          });
-    });
+  handleValidationResponse(validatedResponse) {
+    if (validatedResponse) {
+      dev().assert(this.boundRenderers_[ValidationResult.AMP],
+          'Renderer for AMP creatives never bound!');
+      this.boundRenderers_[ValidationResult.AMP](
+          this.getRenderingDataInput_(validatedResponse));
+    } else if (this.unvalidatedBytes_) {
+      dev().assert(this.boundRenderers_[ValidationResult.NON_AMP],
+          'Renderer for non-AMP creatives never bound!');
+      this.boundRenderers_[ValidationResult.NON_AMP](
+          this.getRenderingDataInput_(utf8Decode(this.unvalidatedBytes_)));
+    }
   }
-
-  /**
-   * Defines sequence of events to follow upon resolution of
-   * validatedResponsePromise_. The promise will resolve after the validator is
-   * finished.
-   *
-   * After resolution, the renderer will be invoked.
-   */
-  initValidationResponseHandling_() {
-    this.validatedResponsePromise_.then(validatedResponse => {
-      if (validatedResponse) {
-        dev().assert(this.boundRenderers_[ValidationResult.AMP],
-            'Renderer for AMP creatives never bound!');
-        this.boundRenderers_[ValidationResult.AMP](
-            this.getRenderingDataInput_(validatedResponse));
-      } else if (this.unvalidatedBytes_) {
-        dev().assert(this.boundRenderers_[ValidationResult.NON_AMP],
-            'Renderer for non-AMP creatives never bound!');
-        this.boundRenderers_[ValidationResult.NON_AMP](
-            this.getRenderingDataInput_(utf8Decode(this.unvalidatedBytes_)));
-      }
-    });
-  }
-
-  /////////////////////////////////////////////////////////////////////////////
-  //    AMP element lifecycle methods: Please keep in alphabetic order.      //
-  /////////////////////////////////////////////////////////////////////////////
 
   /** @override */
   isLayoutSupported(unusedLayout) {
@@ -232,9 +178,8 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    sendXhrRequestMock(this.getExpandedUrl_()).then(responseParts => {
-      this.adResponsePromiseResolver_(responseParts);
-    });
+    sendXhrRequestMock(this.getExpandedUrl_())
+        .then(response => this.handleAdResponse(response));
   }
 }
 

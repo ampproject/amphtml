@@ -179,7 +179,7 @@ export function templateValidator(
     return new AmpAdTemplates()
         .fetch(ampCreativeJson.templateUrl)
         .then(template => {
-          return utf8Encode(parseOnFetch ? parseOnFetch(template) : template);
+          return parseOnFetch ? parseOnFetch(template) : template;
         })
         .catch(error => {
           dev().warn(TAG, 'Error fetching/expanding template',
