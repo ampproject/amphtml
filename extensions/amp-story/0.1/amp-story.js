@@ -34,6 +34,10 @@ import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryVariableService} from './variable-service';
 import {Bookend} from './bookend';
 import {CSS} from '../../../build/amp-story-0.1.css';
+import {
+  DoubletapRecognizer,
+  SwipeXYRecognizer,
+} from '../../../src/gesture-recognizers';
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
 import {KeyCodes} from '../../../src/utils/key-codes';
@@ -44,7 +48,6 @@ import {ORIGIN_WHITELIST} from './origin-whitelist';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareWidget} from './share';
-import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {SystemLayer} from './system-layer';
 import {TapNavigationDirection} from './page-advancement';
 import {
@@ -270,9 +273,6 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?ShareWidget} */
     this.shareWidget_ = null;
 
-    /** @private {?function()} */
-    this.boundOnResize_ = null;
-
     /** @private @const {!Array<string>} */
     this.originWhitelist_ = ORIGIN_WHITELIST;
 
@@ -417,27 +417,36 @@ export class AmpStory extends AMP.BaseElement {
       this.performTapNavigation_(direction);
     });
 
-    const gestures = Gestures.get(this.element,
-        /* shouldNotPreventDefault */ true);
-
-    gestures.onGesture(SwipeXYRecognizer, e => {
-      if (this.bookend_.isActive()) {
-        return;
-      }
-
-      if (!this.isSwipeLargeEnoughForHint_(e.data.deltaX)) {
-        return;
-      }
-
-      this.ampStoryHint_.showNavigationOverlay();
-    });
-
     this.win.document.addEventListener('keydown', e => {
       this.onKeyDown_(e);
     }, true);
 
-    this.boundOnResize_ = debounce(this.win, () => this.onResize(), 300);
-    this.getViewport().onResize(this.boundOnResize_);
+    this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
+    this.installGestureRecognizers_();
+  }
+
+  /** @private */
+  installGestureRecognizers_() {
+    const {element} = this;
+    const gestures = Gestures.get(element, /* shouldNotPreventDefault */ true);
+
+    // Disables zoom on double-tap.
+    gestures.onGesture(DoubletapRecognizer, gesture => {
+      const {event} = gesture;
+      event.preventDefault();
+    });
+
+    // Shows "tap to natigate" hint when swiping.
+    gestures.onGesture(SwipeXYRecognizer, gesture => {
+      const {deltaX} = gesture.data;
+      if (this.bookend_.isActive()) {
+        return;
+      }
+      if (!this.isSwipeLargeEnoughForHint_(deltaX)) {
+        return;
+      }
+      this.ampStoryHint_.showNavigationOverlay();
+    });
   }
 
   /** @private */
@@ -897,6 +906,7 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * Handle resize events and set the story's desktop state.
+   * @visibleForTesting
    */
   onResize() {
     if (this.isDesktop_()) {
