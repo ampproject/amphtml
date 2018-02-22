@@ -23,19 +23,40 @@ import {
 } from '../../../../third_party/subscriptions-project/config';
 import {SubscriptionService} from '../amp-subscriptions';
 
-const paywallUrl = 'https://lipsum.com';
 
 describes.realWin('amp-subscriptions', {amp: true}, env => {
+  let win;
   let ampdoc;
+  let element;
   let pageConfig;
   let subscriptionService;
+  const serviceConfig = {
+    services: [
+      {
+        serviceId: 'amp.local.subscription',
+        authorizationUrl: '/subscription/2/entitlements',
+      },
+      {
+        serviceId: 'google.subscription',
+      },
+    ],
+  };
 
   beforeEach(() => {
+    win = env.win;
     ampdoc = env.ampdoc;
+    element = win.document.createElement('script');
+    element.id = 'amp-subscriptions';
+    element.setAttribute('type', 'json');
+    element.innerHTML = JSON.stringify(serviceConfig);
+
+    win.document.body.appendChild(element);
     subscriptionService = new SubscriptionService(ampdoc);
     pageConfig = new PageConfig('example.org:basic', true);
     sandbox.stub(PageConfigResolver.prototype, 'resolveConfig')
         .callsFake(() => Promise.resolve(pageConfig));
+    sandbox.stub(subscriptionService, 'getServiceConfig_')
+        .callsFake(() => Promise.resolve(serviceConfig));
   });
 
 
@@ -69,11 +90,37 @@ describes.realWin('amp-subscriptions', {amp: true}, env => {
   });
 
   it('should add subscription platform while registering it', () => {
-    const serviceID = 'dummy service';
+    const service = serviceConfig.services[0];
     const subsPlatform = new LocalSubscriptionPlatform(
-        ampdoc, {paywallUrl}, pageConfig);
-    subscriptionService.registerService(serviceID, subsPlatform);
+        ampdoc, service, pageConfig);
+    subscriptionService.registerService(service.serviceID, subsPlatform);
     expect(subscriptionService.subscriptionPlatforms_.includes(subsPlatform))
         .to.be.true;
+  });
+
+  describe('getServiceConfig_', () => {
+    it('should return json inside script#amp-subscriptions tag ', done => {
+      subscriptionService.getServiceConfig_.restore();
+      subscriptionService.getServiceConfig_().then(config => {
+        expect(JSON.stringify(config)).to.be.equal(
+            JSON.stringify(serviceConfig));
+        done();
+      });
+    });
+  });
+
+  describe('initializeSubscriptionPlatforms_', () => {
+    it('should put `LocalSubscriptionPlatform` for every service config'
+        + ' with authorization Url', () => {
+      const service = serviceConfig.services[0];
+      const pushStub = sandbox.stub(
+          subscriptionService.subscriptionPlatforms_, 'push');
+      subscriptionService.initializeSubscriptionPlatforms_(service, pageConfig);
+      expect(pushStub).to.be.calledWith(new LocalSubscriptionPlatform(
+          subscriptionService.ampdoc_,
+          service,
+          pageConfig
+      ));
+    });
   });
 });

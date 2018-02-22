@@ -17,22 +17,29 @@
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 
-const paywallUrl = 'http://lipsum.com';
-
 describes.realWin('local-subscriptions', {amp: true}, env => {
   let ampdoc;
   let localSubscriptionPlatform;
+  const serviceConfig = {
+    'services': [
+      {
+        'serviceId': 'amp.local.subscription',
+        'authorizationUrl': '/subscription/2/entitlements',
+      },
+    ],
+  };
 
   beforeEach(() => {
     ampdoc = env.ampdoc;
     localSubscriptionPlatform = new LocalSubscriptionPlatform(ampdoc,
-        {paywallUrl}, new PageConfig('example.org:basic', true));
+        serviceConfig.services[0], new PageConfig('example.org:basic', true));
   });
 
   it('should fetch the entitlements on getEntitlements', () => {
     const initializeStub =
         sandbox.spy(localSubscriptionPlatform.xhr_, 'fetchJson');
     localSubscriptionPlatform.getEntitlements();
-    expect(initializeStub).to.be.calledWith(paywallUrl);
+    expect(initializeStub).to.be.calledWith(
+        serviceConfig.services[0].authorizationUrl);
   });
 });
