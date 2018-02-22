@@ -43,13 +43,14 @@ const CONFIG = /** @type {!JsonObject} */ ({
  */
 export class ScrollAccessVendor extends AccessClientAdapter {
   /**
-   * @param ampdoc {!../../../src/service/ampdoc-impl.AmpDoc}
-   * @param accessService {!../../amp-access/0.1/amp-access.AccessService}
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../amp-access/0.1/amp-access.AccessService} accessService
+   * @param {!../../amp-access/0.1/amp-access-source.AccessSource} accessSource
    */
-  constructor(ampdoc, accessService) {
+  constructor(ampdoc, accessService, accessSource) {
     super(ampdoc, CONFIG, {
-      buildUrl: accessService.buildUrl.bind(accessService),
-      collectUrlVars: accessService.collectUrlVars_.bind(accessService),
+      buildUrl: accessSource.buildUrl.bind(accessSource),
+      collectUrlVars: accessSource.collectUrlVars.bind(accessSource),
     });
 
     /** @private {!../../amp-access/0.1/amp-access.AccessService} */
@@ -73,7 +74,7 @@ export class ScrollAccessVendor extends AccessClientAdapter {
  */
 class ScrollElement {
   /**
-   * @param ampdoc {!../../../src/service/ampdoc-impl.AmpDoc}
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
     installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
@@ -115,7 +116,7 @@ class ScrollElement {
   }
 
   /**
-   * @param accessService {!../../amp-access/0.1/amp-access.AccessService}
+   * @param {!../../amp-access/0.1/amp-access.AccessService} accessService
    */
   show(accessService) {
     accessService.getAccessReaderId()
