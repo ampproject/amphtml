@@ -14,8 +14,15 @@
  * limitations under the License.
  */
 
-import {user} from '../../../src/log';
+import {StateChangeType} from './navigation-state';
+import {dev, user} from '../../../src/log';
 
+// temp before config in passed in
+/** @const */
+const MIN_INTERVAL = 3;
+
+/** @const */
+const MAX_NUMBER = 2;
 
 /** @const */
 // const EXPERIMENT = 'amp-story-auto-ad';
@@ -29,42 +36,144 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?AmpStory} */
+    /** @private {?./amp-story.AmpStory} */
     this.ampStory_ = null;
+
+    /** @private {?./navigation-state.NavigationState} */
+    this.navigationState_ = null;
+
+    /** @private {number} */
+    this.interactions_ = 0;
+
+    /** @private {!Array} */
+    this.adElements_ = [];
+
+    /** @private {number} */
+    this.adsPlaced_ = 0;
   }
 
   /** @override */
   buildCallback() {
-    const ampStory = this.element.parentElement;
-    user().assert(ampStory.tagName === 'AMP-STORY',
+    const ampStoryElement = this.element.parentElement;
+    user().assert(ampStoryElement.tagName === 'AMP-STORY',
         `<${TAG}> should be child of <amp-story>`);
-    this.ampStory_ = ampStory;
+
+    ampStoryElement.getImpl().then(impl => {
+      this.ampStory_ = impl;
+      this.navigationState_ = this.ampStory_.getNavigationState();
+      this.navigationState_.observe(this.handleStateChange_.bind(this));
+    });
   }
+
 
   /** @override */
   isLayoutSupported() {
     return true;
   }
 
+
   /** @override */
   layoutCallback() {
-    this.ampStory.appendChild(this.makeMockPage());
+    this.schedulePage_();
+    return Promise.resolve();
   }
 
-  // temporary to be replaced with real page later
+  /**
+   * build page and start preloading
+   * @private
+   */
+  schedulePage_() {
+    const page = this.makeMockPage();
+    this.adElements_.push(page);
+
+    this.ampStory_.element.appendChild(page);
+
+    // TODO(ccordry): need to fake distance from page to force load
+
+    page.getImpl().then(impl => {
+      this.ampStory_.addPage(impl);
+    });
+  }
+
+  /**
+   * temporary to be replaced with real fetching
+   */
   makeMockPage() {
     const ampStoryAdPage = document.createElement('amp-story-page');
-    ampStoryAdPage.id = 'i-amphtml-ad-page-1';
+    const id = this.adsPlaced_ + 1;
+    ampStoryAdPage.id = `i-amphtml-ad-page-${id}`;
+    ampStoryAdPage.setAttribute('ad', '');
     ampStoryAdPage./*OK*/innerHTML = `
       <amp-story-grid-layer template="vertical">
-        <h1>First Ad Page</h1>
-        <p>This is the first ad shown in this story.</p>
+        <h1>Ad Page #${id}</h1>
+        <p>This is ad #${id} shown in this story.</p>
       </amp-story-grid-layer>
       `;
     return ampStoryAdPage;
   }
+
+
+  /**
+   * Get array containing all pages of associated story
+   * @private
+   */
+  handleStateChange_(stateChangeEvent) {
+    switch (stateChangeEvent.type) {
+      case StateChangeType.ACTIVE_PAGE:
+        const {pageIndex, pageId} = stateChangeEvent.value;
+        this.handleActivePageChange_(
+            dev().assertNumber(pageIndex),
+            dev().assertString(pageId));
+        break;
+    }
+  }
+
+
+  /**
+   * @param {number} pageIndex
+   * @param {string} pageId
+   * @private
+   */
+  handleActivePageChange_(pageIndex, pageId) {
+    this.interactions_++;
+    // temp before config in passed in
+    if (this.interactions_ > MIN_INTERVAL && !this.allAdsPlaced_()) {
+      this.placeAdAfterPage_(pageId);
+      this.interactions_ = 0;
+    }
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  allAdsPlaced_() {
+    return this.adsPlaced_ >= MAX_NUMBER;
+  }
+
+
+  /**
+   * Place ad based on user config
+   * @param {string} currentPageId
+   * @private
+   */
+  placeAdAfterPage_(currentPageId) {
+    // TODO(ccordry) make sure ad is loaded
+    const nextAdElement = this.adElements_[this.adElements_.length - 1];
+
+    if (!nextAdElement) {
+      return;
+    }
+
+    this.ampStory_.insertPage(currentPageId, nextAdElement.id);
+    this.adsPlaced_++;
+
+    if (!this.allAdsPlaced_()) {
+      this.schedulePage_();
+    }
+  }
 }
 
-AMP.registerElement('amp-story-auto-ads', AmpStoryAutoAds);
+AMP.registerElement(TAG, AmpStoryAutoAds);
 
 
