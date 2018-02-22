@@ -109,3 +109,73 @@ In this example, `<amp-lightbox-gallery>` displays the `alt` value as its descri
   alt="Picture of CN tower">
 </amp-img>
 ```
+
+## CSS API
+
+The CSS API exposes the following CSS classes so that you can customize the style of your lightbox: 
+
+<table>
+  <tr>
+    <th width="40%">CSS class</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>.amp-lbg-mask</code></td>
+    <td>Use to customize the background color and opacity for the lightbox.</td>
+  </tr>
+   <tr>
+    <td><code>.amp-lbv-desc-box.standard</code>,<code>.amp-lbv-desc-box.overflow</code></td>
+    <td>Use to customize the description box's background color and gradient.</td>
+  </tr>
+  <tr>
+    <td><code>.amp-lbg-top-bar</code></td>
+    <td>Use to customize the color and gradient for the lightbox's top controls bar.</td>
+  </tr>
+    <td><code>.amp-lbv-desc-text</code></td>
+    <td>Use to customize the font and colors for the description.</td>
+  </tr>
+  <tr>
+    <td><code>.amp-lbg-icon</code></td>
+    <td>Use to customize the icon colors.</td>
+  </tr>
+  <tr>
+    <td><code>.amp-lbg-button-close</code>,<code>.amp-lbg-icon</code></td>
+    <td>Use to customize the icon for the close button.</td>
+  </tr>
+  <tr>
+    <td><code>.amp-lbg-button-gallery</code>,<code>.amp-lbg-icon</code></td>
+    <td>Use to customize the icon for the gallery button.</td>
+  </tr>
+    <tr>
+    <td><code>.amp-lbg-button-slide</code>,<code>.amp-lbg-icon</code></td>
+    <td>Use to customize the icon for the slide button.</td>
+  </tr>
+</table>
+
+#### Example: Using CSS to invert lightbox colors
+
+The following example uses the CSS API to set the lightbox background to white and the icon colors to black.
+
+```html
+.amp-lbg-mask {
+  opacity: 0.9;
+  background-color: rgba(255, 255, 255, 1);
+}
+
+.amp-lbv-desc-box.standard, .amp-lbv-desc-box.overflow {
+  background: linear-gradient(transparent,rgba(255, 255, 255, 0.5));
+  color: #000000;
+}
+
+.amp-lbg-top-bar {
+  background: linear-gradient(rgba(255,255,255,0.3), rgba(255,255,255,0));
+}
+
+.amp-lbg-icon {
+  background-color: #000000;
+}
+
+.amp-lbv-desc-text {
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+```
