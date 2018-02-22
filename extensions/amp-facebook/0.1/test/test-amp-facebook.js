@@ -125,6 +125,28 @@ describes.realWin('amp-facebook', {
     expect(fbVideo.getAttribute('data-href')).to.equal(fbVideoHref);
   });
 
+  it('adds fb-video element with `data-embed-as` and `data-show-text` ' +
+    'attributes set correctly', () => {
+    const div = doc.createElement('div');
+    div.setAttribute('id', 'c');
+    doc.body.appendChild(div);
+    win.context = {
+      tagName: 'AMP-FACEBOOK',
+    };
+
+    facebook(win, {
+      href: fbVideoHref,
+      width: 111,
+      height: 222,
+    });
+    const fbVideo = doc.body.getElementsByClassName('fb-video')[0];
+    expect(fbVideo).not.to.be.undefined;
+    expect(fbVideo.classList.contains('fb-video')).to.be.true;
+    expect(fbVideo.getAttribute('data-embed-as')).to.equal('video');
+    expect(fbVideo.getAttribute('data-show-text')).to.equal('true');
+  });
+
+
   it('removes iframe after unlayoutCallback', () => {
     return getAmpFacebook(fbPostHref).then(ampFB => {
       const iframe = ampFB.querySelector('iframe');
