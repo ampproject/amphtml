@@ -15,10 +15,10 @@
  */
 
 import {AmpDocSingle} from '../../src/service/ampdoc-impl';
-import {createElementWithAttributes} from '../../src/dom';
 import {OBJECT_STRING_ARGS_KEY} from '../../src/service/action-impl';
 import {Services} from '../../src/services';
 import {StandardActions} from '../../src/service/standard-actions-impl';
+import {createElementWithAttributes} from '../../src/dom';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
 import {setParentWindow} from '../../src/service';
 
