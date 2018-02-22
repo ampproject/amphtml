@@ -651,6 +651,96 @@ describes.realWin('amp-selector', {
           ampSelector, 'select', /* CustomEvent */ eventMatcher);
     });
 
+    it('should trigger `select` action when user uses ' +
+      '`selectUp`/`selectDown` action with default delta value of 1', () => {
+      const ampSelector = getSelector({
+        attributes: {
+          id: 'ampSelector',
+        },
+        config: {
+          count: 6,
+        },
+      });
+      ampSelector.children[0].setAttribute('selected', '');
+      ampSelector.build();
+      const impl = ampSelector.implementation_;
+
+      expect(ampSelector.hasAttribute('multiple')).to.be.false;
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+
+      impl.executeAction({method: 'selectDown', satisfiesTrust: () => true});
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
+      expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
+
+      impl.executeAction({method: 'selectUp', satisfiesTrust: () => true});
+
+      expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+
+    });
+
+    it('should trigger `select` action when user uses ' +
+      '`selectUp`/`selectDown` action with user specified delta value', () => {
+      const ampSelector = getSelector({
+        attributes: {
+          id: 'ampSelector',
+        },
+        config: {
+          count: 6,
+        },
+      });
+      ampSelector.children[0].setAttribute('selected', '');
+      ampSelector.build();
+      const impl = ampSelector.implementation_;
+
+      expect(ampSelector.hasAttribute('multiple')).to.be.false;
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+
+      let args = {'delta': 2};
+      impl.executeAction(
+          {method: 'selectDown', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.true;
+
+      args = {'delta': 2};
+      impl.executeAction(
+          {method: 'selectUp', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
+      expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
+    });
+
+    it('should trigger `select` action when user uses ' +
+      '`selectUp`/`selectDown` action with user specified delta value ' +
+      '(test large values)', () => {
+      const ampSelector = getSelector({
+        attributes: {
+          id: 'ampSelector',
+        },
+        config: {
+          count: 5,
+        },
+      });
+      ampSelector.children[1].setAttribute('selected', '');
+      ampSelector.build();
+      const impl = ampSelector.implementation_;
+
+      expect(ampSelector.hasAttribute('multiple')).to.be.false;
+      expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
+
+      let args = {'delta': 1001};
+      impl.executeAction(
+          {method: 'selectDown', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.true;
+
+      args = {'delta': 1001};
+      impl.executeAction(
+          {method: 'selectUp', args, satisfiesTrust: () => true});
+      expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
+      expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
+    });
+
+
     describe('keyboard-select-mode', () => {
 
       it('should have `none` mode by default', () => {
