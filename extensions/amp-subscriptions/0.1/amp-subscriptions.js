@@ -57,7 +57,7 @@ export class SubscriptionService {
     this.entitlementStore_ = null;
 
     /** @const @private {!Element} */
-    this.configElement_ = dev().assertElement(configElement);
+    this.configElement_ = user().assertElement(configElement);
   }
 
   /**
@@ -93,7 +93,7 @@ export class SubscriptionService {
    * @private
    */
   initializeSubscriptionPlatforms_(serviceConfig, pageConfig) {
-    if (serviceConfig['authorizationUrl']) {
+    if ((serviceConfig['serviceId'] || 'local') == 'local') {
       this.subscriptionPlatforms_.push(
           new LocalSubscriptionPlatform(
               this.ampdoc_,

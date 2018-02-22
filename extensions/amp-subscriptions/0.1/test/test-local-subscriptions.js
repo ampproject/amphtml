@@ -23,8 +23,8 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
   const serviceConfig = {
     'services': [
       {
-        'serviceId': 'amp.local.subscription',
-        'authorizationUrl': '/subscription/2/entitlements',
+        'serviceId': 'local',
+        'authorizationUrl': 'https://subscribe.google.com/subscription/2/entitlements',
       },
     ],
   };
