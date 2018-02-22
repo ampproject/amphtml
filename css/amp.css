@@ -620,8 +620,8 @@ form [submit-error] {
 /**
  * Form validation error messages should be hidden at first.
  */
-span[visible-when-invalid] {
-  display: none;  
+[visible-when-invalid] {
+  display: none;
 }
 
 /**
