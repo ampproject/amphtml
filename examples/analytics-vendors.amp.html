@@ -89,6 +89,7 @@
       <option>top100</option>
       <option>topmailru</option>
       <option>umenganalytics</option>
+      <option>treasuredata</option>
       <option>webtrekk</option>
     </select>
     <input type="submit" value="Go">
@@ -949,6 +950,44 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End SOASTA mPulse example -->
+
+<!-- Treasure Data example -->
+<amp-analytics type="treasuredata" id="treasuredata">
+<script type="application/json">
+  {
+    "vars": {
+      "host": "in.treasuredata.com",
+      "writeKey": "1/deadbeaf",
+      "database": "testdb"
+    },
+    "triggers": {
+      "trackPageview": {
+        "on": "visible",
+        "request": "pageview",
+        "vars": {
+          "table": "pageviews"
+        },
+        "extraUrlParams": {
+          "foo": "123"
+        }
+      },
+      "trackClick": {
+        "on": "click",
+        "request": "event",
+        "selector": "#test1",
+        "vars": {
+          "table": "events"
+        },
+        "extraUrlParams": {
+          "type": "click",
+          "bar": 789
+        }
+      }
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End Treasure Data example -->
 
 <!-- Webtrekk tracking -->
 <amp-analytics type="webtrekk" id="webtrekk">
