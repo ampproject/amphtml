@@ -22,6 +22,7 @@ import {CommonSignals} from '../../../src/common-signals';
 import {
   ELIGIBLE_TAP_TAGS,
   LightboxManager,
+  LightboxThumbnailDataDef,
   LightboxedCarouselMetadataDef,
 } from './service/lightbox-manager-impl';
 import {Gestures} from '../../../src/gesture';
@@ -1071,7 +1072,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
   /**
    * Create an element inside gallery from the thumbnail info from manager.
-   * @param {{url: string, element: !Element}} thumbnailObj
+   * @param {!LightboxThumbnailDataDef} thumbnailObj
    * @return {!Element}
    * @private
    */
@@ -1080,7 +1081,12 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     element.classList.add('i-amphtml-lbg-gallery-thumbnail');
     const imgElement = this.win.document.createElement('img');
     imgElement.classList.add('i-amphtml-lbg-gallery-thumbnail-img');
-    imgElement.setAttribute('src', thumbnailObj.url);
+
+    if (thumbnailObj.srcset) {
+      imgElement.setAttribute('srcset', thumbnailObj.srcset.stringify());
+    } else {
+      imgElement.setAttribute('src', thumbnailObj.placeholderUrl);
+    }
     element.appendChild(imgElement);
     const closeGalleryAndShowTargetSlide = event => {
       this.closeGallery_();
