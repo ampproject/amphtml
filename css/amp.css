@@ -596,6 +596,17 @@ amp-iframe iframe {
   display: none;
 }
 
+/**
+ * Minimal Subscriptions CSS. This part initially disables all of the UI
+ * until the complete rules are loaded as part of amp-subscriptions extension.
+ * Notice that, the `[subscription-dialog]` elements are always hidden.
+ */
+html:not(.i-amphtml-subs-ready) [subscriptions-section],
+html:not(.i-amphtml-subs-ready) [subscriptions-action],
+[subscriptions-dialog] {
+  display: none !important;
+}
+
 
 /**
  * Forms error/success messaging containers should be hidden at first.
@@ -603,6 +614,13 @@ amp-iframe iframe {
 form [submitting],
 form [submit-success],
 form [submit-error] {
+  display: none;
+}
+
+/**
+ * Form validation error messages should be hidden at first.
+ */
+[visible-when-invalid] {
   display: none;
 }
 

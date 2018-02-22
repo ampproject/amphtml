@@ -153,6 +153,10 @@ const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
       this.ampHtmlFile.indexOf('/validator-amp4ads-') != -1) {
     this.htmlFormat = 'AMP4ADS';
   }
+  if (this.ampHtmlFile.indexOf('amp4email_feature_tests/') != -1 ||
+      this.ampHtmlFile.indexOf('/validator-amp4email-') != -1) {
+    this.htmlFormat = 'AMP4EMAIL';
+  }
   /**
    * If set to false, output will be generated without inlining the input
    * document.
@@ -521,7 +525,7 @@ function attrRuleShouldMakeSense(attrSpec, rules) {
           'disallowed_domain is whatever.ampproject.org',
          () => {
            for (const disallowedDomain of attrSpec.valueUrl.disallowedDomain) {
-             expect(disallowedDomain).to.not.equal('whatever.ampproject.org');
+             expect(disallowedDomain !== 'whatever.ampproject.org');
            }
          });
     }
@@ -650,24 +654,23 @@ describe('ValidatorRulesMakeSense', () => {
     });
     // spec_name can't be empty and must be unique.
     it('unique spec_name or if none then unique tag_name', () => {
-      if (tagSpec.extensionSpec !== null) {
+      if (tagSpec.specName !== null) {
+        expect(specNameIsUnique.hasOwnProperty(tagSpec.specName)).toBe(false);
+        specNameIsUnique[tagSpec.specName] = 0;
+      } else if (tagSpec.extensionSpec !== null) {
         const specName = tagSpec.extensionSpec.name + ' extension .js script';
         expect(specNameIsUnique.hasOwnProperty(specName)).toBe(false);
         specNameIsUnique[specName] = 0;
-      } else if (tagSpec.specName !== null) {
-        expect(specNameIsUnique.hasOwnProperty(tagSpec.specName)).toBe(false);
-        specNameIsUnique[tagSpec.specName] = 0;
       } else {
         expect(tagWithoutSpecNameIsUnique.hasOwnProperty(tagSpec.tagName))
             .toBe(false);
         tagWithoutSpecNameIsUnique[tagSpec.tagName] = 0;
       }
     });
-    if ((tagSpec.tagName === 'SCRIPT') &&
+    if ((tagSpec.tagName.indexOf('SCRIPT') === 0) && tagSpec.extensionSpec &&
         ((tagSpec.htmlFormat.length === 0) ||
          (tagSpec.htmlFormat.indexOf(
-            amp.validator.HtmlFormat.Code.AMP4ADS) !== -1)) &&
-        tagSpec.extensionSpec) {
+              amp.validator.HtmlFormat.Code.AMP4ADS) !== -1))) {
       // AMP4ADS Creative Format document is the source of this whitelist.
       // https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md#amp-extensions-and-builtins
       const whitelistedAmp4AdsExtensions = {
