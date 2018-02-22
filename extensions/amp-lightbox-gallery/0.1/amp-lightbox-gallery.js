@@ -457,9 +457,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.topBar_.classList.add('i-amphtml-lbg-top-bar');
     this.topBar_.classList.add('i-amphtml-lbg-controls');
 
-    this.topGradient_ = this.win.document.createElement('div');
-    this.topGradient_.classList.add('i-amphtml-lbg-top-bar-top-gradient');
-    this.topBar_.appendChild(this.topGradient_);
+    // public css api for top control bar
+    this.topBar_.classList.add('amp-lbg-top-bar');
 
     const close = this.close_.bind(this);
     const openGallery = this.openGallery_.bind(this);
