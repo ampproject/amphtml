@@ -130,7 +130,7 @@ export class DoubletapRecognizer extends GestureRecognizer {
     /** @private {number} */
     this.tapCount_ = 0;
 
-    /** @private {boolean} */
+    /** @private {?Event} */
     this.event_ = null;
   }
 
