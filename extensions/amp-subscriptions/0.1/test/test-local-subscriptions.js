@@ -15,6 +15,7 @@
  */
 
 import {LocalSubscriptionPlatform} from '../local-subscription-platform';
+import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 
 const paywallUrl = 'http://lipsum.com';
 
@@ -25,7 +26,7 @@ describes.realWin('local-subscriptions', {amp: true}, env => {
   beforeEach(() => {
     ampdoc = env.ampdoc;
     localSubscriptionPlatform = new LocalSubscriptionPlatform(ampdoc,
-        {paywallUrl});
+        {paywallUrl}, new PageConfig('example.org:basic', true));
   });
 
   it('should fetch the entitlements on getEntitlements', () => {
