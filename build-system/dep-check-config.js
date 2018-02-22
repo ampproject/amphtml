@@ -295,6 +295,7 @@ exports.rules = [
     ],
     whitelist: [
       'ads/ix.js->ads/google/doubleclick.js',
+      'ads/imonomy.js->ads/google/doubleclick.js',
       'ads/medianet.js->ads/google/doubleclick.js',
       'ads/navegg.js->ads/google/doubleclick.js',
       'ads/openx.js->ads/google/doubleclick.js',

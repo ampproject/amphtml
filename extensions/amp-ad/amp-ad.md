@@ -251,6 +251,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [GumGum](../../ads/gumgum.md)
 - [Holder](../../ads/holder.md)
 - [I-Mobile](../../ads/imobile.md)
+- [Imonomy](../../ads/imonomy.md)
 - [iBillboard](../../ads/ibillboard.md)
 - [Imedia](../../ads/imedia.md)
 - [Improve Digital](../../ads/improvedigital.md)
