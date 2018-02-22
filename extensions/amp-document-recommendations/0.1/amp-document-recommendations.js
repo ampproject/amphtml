@@ -48,10 +48,10 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
     }
     activeInstance_ = this;
 
-    /** @private {./config.AmpDocumentRecommendationsConfig} */
+    /** @private {?./config.AmpDocumentRecommendationsConfig} */
     this.config_ = null;
 
-    /** @private {MultidocManager} */
+    /** @private {?MultidocManager} */
     this.multidocManager_ = null;
 
     /** @private {number} */
