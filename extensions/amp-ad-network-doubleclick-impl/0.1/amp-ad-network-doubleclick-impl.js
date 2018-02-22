@@ -501,9 +501,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   constructor(element) {
     super(element);
 
-    /* eslint-disable no-undef */
-    // For some reason the linter thinks `isExperimentOn` was not imported.
-    // Disabling linting here shouldn't matter since this code is disposable.
     /** @private @const {!AmpAdNetworkDoubleclickBinding} */
     // TODO(alanorozco, #13591): Flatten.
     this.binding_ = isExperimentOn(this.win, 'a4a-doubleclick-disable-sf') ?
