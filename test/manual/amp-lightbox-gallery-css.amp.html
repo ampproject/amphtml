@@ -1,0 +1,72 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>Lightbox Carousel Demo</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js"></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+  <script async custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    body {
+      font-family: sans-serif;
+    }
+
+    .amp-lbg-mask {
+      opacity: 0.9;
+      background-color: rgba(255, 255, 255, 1);
+    }
+
+    .amp-lbv-desc-box.standard, .amp-lbv-desc-box.overflow {
+      background: linear-gradient(transparent,rgba(255, 255, 255, 0.5));
+      color: #000000;
+    }
+
+    .amp-lbg-top-bar {
+      background: linear-gradient(rgba(255,255,255,0.3), rgba(255,255,255,0));
+    }
+
+    .amp-lbg-icon {
+      background-color: #000000;
+    }
+
+    .amp-lbv-desc-text {
+      font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    }
+
+  </style>
+</head>
+<body>
+  <script>
+    // Enable amp-lightbox-viewer experiment automatically if it is not enabled.
+    // Disable amp-lightbox-viewer-auto experiment if it is enabled.
+    setTimeout(function() {
+        if (!AMP.isExperimentOn('amp-lightbox-gallery')) {
+          AMP.toggleExperiment('amp-lightbox-gallery');
+          location.reload();
+        }
+    }, 1000);
+  </script>
+
+  <h1>CSS API Tests</h1>
+
+  <amp-carousel height="300"
+  layout="fixed-height"
+  type="slides"
+  lightbox>
+    <amp-img src="https://picsum.photos/300/200/?image=10"
+      width="300"
+      height="200"
+      alt="a sample image"></amp-img>
+    <amp-img src="https://picsum.photos/300/200/?image=11"
+      width="300"
+      height="200"
+      alt="another sample image"></amp-img>
+  </amp-carousel>
+
+</body>
+</html>
