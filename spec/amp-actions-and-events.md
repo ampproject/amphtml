@@ -366,6 +366,22 @@ event.response</pre></td>
   </tr>
 </table>
 
+### amp-selector
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>selectUp(delta=INTEGER)</code></td>
+    <td>Moves the selection up by the value of `delta`. The default `delta` is set to 1.</td>
+  </tr>
+  <tr>
+    <td><code>selectDown(delta=INTEGER)</code></td>
+    <td>Moves the selection down by the value of `delta`. The default `delta` is set to -1.</td>
+  </tr>
+</table>
+
 ### amp-sidebar
 <table>
   <tr>
