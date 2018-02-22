@@ -31,6 +31,7 @@ import {
   DEFAULT_SAFEFRAME_VERSION,
   RENDERING_TYPE_HEADER,
   SAFEFRAME_VERSION_HEADER,
+  SANDBOX_HEADER,
   assignAdUrlToError,
   protectFunctionWrapper,
 } from '../amp-a4a';
@@ -175,7 +176,7 @@ describe('amp-a4a', () => {
   }
 
   // Checks that element is an amp-ad that is rendered via SafeFrame.
-  function verifySafeFrameRender(element, sfVersion) {
+  function verifySafeFrameRender(element, sfVersion, shouldSandbox = false) {
     expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
     expect(element).to.be.visible;
     expect(element.querySelectorAll('iframe')).to.have.lengthOf(1);
@@ -188,6 +189,12 @@ describe('amp-a4a', () => {
     const re = /^([^;]+);(\d+);([\s\S]*)$/;
     const match = re.exec(name);
     expect(match).to.be.ok;
+    const sandbox = child.getAttribute('sandbox');
+    if (shouldSandbox) {
+      expect(sandbox).to.be.ok;
+    } else {
+      expect(sandbox).to.be.null;
+    }
     const contentLength = Number(match[2]);
     const rest = match[3];
     expect(rest.length).to.be.above(contentLength);
@@ -203,7 +210,7 @@ describe('amp-a4a', () => {
   }
 
   // Checks that element is an amp-ad that is rendered via nameframe.
-  function verifyNameFrameRender(element) {
+  function verifyNameFrameRender(element, shouldSandbox = false) {
     expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
     expect(element).to.be.visible;
     expect(element.querySelectorAll('iframe')).to.have.lengthOf(1);
@@ -214,9 +221,16 @@ describe('amp-a4a', () => {
     expect(nameData).to.be.ok;
     verifyNameData(nameData);
     expect(child).to.be.visible;
+    const sandbox = child.getAttribute('sandbox');
+    if (shouldSandbox) {
+      expect(sandbox).to.be.ok;
+    } else {
+      expect(sandbox).to.be.null;
+    }
   }
 
-  function verifyCachedContentIframeRender(element, srcUrl) {
+  function verifyCachedContentIframeRender(element, srcUrl,
+    shouldSandbox = false) {
     expect(element.tagName.toLowerCase()).to.equal('amp-a4a');
     expect(element).to.be.visible;
     expect(element.querySelectorAll('iframe')).to.have.lengthOf(1);
@@ -227,6 +241,12 @@ describe('amp-a4a', () => {
     expect(nameData).to.be.ok;
     verifyNameData(nameData);
     expect(child).to.be.visible;
+    const sandbox = child.getAttribute('sandbox');
+    if (shouldSandbox) {
+      expect(sandbox).to.be.ok;
+    } else {
+      expect(sandbox).to.be.null;
+    }
   }
 
   function verifyNameData(nameData) {
@@ -555,6 +575,41 @@ describe('amp-a4a', () => {
       });
     });
 
+    describe('#renderViaCachedContentIframe', () => {
+      beforeEach(() => {
+        // Verify client cache iframe rendering.
+        adResponse.headers[RENDERING_TYPE_HEADER] = 'client_cache';
+        a4a.onLayoutMeasure();
+      });
+
+      it('should attach a client cached iframe when set', () => {
+        return a4a.layoutCallback().then(() => {
+          verifyCachedContentIframeRender(a4aElement, TEST_URL);
+          expect(fetchMock.called('ad')).to.be.true;
+        });
+      });
+
+      it('should apply sandbox attribute when header is true', () => {
+        adResponse.headers[SANDBOX_HEADER] = 'true';
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          verifyCachedContentIframeRender(a4aElement, TEST_URL,
+              true /* shouldSandbox */);
+          expect(fetchMock.called('ad')).to.be.true;
+        });
+      });
+
+      it('should not apply sandbox attribute when header is false', () => {
+        adResponse.headers[SANDBOX_HEADER] = 'false';
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          verifyCachedContentIframeRender(a4aElement, TEST_URL,
+              false /* shouldSandbox */);
+          expect(fetchMock.called('ad')).to.be.true;
+        });
+      });
+    });
+
     describe('illegal render mode value', () => {
       let devErrLogSpy;
       beforeEach(() => {
@@ -611,6 +666,24 @@ describe('amp-a4a', () => {
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           verifyNameFrameRender(a4aElement);
+          expect(fetchMock.called('ad')).to.be.true;
+        });
+      });
+
+      it('should apply sandbox attribute when header is true', () => {
+        adResponse.headers[SANDBOX_HEADER] = 'true';
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          verifyNameFrameRender(a4aElement, true /* shouldSandbox */);
+          expect(fetchMock.called('ad')).to.be.true;
+        });
+      });
+
+      it('should not apply sandbox attribute when header is false', () => {
+        adResponse.headers[SANDBOX_HEADER] = 'false';
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          verifyNameFrameRender(a4aElement, false /* shouldSandbox */);
           expect(fetchMock.called('ad')).to.be.true;
         });
       });
@@ -682,6 +755,26 @@ describe('amp-a4a', () => {
         a4a.onLayoutMeasure();
         return a4a.layoutCallback().then(() => {
           verifySafeFrameRender(a4aElement, DEFAULT_SAFEFRAME_VERSION);
+          expect(fetchMock.called('ad')).to.be.true;
+        });
+      });
+
+      it('should apply sandbox attribute when header is true', () => {
+        adResponse.headers[SANDBOX_HEADER] = 'true';
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          verifySafeFrameRender(a4aElement, DEFAULT_SAFEFRAME_VERSION,
+              true /* shouldSandbox */);
+          expect(fetchMock.called('ad')).to.be.true;
+        });
+      });
+
+      it('should not apply sandbox attribute when header is false', () => {
+        adResponse.headers[SANDBOX_HEADER] = 'false';
+        a4a.onLayoutMeasure();
+        return a4a.layoutCallback().then(() => {
+          verifySafeFrameRender(a4aElement, DEFAULT_SAFEFRAME_VERSION,
+              false /* shouldSandbox */);
           expect(fetchMock.called('ad')).to.be.true;
         });
       });
