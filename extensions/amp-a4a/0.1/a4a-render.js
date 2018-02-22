@@ -27,7 +27,7 @@ import {
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {setStyle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
-import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
+import {utf8Decode} from '../../../src/utils/bytes';
 
 const TAG = 'a4a-render';
 

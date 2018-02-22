@@ -59,12 +59,6 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
       width: this.element.getAttribute('width'),
       height: this.element.getAttribute('height'),
     };
-
-    // TODO Remove
-    // For test purposes only
-    this.bindAdRequestUrl('foo');
-    this.bindValidator((bytes, header, impl) => Promise.resolve(bytes));
-    this.bindRenderer(ValidationResult.AMP, creative => dev().info(TAG, creative));
   }
 
   /**
@@ -146,10 +140,17 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
     this.unvalidatedBytes_ = unvalidatedBytes;
     this.boundValidator_(unvalidatedBytes, headers, this)
         .then(validatedBytes =>
-            this.handleValidationResponse(utf8Decode(validatedBytes)));
+          this.handleValidationResponse(utf8Decode(validatedBytes)));
+  }
+
+  handleAdResponseError(error) {
+    // TODO(levitzky) add actual error processing logic.
+    dev().warn(TAG, error);
   }
 
   /**
+   * Processes validation response and delegates further action to appropriate
+   * renderer.
    * @param {string} validatedResponse The utf-8 decoded ad response.
    */
   handleValidationResponse(validatedResponse) {
@@ -172,14 +173,10 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   }
 
   /** @override */
-  layoutCallback() {
-    return Promise.resolve();
-  }
-
-  /** @override */
   onLayoutMeasure() {
     sendXhrRequestMock(this.getExpandedUrl_())
-        .then(response => this.handleAdResponse(response));
+        .then(response => this.handleAdResponse(response))
+        .catch(error => this.handleAdResponseError(error));
   }
 }
 
