@@ -91,8 +91,8 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
   afterEach(() => {
     sandbox.restore();
     removeSafeframeListener();
-    if (impl.safeframeApi_) {
-      impl.safeframeApi_.destroy();
+    if (impl.binding_.safeframeApi_) {
+      impl.binding_.safeframeApi_.destroy();
     }
     impl = null;
   });
@@ -103,7 +103,7 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
   });
 
   it('should be fluid enabled', () => {
-    expect(impl.isFluid_).to.be.true;
+    expect(impl.isFluid).to.be.true;
   });
 
   it('should have a supported layout', () => {
@@ -202,12 +202,13 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
     impl.attemptChangeHeight = () => Promise.resolve();
     impl.sentinel = 'sentinel';
     impl.initiateAdRequest();
-    impl.safeframeApi_ = new SafeframeHostApi(
+    impl.binding_.safeframeApi_ = new SafeframeHostApi(
         impl, true, impl.initialSize_, impl.creativeSize_);
-    sandbox./*OK*/stub(impl.safeframeApi_, 'setupGeom_');
+    sandbox./*OK*/stub(impl.binding_.safeframeApi_, 'setupGeom_');
     const connectMessagingChannelSpy =
-        sandbox./*OK*/spy(impl.safeframeApi_, 'connectMessagingChannel');
-    const onFluidResizeSpy = sandbox./*OK*/spy(impl.safeframeApi_,
+          sandbox./*OK*/spy(impl.binding_.safeframeApi_,
+              'connectMessagingChannel');
+    const onFluidResizeSpy = sandbox./*OK*/spy(impl.binding_.safeframeApi_,
         'onFluidResize_');
     return impl.adPromise_.then(() => {
       impl.creativeBody_ = utf8Encode(rawCreative);
