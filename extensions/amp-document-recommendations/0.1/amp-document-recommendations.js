@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-import {assertConfig} from './config';
-import {user} from '../../../src/log';
-import {tryParseJson} from '../../../src/json';
 import {CSS} from '../../../build/amp-document-recommendations-0.1.css';
-import {isJsonScriptTag} from '../../../src/dom';
-import {Services} from '../../../src/services';
+import {Layout} from '../../../src/layout';
 import {MultidocManager} from '../../../src/runtime';
+import {Services} from '../../../src/services';
+import {assertConfig} from './config';
+import {isJsonScriptTag} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
+import {tryParseJson} from '../../../src/json';
+import {user} from '../../../src/log';
 
 /** @const */
 const MAX_ARTICLES = 2;
 
-/** @const */
+/**
+ * @const
+ * TODO(emarchiori): Make this a configurable parameter.
+ */
 const SEPARATPOR_RECOS = 3;
 
 /** @private {AmpDocumentRecommendations} */
@@ -58,8 +62,8 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
   }
 
   /** @override */
-  isLayoutSupported(unused) {
-    return true;
+  isLayoutSupported(layout) {
+    return layout == Layout.CONTAINER;
   }
 
   /**
@@ -78,12 +82,11 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
   appendNextArticle_() {
     if (this.nextArticle_ < MAX_ARTICLES &&
         this.nextArticle_ < this.config_.recommendations.length) {
-      this.appendDivision_();
-      this.appendArticleLinks_(this.nextArticle_ + 1);
-
       const next = this.config_.recommendations[this.nextArticle_];
       this.nextArticle_++;
 
+      // TODO(emarchiori): ampUrl needs to be updated to point to
+      // the cache or same domain, otherwise this is a CORS request.
       Services.xhrFor(this.win)
           .fetchDocument(next.ampUrl)
           .then(
@@ -142,9 +145,15 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
       try {
         this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {});
 
-        // TODO(emarchiori): Update document title.
+        // TODO(peterjosling): Update document title.
+        // TODO(emarchiori): Trigger analtyics event when active
+        // document changes.
+        // TODO(emarchiori): Hide position fixed elements of inactive
+        // documents and update approriately.
 
         this.element.appendChild(shadowRoot);
+        this.appendDivision_();
+        this.appendArticleLinks_(this.nextArticle_ + 1);
 
         if (this.nextArticle_ < this.config_.recommendations.length) {
           this.appendNextArticle_();
@@ -170,6 +179,8 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
         Services.extensionsFor(this.win),
         Services.timerFor(this.win));
 
+    // TODO(peterjosling): Read config from another source.
+
     const children = this.element.children;
     user().assert(children.length == 1,
         'The tag should contain exactly one <script> child.');
@@ -187,9 +198,18 @@ export class AmpDocumentRecommendations extends AMP.BaseElement {
 
     this.config_ = assertConfig(configJson);
 
-    return this.mutateElement(() => {
-      this.appendNextArticle_();
+    this.mutateElement(() => {
+      this.appendDivision_();
+      this.appendArticleLinks_(this.nextArticle_ + 1);
     });
+  }
+
+  /** @override */
+  layoutCallback() {
+    // TODO(emarchiori): Decide when to append the next article
+    // based on PositionObserver.
+    this.appendNextArticle_();
+    return Promise.resolve();
   }
 }
 

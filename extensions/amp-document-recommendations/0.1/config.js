@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {user} from '../../../src/log';
 import {isArray} from '../../../src/types';
+import {user} from '../../../src/log';
 
 /**
  * @typedef {{
