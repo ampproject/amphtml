@@ -29,6 +29,11 @@ import {toArray} from '../../../../src/types';
 
 const LIGHTBOX_ELIGIBLE_TAGS = {
   'amp-img': true,
+  'amp-anim': true,
+  'amp-video': true,
+  'amp-youtube': true,
+  'amp-instagram': true,
+  'amp-facebook': true,
 };
 
 const ELIGIBLE_TAP_TAGS = {
@@ -39,10 +44,6 @@ const GALLERY_TAG = 'amp-lightbox-gallery';
 const CAROUSEL_TAG = 'amp-carousel';
 const FIGURE_TAG = 'figure';
 const SLIDE_SELECTOR = '.amp-carousel-slide';
-
-const VALIDATION_ERROR_MSG = `lightbox attribute is only supported for the
-  <amp-img> tag and <figure> and <amp-carousel> tags containing the <amp-img>
-  tag right now.`;
 
 /** @typedef {{
  *  url: string,
@@ -278,7 +279,8 @@ export class LightboxManager {
       }
     }
 
-    user().assert(this.baseElementIsSupported_(element), VALIDATION_ERROR_MSG);
+    user().assert(this.baseElementIsSupported_(element),
+        `The element ${element.tagName} isn't supported in lightbox yet.`);
 
     if (!this.lightboxGroups_[lightboxGroupId]) {
       this.lightboxGroups_[lightboxGroupId] = [];
