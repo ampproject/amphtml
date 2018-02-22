@@ -29,12 +29,8 @@
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
-  /*
-   * For now we force a non-transparent shim until we find a good solution
-   * for the background page shifting when items get lightboxed.
-   */
-  opacity: 1 !important;
-  background-color: rgba(0,0,0, 1) !important;
+  opacity: 1;
+  background-color: rgba(0,0,0, 1);
 }
 
 .i-amphtml-lbg-mask {
@@ -96,7 +92,7 @@
   bottom: 0 !important;
   overflow-x: hidden !important;
   color: #ffffff;
-  z-index: 2;
+  z-index: 2 !important;
   opacity: 0;
   animation: fadeIn ease-in 0.4s 1 forwards;
 }
@@ -127,12 +123,12 @@
 }
 
 .i-amphtml-lbg[gallery-view] .i-amphtml-lbg-gallery {
-  display: grid;
-  justify-content: center;
-  grid-gap: 5px;
-  grid-template-columns: repeat(3, 1fr);
-  grid-auto-rows: min-content;
-  padding: 5px;
+  display: grid !important;
+  justify-content: center !important;
+  grid-gap: 5px !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  grid-auto-rows: min-content !important;
+  padding: 5px !important;
 }
 
 @media (min-width: 1024px) {
@@ -142,12 +138,12 @@
 }
 
 .i-amphtml-lbg[gallery-view] .i-amphtml-lbg-gallery.i-amphtml-lbg-gallery-hidden {
-  display: none;
+  display: none !important;
 }
 
 .i-amphtml-lbg-gallery-thumbnail {
-  position: relative;
-  padding-top: 100%;
+  position: relative !important;
+  padding-top: 100% !important;
 }
 
 .i-amphtml-lbg-gallery-thumbnail-img {

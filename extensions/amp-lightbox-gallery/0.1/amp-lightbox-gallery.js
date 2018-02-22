@@ -205,6 +205,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     dev().assert(this.container_);
     const mask = this.win.document.createElement('div');
     mask.classList.add('i-amphtml-lbg-mask');
+    // public css class for user styling
+    mask.classList.add('amp-lbg-mask');
     this.container_.appendChild(mask);
   }
 
@@ -324,12 +326,18 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.descriptionBox_ = this.win.document.createElement('div');
     this.descriptionBox_.classList.add('i-amphtml-lbg-desc-box');
     this.descriptionBox_.classList.add('i-amphtml-lbg-controls');
-
     this.descriptionBox_.classList.add('standard');
+
+    // public css api for styling the description box
+    this.descriptionBox_.classList.add('amp-lbv-desc-box');
 
     this.descriptionTextArea_ = this.win.document.createElement('div');
     this.descriptionTextArea_.classList.add('i-amphtml-lbg-desc-text');
     this.descriptionTextArea_.classList.add('non-expanded');
+
+    // public css api for styling the description text area
+    this.descriptionTextArea_.classList.add('amp-lbv-desc-text');
+
     this.descriptionBox_.appendChild(this.descriptionTextArea_);
 
     this.descriptionBox_.addEventListener('click', event => {
