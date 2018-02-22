@@ -77,6 +77,7 @@ export class SubscriptionService {
       this.serviceConfig_ = serviceConfig;
       const pageConfig = user().assert(promiseValues[1]);
       this.pageConfig_ = pageConfig;
+<<<<<<< HEAD
 
       dev().assert(this.serviceConfig_['services'],
           'Services not configured in service config');
@@ -112,6 +113,16 @@ export class SubscriptionService {
     return new Promise((resolve, reject) => {
       const rawContent = tryParseJson(this.configElement_.textContent, e => {
         reject('Failed to parse "amp-subscriptions" JSON: ' + e);
+=======
+      platformConfigs.forEach(platformConfig => {
+        this.subscriptionPlatforms_.push(
+            new LocalSubscriptionPlatform(
+                this.ampdoc_,
+                platformConfig,
+                pageConfig
+            )
+        );
+>>>>>>> 263e2b558f3db81046a54b568f238e55bfbed431
       });
       resolve(rawContent);
     });
@@ -164,10 +175,17 @@ export class SubscriptionService {
   start_() {
     this.initialize_().then(() => {
       this.renderer_.toggleLoading(true);
+<<<<<<< HEAD
       const serviceIds = this.serviceConfig_['services'].map(service =>
         service['serviceId']);
 
       this.entitlementStore_ = new EntitlementStore(serviceIds);
+=======
+      // TODO(@prateekbh): Read the service ids in EntitlementStore constructor
+      // from page config.
+      this.entitlementStore_ =
+        new EntitlementStore(['amp-local-subscription', 'google-subscription']);
+>>>>>>> 263e2b558f3db81046a54b568f238e55bfbed431
 
       this.subscriptionPlatforms_.forEach(subscriptionPlatform => {
         this.fetchEntitlements_(subscriptionPlatform);
