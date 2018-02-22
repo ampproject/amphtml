@@ -568,9 +568,9 @@ amp-instagram {
 
 
 /**
- * Analytics tags should never be visible. keep them hidden.
+ * Analytics & amp-story-auto-ads tags should never be visible. keep them hidden.
  */
-amp-analytics {
+amp-analytics, amp-story-auto-ads {
   /* Fixed to make position independent of page other elements. */
   position: fixed !important;
   top: 0 !important;
@@ -614,6 +614,13 @@ html:not(.i-amphtml-subs-ready) [subscriptions-action],
 form [submitting],
 form [submit-success],
 form [submit-error] {
+  display: none;
+}
+
+/**
+ * Form validation error messages should be hidden at first.
+ */
+[visible-when-invalid] {
   display: none;
 }
 
