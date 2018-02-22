@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {childElementByTag, scopedQuerySelector} from '../dom';
-import {getService, registerServiceBuilder} from '../service';
+import {childElementByTag, rootNodeFor, scopedQuerySelector} from '../dom';
 import {dev, user} from '../log';
+import {getService, registerServiceBuilder} from '../service';
 
 
 /**
@@ -237,7 +237,7 @@ export class Templates {
   maybeFindTemplate_(parent, opt_querySelector) {
     const templateId = parent.getAttribute('template');
     if (templateId) {
-      return parent.ownerDocument.getElementById(templateId);
+      return rootNodeFor(parent).getElementById(templateId);
     } else if (opt_querySelector) {
       return scopedQuerySelector(parent, opt_querySelector);
     } else {

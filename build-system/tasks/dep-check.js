@@ -16,18 +16,20 @@
 'use strict';
 
 
-const BBPromise = require('bluebird');
 const babel = require('babelify');
+const BBPromise = require('bluebird');
 const browserify = require('browserify');
+const colors = require('ansi-colors');
+const createCtrlcHandler = require('../ctrlcHandler').createCtrlcHandler;
 const depCheckConfig = require('../dep-check-config');
+const exitCtrlcHandler = require('../ctrlcHandler').exitCtrlcHandler;
 const fs = BBPromise.promisifyAll(require('fs-extra'));
 const gulp = require('gulp-help')(require('gulp'));
+const log = require('fancy-log');
 const minimatch = require('minimatch');
 const path = require('path');
 const source = require('vinyl-source-stream');
 const through = require('through2');
-const colors = require('ansi-colors');
-const log = require('fancy-log');
 
 
 const root = process.cwd();
@@ -253,19 +255,17 @@ function runRules(modules) {
 }
 
 function depCheck() {
+  const handlerProcess = createCtrlcHandler('dep-check');
   return getSrcs().then(entryPoints => {
     // This check is for extension folders that actually dont have
     // an extension entry point module yet.
     entryPoints = entryPoints.filter(x => fs.existsSync(x));
     return BBPromise.all(entryPoints.map(getGraph));
-  })
-      .then(flattenGraph)
-      .then(runRules)
-      .then(errorsFound => {
-        if (errorsFound) {
-          process.exit(1);
-        }
-      });
+  }).then(flattenGraph).then(runRules).then(errorsFound => {
+    if (errorsFound) {
+      process.exit(1);
+    }
+  }).then(() => exitCtrlcHandler(handlerProcess));
 }
 
 /**
@@ -297,5 +297,5 @@ function flatten(arr) {
 gulp.task(
     'dep-check',
     'Runs a dependency check on each module',
-    ['css'], // Defined in gulpfile.js, and must be run before dep-check.
+    ['update-packages', 'css'],
     depCheck);

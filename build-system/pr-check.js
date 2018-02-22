@@ -26,11 +26,11 @@
  */
 const argv = require('minimist')(process.argv.slice(2));
 const atob = require('atob');
-const execOrDie = require('./exec').execOrDie;
-const getStdout = require('./exec').getStdout;
-const getStderr = require('./exec').getStderr;
-const path = require('path');
 const colors = require('ansi-colors');
+const execOrDie = require('./exec').execOrDie;
+const getStderr = require('./exec').getStderr;
+const getStdout = require('./exec').getStdout;
+const path = require('path');
 
 const fileLogPrefix = colors.bold(colors.yellow('pr-check.js:'));
 
@@ -165,7 +165,7 @@ function isOwnersFile(filePath) {
  * @return {boolean}
  */
 function isDocFile(filePath) {
-  return path.extname(filePath) == '.md';
+  return path.extname(filePath) == '.md' && !filePath.startsWith('examples/');
 }
 
 /**
@@ -176,7 +176,7 @@ function isDocFile(filePath) {
 function isVisualDiffFile(filePath) {
   const filename = path.basename(filePath);
   return (filename == 'visual-diff.rb' ||
-          filename == 'visual-tests.json' ||
+          filename == 'visual-tests.js' ||
           filePath.startsWith('examples/visual-tests/'));
 }
 
@@ -273,7 +273,7 @@ const command = {
     timedExecOrDie('gulp check-types');
   },
   runUnitTests: function() {
-    let cmd = 'gulp test --unit --nobuild';
+    let cmd = 'gulp test --unit --nobuild --headless';
     if (argv.files) {
       cmd = cmd + ' --files ' + argv.files;
     }
@@ -287,7 +287,7 @@ const command = {
   },
   runIntegrationTests: function(compiled) {
     // Integration tests on chrome, or on all saucelabs browsers if set up
-    let cmd = 'gulp test --nobuild --integration';
+    let cmd = 'gulp test --integration --nobuild';
     if (argv.files) {
       cmd = cmd + ' --files ' + argv.files;
     }
@@ -296,6 +296,8 @@ const command = {
     }
     if (!!process.env.SAUCE_USERNAME && !!process.env.SAUCE_ACCESS_KEY) {
       cmd += ' --saucelabs';
+    } else {
+      cmd += ' --headless';
     }
     timedExecOrDie(cmd);
   },
@@ -309,7 +311,7 @@ const command = {
           colors.cyan('PERCY_TOKEN') + '. Skipping visual diff tests.');
       return;
     }
-    let cmd = 'gulp visual-diff';
+    let cmd = 'gulp visual-diff --headless';
     if (opt_mode === 'skip') {
       cmd += ' --skip';
     } else if (opt_mode === 'master') {
@@ -350,7 +352,7 @@ function runAllCommands() {
     command.runJsonCheck();
     command.runDepAndTypeChecks();
     command.runUnitTests();
-    command.verifyVisualDiffTests();
+    // command.verifyVisualDiffTests(); is flaky due to Amp By Example tests
     // command.testDocumentLinks() is skipped during push builds.
     command.buildValidatorWebUI();
     command.buildValidator();
@@ -382,11 +384,78 @@ function runAllCommandsLocally() {
   command.runVisualDiffTests();
   command.runUnitTests();
   command.runIntegrationTests(/* compiled */ false);
-  command.verifyVisualDiffTests();
+  // command.verifyVisualDiffTests(); is flaky due to Amp By Example tests
 
   // Validator tests.
   command.buildValidatorWebUI();
   command.buildValidator();
+}
+
+/**
+ * Makes sure package.json and yarn.lock are in sync.
+ */
+function runYarnIntegrityCheck() {
+  const yarnIntegrityCheck = getStderr('yarn check --integrity').trim();
+  if (yarnIntegrityCheck.includes('error')) {
+    console.error(fileLogPrefix, colors.red('ERROR:'),
+        'Found the following', colors.cyan('yarn'), 'errors:\n' +
+        colors.cyan(yarnIntegrityCheck));
+    console.error(fileLogPrefix, colors.red('ERROR:'),
+        'Updates to', colors.cyan('package.json'),
+        'must be accompanied by a corresponding update to',
+        colors.cyan('yarn.lock'));
+    console.error(fileLogPrefix, colors.yellow('NOTE:'),
+        'To update', colors.cyan('yarn.lock'), 'after changing',
+        colors.cyan('package.json') + ',', 'run',
+        '"' + colors.cyan('yarn install') + '"',
+        'and include the updated', colors.cyan('yarn.lock'),
+        'in your PR.');
+    process.exit(1);
+  }
+}
+
+/**
+ * Makes sure that yarn.lock was properly updated.
+ */
+function runYarnLockfileCheck() {
+  const yarnLockfileCheck = getStdout('git -c color.ui=always diff').trim();
+  if (yarnLockfileCheck.includes('yarn.lock')) {
+    console.error(fileLogPrefix, colors.red('ERROR:'),
+        'This PR did not properly update', colors.cyan('yarn.lock') + '.');
+    console.error(fileLogPrefix, colors.yellow('NOTE:'),
+        'To fix this, sync your branch to', colors.cyan('upstream/master') +
+        ', run', colors.cyan('gulp update-packages') +
+        ', and push a new commit containing the changes.');
+    console.error(fileLogPrefix, 'Expected changes:');
+    console.log(yarnLockfileCheck);
+    process.exit(1);
+  }
+}
+
+/**
+ * Returns true if this is a PR build for a greenkeeper branch.
+ */
+function isGreenkeeperPrBuild() {
+  return (process.env.TRAVIS_EVENT_TYPE == 'pull_request') &&
+      (process.env.TRAVIS_PULL_REQUEST_BRANCH.startsWith('greenkeeper/'));
+}
+
+/**
+ * Returns true if this is a push build for a greenkeeper branch.
+ */
+function isGreenkeeperPushBuild() {
+  return (process.env.TRAVIS_EVENT_TYPE == 'push') &&
+      (process.env.TRAVIS_BRANCH.startsWith('greenkeeper/'));
+}
+
+/**
+ * Returns true if this is a push build for a lockfile update on a greenkeeper
+ * branch.
+ */
+function isGreenkeeperLockfilePushBuild() {
+  return isGreenkeeperPushBuild() &&
+      (process.env.TRAVIS_COMMIT_MESSAGE.startsWith(
+          'chore(package): update lockfile'));
 }
 
 /**
@@ -396,6 +465,21 @@ function runAllCommandsLocally() {
  */
 function main() {
   const startTime = startTimer('pr-check.js');
+
+  // Eliminate unnecessary testing on greenkeeper branches by running tests only
+  // on the push build that contains the lockfile update.
+  if (isGreenkeeperPrBuild() ||
+      (isGreenkeeperPushBuild() && !isGreenkeeperLockfilePushBuild())) {
+    console.log(fileLogPrefix,
+        'Skipping unnecessary testing on greenkeeper branches. ' +
+        'Tests will only be run for the push build with the lockfile update.');
+    stopTimer('pr-check.js', startTime);
+    return 0;
+  }
+
+  // Make sure package.json and yarn.lock are in sync and up-to-date.
+  runYarnIntegrityCheck();
+  runYarnLockfileCheck();
 
   // Run the local version of all tests.
   if (!process.env.TRAVIS) {
@@ -409,24 +493,6 @@ function main() {
       fileLogPrefix, 'Running build shard',
       colors.cyan(process.env.BUILD_SHARD),
       '\n');
-
-  // Eliminate unnecessary testing on greenkeeper branches by running tests only
-  // on the push build that contains the lockfile update.
-  const isGreenkeeperPushBuild =
-      ((process.env.TRAVIS_EVENT_TYPE == 'push') &&
-       (process.env.TRAVIS_BRANCH.indexOf('greenkeeper/') != -1));
-  const isGreenkeeperPrBuild =
-      ((process.env.TRAVIS_EVENT_TYPE == 'pull_request') &&
-       (process.env.TRAVIS_PULL_REQUEST_BRANCH.indexOf('greenkeeper/') != -1));
-  if (isGreenkeeperPrBuild ||
-      (isGreenkeeperPushBuild &&
-       process.env.TRAVIS_COMMIT_MESSAGE.indexOf('update lockfile') == -1)) {
-    console.log(fileLogPrefix,
-        'Skipping unnecessary testing on greenkeeper branches. ' +
-        'Tests will only be run for the push build with the lockfile update.');
-    stopTimer('pr-check.js', startTime);
-    return 0;
-  }
 
   // If $TRAVIS_PULL_REQUEST_SHA is empty then it is a push build and not a PR.
   if (!process.env.TRAVIS_PULL_REQUEST_SHA) {
@@ -452,27 +518,6 @@ function main() {
     process.exit(1);
   }
 
-  // Make sure package.json and yarn.lock are in sync.
-  if (files.indexOf('package.json') != -1 || files.indexOf('yarn.lock') != -1) {
-    const yarnIntegrityCheck = getStderr('yarn check --integrity').trim();
-    if (yarnIntegrityCheck.includes('error')) {
-      console.error(fileLogPrefix, colors.red('ERROR:'),
-          'Found the following', colors.cyan('yarn'), 'errors:\n' +
-          colors.cyan(yarnIntegrityCheck));
-      console.error(fileLogPrefix, colors.red('ERROR:'),
-          'Updates to', colors.cyan('package.json'),
-          'must be accompanied by a corresponding update to',
-          colors.cyan('yarn.lock'));
-      console.error(fileLogPrefix, colors.yellow('NOTE:'),
-          'To update', colors.cyan('yarn.lock'), 'after changing',
-          colors.cyan('package.json') + ',', 'run',
-          '"' + colors.cyan('yarn install') + '"',
-          'and include the updated', colors.cyan('yarn.lock'),
-          'in your PR.');
-      process.exit(1);
-    }
-  }
-
   console.log(
       fileLogPrefix, 'Detected build targets:',
       colors.cyan(Array.from(buildTargets).sort().join(', ')));
@@ -483,12 +528,7 @@ function main() {
         buildTargets.has('RUNTIME')) {
       command.testBuildSystem();
     }
-    if (buildTargets.has('BUILD_SYSTEM') ||
-        buildTargets.has('RUNTIME') ||
-        buildTargets.has('VISUAL_DIFF') ||
-        buildTargets.has('INTEGRATION_TEST')) {
-      command.runLintCheck();
-    }
+    command.runLintCheck();
     if (buildTargets.has('DOCS')) {
       command.testDocumentLinks();
     }
@@ -512,13 +552,15 @@ function main() {
       command.cleanBuild();
       command.buildRuntime();
       command.runVisualDiffTests();
-      // Run presubmit and integration tests only if the PR contains runtime
-      // changes or modifies an integration test.
-      if (buildTargets.has('INTEGRATION_TEST') ||
-          buildTargets.has('RUNTIME')) {
-        command.runPresubmitTests();
-        command.runIntegrationTests(/* compiled */ false);
-      }
+    }
+    command.runPresubmitTests();
+    if (buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('RUNTIME')) {
+      command.runIntegrationTests(/* compiled */ false);
+    }
+    if (buildTargets.has('INTEGRATION_TEST') ||
+        buildTargets.has('RUNTIME') ||
+        buildTargets.has('VISUAL_DIFF')) {
       command.verifyVisualDiffTests();
     } else {
       // Generates a blank Percy build to satisfy the required Github check.

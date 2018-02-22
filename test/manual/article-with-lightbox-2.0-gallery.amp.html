@@ -241,9 +241,14 @@
       font-family: sans-serif;
       font-size: 0.8em;
     }
+
+    amp-img[lightbox] {
+      cursor: pointer;
+    }
+
   </style>
   <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
-  <script async custom-element="amp-lightbox-viewer" src="https://cdn.ampproject.org/v0/amp-lightbox-viewer-0.1.js"></script>
+  <script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js"></script>
   <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
 
   <style amp-boilerplate>
@@ -311,10 +316,10 @@
   </noscript>
 
   <script>
-    // Enable amp-lightbox-viewer experiment automatically if it is not enabled.
+    // Enable amp-lightbox-gallery experiment automatically if it is not enabled.
     setTimeout(function () {
-      if (!AMP.isExperimentOn('amp-lightbox-viewer')) {
-        AMP.toggleExperiment('amp-lightbox-viewer');
+      if (!AMP.isExperimentOn('amp-lightbox-gallery')) {
+        AMP.toggleExperiment('amp-lightbox-gallery');
         location.reload();
       }
     }, 1000);

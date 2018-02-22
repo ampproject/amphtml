@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import {Viewer} from '../../src/service/viewer-impl';
+import * as sinon from 'sinon';
 import {Services} from '../../src/services';
+import {Viewer} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
 import {installDocService} from '../../src/service/ampdoc-impl';
 import {installDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {parseUrl, removeFragment} from '../../src/url';
-import * as sinon from 'sinon';
 
 
 describe('Viewer', () => {
@@ -1424,40 +1424,25 @@ describe('Viewer', () => {
 
   describe('navigateTo', () => {
     const ampUrl = 'https://cdn.ampproject.org/test/123';
-    it('should initiate a2a navigation', () => {
+    it('should message viewer if a2a capability is supported', () => {
       windowApi.location.hash = '#cap=a2a';
-      windowApi.top = {
-        location: {},
-      };
       const viewer = new Viewer(ampdoc);
       const send = sandbox.stub(viewer, 'sendMessage');
-      viewer.navigateTo(ampUrl, 'abc123');
-      expect(send.lastCall.args[0]).to.equal('a2a');
+      const result = viewer.navigateToAmpUrl(ampUrl, 'abc123');
+      expect(send.lastCall.args[0]).to.equal('a2aNavigate');
       expect(send.lastCall.args[1]).to.jsonEqual({
         url: ampUrl,
         requestedBy: 'abc123',
       });
-      expect(windowApi.top.location.href).to.be.undefined;
+      expect(result).to.be.true;
     });
 
-    it('should fail for non-amp url', () => {
-      windowApi.location.hash = '#cap=a2a';
-      const viewer = new Viewer(ampdoc);
-      sandbox.stub(viewer, 'sendMessage');
-      expect(() => {
-        viewer.navigateTo('http://www.test.com', 'abc123');
-      }).to.throw(/Invalid A2A URL/);
-    });
-
-    it('should perform fallback navigation', () => {
-      windowApi.top = {
-        location: {},
-      };
+    it('should return false if a2a capability is not supported', () => {
       const viewer = new Viewer(ampdoc);
       const send = sandbox.stub(viewer, 'sendMessage');
-      viewer.navigateTo(ampUrl, 'abc123');
+      const result = viewer.navigateToAmpUrl(ampUrl, 'abc123');
       expect(send).to.have.not.been.called;
-      expect(windowApi.top.location.href).to.equal(ampUrl);
+      expect(result).to.be.false;
     });
   });
 });

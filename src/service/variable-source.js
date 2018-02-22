@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 import {dev} from '../log';
-import {loadPromise} from '../event-helper';
 import {isFiniteNumber} from '../types';
+import {loadPromise} from '../event-helper';
 
 /** @typedef {string|number|boolean|undefined|null} */
 let ResolverReturnDef;
@@ -24,7 +24,7 @@ let ResolverReturnDef;
 export let SyncResolverDef;
 
 /** @typedef {function(...*):!Promise<ResolverReturnDef>} */
-let AsyncResolverDef;
+export let AsyncResolverDef;
 
 /** @typedef {{sync: SyncResolverDef, async: AsyncResolverDef}} */
 let ReplacementDef;
@@ -78,7 +78,7 @@ export function getTimingDataSync(win, startEvent, endEvent) {
   if (!isFiniteNumber(metric)) {
     // The metric is not supported.
     return;
-  } else if (metric < 0) {;
+  } else if (metric < 0) {
     return '';
   } else {
     return metric;

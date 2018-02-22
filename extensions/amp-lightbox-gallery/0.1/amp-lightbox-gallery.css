@@ -1,0 +1,248 @@
+/**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.i-amphtml-lbg {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 2147483642;
+}
+
+.i-amphtml-lbg-mask,
+.i-amphtml-lbg-gallery {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  /*
+   * For now we force a non-transparent shim until we find a good solution
+   * for the background page shifting when items get lightboxed.
+   */
+  opacity: 1 !important;
+  background-color: rgba(0,0,0, 1) !important;
+}
+
+.i-amphtml-lbg-mask {
+  top:0 !important;
+}
+
+.i-amphtml-lbg-gallery {
+  display: none;
+  top: 0 !important;
+  padding-top: 56px !important;
+  overflow: auto !important;
+}
+
+@media (min-width: 1024px) {
+  .i-amphtml-lbg-gallery {
+    padding-top: 80px !important;
+  }
+}
+
+.i-amphtml-lbg-top-bar {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: 0 !important;
+  height: 56px !important;
+  background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0));
+  z-index: 2;
+}
+
+@media (min-width: 1024px) {
+  .i-amphtml-lbg-top-bar {
+    height: 100px !important;
+  }
+}
+
+.i-amphtml-lbg-controls {
+  opacity: 0;
+  animation: fadeIn ease-in 0.4s 1 forwards;
+}
+
+.i-amphtml-lbg-controls.fade-out
+ {
+  opacity: 1;
+  animation: fadeOut linear 0.4s 1 forwards;
+}
+
+.i-amphtml-lbg-top-bar.fullscreen .i-amphtml-lbg-top-bar-top-gradient {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: 0 !important;
+  background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0));
+}
+
+.i-amphtml-lbg-desc-box {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  overflow-x: hidden !important;
+  color: #ffffff;
+  z-index: 2;
+  opacity: 0;
+  animation: fadeIn ease-in 0.4s 1 forwards;
+}
+
+.i-amphtml-lbg-desc-box.standard {
+  max-height: 6rem;
+  background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.5));
+}
+
+.i-amphtml-lbg-desc-box.overflow {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  background-color: rgba(0,0,0,0.5);
+  top: 0px !important;
+  padding-top: 50px !important;
+}
+
+.i-amphtml-lbg-desc-text {
+  padding: 20px;
+  position: relative !important;
+}
+
+.i-amphtml-lbg-desc-text.non-expanded {
+  overflow-y: hidden !important;
+  overflow-x: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.i-amphtml-lbg[gallery-view] .i-amphtml-lbg-gallery {
+  display: grid;
+  justify-content: center;
+  grid-gap: 5px;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: min-content;
+  padding: 5px;
+}
+
+@media (min-width: 1024px) {
+  .i-amphtml-lbg[gallery-view] .i-amphtml-lbg-gallery {
+    grid-template-columns: repeat(4, calc(1024px/4 - 5px * 5 / 4));
+  }
+}
+
+.i-amphtml-lbg[gallery-view] .i-amphtml-lbg-gallery.i-amphtml-lbg-gallery-hidden {
+  display: none;
+}
+
+.i-amphtml-lbg-gallery-thumbnail {
+  position: relative;
+  padding-top: 100%;
+}
+
+.i-amphtml-lbg-gallery-thumbnail-img {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+/* Controls */
+.amp-lbg-button {
+  position: absolute !important;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  padding: 16px;
+}
+
+@media (min-width: 1024px) {
+  .amp-lbg-button {
+    width: 40px;
+    height: 40px;
+    padding: 20px;
+  }
+}
+
+.amp-lbg-icon {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+.amp-lbg-button-close {
+  top: 0;
+  right: 0;
+}
+
+.amp-lbg-button-close .amp-lbg-icon {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="close" fill="#fff" fill-rule="nonzero"><path d="M18.295,5.705 L18.295,5.705 C17.9056393,5.31563925 17.2743607,5.31563925 16.885,5.705 L12,10.59 L7.115,5.705 C6.72563925,5.31563925 6.09436075,5.31563925 5.705,5.705 L5.705,5.705 C5.31563925,6.09436075 5.31563925,6.72563925 5.705,7.115 L10.59,12 L5.705,16.885 C5.31563925,17.2743607 5.31563925,17.9056393 5.705,18.295 L5.705,18.295 C6.09436075,18.6843607 6.72563925,18.6843607 7.115,18.295 L12,13.41 L16.885,18.295 C17.2743607,18.6843607 17.9056393,18.6843607 18.295,18.295 L18.295,18.295 C18.6843607,17.9056393 18.6843607,17.2743607 18.295,16.885 L13.41,12 L18.295,7.115 C18.6843607,6.72563925 18.6843607,6.09436075 18.295,5.705 Z" id="Shape"></path></g></g></svg>');
+}
+
+
+.amp-lbg-button-gallery {
+  top: 0;
+  left: 0;
+}
+
+.amp-lbg-button-gallery .amp-lbg-icon {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="grid" fill="#fff"><path d="M4,3 L8,3 C8.55228475,3 9,3.44771525 9,4 L9,10 C9,10.5522847 8.55228475,11 8,11 L4,11 C3.44771525,11 3,10.5522847 3,10 L3,4 C3,3.44771525 3.44771525,3 4,3 Z M12,3 L20,3 C20.5522847,3 21,3.44771525 21,4 L21,10 C21,10.5522847 20.5522847,11 20,11 L12,11 C11.4477153,11 11,10.5522847 11,10 L11,4 C11,3.44771525 11.4477153,3 12,3 Z M4,13 L12,13 C12.5522847,13 13,13.4477153 13,14 L13,20 C13,20.5522847 12.5522847,21 12,21 L4,21 C3.44771525,21 3,20.5522847 3,20 L3,14 C3,13.4477153 3.44771525,13 4,13 Z M16,13 L20,13 C20.5522847,13 21,13.4477153 21,14 L21,20 C21,20.5522847 20.5522847,21 20,21 L16,21 C15.4477153,21 15,20.5522847 15,20 L15,14 C15,13.4477153 15.4477153,13 16,13 Z" id="Combined-Shape"></path></g></g></svg>');
+}
+
+.amp-lbg-button-slide {
+  top: 0;
+  left: 0;
+  display: none;
+}
+
+.amp-lbg-button-slide .amp-lbg-icon {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="image" fill="#fff"><path d="M5,3 L19,3 C20.1045695,3 21,3.8954305 21,5 L21,19 C21,20.1045695 20.1045695,21 19,21 L5,21 C3.8954305,21 3,20.1045695 3,19 L3,5 C3,3.8954305 3.8954305,3 5,3 Z M19,15 L19,5 L5,5 L5,13.0000896 L8,10.0003584 L13,15 L16,12 L19,15 Z M15.5,10 C14.6715729,10 14,9.32842712 14,8.5 C14,7.67157288 14.6715729,7 15.5,7 C16.3284271,7 17,7.67157288 17,8.5 C17,9.32842712 16.3284271,10 15.5,10 Z" id="Combined-Shape"></path></g></g></svg>');
+}
+
+.i-amphtml-lbg[gallery-view] .amp-lbg-button-gallery {
+  display: none;
+}
+
+.i-amphtml-lbg[gallery-view] .amp-lbg-button-slide {
+  display: block;
+}
+
+.i-amphtml-lightbox-gallery-trans {
+  pointer-events: none !important;
+  position: fixed;
+  z-index: 1001;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to {
+    opacity: 1;
+    visibility: visible;
+   }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to {
+    opacity: 0;
+    visibility: hidden;
+   }
+}

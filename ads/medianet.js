@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {writeScript, validateData, computeInMasterFrame} from '../3p/3p';
-import {parseUrl, getSourceUrl} from '../src/url';
+import {computeInMasterFrame, validateData, writeScript} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
+import {getSourceUrl, parseUrl} from '../src/url';
 
 const mandatoryParams = ['tagtype', 'cid'],
     optionalParams = [

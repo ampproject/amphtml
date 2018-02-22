@@ -16,13 +16,13 @@
 
 import {
   AmpA4A,
-  NO_CONTENT_RESPONSE,
   CreativeMetaDataDef,
+  NO_CONTENT_RESPONSE,
 } from '../../amp-a4a/0.1/amp-a4a';
 import {AmpAdTemplates} from '../../amp-a4a/0.1/amp-ad-templates';
-import {tryParseJson} from '../../../src/json';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {tryParseJson} from '../../../src/json';
 import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
 
 /** @type {string} */

@@ -15,16 +15,15 @@
  */
 
 import {ActionTrust} from '../action-trust';
-import {OBJECT_STRING_ARGS_KEY} from '../service/action-impl';
 import {Layout, getLayoutClass} from '../layout';
+import {OBJECT_STRING_ARGS_KEY} from '../service/action-impl';
 import {Services} from '../services';
 import {computedStyle, getStyle, toggle} from '../style';
 import {dev, user} from '../log';
 import {dict} from '../utils/object';
-import {isProtocolValid} from '../url';
 import {registerServiceBuilderForDoc} from '../service';
-import {tryFocus} from '../dom';
 import {toWin} from '../types';
+import {tryFocus} from '../dom';
 
 /**
  * @param {!Element} element
@@ -210,15 +209,11 @@ export class StandardActions {
     if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
       return null;
     }
-    const url = invocation.args['url'];
-    if (!isProtocolValid(url)) {
-      user().error(TAG, 'Cannot navigate to invalid protocol: ' + url);
-      return null;
-    }
-    const expandedUrl = this.urlReplacements_.expandUrlSync(url);
     const node = invocation.target;
     const win = (node.ownerDocument || node).defaultView;
-    win.location = expandedUrl;
+    const url = invocation.args['url'];
+    const requestedBy = `AMP.${invocation.method}`;
+    Services.navigationForDoc(this.ampdoc).navigateTo(win, url, requestedBy);
     return null;
   }
 
@@ -385,4 +380,4 @@ export function installStandardActionsForDoc(ampdoc) {
       'standard-actions',
       StandardActions,
       /* opt_instantiate */ true);
-};
+}

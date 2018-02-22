@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {JankMeter} from '../../src/service/jank-meter';
 import * as lolex from 'lolex';
+import {JankMeter} from '../../src/service/jank-meter';
 
 
 describes.realWin('jank-meter', {}, env => {

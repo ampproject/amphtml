@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 import {RTC_VENDORS} from './callout-vendors.js';
-import {tryParseJson} from '../../../src/json';
-import {dev, user} from '../../../src/log';
 import {Services} from '../../../src/services';
+import {dev, user} from '../../../src/log';
 import {isArray, isObject} from '../../../src/types';
 import {isSecureUrl} from '../../../src/url';
+import {tryParseJson} from '../../../src/json';
 
 /** @type {string} */
 const TAG = 'real-time-config';
@@ -47,27 +47,22 @@ export const RTC_ERROR_ENUM = {
   UNKNOWN_VENDOR: 'unknown_vendor',
   // Occurs when request took longer than timeout
   TIMEOUT: 'timeout',
+  // Occurs when URL expansion time exceeded allowed timeout, request never sent.
+  MACRO_EXPAND_TIMEOUT: 'macro_expand_timeout',
 };
-
-/**
- * @param {!Array<!Promise<!rtcResponseDef>>} promiseArray
- * @param {string} error
- * @param {string} callout
- * @private
- */
-function logAndAddErrorResponse_(promiseArray, error, callout) {
-  dev().warn(TAG, `Dropping RTC Callout to ${callout} due to ${error}`);
-  promiseArray.push(buildErrorResponse_(error, callout));
-}
 
 /**
  * @param {string} error
  * @param {string} callout
  * @param {number=} opt_rtcTime
+ * @param {boolean=} opt_log
  * @return {!Promise<!rtcResponseDef>}
  * @private
  */
-function buildErrorResponse_(error, callout, opt_rtcTime) {
+function buildErrorResponse_(error, callout, opt_rtcTime, opt_log) {
+  if (opt_log) {
+    dev().warn(TAG, `Dropping RTC Callout to ${callout} due to ${error}`);
+  }
   return Promise.resolve(/**@type {rtcResponseDef} */(
     {error, callout, rtcTime: opt_rtcTime || 0}));
 }
@@ -76,7 +71,7 @@ function buildErrorResponse_(error, callout, opt_rtcTime) {
  * For a given A4A Element, sends out Real Time Config requests to
  * any urls or vendors specified by the publisher.
  * @param {!AMP.BaseElement} a4aElement
- * @param {!Object<string, !../../../src/service/variable-source.SyncResolverDef>} customMacros The ad-network specified macro
+ * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} customMacros The ad-network specified macro
  *   substitutions available to use.
  * @return {Promise<!Array<!rtcResponseDef>>|undefined}
  * @visibleForTesting
@@ -102,8 +97,9 @@ export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
     const vendorObject = RTC_VENDORS[vendor.toLowerCase()];
     const url = vendorObject ? vendorObject.url : '';
     if (!url) {
-      return logAndAddErrorResponse_(promiseArray,
-          RTC_ERROR_ENUM.UNKNOWN_VENDOR, vendor);
+      return promiseArray.push(
+          buildErrorResponse_(
+              RTC_ERROR_ENUM.UNKNOWN_VENDOR, vendor, undefined, true));
     }
     const validVendorMacros = {};
     Object.keys(rtcConfig['vendors'][vendor]).forEach(macro => {
@@ -130,42 +126,60 @@ export function maybeExecuteRealTimeConfig_(a4aElement, customMacros) {
  * @param {!Object<string, boolean>} seenUrls
  * @param {!Array<!Promise<!rtcResponseDef>>} promiseArray
  * @param {number} rtcStartTime
- * @param {!Object<string, !../../../src/service/variable-source.SyncResolverDef>} macros
+ * @param {!Object<string, !../../../src/service/variable-source.AsyncResolverDef>} macros
  * @param {number} timeoutMillis
  * @param {string=} opt_vendor
  * @private
  */
-function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
-  rtcStartTime, macros, timeoutMillis,
-  opt_vendor) {
+export function inflateAndSendRtc_(a4aElement, url, seenUrls, promiseArray,
+  rtcStartTime, macros, timeoutMillis, opt_vendor) {
   const win = a4aElement.win;
   const ampDoc = a4aElement.getAmpDoc();
-  if (Object.keys(seenUrls).length == MAX_RTC_CALLOUTS) {
-    return logAndAddErrorResponse_(
-        promiseArray, RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED,
-        opt_vendor || url);
-  }
+  /**
+   * The time that it takes to substitute the macros into the URL can vary
+   * depending on what the url requires to be substituted, i.e. a long
+   * async call. Thus, however long the URL replacement took is treated as a
+   * time penalty.
+   */
+  const send = url => {
+    if (Object.keys(seenUrls).length == MAX_RTC_CALLOUTS) {
+      return buildErrorResponse_(
+          RTC_ERROR_ENUM.MAX_CALLOUTS_EXCEEDED,
+          opt_vendor || url, undefined, true);
+    }
+    if (!isSecureUrl(url)) {
+      return buildErrorResponse_(RTC_ERROR_ENUM.INSECURE_URL,
+          opt_vendor || url, undefined, true);
+    }
+    if (seenUrls[url]) {
+      return buildErrorResponse_(RTC_ERROR_ENUM.DUPLICATE_URL,
+          opt_vendor || url, undefined, true);
+    }
+    seenUrls[url] = true;
+    if (url.length > MAX_URL_LENGTH) {
+      url = truncUrl_(url);
+    }
+    return sendRtcCallout_(
+        url, rtcStartTime, win, timeoutMillis, opt_vendor || url);
+  };
+
   if (macros && Object.keys(macros).length) {
     const urlReplacements = Services.urlReplacementsForDoc(ampDoc);
     const whitelist = {};
     Object.keys(macros).forEach(key => whitelist[key] = true);
-    url = urlReplacements.expandUrlSync(
-        url, macros, /** opt_collectVars */undefined, whitelist);
+    const urlReplacementStartTime = Date.now();
+    promiseArray.push(Services.timerFor(win).timeoutPromise(
+        timeoutMillis,
+        urlReplacements.expandUrlAsync(url, macros, whitelist)).then(url => {
+      timeoutMillis -= (urlReplacementStartTime - Date.now());
+      return send(url);
+    }).catch(unused => {
+      return buildErrorResponse_(RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT,
+          opt_vendor || url, undefined, true);
+    }));
+  } else {
+    promiseArray.push(send(url));
   }
-  if (!isSecureUrl(url)) {
-    return logAndAddErrorResponse_(promiseArray, RTC_ERROR_ENUM.INSECURE_URL,
-        opt_vendor || url);
-  }
-  if (seenUrls[url]) {
-    return logAndAddErrorResponse_(promiseArray, RTC_ERROR_ENUM.DUPLICATE_URL,
-        opt_vendor || url);
-  }
-  seenUrls[url] = true;
-  if (url.length > MAX_URL_LENGTH) {
-    url = truncUrl_(url);
-  }
-  promiseArray.push(sendRtcCallout_(
-      url, rtcStartTime, win, timeoutMillis, opt_vendor || url));
 }
 
 /**
