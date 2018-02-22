@@ -801,10 +801,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     const anim = new Animation(this.element);
     let duration = MIN_TRANSITION_DURATION;
     const currentElementMetadata = this.getCurrentElement_();
-    const imageBox = /**@type {?}*/ (currentElementMetadata.imageViewer)
-        .implementation_.getImageBoxWithOffset();
-    const image = /**@type {?}*/ (currentElementMetadata.imageViewer)
-        .implementation_.getImage();
     const sourceElement = currentElementMetadata.sourceElement;
     // Try to transition to the source image.
     let transLayer = null;
@@ -820,6 +816,11 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         && this.shouldAnimate_(sourceElement)
         && (sourceElement == this.sourceElement_
         || this.manager_.hasCarousel(this.currentLightboxGroupId_))) {
+
+        const imageBox = /**@type {?}*/ (currentElementMetadata.imageViewer)
+            .implementation_.getImageBoxWithOffset();
+        const image = /**@type {?}*/ (currentElementMetadata.imageViewer)
+            .implementation_.getImage();
 
         sourceElement.classList.add('i-amphtml-ghost');
         transLayer = this.element.ownerDocument.createElement('div');
