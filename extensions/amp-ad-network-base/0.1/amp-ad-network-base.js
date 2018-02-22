@@ -25,8 +25,6 @@ import {
   sendXhrRequest,
 } from '../../amp-a4a/0.1/a4a-utils';
 import {dev} from '../../../src/log';
-
-// Only need this for development phase
 import {utf8Decode, utf8Encode} from '../../../src/utils/bytes';
 
 const TAG = 'amp-ad-network-base';
@@ -36,13 +34,10 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /**
-     * @const {{ValidationResultType: function()}}
-     * @private
-     */
+    /** @private {Object<ValidationResultType, !function()>} */
     this.boundRenderers_ = {};
 
-    /** @private {?function()} */
+    /** @private {?function(string, function(), AmpAdNetworkBase)} */
     this.boundValidator_ = null;
 
     /** @private {?string} */
@@ -56,8 +51,9 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 
     /** @private {!SizeInfoDef} */
     this.initialSize_ = {
-      width: this.element.getAttribute('width'),
-      height: this.element.getAttribute('height'),
+      // TODO(levitzky) handle non-numeric values.
+      width: Number(this.element.getAttribute('width')),
+      height: Number(this.element.getAttribute('height')),
     };
   }
 
@@ -109,7 +105,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
   getExpandedUrl_() {
     dev().assert(this.adUrl_, 'Ad Request URL never registered!');
     // TODO add expansion logic
-    this.expandedAdUrl_ = this.adUrl_;
+    this.expandedAdUrl_ = /** @type {string} */ (this.adUrl_);
     return this.expandedAdUrl_;
   }
 
@@ -130,7 +126,7 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
    * Processes the ad response as soon as the XHR request returns. This can be
    * overridden and used as a hook to perform any desired logic before passing
    * the response to the validator.
-   * @param {?Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} response
+   * @param {{bytes: !ArrayBuffer, headers: !Headers}} response
    * @protected
    */
   handleAdResponse(response) {
@@ -183,11 +179,11 @@ export class AmpAdNetworkBase extends AMP.BaseElement {
 // Mocks for development. These will obviously go away.
 function sendXhrRequestMock(unusedAdUrl) {
   return Promise.resolve({
-    bytes: /** @type {!ArrayBuffer} */ (utf8Encode(JSON.stringify({
+    bytes: utf8Encode(JSON.stringify({
       templateUrl: 'www.fake.com',
       data: {},
-    }))),
-    headers: /** @type {!Headers} */ (() => {}),
+    })),
+    headers: () => {},
   });
 }
 

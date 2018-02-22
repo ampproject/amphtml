@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 
-import {AmpAdNetworkBase} from '../../amp-ad-network-base/0.1/amp-ad-network-base';
-import {ValidationResult} from '../../amp-a4a/0.1/a4a-render';
+import {AmpAdNetworkTemplateBase} from '../../amp-ad-network-template-base/0.1/amp-ad-network-template-base';
+import {NetworkRegistry} from './config';
 import {dev} from '../../../src/log';
 
-const TAG = 'amp-ad-network-template-base';
+const TAG = 'amp-ad-common';
 
-export class AmpAdNetworkTemplateBase extends AmpAdNetworkBase {
+export class AmpAdNetworkTemplateCommon extends AmpAdNetworkTemplateBase {
   /**
    * @param {!Element} element
    */
   constructor(element) {
     super(element);
-    this.bindValidator(bytes => Promise.resolve(bytes));
-    this.bindRenderer(ValidationResult.AMP,
-        creative => dev().info(TAG, creative));
+    const networkType = element.getAttribute('type');
+    dev().assert(networkType, 'Element did not specify network type!');
+    const networkConfig = NetworkRegistry[element.getAttribute('type')];
+    dev().assert(networkConfig, `Network ${networkType} not registered!`);
+    this.bindAdRequestUrl(networkConfig.requestUrl);
   }
 }
 
 AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(TAG, AmpAdNetworkTemplateBase);
+  AMP.registerElement(TAG, AmpAdNetworkTemplateCommon);
 });

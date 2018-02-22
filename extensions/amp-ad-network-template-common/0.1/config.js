@@ -14,24 +14,17 @@
  * limitations under the License.
  */
 
-import {AmpAdNetworkBase} from '../../amp-ad-network-base/0.1/amp-ad-network-base';
-import {ValidationResult} from '../../amp-a4a/0.1/a4a-render';
-import {dev} from '../../../src/log';
+/** @typedef {{
+      requestUrl: string,
+    }} */
+export let NetworkRegistryEntryDef;
 
-const TAG = 'amp-ad-network-template-base';
+/** @typedef {Object<string, !NetworkRegistryEntryDef>} */
+export let NetworkRegistryDef;
 
-export class AmpAdNetworkTemplateBase extends AmpAdNetworkBase {
-  /**
-   * @param {!Element} element
-   */
-  constructor(element) {
-    super(element);
-    this.bindValidator(bytes => Promise.resolve(bytes));
-    this.bindRenderer(ValidationResult.AMP,
-        creative => dev().info(TAG, creative));
-  }
-}
-
-AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(TAG, AmpAdNetworkTemplateBase);
-});
+/** @const {!NetworkRegistryDef} */
+export const NetworkRegistry = {
+  test: {
+    requestUrl: 'http://www.123fakestreet.com',
+  },
+};

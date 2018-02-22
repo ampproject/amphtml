@@ -16,11 +16,15 @@
 
 import {A4AVariableSource} from './a4a-variable-source';
 import {AmpAdTemplates} from '../../amp-a4a/0.1/amp-ad-templates';
-import {SizeInfoDef} from './a4a-utils';
+import {
+  CreativeMetaDataDef,
+  SizeInfoDef,
+} from './a4a-utils';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
+  FriendlyIframeEmbed,
   installFriendlyIframeEmbed,
   setFriendlyIframeEmbedVisible,
 } from '../../../src/friendly-iframe-embed';
@@ -48,6 +52,24 @@ export let RenderingDataOutputDef;
 /** @typedef {string} */
 export let ValidationResultType;
 
+/** @typedef {
+      !function(
+        !RenderingDataInputDef,
+        !Object,
+        function():boolean=):!RenderingDataOutputDef
+    } */
+export let RendererDef;
+
+/** @typedef {
+      !function(
+        !ArrayBuffer,
+        !Headers,
+        !Object,
+        function():boolean=,
+        function(string):string=): !Promise<string>
+    } */
+export let ValidatorDef;
+
 /** @typedef {{
       templateUrl: string,
       data: (JsonObject|undefined),
@@ -69,10 +91,9 @@ export const NO_CONTENT_RESPONSE = 'NO-CONTENT-RESPONSE';
 /**
  * Render a validated AMP creative directly in the parent page.
  * @param {!RenderingDataInputDef} renderingData
- * @param {!../../amp-ad-network-base/0.1/amp-ad-network-base.AmpAdNetworkBase}
- *   baseImpl
+ * @param {!Object} baseImpl
  * @param {function():boolean=} checkStillCurrent
- * @return {!RenderingDataOutputDef}
+ * @return {!Promise<!RenderingDataOutputDef>}
  * @private
  */
 export function friendlyFrameRenderer(
@@ -126,7 +147,6 @@ export function friendlyFrameRenderer(
       })
       .then(friendlyIframeEmbed => {
         checkStillCurrent();
-        //    this.friendlyIframeEmbed_ = friendlyIframeEmbed;
         setFriendlyIframeEmbedVisible(
             friendlyIframeEmbed, baseImpl.isInViewport());
         // Ensure visibility hidden has been removed (set by boilerplate).
@@ -139,7 +159,7 @@ export function friendlyFrameRenderer(
         return friendlyIframeEmbed.whenIniLoaded()
             .then(() => {
               checkStillCurrent();
-              return /** @type RenderDataOutputDef */ ({
+              return /** @type {!RenderingDataOutputDef} */ ({
                 iframe,
                 friendlyIframeEmbed,
               });
@@ -154,11 +174,10 @@ export function friendlyFrameRenderer(
  * .
  * @param {!ArrayBuffer} bytes
  * @param {!Headers} headers
- * @param {!../../amp-ad-network-base/0.1/amp-ad-network-base.AmpAdNetworkBase}
- *   baseImpl
+ * @param {!Object} baseImpl
  * @param {function():boolean=} checkStillCurrent
  * @param {function(string):string=} parseOnFetch
- * @return {!Promise<?ArrayBuffer>}
+ * @return {!Promise<string>}
  */
 export function templateValidator(
   bytes,
@@ -176,7 +195,8 @@ export function templateValidator(
           (tryParseJson(body) || {});
     // TODO(levitzky) Will probably not want to create a new instance here every
     // time this is invoked.
-    return new AmpAdTemplates()
+    const doc = baseImpl.element.ownerDocument;
+    return new AmpAdTemplates(doc.defaultView || doc.parentWindow)
         .fetch(ampCreativeJson.templateUrl)
         .then(template => {
           return parseOnFetch ? parseOnFetch(template) : template;

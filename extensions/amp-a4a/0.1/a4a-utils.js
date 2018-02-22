@@ -22,6 +22,14 @@ import {parseJson} from '../../../src/json';
 /** @typedef {{width: number, height: number}} */
 export let SizeInfoDef;
 
+/** @typedef {{
+      minifiedCreative: string,
+      customElementExtensions: !Array<string>,
+      customStylesheets: !Array<{href: string}>,
+      images: (Array<string>|undefined),
+    }} */
+export let CreativeMetaDataDef;
+
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
   '<script amp-ad-metadata type=application/json>',
@@ -30,9 +38,9 @@ const METADATA_STRINGS = [
 
 /**
  * Sends a CORS XHR request to the given URL.
- * @param {string} adUrl Request URL to send XHR to.
+ * @param {string} url Request URL to send XHR to.
  * @param {!Window} win
- * @return {!Promise<?../../../src/service/xhr-impl.FetchResponse>}
+ * @return {!Promise<!../../../src/service/xhr-impl.FetchResponse>}
  */
 export function sendXhrRequest(url, win) {
   return Services.xhrFor(win).fetch(url, {
