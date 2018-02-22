@@ -23,7 +23,6 @@ import {setStyles} from '../src/style';
  * script, otherwise it schedules the callback for the script from the master
  * window.
  * @param {!Window} global
- * @param {function(!Object)} cb
  */
 function getBeOpinion(global) {
   loadScript(global, 'https://widget.beopinion.com/sdk.js', function() {});
@@ -88,7 +87,6 @@ function getBeOpinionAsyncInit(global, accountId) {
     global.BeOpinionSDK.init({
       account: accountId,
       onContentReceive: function(hasContent) {
-        console.log('onContentReceive', hasContent);
         if (hasContent) {
           context.renderStart();
         } else {
@@ -96,15 +94,15 @@ function getBeOpinionAsyncInit(global, accountId) {
         }
       },
       onHeightChange: function(newHeight) {
-        console.log('onHeightChange', newHeight);
-        const boundingClientRect = c.getBoundingClientRect();
+        const c = global.document.getElementById('c');
+        const boundingClientRect = c./*REVIEW*/getBoundingClientRect();
         context.onResizeDenied(context.requestResize);
         context.requestResize(boundingClientRect.width, newHeight);
-      }
+      },
     });
     global.BeOpinionSDK['watch'](); // global.BeOpinionSDK.watch() fails 'gulp check-types' validation on Travis
-  }
-};
+  };
+}
 
 /**
  * @param {!Window} global
