@@ -713,7 +713,7 @@ export class AmpStory extends AMP.BaseElement {
     const lastPage = this.pages_[this.getPageCount() - 1];
 
     if (activePage !== lastPage) {
-      activePage.next();
+      activePage.next(opt_isAutomaticAdvance);
     } else {
       this.hasBookend_().then(hasBookend => {
         if (hasBookend) {
