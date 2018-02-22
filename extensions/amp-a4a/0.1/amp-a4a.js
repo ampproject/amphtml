@@ -193,13 +193,13 @@ const LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER = {
  * @const {!Array<string>}
  */
 const IFRAME_SANDBOXING_FLAGS = [
-    'allow-forms',
-    'allow-pointer-lock',
-    'allow-popups',
-    'allow-popups-to-escape-sandbox',
-    'allow-same-origin',
-    'allow-scripts',
-    'allow-top-navigation-by-user-activation',
+  'allow-forms',
+  'allow-pointer-lock',
+  'allow-popups',
+  'allow-popups-to-escape-sandbox',
+  'allow-same-origin',
+  'allow-scripts',
+  'allow-top-navigation-by-user-activation',
 ];
 
 /**
@@ -725,7 +725,7 @@ export class AmpA4A extends AMP.BaseElement {
               fetchResponse.headers.get(RENDERING_TYPE_HEADER));
           this.experimentalNonAmpCreativeRenderMethod_ = method;
           this.shouldSandbox_ =
-            fetchResponse.headers.get(SANDBOX_HEADER) == "true";
+            fetchResponse.headers.get(SANDBOX_HEADER) == 'true';
           const safeframeVersionHeader =
             fetchResponse.headers.get(SAFEFRAME_VERSION_HEADER);
           if (/^[0-9-]+$/.test(safeframeVersionHeader) &&
