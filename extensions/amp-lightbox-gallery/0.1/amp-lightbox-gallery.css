@@ -16,15 +16,15 @@
 
  /* Public CSS Classes */
 
- .amp-lbv-desc-box.standard {
+ .amp-lbg-desc-box.standard {
   background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0.5));
  }
 
- .amp-lbv-desc-box.overflow {
+ .amp-lbg-desc-box.overflow {
   background-color: rgba(0,0,0,0.5);
  }
 
- .amp-lbv-desc-text {
+ .amp-lbg-desc-text {
    /* Public CSS class for description font */
  }
 

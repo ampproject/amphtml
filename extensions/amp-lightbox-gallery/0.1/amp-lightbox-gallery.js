@@ -329,14 +329,14 @@ export class AmpLightboxGallery extends AMP.BaseElement {
     this.descriptionBox_.classList.add('standard');
 
     // public css api for styling the description box
-    this.descriptionBox_.classList.add('amp-lbv-desc-box');
+    this.descriptionBox_.classList.add('amp-lbg-desc-box');
 
     this.descriptionTextArea_ = this.win.document.createElement('div');
     this.descriptionTextArea_.classList.add('i-amphtml-lbg-desc-text');
     this.descriptionTextArea_.classList.add('non-expanded');
 
     // public css api for styling the description text area
-    this.descriptionTextArea_.classList.add('amp-lbv-desc-text');
+    this.descriptionTextArea_.classList.add('amp-lbg-desc-text');
 
     this.descriptionBox_.appendChild(this.descriptionTextArea_);
 
