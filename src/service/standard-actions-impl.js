@@ -67,7 +67,7 @@ export class StandardActions {
     /** @const @private {!./viewport/viewport-impl.Viewport} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
-    /** @const @private {?Array<string>} */
+    /** @private {?Array<string>} */
     this.ampActionWhitelist_ = null;
 
     this.installActions_(this.actions_);
