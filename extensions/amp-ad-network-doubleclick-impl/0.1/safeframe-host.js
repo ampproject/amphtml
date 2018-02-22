@@ -497,8 +497,8 @@ export class SafeframeHostApi {
    */
   handleSizeChange(height, width, messageType, optIsCollapse) {
     if (!optIsCollapse &&
-        width <= this.creativeSize_.width &&
-        height <= this.creativeSize_.height) {
+        width <= this.initialSize_.width &&
+        height <= this.initialSize_.height) {
       this.resizeIframe(height, width);
       this.isCollapsed_ = !!optIsCollapse;
       this.sendResizeResponse(/** SUCCESS */ true, messageType);
