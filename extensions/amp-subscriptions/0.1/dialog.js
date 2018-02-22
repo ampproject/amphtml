@@ -119,7 +119,7 @@ export class Dialog {
       let offsetHeight;
       return this.vsync_.runPromise({
         measure: () => {
-          offsetHeight = this.wrapper_.offsetHeight;
+          offsetHeight = this.wrapper_./*OK*/offsetHeight;
         },
         mutate: () => {
           this.viewport_.updatePaddingBottom(offsetHeight);
