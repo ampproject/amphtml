@@ -123,9 +123,7 @@ export class AmpSlideScroll extends BaseSlides {
     this.action_ = null;
 
     /** @private {boolean} */
-    this.shouldDisableCssSnap_ = isExperimentOn(this.win,
-        'slidescroll-disable-css-snap') &&
-        startsWith(
+    this.shouldDisableCssSnap_ = startsWith(
             Services.platformFor(this.win).getIosVersionString(), '10.3');
   }
 
