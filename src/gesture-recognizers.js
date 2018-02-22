@@ -129,6 +129,9 @@ export class DoubletapRecognizer extends GestureRecognizer {
 
     /** @private {number} */
     this.tapCount_ = 0;
+
+    /** @private {?Event} */
+    this.event_ = null;
   }
 
   /** @override */
@@ -167,11 +170,12 @@ export class DoubletapRecognizer extends GestureRecognizer {
   }
 
   /** @override */
-  onTouchEnd(unusedE) {
+  onTouchEnd(e) {
     this.tapCount_++;
     if (this.tapCount_ < 2) {
       this.signalPending(300);
     } else {
+      this.event_ = e;
       this.signalReady(0);
     }
   }
@@ -179,7 +183,7 @@ export class DoubletapRecognizer extends GestureRecognizer {
   /** @override */
   acceptStart() {
     this.tapCount_ = 0;
-    this.signalEmit({clientX: this.lastX_, clientY: this.lastY_}, null);
+    this.signalEmit({clientX: this.lastX_, clientY: this.lastY_}, this.event_);
     this.signalEnd();
   }
 
