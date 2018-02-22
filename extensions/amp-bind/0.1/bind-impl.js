@@ -1062,7 +1062,7 @@ export class Bind {
   /**
    * @param {{message: string, stack:string}} e
    * @param {string} message
-   * @param {Element=} opt_element
+   * @param {!Element=} opt_element
    * @return {!Error}
    * @private
    */
