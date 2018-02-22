@@ -436,7 +436,7 @@ export class AmpStory extends AMP.BaseElement {
       event.preventDefault();
     });
 
-    // Shows "tap to natigate" hint when swiping.
+    // Shows "tap to navigate" hint when swiping.
     gestures.onGesture(SwipeXYRecognizer, gesture => {
       const {deltaX} = gesture.data;
       if (this.bookend_.isActive()) {
