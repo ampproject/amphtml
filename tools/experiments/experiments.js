@@ -262,6 +262,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/12965',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/12978',
   },
+  {
+    id: 'a4a-doubleclick-disable-sf',
+    name: 'Disables Doubleclick Safeframe Host API for soft-rollback.',
+    spec: 'https://github.com/ampproject/amphtml/issues/13594',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/13591',
+  },
 ];
 
 if (getMode().localDev) {
