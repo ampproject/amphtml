@@ -116,8 +116,8 @@ The CSS API exposes the following CSS classes so that you can customize the styl
 
 <table>
   <tr>
-    <td width="40%">CSS class</td>
-    <td>Description</td>
+    <th width="40%">CSS class</th>
+    <th>Description</th>
   </tr>
   <tr>
     <td><code>.amp-lbg-mask</code></td>
